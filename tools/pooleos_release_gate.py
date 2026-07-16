@@ -18,6 +18,7 @@ from runtime import pgb2_bundle as pgb2  # noqa: E402
 from runtime import adr_ratification  # noqa: E402
 from runtime import hardware_target  # noqa: E402
 from runtime import lab_readiness  # noqa: E402
+from runtime import native_models  # noqa: E402
 from runtime import native_tier0  # noqa: E402
 from runtime import native_v1_objectives  # noqa: E402
 from runtime import readiness  # noqa: E402
@@ -32,13 +33,14 @@ NATIVE_V1_OBJECTIVES_READINESS = ROOT / "runs" / "native_v1_objectives_readiness
 ADR_RATIFICATION_READINESS = ROOT / "runs" / "adr_ratification_readiness.json"
 NATIVE_TOOLCHAIN_QUALIFICATION = ROOT / "runs" / "native_toolchain_qualification.json"
 HARDWARE_TARGET_READINESS = ROOT / "runs" / "hardware_target_readiness.json"
+NATIVE_MODEL_READINESS = ROOT / "runs" / "native_model_readiness.json"
 NATIVE_TIER0_READINESS = ROOT / "runs" / "native_tier0_readiness.json"
 
 
 DEFAULT_GAPS = [
     "The scope-hardened ADR ceremony binds the exact 38-target candidate objectives contract and schema, but all target measurements, owner target acceptance and ADR disposition, signing custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
     "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
-    "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, but current source rebuilds, real PooleBoot launch evidence, complete reference devices and fault campaigns, executable formal models, trace cross-checks, and second-host reproduction remain open.",
+    "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, and two bounded TLC models detect their required boot-slot and capability counterexamples; current source rebuilds, real PooleBoot launch evidence, complete reference devices/fault campaigns, four model domains, all implementation-trace cross-checks, and second-host reproduction remain open.",
     "No PooleBoot PE32+ UEFI loader or frozen native boot protocol.",
     "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path.",
     "No native CPU, interrupt, time, SMP, physical-memory, virtual-memory, or reclaim implementation.",
@@ -603,6 +605,43 @@ def check_native_tier0_readiness(path: Path = NATIVE_TIER0_READINESS) -> dict:
     )
     return readiness.make_check(
         "native_tier0_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_model_readiness(path: Path = NATIVE_MODEL_READINESS) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(path, "native-model-readiness.schema.json")
+    errors = [f"native model readiness {error.path}: {error.message}" for error in artifact_schema_errors[:8]]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_model_readiness",
+            False,
+            "; ".join(errors) or "native model readiness is not an object",
+        )
+    errors.extend(native_models.readiness_contract_errors(artifact, ROOT))
+    summary = artifact.get("summary", {})
+    coverage = artifact.get("domain_coverage", {})
+    runs = artifact.get("runs", [])
+    if [item.get("id") for item in runs if isinstance(item, dict)] != list(native_models.RUN_IDS):
+        errors.append("bounded model run set changed")
+    if summary.get("safe_run_pass_count") != 2 or summary.get("hostile_counterexample_count") != 2:
+        errors.append("safe or hostile model evidence is incomplete")
+    if summary.get("repeat_match_count") != 4 or summary.get("negative_control_pass_count") != 12:
+        errors.append("model determinism or negative controls are incomplete")
+    if coverage.get("modeled_count") != 3 or coverage.get("open_count") != 4:
+        errors.append("bounded model domain coverage changed")
+    if summary.get("implementation_trace_cross_check_count") != 0:
+        errors.append("implementation trace cross-check is overclaimed")
+    if artifact.get("n4_model_slice_satisfied") is not True or artifact.get("n4_exit_gate_satisfied") is not False:
+        errors.append("N4 model-slice or exit boundary changed")
+    detail = (
+        "contract=POOLEOS-N4-MODELS-1; models=2; safe=2/2; counterexamples=2/2; "
+        "repeats=4/4; negatives=12/12; domains=3/7; trace_cross_checks=0/2; "
+        "formal_proof=false; n4_exit=false; production_promotion_allowed=false"
+    )
+    return readiness.make_check(
+        "native_model_readiness",
         not errors,
         detail if not errors else "; ".join(errors[:8]),
     )
@@ -3400,6 +3439,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--native-toolchain-qualification", type=Path, default=NATIVE_TOOLCHAIN_QUALIFICATION)
     parser.add_argument("--hardware-target-readiness", type=Path, default=HARDWARE_TARGET_READINESS)
     parser.add_argument("--native-tier0-readiness", type=Path, default=NATIVE_TIER0_READINESS)
+    parser.add_argument("--native-model-readiness", type=Path, default=NATIVE_MODEL_READINESS)
     parser.add_argument("--out", type=Path, default=ROOT / "runs" / "release_gate.json")
     parser.add_argument("--include-runtime", action="store_true", help="Include PooleGlyph runtime checks in doctor.")
     args = parser.parse_args(argv)
@@ -3413,6 +3453,7 @@ def main(argv: list[str] | None = None) -> int:
         check_native_toolchain_qualification(args.native_toolchain_qualification),
         check_hardware_target_readiness(args.hardware_target_readiness),
         check_native_tier0_readiness(args.native_tier0_readiness),
+        check_native_model_readiness(args.native_model_readiness),
         check_publication_boundary(),
         check_bundle(args.bundle),
         check_replay_proof(args.replay_proof),
@@ -3596,6 +3637,7 @@ def main(argv: list[str] | None = None) -> int:
             args.native_toolchain_qualification,
             args.hardware_target_readiness,
             args.native_tier0_readiness,
+            args.native_model_readiness,
         )
         if path is not None
     ]

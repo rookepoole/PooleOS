@@ -1,0 +1,408 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_model_readiness",
+  "status_date": "2026-07-16",
+  "status": "bounded_models_pass_counterexamples_detected",
+  "selected_move_id": "N4-MODEL-001",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "n4_model_slice_satisfied": true,
+  "n4_exit_gate_satisfied": false,
+  "bindings": {
+    "lock": {
+      "path": "specs/native-model-toolchain-lock.json",
+      "byte_count": 4207,
+      "sha256": "FE5F87CFD05B231152BECA2870658E28F2AEA78E557A2CE698CA8F175C78AD69"
+    },
+    "contract": {
+      "path": "specs/native-model-contract.json",
+      "byte_count": 4941,
+      "sha256": "548DAE5727594A41479344BC7362C3369118561A1771268C59243091EDE47AE5"
+    },
+    "implementation_inputs": [
+      {
+        "path": "runtime/native_models.py",
+        "byte_count": 40426,
+        "sha256": "651CB284F9F87E5C888E3572990D39744A860F874BDE3EB8BA38DD6EFC13431A"
+      },
+      {
+        "path": "tools/bootstrap_native_models.ps1",
+        "byte_count": 3742,
+        "sha256": "F537639018D761A5D7C71D9BE7D2D255A64A54BD3A8D0424C5F542ABE7BD6AE5"
+      },
+      {
+        "path": "tools/qualify_native_models.py",
+        "byte_count": 1589,
+        "sha256": "6FDF1C7DA73936EED58FE969EE1C41130AC73C3701FD24240E961AD11E560D56"
+      }
+    ],
+    "model_inputs": [
+      {
+        "path": "models/tla/PooleBootSlots.tla",
+        "byte_count": 2787,
+        "sha256": "2852418FBB352BC6FDB34159E3D66428D3D6609127B4E77DD15970F6C8318E12"
+      },
+      {
+        "path": "models/tla/PooleBootSlots.safe.cfg",
+        "byte_count": 258,
+        "sha256": "F05265FB2A3DBD6305BC20AB5D2AA53808CCDB6947E19573107B9861F050F70C"
+      },
+      {
+        "path": "models/tla/PooleBootSlots.hostile.cfg",
+        "byte_count": 257,
+        "sha256": "AD1B65898FA5A303FF794742540AB4CDDE1161D8E0535A8BD2DE1A5BB68EFB71"
+      },
+      {
+        "path": "models/tla/PooleCapabilities.tla",
+        "byte_count": 3383,
+        "sha256": "B16734754391BEB2C11B5735A60EF20717E4D785479A057E2BB078E70EAB7571"
+      },
+      {
+        "path": "models/tla/PooleCapabilities.safe.cfg",
+        "byte_count": 423,
+        "sha256": "FECC84DF1FFE163DD2EEF2A9B4825FE5319C6A531B8CA45A8FD89EA4FE352A44"
+      },
+      {
+        "path": "models/tla/PooleCapabilities.hostile.cfg",
+        "byte_count": 422,
+        "sha256": "DA24D09B0AB03F5DEBE1C3F31BCEBB6FD71E7E225FD952C66014729C0584F647"
+      }
+    ]
+  },
+  "toolchain": {
+    "tlc_version": "2.19",
+    "tlc_jar_sha256": "936A262061C914694DFD669A543BE24573C45D5AA0FF20A8B96B23D01E050E88",
+    "java_release": "jdk-21.0.11+10",
+    "java_runtime_tree_sha256": "057E582B6FAC90535C1A51A66856C7D7DCCE27B03536FA0FB019A7C7ADA56DC9",
+    "workspace_local": true,
+    "source_built": false,
+    "second_host_reproduced": false
+  },
+  "domain_coverage": {
+    "required_domains": [
+      "capability_derivation_revocation",
+      "ipc_state",
+      "scheduler_transitions",
+      "virtual_memory_map_unmap",
+      "boot_slot_state",
+      "update_rollback",
+      "poolefs_transaction_recovery"
+    ],
+    "modeled_domains": [
+      "capability_derivation_revocation",
+      "boot_slot_state",
+      "update_rollback"
+    ],
+    "open_domains": [
+      "ipc_state",
+      "scheduler_transitions",
+      "virtual_memory_map_unmap",
+      "poolefs_transaction_recovery"
+    ],
+    "required_count": 7,
+    "modeled_count": 3,
+    "open_count": 4
+  },
+  "runs": [
+    {
+      "id": "boot_slot_rollback.safe",
+      "model_id": "boot_slot_rollback",
+      "mode": "safe",
+      "status": "pass",
+      "expected_exit_code": 0,
+      "observed_exit_code": 0,
+      "expected_invariant_violation": null,
+      "observed_invariant_violation": null,
+      "generated_states": 46,
+      "distinct_states": 20,
+      "left_on_queue": 0,
+      "depth": 7,
+      "trace": [],
+      "trace_sha256": "37517E5F3DC66819F61F5A7BB8ACE1921282415F10551D2DEFA5C3EB0985B570",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "ABCF025CA83C8558DCC8E6B9200EBF12D8EC282773D13591500D67F952E66830"
+    },
+    {
+      "id": "boot_slot_rollback.hostile",
+      "model_id": "boot_slot_rollback",
+      "mode": "hostile",
+      "status": "pass",
+      "expected_exit_code": 12,
+      "observed_exit_code": 12,
+      "expected_invariant_violation": "Recoverable",
+      "observed_invariant_violation": "Recoverable",
+      "generated_states": 14,
+      "distinct_states": 8,
+      "left_on_queue": 2,
+      "depth": 4,
+      "trace": [
+        {
+          "index": 1,
+          "action": "Init",
+          "state_sha256": "025794EF039B262ABA29C22B35723B372659A1AD83579066ECE203195F243F02",
+          "state_lines": [
+            "/\\ active = SlotA",
+            "/\\ attempts = (SlotA :> 0 @@ SlotB :> 0)",
+            "/\\ phase = \"steady\"",
+            "/\\ knownGood = {SlotA}",
+            "/\\ candidate = NoSlot"
+          ]
+        },
+        {
+          "index": 2,
+          "action": "Stage",
+          "state_sha256": "BB0247FABDD7AB5465A17F04B7779788C01DD03F1B59D111B1E63F9349EEC339",
+          "state_lines": [
+            "/\\ active = SlotA",
+            "/\\ attempts = (SlotA :> 0 @@ SlotB :> 0)",
+            "/\\ phase = \"staged\"",
+            "/\\ knownGood = {SlotA}",
+            "/\\ candidate = SlotB"
+          ]
+        },
+        {
+          "index": 3,
+          "action": "StartTrial",
+          "state_sha256": "824A8A204192AFF311D70380E1B657A9F0C9AC1F21AA0FC5B5F556EAE1DB0063",
+          "state_lines": [
+            "/\\ active = SlotB",
+            "/\\ attempts = (SlotA :> 0 @@ SlotB :> 1)",
+            "/\\ phase = \"trial\"",
+            "/\\ knownGood = {SlotA}",
+            "/\\ candidate = SlotB"
+          ]
+        },
+        {
+          "index": 4,
+          "action": "TrialFailure",
+          "state_sha256": "C5C6A0038059C89A5336CA09B0AE33910A060E56453EBEB94438570E9AAD781F",
+          "state_lines": [
+            "/\\ active = SlotA",
+            "/\\ attempts = (SlotA :> 0 @@ SlotB :> 1)",
+            "/\\ phase = \"staged\"",
+            "/\\ knownGood = {}",
+            "/\\ candidate = SlotB"
+          ]
+        }
+      ],
+      "trace_sha256": "D827367B099EE574EACD4A0D7C424C8A797E7B65671D723E599A2D2092240237",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "34C4CF59B8DFB94EA1FA10C6ED18419CD11D91F2C1336D3F912F3FDDFE674C93"
+    },
+    {
+      "id": "capability_revocation.safe",
+      "model_id": "capability_revocation",
+      "mode": "safe",
+      "status": "pass",
+      "expected_exit_code": 0,
+      "observed_exit_code": 0,
+      "expected_invariant_violation": null,
+      "observed_invariant_violation": null,
+      "generated_states": 7963,
+      "distinct_states": 1316,
+      "left_on_queue": 0,
+      "depth": 6,
+      "trace": [],
+      "trace_sha256": "37517E5F3DC66819F61F5A7BB8ACE1921282415F10551D2DEFA5C3EB0985B570",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "947DEFD6BD90E9F13677BE807ED680633DC6D25B734A7E6013DB0347E1F569F8"
+    },
+    {
+      "id": "capability_revocation.hostile",
+      "model_id": "capability_revocation",
+      "mode": "hostile",
+      "status": "pass",
+      "expected_exit_code": 12,
+      "observed_exit_code": 12,
+      "expected_invariant_violation": "NoLiveDescendantOfRevoked",
+      "observed_invariant_violation": "NoLiveDescendantOfRevoked",
+      "generated_states": 36,
+      "distinct_states": 31,
+      "left_on_queue": 28,
+      "depth": 3,
+      "trace": [
+        {
+          "index": 1,
+          "action": "Init",
+          "state_sha256": "945DBEA20871B7C6E77C8058FEA82D57A682756852FF9C871608FCE28E9AA8B6",
+          "state_lines": [
+            "/\\ holder = ( RootCap :> RootPrincipal @@",
+            "  ChildOne :> RootPrincipal @@",
+            "  ChildTwo :> RootPrincipal )",
+            "/\\ rightsOf = (RootCap :> {Read, Write} @@ ChildOne :> {} @@ ChildTwo :> {})",
+            "/\\ revoked = {}",
+            "/\\ ancestors = (RootCap :> {} @@ ChildOne :> {} @@ ChildTwo :> {})",
+            "/\\ parent = (RootCap :> NoCap @@ ChildOne :> NoCap @@ ChildTwo :> NoCap)",
+            "/\\ objectOf = (RootCap :> RootObject @@ ChildOne :> RootObject @@ ChildTwo :> RootObject)",
+            "/\\ present = {RootCap}"
+          ]
+        },
+        {
+          "index": 2,
+          "action": "Derive",
+          "state_sha256": "1F3725F71231D98ECFB54759AC9AFA6016EC886933AD87883ACE8E890D383291",
+          "state_lines": [
+            "/\\ holder = ( RootCap :> RootPrincipal @@",
+            "  ChildOne :> RootPrincipal @@",
+            "  ChildTwo :> RootPrincipal )",
+            "/\\ rightsOf = (RootCap :> {Read, Write} @@ ChildOne :> {} @@ ChildTwo :> {})",
+            "/\\ revoked = {}",
+            "/\\ ancestors = (RootCap :> {} @@ ChildOne :> {RootCap} @@ ChildTwo :> {})",
+            "/\\ parent = (RootCap :> NoCap @@ ChildOne :> RootCap @@ ChildTwo :> NoCap)",
+            "/\\ objectOf = (RootCap :> RootObject @@ ChildOne :> RootObject @@ ChildTwo :> RootObject)",
+            "/\\ present = {RootCap, ChildOne}"
+          ]
+        },
+        {
+          "index": 3,
+          "action": "Revoke",
+          "state_sha256": "44F0157C0A50A49EF4D39ED12D4C5773A99D845560E9DCFE6D1560C46200B3D5",
+          "state_lines": [
+            "/\\ holder = ( RootCap :> RootPrincipal @@",
+            "  ChildOne :> RootPrincipal @@",
+            "  ChildTwo :> RootPrincipal )",
+            "/\\ rightsOf = (RootCap :> {Read, Write} @@ ChildOne :> {} @@ ChildTwo :> {})",
+            "/\\ revoked = {RootCap}",
+            "/\\ ancestors = (RootCap :> {} @@ ChildOne :> {RootCap} @@ ChildTwo :> {})",
+            "/\\ parent = (RootCap :> NoCap @@ ChildOne :> RootCap @@ ChildTwo :> NoCap)",
+            "/\\ objectOf = (RootCap :> RootObject @@ ChildOne :> RootObject @@ ChildTwo :> RootObject)",
+            "/\\ present = {RootCap, ChildOne}"
+          ]
+        }
+      ],
+      "trace_sha256": "A31A4FBFDD81CA9A0352DAB999F3DB62DA3EB726B0E1825C68313B368A7C85A4",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "8CCDF597977A39B881EB8667287A4AB174BCEA90A9AC60DBC121A552616A8137"
+    }
+  ],
+  "negative_controls": [
+    {
+      "id": "NEG-N4-MODEL-TLC-PRERELEASE",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "release_channel_policy"
+    },
+    {
+      "id": "NEG-N4-MODEL-TLC-HASH",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "exact_hash_policy"
+    },
+    {
+      "id": "NEG-N4-MODEL-TLC-SIGNATURE-OVERCLAIM",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "claim_boundary"
+    },
+    {
+      "id": "NEG-N4-MODEL-JRE-HASH",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "exact_hash_policy"
+    },
+    {
+      "id": "NEG-N4-MODEL-JRE-SIGNATURE-OVERCLAIM",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "claim_boundary"
+    },
+    {
+      "id": "NEG-N4-MODEL-RUNTIME-CLOSURE",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "runtime_closure"
+    },
+    {
+      "id": "NEG-N4-MODEL-BOOT-MUTANT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "executed_counterexample"
+    },
+    {
+      "id": "NEG-N4-MODEL-CAPABILITY-MUTANT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "executed_counterexample"
+    },
+    {
+      "id": "NEG-N4-MODEL-SAFE-VIOLATION",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "safe_model_result"
+    },
+    {
+      "id": "NEG-N4-MODEL-PATH-ESCAPE",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "path_policy"
+    },
+    {
+      "id": "NEG-N4-MODEL-EXTRA-ARGUMENT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "closed_command_template"
+    },
+    {
+      "id": "NEG-N4-MODEL-TRACE-OVERCLAIM",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "claim_boundary"
+    }
+  ],
+  "summary": {
+    "model_count": 2,
+    "run_case_count": 4,
+    "safe_run_count": 2,
+    "safe_run_pass_count": 2,
+    "hostile_run_count": 2,
+    "hostile_counterexample_count": 2,
+    "repeat_match_count": 4,
+    "negative_control_count": 12,
+    "negative_control_pass_count": 12,
+    "normalized_trace_count": 2,
+    "implementation_trace_cross_check_count": 0,
+    "failed_check_count": 0
+  },
+  "assumptions": [
+    "The boot model has exactly two abstract slots, one candidate-installation lifecycle, at most two trial attempts, atomic transitions, persistent known-good metadata, and no slot erasure/reuse, concurrency, torn write, cryptography, storage, firmware, or attacker model.",
+    "The capability model has exactly three abstract capability identifiers, two principals, two rights, one object, atomic derive/transfer/revoke transitions, no identifier reuse, and no concurrency, IPC, scheduler, memory, DMA, or persistence model.",
+    "TLC uses 64-bit state fingerprints; complete reachable-state exploration within the constants is not a collision-free mathematical proof.",
+    "Only state safety invariants are checked. No liveness, fairness, real-time, probabilistic, refinement, implementation-equivalence, or physical-hardware property is checked.",
+    "The hostile configurations are deliberate mutations used to demonstrate that the named invariants produce finite counterexample traces."
+  ],
+  "open_work": [
+    "Model IPC state and stale-reply behavior before freezing the IPC ABI.",
+    "Model scheduler transitions, cancellation, priority inversion, and bounded fairness assumptions.",
+    "Model virtual-memory map/unmap, ownership transfer, and shootdown state.",
+    "Model PooleFS transaction recovery and power-loss state before freezing persistent formats.",
+    "Cross-check both current model traces against exact native implementation traces when those implementations exist.",
+    "Source-build and independently reproduce the model-checker and Java inputs with signed provenance, SBOM, vulnerability, license, and redistribution review."
+  ],
+  "claim_boundary": {
+    "bounded_state_search_only": true,
+    "formal_proof_claimed": false,
+    "fingerprint_collision_free_claimed": false,
+    "liveness_checked": false,
+    "implementation_trace_cross_checked": false,
+    "abi_freeze_authorized": false,
+    "pooleboot_executed": false,
+    "poolekernel_executed": false,
+    "production_promotion_allowed": false
+  }
+}

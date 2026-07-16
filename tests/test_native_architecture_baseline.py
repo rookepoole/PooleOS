@@ -68,42 +68,59 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 25)
+        self.assertEqual(len(self.artifact["bound_sources"]), 29)
+        bound_paths = {binding["path"] for binding in self.artifact["bound_sources"]}
         self.assertIn(
             "runs/adr_ratification_readiness.json",
-            {binding["path"] for binding in self.artifact["bound_sources"]},
+            bound_paths,
         )
         self.assertIn(
             "runs/hardware_target_readiness.json",
-            {binding["path"] for binding in self.artifact["bound_sources"]},
+            bound_paths,
         )
         self.assertIn(
             "runs/native_tier0_readiness.json",
-            {binding["path"] for binding in self.artifact["bound_sources"]},
+            bound_paths,
         )
         self.assertIn(
             "runs/native_v1_objectives_readiness.json",
-            {binding["path"] for binding in self.artifact["bound_sources"]},
+            bound_paths,
+        )
+        self.assertIn(
+            "runs/native_model_readiness.json",
+            bound_paths,
         )
         self.assertIn(
             "specs/pooleos-kernel-charter.md",
-            {binding["path"] for binding in self.artifact["bound_sources"]},
+            bound_paths,
         )
         self.assertIn(
             "specs/native-v1-objectives.schema.json",
-            {binding["path"] for binding in self.artifact["bound_sources"]},
+            bound_paths,
         )
         self.assertIn(
             "specs/native-tier0-lock.json",
-            {binding["path"] for binding in self.artifact["bound_sources"]},
+            bound_paths,
         )
         self.assertIn(
             "specs/native-tier0-profile.json",
-            {binding["path"] for binding in self.artifact["bound_sources"]},
+            bound_paths,
         )
         self.assertIn(
             "docs/native-tier0-qemu.md",
-            {binding["path"] for binding in self.artifact["bound_sources"]},
+            bound_paths,
+        )
+        self.assertIn(
+            "docs/native-formal-models.md",
+            bound_paths,
+        )
+        self.assertIn(
+            "specs/native-model-contract.json",
+            bound_paths,
+        )
+        self.assertIn(
+            "specs/native-model-toolchain-lock.json",
+            bound_paths,
         )
         for binding in self.artifact["bound_sources"]:
             self.assertFalse(Path(binding["path"]).is_absolute())

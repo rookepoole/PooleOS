@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-model-contract.schema.json",
+  "title": "PooleOS bounded native model contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "status_date", "contract_id", "selected_move_id", "production_ready", "production_promotion_allowed", "engine", "required_domains", "modeled_domains", "models", "assumptions", "trace_cross_check", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_model_contract"},
+    "status_date": {"const": "2026-07-16"},
+    "contract_id": {"const": "POOLEOS-N4-MODELS-1"},
+    "selected_move_id": {"const": "N4-MODEL-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "engine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "version", "execution_mode", "workers", "fingerprint_polynomial", "tool_messages", "repeat_count", "raw_output_public", "normalized_trace_public", "command_template"],
+      "properties": {
+        "kind": {"const": "TLC explicit-state model checker"},
+        "version": {"const": "2.19"},
+        "execution_mode": {"const": "breadth_first_complete_reachable_state_search_within_frozen_constants"},
+        "workers": {"const": 1},
+        "fingerprint_polynomial": {"const": 0},
+        "tool_messages": {"const": true},
+        "repeat_count": {"const": 2},
+        "raw_output_public": {"const": false},
+        "normalized_trace_public": {"const": true},
+        "command_template": {"type": "array", "minItems": 17, "maxItems": 17, "items": {"type": "string"}}
+      }
+    },
+    "required_domains": {"type": "array", "minItems": 7, "maxItems": 7, "uniqueItems": true, "items": {"type": "string"}},
+    "modeled_domains": {"type": "array", "minItems": 3, "maxItems": 3, "uniqueItems": true, "items": {"type": "string"}},
+    "models": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "module_path", "safe_config_path", "hostile_config_path", "state_variables", "invariants", "hostile_toggle", "hostile_violation", "safe_expected", "hostile_expected"],
+        "properties": {
+          "id": {"enum": ["boot_slot_rollback", "capability_revocation"]},
+          "module_path": {"type": "string"},
+          "safe_config_path": {"type": "string"},
+          "hostile_config_path": {"type": "string"},
+          "state_variables": {"type": "array", "minItems": 5, "uniqueItems": true, "items": {"type": "string"}},
+          "invariants": {"type": "array", "minItems": 6, "maxItems": 6, "uniqueItems": true, "items": {"type": "string"}},
+          "hostile_toggle": {"type": "string"},
+          "hostile_violation": {"type": "string"},
+          "safe_expected": {"$ref": "#/$defs/outcome"},
+          "hostile_expected": {"$ref": "#/$defs/outcome"}
+        }
+      }
+    },
+    "assumptions": {"type": "array", "minItems": 5, "items": {"type": "string"}},
+    "trace_cross_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "required_model_count", "completed_model_count", "abi_freeze_authorized"],
+      "properties": {
+        "status": {"const": "pending_native_implementation_traces"},
+        "required_model_count": {"const": 2},
+        "completed_model_count": {"const": 0},
+        "abi_freeze_authorized": {"const": false}
+      }
+    },
+    "claim_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bounded_model_checks_claimed", "formal_proof_claimed", "implementation_correctness_claimed", "kernel_execution_claimed", "boot_execution_claimed", "n4_exit_gate_claimed"],
+      "properties": {
+        "bounded_model_checks_claimed": {"const": true},
+        "formal_proof_claimed": {"const": false},
+        "implementation_correctness_claimed": {"const": false},
+        "kernel_execution_claimed": {"const": false},
+        "boot_execution_claimed": {"const": false},
+        "n4_exit_gate_claimed": {"const": false}
+      }
+    }
+  },
+  "$defs": {
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["exit_code", "generated_states", "distinct_states", "left_on_queue", "depth", "trace_length", "trace_actions", "trace_sha256"],
+      "properties": {
+        "exit_code": {"enum": [0, 12]},
+        "generated_states": {"type": "integer", "minimum": 1},
+        "distinct_states": {"type": "integer", "minimum": 1},
+        "left_on_queue": {"type": "integer", "minimum": 0},
+        "depth": {"type": "integer", "minimum": 1},
+        "trace_length": {"type": "integer", "minimum": 0},
+        "trace_actions": {"type": "array", "maxItems": 4, "items": {"type": "string"}},
+        "trace_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"}
+      }
+    }
+  }
+}

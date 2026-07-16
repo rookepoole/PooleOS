@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_model_toolchain_lock",
+  "status_date": "2026-07-16",
+  "selected_move_id": "N4-MODEL-001",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "tlc": {
+    "project": "TLA+",
+    "release_tag": "v1.7.4",
+    "release_name": "The Xenophanes release",
+    "release_id": 168523867,
+    "release_date": "2024-08-05T20:16:41Z",
+    "stable_release": true,
+    "prerelease": false,
+    "source_commit": "5a47802b5c391f59ecdd44117981f4ff8c0656ba",
+    "tag_kind": "lightweight",
+    "tag_or_commit_signature_verified": false,
+    "tag_or_commit_signature_status": "unsigned",
+    "release_url": "https://github.com/tlaplus/tlaplus/releases/tag/v1.7.4",
+    "source_url": "https://github.com/tlaplus/tlaplus/tree/5a47802b5c391f59ecdd44117981f4ff8c0656ba",
+    "license": "MIT",
+    "minimum_java_major": 11,
+    "tool_banner": "TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)",
+    "jar": {
+      "asset_id": 184694200,
+      "name": "tla2tools.jar",
+      "byte_count": 2274532,
+      "published_sha1": "BEE4A54F3EE3D4AFC347C3240EC2D9E93B075104",
+      "sha256": "936A262061C914694DFD669A543BE24573C45D5AA0FF20A8B96B23D01E050E88",
+      "url": "https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar",
+      "detached_signature_available": false
+    },
+    "rejected_candidate": {
+      "release_tag": "v1.8.0",
+      "release_id": 25926686,
+      "release_date": "2026-07-15T13:50:49Z",
+      "prerelease": true,
+      "source_commit": "227f61b983d0203a06db8184da45aed421e8f1b8",
+      "jar_byte_count": 4357906,
+      "jar_sha256": "58D44845A37A8D776DEAF8CF3A623213B59D311BC0EC287BCDFBE148DD11BB3D",
+      "rejection_reason": "rolling prerelease is not the frozen stable model-checker input"
+    }
+  },
+  "java": {
+    "distribution": "Eclipse Temurin",
+    "release_name": "jdk-21.0.11+10",
+    "semver": "21.0.11+10.0.LTS",
+    "release_date": "2026-04-23T06:32:33Z",
+    "release_api": "https://api.adoptium.net/v3/assets/latest/21/hotspot?architecture=x64&image_type=jre&os=windows&vendor=eclipse",
+    "package_name": "OpenJDK21U-jre_x64_windows_hotspot_21.0.11_10.zip",
+    "package_byte_count": 49005708,
+    "package_sha256": "BE26677AAA20B39A62EDCAAB4C8857A8B76673B0F45ABC0B6143B142B62717E4",
+    "package_url": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.11%2B10/OpenJDK21U-jre_x64_windows_hotspot_21.0.11_10.zip",
+    "signature_byte_count": 310,
+    "signature_sha256": "DD49A01A70180BEE61CFCCA91C6DB84DD49095E3C3D86A6AC5DCE69D4BCF68C1",
+    "signature_url": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.11%2B10/OpenJDK21U-jre_x64_windows_hotspot_21.0.11_10.zip.sig",
+    "detached_signature_verified": false,
+    "detached_signature_gap": "no pinned local OpenPGP verifier or signer-key ceremony is qualified",
+    "runtime_license": "GPL-2.0-only WITH Classpath-exception-2.0",
+    "runtime_tree": {
+      "file_count": 315,
+      "byte_count": 151530953,
+      "tree_sha256": "057E582B6FAC90535C1A51A66856C7D7DCCE27B03536FA0FB019A7C7ADA56DC9"
+    },
+    "java_executable": {
+      "relative_path": "bin/java.exe",
+      "byte_count": 50344,
+      "sha256": "5E0FAB9F07952CEB6E71EB9FD33E1ED69959904CA00CF70869B7BAF516A98016",
+      "authenticode_status": "Valid",
+      "signer_subject": "CN=\"Eclipse.org Foundation, Inc.\", O=\"Eclipse.org Foundation, Inc.\", L=Ottawa, S=Ontario, C=CA",
+      "signer_thumbprint": "C56B94C0AFC77271D6D5A295DA212F5D093FA00B"
+    },
+    "version_lines": [
+      "openjdk version \"21.0.11\" 2026-04-21 LTS",
+      "OpenJDK Runtime Environment Temurin-21.0.11+10 (build 21.0.11+10-LTS)",
+      "OpenJDK 64-Bit Server VM Temurin-21.0.11+10 (build 21.0.11+10-LTS, mixed mode, sharing)"
+    ]
+  },
+  "supply_chain_boundary": {
+    "workspace_local_only": true,
+    "global_installation_performed": false,
+    "global_path_mutated": false,
+    "tlc_source_build_performed": false,
+    "java_source_build_performed": false,
+    "second_host_reproduction_performed": false,
+    "vulnerability_review_complete": false,
+    "sbom_review_complete": false,
+    "redistribution_review_complete": false
+  }
+}
