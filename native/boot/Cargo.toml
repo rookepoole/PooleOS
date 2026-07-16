@@ -14,3 +14,4 @@ name = "PooleBoot"
 path = "src/main.rs"
 
 [dependencies]
+poole-boot-config = { path = "../bootcfg" }

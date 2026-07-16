@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-boot-config-readiness.schema.json",
+  "title": "PooleOS PBC1 parser qualification readiness",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "status",
+    "contract_id",
+    "selected_move_id",
+    "production_ready",
+    "production_promotion_allowed",
+    "n5_exit_gate_satisfied",
+    "phase_status",
+    "bindings",
+    "parser_qualification",
+    "golden_vectors",
+    "negative_controls",
+    "differential_fuzz",
+    "claims",
+    "summary",
+    "open_items",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_boot_config_readiness"},
+    "status_date": {"const": "2026-07-16"},
+    "status": {"const": "pass_single_host_synthetic_non_promoting"},
+    "contract_id": {"const": "PBC1"},
+    "selected_move_id": {"const": "N5-BOOTCFG-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "n5_exit_gate_satisfied": {"const": false},
+    "phase_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["N5", "N5.4"],
+      "properties": {"N5": {"const": "partial"}, "N5.4": {"const": "partial"}}
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract", "contract_schema", "golden_vectors", "golden_schema", "readiness_schema", "implementation_inputs"],
+      "properties": {
+        "contract": {"type": "object"},
+        "contract_schema": {"type": "object"},
+        "golden_vectors": {"type": "object"},
+        "golden_schema": {"type": "object"},
+        "readiness_schema": {"type": "object"},
+        "implementation_inputs": {"type": "array", "minItems": 13, "maxItems": 13, "items": {"type": "object"}}
+      }
+    },
+    "parser_qualification": {"type": "object"},
+    "golden_vectors": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "object"}},
+    "negative_controls": {"type": "array", "minItems": 64, "maxItems": 64, "items": {"type": "object"}},
+    "differential_fuzz": {"type": "object"},
+    "claims": {"type": "object"},
+    "summary": {"type": "object"},
+    "open_items": {"type": "array", "minItems": 8, "items": {"type": "string"}},
+    "claim_boundary": {"type": "array", "minItems": 7, "items": {"type": "string"}}
+  }
+}

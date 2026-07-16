@@ -94,9 +94,9 @@ The markers prove only that the instrumented application reached each point unde
 
 ## Open N5 Work
 
-The next chronological move is `N5-BOOTPROTO-001`: freeze `ADD-BOOT-001` as canonical versioned handoff bytes with an independent decoder, layout assertions, golden vectors, downgrade controls, malformed records, and fuzzing before kernel entry consumes the protocol.
+Cycles 98 and 99 complete the bounded candidate PBP1 handoff and PBC1 parser qualifications without live producer, consumer, or filesystem claims. The next chronological move is `N5-ELF-001`: define and qualify bounded ELF64 validation and load planning before PooleBoot can consume a trusted manifest entry.
 
-After that, N5 still requires a bounded boot configuration grammar; complete filesystem and RNG/TCG2 handling; ELF64 validation, relocation, and loading; signed kernel and system-artifact verification; normal/safe/previous/recovery/diagnostic selection; memory-map normalization; `ExitBootServices` retry behavior; immutable handoff transfer; hostile loader coverage; second-host reproduction; exact target-firmware execution; and separately authorized physical-media qualification.
+N5 still requires live configuration-file discovery and bounded reads; complete filesystem and RNG/TCG2 handling; ELF64 validation, relocation, and loading; signed kernel and system-artifact verification; normal/safe/previous/recovery/diagnostic selection; memory-map normalization; `ExitBootServices` retry behavior; immutable handoff transfer; hostile loader coverage; second-host reproduction; exact target-firmware execution; and separately authorized physical-media qualification.
 
 ## Claim Boundary
 

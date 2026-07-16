@@ -216,6 +216,17 @@ def check_native_boot_handoff_readiness() -> CheckResult:
     )
 
 
+def check_native_boot_config_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_boot_config_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
 def check_publication_boundary() -> CheckResult:
     from tools import pooleos_release_gate
 
@@ -3314,6 +3325,8 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "tools" / "qualify_native_pooleboot.py",
                 ROOT / "tools" / "generate_native_boot_handoff_vectors.py",
                 ROOT / "tools" / "qualify_native_boot_handoff.py",
+                ROOT / "tools" / "generate_native_boot_config_vectors.py",
+                ROOT / "tools" / "qualify_native_boot_config.py",
                 ROOT / "runtime" / "native_binary.py",
                 ROOT / "runtime" / "native_v1_objectives.py",
                 ROOT / "runtime" / "adr_ratification.py",
@@ -3324,8 +3337,10 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runtime" / "native_models.py",
                 ROOT / "runtime" / "native_pooleboot.py",
                 ROOT / "runtime" / "native_boot_handoff.py",
+                ROOT / "runtime" / "native_boot_config.py",
                 ROOT / "docs" / "native-pooleboot-proof.md",
                 ROOT / "docs" / "native-boot-handoff.md",
+                ROOT / "docs" / "native-boot-config.md",
                 ROOT / "security" / "README.md",
                 ROOT / "security" / "owner-adr-signers.allowed",
                 ROOT / "security" / "revoked-adr-signers",
@@ -3340,6 +3355,10 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "native" / "handoff" / "README.md",
                 ROOT / "native" / "handoff" / "src" / "lib.rs",
                 ROOT / "native" / "handoff" / "src" / "bin" / "pbp1_probe.rs",
+                ROOT / "native" / "bootcfg" / "Cargo.toml",
+                ROOT / "native" / "bootcfg" / "README.md",
+                ROOT / "native" / "bootcfg" / "src" / "lib.rs",
+                ROOT / "native" / "bootcfg" / "src" / "bin" / "pbc1_probe.rs",
                 ROOT / "native" / "fixtures" / "pooleboot" / "Cargo.toml",
                 ROOT / "native" / "fixtures" / "pooleboot" / "src" / "main.rs",
                 ROOT / "native" / "kernel" / "Cargo.toml",
@@ -3364,6 +3383,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runs" / "native_model_readiness.json",
                 ROOT / "runs" / "native_pooleboot_readiness.json",
                 ROOT / "runs" / "native_boot_handoff_readiness.json",
+                ROOT / "runs" / "native_boot_config_readiness.json",
                 ROOT / "specs" / "native-pooleboot-proof.json",
                 ROOT / "specs" / "native-pooleboot-proof.schema.json",
                 ROOT / "specs" / "native-pooleboot-readiness.schema.json",
@@ -3372,6 +3392,11 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "specs" / "native-boot-handoff-golden-vectors.json",
                 ROOT / "specs" / "native-boot-handoff-golden-vectors.schema.json",
                 ROOT / "specs" / "native-boot-handoff-readiness.schema.json",
+                ROOT / "specs" / "native-boot-config-contract.json",
+                ROOT / "specs" / "native-boot-config-contract.schema.json",
+                ROOT / "specs" / "native-boot-config-golden-vectors.json",
+                ROOT / "specs" / "native-boot-config-golden-vectors.schema.json",
+                ROOT / "specs" / "native-boot-config-readiness.schema.json",
                 ROOT / "specs" / "pdc-source-intake.schema.json",
                 ROOT / "specs" / "pdc-math-contract.schema.json",
                 ROOT / "specs" / "pdc-golden-vectors.schema.json",
@@ -3451,6 +3476,7 @@ def main(argv: list[str] | None = None) -> int:
     checks.append(check_native_model_readiness())
     checks.append(check_native_pooleboot_readiness())
     checks.append(check_native_boot_handoff_readiness())
+    checks.append(check_native_boot_config_readiness())
     checks.append(check_publication_boundary())
     checks.extend(check_claim_schema())
     checks.extend(check_claim_examples())
