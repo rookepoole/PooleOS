@@ -1,9 +1,9 @@
 {
-  "schema_version": "1.2",
+  "schema_version": "1.3",
   "artifact_kind": "pooleos_native_model_readiness",
   "status_date": "2026-07-16",
   "status": "bounded_models_pass_counterexamples_detected",
-  "selected_move_id": "N4-IPC-MODEL-001",
+  "selected_move_id": "N4-SCHEDULER-MODEL-001",
   "production_ready": false,
   "production_promotion_allowed": false,
   "n4_model_slice_satisfied": true,
@@ -16,14 +16,14 @@
     },
     "contract": {
       "path": "specs/native-model-contract.json",
-      "byte_count": 12708,
-      "sha256": "87458D2481EF2A22C8497165366D9F69B3224D566F7860B4A1D4AA1D76AA6F85"
+      "byte_count": 20556,
+      "sha256": "A786763D6BFE2E8BAD7239DDFF4AEC7021F61C4A4F82EADD2DF96FF36EE19535"
     },
     "implementation_inputs": [
       {
         "path": "runtime/native_models.py",
-        "byte_count": 43349,
-        "sha256": "50AAE17C087B35CE95BEAF4FD7C4AF78CA87833C2FB1C0289DE6696DA889A47B"
+        "byte_count": 46098,
+        "sha256": "8EA11B1998757D16ECF3F314A36383983709D35873D8E2BF127A2B24542C3792"
       },
       {
         "path": "tools/bootstrap_native_models.ps1",
@@ -116,6 +116,51 @@
         "path": "models/tla/PooleIPC.leaky_teardown.cfg",
         "byte_count": 690,
         "sha256": "DED305ADFCDB6ED7CFC09B5E7A6907674429C22A8307CC162F706AF2296FA251"
+      },
+      {
+        "path": "models/tla/PooleScheduler.tla",
+        "byte_count": 12628,
+        "sha256": "4029DCBE7A9FD5A13FFC50D8B708B824216A1422B8355DA966D8ADE6CC098D67"
+      },
+      {
+        "path": "models/tla/PooleScheduler.safe.cfg",
+        "byte_count": 761,
+        "sha256": "4D8DE4C5E78DF574E432A64D77825D566B8C45D495C8A541A2306141F97CFE33"
+      },
+      {
+        "path": "models/tla/PooleScheduler.lost_cancel.cfg",
+        "byte_count": 760,
+        "sha256": "E8CA701865033AB8B34A361EC38F65E2A8BAD0B81B493E05302296858A3A5CC5"
+      },
+      {
+        "path": "models/tla/PooleScheduler.lost_timeout.cfg",
+        "byte_count": 760,
+        "sha256": "A5268C4907031183ACB54C022330948696C27F33405BACEF0554E743773CF3F2"
+      },
+      {
+        "path": "models/tla/PooleScheduler.duplicate_wakeup.cfg",
+        "byte_count": 760,
+        "sha256": "23E371BCEC3F14C5177E2B6FA696CBEB74D465179D8EA209B1C683202C47A330"
+      },
+      {
+        "path": "models/tla/PooleScheduler.no_inheritance.cfg",
+        "byte_count": 760,
+        "sha256": "6755E161DAC6CC0549E2583A1836F7690533871F59E01876179BC778AC95F0BF"
+      },
+      {
+        "path": "models/tla/PooleScheduler.priority_bypass.cfg",
+        "byte_count": 760,
+        "sha256": "DD5EFD141F0029C8D5F6CC88ABEC07085CCCE4CCC695AAE2B1CDA3A6288E881F"
+      },
+      {
+        "path": "models/tla/PooleScheduler.fairness_bypass.cfg",
+        "byte_count": 760,
+        "sha256": "C508287A53B0CC3968E3913A319E9A38C0559983EED22AFB38954BB00A978F17"
+      },
+      {
+        "path": "models/tla/PooleScheduler.leaky_teardown.cfg",
+        "byte_count": 760,
+        "sha256": "FAA6215EC6AB99219E69BBA47CCE94274C41CF66261AF78B0557D9C37E157653"
       }
     ]
   },
@@ -141,17 +186,17 @@
     "modeled_domains": [
       "capability_derivation_revocation",
       "ipc_state",
+      "scheduler_transitions",
       "virtual_memory_map_unmap",
       "boot_slot_state",
       "update_rollback"
     ],
     "open_domains": [
-      "scheduler_transitions",
       "poolefs_transaction_recovery"
     ],
     "required_count": 7,
-    "modeled_count": 5,
-    "open_count": 2
+    "modeled_count": 6,
+    "open_count": 1
   },
   "runs": [
     {
@@ -965,6 +1010,743 @@
       "repeat_exact_match": true,
       "raw_output_public": false,
       "command_sha256": "921323A501351A16B3851B431DF3CFB153F0F6C7B01B0F48D5EA4365E5258856"
+    },
+    {
+      "id": "bounded_scheduler.safe",
+      "model_id": "bounded_scheduler",
+      "case_id": "safe",
+      "mode": "safe",
+      "status": "pass",
+      "expected_exit_code": 0,
+      "observed_exit_code": 0,
+      "expected_invariant_violation": null,
+      "observed_invariant_violation": null,
+      "generated_states": 11942,
+      "distinct_states": 2391,
+      "left_on_queue": 0,
+      "depth": 19,
+      "trace": [],
+      "trace_sha256": "37517E5F3DC66819F61F5A7BB8ACE1921282415F10551D2DEFA5C3EB0985B570",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "38BA857EE4FB37446E7FD293695B6E75B774D4DBEBE9404B4F6F8851ACEE3A87"
+    },
+    {
+      "id": "bounded_scheduler.unsafe_lost_cancel_wake",
+      "model_id": "bounded_scheduler",
+      "case_id": "unsafe_lost_cancel_wake",
+      "mode": "hostile",
+      "status": "pass",
+      "expected_exit_code": 12,
+      "observed_exit_code": 12,
+      "expected_invariant_violation": "WakeDeliverySound",
+      "observed_invariant_violation": "WakeDeliverySound",
+      "generated_states": 221,
+      "distinct_states": 81,
+      "left_on_queue": 34,
+      "depth": 6,
+      "trace": [
+        {
+          "index": 1,
+          "action": "Init",
+          "state_sha256": "49CC77C734E64EC20BD84B471BFDBB9F728EF1A253062859534EED3A9DFA9821",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = LowTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Running\" @@ MediumTask :> \"Dormant\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 2,
+          "action": "Activate",
+          "state_sha256": "06E2A55DB01B1F42367EF3465E4184C80B35B8F200EF4E6878C3E1856AE2E7DE",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = LowTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Running\" @@ MediumTask :> \"Runnable\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 0 @@ MediumTask :> 1 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 3,
+          "action": "Preempt",
+          "state_sha256": "7BE31E874D6D07C7CDADEEE4E3E6ECA7E8A2DC8898BD59AB162D20F8B4057181",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = NoTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Runnable\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 1 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 4,
+          "action": "Dispatch",
+          "state_sha256": "73C410094E6D8267065D10F34DDEFBB1761B0BB100616A02C10408742F9FF9B3",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = MediumTask",
+            "/\\ bypassCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Running\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 5,
+          "action": "BlockOnLock",
+          "state_sha256": "3C0DBE4B7BCB1AA5487D05370E55E52F77A301D6FB690B3616B386E7ED0E41B4",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = NoTask",
+            "/\\ bypassCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Blocked\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> TRUE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 6,
+          "action": "CancelWait",
+          "state_sha256": "BA3C2C641724C818E41E19A1165C263A8B79F06D163FE0E244B00930C029DCCA",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = NoTask",
+            "/\\ bypassCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Blocked\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> TRUE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"Cancelled\" @@ HighTask :> \"None\")"
+          ]
+        }
+      ],
+      "trace_sha256": "26CB30F126CF34E3A07E0D1CB1EBC44A80ADED1B35D072BD7B2465C0CB711635",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "45DE56EC8EAFC6EBA6A3E918DE90FCF582C9B855564DE1CB842FDFE5FE4CAC01"
+    },
+    {
+      "id": "bounded_scheduler.unsafe_lost_timeout_wake",
+      "model_id": "bounded_scheduler",
+      "case_id": "unsafe_lost_timeout_wake",
+      "mode": "hostile",
+      "status": "pass",
+      "expected_exit_code": 12,
+      "observed_exit_code": 12,
+      "expected_invariant_violation": "WakeDeliverySound",
+      "observed_invariant_violation": "WakeDeliverySound",
+      "generated_states": 222,
+      "distinct_states": 82,
+      "left_on_queue": 35,
+      "depth": 6,
+      "trace": [
+        {
+          "index": 1,
+          "action": "Init",
+          "state_sha256": "49CC77C734E64EC20BD84B471BFDBB9F728EF1A253062859534EED3A9DFA9821",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = LowTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Running\" @@ MediumTask :> \"Dormant\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 2,
+          "action": "Activate",
+          "state_sha256": "06E2A55DB01B1F42367EF3465E4184C80B35B8F200EF4E6878C3E1856AE2E7DE",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = LowTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Running\" @@ MediumTask :> \"Runnable\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 0 @@ MediumTask :> 1 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 3,
+          "action": "Preempt",
+          "state_sha256": "7BE31E874D6D07C7CDADEEE4E3E6ECA7E8A2DC8898BD59AB162D20F8B4057181",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = NoTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Runnable\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 1 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 4,
+          "action": "Dispatch",
+          "state_sha256": "73C410094E6D8267065D10F34DDEFBB1761B0BB100616A02C10408742F9FF9B3",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = MediumTask",
+            "/\\ bypassCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Running\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 5,
+          "action": "BlockOnLock",
+          "state_sha256": "3C0DBE4B7BCB1AA5487D05370E55E52F77A301D6FB690B3616B386E7ED0E41B4",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = NoTask",
+            "/\\ bypassCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Blocked\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> TRUE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 6,
+          "action": "TimeoutWait",
+          "state_sha256": "3CD8B2449014F6DBE60EC3E2BC842DAD3057F3E6CC5AE84085EE6857D5FA19A2",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = NoTask",
+            "/\\ bypassCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Blocked\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> TRUE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"TimedOut\" @@ HighTask :> \"None\")"
+          ]
+        }
+      ],
+      "trace_sha256": "CAC8F22E7E55FA1422D33665F979E18CACB5F732880C396EB216035FC6AD167C",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "63F0EF7333FCFDDC1484F8F78D99B2F02371E1F165689D8E749F4F9FE0CFB16E"
+    },
+    {
+      "id": "bounded_scheduler.unsafe_duplicate_wakeup",
+      "model_id": "bounded_scheduler",
+      "case_id": "unsafe_duplicate_wakeup",
+      "mode": "hostile",
+      "status": "pass",
+      "expected_exit_code": 12,
+      "observed_exit_code": 12,
+      "expected_invariant_violation": "NoDuplicateRunnable",
+      "observed_invariant_violation": "NoDuplicateRunnable",
+      "generated_states": 221,
+      "distinct_states": 81,
+      "left_on_queue": 34,
+      "depth": 6,
+      "trace": [
+        {
+          "index": 1,
+          "action": "Init",
+          "state_sha256": "49CC77C734E64EC20BD84B471BFDBB9F728EF1A253062859534EED3A9DFA9821",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = LowTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Running\" @@ MediumTask :> \"Dormant\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 2,
+          "action": "Activate",
+          "state_sha256": "06E2A55DB01B1F42367EF3465E4184C80B35B8F200EF4E6878C3E1856AE2E7DE",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = LowTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Running\" @@ MediumTask :> \"Runnable\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 0 @@ MediumTask :> 1 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 3,
+          "action": "Preempt",
+          "state_sha256": "7BE31E874D6D07C7CDADEEE4E3E6ECA7E8A2DC8898BD59AB162D20F8B4057181",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = NoTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Runnable\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 1 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 4,
+          "action": "Dispatch",
+          "state_sha256": "73C410094E6D8267065D10F34DDEFBB1761B0BB100616A02C10408742F9FF9B3",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = MediumTask",
+            "/\\ bypassCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Running\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 5,
+          "action": "BlockOnLock",
+          "state_sha256": "3C0DBE4B7BCB1AA5487D05370E55E52F77A301D6FB690B3616B386E7ED0E41B4",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = NoTask",
+            "/\\ bypassCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Blocked\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> TRUE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 6,
+          "action": "CancelWait",
+          "state_sha256": "7A257E6F616B4E3D2448BC18FC9D2BEAA69013696F8A54D4C4F31EE28F8A0835",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = NoTask",
+            "/\\ bypassCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Runnable\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 2 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"Cancelled\" @@ HighTask :> \"None\")"
+          ]
+        }
+      ],
+      "trace_sha256": "4DD10D2D1810F3721D8BBBBB60CA9B8FB547E22B5E5ABDEA77FE6CCAF4EA38C3",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "7EB72C6AF9AAA853C8A2563A63C22DFA9D5C5B9523A9E8863892ADC2735622CB"
+    },
+    {
+      "id": "bounded_scheduler.unsafe_no_priority_inheritance",
+      "model_id": "bounded_scheduler",
+      "case_id": "unsafe_no_priority_inheritance",
+      "mode": "hostile",
+      "status": "pass",
+      "expected_exit_code": 12,
+      "observed_exit_code": 12,
+      "expected_invariant_violation": "PriorityInheritanceSound",
+      "observed_invariant_violation": "PriorityInheritanceSound",
+      "generated_states": 112,
+      "distinct_states": 46,
+      "left_on_queue": 23,
+      "depth": 5,
+      "trace": [
+        {
+          "index": 1,
+          "action": "Init",
+          "state_sha256": "49CC77C734E64EC20BD84B471BFDBB9F728EF1A253062859534EED3A9DFA9821",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = LowTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Running\" @@ MediumTask :> \"Dormant\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 2,
+          "action": "Activate",
+          "state_sha256": "06E2A55DB01B1F42367EF3465E4184C80B35B8F200EF4E6878C3E1856AE2E7DE",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = LowTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Running\" @@ MediumTask :> \"Runnable\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 0 @@ MediumTask :> 1 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 3,
+          "action": "Preempt",
+          "state_sha256": "7BE31E874D6D07C7CDADEEE4E3E6ECA7E8A2DC8898BD59AB162D20F8B4057181",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = NoTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Runnable\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 1 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 4,
+          "action": "Dispatch",
+          "state_sha256": "73C410094E6D8267065D10F34DDEFBB1761B0BB100616A02C10408742F9FF9B3",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = MediumTask",
+            "/\\ bypassCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Running\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 5,
+          "action": "BlockOnLock",
+          "state_sha256": "3C0DBE4B7BCB1AA5487D05370E55E52F77A301D6FB690B3616B386E7ED0E41B4",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = NoTask",
+            "/\\ bypassCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Blocked\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> TRUE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        }
+      ],
+      "trace_sha256": "1A2AFB8F4422B844942D02456DEF89328AFB98C5612E5E080EB2EDEECCA60D10",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "D3E4F53E9E1A129451739C932B389D3B39E552DB3C2D6227C3F1EB94110FD102"
+    },
+    {
+      "id": "bounded_scheduler.unsafe_priority_bypass",
+      "model_id": "bounded_scheduler",
+      "case_id": "unsafe_priority_bypass",
+      "mode": "hostile",
+      "status": "pass",
+      "expected_exit_code": 12,
+      "observed_exit_code": 12,
+      "expected_invariant_violation": "DispatchPrioritySound",
+      "observed_invariant_violation": "DispatchPrioritySound",
+      "generated_states": 42,
+      "distinct_states": 22,
+      "left_on_queue": 13,
+      "depth": 4,
+      "trace": [
+        {
+          "index": 1,
+          "action": "Init",
+          "state_sha256": "49CC77C734E64EC20BD84B471BFDBB9F728EF1A253062859534EED3A9DFA9821",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = LowTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Running\" @@ MediumTask :> \"Dormant\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 2,
+          "action": "Activate",
+          "state_sha256": "06E2A55DB01B1F42367EF3465E4184C80B35B8F200EF4E6878C3E1856AE2E7DE",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = LowTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Running\" @@ MediumTask :> \"Runnable\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 0 @@ MediumTask :> 1 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 3,
+          "action": "Preempt",
+          "state_sha256": "7BE31E874D6D07C7CDADEEE4E3E6ECA7E8A2DC8898BD59AB162D20F8B4057181",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = NoTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Runnable\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 1 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 4,
+          "action": "Dispatch",
+          "state_sha256": "8B593AC1096098A068B3D85268443017CD6507BB743593AD940F6ED9170B76B1",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = LowTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 1 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Running\" @@ MediumTask :> \"Runnable\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = FALSE",
+            "/\\ runCount = (LowTask :> 0 @@ MediumTask :> 1 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        }
+      ],
+      "trace_sha256": "B4197900969BAFBE1CBE61AC87CAAC7E2E807ABED08358B2E417B5F23B2D0A76",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "5861BC8C63A41A83FE61607DB8A8BCAAAD12F928CF01733F1AC7E2695C13A114"
+    },
+    {
+      "id": "bounded_scheduler.unsafe_fairness_bypass",
+      "model_id": "bounded_scheduler",
+      "case_id": "unsafe_fairness_bypass",
+      "mode": "hostile",
+      "status": "pass",
+      "expected_exit_code": 12,
+      "observed_exit_code": 12,
+      "expected_invariant_violation": "BypassBound",
+      "observed_invariant_violation": "BypassBound",
+      "generated_states": 699,
+      "distinct_states": 223,
+      "left_on_queue": 93,
+      "depth": 8,
+      "trace": [
+        {
+          "index": 1,
+          "action": "Init",
+          "state_sha256": "49CC77C734E64EC20BD84B471BFDBB9F728EF1A253062859534EED3A9DFA9821",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = LowTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Running\" @@ MediumTask :> \"Dormant\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 2,
+          "action": "Activate",
+          "state_sha256": "06E2A55DB01B1F42367EF3465E4184C80B35B8F200EF4E6878C3E1856AE2E7DE",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = LowTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Running\" @@ MediumTask :> \"Runnable\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 0 @@ MediumTask :> 1 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 3,
+          "action": "Preempt",
+          "state_sha256": "7BE31E874D6D07C7CDADEEE4E3E6ECA7E8A2DC8898BD59AB162D20F8B4057181",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = NoTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Runnable\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 1 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 4,
+          "action": "Dispatch",
+          "state_sha256": "73C410094E6D8267065D10F34DDEFBB1761B0BB100616A02C10408742F9FF9B3",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = MediumTask",
+            "/\\ bypassCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Running\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 5,
+          "action": "Preempt",
+          "state_sha256": "F992D67C15C2A43FB625D498D250DD4E739AFF09BB318FFC3A390CF0CAB0AA10",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = NoTask",
+            "/\\ bypassCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Runnable\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 1 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 6,
+          "action": "Dispatch",
+          "state_sha256": "A190CE722C0CEE3418731EE79D874F410F1D48DCF16487DD177F80D12A6B112A",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = MediumTask",
+            "/\\ bypassCount = (LowTask :> 2 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Running\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 7,
+          "action": "Preempt",
+          "state_sha256": "B168CF4E7FBFE41DC64A4AC9A7C9D4493943B19C593AB2E6164041EA5AC602A2",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = NoTask",
+            "/\\ bypassCount = (LowTask :> 2 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Runnable\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 1 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 8,
+          "action": "Dispatch",
+          "state_sha256": "3532727848A8386B7CFD866E96288D96A78116F79CFA9E8D9060F061A7CCBF7B",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = MediumTask",
+            "/\\ bypassCount = (LowTask :> 3 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Runnable\" @@ MediumTask :> \"Running\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 1 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        }
+      ],
+      "trace_sha256": "D062782BA88EC3573622B65D6C167303E62F03DFAB2721325115486B27D0D377",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "A5CF9478A58D1011C6CCFB9C0E07D94CA905B2689A88C0D532AB6EBC30956BC0"
+    },
+    {
+      "id": "bounded_scheduler.unsafe_scheduler_teardown_leak",
+      "model_id": "bounded_scheduler",
+      "case_id": "unsafe_scheduler_teardown_leak",
+      "mode": "hostile",
+      "status": "pass",
+      "expected_exit_code": 12,
+      "observed_exit_code": 12,
+      "expected_invariant_violation": "TerminalQuiescent",
+      "observed_invariant_violation": "TerminalQuiescent",
+      "generated_states": 10,
+      "distinct_states": 9,
+      "left_on_queue": 6,
+      "depth": 3,
+      "trace": [
+        {
+          "index": 1,
+          "action": "Init",
+          "state_sha256": "49CC77C734E64EC20BD84B471BFDBB9F728EF1A253062859534EED3A9DFA9821",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = LowTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Running\" @@ MediumTask :> \"Dormant\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 2,
+          "action": "Activate",
+          "state_sha256": "06E2A55DB01B1F42367EF3465E4184C80B35B8F200EF4E6878C3E1856AE2E7DE",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = LowTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Running\" @@ MediumTask :> \"Runnable\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 0 @@ MediumTask :> 1 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        },
+        {
+          "index": 3,
+          "action": "Teardown",
+          "state_sha256": "7F57F9A0C87359E5AC60924BB1EBB7333961D48C0BBF25F5CD7E44AE2954E793",
+          "state_lines": [
+            "/\\ lockOwner = LowTask",
+            "/\\ current = LowTask",
+            "/\\ bypassCount = (LowTask :> 0 @@ MediumTask :> 0 @@ HighTask :> 0)",
+            "/\\ taskState = (LowTask :> \"Running\" @@ MediumTask :> \"Dead\" @@ HighTask :> \"Dormant\")",
+            "/\\ dispatchPrioritySound = TRUE",
+            "/\\ runCount = (LowTask :> 0 @@ MediumTask :> 1 @@ HighTask :> 0)",
+            "/\\ waiting = (LowTask :> FALSE @@ MediumTask :> FALSE @@ HighTask :> FALSE)",
+            "/\\ wakeReason = (LowTask :> \"None\" @@ MediumTask :> \"None\" @@ HighTask :> \"None\")"
+          ]
+        }
+      ],
+      "trace_sha256": "E94E4E04B62AD9F17F1346B6071B5A6D0614FA0E20E15AC0B66A6B719AEE7708",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "F0EFCF32E1AAEF40AFE2A0C664A758299FA49953D9A61EAF593857D602D3D843"
     }
   ],
   "negative_controls": [
@@ -1067,6 +1849,55 @@
       "evidence_kind": "executed_counterexample"
     },
     {
+      "id": "NEG-N4-MODEL-SCHEDULER-LOST-CANCEL-MUTANT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "executed_counterexample"
+    },
+    {
+      "id": "NEG-N4-MODEL-SCHEDULER-LOST-TIMEOUT-MUTANT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "executed_counterexample"
+    },
+    {
+      "id": "NEG-N4-MODEL-SCHEDULER-DUPLICATE-WAKE-MUTANT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "executed_counterexample"
+    },
+    {
+      "id": "NEG-N4-MODEL-SCHEDULER-NO-INHERITANCE-MUTANT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "executed_counterexample"
+    },
+    {
+      "id": "NEG-N4-MODEL-SCHEDULER-PRIORITY-BYPASS-MUTANT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "executed_counterexample"
+    },
+    {
+      "id": "NEG-N4-MODEL-SCHEDULER-FAIRNESS-BYPASS-MUTANT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "executed_counterexample"
+    },
+    {
+      "id": "NEG-N4-MODEL-SCHEDULER-TEARDOWN-LEAK-MUTANT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "executed_counterexample"
+    },
+    {
       "id": "NEG-N4-MODEL-SAFE-VIOLATION",
       "expected": "reject",
       "observed": "reject",
@@ -1096,16 +1927,16 @@
     }
   ],
   "summary": {
-    "model_count": 4,
-    "run_case_count": 12,
-    "safe_run_count": 4,
-    "safe_run_pass_count": 4,
-    "hostile_run_count": 8,
-    "hostile_counterexample_count": 8,
-    "repeat_match_count": 12,
-    "negative_control_count": 18,
-    "negative_control_pass_count": 18,
-    "normalized_trace_count": 8,
+    "model_count": 5,
+    "run_case_count": 20,
+    "safe_run_count": 5,
+    "safe_run_pass_count": 5,
+    "hostile_run_count": 15,
+    "hostile_counterexample_count": 15,
+    "repeat_match_count": 20,
+    "negative_control_count": 25,
+    "negative_control_pass_count": 25,
+    "normalized_trace_count": 15,
     "implementation_trace_cross_check_count": 0,
     "failed_check_count": 0
   },
@@ -1114,14 +1945,14 @@
     "The capability model has exactly three abstract capability identifiers, two principals, two rights, one object, atomic derive/transfer/revoke transitions, no identifier reuse, and no concurrency, IPC, scheduler, memory, DMA, or persistence model.",
     "The virtual-memory model has exactly two domains, two CPUs, two physical pages, one virtual address per domain, generations 0 through 1, and atomic map, TLB fill/evict, transfer, unmap, and shootdown-acknowledgement transitions. It has no page-table hierarchy, PCID/ASID, DMA/IOMMU, interrupt-ordering, weak-memory, concurrent page-table-write, huge-page, copy-on-write, swap, NUMA, or hardware page-walk model.",
     "The IPC model has exactly two principals, one endpoint, two calls, two reply tokens, a one-call queue bound, endpoint epochs 0 through 1, and atomic enqueue, dispatch, cancel, timeout, reply, teardown, and reopen transitions. Call and reply-token identifiers are one-shot and never recycled. CanCall is an abstract authorization predicate, not a composed capability lookup, derivation, or revocation model. The queue is an unordered set abstraction. It has no payload, message-copy, scheduling, priority, fairness, blocking-thread, interrupt, SMP interleaving, weak-memory, resource-accounting, endpoint-transfer, kernel-object implementation, or ABI-encoding model.",
+    "The scheduler model has exactly three fixed-priority tasks, one abstract CPU context, one non-recursive lock, a preloaded low-priority critical section, one-shot task activation, atomic transitions, and a maximum of two recorded dispatch bypasses. Cancellation and timeout are modeled as blocked-to-runnable wake results that must be consumed before the task continues. Priority inheritance is immediate and transitive depth is one. The bypass bound is a safety accounting rule only: Idle remains enabled and no temporal fairness or eventual-dispatch property is checked. There is no timer clock, deadline arithmetic, quantum, multicore execution, interrupt ordering, nested lock, deadlock graph, donation chain, affinity, migration, register context, FPU/vector state, weak memory, resource quota, scheduler implementation, or ABI encoding.",
     "TLC uses 64-bit state fingerprints; complete reachable-state exploration within the constants is not a collision-free mathematical proof.",
     "Only state safety invariants are checked. No liveness, fairness, real-time, probabilistic, refinement, implementation-equivalence, or physical-hardware property is checked.",
     "The hostile configurations are deliberate mutations used to demonstrate that the named invariants produce finite counterexample traces."
   ],
   "open_work": [
-    "Model scheduler transitions, cancellation, priority inversion, and bounded fairness assumptions.",
     "Model PooleFS transaction recovery and power-loss state before freezing persistent formats.",
-    "Cross-check all four current models against exact native implementation traces when those implementations exist.",
+    "Cross-check all five current models against exact native implementation traces when those implementations exist.",
     "Source-build and independently reproduce the model-checker and Java inputs with signed provenance, SBOM, vulnerability, license, and redistribution review."
   ],
   "claim_boundary": {

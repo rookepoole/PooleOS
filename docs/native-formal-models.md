@@ -1,13 +1,13 @@
 # PooleOS Bounded Native Models
 
-Status: Cycle 94 pre-production evidence
+Status: Cycle 95 pre-production evidence
 Date: 2026-07-16
-Selected move: `N4-IPC-MODEL-001`
-Contract: `POOLEOS-N4-MODELS-3`
+Selected move: `N4-SCHEDULER-MODEL-001`
+Contract: `POOLEOS-N4-MODELS-4`
 
 ## Scope
 
-This cycle extends the executable state-model slice required by N4.5-N4.6 and `ADD-ASSURE-001`. It uses the TLC explicit-state model checker to exhaust every reachable state within four small frozen safe configurations and to demonstrate that eight deliberate unsafe mutations produce their required counterexample traces. The new IPC model covers capability-mediated enqueue, bounded endpoint queues, dispatch and reply-token lifecycle, cancellation, timeout, endpoint teardown/reopen epochs, stale-reply rejection, and quiescent teardown.
+This cycle extends the executable state-model slice required by N4.5-N4.6 and `ADD-ASSURE-001`. It uses the TLC explicit-state model checker to exhaust every reachable state within five small frozen safe configurations and to demonstrate that fifteen deliberate unsafe mutations produce their required counterexample traces. The new scheduler model covers dormant, runnable, running, blocked, and dead task states; run-queue multiplicity; dispatch and preemption; lock blocking and priority inheritance; cancellation and timeout wake delivery; lock handoff; teardown; and a bounded dispatch-bypass accounting rule.
 
 This is bounded model checking, not a formal proof of PooleOS or its future implementation. The models do not execute PooleBoot, PooleKernel, firmware, drivers, storage, or hardware.
 
@@ -50,8 +50,9 @@ Raw TLC output and metadata stay under ignored `.toolchains/native-models/eviden
 | `PooleCapabilities` | Three capability IDs; two principals; two rights; one object; no ID reuse | 7,963 generated, 1,316 distinct, queue drained, depth 6 | `UnsafeLocalRevoke=TRUE` violates `NoLiveDescendantOfRevoked`; 36 generated, 31 distinct, depth 3; trace `Init -> Derive -> Revoke` |
 | `PooleVirtualMemory` | Two domains; two CPUs; two pages; one virtual address; generations 0 through 1 | 10,210 generated, 1,422 distinct, queue drained, depth 13 | `UnsafeStaleMapping=TRUE` violates `PageTableSafety`; 136 generated, 75 distinct, depth 4; trace `Init -> Map -> BeginTransfer -> CompleteTransfer`. Separately, `UnsafeEarlyReuse=TRUE` violates `TlbSafety`; 1,128 generated, 339 distinct, depth 6; trace `Init -> Map -> TlbFill -> BeginTransfer -> Unmap -> CompleteTransfer` |
 | `PooleIPC` | Two principals; one endpoint; two calls; two reply tokens; one queued call; endpoint epochs 0 through 1 | 1,402 generated, 621 distinct, queue drained, depth 9 | Independent mutants reject unauthorized enqueue via `QueuedCallAuthorized`, reply-token reuse via `LiveTokenConsistent`, stale post-cancel reply via `AcceptedRepliesFresh`, and queued-state leakage across teardown via `ClosedEndpointQuiescent`; traces have 2, 4, 5, and 3 states respectively |
+| `PooleScheduler` | Three fixed-priority tasks; one CPU context; one lock; one-shot activation; maximum two recorded dispatch bypasses | 11,942 generated, 2,391 distinct, queue drained, depth 19 | Lost cancel and timeout wakeups violate `WakeDeliverySound`; duplicate wake violates `NoDuplicateRunnable`; missing inheritance violates `PriorityInheritanceSound`; lower-priority dispatch violates `DispatchPrioritySound`; a third bypass violates `BypassBound`; teardown leakage violates `TerminalQuiescent`; traces have 6, 6, 6, 5, 4, 8, and 3 states respectively |
 
-Every safe and hostile case executes twice. All twelve normalized results match exactly. A hostile TLC exit code is accepted only when the exact named case, invariant, state counts, depth, normalized trace actions, and trace digest match the contract.
+Every safe and hostile case executes twice. All twenty normalized results match exactly. A hostile TLC exit code is accepted only when the exact named case, invariant, state counts, depth, normalized trace actions, and trace digest match the contract. A separate non-contract `-coverage 1` diagnostic reached all eleven non-idle scheduler actions with positive counts.
 
 ## Safety Properties
 
@@ -63,7 +64,9 @@ The virtual-memory model checks type closure, valid transfer targets, ownership 
 
 The IPC model checks queue bounds and state agreement, enqueue authorization, in-flight call/reply-token consistency, single live-token ownership, terminal token retirement, accepted-reply freshness, and endpoint quiescence after teardown. Endpoint epochs prevent a token issued before teardown from becoming fresh after reopen.
 
-Eighteen fail-closed controls cover prerelease substitution, TLC/JRE hashes, unsigned-input overclaims, runtime closure, all eight executed mutants, unexpected safe violations, path escape, arbitrary TLC modes, and implementation-trace overclaim.
+The scheduler model checks terminal and dormant quiescence, exact runnable/run-count agreement, no duplicate runnable entry, one-current-task agreement, blocked/waiting agreement, live lock ownership, wake delivery, lock-grant ownership, immediate one-level priority inheritance, audited highest-effective-priority dispatch, a two-bypass accounting bound, and bypass relevance. A task dispatched with a pending wake result must consume that result before any later acquire, block, release, or preemption transition.
+
+Twenty-five fail-closed controls cover prerelease substitution, TLC/JRE hashes, unsigned-input overclaims, runtime closure, all fifteen executed mutants, unexpected safe violations, path escape, arbitrary TLC modes, and implementation-trace overclaim.
 
 ## Assumptions And Non-Claims
 
@@ -72,10 +75,12 @@ Eighteen fail-closed controls cover prerelease substitution, TLC/JRE hashes, uns
 - The capability model does not model IPC, scheduling, memory maps, identifier reuse, quotas, timing, revocation races, or kernel data structures.
 - The virtual-memory model does not model page-table levels, PCID/ASID, interrupts, weak-memory ordering, concurrent page-table writers, hardware page walks, huge pages, copy-on-write, swap, NUMA, DMA, or an IOMMU. Its generation range permits only one ownership-changing reuse per page.
 - IPC call and reply-token identifiers are one-shot and never recycled. `CanCall` is an abstract authorization predicate, not a composition with the capability derivation/revocation model. The queue is an unordered set abstraction. The model does not represent payload bytes, message copying, scheduling, priorities, fairness, blocked threads, interrupts, SMP or weak-memory interleavings, quotas, endpoint transfer, kernel object layouts, or ABI encoding.
+- The scheduler starts with the low-priority task running inside one abstract critical section. Tasks activate once; transitions are atomic; priorities are fixed; priority inheritance has depth one; and there is one CPU context and one non-recursive lock. The model has no clock, deadline arithmetic, quantum, nested lock, donation chain, deadlock graph, affinity, migration, interrupt, register, FPU/vector, SMP, weak-memory, resource-quota, implementation-layout, or ABI model.
+- `MaxBypass=2` constrains dispatch-transition accounting only. `Idle` remains enabled, and neither temporal fairness, eventual dispatch, response-time bounds, nor freedom from starvation is checked or claimed.
 - TLC uses 64-bit state fingerprints. A drained queue within frozen constants is not a collision-free theorem.
 - No liveness, fairness, real-time, probabilistic, refinement, or implementation-equivalence property is checked.
 - Counterexamples show that the model's named invariant detects the deliberate mutation. They do not prove that every real defect maps to the mutation.
 
 ## Open Gates
 
-`FLAG-N4-MODELS-001` remains open. The current slice covers five of seven required domains: capability derivation/revocation, IPC state, virtual-memory map/unmap, boot-slot state, and update rollback. Scheduler transitions and PooleFS transaction recovery remain unmodeled. All four model families still require cross-checking against exact native implementation traces before any dependent ABI freeze. N4 remains partial and `production_promotion_allowed=false`.
+`FLAG-N4-MODELS-001` remains open. The current slice covers six of seven required domains: capability derivation/revocation, IPC state, scheduler transitions, virtual-memory map/unmap, boot-slot state, and update rollback. PooleFS transaction recovery remains unmodeled. All five model families still require cross-checking against exact native implementation traces before any dependent ABI freeze. N4 remains partial and `production_promotion_allowed=false`.

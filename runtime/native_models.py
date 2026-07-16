@@ -40,6 +40,15 @@ MODEL_INPUTS = (
     "models/tla/PooleIPC.token_reuse.cfg",
     "models/tla/PooleIPC.stale_reply.cfg",
     "models/tla/PooleIPC.leaky_teardown.cfg",
+    "models/tla/PooleScheduler.tla",
+    "models/tla/PooleScheduler.safe.cfg",
+    "models/tla/PooleScheduler.lost_cancel.cfg",
+    "models/tla/PooleScheduler.lost_timeout.cfg",
+    "models/tla/PooleScheduler.duplicate_wakeup.cfg",
+    "models/tla/PooleScheduler.no_inheritance.cfg",
+    "models/tla/PooleScheduler.priority_bypass.cfg",
+    "models/tla/PooleScheduler.fairness_bypass.cfg",
+    "models/tla/PooleScheduler.leaky_teardown.cfg",
 )
 IMPLEMENTATION_INPUTS = (
     "runtime/native_models.py",
@@ -59,6 +68,14 @@ RUN_IDS = (
     "capability_mediated_ipc.unsafe_token_reuse",
     "capability_mediated_ipc.unsafe_stale_reply",
     "capability_mediated_ipc.unsafe_leaky_teardown",
+    "bounded_scheduler.safe",
+    "bounded_scheduler.unsafe_lost_cancel_wake",
+    "bounded_scheduler.unsafe_lost_timeout_wake",
+    "bounded_scheduler.unsafe_duplicate_wakeup",
+    "bounded_scheduler.unsafe_no_priority_inheritance",
+    "bounded_scheduler.unsafe_priority_bypass",
+    "bounded_scheduler.unsafe_fairness_bypass",
+    "bounded_scheduler.unsafe_scheduler_teardown_leak",
 )
 NEGATIVE_CONTROL_IDS = (
     "NEG-N4-MODEL-TLC-PRERELEASE",
@@ -75,6 +92,13 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N4-MODEL-IPC-TOKEN-REUSE-MUTANT",
     "NEG-N4-MODEL-IPC-STALE-REPLY-MUTANT",
     "NEG-N4-MODEL-IPC-LEAKY-TEARDOWN-MUTANT",
+    "NEG-N4-MODEL-SCHEDULER-LOST-CANCEL-MUTANT",
+    "NEG-N4-MODEL-SCHEDULER-LOST-TIMEOUT-MUTANT",
+    "NEG-N4-MODEL-SCHEDULER-DUPLICATE-WAKE-MUTANT",
+    "NEG-N4-MODEL-SCHEDULER-NO-INHERITANCE-MUTANT",
+    "NEG-N4-MODEL-SCHEDULER-PRIORITY-BYPASS-MUTANT",
+    "NEG-N4-MODEL-SCHEDULER-FAIRNESS-BYPASS-MUTANT",
+    "NEG-N4-MODEL-SCHEDULER-TEARDOWN-LEAK-MUTANT",
     "NEG-N4-MODEL-SAFE-VIOLATION",
     "NEG-N4-MODEL-PATH-ESCAPE",
     "NEG-N4-MODEL-EXTRA-ARGUMENT",
@@ -95,18 +119,24 @@ NEGATIVE_CONTROL_EVIDENCE_KINDS = (
     "executed_counterexample",
     "executed_counterexample",
     "executed_counterexample",
+    "executed_counterexample",
+    "executed_counterexample",
+    "executed_counterexample",
+    "executed_counterexample",
+    "executed_counterexample",
+    "executed_counterexample",
+    "executed_counterexample",
     "safe_model_result",
     "path_policy",
     "closed_command_template",
     "claim_boundary",
 )
 OPEN_WORK = (
-    "Model scheduler transitions, cancellation, priority inversion, and bounded fairness assumptions.",
     "Model PooleFS transaction recovery and power-loss state before freezing persistent formats.",
-    "Cross-check all four current models against exact native implementation traces when those implementations exist.",
+    "Cross-check all five current models against exact native implementation traces when those implementations exist.",
     "Source-build and independently reproduce the model-checker and Java inputs with signed provenance, SBOM, vulnerability, license, and redistribution review.",
 )
-FROZEN_MODEL_CONTRACT_SHA256 = "CD6ED60F79E1566625D04BA180ECCE64540DEAB6BDE881583BA14580BC37807B"
+FROZEN_MODEL_CONTRACT_SHA256 = "F173594952523CEC5058224C6A5F23DF2F3AC70195045186C35085C6932AFD30"
 RUN_KEYS = {
     "id", "model_id", "case_id", "mode", "status", "expected_exit_code", "observed_exit_code",
     "expected_invariant_violation", "observed_invariant_violation", "generated_states",
@@ -234,7 +264,7 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
         errors.append("deterministic TLC controls changed")
     required = contract.get("required_domains", [])
     modeled = contract.get("modeled_domains", [])
-    if len(required) != 7 or len(set(required)) != 7 or len(modeled) != 5 or not set(modeled).issubset(set(required)):
+    if len(required) != 7 or len(set(required)) != 7 or len(modeled) != 6 or not set(modeled).issubset(set(required)):
         errors.append("model domain coverage is malformed")
     model_value = contract.get("models", [])
     models = model_value if isinstance(model_value, list) else []
@@ -243,6 +273,7 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
         "capability_revocation",
         "virtual_memory_ownership",
         "capability_mediated_ipc",
+        "bounded_scheduler",
     ]
     if [item.get("id") for item in models if isinstance(item, dict)] != expected_model_ids:
         errors.append("model identifier set changed")
@@ -295,7 +326,7 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
     trace = contract.get("trace_cross_check", {})
     if (
         trace.get("status") != "pending_native_implementation_traces"
-        or trace.get("required_model_count") != 4
+        or trace.get("required_model_count") != 5
         or trace.get("completed_model_count") != 0
         or trace.get("abi_freeze_authorized") is not False
     ):
@@ -635,6 +666,13 @@ def negative_controls(lock: dict[str, Any], contract: dict[str, Any], runs: list
         _control("NEG-N4-MODEL-IPC-TOKEN-REUSE-MUTANT", by_id["capability_mediated_ipc.unsafe_token_reuse"]["observed_invariant_violation"] == "LiveTokenConsistent", "executed_counterexample"),
         _control("NEG-N4-MODEL-IPC-STALE-REPLY-MUTANT", by_id["capability_mediated_ipc.unsafe_stale_reply"]["observed_invariant_violation"] == "AcceptedRepliesFresh", "executed_counterexample"),
         _control("NEG-N4-MODEL-IPC-LEAKY-TEARDOWN-MUTANT", by_id["capability_mediated_ipc.unsafe_leaky_teardown"]["observed_invariant_violation"] == "ClosedEndpointQuiescent", "executed_counterexample"),
+        _control("NEG-N4-MODEL-SCHEDULER-LOST-CANCEL-MUTANT", by_id["bounded_scheduler.unsafe_lost_cancel_wake"]["observed_invariant_violation"] == "WakeDeliverySound", "executed_counterexample"),
+        _control("NEG-N4-MODEL-SCHEDULER-LOST-TIMEOUT-MUTANT", by_id["bounded_scheduler.unsafe_lost_timeout_wake"]["observed_invariant_violation"] == "WakeDeliverySound", "executed_counterexample"),
+        _control("NEG-N4-MODEL-SCHEDULER-DUPLICATE-WAKE-MUTANT", by_id["bounded_scheduler.unsafe_duplicate_wakeup"]["observed_invariant_violation"] == "NoDuplicateRunnable", "executed_counterexample"),
+        _control("NEG-N4-MODEL-SCHEDULER-NO-INHERITANCE-MUTANT", by_id["bounded_scheduler.unsafe_no_priority_inheritance"]["observed_invariant_violation"] == "PriorityInheritanceSound", "executed_counterexample"),
+        _control("NEG-N4-MODEL-SCHEDULER-PRIORITY-BYPASS-MUTANT", by_id["bounded_scheduler.unsafe_priority_bypass"]["observed_invariant_violation"] == "DispatchPrioritySound", "executed_counterexample"),
+        _control("NEG-N4-MODEL-SCHEDULER-FAIRNESS-BYPASS-MUTANT", by_id["bounded_scheduler.unsafe_fairness_bypass"]["observed_invariant_violation"] == "BypassBound", "executed_counterexample"),
+        _control("NEG-N4-MODEL-SCHEDULER-TEARDOWN-LEAK-MUTANT", by_id["bounded_scheduler.unsafe_scheduler_teardown_leak"]["observed_invariant_violation"] == "TerminalQuiescent", "executed_counterexample"),
         _control("NEG-N4-MODEL-SAFE-VIOLATION", all(item["observed_invariant_violation"] is None for item in runs if item["mode"] == "safe"), "safe_model_result"),
         _control("NEG-N4-MODEL-PATH-ESCAPE", _path_escape_rejected(), "path_policy"),
         _control(
@@ -668,7 +706,7 @@ def build_readiness(toolchain_root: Path = DEFAULT_TOOLCHAIN_ROOT, root: Path = 
     modeled = contract["modeled_domains"]
     open_domains = [item for item in required if item not in modeled]
     readiness = {
-        "schema_version": "1.2",
+        "schema_version": "1.3",
         "artifact_kind": "pooleos_native_model_readiness",
         "status_date": "2026-07-16",
         "status": "bounded_models_pass_counterexamples_detected",
@@ -832,16 +870,16 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path = ROOT) -> l
         errors.append("domain coverage binding changed")
     summary = readiness.get("summary", {})
     expected_summary = {
-        "model_count": 4,
-        "run_case_count": 12,
-        "safe_run_count": 4,
-        "safe_run_pass_count": 4,
-        "hostile_run_count": 8,
-        "hostile_counterexample_count": 8,
-        "repeat_match_count": 12,
-        "negative_control_count": 18,
-        "negative_control_pass_count": 18,
-        "normalized_trace_count": 8,
+        "model_count": 5,
+        "run_case_count": 20,
+        "safe_run_count": 5,
+        "safe_run_pass_count": 5,
+        "hostile_run_count": 15,
+        "hostile_counterexample_count": 15,
+        "repeat_match_count": 20,
+        "negative_control_count": 25,
+        "negative_control_pass_count": 25,
+        "normalized_trace_count": 15,
         "implementation_trace_cross_check_count": 0,
         "failed_check_count": 0,
     }
