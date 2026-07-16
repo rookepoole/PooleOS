@@ -16,6 +16,7 @@ sys.path.insert(0, str(ROOT))
 
 from runtime import pgb2_bundle as pgb2  # noqa: E402
 from runtime import adr_ratification  # noqa: E402
+from runtime import hardware_target  # noqa: E402
 from runtime import lab_readiness  # noqa: E402
 from runtime import readiness  # noqa: E402
 from runtime.schema_validation import validate_json  # noqa: E402
@@ -27,6 +28,7 @@ NATIVE_COVERAGE = ROOT / "runs" / "pooleos_native_checklist_coverage.json"
 NATIVE_ARCHITECTURE_BASELINE = ROOT / "runs" / "native_architecture_baseline.json"
 ADR_RATIFICATION_READINESS = ROOT / "runs" / "adr_ratification_readiness.json"
 NATIVE_TOOLCHAIN_QUALIFICATION = ROOT / "runs" / "native_toolchain_qualification.json"
+HARDWARE_TARGET_READINESS = ROOT / "runs" / "hardware_target_readiness.json"
 
 
 DEFAULT_GAPS = [
@@ -36,7 +38,7 @@ DEFAULT_GAPS = [
     "No PooleBoot PE32+ UEFI loader or frozen native boot protocol.",
     "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path.",
     "No native CPU, interrupt, time, SMP, physical-memory, virtual-memory, or reclaim implementation.",
-    "No native ACPI/AML/SMBIOS/PCIe resource graph or exact platform qualification.",
+    "The sanitized Tier 1 identity matches, but full CPUID/MSR, PCI configuration-space, Secure Boot, TPM, SPD, sensor/power, standards-hash, lab-safety, native enumeration, and physical qualification evidence remain open.",
     "No native DMA/IOMMU/interrupt-remapping confinement.",
     "No native scheduler, task, syscall, capability, IPC, isolation, asynchronous-I/O, or quota implementation.",
     "No native security, cryptography, TPM, secrets, MAC, privacy implementation, or external review.",
@@ -410,6 +412,60 @@ def check_native_toolchain_qualification(path: Path = NATIVE_TOOLCHAIN_QUALIFICA
     )
     return readiness.make_check(
         "native_toolchain_qualification",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_hardware_target_readiness(path: Path = HARDWARE_TARGET_READINESS) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(path, "hardware-target-readiness.schema.json")
+    errors = [f"hardware readiness {error.path}: {error.message}" for error in artifact_schema_errors[:8]]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "hardware_target_readiness",
+            False,
+            "; ".join(errors) or "hardware target readiness is not an object",
+        )
+    try:
+        regenerated = hardware_target.build_readiness(ROOT)
+        if path.read_bytes() != hardware_target.canonical_json_bytes(regenerated):
+            errors.append("hardware readiness is not the exact deterministic regeneration")
+    except (OSError, ValueError, KeyError, json.JSONDecodeError, hardware_target.HardwareEvidenceError) as error:
+        errors.append(f"hardware readiness verifier failed closed: {type(error).__name__}: {error}")
+
+    summary = artifact.get("summary", {})
+    verification = artifact.get("target_verification", {})
+    if artifact.get("status") != "consistent_partial_non_promoting":
+        errors.append("current hardware readiness status is not consistent_partial_non_promoting")
+    if artifact.get("selected_move_id") != "N2-HW-001":
+        errors.append("hardware readiness does not bind N2-HW-001")
+    if artifact.get("production_ready") is not False or artifact.get("production_promotion_allowed") is not False:
+        errors.append("hardware readiness overclaims production promotion")
+    if artifact.get("n2_exit_gate_satisfied") is not False:
+        errors.append("hardware readiness overclaims the N2 exit gate")
+    if summary.get("consistency_pass") is not True:
+        errors.append("hardware readiness consistency does not pass")
+    if summary.get("schema_failure_count") != 0 or summary.get("privacy_violation_count") != 0:
+        errors.append("hardware readiness schema or privacy validation failed")
+    if summary.get("required_target_check_count") != 24 or summary.get("matched_required_target_check_count") != 24:
+        errors.append("exact Tier 1 required identity checks do not all match")
+    if verification.get("required_failure_count") != 0:
+        errors.append("exact Tier 1 verification records a required failure")
+    if summary.get("pending_evidence_channel_count") != 7:
+        errors.append("hardware evidence-channel gap count changed without gate review")
+    if summary.get("pending_lab_safety_count") != 10:
+        errors.append("hardware lab-safety gap count changed without owner review")
+    if summary.get("unresolved_standard_count", 0) < 1:
+        errors.append("standards register unexpectedly claims complete exact-document locks")
+    if summary.get("negative_control_count") != 10 or summary.get("negative_control_pass_count") != 10:
+        errors.append("hardware readiness negative controls are incomplete")
+
+    detail = (
+        "target=TIER1-B650M-9800X3D-RTX5070-001; identity=24/24; privacy=0; "
+        "pending_channels=7; pending_safety=10; n2_exit=false; production_promotion_allowed=false"
+    )
+    return readiness.make_check(
+        "hardware_target_readiness",
         not errors,
         detail if not errors else "; ".join(errors[:8]),
     )
@@ -3204,6 +3260,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--native-architecture-baseline", type=Path, default=NATIVE_ARCHITECTURE_BASELINE)
     parser.add_argument("--adr-ratification-readiness", type=Path, default=ADR_RATIFICATION_READINESS)
     parser.add_argument("--native-toolchain-qualification", type=Path, default=NATIVE_TOOLCHAIN_QUALIFICATION)
+    parser.add_argument("--hardware-target-readiness", type=Path, default=HARDWARE_TARGET_READINESS)
     parser.add_argument("--out", type=Path, default=ROOT / "runs" / "release_gate.json")
     parser.add_argument("--include-runtime", action="store_true", help="Include PooleGlyph runtime checks in doctor.")
     args = parser.parse_args(argv)
@@ -3214,6 +3271,7 @@ def main(argv: list[str] | None = None) -> int:
         check_native_architecture_baseline(args.native_architecture_baseline),
         check_adr_ratification_readiness(args.adr_ratification_readiness),
         check_native_toolchain_qualification(args.native_toolchain_qualification),
+        check_hardware_target_readiness(args.hardware_target_readiness),
         check_publication_boundary(),
         check_bundle(args.bundle),
         check_replay_proof(args.replay_proof),
@@ -3394,6 +3452,7 @@ def main(argv: list[str] | None = None) -> int:
             args.native_architecture_baseline,
             args.adr_ratification_readiness,
             args.native_toolchain_qualification,
+            args.hardware_target_readiness,
         )
         if path is not None
     ]

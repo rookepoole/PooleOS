@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_hardware_support_policy",
+  "status_date": "2026-07-16",
+  "status": "frozen_preproduction_policy",
+  "selected_move_id": "N2-HW-001",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "architecture_scope": {
+    "architecture": "x86_64",
+    "byte_order": "little_endian",
+    "firmware": "UEFI_only",
+    "partitioning": "GPT",
+    "tier0_profile": "QEMU_OVMF_pending_N4",
+    "tier1_profile": "TIER1-B650M-9800X3D-RTX5070-001"
+  },
+  "tiers": [
+    {
+      "id": "tier0_reference_emulator",
+      "ordinal": 0,
+      "meaning": "Pinned QEMU, OVMF, machine, CPU, memory, and non-transitional VIRTIO reference profile.",
+      "claim_rule": "Only exact captured emulator bytes and command lines may satisfy Tier 0 claims.",
+      "current_state": "pending_N4"
+    },
+    {
+      "id": "tier1_exact_physical",
+      "ordinal": 1,
+      "meaning": "One exact physical machine, firmware revision, topology, devices, media, and recovery setup.",
+      "claim_rule": "A claim applies only to the exact manifest and firmware hashes that passed physical qualification.",
+      "current_state": "inventory_partial"
+    },
+    {
+      "id": "tier2_controller_family",
+      "ordinal": 2,
+      "meaning": "A controller or platform family with independently sampled members and explicit compatibility limits.",
+      "claim_rule": "No family claim may be inferred from one Tier 1 device.",
+      "current_state": "not_started"
+    },
+    {
+      "id": "tier3_community_tested",
+      "ordinal": 3,
+      "meaning": "Community hardware with signed, reviewable, exact-profile evidence but no project-owned continuous lab.",
+      "claim_rule": "Reports are profile-specific and expire when firmware, device, or release identity changes.",
+      "current_state": "not_started"
+    },
+    {
+      "id": "tier4_best_effort",
+      "ordinal": 4,
+      "meaning": "Hardware expected to work through standards-compatible paths without release qualification.",
+      "claim_rule": "Best-effort is not supported, tested, secure, recoverable, or performance-qualified.",
+      "current_state": "not_started"
+    },
+    {
+      "id": "unsupported",
+      "ordinal": 5,
+      "meaning": "Hardware or firmware outside a declared release profile.",
+      "claim_rule": "No compatibility or recovery claim is permitted.",
+      "current_state": "active_default"
+    },
+    {
+      "id": "quarantined",
+      "ordinal": 6,
+      "meaning": "Known hardware present in a target but blocked from production use by missing legal, firmware, safety, isolation, reset, or recovery evidence.",
+      "claim_rule": "Enumeration does not authorize initialization, DMA, firmware loading, or user-visible support.",
+      "current_state": "active"
+    }
+  ],
+  "default_disposition": {
+    "unlisted_hardware": "unsupported",
+    "unknown_firmware_revision": "quarantined",
+    "changed_subsystem_or_revision": "quarantined",
+    "missing_recovery_evidence": "quarantined",
+    "device_with_unconfined_dma": "quarantined",
+    "undocumented_register_or_firmware_behavior": "blocker_or_tested_target_specific_assumption"
+  },
+  "privacy_boundary": {
+    "sanitization_mode": "fixed_whitelist_reconstruction",
+    "private_capture_default": "runs/tier1_hardware_capture.private.json",
+    "raw_capture_publication_allowed": false,
+    "raw_firmware_table_publication_allowed": false,
+    "public_hash_binding_allowed": true,
+    "prohibited_public_fields": [
+      "serial numbers",
+      "UUIDs",
+      "MAC addresses",
+      "IP addresses",
+      "user names",
+      "host names",
+      "absolute workstation paths",
+      "full PnP instance paths",
+      "TPM endorsement keys or certificates",
+      "private or owner key material"
+    ]
+  },
+  "evidence_requirements": {
+    "n2_exit_required_channel_ids": [
+      "CIM_CORE_INVENTORY",
+      "PNP_HARDWARE_PREFIXES",
+      "UEFI_FIRMWARE_TYPE",
+      "ACPI_TABLE_HASHES",
+      "SMBIOS_RAW_HASH",
+      "AMD_IOMMU_IVRS",
+      "SECURE_BOOT_STATE",
+      "TPM_INVENTORY",
+      "EDID_IDENTITY",
+      "CPU_CPUID_MSR",
+      "PCI_CONFIG_SPACE",
+      "SPD_MEMORY_TOPOLOGY",
+      "SENSORS_AND_POWER",
+      "UEFI_VARIABLE_SNAPSHOT"
+    ],
+    "native_reenumeration_required": true,
+    "independent_comparison_required": true,
+    "firmware_and_device_change_invalidates_profile": true
+  },
+  "destructive_safety": {
+    "current_approval": false,
+    "approval_scope": "none",
+    "prerequisites": [
+      {
+        "id": "LAB-SAFE-SSD-001",
+        "status": "pending",
+        "description": "Owner identifies an expendable SSD by model, capacity, and private serial evidence and confirms it contains no needed data."
+      },
+      {
+        "id": "LAB-SAFE-USB-A-001",
+        "status": "pending",
+        "description": "Owner labels and approves one expendable USB device for image and boot tests."
+      },
+      {
+        "id": "LAB-SAFE-USB-B-001",
+        "status": "pending",
+        "description": "Owner labels and approves a distinct recovery USB device."
+      },
+      {
+        "id": "LAB-SAFE-BACKUP-001",
+        "status": "pending",
+        "description": "Required data and system recovery backups are verified by sampled restore."
+      },
+      {
+        "id": "LAB-SAFE-RECOVERY-001",
+        "status": "pending",
+        "description": "Immutable recovery media and documented firmware recovery are available."
+      },
+      {
+        "id": "LAB-SAFE-SECOND-HOST-001",
+        "status": "pending",
+        "description": "A second machine can inspect, restore, and reimage the target while the target is unbootable."
+      },
+      {
+        "id": "LAB-SAFE-SERIAL-001",
+        "status": "pending",
+        "description": "An independent serial or equivalent early-boot diagnostic capture path is proven."
+      },
+      {
+        "id": "LAB-SAFE-POWER-001",
+        "status": "pending",
+        "description": "UPS, remotely controlled interruption apparatus, thermal monitoring, and emergency shutdown boundaries are accepted."
+      },
+      {
+        "id": "LAB-SAFE-NETWORK-001",
+        "status": "pending",
+        "description": "Isolated network and packet-capture path are available before untrusted-stack testing."
+      },
+      {
+        "id": "LAB-SAFE-APPROVAL-001",
+        "status": "pending",
+        "description": "Owner gives a separate, target-specific approval immediately before any destructive or persistent mutation."
+      }
+    ]
+  },
+  "claim_boundary": [
+    "Hardware enumeration is not native-driver qualification.",
+    "A Tier 1 match does not imply support for a device currently deferred, unsupported, or quarantined.",
+    "No destructive action is authorized by this policy or its readiness ledger.",
+    "Production promotion remains prohibited until all applicable phase and release gates pass."
+  ]
+}

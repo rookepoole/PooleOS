@@ -128,6 +128,17 @@ def check_native_toolchain_qualification() -> CheckResult:
     )
 
 
+def check_hardware_target_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_hardware_target_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
 def check_publication_boundary() -> CheckResult:
     from tools import pooleos_release_gate
 
@@ -3115,6 +3126,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "docs" / "publication-boundary.md",
                 ROOT / "docs" / "adr-ratification-ceremony.md",
                 ROOT / "docs" / "native-toolchain-qualification.md",
+                ROOT / "docs" / "hardware-target-and-lab-safety.md",
                 ROOT
                 / "sources"
                 / "requirements"
@@ -3137,6 +3149,15 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "specs" / "native-target-contract.json",
                 ROOT / "specs" / "native-target-contract.schema.json",
                 ROOT / "specs" / "native-toolchain-qualification.schema.json",
+                ROOT / "specs" / "hardware-support-policy.json",
+                ROOT / "specs" / "hardware-support-policy.schema.json",
+                ROOT / "specs" / "native-standards-register.json",
+                ROOT / "specs" / "native-standards-register.schema.json",
+                ROOT / "specs" / "tier1-hardware-target.json",
+                ROOT / "specs" / "tier1-hardware-target.schema.json",
+                ROOT / "specs" / "tier1-hardware-capture.schema.json",
+                ROOT / "specs" / "tier1-hardware-observation.schema.json",
+                ROOT / "specs" / "hardware-target-readiness.schema.json",
                 ROOT / "specs" / "native-release-architecture-policy.json",
                 ROOT / "specs" / "native-release-architecture-policy.schema.json",
                 ROOT / "specs" / "native-release-architecture-report.schema.json",
@@ -3150,8 +3171,13 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "tools" / "check_publication_boundary.py",
                 ROOT / "tools" / "bootstrap_native_toolchain.ps1",
                 ROOT / "tools" / "qualify_native_toolchain.py",
+                ROOT / "tools" / "collect_tier1_hardware.ps1",
+                ROOT / "tools" / "sanitize_tier1_hardware_capture.py",
+                ROOT / "tools" / "generate_hardware_target_readiness.py",
+                ROOT / "tools" / "verify_hardware_target.py",
                 ROOT / "runtime" / "native_binary.py",
                 ROOT / "runtime" / "adr_ratification.py",
+                ROOT / "runtime" / "hardware_target.py",
                 ROOT / "security" / "README.md",
                 ROOT / "security" / "owner-adr-signers.allowed",
                 ROOT / "security" / "revoked-adr-signers",
@@ -3168,6 +3194,8 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runs" / "native_architecture_baseline.json",
                 ROOT / "runs" / "adr_ratification_readiness.json",
                 ROOT / "runs" / "native_toolchain_qualification.json",
+                ROOT / "runs" / "tier1_hardware_observation.json",
+                ROOT / "runs" / "hardware_target_readiness.json",
                 ROOT / "specs" / "pdc-source-intake.schema.json",
                 ROOT / "specs" / "pdc-math-contract.schema.json",
                 ROOT / "specs" / "pdc-golden-vectors.schema.json",
@@ -3239,6 +3267,7 @@ def main(argv: list[str] | None = None) -> int:
     checks.append(check_native_architecture_baseline())
     checks.append(check_adr_ratification_readiness())
     checks.append(check_native_toolchain_qualification())
+    checks.append(check_hardware_target_readiness())
     checks.append(check_publication_boundary())
     checks.extend(check_claim_schema())
     checks.extend(check_claim_examples())

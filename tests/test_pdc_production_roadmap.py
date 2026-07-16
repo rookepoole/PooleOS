@@ -125,9 +125,9 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertFalse(historical["production_ready"])
         self.assertEqual(historical["native_promotion_role"], "historical_non_promoting")
         current = self.roadmap["baseline"]["native_consistency_release_gate"]
-        self.assertEqual(current["passed_checks"], 63)
-        self.assertEqual(current["total_checks"], 63)
-        self.assertEqual(current["artifact_count"], 58)
+        self.assertEqual(current["passed_checks"], 64)
+        self.assertEqual(current["total_checks"], 64)
+        self.assertEqual(current["artifact_count"], 59)
         self.assertEqual(current["explicit_gap_count"], 20)
         self.assertFalse(current["production_ready"])
         self.assertEqual(self.roadmap["immediate_next_move"]["id"], "N0-RATIFY-001")
@@ -149,14 +149,16 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
+        self.assertEqual(protocol["selected_move_id"], "N2-HW-001")
+        self.assertIn("runs/hardware_target_readiness.json", protocol["required_records"])
         for record in protocol["required_records"]:
             self.assertTrue((ROOT / record).is_file(), record)
 
     def test_flags_and_gaps_are_native_and_traceable(self) -> None:
         phase_ids = {phase["id"] for phase in self.roadmap["phases"]}
         flags = self.roadmap["implementation_flags"]
-        self.assertEqual(len(flags), 16)
-        self.assertEqual(len({flag["id"] for flag in flags}), 16)
+        self.assertEqual(len(flags), 19)
+        self.assertEqual(len({flag["id"] for flag in flags}), 19)
         self.assertTrue(any(flag["class"] == "STOP_SHIP" and flag["status"] == "open" for flag in flags))
         self.assertEqual(next(flag for flag in flags if flag["id"] == "FLAG-BUILDROOT-LEGACY-001")["status"], "closed")
         for flag in flags:
@@ -165,6 +167,18 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(gaps["native_program_gap_count"], len(gaps["native_program_gaps"]))
         self.assertEqual(gaps["native_program_gap_count"], 20)
         self.assertTrue(gaps["historical_release_gaps_are_non_promoting"])
+
+        n2 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N2")
+        n2_statuses = {subphase["id"]: subphase["status"] for subphase in n2["subphases"]}
+        self.assertEqual(n2_statuses["N2.1"], "partial")
+        self.assertEqual(n2_statuses["N2.2"], "partial")
+        self.assertEqual(n2_statuses["N2.3"], "not_started")
+        self.assertEqual(n2_statuses["N2.4"], "partial")
+        self.assertEqual(n2_statuses["N2.5"], "partial")
+        self.assertEqual(n2_statuses["N2.6"], "partial")
+        self.assertTrue(
+            any(item.startswith("runs/hardware_target_readiness.json:") for item in n2["current_evidence"])
+        )
 
     def test_cycle79_pdc_evidence_is_preserved_without_native_promotion(self) -> None:
         pdc = self.roadmap["baseline"]["pdc"]

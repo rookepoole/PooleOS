@@ -34,6 +34,8 @@ The ring-0 boundary is defined in `specs/pooleos-kernel-charter.md`. General dev
 - `specs/adr-ratification-policy.json`, `docs/adr-ratification-ceremony.md`, and `runs/adr_ratification_readiness.json`: secret-free owner-signing contract, exact action boundary, and deterministic pending ledger.
 - `specs/native-toolchain-lock.json`, `specs/native-target-contract.json`, and `runs/native_toolchain_qualification.json`: exact Rust inputs, freestanding target contracts, and bounded one-host PE32+/ELF64 evidence.
 - `docs/native-toolchain-qualification.md`: reproduction procedure, exact fixture hashes, discovered PE nondeterminism, and open gates.
+- `specs/hardware-support-policy.json`, `specs/tier1-hardware-target.json`, and `specs/native-standards-register.json`: hardware support tiers, exact Tier 1 identity, evidence/safety gates, and primary-source standards metadata.
+- `runs/tier1_hardware_observation.json`, `runs/hardware_target_readiness.json`, and `docs/hardware-target-and-lab-safety.md`: sanitized host observation, deterministic N2 readiness ledger, privacy boundary, and safe capture procedure.
 - `specs/native-release-architecture-policy.json`: extracted-release conformance policy with executable negative tests.
 - `docs/publication-boundary.md`: public source-available and private evidence-vault boundary.
 - `specs/pdc-production-roadmap.schema.json`: roadmap validation contract.
@@ -41,7 +43,7 @@ The ring-0 boundary is defined in `specs/pooleos-kernel-charter.md`. General dev
 
 The locked source checklist has SHA-256 `A8C94719FAF9428C1F133010BA2603C0270C4E1EFD7327AF8EAB9C8C362ABB3D`, 10,512 lines, 171 numbered sections, 8,998 checkbox lines, and 8,996 implementation items after its two generated-metadata checkboxes are excluded. Every source line and requirement is mapped; mapping does not imply completion.
 
-Current Cycle 83 status: 40 phases, 0 complete, 12 partial, 1 blocked, and 27 not started. The public repository, protected workflow, bounded one-host toolchain fixtures, canonical ADR ceremony, deterministic readiness ledger, and fail-closed signature/tag verifier exist. The public trust store intentionally has zero keys; no ADR is cryptographically signed; ADR-0003 and ADR-0004 remain proposed; and `N0-RATIFY-001` awaits Rooke Poole's disposition and custody choice. Native PooleBoot, PooleKernel, ring-3 execution, capability enforcement, native drivers, PooleFS, PooleGlass, and the production ISO do not exist.
+Current Cycle 84 status: 40 phases, 0 complete, 12 partial, 1 blocked, and 27 not started. The public repository, protected workflow, bounded one-host toolchain fixtures, canonical ADR ceremony, exact Tier 1 target, read-only hardware collector, sanitized observation, and fail-closed readiness ledgers exist. The target matches 24/24 required identity checks with zero privacy violations, but N2 still has seven evidence channels, 15 standards hashes, and ten lab-safety prerequisites open. The public ADR trust store intentionally has zero keys; no ADR is cryptographically signed; ADR-0003 and ADR-0004 remain proposed; and `N0-RATIFY-001` awaits Rooke Poole's disposition and custody choice. Native PooleBoot, PooleKernel, ring-3 execution, capability enforcement, native drivers, PooleFS, PooleGlass, and the production ISO do not exist.
 
 ## Validation
 
@@ -50,6 +52,9 @@ python .\tools\generate_native_checklist_coverage.py
 python .\tools\generate_native_production_roadmap.py
 python .\tools\generate_native_architecture_baseline.py
 python .\tools\generate_adr_ratification_readiness.py
+python .\tools\sanitize_tier1_hardware_capture.py --capture .\runs\tier1_hardware_capture.private.json --out .\runs\tier1_hardware_observation.json
+python .\tools\generate_hardware_target_readiness.py
+python .\tools\verify_hardware_target.py
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\bootstrap_native_toolchain.ps1
 python .\tools\qualify_native_toolchain.py
 python -m unittest discover -s tests
@@ -57,9 +62,9 @@ python .\tools\check_publication_boundary.py
 python .\tools\pooleos_doctor.py --pooleglyph <POOLEGYPH_REPO>
 ```
 
-The generators are deterministic: tests reproduce the checklist, roadmap, architecture baseline, ADR-readiness, and native-toolchain ledgers byte for byte. Cycle 83 passes 397 tests with one Windows symlink-permission skip, Doctor passes 198/198 checks against live PooleGlyph Phase 65, and the non-promoting consistency release gate passes 63/63 checks over 58 artifacts with 20 explicit gaps. Doctor verifies the locked checklist hash, coverage digest, N0-N39 sequence, ADR/source hashes, ratification boundary, repository identity, native toolchain/target contracts, public index boundary, PooleGlyph bridge, PDC evidence, and retained historical consistency artifacts.
+The generators are deterministic: tests reproduce the checklist, roadmap, architecture baseline, ADR-readiness, native-toolchain, and hardware-readiness ledgers byte for byte. Cycle 84 passes 412 tests with one Windows symlink-permission skip, and the non-promoting consistency release gate passes 64/64 checks over 59 artifacts with 20 explicit gaps. Doctor verifies the locked checklist hash, coverage digest, N0-N39 sequence, ADR/source hashes, ratification boundary, repository identity, native toolchain/target contracts, hardware target/readiness/privacy boundaries, public index boundary, PooleGlyph bridge, PDC evidence, and retained historical consistency artifacts.
 
-The public repository currently carries source, specifications, tests, and five allowlisted deterministic ledgers. Public ratification manifest, detached signature, and receipt paths are reserved but remain absent until owner action. Raw internal PDC inputs, private benchmark evidence, other local run artifacts, historical lab images, firmware without redistribution clearance, secrets, and private signing material remain in the ignored private evidence vault. Full private-evidence reproduction therefore requires an owner-authorized local vault in addition to the public checkout.
+The public repository currently carries source, specifications, tests, and seven allowlisted deterministic ledgers. The public hardware observation is rebuilt from a fixed whitelist and binds only the byte count and SHA-256 of its ignored private capture; raw firmware-table bytes, serials, MAC addresses, UUIDs, host/user names, absolute local paths, full PnP instances, and TPM key material are not published. Public ratification manifest, detached signature, and receipt paths are reserved but remain absent until owner action. Raw internal PDC inputs, private benchmark evidence, other local run artifacts, historical lab images, firmware without redistribution clearance, secrets, and private signing material remain in the ignored private evidence vault. Full private-evidence reproduction therefore requires an owner-authorized local vault in addition to the public checkout.
 
 ## Current PDC Evidence
 

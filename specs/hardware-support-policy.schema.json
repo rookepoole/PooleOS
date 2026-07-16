@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/hardware-support-policy.schema.json",
+  "title": "PooleOS Hardware Support Policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "status_date", "status", "selected_move_id", "production_ready", "production_promotion_allowed", "architecture_scope", "tiers", "default_disposition", "privacy_boundary", "evidence_requirements", "destructive_safety", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_hardware_support_policy"},
+    "status_date": {"const": "2026-07-16"},
+    "status": {"const": "frozen_preproduction_policy"},
+    "selected_move_id": {"const": "N2-HW-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "architecture_scope": {"type": "object", "required": ["architecture", "byte_order", "firmware", "partitioning", "tier0_profile", "tier1_profile"]},
+    "tiers": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"type": "object", "required": ["id", "ordinal", "meaning", "claim_rule", "current_state"]}},
+    "default_disposition": {"type": "object", "required": ["unlisted_hardware", "unknown_firmware_revision", "changed_subsystem_or_revision", "missing_recovery_evidence", "device_with_unconfined_dma", "undocumented_register_or_firmware_behavior"]},
+    "privacy_boundary": {"type": "object", "required": ["sanitization_mode", "private_capture_default", "raw_capture_publication_allowed", "raw_firmware_table_publication_allowed", "public_hash_binding_allowed", "prohibited_public_fields"]},
+    "evidence_requirements": {"type": "object", "required": ["n2_exit_required_channel_ids", "native_reenumeration_required", "independent_comparison_required", "firmware_and_device_change_invalidates_profile"]},
+    "destructive_safety": {
+      "type": "object",
+      "required": ["current_approval", "approval_scope", "prerequisites"],
+      "properties": {
+        "current_approval": {"const": false},
+        "approval_scope": {"const": "none"},
+        "prerequisites": {"type": "array", "minItems": 10, "maxItems": 10, "items": {"type": "object", "required": ["id", "status", "description"]}}
+      }
+    },
+    "claim_boundary": {"type": "array", "minItems": 4, "items": {"type": "string"}}
+  }
+}

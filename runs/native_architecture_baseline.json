@@ -370,16 +370,22 @@
       "line_count": 110
     },
     {
+      "path": "docs/hardware-target-and-lab-safety.md",
+      "sha256": "B7AFC3AC3D69A9AF36F42CCEE5A0371256D7A3FD42505D6509817082C7CBD938",
+      "byte_count": 8261,
+      "line_count": 125
+    },
+    {
       "path": "docs/production-goal-charter.md",
-      "sha256": "EACB6AF38BFA64E3083BDEF0D6FA1D1EE57C8A573AF880880B984BADBDC949C2",
-      "byte_count": 18080,
+      "sha256": "FC0FA35CD6BAC9200E0A64D12DCDFDF7BA67B954A184833638B05F27BA8E2978",
+      "byte_count": 18262,
       "line_count": 240
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "6C9B104265F1534DA65437B44DD06AAF7759E98F5C96933D5227CE1428EFC102",
-      "byte_count": 96245,
-      "line_count": 1083
+      "sha256": "49826D370F2936D964AA20B9DC6A26DC9E27C3CE41AE12EF1B6F45E6BCAC6560",
+      "byte_count": 99786,
+      "line_count": 1098
     },
     {
       "path": "docs/publication-boundary.md",
@@ -400,10 +406,28 @@
       "line_count": 163
     },
     {
+      "path": "runs/hardware_target_readiness.json",
+      "sha256": "C8089BC32ABCDBA67E98A0A047FB9214209E9C6BFC0005E4A1AAD701BE4633C9",
+      "byte_count": 24285,
+      "line_count": 718
+    },
+    {
+      "path": "runs/tier1_hardware_observation.json",
+      "sha256": "2917E4F1E68C775B41C4690C04526440D8751D837D01BB6C1A13C7E2C10FAA99",
+      "byte_count": 14863,
+      "line_count": 403
+    },
+    {
       "path": "specs/adr-ratification-policy.json",
       "sha256": "A04C51A811C75E97E2EDDA5EB90F2DB28E83C6352792F2E4F885D7C30100822F",
       "byte_count": 6768,
       "line_count": 167
+    },
+    {
+      "path": "specs/hardware-support-policy.json",
+      "sha256": "2F8266D25B86085EB7416FCF9796B338DB6C22D8C6C64434AA8FF71F90EF2461",
+      "byte_count": 6863,
+      "line_count": 178
     },
     {
       "path": "specs/native-architecture-constitution.json",
@@ -416,6 +440,18 @@
       "sha256": "F8B6D491A28D72E3C9B36FAB5B24D446FBD67CD760A9A8B05C7774EB3A691DE5",
       "byte_count": 1765,
       "line_count": 62
+    },
+    {
+      "path": "specs/native-standards-register.json",
+      "sha256": "FD9C5027728E668C6FC8B5C096080664B191ABA104FECCCACF74DD95385F07FD",
+      "byte_count": 13553,
+      "line_count": 295
+    },
+    {
+      "path": "specs/tier1-hardware-target.json",
+      "sha256": "E6976539E72D32974918B2ABA7AB53043AB44AB478D8CBA0ABF9E30E66869F89",
+      "byte_count": 9005,
+      "line_count": 159
     }
   ],
   "primary_toolchain_references": [

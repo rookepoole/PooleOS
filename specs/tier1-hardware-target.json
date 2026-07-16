@@ -1,0 +1,159 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_tier1_hardware_target",
+  "status_date": "2026-07-16",
+  "status": "candidate_exact_physical_target_partial_inventory",
+  "selected_move_id": "N2-HW-001",
+  "target_id": "TIER1-B650M-9800X3D-RTX5070-001",
+  "support_tier": "tier1_exact_physical",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "identity": {
+    "baseboard": {
+      "manufacturer": "Gigabyte Technology Co., Ltd.",
+      "product": "B650M GAMING PLUS WIFI",
+      "version": "x.x"
+    },
+    "firmware": {
+      "type": "UEFI",
+      "vendor": "American Megatrends International, LLC.",
+      "bios_version": "F32",
+      "vendor_release_date": "2025-02-04",
+      "cim_release_date_utc": "2025-02-05",
+      "smbios_exposed_version": "3.7"
+    },
+    "processor": {
+      "name": "AMD Ryzen 7 9800X3D 8-Core Processor",
+      "manufacturer": "AuthenticAMD",
+      "socket": "AM5",
+      "core_count": 8,
+      "logical_processor_count": 16,
+      "cim_family_code": 107,
+      "cim_stepping": "0",
+      "cim_revision": 17408
+    },
+    "memory": {
+      "module_count": 2,
+      "total_capacity_bytes": 17179869184,
+      "module_part_numbers": ["UD5-6000", "UD5-6000"],
+      "module_capacities_bytes": [8589934592, 8589934592],
+      "configured_speeds_mt_s": [6000, 6000]
+    },
+    "storage": [
+      {
+        "role": "candidate_read_only_nvme_boot_target",
+        "model": "Samsung SSD 970 PRO 512GB",
+        "firmware_revision": "1B2QEXP7",
+        "size_bytes": 512105932800,
+        "controller_hardware_prefix": "PCI\\VEN_144D&DEV_A808&SUBSYS_A801144D&REV_00",
+        "destructive_use_authorized": false
+      },
+      {
+        "role": "existing_sata_data_device_not_sacrificial",
+        "model": "CT2000BX500SSD1",
+        "firmware_revision": "M6CR061",
+        "size_bytes": 2000396321280,
+        "controller_hardware_prefix": "not_yet_bound",
+        "destructive_use_authorized": false
+      }
+    ],
+    "display": {
+      "adapter": "NVIDIA GeForce RTX 5070",
+      "hardware_prefix": "PCI\\VEN_10DE&DEV_2F04&SUBSYS_89E71043&REV_A1",
+      "observed_resolution": "2560x1440",
+      "initial_path": "UEFI_GOP_then_software_renderer",
+      "native_acceleration": "quarantined_research_only"
+    },
+    "network": {
+      "ethernet_hardware_prefix": "PCI\\VEN_10EC&DEV_8125&SUBSYS_E0001458&REV_05",
+      "wifi_hardware_prefix": "PCI\\VEN_10EC&DEV_B851&SUBSYS_B85110EC&REV_00",
+      "bluetooth_hardware_prefix": "USB\\VID_0BDA&PID_B850"
+    },
+    "usb_host_hardware_prefixes": [
+      "PCI\\VEN_1022&DEV_15B6&SUBSYS_50071458&REV_00",
+      "PCI\\VEN_1022&DEV_15B7&SUBSYS_50071458&REV_00",
+      "PCI\\VEN_1022&DEV_15B8&SUBSYS_50071458&REV_00",
+      "PCI\\VEN_1022&DEV_43F7&SUBSYS_11421B21&REV_01"
+    ],
+    "audio": {
+      "candidate_initial_codec_hardware_prefix": "HDAUDIO\\FUNC_01&VEN_10EC&DEV_0897&SUBSYS_1458A194&REV_1004",
+      "nvidia_hda": "deferred",
+      "usb_audio": "deferred"
+    }
+  },
+  "verification_contract": [
+    {"id": "HW-ID-BOARD-MANUFACTURER", "fact": "baseboard.manufacturer", "operator": "equals", "expected": "Gigabyte Technology Co., Ltd.", "required": true},
+    {"id": "HW-ID-BOARD-PRODUCT", "fact": "baseboard.product", "operator": "equals", "expected": "B650M GAMING PLUS WIFI", "required": true},
+    {"id": "HW-ID-BOARD-VERSION", "fact": "baseboard.version", "operator": "equals", "expected": "x.x", "required": true},
+    {"id": "HW-ID-BIOS-VENDOR", "fact": "bios.manufacturer", "operator": "equals", "expected": "American Megatrends International, LLC.", "required": true},
+    {"id": "HW-ID-BIOS-VERSION", "fact": "bios.version", "operator": "equals", "expected": "F32", "required": true},
+    {"id": "HW-ID-SMBIOS-VERSION", "fact": "bios.smbios_version", "operator": "equals", "expected": "3.7", "required": true},
+    {"id": "HW-ID-BIOS-CIM-DATE", "fact": "bios.cim_release_date_utc", "operator": "equals", "expected": "2025-02-05", "required": true},
+    {"id": "HW-ID-CPU-NAME", "fact": "cpu.name", "operator": "equals", "expected": "AMD Ryzen 7 9800X3D 8-Core Processor", "required": true},
+    {"id": "HW-ID-CPU-VENDOR", "fact": "cpu.manufacturer", "operator": "equals", "expected": "AuthenticAMD", "required": true},
+    {"id": "HW-ID-CPU-FAMILY-CIM", "fact": "cpu.cim_family_code", "operator": "equals", "expected": 107, "required": true},
+    {"id": "HW-ID-CPU-STEPPING-CIM", "fact": "cpu.cim_stepping", "operator": "equals", "expected": "0", "required": true},
+    {"id": "HW-ID-CPU-REVISION-CIM", "fact": "cpu.cim_revision", "operator": "equals", "expected": 17408, "required": true},
+    {"id": "HW-ID-CPU-CORES", "fact": "cpu.core_count", "operator": "equals", "expected": 8, "required": true},
+    {"id": "HW-ID-CPU-LOGICAL", "fact": "cpu.logical_processor_count", "operator": "equals", "expected": 16, "required": true},
+    {"id": "HW-ID-CPU-SOCKET", "fact": "cpu.socket", "operator": "equals", "expected": "AM5", "required": true},
+    {"id": "HW-ID-MEMORY-COUNT", "fact": "memory.module_count", "operator": "equals", "expected": 2, "required": true},
+    {"id": "HW-ID-MEMORY-TOTAL", "fact": "memory.total_capacity_bytes", "operator": "equals", "expected": 17179869184, "required": true},
+    {"id": "HW-ID-MEMORY-PARTS", "fact": "memory.part_numbers", "operator": "multiset_equals", "expected": ["UD5-6000", "UD5-6000"], "required": true},
+    {"id": "HW-ID-MEMORY-CAPACITY", "fact": "memory.module_capacities_bytes", "operator": "multiset_equals", "expected": [8589934592, 8589934592], "required": true},
+    {"id": "HW-ID-MEMORY-SPEED", "fact": "memory.configured_speeds_mt_s", "operator": "multiset_equals", "expected": [6000, 6000], "required": true},
+    {"id": "HW-ID-STORAGE", "fact": "storage.records", "operator": "contains_all", "expected": ["CT2000BX500SSD1|M6CR061|2000396321280", "Samsung SSD 970 PRO 512GB|1B2QEXP7|512105932800"], "required": true},
+    {"id": "HW-ID-DISPLAY-NAME", "fact": "display.name", "operator": "equals", "expected": "NVIDIA GeForce RTX 5070", "required": true},
+    {"id": "HW-ID-DISPLAY-RESOLUTION", "fact": "display.current_resolution", "operator": "equals", "expected": "2560x1440", "required": false},
+    {"id": "HW-ID-FIRMWARE-TYPE", "fact": "host.firmware_type", "operator": "equals", "expected": "UEFI", "required": true},
+    {
+      "id": "HW-ID-REQUIRED-PNP-PREFIXES",
+      "fact": "pnp.hardware_prefixes",
+      "operator": "contains_all",
+      "expected": [
+        "HDAUDIO\\FUNC_01&VEN_10EC&DEV_0897&SUBSYS_1458A194&REV_1004",
+        "PCI\\VEN_1022&DEV_15B6&SUBSYS_50071458&REV_00",
+        "PCI\\VEN_1022&DEV_15B7&SUBSYS_50071458&REV_00",
+        "PCI\\VEN_1022&DEV_15B8&SUBSYS_50071458&REV_00",
+        "PCI\\VEN_1022&DEV_43F7&SUBSYS_11421B21&REV_01",
+        "PCI\\VEN_10DE&DEV_2F04&SUBSYS_89E71043&REV_A1",
+        "PCI\\VEN_10EC&DEV_8125&SUBSYS_E0001458&REV_05",
+        "PCI\\VEN_10EC&DEV_B851&SUBSYS_B85110EC&REV_00",
+        "PCI\\VEN_144D&DEV_A808&SUBSYS_A801144D&REV_00",
+        "USB\\VID_0BDA&PID_B850"
+      ],
+      "required": true
+    }
+  ],
+  "known_discrepancies": [
+    {
+      "id": "HW-DISCREPANCY-BIOS-DATE-001",
+      "status": "open",
+      "vendor_value": "2025-02-04",
+      "cim_utc_value": "2025-02-05",
+      "impact": "No firmware equivalence claim may rely on date alone; version F32 and future image/table hashes remain authoritative.",
+      "closure": "Record the vendor source and determine whether timezone, release packaging, or firmware encoding explains the one-day difference."
+    }
+  ],
+  "support_profile": {
+    "required_for_first_physical_boot": ["UEFI F32", "GOP output", "Ryzen 7 9800X3D", "16 GiB memory", "one read-only boot medium", "AMD xHCI recovery input", "independent diagnostics"],
+    "deferred": ["RTL8125 network", "Realtek HDA playback", "NVMe writes", "SATA writes", "USB mass storage beyond approved recovery media"],
+    "quarantined": ["RTX 5070 native acceleration", "RTL8851BE Wi-Fi", "Realtek Bluetooth", "NVIDIA HDA", "Focusrite USB audio", "suspend", "hibernation", "firmware update"],
+    "unsupported_v1_default": ["legacy BIOS", "CSM", "non-x86_64", "undeclared boards", "undeclared firmware revisions", "unconfined bus-mastering devices"]
+  },
+  "destructive_authorization": {
+    "approved": false,
+    "approved_device_count": 0,
+    "boot_configuration_change_approved": false,
+    "firmware_change_approved": false,
+    "tpm_change_approved": false,
+    "power_interruption_approved": false
+  },
+  "claim_boundary": [
+    "This is an exact candidate target identity, not a completed hardware qualification matrix.",
+    "CIM family and revision fields are named as CIM values and are not represented as raw CPUID family, model, or stepping evidence.",
+    "Current Windows driver operation does not prove a PooleOS native driver path.",
+    "No listed storage device is sacrificial or approved for writes.",
+    "Native RTX acceleration, Wi-Fi, Bluetooth, suspend, hibernation, and firmware updates are quarantined or deferred."
+  ]
+}

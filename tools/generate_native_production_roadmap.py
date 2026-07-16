@@ -78,7 +78,10 @@ SUBPHASE_OVERRIDES = {
     "N1.6": "partial",
     "N1.7": "partial",
     "N2.1": "partial",
+    "N2.2": "partial",
     "N2.4": "partial",
+    "N2.5": "partial",
+    "N2.6": "partial",
     "N3.1": "partial",
     "N3.2": "partial",
     "N3.3": "partial",
@@ -117,7 +120,14 @@ PHASE_EVIDENCE = {
         "tools/check_publication_boundary.py",
         "public ADR trust and revocation stores are present but intentionally contain zero owner keys",
     ],
-    "N2": ["live Windows CIM/PnP inventory captured 2026-07-15", "master checklist standards registers 146 and 169"],
+    "N2": [
+        "specs/hardware-support-policy.json: support tiers, evidence channels, privacy boundary, and destructive-test prerequisites",
+        "specs/tier1-hardware-target.json: exact Tier 1 target and 24 required identity checks",
+        "specs/native-standards-register.json: 15 primary-source standards records with revision and supersession state",
+        "runs/tier1_hardware_observation.json: sanitized whitelist reconstruction bound to the ignored private capture",
+        "runs/hardware_target_readiness.json: 24/24 required identity checks, zero privacy violations, and explicit non-promotion",
+        "docs/hardware-target-and-lab-safety.md: reproducible capture procedure and owner safety boundary",
+    ],
     "N3": [
         "ADR-0003 proposed Rust/assembly/C17 split",
         "official Rust UEFI and x86_64-unknown-none target documentation",
@@ -133,8 +143,8 @@ PHASE_EVIDENCE = {
     "N33": ["existing PDC receipt schemas and guarded-route source documents; no native services"],
     "N34": ["PooleGlyph Phase 65 checkpoint", "draft PGB2/PGVM2 trap evidence"],
     "N35": ["bounded static capability and trap simulations; no native containment"],
-    "N36": ["Cycle 83 host baseline: 397 tests with one Windows symlink-permission skip", "native binary parser, reproduction, leakage, malformed, substitution, and ADR-signing negatives"],
-    "N37": ["Cycle 83 consistency release gate: 63/63 checks over 58 artifacts", "content-addressed source, ADR-readiness, and native-toolchain artifacts"],
+    "N36": ["Cycle 84 host baseline: 412 tests with one Windows symlink-permission skip", "native binary parser, reproduction, leakage, malformed, substitution, ADR-signing, and hardware privacy negatives"],
+    "N37": ["Cycle 84 consistency release gate: 64/64 checks over 59 artifacts", "content-addressed source, ADR-readiness, native-toolchain, and hardware-readiness artifacts"],
 }
 
 
@@ -148,7 +158,7 @@ PHASE_GAPS = {
         "Public remote and branch protection exist; owner key choice, signed tags, immutable release refs, retained CI/review evidence, signing custody, and multi-maintainer approval policy remain open",
         "Legal, patent, export, trademark, contributor, signing-custody, and component-specific license review remain open",
     ],
-    "N2": ["Full ACPI/PCI/USB/firmware inventory and sacrificial lab media are not accepted"],
+    "N2": ["Exact identity passes 24/24 required checks, but seven required evidence channels, 15 exact standards artifact hashes, ten destructive-lab prerequisites, and native-parser comparison remain open"],
     "N3": ["One-host Rust PE32+/ELF64 qualification passes; second-host reproduction, source provenance, C17/assembly/ABI/image tools, complete build graph, and low-level safety gates remain open"],
     "N4": ["No pinned native-only QEMU/VIRTIO profile or formal model suite exists"],
     "N5": ["No PooleBoot PE32+ image or frozen boot handoff exists"],
@@ -203,6 +213,9 @@ FLAGS = [
     ("FLAG-NATIVE-PGL-001", "BLOCKER", "N34", "Accept PooleGlyph Phase 66 and freeze PGB2/PGVM2 v1"),
     ("FLAG-NATIVE-PDC-001", "REQUIRED", "N32", "Reproduce signed dynamics and pass native/backend differential gates"),
     ("FLAG-NATIVE-HW-001", "STOP_SHIP", "N38", "Qualify exact Tier 1 hardware, firmware, media, drivers, and recovery"),
+    ("FLAG-N2-EVIDENCE-001", "REQUIRED", "N2", "Complete read-only CPUID/MSR, PCI configuration, ACPI duplicate, EDID/SPD, UEFI-variable, sensor/power, and native-parser comparison evidence"),
+    ("FLAG-N2-STANDARDS-001", "REQUIRED", "N2", "Acquire and hash lawfully accessible exact standards artifacts and close supersession, errata, profile, and access review"),
+    ("FLAG-N2-LAB-SAFETY-001", "BLOCKER", "N2", "Obtain owner acceptance for sacrificial media, backups, recovery, diagnostics, power, and network controls plus separate destructive-test approval"),
     ("FLAG-NATIVE-ISO-001", "STOP_SHIP", "N39", "Reproduce and boot the exact signed native ISO in clean QEMU and physical profiles"),
     ("FLAG-NATIVE-REVIEW-001", "STOP_SHIP", "N37", "Close critical/high independent kernel, filesystem, update, security, and release findings"),
     ("FLAG-BUILDROOT-LEGACY-001", "SUPERSEDED", "N0", "Keep Buildroot as historical non-promoting reference evidence"),
@@ -216,7 +229,7 @@ PROGRAM_GAPS = [
     "No PooleBoot PE32+ UEFI loader or frozen boot protocol",
     "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path",
     "No native CPU, interrupts, time, SMP, physical memory, virtual memory, or reclaim implementation",
-    "No native ACPI/AML/SMBIOS/PCIe resource graph or exact platform qualification",
+    "The exact Tier 1 identity passes 24/24 required checks, but seven evidence channels, 15 standards hashes, ten lab-safety prerequisites, native parsing, and physical qualification remain open",
     "No native DMA/IOMMU/interrupt-remapping confinement",
     "No native scheduler, task, syscall, capability, IPC, isolation, async I/O, or quota implementation",
     "No native security/crypto/TPM/secrets/MAC/privacy implementation or external review",
@@ -313,6 +326,9 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
 
     implementation_flags = []
     for flag_id, flag_class, phase_id, closure in FLAGS:
+        evidence = ["docs/pdc-production-build-plan.md", "runs/pooleos_native_checklist_coverage.json"]
+        if phase_id == "N2":
+            evidence.extend(["runs/hardware_target_readiness.json", "specs/hardware-support-policy.json"])
         implementation_flags.append(
             {
                 "id": flag_id,
@@ -320,7 +336,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 "status": "closed" if flag_class == "SUPERSEDED" else "open",
                 "phase_id": phase_id,
                 "closure_condition": closure,
-                "evidence": ["docs/pdc-production-build-plan.md", "runs/pooleos_native_checklist_coverage.json"],
+                "evidence": evidence,
             }
         )
 
@@ -354,8 +370,8 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "inspect_live_pooleglyph_each_turn": True,
             "verify_master_checklist_coverage_each_turn": True,
             "new_work_must_be_flagged": True,
-            "last_updated_cycle": 83,
-            "selected_move_id": "N0-RATIFY-001",
+            "last_updated_cycle": 84,
+            "selected_move_id": "N2-HW-001",
             "immediate_next_move_id": "N0-RATIFY-001",
             "required_records": [
                 "docs/production-goal-charter.md",
@@ -364,6 +380,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 "runs/pooleos_native_checklist_coverage.json",
                 "runs/native_toolchain_qualification.json",
                 "runs/adr_ratification_readiness.json",
+                "runs/hardware_target_readiness.json",
                 "runs/release_gate.json",
                 "docs/cycle_log.md",
                 "README.md",
@@ -384,7 +401,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "added_requirement_count": len(coverage["added_requirements"]),
         },
         "baseline": {
-            "pooleos_cycle": 83,
+            "pooleos_cycle": 84,
             "entry_cycle": 79,
             "pooleos_test_count": test_count,
             "historical_consistency_release_gate": {
@@ -396,9 +413,9 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 "native_promotion_role": "historical_non_promoting",
             },
             "native_consistency_release_gate": {
-                "passed_checks": 63,
-                "total_checks": 63,
-                "artifact_count": 58,
+                "passed_checks": 64,
+                "total_checks": 64,
+                "artifact_count": 59,
                 "explicit_gap_count": len(PROGRAM_GAPS),
                 "production_ready": False,
                 "native_promotion_role": "planning_and_evidence_consistency_non_promoting",
@@ -458,7 +475,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=397)
+    parser.add_argument("--test-count", type=int, default=412)
     parser.add_argument("--status-date", default="2026-07-16")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

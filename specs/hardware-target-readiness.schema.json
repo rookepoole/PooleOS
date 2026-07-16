@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/hardware-target-readiness.schema.json",
+  "title": "PooleOS Tier-1 Hardware Target Readiness",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "status_date", "status", "selected_move_id", "target_id", "production_ready", "production_promotion_allowed", "n2_exit_gate_satisfied", "bindings", "schema_validation", "privacy_validation", "target_verification", "evidence_coverage", "standards_coverage", "lab_safety", "negative_controls", "summary", "binding_errors", "open_items", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_hardware_target_readiness"},
+    "status_date": {"const": "2026-07-16"},
+    "status": {"enum": ["invalid", "consistent_partial_non_promoting", "n2_exit_ready_non_production"]},
+    "selected_move_id": {"const": "N2-HW-001"},
+    "target_id": {"const": "TIER1-B650M-9800X3D-RTX5070-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "n2_exit_gate_satisfied": {"type": "boolean"},
+    "bindings": {
+      "type": "object",
+      "required": ["support_policy", "standards_register", "tier1_target", "sanitized_observation", "collector", "runtime"],
+      "properties": {
+        "support_policy": {"type": "object", "required": ["path", "sha256", "byte_count"]},
+        "standards_register": {"type": "object", "required": ["path", "sha256", "byte_count"]},
+        "tier1_target": {"type": "object", "required": ["path", "sha256", "byte_count"]},
+        "sanitized_observation": {"type": "object", "required": ["path", "sha256", "byte_count"]},
+        "collector": {"type": "object", "required": ["path", "sha256", "byte_count"]},
+        "runtime": {"type": "object", "required": ["path", "sha256", "byte_count"]}
+      }
+    },
+    "schema_validation": {"type": "object", "required": ["failure_count", "results"]},
+    "privacy_validation": {
+      "type": "object",
+      "required": ["mode", "violation_count", "violations", "private_capture_content_present"],
+      "properties": {
+        "mode": {"const": "fixed_whitelist_reconstruction_plus_recursive_scan"},
+        "violation_count": {"type": "integer"},
+        "violations": {"type": "array"},
+        "private_capture_content_present": {"const": false}
+      }
+    },
+    "target_verification": {"type": "object", "required": ["required_check_count", "matched_required_check_count", "required_failure_count", "checks", "known_discrepancies"]},
+    "evidence_coverage": {"type": "object", "required": ["required_channel_count", "observed_required_channel_count", "pending_required_channel_ids", "channels"]},
+    "standards_coverage": {"type": "object", "required": ["entry_count", "metadata_locked_count", "artifact_hash_verified_count", "unresolved_entry_ids", "supersession_review_ids"]},
+    "lab_safety": {
+      "type": "object",
+      "required": ["destructive_testing_approved", "prerequisite_count", "accepted_prerequisite_count", "pending_prerequisite_ids", "mutation_performed"],
+      "properties": {
+        "destructive_testing_approved": {"const": false},
+        "prerequisite_count": {"const": 10},
+        "accepted_prerequisite_count": {"const": 0},
+        "pending_prerequisite_ids": {"type": "array", "minItems": 10, "maxItems": 10, "items": {"type": "string"}},
+        "mutation_performed": {"const": false}
+      }
+    },
+    "negative_controls": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["id", "expected", "observed", "status"],
+        "properties": {
+          "id": {"type": "string"},
+          "expected": {"const": "reject"},
+          "observed": {"const": "reject"},
+          "status": {"const": "pass"}
+        }
+      }
+    },
+    "summary": {"type": "object", "required": ["consistency_pass", "schema_failure_count", "privacy_violation_count", "required_target_check_count", "matched_required_target_check_count", "pending_evidence_channel_count", "unresolved_standard_count", "pending_lab_safety_count", "negative_control_count", "negative_control_pass_count"]},
+    "binding_errors": {"type": "array", "maxItems": 0},
+    "open_items": {"type": "array", "minItems": 6, "items": {"type": "string"}},
+    "claim_boundary": {"type": "array", "minItems": 5, "items": {"type": "string"}}
+  }
+}

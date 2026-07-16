@@ -43,8 +43,8 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 83,
-    "selected_move_id": "N0-RATIFY-001",
+    "last_updated_cycle": 84,
+    "selected_move_id": "N2-HW-001",
     "immediate_next_move_id": "N0-RATIFY-001",
     "required_records": [
       "docs/production-goal-charter.md",
@@ -53,6 +53,7 @@
       "runs/pooleos_native_checklist_coverage.json",
       "runs/native_toolchain_qualification.json",
       "runs/adr_ratification_readiness.json",
+      "runs/hardware_target_readiness.json",
       "runs/release_gate.json",
       "docs/cycle_log.md",
       "README.md"
@@ -82,9 +83,9 @@
     "added_requirement_count": 25
   },
   "baseline": {
-    "pooleos_cycle": 83,
+    "pooleos_cycle": 84,
     "entry_cycle": 79,
-    "pooleos_test_count": 397,
+    "pooleos_test_count": 412,
     "historical_consistency_release_gate": {
       "passed_checks": 58,
       "total_checks": 58,
@@ -94,9 +95,9 @@
       "native_promotion_role": "historical_non_promoting"
     },
     "native_consistency_release_gate": {
-      "passed_checks": 63,
-      "total_checks": 63,
-      "artifact_count": 58,
+      "passed_checks": 64,
+      "total_checks": 64,
+      "artifact_count": 59,
       "explicit_gap_count": 20,
       "production_ready": false,
       "native_promotion_role": "planning_and_evidence_consistency_non_promoting"
@@ -437,7 +438,7 @@
         },
         {
           "id": "N2.2",
-          "status": "not_started",
+          "status": "partial",
           "description": "Assign Tier 0 emulator, Tier 1 exact machine, Tier 2 controller-family, Tier 3 community-tested, Tier 4 best-effort, unsupported, and quarantined states."
         },
         {
@@ -452,12 +453,12 @@
         },
         {
           "id": "N2.5",
-          "status": "not_started",
+          "status": "partial",
           "description": "Lock UEFI 2.11, ACPI 6.6, exact AMD64/AMD IOMMU manuals, SMBIOS 3.9, NVMe 2.2, xHCI 1.2, applicable USB/HID, TPM, network RFC, Unicode 17, POSIX Issue 8, VIRTIO 1.3, and exact device documents unless superseded through review."
         },
         {
           "id": "N2.6",
-          "status": "not_started",
+          "status": "partial",
           "description": "Turn every undocumented register or observed firmware behavior into an explicit blocker or hardware-specific tested assumption."
         }
       ],
@@ -475,11 +476,15 @@
       "source_checkbox_count": 236,
       "added_requirement_ids": [],
       "current_evidence": [
-        "live Windows CIM/PnP inventory captured 2026-07-15",
-        "master checklist standards registers 146 and 169"
+        "specs/hardware-support-policy.json: support tiers, evidence channels, privacy boundary, and destructive-test prerequisites",
+        "specs/tier1-hardware-target.json: exact Tier 1 target and 24 required identity checks",
+        "specs/native-standards-register.json: 15 primary-source standards records with revision and supersession state",
+        "runs/tier1_hardware_observation.json: sanitized whitelist reconstruction bound to the ignored private capture",
+        "runs/hardware_target_readiness.json: 24/24 required identity checks, zero privacy violations, and explicit non-promotion",
+        "docs/hardware-target-and-lab-safety.md: reproducible capture procedure and owner safety boundary"
       ],
       "current_gaps": [
-        "Full ACPI/PCI/USB/firmware inventory and sacrificial lab media are not accepted"
+        "Exact identity passes 24/24 required checks, but seven required evidence channels, 15 exact standards artifact hashes, ten destructive-lab prerequisites, and native-parser comparison remain open"
       ],
       "exit_gate": "Tier 0 and Tier 1 manifests are complete and hashed; destructive-test safety is accepted; every implementation phase has lawful normative references and errata tracking."
     },
@@ -2583,8 +2588,8 @@
         "ADD-TEST-001"
       ],
       "current_evidence": [
-        "Cycle 83 host baseline: 397 tests with one Windows symlink-permission skip",
-        "native binary parser, reproduction, leakage, malformed, substitution, and ADR-signing negatives"
+        "Cycle 84 host baseline: 412 tests with one Windows symlink-permission skip",
+        "native binary parser, reproduction, leakage, malformed, substitution, ADR-signing, and hardware privacy negatives"
       ],
       "current_gaps": [
         "No native system, power-loss, hardware, accessibility, soak, or external security suite exists"
@@ -2651,8 +2656,8 @@
         "ADD-SUPPLY-001"
       ],
       "current_evidence": [
-        "Cycle 83 consistency release gate: 63/63 checks over 58 artifacts",
-        "content-addressed source, ADR-readiness, and native-toolchain artifacts"
+        "Cycle 84 consistency release gate: 64/64 checks over 59 artifacts",
+        "content-addressed source, ADR-readiness, native-toolchain, and hardware-readiness artifacts"
       ],
       "current_gaps": [
         "No native SBOM/provenance/signing ceremony/release manifest or source-controlled release exists"
@@ -2952,6 +2957,45 @@
       ]
     },
     {
+      "id": "FLAG-N2-EVIDENCE-001",
+      "class": "REQUIRED",
+      "status": "open",
+      "phase_id": "N2",
+      "closure_condition": "Complete read-only CPUID/MSR, PCI configuration, ACPI duplicate, EDID/SPD, UEFI-variable, sensor/power, and native-parser comparison evidence",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json",
+        "runs/hardware_target_readiness.json",
+        "specs/hardware-support-policy.json"
+      ]
+    },
+    {
+      "id": "FLAG-N2-STANDARDS-001",
+      "class": "REQUIRED",
+      "status": "open",
+      "phase_id": "N2",
+      "closure_condition": "Acquire and hash lawfully accessible exact standards artifacts and close supersession, errata, profile, and access review",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json",
+        "runs/hardware_target_readiness.json",
+        "specs/hardware-support-policy.json"
+      ]
+    },
+    {
+      "id": "FLAG-N2-LAB-SAFETY-001",
+      "class": "BLOCKER",
+      "status": "open",
+      "phase_id": "N2",
+      "closure_condition": "Obtain owner acceptance for sacrificial media, backups, recovery, diagnostics, power, and network controls plus separate destructive-test approval",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json",
+        "runs/hardware_target_readiness.json",
+        "specs/hardware-support-policy.json"
+      ]
+    },
+    {
       "id": "FLAG-NATIVE-ISO-001",
       "class": "STOP_SHIP",
       "status": "open",
@@ -2994,7 +3038,7 @@
       "No PooleBoot PE32+ UEFI loader or frozen boot protocol",
       "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path",
       "No native CPU, interrupts, time, SMP, physical memory, virtual memory, or reclaim implementation",
-      "No native ACPI/AML/SMBIOS/PCIe resource graph or exact platform qualification",
+      "The exact Tier 1 identity passes 24/24 required checks, but seven evidence channels, 15 standards hashes, ten lab-safety prerequisites, native parsing, and physical qualification remain open",
       "No native DMA/IOMMU/interrupt-remapping confinement",
       "No native scheduler, task, syscall, capability, IPC, isolation, async I/O, or quota implementation",
       "No native security/crypto/TPM/secrets/MAC/privacy implementation or external review",

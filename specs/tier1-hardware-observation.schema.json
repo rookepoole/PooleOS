@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/tier1-hardware-observation.schema.json",
+  "title": "PooleOS Sanitized Tier-1 Hardware Observation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "status_date", "status", "selected_move_id", "target_id", "production_ready", "production_promotion_allowed", "bindings", "collection", "facts", "firmware_table_evidence", "security_observation", "evidence_channels", "privacy", "limitations"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_tier1_hardware_observation"},
+    "status_date": {"const": "2026-07-16"},
+    "status": {"const": "captured_partial_non_promoting"},
+    "selected_move_id": {"const": "N2-HW-001"},
+    "target_id": {"const": "TIER1-B650M-9800X3D-RTX5070-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "bindings": {
+      "type": "object",
+      "required": ["collector", "private_capture"],
+      "properties": {
+        "collector": {"type": "object", "required": ["path", "sha256", "byte_count"]},
+        "private_capture": {
+          "type": "object",
+          "required": ["artifact_kind", "sha256", "byte_count", "path_recorded", "content_publication_allowed"],
+          "properties": {
+            "artifact_kind": {"const": "pooleos_tier1_hardware_private_capture"},
+            "sha256": {"type": "string", "minLength": 64, "maxLength": 64},
+            "byte_count": {"type": "integer"},
+            "path_recorded": {"const": false},
+            "content_publication_allowed": {"const": false}
+          }
+        }
+      }
+    },
+    "collection": {
+      "type": "object",
+      "required": ["mode", "collector_version", "raw_values_published", "host_identity_published"],
+      "properties": {
+        "mode": {"const": "read_only"},
+        "collector_version": {"const": "1.0.0"},
+        "raw_values_published": {"const": false},
+        "host_identity_published": {"const": false}
+      }
+    },
+    "facts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseboard.manufacturer", "baseboard.product", "baseboard.version", "bios.manufacturer", "bios.version", "bios.smbios_version", "bios.cim_release_date_utc", "cpu.name", "cpu.manufacturer", "cpu.cim_family_code", "cpu.cim_stepping", "cpu.cim_revision", "cpu.core_count", "cpu.logical_processor_count", "cpu.socket", "memory.module_count", "memory.total_capacity_bytes", "memory.part_numbers", "memory.module_capacities_bytes", "memory.configured_speeds_mt_s", "storage.records", "display.name", "display.current_resolution", "pnp.hardware_prefixes", "host.firmware_type", "host.hypervisor_present"],
+      "properties": {
+        "baseboard.manufacturer": {"type": "string"},
+        "baseboard.product": {"type": "string"},
+        "baseboard.version": {"type": "string"},
+        "bios.manufacturer": {"type": "string"},
+        "bios.version": {"type": "string"},
+        "bios.smbios_version": {"type": "string"},
+        "bios.cim_release_date_utc": {"type": "string"},
+        "cpu.name": {"type": "string"},
+        "cpu.manufacturer": {"type": "string"},
+        "cpu.cim_family_code": {"type": "integer"},
+        "cpu.cim_stepping": {"type": "string"},
+        "cpu.cim_revision": {"type": "integer"},
+        "cpu.core_count": {"type": "integer"},
+        "cpu.logical_processor_count": {"type": "integer"},
+        "cpu.socket": {"type": "string"},
+        "memory.module_count": {"type": "integer"},
+        "memory.total_capacity_bytes": {"type": "integer"},
+        "memory.part_numbers": {"type": "array", "minItems": 2, "items": {"type": "string"}},
+        "memory.module_capacities_bytes": {"type": "array", "minItems": 2, "items": {"type": "integer"}},
+        "memory.configured_speeds_mt_s": {"type": "array", "minItems": 2, "items": {"type": "integer"}},
+        "storage.records": {"type": "array", "minItems": 2, "items": {"type": "string"}},
+        "display.name": {"type": "string"},
+        "display.current_resolution": {"type": "string"},
+        "pnp.hardware_prefixes": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "host.firmware_type": {"type": "string"},
+        "host.hypervisor_present": {"type": "boolean"}
+      }
+    },
+    "firmware_table_evidence": {"type": "object", "required": ["acpi_status", "acpi_enumerated_signature_count", "acpi_tables", "acpi_duplicate_retrieval_limitation", "smbios_status", "smbios_byte_count", "smbios_sha256", "raw_table_bytes_published"]},
+    "security_observation": {"type": "object", "required": ["secure_boot_status", "secure_boot_enabled", "tpm_status", "tpm_key_or_certificate_material_requested"]},
+    "evidence_channels": {"type": "array", "minItems": 14, "maxItems": 14, "items": {"type": "object", "required": ["id", "status", "detail"]}},
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sanitization_mode", "serials_published", "mac_addresses_published", "uuids_published", "full_pnp_instance_paths_published", "user_or_host_names_published", "absolute_local_paths_published", "tpm_ek_material_published", "privacy_violation_count"],
+      "properties": {
+        "sanitization_mode": {"const": "fixed_whitelist_reconstruction"},
+        "serials_published": {"const": false},
+        "mac_addresses_published": {"const": false},
+        "uuids_published": {"const": false},
+        "full_pnp_instance_paths_published": {"const": false},
+        "user_or_host_names_published": {"const": false},
+        "absolute_local_paths_published": {"const": false},
+        "tpm_ek_material_published": {"const": false},
+        "privacy_violation_count": {"const": 0}
+      }
+    },
+    "limitations": {"type": "array", "minItems": 5, "items": {"type": "string"}}
+  }
+}

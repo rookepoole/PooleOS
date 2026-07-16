@@ -86,6 +86,22 @@ class PublicationBoundaryTests(unittest.TestCase):
                 self.assertEqual(completed.returncode, 1)
                 self.assertEqual(publication.inspect_public_blob(path, b"public ratification evidence"), [])
 
+    def test_sanitized_hardware_evidence_paths_are_explicitly_allowlisted(self) -> None:
+        paths = (
+            "runs/tier1_hardware_observation.json",
+            "runs/hardware_target_readiness.json",
+        )
+        for path in paths:
+            with self.subTest(path=path):
+                self.assertIn(path, publication.ALLOWED_RUNS)
+                completed = subprocess.run(
+                    ["git", "check-ignore", "--quiet", path],
+                    cwd=ROOT,
+                    check=False,
+                )
+                self.assertEqual(completed.returncode, 1)
+                self.assertEqual(publication.inspect_public_blob(path, b"sanitized hardware evidence"), [])
+
     def test_release_gate_carries_publication_boundary(self) -> None:
         check = pooleos_release_gate.check_publication_boundary()
         self.assertTrue(check["ok"], check["detail"])

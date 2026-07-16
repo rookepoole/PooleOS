@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/tier1-hardware-target.schema.json",
+  "title": "PooleOS Exact Tier-1 Hardware Target",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "status_date", "status", "selected_move_id", "target_id", "support_tier", "production_ready", "production_promotion_allowed", "identity", "verification_contract", "known_discrepancies", "support_profile", "destructive_authorization", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_tier1_hardware_target"},
+    "status_date": {"const": "2026-07-16"},
+    "status": {"const": "candidate_exact_physical_target_partial_inventory"},
+    "selected_move_id": {"const": "N2-HW-001"},
+    "target_id": {"const": "TIER1-B650M-9800X3D-RTX5070-001"},
+    "support_tier": {"const": "tier1_exact_physical"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "identity": {"type": "object", "required": ["baseboard", "firmware", "processor", "memory", "storage", "display", "network", "usb_host_hardware_prefixes", "audio"]},
+    "verification_contract": {
+      "type": "array",
+      "minItems": 25,
+      "maxItems": 25,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "fact", "operator", "expected", "required"],
+        "properties": {
+          "id": {"type": "string"},
+          "fact": {"type": "string"},
+          "operator": {"enum": ["equals", "contains_all", "multiset_equals"]},
+          "expected": {},
+          "required": {"type": "boolean"}
+        }
+      }
+    },
+    "known_discrepancies": {"type": "array", "minItems": 1, "maxItems": 1, "items": {"type": "object", "required": ["id", "status", "vendor_value", "cim_utc_value", "impact", "closure"]}},
+    "support_profile": {"type": "object", "required": ["required_for_first_physical_boot", "deferred", "quarantined", "unsupported_v1_default"]},
+    "destructive_authorization": {
+      "type": "object",
+      "required": ["approved", "approved_device_count", "boot_configuration_change_approved", "firmware_change_approved", "tpm_change_approved", "power_interruption_approved"],
+      "properties": {
+        "approved": {"const": false},
+        "approved_device_count": {"const": 0},
+        "boot_configuration_change_approved": {"const": false},
+        "firmware_change_approved": {"const": false},
+        "tpm_change_approved": {"const": false},
+        "power_interruption_approved": {"const": false}
+      }
+    },
+    "claim_boundary": {"type": "array", "minItems": 5, "items": {"type": "string"}}
+  }
+}
