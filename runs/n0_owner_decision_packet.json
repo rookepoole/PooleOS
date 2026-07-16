@@ -1,0 +1,1699 @@
+{
+  "artifact_kind": "pooleos_n0_owner_decision_packet",
+  "claim_boundary": [
+    "This packet is unsigned preparation evidence and is not owner acceptance or cryptographic ratification.",
+    "Recommendations are advisory; every owner selection remains explicitly unselected.",
+    "All 38 objective definitions are listed, but all 38 implementation measurements remain open.",
+    "No public key, private key, credential, recovery secret, hardware-key stub, signature, tag, or publication receipt is included.",
+    "The packet does not authorize Codex to merge, sign, publish, change governance, probe privileged hardware, load a driver, modify firmware, or write physical media.",
+    "Architecture disposition does not prove PooleBoot, PooleKernel, native services, PooleGlass, PGB2, PGVM2, PDC backends, or a production ISO."
+  ],
+  "current_state": {
+    "measured_target_count": 0,
+    "objective_target_count": 38,
+    "owner_acceptance_pending": true,
+    "pending_owner_action_count": 6,
+    "pending_owner_actions": [
+      {
+        "description": "Explicitly accept, amend, or reject the candidate Workstation v1 profile and all 38 target values; definition acceptance must not claim measurement evidence.",
+        "id": "OWNER-OBJECTIVES-DISPOSITION-001",
+        "status": "pending"
+      },
+      {
+        "description": "Explicitly accept, amend, or reject ADR-0003 and ADR-0004; an amendment or rejection requires a revised or superseding ADR before signing.",
+        "id": "OWNER-ADR-DISPOSITION-001",
+        "status": "pending"
+      },
+      {
+        "description": "Choose an allowed owner-controlled SSH governance-key profile and record its public key and fingerprint without publishing private material.",
+        "id": "OWNER-SIGNING-CUSTODY-001",
+        "status": "pending"
+      },
+      {
+        "description": "Sign the canonical manifest with the PooleOS ADR namespace and verify it against the public allowed-signers and revocation files.",
+        "id": "OWNER-DETACHED-SIGN-001",
+        "status": "pending"
+      },
+      {
+        "description": "Create the non-replaceable owner-signed annotated architecture baseline tag over the revision carrying the manifest and detached signature.",
+        "id": "OWNER-SIGNED-TAG-001",
+        "status": "pending"
+      },
+      {
+        "description": "Publish the exact main revision and signed tag, verify remote object identities, and retain the machine receipt.",
+        "id": "OWNER-PUBLISH-RECEIPT-001",
+        "status": "pending"
+      }
+    ],
+    "proposed_adr_ids": [
+      "ADR-0003",
+      "ADR-0004"
+    ],
+    "ready_for_owner_action": true,
+    "ready_for_signature": false,
+    "trusted_signer_count": 0
+  },
+  "decisions": {
+    "adr_0003": {
+      "available_dispositions": [
+        "accept_exactly_as_written",
+        "amend_before_acceptance",
+        "reject_and_supersede"
+      ],
+      "decision_id": "OWNER-ADR-0003-DISPOSITION",
+      "plain_language_summary": "Use Rust 2024 no_std for PooleBoot, PooleKernel, privileged services, and drivers; keep assembly minimal; use freestanding C17 for portable PDC and ABI probes; and keep Python outside production images as a host oracle and harness.",
+      "question": "Adopt the proposed implementation-language and toolchain split?",
+      "recommendation": "accept_exactly_as_written",
+      "recommendation_basis": [
+        "The split reduces memory-safety exposure in privileged code while keeping explicit stable wire and disk ABIs.",
+        "The one-host Rust and LLD qualification already exercises the selected PE32+ and ELF64 target families without claiming a functional boot.",
+        "C17 remains available for independent portable PDC and ABI checks, and Python cannot become a production-image dependency."
+      ],
+      "recommendation_is_advisory": true,
+      "selection": "UNSELECTED",
+      "source": {
+        "byte_count": 4108,
+        "id": "ADR-0003",
+        "path": "docs/adr/0003-language-and-toolchain-split.md",
+        "sha256": "6F874FDBBA98CE728A230C4AF7798F202D09A63CE7394510C810C1E65932B1B0",
+        "source_ratification": "owner acceptance and full two-host toolchain qualification pending",
+        "source_status": "proposed",
+        "title": "Implementation Language and Toolchain Split"
+      },
+      "status": "pending_owner_selection",
+      "structured_snapshot": {
+        "cxx_in_v1_tcb": false,
+        "host_evidence": "Python 3 allowed as a non-production oracle and harness",
+        "native_rust_abi_on_wire_or_disk": false,
+        "pooleboot": "Rust 2024 no_std on x86_64-unknown-uefi with efiapi and rust-lld",
+        "poolekernel": "Rust 2024 no_std on x86_64-unknown-none ELF64 with bounded x86_64 assembly",
+        "portable_pdc_reference": "freestanding C17",
+        "privileged_user_space": "Rust 2024 no_std with controlled alloc and generated stable ABIs",
+        "status": "proposed_pending_toolchain_qualification",
+        "third_party_dependencies_default": "deny"
+      },
+      "tradeoffs": [
+        "Rust, LLVM, LLD, core, alloc, and compiler builtins become reviewed external build inputs.",
+        "Unsafe Rust, assembly, generated bindings, and C interoperability require continuing inventory and independent ABI fixtures.",
+        "A later language change requires a reviewed superseding ADR and new toolchain evidence."
+      ]
+    },
+    "adr_0004": {
+      "available_dispositions": [
+        "accept_exactly_as_written",
+        "amend_before_acceptance",
+        "reject_and_supersede"
+      ],
+      "decision_id": "OWNER-ADR-0004-DISPOSITION",
+      "plain_language_summary": "Keep PooleOS component names coherent while versioning boot, kernel, syscall, IPC, driver, filesystem, package, update, recovery, desktop, receipt, crash, PGB2, and PGVM2 contracts independently.",
+      "question": "Adopt the proposed product names and independent version namespaces?",
+      "recommendation": "accept_exactly_as_written",
+      "recommendation_basis": [
+        "Independent namespaces prevent an unrelated product version from silently changing wire, disk, recovery, or executable compatibility.",
+        "The names match the native architecture constitution and the current PooleGlyph PGB2 and PGVM2 integration boundary.",
+        "Unknown major versions fail closed and persistent layouts never use the unstable native Rust ABI."
+      ],
+      "recommendation_is_advisory": true,
+      "selection": "UNSELECTED",
+      "source": {
+        "byte_count": 2666,
+        "id": "ADR-0004",
+        "path": "docs/adr/0004-product-names-and-version-namespaces.md",
+        "sha256": "9798309FC902C2F5E5A8206751DA4423532E25690A2AD23AD4DC116F3566A637",
+        "source_ratification": "owner acceptance and trademark review pending",
+        "source_status": "proposed",
+        "title": "Product Names and Version Namespaces"
+      },
+      "status": "pending_owner_selection",
+      "structured_snapshot": {
+        "component_names": {
+          "desktop_shell": "PooleGlass",
+          "filesystem": "PooleFS",
+          "language_bytecode": "PGB2",
+          "language_vm": "PGVM2",
+          "package_command": "poolepkg",
+          "pdc_control_service": "pdc-controld",
+          "pdc_reference_service": "pdc-refd",
+          "pdc_route_service": "pdc-routed",
+          "recovery_environment": "PooleRecovery",
+          "service_supervisor": "PooleInit"
+        },
+        "core_names": {
+          "bootloader": "PooleBoot",
+          "kernel": "PooleKernel",
+          "product": "PooleOS"
+        },
+        "version_namespaces": [
+          {
+            "id": "PBP1",
+            "role": "boot_protocol"
+          },
+          {
+            "id": "PKABI1",
+            "role": "kernel_object_abi"
+          },
+          {
+            "id": "PSABI1",
+            "role": "syscall_abi"
+          },
+          {
+            "id": "PIPC1",
+            "role": "ipc_abi"
+          },
+          {
+            "id": "PDRV1",
+            "role": "driver_protocol"
+          },
+          {
+            "id": "PUABI1",
+            "role": "user_abi"
+          },
+          {
+            "id": "PXABI1",
+            "role": "executable_abi"
+          },
+          {
+            "id": "PFS1",
+            "role": "filesystem_format"
+          },
+          {
+            "id": "PVFS1",
+            "role": "vfs_protocol"
+          },
+          {
+            "id": "PPKG1",
+            "role": "package_format"
+          },
+          {
+            "id": "PINIT1",
+            "role": "service_supervisor_protocol"
+          },
+          {
+            "id": "PUPD1",
+            "role": "update_format"
+          },
+          {
+            "id": "PREC1",
+            "role": "recovery_protocol"
+          },
+          {
+            "id": "PGLASS1",
+            "role": "desktop_protocol"
+          },
+          {
+            "id": "PRCP1",
+            "role": "receipt_format"
+          },
+          {
+            "id": "PSM1",
+            "role": "system_manifest"
+          },
+          {
+            "id": "PISO1",
+            "role": "iso_manifest"
+          },
+          {
+            "id": "PCRASH1",
+            "role": "crash_format"
+          },
+          {
+            "id": "PGB2",
+            "role": "pooleglyph_bytecode"
+          },
+          {
+            "id": "PGVM2",
+            "role": "pooleglyph_vm"
+          }
+        ]
+      },
+      "tradeoffs": [
+        "Each public namespace needs its own compatibility, migration, test-corpus, and deprecation policy.",
+        "Renaming a namespace after publication requires explicit migration and compatibility handling.",
+        "PGB2 and PGVM2 remain unfrozen until PooleGlyph Phase 66 and later N34 evidence pass."
+      ]
+    },
+    "custody": {
+      "available_profiles": [
+        {
+          "assurance": "recommended_hardware_backed_user_presence",
+          "id": "hardware_fido2_ed25519_sk",
+          "key_type": "sk-ssh-ed25519@openssh.com",
+          "owner_risk_acceptance_required": false,
+          "production_release_key_eligible": false
+        },
+        {
+          "assurance": "hardware_backed_fallback_when_ed25519_sk_is_unavailable",
+          "id": "hardware_fido2_ecdsa_sk",
+          "key_type": "sk-ecdsa-sha2-nistp256@openssh.com",
+          "owner_risk_acceptance_required": false,
+          "production_release_key_eligible": false
+        },
+        {
+          "assurance": "provisional_preproduction_owner_custody",
+          "id": "passphrase_ed25519_provisional",
+          "key_type": "ssh-ed25519",
+          "owner_risk_acceptance_required": true,
+          "production_release_key_eligible": false
+        }
+      ],
+      "custody_rules": {
+        "governance_key_separate_from_secure_boot_and_release_keys": true,
+        "hardware_key_requires_owner_presence": true,
+        "primary_and_recovery_key_separation_required": true,
+        "private_key_export_by_verifier_prohibited": true,
+        "private_key_in_handoff_prohibited": true,
+        "private_key_in_repository_prohibited": true,
+        "revocation_record_required_before_rotation": true,
+        "software_key_requires_passphrase": true
+      },
+      "decision_id": "OWNER-SIGNING-CUSTODY-001",
+      "hardware_key_availability": "UNSELECTED",
+      "hardware_key_availability_options": [
+        "have",
+        "do_not_have",
+        "unsure"
+      ],
+      "private_material_included": false,
+      "private_material_requested": false,
+      "provisional_software_key_risk_acceptance": "UNSELECTED",
+      "provisional_software_key_risk_acceptance_options": [
+        "yes",
+        "no",
+        "not_applicable"
+      ],
+      "question": "Which owner-controlled governance-key profile will protect architecture ratification?",
+      "recommendation": "hardware_fido2_ed25519_sk",
+      "recommendation_basis": [
+        "The recommended profile keeps private signing operations hardware-backed and owner-presence gated.",
+        "A passphrase Ed25519 software key is an explicit provisional fallback and requires separate risk acceptance.",
+        "Governance signing remains separate from future Secure Boot, package, update, recovery, and ISO release keys."
+      ],
+      "recommendation_is_advisory": true,
+      "selection": "UNSELECTED",
+      "status": "pending_owner_selection"
+    },
+    "objectives": {
+      "available_dispositions": [
+        "accept_exactly_as_written",
+        "amend_before_acceptance",
+        "reject"
+      ],
+      "category_counts": [
+        {
+          "category": "accessibility",
+          "count": 8
+        },
+        {
+          "category": "compatibility",
+          "count": 6
+        },
+        {
+          "category": "performance",
+          "count": 10
+        },
+        {
+          "category": "privacy",
+          "count": 7
+        },
+        {
+          "category": "reliability",
+          "count": 7
+        }
+      ],
+      "compatibility_policy": {
+        "linux_abi": "prohibited_v1",
+        "linux_kernel_modules": "prohibited_v1",
+        "patch_release_rule": "no_breaking_change_to_declared_v1_public_contracts",
+        "posix_role": "declared_source_compatibility_subset_only",
+        "unknown_major_versions": "reject",
+        "unlisted_hardware": "unsupported_until_qualified",
+        "windows_application_abi": "prohibited_v1",
+        "windows_drivers": "prohibited_v1"
+      },
+      "decision_id": "OWNER-OBJECTIVES-DISPOSITION-001",
+      "measured_target_count": 0,
+      "measurement_evidence_accepted": false,
+      "measurement_policy": {
+        "clock": "monotonic_for_durations_and_latency",
+        "failed_samples": "retained_and_counted_as_failures",
+        "independent_reproduction": true,
+        "outlier_removal": "prohibited_unless_predeclared_and_dual_reported",
+        "percentile_method": "nearest_rank_over_retained_raw_samples",
+        "power_baseline": "exact_hardware_firmware_workload_and_instrument_binding_required",
+        "raw_evidence_required": true,
+        "warmup": "declared_per_test_and_excluded_from_measured_samples"
+      },
+      "plain_language_summary": "Freeze a measurable workstation release profile across reliability, accessibility, compatibility, privacy, and performance without claiming that any target has been measured or met.",
+      "profile": {
+        "architecture": "x86_64",
+        "edition": "PooleOS Workstation",
+        "excluded_product_claims": [
+          "multi_tenant_server",
+          "safety_critical_real_time_system",
+          "medical_device",
+          "invasive_physical_attack_resistance",
+          "generic_pc_compatibility",
+          "windows_binary_or_driver_compatibility",
+          "linux_binary_kernel_module_or_driver_compatibility"
+        ],
+        "firmware": "UEFI",
+        "id": "POOLEOS-WORKSTATION-V1-CANDIDATE",
+        "primary_users": [
+          "owner_operator",
+          "software_developer",
+          "local_workstation_user",
+          "accessibility_user",
+          "recovery_operator"
+        ],
+        "required_modes": [
+          "normal",
+          "safe",
+          "previous_known_good",
+          "diagnostic",
+          "live",
+          "installer",
+          "recovery"
+        ],
+        "required_use_cases": [
+          "authenticated_local_graphical_workstation",
+          "terminal_shell_and_native_development",
+          "local_and_explicitly_authorized_network_use",
+          "signed_package_update_rollback_and_recovery",
+          "pooleglyph_pgb2_pgvm2_execution",
+          "canonical_pdc_reference_execution",
+          "accessible_software_rendered_fallback"
+        ],
+        "support_profiles": [
+          "TIER0-QEMU-Q35-OVMF-PENDING",
+          "TIER1-B650M-9800X3D-RTX5070-001"
+        ]
+      },
+      "question": "Adopt the candidate PooleOS Workstation v1 profile and all 38 target definitions?",
+      "recommendation": "accept_exactly_as_written",
+      "recommendation_basis": [
+        "The targets are explicit, testable, evidence-bound, and fail closed instead of relying on broad quality claims.",
+        "Acceptance freezes definitions only; all 38 implementation measurements remain open.",
+        "Future evidence may justify a reviewed amendment, but measurements must not be weakened after results are observed merely to manufacture a pass."
+      ],
+      "recommendation_is_advisory": true,
+      "selection": "UNSELECTED",
+      "status": "pending_owner_selection",
+      "target_count": 38,
+      "target_set_sha256": "9C25304CDB72FD037468481BA6437F0D783A2AA496A6144DC5DE659D9CDF2BCF",
+      "targets": [
+        {
+          "applies_to": [
+            "tier0",
+            "normal",
+            "safe",
+            "recovery"
+          ],
+          "category": "reliability",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N4",
+            "N36",
+            "N38"
+          ],
+          "evidence_requirement": "Retain every seed, launch manifest, serial log, exit reason, and failed boot.",
+          "evidence_status": "not_measured",
+          "id": "REL-T0-BOOT-001",
+          "metric": "successful_clean_tier0_cold_boots_percent",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 10000,
+          "operator": "minimum",
+          "percentile": 0,
+          "unit": "percent",
+          "value": 100,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "tier1",
+            "normal",
+            "safe",
+            "recovery"
+          ],
+          "category": "reliability",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N24",
+            "N36",
+            "N38"
+          ],
+          "evidence_requirement": "Bind every cycle to exact hardware, firmware, media, power source, and stage markers.",
+          "evidence_status": "not_measured",
+          "id": "REL-T1-BOOT-001",
+          "metric": "successful_clean_tier1_boot_restart_shutdown_cycles_percent",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 1000,
+          "operator": "minimum",
+          "percentile": 0,
+          "unit": "percent",
+          "value": 100,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "tier0",
+            "tier1",
+            "normal"
+          ],
+          "category": "reliability",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N35",
+            "N36",
+            "N38"
+          ],
+          "evidence_requirement": "Run a declared seven-day mixed workload with retained faults, resource trends, and watchdog events.",
+          "evidence_status": "not_measured",
+          "id": "REL-SOAK-001",
+          "metric": "fatal_kernel_or_unrecovered_system_fault_count",
+          "minimum_duration_hours": 168,
+          "minimum_sample_count": 1,
+          "operator": "maximum",
+          "percentile": 0,
+          "unit": "count",
+          "value": 0,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "tier0",
+            "tier1",
+            "update",
+            "recovery"
+          ],
+          "category": "reliability",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N23",
+            "N35",
+            "N36"
+          ],
+          "evidence_requirement": "Inject interruption at every declared update transition and prove previous-known-good or recovery availability.",
+          "evidence_status": "not_measured",
+          "id": "REL-UPDATE-001",
+          "metric": "recoverable_update_and_rollback_fault_scenarios_percent",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 1000,
+          "operator": "minimum",
+          "percentile": 0,
+          "unit": "percent",
+          "value": 100,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "tier0",
+            "tier1",
+            "poolefs"
+          ],
+          "category": "reliability",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N19",
+            "N35",
+            "N36"
+          ],
+          "evidence_requirement": "Check acknowledged-data, metadata, replay, repair, and mount invariants after each cut.",
+          "evidence_status": "not_measured",
+          "id": "REL-FS-POWER-001",
+          "metric": "durability_contract_violations_after_randomized_power_cut",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 10000,
+          "operator": "maximum",
+          "percentile": 0,
+          "unit": "count",
+          "value": 0,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "tier0",
+            "tier1",
+            "driver_domains"
+          ],
+          "category": "reliability",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N14",
+            "N16",
+            "N35",
+            "N36"
+          ],
+          "evidence_requirement": "Exercise process death, reset, revocation, stale completion, DMA teardown, and supervised restart.",
+          "evidence_status": "not_measured",
+          "id": "REL-DRIVER-RECOVERY-001",
+          "metric": "stale_authority_or_kernel_faults_after_driver_crash_reset",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 10000,
+          "operator": "maximum",
+          "percentile": 0,
+          "unit": "count",
+          "value": 0,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "tier1",
+            "recovery"
+          ],
+          "category": "reliability",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N23",
+            "N36",
+            "N38"
+          ],
+          "evidence_requirement": "Measure from declared unrecoverable normal-slot failure to usable offline recovery UI and data-repair entry point.",
+          "evidence_status": "not_measured",
+          "id": "REL-RECOVERY-RTO-001",
+          "metric": "recovery_time_objective_seconds",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 100,
+          "operator": "maximum",
+          "percentile": 100,
+          "unit": "seconds",
+          "value": 900,
+          "zero_tolerance": false
+        },
+        {
+          "applies_to": [
+            "normal",
+            "installer",
+            "recovery",
+            "pooleglass"
+          ],
+          "category": "accessibility",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N29",
+            "N36",
+            "N38"
+          ],
+          "evidence_requirement": "Publish an applicability crosswalk; native-software exceptions require an explicit rationale and equivalent test.",
+          "evidence_status": "not_measured",
+          "id": "ACC-WCAG-AA-001",
+          "metric": "applicable_wcag_2_2_level_a_and_aa_criteria_mapped_and_passing_percent",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 1,
+          "operator": "minimum",
+          "percentile": 0,
+          "unit": "percent",
+          "value": 100,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "normal",
+            "installer",
+            "recovery"
+          ],
+          "category": "accessibility",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N18",
+            "N22",
+            "N23",
+            "N29",
+            "N36"
+          ],
+          "evidence_requirement": "Include login, permissions, settings, update, rollback, diagnostics, backup, restore, and shutdown workflows.",
+          "evidence_status": "not_measured",
+          "id": "ACC-KEYBOARD-001",
+          "metric": "required_workflows_completable_keyboard_only_percent",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 25,
+          "operator": "minimum",
+          "percentile": 0,
+          "unit": "percent",
+          "value": 100,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "normal",
+            "installer",
+            "pooleglass"
+          ],
+          "category": "accessibility",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N29",
+            "N30",
+            "N36"
+          ],
+          "evidence_requirement": "Verify through an independent accessibility-tree inspector and representative assistive client.",
+          "evidence_status": "not_measured",
+          "id": "ACC-SEMANTICS-001",
+          "metric": "required_controls_with_programmatic_name_role_state_value_percent",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 100,
+          "operator": "minimum",
+          "percentile": 0,
+          "unit": "percent",
+          "value": 100,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "normal",
+            "installer",
+            "recovery",
+            "pooleglass"
+          ],
+          "category": "accessibility",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N29",
+            "N36"
+          ],
+          "evidence_requirement": "Reject clipped, overlapped, hidden, unreachable, or semantically truncated required content.",
+          "evidence_status": "not_measured",
+          "id": "ACC-TEXT-SCALE-001",
+          "metric": "required_workflows_without_loss_at_text_scale_percent",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 25,
+          "operator": "minimum",
+          "percentile": 0,
+          "unit": "percent_at_200_percent_text_scale",
+          "value": 100,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "normal",
+            "installer",
+            "recovery",
+            "pooleglass"
+          ],
+          "category": "accessibility",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N29",
+            "N36"
+          ],
+          "evidence_requirement": "Also require 3:1 for large text and essential non-text boundaries in every required theme.",
+          "evidence_status": "not_measured",
+          "id": "ACC-CONTRAST-001",
+          "metric": "minimum_normal_text_contrast_ratio",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 100,
+          "operator": "minimum",
+          "percentile": 0,
+          "unit": "ratio",
+          "value": 4.5,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "boot_identity",
+            "normal",
+            "installer",
+            "recovery",
+            "pooleglass"
+          ],
+          "category": "accessibility",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N29",
+            "N36"
+          ],
+          "evidence_requirement": "Disable nonessential animation and preserve static progress and error state without timing dependence.",
+          "evidence_status": "not_measured",
+          "id": "ACC-REDUCED-MOTION-001",
+          "metric": "required_surfaces_honoring_reduced_motion_percent",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 25,
+          "operator": "minimum",
+          "percentile": 0,
+          "unit": "percent",
+          "value": 100,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "boot_identity",
+            "normal",
+            "installer",
+            "recovery",
+            "pooleglass"
+          ],
+          "category": "accessibility",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N29",
+            "N36"
+          ],
+          "evidence_requirement": "Analyze every animation, transition, warning, and error effect including failure fallbacks.",
+          "evidence_status": "not_measured",
+          "id": "ACC-FLASH-001",
+          "metric": "maximum_flashes_per_second",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 25,
+          "operator": "maximum",
+          "percentile": 100,
+          "unit": "flashes_per_second",
+          "value": 3,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "safe",
+            "diagnostic",
+            "recovery"
+          ],
+          "category": "accessibility",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N22",
+            "N23",
+            "N29",
+            "N36"
+          ],
+          "evidence_requirement": "Publish screen-reader and braille boundaries; graphical failure must retain keyboard and serial/GOP operation.",
+          "evidence_status": "not_measured",
+          "id": "ACC-RECOVERY-001",
+          "metric": "required_recovery_workflows_with_keyboard_high_contrast_static_and_serial_alternative_percent",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 15,
+          "operator": "minimum",
+          "percentile": 0,
+          "unit": "percent",
+          "value": 100,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "tier0",
+            "tier1"
+          ],
+          "category": "compatibility",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N2",
+            "N4",
+            "N38"
+          ],
+          "evidence_requirement": "Advertise only exact tested firmware, device, media, and feature combinations.",
+          "evidence_status": "not_measured",
+          "id": "COMP-SUPPORTED-HARDWARE-001",
+          "metric": "advertised_hardware_profiles_with_exact_qualification_receipts_percent",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 2,
+          "operator": "minimum",
+          "percentile": 0,
+          "unit": "percent",
+          "value": 100,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "all_profiles"
+          ],
+          "category": "compatibility",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N5",
+            "N14",
+            "N16",
+            "N20",
+            "N23",
+            "N34",
+            "N36"
+          ],
+          "evidence_requirement": "Exercise older, newer, malformed, colliding, and downgrade version identifiers independently.",
+          "evidence_status": "not_measured",
+          "id": "COMP-VERSION-001",
+          "metric": "unknown_major_boot_abi_ipc_driver_package_and_pgb2_versions_accepted",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 100,
+          "operator": "maximum",
+          "percentile": 0,
+          "unit": "count",
+          "value": 0,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "v1_patch_releases"
+          ],
+          "category": "compatibility",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N20",
+            "N23",
+            "N30",
+            "N34",
+            "N36"
+          ],
+          "evidence_requirement": "Bind each public contract to a declared compatibility window and retained previous-version corpus.",
+          "evidence_status": "not_measured",
+          "id": "COMP-PATCH-001",
+          "metric": "declared_v1_patch_compatible_contract_tests_passing_percent",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 100,
+          "operator": "minimum",
+          "percentile": 0,
+          "unit": "percent",
+          "value": 100,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "native_user_abi"
+          ],
+          "category": "compatibility",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N20",
+            "N22",
+            "N30",
+            "N36"
+          ],
+          "evidence_requirement": "Keep POSIX as an explicitly enumerated source-level subset; unimplemented calls are not advertised.",
+          "evidence_status": "not_measured",
+          "id": "COMP-POSIX-SUBSET-001",
+          "metric": "advertised_posix_source_subset_items_with_conformance_evidence_percent",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 1,
+          "operator": "minimum",
+          "percentile": 0,
+          "unit": "percent",
+          "value": 100,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "all_profiles"
+          ],
+          "category": "compatibility",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N0",
+            "N20",
+            "N37",
+            "N39"
+          ],
+          "evidence_requirement": "Release-tree and documentation scans must reject Linux ABI, module, or driver promotion claims.",
+          "evidence_status": "not_measured",
+          "id": "COMP-LINUX-ABI-001",
+          "metric": "linux_abi_kernel_module_or_driver_compatibility_claims",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 1,
+          "operator": "maximum",
+          "percentile": 0,
+          "unit": "count",
+          "value": 0,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "all_profiles"
+          ],
+          "category": "compatibility",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N0",
+            "N20",
+            "N37",
+            "N39"
+          ],
+          "evidence_requirement": "Windows remains a development host and is not a production ABI or driver source.",
+          "evidence_status": "not_measured",
+          "id": "COMP-WINDOWS-ABI-001",
+          "metric": "windows_binary_or_driver_compatibility_claims",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 1,
+          "operator": "maximum",
+          "percentile": 0,
+          "unit": "count",
+          "value": 0,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "all_profiles"
+          ],
+          "category": "privacy",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N21",
+            "N31",
+            "N36",
+            "N39"
+          ],
+          "evidence_requirement": "Inspect every shipped profile, first-run path, update, recovery, and diagnostic mode offline.",
+          "evidence_status": "not_measured",
+          "id": "PRIV-TELEMETRY-DEFAULT-001",
+          "metric": "profiles_with_telemetry_enabled_by_default",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 7,
+          "operator": "maximum",
+          "percentile": 0,
+          "unit": "count",
+          "value": 0,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "normal",
+            "installer",
+            "recovery"
+          ],
+          "category": "privacy",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N21",
+            "N23",
+            "N25",
+            "N26",
+            "N36"
+          ],
+          "evidence_requirement": "Retain packet captures for clean install, first boot, login, update UI, diagnostics, and recovery.",
+          "evidence_status": "not_measured",
+          "id": "PRIV-PRECONSENT-NETWORK-001",
+          "metric": "undeclared_outbound_connections_before_explicit_user_authorization",
+          "minimum_duration_hours": 24,
+          "minimum_sample_count": 100,
+          "operator": "maximum",
+          "percentile": 0,
+          "unit": "count",
+          "value": 0,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "all_profiles"
+          ],
+          "category": "privacy",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N15",
+            "N21",
+            "N26",
+            "N31",
+            "N36"
+          ],
+          "evidence_requirement": "Test logs, network protocols, crash paths, package operations, and support exports for correlation identifiers.",
+          "evidence_status": "not_measured",
+          "id": "PRIV-STABLE-ID-001",
+          "metric": "stable_device_or_user_identifiers_exported_without_explicit_scope",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 100,
+          "operator": "maximum",
+          "percentile": 0,
+          "unit": "count",
+          "value": 0,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "diagnostic",
+            "recovery",
+            "support_export"
+          ],
+          "category": "privacy",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N15",
+            "N21",
+            "N31",
+            "N36"
+          ],
+          "evidence_requirement": "Run seeded-secret and seeded-identifier corpora through preview, redaction, archive, and transport paths.",
+          "evidence_status": "not_measured",
+          "id": "PRIV-DIAGNOSTIC-REDACTION-001",
+          "metric": "diagnostic_exports_with_unreviewed_secret_or_identifier_findings",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 1000,
+          "operator": "maximum",
+          "percentile": 0,
+          "unit": "count",
+          "value": 0,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "normal",
+            "diagnostic",
+            "support_export"
+          ],
+          "category": "privacy",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N21",
+            "N22",
+            "N29",
+            "N36"
+          ],
+          "evidence_requirement": "Consent must be specific, reversible, non-coercive, and independently auditable.",
+          "evidence_status": "not_measured",
+          "id": "PRIV-CONSENT-REVOCATION-001",
+          "metric": "optional_data_collection_workflows_with_visible_consent_and_revocation_percent",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 10,
+          "operator": "minimum",
+          "percentile": 0,
+          "unit": "percent",
+          "value": 100,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "normal",
+            "diagnostic"
+          ],
+          "category": "privacy",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N21",
+            "N31",
+            "N36"
+          ],
+          "evidence_requirement": "Verify quota, expiry, clock-change, low-space, backup, restore, and user-clear behavior.",
+          "evidence_status": "not_measured",
+          "id": "PRIV-RETENTION-001",
+          "metric": "default_local_diagnostic_retention_days",
+          "minimum_duration_hours": 744,
+          "minimum_sample_count": 100,
+          "operator": "maximum",
+          "percentile": 100,
+          "unit": "days",
+          "value": 30,
+          "zero_tolerance": false
+        },
+        {
+          "applies_to": [
+            "normal",
+            "safe",
+            "diagnostic"
+          ],
+          "category": "privacy",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N21",
+            "N31",
+            "N36"
+          ],
+          "evidence_requirement": "Crash artifacts remain local until a per-export preview and explicit user action.",
+          "evidence_status": "not_measured",
+          "id": "PRIV-CRASH-UPLOAD-001",
+          "metric": "automatic_crash_upload_paths",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 100,
+          "operator": "maximum",
+          "percentile": 0,
+          "unit": "count",
+          "value": 0,
+          "zero_tolerance": true
+        },
+        {
+          "applies_to": [
+            "tier0",
+            "tier1",
+            "all_boot_modes"
+          ],
+          "category": "performance",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N5",
+            "N36",
+            "N38"
+          ],
+          "evidence_requirement": "Measure from UEFI image entry, excluding firmware time, with serial as the independent clocked marker.",
+          "evidence_status": "not_measured",
+          "id": "PERF-BOOT-MARKER-001",
+          "metric": "pooleboot_entry_to_first_serial_or_gop_marker_milliseconds",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 1000,
+          "operator": "maximum",
+          "percentile": 99,
+          "unit": "milliseconds",
+          "value": 1000,
+          "zero_tolerance": false
+        },
+        {
+          "applies_to": [
+            "tier1",
+            "normal",
+            "safe",
+            "recovery"
+          ],
+          "category": "performance",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N6",
+            "N21",
+            "N36",
+            "N38"
+          ],
+          "evidence_requirement": "Use signed stage markers and retain timeout, dependency, driver, and fallback state.",
+          "evidence_status": "not_measured",
+          "id": "PERF-KERNEL-INIT-001",
+          "metric": "poolekernel_entry_to_pooleinit_ready_milliseconds",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 1000,
+          "operator": "maximum",
+          "percentile": 99,
+          "unit": "milliseconds",
+          "value": 2000,
+          "zero_tolerance": false
+        },
+        {
+          "applies_to": [
+            "tier1",
+            "normal"
+          ],
+          "category": "performance",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N21",
+            "N22",
+            "N29",
+            "N36",
+            "N38"
+          ],
+          "evidence_requirement": "Measure cold and warm populations separately and include software-rendered fallback.",
+          "evidence_status": "not_measured",
+          "id": "PERF-LOGIN-READY-001",
+          "metric": "uefi_handoff_to_interactive_login_milliseconds",
+          "minimum_duration_hours": 0,
+          "minimum_sample_count": 1000,
+          "operator": "maximum",
+          "percentile": 95,
+          "unit": "milliseconds",
+          "value": 15000,
+          "zero_tolerance": false
+        },
+        {
+          "applies_to": [
+            "tier1",
+            "2560x1440",
+            "normal"
+          ],
+          "category": "performance",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N27",
+            "N29",
+            "N36"
+          ],
+          "evidence_requirement": "Use representative window, text, transparency, input, and notification workloads with raw frame times.",
+          "evidence_status": "not_measured",
+          "id": "PERF-FRAME-P95-001",
+          "metric": "pooleglass_frame_time_p95_milliseconds",
+          "minimum_duration_hours": 1,
+          "minimum_sample_count": 100000,
+          "operator": "maximum",
+          "percentile": 95,
+          "unit": "milliseconds",
+          "value": 16.67,
+          "zero_tolerance": false
+        },
+        {
+          "applies_to": [
+            "tier1",
+            "2560x1440",
+            "normal"
+          ],
+          "category": "performance",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N27",
+            "N29",
+            "N36"
+          ],
+          "evidence_requirement": "Report animation, reduced-motion, reduced-transparency, and software-rendered populations separately.",
+          "evidence_status": "not_measured",
+          "id": "PERF-FRAME-P99-001",
+          "metric": "pooleglass_frame_time_p99_milliseconds",
+          "minimum_duration_hours": 1,
+          "minimum_sample_count": 100000,
+          "operator": "maximum",
+          "percentile": 99,
+          "unit": "milliseconds",
+          "value": 33.34,
+          "zero_tolerance": false
+        },
+        {
+          "applies_to": [
+            "tier1",
+            "normal",
+            "pooleglass"
+          ],
+          "category": "performance",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N18",
+            "N27",
+            "N29",
+            "N36"
+          ],
+          "evidence_requirement": "Bind physical input timestamp, event delivery, application response, composition, and scanout observation.",
+          "evidence_status": "not_measured",
+          "id": "PERF-INPUT-LATENCY-001",
+          "metric": "input_to_visible_response_p95_milliseconds",
+          "minimum_duration_hours": 1,
+          "minimum_sample_count": 10000,
+          "operator": "maximum",
+          "percentile": 95,
+          "unit": "milliseconds",
+          "value": 50,
+          "zero_tolerance": false
+        },
+        {
+          "applies_to": [
+            "tier1",
+            "normal",
+            "software_rendered_fallback"
+          ],
+          "category": "performance",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N9",
+            "N21",
+            "N29",
+            "N31",
+            "N36"
+          ],
+          "evidence_requirement": "Include kernel, services, drivers, compositor, caches, and retained diagnostic memory after a declared quiet period.",
+          "evidence_status": "not_measured",
+          "id": "PERF-IDLE-MEMORY-001",
+          "metric": "clean_idle_resident_memory_bytes",
+          "minimum_duration_hours": 0.5,
+          "minimum_sample_count": 100,
+          "operator": "maximum",
+          "percentile": 95,
+          "unit": "bytes",
+          "value": 2147483648,
+          "zero_tolerance": false
+        },
+        {
+          "applies_to": [
+            "tier1",
+            "normal"
+          ],
+          "category": "performance",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N8",
+            "N12",
+            "N21",
+            "N24",
+            "N31",
+            "N36"
+          ],
+          "evidence_requirement": "Measure one-second samples with network disconnected and scheduled maintenance separately declared.",
+          "evidence_status": "not_measured",
+          "id": "PERF-IDLE-CPU-001",
+          "metric": "clean_idle_total_cpu_utilization_p95_percent",
+          "minimum_duration_hours": 0.5,
+          "minimum_sample_count": 1800,
+          "operator": "maximum",
+          "percentile": 95,
+          "unit": "percent",
+          "value": 2,
+          "zero_tolerance": false
+        },
+        {
+          "applies_to": [
+            "tier1",
+            "normal"
+          ],
+          "category": "performance",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N24",
+            "N31",
+            "N36",
+            "N38"
+          ],
+          "evidence_requirement": "Bind external instrumentation, ambient conditions, firmware, device state, display state, and workload; never override hard thermal limits.",
+          "evidence_status": "not_measured",
+          "id": "PERF-POWER-REGRESSION-001",
+          "metric": "release_candidate_idle_power_regression_from_accepted_baseline_percent",
+          "minimum_duration_hours": 15,
+          "minimum_sample_count": 30,
+          "operator": "maximum",
+          "percentile": 95,
+          "unit": "percent",
+          "value": 10,
+          "zero_tolerance": false
+        },
+        {
+          "applies_to": [
+            "tier1",
+            "low_load",
+            "same_numa_node"
+          ],
+          "category": "performance",
+          "definition_status": "candidate_owner_ratification_pending",
+          "evidence_phase_ids": [
+            "N12",
+            "N14",
+            "N31",
+            "N36"
+          ],
+          "evidence_requirement": "Retain raw distributions and report cross-core, loaded, timeout, cancellation, and priority-inversion cases separately.",
+          "evidence_status": "not_measured",
+          "id": "PERF-IPC-001",
+          "metric": "local_64_byte_call_reply_p99_microseconds",
+          "minimum_duration_hours": 0.25,
+          "minimum_sample_count": 1000000,
+          "operator": "maximum",
+          "percentile": 99,
+          "unit": "microseconds",
+          "value": 100,
+          "zero_tolerance": false
+        }
+      ],
+      "threat_model": {
+        "external_trust_dependencies": [
+          "qualified_firmware",
+          "qualified_cpu_and_microcode",
+          "qualified_hardware_roots",
+          "owner_controlled_signing_keys"
+        ],
+        "in_scope": [
+          "malicious_or_malformed_applications",
+          "malicious_or_malformed_packages_and_updates",
+          "malicious_filesystems_and_removable_media",
+          "hostile_network_traffic",
+          "hostile_ipc_peers",
+          "crashing_or_compromised_user_space_drivers",
+          "dma_capable_devices_within_declared_iommu_assumptions",
+          "malformed_boot_and_recovery_inputs"
+        ],
+        "out_of_scope_claims": [
+          "invasive_physical_attacks",
+          "malicious_foundry_hardware",
+          "unrecoverable_compromised_motherboard_firmware",
+          "nation_state_laboratory_attacks",
+          "unqualified_hardware"
+        ]
+      },
+      "tradeoffs": [
+        "The reliability and fault-injection sample counts require substantial lab and automation time.",
+        "Accessibility and privacy targets apply to installer and recovery paths, not only the normal desktop.",
+        "Performance gates require retained raw distributions and exact hardware, firmware, workload, and clock bindings."
+      ]
+    },
+    "public_key_publication": {
+      "available_dispositions": [
+        "approve_after_fingerprint_review",
+        "not_yet"
+      ],
+      "decision_id": "OWNER-PUBLIC-KEY-PUBLICATION-001",
+      "private_material_included": false,
+      "question": "After independently reviewing the generated fingerprint, may Codex publish only the public key and fingerprint to the repository and GitHub signing-key registry?",
+      "recommendation": "approve_after_fingerprint_review",
+      "recommendation_is_advisory": true,
+      "registration_scope_may_require_interactive_owner_approval": true,
+      "selection": "UNSELECTED",
+      "status": "pending_owner_selection"
+    }
+  },
+  "execution_boundary": {
+    "prohibited_in_this_packet_cycle": [
+      "owner_acceptance_inference",
+      "private_key_generation_or_access",
+      "manifest_signing",
+      "tag_creation_or_signing",
+      "merge_to_main",
+      "publication_receipt",
+      "repository_governance_change",
+      "privileged_or_destructive_hardware_action"
+    ],
+    "separate_explicit_approval_required": [
+      "merge_to_main",
+      "change_repository_governance",
+      "generate_or_use_private_keys",
+      "sign_or_publish_tags_or_releases",
+      "run_privileged_hardware_probes",
+      "load_drivers",
+      "modify_firmware",
+      "write_physical_media_or_disks"
+    ],
+    "standing_authority_allows": [
+      "read_edit_build_test_and_document_pooleos",
+      "install_workspace_local_non_administrative_tools",
+      "update_roadmap_and_evidence_artifacts",
+      "create_commits_and_topic_branches",
+      "push_topic_branches",
+      "open_or_update_pull_requests"
+    ],
+    "standing_authority_recorded": true
+  },
+  "owner_acceptance_recorded": false,
+  "owner_response_template": {
+    "amendment_details": "UNFILLED",
+    "fields": [
+      {
+        "allowed_values": [
+          "accept_exactly_as_written",
+          "amend_before_acceptance",
+          "reject_and_supersede"
+        ],
+        "id": "OWNER-ADR-0003-DISPOSITION",
+        "selection": "UNSELECTED"
+      },
+      {
+        "allowed_values": [
+          "accept_exactly_as_written",
+          "amend_before_acceptance",
+          "reject_and_supersede"
+        ],
+        "id": "OWNER-ADR-0004-DISPOSITION",
+        "selection": "UNSELECTED"
+      },
+      {
+        "allowed_values": [
+          "accept_exactly_as_written",
+          "amend_before_acceptance",
+          "reject"
+        ],
+        "id": "OWNER-OBJECTIVES-DISPOSITION-001",
+        "selection": "UNSELECTED"
+      },
+      {
+        "allowed_values": [
+          "have",
+          "do_not_have",
+          "unsure"
+        ],
+        "id": "OWNER-FIDO2-HARDWARE-AVAILABILITY",
+        "selection": "UNSELECTED"
+      },
+      {
+        "allowed_values": [
+          "hardware_fido2_ed25519_sk",
+          "hardware_fido2_ecdsa_sk",
+          "passphrase_ed25519_provisional"
+        ],
+        "id": "OWNER-SIGNING-CUSTODY-001",
+        "selection": "UNSELECTED"
+      },
+      {
+        "allowed_values": [
+          "yes",
+          "no",
+          "not_applicable"
+        ],
+        "consistency_rule": "yes is required only for passphrase_ed25519_provisional; hardware profiles require not_applicable",
+        "id": "OWNER-PROVISIONAL-SOFTWARE-KEY-RISK-ACCEPTANCE",
+        "selection": "UNSELECTED"
+      },
+      {
+        "allowed_values": [
+          "approve_after_fingerprint_review",
+          "not_yet"
+        ],
+        "id": "OWNER-PUBLIC-KEY-PUBLICATION-001",
+        "selection": "UNSELECTED"
+      }
+    ],
+    "response_status": "UNFILLED",
+    "understanding_confirmations": [
+      "Definition acceptance does not accept measurements or claim that PooleOS meets any target.",
+      "This response does not authorize key generation, signing, merging, tagging, or publication.",
+      "Any amendment or rejection stops manifest preparation until revised sources are reviewed again."
+    ]
+  },
+  "packet_version": "1.0.0",
+  "production_promotion_allowed": false,
+  "production_ready": false,
+  "publication_authorized": false,
+  "schema_version": "1.0",
+  "selected_move_id": "N0-RATIFY-001",
+  "signature_authorized": false,
+  "source_set": {
+    "binding_count": 16,
+    "bindings": [
+      {
+        "byte_count": 3017,
+        "path": "docs/adr/0001-native-pooleos-constitution.md",
+        "sha256": "6E8D0AD1CF75639F1069D41CA4DA3EC200D999963FA4B7B19E0C27F773CC5834"
+      },
+      {
+        "byte_count": 3868,
+        "path": "docs/adr/0002-reuse-clean-room-and-publication-boundary.md",
+        "sha256": "01E0B5B8AB15736E6E15F8E994CE0456BC0DF7AB5DD3040B2E5A9D06C1FA8E0F"
+      },
+      {
+        "byte_count": 4108,
+        "path": "docs/adr/0003-language-and-toolchain-split.md",
+        "sha256": "6F874FDBBA98CE728A230C4AF7798F202D09A63CE7394510C810C1E65932B1B0"
+      },
+      {
+        "byte_count": 2666,
+        "path": "docs/adr/0004-product-names-and-version-namespaces.md",
+        "sha256": "9798309FC902C2F5E5A8206751DA4423532E25690A2AD23AD4DC116F3566A637"
+      },
+      {
+        "byte_count": 3124,
+        "path": "docs/adr/0005-v1-scope-mission-threats-and-non-goals.md",
+        "sha256": "1C7924EFE619F39AEF6BAB54ED3981BB5439AE929783C5EACD8FAA08EBF60268"
+      },
+      {
+        "byte_count": 2912,
+        "path": "docs/adr/0006-tcb-and-component-placement.md",
+        "sha256": "B973BEB8EE7EABCFB677DA892821287DB77214DE0E980B8EE78342C5DE3C2F03"
+      },
+      {
+        "byte_count": 3680,
+        "path": "docs/adr/0007-repository-governance-and-source-tree.md",
+        "sha256": "F02F1572C1BEDD803B7617E251F0AD4E08942FCE0C4663D21A63CD3FADA17E4D"
+      },
+      {
+        "byte_count": 6015,
+        "path": "specs/native-architecture-constitution.json",
+        "sha256": "94D8BDDF9BC85DE10D3B7FBF53BA2D0CC1C822C1F573FF94D0F1AB49F7EFF753"
+      },
+      {
+        "byte_count": 33416,
+        "path": "specs/native-v1-objectives.json",
+        "sha256": "525946A7AA7A7D0F27682810EDD636D7E743C32548ACE442AB208B680A7E8584"
+      },
+      {
+        "byte_count": 5437,
+        "path": "specs/native-v1-objectives.schema.json",
+        "sha256": "AF4D18B414A65D35ABEBC178AE2B55FFAB3FF5A5CE7D17C8A4CB279A7F038A98"
+      },
+      {
+        "byte_count": 12137,
+        "path": "specs/pooleos-kernel-charter.md",
+        "sha256": "130669A9B001D1B5D228A71130609EB0549777C842912BE4DA6387E2FBF69834"
+      },
+      {
+        "byte_count": 1765,
+        "path": "specs/native-release-architecture-policy.json",
+        "sha256": "F8B6D491A28D72E3C9B36FAB5B24D446FBD67CD760A9A8B05C7774EB3A691DE5"
+      },
+      {
+        "byte_count": 4739,
+        "path": "docs/publication-boundary.md",
+        "sha256": "96C614E2EA4C61809CC07C2804936220BCCC64B3B2EEE5D1711888A58FD65FD6"
+      },
+      {
+        "byte_count": 7394,
+        "path": "specs/adr-ratification-policy.json",
+        "sha256": "ADE9E446A604D224C80D1436D3D1E0AF0DA29A2F567416492BCB133F0E22C111"
+      },
+      {
+        "byte_count": 8684,
+        "path": "runs/adr_ratification_readiness.json",
+        "sha256": "B059934A7741B8F43EB137828B1CC93DD38C1F1012EAB4E2F63888EFE0C06665"
+      },
+      {
+        "byte_count": 8828,
+        "path": "docs/adr-ratification-ceremony.md",
+        "sha256": "372135888F2FEC6BB652E1992D25B5E636CBF23EAB4799A22518F838BC0658FE"
+      }
+    ],
+    "sha256": "FD001AF24B8D564EC6A886BE8431F66A3C3901A5ACBF9A0C61C8B8B9A50A26AB"
+  },
+  "status": "awaiting_owner_response",
+  "status_date": "2026-07-16",
+  "validation": {
+    "negative_control_count": 12,
+    "negative_control_pass_count": 12,
+    "negative_controls": [
+      {
+        "expected": "reject",
+        "id": "N0-PACKET-NEG-STALE-SOURCE",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-PACKET-NEG-MISSING-ADR",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-PACKET-NEG-MISSING-TARGET",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-PACKET-NEG-CHANGED-TARGET",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-PACKET-NEG-MEASUREMENT-OVERCLAIM",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-PACKET-NEG-INFERRED-ACCEPTANCE",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-PACKET-NEG-INFERRED-KEY-SELECTION",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-PACKET-NEG-PRIVATE-MATERIAL",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-PACKET-NEG-SIGNING-AUTHORIZATION",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-PACKET-NEG-PUBLICATION-AUTHORIZATION",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-PACKET-NEG-PRODUCTION-PROMOTION",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-PACKET-NEG-DROPPED-OWNER-ACTION",
+        "observed": "reject",
+        "status": "pass"
+      }
+    ],
+    "schema_and_semantics_valid": true
+  }
+}

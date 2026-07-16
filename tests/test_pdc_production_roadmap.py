@@ -118,8 +118,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 90)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 482)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 91)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 493)
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
         self.assertTrue(all(value is False for key, value in native.items() if key != "source_controlled"))
@@ -127,9 +127,9 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertFalse(historical["production_ready"])
         self.assertEqual(historical["native_promotion_role"], "historical_non_promoting")
         current = self.roadmap["baseline"]["native_consistency_release_gate"]
-        self.assertEqual(current["passed_checks"], 67)
-        self.assertEqual(current["total_checks"], 67)
-        self.assertEqual(current["artifact_count"], 62)
+        self.assertEqual(current["passed_checks"], 68)
+        self.assertEqual(current["total_checks"], 68)
+        self.assertEqual(current["artifact_count"], 63)
         self.assertEqual(current["explicit_gap_count"], 20)
         self.assertFalse(current["production_ready"])
         self.assertEqual(self.roadmap["immediate_next_move"]["id"], "N0-RATIFY-001")
@@ -151,10 +151,11 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N4-VM-MODEL-001")
+        self.assertEqual(protocol["selected_move_id"], "N0-OWNER-PACKET-001")
         self.assertIn("runs/hardware_target_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_tier0_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_model_readiness.json", protocol["required_records"])
+        self.assertIn("runs/n0_owner_decision_packet.json", protocol["required_records"])
         self.assertIn("runs/native_v1_objectives_readiness.json", protocol["required_records"])
         for record in protocol["required_records"]:
             self.assertTrue((ROOT / record).is_file(), record)

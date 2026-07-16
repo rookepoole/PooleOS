@@ -43,8 +43,8 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 90,
-    "selected_move_id": "N4-VM-MODEL-001",
+    "last_updated_cycle": 91,
+    "selected_move_id": "N0-OWNER-PACKET-001",
     "immediate_next_move_id": "N0-RATIFY-001",
     "required_records": [
       "docs/production-goal-charter.md",
@@ -53,6 +53,7 @@
       "runs/pooleos_native_checklist_coverage.json",
       "runs/native_toolchain_qualification.json",
       "runs/adr_ratification_readiness.json",
+      "runs/n0_owner_decision_packet.json",
       "runs/hardware_target_readiness.json",
       "runs/native_tier0_readiness.json",
       "runs/native_model_readiness.json",
@@ -86,9 +87,9 @@
     "added_requirement_count": 27
   },
   "baseline": {
-    "pooleos_cycle": 90,
+    "pooleos_cycle": 91,
     "entry_cycle": 79,
-    "pooleos_test_count": 482,
+    "pooleos_test_count": 493,
     "historical_consistency_release_gate": {
       "passed_checks": 58,
       "total_checks": 58,
@@ -98,9 +99,9 @@
       "native_promotion_role": "historical_non_promoting"
     },
     "native_consistency_release_gate": {
-      "passed_checks": 67,
-      "total_checks": 67,
-      "artifact_count": 62,
+      "passed_checks": 68,
+      "total_checks": 68,
+      "artifact_count": 63,
       "explicit_gap_count": 20,
       "production_ready": false,
       "native_promotion_role": "planning_and_evidence_consistency_non_promoting"
@@ -353,13 +354,14 @@
         "tools/verify_native_v1_objectives.py with ten fail-closed negative controls",
         "specs/adr-ratification-policy.json and docs/adr-ratification-ceremony.md: scope-hardened contract binding six exact decision sources and all 38 objective definitions without accepting measurements",
         "runs/adr_ratification_readiness.json: deterministic six-source owner-action boundary with zero trusted signers, 12 declared negative controls, and six owner actions",
+        "runs/n0_owner_decision_packet.json and docs/n0-owner-decision-packet.md: deterministic 16-source review packet covering both proposed ADRs, all 38 targets, every allowed custody profile, an unfilled response form, and 12/12 fail-closed controls without recording acceptance or authorization",
         "tools/prepare_adr_ratification.py and tools/verify_adr_ratification.py with eleven focused adversarial and signature-path tests",
         "specs/native-release-architecture-policy.json",
         "tools/check_native_release_architecture.py",
         "tests/test_native_release_architecture.py"
       ],
       "current_gaps": [
-        "The canonical ceremony now binds all six decision sources, including the exact 38-target objective contract and schema, but none of seven ADRs is cryptographically signed; ADR-0003 and ADR-0004 still require owner disposition",
+        "The canonical ceremony and deterministic owner packet bind all six decision sources, both proposed ADRs, and the exact 38-target objective contract and schema, but no owner selection or signature exists; ADR-0003 and ADR-0004 still require owner disposition",
         "The 38 reliability, accessibility, compatibility, privacy, and performance target definitions remain candidate-only; owner acceptance and all implementation-bound measurements remain open",
         "The extracted-tree scanner does not yet parse ISO/GPT/ESP/El Torito/signature structures"
       ],
@@ -2606,8 +2608,8 @@
         "ADD-TEST-001"
       ],
       "current_evidence": [
-        "Cycle 90 host baseline: 482 tests with one Windows symlink-permission skip",
-        "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, hardware privacy, malformed-CPUID, Tier 0 profile/provenance/path/overclaim, bounded-model multi-case mutation/trace/claim controls, and collector-smoke negatives"
+        "Cycle 91 host baseline: 493 tests with one Windows symlink-permission skip",
+        "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, owner-packet omission/staleness/acceptance/key/signing/publication controls, hardware privacy, malformed-CPUID, Tier 0 profile/provenance/path/overclaim, bounded-model multi-case mutation/trace/claim controls, and collector-smoke negatives"
       ],
       "current_gaps": [
         "No native system, power-loss, hardware, accessibility, soak, or external security suite exists"
@@ -2674,8 +2676,8 @@
         "ADD-SUPPLY-001"
       ],
       "current_evidence": [
-        "Cycle 90 consistency release gate: 67/67 checks over 62 artifacts",
-        "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, native-toolchain, bounded hardware-readiness, native Tier 0 readiness, and native model-readiness artifacts"
+        "Cycle 91 consistency release gate: 68/68 checks over 63 artifacts",
+        "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, deterministic N0 owner packet, native-toolchain, bounded hardware-readiness, native Tier 0 readiness, and native model-readiness artifacts"
       ],
       "current_gaps": [
         "No native SBOM/provenance/signing ceremony/release manifest or source-controlled release exists"
@@ -2850,7 +2852,10 @@
       "closure_condition": "Ratify the native architecture, TCB, reuse, language, ABI, driver, filesystem, and release ADR set",
       "evidence": [
         "docs/pdc-production-build-plan.md",
-        "runs/pooleos_native_checklist_coverage.json"
+        "runs/pooleos_native_checklist_coverage.json",
+        "runs/adr_ratification_readiness.json",
+        "runs/n0_owner_decision_packet.json",
+        "docs/n0-owner-decision-packet.md"
       ]
     },
     {
@@ -2863,7 +2868,8 @@
         "docs/pdc-production-build-plan.md",
         "runs/pooleos_native_checklist_coverage.json",
         "specs/native-v1-objectives.json",
-        "runs/native_v1_objectives_readiness.json"
+        "runs/native_v1_objectives_readiness.json",
+        "runs/n0_owner_decision_packet.json"
       ]
     },
     {
@@ -3154,7 +3160,7 @@
   "gap_summary": {
     "native_program_gap_count": 20,
     "native_program_gaps": [
-      "The native repository, protected workflow, and scope-hardened ADR ceremony bind the 38-target candidate objectives contract exactly, but target acceptance, all measurements, owner disposition, trusted key custody, signatures, signed tags, immutable release refs, and retained CI review evidence remain open",
+      "The native repository, protected workflow, scope-hardened ADR ceremony, and deterministic 16-source owner packet bind the 38-target candidate objectives contract exactly, but every packet selection, target acceptance, all measurements, owner disposition, trusted key custody, signatures, signed tags, immutable release refs, and retained CI review evidence remain open",
       "Rust PE32+/ELF64 fixtures pass one-host qualification, but second-host reproduction, source provenance, C17/assembly/ABI tools, and image tooling remain open",
       "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls and bounded boot-slot/capability/virtual-memory state checks detect their required hostile violations, but source-rebuilt current QEMU/EDK II, real PooleBoot launch evidence, complete reference devices/fault campaigns, IPC/scheduler/PooleFS models, implementation-trace cross-checks, liveness/refinement work, and second-host reproduction remain open",
       "No PooleBoot PE32+ UEFI loader or frozen boot protocol",
@@ -3190,6 +3196,8 @@
       "runs/native_architecture_baseline.json",
       "runs/native_v1_objectives_readiness.json",
       "runs/adr_ratification_readiness.json",
+      "runs/n0_owner_decision_packet.json",
+      "docs/n0-owner-decision-packet.md",
       "docs/adr-ratification-ceremony.md",
       "runs/native_toolchain_qualification.json"
     ],

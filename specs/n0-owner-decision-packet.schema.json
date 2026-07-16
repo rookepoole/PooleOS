@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/rookepoole/PooleOS/specs/n0-owner-decision-packet.schema.json",
+  "title": "PooleOS N0 Owner Decision Packet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "packet_version",
+    "status_date",
+    "status",
+    "selected_move_id",
+    "production_ready",
+    "production_promotion_allowed",
+    "owner_acceptance_recorded",
+    "signature_authorized",
+    "publication_authorized",
+    "source_set",
+    "current_state",
+    "decisions",
+    "execution_boundary",
+    "owner_response_template",
+    "claim_boundary",
+    "validation"
+  ],
+  "properties": {
+    "schema_version": {"type": "string", "const": "1.0"},
+    "artifact_kind": {"type": "string", "const": "pooleos_n0_owner_decision_packet"},
+    "packet_version": {"type": "string", "const": "1.0.0"},
+    "status_date": {"type": "string", "minLength": 10},
+    "status": {"type": "string", "const": "awaiting_owner_response"},
+    "selected_move_id": {"type": "string", "const": "N0-RATIFY-001"},
+    "production_ready": {"type": "boolean", "const": false},
+    "production_promotion_allowed": {"type": "boolean", "const": false},
+    "owner_acceptance_recorded": {"type": "boolean", "const": false},
+    "signature_authorized": {"type": "boolean", "const": false},
+    "publication_authorized": {"type": "boolean", "const": false},
+    "source_set": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["binding_count", "sha256", "bindings"],
+      "properties": {
+        "binding_count": {"type": "integer", "const": 16},
+        "sha256": {"type": "string", "minLength": 64},
+        "bindings": {
+          "type": "array",
+          "minItems": 16,
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["path", "sha256", "byte_count"],
+            "properties": {
+              "path": {"type": "string", "minLength": 1},
+              "sha256": {"type": "string", "minLength": 64},
+              "byte_count": {"type": "integer"}
+            }
+          }
+        }
+      }
+    },
+    "current_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ready_for_owner_action",
+        "ready_for_signature",
+        "pending_owner_action_count",
+        "pending_owner_actions",
+        "proposed_adr_ids",
+        "trusted_signer_count",
+        "objective_target_count",
+        "measured_target_count",
+        "owner_acceptance_pending"
+      ],
+      "properties": {
+        "ready_for_owner_action": {"type": "boolean", "const": true},
+        "ready_for_signature": {"type": "boolean", "const": false},
+        "pending_owner_action_count": {"type": "integer", "const": 6},
+        "pending_owner_actions": {"type": "array", "minItems": 6, "maxItems": 6},
+        "proposed_adr_ids": {"type": "array", "minItems": 2, "maxItems": 2},
+        "trusted_signer_count": {"type": "integer", "const": 0},
+        "objective_target_count": {"type": "integer", "const": 38},
+        "measured_target_count": {"type": "integer", "const": 0},
+        "owner_acceptance_pending": {"type": "boolean", "const": true}
+      }
+    },
+    "decisions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adr_0003", "adr_0004", "objectives", "custody", "public_key_publication"],
+      "properties": {
+        "adr_0003": {"type": "object"},
+        "adr_0004": {"type": "object"},
+        "objectives": {"type": "object"},
+        "custody": {"type": "object"},
+        "public_key_publication": {"type": "object"}
+      }
+    },
+    "execution_boundary": {"type": "object"},
+    "owner_response_template": {"type": "object"},
+    "claim_boundary": {"type": "array", "minItems": 6, "maxItems": 6, "items": {"type": "string"}},
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_and_semantics_valid",
+        "negative_control_count",
+        "negative_control_pass_count",
+        "negative_controls"
+      ],
+      "properties": {
+        "schema_and_semantics_valid": {"type": "boolean", "const": true},
+        "negative_control_count": {"type": "integer", "const": 12},
+        "negative_control_pass_count": {"type": "integer", "const": 12},
+        "negative_controls": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "status", "expected", "observed"],
+            "properties": {
+              "id": {"type": "string", "minLength": 1},
+              "status": {"type": "string", "const": "pass"},
+              "expected": {"type": "string", "const": "reject"},
+              "observed": {"type": "string", "const": "reject"}
+            }
+          }
+        }
+      }
+    }
+  }
+}

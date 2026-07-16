@@ -7,7 +7,7 @@ Applies to: PooleOS v1, x86-64 UEFI
 
 ## Authority and Precedence
 
-This charter defines the intended privileged kernel boundary for native PooleOS. It is subordinate to `docs/production-goal-charter.md`, and its implementation sequence is governed by `docs/pdc-production-build-plan.md` phases N0-N39. The locked 8,996-item source checklist and `runs/pooleos_native_checklist_coverage.json` remain the complete requirement inventory.
+This charter defines the intended privileged kernel boundary for native PooleOS. It is subordinate to `docs/production-goal-charter.md`, and its implementation sequence is governed by `docs/pdc-production-build-plan.md` phases N0-N39. The locked 8,996-item source checklist and `runs/pooleos_native_checklist_coverage.json` remain the complete requirement inventory. Cycle 91's deterministic N0 owner packet is a review surface, not ratification: both proposed ADR dispositions, all 38 objective decisions, custody selection, and FIDO2-key availability remain `UNSELECTED`, and no signature or production authority exists.
 
 Linux, Debian, Buildroot, GRUB, Limine, and systemd are not PooleOS production foundations. QEMU, OVMF, EDK II, Windows, WSL, Linux, and Buildroot may be used only as development, reference, test, or historical evidence inputs. Their use does not make their kernels, bootloaders, userspaces, ABIs, or policies part of PooleOS.
 

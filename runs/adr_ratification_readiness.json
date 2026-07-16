@@ -122,9 +122,9 @@
         "sha256": "AF4D18B414A65D35ABEBC178AE2B55FFAB3FF5A5CE7D17C8A4CB279A7F038A98"
       },
       {
-        "byte_count": 11881,
+        "byte_count": 12137,
         "path": "specs/pooleos-kernel-charter.md",
-        "sha256": "DC6CD61B740B544FA5AC7CF0D03058452A3C68DB1091037BF0C2C57229384C2D"
+        "sha256": "130669A9B001D1B5D228A71130609EB0549777C842912BE4DA6387E2FBF69834"
       },
       {
         "byte_count": 1765,
@@ -132,9 +132,9 @@
         "sha256": "F8B6D491A28D72E3C9B36FAB5B24D446FBD67CD760A9A8B05C7774EB3A691DE5"
       },
       {
-        "byte_count": 4250,
+        "byte_count": 4739,
         "path": "docs/publication-boundary.md",
-        "sha256": "8D592AB1EA93D85AABEC65035778FBEB039D90AF1A1F4333C8636B7F41E95BDD"
+        "sha256": "96C614E2EA4C61809CC07C2804936220BCCC64B3B2EEE5D1711888A58FD65FD6"
       }
     ],
     "objectives": {
