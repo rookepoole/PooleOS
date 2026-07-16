@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/adr-ratification-receipt.schema.json",
+  "title": "PooleOS ADR Ratification Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "observed_at_utc", "status", "production_ready", "production_promotion_allowed", "manifest", "detached_signature", "signer", "signed_tag", "remote_publication", "ratification", "checks", "errors", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_adr_ratification_receipt"},
+    "observed_at_utc": {"type": "string"},
+    "status": {"enum": ["pending_owner_action", "invalid", "detached_signature_verified_tag_pending", "local_tag_verified_publication_pending", "verified"]},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"type": "boolean"},
+    "manifest": {"type": "object", "required": ["path", "present", "canonical", "sha256", "byte_count"]},
+    "detached_signature": {"type": "object", "required": ["path", "present", "verified", "sha256", "byte_count", "namespace", "principal"]},
+    "signer": {"type": "object", "required": ["allowed_signers_path", "trusted_signer_count", "key_type", "key_profile", "public_key_fingerprint"]},
+    "signed_tag": {"type": "object", "required": ["name", "present", "signature_verified", "target_commit", "contains_manifest", "contains_signature"]},
+    "remote_publication": {"type": "object", "required": ["required", "checked", "remote", "expected_remote_url", "configured_remote_url", "remote_url_match", "default_branch", "main_commit", "tag_object", "peeled_commit", "exact_main_tip_match", "published"]},
+    "ratification": {"type": "object", "required": ["required_adr_count", "accepted_exact_count", "all_required_cryptographically_ratified", "full_n0_exit_evidence_present"]},
+    "checks": {"type": "array", "minItems": 9, "items": {"type": "object", "required": ["name", "ok", "detail"]}},
+    "errors": {"type": "array", "items": {"type": "string"}},
+    "claim_boundary": {"type": "array", "minItems": 3, "items": {"type": "string"}}
+  }
+}

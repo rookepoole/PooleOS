@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/adr-ratification-policy.schema.json",
+  "title": "PooleOS ADR Ratification Policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "status",
+    "decision_owner",
+    "repository",
+    "scope",
+    "required_adrs",
+    "required_bound_sources",
+    "canonical_manifest",
+    "signature",
+    "custody",
+    "tag",
+    "remote_publication",
+    "owner_actions",
+    "negative_controls",
+    "references",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_adr_ratification_policy"},
+    "status_date": {"type": "string"},
+    "status": {"const": "ceremony_frozen_owner_execution_pending"},
+    "decision_owner": {
+      "type": "object",
+      "required": ["name", "github", "signer_principal"],
+      "properties": {
+        "name": {"const": "Rooke Poole"},
+        "github": {"const": "rookepoole"},
+        "signer_principal": {"const": "rookepoole"}
+      }
+    },
+    "repository": {
+      "type": "object",
+      "required": ["owner", "name", "remote_url", "default_branch"],
+      "properties": {
+        "owner": {"const": "rookepoole"},
+        "name": {"const": "PooleOS"},
+        "remote_url": {"const": "https://github.com/rookepoole/PooleOS.git"},
+        "default_branch": {"const": "main"}
+      }
+    },
+    "scope": {"type": "object", "required": ["move_id", "purpose", "ratifies_release_binaries", "ratifies_secure_boot_keys", "ratifies_package_or_update_keys", "ratifies_production_iso"]},
+    "required_adrs": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"type": "object", "required": ["id", "path"]}},
+    "required_bound_sources": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "string"}},
+    "canonical_manifest": {"type": "object", "required": ["serialization", "encoding", "key_order", "indent_spaces", "line_endings", "trailing_newline_count", "unicode_escaping"]},
+    "signature": {
+      "type": "object",
+      "required": ["backend", "format", "executable", "namespace", "git_tag_namespace", "required_allowed_namespaces", "hash_algorithm", "signer_principal", "allowed_signers_path", "revocation_path", "exactly_one_bootstrap_signer_required", "key_profiles"],
+      "properties": {
+        "backend": {"const": "OpenSSH"},
+        "format": {"const": "SSHSIG"},
+        "executable": {"const": "ssh-keygen"},
+        "namespace": {"const": "pooleos-adr-ratification-v1@github.com/rookepoole/PooleOS"},
+        "git_tag_namespace": {"const": "git"},
+        "required_allowed_namespaces": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "string"}},
+        "hash_algorithm": {"const": "sha512"},
+        "signer_principal": {"const": "rookepoole"},
+        "allowed_signers_path": {"const": "security/owner-adr-signers.allowed"},
+        "revocation_path": {"const": "security/revoked-adr-signers"},
+        "exactly_one_bootstrap_signer_required": {"const": true},
+        "key_profiles": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "object", "required": ["id", "key_type", "assurance", "owner_risk_acceptance_required", "production_release_key_eligible"]}}
+      }
+    },
+    "custody": {"type": "object", "required": ["private_key_in_repository_prohibited", "private_key_in_handoff_prohibited", "private_key_export_by_verifier_prohibited", "governance_key_separate_from_secure_boot_and_release_keys", "primary_and_recovery_key_separation_required", "software_key_requires_passphrase", "hardware_key_requires_owner_presence", "revocation_record_required_before_rotation"]},
+    "tag": {"type": "object", "required": ["name", "annotated", "signed", "force_update_allowed", "target_branch", "target_must_contain_manifest", "target_must_contain_detached_signature"]},
+    "remote_publication": {"type": "object", "required": ["remote", "exact_main_tip_match_required_at_receipt_time", "exact_tag_object_match_required", "exact_peeled_commit_match_required", "github_signing_key_registration_required", "github_verification_is_supplemental_not_owner_signature_substitute"]},
+    "owner_actions": {"type": "array", "minItems": 5, "items": {"type": "string"}},
+    "negative_controls": {"type": "array", "minItems": 10, "items": {"type": "string"}},
+    "references": {"type": "array", "minItems": 5, "items": {"type": "object", "required": ["title", "url", "authority"]}},
+    "claim_boundary": {"type": "array", "minItems": 4, "items": {"type": "string"}}
+  }
+}

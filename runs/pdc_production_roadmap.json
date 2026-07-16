@@ -43,8 +43,8 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 82,
-    "selected_move_id": "N3-TOOLCHAIN-001",
+    "last_updated_cycle": 83,
+    "selected_move_id": "N0-RATIFY-001",
     "immediate_next_move_id": "N0-RATIFY-001",
     "required_records": [
       "docs/production-goal-charter.md",
@@ -52,6 +52,7 @@
       "runs/pdc_production_roadmap.json",
       "runs/pooleos_native_checklist_coverage.json",
       "runs/native_toolchain_qualification.json",
+      "runs/adr_ratification_readiness.json",
       "runs/release_gate.json",
       "docs/cycle_log.md",
       "README.md"
@@ -81,9 +82,9 @@
     "added_requirement_count": 25
   },
   "baseline": {
-    "pooleos_cycle": 82,
+    "pooleos_cycle": 83,
     "entry_cycle": 79,
-    "pooleos_test_count": 386,
+    "pooleos_test_count": 397,
     "historical_consistency_release_gate": {
       "passed_checks": 58,
       "total_checks": 58,
@@ -93,9 +94,9 @@
       "native_promotion_role": "historical_non_promoting"
     },
     "native_consistency_release_gate": {
-      "passed_checks": 62,
-      "total_checks": 62,
-      "artifact_count": 57,
+      "passed_checks": 63,
+      "total_checks": 63,
+      "artifact_count": 58,
       "explicit_gap_count": 20,
       "production_ready": false,
       "native_promotion_role": "planning_and_evidence_consistency_non_promoting"
@@ -343,12 +344,15 @@
         "docs/adr/0001-native-pooleos-constitution.md through ADR-0007",
         "specs/native-architecture-constitution.json",
         "runs/native_architecture_baseline.json",
+        "specs/adr-ratification-policy.json and docs/adr-ratification-ceremony.md",
+        "runs/adr_ratification_readiness.json: deterministic owner-action boundary with zero trusted signers",
+        "tools/prepare_adr_ratification.py and tools/verify_adr_ratification.py with ten adversarial controls",
         "specs/native-release-architecture-policy.json",
         "tools/check_native_release_architecture.py",
         "tests/test_native_release_architecture.py"
       ],
       "current_gaps": [
-        "Seven ADRs are byte-bound but none is cryptographically signed; ADR-0003 and ADR-0004 remain proposed",
+        "The canonical ceremony and verifier are ready, but none of seven ADRs is cryptographically signed; ADR-0003 and ADR-0004 still require owner disposition",
         "Quantitative reliability, accessibility, compatibility, privacy, and performance targets remain open",
         "The extracted-tree scanner does not yet parse ISO/GPT/ESP/El Torito/signature structures"
       ],
@@ -412,10 +416,11 @@
         "private vulnerability reporting enabled",
         "LICENSE, NOTICE.md, SECURITY.md, TRADEMARKS.md, and CODEOWNERS",
         "docs/publication-boundary.md",
-        "tools/check_publication_boundary.py"
+        "tools/check_publication_boundary.py",
+        "public ADR trust and revocation stores are present but intentionally contain zero owner keys"
       ],
       "current_gaps": [
-        "Public remote and branch protection exist; signed tags, immutable release refs, retained CI/review evidence, signing custody, and multi-maintainer approval policy remain open",
+        "Public remote and branch protection exist; owner key choice, signed tags, immutable release refs, retained CI/review evidence, signing custody, and multi-maintainer approval policy remain open",
         "Legal, patent, export, trademark, contributor, signing-custody, and component-specific license review remain open"
       ],
       "exit_gate": "PooleOS is source-controlled; every required decision has an owner and due gate; deletions and deferrals are reviewable; no component lacks licensing/provenance classification."
@@ -2578,8 +2583,8 @@
         "ADD-TEST-001"
       ],
       "current_evidence": [
-        "Cycle 82 host baseline: 386 tests",
-        "native binary parser, reproduction, leakage, malformed, and substitution negatives"
+        "Cycle 83 host baseline: 397 tests with one Windows symlink-permission skip",
+        "native binary parser, reproduction, leakage, malformed, substitution, and ADR-signing negatives"
       ],
       "current_gaps": [
         "No native system, power-loss, hardware, accessibility, soak, or external security suite exists"
@@ -2646,8 +2651,8 @@
         "ADD-SUPPLY-001"
       ],
       "current_evidence": [
-        "Cycle 82 consistency release gate: 62/62 checks over 57 artifacts",
-        "content-addressed source and native-toolchain artifacts"
+        "Cycle 83 consistency release gate: 63/63 checks over 58 artifacts",
+        "content-addressed source, ADR-readiness, and native-toolchain artifacts"
       ],
       "current_gaps": [
         "No native SBOM/provenance/signing ceremony/release manifest or source-controlled release exists"
@@ -2983,7 +2988,7 @@
   "gap_summary": {
     "native_program_gap_count": 20,
     "native_program_gaps": [
-      "The native repository is public and main is protected, but signed tags, immutable release refs, retained CI review evidence, and cryptographic ADR ratification remain open",
+      "The native repository, protected workflow, ADR ceremony, and fail-closed verifier exist, but owner disposition, trusted key custody, signatures, signed tags, immutable release refs, and retained CI review evidence remain open",
       "Rust PE32+/ELF64 fixtures pass one-host qualification, but second-host reproduction, source provenance, C17/assembly/ABI tools, and image tooling remain open",
       "No native-only QEMU/OVMF/VIRTIO reference profile or formal state models",
       "No PooleBoot PE32+ UEFI loader or frozen boot protocol",
@@ -3013,10 +3018,12 @@
       "N0",
       "N1"
     ],
-    "title": "Obtain owner acceptance and cryptographic ratification of the native architecture set before implementation promotion",
+    "title": "Complete owner disposition, key custody, signatures, signed tag, and publication receipt for the prepared architecture set",
     "entry_evidence": [
       "docs/adr/0001-native-pooleos-constitution.md through ADR-0007",
       "runs/native_architecture_baseline.json",
+      "runs/adr_ratification_readiness.json",
+      "docs/adr-ratification-ceremony.md",
       "runs/native_toolchain_qualification.json"
     ],
     "exit_evidence": [
@@ -3025,7 +3032,7 @@
       "documented signing custody and verification procedure",
       "signed baseline tag and publication receipt"
     ],
-    "blocked": false
+    "blocked": true
   },
   "claim_boundaries": [
     "Buildroot and Linux artifacts are historical reference evidence and cannot satisfy native PooleOS gates.",

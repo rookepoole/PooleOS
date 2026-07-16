@@ -12,10 +12,14 @@
     "release_authority": true
   },
   "ratification": {
+    "model": "detached_namespaced_manifest_plus_signed_annotated_tag",
+    "policy_path": "specs/adr-ratification-policy.json",
+    "readiness_path": "runs/adr_ratification_readiness.json",
     "owner_direction_recorded": true,
     "owner_direction_source": "active PooleOS native production goal dated 2026-07-16",
     "cryptographic_signature_present": false,
-    "production_promotion_allowed": false
+    "production_promotion_allowed": false,
+    "source_status_is_pre_signature_snapshot": true
   },
   "repository": {
     "model": "public_source_available_monorepo_with_private_evidence_vault",

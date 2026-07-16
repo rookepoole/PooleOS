@@ -31,6 +31,7 @@ The ring-0 boundary is defined in `specs/pooleos-kernel-charter.md`. General dev
 - `runs/pooleos_native_checklist_coverage.json`: exact line and section mapping from the locked master checklist to N0-N39.
 - `docs/adr/`: seven-record native architecture constitution and required ADR template.
 - `runs/native_architecture_baseline.json`: deterministic byte binding for the ADRs, constitution, plan, policy, checklist, license, and repository identity.
+- `specs/adr-ratification-policy.json`, `docs/adr-ratification-ceremony.md`, and `runs/adr_ratification_readiness.json`: secret-free owner-signing contract, exact action boundary, and deterministic pending ledger.
 - `specs/native-toolchain-lock.json`, `specs/native-target-contract.json`, and `runs/native_toolchain_qualification.json`: exact Rust inputs, freestanding target contracts, and bounded one-host PE32+/ELF64 evidence.
 - `docs/native-toolchain-qualification.md`: reproduction procedure, exact fixture hashes, discovered PE nondeterminism, and open gates.
 - `specs/native-release-architecture-policy.json`: extracted-release conformance policy with executable negative tests.
@@ -40,7 +41,7 @@ The ring-0 boundary is defined in `specs/pooleos-kernel-charter.md`. General dev
 
 The locked source checklist has SHA-256 `A8C94719FAF9428C1F133010BA2603C0270C4E1EFD7327AF8EAB9C8C362ABB3D`, 10,512 lines, 171 numbered sections, 8,998 checkbox lines, and 8,996 implementation items after its two generated-metadata checkboxes are excluded. Every source line and requirement is mapped; mapping does not imply completion.
 
-Current Cycle 82 status: 40 phases, 0 complete, 12 partial, 1 blocked, and 27 not started. The public repository and protected workflow exist, and the bounded one-host `N3-TOOLCHAIN-001` fixtures pass, but no ADR is cryptographically signed and the full N3 exit gate remains open. Native PooleBoot, PooleKernel, ring-3 execution, capability enforcement, native drivers, PooleFS, PooleGlass, and the production ISO do not exist. The next critical move is `N0-RATIFY-001`.
+Current Cycle 83 status: 40 phases, 0 complete, 12 partial, 1 blocked, and 27 not started. The public repository, protected workflow, bounded one-host toolchain fixtures, canonical ADR ceremony, deterministic readiness ledger, and fail-closed signature/tag verifier exist. The public trust store intentionally has zero keys; no ADR is cryptographically signed; ADR-0003 and ADR-0004 remain proposed; and `N0-RATIFY-001` awaits Rooke Poole's disposition and custody choice. Native PooleBoot, PooleKernel, ring-3 execution, capability enforcement, native drivers, PooleFS, PooleGlass, and the production ISO do not exist.
 
 ## Validation
 
@@ -48,6 +49,7 @@ Current Cycle 82 status: 40 phases, 0 complete, 12 partial, 1 blocked, and 27 no
 python .\tools\generate_native_checklist_coverage.py
 python .\tools\generate_native_production_roadmap.py
 python .\tools\generate_native_architecture_baseline.py
+python .\tools\generate_adr_ratification_readiness.py
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\bootstrap_native_toolchain.ps1
 python .\tools\qualify_native_toolchain.py
 python -m unittest discover -s tests
@@ -55,9 +57,9 @@ python .\tools\check_publication_boundary.py
 python .\tools\pooleos_doctor.py --pooleglyph <POOLEGYPH_REPO>
 ```
 
-The generators are deterministic: tests reproduce the checklist, roadmap, architecture baseline, and native-toolchain ledger byte for byte. The Cycle 82 suite passes 386 tests with one Windows symlink-permission skip, Doctor passes 183 checks against live PooleGlyph Phase 65, and the non-promoting consistency release gate passes 62/62 checks over 57 artifacts with 20 explicit gaps. Doctor also verifies the locked checklist hash, coverage digest, N0-N39 sequence, ADR/source hashes, repository identity, native toolchain/target contracts, public index boundary, PooleGlyph bridge, PDC evidence, and retained historical consistency artifacts.
+The generators are deterministic: tests reproduce the checklist, roadmap, architecture baseline, ADR-readiness, and native-toolchain ledgers byte for byte. Cycle 83 passes 397 tests with one Windows symlink-permission skip, Doctor passes 198/198 checks against live PooleGlyph Phase 65, and the non-promoting consistency release gate passes 63/63 checks over 58 artifacts with 20 explicit gaps. Doctor verifies the locked checklist hash, coverage digest, N0-N39 sequence, ADR/source hashes, ratification boundary, repository identity, native toolchain/target contracts, public index boundary, PooleGlyph bridge, PDC evidence, and retained historical consistency artifacts.
 
-The public repository carries source, specifications, tests, and four allowlisted deterministic ledgers. Raw internal PDC inputs, private benchmark evidence, other local run artifacts, historical lab images, firmware without redistribution clearance, secrets, and signing material remain in the ignored private evidence vault. Full private-evidence reproduction therefore requires an owner-authorized local vault in addition to the public checkout.
+The public repository currently carries source, specifications, tests, and five allowlisted deterministic ledgers. Public ratification manifest, detached signature, and receipt paths are reserved but remain absent until owner action. Raw internal PDC inputs, private benchmark evidence, other local run artifacts, historical lab images, firmware without redistribution clearance, secrets, and private signing material remain in the ignored private evidence vault. Full private-evidence reproduction therefore requires an owner-authorized local vault in addition to the public checkout.
 
 ## Current PDC Evidence
 

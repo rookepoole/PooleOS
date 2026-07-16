@@ -68,6 +68,11 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
+        self.assertEqual(len(self.artifact["bound_sources"]), 10)
+        self.assertIn(
+            "runs/adr_ratification_readiness.json",
+            {binding["path"] for binding in self.artifact["bound_sources"]},
+        )
         for binding in self.artifact["bound_sources"]:
             self.assertFalse(Path(binding["path"]).is_absolute())
             self.assertNotIn("C:\\Users", binding["path"])

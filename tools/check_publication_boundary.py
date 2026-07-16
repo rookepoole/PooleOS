@@ -23,6 +23,10 @@ FORBIDDEN_PREFIXES = (
     "sources/pdc",
 )
 ALLOWED_RUNS = {
+    "runs/adr_ratification_manifest.json",
+    "runs/adr_ratification_manifest.json.sig",
+    "runs/adr_ratification_readiness.json",
+    "runs/adr_ratification_receipt.json",
     "runs/native_architecture_baseline.json",
     "runs/native_toolchain_qualification.json",
     "runs/pdc_production_roadmap.json",

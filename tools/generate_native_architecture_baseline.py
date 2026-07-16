@@ -25,10 +25,13 @@ ADR_NAMES = (
 )
 BOUND_SOURCE_PATHS = (
     "LICENSE",
+    "docs/adr-ratification-ceremony.md",
     "docs/production-goal-charter.md",
     "docs/pdc-production-build-plan.md",
     "docs/publication-boundary.md",
     "runs/pooleos_native_checklist_coverage.json",
+    "runs/adr_ratification_readiness.json",
+    "specs/adr-ratification-policy.json",
     "specs/native-architecture-constitution.json",
     "specs/native-release-architecture-policy.json",
 )

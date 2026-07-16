@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_adr_ratification_policy",
+  "status_date": "2026-07-16",
+  "status": "ceremony_frozen_owner_execution_pending",
+  "decision_owner": {
+    "name": "Rooke Poole",
+    "github": "rookepoole",
+    "signer_principal": "rookepoole"
+  },
+  "repository": {
+    "owner": "rookepoole",
+    "name": "PooleOS",
+    "remote_url": "https://github.com/rookepoole/PooleOS.git",
+    "default_branch": "main"
+  },
+  "scope": {
+    "move_id": "N0-RATIFY-001",
+    "purpose": "Owner acceptance of the exact native architecture constitution before implementation promotion.",
+    "ratifies_release_binaries": false,
+    "ratifies_secure_boot_keys": false,
+    "ratifies_package_or_update_keys": false,
+    "ratifies_production_iso": false
+  },
+  "required_adrs": [
+    {"id": "ADR-0001", "path": "docs/adr/0001-native-pooleos-constitution.md"},
+    {"id": "ADR-0002", "path": "docs/adr/0002-reuse-clean-room-and-publication-boundary.md"},
+    {"id": "ADR-0003", "path": "docs/adr/0003-language-and-toolchain-split.md"},
+    {"id": "ADR-0004", "path": "docs/adr/0004-product-names-and-version-namespaces.md"},
+    {"id": "ADR-0005", "path": "docs/adr/0005-v1-scope-mission-threats-and-non-goals.md"},
+    {"id": "ADR-0006", "path": "docs/adr/0006-tcb-and-component-placement.md"},
+    {"id": "ADR-0007", "path": "docs/adr/0007-repository-governance-and-source-tree.md"}
+  ],
+  "required_bound_sources": [
+    "specs/native-architecture-constitution.json",
+    "specs/pooleos-kernel-charter.md",
+    "specs/native-release-architecture-policy.json",
+    "docs/publication-boundary.md"
+  ],
+  "canonical_manifest": {
+    "serialization": "json",
+    "encoding": "UTF-8",
+    "key_order": "lexicographic",
+    "indent_spaces": 2,
+    "line_endings": "LF",
+    "trailing_newline_count": 1,
+    "unicode_escaping": "ASCII"
+  },
+  "signature": {
+    "backend": "OpenSSH",
+    "format": "SSHSIG",
+    "executable": "ssh-keygen",
+    "namespace": "pooleos-adr-ratification-v1@github.com/rookepoole/PooleOS",
+    "git_tag_namespace": "git",
+    "required_allowed_namespaces": [
+      "git",
+      "pooleos-adr-ratification-v1@github.com/rookepoole/PooleOS"
+    ],
+    "hash_algorithm": "sha512",
+    "signer_principal": "rookepoole",
+    "allowed_signers_path": "security/owner-adr-signers.allowed",
+    "revocation_path": "security/revoked-adr-signers",
+    "exactly_one_bootstrap_signer_required": true,
+    "key_profiles": [
+      {
+        "id": "hardware_fido2_ed25519_sk",
+        "key_type": "sk-ssh-ed25519@openssh.com",
+        "assurance": "recommended_hardware_backed_user_presence",
+        "owner_risk_acceptance_required": false,
+        "production_release_key_eligible": false
+      },
+      {
+        "id": "hardware_fido2_ecdsa_sk",
+        "key_type": "sk-ecdsa-sha2-nistp256@openssh.com",
+        "assurance": "hardware_backed_fallback_when_ed25519_sk_is_unavailable",
+        "owner_risk_acceptance_required": false,
+        "production_release_key_eligible": false
+      },
+      {
+        "id": "passphrase_ed25519_provisional",
+        "key_type": "ssh-ed25519",
+        "assurance": "provisional_preproduction_owner_custody",
+        "owner_risk_acceptance_required": true,
+        "production_release_key_eligible": false
+      }
+    ]
+  },
+  "custody": {
+    "private_key_in_repository_prohibited": true,
+    "private_key_in_handoff_prohibited": true,
+    "private_key_export_by_verifier_prohibited": true,
+    "governance_key_separate_from_secure_boot_and_release_keys": true,
+    "primary_and_recovery_key_separation_required": true,
+    "software_key_requires_passphrase": true,
+    "hardware_key_requires_owner_presence": true,
+    "revocation_record_required_before_rotation": true
+  },
+  "tag": {
+    "name": "pooleos-architecture-v1.0.0",
+    "annotated": true,
+    "signed": true,
+    "force_update_allowed": false,
+    "target_branch": "main",
+    "target_must_contain_manifest": true,
+    "target_must_contain_detached_signature": true
+  },
+  "remote_publication": {
+    "remote": "origin",
+    "exact_main_tip_match_required_at_receipt_time": true,
+    "exact_tag_object_match_required": true,
+    "exact_peeled_commit_match_required": true,
+    "github_signing_key_registration_required": true,
+    "github_verification_is_supplemental_not_owner_signature_substitute": true
+  },
+  "owner_actions": [
+    "Explicitly dispose ADR-0003 and ADR-0004.",
+    "Choose the governance-key custody profile and verify the public-key fingerprint out of band.",
+    "Register only the public key as a GitHub SSH signing key and place it in the repository allowed-signers file.",
+    "Generate and sign the canonical manifest under the exact PooleOS namespace.",
+    "Create, verify, and publish the non-replaceable signed annotated tag and retain the remote-publication receipt."
+  ],
+  "negative_controls": [
+    "missing owner acceptance flag",
+    "missing or multiple bootstrap signers",
+    "unsupported or unscoped public key",
+    "noncanonical manifest bytes",
+    "tampered ADR or bound-source bytes",
+    "wrong SSH signature namespace",
+    "unknown signer principal",
+    "malformed or swapped detached signature",
+    "revoked signing key",
+    "unsigned, moved, or remotely mismatched architecture tag"
+  ],
+  "references": [
+    {
+      "title": "Git configuration for SSH signing and allowed signers",
+      "url": "https://git-scm.com/docs/git-config",
+      "authority": "official Git documentation"
+    },
+    {
+      "title": "Git signed annotated tags and local verification",
+      "url": "https://git-scm.com/docs/git-tag",
+      "authority": "official Git documentation"
+    },
+    {
+      "title": "OpenSSH namespaced file signatures",
+      "url": "https://man.openbsd.org/ssh-keygen",
+      "authority": "OpenBSD OpenSSH manual"
+    },
+    {
+      "title": "GitHub commit and tag signature verification",
+      "url": "https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification",
+      "authority": "official GitHub documentation"
+    },
+    {
+      "title": "GitHub hardware-backed SSH key generation",
+      "url": "https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent",
+      "authority": "official GitHub documentation"
+    }
+  ],
+  "claim_boundary": [
+    "The policy and readiness ledger are not signatures and do not imply owner acceptance.",
+    "A software governance key is a provisional option only after explicit owner risk acceptance.",
+    "The governance key is not a production Secure Boot, package, update, recovery, or ISO release key.",
+    "N0 remains open until detached signature, signed tag, and remote publication all verify."
+  ]
+}

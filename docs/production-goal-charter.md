@@ -7,9 +7,9 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 82
+Last roadmap reconciliation: PooleOS Cycle 83
 
-Current reconciliation: the seven-record native constitution, public/private boundary, architecture baseline, and conformance policy remain partial evidence. The public `rookepoole/PooleOS` repository now has protected `main` and private vulnerability reporting. A pinned workspace-local Rust 1.97.0/LLD 22.1.6 path produces byte-identical empty UEFI PE32+ and freestanding ELF64 fixtures in two clean builds on one Windows host, with independent format/leakage negatives. No ADR is cryptographically signed; ADR-0003 and ADR-0004 remain proposed; the second-host and remaining N3 gates are open; and no functional PooleBoot, PooleKernel, userspace, driver, desktop, or ISO exists. The next critical move is `N0-RATIFY-001`.
+Current reconciliation: the seven-record native constitution, public/private boundary, architecture baseline, and conformance policy remain partial evidence. The public `rookepoole/PooleOS` repository has protected `main`, merged toolchain PR #1, open draft ratification-readiness PR #2, and private vulnerability reporting. Cycle 83 freezes a canonical, namespace-separated OpenSSH ADR ceremony; public trust and revocation stores; deterministic readiness ledger; manifest builder; detached-signature, signed-tag, and exact-remote verifier; and ten adversarial tests. The trust store intentionally contains zero keys, no owner signing action was performed, ADR-0003 and ADR-0004 remain proposed, and `N0-RATIFY-001` is blocked on Rooke Poole's disposition and custody choice. A pinned workspace-local Rust 1.97.0/LLD 22.1.6 path still provides bounded one-host empty PE32+/ELF64 evidence, while the second-host and remaining N3 gates remain open. No functional PooleBoot, PooleKernel, userspace, driver, desktop, or ISO exists.
 
 ## 1. Objective
 

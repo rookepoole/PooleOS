@@ -364,22 +364,28 @@
       "line_count": 73
     },
     {
+      "path": "docs/adr-ratification-ceremony.md",
+      "sha256": "F547B3D586C6AC6920105F0F0F7E56F4BA8DF5195DC4DC075719542063E679CF",
+      "byte_count": 7127,
+      "line_count": 110
+    },
+    {
       "path": "docs/production-goal-charter.md",
-      "sha256": "A81AA81C9A89030E87B2232FB6429679D515683B922F5CBD77DDB8E3609CED76",
-      "byte_count": 17776,
+      "sha256": "EACB6AF38BFA64E3083BDEF0D6FA1D1EE57C8A573AF880880B984BADBDC949C2",
+      "byte_count": 18080,
       "line_count": 240
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "2CA1EEEA483FDED72E1138DE93F48E1D6BC772CB5D26ADB89B49648F32A8D12F",
-      "byte_count": 93922,
-      "line_count": 1076
+      "sha256": "6C9B104265F1534DA65437B44DD06AAF7759E98F5C96933D5227CE1428EFC102",
+      "byte_count": 96245,
+      "line_count": 1083
     },
     {
       "path": "docs/publication-boundary.md",
-      "sha256": "C737764A7E52B6989EFAA334253CDCE0436F4BD983FE612F08665FA216504CD0",
-      "byte_count": 2690,
-      "line_count": 42
+      "sha256": "5CF21AA85BBBFE0ECAC93204381BD9D4B051D706CC374185E4A5A999DDE47432",
+      "byte_count": 3126,
+      "line_count": 44
     },
     {
       "path": "runs/pooleos_native_checklist_coverage.json",
@@ -388,10 +394,22 @@
       "line_count": 2914
     },
     {
+      "path": "runs/adr_ratification_readiness.json",
+      "sha256": "D222BB4239E79B5917B8D63B0EF237E37347BC00A914C38BCE902886EAB23D78",
+      "byte_count": 6557,
+      "line_count": 163
+    },
+    {
+      "path": "specs/adr-ratification-policy.json",
+      "sha256": "A04C51A811C75E97E2EDDA5EB90F2DB28E83C6352792F2E4F885D7C30100822F",
+      "byte_count": 6768,
+      "line_count": 167
+    },
+    {
       "path": "specs/native-architecture-constitution.json",
-      "sha256": "E492D6E9BED44B10CB310417D6DE40AF4B5F2550DE8B3DCAD64E26DDF53CBA7D",
-      "byte_count": 5759,
-      "line_count": 143
+      "sha256": "8D876B2B9D091697B259F7860A90D59E10F63D80602562A7CC932D780F87A163",
+      "byte_count": 6002,
+      "line_count": 147
     },
     {
       "path": "specs/native-release-architecture-policy.json",
