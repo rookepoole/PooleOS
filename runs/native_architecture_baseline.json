@@ -377,9 +377,9 @@
     },
     {
       "path": "docs/native-formal-models.md",
-      "sha256": "28104F141577564453D30E9FE42709EE716200237AFF20DA68D9CB6EF389F33A",
-      "byte_count": 7210,
-      "line_count": 77
+      "sha256": "91A716D581016ADDA199039CAA0225529ABCCA48AAA02BF2778C12B7CEFD8F3D",
+      "byte_count": 8531,
+      "line_count": 81
     },
     {
       "path": "docs/native-tier0-qemu.md",
@@ -407,21 +407,21 @@
     },
     {
       "path": "specs/pooleos-kernel-charter.md",
-      "sha256": "DFD14DC3D594B419E6C3A1FF4051D4CFA35C1FC18C8DBABF24715C66BFFA2E15",
-      "byte_count": 12238,
+      "sha256": "1DB3F74A64E628DB804C86D020968433316583A2E24F8FA1CF8F9DBDE3009F74",
+      "byte_count": 12292,
       "line_count": 139
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "3795F34C6531EF3083905F2B8665A8459CD728F93723FFFD3CAA850F77F7C333",
-      "byte_count": 21098,
+      "sha256": "7C1B430011D897376E0A30F558F77C6D0BD4339BE07E63D75D3E3000B36A8CA0",
+      "byte_count": 21249,
       "line_count": 251
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "94D41164E05A5683AE6718E528103CEA4ED25CEA96D7ECAD128DE654E6270768",
-      "byte_count": 121484,
-      "line_count": 1160
+      "sha256": "0E5804CF7AB757F2E85C3C336C88BB83491D99E412830AF29D1B0790326EC9C6",
+      "byte_count": 122441,
+      "line_count": 1162
     },
     {
       "path": "docs/publication-boundary.md",
@@ -437,7 +437,7 @@
     },
     {
       "path": "runs/adr_ratification_readiness.json",
-      "sha256": "373ED1361B5FA7EE22B1CCF962891ECF8DB01D00FEEC356C51AD6108E6192AFD",
+      "sha256": "CD525D9395E1AAC5632807C8C3C74D1C5FA8F93E0D9759A2E8D62CA86210EF91",
       "byte_count": 9467,
       "line_count": 231
     },
@@ -449,9 +449,9 @@
     },
     {
       "path": "runs/native_model_readiness.json",
-      "sha256": "742F8720DEC58CB954D8A4BEA36DF92D117C2AFF6495EB1C054539F6256CCFFC",
-      "byte_count": 28920,
-      "line_count": 696
+      "sha256": "00952D8DD082A606BE49D25B021F3B58835DE82AA1D71C2D71411CF1159A8FF5",
+      "byte_count": 48978,
+      "line_count": 1138
     },
     {
       "path": "runs/n0_owner_decision_packet.json",
@@ -503,9 +503,9 @@
     },
     {
       "path": "specs/native-model-contract.json",
-      "sha256": "CA17D83C8EA4E3432E8E9626F6BE49DA17F79D92F6283D3FA747743D2CFC2863",
-      "byte_count": 8214,
-      "line_count": 158
+      "sha256": "87458D2481EF2A22C8497165366D9F69B3224D566F7860B4A1D4AA1D76AA6F85",
+      "byte_count": 12708,
+      "line_count": 208
     },
     {
       "path": "specs/native-model-toolchain-lock.json",

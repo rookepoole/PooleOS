@@ -71,21 +71,27 @@ class NativeModelTests(unittest.TestCase):
 
     def test_required_and_modeled_domain_sets_are_frozen(self) -> None:
         self.assertEqual(7, len(self.contract["required_domains"]))
-        self.assertEqual(4, len(self.contract["modeled_domains"]))
+        self.assertEqual(5, len(self.contract["modeled_domains"]))
         self.assertEqual(
-            {"capability_derivation_revocation", "virtual_memory_map_unmap", "boot_slot_state", "update_rollback"},
+            {"capability_derivation_revocation", "ipc_state", "virtual_memory_map_unmap", "boot_slot_state", "update_rollback"},
             set(self.contract["modeled_domains"]),
         )
 
     def test_model_identifiers_and_invariants_are_frozen(self) -> None:
         models = {item["id"]: item for item in self.contract["models"]}
-        self.assertEqual({"boot_slot_rollback", "capability_revocation", "virtual_memory_ownership"}, set(models))
+        self.assertEqual(
+            {"boot_slot_rollback", "capability_revocation", "virtual_memory_ownership", "capability_mediated_ipc"},
+            set(models),
+        )
         self.assertIn("Recoverable", models["boot_slot_rollback"]["invariants"])
         self.assertIn("NoLiveDescendantOfRevoked", models["capability_revocation"]["invariants"])
         self.assertIn("RetiredPendingConsistency", models["virtual_memory_ownership"]["invariants"])
+        self.assertIn("AcceptedRepliesFresh", models["capability_mediated_ipc"]["invariants"])
+        self.assertIn("ClosedEndpointQuiescent", models["capability_mediated_ipc"]["invariants"])
         self.assertEqual(6, len(models["boot_slot_rollback"]["invariants"]))
         self.assertEqual(6, len(models["capability_revocation"]["invariants"]))
         self.assertEqual(7, len(models["virtual_memory_ownership"]["invariants"]))
+        self.assertEqual(11, len(models["capability_mediated_ipc"]["invariants"]))
 
     def test_normalized_commands_are_closed_and_exact(self) -> None:
         for model in self.contract["models"]:
@@ -118,6 +124,26 @@ class NativeModelTests(unittest.TestCase):
             {"UnsafeStaleMapping": "FALSE", "UnsafeEarlyReuse": "TRUE"},
             cases["unsafe_early_reuse"]["constant_assignments"],
         )
+
+    def test_ipc_mutants_are_independent_and_named(self) -> None:
+        model = next(item for item in self.contract["models"] if item["id"] == "capability_mediated_ipc")
+        cases = {item["id"]: item for item in model["cases"]}
+        self.assertEqual(
+            {"safe", "unsafe_unauthorized_call", "unsafe_token_reuse", "unsafe_stale_reply", "unsafe_leaky_teardown"},
+            set(cases),
+        )
+        expected_violations = {
+            "unsafe_unauthorized_call": "QueuedCallAuthorized",
+            "unsafe_token_reuse": "LiveTokenConsistent",
+            "unsafe_stale_reply": "AcceptedRepliesFresh",
+            "unsafe_leaky_teardown": "ClosedEndpointQuiescent",
+        }
+        self.assertTrue(all(value == "FALSE" for value in cases["safe"]["constant_assignments"].values()))
+        for case_id, invariant in expected_violations.items():
+            with self.subTest(case=case_id):
+                case = cases[case_id]
+                self.assertEqual(invariant, case["expected_invariant_violation"])
+                self.assertEqual(1, sum(value == "TRUE" for value in case["constant_assignments"].values()))
 
     def test_model_input_paths_are_confined(self) -> None:
         for relative in native_models.MODEL_INPUTS:
@@ -216,10 +242,10 @@ The depth of the complete state graph search is 1.
 
     def test_safe_state_spaces_are_completely_drained(self) -> None:
         safe = [item for item in self.readiness["runs"] if item["mode"] == "safe"]
-        self.assertEqual(3, len(safe))
+        self.assertEqual(4, len(safe))
         self.assertTrue(all(item["observed_exit_code"] == 0 for item in safe))
         self.assertTrue(all(item["left_on_queue"] == 0 for item in safe))
-        self.assertEqual({20, 1316, 1422}, {item["distinct_states"] for item in safe})
+        self.assertEqual({20, 621, 1316, 1422}, {item["distinct_states"] for item in safe})
 
     def test_hostile_counterexamples_are_exact(self) -> None:
         hostile = {item["id"]: item for item in self.readiness["runs"] if item["mode"] == "hostile"}
@@ -227,6 +253,10 @@ The depth of the complete state graph search is 1.
         capability = hostile["capability_revocation.unsafe_local_revoke"]
         stale = hostile["virtual_memory_ownership.unsafe_stale_mapping"]
         reuse = hostile["virtual_memory_ownership.unsafe_early_reuse"]
+        unauthorized = hostile["capability_mediated_ipc.unsafe_unauthorized_call"]
+        token_reuse = hostile["capability_mediated_ipc.unsafe_token_reuse"]
+        stale_reply = hostile["capability_mediated_ipc.unsafe_stale_reply"]
+        leaky_teardown = hostile["capability_mediated_ipc.unsafe_leaky_teardown"]
         self.assertEqual("Recoverable", boot["observed_invariant_violation"])
         self.assertEqual(["Init", "Stage", "StartTrial", "TrialFailure"], [item["action"] for item in boot["trace"]])
         self.assertEqual("NoLiveDescendantOfRevoked", capability["observed_invariant_violation"])
@@ -235,6 +265,14 @@ The depth of the complete state graph search is 1.
         self.assertEqual(["Init", "Map", "BeginTransfer", "CompleteTransfer"], [item["action"] for item in stale["trace"]])
         self.assertEqual("TlbSafety", reuse["observed_invariant_violation"])
         self.assertEqual(["Init", "Map", "TlbFill", "BeginTransfer", "Unmap", "CompleteTransfer"], [item["action"] for item in reuse["trace"]])
+        self.assertEqual("QueuedCallAuthorized", unauthorized["observed_invariant_violation"])
+        self.assertEqual(["Init", "Enqueue"], [item["action"] for item in unauthorized["trace"]])
+        self.assertEqual("LiveTokenConsistent", token_reuse["observed_invariant_violation"])
+        self.assertEqual(["Init", "Enqueue", "Dispatch", "Reply"], [item["action"] for item in token_reuse["trace"]])
+        self.assertEqual("AcceptedRepliesFresh", stale_reply["observed_invariant_violation"])
+        self.assertEqual(["Init", "Enqueue", "Dispatch", "Cancel", "Reply"], [item["action"] for item in stale_reply["trace"]])
+        self.assertEqual("ClosedEndpointQuiescent", leaky_teardown["observed_invariant_violation"])
+        self.assertEqual(["Init", "Enqueue", "Teardown"], [item["action"] for item in leaky_teardown["trace"]])
 
     def test_public_traces_contain_no_absolute_paths_or_timestamps(self) -> None:
         encoded = json.dumps(self.readiness["runs"], ensure_ascii=True)
@@ -244,9 +282,9 @@ The depth of the complete state graph search is 1.
 
     def test_open_domains_and_trace_cross_checks_remain_explicit(self) -> None:
         coverage = self.readiness["domain_coverage"]
-        self.assertEqual(3, coverage["open_count"])
+        self.assertEqual(2, coverage["open_count"])
         self.assertEqual(
-            {"ipc_state", "scheduler_transitions", "poolefs_transaction_recovery"},
+            {"scheduler_transitions", "poolefs_transaction_recovery"},
             set(coverage["open_domains"]),
         )
         self.assertEqual(0, self.readiness["summary"]["implementation_trace_cross_check_count"])
@@ -255,7 +293,7 @@ The depth of the complete state graph search is 1.
     def test_negative_control_register_is_complete(self) -> None:
         controls = self.readiness["negative_controls"]
         self.assertEqual(list(native_models.NEGATIVE_CONTROL_IDS), [item["id"] for item in controls])
-        self.assertEqual(14, len(controls))
+        self.assertEqual(18, len(controls))
         self.assertTrue(all(item["status"] == "pass" for item in controls))
 
     def test_stale_bindings_fail_closed(self) -> None:

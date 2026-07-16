@@ -1,9 +1,9 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "artifact_kind": "pooleos_native_model_contract",
   "status_date": "2026-07-16",
-  "contract_id": "POOLEOS-N4-MODELS-2",
-  "selected_move_id": "N4-VM-MODEL-001",
+  "contract_id": "POOLEOS-N4-MODELS-3",
+  "selected_move_id": "N4-IPC-MODEL-001",
   "production_ready": false,
   "production_promotion_allowed": false,
   "engine": {
@@ -47,6 +47,7 @@
   ],
   "modeled_domains": [
     "capability_derivation_revocation",
+    "ipc_state",
     "virtual_memory_map_unmap",
     "boot_slot_state",
     "update_rollback"
@@ -131,19 +132,68 @@
           "expected": {"exit_code": 12, "generated_states": 1128, "distinct_states": 339, "left_on_queue": 167, "depth": 6, "trace_length": 6, "trace_actions": ["Init", "Map", "TlbFill", "BeginTransfer", "Unmap", "CompleteTransfer"], "trace_sha256": "AE37455CC7DC8F3797398EB603592D0ACE5D1E620D85C2A01ED85EDF39A894CD"}
         }
       ]
+    },
+    {
+      "id": "capability_mediated_ipc",
+      "module_path": "models/tla/PooleIPC.tla",
+      "state_variables": ["open", "epoch", "queue", "status", "caller", "endpointOf", "callEpoch", "replyToken", "tokenStatus", "tokenCall", "tokenEpoch", "replyAccepted", "replyFresh"],
+      "invariants": ["TypeOK", "QueueBound", "QueueStateConsistent", "QueuedCallAuthorized", "InFlightCallConsistent", "LiveTokenConsistent", "TerminalCallHasNoLiveToken", "TokenLifecycleConsistent", "AcceptedRepliesFresh", "ClosedEndpointQuiescent", "LiveTokenInjective"],
+      "cases": [
+        {
+          "id": "safe",
+          "role": "safe",
+          "config_path": "models/tla/PooleIPC.safe.cfg",
+          "constant_assignments": {"UnsafeUnauthorizedCall": "FALSE", "UnsafeTokenReuse": "FALSE", "UnsafeStaleReply": "FALSE", "UnsafeLeakyTeardown": "FALSE"},
+          "expected_invariant_violation": null,
+          "expected": {"exit_code": 0, "generated_states": 1402, "distinct_states": 621, "left_on_queue": 0, "depth": 9, "trace_length": 0, "trace_actions": [], "trace_sha256": "37517E5F3DC66819F61F5A7BB8ACE1921282415F10551D2DEFA5C3EB0985B570"}
+        },
+        {
+          "id": "unsafe_unauthorized_call",
+          "role": "hostile",
+          "config_path": "models/tla/PooleIPC.unauthorized_call.cfg",
+          "constant_assignments": {"UnsafeUnauthorizedCall": "TRUE", "UnsafeTokenReuse": "FALSE", "UnsafeStaleReply": "FALSE", "UnsafeLeakyTeardown": "FALSE"},
+          "expected_invariant_violation": "QueuedCallAuthorized",
+          "expected": {"exit_code": 12, "generated_states": 4, "distinct_states": 3, "left_on_queue": 1, "depth": 2, "trace_length": 2, "trace_actions": ["Init", "Enqueue"], "trace_sha256": "084EA00CF9335456E1C5183698EC0EF9A31704F345B77888699342D8B8DB248D"}
+        },
+        {
+          "id": "unsafe_token_reuse",
+          "role": "hostile",
+          "config_path": "models/tla/PooleIPC.token_reuse.cfg",
+          "constant_assignments": {"UnsafeUnauthorizedCall": "FALSE", "UnsafeTokenReuse": "TRUE", "UnsafeStaleReply": "FALSE", "UnsafeLeakyTeardown": "FALSE"},
+          "expected_invariant_violation": "LiveTokenConsistent",
+          "expected": {"exit_code": 12, "generated_states": 23, "distinct_states": 19, "left_on_queue": 13, "depth": 4, "trace_length": 4, "trace_actions": ["Init", "Enqueue", "Dispatch", "Reply"], "trace_sha256": "B859289CA0300641C821848A719DE23BD5A603EA3898BD9A358DCD7C28EE5068"}
+        },
+        {
+          "id": "unsafe_stale_reply",
+          "role": "hostile",
+          "config_path": "models/tla/PooleIPC.stale_reply.cfg",
+          "constant_assignments": {"UnsafeUnauthorizedCall": "FALSE", "UnsafeTokenReuse": "FALSE", "UnsafeStaleReply": "TRUE", "UnsafeLeakyTeardown": "FALSE"},
+          "expected_invariant_violation": "AcceptedRepliesFresh",
+          "expected": {"exit_code": 12, "generated_states": 72, "distinct_states": 55, "left_on_queue": 37, "depth": 5, "trace_length": 5, "trace_actions": ["Init", "Enqueue", "Dispatch", "Cancel", "Reply"], "trace_sha256": "0315303A0E5240EDB2DC6D6819B9216F5C8F2583173E30EDFAA441713AFDF50C"}
+        },
+        {
+          "id": "unsafe_leaky_teardown",
+          "role": "hostile",
+          "config_path": "models/tla/PooleIPC.leaky_teardown.cfg",
+          "constant_assignments": {"UnsafeUnauthorizedCall": "FALSE", "UnsafeTokenReuse": "FALSE", "UnsafeStaleReply": "FALSE", "UnsafeLeakyTeardown": "TRUE"},
+          "expected_invariant_violation": "ClosedEndpointQuiescent",
+          "expected": {"exit_code": 12, "generated_states": 10, "distinct_states": 9, "left_on_queue": 6, "depth": 3, "trace_length": 3, "trace_actions": ["Init", "Enqueue", "Teardown"], "trace_sha256": "90AC0301BD3A7BD62A2F4A7598169508EC1864A6F39638E7A4716A89F15D0F37"}
+        }
+      ]
     }
   ],
   "assumptions": [
     "The boot model has exactly two abstract slots, one candidate-installation lifecycle, at most two trial attempts, atomic transitions, persistent known-good metadata, and no slot erasure/reuse, concurrency, torn write, cryptography, storage, firmware, or attacker model.",
     "The capability model has exactly three abstract capability identifiers, two principals, two rights, one object, atomic derive/transfer/revoke transitions, no identifier reuse, and no concurrency, IPC, scheduler, memory, DMA, or persistence model.",
     "The virtual-memory model has exactly two domains, two CPUs, two physical pages, one virtual address per domain, generations 0 through 1, and atomic map, TLB fill/evict, transfer, unmap, and shootdown-acknowledgement transitions. It has no page-table hierarchy, PCID/ASID, DMA/IOMMU, interrupt-ordering, weak-memory, concurrent page-table-write, huge-page, copy-on-write, swap, NUMA, or hardware page-walk model.",
+    "The IPC model has exactly two principals, one endpoint, two calls, two reply tokens, a one-call queue bound, endpoint epochs 0 through 1, and atomic enqueue, dispatch, cancel, timeout, reply, teardown, and reopen transitions. Call and reply-token identifiers are one-shot and never recycled. CanCall is an abstract authorization predicate, not a composed capability lookup, derivation, or revocation model. The queue is an unordered set abstraction. It has no payload, message-copy, scheduling, priority, fairness, blocking-thread, interrupt, SMP interleaving, weak-memory, resource-accounting, endpoint-transfer, kernel-object implementation, or ABI-encoding model.",
     "TLC uses 64-bit state fingerprints; complete reachable-state exploration within the constants is not a collision-free mathematical proof.",
     "Only state safety invariants are checked. No liveness, fairness, real-time, probabilistic, refinement, implementation-equivalence, or physical-hardware property is checked.",
     "The hostile configurations are deliberate mutations used to demonstrate that the named invariants produce finite counterexample traces."
   ],
   "trace_cross_check": {
     "status": "pending_native_implementation_traces",
-    "required_model_count": 3,
+    "required_model_count": 4,
     "completed_model_count": 0,
     "abi_freeze_authorized": false
   },

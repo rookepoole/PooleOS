@@ -1,9 +1,9 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "artifact_kind": "pooleos_native_model_readiness",
   "status_date": "2026-07-16",
   "status": "bounded_models_pass_counterexamples_detected",
-  "selected_move_id": "N4-VM-MODEL-001",
+  "selected_move_id": "N4-IPC-MODEL-001",
   "production_ready": false,
   "production_promotion_allowed": false,
   "n4_model_slice_satisfied": true,
@@ -16,14 +16,14 @@
     },
     "contract": {
       "path": "specs/native-model-contract.json",
-      "byte_count": 8214,
-      "sha256": "CA17D83C8EA4E3432E8E9626F6BE49DA17F79D92F6283D3FA747743D2CFC2863"
+      "byte_count": 12708,
+      "sha256": "87458D2481EF2A22C8497165366D9F69B3224D566F7860B4A1D4AA1D76AA6F85"
     },
     "implementation_inputs": [
       {
         "path": "runtime/native_models.py",
-        "byte_count": 41679,
-        "sha256": "C26F357F8ED7B708179E9B5AB6522DD9FCA5CE3C76EB9C44E3F50678AA8D5D9B"
+        "byte_count": 43349,
+        "sha256": "50AAE17C087B35CE95BEAF4FD7C4AF78CA87833C2FB1C0289DE6696DA889A47B"
       },
       {
         "path": "tools/bootstrap_native_models.ps1",
@@ -86,6 +86,36 @@
         "path": "models/tla/PooleVirtualMemory.early_reuse.cfg",
         "byte_count": 439,
         "sha256": "9F80D13ED63DC9A902E9CD4A20512307945BC068F7341305923F09155CFFD923"
+      },
+      {
+        "path": "models/tla/PooleIPC.tla",
+        "byte_count": 10910,
+        "sha256": "22E86D7000CB073964486F5A56D6D3458C309705252875A25630E91AB20DDFF0"
+      },
+      {
+        "path": "models/tla/PooleIPC.safe.cfg",
+        "byte_count": 691,
+        "sha256": "9F67698EABF4B8F197B76D977C377D7B922233363234F46D203C8DD1362BD47D"
+      },
+      {
+        "path": "models/tla/PooleIPC.unauthorized_call.cfg",
+        "byte_count": 690,
+        "sha256": "3A5F493222C2AF2F3F366BAF9DBE39F69AE7C69E7D93EB769E141F4CCC07404A"
+      },
+      {
+        "path": "models/tla/PooleIPC.token_reuse.cfg",
+        "byte_count": 690,
+        "sha256": "3B414C5D6FFEDB083D2942B7C4D2202B542E0B0BFCB62E6965417750001B22AC"
+      },
+      {
+        "path": "models/tla/PooleIPC.stale_reply.cfg",
+        "byte_count": 690,
+        "sha256": "674911C5AC478422BBE92C342EF88505485B4B1AA151D2F150CF5E5F25BD530B"
+      },
+      {
+        "path": "models/tla/PooleIPC.leaky_teardown.cfg",
+        "byte_count": 690,
+        "sha256": "DED305ADFCDB6ED7CFC09B5E7A6907674429C22A8307CC162F706AF2296FA251"
       }
     ]
   },
@@ -110,18 +140,18 @@
     ],
     "modeled_domains": [
       "capability_derivation_revocation",
+      "ipc_state",
       "virtual_memory_map_unmap",
       "boot_slot_state",
       "update_rollback"
     ],
     "open_domains": [
-      "ipc_state",
       "scheduler_transitions",
       "poolefs_transaction_recovery"
     ],
     "required_count": 7,
-    "modeled_count": 4,
-    "open_count": 3
+    "modeled_count": 5,
+    "open_count": 2
   },
   "runs": [
     {
@@ -551,6 +581,390 @@
       "repeat_exact_match": true,
       "raw_output_public": false,
       "command_sha256": "E2D1CD8306D7195A6A943C1061F585CA7312FB43536BEBA20F60EABD73B7EC80"
+    },
+    {
+      "id": "capability_mediated_ipc.safe",
+      "model_id": "capability_mediated_ipc",
+      "case_id": "safe",
+      "mode": "safe",
+      "status": "pass",
+      "expected_exit_code": 0,
+      "observed_exit_code": 0,
+      "expected_invariant_violation": null,
+      "observed_invariant_violation": null,
+      "generated_states": 1402,
+      "distinct_states": 621,
+      "left_on_queue": 0,
+      "depth": 9,
+      "trace": [],
+      "trace_sha256": "37517E5F3DC66819F61F5A7BB8ACE1921282415F10551D2DEFA5C3EB0985B570",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "D0F3800DE8D0A035EE57BB91BE1F8647745300DBDAB9B6C8D52311D9BC40E220"
+    },
+    {
+      "id": "capability_mediated_ipc.unsafe_unauthorized_call",
+      "model_id": "capability_mediated_ipc",
+      "case_id": "unsafe_unauthorized_call",
+      "mode": "hostile",
+      "status": "pass",
+      "expected_exit_code": 12,
+      "observed_exit_code": 12,
+      "expected_invariant_violation": "QueuedCallAuthorized",
+      "observed_invariant_violation": "QueuedCallAuthorized",
+      "generated_states": 4,
+      "distinct_states": 3,
+      "left_on_queue": 1,
+      "depth": 2,
+      "trace": [
+        {
+          "index": 1,
+          "action": "Init",
+          "state_sha256": "77FC303A0F2996BBB6A7A42C6EC4BEB184AB34718CEE14A6B30EAB4F49B0DB00",
+          "state_lines": [
+            "/\\ replyFresh = (Call0 :> TRUE @@ Call1 :> TRUE)",
+            "/\\ epoch = (Endpoint0 :> 0)",
+            "/\\ replyAccepted = {}",
+            "/\\ tokenCall = (Token0 :> NoCall @@ Token1 :> NoCall)",
+            "/\\ caller = (Call0 :> Client @@ Call1 :> Client)",
+            "/\\ tokenStatus = (Token0 :> \"Free\" @@ Token1 :> \"Free\")",
+            "/\\ open = {Endpoint0}",
+            "/\\ status = (Call0 :> \"Fresh\" @@ Call1 :> \"Fresh\")",
+            "/\\ replyToken = (Call0 :> NoToken @@ Call1 :> NoToken)",
+            "/\\ tokenEpoch = (Token0 :> 0 @@ Token1 :> 0)",
+            "/\\ queue = (Endpoint0 :> {})",
+            "/\\ callEpoch = (Call0 :> 0 @@ Call1 :> 0)",
+            "/\\ endpointOf = (Call0 :> Endpoint0 @@ Call1 :> Endpoint0)"
+          ]
+        },
+        {
+          "index": 2,
+          "action": "Enqueue",
+          "state_sha256": "DA22AE8F31F83F61E7E95C40FD10784117442AF395114CA808491FA2D92FF40F",
+          "state_lines": [
+            "/\\ replyFresh = (Call0 :> TRUE @@ Call1 :> TRUE)",
+            "/\\ epoch = (Endpoint0 :> 0)",
+            "/\\ replyAccepted = {}",
+            "/\\ tokenCall = (Token0 :> NoCall @@ Token1 :> NoCall)",
+            "/\\ caller = (Call0 :> Server @@ Call1 :> Client)",
+            "/\\ tokenStatus = (Token0 :> \"Free\" @@ Token1 :> \"Free\")",
+            "/\\ open = {Endpoint0}",
+            "/\\ status = (Call0 :> \"Queued\" @@ Call1 :> \"Fresh\")",
+            "/\\ replyToken = (Call0 :> NoToken @@ Call1 :> NoToken)",
+            "/\\ tokenEpoch = (Token0 :> 0 @@ Token1 :> 0)",
+            "/\\ queue = (Endpoint0 :> {Call0})",
+            "/\\ callEpoch = (Call0 :> 0 @@ Call1 :> 0)",
+            "/\\ endpointOf = (Call0 :> Endpoint0 @@ Call1 :> Endpoint0)"
+          ]
+        }
+      ],
+      "trace_sha256": "084EA00CF9335456E1C5183698EC0EF9A31704F345B77888699342D8B8DB248D",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "4E4C143002BD255C59D809D534E8AD9973C4C0B9C609979797EE443A3FB9B213"
+    },
+    {
+      "id": "capability_mediated_ipc.unsafe_token_reuse",
+      "model_id": "capability_mediated_ipc",
+      "case_id": "unsafe_token_reuse",
+      "mode": "hostile",
+      "status": "pass",
+      "expected_exit_code": 12,
+      "observed_exit_code": 12,
+      "expected_invariant_violation": "LiveTokenConsistent",
+      "observed_invariant_violation": "LiveTokenConsistent",
+      "generated_states": 23,
+      "distinct_states": 19,
+      "left_on_queue": 13,
+      "depth": 4,
+      "trace": [
+        {
+          "index": 1,
+          "action": "Init",
+          "state_sha256": "77FC303A0F2996BBB6A7A42C6EC4BEB184AB34718CEE14A6B30EAB4F49B0DB00",
+          "state_lines": [
+            "/\\ replyFresh = (Call0 :> TRUE @@ Call1 :> TRUE)",
+            "/\\ epoch = (Endpoint0 :> 0)",
+            "/\\ replyAccepted = {}",
+            "/\\ tokenCall = (Token0 :> NoCall @@ Token1 :> NoCall)",
+            "/\\ caller = (Call0 :> Client @@ Call1 :> Client)",
+            "/\\ tokenStatus = (Token0 :> \"Free\" @@ Token1 :> \"Free\")",
+            "/\\ open = {Endpoint0}",
+            "/\\ status = (Call0 :> \"Fresh\" @@ Call1 :> \"Fresh\")",
+            "/\\ replyToken = (Call0 :> NoToken @@ Call1 :> NoToken)",
+            "/\\ tokenEpoch = (Token0 :> 0 @@ Token1 :> 0)",
+            "/\\ queue = (Endpoint0 :> {})",
+            "/\\ callEpoch = (Call0 :> 0 @@ Call1 :> 0)",
+            "/\\ endpointOf = (Call0 :> Endpoint0 @@ Call1 :> Endpoint0)"
+          ]
+        },
+        {
+          "index": 2,
+          "action": "Enqueue",
+          "state_sha256": "AD140DD243D6CA557E475D19BFB6D276473A9880AE954605B94BA53918BCA045",
+          "state_lines": [
+            "/\\ replyFresh = (Call0 :> TRUE @@ Call1 :> TRUE)",
+            "/\\ epoch = (Endpoint0 :> 0)",
+            "/\\ replyAccepted = {}",
+            "/\\ tokenCall = (Token0 :> NoCall @@ Token1 :> NoCall)",
+            "/\\ caller = (Call0 :> Client @@ Call1 :> Client)",
+            "/\\ tokenStatus = (Token0 :> \"Free\" @@ Token1 :> \"Free\")",
+            "/\\ open = {Endpoint0}",
+            "/\\ status = (Call0 :> \"Queued\" @@ Call1 :> \"Fresh\")",
+            "/\\ replyToken = (Call0 :> NoToken @@ Call1 :> NoToken)",
+            "/\\ tokenEpoch = (Token0 :> 0 @@ Token1 :> 0)",
+            "/\\ queue = (Endpoint0 :> {Call0})",
+            "/\\ callEpoch = (Call0 :> 0 @@ Call1 :> 0)",
+            "/\\ endpointOf = (Call0 :> Endpoint0 @@ Call1 :> Endpoint0)"
+          ]
+        },
+        {
+          "index": 3,
+          "action": "Dispatch",
+          "state_sha256": "741BDD849B8BFBD1635BB73E22566C26F93ED07CD1C6D9B1276BCEF5F503A987",
+          "state_lines": [
+            "/\\ replyFresh = (Call0 :> TRUE @@ Call1 :> TRUE)",
+            "/\\ epoch = (Endpoint0 :> 0)",
+            "/\\ replyAccepted = {}",
+            "/\\ tokenCall = (Token0 :> Call0 @@ Token1 :> NoCall)",
+            "/\\ caller = (Call0 :> Client @@ Call1 :> Client)",
+            "/\\ tokenStatus = (Token0 :> \"Live\" @@ Token1 :> \"Free\")",
+            "/\\ open = {Endpoint0}",
+            "/\\ status = (Call0 :> \"InFlight\" @@ Call1 :> \"Fresh\")",
+            "/\\ replyToken = (Call0 :> Token0 @@ Call1 :> NoToken)",
+            "/\\ tokenEpoch = (Token0 :> 0 @@ Token1 :> 0)",
+            "/\\ queue = (Endpoint0 :> {})",
+            "/\\ callEpoch = (Call0 :> 0 @@ Call1 :> 0)",
+            "/\\ endpointOf = (Call0 :> Endpoint0 @@ Call1 :> Endpoint0)"
+          ]
+        },
+        {
+          "index": 4,
+          "action": "Reply",
+          "state_sha256": "3C1559B26590F8B8A3CFDFA4D7E59CACDF984401610C346A72BE2A498B05F332",
+          "state_lines": [
+            "/\\ replyFresh = (Call0 :> TRUE @@ Call1 :> TRUE)",
+            "/\\ epoch = (Endpoint0 :> 0)",
+            "/\\ replyAccepted = {Call0}",
+            "/\\ tokenCall = (Token0 :> Call0 @@ Token1 :> NoCall)",
+            "/\\ caller = (Call0 :> Client @@ Call1 :> Client)",
+            "/\\ tokenStatus = (Token0 :> \"Live\" @@ Token1 :> \"Free\")",
+            "/\\ open = {Endpoint0}",
+            "/\\ status = (Call0 :> \"Replied\" @@ Call1 :> \"Fresh\")",
+            "/\\ replyToken = (Call0 :> Token0 @@ Call1 :> NoToken)",
+            "/\\ tokenEpoch = (Token0 :> 0 @@ Token1 :> 0)",
+            "/\\ queue = (Endpoint0 :> {})",
+            "/\\ callEpoch = (Call0 :> 0 @@ Call1 :> 0)",
+            "/\\ endpointOf = (Call0 :> Endpoint0 @@ Call1 :> Endpoint0)"
+          ]
+        }
+      ],
+      "trace_sha256": "B859289CA0300641C821848A719DE23BD5A603EA3898BD9A358DCD7C28EE5068",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "997CE4908521CC2686B13A27FB56E17E27E756625B74A539C2D81F2656DA06BE"
+    },
+    {
+      "id": "capability_mediated_ipc.unsafe_stale_reply",
+      "model_id": "capability_mediated_ipc",
+      "case_id": "unsafe_stale_reply",
+      "mode": "hostile",
+      "status": "pass",
+      "expected_exit_code": 12,
+      "observed_exit_code": 12,
+      "expected_invariant_violation": "AcceptedRepliesFresh",
+      "observed_invariant_violation": "AcceptedRepliesFresh",
+      "generated_states": 72,
+      "distinct_states": 55,
+      "left_on_queue": 37,
+      "depth": 5,
+      "trace": [
+        {
+          "index": 1,
+          "action": "Init",
+          "state_sha256": "77FC303A0F2996BBB6A7A42C6EC4BEB184AB34718CEE14A6B30EAB4F49B0DB00",
+          "state_lines": [
+            "/\\ replyFresh = (Call0 :> TRUE @@ Call1 :> TRUE)",
+            "/\\ epoch = (Endpoint0 :> 0)",
+            "/\\ replyAccepted = {}",
+            "/\\ tokenCall = (Token0 :> NoCall @@ Token1 :> NoCall)",
+            "/\\ caller = (Call0 :> Client @@ Call1 :> Client)",
+            "/\\ tokenStatus = (Token0 :> \"Free\" @@ Token1 :> \"Free\")",
+            "/\\ open = {Endpoint0}",
+            "/\\ status = (Call0 :> \"Fresh\" @@ Call1 :> \"Fresh\")",
+            "/\\ replyToken = (Call0 :> NoToken @@ Call1 :> NoToken)",
+            "/\\ tokenEpoch = (Token0 :> 0 @@ Token1 :> 0)",
+            "/\\ queue = (Endpoint0 :> {})",
+            "/\\ callEpoch = (Call0 :> 0 @@ Call1 :> 0)",
+            "/\\ endpointOf = (Call0 :> Endpoint0 @@ Call1 :> Endpoint0)"
+          ]
+        },
+        {
+          "index": 2,
+          "action": "Enqueue",
+          "state_sha256": "AD140DD243D6CA557E475D19BFB6D276473A9880AE954605B94BA53918BCA045",
+          "state_lines": [
+            "/\\ replyFresh = (Call0 :> TRUE @@ Call1 :> TRUE)",
+            "/\\ epoch = (Endpoint0 :> 0)",
+            "/\\ replyAccepted = {}",
+            "/\\ tokenCall = (Token0 :> NoCall @@ Token1 :> NoCall)",
+            "/\\ caller = (Call0 :> Client @@ Call1 :> Client)",
+            "/\\ tokenStatus = (Token0 :> \"Free\" @@ Token1 :> \"Free\")",
+            "/\\ open = {Endpoint0}",
+            "/\\ status = (Call0 :> \"Queued\" @@ Call1 :> \"Fresh\")",
+            "/\\ replyToken = (Call0 :> NoToken @@ Call1 :> NoToken)",
+            "/\\ tokenEpoch = (Token0 :> 0 @@ Token1 :> 0)",
+            "/\\ queue = (Endpoint0 :> {Call0})",
+            "/\\ callEpoch = (Call0 :> 0 @@ Call1 :> 0)",
+            "/\\ endpointOf = (Call0 :> Endpoint0 @@ Call1 :> Endpoint0)"
+          ]
+        },
+        {
+          "index": 3,
+          "action": "Dispatch",
+          "state_sha256": "741BDD849B8BFBD1635BB73E22566C26F93ED07CD1C6D9B1276BCEF5F503A987",
+          "state_lines": [
+            "/\\ replyFresh = (Call0 :> TRUE @@ Call1 :> TRUE)",
+            "/\\ epoch = (Endpoint0 :> 0)",
+            "/\\ replyAccepted = {}",
+            "/\\ tokenCall = (Token0 :> Call0 @@ Token1 :> NoCall)",
+            "/\\ caller = (Call0 :> Client @@ Call1 :> Client)",
+            "/\\ tokenStatus = (Token0 :> \"Live\" @@ Token1 :> \"Free\")",
+            "/\\ open = {Endpoint0}",
+            "/\\ status = (Call0 :> \"InFlight\" @@ Call1 :> \"Fresh\")",
+            "/\\ replyToken = (Call0 :> Token0 @@ Call1 :> NoToken)",
+            "/\\ tokenEpoch = (Token0 :> 0 @@ Token1 :> 0)",
+            "/\\ queue = (Endpoint0 :> {})",
+            "/\\ callEpoch = (Call0 :> 0 @@ Call1 :> 0)",
+            "/\\ endpointOf = (Call0 :> Endpoint0 @@ Call1 :> Endpoint0)"
+          ]
+        },
+        {
+          "index": 4,
+          "action": "Cancel",
+          "state_sha256": "A83AFBE9543FFF1C686B2EE00E966ADE84A6EAB9B8EEE762345AC9209176C729",
+          "state_lines": [
+            "/\\ replyFresh = (Call0 :> TRUE @@ Call1 :> TRUE)",
+            "/\\ epoch = (Endpoint0 :> 0)",
+            "/\\ replyAccepted = {}",
+            "/\\ tokenCall = (Token0 :> Call0 @@ Token1 :> NoCall)",
+            "/\\ caller = (Call0 :> Client @@ Call1 :> Client)",
+            "/\\ tokenStatus = (Token0 :> \"Retired\" @@ Token1 :> \"Free\")",
+            "/\\ open = {Endpoint0}",
+            "/\\ status = (Call0 :> \"Cancelled\" @@ Call1 :> \"Fresh\")",
+            "/\\ replyToken = (Call0 :> Token0 @@ Call1 :> NoToken)",
+            "/\\ tokenEpoch = (Token0 :> 0 @@ Token1 :> 0)",
+            "/\\ queue = (Endpoint0 :> {})",
+            "/\\ callEpoch = (Call0 :> 0 @@ Call1 :> 0)",
+            "/\\ endpointOf = (Call0 :> Endpoint0 @@ Call1 :> Endpoint0)"
+          ]
+        },
+        {
+          "index": 5,
+          "action": "Reply",
+          "state_sha256": "EF0236D63741E9F2AC62B3467B911882C06FF02F5D56F0CA43ADDB8210148815",
+          "state_lines": [
+            "/\\ replyFresh = (Call0 :> FALSE @@ Call1 :> TRUE)",
+            "/\\ epoch = (Endpoint0 :> 0)",
+            "/\\ replyAccepted = {Call0}",
+            "/\\ tokenCall = (Token0 :> Call0 @@ Token1 :> NoCall)",
+            "/\\ caller = (Call0 :> Client @@ Call1 :> Client)",
+            "/\\ tokenStatus = (Token0 :> \"Used\" @@ Token1 :> \"Free\")",
+            "/\\ open = {Endpoint0}",
+            "/\\ status = (Call0 :> \"Replied\" @@ Call1 :> \"Fresh\")",
+            "/\\ replyToken = (Call0 :> Token0 @@ Call1 :> NoToken)",
+            "/\\ tokenEpoch = (Token0 :> 0 @@ Token1 :> 0)",
+            "/\\ queue = (Endpoint0 :> {})",
+            "/\\ callEpoch = (Call0 :> 0 @@ Call1 :> 0)",
+            "/\\ endpointOf = (Call0 :> Endpoint0 @@ Call1 :> Endpoint0)"
+          ]
+        }
+      ],
+      "trace_sha256": "0315303A0E5240EDB2DC6D6819B9216F5C8F2583173E30EDFAA441713AFDF50C",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "FCBB7BA27FB3CE10EFE74190ABF47E66C354105918F47D600ED3D56346587114"
+    },
+    {
+      "id": "capability_mediated_ipc.unsafe_leaky_teardown",
+      "model_id": "capability_mediated_ipc",
+      "case_id": "unsafe_leaky_teardown",
+      "mode": "hostile",
+      "status": "pass",
+      "expected_exit_code": 12,
+      "observed_exit_code": 12,
+      "expected_invariant_violation": "ClosedEndpointQuiescent",
+      "observed_invariant_violation": "ClosedEndpointQuiescent",
+      "generated_states": 10,
+      "distinct_states": 9,
+      "left_on_queue": 6,
+      "depth": 3,
+      "trace": [
+        {
+          "index": 1,
+          "action": "Init",
+          "state_sha256": "77FC303A0F2996BBB6A7A42C6EC4BEB184AB34718CEE14A6B30EAB4F49B0DB00",
+          "state_lines": [
+            "/\\ replyFresh = (Call0 :> TRUE @@ Call1 :> TRUE)",
+            "/\\ epoch = (Endpoint0 :> 0)",
+            "/\\ replyAccepted = {}",
+            "/\\ tokenCall = (Token0 :> NoCall @@ Token1 :> NoCall)",
+            "/\\ caller = (Call0 :> Client @@ Call1 :> Client)",
+            "/\\ tokenStatus = (Token0 :> \"Free\" @@ Token1 :> \"Free\")",
+            "/\\ open = {Endpoint0}",
+            "/\\ status = (Call0 :> \"Fresh\" @@ Call1 :> \"Fresh\")",
+            "/\\ replyToken = (Call0 :> NoToken @@ Call1 :> NoToken)",
+            "/\\ tokenEpoch = (Token0 :> 0 @@ Token1 :> 0)",
+            "/\\ queue = (Endpoint0 :> {})",
+            "/\\ callEpoch = (Call0 :> 0 @@ Call1 :> 0)",
+            "/\\ endpointOf = (Call0 :> Endpoint0 @@ Call1 :> Endpoint0)"
+          ]
+        },
+        {
+          "index": 2,
+          "action": "Enqueue",
+          "state_sha256": "AD140DD243D6CA557E475D19BFB6D276473A9880AE954605B94BA53918BCA045",
+          "state_lines": [
+            "/\\ replyFresh = (Call0 :> TRUE @@ Call1 :> TRUE)",
+            "/\\ epoch = (Endpoint0 :> 0)",
+            "/\\ replyAccepted = {}",
+            "/\\ tokenCall = (Token0 :> NoCall @@ Token1 :> NoCall)",
+            "/\\ caller = (Call0 :> Client @@ Call1 :> Client)",
+            "/\\ tokenStatus = (Token0 :> \"Free\" @@ Token1 :> \"Free\")",
+            "/\\ open = {Endpoint0}",
+            "/\\ status = (Call0 :> \"Queued\" @@ Call1 :> \"Fresh\")",
+            "/\\ replyToken = (Call0 :> NoToken @@ Call1 :> NoToken)",
+            "/\\ tokenEpoch = (Token0 :> 0 @@ Token1 :> 0)",
+            "/\\ queue = (Endpoint0 :> {Call0})",
+            "/\\ callEpoch = (Call0 :> 0 @@ Call1 :> 0)",
+            "/\\ endpointOf = (Call0 :> Endpoint0 @@ Call1 :> Endpoint0)"
+          ]
+        },
+        {
+          "index": 3,
+          "action": "Teardown",
+          "state_sha256": "5A6EDB6504F562E655B0433B3973E1683FFA8D45A3EE3541681E936BB0D24436",
+          "state_lines": [
+            "/\\ replyFresh = (Call0 :> TRUE @@ Call1 :> TRUE)",
+            "/\\ epoch = (Endpoint0 :> 1)",
+            "/\\ replyAccepted = {}",
+            "/\\ tokenCall = (Token0 :> NoCall @@ Token1 :> NoCall)",
+            "/\\ caller = (Call0 :> Client @@ Call1 :> Client)",
+            "/\\ tokenStatus = (Token0 :> \"Free\" @@ Token1 :> \"Free\")",
+            "/\\ open = {}",
+            "/\\ status = (Call0 :> \"Queued\" @@ Call1 :> \"Fresh\")",
+            "/\\ replyToken = (Call0 :> NoToken @@ Call1 :> NoToken)",
+            "/\\ tokenEpoch = (Token0 :> 0 @@ Token1 :> 0)",
+            "/\\ queue = (Endpoint0 :> {Call0})",
+            "/\\ callEpoch = (Call0 :> 0 @@ Call1 :> 0)",
+            "/\\ endpointOf = (Call0 :> Endpoint0 @@ Call1 :> Endpoint0)"
+          ]
+        }
+      ],
+      "trace_sha256": "90AC0301BD3A7BD62A2F4A7598169508EC1864A6F39638E7A4716A89F15D0F37",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "921323A501351A16B3851B431DF3CFB153F0F6C7B01B0F48D5EA4365E5258856"
     }
   ],
   "negative_controls": [
@@ -625,6 +1039,34 @@
       "evidence_kind": "executed_counterexample"
     },
     {
+      "id": "NEG-N4-MODEL-IPC-UNAUTHORIZED-CALL-MUTANT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "executed_counterexample"
+    },
+    {
+      "id": "NEG-N4-MODEL-IPC-TOKEN-REUSE-MUTANT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "executed_counterexample"
+    },
+    {
+      "id": "NEG-N4-MODEL-IPC-STALE-REPLY-MUTANT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "executed_counterexample"
+    },
+    {
+      "id": "NEG-N4-MODEL-IPC-LEAKY-TEARDOWN-MUTANT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "executed_counterexample"
+    },
+    {
       "id": "NEG-N4-MODEL-SAFE-VIOLATION",
       "expected": "reject",
       "observed": "reject",
@@ -654,16 +1096,16 @@
     }
   ],
   "summary": {
-    "model_count": 3,
-    "run_case_count": 7,
-    "safe_run_count": 3,
-    "safe_run_pass_count": 3,
-    "hostile_run_count": 4,
-    "hostile_counterexample_count": 4,
-    "repeat_match_count": 7,
-    "negative_control_count": 14,
-    "negative_control_pass_count": 14,
-    "normalized_trace_count": 4,
+    "model_count": 4,
+    "run_case_count": 12,
+    "safe_run_count": 4,
+    "safe_run_pass_count": 4,
+    "hostile_run_count": 8,
+    "hostile_counterexample_count": 8,
+    "repeat_match_count": 12,
+    "negative_control_count": 18,
+    "negative_control_pass_count": 18,
+    "normalized_trace_count": 8,
     "implementation_trace_cross_check_count": 0,
     "failed_check_count": 0
   },
@@ -671,15 +1113,15 @@
     "The boot model has exactly two abstract slots, one candidate-installation lifecycle, at most two trial attempts, atomic transitions, persistent known-good metadata, and no slot erasure/reuse, concurrency, torn write, cryptography, storage, firmware, or attacker model.",
     "The capability model has exactly three abstract capability identifiers, two principals, two rights, one object, atomic derive/transfer/revoke transitions, no identifier reuse, and no concurrency, IPC, scheduler, memory, DMA, or persistence model.",
     "The virtual-memory model has exactly two domains, two CPUs, two physical pages, one virtual address per domain, generations 0 through 1, and atomic map, TLB fill/evict, transfer, unmap, and shootdown-acknowledgement transitions. It has no page-table hierarchy, PCID/ASID, DMA/IOMMU, interrupt-ordering, weak-memory, concurrent page-table-write, huge-page, copy-on-write, swap, NUMA, or hardware page-walk model.",
+    "The IPC model has exactly two principals, one endpoint, two calls, two reply tokens, a one-call queue bound, endpoint epochs 0 through 1, and atomic enqueue, dispatch, cancel, timeout, reply, teardown, and reopen transitions. Call and reply-token identifiers are one-shot and never recycled. CanCall is an abstract authorization predicate, not a composed capability lookup, derivation, or revocation model. The queue is an unordered set abstraction. It has no payload, message-copy, scheduling, priority, fairness, blocking-thread, interrupt, SMP interleaving, weak-memory, resource-accounting, endpoint-transfer, kernel-object implementation, or ABI-encoding model.",
     "TLC uses 64-bit state fingerprints; complete reachable-state exploration within the constants is not a collision-free mathematical proof.",
     "Only state safety invariants are checked. No liveness, fairness, real-time, probabilistic, refinement, implementation-equivalence, or physical-hardware property is checked.",
     "The hostile configurations are deliberate mutations used to demonstrate that the named invariants produce finite counterexample traces."
   ],
   "open_work": [
-    "Model IPC state and stale-reply behavior before freezing the IPC ABI.",
     "Model scheduler transitions, cancellation, priority inversion, and bounded fairness assumptions.",
     "Model PooleFS transaction recovery and power-loss state before freezing persistent formats.",
-    "Cross-check all three current models against exact native implementation traces when those implementations exist.",
+    "Cross-check all four current models against exact native implementation traces when those implementations exist.",
     "Source-build and independently reproduce the model-checker and Java inputs with signed provenance, SBOM, vulnerability, license, and redistribution review."
   ],
   "claim_boundary": {

@@ -6,11 +6,11 @@
   "additionalProperties": false,
   "required": ["schema_version", "artifact_kind", "status_date", "status", "selected_move_id", "production_ready", "production_promotion_allowed", "n4_model_slice_satisfied", "n4_exit_gate_satisfied", "bindings", "toolchain", "domain_coverage", "runs", "negative_controls", "summary", "assumptions", "open_work", "claim_boundary"],
   "properties": {
-    "schema_version": {"const": "1.1"},
+    "schema_version": {"const": "1.2"},
     "artifact_kind": {"const": "pooleos_native_model_readiness"},
     "status_date": {"const": "2026-07-16"},
     "status": {"const": "bounded_models_pass_counterexamples_detected"},
-    "selected_move_id": {"const": "N4-VM-MODEL-001"},
+    "selected_move_id": {"const": "N4-IPC-MODEL-001"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
     "n4_model_slice_satisfied": {"const": true},
@@ -23,7 +23,7 @@
         "lock": {"$ref": "#/$defs/binding"},
         "contract": {"$ref": "#/$defs/binding"},
         "implementation_inputs": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"$ref": "#/$defs/binding"}},
-        "model_inputs": {"type": "array", "minItems": 10, "maxItems": 10, "items": {"$ref": "#/$defs/binding"}}
+        "model_inputs": {"type": "array", "minItems": 16, "maxItems": 16, "items": {"$ref": "#/$defs/binding"}}
       }
     },
     "toolchain": {
@@ -46,36 +46,36 @@
       "required": ["required_domains", "modeled_domains", "open_domains", "required_count", "modeled_count", "open_count"],
       "properties": {
         "required_domains": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"type": "string"}},
-        "modeled_domains": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "string"}},
-        "open_domains": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "string"}},
+        "modeled_domains": {"type": "array", "minItems": 5, "maxItems": 5, "items": {"type": "string"}},
+        "open_domains": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "string"}},
         "required_count": {"const": 7},
-        "modeled_count": {"const": 4},
-        "open_count": {"const": 3}
+        "modeled_count": {"const": 5},
+        "open_count": {"const": 2}
       }
     },
-    "runs": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"$ref": "#/$defs/run"}},
-    "negative_controls": {"type": "array", "minItems": 14, "maxItems": 14, "items": {"$ref": "#/$defs/control"}},
+    "runs": {"type": "array", "minItems": 12, "maxItems": 12, "items": {"$ref": "#/$defs/run"}},
+    "negative_controls": {"type": "array", "minItems": 18, "maxItems": 18, "items": {"$ref": "#/$defs/control"}},
     "summary": {
       "type": "object",
       "additionalProperties": false,
       "required": ["model_count", "run_case_count", "safe_run_count", "safe_run_pass_count", "hostile_run_count", "hostile_counterexample_count", "repeat_match_count", "negative_control_count", "negative_control_pass_count", "normalized_trace_count", "implementation_trace_cross_check_count", "failed_check_count"],
       "properties": {
-        "model_count": {"const": 3},
-        "run_case_count": {"const": 7},
-        "safe_run_count": {"const": 3},
-        "safe_run_pass_count": {"const": 3},
-        "hostile_run_count": {"const": 4},
-        "hostile_counterexample_count": {"const": 4},
-        "repeat_match_count": {"const": 7},
-        "negative_control_count": {"const": 14},
-        "negative_control_pass_count": {"const": 14},
-        "normalized_trace_count": {"const": 4},
+        "model_count": {"const": 4},
+        "run_case_count": {"const": 12},
+        "safe_run_count": {"const": 4},
+        "safe_run_pass_count": {"const": 4},
+        "hostile_run_count": {"const": 8},
+        "hostile_counterexample_count": {"const": 8},
+        "repeat_match_count": {"const": 12},
+        "negative_control_count": {"const": 18},
+        "negative_control_pass_count": {"const": 18},
+        "normalized_trace_count": {"const": 8},
         "implementation_trace_cross_check_count": {"const": 0},
         "failed_check_count": {"const": 0}
       }
     },
-    "assumptions": {"type": "array", "minItems": 6, "items": {"type": "string"}},
-    "open_work": {"type": "array", "minItems": 5, "items": {"type": "string"}},
+    "assumptions": {"type": "array", "minItems": 7, "items": {"type": "string"}},
+    "open_work": {"type": "array", "minItems": 4, "items": {"type": "string"}},
     "claim_boundary": {
       "type": "object",
       "additionalProperties": false,
@@ -113,8 +113,8 @@
       "required": ["id", "model_id", "case_id", "mode", "status", "expected_exit_code", "observed_exit_code", "expected_invariant_violation", "observed_invariant_violation", "generated_states", "distinct_states", "left_on_queue", "depth", "trace", "trace_sha256", "repeat_exact_match", "raw_output_public", "command_sha256"],
       "properties": {
         "id": {"type": "string"},
-        "model_id": {"enum": ["boot_slot_rollback", "capability_revocation", "virtual_memory_ownership"]},
-        "case_id": {"enum": ["safe", "unsafe_rollback", "unsafe_local_revoke", "unsafe_stale_mapping", "unsafe_early_reuse"]},
+        "model_id": {"enum": ["boot_slot_rollback", "capability_revocation", "virtual_memory_ownership", "capability_mediated_ipc"]},
+        "case_id": {"enum": ["safe", "unsafe_rollback", "unsafe_local_revoke", "unsafe_stale_mapping", "unsafe_early_reuse", "unsafe_unauthorized_call", "unsafe_token_reuse", "unsafe_stale_reply", "unsafe_leaky_teardown"]},
         "mode": {"enum": ["safe", "hostile"]},
         "status": {"const": "pass"},
         "expected_exit_code": {"enum": [0, 12]},
