@@ -21,7 +21,7 @@ The public repository must not contain:
 
 Content-addressed public manifests may preserve an excluded input's stable ID, byte count, digest, classification, and claim boundary. They must not expose private local paths or reconstructable private content.
 
-Public signing evidence may include public keys, public-key fingerprints, allowed-signers policy, revocation records, detached signatures, signed tags, and verification receipts. It must never include a private key, hardware-key recovery material, passphrase, seed, TPM object, credential, or secret-bearing command output. The reserved ADR evidence paths are individually allowlisted and remain absent until owner-authorized signing.
+Public governance evidence may include the public-safe owner-response source and receipt, public keys, public-key fingerprints, allowed-signers policy, revocation records, detached signatures, signed tags, and verification receipts. It must never include a private key, hardware-key handle or recovery material, passphrase, seed, TPM object, credential, or secret-bearing command output. The owner-response receipt is allowlisted; public keys, signatures, tags, and signing receipts remain absent until separately authorized.
 
 The public N0 owner decision packet may include exact public source digests, proposed dispositions, advisory recommendations, objective definitions, custody-profile identifiers, an unfilled response template, and negative-control results. It must keep every owner selection unselected until an explicit response and must never contain a public key before fingerprint review, private material, credentials, signatures, merge authorization, tag authorization, or publication authorization.
 

@@ -27,6 +27,8 @@ READINESS_RELATIVE = "runs/adr_ratification_readiness.json"
 MANIFEST_RELATIVE = "runs/adr_ratification_manifest.json"
 SIGNATURE_RELATIVE = "runs/adr_ratification_manifest.json.sig"
 RECEIPT_RELATIVE = "runs/adr_ratification_receipt.json"
+OWNER_RESPONSE_RELATIVE = "specs/n0-owner-response.json"
+OWNER_RESPONSE_RECEIPT_RELATIVE = "runs/n0_owner_response_receipt.json"
 
 ADR_NAMES = (
     "0001-native-pooleos-constitution.md",
@@ -226,10 +228,21 @@ def build_readiness(root: Path = ROOT) -> dict[str, Any]:
     objective_targets = objectives["targets"]
     measured_target_count = sum(target.get("evidence_status") != "not_measured" for target in objective_targets)
     objectives_owner = objectives["owner_ratification"]
+    owner_response = _read_json(root / OWNER_RESPONSE_RELATIVE)
+    response_selections = owner_response["selections"]
+    owner_direction_recorded = (
+        response_selections.get("adr_0003") == "accept_exactly_as_written"
+        and response_selections.get("adr_0004") == "accept_exactly_as_written"
+        and response_selections.get("workstation_v1_and_38_targets") == "accept_exactly_as_written"
+    )
     bound_sources = [bind_file(root, path) for path in REQUIRED_BOUND_SOURCES]
     status_counts = Counter(item["source_status"] for item in adrs)
     signers, signer_errors = parse_allowed_signers(root, policy)
     artifacts = {
+        "owner_response_receipt": {
+            "path": OWNER_RESPONSE_RECEIPT_RELATIVE,
+            "present": (root / OWNER_RESPONSE_RECEIPT_RELATIVE).is_file(),
+        },
         "manifest": {"path": MANIFEST_RELATIVE, "present": (root / MANIFEST_RELATIVE).is_file()},
         "signature": {"path": SIGNATURE_RELATIVE, "present": (root / SIGNATURE_RELATIVE).is_file()},
         "receipt": {"path": RECEIPT_RELATIVE, "present": (root / RECEIPT_RELATIVE).is_file()},
@@ -255,7 +268,9 @@ def build_readiness(root: Path = ROOT) -> dict[str, Any]:
     owner_actions = [
         {
             "id": "OWNER-OBJECTIVES-DISPOSITION-001",
-            "status": "pending",
+            "status": "satisfied" if (
+                objectives_owner["profile_accepted"] and objectives_owner["target_values_accepted"]
+            ) else "pending",
             "description": "Explicitly accept, amend, or reject the candidate Workstation v1 profile and all 38 target values; definition acceptance must not claim measurement evidence.",
         },
         {
@@ -265,22 +280,26 @@ def build_readiness(root: Path = ROOT) -> dict[str, Any]:
         },
         {
             "id": "OWNER-SIGNING-CUSTODY-001",
-            "status": "pending" if not signers else "satisfied",
+            "status": "blocked_hardware_key_unavailable" if (
+                response_selections.get("governance_key_profile") == "hardware_fido2_ed25519_sk"
+                and response_selections.get("fido2_hardware_key_available") == "do_not_have"
+                and not signers
+            ) else ("pending" if not signers else "satisfied"),
             "description": "Choose an allowed owner-controlled SSH governance-key profile and record its public key and fingerprint without publishing private material.",
         },
         {
             "id": "OWNER-DETACHED-SIGN-001",
-            "status": "pending" if not artifacts["signature"]["present"] else "evidence_present_unverified",
+            "status": "not_authorized" if not artifacts["signature"]["present"] else "evidence_present_unverified",
             "description": "Sign the canonical manifest with the PooleOS ADR namespace and verify it against the public allowed-signers and revocation files.",
         },
         {
             "id": "OWNER-SIGNED-TAG-001",
-            "status": "pending",
+            "status": "not_authorized",
             "description": "Create the non-replaceable owner-signed annotated architecture baseline tag over the revision carrying the manifest and detached signature.",
         },
         {
             "id": "OWNER-PUBLISH-RECEIPT-001",
-            "status": "pending" if not artifacts["receipt"]["present"] else "evidence_present_unverified",
+            "status": "not_authorized" if not artifacts["receipt"]["present"] else "evidence_present_unverified",
             "description": "Publish the exact main revision and signed tag, verify remote object identities, and retain the machine receipt.",
         },
     ]
@@ -289,7 +308,7 @@ def build_readiness(root: Path = ROOT) -> dict[str, Any]:
         "schema_version": "1.1",
         "artifact_kind": "pooleos_adr_ratification_readiness",
         "status_date": policy["status_date"],
-        "status": "pending_owner_action",
+        "status": "owner_direction_recorded_hardware_key_pending",
         "selected_move_id": "N0-RATIFY-001",
         "production_ready": False,
         "production_promotion_allowed": False,
@@ -328,6 +347,13 @@ def build_readiness(root: Path = ROOT) -> dict[str, Any]:
             "revocation_path": policy["signature"]["revocation_path"],
             "trusted_signer_count": len(signers),
             "signer_file_errors": signer_errors,
+            "owner_response": bind_file(root, OWNER_RESPONSE_RELATIVE),
+            "selected_key_profile": response_selections["governance_key_profile"],
+            "hardware_key_availability": response_selections["fido2_hardware_key_available"],
+            "hardware_key_available": False,
+            "provisional_software_key_risk": response_selections["provisional_software_key_risk_accepted"],
+            "public_key_publication": response_selections["public_key_publication"],
+            "key_generation_authorized": owner_response["execution_authorization"]["key_generation"],
         },
         "artifacts": artifacts,
         "summary": {
@@ -336,19 +362,22 @@ def build_readiness(root: Path = ROOT) -> dict[str, Any]:
             "required_bound_source_count": len(bound_sources),
             "objectives_target_count": len(objective_targets),
             "objectives_measured_target_count": measured_target_count,
-            "objectives_owner_acceptance_pending": True,
+            "objectives_owner_acceptance_pending": not (
+                objectives_owner["profile_accepted"] and objectives_owner["target_values_accepted"]
+            ),
+            "owner_direction_recorded": owner_direction_recorded,
             "ratification_tooling_present": tooling_ready,
             "ready_for_owner_action": ready_for_owner_action,
             "ready_for_signature": ready_for_signature,
-            "blocking_owner_action_count": sum(item["status"] == "pending" for item in owner_actions),
+            "blocking_owner_action_count": sum(item["status"] != "satisfied" for item in owner_actions),
             "defined_negative_control_count": len(policy["negative_controls"]),
         },
         "owner_actions": owner_actions,
         "claim_boundary": [
-            "This readiness ledger is unsigned preparation evidence and is not owner acceptance.",
-            "The exact candidate objectives and schema are bound, but all 38 values still require explicit owner disposition.",
+            "This readiness ledger records unsigned owner direction and is not a cryptographic owner signature.",
+            "The exact objective definitions carry owner-directed acceptance, but all 38 measurements remain open.",
             "No private key, credential, recovery secret, or hardware-backed key handle is recorded.",
-            "A detached signature alone does not satisfy the signed-tag and remote-publication gates.",
+            "No key generation, signing, merge, tag, or publication action is authorized by the response receipt.",
             "Architecture ratification does not prove a bootloader, kernel, driver, desktop, or production ISO.",
         ],
     }

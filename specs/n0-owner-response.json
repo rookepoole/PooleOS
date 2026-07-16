@@ -1,0 +1,53 @@
+{
+  "amendment_details": "none",
+  "artifact_kind": "pooleos_n0_owner_response",
+  "claim_boundary": [
+    "This structured record transcribes Rooke Poole's conversational owner direction and is not a cryptographic signature.",
+    "ADR-0003 and ADR-0004 are accepted exactly as reviewed for owner-directed source status only.",
+    "The Workstation v1 profile and all 38 target values are accepted as definitions; zero measurements are accepted or claimed.",
+    "The selected governance-key profile is hardware_fido2_ed25519_sk, but no compatible hardware key is currently available.",
+    "The provisional software-key risk field is not applicable because no software-key profile was selected.",
+    "Public-key publication is deferred; this record contains no public key, private key, key handle, signature, credential, or secret.",
+    "This response does not authorize key generation, private-key use, signing, merge to main, tagging, or publication.",
+    "No architecture, implementation, hardware, measurement, release, or production claim follows from this unsigned direction record."
+  ],
+  "confirmations": {
+    "definition_acceptance_is_not_measurement_acceptance": true,
+    "no_key_generation_signing_merging_tagging_or_publication_authorized": true
+  },
+  "decision_owner": {
+    "github": "rookepoole",
+    "name": "Rooke Poole"
+  },
+  "decision_packet": {
+    "byte_count": 60493,
+    "path": "runs/n0_owner_decision_packet.json",
+    "repository_commit": "a106e6ffcee06c4a13c67f2b949fbc1ab8f24bc9",
+    "repository_tree": "1aa4e36bf648f663ecc4661de2cc314f636bff2b",
+    "sha256": "BFE74292B2B695E49D48028B5AE9843571FC23878C355CCA9119D90729041AE0",
+    "source_set_sha256": "8F5E4C663D2D6F1BB0D6ECFC7CD85267206A3580B39C96090908DB88A0281E1F",
+    "target_set_sha256": "9C25304CDB72FD037468481BA6437F0D783A2AA496A6144DC5DE659D9CDF2BCF"
+  },
+  "execution_authorization": {
+    "key_generation": false,
+    "merge_to_main": false,
+    "private_key_use": false,
+    "publication": false,
+    "signing": false,
+    "tagging": false
+  },
+  "production_promotion_allowed": false,
+  "response_version": "POOLEOS-N0-OWNER-RESPONSE-V1",
+  "schema_version": "1.0",
+  "selections": {
+    "adr_0003": "accept_exactly_as_written",
+    "adr_0004": "accept_exactly_as_written",
+    "fido2_hardware_key_available": "do_not_have",
+    "governance_key_profile": "hardware_fido2_ed25519_sk",
+    "provisional_software_key_risk_accepted": "not_applicable",
+    "public_key_publication": "not_yet",
+    "workstation_v1_and_38_targets": "accept_exactly_as_written"
+  },
+  "status": "complete_owner_direction_unsigned",
+  "status_date": "2026-07-16"
+}

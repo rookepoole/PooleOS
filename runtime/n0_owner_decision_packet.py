@@ -19,6 +19,7 @@ PACKET_SCHEMA_RELATIVE = "specs/n0-owner-decision-packet.schema.json"
 PACKET_DOCUMENT_RELATIVE = "docs/n0-owner-decision-packet.md"
 CEREMONY_RELATIVE = "docs/adr-ratification-ceremony.md"
 CONSTITUTION_RELATIVE = "specs/native-architecture-constitution.json"
+OWNER_RESPONSE_RELATIVE = "specs/n0-owner-response.json"
 
 DISPOSITIONS = ["accept_exactly_as_written", "amend_before_acceptance", "reject_and_supersede"]
 OBJECTIVE_DISPOSITIONS = ["accept_exactly_as_written", "amend_before_acceptance", "reject"]
@@ -382,6 +383,39 @@ def _core_rejection_reasons(value: dict[str, Any], root: Path) -> list[str]:
     return errors
 
 
+def _frozen_packet_rejection_reasons(value: dict[str, Any], root: Path) -> list[str]:
+    """Validate the accepted pre-response packet without comparing it to changed live sources."""
+    errors: list[str] = []
+    try:
+        response = _read_json(root / OWNER_RESPONSE_RELATIVE)
+        binding = response["decision_packet"]
+        stored_raw = (root / PACKET_RELATIVE).read_bytes()
+        stored = json.loads(stored_raw.decode("utf-8"))
+        if not isinstance(stored, dict):
+            raise ValueError("stored decision packet root is not an object")
+    except (OSError, UnicodeError, ValueError, KeyError, json.JSONDecodeError) as error:
+        return [f"frozen packet binding is unavailable: {type(error).__name__}: {error}"]
+
+    candidate_raw = canonical_json_bytes(value)
+    if binding.get("path") != PACKET_RELATIVE:
+        errors.append("owner response binds an unexpected decision-packet path")
+    if sha256_bytes(candidate_raw) != binding.get("sha256"):
+        errors.append("packet does not match the owner-accepted historical SHA-256")
+    if len(candidate_raw) != binding.get("byte_count"):
+        errors.append("packet does not match the owner-accepted historical byte count")
+    if stored_raw != canonical_json_bytes(stored):
+        errors.append("stored historical packet is not canonical JSON")
+    if sha256_bytes(stored_raw) != binding.get("sha256"):
+        errors.append("stored historical packet digest does not match the owner response")
+    if value != stored:
+        errors.append("packet differs from the frozen historical packet artifact")
+    if value.get("source_set", {}).get("sha256") != binding.get("source_set_sha256"):
+        errors.append("packet source-set digest differs from the owner response")
+    if value.get("decisions", {}).get("objectives", {}).get("target_set_sha256") != binding.get("target_set_sha256"):
+        errors.append("packet target-set digest differs from the owner response")
+    return errors
+
+
 def _run_negative_controls(core: dict[str, Any], root: Path) -> list[dict[str, str]]:
     mutations: list[tuple[str, Any]] = []
 
@@ -428,7 +462,10 @@ def packet_rejection_reasons(value: dict[str, Any], root: Path = ROOT) -> list[s
     except (OSError, ValueError, json.JSONDecodeError) as error:
         errors.append(f"packet schema unavailable: {type(error).__name__}: {error}")
 
-    errors.extend(_core_rejection_reasons(value, root))
+    if (root / OWNER_RESPONSE_RELATIVE).is_file():
+        errors.extend(_frozen_packet_rejection_reasons(value, root))
+    else:
+        errors.extend(_core_rejection_reasons(value, root))
     validation = value.get("validation", {})
     controls = validation.get("negative_controls", []) if isinstance(validation, dict) else []
     if validation.get("schema_and_semantics_valid") is not True:
@@ -445,6 +482,12 @@ def packet_rejection_reasons(value: dict[str, Any], root: Path = ROOT) -> list[s
 
 
 def build_packet(root: Path = ROOT) -> dict[str, Any]:
+    if (root / OWNER_RESPONSE_RELATIVE).is_file():
+        packet = _read_json(root / PACKET_RELATIVE)
+        errors = packet_rejection_reasons(packet, root)
+        if errors:
+            raise ValueError("invalid frozen N0 owner decision packet: " + "; ".join(errors[:8]))
+        return packet
     packet = _build_core(root)
     controls = _run_negative_controls(packet, root)
     packet["validation"] = {

@@ -32,15 +32,15 @@ def main() -> int:
             )
         if readiness_path.read_bytes() != native_v1_objectives.canonical_json_bytes(expected):
             raise native_v1_objectives.ObjectivesError("readiness ledger does not reproduce exactly")
-        if readiness["owner_boundary"]["profile_accepted"] or readiness["production_promotion_allowed"]:
-            raise native_v1_objectives.ObjectivesError("candidate objectives overclaim owner acceptance")
+        if not readiness["owner_boundary"]["profile_accepted"] or readiness["production_promotion_allowed"]:
+            raise native_v1_objectives.ObjectivesError("objectives omit owner direction or overclaim production promotion")
     except (OSError, ValueError, KeyError, json.JSONDecodeError, native_v1_objectives.ObjectivesError) as error:
         print(f"NATIVE_V1_OBJECTIVES FAIL {type(error).__name__}: {error}")
         return 1
     summary = readiness["summary"]
     print(
         f"NATIVE_V1_OBJECTIVES PASS targets={summary['target_count']} measured=0 "
-        f"negatives={summary['negative_control_pass_count']}/10 owner_pending=true production_ready=false"
+        f"negatives={summary['negative_control_pass_count']}/10 owner_direction=true signature=false production_ready=false"
     )
     return 0
 

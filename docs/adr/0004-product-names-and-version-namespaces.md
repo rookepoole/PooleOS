@@ -1,9 +1,11 @@
 # ADR-0004: Product Names and Version Namespaces
 
-Status: proposed  
+Status: accepted-owner-directed
+
 Date: 2026-07-16  
 Decision owner: Rooke Poole  
-Ratification: owner acceptance and trademark review pending  
+Ratification: owner-directed acceptance recorded; cryptographic signature and trademark review pending
+
 Supersedes: none  
 Superseded by: none  
 Requirement mappings: N0.3, section 000.3  
@@ -52,4 +54,3 @@ The proposed names reserve implementation space without claiming trademark clear
 ## Evidence and Exit Gate
 
 Owner acceptance, conflict and trademark research, generated constant registries, duplicate/magic collision tests, and independent ABI fixtures are required before this ADR becomes accepted.
-

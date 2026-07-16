@@ -17,8 +17,8 @@
   "bindings": {
     "toolchain_lock": {
       "path": "specs/native-toolchain-lock.json",
-      "sha256": "0B3D67CA0FF74FF04425A2B90B4DF6143232C3E5524C6B3F79E456923485AB18",
-      "byte_count": 3965
+      "sha256": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E",
+      "byte_count": 4017
     },
     "target_contract": {
       "path": "specs/native-target-contract.json",
@@ -453,7 +453,7 @@
     "The channel manifest detached signature has not been independently verified.",
     "The freestanding C17 compiler, assembler, ABI headers, image tools, QEMU, and firmware are not pinned.",
     "Rust source, LLVM source, LLD source, compiler-builtins source, SBOM, and rebuild-from-source provenance remain open.",
-    "ADR-0003 remains proposed and cannot be promoted by this lock."
+    "ADR-0003 has owner-directed acceptance but remains cryptographically unsigned and cannot be promoted by this lock."
   ],
   "claim_boundary": [
     "This is one-host compiler, linker, format, reproducibility, and leakage qualification evidence.",

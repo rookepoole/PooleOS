@@ -1,0 +1,283 @@
+{
+  "accepted_decisions": {
+    "adr_0003": {
+      "owner_direction_recorded": true,
+      "pre_disposition_source": {
+        "byte_count": 4108,
+        "path": "docs/adr/0003-language-and-toolchain-split.md",
+        "sha256": "6F874FDBBA98CE728A230C4AF7798F202D09A63CE7394510C810C1E65932B1B0"
+      },
+      "selection": "accept_exactly_as_written"
+    },
+    "adr_0004": {
+      "owner_direction_recorded": true,
+      "pre_disposition_source": {
+        "byte_count": 2666,
+        "path": "docs/adr/0004-product-names-and-version-namespaces.md",
+        "sha256": "9798309FC902C2F5E5A8206751DA4423532E25690A2AD23AD4DC116F3566A637"
+      },
+      "selection": "accept_exactly_as_written"
+    },
+    "custody": {
+      "hardware_key_availability": "do_not_have",
+      "key_generation_authorized": false,
+      "private_material_present": false,
+      "profile_selection_recorded": true,
+      "provisional_software_key_risk": "not_applicable",
+      "selected_profile": "hardware_fido2_ed25519_sk"
+    },
+    "objectives": {
+      "definition_acceptance_recorded": true,
+      "measured_target_count": 0,
+      "measurement_evidence_accepted": false,
+      "pre_disposition_source": {
+        "byte_count": 33416,
+        "path": "specs/native-v1-objectives.json",
+        "sha256": "525946A7AA7A7D0F27682810EDD636D7E743C32548ACE442AB208B680A7E8584"
+      },
+      "profile_id": "POOLEOS-WORKSTATION-V1-CANDIDATE",
+      "selection": "accept_exactly_as_written",
+      "target_count": 38,
+      "target_set_sha256": "9C25304CDB72FD037468481BA6437F0D783A2AA496A6144DC5DE659D9CDF2BCF"
+    },
+    "public_key_publication": {
+      "public_key_present": false,
+      "publication_authorized": false,
+      "selection": "not_yet"
+    }
+  },
+  "artifact_kind": "pooleos_n0_owner_response_receipt",
+  "claim_boundary": [
+    "This receipt validates an unsigned conversational owner-direction record; it is not an owner cryptographic signature.",
+    "The historical decision packet remains byte-frozen with every original selection unselected so the reviewed input is not rewritten.",
+    "Owner-directed source status does not satisfy the required detached-signature, signed-tag, or remote-publication gates.",
+    "All 38 target definitions are accepted, but all 38 measurements remain open and zero targets are proven met.",
+    "No public key, private key, key handle, passphrase, credential, recovery secret, signature, or publication receipt is present.",
+    "The selected hardware-backed profile cannot be executed because the owner reports no FIDO2 hardware key is available.",
+    "Key generation, private-key use, signing, merge to main, tagging, and publication each remain explicitly unauthorized.",
+    "This receipt does not prove PooleBoot, PooleKernel, native services, PooleGlass, PooleGlyph, PDC backends, hardware support, or a production ISO."
+  ],
+  "decision_packet": {
+    "byte_count": 60493,
+    "historical_snapshot_frozen": true,
+    "path": "runs/n0_owner_decision_packet.json",
+    "repository_commit": "a106e6ffcee06c4a13c67f2b949fbc1ab8f24bc9",
+    "repository_tree": "1aa4e36bf648f663ecc4661de2cc314f636bff2b",
+    "sha256": "BFE74292B2B695E49D48028B5AE9843571FC23878C355CCA9119D90729041AE0",
+    "source_set_sha256": "8F5E4C663D2D6F1BB0D6ECFC7CD85267206A3580B39C96090908DB88A0281E1F",
+    "target_set_sha256": "9C25304CDB72FD037468481BA6437F0D783A2AA496A6144DC5DE659D9CDF2BCF"
+  },
+  "effective_source_state": {
+    "adr_0003": {
+      "binding": {
+        "byte_count": 4164,
+        "path": "docs/adr/0003-language-and-toolchain-split.md",
+        "sha256": "AB974B13E8A22C04C35A6E3D68FA66EA7B8A97D0545A3E712031CD0B92F8A192"
+      },
+      "cryptographically_ratified": false,
+      "source_status": "accepted-owner-directed"
+    },
+    "adr_0004": {
+      "binding": {
+        "byte_count": 2721,
+        "path": "docs/adr/0004-product-names-and-version-namespaces.md",
+        "sha256": "C1FB684D0404EC0B4CA89B9AF3E454B654FF546BD22736AF03E35ECFF1FC4002"
+      },
+      "cryptographically_ratified": false,
+      "source_status": "accepted-owner-directed"
+    },
+    "all_selected_source_dispositions_recorded": true,
+    "objectives": {
+      "binding": {
+        "byte_count": 33648,
+        "path": "specs/native-v1-objectives.json",
+        "sha256": "43D6F515C76D59D738A284703407E17C4BB69534E5FBAAB94979DE34FA835E60"
+      },
+      "cryptographic_signature_present": false,
+      "measured_target_count": 0,
+      "profile_accepted": true,
+      "target_values_accepted": true
+    }
+  },
+  "execution_boundary": {
+    "key_generation_authorized": false,
+    "merge_to_main_authorized": false,
+    "private_key_use_authorized": false,
+    "publication_authorized": false,
+    "signing_authorized": false,
+    "tagging_authorized": false
+  },
+  "next_gate": {
+    "blocked": true,
+    "blocking_condition": "selected_fido2_hardware_key_not_available",
+    "move_id": "N0-HW-KEY-ACQUIRE-001",
+    "owner_step": "Obtain a compatible FIDO2 security key; do not generate or register any key material until a separate explicit approval is recorded.",
+    "separate_approval_still_required": true
+  },
+  "owner_actions": [
+    {
+      "description": "ADR-0003 and ADR-0004 exact-acceptance direction is recorded in source status without a signature claim.",
+      "id": "OWNER-ADR-DISPOSITION-001",
+      "status": "satisfied_owner_direction_recorded"
+    },
+    {
+      "description": "The Workstation v1 profile and all 38 target definitions are accepted; every target remains unmeasured.",
+      "id": "OWNER-OBJECTIVES-DISPOSITION-001",
+      "status": "satisfied_definitions_only"
+    },
+    {
+      "description": "hardware_fido2_ed25519_sk is selected, but the owner reports no FIDO2 hardware key is currently available.",
+      "id": "OWNER-SIGNING-CUSTODY-001",
+      "status": "blocked_hardware_key_unavailable"
+    },
+    {
+      "description": "Public-key publication remains not_yet and no public key or fingerprint is recorded.",
+      "id": "OWNER-PUBLIC-KEY-PUBLICATION-001",
+      "status": "deferred_by_owner"
+    },
+    {
+      "description": "Key generation or private-key use requires a separate explicit approval after compatible hardware is available.",
+      "id": "OWNER-KEY-GENERATION-001",
+      "status": "not_authorized"
+    },
+    {
+      "description": "No manifest signing is authorized or performed by this response.",
+      "id": "OWNER-DETACHED-SIGN-001",
+      "status": "not_authorized"
+    },
+    {
+      "description": "No signed architecture tag is authorized or present.",
+      "id": "OWNER-SIGNED-TAG-001",
+      "status": "not_authorized"
+    },
+    {
+      "description": "Merge, public-key registration, tag publication, and release publication remain separately gated.",
+      "id": "OWNER-PUBLISH-RECEIPT-001",
+      "status": "not_authorized"
+    }
+  ],
+  "production_promotion_allowed": false,
+  "production_ready": false,
+  "response_source": {
+    "byte_count": 2646,
+    "path": "specs/n0-owner-response.json",
+    "sha256": "CC188374DFC2FDDE78B3461DCCAF0F739FB2628D7E830B8E7C6A0F649DC3F5AF"
+  },
+  "schema_version": "1.0",
+  "selected_move_id": "N0-OWNER-RESPONSE-001",
+  "status": "owner_direction_recorded_hardware_key_unavailable",
+  "status_date": "2026-07-16",
+  "trust_state": {
+    "detached_signature_present": false,
+    "hardware_acquisition_required": true,
+    "hardware_key_available": false,
+    "public_key_present": false,
+    "remote_publication_receipt_present": false,
+    "selected_key_profile": "hardware_fido2_ed25519_sk",
+    "signed_tag_present": false,
+    "trusted_signer_count": 0
+  },
+  "validation": {
+    "negative_control_count": 16,
+    "negative_control_pass_count": 16,
+    "negative_controls": [
+      {
+        "expected": "reject",
+        "id": "N0-RESPONSE-NEG-STALE-PACKET",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-RESPONSE-NEG-MISSING-SELECTION",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-RESPONSE-NEG-UNRESOLVED-PLACEHOLDER",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-RESPONSE-NEG-INVALID-DISPOSITION",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-RESPONSE-NEG-PROVISIONAL-RISK-MISMATCH",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-RESPONSE-NEG-MEASUREMENT-OVERCLAIM",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-RESPONSE-NEG-UNDECLARED-AMENDMENT",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-RESPONSE-NEG-MISSING-CONFIRMATION",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-RESPONSE-NEG-PRIVATE-MATERIAL",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-RESPONSE-NEG-KEY-GENERATION-AUTHORIZATION",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-RESPONSE-NEG-PRIVATE-KEY-USE-AUTHORIZATION",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-RESPONSE-NEG-SIGNING-AUTHORIZATION",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-RESPONSE-NEG-MERGE-AUTHORIZATION",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-RESPONSE-NEG-TAGGING-AUTHORIZATION",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-RESPONSE-NEG-PUBLICATION-AUTHORIZATION",
+        "observed": "reject",
+        "status": "pass"
+      },
+      {
+        "expected": "reject",
+        "id": "N0-RESPONSE-NEG-PRODUCTION-PROMOTION",
+        "observed": "reject",
+        "status": "pass"
+      }
+    ],
+    "schema_and_semantics_valid": true
+  }
+}

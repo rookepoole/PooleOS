@@ -9,7 +9,7 @@
     "schema_version": {"const": "1.0"},
     "artifact_kind": {"const": "pooleos_native_v1_objectives_readiness"},
     "status_date": {"const": "2026-07-16"},
-    "status": {"enum": ["invalid", "consistent_candidate_owner_ratification_pending"]},
+    "status": {"enum": ["invalid", "owner_direction_accepted_signature_pending"]},
     "selected_move_id": {"const": "N0-OBJECTIVES-001"},
     "profile_id": {"const": "POOLEOS-WORKSTATION-V1-CANDIDATE"},
     "production_ready": {"const": false},
@@ -52,7 +52,7 @@
             "performance": {"const": 10}
           }
         },
-        "definition_pending_owner_count": {"const": 38},
+        "definition_pending_owner_count": {"const": 0},
         "measured_target_count": {"const": 0},
         "unmeasured_target_ids": {"type": "array", "minItems": 38, "maxItems": 38, "items": {"type": "string"}, "uniqueItems": true}
       }
@@ -62,10 +62,10 @@
       "required": ["ratification_required", "profile_accepted", "target_values_accepted", "cryptographic_signature_present", "ready_for_owner_review", "ready_for_signature"],
       "properties": {
         "ratification_required": {"const": true},
-        "profile_accepted": {"const": false},
-        "target_values_accepted": {"const": false},
+        "profile_accepted": {"const": true},
+        "target_values_accepted": {"const": true},
         "cryptographic_signature_present": {"const": false},
-        "ready_for_owner_review": {"const": true},
+        "ready_for_owner_review": {"const": false},
         "ready_for_signature": {"const": false}
       }
     },
@@ -91,7 +91,7 @@
         "consistency_pass": {"const": true},
         "target_count": {"const": 38},
         "measured_target_count": {"const": 0},
-        "blocking_owner_action_count": {"const": 3},
+        "blocking_owner_action_count": {"const": 1},
         "negative_control_count": {"const": 10},
         "negative_control_pass_count": {"const": 10}
       }

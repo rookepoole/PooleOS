@@ -9,7 +9,7 @@
     "schema_version": {"const": "1.1"},
     "artifact_kind": {"const": "pooleos_adr_ratification_readiness"},
     "status_date": {"type": "string"},
-    "status": {"enum": ["pending_owner_action", "ratified"]},
+    "status": {"enum": ["pending_owner_action", "owner_direction_recorded_hardware_key_pending", "ratified"]},
     "selected_move_id": {"const": "N0-RATIFY-001"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"type": "boolean"},
@@ -42,17 +42,17 @@
             "profile_id": {"const": "POOLEOS-WORKSTATION-V1-CANDIDATE"},
             "target_count": {"const": 38},
             "measured_target_count": {"const": 0},
-            "source_profile_accepted": {"const": false},
-            "source_target_values_accepted": {"const": false},
-            "owner_ratification_pending": {"const": true},
+            "source_profile_accepted": {"const": true},
+            "source_target_values_accepted": {"const": true},
+            "owner_ratification_pending": {"const": false},
             "schema_and_semantics_valid": {"const": true}
           }
         }
       }
     },
-    "trust_bootstrap": {"type": "object", "required": ["backend", "format", "namespace", "signer_principal", "allowed_signers_path", "revocation_path", "trusted_signer_count", "signer_file_errors"]},
+    "trust_bootstrap": {"type": "object", "required": ["backend", "format", "namespace", "signer_principal", "allowed_signers_path", "revocation_path", "trusted_signer_count", "signer_file_errors", "owner_response", "selected_key_profile", "hardware_key_availability", "hardware_key_available", "provisional_software_key_risk", "public_key_publication", "key_generation_authorized"]},
     "artifacts": {"type": "object", "required": ["manifest", "signature", "receipt"]},
-    "summary": {"type": "object", "required": ["policy_schema_valid", "required_adr_set_complete", "required_bound_source_count", "objectives_target_count", "objectives_measured_target_count", "objectives_owner_acceptance_pending", "ratification_tooling_present", "ready_for_owner_action", "ready_for_signature", "blocking_owner_action_count", "defined_negative_control_count"]},
+    "summary": {"type": "object", "required": ["policy_schema_valid", "required_adr_set_complete", "required_bound_source_count", "objectives_target_count", "objectives_measured_target_count", "objectives_owner_acceptance_pending", "owner_direction_recorded", "ratification_tooling_present", "ready_for_owner_action", "ready_for_signature", "blocking_owner_action_count", "defined_negative_control_count"]},
     "owner_actions": {"type": "array", "minItems": 6, "maxItems": 6, "items": {"type": "object", "required": ["id", "status", "description"]}},
     "claim_boundary": {"type": "array", "minItems": 5, "items": {"type": "string"}}
   }

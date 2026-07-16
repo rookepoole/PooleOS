@@ -1,6 +1,6 @@
 # PooleOS ADR Ratification and Governance-Key Ceremony
 
-Status: scope-hardened tooling frozen; objective/ADR disposition, custody choice, signatures, tag, and publication pending
+Status: owner direction recorded; selected hardware key unavailable; signatures, tag, merge, and publication unauthorized
 Date: 2026-07-16
 Move: `N0-RATIFY-001`
 Decision and signing authority: Rooke Poole
@@ -13,27 +13,27 @@ The ceremony does not generate or approve a Secure Boot key, release-media key, 
 
 ## Current Evidence
 
-- ADR-0001, ADR-0002, and ADR-0005 through ADR-0007 are `accepted-owner-directed` but unsigned.
-- ADR-0003 and ADR-0004 remain `proposed` and require explicit owner disposition.
-- `POOLEOS-WORKSTATION-V1-CANDIDATE` defines 38 candidate target values. Rooke Poole has not accepted those values and zero targets have measured implementation evidence.
+- ADR-0001 through ADR-0007 are `accepted-owner-directed` but cryptographically unsigned.
+- `POOLEOS-WORKSTATION-V1-CANDIDATE` carries owner-directed acceptance for all 38 target definitions; zero targets have measured implementation evidence.
+- `specs/n0-owner-response.json` and `runs/n0_owner_response_receipt.json` bind the completed response to the exact historical packet and pass 16/16 fail-closed controls.
+- `hardware_fido2_ed25519_sk` is selected, but Rooke Poole reports no FIDO2 hardware key is currently available. Software-key risk is therefore `not_applicable`.
+- Public-key publication remains `not_yet`. Key generation, private-key use, signing, merge, tagging, and publication remain separately gated and unauthorized.
 - The public allowed-signers file has zero keys. No local Git signing key, GPG backend, or GitHub SSH signing key was configured when this package was generated.
 - PRs #1 through #5 are merged into public `main`. Required signed-commit enforcement must not be enabled until the remaining pre-signing history and merge strategy are resolved under `N1-SCM-CLOSE-001`.
-- `docs/n0-owner-decision-packet.md` and `runs/n0_owner_decision_packet.json` provide a deterministic review surface over 16 exact sources, both proposed ADRs, all 38 targets, all allowed custody profiles, and 12 fail-closed controls. Every selection remains unselected; the packet is not acceptance, signing authorization, or publication authorization.
+- `docs/n0-owner-decision-packet.md` and `runs/n0_owner_decision_packet.json` remain a byte-frozen historical review surface over 16 exact sources. Every original packet selection remains unselected so the reviewed input is not rewritten after the response.
 
-## Owner Decisions Required
+## Recorded Decisions and Remaining Gates
 
-Review and complete the response form in `docs/n0-owner-decision-packet.md` before changing an ADR status or preparing a manifest. The packet's recommendations are advisory. A response must explicitly dispose every listed decision and must not be inferred from general project direction.
+The completed response records the following unsigned owner direction:
 
-1. Dispose ADR-0003 and ADR-0004 as `accept exactly as written`, `amend before acceptance`, or `reject and supersede`.
-2. Dispose the exact candidate Workstation v1 profile and all 38 target values as `accept exactly as written`, `amend before acceptance`, or `reject`. Accepting definitions does not accept measurements or claim that PooleOS meets them.
-3. Choose one governance-key profile:
-   - `hardware_fido2_ed25519_sk`: recommended; hardware-backed and owner-presence gated.
-   - `hardware_fido2_ecdsa_sk`: hardware fallback when Ed25519-SK is unsupported.
-   - `passphrase_ed25519_provisional`: pre-production fallback only, with explicit acceptance of the lower-assurance software custody risk.
-4. Approve publication of the public key and fingerprint to this repository and as a GitHub SSH signing key.
-5. Physically authorize the detached signature and signed tag.
+1. ADR-0003 and ADR-0004: accept exactly as written.
+2. Workstation v1 and all 38 target values: accept exactly as definitions, with no measurement acceptance.
+3. Governance-key profile: `hardware_fido2_ed25519_sk`; hardware availability: `do_not_have`; software-key risk: `not_applicable`.
+4. Public-key publication: `not_yet`.
 
-An amendment or rejection stops this ceremony. The affected ADR must be revised or superseded, the baseline regenerated, and the complete set reviewed again.
+The next gate is `N0-HW-KEY-ACQUIRE-001`: Rooke Poole obtains a compatible FIDO2 security key. After that, key generation or use still requires a separate explicit approval. Public fingerprint review, allowed-signer registration, detached signing, merge, signed tagging, and publication each remain later separately gated actions.
+
+Any future amendment or rejection stops this ceremony. The affected source must be revised or superseded, the baseline regenerated, and the complete set reviewed again.
 
 ## Custody Rules
 

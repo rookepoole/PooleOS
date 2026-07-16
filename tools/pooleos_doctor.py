@@ -139,6 +139,17 @@ def check_n0_owner_decision_packet() -> CheckResult:
     )
 
 
+def check_n0_owner_response_receipt() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_n0_owner_response_receipt()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
 def check_native_toolchain_qualification() -> CheckResult:
     from tools import pooleos_release_gate
 
@@ -3239,6 +3250,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "tools" / "verify_native_v1_objectives.py",
                 ROOT / "tools" / "generate_adr_ratification_readiness.py",
                 ROOT / "tools" / "generate_n0_owner_decision_packet.py",
+                ROOT / "tools" / "generate_n0_owner_response_receipt.py",
                 ROOT / "tools" / "prepare_adr_ratification.py",
                 ROOT / "tools" / "verify_adr_ratification.py",
                 ROOT / "tools" / "check_native_release_architecture.py",
@@ -3257,6 +3269,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runtime" / "native_v1_objectives.py",
                 ROOT / "runtime" / "adr_ratification.py",
                 ROOT / "runtime" / "n0_owner_decision_packet.py",
+                ROOT / "runtime" / "n0_owner_response.py",
                 ROOT / "runtime" / "hardware_target.py",
                 ROOT / "runtime" / "native_tier0.py",
                 ROOT / "runtime" / "native_models.py",
@@ -3279,6 +3292,11 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runs" / "n0_owner_decision_packet.json",
                 ROOT / "specs" / "n0-owner-decision-packet.schema.json",
                 ROOT / "docs" / "n0-owner-decision-packet.md",
+                ROOT / "specs" / "n0-owner-response.json",
+                ROOT / "specs" / "n0-owner-response.schema.json",
+                ROOT / "specs" / "n0-owner-response-receipt.schema.json",
+                ROOT / "runs" / "n0_owner_response_receipt.json",
+                ROOT / "docs" / "n0-owner-response-receipt.md",
                 ROOT / "runs" / "native_toolchain_qualification.json",
                 ROOT / "runs" / "tier1_hardware_observation.json",
                 ROOT / "runs" / "hardware_target_readiness.json",
@@ -3356,6 +3374,7 @@ def main(argv: list[str] | None = None) -> int:
     checks.append(check_native_v1_objectives_readiness())
     checks.append(check_adr_ratification_readiness())
     checks.append(check_n0_owner_decision_packet())
+    checks.append(check_n0_owner_response_receipt())
     checks.append(check_native_toolchain_qualification())
     checks.append(check_hardware_target_readiness())
     checks.append(check_native_tier0_readiness())

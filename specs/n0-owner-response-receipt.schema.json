@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/n0-owner-response-receipt.schema.json",
+  "title": "PooleOS N0 owner response receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "status",
+    "selected_move_id",
+    "production_ready",
+    "production_promotion_allowed",
+    "response_source",
+    "decision_packet",
+    "accepted_decisions",
+    "effective_source_state",
+    "trust_state",
+    "execution_boundary",
+    "owner_actions",
+    "next_gate",
+    "validation",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_n0_owner_response_receipt"},
+    "status_date": {"const": "2026-07-16"},
+    "status": {"const": "owner_direction_recorded_hardware_key_unavailable"},
+    "selected_move_id": {"const": "N0-OWNER-RESPONSE-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "response_source": {"$ref": "#/$defs/binding"},
+    "decision_packet": {
+      "allOf": [
+        {"$ref": "#/$defs/binding"},
+        {
+          "type": "object",
+          "required": ["source_set_sha256", "target_set_sha256", "repository_commit", "repository_tree", "historical_snapshot_frozen"],
+          "properties": {
+            "source_set_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+            "target_set_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+            "repository_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+            "repository_tree": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+            "historical_snapshot_frozen": {"const": true}
+          }
+        }
+      ]
+    },
+    "accepted_decisions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adr_0003", "adr_0004", "objectives", "custody", "public_key_publication"],
+      "properties": {
+        "adr_0003": {"$ref": "#/$defs/adrDecision"},
+        "adr_0004": {"$ref": "#/$defs/adrDecision"},
+        "objectives": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["selection", "profile_id", "target_count", "measured_target_count", "target_set_sha256", "definition_acceptance_recorded", "measurement_evidence_accepted", "pre_disposition_source"],
+          "properties": {
+            "selection": {"const": "accept_exactly_as_written"},
+            "profile_id": {"const": "POOLEOS-WORKSTATION-V1-CANDIDATE"},
+            "target_count": {"const": 38},
+            "measured_target_count": {"const": 0},
+            "target_set_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+            "definition_acceptance_recorded": {"const": true},
+            "measurement_evidence_accepted": {"const": false},
+            "pre_disposition_source": {"$ref": "#/$defs/binding"}
+          }
+        },
+        "custody": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["selected_profile", "hardware_key_availability", "provisional_software_key_risk", "profile_selection_recorded", "key_generation_authorized", "private_material_present"],
+          "properties": {
+            "selected_profile": {"const": "hardware_fido2_ed25519_sk"},
+            "hardware_key_availability": {"const": "do_not_have"},
+            "provisional_software_key_risk": {"const": "not_applicable"},
+            "profile_selection_recorded": {"const": true},
+            "key_generation_authorized": {"const": false},
+            "private_material_present": {"const": false}
+          }
+        },
+        "public_key_publication": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["selection", "public_key_present", "publication_authorized"],
+          "properties": {
+            "selection": {"const": "not_yet"},
+            "public_key_present": {"const": false},
+            "publication_authorized": {"const": false}
+          }
+        }
+      }
+    },
+    "effective_source_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adr_0003", "adr_0004", "objectives", "all_selected_source_dispositions_recorded"],
+      "properties": {
+        "adr_0003": {"$ref": "#/$defs/liveAdr"},
+        "adr_0004": {"$ref": "#/$defs/liveAdr"},
+        "objectives": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["binding", "profile_accepted", "target_values_accepted", "cryptographic_signature_present", "measured_target_count"],
+          "properties": {
+            "binding": {"$ref": "#/$defs/binding"},
+            "profile_accepted": {"const": true},
+            "target_values_accepted": {"const": true},
+            "cryptographic_signature_present": {"const": false},
+            "measured_target_count": {"const": 0}
+          }
+        },
+        "all_selected_source_dispositions_recorded": {"const": true}
+      }
+    },
+    "trust_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["selected_key_profile", "hardware_key_available", "hardware_acquisition_required", "trusted_signer_count", "public_key_present", "detached_signature_present", "signed_tag_present", "remote_publication_receipt_present"],
+      "properties": {
+        "selected_key_profile": {"const": "hardware_fido2_ed25519_sk"},
+        "hardware_key_available": {"const": false},
+        "hardware_acquisition_required": {"const": true},
+        "trusted_signer_count": {"const": 0},
+        "public_key_present": {"const": false},
+        "detached_signature_present": {"const": false},
+        "signed_tag_present": {"const": false},
+        "remote_publication_receipt_present": {"const": false}
+      }
+    },
+    "execution_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key_generation_authorized", "private_key_use_authorized", "signing_authorized", "merge_to_main_authorized", "tagging_authorized", "publication_authorized"],
+      "properties": {
+        "key_generation_authorized": {"const": false},
+        "private_key_use_authorized": {"const": false},
+        "signing_authorized": {"const": false},
+        "merge_to_main_authorized": {"const": false},
+        "tagging_authorized": {"const": false},
+        "publication_authorized": {"const": false}
+      }
+    },
+    "owner_actions": {"type": "array", "minItems": 8, "maxItems": 8, "items": {"type": "object", "required": ["id", "status", "description"]}},
+    "next_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["move_id", "blocked", "blocking_condition", "separate_approval_still_required", "owner_step"],
+      "properties": {
+        "move_id": {"const": "N0-HW-KEY-ACQUIRE-001"},
+        "blocked": {"const": true},
+        "blocking_condition": {"const": "selected_fido2_hardware_key_not_available"},
+        "separate_approval_still_required": {"const": true},
+        "owner_step": {"type": "string", "minLength": 30}
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_and_semantics_valid", "negative_control_count", "negative_control_pass_count", "negative_controls"],
+      "properties": {
+        "schema_and_semantics_valid": {"const": true},
+        "negative_control_count": {"const": 16},
+        "negative_control_pass_count": {"const": 16},
+        "negative_controls": {"type": "array", "minItems": 16, "maxItems": 16, "items": {"type": "object", "required": ["id", "status", "expected", "observed"]}}
+      }
+    },
+    "claim_boundary": {"type": "array", "minItems": 8, "items": {"type": "string", "minLength": 20}}
+  },
+  "$defs": {
+    "binding": {
+      "type": "object",
+      "required": ["path", "sha256", "byte_count"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+        "byte_count": {"type": "integer", "minimum": 1}
+      }
+    },
+    "adrDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["selection", "owner_direction_recorded", "pre_disposition_source"],
+      "properties": {
+        "selection": {"const": "accept_exactly_as_written"},
+        "owner_direction_recorded": {"const": true},
+        "pre_disposition_source": {"$ref": "#/$defs/binding"}
+      }
+    },
+    "liveAdr": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["binding", "source_status", "cryptographically_ratified"],
+      "properties": {
+        "binding": {"$ref": "#/$defs/binding"},
+        "source_status": {"const": "accepted-owner-directed"},
+        "cryptographically_ratified": {"const": false}
+      }
+    }
+  }
+}

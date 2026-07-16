@@ -91,6 +91,6 @@
     "The channel manifest detached signature has not been independently verified.",
     "The freestanding C17 compiler, assembler, ABI headers, image tools, QEMU, and firmware are not pinned.",
     "Rust source, LLVM source, LLD source, compiler-builtins source, SBOM, and rebuild-from-source provenance remain open.",
-    "ADR-0003 remains proposed and cannot be promoted by this lock."
+    "ADR-0003 has owner-directed acceptance but remains cryptographically unsigned and cannot be promoted by this lock."
   ]
 }

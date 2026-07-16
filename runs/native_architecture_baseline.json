@@ -139,7 +139,7 @@
     }
   ],
   "language_split": {
-    "status": "proposed_pending_toolchain_qualification",
+    "status": "owner_direction_accepted_qualification_pending",
     "pooleboot": "Rust 2024 no_std on x86_64-unknown-uefi with efiapi and rust-lld",
     "poolekernel": "Rust 2024 no_std on x86_64-unknown-none ELF64 with bounded x86_64 assembly",
     "privileged_user_space": "Rust 2024 no_std with controlled alloc and generated stable ABIs",
@@ -205,8 +205,8 @@
   "adr_summary": {
     "required_count": 7,
     "present_count": 7,
-    "accepted_owner_directed_count": 5,
-    "proposed_count": 2,
+    "accepted_owner_directed_count": 7,
+    "proposed_count": 0,
     "accepted_signed_count": 0,
     "all_required_cryptographically_ratified": false
   },
@@ -262,10 +262,10 @@
       "id": "ADR-0003",
       "title": "Implementation Language and Toolchain Split",
       "path": "docs/adr/0003-language-and-toolchain-split.md",
-      "status": "proposed",
+      "status": "accepted-owner-directed",
       "date": "2026-07-16",
       "decision_owner": "Rooke Poole",
-      "ratification": "owner acceptance and full two-host toolchain qualification pending",
+      "ratification": "owner-directed acceptance recorded; cryptographic signature and full two-host toolchain qualification pending",
       "supersedes": "none",
       "superseded_by": "none",
       "requirement_mappings": [
@@ -273,27 +273,27 @@
         "N3.1-N3.8",
         "sections 008-011"
       ],
-      "sha256": "6F874FDBBA98CE728A230C4AF7798F202D09A63CE7394510C810C1E65932B1B0",
-      "byte_count": 4108,
-      "line_count": 44
+      "sha256": "AB974B13E8A22C04C35A6E3D68FA66EA7B8A97D0545A3E712031CD0B92F8A192",
+      "byte_count": 4164,
+      "line_count": 46
     },
     {
       "id": "ADR-0004",
       "title": "Product Names and Version Namespaces",
       "path": "docs/adr/0004-product-names-and-version-namespaces.md",
-      "status": "proposed",
+      "status": "accepted-owner-directed",
       "date": "2026-07-16",
       "decision_owner": "Rooke Poole",
-      "ratification": "owner acceptance and trademark review pending",
+      "ratification": "owner-directed acceptance recorded; cryptographic signature and trademark review pending",
       "supersedes": "none",
       "superseded_by": "none",
       "requirement_mappings": [
         "N0.3",
         "section 000.3"
       ],
-      "sha256": "9798309FC902C2F5E5A8206751DA4423532E25690A2AD23AD4DC116F3566A637",
-      "byte_count": 2666,
-      "line_count": 55
+      "sha256": "C1FB684D0404EC0B4CA89B9AF3E454B654FF546BD22736AF03E35ECFF1FC4002",
+      "byte_count": 2721,
+      "line_count": 56
     },
     {
       "id": "ADR-0005",
@@ -365,8 +365,8 @@
     },
     {
       "path": "docs/adr-ratification-ceremony.md",
-      "sha256": "372135888F2FEC6BB652E1992D25B5E636CBF23EAB4799A22518F838BC0658FE",
-      "byte_count": 8828,
+      "sha256": "3F81258F02767538E108DD7125A78A3C4D15546785B964E1FFFBA27C73941ABD",
+      "byte_count": 8712,
       "line_count": 115
     },
     {
@@ -389,8 +389,8 @@
     },
     {
       "path": "docs/native-v1-objectives.md",
-      "sha256": "76F81918E255067C4D34340967F96E05A12B73118133E71FF535CE1C87082CFA",
-      "byte_count": 4901,
+      "sha256": "CA418029334087F26DD7D6D26902B1EDB7B455AE49460F9596FC04BFA7C3C977",
+      "byte_count": 5136,
       "line_count": 75
     },
     {
@@ -400,6 +400,12 @@
       "line_count": 273
     },
     {
+      "path": "docs/n0-owner-response-receipt.md",
+      "sha256": "B00011FB19919C511FB4350978DB80E117AE11CBD3369DCDB04357187E62D8DF",
+      "byte_count": 3963,
+      "line_count": 60
+    },
+    {
       "path": "specs/pooleos-kernel-charter.md",
       "sha256": "DFD14DC3D594B419E6C3A1FF4051D4CFA35C1FC18C8DBABF24715C66BFFA2E15",
       "byte_count": 12238,
@@ -407,20 +413,20 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "022494F6AA33C299CF9BA2414DF8F3A2080A93708D9C01DEA3E47933414E14B0",
-      "byte_count": 22209,
+      "sha256": "3795F34C6531EF3083905F2B8665A8459CD728F93723FFFD3CAA850F77F7C333",
+      "byte_count": 21098,
       "line_count": 251
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "35225F1476DFAA8395CD097B090DB07829233452EBAE7A05B3B115B80F9B8478",
-      "byte_count": 120638,
-      "line_count": 1157
+      "sha256": "94D41164E05A5683AE6718E528103CEA4ED25CEA96D7ECAD128DE654E6270768",
+      "byte_count": 121484,
+      "line_count": 1160
     },
     {
       "path": "docs/publication-boundary.md",
-      "sha256": "96C614E2EA4C61809CC07C2804936220BCCC64B3B2EEE5D1711888A58FD65FD6",
-      "byte_count": 4739,
+      "sha256": "B88AE8ABA4451DC49CD4012ADF29B740D84EE05420D87DE40896E790DB8FF1D3",
+      "byte_count": 4830,
       "line_count": 50
     },
     {
@@ -431,9 +437,9 @@
     },
     {
       "path": "runs/adr_ratification_readiness.json",
-      "sha256": "8DF0A003B43BF341F329822D521561E6956EA6DFE2054379B03B5FB0B42495A9",
-      "byte_count": 8684,
-      "line_count": 218
+      "sha256": "373ED1361B5FA7EE22B1CCF962891ECF8DB01D00FEEC356C51AD6108E6192AFD",
+      "byte_count": 9467,
+      "line_count": 231
     },
     {
       "path": "runs/hardware_target_readiness.json",
@@ -454,6 +460,12 @@
       "line_count": 1699
     },
     {
+      "path": "runs/n0_owner_response_receipt.json",
+      "sha256": "19F87D8B5B9D8D15EBCEBFB0CF1F6D34ECB9D4E7F25F124ED689AF6DE8C70CAD",
+      "byte_count": 10281,
+      "line_count": 283
+    },
+    {
       "path": "runs/native_tier0_readiness.json",
       "sha256": "08E0083DA4B56E4B95A79AAD562C66D9CAC1AE437192286842E4BA8EBFD00F0A",
       "byte_count": 11904,
@@ -461,8 +473,8 @@
     },
     {
       "path": "runs/native_v1_objectives_readiness.json",
-      "sha256": "0F0F1DCB5A01D0E315B1DD5EFF4129DD228A7FFD32EC4F9E3EBA4CF029CCE4E3",
-      "byte_count": 6176,
+      "sha256": "49131BBBB3FB548C4D87CA573D421DCFB44C1AF35A90536D5680BC492304E7B8",
+      "byte_count": 6181,
       "line_count": 187
     },
     {
@@ -485,8 +497,8 @@
     },
     {
       "path": "specs/native-architecture-constitution.json",
-      "sha256": "94D8BDDF9BC85DE10D3B7FBF53BA2D0CC1C822C1F573FF94D0F1AB49F7EFF753",
-      "byte_count": 6015,
+      "sha256": "90825DC70D5A99DD2061F0638D2550771D01761BB215E91647909AE470FBB9E5",
+      "byte_count": 6021,
       "line_count": 147
     },
     {
@@ -515,15 +527,33 @@
     },
     {
       "path": "specs/native-v1-objectives.json",
-      "sha256": "525946A7AA7A7D0F27682810EDD636D7E743C32548ACE442AB208B680A7E8584",
-      "byte_count": 33416,
+      "sha256": "43D6F515C76D59D738A284703407E17C4BB69534E5FBAAB94979DE34FA835E60",
+      "byte_count": 33648,
       "line_count": 809
     },
     {
       "path": "specs/native-v1-objectives.schema.json",
-      "sha256": "AF4D18B414A65D35ABEBC178AE2B55FFAB3FF5A5CE7D17C8A4CB279A7F038A98",
-      "byte_count": 5437,
+      "sha256": "2B3873C5FC61F2DDCE1B789C29BFB526FCAEB59B8F2B832F5D2CED0FB58C8F56",
+      "byte_count": 5447,
       "line_count": 89
+    },
+    {
+      "path": "specs/n0-owner-response.json",
+      "sha256": "CC188374DFC2FDDE78B3461DCCAF0F739FB2628D7E830B8E7C6A0F649DC3F5AF",
+      "byte_count": 2646,
+      "line_count": 53
+    },
+    {
+      "path": "specs/n0-owner-response-receipt.schema.json",
+      "sha256": "42E84F3B98708FD547BC4252A4F0180BEED3C285E3D5A3A82A3FDDFF1CB1CF19",
+      "byte_count": 8876,
+      "line_count": 205
+    },
+    {
+      "path": "specs/n0-owner-response.schema.json",
+      "sha256": "E32F502E40D387629D9C7B1BD928DE43E7B1478AA1EFDB61CB62F5AA2638DC8B",
+      "byte_count": 3768,
+      "line_count": 91
     },
     {
       "path": "specs/native-release-architecture-policy.json",

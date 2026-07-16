@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/n0-owner-response.schema.json",
+  "title": "PooleOS N0 owner response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "response_version",
+    "status_date",
+    "status",
+    "decision_owner",
+    "decision_packet",
+    "selections",
+    "amendment_details",
+    "confirmations",
+    "execution_authorization",
+    "production_promotion_allowed",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_n0_owner_response"},
+    "response_version": {"const": "POOLEOS-N0-OWNER-RESPONSE-V1"},
+    "status_date": {"const": "2026-07-16"},
+    "status": {"const": "complete_owner_direction_unsigned"},
+    "decision_owner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "github"],
+      "properties": {
+        "name": {"const": "Rooke Poole"},
+        "github": {"const": "rookepoole"}
+      }
+    },
+    "decision_packet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "byte_count", "source_set_sha256", "target_set_sha256", "repository_commit", "repository_tree"],
+      "properties": {
+        "path": {"const": "runs/n0_owner_decision_packet.json"},
+        "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+        "byte_count": {"type": "integer", "minimum": 1},
+        "source_set_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+        "target_set_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+        "repository_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "repository_tree": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+      }
+    },
+    "selections": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adr_0003", "adr_0004", "workstation_v1_and_38_targets", "fido2_hardware_key_available", "governance_key_profile", "provisional_software_key_risk_accepted", "public_key_publication"],
+      "properties": {
+        "adr_0003": {"const": "accept_exactly_as_written"},
+        "adr_0004": {"const": "accept_exactly_as_written"},
+        "workstation_v1_and_38_targets": {"const": "accept_exactly_as_written"},
+        "fido2_hardware_key_available": {"const": "do_not_have"},
+        "governance_key_profile": {"const": "hardware_fido2_ed25519_sk"},
+        "provisional_software_key_risk_accepted": {"const": "not_applicable"},
+        "public_key_publication": {"const": "not_yet"}
+      }
+    },
+    "amendment_details": {"const": "none"},
+    "confirmations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["definition_acceptance_is_not_measurement_acceptance", "no_key_generation_signing_merging_tagging_or_publication_authorized"],
+      "properties": {
+        "definition_acceptance_is_not_measurement_acceptance": {"const": true},
+        "no_key_generation_signing_merging_tagging_or_publication_authorized": {"const": true}
+      }
+    },
+    "execution_authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key_generation", "private_key_use", "signing", "merge_to_main", "tagging", "publication"],
+      "properties": {
+        "key_generation": {"const": false},
+        "private_key_use": {"const": false},
+        "signing": {"const": false},
+        "merge_to_main": {"const": false},
+        "tagging": {"const": false},
+        "publication": {"const": false}
+      }
+    },
+    "production_promotion_allowed": {"const": false},
+    "claim_boundary": {"type": "array", "minItems": 6, "items": {"type": "string", "minLength": 20}}
+  }
+}

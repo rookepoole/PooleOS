@@ -31,6 +31,7 @@ ALLOWED_RUNS = {
     "runs/native_architecture_baseline.json",
     "runs/native_model_readiness.json",
     "runs/n0_owner_decision_packet.json",
+    "runs/n0_owner_response_receipt.json",
     "runs/native_toolchain_qualification.json",
     "runs/native_tier0_readiness.json",
     "runs/native_v1_objectives_readiness.json",

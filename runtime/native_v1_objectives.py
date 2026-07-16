@@ -127,8 +127,8 @@ def semantic_violations(value: dict[str, Any]) -> list[str]:
         percentile = target.get("percentile")
         if not isinstance(percentile, (int, float)) or isinstance(percentile, bool) or not 0 <= percentile <= 100:
             violations.append(f"{target_id}: percentile must be in [0, 100]")
-        if target.get("definition_status") != "candidate_owner_ratification_pending":
-            violations.append(f"{target_id}: definition status overclaims owner acceptance")
+        if target.get("definition_status") != "owner_direction_accepted_signature_pending":
+            violations.append(f"{target_id}: definition status does not record the accepted owner direction")
         if target.get("evidence_status") != "not_measured":
             violations.append(f"{target_id}: evidence status must remain not_measured")
         phases = target.get("evidence_phase_ids", [])
@@ -191,9 +191,11 @@ def semantic_violations(value: dict[str, Any]) -> list[str]:
     owner = value.get("owner_ratification", {})
     if not isinstance(owner, dict) or owner.get("required") is not True:
         violations.append("owner ratification must be required")
-    for field in ("profile_accepted", "target_values_accepted", "cryptographic_signature_present"):
-        if not isinstance(owner, dict) or owner.get(field) is not False:
-            violations.append(f"owner ratification field must remain false: {field}")
+    for field in ("profile_accepted", "target_values_accepted"):
+        if not isinstance(owner, dict) or owner.get(field) is not True:
+            violations.append(f"owner direction must remain recorded for: {field}")
+    if not isinstance(owner, dict) or owner.get("cryptographic_signature_present") is not False:
+        violations.append("owner direction must not be promoted to a cryptographic signature")
     if value.get("production_ready") is not False or value.get("production_promotion_allowed") is not False:
         violations.append("candidate objectives cannot enable production promotion")
 
@@ -239,8 +241,8 @@ def _negative_controls(objectives: dict[str, Any], root: Path) -> list[dict[str,
     def mutate_promote(value: dict[str, Any]) -> None:
         value["production_promotion_allowed"] = True
 
-    def mutate_infer_owner_acceptance(value: dict[str, Any]) -> None:
-        value["owner_ratification"]["profile_accepted"] = True
+    def mutate_remove_owner_acceptance(value: dict[str, Any]) -> None:
+        value["owner_ratification"]["profile_accepted"] = False
 
     controls.extend(
         [
@@ -253,7 +255,7 @@ def _negative_controls(objectives: dict[str, Any], root: Path) -> list[dict[str,
             ("reject_missing_recovery_accessibility", mutate_remove_recovery_access),
             ("reject_measured_status_without_evidence", mutate_measured_without_evidence),
             ("reject_candidate_production_promotion", mutate_promote),
-            ("reject_inferred_owner_acceptance", mutate_infer_owner_acceptance),
+            ("reject_owner_acceptance_regression", mutate_remove_owner_acceptance),
         ]
     )
 
@@ -289,7 +291,7 @@ def build_readiness(root: Path = ROOT) -> dict[str, Any]:
         "schema_version": "1.0",
         "artifact_kind": "pooleos_native_v1_objectives_readiness",
         "status_date": objectives["status_date"],
-        "status": "consistent_candidate_owner_ratification_pending" if consistency_pass else "invalid",
+        "status": "owner_direction_accepted_signature_pending" if consistency_pass else "invalid",
         "selected_move_id": objectives["selected_move_id"],
         "profile_id": objectives["release_profile"]["id"],
         "production_ready": False,
@@ -321,7 +323,7 @@ def build_readiness(root: Path = ROOT) -> dict[str, Any]:
             "profile_accepted": owner["profile_accepted"],
             "target_values_accepted": owner["target_values_accepted"],
             "cryptographic_signature_present": owner["cryptographic_signature_present"],
-            "ready_for_owner_review": consistency_pass,
+            "ready_for_owner_review": False,
             "ready_for_signature": False,
         },
         "negative_controls": controls,
@@ -329,17 +331,17 @@ def build_readiness(root: Path = ROOT) -> dict[str, Any]:
             "consistency_pass": consistency_pass,
             "target_count": len(targets),
             "measured_target_count": sum(target.get("evidence_status") != "not_measured" for target in targets),
-            "blocking_owner_action_count": 3,
+            "blocking_owner_action_count": 1,
             "negative_control_count": len(controls),
             "negative_control_pass_count": sum(item["status"] == "pass" for item in controls),
         },
         "open_items": objectives["open_items"],
         "claim_boundary": [
-            "The candidate profile and values are ready for owner review, not owner-accepted or cryptographically ratified.",
+            "The profile and all 38 target definitions carry owner-directed acceptance but remain cryptographically unsigned.",
             "All 38 target definitions are unmeasured and satisfy no implementation, qualification, or release phase gate.",
             "Schema and semantic consistency do not prove reliability, accessibility, compatibility, privacy, or performance.",
             "The objectives ledger cannot authorize signatures, production promotion, hardware mutation, or destructive testing.",
             "Finite future samples remain bounded to their exact profiles, durations, workloads, firmware, and evidence.",
-            "N0.6 and N0 remain partial until owner ratification and implementation-bound evidence satisfy the Build Plan."
+            "N0.6 and N0 remain partial until cryptographic ratification and implementation-bound evidence satisfy the Build Plan."
         ],
     }

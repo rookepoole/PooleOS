@@ -111,7 +111,7 @@
       "type": "object",
       "required": ["status", "pooleboot", "poolekernel", "privileged_user_space", "portable_pdc_reference", "host_evidence", "native_rust_abi_on_wire_or_disk", "cxx_in_v1_tcb", "third_party_dependencies_default"],
       "properties": {
-        "status": {"const": "proposed_pending_toolchain_qualification"},
+        "status": {"const": "owner_direction_accepted_qualification_pending"},
         "native_rust_abi_on_wire_or_disk": {"const": false},
         "cxx_in_v1_tcb": {"const": false},
         "third_party_dependencies_default": {"const": "deny"}
