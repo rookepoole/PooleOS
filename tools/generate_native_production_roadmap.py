@@ -124,11 +124,12 @@ PHASE_EVIDENCE = {
         "public ADR trust and revocation stores are present but intentionally contain zero owner keys",
     ],
     "N2": [
-        "specs/hardware-support-policy.json: support tiers, evidence channels, privacy boundary, and destructive-test prerequisites",
+        "specs/hardware-support-policy.json: support tiers, evidence channels, privacy boundary, destructive-test prerequisites, and a source-bound user-mode CPUID versus privileged-probe boundary",
         "specs/tier1-hardware-target.json: exact Tier 1 target and 24 required identity checks",
         "specs/native-standards-register.json: 15 primary-source standards records with revision and supersession state",
-        "runs/tier1_hardware_observation.json: sanitized whitelist reconstruction bound to the ignored private capture",
-        "runs/hardware_target_readiness.json: 24/24 required identity checks, zero privacy violations, and explicit non-promotion",
+        "tools/collect_tier1_hardware.ps1 1.1: bounded W-to-X user-mode CPUID thunk with an exact leaf/subleaf allowlist, lowest allowed logical-processor affinity restored after every query, no processor-serial leaf, no driver, and no privileged access attempt",
+        "runs/tier1_hardware_observation.json: sanitized whitelist reconstruction bound to the ignored private capture, with 16 canonical CPUID records represented by a public transcript hash and decoded facts rather than raw registers",
+        "runs/hardware_target_readiness.json: 24/24 required identity checks, two partial evidence channels, 16 CPUID records, 14/14 negative controls, zero privacy violations, and explicit non-promotion",
         "docs/hardware-target-and-lab-safety.md: reproducible capture procedure and owner safety boundary",
     ],
     "N3": [
@@ -146,8 +147,8 @@ PHASE_EVIDENCE = {
     "N33": ["existing PDC receipt schemas and guarded-route source documents; no native services"],
     "N34": ["PooleGlyph Phase 65 checkpoint", "draft PGB2/PGVM2 trap evidence"],
     "N35": ["bounded static capability and trap simulations; no native containment"],
-    "N36": ["Cycle 86 host baseline: 428 tests with one Windows symlink-permission skip", "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, and hardware privacy negatives"],
-    "N37": ["Cycle 86 consistency release gate: 65/65 checks over 60 artifacts", "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, native-toolchain, and hardware-readiness artifacts"],
+    "N36": ["Cycle 87 host baseline: 431 tests with one Windows symlink-permission skip", "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, hardware privacy, malformed-CPUID, serial-leaf, privileged-overclaim, and collector-smoke negatives"],
+    "N37": ["Cycle 87 consistency release gate: 65/65 checks over 60 artifacts", "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, native-toolchain, and bounded hardware-readiness artifacts"],
 }
 
 
@@ -161,7 +162,7 @@ PHASE_GAPS = {
         "Public remote and branch protection exist; owner key choice, signed tags, immutable release refs, retained CI/review evidence, signing custody, and multi-maintainer approval policy remain open",
         "Legal, patent, export, trademark, contributor, signing-custody, and component-specific license review remain open",
     ],
-    "N2": ["Exact identity passes 24/24 required checks, but seven required evidence channels, 15 exact standards artifact hashes, ten destructive-lab prerequisites, and native-parser comparison remain open"],
+    "N2": ["Exact identity passes 24/24 required checks and 16 allowlisted user-mode CPUID records close the bounded CPUID sub-capability, but MSR access remains pending a reviewed privileged mechanism; seven required evidence channels, 15 exact standards artifact hashes, ten destructive-lab prerequisites, and native-parser comparison remain open"],
     "N3": ["One-host Rust PE32+/ELF64 qualification passes; second-host reproduction, source provenance, C17/assembly/ABI/image tools, complete build graph, and low-level safety gates remain open"],
     "N4": ["No pinned native-only QEMU/VIRTIO profile or formal model suite exists"],
     "N5": ["No PooleBoot PE32+ image or frozen boot handoff exists"],
@@ -218,6 +219,8 @@ FLAGS = [
     ("FLAG-NATIVE-PGL-001", "BLOCKER", "N34", "Accept PooleGlyph Phase 66 and freeze PGB2/PGVM2 v1"),
     ("FLAG-NATIVE-PDC-001", "REQUIRED", "N32", "Reproduce signed dynamics and pass native/backend differential gates"),
     ("FLAG-NATIVE-HW-001", "STOP_SHIP", "N38", "Qualify exact Tier 1 hardware, firmware, media, drivers, and recovery"),
+    ("FLAG-N2-CPUID-001", "REQUIRED", "N2", "Capture and sanitize a bounded direct user-mode CPUID transcript with an exact allowlist, no processor-serial leaf, no raw-register publication, and passing malformed/overclaim negative controls"),
+    ("FLAG-N2-PRIVILEGED-PROBE-001", "BLOCKER", "N2", "Qualify source-bound read-only MSR, PCI, SPD, UEFI-variable, memory, and I/O mechanisms through driver and side-effect review, then require explicit operator authorization before any driver load or privileged probe"),
     ("FLAG-N2-EVIDENCE-001", "REQUIRED", "N2", "Complete read-only CPUID/MSR, PCI configuration, ACPI duplicate, EDID/SPD, UEFI-variable, sensor/power, and native-parser comparison evidence"),
     ("FLAG-N2-STANDARDS-001", "REQUIRED", "N2", "Acquire and hash lawfully accessible exact standards artifacts and close supersession, errata, profile, and access review"),
     ("FLAG-N2-LAB-SAFETY-001", "BLOCKER", "N2", "Obtain owner acceptance for sacrificial media, backups, recovery, diagnostics, power, and network controls plus separate destructive-test approval"),
@@ -234,7 +237,7 @@ PROGRAM_GAPS = [
     "No PooleBoot PE32+ UEFI loader or frozen boot protocol",
     "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path",
     "No native CPU, interrupts, time, SMP, physical memory, virtual memory, or reclaim implementation",
-    "The exact Tier 1 identity passes 24/24 required checks, but seven evidence channels, 15 standards hashes, ten lab-safety prerequisites, native parsing, and physical qualification remain open",
+    "The exact Tier 1 identity passes 24/24 required checks and 16 allowlisted user-mode CPUID records are captured with zero public raw registers, but seven required channels remain non-complete in total, including partial CPU/MSR and SPD/topology; 15 standards hashes, ten lab-safety prerequisites, native parsing, and physical qualification also remain open",
     "No native DMA/IOMMU/interrupt-remapping confinement",
     "No native scheduler, task, syscall, capability, IPC, isolation, async I/O, or quota implementation",
     "No native security/crypto/TPM/secrets/MAC/privacy implementation or external review",
@@ -334,6 +337,21 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
         evidence = ["docs/pdc-production-build-plan.md", "runs/pooleos_native_checklist_coverage.json"]
         if phase_id == "N2":
             evidence.extend(["runs/hardware_target_readiness.json", "specs/hardware-support-policy.json"])
+        if flag_id == "FLAG-N2-CPUID-001":
+            evidence.extend(
+                [
+                    "tools/collect_tier1_hardware.ps1",
+                    "runs/tier1_hardware_observation.json",
+                    "specs/tier1-hardware-observation.schema.json",
+                ]
+            )
+        if flag_id == "FLAG-N2-PRIVILEGED-PROBE-001":
+            evidence.extend(
+                [
+                    "specs/tier1-hardware-capture.schema.json",
+                    "docs/hardware-target-and-lab-safety.md",
+                ]
+            )
         if flag_id == "FLAG-N0-OBJECTIVES-001":
             evidence.extend(["specs/native-v1-objectives.json", "runs/native_v1_objectives_readiness.json"])
         if flag_id == "FLAG-N0-RATIFICATION-SCOPE-001":
@@ -350,7 +368,8 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 "id": flag_id,
                 "class": flag_class,
                 "status": "closed"
-                if flag_class == "SUPERSEDED" or flag_id == "FLAG-N0-RATIFICATION-SCOPE-001"
+                if flag_class == "SUPERSEDED"
+                or flag_id in {"FLAG-N0-RATIFICATION-SCOPE-001", "FLAG-N2-CPUID-001"}
                 else "open",
                 "phase_id": phase_id,
                 "closure_condition": closure,
@@ -388,8 +407,8 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "inspect_live_pooleglyph_each_turn": True,
             "verify_master_checklist_coverage_each_turn": True,
             "new_work_must_be_flagged": True,
-            "last_updated_cycle": 86,
-            "selected_move_id": "N0-ADR-001",
+            "last_updated_cycle": 87,
+            "selected_move_id": "N2-HW-002",
             "immediate_next_move_id": "N0-RATIFY-001",
             "required_records": [
                 "docs/production-goal-charter.md",
@@ -420,7 +439,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "added_requirement_count": len(coverage["added_requirements"]),
         },
         "baseline": {
-            "pooleos_cycle": 86,
+            "pooleos_cycle": 87,
             "entry_cycle": 79,
             "pooleos_test_count": test_count,
             "historical_consistency_release_gate": {
@@ -484,6 +503,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "Buildroot and Linux artifacts are historical reference evidence and cannot satisfy native PooleOS gates.",
             "Checklist mapping is not implementation completion.",
             "Host simulations and schemas are not native kernel enforcement.",
+            "Sixteen allowlisted user-mode CPUID records prove only a bounded host observation; they do not prove MSR access, privileged probes, native parsing, driver safety, or Tier 1 qualification.",
             "Binding thirty-eight consistent candidate objective definitions into a future signature while binding zero measurements is not owner ratification or implementation evidence.",
             "PooleGlyph Phase 65 metadata cannot be promoted before Phase 66 executable evidence.",
             "Finite PDC/QP evidence remains bounded to its declared classical models and protocols.",
@@ -495,7 +515,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=428)
+    parser.add_argument("--test-count", type=int, default=431)
     parser.add_argument("--status-date", default="2026-07-16")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

@@ -1,9 +1,9 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "artifact_kind": "pooleos_hardware_support_policy",
   "status_date": "2026-07-16",
   "status": "frozen_preproduction_policy",
-  "selected_move_id": "N2-HW-001",
+  "selected_move_id": "N2-HW-002",
   "production_ready": false,
   "production_promotion_allowed": false,
   "architecture_scope": {
@@ -113,6 +113,44 @@
     "independent_comparison_required": true,
     "firmware_and_device_change_invalidates_profile": true
   },
+  "low_level_probe_boundary": {
+    "cpuid_allowlist_id": "POOLEOS-CPUID-ALLOWLIST-1",
+    "cpuid_execution_mode": "unprivileged_user_mode",
+    "cpuid_thread_affinity_policy": "lowest_process_allowed_logical_processor_restored_per_query",
+    "cpuid_basic_leaves": [
+      "0x00000000",
+      "0x00000001",
+      "0x00000007",
+      "0x0000000B",
+      "0x0000000D"
+    ],
+    "cpuid_extended_leaves": [
+      "0x80000000",
+      "0x80000001",
+      "0x80000007",
+      "0x80000008",
+      "0x8000000A",
+      "0x8000001E",
+      "0x8000001F"
+    ],
+    "cpuid_max_subleaf": {
+      "0x00000007": 2,
+      "0x0000000B": 7,
+      "0x0000000D": 1
+    },
+    "cpuid_processor_serial_leaf_allowed": false,
+    "cpuid_raw_register_publication_allowed": false,
+    "dynamic_code_memory_transition": "PAGE_READWRITE_to_PAGE_EXECUTE_READ",
+    "msr_status": "pending_reviewed_privileged_mechanism",
+    "pci_config_status": "pending_reviewed_privileged_mechanism",
+    "spd_status": "pending_reviewed_privileged_mechanism",
+    "uefi_variable_status": "pending_reviewed_privileged_mechanism",
+    "kernel_driver_loading_authorized": false,
+    "kernel_device_open_authorized": false,
+    "physical_memory_mapping_authorized": false,
+    "io_port_access_authorized": false,
+    "write_capable_probe_authorized": false
+  },
   "destructive_safety": {
     "current_approval": false,
     "approval_scope": "none",
@@ -171,6 +209,7 @@
   },
   "claim_boundary": [
     "Hardware enumeration is not native-driver qualification.",
+    "User-mode CPUID evidence does not satisfy MSR, PCI configuration-space, SPD, UEFI-variable, microcode, or native-parser evidence.",
     "A Tier 1 match does not imply support for a device currently deferred, unsupported, or quarantined.",
     "No destructive action is authorized by this policy or its readiness ledger.",
     "Production promotion remains prohibited until all applicable phase and release gates pass."

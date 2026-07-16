@@ -118,6 +118,16 @@ ADDED_REQUIREMENTS = [
         "basis": ["https://docs.oasis-open.org/virtio/virtio/v1.3/virtio-v1.3.html"],
     },
     {
+        "id": "ADD-HW-PROBE-001",
+        "phase_id": "N2",
+        "requirement": "Separate unprivileged CPUID collection from privileged MSR, PCI configuration-space, SPD, UEFI-variable, physical-memory, and I/O-port probes; require exact allowlists, deterministic logical-processor affinity with restoration, source-bound read-only mechanisms, no write-capable path, driver and side-effect review, hostile tests, and explicit operator authorization before any kernel driver is loaded.",
+        "basis": [
+            "https://docs.amd.com/v/u/en-US/40332_4.09_APM_PUB",
+            "https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualalloc",
+            "PooleOS destructive and privileged hardware safety boundary",
+        ],
+    },
+    {
         "id": "ADD-VIRTIO-002",
         "phase_id": "N16",
         "requirement": "Provide isolated virtio console, block, network, input, GPU, RNG, balloon, and IOMMU driver paths as applicable, each with feature negotiation, queue validation, DMA confinement, reset, cancellation, and malformed-device tests.",

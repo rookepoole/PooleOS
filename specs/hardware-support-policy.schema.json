@@ -4,13 +4,13 @@
   "title": "PooleOS Hardware Support Policy",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "artifact_kind", "status_date", "status", "selected_move_id", "production_ready", "production_promotion_allowed", "architecture_scope", "tiers", "default_disposition", "privacy_boundary", "evidence_requirements", "destructive_safety", "claim_boundary"],
+  "required": ["schema_version", "artifact_kind", "status_date", "status", "selected_move_id", "production_ready", "production_promotion_allowed", "architecture_scope", "tiers", "default_disposition", "privacy_boundary", "evidence_requirements", "low_level_probe_boundary", "destructive_safety", "claim_boundary"],
   "properties": {
-    "schema_version": {"const": "1.0"},
+    "schema_version": {"const": "1.1"},
     "artifact_kind": {"const": "pooleos_hardware_support_policy"},
     "status_date": {"const": "2026-07-16"},
     "status": {"const": "frozen_preproduction_policy"},
-    "selected_move_id": {"const": "N2-HW-001"},
+    "selected_move_id": {"const": "N2-HW-002"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
     "architecture_scope": {"type": "object", "required": ["architecture", "byte_order", "firmware", "partitioning", "tier0_profile", "tier1_profile"]},
@@ -18,6 +18,31 @@
     "default_disposition": {"type": "object", "required": ["unlisted_hardware", "unknown_firmware_revision", "changed_subsystem_or_revision", "missing_recovery_evidence", "device_with_unconfined_dma", "undocumented_register_or_firmware_behavior"]},
     "privacy_boundary": {"type": "object", "required": ["sanitization_mode", "private_capture_default", "raw_capture_publication_allowed", "raw_firmware_table_publication_allowed", "public_hash_binding_allowed", "prohibited_public_fields"]},
     "evidence_requirements": {"type": "object", "required": ["n2_exit_required_channel_ids", "native_reenumeration_required", "independent_comparison_required", "firmware_and_device_change_invalidates_profile"]},
+    "low_level_probe_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cpuid_allowlist_id", "cpuid_execution_mode", "cpuid_thread_affinity_policy", "cpuid_basic_leaves", "cpuid_extended_leaves", "cpuid_max_subleaf", "cpuid_processor_serial_leaf_allowed", "cpuid_raw_register_publication_allowed", "dynamic_code_memory_transition", "msr_status", "pci_config_status", "spd_status", "uefi_variable_status", "kernel_driver_loading_authorized", "kernel_device_open_authorized", "physical_memory_mapping_authorized", "io_port_access_authorized", "write_capable_probe_authorized"],
+      "properties": {
+        "cpuid_allowlist_id": {"const": "POOLEOS-CPUID-ALLOWLIST-1"},
+        "cpuid_execution_mode": {"const": "unprivileged_user_mode"},
+        "cpuid_thread_affinity_policy": {"const": "lowest_process_allowed_logical_processor_restored_per_query"},
+        "cpuid_basic_leaves": {"type": "array", "minItems": 5, "maxItems": 5, "items": {"type": "string"}, "uniqueItems": true},
+        "cpuid_extended_leaves": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"type": "string"}, "uniqueItems": true},
+        "cpuid_max_subleaf": {"type": "object", "required": ["0x00000007", "0x0000000B", "0x0000000D"]},
+        "cpuid_processor_serial_leaf_allowed": {"const": false},
+        "cpuid_raw_register_publication_allowed": {"const": false},
+        "dynamic_code_memory_transition": {"const": "PAGE_READWRITE_to_PAGE_EXECUTE_READ"},
+        "msr_status": {"const": "pending_reviewed_privileged_mechanism"},
+        "pci_config_status": {"const": "pending_reviewed_privileged_mechanism"},
+        "spd_status": {"const": "pending_reviewed_privileged_mechanism"},
+        "uefi_variable_status": {"const": "pending_reviewed_privileged_mechanism"},
+        "kernel_driver_loading_authorized": {"const": false},
+        "kernel_device_open_authorized": {"const": false},
+        "physical_memory_mapping_authorized": {"const": false},
+        "io_port_access_authorized": {"const": false},
+        "write_capable_probe_authorized": {"const": false}
+      }
+    },
     "destructive_safety": {
       "type": "object",
       "required": ["current_approval", "approval_scope", "prerequisites"],
@@ -27,6 +52,6 @@
         "prerequisites": {"type": "array", "minItems": 10, "maxItems": 10, "items": {"type": "object", "required": ["id", "status", "description"]}}
       }
     },
-    "claim_boundary": {"type": "array", "minItems": 4, "items": {"type": "string"}}
+    "claim_boundary": {"type": "array", "minItems": 5, "items": {"type": "string"}}
   }
 }

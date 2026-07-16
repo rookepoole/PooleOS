@@ -40,7 +40,7 @@ DEFAULT_GAPS = [
     "No PooleBoot PE32+ UEFI loader or frozen native boot protocol.",
     "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path.",
     "No native CPU, interrupt, time, SMP, physical-memory, virtual-memory, or reclaim implementation.",
-    "The sanitized Tier 1 identity matches, but full CPUID/MSR, PCI configuration-space, Secure Boot, TPM, SPD, sensor/power, standards-hash, lab-safety, native enumeration, and physical qualification evidence remain open.",
+    "The sanitized Tier 1 identity and bounded user-mode CPUID transcript match, but MSR, PCI configuration-space, Secure Boot, TPM, SPD, sensor/power, standards-hash, lab-safety, native enumeration, and physical qualification evidence remain open.",
     "No native DMA/IOMMU/interrupt-remapping confinement.",
     "No native scheduler, task, syscall, capability, IPC, isolation, asynchronous-I/O, or quota implementation.",
     "No native security, cryptography, TPM, secrets, MAC, privacy implementation, or external review.",
@@ -516,8 +516,8 @@ def check_hardware_target_readiness(path: Path = HARDWARE_TARGET_READINESS) -> d
     verification = artifact.get("target_verification", {})
     if artifact.get("status") != "consistent_partial_non_promoting":
         errors.append("current hardware readiness status is not consistent_partial_non_promoting")
-    if artifact.get("selected_move_id") != "N2-HW-001":
-        errors.append("hardware readiness does not bind N2-HW-001")
+    if artifact.get("selected_move_id") != "N2-HW-002":
+        errors.append("hardware readiness does not bind N2-HW-002")
     if artifact.get("production_ready") is not False or artifact.get("production_promotion_allowed") is not False:
         errors.append("hardware readiness overclaims production promotion")
     if artifact.get("n2_exit_gate_satisfied") is not False:
@@ -532,16 +532,28 @@ def check_hardware_target_readiness(path: Path = HARDWARE_TARGET_READINESS) -> d
         errors.append("exact Tier 1 verification records a required failure")
     if summary.get("pending_evidence_channel_count") != 7:
         errors.append("hardware evidence-channel gap count changed without gate review")
+    if summary.get("partial_evidence_channel_count") != 2 or summary.get("cpuid_record_count") != 16:
+        errors.append("hardware readiness does not bind the bounded partial CPUID evidence")
     if summary.get("pending_lab_safety_count") != 10:
         errors.append("hardware lab-safety gap count changed without owner review")
     if summary.get("unresolved_standard_count", 0) < 1:
         errors.append("standards register unexpectedly claims complete exact-document locks")
-    if summary.get("negative_control_count") != 10 or summary.get("negative_control_pass_count") != 10:
+    if summary.get("negative_control_count") != 14 or summary.get("negative_control_pass_count") != 14:
         errors.append("hardware readiness negative controls are incomplete")
+    cpu_components = artifact.get("evidence_coverage", {}).get("cpu_architecture_components", {})
+    if (
+        cpu_components.get("cpuid_status") != "observed"
+        or cpu_components.get("cpuid_record_count") != 16
+        or cpu_components.get("cpuid_affinity_policy") != "lowest_process_allowed_logical_processor_restored_per_query"
+        or cpu_components.get("msr_status") != "pending_reviewed_privileged_mechanism"
+        or cpu_components.get("combined_channel_complete") is not False
+    ):
+        errors.append("hardware CPU architecture component boundary is inconsistent")
 
     detail = (
         "target=TIER1-B650M-9800X3D-RTX5070-001; identity=24/24; privacy=0; "
-        "pending_channels=7; pending_safety=10; n2_exit=false; production_promotion_allowed=false"
+        "cpuid=16; msr=pending; pending_channels=7; partial_channels=2; negatives=14/14; "
+        "pending_safety=10; n2_exit=false; production_promotion_allowed=false"
     )
     return readiness.make_check(
         "hardware_target_readiness",

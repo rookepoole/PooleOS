@@ -3,19 +3,19 @@
   "binding_errors": [],
   "bindings": {
     "collector": {
-      "byte_count": 13597,
+      "byte_count": 22051,
       "path": "tools/collect_tier1_hardware.ps1",
-      "sha256": "2F32670FB9648682E41C70008270370D7652D7D27DEFEFA2C2E9A8D480560AFA"
+      "sha256": "21A7340373890AA2A5DB88958D4F04E86F6AD7510B729E429EBE226EEEE0AE82"
     },
     "runtime": {
-      "byte_count": 27147,
+      "byte_count": 42835,
       "path": "runtime/hardware_target.py",
-      "sha256": "44CEE508FBB86EFEB09337138AFCA249DCD7827F2F193E64A02D27B8C888D6AF"
+      "sha256": "AAA27935B1D94C7E93AAF2AAFA299B0C18664A9C189F59A89CF6C64866F6FFB3"
     },
     "sanitized_observation": {
-      "byte_count": 14863,
+      "byte_count": 16681,
       "path": "runs/tier1_hardware_observation.json",
-      "sha256": "2917E4F1E68C775B41C4690C04526440D8751D837D01BB6C1A13C7E2C10FAA99"
+      "sha256": "1F9FFF6C02751E35E7FCD2B55D80E5988D5940CADAF0DE3817A673F2706FEF7B"
     },
     "standards_register": {
       "byte_count": 13553,
@@ -23,9 +23,9 @@
       "sha256": "FD9C5027728E668C6FC8B5C096080664B191ABA104FECCCACF74DD95385F07FD"
     },
     "support_policy": {
-      "byte_count": 6863,
+      "byte_count": 8315,
       "path": "specs/hardware-support-policy.json",
-      "sha256": "2F8266D25B86085EB7416FCF9796B338DB6C22D8C6C64434AA8FF71F90EF2461"
+      "sha256": "E9B3DD912305C065E388D588DD3F51CF67E9AA092DBFC10E73F62AF84EA38F0E"
     },
     "tier1_target": {
       "byte_count": 9005,
@@ -35,6 +35,7 @@
   },
   "claim_boundary": [
     "This ledger proves that a sanitized Windows-host observation consistently matches the declared Tier-1 identity checks; it is not PooleBoot or PooleKernel hardware enumeration evidence.",
+    "16 bounded user-mode CPUID records on the current host are partial CPU evidence; MSR and native CPUID comparison remain open.",
     "A matching model, firmware, or hardware-ID prefix does not qualify a native driver, DMA confinement, reset, power, recovery, update, or daily-driver claim.",
     "Private capture bytes remain local and are represented publicly only by SHA-256 and byte count.",
     "Unresolved standards, evidence channels, and destructive-test prerequisites keep N2 open and production promotion prohibited.",
@@ -88,9 +89,9 @@
         "status": "observed"
       },
       {
-        "detail": "CIM values do not replace leaf/subleaf CPUID and MSR capture",
+        "detail": "direct user-mode CPUID records=16; MSR remains pending a reviewed privileged mechanism",
         "id": "CPU_CPUID_MSR",
-        "status": "pending_tool"
+        "status": "partial"
       },
       {
         "detail": "PnP identifiers do not replace ECAM/configuration-space capture",
@@ -113,7 +114,16 @@
         "status": "pending_tool"
       }
     ],
+    "cpu_architecture_components": {
+      "combined_channel_complete": false,
+      "cpuid_affinity_policy": "lowest_process_allowed_logical_processor_restored_per_query",
+      "cpuid_record_count": 16,
+      "cpuid_status": "observed",
+      "cpuid_transcript_sha256": "1C4EB05B165ABA43F3DED644B0ADFB29A96D8919D0A15948028C1BEA03CC2848",
+      "msr_status": "pending_reviewed_privileged_mechanism"
+    },
     "observed_required_channel_count": 7,
+    "partial_required_channel_count": 2,
     "pending_required_channel_ids": [
       "CPU_CPUID_MSR",
       "PCI_CONFIG_SPACE",
@@ -204,11 +214,36 @@
       "id": "deny_private_capture_publication",
       "observed": "reject",
       "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_cpuid_processor_serial_leaf",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_malformed_cpuid_transcript_hash",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_msr_completion_without_evidence",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_privileged_driver_overclaim",
+      "observed": "reject",
+      "status": "pass"
     }
   ],
   "open_items": [
     "Reconcile the vendor BIOS release date with the CIM UTC date representation.",
-    "Acquire full CPUID/MSR, PCI configuration-space, EDID, SPD, ACPI duplicate-table, UEFI-variable, sensor, and power evidence with reviewed read-only tools.",
+    "Complete the CPU channel with reviewed MSR evidence; direct bounded user-mode CPUID is captured but remains non-promoting.",
+    "Acquire PCI configuration-space, EDID, SPD, ACPI duplicate-table, UEFI-variable, sensor, and power evidence with reviewed read-only tools.",
     "Resolve TPM inventory permission without requesting EK, certificate, owner, or secret material.",
     "Acquire and hash every lawfully accessible locked standard and complete supersession/errata review.",
     "Owner must separately identify sacrificial media, backups, immutable recovery, a second recovery machine, serial path, power-cut apparatus, and explicit destructive-test approval.",
@@ -231,8 +266,8 @@
       "target": []
     }
   },
-  "schema_version": "1.0",
-  "selected_move_id": "N2-HW-001",
+  "schema_version": "1.1",
+  "selected_move_id": "N2-HW-002",
   "standards_coverage": {
     "artifact_hash_verified_count": 0,
     "entry_count": 15,
@@ -266,9 +301,11 @@
   "status_date": "2026-07-16",
   "summary": {
     "consistency_pass": true,
+    "cpuid_record_count": 16,
     "matched_required_target_check_count": 24,
-    "negative_control_count": 10,
-    "negative_control_pass_count": 10,
+    "negative_control_count": 14,
+    "negative_control_pass_count": 14,
+    "partial_evidence_channel_count": 2,
     "pending_evidence_channel_count": 7,
     "pending_lab_safety_count": 10,
     "privacy_violation_count": 0,

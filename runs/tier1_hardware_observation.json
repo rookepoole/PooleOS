@@ -2,23 +2,71 @@
   "artifact_kind": "pooleos_tier1_hardware_observation",
   "bindings": {
     "collector": {
-      "byte_count": 13597,
+      "byte_count": 22051,
       "path": "tools/collect_tier1_hardware.ps1",
-      "sha256": "2F32670FB9648682E41C70008270370D7652D7D27DEFEFA2C2E9A8D480560AFA"
+      "sha256": "21A7340373890AA2A5DB88958D4F04E86F6AD7510B729E429EBE226EEEE0AE82"
     },
     "private_capture": {
       "artifact_kind": "pooleos_tier1_hardware_private_capture",
-      "byte_count": 96365,
+      "byte_count": 108739,
       "content_publication_allowed": false,
       "path_recorded": false,
-      "sha256": "D87D25D09B566920490699ADFD473A7800A91E06AE1F7E1F4D9557B7A4FA4B19"
+      "sha256": "121FAEA3AAF532F8C6C066E0C44DCB6BB9FAA5E848C7B015159C95215802017D"
+    },
+    "probe_policy": {
+      "byte_count": 8315,
+      "path": "specs/hardware-support-policy.json",
+      "sha256": "E9B3DD912305C065E388D588DD3F51CF67E9AA092DBFC10E73F62AF84EA38F0E"
     }
   },
   "collection": {
-    "collector_version": "1.0.0",
+    "collector_version": "1.1.0",
     "host_identity_published": false,
     "mode": "read_only",
     "raw_values_published": false
+  },
+  "cpu_architecture_evidence": {
+    "affinity_policy": "lowest_process_allowed_logical_processor_restored_per_query",
+    "allowlist_id": "POOLEOS-CPUID-ALLOWLIST-1",
+    "cpuid_status": "observed",
+    "execution_mode": "unprivileged_user_mode",
+    "family": 26,
+    "features": {
+      "aes": true,
+      "avx": true,
+      "avx2": true,
+      "bmi1": true,
+      "bmi2": true,
+      "fsgsbase": true,
+      "hypervisor_present": true,
+      "invariant_tsc": true,
+      "long_mode": true,
+      "nx": true,
+      "osxsave": true,
+      "rdrand": true,
+      "smap": true,
+      "smep": true,
+      "sse2": true,
+      "svm": false,
+      "tsc_deadline": false,
+      "x2apic": false,
+      "xsave": true
+    },
+    "linear_width_bits": 48,
+    "max_basic_leaf": "0x0000000D",
+    "max_extended_leaf": "0x80000027",
+    "model": 68,
+    "msr_access_attempted": false,
+    "msr_status": "pending_reviewed_privileged_mechanism",
+    "physical_width_bits": 48,
+    "privileged_driver_loaded": false,
+    "processor_serial_leaf_published": false,
+    "raw_registers_published": false,
+    "record_count": 16,
+    "status": "partial_cpuid_observed_msr_pending",
+    "stepping": 0,
+    "transcript_sha256": "1C4EB05B165ABA43F3DED644B0ADFB29A96D8919D0A15948028C1BEA03CC2848",
+    "vendor": "AuthenticAMD"
   },
   "evidence_channels": [
     {
@@ -67,9 +115,9 @@
       "status": "observed"
     },
     {
-      "detail": "CIM values do not replace leaf/subleaf CPUID and MSR capture",
+      "detail": "direct user-mode CPUID records=16; MSR remains pending a reviewed privileged mechanism",
       "id": "CPU_CPUID_MSR",
-      "status": "pending_tool"
+      "status": "partial"
     },
     {
       "detail": "PnP identifiers do not replace ECAM/configuration-space capture",
@@ -371,13 +419,16 @@
   },
   "limitations": [
     "This observation is a sanitized Windows-host view, not PooleKernel enumeration evidence.",
-    "CIM and PnP values do not replace raw PCI configuration space, CPUID/MSR, complete EDID, SPD, or native ACPI parser evidence.",
+    "Direct user-mode CPUID evidence does not replace reviewed MSR, raw PCI configuration-space, complete EDID, SPD, UEFI-variable, or native parser evidence.",
+    "The CPUID channel remains partial because no kernel driver, device handle, MSR access, physical-memory mapping, I/O-port access, or write-capable probe was authorized.",
     "Windows firmware-table APIs return only the first ACPI table for a duplicated signature.",
     "The private capture hash permits owner-side correlation but does not make private evidence independently reproducible from the public checkout.",
     "No destructive, privileged configuration, firmware, TPM, disk, boot, power, or device action was performed."
   ],
   "privacy": {
     "absolute_local_paths_published": false,
+    "cpuid_processor_serial_leaf_published": false,
+    "cpuid_raw_registers_published": false,
     "full_pnp_instance_paths_published": false,
     "mac_addresses_published": false,
     "privacy_violation_count": 0,
@@ -389,14 +440,14 @@
   },
   "production_promotion_allowed": false,
   "production_ready": false,
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "security_observation": {
     "secure_boot_enabled": null,
     "secure_boot_status": "permission_limited",
     "tpm_key_or_certificate_material_requested": false,
     "tpm_status": "permission_limited"
   },
-  "selected_move_id": "N2-HW-001",
+  "selected_move_id": "N2-HW-002",
   "status": "captured_partial_non_promoting",
   "status_date": "2026-07-16",
   "target_id": "TIER1-B650M-9800X3D-RTX5070-001"

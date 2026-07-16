@@ -43,8 +43,8 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 86,
-    "selected_move_id": "N0-ADR-001",
+    "last_updated_cycle": 87,
+    "selected_move_id": "N2-HW-002",
     "immediate_next_move_id": "N0-RATIFY-001",
     "required_records": [
       "docs/production-goal-charter.md",
@@ -79,14 +79,14 @@
     "implementation_item_count": 8996,
     "section_count": 171,
     "coverage_path": "runs/pooleos_native_checklist_coverage.json",
-    "coverage_sha256": "280D3DF7ADAA87DD2E86287B75805D531AD7B827F0AF9FD0C22D25F8AE4DC872",
+    "coverage_sha256": "7A244810CA2E3E0F31B38A0D8C67CF67ED502C83B62736237156E1920FBCB63A",
     "coverage_status": "pass",
-    "added_requirement_count": 25
+    "added_requirement_count": 26
   },
   "baseline": {
-    "pooleos_cycle": 86,
+    "pooleos_cycle": 87,
     "entry_cycle": 79,
-    "pooleos_test_count": 428,
+    "pooleos_test_count": 431,
     "historical_consistency_release_gate": {
       "passed_checks": 58,
       "total_checks": 58,
@@ -478,17 +478,20 @@
         "169"
       ],
       "source_checkbox_count": 236,
-      "added_requirement_ids": [],
+      "added_requirement_ids": [
+        "ADD-HW-PROBE-001"
+      ],
       "current_evidence": [
-        "specs/hardware-support-policy.json: support tiers, evidence channels, privacy boundary, and destructive-test prerequisites",
+        "specs/hardware-support-policy.json: support tiers, evidence channels, privacy boundary, destructive-test prerequisites, and a source-bound user-mode CPUID versus privileged-probe boundary",
         "specs/tier1-hardware-target.json: exact Tier 1 target and 24 required identity checks",
         "specs/native-standards-register.json: 15 primary-source standards records with revision and supersession state",
-        "runs/tier1_hardware_observation.json: sanitized whitelist reconstruction bound to the ignored private capture",
-        "runs/hardware_target_readiness.json: 24/24 required identity checks, zero privacy violations, and explicit non-promotion",
+        "tools/collect_tier1_hardware.ps1 1.1: bounded W-to-X user-mode CPUID thunk with an exact leaf/subleaf allowlist, lowest allowed logical-processor affinity restored after every query, no processor-serial leaf, no driver, and no privileged access attempt",
+        "runs/tier1_hardware_observation.json: sanitized whitelist reconstruction bound to the ignored private capture, with 16 canonical CPUID records represented by a public transcript hash and decoded facts rather than raw registers",
+        "runs/hardware_target_readiness.json: 24/24 required identity checks, two partial evidence channels, 16 CPUID records, 14/14 negative controls, zero privacy violations, and explicit non-promotion",
         "docs/hardware-target-and-lab-safety.md: reproducible capture procedure and owner safety boundary"
       ],
       "current_gaps": [
-        "Exact identity passes 24/24 required checks, but seven required evidence channels, 15 exact standards artifact hashes, ten destructive-lab prerequisites, and native-parser comparison remain open"
+        "Exact identity passes 24/24 required checks and 16 allowlisted user-mode CPUID records close the bounded CPUID sub-capability, but MSR access remains pending a reviewed privileged mechanism; seven required evidence channels, 15 exact standards artifact hashes, ten destructive-lab prerequisites, and native-parser comparison remain open"
       ],
       "exit_gate": "Tier 0 and Tier 1 manifests are complete and hashed; destructive-test safety is accepted; every implementation phase has lawful normative references and errata tracking."
     },
@@ -2592,8 +2595,8 @@
         "ADD-TEST-001"
       ],
       "current_evidence": [
-        "Cycle 86 host baseline: 428 tests with one Windows symlink-permission skip",
-        "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, and hardware privacy negatives"
+        "Cycle 87 host baseline: 431 tests with one Windows symlink-permission skip",
+        "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, hardware privacy, malformed-CPUID, serial-leaf, privileged-overclaim, and collector-smoke negatives"
       ],
       "current_gaps": [
         "No native system, power-loss, hardware, accessibility, soak, or external security suite exists"
@@ -2660,8 +2663,8 @@
         "ADD-SUPPLY-001"
       ],
       "current_evidence": [
-        "Cycle 86 consistency release gate: 65/65 checks over 60 artifacts",
-        "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, native-toolchain, and hardware-readiness artifacts"
+        "Cycle 87 consistency release gate: 65/65 checks over 60 artifacts",
+        "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, native-toolchain, and bounded hardware-readiness artifacts"
       ],
       "current_gaps": [
         "No native SBOM/provenance/signing ceremony/release manifest or source-controlled release exists"
@@ -2989,6 +2992,37 @@
       ]
     },
     {
+      "id": "FLAG-N2-CPUID-001",
+      "class": "REQUIRED",
+      "status": "closed",
+      "phase_id": "N2",
+      "closure_condition": "Capture and sanitize a bounded direct user-mode CPUID transcript with an exact allowlist, no processor-serial leaf, no raw-register publication, and passing malformed/overclaim negative controls",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json",
+        "runs/hardware_target_readiness.json",
+        "specs/hardware-support-policy.json",
+        "tools/collect_tier1_hardware.ps1",
+        "runs/tier1_hardware_observation.json",
+        "specs/tier1-hardware-observation.schema.json"
+      ]
+    },
+    {
+      "id": "FLAG-N2-PRIVILEGED-PROBE-001",
+      "class": "BLOCKER",
+      "status": "open",
+      "phase_id": "N2",
+      "closure_condition": "Qualify source-bound read-only MSR, PCI, SPD, UEFI-variable, memory, and I/O mechanisms through driver and side-effect review, then require explicit operator authorization before any driver load or privileged probe",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json",
+        "runs/hardware_target_readiness.json",
+        "specs/hardware-support-policy.json",
+        "specs/tier1-hardware-capture.schema.json",
+        "docs/hardware-target-and-lab-safety.md"
+      ]
+    },
+    {
       "id": "FLAG-N2-EVIDENCE-001",
       "class": "REQUIRED",
       "status": "open",
@@ -3070,7 +3104,7 @@
       "No PooleBoot PE32+ UEFI loader or frozen boot protocol",
       "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path",
       "No native CPU, interrupts, time, SMP, physical memory, virtual memory, or reclaim implementation",
-      "The exact Tier 1 identity passes 24/24 required checks, but seven evidence channels, 15 standards hashes, ten lab-safety prerequisites, native parsing, and physical qualification remain open",
+      "The exact Tier 1 identity passes 24/24 required checks and 16 allowlisted user-mode CPUID records are captured with zero public raw registers, but seven required channels remain non-complete in total, including partial CPU/MSR and SPD/topology; 15 standards hashes, ten lab-safety prerequisites, native parsing, and physical qualification also remain open",
       "No native DMA/IOMMU/interrupt-remapping confinement",
       "No native scheduler, task, syscall, capability, IPC, isolation, async I/O, or quota implementation",
       "No native security/crypto/TPM/secrets/MAC/privacy implementation or external review",
@@ -3116,6 +3150,7 @@
     "Buildroot and Linux artifacts are historical reference evidence and cannot satisfy native PooleOS gates.",
     "Checklist mapping is not implementation completion.",
     "Host simulations and schemas are not native kernel enforcement.",
+    "Sixteen allowlisted user-mode CPUID records prove only a bounded host observation; they do not prove MSR access, privileged probes, native parsing, driver safety, or Tier 1 qualification.",
     "Binding thirty-eight consistent candidate objective definitions into a future signature while binding zero measurements is not owner ratification or implementation evidence.",
     "PooleGlyph Phase 65 metadata cannot be promoted before Phase 66 executable evidence.",
     "Finite PDC/QP evidence remains bounded to its declared classical models and protocols.",
