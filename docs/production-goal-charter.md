@@ -7,9 +7,9 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 91
+Last roadmap reconciliation: PooleOS Cycle 92
 
-Current reconciliation: the seven-record native constitution, public/private boundary, architecture baseline, and conformance policy remain partial evidence. The public `rookepoole/PooleOS` repository has protected `main`; PRs #1 through #5 are merged, with Cycle 90 public at `3f364a4a06e0ce3eb676e98fe6444669c4e2b3d7`. The owner-controlled ADR ceremony binds six exact decision sources and all 38 target definitions while accepting zero measurements. Cycle 91 adds a deterministic 16-source owner packet that presents both proposed ADRs, all 38 target definitions, every allowed custody profile, an unfilled response form, and 12/12 fail-closed packet controls. Every owner selection remains `UNSELECTED`; there are zero trusted keys, no owner signature, no merge or publication authorization, and no production-promotion power. Cycle 87 closed the bounded unprivileged CPUID portion of `N2-HW-002` with 16 allowlisted records, 24/24 identity checks, 14/14 hostile controls, and zero public privacy violations; no driver or privileged probe was loaded. Cycle 88 closed `FLAG-N4-PROFILE-001` and partially advanced N4.1-N4.4 with 4/4 paused QMP machine probes and 18/18 negative controls without starting a guest CPU. Cycles 89-90 added bounded boot-slot rollback, capability derivation/revocation, page ownership, virtual map/unmap, TLB shootdown, and generation-transfer state; across all three models, 3/3 safe searches drain, 4/4 required hostile counterexamples are detected, 7/7 repeat pairs match, and 14/14 negative controls pass. `FLAG-N4-MODELS-001` remains open: IPC, scheduler, PooleFS recovery, and all three native implementation-trace comparisons are unfinished. The checks are not theorem proofs, liveness or refinement checks, fingerprint-collision guarantees, ABI-freeze authority, or PooleKernel evidence. Current QEMU and EDK II source rebuilds, provider patch-delta review, license/SBOM/vulnerability closure, real PooleBoot evidence, fault campaigns, and second-host reproduction also remain open. `N0-RATIFY-001` remains blocked on Rooke Poole's completed packet response, objective/ADR disposition, and custody choice; all 38 values await owner acceptance or amendment and all 38 targets remain unmeasured. The next owner-independent move remains `N4-IPC-MODEL-001`, but the chronological lane pauses there while the packet is under owner review. The one-host Rust 1.97.0/LLD 22.1.6, QEMU 11.0.0, and bounded model evidence remains non-promoting. No functional PooleBoot, PooleKernel, userspace, driver, desktop, or ISO exists.
+Current reconciliation: the seven-record native constitution, public/private boundary, architecture baseline, and conformance policy remain partial evidence. The public `rookepoole/PooleOS` repository has protected `main`; PRs #1 through #5 are merged, with Cycle 90 public at `3f364a4a06e0ce3eb676e98fe6444669c4e2b3d7`. The owner-controlled ADR ceremony binds six exact decision sources and all 38 target definitions while accepting zero measurements. Cycle 91 adds a deterministic 16-source owner packet that presents both proposed ADRs, all 38 target definitions, every allowed custody profile, an unfilled response form, and 12/12 fail-closed packet controls. Cycle 92 receives an owner response but does not promote it because one bounded-choice placeholder remains unresolved; the packet therefore still records every owner selection as `UNSELECTED`, with zero trusted keys, no owner signature, no merge or publication authorization, and no production-promotion power. Cycle 92 also expands N34 into a first-class, 22-subphase PooleGlyph machine-language co-development track spanning language governance, Phase 66, frontend, canonical Core IR, PGASM, PGB2, PGVM2, host ABI, policy, tooling, conformance, native integration, release, and source-available/private-IP boundaries. Cycle 87 closed the bounded unprivileged CPUID portion of `N2-HW-002` with 16 allowlisted records, 24/24 identity checks, 14/14 hostile controls, and zero public privacy violations; no driver or privileged probe was loaded. Cycle 88 closed `FLAG-N4-PROFILE-001` and partially advanced N4.1-N4.4 with 4/4 paused QMP machine probes and 18/18 negative controls without starting a guest CPU. Cycles 89-90 added bounded boot-slot rollback, capability derivation/revocation, page ownership, virtual map/unmap, TLB shootdown, and generation-transfer state; across all three models, 3/3 safe searches drain, 4/4 required hostile counterexamples are detected, 7/7 repeat pairs match, and 14/14 negative controls pass. `FLAG-N4-MODELS-001` remains open: IPC, scheduler, PooleFS recovery, and all three native implementation-trace comparisons are unfinished. The checks are not theorem proofs, liveness or refinement checks, fingerprint-collision guarantees, ABI-freeze authority, or PooleKernel evidence. Current QEMU and EDK II source rebuilds, provider patch-delta review, license/SBOM/vulnerability closure, real PooleBoot evidence, fault campaigns, and second-host reproduction also remain open. `N0-RATIFY-001` remains blocked on one explicit owner-response value followed by separately authorized custody, key, signing, merge, tag, and publication steps; all 38 targets remain unmeasured. The next owner-independent move remains `N4-IPC-MODEL-001`, while PooleGlyph Phase 66 may advance as a parallel component lane. The one-host Rust 1.97.0/LLD 22.1.6, QEMU 11.0.0, bounded model evidence, and PooleGlyph planning evidence remain non-promoting. No functional PooleBoot, PooleKernel, userspace, driver, desktop, or ISO exists.
 
 ## 1. Objective
 
@@ -74,7 +74,7 @@ The release profile decides whether Wi-Fi, Bluetooth, suspend, hibernation, AHCI
 
 ## 5. PooleGlyph Contract
 
-Develop PooleOS and the live `<POOLEGYPH_REPO>` checkout in tandem.
+Develop PooleGlyph machine language itself and PooleOS in tandem. PooleGlyph is not merely a dependency to import after it is finished: language design, frontend, semantic model, Core IR, assembly, package format, virtual machine, standard library, tools, conformance, optimization, security, release, and PooleOS integration are all governed production work.
 
 At the start of each active cycle:
 
@@ -84,7 +84,18 @@ At the start of each active cycle:
 4. keep parser-to-kernel/system promotion blocked until Phase 66 executable Core IR evidence is accepted;
 5. never promote metadata-only declarations into executable or privileged authority.
 
-PGB2 must become a canonical signed binary package format. PGVM2 must become a bounded deterministic virtual machine with independent verification, typed effects, explicit capabilities, quotas, deadlines, cancellation, cleanup, traps, replay, and version negotiation. PooleGlyph policy may narrow existing authority but cannot create kernel/device authority.
+Every tandem cycle must also:
+
+- classify changes across source syntax, diagnostics, AST, semantics, Core IR, PGASM, PGB2, PGVM2, host ABI, policy, standard library, tools, conformance, performance, release, and IP boundaries;
+- update a cross-repository compatibility matrix and identify required migrations before either repository consumes changed bytes;
+- retain a public-safe deterministic reference path and independent validators for every canonical representation;
+- keep experimental language features behind explicit version/profile gates and preserve stable compatibility windows;
+- reject semantic, effect, resource, determinism, or authority drift introduced by optimization or private acceleration;
+- advance Phase 66 first, followed by evidence-gated v0.5 stabilization, v0.6 AST-parser replacement, v0.7 modules/standard-library expansion, v0.8 process/runtime prototype, v0.9 replay/debug polish, and v1.0 stable public language.
+
+Rooke Poole owns the PooleGlyph and PooleOS IP. Their source-available path does not make every implementation detail public: canonical specifications, formats, reference toolchain/runtime, and conformance evidence must remain sufficient for independent review, while private PooleMath methods and optimization strategy remain segregated and cannot substitute for public-safe reference behavior or PooleOS security enforcement.
+
+PGB2 must become a canonical signed binary package format. PGVM2 must become a bounded deterministic virtual machine with independent verification, typed effects, explicit capabilities, quotas, deadlines, cancellation, cleanup, traps, replay, and version negotiation. PooleGlyph policy may narrow existing authority but cannot create kernel/device authority. Private or optimized compilers and backends must reproduce the declared reference semantics, effects, authority, and bounded outputs before promotion.
 
 Recovery and safe mode must not require PooleGlyph.
 
@@ -174,7 +185,7 @@ For every promoted requirement:
 Every active goal turn must:
 
 1. Read this charter, the Build Plan, machine roadmap, checklist coverage ledger, current flags, release gaps, latest cycle log, and previous handoff.
-2. Reinspect the live PooleGlyph checkpoint folder and repository state.
+2. Reinspect the live PooleGlyph checkpoint folder and repository state, then decide whether the selected move belongs in PooleOS, PooleGlyph, or a coordinated cross-repository change.
 3. Confirm the locked master checklist and coverage manifest still match their expected hashes/counts.
 4. Determine the earliest unmet dependency and highest-risk unblocked native requirement.
 5. Select the smallest proof-strengthening move that advances the native critical path without relying on an unfrozen downstream interface.
@@ -186,7 +197,7 @@ Every active goal turn must:
 11. Record honest non-claims and any newly discovered required work. Never hide a blocker to preserve a schedule or phase count.
 12. End with the exact next dependency-ordered move.
 
-Architecture work N0-N5 outranks downstream optimization while those foundations remain unclosed. PDC signed dynamics and PooleGlyph Phase 66 may proceed in parallel but cannot substitute for native boot progress.
+Architecture work N0-N5 outranks downstream optimization while those foundations remain unclosed. PDC signed dynamics and the PooleGlyph machine-language lane beginning with Phase 66 may proceed in parallel but cannot substitute for native boot progress.
 
 ## 12. Phase Contract
 
@@ -226,7 +237,7 @@ Do not mark this goal complete until all of the following are true for the exact
 - PooleOS is source-controlled and every release byte has provenance and licensing records;
 - PooleBoot and PooleKernel are original, reviewed, reproducible, signed native components;
 - capability, IPC, memory, scheduler, IOMMU, driver isolation, storage, PooleFS, network, security, update, recovery, and fault-containment gates pass;
-- PooleGlyph Phase 66 promotion is accepted and PGB2/PGVM2 v1 is frozen and enforced;
+- the promoted PooleGlyph revision, Phase 66 boundary, source/semantic/Core IR/PGASM/PGB2/PGVM2/host-ABI contracts, compatibility profile, public/private IP boundary, independent conformance, and native capability enforcement are accepted for the release profile;
 - PDC reference and native/backends agree within declared contracts and bounded control lanes pass rollback/watchdog gates;
 - accessible PooleGlass Liquid Glass, software-rendered fallback, static/animated boot identity, installer, and recovery pass;
 - external review closes all critical and high findings;

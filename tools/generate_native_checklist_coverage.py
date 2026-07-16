@@ -234,6 +234,36 @@ ADDED_REQUIREMENTS = [
         "basis": ["live PooleGlyph Phase 65 checkpoint", "existing draft PGB2/PGVM2 evidence"],
     },
     {
+        "id": "ADD-PGL-002",
+        "phase_id": "N34",
+        "requirement": "Develop PooleGlyph machine language and PooleOS in tandem through exact checkpoint, commit, manifest, compatibility-matrix, and change-impact records; preserve user work and reject silent source, language, Core IR, package, VM, host-ABI, or policy drift between repositories.",
+        "basis": ["Rooke Poole tandem-development direction on 2026-07-16", "live PooleGlyph Phase 65 checkpoint protocol"],
+    },
+    {
+        "id": "ADD-PGL-003",
+        "phase_id": "N34",
+        "requirement": "Specify and independently validate the complete deterministic PooleGlyph pipeline from source bytes through tokens, AST, semantic analysis, canonical Core IR, PGASM, PGB2, and PGVM2 behavior; metadata-only declarations must remain non-executable and no lowering or optimization may amplify effects or authority.",
+        "basis": ["PooleGlyph v0.5-dev parser/AST system specification", "Phase 66 Core IR boundary requirement"],
+    },
+    {
+        "id": "ADD-PGL-004",
+        "phase_id": "N34",
+        "requirement": "Maintain versioned golden, malformed, adversarial, migration, differential, and replay corpora across every PooleGlyph representation, with independent encoders, decoders, verifiers, interpreters, source maps, compatibility profiles, and cross-repository fixtures before a language or runtime version is promoted.",
+        "basis": ["PooleGlyph v0.5-dev conformance and diagnostic evidence", "native PooleOS independent-verification policy"],
+    },
+    {
+        "id": "ADD-PGL-005",
+        "phase_id": "N34",
+        "requirement": "Confine PooleGlyph execution behind verified PGB2/PGVM2 and capability-broker boundaries with explicit rights, effects, resources, quotas, deadlines, cancellation, teardown, host-call schemas, and recovery independence; language policy may only attenuate authority already issued by PooleKernel.",
+        "basis": ["native PooleOS capability architecture", "PooleGlyph-to-PooleOS integration boundary"],
+    },
+    {
+        "id": "ADD-PGL-006",
+        "phase_id": "N34",
+        "requirement": "Keep the public PooleGlyph source-available language, reference compiler, canonical formats, baseline verifier/runtime, and conformance evidence sufficient for independent review while segregating private PooleMath optimizations and acceleration strategy; every private backend must remain differential-equivalent to a public-safe reference path and must not change semantics or authority.",
+        "basis": ["Rooke Poole IP direction", "PooleGlyph public/private IP boundary"],
+    },
+    {
         "id": "ADD-TEST-001",
         "phase_id": "N36",
         "requirement": "Add property-based testing, model-based state-machine testing, schedule exploration, mutation testing, symbolic execution where tractable, parser differential testing, and proof-to-test traceability to the existing unit/fuzz/fault suites.",

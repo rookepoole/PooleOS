@@ -395,27 +395,27 @@
     },
     {
       "path": "docs/n0-owner-decision-packet.md",
-      "sha256": "4D05ED8C819EF6837BCC2267DA96923CBFE69BEC44B246BD9D663953C5BBD020",
+      "sha256": "23AF77F81CAEEDEB88F2103BE4A020C8DF9733FD186A4AB444382EB32E90E5F0",
       "byte_count": 23090,
       "line_count": 273
     },
     {
       "path": "specs/pooleos-kernel-charter.md",
-      "sha256": "130669A9B001D1B5D228A71130609EB0549777C842912BE4DA6387E2FBF69834",
-      "byte_count": 12137,
+      "sha256": "DFD14DC3D594B419E6C3A1FF4051D4CFA35C1FC18C8DBABF24715C66BFFA2E15",
+      "byte_count": 12238,
       "line_count": 139
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "31E6AD7EF1BF2717274402E5D2AF56B396D9085A54E3A423F966034C38853FDC",
-      "byte_count": 19604,
-      "line_count": 240
+      "sha256": "022494F6AA33C299CF9BA2414DF8F3A2080A93708D9C01DEA3E47933414E14B0",
+      "byte_count": 22209,
+      "line_count": 251
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "A906C7BC9AFD553D58CCE74AF8DDAFD9575FB86286832F728FC93D78527E0489",
-      "byte_count": 112989,
-      "line_count": 1136
+      "sha256": "35225F1476DFAA8395CD097B090DB07829233452EBAE7A05B3B115B80F9B8478",
+      "byte_count": 120638,
+      "line_count": 1157
     },
     {
       "path": "docs/publication-boundary.md",
@@ -425,13 +425,13 @@
     },
     {
       "path": "runs/pooleos_native_checklist_coverage.json",
-      "sha256": "FCAC371582B5942214EF1BD273CE0D200CE51E418525486042FDACAE73793D86",
-      "byte_count": 83661,
-      "line_count": 2937
+      "sha256": "60268A163D88BD3D66D966B3AA40C67DC88F964B9EEDAE3C799D53B80E9BD226",
+      "byte_count": 86477,
+      "line_count": 2987
     },
     {
       "path": "runs/adr_ratification_readiness.json",
-      "sha256": "B059934A7741B8F43EB137828B1CC93DD38C1F1012EAB4E2F63888EFE0C06665",
+      "sha256": "8DF0A003B43BF341F329822D521561E6956EA6DFE2054379B03B5FB0B42495A9",
       "byte_count": 8684,
       "line_count": 218
     },
@@ -449,7 +449,7 @@
     },
     {
       "path": "runs/n0_owner_decision_packet.json",
-      "sha256": "F7E3EADEF909413FA19B3ADC688EC4D33F5DD502AA3AD84F1E2D0B801D859062",
+      "sha256": "BFE74292B2B695E49D48028B5AE9843571FC23878C355CCA9119D90729041AE0",
       "byte_count": 60493,
       "line_count": 1699
     },
