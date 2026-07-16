@@ -1,0 +1,3 @@
+# Intentionally empty pending OWNER-SIGNING-CUSTODY-001.
+# Required form after owner approval:
+# rookepoole namespaces="git,pooleos-adr-ratification-v1@github.com/rookepoole/PooleOS" <PUBLIC_SSH_KEY>

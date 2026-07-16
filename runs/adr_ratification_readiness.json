@@ -1,0 +1,163 @@
+{
+  "adr_set": {
+    "accepted_owner_directed_count": 5,
+    "adrs": [
+      {
+        "byte_count": 3017,
+        "decision_owner": "Rooke Poole",
+        "id": "ADR-0001",
+        "path": "docs/adr/0001-native-pooleos-constitution.md",
+        "sha256": "6E8D0AD1CF75639F1069D41CA4DA3EC200D999963FA4B7B19E0C27F773CC5834",
+        "source_ratification": "cryptographic signature pending",
+        "source_status": "accepted-owner-directed",
+        "title": "Native PooleOS Constitution"
+      },
+      {
+        "byte_count": 3868,
+        "decision_owner": "Rooke Poole",
+        "id": "ADR-0002",
+        "path": "docs/adr/0002-reuse-clean-room-and-publication-boundary.md",
+        "sha256": "01E0B5B8AB15736E6E15F8E994CE0456BC0DF7AB5DD3040B2E5A9D06C1FA8E0F",
+        "source_ratification": "cryptographic signature and legal review pending",
+        "source_status": "accepted-owner-directed",
+        "title": "Reuse, Clean-Room, and Publication Boundary"
+      },
+      {
+        "byte_count": 4108,
+        "decision_owner": "Rooke Poole",
+        "id": "ADR-0003",
+        "path": "docs/adr/0003-language-and-toolchain-split.md",
+        "sha256": "6F874FDBBA98CE728A230C4AF7798F202D09A63CE7394510C810C1E65932B1B0",
+        "source_ratification": "owner acceptance and full two-host toolchain qualification pending",
+        "source_status": "proposed",
+        "title": "Implementation Language and Toolchain Split"
+      },
+      {
+        "byte_count": 2666,
+        "decision_owner": "Rooke Poole",
+        "id": "ADR-0004",
+        "path": "docs/adr/0004-product-names-and-version-namespaces.md",
+        "sha256": "9798309FC902C2F5E5A8206751DA4423532E25690A2AD23AD4DC116F3566A637",
+        "source_ratification": "owner acceptance and trademark review pending",
+        "source_status": "proposed",
+        "title": "Product Names and Version Namespaces"
+      },
+      {
+        "byte_count": 3124,
+        "decision_owner": "Rooke Poole",
+        "id": "ADR-0005",
+        "path": "docs/adr/0005-v1-scope-mission-threats-and-non-goals.md",
+        "sha256": "1C7924EFE619F39AEF6BAB54ED3981BB5439AE929783C5EACD8FAA08EBF60268",
+        "source_ratification": "cryptographic signature and final quantitative targets pending",
+        "source_status": "accepted-owner-directed",
+        "title": "V1 Scope, Mission, Threats, and Non-Goals"
+      },
+      {
+        "byte_count": 2912,
+        "decision_owner": "Rooke Poole",
+        "id": "ADR-0006",
+        "path": "docs/adr/0006-tcb-and-component-placement.md",
+        "sha256": "B973BEB8EE7EABCFB677DA892821287DB77214DE0E980B8EE78342C5DE3C2F03",
+        "source_ratification": "cryptographic signature and executable-model review pending",
+        "source_status": "accepted-owner-directed",
+        "title": "Trusted Computing Base and Component Placement"
+      },
+      {
+        "byte_count": 3680,
+        "decision_owner": "Rooke Poole",
+        "id": "ADR-0007",
+        "path": "docs/adr/0007-repository-governance-and-source-tree.md",
+        "sha256": "F02F1572C1BEDD803B7617E251F0AD4E08942FCE0C4663D21A63CD3FADA17E4D",
+        "source_ratification": "signed-tag, immutable-release-ref, and retention controls pending",
+        "source_status": "accepted-owner-directed",
+        "title": "Repository Governance and Source Tree"
+      }
+    ],
+    "cryptographically_ratified_count": 0,
+    "pending_owner_disposition": [
+      "ADR-0003",
+      "ADR-0004"
+    ],
+    "present_count": 7,
+    "proposed_count": 2,
+    "required_count": 7
+  },
+  "artifact_kind": "pooleos_adr_ratification_readiness",
+  "artifacts": {
+    "manifest": {
+      "path": "runs/adr_ratification_manifest.json",
+      "present": false
+    },
+    "receipt": {
+      "path": "runs/adr_ratification_receipt.json",
+      "present": false
+    },
+    "signature": {
+      "path": "runs/adr_ratification_manifest.json.sig",
+      "present": false
+    }
+  },
+  "claim_boundary": [
+    "This readiness ledger is unsigned preparation evidence and is not owner acceptance.",
+    "No private key, credential, recovery secret, or hardware-backed key handle is recorded.",
+    "A detached signature alone does not satisfy the signed-tag and remote-publication gates.",
+    "Architecture ratification does not prove a bootloader, kernel, driver, desktop, or production ISO."
+  ],
+  "owner_actions": [
+    {
+      "description": "Explicitly accept, amend, or reject ADR-0003 and ADR-0004; an amendment or rejection requires a revised or superseding ADR before signing.",
+      "id": "OWNER-ADR-DISPOSITION-001",
+      "status": "pending"
+    },
+    {
+      "description": "Choose an allowed owner-controlled SSH governance-key profile and record its public key and fingerprint without publishing private material.",
+      "id": "OWNER-SIGNING-CUSTODY-001",
+      "status": "pending"
+    },
+    {
+      "description": "Sign the canonical manifest with the PooleOS ADR namespace and verify it against the public allowed-signers and revocation files.",
+      "id": "OWNER-DETACHED-SIGN-001",
+      "status": "pending"
+    },
+    {
+      "description": "Create the non-replaceable owner-signed annotated architecture baseline tag over the revision carrying the manifest and detached signature.",
+      "id": "OWNER-SIGNED-TAG-001",
+      "status": "pending"
+    },
+    {
+      "description": "Publish the exact main revision and signed tag, verify remote object identities, and retain the machine receipt.",
+      "id": "OWNER-PUBLISH-RECEIPT-001",
+      "status": "pending"
+    }
+  ],
+  "policy": {
+    "byte_count": 6768,
+    "path": "specs/adr-ratification-policy.json",
+    "sha256": "A04C51A811C75E97E2EDDA5EB90F2DB28E83C6352792F2E4F885D7C30100822F"
+  },
+  "production_promotion_allowed": false,
+  "production_ready": false,
+  "schema_version": "1.0",
+  "selected_move_id": "N0-RATIFY-001",
+  "status": "pending_owner_action",
+  "status_date": "2026-07-16",
+  "summary": {
+    "blocking_owner_action_count": 5,
+    "defined_negative_control_count": 10,
+    "policy_schema_valid": true,
+    "ratification_tooling_present": true,
+    "ready_for_owner_action": true,
+    "ready_for_signature": false,
+    "required_adr_set_complete": true
+  },
+  "trust_bootstrap": {
+    "allowed_signers_path": "security/owner-adr-signers.allowed",
+    "backend": "OpenSSH",
+    "format": "SSHSIG",
+    "namespace": "pooleos-adr-ratification-v1@github.com/rookepoole/PooleOS",
+    "revocation_path": "security/revoked-adr-signers",
+    "signer_file_errors": [],
+    "signer_principal": "rookepoole",
+    "trusted_signer_count": 0
+  }
+}

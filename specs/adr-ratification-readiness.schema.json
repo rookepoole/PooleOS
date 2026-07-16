@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/adr-ratification-readiness.schema.json",
+  "title": "PooleOS ADR Ratification Readiness",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "status_date", "status", "selected_move_id", "production_ready", "production_promotion_allowed", "policy", "adr_set", "trust_bootstrap", "artifacts", "summary", "owner_actions", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_adr_ratification_readiness"},
+    "status_date": {"type": "string"},
+    "status": {"enum": ["pending_owner_action", "ratified"]},
+    "selected_move_id": {"const": "N0-RATIFY-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"type": "boolean"},
+    "policy": {"type": "object", "required": ["path", "sha256", "byte_count"]},
+    "adr_set": {
+      "type": "object",
+      "required": ["required_count", "present_count", "accepted_owner_directed_count", "proposed_count", "cryptographically_ratified_count", "pending_owner_disposition", "adrs"],
+      "properties": {
+        "required_count": {"const": 7},
+        "present_count": {"const": 7},
+        "accepted_owner_directed_count": {"type": "integer"},
+        "proposed_count": {"type": "integer"},
+        "cryptographically_ratified_count": {"type": "integer"},
+        "pending_owner_disposition": {"type": "array", "items": {"type": "string"}},
+        "adrs": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"type": "object", "required": ["id", "title", "path", "source_status", "source_ratification", "decision_owner", "sha256", "byte_count"]}}
+      }
+    },
+    "trust_bootstrap": {"type": "object", "required": ["backend", "format", "namespace", "signer_principal", "allowed_signers_path", "revocation_path", "trusted_signer_count", "signer_file_errors"]},
+    "artifacts": {"type": "object", "required": ["manifest", "signature", "receipt"]},
+    "summary": {"type": "object", "required": ["policy_schema_valid", "required_adr_set_complete", "ratification_tooling_present", "ready_for_owner_action", "ready_for_signature", "blocking_owner_action_count", "defined_negative_control_count"]},
+    "owner_actions": {"type": "array", "minItems": 5, "maxItems": 5, "items": {"type": "object", "required": ["id", "status", "description"]}},
+    "claim_boundary": {"type": "array", "minItems": 4, "items": {"type": "string"}}
+  }
+}

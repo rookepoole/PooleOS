@@ -12,9 +12,13 @@ Architecture Decision Records (ADRs) are immutable decision snapshots. Supersedi
 
 An owner-directed ADR is not equivalent to a cryptographically signed ADR. The N0 exit gate remains open until every required constitution record has the required signature and review evidence.
 
+The first ratification uses a detached manifest overlay to avoid a circular signature. ADR header status and ratification text record the unsigned source snapshot; the canonical manifest binds those exact bytes and records the owner's disposition. A valid detached signature gives each accepted binding the effective status `accepted-signed` without rewriting the already signed ADR. `runs/adr_ratification_receipt.json`, the signed annotated tag, and the immutable historical checkout are the authoritative cryptographic evidence. An unsigned manifest or a changed ADR never changes effective status.
+
 ## Required Header
 
 Every ADR records its ID, title, status, date, decision owner, ratification state, requirement mappings, and supersession relationship. Machine evidence in `runs/native_architecture_baseline.json` binds the exact bytes of the current constitution set.
+
+The ceremony, custody choices, signature namespace, public trust format, revocation input, negative controls, tag, and remote-publication gate are defined in `docs/adr-ratification-ceremony.md` and `specs/adr-ratification-policy.json`.
 
 ## Constitution Set
 
@@ -27,4 +31,3 @@ Every ADR records its ID, title, status, date, decision owner, ratification stat
 - `0007-repository-governance-and-source-tree.md`
 
 `0000-template.md` is the required template for subsequent decisions.
-
