@@ -118,6 +118,26 @@ ADDED_REQUIREMENTS = [
         "basis": ["https://docs.oasis-open.org/virtio/virtio/v1.3/virtio-v1.3.html"],
     },
     {
+        "id": "ADD-TIER0-SUPPLY-001",
+        "phase_id": "N4",
+        "requirement": "Treat QEMU, firmware, and debugger inputs as a pinned host-tool supply chain: bind exact source tags and commits, provider patch deltas, signatures, executable and runtime-closure hashes, firmware source-to-binary provenance, licenses, SBOM, vulnerabilities, redistribution status, host security controls, and second-builder reproduction; reject aliases, development builds, Android forks, expired-certificate trust, and stale bundled firmware as silent substitutes.",
+        "basis": [
+            "https://www.qemu.org/download/",
+            "https://github.com/tianocore/edk2/releases",
+            "Cycle 88 observed QEMU/OVMF candidate provenance gaps",
+        ],
+    },
+    {
+        "id": "ADD-HW-PROBE-001",
+        "phase_id": "N2",
+        "requirement": "Separate unprivileged CPUID collection from privileged MSR, PCI configuration-space, SPD, UEFI-variable, physical-memory, and I/O-port probes; require exact allowlists, deterministic logical-processor affinity with restoration, source-bound read-only mechanisms, no write-capable path, driver and side-effect review, hostile tests, and explicit operator authorization before any kernel driver is loaded.",
+        "basis": [
+            "https://docs.amd.com/v/u/en-US/40332_4.09_APM_PUB",
+            "https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualalloc",
+            "PooleOS destructive and privileged hardware safety boundary",
+        ],
+    },
+    {
         "id": "ADD-VIRTIO-002",
         "phase_id": "N16",
         "requirement": "Provide isolated virtio console, block, network, input, GPU, RNG, balloon, and IOMMU driver paths as applicable, each with feature negotiation, queue validation, DMA confinement, reset, cancellation, and malformed-device tests.",

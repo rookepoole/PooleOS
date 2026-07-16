@@ -2,7 +2,7 @@
 
 Status date: 2026-07-16  
 Plan version: 2.0.0-native-reset  
-Roadmap cycle: PooleOS Cycle 83
+Roadmap cycle: PooleOS Cycle 88
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
@@ -110,7 +110,7 @@ Recovery boots from a separately signed immutable image and remains usable witho
 
 ## 5. Current Evidence Baseline
 
-Cycle 80 reset architecture claims without discarding validated component evidence. Cycle 81 established the first byte-bound native constitution and repository boundary. Cycle 82 published the baseline repository, protected `main`, and qualified the first pinned freestanding PE32+/ELF64 compiler path on one host. Cycle 83 freezes and tests the owner-controlled ADR ceremony without generating a key, signing as the owner, or promoting any unsigned decision.
+Cycle 80 reset architecture claims without discarding validated component evidence. Cycle 81 established the first byte-bound native constitution and repository boundary. Cycle 82 published the baseline repository, protected `main`, and qualified the first pinned freestanding PE32+/ELF64 compiler path on one host. Cycle 83 froze and tested the owner-controlled ADR ceremony without generating a key, signing as the owner, or promoting any unsigned decision. Cycle 84 established the privacy-preserving Tier 1 hardware target, support policy, standards register, read-only capture path, and fail-closed readiness ledger without authorizing hardware mutation or destructive testing. Cycle 85 defines a measurable candidate Workstation v1 profile across reliability, accessibility, compatibility, privacy, and performance while preserving owner ratification and all implementation measurements as open gates. Cycle 86 hardens the ratification scope so an eventual owner signature commits to the exact objective definitions and schema while explicitly accepting zero measurements and granting no production promotion. Cycle 87 implements and proves the unprivileged part of `N2-HW-002`: direct allowlisted CPUID capture, sanitized decoded evidence, and explicit separation from every privileged or write-capable hardware probe. Cycle 88 executes the bounded foundation of `N4-QEMU-001`: exact one-host QEMU/OVMF/runtime locks, versioned q35 launch profiles, modern-only VIRTIO block, paused machine instantiation, deterministic command/QMP evidence, and fail-closed substitution controls without booting guest code.
 
 | Area | Current evidence | Native status | Boundary |
 |---|---|---|---|
@@ -124,11 +124,14 @@ Cycle 80 reset architecture claims without discarding validated component eviden
 | PGB2/PGVM2 | JSON draft, byte/trap simulator, capability planning receipts | Partial N34/N35 | No frozen binary ABI or native execution |
 | Isolation | Static microkernel/capability simulations and bounded fuzz evidence | Partial N15/N35 | Not enforced by PooleKernel |
 | QEMU/Buildroot | Historical lab scaffolding and evidence contracts | Reference only | Cannot satisfy native boot, kernel, driver, or ISO gates |
-| Test suite | Cycle 83: 397 tests pass with one Windows symlink-permission skip, including ten real/adversarial ADR-signing tests | Partial N36 | Predominantly host/reference and artifact tests |
-| Release gate | Cycle 83: 63/63 consistency checks over 58 artifacts; 20 native gaps | Partial N37 | `production_ready=false`; not a release acceptance gate |
+| Native Tier 0 | `POOLEOS-TIER0-Q35-1`; exact 1,180,772,298-byte QEMU runtime closure; two profiles; 4/4 paused q35/QMP probes; 18/18 negative controls | Partial N4.1-N4.4 | No guest CPU execution, native media, PooleBoot boot, current source rebuild, driver execution, Secure Boot, formal model, or N4 exit claim |
+| Native v1 objectives | 38 measurable candidate targets: 7 reliability, 8 accessibility, 6 compatibility, 7 privacy, and 10 performance; ten negative controls pass | Partial N0.6 | Zero targets measured; profile and values await owner ratification |
+| Test suite | Cycle 88: 455 tests pass with one Windows symlink-permission skip, including Tier 0 provenance, q35, pflash, VIRTIO, launch, path, substitution, timeout, and boot-overclaim controls | Partial N36 | Predominantly host/reference and artifact tests; four QEMU probes keep guest CPUs paused |
+| Release gate | Cycle 88: 66/66 consistency checks over 61 artifacts; 20 native gaps | Partial N37 | `production_ready=false`; not a release acceptance gate |
 | Source control | Public `rookepoole/PooleOS`, protected `main`, topic-branch workflow, private vulnerability reporting | Partial N1/N37 | Initial commit unsigned; signed tags, immutable release refs, retained CI, and full review policy remain open |
-| ADR ratification | Canonical OpenSSH `SSHSIG` manifest, domain-separated namespace, public trust/revocation files, signed-tag/remote verifier, ten negative controls | Partial N0/N1/N37 | Zero trusted owner keys; ADR-0003/0004 disposition, signature, tag, and publication receipt remain owner actions |
+| ADR ratification | Canonical OpenSSH `SSHSIG` manifest, domain-separated namespace, six exact decision sources, explicit 38-target definition acceptance with zero measurement acceptance, public trust/revocation files, signed-tag/remote verifier, and 12 declared negative controls | Partial N0/N1/N37 | Zero trusted owner keys; six owner actions, ADR-0003/0004 disposition, signature, tag, and publication receipt remain open |
 | Native toolchain | Rust 1.97.0/Cargo 1.97.0/LLD 22.1.6; two clean PE32+ and ELF64 builds match exactly on one host | Partial N3 | Empty non-booting fixtures; second host and remaining tool families are open |
+| Tier 1 hardware | Exact target matches 24/24 required identity checks; 16 allowlisted user-mode CPUID records are captured and decoded; 14/14 negative controls pass with zero privacy violations | Partial N2 | Seven required channels remain non-complete, including partial CPU/MSR and SPD/topology; 15 standards hashes, ten lab prerequisites, and native comparison remain open |
 | Native bootloader | No Poole-authored PE32+ UEFI image | Not started N5 | No native UEFI proof of life |
 | Native kernel | No PooleKernel source, ELF image, boot, ring 3, IPC, capability, or driver-domain execution | Not started N6-N16 | Zero native-kernel production claims |
 | Native media | No native signed ISO or physical boot | Not started N39 | Existing image names are non-promoting fixtures |
@@ -269,22 +272,25 @@ Subphases:
 - N0.7 Define release claims and independent-reproduction requirements.
 - N0.8 Add architecture-conformance tests that reject Linux kernels, Buildroot rootfs markers, GRUB/Limine, systemd, and other prohibited production dependencies from release media.
 
-Cycle 81-83 evidence:
+Cycle 81-86 evidence:
 
 - ADR-0001 through ADR-0007 record the native constitution, reuse/publication boundary, proposed language split, proposed namespace registry, v1 scope, TCB placement, and repository governance.
 - `specs/native-architecture-constitution.json` and `runs/native_architecture_baseline.json` bind exact architecture constants, seven ADR byte hashes, source hashes, owner direction, repository identity, 20 version namespaces, and eight TCB domains.
 - `specs/native-release-architecture-policy.json` and `tools/check_native_release_architecture.py` reject missing native release objects, prohibited substitute paths/content, symbolic links, case-fold collisions, non-NFC paths, unreadable objects, and unscanned oversized binaries.
 - Negative tests execute every prohibited path glob and every prohibited binary marker. A passing extracted-tree report remains non-promoting because it does not parse ISO, GPT, ESP, El Torito, signatures, hidden sectors, or source provenance.
-- `specs/adr-ratification-policy.json` freezes canonical sorted UTF-8/LF JSON, the owner principal, a PooleOS-specific SSH signature namespace, allowed key profiles, public trust/revocation paths, immutable tag name, and exact remote-publication contract.
-- `tools/prepare_adr_ratification.py` refuses inferred acceptance, zero/multiple signers, unsupported keys, and unacknowledged provisional software-key risk. `tools/verify_adr_ratification.py` verifies exact manifest bytes, owner principal, namespace, revocation, signed annotated tag, tag-contained evidence, remote tag object, peeled commit, and exact remote `main` tip.
-- Ten focused tests exercise a throwaway test-only key and Git repository plus tampered ADRs, wrong namespaces, unknown signers, malformed signatures, noncanonical bytes, revocation, missing disposition, and tag/publication gates. No test key is retained.
-- `runs/adr_ratification_readiness.json` deterministically records seven bound ADRs, two proposed records, zero cryptographically ratified records, zero trusted signers, five owner actions, and `production_promotion_allowed=false`.
+- `specs/adr-ratification-policy.json` freezes canonical sorted UTF-8/LF JSON, the owner principal, a PooleOS-specific SSH signature namespace, allowed key profiles, public trust/revocation paths, immutable tag name, exact remote-publication contract, and six exact decision sources. Those sources include the candidate objectives and schema, PooleKernel charter, native constitution, release-architecture policy, and publication boundary.
+- `tools/prepare_adr_ratification.py` requires separate explicit acceptance of all seven ADR bytes and all 38 exact objective definitions. It refuses inferred acceptance, zero/multiple signers, unsupported keys, and unacknowledged provisional software-key risk. `tools/verify_adr_ratification.py` verifies exact manifest bytes, objective/profile/count bindings, owner principal, namespace, revocation, signed annotated tag, tag-contained evidence, remote tag object, peeled commit, and exact remote `main` tip.
+- Eleven focused tests exercise a throwaway test-only key and Git repository plus tampered ADRs, objective definitions, objective schema, wrong namespaces, unknown signers, malformed signatures, noncanonical bytes, revocation, missing dispositions, and tag/publication gates. A simulated fully verified architecture ceremony still yields `production_promotion_allowed=false`, `measurements_complete=false`, and `full_n0_exit_evidence_present=false`. No test key is retained.
+- `runs/adr_ratification_readiness.json` deterministically records seven bound ADRs, six bound decision sources, 38 objective definitions, zero measured targets, two proposed records, zero cryptographically ratified records, zero trusted signers, 12 declared negative controls, six owner actions, and `production_promotion_allowed=false`.
+- `specs/native-v1-objectives.json` defines the candidate `POOLEOS-WORKSTATION-V1-CANDIDATE` profile, seven required operating modes, exact Tier 0/Tier 1 scope boundaries, threat assumptions, measurement policy, and 38 measurable targets: 7 reliability, 8 accessibility, 6 compatibility, 7 privacy, and 10 performance.
+- `runtime/native_v1_objectives.py`, both schemas, and `runs/native_v1_objectives_readiness.json` enforce exact target-family counts, owner-pending state, zero measured targets, deterministic byte bindings, and ten negative controls covering missing families, duplicates, invalid samples/percentiles, telemetry defaults, compatibility overclaims, recovery accessibility, evidence overclaims, production promotion, and inferred owner acceptance.
+- The candidate contract references WCAG 2.2, ETSI EN 301 549 V3.2.1, NIST Privacy Framework 1.1, and ADR-0005 with explicit applicability and non-claim boundaries. These references inform candidate criteria; they do not assert PooleOS conformance.
 
 Open N0 work:
 
 - No ADR has an owner-controlled cryptographic signature. ADR-0003 and ADR-0004 remain proposals pending explicit owner disposition; trademark and full toolchain review also remain open.
 - Rooke Poole must choose governance-key custody, approve the public key/fingerprint, physically authorize the detached signature and tag, and publish the exact receipt. Codex has performed none of those owner actions.
-- Quantitative reliability, accessibility, compatibility, privacy, and performance targets remain open.
+- Rooke Poole must accept, amend, or reject the candidate Workstation v1 profile and all 38 target values. Every target remains `not_measured`; implementation-bound baselines and passing evidence remain open across N4-N39.
 - N0 therefore remains `partial`; no bootloader, kernel, driver, userspace, desktop, or ISO implementation is inferred from this evidence.
 
 Exit gate: signed ADRs resolve every section 000.2 choice; names and version identifiers are reserved; exact supported scope and completion conditions are machine-readable; no production document describes PooleOS as Linux-based.
@@ -307,7 +313,7 @@ Subphases:
 Cycle 81-83 evidence:
 
 - The public repository is published at `https://github.com/rookepoole/PooleOS`, with `main` as the default branch and the Cycle 81 bootstrap commit as its root.
-- `main` requires pull requests, stale-review dismissal, resolved conversations, and linear history; force-push and deletion are denied. Private vulnerability reporting is enabled. Rooke Poole merged the Cycle 82 toolchain work through PR #1; Cycle 83 ratification readiness is isolated in open draft PR #2.
+- `main` requires pull requests, stale-review dismissal, resolved conversations, and linear history; force-push and deletion are denied. Private vulnerability reporting is enabled. Rooke Poole merged the Cycle 82 toolchain work through PR #1 and the Cycle 83 ratification-readiness work through PR #2 at merge commit `2e4fc898745812b69c5d666b07f409ecb76485ad`.
 - PolyForm Noncommercial 1.0.0 terms, owner notice, security policy, trademark notice, CODEOWNERS, ADR template, public/private evidence boundary, and native source-tree ownership skeleton are present.
 - `.gitignore` excludes raw internal PDC inputs, private/local run evidence, historical Buildroot sources and lab images, archives, credentials, private signing material, firmware without redistribution clearance, and release-media binaries.
 - `tools/check_publication_boundary.py` scans exact indexed bytes for prohibited paths, unapproved run artifacts, release media, credential containers, secret signatures, and workstation-specific paths.
@@ -319,7 +325,7 @@ Exit gate: PooleOS is source-controlled; every required decision has an owner an
 
 ### N2 - Hardware Target, Laboratory, and Standards (`partial`)
 
-Inherited sections: `005-007`, `146`, `169`.  
+Inherited sections: `005-007`, `146`, `169`. Added: `ADD-HW-PROBE-001`.
 Goal: replace generic hardware assumptions with exact devices, lawful specifications, errata, safe test equipment, and support tiers.
 
 Subphases:
@@ -330,6 +336,19 @@ Subphases:
 - N2.4 Build the standards register with revision, publication date, hash, license/access terms, errata, assumptions, supersession, and implementation owner.
 - N2.5 Lock UEFI 2.11, ACPI 6.6, exact AMD64/AMD IOMMU manuals, SMBIOS 3.9, NVMe 2.2, xHCI 1.2, applicable USB/HID, TPM, network RFC, Unicode 17, POSIX Issue 8, VIRTIO 1.3, and exact device documents unless superseded through review.
 - N2.6 Turn every undocumented register or observed firmware behavior into an explicit blocker or hardware-specific tested assumption.
+
+Cycle 84 and Cycle 87 evidence:
+
+- `specs/hardware-support-policy.json` defines Tier 0 through Tier 4, unsupported, and quarantined states; 14 required evidence channels; privacy prohibitions; ten destructive-lab prerequisites; and fail-closed promotion rules.
+- `specs/tier1-hardware-target.json` identifies `TIER1-B650M-9800X3D-RTX5070-001`. The sanitized host observation matches all 24 required identity checks plus the optional display-resolution check.
+- `tools/collect_tier1_hardware.ps1` 1.1 is read-only and writes only an ignored `.private.json` capture. Its x86-64 thunk queries a frozen CPUID leaf/subleaf allowlist from user mode, pins each query to the lowest process-allowed logical processor, restores the previous thread affinity immediately afterward, never queries processor-serial leaf `0x00000003`, allocates writable memory before changing it to execute/read, flushes the instruction cache, and never creates an RWX mapping. It loads no driver and attempts no MSR, PCI, SPD, UEFI-variable, physical-memory, I/O-port, TPM-write, firmware-write, disk-write, boot-state, or device-state operation.
+- `tools/sanitize_tier1_hardware_capture.py` and `runtime/hardware_target.py` validate the exact private CPUID transcript before reconstructing a fixed public whitelist. They reject forbidden leaves, duplicate/missing records, malformed register encodings, false transcript hashes, serial-leaf collection, MSR overclaim, privileged-driver overclaim, or any mutation guard.
+- `runs/tier1_hardware_observation.json` publishes only allowlisted facts and hashes: 25 enumerated ACPI signatures, first-table hashes including `IVRS` and `TPM2`, a 2,492-byte SMBIOS blob hash `F04EFC0E99D7CAC1A528D529E2D9B7E807D4B05DDF657FF4A013545F6DF096AB`, and an affinity-pinned 16-record CPUID transcript hash `1C4EB05B165ABA43F3DED644B0ADFB29A96D8919D0A15948028C1BEA03CC2848`. It publishes decoded vendor/family/model/stepping, address widths, and bounded feature booleans, not raw CPUID registers or a processor serial.
+- `specs/native-standards-register.json` records 15 official primary-source entries. Ten metadata locks are verified, five supersession/profile reviews remain open, and zero exact artifacts are hash-verified; metadata and URLs do not satisfy the standards exit gate.
+- `runs/hardware_target_readiness.json` passes schema and binding checks, all 24 required identity checks, two partial evidence channels, 16 CPUID records, zero privacy violations, and 14/14 adversarial controls. Seven required evidence channels and all ten lab-safety prerequisites remain pending, so `n2_exit_gate_satisfied=false` and `production_promotion_allowed=false`.
+- `FLAG-N2-CPUID-001` closes only the direct user-mode CPUID sub-capability. `FLAG-N2-PRIVILEGED-PROBE-001` blocks driver-backed or privileged acquisition until its exact source, read-only mechanism, possible side effects, access scope, failure path, hostile tests, and operator authorization have been reviewed.
+- Secure Boot and TPM inventory are permission-limited. MSR, PCI configuration space, SPD, UEFI variables, sensor/power evidence, duplicate ACPI retrieval, exact standards hashes, and native PooleOS parser comparison remain open. The separate N4 Tier 0 profile is now partially qualified, but it does not close any missing Tier 1 evidence channel. The firmware release-date representation also requires reconciliation.
+- No firmware, TPM, disk, boot, power, device, or configuration mutation was authorized or performed. N2.3 remains `not_started`; destructive testing requires separate owner approval after every prerequisite is accepted.
 
 Exit gate: Tier 0 and Tier 1 manifests are complete and hashed; destructive-test safety is accepted; every implementation phase has lawful normative references and errata tracking.
 
@@ -361,15 +380,15 @@ Cycle 82 qualification evidence:
 - The independent parser verifies machine, format, subsystem/type, entry, timestamp, imports/debug state, static segments, and bounded section layout. Host-path/runtime-library scans find zero hits. Injected host leakage, PE-for-ELF substitution, and truncated ELF controls are rejected.
 - `runs/native_toolchain_qualification.json` is schema-validated and explicitly records one host, no functional boot, no kernel execution, no two-host completion, and no production promotion.
 
-Open N3 work: a second clean host, detached-signature and source-rebuild provenance, freestanding C17, bounded assembly, ABI probes/headers, archive and image tools, QEMU/OVMF, generated ABI tables, complete build graph, static analysis, unsafe inventory, and the remaining section 008-011 requirements.
+Open N3 work: a second clean host, detached-signature and source-rebuild provenance, freestanding C17, bounded assembly, ABI probes/headers, archive and image tools, QEMU/OVMF source-build integration, generated ABI tables, complete build graph, static analysis, unsafe inventory, and the remaining section 008-011 requirements.
 
-Cycle 83 control-plane validation passes 397 tests with one Windows symlink-permission skip, Doctor passes 198/198 checks against live PooleGlyph Phase 65, and the complete consistency release gate passes 63/63 checks over 58 artifacts while retaining 20 explicit gaps and `production_ready=false`. Exact public-index, release-gate, and handoff hashes are recorded in the Cycle 83 log after staging.
+Cycle 88 control-plane validation passes 455 tests with one Windows symlink-permission skip, Doctor passes its complete check set against live PooleGlyph Phase 65, and the complete consistency release gate passes 66/66 checks over 61 artifacts while retaining 20 explicit gaps and `production_ready=false`. Exact public-index, release-gate, and handoff hashes are recorded in the Cycle 88 log after staging.
 
 Exit gate: two clean host environments reproduce bootstrap tools and empty native images; host headers/libraries cannot leak; ABI fixtures pass independently; all generated inputs are declared.
 
 ### N4 - Emulation, Reference Devices, and Formal Models (`partial`)
 
-Inherited section: `012`. Added: `ADD-ASSURE-001`, `ADD-VIRTIO-001`.  
+Inherited section: `012`. Added: `ADD-ASSURE-001`, `ADD-VIRTIO-001`, `ADD-TIER0-SUPPLY-001`.
 Goal: create the disposable, observable environment in which native mechanisms can fail safely and repeatably.
 
 Subphases:
@@ -380,6 +399,17 @@ Subphases:
 - N4.4 Provide malformed ACPI/SMBIOS/PCI/virtio/USB/storage/network fixtures and hardware-fault injection profiles.
 - N4.5 Model capability derivation/revocation, IPC, scheduler, page mapping, boot slots, update rollback, and PooleFS transaction state before ABI freeze.
 - N4.6 Record model assumptions and cross-check model traces against implementation traces; no proof claim extends beyond its configuration and assumptions.
+
+Cycle 88 bounded foundation evidence:
+
+- `specs/native-tier0-lock.json` separates the QEMU `11.0.2` upstream source target from the exact one-host QEMU `11.0.0` Windows runner, binds the publisher SHA-512, installer SHA-256, executable, all 3,368 extracted runtime files, five OVMF/descriptor inputs, provider commit, bundled EDK II commit, target EDK II commit, and two rejected substitute binaries;
+- `specs/native-tier0-profile.json` freezes `pc-q35-11.0`, TCG single-thread execution, `qemu64`, one vCPU, 512 MiB, fixed virtual time, immutable code flash, a fresh variables copy, no default devices/network/host share/passthrough, non-transitional VIRTIO PCI block, serial, debugcon, ISA debug exit, tracing, and opt-in loopback GDB;
+- `tools/qualify_native_tier0.py` verifies the complete workspace-local runtime closure and runs both profiles twice with guest CPUs paused, a private placeholder medium, temporary loopback QMP, and clean quit; 4/4 machine probes and both deterministic command/QMP comparisons pass;
+- `tools/run_native_tier0.py` is dry-run-first, accepts no unknown QEMU argument, requires read-only non-Buildroot/non-Linux media and a new confined run directory, copies OVMF variables per launch, and leaves every boot and promotion claim false;
+- 18/18 controls reject Android QEMU, a QEMU `11.0.50` development build, hash/version/machine/firmware drift, writable code, variables-template reuse, legacy/transitional VIRTIO, networking, host sharing, host acceleration, extra arguments, Buildroot/Linux media, path escape, and boot overclaim;
+- the Windows candidate cannot disable guest memory dumping through the q35 property; its Authenticode certificate is expired; its bundled OVMF is older than `edk2-stable202605`; current source rebuilds, SBOM/license/vulnerability/redistribution review, and second-host reproduction remain mandatory.
+
+N4.1-N4.4 are partial. N4.5-N4.6 remain not started. No guest CPU instruction, original PooleOS medium, PooleBoot serial marker, debug-exit value, reset path, GDB session, VIRTIO driver, Secure Boot state, malformed-device campaign, or formal-model trace was executed or claimed.
 
 Exit gate: one command launches each pinned native test profile; logs and artifacts are deterministic where declared; formal models have executable counterexample checks; no Buildroot guest is required.
 
@@ -1024,6 +1054,8 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 |---|---|---|---|
 | `FLAG-NATIVE-SCM-001` | STOP_SHIP | Open | Put PooleOS under reviewed source control with immutable release revisions |
 | `FLAG-NATIVE-ADR-001` | BLOCKER | Open | Ratify kernel, reuse, language, TCB, ABI, driver, filesystem, and release ADRs |
+| `FLAG-N0-OBJECTIVES-001` | REQUIRED | Open | Owner-ratify the v1 profile and 38 target values, then bind passing native evidence to every target |
+| `FLAG-N0-RATIFICATION-SCOPE-001` | REQUIRED | Closed in Cycle 86 | Bind exact objective definitions and schema into the owner ceremony while excluding measurements and production promotion |
 | `FLAG-NATIVE-BOOT-001` | STOP_SHIP | Open | Reproducible PooleBoot PE32+ boots and transfers through the frozen handoff |
 | `FLAG-NATIVE-KERNEL-001` | STOP_SHIP | Open | PooleKernel boots, enforces memory/capabilities/IPC, and runs ring 3 |
 | `FLAG-NATIVE-IOMMU-001` | STOP_SHIP | Open | DMA and interrupt remapping confine every bus-mastering driver |
@@ -1035,20 +1067,28 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 | `FLAG-NATIVE-PGL-001` | BLOCKER | Open | PooleGlyph Phase 66 promotion and PGB2/PGVM2 v1 freeze are accepted |
 | `FLAG-NATIVE-PDC-001` | REQUIRED | Open | Signed dynamics and native/backend differentials pass without claim expansion |
 | `FLAG-NATIVE-HW-001` | STOP_SHIP | Open | Exact Tier 1 hardware, spare media, firmware, driver, and recovery qualification pass |
+| `FLAG-N2-CPUID-001` | REQUIRED | Closed in Cycle 87 | Bounded direct user-mode CPUID transcript is captured, sanitized, privacy-safe, and adversarially tested |
+| `FLAG-N2-PRIVILEGED-PROBE-001` | BLOCKER | Open | Review source-bound read-only privileged mechanisms and require explicit authorization before any driver load or probe |
+| `FLAG-N2-EVIDENCE-001` | REQUIRED | Open | Complete low-level read-only hardware capture and native-parser comparison evidence |
+| `FLAG-N2-STANDARDS-001` | REQUIRED | Open | Hash lawful exact standards and close supersession, errata, profile, and access review |
+| `FLAG-N2-LAB-SAFETY-001` | BLOCKER | Open | Accept all sacrificial-media and recovery prerequisites, then separately approve destructive testing |
+| `FLAG-N4-PROFILE-001` | REQUIRED | Closed in Cycle 88 | Exact native-only q35/QEMU/OVMF/VIRTIO profile passes deterministic paused-instantiation and hostile substitution controls without a boot claim |
+| `FLAG-N4-PROVENANCE-001` | BLOCKER | Open | Source-build current pinned QEMU/EDK II, verify signatures/patches, close runtime security/license/SBOM/redistribution review, and reproduce on a second host |
+| `FLAG-N4-MODELS-001` | BLOCKER | Open | Executable counterexample models and implementation-trace cross-checks pass before dependent ABI freezes |
 | `FLAG-NATIVE-ISO-001` | STOP_SHIP | Open | Two builders reproduce and exact signed ISO passes clean QEMU and physical media |
 | `FLAG-NATIVE-REVIEW-001` | STOP_SHIP | Open | Independent security, filesystem, kernel, update, and release review closes critical/high findings |
 | `FLAG-BUILDROOT-LEGACY-001` | SUPERSEDED | Closed by architecture reset | Buildroot remains historical reference and cannot promote native status |
 
 ## 12. Near-Term Execution Sequence
 
-Cycle 83 completes every non-owner preparation step currently available for `N0-RATIFY-001`. The manifest/signature/tag verifier fails closed, but the move is now blocked on owner disposition, key custody, physical signing, and publication. `N2-HW-001`, `N4-QEMU-001`, and second-host N3 reproduction may proceed in parallel without promoting N0.
+Cycle 88 completes the one-host, no-guest foundation slice of `N4-QEMU-001`: an exact native-only q35/QEMU/OVMF/VIRTIO profile, full runtime closure, deterministic commands, four paused machine probes, and 18/18 hostile controls now pass. This closes only `FLAG-N4-PROFILE-001`; N4 remains partial because source-built current QEMU/EDK II, original native launch evidence, the remaining reference devices and fault campaigns, formal models, model-trace comparisons, and second-host reproduction remain open. `N0-RATIFY-001` remains the immediate owner move and is blocked on target acceptance or amendment, ADR disposition, key custody, physical signing, and publication. No owner action, guest boot, hardware mutation, privileged probe, or destructive test is inferred.
 
 | Order | Move | Required output |
 |---:|---|---|
-| 1 | `N0-RATIFY-001` | Owner disposition of ADR-0003/0004, custody choice, public-key fingerprint, detached signature, signed tag, and exact publication receipt |
+| 1 | `N0-RATIFY-001` | Owner acceptance or amendment of the v1 profile and 38 values, ADR-0003/0004 disposition, custody choice, public-key fingerprint, detached signature, signed tag, and exact publication receipt |
 | 2 | `N1-SCM-CLOSE-001` | Signed-commit policy, immutable refs, retained CI/review policy, and protected-workflow closure after the pre-signing history is resolved |
-| 3 | `N2-HW-001` | Exact Tier 0/Tier 1 hardware and standards manifests plus safe lab approval |
-| 4 | `N4-QEMU-001` | Pinned OVMF/QEMU native launch, serial capture, GDB, deterministic debug-exit receipt |
+| 3 | `N2-HW-002` | Complete reviewed read-only MSR, PCI configuration, duplicate ACPI, EDID/SPD, UEFI-variable, sensor/power, and native-comparison evidence; direct CPUID is complete but grants no privileged authorization |
+| 4 | `N4-MODEL-001` | First executable boot-slot and capability-state counterexample models with frozen assumptions, hostile traces, and no proof expansion; QEMU source-rebuild and real PooleBoot launch evidence remain parallel N4 work |
 | 5 | `N5-POOLEBOOT-001` | Poole-authored PE32+ UEFI application prints, draws GOP pixels, reads tables/map, exits cleanly |
 | 6 | `N5-BOOTPROTO-001` | Canonical boot handoff schema, independent decoder, golden bytes, malformed corpus |
 | 7 | `N5-ELF-001` | PooleBoot validates and loads a minimal PooleKernel ELF64 image |

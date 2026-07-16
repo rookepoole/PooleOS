@@ -4,9 +4,9 @@
   "title": "PooleOS ADR Ratification Manifest",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "artifact_kind", "canonicalization", "repository", "decision_owner", "owner_acceptance", "bound_sources", "policy_binding", "signer", "signature_contract", "tag_contract", "claim_boundary"],
+  "required": ["schema_version", "artifact_kind", "canonicalization", "repository", "decision_owner", "owner_acceptance", "objectives_acceptance", "bound_sources", "policy_binding", "signer", "signature_contract", "tag_contract", "claim_boundary"],
   "properties": {
-    "schema_version": {"const": "1.0"},
+    "schema_version": {"const": "1.1"},
     "artifact_kind": {"const": "pooleos_adr_ratification_manifest"},
     "canonicalization": {"type": "object", "required": ["serialization", "encoding", "key_order", "indent_spaces", "line_endings", "trailing_newline_count", "unicode_escaping"]},
     "repository": {"type": "object", "required": ["owner", "name", "remote_url", "default_branch"]},
@@ -22,11 +22,29 @@
         "decisions": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"type": "object", "required": ["id", "title", "path", "source_status", "source_ratification", "decision_owner", "sha256", "byte_count", "disposition", "effective_status_after_valid_signature"]}}
       }
     },
-    "bound_sources": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "object", "required": ["path", "sha256", "byte_count"]}},
+    "objectives_acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action", "statement", "profile_id", "target_count", "source_profile_accepted", "source_target_values_accepted", "disposition", "effective_status_after_valid_signature", "measurement_evidence_accepted", "objectives_binding", "objectives_schema_binding"],
+      "properties": {
+        "action": {"const": "accept_exact_profile_and_target_values"},
+        "statement": {"type": "string"},
+        "profile_id": {"const": "POOLEOS-WORKSTATION-V1-CANDIDATE"},
+        "target_count": {"const": 38},
+        "source_profile_accepted": {"const": false},
+        "source_target_values_accepted": {"const": false},
+        "disposition": {"const": "accept_exact_bytes"},
+        "effective_status_after_valid_signature": {"const": "accepted-signed"},
+        "measurement_evidence_accepted": {"const": false},
+        "objectives_binding": {"type": "object", "required": ["path", "sha256", "byte_count"]},
+        "objectives_schema_binding": {"type": "object", "required": ["path", "sha256", "byte_count"]}
+      }
+    },
+    "bound_sources": {"type": "array", "minItems": 6, "maxItems": 6, "items": {"type": "object", "required": ["path", "sha256", "byte_count"]}},
     "policy_binding": {"type": "object", "required": ["path", "sha256", "byte_count"]},
     "signer": {"type": "object", "required": ["principal", "key_type", "key_profile", "public_key_fingerprint", "software_key_risk_explicitly_accepted"]},
     "signature_contract": {"type": "object", "required": ["backend", "format", "namespace", "hash_algorithm", "allowed_signers_path", "revocation_path"]},
     "tag_contract": {"type": "object", "required": ["name", "annotated", "signed", "force_update_allowed", "target_branch", "target_must_contain_manifest", "target_must_contain_detached_signature"]},
-    "claim_boundary": {"type": "array", "minItems": 3, "items": {"type": "string"}}
+    "claim_boundary": {"type": "array", "minItems": 4, "items": {"type": "string"}}
   }
 }

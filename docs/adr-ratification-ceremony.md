@@ -1,13 +1,13 @@
 # PooleOS ADR Ratification and Governance-Key Ceremony
 
-Status: tooling frozen; owner disposition, custody choice, signatures, tag, and publication pending
+Status: scope-hardened tooling frozen; objective/ADR disposition, custody choice, signatures, tag, and publication pending
 Date: 2026-07-16
 Move: `N0-RATIFY-001`
 Decision and signing authority: Rooke Poole
 
 ## Purpose and Boundary
 
-This ceremony converts the exact bytes of ADR-0001 through ADR-0007 from unsigned design evidence into an owner-ratified architecture set. It uses an OpenSSH `SSHSIG` detached signature with a PooleOS-specific namespace, followed by an owner-signed annotated Git tag over the revision that contains the manifest and signature.
+This ceremony converts the exact bytes of ADR-0001 through ADR-0007 and six required architecture sources into an owner-ratified architecture set. The six-source set explicitly includes `specs/native-v1-objectives.json` and its schema. A separate manifest statement accepts the candidate Workstation v1 profile and all 38 target values as definitions while explicitly accepting no measurement evidence. The ceremony uses an OpenSSH `SSHSIG` detached signature with a PooleOS-specific namespace, followed by an owner-signed annotated Git tag over the revision that contains the manifest and signature.
 
 The ceremony does not generate or approve a Secure Boot key, release-media key, package/update key, recovery key, PooleBoot binary, PooleKernel image, or ISO. GitHub verification supplements the owner trust root; it does not replace the detached signature or owner-signed tag.
 
@@ -15,18 +15,20 @@ The ceremony does not generate or approve a Secure Boot key, release-media key, 
 
 - ADR-0001, ADR-0002, and ADR-0005 through ADR-0007 are `accepted-owner-directed` but unsigned.
 - ADR-0003 and ADR-0004 remain `proposed` and require explicit owner disposition.
+- `POOLEOS-WORKSTATION-V1-CANDIDATE` defines 38 candidate target values. Rooke Poole has not accepted those values and zero targets have measured implementation evidence.
 - The public allowed-signers file has zero keys. No local Git signing key, GPG backend, or GitHub SSH signing key was configured when this package was generated.
 - The Cycle 82 toolchain work was merged through PR #1. Cycle 83 ceremony readiness is isolated in draft PR #2. Required signed-commit enforcement must not be enabled until the remaining pre-signing history and merge strategy are resolved under `N1-SCM-CLOSE-001`.
 
 ## Owner Decisions Required
 
 1. Dispose ADR-0003 and ADR-0004 as `accept exactly as written`, `amend before acceptance`, or `reject and supersede`.
-2. Choose one governance-key profile:
+2. Dispose the exact candidate Workstation v1 profile and all 38 target values as `accept exactly as written`, `amend before acceptance`, or `reject`. Accepting definitions does not accept measurements or claim that PooleOS meets them.
+3. Choose one governance-key profile:
    - `hardware_fido2_ed25519_sk`: recommended; hardware-backed and owner-presence gated.
    - `hardware_fido2_ecdsa_sk`: hardware fallback when Ed25519-SK is unsupported.
    - `passphrase_ed25519_provisional`: pre-production fallback only, with explicit acceptance of the lower-assurance software custody risk.
-3. Approve publication of the public key and fingerprint to this repository and as a GitHub SSH signing key.
-4. Physically authorize the detached signature and signed tag.
+4. Approve publication of the public key and fingerprint to this repository and as a GitHub SSH signing key.
+5. Physically authorize the detached signature and signed tag.
 
 An amendment or rejection stops this ceremony. The affected ADR must be revised or superseded, the baseline regenerated, and the complete set reviewed again.
 
@@ -67,13 +69,13 @@ ssh-keygen -lf "$HOME\.ssh\pooleos_adr_ed25519_sk.pub"
 rookepoole namespaces="git,pooleos-adr-ratification-v1@github.com/rookepoole/PooleOS" <PUBLIC_SSH_KEY>
 ```
 
-4. After explicit acceptance of all seven exact ADR bindings, generate the canonical unsigned manifest. Add `--accept-software-key-risk` only for the provisional software profile:
+4. After explicit acceptance of all seven exact ADR bindings and the exact objectives definitions, generate the canonical unsigned manifest. Add `--accept-software-key-risk` only for the provisional software profile:
 
 ```powershell
-python .\tools\prepare_adr_ratification.py --owner-accept-all-exact
+python .\tools\prepare_adr_ratification.py --owner-accept-all-exact --owner-accept-objectives-exact
 ```
 
-5. Review the manifest digest and sign its exact bytes under the frozen namespace:
+5. Review the manifest's seven ADR decisions, six bound-source digests, explicit 38-target objectives acceptance, and `measurement_evidence_accepted=false`; then sign its exact bytes under the frozen namespace:
 
 ```powershell
 Get-FileHash .\runs\adr_ratification_manifest.json -Algorithm SHA256
@@ -92,11 +94,11 @@ git push origin main refs/tags/pooleos-architecture-v1.0.0
 python .\tools\verify_adr_ratification.py --verify-remote
 ```
 
-The verifier grants architecture promotion only when the detached signature, annotated tag, tag-contained evidence, remote tag object, peeled commit, and exact remote `main` tip all agree. The resulting receipt still states `production_ready=false`.
+The verifier records architecture ratification only when the detached signature, annotated tag, tag-contained evidence, remote tag object, peeled commit, and exact remote `main` tip all agree. The resulting receipt still states `production_ready=false`, `production_promotion_allowed=false`, `objectives_measurements_complete=false`, and `full_n0_exit_evidence_present=false`.
 
 ## Failure and Recovery
 
-- A wrong namespace, unknown principal, changed ADR byte, changed bound source, noncanonical JSON encoding, malformed signature, revoked key, unsigned tag, moved tag, or remote mismatch fails closed.
+- A missing objectives-acceptance flag, wrong profile/count, changed objective or schema byte, wrong namespace, unknown principal, changed ADR byte, changed bound source, noncanonical JSON encoding, malformed signature, revoked key, unsigned tag, moved tag, or remote mismatch fails closed.
 - Never force-move `pooleos-architecture-v1.0.0`. Revoke and create a new versioned ratification tag after a reviewed superseding ADR.
 - If the owner loses access before signing, discard the unsigned manifest and restart with a newly reviewed public key.
 - If compromise occurs after publication, preserve the old receipt, publish revocation evidence, rotate trust through a new reviewed commit, and create a new signed architecture version.

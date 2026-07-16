@@ -365,57 +365,147 @@
     },
     {
       "path": "docs/adr-ratification-ceremony.md",
-      "sha256": "F547B3D586C6AC6920105F0F0F7E56F4BA8DF5195DC4DC075719542063E679CF",
-      "byte_count": 7127,
+      "sha256": "8AF9CC86DB37726541F73ACEC3D9684F5BB5353EA6A24EF6BE1E92BE7C8507CF",
+      "byte_count": 8246,
+      "line_count": 112
+    },
+    {
+      "path": "docs/hardware-target-and-lab-safety.md",
+      "sha256": "F1F65998A5F2B898F677F0F3669C0DA1AE2A400BB8E0860755A32308404C1C92",
+      "byte_count": 11846,
+      "line_count": 146
+    },
+    {
+      "path": "docs/native-tier0-qemu.md",
+      "sha256": "44D7C28F677FD7F71253ECE49FD253583EE6502E747E23AC7A8006FFDE58304B",
+      "byte_count": 5853,
       "line_count": 110
     },
     {
+      "path": "docs/native-v1-objectives.md",
+      "sha256": "76F81918E255067C4D34340967F96E05A12B73118133E71FF535CE1C87082CFA",
+      "byte_count": 4901,
+      "line_count": 75
+    },
+    {
+      "path": "specs/pooleos-kernel-charter.md",
+      "sha256": "5909F5F837DB169D97B6C62BB927C1AE7B422546488D56B11BE23AC937B7D74A",
+      "byte_count": 10307,
+      "line_count": 137
+    },
+    {
       "path": "docs/production-goal-charter.md",
-      "sha256": "EACB6AF38BFA64E3083BDEF0D6FA1D1EE57C8A573AF880880B984BADBDC949C2",
-      "byte_count": 18080,
+      "sha256": "DFB3403CD3DD8DF5AC2230AD291855A6E823E03839807CB77E04BFB0F32E1F17",
+      "byte_count": 18898,
       "line_count": 240
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "6C9B104265F1534DA65437B44DD06AAF7759E98F5C96933D5227CE1428EFC102",
-      "byte_count": 96245,
-      "line_count": 1083
+      "sha256": "7EC1D897ECAF215299486242C23C8AE82CE8FB9790A60E06792DEABD4DA871D4",
+      "byte_count": 108643,
+      "line_count": 1123
     },
     {
       "path": "docs/publication-boundary.md",
-      "sha256": "5CF21AA85BBBFE0ECAC93204381BD9D4B051D706CC374185E4A5A999DDE47432",
-      "byte_count": 3126,
-      "line_count": 44
+      "sha256": "5208E0176CB394B9057299081A3DCAD02B7C535496C8BCECFA9B1FA27ED1045C",
+      "byte_count": 3653,
+      "line_count": 46
     },
     {
       "path": "runs/pooleos_native_checklist_coverage.json",
-      "sha256": "280D3DF7ADAA87DD2E86287B75805D531AD7B827F0AF9FD0C22D25F8AE4DC872",
-      "byte_count": 82094,
-      "line_count": 2914
+      "sha256": "FCAC371582B5942214EF1BD273CE0D200CE51E418525486042FDACAE73793D86",
+      "byte_count": 83661,
+      "line_count": 2937
     },
     {
       "path": "runs/adr_ratification_readiness.json",
-      "sha256": "D222BB4239E79B5917B8D63B0EF237E37347BC00A914C38BCE902886EAB23D78",
-      "byte_count": 6557,
-      "line_count": 163
+      "sha256": "3A845F5E3F24B8C80633DBDF8B0430B279ECC0CD8AD3621784AC00C3B9175D32",
+      "byte_count": 8684,
+      "line_count": 218
+    },
+    {
+      "path": "runs/hardware_target_readiness.json",
+      "sha256": "7696ACC6DFB8287ED241E6D574956DAFA716F0A2A79A0BABE362E4BC3A7BA987",
+      "byte_count": 25648,
+      "line_count": 755
+    },
+    {
+      "path": "runs/native_tier0_readiness.json",
+      "sha256": "08E0083DA4B56E4B95A79AAD562C66D9CAC1AE437192286842E4BA8EBFD00F0A",
+      "byte_count": 11904,
+      "line_count": 342
+    },
+    {
+      "path": "runs/native_v1_objectives_readiness.json",
+      "sha256": "0F0F1DCB5A01D0E315B1DD5EFF4129DD228A7FFD32EC4F9E3EBA4CF029CCE4E3",
+      "byte_count": 6176,
+      "line_count": 187
+    },
+    {
+      "path": "runs/tier1_hardware_observation.json",
+      "sha256": "1F9FFF6C02751E35E7FCD2B55D80E5988D5940CADAF0DE3817A673F2706FEF7B",
+      "byte_count": 16681,
+      "line_count": 454
     },
     {
       "path": "specs/adr-ratification-policy.json",
-      "sha256": "A04C51A811C75E97E2EDDA5EB90F2DB28E83C6352792F2E4F885D7C30100822F",
-      "byte_count": 6768,
-      "line_count": 167
+      "sha256": "ADE9E446A604D224C80D1436D3D1E0AF0DA29A2F567416492BCB133F0E22C111",
+      "byte_count": 7394,
+      "line_count": 175
+    },
+    {
+      "path": "specs/hardware-support-policy.json",
+      "sha256": "E9B3DD912305C065E388D588DD3F51CF67E9AA092DBFC10E73F62AF84EA38F0E",
+      "byte_count": 8315,
+      "line_count": 217
     },
     {
       "path": "specs/native-architecture-constitution.json",
-      "sha256": "8D876B2B9D091697B259F7860A90D59E10F63D80602562A7CC932D780F87A163",
-      "byte_count": 6002,
+      "sha256": "94D8BDDF9BC85DE10D3B7FBF53BA2D0CC1C822C1F573FF94D0F1AB49F7EFF753",
+      "byte_count": 6015,
       "line_count": 147
+    },
+    {
+      "path": "specs/native-tier0-lock.json",
+      "sha256": "E6E126A5EC683FC1A73B82B8C889F4212BE507BAA52EA43548B23C938093499F",
+      "byte_count": 5641,
+      "line_count": 127
+    },
+    {
+      "path": "specs/native-tier0-profile.json",
+      "sha256": "EE5139B1B71DC20684BFEBD862D2CD00A31A9BB1C8EADDC349CE659D252717DF",
+      "byte_count": 6439,
+      "line_count": 226
+    },
+    {
+      "path": "specs/native-v1-objectives.json",
+      "sha256": "525946A7AA7A7D0F27682810EDD636D7E743C32548ACE442AB208B680A7E8584",
+      "byte_count": 33416,
+      "line_count": 809
+    },
+    {
+      "path": "specs/native-v1-objectives.schema.json",
+      "sha256": "AF4D18B414A65D35ABEBC178AE2B55FFAB3FF5A5CE7D17C8A4CB279A7F038A98",
+      "byte_count": 5437,
+      "line_count": 89
     },
     {
       "path": "specs/native-release-architecture-policy.json",
       "sha256": "F8B6D491A28D72E3C9B36FAB5B24D446FBD67CD760A9A8B05C7774EB3A691DE5",
       "byte_count": 1765,
       "line_count": 62
+    },
+    {
+      "path": "specs/native-standards-register.json",
+      "sha256": "FD9C5027728E668C6FC8B5C096080664B191ABA104FECCCACF74DD95385F07FD",
+      "byte_count": 13553,
+      "line_count": 295
+    },
+    {
+      "path": "specs/tier1-hardware-target.json",
+      "sha256": "E6976539E72D32974918B2ABA7AB53043AB44AB478D8CBA0ABF9E30E66869F89",
+      "byte_count": 9005,
+      "line_count": 159
     }
   ],
   "primary_toolchain_references": [
@@ -439,7 +529,7 @@
     "OWNER-SIGN-ADR-SET",
     "LEGAL-REVIEW-001",
     "TRADEMARK-REVIEW-001",
-    "N0-QUANT-TARGETS-001",
+    "OWNER-RATIFY-NATIVE-V1-OBJECTIVES",
     "N1-SIGNED-TAG-001",
     "N1-SIGNING-CUSTODY-001",
     "N3-TOOLCHAIN-TWO-HOST-001",

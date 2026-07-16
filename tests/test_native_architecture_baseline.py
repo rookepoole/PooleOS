@@ -68,9 +68,41 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 10)
+        self.assertEqual(len(self.artifact["bound_sources"]), 25)
         self.assertIn(
             "runs/adr_ratification_readiness.json",
+            {binding["path"] for binding in self.artifact["bound_sources"]},
+        )
+        self.assertIn(
+            "runs/hardware_target_readiness.json",
+            {binding["path"] for binding in self.artifact["bound_sources"]},
+        )
+        self.assertIn(
+            "runs/native_tier0_readiness.json",
+            {binding["path"] for binding in self.artifact["bound_sources"]},
+        )
+        self.assertIn(
+            "runs/native_v1_objectives_readiness.json",
+            {binding["path"] for binding in self.artifact["bound_sources"]},
+        )
+        self.assertIn(
+            "specs/pooleos-kernel-charter.md",
+            {binding["path"] for binding in self.artifact["bound_sources"]},
+        )
+        self.assertIn(
+            "specs/native-v1-objectives.schema.json",
+            {binding["path"] for binding in self.artifact["bound_sources"]},
+        )
+        self.assertIn(
+            "specs/native-tier0-lock.json",
+            {binding["path"] for binding in self.artifact["bound_sources"]},
+        )
+        self.assertIn(
+            "specs/native-tier0-profile.json",
+            {binding["path"] for binding in self.artifact["bound_sources"]},
+        )
+        self.assertIn(
+            "docs/native-tier0-qemu.md",
             {binding["path"] for binding in self.artifact["bound_sources"]},
         )
         for binding in self.artifact["bound_sources"]:

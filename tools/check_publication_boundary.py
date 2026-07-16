@@ -27,10 +27,14 @@ ALLOWED_RUNS = {
     "runs/adr_ratification_manifest.json.sig",
     "runs/adr_ratification_readiness.json",
     "runs/adr_ratification_receipt.json",
+    "runs/hardware_target_readiness.json",
     "runs/native_architecture_baseline.json",
     "runs/native_toolchain_qualification.json",
+    "runs/native_tier0_readiness.json",
+    "runs/native_v1_objectives_readiness.json",
     "runs/pdc_production_roadmap.json",
     "runs/pooleos_native_checklist_coverage.json",
+    "runs/tier1_hardware_observation.json",
 }
 FORBIDDEN_SUFFIXES = (".img", ".iso", ".key", ".p12", ".pem", ".pfx", ".qcow2", ".vhdx", ".zip")
 DOCUMENT_SUFFIXES = (".json", ".md", ".txt", ".toml", ".yaml", ".yml")

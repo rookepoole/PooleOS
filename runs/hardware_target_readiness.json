@@ -1,0 +1,755 @@
+{
+  "artifact_kind": "pooleos_hardware_target_readiness",
+  "binding_errors": [],
+  "bindings": {
+    "collector": {
+      "byte_count": 22051,
+      "path": "tools/collect_tier1_hardware.ps1",
+      "sha256": "21A7340373890AA2A5DB88958D4F04E86F6AD7510B729E429EBE226EEEE0AE82"
+    },
+    "runtime": {
+      "byte_count": 42835,
+      "path": "runtime/hardware_target.py",
+      "sha256": "AAA27935B1D94C7E93AAF2AAFA299B0C18664A9C189F59A89CF6C64866F6FFB3"
+    },
+    "sanitized_observation": {
+      "byte_count": 16681,
+      "path": "runs/tier1_hardware_observation.json",
+      "sha256": "1F9FFF6C02751E35E7FCD2B55D80E5988D5940CADAF0DE3817A673F2706FEF7B"
+    },
+    "standards_register": {
+      "byte_count": 13553,
+      "path": "specs/native-standards-register.json",
+      "sha256": "FD9C5027728E668C6FC8B5C096080664B191ABA104FECCCACF74DD95385F07FD"
+    },
+    "support_policy": {
+      "byte_count": 8315,
+      "path": "specs/hardware-support-policy.json",
+      "sha256": "E9B3DD912305C065E388D588DD3F51CF67E9AA092DBFC10E73F62AF84EA38F0E"
+    },
+    "tier1_target": {
+      "byte_count": 9005,
+      "path": "specs/tier1-hardware-target.json",
+      "sha256": "E6976539E72D32974918B2ABA7AB53043AB44AB478D8CBA0ABF9E30E66869F89"
+    }
+  },
+  "claim_boundary": [
+    "This ledger proves that a sanitized Windows-host observation consistently matches the declared Tier-1 identity checks; it is not PooleBoot or PooleKernel hardware enumeration evidence.",
+    "16 bounded user-mode CPUID records on the current host are partial CPU evidence; MSR and native CPUID comparison remain open.",
+    "A matching model, firmware, or hardware-ID prefix does not qualify a native driver, DMA confinement, reset, power, recovery, update, or daily-driver claim.",
+    "Private capture bytes remain local and are represented publicly only by SHA-256 and byte count.",
+    "Unresolved standards, evidence channels, and destructive-test prerequisites keep N2 open and production promotion prohibited.",
+    "No firmware, TPM, disk, boot, power, device, or configuration mutation was authorized or performed."
+  ],
+  "evidence_coverage": {
+    "channels": [
+      {
+        "detail": "allowlisted board, firmware, CPU, memory, storage, display, and network properties",
+        "id": "CIM_CORE_INVENTORY",
+        "status": "observed"
+      },
+      {
+        "detail": "bus and hardware identifiers only; instance suffixes removed",
+        "id": "PNP_HARDWARE_PREFIXES",
+        "status": "observed"
+      },
+      {
+        "detail": "UEFI",
+        "id": "UEFI_FIRMWARE_TYPE",
+        "status": "observed"
+      },
+      {
+        "detail": "table signatures, byte counts, and SHA-256 only",
+        "id": "ACPI_TABLE_HASHES",
+        "status": "observed"
+      },
+      {
+        "detail": "raw table bytes are not published",
+        "id": "SMBIOS_RAW_HASH",
+        "status": "observed"
+      },
+      {
+        "detail": "derived only from ACPI IVRS presence",
+        "id": "AMD_IOMMU_IVRS",
+        "status": "observed"
+      },
+      {
+        "detail": "read-only Confirm-SecureBootUEFI query",
+        "id": "SECURE_BOOT_STATE",
+        "status": "permission_limited"
+      },
+      {
+        "detail": "no EK, certificate, owner state, or key material requested",
+        "id": "TPM_INVENTORY",
+        "status": "permission_limited"
+      },
+      {
+        "detail": "serial field excluded; full EDID acquisition remains separate",
+        "id": "EDID_IDENTITY",
+        "status": "observed"
+      },
+      {
+        "detail": "direct user-mode CPUID records=16; MSR remains pending a reviewed privileged mechanism",
+        "id": "CPU_CPUID_MSR",
+        "status": "partial"
+      },
+      {
+        "detail": "PnP identifiers do not replace ECAM/configuration-space capture",
+        "id": "PCI_CONFIG_SPACE",
+        "status": "pending_tool"
+      },
+      {
+        "detail": "CIM part/capacity/channel facts only; raw SPD not acquired",
+        "id": "SPD_MEMORY_TOPOLOGY",
+        "status": "partial"
+      },
+      {
+        "detail": "no firmware writes, fan changes, stress load, or power action performed",
+        "id": "SENSORS_AND_POWER",
+        "status": "unavailable"
+      },
+      {
+        "detail": "no NVRAM variable values acquired in this cycle",
+        "id": "UEFI_VARIABLE_SNAPSHOT",
+        "status": "pending_tool"
+      }
+    ],
+    "cpu_architecture_components": {
+      "combined_channel_complete": false,
+      "cpuid_affinity_policy": "lowest_process_allowed_logical_processor_restored_per_query",
+      "cpuid_record_count": 16,
+      "cpuid_status": "observed",
+      "cpuid_transcript_sha256": "1C4EB05B165ABA43F3DED644B0ADFB29A96D8919D0A15948028C1BEA03CC2848",
+      "msr_status": "pending_reviewed_privileged_mechanism"
+    },
+    "observed_required_channel_count": 7,
+    "partial_required_channel_count": 2,
+    "pending_required_channel_ids": [
+      "CPU_CPUID_MSR",
+      "PCI_CONFIG_SPACE",
+      "SECURE_BOOT_STATE",
+      "SENSORS_AND_POWER",
+      "SPD_MEMORY_TOPOLOGY",
+      "TPM_INVENTORY",
+      "UEFI_VARIABLE_SNAPSHOT"
+    ],
+    "required_channel_count": 14
+  },
+  "lab_safety": {
+    "accepted_prerequisite_count": 0,
+    "destructive_testing_approved": false,
+    "mutation_performed": false,
+    "pending_prerequisite_ids": [
+      "LAB-SAFE-SSD-001",
+      "LAB-SAFE-USB-A-001",
+      "LAB-SAFE-USB-B-001",
+      "LAB-SAFE-BACKUP-001",
+      "LAB-SAFE-RECOVERY-001",
+      "LAB-SAFE-SECOND-HOST-001",
+      "LAB-SAFE-SERIAL-001",
+      "LAB-SAFE-POWER-001",
+      "LAB-SAFE-NETWORK-001",
+      "LAB-SAFE-APPROVAL-001"
+    ],
+    "prerequisite_count": 10
+  },
+  "n2_exit_gate_satisfied": false,
+  "negative_controls": [
+    {
+      "expected": "reject",
+      "id": "reject_serial_field",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_mac_address",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_absolute_user_path",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_full_pnp_instance",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_substituted_baseboard",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_missing_required_fact",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_target_identity_substitution",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "deny_destructive_testing_without_acceptance",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "deny_unlisted_hardware_promotion",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "deny_private_capture_publication",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_cpuid_processor_serial_leaf",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_malformed_cpuid_transcript_hash",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_msr_completion_without_evidence",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_privileged_driver_overclaim",
+      "observed": "reject",
+      "status": "pass"
+    }
+  ],
+  "open_items": [
+    "Reconcile the vendor BIOS release date with the CIM UTC date representation.",
+    "Complete the CPU channel with reviewed MSR evidence; direct bounded user-mode CPUID is captured but remains non-promoting.",
+    "Acquire PCI configuration-space, EDID, SPD, ACPI duplicate-table, UEFI-variable, sensor, and power evidence with reviewed read-only tools.",
+    "Resolve TPM inventory permission without requesting EK, certificate, owner, or secret material.",
+    "Acquire and hash every lawfully accessible locked standard and complete supersession/errata review.",
+    "Owner must separately identify sacrificial media, backups, immutable recovery, a second recovery machine, serial path, power-cut apparatus, and explicit destructive-test approval.",
+    "Define and qualify the Tier-0 QEMU/OVMF target under N4 before N2 can close."
+  ],
+  "privacy_validation": {
+    "mode": "fixed_whitelist_reconstruction_plus_recursive_scan",
+    "private_capture_content_present": false,
+    "violation_count": 0,
+    "violations": []
+  },
+  "production_promotion_allowed": false,
+  "production_ready": false,
+  "schema_validation": {
+    "failure_count": 0,
+    "results": {
+      "observation": [],
+      "policy": [],
+      "standards_register": [],
+      "target": []
+    }
+  },
+  "schema_version": "1.1",
+  "selected_move_id": "N2-HW-002",
+  "standards_coverage": {
+    "artifact_hash_verified_count": 0,
+    "entry_count": 15,
+    "metadata_locked_count": 10,
+    "supersession_review_ids": [
+      "STD-PCIE-BASE",
+      "STD-NVME-BASE",
+      "STD-TPM2-V185",
+      "STD-IETF-NETWORK-PROFILE",
+      "STD-EDID-CTA"
+    ],
+    "unresolved_entry_ids": [
+      "STD-UEFI-2.11",
+      "STD-ACPI-6.6",
+      "STD-SMBIOS-3.9.0",
+      "STD-AMD64-APM-4.09",
+      "STD-AMD-IOMMU-3.09",
+      "STD-PCIE-BASE",
+      "STD-NVME-BASE",
+      "STD-XHCI-1.2",
+      "STD-USB-HID",
+      "STD-TPM2-V185",
+      "STD-VIRTIO-1.3-CSD01",
+      "STD-UNICODE-17.0.0",
+      "STD-POSIX-ISSUE8",
+      "STD-IETF-NETWORK-PROFILE",
+      "STD-EDID-CTA"
+    ]
+  },
+  "status": "consistent_partial_non_promoting",
+  "status_date": "2026-07-16",
+  "summary": {
+    "consistency_pass": true,
+    "cpuid_record_count": 16,
+    "matched_required_target_check_count": 24,
+    "negative_control_count": 14,
+    "negative_control_pass_count": 14,
+    "partial_evidence_channel_count": 2,
+    "pending_evidence_channel_count": 7,
+    "pending_lab_safety_count": 10,
+    "privacy_violation_count": 0,
+    "required_target_check_count": 24,
+    "schema_failure_count": 0,
+    "unresolved_standard_count": 15
+  },
+  "target_id": "TIER1-B650M-9800X3D-RTX5070-001",
+  "target_verification": {
+    "checks": [
+      {
+        "expected": "Gigabyte Technology Co., Ltd.",
+        "fact": "baseboard.manufacturer",
+        "id": "HW-ID-BOARD-MANUFACTURER",
+        "observed": "Gigabyte Technology Co., Ltd.",
+        "operator": "equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": "B650M GAMING PLUS WIFI",
+        "fact": "baseboard.product",
+        "id": "HW-ID-BOARD-PRODUCT",
+        "observed": "B650M GAMING PLUS WIFI",
+        "operator": "equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": "x.x",
+        "fact": "baseboard.version",
+        "id": "HW-ID-BOARD-VERSION",
+        "observed": "x.x",
+        "operator": "equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": "American Megatrends International, LLC.",
+        "fact": "bios.manufacturer",
+        "id": "HW-ID-BIOS-VENDOR",
+        "observed": "American Megatrends International, LLC.",
+        "operator": "equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": "F32",
+        "fact": "bios.version",
+        "id": "HW-ID-BIOS-VERSION",
+        "observed": "F32",
+        "operator": "equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": "3.7",
+        "fact": "bios.smbios_version",
+        "id": "HW-ID-SMBIOS-VERSION",
+        "observed": "3.7",
+        "operator": "equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": "2025-02-05",
+        "fact": "bios.cim_release_date_utc",
+        "id": "HW-ID-BIOS-CIM-DATE",
+        "observed": "2025-02-05",
+        "operator": "equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": "AMD Ryzen 7 9800X3D 8-Core Processor",
+        "fact": "cpu.name",
+        "id": "HW-ID-CPU-NAME",
+        "observed": "AMD Ryzen 7 9800X3D 8-Core Processor",
+        "operator": "equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": "AuthenticAMD",
+        "fact": "cpu.manufacturer",
+        "id": "HW-ID-CPU-VENDOR",
+        "observed": "AuthenticAMD",
+        "operator": "equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": 107,
+        "fact": "cpu.cim_family_code",
+        "id": "HW-ID-CPU-FAMILY-CIM",
+        "observed": 107,
+        "operator": "equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": "0",
+        "fact": "cpu.cim_stepping",
+        "id": "HW-ID-CPU-STEPPING-CIM",
+        "observed": "0",
+        "operator": "equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": 17408,
+        "fact": "cpu.cim_revision",
+        "id": "HW-ID-CPU-REVISION-CIM",
+        "observed": 17408,
+        "operator": "equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": 8,
+        "fact": "cpu.core_count",
+        "id": "HW-ID-CPU-CORES",
+        "observed": 8,
+        "operator": "equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": 16,
+        "fact": "cpu.logical_processor_count",
+        "id": "HW-ID-CPU-LOGICAL",
+        "observed": 16,
+        "operator": "equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": "AM5",
+        "fact": "cpu.socket",
+        "id": "HW-ID-CPU-SOCKET",
+        "observed": "AM5",
+        "operator": "equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": 2,
+        "fact": "memory.module_count",
+        "id": "HW-ID-MEMORY-COUNT",
+        "observed": 2,
+        "operator": "equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": 17179869184,
+        "fact": "memory.total_capacity_bytes",
+        "id": "HW-ID-MEMORY-TOTAL",
+        "observed": 17179869184,
+        "operator": "equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": [
+          "UD5-6000",
+          "UD5-6000"
+        ],
+        "fact": "memory.part_numbers",
+        "id": "HW-ID-MEMORY-PARTS",
+        "observed": [
+          "UD5-6000",
+          "UD5-6000"
+        ],
+        "operator": "multiset_equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": [
+          8589934592,
+          8589934592
+        ],
+        "fact": "memory.module_capacities_bytes",
+        "id": "HW-ID-MEMORY-CAPACITY",
+        "observed": [
+          8589934592,
+          8589934592
+        ],
+        "operator": "multiset_equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": [
+          6000,
+          6000
+        ],
+        "fact": "memory.configured_speeds_mt_s",
+        "id": "HW-ID-MEMORY-SPEED",
+        "observed": [
+          6000,
+          6000
+        ],
+        "operator": "multiset_equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": [
+          "CT2000BX500SSD1|M6CR061|2000396321280",
+          "Samsung SSD 970 PRO 512GB|1B2QEXP7|512105932800"
+        ],
+        "fact": "storage.records",
+        "id": "HW-ID-STORAGE",
+        "observed": [
+          "CT2000BX500SSD1|M6CR061|2000396321280",
+          "Samsung SSD 970 PRO 512GB|1B2QEXP7|512105932800"
+        ],
+        "operator": "contains_all",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": "NVIDIA GeForce RTX 5070",
+        "fact": "display.name",
+        "id": "HW-ID-DISPLAY-NAME",
+        "observed": "NVIDIA GeForce RTX 5070",
+        "operator": "equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": "2560x1440",
+        "fact": "display.current_resolution",
+        "id": "HW-ID-DISPLAY-RESOLUTION",
+        "observed": "2560x1440",
+        "operator": "equals",
+        "required": false,
+        "status": "match"
+      },
+      {
+        "expected": "UEFI",
+        "fact": "host.firmware_type",
+        "id": "HW-ID-FIRMWARE-TYPE",
+        "observed": "UEFI",
+        "operator": "equals",
+        "required": true,
+        "status": "match"
+      },
+      {
+        "expected": [
+          "HDAUDIO\\FUNC_01&VEN_10EC&DEV_0897&SUBSYS_1458A194&REV_1004",
+          "PCI\\VEN_1022&DEV_15B6&SUBSYS_50071458&REV_00",
+          "PCI\\VEN_1022&DEV_15B7&SUBSYS_50071458&REV_00",
+          "PCI\\VEN_1022&DEV_15B8&SUBSYS_50071458&REV_00",
+          "PCI\\VEN_1022&DEV_43F7&SUBSYS_11421B21&REV_01",
+          "PCI\\VEN_10DE&DEV_2F04&SUBSYS_89E71043&REV_A1",
+          "PCI\\VEN_10EC&DEV_8125&SUBSYS_E0001458&REV_05",
+          "PCI\\VEN_10EC&DEV_B851&SUBSYS_B85110EC&REV_00",
+          "PCI\\VEN_144D&DEV_A808&SUBSYS_A801144D&REV_00",
+          "USB\\VID_0BDA&PID_B850"
+        ],
+        "fact": "pnp.hardware_prefixes",
+        "id": "HW-ID-REQUIRED-PNP-PREFIXES",
+        "observed": [
+          "ACPI\\ACPI000C",
+          "ACPI\\ACPI0010",
+          "ACPI\\AMDI0010",
+          "ACPI\\AMDI0030",
+          "ACPI\\AMDI0052",
+          "ACPI\\AMDI0101",
+          "ACPI\\AUTHENTICAMD_-_AMD64_FAMILY_26_MODEL_68_-_AMD_RYZEN_7_9800X3D_8-CORE_PROCESSOR___________",
+          "ACPI\\FIXEDBUTTON",
+          "ACPI\\MSFT0101",
+          "ACPI\\MSFT8000",
+          "ACPI\\PNP0000",
+          "ACPI\\PNP0100",
+          "ACPI\\PNP0103",
+          "ACPI\\PNP0200",
+          "ACPI\\PNP0800",
+          "ACPI\\PNP0A08",
+          "ACPI\\PNP0B00",
+          "ACPI\\PNP0C01",
+          "ACPI\\PNP0C02",
+          "ACPI\\PNP0C0C",
+          "ACPI\\PNP0C14",
+          "ACPI\\THERMALZONE",
+          "ACPI_HAL\\PNP0C08",
+          "ACPI_HAL\\UEFI",
+          "BTHENUM\\DEV_64C2DEDFFDDC",
+          "BTHENUM\\DEV_ACB1EEDEEB08",
+          "BTHENUM\\{00001105-0000-1000-8000-00805F9B34FB}_VID&000100C4_PID&13A1",
+          "BTHENUM\\{0000110A-0000-1000-8000-00805F9B34FB}_VID&000100C4_PID&13A1",
+          "BTHENUM\\{0000110B-0000-1000-8000-00805F9B34FB}_VID&0001E003_PID&3528",
+          "BTHENUM\\{0000110C-0000-1000-8000-00805F9B34FB}_VID&000100C4_PID&13A1",
+          "BTHENUM\\{0000110C-0000-1000-8000-00805F9B34FB}_VID&0001E003_PID&3528",
+          "BTHENUM\\{0000110E-0000-1000-8000-00805F9B34FB}_VID&000100C4_PID&13A1",
+          "BTHENUM\\{0000110E-0000-1000-8000-00805F9B34FB}_VID&0001E003_PID&3528",
+          "BTHENUM\\{00001112-0000-1000-8000-00805F9B34FB}_VID&000100C4_PID&13A1",
+          "BTHENUM\\{00001116-0000-1000-8000-00805F9B34FB}_VID&000100C4_PID&13A1",
+          "BTHENUM\\{0000111F-0000-1000-8000-00805F9B34FB}_VID&000100C4_PID&13A1",
+          "BTHENUM\\{0000112F-0000-1000-8000-00805F9B34FB}_VID&000100C4_PID&13A1",
+          "BTHENUM\\{00001132-0000-1000-8000-00805F9B34FB}_VID&000100C4_PID&13A1",
+          "BTHENUM\\{00001800-0000-1000-8000-00805F9B34FB}_VID&000100C4_PID&13A1",
+          "BTHENUM\\{00001801-0000-1000-8000-00805F9B34FB}_VID&000100C4_PID&13A1",
+          "BTHENUM\\{A82EFA21-AE5C-3DDE-9BBC-F16DA7B16C5A}_VID&000100C4_PID&13A1",
+          "BTHHFENUM\\BTHHFPAUDIO",
+          "BTHLEDEVICE\\{00000001-5F60-4C4F-9C83-A7953298D40D}_DEV_VID&02045E_PID&0B13_REV&0509_408E2CB60DEE",
+          "BTHLEDEVICE\\{00001800-0000-1000-8000-00805F9B34FB}_DEV_VID&02045E_PID&0B13_REV&0509_408E2CB60DEE",
+          "BTHLEDEVICE\\{00001801-0000-1000-8000-00805F9B34FB}_DEV_VID&02045E_PID&0B13_REV&0509_408E2CB60DEE",
+          "BTHLEDEVICE\\{0000180A-0000-1000-8000-00805F9B34FB}_DEV_VID&02045E_PID&0B13_REV&0509_408E2CB60DEE",
+          "BTHLEDEVICE\\{0000180F-0000-1000-8000-00805F9B34FB}_DEV_VID&02045E_PID&0B13_REV&0509_408E2CB60DEE",
+          "BTHLEDEVICE\\{00001812-0000-1000-8000-00805F9B34FB}_DEV_VID&02045E_PID&0B13_REV&0509_408E2CB60DEE",
+          "BTHLE\\DEV_408E2CB60DEE",
+          "BTH\\MS_BTHBRB",
+          "BTH\\MS_BTHLE",
+          "BTH\\MS_BTHPAN",
+          "BTH\\MS_RFCOMM",
+          "DISPLAY\\DELD1AB",
+          "FOCUSRITEUSB\\AUDIO&ADAPTER",
+          "HDAUDIO\\FUNC_01&VEN_10DE&DEV_00AF&SUBSYS_10DE0000&REV_1001",
+          "HDAUDIO\\FUNC_01&VEN_10EC&DEV_0897&SUBSYS_1458A194&REV_1004",
+          "HID\\VID_046D&PID_C53F&MI_00",
+          "HID\\VID_046D&PID_C53F&MI_01&COL01",
+          "HID\\VID_046D&PID_C53F&MI_01&COL02",
+          "HID\\VID_046D&PID_C53F&MI_01&COL03",
+          "HID\\VID_046D&PID_C53F&MI_01&COL04",
+          "HID\\VID_046D&PID_C53F&MI_02&COL01",
+          "HID\\VID_046D&PID_C53F&MI_02&COL02",
+          "HID\\VID_046D&PID_C53F&MI_02&COL03",
+          "HID\\VID_048D&PID_5702&COL01",
+          "HID\\VID_048D&PID_5702&COL02",
+          "HID\\VID_1B1C&PID_1B0A&MI_00",
+          "HID\\VID_1B1C&PID_1B0A&MI_01",
+          "HID\\VID_1B1C&PID_1B0A&MI_02",
+          "HTREE\\ROOT",
+          "PCI\\VEN_1022&DEV_14D8&SUBSYS_14D81022&REV_00",
+          "PCI\\VEN_1022&DEV_14DA&SUBSYS_00000000&REV_00",
+          "PCI\\VEN_1022&DEV_14DB&SUBSYS_14531022&REV_00",
+          "PCI\\VEN_1022&DEV_14DD&SUBSYS_14DD1022&REV_00",
+          "PCI\\VEN_1022&DEV_14DE&SUBSYS_D0001458&REV_CB",
+          "PCI\\VEN_1022&DEV_14E0&SUBSYS_00000000&REV_00",
+          "PCI\\VEN_1022&DEV_14E1&SUBSYS_00000000&REV_00",
+          "PCI\\VEN_1022&DEV_14E2&SUBSYS_00000000&REV_00",
+          "PCI\\VEN_1022&DEV_14E3&SUBSYS_00000000&REV_00",
+          "PCI\\VEN_1022&DEV_14E4&SUBSYS_00000000&REV_00",
+          "PCI\\VEN_1022&DEV_14E5&SUBSYS_00000000&REV_00",
+          "PCI\\VEN_1022&DEV_14E6&SUBSYS_00000000&REV_00",
+          "PCI\\VEN_1022&DEV_14E7&SUBSYS_00000000&REV_00",
+          "PCI\\VEN_1022&DEV_15B6&SUBSYS_50071458&REV_00",
+          "PCI\\VEN_1022&DEV_15B7&SUBSYS_50071458&REV_00",
+          "PCI\\VEN_1022&DEV_15B8&SUBSYS_50071458&REV_00",
+          "PCI\\VEN_1022&DEV_15E3&SUBSYS_A1941458&REV_00",
+          "PCI\\VEN_1022&DEV_1649&SUBSYS_16491022&REV_00",
+          "PCI\\VEN_1022&DEV_43F4&SUBSYS_33281B21&REV_01",
+          "PCI\\VEN_1022&DEV_43F5&SUBSYS_33281B21&REV_01",
+          "PCI\\VEN_1022&DEV_43F6&SUBSYS_10621B21&REV_01",
+          "PCI\\VEN_1022&DEV_43F7&SUBSYS_11421B21&REV_01",
+          "PCI\\VEN_1022&DEV_790B&SUBSYS_50011458&REV_71",
+          "PCI\\VEN_1022&DEV_790E&SUBSYS_50011458&REV_51",
+          "PCI\\VEN_10DE&DEV_2F04&SUBSYS_89E71043&REV_A1",
+          "PCI\\VEN_10DE&DEV_2F80&SUBSYS_000010DE&REV_A1",
+          "PCI\\VEN_10EC&DEV_8125&SUBSYS_E0001458&REV_05",
+          "PCI\\VEN_10EC&DEV_B851&SUBSYS_B85110EC&REV_00",
+          "PCI\\VEN_144D&DEV_A808&SUBSYS_A801144D&REV_00",
+          "ROOT\\ACPI_HAL",
+          "ROOT\\AMDLOG",
+          "ROOT\\AMDSAFD&FUN_01&REV_01",
+          "ROOT\\AMDXE",
+          "ROOT\\BASICDISPLAY",
+          "ROOT\\BASICRENDER",
+          "ROOT\\COMPOSITEBUS",
+          "ROOT\\FOCUSRITE_AUDIO",
+          "ROOT\\HVSERVICE",
+          "ROOT\\KDNIC",
+          "ROOT\\MSSMBIOS",
+          "ROOT\\NDISVIRTUALBUS",
+          "ROOT\\PAWNIO",
+          "ROOT\\RDPBUS",
+          "ROOT\\SPACEPORT",
+          "ROOT\\STORVSP",
+          "ROOT\\SYSTEM",
+          "ROOT\\UMBUS",
+          "ROOT\\UNNAMED_DEVICE",
+          "ROOT\\VDRVROOT",
+          "ROOT\\VID",
+          "ROOT\\VMBUS",
+          "ROOT\\VMS_VSMP",
+          "ROOT\\VOLMGR",
+          "ROOT\\VPCIVSP",
+          "ROOT\\WINDOWSHELLOFACESOFTWAREDRIVER",
+          "SCSI\\DISK&VEN_&PROD_CT2000BX500SSD1",
+          "SCSI\\DISK&VEN_NVME&PROD_SAMSUNG_SSD_970",
+          "STORAGE\\VOLUME",
+          "STORAGE\\VOLUMESNAPSHOT",
+          "SWD\\COMPUTER",
+          "SWD\\DRIVERENUM",
+          "SWD\\MMDEVAPI",
+          "SWD\\MSDAS",
+          "SWD\\MSRRAS",
+          "SWD\\PRINTENUM",
+          "SWD\\RADIO",
+          "SWD\\WPDBUSENUM",
+          "SWD\\XVDDENUM",
+          "SW\\{EEAB7790-C514-11D1-B42B-00805FC1270E}",
+          "UEFI\\RES_{00000000-0000-0000-0000-000000000000}",
+          "USB\\ROOT_HUB30",
+          "USB\\VID_046D&PID_C53F",
+          "USB\\VID_046D&PID_C53F&LAMPARRAY",
+          "USB\\VID_046D&PID_C53F&MI_00",
+          "USB\\VID_046D&PID_C53F&MI_01",
+          "USB\\VID_046D&PID_C53F&MI_02",
+          "USB\\VID_048D&PID_5702",
+          "USB\\VID_04E8&PID_6860",
+          "USB\\VID_04E8&PID_6860&ADB",
+          "USB\\VID_04E8&PID_6860&MODEM",
+          "USB\\VID_04E8&PID_6860&MS_COMP_MTP&SAMSUNG_ANDROID",
+          "USB\\VID_0BDA&PID_B850",
+          "USB\\VID_1235&PID_8205",
+          "USB\\VID_1B1C&PID_1B0A",
+          "USB\\VID_1B1C&PID_1B0A&MI_00",
+          "USB\\VID_1B1C&PID_1B0A&MI_01",
+          "USB\\VID_1B1C&PID_1B0A&MI_02",
+          "{742787E2-EA40-4366-8FB4-DE98EE777D7C}\\RTKFILTER0",
+          "{8E7BD593-6E6C-4C52-86A6-77175494DD8E}\\MSVHDHBA"
+        ],
+        "operator": "contains_all",
+        "required": true,
+        "status": "match"
+      }
+    ],
+    "known_discrepancies": [
+      {
+        "cim_utc_value": "2025-02-05",
+        "closure": "Record the vendor source and determine whether timezone, release packaging, or firmware encoding explains the one-day difference.",
+        "id": "HW-DISCREPANCY-BIOS-DATE-001",
+        "impact": "No firmware equivalence claim may rely on date alone; version F32 and future image/table hashes remain authoritative.",
+        "status": "open",
+        "vendor_value": "2025-02-04"
+      }
+    ],
+    "matched_required_check_count": 24,
+    "required_check_count": 24,
+    "required_failure_count": 0
+  }
+}

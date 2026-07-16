@@ -16,7 +16,10 @@ sys.path.insert(0, str(ROOT))
 
 from runtime import pgb2_bundle as pgb2  # noqa: E402
 from runtime import adr_ratification  # noqa: E402
+from runtime import hardware_target  # noqa: E402
 from runtime import lab_readiness  # noqa: E402
+from runtime import native_tier0  # noqa: E402
+from runtime import native_v1_objectives  # noqa: E402
 from runtime import readiness  # noqa: E402
 from runtime.schema_validation import validate_json  # noqa: E402
 
@@ -25,18 +28,21 @@ MASTER_CHECKLIST_SHA256 = "A8C94719FAF9428C1F133010BA2603C0270C4E1EFD7327AF8EAB9
 NATIVE_ROADMAP = ROOT / "runs" / "pdc_production_roadmap.json"
 NATIVE_COVERAGE = ROOT / "runs" / "pooleos_native_checklist_coverage.json"
 NATIVE_ARCHITECTURE_BASELINE = ROOT / "runs" / "native_architecture_baseline.json"
+NATIVE_V1_OBJECTIVES_READINESS = ROOT / "runs" / "native_v1_objectives_readiness.json"
 ADR_RATIFICATION_READINESS = ROOT / "runs" / "adr_ratification_readiness.json"
 NATIVE_TOOLCHAIN_QUALIFICATION = ROOT / "runs" / "native_toolchain_qualification.json"
+HARDWARE_TARGET_READINESS = ROOT / "runs" / "hardware_target_readiness.json"
+NATIVE_TIER0_READINESS = ROOT / "runs" / "native_tier0_readiness.json"
 
 
 DEFAULT_GAPS = [
-    "The ADR ceremony and fail-closed verifier are ready, but owner disposition, signing custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
+    "The scope-hardened ADR ceremony binds the exact 38-target candidate objectives contract and schema, but all target measurements, owner target acceptance and ADR disposition, signing custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
     "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
-    "No native-only QEMU/OVMF/VIRTIO reference profile or executable formal state models.",
+    "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, but current source rebuilds, real PooleBoot launch evidence, complete reference devices and fault campaigns, executable formal models, trace cross-checks, and second-host reproduction remain open.",
     "No PooleBoot PE32+ UEFI loader or frozen native boot protocol.",
     "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path.",
     "No native CPU, interrupt, time, SMP, physical-memory, virtual-memory, or reclaim implementation.",
-    "No native ACPI/AML/SMBIOS/PCIe resource graph or exact platform qualification.",
+    "The sanitized Tier 1 identity and bounded user-mode CPUID transcript match, but MSR, PCI configuration-space, Secure Boot, TPM, SPD, sensor/power, standards-hash, lab-safety, native enumeration, and physical qualification evidence remain open.",
     "No native DMA/IOMMU/interrupt-remapping confinement.",
     "No native scheduler, task, syscall, capability, IPC, isolation, asynchronous-I/O, or quota implementation.",
     "No native security, cryptography, TPM, secrets, MAC, privacy implementation, or external review.",
@@ -264,6 +270,62 @@ def check_native_architecture_baseline(path: Path = NATIVE_ARCHITECTURE_BASELINE
     )
 
 
+def check_native_v1_objectives_readiness(path: Path = NATIVE_V1_OBJECTIVES_READINESS) -> dict:
+    artifact, schema_errors = _load_schema_artifact(path, "native-v1-objectives-readiness.schema.json")
+    errors = [f"objectives readiness {error.path}: {error.message}" for error in schema_errors[:8]]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_v1_objectives_readiness",
+            False,
+            "; ".join(errors) or "native v1 objectives readiness is not an object",
+        )
+
+    try:
+        regenerated = native_v1_objectives.build_readiness(ROOT)
+        if path.read_bytes() != native_v1_objectives.canonical_json_bytes(regenerated):
+            errors.append("objectives readiness is not the exact deterministic regeneration")
+    except (OSError, ValueError, KeyError, json.JSONDecodeError, native_v1_objectives.ObjectivesError) as error:
+        errors.append(f"objectives verifier failed closed: {type(error).__name__}: {error}")
+
+    summary = artifact.get("summary", {})
+    owner = artifact.get("owner_boundary", {})
+    if artifact.get("status") != "consistent_candidate_owner_ratification_pending":
+        errors.append("candidate objectives are not consistently ready for owner review")
+    if artifact.get("selected_move_id") != "N0-OBJECTIVES-001":
+        errors.append("objectives readiness does not bind N0-OBJECTIVES-001")
+    if summary.get("consistency_pass") is not True:
+        errors.append("objectives consistency check did not pass")
+    if summary.get("target_count") != 38 or summary.get("measured_target_count") != 0:
+        errors.append("objectives readiness must bind 38 candidate and zero measured targets")
+    if summary.get("negative_control_count") != 10 or summary.get("negative_control_pass_count") != 10:
+        errors.append("objectives negative-control inventory is incomplete")
+    if owner.get("ratification_required") is not True or owner.get("ready_for_owner_review") is not True:
+        errors.append("objectives owner-review boundary is inconsistent")
+    if any(owner.get(field) is not False for field in (
+        "profile_accepted",
+        "target_values_accepted",
+        "cryptographic_signature_present",
+        "ready_for_signature",
+    )):
+        errors.append("objectives readiness overclaims owner acceptance or signature readiness")
+    if artifact.get("n0_6_exit_gate_satisfied") is not False:
+        errors.append("objectives readiness overclaims the N0.6 exit gate")
+    if artifact.get("production_ready") is not False or artifact.get("production_promotion_allowed") is not False:
+        errors.append("objectives readiness overclaims production promotion")
+
+    detail = (
+        f"profile={artifact.get('profile_id')}; targets={summary.get('target_count')}; "
+        f"measured={summary.get('measured_target_count')}; "
+        f"negatives={summary.get('negative_control_pass_count')}/{summary.get('negative_control_count')}; "
+        "owner_pending=true; n0_6_exit=false; production_promotion_allowed=false"
+    )
+    return readiness.make_check(
+        "native_v1_objectives_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
 def check_adr_ratification_readiness(path: Path = ADR_RATIFICATION_READINESS) -> dict:
     artifact, schema_errors = _load_schema_artifact(path, "adr-ratification-readiness.schema.json")
     errors = [f"ratification readiness {error.path}: {error.message}" for error in schema_errors[:8]]
@@ -302,14 +364,34 @@ def check_adr_ratification_readiness(path: Path = ADR_RATIFICATION_READINESS) ->
     summary = artifact.get("summary", {})
     if summary.get("ready_for_owner_action") is not True or summary.get("ready_for_signature") is not False:
         errors.append("readiness owner/signature boundary is inconsistent")
-    if summary.get("defined_negative_control_count") != 10:
+    if summary.get("defined_negative_control_count") != 12:
         errors.append("ratification negative-control inventory is incomplete")
+    if summary.get("blocking_owner_action_count") != 6:
+        errors.append("ratification owner-action inventory is incomplete")
+    decision_inputs = artifact.get("decision_inputs", {})
+    objectives = decision_inputs.get("objectives", {})
+    if decision_inputs.get("required_bound_source_count") != 6 or len(decision_inputs.get("bound_sources", [])) != 6:
+        errors.append("ratification readiness does not bind the exact six-source decision set")
+    if objectives.get("profile_id") != "POOLEOS-WORKSTATION-V1-CANDIDATE":
+        errors.append("ratification readiness does not bind the candidate Workstation v1 profile")
+    if objectives.get("target_count") != 38 or objectives.get("measured_target_count") != 0:
+        errors.append("ratification readiness must retain 38 candidate and zero measured targets")
+    if objectives.get("owner_ratification_pending") is not True:
+        errors.append("ratification readiness overclaims objectives owner acceptance")
     if receipt.get("status") == "invalid":
         errors.append("live ratification verifier reports an invalid partial ceremony")
-    if receipt.get("status") != "pending_owner_action" or receipt.get("production_promotion_allowed") is not False:
+    if (
+        receipt.get("status") != "pending_owner_action"
+        or receipt.get("production_promotion_allowed") is not False
+        or receipt.get("architecture_ratification_verified") is not False
+    ):
         errors.append("current live ratification state is not a bounded non-promoting owner-action wait")
 
-    for binding in [artifact.get("policy", {}), *adr_set.get("adrs", [])]:
+    for binding in [
+        artifact.get("policy", {}),
+        *adr_set.get("adrs", []),
+        *decision_inputs.get("bound_sources", []),
+    ]:
         relative = binding.get("path")
         if not isinstance(relative, str):
             errors.append("ratification binding is missing a relative path")
@@ -328,8 +410,9 @@ def check_adr_ratification_readiness(path: Path = ADR_RATIFICATION_READINESS) ->
             errors.append(f"ratification binding mismatch: {relative}")
 
     detail = (
-        "policy=frozen; adrs=7; proposed=2; trusted_signers=0; negative_controls=10; "
-        "owner_actions=5; status=pending_owner_action; production_promotion_allowed=false"
+        "policy=scope_hardened; adrs=7; proposed=2; bound_sources=6; objectives=38; measured=0; "
+        "trusted_signers=0; negative_controls=12; owner_actions=6; status=pending_owner_action; "
+        "production_promotion_allowed=false"
     )
     return readiness.make_check(
         "adr_ratification_readiness",
@@ -410,6 +493,116 @@ def check_native_toolchain_qualification(path: Path = NATIVE_TOOLCHAIN_QUALIFICA
     )
     return readiness.make_check(
         "native_toolchain_qualification",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_hardware_target_readiness(path: Path = HARDWARE_TARGET_READINESS) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(path, "hardware-target-readiness.schema.json")
+    errors = [f"hardware readiness {error.path}: {error.message}" for error in artifact_schema_errors[:8]]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "hardware_target_readiness",
+            False,
+            "; ".join(errors) or "hardware target readiness is not an object",
+        )
+    try:
+        regenerated = hardware_target.build_readiness(ROOT)
+        if path.read_bytes() != hardware_target.canonical_json_bytes(regenerated):
+            errors.append("hardware readiness is not the exact deterministic regeneration")
+    except (OSError, ValueError, KeyError, json.JSONDecodeError, hardware_target.HardwareEvidenceError) as error:
+        errors.append(f"hardware readiness verifier failed closed: {type(error).__name__}: {error}")
+
+    summary = artifact.get("summary", {})
+    verification = artifact.get("target_verification", {})
+    if artifact.get("status") != "consistent_partial_non_promoting":
+        errors.append("current hardware readiness status is not consistent_partial_non_promoting")
+    if artifact.get("selected_move_id") != "N2-HW-002":
+        errors.append("hardware readiness does not bind N2-HW-002")
+    if artifact.get("production_ready") is not False or artifact.get("production_promotion_allowed") is not False:
+        errors.append("hardware readiness overclaims production promotion")
+    if artifact.get("n2_exit_gate_satisfied") is not False:
+        errors.append("hardware readiness overclaims the N2 exit gate")
+    if summary.get("consistency_pass") is not True:
+        errors.append("hardware readiness consistency does not pass")
+    if summary.get("schema_failure_count") != 0 or summary.get("privacy_violation_count") != 0:
+        errors.append("hardware readiness schema or privacy validation failed")
+    if summary.get("required_target_check_count") != 24 or summary.get("matched_required_target_check_count") != 24:
+        errors.append("exact Tier 1 required identity checks do not all match")
+    if verification.get("required_failure_count") != 0:
+        errors.append("exact Tier 1 verification records a required failure")
+    if summary.get("pending_evidence_channel_count") != 7:
+        errors.append("hardware evidence-channel gap count changed without gate review")
+    if summary.get("partial_evidence_channel_count") != 2 or summary.get("cpuid_record_count") != 16:
+        errors.append("hardware readiness does not bind the bounded partial CPUID evidence")
+    if summary.get("pending_lab_safety_count") != 10:
+        errors.append("hardware lab-safety gap count changed without owner review")
+    if summary.get("unresolved_standard_count", 0) < 1:
+        errors.append("standards register unexpectedly claims complete exact-document locks")
+    if summary.get("negative_control_count") != 14 or summary.get("negative_control_pass_count") != 14:
+        errors.append("hardware readiness negative controls are incomplete")
+    cpu_components = artifact.get("evidence_coverage", {}).get("cpu_architecture_components", {})
+    if (
+        cpu_components.get("cpuid_status") != "observed"
+        or cpu_components.get("cpuid_record_count") != 16
+        or cpu_components.get("cpuid_affinity_policy") != "lowest_process_allowed_logical_processor_restored_per_query"
+        or cpu_components.get("msr_status") != "pending_reviewed_privileged_mechanism"
+        or cpu_components.get("combined_channel_complete") is not False
+    ):
+        errors.append("hardware CPU architecture component boundary is inconsistent")
+
+    detail = (
+        "target=TIER1-B650M-9800X3D-RTX5070-001; identity=24/24; privacy=0; "
+        "cpuid=16; msr=pending; pending_channels=7; partial_channels=2; negatives=14/14; "
+        "pending_safety=10; n2_exit=false; production_promotion_allowed=false"
+    )
+    return readiness.make_check(
+        "hardware_target_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_tier0_readiness(path: Path = NATIVE_TIER0_READINESS) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(path, "native-tier0-readiness.schema.json")
+    errors = [f"Tier 0 readiness {error.path}: {error.message}" for error in artifact_schema_errors[:8]]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_tier0_readiness",
+            False,
+            "; ".join(errors) or "native Tier 0 readiness is not an object",
+        )
+    errors.extend(native_tier0.readiness_contract_errors(artifact, ROOT))
+    candidate = artifact.get("candidate", {})
+    tree = candidate.get("runtime_tree", {})
+    capabilities = candidate.get("capabilities", {})
+    if tree.get("file_count") != 3368 or tree.get("byte_count") != 1180772298:
+        errors.append("qualified QEMU runtime closure count or size changed")
+    if tree.get("tree_sha256") != "A4CAF423F71E629B839298B35CAE17995865298CF7B29B16C0DD75437B6C0971":
+        errors.append("qualified QEMU runtime closure hash changed")
+    if not all(capabilities.get(key) is True for key in ("pc_q35_11_0", "q35_alias", "virtio_blk_non_transitional", "isa_debug_exit")):
+        errors.append("required q35/VIRTIO/debug-exit capability probe is incomplete")
+    profile_checks = artifact.get("profile_checks", [])
+    if [item.get("profile_id") for item in profile_checks if isinstance(item, dict)] != list(native_tier0.PROFILE_IDS):
+        errors.append("Tier 0 profile set changed")
+    if any(
+        item.get("command_generation_exact_match") is not True
+        or item.get("qmp_summary_exact_match") is not True
+        or item.get("machine_instantiation_pass") is not True
+        or item.get("guest_cpu_execution_started") is not False
+        or item.get("boot_claimed") is not False
+        for item in profile_checks
+        if isinstance(item, dict)
+    ):
+        errors.append("Tier 0 profile evidence does not preserve the paused non-boot boundary")
+    detail = (
+        "profile=POOLEOS-TIER0-Q35-1; qemu=11.0.0-candidate; q35=pc-q35-11.0; "
+        "profiles=2/2; paused_qmp=4/4; negatives=18/18; paths=0; boot_claims=0; "
+        "formal_models=0; n4_exit=false; production_promotion_allowed=false"
+    )
+    return readiness.make_check(
+        "native_tier0_readiness",
         not errors,
         detail if not errors else "; ".join(errors[:8]),
     )
@@ -3202,8 +3395,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--native-roadmap", type=Path, default=NATIVE_ROADMAP)
     parser.add_argument("--native-checklist-coverage", type=Path, default=NATIVE_COVERAGE)
     parser.add_argument("--native-architecture-baseline", type=Path, default=NATIVE_ARCHITECTURE_BASELINE)
+    parser.add_argument("--native-v1-objectives-readiness", type=Path, default=NATIVE_V1_OBJECTIVES_READINESS)
     parser.add_argument("--adr-ratification-readiness", type=Path, default=ADR_RATIFICATION_READINESS)
     parser.add_argument("--native-toolchain-qualification", type=Path, default=NATIVE_TOOLCHAIN_QUALIFICATION)
+    parser.add_argument("--hardware-target-readiness", type=Path, default=HARDWARE_TARGET_READINESS)
+    parser.add_argument("--native-tier0-readiness", type=Path, default=NATIVE_TIER0_READINESS)
     parser.add_argument("--out", type=Path, default=ROOT / "runs" / "release_gate.json")
     parser.add_argument("--include-runtime", action="store_true", help="Include PooleGlyph runtime checks in doctor.")
     args = parser.parse_args(argv)
@@ -3212,8 +3408,11 @@ def main(argv: list[str] | None = None) -> int:
         run_doctor(include_runtime=args.include_runtime),
         check_native_architecture_plan(args.native_roadmap, args.native_checklist_coverage),
         check_native_architecture_baseline(args.native_architecture_baseline),
+        check_native_v1_objectives_readiness(args.native_v1_objectives_readiness),
         check_adr_ratification_readiness(args.adr_ratification_readiness),
         check_native_toolchain_qualification(args.native_toolchain_qualification),
+        check_hardware_target_readiness(args.hardware_target_readiness),
+        check_native_tier0_readiness(args.native_tier0_readiness),
         check_publication_boundary(),
         check_bundle(args.bundle),
         check_replay_proof(args.replay_proof),
@@ -3392,8 +3591,11 @@ def main(argv: list[str] | None = None) -> int:
             args.native_roadmap,
             args.native_checklist_coverage,
             args.native_architecture_baseline,
+            args.native_v1_objectives_readiness,
             args.adr_ratification_readiness,
             args.native_toolchain_qualification,
+            args.hardware_target_readiness,
+            args.native_tier0_readiness,
         )
         if path is not None
     ]

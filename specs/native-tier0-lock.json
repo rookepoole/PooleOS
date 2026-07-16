@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_tier0_lock",
+  "status_date": "2026-07-16",
+  "status": "candidate_pinned_non_promoting",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "upstream_qemu": {
+    "project": "QEMU",
+    "release_channel": "stable",
+    "latest_stable_version": "11.0.2",
+    "release_date": "2026-06-26",
+    "source_url": "https://download.qemu.org/qemu-11.0.2.tar.xz",
+    "signature_url": "https://download.qemu.org/qemu-11.0.2.tar.xz.sig",
+    "source_tag": "v11.0.2",
+    "tag_object_sha1": "0AB45D2AF85F2FC9885B526FFBC8A15BBD1A2DA8",
+    "commit_sha1": "E545D8BB9D63E9DD61542B88463183314CFF9482",
+    "release_signing_key_fingerprint": "CEACC9E15534EBABB82D3FA03353C9CEF108B584",
+    "detached_signature_verified_locally": false
+  },
+  "windows_runner": {
+    "role": "single_host_tier0_candidate",
+    "provider": "Stefan Weil QEMU for Windows",
+    "provider_url": "https://qemu.weilnetz.de/w64/",
+    "version": "11.0.0",
+    "version_output_exact": "QEMU emulator version 11.0.0 (v11.0.0-12122-ga4bb4b10c9)",
+    "provider_commit_sha1": "A4BB4B10C9D43D416F6E8BC9BB5C8F372FD80769",
+    "merged_upstream_tag": "v11.0.0",
+    "merged_upstream_commit_sha1": "98B060DA3A4F92B2A994EAD5B16A87E783BAF77C",
+    "installer_name": "qemu-w64-setup-20260422.exe",
+    "installer_url": "https://qemu.weilnetz.de/w64/qemu-w64-setup-20260422.exe",
+    "installer_sha512_url": "https://qemu.weilnetz.de/w64/qemu-w64-setup-20260422.sha512",
+    "installer_sha512": "64A43C0D39ACDDC9D30D290935A312A2B5C4FA62CFFE6C27090F2A45CA6C8DE0F0E8673E1E5117FB116A8742F86DF92163531AFC23F34758AADFC6D82C1F41A5",
+    "installer_sha256": "DA95183368398B651ACDB9236F033A76175C9D1298DD90E6C7836F528A63B27D",
+    "installer_byte_count": 185604552,
+    "authenticode": {
+      "signer_thumbprint_sha1": "2F92CB990D57719BDCCA2D72134378614A040D9B",
+      "certificate_not_before_utc": "2022-12-09T00:00:00Z",
+      "certificate_not_after_utc": "2023-12-09T23:59:59Z",
+      "current_status": "NotTimeValid",
+      "acceptance_signal": false
+    },
+    "qemu_system_x86_64": {
+      "relative_path": "qemu-system-x86_64.exe",
+      "sha256": "A930E028F93D0FA47E4D58BDAD2432F7466DC2B6AF0AE376F77EF7A298FFDD02",
+      "byte_count": 25287296
+    },
+    "latest_upstream_patch_level_matched": false
+  },
+  "firmware": {
+    "runner_bundled_source_repository": "https://gitlab.com/qemu-project/edk2.git",
+    "runner_bundled_source_commit_sha1": "4DFDCA63A93497203F197EC98BA20E2327E4AFE4",
+    "target_upstream_repository": "https://github.com/tianocore/edk2",
+    "target_stable_tag": "edk2-stable202605",
+    "target_stable_commit_sha1": "B03A21A63E3BD001F52C527E5A57FEDDB53A690B",
+    "runner_bundled_matches_target_stable": false,
+    "files": [
+      {
+        "role": "debug_code_read_only",
+        "relative_path": "share/edk2-x86_64-code.fd",
+        "sha256": "33090CC07675BAA5190D9F1E84BF5176B33BCBFA9BACAC522961150CDB6DBB2A",
+        "byte_count": 3653632
+      },
+      {
+        "role": "secure_code_read_only",
+        "relative_path": "share/edk2-x86_64-secure-code.fd",
+        "sha256": "32807682A9E5C0E2D192ECB6077941D4BE8BCFA6B9CD6E60830C3A9F48C0555A",
+        "byte_count": 3653632
+      },
+      {
+        "role": "vars_template_copy_only",
+        "relative_path": "share/edk2-i386-vars.fd",
+        "sha256": "5D2AC383371B408398ACCEE7EC27C8C09EA5B74A0DE0CEEA6513388B15BE5D1E",
+        "byte_count": 540672
+      },
+      {
+        "role": "debug_descriptor",
+        "relative_path": "share/firmware/60-edk2-x86_64.json",
+        "sha256": "F6756761629339223E398BAD85CFF8DACE5310E9C88876052A0784B16BA7FF5D",
+        "byte_count": 718
+      },
+      {
+        "role": "secure_descriptor",
+        "relative_path": "share/firmware/50-edk2-x86_64-secure.json",
+        "sha256": "6E6CC9506AA6D77E4673A9AD081C01854031E3EA8FD993A1E9825D909302EE96",
+        "byte_count": 745
+      }
+    ]
+  },
+  "virtio": {
+    "standard": "Virtual I/O Device (VIRTIO) Version 1.3",
+    "stage": "Committee Specification Draft 01",
+    "date": "2023-10-06",
+    "url": "https://docs.oasis-open.org/virtio/virtio/v1.3/virtio-v1.3.html",
+    "transport": "pci",
+    "legacy_or_transitional_devices_allowed": false
+  },
+  "host_policy": {
+    "tool_root": "workspace_local_untracked",
+    "global_install_required": false,
+    "global_path_mutation_allowed": false,
+    "network_enabled_in_guest": false,
+    "host_acceleration_allowed_in_deterministic_profile": false,
+    "arbitrary_extra_arguments_allowed": false
+  },
+  "rejected_candidates": [
+    {
+      "id": "android_qemu",
+      "reason": "Android emulator fork is not the locked general-purpose QEMU runtime and did not load as a standalone candidate.",
+      "sha256": "2C389BF3C28F37968A226E6CBD9C50F8B051C7DB9DB471E7E10548F645652AD3",
+      "byte_count": 62163608
+    },
+    {
+      "id": "development_qemu",
+      "reason": "Provider development build reports QEMU 11.0.50 instead of the locked 11.0.0 candidate.",
+      "sha256": "B396EB9B669F6282EC60F0D46E6ADDCA8C669992E67A34365BE44CD3CB97C9A7",
+      "byte_count": 25272968
+    }
+  ],
+  "open_items": [
+    "Rebuild and qualify QEMU 11.0.2 from the exact upstream source and verified release signature.",
+    "Build OVMF from edk2-stable202605 and bind source-to-binary provenance.",
+    "Complete license, notice, SBOM, vulnerability, and redistribution review for the exact runtime closure.",
+    "Reproduce the accepted runtime and firmware bytes on a second clean builder.",
+    "Replace the expired Authenticode chain with source-rebuild provenance before production promotion."
+  ]
+}

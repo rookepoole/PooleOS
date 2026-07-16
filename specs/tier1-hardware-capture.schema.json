@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/tier1-hardware-capture.schema.json",
+  "title": "PooleOS Private Tier-1 Hardware Capture",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "collected_at_utc", "collection_mode", "collector", "mutation_guard", "privileged_probe_guard", "privacy_guard", "host_context", "security", "system", "processor", "cpu_architecture", "memory", "storage", "display", "network", "pnp_devices", "monitor", "firmware_tables", "sensors_power", "collector_errors"],
+  "properties": {
+    "schema_version": {"const": "1.1"},
+    "artifact_kind": {"const": "pooleos_tier1_hardware_private_capture"},
+    "collected_at_utc": {"type": "string"},
+    "collection_mode": {"const": "read_only"},
+    "collector": {"type": "object", "required": ["version", "script_sha256"]},
+    "mutation_guard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["firmware_write", "disk_write", "tpm_write", "boot_configuration_write", "device_configuration_write", "power_action", "stress_load"],
+      "properties": {
+        "firmware_write": {"const": false},
+        "disk_write": {"const": false},
+        "tpm_write": {"const": false},
+        "boot_configuration_write": {"const": false},
+        "device_configuration_write": {"const": false},
+        "power_action": {"const": false},
+        "stress_load": {"const": false}
+      }
+    },
+    "privileged_probe_guard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kernel_driver_loaded", "kernel_device_opened", "physical_memory_mapped", "io_ports_accessed", "msr_read_attempted", "msr_write_attempted", "pci_config_read_attempted", "pci_config_write_attempted", "spd_bus_access_attempted", "uefi_variable_read_attempted", "uefi_variable_write_attempted"],
+      "properties": {
+        "kernel_driver_loaded": {"const": false},
+        "kernel_device_opened": {"const": false},
+        "physical_memory_mapped": {"const": false},
+        "io_ports_accessed": {"const": false},
+        "msr_read_attempted": {"const": false},
+        "msr_write_attempted": {"const": false},
+        "pci_config_read_attempted": {"const": false},
+        "pci_config_write_attempted": {"const": false},
+        "spd_bus_access_attempted": {"const": false},
+        "uefi_variable_read_attempted": {"const": false},
+        "uefi_variable_write_attempted": {"const": false}
+      }
+    },
+    "privacy_guard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["serial_numbers_collected", "mac_addresses_collected", "uuids_collected", "full_pnp_instance_paths_collected", "user_or_host_names_collected", "tpm_ek_or_certificate_material_collected", "raw_firmware_table_bytes_retained", "cpuid_processor_serial_leaf_collected"],
+      "properties": {
+        "serial_numbers_collected": {"const": false},
+        "mac_addresses_collected": {"const": false},
+        "uuids_collected": {"const": false},
+        "full_pnp_instance_paths_collected": {"const": false},
+        "user_or_host_names_collected": {"const": false},
+        "tpm_ek_or_certificate_material_collected": {"const": false},
+        "raw_firmware_table_bytes_retained": {"const": false},
+        "cpuid_processor_serial_leaf_collected": {"const": false}
+      }
+    },
+    "host_context": {"type": "object", "required": ["architecture", "firmware_type", "hypervisor_present"]},
+    "security": {"type": "object", "required": ["secure_boot", "tpm"]},
+    "system": {"type": "object", "required": ["baseboard", "bios", "computer_system"]},
+    "processor": {"type": "array", "minItems": 1},
+    "cpu_architecture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "cpuid", "msr"],
+      "properties": {
+        "status": {"enum": ["partial_cpuid_observed_msr_pending", "unavailable"]},
+        "cpuid": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "execution_mode", "affinity_policy", "allowlist_id", "record_count", "max_basic_leaf", "max_extended_leaf", "processor_serial_leaf_collected", "records"],
+          "properties": {
+            "status": {"enum": ["observed", "unavailable"]},
+            "execution_mode": {"const": "unprivileged_user_mode"},
+            "affinity_policy": {"const": "lowest_process_allowed_logical_processor_restored_per_query"},
+            "allowlist_id": {"const": "POOLEOS-CPUID-ALLOWLIST-1"},
+            "record_count": {"type": "integer", "minimum": 0, "maximum": 32},
+            "max_basic_leaf": {"type": "string", "pattern": "^0x[0-9A-F]{8}$"},
+            "max_extended_leaf": {"type": "string", "pattern": "^0x[0-9A-F]{8}$"},
+            "processor_serial_leaf_collected": {"const": false},
+            "records": {
+              "type": "array",
+              "maxItems": 32,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["leaf", "subleaf", "eax", "ebx", "ecx", "edx"],
+                "properties": {
+                  "leaf": {"type": "string", "pattern": "^0x[0-9A-F]{8}$"},
+                  "subleaf": {"type": "string", "pattern": "^0x[0-9A-F]{8}$"},
+                  "eax": {"type": "string", "pattern": "^0x[0-9A-F]{8}$"},
+                  "ebx": {"type": "string", "pattern": "^0x[0-9A-F]{8}$"},
+                  "ecx": {"type": "string", "pattern": "^0x[0-9A-F]{8}$"},
+                  "edx": {"type": "string", "pattern": "^0x[0-9A-F]{8}$"}
+                }
+              }
+            }
+          }
+        },
+        "msr": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "access_attempted", "driver_loaded", "device_opened", "write_attempted"],
+          "properties": {
+            "status": {"const": "pending_reviewed_privileged_mechanism"},
+            "access_attempted": {"const": false},
+            "driver_loaded": {"const": false},
+            "device_opened": {"const": false},
+            "write_attempted": {"const": false}
+          }
+        }
+      }
+    },
+    "memory": {"type": "array", "minItems": 2},
+    "storage": {"type": "array", "minItems": 2},
+    "display": {"type": "array", "minItems": 1},
+    "network": {"type": "array", "minItems": 1},
+    "pnp_devices": {"type": "array", "minItems": 1},
+    "monitor": {"type": "object", "required": ["status", "records", "serial_field_collected"]},
+    "firmware_tables": {"type": "object", "required": ["acpi", "smbios"]},
+    "sensors_power": {"type": "object", "required": ["status", "temperature_probe_count", "battery_count", "ups_count", "active_probe_performed"]},
+    "collector_errors": {"type": "array"}
+  }
+}

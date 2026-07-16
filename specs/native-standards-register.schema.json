@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/native-standards-register.schema.json",
+  "title": "PooleOS Native Standards Register",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "status_date", "status", "selected_move_id", "production_ready", "production_promotion_allowed", "research_policy", "entries", "collector_references", "summary", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_standards_register"},
+    "status_date": {"const": "2026-07-16"},
+    "status": {"const": "official_metadata_partial_hashes_pending"},
+    "selected_move_id": {"const": "N2-HW-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "research_policy": {"type": "object", "required": ["source_class", "document_redistribution", "hash_rule", "supersession_rule"]},
+    "entries": {
+      "type": "array",
+      "minItems": 15,
+      "maxItems": 15,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "domain", "title", "authority", "candidate_revision", "candidate_publication_date", "official_metadata_url", "access_mode", "lock_status", "artifact_hash_status", "artifact_sha256", "errata_status", "supersession_review", "implementation_owner", "phase_ids"],
+        "properties": {
+          "id": {"type": "string"},
+          "domain": {"type": "string"},
+          "title": {"type": "string"},
+          "authority": {"type": "string"},
+          "candidate_revision": {"type": "string"},
+          "candidate_publication_date": {"type": "string"},
+          "official_metadata_url": {"type": "string"},
+          "access_mode": {"type": "string"},
+          "lock_status": {"enum": ["locked_metadata_verified", "candidate_metadata_verified", "supersession_review_required", "target_revision_review_required", "profile_definition_required"]},
+          "artifact_hash_status": {"type": "string"},
+          "artifact_sha256": {"type": "string"},
+          "errata_status": {"type": "string"},
+          "supersession_review": {"type": "string"},
+          "implementation_owner": {"type": "string"},
+          "phase_ids": {"type": "array", "minItems": 2, "items": {"type": "string"}}
+        }
+      }
+    },
+    "collector_references": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["id", "authority", "url", "role", "known_limitation"]}},
+    "summary": {"type": "object", "required": ["entry_count", "metadata_locked_count", "artifact_hash_verified_count", "supersession_or_profile_review_count", "n2_standards_exit_ready"]},
+    "claim_boundary": {"type": "array", "minItems": 5, "items": {"type": "string"}}
+  }
+}

@@ -80,14 +80,15 @@ class NativeChecklistCoverageTests(unittest.TestCase):
         self.assertEqual(sum(phase["source_line_count"] for phase in phases) + 16, 10512)
         self.assertEqual(sum(phase["source_checkbox_count"] for phase in phases) + 10, 8996)
         additions = self.artifact["added_requirements"]
-        self.assertEqual(len(additions), 25)
-        self.assertEqual(len({item["id"] for item in additions}), 25)
+        self.assertEqual(len(additions), 27)
+        self.assertEqual(len({item["id"] for item in additions}), 27)
         phase_ids = {phase["phase_id"] for phase in phases}
         self.assertTrue(all(item["phase_id"] in phase_ids for item in additions))
         classes = Counter(item["id"].split("-")[1] for item in additions)
         self.assertGreaterEqual(classes["NATIVE"], 2)
         self.assertGreaterEqual(classes["ASSURE"], 2)
         self.assertGreaterEqual(classes["VIRTIO"], 2)
+        self.assertEqual(classes["TIER0"], 1)
 
     def test_canonical_generator_reproduces_artifact_exactly(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/native-tier0-launch-receipt.schema.json",
+  "title": "PooleOS Native Tier 0 Launch Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "status_date", "status", "production_ready", "production_promotion_allowed", "profile_id", "bindings", "media", "command", "execution", "claims"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_tier0_launch_receipt"},
+    "status_date": {"const": "2026-07-16"},
+    "status": {"enum": ["dry_run_ready", "process_exited_non_promoting", "process_timeout_non_promoting"]},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "profile_id": {"enum": ["bootstrap-debug", "secure-firmware-prep"]},
+    "bindings": {"type": "object", "required": ["lock_sha256", "profile_sha256", "qemu_sha256", "firmware_code_sha256", "vars_template_sha256"]},
+    "media": {"type": "object", "required": ["name", "sha256", "byte_count", "qemu_read_only", "native_identity_verified"]},
+    "command": {"type": "object", "required": ["normalized", "normalized_sha256", "debug_overlay_enabled", "unknown_arguments_accepted"]},
+    "execution": {"type": "object", "required": ["requested", "started", "timed_out", "exit_code", "run_artifacts"]},
+    "claims": {"type": "object", "required": ["pooleboot_booted", "poolekernel_executed", "serial_evidence_validated", "debug_exit_validated", "secure_boot_enforced", "production_boot_evidence"]}
+  }
+}
