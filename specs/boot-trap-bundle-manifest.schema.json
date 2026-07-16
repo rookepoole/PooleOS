@@ -1,0 +1,306 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/boot-trap-bundle-manifest.schema.json",
+  "title": "PooleOS Boot Trap Bundle Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "manifest_role",
+    "lab_mount",
+    "bundle",
+    "replay_proof",
+    "trap_execution",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.boot_trap_bundle_manifest"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail"
+      ]
+    },
+    "manifest_role": {
+      "type": "string"
+    },
+    "lab_mount": {
+      "type": "object",
+      "required": [
+        "mount_dir",
+        "bundle_target_path",
+        "replay_target_path",
+        "manifest_target_path",
+        "verification_result_path",
+        "smoke_command",
+        "verify_command"
+      ],
+      "properties": {
+        "mount_dir": {
+          "type": "string"
+        },
+        "bundle_target_path": {
+          "type": "string"
+        },
+        "replay_target_path": {
+          "type": "string"
+        },
+        "manifest_target_path": {
+          "type": "string"
+        },
+        "verification_result_path": {
+          "type": "string"
+        },
+        "smoke_command": {
+          "type": "string"
+        },
+        "verify_command": {
+          "type": "string"
+        }
+      }
+    },
+    "bundle": {
+      "type": "object",
+      "required": [
+        "source_path",
+        "target_path",
+        "sha256",
+        "artifact_kind",
+        "section_count",
+        "section_names",
+        "signed_metrics_present",
+        "trap_encoding_section_sha256",
+        "trap_execution_section_sha256"
+      ],
+      "properties": {
+        "source_path": {
+          "type": "string"
+        },
+        "target_path": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "artifact_kind": {
+          "type": "string"
+        },
+        "section_count": {
+          "type": "integer"
+        },
+        "section_names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "signed_metrics_present": {
+          "type": "boolean"
+        },
+        "trap_encoding_section_sha256": {
+          "type": "string"
+        },
+        "trap_execution_section_sha256": {
+          "type": "string"
+        }
+      }
+    },
+    "replay_proof": {
+      "type": "object",
+      "required": [
+        "source_path",
+        "target_path",
+        "sha256",
+        "bundle_sha256",
+        "channel_summary_match",
+        "signed_metrics_present",
+        "section_names"
+      ],
+      "properties": {
+        "source_path": {
+          "type": "string"
+        },
+        "target_path": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "bundle_sha256": {
+          "type": "string"
+        },
+        "channel_summary_match": {
+          "type": "boolean"
+        },
+        "signed_metrics_present": {
+          "type": "boolean"
+        },
+        "section_names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "trap_execution": {
+      "type": "object",
+      "required": [
+        "source_path",
+        "embedded_in_bundle",
+        "section_sha256",
+        "body_sha256",
+        "expected_summary"
+      ],
+      "properties": {
+        "source_path": {
+          "type": "string"
+        },
+        "embedded_in_bundle": {
+          "type": "boolean"
+        },
+        "section_sha256": {
+          "type": "string"
+        },
+        "body_sha256": {
+          "type": "string"
+        },
+        "expected_summary": {
+          "type": "object",
+          "required": [
+            "status",
+            "program_sha256",
+            "byte_length",
+            "encoded_instruction_count",
+            "executed_instruction_count",
+            "allowed_count",
+            "trapped_count",
+            "matrix_instruction_count",
+            "fuzz_instruction_count",
+            "decode_error_count",
+            "outcome_mismatch_count",
+            "failed_check_count",
+            "security_boundary_claimed"
+          ],
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "program_sha256": {
+              "type": "string"
+            },
+            "byte_length": {
+              "type": "integer"
+            },
+            "encoded_instruction_count": {
+              "type": "integer"
+            },
+            "executed_instruction_count": {
+              "type": "integer"
+            },
+            "allowed_count": {
+              "type": "integer"
+            },
+            "trapped_count": {
+              "type": "integer"
+            },
+            "matrix_instruction_count": {
+              "type": "integer"
+            },
+            "fuzz_instruction_count": {
+              "type": "integer"
+            },
+            "decode_error_count": {
+              "type": "integer"
+            },
+            "outcome_mismatch_count": {
+              "type": "integer"
+            },
+            "failed_check_count": {
+              "type": "integer"
+            },
+            "security_boundary_claimed": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "bundle_section_count",
+        "trap_evidence_present",
+        "expected_executed_instruction_count",
+        "expected_trapped_count",
+        "expected_allowed_count",
+        "failed_check_count"
+      ],
+      "properties": {
+        "bundle_section_count": {
+          "type": "integer"
+        },
+        "trap_evidence_present": {
+          "type": "boolean"
+        },
+        "expected_executed_instruction_count": {
+          "type": "integer"
+        },
+        "expected_trapped_count": {
+          "type": "integer"
+        },
+        "expected_allowed_count": {
+          "type": "integer"
+        },
+        "failed_check_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

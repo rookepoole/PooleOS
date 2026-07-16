@@ -1,0 +1,324 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/pooleglyph-core-ir-executable-audit.schema.json",
+  "title": "PooleOS PooleGlyph Core IR Executable Audit",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "source_boundary_receipt",
+    "audit_scope",
+    "executable_candidates",
+    "metadata_zero_outputs",
+    "expected_negative_fixtures",
+    "structural_anomalies",
+    "unexpected_invalid_outputs",
+    "boundary_decisions",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.pooleglyph_core_ir_executable_audit"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "audited_non_promoting",
+        "parser_to_kernel_ready",
+        "fail"
+      ]
+    },
+    "source_boundary_receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_path",
+        "exists",
+        "artifact_kind",
+        "status",
+        "phase66_audit_present",
+        "parser_to_kernel_promotion_allowed",
+        "kernel_enforcement_claimed",
+        "failed_check_count",
+        "failed_promotion_gate_count"
+      ],
+      "properties": {
+        "artifact_path": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "boolean"
+        },
+        "artifact_kind": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "phase66_audit_present": {
+          "type": "boolean"
+        },
+        "parser_to_kernel_promotion_allowed": {
+          "type": "boolean"
+        },
+        "kernel_enforcement_claimed": {
+          "type": "boolean"
+        },
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "failed_promotion_gate_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "audit_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "validation_file_count",
+        "valid_file_count",
+        "validator_versions",
+        "total_program_count",
+        "total_instruction_count",
+        "public_safe_note_count"
+      ],
+      "properties": {
+        "validation_file_count": {
+          "type": "integer"
+        },
+        "valid_file_count": {
+          "type": "integer"
+        },
+        "validator_versions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "total_program_count": {
+          "type": "integer"
+        },
+        "total_instruction_count": {
+          "type": "integer"
+        },
+        "public_safe_note_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "executable_candidates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/audit_record"
+      }
+    },
+    "metadata_zero_outputs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/audit_record"
+      }
+    },
+    "expected_negative_fixtures": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/audit_record"
+      }
+    },
+    "structural_anomalies": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/audit_record"
+      }
+    },
+    "unexpected_invalid_outputs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/audit_record"
+      }
+    },
+    "boundary_decisions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executable_candidate_decision",
+        "metadata_zero_decision",
+        "parser_to_kernel_decision",
+        "kernel_handoff_allowed",
+        "kernel_enforcement_claimed",
+        "reason"
+      ],
+      "properties": {
+        "executable_candidate_decision": {
+          "type": "string"
+        },
+        "metadata_zero_decision": {
+          "type": "string"
+        },
+        "parser_to_kernel_decision": {
+          "type": "string"
+        },
+        "kernel_handoff_allowed": {
+          "type": "boolean"
+        },
+        "kernel_enforcement_claimed": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "failed_check_count",
+        "phase66_audit_present",
+        "parser_to_kernel_promotion_allowed",
+        "kernel_handoff_allowed",
+        "kernel_enforcement_claimed",
+        "executable_candidate_count",
+        "metadata_zero_count",
+        "expected_negative_fixture_count",
+        "structural_anomaly_count",
+        "unexpected_invalid_count",
+        "validation_file_count"
+      ],
+      "properties": {
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "phase66_audit_present": {
+          "type": "boolean"
+        },
+        "parser_to_kernel_promotion_allowed": {
+          "type": "boolean"
+        },
+        "kernel_handoff_allowed": {
+          "type": "boolean"
+        },
+        "kernel_enforcement_claimed": {
+          "type": "boolean"
+        },
+        "executable_candidate_count": {
+          "type": "integer"
+        },
+        "metadata_zero_count": {
+          "type": "integer"
+        },
+        "expected_negative_fixture_count": {
+          "type": "integer"
+        },
+        "structural_anomaly_count": {
+          "type": "integer"
+        },
+        "unexpected_invalid_count": {
+          "type": "integer"
+        },
+        "validation_file_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "ok",
+        "detail"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string"
+        }
+      }
+    },
+    "audit_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256",
+        "classification",
+        "ok",
+        "module",
+        "program_count",
+        "instruction_count",
+        "validator_version",
+        "public_safe_notes_present",
+        "diagnostic_codes"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "classification": {
+          "type": "string"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "module": {
+          "type": "string"
+        },
+        "program_count": {
+          "type": "integer"
+        },
+        "instruction_count": {
+          "type": "integer"
+        },
+        "validator_version": {
+          "type": "string"
+        },
+        "public_safe_notes_present": {
+          "type": "boolean"
+        },
+        "diagnostic_codes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

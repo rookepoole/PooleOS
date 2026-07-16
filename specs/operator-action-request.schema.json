@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/operator-action-request.schema.json",
+  "title": "PooleOS Operator Action Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "action_kind",
+    "target",
+    "source_artifact",
+    "source_status",
+    "requires_operator_approval",
+    "codex_execution_allowed",
+    "execution_performed",
+    "command",
+    "command_sha256",
+    "packages",
+    "safety_checks",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.operator_action_request"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending_approval",
+        "no_action_needed",
+        "invalid"
+      ]
+    },
+    "action_kind": {
+      "type": "string",
+      "enum": [
+        "wsl_package_install"
+      ]
+    },
+    "target": {
+      "type": "object",
+      "required": [
+        "environment",
+        "distro",
+        "package_manager"
+      ],
+      "properties": {
+        "environment": {
+          "type": "string"
+        },
+        "distro": {
+          "type": "string"
+        },
+        "package_manager": {
+          "type": "string"
+        }
+      }
+    },
+    "source_artifact": {
+      "type": "string"
+    },
+    "source_status": {
+      "type": "string"
+    },
+    "requires_operator_approval": {
+      "type": "boolean"
+    },
+    "codex_execution_allowed": {
+      "type": "boolean"
+    },
+    "execution_performed": {
+      "type": "boolean"
+    },
+    "command": {
+      "type": "string"
+    },
+    "command_sha256": {
+      "type": "string"
+    },
+    "packages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "safety_checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

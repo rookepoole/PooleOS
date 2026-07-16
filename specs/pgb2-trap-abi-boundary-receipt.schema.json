@@ -1,0 +1,544 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/pgb2-trap-abi-boundary-receipt.schema.json",
+  "title": "PooleOS PGB2 Trap ABI Boundary Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "boundary_version",
+    "abi_boundary",
+    "evidence_sources",
+    "claim_boundaries",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.pgb2_trap_abi_boundary_receipt"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft_verified",
+        "verification_failed",
+        "invalid"
+      ]
+    },
+    "boundary_version": {
+      "type": "string"
+    },
+    "abi_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "encoding_version",
+        "execution_version",
+        "byte_format_classification",
+        "abi_frozen",
+        "kernel_abi_promotion_allowed",
+        "kernel_enforcement_claimed",
+        "security_boundary_claimed"
+      ],
+      "properties": {
+        "encoding_version": {
+          "type": "string"
+        },
+        "execution_version": {
+          "type": "string"
+        },
+        "byte_format_classification": {
+          "type": "string"
+        },
+        "abi_frozen": {
+          "type": "boolean"
+        },
+        "kernel_abi_promotion_allowed": {
+          "type": "boolean"
+        },
+        "kernel_enforcement_claimed": {
+          "type": "boolean"
+        },
+        "security_boundary_claimed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "evidence_sources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trap_encoding",
+        "trap_execution",
+        "bundle",
+        "boot_trap_bundle_manifest",
+        "qemu_shared_folder_contract"
+      ],
+      "properties": {
+        "trap_encoding": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "artifact_path",
+            "exists",
+            "sha256",
+            "artifact_kind",
+            "status",
+            "failed_check_count",
+            "encoding_version",
+            "program_sha256",
+            "instruction_count",
+            "byte_length",
+            "matrix_bound",
+            "fuzz_bound",
+            "core_ir_binding_mode",
+            "parser_to_kernel_promotion_allowed",
+            "kernel_enforcement_claimed"
+          ],
+          "properties": {
+            "artifact_path": {
+              "type": "string"
+            },
+            "exists": {
+              "type": "boolean"
+            },
+            "sha256": {
+              "type": "string"
+            },
+            "artifact_kind": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string"
+            },
+            "failed_check_count": {
+              "type": "integer"
+            },
+            "encoding_version": {
+              "type": "string"
+            },
+            "program_sha256": {
+              "type": "string"
+            },
+            "instruction_count": {
+              "type": "integer"
+            },
+            "byte_length": {
+              "type": "integer"
+            },
+            "matrix_bound": {
+              "type": "boolean"
+            },
+            "fuzz_bound": {
+              "type": "boolean"
+            },
+            "core_ir_binding_mode": {
+              "type": "string"
+            },
+            "parser_to_kernel_promotion_allowed": {
+              "type": "boolean"
+            },
+            "kernel_enforcement_claimed": {
+              "type": "boolean"
+            }
+          }
+        },
+        "trap_execution": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "artifact_path",
+            "exists",
+            "sha256",
+            "artifact_kind",
+            "status",
+            "failed_check_count",
+            "execution_version",
+            "encoding_version",
+            "encoded_instruction_count",
+            "executed_instruction_count",
+            "byte_length",
+            "program_sha256",
+            "decode_error_count",
+            "outcome_mismatch_count",
+            "security_boundary_claimed",
+            "all_bytes_consumed",
+            "core_ir_binding_mode",
+            "parser_to_kernel_promotion_allowed",
+            "kernel_enforcement_claimed"
+          ],
+          "properties": {
+            "artifact_path": {
+              "type": "string"
+            },
+            "exists": {
+              "type": "boolean"
+            },
+            "sha256": {
+              "type": "string"
+            },
+            "artifact_kind": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string"
+            },
+            "failed_check_count": {
+              "type": "integer"
+            },
+            "execution_version": {
+              "type": "string"
+            },
+            "encoding_version": {
+              "type": "string"
+            },
+            "encoded_instruction_count": {
+              "type": "integer"
+            },
+            "executed_instruction_count": {
+              "type": "integer"
+            },
+            "byte_length": {
+              "type": "integer"
+            },
+            "program_sha256": {
+              "type": "string"
+            },
+            "decode_error_count": {
+              "type": "integer"
+            },
+            "outcome_mismatch_count": {
+              "type": "integer"
+            },
+            "security_boundary_claimed": {
+              "type": "boolean"
+            },
+            "all_bytes_consumed": {
+              "type": "boolean"
+            },
+            "core_ir_binding_mode": {
+              "type": "string"
+            },
+            "parser_to_kernel_promotion_allowed": {
+              "type": "boolean"
+            },
+            "kernel_enforcement_claimed": {
+              "type": "boolean"
+            }
+          }
+        },
+        "bundle": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "artifact_path",
+            "exists",
+            "sha256",
+            "artifact_kind",
+            "status",
+            "failed_check_count",
+            "section_names",
+            "trap_encoding_section_sha256",
+            "trap_execution_section_sha256",
+            "trap_encoding_body_sha256",
+            "trap_execution_body_sha256"
+          ],
+          "properties": {
+            "artifact_path": {
+              "type": "string"
+            },
+            "exists": {
+              "type": "boolean"
+            },
+            "sha256": {
+              "type": "string"
+            },
+            "artifact_kind": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string"
+            },
+            "failed_check_count": {
+              "type": "integer"
+            },
+            "section_names": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "trap_encoding_section_sha256": {
+              "type": "string"
+            },
+            "trap_execution_section_sha256": {
+              "type": "string"
+            },
+            "trap_encoding_body_sha256": {
+              "type": "string"
+            },
+            "trap_execution_body_sha256": {
+              "type": "string"
+            }
+          }
+        },
+        "boot_trap_bundle_manifest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "artifact_path",
+            "exists",
+            "sha256",
+            "artifact_kind",
+            "status",
+            "failed_check_count",
+            "expected_program_sha256",
+            "expected_executed_instruction_count",
+            "security_boundary_claimed"
+          ],
+          "properties": {
+            "artifact_path": {
+              "type": "string"
+            },
+            "exists": {
+              "type": "boolean"
+            },
+            "sha256": {
+              "type": "string"
+            },
+            "artifact_kind": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string"
+            },
+            "failed_check_count": {
+              "type": "integer"
+            },
+            "expected_program_sha256": {
+              "type": "string"
+            },
+            "expected_executed_instruction_count": {
+              "type": "integer"
+            },
+            "security_boundary_claimed": {
+              "type": "boolean"
+            }
+          }
+        },
+        "qemu_shared_folder_contract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "artifact_path",
+            "exists",
+            "sha256",
+            "artifact_kind",
+            "status",
+            "failed_check_count",
+            "staged_file_count",
+            "perform_copy",
+            "staged_roles",
+            "qemu_mount_tag"
+          ],
+          "properties": {
+            "artifact_path": {
+              "type": "string"
+            },
+            "exists": {
+              "type": "boolean"
+            },
+            "sha256": {
+              "type": "string"
+            },
+            "artifact_kind": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string"
+            },
+            "failed_check_count": {
+              "type": "integer"
+            },
+            "staged_file_count": {
+              "type": "integer"
+            },
+            "perform_copy": {
+              "type": "boolean"
+            },
+            "staged_roles": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "qemu_mount_tag": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "claim_boundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_overclaim_count",
+        "source_overclaim_paths",
+        "draft_bytes_release_gate_usable",
+        "abi_freeze_evidence_present",
+        "kernel_abi_promotion_allowed",
+        "kernel_enforcement_claimed"
+      ],
+      "properties": {
+        "source_overclaim_count": {
+          "type": "integer"
+        },
+        "source_overclaim_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "draft_bytes_release_gate_usable": {
+          "type": "boolean"
+        },
+        "abi_freeze_evidence_present": {
+          "type": "boolean"
+        },
+        "kernel_abi_promotion_allowed": {
+          "type": "boolean"
+        },
+        "kernel_enforcement_claimed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "failed_check_count",
+        "source_overclaim_count",
+        "instruction_count",
+        "byte_length",
+        "draft_encoding_version",
+        "draft_execution_version",
+        "bundle_trap_sections_present",
+        "boot_manifest_bound",
+        "qemu_contract_bound",
+        "abi_frozen",
+        "kernel_abi_promotion_allowed",
+        "kernel_enforcement_claimed"
+      ],
+      "properties": {
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "source_overclaim_count": {
+          "type": "integer"
+        },
+        "instruction_count": {
+          "type": "integer"
+        },
+        "byte_length": {
+          "type": "integer"
+        },
+        "draft_encoding_version": {
+          "type": "string"
+        },
+        "draft_execution_version": {
+          "type": "string"
+        },
+        "bundle_trap_sections_present": {
+          "type": "boolean"
+        },
+        "boot_manifest_bound": {
+          "type": "boolean"
+        },
+        "qemu_contract_bound": {
+          "type": "boolean"
+        },
+        "abi_frozen": {
+          "type": "boolean"
+        },
+        "kernel_abi_promotion_allowed": {
+          "type": "boolean"
+        },
+        "kernel_enforcement_claimed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "ok",
+        "detail"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "artifact_path": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "boolean"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "artifact_kind": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "failed_check_count": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

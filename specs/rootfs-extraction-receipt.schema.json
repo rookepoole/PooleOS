@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/rootfs-extraction-receipt.schema.json",
+  "title": "PooleOS Rootfs Extraction Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "operator_executed",
+    "codex_execution_performed",
+    "rootfs_extraction_performed",
+    "captured_qemu_promotion_allowed",
+    "handoff",
+    "rootfs_content_manifest",
+    "operator_notes",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.rootfs_extraction_receipt"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending_operator_action",
+        "verified",
+        "verification_failed",
+        "invalid"
+      ]
+    },
+    "operator_executed": {
+      "type": "boolean"
+    },
+    "codex_execution_performed": {
+      "type": "boolean"
+    },
+    "rootfs_extraction_performed": {
+      "type": "boolean"
+    },
+    "captured_qemu_promotion_allowed": {
+      "type": "boolean"
+    },
+    "handoff": {
+      "type": "object",
+      "required": [
+        "path",
+        "status",
+        "bash_script_sha256",
+        "command_count",
+        "failed_check_count"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "bash_script_sha256": {
+          "type": "string"
+        },
+        "command_count": {
+          "type": "integer"
+        },
+        "failed_check_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "rootfs_content_manifest": {
+      "type": "object",
+      "required": [
+        "path",
+        "status",
+        "failed_check_count",
+        "source_file_count",
+        "matched_source_file_count",
+        "image_exists",
+        "extracted_rootfs_exists",
+        "image_sha256"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "source_file_count": {
+          "type": "integer"
+        },
+        "matched_source_file_count": {
+          "type": "integer"
+        },
+        "image_exists": {
+          "type": "boolean"
+        },
+        "extracted_rootfs_exists": {
+          "type": "boolean"
+        },
+        "image_sha256": {
+          "type": "string"
+        }
+      }
+    },
+    "operator_notes": {
+      "type": "string"
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "failed_check_count",
+        "handoff_status",
+        "rootfs_manifest_status",
+        "operator_executed",
+        "codex_execution_performed",
+        "rootfs_extraction_performed",
+        "captured_qemu_promotion_allowed",
+        "source_file_count",
+        "matched_source_file_count"
+      ],
+      "properties": {
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "handoff_status": {
+          "type": "string"
+        },
+        "rootfs_manifest_status": {
+          "type": "string"
+        },
+        "operator_executed": {
+          "type": "boolean"
+        },
+        "codex_execution_performed": {
+          "type": "boolean"
+        },
+        "rootfs_extraction_performed": {
+          "type": "boolean"
+        },
+        "captured_qemu_promotion_allowed": {
+          "type": "boolean"
+        },
+        "source_file_count": {
+          "type": "integer"
+        },
+        "matched_source_file_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

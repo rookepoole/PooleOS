@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/pdc-golden-vectors.schema.json",
+  "title": "PooleOS PDC Golden Vectors",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "vector_set_version",
+    "created_utc",
+    "status",
+    "math_contract_binding",
+    "cases",
+    "summary",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "artifact_kind": {"const": "pdc_golden_vectors"},
+    "vector_set_version": {"const": "PDC-GOLDEN-0.1"},
+    "created_utc": {"type": "string", "minLength": 20},
+    "status": {"const": "pass"},
+    "math_contract_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_path", "artifact_sha256", "contract_version"],
+      "properties": {
+        "artifact_path": {"const": "runs/pdc_math_contract.json"},
+        "artifact_sha256": {"$ref": "#/$defs/sha256"},
+        "contract_version": {"const": "PDC-MATH-0.1"}
+      }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 10,
+      "items": {"$ref": "#/$defs/case"}
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_count",
+        "passed_count",
+        "failed_count",
+        "matrix_scalar_agreement_case_count",
+        "binary_case_count",
+        "planar_case_count",
+        "formula_case_count"
+      ],
+      "properties": {
+        "case_count": {"type": "integer", "minimum": 10},
+        "passed_count": {"type": "integer", "minimum": 10},
+        "failed_count": {"const": 0},
+        "matrix_scalar_agreement_case_count": {"type": "integer", "minimum": 1},
+        "binary_case_count": {"type": "integer", "minimum": 1},
+        "planar_case_count": {"type": "integer", "minimum": 1},
+        "formula_case_count": {"type": "integer", "minimum": 1}
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 3,
+      "items": {"type": "string", "minLength": 15},
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "family", "claim_class", "model_tag", "shape", "input", "expected", "oracle", "source_ids"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+        "family": {"enum": ["binary_3d", "planar_first_step", "rectangle_variant", "solid_cuboid", "closed_shell"]},
+        "claim_class": {"const": "verifier"},
+        "model_tag": {"enum": ["B5-7/S5-9", "PMphi.default.remove_B7"]},
+        "shape": {
+          "type": "array",
+          "items": {"type": "integer", "minimum": 3},
+          "maxItems": 3
+        },
+        "input": {"type": "object", "minProperties": 1},
+        "expected": {"type": "object", "minProperties": 1},
+        "oracle": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["scalar", "matrix", "agreement"],
+          "properties": {
+            "scalar": {"type": "string", "minLength": 3},
+            "matrix": {"type": "string", "minLength": 3},
+            "agreement": {"const": true}
+          }
+        },
+        "source_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "pattern": "^SRC-[A-Z]+-[0-9]+$"},
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}

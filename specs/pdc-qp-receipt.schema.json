@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/pdc-qp-receipt.schema.json",
+  "title": "PooleOS PDC-QP Verification Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "contract_version",
+    "created_utc",
+    "status",
+    "bindings",
+    "environment",
+    "feature_thresholds",
+    "probability",
+    "typed_cases",
+    "correlation_and_spectrometry",
+    "negative_checks",
+    "digests",
+    "summary",
+    "claim_boundary",
+    "remaining_scope"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "artifact_kind": {"const": "pdc_qp_receipt"},
+    "contract_version": {"const": "PDC-QP-0.1"},
+    "created_utc": {"type": "string", "minLength": 20},
+    "status": {"const": "pass"},
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reference_implementation_path",
+        "reference_implementation_sha256",
+        "evidence_implementation_path",
+        "evidence_implementation_sha256",
+        "contract_path",
+        "contract_sha256",
+        "source_intake_path",
+        "source_intake_sha256",
+        "verifier_intake_path",
+        "verifier_intake_sha256",
+        "math_contract_path",
+        "math_contract_sha256",
+        "typed_case_archive_path",
+        "typed_case_archive_sha256"
+      ],
+      "properties": {
+        "reference_implementation_path": {"const": "runtime/pdc_qp.py"},
+        "reference_implementation_sha256": {"$ref": "#/$defs/sha256"},
+        "evidence_implementation_path": {"const": "runtime/pdc_qp_evidence.py"},
+        "evidence_implementation_sha256": {"$ref": "#/$defs/sha256"},
+        "contract_path": {"const": "runs/pdc_qp_contract.json"},
+        "contract_sha256": {"$ref": "#/$defs/sha256"},
+        "source_intake_path": {"const": "runs/pdc_source_intake.json"},
+        "source_intake_sha256": {"$ref": "#/$defs/sha256"},
+        "verifier_intake_path": {"const": "runs/pdc_verifier_intake.json"},
+        "verifier_intake_sha256": {"$ref": "#/$defs/sha256"},
+        "math_contract_path": {"const": "runs/pdc_math_contract.json"},
+        "math_contract_sha256": {"$ref": "#/$defs/sha256"},
+        "typed_case_archive_path": {"const": "sources/pdc/verifiers/sha256/09374edcfeb3063225e2d60b75d8ee317cc5766ad036729cd77c8f6e63c1b441.zip"},
+        "typed_case_archive_sha256": {"const": "09374EDCFEB3063225E2D60B75D8EE317CC5766AD036729CD77C8F6E63C1B441"}
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["python_version", "python_implementation", "platform", "executable", "floating_point_format"],
+      "properties": {
+        "python_version": {"type": "string", "minLength": 3},
+        "python_implementation": {"type": "string", "minLength": 3},
+        "platform": {"type": "string", "minLength": 5},
+        "executable": {"type": "string", "minLength": 3},
+        "floating_point_format": {"const": "IEEE-754 binary64"}
+      }
+    },
+    "feature_thresholds": {"$ref": "#/$defs/feature_result"},
+    "probability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["full_neighborhood_cases", "small_neighborhood_cases", "summary"],
+      "properties": {
+        "full_neighborhood_cases": {"type": "array", "minItems": 10, "maxItems": 10, "items": {"$ref": "#/$defs/full_case"}},
+        "small_neighborhood_cases": {"type": "array", "minItems": 12, "maxItems": 12, "items": {"$ref": "#/$defs/small_case"}},
+        "summary": {"$ref": "#/$defs/probability_summary"}
+      }
+    },
+    "typed_cases": {"$ref": "#/$defs/typed_cases"},
+    "correlation_and_spectrometry": {"$ref": "#/$defs/nonempty_object"},
+    "negative_checks": {"type": "array", "minItems": 16, "maxItems": 16, "items": {"$ref": "#/$defs/negative_check"}},
+    "digests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["feature_result_sha256", "probability_result_sha256", "typed_case_result_sha256", "correlation_result_sha256", "negative_check_set_sha256"],
+      "properties": {
+        "feature_result_sha256": {"$ref": "#/$defs/sha256"},
+        "probability_result_sha256": {"$ref": "#/$defs/sha256"},
+        "typed_case_result_sha256": {"$ref": "#/$defs/sha256"},
+        "correlation_result_sha256": {"$ref": "#/$defs/sha256"},
+        "negative_check_set_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "summary": {"$ref": "#/$defs/receipt_summary"},
+    "claim_boundary": {"$ref": "#/$defs/nonempty_strings"},
+    "remaining_scope": {"$ref": "#/$defs/nonempty_strings"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "nonempty_strings": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 12}},
+    "nonempty_object": {"type": "object", "minProperties": 1},
+    "feature_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["case_count", "passed_count", "channel_disjointness_count", "collapsed_equivalence_count", "record_set_sha256", "mismatch_count"],
+      "properties": {
+        "case_count": {"const": 54},
+        "passed_count": {"const": 54},
+        "channel_disjointness_count": {"const": 54},
+        "collapsed_equivalence_count": {"const": 54},
+        "record_set_sha256": {"$ref": "#/$defs/sha256"},
+        "mismatch_count": {"const": 0}
+      }
+    },
+    "full_case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "generator", "center_probability", "coefficient_sha256", "neighbor_derivative_sha256", "activation_probability", "center_derivative", "coefficient_dp_polynomial_max_abs_error", "derivative_dp_polynomial_max_abs_error", "finite_difference_max_abs_error"],
+      "properties": {
+        "id": {"type": "string", "minLength": 5},
+        "generator": {"type": "string", "minLength": 3},
+        "center_probability": {"type": "number"},
+        "coefficient_sha256": {"$ref": "#/$defs/sha256"},
+        "neighbor_derivative_sha256": {"$ref": "#/$defs/sha256"},
+        "activation_probability": {"type": "number"},
+        "center_derivative": {"type": "number"},
+        "coefficient_dp_polynomial_max_abs_error": {"type": "number"},
+        "derivative_dp_polynomial_max_abs_error": {"type": "number"},
+        "finite_difference_max_abs_error": {"type": "number"}
+      }
+    },
+    "small_case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "neighbor_count", "coefficient_sha256", "max_abs_error"],
+      "properties": {
+        "id": {"type": "string", "minLength": 5},
+        "neighbor_count": {"type": "integer", "minimum": 0, "maximum": 16},
+        "coefficient_sha256": {"$ref": "#/$defs/sha256"},
+        "max_abs_error": {"type": "number"}
+      }
+    },
+    "probability_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["full_neighborhood_case_count", "small_brute_force_case_count", "dp_polynomial_coefficient_check_count", "brute_force_coefficient_check_count", "derivative_oracle_check_count", "center_derivative_check_count", "finite_difference_check_count", "expected_channel_sum_check_count", "normalization_check_count", "max_dp_polynomial_abs_error", "max_brute_force_abs_error", "max_derivative_oracle_abs_error", "max_finite_difference_abs_error", "mismatch_count"],
+      "properties": {
+        "full_neighborhood_case_count": {"const": 10},
+        "small_brute_force_case_count": {"const": 12},
+        "dp_polynomial_coefficient_check_count": {"const": 270},
+        "brute_force_coefficient_check_count": {"const": 79},
+        "derivative_oracle_check_count": {"const": 260},
+        "center_derivative_check_count": {"const": 10},
+        "finite_difference_check_count": {"const": 104},
+        "expected_channel_sum_check_count": {"const": 10},
+        "normalization_check_count": {"const": 56},
+        "max_dp_polynomial_abs_error": {"type": "number"},
+        "max_brute_force_abs_error": {"type": "number"},
+        "max_derivative_oracle_abs_error": {"type": "number"},
+        "max_finite_difference_abs_error": {"type": "number"},
+        "mismatch_count": {"const": 0}
+      }
+    },
+    "typed_cases": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["families", "summary", "recomputed_family_set_sha256"],
+      "properties": {
+        "families": {"type": "array", "minItems": 5, "maxItems": 5, "items": {"$ref": "#/$defs/typed_family"}},
+        "summary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["family_count", "case_count", "passed_count", "mismatch_count"],
+          "properties": {
+            "family_count": {"const": 5},
+            "case_count": {"const": 42},
+            "passed_count": {"const": 42},
+            "mismatch_count": {"const": 0}
+          }
+        },
+        "recomputed_family_set_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "typed_family": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "source_member_sha256", "case_count", "passed_count", "mismatch_count", "recomputed_record_set_sha256"],
+      "properties": {
+        "id": {"enum": ["raw_gate", "one_input", "half_adder", "full_adder", "cardinality"]},
+        "source_member_sha256": {"$ref": "#/$defs/sha256"},
+        "case_count": {"type": "integer", "minimum": 1},
+        "passed_count": {"type": "integer", "minimum": 1},
+        "mismatch_count": {"const": 0},
+        "recomputed_record_set_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "negative_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "passed", "error_type"],
+      "properties": {
+        "id": {"type": "string", "minLength": 8},
+        "passed": {"const": true},
+        "error_type": {"type": "string", "minLength": 5}
+      }
+    },
+    "receipt_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["feature_threshold_case_count", "full_probability_case_count", "small_brute_force_case_count", "dp_polynomial_coefficient_check_count", "brute_force_coefficient_check_count", "derivative_oracle_check_count", "center_derivative_check_count", "finite_difference_check_count", "normalization_check_count", "typed_case_family_count", "imported_typed_case_count", "negative_check_count", "failed_negative_check_count", "mismatch_count"],
+      "properties": {
+        "feature_threshold_case_count": {"const": 54},
+        "full_probability_case_count": {"const": 10},
+        "small_brute_force_case_count": {"const": 12},
+        "dp_polynomial_coefficient_check_count": {"const": 270},
+        "brute_force_coefficient_check_count": {"const": 79},
+        "derivative_oracle_check_count": {"const": 260},
+        "center_derivative_check_count": {"const": 10},
+        "finite_difference_check_count": {"const": 104},
+        "normalization_check_count": {"const": 56},
+        "typed_case_family_count": {"const": 5},
+        "imported_typed_case_count": {"const": 42},
+        "negative_check_count": {"const": 16},
+        "failed_negative_check_count": {"const": 0},
+        "mismatch_count": {"const": 0}
+      }
+    }
+  }
+}

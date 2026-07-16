@@ -1,0 +1,448 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/qemu-captured-boot-dry-run-checklist.schema.json",
+  "title": "PooleOS QEMU Captured Boot Dry-Run Checklist",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "launch_ready",
+    "execution_performed",
+    "source_launch_bundle",
+    "preflight",
+    "checklist_steps",
+    "expected_serial_markers",
+    "post_capture_files",
+    "operator_receipt_template",
+    "release_gate_reconciliation",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.qemu_captured_boot_dry_run_checklist"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "blocked",
+        "fail"
+      ]
+    },
+    "launch_ready": {
+      "type": "boolean"
+    },
+    "execution_performed": {
+      "type": "boolean"
+    },
+    "source_launch_bundle": {
+      "type": "string"
+    },
+    "preflight": {
+      "type": "object",
+      "required": [
+        "path",
+        "status",
+        "launch_ready",
+        "blocking_checks"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "launch_ready": {
+          "type": "boolean"
+        },
+        "blocking_checks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/blocker"
+          }
+        }
+      }
+    },
+    "checklist_steps": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/checklist_step"
+      }
+    },
+    "expected_serial_markers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "post_capture_files": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/post_capture_file"
+      }
+    },
+    "operator_receipt_template": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "artifact_kind",
+        "operator_executed",
+        "codex_execution_performed",
+        "checklist",
+        "launch_bundle",
+        "commands",
+        "preflight_blockers_resolved",
+        "expected_serial_markers",
+        "post_capture_files",
+        "release_gate"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "string"
+        },
+        "artifact_kind": {
+          "const": "pooleos.qemu_captured_boot_operator_receipt_template"
+        },
+        "operator_executed": {
+          "type": "boolean"
+        },
+        "codex_execution_performed": {
+          "type": "boolean"
+        },
+        "checklist": {
+          "type": "string"
+        },
+        "launch_bundle": {
+          "type": "string"
+        },
+        "commands": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "step_id",
+              "command_role",
+              "operator_checked",
+              "exit_code",
+              "notes"
+            ],
+            "properties": {
+              "step_id": {
+                "type": "string"
+              },
+              "command_role": {
+                "type": "string"
+              },
+              "operator_checked": {
+                "type": "boolean"
+              },
+              "exit_code": {
+                "type": "string"
+              },
+              "notes": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "preflight_blockers_resolved": {
+          "type": "boolean"
+        },
+        "expected_serial_markers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "marker",
+              "observed"
+            ],
+            "properties": {
+              "marker": {
+                "type": "string"
+              },
+              "observed": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "post_capture_files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "role",
+              "path",
+              "operator_verified"
+            ],
+            "properties": {
+              "role": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              },
+              "operator_verified": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "release_gate": {
+          "type": "object",
+          "required": [
+            "arguments",
+            "operator_reconciled"
+          ],
+          "properties": {
+            "arguments": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "operator_reconciled": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "release_gate_reconciliation": {
+      "type": "object",
+      "required": [
+        "base_arguments",
+        "checklist_arguments",
+        "output_path"
+      ],
+      "properties": {
+        "base_arguments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "checklist_arguments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "output_path": {
+          "type": "string"
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "severity",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "fail",
+              "block"
+            ]
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "failed_check_count",
+        "blocking_check_count",
+        "checklist_step_count",
+        "command_count",
+        "preflight_blocker_count",
+        "expected_marker_count",
+        "post_capture_file_count",
+        "release_gate_argument_count",
+        "operator_executed",
+        "execution_performed"
+      ],
+      "properties": {
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "blocking_check_count": {
+          "type": "integer"
+        },
+        "checklist_step_count": {
+          "type": "integer"
+        },
+        "command_count": {
+          "type": "integer"
+        },
+        "preflight_blocker_count": {
+          "type": "integer"
+        },
+        "expected_marker_count": {
+          "type": "integer"
+        },
+        "post_capture_file_count": {
+          "type": "integer"
+        },
+        "release_gate_argument_count": {
+          "type": "integer"
+        },
+        "operator_executed": {
+          "type": "boolean"
+        },
+        "execution_performed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "blocker": {
+      "type": "object",
+      "required": [
+        "name",
+        "detail",
+        "resolved"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "resolved": {
+          "type": "boolean"
+        }
+      }
+    },
+    "checklist_step": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "phase",
+        "readiness",
+        "required",
+        "command_role",
+        "powershell",
+        "operator_receipt_field",
+        "expected_outputs",
+        "expected_markers",
+        "blockers"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "phase": {
+          "type": "string"
+        },
+        "readiness": {
+          "type": "string",
+          "enum": [
+            "ready",
+            "blocked",
+            "post_capture"
+          ]
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "command_role": {
+          "type": "string"
+        },
+        "powershell": {
+          "type": "string"
+        },
+        "operator_receipt_field": {
+          "type": "string"
+        },
+        "expected_outputs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "expected_markers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "blockers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/blocker"
+          }
+        }
+      }
+    },
+    "post_capture_file": {
+      "type": "object",
+      "required": [
+        "role",
+        "path",
+        "required_after_capture",
+        "exists_at_template_time",
+        "description"
+      ],
+      "properties": {
+        "role": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "required_after_capture": {
+          "type": "boolean"
+        },
+        "exists_at_template_time": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

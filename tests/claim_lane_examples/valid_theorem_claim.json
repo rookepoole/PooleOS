@@ -1,0 +1,19 @@
+{
+  "id": "THM-001",
+  "title": "PGB1 compatibility is the initial PooleOS kernel boundary",
+  "owner": "Rooke Poole",
+  "claim_lane": "theorem",
+  "evidence_kind": "design_note",
+  "rule": "B5-7/S5-9",
+  "model_tag": "raw",
+  "source_hash": "pending-source-hash",
+  "inputs": [
+    "PooleGlyph PGVM conformance contract"
+  ],
+  "outputs": [
+    "PooleOS kernel charter"
+  ],
+  "limitations": "This record documents a kernel boundary decision; it is not a mathematical theorem proof.",
+  "created_utc": "2026-06-29T00:00:00Z"
+}
+

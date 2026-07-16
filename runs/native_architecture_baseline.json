@@ -1,0 +1,436 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_architecture_baseline",
+  "status_date": "2026-07-16",
+  "status": "partial_owner_directed_signature_pending",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "owner": {
+    "name": "Rooke Poole",
+    "github": "rookepoole",
+    "technical_authority": true,
+    "ip_authority": true,
+    "release_authority": true
+  },
+  "repository": {
+    "initialized": true,
+    "current_branch": "main",
+    "configured_remote": "https://github.com/rookepoole/PooleOS.git",
+    "expected_remote": "https://github.com/rookepoole/PooleOS.git",
+    "default_branch": "main",
+    "visibility": "public",
+    "publication_state": "initialized_unpublished"
+  },
+  "architecture": {
+    "product": "PooleOS",
+    "bootloader": "PooleBoot",
+    "kernel": "PooleKernel",
+    "kernel_style": "capability_microkernel",
+    "target_architecture": "x86_64",
+    "endianness": "little",
+    "firmware": "UEFI",
+    "boot_media_partitioning": "GPT",
+    "legacy_bios": false,
+    "production_kernel_modules_v1": false,
+    "general_drivers_in_user_space": true,
+    "production_base": "original_native_pooleos",
+    "forbidden_production_substitutes": [
+      "Linux",
+      "Debian",
+      "Buildroot",
+      "GRUB",
+      "Limine",
+      "systemd",
+      "Linux userspace"
+    ]
+  },
+  "component_names": {
+    "filesystem": "PooleFS",
+    "service_supervisor": "PooleInit",
+    "package_command": "poolepkg",
+    "recovery_environment": "PooleRecovery",
+    "desktop_shell": "PooleGlass",
+    "language_bytecode": "PGB2",
+    "language_vm": "PGVM2",
+    "pdc_reference_service": "pdc-refd",
+    "pdc_route_service": "pdc-routed",
+    "pdc_control_service": "pdc-controld"
+  },
+  "version_namespaces": [
+    {
+      "id": "PBP1",
+      "role": "boot_protocol"
+    },
+    {
+      "id": "PKABI1",
+      "role": "kernel_object_abi"
+    },
+    {
+      "id": "PSABI1",
+      "role": "syscall_abi"
+    },
+    {
+      "id": "PIPC1",
+      "role": "ipc_abi"
+    },
+    {
+      "id": "PDRV1",
+      "role": "driver_protocol"
+    },
+    {
+      "id": "PUABI1",
+      "role": "user_abi"
+    },
+    {
+      "id": "PXABI1",
+      "role": "executable_abi"
+    },
+    {
+      "id": "PFS1",
+      "role": "filesystem_format"
+    },
+    {
+      "id": "PVFS1",
+      "role": "vfs_protocol"
+    },
+    {
+      "id": "PPKG1",
+      "role": "package_format"
+    },
+    {
+      "id": "PINIT1",
+      "role": "service_supervisor_protocol"
+    },
+    {
+      "id": "PUPD1",
+      "role": "update_format"
+    },
+    {
+      "id": "PREC1",
+      "role": "recovery_protocol"
+    },
+    {
+      "id": "PGLASS1",
+      "role": "desktop_protocol"
+    },
+    {
+      "id": "PRCP1",
+      "role": "receipt_format"
+    },
+    {
+      "id": "PSM1",
+      "role": "system_manifest"
+    },
+    {
+      "id": "PISO1",
+      "role": "iso_manifest"
+    },
+    {
+      "id": "PCRASH1",
+      "role": "crash_format"
+    },
+    {
+      "id": "PGB2",
+      "role": "pooleglyph_bytecode"
+    },
+    {
+      "id": "PGVM2",
+      "role": "pooleglyph_vm"
+    }
+  ],
+  "language_split": {
+    "status": "proposed_pending_toolchain_qualification",
+    "pooleboot": "Rust 2024 no_std on x86_64-unknown-uefi with efiapi and rust-lld",
+    "poolekernel": "Rust 2024 no_std on x86_64-unknown-none ELF64 with bounded x86_64 assembly",
+    "privileged_user_space": "Rust 2024 no_std with controlled alloc and generated stable ABIs",
+    "portable_pdc_reference": "freestanding C17",
+    "host_evidence": "Python 3 allowed as a non-production oracle and harness",
+    "native_rust_abi_on_wire_or_disk": false,
+    "cxx_in_v1_tcb": false,
+    "third_party_dependencies_default": "deny"
+  },
+  "tcb_domains": [
+    {
+      "id": "boot_tcb",
+      "ring": "firmware_application",
+      "component": "PooleBoot"
+    },
+    {
+      "id": "kernel_tcb",
+      "ring": "ring0",
+      "component": "PooleKernel"
+    },
+    {
+      "id": "initial_system",
+      "ring": "ring3_privileged",
+      "component": "PooleOS initial system"
+    },
+    {
+      "id": "system_servers",
+      "ring": "ring3_capability_confined",
+      "component": "native system servers"
+    },
+    {
+      "id": "driver_domains",
+      "ring": "ring3_capability_confined",
+      "component": "native user-space drivers"
+    },
+    {
+      "id": "language_and_pdc",
+      "ring": "ring3_capability_confined",
+      "component": "PooleGlyph, PGVM2, and PDC services"
+    },
+    {
+      "id": "applications",
+      "ring": "ring3_unprivileged",
+      "component": "native applications"
+    },
+    {
+      "id": "recovery_tcb",
+      "ring": "separate_verified_profile",
+      "component": "PooleRecovery"
+    }
+  ],
+  "scope": {
+    "product_profile": "PooleOS Workstation v1",
+    "tier0": "pinned QEMU q35 and OVMF",
+    "tier1": "inventoried Gigabyte B650M GAMING PLUS WIFI and Ryzen 7 9800X3D workstation",
+    "unlisted_hardware": "unsupported_until_qualified",
+    "pooleglyph_required_for_first_boot": false,
+    "pooleglyph_required_for_production": true,
+    "optimized_pdc_required_for_first_boot": false,
+    "pdc_reference_required_for_production": true,
+    "pdc_disabled_safe_mode_required": true
+  },
+  "adr_summary": {
+    "required_count": 7,
+    "present_count": 7,
+    "accepted_owner_directed_count": 5,
+    "proposed_count": 2,
+    "accepted_signed_count": 0,
+    "all_required_cryptographically_ratified": false
+  },
+  "adrs": [
+    {
+      "id": "ADR-0001",
+      "title": "Native PooleOS Constitution",
+      "path": "docs/adr/0001-native-pooleos-constitution.md",
+      "status": "accepted-owner-directed",
+      "date": "2026-07-16",
+      "decision_owner": "Rooke Poole",
+      "ratification": "cryptographic signature pending",
+      "supersedes": "Cycle 1-79 Linux/Buildroot production assumption",
+      "superseded_by": "none",
+      "requirement_mappings": [
+        "N0.1",
+        "N0.4",
+        "N0.5",
+        "N0.8",
+        "sections 000.2",
+        "000.3",
+        "001.2",
+        "001.3",
+        "170",
+        "ADD-NATIVE-001"
+      ],
+      "sha256": "6E8D0AD1CF75639F1069D41CA4DA3EC200D999963FA4B7B19E0C27F773CC5834",
+      "byte_count": 3017,
+      "line_count": 49
+    },
+    {
+      "id": "ADR-0002",
+      "title": "Reuse, Clean-Room, and Publication Boundary",
+      "path": "docs/adr/0002-reuse-clean-room-and-publication-boundary.md",
+      "status": "accepted-owner-directed",
+      "date": "2026-07-16",
+      "decision_owner": "Rooke Poole",
+      "ratification": "cryptographic signature and legal review pending",
+      "supersedes": "none",
+      "superseded_by": "none",
+      "requirement_mappings": [
+        "N0.2",
+        "N1.4-N1.6",
+        "section 000.2",
+        "section 003",
+        "ADD-REUSE-001"
+      ],
+      "sha256": "01E0B5B8AB15736E6E15F8E994CE0456BC0DF7AB5DD3040B2E5A9D06C1FA8E0F",
+      "byte_count": 3868,
+      "line_count": 49
+    },
+    {
+      "id": "ADR-0003",
+      "title": "Implementation Language and Toolchain Split",
+      "path": "docs/adr/0003-language-and-toolchain-split.md",
+      "status": "proposed",
+      "date": "2026-07-16",
+      "decision_owner": "Rooke Poole",
+      "ratification": "owner acceptance and toolchain qualification pending",
+      "supersedes": "none",
+      "superseded_by": "none",
+      "requirement_mappings": [
+        "N0.2",
+        "N3.1-N3.8",
+        "sections 008-011"
+      ],
+      "sha256": "9891370AAAABCDD27D1C59E7A443E36230A5FEB6827E94DAA6B0F364E631EEF5",
+      "byte_count": 3332,
+      "line_count": 43
+    },
+    {
+      "id": "ADR-0004",
+      "title": "Product Names and Version Namespaces",
+      "path": "docs/adr/0004-product-names-and-version-namespaces.md",
+      "status": "proposed",
+      "date": "2026-07-16",
+      "decision_owner": "Rooke Poole",
+      "ratification": "owner acceptance and trademark review pending",
+      "supersedes": "none",
+      "superseded_by": "none",
+      "requirement_mappings": [
+        "N0.3",
+        "section 000.3"
+      ],
+      "sha256": "9798309FC902C2F5E5A8206751DA4423532E25690A2AD23AD4DC116F3566A637",
+      "byte_count": 2666,
+      "line_count": 55
+    },
+    {
+      "id": "ADR-0005",
+      "title": "V1 Scope, Mission, Threats, and Non-Goals",
+      "path": "docs/adr/0005-v1-scope-mission-threats-and-non-goals.md",
+      "status": "accepted-owner-directed",
+      "date": "2026-07-16",
+      "decision_owner": "Rooke Poole",
+      "ratification": "cryptographic signature and final quantitative targets pending",
+      "supersedes": "none",
+      "superseded_by": "none",
+      "requirement_mappings": [
+        "N0.5-N0.7",
+        "N2.1-N2.3",
+        "section 001"
+      ],
+      "sha256": "1C7924EFE619F39AEF6BAB54ED3981BB5439AE929783C5EACD8FAA08EBF60268",
+      "byte_count": 3124,
+      "line_count": 43
+    },
+    {
+      "id": "ADR-0006",
+      "title": "Trusted Computing Base and Component Placement",
+      "path": "docs/adr/0006-tcb-and-component-placement.md",
+      "status": "accepted-owner-directed",
+      "date": "2026-07-16",
+      "decision_owner": "Rooke Poole",
+      "ratification": "cryptographic signature and executable-model review pending",
+      "supersedes": "PGVM2-as-kernel framing",
+      "superseded_by": "none",
+      "requirement_mappings": [
+        "N0.4",
+        "N4.5-N4.6",
+        "N11-N16",
+        "ADD-NATIVE-002",
+        "ADD-CAP-001",
+        "ADD-DRIVER-001"
+      ],
+      "sha256": "B973BEB8EE7EABCFB677DA892821287DB77214DE0E980B8EE78342C5DE3C2F03",
+      "byte_count": 2912,
+      "line_count": 33
+    },
+    {
+      "id": "ADR-0007",
+      "title": "Repository Governance and Source Tree",
+      "path": "docs/adr/0007-repository-governance-and-source-tree.md",
+      "status": "accepted-owner-directed",
+      "date": "2026-07-16",
+      "decision_owner": "Rooke Poole",
+      "ratification": "branch protection, signed-tag, and retention controls pending",
+      "supersedes": "none",
+      "superseded_by": "none",
+      "requirement_mappings": [
+        "N1.1",
+        "N1.3-N1.7",
+        "section 004"
+      ],
+      "sha256": "50E052BCD331D8FA02BF0FA2DB44A2C2440B4D3AFDEBAADC895B5946112F14B6",
+      "byte_count": 3057,
+      "line_count": 44
+    }
+  ],
+  "bound_sources": [
+    {
+      "path": "LICENSE",
+      "sha256": "CE7DCC73BA8040E50385FFAD648A19E7535F0DB8897FE3DD6749029DD9CED3AE",
+      "byte_count": 4586,
+      "line_count": 73
+    },
+    {
+      "path": "docs/production-goal-charter.md",
+      "sha256": "DD4BE218538820704F060CD3534D93312AE56FAF41134BD54A8724F9F69E0CE3",
+      "byte_count": 17665,
+      "line_count": 240
+    },
+    {
+      "path": "docs/pdc-production-build-plan.md",
+      "sha256": "12294D11A51B944066EABA8C59532BF8F5681EB5D887EFF936787856140B47BC",
+      "byte_count": 91610,
+      "line_count": 1063
+    },
+    {
+      "path": "docs/publication-boundary.md",
+      "sha256": "C737764A7E52B6989EFAA334253CDCE0436F4BD983FE612F08665FA216504CD0",
+      "byte_count": 2690,
+      "line_count": 42
+    },
+    {
+      "path": "runs/pooleos_native_checklist_coverage.json",
+      "sha256": "280D3DF7ADAA87DD2E86287B75805D531AD7B827F0AF9FD0C22D25F8AE4DC872",
+      "byte_count": 82094,
+      "line_count": 2914
+    },
+    {
+      "path": "specs/native-architecture-constitution.json",
+      "sha256": "1EA65036BFC881F44028AF8CE96300A7F195FFB1424EAA0A99829C0912A3689C",
+      "byte_count": 5759,
+      "line_count": 143
+    },
+    {
+      "path": "specs/native-release-architecture-policy.json",
+      "sha256": "F8B6D491A28D72E3C9B36FAB5B24D446FBD67CD760A9A8B05C7774EB3A691DE5",
+      "byte_count": 1765,
+      "line_count": 62
+    }
+  ],
+  "primary_toolchain_references": [
+    {
+      "topic": "PooleBoot UEFI target",
+      "url": "https://doc.rust-lang.org/rustc/platform-support/unknown-uefi.html",
+      "authority": "official Rust compiler documentation"
+    },
+    {
+      "topic": "PooleKernel freestanding x86-64 target",
+      "url": "https://doc.rust-lang.org/rustc/platform-support/x86_64-unknown-none.html",
+      "authority": "official Rust compiler documentation"
+    },
+    {
+      "topic": "UEFI calling convention",
+      "url": "https://doc.rust-lang.org/reference/items/external-blocks.html",
+      "authority": "official Rust language reference"
+    }
+  ],
+  "open_items": [
+    "OWNER-SIGN-ADR-SET",
+    "LEGAL-REVIEW-001",
+    "TRADEMARK-REVIEW-001",
+    "N0-QUANT-TARGETS-001",
+    "N1-BRANCH-PROTECTION-001",
+    "N1-SIGNING-CUSTODY-001",
+    "N3-TOOLCHAIN-001",
+    "N4-QEMU-001"
+  ],
+  "claim_boundary": {
+    "owner_direction_is_not_a_cryptographic_signature": true,
+    "architecture_baseline_is_not_a_bootable_system": true,
+    "passing_release_tree_policy_is_not_n39_release_acceptance": true,
+    "private_source_content_embedded": false
+  }
+}

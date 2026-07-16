@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/qemu-shared-folder-contract.schema.json",
+  "title": "PooleOS QEMU Shared Folder Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "shared_folder",
+    "staged_files",
+    "expected_guest_verification",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.qemu_shared_folder_contract"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail"
+      ]
+    },
+    "shared_folder": {
+      "type": "object",
+      "required": [
+        "host_path",
+        "mount_tag",
+        "guest_mount_path",
+        "qemu_args",
+        "prepared_for_launch"
+      ],
+      "properties": {
+        "host_path": {
+          "type": "string"
+        },
+        "mount_tag": {
+          "type": "string"
+        },
+        "guest_mount_path": {
+          "type": "string"
+        },
+        "qemu_args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "prepared_for_launch": {
+          "type": "boolean"
+        }
+      }
+    },
+    "staged_files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "role",
+          "source_path",
+          "host_path",
+          "guest_path",
+          "sha256",
+          "expected_sha256"
+        ],
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "source_path": {
+            "type": "string"
+          },
+          "host_path": {
+            "type": "string"
+          },
+          "guest_path": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "expected_sha256": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "expected_guest_verification": {
+      "type": "object",
+      "required": [
+        "command",
+        "result_path",
+        "expected_executed_instruction_count",
+        "expected_trapped_count",
+        "expected_allowed_count",
+        "abi_boundary_receipt_guest_path",
+        "expected_abi_boundary_status",
+        "expected_abi_frozen",
+        "expected_kernel_abi_promotion_allowed",
+        "expected_kernel_enforcement_claimed"
+      ],
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "result_path": {
+          "type": "string"
+        },
+        "expected_executed_instruction_count": {
+          "type": "integer"
+        },
+        "expected_trapped_count": {
+          "type": "integer"
+        },
+        "expected_allowed_count": {
+          "type": "integer"
+        },
+        "abi_boundary_receipt_guest_path": {
+          "type": "string"
+        },
+        "expected_abi_boundary_status": {
+          "type": "string"
+        },
+        "expected_abi_frozen": {
+          "type": "boolean"
+        },
+        "expected_kernel_abi_promotion_allowed": {
+          "type": "boolean"
+        },
+        "expected_kernel_enforcement_claimed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "staged_file_count",
+        "failed_check_count",
+        "perform_copy",
+        "expected_executed_instruction_count",
+        "abi_boundary_receipt_staged",
+        "expected_abi_boundary_status"
+      ],
+      "properties": {
+        "staged_file_count": {
+          "type": "integer"
+        },
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "perform_copy": {
+          "type": "boolean"
+        },
+        "expected_executed_instruction_count": {
+          "type": "integer"
+        },
+        "abi_boundary_receipt_staged": {
+          "type": "boolean"
+        },
+        "expected_abi_boundary_status": {
+          "type": "string"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

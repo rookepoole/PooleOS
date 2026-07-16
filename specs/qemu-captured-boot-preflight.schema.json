@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/qemu-captured-boot-preflight.schema.json",
+  "title": "PooleOS QEMU Captured Boot Preflight",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "launch_ready",
+    "execution_performed",
+    "qemu",
+    "paths",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.qemu_captured_boot_preflight"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "blocked",
+        "fail"
+      ]
+    },
+    "launch_ready": {
+      "type": "boolean"
+    },
+    "execution_performed": {
+      "type": "boolean"
+    },
+    "qemu": {
+      "type": "object",
+      "required": [
+        "command",
+        "found_path",
+        "no_virtfs",
+        "shared_mount_tag"
+      ],
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "found_path": {
+          "type": "string"
+        },
+        "no_virtfs": {
+          "type": "boolean"
+        },
+        "shared_mount_tag": {
+          "type": "string"
+        }
+      }
+    },
+    "paths": {
+      "type": "object",
+      "required": [
+        "image_path",
+        "kernel_path",
+        "serial_log_path",
+        "shared_output_path",
+        "boot_validation_output",
+        "qemu_boot_evidence_output",
+        "qemu_captured_boot_receipt_output"
+      ],
+      "properties": {
+        "image_path": {
+          "type": "string"
+        },
+        "kernel_path": {
+          "type": "string"
+        },
+        "serial_log_path": {
+          "type": "string"
+        },
+        "shared_output_path": {
+          "type": "string"
+        },
+        "boot_validation_output": {
+          "type": "string"
+        },
+        "qemu_boot_evidence_output": {
+          "type": "string"
+        },
+        "qemu_captured_boot_receipt_output": {
+          "type": "string"
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "required",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "safety_failure_count",
+        "blocking_check_count",
+        "warning_check_count",
+        "image_exists",
+        "kernel_required",
+        "kernel_exists",
+        "shared_output_exists",
+        "serial_log_parent_exists",
+        "captured_outputs_separate"
+      ],
+      "properties": {
+        "safety_failure_count": {
+          "type": "integer"
+        },
+        "blocking_check_count": {
+          "type": "integer"
+        },
+        "warning_check_count": {
+          "type": "integer"
+        },
+        "image_exists": {
+          "type": "boolean"
+        },
+        "kernel_required": {
+          "type": "boolean"
+        },
+        "kernel_exists": {
+          "type": "boolean"
+        },
+        "shared_output_exists": {
+          "type": "boolean"
+        },
+        "serial_log_parent_exists": {
+          "type": "boolean"
+        },
+        "captured_outputs_separate": {
+          "type": "boolean"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

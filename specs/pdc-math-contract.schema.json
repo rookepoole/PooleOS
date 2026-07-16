@@ -1,0 +1,211 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/pdc-math-contract.schema.json",
+  "title": "PooleOS Canonical PDC Math Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "contract_version",
+    "created_utc",
+    "status",
+    "source_binding",
+    "binary_model",
+    "coordinates",
+    "boundary",
+    "matrices",
+    "typed_channels",
+    "planar_first_step",
+    "numerical_contract",
+    "canonical_hash",
+    "variant_policy",
+    "reference_oracles",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "artifact_kind": {"const": "pdc_math_contract"},
+    "contract_version": {"const": "PDC-MATH-0.1"},
+    "created_utc": {"type": "string", "minLength": 20},
+    "status": {"const": "pass"},
+    "source_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_path", "artifact_sha256", "designated_source_set_sha256"],
+      "properties": {
+        "artifact_path": {"const": "runs/pdc_source_intake.json"},
+        "artifact_sha256": {"$ref": "#/$defs/sha256"},
+        "designated_source_set_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "binary_model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_tag",
+        "state_set",
+        "update_expression",
+        "birth_window",
+        "survival_window",
+        "capacity_expression",
+        "deficit_expression",
+        "excess_expression",
+        "strain_expression",
+        "strain_is_not_acceptance_predicate"
+      ],
+      "properties": {
+        "model_tag": {"const": "B5-7/S5-9"},
+        "state_set": {"const": [0, 1]},
+        "update_expression": {"type": "string", "minLength": 10},
+        "birth_window": {"const": [5, 7]},
+        "survival_window": {"const": [5, 9]},
+        "capacity_expression": {"type": "string", "minLength": 5},
+        "deficit_expression": {"type": "string", "minLength": 5},
+        "excess_expression": {"type": "string", "minLength": 5},
+        "strain_expression": {"type": "string", "minLength": 5},
+        "strain_is_not_acceptance_predicate": {"const": true}
+      }
+    },
+    "coordinates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["coordinate_order", "shape_order", "flat_order", "flat_index_3d", "flat_index_2d", "origin"],
+      "properties": {
+        "coordinate_order": {"const": ["x", "y", "z"]},
+        "shape_order": {"const": ["x_extent", "y_extent", "z_extent"]},
+        "flat_order": {"const": "x_fastest_then_y_then_z"},
+        "flat_index_3d": {"type": "string", "minLength": 5},
+        "flat_index_2d": {"type": "string", "minLength": 5},
+        "origin": {"const": [0, 0, 0]}
+      }
+    },
+    "boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "minimum_extent", "small_extent_policy", "reason"],
+      "properties": {
+        "mode": {"const": "periodic"},
+        "minimum_extent": {"const": 3},
+        "small_extent_policy": {"const": "reject"},
+        "reason": {"type": "string", "minLength": 20}
+      }
+    },
+    "matrices": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {"$ref": "#/$defs/matrix"}
+    },
+    "typed_channels": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["birth", "survival", "overflow", "preserved_feature_order"],
+      "properties": {
+        "birth": {"type": "string", "minLength": 5},
+        "survival": {"type": "string", "minLength": 5},
+        "overflow": {"type": "string", "minLength": 5},
+        "preserved_feature_order": {"const": ["B5", "B6", "B7", "S5", "S6", "S7", "S8", "S9", "O10+", "psi"]}
+      }
+    },
+    "planar_first_step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["active_survival", "active_death", "in_plane_birth", "normal_layer_birth", "far_layer_behavior", "normal_channel_map"],
+      "properties": {
+        "active_survival": {"const": "q <= 3"},
+        "active_death": {"const": "q >= 4"},
+        "in_plane_birth": {"const": "1 <= q <= 3"},
+        "normal_layer_birth": {"const": "2 <= r <= 4"},
+        "far_layer_behavior": {"type": "string", "minLength": 5},
+        "normal_channel_map": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["r=2", "r=3", "r=4"],
+          "properties": {
+            "r=2": {"const": "B7"},
+            "r=3": {"const": "B6"},
+            "r=4": {"const": "B5"}
+          }
+        }
+      }
+    },
+    "numerical_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "support_n",
+        "capacity",
+        "deficit",
+        "excess",
+        "strain",
+        "aggregate_counts",
+        "maximum_support",
+        "maximum_strain",
+        "minimum_strain",
+        "maximum_reference_cells",
+        "maximum_dense_matrix_cells",
+        "checked_shape_and_byte_arithmetic"
+      ],
+      "properties": {
+        "state": {"const": "u8"},
+        "support_n": {"const": "u8"},
+        "capacity": {"const": "u8"},
+        "deficit": {"const": "u8"},
+        "excess": {"const": "u8"},
+        "strain": {"const": "i8"},
+        "aggregate_counts": {"const": "u64"},
+        "maximum_support": {"const": 26},
+        "maximum_strain": {"const": 19},
+        "minimum_strain": {"const": -5},
+        "maximum_reference_cells": {"type": "integer", "minimum": 1},
+        "maximum_dense_matrix_cells": {"type": "integer", "minimum": 1},
+        "checked_shape_and_byte_arithmetic": {"const": true}
+      }
+    },
+    "canonical_hash": {"$ref": "#/$defs/string_map"},
+    "variant_policy": {"$ref": "#/$defs/string_bool_map"},
+    "reference_oracles": {"$ref": "#/$defs/string_bool_map"},
+    "claim_boundary": {
+      "type": "array",
+      "minItems": 4,
+      "items": {"type": "string", "minLength": 15},
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "matrix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "dimensions", "expression", "semantics"],
+      "properties": {
+        "id": {"enum": ["T_n", "A26", "A8", "A9"]},
+        "dimensions": {"type": "integer", "minimum": 1, "maximum": 3},
+        "expression": {"type": "string", "minLength": 5},
+        "semantics": {"type": "string", "minLength": 10}
+      }
+    },
+    "string_map": {
+      "type": "object",
+      "minProperties": 4,
+      "additionalProperties": {
+        "anyOf": [
+          {"type": "string", "minLength": 1},
+          {"type": "array", "items": {"type": "string", "minLength": 1}}
+        ]
+      }
+    },
+    "string_bool_map": {
+      "type": "object",
+      "minProperties": 3,
+      "additionalProperties": {
+        "anyOf": [
+          {"type": "string", "minLength": 1},
+          {"type": "boolean"}
+        ]
+      }
+    }
+  }
+}

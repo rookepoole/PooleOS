@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/channel-trace.schema.json",
+  "title": "PooleOS Channel Trace Artifact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "rule",
+    "claim",
+    "summary",
+    "events"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.channel_trace"
+    },
+    "rule": {
+      "type": "object",
+      "required": ["birth", "survival", "neighborhood"],
+      "properties": {
+        "birth": {
+          "type": "array",
+          "items": {"type": "integer"},
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "survival": {
+          "type": "array",
+          "items": {"type": "integer"},
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "neighborhood": {
+          "type": "string"
+        }
+      }
+    },
+    "claim": {
+      "type": "object"
+    },
+    "summary": {
+      "type": "object",
+      "required": ["event_count", "counts", "accepted_counts", "births", "survivors", "deaths", "void_stays", "psi_total"],
+      "properties": {
+        "event_count": {"type": "integer"},
+        "counts": {"type": "object"},
+        "accepted_counts": {"type": "object"},
+        "births": {"type": "integer"},
+        "survivors": {"type": "integer"},
+        "deaths": {"type": "integer"},
+        "void_stays": {"type": "integer"},
+        "psi_total": {"type": "integer"}
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["coord", "previous_state", "support_count", "raw_channel", "accepted", "next_state", "psi"],
+        "properties": {
+          "coord": {
+            "type": "array",
+            "items": {"type": "integer"},
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "previous_state": {"type": "string"},
+          "support_count": {"type": "integer"},
+          "raw_channel": {"type": "string"},
+          "accepted": {"type": "boolean"},
+          "next_state": {"type": "string"},
+          "psi": {"type": "integer"}
+        }
+      }
+    }
+  }
+}
+

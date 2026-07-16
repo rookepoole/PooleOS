@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/wsl-prerequisites.schema.json",
+  "title": "PooleOS WSL Prerequisites Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "distro",
+    "source_basis",
+    "execution_performed",
+    "host_modification_required",
+    "package_manager",
+    "install_command",
+    "missing_packages",
+    "checks",
+    "notes"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.wsl_prerequisites"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "blocked",
+        "fail"
+      ]
+    },
+    "distro": {
+      "type": "string"
+    },
+    "source_basis": {
+      "type": "object",
+      "required": [
+        "buildroot_version",
+        "buildroot_git_commit",
+        "buildroot_manual_path"
+      ],
+      "properties": {
+        "buildroot_version": {
+          "type": "string"
+        },
+        "buildroot_git_commit": {
+          "type": "string"
+        },
+        "buildroot_manual_path": {
+          "type": "string"
+        }
+      }
+    },
+    "execution_performed": {
+      "type": "boolean"
+    },
+    "host_modification_required": {
+      "type": "boolean"
+    },
+    "package_manager": {
+      "type": "string"
+    },
+    "install_command": {
+      "type": "string"
+    },
+    "missing_packages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "role",
+          "command",
+          "package",
+          "required",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "command": {
+            "type": "string"
+          },
+          "package": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

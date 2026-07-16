@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/native-release-architecture-policy.schema.json",
+  "title": "PooleOS Native Release Architecture Policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "policy_version",
+    "status_date",
+    "input_kind",
+    "required_paths",
+    "forbidden_path_globs",
+    "content_scan_globs",
+    "forbidden_ascii_markers",
+    "path_matching_case_insensitive",
+    "content_matching_case_insensitive",
+    "reject_symbolic_links",
+    "reject_casefold_path_collisions",
+    "reject_non_nfc_paths",
+    "maximum_scanned_file_bytes",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_release_architecture_policy"},
+    "policy_version": {"const": "NATIVE-MEDIA-ARCH-0.1"},
+    "status_date": {"type": "string"},
+    "input_kind": {"const": "extracted_release_tree"},
+    "required_paths": {"type": "array", "minItems": 5, "items": {"type": "string"}},
+    "forbidden_path_globs": {"type": "array", "minItems": 12, "items": {"type": "string"}},
+    "content_scan_globs": {"type": "array", "minItems": 8, "items": {"type": "string"}},
+    "forbidden_ascii_markers": {"type": "array", "minItems": 9, "items": {"type": "string"}},
+    "path_matching_case_insensitive": {"const": true},
+    "content_matching_case_insensitive": {"const": false},
+    "reject_symbolic_links": {"const": true},
+    "reject_casefold_path_collisions": {"const": true},
+    "reject_non_nfc_paths": {"const": true},
+    "maximum_scanned_file_bytes": {"const": 67108864},
+    "limitations": {"type": "array", "minItems": 3, "items": {"type": "string"}}
+  }
+}

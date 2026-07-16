@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/native-release-architecture-report.schema.json",
+  "title": "PooleOS Native Release Architecture Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "input",
+    "policy",
+    "status",
+    "architecture_conformance_passed",
+    "production_promotion_allowed",
+    "summary",
+    "required_paths",
+    "violations",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_release_architecture_report"},
+    "input": {
+      "type": "object",
+      "required": ["id", "kind", "absolute_path_recorded"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "kind": {"const": "extracted_release_tree"},
+        "absolute_path_recorded": {"const": false}
+      }
+    },
+    "policy": {"type": "object", "required": ["version", "path", "sha256"]},
+    "status": {"enum": ["pass", "fail"]},
+    "architecture_conformance_passed": {"type": "boolean"},
+    "production_promotion_allowed": {"const": false},
+    "summary": {"type": "object", "required": ["entry_count", "file_count", "directory_count", "required_path_count", "required_path_missing_count", "content_scanned_file_count", "content_scanned_byte_count", "violation_count"]},
+    "required_paths": {"type": "array", "minItems": 5, "items": {"type": "object", "required": ["path", "status"]}},
+    "violations": {"type": "array", "items": {"type": "object", "required": ["type", "path", "rule", "detail"]}},
+    "limitations": {"type": "array", "minItems": 3, "items": {"type": "string"}}
+  }
+}

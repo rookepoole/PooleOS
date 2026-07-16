@@ -1,0 +1,347 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/pooleglyph-core-ir-boundary-receipt.schema.json",
+  "title": "PooleOS PooleGlyph Core IR Boundary Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "bridge_manifest",
+    "pooleglyph",
+    "declaration_boundary",
+    "core_ir_validation_summary",
+    "validation_records",
+    "promotion_gates",
+    "parser_to_kernel_promotion_allowed",
+    "kernel_enforcement_claimed",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.pooleglyph_core_ir_boundary_receipt"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "phase66_pending",
+        "validated_non_promoting",
+        "parser_to_kernel_ready",
+        "fail"
+      ]
+    },
+    "bridge_manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_path",
+        "exists",
+        "artifact_kind",
+        "status",
+        "latest_phase",
+        "failed_check_count",
+        "core_ir_boundary_status",
+        "phase66_audit_present"
+      ],
+      "properties": {
+        "artifact_path": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "boolean"
+        },
+        "artifact_kind": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "latest_phase": {
+          "type": "integer"
+        },
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "core_ir_boundary_status": {
+          "type": "string"
+        },
+        "phase66_audit_present": {
+          "type": "boolean"
+        }
+      }
+    },
+    "pooleglyph": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pooleglyph_path",
+        "package_root",
+        "validator_path",
+        "verifier_script_path"
+      ],
+      "properties": {
+        "pooleglyph_path": {
+          "type": "string"
+        },
+        "package_root": {
+          "type": "string"
+        },
+        "validator_path": {
+          "type": "string"
+        },
+        "verifier_script_path": {
+          "type": "string"
+        }
+      }
+    },
+    "declaration_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bridge_declaration_count",
+        "bridge_map_count",
+        "metadata_only_until_phase66",
+        "boundary_rule"
+      ],
+      "properties": {
+        "bridge_declaration_count": {
+          "type": "integer"
+        },
+        "bridge_map_count": {
+          "type": "integer"
+        },
+        "metadata_only_until_phase66": {
+          "type": "boolean"
+        },
+        "boundary_rule": {
+          "type": "string"
+        }
+      }
+    },
+    "core_ir_validation_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "validation_file_count",
+        "valid_file_count",
+        "validated_executable_candidate_count",
+        "validated_metadata_zero_program_count",
+        "expected_negative_fixture_count",
+        "unexpected_invalid_count",
+        "structural_anomaly_count",
+        "validator_versions",
+        "total_program_count",
+        "total_instruction_count",
+        "public_safe_note_count"
+      ],
+      "properties": {
+        "validation_file_count": {
+          "type": "integer"
+        },
+        "valid_file_count": {
+          "type": "integer"
+        },
+        "validated_executable_candidate_count": {
+          "type": "integer"
+        },
+        "validated_metadata_zero_program_count": {
+          "type": "integer"
+        },
+        "expected_negative_fixture_count": {
+          "type": "integer"
+        },
+        "unexpected_invalid_count": {
+          "type": "integer"
+        },
+        "structural_anomaly_count": {
+          "type": "integer"
+        },
+        "validator_versions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "total_program_count": {
+          "type": "integer"
+        },
+        "total_instruction_count": {
+          "type": "integer"
+        },
+        "public_safe_note_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "validation_records": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/validation_record"
+      }
+    },
+    "promotion_gates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    },
+    "parser_to_kernel_promotion_allowed": {
+      "type": "boolean"
+    },
+    "kernel_enforcement_claimed": {
+      "type": "boolean"
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "failed_check_count",
+        "failed_promotion_gate_count",
+        "phase66_audit_present",
+        "parser_to_kernel_promotion_allowed",
+        "kernel_enforcement_claimed",
+        "validated_executable_candidate_count",
+        "validated_metadata_zero_program_count",
+        "unexpected_invalid_count"
+      ],
+      "properties": {
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "failed_promotion_gate_count": {
+          "type": "integer"
+        },
+        "phase66_audit_present": {
+          "type": "boolean"
+        },
+        "parser_to_kernel_promotion_allowed": {
+          "type": "boolean"
+        },
+        "kernel_enforcement_claimed": {
+          "type": "boolean"
+        },
+        "validated_executable_candidate_count": {
+          "type": "integer"
+        },
+        "validated_metadata_zero_program_count": {
+          "type": "integer"
+        },
+        "unexpected_invalid_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "ok",
+        "detail"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string"
+        }
+      }
+    },
+    "validation_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "exists",
+        "sha256",
+        "ok",
+        "classification",
+        "validator_version",
+        "module",
+        "program_count",
+        "instruction_count",
+        "diagnostic_codes",
+        "public_safe_notes_present"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "boolean"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "parse_error": {
+          "type": "string"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "classification": {
+          "type": "string",
+          "enum": [
+            "validated_executable_candidate",
+            "validated_metadata_zero_program",
+            "validated_structural_anomaly",
+            "expected_negative_fixture",
+            "unexpected_invalid"
+          ]
+        },
+        "validator_version": {
+          "type": "string"
+        },
+        "module": {
+          "type": "string"
+        },
+        "program_count": {
+          "type": "integer"
+        },
+        "instruction_count": {
+          "type": "integer"
+        },
+        "diagnostic_codes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "public_safe_notes_present": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

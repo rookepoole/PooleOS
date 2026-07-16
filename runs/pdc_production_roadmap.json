@@ -1,0 +1,3031 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pdc_production_roadmap",
+  "status_date": "2026-07-16",
+  "objective": "Deliver production-ready native PooleOS as an original PooleBoot plus PooleKernel microkernel system and reproducible signed UEFI bootable ISO with PooleGlyph, canonical PDC, isolated drivers, guarded backends, and accessible PooleGlass Liquid Glass UI.",
+  "production_ready": false,
+  "architecture": {
+    "mode": "native_capability_microkernel",
+    "bootloader": "PooleBoot",
+    "kernel": "PooleKernel",
+    "production_base": "original_pooleos",
+    "forbidden_production_substitutes": [
+      "Linux",
+      "Debian",
+      "Buildroot",
+      "GRUB",
+      "Limine",
+      "systemd"
+    ],
+    "development_only_inputs": [
+      "Windows",
+      "WSL",
+      "Linux",
+      "Buildroot",
+      "QEMU",
+      "OVMF",
+      "EDK II"
+    ],
+    "target_architecture": "x86_64",
+    "firmware_interface": "UEFI",
+    "legacy_bios_required": false,
+    "production_kernel_modules_v1": false,
+    "completion_phase_range": "N0-N39"
+  },
+  "goal_charter": {
+    "version": "2.0.0-native-reset",
+    "path": "docs/production-goal-charter.md",
+    "status": "adopted",
+    "completion_phase_range": "N0-N39"
+  },
+  "execution_protocol": {
+    "updates_required_each_goal_turn": true,
+    "inspect_live_pooleglyph_each_turn": true,
+    "verify_master_checklist_coverage_each_turn": true,
+    "new_work_must_be_flagged": true,
+    "last_updated_cycle": 81,
+    "selected_move_id": "N0-ADR-001",
+    "immediate_next_move_id": "N3-TOOLCHAIN-001",
+    "required_records": [
+      "docs/production-goal-charter.md",
+      "docs/pdc-production-build-plan.md",
+      "runs/pdc_production_roadmap.json",
+      "runs/pooleos_native_checklist_coverage.json",
+      "runs/release_gate.json",
+      "docs/cycle_log.md",
+      "README.md"
+    ],
+    "flag_classes": [
+      "STOP_SHIP",
+      "BLOCKER",
+      "REQUIRED",
+      "RISK",
+      "RESEARCH",
+      "OPTIONAL",
+      "DEFERRED",
+      "SUPERSEDED"
+    ]
+  },
+  "master_checklist": {
+    "source_path": "sources/requirements/sha256/a8c94719faf9428c1f133010ba2603c0270c4e1efd7327af8eab9c8c362abb3d/PooleOS_From_Scratch_Master_Checklist.md",
+    "source_sha256": "A8C94719FAF9428C1F133010BA2603C0270C4E1EFD7327AF8EAB9C8C362ABB3D",
+    "source_byte_count": 416063,
+    "source_line_count": 10512,
+    "checkbox_line_count": 8998,
+    "implementation_item_count": 8996,
+    "section_count": 171,
+    "coverage_path": "runs/pooleos_native_checklist_coverage.json",
+    "coverage_sha256": "280D3DF7ADAA87DD2E86287B75805D531AD7B827F0AF9FD0C22D25F8AE4DC872",
+    "coverage_status": "pass",
+    "added_requirement_count": 25
+  },
+  "baseline": {
+    "pooleos_cycle": 81,
+    "entry_cycle": 79,
+    "pooleos_test_count": 376,
+    "historical_consistency_release_gate": {
+      "passed_checks": 58,
+      "total_checks": 58,
+      "artifact_count": 53,
+      "explicit_gap_count": 41,
+      "production_ready": false,
+      "native_promotion_role": "historical_non_promoting"
+    },
+    "native_consistency_release_gate": {
+      "passed_checks": 61,
+      "total_checks": 61,
+      "artifact_count": 56,
+      "explicit_gap_count": 20,
+      "production_ready": false,
+      "native_promotion_role": "planning_and_evidence_consistency_non_promoting"
+    },
+    "native": {
+      "source_controlled": true,
+      "pooleboot_exists": false,
+      "poolekernel_exists": false,
+      "native_qemu_boot": false,
+      "native_physical_boot": false,
+      "ring3_execution": false,
+      "capability_enforcement": false,
+      "iommu_driver_confinement": false,
+      "native_filesystem": false,
+      "native_desktop": false,
+      "reproducible_signed_iso": false
+    },
+    "pooleglyph": {
+      "checkpoint_phase": 65,
+      "next_required_phase": 66,
+      "conformance_passed": 97,
+      "conformance_total": 97,
+      "parser_kernel_promotion_status": "blocked_until_phase66",
+      "checkpoint_zip_sha256": "F3CCEB701CF76274D9464A0958BF6106888FB34F3C0BFBD55DE4ACE03C427ABC",
+      "dirty_generated_reports": [
+        "tests/reports/conformance_report.json"
+      ]
+    },
+    "pdc": {
+      "pdc_math": {
+        "contract_version": "PDC-MATH-0.1",
+        "locked_source_count": 7,
+        "raw_candidate_count": 67,
+        "golden_case_count": 13,
+        "matrix_scalar_agreement_case_count": 10,
+        "status": "reference_contract_pass"
+      },
+      "pdc_verifiers": {
+        "selected_source_count": 4,
+        "verified_manifest_entry_count": 46,
+        "family_count": 6,
+        "declared_case_count": 4324,
+        "published_case_count": 4324,
+        "source_execution_case_count": 4324,
+        "independent_case_count": 4324,
+        "canonical_lf_match_file_count": 6,
+        "exact_byte_match_file_count": 0,
+        "mismatch_count": 0,
+        "status": "pass_with_documented_serialization_drift"
+      },
+      "pdc_representation": {
+        "abi_version": "PDC-REP-0.1",
+        "representation_count": 5,
+        "conversion_path_count": 10,
+        "differential_case_count": 3109,
+        "round_trip_count": 12436,
+        "pdc_result_match_count": 3109,
+        "negative_check_count": 13,
+        "exact_excluded_formula_case_count": 1225,
+        "mismatch_count": 0,
+        "status": "pass_with_explicit_formula_exclusions"
+      },
+      "pdc_golden_metamorphic": {
+        "corpus_version": "PDC-GOLDEN-0.2",
+        "threshold_pair_count": 54,
+        "adversarial_case_count": 8,
+        "translation_relation_count": 32,
+        "axis_permutation_relation_count": 40,
+        "metamorphic_relation_count": 72,
+        "non_relation_count": 6,
+        "oracle_field_evaluation_count": 206,
+        "representation_round_trip_count": 824,
+        "negative_check_count": 10,
+        "mismatch_count": 0,
+        "status": "pass"
+      },
+      "pdc_qp": {
+        "contract_version": "PDC-QP-0.1",
+        "feature_threshold_case_count": 54,
+        "full_probability_case_count": 10,
+        "small_brute_force_case_count": 12,
+        "dp_polynomial_coefficient_check_count": 270,
+        "brute_force_coefficient_check_count": 79,
+        "derivative_oracle_check_count": 260,
+        "center_derivative_check_count": 10,
+        "finite_difference_check_count": 104,
+        "normalization_check_count": 56,
+        "typed_case_family_count": 5,
+        "imported_typed_case_count": 42,
+        "negative_check_count": 16,
+        "mismatch_count": 0,
+        "status": "pass_with_pooleglyph_exposure_open"
+      },
+      "pdc_qp_stability": {
+        "contract_version": "PDC-QP-STABILITY-0.1",
+        "source_package_count": 2,
+        "verified_source_member_count": 13,
+        "fresh_field_count": 550,
+        "published_channel_rate_check_count": 7150,
+        "independent_channel_rate_check_count": 7150,
+        "score_check_count": 4400,
+        "summary_check_count": 517,
+        "perturbation_case_count": 2200,
+        "structured_perturbation_case_count": 1000,
+        "control_perturbation_case_count": 1200,
+        "negative_check_count": 14,
+        "mismatch_count": 0,
+        "status": "pass_finite_declared_protocol"
+      }
+    }
+  },
+  "source_set": [
+    {
+      "id": "SRC-TAX-1",
+      "path": "C:\\Users\\rookp\\Downloads\\PooleTaxOptimizer_INTERNAL_TECHNICAL_IMPLEMENTATION_v1_0_0.md",
+      "kind": "markdown",
+      "sha256": "AC76CC589925CE1BF1EF8E60F78663F776294F093A0C7C55263E3BA43716985C",
+      "claim_role": "Receipt locks, rollback discipline, deterministic sidecar cache, and app-local product evidence.",
+      "intake_status": "imported_locked"
+    },
+    {
+      "id": "SRC-GPU-1",
+      "path": "C:\\Users\\rookp\\Downloads\\PDC_GPU_Route_Selector_Internal_Implementation_Document.md",
+      "kind": "markdown",
+      "sha256": "68326C4A97E82F10C650522DE8CC29D6EBFFE812209B16E2D8C764AA8C0DA373",
+      "claim_role": "GPU resident-chain selection, shape bins, calibration, hard guards, and bounded-regret promotion.",
+      "intake_status": "imported_locked"
+    },
+    {
+      "id": "SRC-CPU-1",
+      "path": "C:\\Users\\rookp\\Downloads\\PDC_CPU_Internal_Implementation_Document_v1.md",
+      "kind": "markdown",
+      "sha256": "929009DDF302BE959BCC8D22ADA7183E09A68839C66CC8E62A677E1716D7089F",
+      "claim_role": "CPU route candidates, controls, setup accounting, repeat gates, and promotion/demotion policy.",
+      "intake_status": "imported_locked"
+    },
+    {
+      "id": "SRC-RAM-1",
+      "path": "C:\\Users\\rookp\\Downloads\\PDC_RAM_Data_Lane_Implementation_Document_v1.md",
+      "kind": "markdown",
+      "sha256": "C3AABECADC49E3E9385E6A9F5B109E9CEC28EAD08E0BB83D0B0BB945478F0E6C",
+      "claim_role": "Persistent live/scratch buffer pooling, ownership hazards, controls, and memory promotion gates.",
+      "intake_status": "imported_locked"
+    },
+    {
+      "id": "SRC-HASH-1",
+      "path": "C:\\Users\\rookp\\Downloads\\poole_defect_calculus_hashrate_implementation.md",
+      "kind": "markdown",
+      "sha256": "2140DCD1164C582433C520EDAD37E40B0CF7D4B6F2296BF61E200DED54284D97",
+      "claim_role": "Optional valid SHA-256d OpenCL application benchmark and explicit non-shortcut claim boundary.",
+      "intake_status": "imported_locked"
+    },
+    {
+      "id": "SRC-LG-1",
+      "path": "C:\\Users\\rookp\\Downloads\\The Poole Local-Geometry Program.pdf",
+      "kind": "pdf",
+      "sha256": "D3772D9A79A33AB7D19CBA9D68C32CBCE5C72B780CBABBF6B9C7A69D354D8075",
+      "claim_role": "Local-geometry definitions, theorem program, reconstruction limits, and open mathematical questions.",
+      "intake_status": "imported_locked"
+    },
+    {
+      "id": "SRC-MAG-1",
+      "path": "C:\\Users\\rookp\\Downloads\\Poole_Local_Geometry_Magnum_Opus_v1_4_Bridge_Benchmark_Deep_Cleanup.pdf",
+      "kind": "pdf",
+      "sha256": "8B1CE6183C7576BA823E7A88D29B82C3F2259070367ECBA4BF3C346A60DAC865",
+      "claim_role": "Consolidated algebra, exact verifiers, Q/P, signed membrane benchmarks, and cleaned bridge claim boundary.",
+      "intake_status": "imported_locked"
+    },
+    {
+      "id": "SRC-NATIVE-CHECKLIST-1",
+      "path": "sources/requirements/sha256/a8c94719faf9428c1f133010ba2603c0270c4e1efd7327af8eab9c8c362abb3d/PooleOS_From_Scratch_Master_Checklist.md",
+      "kind": "markdown",
+      "sha256": "A8C94719FAF9428C1F133010BA2603C0270C4E1EFD7327AF8EAB9C8C362ABB3D",
+      "claim_role": "Normative from-scratch native OS leaf-requirement register.",
+      "intake_status": "imported_locked"
+    }
+  ],
+  "phase_summary": {
+    "total": 40,
+    "complete": 0,
+    "partial": 12,
+    "blocked": 1,
+    "not_started": 27,
+    "subphase_total": 287
+  },
+  "phases": [
+    {
+      "id": "N0",
+      "title": "Native Architecture Constitution",
+      "status": "partial",
+      "subphases": [
+        {
+          "id": "N0.1",
+          "status": "partial",
+          "description": "Ratify ADR-0001: PooleOS v1 is PooleBoot plus a Poole-authored capability microkernel and native userspace."
+        },
+        {
+          "id": "N0.2",
+          "status": "partial",
+          "description": "Ratify the reuse, clean-room, firmware, microcode, cryptography, font, Unicode, and third-party data boundary."
+        },
+        {
+          "id": "N0.3",
+          "status": "partial",
+          "description": "Freeze canonical names and version namespaces for boot protocol, kernel, syscall ABI, IPC ABI, driver protocol, executable ABI, PGB2, PGVM2, package, filesystem, receipt, and ISO manifest."
+        },
+        {
+          "id": "N0.4",
+          "status": "partial",
+          "description": "Freeze the kernel TCB and the kernel/server/driver/application/recovery placement table."
+        },
+        {
+          "id": "N0.5",
+          "status": "partial",
+          "description": "Freeze x86-64 UEFI-only v1 scope, QEMU Tier 0, exact Tier 1 machine, and explicit non-goals."
+        },
+        {
+          "id": "N0.6",
+          "status": "partial",
+          "description": "Define editions, users, use cases, threat model, reliability, accessibility, compatibility, privacy, and performance objectives."
+        },
+        {
+          "id": "N0.7",
+          "status": "partial",
+          "description": "Define release claims and independent-reproduction requirements."
+        },
+        {
+          "id": "N0.8",
+          "status": "partial",
+          "description": "Add architecture-conformance tests that reject Linux kernels, Buildroot rootfs markers, GRUB/Limine, systemd, and other prohibited production dependencies from release media."
+        }
+      ],
+      "depends_on": [],
+      "source_section_ids": [
+        "000",
+        "001",
+        "170"
+      ],
+      "source_checkbox_count": 167,
+      "added_requirement_ids": [
+        "ADD-NATIVE-001",
+        "ADD-NATIVE-002"
+      ],
+      "current_evidence": [
+        "docs/adr/0001-native-pooleos-constitution.md through ADR-0007",
+        "specs/native-architecture-constitution.json",
+        "runs/native_architecture_baseline.json",
+        "specs/native-release-architecture-policy.json",
+        "tools/check_native_release_architecture.py",
+        "tests/test_native_release_architecture.py"
+      ],
+      "current_gaps": [
+        "Seven ADRs are byte-bound but none is cryptographically signed; ADR-0003 and ADR-0004 remain proposed",
+        "Quantitative reliability, accessibility, compatibility, privacy, and performance targets remain open",
+        "The extracted-tree scanner does not yet parse ISO/GPT/ESP/El Torito/signature structures"
+      ],
+      "exit_gate": "signed ADRs resolve every section 000.2 choice; names and version identifiers are reserved; exact supported scope and completion conditions are machine-readable; no production document describes PooleOS as Linux-based."
+    },
+    {
+      "id": "N1",
+      "title": "Requirements, Governance, Legal, and Provenance",
+      "status": "partial",
+      "subphases": [
+        {
+          "id": "N1.1",
+          "status": "partial",
+          "description": "Initialize PooleOS source control with protected main, signed tags, immutable release refs, review rules, and retention policy."
+        },
+        {
+          "id": "N1.2",
+          "status": "partial",
+          "description": "Assign stable requirement IDs and generate requirement-to-code, test, documentation, threat, evidence, and release mappings."
+        },
+        {
+          "id": "N1.3",
+          "status": "partial",
+          "description": "Create ADR templates and required ADRs for kernel, privilege rings, capabilities, IPC, scheduler, memory, drivers, filesystems, graphics, networking, audio, crypto, PDC, and PooleGlyph."
+        },
+        {
+          "id": "N1.4",
+          "status": "partial",
+          "description": "Establish repository/source-tree boundaries, generated-file policy, ABI generation, third-party patches, firmware storage, and conformance corpora."
+        },
+        {
+          "id": "N1.5",
+          "status": "partial",
+          "description": "Record Rooke Poole ownership and choose source-available licenses for every component class without presuming identical terms for code, specifications, data, models, or visual assets."
+        },
+        {
+          "id": "N1.6",
+          "status": "partial",
+          "description": "Establish contributor, SPDX, provenance, export, patent, trademark, privacy, vulnerability disclosure, security contact, and NDA segregation policies."
+        },
+        {
+          "id": "N1.7",
+          "status": "partial",
+          "description": "Define maintainers, signing custodians, release authority, severity, emergency change, deprecation, compatibility, and incident postmortem processes."
+        }
+      ],
+      "depends_on": [
+        "N0"
+      ],
+      "source_section_ids": [
+        "002",
+        "003",
+        "004"
+      ],
+      "source_checkbox_count": 181,
+      "added_requirement_ids": [
+        "ADD-REUSE-001"
+      ],
+      "current_evidence": [
+        "local Git repository on main with owner PooleOS origin",
+        "LICENSE, NOTICE.md, SECURITY.md, TRADEMARKS.md, and CODEOWNERS",
+        "docs/publication-boundary.md",
+        "tools/check_publication_boundary.py"
+      ],
+      "current_gaps": [
+        "The local repository is initialized but public remote publication, branch protection, signed tags, and immutable release refs remain open",
+        "Legal, patent, export, trademark, contributor, signing-custody, and component-specific license review remain open"
+      ],
+      "exit_gate": "PooleOS is source-controlled; every required decision has an owner and due gate; deletions and deferrals are reviewable; no component lacks licensing/provenance classification."
+    },
+    {
+      "id": "N2",
+      "title": "Hardware Target, Laboratory, and Standards",
+      "status": "partial",
+      "subphases": [
+        {
+          "id": "N2.1",
+          "status": "partial",
+          "description": "Capture full PCIe, USB, ACPI, SMBIOS, UEFI, CPU feature, IOMMU, EDID, storage, firmware, topology, sensor, and power inventories for Tier 1."
+        },
+        {
+          "id": "N2.2",
+          "status": "not_started",
+          "description": "Assign Tier 0 emulator, Tier 1 exact machine, Tier 2 controller-family, Tier 3 community-tested, Tier 4 best-effort, unsupported, and quarantined states."
+        },
+        {
+          "id": "N2.3",
+          "status": "not_started",
+          "description": "Acquire a confirmed sacrificial SSD, two labeled USB devices, immutable recovery media, serial path, second-machine recovery, backups, UPS/power-cut apparatus, packet capture, and thermal/power measurement."
+        },
+        {
+          "id": "N2.4",
+          "status": "partial",
+          "description": "Build the standards register with revision, publication date, hash, license/access terms, errata, assumptions, supersession, and implementation owner."
+        },
+        {
+          "id": "N2.5",
+          "status": "not_started",
+          "description": "Lock UEFI 2.11, ACPI 6.6, exact AMD64/AMD IOMMU manuals, SMBIOS 3.9, NVMe 2.2, xHCI 1.2, applicable USB/HID, TPM, network RFC, Unicode 17, POSIX Issue 8, VIRTIO 1.3, and exact device documents unless superseded through review."
+        },
+        {
+          "id": "N2.6",
+          "status": "not_started",
+          "description": "Turn every undocumented register or observed firmware behavior into an explicit blocker or hardware-specific tested assumption."
+        }
+      ],
+      "depends_on": [
+        "N0",
+        "N1"
+      ],
+      "source_section_ids": [
+        "005",
+        "006",
+        "007",
+        "146",
+        "169"
+      ],
+      "source_checkbox_count": 236,
+      "added_requirement_ids": [],
+      "current_evidence": [
+        "live Windows CIM/PnP inventory captured 2026-07-15",
+        "master checklist standards registers 146 and 169"
+      ],
+      "current_gaps": [
+        "Full ACPI/PCI/USB/firmware inventory and sacrificial lab media are not accepted"
+      ],
+      "exit_gate": "Tier 0 and Tier 1 manifests are complete and hashed; destructive-test safety is accepted; every implementation phase has lawful normative references and errata tracking."
+    },
+    {
+      "id": "N3",
+      "title": "Toolchain, Build, CI, and Low-Level Safety",
+      "status": "partial",
+      "subphases": [
+        {
+          "id": "N3.1",
+          "status": "partial",
+          "description": "Decide the implementation-language split. Working candidate: memory-safe `no_std` Rust for architecture-independent kernel/services, constrained assembly for entry/switch paths, and C17 for `libpdc`; the ADR must compare assurance, ABI, compiler maturity, runtime, and from-scratch provenance."
+        },
+        {
+          "id": "N3.2",
+          "status": "not_started",
+          "description": "Freeze target triples, calling conventions, object formats, code models, relocation, red-zone, floating/vector state, and debug/release profiles."
+        },
+        {
+          "id": "N3.3",
+          "status": "not_started",
+          "description": "Build hermetic host tools, cross compiler, assembler, linker, archiver, sysroot, builtins, ABI headers, and image utilities with pinned hashes."
+        },
+        {
+          "id": "N3.4",
+          "status": "not_started",
+          "description": "Generate structure offsets, syscall tables, capability rights, boot ABI, IPC layouts, error enums, and static assertions from canonical schemas."
+        },
+        {
+          "id": "N3.5",
+          "status": "not_started",
+          "description": "Implement a dependency-accurate build graph for PooleBoot, PooleKernel, servers, drivers, libraries, assets, system/recovery images, tests, and ISO."
+        },
+        {
+          "id": "N3.6",
+          "status": "partial",
+          "description": "Enforce deterministic timestamps, archive order, paths, locale, timezone, user IDs, filesystem metadata, flags, environment, and offline release builds."
+        },
+        {
+          "id": "N3.7",
+          "status": "not_started",
+          "description": "Add formatting, lint, static analysis, warning-as-error, UB/address/thread/memory sanitizers for host-portable code, stack reports, ABI checks, and artifact size budgets."
+        },
+        {
+          "id": "N3.8",
+          "status": "not_started",
+          "description": "Define unsafe-code inventory, checked arithmetic, parser limits, MMIO access rules, volatile/atomic policy, lock rules, interrupt-context restrictions, and fatal undefined behavior policy."
+        }
+      ],
+      "depends_on": [
+        "N0",
+        "N1"
+      ],
+      "source_section_ids": [
+        "008",
+        "009",
+        "010",
+        "011"
+      ],
+      "source_checkbox_count": 200,
+      "added_requirement_ids": [],
+      "current_evidence": [
+        "ADR-0003 proposed Rust/assembly/C17 split",
+        "official Rust UEFI and x86_64-unknown-none target documentation",
+        "existing deterministic Python artifact/test framework"
+      ],
+      "current_gaps": [
+        "No native target triple, sysroot, linker layout, or hermetic native build exists"
+      ],
+      "exit_gate": "two clean host environments reproduce bootstrap tools and empty native images; host headers/libraries cannot leak; ABI fixtures pass independently; all generated inputs are declared."
+    },
+    {
+      "id": "N4",
+      "title": "Emulation, Reference Devices, and Formal Models",
+      "status": "partial",
+      "subphases": [
+        {
+          "id": "N4.1",
+          "status": "partial",
+          "description": "Freeze QEMU machine, CPU, RAM, OVMF code/variables, q35 PCIe topology, serial, debug exit, and deterministic launch profiles."
+        },
+        {
+          "id": "N4.2",
+          "status": "not_started",
+          "description": "Add OASIS VIRTIO 1.3 PCI transport and staged console, block, net, input, GPU, RNG, balloon, and IOMMU profiles."
+        },
+        {
+          "id": "N4.3",
+          "status": "not_started",
+          "description": "Provide GDB/LLDB remote debugging, symbols, disassembly, QEMU tracing, serial capture, monitor control, deterministic seeds, snapshots, and packet/disk capture."
+        },
+        {
+          "id": "N4.4",
+          "status": "not_started",
+          "description": "Provide malformed ACPI/SMBIOS/PCI/virtio/USB/storage/network fixtures and hardware-fault injection profiles."
+        },
+        {
+          "id": "N4.5",
+          "status": "not_started",
+          "description": "Model capability derivation/revocation, IPC, scheduler, page mapping, boot slots, update rollback, and PooleFS transaction state before ABI freeze."
+        },
+        {
+          "id": "N4.6",
+          "status": "not_started",
+          "description": "Record model assumptions and cross-check model traces against implementation traces; no proof claim extends beyond its configuration and assumptions."
+        }
+      ],
+      "depends_on": [
+        "N2",
+        "N3"
+      ],
+      "source_section_ids": [
+        "012"
+      ],
+      "source_checkbox_count": 34,
+      "added_requirement_ids": [
+        "ADD-ASSURE-001",
+        "ADD-VIRTIO-001"
+      ],
+      "current_evidence": [
+        "historical QEMU/Buildroot launch and receipt scaffolding; non-promoting"
+      ],
+      "current_gaps": [
+        "No pinned native-only QEMU/VIRTIO profile or formal model suite exists"
+      ],
+      "exit_gate": "one command launches each pinned native test profile; logs and artifacts are deterministic where declared; formal models have executable counterexample checks; no Buildroot guest is required."
+    },
+    {
+      "id": "N5",
+      "title": "Boot Media, Boot Protocol, and PooleBoot UEFI Loader",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N5.1",
+          "status": "not_started",
+          "description": "Define deterministic GPT/ESP/El Torito EFI media, partition GUIDs, labels, paths, alignment, and image inspection."
+        },
+        {
+          "id": "N5.2",
+          "status": "not_started",
+          "description": "Build a PE32+ `PooleBoot.efi` with correct Microsoft x64 UEFI calling convention and no host runtime dependency."
+        },
+        {
+          "id": "N5.3",
+          "status": "not_started",
+          "description": "Implement console, serial, watchdog, allocation, filesystem, GOP, RNG, TCG2, configuration-table, and protocol discovery with absent/malformed handling."
+        },
+        {
+          "id": "N5.4",
+          "status": "not_started",
+          "description": "Define and fuzz a bounded boot configuration grammar; reject traversal, overflow, duplicate/unknown keys, truncation, incompatible versions, and oversized artifacts."
+        },
+        {
+          "id": "N5.5",
+          "status": "not_started",
+          "description": "Validate and load relocatable ELF64 PooleKernel segments with bounds, alignment, BSS, relocations, W^X plan, physical/virtual bounds, and entry point."
+        },
+        {
+          "id": "N5.6",
+          "status": "not_started",
+          "description": "Load signed initial-system, recovery, symbol, microcode, firmware-manifest, and policy artifacts according to profile."
+        },
+        {
+          "id": "N5.7",
+          "status": "not_started",
+          "description": "Select a safe GOP mode, record exact framebuffer metadata, and retain text/serial fallback."
+        },
+        {
+          "id": "N5.8",
+          "status": "not_started",
+          "description": "Retrieve and normalize the UEFI memory map, copy required tables, retry `ExitBootServices`, prohibit later boot-service use, and hand off only validated immutable records."
+        },
+        {
+          "id": "N5.9",
+          "status": "not_started",
+          "description": "Implement normal, safe, previous-known-good, recovery, diagnostic, and firmware-setup entries with bounded boot attempts and physical-presence policy."
+        }
+      ],
+      "depends_on": [
+        "N4"
+      ],
+      "source_section_ids": [
+        "013",
+        "014",
+        "015"
+      ],
+      "source_checkbox_count": 241,
+      "added_requirement_ids": [
+        "ADD-BOOT-001"
+      ],
+      "current_evidence": [],
+      "current_gaps": [
+        "No PooleBoot PE32+ image or frozen boot handoff exists"
+      ],
+      "exit_gate": "PooleBoot reproducibly boots under pinned OVMF and target firmware, validates all artifacts, exits boot services, transfers through a versioned golden-tested handoff, and rejects the complete hostile loader corpus."
+    },
+    {
+      "id": "N6",
+      "title": "Boot Trust, Kernel Image, Early Runtime, and Emergency Diagnostics",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N6.1",
+          "status": "not_started",
+          "description": "Define offline root, release intermediates, development keys, PK/KEK/db/dbx interaction, key rotation, revocation, compromised-key response, and development-mode visibility."
+        },
+        {
+          "id": "N6.2",
+          "status": "not_started",
+          "description": "Verify boot manifest, kernel, initial system, recovery, modules if ever allowed, firmware, PDC, and PooleGlyph policy by artifact type and minimum secure version."
+        },
+        {
+          "id": "N6.3",
+          "status": "not_started",
+          "description": "Measure configuration and artifacts through TCG2 with documented PCR/event semantics and preserve the event log for local verification."
+        },
+        {
+          "id": "N6.4",
+          "status": "not_started",
+          "description": "Freeze kernel ELF layout, relocation, KASLR policy, section permissions, debug symbols, map files, build ID, unwind strategy, and read-only-after-init behavior."
+        },
+        {
+          "id": "N6.5",
+          "status": "not_started",
+          "description": "Enter on a known stack with interrupts disabled; validate handoff, reserve every range, establish canonical mappings, initialize bootstrap GDT/IDT/TSS, and run early self-tests."
+        },
+        {
+          "id": "N6.6",
+          "status": "not_started",
+          "description": "Implement allocation-independent serial, framebuffer, and ring-buffer logs; bounded formatting; panic codes; register/control-state/page-fault dumps; nested panic; double-fault/NMI paths; and next-boot panic summary."
+        },
+        {
+          "id": "N6.7",
+          "status": "not_started",
+          "description": "Implement 16550-compatible emergency serial discovery plus RTC/CMOS and UEFI-variable access with locking, validation, write limits, rollback state, and wake-alarm boundaries."
+        }
+      ],
+      "depends_on": [
+        "N5"
+      ],
+      "source_section_ids": [
+        "016",
+        "017",
+        "018",
+        "019",
+        "148",
+        "149"
+      ],
+      "source_checkbox_count": 291,
+      "added_requirement_ids": [
+        "ADD-BOOT-002"
+      ],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native boot trust, kernel image, entry, serial panic, or measured boot exists"
+      ],
+      "exit_gate": "every accepted boot is signature/digest/version bound; revocation and malformed signatures fail closed into recovery; deliberate failures at every early stage yield retained serial evidence without silent reset loops."
+    },
+    {
+      "id": "N7",
+      "title": "x86-64 CPU, Privilege, Descriptor, and Fault Foundation",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N7.1",
+          "status": "not_started",
+          "description": "Enumerate CPUID leaves, topology, address widths, caches, APIC, NX, PCID, SMEP/SMAP/UMIP, FSGSBASE, XSAVE, entropy, virtualization, encryption, RAS, PMU, and thermal features."
+        },
+        {
+          "id": "N7.2",
+          "status": "not_started",
+          "description": "Validate exact Ryzen 7 9800X3D family/model/stepping and microcode against errata; reject missing mandatory features precisely."
+        },
+        {
+          "id": "N7.3",
+          "status": "not_started",
+          "description": "Define CR0/CR4/EFER, PAT/MTRR, syscall, GS, TSC_AUX, APIC, machine-check, and performance MSR policy with reserved-bit discipline."
+        },
+        {
+          "id": "N7.4",
+          "status": "not_started",
+          "description": "Initialize x87/SSE/XSAVE state, per-thread vector areas, exception behavior, sensitive-state clearing, and kernel SIMD restrictions."
+        },
+        {
+          "id": "N7.5",
+          "status": "not_started",
+          "description": "Build per-CPU GDT, TSS, RSP0, IST stacks, IDT stubs, uniform trap frames, and entry/exit assembly with generated offset validation."
+        },
+        {
+          "id": "N7.6",
+          "status": "not_started",
+          "description": "Handle every architectural exception with user delivery or kernel panic policy, recursion limits, stack guards, and adversarial tests."
+        }
+      ],
+      "depends_on": [
+        "N6"
+      ],
+      "source_section_ids": [
+        "020",
+        "021",
+        "022"
+      ],
+      "source_checkbox_count": 192,
+      "added_requirement_ids": [],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native CPU/descriptor/exception implementation exists"
+      ],
+      "exit_gate": "independent ABI fixtures validate every frame; deliberate exceptions behave correctly in kernel and user contexts; no reserved-bit, stack, vector-state, or privilege transition defect remains."
+    },
+    {
+      "id": "N8",
+      "title": "Interrupts, Time, SMP, and CPU Lifecycle",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N8.1",
+          "status": "not_started",
+          "description": "Mask legacy PIC; initialize local APIC/x2APIC; parse MADT and overrides; configure I/O APIC; allocate vectors; handle spurious/error interrupts."
+        },
+        {
+          "id": "N8.2",
+          "status": "not_started",
+          "description": "Implement MSI/MSI-X allocation, affinity, masking, teardown, and stale interrupt defense through capability-authorized operations."
+        },
+        {
+          "id": "N8.3",
+          "status": "not_started",
+          "description": "Calibrate invariant TSC against HPET/PM timer as applicable; implement clocksource watchdog, timer queues, TSC deadline, and monotonic nanosecond APIs."
+        },
+        {
+          "id": "N8.4",
+          "status": "not_started",
+          "description": "Separate monotonic, boottime, UTC, RTC, and civil time; handle invalid RTC, clock step, leap-second policy, suspend, and network synchronization without corrupting deadlines."
+        },
+        {
+          "id": "N8.5",
+          "status": "not_started",
+          "description": "Discover CPU topology; allocate guarded per-CPU areas/stacks; start APs through trampoline/mailbox; verify features and time synchronization."
+        },
+        {
+          "id": "N8.6",
+          "status": "not_started",
+          "description": "Implement IPIs for reschedule, TLB shootdown, call function, stop, panic, and diagnostics with timeout/failure behavior."
+        },
+        {
+          "id": "N8.7",
+          "status": "not_started",
+          "description": "Implement idle states conservatively; defer hotplug until required by a later profile."
+        }
+      ],
+      "depends_on": [
+        "N7"
+      ],
+      "source_section_ids": [
+        "023",
+        "024",
+        "025"
+      ],
+      "source_checkbox_count": 204,
+      "added_requirement_ids": [
+        "ADD-TIME-001"
+      ],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native APIC/timer/SMP implementation exists"
+      ],
+      "exit_gate": "all 16 logical processors repeatedly start under Tier 0 and Tier 1 profiles; timer monotonicity, interrupt routing, IPI, and SMP stress tests pass with bounded skew and no lost/duplicate work."
+    },
+    {
+      "id": "N9",
+      "title": "Physical and Virtual Memory, MMIO, Allocation, and Reclaim",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N9.1",
+          "status": "not_started",
+          "description": "Normalize overlapping UEFI/ACPI/firmware/kernel/framebuffer/device ranges with precedence rules and a reserved-range audit."
+        },
+        {
+          "id": "N9.2",
+          "status": "not_started",
+          "description": "Implement a bounded bootstrap allocator and main physical-page allocator with zones, metadata protection, poisoning, double-free detection, quotas, and fragmentation metrics."
+        },
+        {
+          "id": "N9.3",
+          "status": "not_started",
+          "description": "Freeze kernel/user virtual layouts, canonical-address policy, direct map, recursive/temp mappings if used, guard regions, and KASLR interactions."
+        },
+        {
+          "id": "N9.4",
+          "status": "not_started",
+          "description": "Implement page-table allocation, map/unmap/protect, huge pages, PCID, shootdown, copy-on-write, user faults, stack growth, and pager protocol."
+        },
+        {
+          "id": "N9.5",
+          "status": "not_started",
+          "description": "Implement kernel heap/object caches/stacks with red zones, quarantine, overflow checks, failure injection, and no hidden allocation in atomic paths."
+        },
+        {
+          "id": "N9.6",
+          "status": "not_started",
+          "description": "Centralize PAT/MTRR/cacheability aliases and MMIO mapping; reject conflicting memory types."
+        },
+        {
+          "id": "N9.7",
+          "status": "not_started",
+          "description": "Implement reclaim classes, watermarks, working-set replacement, slab reclaim, compaction, compressed memory/swap policy, pressure events, and deterministic OOM selection."
+        }
+      ],
+      "depends_on": [
+        "N7"
+      ],
+      "source_section_ids": [
+        "026",
+        "027",
+        "028",
+        "029",
+        "151"
+      ],
+      "source_checkbox_count": 410,
+      "added_requirement_ids": [],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native allocator, paging, address-space, or reclaim implementation exists"
+      ],
+      "exit_gate": "allocator/page-table invariants survive randomized and concurrent stress; no alias-cache conflict, stale mapping, use-after-free, unbounded reclaim, or OOM deadlock remains in supported profiles."
+    },
+    {
+      "id": "N10",
+      "title": "Platform Discovery, ACPI, SMBIOS, PCIe, and Low-Speed Buses",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N10.1",
+          "status": "not_started",
+          "description": "Define device objects, buses, resources, dependencies, firmware nodes, stable identities, driver matching, hotplug, quirk, power, and diagnostics schemas."
+        },
+        {
+          "id": "N10.2",
+          "status": "not_started",
+          "description": "Validate RSDP/XSDT and required ACPI tables; parse MADT, MCFG, FADT, HPET, IVRS, TPM2, HEST, SRAT/SLIT/PPTT, SPCR/DBG2 as profile requires."
+        },
+        {
+          "id": "N10.3",
+          "status": "not_started",
+          "description": "Run AML evaluation in a resource-bounded user-space service with namespace, region, mutex, recursion, timeout, side-effect, and fuzz controls."
+        },
+        {
+          "id": "N10.4",
+          "status": "not_started",
+          "description": "Parse SMBIOS defensively for platform identity without treating strings as authorization."
+        },
+        {
+          "id": "N10.5",
+          "status": "not_started",
+          "description": "Implement ECAM PCIe enumeration, bridges, BAR sizing/allocation, capabilities, MSI/MSI-X, AER, ACS, reset, power, and bus-master enable policy."
+        },
+        {
+          "id": "N10.6",
+          "status": "not_started",
+          "description": "Add I2C/SMBus/SPI/GPIO/embedded-controller/Super I/O frameworks only for exact target needs, with electrical and firmware safety boundaries."
+        },
+        {
+          "id": "N10.7",
+          "status": "not_started",
+          "description": "Publish the complete device/resource graph to the driver manager through a versioned read-only protocol."
+        }
+      ],
+      "depends_on": [
+        "N8",
+        "N9"
+      ],
+      "source_section_ids": [
+        "042",
+        "043",
+        "044",
+        "045",
+        "046",
+        "152"
+      ],
+      "source_checkbox_count": 447,
+      "added_requirement_ids": [],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native ACPI/AML/SMBIOS/PCIe resource graph exists"
+      ],
+      "exit_gate": "Tier 0 and Tier 1 device graphs match independent host captures; malformed tables cannot escape parsers; PCI writes and ACPI methods require explicit capability and policy."
+    },
+    {
+      "id": "N11",
+      "title": "DMA, IOMMU, and Interrupt Remapping",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N11.1",
+          "status": "not_started",
+          "description": "Specify coherent and streaming DMA buffers, scatter/gather, boundaries, widths, bounce buffers, synchronization, ownership, and outstanding-map accounting."
+        },
+        {
+          "id": "N11.2",
+          "status": "not_started",
+          "description": "Parse AMD IVRS, discover IOMMU units and aliases, create per-device/trust-group domains, and preserve only required firmware mappings."
+        },
+        {
+          "id": "N11.3",
+          "status": "not_started",
+          "description": "Implement I/O page tables, map/unmap, invalidation, interrupt remapping, fault reporting, and quarantine."
+        },
+        {
+          "id": "N11.4",
+          "status": "not_started",
+          "description": "Keep bus mastering disabled until domain attachment and buffers are valid; revoke before reset, driver death, or reassignment."
+        },
+        {
+          "id": "N11.5",
+          "status": "not_started",
+          "description": "Test 32/64-bit DMA, stale descriptors, malicious addresses, reset races, mapping failure, IOMMU faults, and no-IOMMU restricted mode."
+        }
+      ],
+      "depends_on": [
+        "N10"
+      ],
+      "source_section_ids": [
+        "030"
+      ],
+      "source_checkbox_count": 42,
+      "added_requirement_ids": [],
+      "current_evidence": [],
+      "current_gaps": [
+        "No AMD IOMMU or interrupt-remapping confinement exists"
+      ],
+      "exit_gate": "a hostile driver/device cannot DMA outside its granted pages or inject unowned interrupts; all mappings disappear on teardown; fault evidence names exact requester and authority."
+    },
+    {
+      "id": "N12",
+      "title": "Concurrency, Scheduler, Deferred Work, and Context Switching",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N12.1",
+          "status": "not_started",
+          "description": "Implement typed atomics and x86/compiler memory-order litmus tests with generated-assembly review."
+        },
+        {
+          "id": "N12.2",
+          "status": "not_started",
+          "description": "Implement minimal spin/mutex/wait/notification primitives with ownership, rank, recursion, IRQ, sleep, priority-inheritance, contention, and deadlock diagnostics."
+        },
+        {
+          "id": "N12.3",
+          "status": "not_started",
+          "description": "Select reclamation mechanisms only when required and state progress guarantees; prove and stress deferred reclamation."
+        },
+        {
+          "id": "N12.4",
+          "status": "not_started",
+          "description": "Implement bounded interrupt-deferred work and kernel-internal workers with cancellation, flush, duplicate-queue, recursion, and reclaim safety."
+        },
+        {
+          "id": "N12.5",
+          "status": "not_started",
+          "description": "Freeze scheduler entities, states, classes, priorities, fairness/starvation bounds, affinity, topology, preemption, accounting, and neutral fallback."
+        },
+        {
+          "id": "N12.6",
+          "status": "not_started",
+          "description": "Implement run queues, wake/block/exit/migration, balancing, preemption entry points, stall watchdog, and invariant checks."
+        },
+        {
+          "id": "N12.7",
+          "status": "not_started",
+          "description": "Implement context switching for general, segment, FS/GS, address-space, PCID, vector, debug, PMU, mitigation, and kernel-stack state."
+        },
+        {
+          "id": "N12.8",
+          "status": "not_started",
+          "description": "Keep PDC scheduler proposals outside the kernel; admit only bounded policy requests through validated scheduler capabilities after N33 gates."
+        }
+      ],
+      "depends_on": [
+        "N8",
+        "N9"
+      ],
+      "source_section_ids": [
+        "031",
+        "032",
+        "033",
+        "034"
+      ],
+      "source_checkbox_count": 193,
+      "added_requirement_ids": [],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native concurrency primitives, scheduler, or context switch exists"
+      ],
+      "exit_gate": "deterministic and randomized SMP schedule tests show no lost wakeup, duplicate runnable task, dead task, priority inversion violation, register leak, or starvation beyond declared bounds."
+    },
+    {
+      "id": "N13",
+      "title": "Tasks, Syscalls, Events, and Capability Object Model",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N13.1",
+          "status": "not_started",
+          "description": "Define process/thread/task identity, ownership, lifecycle, address space, scheduling, accounting, audit, and generation-safe identifier behavior."
+        },
+        {
+          "id": "N13.2",
+          "status": "not_started",
+          "description": "Implement spawn, thread create, executable replacement, exit, wait/reap, process-death cleanup, and failure at every allocation step."
+        },
+        {
+          "id": "N13.3",
+          "status": "not_started",
+          "description": "Freeze `SYSCALL/SYSRET` entry ABI, register frame, error model, cancellation/restart semantics, tracing, compatibility negotiation, and safe `IRETQ` fallback."
+        },
+        {
+          "id": "N13.4",
+          "status": "not_started",
+          "description": "Implement hardened copyin/copyout with canonicality, overflow, page-fault recovery, partial-copy policy, SMAP, and TOCTOU-safe pin/copy semantics."
+        },
+        {
+          "id": "N13.5",
+          "status": "not_started",
+          "description": "Specify kernel object types and unforgeable capabilities with rights attenuation, derivation, transfer, revocation, generations, quotas, destruction, and audit provenance."
+        },
+        {
+          "id": "N13.6",
+          "status": "not_started",
+          "description": "Define user exception, cancellation, process event, notification, and debugger delivery without Unix signals becoming the native authority model."
+        },
+        {
+          "id": "N13.7",
+          "status": "not_started",
+          "description": "Prove and test no capability forging, rights amplification, stale-handle reuse, cross-process object confusion, or cleanup leak."
+        }
+      ],
+      "depends_on": [
+        "N12"
+      ],
+      "source_section_ids": [
+        "035",
+        "036",
+        "037",
+        "038"
+      ],
+      "source_checkbox_count": 183,
+      "added_requirement_ids": [
+        "ADD-CAP-001"
+      ],
+      "current_evidence": [],
+      "current_gaps": [
+        "No ring-3 task, syscall, or capability object implementation exists"
+      ],
+      "exit_gate": "a static user task enters ring 3, performs capability-mediated syscalls, receives exceptions, exits cleanly, and cannot access any ungranted kernel object or memory."
+    },
+    {
+      "id": "N14",
+      "title": "IPC, Identity, Isolation, Async I/O, and Resource Control",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N14.1",
+          "status": "not_started",
+          "description": "Define synchronous call/reply, one-way message, notification, shared-memory, stream, and local RPC primitives with explicit maximum sizes."
+        },
+        {
+          "id": "N14.2",
+          "status": "not_started",
+          "description": "Define endpoint capabilities, sender identity, reply tokens, capability-transfer slots, delegation limits, deadline/cancellation, and priority propagation."
+        },
+        {
+          "id": "N14.3",
+          "status": "not_started",
+          "description": "Implement generated IPC wire layouts and independent encode/decode fixtures; reject version, length, alignment, count, and capability mismatches."
+        },
+        {
+          "id": "N14.4",
+          "status": "not_started",
+          "description": "Define credentials, users/groups, executable identity, service identity, audit identity, and login/session context as user-space policy over kernel identities."
+        },
+        {
+          "id": "N14.5",
+          "status": "not_started",
+          "description": "Implement process/service/application isolation groups with CPU, memory, handle, IPC, storage, and device quotas and pressure notifications."
+        },
+        {
+          "id": "N14.6",
+          "status": "not_started",
+          "description": "Implement readiness multiplexing, event objects, filesystem notification, and asynchronous completion queues without stale completions or lifetime ambiguity."
+        },
+        {
+          "id": "N14.7",
+          "status": "not_started",
+          "description": "Add deterministic IPC trace/replay, saturation, priority inversion, dead peer, confused deputy, queue exhaustion, and cancellation-race tests."
+        }
+      ],
+      "depends_on": [
+        "N13"
+      ],
+      "source_section_ids": [
+        "039",
+        "040",
+        "041",
+        "163",
+        "164"
+      ],
+      "source_checkbox_count": 261,
+      "added_requirement_ids": [
+        "ADD-ABI-001"
+      ],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native IPC, isolation, async completion, or quota implementation exists"
+      ],
+      "exit_gate": "isolated services communicate only through granted endpoints; quotas bound denial of service; cancellation and process death release all resources; capability flow is reconstructable from receipts."
+    },
+    {
+      "id": "N15",
+      "title": "Security, Cryptography, TPM, Secrets, MAC, and Firmware Boundaries",
+      "status": "partial",
+      "subphases": [
+        {
+          "id": "N15.1",
+          "status": "partial",
+          "description": "Threat-model malicious apps, parsers, devices, DMA, radios, networks, packages, builders, keys, firmware, physical access, rollback, side channels, denial, and PDC/PooleGlyph compromise."
+        },
+        {
+          "id": "N15.2",
+          "status": "not_started",
+          "description": "Enforce W^X, NX, SMEP, SMAP, UMIP, KASLR, protected page tables, hardened copies, stack guards, read-only metadata, pointer redaction, CFI/control-flow defenses, and exact CPU mitigation policy."
+        },
+        {
+          "id": "N15.3",
+          "status": "not_started",
+          "description": "Build entropy-source health, boot seeding, persistent reseed, readiness, fork/snapshot safety, and reviewed CSPRNG behavior."
+        },
+        {
+          "id": "N15.4",
+          "status": "not_started",
+          "description": "Port or implement a reviewed crypto provider API for hash, MAC, AEAD, KDF, signatures, key agreement, constant-time operation, vector tests, and algorithm deprecation."
+        },
+        {
+          "id": "N15.5",
+          "status": "not_started",
+          "description": "Implement TPM 2.0 discovery, bounded framing, PCR/event-log use, sealing with recovery, and parser fuzzing without making TPM the sole recovery path."
+        },
+        {
+          "id": "N15.6",
+          "status": "not_started",
+          "description": "Implement secret and certificate stores, separate trust domains, trusted prompts, zeroization, dump/swap/log protection, distrust and update processes, and audited key use."
+        },
+        {
+          "id": "N15.7",
+          "status": "not_started",
+          "description": "Define default-deny MAC labels and PooleGlyph policy compilation only after equivalent simulator, downgrade, signing, recovery, and fuzz gates."
+        },
+        {
+          "id": "N15.8",
+          "status": "not_started",
+          "description": "Keep telemetry disabled by default and minimize, consent, bound, encrypt, retain, export, and delete any enabled data."
+        },
+        {
+          "id": "N15.9",
+          "status": "not_started",
+          "description": "Bound UEFI runtime services, SMM, PSP/security coprocessor, firmware interfaces, and privileged update commands; treat opaque platform components as explicit assumptions."
+        }
+      ],
+      "depends_on": [
+        "N6",
+        "N11",
+        "N14"
+      ],
+      "source_section_ids": [
+        "107",
+        "108",
+        "109",
+        "110",
+        "111",
+        "112",
+        "155"
+      ],
+      "source_checkbox_count": 240,
+      "added_requirement_ids": [
+        "ADD-CPU-001"
+      ],
+      "current_evidence": [
+        "runs/microkernel_isolation.json",
+        "runs/capability_trap_proof.json",
+        "runs/capability_trap_fuzz.json"
+      ],
+      "current_gaps": [
+        "Current security artifacts are simulations; native crypto, TPM, MAC, and mitigations are absent"
+      ],
+      "exit_gate": "independent review closes critical threat-model findings; crypto and RNG vectors/health pass; capability/MAC recovery cannot lock out the owner; exact CPU/firmware mitigation state is attested."
+    },
+    {
+      "id": "N16",
+      "title": "Isolated Driver Domains and Extension Lifecycle",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N16.1",
+          "status": "not_started",
+          "description": "Freeze driver manifest, match, protocol, resource request, firmware, dependency, version, health, reset, and compatibility schemas."
+        },
+        {
+          "id": "N16.2",
+          "status": "not_started",
+          "description": "Implement driver manager creation of isolated address spaces and revocable MMIO/port/IRQ/DMA/reset capabilities."
+        },
+        {
+          "id": "N16.3",
+          "status": "not_started",
+          "description": "Implement versioned bus/device service protocols and generated bindings; prohibit arbitrary register access through high-level policy."
+        },
+        {
+          "id": "N16.4",
+          "status": "not_started",
+          "description": "Implement signed user-space driver packages, dependency resolution, staged activation, rollback, quarantine, crash-loop limits, and safe removal."
+        },
+        {
+          "id": "N16.5",
+          "status": "not_started",
+          "description": "Implement virtio PCI transport and isolated console/RNG/balloon foundation, then shared queue libraries for block/net/input/GPU without trusting device lengths."
+        },
+        {
+          "id": "N16.6",
+          "status": "not_started",
+          "description": "Revoke capabilities, disable bus mastering, drain/cancel work, invalidate DMA, reset hardware, and reject stale completions on driver death or upgrade."
+        },
+        {
+          "id": "N16.7",
+          "status": "not_started",
+          "description": "Keep production kernel-module loading disabled. Any future exception requires a new TCB proof and release-profile review."
+        }
+      ],
+      "depends_on": [
+        "N10",
+        "N11",
+        "N14",
+        "N15"
+      ],
+      "source_section_ids": [
+        "150"
+      ],
+      "source_checkbox_count": 96,
+      "added_requirement_ids": [
+        "ADD-VIRTIO-002",
+        "ADD-DRIVER-001",
+        "ADD-MODULE-001"
+      ],
+      "current_evidence": [],
+      "current_gaps": [
+        "No isolated native driver domain or virtio transport exists"
+      ],
+      "exit_gate": "a deliberately crashed or hostile reference driver cannot corrupt kernel or peer memory; supervisor restart restores service or cleanly degrades without stale authority."
+    },
+    {
+      "id": "N17",
+      "title": "Block Storage, Partitions, and Volume Management",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N17.1",
+          "status": "not_started",
+          "description": "Define asynchronous block request, scatter/gather, flush, FUA, discard, zero, cancellation, timeout, retry, barrier, and completion semantics."
+        },
+        {
+          "id": "N17.2",
+          "status": "not_started",
+          "description": "Implement virtio-blk reference driver and deterministic error device before physical storage."
+        },
+        {
+          "id": "N17.3",
+          "status": "not_started",
+          "description": "Implement isolated NVMe controller discovery, admin queue, identify, namespace, I/O queues, PRP/SGL, MSI-X, reset, shutdown, SMART/health, and fault recovery for the Samsung 970 PRO profile."
+        },
+        {
+          "id": "N17.4",
+          "status": "not_started",
+          "description": "Keep AHCI/SATA/ATAPI as profile-dependent later work; never let it delay the NVMe-first critical path."
+        },
+        {
+          "id": "N17.5",
+          "status": "not_started",
+          "description": "Parse GPT/MBR defensively with overlap, overflow, duplicate GUID, hybrid, and malformed table handling."
+        },
+        {
+          "id": "N17.6",
+          "status": "not_started",
+          "description": "Implement stacked volumes, loop images, RAID, snapshots, thin provisioning, encryption, and multipath only behind separately scoped profiles."
+        },
+        {
+          "id": "N17.7",
+          "status": "not_started",
+          "description": "Preserve raw I/O traces and test timeout, reset, surprise removal, full device, corrupt completion, flush failure, and power loss on sacrificial media."
+        }
+      ],
+      "depends_on": [
+        "N16"
+      ],
+      "source_section_ids": [
+        "047",
+        "048",
+        "049",
+        "050",
+        "166"
+      ],
+      "source_checkbox_count": 268,
+      "added_requirement_ids": [],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native block, NVMe, partition, or volume path exists"
+      ],
+      "exit_gate": "reference and Tier 1 storage read/write/flush semantics match independent tests; no production write occurs without explicit target identity and recovery evidence."
+    },
+    {
+      "id": "N18",
+      "title": "USB, Input, and Removable Media",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N18.1",
+          "status": "not_started",
+          "description": "Implement virtio-input reference keyboard/pointer before physical USB."
+        },
+        {
+          "id": "N18.2",
+          "status": "not_started",
+          "description": "Define USB device/config/interface/endpoint objects, descriptors, enumeration state, transfer ownership, and disconnect cancellation."
+        },
+        {
+          "id": "N18.3",
+          "status": "not_started",
+          "description": "Implement isolated xHCI discovery, reset, rings, TRBs, contexts, events, root hubs, ports, timeouts, and controller recovery for exact AMD functions."
+        },
+        {
+          "id": "N18.4",
+          "status": "not_started",
+          "description": "Implement hubs, HID parser, boot keyboard, pointer, generic input events, focus/security attribution, and simple PS/2 recovery input if target hardware exposes it."
+        },
+        {
+          "id": "N18.5",
+          "status": "not_started",
+          "description": "Implement USB mass-storage BOT/SCSI subset after block-layer maturity; UASP remains optional."
+        },
+        {
+          "id": "N18.6",
+          "status": "not_started",
+          "description": "Classify audio, CDC, camera, game controllers, printers, scanners, SD/eMMC, optical, Type-C/PD, USB4, and Thunderbolt by release profile and security boundary."
+        },
+        {
+          "id": "N18.7",
+          "status": "not_started",
+          "description": "Fuzz all descriptors and events; test disconnect/reconnect, stalls, short packets, malicious lengths, hub depth, power budget, DMA, and device identity changes."
+        }
+      ],
+      "depends_on": [
+        "N16"
+      ],
+      "source_section_ids": [
+        "051",
+        "052",
+        "053",
+        "054",
+        "055",
+        "056",
+        "057",
+        "165"
+      ],
+      "source_checkbox_count": 443,
+      "added_requirement_ids": [],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native virtio input, xHCI, USB, HID, or removable-media path exists"
+      ],
+      "exit_gate": "basic keyboard and pointer work through virtio and exact Tier 1 USB paths; malicious devices cannot escape driver domains; recovery input remains available."
+    },
+    {
+      "id": "N19",
+      "title": "VFS, PooleFS, Page Cache, Encryption, and Persistent Data",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N19.1",
+          "status": "not_started",
+          "description": "Define user-space VFS vnode/inode/file/mount/path/name-cache semantics, capabilities, metadata, links, rename, mount namespaces, and TOCTOU behavior."
+        },
+        {
+          "id": "N19.2",
+          "status": "not_started",
+          "description": "Implement initramfs, tmpfs, device/system pseudo-filesystems, and read-only FAT32 ESP access first."
+        },
+        {
+          "id": "N19.3",
+          "status": "not_started",
+          "description": "Specify PooleFS on-disk superblocks, checksummed metadata, allocation, directories, extents, files, sparse data, timestamps, xattrs, snapshots, quotas, and feature negotiation."
+        },
+        {
+          "id": "N19.4",
+          "status": "not_started",
+          "description": "Specify transaction ordering, journal or copy-on-write choice, flush/FUA boundaries, fsync, rename atomicity, mount recovery, repair, bad blocks, and version upgrade."
+        },
+        {
+          "id": "N19.5",
+          "status": "not_started",
+          "description": "Implement page cache, read-ahead, dirty accounting, writeback, file mappings, coherency, truncation, pressure integration, and direct-I/O exclusions."
+        },
+        {
+          "id": "N19.6",
+          "status": "not_started",
+          "description": "Implement encryption and key lifecycle with recovery; swap/paging store stays disabled until encryption, crash, and secret-leak behavior is proven."
+        },
+        {
+          "id": "N19.7",
+          "status": "not_started",
+          "description": "Run randomized model comparison, filesystem image fuzzing, full-volume/ENOSPC, corruption, repair, and automated power-cut matrices; retain every failing image."
+        }
+      ],
+      "depends_on": [
+        "N14",
+        "N17"
+      ],
+      "source_section_ids": [
+        "076",
+        "077",
+        "078",
+        "079",
+        "080",
+        "081"
+      ],
+      "source_checkbox_count": 329,
+      "added_requirement_ids": [
+        "ADD-FS-001"
+      ],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native VFS, PooleFS, page cache, encryption, or power-loss evidence exists"
+      ],
+      "exit_gate": "PooleFS meets declared crash semantics on reference and sacrificial Tier 1 storage; repair is idempotent; no cross-file disclosure or silent durability downgrade remains."
+    },
+    {
+      "id": "N20",
+      "title": "Executable Loader, User ABI, C Runtime, Threads, and Language Runtimes",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N20.1",
+          "status": "not_started",
+          "description": "Freeze user ELF64 validation, segment mapping, W^X, ASLR, stack/aux vector, capability bootstrap, TLS, relocations, and interpreter policy."
+        },
+        {
+          "id": "N20.2",
+          "status": "not_started",
+          "description": "Start with static PIE executables; add a dynamic linker only after symbol/version/relocation/unload/thread safety and attack surface are justified."
+        },
+        {
+          "id": "N20.3",
+          "status": "not_started",
+          "description": "Implement Poole-authored startup, termination, fundamental libc, checked memory/string, allocation, stdio, math, time, locale, Unicode, and error APIs."
+        },
+        {
+          "id": "N20.4",
+          "status": "not_started",
+          "description": "Implement thread creation, TLS, mutex/condition/semaphore/once, cancellation, robust owner death, and scheduler interaction."
+        },
+        {
+          "id": "N20.5",
+          "status": "not_started",
+          "description": "Publish a native API and POSIX compatibility matrix with exact semantics, omissions, errno mapping, conformance tests, and no implicit Linux ABI."
+        },
+        {
+          "id": "N20.6",
+          "status": "not_started",
+          "description": "Support Rust and later language runtimes through the native ABI; keep runtime unwinding, GC, JIT, executable memory, and signal assumptions explicit."
+        },
+        {
+          "id": "N20.7",
+          "status": "not_started",
+          "description": "Build ABI compatibility, symbol, layout, syscall, and independent assembly fixtures into CI."
+        }
+      ],
+      "depends_on": [
+        "N13",
+        "N14"
+      ],
+      "source_section_ids": [
+        "082",
+        "083",
+        "084",
+        "085",
+        "086",
+        "087"
+      ],
+      "source_checkbox_count": 238,
+      "added_requirement_ids": [],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native executable loader, user ABI, libc, threads, or language runtime exists"
+      ],
+      "exit_gate": "static native programs spawn, allocate, use files/IPC/threads, fail cleanly, and remain ABI-compatible across the declared version range."
+    },
+    {
+      "id": "N21",
+      "title": "Init, Services, Utilities, Logging, Device Policy, and Integrity Maintenance",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N21.1",
+          "status": "not_started",
+          "description": "Build essential filesystem, process, text, diagnostic, and recovery utilities without requiring a shell for system operation."
+        },
+        {
+          "id": "N21.2",
+          "status": "not_started",
+          "description": "Implement PID 1/root supervisor responsibilities, declarative service graph, transactions, readiness, dependencies, timeouts, restart, crash loops, resource groups, and emergency mode."
+        },
+        {
+          "id": "N21.3",
+          "status": "not_started",
+          "description": "Define exact boot order from kernel handoff through resource manager, driver manager, storage, VFS, logging, identity, network, display, session, PDC, and optional services."
+        },
+        {
+          "id": "N21.4",
+          "status": "not_started",
+          "description": "Implement structured logging, persistent journal, security audit, rate limiting, rotation, redaction, integrity, support bundles, and serial fallback."
+        },
+        {
+          "id": "N21.5",
+          "status": "not_started",
+          "description": "Implement user-space device policy, firmware loading, hotplug, seat/session attribution, and driver quarantine."
+        },
+        {
+          "id": "N21.6",
+          "status": "not_started",
+          "description": "Implement system/session IPC bus, service naming, activation, discovery, introspection, authorization, bounded messages, and cycle detection."
+        },
+        {
+          "id": "N21.7",
+          "status": "not_started",
+          "description": "Implement scheduled maintenance and integrity health service for boot images, filesystem, packages, configuration, certificates, updates, backups, PDC rollback, and bounded self-tests."
+        }
+      ],
+      "depends_on": [
+        "N16",
+        "N19",
+        "N20"
+      ],
+      "source_section_ids": [
+        "088",
+        "089",
+        "090",
+        "091",
+        "092",
+        "141",
+        "158",
+        "168"
+      ],
+      "source_checkbox_count": 467,
+      "added_requirement_ids": [],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native init, service graph, utilities, logging, device policy, or health service exists"
+      ],
+      "exit_gate": "repeated boot reaches the same service graph; failures degrade or recover according to policy; no service can silently claim readiness; support evidence identifies every transition."
+    },
+    {
+      "id": "N22",
+      "title": "Authentication, Sessions, Shell, Terminal, Accounts, and User Data",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N22.1",
+          "status": "not_started",
+          "description": "Define local accounts/groups, stable IDs, password/credential hashing, lockout, recovery, TPM-assisted options, and migration."
+        },
+        {
+          "id": "N22.2",
+          "status": "not_started",
+          "description": "Implement trusted login, session creation, seat/device assignment, environment, capability grants, lock, logout, and privilege elevation with audit."
+        },
+        {
+          "id": "N22.3",
+          "status": "not_started",
+          "description": "Implement kernel virtual console, PTYs, terminal line discipline, signals/job-control compatibility, shell parser/execution, pipelines, redirection, quoting, and bounded startup files."
+        },
+        {
+          "id": "N22.4",
+          "status": "not_started",
+          "description": "Implement terminal emulator parsing, Unicode cell model, grapheme width, bidi safety policy, input methods, selection, clipboard, resizing, and accessibility semantics."
+        },
+        {
+          "id": "N22.5",
+          "status": "not_started",
+          "description": "Implement name-service/account database interfaces and optional directory integration without making network identity necessary for local recovery."
+        },
+        {
+          "id": "N22.6",
+          "status": "not_started",
+          "description": "Define home directory, XDG-like data/config/cache/state, MIME, associations, recent documents, session restore, privacy, and backup inclusion."
+        }
+      ],
+      "depends_on": [
+        "N20",
+        "N21"
+      ],
+      "source_section_ids": [
+        "093",
+        "094",
+        "157",
+        "162",
+        "167"
+      ],
+      "source_checkbox_count": 308,
+      "added_requirement_ids": [],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native authentication, session, shell, PTY, terminal, account, or user-data model exists"
+      ],
+      "exit_gate": "an authenticated user can operate shell and terminal, launch isolated services/apps, lock/logout, recover credentials, and never inherit undeclared device or system authority."
+    },
+    {
+      "id": "N23",
+      "title": "Packages, Updates, Installer, Recovery, Backup, and Migration",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N23.1",
+          "status": "not_started",
+          "description": "Freeze signed package format, canonical metadata, dependencies, capabilities, services, files, scripts or script prohibition, conflicts, receipts, uninstall, and transactional database."
+        },
+        {
+          "id": "N23.2",
+          "status": "not_started",
+          "description": "Implement repository roles modeled on TUF root/targets/snapshot/timestamp with threshold keys, expiry, consistent snapshots, delegated targets, rollback/freeze/mix-and-match protection, and offline root rotation."
+        },
+        {
+          "id": "N23.3",
+          "status": "not_started",
+          "description": "Implement immutable A/B system images, pending/healthy state, boot attempts, minimum secure versions, configuration/data migration, automatic rollback, and failed-update diagnostics."
+        },
+        {
+          "id": "N23.4",
+          "status": "not_started",
+          "description": "Build installer in an isolated environment with exact-disk identity, backup checks, partition plan preview, encryption, format/populate/verify, boot entry, first boot, cancellation, and power-loss recovery."
+        },
+        {
+          "id": "N23.5",
+          "status": "not_started",
+          "description": "Build separately signed recovery with read-only diagnostics, slot selection, boot repair, filesystem check, package rollback, key recovery, data export, reinstall/reset, and serial/GOP operation."
+        },
+        {
+          "id": "N23.6",
+          "status": "not_started",
+          "description": "Implement snapshots, backup policy, encrypted/deduplicated backup, application quiescence, integrity verification, restore sampling, disaster recovery, synchronization, and migration."
+        },
+        {
+          "id": "N23.7",
+          "status": "not_started",
+          "description": "Test malicious metadata, compromised online keys, stale mirrors, full disks, interruption at every transaction step, broken configuration, and recovery without normal services."
+        }
+      ],
+      "depends_on": [
+        "N15",
+        "N19",
+        "N21",
+        "N22"
+      ],
+      "source_section_ids": [
+        "095",
+        "096",
+        "097",
+        "098",
+        "159"
+      ],
+      "source_checkbox_count": 315,
+      "added_requirement_ids": [
+        "ADD-UPDATE-001",
+        "ADD-RECOVERY-001"
+      ],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native packages, TUF-style updates, installer, recovery, backup, or migration exists"
+      ],
+      "exit_gate": "no single online key or mirror can install arbitrary/stale software; every failed install/update returns to a bootable signed state; sampled backups restore correctly."
+    },
+    {
+      "id": "N24",
+      "title": "Shutdown, Power, Firmware Updates, Sensors, and Hardware Health",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N24.1",
+          "status": "not_started",
+          "description": "Implement ordered shutdown/reboot with session notice, service stop, storage flush, device quiesce, watchdog handling, ACPI reset/power-off, and timeout escalation."
+        },
+        {
+          "id": "N24.2",
+          "status": "not_started",
+          "description": "Add suspend only after device save/restore, wake routing, time correction, key handling, and repeated target-hardware tests; hibernation remains post-v1 unless explicitly promoted."
+        },
+        {
+          "id": "N24.3",
+          "status": "not_started",
+          "description": "Implement CPU idle/frequency, PCI/device power, thermal zones, fans, energy accounting, and conservative failsafe limits without undocumented voltage/clock writes."
+        },
+        {
+          "id": "N24.4",
+          "status": "not_started",
+          "description": "Inventory firmware/microcode; implement signed staged CPU microcode and device update frameworks with compatibility, antirollback, power prerequisites, progress, recovery, and audit."
+        },
+        {
+          "id": "N24.5",
+          "status": "not_started",
+          "description": "Treat UEFI capsule/ESRT updates as profile-dependent high-risk work requiring exact board documentation and an independent firmware recovery path."
+        },
+        {
+          "id": "N24.6",
+          "status": "not_started",
+          "description": "Implement sensor, fan, battery/storage/chassis health, hardware watchdog, missing-sensor semantics, rate limiting, and user notification."
+        }
+      ],
+      "depends_on": [
+        "N10",
+        "N17",
+        "N21"
+      ],
+      "source_section_ids": [
+        "099",
+        "100",
+        "153",
+        "154"
+      ],
+      "source_checkbox_count": 260,
+      "added_requirement_ids": [],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native shutdown/power/firmware/sensor/health implementation exists"
+      ],
+      "exit_gate": "shutdown/reboot never corrupt supported filesystems; thermal and watchdog safety does not depend on PDC; interrupted firmware update cannot silently brick a supported profile."
+    },
+    {
+      "id": "N25",
+      "title": "Ethernet, Wi-Fi, Bluetooth, and Link Drivers",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N25.1",
+          "status": "not_started",
+          "description": "Define network-device queues, buffers, offloads, MTU, addresses, link state, statistics, cancellation, reset, and zero-copy ownership."
+        },
+        {
+          "id": "N25.2",
+          "status": "not_started",
+          "description": "Implement virtio-net as the Tier 0 reference path with hostile descriptor/device tests."
+        },
+        {
+          "id": "N25.3",
+          "status": "not_started",
+          "description": "Implement an isolated Realtek RTL8125 Tier 1 driver using lawful documentation, DMA confinement, MSI-X, PHY/link state, reset, and packet checks."
+        },
+        {
+          "id": "N25.4",
+          "status": "not_started",
+          "description": "Implement Ethernet framing, VLAN boundary, multicast filters, MTU, checksums, and capture interfaces."
+        },
+        {
+          "id": "N25.5",
+          "status": "not_started",
+          "description": "Treat Realtek 8851BE Wi-Fi as a later profile: firmware rights, regulatory database, radio kill, scan/auth/association, WPA2/WPA3, replay protection, data path, roaming, and hostile AP tests are all mandatory before support."
+        },
+        {
+          "id": "N25.6",
+          "status": "not_started",
+          "description": "Treat Realtek USB Bluetooth as a later profile: HCI transport, L2CAP, security manager, GATT, HID, privacy, pairing, key storage, and hostile peer tests precede optional audio."
+        }
+      ],
+      "depends_on": [
+        "N16"
+      ],
+      "source_section_ids": [
+        "063",
+        "064",
+        "065",
+        "066"
+      ],
+      "source_checkbox_count": 210,
+      "added_requirement_ids": [],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native virtio-net, RTL8125, Wi-Fi, or Bluetooth driver exists"
+      ],
+      "exit_gate": "virtio-net and selected Tier 1 Ethernet maintain isolation and recover from driver/device failure; radio features are absent or explicitly unsupported until fully qualified."
+    },
+    {
+      "id": "N26",
+      "title": "Network Protocols, Services, Firewall, TLS, and Virtual Links",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N26.1",
+          "status": "not_started",
+          "description": "Define reference-counted packet buffers, interface/route tables, neighbor state, checksums, MTU, fragmentation, reassembly bounds, queueing, and tracing."
+        },
+        {
+          "id": "N26.2",
+          "status": "not_started",
+          "description": "Implement ARP, IPv4, ICMPv4, IPv6, ICMPv6, Neighbor Discovery, SLAAC, PMTU, duplicate-address detection, and extension-header policy."
+        },
+        {
+          "id": "N26.3",
+          "status": "not_started",
+          "description": "Implement UDP and TCP state, options, retransmission, congestion/flow control, timers, windows, teardown, resource bounds, and interoperability."
+        },
+        {
+          "id": "N26.4",
+          "status": "not_started",
+          "description": "Implement capability-aware sockets, names, readiness/async I/O, local binding, ancillary data, raw access policy, and error queues."
+        },
+        {
+          "id": "N26.5",
+          "status": "not_started",
+          "description": "Implement DHCPv4/v6, DNS with cache and DNSSEC policy, NTP/NTS policy, network manager, profiles, captive/metered state, and offline behavior."
+        },
+        {
+          "id": "N26.6",
+          "status": "not_started",
+          "description": "Implement firewall/packet filtering, connection tracking only if justified, NAT, VPN interface boundary, loopback, packet capture, multicast, VLAN/bridge, tunnels, QoS, and traffic control by profile."
+        },
+        {
+          "id": "N26.7",
+          "status": "not_started",
+          "description": "Port reviewed TLS 1.3 and certificate validation through N15; package authenticity remains independent of transport security."
+        },
+        {
+          "id": "N26.8",
+          "status": "not_started",
+          "description": "Fuzz every protocol and test loss, reordering, duplication, fragmentation, exhaustion, hostile peers, and independent-stack interoperability."
+        }
+      ],
+      "depends_on": [
+        "N15",
+        "N20",
+        "N25"
+      ],
+      "source_section_ids": [
+        "067",
+        "068",
+        "069",
+        "070",
+        "071",
+        "072",
+        "073",
+        "074",
+        "075",
+        "156"
+      ],
+      "source_checkbox_count": 455,
+      "added_requirement_ids": [],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native network stack, services, firewall, or TLS integration exists"
+      ],
+      "exit_gate": "supported protocols interoperate and survive hostile corpora without memory/authority escape; signed packages fetch over untrusted networks and still verify offline."
+    },
+    {
+      "id": "N27",
+      "title": "Display Bootstrap, Virtio GPU, and Native Graphics Research",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N27.1",
+          "status": "not_started",
+          "description": "Preserve GOP framebuffer metadata and a permanent safe mode independent of native GPU code."
+        },
+        {
+          "id": "N27.2",
+          "status": "not_started",
+          "description": "Implement pixel formats, clipping, damage, blits, alpha, scaling, color conversion, text primitives, double buffering, and deterministic reference images in a software renderer."
+        },
+        {
+          "id": "N27.3",
+          "status": "not_started",
+          "description": "Parse EDID/DisplayID only from lawful specs with strict bounds and safe fallback modes."
+        },
+        {
+          "id": "N27.4",
+          "status": "not_started",
+          "description": "Implement isolated virtio-gpu 2D resource/scanout/cursor/fence path before physical acceleration."
+        },
+        {
+          "id": "N27.5",
+          "status": "not_started",
+          "description": "Define native GPU kernel mediation only for capabilities, MMIO/IRQ/DMA assignment, memory objects, command buffers, fences, reset, and accounting; command validation lives outside PooleKernel."
+        },
+        {
+          "id": "N27.6",
+          "status": "not_started",
+          "description": "Keep RTX 5070 work a legal/documentation/firmware research lane: connector/scanout, memory, copy, command submission, synchronization, reset, and conformance cannot gate recovery or initial release."
+        },
+        {
+          "id": "N27.7",
+          "status": "not_started",
+          "description": "Define native graphics API and shader/SPIR-V/Vulkan/OpenGL compatibility only after security, memory, synchronization, and conformance strategy is accepted."
+        }
+      ],
+      "depends_on": [
+        "N16",
+        "N18",
+        "N20"
+      ],
+      "source_section_ids": [
+        "058",
+        "059",
+        "060",
+        "061"
+      ],
+      "source_checkbox_count": 172,
+      "added_requirement_ids": [
+        "ADD-GPU-001"
+      ],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native software renderer or virtio-gpu path exists; RTX support remains research"
+      ],
+      "exit_gate": "software and virtio graphics display deterministic frames, recover from compositor/driver failure, and preserve serial/GOP recovery. RTX claims require exact hardware and independent output evidence."
+    },
+    {
+      "id": "N28",
+      "title": "Audio, Media Policy, and Optional Peripherals",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N28.1",
+          "status": "not_started",
+          "description": "Define audio device/stream/buffer/format/clock/xrun/mixer/capture/security APIs and DMA ownership."
+        },
+        {
+          "id": "N28.2",
+          "status": "not_started",
+          "description": "Select one exact Tier 1 HDA controller/codec path, likely Realtek `DEV_0897`, before NVIDIA HDA or USB audio expansion."
+        },
+        {
+          "id": "N28.3",
+          "status": "not_started",
+          "description": "Implement isolated HDA reset, CORB/RIRB, codec discovery, widgets/routes, stream descriptors, interrupts, jack state, and timeout recovery."
+        },
+        {
+          "id": "N28.4",
+          "status": "not_started",
+          "description": "Implement user-space audio server with per-app permissions, mixing, resampling, routing, volume limits, privacy indicators, latency and glitch budgets."
+        },
+        {
+          "id": "N28.5",
+          "status": "not_started",
+          "description": "Treat printing, scanning, camera, capture, codecs, and media services as profile-scoped ports with sandboxed parsers and explicit patent/license review."
+        }
+      ],
+      "depends_on": [
+        "N16",
+        "N20"
+      ],
+      "source_section_ids": [
+        "062",
+        "104",
+        "105"
+      ],
+      "source_checkbox_count": 96,
+      "added_requirement_ids": [],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native audio path or media/peripheral service exists"
+      ],
+      "exit_gate": "selected playback/capture path meets glitch, latency, privacy, and crash-recovery gates; malformed streams/codecs cannot escape service sandboxes."
+    },
+    {
+      "id": "N29",
+      "title": "Compositor, Text, Desktop, GUI Toolkit, and Accessibility",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N29.1",
+          "status": "not_started",
+          "description": "Freeze a capability-authenticated display protocol for surfaces, buffers, damage, input, focus, clipboard, drag/drop, portals, security labels, and version negotiation."
+        },
+        {
+          "id": "N29.2",
+          "status": "not_started",
+          "description": "Implement compositor scene graph, software composition, occlusion, transforms, clipping, frame callbacks, presentation timing, direct scanout gates, and crash recovery."
+        },
+        {
+          "id": "N29.3",
+          "status": "not_started",
+          "description": "Implement window/session policy, trusted system UI, notifications, settings, task switching, multi-display rules, safe mode, and anti-spoofing boundaries."
+        },
+        {
+          "id": "N29.4",
+          "status": "not_started",
+          "description": "Port or implement font rasterization/shaping with Unicode 17 segmentation, normalization, bidi, line breaking, fallback, locale, input method, and security handling."
+        },
+        {
+          "id": "N29.5",
+          "status": "not_started",
+          "description": "Build the native GUI toolkit, layout, controls, theming, accessibility semantics, clipboard, drag/drop, portals, and desktop IPC."
+        },
+        {
+          "id": "N29.6",
+          "status": "not_started",
+          "description": "Implement original Liquid Glass materials with bounded blur/transparency, balanced palette, stable dimensions, no information-obscuring effects, and CPU/GPU/memory/power budgets."
+        },
+        {
+          "id": "N29.7",
+          "status": "not_started",
+          "description": "Implement keyboard-only operation, focus, magnification, high contrast, text scaling, color-vision modes, screen reader, speech/captions, braille boundary, reduced transparency/motion, and automated/manual accessibility suites."
+        },
+        {
+          "id": "N29.8",
+          "status": "not_started",
+          "description": "Implement a static firmware-safe PooleOS mark, early-userspace animated Liquid Glass boot identity, reduced-motion/static fallback, serial diagnostics, and signed stage markers outside presentation."
+        }
+      ],
+      "depends_on": [
+        "N18",
+        "N20",
+        "N21",
+        "N27"
+      ],
+      "source_section_ids": [
+        "101",
+        "102",
+        "103",
+        "160",
+        "161"
+      ],
+      "source_checkbox_count": 322,
+      "added_requirement_ids": [
+        "ADD-UI-001"
+      ],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native compositor, PooleGlass desktop, toolkit, accessibility, or boot identity exists"
+      ],
+      "exit_gate": "the complete desktop runs through software rendering at minimum profile, survives compositor/GPU failure, passes accessibility and anti-spoofing gates, and never makes animation evidence of boot correctness."
+    },
+    {
+      "id": "N30",
+      "title": "Application Model, SDK, Sandboxing, and Porting",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N30.1",
+          "status": "not_started",
+          "description": "Freeze native application ABI, executable/package identity, lifecycle, activation, single-instance, background, URL/MIME, notification, and settings contracts."
+        },
+        {
+          "id": "N30.2",
+          "status": "not_started",
+          "description": "Build SDK/sysroot, headers, generated IPC bindings, templates, compiler/linker profiles, debugger, emulator, docs, examples, and ABI checker."
+        },
+        {
+          "id": "N30.3",
+          "status": "not_started",
+          "description": "Define signed capability manifests, sandbox roots, device/network/file/clipboard portals, user consent, revocation, quotas, and audit."
+        },
+        {
+          "id": "N30.4",
+          "status": "not_started",
+          "description": "Add application crash, update, migration, uninstall, data retention, backup, and compatibility behavior."
+        },
+        {
+          "id": "N30.5",
+          "status": "not_started",
+          "description": "Port third-party libraries/apps only through provenance, license, sandbox, test, and native-ABI adaptation; emulation/compatibility layers remain optional post-v1 services."
+        }
+      ],
+      "depends_on": [
+        "N20",
+        "N21",
+        "N23",
+        "N29"
+      ],
+      "source_section_ids": [
+        "106"
+      ],
+      "source_checkbox_count": 70,
+      "added_requirement_ids": [],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native application ABI, SDK, sandbox, or portal model exists"
+      ],
+      "exit_gate": "an independently built sample app installs, runs, updates, rolls back, and uninstalls without undeclared authority or host dependencies."
+    },
+    {
+      "id": "N31",
+      "title": "Debugging, Crash Analysis, Tracing, and Performance Methodology",
+      "status": "partial",
+      "subphases": [
+        {
+          "id": "N31.1",
+          "status": "not_started",
+          "description": "Generate split symbols, build IDs, source maps, unwind data, symbol server/index, and release/debug correspondence."
+        },
+        {
+          "id": "N31.2",
+          "status": "not_started",
+          "description": "Implement serial and remote kernel debugger with CPU/task/memory/register/breakpoint/watchpoint controls and authentication boundary."
+        },
+        {
+          "id": "N31.3",
+          "status": "not_started",
+          "description": "Implement user debugger, core dumps, secret redaction/encryption, quotas, and symbolized postmortem tools."
+        },
+        {
+          "id": "N31.4",
+          "status": "not_started",
+          "description": "Implement kernel crash dumps to reserved memory/storage/network only after recursion, corruption, and privacy behavior is tested."
+        },
+        {
+          "id": "N31.5",
+          "status": "not_started",
+          "description": "Build trace buffers, event schemas, clock correlation, loss accounting, privilege filters, required scheduler/IPC/memory/IRQ/driver/storage/network/PDC events, and export."
+        },
+        {
+          "id": "N31.6",
+          "status": "not_started",
+          "description": "Expose PMU and system metrics with virtualization, multiplexing, overflow, side-channel, and measurement-overhead controls."
+        },
+        {
+          "id": "N31.7",
+          "status": "partial",
+          "description": "Freeze benchmark hypotheses, controls, warmup, sample size, statistics, outliers, thermal/power state, correctness equivalence, total cost, raw data, and independent reproduction."
+        }
+      ],
+      "depends_on": [
+        "N6",
+        "N14",
+        "N20"
+      ],
+      "source_section_ids": [
+        "113",
+        "114",
+        "115",
+        "116"
+      ],
+      "source_checkbox_count": 193,
+      "added_requirement_ids": [],
+      "current_evidence": [
+        "existing signed receipt and benchmark methodology artifacts"
+      ],
+      "current_gaps": [
+        "No native debugger, crash dump, trace, PMU, or system metrics implementation exists"
+      ],
+      "exit_gate": "every release crash and performance result is tied to exact symbols, build, hardware, trace loss, methodology, raw data, and claim boundary."
+    },
+    {
+      "id": "N32",
+      "title": "PDC Canonical Mathematics, Portable Runtime, and Guarded Backends",
+      "status": "partial",
+      "subphases": [
+        {
+          "id": "N32.1",
+          "status": "complete",
+          "description": "Preserve locked source intake, formulas, matrices, exact verifier packages, representation tags, golden/metamorphic vectors, Q/P, and finite claim boundaries."
+        },
+        {
+          "id": "N32.2",
+          "status": "not_started",
+          "description": "Complete source-bound signed dynamics and benchmark reproduction before native port promotion."
+        },
+        {
+          "id": "N32.3",
+          "status": "not_started",
+          "description": "Freeze a portable deterministic C17 `libpdc` ABI with fixed widths, explicit buffers, no hidden allocation, checked arithmetic, scalar reference, and stable errors."
+        },
+        {
+          "id": "N32.4",
+          "status": "not_started",
+          "description": "Differentially test host Python, portable C, PooleOS user-space scalar, SIMD, RAM-pool, GPU, and bounded rescue paths against identical vectors."
+        },
+        {
+          "id": "N32.5",
+          "status": "not_started",
+          "description": "Implement CPU route candidates only after output equivalence, setup cost, repetitions, confidence, invalidation, regret, and rollback gates."
+        },
+        {
+          "id": "N32.6",
+          "status": "not_started",
+          "description": "Implement RAM pools with ownership, alignment, NUMA, lifetime, zeroization, poisoning, retention, pressure, and fallback gates."
+        },
+        {
+          "id": "N32.7",
+          "status": "not_started",
+          "description": "Implement GPU routes only after resident eager kernels, transfer accounting, guard profiles, reset/failure recovery, deterministic outputs where declared, and CPU fallback."
+        },
+        {
+          "id": "N32.8",
+          "status": "not_started",
+          "description": "Keep Q/P classical and measured-field scoped; no finite benchmark becomes a universal physical, quantum, medical, financial, or hardware claim."
+        }
+      ],
+      "depends_on": [
+        "N3",
+        "N20",
+        "N31"
+      ],
+      "source_section_ids": [],
+      "source_checkbox_count": 0,
+      "added_requirement_ids": [
+        "ADD-PDC-001"
+      ],
+      "current_evidence": [
+        "PDC-MATH-0.1",
+        "PDC-REP-0.1",
+        "PDC-GOLDEN-0.2",
+        "PDC-QP-0.1",
+        "PDC-QP-STABILITY-0.1"
+      ],
+      "current_gaps": [
+        "Signed dynamics and portable/native C/CPU/RAM/GPU execution remain open"
+      ],
+      "exit_gate": "every supported native backend matches the canonical oracle and survives invalidation/failure; signed dynamics are reproduced; no optimizer can bypass capabilities or correctness checks."
+    },
+    {
+      "id": "N33",
+      "title": "PDC Native Control Plane and Bounded Actuation Lanes",
+      "status": "partial",
+      "subphases": [
+        {
+          "id": "N33.1",
+          "status": "partial",
+          "description": "Define immutable versioned observations, units, validity, uncertainty, missing data, sampling, overhead, and privacy."
+        },
+        {
+          "id": "N33.2",
+          "status": "not_started",
+          "description": "Build topology/model service for CPUs, memory, devices, queues, workloads, locality, dependency, contention, defect confidence, decay, divergence, and bounded snapshots."
+        },
+        {
+          "id": "N33.3",
+          "status": "not_started",
+          "description": "Run planner with no hardware authority; produce signed immutable proposals with preconditions, expected benefit, cost, duration, invariants, rollback, conflicts, evidence, and expiry."
+        },
+        {
+          "id": "N33.4",
+          "status": "not_started",
+          "description": "Run independent policy gate to authenticate, validate schema/target/ownership/action/state/budget/fairness/thermal/security/consent/rollback/watchdog and fail closed."
+        },
+        {
+          "id": "N33.5",
+          "status": "not_started",
+          "description": "Give each actuator only lane-specific capabilities; capture prestate, lease resource, apply the smallest action, verify, expire, cancel, restore, and receipt every operation."
+        },
+        {
+          "id": "N33.6",
+          "status": "not_started",
+          "description": "Run an independent watchdog that can roll back and disable a lane without planner, actuator, GUI, or network."
+        },
+        {
+          "id": "N33.7",
+          "status": "not_started",
+          "description": "Implement observation first, proposal second, then one reversible actuator at a time across CPU, memory, storage, network, GPU/display, and startup lanes."
+        },
+        {
+          "id": "N33.8",
+          "status": "partial",
+          "description": "Require neutral/conventional controls, total-cost accounting, output equivalence, repeated trials, bounded promotion, expiry, and automatic demotion."
+        }
+      ],
+      "depends_on": [
+        "N15",
+        "N21",
+        "N31",
+        "N32",
+        "N34"
+      ],
+      "source_section_ids": [
+        "117",
+        "118",
+        "119",
+        "120",
+        "121",
+        "122",
+        "123"
+      ],
+      "source_checkbox_count": 337,
+      "added_requirement_ids": [],
+      "current_evidence": [
+        "existing PDC receipt schemas and guarded-route source documents; no native services"
+      ],
+      "current_gaps": [
+        "No native PDC observer/planner/gate/actuator/watchdog/rollback service exists"
+      ],
+      "exit_gate": "observation and proposal modes are safe under hostile inputs; each promoted actuator has independent rollback and watchdog; PDC has no authority over boot trust, recovery, keys, thermal hard limits, or firmware flashing."
+    },
+    {
+      "id": "N34",
+      "title": "PooleGlyph, PGB2, PGVM2, and System Policy",
+      "status": "blocked",
+      "subphases": [
+        {
+          "id": "N34.1",
+          "status": "blocked",
+          "description": "Continue tandem development from live Phase 65 and complete Phase 66 executable Core IR audit without rewriting user-generated evidence."
+        },
+        {
+          "id": "N34.2",
+          "status": "not_started",
+          "description": "Freeze grammar, Unicode, tokens, precedence, declarations, modules, visibility, types/effects, capabilities, resources, permissions, lifecycle, services, packages, deployment, policy, contracts, and compatibility."
+        },
+        {
+          "id": "N34.3",
+          "status": "not_started",
+          "description": "Harden source loader, lexer, parser, recovery, spans, AST, name/module resolution, type/effect/capability checks, constant evaluation, cycle checks, lint/format/LSP, and fuzz/differential tests."
+        },
+        {
+          "id": "N34.4",
+          "status": "not_started",
+          "description": "Freeze deterministic Core IR and independently validate lowering, canonical serialization, policy/service/resource/deployment forms, explanations, hashes, and signatures."
+        },
+        {
+          "id": "N34.5",
+          "status": "not_started",
+          "description": "Freeze PGB2 binary package framing, sections, canonical bytes, digests, signatures, version/feature negotiation, capability declarations, resource limits, trace and replay."
+        },
+        {
+          "id": "N34.6",
+          "status": "not_started",
+          "description": "Implement PGVM2 verifier and bounded deterministic runtime with typed instructions, memory, stack, calls, traps, quotas, deadlines, cancellation, cleanup, host calls, and no ambient kernel/device access."
+        },
+        {
+          "id": "N34.7",
+          "status": "not_started",
+          "description": "Generate only declarative kernel boot policy and user-space service manifests; policy application is transactional, signed, simulated, rollbackable, bounded, and safe-mode optional."
+        },
+        {
+          "id": "N34.8",
+          "status": "not_started",
+          "description": "Build compiler, package, formatter, linter, simulator, debugger, trace, diff, migration, test, docs, standard library, compatibility, and publisher tools."
+        }
+      ],
+      "depends_on": [
+        "N13",
+        "N14",
+        "N20"
+      ],
+      "source_section_ids": [
+        "124"
+      ],
+      "source_checkbox_count": 102,
+      "added_requirement_ids": [
+        "ADD-PGL-001"
+      ],
+      "current_evidence": [
+        "PooleGlyph Phase 65 checkpoint",
+        "draft PGB2/PGVM2 trap evidence"
+      ],
+      "current_gaps": [
+        "PooleGlyph Phase 66 is absent",
+        "PGB2 and PGVM2 v1 are not frozen or native"
+      ],
+      "exit_gate": "Phase 66 promotion is accepted; PGB2/PGVM2 v1 is frozen; independent verifier rejects malformed/over-authorized programs; native runtime passes replay, resource, cancellation, and hostile host-call tests; recovery does not require PooleGlyph."
+    },
+    {
+      "id": "N35",
+      "title": "Reliability, Watchdogs, Fault Containment, Virtualization, and RAS",
+      "status": "partial",
+      "subphases": [
+        {
+          "id": "N35.1",
+          "status": "partial",
+          "description": "Implement scheduler, service, storage, GPU, network firmware, PDC, and exact hardware watchdogs with independent ownership and false-positive tests."
+        },
+        {
+          "id": "N35.2",
+          "status": "not_started",
+          "description": "Escalate from local cancel/restart/reset through degraded mode, quarantine, safe-mode reboot, and loop prevention; persist exact reason and counts."
+        },
+        {
+          "id": "N35.3",
+          "status": "not_started",
+          "description": "Define service and driver state-reconstruction contracts so restart never reuses stale handles, DMA, transactions, or completions."
+        },
+        {
+          "id": "N35.4",
+          "status": "not_started",
+          "description": "Initialize machine-check/RAS, APEI/HEST, PCIe AER, NVMe health, ECC if exposed, bad-page retirement, device quarantine, and persistent error records."
+        },
+        {
+          "id": "N35.5",
+          "status": "not_started",
+          "description": "Keep AMD SVM/hypervisor support optional and outside v1 TCB unless a later profile needs it; fuzz VM exits, hypercalls, emulation, assignment, and snapshots."
+        },
+        {
+          "id": "N35.6",
+          "status": "not_started",
+          "description": "Run long-duration failure storms and verify bounded recovery, no reboot loops, no hidden data loss, and useful user diagnostics."
+        }
+      ],
+      "depends_on": [
+        "N16",
+        "N21",
+        "N24",
+        "N31",
+        "N33"
+      ],
+      "source_section_ids": [
+        "125",
+        "126",
+        "127"
+      ],
+      "source_checkbox_count": 61,
+      "added_requirement_ids": [],
+      "current_evidence": [
+        "bounded static capability and trap simulations; no native containment"
+      ],
+      "current_gaps": [
+        "No native watchdog, driver restart, RAS, or fault-containment evidence exists"
+      ],
+      "exit_gate": "supported failures either recover locally or enter a known safe state; integrity uncertainty stops operation; no watchdog/planner/actuator can suppress independent recovery."
+    },
+    {
+      "id": "N36",
+      "title": "Verification, Fuzzing, Fault Injection, Security, and Conformance",
+      "status": "partial",
+      "subphases": [
+        {
+          "id": "N36.1",
+          "status": "partial",
+          "description": "Build host unit, kernel in-situ, user-space, property, model-based, ABI, parser, crypto, time, Unicode, PooleGlyph, and PDC tests."
+        },
+        {
+          "id": "N36.2",
+          "status": "not_started",
+          "description": "Build bootloader-kernel, kernel-init, process/IPC, driver/device, storage/FS, network/TLS, display/input/audio, package/update, installer/recovery, and PDC integration tests."
+        },
+        {
+          "id": "N36.3",
+          "status": "not_started",
+          "description": "Build cold/warm/repeated boot, CPU/RAM bounds, full disk, missing/failed devices, malformed media, revoked update, service/driver crash, safe mode, previous slot, recovery, and soak tests."
+        },
+        {
+          "id": "N36.4",
+          "status": "partial",
+          "description": "Fuzz every parser and boundary listed in section 129 with seed retention, coverage, minimization, deduplication, sanitizer and disposable-native-VM execution."
+        },
+        {
+          "id": "N36.5",
+          "status": "not_started",
+          "description": "Inject every failure listed in section 130 plus schedule, capability revocation, stale reply, DMA lease, driver restart, and model divergence failures."
+        },
+        {
+          "id": "N36.6",
+          "status": "not_started",
+          "description": "Run automated storage power-cut/corruption tests across all declared durability boundaries and retain disk images/health logs."
+        },
+        {
+          "id": "N36.7",
+          "status": "not_started",
+          "description": "Run static and dynamic security, privilege, auth, permission, sandbox, package/update/boot, DMA/USB/network/radio, TOCTOU, secret, dump/log, and external review."
+        },
+        {
+          "id": "N36.8",
+          "status": "not_started",
+          "description": "Run exact firmware/hardware, protocol interoperability, POSIX subset, graphics API, upgrade, accessibility, and published support conformance."
+        },
+        {
+          "id": "N36.9",
+          "status": "not_started",
+          "description": "Add schedule exploration, mutation testing, symbolic execution where tractable, formal model counterexamples, and proof-assumption checks."
+        },
+        {
+          "id": "N36.10",
+          "status": "not_started",
+          "description": "Apply section 140 definition of done to every component; no happy-path-only promotion."
+        }
+      ],
+      "depends_on": [
+        "N4",
+        "N31",
+        "N35"
+      ],
+      "source_section_ids": [
+        "128",
+        "129",
+        "130",
+        "131",
+        "132",
+        "133",
+        "134",
+        "140"
+      ],
+      "source_checkbox_count": 272,
+      "added_requirement_ids": [
+        "ADD-ASSURE-002",
+        "ADD-TEST-001"
+      ],
+      "current_evidence": [
+        "Cycle 79 host baseline: 345 tests",
+        "existing parser/artifact negative tests"
+      ],
+      "current_gaps": [
+        "No native system, power-loss, hardware, accessibility, soak, or external security suite exists"
+      ],
+      "exit_gate": "all required suites pass from clean inputs; failures and flakes are retained and classified; external review closes critical/high findings; no coverage claim exceeds measured evidence."
+    },
+    {
+      "id": "N37",
+      "title": "Supply Chain, Release, Signing, Operations, Documentation, and Manifest",
+      "status": "partial",
+      "subphases": [
+        {
+          "id": "N37.1",
+          "status": "partial",
+          "description": "Generate complete source/dependency/firmware/data inventories, SPDX 3.0.1 SBOM, vulnerabilities, licenses, patches, and reproducibility metadata."
+        },
+        {
+          "id": "N37.2",
+          "status": "not_started",
+          "description": "Generate SLSA 1.2 source/build provenance and in-toto-style signed links across checkout, code review, build, test, image, sign, publish, and independent verification."
+        },
+        {
+          "id": "N37.3",
+          "status": "not_started",
+          "description": "Define versions, channels, support lifetimes, compatibility promises, release branches, freeze, candidate, reproducibility, security, performance, accessibility, hardware, and rollback gates."
+        },
+        {
+          "id": "N37.4",
+          "status": "not_started",
+          "description": "Separate offline root, online metadata, boot, package, update, receipt, and development keys; document ceremony, quorum, backup, rotation, revocation, expiry, destruction, and incident drills."
+        },
+        {
+          "id": "N37.5",
+          "status": "not_started",
+          "description": "Generate the complete section 147 release manifest including exact bootloader/kernel/system/recovery/driver/firmware/ABI/PooleGlyph/PDC/SBOM/provenance/test/benchmark/signature fields."
+        },
+        {
+          "id": "N37.6",
+          "status": "not_started",
+          "description": "Publish architecture, boot, kernel, driver, ABI, filesystem, package/update, security, privacy, recovery, admin, SDK, compatibility, hardware, release, and incident documentation."
+        },
+        {
+          "id": "N37.7",
+          "status": "not_started",
+          "description": "Establish vulnerability intake, CVE response, telemetry/privacy operation, update revocation, support bundles, disaster recovery, and maintenance ownership."
+        }
+      ],
+      "depends_on": [
+        "N1",
+        "N3",
+        "N23",
+        "N36"
+      ],
+      "source_section_ids": [
+        "135",
+        "136",
+        "137",
+        "138",
+        "139",
+        "147"
+      ],
+      "source_checkbox_count": 203,
+      "added_requirement_ids": [
+        "ADD-SUPPLY-001"
+      ],
+      "current_evidence": [
+        "Cycle 79 consistency release gate and content-addressed source artifacts"
+      ],
+      "current_gaps": [
+        "No native SBOM/provenance/signing ceremony/release manifest or source-controlled release exists"
+      ],
+      "exit_gate": "an independent verifier can reconstruct every release artifact and approval from immutable signed records; key compromise and revocation drills pass; support and recovery documentation is complete."
+    },
+    {
+      "id": "N38",
+      "title": "Dependency Milestones, Hardware Qualification, and Readiness Gates",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N38.1",
+          "status": "not_started",
+          "description": "Reissue milestone 0 as native constitution/toolchain/QEMU reproducibility."
+        },
+        {
+          "id": "N38.2",
+          "status": "not_started",
+          "description": "Demonstrate PooleBoot UEFI proof of life in OVMF and target firmware."
+        },
+        {
+          "id": "N38.3",
+          "status": "not_started",
+          "description": "Demonstrate PooleKernel entry, exceptions, memory, panic, interrupts, time, and SMP."
+        },
+        {
+          "id": "N38.4",
+          "status": "not_started",
+          "description": "Demonstrate ring 3, capabilities, IPC, root task, driver domains, and service restart."
+        },
+        {
+          "id": "N38.5",
+          "status": "not_started",
+          "description": "Demonstrate virtio and exact Tier 1 storage/input/network paths before wider hardware."
+        },
+        {
+          "id": "N38.6",
+          "status": "not_started",
+          "description": "Demonstrate PooleFS persistent root, power-loss recovery, userland, service manager, login, shell, package, and update."
+        },
+        {
+          "id": "N38.7",
+          "status": "not_started",
+          "description": "Demonstrate software desktop, Liquid Glass fallback, accessibility, audio, and selected connectivity."
+        },
+        {
+          "id": "N38.8",
+          "status": "not_started",
+          "description": "Demonstrate observer-only PDC, signed receipts, one bounded actuator, watchdog, and rollback."
+        },
+        {
+          "id": "N38.9",
+          "status": "not_started",
+          "description": "Pass first physical boot checklist with exact firmware/device IDs, immutable media hash, serial/graphical logs, shutdown, reboot, and safe mode."
+        },
+        {
+          "id": "N38.10",
+          "status": "not_started",
+          "description": "Pass daily-driver gate only after data-loss, boot-loop, privilege, recovery, update, device, accessibility, and soak blockers are closed."
+        },
+        {
+          "id": "N38.11",
+          "status": "not_started",
+          "description": "Pass public alpha gate only with installer/recovery safety, signed media, exact limitations, support path, and incident readiness."
+        }
+      ],
+      "depends_on": [
+        "N23",
+        "N24",
+        "N26",
+        "N29",
+        "N30",
+        "N33",
+        "N34",
+        "N36",
+        "N37"
+      ],
+      "source_section_ids": [
+        "142",
+        "143",
+        "144",
+        "145"
+      ],
+      "source_checkbox_count": 247,
+      "added_requirement_ids": [],
+      "current_evidence": [],
+      "current_gaps": [
+        "No native milestone, first hardware boot, daily-driver, or public-alpha gate has passed"
+      ],
+      "exit_gate": "every readiness label is generated from leaf evidence and exact hardware profiles; emulator, one boot, or one machine never becomes a general compatibility claim."
+    },
+    {
+      "id": "N39",
+      "title": "Reproducible Signed Native ISO and Production Release",
+      "status": "not_started",
+      "subphases": [
+        {
+          "id": "N39.1",
+          "status": "not_started",
+          "description": "Freeze UEFI-only ISO profile, El Torito EFI image, GPT/ESP layout, deterministic volume metadata, boot paths, system/recovery slots, and source archive placement."
+        },
+        {
+          "id": "N39.2",
+          "status": "not_started",
+          "description": "Assemble only PooleBoot, PooleKernel, native system bundles, native drivers/services, PooleGlyph/PGB2/PGVM2, PDC, PooleGlass, installer, recovery, manifests, and permitted third-party assets."
+        },
+        {
+          "id": "N39.3",
+          "status": "not_started",
+          "description": "Prove architecture conformance: no Linux kernel, Buildroot rootfs, Debian package database, GRUB/Limine, systemd, or undeclared host artifact exists."
+        },
+        {
+          "id": "N39.4",
+          "status": "not_started",
+          "description": "Reproduce unsigned artifacts and ISO bytes on two clean independent builders; document signing timestamp/determinism boundaries and bind exact signed outputs."
+        },
+        {
+          "id": "N39.5",
+          "status": "not_started",
+          "description": "Sign bootloader, manifest, kernel, system, recovery, packages, update metadata, SBOM, provenance, and final ISO/checksum records through the release ceremony."
+        },
+        {
+          "id": "N39.6",
+          "status": "not_started",
+          "description": "Boot the exact signed ISO from clean media across every declared OVMF/QEMU CPU, RAM, firmware, graphics, storage, network, and fault profile."
+        },
+        {
+          "id": "N39.7",
+          "status": "not_started",
+          "description": "Boot and operate the exact signed ISO on every Tier 1 physical profile; test live, install, first boot, normal/safe/previous/recovery, shutdown/reboot, update/rollback, damaged media, and unsupported hardware."
+        },
+        {
+          "id": "N39.8",
+          "status": "not_started",
+          "description": "Verify distributed bytes equal tested/signed bytes and publish source, checksums, signatures, manifest, SBOM, provenance, limitations, hardware matrix, recovery, and support lifecycle."
+        }
+      ],
+      "depends_on": [
+        "N37",
+        "N38"
+      ],
+      "source_section_ids": [],
+      "source_checkbox_count": 0,
+      "added_requirement_ids": [
+        "ADD-REPRO-001"
+      ],
+      "current_evidence": [],
+      "current_gaps": [
+        "No reproducible signed native ISO, clean-media boot, or exact-byte release receipt exists"
+      ],
+      "exit_gate": "all N0-N39 required gates are complete; independent clean builds reproduce declared bytes; exact distributed signed media boots and recovers in every supported profile; external release review accepts the evidence; `production_ready=true` is signed for that exact ISO hash only."
+    }
+  ],
+  "implementation_flags": [
+    {
+      "id": "FLAG-NATIVE-SCM-001",
+      "class": "STOP_SHIP",
+      "status": "open",
+      "phase_id": "N1",
+      "closure_condition": "Put PooleOS under reviewed source control with immutable release revisions",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json"
+      ]
+    },
+    {
+      "id": "FLAG-NATIVE-ADR-001",
+      "class": "BLOCKER",
+      "status": "open",
+      "phase_id": "N0",
+      "closure_condition": "Ratify the native architecture, TCB, reuse, language, ABI, driver, filesystem, and release ADR set",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json"
+      ]
+    },
+    {
+      "id": "FLAG-NATIVE-BOOT-001",
+      "class": "STOP_SHIP",
+      "status": "open",
+      "phase_id": "N5",
+      "closure_condition": "Boot reproducible PooleBoot PE32+ and transfer through the frozen handoff",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json"
+      ]
+    },
+    {
+      "id": "FLAG-NATIVE-KERNEL-001",
+      "class": "STOP_SHIP",
+      "status": "open",
+      "phase_id": "N13",
+      "closure_condition": "Boot PooleKernel and enforce memory, capabilities, IPC, and ring-3 execution",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json"
+      ]
+    },
+    {
+      "id": "FLAG-NATIVE-IOMMU-001",
+      "class": "STOP_SHIP",
+      "status": "open",
+      "phase_id": "N11",
+      "closure_condition": "Confine all bus-mastering drivers with DMA and interrupt remapping",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json"
+      ]
+    },
+    {
+      "id": "FLAG-NATIVE-DRIVER-001",
+      "class": "STOP_SHIP",
+      "status": "open",
+      "phase_id": "N16",
+      "closure_condition": "Prove driver crash/reset/revocation without stale authority",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json"
+      ]
+    },
+    {
+      "id": "FLAG-NATIVE-FS-001",
+      "class": "STOP_SHIP",
+      "status": "open",
+      "phase_id": "N19",
+      "closure_condition": "Pass declared PooleFS durability and randomized power-cut gates",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json"
+      ]
+    },
+    {
+      "id": "FLAG-NATIVE-UPDATE-001",
+      "class": "STOP_SHIP",
+      "status": "open",
+      "phase_id": "N23",
+      "closure_condition": "Pass signed A/B update, rollback, compromise, and recovery gates",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json"
+      ]
+    },
+    {
+      "id": "FLAG-NATIVE-SEC-001",
+      "class": "STOP_SHIP",
+      "status": "open",
+      "phase_id": "N15",
+      "closure_condition": "Pass boot trust, crypto/RNG, capability, isolation, and external security review",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json"
+      ]
+    },
+    {
+      "id": "FLAG-NATIVE-UI-001",
+      "class": "REQUIRED",
+      "status": "open",
+      "phase_id": "N29",
+      "closure_condition": "Pass PooleGlass accessibility, software fallback, and recovery UI gates",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json"
+      ]
+    },
+    {
+      "id": "FLAG-NATIVE-PGL-001",
+      "class": "BLOCKER",
+      "status": "open",
+      "phase_id": "N34",
+      "closure_condition": "Accept PooleGlyph Phase 66 and freeze PGB2/PGVM2 v1",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json"
+      ]
+    },
+    {
+      "id": "FLAG-NATIVE-PDC-001",
+      "class": "REQUIRED",
+      "status": "open",
+      "phase_id": "N32",
+      "closure_condition": "Reproduce signed dynamics and pass native/backend differential gates",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json"
+      ]
+    },
+    {
+      "id": "FLAG-NATIVE-HW-001",
+      "class": "STOP_SHIP",
+      "status": "open",
+      "phase_id": "N38",
+      "closure_condition": "Qualify exact Tier 1 hardware, firmware, media, drivers, and recovery",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json"
+      ]
+    },
+    {
+      "id": "FLAG-NATIVE-ISO-001",
+      "class": "STOP_SHIP",
+      "status": "open",
+      "phase_id": "N39",
+      "closure_condition": "Reproduce and boot the exact signed native ISO in clean QEMU and physical profiles",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json"
+      ]
+    },
+    {
+      "id": "FLAG-NATIVE-REVIEW-001",
+      "class": "STOP_SHIP",
+      "status": "open",
+      "phase_id": "N37",
+      "closure_condition": "Close critical/high independent kernel, filesystem, update, security, and release findings",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json"
+      ]
+    },
+    {
+      "id": "FLAG-BUILDROOT-LEGACY-001",
+      "class": "SUPERSEDED",
+      "status": "closed",
+      "phase_id": "N0",
+      "closure_condition": "Keep Buildroot as historical non-promoting reference evidence",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json"
+      ]
+    }
+  ],
+  "gap_summary": {
+    "native_program_gap_count": 20,
+    "native_program_gaps": [
+      "The native repository and byte-bound ADR baseline exist locally, but remote publication, protected review, signed tags, and cryptographic ADR ratification remain open",
+      "No hermetic native compiler/sysroot/build/image toolchain",
+      "No native-only QEMU/OVMF/VIRTIO reference profile or formal state models",
+      "No PooleBoot PE32+ UEFI loader or frozen boot protocol",
+      "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path",
+      "No native CPU, interrupts, time, SMP, physical memory, virtual memory, or reclaim implementation",
+      "No native ACPI/AML/SMBIOS/PCIe resource graph or exact platform qualification",
+      "No native DMA/IOMMU/interrupt-remapping confinement",
+      "No native scheduler, task, syscall, capability, IPC, isolation, async I/O, or quota implementation",
+      "No native security/crypto/TPM/secrets/MAC/privacy implementation or external review",
+      "No isolated native driver domains or virtio reference drivers",
+      "No native block/NVMe/USB/input/VFS/PooleFS persistent path",
+      "No native user ABI, libc, init, service manager, login, shell, terminal, package, update, installer, or recovery",
+      "No native network, graphics, audio, compositor, PooleGlass, accessibility, or application platform",
+      "No source-bound signed PDC dynamics or portable/native PDC backends",
+      "No native PDC control-plane services or bounded actuator proof",
+      "PooleGlyph Phase 66, PGB2 v1, and PGVM2 v1 remain open",
+      "No native integrated fuzz/fault/power-loss/security/conformance/soak evidence",
+      "No native SBOM/provenance/signing ceremony/operations/release manifest",
+      "No reproducible signed native ISO or exact clean-media QEMU/physical release receipt"
+    ],
+    "historical_release_gate_gap_count": 41,
+    "historical_release_gaps_are_non_promoting": true
+  },
+  "immediate_next_move": {
+    "id": "N3-TOOLCHAIN-001",
+    "phase_ids": [
+      "N3"
+    ],
+    "title": "Qualify and pin the freestanding PooleBoot and PooleKernel toolchain without promoting unsigned architecture drafts",
+    "entry_evidence": [
+      "docs/adr/0003-language-and-toolchain-split.md",
+      "runs/native_architecture_baseline.json",
+      "official Rust target documentation"
+    ],
+    "exit_evidence": [
+      "pinned host-tool manifest",
+      "frozen target specifications",
+      "reproducible empty PE32+ and ELF64 fixtures",
+      "host-leakage negative tests"
+    ],
+    "blocked": false
+  },
+  "claim_boundaries": [
+    "Buildroot and Linux artifacts are historical reference evidence and cannot satisfy native PooleOS gates.",
+    "Checklist mapping is not implementation completion.",
+    "Host simulations and schemas are not native kernel enforcement.",
+    "PooleGlyph Phase 65 metadata cannot be promoted before Phase 66 executable evidence.",
+    "Finite PDC/QP evidence remains bounded to its declared classical models and protocols.",
+    "A file named ISO is not reproducible signed clean-media boot evidence."
+  ]
+}

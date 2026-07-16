@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/pdc-qp-stability-receipt.schema.json",
+  "title": "PDC Q/P stability receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "contract_version", "created_utc", "status", "bindings", "environment", "benchmark_reproduction", "controlled_perturbations", "negative_checks", "digests", "summary", "claim_boundary", "remaining_scope"],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "artifact_kind": {"const": "pdc_qp_stability_receipt"},
+    "contract_version": {"const": "PDC-QP-STABILITY-0.1"},
+    "created_utc": {"type": "string", "minLength": 20},
+    "status": {"const": "pass"},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "environment": {"$ref": "#/$defs/environment"},
+    "benchmark_reproduction": {"$ref": "#/$defs/reproduction"},
+    "controlled_perturbations": {"$ref": "#/$defs/perturbations"},
+    "negative_checks": {"type": "array", "minItems": 14, "maxItems": 14, "items": {"$ref": "#/$defs/negative"}, "uniqueItems": true},
+    "digests": {"type": "object", "additionalProperties": false, "required": ["benchmark_reproduction_sha256", "controlled_perturbation_sha256", "negative_check_set_sha256"], "properties": {"benchmark_reproduction_sha256": {"$ref": "#/$defs/sha256"}, "controlled_perturbation_sha256": {"$ref": "#/$defs/sha256"}, "negative_check_set_sha256": {"$ref": "#/$defs/sha256"}}},
+    "summary": {"$ref": "#/$defs/summary"},
+    "claim_boundary": {"type": "array", "minItems": 5, "items": {"type": "string", "minLength": 20}, "uniqueItems": true},
+    "remaining_scope": {"type": "array", "minItems": 3, "items": {"type": "string", "minLength": 20}, "uniqueItems": true}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "nullable_number": {"type": ["number", "null"]},
+    "nullable_boolean": {"type": ["boolean", "null"]},
+    "bindings": {
+      "type": "object", "additionalProperties": false,
+      "required": ["reference_implementation_path", "reference_implementation_sha256", "evidence_implementation_path", "evidence_implementation_sha256", "contract_path", "contract_sha256", "qp_contract_path", "qp_contract_sha256", "qp_receipt_path", "qp_receipt_sha256", "runner_package_path", "runner_package_sha256", "result_package_path", "result_package_sha256"],
+      "properties": {
+        "reference_implementation_path": {"const": "runtime/pdc_qp_stability.py"}, "reference_implementation_sha256": {"$ref": "#/$defs/sha256"},
+        "evidence_implementation_path": {"const": "runtime/pdc_qp_stability_evidence.py"}, "evidence_implementation_sha256": {"$ref": "#/$defs/sha256"},
+        "contract_path": {"const": "runs/pdc_qp_stability_contract.json"}, "contract_sha256": {"$ref": "#/$defs/sha256"},
+        "qp_contract_path": {"const": "runs/pdc_qp_contract.json"}, "qp_contract_sha256": {"$ref": "#/$defs/sha256"},
+        "qp_receipt_path": {"const": "runs/pdc_qp_receipt.json"}, "qp_receipt_sha256": {"$ref": "#/$defs/sha256"},
+        "runner_package_path": {"type": "string", "minLength": 20}, "runner_package_sha256": {"const": "C5DE80C53F8E7F475D9D7D3CD4C63F62EC086BDFCC2A8D806762B069E6349720"},
+        "result_package_path": {"type": "string", "minLength": 20}, "result_package_sha256": {"const": "5EDAC791B9D56FC74BFA4F595569BE9D654D8C06B12548DF56E3582B0A5484F9"}
+      }
+    },
+    "environment": {"type": "object", "additionalProperties": false, "required": ["python_version", "python_implementation", "numpy_version", "platform", "executable", "floating_point_format"], "properties": {"python_version": {"type": "string"}, "python_implementation": {"type": "string"}, "numpy_version": {"type": "string"}, "platform": {"type": "string"}, "executable": {"type": "string"}, "floating_point_format": {"const": "IEEE-754 binary64"}}},
+    "verification": {
+      "type": "object", "additionalProperties": false,
+      "required": ["same_density_ok", "active_count_audit_ok", "shuffle_audit_ok", "clean_robust_separation", "structured_beats_shuffled", "max_control_R_combined", "min_structured_R_combined", "pair_details", "overall_pass"],
+      "properties": {"same_density_ok": {"const": true}, "active_count_audit_ok": {"const": true}, "shuffle_audit_ok": {"const": true}, "clean_robust_separation": {"const": true}, "structured_beats_shuffled": {"const": true}, "max_control_R_combined": {"type": "number", "minimum": 0}, "min_structured_R_combined": {"type": "number", "minimum": 2}, "pair_details": {"type": "array", "minItems": 5, "maxItems": 5, "items": {"type": "object"}}, "overall_pass": {"const": true}}
+    },
+    "field_record": {
+      "type": "object", "additionalProperties": false,
+      "required": ["class", "sample", "field_sha256", "active_count", "active_count_pass", "channel_row_sha256", "neighbor_oracle_match"],
+      "properties": {"class": {"type": "string"}, "sample": {"type": "integer", "minimum": 0, "maximum": 49}, "field_sha256": {"$ref": "#/$defs/sha256"}, "active_count": {"const": 1317}, "active_count_pass": {"const": true}, "channel_row_sha256": {"$ref": "#/$defs/sha256"}, "neighbor_oracle_match": {"const": true}}
+    },
+    "reproduction": {
+      "type": "object", "additionalProperties": false,
+      "required": ["parameters_match", "class_count", "field_count", "active_count_check_count", "neighbor_oracle_field_count", "neighbor_oracle_voxel_count", "neighbor_mismatch_voxel_count", "channel_rate_oracle_check_count", "published_channel_rate_check_count", "calibration_check_count", "score_check_count", "summary_check_count", "verification_check_count", "max_oracle_rate_abs_error", "max_published_rate_abs_error", "max_calibration_abs_error", "max_score_abs_error", "max_summary_abs_error", "max_verification_abs_error", "verification", "field_records", "field_record_set_sha256", "fresh_summary_sha256", "fresh_scored_row_sha256", "mismatch_count"],
+      "properties": {
+        "parameters_match": {"const": true}, "class_count": {"const": 11}, "field_count": {"const": 550}, "active_count_check_count": {"const": 550}, "neighbor_oracle_field_count": {"const": 550}, "neighbor_oracle_voxel_count": {"const": 12073600}, "neighbor_mismatch_voxel_count": {"const": 0}, "channel_rate_oracle_check_count": {"const": 7150}, "published_channel_rate_check_count": {"const": 7150}, "calibration_check_count": {"const": 14}, "score_check_count": {"const": 4400}, "summary_check_count": {"const": 517}, "verification_check_count": {"type": "integer", "minimum": 10},
+        "max_oracle_rate_abs_error": {"const": 0.0}, "max_published_rate_abs_error": {"const": 0.0}, "max_calibration_abs_error": {"type": "number", "minimum": 0, "maximum": 2e-15}, "max_score_abs_error": {"type": "number", "minimum": 0, "maximum": 2e-12}, "max_summary_abs_error": {"type": "number", "minimum": 0, "maximum": 2e-12}, "max_verification_abs_error": {"type": "number", "minimum": 0, "maximum": 2e-12},
+        "verification": {"$ref": "#/$defs/verification"}, "field_records": {"type": "array", "minItems": 550, "maxItems": 550, "items": {"$ref": "#/$defs/field_record"}}, "field_record_set_sha256": {"$ref": "#/$defs/sha256"}, "fresh_summary_sha256": {"$ref": "#/$defs/sha256"}, "fresh_scored_row_sha256": {"$ref": "#/$defs/sha256"}, "mismatch_count": {"const": 0}
+      }
+    },
+    "tolerances": {"type": "object", "additionalProperties": false, "required": ["max_abs_R_drift", "max_relative_R_drift", "max_spectrum_l1_drift"], "properties": {"max_abs_R_drift": {"type": "number", "minimum": 0}, "max_relative_R_drift": {"$ref": "#/$defs/nullable_number"}, "max_spectrum_l1_drift": {"$ref": "#/$defs/nullable_number"}}},
+    "perturbation_record": {
+      "type": "object", "additionalProperties": false,
+      "required": ["class", "sample", "scope", "swaps", "base_field_sha256", "perturbed_field_sha256", "active_count", "hamming_count", "hamming_fraction", "base_R_combined", "perturbed_R_combined", "absolute_R_drift", "relative_R_drift", "spectrum_l1_drift", "dominant_label_retained", "tolerances", "density_pass", "hamming_pass", "independent_oracle_pass", "classification_pass", "absolute_R_bound_pass", "relative_R_bound_pass", "spectrum_bound_pass", "passed"],
+      "properties": {"class": {"type": "string"}, "sample": {"type": "integer", "minimum": 0, "maximum": 49}, "scope": {"enum": ["structured", "control"]}, "swaps": {"enum": [1, 4, 16, 64]}, "base_field_sha256": {"$ref": "#/$defs/sha256"}, "perturbed_field_sha256": {"$ref": "#/$defs/sha256"}, "active_count": {"const": 1317}, "hamming_count": {"enum": [2, 8, 32, 128]}, "hamming_fraction": {"type": "number", "exclusiveMinimum": 0, "maximum": 1}, "base_R_combined": {"type": "number", "minimum": 0}, "perturbed_R_combined": {"type": "number", "minimum": 0}, "absolute_R_drift": {"type": "number", "minimum": 0}, "relative_R_drift": {"type": "number", "minimum": 0}, "spectrum_l1_drift": {"$ref": "#/$defs/nullable_number"}, "dominant_label_retained": {"$ref": "#/$defs/nullable_boolean"}, "tolerances": {"$ref": "#/$defs/tolerances"}, "density_pass": {"const": true}, "hamming_pass": {"const": true}, "independent_oracle_pass": {"const": true}, "classification_pass": {"const": true}, "absolute_R_bound_pass": {"const": true}, "relative_R_bound_pass": {"const": true}, "spectrum_bound_pass": {"const": true}, "passed": {"const": true}}
+    },
+    "level_summary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["scope", "swaps", "case_count", "max_absolute_R_drift", "max_relative_R_drift", "max_spectrum_l1_drift", "minimum_perturbed_R", "maximum_perturbed_R", "dominant_label_retention_rate", "passed_count", "mismatch_count"],
+      "properties": {"scope": {"enum": ["structured", "control"]}, "swaps": {"enum": [1, 4, 16, 64]}, "case_count": {"type": "integer", "minimum": 250, "maximum": 300}, "max_absolute_R_drift": {"type": "number", "minimum": 0}, "max_relative_R_drift": {"type": "number", "minimum": 0}, "max_spectrum_l1_drift": {"$ref": "#/$defs/nullable_number"}, "minimum_perturbed_R": {"type": "number", "minimum": 0}, "maximum_perturbed_R": {"type": "number", "minimum": 0}, "dominant_label_retention_rate": {"$ref": "#/$defs/nullable_number"}, "passed_count": {"type": "integer", "minimum": 250, "maximum": 300}, "mismatch_count": {"const": 0}}
+    },
+    "perturbation_summary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["field_count", "swap_level_count", "case_count", "structured_case_count", "control_case_count", "density_check_count", "hamming_check_count", "independent_oracle_field_count", "classification_check_count", "absolute_R_bound_check_count", "relative_R_bound_check_count", "spectrum_bound_check_count", "passed_count", "mismatch_count"],
+      "properties": {"field_count": {"const": 550}, "swap_level_count": {"const": 4}, "case_count": {"const": 2200}, "structured_case_count": {"const": 1000}, "control_case_count": {"const": 1200}, "density_check_count": {"const": 2200}, "hamming_check_count": {"const": 2200}, "independent_oracle_field_count": {"const": 2200}, "classification_check_count": {"const": 2200}, "absolute_R_bound_check_count": {"const": 2200}, "relative_R_bound_check_count": {"const": 1000}, "spectrum_bound_check_count": {"const": 1000}, "passed_count": {"const": 2200}, "mismatch_count": {"const": 0}}
+    },
+    "perturbations": {"type": "object", "additionalProperties": false, "required": ["records", "level_summaries", "record_set_sha256", "summary_sha256", "summary"], "properties": {"records": {"type": "array", "minItems": 2200, "maxItems": 2200, "items": {"$ref": "#/$defs/perturbation_record"}}, "level_summaries": {"type": "array", "minItems": 8, "maxItems": 8, "items": {"$ref": "#/$defs/level_summary"}}, "record_set_sha256": {"$ref": "#/$defs/sha256"}, "summary_sha256": {"$ref": "#/$defs/sha256"}, "summary": {"$ref": "#/$defs/perturbation_summary"}}},
+    "negative": {"type": "object", "additionalProperties": false, "required": ["id", "passed", "error_type"], "properties": {"id": {"type": "string", "minLength": 5}, "passed": {"const": true}, "error_type": {"type": "string", "minLength": 3}}},
+    "summary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_package_count", "verified_source_member_count", "fresh_field_count", "published_channel_rate_check_count", "independent_channel_rate_check_count", "score_check_count", "summary_check_count", "perturbation_case_count", "structured_perturbation_case_count", "control_perturbation_case_count", "negative_check_count", "failed_negative_check_count", "mismatch_count"],
+      "properties": {"source_package_count": {"const": 2}, "verified_source_member_count": {"const": 13}, "fresh_field_count": {"const": 550}, "published_channel_rate_check_count": {"const": 7150}, "independent_channel_rate_check_count": {"const": 7150}, "score_check_count": {"const": 4400}, "summary_check_count": {"const": 517}, "perturbation_case_count": {"const": 2200}, "structured_perturbation_case_count": {"const": 1000}, "control_perturbation_case_count": {"const": 1200}, "negative_check_count": {"const": 14}, "failed_negative_check_count": {"const": 0}, "mismatch_count": {"const": 0}}
+    }
+  }
+}

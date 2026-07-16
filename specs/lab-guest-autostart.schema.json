@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/lab-guest-autostart.schema.json",
+  "title": "PooleOS Lab Guest Autostart",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "boot_evidence_claimed",
+    "guest_autostart",
+    "qemu_shared_folder_contract",
+    "boot_log_profile",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.lab_guest_autostart"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail"
+      ]
+    },
+    "boot_evidence_claimed": {
+      "type": "boolean"
+    },
+    "guest_autostart": {
+      "type": "object",
+      "required": [
+        "init_script_path",
+        "init_order",
+        "smoke_command",
+        "mount_tag",
+        "mount_point",
+        "mount_type",
+        "mount_options"
+      ],
+      "properties": {
+        "init_script_path": {
+          "type": "string"
+        },
+        "init_order": {
+          "type": "string"
+        },
+        "smoke_command": {
+          "type": "string"
+        },
+        "mount_tag": {
+          "type": "string"
+        },
+        "mount_point": {
+          "type": "string"
+        },
+        "mount_type": {
+          "type": "string"
+        },
+        "mount_options": {
+          "type": "string"
+        }
+      }
+    },
+    "qemu_shared_folder_contract": {
+      "type": "object",
+      "required": [
+        "artifact_path",
+        "status",
+        "mount_tag",
+        "host_path"
+      ],
+      "properties": {
+        "artifact_path": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "mount_tag": {
+          "type": "string"
+        },
+        "host_path": {
+          "type": "string"
+        }
+      }
+    },
+    "boot_log_profile": {
+      "type": "object",
+      "required": [
+        "profile",
+        "required_markers"
+      ],
+      "properties": {
+        "profile": {
+          "type": "string"
+        },
+        "required_markers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "failed_check_count",
+        "required_marker_count",
+        "autostart_marker_count",
+        "qemu_contract_bound"
+      ],
+      "properties": {
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "required_marker_count": {
+          "type": "integer"
+        },
+        "autostart_marker_count": {
+          "type": "integer"
+        },
+        "qemu_contract_bound": {
+          "type": "boolean"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

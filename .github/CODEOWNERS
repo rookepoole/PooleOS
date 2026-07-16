@@ -1,0 +1,15 @@
+# Rooke Poole retains technical, release, licensing, and IP authority.
+* @rookepoole
+
+# TCB, trust, release, and policy boundaries always require owner review.
+/native/boot/ @rookepoole
+/native/kernel/ @rookepoole
+/native/abi/ @rookepoole
+/native/security/ @rookepoole
+/native/image/ @rookepoole
+/docs/adr/ @rookepoole
+/specs/ @rookepoole
+/LICENSE @rookepoole
+/NOTICE.md @rookepoole
+/SECURITY.md @rookepoole
+

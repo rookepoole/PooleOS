@@ -1,0 +1,279 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/capability-trap-proof.schema.json",
+  "title": "PooleOS Capability Trap Proof",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "policy_version",
+    "policy_artifact",
+    "instruction_family",
+    "security_boundary_claimed",
+    "operations",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.capability_trap_proof"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail"
+      ]
+    },
+    "policy_version": {
+      "type": "string"
+    },
+    "policy_artifact": {
+      "type": "string"
+    },
+    "matrix_artifact": {
+      "type": "string"
+    },
+    "matrix_summary": {
+      "type": "object",
+      "required": [
+        "matrix_bound",
+        "matrix_artifact",
+        "matrix_status",
+        "matrix_failed_check_count",
+        "matrix_operation_count",
+        "core_ir_receipt_artifact",
+        "core_ir_boundary_status",
+        "core_ir_binding_mode",
+        "core_ir_phase66_audit_present",
+        "core_ir_executable_audit_artifact",
+        "core_ir_executable_audit_bound",
+        "core_ir_executable_audit_status",
+        "core_ir_executable_candidate_count",
+        "core_ir_metadata_zero_count",
+        "core_ir_kernel_handoff_allowed",
+        "parser_kernel_promotion_receipt_artifact",
+        "parser_kernel_promotion_receipt_bound",
+        "parser_kernel_promotion_receipt_status",
+        "parser_kernel_promotion_kernel_handoff_allowed",
+        "parser_to_kernel_promotion_allowed",
+        "kernel_enforcement_claimed"
+      ],
+      "properties": {
+        "matrix_bound": {
+          "type": "boolean"
+        },
+        "matrix_artifact": {
+          "type": "string"
+        },
+        "matrix_status": {
+          "type": "string"
+        },
+        "matrix_failed_check_count": {
+          "type": "integer"
+        },
+        "matrix_operation_count": {
+          "type": "integer"
+        },
+        "core_ir_receipt_artifact": {
+          "type": "string"
+        },
+        "core_ir_boundary_status": {
+          "type": "string"
+        },
+        "core_ir_binding_mode": {
+          "type": "string"
+        },
+        "core_ir_phase66_audit_present": {
+          "type": "boolean"
+        },
+        "core_ir_executable_audit_artifact": {
+          "type": "string"
+        },
+        "core_ir_executable_audit_bound": {
+          "type": "boolean"
+        },
+        "core_ir_executable_audit_status": {
+          "type": "string"
+        },
+        "core_ir_executable_candidate_count": {
+          "type": "integer"
+        },
+        "core_ir_metadata_zero_count": {
+          "type": "integer"
+        },
+        "core_ir_kernel_handoff_allowed": {
+          "type": "boolean"
+        },
+        "parser_kernel_promotion_receipt_artifact": {
+          "type": "string"
+        },
+        "parser_kernel_promotion_receipt_bound": {
+          "type": "boolean"
+        },
+        "parser_kernel_promotion_receipt_status": {
+          "type": "string"
+        },
+        "parser_kernel_promotion_kernel_handoff_allowed": {
+          "type": "boolean"
+        },
+        "parser_to_kernel_promotion_allowed": {
+          "type": "boolean"
+        },
+        "kernel_enforcement_claimed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "fuzz_artifact": {
+      "type": "string"
+    },
+    "fuzz_summary": {
+      "type": "object",
+      "required": [
+        "fuzz_bound",
+        "fuzz_artifact",
+        "fuzz_status",
+        "fuzz_failed_check_count",
+        "fuzz_operation_count"
+      ],
+      "properties": {
+        "fuzz_bound": {
+          "type": "boolean"
+        },
+        "fuzz_artifact": {
+          "type": "string"
+        },
+        "fuzz_status": {
+          "type": "string"
+        },
+        "fuzz_failed_check_count": {
+          "type": "integer"
+        },
+        "fuzz_operation_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "instruction_family": {
+      "type": "string"
+    },
+    "security_boundary_claimed": {
+      "type": "boolean"
+    },
+    "operations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "opcode",
+          "region",
+          "source",
+          "target",
+          "capability",
+          "allowed",
+          "expected_trap",
+          "actual_trapped",
+          "trap_code",
+          "reason"
+        ],
+        "properties": {
+          "opcode": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "capability": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "expected_trap": {
+            "type": "boolean"
+          },
+          "actual_trapped": {
+            "type": "boolean"
+          },
+          "trap_code": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "operation_count",
+        "allowed_count",
+        "trapped_count",
+        "failed_check_count"
+      ],
+      "properties": {
+        "operation_count": {
+          "type": "integer"
+        },
+        "allowed_count": {
+          "type": "integer"
+        },
+        "trapped_count": {
+          "type": "integer"
+        },
+        "failed_check_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

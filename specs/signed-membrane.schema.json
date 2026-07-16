@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/signed-membrane.schema.json",
+  "title": "PooleOS Signed Membrane Metrics",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "claim",
+    "parameters",
+    "summary"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.signed_membrane_metrics"
+    },
+    "claim": {
+      "type": "object"
+    },
+    "parameters": {
+      "type": "object",
+      "required": [
+        "q0",
+        "epsilon"
+      ],
+      "properties": {
+        "q0": {
+          "type": "integer"
+        },
+        "epsilon": {
+          "type": "string"
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "positive_count",
+        "negative_count",
+        "omega_size",
+        "interface_support",
+        "interface_density",
+        "signed_imbalance",
+        "thickness_y",
+        "membrane_quality"
+      ],
+      "properties": {
+        "positive_count": {
+          "type": "integer"
+        },
+        "negative_count": {
+          "type": "integer"
+        },
+        "omega_size": {
+          "type": "integer"
+        },
+        "interface_support": {
+          "type": "integer"
+        },
+        "interface_density": {
+          "type": "string"
+        },
+        "signed_imbalance": {
+          "type": "string"
+        },
+        "thickness_y": {
+          "type": "string"
+        },
+        "membrane_quality": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
+

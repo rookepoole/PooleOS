@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/operator-action-receipt.schema.json",
+  "title": "PooleOS Operator Action Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "action_kind",
+    "target",
+    "operator_action_request",
+    "verification_prerequisites",
+    "operator_executed",
+    "codex_execution_performed",
+    "command",
+    "command_sha256",
+    "packages",
+    "checks",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.operator_action_receipt"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending_operator_action",
+        "verified",
+        "verification_failed",
+        "invalid"
+      ]
+    },
+    "action_kind": {
+      "type": "string"
+    },
+    "target": {
+      "type": "object",
+      "required": [
+        "environment",
+        "distro",
+        "package_manager"
+      ],
+      "properties": {
+        "environment": {
+          "type": "string"
+        },
+        "distro": {
+          "type": "string"
+        },
+        "package_manager": {
+          "type": "string"
+        }
+      }
+    },
+    "operator_action_request": {
+      "type": "string"
+    },
+    "verification_prerequisites": {
+      "type": "string"
+    },
+    "operator_executed": {
+      "type": "boolean"
+    },
+    "codex_execution_performed": {
+      "type": "boolean"
+    },
+    "command": {
+      "type": "string"
+    },
+    "command_sha256": {
+      "type": "string"
+    },
+    "packages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

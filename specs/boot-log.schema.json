@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/boot-log.schema.json",
+  "title": "PooleOS Lab Boot Log Validation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "log_path",
+    "profile",
+    "ok",
+    "required_markers",
+    "missing_markers"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.boot_log_validation"
+    },
+    "log_path": {
+      "type": "string"
+    },
+    "profile": {
+      "type": "string"
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "required_markers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "missing_markers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

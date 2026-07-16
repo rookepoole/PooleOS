@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/replay-proof.schema.json",
+  "title": "PooleOS Replay Proof Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "case",
+    "bundle_sha256",
+    "sections",
+    "pgvm_report",
+    "channel_summary_match",
+    "claim"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.replay_proof"
+    },
+    "case": {
+      "type": "string"
+    },
+    "bundle_sha256": {
+      "type": "string",
+      "minLength": 64
+    },
+    "sections": {
+      "type": "object"
+    },
+    "pgvm_report": {
+      "type": "object",
+      "required": [
+        "halted",
+        "trap",
+        "final_body_count",
+        "instruction_count"
+      ],
+      "properties": {
+        "halted": {
+          "type": "boolean"
+        },
+        "trap": {
+          "type": "string"
+        },
+        "final_body_count": {
+          "type": "integer"
+        },
+        "instruction_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "channel_summary_match": {
+      "type": "boolean"
+    },
+    "signed_metrics_present": {
+      "type": "boolean"
+    },
+    "claim": {
+      "type": "object"
+    }
+  }
+}
+

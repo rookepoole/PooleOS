@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/claim-lanes.schema.json",
+  "title": "PooleOS Claim Lane Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "owner",
+    "claim_lane",
+    "evidence_kind",
+    "rule",
+    "model_tag",
+    "source_hash",
+    "limitations",
+    "created_utc"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]*-[0-9]{3,}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 3
+    },
+    "claim_lane": {
+      "type": "string",
+      "enum": [
+        "theorem",
+        "verifier",
+        "benchmark",
+        "atlas",
+        "bridge_open"
+      ]
+    },
+    "evidence_kind": {
+      "type": "string",
+      "enum": [
+        "proof",
+        "script",
+        "conformance",
+        "benchmark",
+        "trace",
+        "design_note"
+      ]
+    },
+    "rule": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model_tag": {
+      "type": "string",
+      "enum": [
+        "raw",
+        "prime_sharpened",
+        "signed",
+        "rule_conditioned",
+        "hosted_os",
+        "microkernel",
+        "unknown"
+      ]
+    },
+    "source_hash": {
+      "type": "string",
+      "minLength": 8
+    },
+    "seed_policy": {
+      "type": "string"
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "limitations": {
+      "type": "string",
+      "minLength": 10
+    },
+    "created_utc": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
+

@@ -1,0 +1,199 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/pooleglyph-source-anchor.schema.json",
+  "title": "PooleOS PooleGlyph Source Anchor",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "pooleglyph_path",
+    "git",
+    "required_files",
+    "checkpoint_root",
+    "latest_checkpoint",
+    "checkpoint_lineage",
+    "checks",
+    "summary",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.pooleglyph_source_anchor"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "warn",
+        "fail"
+      ]
+    },
+    "pooleglyph_path": {
+      "type": "string"
+    },
+    "git": {
+      "type": "object",
+      "required": [
+        "is_work_tree",
+        "commit",
+        "dirty_files"
+      ],
+      "properties": {
+        "is_work_tree": {
+          "type": "boolean"
+        },
+        "commit": {
+          "type": "string"
+        },
+        "dirty_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "required_files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "exists"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "exists": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "checkpoint_root": {
+      "type": "string"
+    },
+    "latest_checkpoint": {
+      "type": "object",
+      "required": [
+        "manifest_path",
+        "handoff_markdown",
+        "checkpoint",
+        "sha256",
+        "zip_path",
+        "next_recommended_phase",
+        "created_local_time"
+      ],
+      "properties": {
+        "manifest_path": {
+          "type": "string"
+        },
+        "handoff_markdown": {
+          "type": "string"
+        },
+        "checkpoint": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "zip_path": {
+          "type": "string"
+        },
+        "next_recommended_phase": {
+          "type": "string"
+        },
+        "created_local_time": {
+          "type": "string"
+        }
+      }
+    },
+    "checkpoint_lineage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "manifest_path",
+          "checkpoint",
+          "sha256",
+          "created_local_time"
+        ],
+        "properties": {
+          "manifest_path": {
+            "type": "string"
+          },
+          "checkpoint": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "created_local_time": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "required_file_count",
+        "missing_required_file_count",
+        "checkpoint_manifest_count",
+        "dirty_file_count",
+        "failed_check_count"
+      ],
+      "properties": {
+        "required_file_count": {
+          "type": "integer"
+        },
+        "missing_required_file_count": {
+          "type": "integer"
+        },
+        "checkpoint_manifest_count": {
+          "type": "integer"
+        },
+        "dirty_file_count": {
+          "type": "integer"
+        },
+        "failed_check_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

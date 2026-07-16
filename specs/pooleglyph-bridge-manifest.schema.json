@@ -1,0 +1,381 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/pooleglyph-bridge-manifest.schema.json",
+  "title": "PooleOS PooleGlyph Bridge Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "source_anchor",
+    "required_inputs",
+    "language_surface",
+    "core_ir_boundary",
+    "bridge_maps",
+    "diagnostic_summary",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.pooleglyph_bridge_manifest"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "warn",
+        "fail"
+      ]
+    },
+    "source_anchor": {
+      "type": "object",
+      "required": [
+        "artifact_path",
+        "status",
+        "pooleglyph_path",
+        "commit",
+        "dirty_file_count",
+        "latest_checkpoint",
+        "latest_phase",
+        "failed_check_count"
+      ],
+      "properties": {
+        "artifact_path": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "pooleglyph_path": {
+          "type": "string"
+        },
+        "commit": {
+          "type": "string"
+        },
+        "dirty_file_count": {
+          "type": "integer"
+        },
+        "latest_checkpoint": {
+          "type": "string"
+        },
+        "latest_phase": {
+          "type": "integer"
+        },
+        "failed_check_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "required_inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "path",
+          "exists",
+          "role"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "exists": {
+            "type": "boolean"
+          },
+          "role": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "language_surface": {
+      "type": "object",
+      "required": [
+        "phase",
+        "phase_name",
+        "stack_count",
+        "stack",
+        "source_map_node_kind_count",
+        "source_map_node_kinds",
+        "semantic_root_field_count",
+        "semantic_root_fields"
+      ],
+      "properties": {
+        "phase": {
+          "type": "integer"
+        },
+        "phase_name": {
+          "type": "string"
+        },
+        "stack_count": {
+          "type": "integer"
+        },
+        "stack": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_map_node_kind_count": {
+          "type": "integer"
+        },
+        "source_map_node_kinds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "semantic_root_field_count": {
+          "type": "integer"
+        },
+        "semantic_root_fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "bridge_maps": {
+      "type": "object",
+      "properties": {
+        "abi_and_package": {
+          "$ref": "#/$defs/bridge_map"
+        },
+        "capability_security": {
+          "$ref": "#/$defs/bridge_map"
+        },
+        "boot_graph": {
+          "$ref": "#/$defs/bridge_map"
+        },
+        "service_graph": {
+          "$ref": "#/$defs/bridge_map"
+        },
+        "topology": {
+          "$ref": "#/$defs/bridge_map"
+        },
+        "diagnostics": {
+          "$ref": "#/$defs/bridge_map"
+        }
+      }
+    },
+    "core_ir_boundary": {
+      "type": "object",
+      "required": [
+        "status",
+        "receipt_artifact_kind",
+        "phase66_audit_present",
+        "parser_to_kernel_promotion_allowed",
+        "boundary_rule",
+        "current_scope",
+        "blocked_claims"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "phase66_pending",
+            "phase66_audit_present"
+          ]
+        },
+        "receipt_artifact_kind": {
+          "const": "pooleos.pooleglyph_core_ir_boundary_receipt"
+        },
+        "phase66_audit_present": {
+          "type": "boolean"
+        },
+        "parser_to_kernel_promotion_allowed": {
+          "type": "boolean"
+        },
+        "boundary_rule": {
+          "type": "string"
+        },
+        "current_scope": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "blocked_claims": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "diagnostic_summary": {
+      "type": "object",
+      "required": [
+        "phase",
+        "phase_name",
+        "diagnostic_case_count",
+        "case_file_count",
+        "parse_diagnostic_code_count",
+        "semantic_diagnostic_code_count",
+        "lexer_diagnostic_code_count",
+        "stack_case_coverage_count",
+        "missing_stack_case_files",
+        "next_recommended_phase"
+      ],
+      "properties": {
+        "phase": {
+          "type": "integer"
+        },
+        "phase_name": {
+          "type": "string"
+        },
+        "diagnostic_case_count": {
+          "type": "integer"
+        },
+        "case_file_count": {
+          "type": "integer"
+        },
+        "parse_diagnostic_code_count": {
+          "type": "integer"
+        },
+        "semantic_diagnostic_code_count": {
+          "type": "integer"
+        },
+        "lexer_diagnostic_code_count": {
+          "type": "integer"
+        },
+        "stack_case_coverage_count": {
+          "type": "integer"
+        },
+        "missing_stack_case_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "next_recommended_phase": {
+          "type": "string"
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "bridge_map_count",
+        "fully_covered_bridge_map_count",
+        "language_stack_count",
+        "diagnostic_case_count",
+        "failed_check_count",
+        "warning_count"
+      ],
+      "properties": {
+        "bridge_map_count": {
+          "type": "integer"
+        },
+        "fully_covered_bridge_map_count": {
+          "type": "integer"
+        },
+        "language_stack_count": {
+          "type": "integer"
+        },
+        "diagnostic_case_count": {
+          "type": "integer"
+        },
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "warning_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "bridge_map": {
+      "type": "object",
+      "required": [
+        "pooleglyph_declarations",
+        "missing_declarations",
+        "pooleos_targets",
+        "coverage",
+        "boundary",
+        "next_artifact"
+      ],
+      "properties": {
+        "pooleglyph_declarations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "missing_declarations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "pooleos_targets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "coverage": {
+          "type": "string",
+          "enum": [
+            "covered",
+            "partial",
+            "missing"
+          ]
+        },
+        "boundary": {
+          "type": "string"
+        },
+        "next_artifact": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

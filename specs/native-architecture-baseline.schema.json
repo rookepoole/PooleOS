@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/native-architecture-baseline.schema.json",
+  "title": "PooleOS Native Architecture Baseline",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "status",
+    "production_ready",
+    "production_promotion_allowed",
+    "owner",
+    "repository",
+    "architecture",
+    "component_names",
+    "version_namespaces",
+    "language_split",
+    "tcb_domains",
+    "scope",
+    "adr_summary",
+    "adrs",
+    "bound_sources",
+    "primary_toolchain_references",
+    "open_items",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_architecture_baseline"},
+    "status_date": {"const": "2026-07-16"},
+    "status": {"const": "partial_owner_directed_signature_pending"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "owner": {"type": "object", "required": ["name", "github", "technical_authority", "ip_authority", "release_authority"]},
+    "repository": {
+      "type": "object",
+      "required": ["initialized", "current_branch", "configured_remote", "expected_remote", "default_branch", "visibility", "publication_state"],
+      "properties": {
+        "initialized": {"const": true},
+        "current_branch": {"const": "main"},
+        "configured_remote": {"const": "https://github.com/rookepoole/PooleOS.git"},
+        "expected_remote": {"const": "https://github.com/rookepoole/PooleOS.git"},
+        "default_branch": {"const": "main"},
+        "visibility": {"const": "public"},
+        "publication_state": {"enum": ["initialized_unpublished", "initialized_published"]}
+      }
+    },
+    "architecture": {"type": "object", "required": ["product", "bootloader", "kernel", "kernel_style", "target_architecture", "firmware", "production_base", "forbidden_production_substitutes"]},
+    "component_names": {"type": "object"},
+    "version_namespaces": {"type": "array", "minItems": 20, "maxItems": 20, "items": {"type": "object", "required": ["id", "role"]}},
+    "language_split": {"type": "object", "required": ["status", "pooleboot", "poolekernel", "privileged_user_space", "portable_pdc_reference", "host_evidence", "native_rust_abi_on_wire_or_disk", "cxx_in_v1_tcb", "third_party_dependencies_default"]},
+    "tcb_domains": {"type": "array", "minItems": 8, "maxItems": 8, "items": {"type": "object", "required": ["id", "ring", "component"]}},
+    "scope": {"type": "object"},
+    "adr_summary": {
+      "type": "object",
+      "required": ["required_count", "present_count", "accepted_owner_directed_count", "proposed_count", "accepted_signed_count", "all_required_cryptographically_ratified"],
+      "properties": {
+        "required_count": {"const": 7},
+        "present_count": {"const": 7},
+        "accepted_owner_directed_count": {"const": 5},
+        "proposed_count": {"const": 2},
+        "accepted_signed_count": {"const": 0},
+        "all_required_cryptographically_ratified": {"const": false}
+      }
+    },
+    "adrs": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {"type": "object", "required": ["id", "title", "path", "status", "date", "decision_owner", "ratification", "supersedes", "superseded_by", "requirement_mappings", "sha256", "byte_count", "line_count"]}
+    },
+    "bound_sources": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"type": "object", "required": ["path", "sha256", "byte_count", "line_count"]}},
+    "primary_toolchain_references": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "object", "required": ["topic", "url", "authority"]}},
+    "open_items": {"type": "array", "minItems": 8, "items": {"type": "string"}},
+    "claim_boundary": {
+      "type": "object",
+      "required": ["owner_direction_is_not_a_cryptographic_signature", "architecture_baseline_is_not_a_bootable_system", "passing_release_tree_policy_is_not_n39_release_acceptance", "private_source_content_embedded"],
+      "properties": {
+        "owner_direction_is_not_a_cryptographic_signature": {"const": true},
+        "architecture_baseline_is_not_a_bootable_system": {"const": true},
+        "passing_release_tree_policy_is_not_n39_release_acceptance": {"const": true},
+        "private_source_content_embedded": {"const": false}
+      }
+    }
+  }
+}

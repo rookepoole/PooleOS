@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/lab-image-manifest.schema.json",
+  "title": "PooleOS Lab Image Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "buildroot",
+    "qemu",
+    "validations"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.lab_image_manifest"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "scaffold",
+        "built",
+        "boot_validated"
+      ]
+    },
+    "buildroot": {
+      "type": "object",
+      "required": [
+        "external_tree_path",
+        "defconfig_path",
+        "defconfig_sha256",
+        "buildroot_path",
+        "buildroot_version"
+      ],
+      "properties": {
+        "external_tree_path": {
+          "type": "string"
+        },
+        "defconfig_path": {
+          "type": "string"
+        },
+        "defconfig_sha256": {
+          "type": "string"
+        },
+        "buildroot_path": {
+          "type": "string"
+        },
+        "buildroot_version": {
+          "type": "string"
+        }
+      }
+    },
+    "qemu": {
+      "type": "object",
+      "required": [
+        "command",
+        "image_path",
+        "kernel_path",
+        "serial_log_path"
+      ],
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "image_path": {
+          "type": "string"
+        },
+        "kernel_path": {
+          "type": "string"
+        },
+        "serial_log_path": {
+          "type": "string"
+        }
+      }
+    },
+    "validations": {
+      "type": "object",
+      "required": [
+        "boot_log_validation_path",
+        "boot_log_ok",
+        "release_gate_path",
+        "release_gate_status",
+        "buildroot_probe_path",
+        "buildroot_probe_ok",
+        "buildroot_probe_status",
+        "buildroot_configure_path",
+        "buildroot_configure_ok",
+        "buildroot_configure_status",
+        "buildroot_build_path",
+        "buildroot_build_ok",
+        "buildroot_build_status",
+        "buildroot_build_rootfs_image_path",
+        "wsl_prerequisites_path",
+        "wsl_prerequisites_status",
+        "wsl_missing_package_count"
+      ],
+      "properties": {
+        "boot_log_validation_path": {
+          "type": "string"
+        },
+        "boot_log_ok": {
+          "type": "boolean"
+        },
+        "release_gate_path": {
+          "type": "string"
+        },
+        "release_gate_status": {
+          "type": "string"
+        },
+        "buildroot_probe_path": {
+          "type": "string"
+        },
+        "buildroot_probe_ok": {
+          "type": "boolean"
+        },
+        "buildroot_probe_status": {
+          "type": "string"
+        },
+        "buildroot_configure_path": {
+          "type": "string"
+        },
+        "buildroot_configure_ok": {
+          "type": "boolean"
+        },
+        "buildroot_configure_status": {
+          "type": "string"
+        },
+        "buildroot_build_path": {
+          "type": "string"
+        },
+        "buildroot_build_ok": {
+          "type": "boolean"
+        },
+        "buildroot_build_status": {
+          "type": "string"
+        },
+        "buildroot_build_rootfs_image_path": {
+          "type": "string"
+        },
+        "wsl_prerequisites_path": {
+          "type": "string"
+        },
+        "wsl_prerequisites_status": {
+          "type": "string"
+        },
+        "wsl_missing_package_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

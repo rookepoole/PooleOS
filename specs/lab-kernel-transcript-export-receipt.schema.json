@@ -1,0 +1,356 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/lab-kernel-transcript-export-receipt.schema.json",
+  "title": "PooleOS Lab Kernel Transcript Export Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "operator_executed",
+    "contract_run_recorded",
+    "codex_execution_performed",
+    "contract_mode",
+    "inferred_contract_mode",
+    "contract_source",
+    "transcript_export",
+    "guest_environment",
+    "verifier_output",
+    "guest_environment_digest_pair_attested",
+    "transcript_digest_matches_verifier",
+    "verifier_accepted_export",
+    "kernel_enforcement_promotion_allowed",
+    "operator_notes",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.lab_kernel_transcript_export_receipt"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending_contract_run",
+        "disabled_verified",
+        "enabled_verified",
+        "verification_failed",
+        "invalid"
+      ]
+    },
+    "operator_executed": {
+      "type": "boolean"
+    },
+    "contract_run_recorded": {
+      "type": "boolean"
+    },
+    "codex_execution_performed": {
+      "type": "boolean"
+    },
+    "contract_mode": {
+      "type": "string",
+      "enum": [
+        "auto",
+        "disabled",
+        "enabled"
+      ]
+    },
+    "inferred_contract_mode": {
+      "type": "string",
+      "enum": [
+        "disabled",
+        "enabled",
+        "unknown"
+      ]
+    },
+    "contract_source": {
+      "$ref": "#/$defs/file_source"
+    },
+    "transcript_export": {
+      "$ref": "#/$defs/file_source"
+    },
+    "guest_environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_anchor",
+        "parser_promotion_receipt",
+        "digest_pair_attested"
+      ],
+      "properties": {
+        "source_anchor": {
+          "$ref": "#/$defs/guest_environment_attestation"
+        },
+        "parser_promotion_receipt": {
+          "$ref": "#/$defs/guest_environment_attestation"
+        },
+        "digest_pair_attested": {
+          "type": "boolean"
+        }
+      }
+    },
+    "verifier_output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "exists",
+        "sha256",
+        "line_count",
+        "artifact_kind",
+        "status",
+        "booted_kernel_path",
+        "kernel_enforcement_claimed",
+        "pgvm2_execution_claimed",
+        "failed_check_count",
+        "blocking_check_count",
+        "kernel_check_count",
+        "satisfied_kernel_check_count",
+        "negative_claim_guard_held",
+        "source_handoff_sha256",
+        "pooleglyph_source_anchor_sha256",
+        "pooleglyph_parser_kernel_promotion_receipt_sha256",
+        "transcript_source_sha256",
+        "transcript_claims"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "boolean"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "line_count": {
+          "type": "integer"
+        },
+        "artifact_kind": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "booted_kernel_path": {
+          "type": "boolean"
+        },
+        "kernel_enforcement_claimed": {
+          "type": "boolean"
+        },
+        "pgvm2_execution_claimed": {
+          "type": "boolean"
+        },
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "blocking_check_count": {
+          "type": "integer"
+        },
+        "kernel_check_count": {
+          "type": "integer"
+        },
+        "satisfied_kernel_check_count": {
+          "type": "integer"
+        },
+        "negative_claim_guard_held": {
+          "type": "boolean"
+        },
+        "source_handoff_sha256": {
+          "type": "string"
+        },
+        "pooleglyph_source_anchor_sha256": {
+          "type": "string"
+        },
+        "pooleglyph_parser_kernel_promotion_receipt_sha256": {
+          "type": "string"
+        },
+        "transcript_source_sha256": {
+          "type": "string"
+        },
+        "transcript_claims": {
+          "type": "object"
+        }
+      }
+    },
+    "guest_environment_digest_pair_attested": {
+      "type": "boolean"
+    },
+    "transcript_digest_matches_verifier": {
+      "type": "boolean"
+    },
+    "verifier_accepted_export": {
+      "type": "boolean"
+    },
+    "kernel_enforcement_promotion_allowed": {
+      "type": "boolean"
+    },
+    "operator_notes": {
+      "type": "string"
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "failed_check_count",
+        "contract_run_recorded",
+        "codex_execution_performed",
+        "contract_mode",
+        "inferred_contract_mode",
+        "transcript_exists",
+        "verifier_output_exists",
+        "verifier_output_status",
+        "transcript_digest_matches_verifier",
+        "guest_environment_digest_pair_attested",
+        "verifier_accepted_export",
+        "overclaim_detected",
+        "kernel_enforcement_promotion_allowed"
+      ],
+      "properties": {
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "contract_run_recorded": {
+          "type": "boolean"
+        },
+        "codex_execution_performed": {
+          "type": "boolean"
+        },
+        "contract_mode": {
+          "type": "string"
+        },
+        "inferred_contract_mode": {
+          "type": "string"
+        },
+        "transcript_exists": {
+          "type": "boolean"
+        },
+        "verifier_output_exists": {
+          "type": "boolean"
+        },
+        "verifier_output_status": {
+          "type": "string"
+        },
+        "transcript_digest_matches_verifier": {
+          "type": "boolean"
+        },
+        "guest_environment_digest_pair_attested": {
+          "type": "boolean"
+        },
+        "verifier_accepted_export": {
+          "type": "boolean"
+        },
+        "overclaim_detected": {
+          "type": "boolean"
+        },
+        "kernel_enforcement_promotion_allowed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "guest_environment_attestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "variable_name",
+        "transcript_marker",
+        "occurrence_count",
+        "observed_value",
+        "expected_value",
+        "valid_sha256",
+        "matches_verifier"
+      ],
+      "properties": {
+        "variable_name": {
+          "type": "string"
+        },
+        "transcript_marker": {
+          "const": "POOLEOS_KERNEL_GUEST_ENV"
+        },
+        "occurrence_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "observed_value": {
+          "type": "string"
+        },
+        "expected_value": {
+          "type": "string"
+        },
+        "valid_sha256": {
+          "type": "boolean"
+        },
+        "matches_verifier": {
+          "type": "boolean"
+        }
+      }
+    },
+    "file_source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "exists",
+        "sha256",
+        "line_count"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "boolean"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "line_count": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/qemu-boot-evidence.schema.json",
+  "title": "PooleOS QEMU Boot Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "evidence_source",
+    "boot_evidence_claimed",
+    "log",
+    "boot_log_validation",
+    "boot_log_validation_path",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.qemu_boot_evidence"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail"
+      ]
+    },
+    "evidence_source": {
+      "type": "string",
+      "enum": [
+        "fixture",
+        "captured_qemu_serial"
+      ]
+    },
+    "boot_evidence_claimed": {
+      "type": "boolean"
+    },
+    "log": {
+      "type": "object",
+      "required": [
+        "path",
+        "exists",
+        "sha256",
+        "byte_count",
+        "line_count"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "boolean"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "byte_count": {
+          "type": "integer"
+        },
+        "line_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "boot_log_validation": {
+      "type": "object"
+    },
+    "boot_log_validation_path": {
+      "type": "string"
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "failed_check_count",
+        "required_marker_count",
+        "missing_marker_count",
+        "profile",
+        "evidence_source",
+        "boot_evidence_claimed"
+      ],
+      "properties": {
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "required_marker_count": {
+          "type": "integer"
+        },
+        "missing_marker_count": {
+          "type": "integer"
+        },
+        "profile": {
+          "type": "string"
+        },
+        "evidence_source": {
+          "type": "string"
+        },
+        "boot_evidence_claimed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

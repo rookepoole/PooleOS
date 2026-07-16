@@ -1,0 +1,239 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/pdc-verifier-reproduction.schema.json",
+  "title": "PooleOS PDC Exact Verifier Reproduction",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "created_utc",
+    "status",
+    "bindings",
+    "environment",
+    "source_executions",
+    "family_results",
+    "mismatch_rows",
+    "digests",
+    "summary",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "artifact_kind": {"const": "pdc_verifier_reproduction"},
+    "created_utc": {"type": "string", "minLength": 20},
+    "status": {"const": "pass_with_documented_serialization_drift"},
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "verifier_intake_path",
+        "verifier_intake_sha256",
+        "math_contract_path",
+        "math_contract_sha256",
+        "math_contract_version",
+        "selected_source_set_sha256"
+      ],
+      "properties": {
+        "verifier_intake_path": {"const": "runs/pdc_verifier_intake.json"},
+        "verifier_intake_sha256": {"$ref": "#/$defs/sha256"},
+        "math_contract_path": {"const": "runs/pdc_math_contract.json"},
+        "math_contract_sha256": {"$ref": "#/$defs/sha256"},
+        "math_contract_version": {"const": "PDC-MATH-0.1"},
+        "selected_source_set_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "python_version",
+        "python_implementation",
+        "platform",
+        "executable",
+        "numpy_version",
+        "pandas_version",
+        "matplotlib_version",
+        "pythonhashseed",
+        "matplotlib_backend"
+      ],
+      "properties": {
+        "python_version": {"type": "string", "minLength": 3},
+        "python_implementation": {"type": "string", "minLength": 3},
+        "platform": {"type": "string", "minLength": 5},
+        "executable": {"type": "string", "minLength": 3},
+        "numpy_version": {"type": "string", "minLength": 3},
+        "pandas_version": {"type": "string", "minLength": 3},
+        "matplotlib_version": {"type": "string", "minLength": 3},
+        "pythonhashseed": {"const": "0"},
+        "matplotlib_backend": {"const": "Agg"}
+      }
+    },
+    "source_executions": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {"$ref": "#/$defs/source_execution"}
+    },
+    "family_results": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {"$ref": "#/$defs/family"}
+    },
+    "mismatch_rows": {"type": "array", "maxItems": 0},
+    "digests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["family_digest_set_sha256"],
+      "properties": {"family_digest_set_sha256": {"$ref": "#/$defs/sha256"}}
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "family_count",
+        "declared_case_count",
+        "published_case_count",
+        "source_execution_case_count",
+        "independent_case_count",
+        "source_execution_count",
+        "source_output_file_count",
+        "exact_byte_match_file_count",
+        "canonical_lf_match_file_count",
+        "serialization_drift_file_count",
+        "failed_family_count",
+        "mismatch_count",
+        "failed_check_count"
+      ],
+      "properties": {
+        "family_count": {"const": 6},
+        "declared_case_count": {"const": 4324},
+        "published_case_count": {"const": 4324},
+        "source_execution_case_count": {"const": 4324},
+        "independent_case_count": {"const": 4324},
+        "source_execution_count": {"const": 2},
+        "source_output_file_count": {"const": 6},
+        "exact_byte_match_file_count": {"const": 0},
+        "canonical_lf_match_file_count": {"const": 6},
+        "serialization_drift_file_count": {"const": 6},
+        "failed_family_count": {"const": 0},
+        "mismatch_count": {"const": 0},
+        "failed_check_count": {"const": 0}
+      }
+    },
+    "claim_boundary": {
+      "type": "array",
+      "minItems": 5,
+      "items": {"type": "string", "minLength": 30},
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "preserved_path",
+        "sha256",
+        "size_bytes",
+        "published_sha256",
+        "published_size_bytes",
+        "byte_match",
+        "canonical_lf_sha256",
+        "published_canonical_lf_sha256",
+        "canonical_lf_match",
+        "serialization_difference",
+        "row_count"
+      ],
+      "properties": {
+        "id": {"enum": ["rectangle", "line_hole", "arbitrary_mask", "inversion", "nonplanar_rows", "nonplanar_summary"]},
+        "preserved_path": {"type": "string", "pattern": "^runs/pdc_verifier_source_outputs/.+\\.(csv)$"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "size_bytes": {"type": "integer", "minimum": 1},
+        "published_sha256": {"$ref": "#/$defs/sha256"},
+        "published_size_bytes": {"type": "integer", "minimum": 1},
+        "byte_match": {"const": false},
+        "canonical_lf_sha256": {"$ref": "#/$defs/sha256"},
+        "published_canonical_lf_sha256": {"$ref": "#/$defs/sha256"},
+        "canonical_lf_match": {"const": true},
+        "serialization_difference": {"const": "line_endings_crlf_vs_lf_only"},
+        "row_count": {"type": "integer", "minimum": 1}
+      }
+    },
+    "source_execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "working_directory",
+        "started_utc",
+        "duration_seconds",
+        "return_code",
+        "stdout_sha256",
+        "stderr_sha256",
+        "stdout_tail",
+        "stderr_tail",
+        "id",
+        "source_id",
+        "source_sha256",
+        "required_outputs",
+        "status"
+      ],
+      "properties": {
+        "command": {"type": "array", "minItems": 2, "items": {"type": "string", "minLength": 1}},
+        "working_directory": {"type": "string", "minLength": 3},
+        "started_utc": {"type": "string", "minLength": 20},
+        "duration_seconds": {"type": "number", "minimum": 0},
+        "return_code": {"const": 0},
+        "stdout_sha256": {"$ref": "#/$defs/sha256"},
+        "stderr_sha256": {"$ref": "#/$defs/sha256"},
+        "stdout_tail": {"type": "string"},
+        "stderr_tail": {"type": "string"},
+        "id": {"enum": ["source-execution-planar-v1_1", "source-execution-nonplanar-v1_3_3"]},
+        "source_id": {"type": "string", "pattern": "^VER-SRC-"},
+        "source_sha256": {"$ref": "#/$defs/sha256"},
+        "required_outputs": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/output"}},
+        "status": {"const": "pass_with_documented_serialization_drift"}
+      }
+    },
+    "family": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "declared_case_count",
+        "published_case_count",
+        "source_execution_case_count",
+        "independent_case_count",
+        "source_execution_raw_byte_match",
+        "source_execution_canonical_lf_match",
+        "source_execution_semantic_mismatch_count",
+        "published_failed_case_count",
+        "independent_source_mismatch_count",
+        "formula_mismatch_count",
+        "secondary_oracle_mismatch_count",
+        "cases_digest_sha256",
+        "status"
+      ],
+      "properties": {
+        "id": {"enum": ["rectangle", "line_hole", "arbitrary_mask", "inversion", "solid_cuboid", "surface_shell"]},
+        "declared_case_count": {"type": "integer", "minimum": 80, "maximum": 1225},
+        "published_case_count": {"type": "integer", "minimum": 80, "maximum": 1225},
+        "source_execution_case_count": {"type": "integer", "minimum": 80, "maximum": 1225},
+        "independent_case_count": {"type": "integer", "minimum": 80, "maximum": 1225},
+        "source_execution_raw_byte_match": {"const": false},
+        "source_execution_canonical_lf_match": {"const": true},
+        "source_execution_semantic_mismatch_count": {"const": 0},
+        "published_failed_case_count": {"const": 0},
+        "independent_source_mismatch_count": {"const": 0},
+        "formula_mismatch_count": {"const": 0},
+        "secondary_oracle_mismatch_count": {"const": 0},
+        "cases_digest_sha256": {"$ref": "#/$defs/sha256"},
+        "status": {"const": "pass"}
+      }
+    }
+  }
+}

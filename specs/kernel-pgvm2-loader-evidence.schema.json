@@ -1,0 +1,403 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/kernel-pgvm2-loader-evidence.schema.json",
+  "title": "PooleOS Kernel PGVM2 Loader Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "kernel_loader_ready",
+    "kernel_enforcement_claimed",
+    "pgvm2_execution_claimed",
+    "booted_kernel_path_claimed",
+    "sources",
+    "source_handoff_sha256",
+    "pooleglyph_source_anchor_sha256",
+    "pooleglyph_parser_kernel_promotion_receipt_sha256",
+    "handoff_summary",
+    "pooleglyph_source_summary",
+    "parser_promotion_summary",
+    "planned_kernel_checks",
+    "enforcement_requirements",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.kernel_pgvm2_loader_evidence"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "blocked",
+        "ready_for_kernel_loader",
+        "kernel_enforced",
+        "invalid"
+      ]
+    },
+    "kernel_loader_ready": {
+      "type": "boolean"
+    },
+    "kernel_enforcement_claimed": {
+      "type": "boolean"
+    },
+    "pgvm2_execution_claimed": {
+      "type": "boolean"
+    },
+    "booted_kernel_path_claimed": {
+      "type": "boolean"
+    },
+    "sources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kernel_boot_handoff",
+        "kernel_loader_output",
+        "pooleglyph_source_anchor",
+        "pooleglyph_parser_kernel_promotion_receipt"
+      ],
+      "properties": {
+        "kernel_boot_handoff": {
+          "$ref": "#/$defs/source"
+        },
+        "kernel_loader_output": {
+          "$ref": "#/$defs/source"
+        },
+        "pooleglyph_source_anchor": {
+          "$ref": "#/$defs/source"
+        },
+        "pooleglyph_parser_kernel_promotion_receipt": {
+          "$ref": "#/$defs/source"
+        }
+      }
+    },
+    "source_handoff_sha256": {
+      "type": "string"
+    },
+    "pooleglyph_source_anchor_sha256": {
+      "type": "string"
+    },
+    "pooleglyph_parser_kernel_promotion_receipt_sha256": {
+      "type": "string"
+    },
+    "handoff_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "kernel_handoff_allowed",
+        "failed_check_count",
+        "unmet_requirement_count",
+        "expected_executed_instruction_count"
+      ],
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "kernel_handoff_allowed": {
+          "type": "boolean"
+        },
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "unmet_requirement_count": {
+          "type": "integer"
+        },
+        "expected_executed_instruction_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "pooleglyph_source_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "anchor_bound",
+        "dirty_file_count",
+        "failed_check_count",
+        "source_anchor_digest_matches_loader_output"
+      ],
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "anchor_bound": {
+          "type": "boolean"
+        },
+        "dirty_file_count": {
+          "type": "integer"
+        },
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "source_anchor_digest_matches_loader_output": {
+          "type": "boolean"
+        }
+      }
+    },
+    "parser_promotion_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "receipt_bound",
+        "phase66_audit_present",
+        "parser_to_kernel_promotion_allowed",
+        "kernel_handoff_allowed",
+        "parser_promotion_ready_for_enforcement"
+      ],
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "receipt_bound": {
+          "type": "boolean"
+        },
+        "phase66_audit_present": {
+          "type": "boolean"
+        },
+        "parser_to_kernel_promotion_allowed": {
+          "type": "boolean"
+        },
+        "kernel_handoff_allowed": {
+          "type": "boolean"
+        },
+        "parser_promotion_ready_for_enforcement": {
+          "type": "boolean"
+        }
+      }
+    },
+    "planned_kernel_checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/planned_kernel_check"
+      }
+    },
+    "enforcement_requirements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/requirement"
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "failed_check_count",
+        "unmet_requirement_count",
+        "planned_kernel_check_count",
+        "satisfied_kernel_check_count",
+        "kernel_boot_handoff_status",
+        "kernel_handoff_allowed",
+        "kernel_loader_output_exists",
+        "kernel_loader_output_status",
+        "pooleglyph_source_anchor_bound",
+        "pooleglyph_source_anchor_digest_matches",
+        "parser_promotion_receipt_bound",
+        "parser_promotion_receipt_status",
+        "parser_promotion_ready_for_enforcement",
+        "parser_promotion_receipt_digest_matches",
+        "output_handoff_hash_matches",
+        "all_kernel_checks_satisfied",
+        "expected_executed_instruction_count",
+        "actual_executed_instruction_count",
+        "kernel_loader_ready",
+        "kernel_enforcement_claimed",
+        "pgvm2_execution_claimed",
+        "booted_kernel_path_claimed"
+      ],
+      "properties": {
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "unmet_requirement_count": {
+          "type": "integer"
+        },
+        "planned_kernel_check_count": {
+          "type": "integer"
+        },
+        "satisfied_kernel_check_count": {
+          "type": "integer"
+        },
+        "kernel_boot_handoff_status": {
+          "type": "string"
+        },
+        "kernel_handoff_allowed": {
+          "type": "boolean"
+        },
+        "kernel_loader_output_exists": {
+          "type": "boolean"
+        },
+        "kernel_loader_output_status": {
+          "type": "string"
+        },
+        "pooleglyph_source_anchor_bound": {
+          "type": "boolean"
+        },
+        "pooleglyph_source_anchor_digest_matches": {
+          "type": "boolean"
+        },
+        "parser_promotion_receipt_bound": {
+          "type": "boolean"
+        },
+        "parser_promotion_receipt_status": {
+          "type": "string"
+        },
+        "parser_promotion_ready_for_enforcement": {
+          "type": "boolean"
+        },
+        "parser_promotion_receipt_digest_matches": {
+          "type": "boolean"
+        },
+        "output_handoff_hash_matches": {
+          "type": "boolean"
+        },
+        "all_kernel_checks_satisfied": {
+          "type": "boolean"
+        },
+        "expected_executed_instruction_count": {
+          "type": "integer"
+        },
+        "actual_executed_instruction_count": {
+          "type": "integer"
+        },
+        "kernel_loader_ready": {
+          "type": "boolean"
+        },
+        "kernel_enforcement_claimed": {
+          "type": "boolean"
+        },
+        "pgvm2_execution_claimed": {
+          "type": "boolean"
+        },
+        "booted_kernel_path_claimed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "exists",
+        "artifact_kind",
+        "status"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "boolean"
+        },
+        "artifact_kind": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "planned_kernel_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "required_input",
+        "expected_kernel_action",
+        "evidence_field",
+        "satisfied",
+        "detail"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "required_input": {
+          "type": "string"
+        },
+        "expected_kernel_action": {
+          "type": "string"
+        },
+        "evidence_field": {
+          "type": "string"
+        },
+        "satisfied": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string"
+        }
+      }
+    },
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "met",
+        "detail"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "met": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string"
+        }
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "ok",
+        "detail"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

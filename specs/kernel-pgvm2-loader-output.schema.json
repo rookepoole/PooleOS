@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/kernel-pgvm2-loader-output.schema.json",
+  "title": "PooleOS Kernel PGVM2 Loader Output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "booted_kernel_path",
+    "kernel_enforcement_claimed",
+    "pgvm2_execution_claimed",
+    "source_handoff_sha256",
+    "pooleglyph_source_anchor_sha256",
+    "pooleglyph_parser_kernel_promotion_receipt_sha256",
+    "kernel_build_id",
+    "kernel_checks",
+    "summary",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.kernel_pgvm2_loader_output"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "blocked",
+        "pass",
+        "invalid"
+      ]
+    },
+    "booted_kernel_path": {
+      "type": "boolean"
+    },
+    "kernel_enforcement_claimed": {
+      "type": "boolean"
+    },
+    "pgvm2_execution_claimed": {
+      "type": "boolean"
+    },
+    "source_handoff_sha256": {
+      "type": "string"
+    },
+    "pooleglyph_source_anchor_sha256": {
+      "type": "string"
+    },
+    "pooleglyph_parser_kernel_promotion_receipt_sha256": {
+      "type": "string"
+    },
+    "kernel_build_id": {
+      "type": "string"
+    },
+    "kernel_checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/kernel_check"
+      }
+    },
+    "transcript_source": {
+      "$ref": "#/$defs/transcript_source"
+    },
+    "transcript_claims": {
+      "$ref": "#/$defs/transcript_claims"
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "failed_check_count",
+        "blocking_check_count",
+        "kernel_check_count",
+        "satisfied_kernel_check_count",
+        "expected_executed_instruction_count",
+        "actual_executed_instruction_count",
+        "enforcement_claim_allowed",
+        "negative_claim_guard_held"
+      ],
+      "properties": {
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "blocking_check_count": {
+          "type": "integer"
+        },
+        "kernel_check_count": {
+          "type": "integer"
+        },
+        "satisfied_kernel_check_count": {
+          "type": "integer"
+        },
+        "expected_executed_instruction_count": {
+          "type": "integer"
+        },
+        "actual_executed_instruction_count": {
+          "type": "integer"
+        },
+        "enforcement_claim_allowed": {
+          "type": "boolean"
+        },
+        "negative_claim_guard_held": {
+          "type": "boolean"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "kernel_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "ok",
+        "required_input",
+        "observed_value",
+        "detail"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "required_input": {
+          "type": "string"
+        },
+        "observed_value": {
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        }
+      }
+    },
+    "transcript_source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "exists",
+        "sha256",
+        "line_count"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "boolean"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "line_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "transcript_claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kernel_build_id",
+        "source_handoff_sha256",
+        "pooleglyph_source_anchor_sha256",
+        "pooleglyph_parser_kernel_promotion_receipt_sha256",
+        "booted_kernel_path",
+        "kernel_enforcement_claimed",
+        "pgvm2_execution_claimed",
+        "expected_executed_instruction_count",
+        "actual_executed_instruction_count"
+      ],
+      "properties": {
+        "kernel_build_id": {
+          "type": "string"
+        },
+        "source_handoff_sha256": {
+          "type": "string"
+        },
+        "pooleglyph_source_anchor_sha256": {
+          "type": "string"
+        },
+        "pooleglyph_parser_kernel_promotion_receipt_sha256": {
+          "type": "string"
+        },
+        "booted_kernel_path": {
+          "type": "boolean"
+        },
+        "kernel_enforcement_claimed": {
+          "type": "boolean"
+        },
+        "pgvm2_execution_claimed": {
+          "type": "boolean"
+        },
+        "expected_executed_instruction_count": {
+          "type": "integer"
+        },
+        "actual_executed_instruction_count": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

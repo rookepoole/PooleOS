@@ -1,0 +1,267 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/pdc-golden-metamorphic-corpus.schema.json",
+  "title": "PooleOS PDC Golden Metamorphic Corpus",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "corpus_version",
+    "created_utc",
+    "status",
+    "bindings",
+    "scope",
+    "threshold_records",
+    "adversarial_records",
+    "metamorphic_records",
+    "non_relations",
+    "digests",
+    "summary",
+    "oracle_policy",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.2"},
+    "artifact_kind": {"const": "pdc_golden_metamorphic_corpus"},
+    "corpus_version": {"const": "PDC-GOLDEN-0.2"},
+    "created_utc": {"type": "string", "minLength": 20},
+    "status": {"const": "published_expected"},
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reference_implementation_path",
+        "reference_implementation_sha256",
+        "math_contract_path",
+        "math_contract_sha256",
+        "math_contract_version",
+        "predecessor_golden_path",
+        "predecessor_golden_sha256",
+        "predecessor_golden_version",
+        "representation_contract_path",
+        "representation_contract_sha256",
+        "representation_abi_version",
+        "representation_receipt_path",
+        "representation_receipt_sha256"
+      ],
+      "properties": {
+        "reference_implementation_path": {"const": "runtime/pdc_golden_metamorphic.py"},
+        "reference_implementation_sha256": {"$ref": "#/$defs/sha256"},
+        "math_contract_path": {"const": "runs/pdc_math_contract.json"},
+        "math_contract_sha256": {"$ref": "#/$defs/sha256"},
+        "math_contract_version": {"const": "PDC-MATH-0.1"},
+        "predecessor_golden_path": {"const": "runs/pdc_golden_vectors.json"},
+        "predecessor_golden_sha256": {"$ref": "#/$defs/sha256"},
+        "predecessor_golden_version": {"const": "PDC-GOLDEN-0.1"},
+        "representation_contract_path": {"const": "runs/pdc_representation_contract.json"},
+        "representation_contract_sha256": {"$ref": "#/$defs/sha256"},
+        "representation_abi_version": {"const": "PDC-REP-0.1"},
+        "representation_receipt_path": {"const": "runs/pdc_representation_receipt.json"},
+        "representation_receipt_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["boundary_mode", "dimensions", "model_tag", "finite_verifier_not_all_size_theorem", "predecessor_is_preserved"],
+      "properties": {
+        "boundary_mode": {"const": "periodic"},
+        "dimensions": {"const": 3},
+        "model_tag": {"const": "B5-7/S5-9"},
+        "finite_verifier_not_all_size_theorem": {"const": true},
+        "predecessor_is_preserved": {"const": true}
+      }
+    },
+    "threshold_records": {
+      "type": "array",
+      "minItems": 54,
+      "maxItems": 54,
+      "items": {"$ref": "#/$defs/threshold_record"}
+    },
+    "adversarial_records": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {"$ref": "#/$defs/adversarial_record"}
+    },
+    "metamorphic_records": {
+      "type": "array",
+      "minItems": 72,
+      "maxItems": 72,
+      "items": {"$ref": "#/$defs/metamorphic_record"}
+    },
+    "non_relations": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {"$ref": "#/$defs/non_relation"}
+    },
+    "digests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["threshold_set_sha256", "adversarial_set_sha256", "metamorphic_set_sha256", "non_relation_set_sha256", "record_set_sha256"],
+      "properties": {
+        "threshold_set_sha256": {"$ref": "#/$defs/sha256"},
+        "adversarial_set_sha256": {"$ref": "#/$defs/sha256"},
+        "metamorphic_set_sha256": {"$ref": "#/$defs/sha256"},
+        "non_relation_set_sha256": {"$ref": "#/$defs/sha256"},
+        "record_set_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["threshold_pair_count", "adversarial_case_count", "translation_relation_count", "axis_permutation_relation_count", "metamorphic_relation_count", "non_relation_count", "published_record_count"],
+      "properties": {
+        "threshold_pair_count": {"const": 54},
+        "adversarial_case_count": {"const": 8},
+        "translation_relation_count": {"const": 32},
+        "axis_permutation_relation_count": {"const": 40},
+        "metamorphic_relation_count": {"const": 72},
+        "non_relation_count": {"const": 6},
+        "published_record_count": {"const": 140}
+      }
+    },
+    "oracle_policy": {"$ref": "#/$defs/nonempty_strings"},
+    "limitations": {"$ref": "#/$defs/nonempty_strings"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "shape3": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "integer", "minimum": 3}},
+    "coord3": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "integer", "minimum": 0}},
+    "nonempty_strings": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 12}},
+    "measurement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["support", "capacity", "deficit", "excess", "strain", "channel", "accepted", "next_state"],
+      "properties": {
+        "support": {"type": "integer", "minimum": 0, "maximum": 26},
+        "capacity": {"enum": [7, 9]},
+        "deficit": {"type": "integer", "minimum": 0, "maximum": 5},
+        "excess": {"type": "integer", "minimum": 0, "maximum": 19},
+        "strain": {"type": "integer", "minimum": -5, "maximum": 19},
+        "channel": {"type": "string", "pattern": "^(B([0-9]|1[0-9]|2[0-6])|S[0-9]|O10\\+)$"},
+        "accepted": {"type": "boolean"},
+        "next_state": {"enum": [0, 1]}
+      }
+    },
+    "threshold_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "claim_class", "state", "support", "shape", "target", "field_generator", "expected"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^threshold-s[01]-n[0-2][0-9]$"},
+        "claim_class": {"const": "verifier"},
+        "state": {"enum": [0, 1]},
+        "support": {"type": "integer", "minimum": 0, "maximum": 26},
+        "shape": {"const": [5, 5, 5]},
+        "target": {"const": [2, 2, 2]},
+        "field_generator": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "neighbor_order", "selected_neighbor_count"],
+          "properties": {
+            "kind": {"const": "target_plus_neighbor_prefix"},
+            "neighbor_order": {"const": "dz_then_dy_then_dx_with_dx_fastest"},
+            "selected_neighbor_count": {"type": "integer", "minimum": 0, "maximum": 26}
+          }
+        },
+        "expected": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["measurement", "field_sha256", "support_vector_sha256", "next_state_sha256"],
+          "properties": {
+            "measurement": {"$ref": "#/$defs/measurement"},
+            "field_sha256": {"$ref": "#/$defs/sha256"},
+            "support_vector_sha256": {"$ref": "#/$defs/sha256"},
+            "next_state_sha256": {"$ref": "#/$defs/sha256"}
+          }
+        }
+      }
+    },
+    "field_expected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field_sha256", "support_sha256", "next_state_sha256", "active_count", "next_active_count", "cell_count", "bitpacked_byte_count", "bitpacked_padding_bit_count"],
+      "properties": {
+        "field_sha256": {"$ref": "#/$defs/sha256"},
+        "support_sha256": {"$ref": "#/$defs/sha256"},
+        "next_state_sha256": {"$ref": "#/$defs/sha256"},
+        "active_count": {"type": "integer", "minimum": 0},
+        "next_active_count": {"type": "integer", "minimum": 0},
+        "cell_count": {"type": "integer", "minimum": 27, "maximum": 125},
+        "bitpacked_byte_count": {"type": "integer", "minimum": 4},
+        "bitpacked_padding_bit_count": {"type": "integer", "minimum": 0, "maximum": 7}
+      }
+    },
+    "wrap_probe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target", "source", "wrapped_axis_count", "target_support", "source_contributes"],
+      "properties": {
+        "target": {"$ref": "#/$defs/coord3"},
+        "source": {"$ref": "#/$defs/coord3"},
+        "wrapped_axis_count": {"type": "integer", "minimum": 1, "maximum": 3},
+        "target_support": {"type": "integer", "minimum": 1, "maximum": 26},
+        "source_contributes": {"const": true}
+      }
+    },
+    "adversarial_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "claim_class", "shape", "boundary_focus", "pattern_id", "active_indices", "wraparound_probe", "expected"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+        "claim_class": {"const": "verifier"},
+        "shape": {"$ref": "#/$defs/shape3"},
+        "boundary_focus": {"enum": ["empty", "full", "singleton_wrap_corner", "wrap_face", "wrap_edge", "wrap_corner", "zero_bit_padding", "nonzero_bit_padding_width"]},
+        "pattern_id": {"type": "string", "minLength": 4},
+        "active_indices": {"type": "array", "items": {"type": "integer", "minimum": 0}, "uniqueItems": true},
+        "wraparound_probe": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/wrap_probe"}]},
+        "expected": {"$ref": "#/$defs/field_expected"}
+      }
+    },
+    "metamorphic_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "claim_class", "base_case_id", "relation", "parameters", "expected"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^(translate|axis)-[a-z0-9-]+-[0-4]$"},
+        "claim_class": {"const": "verifier"},
+        "base_case_id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+        "relation": {"enum": ["periodic_translation_equivariance", "axis_permutation_equivariance"]},
+        "parameters": {"type": "object", "minProperties": 1},
+        "expected": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["transformed_shape", "base_field_sha256", "transformed_field_sha256", "base_support_sha256", "transformed_support_sha256", "base_next_state_sha256", "transformed_next_state_sha256", "support_equivariant", "next_state_equivariant"],
+          "properties": {
+            "transformed_shape": {"$ref": "#/$defs/shape3"},
+            "base_field_sha256": {"$ref": "#/$defs/sha256"},
+            "transformed_field_sha256": {"$ref": "#/$defs/sha256"},
+            "base_support_sha256": {"$ref": "#/$defs/sha256"},
+            "transformed_support_sha256": {"$ref": "#/$defs/sha256"},
+            "base_next_state_sha256": {"$ref": "#/$defs/sha256"},
+            "transformed_next_state_sha256": {"$ref": "#/$defs/sha256"},
+            "support_equivariant": {"const": true},
+            "next_state_equivariant": {"const": true}
+          }
+        }
+      }
+    },
+    "non_relation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "evidence_type", "relation", "expected_relation", "description", "witness"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+        "evidence_type": {"enum": ["finite_counterexample", "contract_exclusion"]},
+        "relation": {"type": "string", "minLength": 8},
+        "expected_relation": {"const": false},
+        "description": {"type": "string", "minLength": 30},
+        "witness": {"type": "object", "minProperties": 2}
+      }
+    }
+  }
+}

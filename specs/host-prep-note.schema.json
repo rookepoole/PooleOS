@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/host-prep-note.schema.json",
+  "title": "PooleOS Host Prep Note",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "note_path",
+    "operator_action_request",
+    "operator_action_receipt",
+    "target",
+    "request_status",
+    "receipt_status",
+    "requires_operator_approval",
+    "codex_execution_allowed",
+    "execution_performed",
+    "codex_execution_performed",
+    "operator_executed",
+    "command",
+    "command_sha256",
+    "packages",
+    "checks",
+    "next_steps",
+    "verification_commands"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.host_prep_note"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ready_for_operator",
+        "no_action_needed",
+        "invalid"
+      ]
+    },
+    "note_path": {
+      "type": "string"
+    },
+    "operator_action_request": {
+      "type": "string"
+    },
+    "operator_action_receipt": {
+      "type": "string"
+    },
+    "target": {
+      "type": "object",
+      "required": [
+        "environment",
+        "distro",
+        "package_manager"
+      ],
+      "properties": {
+        "environment": {
+          "type": "string"
+        },
+        "distro": {
+          "type": "string"
+        },
+        "package_manager": {
+          "type": "string"
+        }
+      }
+    },
+    "request_status": {
+      "type": "string"
+    },
+    "receipt_status": {
+      "type": "string"
+    },
+    "requires_operator_approval": {
+      "type": "boolean"
+    },
+    "codex_execution_allowed": {
+      "type": "boolean"
+    },
+    "execution_performed": {
+      "type": "boolean"
+    },
+    "codex_execution_performed": {
+      "type": "boolean"
+    },
+    "operator_executed": {
+      "type": "boolean"
+    },
+    "command": {
+      "type": "string"
+    },
+    "command_sha256": {
+      "type": "string"
+    },
+    "packages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "verification_commands": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

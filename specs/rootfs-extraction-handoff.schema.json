@@ -1,0 +1,336 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/rootfs-extraction-handoff.schema.json",
+  "title": "PooleOS Rootfs Extraction Handoff",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "execution_performed",
+    "codex_execution_allowed",
+    "rootfs_extraction_performed",
+    "source_artifact",
+    "source_status",
+    "handoff_output_path",
+    "note_output_path",
+    "rootfs_image",
+    "extracted_rootfs",
+    "mount",
+    "image_binding",
+    "rootfs_content_manifest_output",
+    "command_plan",
+    "bash_script",
+    "bash_script_sha256",
+    "operator_receipt_template",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.rootfs_extraction_handoff"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "blocked",
+        "fail"
+      ]
+    },
+    "execution_performed": {
+      "type": "boolean"
+    },
+    "codex_execution_allowed": {
+      "type": "boolean"
+    },
+    "rootfs_extraction_performed": {
+      "type": "boolean"
+    },
+    "source_artifact": {
+      "type": "string"
+    },
+    "source_status": {
+      "type": "string"
+    },
+    "handoff_output_path": {
+      "type": "string"
+    },
+    "note_output_path": {
+      "type": "string"
+    },
+    "rootfs_image": {
+      "type": "object",
+      "required": [
+        "path",
+        "linux_path",
+        "exists"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "linux_path": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "boolean"
+        }
+      }
+    },
+    "extracted_rootfs": {
+      "type": "object",
+      "required": [
+        "path",
+        "linux_path",
+        "exists"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "linux_path": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "boolean"
+        }
+      }
+    },
+    "mount": {
+      "type": "object",
+      "required": [
+        "path",
+        "linux_path",
+        "read_only",
+        "loop"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "linux_path": {
+          "type": "string"
+        },
+        "read_only": {
+          "type": "boolean"
+        },
+        "loop": {
+          "type": "boolean"
+        }
+      }
+    },
+    "image_binding": {
+      "type": "object",
+      "required": [
+        "path",
+        "linux_path"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "linux_path": {
+          "type": "string"
+        }
+      }
+    },
+    "rootfs_content_manifest_output": {
+      "type": "object",
+      "required": [
+        "path",
+        "linux_path"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "linux_path": {
+          "type": "string"
+        }
+      }
+    },
+    "command_plan": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "role",
+          "description",
+          "bash",
+          "requires_sudo",
+          "mutates_host"
+        ],
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "bash": {
+            "type": "string"
+          },
+          "requires_sudo": {
+            "type": "boolean"
+          },
+          "mutates_host": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "bash_script": {
+      "type": "string"
+    },
+    "bash_script_sha256": {
+      "type": "string"
+    },
+    "operator_receipt_template": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "artifact_kind",
+        "operator_executed",
+        "codex_execution_performed",
+        "rootfs_image",
+        "extracted_rootfs",
+        "rootfs_content_manifest_output",
+        "commands",
+        "post_extraction_verification"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "string"
+        },
+        "artifact_kind": {
+          "type": "string"
+        },
+        "operator_executed": {
+          "type": "boolean"
+        },
+        "codex_execution_performed": {
+          "type": "boolean"
+        },
+        "rootfs_image": {
+          "type": "string"
+        },
+        "extracted_rootfs": {
+          "type": "string"
+        },
+        "rootfs_content_manifest_output": {
+          "type": "string"
+        },
+        "commands": {
+          "type": "array"
+        },
+        "post_extraction_verification": {
+          "type": "object"
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "severity",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "fail",
+              "block"
+            ]
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "failed_check_count",
+        "blocking_check_count",
+        "command_count",
+        "source_manifest_status",
+        "source_manifest_failed_check_count",
+        "source_file_count",
+        "rootfs_image_exists",
+        "extracted_rootfs_exists",
+        "bash_script_sha256",
+        "operator_executed",
+        "execution_performed",
+        "rootfs_extraction_performed"
+      ],
+      "properties": {
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "blocking_check_count": {
+          "type": "integer"
+        },
+        "command_count": {
+          "type": "integer"
+        },
+        "source_manifest_status": {
+          "type": "string"
+        },
+        "source_manifest_failed_check_count": {
+          "type": "integer"
+        },
+        "source_file_count": {
+          "type": "integer"
+        },
+        "rootfs_image_exists": {
+          "type": "boolean"
+        },
+        "extracted_rootfs_exists": {
+          "type": "boolean"
+        },
+        "bash_script_sha256": {
+          "type": "string"
+        },
+        "operator_executed": {
+          "type": "boolean"
+        },
+        "execution_performed": {
+          "type": "boolean"
+        },
+        "rootfs_extraction_performed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

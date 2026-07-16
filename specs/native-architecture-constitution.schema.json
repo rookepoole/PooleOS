@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/native-architecture-constitution.schema.json",
+  "title": "PooleOS Native Architecture Constitution",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "status",
+    "production_ready",
+    "owner",
+    "ratification",
+    "repository",
+    "checklist",
+    "architecture",
+    "component_names",
+    "version_namespaces",
+    "language_split",
+    "tcb_domains",
+    "scope",
+    "publication_boundary",
+    "open_items"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_architecture_constitution"},
+    "status_date": {"type": "string"},
+    "status": {"const": "partial_owner_directed_signature_pending"},
+    "production_ready": {"const": false},
+    "owner": {
+      "type": "object",
+      "required": ["name", "github", "technical_authority", "ip_authority", "release_authority"],
+      "properties": {
+        "name": {"const": "Rooke Poole"},
+        "github": {"const": "rookepoole"},
+        "technical_authority": {"const": true},
+        "ip_authority": {"const": true},
+        "release_authority": {"const": true}
+      }
+    },
+    "ratification": {
+      "type": "object",
+      "required": ["owner_direction_recorded", "owner_direction_source", "cryptographic_signature_present", "production_promotion_allowed"],
+      "properties": {
+        "owner_direction_recorded": {"const": true},
+        "owner_direction_source": {"type": "string"},
+        "cryptographic_signature_present": {"const": false},
+        "production_promotion_allowed": {"const": false}
+      }
+    },
+    "repository": {
+      "type": "object",
+      "required": ["model", "remote", "default_branch", "visibility", "local_source_control_status", "license_family", "private_inputs_may_be_hash_bound"],
+      "properties": {
+        "model": {"const": "public_source_available_monorepo_with_private_evidence_vault"},
+        "remote": {"const": "https://github.com/rookepoole/PooleOS.git"},
+        "default_branch": {"const": "main"},
+        "visibility": {"const": "public"},
+        "local_source_control_status": {"enum": ["initialization_in_progress", "initialized_unpublished", "initialized_published"]},
+        "license_family": {"const": "PolyForm-Noncommercial-1.0.0"},
+        "private_inputs_may_be_hash_bound": {"const": true}
+      }
+    },
+    "checklist": {
+      "type": "object",
+      "required": ["sha256", "line_count", "section_count", "implementation_requirement_count", "completion_phase_range"],
+      "properties": {
+        "sha256": {"const": "A8C94719FAF9428C1F133010BA2603C0270C4E1EFD7327AF8EAB9C8C362ABB3D"},
+        "line_count": {"const": 10512},
+        "section_count": {"const": 171},
+        "implementation_requirement_count": {"const": 8996},
+        "completion_phase_range": {"const": "N0-N39"}
+      }
+    },
+    "architecture": {
+      "type": "object",
+      "required": ["product", "bootloader", "kernel", "kernel_style", "target_architecture", "endianness", "firmware", "boot_media_partitioning", "legacy_bios", "production_kernel_modules_v1", "general_drivers_in_user_space", "production_base", "forbidden_production_substitutes"],
+      "properties": {
+        "product": {"const": "PooleOS"},
+        "bootloader": {"const": "PooleBoot"},
+        "kernel": {"const": "PooleKernel"},
+        "kernel_style": {"const": "capability_microkernel"},
+        "target_architecture": {"const": "x86_64"},
+        "endianness": {"const": "little"},
+        "firmware": {"const": "UEFI"},
+        "boot_media_partitioning": {"const": "GPT"},
+        "legacy_bios": {"const": false},
+        "production_kernel_modules_v1": {"const": false},
+        "general_drivers_in_user_space": {"const": true},
+        "production_base": {"const": "original_native_pooleos"},
+        "forbidden_production_substitutes": {"type": "array", "minItems": 7, "items": {"type": "string"}}
+      }
+    },
+    "component_names": {"type": "object"},
+    "version_namespaces": {
+      "type": "array",
+      "minItems": 20,
+      "items": {
+        "type": "object",
+        "required": ["id", "role"],
+        "properties": {"id": {"type": "string"}, "role": {"type": "string"}}
+      }
+    },
+    "language_split": {
+      "type": "object",
+      "required": ["status", "pooleboot", "poolekernel", "privileged_user_space", "portable_pdc_reference", "host_evidence", "native_rust_abi_on_wire_or_disk", "cxx_in_v1_tcb", "third_party_dependencies_default"],
+      "properties": {
+        "status": {"const": "proposed_pending_toolchain_qualification"},
+        "native_rust_abi_on_wire_or_disk": {"const": false},
+        "cxx_in_v1_tcb": {"const": false},
+        "third_party_dependencies_default": {"const": "deny"}
+      }
+    },
+    "tcb_domains": {
+      "type": "array",
+      "minItems": 8,
+      "items": {"type": "object", "required": ["id", "ring", "component"]}
+    },
+    "scope": {"type": "object", "required": ["product_profile", "tier0", "tier1", "unlisted_hardware", "pooleglyph_required_for_first_boot", "pooleglyph_required_for_production", "optimized_pdc_required_for_first_boot", "pdc_reference_required_for_production", "pdc_disabled_safe_mode_required"]},
+    "publication_boundary": {"type": "object", "required": ["public_repository_contains_private_implementation_documents", "public_repository_contains_private_benchmark_datasets", "public_repository_contains_signing_private_keys", "public_repository_contains_redistribution_uncleared_firmware", "public_hash_only_provenance_allowed", "legal_review_complete"]},
+    "open_items": {"type": "array", "minItems": 8, "items": {"type": "string"}}
+  }
+}
+

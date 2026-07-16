@@ -1,0 +1,238 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/pdc-qp-contract.schema.json",
+  "title": "PooleOS PDC-QP Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "contract_version",
+    "created_utc",
+    "status",
+    "bindings",
+    "feature_contract",
+    "probability_contract",
+    "correlation_contract",
+    "cardinality_contract",
+    "spectrometry_contract",
+    "imported_case_families",
+    "digests",
+    "summary",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "artifact_kind": {"const": "pdc_qp_contract"},
+    "contract_version": {"const": "PDC-QP-0.1"},
+    "created_utc": {"type": "string", "minLength": 20},
+    "status": {"const": "frozen_reference_contract"},
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reference_implementation_path",
+        "reference_implementation_sha256",
+        "source_intake_path",
+        "source_intake_sha256",
+        "verifier_intake_path",
+        "verifier_intake_sha256",
+        "math_contract_path",
+        "math_contract_sha256",
+        "math_contract_version",
+        "formula_sources",
+        "typed_case_archive",
+        "typed_case_members"
+      ],
+      "properties": {
+        "reference_implementation_path": {"const": "runtime/pdc_qp.py"},
+        "reference_implementation_sha256": {"$ref": "#/$defs/sha256"},
+        "source_intake_path": {"const": "runs/pdc_source_intake.json"},
+        "source_intake_sha256": {"$ref": "#/$defs/sha256"},
+        "verifier_intake_path": {"const": "runs/pdc_verifier_intake.json"},
+        "verifier_intake_sha256": {"$ref": "#/$defs/sha256"},
+        "math_contract_path": {"const": "runs/pdc_math_contract.json"},
+        "math_contract_sha256": {"$ref": "#/$defs/sha256"},
+        "math_contract_version": {"const": "PDC-MATH-0.1"},
+        "formula_sources": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"$ref": "#/$defs/formula_source"}
+        },
+        "typed_case_archive": {"$ref": "#/$defs/archive"},
+        "typed_case_members": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {"$ref": "#/$defs/member"}
+        }
+      }
+    },
+    "feature_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type_tag",
+        "model_tag",
+        "input_state_set",
+        "support_range",
+        "channel_order",
+        "definitions",
+        "collapsed_type_tag",
+        "collapsed_expression",
+        "collapsed_state_preserves_channel_identity",
+        "typed_and_collapsed_outputs_are_interchangeable"
+      ],
+      "properties": {
+        "type_tag": {"const": "PDC.QP.Feature.v0.1"},
+        "model_tag": {"const": "B5-7/S5-9"},
+        "input_state_set": {"type": "array", "minItems": 2, "maxItems": 2},
+        "support_range": {"type": "array", "minItems": 2, "maxItems": 2},
+        "channel_order": {"type": "array", "minItems": 10, "maxItems": 10, "items": {"type": "string"}},
+        "definitions": {"type": "object"},
+        "collapsed_type_tag": {"const": "PDC.CollapsedState.v0.1"},
+        "collapsed_expression": {"type": "string", "minLength": 10},
+        "collapsed_state_preserves_channel_identity": {"const": false},
+        "typed_and_collapsed_outputs_are_interchangeable": {"const": false}
+      }
+    },
+    "probability_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type_tag",
+        "model_tag",
+        "center_excluded_from_neighbor_count",
+        "neighbor_probability_count",
+        "generating_function",
+        "coefficient_definition",
+        "dynamic_program",
+        "activation_probability",
+        "center_derivative",
+        "neighbor_coefficient_derivative",
+        "oracles",
+        "floating_point_policy"
+      ],
+      "properties": {
+        "type_tag": {"const": "PDC.QP.Probability.v0.1"},
+        "model_tag": {"const": "B5-7/S5-9.independent_bernoulli_product"},
+        "center_excluded_from_neighbor_count": {"const": true},
+        "neighbor_probability_count": {"const": 26},
+        "generating_function": {"type": "string", "minLength": 10},
+        "coefficient_definition": {"type": "string", "minLength": 10},
+        "dynamic_program": {"type": "string", "minLength": 10},
+        "activation_probability": {"type": "string", "minLength": 10},
+        "center_derivative": {"type": "string", "minLength": 10},
+        "neighbor_coefficient_derivative": {"type": "string", "minLength": 10},
+        "oracles": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "string"}},
+        "floating_point_policy": {"$ref": "#/$defs/floating_point_policy"}
+      }
+    },
+    "correlation_contract": {"$ref": "#/$defs/nonempty_object"},
+    "cardinality_contract": {"$ref": "#/$defs/nonempty_object"},
+    "spectrometry_contract": {"$ref": "#/$defs/nonempty_object"},
+    "imported_case_families": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {"$ref": "#/$defs/case_family"}
+    },
+    "digests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["formula_source_set_sha256", "typed_case_member_set_sha256"],
+      "properties": {
+        "formula_source_set_sha256": {"$ref": "#/$defs/sha256"},
+        "typed_case_member_set_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "feature_channel_count",
+        "residue_channel_count",
+        "probability_neighbor_count",
+        "typed_case_family_count",
+        "imported_typed_case_count",
+        "formula_source_count"
+      ],
+      "properties": {
+        "feature_channel_count": {"const": 10},
+        "residue_channel_count": {"const": 5},
+        "probability_neighbor_count": {"const": 26},
+        "typed_case_family_count": {"const": 5},
+        "imported_typed_case_count": {"const": 42},
+        "formula_source_count": {"const": 2}
+      }
+    },
+    "claim_boundary": {"$ref": "#/$defs/nonempty_strings"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "nonempty_strings": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 12}},
+    "nonempty_object": {"type": "object", "minProperties": 1},
+    "formula_source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "stored_path", "sha256", "role"],
+      "properties": {
+        "id": {"enum": ["SRC-LG-1", "SRC-MAG-1"]},
+        "stored_path": {"type": "string", "minLength": 10},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "role": {"type": "string", "minLength": 10}
+      }
+    },
+    "archive": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_id", "stored_path", "sha256", "size_bytes"],
+      "properties": {
+        "source_id": {"const": "VER-SRC-LOCAL-GEOMETRY-ANCILLARY-V1_7_1"},
+        "stored_path": {"const": "sources/pdc/verifiers/sha256/09374edcfeb3063225e2d60b75d8ee317cc5766ad036729cd77c8f6e63c1b441.zip"},
+        "sha256": {"const": "09374EDCFEB3063225E2D60B75D8EE317CC5766AD036729CD77C8F6E63C1B441"},
+        "size_bytes": {"const": 5521875}
+      }
+    },
+    "member": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "member_path", "sha256", "size_bytes", "row_count", "role"],
+      "properties": {
+        "id": {"enum": ["raw_gate", "one_input", "half_adder", "full_adder", "cardinality"]},
+        "member_path": {"type": "string", "minLength": 20},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "size_bytes": {"type": "integer", "minimum": 1},
+        "row_count": {"type": "integer", "minimum": 1},
+        "role": {"type": "string", "minLength": 10}
+      }
+    },
+    "case_family": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "case_count", "member_sha256"],
+      "properties": {
+        "id": {"type": "string", "minLength": 4},
+        "case_count": {"type": "integer", "minimum": 1},
+        "member_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "floating_point_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["format", "input_order", "dp_order", "polynomial_order", "normalization_sum", "absolute_tolerance", "relative_tolerance", "invalid_input_policy", "output_clipping"],
+      "properties": {
+        "format": {"const": "IEEE-754 binary64"},
+        "input_order": {"type": "string", "minLength": 10},
+        "dp_order": {"type": "string", "minLength": 10},
+        "polynomial_order": {"type": "string", "minLength": 10},
+        "normalization_sum": {"const": "math.fsum"},
+        "absolute_tolerance": {"type": "number"},
+        "relative_tolerance": {"type": "number"},
+        "invalid_input_policy": {"type": "string", "minLength": 10},
+        "output_clipping": {"const": false}
+      }
+    }
+  }
+}

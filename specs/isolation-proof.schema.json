@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/isolation-proof.schema.json",
+  "title": "PooleOS Microkernel Isolation Spike Proof",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "policy_version",
+    "kernel_surface",
+    "security_boundary_claimed",
+    "source_basis",
+    "compartments",
+    "channels",
+    "denied_channels",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.microkernel_isolation_spike"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail"
+      ]
+    },
+    "policy_version": {
+      "type": "string"
+    },
+    "kernel_surface": {
+      "type": "string"
+    },
+    "security_boundary_claimed": {
+      "type": "boolean"
+    },
+    "source_basis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "compartments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "trust_level",
+          "role",
+          "owns"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "trust_level": {
+            "type": "string",
+            "enum": [
+              "trusted",
+              "restricted",
+              "untrusted",
+              "operator"
+            ]
+          },
+          "role": {
+            "type": "string"
+          },
+          "owns": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "channels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "source",
+          "target",
+          "capability",
+          "direction",
+          "purpose",
+          "allowed",
+          "requires_mediation"
+        ],
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "capability": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "requires_mediation": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "denied_channels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "source",
+          "target",
+          "capability",
+          "reason"
+        ],
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "capability": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "compartment_count",
+        "allowed_channel_count",
+        "denied_channel_count",
+        "failed_check_count"
+      ],
+      "properties": {
+        "compartment_count": {
+          "type": "integer"
+        },
+        "allowed_channel_count": {
+          "type": "integer"
+        },
+        "denied_channel_count": {
+          "type": "integer"
+        },
+        "failed_check_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

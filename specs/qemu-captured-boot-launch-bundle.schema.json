@@ -1,0 +1,230 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/qemu-captured-boot-launch-bundle.schema.json",
+  "title": "PooleOS QEMU Captured Boot Launch Bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "launch_ready",
+    "execution_performed",
+    "pooleos_root",
+    "inputs",
+    "expected_outputs",
+    "command_plan",
+    "release_gate_arguments",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.qemu_captured_boot_launch_bundle"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "blocked",
+        "fail"
+      ]
+    },
+    "launch_ready": {
+      "type": "boolean"
+    },
+    "execution_performed": {
+      "type": "boolean"
+    },
+    "pooleos_root": {
+      "type": "string"
+    },
+    "inputs": {
+      "type": "object",
+      "required": [
+        "preflight",
+        "qemu_shared_folder_contract",
+        "qemu_captured_boot_receipt",
+        "fixture_evidence",
+        "launcher_script"
+      ],
+      "properties": {
+        "preflight": {
+          "type": "string"
+        },
+        "qemu_shared_folder_contract": {
+          "type": "string"
+        },
+        "qemu_captured_boot_receipt": {
+          "type": "string"
+        },
+        "fixture_evidence": {
+          "type": "string"
+        },
+        "launcher_script": {
+          "type": "string"
+        }
+      }
+    },
+    "expected_outputs": {
+      "type": "object",
+      "required": [
+        "serial_log_path",
+        "boot_validation_output",
+        "qemu_boot_evidence_output",
+        "qemu_captured_boot_receipt_output",
+        "launch_bundle_output",
+        "release_gate_output"
+      ],
+      "properties": {
+        "serial_log_path": {
+          "type": "string"
+        },
+        "boot_validation_output": {
+          "type": "string"
+        },
+        "qemu_boot_evidence_output": {
+          "type": "string"
+        },
+        "qemu_captured_boot_receipt_output": {
+          "type": "string"
+        },
+        "launch_bundle_output": {
+          "type": "string"
+        },
+        "release_gate_output": {
+          "type": "string"
+        }
+      }
+    },
+    "command_plan": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "role",
+          "description",
+          "argv",
+          "powershell"
+        ],
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "argv": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "powershell": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "release_gate_arguments": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "severity",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "fail",
+              "block"
+            ]
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "failed_check_count",
+        "blocking_check_count",
+        "command_count",
+        "preflight_status",
+        "preflight_launch_ready",
+        "shared_folder_status",
+        "shared_folder_ready",
+        "receipt_status",
+        "captured_outputs_separate",
+        "execution_performed"
+      ],
+      "properties": {
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "blocking_check_count": {
+          "type": "integer"
+        },
+        "command_count": {
+          "type": "integer"
+        },
+        "preflight_status": {
+          "type": "string"
+        },
+        "preflight_launch_ready": {
+          "type": "boolean"
+        },
+        "shared_folder_status": {
+          "type": "string"
+        },
+        "shared_folder_ready": {
+          "type": "boolean"
+        },
+        "receipt_status": {
+          "type": "string"
+        },
+        "captured_outputs_separate": {
+          "type": "boolean"
+        },
+        "execution_performed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

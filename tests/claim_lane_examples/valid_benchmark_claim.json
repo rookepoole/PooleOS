@@ -1,0 +1,25 @@
+{
+  "id": "BENCH-001",
+  "title": "Signed membrane claims remain benchmark-lane until theorem closure",
+  "owner": "Rooke Poole",
+  "claim_lane": "benchmark",
+  "evidence_kind": "benchmark",
+  "rule": "B5-7/S3-11/k3",
+  "model_tag": "signed",
+  "source_hash": "pending-source-hash",
+  "seed_policy": "Seed-controlled benchmark runs required for generated artifacts.",
+  "inputs": [
+    "signed initial condition",
+    "rule window",
+    "warmup protocol"
+  ],
+  "outputs": [
+    "membrane quality proxy",
+    "interface density",
+    "thinness",
+    "imbalance"
+  ],
+  "limitations": "Benchmark descriptor only; does not claim physical energy, thrust, medical safety, financial safety, or security-boundary status.",
+  "created_utc": "2026-06-29T00:00:00Z"
+}
+

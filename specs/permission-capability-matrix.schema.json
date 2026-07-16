@@ -1,0 +1,717 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/permission-capability-matrix.schema.json",
+  "title": "PooleOS Permission Capability Matrix",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "bridge_manifest",
+    "core_ir_boundary_receipt",
+    "core_ir_executable_audit",
+    "parser_kernel_promotion_receipt",
+    "symbol_sources",
+    "capabilities",
+    "resources",
+    "permissions",
+    "policies",
+    "contracts",
+    "resource_permissions",
+    "trap_operations",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.permission_capability_matrix"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "warn",
+        "fail"
+      ]
+    },
+    "bridge_manifest": {
+      "type": "object",
+      "required": [
+        "artifact_path",
+        "status",
+        "latest_phase",
+        "failed_check_count",
+        "pooleglyph_path"
+      ],
+      "properties": {
+        "artifact_path": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "latest_phase": {
+          "type": "integer"
+        },
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "pooleglyph_path": {
+          "type": "string"
+        }
+      }
+    },
+    "core_ir_boundary_receipt": {
+      "type": "object",
+      "required": [
+        "artifact_path",
+        "exists",
+        "status",
+        "phase66_audit_present",
+        "parser_to_kernel_promotion_allowed",
+        "kernel_enforcement_claimed",
+        "failed_check_count",
+        "failed_promotion_gate_count",
+        "validated_executable_candidate_count",
+        "validated_metadata_zero_program_count",
+        "unexpected_invalid_count",
+        "validation_file_count",
+        "binding_mode"
+      ],
+      "properties": {
+        "artifact_path": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string"
+        },
+        "phase66_audit_present": {
+          "type": "boolean"
+        },
+        "parser_to_kernel_promotion_allowed": {
+          "type": "boolean"
+        },
+        "kernel_enforcement_claimed": {
+          "type": "boolean"
+        },
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "failed_promotion_gate_count": {
+          "type": "integer"
+        },
+        "validated_executable_candidate_count": {
+          "type": "integer"
+        },
+        "validated_metadata_zero_program_count": {
+          "type": "integer"
+        },
+        "unexpected_invalid_count": {
+          "type": "integer"
+        },
+        "validation_file_count": {
+          "type": "integer"
+        },
+        "binding_mode": {
+          "type": "string",
+          "enum": [
+            "metadata_only_non_promoting",
+            "phase66_parser_to_kernel_promotable",
+            "unbound_or_invalid"
+          ]
+        }
+      }
+    },
+    "core_ir_executable_audit": {
+      "type": "object",
+      "required": [
+        "artifact_path",
+        "exists",
+        "status",
+        "source_boundary_receipt",
+        "source_matches_receipt",
+        "phase66_audit_present",
+        "parser_to_kernel_promotion_allowed",
+        "kernel_handoff_allowed",
+        "kernel_enforcement_claimed",
+        "failed_check_count",
+        "executable_candidate_count",
+        "metadata_zero_count",
+        "unexpected_invalid_count"
+      ],
+      "properties": {
+        "artifact_path": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string"
+        },
+        "source_boundary_receipt": {
+          "type": "string"
+        },
+        "source_matches_receipt": {
+          "type": "boolean"
+        },
+        "phase66_audit_present": {
+          "type": "boolean"
+        },
+        "parser_to_kernel_promotion_allowed": {
+          "type": "boolean"
+        },
+        "kernel_handoff_allowed": {
+          "type": "boolean"
+        },
+        "kernel_enforcement_claimed": {
+          "type": "boolean"
+        },
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "executable_candidate_count": {
+          "type": "integer"
+        },
+        "metadata_zero_count": {
+          "type": "integer"
+        },
+        "unexpected_invalid_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "parser_kernel_promotion_receipt": {
+      "type": "object",
+      "required": [
+        "artifact_path",
+        "exists",
+        "status",
+        "source_executable_audit",
+        "source_matches_audit",
+        "phase66_audit_present",
+        "parser_to_kernel_promotion_allowed",
+        "kernel_handoff_allowed",
+        "kernel_enforcement_claimed",
+        "failed_check_count"
+      ],
+      "properties": {
+        "artifact_path": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string"
+        },
+        "source_executable_audit": {
+          "type": "string"
+        },
+        "source_matches_audit": {
+          "type": "boolean"
+        },
+        "phase66_audit_present": {
+          "type": "boolean"
+        },
+        "parser_to_kernel_promotion_allowed": {
+          "type": "boolean"
+        },
+        "kernel_handoff_allowed": {
+          "type": "boolean"
+        },
+        "kernel_enforcement_claimed": {
+          "type": "boolean"
+        },
+        "failed_check_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "symbol_sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "kind",
+          "path",
+          "exists",
+          "module"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "exists": {
+            "type": "boolean"
+          },
+          "module": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/named_declaration"
+      }
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "name",
+          "fields",
+          "source_modules",
+          "source_paths"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "fields": {
+            "type": "object"
+          },
+          "source_modules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "source_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "access_hint",
+          "resource_kind_hint",
+          "source_modules",
+          "source_paths"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "access_hint": {
+            "type": "string"
+          },
+          "resource_kind_hint": {
+            "type": "string"
+          },
+          "source_modules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "source_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "policies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "allowed_permissions",
+          "missing_permissions",
+          "source_modules",
+          "source_paths"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "allowed_permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "missing_permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "source_modules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "source_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "contracts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "required_policies",
+          "missing_policies",
+          "source_modules",
+          "source_paths"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "required_policies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "missing_policies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "source_modules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "source_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "resource_permissions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/resource_permission"
+      }
+    },
+    "trap_operations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "opcode",
+          "region",
+          "source",
+          "target",
+          "capability",
+          "matrix_allowed",
+          "expected_trap",
+          "binding_mode",
+          "core_ir_boundary_status",
+          "parser_to_kernel_promotion_allowed",
+          "reason"
+        ],
+        "properties": {
+          "opcode": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "capability": {
+            "type": "string"
+          },
+          "matrix_allowed": {
+            "type": "boolean"
+          },
+          "expected_trap": {
+            "type": "boolean"
+          },
+          "binding_mode": {
+            "type": "string"
+          },
+          "core_ir_boundary_status": {
+            "type": "string"
+          },
+          "parser_to_kernel_promotion_allowed": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "capability_count",
+        "resource_count",
+        "permission_count",
+        "policy_count",
+        "contract_count",
+        "resource_permission_count",
+        "allowed_resource_permission_count",
+        "denied_resource_permission_count",
+        "trap_operation_count",
+        "failed_check_count",
+        "warning_count",
+        "core_ir_binding_mode",
+        "core_ir_phase66_audit_present",
+        "core_ir_executable_audit_bound",
+        "core_ir_executable_audit_status",
+        "core_ir_executable_candidate_count",
+        "core_ir_metadata_zero_count",
+        "core_ir_kernel_handoff_allowed",
+        "parser_kernel_promotion_receipt_bound",
+        "parser_kernel_promotion_receipt_status",
+        "parser_kernel_promotion_kernel_handoff_allowed",
+        "parser_to_kernel_promotion_allowed",
+        "kernel_enforcement_claimed"
+      ],
+      "properties": {
+        "capability_count": {
+          "type": "integer"
+        },
+        "resource_count": {
+          "type": "integer"
+        },
+        "permission_count": {
+          "type": "integer"
+        },
+        "policy_count": {
+          "type": "integer"
+        },
+        "contract_count": {
+          "type": "integer"
+        },
+        "resource_permission_count": {
+          "type": "integer"
+        },
+        "allowed_resource_permission_count": {
+          "type": "integer"
+        },
+        "denied_resource_permission_count": {
+          "type": "integer"
+        },
+        "trap_operation_count": {
+          "type": "integer"
+        },
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "warning_count": {
+          "type": "integer"
+        },
+        "core_ir_binding_mode": {
+          "type": "string"
+        },
+        "core_ir_phase66_audit_present": {
+          "type": "boolean"
+        },
+        "core_ir_executable_audit_bound": {
+          "type": "boolean"
+        },
+        "core_ir_executable_audit_status": {
+          "type": "string"
+        },
+        "core_ir_executable_candidate_count": {
+          "type": "integer"
+        },
+        "core_ir_metadata_zero_count": {
+          "type": "integer"
+        },
+        "core_ir_kernel_handoff_allowed": {
+          "type": "boolean"
+        },
+        "parser_kernel_promotion_receipt_bound": {
+          "type": "boolean"
+        },
+        "parser_kernel_promotion_receipt_status": {
+          "type": "string"
+        },
+        "parser_kernel_promotion_kernel_handoff_allowed": {
+          "type": "boolean"
+        },
+        "parser_to_kernel_promotion_allowed": {
+          "type": "boolean"
+        },
+        "kernel_enforcement_claimed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "named_declaration": {
+      "type": "object",
+      "required": [
+        "name",
+        "source_modules",
+        "source_paths"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "source_modules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "resource_permission": {
+      "type": "object",
+      "required": [
+        "resource_id",
+        "permission",
+        "access_hint",
+        "binding_source",
+        "binding_mode",
+        "core_ir_boundary_status",
+        "parser_to_kernel_promotion_allowed",
+        "policy_allowed",
+        "policy_names",
+        "contract_names",
+        "expected_trap",
+        "reason"
+      ],
+      "properties": {
+        "resource_id": {
+          "type": "string"
+        },
+        "permission": {
+          "type": "string"
+        },
+        "access_hint": {
+          "type": "string"
+        },
+        "binding_source": {
+          "type": "string"
+        },
+        "binding_mode": {
+          "type": "string"
+        },
+        "core_ir_boundary_status": {
+          "type": "string"
+        },
+        "parser_to_kernel_promotion_allowed": {
+          "type": "boolean"
+        },
+        "policy_allowed": {
+          "type": "boolean"
+        },
+        "policy_names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "contract_names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "expected_trap": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "check": {
+      "type": "object",
+      "required": [
+        "name",
+        "ok",
+        "detail"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

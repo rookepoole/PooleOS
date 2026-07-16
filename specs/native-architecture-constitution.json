@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_architecture_constitution",
+  "status_date": "2026-07-16",
+  "status": "partial_owner_directed_signature_pending",
+  "production_ready": false,
+  "owner": {
+    "name": "Rooke Poole",
+    "github": "rookepoole",
+    "technical_authority": true,
+    "ip_authority": true,
+    "release_authority": true
+  },
+  "ratification": {
+    "owner_direction_recorded": true,
+    "owner_direction_source": "active PooleOS native production goal dated 2026-07-16",
+    "cryptographic_signature_present": false,
+    "production_promotion_allowed": false
+  },
+  "repository": {
+    "model": "public_source_available_monorepo_with_private_evidence_vault",
+    "remote": "https://github.com/rookepoole/PooleOS.git",
+    "default_branch": "main",
+    "visibility": "public",
+    "local_source_control_status": "initialized_unpublished",
+    "license_family": "PolyForm-Noncommercial-1.0.0",
+    "private_inputs_may_be_hash_bound": true
+  },
+  "checklist": {
+    "sha256": "A8C94719FAF9428C1F133010BA2603C0270C4E1EFD7327AF8EAB9C8C362ABB3D",
+    "line_count": 10512,
+    "section_count": 171,
+    "implementation_requirement_count": 8996,
+    "completion_phase_range": "N0-N39"
+  },
+  "architecture": {
+    "product": "PooleOS",
+    "bootloader": "PooleBoot",
+    "kernel": "PooleKernel",
+    "kernel_style": "capability_microkernel",
+    "target_architecture": "x86_64",
+    "endianness": "little",
+    "firmware": "UEFI",
+    "boot_media_partitioning": "GPT",
+    "legacy_bios": false,
+    "production_kernel_modules_v1": false,
+    "general_drivers_in_user_space": true,
+    "production_base": "original_native_pooleos",
+    "forbidden_production_substitutes": [
+      "Linux",
+      "Debian",
+      "Buildroot",
+      "GRUB",
+      "Limine",
+      "systemd",
+      "Linux userspace"
+    ]
+  },
+  "component_names": {
+    "filesystem": "PooleFS",
+    "service_supervisor": "PooleInit",
+    "package_command": "poolepkg",
+    "recovery_environment": "PooleRecovery",
+    "desktop_shell": "PooleGlass",
+    "language_bytecode": "PGB2",
+    "language_vm": "PGVM2",
+    "pdc_reference_service": "pdc-refd",
+    "pdc_route_service": "pdc-routed",
+    "pdc_control_service": "pdc-controld"
+  },
+  "version_namespaces": [
+    {"id": "PBP1", "role": "boot_protocol"},
+    {"id": "PKABI1", "role": "kernel_object_abi"},
+    {"id": "PSABI1", "role": "syscall_abi"},
+    {"id": "PIPC1", "role": "ipc_abi"},
+    {"id": "PDRV1", "role": "driver_protocol"},
+    {"id": "PUABI1", "role": "user_abi"},
+    {"id": "PXABI1", "role": "executable_abi"},
+    {"id": "PFS1", "role": "filesystem_format"},
+    {"id": "PVFS1", "role": "vfs_protocol"},
+    {"id": "PPKG1", "role": "package_format"},
+    {"id": "PINIT1", "role": "service_supervisor_protocol"},
+    {"id": "PUPD1", "role": "update_format"},
+    {"id": "PREC1", "role": "recovery_protocol"},
+    {"id": "PGLASS1", "role": "desktop_protocol"},
+    {"id": "PRCP1", "role": "receipt_format"},
+    {"id": "PSM1", "role": "system_manifest"},
+    {"id": "PISO1", "role": "iso_manifest"},
+    {"id": "PCRASH1", "role": "crash_format"},
+    {"id": "PGB2", "role": "pooleglyph_bytecode"},
+    {"id": "PGVM2", "role": "pooleglyph_vm"}
+  ],
+  "language_split": {
+    "status": "proposed_pending_toolchain_qualification",
+    "pooleboot": "Rust 2024 no_std on x86_64-unknown-uefi with efiapi and rust-lld",
+    "poolekernel": "Rust 2024 no_std on x86_64-unknown-none ELF64 with bounded x86_64 assembly",
+    "privileged_user_space": "Rust 2024 no_std with controlled alloc and generated stable ABIs",
+    "portable_pdc_reference": "freestanding C17",
+    "host_evidence": "Python 3 allowed as a non-production oracle and harness",
+    "native_rust_abi_on_wire_or_disk": false,
+    "cxx_in_v1_tcb": false,
+    "third_party_dependencies_default": "deny"
+  },
+  "tcb_domains": [
+    {"id": "boot_tcb", "ring": "firmware_application", "component": "PooleBoot"},
+    {"id": "kernel_tcb", "ring": "ring0", "component": "PooleKernel"},
+    {"id": "initial_system", "ring": "ring3_privileged", "component": "PooleOS initial system"},
+    {"id": "system_servers", "ring": "ring3_capability_confined", "component": "native system servers"},
+    {"id": "driver_domains", "ring": "ring3_capability_confined", "component": "native user-space drivers"},
+    {"id": "language_and_pdc", "ring": "ring3_capability_confined", "component": "PooleGlyph, PGVM2, and PDC services"},
+    {"id": "applications", "ring": "ring3_unprivileged", "component": "native applications"},
+    {"id": "recovery_tcb", "ring": "separate_verified_profile", "component": "PooleRecovery"}
+  ],
+  "scope": {
+    "product_profile": "PooleOS Workstation v1",
+    "tier0": "pinned QEMU q35 and OVMF",
+    "tier1": "inventoried Gigabyte B650M GAMING PLUS WIFI and Ryzen 7 9800X3D workstation",
+    "unlisted_hardware": "unsupported_until_qualified",
+    "pooleglyph_required_for_first_boot": false,
+    "pooleglyph_required_for_production": true,
+    "optimized_pdc_required_for_first_boot": false,
+    "pdc_reference_required_for_production": true,
+    "pdc_disabled_safe_mode_required": true
+  },
+  "publication_boundary": {
+    "public_repository_contains_private_implementation_documents": false,
+    "public_repository_contains_private_benchmark_datasets": false,
+    "public_repository_contains_signing_private_keys": false,
+    "public_repository_contains_redistribution_uncleared_firmware": false,
+    "public_hash_only_provenance_allowed": true,
+    "legal_review_complete": false
+  },
+  "open_items": [
+    "OWNER-SIGN-ADR-SET",
+    "LEGAL-REVIEW-001",
+    "TRADEMARK-REVIEW-001",
+    "N0-QUANT-TARGETS-001",
+    "N1-BRANCH-PROTECTION-001",
+    "N1-SIGNING-CUSTODY-001",
+    "N3-TOOLCHAIN-001",
+    "N4-QEMU-001"
+  ]
+}

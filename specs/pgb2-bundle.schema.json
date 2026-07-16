@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/pgb2-bundle.schema.json",
+  "title": "PooleOS PGB2 Draft Bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "header",
+    "sections"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.pgb2_bundle"
+    },
+    "header": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "magic",
+        "compatibility",
+        "byte_order"
+      ],
+      "properties": {
+        "magic": {
+          "const": "PGB2"
+        },
+        "compatibility": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "byte_order": {
+          "const": "little"
+        }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "media_type",
+          "sha256",
+          "body"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "media_type": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "minLength": 64
+          },
+          "body": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}
+

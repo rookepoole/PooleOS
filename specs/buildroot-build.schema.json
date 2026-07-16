@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/buildroot-build.schema.json",
+  "title": "PooleOS Buildroot Build Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "execution_performed",
+    "buildroot_path",
+    "external_path",
+    "output_dir",
+    "command",
+    "exit_code",
+    "stdout_tail",
+    "source_configure",
+    "rootfs_image",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.buildroot_build"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail",
+        "blocked"
+      ]
+    },
+    "execution_performed": {
+      "type": "boolean"
+    },
+    "buildroot_path": {
+      "type": "string"
+    },
+    "external_path": {
+      "type": "string"
+    },
+    "output_dir": {
+      "type": "string"
+    },
+    "command": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "exit_code": {
+      "type": "integer"
+    },
+    "stdout_tail": {
+      "type": "string"
+    },
+    "source_configure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "exists",
+        "status",
+        "output_dir",
+        "exit_code"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string"
+        },
+        "output_dir": {
+          "type": "string"
+        },
+        "exit_code": {
+          "type": "integer"
+        }
+      }
+    },
+    "rootfs_image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "exists",
+        "sha256",
+        "byte_count"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "boolean"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "byte_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "failed_check_count",
+        "execution_performed",
+        "configure_status",
+        "rootfs_image_exists",
+        "rootfs_image_sha256"
+      ],
+      "properties": {
+        "failed_check_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "execution_performed": {
+          "type": "boolean"
+        },
+        "configure_status": {
+          "type": "string"
+        },
+        "rootfs_image_exists": {
+          "type": "boolean"
+        },
+        "rootfs_image_sha256": {
+          "type": "string"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

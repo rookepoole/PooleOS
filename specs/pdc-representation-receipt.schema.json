@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/pdc-representation-receipt.schema.json",
+  "title": "PooleOS PDC Representation Differential Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "abi_version",
+    "created_utc",
+    "status",
+    "bindings",
+    "environment",
+    "golden_corpus",
+    "exact_family_results",
+    "probability_native_probe",
+    "negative_checks",
+    "digests",
+    "summary",
+    "exclusions",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "artifact_kind": {"const": "pdc_representation_receipt"},
+    "abi_version": {"const": "PDC-REP-0.1"},
+    "created_utc": {"type": "string", "minLength": 20},
+    "status": {"const": "pass_with_explicit_formula_exclusions"},
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reference_implementation_path",
+        "reference_implementation_sha256",
+        "representation_contract_path",
+        "representation_contract_sha256",
+        "math_contract_path",
+        "math_contract_sha256",
+        "golden_vectors_path",
+        "golden_vectors_sha256",
+        "verifier_reproduction_path",
+        "verifier_reproduction_sha256"
+      ],
+      "properties": {
+        "reference_implementation_path": {"const": "runtime/pdc_representation.py"},
+        "reference_implementation_sha256": {"$ref": "#/$defs/sha256"},
+        "representation_contract_path": {"const": "runs/pdc_representation_contract.json"},
+        "representation_contract_sha256": {"$ref": "#/$defs/sha256"},
+        "math_contract_path": {"const": "runs/pdc_math_contract.json"},
+        "math_contract_sha256": {"$ref": "#/$defs/sha256"},
+        "golden_vectors_path": {"const": "runs/pdc_golden_vectors.json"},
+        "golden_vectors_sha256": {"$ref": "#/$defs/sha256"},
+        "verifier_reproduction_path": {"const": "runs/pdc_verifier_reproduction.json"},
+        "verifier_reproduction_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["python_version", "python_implementation", "platform", "executable", "numpy_version"],
+      "properties": {
+        "python_version": {"type": "string", "minLength": 3},
+        "python_implementation": {"type": "string", "minLength": 3},
+        "platform": {"type": "string", "minLength": 5},
+        "executable": {"type": "string", "minLength": 3},
+        "numpy_version": {"type": "string", "minLength": 3}
+      }
+    },
+    "golden_corpus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["declared_case_count", "representation_applicable_case_count", "excluded_formula_case_count", "round_trip_count", "pdc_result_match_count", "mismatch_count", "cases_digest_sha256", "status"],
+      "properties": {
+        "declared_case_count": {"const": 13},
+        "representation_applicable_case_count": {"const": 10},
+        "excluded_formula_case_count": {"const": 3},
+        "round_trip_count": {"const": 40},
+        "pdc_result_match_count": {"const": 10},
+        "mismatch_count": {"const": 0},
+        "cases_digest_sha256": {"$ref": "#/$defs/sha256"},
+        "status": {"const": "pass_with_formula_exclusions"}
+      }
+    },
+    "exact_family_results": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {"$ref": "#/$defs/family_result"}
+    },
+    "probability_native_probe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["case_count", "round_trip_match", "semantic_hash_match", "storage_hash_sha256", "status"],
+      "properties": {
+        "case_count": {"const": 1},
+        "round_trip_match": {"const": true},
+        "semantic_hash_match": {"const": true},
+        "storage_hash_sha256": {"$ref": "#/$defs/sha256"},
+        "status": {"const": "pass"}
+      }
+    },
+    "negative_checks": {
+      "type": "array",
+      "minItems": 13,
+      "maxItems": 13,
+      "items": {"$ref": "#/$defs/negative_check"}
+    },
+    "digests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["exact_family_set_sha256", "negative_check_set_sha256"],
+      "properties": {
+        "exact_family_set_sha256": {"$ref": "#/$defs/sha256"},
+        "negative_check_set_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "representation_count",
+        "conversion_path_count",
+        "round_trips_per_applicable_binary_case",
+        "golden_declared_case_count",
+        "golden_applicable_case_count",
+        "golden_excluded_formula_case_count",
+        "exact_declared_case_count",
+        "exact_applicable_case_count",
+        "exact_excluded_formula_case_count",
+        "differential_case_count",
+        "round_trip_count",
+        "pdc_result_match_count",
+        "negative_check_count",
+        "failed_negative_check_count",
+        "mismatch_count"
+      ],
+      "properties": {
+        "representation_count": {"const": 5},
+        "conversion_path_count": {"const": 10},
+        "round_trips_per_applicable_binary_case": {"const": 4},
+        "golden_declared_case_count": {"const": 13},
+        "golden_applicable_case_count": {"const": 10},
+        "golden_excluded_formula_case_count": {"const": 3},
+        "exact_declared_case_count": {"const": 4324},
+        "exact_applicable_case_count": {"const": 3099},
+        "exact_excluded_formula_case_count": {"const": 1225},
+        "differential_case_count": {"const": 3109},
+        "round_trip_count": {"const": 12436},
+        "pdc_result_match_count": {"const": 3109},
+        "negative_check_count": {"const": 13},
+        "failed_negative_check_count": {"const": 0},
+        "mismatch_count": {"const": 0}
+      }
+    },
+    "exclusions": {"$ref": "#/$defs/nonempty_strings"},
+    "claim_boundary": {"$ref": "#/$defs/nonempty_strings"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "nonempty_strings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 8},
+      "uniqueItems": true
+    },
+    "family_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "declared_case_count", "tested_case_count", "excluded_case_count", "round_trip_count", "pdc_result_match_count", "source_result_match_count", "mismatch_count", "cases_digest_sha256", "status"],
+      "properties": {
+        "id": {"enum": ["rectangle", "line_hole", "arbitrary_mask", "inversion", "solid_cuboid", "surface_shell"]},
+        "declared_case_count": {"type": "integer", "minimum": 1},
+        "tested_case_count": {"type": "integer", "minimum": 0},
+        "excluded_case_count": {"type": "integer", "minimum": 0},
+        "round_trip_count": {"type": "integer", "minimum": 0},
+        "pdc_result_match_count": {"type": "integer", "minimum": 0},
+        "source_result_match_count": {"type": "integer", "minimum": 0},
+        "mismatch_count": {"const": 0},
+        "cases_digest_sha256": {"$ref": "#/$defs/sha256"},
+        "status": {"enum": ["pass", "excluded_non_field_formula_family"]}
+      }
+    },
+    "negative_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "passed", "error_type"],
+      "properties": {
+        "id": {"type": "string", "minLength": 5},
+        "passed": {"const": true},
+        "error_type": {"type": "string", "minLength": 5}
+      }
+    }
+  }
+}

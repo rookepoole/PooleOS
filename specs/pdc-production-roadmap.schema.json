@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/pdc-production-roadmap.schema.json",
+  "title": "PooleOS native production roadmap",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "status_date", "objective", "production_ready", "architecture", "goal_charter", "execution_protocol", "master_checklist", "baseline", "source_set", "phase_summary", "phases", "implementation_flags", "gap_summary", "immediate_next_move", "claim_boundaries"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pdc_production_roadmap"},
+    "status_date": {"type": "string", "format": "date"},
+    "objective": {"type": "string", "minLength": 80},
+    "production_ready": {"const": false},
+    "architecture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "bootloader", "kernel", "production_base", "forbidden_production_substitutes", "development_only_inputs", "target_architecture", "firmware_interface", "legacy_bios_required", "production_kernel_modules_v1", "completion_phase_range"],
+      "properties": {
+        "mode": {"const": "native_capability_microkernel"},
+        "bootloader": {"const": "PooleBoot"},
+        "kernel": {"const": "PooleKernel"},
+        "production_base": {"const": "original_pooleos"},
+        "forbidden_production_substitutes": {"type": "array", "minItems": 6, "items": {"type": "string"}, "uniqueItems": true},
+        "development_only_inputs": {"type": "array", "minItems": 5, "items": {"type": "string"}, "uniqueItems": true},
+        "target_architecture": {"const": "x86_64"},
+        "firmware_interface": {"const": "UEFI"},
+        "legacy_bios_required": {"const": false},
+        "production_kernel_modules_v1": {"const": false},
+        "completion_phase_range": {"const": "N0-N39"}
+      }
+    },
+    "goal_charter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "path", "status", "completion_phase_range"],
+      "properties": {
+        "version": {"const": "2.0.0-native-reset"},
+        "path": {"const": "docs/production-goal-charter.md"},
+        "status": {"const": "adopted"},
+        "completion_phase_range": {"const": "N0-N39"}
+      }
+    },
+    "execution_protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["updates_required_each_goal_turn", "inspect_live_pooleglyph_each_turn", "verify_master_checklist_coverage_each_turn", "new_work_must_be_flagged", "last_updated_cycle", "selected_move_id", "immediate_next_move_id", "required_records", "flag_classes"],
+      "properties": {
+        "updates_required_each_goal_turn": {"const": true},
+        "inspect_live_pooleglyph_each_turn": {"const": true},
+        "verify_master_checklist_coverage_each_turn": {"const": true},
+        "new_work_must_be_flagged": {"const": true},
+        "last_updated_cycle": {"const": 81},
+        "selected_move_id": {"const": "N0-ADR-001"},
+        "immediate_next_move_id": {"const": "N3-TOOLCHAIN-001"},
+        "required_records": {"type": "array", "minItems": 7, "items": {"type": "string"}, "uniqueItems": true},
+        "flag_classes": {"type": "array", "minItems": 8, "items": {"type": "string"}, "uniqueItems": true}
+      }
+    },
+    "master_checklist": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_path", "source_sha256", "source_byte_count", "source_line_count", "checkbox_line_count", "implementation_item_count", "section_count", "coverage_path", "coverage_sha256", "coverage_status", "added_requirement_count"],
+      "properties": {
+        "source_path": {"type": "string"},
+        "source_sha256": {"const": "A8C94719FAF9428C1F133010BA2603C0270C4E1EFD7327AF8EAB9C8C362ABB3D"},
+        "source_byte_count": {"const": 416063},
+        "source_line_count": {"const": 10512},
+        "checkbox_line_count": {"const": 8998},
+        "implementation_item_count": {"const": 8996},
+        "section_count": {"const": 171},
+        "coverage_path": {"const": "runs/pooleos_native_checklist_coverage.json"},
+        "coverage_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+        "coverage_status": {"const": "pass"},
+        "added_requirement_count": {"const": 25}
+      }
+    },
+    "baseline": {"type": "object", "required": ["pooleos_cycle", "entry_cycle", "pooleos_test_count", "historical_consistency_release_gate", "native_consistency_release_gate", "native", "pooleglyph", "pdc"]},
+    "source_set": {
+      "type": "array",
+      "minItems": 8,
+      "items": {
+        "type": "object",
+        "required": ["id", "path", "kind", "sha256", "claim_role", "intake_status"],
+        "properties": {"sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"}}
+      }
+    },
+    "phase_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "complete", "partial", "blocked", "not_started", "subphase_total"],
+      "properties": {
+        "total": {"const": 40},
+        "complete": {"const": 0},
+        "partial": {"const": 12},
+        "blocked": {"const": 1},
+        "not_started": {"const": 27},
+        "subphase_total": {"const": 287}
+      }
+    },
+    "phases": {
+      "type": "array",
+      "minItems": 40,
+      "maxItems": 40,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "status", "subphases", "depends_on", "source_section_ids", "source_checkbox_count", "added_requirement_ids", "current_evidence", "current_gaps", "exit_gate"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^N([0-9]|[1-3][0-9])$"},
+          "title": {"type": "string", "minLength": 1},
+          "status": {"enum": ["complete", "partial", "blocked", "not_started"]},
+          "subphases": {
+            "type": "array",
+            "minItems": 5,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "status", "description"],
+              "properties": {
+                "id": {"type": "string", "pattern": "^N([0-9]|[1-3][0-9])\\.[0-9]+$"},
+                "status": {"enum": ["complete", "partial", "blocked", "not_started"]},
+                "description": {"type": "string", "minLength": 10}
+              }
+            }
+          },
+          "depends_on": {"type": "array", "items": {"type": "string", "pattern": "^N([0-9]|[1-3][0-9])$"}, "uniqueItems": true},
+          "source_section_ids": {"type": "array", "items": {"type": "string", "pattern": "^[0-9]{3}$"}, "uniqueItems": true},
+          "source_checkbox_count": {"type": "integer", "minimum": 0},
+          "added_requirement_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+          "current_evidence": {"type": "array", "items": {"type": "string"}},
+          "current_gaps": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+          "exit_gate": {"type": "string", "minLength": 30}
+        }
+      }
+    },
+    "implementation_flags": {
+      "type": "array",
+      "minItems": 16,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "class", "status", "phase_id", "closure_condition", "evidence"],
+        "properties": {
+          "id": {"type": "string"},
+          "class": {"enum": ["STOP_SHIP", "BLOCKER", "REQUIRED", "RISK", "RESEARCH", "OPTIONAL", "DEFERRED", "SUPERSEDED"]},
+          "status": {"enum": ["open", "mitigated", "closed"]},
+          "phase_id": {"type": "string", "pattern": "^N([0-9]|[1-3][0-9])$"},
+          "closure_condition": {"type": "string", "minLength": 10},
+          "evidence": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+        }
+      }
+    },
+    "gap_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["native_program_gap_count", "native_program_gaps", "historical_release_gate_gap_count", "historical_release_gaps_are_non_promoting"],
+      "properties": {
+        "native_program_gap_count": {"const": 20},
+        "native_program_gaps": {"type": "array", "minItems": 20, "maxItems": 20, "items": {"type": "string"}},
+        "historical_release_gate_gap_count": {"const": 41},
+        "historical_release_gaps_are_non_promoting": {"const": true}
+      }
+    },
+    "immediate_next_move": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "phase_ids", "title", "entry_evidence", "exit_evidence", "blocked"],
+      "properties": {
+        "id": {"const": "N3-TOOLCHAIN-001"},
+        "phase_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "title": {"type": "string"},
+        "entry_evidence": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "exit_evidence": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "blocked": {"const": false}
+      }
+    },
+    "claim_boundaries": {"type": "array", "minItems": 6, "items": {"type": "string"}}
+  }
+}

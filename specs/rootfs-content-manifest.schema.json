@@ -1,0 +1,260 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/rootfs-content-manifest.schema.json",
+  "title": "PooleOS Rootfs Content Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "execution_performed",
+    "rootfs_extraction_performed",
+    "boot_evidence_claimed",
+    "security_boundary_claimed",
+    "source_inputs",
+    "rootfs_image",
+    "extracted_rootfs",
+    "content_file_bindings",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.rootfs_content_manifest"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "blocked",
+        "fail"
+      ]
+    },
+    "execution_performed": {
+      "type": "boolean"
+    },
+    "rootfs_extraction_performed": {
+      "type": "boolean"
+    },
+    "boot_evidence_claimed": {
+      "type": "boolean"
+    },
+    "security_boundary_claimed": {
+      "type": "boolean"
+    },
+    "source_inputs": {
+      "type": "object",
+      "required": [
+        "image_binding_path",
+        "image_binding_status"
+      ],
+      "properties": {
+        "image_binding_path": {
+          "type": "string"
+        },
+        "image_binding_status": {
+          "type": "string"
+        }
+      }
+    },
+    "rootfs_image": {
+      "type": "object",
+      "required": [
+        "path",
+        "exists",
+        "sha256",
+        "byte_count"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "boolean"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "byte_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "extracted_rootfs": {
+      "type": "object",
+      "required": [
+        "path",
+        "exists"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "boolean"
+        }
+      }
+    },
+    "content_file_bindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "role",
+          "guest_path",
+          "source_path",
+          "source_sha256",
+          "source_byte_count",
+          "rootfs_path",
+          "rootfs_exists",
+          "rootfs_sha256",
+          "rootfs_byte_count",
+          "matches_source_sha256"
+        ],
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "guest_path": {
+            "type": "string"
+          },
+          "source_path": {
+            "type": "string"
+          },
+          "source_sha256": {
+            "type": "string"
+          },
+          "source_byte_count": {
+            "type": "integer"
+          },
+          "rootfs_path": {
+            "type": "string"
+          },
+          "rootfs_exists": {
+            "type": "boolean"
+          },
+          "rootfs_sha256": {
+            "type": "string"
+          },
+          "rootfs_byte_count": {
+            "type": "integer"
+          },
+          "matches_source_sha256": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "severity",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "fail",
+              "block"
+            ]
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "failed_check_count",
+        "blocking_check_count",
+        "source_file_count",
+        "source_hashed_file_count",
+        "rootfs_file_count",
+        "matched_source_file_count",
+        "image_exists",
+        "image_sha256",
+        "extracted_rootfs_exists",
+        "image_binding_status",
+        "execution_performed",
+        "rootfs_extraction_performed",
+        "boot_evidence_claimed",
+        "security_boundary_claimed"
+      ],
+      "properties": {
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "blocking_check_count": {
+          "type": "integer"
+        },
+        "source_file_count": {
+          "type": "integer"
+        },
+        "source_hashed_file_count": {
+          "type": "integer"
+        },
+        "rootfs_file_count": {
+          "type": "integer"
+        },
+        "matched_source_file_count": {
+          "type": "integer"
+        },
+        "image_exists": {
+          "type": "boolean"
+        },
+        "image_sha256": {
+          "type": "string"
+        },
+        "extracted_rootfs_exists": {
+          "type": "boolean"
+        },
+        "image_binding_status": {
+          "type": "string"
+        },
+        "execution_performed": {
+          "type": "boolean"
+        },
+        "rootfs_extraction_performed": {
+          "type": "boolean"
+        },
+        "boot_evidence_claimed": {
+          "type": "boolean"
+        },
+        "security_boundary_claimed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

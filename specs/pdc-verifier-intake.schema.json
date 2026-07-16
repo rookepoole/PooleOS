@@ -1,0 +1,235 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/pdc-verifier-intake.schema.json",
+  "title": "PooleOS PDC Exact Verifier Intake",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "created_utc",
+    "status",
+    "bindings",
+    "selected_sources",
+    "archive_security",
+    "embedded_manifests",
+    "lineage_checks",
+    "errata",
+    "digests",
+    "summary",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "artifact_kind": {"const": "pdc_verifier_intake"},
+    "created_utc": {"type": "string", "minLength": 20},
+    "status": {"const": "pass_with_documented_erratum"},
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_intake_path",
+        "source_intake_sha256",
+        "math_contract_path",
+        "math_contract_sha256",
+        "math_contract_version"
+      ],
+      "properties": {
+        "source_intake_path": {"const": "runs/pdc_source_intake.json"},
+        "source_intake_sha256": {"$ref": "#/$defs/sha256"},
+        "math_contract_path": {"const": "runs/pdc_math_contract.json"},
+        "math_contract_sha256": {"$ref": "#/$defs/sha256"},
+        "math_contract_version": {"const": "PDC-MATH-0.1"}
+      }
+    },
+    "selected_sources": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {"$ref": "#/$defs/source"}
+    },
+    "archive_security": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"$ref": "#/$defs/archive_security"}
+    },
+    "embedded_manifests": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"$ref": "#/$defs/manifest"}
+    },
+    "lineage_checks": {
+      "type": "array",
+      "minItems": 3,
+      "items": {"$ref": "#/$defs/check"}
+    },
+    "errata": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/erratum"}
+    },
+    "digests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["selected_source_set_sha256"],
+      "properties": {"selected_source_set_sha256": {"$ref": "#/$defs/sha256"}}
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selected_source_count",
+        "verified_copy_count",
+        "cycle74_indexed_import_count",
+        "newly_discovered_source_count",
+        "safe_archive_count",
+        "embedded_manifest_count",
+        "manifest_entry_count",
+        "verified_manifest_entry_count",
+        "documented_erratum_count",
+        "failed_check_count"
+      ],
+      "properties": {
+        "selected_source_count": {"const": 4},
+        "verified_copy_count": {"const": 4},
+        "cycle74_indexed_import_count": {"const": 1},
+        "newly_discovered_source_count": {"const": 3},
+        "safe_archive_count": {"const": 3},
+        "embedded_manifest_count": {"const": 3},
+        "manifest_entry_count": {"type": "integer", "minimum": 26},
+        "verified_manifest_entry_count": {"type": "integer", "minimum": 26},
+        "documented_erratum_count": {"const": 1},
+        "failed_check_count": {"const": 0}
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 3,
+      "items": {"type": "string", "minLength": 20},
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "original_name",
+        "original_path",
+        "stored_path",
+        "sha256",
+        "size_bytes",
+        "role",
+        "cycle74_candidate_id",
+        "discovery_status",
+        "status"
+      ],
+      "properties": {
+        "id": {"type": "string", "pattern": "^VER-SRC-[A-Z0-9_]+(?:-[A-Z0-9_]+)*$"},
+        "original_name": {"type": "string", "minLength": 3},
+        "original_path": {"type": "string", "minLength": 3},
+        "stored_path": {"type": "string", "pattern": "^sources/pdc/verifiers/sha256/[0-9a-f]{64}\\.(zip|py)$"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "size_bytes": {"type": "integer", "minimum": 1},
+        "role": {"type": "string", "minLength": 20},
+        "cycle74_candidate_id": {
+          "anyOf": [
+            {"type": "null"},
+            {"type": "string", "pattern": "^RAW-PDC-[0-9]{3}$"}
+          ]
+        },
+        "discovery_status": {"enum": ["selected_from_cycle74_index", "discovered_outside_cycle74_scan"]},
+        "status": {"const": "imported_read_only_copy_verified"},
+        "executable_path": {"type": "string", "pattern": "^sources/pdc/verifiers/(?:extracted|sha256)/.+\\.py$"},
+        "executable_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "archive_security": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entry_count",
+        "total_uncompressed_bytes",
+        "unsafe_names",
+        "duplicate_names",
+        "symlink_members",
+        "corrupt_member",
+        "status",
+        "source_id"
+      ],
+      "properties": {
+        "entry_count": {"type": "integer", "minimum": 1},
+        "total_uncompressed_bytes": {"type": "integer", "minimum": 1},
+        "unsafe_names": {"type": "array", "maxItems": 0},
+        "duplicate_names": {"type": "array", "maxItems": 0},
+        "symlink_members": {"type": "array", "maxItems": 0},
+        "corrupt_member": {"type": "null"},
+        "status": {"const": "pass"},
+        "source_id": {"type": "string", "pattern": "^VER-SRC-"}
+      }
+    },
+    "manifest_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["declared_path", "resolved_member", "alias_applied", "hash_match", "size_match", "status"],
+      "properties": {
+        "declared_path": {"type": "string", "minLength": 1},
+        "resolved_member": {"type": "string", "minLength": 1},
+        "alias_applied": {"type": "boolean"},
+        "hash_match": {"const": true},
+        "size_match": {"const": true},
+        "status": {"const": "verified"}
+      }
+    },
+    "manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manifest_member",
+        "manifest_sha256",
+        "entry_count",
+        "verified_entry_count",
+        "failed_entry_count",
+        "alias_count",
+        "entries",
+        "status"
+      ],
+      "properties": {
+        "manifest_member": {"type": "string", "minLength": 3},
+        "manifest_sha256": {"$ref": "#/$defs/sha256"},
+        "entry_count": {"type": "integer", "minimum": 1},
+        "verified_entry_count": {"type": "integer", "minimum": 1},
+        "failed_entry_count": {"const": 0},
+        "alias_count": {"type": "integer", "minimum": 0, "maximum": 1},
+        "entries": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/manifest_entry"}},
+        "status": {"const": "pass"}
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "ok", "detail"],
+      "properties": {
+        "name": {"type": "string", "minLength": 5},
+        "ok": {"const": true},
+        "detail": {"type": "string", "minLength": 20}
+      }
+    },
+    "erratum": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "severity", "description", "affected_closed_family", "status"],
+      "properties": {
+        "id": {"const": "ERR-PLANAR-MANIFEST-PATH-001"},
+        "severity": {"const": "documented_nonblocking"},
+        "description": {"type": "string", "minLength": 40},
+        "affected_closed_family": {"const": false},
+        "status": {"const": "resolved_by_exact_hash_alias"}
+      }
+    }
+  }
+}

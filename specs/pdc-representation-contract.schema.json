@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/pdc-representation-contract.schema.json",
+  "title": "PooleOS PDC Representation Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "abi_version",
+    "created_utc",
+    "status",
+    "bindings",
+    "coordinate_contract",
+    "representations",
+    "conversion_paths",
+    "native_buffer_contract",
+    "canonical_hash_contract",
+    "arithmetic_contract",
+    "failure_modes",
+    "summary",
+    "unsupported",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "artifact_kind": {"const": "pdc_representation_contract"},
+    "abi_version": {"const": "PDC-REP-0.1"},
+    "created_utc": {"type": "string", "minLength": 20},
+    "status": {"const": "pass"},
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reference_implementation_path",
+        "reference_implementation_sha256",
+        "math_contract_path",
+        "math_contract_sha256",
+        "math_contract_version",
+        "golden_vectors_path",
+        "golden_vectors_sha256",
+        "golden_vector_set_version",
+        "verifier_reproduction_path",
+        "verifier_reproduction_sha256",
+        "verifier_case_count"
+      ],
+      "properties": {
+        "reference_implementation_path": {"const": "runtime/pdc_representation.py"},
+        "reference_implementation_sha256": {"$ref": "#/$defs/sha256"},
+        "math_contract_path": {"const": "runs/pdc_math_contract.json"},
+        "math_contract_sha256": {"$ref": "#/$defs/sha256"},
+        "math_contract_version": {"const": "PDC-MATH-0.1"},
+        "golden_vectors_path": {"const": "runs/pdc_golden_vectors.json"},
+        "golden_vectors_sha256": {"$ref": "#/$defs/sha256"},
+        "golden_vector_set_version": {"const": "PDC-GOLDEN-0.1"},
+        "verifier_reproduction_path": {"const": "runs/pdc_verifier_reproduction.json"},
+        "verifier_reproduction_sha256": {"$ref": "#/$defs/sha256"},
+        "verifier_case_count": {"const": 4324}
+      }
+    },
+    "coordinate_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimensions", "shape_order", "axis_order", "origin", "boundary", "minimum_periodic_extent", "maximum_reference_cells"],
+      "properties": {
+        "dimensions": {"const": [2, 3]},
+        "shape_order": {"const": "x_extent,y_extent,z_extent_when_present"},
+        "axis_order": {"const": "x_fastest_then_y_then_z"},
+        "origin": {"const": "zero"},
+        "boundary": {"const": "periodic"},
+        "minimum_periodic_extent": {"const": 3},
+        "maximum_reference_cells": {"const": 16777216}
+      }
+    },
+    "representations": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {"$ref": "#/$defs/representation"}
+    },
+    "conversion_paths": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {"$ref": "#/$defs/conversion"}
+    },
+    "native_buffer_contract": {"$ref": "#/$defs/string_map"},
+    "canonical_hash_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "framing", "binary_semantic_hash", "probability_semantic_hash", "storage_hash", "native_padding_bytes_hashed"],
+      "properties": {
+        "algorithm": {"const": "SHA-256"},
+        "framing": {"type": "string", "minLength": 10},
+        "binary_semantic_hash": {"type": "string", "minLength": 10},
+        "probability_semantic_hash": {"type": "string", "minLength": 10},
+        "storage_hash": {"type": "string", "minLength": 10},
+        "native_padding_bytes_hashed": {"const": false}
+      }
+    },
+    "arithmetic_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "checked_operations", "failure"],
+      "properties": {
+        "width": {"const": "u64"},
+        "checked_operations": {
+          "type": "array",
+          "minItems": 5,
+          "items": {"type": "string", "minLength": 3},
+          "uniqueItems": true
+        },
+        "failure": {"type": "string", "minLength": 8}
+      }
+    },
+    "failure_modes": {
+      "type": "array",
+      "minItems": 16,
+      "maxItems": 16,
+      "items": {"type": "string", "minLength": 5},
+      "uniqueItems": true
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["representation_count", "conversion_path_count", "native_dtype_count", "failure_mode_count"],
+      "properties": {
+        "representation_count": {"const": 5},
+        "conversion_path_count": {"const": 10},
+        "native_dtype_count": {"const": 2},
+        "failure_mode_count": {"const": 16}
+      }
+    },
+    "unsupported": {"$ref": "#/$defs/nonempty_strings"},
+    "claim_boundary": {"$ref": "#/$defs/nonempty_strings"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "nonempty_strings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 5},
+      "uniqueItems": true
+    },
+    "string_map": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"type": "string", "minLength": 3}
+    },
+    "representation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "logical_dtype", "storage", "ownership", "canonicalization", "failure_boundary"],
+      "properties": {
+        "id": {"enum": ["dense_binary", "sparse_binary", "bitpacked_binary", "probability_field", "native_buffer_snapshot"]},
+        "logical_dtype": {"enum": ["u8", "f64", "u8_or_f64"]},
+        "storage": {"type": "string", "minLength": 10},
+        "ownership": {"type": "string", "minLength": 10},
+        "canonicalization": {"type": "string", "minLength": 10},
+        "failure_boundary": {"type": "string", "minLength": 10}
+      }
+    },
+    "conversion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "source", "target", "lossless_condition"],
+      "properties": {
+        "id": {"type": "string", "minLength": 5},
+        "source": {"enum": ["dense_binary", "sparse_binary", "bitpacked_binary", "probability_field", "native_buffer_snapshot"]},
+        "target": {"enum": ["dense_binary", "sparse_binary", "bitpacked_binary", "probability_field", "native_buffer_snapshot"]},
+        "lossless_condition": {"type": "string", "minLength": 3}
+      }
+    }
+  }
+}

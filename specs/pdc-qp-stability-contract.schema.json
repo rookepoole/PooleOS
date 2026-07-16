@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/pdc-qp-stability-contract.schema.json",
+  "title": "PDC Q/P stability contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "contract_version", "created_utc", "status", "bindings", "benchmark_protocol", "perturbation_protocol", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "artifact_kind": {"const": "pdc_qp_stability_contract"},
+    "contract_version": {"const": "PDC-QP-STABILITY-0.1"},
+    "created_utc": {"type": "string", "minLength": 20},
+    "status": {"const": "frozen_benchmark_protocol"},
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reference_implementation_path", "reference_implementation_sha256", "qp_contract_path", "qp_contract_sha256", "qp_receipt_path", "qp_receipt_sha256", "source_packages"],
+      "properties": {
+        "reference_implementation_path": {"const": "runtime/pdc_qp_stability.py"},
+        "reference_implementation_sha256": {"$ref": "#/$defs/sha256"},
+        "qp_contract_path": {"const": "runs/pdc_qp_contract.json"},
+        "qp_contract_sha256": {"$ref": "#/$defs/sha256"},
+        "qp_receipt_path": {"const": "runs/pdc_qp_receipt.json"},
+        "qp_receipt_sha256": {"$ref": "#/$defs/sha256"},
+        "source_packages": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/package"}}
+      }
+    },
+    "benchmark_protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lattice_shape", "boundary_mode", "active_probability", "target_active_count", "sample_count_per_raw_class", "seed", "raw_classes", "structured_classes", "control_classes", "channel_order", "channel_groups", "combined_channels", "robust_z_scale", "std_floor_multiplier", "null_like_R_threshold", "score_epsilon", "score_abs_tolerance", "summary_abs_tolerance", "poole_active_excluded_from_combined_score"],
+      "properties": {
+        "lattice_shape": {"const": [28, 28, 28]},
+        "boundary_mode": {"const": "periodic"},
+        "active_probability": {"const": 0.06},
+        "target_active_count": {"const": 1317},
+        "sample_count_per_raw_class": {"const": 50},
+        "seed": {"const": 23},
+        "raw_classes": {"type": "array", "minItems": 6, "maxItems": 6, "items": {"type": "string"}, "uniqueItems": true},
+        "structured_classes": {"type": "array", "minItems": 5, "maxItems": 5, "items": {"type": "string"}, "uniqueItems": true},
+        "control_classes": {"type": "array", "minItems": 6, "maxItems": 6, "items": {"type": "string"}, "uniqueItems": true},
+        "channel_order": {"type": "array", "minItems": 13, "maxItems": 13, "items": {"type": "string"}, "uniqueItems": true},
+        "channel_groups": {"type": "object", "additionalProperties": false, "required": ["birth", "high_support", "strain"], "properties": {"birth": {"type": "array", "minItems": 3, "maxItems": 3}, "high_support": {"type": "array", "minItems": 3, "maxItems": 3}, "strain": {"const": ["psi_abs"]}}},
+        "combined_channels": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"type": "string"}, "uniqueItems": true},
+        "robust_z_scale": {"const": 5.0},
+        "std_floor_multiplier": {"const": 2.0},
+        "null_like_R_threshold": {"const": 2.0},
+        "score_epsilon": {"const": 1e-12},
+        "score_abs_tolerance": {"const": 2e-12},
+        "summary_abs_tolerance": {"const": 2e-12},
+        "poole_active_excluded_from_combined_score": {"const": true}
+      }
+    },
+    "perturbation_protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "swap_levels", "field_scope", "seed_derivation", "hamming_count", "structured_abs_R_envelope", "control_abs_R_envelope", "structured_relative_R_envelope", "structured_spectrum_l1_envelope", "classification_gate", "dominant_label_retention_is_diagnostic_not_gate"],
+      "properties": {
+        "type": {"const": "exact-density active/inactive index swaps"},
+        "swap_levels": {"const": [1, 4, 16, 64]},
+        "field_scope": {"type": "string", "minLength": 10},
+        "seed_derivation": {"type": "string", "minLength": 20},
+        "hamming_count": {"type": "string", "minLength": 10},
+        "structured_abs_R_envelope": {"const": "0.06 + 125*hamming_fraction"},
+        "control_abs_R_envelope": {"const": "0.08 + 125*hamming_fraction"},
+        "structured_relative_R_envelope": {"const": "0.01 + 25*hamming_fraction"},
+        "structured_spectrum_l1_envelope": {"const": "0.03 + 50*hamming_fraction"},
+        "classification_gate": {"type": "string", "minLength": 10},
+        "dominant_label_retention_is_diagnostic_not_gate": {"const": true}
+      }
+    },
+    "claim_boundary": {"type": "array", "minItems": 5, "items": {"type": "string", "minLength": 20}, "uniqueItems": true}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "member": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "path", "sha256", "size_bytes", "role"],
+      "properties": {"id": {"type": "string", "minLength": 3}, "path": {"type": "string", "minLength": 5}, "sha256": {"$ref": "#/$defs/sha256"}, "size_bytes": {"type": "integer", "minimum": 1}, "role": {"type": "string", "minLength": 10}}
+    },
+    "package": {
+      "type": "object", "additionalProperties": false,
+      "required": ["version", "stored_path", "sha256", "size_bytes", "role", "members"],
+      "properties": {"version": {"type": "string", "minLength": 10}, "stored_path": {"type": "string", "minLength": 10}, "sha256": {"$ref": "#/$defs/sha256"}, "size_bytes": {"type": "integer", "minimum": 1}, "role": {"type": "string", "minLength": 10}, "members": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/member"}}}
+    }
+  }
+}

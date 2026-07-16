@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/capability-trap-fuzz.schema.json",
+  "title": "PooleOS Capability Trap Fuzz Proof",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "seed",
+    "policy_artifact",
+    "matrix_artifact",
+    "security_boundary_claimed",
+    "operations",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.capability_trap_fuzz"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail"
+      ]
+    },
+    "seed": {
+      "type": "string"
+    },
+    "policy_artifact": {
+      "type": "string"
+    },
+    "matrix_artifact": {
+      "type": "string"
+    },
+    "security_boundary_claimed": {
+      "type": "boolean"
+    },
+    "operations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "case_id",
+          "fuzz_kind",
+          "opcode",
+          "region",
+          "source",
+          "target",
+          "capability",
+          "allowed",
+          "expected_trap",
+          "actual_trapped",
+          "trap_code",
+          "reason"
+        ],
+        "properties": {
+          "case_id": {
+            "type": "string"
+          },
+          "fuzz_kind": {
+            "type": "string"
+          },
+          "opcode": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "capability": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "matrix_allowed": {
+            "type": "boolean"
+          },
+          "expected_trap": {
+            "type": "boolean"
+          },
+          "actual_trapped": {
+            "type": "boolean"
+          },
+          "trap_code": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "operation_count",
+        "unknown_capability_count",
+        "unknown_permission_count",
+        "trapped_count",
+        "failed_check_count"
+      ],
+      "properties": {
+        "operation_count": {
+          "type": "integer"
+        },
+        "unknown_capability_count": {
+          "type": "integer"
+        },
+        "unknown_permission_count": {
+          "type": "integer"
+        },
+        "trapped_count": {
+          "type": "integer"
+        },
+        "failed_check_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "check": {
+      "type": "object",
+      "required": [
+        "name",
+        "ok",
+        "detail"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

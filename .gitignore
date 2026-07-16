@@ -1,0 +1,54 @@
+# Local and generated state
+tmp/
+outputs/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+target/
+*.iso
+*.img
+*.qcow2
+*.vhdx
+*.zip
+
+# Editor and operating-system state
+.idea/
+.vscode/
+*.swp
+*.swo
+Thumbs.db
+.DS_Store
+
+# Secrets and private signing material
+.env
+.env.*
+!.env.example
+secrets/
+keys/private/
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Private/internal Poole evidence. Public artifacts may bind hashes, not content.
+sources/pdc/
+
+# Local evidence defaults to private. These three deterministic ledgers are public.
+runs/*
+!runs/native_architecture_baseline.json
+!runs/pdc_production_roadmap.json
+!runs/pooleos_native_checklist_coverage.json
+
+# Superseded third-party lab source and pre-reset internal archives.
+sources/buildroot-*/
+lab-os/
+docs/archive/
+docs/cycle_log.md
+runs/archive/
+
+# Redistribution-uncleared firmware remains outside the public repository.
+firmware/private/

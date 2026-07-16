@@ -1,0 +1,325 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/qemu-boot-marker-image-binding.schema.json",
+  "title": "PooleOS QEMU Boot Marker Image Binding",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "execution_performed",
+    "boot_evidence_claimed",
+    "security_boundary_claimed",
+    "source_inputs",
+    "buildroot_binding",
+    "marker_file_bindings",
+    "support_file_bindings",
+    "buildroot_manifest_files",
+    "lab_image_manifest_binding",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.qemu_boot_marker_image_binding"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "blocked",
+        "fail"
+      ]
+    },
+    "execution_performed": {
+      "type": "boolean"
+    },
+    "boot_evidence_claimed": {
+      "type": "boolean"
+    },
+    "security_boundary_claimed": {
+      "type": "boolean"
+    },
+    "source_inputs": {
+      "type": "object",
+      "required": [
+        "marker_contract_path",
+        "marker_contract_status",
+        "lab_image_manifest_path",
+        "lab_image_manifest_status"
+      ],
+      "properties": {
+        "marker_contract_path": {
+          "type": "string"
+        },
+        "marker_contract_status": {
+          "type": "string"
+        },
+        "lab_image_manifest_path": {
+          "type": "string"
+        },
+        "lab_image_manifest_status": {
+          "type": "string"
+        }
+      }
+    },
+    "buildroot_binding": {
+      "type": "object",
+      "required": [
+        "external_tree_path",
+        "overlay_path",
+        "defconfig_path",
+        "post_build_path",
+        "config_option",
+        "overlay_defconfig_key",
+        "post_build_defconfig_key"
+      ],
+      "properties": {
+        "external_tree_path": {
+          "type": "string"
+        },
+        "overlay_path": {
+          "type": "string"
+        },
+        "defconfig_path": {
+          "type": "string"
+        },
+        "post_build_path": {
+          "type": "string"
+        },
+        "config_option": {
+          "type": "string"
+        },
+        "overlay_defconfig_key": {
+          "type": "string"
+        },
+        "post_build_defconfig_key": {
+          "type": "string"
+        }
+      }
+    },
+    "marker_file_bindings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/file_binding"
+      }
+    },
+    "support_file_bindings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/file_binding"
+      }
+    },
+    "buildroot_manifest_files": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/buildroot_file_binding"
+      }
+    },
+    "lab_image_manifest_binding": {
+      "type": "object",
+      "required": [
+        "defconfig_sha256",
+        "current_defconfig_sha256",
+        "external_tree_path",
+        "current_external_tree_path"
+      ],
+      "properties": {
+        "defconfig_sha256": {
+          "type": "string"
+        },
+        "current_defconfig_sha256": {
+          "type": "string"
+        },
+        "external_tree_path": {
+          "type": "string"
+        },
+        "current_external_tree_path": {
+          "type": "string"
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "severity",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "fail",
+              "block"
+            ]
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "failed_check_count",
+        "blocking_check_count",
+        "marker_count",
+        "marker_source_file_count",
+        "support_file_count",
+        "buildroot_manifest_file_count",
+        "hashed_file_count",
+        "marker_contract_status",
+        "lab_image_manifest_status",
+        "execution_performed",
+        "boot_evidence_claimed",
+        "security_boundary_claimed"
+      ],
+      "properties": {
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "blocking_check_count": {
+          "type": "integer"
+        },
+        "marker_count": {
+          "type": "integer"
+        },
+        "marker_source_file_count": {
+          "type": "integer"
+        },
+        "support_file_count": {
+          "type": "integer"
+        },
+        "buildroot_manifest_file_count": {
+          "type": "integer"
+        },
+        "hashed_file_count": {
+          "type": "integer"
+        },
+        "marker_contract_status": {
+          "type": "string"
+        },
+        "lab_image_manifest_status": {
+          "type": "string"
+        },
+        "execution_performed": {
+          "type": "boolean"
+        },
+        "boot_evidence_claimed": {
+          "type": "boolean"
+        },
+        "security_boundary_claimed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "file_binding": {
+      "type": "object",
+      "required": [
+        "role",
+        "path",
+        "exists",
+        "sha256",
+        "byte_count",
+        "overlay_relative_path",
+        "guest_path",
+        "markers",
+        "marker_texts_present"
+      ],
+      "properties": {
+        "role": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "boolean"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "byte_count": {
+          "type": "integer"
+        },
+        "overlay_relative_path": {
+          "type": "string"
+        },
+        "guest_path": {
+          "type": "string"
+        },
+        "markers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "marker_texts_present": {
+          "type": "boolean"
+        }
+      }
+    },
+    "buildroot_file_binding": {
+      "type": "object",
+      "required": [
+        "role",
+        "path",
+        "exists",
+        "sha256",
+        "byte_count",
+        "external_relative_path"
+      ],
+      "properties": {
+        "role": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "boolean"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "byte_count": {
+          "type": "integer"
+        },
+        "external_relative_path": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

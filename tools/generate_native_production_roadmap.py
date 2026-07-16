@@ -1,0 +1,463 @@
+#!/usr/bin/env python3
+"""Generate the machine-readable PooleOS native production roadmap."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+from collections import Counter
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+PLAN_PATH = ROOT / "docs/pdc-production-build-plan.md"
+COVERAGE_PATH = ROOT / "runs/pooleos_native_checklist_coverage.json"
+ARCHIVED_ROADMAP_PATH = ROOT / "runs/archive/cycle79-linux-buildroot-baseline/pdc_production_roadmap.json"
+
+
+DEPENDENCIES = {
+    "N0": [],
+    "N1": ["N0"],
+    "N2": ["N0", "N1"],
+    "N3": ["N0", "N1"],
+    "N4": ["N2", "N3"],
+    "N5": ["N4"],
+    "N6": ["N5"],
+    "N7": ["N6"],
+    "N8": ["N7"],
+    "N9": ["N7"],
+    "N10": ["N8", "N9"],
+    "N11": ["N10"],
+    "N12": ["N8", "N9"],
+    "N13": ["N12"],
+    "N14": ["N13"],
+    "N15": ["N6", "N11", "N14"],
+    "N16": ["N10", "N11", "N14", "N15"],
+    "N17": ["N16"],
+    "N18": ["N16"],
+    "N19": ["N14", "N17"],
+    "N20": ["N13", "N14"],
+    "N21": ["N16", "N19", "N20"],
+    "N22": ["N20", "N21"],
+    "N23": ["N15", "N19", "N21", "N22"],
+    "N24": ["N10", "N17", "N21"],
+    "N25": ["N16"],
+    "N26": ["N15", "N20", "N25"],
+    "N27": ["N16", "N18", "N20"],
+    "N28": ["N16", "N20"],
+    "N29": ["N18", "N20", "N21", "N27"],
+    "N30": ["N20", "N21", "N23", "N29"],
+    "N31": ["N6", "N14", "N20"],
+    "N32": ["N3", "N20", "N31"],
+    "N33": ["N15", "N21", "N31", "N32", "N34"],
+    "N34": ["N13", "N14", "N20"],
+    "N35": ["N16", "N21", "N24", "N31", "N33"],
+    "N36": ["N4", "N31", "N35"],
+    "N37": ["N1", "N3", "N23", "N36"],
+    "N38": ["N23", "N24", "N26", "N29", "N30", "N33", "N34", "N36", "N37"],
+    "N39": ["N37", "N38"],
+}
+
+
+SUBPHASE_OVERRIDES = {
+    "N0.1": "partial",
+    "N0.2": "partial",
+    "N0.3": "partial",
+    "N0.4": "partial",
+    "N0.5": "partial",
+    "N0.6": "partial",
+    "N0.7": "partial",
+    "N0.8": "partial",
+    "N1.1": "partial",
+    "N1.2": "partial",
+    "N1.3": "partial",
+    "N1.4": "partial",
+    "N1.5": "partial",
+    "N1.6": "partial",
+    "N1.7": "partial",
+    "N2.1": "partial",
+    "N2.4": "partial",
+    "N3.1": "partial",
+    "N3.6": "partial",
+    "N4.1": "partial",
+    "N15.1": "partial",
+    "N31.7": "partial",
+    "N32.1": "complete",
+    "N33.1": "partial",
+    "N33.8": "partial",
+    "N34.1": "blocked",
+    "N35.1": "partial",
+    "N36.1": "partial",
+    "N36.4": "partial",
+    "N37.1": "partial",
+}
+
+
+PHASE_EVIDENCE = {
+    "N0": [
+        "docs/adr/0001-native-pooleos-constitution.md through ADR-0007",
+        "specs/native-architecture-constitution.json",
+        "runs/native_architecture_baseline.json",
+        "specs/native-release-architecture-policy.json",
+        "tools/check_native_release_architecture.py",
+        "tests/test_native_release_architecture.py",
+    ],
+    "N1": [
+        "local Git repository on main with owner PooleOS origin",
+        "LICENSE, NOTICE.md, SECURITY.md, TRADEMARKS.md, and CODEOWNERS",
+        "docs/publication-boundary.md",
+        "tools/check_publication_boundary.py",
+    ],
+    "N2": ["live Windows CIM/PnP inventory captured 2026-07-15", "master checklist standards registers 146 and 169"],
+    "N3": [
+        "ADR-0003 proposed Rust/assembly/C17 split",
+        "official Rust UEFI and x86_64-unknown-none target documentation",
+        "existing deterministic Python artifact/test framework",
+    ],
+    "N4": ["historical QEMU/Buildroot launch and receipt scaffolding; non-promoting"],
+    "N15": ["runs/microkernel_isolation.json", "runs/capability_trap_proof.json", "runs/capability_trap_fuzz.json"],
+    "N31": ["existing signed receipt and benchmark methodology artifacts"],
+    "N32": ["PDC-MATH-0.1", "PDC-REP-0.1", "PDC-GOLDEN-0.2", "PDC-QP-0.1", "PDC-QP-STABILITY-0.1"],
+    "N33": ["existing PDC receipt schemas and guarded-route source documents; no native services"],
+    "N34": ["PooleGlyph Phase 65 checkpoint", "draft PGB2/PGVM2 trap evidence"],
+    "N35": ["bounded static capability and trap simulations; no native containment"],
+    "N36": ["Cycle 79 host baseline: 345 tests", "existing parser/artifact negative tests"],
+    "N37": ["Cycle 79 consistency release gate and content-addressed source artifacts"],
+}
+
+
+PHASE_GAPS = {
+    "N0": [
+        "Seven ADRs are byte-bound but none is cryptographically signed; ADR-0003 and ADR-0004 remain proposed",
+        "Quantitative reliability, accessibility, compatibility, privacy, and performance targets remain open",
+        "The extracted-tree scanner does not yet parse ISO/GPT/ESP/El Torito/signature structures",
+    ],
+    "N1": [
+        "The local repository is initialized but public remote publication, branch protection, signed tags, and immutable release refs remain open",
+        "Legal, patent, export, trademark, contributor, signing-custody, and component-specific license review remain open",
+    ],
+    "N2": ["Full ACPI/PCI/USB/firmware inventory and sacrificial lab media are not accepted"],
+    "N3": ["No native target triple, sysroot, linker layout, or hermetic native build exists"],
+    "N4": ["No pinned native-only QEMU/VIRTIO profile or formal model suite exists"],
+    "N5": ["No PooleBoot PE32+ image or frozen boot handoff exists"],
+    "N6": ["No native boot trust, kernel image, entry, serial panic, or measured boot exists"],
+    "N7": ["No native CPU/descriptor/exception implementation exists"],
+    "N8": ["No native APIC/timer/SMP implementation exists"],
+    "N9": ["No native allocator, paging, address-space, or reclaim implementation exists"],
+    "N10": ["No native ACPI/AML/SMBIOS/PCIe resource graph exists"],
+    "N11": ["No AMD IOMMU or interrupt-remapping confinement exists"],
+    "N12": ["No native concurrency primitives, scheduler, or context switch exists"],
+    "N13": ["No ring-3 task, syscall, or capability object implementation exists"],
+    "N14": ["No native IPC, isolation, async completion, or quota implementation exists"],
+    "N15": ["Current security artifacts are simulations; native crypto, TPM, MAC, and mitigations are absent"],
+    "N16": ["No isolated native driver domain or virtio transport exists"],
+    "N17": ["No native block, NVMe, partition, or volume path exists"],
+    "N18": ["No native virtio input, xHCI, USB, HID, or removable-media path exists"],
+    "N19": ["No native VFS, PooleFS, page cache, encryption, or power-loss evidence exists"],
+    "N20": ["No native executable loader, user ABI, libc, threads, or language runtime exists"],
+    "N21": ["No native init, service graph, utilities, logging, device policy, or health service exists"],
+    "N22": ["No native authentication, session, shell, PTY, terminal, account, or user-data model exists"],
+    "N23": ["No native packages, TUF-style updates, installer, recovery, backup, or migration exists"],
+    "N24": ["No native shutdown/power/firmware/sensor/health implementation exists"],
+    "N25": ["No native virtio-net, RTL8125, Wi-Fi, or Bluetooth driver exists"],
+    "N26": ["No native network stack, services, firewall, or TLS integration exists"],
+    "N27": ["No native software renderer or virtio-gpu path exists; RTX support remains research"],
+    "N28": ["No native audio path or media/peripheral service exists"],
+    "N29": ["No native compositor, PooleGlass desktop, toolkit, accessibility, or boot identity exists"],
+    "N30": ["No native application ABI, SDK, sandbox, or portal model exists"],
+    "N31": ["No native debugger, crash dump, trace, PMU, or system metrics implementation exists"],
+    "N32": ["Signed dynamics and portable/native C/CPU/RAM/GPU execution remain open"],
+    "N33": ["No native PDC observer/planner/gate/actuator/watchdog/rollback service exists"],
+    "N34": ["PooleGlyph Phase 66 is absent", "PGB2 and PGVM2 v1 are not frozen or native"],
+    "N35": ["No native watchdog, driver restart, RAS, or fault-containment evidence exists"],
+    "N36": ["No native system, power-loss, hardware, accessibility, soak, or external security suite exists"],
+    "N37": ["No native SBOM/provenance/signing ceremony/release manifest or source-controlled release exists"],
+    "N38": ["No native milestone, first hardware boot, daily-driver, or public-alpha gate has passed"],
+    "N39": ["No reproducible signed native ISO, clean-media boot, or exact-byte release receipt exists"],
+}
+
+
+FLAGS = [
+    ("FLAG-NATIVE-SCM-001", "STOP_SHIP", "N1", "Put PooleOS under reviewed source control with immutable release revisions"),
+    ("FLAG-NATIVE-ADR-001", "BLOCKER", "N0", "Ratify the native architecture, TCB, reuse, language, ABI, driver, filesystem, and release ADR set"),
+    ("FLAG-NATIVE-BOOT-001", "STOP_SHIP", "N5", "Boot reproducible PooleBoot PE32+ and transfer through the frozen handoff"),
+    ("FLAG-NATIVE-KERNEL-001", "STOP_SHIP", "N13", "Boot PooleKernel and enforce memory, capabilities, IPC, and ring-3 execution"),
+    ("FLAG-NATIVE-IOMMU-001", "STOP_SHIP", "N11", "Confine all bus-mastering drivers with DMA and interrupt remapping"),
+    ("FLAG-NATIVE-DRIVER-001", "STOP_SHIP", "N16", "Prove driver crash/reset/revocation without stale authority"),
+    ("FLAG-NATIVE-FS-001", "STOP_SHIP", "N19", "Pass declared PooleFS durability and randomized power-cut gates"),
+    ("FLAG-NATIVE-UPDATE-001", "STOP_SHIP", "N23", "Pass signed A/B update, rollback, compromise, and recovery gates"),
+    ("FLAG-NATIVE-SEC-001", "STOP_SHIP", "N15", "Pass boot trust, crypto/RNG, capability, isolation, and external security review"),
+    ("FLAG-NATIVE-UI-001", "REQUIRED", "N29", "Pass PooleGlass accessibility, software fallback, and recovery UI gates"),
+    ("FLAG-NATIVE-PGL-001", "BLOCKER", "N34", "Accept PooleGlyph Phase 66 and freeze PGB2/PGVM2 v1"),
+    ("FLAG-NATIVE-PDC-001", "REQUIRED", "N32", "Reproduce signed dynamics and pass native/backend differential gates"),
+    ("FLAG-NATIVE-HW-001", "STOP_SHIP", "N38", "Qualify exact Tier 1 hardware, firmware, media, drivers, and recovery"),
+    ("FLAG-NATIVE-ISO-001", "STOP_SHIP", "N39", "Reproduce and boot the exact signed native ISO in clean QEMU and physical profiles"),
+    ("FLAG-NATIVE-REVIEW-001", "STOP_SHIP", "N37", "Close critical/high independent kernel, filesystem, update, security, and release findings"),
+    ("FLAG-BUILDROOT-LEGACY-001", "SUPERSEDED", "N0", "Keep Buildroot as historical non-promoting reference evidence"),
+]
+
+
+PROGRAM_GAPS = [
+    "The native repository and byte-bound ADR baseline exist locally, but remote publication, protected review, signed tags, and cryptographic ADR ratification remain open",
+    "No hermetic native compiler/sysroot/build/image toolchain",
+    "No native-only QEMU/OVMF/VIRTIO reference profile or formal state models",
+    "No PooleBoot PE32+ UEFI loader or frozen boot protocol",
+    "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path",
+    "No native CPU, interrupts, time, SMP, physical memory, virtual memory, or reclaim implementation",
+    "No native ACPI/AML/SMBIOS/PCIe resource graph or exact platform qualification",
+    "No native DMA/IOMMU/interrupt-remapping confinement",
+    "No native scheduler, task, syscall, capability, IPC, isolation, async I/O, or quota implementation",
+    "No native security/crypto/TPM/secrets/MAC/privacy implementation or external review",
+    "No isolated native driver domains or virtio reference drivers",
+    "No native block/NVMe/USB/input/VFS/PooleFS persistent path",
+    "No native user ABI, libc, init, service manager, login, shell, terminal, package, update, installer, or recovery",
+    "No native network, graphics, audio, compositor, PooleGlass, accessibility, or application platform",
+    "No source-bound signed PDC dynamics or portable/native PDC backends",
+    "No native PDC control-plane services or bounded actuator proof",
+    "PooleGlyph Phase 66, PGB2 v1, and PGVM2 v1 remain open",
+    "No native integrated fuzz/fault/power-loss/security/conformance/soak evidence",
+    "No native SBOM/provenance/signing ceremony/operations/release manifest",
+    "No reproducible signed native ISO or exact clean-media QEMU/physical release receipt",
+]
+
+
+def sha256_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest().upper()
+
+
+def parse_plan() -> tuple[list[dict], dict[str, str]]:
+    text = PLAN_PATH.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    phase_indices: list[tuple[int, str, str, str]] = []
+    for index, line in enumerate(lines):
+        match = re.match(r"^### (N\d+) - (.+) \(`([^`]+)`\)$", line)
+        if match:
+            phase_indices.append((index, match.group(1), match.group(2), match.group(3)))
+    if len(phase_indices) != 40:
+        raise ValueError(f"expected 40 native phases in Build Plan, found {len(phase_indices)}")
+
+    phases = []
+    exit_gates: dict[str, str] = {}
+    for position, (start, phase_id, title, status) in enumerate(phase_indices):
+        end = phase_indices[position + 1][0] if position + 1 < len(phase_indices) else len(lines)
+        block = lines[start:end]
+        subphases = []
+        for line in block:
+            match = re.match(r"^- (N\d+\.\d+) (.+)$", line)
+            if match:
+                subphase_id = match.group(1)
+                subphases.append(
+                    {
+                        "id": subphase_id,
+                        "status": SUBPHASE_OVERRIDES.get(subphase_id, "not_started"),
+                        "description": match.group(2),
+                    }
+                )
+            if line.startswith("Exit gate: "):
+                exit_gates[phase_id] = line[len("Exit gate: ") :]
+        phases.append({"id": phase_id, "title": title, "status": status, "subphases": subphases})
+    return phases, exit_gates
+
+
+def make_roadmap(test_count: int, status_date: str) -> dict:
+    coverage = json.loads(COVERAGE_PATH.read_text(encoding="utf-8"))
+    archived = json.loads(ARCHIVED_ROADMAP_PATH.read_text(encoding="utf-8"))
+    phases, exit_gates = parse_plan()
+    coverage_by_phase = {item["phase_id"]: item for item in coverage["phase_coverage"]}
+
+    for phase in phases:
+        phase_id = phase["id"]
+        cover = coverage_by_phase[phase_id]
+        phase["depends_on"] = DEPENDENCIES[phase_id]
+        phase["source_section_ids"] = cover["source_section_ids"]
+        phase["source_checkbox_count"] = cover["source_checkbox_count"]
+        phase["added_requirement_ids"] = cover["added_requirement_ids"]
+        phase["current_evidence"] = PHASE_EVIDENCE.get(phase_id, [])
+        phase["current_gaps"] = PHASE_GAPS[phase_id]
+        phase["exit_gate"] = exit_gates[phase_id]
+
+    status_counts = Counter(phase["status"] for phase in phases)
+    source_set = list(archived["source_set"])
+    source_set.append(
+        {
+            "id": "SRC-NATIVE-CHECKLIST-1",
+            "path": coverage["source"]["path"],
+            "kind": "markdown",
+            "sha256": coverage["source"]["sha256"],
+            "claim_role": "Normative from-scratch native OS leaf-requirement register.",
+            "intake_status": "imported_locked",
+        }
+    )
+
+    pdc_baseline_keys = [
+        "pdc_math",
+        "pdc_verifiers",
+        "pdc_representation",
+        "pdc_golden_metamorphic",
+        "pdc_qp",
+        "pdc_qp_stability",
+    ]
+    pdc_baseline = {key: archived["baseline"][key] for key in pdc_baseline_keys}
+
+    implementation_flags = []
+    for flag_id, flag_class, phase_id, closure in FLAGS:
+        implementation_flags.append(
+            {
+                "id": flag_id,
+                "class": flag_class,
+                "status": "closed" if flag_class == "SUPERSEDED" else "open",
+                "phase_id": phase_id,
+                "closure_condition": closure,
+                "evidence": ["docs/pdc-production-build-plan.md", "runs/pooleos_native_checklist_coverage.json"],
+            }
+        )
+
+    return {
+        "schema_version": "1.0",
+        "artifact_kind": "pdc_production_roadmap",
+        "status_date": status_date,
+        "objective": "Deliver production-ready native PooleOS as an original PooleBoot plus PooleKernel microkernel system and reproducible signed UEFI bootable ISO with PooleGlyph, canonical PDC, isolated drivers, guarded backends, and accessible PooleGlass Liquid Glass UI.",
+        "production_ready": False,
+        "architecture": {
+            "mode": "native_capability_microkernel",
+            "bootloader": "PooleBoot",
+            "kernel": "PooleKernel",
+            "production_base": "original_pooleos",
+            "forbidden_production_substitutes": ["Linux", "Debian", "Buildroot", "GRUB", "Limine", "systemd"],
+            "development_only_inputs": ["Windows", "WSL", "Linux", "Buildroot", "QEMU", "OVMF", "EDK II"],
+            "target_architecture": "x86_64",
+            "firmware_interface": "UEFI",
+            "legacy_bios_required": False,
+            "production_kernel_modules_v1": False,
+            "completion_phase_range": "N0-N39",
+        },
+        "goal_charter": {
+            "version": "2.0.0-native-reset",
+            "path": "docs/production-goal-charter.md",
+            "status": "adopted",
+            "completion_phase_range": "N0-N39",
+        },
+        "execution_protocol": {
+            "updates_required_each_goal_turn": True,
+            "inspect_live_pooleglyph_each_turn": True,
+            "verify_master_checklist_coverage_each_turn": True,
+            "new_work_must_be_flagged": True,
+            "last_updated_cycle": 81,
+            "selected_move_id": "N0-ADR-001",
+            "immediate_next_move_id": "N3-TOOLCHAIN-001",
+            "required_records": [
+                "docs/production-goal-charter.md",
+                "docs/pdc-production-build-plan.md",
+                "runs/pdc_production_roadmap.json",
+                "runs/pooleos_native_checklist_coverage.json",
+                "runs/release_gate.json",
+                "docs/cycle_log.md",
+                "README.md",
+            ],
+            "flag_classes": ["STOP_SHIP", "BLOCKER", "REQUIRED", "RISK", "RESEARCH", "OPTIONAL", "DEFERRED", "SUPERSEDED"],
+        },
+        "master_checklist": {
+            "source_path": coverage["source"]["path"],
+            "source_sha256": coverage["source"]["sha256"],
+            "source_byte_count": coverage["source"]["byte_count"],
+            "source_line_count": coverage["source"]["line_count"],
+            "checkbox_line_count": coverage["source"]["checkbox_line_count"],
+            "implementation_item_count": coverage["source"]["declared_generated_implementation_item_count"],
+            "section_count": coverage["source"]["top_level_section_count"],
+            "coverage_path": "runs/pooleos_native_checklist_coverage.json",
+            "coverage_sha256": sha256_file(COVERAGE_PATH),
+            "coverage_status": coverage["status"],
+            "added_requirement_count": len(coverage["added_requirements"]),
+        },
+        "baseline": {
+            "pooleos_cycle": 81,
+            "entry_cycle": 79,
+            "pooleos_test_count": test_count,
+            "historical_consistency_release_gate": {
+                "passed_checks": archived["baseline"]["release_gate"]["passed_checks"],
+                "total_checks": archived["baseline"]["release_gate"]["total_checks"],
+                "artifact_count": archived["baseline"]["release_gate"]["artifact_count"],
+                "explicit_gap_count": archived["baseline"]["release_gate"]["explicit_gap_count"],
+                "production_ready": False,
+                "native_promotion_role": "historical_non_promoting",
+            },
+            "native_consistency_release_gate": {
+                "passed_checks": 61,
+                "total_checks": 61,
+                "artifact_count": 56,
+                "explicit_gap_count": len(PROGRAM_GAPS),
+                "production_ready": False,
+                "native_promotion_role": "planning_and_evidence_consistency_non_promoting",
+            },
+            "native": {
+                "source_controlled": True,
+                "pooleboot_exists": False,
+                "poolekernel_exists": False,
+                "native_qemu_boot": False,
+                "native_physical_boot": False,
+                "ring3_execution": False,
+                "capability_enforcement": False,
+                "iommu_driver_confinement": False,
+                "native_filesystem": False,
+                "native_desktop": False,
+                "reproducible_signed_iso": False,
+            },
+            "pooleglyph": archived["baseline"]["pooleglyph"],
+            "pdc": pdc_baseline,
+        },
+        "source_set": source_set,
+        "phase_summary": {
+            "total": len(phases),
+            "complete": status_counts["complete"],
+            "partial": status_counts["partial"],
+            "blocked": status_counts["blocked"],
+            "not_started": status_counts["not_started"],
+            "subphase_total": sum(len(phase["subphases"]) for phase in phases),
+        },
+        "phases": phases,
+        "implementation_flags": implementation_flags,
+        "gap_summary": {
+            "native_program_gap_count": len(PROGRAM_GAPS),
+            "native_program_gaps": PROGRAM_GAPS,
+            "historical_release_gate_gap_count": archived["baseline"]["release_gate"]["explicit_gap_count"],
+            "historical_release_gaps_are_non_promoting": True,
+        },
+        "immediate_next_move": {
+            "id": "N3-TOOLCHAIN-001",
+            "phase_ids": ["N3"],
+            "title": "Qualify and pin the freestanding PooleBoot and PooleKernel toolchain without promoting unsigned architecture drafts",
+            "entry_evidence": ["docs/adr/0003-language-and-toolchain-split.md", "runs/native_architecture_baseline.json", "official Rust target documentation"],
+            "exit_evidence": ["pinned host-tool manifest", "frozen target specifications", "reproducible empty PE32+ and ELF64 fixtures", "host-leakage negative tests"],
+            "blocked": False,
+        },
+        "claim_boundaries": [
+            "Buildroot and Linux artifacts are historical reference evidence and cannot satisfy native PooleOS gates.",
+            "Checklist mapping is not implementation completion.",
+            "Host simulations and schemas are not native kernel enforcement.",
+            "PooleGlyph Phase 65 metadata cannot be promoted before Phase 66 executable evidence.",
+            "Finite PDC/QP evidence remains bounded to its declared classical models and protocols.",
+            "A file named ISO is not reproducible signed clean-media boot evidence.",
+        ],
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
+    parser.add_argument("--test-count", type=int, default=376)
+    parser.add_argument("--status-date", default="2026-07-16")
+    args = parser.parse_args()
+    roadmap = make_roadmap(args.test_count, args.status_date)
+    args.out.write_text(json.dumps(roadmap, indent=2, ensure_ascii=True) + "\n", encoding="utf-8", newline="\n")
+    print(
+        f"wrote {args.out}: phases={roadmap['phase_summary']['total']} "
+        f"subphases={roadmap['phase_summary']['subphase_total']} "
+        f"gaps={roadmap['gap_summary']['native_program_gap_count']}"
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

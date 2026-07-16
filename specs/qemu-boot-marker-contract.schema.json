@@ -1,0 +1,313 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/qemu-boot-marker-contract.schema.json",
+  "title": "PooleOS QEMU Boot Marker Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "profile",
+    "execution_performed",
+    "boot_evidence_claimed",
+    "security_boundary_claimed",
+    "source_inputs",
+    "kernel_pgvm2_boundary",
+    "marker_contract",
+    "marker_mappings",
+    "checks",
+    "summary",
+    "limitations",
+    "next_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.qemu_boot_marker_contract"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "blocked",
+        "fail"
+      ]
+    },
+    "profile": {
+      "const": "trap-input"
+    },
+    "execution_performed": {
+      "type": "boolean"
+    },
+    "boot_evidence_claimed": {
+      "type": "boolean"
+    },
+    "security_boundary_claimed": {
+      "type": "boolean"
+    },
+    "source_inputs": {
+      "type": "object",
+      "required": [
+        "dry_run_checklist_path",
+        "dry_run_status",
+        "lab_guest_autostart_path",
+        "lab_guest_autostart_status"
+      ],
+      "properties": {
+        "dry_run_checklist_path": {
+          "type": "string"
+        },
+        "dry_run_status": {
+          "type": "string"
+        },
+        "lab_guest_autostart_path": {
+          "type": "string"
+        },
+        "lab_guest_autostart_status": {
+          "type": "string"
+        }
+      }
+    },
+    "kernel_pgvm2_boundary": {
+      "type": "object",
+      "required": [
+        "current_contract_owner",
+        "future_contract_owner",
+        "kernel_boundary_claimed",
+        "pgvm2_execution_claimed",
+        "claim_boundary",
+        "required_before_kernel_claim"
+      ],
+      "properties": {
+        "current_contract_owner": {
+          "type": "string"
+        },
+        "future_contract_owner": {
+          "type": "string"
+        },
+        "kernel_boundary_claimed": {
+          "type": "boolean"
+        },
+        "pgvm2_execution_claimed": {
+          "type": "boolean"
+        },
+        "claim_boundary": {
+          "type": "string"
+        },
+        "required_before_kernel_claim": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "marker_contract": {
+      "type": "object",
+      "required": [
+        "profile",
+        "sequence_source",
+        "required_markers"
+      ],
+      "properties": {
+        "profile": {
+          "const": "trap-input"
+        },
+        "sequence_source": {
+          "type": "string"
+        },
+        "required_markers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "marker_mappings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "marker",
+          "sequence",
+          "phase",
+          "emitter",
+          "source_file",
+          "source_marker_text",
+          "source_file_exists",
+          "trap_bundle_role",
+          "guest_evidence_path",
+          "captured_evidence_files",
+          "responsibility_boundary"
+        ],
+        "properties": {
+          "marker": {
+            "type": "string"
+          },
+          "sequence": {
+            "type": "integer"
+          },
+          "phase": {
+            "type": "string"
+          },
+          "emitter": {
+            "type": "string"
+          },
+          "source_file": {
+            "type": "string"
+          },
+          "source_marker_text": {
+            "type": "string"
+          },
+          "source_file_exists": {
+            "type": "boolean"
+          },
+          "trap_bundle_role": {
+            "type": "string"
+          },
+          "guest_evidence_path": {
+            "type": "string"
+          },
+          "captured_evidence_files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "role",
+                "path"
+              ],
+              "properties": {
+                "role": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "responsibility_boundary": {
+            "type": "object",
+            "required": [
+              "owner",
+              "kernel_boundary_claimed",
+              "pgvm2_execution_claimed",
+              "contract_claim",
+              "handoff_rule"
+            ],
+            "properties": {
+              "owner": {
+                "type": "string"
+              },
+              "kernel_boundary_claimed": {
+                "type": "boolean"
+              },
+              "pgvm2_execution_claimed": {
+                "type": "boolean"
+              },
+              "contract_claim": {
+                "type": "string"
+              },
+              "handoff_rule": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "severity",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "fail",
+              "block"
+            ]
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "failed_check_count",
+        "blocking_check_count",
+        "marker_count",
+        "expected_marker_count",
+        "boundary_count",
+        "post_capture_file_count",
+        "dry_run_status",
+        "execution_performed",
+        "boot_evidence_claimed",
+        "security_boundary_claimed"
+      ],
+      "properties": {
+        "failed_check_count": {
+          "type": "integer"
+        },
+        "blocking_check_count": {
+          "type": "integer"
+        },
+        "marker_count": {
+          "type": "integer"
+        },
+        "expected_marker_count": {
+          "type": "integer"
+        },
+        "boundary_count": {
+          "type": "integer"
+        },
+        "post_capture_file_count": {
+          "type": "integer"
+        },
+        "dry_run_status": {
+          "type": "string"
+        },
+        "execution_performed": {
+          "type": "boolean"
+        },
+        "boot_evidence_claimed": {
+          "type": "boolean"
+        },
+        "security_boundary_claimed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

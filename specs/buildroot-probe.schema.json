@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/buildroot-probe.schema.json",
+  "title": "PooleOS Buildroot Probe Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status",
+    "buildroot_path",
+    "buildroot_version",
+    "buildroot_git_commit",
+    "buildroot_git_tag",
+    "external_path",
+    "defconfig_path",
+    "checks"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "artifact_kind": {
+      "const": "pooleos.buildroot_probe"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail"
+      ]
+    },
+    "buildroot_path": {
+      "type": "string"
+    },
+    "buildroot_version": {
+      "type": "string"
+    },
+    "buildroot_git_commit": {
+      "type": "string"
+    },
+    "buildroot_git_tag": {
+      "type": "string"
+    },
+    "external_path": {
+      "type": "string"
+    },
+    "defconfig_path": {
+      "type": "string"
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "ok",
+          "detail"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

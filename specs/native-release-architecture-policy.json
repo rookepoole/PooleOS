@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_release_architecture_policy",
+  "policy_version": "NATIVE-MEDIA-ARCH-0.1",
+  "status_date": "2026-07-16",
+  "input_kind": "extracted_release_tree",
+  "required_paths": [
+    "EFI/BOOT/BOOTX64.EFI",
+    "pooleos/PooleKernel.elf",
+    "pooleos/system/initial-system.bundle",
+    "pooleos/recovery/recovery.bundle",
+    "pooleos/manifest.json"
+  ],
+  "forbidden_path_globs": [
+    "boot/vmlinuz*",
+    "boot/bzimage*",
+    "boot/grub/**",
+    "efi/**/grub*.efi",
+    "**/limine.cfg",
+    "**/limine.conf",
+    "**/limine*.sys",
+    "etc/systemd/**",
+    "usr/lib/systemd/**",
+    "lib/systemd/**",
+    "var/lib/dpkg/**",
+    "etc/debian_version",
+    "etc/buildroot-release"
+  ],
+  "content_scan_globs": [
+    "**/*.efi",
+    "**/*.elf",
+    "**/*.bin",
+    "**/*.bundle",
+    "**/*.cfg",
+    "**/*.conf",
+    "**/*.service",
+    "**/os-release"
+  ],
+  "forbidden_ascii_markers": [
+    "Linux version ",
+    "BOOT_IMAGE=/boot/vmlinuz",
+    "GNU GRUB",
+    "grub-core",
+    "Limine Boot Protocol",
+    "BUILDROOT_VERSION",
+    "NAME=Buildroot",
+    "ID=debian",
+    "/lib/systemd/systemd"
+  ],
+  "path_matching_case_insensitive": true,
+  "content_matching_case_insensitive": false,
+  "reject_symbolic_links": true,
+  "reject_casefold_path_collisions": true,
+  "reject_non_nfc_paths": true,
+  "maximum_scanned_file_bytes": 67108864,
+  "limitations": [
+    "This policy scans an extracted directory tree, not ISO partition tables, El Torito catalogs, signatures, or hidden sectors.",
+    "Absence of known substitute markers does not prove that a binary was authored by PooleOS.",
+    "N39 must bind this report to independently parsed ISO, ESP, manifest, signature, and source-provenance evidence."
+  ]
+}
+
