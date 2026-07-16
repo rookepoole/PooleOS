@@ -80,6 +80,8 @@ SUBPHASE_OVERRIDES = {
     "N2.1": "partial",
     "N2.4": "partial",
     "N3.1": "partial",
+    "N3.2": "partial",
+    "N3.3": "partial",
     "N3.6": "partial",
     "N4.1": "partial",
     "N15.1": "partial",
@@ -105,7 +107,8 @@ PHASE_EVIDENCE = {
         "tests/test_native_release_architecture.py",
     ],
     "N1": [
-        "local Git repository on main with owner PooleOS origin",
+        "public rookepoole/PooleOS repository with protected main and topic-branch workflow",
+        "private vulnerability reporting enabled",
         "LICENSE, NOTICE.md, SECURITY.md, TRADEMARKS.md, and CODEOWNERS",
         "docs/publication-boundary.md",
         "tools/check_publication_boundary.py",
@@ -114,7 +117,10 @@ PHASE_EVIDENCE = {
     "N3": [
         "ADR-0003 proposed Rust/assembly/C17 split",
         "official Rust UEFI and x86_64-unknown-none target documentation",
-        "existing deterministic Python artifact/test framework",
+        "specs/native-toolchain-lock.json and specs/native-target-contract.json",
+        "dependency-free no_std PE32+/ELF64 qualification fixtures",
+        "runs/native_toolchain_qualification.json: two byte-identical clean builds per fixture on one host",
+        "format-aware inspection, zero host-leakage hits, and three passing negative controls",
     ],
     "N4": ["historical QEMU/Buildroot launch and receipt scaffolding; non-promoting"],
     "N15": ["runs/microkernel_isolation.json", "runs/capability_trap_proof.json", "runs/capability_trap_fuzz.json"],
@@ -123,8 +129,8 @@ PHASE_EVIDENCE = {
     "N33": ["existing PDC receipt schemas and guarded-route source documents; no native services"],
     "N34": ["PooleGlyph Phase 65 checkpoint", "draft PGB2/PGVM2 trap evidence"],
     "N35": ["bounded static capability and trap simulations; no native containment"],
-    "N36": ["Cycle 79 host baseline: 345 tests", "existing parser/artifact negative tests"],
-    "N37": ["Cycle 79 consistency release gate and content-addressed source artifacts"],
+    "N36": ["Cycle 82 host baseline: 386 tests", "native binary parser, reproduction, leakage, malformed, and substitution negatives"],
+    "N37": ["Cycle 82 consistency release gate: 62/62 checks over 57 artifacts", "content-addressed source and native-toolchain artifacts"],
 }
 
 
@@ -135,11 +141,11 @@ PHASE_GAPS = {
         "The extracted-tree scanner does not yet parse ISO/GPT/ESP/El Torito/signature structures",
     ],
     "N1": [
-        "The local repository is initialized but public remote publication, branch protection, signed tags, and immutable release refs remain open",
+        "Public remote and branch protection exist; signed tags, immutable release refs, retained CI/review evidence, signing custody, and multi-maintainer approval policy remain open",
         "Legal, patent, export, trademark, contributor, signing-custody, and component-specific license review remain open",
     ],
     "N2": ["Full ACPI/PCI/USB/firmware inventory and sacrificial lab media are not accepted"],
-    "N3": ["No native target triple, sysroot, linker layout, or hermetic native build exists"],
+    "N3": ["One-host Rust PE32+/ELF64 qualification passes; second-host reproduction, source provenance, C17/assembly/ABI/image tools, complete build graph, and low-level safety gates remain open"],
     "N4": ["No pinned native-only QEMU/VIRTIO profile or formal model suite exists"],
     "N5": ["No PooleBoot PE32+ image or frozen boot handoff exists"],
     "N6": ["No native boot trust, kernel image, entry, serial panic, or measured boot exists"],
@@ -200,8 +206,8 @@ FLAGS = [
 
 
 PROGRAM_GAPS = [
-    "The native repository and byte-bound ADR baseline exist locally, but remote publication, protected review, signed tags, and cryptographic ADR ratification remain open",
-    "No hermetic native compiler/sysroot/build/image toolchain",
+    "The native repository is public and main is protected, but signed tags, immutable release refs, retained CI review evidence, and cryptographic ADR ratification remain open",
+    "Rust PE32+/ELF64 fixtures pass one-host qualification, but second-host reproduction, source provenance, C17/assembly/ABI tools, and image tooling remain open",
     "No native-only QEMU/OVMF/VIRTIO reference profile or formal state models",
     "No PooleBoot PE32+ UEFI loader or frozen boot protocol",
     "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path",
@@ -344,14 +350,15 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "inspect_live_pooleglyph_each_turn": True,
             "verify_master_checklist_coverage_each_turn": True,
             "new_work_must_be_flagged": True,
-            "last_updated_cycle": 81,
-            "selected_move_id": "N0-ADR-001",
-            "immediate_next_move_id": "N3-TOOLCHAIN-001",
+            "last_updated_cycle": 82,
+            "selected_move_id": "N3-TOOLCHAIN-001",
+            "immediate_next_move_id": "N0-RATIFY-001",
             "required_records": [
                 "docs/production-goal-charter.md",
                 "docs/pdc-production-build-plan.md",
                 "runs/pdc_production_roadmap.json",
                 "runs/pooleos_native_checklist_coverage.json",
+                "runs/native_toolchain_qualification.json",
                 "runs/release_gate.json",
                 "docs/cycle_log.md",
                 "README.md",
@@ -372,7 +379,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "added_requirement_count": len(coverage["added_requirements"]),
         },
         "baseline": {
-            "pooleos_cycle": 81,
+            "pooleos_cycle": 82,
             "entry_cycle": 79,
             "pooleos_test_count": test_count,
             "historical_consistency_release_gate": {
@@ -384,9 +391,9 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 "native_promotion_role": "historical_non_promoting",
             },
             "native_consistency_release_gate": {
-                "passed_checks": 61,
-                "total_checks": 61,
-                "artifact_count": 56,
+                "passed_checks": 62,
+                "total_checks": 62,
+                "artifact_count": 57,
                 "explicit_gap_count": len(PROGRAM_GAPS),
                 "production_ready": False,
                 "native_promotion_role": "planning_and_evidence_consistency_non_promoting",
@@ -425,11 +432,11 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "historical_release_gaps_are_non_promoting": True,
         },
         "immediate_next_move": {
-            "id": "N3-TOOLCHAIN-001",
-            "phase_ids": ["N3"],
-            "title": "Qualify and pin the freestanding PooleBoot and PooleKernel toolchain without promoting unsigned architecture drafts",
-            "entry_evidence": ["docs/adr/0003-language-and-toolchain-split.md", "runs/native_architecture_baseline.json", "official Rust target documentation"],
-            "exit_evidence": ["pinned host-tool manifest", "frozen target specifications", "reproducible empty PE32+ and ELF64 fixtures", "host-leakage negative tests"],
+            "id": "N0-RATIFY-001",
+            "phase_ids": ["N0", "N1"],
+            "title": "Obtain owner acceptance and cryptographic ratification of the native architecture set before implementation promotion",
+            "entry_evidence": ["docs/adr/0001-native-pooleos-constitution.md through ADR-0007", "runs/native_architecture_baseline.json", "runs/native_toolchain_qualification.json"],
+            "exit_evidence": ["owner disposition of ADR-0003 and ADR-0004", "owner-controlled signatures for the accepted ADR set", "documented signing custody and verification procedure", "signed baseline tag and publication receipt"],
             "blocked": False,
         },
         "claim_boundaries": [
@@ -446,7 +453,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=376)
+    parser.add_argument("--test-count", type=int, default=386)
     parser.add_argument("--status-date", default="2026-07-16")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

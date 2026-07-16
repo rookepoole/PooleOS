@@ -1,0 +1,19 @@
+[build]
+incremental = false
+
+[target.x86_64-unknown-uefi]
+rustflags = [
+  "-Cpanic=abort",
+  "-Clink-arg=/debug:none",
+  "-Clink-arg=/timestamp:0",
+]
+
+[target.x86_64-unknown-none]
+rustflags = [
+  "-Cpanic=abort",
+  "-Crelocation-model=static",
+  "-Clink-arg=--entry=_start",
+  "-Clink-arg=--build-id=none",
+  "-Clink-arg=--gc-sections",
+  "-Clink-arg=-static",
+]

@@ -1,0 +1,12 @@
+[package]
+name = "poolekernel-fixture"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "PooleKernelFixture"
+path = "src/main.rs"
+
+[dependencies]

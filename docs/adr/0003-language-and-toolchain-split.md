@@ -3,14 +3,14 @@
 Status: proposed  
 Date: 2026-07-16  
 Decision owner: Rooke Poole  
-Ratification: owner acceptance and toolchain qualification pending  
+Ratification: owner acceptance and full two-host toolchain qualification pending  
 Supersedes: none  
 Superseded by: none  
 Requirement mappings: N0.2, N3.1-N3.8, sections 008-011  
 
 ## Context
 
-PooleOS requires freestanding UEFI PE32+ and x86-64 ELF64 output, explicit ABIs, small unsafe surfaces, deterministic release tooling, and interoperability with a portable PDC reference. The current host has Git but no Rust, LLVM, NASM, or QEMU available on `PATH`.
+PooleOS requires freestanding UEFI PE32+ and x86-64 ELF64 output, explicit ABIs, small unsafe surfaces, deterministic release tooling, and interoperability with a portable PDC reference. Cycle 82 installs a pinned Rust/LLD toolchain only in the ignored workspace-local tool directory; no global Rust state or `PATH` mutation is permitted. NASM, the freestanding C17 path, image tools, QEMU, and OVMF are not yet qualified.
 
 ## Proposed Decision
 
@@ -39,5 +39,6 @@ The memory-safe default narrows but does not remove the TCB or unsafe-code burde
 
 ## Evidence and Exit Gate
 
-N3 must pin exact source versions and hashes, reproduce empty PE32+/ELF64 artifacts on two clean hosts, prove ABI fixtures, inventory unsafe code, and show no host headers or libraries leak into target artifacts before this ADR becomes accepted.
+Cycle 82 pins Rust 1.97.0, Cargo 1.97.0, rustup 1.29.0, LLD 22.1.6, the dated Rust channel manifest, and both target library components. Dependency-free empty fixtures build offline in two separate clean target trees on one Windows host. The 3,072-byte PE32+ and 984-byte ELF64 outputs are byte-identical across runs, pass independent structure checks, contain no scanned host paths or runtime-library markers, and reject malformed/substituted targets. `runs/native_toolchain_qualification.json` records this bounded evidence.
 
+N3 must still reproduce the artifacts on a second clean host, verify detached distribution signatures and source-rebuild provenance, qualify the C17/assembly/ABI/image tools, prove ABI fixtures, inventory unsafe code, and show no host headers or libraries leak into any production artifact before this ADR becomes accepted.

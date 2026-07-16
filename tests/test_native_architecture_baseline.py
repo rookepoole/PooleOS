@@ -82,6 +82,7 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(repository["current_branch"], "main")
         self.assertEqual(repository["configured_remote"], "https://github.com/rookepoole/PooleOS.git")
         self.assertEqual(repository["visibility"], "public")
+        self.assertEqual(repository["publication_state"], "initialized_published")
 
     def test_license_and_publication_boundary_are_explicit(self) -> None:
         license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")

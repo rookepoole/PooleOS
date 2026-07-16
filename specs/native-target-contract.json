@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_target_contract",
+  "status_date": "2026-07-16",
+  "status": "qualification_fixture_contract",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "language": {
+    "name": "Rust",
+    "edition": "2024",
+    "standard_library": false,
+    "panic_strategy": "abort",
+    "unwinding_allowed": false,
+    "native_rust_abi_at_persistent_or_protection_boundary": false
+  },
+  "profiles": {
+    "release": {
+      "opt_level": "s",
+      "codegen_units": 1,
+      "incremental": false,
+      "debug": 0,
+      "lto": false,
+      "overflow_checks": true,
+      "strip": "symbols"
+    }
+  },
+  "targets": [
+    {
+      "id": "pooleboot_empty_qualification_fixture",
+      "package": "pooleboot-fixture",
+      "binary_name": "PooleBootFixture.efi",
+      "triple": "x86_64-unknown-uefi",
+      "tier": 2,
+      "architecture": "x86_64",
+      "object_format": "PE32+",
+      "calling_convention": "efiapi",
+      "calling_convention_expansion": "Microsoft x64 UEFI ABI",
+      "entry_symbol": "efi_main",
+      "entry_return": "EFI_STATUS represented as usize",
+      "code_model": "small",
+      "relocation_model": "pic",
+      "red_zone": false,
+      "floating_or_vector_before_explicit_state_support": false,
+      "linker": "rust-lld",
+      "static_link": true,
+      "expected_binary": {
+        "format": "PE32+",
+        "machine": 34404,
+        "subsystem": 10,
+        "timestamp": 0,
+        "entry_nonzero": true,
+        "imports_present": false,
+        "debug_directory_present": false
+      }
+    },
+    {
+      "id": "poolekernel_empty_qualification_fixture",
+      "package": "poolekernel-fixture",
+      "binary_name": "PooleKernelFixture",
+      "triple": "x86_64-unknown-none",
+      "tier": 2,
+      "architecture": "x86_64",
+      "object_format": "ELF64",
+      "calling_convention": "C",
+      "calling_convention_expansion": "System V AMD64 ABI",
+      "entry_symbol": "_start",
+      "entry_return": "never",
+      "code_model": "kernel",
+      "relocation_model": "static",
+      "red_zone": false,
+      "floating_or_vector_before_explicit_state_support": false,
+      "linker": "rust-lld",
+      "static_link": true,
+      "expected_binary": {
+        "format": "ELF64",
+        "machine": 62,
+        "elf_type": 2,
+        "entry_nonzero": true,
+        "dynamic_segment_present": false,
+        "interpreter_segment_present": false
+      }
+    }
+  ],
+  "claim_boundary": [
+    "These targets describe empty compiler/linker fixtures, not a functional PooleBoot or PooleKernel.",
+    "A structurally valid PE32+ file is not UEFI boot evidence.",
+    "A structurally valid ELF64 file is not kernel execution, isolation, or policy evidence.",
+    "Target defaults remain assurance inputs and require source-level compiler and linker review before release."
+  ]
+}

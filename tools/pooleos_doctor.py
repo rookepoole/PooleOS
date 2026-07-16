@@ -106,6 +106,17 @@ def check_native_architecture_baseline() -> CheckResult:
     )
 
 
+def check_native_toolchain_qualification() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_toolchain_qualification()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
 def check_publication_boundary() -> CheckResult:
     from tools import pooleos_release_gate
 
@@ -3091,6 +3102,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "docs" / "production-goal-charter.md",
                 ROOT / "docs" / "pdc-production-build-plan.md",
                 ROOT / "docs" / "publication-boundary.md",
+                ROOT / "docs" / "native-toolchain-qualification.md",
                 ROOT
                 / "sources"
                 / "requirements"
@@ -3103,6 +3115,11 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "specs" / "native-architecture-constitution.json",
                 ROOT / "specs" / "native-architecture-constitution.schema.json",
                 ROOT / "specs" / "native-architecture-baseline.schema.json",
+                ROOT / "specs" / "native-toolchain-lock.json",
+                ROOT / "specs" / "native-toolchain-lock.schema.json",
+                ROOT / "specs" / "native-target-contract.json",
+                ROOT / "specs" / "native-target-contract.schema.json",
+                ROOT / "specs" / "native-toolchain-qualification.schema.json",
                 ROOT / "specs" / "native-release-architecture-policy.json",
                 ROOT / "specs" / "native-release-architecture-policy.schema.json",
                 ROOT / "specs" / "native-release-architecture-report.schema.json",
@@ -3111,9 +3128,21 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "tools" / "generate_native_architecture_baseline.py",
                 ROOT / "tools" / "check_native_release_architecture.py",
                 ROOT / "tools" / "check_publication_boundary.py",
+                ROOT / "tools" / "bootstrap_native_toolchain.ps1",
+                ROOT / "tools" / "qualify_native_toolchain.py",
+                ROOT / "runtime" / "native_binary.py",
+                ROOT / "native" / "Cargo.toml",
+                ROOT / "native" / "Cargo.lock",
+                ROOT / "native" / "rust-toolchain.toml",
+                ROOT / "native" / ".cargo" / "config.toml",
+                ROOT / "native" / "boot" / "Cargo.toml",
+                ROOT / "native" / "boot" / "src" / "main.rs",
+                ROOT / "native" / "kernel" / "Cargo.toml",
+                ROOT / "native" / "kernel" / "src" / "main.rs",
                 ROOT / "runs" / "pooleos_native_checklist_coverage.json",
                 ROOT / "runs" / "pdc_production_roadmap.json",
                 ROOT / "runs" / "native_architecture_baseline.json",
+                ROOT / "runs" / "native_toolchain_qualification.json",
                 ROOT / "specs" / "pdc-source-intake.schema.json",
                 ROOT / "specs" / "pdc-math-contract.schema.json",
                 ROOT / "specs" / "pdc-golden-vectors.schema.json",
@@ -3183,6 +3212,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     checks.append(check_native_architecture_plan())
     checks.append(check_native_architecture_baseline())
+    checks.append(check_native_toolchain_qualification())
     checks.append(check_publication_boundary())
     checks.extend(check_claim_schema())
     checks.extend(check_claim_examples())

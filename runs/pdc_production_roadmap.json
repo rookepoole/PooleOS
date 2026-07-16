@@ -43,14 +43,15 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 81,
-    "selected_move_id": "N0-ADR-001",
-    "immediate_next_move_id": "N3-TOOLCHAIN-001",
+    "last_updated_cycle": 82,
+    "selected_move_id": "N3-TOOLCHAIN-001",
+    "immediate_next_move_id": "N0-RATIFY-001",
     "required_records": [
       "docs/production-goal-charter.md",
       "docs/pdc-production-build-plan.md",
       "runs/pdc_production_roadmap.json",
       "runs/pooleos_native_checklist_coverage.json",
+      "runs/native_toolchain_qualification.json",
       "runs/release_gate.json",
       "docs/cycle_log.md",
       "README.md"
@@ -80,9 +81,9 @@
     "added_requirement_count": 25
   },
   "baseline": {
-    "pooleos_cycle": 81,
+    "pooleos_cycle": 82,
     "entry_cycle": 79,
-    "pooleos_test_count": 376,
+    "pooleos_test_count": 386,
     "historical_consistency_release_gate": {
       "passed_checks": 58,
       "total_checks": 58,
@@ -92,9 +93,9 @@
       "native_promotion_role": "historical_non_promoting"
     },
     "native_consistency_release_gate": {
-      "passed_checks": 61,
-      "total_checks": 61,
-      "artifact_count": 56,
+      "passed_checks": 62,
+      "total_checks": 62,
+      "artifact_count": 57,
       "explicit_gap_count": 20,
       "production_ready": false,
       "native_promotion_role": "planning_and_evidence_consistency_non_promoting"
@@ -407,13 +408,14 @@
         "ADD-REUSE-001"
       ],
       "current_evidence": [
-        "local Git repository on main with owner PooleOS origin",
+        "public rookepoole/PooleOS repository with protected main and topic-branch workflow",
+        "private vulnerability reporting enabled",
         "LICENSE, NOTICE.md, SECURITY.md, TRADEMARKS.md, and CODEOWNERS",
         "docs/publication-boundary.md",
         "tools/check_publication_boundary.py"
       ],
       "current_gaps": [
-        "The local repository is initialized but public remote publication, branch protection, signed tags, and immutable release refs remain open",
+        "Public remote and branch protection exist; signed tags, immutable release refs, retained CI/review evidence, signing custody, and multi-maintainer approval policy remain open",
         "Legal, patent, export, trademark, contributor, signing-custody, and component-specific license review remain open"
       ],
       "exit_gate": "PooleOS is source-controlled; every required decision has an owner and due gate; deletions and deferrals are reviewable; no component lacks licensing/provenance classification."
@@ -488,12 +490,12 @@
         },
         {
           "id": "N3.2",
-          "status": "not_started",
+          "status": "partial",
           "description": "Freeze target triples, calling conventions, object formats, code models, relocation, red-zone, floating/vector state, and debug/release profiles."
         },
         {
           "id": "N3.3",
-          "status": "not_started",
+          "status": "partial",
           "description": "Build hermetic host tools, cross compiler, assembler, linker, archiver, sysroot, builtins, ABI headers, and image utilities with pinned hashes."
         },
         {
@@ -537,10 +539,13 @@
       "current_evidence": [
         "ADR-0003 proposed Rust/assembly/C17 split",
         "official Rust UEFI and x86_64-unknown-none target documentation",
-        "existing deterministic Python artifact/test framework"
+        "specs/native-toolchain-lock.json and specs/native-target-contract.json",
+        "dependency-free no_std PE32+/ELF64 qualification fixtures",
+        "runs/native_toolchain_qualification.json: two byte-identical clean builds per fixture on one host",
+        "format-aware inspection, zero host-leakage hits, and three passing negative controls"
       ],
       "current_gaps": [
-        "No native target triple, sysroot, linker layout, or hermetic native build exists"
+        "One-host Rust PE32+/ELF64 qualification passes; second-host reproduction, source provenance, C17/assembly/ABI/image tools, complete build graph, and low-level safety gates remain open"
       ],
       "exit_gate": "two clean host environments reproduce bootstrap tools and empty native images; host headers/libraries cannot leak; ABI fixtures pass independently; all generated inputs are declared."
     },
@@ -2573,8 +2578,8 @@
         "ADD-TEST-001"
       ],
       "current_evidence": [
-        "Cycle 79 host baseline: 345 tests",
-        "existing parser/artifact negative tests"
+        "Cycle 82 host baseline: 386 tests",
+        "native binary parser, reproduction, leakage, malformed, and substitution negatives"
       ],
       "current_gaps": [
         "No native system, power-loss, hardware, accessibility, soak, or external security suite exists"
@@ -2641,7 +2646,8 @@
         "ADD-SUPPLY-001"
       ],
       "current_evidence": [
-        "Cycle 79 consistency release gate and content-addressed source artifacts"
+        "Cycle 82 consistency release gate: 62/62 checks over 57 artifacts",
+        "content-addressed source and native-toolchain artifacts"
       ],
       "current_gaps": [
         "No native SBOM/provenance/signing ceremony/release manifest or source-controlled release exists"
@@ -2977,8 +2983,8 @@
   "gap_summary": {
     "native_program_gap_count": 20,
     "native_program_gaps": [
-      "The native repository and byte-bound ADR baseline exist locally, but remote publication, protected review, signed tags, and cryptographic ADR ratification remain open",
-      "No hermetic native compiler/sysroot/build/image toolchain",
+      "The native repository is public and main is protected, but signed tags, immutable release refs, retained CI review evidence, and cryptographic ADR ratification remain open",
+      "Rust PE32+/ELF64 fixtures pass one-host qualification, but second-host reproduction, source provenance, C17/assembly/ABI tools, and image tooling remain open",
       "No native-only QEMU/OVMF/VIRTIO reference profile or formal state models",
       "No PooleBoot PE32+ UEFI loader or frozen boot protocol",
       "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path",
@@ -3002,21 +3008,22 @@
     "historical_release_gaps_are_non_promoting": true
   },
   "immediate_next_move": {
-    "id": "N3-TOOLCHAIN-001",
+    "id": "N0-RATIFY-001",
     "phase_ids": [
-      "N3"
+      "N0",
+      "N1"
     ],
-    "title": "Qualify and pin the freestanding PooleBoot and PooleKernel toolchain without promoting unsigned architecture drafts",
+    "title": "Obtain owner acceptance and cryptographic ratification of the native architecture set before implementation promotion",
     "entry_evidence": [
-      "docs/adr/0003-language-and-toolchain-split.md",
+      "docs/adr/0001-native-pooleos-constitution.md through ADR-0007",
       "runs/native_architecture_baseline.json",
-      "official Rust target documentation"
+      "runs/native_toolchain_qualification.json"
     ],
     "exit_evidence": [
-      "pinned host-tool manifest",
-      "frozen target specifications",
-      "reproducible empty PE32+ and ELF64 fixtures",
-      "host-leakage negative tests"
+      "owner disposition of ADR-0003 and ADR-0004",
+      "owner-controlled signatures for the accepted ADR set",
+      "documented signing custody and verification procedure",
+      "signed baseline tag and publication receipt"
     ],
     "blocked": false
   },

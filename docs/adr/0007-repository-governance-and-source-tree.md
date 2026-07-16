@@ -3,7 +3,7 @@
 Status: accepted-owner-directed  
 Date: 2026-07-16  
 Decision owner: Rooke Poole  
-Ratification: branch protection, signed-tag, and retention controls pending  
+Ratification: signed-tag, immutable-release-ref, and retention controls pending  
 Supersedes: none  
 Superseded by: none  
 Requirement mappings: N1.1, N1.3-N1.7, section 004  
@@ -36,9 +36,13 @@ Generated files live only in declared generated directories and identify their g
 
 Initial import may be an unsigned bootstrap commit because no owner signing key is configured on the host. It cannot satisfy signed-release gates. Production commits and tags require the later signing-custody policy, protected branch rules, immutable release refs, retained CI evidence, and review records.
 
+## Cycle 82 Evidence
+
+The public `rookepoole/PooleOS` repository now has `main` as its default branch. The initial unsigned bootstrap commit is published. Branch protection requires pull requests, dismisses stale reviews, requires resolved conversations and linear history, and denies force-pushes and branch deletion. Administrator enforcement and approving-review count remain deliberately unset while Rooke Poole is the only configured maintainer. Private vulnerability reporting is enabled. Cycle 82 work proceeds on a protected-workflow topic branch.
+
 ## Open Items
 
-- configure branch protection and private vulnerability reporting;
 - choose owner-controlled commit/tag signing technology and custody process;
+- create an owner-signed baseline tag, immutable release-reference policy, retained CI evidence policy, and publication receipt;
 - define contributor agreement, reviewer quorum, emergency authority, severity, retention, deprecation, compatibility, and incident policies;
 - create required subsystem ADRs from section 002.3 before each ABI is frozen.

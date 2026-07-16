@@ -9,6 +9,7 @@ htmlcov/
 .venv/
 venv/
 target/
+.toolchains/
 *.iso
 *.img
 *.qcow2
@@ -37,9 +38,10 @@ keys/private/
 # Private/internal Poole evidence. Public artifacts may bind hashes, not content.
 sources/pdc/
 
-# Local evidence defaults to private. These three deterministic ledgers are public.
+# Local evidence defaults to private. These deterministic ledgers are public.
 runs/*
 !runs/native_architecture_baseline.json
+!runs/native_toolchain_qualification.json
 !runs/pdc_production_roadmap.json
 !runs/pooleos_native_checklist_coverage.json
 

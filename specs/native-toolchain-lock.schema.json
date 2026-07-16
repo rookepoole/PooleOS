@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/native-toolchain-lock.schema.json",
+  "title": "PooleOS Native Toolchain Lock",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "status",
+    "production_ready",
+    "production_promotion_allowed",
+    "host",
+    "rustup_init",
+    "channel_manifest",
+    "toolchain",
+    "offline_build_contract",
+    "official_references",
+    "open_items"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_toolchain_lock"},
+    "status_date": {"const": "2026-07-16"},
+    "status": {"const": "pinned_for_single_host_qualification"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "host": {
+      "type": "object",
+      "required": ["triple", "toolchain_directory_policy", "global_path_mutation_allowed", "global_rustup_or_cargo_state_allowed"],
+      "properties": {
+        "triple": {"const": "x86_64-pc-windows-msvc"},
+        "toolchain_directory_policy": {"const": "workspace_local_untracked"},
+        "global_path_mutation_allowed": {"const": false},
+        "global_rustup_or_cargo_state_allowed": {"const": false}
+      }
+    },
+    "rustup_init": {
+      "type": "object",
+      "required": ["version_observed_after_install", "url", "sha256_url", "sha256"],
+      "properties": {
+        "version_observed_after_install": {"const": "1.29.0"},
+        "url": {"type": "string"},
+        "sha256_url": {"type": "string"},
+        "sha256": {"type": "string", "minLength": 64, "maxLength": 64}
+      }
+    },
+    "channel_manifest": {
+      "type": "object",
+      "required": ["manifest_version", "date", "rust_version", "url", "sha256_url", "sha256", "detached_signature_verified"],
+      "properties": {
+        "manifest_version": {"const": "2"},
+        "date": {"const": "2026-07-09"},
+        "rust_version": {"const": "1.97.0 (2d8144b78 2026-07-07)"},
+        "url": {"type": "string"},
+        "sha256_url": {"type": "string"},
+        "sha256": {"type": "string", "minLength": 64, "maxLength": 64},
+        "detached_signature_verified": {"const": false}
+      }
+    },
+    "toolchain": {
+      "type": "object",
+      "required": ["channel", "profile", "components"],
+      "properties": {
+        "channel": {"const": "1.97.0-x86_64-pc-windows-msvc"},
+        "profile": {"const": "minimal"},
+        "components": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "object",
+            "required": ["package", "target", "xz_url", "xz_sha256"],
+            "properties": {
+              "package": {"type": "string"},
+              "target": {"type": "string"},
+              "xz_url": {"type": "string"},
+              "xz_sha256": {"type": "string", "minLength": 64, "maxLength": 64}
+            }
+          }
+        }
+      }
+    },
+    "offline_build_contract": {
+      "type": "object",
+      "required": ["cargo_locked", "cargo_offline", "source_date_epoch", "timezone", "locale", "incremental_compilation", "clean_target_directory_per_run", "external_crate_count"]
+    },
+    "official_references": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "object", "required": ["topic", "url"]}},
+    "open_items": {"type": "array", "minItems": 5, "items": {"type": "string"}}
+  }
+}
