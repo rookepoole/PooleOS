@@ -6,11 +6,11 @@
   "additionalProperties": false,
   "required": ["schema_version", "artifact_kind", "status_date", "contract_id", "selected_move_id", "production_ready", "production_promotion_allowed", "engine", "required_domains", "modeled_domains", "models", "assumptions", "trace_cross_check", "claim_boundary"],
   "properties": {
-    "schema_version": {"const": "1.0"},
+    "schema_version": {"const": "1.1"},
     "artifact_kind": {"const": "pooleos_native_model_contract"},
     "status_date": {"const": "2026-07-16"},
-    "contract_id": {"const": "POOLEOS-N4-MODELS-1"},
-    "selected_move_id": {"const": "N4-MODEL-001"},
+    "contract_id": {"const": "POOLEOS-N4-MODELS-2"},
+    "selected_move_id": {"const": "N4-VM-MODEL-001"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
     "engine": {
@@ -31,37 +31,32 @@
       }
     },
     "required_domains": {"type": "array", "minItems": 7, "maxItems": 7, "uniqueItems": true, "items": {"type": "string"}},
-    "modeled_domains": {"type": "array", "minItems": 3, "maxItems": 3, "uniqueItems": true, "items": {"type": "string"}},
+    "modeled_domains": {"type": "array", "minItems": 4, "maxItems": 4, "uniqueItems": true, "items": {"type": "string"}},
     "models": {
       "type": "array",
-      "minItems": 2,
-      "maxItems": 2,
+      "minItems": 3,
+      "maxItems": 3,
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "module_path", "safe_config_path", "hostile_config_path", "state_variables", "invariants", "hostile_toggle", "hostile_violation", "safe_expected", "hostile_expected"],
+        "required": ["id", "module_path", "state_variables", "invariants", "cases"],
         "properties": {
-          "id": {"enum": ["boot_slot_rollback", "capability_revocation"]},
+          "id": {"enum": ["boot_slot_rollback", "capability_revocation", "virtual_memory_ownership"]},
           "module_path": {"type": "string"},
-          "safe_config_path": {"type": "string"},
-          "hostile_config_path": {"type": "string"},
-          "state_variables": {"type": "array", "minItems": 5, "uniqueItems": true, "items": {"type": "string"}},
-          "invariants": {"type": "array", "minItems": 6, "maxItems": 6, "uniqueItems": true, "items": {"type": "string"}},
-          "hostile_toggle": {"type": "string"},
-          "hostile_violation": {"type": "string"},
-          "safe_expected": {"$ref": "#/$defs/outcome"},
-          "hostile_expected": {"$ref": "#/$defs/outcome"}
+          "state_variables": {"type": "array", "minItems": 5, "maxItems": 7, "uniqueItems": true, "items": {"type": "string"}},
+          "invariants": {"type": "array", "minItems": 6, "maxItems": 7, "uniqueItems": true, "items": {"type": "string"}},
+          "cases": {"type": "array", "minItems": 2, "maxItems": 3, "items": {"$ref": "#/$defs/case"}}
         }
       }
     },
-    "assumptions": {"type": "array", "minItems": 5, "items": {"type": "string"}},
+    "assumptions": {"type": "array", "minItems": 6, "items": {"type": "string"}},
     "trace_cross_check": {
       "type": "object",
       "additionalProperties": false,
       "required": ["status", "required_model_count", "completed_model_count", "abi_freeze_authorized"],
       "properties": {
         "status": {"const": "pending_native_implementation_traces"},
-        "required_model_count": {"const": 2},
+        "required_model_count": {"const": 3},
         "completed_model_count": {"const": 0},
         "abi_freeze_authorized": {"const": false}
       }
@@ -81,6 +76,44 @@
     }
   },
   "$defs": {
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "role", "config_path", "constant_assignments", "expected_invariant_violation", "expected"],
+      "properties": {
+        "id": {"enum": ["safe", "unsafe_rollback", "unsafe_local_revoke", "unsafe_stale_mapping", "unsafe_early_reuse"]},
+        "role": {"enum": ["safe", "hostile"]},
+        "config_path": {"type": "string"},
+        "constant_assignments": {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 2,
+          "additionalProperties": {"enum": ["TRUE", "FALSE"]}
+        },
+        "expected_invariant_violation": {"type": ["string", "null"]},
+        "expected": {"$ref": "#/$defs/outcome"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"role": {"const": "safe"}}},
+          "then": {
+            "properties": {
+              "expected_invariant_violation": {"type": "null"},
+              "expected": {"properties": {"exit_code": {"const": 0}, "trace_length": {"const": 0}, "trace_actions": {"maxItems": 0}}}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"role": {"const": "hostile"}}},
+          "then": {
+            "properties": {
+              "expected_invariant_violation": {"type": "string", "minLength": 1},
+              "expected": {"properties": {"exit_code": {"const": 12}, "trace_length": {"minimum": 1}, "trace_actions": {"minItems": 1}}}
+            }
+          }
+        }
+      ]
+    },
     "outcome": {
       "type": "object",
       "additionalProperties": false,
@@ -91,8 +124,8 @@
         "distinct_states": {"type": "integer", "minimum": 1},
         "left_on_queue": {"type": "integer", "minimum": 0},
         "depth": {"type": "integer", "minimum": 1},
-        "trace_length": {"type": "integer", "minimum": 0},
-        "trace_actions": {"type": "array", "maxItems": 4, "items": {"type": "string"}},
+        "trace_length": {"type": "integer", "minimum": 0, "maximum": 6},
+        "trace_actions": {"type": "array", "maxItems": 6, "items": {"type": "string"}},
         "trace_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"}
       }
     }

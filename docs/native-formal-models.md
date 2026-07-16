@@ -1,13 +1,13 @@
 # PooleOS Bounded Native Models
 
-Status: Cycle 89 pre-production evidence
+Status: Cycle 90 pre-production evidence
 Date: 2026-07-16
-Selected move: `N4-MODEL-001`
-Contract: `POOLEOS-N4-MODELS-1`
+Selected move: `N4-VM-MODEL-001`
+Contract: `POOLEOS-N4-MODELS-2`
 
 ## Scope
 
-This cycle adds the first executable state-model slice required by N4.5-N4.6 and `ADD-ASSURE-001`. It uses the TLC explicit-state model checker to exhaust every reachable state within two small frozen configurations and to demonstrate that two deliberate unsafe mutations produce the required counterexample traces.
+This cycle extends the executable state-model slice required by N4.5-N4.6 and `ADD-ASSURE-001`. It uses the TLC explicit-state model checker to exhaust every reachable state within three small frozen safe configurations and to demonstrate that four deliberate unsafe mutations produce their required counterexample traces. The new virtual-memory model covers bounded page ownership, map/unmap state, TLB caching and eviction, shootdown acknowledgement, and generation-changing ownership transfer.
 
 This is bounded model checking, not a formal proof of PooleOS or its future implementation. The models do not execute PooleBoot, PooleKernel, firmware, drivers, storage, or hardware.
 
@@ -44,12 +44,13 @@ Raw TLC output and metadata stay under ignored `.toolchains/native-models/eviden
 
 ## Executed Models
 
-| Model | Frozen finite bounds | Safe result | Required hostile result |
+| Model | Frozen finite bounds | Safe result | Required hostile result(s) |
 | --- | --- | --- | --- |
 | `PooleBootSlots` | Two slots; two trial attempts; atomic stage/trial/success/failure/discard transitions | 46 generated, 20 distinct, queue drained, depth 7 | `UnsafeRollback=TRUE` violates `Recoverable`; 14 generated, 8 distinct, depth 4; trace `Init -> Stage -> StartTrial -> TrialFailure` |
 | `PooleCapabilities` | Three capability IDs; two principals; two rights; one object; no ID reuse | 7,963 generated, 1,316 distinct, queue drained, depth 6 | `UnsafeLocalRevoke=TRUE` violates `NoLiveDescendantOfRevoked`; 36 generated, 31 distinct, depth 3; trace `Init -> Derive -> Revoke` |
+| `PooleVirtualMemory` | Two domains; two CPUs; two pages; one virtual address; generations 0 through 1 | 10,210 generated, 1,422 distinct, queue drained, depth 13 | `UnsafeStaleMapping=TRUE` violates `PageTableSafety`; 136 generated, 75 distinct, depth 4; trace `Init -> Map -> BeginTransfer -> CompleteTransfer`. Separately, `UnsafeEarlyReuse=TRUE` violates `TlbSafety`; 1,128 generated, 339 distinct, depth 6; trace `Init -> Map -> TlbFill -> BeginTransfer -> Unmap -> CompleteTransfer` |
 
-Both safe and hostile cases execute twice. All four normalized results match exactly. A hostile TLC exit code is accepted only when the exact named invariant, state counts, depth, and normalized trace length match the contract.
+Every safe and hostile case executes twice. All seven normalized results match exactly. A hostile TLC exit code is accepted only when the exact named case, invariant, state counts, depth, normalized trace actions, and trace digest match the contract.
 
 ## Safety Properties
 
@@ -57,17 +58,20 @@ The boot-slot model checks type closure, nonempty known-good recovery state, kno
 
 The capability model checks type closure, immutable root metadata, rights attenuation, object continuity, ancestry consistency, acyclic derivation, no live descendant beneath a revoked ancestor, and transitive revocation closure.
 
-Twelve fail-closed controls cover prerelease substitution, TLC/JRE hashes, unsigned-input overclaims, runtime closure, both executed mutants, unexpected safe violations, path escape, arbitrary TLC modes, and implementation-trace overclaim.
+The virtual-memory model checks type closure, valid transfer targets, ownership and generation agreement for page-table, TLB, and retired translations, exact retired-translation/shootdown-pending consistency, and the requirement that pending shootdowns follow unmapping. The safe transfer transition cannot change ownership or generation until page-table, TLB, and retired references are clear.
+
+Fourteen fail-closed controls cover prerelease substitution, TLC/JRE hashes, unsigned-input overclaims, runtime closure, all four executed mutants, unexpected safe violations, path escape, arbitrary TLC modes, and implementation-trace overclaim.
 
 ## Assumptions And Non-Claims
 
 - Transitions are atomic. No concurrency, torn write, crash persistence, cryptography, firmware, DMA, or physical attacker is modeled.
 - The boot model abstracts persistent metadata, exactly two slots, and one candidate-installation lifecycle without slot erasure or reuse. It does not model image verification, storage ordering, power loss, Secure Boot, anti-rollback counters, or real update formats.
 - The capability model does not model IPC, scheduling, memory maps, identifier reuse, quotas, timing, revocation races, or kernel data structures.
+- The virtual-memory model does not model page-table levels, PCID/ASID, interrupts, weak-memory ordering, concurrent page-table writers, hardware page walks, huge pages, copy-on-write, swap, NUMA, DMA, or an IOMMU. Its generation range permits only one ownership-changing reuse per page.
 - TLC uses 64-bit state fingerprints. A drained queue within frozen constants is not a collision-free theorem.
 - No liveness, fairness, real-time, probabilistic, refinement, or implementation-equivalence property is checked.
 - Counterexamples show that the model's named invariant detects the deliberate mutation. They do not prove that every real defect maps to the mutation.
 
 ## Open Gates
 
-`FLAG-N4-MODELS-001` remains open. The current slice covers three of seven required domains: capability derivation/revocation, boot-slot state, and update rollback. IPC, scheduler, VM map/unmap, and PooleFS transaction recovery remain unmodeled. Both model traces still require cross-checking against exact native implementation traces before any dependent ABI freeze. N4 remains partial and `production_promotion_allowed=false`.
+`FLAG-N4-MODELS-001` remains open. The current slice covers four of seven required domains: capability derivation/revocation, virtual-memory map/unmap, boot-slot state, and update rollback. IPC, scheduler, and PooleFS transaction recovery remain unmodeled. All three model families still require cross-checking against exact native implementation traces before any dependent ABI freeze. N4 remains partial and `production_promotion_allowed=false`.

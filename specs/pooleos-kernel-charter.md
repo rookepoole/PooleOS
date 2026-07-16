@@ -1,7 +1,7 @@
 # PooleKernel Native Microkernel Charter
 
 Status: draft v0.2 native reset  
-Date: 2026-07-15  
+Date: 2026-07-16
 Owner and IP steward: Rooke Poole  
 Applies to: PooleOS v1, x86-64 UEFI  
 
@@ -66,6 +66,8 @@ The capability model must enforce all of the following:
 10. Recovery discipline: restarting a server or driver never silently restores revoked authority.
 
 The executable capability model and its revocation state machine are N4/N13 prerequisites. Cycle 89 checks attenuation, ancestry, acyclic derivation, and transitive revocation over three capability IDs, two principals, two rights, and one object; it deliberately excludes IPC, handle reuse, concurrency, quotas, timing, kernel data structures, and implementation traces. This finite state-space result is not a theorem, ABI freeze, or kernel enforcement claim. Model and simulator receipts remain non-promoting until the same laws are enforced by a booted PooleKernel and cross-checked against exact implementation traces.
+
+The executable virtual-memory ownership model is an N4/N9 prerequisite. Cycle 90 checks page-table, TLB, and retired-translation ownership/generation agreement over two domains, two CPUs, two physical pages, one virtual address, and one generation-changing ownership reuse. The safe transfer path requires old page-table mappings, cached translations, and pending shootdown state to clear before ownership changes; independent stale-mapping and early-reuse mutants must violate `PageTableSafety` and `TlbSafety`. The model deliberately excludes page-table levels, PCID/ASID, weak-memory ordering, interrupt races, concurrent page-table writers, DMA/IOMMU, hardware page walks, huge pages, copy-on-write, swap, and NUMA. It is not a theorem, memory ABI freeze, kernel execution, or implementation-equivalence claim.
 
 ## Boot and Trust Boundary
 
@@ -134,4 +136,4 @@ PooleKernel is not production-ready until:
 7. the signed ISO is reproducible and free of prohibited production substitutes; and
 8. clean-media QEMU and physical-machine receipts bind the exact source, toolchain, binaries, configuration, keys, and hardware identity.
 
-Current state: chartered, not implemented, not production-ready. Cycle 87 closes only the bounded user-mode CPUID sub-capability of `N2-HW-002`; no privileged probe, native parser, driver, or kernel mechanism is implied. Cycle 88 adds a pinned host-side Tier 0 Q35/QEMU/OVMF profile and proves only deterministic command construction plus paused machine instantiation. Cycle 89 adds bounded boot-slot rollback and capability derivation/revocation checks: both safe finite spaces drain and both deliberately unsafe configurations yield the required invariant violation. These results execute no guest or kernel instruction, contain zero implementation-trace comparisons, and grant no liveness, refinement, fingerprint-collision, ABI-freeze, or production claim. The immediate owner move remains `N0-RATIFY-001`; the next owner-independent engineering move is `N4-VM-MODEL-001`.
+Current state: chartered, not implemented, not production-ready. Cycle 87 closes only the bounded user-mode CPUID sub-capability of `N2-HW-002`; no privileged probe, native parser, driver, or kernel mechanism is implied. Cycle 88 adds a pinned host-side Tier 0 Q35/QEMU/OVMF profile and proves only deterministic command construction plus paused machine instantiation. Cycles 89-90 add bounded boot-slot rollback, capability derivation/revocation, and virtual-memory ownership/map/unmap/shootdown checks: all three safe finite spaces drain and all four deliberately unsafe configurations yield their required invariant violation. These results execute no guest or kernel instruction, contain zero implementation-trace comparisons, and grant no liveness, refinement, fingerprint-collision, ABI-freeze, or production claim. The immediate owner move remains `N0-RATIFY-001`; the next owner-independent engineering move is `N4-IPC-MODEL-001`.
