@@ -118,8 +118,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 97)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 521)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 98)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 531)
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
         self.assertTrue(all(value is False for key, value in native.items() if key != "source_controlled"))
@@ -127,9 +127,9 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertFalse(historical["production_ready"])
         self.assertEqual(historical["native_promotion_role"], "historical_non_promoting")
         current = self.roadmap["baseline"]["native_consistency_release_gate"]
-        self.assertEqual(current["passed_checks"], 70)
-        self.assertEqual(current["total_checks"], 70)
-        self.assertEqual(current["artifact_count"], 65)
+        self.assertEqual(current["passed_checks"], 71)
+        self.assertEqual(current["total_checks"], 71)
+        self.assertEqual(current["artifact_count"], 66)
         self.assertEqual(current["explicit_gap_count"], 20)
         self.assertFalse(current["production_ready"])
         self.assertEqual(self.roadmap["immediate_next_move"]["id"], "N0-HW-KEY-ACQUIRE-001")
@@ -151,12 +151,13 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N5-POOLEBOOT-001")
-        self.assertEqual(protocol["owner_independent_next_move_id"], "N5-BOOTPROTO-001")
+        self.assertEqual(protocol["selected_move_id"], "N5-BOOTPROTO-001")
+        self.assertEqual(protocol["owner_independent_next_move_id"], "N5-BOOTCFG-001")
         self.assertIn("runs/hardware_target_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_tier0_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_model_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_pooleboot_readiness.json", protocol["required_records"])
+        self.assertIn("runs/native_boot_handoff_readiness.json", protocol["required_records"])
         self.assertIn("runs/n0_owner_decision_packet.json", protocol["required_records"])
         self.assertIn("runs/n0_owner_response_receipt.json", protocol["required_records"])
         self.assertIn("runs/native_v1_objectives_readiness.json", protocol["required_records"])
@@ -166,8 +167,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
     def test_flags_and_gaps_are_native_and_traceable(self) -> None:
         phase_ids = {phase["id"] for phase in self.roadmap["phases"]}
         flags = self.roadmap["implementation_flags"]
-        self.assertEqual(len(flags), 34)
-        self.assertEqual(len({flag["id"] for flag in flags}), 34)
+        self.assertEqual(len(flags), 35)
+        self.assertEqual(len({flag["id"] for flag in flags}), 35)
         self.assertTrue(any(flag["class"] == "STOP_SHIP" and flag["status"] == "open" for flag in flags))
         self.assertEqual(next(flag for flag in flags if flag["id"] == "FLAG-BUILDROOT-LEGACY-001")["status"], "closed")
         objectives_flag = next(flag for flag in flags if flag["id"] == "FLAG-N0-OBJECTIVES-001")
@@ -215,6 +216,10 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(pooleboot_proof_flag["class"], "REQUIRED")
         self.assertEqual(pooleboot_proof_flag["status"], "closed")
         self.assertIn("runs/native_pooleboot_readiness.json", pooleboot_proof_flag["evidence"])
+        bootproto_flag = next(flag for flag in flags if flag["id"] == "FLAG-N5-BOOTPROTO-001")
+        self.assertEqual(bootproto_flag["class"], "REQUIRED")
+        self.assertEqual(bootproto_flag["status"], "closed")
+        self.assertIn("runs/native_boot_handoff_readiness.json", bootproto_flag["evidence"])
         codev_flag = next(flag for flag in flags if flag["id"] == "FLAG-PGL-CODEV-001")
         self.assertEqual(codev_flag["class"], "REQUIRED")
         self.assertEqual(codev_flag["status"], "open")
@@ -263,9 +268,11 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         n5_statuses = {subphase["id"]: subphase["status"] for subphase in n5["subphases"]}
         for subphase_id in ("N5.1", "N5.2", "N5.3", "N5.7"):
             self.assertEqual(n5_statuses[subphase_id], "partial")
-        for subphase_id in ("N5.4", "N5.5", "N5.6", "N5.8", "N5.9"):
+        self.assertEqual(n5_statuses["N5.8"], "partial")
+        for subphase_id in ("N5.4", "N5.5", "N5.6", "N5.9"):
             self.assertEqual(n5_statuses[subphase_id], "not_started")
         self.assertTrue(any(item.startswith("runs/native_pooleboot_readiness.json:") for item in n5["current_evidence"]))
+        self.assertTrue(any(item.startswith("runs/native_boot_handoff_readiness.json:") for item in n5["current_evidence"]))
         self.assertTrue(any("complete loader" in item for item in n5["current_gaps"]))
 
         n0 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N0")

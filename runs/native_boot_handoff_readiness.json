@@ -1,0 +1,537 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_boot_handoff_readiness",
+  "status_date": "2026-07-16",
+  "status": "pass_single_host_synthetic_non_promoting",
+  "contract_id": "PBP1",
+  "selected_move_id": "N5-BOOTPROTO-001",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "n5_exit_gate_satisfied": false,
+  "phase_status": {
+    "N5": "partial",
+    "N5.8": "partial"
+  },
+  "bindings": {
+    "contract": {
+      "path": "specs/native-boot-handoff-contract.json",
+      "sha256": "AE4D6AF8E29E74CE8D993D7E10085C419465333491B4344E645AD54441647635",
+      "byte_count": 14211
+    },
+    "contract_schema": {
+      "path": "specs/native-boot-handoff-contract.schema.json",
+      "sha256": "C1FC90DFCA0320CB0B637C7284D637C8049A262D6A301E3100C6CF4EBCB8E653",
+      "byte_count": 3914
+    },
+    "golden_vectors": {
+      "path": "specs/native-boot-handoff-golden-vectors.json",
+      "sha256": "F4EF9CA513BBD0855C7C2126355A17B42EEB2EDED13AAAB1F9A0A76FA57FD822",
+      "byte_count": 6357
+    },
+    "golden_schema": {
+      "path": "specs/native-boot-handoff-golden-vectors.schema.json",
+      "sha256": "67CA560C0259C1022D8A81C4003E2F40416BCB381CB4634309B697EF4F723070",
+      "byte_count": 1472
+    },
+    "readiness_schema": {
+      "path": "specs/native-boot-handoff-readiness.schema.json",
+      "sha256": "DEF4C046397F11C0DC69F8D13335B68EB1306003A4C0D87FC11A5F2841844325",
+      "byte_count": 2292
+    },
+    "implementation_inputs": [
+      {
+        "path": "native/Cargo.toml",
+        "sha256": "3B9A060976B17C119C6A1B966DAE371160942C1F85C490F83BDA91B0A420541A",
+        "byte_count": 341
+      },
+      {
+        "path": "native/Cargo.lock",
+        "sha256": "B1020BD94E015B75B9E2203A111AB7ECD11E9ACA596610A89EC41554E11B8ED6",
+        "byte_count": 325
+      },
+      {
+        "path": "native/handoff/Cargo.toml",
+        "sha256": "9D92AEBADF8F80E38FC4D3B2832CDE7BEE91E65E9C67AF566B475979F7804325",
+        "byte_count": 340
+      },
+      {
+        "path": "native/handoff/README.md",
+        "sha256": "A58B13C2A16DEDFD93A2A50C5752DC3DE5AD5DB9155F874880067D50A50077F2",
+        "byte_count": 599
+      },
+      {
+        "path": "native/handoff/src/lib.rs",
+        "sha256": "82BD79430F377BAF686839B517C26520F76F69AA8F4F008603012012988CD6CE",
+        "byte_count": 46434
+      },
+      {
+        "path": "native/handoff/src/bin/pbp1_probe.rs",
+        "sha256": "58243B2FD8B35FAB473C50EF90DAAC27711C637BD6E5B4DD7BC0F347EAA1AFE7",
+        "byte_count": 1093
+      },
+      {
+        "path": "runtime/native_boot_handoff.py",
+        "sha256": "F81645F6858B4F18E7586ACCE23FB751FCC88EB50A108808407EAB228FA03ECE",
+        "byte_count": 47057
+      },
+      {
+        "path": "tools/generate_native_boot_handoff_vectors.py",
+        "sha256": "3032F71A2134B18D236E426C9B27AC81EAF418B8A25065EEF4A4C05749CE8467",
+        "byte_count": 1491
+      },
+      {
+        "path": "tools/qualify_native_boot_handoff.py",
+        "sha256": "F30F6A3D64459159F87D3CB0EF5F920D5AA101F069339D71A172C78DD792D2B9",
+        "byte_count": 25030
+      },
+      {
+        "path": "tests/test_native_boot_handoff.py",
+        "sha256": "53A11199CB20F8C40D36D848988B41AA6449C84647B89EBD68C067103B465A72",
+        "byte_count": 5434
+      },
+      {
+        "path": "docs/native-boot-handoff.md",
+        "sha256": "5835B2B0A0E44612532B7699F0D30EEB579034DD85ECE8F1DDA66BDD9F5C7133",
+        "byte_count": 6346
+      }
+    ]
+  },
+  "codec_qualification": {
+    "rustc_version_sha256": "F3C960598A5E9037C4CF8E4AA06C018171ABF07C381D165C3986C6A954DEA1BB",
+    "rust_host_target": "x86_64-pc-windows-msvc",
+    "rust_host_test_count": 8,
+    "rust_host_test_pass_count": 8,
+    "no_std_target_builds": [
+      {
+        "target": "x86_64-unknown-uefi",
+        "status": "pass",
+        "byte_count": 100546,
+        "sha256": "B956CE27CCAF7BD40735BD0296666A81038ECECEB3571450213204854F932BE5"
+      },
+      {
+        "target": "x86_64-unknown-none",
+        "status": "pass",
+        "byte_count": 105534,
+        "sha256": "4A289471995969FB992831F799D75D2AA97BDE07ABBB5BDFD385D37B8F13D897"
+      }
+    ],
+    "layout_assertion_count": 12,
+    "host_probe_byte_count": 139776,
+    "host_probe_artifact_identity_recorded": false,
+    "host_probe_role": "ephemeral host-only differential transport"
+  },
+  "golden_vectors": [
+    {
+      "id": "full_kernel_entry_v1",
+      "sha256": "28A9F1AEF191F72FF66DFD6C93021716C0EF96CF5B2DBB48F09FC625F6BE742A",
+      "byte_count": 1488,
+      "python_decode": "pass",
+      "rust_decode": "pass",
+      "kernel_entry_profile": true,
+      "synthetic": true
+    },
+    {
+      "id": "minimal_v1",
+      "sha256": "BDC85308659473920C193357F4EC8BFA3B6F143EB385E341AD233C56DC26224C",
+      "byte_count": 456,
+      "python_decode": "pass",
+      "rust_decode": "pass",
+      "kernel_entry_profile": false,
+      "synthetic": true
+    },
+    {
+      "id": "forward_optional_v1_1",
+      "sha256": "A6DF3CA4492AE9479DD4AF75963D1409EFD63121C7108E7F2CE81ADB0A7B4EA4",
+      "byte_count": 496,
+      "python_decode": "pass",
+      "rust_decode": "pass",
+      "kernel_entry_profile": false,
+      "synthetic": true
+    }
+  ],
+  "negative_controls": [
+    {
+      "id": "NEG-N5-PBP1-MAGIC",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "3198E21252CD5991EEC86F6AE154316E6918B6CDAF149817C3EB0D840F2B2139",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-MAJOR-DOWNGRADE",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "F4CFDCDBD1D9CCAC93EDCDC54F85B036D3C91285731B273A62549A979B591C62",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-MAJOR-FUTURE",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "01E7554E99FA8A9420340ECCEEF176C18F5D347296A08A3DBDC120F4FDC6CD1C",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-READER-MINOR",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "F66F81142908B364E795F9966C2BA4EEFBC124EFCEBBC04BF199916E34A914ED",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-HEADER-SIZE",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "8090E8450E22EDC81CBD917BBD477E32408A4D4ECFB6146FE52488315BD9A2A0",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-TOTAL-SIZE",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "15BC5C763BE6BF21DD3A4F29A62B22FC639C88799D05D8F09449064D5B00C100",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-HEADER-FLAGS",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "8B3DFF56231976FDCE6499954F438E8DBE816DD643D5D1A3EFE9F13FF02CC19B",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-HEADER-RESERVED",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "E606CF1533EB8857E7685F8371CF39A598E2C7CD5429BB43D4ECC03ED1C38A0E",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-MESSAGE-CRC",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "C0A5256A2AFECB8A066A7FDA4DBF382EB812D4C0AF94C2F584E50CFE1F9E1EAA",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-RECORD-ORDER",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "8AD958F05EB0C7E32C86963084A1DD7DAD57E1BBA5BDAD8B2965A09BE8701803",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-RECORD-OFFSET",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "C392DED69482C02BBAED7980CA78D0F21D9FAB3CCE57ECEA53FB171E9B42F2AC",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-RECORD-LENGTH",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "9AC1D0F6314A726FAAA9B7C9506F9EF4611DDEDBB2BBCD68104562FA3240CFC6",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-RECORD-CRC",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "81F9FB611703D7836DC826F6349FD2D9C4CD2B1F7CDD90DD290EADD9E84B6C6F",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-RECORD-FLAGS",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "BD205A1A94455286B72FB2BA0A47F0D7F50E94D88D6B22E298C7837565F33FE5",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-UNKNOWN-REQUIRED",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "9A52C29433478A7311C3CBCCB2B1FD7051F9897B0A37E6E7DA6D3182303A3CE2",
+      "input_byte_count": 496
+    },
+    {
+      "id": "NEG-N5-PBP1-UNKNOWN-SAME-MINOR",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "E6F593106A9B2D7C4C7CBB60A6ABE39DF51D2E16CC349FAC0F8C20D4706C5FD2",
+      "input_byte_count": 496
+    },
+    {
+      "id": "NEG-N5-PBP1-UNKNOWN-REQUIRED-FEATURE",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "B006B62A190D3FA7F7057A7C35C00689FB5BA272852D9CE1795615B0A79B727C",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-MISSING-CORE",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "DCACBECD8FFFB8D34BE7017988F0FCA6B5371CEF020BEB6B17A1E9692B52D036",
+      "input_byte_count": 456
+    },
+    {
+      "id": "NEG-N5-PBP1-MEMORY-OVERLAP",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "257D431E7B9C124B4A24F341AFDBF5ACB84BA5EF566022D4FE9151E4C78AACE6",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-MEMORY-ZERO-PAGES",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "952838DF77D99F19367C596D76DC56AA2FC8D13029052980F732B2A6C9F228F3",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-FRAMEBUFFER-STRIDE",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "D254E169C8379BE35522F242781B48115AABA78D0A2FC16AECCDABE82BDF3DC6",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-FIRMWARE-DUPLICATE",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "4D6807B281EC86C0D9AD3A7A75185FD84A81A20CB2E3FC7A389FDF5589334919",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-ARTIFACT-DIGEST",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "44CF46212001B00DFEB9979E42E9B656690B39AF81562543D36582CC11C42914",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-KERNEL-CROSS-BINDING",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "0C682A8602199ECACAC376E6C9C673DDF7B5BF5597CFD15A803173844171B92E",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-COMMAND-UTF8",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "B795858636CCB7C4005AD06AE0CE6BD441EA4B3971A17285163A6C2F1AE0EFFA",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-BOOT-DEVICE-RANGE",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "F3279D28302412EAAF80EB25D06ABA39243F66D11E12C25B4AAE628841718E14",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-RANDOM-ZERO",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "6033F81EE99EBB4A64A09A8DE4F22792FF184F69960198BD1AF7336A1E17F490",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-EARLY-LOG-UTF8",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "3301BE2C82DF856CEE32F85BA35CC685879829D7ABE2056C55B565E0A6AF23D7",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-CPU-PAGE-SIZE",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "2D55B1ABF258C83107C676DDE3697BDDC2F24D0854A85390C1ECFE7DE2672B61",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-TIMESTAMP-ORDER",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "7F9CB8ABBAFDFA1776605F04E20E31D7A5FC7EC72611EDD02158983D706B1C9C",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-TCG-DIGEST",
+      "surface": "decode",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "B42A1A873E84EABE4D818C80DD1A7769390B8EA619DE216C1A40BB65C88B6780",
+      "input_byte_count": 1488
+    },
+    {
+      "id": "NEG-N5-PBP1-KERNEL-PROFILE-EBS",
+      "surface": "kernel_profile",
+      "expected": "reject",
+      "python_observed": "reject",
+      "rust_observed": "reject",
+      "status": "pass",
+      "input_sha256": "9E3B9A4E168112A8458EB807BB73048862DBDE64540E2EF744027390083548CF",
+      "input_byte_count": 1488
+    }
+  ],
+  "differential_fuzz": {
+    "algorithm": "LCG plus deterministic structural, truncation, checksum, payload, and extension mutations",
+    "seed": "0x50425031",
+    "case_count": 16384,
+    "python_accept_count": 1947,
+    "python_reject_count": 14437,
+    "rust_accept_count": 1947,
+    "rust_reject_count": 14437,
+    "differential_mismatch_count": 0,
+    "corpus_and_outcome_sha256": "EF689F15265064842715DD58AF996B7B45E4E9EF095C08FF33026522B63011E5",
+    "corpus_published": false,
+    "malformed_control_count": 32,
+    "malformed_control_corpus_sha256": "70BB02B9066268C548AC8476FC028EDB31A7F8975258BC122873A554AA3D7FB3"
+  },
+  "claims": {
+    "canonical_schema_defined": true,
+    "rust_no_std_codec_executed": true,
+    "independent_python_codec_executed": true,
+    "golden_byte_agreement": true,
+    "downgrade_controls_executed": true,
+    "malformed_corpus_executed": true,
+    "deterministic_differential_fuzz_executed": true,
+    "pooleboot_populates_handoff": false,
+    "exit_boot_services_executed": false,
+    "poolekernel_consumes_handoff": false,
+    "poolekernel_executed": false,
+    "target_firmware_tested": false,
+    "n5_exit_gate_satisfied": false,
+    "production_ready": false
+  },
+  "summary": {
+    "rust_host_tests_passed": 8,
+    "rust_host_tests_total": 8,
+    "no_std_target_builds_passed": 2,
+    "no_std_target_builds_total": 2,
+    "layout_assertions_passed": 12,
+    "golden_vectors_matched": 3,
+    "golden_vectors_total": 3,
+    "negative_controls_passed": 32,
+    "negative_controls_total": 32,
+    "differential_fuzz_cases": 16384,
+    "differential_mismatches": 0,
+    "production_claim_count": 0
+  },
+  "open_items": [
+    "Wire the qualified PBP1 encoder into PooleBoot only after boot configuration, ELF, artifact verification, memory-map finalization, and retry policy are implemented.",
+    "Implement the PooleKernel PBP1 intake path with read-only mapping, early copy policy, serial-first rejection, and exact entry assembly.",
+    "Cross-check normalized memory-map records against captured UEFI descriptor streams, including larger future descriptor sizes.",
+    "Exercise the final GetMemoryMap and ExitBootServices retry loop under malformed and map-changing firmware fixtures.",
+    "Bind PBP1 loaded-artifact roles to the signed system-manifest, rollback, measurement, and recovery contracts.",
+    "Add coverage-guided native fuzzing, sanitizer/Miri-equivalent host checks where supported, and independent security review.",
+    "Reproduce qualification on a second clean builder and target firmware.",
+    "Cryptographically ratify the ABI only through the separately approved owner signing and release process."
+  ],
+  "claim_boundary": [
+    "The full kernel-entry vector is synthetic and does not prove successful ExitBootServices or PooleKernel execution.",
+    "The Rust library compiles for UEFI and freestanding targets but is not called by current PooleBoot or PooleKernel code.",
+    "The Python implementation is an independent host oracle and is prohibited from the production boot chain.",
+    "CRC-32 is corruption detection, not authentication or signed-manifest verification.",
+    "Finite negative and deterministic fuzz corpora do not prove correctness for all byte strings or hardware states.",
+    "No target firmware, physical media, Secure Boot, TPM, signature, loader, or kernel transfer was exercised.",
+    "No N5 exit, production readiness, signing, merge, tag, release, or publication authority follows."
+  ]
+}

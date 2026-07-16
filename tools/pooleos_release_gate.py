@@ -18,6 +18,7 @@ from runtime import pgb2_bundle as pgb2  # noqa: E402
 from runtime import adr_ratification  # noqa: E402
 from runtime import hardware_target  # noqa: E402
 from runtime import lab_readiness  # noqa: E402
+from runtime import native_boot_handoff  # noqa: E402
 from runtime import native_models  # noqa: E402
 from runtime import native_pooleboot  # noqa: E402
 from runtime import n0_owner_decision_packet  # noqa: E402
@@ -39,6 +40,7 @@ N0_OWNER_RESPONSE_RECEIPT = ROOT / "runs" / "n0_owner_response_receipt.json"
 NATIVE_TOOLCHAIN_QUALIFICATION = ROOT / "runs" / "native_toolchain_qualification.json"
 HARDWARE_TARGET_READINESS = ROOT / "runs" / "hardware_target_readiness.json"
 NATIVE_MODEL_READINESS = ROOT / "runs" / "native_model_readiness.json"
+NATIVE_BOOT_HANDOFF_READINESS = ROOT / "runs" / "native_boot_handoff_readiness.json"
 NATIVE_POOLEBOOT_READINESS = ROOT / "runs" / "native_pooleboot_readiness.json"
 NATIVE_TIER0_READINESS = ROOT / "runs" / "native_tier0_readiness.json"
 
@@ -47,7 +49,7 @@ DEFAULT_GAPS = [
     "The completed owner response records both ADR dispositions and all 38 objective definitions while accepting zero measurements, but the selected FIDO2 hardware key is unavailable; trusted public-key custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
     "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
     "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, six bounded TLC models cover all seven required domains and detect twenty-one required counterexamples, and a bounded PooleBoot proof executes under the pinned profile; current source rebuilds, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open.",
-    "A reproducible unsigned PooleBoot PE32+ proof application boots twice under pinned non-promoting OVMF with deterministic GPT/FAT32 media, eleven ordered serial/debugcon markers, and exact GOP frames, but the complete loader, hostile configuration/ELF corpus, signed artifact verification, frozen handoff, ExitBootServices transfer, second host, target firmware, and physical-media qualification remain open.",
+    "A reproducible unsigned PooleBoot PE32+ proof application boots twice under pinned non-promoting OVMF with deterministic GPT/FAT32 media, eleven ordered serial/debugcon markers, and exact GOP frames; PBP1 now has qualified Rust/Python codecs and golden bytes, but the complete loader, hostile configuration/ELF corpus, signed artifact verification, producer/consumer integration, ExitBootServices transfer, second host, target firmware, and physical-media qualification remain open.",
     "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path.",
     "No native CPU, interrupt, time, SMP, physical-memory, virtual-memory, or reclaim implementation.",
     "The sanitized Tier 1 identity and bounded user-mode CPUID transcript match, but MSR, PCI configuration-space, Secure Boot, TPM, SPD, sensor/power, standards-hash, lab-safety, native enumeration, and physical qualification evidence remain open.",
@@ -818,6 +820,45 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
     )
     return readiness.make_check(
         "native_pooleboot_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_boot_handoff_readiness(path: Path = NATIVE_BOOT_HANDOFF_READINESS) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(path, "native-boot-handoff-readiness.schema.json")
+    errors = [f"native boot handoff readiness {error.path}: {error.message}" for error in artifact_schema_errors[:8]]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_boot_handoff_readiness",
+            False,
+            "; ".join(errors) or "native boot handoff readiness is not an object",
+        )
+    errors.extend(native_boot_handoff.readiness_errors(artifact, ROOT))
+    if artifact.get("summary") != {
+        "rust_host_tests_passed": 8,
+        "rust_host_tests_total": 8,
+        "no_std_target_builds_passed": 2,
+        "no_std_target_builds_total": 2,
+        "layout_assertions_passed": 12,
+        "golden_vectors_matched": 3,
+        "golden_vectors_total": 3,
+        "negative_controls_passed": 32,
+        "negative_controls_total": 32,
+        "differential_fuzz_cases": 16_384,
+        "differential_mismatches": 0,
+        "production_claim_count": 0,
+    }:
+        errors.append("PBP1 qualification summary changed")
+    if artifact.get("claims") != native_boot_handoff.expected_claims():
+        errors.append("PBP1 claim boundary changed")
+    detail = (
+        "contract=PBP1; rust_tests=8/8; no_std_targets=2/2; layouts=12; golden=3/3; "
+        "negatives=32/32; fuzz=16384; mismatches=0; producer=false; consumer=false; "
+        "n5_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_boot_handoff_readiness",
         not errors,
         detail if not errors else "; ".join(errors[:8]),
     )
@@ -3619,6 +3660,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--native-tier0-readiness", type=Path, default=NATIVE_TIER0_READINESS)
     parser.add_argument("--native-model-readiness", type=Path, default=NATIVE_MODEL_READINESS)
     parser.add_argument("--native-pooleboot-readiness", type=Path, default=NATIVE_POOLEBOOT_READINESS)
+    parser.add_argument("--native-boot-handoff-readiness", type=Path, default=NATIVE_BOOT_HANDOFF_READINESS)
     parser.add_argument("--out", type=Path, default=ROOT / "runs" / "release_gate.json")
     parser.add_argument("--include-runtime", action="store_true", help="Include PooleGlyph runtime checks in doctor.")
     args = parser.parse_args(argv)
@@ -3636,6 +3678,7 @@ def main(argv: list[str] | None = None) -> int:
         check_native_tier0_readiness(args.native_tier0_readiness),
         check_native_model_readiness(args.native_model_readiness),
         check_native_pooleboot_readiness(args.native_pooleboot_readiness),
+        check_native_boot_handoff_readiness(args.native_boot_handoff_readiness),
         check_publication_boundary(),
         check_bundle(args.bundle),
         check_replay_proof(args.replay_proof),
@@ -3823,6 +3866,7 @@ def main(argv: list[str] | None = None) -> int:
             args.native_tier0_readiness,
             args.native_model_readiness,
             args.native_pooleboot_readiness,
+            args.native_boot_handoff_readiness,
         )
         if path is not None
     ]
