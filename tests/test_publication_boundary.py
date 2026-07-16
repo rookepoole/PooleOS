@@ -58,15 +58,20 @@ class PublicationBoundaryTests(unittest.TestCase):
                 self.assertEqual(completed.returncode, 0)
 
     def test_native_toolchain_ledger_remains_explicitly_public(self) -> None:
-        path = "runs/native_toolchain_qualification.json"
-        self.assertIn(path, publication.ALLOWED_RUNS)
-        completed = subprocess.run(
-            ["git", "check-ignore", "--quiet", path],
-            cwd=ROOT,
-            check=False,
+        paths = (
+            "runs/native_toolchain_qualification.json",
+            "runs/native_model_readiness.json",
         )
-        self.assertEqual(completed.returncode, 1)
-        self.assertEqual(publication.inspect_public_blob(path, b"{}"), [])
+        for path in paths:
+            with self.subTest(path=path):
+                self.assertIn(path, publication.ALLOWED_RUNS)
+                completed = subprocess.run(
+                    ["git", "check-ignore", "--quiet", path],
+                    cwd=ROOT,
+                    check=False,
+                )
+                self.assertEqual(completed.returncode, 1)
+                self.assertEqual(publication.inspect_public_blob(path, b"{}"), [])
 
     def test_native_v1_objectives_readiness_remains_explicitly_public(self) -> None:
         path = "runs/native_v1_objectives_readiness.json"

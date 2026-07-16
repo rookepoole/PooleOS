@@ -2,7 +2,7 @@
 
 Status date: 2026-07-16  
 Plan version: 2.0.0-native-reset  
-Roadmap cycle: PooleOS Cycle 88
+Roadmap cycle: PooleOS Cycle 89
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
@@ -110,7 +110,7 @@ Recovery boots from a separately signed immutable image and remains usable witho
 
 ## 5. Current Evidence Baseline
 
-Cycle 80 reset architecture claims without discarding validated component evidence. Cycle 81 established the first byte-bound native constitution and repository boundary. Cycle 82 published the baseline repository, protected `main`, and qualified the first pinned freestanding PE32+/ELF64 compiler path on one host. Cycle 83 froze and tested the owner-controlled ADR ceremony without generating a key, signing as the owner, or promoting any unsigned decision. Cycle 84 established the privacy-preserving Tier 1 hardware target, support policy, standards register, read-only capture path, and fail-closed readiness ledger without authorizing hardware mutation or destructive testing. Cycle 85 defines a measurable candidate Workstation v1 profile across reliability, accessibility, compatibility, privacy, and performance while preserving owner ratification and all implementation measurements as open gates. Cycle 86 hardens the ratification scope so an eventual owner signature commits to the exact objective definitions and schema while explicitly accepting zero measurements and granting no production promotion. Cycle 87 implements and proves the unprivileged part of `N2-HW-002`: direct allowlisted CPUID capture, sanitized decoded evidence, and explicit separation from every privileged or write-capable hardware probe. Cycle 88 executes the bounded foundation of `N4-QEMU-001`: exact one-host QEMU/OVMF/runtime locks, versioned q35 launch profiles, modern-only VIRTIO block, paused machine instantiation, deterministic command/QMP evidence, and fail-closed substitution controls without booting guest code.
+Cycle 80 reset architecture claims without discarding validated component evidence. Cycle 81 established the first byte-bound native constitution and repository boundary. Cycle 82 published the baseline repository, protected `main`, and qualified the first pinned freestanding PE32+/ELF64 compiler path on one host. Cycle 83 froze and tested the owner-controlled ADR ceremony without generating a key, signing as the owner, or promoting any unsigned decision. Cycle 84 established the privacy-preserving Tier 1 hardware target, support policy, standards register, read-only capture path, and fail-closed readiness ledger without authorizing hardware mutation or destructive testing. Cycle 85 defines a measurable candidate Workstation v1 profile across reliability, accessibility, compatibility, privacy, and performance while preserving owner ratification and all implementation measurements as open gates. Cycle 86 hardens the ratification scope so an eventual owner signature commits to the exact objective definitions and schema while explicitly accepting zero measurements and granting no production promotion. Cycle 87 implements and proves the unprivileged part of `N2-HW-002`: direct allowlisted CPUID capture, sanitized decoded evidence, and explicit separation from every privileged or write-capable hardware probe. Cycle 88 executes the bounded foundation of `N4-QEMU-001`: exact one-host QEMU/OVMF/runtime locks, versioned q35 launch profiles, modern-only VIRTIO block, paused machine instantiation, deterministic command/QMP evidence, and fail-closed substitution controls without booting guest code. Cycle 89 executes the first `N4-MODEL-001` slice: exact workspace-local TLC/Java inputs, finite boot-slot rollback and capability derivation/revocation state machines, complete safe-state searches within frozen constants, required hostile counterexamples, normalized public traces, and fail-closed claim boundaries.
 
 | Area | Current evidence | Native status | Boundary |
 |---|---|---|---|
@@ -125,9 +125,10 @@ Cycle 80 reset architecture claims without discarding validated component eviden
 | Isolation | Static microkernel/capability simulations and bounded fuzz evidence | Partial N15/N35 | Not enforced by PooleKernel |
 | QEMU/Buildroot | Historical lab scaffolding and evidence contracts | Reference only | Cannot satisfy native boot, kernel, driver, or ISO gates |
 | Native Tier 0 | `POOLEOS-TIER0-Q35-1`; exact 1,180,772,298-byte QEMU runtime closure; two profiles; 4/4 paused q35/QMP probes; 18/18 negative controls | Partial N4.1-N4.4 | No guest CPU execution, native media, PooleBoot boot, current source rebuild, driver execution, Secure Boot, formal model, or N4 exit claim |
+| Native formal models | `POOLEOS-N4-MODELS-1`; two safe state spaces drained; two required hostile invariant violations; 4/4 repeat matches; 12/12 negative controls | Partial N4.5-N4.6 | Frozen finite constants only; four domains and all implementation-trace comparisons remain open; no theorem, liveness, refinement, ABI-freeze, kernel-execution, or promotion claim |
 | Native v1 objectives | 38 measurable candidate targets: 7 reliability, 8 accessibility, 6 compatibility, 7 privacy, and 10 performance; ten negative controls pass | Partial N0.6 | Zero targets measured; profile and values await owner ratification |
-| Test suite | Cycle 88: 455 tests pass with one Windows symlink-permission skip, including Tier 0 provenance, q35, pflash, VIRTIO, launch, path, substitution, timeout, and boot-overclaim controls | Partial N36 | Predominantly host/reference and artifact tests; four QEMU probes keep guest CPUs paused |
-| Release gate | Cycle 88: 66/66 consistency checks over 61 artifacts; 20 native gaps | Partial N37 | `production_ready=false`; not a release acceptance gate |
+| Test suite | Cycle 89: 481 tests pass with one Windows symlink-permission skip, including model input confinement, mutation, exact-state, trace-integrity, stale-binding, and claim-overreach controls | Partial N36 | Predominantly host/reference, bounded-model, and artifact tests; no PooleKernel implementation trace exists |
+| Release gate | Cycle 89: 67/67 consistency checks over 62 artifacts; 20 native gaps | Partial N37 | `production_ready=false`; not a release acceptance gate |
 | Source control | Public `rookepoole/PooleOS`, protected `main`, topic-branch workflow, private vulnerability reporting | Partial N1/N37 | Initial commit unsigned; signed tags, immutable release refs, retained CI, and full review policy remain open |
 | ADR ratification | Canonical OpenSSH `SSHSIG` manifest, domain-separated namespace, six exact decision sources, explicit 38-target definition acceptance with zero measurement acceptance, public trust/revocation files, signed-tag/remote verifier, and 12 declared negative controls | Partial N0/N1/N37 | Zero trusted owner keys; six owner actions, ADR-0003/0004 disposition, signature, tag, and publication receipt remain open |
 | Native toolchain | Rust 1.97.0/Cargo 1.97.0/LLD 22.1.6; two clean PE32+ and ELF64 builds match exactly on one host | Partial N3 | Empty non-booting fixtures; second host and remaining tool families are open |
@@ -382,7 +383,7 @@ Cycle 82 qualification evidence:
 
 Open N3 work: a second clean host, detached-signature and source-rebuild provenance, freestanding C17, bounded assembly, ABI probes/headers, archive and image tools, QEMU/OVMF source-build integration, generated ABI tables, complete build graph, static analysis, unsafe inventory, and the remaining section 008-011 requirements.
 
-Cycle 88 control-plane validation passes 455 tests with one Windows symlink-permission skip, Doctor passes its complete check set against live PooleGlyph Phase 65, and the complete consistency release gate passes 66/66 checks over 61 artifacts while retaining 20 explicit gaps and `production_ready=false`. Exact public-index, release-gate, and handoff hashes are recorded in the Cycle 88 log after staging.
+Cycle 89 control-plane validation passes 481 tests with one Windows symlink-permission skip, Doctor passes its complete check set against live PooleGlyph Phase 65, and the complete consistency release gate passes 67/67 checks over 62 artifacts while retaining 20 explicit gaps and `production_ready=false`. Exact public-index, release-gate, and handoff hashes are recorded in the Cycle 89 log after staging.
 
 Exit gate: two clean host environments reproduce bootstrap tools and empty native images; host headers/libraries cannot leak; ABI fixtures pass independently; all generated inputs are declared.
 
@@ -409,7 +410,16 @@ Cycle 88 bounded foundation evidence:
 - 18/18 controls reject Android QEMU, a QEMU `11.0.50` development build, hash/version/machine/firmware drift, writable code, variables-template reuse, legacy/transitional VIRTIO, networking, host sharing, host acceleration, extra arguments, Buildroot/Linux media, path escape, and boot overclaim;
 - the Windows candidate cannot disable guest memory dumping through the q35 property; its Authenticode certificate is expired; its bundled OVMF is older than `edk2-stable202605`; current source rebuilds, SBOM/license/vulnerability/redistribution review, and second-host reproduction remain mandatory.
 
-N4.1-N4.4 are partial. N4.5-N4.6 remain not started. No guest CPU instruction, original PooleOS medium, PooleBoot serial marker, debug-exit value, reset path, GDB session, VIRTIO driver, Secure Boot state, malformed-device campaign, or formal-model trace was executed or claimed.
+Cycle 89 bounded model evidence:
+
+- `specs/native-model-toolchain-lock.json` freezes TLA+ `v1.7.4`, `tla2tools.jar`, Eclipse Temurin JRE `jdk-21.0.11+10`, the complete 315-file JRE closure, TLC arguments, and two repeats while recording unsigned-input and unverified-detached-signature limits;
+- `PooleBootSlots` checks a two-slot, two-attempt atomic rollback abstraction: the safe configuration drains 20 distinct states at depth 7, while `UnsafeRollback=TRUE` violates `Recoverable` through `Init -> Stage -> StartTrial -> TrialFailure`;
+- `PooleCapabilities` checks three capability IDs, attenuation, ancestry, and transitive revocation: the safe configuration drains 1,316 distinct states at depth 6, while `UnsafeLocalRevoke=TRUE` violates `NoLiveDescendantOfRevoked` through `Init -> Derive -> Revoke`;
+- all four model cases reproduce exactly over two runs, and 12/12 controls reject prerelease/toolchain substitution, stale runtime/model bindings, path escape, arbitrary TLC modes, unexpected safe violations, missing hostile violations, and implementation-trace overclaim;
+- `runs/native_model_readiness.json` publishes normalized, path-free traces and keeps `formal_proof_claimed`, `liveness_checked`, `implementation_trace_cross_checked`, `abi_freeze_authorized`, `poolekernel_executed`, and `production_promotion_allowed` false;
+- IPC, scheduler, virtual-memory map/unmap, and PooleFS transaction recovery remain unmodeled; the two current model traces have zero native implementation-trace cross-checks.
+
+N4.1-N4.6 are partial. No guest CPU instruction, original PooleOS medium, PooleBoot serial marker, debug-exit value, reset path, GDB session, VIRTIO driver, Secure Boot state, malformed-device campaign, native implementation trace, liveness/refinement proof, or ABI-freeze authority was executed or claimed.
 
 Exit gate: one command launches each pinned native test profile; logs and artifacts are deterministic where declared; formal models have executable counterexample checks; no Buildroot guest is required.
 
@@ -1074,21 +1084,21 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 | `FLAG-N2-LAB-SAFETY-001` | BLOCKER | Open | Accept all sacrificial-media and recovery prerequisites, then separately approve destructive testing |
 | `FLAG-N4-PROFILE-001` | REQUIRED | Closed in Cycle 88 | Exact native-only q35/QEMU/OVMF/VIRTIO profile passes deterministic paused-instantiation and hostile substitution controls without a boot claim |
 | `FLAG-N4-PROVENANCE-001` | BLOCKER | Open | Source-build current pinned QEMU/EDK II, verify signatures/patches, close runtime security/license/SBOM/redistribution review, and reproduce on a second host |
-| `FLAG-N4-MODELS-001` | BLOCKER | Open | Executable counterexample models and implementation-trace cross-checks pass before dependent ABI freezes |
+| `FLAG-N4-MODELS-001` | BLOCKER | Open; first bounded slice landed in Cycle 89 | Boot-slot and capability checks pass, but IPC, scheduler, VM, PooleFS, and implementation-trace cross-checks remain required before dependent ABI freezes |
 | `FLAG-NATIVE-ISO-001` | STOP_SHIP | Open | Two builders reproduce and exact signed ISO passes clean QEMU and physical media |
 | `FLAG-NATIVE-REVIEW-001` | STOP_SHIP | Open | Independent security, filesystem, kernel, update, and release review closes critical/high findings |
 | `FLAG-BUILDROOT-LEGACY-001` | SUPERSEDED | Closed by architecture reset | Buildroot remains historical reference and cannot promote native status |
 
 ## 12. Near-Term Execution Sequence
 
-Cycle 88 completes the one-host, no-guest foundation slice of `N4-QEMU-001`: an exact native-only q35/QEMU/OVMF/VIRTIO profile, full runtime closure, deterministic commands, four paused machine probes, and 18/18 hostile controls now pass. This closes only `FLAG-N4-PROFILE-001`; N4 remains partial because source-built current QEMU/EDK II, original native launch evidence, the remaining reference devices and fault campaigns, formal models, model-trace comparisons, and second-host reproduction remain open. `N0-RATIFY-001` remains the immediate owner move and is blocked on target acceptance or amendment, ADR disposition, key custody, physical signing, and publication. No owner action, guest boot, hardware mutation, privileged probe, or destructive test is inferred.
+Cycle 89 completes the first bounded slice of `N4-MODEL-001`: boot-slot rollback and capability derivation/revocation safe spaces drain under frozen finite constants, both deliberate unsafe mutations produce their required normalized counterexamples, and all repeat and negative controls pass. `FLAG-N4-MODELS-001` remains open because IPC, scheduler, virtual-memory map/unmap, PooleFS recovery, and every native implementation-trace cross-check remain unfinished. `N0-RATIFY-001` remains the immediate owner move and is blocked on target acceptance or amendment, ADR disposition, key custody, physical signing, and publication. The next owner-independent engineering move is `N4-VM-MODEL-001`; no owner action, guest boot, kernel execution, proof expansion, ABI freeze, hardware mutation, privileged probe, or destructive test is inferred.
 
 | Order | Move | Required output |
 |---:|---|---|
 | 1 | `N0-RATIFY-001` | Owner acceptance or amendment of the v1 profile and 38 values, ADR-0003/0004 disposition, custody choice, public-key fingerprint, detached signature, signed tag, and exact publication receipt |
 | 2 | `N1-SCM-CLOSE-001` | Signed-commit policy, immutable refs, retained CI/review policy, and protected-workflow closure after the pre-signing history is resolved |
 | 3 | `N2-HW-002` | Complete reviewed read-only MSR, PCI configuration, duplicate ACPI, EDID/SPD, UEFI-variable, sensor/power, and native-comparison evidence; direct CPUID is complete but grants no privileged authorization |
-| 4 | `N4-MODEL-001` | First executable boot-slot and capability-state counterexample models with frozen assumptions, hostile traces, and no proof expansion; QEMU source-rebuild and real PooleBoot launch evidence remain parallel N4 work |
+| 4 | `N4-VM-MODEL-001` | Bounded page-ownership and virtual-map/unmap/shootdown state model, required unsafe mutants, frozen assumptions, normalized traces, and no implementation-equivalence claim; QEMU source-rebuild and real PooleBoot launch evidence remain parallel N4 work |
 | 5 | `N5-POOLEBOOT-001` | Poole-authored PE32+ UEFI application prints, draws GOP pixels, reads tables/map, exits cleanly |
 | 6 | `N5-BOOTPROTO-001` | Canonical boot handoff schema, independent decoder, golden bytes, malformed corpus |
 | 7 | `N5-ELF-001` | PooleBoot validates and loads a minimal PooleKernel ELF64 image |

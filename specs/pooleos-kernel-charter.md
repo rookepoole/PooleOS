@@ -65,7 +65,7 @@ The capability model must enforce all of the following:
 9. Bounded accounting: object, page, CPU, IPC, IRQ, and DMA consumption is charged to an accountable domain.
 10. Recovery discipline: restarting a server or driver never silently restores revoked authority.
 
-The executable capability model and its revocation state machine are N4/N13 prerequisites. Simulator receipts remain non-promoting until the same laws are enforced by a booted PooleKernel.
+The executable capability model and its revocation state machine are N4/N13 prerequisites. Cycle 89 checks attenuation, ancestry, acyclic derivation, and transitive revocation over three capability IDs, two principals, two rights, and one object; it deliberately excludes IPC, handle reuse, concurrency, quotas, timing, kernel data structures, and implementation traces. This finite state-space result is not a theorem, ABI freeze, or kernel enforcement claim. Model and simulator receipts remain non-promoting until the same laws are enforced by a booted PooleKernel and cross-checked against exact implementation traces.
 
 ## Boot and Trust Boundary
 
@@ -134,4 +134,4 @@ PooleKernel is not production-ready until:
 7. the signed ISO is reproducible and free of prohibited production substitutes; and
 8. clean-media QEMU and physical-machine receipts bind the exact source, toolchain, binaries, configuration, keys, and hardware identity.
 
-Current state: chartered, not implemented, not production-ready. Cycle 87 closes only the bounded user-mode CPUID sub-capability of `N2-HW-002`; no privileged probe, native parser, driver, or kernel mechanism is implied. Cycle 88 adds a pinned, host-side Tier 0 Q35/QEMU/OVMF profile and proves only deterministic command construction plus paused machine instantiation. It executes no guest instruction and proves no PooleBoot, PooleKernel, capability, driver, Secure Boot, or formal-model behavior. The immediate owner move remains `N0-RATIFY-001`; the next owner-independent engineering move is `N4-MODEL-001`.
+Current state: chartered, not implemented, not production-ready. Cycle 87 closes only the bounded user-mode CPUID sub-capability of `N2-HW-002`; no privileged probe, native parser, driver, or kernel mechanism is implied. Cycle 88 adds a pinned host-side Tier 0 Q35/QEMU/OVMF profile and proves only deterministic command construction plus paused machine instantiation. Cycle 89 adds bounded boot-slot rollback and capability derivation/revocation checks: both safe finite spaces drain and both deliberately unsafe configurations yield the required invariant violation. These results execute no guest or kernel instruction, contain zero implementation-trace comparisons, and grant no liveness, refinement, fingerprint-collision, ABI-freeze, or production claim. The immediate owner move remains `N0-RATIFY-001`; the next owner-independent engineering move is `N4-VM-MODEL-001`.
