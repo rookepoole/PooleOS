@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/native-target-contract.schema.json",
+  "title": "PooleOS Native Target Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "status",
+    "production_ready",
+    "production_promotion_allowed",
+    "language",
+    "profiles",
+    "targets",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_target_contract"},
+    "status_date": {"const": "2026-07-16"},
+    "status": {"const": "qualification_fixture_contract"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "language": {
+      "type": "object",
+      "required": ["name", "edition", "standard_library", "panic_strategy", "unwinding_allowed", "native_rust_abi_at_persistent_or_protection_boundary"],
+      "properties": {
+        "name": {"const": "Rust"},
+        "edition": {"const": "2024"},
+        "standard_library": {"const": false},
+        "panic_strategy": {"const": "abort"},
+        "unwinding_allowed": {"const": false},
+        "native_rust_abi_at_persistent_or_protection_boundary": {"const": false}
+      }
+    },
+    "profiles": {"type": "object", "required": ["release"]},
+    "targets": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "package",
+          "binary_name",
+          "triple",
+          "tier",
+          "architecture",
+          "object_format",
+          "calling_convention",
+          "calling_convention_expansion",
+          "entry_symbol",
+          "entry_return",
+          "code_model",
+          "relocation_model",
+          "red_zone",
+          "floating_or_vector_before_explicit_state_support",
+          "linker",
+          "static_link",
+          "expected_binary"
+        ],
+        "properties": {
+          "id": {"type": "string"},
+          "package": {"type": "string"},
+          "binary_name": {"type": "string"},
+          "triple": {"enum": ["x86_64-unknown-uefi", "x86_64-unknown-none"]},
+          "tier": {"const": 2},
+          "architecture": {"const": "x86_64"},
+          "object_format": {"enum": ["PE32+", "ELF64"]},
+          "calling_convention": {"enum": ["efiapi", "C"]},
+          "calling_convention_expansion": {"type": "string"},
+          "entry_symbol": {"enum": ["efi_main", "_start"]},
+          "entry_return": {"type": "string"},
+          "code_model": {"enum": ["small", "kernel"]},
+          "relocation_model": {"enum": ["pic", "static"]},
+          "red_zone": {"const": false},
+          "floating_or_vector_before_explicit_state_support": {"const": false},
+          "linker": {"const": "rust-lld"},
+          "static_link": {"const": true},
+          "expected_binary": {"type": "object", "required": ["format", "machine", "entry_nonzero"]}
+        }
+      }
+    },
+    "claim_boundary": {"type": "array", "minItems": 4, "items": {"type": "string"}}
+  }
+}

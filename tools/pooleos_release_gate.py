@@ -24,11 +24,12 @@ MASTER_CHECKLIST_SHA256 = "A8C94719FAF9428C1F133010BA2603C0270C4E1EFD7327AF8EAB9
 NATIVE_ROADMAP = ROOT / "runs" / "pdc_production_roadmap.json"
 NATIVE_COVERAGE = ROOT / "runs" / "pooleos_native_checklist_coverage.json"
 NATIVE_ARCHITECTURE_BASELINE = ROOT / "runs" / "native_architecture_baseline.json"
+NATIVE_TOOLCHAIN_QUALIFICATION = ROOT / "runs" / "native_toolchain_qualification.json"
 
 
 DEFAULT_GAPS = [
-    "The native repository is initialized locally, but remote publication, branch protection, signed tags, and cryptographically signed ADR ratification remain open.",
-    "No hermetic native compiler, sysroot, build, or image toolchain.",
+    "The native repository is public and main is protected, but signed tags, immutable release refs, retained CI review evidence, and cryptographically signed ADR ratification remain open.",
+    "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
     "No native-only QEMU/OVMF/VIRTIO reference profile or executable formal state models.",
     "No PooleBoot PE32+ UEFI loader or frozen native boot protocol.",
     "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path.",
@@ -218,7 +219,7 @@ def check_native_architecture_baseline(path: Path = NATIVE_ARCHITECTURE_BASELINE
     if summary.get("required_count") != 7 or summary.get("present_count") != 7:
         errors.append("required seven-record ADR constitution is incomplete")
     if summary.get("accepted_owner_directed_count") != 5 or summary.get("proposed_count") != 2:
-        errors.append("ADR status inventory does not match the Cycle 81 baseline")
+        errors.append("ADR status inventory does not match the current baseline")
     if summary.get("accepted_signed_count") != 0 or summary.get("all_required_cryptographically_ratified") is not False:
         errors.append("ADR baseline overclaims cryptographic ratification")
     if artifact.get("production_ready") is not False or artifact.get("production_promotion_allowed") is not False:
@@ -256,6 +257,83 @@ def check_native_architecture_baseline(path: Path = NATIVE_ARCHITECTURE_BASELINE
     )
     return readiness.make_check(
         "native_architecture_baseline",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_toolchain_qualification(path: Path = NATIVE_TOOLCHAIN_QUALIFICATION) -> dict:
+    artifact, schema_errors = _load_schema_artifact(path, "native-toolchain-qualification.schema.json")
+    errors = [f"qualification {error.path}: {error.message}" for error in schema_errors[:8]]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_toolchain_qualification",
+            False,
+            "; ".join(errors) or "native toolchain qualification is not an object",
+        )
+
+    if artifact.get("status") != "pass_single_windows_host_non_promoting":
+        errors.append("qualification status is not the bounded one-host pass state")
+    if artifact.get("production_ready") is not False or artifact.get("production_promotion_allowed") is not False:
+        errors.append("qualification overclaims production promotion")
+    scope = artifact.get("scope", {})
+    if scope.get("host_environment_count") != 1 or scope.get("two_host_reproduction_complete") is not False:
+        errors.append("qualification does not preserve the one-host/two-host-open boundary")
+    if scope.get("functional_boot_tested") is not False or scope.get("kernel_execution_tested") is not False:
+        errors.append("qualification overclaims boot or kernel execution")
+
+    for key in ("toolchain_lock", "target_contract"):
+        binding = artifact.get("bindings", {}).get(key, {})
+        relative = binding.get("path")
+        if not isinstance(relative, str):
+            errors.append(f"{key} binding has no relative path")
+            continue
+        bound = ROOT / relative
+        try:
+            bound.resolve().relative_to(ROOT.resolve())
+        except ValueError:
+            errors.append(f"{key} binding escapes the repository")
+            continue
+        if not bound.is_file():
+            errors.append(f"{key} binding is missing")
+            continue
+        data = bound.read_bytes()
+        if hashlib.sha256(data).hexdigest().upper() != binding.get("sha256") or len(data) != binding.get("byte_count"):
+            errors.append(f"{key} binding does not match the current file")
+
+    expected_targets = {"x86_64-unknown-uefi": "PE32+", "x86_64-unknown-none": "ELF64"}
+    builds = artifact.get("builds", [])
+    if {item.get("target_triple") for item in builds if isinstance(item, dict)} != set(expected_targets):
+        errors.append("qualification target set is not exactly UEFI and freestanding x86-64")
+    for build in builds:
+        if not isinstance(build, dict):
+            errors.append("qualification build entry is not an object")
+            continue
+        inspection = build.get("inspection", {})
+        expected_format = expected_targets.get(build.get("target_triple"))
+        if inspection.get("format") != expected_format:
+            errors.append(f"{build.get('target_triple')} inspection format mismatch")
+        if len(set(build.get("run_sha256", []))) != 1 or len(set(build.get("run_byte_count", []))) != 1:
+            errors.append(f"{build.get('target_triple')} clean runs are not identical")
+        if build.get("exact_byte_match") is not True or build.get("binary_contract_pass") is not True:
+            errors.append(f"{build.get('target_triple')} build evidence does not pass")
+        if build.get("host_leakage_hit_count") != 0:
+            errors.append(f"{build.get('target_triple')} contains host leakage")
+    controls = artifact.get("negative_controls", [])
+    if len(controls) != 3 or any(item.get("status") != "pass" for item in controls if isinstance(item, dict)):
+        errors.append("qualification negative controls are incomplete")
+    summary = artifact.get("summary", {})
+    if summary.get("fixture_count") != 2 or summary.get("byte_identical_fixture_count") != 2:
+        errors.append("qualification fixture summary is incomplete")
+    if summary.get("binary_contract_pass_count") != 2 or summary.get("host_leakage_hit_count") != 0:
+        errors.append("qualification contract/leakage summary does not pass")
+
+    detail = (
+        "Rust 1.97.0; UEFI PE32+ and freestanding ELF64; clean_runs=2+2; "
+        "byte_identical=2/2; host_leaks=0; negatives=3/3; two_host=false; non_promoting=true"
+    )
+    return readiness.make_check(
+        "native_toolchain_qualification",
         not errors,
         detail if not errors else "; ".join(errors[:8]),
     )
@@ -3048,6 +3126,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--native-roadmap", type=Path, default=NATIVE_ROADMAP)
     parser.add_argument("--native-checklist-coverage", type=Path, default=NATIVE_COVERAGE)
     parser.add_argument("--native-architecture-baseline", type=Path, default=NATIVE_ARCHITECTURE_BASELINE)
+    parser.add_argument("--native-toolchain-qualification", type=Path, default=NATIVE_TOOLCHAIN_QUALIFICATION)
     parser.add_argument("--out", type=Path, default=ROOT / "runs" / "release_gate.json")
     parser.add_argument("--include-runtime", action="store_true", help="Include PooleGlyph runtime checks in doctor.")
     args = parser.parse_args(argv)
@@ -3056,6 +3135,7 @@ def main(argv: list[str] | None = None) -> int:
         run_doctor(include_runtime=args.include_runtime),
         check_native_architecture_plan(args.native_roadmap, args.native_checklist_coverage),
         check_native_architecture_baseline(args.native_architecture_baseline),
+        check_native_toolchain_qualification(args.native_toolchain_qualification),
         check_publication_boundary(),
         check_bundle(args.bundle),
         check_replay_proof(args.replay_proof),
@@ -3234,6 +3314,7 @@ def main(argv: list[str] | None = None) -> int:
             args.native_roadmap,
             args.native_checklist_coverage,
             args.native_architecture_baseline,
+            args.native_toolchain_qualification,
         )
         if path is not None
     ]

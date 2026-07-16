@@ -22,7 +22,7 @@
     "remote": "https://github.com/rookepoole/PooleOS.git",
     "default_branch": "main",
     "visibility": "public",
-    "local_source_control_status": "initialized_unpublished",
+    "local_source_control_status": "initialized_published",
     "license_family": "PolyForm-Noncommercial-1.0.0",
     "private_inputs_may_be_hash_bound": true
   },
@@ -135,9 +135,9 @@
     "LEGAL-REVIEW-001",
     "TRADEMARK-REVIEW-001",
     "N0-QUANT-TARGETS-001",
-    "N1-BRANCH-PROTECTION-001",
+    "N1-SIGNED-TAG-001",
     "N1-SIGNING-CUSTODY-001",
-    "N3-TOOLCHAIN-001",
+    "N3-TOOLCHAIN-TWO-HOST-001",
     "N4-QEMU-001"
   ]
 }

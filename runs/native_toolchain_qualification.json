@@ -1,0 +1,465 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_toolchain_qualification",
+  "status_date": "2026-07-16",
+  "status": "pass_single_windows_host_non_promoting",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "scope": {
+    "host_environment_count": 1,
+    "host_class": "x86_64-pc-windows-msvc",
+    "clean_run_count_per_fixture": 2,
+    "fixture_count": 2,
+    "functional_boot_tested": false,
+    "kernel_execution_tested": false,
+    "two_host_reproduction_complete": false
+  },
+  "bindings": {
+    "toolchain_lock": {
+      "path": "specs/native-toolchain-lock.json",
+      "sha256": "0B3D67CA0FF74FF04425A2B90B4DF6143232C3E5524C6B3F79E456923485AB18",
+      "byte_count": 3965
+    },
+    "target_contract": {
+      "path": "specs/native-target-contract.json",
+      "sha256": "75E547BE6EFE1175F4E95240E482D2E6F01962F21F45C7EE5886A7415C2FD15E",
+      "byte_count": 2872
+    },
+    "build_inputs": [
+      {
+        "path": "native/Cargo.toml",
+        "sha256": "8FAE196869B772D7CD4600412A134FB549B2677E2837DD115C862DB7485C6246",
+        "byte_count": 308
+      },
+      {
+        "path": "native/Cargo.lock",
+        "sha256": "81B1D5B6368BEFCFB013B66C2E411E76ECF20CCADE8ABEEAD0528FD2AFB3AD4E",
+        "byte_count": 221
+      },
+      {
+        "path": "native/rust-toolchain.toml",
+        "sha256": "06C4E0BD63FE84DCB26A0FAE52D96F23C38979DBE6F154D58EAB1547F81FA26B",
+        "byte_count": 131
+      },
+      {
+        "path": "native/.cargo/config.toml",
+        "sha256": "98D1AD53467848CFE31349BE720C58CC1432570F5564FA9B8F727482BBBD2A23",
+        "byte_count": 363
+      },
+      {
+        "path": "native/boot/Cargo.toml",
+        "sha256": "537AD7C57F0C8C26600162D2B3C94D2FDEC2989EF971C8A0445AFAA62CAF6D53",
+        "byte_count": 214
+      },
+      {
+        "path": "native/boot/src/main.rs",
+        "sha256": "18C9762993BC10303596B944FAEEB113457288D263D62F36692367716AABA890",
+        "byte_count": 404
+      },
+      {
+        "path": "native/kernel/Cargo.toml",
+        "sha256": "6D0DDE25F74DEEEDA7794077273B85A4A8B099E73C68939C686173716D20FF46",
+        "byte_count": 218
+      },
+      {
+        "path": "native/kernel/src/main.rs",
+        "sha256": "C211A93BF7EDF8CCFC1E1EBBF03063825D63AC52A330A71F41CD43D27664CFD7",
+        "byte_count": 349
+      },
+      {
+        "path": "runtime/native_binary.py",
+        "sha256": "668F101989EBCE1C9C46B07C6419FEFBCFA3D298D4AB88444141EF5921517FE8",
+        "byte_count": 11251
+      },
+      {
+        "path": "tools/bootstrap_native_toolchain.ps1",
+        "sha256": "CAB72D7B198989E9450FE259BFABCBF96E5330330F0A23DB70F6102B69CA9779",
+        "byte_count": 4563
+      },
+      {
+        "path": "tools/qualify_native_toolchain.py",
+        "sha256": "BDDB5483C649AF1CC905684198CD9DCE3F67E1F30FDBE37DC727E85A945FC2CD",
+        "byte_count": 16610
+      }
+    ]
+  },
+  "toolchain": {
+    "channel": "1.97.0-x86_64-pc-windows-msvc",
+    "profile": "minimal",
+    "versions": {
+      "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)\nbinary: rustc\ncommit-hash: 2d8144b7880597b6e6d3dfd63a9a9efae3f533d3\ncommit-date: 2026-07-07\nhost: x86_64-pc-windows-msvc\nrelease: 1.97.0\nLLVM version: 22.1.6",
+      "cargo": "cargo 1.97.0 (c980f4866 2026-06-30)\nrelease: 1.97.0\ncommit-hash: c980f4866141969fab6254a680546a277789d6f0\ncommit-date: 2026-06-30\nhost: x86_64-pc-windows-msvc\nlibgit2: 1.9.2 (sys:0.20.4 vendored)\nlibcurl: 8.20.0-DEV (sys:0.4.88+curl-8.20.0 vendored ssl:Schannel)\nos: Windows 10.0.26200 (Windows 11 Core) [64-bit]",
+      "rust_lld": "LLD 22.1.6 (https://github.com/rust-lang/llvm-project.git 08c84e69a84d95936296dfcab0e38b34100725d5) (compatible with GNU linkers)",
+      "rustup": "rustup 1.29.0 (28d1352db 2026-03-05)"
+    },
+    "executables": [
+      {
+        "role": "rustup_proxy",
+        "sha256": "86478E53F769379D7F0EBFA7C9AA97CB76CA92233F79AA2CC0DBEE2EFAAC73C7",
+        "byte_count": 12814336
+      },
+      {
+        "role": "rustc",
+        "sha256": "6D1C5543ED3A45CFBC1C1332D42D6550D883C14D3C2E323427E631C331CEBEEB",
+        "byte_count": 110592
+      },
+      {
+        "role": "cargo",
+        "sha256": "3CD119FE81DFEDB9DCE4573696BF65058F16B57C9E5BABE415B71624315CBB7D",
+        "byte_count": 31288320
+      },
+      {
+        "role": "rust_lld",
+        "sha256": "55BD23CEE94C73C87DE51106F60B63AD8981390AA7079C435C27FB5B04E283AD",
+        "byte_count": 113417728
+      }
+    ],
+    "target_library_trees": [
+      {
+        "role": "rust_std_uefi",
+        "tree_sha256": "B6CCB84887578AA0D15CC14797F065B42ACFD67FFBFB25BB413A598F3D1D7A50",
+        "file_count": 56,
+        "byte_count": 123815100
+      },
+      {
+        "role": "rust_std_none",
+        "tree_sha256": "C27862A3AB26D12E5302606EA2786B4FBE1619FDC7259174E289E059CB03AE20",
+        "file_count": 6,
+        "byte_count": 84909908
+      }
+    ],
+    "toolchain_root_recorded": false,
+    "global_path_mutated": false
+  },
+  "environment": {
+    "cargo_locked": true,
+    "cargo_offline": true,
+    "source_date_epoch": "0",
+    "timezone": "UTC",
+    "locale": "C",
+    "incremental_compilation": false,
+    "clean_target_directory_per_run": true,
+    "external_crate_count": 0
+  },
+  "builds": [
+    {
+      "id": "pooleboot_empty_qualification_fixture",
+      "package": "pooleboot-fixture",
+      "target_triple": "x86_64-unknown-uefi",
+      "binary_name": "PooleBootFixture.efi",
+      "normalized_command": [
+        "$CARGO",
+        "toolchain=1.97.0-x86_64-pc-windows-msvc",
+        "build",
+        "--manifest-path",
+        "$REPO/native/Cargo.toml",
+        "--package",
+        "pooleboot-fixture",
+        "--target",
+        "x86_64-unknown-uefi",
+        "--release",
+        "--locked",
+        "--offline",
+        "--target-dir",
+        "$CLEAN_TARGET_DIR"
+      ],
+      "clean_run_count": 2,
+      "run_sha256": [
+        "41E212DE8ADFF8F673B857C46EA9913F94A6B09C35567E2B5F289BDEB756DE45",
+        "41E212DE8ADFF8F673B857C46EA9913F94A6B09C35567E2B5F289BDEB756DE45"
+      ],
+      "run_byte_count": [
+        3072,
+        3072
+      ],
+      "exact_byte_match": true,
+      "binary_contract_pass": true,
+      "host_leakage_marker_count": 12,
+      "host_leakage_hit_count": 0,
+      "inspection": {
+        "sha256": "41E212DE8ADFF8F673B857C46EA9913F94A6B09C35567E2B5F289BDEB756DE45",
+        "byte_count": 3072,
+        "format": "PE32+",
+        "machine": 34404,
+        "section_count": 4,
+        "timestamp": 0,
+        "entry_point": 4096,
+        "entry_nonzero": true,
+        "image_base": 5368709120,
+        "image_size": 20480,
+        "header_size": 1024,
+        "section_alignment": 4096,
+        "file_alignment": 512,
+        "subsystem": 10,
+        "characteristics": 34,
+        "dll_characteristics": 33120,
+        "imports_present": false,
+        "import_directory": {
+          "rva": 0,
+          "size": 0
+        },
+        "debug_directory_present": false,
+        "debug_directory": {
+          "rva": 0,
+          "size": 0
+        },
+        "sections": [
+          {
+            "name": ".text",
+            "virtual_address": 4096,
+            "virtual_size": 4,
+            "raw_offset": 1024,
+            "raw_size": 512,
+            "characteristics": 1610612768
+          },
+          {
+            "name": ".rdata",
+            "virtual_address": 8192,
+            "virtual_size": 4,
+            "raw_offset": 1536,
+            "raw_size": 512,
+            "characteristics": 1073741888
+          },
+          {
+            "name": ".eh_fram",
+            "virtual_address": 12288,
+            "virtual_size": 64,
+            "raw_offset": 2048,
+            "raw_size": 512,
+            "characteristics": 1073741888
+          },
+          {
+            "name": ".reloc",
+            "virtual_address": 16384,
+            "virtual_size": 12,
+            "raw_offset": 2560,
+            "raw_size": 512,
+            "characteristics": 1107296320
+          }
+        ]
+      }
+    },
+    {
+      "id": "poolekernel_empty_qualification_fixture",
+      "package": "poolekernel-fixture",
+      "target_triple": "x86_64-unknown-none",
+      "binary_name": "PooleKernelFixture",
+      "normalized_command": [
+        "$CARGO",
+        "toolchain=1.97.0-x86_64-pc-windows-msvc",
+        "build",
+        "--manifest-path",
+        "$REPO/native/Cargo.toml",
+        "--package",
+        "poolekernel-fixture",
+        "--target",
+        "x86_64-unknown-none",
+        "--release",
+        "--locked",
+        "--offline",
+        "--target-dir",
+        "$CLEAN_TARGET_DIR"
+      ],
+      "clean_run_count": 2,
+      "run_sha256": [
+        "806660E6276777DC0023ED89379B0F94FDB5FF354325F5CABB6E808F94B27322",
+        "806660E6276777DC0023ED89379B0F94FDB5FF354325F5CABB6E808F94B27322"
+      ],
+      "run_byte_count": [
+        984,
+        984
+      ],
+      "exact_byte_match": true,
+      "binary_contract_pass": true,
+      "host_leakage_marker_count": 12,
+      "host_leakage_hit_count": 0,
+      "inspection": {
+        "sha256": "806660E6276777DC0023ED89379B0F94FDB5FF354325F5CABB6E808F94B27322",
+        "byte_count": 984,
+        "format": "ELF64",
+        "elf_type": 2,
+        "machine": 62,
+        "flags": 0,
+        "entry_point": 2101636,
+        "entry_nonzero": true,
+        "program_header_count": 5,
+        "section_count": 6,
+        "dynamic_segment_present": false,
+        "interpreter_segment_present": false,
+        "program_headers": [
+          {
+            "type": 6,
+            "type_name": "PHDR",
+            "flags": 4,
+            "file_offset": 64,
+            "virtual_address": 2097216,
+            "physical_address": 2097216,
+            "file_size": 280,
+            "memory_size": 280,
+            "alignment": 8
+          },
+          {
+            "type": 1,
+            "type_name": "LOAD",
+            "flags": 4,
+            "file_offset": 0,
+            "virtual_address": 2097152,
+            "physical_address": 2097152,
+            "file_size": 388,
+            "memory_size": 388,
+            "alignment": 4096
+          },
+          {
+            "type": 1,
+            "type_name": "LOAD",
+            "flags": 5,
+            "file_offset": 388,
+            "virtual_address": 2101636,
+            "physical_address": 2101636,
+            "file_size": 4,
+            "memory_size": 4,
+            "alignment": 4096
+          },
+          {
+            "type": 1685382480,
+            "type_name": "OTHER",
+            "flags": 4,
+            "file_offset": 344,
+            "virtual_address": 2097496,
+            "physical_address": 2097496,
+            "file_size": 12,
+            "memory_size": 12,
+            "alignment": 4
+          },
+          {
+            "type": 1685382481,
+            "type_name": "OTHER",
+            "flags": 6,
+            "file_offset": 0,
+            "virtual_address": 0,
+            "physical_address": 0,
+            "file_size": 0,
+            "memory_size": 0,
+            "alignment": 0
+          }
+        ],
+        "sections": [
+          {
+            "name": "",
+            "type": 0,
+            "flags": 0,
+            "address": 0,
+            "file_offset": 0,
+            "size": 0,
+            "link": 0,
+            "info": 0,
+            "alignment": 0,
+            "entry_size": 0
+          },
+          {
+            "name": ".eh_frame_hdr",
+            "type": 1,
+            "flags": 2,
+            "address": 2097496,
+            "file_offset": 344,
+            "size": 12,
+            "link": 0,
+            "info": 0,
+            "alignment": 4,
+            "entry_size": 0
+          },
+          {
+            "name": ".eh_frame",
+            "type": 1,
+            "flags": 2,
+            "address": 2097512,
+            "file_offset": 360,
+            "size": 28,
+            "link": 0,
+            "info": 0,
+            "alignment": 8,
+            "entry_size": 0
+          },
+          {
+            "name": ".text",
+            "type": 1,
+            "flags": 6,
+            "address": 2101636,
+            "file_offset": 388,
+            "size": 4,
+            "link": 0,
+            "info": 0,
+            "alignment": 1,
+            "entry_size": 0
+          },
+          {
+            "name": ".comment",
+            "type": 1,
+            "flags": 48,
+            "address": 0,
+            "file_offset": 392,
+            "size": 153,
+            "link": 0,
+            "info": 0,
+            "alignment": 1,
+            "entry_size": 1
+          },
+          {
+            "name": ".shstrtab",
+            "type": 3,
+            "flags": 0,
+            "address": 0,
+            "file_offset": 545,
+            "size": 50,
+            "link": 0,
+            "info": 0,
+            "alignment": 1,
+            "entry_size": 0
+          }
+        ]
+      }
+    }
+  ],
+  "negative_controls": [
+    {
+      "id": "injected_host_path_detection",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "id": "pe_as_elf_target_substitution",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "id": "truncated_elf_header",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass"
+    }
+  ],
+  "summary": {
+    "fixture_count": 2,
+    "byte_identical_fixture_count": 2,
+    "binary_contract_pass_count": 2,
+    "host_leakage_hit_count": 0,
+    "negative_control_count": 3,
+    "negative_control_pass_count": 3
+  },
+  "open_items": [
+    "A second clean host has not reproduced the fixtures.",
+    "The channel manifest detached signature has not been independently verified.",
+    "The freestanding C17 compiler, assembler, ABI headers, image tools, QEMU, and firmware are not pinned.",
+    "Rust source, LLVM source, LLD source, compiler-builtins source, SBOM, and rebuild-from-source provenance remain open.",
+    "ADR-0003 remains proposed and cannot be promoted by this lock."
+  ],
+  "claim_boundary": [
+    "This is one-host compiler, linker, format, reproducibility, and leakage qualification evidence.",
+    "The fixtures do not implement or boot PooleBoot or PooleKernel.",
+    "The report does not accept ADR-0003 or close the N3 two-clean-host exit gate.",
+    "No fixture, tool binary, or host path is embedded in this public JSON ledger.",
+    "Production and release promotion remain prohibited."
+  ]
+}

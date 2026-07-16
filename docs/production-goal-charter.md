@@ -7,9 +7,9 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 81
+Last roadmap reconciliation: PooleOS Cycle 82
 
-Current reconciliation: the seven-record native constitution, machine constitution, public/private repository boundary, local `main` repository, architecture baseline, and extracted-release conformance policy exist as partial evidence. No ADR is cryptographically signed; the GitHub remote is not yet published; ADR-0003 and ADR-0004 remain proposed; and no native PooleBoot, PooleKernel, userspace, driver, desktop, or ISO binary exists. The next unblocked engineering move is `N3-TOOLCHAIN-001`, performed as a non-promoting qualification draft while owner signatures and remote-governance controls remain open.
+Current reconciliation: the seven-record native constitution, public/private boundary, architecture baseline, and conformance policy remain partial evidence. The public `rookepoole/PooleOS` repository now has protected `main` and private vulnerability reporting. A pinned workspace-local Rust 1.97.0/LLD 22.1.6 path produces byte-identical empty UEFI PE32+ and freestanding ELF64 fixtures in two clean builds on one Windows host, with independent format/leakage negatives. No ADR is cryptographically signed; ADR-0003 and ADR-0004 remain proposed; the second-host and remaining N3 gates are open; and no functional PooleBoot, PooleKernel, userspace, driver, desktop, or ISO exists. The next critical move is `N0-RATIFY-001`.
 
 ## 1. Objective
 

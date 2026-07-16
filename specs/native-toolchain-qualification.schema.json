@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/native-toolchain-qualification.schema.json",
+  "title": "PooleOS Native Toolchain Qualification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "status",
+    "production_ready",
+    "production_promotion_allowed",
+    "scope",
+    "bindings",
+    "toolchain",
+    "environment",
+    "builds",
+    "negative_controls",
+    "summary",
+    "open_items",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_toolchain_qualification"},
+    "status_date": {"const": "2026-07-16"},
+    "status": {"const": "pass_single_windows_host_non_promoting"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "scope": {
+      "type": "object",
+      "required": ["host_environment_count", "host_class", "clean_run_count_per_fixture", "fixture_count", "functional_boot_tested", "kernel_execution_tested", "two_host_reproduction_complete"],
+      "properties": {
+        "host_environment_count": {"const": 1},
+        "host_class": {"const": "x86_64-pc-windows-msvc"},
+        "clean_run_count_per_fixture": {"const": 2},
+        "fixture_count": {"const": 2},
+        "functional_boot_tested": {"const": false},
+        "kernel_execution_tested": {"const": false},
+        "two_host_reproduction_complete": {"const": false}
+      }
+    },
+    "bindings": {
+      "type": "object",
+      "required": ["toolchain_lock", "target_contract", "build_inputs"],
+      "properties": {
+        "toolchain_lock": {"type": "object", "required": ["path", "sha256", "byte_count"]},
+        "target_contract": {"type": "object", "required": ["path", "sha256", "byte_count"]},
+        "build_inputs": {"type": "array", "minItems": 11, "maxItems": 11, "items": {"type": "object", "required": ["path", "sha256", "byte_count"]}}
+      }
+    },
+    "toolchain": {
+      "type": "object",
+      "required": ["channel", "profile", "versions", "executables", "target_library_trees", "toolchain_root_recorded", "global_path_mutated"],
+      "properties": {
+        "channel": {"const": "1.97.0-x86_64-pc-windows-msvc"},
+        "profile": {"const": "minimal"},
+        "versions": {"type": "object", "required": ["rustc", "cargo", "rust_lld", "rustup"]},
+        "executables": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "object", "required": ["role", "sha256", "byte_count"]}},
+        "target_library_trees": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "object", "required": ["role", "tree_sha256", "file_count", "byte_count"]}},
+        "toolchain_root_recorded": {"const": false},
+        "global_path_mutated": {"const": false}
+      }
+    },
+    "environment": {
+      "type": "object",
+      "required": ["cargo_locked", "cargo_offline", "source_date_epoch", "timezone", "locale", "incremental_compilation", "clean_target_directory_per_run", "external_crate_count"]
+    },
+    "builds": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["id", "package", "target_triple", "binary_name", "normalized_command", "clean_run_count", "run_sha256", "run_byte_count", "exact_byte_match", "binary_contract_pass", "host_leakage_marker_count", "host_leakage_hit_count", "inspection"],
+        "properties": {
+          "id": {"type": "string"},
+          "package": {"type": "string"},
+          "target_triple": {"type": "string"},
+          "binary_name": {"type": "string"},
+          "normalized_command": {"type": "array", "minItems": 12, "items": {"type": "string"}},
+          "clean_run_count": {"const": 2},
+          "run_sha256": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "string", "minLength": 64, "maxLength": 64}},
+          "run_byte_count": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "integer"}},
+          "exact_byte_match": {"const": true},
+          "binary_contract_pass": {"const": true},
+          "host_leakage_marker_count": {"type": "integer"},
+          "host_leakage_hit_count": {"const": 0},
+          "inspection": {"type": "object", "required": ["sha256", "byte_count", "format", "machine", "entry_point", "entry_nonzero", "sections"]}
+        }
+      }
+    },
+    "negative_controls": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["id", "expected", "observed", "status"],
+        "properties": {
+          "id": {"type": "string"},
+          "expected": {"const": "reject"},
+          "observed": {"const": "reject"},
+          "status": {"const": "pass"}
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["fixture_count", "byte_identical_fixture_count", "binary_contract_pass_count", "host_leakage_hit_count", "negative_control_count", "negative_control_pass_count"],
+      "properties": {
+        "fixture_count": {"const": 2},
+        "byte_identical_fixture_count": {"const": 2},
+        "binary_contract_pass_count": {"const": 2},
+        "host_leakage_hit_count": {"const": 0},
+        "negative_control_count": {"const": 3},
+        "negative_control_pass_count": {"const": 3}
+      }
+    },
+    "open_items": {"type": "array", "minItems": 5, "items": {"type": "string"}},
+    "claim_boundary": {"type": "array", "minItems": 5, "items": {"type": "string"}}
+  }
+}

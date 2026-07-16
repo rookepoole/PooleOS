@@ -19,7 +19,7 @@
     "expected_remote": "https://github.com/rookepoole/PooleOS.git",
     "default_branch": "main",
     "visibility": "public",
-    "publication_state": "initialized_unpublished"
+    "publication_state": "initialized_published"
   },
   "architecture": {
     "product": "PooleOS",
@@ -265,7 +265,7 @@
       "status": "proposed",
       "date": "2026-07-16",
       "decision_owner": "Rooke Poole",
-      "ratification": "owner acceptance and toolchain qualification pending",
+      "ratification": "owner acceptance and full two-host toolchain qualification pending",
       "supersedes": "none",
       "superseded_by": "none",
       "requirement_mappings": [
@@ -273,9 +273,9 @@
         "N3.1-N3.8",
         "sections 008-011"
       ],
-      "sha256": "9891370AAAABCDD27D1C59E7A443E36230A5FEB6827E94DAA6B0F364E631EEF5",
-      "byte_count": 3332,
-      "line_count": 43
+      "sha256": "6F874FDBBA98CE728A230C4AF7798F202D09A63CE7394510C810C1E65932B1B0",
+      "byte_count": 4108,
+      "line_count": 44
     },
     {
       "id": "ADR-0004",
@@ -343,7 +343,7 @@
       "status": "accepted-owner-directed",
       "date": "2026-07-16",
       "decision_owner": "Rooke Poole",
-      "ratification": "branch protection, signed-tag, and retention controls pending",
+      "ratification": "signed-tag, immutable-release-ref, and retention controls pending",
       "supersedes": "none",
       "superseded_by": "none",
       "requirement_mappings": [
@@ -351,9 +351,9 @@
         "N1.3-N1.7",
         "section 004"
       ],
-      "sha256": "50E052BCD331D8FA02BF0FA2DB44A2C2440B4D3AFDEBAADC895B5946112F14B6",
-      "byte_count": 3057,
-      "line_count": 44
+      "sha256": "F02F1572C1BEDD803B7617E251F0AD4E08942FCE0C4663D21A63CD3FADA17E4D",
+      "byte_count": 3680,
+      "line_count": 48
     }
   ],
   "bound_sources": [
@@ -365,15 +365,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "DD4BE218538820704F060CD3534D93312AE56FAF41134BD54A8724F9F69E0CE3",
-      "byte_count": 17665,
+      "sha256": "A81AA81C9A89030E87B2232FB6429679D515683B922F5CBD77DDB8E3609CED76",
+      "byte_count": 17776,
       "line_count": 240
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "12294D11A51B944066EABA8C59532BF8F5681EB5D887EFF936787856140B47BC",
-      "byte_count": 91610,
-      "line_count": 1063
+      "sha256": "2CA1EEEA483FDED72E1138DE93F48E1D6BC772CB5D26ADB89B49648F32A8D12F",
+      "byte_count": 93922,
+      "line_count": 1076
     },
     {
       "path": "docs/publication-boundary.md",
@@ -389,7 +389,7 @@
     },
     {
       "path": "specs/native-architecture-constitution.json",
-      "sha256": "1EA65036BFC881F44028AF8CE96300A7F195FFB1424EAA0A99829C0912A3689C",
+      "sha256": "E492D6E9BED44B10CB310417D6DE40AF4B5F2550DE8B3DCAD64E26DDF53CBA7D",
       "byte_count": 5759,
       "line_count": 143
     },
@@ -422,9 +422,9 @@
     "LEGAL-REVIEW-001",
     "TRADEMARK-REVIEW-001",
     "N0-QUANT-TARGETS-001",
-    "N1-BRANCH-PROTECTION-001",
+    "N1-SIGNED-TAG-001",
     "N1-SIGNING-CUSTODY-001",
-    "N3-TOOLCHAIN-001",
+    "N3-TOOLCHAIN-TWO-HOST-001",
     "N4-QEMU-001"
   ],
   "claim_boundary": {

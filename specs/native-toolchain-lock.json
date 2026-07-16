@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_toolchain_lock",
+  "status_date": "2026-07-16",
+  "status": "pinned_for_single_host_qualification",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "host": {
+    "triple": "x86_64-pc-windows-msvc",
+    "toolchain_directory_policy": "workspace_local_untracked",
+    "global_path_mutation_allowed": false,
+    "global_rustup_or_cargo_state_allowed": false
+  },
+  "rustup_init": {
+    "version_observed_after_install": "1.29.0",
+    "url": "https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe",
+    "sha256_url": "https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe.sha256",
+    "sha256": "86478E53F769379D7F0EBFA7C9AA97CB76CA92233F79AA2CC0DBEE2EFAAC73C7"
+  },
+  "channel_manifest": {
+    "manifest_version": "2",
+    "date": "2026-07-09",
+    "rust_version": "1.97.0 (2d8144b78 2026-07-07)",
+    "url": "https://static.rust-lang.org/dist/2026-07-09/channel-rust-1.97.0.toml",
+    "sha256_url": "https://static.rust-lang.org/dist/2026-07-09/channel-rust-1.97.0.toml.sha256",
+    "sha256": "3804D2666F7C12CE64205BAA69B6BE52F910B45B158091013264BEB7AA1DE7F5",
+    "detached_signature_verified": false
+  },
+  "toolchain": {
+    "channel": "1.97.0-x86_64-pc-windows-msvc",
+    "profile": "minimal",
+    "components": [
+      {
+        "package": "rustc",
+        "target": "x86_64-pc-windows-msvc",
+        "xz_url": "https://static.rust-lang.org/dist/2026-07-09/rustc-1.97.0-x86_64-pc-windows-msvc.tar.xz",
+        "xz_sha256": "32F62B4162C729C080D0F5FDDC8386AE6D160BD493016E850C1DBA26AA20A196"
+      },
+      {
+        "package": "cargo",
+        "target": "x86_64-pc-windows-msvc",
+        "xz_url": "https://static.rust-lang.org/dist/2026-07-09/cargo-1.97.0-x86_64-pc-windows-msvc.tar.xz",
+        "xz_sha256": "C20EAC3F96BE787B0A3D5BE6204A37B921307B2573E0C1D8162A3D992FD186F6"
+      },
+      {
+        "package": "rust-std",
+        "target": "x86_64-pc-windows-msvc",
+        "xz_url": "https://static.rust-lang.org/dist/2026-07-09/rust-std-1.97.0-x86_64-pc-windows-msvc.tar.xz",
+        "xz_sha256": "DA2C160B962B98B1603EDA2120E608BD74E0BAF56962FC32A7B5EA56B6FD6211"
+      },
+      {
+        "package": "rust-std",
+        "target": "x86_64-unknown-uefi",
+        "xz_url": "https://static.rust-lang.org/dist/2026-07-09/rust-std-1.97.0-x86_64-unknown-uefi.tar.xz",
+        "xz_sha256": "2C48C8B659D65EC74E916E44E5ECAC8E77F4C1ABCE51D01D661F133233641AD0"
+      },
+      {
+        "package": "rust-std",
+        "target": "x86_64-unknown-none",
+        "xz_url": "https://static.rust-lang.org/dist/2026-07-09/rust-std-1.97.0-x86_64-unknown-none.tar.xz",
+        "xz_sha256": "5B6702D1CE758D4D01FC3861085BBF1EE19EB9D7F7DC69E066C299EE9606168A"
+      }
+    ]
+  },
+  "offline_build_contract": {
+    "cargo_locked": true,
+    "cargo_offline": true,
+    "source_date_epoch": "0",
+    "timezone": "UTC",
+    "locale": "C",
+    "incremental_compilation": false,
+    "clean_target_directory_per_run": true,
+    "external_crate_count": 0
+  },
+  "official_references": [
+    {
+      "topic": "Rust 1.97.0 release",
+      "url": "https://blog.rust-lang.org/releases/latest/"
+    },
+    {
+      "topic": "x86_64 UEFI target",
+      "url": "https://doc.rust-lang.org/rustc/platform-support/unknown-uefi.html"
+    },
+    {
+      "topic": "x86_64 freestanding target",
+      "url": "https://doc.rust-lang.org/rustc/platform-support/x86_64-unknown-none.html"
+    }
+  ],
+  "open_items": [
+    "A second clean host has not reproduced the fixtures.",
+    "The channel manifest detached signature has not been independently verified.",
+    "The freestanding C17 compiler, assembler, ABI headers, image tools, QEMU, and firmware are not pinned.",
+    "Rust source, LLVM source, LLD source, compiler-builtins source, SBOM, and rebuild-from-source provenance remain open.",
+    "ADR-0003 remains proposed and cannot be promoted by this lock."
+  ]
+}

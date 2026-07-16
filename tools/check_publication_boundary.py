@@ -24,6 +24,7 @@ FORBIDDEN_PREFIXES = (
 )
 ALLOWED_RUNS = {
     "runs/native_architecture_baseline.json",
+    "runs/native_toolchain_qualification.json",
     "runs/pdc_production_roadmap.json",
     "runs/pooleos_native_checklist_coverage.json",
 }
@@ -94,7 +95,7 @@ def inspect_public_blob(relative_path: str, data: bytes) -> list[dict[str, str]]
             {
                 "type": "private_run_artifact",
                 "path": path,
-                "detail": "only deterministic public roadmap, coverage, and architecture ledgers may be published",
+                "detail": "only explicitly allowlisted deterministic public ledgers may be published",
             }
         )
     if folded.endswith(FORBIDDEN_SUFFIXES):

@@ -2,7 +2,7 @@
 
 Status date: 2026-07-16  
 Plan version: 2.0.0-native-reset  
-Roadmap cycle: PooleOS Cycle 81  
+Roadmap cycle: PooleOS Cycle 82  
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
@@ -110,7 +110,7 @@ Recovery boots from a separately signed immutable image and remains usable witho
 
 ## 5. Current Evidence Baseline
 
-Cycle 80 reset architecture claims without discarding validated component evidence. Cycle 81 establishes the first byte-bound native constitution and public-repository control surface without claiming that unsigned decisions are ratified or that native code exists.
+Cycle 80 reset architecture claims without discarding validated component evidence. Cycle 81 established the first byte-bound native constitution and repository boundary. Cycle 82 publishes the baseline repository, protects `main`, and qualifies the first pinned freestanding PE32+/ELF64 compiler path on one host without claiming that unsigned decisions are ratified or that functional native code exists.
 
 | Area | Current evidence | Native status | Boundary |
 |---|---|---|---|
@@ -124,9 +124,10 @@ Cycle 80 reset architecture claims without discarding validated component eviden
 | PGB2/PGVM2 | JSON draft, byte/trap simulator, capability planning receipts | Partial N34/N35 | No frozen binary ABI or native execution |
 | Isolation | Static microkernel/capability simulations and bounded fuzz evidence | Partial N15/N35 | Not enforced by PooleKernel |
 | QEMU/Buildroot | Historical lab scaffolding and evidence contracts | Reference only | Cannot satisfy native boot, kernel, driver, or ISO gates |
-| Test suite | Cycle 79 baseline: 345 tests | Partial N36 | Predominantly host/reference and artifact tests |
-| Release gate | Cycle 79 baseline: 58/58 consistency checks over 53 artifacts; 41 known gaps | Historical baseline | `production_ready=false`; not a native release gate |
-| Source control | PooleOS directory is not a Git repository | Blocker N1/N37 | No trustworthy source revision or protected review history |
+| Test suite | Cycle 82: 386 tests pass with one Windows symlink-permission skip | Partial N36 | Predominantly host/reference and artifact tests |
+| Release gate | Cycle 82: 62/62 consistency checks over 57 artifacts; 20 native gaps | Partial N37 | `production_ready=false`; not a release acceptance gate |
+| Source control | Public `rookepoole/PooleOS`, protected `main`, topic-branch workflow, private vulnerability reporting | Partial N1/N37 | Initial commit unsigned; signed tags, immutable release refs, retained CI, and full review policy remain open |
+| Native toolchain | Rust 1.97.0/Cargo 1.97.0/LLD 22.1.6; two clean PE32+ and ELF64 builds match exactly on one host | Partial N3 | Empty non-booting fixtures; second host and remaining tool families are open |
 | Native bootloader | No Poole-authored PE32+ UEFI image | Not started N5 | No native UEFI proof of life |
 | Native kernel | No PooleKernel source, ELF image, boot, ring 3, IPC, capability, or driver-domain execution | Not started N6-N16 | Zero native-kernel production claims |
 | Native media | No native signed ISO or physical boot | Not started N39 | Existing image names are non-promoting fixtures |
@@ -297,14 +298,15 @@ Subphases:
 - N1.6 Establish contributor, SPDX, provenance, export, patent, trademark, privacy, vulnerability disclosure, security contact, and NDA segregation policies.
 - N1.7 Define maintainers, signing custodians, release authority, severity, emergency change, deprecation, compatibility, and incident postmortem processes.
 
-Cycle 81 evidence:
+Cycle 81-82 evidence:
 
-- The local repository is initialized on `main` with `https://github.com/rookepoole/PooleOS.git` as `origin`.
+- The public repository is published at `https://github.com/rookepoole/PooleOS`, with `main` as the default branch and the Cycle 81 bootstrap commit as its root.
+- `main` requires pull requests, stale-review dismissal, resolved conversations, and linear history; force-push and deletion are denied. Private vulnerability reporting is enabled. Cycle 82 proceeds on a topic branch.
 - PolyForm Noncommercial 1.0.0 terms, owner notice, security policy, trademark notice, CODEOWNERS, ADR template, public/private evidence boundary, and native source-tree ownership skeleton are present.
 - `.gitignore` excludes raw internal PDC inputs, private/local run evidence, historical Buildroot sources and lab images, archives, credentials, private signing material, firmware without redistribution clearance, and release-media binaries.
 - `tools/check_publication_boundary.py` scans exact indexed bytes for prohibited paths, unapproved run artifacts, release media, credential containers, secret signatures, and workstation-specific paths.
 
-Open N1 work: remote publication, protected-branch settings, reviewed change workflow, signed tags, immutable release references, signing custody, contributor policy, and legal/patent/export/trademark/component-license review remain open.
+Open N1 work: owner-controlled commit/tag signing, a signed baseline tag, immutable release references, retained CI evidence, reviewer quorum, signing custody, contributor policy, and legal/patent/export/trademark/component-license review remain open. Administrator enforcement and approval count must be revisited when another maintainer is configured.
 
 Exit gate: PooleOS is source-controlled; every required decision has an owner and due gate; deletions and deferrals are reviewable; no component lacks licensing/provenance classification.
 
@@ -340,9 +342,21 @@ Subphases:
 - N3.7 Add formatting, lint, static analysis, warning-as-error, UB/address/thread/memory sanitizers for host-portable code, stack reports, ABI checks, and artifact size budgets.
 - N3.8 Define unsafe-code inventory, checked arithmetic, parser limits, MMIO access rules, volatile/atomic policy, lock rules, interrupt-context restrictions, and fatal undefined behavior policy.
 
-Cycle 81 evidence: ADR-0003 proposes Rust 2024 `no_std` for PooleBoot, PooleKernel, and privileged native services; bounded x86-64 assembly for architectural entry/switch paths; freestanding C17 for the portable PDC reference; and Python only for non-production host oracles. Official Rust documentation confirms the available `x86_64-unknown-uefi` PE32+ target, `efiapi` convention, and freestanding `x86_64-unknown-none` ELF64 target. No compiler, linker, assembler, sysroot, QEMU, or hermetic tool lock has yet been qualified on this host.
+Cycle 81 proposal evidence: ADR-0003 proposes Rust 2024 `no_std` for PooleBoot, PooleKernel, and privileged native services; bounded x86-64 assembly for architectural entry/switch paths; freestanding C17 for the portable PDC reference; and Python only for non-production host oracles. Official Rust documentation confirms the available `x86_64-unknown-uefi` PE32+ target, `efiapi` convention, and freestanding `x86_64-unknown-none` ELF64 target.
 
-Cycle 81 control-plane validation: all 376 PooleOS tests pass with one host-permission symlink test skipped on Windows; Doctor passes 164/164 checks against the live Phase 65 PooleGlyph checkout; the exact Git index publication audit passes over 335 paths with zero violations; and the complete consistency release gate passes 61/61 checks over 56 artifacts while retaining 20 explicit gaps and `production_ready=false`. The release-gate receipt SHA-256 is `935814C2F819508839D6D908FBE268BB0DC814A8F368F86397ED69FE05CB6C57`.
+Cycle 82 qualification evidence:
+
+- `specs/native-toolchain-lock.json` freezes the official dated Rust 1.97.0 channel manifest, rustup-init, rustc, Cargo, host standard library, and both target standard-library archive hashes.
+- `specs/native-target-contract.json` freezes Rust 2024, `no_std`, panic abort, static link, calling conventions, PE32+/ELF64 formats, entry symbols, code/relocation models, red-zone policy, and pre-context floating/vector prohibition.
+- `tools/bootstrap_native_toolchain.ps1` verifies official SHA-256 records and installs only under ignored workspace-local Rust/Cargo homes without global `PATH` mutation.
+- Dependency-free empty PooleBoot and PooleKernel qualification crates build offline and locked in two distinct clean target directories.
+- The PE32+ fixture is 3,072 bytes at `41E212DE8ADFF8F673B857C46EA9913F94A6B09C35567E2B5F289BDEB756DE45`; the ELF64 fixture is 984 bytes at `806660E6276777DC0023ED89379B0F94FDB5FF354325F5CABB6E808F94B27322`. Both pairs are byte-identical.
+- The independent parser verifies machine, format, subsystem/type, entry, timestamp, imports/debug state, static segments, and bounded section layout. Host-path/runtime-library scans find zero hits. Injected host leakage, PE-for-ELF substitution, and truncated ELF controls are rejected.
+- `runs/native_toolchain_qualification.json` is schema-validated and explicitly records one host, no functional boot, no kernel execution, no two-host completion, and no production promotion.
+
+Open N3 work: a second clean host, detached-signature and source-rebuild provenance, freestanding C17, bounded assembly, ABI probes/headers, archive and image tools, QEMU/OVMF, generated ABI tables, complete build graph, static analysis, unsafe inventory, and the remaining section 008-011 requirements.
+
+Cycle 82 control-plane validation: all 386 PooleOS tests pass with one host-permission symlink test skipped on Windows; Doctor passes 183 checks against the live Phase 65 PooleGlyph checkout; and the complete consistency release gate passes 62/62 checks over 57 artifacts while retaining 20 explicit gaps and `production_ready=false`. The final exact-index path/byte count and release-gate digest are recorded in the Cycle 82 log after staging.
 
 Exit gate: two clean host environments reproduce bootstrap tools and empty native images; host headers/libraries cannot leak; ABI fixtures pass independently; all generated inputs are declared.
 
@@ -1020,26 +1034,25 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 
 ## 12. Near-Term Execution Sequence
 
-Cycle 81 establishes the local source-control and executable constitution baseline. Owner/signing actions remain on the critical path, while the next unblocked engineering move is a non-promoting N3 toolchain qualification draft.
+Cycle 82 completes the bounded one-host output of `N3-TOOLCHAIN-001` and publishes the Cycle 81 baseline under a protected workflow. The full N3 exit gate remains open. Owner acceptance and signing now return to the front of the critical path.
 
 | Order | Move | Required output |
 |---:|---|---|
-| 1 | `N3-TOOLCHAIN-001` | Pinned host tools, frozen freestanding targets, reproducible empty PE32+/ELF64 fixtures, and host-leakage negatives; non-promoting until N0/N1 close |
-| 2 | `N0-RATIFY-001` | Owner-controlled signatures for accepted ADRs plus acceptance/disposition of proposed language and namespace ADRs |
-| 3 | `N1-SCM-PUBLISH-001` | Public remote publication, protected workflow, signed baseline tag, immutable refs, and publication receipt |
-| 4 | `N2-HW-001` | Exact Tier 0/Tier 1 hardware and standards manifests plus safe lab approval |
-| 5 | `N4-QEMU-001` | Pinned OVMF/QEMU native launch, serial capture, GDB, deterministic debug-exit receipt |
-| 6 | `N5-POOLEBOOT-001` | Poole-authored PE32+ UEFI application prints, draws GOP pixels, reads tables/map, exits cleanly |
-| 7 | `N5-BOOTPROTO-001` | Canonical boot handoff schema, independent decoder, golden bytes, malformed corpus |
-| 8 | `N5-ELF-001` | PooleBoot validates and loads a minimal PooleKernel ELF64 image |
-| 9 | `N6-KENTRY-001` | Kernel entry, serial/framebuffer log, panic, build ID, signed manifest continuity |
-| 10 | `N7-TRAP-001` | GDT/TSS/IDT and deliberate breakpoint/page-fault evidence |
-| 11 | `N9-PMM-001` | Normalized map, bootstrap allocator, physical allocator, guarded mappings |
-| 12 | `N8-IRQ-001` | Local APIC, timer, monotonic clock, and first SMP application processor |
-| 13 | `N12-SCHED-001` | Neutral scheduler and context switch under SMP stress |
-| 14 | `N13-RING3-001` | First user task, syscall, capability object, exception, and clean exit |
-| 15 | `N14-IPC-001` | Capability-mediated call/reply, cancellation, quota, and hostile message tests |
-| 16 | `N16-VIRTIO-001` | Isolated virtio console/RNG driver domain with revocation and restart |
+| 1 | `N0-RATIFY-001` | Owner acceptance/disposition of proposed ADRs and owner-controlled signatures for the accepted set |
+| 2 | `N1-SCM-CLOSE-001` | Signing custody, signed baseline tag, immutable refs, retained CI/review policy, and publication receipt |
+| 3 | `N2-HW-001` | Exact Tier 0/Tier 1 hardware and standards manifests plus safe lab approval |
+| 4 | `N4-QEMU-001` | Pinned OVMF/QEMU native launch, serial capture, GDB, deterministic debug-exit receipt |
+| 5 | `N5-POOLEBOOT-001` | Poole-authored PE32+ UEFI application prints, draws GOP pixels, reads tables/map, exits cleanly |
+| 6 | `N5-BOOTPROTO-001` | Canonical boot handoff schema, independent decoder, golden bytes, malformed corpus |
+| 7 | `N5-ELF-001` | PooleBoot validates and loads a minimal PooleKernel ELF64 image |
+| 8 | `N6-KENTRY-001` | Kernel entry, serial/framebuffer log, panic, build ID, signed manifest continuity |
+| 9 | `N7-TRAP-001` | GDT/TSS/IDT and deliberate breakpoint/page-fault evidence |
+| 10 | `N9-PMM-001` | Normalized map, bootstrap allocator, physical allocator, guarded mappings |
+| 11 | `N8-IRQ-001` | Local APIC, timer, monotonic clock, and first SMP application processor |
+| 12 | `N12-SCHED-001` | Neutral scheduler and context switch under SMP stress |
+| 13 | `N13-RING3-001` | First user task, syscall, capability object, exception, and clean exit |
+| 14 | `N14-IPC-001` | Capability-mediated call/reply, cancellation, quota, and hostile message tests |
+| 15 | `N16-VIRTIO-001` | Isolated virtio console/RNG driver domain with revocation and restart |
 
 PDC-SIGNED-001 and PooleGlyph Phase 66 may proceed as parallel component lanes, but neither outranks N0-N5 on the native critical path.
 

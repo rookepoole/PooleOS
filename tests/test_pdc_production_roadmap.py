@@ -125,12 +125,12 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertFalse(historical["production_ready"])
         self.assertEqual(historical["native_promotion_role"], "historical_non_promoting")
         current = self.roadmap["baseline"]["native_consistency_release_gate"]
-        self.assertEqual(current["passed_checks"], 61)
-        self.assertEqual(current["total_checks"], 61)
-        self.assertEqual(current["artifact_count"], 56)
+        self.assertEqual(current["passed_checks"], 62)
+        self.assertEqual(current["total_checks"], 62)
+        self.assertEqual(current["artifact_count"], 57)
         self.assertEqual(current["explicit_gap_count"], 20)
         self.assertFalse(current["production_ready"])
-        self.assertEqual(self.roadmap["immediate_next_move"]["id"], "N3-TOOLCHAIN-001")
+        self.assertEqual(self.roadmap["immediate_next_move"]["id"], "N0-RATIFY-001")
         self.assertFalse(self.roadmap["immediate_next_move"]["blocked"])
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:

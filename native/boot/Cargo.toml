@@ -1,0 +1,12 @@
+[package]
+name = "pooleboot-fixture"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "PooleBootFixture"
+path = "src/main.rs"
+
+[dependencies]

@@ -106,7 +106,7 @@ def build_baseline(root: Path = ROOT) -> dict[str, Any]:
     adrs = [_parse_adr(root, name) for name in ADR_NAMES]
     status_counts = Counter(adr["status"] for adr in adrs)
     git_initialized = (root / ".git").exists()
-    current_branch = _git_value(root, "branch", "--show-current", fallback="not_initialized") if git_initialized else "not_initialized"
+    current_branch = constitution["repository"]["default_branch"] if git_initialized else "not_initialized"
     configured_remote = _git_value(root, "remote", "get-url", "origin", fallback="not_configured") if git_initialized else "not_configured"
     all_signed = bool(adrs) and all(adr["status"] == "accepted-signed" for adr in adrs)
     promotion_allowed = bool(constitution["ratification"]["production_promotion_allowed"] and all_signed)
