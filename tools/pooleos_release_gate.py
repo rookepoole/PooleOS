@@ -18,6 +18,7 @@ from runtime import pgb2_bundle as pgb2  # noqa: E402
 from runtime import adr_ratification  # noqa: E402
 from runtime import hardware_target  # noqa: E402
 from runtime import lab_readiness  # noqa: E402
+from runtime import native_v1_objectives  # noqa: E402
 from runtime import readiness  # noqa: E402
 from runtime.schema_validation import validate_json  # noqa: E402
 
@@ -26,13 +27,14 @@ MASTER_CHECKLIST_SHA256 = "A8C94719FAF9428C1F133010BA2603C0270C4E1EFD7327AF8EAB9
 NATIVE_ROADMAP = ROOT / "runs" / "pdc_production_roadmap.json"
 NATIVE_COVERAGE = ROOT / "runs" / "pooleos_native_checklist_coverage.json"
 NATIVE_ARCHITECTURE_BASELINE = ROOT / "runs" / "native_architecture_baseline.json"
+NATIVE_V1_OBJECTIVES_READINESS = ROOT / "runs" / "native_v1_objectives_readiness.json"
 ADR_RATIFICATION_READINESS = ROOT / "runs" / "adr_ratification_readiness.json"
 NATIVE_TOOLCHAIN_QUALIFICATION = ROOT / "runs" / "native_toolchain_qualification.json"
 HARDWARE_TARGET_READINESS = ROOT / "runs" / "hardware_target_readiness.json"
 
 
 DEFAULT_GAPS = [
-    "The ADR ceremony and fail-closed verifier are ready, but owner disposition, signing custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
+    "The ADR ceremony and 38-target candidate objectives contract are ready, but all target measurements, owner target acceptance and ADR disposition, signing custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
     "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
     "No native-only QEMU/OVMF/VIRTIO reference profile or executable formal state models.",
     "No PooleBoot PE32+ UEFI loader or frozen native boot protocol.",
@@ -261,6 +263,62 @@ def check_native_architecture_baseline(path: Path = NATIVE_ARCHITECTURE_BASELINE
     )
     return readiness.make_check(
         "native_architecture_baseline",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_v1_objectives_readiness(path: Path = NATIVE_V1_OBJECTIVES_READINESS) -> dict:
+    artifact, schema_errors = _load_schema_artifact(path, "native-v1-objectives-readiness.schema.json")
+    errors = [f"objectives readiness {error.path}: {error.message}" for error in schema_errors[:8]]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_v1_objectives_readiness",
+            False,
+            "; ".join(errors) or "native v1 objectives readiness is not an object",
+        )
+
+    try:
+        regenerated = native_v1_objectives.build_readiness(ROOT)
+        if path.read_bytes() != native_v1_objectives.canonical_json_bytes(regenerated):
+            errors.append("objectives readiness is not the exact deterministic regeneration")
+    except (OSError, ValueError, KeyError, json.JSONDecodeError, native_v1_objectives.ObjectivesError) as error:
+        errors.append(f"objectives verifier failed closed: {type(error).__name__}: {error}")
+
+    summary = artifact.get("summary", {})
+    owner = artifact.get("owner_boundary", {})
+    if artifact.get("status") != "consistent_candidate_owner_ratification_pending":
+        errors.append("candidate objectives are not consistently ready for owner review")
+    if artifact.get("selected_move_id") != "N0-OBJECTIVES-001":
+        errors.append("objectives readiness does not bind N0-OBJECTIVES-001")
+    if summary.get("consistency_pass") is not True:
+        errors.append("objectives consistency check did not pass")
+    if summary.get("target_count") != 38 or summary.get("measured_target_count") != 0:
+        errors.append("objectives readiness must bind 38 candidate and zero measured targets")
+    if summary.get("negative_control_count") != 10 or summary.get("negative_control_pass_count") != 10:
+        errors.append("objectives negative-control inventory is incomplete")
+    if owner.get("ratification_required") is not True or owner.get("ready_for_owner_review") is not True:
+        errors.append("objectives owner-review boundary is inconsistent")
+    if any(owner.get(field) is not False for field in (
+        "profile_accepted",
+        "target_values_accepted",
+        "cryptographic_signature_present",
+        "ready_for_signature",
+    )):
+        errors.append("objectives readiness overclaims owner acceptance or signature readiness")
+    if artifact.get("n0_6_exit_gate_satisfied") is not False:
+        errors.append("objectives readiness overclaims the N0.6 exit gate")
+    if artifact.get("production_ready") is not False or artifact.get("production_promotion_allowed") is not False:
+        errors.append("objectives readiness overclaims production promotion")
+
+    detail = (
+        f"profile={artifact.get('profile_id')}; targets={summary.get('target_count')}; "
+        f"measured={summary.get('measured_target_count')}; "
+        f"negatives={summary.get('negative_control_pass_count')}/{summary.get('negative_control_count')}; "
+        "owner_pending=true; n0_6_exit=false; production_promotion_allowed=false"
+    )
+    return readiness.make_check(
+        "native_v1_objectives_readiness",
         not errors,
         detail if not errors else "; ".join(errors[:8]),
     )
@@ -3258,6 +3316,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--native-roadmap", type=Path, default=NATIVE_ROADMAP)
     parser.add_argument("--native-checklist-coverage", type=Path, default=NATIVE_COVERAGE)
     parser.add_argument("--native-architecture-baseline", type=Path, default=NATIVE_ARCHITECTURE_BASELINE)
+    parser.add_argument("--native-v1-objectives-readiness", type=Path, default=NATIVE_V1_OBJECTIVES_READINESS)
     parser.add_argument("--adr-ratification-readiness", type=Path, default=ADR_RATIFICATION_READINESS)
     parser.add_argument("--native-toolchain-qualification", type=Path, default=NATIVE_TOOLCHAIN_QUALIFICATION)
     parser.add_argument("--hardware-target-readiness", type=Path, default=HARDWARE_TARGET_READINESS)
@@ -3269,6 +3328,7 @@ def main(argv: list[str] | None = None) -> int:
         run_doctor(include_runtime=args.include_runtime),
         check_native_architecture_plan(args.native_roadmap, args.native_checklist_coverage),
         check_native_architecture_baseline(args.native_architecture_baseline),
+        check_native_v1_objectives_readiness(args.native_v1_objectives_readiness),
         check_adr_ratification_readiness(args.adr_ratification_readiness),
         check_native_toolchain_qualification(args.native_toolchain_qualification),
         check_hardware_target_readiness(args.hardware_target_readiness),
@@ -3450,6 +3510,7 @@ def main(argv: list[str] | None = None) -> int:
             args.native_roadmap,
             args.native_checklist_coverage,
             args.native_architecture_baseline,
+            args.native_v1_objectives_readiness,
             args.adr_ratification_readiness,
             args.native_toolchain_qualification,
             args.hardware_target_readiness,

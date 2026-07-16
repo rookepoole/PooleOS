@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/native-v1-objectives.schema.json",
+  "title": "PooleOS Native V1 Candidate Objectives",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "profile_version", "status_date", "status", "selected_move_id", "production_ready", "production_promotion_allowed", "owner_ratification", "release_profile", "threat_model", "compatibility_policy", "measurement_policy", "targets", "references", "open_items", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_v1_objectives"},
+    "profile_version": {"const": "0.1"},
+    "status_date": {"const": "2026-07-16"},
+    "status": {"const": "candidate_owner_ratification_pending"},
+    "selected_move_id": {"const": "N0-OBJECTIVES-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "owner_ratification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "profile_accepted", "target_values_accepted", "cryptographic_signature_present", "ratification_path"],
+      "properties": {
+        "required": {"const": true},
+        "profile_accepted": {"const": false},
+        "target_values_accepted": {"const": false},
+        "cryptographic_signature_present": {"const": false},
+        "ratification_path": {"const": "N0-RATIFY-001"}
+      }
+    },
+    "release_profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "edition", "architecture", "firmware", "support_profiles", "required_modes", "primary_users", "required_use_cases", "excluded_product_claims"],
+      "properties": {
+        "id": {"const": "POOLEOS-WORKSTATION-V1-CANDIDATE"},
+        "edition": {"const": "PooleOS Workstation"},
+        "architecture": {"const": "x86_64"},
+        "firmware": {"const": "UEFI"},
+        "support_profiles": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "string"}, "uniqueItems": true},
+        "required_modes": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"type": "string"}, "uniqueItems": true},
+        "primary_users": {"type": "array", "minItems": 5, "items": {"type": "string"}, "uniqueItems": true},
+        "required_use_cases": {"type": "array", "minItems": 7, "items": {"type": "string"}, "uniqueItems": true},
+        "excluded_product_claims": {"type": "array", "minItems": 7, "items": {"type": "string"}, "uniqueItems": true}
+      }
+    },
+    "threat_model": {"type": "object", "required": ["in_scope", "external_trust_dependencies", "out_of_scope_claims"]},
+    "compatibility_policy": {
+      "type": "object",
+      "required": ["posix_role", "linux_abi", "linux_kernel_modules", "windows_application_abi", "windows_drivers", "unknown_major_versions", "patch_release_rule", "unlisted_hardware"],
+      "properties": {
+        "linux_abi": {"const": "prohibited_v1"},
+        "linux_kernel_modules": {"const": "prohibited_v1"},
+        "windows_application_abi": {"const": "prohibited_v1"},
+        "windows_drivers": {"const": "prohibited_v1"},
+        "unknown_major_versions": {"const": "reject"}
+      }
+    },
+    "measurement_policy": {"type": "object", "required": ["clock", "percentile_method", "warmup", "failed_samples", "outlier_removal", "power_baseline", "independent_reproduction", "raw_evidence_required"]},
+    "targets": {
+      "type": "array",
+      "minItems": 38,
+      "maxItems": 38,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "category", "metric", "operator", "value", "unit", "minimum_sample_count", "minimum_duration_hours", "percentile", "zero_tolerance", "applies_to", "evidence_phase_ids", "evidence_requirement", "definition_status", "evidence_status"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^(REL|ACC|COMP|PRIV|PERF)-[A-Z0-9-]+-001$"},
+          "category": {"enum": ["reliability", "accessibility", "compatibility", "privacy", "performance"]},
+          "metric": {"type": "string", "minLength": 8},
+          "operator": {"enum": ["minimum", "maximum", "exact"]},
+          "value": {"type": "number", "minimum": 0},
+          "unit": {"type": "string", "minLength": 2},
+          "minimum_sample_count": {"type": "integer", "minimum": 1},
+          "minimum_duration_hours": {"type": "number", "minimum": 0},
+          "percentile": {"type": "number", "minimum": 0, "maximum": 100},
+          "zero_tolerance": {"type": "boolean"},
+          "applies_to": {"type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true},
+          "evidence_phase_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^N(?:[0-9]|[1-3][0-9])$"}, "uniqueItems": true},
+          "evidence_requirement": {"type": "string", "minLength": 30},
+          "definition_status": {"const": "candidate_owner_ratification_pending"},
+          "evidence_status": {"const": "not_measured"}
+        }
+      }
+    },
+    "references": {"type": "array", "minItems": 5, "maxItems": 5, "items": {"type": "object", "required": ["id", "title", "authority", "url", "role"]}},
+    "open_items": {"type": "array", "minItems": 8, "items": {"type": "string"}},
+    "claim_boundary": {"type": "array", "minItems": 6, "items": {"type": "string"}}
+  }
+}

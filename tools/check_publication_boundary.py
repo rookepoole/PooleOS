@@ -30,6 +30,7 @@ ALLOWED_RUNS = {
     "runs/hardware_target_readiness.json",
     "runs/native_architecture_baseline.json",
     "runs/native_toolchain_qualification.json",
+    "runs/native_v1_objectives_readiness.json",
     "runs/pdc_production_roadmap.json",
     "runs/pooleos_native_checklist_coverage.json",
     "runs/tier1_hardware_observation.json",

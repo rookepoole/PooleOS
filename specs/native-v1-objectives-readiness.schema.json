@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/native-v1-objectives-readiness.schema.json",
+  "title": "PooleOS Native V1 Objectives Readiness",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "status_date", "status", "selected_move_id", "profile_id", "production_ready", "production_promotion_allowed", "n0_6_exit_gate_satisfied", "bindings", "validation", "target_coverage", "owner_boundary", "negative_controls", "summary", "open_items", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_v1_objectives_readiness"},
+    "status_date": {"const": "2026-07-16"},
+    "status": {"enum": ["invalid", "consistent_candidate_owner_ratification_pending"]},
+    "selected_move_id": {"const": "N0-OBJECTIVES-001"},
+    "profile_id": {"const": "POOLEOS-WORKSTATION-V1-CANDIDATE"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "n0_6_exit_gate_satisfied": {"const": false},
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["objectives", "objectives_schema", "source_adr", "runtime"],
+      "properties": {
+        "objectives": {"type": "object", "required": ["path", "sha256", "byte_count"]},
+        "objectives_schema": {"type": "object", "required": ["path", "sha256", "byte_count"]},
+        "source_adr": {"type": "object", "required": ["path", "sha256", "byte_count"]},
+        "runtime": {"type": "object", "required": ["path", "sha256", "byte_count"]}
+      }
+    },
+    "validation": {
+      "type": "object",
+      "required": ["schema_failure_count", "schema_failures", "semantic_violation_count", "semantic_violations"],
+      "properties": {
+        "schema_failure_count": {"const": 0},
+        "schema_failures": {"type": "array", "maxItems": 0},
+        "semantic_violation_count": {"const": 0},
+        "semantic_violations": {"type": "array", "maxItems": 0}
+      }
+    },
+    "target_coverage": {
+      "type": "object",
+      "required": ["target_count", "category_counts", "definition_pending_owner_count", "measured_target_count", "unmeasured_target_ids"],
+      "properties": {
+        "target_count": {"const": 38},
+        "category_counts": {
+          "type": "object",
+          "required": ["reliability", "accessibility", "compatibility", "privacy", "performance"],
+          "properties": {
+            "reliability": {"const": 7},
+            "accessibility": {"const": 8},
+            "compatibility": {"const": 6},
+            "privacy": {"const": 7},
+            "performance": {"const": 10}
+          }
+        },
+        "definition_pending_owner_count": {"const": 38},
+        "measured_target_count": {"const": 0},
+        "unmeasured_target_ids": {"type": "array", "minItems": 38, "maxItems": 38, "items": {"type": "string"}, "uniqueItems": true}
+      }
+    },
+    "owner_boundary": {
+      "type": "object",
+      "required": ["ratification_required", "profile_accepted", "target_values_accepted", "cryptographic_signature_present", "ready_for_owner_review", "ready_for_signature"],
+      "properties": {
+        "ratification_required": {"const": true},
+        "profile_accepted": {"const": false},
+        "target_values_accepted": {"const": false},
+        "cryptographic_signature_present": {"const": false},
+        "ready_for_owner_review": {"const": true},
+        "ready_for_signature": {"const": false}
+      }
+    },
+    "negative_controls": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["id", "expected", "observed", "status"],
+        "properties": {
+          "id": {"type": "string"},
+          "expected": {"const": "reject"},
+          "observed": {"const": "reject"},
+          "status": {"const": "pass"}
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["consistency_pass", "target_count", "measured_target_count", "blocking_owner_action_count", "negative_control_count", "negative_control_pass_count"],
+      "properties": {
+        "consistency_pass": {"const": true},
+        "target_count": {"const": 38},
+        "measured_target_count": {"const": 0},
+        "blocking_owner_action_count": {"const": 3},
+        "negative_control_count": {"const": 10},
+        "negative_control_pass_count": {"const": 10}
+      }
+    },
+    "open_items": {"type": "array", "minItems": 6, "items": {"type": "string"}},
+    "claim_boundary": {"type": "array", "minItems": 6, "items": {"type": "string"}}
+  }
+}

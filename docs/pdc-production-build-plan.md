@@ -2,7 +2,7 @@
 
 Status date: 2026-07-16  
 Plan version: 2.0.0-native-reset  
-Roadmap cycle: PooleOS Cycle 84
+Roadmap cycle: PooleOS Cycle 85
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
@@ -110,7 +110,7 @@ Recovery boots from a separately signed immutable image and remains usable witho
 
 ## 5. Current Evidence Baseline
 
-Cycle 80 reset architecture claims without discarding validated component evidence. Cycle 81 established the first byte-bound native constitution and repository boundary. Cycle 82 published the baseline repository, protected `main`, and qualified the first pinned freestanding PE32+/ELF64 compiler path on one host. Cycle 83 froze and tested the owner-controlled ADR ceremony without generating a key, signing as the owner, or promoting any unsigned decision. Cycle 84 establishes the privacy-preserving Tier 1 hardware target, support policy, standards register, read-only capture path, and fail-closed readiness ledger without authorizing hardware mutation or destructive testing.
+Cycle 80 reset architecture claims without discarding validated component evidence. Cycle 81 established the first byte-bound native constitution and repository boundary. Cycle 82 published the baseline repository, protected `main`, and qualified the first pinned freestanding PE32+/ELF64 compiler path on one host. Cycle 83 froze and tested the owner-controlled ADR ceremony without generating a key, signing as the owner, or promoting any unsigned decision. Cycle 84 established the privacy-preserving Tier 1 hardware target, support policy, standards register, read-only capture path, and fail-closed readiness ledger without authorizing hardware mutation or destructive testing. Cycle 85 defines a measurable candidate Workstation v1 profile across reliability, accessibility, compatibility, privacy, and performance while preserving owner ratification and all implementation measurements as open gates.
 
 | Area | Current evidence | Native status | Boundary |
 |---|---|---|---|
@@ -124,8 +124,9 @@ Cycle 80 reset architecture claims without discarding validated component eviden
 | PGB2/PGVM2 | JSON draft, byte/trap simulator, capability planning receipts | Partial N34/N35 | No frozen binary ABI or native execution |
 | Isolation | Static microkernel/capability simulations and bounded fuzz evidence | Partial N15/N35 | Not enforced by PooleKernel |
 | QEMU/Buildroot | Historical lab scaffolding and evidence contracts | Reference only | Cannot satisfy native boot, kernel, driver, or ISO gates |
-| Test suite | Cycle 84: 412 tests pass with one Windows symlink-permission skip, including ten hardware privacy, substitution, and safety negative controls | Partial N36 | Predominantly host/reference and artifact tests |
-| Release gate | Cycle 84: 64/64 consistency checks over 59 artifacts; 20 native gaps | Partial N37 | `production_ready=false`; not a release acceptance gate |
+| Native v1 objectives | 38 measurable candidate targets: 7 reliability, 8 accessibility, 6 compatibility, 7 privacy, and 10 performance; ten negative controls pass | Partial N0.6 | Zero targets measured; profile and values await owner ratification |
+| Test suite | Cycle 85: 427 tests pass with one Windows symlink-permission skip, including objectives, hardware privacy, substitution, and safety negative controls | Partial N36 | Predominantly host/reference and artifact tests |
+| Release gate | Cycle 85: 65/65 consistency checks over 60 artifacts; 20 native gaps | Partial N37 | `production_ready=false`; not a release acceptance gate |
 | Source control | Public `rookepoole/PooleOS`, protected `main`, topic-branch workflow, private vulnerability reporting | Partial N1/N37 | Initial commit unsigned; signed tags, immutable release refs, retained CI, and full review policy remain open |
 | ADR ratification | Canonical OpenSSH `SSHSIG` manifest, domain-separated namespace, public trust/revocation files, signed-tag/remote verifier, ten negative controls | Partial N0/N1/N37 | Zero trusted owner keys; ADR-0003/0004 disposition, signature, tag, and publication receipt remain owner actions |
 | Native toolchain | Rust 1.97.0/Cargo 1.97.0/LLD 22.1.6; two clean PE32+ and ELF64 builds match exactly on one host | Partial N3 | Empty non-booting fixtures; second host and remaining tool families are open |
@@ -270,7 +271,7 @@ Subphases:
 - N0.7 Define release claims and independent-reproduction requirements.
 - N0.8 Add architecture-conformance tests that reject Linux kernels, Buildroot rootfs markers, GRUB/Limine, systemd, and other prohibited production dependencies from release media.
 
-Cycle 81-84 evidence:
+Cycle 81-85 evidence:
 
 - ADR-0001 through ADR-0007 record the native constitution, reuse/publication boundary, proposed language split, proposed namespace registry, v1 scope, TCB placement, and repository governance.
 - `specs/native-architecture-constitution.json` and `runs/native_architecture_baseline.json` bind exact architecture constants, seven ADR byte hashes, source hashes, owner direction, repository identity, 20 version namespaces, and eight TCB domains.
@@ -280,12 +281,15 @@ Cycle 81-84 evidence:
 - `tools/prepare_adr_ratification.py` refuses inferred acceptance, zero/multiple signers, unsupported keys, and unacknowledged provisional software-key risk. `tools/verify_adr_ratification.py` verifies exact manifest bytes, owner principal, namespace, revocation, signed annotated tag, tag-contained evidence, remote tag object, peeled commit, and exact remote `main` tip.
 - Ten focused tests exercise a throwaway test-only key and Git repository plus tampered ADRs, wrong namespaces, unknown signers, malformed signatures, noncanonical bytes, revocation, missing disposition, and tag/publication gates. No test key is retained.
 - `runs/adr_ratification_readiness.json` deterministically records seven bound ADRs, two proposed records, zero cryptographically ratified records, zero trusted signers, five owner actions, and `production_promotion_allowed=false`.
+- `specs/native-v1-objectives.json` defines the candidate `POOLEOS-WORKSTATION-V1-CANDIDATE` profile, seven required operating modes, exact Tier 0/Tier 1 scope boundaries, threat assumptions, measurement policy, and 38 measurable targets: 7 reliability, 8 accessibility, 6 compatibility, 7 privacy, and 10 performance.
+- `runtime/native_v1_objectives.py`, both schemas, and `runs/native_v1_objectives_readiness.json` enforce exact target-family counts, owner-pending state, zero measured targets, deterministic byte bindings, and ten negative controls covering missing families, duplicates, invalid samples/percentiles, telemetry defaults, compatibility overclaims, recovery accessibility, evidence overclaims, production promotion, and inferred owner acceptance.
+- The candidate contract references WCAG 2.2, ETSI EN 301 549 V3.2.1, NIST Privacy Framework 1.1, and ADR-0005 with explicit applicability and non-claim boundaries. These references inform candidate criteria; they do not assert PooleOS conformance.
 
 Open N0 work:
 
 - No ADR has an owner-controlled cryptographic signature. ADR-0003 and ADR-0004 remain proposals pending explicit owner disposition; trademark and full toolchain review also remain open.
 - Rooke Poole must choose governance-key custody, approve the public key/fingerprint, physically authorize the detached signature and tag, and publish the exact receipt. Codex has performed none of those owner actions.
-- Quantitative reliability, accessibility, compatibility, privacy, and performance targets remain open.
+- Rooke Poole must accept, amend, or reject the candidate Workstation v1 profile and all 38 target values. Every target remains `not_measured`; implementation-bound baselines and passing evidence remain open across N4-N39.
 - N0 therefore remains `partial`; no bootloader, kernel, driver, userspace, desktop, or ISO implementation is inferred from this evidence.
 
 Exit gate: signed ADRs resolve every section 000.2 choice; names and version identifiers are reserved; exact supported scope and completion conditions are machine-readable; no production document describes PooleOS as Linux-based.
@@ -375,7 +379,7 @@ Cycle 82 qualification evidence:
 
 Open N3 work: a second clean host, detached-signature and source-rebuild provenance, freestanding C17, bounded assembly, ABI probes/headers, archive and image tools, QEMU/OVMF, generated ABI tables, complete build graph, static analysis, unsafe inventory, and the remaining section 008-011 requirements.
 
-Cycle 84 control-plane validation passes 412 tests with one Windows symlink-permission skip, Doctor passes its complete check set against live PooleGlyph Phase 65, and the complete consistency release gate passes 64/64 checks over 59 artifacts while retaining 20 explicit gaps and `production_ready=false`. Exact public-index, release-gate, and handoff hashes are recorded in the Cycle 84 log after staging.
+Cycle 85 control-plane validation passes 427 tests with one Windows symlink-permission skip, Doctor passes its complete check set against live PooleGlyph Phase 65, and the complete consistency release gate passes 65/65 checks over 60 artifacts while retaining 20 explicit gaps and `production_ready=false`. Exact public-index, release-gate, and handoff hashes are recorded in the Cycle 85 log after staging.
 
 Exit gate: two clean host environments reproduce bootstrap tools and empty native images; host headers/libraries cannot leak; ABI fixtures pass independently; all generated inputs are declared.
 
@@ -1036,6 +1040,7 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 |---|---|---|---|
 | `FLAG-NATIVE-SCM-001` | STOP_SHIP | Open | Put PooleOS under reviewed source control with immutable release revisions |
 | `FLAG-NATIVE-ADR-001` | BLOCKER | Open | Ratify kernel, reuse, language, TCB, ABI, driver, filesystem, and release ADRs |
+| `FLAG-N0-OBJECTIVES-001` | REQUIRED | Open | Owner-ratify the v1 profile and 38 target values, then bind passing native evidence to every target |
 | `FLAG-NATIVE-BOOT-001` | STOP_SHIP | Open | Reproducible PooleBoot PE32+ boots and transfers through the frozen handoff |
 | `FLAG-NATIVE-KERNEL-001` | STOP_SHIP | Open | PooleKernel boots, enforces memory/capabilities/IPC, and runs ring 3 |
 | `FLAG-NATIVE-IOMMU-001` | STOP_SHIP | Open | DMA and interrupt remapping confine every bus-mastering driver |
@@ -1056,11 +1061,11 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 
 ## 12. Near-Term Execution Sequence
 
-Cycle 84 completes the safe, sanitized portion of `N2-HW-001`: exact target identity, support policy, public observation, standards metadata, privacy controls, and readiness accounting. The move remains partial because seven required evidence channels, 15 exact standards hashes, ten lab-safety prerequisites, Tier 0 qualification, and native comparison are open. `N0-RATIFY-001` remains the immediate owner move and is blocked on owner disposition, key custody, physical signing, and publication; `N2-HW-002`, `N4-QEMU-001`, and second-host N3 reproduction may proceed without promoting N0 or N2.
+Cycle 85 completes the safe preparation portion of `N0-OBJECTIVES-001`: a machine-readable candidate profile, 38 measurable targets, deterministic readiness, and ten fail-closed controls. N0.6 remains partial because owner profile/value acceptance and all 38 measurements are open. `N0-RATIFY-001` remains the immediate owner move and is blocked on target acceptance or amendment, ADR disposition, key custody, physical signing, and publication. `N2-HW-002`, `N4-QEMU-001`, and second-host N3 reproduction may proceed as non-promoting engineering preparation; no owner action, hardware mutation, or destructive test is inferred.
 
 | Order | Move | Required output |
 |---:|---|---|
-| 1 | `N0-RATIFY-001` | Owner disposition of ADR-0003/0004, custody choice, public-key fingerprint, detached signature, signed tag, and exact publication receipt |
+| 1 | `N0-RATIFY-001` | Owner acceptance or amendment of the v1 profile and 38 values, ADR-0003/0004 disposition, custody choice, public-key fingerprint, detached signature, signed tag, and exact publication receipt |
 | 2 | `N1-SCM-CLOSE-001` | Signed-commit policy, immutable refs, retained CI/review policy, and protected-workflow closure after the pre-signing history is resolved |
 | 3 | `N2-HW-002` | Read-only CPUID/MSR, PCI configuration, duplicate ACPI, EDID/SPD, UEFI-variable, sensor/power, and native-comparison evidence with no destructive action |
 | 4 | `N4-QEMU-001` | Pinned OVMF/QEMU native launch, serial capture, GDB, deterministic debug-exit receipt |

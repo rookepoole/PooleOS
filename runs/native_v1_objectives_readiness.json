@@ -1,0 +1,187 @@
+{
+  "artifact_kind": "pooleos_native_v1_objectives_readiness",
+  "bindings": {
+    "objectives": {
+      "byte_count": 33416,
+      "path": "specs/native-v1-objectives.json",
+      "sha256": "525946A7AA7A7D0F27682810EDD636D7E743C32548ACE442AB208B680A7E8584"
+    },
+    "objectives_schema": {
+      "byte_count": 5437,
+      "path": "specs/native-v1-objectives.schema.json",
+      "sha256": "AF4D18B414A65D35ABEBC178AE2B55FFAB3FF5A5CE7D17C8A4CB279A7F038A98"
+    },
+    "runtime": {
+      "byte_count": 17021,
+      "path": "runtime/native_v1_objectives.py",
+      "sha256": "D589808391E796B7E87788861CED7E51D714A9419F3F191B3A34B95AD42CA6D2"
+    },
+    "source_adr": {
+      "byte_count": 3124,
+      "path": "docs/adr/0005-v1-scope-mission-threats-and-non-goals.md",
+      "sha256": "1C7924EFE619F39AEF6BAB54ED3981BB5439AE929783C5EACD8FAA08EBF60268"
+    }
+  },
+  "claim_boundary": [
+    "The candidate profile and values are ready for owner review, not owner-accepted or cryptographically ratified.",
+    "All 38 target definitions are unmeasured and satisfy no implementation, qualification, or release phase gate.",
+    "Schema and semantic consistency do not prove reliability, accessibility, compatibility, privacy, or performance.",
+    "The objectives ledger cannot authorize signatures, production promotion, hardware mutation, or destructive testing.",
+    "Finite future samples remain bounded to their exact profiles, durations, workloads, firmware, and evidence.",
+    "N0.6 and N0 remain partial until owner ratification and implementation-bound evidence satisfy the Build Plan."
+  ],
+  "n0_6_exit_gate_satisfied": false,
+  "negative_controls": [
+    {
+      "expected": "reject",
+      "id": "reject_missing_target_family",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_duplicate_target_id",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_zero_sample_count",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_impossible_percentile",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_telemetry_enabled_by_default",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_linux_compatibility_claim",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_missing_recovery_accessibility",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_measured_status_without_evidence",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_candidate_production_promotion",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "reject_inferred_owner_acceptance",
+      "observed": "reject",
+      "status": "pass"
+    }
+  ],
+  "open_items": [
+    "Rooke Poole must accept, amend, or reject the candidate profile and each quantitative target before ADR ratification.",
+    "Tier-0 QEMU/OVMF and exact Tier-1 measurement baselines do not exist.",
+    "No target has implementation-bound measured evidence.",
+    "Accessibility applicability and EN 301 549 supersession review remain open.",
+    "Power targets require external instrumentation and an accepted baseline.",
+    "Compatibility windows require frozen PBP1, PKABI1, PSABI1, PIPC1, PDRV1, PUABI1, PXABI1, PGB2, and PGVM2 contracts.",
+    "Privacy targets require native networking, logging, diagnostics, consent, and deletion implementations.",
+    "Release thresholds must be reviewed after prototype baselines without silently weakening safety or claim boundaries."
+  ],
+  "owner_boundary": {
+    "cryptographic_signature_present": false,
+    "profile_accepted": false,
+    "ratification_required": true,
+    "ready_for_owner_review": true,
+    "ready_for_signature": false,
+    "target_values_accepted": false
+  },
+  "production_promotion_allowed": false,
+  "production_ready": false,
+  "profile_id": "POOLEOS-WORKSTATION-V1-CANDIDATE",
+  "schema_version": "1.0",
+  "selected_move_id": "N0-OBJECTIVES-001",
+  "status": "consistent_candidate_owner_ratification_pending",
+  "status_date": "2026-07-16",
+  "summary": {
+    "blocking_owner_action_count": 3,
+    "consistency_pass": true,
+    "measured_target_count": 0,
+    "negative_control_count": 10,
+    "negative_control_pass_count": 10,
+    "target_count": 38
+  },
+  "target_coverage": {
+    "category_counts": {
+      "accessibility": 8,
+      "compatibility": 6,
+      "performance": 10,
+      "privacy": 7,
+      "reliability": 7
+    },
+    "definition_pending_owner_count": 38,
+    "measured_target_count": 0,
+    "target_count": 38,
+    "unmeasured_target_ids": [
+      "ACC-CONTRAST-001",
+      "ACC-FLASH-001",
+      "ACC-KEYBOARD-001",
+      "ACC-RECOVERY-001",
+      "ACC-REDUCED-MOTION-001",
+      "ACC-SEMANTICS-001",
+      "ACC-TEXT-SCALE-001",
+      "ACC-WCAG-AA-001",
+      "COMP-LINUX-ABI-001",
+      "COMP-PATCH-001",
+      "COMP-POSIX-SUBSET-001",
+      "COMP-SUPPORTED-HARDWARE-001",
+      "COMP-VERSION-001",
+      "COMP-WINDOWS-ABI-001",
+      "PERF-BOOT-MARKER-001",
+      "PERF-FRAME-P95-001",
+      "PERF-FRAME-P99-001",
+      "PERF-IDLE-CPU-001",
+      "PERF-IDLE-MEMORY-001",
+      "PERF-INPUT-LATENCY-001",
+      "PERF-IPC-001",
+      "PERF-KERNEL-INIT-001",
+      "PERF-LOGIN-READY-001",
+      "PERF-POWER-REGRESSION-001",
+      "PRIV-CONSENT-REVOCATION-001",
+      "PRIV-CRASH-UPLOAD-001",
+      "PRIV-DIAGNOSTIC-REDACTION-001",
+      "PRIV-PRECONSENT-NETWORK-001",
+      "PRIV-RETENTION-001",
+      "PRIV-STABLE-ID-001",
+      "PRIV-TELEMETRY-DEFAULT-001",
+      "REL-DRIVER-RECOVERY-001",
+      "REL-FS-POWER-001",
+      "REL-RECOVERY-RTO-001",
+      "REL-SOAK-001",
+      "REL-T0-BOOT-001",
+      "REL-T1-BOOT-001",
+      "REL-UPDATE-001"
+    ]
+  },
+  "validation": {
+    "schema_failure_count": 0,
+    "schema_failures": [],
+    "semantic_violation_count": 0,
+    "semantic_violations": []
+  }
+}

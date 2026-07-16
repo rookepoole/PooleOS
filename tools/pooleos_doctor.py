@@ -106,6 +106,17 @@ def check_native_architecture_baseline() -> CheckResult:
     )
 
 
+def check_native_v1_objectives_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_v1_objectives_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
 def check_adr_ratification_readiness() -> CheckResult:
     from tools import pooleos_release_gate
 
@@ -3127,6 +3138,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "docs" / "adr-ratification-ceremony.md",
                 ROOT / "docs" / "native-toolchain-qualification.md",
                 ROOT / "docs" / "hardware-target-and-lab-safety.md",
+                ROOT / "docs" / "native-v1-objectives.md",
                 ROOT
                 / "sources"
                 / "requirements"
@@ -3139,6 +3151,9 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "specs" / "native-architecture-constitution.json",
                 ROOT / "specs" / "native-architecture-constitution.schema.json",
                 ROOT / "specs" / "native-architecture-baseline.schema.json",
+                ROOT / "specs" / "native-v1-objectives.json",
+                ROOT / "specs" / "native-v1-objectives.schema.json",
+                ROOT / "specs" / "native-v1-objectives-readiness.schema.json",
                 ROOT / "specs" / "adr-ratification-policy.json",
                 ROOT / "specs" / "adr-ratification-policy.schema.json",
                 ROOT / "specs" / "adr-ratification-manifest.schema.json",
@@ -3164,6 +3179,8 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "tools" / "generate_native_checklist_coverage.py",
                 ROOT / "tools" / "generate_native_production_roadmap.py",
                 ROOT / "tools" / "generate_native_architecture_baseline.py",
+                ROOT / "tools" / "generate_native_v1_objectives_readiness.py",
+                ROOT / "tools" / "verify_native_v1_objectives.py",
                 ROOT / "tools" / "generate_adr_ratification_readiness.py",
                 ROOT / "tools" / "prepare_adr_ratification.py",
                 ROOT / "tools" / "verify_adr_ratification.py",
@@ -3176,6 +3193,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "tools" / "generate_hardware_target_readiness.py",
                 ROOT / "tools" / "verify_hardware_target.py",
                 ROOT / "runtime" / "native_binary.py",
+                ROOT / "runtime" / "native_v1_objectives.py",
                 ROOT / "runtime" / "adr_ratification.py",
                 ROOT / "runtime" / "hardware_target.py",
                 ROOT / "security" / "README.md",
@@ -3192,6 +3210,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runs" / "pooleos_native_checklist_coverage.json",
                 ROOT / "runs" / "pdc_production_roadmap.json",
                 ROOT / "runs" / "native_architecture_baseline.json",
+                ROOT / "runs" / "native_v1_objectives_readiness.json",
                 ROOT / "runs" / "adr_ratification_readiness.json",
                 ROOT / "runs" / "native_toolchain_qualification.json",
                 ROOT / "runs" / "tier1_hardware_observation.json",
@@ -3265,6 +3284,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     checks.append(check_native_architecture_plan())
     checks.append(check_native_architecture_baseline())
+    checks.append(check_native_v1_objectives_readiness())
     checks.append(check_adr_ratification_readiness())
     checks.append(check_native_toolchain_qualification())
     checks.append(check_hardware_target_readiness())
