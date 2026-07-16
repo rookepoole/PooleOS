@@ -99,11 +99,62 @@
   },
   "claim_boundary": [
     "This readiness ledger is unsigned preparation evidence and is not owner acceptance.",
+    "The exact candidate objectives and schema are bound, but all 38 values still require explicit owner disposition.",
     "No private key, credential, recovery secret, or hardware-backed key handle is recorded.",
     "A detached signature alone does not satisfy the signed-tag and remote-publication gates.",
     "Architecture ratification does not prove a bootloader, kernel, driver, desktop, or production ISO."
   ],
+  "decision_inputs": {
+    "bound_sources": [
+      {
+        "byte_count": 6015,
+        "path": "specs/native-architecture-constitution.json",
+        "sha256": "94D8BDDF9BC85DE10D3B7FBF53BA2D0CC1C822C1F573FF94D0F1AB49F7EFF753"
+      },
+      {
+        "byte_count": 33416,
+        "path": "specs/native-v1-objectives.json",
+        "sha256": "525946A7AA7A7D0F27682810EDD636D7E743C32548ACE442AB208B680A7E8584"
+      },
+      {
+        "byte_count": 5437,
+        "path": "specs/native-v1-objectives.schema.json",
+        "sha256": "AF4D18B414A65D35ABEBC178AE2B55FFAB3FF5A5CE7D17C8A4CB279A7F038A98"
+      },
+      {
+        "byte_count": 10030,
+        "path": "specs/pooleos-kernel-charter.md",
+        "sha256": "A70F2AB3246D0F4E27770776068B70817CE1B7F2996768AEE2964D99CC534F2F"
+      },
+      {
+        "byte_count": 1765,
+        "path": "specs/native-release-architecture-policy.json",
+        "sha256": "F8B6D491A28D72E3C9B36FAB5B24D446FBD67CD760A9A8B05C7774EB3A691DE5"
+      },
+      {
+        "byte_count": 3126,
+        "path": "docs/publication-boundary.md",
+        "sha256": "5CF21AA85BBBFE0ECAC93204381BD9D4B051D706CC374185E4A5A999DDE47432"
+      }
+    ],
+    "objectives": {
+      "measured_target_count": 0,
+      "owner_ratification_pending": true,
+      "path": "specs/native-v1-objectives.json",
+      "profile_id": "POOLEOS-WORKSTATION-V1-CANDIDATE",
+      "schema_and_semantics_valid": true,
+      "source_profile_accepted": false,
+      "source_target_values_accepted": false,
+      "target_count": 38
+    },
+    "required_bound_source_count": 6
+  },
   "owner_actions": [
+    {
+      "description": "Explicitly accept, amend, or reject the candidate Workstation v1 profile and all 38 target values; definition acceptance must not claim measurement evidence.",
+      "id": "OWNER-OBJECTIVES-DISPOSITION-001",
+      "status": "pending"
+    },
     {
       "description": "Explicitly accept, amend, or reject ADR-0003 and ADR-0004; an amendment or rejection requires a revised or superseding ADR before signing.",
       "id": "OWNER-ADR-DISPOSITION-001",
@@ -131,24 +182,28 @@
     }
   ],
   "policy": {
-    "byte_count": 6768,
+    "byte_count": 7394,
     "path": "specs/adr-ratification-policy.json",
-    "sha256": "A04C51A811C75E97E2EDDA5EB90F2DB28E83C6352792F2E4F885D7C30100822F"
+    "sha256": "ADE9E446A604D224C80D1436D3D1E0AF0DA29A2F567416492BCB133F0E22C111"
   },
   "production_promotion_allowed": false,
   "production_ready": false,
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "selected_move_id": "N0-RATIFY-001",
   "status": "pending_owner_action",
   "status_date": "2026-07-16",
   "summary": {
-    "blocking_owner_action_count": 5,
-    "defined_negative_control_count": 10,
+    "blocking_owner_action_count": 6,
+    "defined_negative_control_count": 12,
+    "objectives_measured_target_count": 0,
+    "objectives_owner_acceptance_pending": true,
+    "objectives_target_count": 38,
     "policy_schema_valid": true,
     "ratification_tooling_present": true,
     "ready_for_owner_action": true,
     "ready_for_signature": false,
-    "required_adr_set_complete": true
+    "required_adr_set_complete": true,
+    "required_bound_source_count": 6
   },
   "trust_bootstrap": {
     "allowed_signers_path": "security/owner-adr-signers.allowed",

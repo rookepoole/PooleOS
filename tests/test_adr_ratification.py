@@ -4,6 +4,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 
@@ -23,6 +24,8 @@ CONTRACT_PATHS = (
     "specs/adr-ratification-readiness.schema.json",
     "specs/adr-ratification-receipt.schema.json",
     "specs/native-architecture-constitution.json",
+    "specs/native-v1-objectives.json",
+    "specs/native-v1-objectives.schema.json",
     "specs/pooleos-kernel-charter.md",
     "specs/native-release-architecture-policy.json",
     "docs/publication-boundary.md",
@@ -81,6 +84,7 @@ class AdrRatificationTests(unittest.TestCase):
         manifest = adr_ratification.build_manifest(
             repo,
             owner_accept_all_exact=True,
+            owner_accept_objectives_exact=True,
             accept_software_key_risk=True,
         )
         manifest_path = repo / adr_ratification.MANIFEST_RELATIVE
@@ -113,9 +117,15 @@ class AdrRatificationTests(unittest.TestCase):
         self.assertEqual(self.readiness["status"], "pending_owner_action")
         self.assertEqual(self.readiness["adr_set"]["present_count"], 7)
         self.assertEqual(self.readiness["adr_set"]["pending_owner_disposition"], ["ADR-0003", "ADR-0004"])
+        self.assertEqual(self.readiness["decision_inputs"]["required_bound_source_count"], 6)
+        self.assertEqual(self.readiness["decision_inputs"]["objectives"]["target_count"], 38)
+        self.assertEqual(self.readiness["decision_inputs"]["objectives"]["measured_target_count"], 0)
+        self.assertTrue(self.readiness["decision_inputs"]["objectives"]["owner_ratification_pending"])
         self.assertEqual(self.readiness["trust_bootstrap"]["trusted_signer_count"], 0)
         self.assertTrue(self.readiness["summary"]["ready_for_owner_action"])
         self.assertFalse(self.readiness["summary"]["ready_for_signature"])
+        self.assertEqual(self.readiness["summary"]["blocking_owner_action_count"], 6)
+        self.assertEqual(self.readiness["summary"]["defined_negative_control_count"], 12)
         self.assertFalse(self.readiness["production_promotion_allowed"])
         self.assertFalse(self.readiness["production_ready"])
         gate = pooleos_release_gate.check_adr_ratification_readiness()
@@ -131,17 +141,65 @@ class AdrRatificationTests(unittest.TestCase):
 
     def test_manifest_requires_explicit_acceptance_and_one_scoped_signer(self) -> None:
         with self.assertRaisesRegex(ValueError, "owner_accept_all_exact"):
-            adr_ratification.build_manifest(ROOT, owner_accept_all_exact=False)
+            adr_ratification.build_manifest(
+                ROOT,
+                owner_accept_all_exact=False,
+                owner_accept_objectives_exact=False,
+            )
+        with self.assertRaisesRegex(ValueError, "owner_accept_objectives_exact"):
+            adr_ratification.build_manifest(
+                ROOT,
+                owner_accept_all_exact=True,
+                owner_accept_objectives_exact=False,
+            )
         with self.assertRaisesRegex(ValueError, "exactly one owner bootstrap signer"):
-            adr_ratification.build_manifest(ROOT, owner_accept_all_exact=True)
+            adr_ratification.build_manifest(
+                ROOT,
+                owner_accept_all_exact=True,
+                owner_accept_objectives_exact=True,
+            )
+
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = Path(tmp)
+            repo = parent / "repo"
+            repo.mkdir()
+            self._copy_contract(repo)
+            self._generate_test_signer(parent, repo)
+            manifest = adr_ratification.build_manifest(
+                repo,
+                owner_accept_all_exact=True,
+                owner_accept_objectives_exact=True,
+                accept_software_key_risk=True,
+            )
+            self.assertEqual(len(manifest["bound_sources"]), 6)
+            self.assertEqual(manifest["objectives_acceptance"]["target_count"], 38)
+            self.assertFalse(manifest["objectives_acceptance"]["measurement_evidence_accepted"])
+            self.assertEqual(
+                {binding["path"] for binding in manifest["bound_sources"]},
+                set(adr_ratification.REQUIRED_BOUND_SOURCES),
+            )
 
     def test_current_receipt_state_is_pending_and_never_promotes(self) -> None:
         receipt = adr_ratification.build_receipt(ROOT, observed_at_utc="2026-07-16T00:00:00Z")
         self.assertEqual(receipt["status"], "pending_owner_action")
         self.assertFalse(receipt["detached_signature"]["verified"])
         self.assertFalse(receipt["ratification"]["all_required_cryptographically_ratified"])
+        self.assertFalse(receipt["ratification"]["objectives_definitions_cryptographically_ratified"])
+        self.assertFalse(receipt["architecture_ratification_verified"])
         self.assertFalse(receipt["production_promotion_allowed"])
         self.assertFalse(receipt["production_ready"])
+
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "repo"
+            repo.mkdir()
+            self._copy_contract(repo)
+            policy_path = repo / adr_ratification.POLICY_RELATIVE
+            policy = json.loads(policy_path.read_text(encoding="utf-8"))
+            policy["required_bound_sources"].remove("specs/native-v1-objectives.schema.json")
+            policy_path.write_text(json.dumps(policy, indent=2) + "\n", encoding="utf-8", newline="\n")
+            invalid = adr_ratification.build_receipt(repo, observed_at_utc="2026-07-16T00:00:00Z")
+            self.assertEqual(invalid["status"], "invalid")
+            self.assertFalse(next(check for check in invalid["checks"] if check["name"] == "policy_schema_valid")["ok"])
 
     @unittest.skipUnless(shutil.which("ssh-keygen"), "OpenSSH ssh-keygen is unavailable")
     def test_real_detached_signature_verifies_but_tag_gate_stays_closed(self) -> None:
@@ -160,6 +218,8 @@ class AdrRatificationTests(unittest.TestCase):
             self.assertEqual(receipt["status"], "detached_signature_verified_tag_pending")
             self.assertTrue(receipt["detached_signature"]["verified"])
             self.assertEqual(receipt["ratification"]["accepted_exact_count"], 7)
+            self.assertTrue(receipt["ratification"]["objectives_definitions_cryptographically_ratified"])
+            self.assertFalse(receipt["ratification"]["objectives_measurements_complete"])
             self.assertFalse(receipt["signed_tag"]["present"])
             self.assertFalse(receipt["production_promotion_allowed"])
 
@@ -216,6 +276,35 @@ class AdrRatificationTests(unittest.TestCase):
             self.assertFalse(remote_receipt["remote_publication"]["remote_url_match"])
             self.assertFalse(remote_receipt["production_promotion_allowed"])
 
+            target_commit = receipt["signed_tag"]["target_commit"]
+            published = {
+                "required": True,
+                "checked": True,
+                "remote": self.policy["remote_publication"]["remote"],
+                "expected_remote_url": self.policy["repository"]["remote_url"],
+                "configured_remote_url": self.policy["repository"]["remote_url"],
+                "remote_url_match": True,
+                "default_branch": self.policy["repository"]["default_branch"],
+                "main_commit": target_commit,
+                "tag_object": "A" * 40,
+                "peeled_commit": target_commit,
+                "exact_main_tip_match": True,
+                "published": True,
+            }
+            with mock.patch.object(adr_ratification, "verify_remote_publication", return_value=published):
+                verified = adr_ratification.build_receipt(
+                    repo,
+                    manifest_path=manifest_path,
+                    signature_path=signature_path,
+                    verify_remote=True,
+                    observed_at_utc="2026-07-16T00:00:00Z",
+                )
+            self.assertEqual(verified["status"], "verified")
+            self.assertTrue(verified["architecture_ratification_verified"])
+            self.assertFalse(verified["production_promotion_allowed"])
+            self.assertFalse(verified["ratification"]["objectives_measurements_complete"])
+            self.assertFalse(verified["ratification"]["full_n0_exit_evidence_present"])
+
     @unittest.skipUnless(shutil.which("ssh-keygen"), "OpenSSH ssh-keygen is unavailable")
     def test_tampered_adr_is_rejected_after_manifest_creation(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -226,6 +315,42 @@ class AdrRatificationTests(unittest.TestCase):
             _, manifest_path, signature_path = self._prepare_and_sign(parent, repo)
             adr = repo / "docs" / "adr" / adr_ratification.ADR_NAMES[0]
             adr.write_text(adr.read_text(encoding="utf-8") + "\nTampered.\n", encoding="utf-8")
+            receipt = adr_ratification.build_receipt(
+                repo,
+                manifest_path=manifest_path,
+                signature_path=signature_path,
+                observed_at_utc="2026-07-16T00:00:00Z",
+            )
+            self.assertEqual(receipt["status"], "invalid")
+            self.assertTrue(any("does not match" in error for error in receipt["errors"]))
+            self.assertFalse(receipt["production_promotion_allowed"])
+
+    @unittest.skipUnless(shutil.which("ssh-keygen"), "OpenSSH ssh-keygen is unavailable")
+    def test_tampered_objectives_or_schema_are_rejected_after_manifest_creation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = Path(tmp)
+            repo = parent / "repo"
+            repo.mkdir()
+            self._copy_contract(repo)
+            _, manifest_path, signature_path = self._prepare_and_sign(parent, repo)
+            objectives_path = repo / "specs" / "native-v1-objectives.json"
+            schema_path = repo / "specs" / "native-v1-objectives.schema.json"
+            objectives_bytes = objectives_path.read_bytes()
+
+            objectives = json.loads(objectives_path.read_text(encoding="utf-8"))
+            objectives["targets"][0]["evidence_requirement"] += " Changed after manifest."
+            objectives_path.write_text(json.dumps(objectives, indent=2) + "\n", encoding="utf-8", newline="\n")
+            receipt = adr_ratification.build_receipt(
+                repo,
+                manifest_path=manifest_path,
+                signature_path=signature_path,
+                observed_at_utc="2026-07-16T00:00:00Z",
+            )
+            self.assertEqual(receipt["status"], "invalid")
+            self.assertTrue(any("does not match" in error for error in receipt["errors"]))
+
+            objectives_path.write_bytes(objectives_bytes)
+            schema_path.write_bytes(schema_path.read_bytes() + b"\n")
             receipt = adr_ratification.build_receipt(
                 repo,
                 manifest_path=manifest_path,

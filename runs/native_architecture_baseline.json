@@ -365,9 +365,9 @@
     },
     {
       "path": "docs/adr-ratification-ceremony.md",
-      "sha256": "F547B3D586C6AC6920105F0F0F7E56F4BA8DF5195DC4DC075719542063E679CF",
-      "byte_count": 7127,
-      "line_count": 110
+      "sha256": "8AF9CC86DB37726541F73ACEC3D9684F5BB5353EA6A24EF6BE1E92BE7C8507CF",
+      "byte_count": 8246,
+      "line_count": 112
     },
     {
       "path": "docs/hardware-target-and-lab-safety.md",
@@ -382,16 +382,22 @@
       "line_count": 75
     },
     {
+      "path": "specs/pooleos-kernel-charter.md",
+      "sha256": "A70F2AB3246D0F4E27770776068B70817CE1B7F2996768AEE2964D99CC534F2F",
+      "byte_count": 10030,
+      "line_count": 137
+    },
+    {
       "path": "docs/production-goal-charter.md",
-      "sha256": "0077F2D4E1A8EA6D7C5278BD8D89B643E8A5649A1606909A81A3EDD82167EE89",
-      "byte_count": 18542,
+      "sha256": "524E5D3C62BF4B7F17F2C7A789567E34FB712DC2FD6CB1AF97E5EA427B4FFF57",
+      "byte_count": 18534,
       "line_count": 240
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "43A1F13EDCFF6DA7E8289874797CE45E867F1429F013AEA9A7C33197030DFEBD",
-      "byte_count": 101636,
-      "line_count": 1103
+      "sha256": "B8D4C75A1F9EC0EE3FB92443CE668B7669A9961F674484338D6172775F5D084B",
+      "byte_count": 102977,
+      "line_count": 1104
     },
     {
       "path": "docs/publication-boundary.md",
@@ -407,9 +413,9 @@
     },
     {
       "path": "runs/adr_ratification_readiness.json",
-      "sha256": "D222BB4239E79B5917B8D63B0EF237E37347BC00A914C38BCE902886EAB23D78",
-      "byte_count": 6557,
-      "line_count": 163
+      "sha256": "508ECA8840091D07EF7AA4119BD87ACA7868B181757EFE37B9290700368343DA",
+      "byte_count": 8684,
+      "line_count": 218
     },
     {
       "path": "runs/hardware_target_readiness.json",
@@ -431,9 +437,9 @@
     },
     {
       "path": "specs/adr-ratification-policy.json",
-      "sha256": "A04C51A811C75E97E2EDDA5EB90F2DB28E83C6352792F2E4F885D7C30100822F",
-      "byte_count": 6768,
-      "line_count": 167
+      "sha256": "ADE9E446A604D224C80D1436D3D1E0AF0DA29A2F567416492BCB133F0E22C111",
+      "byte_count": 7394,
+      "line_count": 175
     },
     {
       "path": "specs/hardware-support-policy.json",
@@ -443,8 +449,8 @@
     },
     {
       "path": "specs/native-architecture-constitution.json",
-      "sha256": "8D876B2B9D091697B259F7860A90D59E10F63D80602562A7CC932D780F87A163",
-      "byte_count": 6002,
+      "sha256": "94D8BDDF9BC85DE10D3B7FBF53BA2D0CC1C822C1F573FF94D0F1AB49F7EFF753",
+      "byte_count": 6015,
       "line_count": 147
     },
     {
@@ -452,6 +458,12 @@
       "sha256": "525946A7AA7A7D0F27682810EDD636D7E743C32548ACE442AB208B680A7E8584",
       "byte_count": 33416,
       "line_count": 809
+    },
+    {
+      "path": "specs/native-v1-objectives.schema.json",
+      "sha256": "AF4D18B414A65D35ABEBC178AE2B55FFAB3FF5A5CE7D17C8A4CB279A7F038A98",
+      "byte_count": 5437,
+      "line_count": 89
     },
     {
       "path": "specs/native-release-architecture-policy.json",
@@ -493,7 +505,7 @@
     "OWNER-SIGN-ADR-SET",
     "LEGAL-REVIEW-001",
     "TRADEMARK-REVIEW-001",
-    "N0-QUANT-TARGETS-001",
+    "OWNER-RATIFY-NATIVE-V1-OBJECTIVES",
     "N1-SIGNED-TAG-001",
     "N1-SIGNING-CUSTODY-001",
     "N3-TOOLCHAIN-TWO-HOST-001",

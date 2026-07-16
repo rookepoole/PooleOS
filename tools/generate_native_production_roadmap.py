@@ -108,9 +108,9 @@ PHASE_EVIDENCE = {
         "specs/native-v1-objectives.json and docs/native-v1-objectives.md: 38 measurable candidate targets across five required families",
         "runs/native_v1_objectives_readiness.json: deterministic consistency pass with zero measured targets and owner ratification pending",
         "tools/verify_native_v1_objectives.py with ten fail-closed negative controls",
-        "specs/adr-ratification-policy.json and docs/adr-ratification-ceremony.md",
-        "runs/adr_ratification_readiness.json: deterministic owner-action boundary with zero trusted signers",
-        "tools/prepare_adr_ratification.py and tools/verify_adr_ratification.py with ten adversarial controls",
+        "specs/adr-ratification-policy.json and docs/adr-ratification-ceremony.md: scope-hardened contract binding six exact decision sources and all 38 objective definitions without accepting measurements",
+        "runs/adr_ratification_readiness.json: deterministic six-source owner-action boundary with zero trusted signers, 12 declared negative controls, and six owner actions",
+        "tools/prepare_adr_ratification.py and tools/verify_adr_ratification.py with eleven focused adversarial and signature-path tests",
         "specs/native-release-architecture-policy.json",
         "tools/check_native_release_architecture.py",
         "tests/test_native_release_architecture.py",
@@ -146,15 +146,15 @@ PHASE_EVIDENCE = {
     "N33": ["existing PDC receipt schemas and guarded-route source documents; no native services"],
     "N34": ["PooleGlyph Phase 65 checkpoint", "draft PGB2/PGVM2 trap evidence"],
     "N35": ["bounded static capability and trap simulations; no native containment"],
-    "N36": ["Cycle 85 host baseline: 427 tests with one Windows symlink-permission skip", "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, and hardware privacy negatives"],
-    "N37": ["Cycle 85 consistency release gate: 65/65 checks over 60 artifacts", "content-addressed source, objectives-readiness, ADR-readiness, native-toolchain, and hardware-readiness artifacts"],
+    "N36": ["Cycle 86 host baseline: 428 tests with one Windows symlink-permission skip", "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, and hardware privacy negatives"],
+    "N37": ["Cycle 86 consistency release gate: 65/65 checks over 60 artifacts", "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, native-toolchain, and hardware-readiness artifacts"],
 }
 
 
 PHASE_GAPS = {
     "N0": [
-        "The canonical ceremony and verifier are ready, but none of seven ADRs is cryptographically signed; ADR-0003 and ADR-0004 still require owner disposition",
-        "All 38 reliability, accessibility, compatibility, privacy, and performance target definitions are candidate-only; owner acceptance and all implementation-bound measurements remain open",
+        "The canonical ceremony now binds all six decision sources, including the exact 38-target objective contract and schema, but none of seven ADRs is cryptographically signed; ADR-0003 and ADR-0004 still require owner disposition",
+        "The 38 reliability, accessibility, compatibility, privacy, and performance target definitions remain candidate-only; owner acceptance and all implementation-bound measurements remain open",
         "The extracted-tree scanner does not yet parse ISO/GPT/ESP/El Torito/signature structures",
     ],
     "N1": [
@@ -206,6 +206,7 @@ FLAGS = [
     ("FLAG-NATIVE-SCM-001", "STOP_SHIP", "N1", "Put PooleOS under reviewed source control with immutable release revisions"),
     ("FLAG-NATIVE-ADR-001", "BLOCKER", "N0", "Ratify the native architecture, TCB, reuse, language, ABI, driver, filesystem, and release ADR set"),
     ("FLAG-N0-OBJECTIVES-001", "REQUIRED", "N0", "Owner-ratify the native v1 profile and all 38 target values, then bind passing implementation evidence to every target"),
+    ("FLAG-N0-RATIFICATION-SCOPE-001", "REQUIRED", "N0", "Bind the exact objective definitions and schema into the owner ceremony while excluding measurements and all production promotion"),
     ("FLAG-NATIVE-BOOT-001", "STOP_SHIP", "N5", "Boot reproducible PooleBoot PE32+ and transfer through the frozen handoff"),
     ("FLAG-NATIVE-KERNEL-001", "STOP_SHIP", "N13", "Boot PooleKernel and enforce memory, capabilities, IPC, and ring-3 execution"),
     ("FLAG-NATIVE-IOMMU-001", "STOP_SHIP", "N11", "Confine all bus-mastering drivers with DMA and interrupt remapping"),
@@ -227,7 +228,7 @@ FLAGS = [
 
 
 PROGRAM_GAPS = [
-    "The native repository, protected workflow, ADR ceremony, and 38-target candidate objectives contract exist, but target acceptance, all measurements, owner disposition, trusted key custody, signatures, signed tags, immutable release refs, and retained CI review evidence remain open",
+    "The native repository, protected workflow, and scope-hardened ADR ceremony bind the 38-target candidate objectives contract exactly, but target acceptance, all measurements, owner disposition, trusted key custody, signatures, signed tags, immutable release refs, and retained CI review evidence remain open",
     "Rust PE32+/ELF64 fixtures pass one-host qualification, but second-host reproduction, source provenance, C17/assembly/ABI tools, and image tooling remain open",
     "No native-only QEMU/OVMF/VIRTIO reference profile or formal state models",
     "No PooleBoot PE32+ UEFI loader or frozen boot protocol",
@@ -335,11 +336,22 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             evidence.extend(["runs/hardware_target_readiness.json", "specs/hardware-support-policy.json"])
         if flag_id == "FLAG-N0-OBJECTIVES-001":
             evidence.extend(["specs/native-v1-objectives.json", "runs/native_v1_objectives_readiness.json"])
+        if flag_id == "FLAG-N0-RATIFICATION-SCOPE-001":
+            evidence.extend(
+                [
+                    "specs/adr-ratification-policy.json",
+                    "specs/native-v1-objectives.json",
+                    "specs/native-v1-objectives.schema.json",
+                    "runs/adr_ratification_readiness.json",
+                ]
+            )
         implementation_flags.append(
             {
                 "id": flag_id,
                 "class": flag_class,
-                "status": "closed" if flag_class == "SUPERSEDED" else "open",
+                "status": "closed"
+                if flag_class == "SUPERSEDED" or flag_id == "FLAG-N0-RATIFICATION-SCOPE-001"
+                else "open",
                 "phase_id": phase_id,
                 "closure_condition": closure,
                 "evidence": evidence,
@@ -376,8 +388,8 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "inspect_live_pooleglyph_each_turn": True,
             "verify_master_checklist_coverage_each_turn": True,
             "new_work_must_be_flagged": True,
-            "last_updated_cycle": 85,
-            "selected_move_id": "N0-OBJECTIVES-001",
+            "last_updated_cycle": 86,
+            "selected_move_id": "N0-ADR-001",
             "immediate_next_move_id": "N0-RATIFY-001",
             "required_records": [
                 "docs/production-goal-charter.md",
@@ -408,7 +420,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "added_requirement_count": len(coverage["added_requirements"]),
         },
         "baseline": {
-            "pooleos_cycle": 85,
+            "pooleos_cycle": 86,
             "entry_cycle": 79,
             "pooleos_test_count": test_count,
             "historical_consistency_release_gate": {
@@ -463,7 +475,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
         "immediate_next_move": {
             "id": "N0-RATIFY-001",
             "phase_ids": ["N0", "N1"],
-            "title": "Complete owner target acceptance, ADR disposition, key custody, signatures, signed tag, and publication receipt for the prepared architecture set",
+            "title": "Complete owner objective acceptance, ADR disposition, key custody, signatures, signed tag, and publication receipt for the exact six-source architecture set",
             "entry_evidence": ["docs/adr/0001-native-pooleos-constitution.md through ADR-0007", "runs/native_architecture_baseline.json", "runs/native_v1_objectives_readiness.json", "runs/adr_ratification_readiness.json", "docs/adr-ratification-ceremony.md", "runs/native_toolchain_qualification.json"],
             "exit_evidence": ["owner acceptance or amendment of the native v1 profile and all 38 target values", "owner disposition of ADR-0003 and ADR-0004", "owner-controlled signatures for the accepted ADR set", "documented signing custody and verification procedure", "signed baseline tag and publication receipt"],
             "blocked": True,
@@ -472,7 +484,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "Buildroot and Linux artifacts are historical reference evidence and cannot satisfy native PooleOS gates.",
             "Checklist mapping is not implementation completion.",
             "Host simulations and schemas are not native kernel enforcement.",
-            "Thirty-eight consistent candidate objective definitions and zero measurements are not owner-ratified requirements or implementation evidence.",
+            "Binding thirty-eight consistent candidate objective definitions into a future signature while binding zero measurements is not owner ratification or implementation evidence.",
             "PooleGlyph Phase 65 metadata cannot be promoted before Phase 66 executable evidence.",
             "Finite PDC/QP evidence remains bounded to its declared classical models and protocols.",
             "A file named ISO is not reproducible signed clean-media boot evidence.",
@@ -483,7 +495,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=427)
+    parser.add_argument("--test-count", type=int, default=428)
     parser.add_argument("--status-date", default="2026-07-16")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

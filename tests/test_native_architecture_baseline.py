@@ -68,7 +68,7 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 19)
+        self.assertEqual(len(self.artifact["bound_sources"]), 21)
         self.assertIn(
             "runs/adr_ratification_readiness.json",
             {binding["path"] for binding in self.artifact["bound_sources"]},
@@ -79,6 +79,14 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         )
         self.assertIn(
             "runs/native_v1_objectives_readiness.json",
+            {binding["path"] for binding in self.artifact["bound_sources"]},
+        )
+        self.assertIn(
+            "specs/pooleos-kernel-charter.md",
+            {binding["path"] for binding in self.artifact["bound_sources"]},
+        )
+        self.assertIn(
+            "specs/native-v1-objectives.schema.json",
             {binding["path"] for binding in self.artifact["bound_sources"]},
         )
         for binding in self.artifact["bound_sources"]:

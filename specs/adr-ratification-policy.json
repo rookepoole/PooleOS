@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "artifact_kind": "pooleos_adr_ratification_policy",
   "status_date": "2026-07-16",
   "status": "ceremony_frozen_owner_execution_pending",
@@ -16,7 +16,9 @@
   },
   "scope": {
     "move_id": "N0-RATIFY-001",
-    "purpose": "Owner acceptance of the exact native architecture constitution before implementation promotion.",
+    "purpose": "Owner acceptance of the exact native architecture constitution and candidate v1 objective definitions before architecture promotion.",
+    "ratifies_native_v1_objective_definitions": true,
+    "ratifies_native_v1_measurements": false,
     "ratifies_release_binaries": false,
     "ratifies_secure_boot_keys": false,
     "ratifies_package_or_update_keys": false,
@@ -33,6 +35,8 @@
   ],
   "required_bound_sources": [
     "specs/native-architecture-constitution.json",
+    "specs/native-v1-objectives.json",
+    "specs/native-v1-objectives.schema.json",
     "specs/pooleos-kernel-charter.md",
     "specs/native-release-architecture-policy.json",
     "docs/publication-boundary.md"
@@ -114,6 +118,7 @@
   },
   "owner_actions": [
     "Explicitly dispose ADR-0003 and ADR-0004.",
+    "Explicitly accept, amend, or reject the exact candidate Workstation v1 profile and all 38 target values without claiming measurement evidence.",
     "Choose the governance-key custody profile and verify the public-key fingerprint out of band.",
     "Register only the public key as a GitHub SSH signing key and place it in the repository allowed-signers file.",
     "Generate and sign the canonical manifest under the exact PooleOS namespace.",
@@ -121,10 +126,12 @@
   ],
   "negative_controls": [
     "missing owner acceptance flag",
+    "missing objectives acceptance flag",
     "missing or multiple bootstrap signers",
     "unsupported or unscoped public key",
     "noncanonical manifest bytes",
     "tampered ADR or bound-source bytes",
+    "tampered objectives profile, target value, or objectives schema bytes",
     "wrong SSH signature namespace",
     "unknown signer principal",
     "malformed or swapped detached signature",
@@ -160,6 +167,7 @@
   ],
   "claim_boundary": [
     "The policy and readiness ledger are not signatures and do not imply owner acceptance.",
+    "A valid architecture signature may accept objective definitions but does not prove that any objective has been measured or met.",
     "A software governance key is a provisional option only after explicit owner risk acceptance.",
     "The governance key is not a production Secure Boot, package, update, recovery, or ISO release key.",
     "N0 remains open until detached signature, signed tag, and remote publication all verify."

@@ -134,4 +134,4 @@ PooleKernel is not production-ready until:
 7. the signed ISO is reproducible and free of prohibited production substitutes; and
 8. clean-media QEMU and physical-machine receipts bind the exact source, toolchain, binaries, configuration, keys, and hardware identity.
 
-Current state: chartered, not implemented, not production-ready. The immediate implementation move is `N0-ADR-001`.
+Current state: chartered, not implemented, not production-ready. Cycle 86 hardens `N0-ADR-001` so the owner ceremony binds the exact candidate v1 objectives without accepting measurements. The immediate owner move remains `N0-RATIFY-001`; owner-independent engineering continues through the roadmap's next safe native preparation move.

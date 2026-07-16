@@ -14,6 +14,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from runtime import native_v1_objectives
+
 
 ROOT = Path(__file__).resolve().parents[1]
 POLICY_RELATIVE = "specs/adr-ratification-policy.json"
@@ -36,6 +38,14 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 ADR_IDS = tuple(f"ADR-{index:04d}" for index in range(1, 8))
+REQUIRED_BOUND_SOURCES = (
+    "specs/native-architecture-constitution.json",
+    "specs/native-v1-objectives.json",
+    "specs/native-v1-objectives.schema.json",
+    "specs/pooleos-kernel-charter.md",
+    "specs/native-release-architecture-policy.json",
+    "docs/publication-boundary.md",
+)
 ADR_HEADER_PATTERN = re.compile(r"^# ADR-(\d{4}): (.+)$")
 FIELD_PATTERN = re.compile(r"^([A-Za-z][A-Za-z ]+):\s*(.*?)\s*$")
 
@@ -188,10 +198,35 @@ def _schema_errors(value: dict[str, Any], root: Path, schema_relative: str) -> l
     return [f"{error.path}: {error.message}" for error in validate_json(value, schema)]
 
 
+def _policy_contract_errors(policy: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    if tuple(policy.get("required_bound_sources", [])) != REQUIRED_BOUND_SOURCES:
+        errors.append("required_bound_sources must be the exact six-source N0 decision set")
+    scope = policy.get("scope", {})
+    if not isinstance(scope, dict) or scope.get("ratifies_native_v1_objective_definitions") is not True:
+        errors.append("policy must ratify the exact native v1 objective definitions")
+    if not isinstance(scope, dict) or scope.get("ratifies_native_v1_measurements") is not False:
+        errors.append("policy must not ratify unmeasured native v1 evidence")
+    return errors
+
+
+def _load_valid_objectives(root: Path) -> dict[str, Any]:
+    objectives = _read_json(root / native_v1_objectives.OBJECTIVES_RELATIVE)
+    errors = native_v1_objectives.rejection_reasons(objectives, root)
+    if errors:
+        raise ValueError("native v1 objectives are invalid: " + "; ".join(errors[:8]))
+    return objectives
+
+
 def build_readiness(root: Path = ROOT) -> dict[str, Any]:
     policy = load_policy(root)
-    policy_errors = _schema_errors(policy, root, POLICY_SCHEMA_RELATIVE)
+    policy_errors = _schema_errors(policy, root, POLICY_SCHEMA_RELATIVE) + _policy_contract_errors(policy)
     adrs = parse_adr_set(root)
+    objectives = _load_valid_objectives(root)
+    objective_targets = objectives["targets"]
+    measured_target_count = sum(target.get("evidence_status") != "not_measured" for target in objective_targets)
+    objectives_owner = objectives["owner_ratification"]
+    bound_sources = [bind_file(root, path) for path in REQUIRED_BOUND_SOURCES]
     status_counts = Counter(item["source_status"] for item in adrs)
     signers, signer_errors = parse_allowed_signers(root, policy)
     artifacts = {
@@ -218,6 +253,11 @@ def build_readiness(root: Path = ROOT) -> dict[str, Any]:
     )
 
     owner_actions = [
+        {
+            "id": "OWNER-OBJECTIVES-DISPOSITION-001",
+            "status": "pending",
+            "description": "Explicitly accept, amend, or reject the candidate Workstation v1 profile and all 38 target values; definition acceptance must not claim measurement evidence.",
+        },
         {
             "id": "OWNER-ADR-DISPOSITION-001",
             "status": "pending" if pending_disposition else "satisfied",
@@ -246,7 +286,7 @@ def build_readiness(root: Path = ROOT) -> dict[str, Any]:
     ]
 
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "artifact_kind": "pooleos_adr_ratification_readiness",
         "status_date": policy["status_date"],
         "status": "pending_owner_action",
@@ -263,6 +303,22 @@ def build_readiness(root: Path = ROOT) -> dict[str, Any]:
             "pending_owner_disposition": pending_disposition,
             "adrs": adrs,
         },
+        "decision_inputs": {
+            "required_bound_source_count": len(bound_sources),
+            "bound_sources": bound_sources,
+            "objectives": {
+                "path": native_v1_objectives.OBJECTIVES_RELATIVE,
+                "profile_id": objectives["release_profile"]["id"],
+                "target_count": len(objective_targets),
+                "measured_target_count": measured_target_count,
+                "source_profile_accepted": objectives_owner["profile_accepted"],
+                "source_target_values_accepted": objectives_owner["target_values_accepted"],
+                "owner_ratification_pending": not (
+                    objectives_owner["profile_accepted"] and objectives_owner["target_values_accepted"]
+                ),
+                "schema_and_semantics_valid": True,
+            },
+        },
         "trust_bootstrap": {
             "backend": policy["signature"]["backend"],
             "format": policy["signature"]["format"],
@@ -277,6 +333,10 @@ def build_readiness(root: Path = ROOT) -> dict[str, Any]:
         "summary": {
             "policy_schema_valid": not policy_errors,
             "required_adr_set_complete": len(adrs) == 7,
+            "required_bound_source_count": len(bound_sources),
+            "objectives_target_count": len(objective_targets),
+            "objectives_measured_target_count": measured_target_count,
+            "objectives_owner_acceptance_pending": True,
             "ratification_tooling_present": tooling_ready,
             "ready_for_owner_action": ready_for_owner_action,
             "ready_for_signature": ready_for_signature,
@@ -286,6 +346,7 @@ def build_readiness(root: Path = ROOT) -> dict[str, Any]:
         "owner_actions": owner_actions,
         "claim_boundary": [
             "This readiness ledger is unsigned preparation evidence and is not owner acceptance.",
+            "The exact candidate objectives and schema are bound, but all 38 values still require explicit owner disposition.",
             "No private key, credential, recovery secret, or hardware-backed key handle is recorded.",
             "A detached signature alone does not satisfy the signed-tag and remote-publication gates.",
             "Architecture ratification does not prove a bootloader, kernel, driver, desktop, or production ISO.",
@@ -297,13 +358,17 @@ def build_manifest(
     root: Path = ROOT,
     *,
     owner_accept_all_exact: bool,
+    owner_accept_objectives_exact: bool,
     accept_software_key_risk: bool = False,
 ) -> dict[str, Any]:
     if not owner_accept_all_exact:
         raise ValueError("owner_accept_all_exact is required; no ADR disposition is inferred")
+    if not owner_accept_objectives_exact:
+        raise ValueError("owner_accept_objectives_exact is required; no objectives disposition is inferred")
     policy = load_policy(root)
-    if _schema_errors(policy, root, POLICY_SCHEMA_RELATIVE):
+    if _schema_errors(policy, root, POLICY_SCHEMA_RELATIVE) or _policy_contract_errors(policy):
         raise ValueError("ratification policy does not satisfy its schema")
+    objectives = _load_valid_objectives(root)
     signers, signer_errors = parse_allowed_signers(root, policy)
     if signer_errors:
         raise ValueError("allowed-signers file is invalid: " + "; ".join(signer_errors))
@@ -325,8 +390,11 @@ def build_manifest(
         for adr in adrs
     ]
     signature = policy["signature"]
+    objectives_owner = objectives["owner_ratification"]
+    objectives_binding = bind_file(root, native_v1_objectives.OBJECTIVES_RELATIVE)
+    objectives_schema_binding = bind_file(root, native_v1_objectives.OBJECTIVES_SCHEMA_RELATIVE)
     manifest = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "artifact_kind": "pooleos_adr_ratification_manifest",
         "canonicalization": policy["canonical_manifest"],
         "repository": policy["repository"],
@@ -337,6 +405,19 @@ def build_manifest(
             "required_adr_count": 7,
             "accepted_exact_count": 7,
             "decisions": decisions,
+        },
+        "objectives_acceptance": {
+            "action": "accept_exact_profile_and_target_values",
+            "statement": "By signing these canonical bytes, Rooke Poole accepts the exact candidate Workstation v1 profile and all 38 listed target values as definitions, without accepting or claiming measurement evidence.",
+            "profile_id": objectives["release_profile"]["id"],
+            "target_count": len(objectives["targets"]),
+            "source_profile_accepted": objectives_owner["profile_accepted"],
+            "source_target_values_accepted": objectives_owner["target_values_accepted"],
+            "disposition": "accept_exact_bytes",
+            "effective_status_after_valid_signature": "accepted-signed",
+            "measurement_evidence_accepted": False,
+            "objectives_binding": objectives_binding,
+            "objectives_schema_binding": objectives_schema_binding,
         },
         "bound_sources": [bind_file(root, path) for path in policy["required_bound_sources"]],
         "policy_binding": bind_file(root, POLICY_RELATIVE),
@@ -358,6 +439,7 @@ def build_manifest(
         "tag_contract": policy["tag"],
         "claim_boundary": [
             "This manifest has no authority until its exact canonical bytes carry a valid owner-controlled detached signature.",
+            "Objective-definition acceptance does not accept measurement evidence or prove that any target is met.",
             "The detached signature ratifies architecture decisions; it is not a PooleOS binary, Secure Boot, package, update, or release-media signature.",
             "Production promotion additionally requires the signed annotated tag and exact remote-publication receipt defined by this manifest.",
         ],
@@ -384,6 +466,7 @@ def validate_manifest(root: Path, manifest_path: Path) -> tuple[dict[str, Any] |
         expected = build_manifest(
             root,
             owner_accept_all_exact=True,
+            owner_accept_objectives_exact=True,
             accept_software_key_risk=bool(
                 manifest.get("signer", {}).get("software_key_risk_explicitly_accepted", False)
             ),
@@ -570,6 +653,7 @@ def build_receipt(
     observed_at_utc: str | None = None,
 ) -> dict[str, Any]:
     policy = load_policy(root)
+    policy_errors = _schema_errors(policy, root, POLICY_SCHEMA_RELATIVE) + _policy_contract_errors(policy)
     manifest_path = manifest_path or root / MANIFEST_RELATIVE
     signature_path = signature_path or root / SIGNATURE_RELATIVE
     observed_at_utc = observed_at_utc or datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
@@ -623,7 +707,8 @@ def build_receipt(
         remote_info = verify_remote_publication(root, tag_info, policy)
 
     invalid = bool(
-        partial_artifacts
+        policy_errors
+        or partial_artifacts
         or signer_errors
         or (manifest_present and not signers)
         or manifest_errors
@@ -641,16 +726,25 @@ def build_receipt(
         status = "local_tag_verified_publication_pending"
     else:
         status = "verified"
-    promotion_allowed = status == "verified"
+    architecture_ratification_verified = status == "verified"
 
     manifest_data = manifest_path.read_bytes() if manifest_present else b""
     signature_data = signature_path.read_bytes() if signature_present else b""
     signer = signers[0] if len(signers) == 1 else None
     checks = [
-        {"name": "policy_schema_valid", "ok": not _schema_errors(policy, root, POLICY_SCHEMA_RELATIVE), "detail": "frozen policy"},
+        {
+            "name": "policy_schema_valid",
+            "ok": not policy_errors,
+            "detail": "frozen policy and exact ratification scope",
+        },
         {"name": "single_trusted_owner_signer", "ok": len(signers) == 1 and not signer_errors, "detail": f"trusted_signers={len(signers)}"},
         {"name": "manifest_present", "ok": manifest_present, "detail": MANIFEST_RELATIVE},
         {"name": "manifest_canonical", "ok": canonical and not manifest_errors, "detail": "exact canonical bytes" if canonical else "pending or invalid"},
+        {
+            "name": "objectives_definitions_bound",
+            "ok": bool(manifest is not None and not manifest_errors and manifest.get("objectives_acceptance", {}).get("target_count") == 38),
+            "detail": "38 exact candidate definitions" if manifest is not None and not manifest_errors else "pending or invalid",
+        },
         {"name": "detached_signature_present", "ok": signature_present, "detail": SIGNATURE_RELATIVE},
         {"name": "detached_signature_verified", "ok": detached_verified, "detail": detached_detail},
         {"name": "signed_annotated_tag_verified", "ok": tag_verified, "detail": policy["tag"]["name"]},
@@ -658,12 +752,13 @@ def build_receipt(
         {"name": "production_readiness_not_overclaimed", "ok": True, "detail": "production_ready=false"},
     ]
     receipt = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "artifact_kind": "pooleos_adr_ratification_receipt",
         "observed_at_utc": observed_at_utc,
         "status": status,
         "production_ready": False,
-        "production_promotion_allowed": promotion_allowed,
+        "production_promotion_allowed": False,
+        "architecture_ratification_verified": architecture_ratification_verified,
         "manifest": {
             "path": MANIFEST_RELATIVE,
             "present": manifest_present,
@@ -693,12 +788,18 @@ def build_receipt(
             "required_adr_count": 7,
             "accepted_exact_count": 7 if detached_verified else 0,
             "all_required_cryptographically_ratified": detached_verified,
-            "full_n0_exit_evidence_present": promotion_allowed,
+            "required_bound_source_count": len(REQUIRED_BOUND_SOURCES),
+            "objectives_profile_id": "POOLEOS-WORKSTATION-V1-CANDIDATE",
+            "objectives_target_count": 38,
+            "objectives_definitions_cryptographically_ratified": detached_verified,
+            "objectives_measurements_complete": False,
+            "full_n0_exit_evidence_present": False,
         },
         "checks": checks,
         "errors": [*signer_errors, *manifest_errors],
         "claim_boundary": [
             "production_ready remains false even when architecture ratification verifies.",
+            "Architecture ratification accepts exact objective definitions only; all 38 implementation measurements remain separate release evidence.",
             "The receipt does not sign PooleBoot, PooleKernel, packages, updates, Secure Boot databases, or ISO media.",
             "Remote publication is accepted only when remote main, the annotated tag object, and its peeled commit match the locally verified ceremony objects.",
         ],

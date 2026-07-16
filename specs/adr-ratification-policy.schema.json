@@ -25,7 +25,7 @@
     "claim_boundary"
   ],
   "properties": {
-    "schema_version": {"const": "1.0"},
+    "schema_version": {"const": "1.1"},
     "artifact_kind": {"const": "pooleos_adr_ratification_policy"},
     "status_date": {"type": "string"},
     "status": {"const": "ceremony_frozen_owner_execution_pending"},
@@ -48,9 +48,20 @@
         "default_branch": {"const": "main"}
       }
     },
-    "scope": {"type": "object", "required": ["move_id", "purpose", "ratifies_release_binaries", "ratifies_secure_boot_keys", "ratifies_package_or_update_keys", "ratifies_production_iso"]},
+    "scope": {
+      "type": "object",
+      "required": ["move_id", "purpose", "ratifies_native_v1_objective_definitions", "ratifies_native_v1_measurements", "ratifies_release_binaries", "ratifies_secure_boot_keys", "ratifies_package_or_update_keys", "ratifies_production_iso"],
+      "properties": {
+        "ratifies_native_v1_objective_definitions": {"const": true},
+        "ratifies_native_v1_measurements": {"const": false},
+        "ratifies_release_binaries": {"const": false},
+        "ratifies_secure_boot_keys": {"const": false},
+        "ratifies_package_or_update_keys": {"const": false},
+        "ratifies_production_iso": {"const": false}
+      }
+    },
     "required_adrs": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"type": "object", "required": ["id", "path"]}},
-    "required_bound_sources": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "string"}},
+    "required_bound_sources": {"type": "array", "minItems": 6, "maxItems": 6, "items": {"type": "string"}, "uniqueItems": true},
     "canonical_manifest": {"type": "object", "required": ["serialization", "encoding", "key_order", "indent_spaces", "line_endings", "trailing_newline_count", "unicode_escaping"]},
     "signature": {
       "type": "object",
@@ -73,9 +84,9 @@
     "custody": {"type": "object", "required": ["private_key_in_repository_prohibited", "private_key_in_handoff_prohibited", "private_key_export_by_verifier_prohibited", "governance_key_separate_from_secure_boot_and_release_keys", "primary_and_recovery_key_separation_required", "software_key_requires_passphrase", "hardware_key_requires_owner_presence", "revocation_record_required_before_rotation"]},
     "tag": {"type": "object", "required": ["name", "annotated", "signed", "force_update_allowed", "target_branch", "target_must_contain_manifest", "target_must_contain_detached_signature"]},
     "remote_publication": {"type": "object", "required": ["remote", "exact_main_tip_match_required_at_receipt_time", "exact_tag_object_match_required", "exact_peeled_commit_match_required", "github_signing_key_registration_required", "github_verification_is_supplemental_not_owner_signature_substitute"]},
-    "owner_actions": {"type": "array", "minItems": 5, "items": {"type": "string"}},
-    "negative_controls": {"type": "array", "minItems": 10, "items": {"type": "string"}},
+    "owner_actions": {"type": "array", "minItems": 6, "maxItems": 6, "items": {"type": "string"}},
+    "negative_controls": {"type": "array", "minItems": 12, "maxItems": 12, "items": {"type": "string"}},
     "references": {"type": "array", "minItems": 5, "items": {"type": "object", "required": ["title", "url", "authority"]}},
-    "claim_boundary": {"type": "array", "minItems": 4, "items": {"type": "string"}}
+    "claim_boundary": {"type": "array", "minItems": 5, "items": {"type": "string"}}
   }
 }

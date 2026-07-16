@@ -34,7 +34,7 @@ HARDWARE_TARGET_READINESS = ROOT / "runs" / "hardware_target_readiness.json"
 
 
 DEFAULT_GAPS = [
-    "The ADR ceremony and 38-target candidate objectives contract are ready, but all target measurements, owner target acceptance and ADR disposition, signing custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
+    "The scope-hardened ADR ceremony binds the exact 38-target candidate objectives contract and schema, but all target measurements, owner target acceptance and ADR disposition, signing custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
     "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
     "No native-only QEMU/OVMF/VIRTIO reference profile or executable formal state models.",
     "No PooleBoot PE32+ UEFI loader or frozen native boot protocol.",
@@ -362,14 +362,34 @@ def check_adr_ratification_readiness(path: Path = ADR_RATIFICATION_READINESS) ->
     summary = artifact.get("summary", {})
     if summary.get("ready_for_owner_action") is not True or summary.get("ready_for_signature") is not False:
         errors.append("readiness owner/signature boundary is inconsistent")
-    if summary.get("defined_negative_control_count") != 10:
+    if summary.get("defined_negative_control_count") != 12:
         errors.append("ratification negative-control inventory is incomplete")
+    if summary.get("blocking_owner_action_count") != 6:
+        errors.append("ratification owner-action inventory is incomplete")
+    decision_inputs = artifact.get("decision_inputs", {})
+    objectives = decision_inputs.get("objectives", {})
+    if decision_inputs.get("required_bound_source_count") != 6 or len(decision_inputs.get("bound_sources", [])) != 6:
+        errors.append("ratification readiness does not bind the exact six-source decision set")
+    if objectives.get("profile_id") != "POOLEOS-WORKSTATION-V1-CANDIDATE":
+        errors.append("ratification readiness does not bind the candidate Workstation v1 profile")
+    if objectives.get("target_count") != 38 or objectives.get("measured_target_count") != 0:
+        errors.append("ratification readiness must retain 38 candidate and zero measured targets")
+    if objectives.get("owner_ratification_pending") is not True:
+        errors.append("ratification readiness overclaims objectives owner acceptance")
     if receipt.get("status") == "invalid":
         errors.append("live ratification verifier reports an invalid partial ceremony")
-    if receipt.get("status") != "pending_owner_action" or receipt.get("production_promotion_allowed") is not False:
+    if (
+        receipt.get("status") != "pending_owner_action"
+        or receipt.get("production_promotion_allowed") is not False
+        or receipt.get("architecture_ratification_verified") is not False
+    ):
         errors.append("current live ratification state is not a bounded non-promoting owner-action wait")
 
-    for binding in [artifact.get("policy", {}), *adr_set.get("adrs", [])]:
+    for binding in [
+        artifact.get("policy", {}),
+        *adr_set.get("adrs", []),
+        *decision_inputs.get("bound_sources", []),
+    ]:
         relative = binding.get("path")
         if not isinstance(relative, str):
             errors.append("ratification binding is missing a relative path")
@@ -388,8 +408,9 @@ def check_adr_ratification_readiness(path: Path = ADR_RATIFICATION_READINESS) ->
             errors.append(f"ratification binding mismatch: {relative}")
 
     detail = (
-        "policy=frozen; adrs=7; proposed=2; trusted_signers=0; negative_controls=10; "
-        "owner_actions=5; status=pending_owner_action; production_promotion_allowed=false"
+        "policy=scope_hardened; adrs=7; proposed=2; bound_sources=6; objectives=38; measured=0; "
+        "trusted_signers=0; negative_controls=12; owner_actions=6; status=pending_owner_action; "
+        "production_promotion_allowed=false"
     )
     return readiness.make_check(
         "adr_ratification_readiness",

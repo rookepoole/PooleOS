@@ -43,8 +43,8 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 85,
-    "selected_move_id": "N0-OBJECTIVES-001",
+    "last_updated_cycle": 86,
+    "selected_move_id": "N0-ADR-001",
     "immediate_next_move_id": "N0-RATIFY-001",
     "required_records": [
       "docs/production-goal-charter.md",
@@ -84,9 +84,9 @@
     "added_requirement_count": 25
   },
   "baseline": {
-    "pooleos_cycle": 85,
+    "pooleos_cycle": 86,
     "entry_cycle": 79,
-    "pooleos_test_count": 427,
+    "pooleos_test_count": 428,
     "historical_consistency_release_gate": {
       "passed_checks": 58,
       "total_checks": 58,
@@ -349,16 +349,16 @@
         "specs/native-v1-objectives.json and docs/native-v1-objectives.md: 38 measurable candidate targets across five required families",
         "runs/native_v1_objectives_readiness.json: deterministic consistency pass with zero measured targets and owner ratification pending",
         "tools/verify_native_v1_objectives.py with ten fail-closed negative controls",
-        "specs/adr-ratification-policy.json and docs/adr-ratification-ceremony.md",
-        "runs/adr_ratification_readiness.json: deterministic owner-action boundary with zero trusted signers",
-        "tools/prepare_adr_ratification.py and tools/verify_adr_ratification.py with ten adversarial controls",
+        "specs/adr-ratification-policy.json and docs/adr-ratification-ceremony.md: scope-hardened contract binding six exact decision sources and all 38 objective definitions without accepting measurements",
+        "runs/adr_ratification_readiness.json: deterministic six-source owner-action boundary with zero trusted signers, 12 declared negative controls, and six owner actions",
+        "tools/prepare_adr_ratification.py and tools/verify_adr_ratification.py with eleven focused adversarial and signature-path tests",
         "specs/native-release-architecture-policy.json",
         "tools/check_native_release_architecture.py",
         "tests/test_native_release_architecture.py"
       ],
       "current_gaps": [
-        "The canonical ceremony and verifier are ready, but none of seven ADRs is cryptographically signed; ADR-0003 and ADR-0004 still require owner disposition",
-        "All 38 reliability, accessibility, compatibility, privacy, and performance target definitions are candidate-only; owner acceptance and all implementation-bound measurements remain open",
+        "The canonical ceremony now binds all six decision sources, including the exact 38-target objective contract and schema, but none of seven ADRs is cryptographically signed; ADR-0003 and ADR-0004 still require owner disposition",
+        "The 38 reliability, accessibility, compatibility, privacy, and performance target definitions remain candidate-only; owner acceptance and all implementation-bound measurements remain open",
         "The extracted-tree scanner does not yet parse ISO/GPT/ESP/El Torito/signature structures"
       ],
       "exit_gate": "signed ADRs resolve every section 000.2 choice; names and version identifiers are reserved; exact supported scope and completion conditions are machine-readable; no production document describes PooleOS as Linux-based."
@@ -2592,8 +2592,8 @@
         "ADD-TEST-001"
       ],
       "current_evidence": [
-        "Cycle 85 host baseline: 427 tests with one Windows symlink-permission skip",
-        "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, and hardware privacy negatives"
+        "Cycle 86 host baseline: 428 tests with one Windows symlink-permission skip",
+        "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, and hardware privacy negatives"
       ],
       "current_gaps": [
         "No native system, power-loss, hardware, accessibility, soak, or external security suite exists"
@@ -2660,8 +2660,8 @@
         "ADD-SUPPLY-001"
       ],
       "current_evidence": [
-        "Cycle 85 consistency release gate: 65/65 checks over 60 artifacts",
-        "content-addressed source, objectives-readiness, ADR-readiness, native-toolchain, and hardware-readiness artifacts"
+        "Cycle 86 consistency release gate: 65/65 checks over 60 artifacts",
+        "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, native-toolchain, and hardware-readiness artifacts"
       ],
       "current_gaps": [
         "No native SBOM/provenance/signing ceremony/release manifest or source-controlled release exists"
@@ -2850,6 +2850,21 @@
         "runs/pooleos_native_checklist_coverage.json",
         "specs/native-v1-objectives.json",
         "runs/native_v1_objectives_readiness.json"
+      ]
+    },
+    {
+      "id": "FLAG-N0-RATIFICATION-SCOPE-001",
+      "class": "REQUIRED",
+      "status": "closed",
+      "phase_id": "N0",
+      "closure_condition": "Bind the exact objective definitions and schema into the owner ceremony while excluding measurements and all production promotion",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json",
+        "specs/adr-ratification-policy.json",
+        "specs/native-v1-objectives.json",
+        "specs/native-v1-objectives.schema.json",
+        "runs/adr_ratification_readiness.json"
       ]
     },
     {
@@ -3049,7 +3064,7 @@
   "gap_summary": {
     "native_program_gap_count": 20,
     "native_program_gaps": [
-      "The native repository, protected workflow, ADR ceremony, and 38-target candidate objectives contract exist, but target acceptance, all measurements, owner disposition, trusted key custody, signatures, signed tags, immutable release refs, and retained CI review evidence remain open",
+      "The native repository, protected workflow, and scope-hardened ADR ceremony bind the 38-target candidate objectives contract exactly, but target acceptance, all measurements, owner disposition, trusted key custody, signatures, signed tags, immutable release refs, and retained CI review evidence remain open",
       "Rust PE32+/ELF64 fixtures pass one-host qualification, but second-host reproduction, source provenance, C17/assembly/ABI tools, and image tooling remain open",
       "No native-only QEMU/OVMF/VIRTIO reference profile or formal state models",
       "No PooleBoot PE32+ UEFI loader or frozen boot protocol",
@@ -3079,7 +3094,7 @@
       "N0",
       "N1"
     ],
-    "title": "Complete owner target acceptance, ADR disposition, key custody, signatures, signed tag, and publication receipt for the prepared architecture set",
+    "title": "Complete owner objective acceptance, ADR disposition, key custody, signatures, signed tag, and publication receipt for the exact six-source architecture set",
     "entry_evidence": [
       "docs/adr/0001-native-pooleos-constitution.md through ADR-0007",
       "runs/native_architecture_baseline.json",
@@ -3101,7 +3116,7 @@
     "Buildroot and Linux artifacts are historical reference evidence and cannot satisfy native PooleOS gates.",
     "Checklist mapping is not implementation completion.",
     "Host simulations and schemas are not native kernel enforcement.",
-    "Thirty-eight consistent candidate objective definitions and zero measurements are not owner-ratified requirements or implementation evidence.",
+    "Binding thirty-eight consistent candidate objective definitions into a future signature while binding zero measurements is not owner ratification or implementation evidence.",
     "PooleGlyph Phase 65 metadata cannot be promoted before Phase 66 executable evidence.",
     "Finite PDC/QP evidence remains bounded to its declared classical models and protocols.",
     "A file named ISO is not reproducible signed clean-media boot evidence."
