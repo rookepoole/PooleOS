@@ -6,11 +6,11 @@
   "additionalProperties": false,
   "required": ["schema_version", "artifact_kind", "status_date", "contract_id", "selected_move_id", "production_ready", "production_promotion_allowed", "engine", "required_domains", "modeled_domains", "models", "assumptions", "trace_cross_check", "claim_boundary"],
   "properties": {
-    "schema_version": {"const": "1.1"},
+    "schema_version": {"const": "1.2"},
     "artifact_kind": {"const": "pooleos_native_model_contract"},
     "status_date": {"const": "2026-07-16"},
-    "contract_id": {"const": "POOLEOS-N4-MODELS-2"},
-    "selected_move_id": {"const": "N4-VM-MODEL-001"},
+    "contract_id": {"const": "POOLEOS-N4-MODELS-3"},
+    "selected_move_id": {"const": "N4-IPC-MODEL-001"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
     "engine": {
@@ -31,32 +31,32 @@
       }
     },
     "required_domains": {"type": "array", "minItems": 7, "maxItems": 7, "uniqueItems": true, "items": {"type": "string"}},
-    "modeled_domains": {"type": "array", "minItems": 4, "maxItems": 4, "uniqueItems": true, "items": {"type": "string"}},
+    "modeled_domains": {"type": "array", "minItems": 5, "maxItems": 5, "uniqueItems": true, "items": {"type": "string"}},
     "models": {
       "type": "array",
-      "minItems": 3,
-      "maxItems": 3,
+      "minItems": 4,
+      "maxItems": 4,
       "items": {
         "type": "object",
         "additionalProperties": false,
         "required": ["id", "module_path", "state_variables", "invariants", "cases"],
         "properties": {
-          "id": {"enum": ["boot_slot_rollback", "capability_revocation", "virtual_memory_ownership"]},
+          "id": {"enum": ["boot_slot_rollback", "capability_revocation", "virtual_memory_ownership", "capability_mediated_ipc"]},
           "module_path": {"type": "string"},
-          "state_variables": {"type": "array", "minItems": 5, "maxItems": 7, "uniqueItems": true, "items": {"type": "string"}},
-          "invariants": {"type": "array", "minItems": 6, "maxItems": 7, "uniqueItems": true, "items": {"type": "string"}},
-          "cases": {"type": "array", "minItems": 2, "maxItems": 3, "items": {"$ref": "#/$defs/case"}}
+          "state_variables": {"type": "array", "minItems": 5, "maxItems": 13, "uniqueItems": true, "items": {"type": "string"}},
+          "invariants": {"type": "array", "minItems": 6, "maxItems": 11, "uniqueItems": true, "items": {"type": "string"}},
+          "cases": {"type": "array", "minItems": 2, "maxItems": 5, "items": {"$ref": "#/$defs/case"}}
         }
       }
     },
-    "assumptions": {"type": "array", "minItems": 6, "items": {"type": "string"}},
+    "assumptions": {"type": "array", "minItems": 7, "items": {"type": "string"}},
     "trace_cross_check": {
       "type": "object",
       "additionalProperties": false,
       "required": ["status", "required_model_count", "completed_model_count", "abi_freeze_authorized"],
       "properties": {
         "status": {"const": "pending_native_implementation_traces"},
-        "required_model_count": {"const": 3},
+        "required_model_count": {"const": 4},
         "completed_model_count": {"const": 0},
         "abi_freeze_authorized": {"const": false}
       }
@@ -81,13 +81,13 @@
       "additionalProperties": false,
       "required": ["id", "role", "config_path", "constant_assignments", "expected_invariant_violation", "expected"],
       "properties": {
-        "id": {"enum": ["safe", "unsafe_rollback", "unsafe_local_revoke", "unsafe_stale_mapping", "unsafe_early_reuse"]},
+        "id": {"enum": ["safe", "unsafe_rollback", "unsafe_local_revoke", "unsafe_stale_mapping", "unsafe_early_reuse", "unsafe_unauthorized_call", "unsafe_token_reuse", "unsafe_stale_reply", "unsafe_leaky_teardown"]},
         "role": {"enum": ["safe", "hostile"]},
         "config_path": {"type": "string"},
         "constant_assignments": {
           "type": "object",
           "minProperties": 1,
-          "maxProperties": 2,
+          "maxProperties": 4,
           "additionalProperties": {"enum": ["TRUE", "FALSE"]}
         },
         "expected_invariant_violation": {"type": ["string", "null"]},

@@ -49,8 +49,8 @@
         "inspect_live_pooleglyph_each_turn": {"const": true},
         "verify_master_checklist_coverage_each_turn": {"const": true},
         "new_work_must_be_flagged": {"const": true},
-        "last_updated_cycle": {"const": 93},
-        "selected_move_id": {"const": "N0-OWNER-RESPONSE-001"},
+        "last_updated_cycle": {"const": 94},
+        "selected_move_id": {"const": "N4-IPC-MODEL-001"},
         "immediate_next_move_id": {"const": "N0-HW-KEY-ACQUIRE-001"},
         "required_records": {"type": "array", "minItems": 7, "items": {"type": "string"}, "uniqueItems": true},
         "flag_classes": {"type": "array", "minItems": 8, "items": {"type": "string"}, "uniqueItems": true}
@@ -135,8 +135,8 @@
     },
     "implementation_flags": {
       "type": "array",
-      "minItems": 30,
-      "maxItems": 30,
+      "minItems": 31,
+      "maxItems": 31,
       "items": {
         "type": "object",
         "additionalProperties": false,
