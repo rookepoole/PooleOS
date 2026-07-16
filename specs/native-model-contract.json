@@ -1,9 +1,9 @@
 {
-  "schema_version": "1.3",
+  "schema_version": "1.4",
   "artifact_kind": "pooleos_native_model_contract",
   "status_date": "2026-07-16",
-  "contract_id": "POOLEOS-N4-MODELS-4",
-  "selected_move_id": "N4-SCHEDULER-MODEL-001",
+  "contract_id": "POOLEOS-N4-MODELS-5",
+  "selected_move_id": "N4-POOLEFS-MODEL-001",
   "production_ready": false,
   "production_promotion_allowed": false,
   "engine": {
@@ -51,7 +51,8 @@
     "scheduler_transitions",
     "virtual_memory_map_unmap",
     "boot_slot_state",
-    "update_rollback"
+    "update_rollback",
+    "poolefs_transaction_recovery"
   ],
   "models": [
     {
@@ -253,6 +254,70 @@
           "expected": {"exit_code": 12, "generated_states": 10, "distinct_states": 9, "left_on_queue": 6, "depth": 3, "trace_length": 3, "trace_actions": ["Init", "Activate", "Teardown"], "trace_sha256": "E94E4E04B62AD9F17F1346B6071B5A6D0614FA0E20E15AC0B66A6B719AEE7708"}
         }
       ]
+    },
+    {
+      "id": "poolefs_transaction_recovery",
+      "module_path": "models/tla/PooleFS.tla",
+      "state_variables": ["systemState", "transactionState", "txTarget", "pendingData", "activeBlock", "blockValue", "blockChecksum", "blockRole", "journalState", "journalTarget", "journalChecksumValid", "replayApplyCount", "auditFault"],
+      "invariants": ["TypeOK", "AllocationOwnershipSound", "ChecksummedDataValid", "PublicationOrderSound", "ChecksumRejectionSound", "VisibleOldOrNew", "JournalShapeSound", "TransactionStateSound", "RecoveryStateSound", "MountedQuiescent", "ReplayIdempotent", "StagingBound"],
+      "cases": [
+        {
+          "id": "safe",
+          "role": "safe",
+          "config_path": "models/tla/PooleFS.safe.cfg",
+          "constant_assignments": {"UnsafeTornWrite": "FALSE", "UnsafePrematurePublish": "FALSE", "UnsafeDoubleAllocation": "FALSE", "UnsafeNonIdempotentReplay": "FALSE", "UnsafeChecksumAcceptance": "FALSE", "UnsafeRecoveryLeak": "FALSE"},
+          "expected_invariant_violation": null,
+          "expected": {"exit_code": 0, "generated_states": 214, "distinct_states": 74, "left_on_queue": 0, "depth": 13, "trace_length": 0, "trace_actions": [], "trace_sha256": "37517E5F3DC66819F61F5A7BB8ACE1921282415F10551D2DEFA5C3EB0985B570"}
+        },
+        {
+          "id": "unsafe_torn_write",
+          "role": "hostile",
+          "config_path": "models/tla/PooleFS.torn_write.cfg",
+          "constant_assignments": {"UnsafeTornWrite": "TRUE", "UnsafePrematurePublish": "FALSE", "UnsafeDoubleAllocation": "FALSE", "UnsafeNonIdempotentReplay": "FALSE", "UnsafeChecksumAcceptance": "FALSE", "UnsafeRecoveryLeak": "FALSE"},
+          "expected_invariant_violation": "ChecksummedDataValid",
+          "expected": {"exit_code": 12, "generated_states": 11, "distinct_states": 8, "left_on_queue": 3, "depth": 4, "trace_length": 4, "trace_actions": ["Init", "BeginTransaction", "WriteData", "CrashMounted"], "trace_sha256": "33606BAC4E23AB8997ABCC30C71025EE20C231675D53CC5BDCE5649F898D4617"}
+        },
+        {
+          "id": "unsafe_premature_publish",
+          "role": "hostile",
+          "config_path": "models/tla/PooleFS.premature_publish.cfg",
+          "constant_assignments": {"UnsafeTornWrite": "FALSE", "UnsafePrematurePublish": "TRUE", "UnsafeDoubleAllocation": "FALSE", "UnsafeNonIdempotentReplay": "FALSE", "UnsafeChecksumAcceptance": "FALSE", "UnsafeRecoveryLeak": "FALSE"},
+          "expected_invariant_violation": "PublicationOrderSound",
+          "expected": {"exit_code": 12, "generated_states": 20, "distinct_states": 12, "left_on_queue": 4, "depth": 5, "trace_length": 5, "trace_actions": ["Init", "BeginTransaction", "WriteData", "FlushData", "PublishPremature"], "trace_sha256": "11E00D83B8742C2798441DE0BBBB3F7E5065C9D327C3AC3E2E52687061A266F3"}
+        },
+        {
+          "id": "unsafe_double_allocation",
+          "role": "hostile",
+          "config_path": "models/tla/PooleFS.double_allocation.cfg",
+          "constant_assignments": {"UnsafeTornWrite": "FALSE", "UnsafePrematurePublish": "FALSE", "UnsafeDoubleAllocation": "TRUE", "UnsafeNonIdempotentReplay": "FALSE", "UnsafeChecksumAcceptance": "FALSE", "UnsafeRecoveryLeak": "FALSE"},
+          "expected_invariant_violation": "AllocationOwnershipSound",
+          "expected": {"exit_code": 12, "generated_states": 2, "distinct_states": 2, "left_on_queue": 0, "depth": 2, "trace_length": 2, "trace_actions": ["Init", "BeginTransaction"], "trace_sha256": "B34EBD56EBBDDF89FAAC2E640EEEF0456EB78CF9118AE29E3D024C5E32CF79B6"}
+        },
+        {
+          "id": "unsafe_non_idempotent_replay",
+          "role": "hostile",
+          "config_path": "models/tla/PooleFS.non_idempotent_replay.cfg",
+          "constant_assignments": {"UnsafeTornWrite": "FALSE", "UnsafePrematurePublish": "FALSE", "UnsafeDoubleAllocation": "FALSE", "UnsafeNonIdempotentReplay": "TRUE", "UnsafeChecksumAcceptance": "FALSE", "UnsafeRecoveryLeak": "FALSE"},
+          "expected_invariant_violation": "ReplayIdempotent",
+          "expected": {"exit_code": 12, "generated_states": 193, "distinct_states": 71, "left_on_queue": 3, "depth": 12, "trace_length": 12, "trace_actions": ["Init", "BeginTransaction", "WriteData", "FlushData", "PersistIntent", "PersistCommit", "CrashMounted", "StartRecovery", "ApplyRecoveryCommit", "CrashRecovery", "StartRecovery", "ApplyRecoveryCommit"], "trace_sha256": "32B4811E4F8601203EDD81FC058FFA651EDFDD897F542EFB3114700456170E61"}
+        },
+        {
+          "id": "unsafe_checksum_acceptance",
+          "role": "hostile",
+          "config_path": "models/tla/PooleFS.checksum_acceptance.cfg",
+          "constant_assignments": {"UnsafeTornWrite": "FALSE", "UnsafePrematurePublish": "FALSE", "UnsafeDoubleAllocation": "FALSE", "UnsafeNonIdempotentReplay": "FALSE", "UnsafeChecksumAcceptance": "TRUE", "UnsafeRecoveryLeak": "FALSE"},
+          "expected_invariant_violation": "ChecksumRejectionSound",
+          "expected": {"exit_code": 12, "generated_states": 129, "distinct_states": 57, "left_on_queue": 12, "depth": 10, "trace_length": 10, "trace_actions": ["Init", "BeginTransaction", "WriteData", "FlushData", "PersistIntent", "PersistCommit", "CrashMounted", "CorruptJournal", "StartRecovery", "ApplyRecoveryCommit"], "trace_sha256": "91DD1D450121F67A86F68D9BF1AA7367C61264B64DBFCB4851172CA64BF8A4C7"}
+        },
+        {
+          "id": "unsafe_recovery_leak",
+          "role": "hostile",
+          "config_path": "models/tla/PooleFS.recovery_leak.cfg",
+          "constant_assignments": {"UnsafeTornWrite": "FALSE", "UnsafePrematurePublish": "FALSE", "UnsafeDoubleAllocation": "FALSE", "UnsafeNonIdempotentReplay": "FALSE", "UnsafeChecksumAcceptance": "FALSE", "UnsafeRecoveryLeak": "TRUE"},
+          "expected_invariant_violation": "MountedQuiescent",
+          "expected": {"exit_code": 12, "generated_states": 41, "distinct_states": 19, "left_on_queue": 4, "depth": 6, "trace_length": 6, "trace_actions": ["Init", "BeginTransaction", "CrashMounted", "StartRecovery", "ApplyRecoveryRollback", "FinishRecovery"], "trace_sha256": "B4704258E84B3639B7BE61B83613AD64B60FB46E0F40EE92885A5297B04B1F52"}
+        }
+      ]
     }
   ],
   "assumptions": [
@@ -261,13 +326,14 @@
     "The virtual-memory model has exactly two domains, two CPUs, two physical pages, one virtual address per domain, generations 0 through 1, and atomic map, TLB fill/evict, transfer, unmap, and shootdown-acknowledgement transitions. It has no page-table hierarchy, PCID/ASID, DMA/IOMMU, interrupt-ordering, weak-memory, concurrent page-table-write, huge-page, copy-on-write, swap, NUMA, or hardware page-walk model.",
     "The IPC model has exactly two principals, one endpoint, two calls, two reply tokens, a one-call queue bound, endpoint epochs 0 through 1, and atomic enqueue, dispatch, cancel, timeout, reply, teardown, and reopen transitions. Call and reply-token identifiers are one-shot and never recycled. CanCall is an abstract authorization predicate, not a composed capability lookup, derivation, or revocation model. The queue is an unordered set abstraction. It has no payload, message-copy, scheduling, priority, fairness, blocking-thread, interrupt, SMP interleaving, weak-memory, resource-accounting, endpoint-transfer, kernel-object implementation, or ABI-encoding model.",
     "The scheduler model has exactly three fixed-priority tasks, one abstract CPU context, one non-recursive lock, a preloaded low-priority critical section, one-shot task activation, atomic transitions, and a maximum of two recorded dispatch bypasses. Cancellation and timeout are modeled as blocked-to-runnable wake results that must be consumed before the task continues. Priority inheritance is immediate and transitive depth is one. The bypass bound is a safety accounting rule only: Idle remains enabled and no temporal fairness or eventual-dispatch property is checked. There is no timer clock, deadline arithmetic, quantum, multicore execution, interrupt ordering, nested lock, deadlock graph, donation chain, affinity, migration, register context, FPU/vector state, weak memory, resource quota, scheduler implementation, or ABI encoding.",
+    "The PooleFS model has exactly two abstract blocks, one logical old value, one copy-on-write update, one transaction, atomic model transitions, explicit volatile pending data, durable data/checksum/allocation-role/journal state, crash and restart before or during recovery, and at most one successful recovery publication. Flush and FUA are abstract atomic persistence edges, and journal or staged-data corruption is injected only while crashed. There is no byte- or sector-level atomicity, device write cache, controller reordering, multiple-file or multiple-transaction concurrency, directory, extent, snapshot, quota, ENOSPC, page-cache, VFS, encryption, block-driver, repair traversal, physical-medium, implementation, or on-disk ABI model.",
     "TLC uses 64-bit state fingerprints; complete reachable-state exploration within the constants is not a collision-free mathematical proof.",
     "Only state safety invariants are checked. No liveness, fairness, real-time, probabilistic, refinement, implementation-equivalence, or physical-hardware property is checked.",
     "The hostile configurations are deliberate mutations used to demonstrate that the named invariants produce finite counterexample traces."
   ],
   "trace_cross_check": {
     "status": "pending_native_implementation_traces",
-    "required_model_count": 5,
+    "required_model_count": 6,
     "completed_model_count": 0,
     "abi_freeze_authorized": false
   },

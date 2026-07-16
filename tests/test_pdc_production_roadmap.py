@@ -118,8 +118,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 95)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 507)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 96)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 508)
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
         self.assertTrue(all(value is False for key, value in native.items() if key != "source_controlled"))
@@ -151,7 +151,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N4-SCHEDULER-MODEL-001")
+        self.assertEqual(protocol["selected_move_id"], "N4-POOLEFS-MODEL-001")
         self.assertIn("runs/hardware_target_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_tier0_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_model_readiness.json", protocol["required_records"])
@@ -164,8 +164,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
     def test_flags_and_gaps_are_native_and_traceable(self) -> None:
         phase_ids = {phase["id"] for phase in self.roadmap["phases"]}
         flags = self.roadmap["implementation_flags"]
-        self.assertEqual(len(flags), 32)
-        self.assertEqual(len({flag["id"] for flag in flags}), 32)
+        self.assertEqual(len(flags), 33)
+        self.assertEqual(len({flag["id"] for flag in flags}), 33)
         self.assertTrue(any(flag["class"] == "STOP_SHIP" and flag["status"] == "open" for flag in flags))
         self.assertEqual(next(flag for flag in flags if flag["id"] == "FLAG-BUILDROOT-LEGACY-001")["status"], "closed")
         objectives_flag = next(flag for flag in flags if flag["id"] == "FLAG-N0-OBJECTIVES-001")
@@ -205,6 +205,10 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(scheduler_model_flag["class"], "REQUIRED")
         self.assertEqual(scheduler_model_flag["status"], "closed")
         self.assertIn("models/tla/PooleScheduler.tla", scheduler_model_flag["evidence"])
+        poolefs_model_flag = next(flag for flag in flags if flag["id"] == "FLAG-N4-POOLEFS-MODEL-001")
+        self.assertEqual(poolefs_model_flag["class"], "REQUIRED")
+        self.assertEqual(poolefs_model_flag["status"], "closed")
+        self.assertIn("models/tla/PooleFS.tla", poolefs_model_flag["evidence"])
         codev_flag = next(flag for flag in flags if flag["id"] == "FLAG-PGL-CODEV-001")
         self.assertEqual(codev_flag["class"], "REQUIRED")
         self.assertEqual(codev_flag["status"], "open")
@@ -245,6 +249,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(any("PooleVirtualMemory.tla" in item for item in n4["current_evidence"]))
         self.assertTrue(any("PooleIPC.tla" in item for item in n4["current_evidence"]))
         self.assertTrue(any("PooleScheduler.tla" in item for item in n4["current_evidence"]))
+        self.assertTrue(any("PooleFS.tla" in item for item in n4["current_evidence"]))
         self.assertTrue(any("implementation-trace cross-checks" in item for item in n4["current_gaps"]))
 
         n0 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N0")

@@ -43,8 +43,8 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 95,
-    "selected_move_id": "N4-SCHEDULER-MODEL-001",
+    "last_updated_cycle": 96,
+    "selected_move_id": "N4-POOLEFS-MODEL-001",
     "immediate_next_move_id": "N0-HW-KEY-ACQUIRE-001",
     "required_records": [
       "docs/production-goal-charter.md",
@@ -88,9 +88,9 @@
     "added_requirement_count": 32
   },
   "baseline": {
-    "pooleos_cycle": 95,
+    "pooleos_cycle": 96,
     "entry_cycle": 79,
-    "pooleos_test_count": 507,
+    "pooleos_test_count": 508,
     "historical_consistency_release_gate": {
       "passed_checks": 58,
       "total_checks": 58,
@@ -627,13 +627,13 @@
         "runs/native_tier0_readiness.json: 2/2 deterministic profiles, 4/4 paused QMP machine probes, 18/18 fail-closed controls, zero path leaks, and zero boot claims",
         "tools/qualify_native_tier0.py and tools/run_native_tier0.py: workspace-local qualification and dry-run-first launcher with no arbitrary QEMU arguments",
         "docs/native-tier0-qemu.md: acquisition, reproduction, launch, provenance gaps, and non-claim boundary",
-        "specs/native-model-toolchain-lock.json and specs/native-model-contract.json: exact workspace-local TLC/Java inputs, five finite-state model contracts, twenty named cases, safe expectations, and required hostile violations",
-        "runs/native_model_readiness.json: 5/5 safe state spaces drained, 15/15 required counterexamples detected, 20/20 repeat matches, 25/25 negative controls, and fifteen normalized traces",
-        "models/tla/PooleBootSlots.tla, models/tla/PooleCapabilities.tla, models/tla/PooleVirtualMemory.tla, models/tla/PooleIPC.tla, and models/tla/PooleScheduler.tla: bounded boot rollback, capability derivation/revocation, page-ownership/map/unmap/shootdown, capability-mediated IPC, and scheduler state machines",
+        "specs/native-model-toolchain-lock.json and specs/native-model-contract.json: exact workspace-local TLC/Java inputs, six finite-state model contracts, twenty-seven named cases, safe expectations, and required hostile violations",
+        "runs/native_model_readiness.json: 6/6 safe state spaces drained, 21/21 required counterexamples detected, 27/27 repeat matches, 31/31 negative controls, and twenty-one normalized traces",
+        "models/tla/PooleBootSlots.tla, models/tla/PooleCapabilities.tla, models/tla/PooleVirtualMemory.tla, models/tla/PooleIPC.tla, models/tla/PooleScheduler.tla, and models/tla/PooleFS.tla: bounded boot rollback, capability derivation/revocation, page-ownership/map/unmap/shootdown, capability-mediated IPC, scheduler, and PooleFS transaction/recovery state machines",
         "docs/native-formal-models.md: frozen assumptions, reproduction, trace normalization, open domains, and explicit non-proof boundary"
       ],
       "current_gaps": [
-        "A pinned one-host q35/QEMU/OVMF/VIRTIO profile, paused-instantiation evidence, and bounded boot-slot/capability/virtual-memory/IPC/scheduler model checks exist, but current upstream source rebuilds, actual PooleBoot serial/debug-exit/GDB/reset evidence, remaining VIRTIO profiles, malformed-device campaigns, the PooleFS model, implementation-trace cross-checks, liveness/refinement work, and second-host reproduction remain open"
+        "A pinned one-host q35/QEMU/OVMF/VIRTIO profile, paused-instantiation evidence, and bounded checks for all seven required boot-slot/capability/virtual-memory/IPC/scheduler/update/PooleFS domains exist, but current upstream source rebuilds, actual PooleBoot serial/debug-exit/GDB/reset evidence, remaining VIRTIO profiles, malformed-device campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open"
       ],
       "exit_gate": "one command launches each pinned native test profile; logs and artifacts are deterministic where declared; formal models have executable counterexample checks; no Buildroot guest is required."
     },
@@ -2689,8 +2689,8 @@
         "ADD-TEST-001"
       ],
       "current_evidence": [
-        "Cycle 95 host baseline: 507 tests with one Windows symlink-permission skip",
-        "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, frozen owner-packet and completed owner-response omission/staleness/placeholder/custody/private-material/authorization controls, hardware privacy, malformed-CPUID, Tier 0 profile/provenance/path/overclaim, bounded-model multi-case mutation/trace/claim controls including seven independent scheduler mutants, PooleGlyph roadmap bindings, and collector-smoke negatives"
+        "Cycle 96 host baseline: 508 tests with one Windows symlink-permission skip",
+        "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, frozen owner-packet and completed owner-response omission/staleness/placeholder/custody/private-material/authorization controls, hardware privacy, malformed-CPUID, Tier 0 profile/provenance/path/overclaim, bounded-model multi-case mutation/trace/claim controls including six independent PooleFS mutants, PooleGlyph roadmap bindings, and collector-smoke negatives"
       ],
       "current_gaps": [
         "No native system, power-loss, hardware, accessibility, soak, or external security suite exists"
@@ -2757,7 +2757,7 @@
         "ADD-SUPPLY-001"
       ],
       "current_evidence": [
-        "Cycle 95 consistency release gate: 69/69 checks over 64 artifacts",
+        "Cycle 96 consistency release gate: 69/69 checks over 64 artifacts",
         "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, frozen N0 owner packet, deterministic owner-response receipt, native-toolchain, bounded hardware-readiness, native Tier 0 readiness, native model-readiness, and PooleGlyph planning artifacts"
       ],
       "current_gaps": [
@@ -3268,6 +3268,7 @@
         "specs/native-model-contract.json",
         "models/tla/PooleIPC.tla",
         "models/tla/PooleScheduler.tla",
+        "models/tla/PooleFS.tla",
         "docs/native-formal-models.md"
       ]
     },
@@ -3288,6 +3289,7 @@
         "specs/native-model-contract.json",
         "models/tla/PooleIPC.tla",
         "models/tla/PooleScheduler.tla",
+        "models/tla/PooleFS.tla",
         "docs/native-formal-models.md"
       ]
     },
@@ -3308,6 +3310,28 @@
         "specs/native-model-contract.json",
         "models/tla/PooleIPC.tla",
         "models/tla/PooleScheduler.tla",
+        "models/tla/PooleFS.tla",
+        "docs/native-formal-models.md"
+      ]
+    },
+    {
+      "id": "FLAG-N4-POOLEFS-MODEL-001",
+      "class": "REQUIRED",
+      "status": "closed",
+      "phase_id": "N4",
+      "closure_condition": "Exhaust the frozen PooleFS transaction/recovery state space, detect torn-write, premature-publication, double-allocation, non-idempotent-replay, checksum-acceptance, and recovery-leak mutants, and retain the finite non-implementation boundary",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json",
+        "runs/native_tier0_readiness.json",
+        "specs/native-tier0-lock.json",
+        "specs/native-tier0-profile.json",
+        "runs/native_model_readiness.json",
+        "specs/native-model-toolchain-lock.json",
+        "specs/native-model-contract.json",
+        "models/tla/PooleIPC.tla",
+        "models/tla/PooleScheduler.tla",
+        "models/tla/PooleFS.tla",
         "docs/native-formal-models.md"
       ]
     },
@@ -3350,7 +3374,7 @@
     "native_program_gaps": [
       "The native repository, protected workflow, scope-hardened ADR ceremony, frozen 16-source packet, and completed response receipt record 2/2 ADR and 38/38 definition dispositions, but all measurements, compatible hardware-key acquisition, trusted public key custody, signatures, signed tags, immutable release refs, and retained CI review evidence remain open",
       "Rust PE32+/ELF64 fixtures pass one-host qualification, but second-host reproduction, source provenance, C17/assembly/ABI tools, and image tooling remain open",
-      "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls and bounded boot-slot/capability/virtual-memory/IPC/scheduler state checks detect their required hostile violations, but source-rebuilt current QEMU/EDK II, real PooleBoot launch evidence, complete reference devices/fault campaigns, the PooleFS model, implementation-trace cross-checks, liveness/refinement work, and second-host reproduction remain open",
+      "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls and bounded checks for all seven required boot-slot/capability/virtual-memory/IPC/scheduler/update/PooleFS domains detect their required hostile violations, but source-rebuilt current QEMU/EDK II, real PooleBoot launch evidence, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open",
       "No PooleBoot PE32+ UEFI loader or frozen boot protocol",
       "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path",
       "No native CPU, interrupts, time, SMP, physical memory, virtual memory, or reclaim implementation",
@@ -3397,7 +3421,7 @@
     "Checklist mapping is not implementation completion.",
     "Host simulations and schemas are not native kernel enforcement.",
     "Four paused q35/QMP instantiations prove host-side profile construction only; no guest CPU instruction, native media, boot, driver, Secure Boot, or formal-model claim follows.",
-    "The five TLC state models are complete only for their frozen finite constants: they are not theorem proofs, liveness checks, refinement proofs, fingerprint-collision guarantees, implementation-trace comparisons, ABI-freeze authority, or PooleKernel execution evidence.",
+    "The six TLC state models cover all seven required domains only for their frozen finite constants: they are not theorem proofs, liveness checks, refinement proofs, fingerprint-collision guarantees, implementation-trace comparisons, ABI-freeze authority, hardware-durability evidence, or PooleKernel/PooleFS execution evidence.",
     "Sixteen allowlisted user-mode CPUID records prove only a bounded host observation; they do not prove MSR access, privileged probes, native parsing, driver safety, or Tier 1 qualification.",
     "Owner-directed acceptance of thirty-eight objective definitions while binding zero measurements is not a cryptographic signature or implementation evidence.",
     "PooleGlyph Phase 65 proves a metadata, parser, AST, and diagnostic foundation only; no source form, Core IR, PGASM, PGB2, PGVM2, host call, policy, optimization, or version label is promoted without its own frozen contract and evidence gate.",

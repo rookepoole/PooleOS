@@ -6,11 +6,11 @@
   "additionalProperties": false,
   "required": ["schema_version", "artifact_kind", "status_date", "contract_id", "selected_move_id", "production_ready", "production_promotion_allowed", "engine", "required_domains", "modeled_domains", "models", "assumptions", "trace_cross_check", "claim_boundary"],
   "properties": {
-    "schema_version": {"const": "1.3"},
+    "schema_version": {"const": "1.4"},
     "artifact_kind": {"const": "pooleos_native_model_contract"},
     "status_date": {"const": "2026-07-16"},
-    "contract_id": {"const": "POOLEOS-N4-MODELS-4"},
-    "selected_move_id": {"const": "N4-SCHEDULER-MODEL-001"},
+    "contract_id": {"const": "POOLEOS-N4-MODELS-5"},
+    "selected_move_id": {"const": "N4-POOLEFS-MODEL-001"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
     "engine": {
@@ -31,17 +31,17 @@
       }
     },
     "required_domains": {"type": "array", "minItems": 7, "maxItems": 7, "uniqueItems": true, "items": {"type": "string"}},
-    "modeled_domains": {"type": "array", "minItems": 6, "maxItems": 6, "uniqueItems": true, "items": {"type": "string"}},
+    "modeled_domains": {"type": "array", "minItems": 7, "maxItems": 7, "uniqueItems": true, "items": {"type": "string"}},
     "models": {
       "type": "array",
-      "minItems": 5,
-      "maxItems": 5,
+      "minItems": 6,
+      "maxItems": 6,
       "items": {
         "type": "object",
         "additionalProperties": false,
         "required": ["id", "module_path", "state_variables", "invariants", "cases"],
         "properties": {
-          "id": {"enum": ["boot_slot_rollback", "capability_revocation", "virtual_memory_ownership", "capability_mediated_ipc", "bounded_scheduler"]},
+          "id": {"enum": ["boot_slot_rollback", "capability_revocation", "virtual_memory_ownership", "capability_mediated_ipc", "bounded_scheduler", "poolefs_transaction_recovery"]},
           "module_path": {"type": "string"},
           "state_variables": {"type": "array", "minItems": 5, "maxItems": 13, "uniqueItems": true, "items": {"type": "string"}},
           "invariants": {"type": "array", "minItems": 6, "maxItems": 15, "uniqueItems": true, "items": {"type": "string"}},
@@ -49,14 +49,14 @@
         }
       }
     },
-    "assumptions": {"type": "array", "minItems": 8, "items": {"type": "string"}},
+    "assumptions": {"type": "array", "minItems": 9, "items": {"type": "string"}},
     "trace_cross_check": {
       "type": "object",
       "additionalProperties": false,
       "required": ["status", "required_model_count", "completed_model_count", "abi_freeze_authorized"],
       "properties": {
         "status": {"const": "pending_native_implementation_traces"},
-        "required_model_count": {"const": 5},
+        "required_model_count": {"const": 6},
         "completed_model_count": {"const": 0},
         "abi_freeze_authorized": {"const": false}
       }
@@ -81,7 +81,7 @@
       "additionalProperties": false,
       "required": ["id", "role", "config_path", "constant_assignments", "expected_invariant_violation", "expected"],
       "properties": {
-        "id": {"enum": ["safe", "unsafe_rollback", "unsafe_local_revoke", "unsafe_stale_mapping", "unsafe_early_reuse", "unsafe_unauthorized_call", "unsafe_token_reuse", "unsafe_stale_reply", "unsafe_leaky_teardown", "unsafe_lost_cancel_wake", "unsafe_lost_timeout_wake", "unsafe_duplicate_wakeup", "unsafe_no_priority_inheritance", "unsafe_priority_bypass", "unsafe_fairness_bypass", "unsafe_scheduler_teardown_leak"]},
+        "id": {"enum": ["safe", "unsafe_rollback", "unsafe_local_revoke", "unsafe_stale_mapping", "unsafe_early_reuse", "unsafe_unauthorized_call", "unsafe_token_reuse", "unsafe_stale_reply", "unsafe_leaky_teardown", "unsafe_lost_cancel_wake", "unsafe_lost_timeout_wake", "unsafe_duplicate_wakeup", "unsafe_no_priority_inheritance", "unsafe_priority_bypass", "unsafe_fairness_bypass", "unsafe_scheduler_teardown_leak", "unsafe_torn_write", "unsafe_premature_publish", "unsafe_double_allocation", "unsafe_non_idempotent_replay", "unsafe_checksum_acceptance", "unsafe_recovery_leak"]},
         "role": {"enum": ["safe", "hostile"]},
         "config_path": {"type": "string"},
         "constant_assignments": {
@@ -124,8 +124,8 @@
         "distinct_states": {"type": "integer", "minimum": 1},
         "left_on_queue": {"type": "integer", "minimum": 0},
         "depth": {"type": "integer", "minimum": 1},
-        "trace_length": {"type": "integer", "minimum": 0, "maximum": 8},
-        "trace_actions": {"type": "array", "maxItems": 8, "items": {"type": "string"}},
+        "trace_length": {"type": "integer", "minimum": 0, "maximum": 12},
+        "trace_actions": {"type": "array", "maxItems": 12, "items": {"type": "string"}},
         "trace_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"}
       }
     }

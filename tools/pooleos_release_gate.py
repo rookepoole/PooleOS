@@ -44,7 +44,7 @@ NATIVE_TIER0_READINESS = ROOT / "runs" / "native_tier0_readiness.json"
 DEFAULT_GAPS = [
     "The completed owner response records both ADR dispositions and all 38 objective definitions while accepting zero measurements, but the selected FIDO2 hardware key is unavailable; trusted public-key custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
     "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
-    "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, and four bounded TLC models detect required boot-slot, capability, virtual-memory, and IPC counterexamples; current source rebuilds, real PooleBoot launch evidence, complete reference devices/fault campaigns, scheduler/PooleFS models, all implementation-trace cross-checks, and second-host reproduction remain open.",
+    "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, and six bounded TLC models cover all seven required domains and detect twenty-one required counterexamples; current source rebuilds, real PooleBoot launch evidence, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open.",
     "No PooleBoot PE32+ UEFI loader or frozen native boot protocol.",
     "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path.",
     "No native CPU, interrupt, time, SMP, physical-memory, virtual-memory, or reclaim implementation.",
@@ -752,19 +752,19 @@ def check_native_model_readiness(path: Path = NATIVE_MODEL_READINESS) -> dict:
     runs = artifact.get("runs", [])
     if [item.get("id") for item in runs if isinstance(item, dict)] != list(native_models.RUN_IDS):
         errors.append("bounded model run set changed")
-    if summary.get("safe_run_pass_count") != 5 or summary.get("hostile_counterexample_count") != 15:
+    if summary.get("safe_run_pass_count") != 6 or summary.get("hostile_counterexample_count") != 21:
         errors.append("safe or hostile model evidence is incomplete")
-    if summary.get("repeat_match_count") != 20 or summary.get("negative_control_pass_count") != 25:
+    if summary.get("repeat_match_count") != 27 or summary.get("negative_control_pass_count") != 31:
         errors.append("model determinism or negative controls are incomplete")
-    if coverage.get("modeled_count") != 6 or coverage.get("open_count") != 1:
+    if coverage.get("modeled_count") != 7 or coverage.get("open_count") != 0:
         errors.append("bounded model domain coverage changed")
     if summary.get("implementation_trace_cross_check_count") != 0:
         errors.append("implementation trace cross-check is overclaimed")
     if artifact.get("n4_model_slice_satisfied") is not True or artifact.get("n4_exit_gate_satisfied") is not False:
         errors.append("N4 model-slice or exit boundary changed")
     detail = (
-        "contract=POOLEOS-N4-MODELS-4; models=5; safe=5/5; counterexamples=15/15; "
-        "repeats=20/20; negatives=25/25; domains=6/7; trace_cross_checks=0/5; "
+        "contract=POOLEOS-N4-MODELS-5; models=6; safe=6/6; counterexamples=21/21; "
+        "repeats=27/27; negatives=31/31; domains=7/7; trace_cross_checks=0/6; "
         "formal_proof=false; n4_exit=false; production_promotion_allowed=false"
     )
     return readiness.make_check(
