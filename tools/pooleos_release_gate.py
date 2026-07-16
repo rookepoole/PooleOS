@@ -18,6 +18,7 @@ from runtime import pgb2_bundle as pgb2  # noqa: E402
 from runtime import adr_ratification  # noqa: E402
 from runtime import hardware_target  # noqa: E402
 from runtime import lab_readiness  # noqa: E402
+from runtime import native_tier0  # noqa: E402
 from runtime import native_v1_objectives  # noqa: E402
 from runtime import readiness  # noqa: E402
 from runtime.schema_validation import validate_json  # noqa: E402
@@ -31,12 +32,13 @@ NATIVE_V1_OBJECTIVES_READINESS = ROOT / "runs" / "native_v1_objectives_readiness
 ADR_RATIFICATION_READINESS = ROOT / "runs" / "adr_ratification_readiness.json"
 NATIVE_TOOLCHAIN_QUALIFICATION = ROOT / "runs" / "native_toolchain_qualification.json"
 HARDWARE_TARGET_READINESS = ROOT / "runs" / "hardware_target_readiness.json"
+NATIVE_TIER0_READINESS = ROOT / "runs" / "native_tier0_readiness.json"
 
 
 DEFAULT_GAPS = [
     "The scope-hardened ADR ceremony binds the exact 38-target candidate objectives contract and schema, but all target measurements, owner target acceptance and ADR disposition, signing custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
     "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
-    "No native-only QEMU/OVMF/VIRTIO reference profile or executable formal state models.",
+    "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, but current source rebuilds, real PooleBoot launch evidence, complete reference devices and fault campaigns, executable formal models, trace cross-checks, and second-host reproduction remain open.",
     "No PooleBoot PE32+ UEFI loader or frozen native boot protocol.",
     "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path.",
     "No native CPU, interrupt, time, SMP, physical-memory, virtual-memory, or reclaim implementation.",
@@ -557,6 +559,50 @@ def check_hardware_target_readiness(path: Path = HARDWARE_TARGET_READINESS) -> d
     )
     return readiness.make_check(
         "hardware_target_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_tier0_readiness(path: Path = NATIVE_TIER0_READINESS) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(path, "native-tier0-readiness.schema.json")
+    errors = [f"Tier 0 readiness {error.path}: {error.message}" for error in artifact_schema_errors[:8]]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_tier0_readiness",
+            False,
+            "; ".join(errors) or "native Tier 0 readiness is not an object",
+        )
+    errors.extend(native_tier0.readiness_contract_errors(artifact, ROOT))
+    candidate = artifact.get("candidate", {})
+    tree = candidate.get("runtime_tree", {})
+    capabilities = candidate.get("capabilities", {})
+    if tree.get("file_count") != 3368 or tree.get("byte_count") != 1180772298:
+        errors.append("qualified QEMU runtime closure count or size changed")
+    if tree.get("tree_sha256") != "A4CAF423F71E629B839298B35CAE17995865298CF7B29B16C0DD75437B6C0971":
+        errors.append("qualified QEMU runtime closure hash changed")
+    if not all(capabilities.get(key) is True for key in ("pc_q35_11_0", "q35_alias", "virtio_blk_non_transitional", "isa_debug_exit")):
+        errors.append("required q35/VIRTIO/debug-exit capability probe is incomplete")
+    profile_checks = artifact.get("profile_checks", [])
+    if [item.get("profile_id") for item in profile_checks if isinstance(item, dict)] != list(native_tier0.PROFILE_IDS):
+        errors.append("Tier 0 profile set changed")
+    if any(
+        item.get("command_generation_exact_match") is not True
+        or item.get("qmp_summary_exact_match") is not True
+        or item.get("machine_instantiation_pass") is not True
+        or item.get("guest_cpu_execution_started") is not False
+        or item.get("boot_claimed") is not False
+        for item in profile_checks
+        if isinstance(item, dict)
+    ):
+        errors.append("Tier 0 profile evidence does not preserve the paused non-boot boundary")
+    detail = (
+        "profile=POOLEOS-TIER0-Q35-1; qemu=11.0.0-candidate; q35=pc-q35-11.0; "
+        "profiles=2/2; paused_qmp=4/4; negatives=18/18; paths=0; boot_claims=0; "
+        "formal_models=0; n4_exit=false; production_promotion_allowed=false"
+    )
+    return readiness.make_check(
+        "native_tier0_readiness",
         not errors,
         detail if not errors else "; ".join(errors[:8]),
     )
@@ -3353,6 +3399,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--adr-ratification-readiness", type=Path, default=ADR_RATIFICATION_READINESS)
     parser.add_argument("--native-toolchain-qualification", type=Path, default=NATIVE_TOOLCHAIN_QUALIFICATION)
     parser.add_argument("--hardware-target-readiness", type=Path, default=HARDWARE_TARGET_READINESS)
+    parser.add_argument("--native-tier0-readiness", type=Path, default=NATIVE_TIER0_READINESS)
     parser.add_argument("--out", type=Path, default=ROOT / "runs" / "release_gate.json")
     parser.add_argument("--include-runtime", action="store_true", help="Include PooleGlyph runtime checks in doctor.")
     args = parser.parse_args(argv)
@@ -3365,6 +3412,7 @@ def main(argv: list[str] | None = None) -> int:
         check_adr_ratification_readiness(args.adr_ratification_readiness),
         check_native_toolchain_qualification(args.native_toolchain_qualification),
         check_hardware_target_readiness(args.hardware_target_readiness),
+        check_native_tier0_readiness(args.native_tier0_readiness),
         check_publication_boundary(),
         check_bundle(args.bundle),
         check_replay_proof(args.replay_proof),
@@ -3547,6 +3595,7 @@ def main(argv: list[str] | None = None) -> int:
             args.adr_ratification_readiness,
             args.native_toolchain_qualification,
             args.hardware_target_readiness,
+            args.native_tier0_readiness,
         )
         if path is not None
     ]

@@ -1,0 +1,342 @@
+{
+  "artifact_kind": "pooleos_native_tier0_readiness",
+  "bindings": {
+    "implementation_inputs": [
+      {
+        "byte_count": 44441,
+        "path": "runtime/native_tier0.py",
+        "sha256": "87716D0D8127599A462A535E83FF779248AF9681CE11E8B6D53151B11DB79A39"
+      },
+      {
+        "byte_count": 2167,
+        "path": "tools/qualify_native_tier0.py",
+        "sha256": "B321087A47F2A49B619693CB794D8C1E3E68BF5E2F2DB55C3924F1E89A6B03A9"
+      },
+      {
+        "byte_count": 2862,
+        "path": "tools/run_native_tier0.py",
+        "sha256": "34CC576622755F618AE4125B70CC4441C1275C26AB5F36A33185CA4A091AD375"
+      },
+      {
+        "byte_count": 1626,
+        "path": "specs/native-tier0-launch-receipt.schema.json",
+        "sha256": "D11FFA9385B6C6D7ACE11B37AABF176A0546BF30223F3C6D11C0C25248A56990"
+      }
+    ],
+    "lock": {
+      "byte_count": 5641,
+      "path": "specs/native-tier0-lock.json",
+      "sha256": "E6E126A5EC683FC1A73B82B8C889F4212BE507BAA52EA43548B23C938093499F"
+    },
+    "profile": {
+      "byte_count": 6439,
+      "path": "specs/native-tier0-profile.json",
+      "sha256": "EE5139B1B71DC20684BFEBD862D2CD00A31A9BB1C8EADDC349CE659D252717DF"
+    }
+  },
+  "candidate": {
+    "capabilities": {
+      "device_help_sha256": "2C2E77A9C3A0A572EE1C639E42B276EDCB612FB4F34081CB9DCADB27433A675D",
+      "isa_debug_exit": true,
+      "machine_help_sha256": "0DA987EDADA3D8BCEC75B2F14B05922D16A9200B3F02F34518CD00FE8CEA3C3E",
+      "pc_q35_11_0": true,
+      "q35_alias": true,
+      "virtio_blk_non_transitional": true
+    },
+    "executable": {
+      "byte_count": 25287296,
+      "name": "qemu-system-x86_64.exe",
+      "sha256": "A930E028F93D0FA47E4D58BDAD2432F7466DC2B6AF0AE376F77EF7A298FFDD02"
+    },
+    "firmware": [
+      {
+        "byte_count": 3653632,
+        "exact_match": true,
+        "name": "edk2-x86_64-code.fd",
+        "role": "debug_code_read_only",
+        "sha256": "33090CC07675BAA5190D9F1E84BF5176B33BCBFA9BACAC522961150CDB6DBB2A"
+      },
+      {
+        "byte_count": 3653632,
+        "exact_match": true,
+        "name": "edk2-x86_64-secure-code.fd",
+        "role": "secure_code_read_only",
+        "sha256": "32807682A9E5C0E2D192ECB6077941D4BE8BCFA6B9CD6E60830C3A9F48C0555A"
+      },
+      {
+        "byte_count": 540672,
+        "exact_match": true,
+        "name": "edk2-i386-vars.fd",
+        "role": "vars_template_copy_only",
+        "sha256": "5D2AC383371B408398ACCEE7EC27C8C09EA5B74A0DE0CEEA6513388B15BE5D1E"
+      },
+      {
+        "byte_count": 718,
+        "exact_match": true,
+        "name": "60-edk2-x86_64.json",
+        "role": "debug_descriptor",
+        "sha256": "F6756761629339223E398BAD85CFF8DACE5310E9C88876052A0784B16BA7FF5D"
+      },
+      {
+        "byte_count": 745,
+        "exact_match": true,
+        "name": "50-edk2-x86_64-secure.json",
+        "role": "secure_descriptor",
+        "sha256": "6E6CC9506AA6D77E4673A9AD081C01854031E3EA8FD993A1E9825D909302EE96"
+      }
+    ],
+    "installer": {
+      "authenticode_currently_valid": false,
+      "byte_count": 185604552,
+      "name": "qemu-w64-setup-20260422.exe",
+      "publisher_sha512_match": true,
+      "sha256": "DA95183368398B651ACDB9236F033A76175C9D1298DD90E6C7836F528A63B27D",
+      "sha512": "64A43C0D39ACDDC9D30D290935A312A2B5C4FA62CFFE6C27090F2A45CA6C8DE0F0E8673E1E5117FB116A8742F86DF92163531AFC23F34758AADFC6D82C1F41A5"
+    },
+    "local_path_recorded": false,
+    "provenance": {
+      "bundled_edk2_commit_sha1": "4DFDCA63A93497203F197EC98BA20E2327E4AFE4",
+      "bundled_firmware_matches_target": false,
+      "ovmf_source_rebuild_complete": false,
+      "provider_commit_sha1": "A4BB4B10C9D43D416F6E8BC9BB5C8F372FD80769",
+      "qemu_source_rebuild_complete": false,
+      "target_edk2_commit_sha1": "B03A21A63E3BD001F52C527E5A57FEDDB53A690B"
+    },
+    "runtime_tree": {
+      "byte_count": 1180772298,
+      "file_count": 3368,
+      "tree_sha256": "A4CAF423F71E629B839298B35CAE17995865298CF7B29B16C0DD75437B6C0971"
+    },
+    "version": {
+      "exact_match": true,
+      "latest_upstream_patch_level_matched": false,
+      "observed": "QEMU emulator version 11.0.0 (v11.0.0-12122-ga4bb4b10c9)"
+    }
+  },
+  "claim_boundary": [
+    "A passing Tier 0 qualification proves only exact host-tool, firmware-byte, capability-probe, machine-instantiation, and command-generation controls.",
+    "A paused QMP handshake is not a PooleBoot boot, PooleKernel execution, VIRTIO driver proof, or guest determinism proof.",
+    "The secure firmware profile does not claim enrolled keys, Secure Boot enforcement, measured boot, or owner signatures.",
+    "QEMU and OVMF are development inputs and are not PooleOS production components.",
+    "No Buildroot or Linux guest artifact can satisfy a native PooleOS gate.",
+    "The Windows candidate cannot disable guest memory dumps through the q35 dump-guest-core property and is not production-qualified."
+  ],
+  "n4_exit_gate_satisfied": false,
+  "negative_controls": [
+    {
+      "evidence_kind": "observed_binary_hash_substitution",
+      "expected": "reject",
+      "id": "NEG-N4-ANDROID-QEMU",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "evidence_kind": "observed_binary_hash_substitution",
+      "expected": "reject",
+      "id": "NEG-N4-DEVELOPMENT-QEMU",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "evidence_kind": "exact_hash_comparison",
+      "expected": "reject",
+      "id": "NEG-N4-QEMU-HASH",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "evidence_kind": "contract_mutation",
+      "expected": "reject",
+      "id": "NEG-N4-QEMU-VERSION",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "evidence_kind": "contract_mutation",
+      "expected": "reject",
+      "id": "NEG-N4-MACHINE",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "evidence_kind": "exact_hash_comparison",
+      "expected": "reject",
+      "id": "NEG-N4-FIRMWARE-CODE-HASH",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "evidence_kind": "contract_mutation",
+      "expected": "reject",
+      "id": "NEG-N4-FIRMWARE-CODE-WRITABLE",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "evidence_kind": "fresh_copy_policy",
+      "expected": "reject",
+      "id": "NEG-N4-VARS-TEMPLATE-REUSE",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "evidence_kind": "contract_mutation",
+      "expected": "reject",
+      "id": "NEG-N4-LEGACY-VIRTIO",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "evidence_kind": "contract_mutation",
+      "expected": "reject",
+      "id": "NEG-N4-TRANSITIONAL-VIRTIO",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "evidence_kind": "contract_mutation",
+      "expected": "reject",
+      "id": "NEG-N4-NETWORK",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "evidence_kind": "prohibited_device_policy",
+      "expected": "reject",
+      "id": "NEG-N4-HOST-SHARE",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "evidence_kind": "contract_mutation",
+      "expected": "reject",
+      "id": "NEG-N4-HOST-ACCEL",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "evidence_kind": "contract_mutation",
+      "expected": "reject",
+      "id": "NEG-N4-EXTRA-ARG",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "evidence_kind": "media_path_policy",
+      "expected": "reject",
+      "id": "NEG-N4-BUILDROOT-GUEST",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "evidence_kind": "media_path_policy",
+      "expected": "reject",
+      "id": "NEG-N4-LINUX-GUEST",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "evidence_kind": "run_directory_policy",
+      "expected": "reject",
+      "id": "NEG-N4-PATH-ESCAPE",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "evidence_kind": "claim_boundary",
+      "expected": "reject",
+      "id": "NEG-N4-BOOT-OVERCLAIM",
+      "observed": "reject",
+      "status": "pass"
+    }
+  ],
+  "open_items": [
+    "Build and qualify QEMU 11.0.2 from its exact signed upstream source.",
+    "Build and qualify OVMF from edk2-stable202605 with source-to-binary provenance.",
+    "Attach and boot an original native PooleBoot image; no native media was attached here.",
+    "Validate serial markers, debug-exit values, reset behavior, and crash capture against a frozen PooleBoot protocol.",
+    "Run the opt-in GDB profile with symbols and preserve debugger transcripts.",
+    "Execute malformed firmware, PCI, VIRTIO, image, and reset fault campaigns.",
+    "Implement executable formal models and cross-check model traces against QEMU traces.",
+    "Reproduce the profile and exact runtime closure on a second clean host.",
+    "Complete licenses, notices, SBOM, vulnerability review, and redistribution approval.",
+    "Enroll test keys and prove Secure Boot only after the owner signing ceremony is authorized."
+  ],
+  "production_promotion_allowed": false,
+  "production_ready": false,
+  "profile_checks": [
+    {
+      "boot_claimed": false,
+      "command_generation_exact_match": true,
+      "firmware_role": "debug_code_read_only",
+      "generation_run_sha256": [
+        "9379B581B8A0A6C0CE73F817E2FB18A83665FBF13032805EAF97CD4F87C75B8C",
+        "9379B581B8A0A6C0CE73F817E2FB18A83665FBF13032805EAF97CD4F87C75B8C"
+      ],
+      "guest_cpu_execution_started": false,
+      "machine_instantiation_pass": true,
+      "normalized_command_sha256": "9379B581B8A0A6C0CE73F817E2FB18A83665FBF13032805EAF97CD4F87C75B8C",
+      "probe_run_count": 2,
+      "profile_id": "bootstrap-debug",
+      "qmp_summary_exact_match": true,
+      "qmp_summary_sha256": [
+        "BA841B6FAF356E86CA4AFF1512178FF1AB5F8B74AF157CAF6AC9E1EFD92C8C6E",
+        "BA841B6FAF356E86CA4AFF1512178FF1AB5F8B74AF157CAF6AC9E1EFD92C8C6E"
+      ],
+      "vars_copy_exact_before_cpu_start": true
+    },
+    {
+      "boot_claimed": false,
+      "command_generation_exact_match": true,
+      "firmware_role": "secure_code_read_only",
+      "generation_run_sha256": [
+        "C6F671D379F3949D96332DFFC1FDE6FB7B2196011819BC69542D028BC60441CF",
+        "C6F671D379F3949D96332DFFC1FDE6FB7B2196011819BC69542D028BC60441CF"
+      ],
+      "guest_cpu_execution_started": false,
+      "machine_instantiation_pass": true,
+      "normalized_command_sha256": "C6F671D379F3949D96332DFFC1FDE6FB7B2196011819BC69542D028BC60441CF",
+      "probe_run_count": 2,
+      "profile_id": "secure-firmware-prep",
+      "qmp_summary_exact_match": true,
+      "qmp_summary_sha256": [
+        "BA841B6FAF356E86CA4AFF1512178FF1AB5F8B74AF157CAF6AC9E1EFD92C8C6E",
+        "BA841B6FAF356E86CA4AFF1512178FF1AB5F8B74AF157CAF6AC9E1EFD92C8C6E"
+      ],
+      "vars_copy_exact_before_cpu_start": true
+    }
+  ],
+  "schema_version": "1.0",
+  "scope": {
+    "formal_models_executed": false,
+    "guest_cpu_execution_started": false,
+    "guest_determinism_proved": false,
+    "host_class": "x86_64-pc-windows",
+    "host_environment_count": 1,
+    "machine_instantiated_paused": true,
+    "native_media_attached": false,
+    "pooleboot_booted": false,
+    "poolekernel_executed": false,
+    "probe_run_count_per_profile": 2,
+    "profile_count": 2,
+    "secure_boot_enforced": false,
+    "two_host_reproduction_complete": false,
+    "virtio_driver_executed": false
+  },
+  "selected_move_id": "N4-QEMU-001",
+  "status": "pass_profile_and_candidate_probe_non_promoting",
+  "status_date": "2026-07-16",
+  "summary": {
+    "boot_claim_count": 0,
+    "contract_failure_count": 0,
+    "formal_model_count": 0,
+    "machine_probe_count": 4,
+    "machine_probe_pass_count": 4,
+    "negative_control_count": 18,
+    "negative_control_pass_count": 18,
+    "path_leak_count": 0,
+    "profile_count": 2,
+    "profile_pass_count": 2,
+    "schema_failure_count": 0
+  }
+}

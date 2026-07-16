@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/native-tier0-readiness.schema.json",
+  "title": "PooleOS Native Tier 0 Readiness",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "selected_move_id",
+    "status",
+    "production_ready",
+    "production_promotion_allowed",
+    "n4_exit_gate_satisfied",
+    "scope",
+    "bindings",
+    "candidate",
+    "profile_checks",
+    "negative_controls",
+    "summary",
+    "open_items",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_tier0_readiness"},
+    "status_date": {"const": "2026-07-16"},
+    "selected_move_id": {"const": "N4-QEMU-001"},
+    "status": {"const": "pass_profile_and_candidate_probe_non_promoting"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "n4_exit_gate_satisfied": {"const": false},
+    "scope": {
+      "type": "object",
+      "required": ["host_environment_count", "host_class", "profile_count", "probe_run_count_per_profile", "machine_instantiated_paused", "guest_cpu_execution_started", "native_media_attached", "pooleboot_booted", "poolekernel_executed", "virtio_driver_executed", "guest_determinism_proved", "secure_boot_enforced", "formal_models_executed", "two_host_reproduction_complete"],
+      "properties": {
+        "host_environment_count": {"const": 1},
+        "host_class": {"const": "x86_64-pc-windows"},
+        "profile_count": {"const": 2},
+        "probe_run_count_per_profile": {"const": 2},
+        "machine_instantiated_paused": {"const": true},
+        "guest_cpu_execution_started": {"const": false},
+        "native_media_attached": {"const": false},
+        "pooleboot_booted": {"const": false},
+        "poolekernel_executed": {"const": false},
+        "virtio_driver_executed": {"const": false},
+        "guest_determinism_proved": {"const": false},
+        "secure_boot_enforced": {"const": false},
+        "formal_models_executed": {"const": false},
+        "two_host_reproduction_complete": {"const": false}
+      }
+    },
+    "bindings": {
+      "type": "object",
+      "required": ["lock", "profile", "implementation_inputs"],
+      "properties": {
+        "lock": {"type": "object", "required": ["path", "sha256", "byte_count"]},
+        "profile": {"type": "object", "required": ["path", "sha256", "byte_count"]},
+        "implementation_inputs": {"type": "array", "minItems": 4, "items": {"type": "object", "required": ["path", "sha256", "byte_count"]}}
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "required": ["local_path_recorded", "installer", "runtime_tree", "executable", "version", "capabilities", "firmware", "provenance"],
+      "properties": {
+        "local_path_recorded": {"const": false},
+        "installer": {"type": "object", "required": ["name", "sha256", "sha512", "byte_count", "publisher_sha512_match", "authenticode_currently_valid"]},
+        "runtime_tree": {"type": "object", "required": ["tree_sha256", "file_count", "byte_count"]},
+        "executable": {"type": "object", "required": ["name", "sha256", "byte_count"]},
+        "version": {"type": "object", "required": ["observed", "exact_match", "latest_upstream_patch_level_matched"]},
+        "capabilities": {"type": "object", "required": ["machine_help_sha256", "device_help_sha256", "pc_q35_11_0", "q35_alias", "virtio_blk_non_transitional", "isa_debug_exit"]},
+        "firmware": {"type": "array", "minItems": 5, "maxItems": 5, "items": {"type": "object", "required": ["role", "name", "sha256", "byte_count", "exact_match"]}},
+        "provenance": {"type": "object", "required": ["provider_commit_sha1", "bundled_edk2_commit_sha1", "target_edk2_commit_sha1", "bundled_firmware_matches_target", "qemu_source_rebuild_complete", "ovmf_source_rebuild_complete"]}
+      }
+    },
+    "profile_checks": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["profile_id", "firmware_role", "normalized_command_sha256", "generation_run_sha256", "command_generation_exact_match", "probe_run_count", "qmp_summary_sha256", "qmp_summary_exact_match", "machine_instantiation_pass", "vars_copy_exact_before_cpu_start", "guest_cpu_execution_started", "boot_claimed"]
+      }
+    },
+    "negative_controls": {
+      "type": "array",
+      "minItems": 18,
+      "maxItems": 18,
+      "items": {
+        "type": "object",
+        "required": ["id", "expected", "observed", "status", "evidence_kind"],
+        "properties": {
+          "expected": {"const": "reject"},
+          "observed": {"const": "reject"},
+          "status": {"const": "pass"}
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["schema_failure_count", "contract_failure_count", "profile_count", "profile_pass_count", "machine_probe_count", "machine_probe_pass_count", "negative_control_count", "negative_control_pass_count", "path_leak_count", "boot_claim_count", "formal_model_count"],
+      "properties": {
+        "schema_failure_count": {"const": 0},
+        "contract_failure_count": {"const": 0},
+        "profile_count": {"const": 2},
+        "profile_pass_count": {"const": 2},
+        "machine_probe_count": {"const": 4},
+        "machine_probe_pass_count": {"const": 4},
+        "negative_control_count": {"const": 18},
+        "negative_control_pass_count": {"const": 18},
+        "path_leak_count": {"const": 0},
+        "boot_claim_count": {"const": 0},
+        "formal_model_count": {"const": 0}
+      }
+    },
+    "open_items": {"type": "array", "minItems": 8, "items": {"type": "string"}},
+    "claim_boundary": {"type": "array", "minItems": 5, "items": {"type": "string"}}
+  }
+}

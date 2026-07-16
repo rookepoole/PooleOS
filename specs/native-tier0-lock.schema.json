@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/native-tier0-lock.schema.json",
+  "title": "PooleOS Native Tier 0 Tool Lock",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "status",
+    "production_ready",
+    "production_promotion_allowed",
+    "upstream_qemu",
+    "windows_runner",
+    "firmware",
+    "virtio",
+    "host_policy",
+    "rejected_candidates",
+    "open_items"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_tier0_lock"},
+    "status_date": {"const": "2026-07-16"},
+    "status": {"const": "candidate_pinned_non_promoting"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "upstream_qemu": {
+      "type": "object",
+      "required": ["project", "release_channel", "latest_stable_version", "release_date", "source_url", "signature_url", "source_tag", "tag_object_sha1", "commit_sha1", "release_signing_key_fingerprint", "detached_signature_verified_locally"],
+      "properties": {
+        "latest_stable_version": {"const": "11.0.2"},
+        "source_tag": {"const": "v11.0.2"},
+        "commit_sha1": {"type": "string", "pattern": "^[0-9A-F]{40}$"},
+        "detached_signature_verified_locally": {"const": false}
+      }
+    },
+    "windows_runner": {
+      "type": "object",
+      "required": ["role", "provider", "provider_url", "version", "version_output_exact", "provider_commit_sha1", "merged_upstream_tag", "merged_upstream_commit_sha1", "installer_name", "installer_url", "installer_sha512_url", "installer_sha512", "installer_sha256", "installer_byte_count", "authenticode", "qemu_system_x86_64", "latest_upstream_patch_level_matched"],
+      "properties": {
+        "version": {"const": "11.0.0"},
+        "version_output_exact": {"const": "QEMU emulator version 11.0.0 (v11.0.0-12122-ga4bb4b10c9)"},
+        "installer_sha512": {"type": "string", "pattern": "^[0-9A-F]{128}$"},
+        "installer_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+        "installer_byte_count": {"const": 185604552},
+        "authenticode": {"type": "object", "required": ["signer_thumbprint_sha1", "certificate_not_before_utc", "certificate_not_after_utc", "current_status", "acceptance_signal"]},
+        "qemu_system_x86_64": {"type": "object", "required": ["relative_path", "sha256", "byte_count"]},
+        "latest_upstream_patch_level_matched": {"const": false}
+      }
+    },
+    "firmware": {
+      "type": "object",
+      "required": ["runner_bundled_source_repository", "runner_bundled_source_commit_sha1", "target_upstream_repository", "target_stable_tag", "target_stable_commit_sha1", "runner_bundled_matches_target_stable", "files"],
+      "properties": {
+        "target_stable_tag": {"const": "edk2-stable202605"},
+        "target_stable_commit_sha1": {"type": "string", "pattern": "^[0-9A-F]{40}$"},
+        "runner_bundled_matches_target_stable": {"const": false},
+        "files": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {"type": "object", "required": ["role", "relative_path", "sha256", "byte_count"]}
+        }
+      }
+    },
+    "virtio": {
+      "type": "object",
+      "required": ["standard", "stage", "date", "url", "transport", "legacy_or_transitional_devices_allowed"],
+      "properties": {
+        "standard": {"const": "Virtual I/O Device (VIRTIO) Version 1.3"},
+        "transport": {"const": "pci"},
+        "legacy_or_transitional_devices_allowed": {"const": false}
+      }
+    },
+    "host_policy": {
+      "type": "object",
+      "required": ["tool_root", "global_install_required", "global_path_mutation_allowed", "network_enabled_in_guest", "host_acceleration_allowed_in_deterministic_profile", "arbitrary_extra_arguments_allowed"],
+      "properties": {
+        "tool_root": {"const": "workspace_local_untracked"},
+        "global_install_required": {"const": false},
+        "global_path_mutation_allowed": {"const": false},
+        "network_enabled_in_guest": {"const": false},
+        "host_acceleration_allowed_in_deterministic_profile": {"const": false},
+        "arbitrary_extra_arguments_allowed": {"const": false}
+      }
+    },
+    "rejected_candidates": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {"type": "object", "required": ["id", "reason", "sha256", "byte_count"]}
+    },
+    "open_items": {"type": "array", "minItems": 5, "items": {"type": "string"}}
+  }
+}

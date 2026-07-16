@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/native-tier0-profile.schema.json",
+  "title": "PooleOS Native Tier 0 QEMU Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "profile_set_id",
+    "status",
+    "production_ready",
+    "production_promotion_allowed",
+    "phase_mapping",
+    "machine",
+    "determinism",
+    "devices",
+    "firmware_flash",
+    "profiles",
+    "base_argument_template",
+    "profile_overlays",
+    "debug_overlay",
+    "evidence_contract",
+    "launch_policy",
+    "required_negative_controls",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_tier0_profile"},
+    "status_date": {"const": "2026-07-16"},
+    "profile_set_id": {"const": "POOLEOS-TIER0-Q35-1"},
+    "status": {"const": "frozen_for_non_promoting_qualification"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "phase_mapping": {"type": "array", "minItems": 5, "maxItems": 5, "items": {"type": "string"}},
+    "machine": {
+      "type": "object",
+      "required": ["type", "architecture", "accelerator", "tcg_thread_mode", "cpu_model", "vcpus", "sockets", "dies", "clusters", "cores", "threads", "memory_mib", "usb_enabled", "vmport_enabled", "guest_core_dump_control_available", "guest_core_dump_disabled", "network_enabled", "default_devices_enabled", "host_acceleration_enabled"],
+      "properties": {
+        "type": {"const": "pc-q35-11.0"},
+        "architecture": {"const": "x86_64"},
+        "accelerator": {"const": "tcg"},
+        "tcg_thread_mode": {"const": "single"},
+        "cpu_model": {"const": "qemu64"},
+        "vcpus": {"const": 1},
+        "memory_mib": {"const": 512},
+        "guest_core_dump_control_available": {"const": false},
+        "guest_core_dump_disabled": {"const": false},
+        "network_enabled": {"const": false},
+        "default_devices_enabled": {"const": false},
+        "host_acceleration_enabled": {"const": false}
+      }
+    },
+    "determinism": {
+      "type": "object",
+      "required": ["virtual_clock", "rtc_base", "rtc_driftfix", "icount_shift", "icount_align", "icount_sleep", "s3_enabled", "s4_enabled", "boot_menu_enabled", "strict_boot", "input_media_read_only", "fresh_vars_copy_per_launch", "command_generation_must_be_byte_identical", "guest_execution_determinism_claimed"],
+      "properties": {
+        "icount_shift": {"const": 0},
+        "icount_align": {"const": false},
+        "icount_sleep": {"const": false},
+        "input_media_read_only": {"const": true},
+        "fresh_vars_copy_per_launch": {"const": true},
+        "command_generation_must_be_byte_identical": {"const": true},
+        "guest_execution_determinism_claimed": {"const": false}
+      }
+    },
+    "devices": {
+      "type": "object",
+      "required": ["required", "virtio_transport", "virtio_legacy_allowed", "virtio_transitional_allowed", "prohibited"],
+      "properties": {
+        "required": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "string"}},
+        "virtio_transport": {"const": "pci-modern-only"},
+        "virtio_legacy_allowed": {"const": false},
+        "virtio_transitional_allowed": {"const": false},
+        "prohibited": {"type": "array", "minItems": 9, "items": {"type": "string"}}
+      }
+    },
+    "firmware_flash": {"type": "object", "required": ["code_unit", "code_format", "code_read_only", "vars_unit", "vars_format", "vars_template_never_written", "vars_working_copy_scope"]},
+    "profiles": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {"type": "object", "required": ["id", "firmware_role", "smm", "secure_flash", "secure_boot_enabled", "secure_boot_claimed"]}
+    },
+    "base_argument_template": {"type": "array", "minItems": 50, "items": {"type": "string"}},
+    "profile_overlays": {"type": "object", "required": ["bootstrap-debug", "secure-firmware-prep"]},
+    "debug_overlay": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "string"}},
+    "evidence_contract": {"type": "object", "required": ["serial_log", "debugcon_log", "qemu_trace_log", "vars_copy", "launch_receipt", "serial_is_primary_boot_evidence", "debug_exit_port", "debug_exit_size_bytes", "debug_exit_host_status_formula", "guest_exit_values_assigned", "gdb_bind_address", "gdb_port", "gdb_enabled_by_default", "boot_timeout_seconds", "qualification_start_timeout_seconds"]},
+    "launch_policy": {"type": "object", "required": ["entrypoint", "dry_run_default", "execute_requires_explicit_flag", "media_must_exist", "media_must_be_regular_file", "media_writable_by_qemu", "buildroot_or_linux_guest_allowed", "absolute_paths_allowed_in_public_receipt", "unknown_arguments_allowed", "run_directory_must_not_be_repository_tracked"]},
+    "required_negative_controls": {"type": "array", "minItems": 18, "maxItems": 18, "uniqueItems": true, "items": {"type": "string"}},
+    "claim_boundary": {"type": "array", "minItems": 6, "items": {"type": "string"}}
+  }
+}

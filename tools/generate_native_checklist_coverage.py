@@ -118,6 +118,16 @@ ADDED_REQUIREMENTS = [
         "basis": ["https://docs.oasis-open.org/virtio/virtio/v1.3/virtio-v1.3.html"],
     },
     {
+        "id": "ADD-TIER0-SUPPLY-001",
+        "phase_id": "N4",
+        "requirement": "Treat QEMU, firmware, and debugger inputs as a pinned host-tool supply chain: bind exact source tags and commits, provider patch deltas, signatures, executable and runtime-closure hashes, firmware source-to-binary provenance, licenses, SBOM, vulnerabilities, redistribution status, host security controls, and second-builder reproduction; reject aliases, development builds, Android forks, expired-certificate trust, and stale bundled firmware as silent substitutes.",
+        "basis": [
+            "https://www.qemu.org/download/",
+            "https://github.com/tianocore/edk2/releases",
+            "Cycle 88 observed QEMU/OVMF candidate provenance gaps",
+        ],
+    },
+    {
         "id": "ADD-HW-PROBE-001",
         "phase_id": "N2",
         "requirement": "Separate unprivileged CPUID collection from privileged MSR, PCI configuration-space, SPD, UEFI-variable, physical-memory, and I/O-port probes; require exact allowlists, deterministic logical-processor affinity with restoration, source-bound read-only mechanisms, no write-capable path, driver and side-effect review, hostile tests, and explicit operator authorization before any kernel driver is loaded.",

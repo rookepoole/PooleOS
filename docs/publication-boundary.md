@@ -29,6 +29,8 @@ Third-party code and data require an allowlisted license, provenance record, exa
 
 The historical Buildroot source tree is not published as PooleOS source and cannot satisfy a native architecture gate.
 
+The public native Tier 0 lock, profile, schemas, tools, guide, and readiness ledger may identify third-party QEMU/EDK II inputs by version, source commit, digest, relative runtime role, license metadata, and bounded probe result. Installers, extracted runtime trees, writable firmware-variable copies, launch media, traces, and local run directories remain ignored and unpublished. A public hash or qualification receipt neither grants redistribution rights nor promotes a third-party host tool into PooleOS production media.
+
 ## Publication Gate
 
 Before every push or release:

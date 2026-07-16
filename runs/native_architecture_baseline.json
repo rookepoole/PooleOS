@@ -376,6 +376,12 @@
       "line_count": 146
     },
     {
+      "path": "docs/native-tier0-qemu.md",
+      "sha256": "44D7C28F677FD7F71253ECE49FD253583EE6502E747E23AC7A8006FFDE58304B",
+      "byte_count": 5853,
+      "line_count": 110
+    },
+    {
       "path": "docs/native-v1-objectives.md",
       "sha256": "76F81918E255067C4D34340967F96E05A12B73118133E71FF535CE1C87082CFA",
       "byte_count": 4901,
@@ -383,37 +389,37 @@
     },
     {
       "path": "specs/pooleos-kernel-charter.md",
-      "sha256": "78EE8EB1D9E437267A68EA6FDF4F6BD95EB7BD3244412CE4C485CC80E4E55422",
-      "byte_count": 10062,
+      "sha256": "5909F5F837DB169D97B6C62BB927C1AE7B422546488D56B11BE23AC937B7D74A",
+      "byte_count": 10307,
       "line_count": 137
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "F42626E852D9FD39ED9F2984137BB7AF1D97989B2E3DF1A1607C4E70537E75EA",
-      "byte_count": 18626,
+      "sha256": "DFB3403CD3DD8DF5AC2230AD291855A6E823E03839807CB77E04BFB0F32E1F17",
+      "byte_count": 18898,
       "line_count": 240
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "87157A0F7767F88B2E096170F0F706EE758F4A0E55189DCCBC301C653F482152",
-      "byte_count": 105078,
-      "line_count": 1108
+      "sha256": "7EC1D897ECAF215299486242C23C8AE82CE8FB9790A60E06792DEABD4DA871D4",
+      "byte_count": 108643,
+      "line_count": 1123
     },
     {
       "path": "docs/publication-boundary.md",
-      "sha256": "5CF21AA85BBBFE0ECAC93204381BD9D4B051D706CC374185E4A5A999DDE47432",
-      "byte_count": 3126,
-      "line_count": 44
+      "sha256": "5208E0176CB394B9057299081A3DCAD02B7C535496C8BCECFA9B1FA27ED1045C",
+      "byte_count": 3653,
+      "line_count": 46
     },
     {
       "path": "runs/pooleos_native_checklist_coverage.json",
-      "sha256": "7A244810CA2E3E0F31B38A0D8C67CF67ED502C83B62736237156E1920FBCB63A",
-      "byte_count": 82880,
-      "line_count": 2926
+      "sha256": "FCAC371582B5942214EF1BD273CE0D200CE51E418525486042FDACAE73793D86",
+      "byte_count": 83661,
+      "line_count": 2937
     },
     {
       "path": "runs/adr_ratification_readiness.json",
-      "sha256": "8BDE765C3E05527F50840F2D0460CDDC74E66078A04E9D7DB69C499FBC43F24C",
+      "sha256": "3A845F5E3F24B8C80633DBDF8B0430B279ECC0CD8AD3621784AC00C3B9175D32",
       "byte_count": 8684,
       "line_count": 218
     },
@@ -422,6 +428,12 @@
       "sha256": "7696ACC6DFB8287ED241E6D574956DAFA716F0A2A79A0BABE362E4BC3A7BA987",
       "byte_count": 25648,
       "line_count": 755
+    },
+    {
+      "path": "runs/native_tier0_readiness.json",
+      "sha256": "08E0083DA4B56E4B95A79AAD562C66D9CAC1AE437192286842E4BA8EBFD00F0A",
+      "byte_count": 11904,
+      "line_count": 342
     },
     {
       "path": "runs/native_v1_objectives_readiness.json",
@@ -452,6 +464,18 @@
       "sha256": "94D8BDDF9BC85DE10D3B7FBF53BA2D0CC1C822C1F573FF94D0F1AB49F7EFF753",
       "byte_count": 6015,
       "line_count": 147
+    },
+    {
+      "path": "specs/native-tier0-lock.json",
+      "sha256": "E6E126A5EC683FC1A73B82B8C889F4212BE507BAA52EA43548B23C938093499F",
+      "byte_count": 5641,
+      "line_count": 127
+    },
+    {
+      "path": "specs/native-tier0-profile.json",
+      "sha256": "EE5139B1B71DC20684BFEBD862D2CD00A31A9BB1C8EADDC349CE659D252717DF",
+      "byte_count": 6439,
+      "line_count": 226
     },
     {
       "path": "specs/native-v1-objectives.json",
