@@ -1,10 +1,10 @@
 # PooleOS Native V1 Candidate Objectives
 
-Status: Cycle 85 pre-production candidate
+Status: Cycle 93 owner-directed definitions; cryptographic signature and all measurements pending
 
 Selected move: `N0-OBJECTIVES-001`
 
-Authority boundary: `specs/native-v1-objectives.json` is a measurable proposal for N0.6 owner review. It does not amend or ratify ADR-0005, record Rooke Poole's acceptance, provide measured product evidence, or permit production promotion.
+Authority boundary: `specs/native-v1-objectives.json` records Rooke Poole's unsigned acceptance of the exact profile and 38 target definitions. It does not accept measurement evidence, cryptographically ratify the architecture, prove a target is met, or permit production promotion.
 
 ## Profile
 
@@ -52,17 +52,17 @@ Performance candidates cover first PooleBoot marker, PooleKernel-to-PooleInit re
 
 The deterministic ledger at `runs/native_v1_objectives_readiness.json` records:
 
-- 38 complete candidate definitions;
+- 38 complete owner-directed definitions;
 - zero measured targets;
 - zero schema or semantic violations;
 - ten of ten negative controls passing;
-- profile acceptance false;
-- target-value acceptance false;
+- profile acceptance true by unsigned owner direction;
+- target-value acceptance true by unsigned owner direction;
 - cryptographic signature false;
 - `n0_6_exit_gate_satisfied=false`;
 - `production_promotion_allowed=false`.
 
-Rooke Poole must accept, amend, or reject the profile and values before they can enter the owner-signed architecture manifest. Baseline evidence may justify an amendment, but no threshold may be silently weakened to turn a failing implementation into a passing claim.
+The definitions may enter a future owner-signed architecture manifest, but the selected hardware key is not yet available and no key generation, signing, merge, tag, or publication is authorized. Baseline evidence may justify a reviewed amendment, but no threshold may be silently weakened to turn a failing implementation into a passing claim.
 
 ## Reproduction
 

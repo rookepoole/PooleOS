@@ -1,9 +1,11 @@
 # ADR-0003: Implementation Language and Toolchain Split
 
-Status: proposed  
+Status: accepted-owner-directed
+
 Date: 2026-07-16  
 Decision owner: Rooke Poole  
-Ratification: owner acceptance and full two-host toolchain qualification pending  
+Ratification: owner-directed acceptance recorded; cryptographic signature and full two-host toolchain qualification pending
+
 Supersedes: none  
 Superseded by: none  
 Requirement mappings: N0.2, N3.1-N3.8, sections 008-011  

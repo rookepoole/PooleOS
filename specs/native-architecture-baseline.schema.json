@@ -59,8 +59,8 @@
       "properties": {
         "required_count": {"const": 7},
         "present_count": {"const": 7},
-        "accepted_owner_directed_count": {"const": 5},
-        "proposed_count": {"const": 2},
+        "accepted_owner_directed_count": {"const": 7},
+        "proposed_count": {"const": 0},
         "accepted_signed_count": {"const": 0},
         "all_required_cryptographically_ratified": {"const": false}
       }
@@ -71,7 +71,7 @@
       "maxItems": 7,
       "items": {"type": "object", "required": ["id", "title", "path", "status", "date", "decision_owner", "ratification", "supersedes", "superseded_by", "requirement_mappings", "sha256", "byte_count", "line_count"]}
     },
-    "bound_sources": {"type": "array", "minItems": 31, "maxItems": 31, "items": {"type": "object", "required": ["path", "sha256", "byte_count", "line_count"]}},
+    "bound_sources": {"type": "array", "minItems": 36, "maxItems": 36, "items": {"type": "object", "required": ["path", "sha256", "byte_count", "line_count"]}},
     "primary_toolchain_references": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "object", "required": ["topic", "url", "authority"]}},
     "open_items": {"type": "array", "minItems": 8, "items": {"type": "string"}},
     "claim_boundary": {

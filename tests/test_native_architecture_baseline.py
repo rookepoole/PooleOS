@@ -42,8 +42,8 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
     def test_required_adr_set_is_byte_bound_and_not_overclaimed(self) -> None:
         adrs = self.artifact["adrs"]
         self.assertEqual([item["id"] for item in adrs], [f"ADR-{index:04d}" for index in range(1, 8)])
-        self.assertEqual([item["status"] for item in adrs].count("accepted-owner-directed"), 5)
-        self.assertEqual([item["status"] for item in adrs].count("proposed"), 2)
+        self.assertEqual([item["status"] for item in adrs].count("accepted-owner-directed"), 7)
+        self.assertEqual([item["status"] for item in adrs].count("proposed"), 0)
         for adr in adrs:
             data = (ROOT / adr["path"]).read_bytes()
             self.assertEqual(hashlib.sha256(data).hexdigest().upper(), adr["sha256"])
@@ -68,7 +68,7 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 31)
+        self.assertEqual(len(self.artifact["bound_sources"]), 36)
         bound_paths = {binding["path"] for binding in self.artifact["bound_sources"]}
         self.assertIn(
             "runs/adr_ratification_readiness.json",
@@ -76,6 +76,9 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         )
         self.assertIn("runs/n0_owner_decision_packet.json", bound_paths)
         self.assertIn("docs/n0-owner-decision-packet.md", bound_paths)
+        self.assertIn("runs/n0_owner_response_receipt.json", bound_paths)
+        self.assertIn("docs/n0-owner-response-receipt.md", bound_paths)
+        self.assertIn("specs/n0-owner-response.json", bound_paths)
         self.assertIn(
             "runs/hardware_target_readiness.json",
             bound_paths,

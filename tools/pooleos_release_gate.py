@@ -20,6 +20,7 @@ from runtime import hardware_target  # noqa: E402
 from runtime import lab_readiness  # noqa: E402
 from runtime import native_models  # noqa: E402
 from runtime import n0_owner_decision_packet  # noqa: E402
+from runtime import n0_owner_response  # noqa: E402
 from runtime import native_tier0  # noqa: E402
 from runtime import native_v1_objectives  # noqa: E402
 from runtime import readiness  # noqa: E402
@@ -33,6 +34,7 @@ NATIVE_ARCHITECTURE_BASELINE = ROOT / "runs" / "native_architecture_baseline.jso
 NATIVE_V1_OBJECTIVES_READINESS = ROOT / "runs" / "native_v1_objectives_readiness.json"
 ADR_RATIFICATION_READINESS = ROOT / "runs" / "adr_ratification_readiness.json"
 N0_OWNER_DECISION_PACKET = ROOT / "runs" / "n0_owner_decision_packet.json"
+N0_OWNER_RESPONSE_RECEIPT = ROOT / "runs" / "n0_owner_response_receipt.json"
 NATIVE_TOOLCHAIN_QUALIFICATION = ROOT / "runs" / "native_toolchain_qualification.json"
 HARDWARE_TARGET_READINESS = ROOT / "runs" / "hardware_target_readiness.json"
 NATIVE_MODEL_READINESS = ROOT / "runs" / "native_model_readiness.json"
@@ -40,7 +42,7 @@ NATIVE_TIER0_READINESS = ROOT / "runs" / "native_tier0_readiness.json"
 
 
 DEFAULT_GAPS = [
-    "The scope-hardened ADR ceremony binds the exact 38-target candidate objectives contract and schema, but the received owner response retains one unresolved bounded-choice placeholder; all target measurements, owner target acceptance and ADR disposition, signing custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
+    "The completed owner response records both ADR dispositions and all 38 objective definitions while accepting zero measurements, but the selected FIDO2 hardware key is unavailable; trusted public-key custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
     "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
     "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, and three bounded TLC models detect required boot-slot, capability, stale-mapping, and early-reuse counterexamples; current source rebuilds, real PooleBoot launch evidence, complete reference devices/fault campaigns, IPC/scheduler/PooleFS models, all implementation-trace cross-checks, and second-host reproduction remain open.",
     "No PooleBoot PE32+ UEFI loader or frozen native boot protocol.",
@@ -230,7 +232,7 @@ def check_native_architecture_baseline(path: Path = NATIVE_ARCHITECTURE_BASELINE
     summary = artifact.get("adr_summary", {})
     if summary.get("required_count") != 7 or summary.get("present_count") != 7:
         errors.append("required seven-record ADR constitution is incomplete")
-    if summary.get("accepted_owner_directed_count") != 5 or summary.get("proposed_count") != 2:
+    if summary.get("accepted_owner_directed_count") != 7 or summary.get("proposed_count") != 0:
         errors.append("ADR status inventory does not match the current baseline")
     if summary.get("accepted_signed_count") != 0 or summary.get("all_required_cryptographically_ratified") is not False:
         errors.append("ADR baseline overclaims cryptographic ratification")
@@ -264,7 +266,7 @@ def check_native_architecture_baseline(path: Path = NATIVE_ARCHITECTURE_BASELINE
         errors.append("baseline production base is not original native PooleOS")
 
     detail = (
-        "7 ADRs byte-bound; accepted_owner_directed=5; proposed=2; signed=0; "
+        "7 ADRs byte-bound; accepted_owner_directed=7; proposed=0; signed=0; "
         "repository=main@owner-remote; production_promotion_allowed=false"
     )
     return readiness.make_check(
@@ -293,8 +295,8 @@ def check_native_v1_objectives_readiness(path: Path = NATIVE_V1_OBJECTIVES_READI
 
     summary = artifact.get("summary", {})
     owner = artifact.get("owner_boundary", {})
-    if artifact.get("status") != "consistent_candidate_owner_ratification_pending":
-        errors.append("candidate objectives are not consistently ready for owner review")
+    if artifact.get("status") != "owner_direction_accepted_signature_pending":
+        errors.append("objectives do not record owner direction with signature still pending")
     if artifact.get("selected_move_id") != "N0-OBJECTIVES-001":
         errors.append("objectives readiness does not bind N0-OBJECTIVES-001")
     if summary.get("consistency_pass") is not True:
@@ -303,15 +305,12 @@ def check_native_v1_objectives_readiness(path: Path = NATIVE_V1_OBJECTIVES_READI
         errors.append("objectives readiness must bind 38 candidate and zero measured targets")
     if summary.get("negative_control_count") != 10 or summary.get("negative_control_pass_count") != 10:
         errors.append("objectives negative-control inventory is incomplete")
-    if owner.get("ratification_required") is not True or owner.get("ready_for_owner_review") is not True:
-        errors.append("objectives owner-review boundary is inconsistent")
-    if any(owner.get(field) is not False for field in (
-        "profile_accepted",
-        "target_values_accepted",
-        "cryptographic_signature_present",
-        "ready_for_signature",
-    )):
-        errors.append("objectives readiness overclaims owner acceptance or signature readiness")
+    if owner.get("ratification_required") is not True or owner.get("ready_for_owner_review") is not False:
+        errors.append("objectives owner-direction boundary is inconsistent")
+    if owner.get("profile_accepted") is not True or owner.get("target_values_accepted") is not True:
+        errors.append("objectives readiness omits the recorded owner direction")
+    if owner.get("cryptographic_signature_present") is not False or owner.get("ready_for_signature") is not False:
+        errors.append("objectives readiness overclaims signature readiness")
     if artifact.get("n0_6_exit_gate_satisfied") is not False:
         errors.append("objectives readiness overclaims the N0.6 exit gate")
     if artifact.get("production_ready") is not False or artifact.get("production_promotion_allowed") is not False:
@@ -321,7 +320,7 @@ def check_native_v1_objectives_readiness(path: Path = NATIVE_V1_OBJECTIVES_READI
         f"profile={artifact.get('profile_id')}; targets={summary.get('target_count')}; "
         f"measured={summary.get('measured_target_count')}; "
         f"negatives={summary.get('negative_control_pass_count')}/{summary.get('negative_control_count')}; "
-        "owner_pending=true; n0_6_exit=false; production_promotion_allowed=false"
+        "owner_direction=true; signature=false; n0_6_exit=false; production_promotion_allowed=false"
     )
     return readiness.make_check(
         "native_v1_objectives_readiness",
@@ -349,8 +348,8 @@ def check_adr_ratification_readiness(path: Path = ADR_RATIFICATION_READINESS) ->
         errors.append(f"ratification verifier failed closed: {type(error).__name__}: {error}")
         receipt = {"status": "invalid", "production_promotion_allowed": False}
 
-    if artifact.get("status") != "pending_owner_action":
-        errors.append("current readiness status must remain pending_owner_action until owner evidence exists")
+    if artifact.get("status") != "owner_direction_recorded_hardware_key_pending":
+        errors.append("current readiness status does not preserve the owner-direction and unavailable-key boundary")
     if artifact.get("selected_move_id") != "N0-RATIFY-001":
         errors.append("readiness does not bind N0-RATIFY-001")
     if artifact.get("production_ready") is not False or artifact.get("production_promotion_allowed") is not False:
@@ -358,20 +357,31 @@ def check_adr_ratification_readiness(path: Path = ADR_RATIFICATION_READINESS) ->
     adr_set = artifact.get("adr_set", {})
     if adr_set.get("required_count") != 7 or adr_set.get("present_count") != 7:
         errors.append("readiness does not bind all seven ADRs")
-    if adr_set.get("pending_owner_disposition") != ["ADR-0003", "ADR-0004"]:
-        errors.append("readiness does not preserve the two proposed ADR dispositions")
+    if adr_set.get("pending_owner_disposition") != []:
+        errors.append("readiness still reports an owner ADR disposition as pending")
+    if adr_set.get("accepted_owner_directed_count") != 7 or adr_set.get("proposed_count") != 0:
+        errors.append("readiness does not record all seven owner-directed ADR statuses")
     if adr_set.get("cryptographically_ratified_count") != 0:
         errors.append("readiness overclaims cryptographic ADR ratification")
     trust = artifact.get("trust_bootstrap", {})
     if trust.get("trusted_signer_count") != 0 or trust.get("signer_file_errors") != []:
         errors.append("current public trust bootstrap does not match the deliberate zero-signer state")
+    if (
+        trust.get("selected_key_profile") != "hardware_fido2_ed25519_sk"
+        or trust.get("hardware_key_availability") != "do_not_have"
+        or trust.get("hardware_key_available") is not False
+        or trust.get("key_generation_authorized") is not False
+    ):
+        errors.append("ratification readiness does not preserve the selected unavailable hardware-key boundary")
     summary = artifact.get("summary", {})
     if summary.get("ready_for_owner_action") is not True or summary.get("ready_for_signature") is not False:
         errors.append("readiness owner/signature boundary is inconsistent")
     if summary.get("defined_negative_control_count") != 12:
         errors.append("ratification negative-control inventory is incomplete")
-    if summary.get("blocking_owner_action_count") != 6:
+    if summary.get("blocking_owner_action_count") != 4:
         errors.append("ratification owner-action inventory is incomplete")
+    if summary.get("owner_direction_recorded") is not True:
+        errors.append("ratification readiness omits the completed owner direction")
     decision_inputs = artifact.get("decision_inputs", {})
     objectives = decision_inputs.get("objectives", {})
     if decision_inputs.get("required_bound_source_count") != 6 or len(decision_inputs.get("bound_sources", [])) != 6:
@@ -380,8 +390,8 @@ def check_adr_ratification_readiness(path: Path = ADR_RATIFICATION_READINESS) ->
         errors.append("ratification readiness does not bind the candidate Workstation v1 profile")
     if objectives.get("target_count") != 38 or objectives.get("measured_target_count") != 0:
         errors.append("ratification readiness must retain 38 candidate and zero measured targets")
-    if objectives.get("owner_ratification_pending") is not True:
-        errors.append("ratification readiness overclaims objectives owner acceptance")
+    if objectives.get("owner_ratification_pending") is not False:
+        errors.append("ratification readiness still reports objectives owner direction as pending")
     if receipt.get("status") == "invalid":
         errors.append("live ratification verifier reports an invalid partial ceremony")
     if (
@@ -414,8 +424,8 @@ def check_adr_ratification_readiness(path: Path = ADR_RATIFICATION_READINESS) ->
             errors.append(f"ratification binding mismatch: {relative}")
 
     detail = (
-        "policy=scope_hardened; adrs=7; proposed=2; bound_sources=6; objectives=38; measured=0; "
-        "trusted_signers=0; negative_controls=12; owner_actions=6; status=pending_owner_action; "
+        "policy=scope_hardened; adrs=7; proposed=0; owner_directed=7; bound_sources=6; objectives=38; measured=0; "
+        "trusted_signers=0; negative_controls=12; owner_actions=4; status=owner_direction_recorded_hardware_key_pending; "
         "production_promotion_allowed=false"
     )
     return readiness.make_check(
@@ -473,6 +483,68 @@ def check_n0_owner_decision_packet(path: Path = N0_OWNER_DECISION_PACKET) -> dic
     )
     return readiness.make_check(
         "n0_owner_decision_packet",
+        not errors,
+        detail if not errors else "; ".join(dict.fromkeys(errors))[:2000],
+    )
+
+
+def check_n0_owner_response_receipt(path: Path = N0_OWNER_RESPONSE_RECEIPT) -> dict:
+    artifact, schema_errors = _load_schema_artifact(path, "n0-owner-response-receipt.schema.json")
+    errors = [f"N0 owner response receipt {error.path}: {error.message}" for error in schema_errors[:8]]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "n0_owner_response_receipt",
+            False,
+            "; ".join(errors) or "N0 owner response receipt is not an object",
+        )
+
+    try:
+        response = json.loads((ROOT / n0_owner_response.RESPONSE_RELATIVE).read_text(encoding="utf-8"))
+        errors.extend(n0_owner_response.response_rejection_reasons(response, ROOT))
+        regenerated = n0_owner_response.build_receipt(ROOT)
+        if path.read_bytes() != n0_owner_response.canonical_json_bytes(regenerated):
+            errors.append("owner response receipt is not the exact deterministic regeneration")
+        errors.extend(n0_owner_response.receipt_rejection_reasons(artifact, ROOT))
+    except (OSError, UnicodeError, ValueError, KeyError, TypeError, json.JSONDecodeError) as error:
+        errors.append(f"owner response verifier failed closed: {type(error).__name__}: {error}")
+
+    decisions = artifact.get("accepted_decisions", {})
+    objectives = decisions.get("objectives", {})
+    custody = decisions.get("custody", {})
+    state = artifact.get("effective_source_state", {})
+    trust = artifact.get("trust_state", {})
+    execution = artifact.get("execution_boundary", {})
+    validation = artifact.get("validation", {})
+    if artifact.get("status") != "owner_direction_recorded_hardware_key_unavailable":
+        errors.append("owner response receipt has the wrong bounded status")
+    if artifact.get("selected_move_id") != "N0-OWNER-RESPONSE-001":
+        errors.append("owner response receipt does not bind N0-OWNER-RESPONSE-001")
+    if objectives.get("target_count") != 38 or objectives.get("measured_target_count") != 0:
+        errors.append("owner response must accept 38 definitions and zero measurements")
+    if objectives.get("definition_acceptance_recorded") is not True or objectives.get("measurement_evidence_accepted") is not False:
+        errors.append("owner response confuses definition acceptance with measurement acceptance")
+    if custody.get("selected_profile") != "hardware_fido2_ed25519_sk":
+        errors.append("owner response does not preserve the selected governance-key profile")
+    if custody.get("hardware_key_availability") != "do_not_have" or custody.get("provisional_software_key_risk") != "not_applicable":
+        errors.append("owner response custody selections are inconsistent")
+    if state.get("all_selected_source_dispositions_recorded") is not True:
+        errors.append("selected ADR or objectives source disposition is not recorded")
+    if trust.get("hardware_key_available") is not False or trust.get("trusted_signer_count") != 0:
+        errors.append("owner response receipt overclaims hardware-key or signer availability")
+    if any(value is not False for value in execution.values()):
+        errors.append("owner response receipt authorizes a separately gated action")
+    if validation.get("negative_control_count") != 16 or validation.get("negative_control_pass_count") != 16:
+        errors.append("owner response receipt does not retain all 16 fail-closed controls")
+    if artifact.get("production_ready") is not False or artifact.get("production_promotion_allowed") is not False:
+        errors.append("owner response receipt overclaims production promotion")
+
+    detail = (
+        "response=complete_unsigned; adrs=2/2 owner-directed; objective_definitions=38; measured=0; "
+        "profile=hardware_fido2_ed25519_sk; hardware_available=false; signers=0; negatives=16/16; "
+        "key_generation=false; signing=false; merge=false; tagging=false; publication=false; promotion=false"
+    )
+    return readiness.make_check(
+        "n0_owner_response_receipt",
         not errors,
         detail if not errors else "; ".join(dict.fromkeys(errors))[:2000],
     )
@@ -3492,6 +3564,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--native-v1-objectives-readiness", type=Path, default=NATIVE_V1_OBJECTIVES_READINESS)
     parser.add_argument("--adr-ratification-readiness", type=Path, default=ADR_RATIFICATION_READINESS)
     parser.add_argument("--n0-owner-decision-packet", type=Path, default=N0_OWNER_DECISION_PACKET)
+    parser.add_argument("--n0-owner-response-receipt", type=Path, default=N0_OWNER_RESPONSE_RECEIPT)
     parser.add_argument("--native-toolchain-qualification", type=Path, default=NATIVE_TOOLCHAIN_QUALIFICATION)
     parser.add_argument("--hardware-target-readiness", type=Path, default=HARDWARE_TARGET_READINESS)
     parser.add_argument("--native-tier0-readiness", type=Path, default=NATIVE_TIER0_READINESS)
@@ -3507,6 +3580,7 @@ def main(argv: list[str] | None = None) -> int:
         check_native_v1_objectives_readiness(args.native_v1_objectives_readiness),
         check_adr_ratification_readiness(args.adr_ratification_readiness),
         check_n0_owner_decision_packet(args.n0_owner_decision_packet),
+        check_n0_owner_response_receipt(args.n0_owner_response_receipt),
         check_native_toolchain_qualification(args.native_toolchain_qualification),
         check_hardware_target_readiness(args.hardware_target_readiness),
         check_native_tier0_readiness(args.native_tier0_readiness),
@@ -3692,6 +3766,7 @@ def main(argv: list[str] | None = None) -> int:
             args.native_v1_objectives_readiness,
             args.adr_ratification_readiness,
             args.n0_owner_decision_packet,
+            args.n0_owner_response_receipt,
             args.native_toolchain_qualification,
             args.hardware_target_readiness,
             args.native_tier0_readiness,

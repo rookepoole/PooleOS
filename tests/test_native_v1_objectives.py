@@ -48,7 +48,7 @@ class NativeV1ObjectivesTests(unittest.TestCase):
             self.assertGreaterEqual(target["percentile"], 0, target["id"])
             self.assertLessEqual(target["percentile"], 100, target["id"])
             self.assertTrue(target["evidence_phase_ids"], target["id"])
-            self.assertEqual(target["definition_status"], "candidate_owner_ratification_pending")
+            self.assertEqual(target["definition_status"], "owner_direction_accepted_signature_pending")
             self.assertEqual(target["evidence_status"], "not_measured")
 
     def test_profile_scope_and_modes_are_exact(self) -> None:
@@ -113,9 +113,9 @@ class NativeV1ObjectivesTests(unittest.TestCase):
         promoted = copy.deepcopy(self.objectives)
         promoted["production_promotion_allowed"] = True
         self.assertTrue(native_v1_objectives.rejection_reasons(promoted))
-        inferred = copy.deepcopy(self.objectives)
-        inferred["owner_ratification"]["profile_accepted"] = True
-        self.assertTrue(native_v1_objectives.rejection_reasons(inferred))
+        regressed = copy.deepcopy(self.objectives)
+        regressed["owner_ratification"]["profile_accepted"] = False
+        self.assertTrue(native_v1_objectives.rejection_reasons(regressed))
 
     def test_readiness_reproduces_exactly(self) -> None:
         self.assertEqual(
@@ -136,9 +136,9 @@ class NativeV1ObjectivesTests(unittest.TestCase):
     def test_owner_boundary_and_n0_exit_remain_open(self) -> None:
         owner = self.readiness["owner_boundary"]
         self.assertTrue(owner["ratification_required"])
-        self.assertTrue(owner["ready_for_owner_review"])
-        self.assertFalse(owner["profile_accepted"])
-        self.assertFalse(owner["target_values_accepted"])
+        self.assertFalse(owner["ready_for_owner_review"])
+        self.assertTrue(owner["profile_accepted"])
+        self.assertTrue(owner["target_values_accepted"])
         self.assertFalse(owner["cryptographic_signature_present"])
         self.assertFalse(owner["ready_for_signature"])
         self.assertFalse(self.readiness["n0_6_exit_gate_satisfied"])
@@ -149,7 +149,7 @@ class NativeV1ObjectivesTests(unittest.TestCase):
         self.assertTrue(check["ok"], check["detail"])
         self.assertIn("targets=38", check["detail"])
         self.assertIn("measured=0", check["detail"])
-        self.assertIn("owner_pending=true", check["detail"])
+        self.assertIn("owner_direction=true", check["detail"])
 
 
 if __name__ == "__main__":

@@ -95,7 +95,7 @@
     {"id": "PGVM2", "role": "pooleglyph_vm"}
   ],
   "language_split": {
-    "status": "proposed_pending_toolchain_qualification",
+    "status": "owner_direction_accepted_qualification_pending",
     "pooleboot": "Rust 2024 no_std on x86_64-unknown-uefi with efiapi and rust-lld",
     "poolekernel": "Rust 2024 no_std on x86_64-unknown-none ELF64 with bounded x86_64 assembly",
     "privileged_user_space": "Rust 2024 no_std with controlled alloc and generated stable ABIs",

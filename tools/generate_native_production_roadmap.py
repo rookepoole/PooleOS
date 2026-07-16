@@ -113,12 +113,13 @@ PHASE_EVIDENCE = {
         "docs/adr/0001-native-pooleos-constitution.md through ADR-0007",
         "specs/native-architecture-constitution.json",
         "runs/native_architecture_baseline.json",
-        "specs/native-v1-objectives.json and docs/native-v1-objectives.md: 38 measurable candidate targets across five required families",
-        "runs/native_v1_objectives_readiness.json: deterministic consistency pass with zero measured targets and owner ratification pending",
+        "specs/native-v1-objectives.json and docs/native-v1-objectives.md: 38 measurable owner-directed target definitions across five required families with zero measurements",
+        "runs/native_v1_objectives_readiness.json: deterministic consistency pass with definition acceptance recorded, zero measured targets, and cryptographic signature pending",
         "tools/verify_native_v1_objectives.py with ten fail-closed negative controls",
         "specs/adr-ratification-policy.json and docs/adr-ratification-ceremony.md: scope-hardened contract binding six exact decision sources and all 38 objective definitions without accepting measurements",
-        "runs/adr_ratification_readiness.json: deterministic six-source owner-action boundary with zero trusted signers, 12 declared negative controls, and six owner actions",
-        "runs/n0_owner_decision_packet.json and docs/n0-owner-decision-packet.md: deterministic 16-source review packet covering both proposed ADRs, all 38 targets, every allowed custody profile, an unfilled response form, and 12/12 fail-closed controls without recording acceptance or authorization",
+        "runs/adr_ratification_readiness.json: all seven ADRs owner-directed, zero trusted signers, selected unavailable hardware-key profile, 12 declared negative controls, and four remaining gated actions",
+        "runs/n0_owner_decision_packet.json and docs/n0-owner-decision-packet.md: byte-frozen 16-source historical review packet retaining every original field as UNSELECTED and 12/12 fail-closed controls",
+        "specs/n0-owner-response.json, runs/n0_owner_response_receipt.json, and docs/n0-owner-response-receipt.md: exact completed response, 2/2 ADR and 38/38 definition dispositions, unavailable hardware-key state, 16/16 hostile controls, and zero authorization for key generation, signing, merge, tag, or publication",
         "tools/prepare_adr_ratification.py and tools/verify_adr_ratification.py with eleven focused adversarial and signature-path tests",
         "specs/native-release-architecture-policy.json",
         "tools/check_native_release_architecture.py",
@@ -142,7 +143,7 @@ PHASE_EVIDENCE = {
         "docs/hardware-target-and-lab-safety.md: reproducible capture procedure and owner safety boundary",
     ],
     "N3": [
-        "ADR-0003 proposed Rust/assembly/C17 split",
+        "ADR-0003 owner-directed Rust/assembly/C17 split with cryptographic signature and full qualification still pending",
         "official Rust UEFI and x86_64-unknown-none target documentation",
         "specs/native-toolchain-lock.json and specs/native-target-contract.json",
         "dependency-free no_std PE32+/ELF64 qualification fixtures",
@@ -172,15 +173,15 @@ PHASE_EVIDENCE = {
         "Cycle 92 N34 machine-language co-development plan with six ADD-PGL requirements and explicit drift, Core IR, and IP flags",
     ],
     "N35": ["bounded static capability and trap simulations; no native containment"],
-    "N36": ["Cycle 92 host baseline: 493 tests with one Windows symlink-permission skip", "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, owner-packet omission/staleness/acceptance/key/signing/publication controls, hardware privacy, malformed-CPUID, Tier 0 profile/provenance/path/overclaim, bounded-model multi-case mutation/trace/claim controls, PooleGlyph roadmap bindings, and collector-smoke negatives"],
-    "N37": ["Cycle 92 consistency release gate: 68/68 checks over 63 artifacts", "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, deterministic N0 owner packet, native-toolchain, bounded hardware-readiness, native Tier 0 readiness, native model-readiness, and PooleGlyph planning artifacts"],
+    "N36": ["Cycle 93 host baseline: 505 tests with one Windows symlink-permission skip", "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, frozen owner-packet and completed owner-response omission/staleness/placeholder/custody/private-material/authorization controls, hardware privacy, malformed-CPUID, Tier 0 profile/provenance/path/overclaim, bounded-model multi-case mutation/trace/claim controls, PooleGlyph roadmap bindings, and collector-smoke negatives"],
+    "N37": ["Cycle 93 consistency release gate: 69/69 checks over 64 artifacts", "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, frozen N0 owner packet, deterministic owner-response receipt, native-toolchain, bounded hardware-readiness, native Tier 0 readiness, native model-readiness, and PooleGlyph planning artifacts"],
 }
 
 
 PHASE_GAPS = {
     "N0": [
-        "The canonical ceremony and deterministic owner packet bind all six decision sources, both proposed ADRs, and the exact 38-target objective contract and schema, but no owner selection or signature exists; ADR-0003 and ADR-0004 still require owner disposition",
-        "The 38 reliability, accessibility, compatibility, privacy, and performance target definitions remain candidate-only; owner acceptance and all implementation-bound measurements remain open",
+        "The completed response records exact owner direction for ADR-0003, ADR-0004, and all 38 objective definitions, but the selected hardware-backed governance key is unavailable and no public key, signature, tag, merge, or publication is authorized",
+        "The 38 reliability, accessibility, compatibility, privacy, and performance definitions are owner-directed but cryptographically unsigned; every implementation-bound measurement remains open",
         "The extracted-tree scanner does not yet parse ISO/GPT/ESP/El Torito/signature structures",
     ],
     "N1": [
@@ -237,6 +238,7 @@ FLAGS = [
     ("FLAG-NATIVE-ADR-001", "BLOCKER", "N0", "Ratify the native architecture, TCB, reuse, language, ABI, driver, filesystem, and release ADR set"),
     ("FLAG-N0-OBJECTIVES-001", "REQUIRED", "N0", "Owner-ratify the native v1 profile and all 38 target values, then bind passing implementation evidence to every target"),
     ("FLAG-N0-RATIFICATION-SCOPE-001", "REQUIRED", "N0", "Bind the exact objective definitions and schema into the owner ceremony while excluding measurements and all production promotion"),
+    ("FLAG-N0-GOVERNANCE-KEY-001", "BLOCKER", "N0", "Obtain a compatible FIDO2 hardware key, then separately authorize and verify governance-key generation, public fingerprint review, signer registration, and recovery custody without exposing private material"),
     ("FLAG-NATIVE-BOOT-001", "STOP_SHIP", "N5", "Boot reproducible PooleBoot PE32+ and transfer through the frozen handoff"),
     ("FLAG-NATIVE-KERNEL-001", "STOP_SHIP", "N13", "Boot PooleKernel and enforce memory, capabilities, IPC, and ring-3 execution"),
     ("FLAG-NATIVE-IOMMU-001", "STOP_SHIP", "N11", "Confine all bus-mastering drivers with DMA and interrupt remapping"),
@@ -266,7 +268,7 @@ FLAGS = [
 
 
 PROGRAM_GAPS = [
-    "The native repository, protected workflow, scope-hardened ADR ceremony, and deterministic 16-source owner packet bind the 38-target candidate objectives contract exactly, but every packet selection, target acceptance, all measurements, owner disposition, trusted key custody, signatures, signed tags, immutable release refs, and retained CI review evidence remain open",
+    "The native repository, protected workflow, scope-hardened ADR ceremony, frozen 16-source packet, and completed response receipt record 2/2 ADR and 38/38 definition dispositions, but all measurements, compatible hardware-key acquisition, trusted public key custody, signatures, signed tags, immutable release refs, and retained CI review evidence remain open",
     "Rust PE32+/ELF64 fixtures pass one-host qualification, but second-host reproduction, source provenance, C17/assembly/ABI tools, and image tooling remain open",
     "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls and bounded boot-slot/capability/virtual-memory state checks detect their required hostile violations, but source-rebuilt current QEMU/EDK II, real PooleBoot launch evidence, complete reference devices/fault campaigns, IPC/scheduler/PooleFS models, implementation-trace cross-checks, liveness/refinement work, and second-host reproduction remain open",
     "No PooleBoot PE32+ UEFI loader or frozen boot protocol",
@@ -419,6 +421,15 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                     "runs/adr_ratification_readiness.json",
                 ]
             )
+        if flag_id == "FLAG-N0-GOVERNANCE-KEY-001":
+            evidence.extend(
+                [
+                    "specs/n0-owner-response.json",
+                    "runs/n0_owner_response_receipt.json",
+                    "runs/adr_ratification_readiness.json",
+                    "security/owner-adr-signers.allowed",
+                ]
+            )
         implementation_flags.append(
             {
                 "id": flag_id,
@@ -463,9 +474,9 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "inspect_live_pooleglyph_each_turn": True,
             "verify_master_checklist_coverage_each_turn": True,
             "new_work_must_be_flagged": True,
-            "last_updated_cycle": 92,
-            "selected_move_id": "N34-PGL-CODEV-PLAN-001",
-            "immediate_next_move_id": "N0-RATIFY-001",
+            "last_updated_cycle": 93,
+            "selected_move_id": "N0-OWNER-RESPONSE-001",
+            "immediate_next_move_id": "N0-HW-KEY-ACQUIRE-001",
             "required_records": [
                 "docs/production-goal-charter.md",
                 "docs/pdc-production-build-plan.md",
@@ -474,6 +485,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 "runs/native_toolchain_qualification.json",
                 "runs/adr_ratification_readiness.json",
                 "runs/n0_owner_decision_packet.json",
+                "runs/n0_owner_response_receipt.json",
                 "runs/hardware_target_readiness.json",
                 "runs/native_tier0_readiness.json",
                 "runs/native_model_readiness.json",
@@ -498,7 +510,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "added_requirement_count": len(coverage["added_requirements"]),
         },
         "baseline": {
-            "pooleos_cycle": 92,
+            "pooleos_cycle": 93,
             "entry_cycle": 79,
             "pooleos_test_count": test_count,
             "historical_consistency_release_gate": {
@@ -510,9 +522,9 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 "native_promotion_role": "historical_non_promoting",
             },
             "native_consistency_release_gate": {
-                "passed_checks": 68,
-                "total_checks": 68,
-                "artifact_count": 63,
+                "passed_checks": 69,
+                "total_checks": 69,
+                "artifact_count": 64,
                 "explicit_gap_count": len(PROGRAM_GAPS),
                 "production_ready": False,
                 "native_promotion_role": "planning_and_evidence_consistency_non_promoting",
@@ -551,11 +563,11 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "historical_release_gaps_are_non_promoting": True,
         },
         "immediate_next_move": {
-            "id": "N0-RATIFY-001",
+            "id": "N0-HW-KEY-ACQUIRE-001",
             "phase_ids": ["N0", "N1"],
-            "title": "Complete owner objective acceptance, ADR disposition, key custody, signatures, signed tag, and publication receipt for the exact six-source architecture set",
-            "entry_evidence": ["docs/adr/0001-native-pooleos-constitution.md through ADR-0007", "runs/native_architecture_baseline.json", "runs/native_v1_objectives_readiness.json", "runs/adr_ratification_readiness.json", "runs/n0_owner_decision_packet.json", "docs/n0-owner-decision-packet.md", "docs/adr-ratification-ceremony.md", "runs/native_toolchain_qualification.json"],
-            "exit_evidence": ["owner acceptance or amendment of the native v1 profile and all 38 target values", "owner disposition of ADR-0003 and ADR-0004", "owner-controlled signatures for the accepted ADR set", "documented signing custody and verification procedure", "signed baseline tag and publication receipt"],
+            "title": "Obtain the selected compatible FIDO2 hardware key before any separately approved governance-key generation or registration",
+            "entry_evidence": ["specs/n0-owner-response.json", "runs/n0_owner_response_receipt.json", "runs/adr_ratification_readiness.json", "docs/adr-ratification-ceremony.md"],
+            "exit_evidence": ["owner confirms possession of a compatible FIDO2 hardware key", "separate explicit approval for governance-key generation or use", "owner-presence and recovery-custody procedure reviewed before execution"],
             "blocked": True,
         },
         "claim_boundaries": [
@@ -565,7 +577,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "Four paused q35/QMP instantiations prove host-side profile construction only; no guest CPU instruction, native media, boot, driver, Secure Boot, or formal-model claim follows.",
             "The three TLC state models are complete only for their frozen finite constants: they are not theorem proofs, liveness checks, refinement proofs, fingerprint-collision guarantees, implementation-trace comparisons, ABI-freeze authority, or PooleKernel execution evidence.",
             "Sixteen allowlisted user-mode CPUID records prove only a bounded host observation; they do not prove MSR access, privileged probes, native parsing, driver safety, or Tier 1 qualification.",
-            "Binding thirty-eight consistent candidate objective definitions into a future signature while binding zero measurements is not owner ratification or implementation evidence.",
+            "Owner-directed acceptance of thirty-eight objective definitions while binding zero measurements is not a cryptographic signature or implementation evidence.",
             "PooleGlyph Phase 65 proves a metadata, parser, AST, and diagnostic foundation only; no source form, Core IR, PGASM, PGB2, PGVM2, host call, policy, optimization, or version label is promoted without its own frozen contract and evidence gate.",
             "Private PooleGlyph or PooleMath optimization evidence cannot replace the public-safe reference path, independent semantic/effect/authority differentials, or PooleOS capability enforcement.",
             "Finite PDC/QP evidence remains bounded to its declared classical models and protocols.",
@@ -577,7 +589,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=493)
+    parser.add_argument("--test-count", type=int, default=505)
     parser.add_argument("--status-date", default="2026-07-16")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

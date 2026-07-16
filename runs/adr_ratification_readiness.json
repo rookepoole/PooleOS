@@ -1,6 +1,6 @@
 {
   "adr_set": {
-    "accepted_owner_directed_count": 5,
+    "accepted_owner_directed_count": 7,
     "adrs": [
       {
         "byte_count": 3017,
@@ -23,23 +23,23 @@
         "title": "Reuse, Clean-Room, and Publication Boundary"
       },
       {
-        "byte_count": 4108,
+        "byte_count": 4164,
         "decision_owner": "Rooke Poole",
         "id": "ADR-0003",
         "path": "docs/adr/0003-language-and-toolchain-split.md",
-        "sha256": "6F874FDBBA98CE728A230C4AF7798F202D09A63CE7394510C810C1E65932B1B0",
-        "source_ratification": "owner acceptance and full two-host toolchain qualification pending",
-        "source_status": "proposed",
+        "sha256": "AB974B13E8A22C04C35A6E3D68FA66EA7B8A97D0545A3E712031CD0B92F8A192",
+        "source_ratification": "owner-directed acceptance recorded; cryptographic signature and full two-host toolchain qualification pending",
+        "source_status": "accepted-owner-directed",
         "title": "Implementation Language and Toolchain Split"
       },
       {
-        "byte_count": 2666,
+        "byte_count": 2721,
         "decision_owner": "Rooke Poole",
         "id": "ADR-0004",
         "path": "docs/adr/0004-product-names-and-version-namespaces.md",
-        "sha256": "9798309FC902C2F5E5A8206751DA4423532E25690A2AD23AD4DC116F3566A637",
-        "source_ratification": "owner acceptance and trademark review pending",
-        "source_status": "proposed",
+        "sha256": "C1FB684D0404EC0B4CA89B9AF3E454B654FF546BD22736AF03E35ECFF1FC4002",
+        "source_ratification": "owner-directed acceptance recorded; cryptographic signature and trademark review pending",
+        "source_status": "accepted-owner-directed",
         "title": "Product Names and Version Namespaces"
       },
       {
@@ -74,12 +74,9 @@
       }
     ],
     "cryptographically_ratified_count": 0,
-    "pending_owner_disposition": [
-      "ADR-0003",
-      "ADR-0004"
-    ],
+    "pending_owner_disposition": [],
     "present_count": 7,
-    "proposed_count": 2,
+    "proposed_count": 0,
     "required_count": 7
   },
   "artifact_kind": "pooleos_adr_ratification_readiness",
@@ -87,6 +84,10 @@
     "manifest": {
       "path": "runs/adr_ratification_manifest.json",
       "present": false
+    },
+    "owner_response_receipt": {
+      "path": "runs/n0_owner_response_receipt.json",
+      "present": true
     },
     "receipt": {
       "path": "runs/adr_ratification_receipt.json",
@@ -98,28 +99,28 @@
     }
   },
   "claim_boundary": [
-    "This readiness ledger is unsigned preparation evidence and is not owner acceptance.",
-    "The exact candidate objectives and schema are bound, but all 38 values still require explicit owner disposition.",
+    "This readiness ledger records unsigned owner direction and is not a cryptographic owner signature.",
+    "The exact objective definitions carry owner-directed acceptance, but all 38 measurements remain open.",
     "No private key, credential, recovery secret, or hardware-backed key handle is recorded.",
-    "A detached signature alone does not satisfy the signed-tag and remote-publication gates.",
+    "No key generation, signing, merge, tag, or publication action is authorized by the response receipt.",
     "Architecture ratification does not prove a bootloader, kernel, driver, desktop, or production ISO."
   ],
   "decision_inputs": {
     "bound_sources": [
       {
-        "byte_count": 6015,
+        "byte_count": 6021,
         "path": "specs/native-architecture-constitution.json",
-        "sha256": "94D8BDDF9BC85DE10D3B7FBF53BA2D0CC1C822C1F573FF94D0F1AB49F7EFF753"
+        "sha256": "90825DC70D5A99DD2061F0638D2550771D01761BB215E91647909AE470FBB9E5"
       },
       {
-        "byte_count": 33416,
+        "byte_count": 33648,
         "path": "specs/native-v1-objectives.json",
-        "sha256": "525946A7AA7A7D0F27682810EDD636D7E743C32548ACE442AB208B680A7E8584"
+        "sha256": "43D6F515C76D59D738A284703407E17C4BB69534E5FBAAB94979DE34FA835E60"
       },
       {
-        "byte_count": 5437,
+        "byte_count": 5447,
         "path": "specs/native-v1-objectives.schema.json",
-        "sha256": "AF4D18B414A65D35ABEBC178AE2B55FFAB3FF5A5CE7D17C8A4CB279A7F038A98"
+        "sha256": "2B3873C5FC61F2DDCE1B789C29BFB526FCAEB59B8F2B832F5D2CED0FB58C8F56"
       },
       {
         "byte_count": 12238,
@@ -132,19 +133,19 @@
         "sha256": "F8B6D491A28D72E3C9B36FAB5B24D446FBD67CD760A9A8B05C7774EB3A691DE5"
       },
       {
-        "byte_count": 4739,
+        "byte_count": 4830,
         "path": "docs/publication-boundary.md",
-        "sha256": "96C614E2EA4C61809CC07C2804936220BCCC64B3B2EEE5D1711888A58FD65FD6"
+        "sha256": "B88AE8ABA4451DC49CD4012ADF29B740D84EE05420D87DE40896E790DB8FF1D3"
       }
     ],
     "objectives": {
       "measured_target_count": 0,
-      "owner_ratification_pending": true,
+      "owner_ratification_pending": false,
       "path": "specs/native-v1-objectives.json",
       "profile_id": "POOLEOS-WORKSTATION-V1-CANDIDATE",
       "schema_and_semantics_valid": true,
-      "source_profile_accepted": false,
-      "source_target_values_accepted": false,
+      "source_profile_accepted": true,
+      "source_target_values_accepted": true,
       "target_count": 38
     },
     "required_bound_source_count": 6
@@ -153,32 +154,32 @@
     {
       "description": "Explicitly accept, amend, or reject the candidate Workstation v1 profile and all 38 target values; definition acceptance must not claim measurement evidence.",
       "id": "OWNER-OBJECTIVES-DISPOSITION-001",
-      "status": "pending"
+      "status": "satisfied"
     },
     {
       "description": "Explicitly accept, amend, or reject ADR-0003 and ADR-0004; an amendment or rejection requires a revised or superseding ADR before signing.",
       "id": "OWNER-ADR-DISPOSITION-001",
-      "status": "pending"
+      "status": "satisfied"
     },
     {
       "description": "Choose an allowed owner-controlled SSH governance-key profile and record its public key and fingerprint without publishing private material.",
       "id": "OWNER-SIGNING-CUSTODY-001",
-      "status": "pending"
+      "status": "blocked_hardware_key_unavailable"
     },
     {
       "description": "Sign the canonical manifest with the PooleOS ADR namespace and verify it against the public allowed-signers and revocation files.",
       "id": "OWNER-DETACHED-SIGN-001",
-      "status": "pending"
+      "status": "not_authorized"
     },
     {
       "description": "Create the non-replaceable owner-signed annotated architecture baseline tag over the revision carrying the manifest and detached signature.",
       "id": "OWNER-SIGNED-TAG-001",
-      "status": "pending"
+      "status": "not_authorized"
     },
     {
       "description": "Publish the exact main revision and signed tag, verify remote object identities, and retain the machine receipt.",
       "id": "OWNER-PUBLISH-RECEIPT-001",
-      "status": "pending"
+      "status": "not_authorized"
     }
   ],
   "policy": {
@@ -190,14 +191,15 @@
   "production_ready": false,
   "schema_version": "1.1",
   "selected_move_id": "N0-RATIFY-001",
-  "status": "pending_owner_action",
+  "status": "owner_direction_recorded_hardware_key_pending",
   "status_date": "2026-07-16",
   "summary": {
-    "blocking_owner_action_count": 6,
+    "blocking_owner_action_count": 4,
     "defined_negative_control_count": 12,
     "objectives_measured_target_count": 0,
-    "objectives_owner_acceptance_pending": true,
+    "objectives_owner_acceptance_pending": false,
     "objectives_target_count": 38,
+    "owner_direction_recorded": true,
     "policy_schema_valid": true,
     "ratification_tooling_present": true,
     "ready_for_owner_action": true,
@@ -209,8 +211,19 @@
     "allowed_signers_path": "security/owner-adr-signers.allowed",
     "backend": "OpenSSH",
     "format": "SSHSIG",
+    "hardware_key_availability": "do_not_have",
+    "hardware_key_available": false,
+    "key_generation_authorized": false,
     "namespace": "pooleos-adr-ratification-v1@github.com/rookepoole/PooleOS",
+    "owner_response": {
+      "byte_count": 2646,
+      "path": "specs/n0-owner-response.json",
+      "sha256": "CC188374DFC2FDDE78B3461DCCAF0F739FB2628D7E830B8E7C6A0F649DC3F5AF"
+    },
+    "provisional_software_key_risk": "not_applicable",
+    "public_key_publication": "not_yet",
     "revocation_path": "security/revoked-adr-signers",
+    "selected_key_profile": "hardware_fido2_ed25519_sk",
     "signer_file_errors": [],
     "signer_principal": "rookepoole",
     "trusted_signer_count": 0

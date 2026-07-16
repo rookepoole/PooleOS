@@ -2,19 +2,19 @@
   "artifact_kind": "pooleos_native_v1_objectives_readiness",
   "bindings": {
     "objectives": {
-      "byte_count": 33416,
+      "byte_count": 33648,
       "path": "specs/native-v1-objectives.json",
-      "sha256": "525946A7AA7A7D0F27682810EDD636D7E743C32548ACE442AB208B680A7E8584"
+      "sha256": "43D6F515C76D59D738A284703407E17C4BB69534E5FBAAB94979DE34FA835E60"
     },
     "objectives_schema": {
-      "byte_count": 5437,
+      "byte_count": 5447,
       "path": "specs/native-v1-objectives.schema.json",
-      "sha256": "AF4D18B414A65D35ABEBC178AE2B55FFAB3FF5A5CE7D17C8A4CB279A7F038A98"
+      "sha256": "2B3873C5FC61F2DDCE1B789C29BFB526FCAEB59B8F2B832F5D2CED0FB58C8F56"
     },
     "runtime": {
-      "byte_count": 17021,
+      "byte_count": 17197,
       "path": "runtime/native_v1_objectives.py",
-      "sha256": "D589808391E796B7E87788861CED7E51D714A9419F3F191B3A34B95AD42CA6D2"
+      "sha256": "5F5A4D194BFDF75C73F4D0E11F11AA25C076B72EA189873CDCB257384BAC5C18"
     },
     "source_adr": {
       "byte_count": 3124,
@@ -23,12 +23,12 @@
     }
   },
   "claim_boundary": [
-    "The candidate profile and values are ready for owner review, not owner-accepted or cryptographically ratified.",
+    "The profile and all 38 target definitions carry owner-directed acceptance but remain cryptographically unsigned.",
     "All 38 target definitions are unmeasured and satisfy no implementation, qualification, or release phase gate.",
     "Schema and semantic consistency do not prove reliability, accessibility, compatibility, privacy, or performance.",
     "The objectives ledger cannot authorize signatures, production promotion, hardware mutation, or destructive testing.",
     "Finite future samples remain bounded to their exact profiles, durations, workloads, firmware, and evidence.",
-    "N0.6 and N0 remain partial until owner ratification and implementation-bound evidence satisfy the Build Plan."
+    "N0.6 and N0 remain partial until cryptographic ratification and implementation-bound evidence satisfy the Build Plan."
   ],
   "n0_6_exit_gate_satisfied": false,
   "negative_controls": [
@@ -88,7 +88,7 @@
     },
     {
       "expected": "reject",
-      "id": "reject_inferred_owner_acceptance",
+      "id": "reject_owner_acceptance_regression",
       "observed": "reject",
       "status": "pass"
     }
@@ -105,21 +105,21 @@
   ],
   "owner_boundary": {
     "cryptographic_signature_present": false,
-    "profile_accepted": false,
+    "profile_accepted": true,
     "ratification_required": true,
-    "ready_for_owner_review": true,
+    "ready_for_owner_review": false,
     "ready_for_signature": false,
-    "target_values_accepted": false
+    "target_values_accepted": true
   },
   "production_promotion_allowed": false,
   "production_ready": false,
   "profile_id": "POOLEOS-WORKSTATION-V1-CANDIDATE",
   "schema_version": "1.0",
   "selected_move_id": "N0-OBJECTIVES-001",
-  "status": "consistent_candidate_owner_ratification_pending",
+  "status": "owner_direction_accepted_signature_pending",
   "status_date": "2026-07-16",
   "summary": {
-    "blocking_owner_action_count": 3,
+    "blocking_owner_action_count": 1,
     "consistency_pass": true,
     "measured_target_count": 0,
     "negative_control_count": 10,
@@ -134,7 +134,7 @@
       "privacy": 7,
       "reliability": 7
     },
-    "definition_pending_owner_count": 38,
+    "definition_pending_owner_count": 0,
     "measured_target_count": 0,
     "target_count": 38,
     "unmeasured_target_ids": [

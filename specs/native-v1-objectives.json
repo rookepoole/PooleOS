@@ -3,14 +3,14 @@
   "artifact_kind": "pooleos_native_v1_objectives",
   "profile_version": "0.1",
   "status_date": "2026-07-16",
-  "status": "candidate_owner_ratification_pending",
+  "status": "owner_direction_accepted_signature_pending",
   "selected_move_id": "N0-OBJECTIVES-001",
   "production_ready": false,
   "production_promotion_allowed": false,
   "owner_ratification": {
     "required": true,
-    "profile_accepted": false,
-    "target_values_accepted": false,
+    "profile_accepted": true,
+    "target_values_accepted": true,
     "cryptographic_signature_present": false,
     "ratification_path": "N0-RATIFY-001"
   },
@@ -118,7 +118,7 @@
       "applies_to": ["tier0", "normal", "safe", "recovery"],
       "evidence_phase_ids": ["N4", "N36", "N38"],
       "evidence_requirement": "Retain every seed, launch manifest, serial log, exit reason, and failed boot.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -135,7 +135,7 @@
       "applies_to": ["tier1", "normal", "safe", "recovery"],
       "evidence_phase_ids": ["N24", "N36", "N38"],
       "evidence_requirement": "Bind every cycle to exact hardware, firmware, media, power source, and stage markers.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -152,7 +152,7 @@
       "applies_to": ["tier0", "tier1", "normal"],
       "evidence_phase_ids": ["N35", "N36", "N38"],
       "evidence_requirement": "Run a declared seven-day mixed workload with retained faults, resource trends, and watchdog events.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -169,7 +169,7 @@
       "applies_to": ["tier0", "tier1", "update", "recovery"],
       "evidence_phase_ids": ["N23", "N35", "N36"],
       "evidence_requirement": "Inject interruption at every declared update transition and prove previous-known-good or recovery availability.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -186,7 +186,7 @@
       "applies_to": ["tier0", "tier1", "poolefs"],
       "evidence_phase_ids": ["N19", "N35", "N36"],
       "evidence_requirement": "Check acknowledged-data, metadata, replay, repair, and mount invariants after each cut.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -203,7 +203,7 @@
       "applies_to": ["tier0", "tier1", "driver_domains"],
       "evidence_phase_ids": ["N14", "N16", "N35", "N36"],
       "evidence_requirement": "Exercise process death, reset, revocation, stale completion, DMA teardown, and supervised restart.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -220,7 +220,7 @@
       "applies_to": ["tier1", "recovery"],
       "evidence_phase_ids": ["N23", "N36", "N38"],
       "evidence_requirement": "Measure from declared unrecoverable normal-slot failure to usable offline recovery UI and data-repair entry point.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -237,7 +237,7 @@
       "applies_to": ["normal", "installer", "recovery", "pooleglass"],
       "evidence_phase_ids": ["N29", "N36", "N38"],
       "evidence_requirement": "Publish an applicability crosswalk; native-software exceptions require an explicit rationale and equivalent test.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -254,7 +254,7 @@
       "applies_to": ["normal", "installer", "recovery"],
       "evidence_phase_ids": ["N18", "N22", "N23", "N29", "N36"],
       "evidence_requirement": "Include login, permissions, settings, update, rollback, diagnostics, backup, restore, and shutdown workflows.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -271,7 +271,7 @@
       "applies_to": ["normal", "installer", "pooleglass"],
       "evidence_phase_ids": ["N29", "N30", "N36"],
       "evidence_requirement": "Verify through an independent accessibility-tree inspector and representative assistive client.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -288,7 +288,7 @@
       "applies_to": ["normal", "installer", "recovery", "pooleglass"],
       "evidence_phase_ids": ["N29", "N36"],
       "evidence_requirement": "Reject clipped, overlapped, hidden, unreachable, or semantically truncated required content.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -305,7 +305,7 @@
       "applies_to": ["normal", "installer", "recovery", "pooleglass"],
       "evidence_phase_ids": ["N29", "N36"],
       "evidence_requirement": "Also require 3:1 for large text and essential non-text boundaries in every required theme.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -322,7 +322,7 @@
       "applies_to": ["boot_identity", "normal", "installer", "recovery", "pooleglass"],
       "evidence_phase_ids": ["N29", "N36"],
       "evidence_requirement": "Disable nonessential animation and preserve static progress and error state without timing dependence.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -339,7 +339,7 @@
       "applies_to": ["boot_identity", "normal", "installer", "recovery", "pooleglass"],
       "evidence_phase_ids": ["N29", "N36"],
       "evidence_requirement": "Analyze every animation, transition, warning, and error effect including failure fallbacks.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -356,7 +356,7 @@
       "applies_to": ["safe", "diagnostic", "recovery"],
       "evidence_phase_ids": ["N22", "N23", "N29", "N36"],
       "evidence_requirement": "Publish screen-reader and braille boundaries; graphical failure must retain keyboard and serial/GOP operation.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -373,7 +373,7 @@
       "applies_to": ["tier0", "tier1"],
       "evidence_phase_ids": ["N2", "N4", "N38"],
       "evidence_requirement": "Advertise only exact tested firmware, device, media, and feature combinations.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -390,7 +390,7 @@
       "applies_to": ["all_profiles"],
       "evidence_phase_ids": ["N5", "N14", "N16", "N20", "N23", "N34", "N36"],
       "evidence_requirement": "Exercise older, newer, malformed, colliding, and downgrade version identifiers independently.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -407,7 +407,7 @@
       "applies_to": ["v1_patch_releases"],
       "evidence_phase_ids": ["N20", "N23", "N30", "N34", "N36"],
       "evidence_requirement": "Bind each public contract to a declared compatibility window and retained previous-version corpus.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -424,7 +424,7 @@
       "applies_to": ["native_user_abi"],
       "evidence_phase_ids": ["N20", "N22", "N30", "N36"],
       "evidence_requirement": "Keep POSIX as an explicitly enumerated source-level subset; unimplemented calls are not advertised.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -441,7 +441,7 @@
       "applies_to": ["all_profiles"],
       "evidence_phase_ids": ["N0", "N20", "N37", "N39"],
       "evidence_requirement": "Release-tree and documentation scans must reject Linux ABI, module, or driver promotion claims.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -458,7 +458,7 @@
       "applies_to": ["all_profiles"],
       "evidence_phase_ids": ["N0", "N20", "N37", "N39"],
       "evidence_requirement": "Windows remains a development host and is not a production ABI or driver source.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -475,7 +475,7 @@
       "applies_to": ["all_profiles"],
       "evidence_phase_ids": ["N21", "N31", "N36", "N39"],
       "evidence_requirement": "Inspect every shipped profile, first-run path, update, recovery, and diagnostic mode offline.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -492,7 +492,7 @@
       "applies_to": ["normal", "installer", "recovery"],
       "evidence_phase_ids": ["N21", "N23", "N25", "N26", "N36"],
       "evidence_requirement": "Retain packet captures for clean install, first boot, login, update UI, diagnostics, and recovery.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -509,7 +509,7 @@
       "applies_to": ["all_profiles"],
       "evidence_phase_ids": ["N15", "N21", "N26", "N31", "N36"],
       "evidence_requirement": "Test logs, network protocols, crash paths, package operations, and support exports for correlation identifiers.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -526,7 +526,7 @@
       "applies_to": ["diagnostic", "recovery", "support_export"],
       "evidence_phase_ids": ["N15", "N21", "N31", "N36"],
       "evidence_requirement": "Run seeded-secret and seeded-identifier corpora through preview, redaction, archive, and transport paths.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -543,7 +543,7 @@
       "applies_to": ["normal", "diagnostic", "support_export"],
       "evidence_phase_ids": ["N21", "N22", "N29", "N36"],
       "evidence_requirement": "Consent must be specific, reversible, non-coercive, and independently auditable.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -560,7 +560,7 @@
       "applies_to": ["normal", "diagnostic"],
       "evidence_phase_ids": ["N21", "N31", "N36"],
       "evidence_requirement": "Verify quota, expiry, clock-change, low-space, backup, restore, and user-clear behavior.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -577,7 +577,7 @@
       "applies_to": ["normal", "safe", "diagnostic"],
       "evidence_phase_ids": ["N21", "N31", "N36"],
       "evidence_requirement": "Crash artifacts remain local until a per-export preview and explicit user action.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -594,7 +594,7 @@
       "applies_to": ["tier0", "tier1", "all_boot_modes"],
       "evidence_phase_ids": ["N5", "N36", "N38"],
       "evidence_requirement": "Measure from UEFI image entry, excluding firmware time, with serial as the independent clocked marker.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -611,7 +611,7 @@
       "applies_to": ["tier1", "normal", "safe", "recovery"],
       "evidence_phase_ids": ["N6", "N21", "N36", "N38"],
       "evidence_requirement": "Use signed stage markers and retain timeout, dependency, driver, and fallback state.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -628,7 +628,7 @@
       "applies_to": ["tier1", "normal"],
       "evidence_phase_ids": ["N21", "N22", "N29", "N36", "N38"],
       "evidence_requirement": "Measure cold and warm populations separately and include software-rendered fallback.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -645,7 +645,7 @@
       "applies_to": ["tier1", "2560x1440", "normal"],
       "evidence_phase_ids": ["N27", "N29", "N36"],
       "evidence_requirement": "Use representative window, text, transparency, input, and notification workloads with raw frame times.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -662,7 +662,7 @@
       "applies_to": ["tier1", "2560x1440", "normal"],
       "evidence_phase_ids": ["N27", "N29", "N36"],
       "evidence_requirement": "Report animation, reduced-motion, reduced-transparency, and software-rendered populations separately.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -679,7 +679,7 @@
       "applies_to": ["tier1", "normal", "pooleglass"],
       "evidence_phase_ids": ["N18", "N27", "N29", "N36"],
       "evidence_requirement": "Bind physical input timestamp, event delivery, application response, composition, and scanout observation.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -696,7 +696,7 @@
       "applies_to": ["tier1", "normal", "software_rendered_fallback"],
       "evidence_phase_ids": ["N9", "N21", "N29", "N31", "N36"],
       "evidence_requirement": "Include kernel, services, drivers, compositor, caches, and retained diagnostic memory after a declared quiet period.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -713,7 +713,7 @@
       "applies_to": ["tier1", "normal"],
       "evidence_phase_ids": ["N8", "N12", "N21", "N24", "N31", "N36"],
       "evidence_requirement": "Measure one-second samples with network disconnected and scheduled maintenance separately declared.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -730,7 +730,7 @@
       "applies_to": ["tier1", "normal"],
       "evidence_phase_ids": ["N24", "N31", "N36", "N38"],
       "evidence_requirement": "Bind external instrumentation, ambient conditions, firmware, device state, display state, and workload; never override hard thermal limits.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     },
     {
@@ -747,7 +747,7 @@
       "applies_to": ["tier1", "low_load", "same_numa_node"],
       "evidence_phase_ids": ["N12", "N14", "N31", "N36"],
       "evidence_requirement": "Retain raw distributions and report cross-core, loaded, timeout, cancellation, and priority-inversion cases separately.",
-      "definition_status": "candidate_owner_ratification_pending",
+      "definition_status": "owner_direction_accepted_signature_pending",
       "evidence_status": "not_measured"
     }
   ],
