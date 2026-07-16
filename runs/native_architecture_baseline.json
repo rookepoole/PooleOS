@@ -365,20 +365,20 @@
     },
     {
       "path": "docs/adr-ratification-ceremony.md",
-      "sha256": "F8A94BA2177B5E75797ED8175BC092D8AFE6E4C0B27C6588AA4D1A6551BA3B4F",
-      "byte_count": 7061,
+      "sha256": "F547B3D586C6AC6920105F0F0F7E56F4BA8DF5195DC4DC075719542063E679CF",
+      "byte_count": 7127,
       "line_count": 110
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "9D7A75F14F6E885EF1BC4F8796A1307ABD407F9B53097CC91BC7D934B0C901A3",
-      "byte_count": 18028,
+      "sha256": "EACB6AF38BFA64E3083BDEF0D6FA1D1EE57C8A573AF880880B984BADBDC949C2",
+      "byte_count": 18080,
       "line_count": 240
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "D1588F3D726B81EB4B551A6BC637B91A82B8FFD4FF1CC2F461C4BF64AB23D732",
-      "byte_count": 96180,
+      "sha256": "6C9B104265F1534DA65437B44DD06AAF7759E98F5C96933D5227CE1428EFC102",
+      "byte_count": 96245,
       "line_count": 1083
     },
     {

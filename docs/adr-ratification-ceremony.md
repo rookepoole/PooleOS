@@ -16,7 +16,7 @@ The ceremony does not generate or approve a Secure Boot key, release-media key, 
 - ADR-0001, ADR-0002, and ADR-0005 through ADR-0007 are `accepted-owner-directed` but unsigned.
 - ADR-0003 and ADR-0004 remain `proposed` and require explicit owner disposition.
 - The public allowed-signers file has zero keys. No local Git signing key, GPG backend, or GitHub SSH signing key was configured when this package was generated.
-- The current topic work remains in draft PR #1. Required signed-commit enforcement must not be enabled until the pre-signing branch history and merge strategy are resolved under `N1-SCM-CLOSE-001`.
+- The Cycle 82 toolchain work was merged through PR #1. Cycle 83 ceremony readiness is isolated in draft PR #2. Required signed-commit enforcement must not be enabled until the remaining pre-signing history and merge strategy are resolved under `N1-SCM-CLOSE-001`.
 
 ## Owner Decisions Required
 

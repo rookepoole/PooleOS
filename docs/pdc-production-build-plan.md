@@ -307,7 +307,7 @@ Subphases:
 Cycle 81-83 evidence:
 
 - The public repository is published at `https://github.com/rookepoole/PooleOS`, with `main` as the default branch and the Cycle 81 bootstrap commit as its root.
-- `main` requires pull requests, stale-review dismissal, resolved conversations, and linear history; force-push and deletion are denied. Private vulnerability reporting is enabled. Cycle 83 remains in draft PR #1 on the existing topic branch.
+- `main` requires pull requests, stale-review dismissal, resolved conversations, and linear history; force-push and deletion are denied. Private vulnerability reporting is enabled. Rooke Poole merged the Cycle 82 toolchain work through PR #1; Cycle 83 ratification readiness is isolated in open draft PR #2.
 - PolyForm Noncommercial 1.0.0 terms, owner notice, security policy, trademark notice, CODEOWNERS, ADR template, public/private evidence boundary, and native source-tree ownership skeleton are present.
 - `.gitignore` excludes raw internal PDC inputs, private/local run evidence, historical Buildroot sources and lab images, archives, credentials, private signing material, firmware without redistribution clearance, and release-media binaries.
 - `tools/check_publication_boundary.py` scans exact indexed bytes for prohibited paths, unapproved run artifacts, release media, credential containers, secret signatures, and workstation-specific paths.
