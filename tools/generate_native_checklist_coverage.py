@@ -69,6 +69,7 @@ PHASE_STATUS = {
     "N2": "partial",
     "N3": "partial",
     "N4": "partial",
+    "N5": "partial",
     "N15": "partial",
     "N31": "partial",
     "N32": "partial",

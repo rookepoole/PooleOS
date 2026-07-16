@@ -1,0 +1,688 @@
+{
+  "artifact_kind": "pooleos_native_pooleboot_readiness",
+  "bindings": {
+    "contract": {
+      "byte_count": 4969,
+      "path": "specs/native-pooleboot-proof.json",
+      "sha256": "47480A4247220487E41EC8B9469D74240B7E2C38411FE8FF18B2AA99D2B54FF8"
+    },
+    "implementation_inputs": [
+      {
+        "byte_count": 330,
+        "path": "native/Cargo.toml",
+        "sha256": "54CEB74EC520AD7ECA2CA738384000BE4D6E90CE316068BFD7D3217C9119BC51"
+      },
+      {
+        "byte_count": 271,
+        "path": "native/Cargo.lock",
+        "sha256": "EE7260F947D9CF831B67245C9DFEA709DCF64895724308EE238E0AAD88957CB4"
+      },
+      {
+        "byte_count": 131,
+        "path": "native/rust-toolchain.toml",
+        "sha256": "06C4E0BD63FE84DCB26A0FAE52D96F23C38979DBE6F154D58EAB1547F81FA26B"
+      },
+      {
+        "byte_count": 363,
+        "path": "native/.cargo/config.toml",
+        "sha256": "98D1AD53467848CFE31349BE720C58CC1432570F5564FA9B8F727482BBBD2A23"
+      },
+      {
+        "byte_count": 245,
+        "path": "native/boot/Cargo.toml",
+        "sha256": "C6E4F173A51D1CA8459DFFC02BD6CEA7E9F68833635F51789852CAED7C36F248"
+      },
+      {
+        "byte_count": 16114,
+        "path": "native/boot/src/lib.rs",
+        "sha256": "A07CA0D5566B47CDC30632FB723605190223C78DECB126015EF27F58EBACE9C6"
+      },
+      {
+        "byte_count": 18466,
+        "path": "native/boot/src/main.rs",
+        "sha256": "ABEAFBB979E9EDAF6D3C4C45B46A106D9F4FD73C7946DC69ED7EBE54C14BB551"
+      },
+      {
+        "byte_count": 11251,
+        "path": "runtime/native_binary.py",
+        "sha256": "668F101989EBCE1C9C46B07C6419FEFBCFA3D298D4AB88444141EF5921517FE8"
+      },
+      {
+        "byte_count": 46396,
+        "path": "runtime/native_pooleboot.py",
+        "sha256": "A6158B05C0C6C03085A8AC6FEF2D1199A766603191D0999A17450B626BE236E6"
+      },
+      {
+        "byte_count": 44441,
+        "path": "runtime/native_tier0.py",
+        "sha256": "87716D0D8127599A462A535E83FF779248AF9681CE11E8B6D53151B11DB79A39"
+      },
+      {
+        "byte_count": 4969,
+        "path": "specs/native-pooleboot-proof.json",
+        "sha256": "47480A4247220487E41EC8B9469D74240B7E2C38411FE8FF18B2AA99D2B54FF8"
+      },
+      {
+        "byte_count": 6584,
+        "path": "specs/native-pooleboot-proof.schema.json",
+        "sha256": "5DC2A0DDEE88B10F041FE93D415A88FF7423684193BFEDBE2E5362EF2DB06102"
+      },
+      {
+        "byte_count": 10928,
+        "path": "specs/native-pooleboot-readiness.schema.json",
+        "sha256": "6EADFC3D33DBD7C653EA7AA2349FA1E3FE318012E6177B12A5063E6AFE3B9485"
+      },
+      {
+        "byte_count": 5641,
+        "path": "specs/native-tier0-lock.json",
+        "sha256": "E6E126A5EC683FC1A73B82B8C889F4212BE507BAA52EA43548B23C938093499F"
+      },
+      {
+        "byte_count": 6439,
+        "path": "specs/native-tier0-profile.json",
+        "sha256": "EE5139B1B71DC20684BFEBD862D2CD00A31A9BB1C8EADDC349CE659D252717DF"
+      },
+      {
+        "byte_count": 11904,
+        "path": "runs/native_tier0_readiness.json",
+        "sha256": "08E0083DA4B56E4B95A79AAD562C66D9CAC1AE437192286842E4BA8EBFD00F0A"
+      },
+      {
+        "byte_count": 2272,
+        "path": "tools/build_native_pooleboot_media.py",
+        "sha256": "4A54F44A0AE5D794A3D3EA87CCBED7B3CED3298E4660F7B5FEAE706AB22206D2"
+      },
+      {
+        "byte_count": 29969,
+        "path": "tools/qualify_native_pooleboot.py",
+        "sha256": "D70E464B8EA4D81286AD7C95D5F8DBFD023431FD6F4422E0281283A929B2463A"
+      }
+    ],
+    "tier0_lock": {
+      "byte_count": 5641,
+      "path": "specs/native-tier0-lock.json",
+      "sha256": "E6E126A5EC683FC1A73B82B8C889F4212BE507BAA52EA43548B23C938093499F"
+    },
+    "tier0_profile": {
+      "byte_count": 6439,
+      "path": "specs/native-tier0-profile.json",
+      "sha256": "EE5139B1B71DC20684BFEBD862D2CD00A31A9BB1C8EADDC349CE659D252717DF"
+    },
+    "tier0_readiness": {
+      "byte_count": 11904,
+      "path": "runs/native_tier0_readiness.json",
+      "sha256": "08E0083DA4B56E4B95A79AAD562C66D9CAC1AE437192286842E4BA8EBFD00F0A"
+    },
+    "toolchain_lock": {
+      "byte_count": 4017,
+      "path": "specs/native-toolchain-lock.json",
+      "sha256": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E"
+    },
+    "toolchain_qualification": {
+      "byte_count": 14394,
+      "path": "runs/native_toolchain_qualification.json",
+      "sha256": "CD250C445A77F51E76B11921B2FD2D8F44FB094A4A74268B43B42C0006DF48B9"
+    }
+  },
+  "build": {
+    "byte_count": 13312,
+    "clean_build_count": 2,
+    "exact_clean_build_match": true,
+    "host_contract_test_count": 8,
+    "host_contract_test_pass_count": 8,
+    "host_leakage_hit_count": 0,
+    "host_leakage_marker_count": 7,
+    "inspection": {
+      "byte_count": 13312,
+      "characteristics": 34,
+      "debug_directory": {
+        "rva": 0,
+        "size": 0
+      },
+      "debug_directory_present": false,
+      "dll_characteristics": 33120,
+      "entry_nonzero": true,
+      "entry_point": 5869,
+      "file_alignment": 512,
+      "format": "PE32+",
+      "header_size": 1024,
+      "image_base": 5368709120,
+      "image_size": 28672,
+      "import_directory": {
+        "rva": 0,
+        "size": 0
+      },
+      "imports_present": false,
+      "machine": 34404,
+      "section_alignment": 4096,
+      "section_count": 4,
+      "sections": [
+        {
+          "characteristics": 1610612768,
+          "name": ".text",
+          "raw_offset": 1024,
+          "raw_size": 9216,
+          "virtual_address": 4096,
+          "virtual_size": 9040
+        },
+        {
+          "characteristics": 1073741888,
+          "name": ".rdata",
+          "raw_offset": 10240,
+          "raw_size": 2048,
+          "virtual_address": 16384,
+          "virtual_size": 1596
+        },
+        {
+          "characteristics": 1073741888,
+          "name": ".eh_fram",
+          "raw_offset": 12288,
+          "raw_size": 512,
+          "virtual_address": 20480,
+          "virtual_size": 64
+        },
+        {
+          "characteristics": 1107296320,
+          "name": ".reloc",
+          "raw_offset": 12800,
+          "raw_size": 512,
+          "virtual_address": 24576,
+          "virtual_size": 44
+        }
+      ],
+      "sha256": "B4EF888C588807CBF715E33831A0B52B07CEF5F8BEAFA4FD74D65BD9AA4919B8",
+      "subsystem": 10,
+      "timestamp": 0
+    },
+    "sha256": "B4EF888C588807CBF715E33831A0B52B07CEF5F8BEAFA4FD74D65BD9AA4919B8"
+  },
+  "claim_boundary": [
+    "This contract covers one unsigned UEFI proof application, not the complete PooleBoot loader.",
+    "The proof does not load, authenticate, relocate, or enter PooleKernel or an initial-system bundle.",
+    "The proof obtains a bounded memory map but does not call ExitBootServices or define the kernel handoff ABI.",
+    "The proof does not enroll keys, enforce Secure Boot, perform measured boot, use TPM state, or create a signature.",
+    "The deterministic raw image is development media, not an ISO, installer, recovery image, or physical-media qualification.",
+    "A return-path marker immediately precedes the Rust return; it does not prove subsequent firmware policy or target-firmware behavior.",
+    "QEMU and OVMF remain exact non-promoting development inputs with the provenance gaps recorded by the Tier 0 lock.",
+    "The static framebuffer identity is not the final animated PooleGlass boot identity or an accessibility acceptance result.",
+    "No N5 exit gate, production readiness, signing, release, or physical hardware claim follows."
+  ],
+  "claims": {
+    "bounded_memory_map_observed": true,
+    "complete_pooleboot_loader": false,
+    "deterministic_gpt_esp_observed": true,
+    "efi_success_return_path_marker_observed": true,
+    "exit_boot_services_called": false,
+    "gop_frame_observed": true,
+    "measured_boot_performed": false,
+    "n5_exit_gate_satisfied": false,
+    "one_host_pe32_reproducible": true,
+    "owner_signature_present": false,
+    "physical_media_tested": false,
+    "pooleboot_guest_entry_observed": true,
+    "poolekernel_executed": false,
+    "poolekernel_loaded": false,
+    "production_boot_evidence": false,
+    "production_ready": false,
+    "secure_boot_enforced": false,
+    "target_firmware_tested": false
+  },
+  "contract_id": "POOLEOS-N5-POOLEBOOT-1",
+  "execution": {
+    "exact_marker_match": true,
+    "exact_screenshot_match": true,
+    "firmware_code_sha256": "33090CC07675BAA5190D9F1E84BF5176B33BCBFA9BACAC522961150CDB6DBB2A",
+    "host_environment_count": 1,
+    "local_paths_recorded": false,
+    "machine": "pc-q35-11.0",
+    "normalized_command": [
+      "$QEMU",
+      "-L",
+      "$QEMU_ROOT/share",
+      "-nodefaults",
+      "-no-user-config",
+      "-machine",
+      "pc-q35-11.0,smm=off,usb=off,vmport=off",
+      "-accel",
+      "tcg,thread=single",
+      "-cpu",
+      "qemu64",
+      "-smp",
+      "1,sockets=1,dies=1,clusters=1,cores=1,threads=1,maxcpus=1",
+      "-m",
+      "512M",
+      "-rtc",
+      "base=utc,clock=vm,driftfix=none",
+      "-icount",
+      "shift=0,align=off,sleep=off",
+      "-global",
+      "ICH9-LPC.disable_s3=1",
+      "-global",
+      "ICH9-LPC.disable_s4=1",
+      "-drive",
+      "if=pflash,format=raw,unit=0,readonly=on,file=$QEMU_ROOT/share/edk2-x86_64-code.fd",
+      "-drive",
+      "if=pflash,format=raw,unit=1,file=$RUN_DIR/OVMF_VARS.fd",
+      "-drive",
+      "if=none,id=pooleos_media,format=raw,readonly=on,file=$MEDIA_READ_ONLY",
+      "-device",
+      "virtio-blk-pci-non-transitional,drive=pooleos_media",
+      "-chardev",
+      "file,id=poole_serial,path=$RUN_DIR/pooleos.serial.log,append=off",
+      "-serial",
+      "chardev:poole_serial",
+      "-debugcon",
+      "file:$RUN_DIR/pooleos.debugcon.log",
+      "-global",
+      "isa-debugcon.iobase=0x402",
+      "-device",
+      "isa-debug-exit,iobase=0xf4,iosize=0x04",
+      "-display",
+      "none",
+      "-monitor",
+      "none",
+      "-nic",
+      "none",
+      "-no-reboot",
+      "-boot",
+      "strict=on,menu=off",
+      "-d",
+      "guest_errors,unimp",
+      "-D",
+      "$RUN_DIR/qemu.trace.log",
+      "-device",
+      "VGA,id=poole_gop",
+      "-qmp",
+      "tcp:127.0.0.1:$QMP_PORT,server=on,wait=off"
+    ],
+    "normalized_command_sha256": "BF26B10D53C21F195065BE2F2261FCDEED04E2013068AC329F1BB1D0A3766C32",
+    "profile_id": "bootstrap-debug",
+    "qemu_sha256": "A930E028F93D0FA47E4D58BDAD2432F7466DC2B6AF0AE376F77EF7A298FFDD02",
+    "run_count": 2,
+    "runs": [
+      {
+        "fresh_vars_copy": true,
+        "guest_network": false,
+        "host_acceleration": false,
+        "local_paths_recorded": false,
+        "marker_sha256": "225AFFFF8A419382D2B748CF9D8BFC20E220F7608F0846559C969BFDC7C28027",
+        "marker_summary": {
+          "config_table_count": 10,
+          "gop": {
+            "format": "BGR",
+            "height": 800,
+            "mode": 0,
+            "stride": 1280,
+            "width": 1280
+          },
+          "marker_count": 11,
+          "memory_map": {
+            "byte_count": 4512,
+            "descriptor_bytes": 48,
+            "descriptor_count": 94
+          },
+          "ordered_contract_match": true
+        },
+        "markers": [
+          "POOLEBOOT/0.1 ENTRY",
+          "POOLEBOOT/0.1 SYSTEM_TABLE PASS revision=0x00020046",
+          "POOLEBOOT/0.1 BOOT_SERVICES PASS",
+          "POOLEBOOT/0.1 WATCHDOG status=0x0000000000000000",
+          "POOLEBOOT/0.1 CONSOLE PASS",
+          "POOLEBOOT/0.1 CONFIG PASS count=10 acpi20=1 smbios3=0 smbios2=1",
+          "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
+          "POOLEBOOT/0.1 MEMORY_MAP PASS bytes=4512 descriptor_bytes=48 descriptors=94",
+          "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested kernel=not_loaded exit_boot_services=not_called",
+          "POOLEBOOT/0.1 FRAME READY",
+          "POOLEBOOT/0.1 RETURN EFI_SUCCESS"
+        ],
+        "media_read_only": true,
+        "qemu_exit_code": 0,
+        "qmp_greeting": {
+          "capabilities": [
+            "oob"
+          ],
+          "version": {
+            "package": "v11.0.0-12122-ga4bb4b10c9",
+            "qemu": {
+              "major": 11,
+              "micro": 0,
+              "minor": 0
+            }
+          }
+        },
+        "qmp_loopback_only": true,
+        "qmp_quit_requested": true,
+        "run_id": "run-1",
+        "screenshot": {
+          "bright_cyan_pixel_count": 44970,
+          "byte_count": 3072016,
+          "dark_pixel_count": 979030,
+          "height": 800,
+          "nonblank": true,
+          "pixel_count": 1024000,
+          "poole_identity_palette_observed": true,
+          "sampled_unique_color_count": 6,
+          "sha256": "E9D4CFD48C23DBA760AED5B2049B39DCA49A0D172F680D570082EB0680FDFDBD",
+          "width": 1280
+        },
+        "serial_debugcon_exact_match": true,
+        "stderr_byte_count": 0,
+        "stderr_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "timestamped_qmp_events_excluded_from_equality": true
+      },
+      {
+        "fresh_vars_copy": true,
+        "guest_network": false,
+        "host_acceleration": false,
+        "local_paths_recorded": false,
+        "marker_sha256": "225AFFFF8A419382D2B748CF9D8BFC20E220F7608F0846559C969BFDC7C28027",
+        "marker_summary": {
+          "config_table_count": 10,
+          "gop": {
+            "format": "BGR",
+            "height": 800,
+            "mode": 0,
+            "stride": 1280,
+            "width": 1280
+          },
+          "marker_count": 11,
+          "memory_map": {
+            "byte_count": 4512,
+            "descriptor_bytes": 48,
+            "descriptor_count": 94
+          },
+          "ordered_contract_match": true
+        },
+        "markers": [
+          "POOLEBOOT/0.1 ENTRY",
+          "POOLEBOOT/0.1 SYSTEM_TABLE PASS revision=0x00020046",
+          "POOLEBOOT/0.1 BOOT_SERVICES PASS",
+          "POOLEBOOT/0.1 WATCHDOG status=0x0000000000000000",
+          "POOLEBOOT/0.1 CONSOLE PASS",
+          "POOLEBOOT/0.1 CONFIG PASS count=10 acpi20=1 smbios3=0 smbios2=1",
+          "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
+          "POOLEBOOT/0.1 MEMORY_MAP PASS bytes=4512 descriptor_bytes=48 descriptors=94",
+          "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested kernel=not_loaded exit_boot_services=not_called",
+          "POOLEBOOT/0.1 FRAME READY",
+          "POOLEBOOT/0.1 RETURN EFI_SUCCESS"
+        ],
+        "media_read_only": true,
+        "qemu_exit_code": 0,
+        "qmp_greeting": {
+          "capabilities": [
+            "oob"
+          ],
+          "version": {
+            "package": "v11.0.0-12122-ga4bb4b10c9",
+            "qemu": {
+              "major": 11,
+              "micro": 0,
+              "minor": 0
+            }
+          }
+        },
+        "qmp_loopback_only": true,
+        "qmp_quit_requested": true,
+        "run_id": "run-2",
+        "screenshot": {
+          "bright_cyan_pixel_count": 44970,
+          "byte_count": 3072016,
+          "dark_pixel_count": 979030,
+          "height": 800,
+          "nonblank": true,
+          "pixel_count": 1024000,
+          "poole_identity_palette_observed": true,
+          "sampled_unique_color_count": 6,
+          "sha256": "E9D4CFD48C23DBA760AED5B2049B39DCA49A0D172F680D570082EB0680FDFDBD",
+          "width": 1280
+        },
+        "serial_debugcon_exact_match": true,
+        "stderr_byte_count": 0,
+        "stderr_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "timestamped_qmp_events_excluded_from_equality": true
+      }
+    ],
+    "vars_template_sha256": "5D2AC383371B408398ACCEE7EC27C8C09EA5B74A0DE0CEEA6513388B15BE5D1E"
+  },
+  "media": {
+    "clean_generation_count": 2,
+    "exact_clean_generation_match": true,
+    "inspection": {
+      "embedded_efi": {
+        "byte_count": 13312,
+        "characteristics": 34,
+        "debug_directory": {
+          "rva": 0,
+          "size": 0
+        },
+        "debug_directory_present": false,
+        "dll_characteristics": 33120,
+        "entry_nonzero": true,
+        "entry_point": 5869,
+        "file_alignment": 512,
+        "format": "PE32+",
+        "header_size": 1024,
+        "image_base": 5368709120,
+        "image_size": 28672,
+        "import_directory": {
+          "rva": 0,
+          "size": 0
+        },
+        "imports_present": false,
+        "machine": 34404,
+        "section_alignment": 4096,
+        "section_count": 4,
+        "sections": [
+          {
+            "characteristics": 1610612768,
+            "name": ".text",
+            "raw_offset": 1024,
+            "raw_size": 9216,
+            "virtual_address": 4096,
+            "virtual_size": 9040
+          },
+          {
+            "characteristics": 1073741888,
+            "name": ".rdata",
+            "raw_offset": 10240,
+            "raw_size": 2048,
+            "virtual_address": 16384,
+            "virtual_size": 1596
+          },
+          {
+            "characteristics": 1073741888,
+            "name": ".eh_fram",
+            "raw_offset": 12288,
+            "raw_size": 512,
+            "virtual_address": 20480,
+            "virtual_size": 64
+          },
+          {
+            "characteristics": 1107296320,
+            "name": ".reloc",
+            "raw_offset": 12800,
+            "raw_size": 512,
+            "virtual_address": 24576,
+            "virtual_size": 44
+          }
+        ],
+        "sha256": "B4EF888C588807CBF715E33831A0B52B07CEF5F8BEAFA4FD74D65BD9AA4919B8",
+        "subsystem": 10,
+        "timestamp": 0
+      },
+      "esp": {
+        "end_lba": 131038,
+        "label": "POOLEOS ESP",
+        "sector_count": 128991,
+        "start_lba": 2048,
+        "type_guid": "C12A7328-F81F-11D2-BA4B-00A0C93EC93B",
+        "unique_guid": "504F4F4C-4553-5000-8000-000000000001"
+      },
+      "fat32": {
+        "boot_sector_backup_exact_match": true,
+        "cluster_count": 126973,
+        "fat_copies_exact_match": true,
+        "fat_count": 2,
+        "fat_sector_count": 993,
+        "fsinfo_backup_exact_match": true,
+        "volume_id": "97970001",
+        "volume_label": "POOLEOS ESP"
+      },
+      "files": [
+        {
+          "byte_count": 13312,
+          "cluster_count": 26,
+          "path": "EFI/BOOT/BOOTX64.EFI",
+          "sha256": "B4EF888C588807CBF715E33831A0B52B07CEF5F8BEAFA4FD74D65BD9AA4919B8"
+        }
+      ],
+      "gpt": {
+        "backup_header_crc32": "A1498926",
+        "disk_guid": "504F4F4C-454F-534E-8000-000000000097",
+        "partition_entries_crc32": "36995F84",
+        "primary_backup_entries_exact_match": true,
+        "primary_header_crc32": "2F4545E3"
+      },
+      "image": {
+        "byte_count": 67108864,
+        "protective_mbr_valid": true,
+        "sector_bytes": 512,
+        "sector_count": 131072,
+        "sha256": "E8175F70270D6E0A9D4BD1FB16A8814D9B30DD460CE1E6219CCF7AC528600FCA"
+      }
+    },
+    "ordinary_workspace_file_only": true,
+    "physical_media_write_performed": false
+  },
+  "n5_exit_gate_satisfied": false,
+  "negative_controls": [
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PE-SUBSYSTEM",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PE-MACHINE",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PE-DEBUG-DIRECTORY",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-GPT-PRIMARY-CRC",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-GPT-BACKUP-CRC",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-GPT-ENTRY-CRC",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-ESP-TYPE",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-FAT-COPY",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-FAT-CHAIN-LOOP",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-FALLBACK-PATH",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-MEDIA-OUTPUT-PATH",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-MARKER-OMISSION",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-MARKER-ORDER",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-SCREENSHOT-BLANK",
+      "observed": "reject",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-CLAIM-OVERREACH",
+      "observed": "reject",
+      "status": "pass"
+    }
+  ],
+  "open_items": [
+    "Complete boot configuration parsing, signed artifact verification, and hostile loader corpus coverage.",
+    "Define and freeze ADD-BOOT-001 canonical handoff bytes before PooleKernel entry depends on them.",
+    "Load and validate PooleKernel ELF64 plus initial-system and recovery bundles.",
+    "Implement final memory-map retry, ExitBootServices, and a no-later-boot-service proof.",
+    "Qualify target firmware and physical media only under separately approved lab procedures.",
+    "Replace the non-promoting QEMU/OVMF candidates with source-built, provenance-complete inputs.",
+    "Reproduce exact build, media, markers, and frame on a second clean host.",
+    "Implement animated, static, reduced-motion, recovery, and software-rendered PooleGlass boot identities."
+  ],
+  "phase_status": {
+    "N5": "partial",
+    "N5.1": "partial",
+    "N5.2": "partial",
+    "N5.3": "partial",
+    "N5.7": "partial"
+  },
+  "production_promotion_allowed": false,
+  "production_ready": false,
+  "schema_version": "1.0",
+  "selected_move_id": "N5-POOLEBOOT-001",
+  "status": "pass_single_host_two_run_unsigned_non_promoting",
+  "status_date": "2026-07-16",
+  "summary": {
+    "clean_builds_exact": 2,
+    "clean_media_generations_exact": 2,
+    "gop_frame_match_count": 2,
+    "guest_runs_passed": 2,
+    "guest_runs_total": 2,
+    "host_contract_tests_passed": 8,
+    "host_contract_tests_total": 8,
+    "negative_controls_passed": 15,
+    "negative_controls_total": 15,
+    "ordered_marker_count": 11,
+    "production_claim_count": 0,
+    "serial_debugcon_match_count": 2
+  }
+}

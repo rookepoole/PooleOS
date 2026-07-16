@@ -43,9 +43,10 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 96,
-    "selected_move_id": "N4-POOLEFS-MODEL-001",
+    "last_updated_cycle": 97,
+    "selected_move_id": "N5-POOLEBOOT-001",
     "immediate_next_move_id": "N0-HW-KEY-ACQUIRE-001",
+    "owner_independent_next_move_id": "N5-BOOTPROTO-001",
     "required_records": [
       "docs/production-goal-charter.md",
       "docs/pdc-production-build-plan.md",
@@ -58,6 +59,7 @@
       "runs/hardware_target_readiness.json",
       "runs/native_tier0_readiness.json",
       "runs/native_model_readiness.json",
+      "runs/native_pooleboot_readiness.json",
       "runs/native_v1_objectives_readiness.json",
       "runs/release_gate.json",
       "docs/cycle_log.md",
@@ -83,14 +85,14 @@
     "implementation_item_count": 8996,
     "section_count": 171,
     "coverage_path": "runs/pooleos_native_checklist_coverage.json",
-    "coverage_sha256": "60268A163D88BD3D66D966B3AA40C67DC88F964B9EEDAE3C799D53B80E9BD226",
+    "coverage_sha256": "7B49729139EF7D4832B0F112176C516CA7FC8C7A73F13FAC7DBFC72CB1164A19",
     "coverage_status": "pass",
     "added_requirement_count": 32
   },
   "baseline": {
-    "pooleos_cycle": 96,
+    "pooleos_cycle": 97,
     "entry_cycle": 79,
-    "pooleos_test_count": 508,
+    "pooleos_test_count": 521,
     "historical_consistency_release_gate": {
       "passed_checks": 58,
       "total_checks": 58,
@@ -100,9 +102,9 @@
       "native_promotion_role": "historical_non_promoting"
     },
     "native_consistency_release_gate": {
-      "passed_checks": 69,
-      "total_checks": 69,
-      "artifact_count": 64,
+      "passed_checks": 70,
+      "total_checks": 70,
+      "artifact_count": 65,
       "explicit_gap_count": 20,
       "production_ready": false,
       "native_promotion_role": "planning_and_evidence_consistency_non_promoting"
@@ -283,9 +285,9 @@
   "phase_summary": {
     "total": 40,
     "complete": 0,
-    "partial": 12,
+    "partial": 13,
     "blocked": 1,
-    "not_started": 27,
+    "not_started": 26,
     "subphase_total": 301
   },
   "phases": [
@@ -633,28 +635,28 @@
         "docs/native-formal-models.md: frozen assumptions, reproduction, trace normalization, open domains, and explicit non-proof boundary"
       ],
       "current_gaps": [
-        "A pinned one-host q35/QEMU/OVMF/VIRTIO profile, paused-instantiation evidence, and bounded checks for all seven required boot-slot/capability/virtual-memory/IPC/scheduler/update/PooleFS domains exist, but current upstream source rebuilds, actual PooleBoot serial/debug-exit/GDB/reset evidence, remaining VIRTIO profiles, malformed-device campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open"
+        "A pinned one-host q35/QEMU/OVMF/VIRTIO profile, paused-instantiation evidence, bounded checks for all seven required boot-slot/capability/virtual-memory/IPC/scheduler/update/PooleFS domains, and two bounded PooleBoot guest runs exist, but current upstream source rebuilds, debug-exit/GDB/reset/fault evidence, remaining VIRTIO profiles, malformed-device campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open"
       ],
       "exit_gate": "one command launches each pinned native test profile; logs and artifacts are deterministic where declared; formal models have executable counterexample checks; no Buildroot guest is required."
     },
     {
       "id": "N5",
       "title": "Boot Media, Boot Protocol, and PooleBoot UEFI Loader",
-      "status": "not_started",
+      "status": "partial",
       "subphases": [
         {
           "id": "N5.1",
-          "status": "not_started",
+          "status": "partial",
           "description": "Define deterministic GPT/ESP/El Torito EFI media, partition GUIDs, labels, paths, alignment, and image inspection."
         },
         {
           "id": "N5.2",
-          "status": "not_started",
+          "status": "partial",
           "description": "Build a PE32+ `PooleBoot.efi` with correct Microsoft x64 UEFI calling convention and no host runtime dependency."
         },
         {
           "id": "N5.3",
-          "status": "not_started",
+          "status": "partial",
           "description": "Implement console, serial, watchdog, allocation, filesystem, GOP, RNG, TCG2, configuration-table, and protocol discovery with absent/malformed handling."
         },
         {
@@ -674,7 +676,7 @@
         },
         {
           "id": "N5.7",
-          "status": "not_started",
+          "status": "partial",
           "description": "Select a safe GOP mode, record exact framebuffer metadata, and retain text/serial fallback."
         },
         {
@@ -700,9 +702,15 @@
       "added_requirement_ids": [
         "ADD-BOOT-001"
       ],
-      "current_evidence": [],
+      "current_evidence": [
+        "specs/native-pooleboot-proof.json: POOLEOS-N5-POOLEBOOT-1 bounded unsigned proof contract across N5.1, N5.2, N5.3, and N5.7",
+        "native/boot: Poole-authored no_std PE32+ UEFI proof application with raw reviewed firmware bindings, independent serial/debugcon diagnostics, bounded table/map handling, GOP identity, and EFI_SUCCESS return",
+        "runtime/native_pooleboot.py and tools/build_native_pooleboot_media.py: deterministic 64 MiB protective-MBR/GPT/FAT32 ordinary-file media with exact fallback EFI inspection and no physical-media output mode",
+        "runs/native_pooleboot_readiness.json: 8/8 host tests, 2/2 exact PE builds, 2/2 exact media generations, 2/2 exact QEMU/OVMF runs, eleven ordered markers, 2/2 serial/debugcon matches, 2/2 exact GOP frames, and 15/15 hostile controls",
+        "docs/native-pooleboot-proof.md: reproduction procedure, observed firmware boundary, hostile corpus, exact evidence, and N5 nonclaims"
+      ],
       "current_gaps": [
-        "No PooleBoot PE32+ image or frozen boot handoff exists"
+        "A reproducible unsigned PooleBoot PE32+ proof application and deterministic GPT/FAT32 development medium execute twice under pinned OVMF, but the complete loader, boot grammar, ELF and signed-artifact loading, immutable handoff, ExitBootServices transfer, hostile loader corpus, second host, target firmware, physical media, and N5 exit remain open"
       ],
       "exit_gate": "PooleBoot reproducibly boots under pinned OVMF and target firmware, validates all artifacts, exits boot services, transfers through a versioned golden-tested handoff, and rejects the complete hostile loader corpus."
     },
@@ -2689,8 +2697,8 @@
         "ADD-TEST-001"
       ],
       "current_evidence": [
-        "Cycle 96 host baseline: 508 tests with one Windows symlink-permission skip",
-        "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, frozen owner-packet and completed owner-response omission/staleness/placeholder/custody/private-material/authorization controls, hardware privacy, malformed-CPUID, Tier 0 profile/provenance/path/overclaim, bounded-model multi-case mutation/trace/claim controls including six independent PooleFS mutants, PooleGlyph roadmap bindings, and collector-smoke negatives"
+        "Cycle 97 host baseline: 521 tests with one Windows symlink-permission skip",
+        "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, frozen owner-packet and completed owner-response omission/staleness/placeholder/custody/private-material/authorization controls, hardware privacy, malformed-CPUID, Tier 0 profile/provenance/path/overclaim, bounded-model multi-case mutation/trace/claim controls including six independent PooleFS mutants, deterministic GPT/FAT32 inspection, media path-policy rejection, PE mutation, marker/frame, claim-overreach, PooleGlyph roadmap bindings, and collector-smoke negatives"
       ],
       "current_gaps": [
         "No native system, power-loss, hardware, accessibility, soak, or external security suite exists"
@@ -2757,8 +2765,8 @@
         "ADD-SUPPLY-001"
       ],
       "current_evidence": [
-        "Cycle 96 consistency release gate: 69/69 checks over 64 artifacts",
-        "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, frozen N0 owner packet, deterministic owner-response receipt, native-toolchain, bounded hardware-readiness, native Tier 0 readiness, native model-readiness, and PooleGlyph planning artifacts"
+        "Cycle 97 consistency release gate: 70/70 checks over 65 artifacts",
+        "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, frozen N0 owner packet, deterministic owner-response receipt, native-toolchain, bounded hardware-readiness, native Tier 0 readiness, native model-readiness, bounded PooleBoot readiness, and PooleGlyph planning artifacts"
       ],
       "current_gaps": [
         "No native SBOM/provenance/signing ceremony/release manifest or source-controlled release exists"
@@ -2991,7 +2999,26 @@
       "closure_condition": "Boot reproducible PooleBoot PE32+ and transfer through the frozen handoff",
       "evidence": [
         "docs/pdc-production-build-plan.md",
-        "runs/pooleos_native_checklist_coverage.json"
+        "runs/pooleos_native_checklist_coverage.json",
+        "specs/native-pooleboot-proof.json",
+        "runs/native_pooleboot_readiness.json",
+        "docs/native-pooleboot-proof.md",
+        "native/boot/src/main.rs"
+      ]
+    },
+    {
+      "id": "FLAG-N5-POOLEBOOT-PROOF-001",
+      "class": "REQUIRED",
+      "status": "closed",
+      "phase_id": "N5",
+      "closure_condition": "Reproduce the bounded unsigned PooleBoot PE32+ proof, deterministic GPT/FAT32 media, ordered dual-channel diagnostics, GOP frame, and hostile corpus without claiming the complete loader or N5 exit",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json",
+        "specs/native-pooleboot-proof.json",
+        "runs/native_pooleboot_readiness.json",
+        "docs/native-pooleboot-proof.md",
+        "native/boot/src/main.rs"
       ]
     },
     {
@@ -3374,8 +3401,8 @@
     "native_program_gaps": [
       "The native repository, protected workflow, scope-hardened ADR ceremony, frozen 16-source packet, and completed response receipt record 2/2 ADR and 38/38 definition dispositions, but all measurements, compatible hardware-key acquisition, trusted public key custody, signatures, signed tags, immutable release refs, and retained CI review evidence remain open",
       "Rust PE32+/ELF64 fixtures pass one-host qualification, but second-host reproduction, source provenance, C17/assembly/ABI tools, and image tooling remain open",
-      "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls and bounded checks for all seven required boot-slot/capability/virtual-memory/IPC/scheduler/update/PooleFS domains detect their required hostile violations, but source-rebuilt current QEMU/EDK II, real PooleBoot launch evidence, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open",
-      "No PooleBoot PE32+ UEFI loader or frozen boot protocol",
+      "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, bounded checks for all seven required boot-slot/capability/virtual-memory/IPC/scheduler/update/PooleFS domains detect their required hostile violations, and a bounded PooleBoot proof executes under pinned OVMF, but source-rebuilt current QEMU/EDK II, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open",
+      "A reproducible unsigned PooleBoot PE32+ proof application boots twice with deterministic GPT/FAT32 media, ordered dual-channel markers, and exact GOP frames, but the complete loader, frozen handoff, ELF and signed-artifact loading, ExitBootServices transfer, target firmware, physical-media qualification, and N5 exit remain open",
       "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path",
       "No native CPU, interrupts, time, SMP, physical memory, virtual memory, or reclaim implementation",
       "The exact Tier 1 identity passes 24/24 required checks and 16 allowlisted user-mode CPUID records are captured with zero public raw registers, but seven required channels remain non-complete in total, including partial CPU/MSR and SPD/topology; 15 standards hashes, ten lab-safety prerequisites, native parsing, and physical qualification also remain open",
@@ -3422,6 +3449,7 @@
     "Host simulations and schemas are not native kernel enforcement.",
     "Four paused q35/QMP instantiations prove host-side profile construction only; no guest CPU instruction, native media, boot, driver, Secure Boot, or formal-model claim follows.",
     "The six TLC state models cover all seven required domains only for their frozen finite constants: they are not theorem proofs, liveness checks, refinement proofs, fingerprint-collision guarantees, implementation-trace comparisons, ABI-freeze authority, hardware-durability evidence, or PooleKernel/PooleFS execution evidence.",
+    "The Cycle 97 PooleBoot receipt proves one unsigned bounded UEFI application, deterministic development media, two pinned OVMF executions, ordered diagnostics, and exact static GOP frames; it does not prove the complete loader, a frozen handoff, PooleKernel loading or execution, ExitBootServices, Secure Boot, measured boot, signatures, target firmware, physical media, N5 exit, or production readiness.",
     "Sixteen allowlisted user-mode CPUID records prove only a bounded host observation; they do not prove MSR access, privileged probes, native parsing, driver safety, or Tier 1 qualification.",
     "Owner-directed acceptance of thirty-eight objective definitions while binding zero measurements is not a cryptographic signature or implementation evidence.",
     "PooleGlyph Phase 65 proves a metadata, parser, AST, and diagnostic foundation only; no source form, Core IR, PGASM, PGB2, PGVM2, host call, policy, optimization, or version label is promoted without its own frozen contract and evidence gate.",

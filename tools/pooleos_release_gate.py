@@ -19,6 +19,7 @@ from runtime import adr_ratification  # noqa: E402
 from runtime import hardware_target  # noqa: E402
 from runtime import lab_readiness  # noqa: E402
 from runtime import native_models  # noqa: E402
+from runtime import native_pooleboot  # noqa: E402
 from runtime import n0_owner_decision_packet  # noqa: E402
 from runtime import n0_owner_response  # noqa: E402
 from runtime import native_tier0  # noqa: E402
@@ -38,14 +39,15 @@ N0_OWNER_RESPONSE_RECEIPT = ROOT / "runs" / "n0_owner_response_receipt.json"
 NATIVE_TOOLCHAIN_QUALIFICATION = ROOT / "runs" / "native_toolchain_qualification.json"
 HARDWARE_TARGET_READINESS = ROOT / "runs" / "hardware_target_readiness.json"
 NATIVE_MODEL_READINESS = ROOT / "runs" / "native_model_readiness.json"
+NATIVE_POOLEBOOT_READINESS = ROOT / "runs" / "native_pooleboot_readiness.json"
 NATIVE_TIER0_READINESS = ROOT / "runs" / "native_tier0_readiness.json"
 
 
 DEFAULT_GAPS = [
     "The completed owner response records both ADR dispositions and all 38 objective definitions while accepting zero measurements, but the selected FIDO2 hardware key is unavailable; trusted public-key custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
     "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
-    "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, and six bounded TLC models cover all seven required domains and detect twenty-one required counterexamples; current source rebuilds, real PooleBoot launch evidence, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open.",
-    "No PooleBoot PE32+ UEFI loader or frozen native boot protocol.",
+    "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, six bounded TLC models cover all seven required domains and detect twenty-one required counterexamples, and a bounded PooleBoot proof executes under the pinned profile; current source rebuilds, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open.",
+    "A reproducible unsigned PooleBoot PE32+ proof application boots twice under pinned non-promoting OVMF with deterministic GPT/FAT32 media, eleven ordered serial/debugcon markers, and exact GOP frames, but the complete loader, hostile configuration/ELF corpus, signed artifact verification, frozen handoff, ExitBootServices transfer, second host, target firmware, and physical-media qualification remain open.",
     "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path.",
     "No native CPU, interrupt, time, SMP, physical-memory, virtual-memory, or reclaim implementation.",
     "The sanitized Tier 1 identity and bounded user-mode CPUID transcript match, but MSR, PCI configuration-space, Secure Boot, TPM, SPD, sensor/power, standards-hash, lab-safety, native enumeration, and physical qualification evidence remain open.",
@@ -77,7 +79,12 @@ def run_doctor(*, include_runtime: bool) -> dict:
         stderr=subprocess.STDOUT,
         check=False,
     )
-    detail = "\n".join(completed.stdout.splitlines()[-8:])
+    output_lines = completed.stdout.splitlines()
+    if completed.returncode == 0:
+        detail = "\n".join(output_lines[-8:])
+    else:
+        failure_lines = [line for line in output_lines if line.startswith("FAIL ")]
+        detail = "\n".join([*failure_lines[-12:], "--- doctor tail ---", *output_lines[-8:]])
     return readiness.make_check("pooleos_doctor", completed.returncode == 0, detail)
 
 
@@ -769,6 +776,48 @@ def check_native_model_readiness(path: Path = NATIVE_MODEL_READINESS) -> dict:
     )
     return readiness.make_check(
         "native_model_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(path, "native-pooleboot-readiness.schema.json")
+    errors = [f"native PooleBoot readiness {error.path}: {error.message}" for error in artifact_schema_errors[:8]]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_pooleboot_readiness",
+            False,
+            "; ".join(errors) or "native PooleBoot readiness is not an object",
+        )
+    errors.extend(native_pooleboot.readiness_contract_errors(artifact, ROOT))
+    expected_summary = {
+        "host_contract_tests_total": 8,
+        "host_contract_tests_passed": 8,
+        "clean_builds_exact": 2,
+        "clean_media_generations_exact": 2,
+        "guest_runs_total": 2,
+        "guest_runs_passed": 2,
+        "ordered_marker_count": 11,
+        "serial_debugcon_match_count": 2,
+        "gop_frame_match_count": 2,
+        "negative_controls_total": 15,
+        "negative_controls_passed": 15,
+        "production_claim_count": 0,
+    }
+    if artifact.get("summary") != expected_summary:
+        errors.append("PooleBoot proof summary changed")
+    if artifact.get("claims") != native_pooleboot.expected_claims():
+        errors.append("PooleBoot proof claim boundary changed")
+    if artifact.get("n5_exit_gate_satisfied") is not False or artifact.get("production_ready") is not False:
+        errors.append("PooleBoot proof overclaims N5 exit or production readiness")
+    detail = (
+        "contract=POOLEOS-N5-POOLEBOOT-1; host_tests=8/8; builds=2/2; media=2/2; "
+        "guest_runs=2/2; markers=11; serial_debugcon=2/2; gop_frames=2/2; "
+        "negatives=15/15; production_claims=0; n5_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_pooleboot_readiness",
         not errors,
         detail if not errors else "; ".join(errors[:8]),
     )
@@ -3569,6 +3618,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--hardware-target-readiness", type=Path, default=HARDWARE_TARGET_READINESS)
     parser.add_argument("--native-tier0-readiness", type=Path, default=NATIVE_TIER0_READINESS)
     parser.add_argument("--native-model-readiness", type=Path, default=NATIVE_MODEL_READINESS)
+    parser.add_argument("--native-pooleboot-readiness", type=Path, default=NATIVE_POOLEBOOT_READINESS)
     parser.add_argument("--out", type=Path, default=ROOT / "runs" / "release_gate.json")
     parser.add_argument("--include-runtime", action="store_true", help="Include PooleGlyph runtime checks in doctor.")
     args = parser.parse_args(argv)
@@ -3585,6 +3635,7 @@ def main(argv: list[str] | None = None) -> int:
         check_hardware_target_readiness(args.hardware_target_readiness),
         check_native_tier0_readiness(args.native_tier0_readiness),
         check_native_model_readiness(args.native_model_readiness),
+        check_native_pooleboot_readiness(args.native_pooleboot_readiness),
         check_publication_boundary(),
         check_bundle(args.bundle),
         check_replay_proof(args.replay_proof),
@@ -3771,6 +3822,7 @@ def main(argv: list[str] | None = None) -> int:
             args.hardware_target_readiness,
             args.native_tier0_readiness,
             args.native_model_readiness,
+            args.native_pooleboot_readiness,
         )
         if path is not None
     ]
