@@ -40,7 +40,7 @@ NATIVE_TIER0_READINESS = ROOT / "runs" / "native_tier0_readiness.json"
 
 
 DEFAULT_GAPS = [
-    "The scope-hardened ADR ceremony binds the exact 38-target candidate objectives contract and schema, but all target measurements, owner target acceptance and ADR disposition, signing custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
+    "The scope-hardened ADR ceremony binds the exact 38-target candidate objectives contract and schema, but the received owner response retains one unresolved bounded-choice placeholder; all target measurements, owner target acceptance and ADR disposition, signing custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
     "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
     "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, and three bounded TLC models detect required boot-slot, capability, stale-mapping, and early-reuse counterexamples; current source rebuilds, real PooleBoot launch evidence, complete reference devices/fault campaigns, IPC/scheduler/PooleFS models, all implementation-trace cross-checks, and second-host reproduction remain open.",
     "No PooleBoot PE32+ UEFI loader or frozen native boot protocol.",
@@ -56,7 +56,7 @@ DEFAULT_GAPS = [
     "No native network, graphics, audio, compositor, PooleGlass, accessibility, or application platform.",
     "No source-bound signed PDC dynamics or portable and native PDC backends.",
     "No native PDC control-plane services or bounded actuator proof.",
-    "PooleGlyph Phase 66, PGB2 v1, and PGVM2 v1 remain open.",
+    "PooleGlyph Phase 66 and the source, semantic, Core IR, PGASM, PGB2, PGVM2, host-ABI, policy, toolchain, compatibility, IP-boundary, private-backend-equivalence, and native-integration gates remain open.",
     "No native integrated fuzz, fault, power-loss, security, conformance, or soak evidence.",
     "No native SBOM, provenance, signing ceremony, operations evidence, or release manifest.",
     "No reproducible signed native ISO or exact clean-media QEMU and physical release receipt.",

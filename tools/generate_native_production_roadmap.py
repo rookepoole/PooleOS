@@ -97,7 +97,10 @@ SUBPHASE_OVERRIDES = {
     "N32.1": "complete",
     "N33.1": "partial",
     "N33.8": "partial",
-    "N34.1": "blocked",
+    "N34.1": "partial",
+    "N34.3": "blocked",
+    "N34.4": "partial",
+    "N34.6": "partial",
     "N35.1": "partial",
     "N36.1": "partial",
     "N36.4": "partial",
@@ -161,10 +164,16 @@ PHASE_EVIDENCE = {
     "N31": ["existing signed receipt and benchmark methodology artifacts"],
     "N32": ["PDC-MATH-0.1", "PDC-REP-0.1", "PDC-GOLDEN-0.2", "PDC-QP-0.1", "PDC-QP-STABILITY-0.1"],
     "N33": ["existing PDC receipt schemas and guarded-route source documents; no native services"],
-    "N34": ["PooleGlyph Phase 65 checkpoint", "draft PGB2/PGVM2 trap evidence"],
+    "N34": [
+        "PooleGlyph Phase 65 checkpoint and manifest with verified ZIP SHA-256 F3CCEB701CF76274D9464A0958BF6106888FB34F3C0BFBD55DE4ACE03C427ABC",
+        "PooleGlyph v0.5-dev parser, source-spanned AST, semantic diagnostics, Core IR candidate, source-map, module, and conformance foundations",
+        "runs/pooleglyph_source_anchor.json, runs/pooleglyph_bridge_manifest.json, runs/pooleglyph_core_ir_boundary_receipt.json, runs/pooleglyph_core_ir_executable_audit.json, and runs/pooleglyph_parser_kernel_promotion_receipt.json",
+        "draft PGB2/PGVM2 trap evidence and capability/resource bridge artifacts",
+        "Cycle 92 N34 machine-language co-development plan with six ADD-PGL requirements and explicit drift, Core IR, and IP flags",
+    ],
     "N35": ["bounded static capability and trap simulations; no native containment"],
-    "N36": ["Cycle 91 host baseline: 493 tests with one Windows symlink-permission skip", "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, owner-packet omission/staleness/acceptance/key/signing/publication controls, hardware privacy, malformed-CPUID, Tier 0 profile/provenance/path/overclaim, bounded-model multi-case mutation/trace/claim controls, and collector-smoke negatives"],
-    "N37": ["Cycle 91 consistency release gate: 68/68 checks over 63 artifacts", "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, deterministic N0 owner packet, native-toolchain, bounded hardware-readiness, native Tier 0 readiness, and native model-readiness artifacts"],
+    "N36": ["Cycle 92 host baseline: 493 tests with one Windows symlink-permission skip", "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, owner-packet omission/staleness/acceptance/key/signing/publication controls, hardware privacy, malformed-CPUID, Tier 0 profile/provenance/path/overclaim, bounded-model multi-case mutation/trace/claim controls, PooleGlyph roadmap bindings, and collector-smoke negatives"],
+    "N37": ["Cycle 92 consistency release gate: 68/68 checks over 63 artifacts", "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, deterministic N0 owner packet, native-toolchain, bounded hardware-readiness, native Tier 0 readiness, native model-readiness, and PooleGlyph planning artifacts"],
 }
 
 
@@ -210,7 +219,11 @@ PHASE_GAPS = {
     "N31": ["No native debugger, crash dump, trace, PMU, or system metrics implementation exists"],
     "N32": ["Signed dynamics and portable/native C/CPU/RAM/GPU execution remain open"],
     "N33": ["No native PDC observer/planner/gate/actuator/watchdog/rollback service exists"],
-    "N34": ["PooleGlyph Phase 66 is absent", "PGB2 and PGVM2 v1 are not frozen or native"],
+    "N34": [
+        "PooleGlyph Phase 66 Core IR classification and promotion evidence are absent",
+        "Source, semantic, Core IR, PGASM, PGB2, PGVM2, host-ABI, policy, compatibility, release, and IP contracts are not frozen for a PooleOS profile",
+        "No independent end-to-end toolchain, native PGVM2 runtime, capability-broker integration, private-backend equivalence, or cross-repository compatibility release evidence exists",
+    ],
     "N35": ["No native watchdog, driver restart, RAS, or fault-containment evidence exists"],
     "N36": ["No native system, power-loss, hardware, accessibility, soak, or external security suite exists"],
     "N37": ["No native SBOM/provenance/signing ceremony/release manifest or source-controlled release exists"],
@@ -232,7 +245,10 @@ FLAGS = [
     ("FLAG-NATIVE-UPDATE-001", "STOP_SHIP", "N23", "Pass signed A/B update, rollback, compromise, and recovery gates"),
     ("FLAG-NATIVE-SEC-001", "STOP_SHIP", "N15", "Pass boot trust, crypto/RNG, capability, isolation, and external security review"),
     ("FLAG-NATIVE-UI-001", "REQUIRED", "N29", "Pass PooleGlass accessibility, software fallback, and recovery UI gates"),
-    ("FLAG-NATIVE-PGL-001", "BLOCKER", "N34", "Accept PooleGlyph Phase 66 and freeze PGB2/PGVM2 v1"),
+    ("FLAG-NATIVE-PGL-001", "BLOCKER", "N34", "Close the promoted PooleGlyph language, Phase 66, PGB2/PGVM2 v1, host-ABI, compatibility, native-integration, and recovery gates"),
+    ("FLAG-PGL-CODEV-001", "REQUIRED", "N34", "Bind exact PooleGlyph and PooleOS revisions, checkpoint evidence, change impacts, and compatibility profiles so neither repository drifts silently"),
+    ("FLAG-PGL-CORE-IR-001", "BLOCKER", "N34", "Accept Phase 66 classification and independent validation proving metadata cannot become executable or privileged Core IR"),
+    ("FLAG-PGL-IP-001", "REQUIRED", "N34", "Review and enforce the source-available/public/private component boundary while keeping private backends reference-equivalent and non-authority-amplifying"),
     ("FLAG-NATIVE-PDC-001", "REQUIRED", "N32", "Reproduce signed dynamics and pass native/backend differential gates"),
     ("FLAG-NATIVE-HW-001", "STOP_SHIP", "N38", "Qualify exact Tier 1 hardware, firmware, media, drivers, and recovery"),
     ("FLAG-N2-CPUID-001", "REQUIRED", "N2", "Capture and sanitize a bounded direct user-mode CPUID transcript with an exact allowlist, no processor-serial leaf, no raw-register publication, and passing malformed/overclaim negative controls"),
@@ -266,7 +282,7 @@ PROGRAM_GAPS = [
     "No native network, graphics, audio, compositor, PooleGlass, accessibility, or application platform",
     "No source-bound signed PDC dynamics or portable/native PDC backends",
     "No native PDC control-plane services or bounded actuator proof",
-    "PooleGlyph Phase 66, PGB2 v1, and PGVM2 v1 remain open",
+    "PooleGlyph Phase 66 and the source, semantic, Core IR, PGASM, PGB2, PGVM2, host-ABI, policy, toolchain, compatibility, IP-boundary, private-backend-equivalence, and native-integration gates remain open",
     "No native integrated fuzz/fault/power-loss/security/conformance/soak evidence",
     "No native SBOM/provenance/signing ceremony/operations/release manifest",
     "No reproducible signed native ISO or exact clean-media QEMU/physical release receipt",
@@ -358,6 +374,15 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             evidence.extend(["runs/hardware_target_readiness.json", "specs/hardware-support-policy.json"])
         if phase_id == "N4":
             evidence.extend(["runs/native_tier0_readiness.json", "specs/native-tier0-lock.json", "specs/native-tier0-profile.json"])
+        if phase_id == "N34":
+            evidence.extend(
+                [
+                    "docs/pooleglyph-checkpoint-deep-inspection.md",
+                    "runs/pooleglyph_source_anchor.json",
+                    "runs/pooleglyph_core_ir_boundary_receipt.json",
+                    "runs/pooleglyph_parser_kernel_promotion_receipt.json",
+                ]
+            )
         if flag_id == "FLAG-N4-MODELS-001":
             evidence.extend(
                 [
@@ -412,7 +437,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
         "schema_version": "1.0",
         "artifact_kind": "pdc_production_roadmap",
         "status_date": status_date,
-        "objective": "Deliver production-ready native PooleOS as an original PooleBoot plus PooleKernel microkernel system and reproducible signed UEFI bootable ISO with PooleGlyph, canonical PDC, isolated drivers, guarded backends, and accessible PooleGlass Liquid Glass UI.",
+        "objective": "Deliver production-ready native PooleOS as an original PooleBoot plus PooleKernel microkernel system and reproducible signed UEFI bootable ISO while developing PooleGlyph machine language in tandem through independently verified source, Core IR, PGB2, PGVM2, host-ABI, policy, compatibility, and IP-boundary gates, alongside canonical PDC, isolated drivers, guarded backends, and accessible PooleGlass Liquid Glass UI.",
         "production_ready": False,
         "architecture": {
             "mode": "native_capability_microkernel",
@@ -438,8 +463,8 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "inspect_live_pooleglyph_each_turn": True,
             "verify_master_checklist_coverage_each_turn": True,
             "new_work_must_be_flagged": True,
-            "last_updated_cycle": 91,
-            "selected_move_id": "N0-OWNER-PACKET-001",
+            "last_updated_cycle": 92,
+            "selected_move_id": "N34-PGL-CODEV-PLAN-001",
             "immediate_next_move_id": "N0-RATIFY-001",
             "required_records": [
                 "docs/production-goal-charter.md",
@@ -473,7 +498,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "added_requirement_count": len(coverage["added_requirements"]),
         },
         "baseline": {
-            "pooleos_cycle": 91,
+            "pooleos_cycle": 92,
             "entry_cycle": 79,
             "pooleos_test_count": test_count,
             "historical_consistency_release_gate": {
@@ -541,7 +566,8 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "The three TLC state models are complete only for their frozen finite constants: they are not theorem proofs, liveness checks, refinement proofs, fingerprint-collision guarantees, implementation-trace comparisons, ABI-freeze authority, or PooleKernel execution evidence.",
             "Sixteen allowlisted user-mode CPUID records prove only a bounded host observation; they do not prove MSR access, privileged probes, native parsing, driver safety, or Tier 1 qualification.",
             "Binding thirty-eight consistent candidate objective definitions into a future signature while binding zero measurements is not owner ratification or implementation evidence.",
-            "PooleGlyph Phase 65 metadata cannot be promoted before Phase 66 executable evidence.",
+            "PooleGlyph Phase 65 proves a metadata, parser, AST, and diagnostic foundation only; no source form, Core IR, PGASM, PGB2, PGVM2, host call, policy, optimization, or version label is promoted without its own frozen contract and evidence gate.",
+            "Private PooleGlyph or PooleMath optimization evidence cannot replace the public-safe reference path, independent semantic/effect/authority differentials, or PooleOS capability enforcement.",
             "Finite PDC/QP evidence remains bounded to its declared classical models and protocols.",
             "A file named ISO is not reproducible signed clean-media boot evidence.",
         ],

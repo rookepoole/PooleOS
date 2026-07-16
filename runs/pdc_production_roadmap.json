@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "artifact_kind": "pdc_production_roadmap",
   "status_date": "2026-07-16",
-  "objective": "Deliver production-ready native PooleOS as an original PooleBoot plus PooleKernel microkernel system and reproducible signed UEFI bootable ISO with PooleGlyph, canonical PDC, isolated drivers, guarded backends, and accessible PooleGlass Liquid Glass UI.",
+  "objective": "Deliver production-ready native PooleOS as an original PooleBoot plus PooleKernel microkernel system and reproducible signed UEFI bootable ISO while developing PooleGlyph machine language in tandem through independently verified source, Core IR, PGB2, PGVM2, host-ABI, policy, compatibility, and IP-boundary gates, alongside canonical PDC, isolated drivers, guarded backends, and accessible PooleGlass Liquid Glass UI.",
   "production_ready": false,
   "architecture": {
     "mode": "native_capability_microkernel",
@@ -43,8 +43,8 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 91,
-    "selected_move_id": "N0-OWNER-PACKET-001",
+    "last_updated_cycle": 92,
+    "selected_move_id": "N34-PGL-CODEV-PLAN-001",
     "immediate_next_move_id": "N0-RATIFY-001",
     "required_records": [
       "docs/production-goal-charter.md",
@@ -82,12 +82,12 @@
     "implementation_item_count": 8996,
     "section_count": 171,
     "coverage_path": "runs/pooleos_native_checklist_coverage.json",
-    "coverage_sha256": "FCAC371582B5942214EF1BD273CE0D200CE51E418525486042FDACAE73793D86",
+    "coverage_sha256": "60268A163D88BD3D66D966B3AA40C67DC88F964B9EEDAE3C799D53B80E9BD226",
     "coverage_status": "pass",
-    "added_requirement_count": 27
+    "added_requirement_count": 32
   },
   "baseline": {
-    "pooleos_cycle": 91,
+    "pooleos_cycle": 92,
     "entry_cycle": 79,
     "pooleos_test_count": 493,
     "historical_consistency_release_gate": {
@@ -285,7 +285,7 @@
     "partial": 12,
     "blocked": 1,
     "not_started": 27,
-    "subphase_total": 287
+    "subphase_total": 301
   },
   "phases": [
     {
@@ -2407,48 +2407,118 @@
     },
     {
       "id": "N34",
-      "title": "PooleGlyph, PGB2, PGVM2, and System Policy",
+      "title": "PooleGlyph Machine Language, PGB2, PGVM2, and System Policy",
       "status": "blocked",
       "subphases": [
         {
           "id": "N34.1",
-          "status": "blocked",
-          "description": "Continue tandem development from live Phase 65 and complete Phase 66 executable Core IR audit without rewriting user-generated evidence."
+          "status": "partial",
+          "description": "Operate a tandem-development intake loop that inspects the live PooleGlyph repository and newest checkpoint first, binds exact commits/manifests/hashes, preserves dirty user-generated evidence, records ownership direction, and classifies every observed change by PooleGlyph and PooleOS impact."
         },
         {
           "id": "N34.2",
           "status": "not_started",
-          "description": "Freeze grammar, Unicode, tokens, precedence, declarations, modules, visibility, types/effects, capabilities, resources, permissions, lifecycle, services, packages, deployment, policy, contracts, and compatibility."
+          "description": "Establish language governance with semantic versioning, experimental and stable feature tiers, compatibility profiles, deprecation and migration rules, reserved namespaces, release branches, checkpoint promotion, and an explicit source-available/public/private IP classification for every language component."
         },
         {
           "id": "N34.3",
-          "status": "not_started",
-          "description": "Harden source loader, lexer, parser, recovery, spans, AST, name/module resolution, type/effect/capability checks, constant evaluation, cycle checks, lint/format/LSP, and fuzz/differential tests."
+          "status": "blocked",
+          "description": "Complete and accept Phase 66 by auditing every declaration and Core IR form as source syntax, compile-time metadata, non-executable descriptor, executable operation, privileged policy request, or invalid form; default unknown and metadata-only forms to non-executable and non-promotable."
         },
         {
           "id": "N34.4",
-          "status": "not_started",
-          "description": "Freeze deterministic Core IR and independently validate lowering, canonical serialization, policy/service/resource/deployment forms, explanations, hashes, and signatures."
+          "status": "partial",
+          "description": "Freeze the source-language lexical and syntactic contract: UTF-8/Unicode policy, normalization, tokens, comments, literals, operators, precedence, declarations, patterns, predicates, macros, modules, imports/exports, visibility, attributes, feature gates, and bounded parser recovery."
         },
         {
           "id": "N34.5",
           "status": "not_started",
-          "description": "Freeze PGB2 binary package framing, sections, canonical bytes, digests, signatures, version/feature negotiation, capability declarations, resource limits, trace and replay."
+          "description": "Freeze the semantic contract: scopes, symbols, identity, type and value domains, generic and aggregate forms where adopted, constant evaluation, effects, capabilities, permissions, resources, lifecycle, service/package/deployment forms, determinism, initialization, errors, and compatibility behavior."
         },
         {
           "id": "N34.6",
-          "status": "not_started",
-          "description": "Implement PGVM2 verifier and bounded deterministic runtime with typed instructions, memory, stack, calls, traps, quotas, deadlines, cancellation, cleanup, host calls, and no ambient kernel/device access."
+          "status": "partial",
+          "description": "Harden the complete frontend pipeline from source loader through lexer, parser, source-spanned AST, diagnostics and recovery, module/name resolution, macro expansion, semantic/type/effect/capability checking, cycle detection, constant evaluation, linting, and a stable diagnostic-code catalog."
         },
         {
           "id": "N34.7",
           "status": "not_started",
-          "description": "Generate only declarative kernel boot policy and user-space service manifests; policy application is transactional, signed, simulated, rollbackable, bounded, and safe-mode optional."
+          "description": "Freeze canonical Core IR with explicit operation semantics, typed operands/results, control flow, effects, capability/resource requirements, source maps, canonical serialization, hashes, version/feature negotiation, validators, and independent encoder/decoder/lowering implementations."
         },
         {
           "id": "N34.8",
           "status": "not_started",
-          "description": "Build compiler, package, formatter, linter, simulator, debugger, trace, diff, migration, test, docs, standard library, compatibility, and publisher tools."
+          "description": "Freeze PGASM as the reviewable textual assembly boundary with a canonical grammar, assembler, disassembler, verifier, source/debug maps, lossless supported round trips, stable diagnostics, and differential agreement with direct Core IR-to-PGB2 lowering."
+        },
+        {
+          "id": "N34.9",
+          "status": "not_started",
+          "description": "Define reference and optimized compiler passes with preconditions, postconditions, invariants, deterministic modes, pass receipts, translation validation, differential tests, and a mandatory no-optimization path; no pass may change observable semantics, effects, resource bounds, or authority."
+        },
+        {
+          "id": "N34.10",
+          "status": "not_started",
+          "description": "Freeze PGB2 as a canonical signed binary package with framing, section table, byte order, widths, alignment, canonical bytes, digests, signatures, dependency and feature metadata, capability/resource declarations, debug/source sections, unknown-section rules, size limits, and downgrade-safe version negotiation."
+        },
+        {
+          "id": "N34.11",
+          "status": "not_started",
+          "description": "Freeze the PGVM2 instruction-set and verifier contract covering typed instructions, control flow, calls, stack/register state, linear and bounded memory, object/handle lifetimes, effects, capability use, resource accounting, traps, malformed bytecode, verifier termination, and proof-carrying receipts where practical."
+        },
+        {
+          "id": "N34.12",
+          "status": "not_started",
+          "description": "Implement the bounded deterministic PGVM2 runtime with quotas, fuel, deadlines, cancellation, cleanup, replay, trace, deterministic scheduling modes, memory safety, generation-safe handles, structured traps, watchdog integration, and no ambient kernel, filesystem, network, device, clock, entropy, or secret access."
+        },
+        {
+          "id": "N34.13",
+          "status": "not_started",
+          "description": "Freeze the PooleOS host ABI and capability-broker boundary with canonical host-call schemas, rights attenuation, argument/result validation, copy and shared-memory rules, async completion, cancellation races, version negotiation, audit receipts, revocation, process death, and stale-handle rejection."
+        },
+        {
+          "id": "N34.14",
+          "status": "not_started",
+          "description": "Compile PooleGlyph policy only into declarative boot, service, package, deployment, resource, permission, and topology manifests; validate and simulate before transactional application, require signatures for privileged policy, retain rollback and explanation records, and keep static recovery policy independent."
+        },
+        {
+          "id": "N34.15",
+          "status": "not_started",
+          "description": "Build a versioned standard library, module/package system, local-first resolver, lockfile, offline cache, reproducible dependency graph, core/geometry/PDC/system APIs, capability-safe wrappers, documentation, licensing metadata, vulnerability handling, and compatibility support windows."
+        },
+        {
+          "id": "N34.16",
+          "status": "not_started",
+          "description": "Deliver compiler, package manager, formatter, linter, language server, documentation generator, REPL/simulator where safe, debugger, trace/replay viewer, profiler, diff, migration, conformance, publisher, and IDE/editor integrations without requiring private optimization code."
+        },
+        {
+          "id": "N34.17",
+          "status": "not_started",
+          "description": "Maintain a language and runtime threat model plus parser, semantic, Core IR, PGASM, PGB2, verifier, VM, host-call, package, dependency, signature, resource-exhaustion, cancellation, concurrency, and supply-chain fuzz/fault/adversarial campaigns with minimized retained cases."
+        },
+        {
+          "id": "N34.18",
+          "status": "not_started",
+          "description": "Maintain cross-repository golden and negative corpora spanning source bytes, tokens, AST, diagnostics, semantic model, Core IR, PGASM, PGB2, verifier results, runtime traces, host calls, and policy output; require independent implementations and an explicit compatibility matrix before promotion."
+        },
+        {
+          "id": "N34.19",
+          "status": "not_started",
+          "description": "Provide a portable public-safe reference backend first, then separately gated CPU, SIMD, RAM-data-lane, GPU, and PDC-assisted optimization lanes with workload budgets, deterministic fallback, output/effect/authority equivalence, invalidation, and no expansion of bounded performance claims."
+        },
+        {
+          "id": "N34.20",
+          "status": "not_started",
+          "description": "Enforce the PooleGlyph IP and publication boundary: public source-available specifications, canonical formats, reference toolchain/runtime, and conformance evidence remain independently reviewable while private PooleMath methods and optimization strategy stay segregated, inventoried, access-controlled, and legally reviewed."
+        },
+        {
+          "id": "N34.21",
+          "status": "not_started",
+          "description": "Integrate promoted PooleGlyph releases into PooleOS userspace, service startup, package/update, SDK, policy, observability, crash, and application lanes through pinned compatibility profiles; prevent bootstrapping cycles and ensure normal boot, safe mode, and recovery remain available when PooleGlyph is absent or rejected."
+        },
+        {
+          "id": "N34.22",
+          "status": "not_started",
+          "description": "Advance the upstream language roadmap through evidence-gated milestones: v0.5 frontend/Core IR stabilization, v0.6 AST-parser replacement, v0.7 modules and standard-library expansion, v0.8 process/runtime prototype, v0.9 replay/debug polish, and v1.0 stable public language, without treating version labels or checkpoints as PooleOS production evidence."
         }
       ],
       "depends_on": [
@@ -2461,17 +2531,26 @@
       ],
       "source_checkbox_count": 102,
       "added_requirement_ids": [
-        "ADD-PGL-001"
+        "ADD-PGL-001",
+        "ADD-PGL-002",
+        "ADD-PGL-003",
+        "ADD-PGL-004",
+        "ADD-PGL-005",
+        "ADD-PGL-006"
       ],
       "current_evidence": [
-        "PooleGlyph Phase 65 checkpoint",
-        "draft PGB2/PGVM2 trap evidence"
+        "PooleGlyph Phase 65 checkpoint and manifest with verified ZIP SHA-256 F3CCEB701CF76274D9464A0958BF6106888FB34F3C0BFBD55DE4ACE03C427ABC",
+        "PooleGlyph v0.5-dev parser, source-spanned AST, semantic diagnostics, Core IR candidate, source-map, module, and conformance foundations",
+        "runs/pooleglyph_source_anchor.json, runs/pooleglyph_bridge_manifest.json, runs/pooleglyph_core_ir_boundary_receipt.json, runs/pooleglyph_core_ir_executable_audit.json, and runs/pooleglyph_parser_kernel_promotion_receipt.json",
+        "draft PGB2/PGVM2 trap evidence and capability/resource bridge artifacts",
+        "Cycle 92 N34 machine-language co-development plan with six ADD-PGL requirements and explicit drift, Core IR, and IP flags"
       ],
       "current_gaps": [
-        "PooleGlyph Phase 66 is absent",
-        "PGB2 and PGVM2 v1 are not frozen or native"
+        "PooleGlyph Phase 66 Core IR classification and promotion evidence are absent",
+        "Source, semantic, Core IR, PGASM, PGB2, PGVM2, host-ABI, policy, compatibility, release, and IP contracts are not frozen for a PooleOS profile",
+        "No independent end-to-end toolchain, native PGVM2 runtime, capability-broker integration, private-backend equivalence, or cross-repository compatibility release evidence exists"
       ],
-      "exit_gate": "Phase 66 promotion is accepted; PGB2/PGVM2 v1 is frozen; independent verifier rejects malformed/over-authorized programs; native runtime passes replay, resource, cancellation, and hostile host-call tests; recovery does not require PooleGlyph."
+      "exit_gate": "the exact promoted PooleGlyph revision and Phase 66 boundary are accepted; source, semantic, Core IR, PGASM, PGB2, PGVM2, host-ABI, policy, compatibility, IP, and recovery contracts are frozen for the release profile; independent toolchains reproduce canonical artifacts; verifier and native runtime pass malformed, over-authorized, resource, replay, cancellation, teardown, hostile-host-call, and cross-version tests; private backends remain reference-equivalent; and recovery does not require PooleGlyph."
     },
     {
       "id": "N35",
@@ -2608,8 +2687,8 @@
         "ADD-TEST-001"
       ],
       "current_evidence": [
-        "Cycle 91 host baseline: 493 tests with one Windows symlink-permission skip",
-        "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, owner-packet omission/staleness/acceptance/key/signing/publication controls, hardware privacy, malformed-CPUID, Tier 0 profile/provenance/path/overclaim, bounded-model multi-case mutation/trace/claim controls, and collector-smoke negatives"
+        "Cycle 92 host baseline: 493 tests with one Windows symlink-permission skip",
+        "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, owner-packet omission/staleness/acceptance/key/signing/publication controls, hardware privacy, malformed-CPUID, Tier 0 profile/provenance/path/overclaim, bounded-model multi-case mutation/trace/claim controls, PooleGlyph roadmap bindings, and collector-smoke negatives"
       ],
       "current_gaps": [
         "No native system, power-loss, hardware, accessibility, soak, or external security suite exists"
@@ -2676,8 +2755,8 @@
         "ADD-SUPPLY-001"
       ],
       "current_evidence": [
-        "Cycle 91 consistency release gate: 68/68 checks over 63 artifacts",
-        "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, deterministic N0 owner packet, native-toolchain, bounded hardware-readiness, native Tier 0 readiness, and native model-readiness artifacts"
+        "Cycle 92 consistency release gate: 68/68 checks over 63 artifacts",
+        "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, deterministic N0 owner packet, native-toolchain, bounded hardware-readiness, native Tier 0 readiness, native model-readiness, and PooleGlyph planning artifacts"
       ],
       "current_gaps": [
         "No native SBOM/provenance/signing ceremony/release manifest or source-controlled release exists"
@@ -2980,10 +3059,59 @@
       "class": "BLOCKER",
       "status": "open",
       "phase_id": "N34",
-      "closure_condition": "Accept PooleGlyph Phase 66 and freeze PGB2/PGVM2 v1",
+      "closure_condition": "Close the promoted PooleGlyph language, Phase 66, PGB2/PGVM2 v1, host-ABI, compatibility, native-integration, and recovery gates",
       "evidence": [
         "docs/pdc-production-build-plan.md",
-        "runs/pooleos_native_checklist_coverage.json"
+        "runs/pooleos_native_checklist_coverage.json",
+        "docs/pooleglyph-checkpoint-deep-inspection.md",
+        "runs/pooleglyph_source_anchor.json",
+        "runs/pooleglyph_core_ir_boundary_receipt.json",
+        "runs/pooleglyph_parser_kernel_promotion_receipt.json"
+      ]
+    },
+    {
+      "id": "FLAG-PGL-CODEV-001",
+      "class": "REQUIRED",
+      "status": "open",
+      "phase_id": "N34",
+      "closure_condition": "Bind exact PooleGlyph and PooleOS revisions, checkpoint evidence, change impacts, and compatibility profiles so neither repository drifts silently",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json",
+        "docs/pooleglyph-checkpoint-deep-inspection.md",
+        "runs/pooleglyph_source_anchor.json",
+        "runs/pooleglyph_core_ir_boundary_receipt.json",
+        "runs/pooleglyph_parser_kernel_promotion_receipt.json"
+      ]
+    },
+    {
+      "id": "FLAG-PGL-CORE-IR-001",
+      "class": "BLOCKER",
+      "status": "open",
+      "phase_id": "N34",
+      "closure_condition": "Accept Phase 66 classification and independent validation proving metadata cannot become executable or privileged Core IR",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json",
+        "docs/pooleglyph-checkpoint-deep-inspection.md",
+        "runs/pooleglyph_source_anchor.json",
+        "runs/pooleglyph_core_ir_boundary_receipt.json",
+        "runs/pooleglyph_parser_kernel_promotion_receipt.json"
+      ]
+    },
+    {
+      "id": "FLAG-PGL-IP-001",
+      "class": "REQUIRED",
+      "status": "open",
+      "phase_id": "N34",
+      "closure_condition": "Review and enforce the source-available/public/private component boundary while keeping private backends reference-equivalent and non-authority-amplifying",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json",
+        "docs/pooleglyph-checkpoint-deep-inspection.md",
+        "runs/pooleglyph_source_anchor.json",
+        "runs/pooleglyph_core_ir_boundary_receipt.json",
+        "runs/pooleglyph_parser_kernel_promotion_receipt.json"
       ]
     },
     {
@@ -3176,7 +3304,7 @@
       "No native network, graphics, audio, compositor, PooleGlass, accessibility, or application platform",
       "No source-bound signed PDC dynamics or portable/native PDC backends",
       "No native PDC control-plane services or bounded actuator proof",
-      "PooleGlyph Phase 66, PGB2 v1, and PGVM2 v1 remain open",
+      "PooleGlyph Phase 66 and the source, semantic, Core IR, PGASM, PGB2, PGVM2, host-ABI, policy, toolchain, compatibility, IP-boundary, private-backend-equivalence, and native-integration gates remain open",
       "No native integrated fuzz/fault/power-loss/security/conformance/soak evidence",
       "No native SBOM/provenance/signing ceremony/operations/release manifest",
       "No reproducible signed native ISO or exact clean-media QEMU/physical release receipt"
@@ -3218,7 +3346,8 @@
     "The three TLC state models are complete only for their frozen finite constants: they are not theorem proofs, liveness checks, refinement proofs, fingerprint-collision guarantees, implementation-trace comparisons, ABI-freeze authority, or PooleKernel execution evidence.",
     "Sixteen allowlisted user-mode CPUID records prove only a bounded host observation; they do not prove MSR access, privileged probes, native parsing, driver safety, or Tier 1 qualification.",
     "Binding thirty-eight consistent candidate objective definitions into a future signature while binding zero measurements is not owner ratification or implementation evidence.",
-    "PooleGlyph Phase 65 metadata cannot be promoted before Phase 66 executable evidence.",
+    "PooleGlyph Phase 65 proves a metadata, parser, AST, and diagnostic foundation only; no source form, Core IR, PGASM, PGB2, PGVM2, host call, policy, optimization, or version label is promoted without its own frozen contract and evidence gate.",
+    "Private PooleGlyph or PooleMath optimization evidence cannot replace the public-safe reference path, independent semantic/effect/authority differentials, or PooleOS capability enforcement.",
     "Finite PDC/QP evidence remains bounded to its declared classical models and protocols.",
     "A file named ISO is not reproducible signed clean-media boot evidence."
   ]
