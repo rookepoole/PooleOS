@@ -71,35 +71,53 @@ class NativeModelTests(unittest.TestCase):
 
     def test_required_and_modeled_domain_sets_are_frozen(self) -> None:
         self.assertEqual(7, len(self.contract["required_domains"]))
-        self.assertEqual(3, len(self.contract["modeled_domains"]))
+        self.assertEqual(4, len(self.contract["modeled_domains"]))
         self.assertEqual(
-            {"capability_derivation_revocation", "boot_slot_state", "update_rollback"},
+            {"capability_derivation_revocation", "virtual_memory_map_unmap", "boot_slot_state", "update_rollback"},
             set(self.contract["modeled_domains"]),
         )
 
     def test_model_identifiers_and_invariants_are_frozen(self) -> None:
         models = {item["id"]: item for item in self.contract["models"]}
-        self.assertEqual({"boot_slot_rollback", "capability_revocation"}, set(models))
+        self.assertEqual({"boot_slot_rollback", "capability_revocation", "virtual_memory_ownership"}, set(models))
         self.assertIn("Recoverable", models["boot_slot_rollback"]["invariants"])
         self.assertIn("NoLiveDescendantOfRevoked", models["capability_revocation"]["invariants"])
+        self.assertIn("RetiredPendingConsistency", models["virtual_memory_ownership"]["invariants"])
         self.assertEqual(6, len(models["boot_slot_rollback"]["invariants"]))
         self.assertEqual(6, len(models["capability_revocation"]["invariants"]))
+        self.assertEqual(7, len(models["virtual_memory_ownership"]["invariants"]))
 
     def test_normalized_commands_are_closed_and_exact(self) -> None:
         for model in self.contract["models"]:
-            for mode in ("safe", "hostile"):
-                command = native_models.normalized_command(self.contract, model, mode)
+            for case in model["cases"]:
+                command = native_models.normalized_command(self.contract, model, case)
                 self.assertEqual(17, len(command))
                 self.assertEqual(model["module_path"], command[-1])
+                self.assertEqual(case["config_path"], command[-2])
                 self.assertNotIn("-simulate", command)
                 self.assertNotIn("-continue", command)
 
-    def test_safe_and_hostile_configs_freeze_opposite_toggles(self) -> None:
+    def test_model_configs_freeze_all_case_constants(self) -> None:
         for model in self.contract["models"]:
-            safe = (ROOT / model["safe_config_path"]).read_text(encoding="utf-8")
-            hostile = (ROOT / model["hostile_config_path"]).read_text(encoding="utf-8")
-            self.assertIn(f"{model['hostile_toggle']} = FALSE", safe)
-            self.assertIn(f"{model['hostile_toggle']} = TRUE", hostile)
+            for case in model["cases"]:
+                config = (ROOT / case["config_path"]).read_text(encoding="utf-8")
+                for name, value in case["constant_assignments"].items():
+                    self.assertIn(f"{name} = {value}", config)
+
+    def test_vm_mutants_are_independent_and_named(self) -> None:
+        model = next(item for item in self.contract["models"] if item["id"] == "virtual_memory_ownership")
+        cases = {item["id"]: item for item in model["cases"]}
+        self.assertEqual({"safe", "unsafe_stale_mapping", "unsafe_early_reuse"}, set(cases))
+        self.assertEqual("PageTableSafety", cases["unsafe_stale_mapping"]["expected_invariant_violation"])
+        self.assertEqual("TlbSafety", cases["unsafe_early_reuse"]["expected_invariant_violation"])
+        self.assertEqual(
+            {"UnsafeStaleMapping": "TRUE", "UnsafeEarlyReuse": "FALSE"},
+            cases["unsafe_stale_mapping"]["constant_assignments"],
+        )
+        self.assertEqual(
+            {"UnsafeStaleMapping": "FALSE", "UnsafeEarlyReuse": "TRUE"},
+            cases["unsafe_early_reuse"]["constant_assignments"],
+        )
 
     def test_model_input_paths_are_confined(self) -> None:
         for relative in native_models.MODEL_INPUTS:
@@ -198,17 +216,25 @@ The depth of the complete state graph search is 1.
 
     def test_safe_state_spaces_are_completely_drained(self) -> None:
         safe = [item for item in self.readiness["runs"] if item["mode"] == "safe"]
-        self.assertEqual(2, len(safe))
+        self.assertEqual(3, len(safe))
         self.assertTrue(all(item["observed_exit_code"] == 0 for item in safe))
         self.assertTrue(all(item["left_on_queue"] == 0 for item in safe))
-        self.assertEqual({20, 1316}, {item["distinct_states"] for item in safe})
+        self.assertEqual({20, 1316, 1422}, {item["distinct_states"] for item in safe})
 
     def test_hostile_counterexamples_are_exact(self) -> None:
-        hostile = {item["model_id"]: item for item in self.readiness["runs"] if item["mode"] == "hostile"}
-        self.assertEqual("Recoverable", hostile["boot_slot_rollback"]["observed_invariant_violation"])
-        self.assertEqual(["Init", "Stage", "StartTrial", "TrialFailure"], [item["action"] for item in hostile["boot_slot_rollback"]["trace"]])
-        self.assertEqual("NoLiveDescendantOfRevoked", hostile["capability_revocation"]["observed_invariant_violation"])
-        self.assertEqual(["Init", "Derive", "Revoke"], [item["action"] for item in hostile["capability_revocation"]["trace"]])
+        hostile = {item["id"]: item for item in self.readiness["runs"] if item["mode"] == "hostile"}
+        boot = hostile["boot_slot_rollback.unsafe_rollback"]
+        capability = hostile["capability_revocation.unsafe_local_revoke"]
+        stale = hostile["virtual_memory_ownership.unsafe_stale_mapping"]
+        reuse = hostile["virtual_memory_ownership.unsafe_early_reuse"]
+        self.assertEqual("Recoverable", boot["observed_invariant_violation"])
+        self.assertEqual(["Init", "Stage", "StartTrial", "TrialFailure"], [item["action"] for item in boot["trace"]])
+        self.assertEqual("NoLiveDescendantOfRevoked", capability["observed_invariant_violation"])
+        self.assertEqual(["Init", "Derive", "Revoke"], [item["action"] for item in capability["trace"]])
+        self.assertEqual("PageTableSafety", stale["observed_invariant_violation"])
+        self.assertEqual(["Init", "Map", "BeginTransfer", "CompleteTransfer"], [item["action"] for item in stale["trace"]])
+        self.assertEqual("TlbSafety", reuse["observed_invariant_violation"])
+        self.assertEqual(["Init", "Map", "TlbFill", "BeginTransfer", "Unmap", "CompleteTransfer"], [item["action"] for item in reuse["trace"]])
 
     def test_public_traces_contain_no_absolute_paths_or_timestamps(self) -> None:
         encoded = json.dumps(self.readiness["runs"], ensure_ascii=True)
@@ -218,9 +244,9 @@ The depth of the complete state graph search is 1.
 
     def test_open_domains_and_trace_cross_checks_remain_explicit(self) -> None:
         coverage = self.readiness["domain_coverage"]
-        self.assertEqual(4, coverage["open_count"])
+        self.assertEqual(3, coverage["open_count"])
         self.assertEqual(
-            {"ipc_state", "scheduler_transitions", "virtual_memory_map_unmap", "poolefs_transaction_recovery"},
+            {"ipc_state", "scheduler_transitions", "poolefs_transaction_recovery"},
             set(coverage["open_domains"]),
         )
         self.assertEqual(0, self.readiness["summary"]["implementation_trace_cross_check_count"])
@@ -229,7 +255,7 @@ The depth of the complete state graph search is 1.
     def test_negative_control_register_is_complete(self) -> None:
         controls = self.readiness["negative_controls"]
         self.assertEqual(list(native_models.NEGATIVE_CONTROL_IDS), [item["id"] for item in controls])
-        self.assertEqual(12, len(controls))
+        self.assertEqual(14, len(controls))
         self.assertTrue(all(item["status"] == "pass" for item in controls))
 
     def test_stale_bindings_fail_closed(self) -> None:
@@ -276,16 +302,19 @@ The depth of the complete state graph search is 1.
 
     def test_contract_mutations_fail_closed(self) -> None:
         altered = copy.deepcopy(self.contract)
+        altered["models"] = None
+        self.assertTrue(native_models.contract_errors(altered))
+        altered = copy.deepcopy(self.contract)
         altered["engine"]["workers"] = 2
         self.assertTrue(native_models.contract_errors(altered))
         altered = copy.deepcopy(self.contract)
-        altered["models"][0]["safe_expected"]["distinct_states"] += 1
+        altered["models"][0]["cases"][0]["expected"]["distinct_states"] += 1
         self.assertTrue(native_models.contract_errors(altered))
         altered = copy.deepcopy(self.contract)
         altered["engine"]["command_template"].insert(-1, "-simulate")
         self.assertTrue(native_models.contract_errors(altered))
         altered = copy.deepcopy(self.contract)
-        altered["models"][0]["hostile_expected"]["trace_sha256"] = "0" * 64
+        altered["models"][0]["cases"][1]["expected"]["trace_sha256"] = "0" * 64
         self.assertTrue(native_models.contract_errors(altered))
         altered_lock = copy.deepcopy(self.lock)
         altered_lock["tlc"]["jar"]["sha256"] = "0" * 64

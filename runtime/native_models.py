@@ -30,6 +30,10 @@ MODEL_INPUTS = (
     "models/tla/PooleCapabilities.tla",
     "models/tla/PooleCapabilities.safe.cfg",
     "models/tla/PooleCapabilities.hostile.cfg",
+    "models/tla/PooleVirtualMemory.tla",
+    "models/tla/PooleVirtualMemory.safe.cfg",
+    "models/tla/PooleVirtualMemory.stale_mapping.cfg",
+    "models/tla/PooleVirtualMemory.early_reuse.cfg",
 )
 IMPLEMENTATION_INPUTS = (
     "runtime/native_models.py",
@@ -38,9 +42,12 @@ IMPLEMENTATION_INPUTS = (
 )
 RUN_IDS = (
     "boot_slot_rollback.safe",
-    "boot_slot_rollback.hostile",
+    "boot_slot_rollback.unsafe_rollback",
     "capability_revocation.safe",
-    "capability_revocation.hostile",
+    "capability_revocation.unsafe_local_revoke",
+    "virtual_memory_ownership.safe",
+    "virtual_memory_ownership.unsafe_stale_mapping",
+    "virtual_memory_ownership.unsafe_early_reuse",
 )
 NEGATIVE_CONTROL_IDS = (
     "NEG-N4-MODEL-TLC-PRERELEASE",
@@ -51,6 +58,8 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N4-MODEL-RUNTIME-CLOSURE",
     "NEG-N4-MODEL-BOOT-MUTANT",
     "NEG-N4-MODEL-CAPABILITY-MUTANT",
+    "NEG-N4-MODEL-VM-STALE-MAPPING-MUTANT",
+    "NEG-N4-MODEL-VM-EARLY-REUSE-MUTANT",
     "NEG-N4-MODEL-SAFE-VIOLATION",
     "NEG-N4-MODEL-PATH-ESCAPE",
     "NEG-N4-MODEL-EXTRA-ARGUMENT",
@@ -65,6 +74,8 @@ NEGATIVE_CONTROL_EVIDENCE_KINDS = (
     "runtime_closure",
     "executed_counterexample",
     "executed_counterexample",
+    "executed_counterexample",
+    "executed_counterexample",
     "safe_model_result",
     "path_policy",
     "closed_command_template",
@@ -73,13 +84,13 @@ NEGATIVE_CONTROL_EVIDENCE_KINDS = (
 OPEN_WORK = (
     "Model IPC state and stale-reply behavior before freezing the IPC ABI.",
     "Model scheduler transitions, cancellation, priority inversion, and bounded fairness assumptions.",
-    "Model virtual-memory map/unmap, ownership transfer, and shootdown state.",
     "Model PooleFS transaction recovery and power-loss state before freezing persistent formats.",
-    "Cross-check both current model traces against exact native implementation traces when those implementations exist.",
+    "Cross-check all three current models against exact native implementation traces when those implementations exist.",
     "Source-build and independently reproduce the model-checker and Java inputs with signed provenance, SBOM, vulnerability, license, and redistribution review.",
 )
+FROZEN_MODEL_CONTRACT_SHA256 = "1989C502FF95846FF1F3332D5C222CF5A3C6131DF466992871BE41D8E9A7C78D"
 RUN_KEYS = {
-    "id", "model_id", "mode", "status", "expected_exit_code", "observed_exit_code",
+    "id", "model_id", "case_id", "mode", "status", "expected_exit_code", "observed_exit_code",
     "expected_invariant_violation", "observed_invariant_violation", "generated_states",
     "distinct_states", "left_on_queue", "depth", "trace", "trace_sha256",
     "repeat_exact_match", "raw_output_public", "command_sha256",
@@ -205,68 +216,59 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
         errors.append("deterministic TLC controls changed")
     required = contract.get("required_domains", [])
     modeled = contract.get("modeled_domains", [])
-    if len(required) != 7 or len(set(required)) != 7 or len(modeled) != 3 or not set(modeled).issubset(set(required)):
+    if len(required) != 7 or len(set(required)) != 7 or len(modeled) != 4 or not set(modeled).issubset(set(required)):
         errors.append("model domain coverage is malformed")
-    models = contract.get("models", [])
-    if [item.get("id") for item in models if isinstance(item, dict)] != ["boot_slot_rollback", "capability_revocation"]:
+    model_value = contract.get("models", [])
+    models = model_value if isinstance(model_value, list) else []
+    expected_model_ids = ["boot_slot_rollback", "capability_revocation", "virtual_memory_ownership"]
+    if [item.get("id") for item in models if isinstance(item, dict)] != expected_model_ids:
         errors.append("model identifier set changed")
-    expected = {
-        "boot_slot_rollback": {
-            "module": "models/tla/PooleBootSlots.tla",
-            "safe": {
-                "exit_code": 0, "generated_states": 46, "distinct_states": 20,
-                "left_on_queue": 0, "depth": 7, "trace_length": 0, "trace_actions": [],
-                "trace_sha256": "37517E5F3DC66819F61F5A7BB8ACE1921282415F10551D2DEFA5C3EB0985B570",
-            },
-            "hostile": {
-                "exit_code": 12, "generated_states": 14, "distinct_states": 8,
-                "left_on_queue": 2, "depth": 4, "trace_length": 4,
-                "trace_actions": ["Init", "Stage", "StartTrial", "TrialFailure"],
-                "trace_sha256": "D827367B099EE574EACD4A0D7C424C8A797E7B65671D723E599A2D2092240237",
-            },
-            "violation": "Recoverable",
-            "toggle": "UnsafeRollback",
-        },
-        "capability_revocation": {
-            "module": "models/tla/PooleCapabilities.tla",
-            "safe": {
-                "exit_code": 0, "generated_states": 7963, "distinct_states": 1316,
-                "left_on_queue": 0, "depth": 6, "trace_length": 0, "trace_actions": [],
-                "trace_sha256": "37517E5F3DC66819F61F5A7BB8ACE1921282415F10551D2DEFA5C3EB0985B570",
-            },
-            "hostile": {
-                "exit_code": 12, "generated_states": 36, "distinct_states": 31,
-                "left_on_queue": 28, "depth": 3, "trace_length": 3,
-                "trace_actions": ["Init", "Derive", "Revoke"],
-                "trace_sha256": "A31A4FBFDD81CA9A0352DAB999F3DB62DA3EB726B0E1825C68313B368A7C85A4",
-            },
-            "violation": "NoLiveDescendantOfRevoked",
-            "toggle": "UnsafeLocalRevoke",
-        },
-    }
+    if not isinstance(model_value, list) or sha256_bytes(canonical_json_bytes(models)) != FROZEN_MODEL_CONTRACT_SHA256:
+        errors.append("frozen model/case contract changed")
     for model in models:
-        if not isinstance(model, dict) or model.get("id") not in expected:
+        if not isinstance(model, dict) or model.get("id") not in expected_model_ids:
             continue
-        frozen = expected[model["id"]]
-        if model.get("module_path") != frozen["module"]:
-            errors.append(f"module path changed: {model['id']}")
-        if model.get("hostile_violation") != frozen["violation"] or model.get("hostile_toggle") != frozen["toggle"]:
-            errors.append(f"hostile contract changed: {model['id']}")
-        for mode in ("safe", "hostile"):
-            outcome = model.get(f"{mode}_expected", {})
-            if outcome != frozen[mode]:
-                errors.append(f"expected state-space result changed: {model['id']}.{mode}")
-        paths = (model.get("module_path"), model.get("safe_config_path"), model.get("hostile_config_path"))
+        cases = model.get("cases", [])
+        if not isinstance(cases, list) or not cases:
+            errors.append(f"model cases are missing: {model['id']}")
+            continue
+        case_ids = [case.get("id") for case in cases if isinstance(case, dict)]
+        if len(case_ids) != len(cases) or len(set(case_ids)) != len(case_ids):
+            errors.append(f"model case identifiers are malformed: {model['id']}")
+        if sum(case.get("role") == "safe" for case in cases if isinstance(case, dict)) != 1:
+            errors.append(f"model must have exactly one safe case: {model['id']}")
+        paths = [model.get("module_path")] + [case.get("config_path") for case in cases if isinstance(case, dict)]
         for relative in paths:
             try:
                 _model_input_path(str(relative), root)
             except NativeModelError as error:
                 errors.append(f"model input path invalid: {model['id']}: {error}")
-        safe_text = (root / str(model.get("safe_config_path"))).read_text(encoding="utf-8-sig")
-        hostile_text = (root / str(model.get("hostile_config_path"))).read_text(encoding="utf-8-sig")
-        toggle = model.get("hostile_toggle")
-        if f"{toggle} = FALSE" not in safe_text or f"{toggle} = TRUE" not in hostile_text:
-            errors.append(f"hostile toggle configuration changed: {model['id']}")
+        for case in cases:
+            if not isinstance(case, dict):
+                continue
+            role = case.get("role")
+            violation = case.get("expected_invariant_violation")
+            outcome = case.get("expected", {})
+            if not isinstance(outcome, dict):
+                errors.append(f"case outcome is malformed: {model['id']}.{case.get('id')}")
+                continue
+            if role == "safe" and (violation is not None or outcome.get("exit_code") != 0):
+                errors.append(f"safe-case expectation changed: {model['id']}.{case.get('id')}")
+            if role == "hostile" and (not isinstance(violation, str) or outcome.get("exit_code") != 12):
+                errors.append(f"hostile-case expectation changed: {model['id']}.{case.get('id')}")
+            if outcome.get("trace_length") != len(outcome.get("trace_actions", [])):
+                errors.append(f"trace expectation is inconsistent: {model['id']}.{case.get('id')}")
+            try:
+                config_text = _model_input_path(str(case.get("config_path")), root).read_text(encoding="utf-8-sig")
+            except (OSError, UnicodeError, NativeModelError):
+                continue
+            assignments = case.get("constant_assignments", {})
+            if not isinstance(assignments, dict) or not assignments:
+                errors.append(f"constant assignments are missing: {model['id']}.{case.get('id')}")
+                continue
+            for name, value in assignments.items():
+                if not isinstance(name, str) or value not in {"TRUE", "FALSE"} or f"{name} = {value}" not in config_text:
+                    errors.append(f"constant assignment changed: {model['id']}.{case.get('id')}.{name}")
     trace = contract.get("trace_cross_check", {})
     if trace.get("status") != "pending_native_implementation_traces" or trace.get("completed_model_count") != 0 or trace.get("abi_freeze_authorized") is not False:
         errors.append("implementation trace boundary is overclaimed")
@@ -447,10 +449,10 @@ def parse_tlc_output(output: str, exit_code: int) -> dict[str, Any]:
     }
 
 
-def normalized_command(contract: dict[str, Any], model: dict[str, Any], mode: str) -> list[str]:
-    if mode not in {"safe", "hostile"}:
-        raise NativeModelError("unsupported model mode")
-    config = model[f"{mode}_config_path"]
+def normalized_command(contract: dict[str, Any], model: dict[str, Any], case: dict[str, Any]) -> list[str]:
+    if case.get("role") not in {"safe", "hostile"}:
+        raise NativeModelError("unsupported model case role")
+    config = case["config_path"]
     replacements = {
         "$JAVA": "$MODEL_TOOLCHAIN/java",
         "$TLC_JAR": "$MODEL_TOOLCHAIN/tla2tools.jar",
@@ -464,11 +466,11 @@ def normalized_command(contract: dict[str, Any], model: dict[str, Any], mode: st
 def _actual_command(
     contract: dict[str, Any],
     model: dict[str, Any],
-    mode: str,
+    case: dict[str, Any],
     toolchain: dict[str, Any],
     run_directory: Path,
 ) -> list[str]:
-    config = _model_input_path(model[f"{mode}_config_path"])
+    config = _model_input_path(case["config_path"])
     module = _model_input_path(model["module_path"])
     replacements = {
         "$JAVA": str(toolchain["java"]),
@@ -483,14 +485,14 @@ def _actual_command(
 def _run_once(
     contract: dict[str, Any],
     model: dict[str, Any],
-    mode: str,
+    case: dict[str, Any],
     toolchain: dict[str, Any],
     private_root: Path,
     repeat_index: int,
 ) -> dict[str, Any]:
-    case_root = Path(tempfile.mkdtemp(prefix=f"{model['id']}-{mode}-{repeat_index}-", dir=private_root))
+    case_root = Path(tempfile.mkdtemp(prefix=f"{model['id']}-{case['id']}-{repeat_index}-", dir=private_root))
     metadata = case_root / "tlc-metadata"
-    command = _actual_command(contract, model, mode, toolchain, metadata)
+    command = _actual_command(contract, model, case, toolchain, metadata)
     environment = os.environ.copy()
     for key in ("JAVA_TOOL_OPTIONS", "JDK_JAVA_OPTIONS", "_JAVA_OPTIONS"):
         environment.pop(key, None)
@@ -524,36 +526,37 @@ def _expected_tuple(outcome: dict[str, Any]) -> tuple[int, int, int, int, int, i
 def execute_case(
     contract: dict[str, Any],
     model: dict[str, Any],
-    mode: str,
+    case: dict[str, Any],
     toolchain: dict[str, Any],
     private_root: Path,
 ) -> dict[str, Any]:
     repeats = [
-        _run_once(contract, model, mode, toolchain, private_root, index)
+        _run_once(contract, model, case, toolchain, private_root, index)
         for index in range(1, contract["engine"]["repeat_count"] + 1)
     ]
     if any(item != repeats[0] for item in repeats[1:]):
-        raise NativeModelError(f"nondeterministic normalized result: {model['id']}.{mode}")
+        raise NativeModelError(f"nondeterministic normalized result: {model['id']}.{case['id']}")
     observed = repeats[0]
-    expected = model[f"{mode}_expected"]
+    expected = case["expected"]
     expected_tuple = _expected_tuple(expected)
     observed_tuple = (
         observed["observed_exit_code"], observed["generated_states"], observed["distinct_states"],
         observed["left_on_queue"], observed["depth"], len(observed["trace"]),
     )
     if observed_tuple != expected_tuple:
-        raise NativeModelError(f"frozen state-space result changed: {model['id']}.{mode}")
-    expected_violation = model["hostile_violation"] if mode == "hostile" else None
+        raise NativeModelError(f"frozen state-space result changed: {model['id']}.{case['id']}")
+    expected_violation = case["expected_invariant_violation"]
     if observed["observed_invariant_violation"] != expected_violation:
-        raise NativeModelError(f"unexpected invariant result: {model['id']}.{mode}")
+        raise NativeModelError(f"unexpected invariant result: {model['id']}.{case['id']}")
     observed_actions = [item["action"] for item in observed["trace"]]
     if observed_actions != expected["trace_actions"] or observed["trace_sha256"] != expected["trace_sha256"]:
-        raise NativeModelError(f"frozen counterexample trace changed: {model['id']}.{mode}")
-    normalized = normalized_command(contract, model, mode)
+        raise NativeModelError(f"frozen counterexample trace changed: {model['id']}.{case['id']}")
+    normalized = normalized_command(contract, model, case)
     return {
-        "id": f"{model['id']}.{mode}",
+        "id": f"{model['id']}.{case['id']}",
         "model_id": model["id"],
-        "mode": mode,
+        "case_id": case["id"],
+        "mode": case["role"],
         "status": "pass",
         "expected_exit_code": expected["exit_code"],
         "observed_exit_code": observed["observed_exit_code"],
@@ -588,7 +591,7 @@ def _path_escape_rejected() -> bool:
 def negative_controls(lock: dict[str, Any], contract: dict[str, Any], runs: list[dict[str, Any]]) -> list[dict[str, str]]:
     by_id = {item["id"]: item for item in runs}
     claims = contract["claim_boundary"]
-    normalized = normalized_command(contract, contract["models"][0], "safe")
+    normalized = normalized_command(contract, contract["models"][0], contract["models"][0]["cases"][0])
     controls = [
         _control("NEG-N4-MODEL-TLC-PRERELEASE", lock["tlc"]["rejected_candidate"]["prerelease"] is True, "release_channel_policy"),
         _control("NEG-N4-MODEL-TLC-HASH", lock["tlc"]["jar"]["sha256"] != lock["tlc"]["rejected_candidate"]["jar_sha256"], "exact_hash_policy"),
@@ -596,9 +599,11 @@ def negative_controls(lock: dict[str, Any], contract: dict[str, Any], runs: list
         _control("NEG-N4-MODEL-JRE-HASH", lock["java"]["package_sha256"] == "BE26677AAA20B39A62EDCAAB4C8857A8B76673B0F45ABC0B6143B142B62717E4", "exact_hash_policy"),
         _control("NEG-N4-MODEL-JRE-SIGNATURE-OVERCLAIM", lock["java"]["detached_signature_verified"] is False, "claim_boundary"),
         _control("NEG-N4-MODEL-RUNTIME-CLOSURE", lock["java"]["runtime_tree"]["file_count"] == 315, "runtime_closure"),
-        _control("NEG-N4-MODEL-BOOT-MUTANT", by_id["boot_slot_rollback.hostile"]["observed_invariant_violation"] == "Recoverable", "executed_counterexample"),
-        _control("NEG-N4-MODEL-CAPABILITY-MUTANT", by_id["capability_revocation.hostile"]["observed_invariant_violation"] == "NoLiveDescendantOfRevoked", "executed_counterexample"),
-        _control("NEG-N4-MODEL-SAFE-VIOLATION", all(by_id[item]["observed_invariant_violation"] is None for item in ("boot_slot_rollback.safe", "capability_revocation.safe")), "safe_model_result"),
+        _control("NEG-N4-MODEL-BOOT-MUTANT", by_id["boot_slot_rollback.unsafe_rollback"]["observed_invariant_violation"] == "Recoverable", "executed_counterexample"),
+        _control("NEG-N4-MODEL-CAPABILITY-MUTANT", by_id["capability_revocation.unsafe_local_revoke"]["observed_invariant_violation"] == "NoLiveDescendantOfRevoked", "executed_counterexample"),
+        _control("NEG-N4-MODEL-VM-STALE-MAPPING-MUTANT", by_id["virtual_memory_ownership.unsafe_stale_mapping"]["observed_invariant_violation"] == "PageTableSafety", "executed_counterexample"),
+        _control("NEG-N4-MODEL-VM-EARLY-REUSE-MUTANT", by_id["virtual_memory_ownership.unsafe_early_reuse"]["observed_invariant_violation"] == "TlbSafety", "executed_counterexample"),
+        _control("NEG-N4-MODEL-SAFE-VIOLATION", all(item["observed_invariant_violation"] is None for item in runs if item["mode"] == "safe"), "safe_model_result"),
         _control("NEG-N4-MODEL-PATH-ESCAPE", _path_escape_rejected(), "path_policy"),
         _control(
             "NEG-N4-MODEL-EXTRA-ARGUMENT",
@@ -620,9 +625,9 @@ def build_readiness(toolchain_root: Path = DEFAULT_TOOLCHAIN_ROOT, root: Path = 
     private_root = toolchain["root"] / "evidence"
     private_root.mkdir(parents=True, exist_ok=True)
     runs = [
-        execute_case(contract, model, mode, toolchain, private_root)
+        execute_case(contract, model, case, toolchain, private_root)
         for model in contract["models"]
-        for mode in ("safe", "hostile")
+        for case in model["cases"]
     ]
     if [item["id"] for item in runs] != list(RUN_IDS):
         raise NativeModelError("model-run order changed")
@@ -631,11 +636,11 @@ def build_readiness(toolchain_root: Path = DEFAULT_TOOLCHAIN_ROOT, root: Path = 
     modeled = contract["modeled_domains"]
     open_domains = [item for item in required if item not in modeled]
     readiness = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "artifact_kind": "pooleos_native_model_readiness",
         "status_date": "2026-07-16",
         "status": "bounded_models_pass_counterexamples_detected",
-        "selected_move_id": "N4-MODEL-001",
+        "selected_move_id": contract["selected_move_id"],
         "production_ready": False,
         "production_promotion_allowed": False,
         "n4_model_slice_satisfied": True,
@@ -727,16 +732,24 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path = ROOT) -> l
         errors.append("model run set or ordering changed")
     model_by_id = {item["id"]: item for item in contract["models"]}
     for run in runs:
-        if not isinstance(run, dict) or run.get("model_id") not in model_by_id or run.get("mode") not in {"safe", "hostile"}:
+        if not isinstance(run, dict) or run.get("model_id") not in model_by_id:
+            continue
+        model = model_by_id[run["model_id"]]
+        case_by_id = {item["id"]: item for item in model["cases"]}
+        case = case_by_id.get(run.get("case_id"))
+        if case is None or run.get("mode") != case["role"]:
+            errors.append(f"run case or role changed: {run.get('id')}")
             continue
         if set(run) != RUN_KEYS:
             errors.append(f"run field set changed: {run.get('id')}")
-        expected = model_by_id[run["model_id"]][f"{run['mode']}_expected"]
+        if run.get("id") != f"{run['model_id']}.{case['id']}":
+            errors.append(f"run identifier changed: {run.get('id')}")
+        expected = case["expected"]
         observed = tuple(run.get(key) for key in ("observed_exit_code", "generated_states", "distinct_states", "left_on_queue", "depth")) + (len(run.get("trace", [])),)
         frozen = tuple(expected[key] for key in ("exit_code", "generated_states", "distinct_states", "left_on_queue", "depth", "trace_length"))
         if observed != frozen:
             errors.append(f"run result drift: {run.get('id')}")
-        expected_violation = model_by_id[run["model_id"]]["hostile_violation"] if run["mode"] == "hostile" else None
+        expected_violation = case["expected_invariant_violation"]
         if (
             run.get("status") != "pass"
             or run.get("expected_exit_code") != expected["exit_code"]
@@ -757,7 +770,7 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path = ROOT) -> l
             if step.get("index") != index or step.get("state_sha256") != sha256_bytes(canonical_json_bytes(step.get("state_lines", []))):
                 errors.append(f"trace state binding mismatch: {run.get('id')}[{index}]")
         expected_command_sha256 = sha256_bytes(
-            canonical_json_bytes(normalized_command(contract, model_by_id[run["model_id"]], run["mode"]))
+            canonical_json_bytes(normalized_command(contract, model, case))
         )
         if run.get("command_sha256") != expected_command_sha256:
             errors.append(f"command digest mismatch: {run.get('id')}")
@@ -787,16 +800,16 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path = ROOT) -> l
         errors.append("domain coverage binding changed")
     summary = readiness.get("summary", {})
     expected_summary = {
-        "model_count": 2,
-        "run_case_count": 4,
-        "safe_run_count": 2,
-        "safe_run_pass_count": 2,
-        "hostile_run_count": 2,
-        "hostile_counterexample_count": 2,
-        "repeat_match_count": 4,
-        "negative_control_count": 12,
-        "negative_control_pass_count": 12,
-        "normalized_trace_count": 2,
+        "model_count": 3,
+        "run_case_count": 7,
+        "safe_run_count": 3,
+        "safe_run_pass_count": 3,
+        "hostile_run_count": 4,
+        "hostile_counterexample_count": 4,
+        "repeat_match_count": 7,
+        "negative_control_count": 14,
+        "negative_control_pass_count": 14,
+        "normalized_trace_count": 4,
         "implementation_trace_cross_check_count": 0,
         "failed_check_count": 0,
     }

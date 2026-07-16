@@ -118,8 +118,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 89)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 481)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 90)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 482)
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
         self.assertTrue(all(value is False for key, value in native.items() if key != "source_controlled"))
@@ -151,7 +151,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N4-MODEL-001")
+        self.assertEqual(protocol["selected_move_id"], "N4-VM-MODEL-001")
         self.assertIn("runs/hardware_target_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_tier0_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_model_readiness.json", protocol["required_records"])
@@ -218,6 +218,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             self.assertEqual(n4_statuses[subphase_id], "partial")
         self.assertTrue(any(item.startswith("runs/native_tier0_readiness.json:") for item in n4["current_evidence"]))
         self.assertTrue(any(item.startswith("runs/native_model_readiness.json:") for item in n4["current_evidence"]))
+        self.assertTrue(any("PooleVirtualMemory.tla" in item for item in n4["current_evidence"]))
         self.assertTrue(any("implementation-trace cross-checks" in item for item in n4["current_gaps"]))
 
         n0 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N0")

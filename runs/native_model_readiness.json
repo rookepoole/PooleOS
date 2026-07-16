@@ -1,9 +1,9 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "artifact_kind": "pooleos_native_model_readiness",
   "status_date": "2026-07-16",
   "status": "bounded_models_pass_counterexamples_detected",
-  "selected_move_id": "N4-MODEL-001",
+  "selected_move_id": "N4-VM-MODEL-001",
   "production_ready": false,
   "production_promotion_allowed": false,
   "n4_model_slice_satisfied": true,
@@ -16,14 +16,14 @@
     },
     "contract": {
       "path": "specs/native-model-contract.json",
-      "byte_count": 4941,
-      "sha256": "548DAE5727594A41479344BC7362C3369118561A1771268C59243091EDE47AE5"
+      "byte_count": 8214,
+      "sha256": "CA17D83C8EA4E3432E8E9626F6BE49DA17F79D92F6283D3FA747743D2CFC2863"
     },
     "implementation_inputs": [
       {
         "path": "runtime/native_models.py",
-        "byte_count": 40426,
-        "sha256": "651CB284F9F87E5C888E3572990D39744A860F874BDE3EB8BA38DD6EFC13431A"
+        "byte_count": 41679,
+        "sha256": "C26F357F8ED7B708179E9B5AB6522DD9FCA5CE3C76EB9C44E3F50678AA8D5D9B"
       },
       {
         "path": "tools/bootstrap_native_models.ps1",
@@ -66,6 +66,26 @@
         "path": "models/tla/PooleCapabilities.hostile.cfg",
         "byte_count": 422,
         "sha256": "DA24D09B0AB03F5DEBE1C3F31BCEBB6FD71E7E225FD952C66014729C0584F647"
+      },
+      {
+        "path": "models/tla/PooleVirtualMemory.tla",
+        "byte_count": 8058,
+        "sha256": "46F0AC1883DEBC488DD4074370C49CEA6C8CA71140955D85E9D7D268B4B7304D"
+      },
+      {
+        "path": "models/tla/PooleVirtualMemory.safe.cfg",
+        "byte_count": 440,
+        "sha256": "2AC7A2469956FC6A6032B1C1B5FB517C1766AB45F2E0F441C150156CFAE0FA3A"
+      },
+      {
+        "path": "models/tla/PooleVirtualMemory.stale_mapping.cfg",
+        "byte_count": 439,
+        "sha256": "44E2FE29183346E908022BFB6BF4E1F4F03B2B7B20DEFEC8ED3CA16BBD40A9FE"
+      },
+      {
+        "path": "models/tla/PooleVirtualMemory.early_reuse.cfg",
+        "byte_count": 439,
+        "sha256": "9F80D13ED63DC9A902E9CD4A20512307945BC068F7341305923F09155CFFD923"
       }
     ]
   },
@@ -90,23 +110,24 @@
     ],
     "modeled_domains": [
       "capability_derivation_revocation",
+      "virtual_memory_map_unmap",
       "boot_slot_state",
       "update_rollback"
     ],
     "open_domains": [
       "ipc_state",
       "scheduler_transitions",
-      "virtual_memory_map_unmap",
       "poolefs_transaction_recovery"
     ],
     "required_count": 7,
-    "modeled_count": 3,
-    "open_count": 4
+    "modeled_count": 4,
+    "open_count": 3
   },
   "runs": [
     {
       "id": "boot_slot_rollback.safe",
       "model_id": "boot_slot_rollback",
+      "case_id": "safe",
       "mode": "safe",
       "status": "pass",
       "expected_exit_code": 0,
@@ -124,8 +145,9 @@
       "command_sha256": "ABCF025CA83C8558DCC8E6B9200EBF12D8EC282773D13591500D67F952E66830"
     },
     {
-      "id": "boot_slot_rollback.hostile",
+      "id": "boot_slot_rollback.unsafe_rollback",
       "model_id": "boot_slot_rollback",
+      "case_id": "unsafe_rollback",
       "mode": "hostile",
       "status": "pass",
       "expected_exit_code": 12,
@@ -194,6 +216,7 @@
     {
       "id": "capability_revocation.safe",
       "model_id": "capability_revocation",
+      "case_id": "safe",
       "mode": "safe",
       "status": "pass",
       "expected_exit_code": 0,
@@ -211,8 +234,9 @@
       "command_sha256": "947DEFD6BD90E9F13677BE807ED680633DC6D25B734A7E6013DB0347E1F569F8"
     },
     {
-      "id": "capability_revocation.hostile",
+      "id": "capability_revocation.unsafe_local_revoke",
       "model_id": "capability_revocation",
+      "case_id": "unsafe_local_revoke",
       "mode": "hostile",
       "status": "pass",
       "expected_exit_code": 12,
@@ -277,6 +301,256 @@
       "repeat_exact_match": true,
       "raw_output_public": false,
       "command_sha256": "8CCDF597977A39B881EB8667287A4AB174BCEA90A9AC60DBC121A552616A8137"
+    },
+    {
+      "id": "virtual_memory_ownership.safe",
+      "model_id": "virtual_memory_ownership",
+      "case_id": "safe",
+      "mode": "safe",
+      "status": "pass",
+      "expected_exit_code": 0,
+      "observed_exit_code": 0,
+      "expected_invariant_violation": null,
+      "observed_invariant_violation": null,
+      "generated_states": 10210,
+      "distinct_states": 1422,
+      "left_on_queue": 0,
+      "depth": 13,
+      "trace": [],
+      "trace_sha256": "37517E5F3DC66819F61F5A7BB8ACE1921282415F10551D2DEFA5C3EB0985B570",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "B167DB021DC0786AB0FCE5CC1D86909281288804F60C1425159A462966805C91"
+    },
+    {
+      "id": "virtual_memory_ownership.unsafe_stale_mapping",
+      "model_id": "virtual_memory_ownership",
+      "case_id": "unsafe_stale_mapping",
+      "mode": "hostile",
+      "status": "pass",
+      "expected_exit_code": 12,
+      "observed_exit_code": 12,
+      "expected_invariant_violation": "PageTableSafety",
+      "observed_invariant_violation": "PageTableSafety",
+      "generated_states": 136,
+      "distinct_states": 75,
+      "left_on_queue": 51,
+      "depth": 4,
+      "trace": [
+        {
+          "index": 1,
+          "action": "Init",
+          "state_sha256": "9C495F2B286B816DADD5875CCD5B08C934463579EC8DD57FC554078AB9E5D43E",
+          "state_lines": [
+            "/\\ pending = (DomainA :> (Va0 :> {}) @@ DomainB :> (Va0 :> {}))",
+            "/\\ retired = (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation))",
+            "/\\ owner = (Page0 :> DomainA @@ Page1 :> DomainA)",
+            "/\\ generation = (Page0 :> 0 @@ Page1 :> 0)",
+            "/\\ pageTable = (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation))",
+            "/\\ tlb = ( Cpu0 :>",
+            "      ( DomainA :> (Va0 :> NoTranslation) @@",
+            "        DomainB :> (Va0 :> NoTranslation) ) @@",
+            "  Cpu1 :>",
+            "      (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation)) )",
+            "/\\ transferTarget = (Page0 :> NoDomain @@ Page1 :> NoDomain)"
+          ]
+        },
+        {
+          "index": 2,
+          "action": "Map",
+          "state_sha256": "8BC6075B4B8C7805ADE4F78B9C54FAB03BE7DAA924168259262055E091564996",
+          "state_lines": [
+            "/\\ pending = (DomainA :> (Va0 :> {}) @@ DomainB :> (Va0 :> {}))",
+            "/\\ retired = (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation))",
+            "/\\ owner = (Page0 :> DomainA @@ Page1 :> DomainA)",
+            "/\\ generation = (Page0 :> 0 @@ Page1 :> 0)",
+            "/\\ pageTable = ( DomainA :> (Va0 :> [page |-> Page0, generation |-> 0]) @@",
+            "  DomainB :> (Va0 :> NoTranslation) )",
+            "/\\ tlb = ( Cpu0 :>",
+            "      ( DomainA :> (Va0 :> NoTranslation) @@",
+            "        DomainB :> (Va0 :> NoTranslation) ) @@",
+            "  Cpu1 :>",
+            "      (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation)) )",
+            "/\\ transferTarget = (Page0 :> NoDomain @@ Page1 :> NoDomain)"
+          ]
+        },
+        {
+          "index": 3,
+          "action": "BeginTransfer",
+          "state_sha256": "FD6FABD35456A5545757149B9CBA16C177DFECBF088C1D6159A32207783BA38A",
+          "state_lines": [
+            "/\\ pending = (DomainA :> (Va0 :> {}) @@ DomainB :> (Va0 :> {}))",
+            "/\\ retired = (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation))",
+            "/\\ owner = (Page0 :> DomainA @@ Page1 :> DomainA)",
+            "/\\ generation = (Page0 :> 0 @@ Page1 :> 0)",
+            "/\\ pageTable = ( DomainA :> (Va0 :> [page |-> Page0, generation |-> 0]) @@",
+            "  DomainB :> (Va0 :> NoTranslation) )",
+            "/\\ tlb = ( Cpu0 :>",
+            "      ( DomainA :> (Va0 :> NoTranslation) @@",
+            "        DomainB :> (Va0 :> NoTranslation) ) @@",
+            "  Cpu1 :>",
+            "      (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation)) )",
+            "/\\ transferTarget = (Page0 :> DomainB @@ Page1 :> NoDomain)"
+          ]
+        },
+        {
+          "index": 4,
+          "action": "CompleteTransfer",
+          "state_sha256": "6774ED6708616B4BBEFEDC08B7F1426CBA231F2674CD252400B235A37C45E4B7",
+          "state_lines": [
+            "/\\ pending = (DomainA :> (Va0 :> {}) @@ DomainB :> (Va0 :> {}))",
+            "/\\ retired = (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation))",
+            "/\\ owner = (Page0 :> DomainB @@ Page1 :> DomainA)",
+            "/\\ generation = (Page0 :> 1 @@ Page1 :> 0)",
+            "/\\ pageTable = ( DomainA :> (Va0 :> [page |-> Page0, generation |-> 0]) @@",
+            "  DomainB :> (Va0 :> NoTranslation) )",
+            "/\\ tlb = ( Cpu0 :>",
+            "      ( DomainA :> (Va0 :> NoTranslation) @@",
+            "        DomainB :> (Va0 :> NoTranslation) ) @@",
+            "  Cpu1 :>",
+            "      (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation)) )",
+            "/\\ transferTarget = (Page0 :> NoDomain @@ Page1 :> NoDomain)"
+          ]
+        }
+      ],
+      "trace_sha256": "B86E74503711073D1B57F464D10B23EAD74572C0F0699093A38559CEA35D89CB",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "0065125435C457D497F9A15FA54BEE068A0EDE9F73E05D4BC57AE692473E8FE2"
+    },
+    {
+      "id": "virtual_memory_ownership.unsafe_early_reuse",
+      "model_id": "virtual_memory_ownership",
+      "case_id": "unsafe_early_reuse",
+      "mode": "hostile",
+      "status": "pass",
+      "expected_exit_code": 12,
+      "observed_exit_code": 12,
+      "expected_invariant_violation": "TlbSafety",
+      "observed_invariant_violation": "TlbSafety",
+      "generated_states": 1128,
+      "distinct_states": 339,
+      "left_on_queue": 167,
+      "depth": 6,
+      "trace": [
+        {
+          "index": 1,
+          "action": "Init",
+          "state_sha256": "9C495F2B286B816DADD5875CCD5B08C934463579EC8DD57FC554078AB9E5D43E",
+          "state_lines": [
+            "/\\ pending = (DomainA :> (Va0 :> {}) @@ DomainB :> (Va0 :> {}))",
+            "/\\ retired = (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation))",
+            "/\\ owner = (Page0 :> DomainA @@ Page1 :> DomainA)",
+            "/\\ generation = (Page0 :> 0 @@ Page1 :> 0)",
+            "/\\ pageTable = (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation))",
+            "/\\ tlb = ( Cpu0 :>",
+            "      ( DomainA :> (Va0 :> NoTranslation) @@",
+            "        DomainB :> (Va0 :> NoTranslation) ) @@",
+            "  Cpu1 :>",
+            "      (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation)) )",
+            "/\\ transferTarget = (Page0 :> NoDomain @@ Page1 :> NoDomain)"
+          ]
+        },
+        {
+          "index": 2,
+          "action": "Map",
+          "state_sha256": "8BC6075B4B8C7805ADE4F78B9C54FAB03BE7DAA924168259262055E091564996",
+          "state_lines": [
+            "/\\ pending = (DomainA :> (Va0 :> {}) @@ DomainB :> (Va0 :> {}))",
+            "/\\ retired = (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation))",
+            "/\\ owner = (Page0 :> DomainA @@ Page1 :> DomainA)",
+            "/\\ generation = (Page0 :> 0 @@ Page1 :> 0)",
+            "/\\ pageTable = ( DomainA :> (Va0 :> [page |-> Page0, generation |-> 0]) @@",
+            "  DomainB :> (Va0 :> NoTranslation) )",
+            "/\\ tlb = ( Cpu0 :>",
+            "      ( DomainA :> (Va0 :> NoTranslation) @@",
+            "        DomainB :> (Va0 :> NoTranslation) ) @@",
+            "  Cpu1 :>",
+            "      (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation)) )",
+            "/\\ transferTarget = (Page0 :> NoDomain @@ Page1 :> NoDomain)"
+          ]
+        },
+        {
+          "index": 3,
+          "action": "TlbFill",
+          "state_sha256": "4589F9C92DD9C973D237554266FDD75A61CA6C5E71D4C9206C429B46C493B909",
+          "state_lines": [
+            "/\\ pending = (DomainA :> (Va0 :> {}) @@ DomainB :> (Va0 :> {}))",
+            "/\\ retired = (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation))",
+            "/\\ owner = (Page0 :> DomainA @@ Page1 :> DomainA)",
+            "/\\ generation = (Page0 :> 0 @@ Page1 :> 0)",
+            "/\\ pageTable = ( DomainA :> (Va0 :> [page |-> Page0, generation |-> 0]) @@",
+            "  DomainB :> (Va0 :> NoTranslation) )",
+            "/\\ tlb = ( Cpu0 :>",
+            "      ( DomainA :> (Va0 :> [page |-> Page0, generation |-> 0]) @@",
+            "        DomainB :> (Va0 :> NoTranslation) ) @@",
+            "  Cpu1 :>",
+            "      (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation)) )",
+            "/\\ transferTarget = (Page0 :> NoDomain @@ Page1 :> NoDomain)"
+          ]
+        },
+        {
+          "index": 4,
+          "action": "BeginTransfer",
+          "state_sha256": "DF3A155450044E4233A62A697DA3DA229989C9D4599C03F71E02E14BB0D112AE",
+          "state_lines": [
+            "/\\ pending = (DomainA :> (Va0 :> {}) @@ DomainB :> (Va0 :> {}))",
+            "/\\ retired = (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation))",
+            "/\\ owner = (Page0 :> DomainA @@ Page1 :> DomainA)",
+            "/\\ generation = (Page0 :> 0 @@ Page1 :> 0)",
+            "/\\ pageTable = ( DomainA :> (Va0 :> [page |-> Page0, generation |-> 0]) @@",
+            "  DomainB :> (Va0 :> NoTranslation) )",
+            "/\\ tlb = ( Cpu0 :>",
+            "      ( DomainA :> (Va0 :> [page |-> Page0, generation |-> 0]) @@",
+            "        DomainB :> (Va0 :> NoTranslation) ) @@",
+            "  Cpu1 :>",
+            "      (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation)) )",
+            "/\\ transferTarget = (Page0 :> DomainB @@ Page1 :> NoDomain)"
+          ]
+        },
+        {
+          "index": 5,
+          "action": "Unmap",
+          "state_sha256": "5EEB74067EA2E58339ADF9E9AC44BC9698EA162B17C27915166F3853262A5052",
+          "state_lines": [
+            "/\\ pending = (DomainA :> (Va0 :> {Cpu0}) @@ DomainB :> (Va0 :> {}))",
+            "/\\ retired = ( DomainA :> (Va0 :> [page |-> Page0, generation |-> 0]) @@",
+            "  DomainB :> (Va0 :> NoTranslation) )",
+            "/\\ owner = (Page0 :> DomainA @@ Page1 :> DomainA)",
+            "/\\ generation = (Page0 :> 0 @@ Page1 :> 0)",
+            "/\\ pageTable = (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation))",
+            "/\\ tlb = ( Cpu0 :>",
+            "      ( DomainA :> (Va0 :> [page |-> Page0, generation |-> 0]) @@",
+            "        DomainB :> (Va0 :> NoTranslation) ) @@",
+            "  Cpu1 :>",
+            "      (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation)) )",
+            "/\\ transferTarget = (Page0 :> DomainB @@ Page1 :> NoDomain)"
+          ]
+        },
+        {
+          "index": 6,
+          "action": "CompleteTransfer",
+          "state_sha256": "A7BD7E3E97405B87F4379013AAF53CE7F9EF9606FE20511C9FA811B6625D17AF",
+          "state_lines": [
+            "/\\ pending = (DomainA :> (Va0 :> {Cpu0}) @@ DomainB :> (Va0 :> {}))",
+            "/\\ retired = ( DomainA :> (Va0 :> [page |-> Page0, generation |-> 0]) @@",
+            "  DomainB :> (Va0 :> NoTranslation) )",
+            "/\\ owner = (Page0 :> DomainB @@ Page1 :> DomainA)",
+            "/\\ generation = (Page0 :> 1 @@ Page1 :> 0)",
+            "/\\ pageTable = (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation))",
+            "/\\ tlb = ( Cpu0 :>",
+            "      ( DomainA :> (Va0 :> [page |-> Page0, generation |-> 0]) @@",
+            "        DomainB :> (Va0 :> NoTranslation) ) @@",
+            "  Cpu1 :>",
+            "      (DomainA :> (Va0 :> NoTranslation) @@ DomainB :> (Va0 :> NoTranslation)) )",
+            "/\\ transferTarget = (Page0 :> NoDomain @@ Page1 :> NoDomain)"
+          ]
+        }
+      ],
+      "trace_sha256": "AE37455CC7DC8F3797398EB603592D0ACE5D1E620D85C2A01ED85EDF39A894CD",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "E2D1CD8306D7195A6A943C1061F585CA7312FB43536BEBA20F60EABD73B7EC80"
     }
   ],
   "negative_controls": [
@@ -337,6 +611,20 @@
       "evidence_kind": "executed_counterexample"
     },
     {
+      "id": "NEG-N4-MODEL-VM-STALE-MAPPING-MUTANT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "executed_counterexample"
+    },
+    {
+      "id": "NEG-N4-MODEL-VM-EARLY-REUSE-MUTANT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "executed_counterexample"
+    },
+    {
       "id": "NEG-N4-MODEL-SAFE-VIOLATION",
       "expected": "reject",
       "observed": "reject",
@@ -366,22 +654,23 @@
     }
   ],
   "summary": {
-    "model_count": 2,
-    "run_case_count": 4,
-    "safe_run_count": 2,
-    "safe_run_pass_count": 2,
-    "hostile_run_count": 2,
-    "hostile_counterexample_count": 2,
-    "repeat_match_count": 4,
-    "negative_control_count": 12,
-    "negative_control_pass_count": 12,
-    "normalized_trace_count": 2,
+    "model_count": 3,
+    "run_case_count": 7,
+    "safe_run_count": 3,
+    "safe_run_pass_count": 3,
+    "hostile_run_count": 4,
+    "hostile_counterexample_count": 4,
+    "repeat_match_count": 7,
+    "negative_control_count": 14,
+    "negative_control_pass_count": 14,
+    "normalized_trace_count": 4,
     "implementation_trace_cross_check_count": 0,
     "failed_check_count": 0
   },
   "assumptions": [
     "The boot model has exactly two abstract slots, one candidate-installation lifecycle, at most two trial attempts, atomic transitions, persistent known-good metadata, and no slot erasure/reuse, concurrency, torn write, cryptography, storage, firmware, or attacker model.",
     "The capability model has exactly three abstract capability identifiers, two principals, two rights, one object, atomic derive/transfer/revoke transitions, no identifier reuse, and no concurrency, IPC, scheduler, memory, DMA, or persistence model.",
+    "The virtual-memory model has exactly two domains, two CPUs, two physical pages, one virtual address per domain, generations 0 through 1, and atomic map, TLB fill/evict, transfer, unmap, and shootdown-acknowledgement transitions. It has no page-table hierarchy, PCID/ASID, DMA/IOMMU, interrupt-ordering, weak-memory, concurrent page-table-write, huge-page, copy-on-write, swap, NUMA, or hardware page-walk model.",
     "TLC uses 64-bit state fingerprints; complete reachable-state exploration within the constants is not a collision-free mathematical proof.",
     "Only state safety invariants are checked. No liveness, fairness, real-time, probabilistic, refinement, implementation-equivalence, or physical-hardware property is checked.",
     "The hostile configurations are deliberate mutations used to demonstrate that the named invariants produce finite counterexample traces."
@@ -389,9 +678,8 @@
   "open_work": [
     "Model IPC state and stale-reply behavior before freezing the IPC ABI.",
     "Model scheduler transitions, cancellation, priority inversion, and bounded fairness assumptions.",
-    "Model virtual-memory map/unmap, ownership transfer, and shootdown state.",
     "Model PooleFS transaction recovery and power-loss state before freezing persistent formats.",
-    "Cross-check both current model traces against exact native implementation traces when those implementations exist.",
+    "Cross-check all three current models against exact native implementation traces when those implementations exist.",
     "Source-build and independently reproduce the model-checker and Java inputs with signed provenance, SBOM, vulnerability, license, and redistribution review."
   ],
   "claim_boundary": {
