@@ -1,9 +1,9 @@
 {
-  "schema_version": "1.3",
+  "schema_version": "1.4",
   "artifact_kind": "pooleos_native_model_readiness",
   "status_date": "2026-07-16",
   "status": "bounded_models_pass_counterexamples_detected",
-  "selected_move_id": "N4-SCHEDULER-MODEL-001",
+  "selected_move_id": "N4-POOLEFS-MODEL-001",
   "production_ready": false,
   "production_promotion_allowed": false,
   "n4_model_slice_satisfied": true,
@@ -16,14 +16,14 @@
     },
     "contract": {
       "path": "specs/native-model-contract.json",
-      "byte_count": 20556,
-      "sha256": "A786763D6BFE2E8BAD7239DDFF4AEC7021F61C4A4F82EADD2DF96FF36EE19535"
+      "byte_count": 27518,
+      "sha256": "EDE790826CB3743D6D8A7D48F54F7A90A043DAB154CCFF24AB752C2A00078079"
     },
     "implementation_inputs": [
       {
         "path": "runtime/native_models.py",
-        "byte_count": 46098,
-        "sha256": "8EA11B1998757D16ECF3F314A36383983709D35873D8E2BF127A2B24542C3792"
+        "byte_count": 48697,
+        "sha256": "61E42AB84893CDFBD2BE9CEC39FC62DEA46AAF3902A56E60BCCCA09DA73F0B48"
       },
       {
         "path": "tools/bootstrap_native_models.ps1",
@@ -161,6 +161,46 @@
         "path": "models/tla/PooleScheduler.leaky_teardown.cfg",
         "byte_count": 760,
         "sha256": "FAA6215EC6AB99219E69BBA47CCE94274C41CF66261AF78B0557D9C37E157653"
+      },
+      {
+        "path": "models/tla/PooleFS.tla",
+        "byte_count": 15521,
+        "sha256": "C100DAA17E53794E094FE0D1FF34F9687748978FE3B13DD35DA62026B1445119"
+      },
+      {
+        "path": "models/tla/PooleFS.safe.cfg",
+        "byte_count": 624,
+        "sha256": "A05EFC3B9FE7A8B219F9796C215C313D5F5D922EC9E7C7BCC841040C13DD3BC3"
+      },
+      {
+        "path": "models/tla/PooleFS.torn_write.cfg",
+        "byte_count": 623,
+        "sha256": "D533C60BE9599E76A0539569CC5F56E3D8C80761B03A43240B0D8651A29DD3F1"
+      },
+      {
+        "path": "models/tla/PooleFS.premature_publish.cfg",
+        "byte_count": 623,
+        "sha256": "2022BBD6234CCA5656A519C11D2E0E48095FEE7B84623ADDD5892B6F43B194BB"
+      },
+      {
+        "path": "models/tla/PooleFS.double_allocation.cfg",
+        "byte_count": 623,
+        "sha256": "DCE835E2677519D1D232CCA2C144F43B3317D3854104299163C225918A8B669D"
+      },
+      {
+        "path": "models/tla/PooleFS.non_idempotent_replay.cfg",
+        "byte_count": 623,
+        "sha256": "CD7D76843D0866661809BB0CDEA7D99A16CB1C996BBE58EB9C90A4446078CAF4"
+      },
+      {
+        "path": "models/tla/PooleFS.checksum_acceptance.cfg",
+        "byte_count": 623,
+        "sha256": "2873545CE40E2F40CCD00186DFE174B29D898DED183D261C8B96E8AB66BB42FE"
+      },
+      {
+        "path": "models/tla/PooleFS.recovery_leak.cfg",
+        "byte_count": 623,
+        "sha256": "C67578C1ADED7CDE792AA648BA909BD90BDF1F9BA30745F2F0A6586042C5C88E"
       }
     ]
   },
@@ -189,14 +229,13 @@
       "scheduler_transitions",
       "virtual_memory_map_unmap",
       "boot_slot_state",
-      "update_rollback"
-    ],
-    "open_domains": [
+      "update_rollback",
       "poolefs_transaction_recovery"
     ],
+    "open_domains": [],
     "required_count": 7,
-    "modeled_count": 6,
-    "open_count": 1
+    "modeled_count": 7,
+    "open_count": 0
   },
   "runs": [
     {
@@ -1747,6 +1786,932 @@
       "repeat_exact_match": true,
       "raw_output_public": false,
       "command_sha256": "F0EFCF32E1AAEF40AFE2A0C664A758299FA49953D9A61EAF593857D602D3D843"
+    },
+    {
+      "id": "poolefs_transaction_recovery.safe",
+      "model_id": "poolefs_transaction_recovery",
+      "case_id": "safe",
+      "mode": "safe",
+      "status": "pass",
+      "expected_exit_code": 0,
+      "observed_exit_code": 0,
+      "expected_invariant_violation": null,
+      "observed_invariant_violation": null,
+      "generated_states": 214,
+      "distinct_states": 74,
+      "left_on_queue": 0,
+      "depth": 13,
+      "trace": [],
+      "trace_sha256": "37517E5F3DC66819F61F5A7BB8ACE1921282415F10551D2DEFA5C3EB0985B570",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "1E69ADF768006CC89F6452CC251BFA451C1A29482EA187E0491DA9C5F7F57A3A"
+    },
+    {
+      "id": "poolefs_transaction_recovery.unsafe_torn_write",
+      "model_id": "poolefs_transaction_recovery",
+      "case_id": "unsafe_torn_write",
+      "mode": "hostile",
+      "status": "pass",
+      "expected_exit_code": 12,
+      "observed_exit_code": 12,
+      "expected_invariant_violation": "ChecksummedDataValid",
+      "observed_invariant_violation": "ChecksummedDataValid",
+      "generated_states": 11,
+      "distinct_states": 8,
+      "left_on_queue": 3,
+      "depth": 4,
+      "trace": [
+        {
+          "index": 1,
+          "action": "Init",
+          "state_sha256": "BF4D76A4B72A8C6C8AB88F0DBD70792EA588771518B2EDB580AF57812F5F999D",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> FALSE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"Empty\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Free\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = NoBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Unused\""
+          ]
+        },
+        {
+          "index": 2,
+          "action": "BeginTransaction",
+          "state_sha256": "E74A03C47F60E0E4D57D6884BAA74CD1C3A80E787FBFDCF0F8FB628AFA293D40",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> FALSE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"Empty\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Open\""
+          ]
+        },
+        {
+          "index": 3,
+          "action": "WriteData",
+          "state_sha256": "E91E7003E5AF8ADD948FBB9B5185B12F72453D618AD9FB5B99F76A5A35544492",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> FALSE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"Empty\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = TRUE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Open\""
+          ]
+        },
+        {
+          "index": 4,
+          "action": "CrashMounted",
+          "state_sha256": "37B8D302404DC1CA38F27CADCC88F81E6A0666D73005678615F7A78E92D5701B",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> TRUE)",
+            "/\\ systemState = \"Crashed\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"Torn\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Interrupted\""
+          ]
+        }
+      ],
+      "trace_sha256": "33606BAC4E23AB8997ABCC30C71025EE20C231675D53CC5BDCE5649F898D4617",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "243402B52F329EA270D2065A620ED45FE2EEBC23257E9EEDA8906442724C452F"
+    },
+    {
+      "id": "poolefs_transaction_recovery.unsafe_premature_publish",
+      "model_id": "poolefs_transaction_recovery",
+      "case_id": "unsafe_premature_publish",
+      "mode": "hostile",
+      "status": "pass",
+      "expected_exit_code": 12,
+      "observed_exit_code": 12,
+      "expected_invariant_violation": "PublicationOrderSound",
+      "observed_invariant_violation": "PublicationOrderSound",
+      "generated_states": 20,
+      "distinct_states": 12,
+      "left_on_queue": 4,
+      "depth": 5,
+      "trace": [
+        {
+          "index": 1,
+          "action": "Init",
+          "state_sha256": "BF4D76A4B72A8C6C8AB88F0DBD70792EA588771518B2EDB580AF57812F5F999D",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> FALSE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"Empty\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Free\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = NoBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Unused\""
+          ]
+        },
+        {
+          "index": 2,
+          "action": "BeginTransaction",
+          "state_sha256": "E74A03C47F60E0E4D57D6884BAA74CD1C3A80E787FBFDCF0F8FB628AFA293D40",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> FALSE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"Empty\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Open\""
+          ]
+        },
+        {
+          "index": 3,
+          "action": "WriteData",
+          "state_sha256": "E91E7003E5AF8ADD948FBB9B5185B12F72453D618AD9FB5B99F76A5A35544492",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> FALSE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"Empty\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = TRUE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Open\""
+          ]
+        },
+        {
+          "index": 4,
+          "action": "FlushData",
+          "state_sha256": "FE75145BFC9C5C98B274434EBC92BFB10B917F93A3904ECB592089680A1896A4",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> TRUE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"New\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Open\""
+          ]
+        },
+        {
+          "index": 5,
+          "action": "PublishPremature",
+          "state_sha256": "025C97F6C56F679C9B975362FB57FE9E3D97B0EF4E05EFD9F7D75A72786C720E",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> TRUE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"New\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Free\" @@ SpareBlock :> \"Live\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = SpareBlock",
+            "/\\ auditFault = \"PrematurePublish\"",
+            "/\\ transactionState = \"Open\""
+          ]
+        }
+      ],
+      "trace_sha256": "11E00D83B8742C2798441DE0BBBB3F7E5065C9D327C3AC3E2E52687061A266F3",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "7D7B0E61D0F530867671C495C8DAC1436DFD7B44CFDE716E59A9469264A49EED"
+    },
+    {
+      "id": "poolefs_transaction_recovery.unsafe_double_allocation",
+      "model_id": "poolefs_transaction_recovery",
+      "case_id": "unsafe_double_allocation",
+      "mode": "hostile",
+      "status": "pass",
+      "expected_exit_code": 12,
+      "observed_exit_code": 12,
+      "expected_invariant_violation": "AllocationOwnershipSound",
+      "observed_invariant_violation": "AllocationOwnershipSound",
+      "generated_states": 2,
+      "distinct_states": 2,
+      "left_on_queue": 0,
+      "depth": 2,
+      "trace": [
+        {
+          "index": 1,
+          "action": "Init",
+          "state_sha256": "BF4D76A4B72A8C6C8AB88F0DBD70792EA588771518B2EDB580AF57812F5F999D",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> FALSE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"Empty\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Free\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = NoBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Unused\""
+          ]
+        },
+        {
+          "index": 2,
+          "action": "BeginTransaction",
+          "state_sha256": "154D2A50C04302A278378A1D822D3323B388FECA0509F43A10F83F8993967960",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> FALSE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"Empty\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Staged\" @@ SpareBlock :> \"Free\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = OldBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Open\""
+          ]
+        }
+      ],
+      "trace_sha256": "B34EBD56EBBDDF89FAAC2E640EEEF0456EB78CF9118AE29E3D024C5E32CF79B6",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "94725403BF1903AEEC3B1AE6CF186FEDB0FE03942BF6583B7180A0070C73C438"
+    },
+    {
+      "id": "poolefs_transaction_recovery.unsafe_non_idempotent_replay",
+      "model_id": "poolefs_transaction_recovery",
+      "case_id": "unsafe_non_idempotent_replay",
+      "mode": "hostile",
+      "status": "pass",
+      "expected_exit_code": 12,
+      "observed_exit_code": 12,
+      "expected_invariant_violation": "ReplayIdempotent",
+      "observed_invariant_violation": "ReplayIdempotent",
+      "generated_states": 193,
+      "distinct_states": 71,
+      "left_on_queue": 3,
+      "depth": 12,
+      "trace": [
+        {
+          "index": 1,
+          "action": "Init",
+          "state_sha256": "BF4D76A4B72A8C6C8AB88F0DBD70792EA588771518B2EDB580AF57812F5F999D",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> FALSE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"Empty\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Free\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = NoBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Unused\""
+          ]
+        },
+        {
+          "index": 2,
+          "action": "BeginTransaction",
+          "state_sha256": "E74A03C47F60E0E4D57D6884BAA74CD1C3A80E787FBFDCF0F8FB628AFA293D40",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> FALSE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"Empty\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Open\""
+          ]
+        },
+        {
+          "index": 3,
+          "action": "WriteData",
+          "state_sha256": "E91E7003E5AF8ADD948FBB9B5185B12F72453D618AD9FB5B99F76A5A35544492",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> FALSE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"Empty\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = TRUE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Open\""
+          ]
+        },
+        {
+          "index": 4,
+          "action": "FlushData",
+          "state_sha256": "FE75145BFC9C5C98B274434EBC92BFB10B917F93A3904ECB592089680A1896A4",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> TRUE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"New\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Open\""
+          ]
+        },
+        {
+          "index": 5,
+          "action": "PersistIntent",
+          "state_sha256": "353CDA581E61D097D2B7B811AEB62808691ECA12F3228F6F509FC9DB1CC73F6B",
+          "state_lines": [
+            "/\\ journalState = \"Intent\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> TRUE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"New\")",
+            "/\\ journalChecksumValid = TRUE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = SpareBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Open\""
+          ]
+        },
+        {
+          "index": 6,
+          "action": "PersistCommit",
+          "state_sha256": "1E51EA59C11797873E2F1B7B7743B19E95E608AB16C280A390BD9CBD802CA565",
+          "state_lines": [
+            "/\\ journalState = \"Committed\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> TRUE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"New\")",
+            "/\\ journalChecksumValid = TRUE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = SpareBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Open\""
+          ]
+        },
+        {
+          "index": 7,
+          "action": "CrashMounted",
+          "state_sha256": "1FCDB7E28391BFAD5B73F850894ECBBFF6934916DC0AA5A25FFD30583BEE3631",
+          "state_lines": [
+            "/\\ journalState = \"Committed\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> TRUE)",
+            "/\\ systemState = \"Crashed\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"New\")",
+            "/\\ journalChecksumValid = TRUE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = SpareBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Interrupted\""
+          ]
+        },
+        {
+          "index": 8,
+          "action": "StartRecovery",
+          "state_sha256": "2667715CEB2EE77EAE15D63A9016FB2DB0C20D9DEAE33D663FC508BB8C3F9893",
+          "state_lines": [
+            "/\\ journalState = \"Committed\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> TRUE)",
+            "/\\ systemState = \"RecoveryInspect\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"New\")",
+            "/\\ journalChecksumValid = TRUE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = SpareBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Interrupted\""
+          ]
+        },
+        {
+          "index": 9,
+          "action": "ApplyRecoveryCommit",
+          "state_sha256": "FF9FBDBAB2A2D0A95394569C9FA3E7F9FBFBB26F92D8A1C80C8BB2A82555FCEE",
+          "state_lines": [
+            "/\\ journalState = \"Committed\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> TRUE)",
+            "/\\ systemState = \"RecoveryApplied\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"New\")",
+            "/\\ journalChecksumValid = TRUE",
+            "/\\ blockRole = (OldBlock :> \"Free\" @@ SpareBlock :> \"Live\")",
+            "/\\ replayApplyCount = 1",
+            "/\\ journalTarget = SpareBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = SpareBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Interrupted\""
+          ]
+        },
+        {
+          "index": 10,
+          "action": "CrashRecovery",
+          "state_sha256": "0C621ADEB163423489130144C92B5DCF201948EA0E54F5CBB02D71057816EB40",
+          "state_lines": [
+            "/\\ journalState = \"Committed\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> TRUE)",
+            "/\\ systemState = \"Crashed\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"New\")",
+            "/\\ journalChecksumValid = TRUE",
+            "/\\ blockRole = (OldBlock :> \"Free\" @@ SpareBlock :> \"Live\")",
+            "/\\ replayApplyCount = 1",
+            "/\\ journalTarget = SpareBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = SpareBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Interrupted\""
+          ]
+        },
+        {
+          "index": 11,
+          "action": "StartRecovery",
+          "state_sha256": "62EC81931D38B2F8368757C8924A75D240C135A6F2557B565695AFBDA70E7894",
+          "state_lines": [
+            "/\\ journalState = \"Committed\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> TRUE)",
+            "/\\ systemState = \"RecoveryInspect\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"New\")",
+            "/\\ journalChecksumValid = TRUE",
+            "/\\ blockRole = (OldBlock :> \"Free\" @@ SpareBlock :> \"Live\")",
+            "/\\ replayApplyCount = 1",
+            "/\\ journalTarget = SpareBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = SpareBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Interrupted\""
+          ]
+        },
+        {
+          "index": 12,
+          "action": "ApplyRecoveryCommit",
+          "state_sha256": "FB49E2ECC1C206872CF16FB9F38CD487ACC5C2A255676FE6643251F630AE562C",
+          "state_lines": [
+            "/\\ journalState = \"Committed\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> TRUE)",
+            "/\\ systemState = \"RecoveryApplied\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"New\")",
+            "/\\ journalChecksumValid = TRUE",
+            "/\\ blockRole = (OldBlock :> \"Free\" @@ SpareBlock :> \"Live\")",
+            "/\\ replayApplyCount = 2",
+            "/\\ journalTarget = SpareBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = SpareBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Interrupted\""
+          ]
+        }
+      ],
+      "trace_sha256": "32B4811E4F8601203EDD81FC058FFA651EDFDD897F542EFB3114700456170E61",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "E535E6A2B51B55A94256F9FDC658650064B9121144E63C8AEF5AC6228333CD9C"
+    },
+    {
+      "id": "poolefs_transaction_recovery.unsafe_checksum_acceptance",
+      "model_id": "poolefs_transaction_recovery",
+      "case_id": "unsafe_checksum_acceptance",
+      "mode": "hostile",
+      "status": "pass",
+      "expected_exit_code": 12,
+      "observed_exit_code": 12,
+      "expected_invariant_violation": "ChecksumRejectionSound",
+      "observed_invariant_violation": "ChecksumRejectionSound",
+      "generated_states": 129,
+      "distinct_states": 57,
+      "left_on_queue": 12,
+      "depth": 10,
+      "trace": [
+        {
+          "index": 1,
+          "action": "Init",
+          "state_sha256": "BF4D76A4B72A8C6C8AB88F0DBD70792EA588771518B2EDB580AF57812F5F999D",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> FALSE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"Empty\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Free\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = NoBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Unused\""
+          ]
+        },
+        {
+          "index": 2,
+          "action": "BeginTransaction",
+          "state_sha256": "E74A03C47F60E0E4D57D6884BAA74CD1C3A80E787FBFDCF0F8FB628AFA293D40",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> FALSE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"Empty\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Open\""
+          ]
+        },
+        {
+          "index": 3,
+          "action": "WriteData",
+          "state_sha256": "E91E7003E5AF8ADD948FBB9B5185B12F72453D618AD9FB5B99F76A5A35544492",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> FALSE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"Empty\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = TRUE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Open\""
+          ]
+        },
+        {
+          "index": 4,
+          "action": "FlushData",
+          "state_sha256": "FE75145BFC9C5C98B274434EBC92BFB10B917F93A3904ECB592089680A1896A4",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> TRUE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"New\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Open\""
+          ]
+        },
+        {
+          "index": 5,
+          "action": "PersistIntent",
+          "state_sha256": "353CDA581E61D097D2B7B811AEB62808691ECA12F3228F6F509FC9DB1CC73F6B",
+          "state_lines": [
+            "/\\ journalState = \"Intent\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> TRUE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"New\")",
+            "/\\ journalChecksumValid = TRUE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = SpareBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Open\""
+          ]
+        },
+        {
+          "index": 6,
+          "action": "PersistCommit",
+          "state_sha256": "1E51EA59C11797873E2F1B7B7743B19E95E608AB16C280A390BD9CBD802CA565",
+          "state_lines": [
+            "/\\ journalState = \"Committed\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> TRUE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"New\")",
+            "/\\ journalChecksumValid = TRUE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = SpareBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Open\""
+          ]
+        },
+        {
+          "index": 7,
+          "action": "CrashMounted",
+          "state_sha256": "1FCDB7E28391BFAD5B73F850894ECBBFF6934916DC0AA5A25FFD30583BEE3631",
+          "state_lines": [
+            "/\\ journalState = \"Committed\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> TRUE)",
+            "/\\ systemState = \"Crashed\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"New\")",
+            "/\\ journalChecksumValid = TRUE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = SpareBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Interrupted\""
+          ]
+        },
+        {
+          "index": 8,
+          "action": "CorruptJournal",
+          "state_sha256": "A1081039DC738433B0769B956917C8BCB78752FD9206A6E98D6B3A71F12F970A",
+          "state_lines": [
+            "/\\ journalState = \"Committed\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> TRUE)",
+            "/\\ systemState = \"Crashed\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"New\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = SpareBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Interrupted\""
+          ]
+        },
+        {
+          "index": 9,
+          "action": "StartRecovery",
+          "state_sha256": "0BADF616BBA16DD6A8044DA0386318222F1338C2D2D9066A87E8A610ECBA5D23",
+          "state_lines": [
+            "/\\ journalState = \"Committed\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> TRUE)",
+            "/\\ systemState = \"RecoveryInspect\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"New\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = SpareBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Interrupted\""
+          ]
+        },
+        {
+          "index": 10,
+          "action": "ApplyRecoveryCommit",
+          "state_sha256": "34EAA2049F6AF308C75FF77ABD14EF574ADDD6D27CE6FF44DA3764AEB81AA23D",
+          "state_lines": [
+            "/\\ journalState = \"Committed\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> TRUE)",
+            "/\\ systemState = \"RecoveryApplied\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"New\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Free\" @@ SpareBlock :> \"Live\")",
+            "/\\ replayApplyCount = 1",
+            "/\\ journalTarget = SpareBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = SpareBlock",
+            "/\\ auditFault = \"InvalidChecksum\"",
+            "/\\ transactionState = \"Interrupted\""
+          ]
+        }
+      ],
+      "trace_sha256": "91DD1D450121F67A86F68D9BF1AA7367C61264B64DBFCB4851172CA64BF8A4C7",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "E3B93E80752EEEF75F0CEB2E6454E295DB707FE8A75053D1A9F19E0C8D33F090"
+    },
+    {
+      "id": "poolefs_transaction_recovery.unsafe_recovery_leak",
+      "model_id": "poolefs_transaction_recovery",
+      "case_id": "unsafe_recovery_leak",
+      "mode": "hostile",
+      "status": "pass",
+      "expected_exit_code": 12,
+      "observed_exit_code": 12,
+      "expected_invariant_violation": "MountedQuiescent",
+      "observed_invariant_violation": "MountedQuiescent",
+      "generated_states": 41,
+      "distinct_states": 19,
+      "left_on_queue": 4,
+      "depth": 6,
+      "trace": [
+        {
+          "index": 1,
+          "action": "Init",
+          "state_sha256": "BF4D76A4B72A8C6C8AB88F0DBD70792EA588771518B2EDB580AF57812F5F999D",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> FALSE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"Empty\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Free\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = NoBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Unused\""
+          ]
+        },
+        {
+          "index": 2,
+          "action": "BeginTransaction",
+          "state_sha256": "E74A03C47F60E0E4D57D6884BAA74CD1C3A80E787FBFDCF0F8FB628AFA293D40",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> FALSE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"Empty\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Open\""
+          ]
+        },
+        {
+          "index": 3,
+          "action": "CrashMounted",
+          "state_sha256": "44B9D9BFC686FDA972445F15CC69C986FE1B82AEB28AD06549DA7D03D0711A56",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> FALSE)",
+            "/\\ systemState = \"Crashed\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"Empty\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Interrupted\""
+          ]
+        },
+        {
+          "index": 4,
+          "action": "StartRecovery",
+          "state_sha256": "3E1B8C8706EE820C2868D22C78C1BC92B7D34414AB6D3EA214AB830B2E8FB968",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> FALSE)",
+            "/\\ systemState = \"RecoveryInspect\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"Empty\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Interrupted\""
+          ]
+        },
+        {
+          "index": 5,
+          "action": "ApplyRecoveryRollback",
+          "state_sha256": "0CA4D376AD0E17B190FDF18EA8D3C14F1453DC39C7B809BD6F00DEEBBF900570",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> FALSE)",
+            "/\\ systemState = \"RecoveryApplied\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"Empty\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Interrupted\""
+          ]
+        },
+        {
+          "index": 6,
+          "action": "FinishRecovery",
+          "state_sha256": "9AB2A4A6097ADF5E636C47038D7D9972B0498B1304C13904685434AE663C8C2A",
+          "state_lines": [
+            "/\\ journalState = \"Empty\"",
+            "/\\ blockChecksum = (OldBlock :> TRUE @@ SpareBlock :> FALSE)",
+            "/\\ systemState = \"Mounted\"",
+            "/\\ blockValue = (OldBlock :> \"Old\" @@ SpareBlock :> \"Empty\")",
+            "/\\ journalChecksumValid = FALSE",
+            "/\\ blockRole = (OldBlock :> \"Live\" @@ SpareBlock :> \"Staged\")",
+            "/\\ replayApplyCount = 0",
+            "/\\ journalTarget = NoBlock",
+            "/\\ txTarget = SpareBlock",
+            "/\\ pendingData = FALSE",
+            "/\\ activeBlock = OldBlock",
+            "/\\ auditFault = \"None\"",
+            "/\\ transactionState = \"Finished\""
+          ]
+        }
+      ],
+      "trace_sha256": "B4704258E84B3639B7BE61B83613AD64B60FB46E0F40EE92885A5297B04B1F52",
+      "repeat_exact_match": true,
+      "raw_output_public": false,
+      "command_sha256": "1131FC714576874ABFC312A7893C125A9818B53DF361E4E50EE214E30D7E86D9"
     }
   ],
   "negative_controls": [
@@ -1898,6 +2863,48 @@
       "evidence_kind": "executed_counterexample"
     },
     {
+      "id": "NEG-N4-MODEL-POOLEFS-TORN-WRITE-MUTANT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "executed_counterexample"
+    },
+    {
+      "id": "NEG-N4-MODEL-POOLEFS-PREMATURE-PUBLISH-MUTANT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "executed_counterexample"
+    },
+    {
+      "id": "NEG-N4-MODEL-POOLEFS-DOUBLE-ALLOCATION-MUTANT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "executed_counterexample"
+    },
+    {
+      "id": "NEG-N4-MODEL-POOLEFS-NON-IDEMPOTENT-REPLAY-MUTANT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "executed_counterexample"
+    },
+    {
+      "id": "NEG-N4-MODEL-POOLEFS-CHECKSUM-ACCEPTANCE-MUTANT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "executed_counterexample"
+    },
+    {
+      "id": "NEG-N4-MODEL-POOLEFS-RECOVERY-LEAK-MUTANT",
+      "expected": "reject",
+      "observed": "reject",
+      "status": "pass",
+      "evidence_kind": "executed_counterexample"
+    },
+    {
       "id": "NEG-N4-MODEL-SAFE-VIOLATION",
       "expected": "reject",
       "observed": "reject",
@@ -1927,16 +2934,16 @@
     }
   ],
   "summary": {
-    "model_count": 5,
-    "run_case_count": 20,
-    "safe_run_count": 5,
-    "safe_run_pass_count": 5,
-    "hostile_run_count": 15,
-    "hostile_counterexample_count": 15,
-    "repeat_match_count": 20,
-    "negative_control_count": 25,
-    "negative_control_pass_count": 25,
-    "normalized_trace_count": 15,
+    "model_count": 6,
+    "run_case_count": 27,
+    "safe_run_count": 6,
+    "safe_run_pass_count": 6,
+    "hostile_run_count": 21,
+    "hostile_counterexample_count": 21,
+    "repeat_match_count": 27,
+    "negative_control_count": 31,
+    "negative_control_pass_count": 31,
+    "normalized_trace_count": 21,
     "implementation_trace_cross_check_count": 0,
     "failed_check_count": 0
   },
@@ -1946,13 +2953,14 @@
     "The virtual-memory model has exactly two domains, two CPUs, two physical pages, one virtual address per domain, generations 0 through 1, and atomic map, TLB fill/evict, transfer, unmap, and shootdown-acknowledgement transitions. It has no page-table hierarchy, PCID/ASID, DMA/IOMMU, interrupt-ordering, weak-memory, concurrent page-table-write, huge-page, copy-on-write, swap, NUMA, or hardware page-walk model.",
     "The IPC model has exactly two principals, one endpoint, two calls, two reply tokens, a one-call queue bound, endpoint epochs 0 through 1, and atomic enqueue, dispatch, cancel, timeout, reply, teardown, and reopen transitions. Call and reply-token identifiers are one-shot and never recycled. CanCall is an abstract authorization predicate, not a composed capability lookup, derivation, or revocation model. The queue is an unordered set abstraction. It has no payload, message-copy, scheduling, priority, fairness, blocking-thread, interrupt, SMP interleaving, weak-memory, resource-accounting, endpoint-transfer, kernel-object implementation, or ABI-encoding model.",
     "The scheduler model has exactly three fixed-priority tasks, one abstract CPU context, one non-recursive lock, a preloaded low-priority critical section, one-shot task activation, atomic transitions, and a maximum of two recorded dispatch bypasses. Cancellation and timeout are modeled as blocked-to-runnable wake results that must be consumed before the task continues. Priority inheritance is immediate and transitive depth is one. The bypass bound is a safety accounting rule only: Idle remains enabled and no temporal fairness or eventual-dispatch property is checked. There is no timer clock, deadline arithmetic, quantum, multicore execution, interrupt ordering, nested lock, deadlock graph, donation chain, affinity, migration, register context, FPU/vector state, weak memory, resource quota, scheduler implementation, or ABI encoding.",
+    "The PooleFS model has exactly two abstract blocks, one logical old value, one copy-on-write update, one transaction, atomic model transitions, explicit volatile pending data, durable data/checksum/allocation-role/journal state, crash and restart before or during recovery, and at most one successful recovery publication. Flush and FUA are abstract atomic persistence edges, and journal or staged-data corruption is injected only while crashed. There is no byte- or sector-level atomicity, device write cache, controller reordering, multiple-file or multiple-transaction concurrency, directory, extent, snapshot, quota, ENOSPC, page-cache, VFS, encryption, block-driver, repair traversal, physical-medium, implementation, or on-disk ABI model.",
     "TLC uses 64-bit state fingerprints; complete reachable-state exploration within the constants is not a collision-free mathematical proof.",
     "Only state safety invariants are checked. No liveness, fairness, real-time, probabilistic, refinement, implementation-equivalence, or physical-hardware property is checked.",
     "The hostile configurations are deliberate mutations used to demonstrate that the named invariants produce finite counterexample traces."
   ],
   "open_work": [
-    "Model PooleFS transaction recovery and power-loss state before freezing persistent formats.",
-    "Cross-check all five current models against exact native implementation traces when those implementations exist.",
+    "Cross-check all six current models against exact native implementation traces when those implementations exist.",
+    "Add separately scoped temporal liveness, refinement, and implementation-conformance work beyond finite safety checks.",
     "Source-build and independently reproduce the model-checker and Java inputs with signed provenance, SBOM, vulnerability, license, and redistribution review."
   ],
   "claim_boundary": {

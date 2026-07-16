@@ -71,16 +71,16 @@ class NativeModelTests(unittest.TestCase):
 
     def test_required_and_modeled_domain_sets_are_frozen(self) -> None:
         self.assertEqual(7, len(self.contract["required_domains"]))
-        self.assertEqual(6, len(self.contract["modeled_domains"]))
+        self.assertEqual(7, len(self.contract["modeled_domains"]))
         self.assertEqual(
-            {"capability_derivation_revocation", "ipc_state", "scheduler_transitions", "virtual_memory_map_unmap", "boot_slot_state", "update_rollback"},
+            {"capability_derivation_revocation", "ipc_state", "scheduler_transitions", "virtual_memory_map_unmap", "boot_slot_state", "update_rollback", "poolefs_transaction_recovery"},
             set(self.contract["modeled_domains"]),
         )
 
     def test_model_identifiers_and_invariants_are_frozen(self) -> None:
         models = {item["id"]: item for item in self.contract["models"]}
         self.assertEqual(
-            {"boot_slot_rollback", "capability_revocation", "virtual_memory_ownership", "capability_mediated_ipc", "bounded_scheduler"},
+            {"boot_slot_rollback", "capability_revocation", "virtual_memory_ownership", "capability_mediated_ipc", "bounded_scheduler", "poolefs_transaction_recovery"},
             set(models),
         )
         self.assertIn("Recoverable", models["boot_slot_rollback"]["invariants"])
@@ -90,11 +90,14 @@ class NativeModelTests(unittest.TestCase):
         self.assertIn("ClosedEndpointQuiescent", models["capability_mediated_ipc"]["invariants"])
         self.assertIn("PriorityInheritanceSound", models["bounded_scheduler"]["invariants"])
         self.assertIn("BypassBound", models["bounded_scheduler"]["invariants"])
+        self.assertIn("PublicationOrderSound", models["poolefs_transaction_recovery"]["invariants"])
+        self.assertIn("ReplayIdempotent", models["poolefs_transaction_recovery"]["invariants"])
         self.assertEqual(6, len(models["boot_slot_rollback"]["invariants"]))
         self.assertEqual(6, len(models["capability_revocation"]["invariants"]))
         self.assertEqual(7, len(models["virtual_memory_ownership"]["invariants"]))
         self.assertEqual(11, len(models["capability_mediated_ipc"]["invariants"]))
         self.assertEqual(15, len(models["bounded_scheduler"]["invariants"]))
+        self.assertEqual(12, len(models["poolefs_transaction_recovery"]["invariants"]))
 
     def test_normalized_commands_are_closed_and_exact(self) -> None:
         for model in self.contract["models"]:
@@ -159,6 +162,25 @@ class NativeModelTests(unittest.TestCase):
             "unsafe_priority_bypass": "DispatchPrioritySound",
             "unsafe_fairness_bypass": "BypassBound",
             "unsafe_scheduler_teardown_leak": "TerminalQuiescent",
+        }
+        self.assertEqual({"safe", *expected_violations}, set(cases))
+        self.assertTrue(all(value == "FALSE" for value in cases["safe"]["constant_assignments"].values()))
+        for case_id, invariant in expected_violations.items():
+            with self.subTest(case=case_id):
+                case = cases[case_id]
+                self.assertEqual(invariant, case["expected_invariant_violation"])
+                self.assertEqual(1, sum(value == "TRUE" for value in case["constant_assignments"].values()))
+
+    def test_poolefs_mutants_are_independent_and_named(self) -> None:
+        model = next(item for item in self.contract["models"] if item["id"] == "poolefs_transaction_recovery")
+        cases = {item["id"]: item for item in model["cases"]}
+        expected_violations = {
+            "unsafe_torn_write": "ChecksummedDataValid",
+            "unsafe_premature_publish": "PublicationOrderSound",
+            "unsafe_double_allocation": "AllocationOwnershipSound",
+            "unsafe_non_idempotent_replay": "ReplayIdempotent",
+            "unsafe_checksum_acceptance": "ChecksumRejectionSound",
+            "unsafe_recovery_leak": "MountedQuiescent",
         }
         self.assertEqual({"safe", *expected_violations}, set(cases))
         self.assertTrue(all(value == "FALSE" for value in cases["safe"]["constant_assignments"].values()))
@@ -265,10 +287,10 @@ The depth of the complete state graph search is 1.
 
     def test_safe_state_spaces_are_completely_drained(self) -> None:
         safe = [item for item in self.readiness["runs"] if item["mode"] == "safe"]
-        self.assertEqual(5, len(safe))
+        self.assertEqual(6, len(safe))
         self.assertTrue(all(item["observed_exit_code"] == 0 for item in safe))
         self.assertTrue(all(item["left_on_queue"] == 0 for item in safe))
-        self.assertEqual({20, 621, 1316, 1422, 2391}, {item["distinct_states"] for item in safe})
+        self.assertEqual({20, 74, 621, 1316, 1422, 2391}, {item["distinct_states"] for item in safe})
 
     def test_hostile_counterexamples_are_exact(self) -> None:
         hostile = {item["id"]: item for item in self.readiness["runs"] if item["mode"] == "hostile"}
@@ -287,6 +309,12 @@ The depth of the complete state graph search is 1.
         priority_bypass = hostile["bounded_scheduler.unsafe_priority_bypass"]
         fairness_bypass = hostile["bounded_scheduler.unsafe_fairness_bypass"]
         scheduler_teardown = hostile["bounded_scheduler.unsafe_scheduler_teardown_leak"]
+        torn_write = hostile["poolefs_transaction_recovery.unsafe_torn_write"]
+        premature_publish = hostile["poolefs_transaction_recovery.unsafe_premature_publish"]
+        double_allocation = hostile["poolefs_transaction_recovery.unsafe_double_allocation"]
+        non_idempotent_replay = hostile["poolefs_transaction_recovery.unsafe_non_idempotent_replay"]
+        checksum_acceptance = hostile["poolefs_transaction_recovery.unsafe_checksum_acceptance"]
+        recovery_leak = hostile["poolefs_transaction_recovery.unsafe_recovery_leak"]
         self.assertEqual("Recoverable", boot["observed_invariant_violation"])
         self.assertEqual(["Init", "Stage", "StartTrial", "TrialFailure"], [item["action"] for item in boot["trace"]])
         self.assertEqual("NoLiveDescendantOfRevoked", capability["observed_invariant_violation"])
@@ -314,6 +342,18 @@ The depth of the complete state graph search is 1.
         self.assertEqual(["Init", "Activate", "Preempt", "Dispatch", "Preempt", "Dispatch", "Preempt", "Dispatch"], [item["action"] for item in fairness_bypass["trace"]])
         self.assertEqual("TerminalQuiescent", scheduler_teardown["observed_invariant_violation"])
         self.assertEqual(["Init", "Activate", "Teardown"], [item["action"] for item in scheduler_teardown["trace"]])
+        self.assertEqual("ChecksummedDataValid", torn_write["observed_invariant_violation"])
+        self.assertEqual(["Init", "BeginTransaction", "WriteData", "CrashMounted"], [item["action"] for item in torn_write["trace"]])
+        self.assertEqual("PublicationOrderSound", premature_publish["observed_invariant_violation"])
+        self.assertEqual(["Init", "BeginTransaction", "WriteData", "FlushData", "PublishPremature"], [item["action"] for item in premature_publish["trace"]])
+        self.assertEqual("AllocationOwnershipSound", double_allocation["observed_invariant_violation"])
+        self.assertEqual(["Init", "BeginTransaction"], [item["action"] for item in double_allocation["trace"]])
+        self.assertEqual("ReplayIdempotent", non_idempotent_replay["observed_invariant_violation"])
+        self.assertEqual(["Init", "BeginTransaction", "WriteData", "FlushData", "PersistIntent", "PersistCommit", "CrashMounted", "StartRecovery", "ApplyRecoveryCommit", "CrashRecovery", "StartRecovery", "ApplyRecoveryCommit"], [item["action"] for item in non_idempotent_replay["trace"]])
+        self.assertEqual("ChecksumRejectionSound", checksum_acceptance["observed_invariant_violation"])
+        self.assertEqual(["Init", "BeginTransaction", "WriteData", "FlushData", "PersistIntent", "PersistCommit", "CrashMounted", "CorruptJournal", "StartRecovery", "ApplyRecoveryCommit"], [item["action"] for item in checksum_acceptance["trace"]])
+        self.assertEqual("MountedQuiescent", recovery_leak["observed_invariant_violation"])
+        self.assertEqual(["Init", "BeginTransaction", "CrashMounted", "StartRecovery", "ApplyRecoveryRollback", "FinishRecovery"], [item["action"] for item in recovery_leak["trace"]])
 
     def test_public_traces_contain_no_absolute_paths_or_timestamps(self) -> None:
         encoded = json.dumps(self.readiness["runs"], ensure_ascii=True)
@@ -323,15 +363,15 @@ The depth of the complete state graph search is 1.
 
     def test_open_domains_and_trace_cross_checks_remain_explicit(self) -> None:
         coverage = self.readiness["domain_coverage"]
-        self.assertEqual(1, coverage["open_count"])
-        self.assertEqual({"poolefs_transaction_recovery"}, set(coverage["open_domains"]))
+        self.assertEqual(0, coverage["open_count"])
+        self.assertEqual(set(), set(coverage["open_domains"]))
         self.assertEqual(0, self.readiness["summary"]["implementation_trace_cross_check_count"])
         self.assertFalse(self.readiness["claim_boundary"]["abi_freeze_authorized"])
 
     def test_negative_control_register_is_complete(self) -> None:
         controls = self.readiness["negative_controls"]
         self.assertEqual(list(native_models.NEGATIVE_CONTROL_IDS), [item["id"] for item in controls])
-        self.assertEqual(25, len(controls))
+        self.assertEqual(31, len(controls))
         self.assertTrue(all(item["status"] == "pass" for item in controls))
 
     def test_stale_bindings_fail_closed(self) -> None:

@@ -1,13 +1,13 @@
 # PooleOS Bounded Native Models
 
-Status: Cycle 95 pre-production evidence
+Status: Cycle 96 pre-production evidence
 Date: 2026-07-16
-Selected move: `N4-SCHEDULER-MODEL-001`
-Contract: `POOLEOS-N4-MODELS-4`
+Selected move: `N4-POOLEFS-MODEL-001`
+Contract: `POOLEOS-N4-MODELS-5`
 
 ## Scope
 
-This cycle extends the executable state-model slice required by N4.5-N4.6 and `ADD-ASSURE-001`. It uses the TLC explicit-state model checker to exhaust every reachable state within five small frozen safe configurations and to demonstrate that fifteen deliberate unsafe mutations produce their required counterexample traces. The new scheduler model covers dormant, runnable, running, blocked, and dead task states; run-queue multiplicity; dispatch and preemption; lock blocking and priority inheritance; cancellation and timeout wake delivery; lock handoff; teardown; and a bounded dispatch-bypass accounting rule.
+This cycle completes bounded safety-model coverage of the seven domains required by N4.5-N4.6 and `ADD-ASSURE-001`. TLC exhausts every reachable state within six small frozen safe configurations and demonstrates that twenty-one deliberate unsafe mutations produce their required counterexample traces. The new PooleFS model covers one copy-on-write transaction over two abstract blocks, ordered data/intent/commit publication, crash and restart before or during recovery, idempotent replay, checksum rejection, allocation roles, old-or-new visibility, and recovery teardown.
 
 This is bounded model checking, not a formal proof of PooleOS or its future implementation. The models do not execute PooleBoot, PooleKernel, firmware, drivers, storage, or hardware.
 
@@ -51,8 +51,9 @@ Raw TLC output and metadata stay under ignored `.toolchains/native-models/eviden
 | `PooleVirtualMemory` | Two domains; two CPUs; two pages; one virtual address; generations 0 through 1 | 10,210 generated, 1,422 distinct, queue drained, depth 13 | `UnsafeStaleMapping=TRUE` violates `PageTableSafety`; 136 generated, 75 distinct, depth 4; trace `Init -> Map -> BeginTransfer -> CompleteTransfer`. Separately, `UnsafeEarlyReuse=TRUE` violates `TlbSafety`; 1,128 generated, 339 distinct, depth 6; trace `Init -> Map -> TlbFill -> BeginTransfer -> Unmap -> CompleteTransfer` |
 | `PooleIPC` | Two principals; one endpoint; two calls; two reply tokens; one queued call; endpoint epochs 0 through 1 | 1,402 generated, 621 distinct, queue drained, depth 9 | Independent mutants reject unauthorized enqueue via `QueuedCallAuthorized`, reply-token reuse via `LiveTokenConsistent`, stale post-cancel reply via `AcceptedRepliesFresh`, and queued-state leakage across teardown via `ClosedEndpointQuiescent`; traces have 2, 4, 5, and 3 states respectively |
 | `PooleScheduler` | Three fixed-priority tasks; one CPU context; one lock; one-shot activation; maximum two recorded dispatch bypasses | 11,942 generated, 2,391 distinct, queue drained, depth 19 | Lost cancel and timeout wakeups violate `WakeDeliverySound`; duplicate wake violates `NoDuplicateRunnable`; missing inheritance violates `PriorityInheritanceSound`; lower-priority dispatch violates `DispatchPrioritySound`; a third bypass violates `BypassBound`; teardown leakage violates `TerminalQuiescent`; traces have 6, 6, 6, 5, 4, 8, and 3 states respectively |
+| `PooleFS` | Two abstract blocks; one logical update; one copy-on-write transaction; atomic persistence edges; crash/restart during mounted operation or recovery | 214 generated, 74 distinct, queue drained, depth 13 | Independent mutants detect torn staged data via `ChecksummedDataValid`, publication before commit via `PublicationOrderSound`, double allocation via `AllocationOwnershipSound`, repeated replay via `ReplayIdempotent`, corrupt-journal acceptance via `ChecksumRejectionSound`, and recovery residue via `MountedQuiescent`; traces have 4, 5, 2, 12, 10, and 6 states respectively |
 
-Every safe and hostile case executes twice. All twenty normalized results match exactly. A hostile TLC exit code is accepted only when the exact named case, invariant, state counts, depth, normalized trace actions, and trace digest match the contract. A separate non-contract `-coverage 1` diagnostic reached all eleven non-idle scheduler actions with positive counts.
+Every safe and hostile case executes twice. All twenty-seven normalized results match exactly. A hostile TLC exit code is accepted only when the exact named case, invariant, state counts, depth, normalized trace actions, and trace digest match the contract. Separate non-contract `-coverage 1` diagnostics reached all eleven non-idle scheduler actions and all fifteen non-mutant PooleFS actions with positive counts.
 
 ## Safety Properties
 
@@ -66,21 +67,24 @@ The IPC model checks queue bounds and state agreement, enqueue authorization, in
 
 The scheduler model checks terminal and dormant quiescence, exact runnable/run-count agreement, no duplicate runnable entry, one-current-task agreement, blocked/waiting agreement, live lock ownership, wake delivery, lock-grant ownership, immediate one-level priority inheritance, audited highest-effective-priority dispatch, a two-bypass accounting bound, and bypass relevance. A task dispatched with a pending wake result must consume that result before any later acquire, block, release, or preemption transition.
 
-Twenty-five fail-closed controls cover prerelease substitution, TLC/JRE hashes, unsigned-input overclaims, runtime closure, all fifteen executed mutants, unexpected safe violations, path escape, arbitrary TLC modes, and implementation-trace overclaim.
+The PooleFS model checks allocation-role exclusivity, checksum/data agreement, commit-before-publication ordering, rejection of corrupt journal or staged data, old-or-new visible values, journal and transaction shape, recovery-state consistency, mounted quiescence, replay idempotence, and bounded staging ownership. Crashes may interrupt mounted work or recovery, and recovery chooses commit replay only when durable intent, commit, target data, and both checksums agree.
+
+Thirty-one fail-closed controls cover prerelease substitution, TLC/JRE hashes, unsigned-input overclaims, runtime closure, all twenty-one executed mutants, unexpected safe violations, path escape, arbitrary TLC modes, and implementation-trace overclaim.
 
 ## Assumptions And Non-Claims
 
-- Transitions are atomic. No concurrency, torn write, crash persistence, cryptography, firmware, DMA, or physical attacker is modeled.
+- Transitions are atomic. The PooleFS model exposes volatile versus durable state and abstract crash/restart edges, but none of the models represents instruction-level concurrency, weak memory, cryptography, firmware, DMA, or a physical attacker.
 - The boot model abstracts persistent metadata, exactly two slots, and one candidate-installation lifecycle without slot erasure or reuse. It does not model image verification, storage ordering, power loss, Secure Boot, anti-rollback counters, or real update formats.
 - The capability model does not model IPC, scheduling, memory maps, identifier reuse, quotas, timing, revocation races, or kernel data structures.
 - The virtual-memory model does not model page-table levels, PCID/ASID, interrupts, weak-memory ordering, concurrent page-table writers, hardware page walks, huge pages, copy-on-write, swap, NUMA, DMA, or an IOMMU. Its generation range permits only one ownership-changing reuse per page.
 - IPC call and reply-token identifiers are one-shot and never recycled. `CanCall` is an abstract authorization predicate, not a composition with the capability derivation/revocation model. The queue is an unordered set abstraction. The model does not represent payload bytes, message copying, scheduling, priorities, fairness, blocked threads, interrupts, SMP or weak-memory interleavings, quotas, endpoint transfer, kernel object layouts, or ABI encoding.
 - The scheduler starts with the low-priority task running inside one abstract critical section. Tasks activate once; transitions are atomic; priorities are fixed; priority inheritance has depth one; and there is one CPU context and one non-recursive lock. The model has no clock, deadline arithmetic, quantum, nested lock, donation chain, deadlock graph, affinity, migration, interrupt, register, FPU/vector, SMP, weak-memory, resource-quota, implementation-layout, or ABI model.
 - `MaxBypass=2` constrains dispatch-transition accounting only. `Idle` remains enabled, and neither temporal fairness, eventual dispatch, response-time bounds, nor freedom from starvation is checked or claimed.
+- PooleFS has exactly two abstract blocks, one old value, one update, one transaction, and atomic flush/FUA-style persistence edges. It has no sector atomicity, device cache, controller reordering, concurrent transactions, files, directories, extents, snapshots, quotas, ENOSPC, page cache, VFS, encryption, block driver, repair traversal, physical medium, implementation, or on-disk ABI model.
 - TLC uses 64-bit state fingerprints. A drained queue within frozen constants is not a collision-free theorem.
 - No liveness, fairness, real-time, probabilistic, refinement, or implementation-equivalence property is checked.
 - Counterexamples show that the model's named invariant detects the deliberate mutation. They do not prove that every real defect maps to the mutation.
 
 ## Open Gates
 
-`FLAG-N4-MODELS-001` remains open. The current slice covers six of seven required domains: capability derivation/revocation, IPC state, scheduler transitions, virtual-memory map/unmap, boot-slot state, and update rollback. PooleFS transaction recovery remains unmodeled. All five model families still require cross-checking against exact native implementation traces before any dependent ABI freeze. N4 remains partial and `production_promotion_allowed=false`.
+`FLAG-N4-POOLEFS-MODEL-001` is closed for its bounded finite safety slice. `FLAG-N4-MODELS-001` remains open: all seven required domains now have bounded models, but all six model families still require cross-checking against exact native implementation traces before dependent ABI freezes. Temporal liveness, refinement, implementation conformance, source-built toolchain provenance, and second-host reproduction remain separately scoped open work. N4 remains partial and `production_promotion_allowed=false`.

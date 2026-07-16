@@ -49,8 +49,8 @@
         "inspect_live_pooleglyph_each_turn": {"const": true},
         "verify_master_checklist_coverage_each_turn": {"const": true},
         "new_work_must_be_flagged": {"const": true},
-        "last_updated_cycle": {"const": 95},
-        "selected_move_id": {"const": "N4-SCHEDULER-MODEL-001"},
+        "last_updated_cycle": {"const": 96},
+        "selected_move_id": {"const": "N4-POOLEFS-MODEL-001"},
         "immediate_next_move_id": {"const": "N0-HW-KEY-ACQUIRE-001"},
         "required_records": {"type": "array", "minItems": 7, "items": {"type": "string"}, "uniqueItems": true},
         "flag_classes": {"type": "array", "minItems": 8, "items": {"type": "string"}, "uniqueItems": true}
@@ -135,8 +135,8 @@
     },
     "implementation_flags": {
       "type": "array",
-      "minItems": 32,
-      "maxItems": 32,
+      "minItems": 33,
+      "maxItems": 33,
       "items": {
         "type": "object",
         "additionalProperties": false,
