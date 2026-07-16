@@ -71,16 +71,16 @@ class NativeModelTests(unittest.TestCase):
 
     def test_required_and_modeled_domain_sets_are_frozen(self) -> None:
         self.assertEqual(7, len(self.contract["required_domains"]))
-        self.assertEqual(5, len(self.contract["modeled_domains"]))
+        self.assertEqual(6, len(self.contract["modeled_domains"]))
         self.assertEqual(
-            {"capability_derivation_revocation", "ipc_state", "virtual_memory_map_unmap", "boot_slot_state", "update_rollback"},
+            {"capability_derivation_revocation", "ipc_state", "scheduler_transitions", "virtual_memory_map_unmap", "boot_slot_state", "update_rollback"},
             set(self.contract["modeled_domains"]),
         )
 
     def test_model_identifiers_and_invariants_are_frozen(self) -> None:
         models = {item["id"]: item for item in self.contract["models"]}
         self.assertEqual(
-            {"boot_slot_rollback", "capability_revocation", "virtual_memory_ownership", "capability_mediated_ipc"},
+            {"boot_slot_rollback", "capability_revocation", "virtual_memory_ownership", "capability_mediated_ipc", "bounded_scheduler"},
             set(models),
         )
         self.assertIn("Recoverable", models["boot_slot_rollback"]["invariants"])
@@ -88,10 +88,13 @@ class NativeModelTests(unittest.TestCase):
         self.assertIn("RetiredPendingConsistency", models["virtual_memory_ownership"]["invariants"])
         self.assertIn("AcceptedRepliesFresh", models["capability_mediated_ipc"]["invariants"])
         self.assertIn("ClosedEndpointQuiescent", models["capability_mediated_ipc"]["invariants"])
+        self.assertIn("PriorityInheritanceSound", models["bounded_scheduler"]["invariants"])
+        self.assertIn("BypassBound", models["bounded_scheduler"]["invariants"])
         self.assertEqual(6, len(models["boot_slot_rollback"]["invariants"]))
         self.assertEqual(6, len(models["capability_revocation"]["invariants"]))
         self.assertEqual(7, len(models["virtual_memory_ownership"]["invariants"]))
         self.assertEqual(11, len(models["capability_mediated_ipc"]["invariants"]))
+        self.assertEqual(15, len(models["bounded_scheduler"]["invariants"]))
 
     def test_normalized_commands_are_closed_and_exact(self) -> None:
         for model in self.contract["models"]:
@@ -138,6 +141,26 @@ class NativeModelTests(unittest.TestCase):
             "unsafe_stale_reply": "AcceptedRepliesFresh",
             "unsafe_leaky_teardown": "ClosedEndpointQuiescent",
         }
+        self.assertTrue(all(value == "FALSE" for value in cases["safe"]["constant_assignments"].values()))
+        for case_id, invariant in expected_violations.items():
+            with self.subTest(case=case_id):
+                case = cases[case_id]
+                self.assertEqual(invariant, case["expected_invariant_violation"])
+                self.assertEqual(1, sum(value == "TRUE" for value in case["constant_assignments"].values()))
+
+    def test_scheduler_mutants_are_independent_and_named(self) -> None:
+        model = next(item for item in self.contract["models"] if item["id"] == "bounded_scheduler")
+        cases = {item["id"]: item for item in model["cases"]}
+        expected_violations = {
+            "unsafe_lost_cancel_wake": "WakeDeliverySound",
+            "unsafe_lost_timeout_wake": "WakeDeliverySound",
+            "unsafe_duplicate_wakeup": "NoDuplicateRunnable",
+            "unsafe_no_priority_inheritance": "PriorityInheritanceSound",
+            "unsafe_priority_bypass": "DispatchPrioritySound",
+            "unsafe_fairness_bypass": "BypassBound",
+            "unsafe_scheduler_teardown_leak": "TerminalQuiescent",
+        }
+        self.assertEqual({"safe", *expected_violations}, set(cases))
         self.assertTrue(all(value == "FALSE" for value in cases["safe"]["constant_assignments"].values()))
         for case_id, invariant in expected_violations.items():
             with self.subTest(case=case_id):
@@ -242,10 +265,10 @@ The depth of the complete state graph search is 1.
 
     def test_safe_state_spaces_are_completely_drained(self) -> None:
         safe = [item for item in self.readiness["runs"] if item["mode"] == "safe"]
-        self.assertEqual(4, len(safe))
+        self.assertEqual(5, len(safe))
         self.assertTrue(all(item["observed_exit_code"] == 0 for item in safe))
         self.assertTrue(all(item["left_on_queue"] == 0 for item in safe))
-        self.assertEqual({20, 621, 1316, 1422}, {item["distinct_states"] for item in safe})
+        self.assertEqual({20, 621, 1316, 1422, 2391}, {item["distinct_states"] for item in safe})
 
     def test_hostile_counterexamples_are_exact(self) -> None:
         hostile = {item["id"]: item for item in self.readiness["runs"] if item["mode"] == "hostile"}
@@ -257,6 +280,13 @@ The depth of the complete state graph search is 1.
         token_reuse = hostile["capability_mediated_ipc.unsafe_token_reuse"]
         stale_reply = hostile["capability_mediated_ipc.unsafe_stale_reply"]
         leaky_teardown = hostile["capability_mediated_ipc.unsafe_leaky_teardown"]
+        lost_cancel = hostile["bounded_scheduler.unsafe_lost_cancel_wake"]
+        lost_timeout = hostile["bounded_scheduler.unsafe_lost_timeout_wake"]
+        duplicate_wakeup = hostile["bounded_scheduler.unsafe_duplicate_wakeup"]
+        no_inheritance = hostile["bounded_scheduler.unsafe_no_priority_inheritance"]
+        priority_bypass = hostile["bounded_scheduler.unsafe_priority_bypass"]
+        fairness_bypass = hostile["bounded_scheduler.unsafe_fairness_bypass"]
+        scheduler_teardown = hostile["bounded_scheduler.unsafe_scheduler_teardown_leak"]
         self.assertEqual("Recoverable", boot["observed_invariant_violation"])
         self.assertEqual(["Init", "Stage", "StartTrial", "TrialFailure"], [item["action"] for item in boot["trace"]])
         self.assertEqual("NoLiveDescendantOfRevoked", capability["observed_invariant_violation"])
@@ -273,6 +303,17 @@ The depth of the complete state graph search is 1.
         self.assertEqual(["Init", "Enqueue", "Dispatch", "Cancel", "Reply"], [item["action"] for item in stale_reply["trace"]])
         self.assertEqual("ClosedEndpointQuiescent", leaky_teardown["observed_invariant_violation"])
         self.assertEqual(["Init", "Enqueue", "Teardown"], [item["action"] for item in leaky_teardown["trace"]])
+        self.assertEqual("WakeDeliverySound", lost_cancel["observed_invariant_violation"])
+        self.assertEqual(["Init", "Activate", "Preempt", "Dispatch", "BlockOnLock", "CancelWait"], [item["action"] for item in lost_cancel["trace"]])
+        self.assertEqual("WakeDeliverySound", lost_timeout["observed_invariant_violation"])
+        self.assertEqual(["Init", "Activate", "Preempt", "Dispatch", "BlockOnLock", "TimeoutWait"], [item["action"] for item in lost_timeout["trace"]])
+        self.assertEqual("NoDuplicateRunnable", duplicate_wakeup["observed_invariant_violation"])
+        self.assertEqual("PriorityInheritanceSound", no_inheritance["observed_invariant_violation"])
+        self.assertEqual("DispatchPrioritySound", priority_bypass["observed_invariant_violation"])
+        self.assertEqual("BypassBound", fairness_bypass["observed_invariant_violation"])
+        self.assertEqual(["Init", "Activate", "Preempt", "Dispatch", "Preempt", "Dispatch", "Preempt", "Dispatch"], [item["action"] for item in fairness_bypass["trace"]])
+        self.assertEqual("TerminalQuiescent", scheduler_teardown["observed_invariant_violation"])
+        self.assertEqual(["Init", "Activate", "Teardown"], [item["action"] for item in scheduler_teardown["trace"]])
 
     def test_public_traces_contain_no_absolute_paths_or_timestamps(self) -> None:
         encoded = json.dumps(self.readiness["runs"], ensure_ascii=True)
@@ -282,18 +323,15 @@ The depth of the complete state graph search is 1.
 
     def test_open_domains_and_trace_cross_checks_remain_explicit(self) -> None:
         coverage = self.readiness["domain_coverage"]
-        self.assertEqual(2, coverage["open_count"])
-        self.assertEqual(
-            {"scheduler_transitions", "poolefs_transaction_recovery"},
-            set(coverage["open_domains"]),
-        )
+        self.assertEqual(1, coverage["open_count"])
+        self.assertEqual({"poolefs_transaction_recovery"}, set(coverage["open_domains"]))
         self.assertEqual(0, self.readiness["summary"]["implementation_trace_cross_check_count"])
         self.assertFalse(self.readiness["claim_boundary"]["abi_freeze_authorized"])
 
     def test_negative_control_register_is_complete(self) -> None:
         controls = self.readiness["negative_controls"]
         self.assertEqual(list(native_models.NEGATIVE_CONTROL_IDS), [item["id"] for item in controls])
-        self.assertEqual(18, len(controls))
+        self.assertEqual(25, len(controls))
         self.assertTrue(all(item["status"] == "pass" for item in controls))
 
     def test_stale_bindings_fail_closed(self) -> None:

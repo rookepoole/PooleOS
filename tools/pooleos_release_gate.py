@@ -752,19 +752,19 @@ def check_native_model_readiness(path: Path = NATIVE_MODEL_READINESS) -> dict:
     runs = artifact.get("runs", [])
     if [item.get("id") for item in runs if isinstance(item, dict)] != list(native_models.RUN_IDS):
         errors.append("bounded model run set changed")
-    if summary.get("safe_run_pass_count") != 4 or summary.get("hostile_counterexample_count") != 8:
+    if summary.get("safe_run_pass_count") != 5 or summary.get("hostile_counterexample_count") != 15:
         errors.append("safe or hostile model evidence is incomplete")
-    if summary.get("repeat_match_count") != 12 or summary.get("negative_control_pass_count") != 18:
+    if summary.get("repeat_match_count") != 20 or summary.get("negative_control_pass_count") != 25:
         errors.append("model determinism or negative controls are incomplete")
-    if coverage.get("modeled_count") != 5 or coverage.get("open_count") != 2:
+    if coverage.get("modeled_count") != 6 or coverage.get("open_count") != 1:
         errors.append("bounded model domain coverage changed")
     if summary.get("implementation_trace_cross_check_count") != 0:
         errors.append("implementation trace cross-check is overclaimed")
     if artifact.get("n4_model_slice_satisfied") is not True or artifact.get("n4_exit_gate_satisfied") is not False:
         errors.append("N4 model-slice or exit boundary changed")
     detail = (
-        "contract=POOLEOS-N4-MODELS-3; models=4; safe=4/4; counterexamples=8/8; "
-        "repeats=12/12; negatives=18/18; domains=5/7; trace_cross_checks=0/4; "
+        "contract=POOLEOS-N4-MODELS-4; models=5; safe=5/5; counterexamples=15/15; "
+        "repeats=20/20; negatives=25/25; domains=6/7; trace_cross_checks=0/5; "
         "formal_proof=false; n4_exit=false; production_promotion_allowed=false"
     )
     return readiness.make_check(
