@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_model_contract",
+  "status_date": "2026-07-16",
+  "contract_id": "POOLEOS-N4-MODELS-1",
+  "selected_move_id": "N4-MODEL-001",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "engine": {
+    "kind": "TLC explicit-state model checker",
+    "version": "2.19",
+    "execution_mode": "breadth_first_complete_reachable_state_search_within_frozen_constants",
+    "workers": 1,
+    "fingerprint_polynomial": 0,
+    "tool_messages": true,
+    "repeat_count": 2,
+    "raw_output_public": false,
+    "normalized_trace_public": true,
+    "command_template": [
+      "$JAVA",
+      "-XX:+UseParallelGC",
+      "-Dfile.encoding=UTF-8",
+      "-jar",
+      "$TLC_JAR",
+      "-workers",
+      "1",
+      "-fp",
+      "0",
+      "-terse",
+      "-tool",
+      "-cleanup",
+      "-metadir",
+      "$RUN_DIR",
+      "-config",
+      "$CONFIG",
+      "$MODULE"
+    ]
+  },
+  "required_domains": [
+    "capability_derivation_revocation",
+    "ipc_state",
+    "scheduler_transitions",
+    "virtual_memory_map_unmap",
+    "boot_slot_state",
+    "update_rollback",
+    "poolefs_transaction_recovery"
+  ],
+  "modeled_domains": [
+    "capability_derivation_revocation",
+    "boot_slot_state",
+    "update_rollback"
+  ],
+  "models": [
+    {
+      "id": "boot_slot_rollback",
+      "module_path": "models/tla/PooleBootSlots.tla",
+      "safe_config_path": "models/tla/PooleBootSlots.safe.cfg",
+      "hostile_config_path": "models/tla/PooleBootSlots.hostile.cfg",
+      "state_variables": ["active", "knownGood", "candidate", "attempts", "phase"],
+      "invariants": ["TypeOK", "Recoverable", "SteadyActiveKnownGood", "TrialRollbackAvailable", "CandidateConsistency", "AttemptBound"],
+      "hostile_toggle": "UnsafeRollback",
+      "hostile_violation": "Recoverable",
+      "safe_expected": {"exit_code": 0, "generated_states": 46, "distinct_states": 20, "left_on_queue": 0, "depth": 7, "trace_length": 0, "trace_actions": [], "trace_sha256": "37517E5F3DC66819F61F5A7BB8ACE1921282415F10551D2DEFA5C3EB0985B570"},
+      "hostile_expected": {"exit_code": 12, "generated_states": 14, "distinct_states": 8, "left_on_queue": 2, "depth": 4, "trace_length": 4, "trace_actions": ["Init", "Stage", "StartTrial", "TrialFailure"], "trace_sha256": "D827367B099EE574EACD4A0D7C424C8A797E7B65671D723E599A2D2092240237"}
+    },
+    {
+      "id": "capability_revocation",
+      "module_path": "models/tla/PooleCapabilities.tla",
+      "safe_config_path": "models/tla/PooleCapabilities.safe.cfg",
+      "hostile_config_path": "models/tla/PooleCapabilities.hostile.cfg",
+      "state_variables": ["present", "parent", "holder", "objectOf", "rightsOf", "ancestors", "revoked"],
+      "invariants": ["TypeOK", "RootStable", "Attenuation", "Acyclic", "NoLiveDescendantOfRevoked", "RevocationClosure"],
+      "hostile_toggle": "UnsafeLocalRevoke",
+      "hostile_violation": "NoLiveDescendantOfRevoked",
+      "safe_expected": {"exit_code": 0, "generated_states": 7963, "distinct_states": 1316, "left_on_queue": 0, "depth": 6, "trace_length": 0, "trace_actions": [], "trace_sha256": "37517E5F3DC66819F61F5A7BB8ACE1921282415F10551D2DEFA5C3EB0985B570"},
+      "hostile_expected": {"exit_code": 12, "generated_states": 36, "distinct_states": 31, "left_on_queue": 28, "depth": 3, "trace_length": 3, "trace_actions": ["Init", "Derive", "Revoke"], "trace_sha256": "A31A4FBFDD81CA9A0352DAB999F3DB62DA3EB726B0E1825C68313B368A7C85A4"}
+    }
+  ],
+  "assumptions": [
+    "The boot model has exactly two abstract slots, one candidate-installation lifecycle, at most two trial attempts, atomic transitions, persistent known-good metadata, and no slot erasure/reuse, concurrency, torn write, cryptography, storage, firmware, or attacker model.",
+    "The capability model has exactly three abstract capability identifiers, two principals, two rights, one object, atomic derive/transfer/revoke transitions, no identifier reuse, and no concurrency, IPC, scheduler, memory, DMA, or persistence model.",
+    "TLC uses 64-bit state fingerprints; complete reachable-state exploration within the constants is not a collision-free mathematical proof.",
+    "Only state safety invariants are checked. No liveness, fairness, real-time, probabilistic, refinement, implementation-equivalence, or physical-hardware property is checked.",
+    "The hostile configurations are deliberate mutations used to demonstrate that the named invariants produce finite counterexample traces."
+  ],
+  "trace_cross_check": {
+    "status": "pending_native_implementation_traces",
+    "required_model_count": 2,
+    "completed_model_count": 0,
+    "abi_freeze_authorized": false
+  },
+  "claim_boundary": {
+    "bounded_model_checks_claimed": true,
+    "formal_proof_claimed": false,
+    "implementation_correctness_claimed": false,
+    "kernel_execution_claimed": false,
+    "boot_execution_claimed": false,
+    "n4_exit_gate_claimed": false
+  }
+}

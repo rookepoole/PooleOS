@@ -118,8 +118,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 88)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 455)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 89)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 481)
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
         self.assertTrue(all(value is False for key, value in native.items() if key != "source_controlled"))
@@ -127,9 +127,9 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertFalse(historical["production_ready"])
         self.assertEqual(historical["native_promotion_role"], "historical_non_promoting")
         current = self.roadmap["baseline"]["native_consistency_release_gate"]
-        self.assertEqual(current["passed_checks"], 66)
-        self.assertEqual(current["total_checks"], 66)
-        self.assertEqual(current["artifact_count"], 61)
+        self.assertEqual(current["passed_checks"], 67)
+        self.assertEqual(current["total_checks"], 67)
+        self.assertEqual(current["artifact_count"], 62)
         self.assertEqual(current["explicit_gap_count"], 20)
         self.assertFalse(current["production_ready"])
         self.assertEqual(self.roadmap["immediate_next_move"]["id"], "N0-RATIFY-001")
@@ -151,9 +151,10 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N4-QEMU-001")
+        self.assertEqual(protocol["selected_move_id"], "N4-MODEL-001")
         self.assertIn("runs/hardware_target_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_tier0_readiness.json", protocol["required_records"])
+        self.assertIn("runs/native_model_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_v1_objectives_readiness.json", protocol["required_records"])
         for record in protocol["required_records"]:
             self.assertTrue((ROOT / record).is_file(), record)
@@ -186,6 +187,10 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(tier0_profile_flag["class"], "REQUIRED")
         self.assertEqual(tier0_profile_flag["status"], "closed")
         self.assertIn("runs/native_tier0_readiness.json", tier0_profile_flag["evidence"])
+        model_flag = next(flag for flag in flags if flag["id"] == "FLAG-N4-MODELS-001")
+        self.assertEqual(model_flag["class"], "BLOCKER")
+        self.assertEqual(model_flag["status"], "open")
+        self.assertIn("runs/native_model_readiness.json", model_flag["evidence"])
         for flag in flags:
             self.assertIn(flag["phase_id"], phase_ids)
         gaps = self.roadmap["gap_summary"]
@@ -209,10 +214,11 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
         n4 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N4")
         n4_statuses = {subphase["id"]: subphase["status"] for subphase in n4["subphases"]}
-        for subphase_id in ("N4.1", "N4.2", "N4.3", "N4.4"):
+        for subphase_id in ("N4.1", "N4.2", "N4.3", "N4.4", "N4.5", "N4.6"):
             self.assertEqual(n4_statuses[subphase_id], "partial")
         self.assertTrue(any(item.startswith("runs/native_tier0_readiness.json:") for item in n4["current_evidence"]))
-        self.assertTrue(any("formal models" in item for item in n4["current_gaps"]))
+        self.assertTrue(any(item.startswith("runs/native_model_readiness.json:") for item in n4["current_evidence"]))
+        self.assertTrue(any("implementation-trace cross-checks" in item for item in n4["current_gaps"]))
 
         n0 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N0")
         n0_statuses = {subphase["id"]: subphase["status"] for subphase in n0["subphases"]}

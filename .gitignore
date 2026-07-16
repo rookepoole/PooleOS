@@ -50,6 +50,7 @@ runs/*
 !runs/tier1_hardware_observation.json
 !runs/hardware_target_readiness.json
 !runs/native_tier0_readiness.json
+!runs/native_model_readiness.json
 !runs/pdc_production_roadmap.json
 !runs/pooleos_native_checklist_coverage.json
 

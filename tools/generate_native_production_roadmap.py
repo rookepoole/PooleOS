@@ -90,6 +90,8 @@ SUBPHASE_OVERRIDES = {
     "N4.2": "partial",
     "N4.3": "partial",
     "N4.4": "partial",
+    "N4.5": "partial",
+    "N4.6": "partial",
     "N15.1": "partial",
     "N31.7": "partial",
     "N32.1": "complete",
@@ -149,6 +151,10 @@ PHASE_EVIDENCE = {
         "runs/native_tier0_readiness.json: 2/2 deterministic profiles, 4/4 paused QMP machine probes, 18/18 fail-closed controls, zero path leaks, and zero boot claims",
         "tools/qualify_native_tier0.py and tools/run_native_tier0.py: workspace-local qualification and dry-run-first launcher with no arbitrary QEMU arguments",
         "docs/native-tier0-qemu.md: acquisition, reproduction, launch, provenance gaps, and non-claim boundary",
+        "specs/native-model-toolchain-lock.json and specs/native-model-contract.json: exact workspace-local TLC/Java inputs, two finite-state model contracts, safe expectations, and required hostile violations",
+        "runs/native_model_readiness.json: 2/2 safe state spaces drained, 2/2 required counterexamples detected, 4/4 repeat matches, 12/12 negative controls, and two normalized traces",
+        "models/tla/PooleBootSlots.tla and models/tla/PooleCapabilities.tla: bounded boot rollback and capability derivation/revocation state machines",
+        "docs/native-formal-models.md: frozen assumptions, reproduction, trace normalization, open domains, and explicit non-proof boundary",
     ],
     "N15": ["runs/microkernel_isolation.json", "runs/capability_trap_proof.json", "runs/capability_trap_fuzz.json"],
     "N31": ["existing signed receipt and benchmark methodology artifacts"],
@@ -156,8 +162,8 @@ PHASE_EVIDENCE = {
     "N33": ["existing PDC receipt schemas and guarded-route source documents; no native services"],
     "N34": ["PooleGlyph Phase 65 checkpoint", "draft PGB2/PGVM2 trap evidence"],
     "N35": ["bounded static capability and trap simulations; no native containment"],
-    "N36": ["Cycle 88 host baseline: 455 tests with one Windows symlink-permission skip", "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, hardware privacy, malformed-CPUID, Tier 0 profile/provenance/path/overclaim controls, and collector-smoke negatives"],
-    "N37": ["Cycle 88 consistency release gate: 66/66 checks over 61 artifacts", "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, native-toolchain, bounded hardware-readiness, and native Tier 0 readiness artifacts"],
+    "N36": ["Cycle 89 host baseline: 481 tests with one Windows symlink-permission skip", "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, hardware privacy, malformed-CPUID, Tier 0 profile/provenance/path/overclaim, bounded-model mutation/trace/claim controls, and collector-smoke negatives"],
+    "N37": ["Cycle 89 consistency release gate: 67/67 checks over 62 artifacts", "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, native-toolchain, bounded hardware-readiness, native Tier 0 readiness, and native model-readiness artifacts"],
 }
 
 
@@ -173,7 +179,7 @@ PHASE_GAPS = {
     ],
     "N2": ["Exact identity passes 24/24 required checks and 16 allowlisted user-mode CPUID records close the bounded CPUID sub-capability, but MSR access remains pending a reviewed privileged mechanism; seven required evidence channels, 15 exact standards artifact hashes, ten destructive-lab prerequisites, and native-parser comparison remain open"],
     "N3": ["One-host Rust PE32+/ELF64 qualification passes; second-host reproduction, source provenance, C17/assembly/ABI/image tools, complete build graph, and low-level safety gates remain open"],
-    "N4": ["A pinned one-host q35/QEMU/OVMF/VIRTIO profile and paused-instantiation evidence exist, but current upstream source rebuilds, actual PooleBoot serial/debug-exit/GDB/reset evidence, remaining VIRTIO profiles, malformed-device campaigns, formal models, model-trace cross-checks, and second-host reproduction remain open"],
+    "N4": ["A pinned one-host q35/QEMU/OVMF/VIRTIO profile, paused-instantiation evidence, and bounded boot-slot/capability model checks exist, but current upstream source rebuilds, actual PooleBoot serial/debug-exit/GDB/reset evidence, remaining VIRTIO profiles, malformed-device campaigns, IPC/scheduler/virtual-memory/PooleFS models, implementation-trace cross-checks, liveness/refinement work, and second-host reproduction remain open"],
     "N5": ["No PooleBoot PE32+ image or frozen boot handoff exists"],
     "N6": ["No native boot trust, kernel image, entry, serial panic, or measured boot exists"],
     "N7": ["No native CPU/descriptor/exception implementation exists"],
@@ -245,7 +251,7 @@ FLAGS = [
 PROGRAM_GAPS = [
     "The native repository, protected workflow, and scope-hardened ADR ceremony bind the 38-target candidate objectives contract exactly, but target acceptance, all measurements, owner disposition, trusted key custody, signatures, signed tags, immutable release refs, and retained CI review evidence remain open",
     "Rust PE32+/ELF64 fixtures pass one-host qualification, but second-host reproduction, source provenance, C17/assembly/ABI tools, and image tooling remain open",
-    "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, but source-rebuilt current QEMU/EDK II, real PooleBoot launch evidence, complete reference devices/fault campaigns, formal state models, trace cross-checks, and second-host reproduction remain open",
+    "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls and bounded boot-slot/capability state checks detect their required hostile violations, but source-rebuilt current QEMU/EDK II, real PooleBoot launch evidence, complete reference devices/fault campaigns, IPC/scheduler/virtual-memory/PooleFS models, implementation-trace cross-checks, liveness/refinement work, and second-host reproduction remain open",
     "No PooleBoot PE32+ UEFI loader or frozen boot protocol",
     "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path",
     "No native CPU, interrupts, time, SMP, physical memory, virtual memory, or reclaim implementation",
@@ -351,6 +357,14 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             evidence.extend(["runs/hardware_target_readiness.json", "specs/hardware-support-policy.json"])
         if phase_id == "N4":
             evidence.extend(["runs/native_tier0_readiness.json", "specs/native-tier0-lock.json", "specs/native-tier0-profile.json"])
+        if flag_id == "FLAG-N4-MODELS-001":
+            evidence.extend(
+                [
+                    "runs/native_model_readiness.json",
+                    "specs/native-model-toolchain-lock.json",
+                    "specs/native-model-contract.json",
+                ]
+            )
         if flag_id == "FLAG-N2-CPUID-001":
             evidence.extend(
                 [
@@ -421,8 +435,8 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "inspect_live_pooleglyph_each_turn": True,
             "verify_master_checklist_coverage_each_turn": True,
             "new_work_must_be_flagged": True,
-            "last_updated_cycle": 88,
-            "selected_move_id": "N4-QEMU-001",
+            "last_updated_cycle": 89,
+            "selected_move_id": "N4-MODEL-001",
             "immediate_next_move_id": "N0-RATIFY-001",
             "required_records": [
                 "docs/production-goal-charter.md",
@@ -433,6 +447,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 "runs/adr_ratification_readiness.json",
                 "runs/hardware_target_readiness.json",
                 "runs/native_tier0_readiness.json",
+                "runs/native_model_readiness.json",
                 "runs/native_v1_objectives_readiness.json",
                 "runs/release_gate.json",
                 "docs/cycle_log.md",
@@ -454,7 +469,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "added_requirement_count": len(coverage["added_requirements"]),
         },
         "baseline": {
-            "pooleos_cycle": 88,
+            "pooleos_cycle": 89,
             "entry_cycle": 79,
             "pooleos_test_count": test_count,
             "historical_consistency_release_gate": {
@@ -466,9 +481,9 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 "native_promotion_role": "historical_non_promoting",
             },
             "native_consistency_release_gate": {
-                "passed_checks": 66,
-                "total_checks": 66,
-                "artifact_count": 61,
+                "passed_checks": 67,
+                "total_checks": 67,
+                "artifact_count": 62,
                 "explicit_gap_count": len(PROGRAM_GAPS),
                 "production_ready": False,
                 "native_promotion_role": "planning_and_evidence_consistency_non_promoting",
@@ -519,6 +534,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "Checklist mapping is not implementation completion.",
             "Host simulations and schemas are not native kernel enforcement.",
             "Four paused q35/QMP instantiations prove host-side profile construction only; no guest CPU instruction, native media, boot, driver, Secure Boot, or formal-model claim follows.",
+            "The two TLC state models are complete only for their frozen finite constants: they are not theorem proofs, liveness checks, refinement proofs, fingerprint-collision guarantees, implementation-trace comparisons, ABI-freeze authority, or PooleKernel execution evidence.",
             "Sixteen allowlisted user-mode CPUID records prove only a bounded host observation; they do not prove MSR access, privileged probes, native parsing, driver safety, or Tier 1 qualification.",
             "Binding thirty-eight consistent candidate objective definitions into a future signature while binding zero measurements is not owner ratification or implementation evidence.",
             "PooleGlyph Phase 65 metadata cannot be promoted before Phase 66 executable evidence.",
@@ -531,7 +547,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=455)
+    parser.add_argument("--test-count", type=int, default=481)
     parser.add_argument("--status-date", default="2026-07-16")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

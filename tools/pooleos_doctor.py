@@ -161,6 +161,17 @@ def check_native_tier0_readiness() -> CheckResult:
     )
 
 
+def check_native_model_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_model_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
 def check_publication_boundary() -> CheckResult:
     from tools import pooleos_release_gate
 
@@ -3191,6 +3202,18 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "specs" / "native-tier0-readiness.schema.json",
                 ROOT / "specs" / "native-tier0-launch-receipt.schema.json",
                 ROOT / "docs" / "native-tier0-qemu.md",
+                ROOT / "specs" / "native-model-toolchain-lock.json",
+                ROOT / "specs" / "native-model-toolchain-lock.schema.json",
+                ROOT / "specs" / "native-model-contract.json",
+                ROOT / "specs" / "native-model-contract.schema.json",
+                ROOT / "specs" / "native-model-readiness.schema.json",
+                ROOT / "docs" / "native-formal-models.md",
+                ROOT / "models" / "tla" / "PooleBootSlots.tla",
+                ROOT / "models" / "tla" / "PooleBootSlots.safe.cfg",
+                ROOT / "models" / "tla" / "PooleBootSlots.hostile.cfg",
+                ROOT / "models" / "tla" / "PooleCapabilities.tla",
+                ROOT / "models" / "tla" / "PooleCapabilities.safe.cfg",
+                ROOT / "models" / "tla" / "PooleCapabilities.hostile.cfg",
                 ROOT / "specs" / "native-release-architecture-policy.json",
                 ROOT / "specs" / "native-release-architecture-policy.schema.json",
                 ROOT / "specs" / "native-release-architecture-report.schema.json",
@@ -3212,11 +3235,14 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "tools" / "verify_hardware_target.py",
                 ROOT / "tools" / "qualify_native_tier0.py",
                 ROOT / "tools" / "run_native_tier0.py",
+                ROOT / "tools" / "bootstrap_native_models.ps1",
+                ROOT / "tools" / "qualify_native_models.py",
                 ROOT / "runtime" / "native_binary.py",
                 ROOT / "runtime" / "native_v1_objectives.py",
                 ROOT / "runtime" / "adr_ratification.py",
                 ROOT / "runtime" / "hardware_target.py",
                 ROOT / "runtime" / "native_tier0.py",
+                ROOT / "runtime" / "native_models.py",
                 ROOT / "security" / "README.md",
                 ROOT / "security" / "owner-adr-signers.allowed",
                 ROOT / "security" / "revoked-adr-signers",
@@ -3237,6 +3263,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runs" / "tier1_hardware_observation.json",
                 ROOT / "runs" / "hardware_target_readiness.json",
                 ROOT / "runs" / "native_tier0_readiness.json",
+                ROOT / "runs" / "native_model_readiness.json",
                 ROOT / "specs" / "pdc-source-intake.schema.json",
                 ROOT / "specs" / "pdc-math-contract.schema.json",
                 ROOT / "specs" / "pdc-golden-vectors.schema.json",
@@ -3311,6 +3338,7 @@ def main(argv: list[str] | None = None) -> int:
     checks.append(check_native_toolchain_qualification())
     checks.append(check_hardware_target_readiness())
     checks.append(check_native_tier0_readiness())
+    checks.append(check_native_model_readiness())
     checks.append(check_publication_boundary())
     checks.extend(check_claim_schema())
     checks.extend(check_claim_examples())

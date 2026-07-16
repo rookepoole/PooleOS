@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-model-toolchain-lock.schema.json",
+  "title": "PooleOS native model toolchain lock",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "status_date", "selected_move_id", "production_ready", "production_promotion_allowed", "tlc", "java", "supply_chain_boundary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_model_toolchain_lock"},
+    "status_date": {"const": "2026-07-16"},
+    "selected_move_id": {"const": "N4-MODEL-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "tlc": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["project", "release_tag", "release_name", "release_id", "release_date", "stable_release", "prerelease", "source_commit", "tag_kind", "tag_or_commit_signature_verified", "tag_or_commit_signature_status", "release_url", "source_url", "license", "minimum_java_major", "tool_banner", "jar", "rejected_candidate"],
+      "properties": {
+        "project": {"const": "TLA+"},
+        "release_tag": {"const": "v1.7.4"},
+        "release_name": {"const": "The Xenophanes release"},
+        "release_id": {"const": 168523867},
+        "release_date": {"const": "2024-08-05T20:16:41Z"},
+        "stable_release": {"const": true},
+        "prerelease": {"const": false},
+        "source_commit": {"const": "5a47802b5c391f59ecdd44117981f4ff8c0656ba"},
+        "tag_kind": {"const": "lightweight"},
+        "tag_or_commit_signature_verified": {"const": false},
+        "tag_or_commit_signature_status": {"const": "unsigned"},
+        "release_url": {"type": "string", "format": "uri"},
+        "source_url": {"type": "string", "format": "uri"},
+        "license": {"const": "MIT"},
+        "minimum_java_major": {"const": 11},
+        "tool_banner": {"const": "TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)"},
+        "jar": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["asset_id", "name", "byte_count", "published_sha1", "sha256", "url", "detached_signature_available"],
+          "properties": {
+            "asset_id": {"const": 184694200},
+            "name": {"const": "tla2tools.jar"},
+            "byte_count": {"const": 2274532},
+            "published_sha1": {"const": "BEE4A54F3EE3D4AFC347C3240EC2D9E93B075104"},
+            "sha256": {"const": "936A262061C914694DFD669A543BE24573C45D5AA0FF20A8B96B23D01E050E88"},
+            "url": {"type": "string", "format": "uri"},
+            "detached_signature_available": {"const": false}
+          }
+        },
+        "rejected_candidate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["release_tag", "release_id", "release_date", "prerelease", "source_commit", "jar_byte_count", "jar_sha256", "rejection_reason"],
+          "properties": {
+            "release_tag": {"const": "v1.8.0"},
+            "release_id": {"const": 25926686},
+            "release_date": {"const": "2026-07-15T13:50:49Z"},
+            "prerelease": {"const": true},
+            "source_commit": {"const": "227f61b983d0203a06db8184da45aed421e8f1b8"},
+            "jar_byte_count": {"const": 4357906},
+            "jar_sha256": {"const": "58D44845A37A8D776DEAF8CF3A623213B59D311BC0EC287BCDFBE148DD11BB3D"},
+            "rejection_reason": {"const": "rolling prerelease is not the frozen stable model-checker input"}
+          }
+        }
+      }
+    },
+    "java": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["distribution", "release_name", "semver", "release_date", "release_api", "package_name", "package_byte_count", "package_sha256", "package_url", "signature_byte_count", "signature_sha256", "signature_url", "detached_signature_verified", "detached_signature_gap", "runtime_license", "runtime_tree", "java_executable", "version_lines"],
+      "properties": {
+        "distribution": {"const": "Eclipse Temurin"},
+        "release_name": {"const": "jdk-21.0.11+10"},
+        "semver": {"const": "21.0.11+10.0.LTS"},
+        "release_date": {"const": "2026-04-23T06:32:33Z"},
+        "release_api": {"type": "string", "format": "uri"},
+        "package_name": {"const": "OpenJDK21U-jre_x64_windows_hotspot_21.0.11_10.zip"},
+        "package_byte_count": {"const": 49005708},
+        "package_sha256": {"const": "BE26677AAA20B39A62EDCAAB4C8857A8B76673B0F45ABC0B6143B142B62717E4"},
+        "package_url": {"type": "string", "format": "uri"},
+        "signature_byte_count": {"const": 310},
+        "signature_sha256": {"const": "DD49A01A70180BEE61CFCCA91C6DB84DD49095E3C3D86A6AC5DCE69D4BCF68C1"},
+        "signature_url": {"type": "string", "format": "uri"},
+        "detached_signature_verified": {"const": false},
+        "detached_signature_gap": {"const": "no pinned local OpenPGP verifier or signer-key ceremony is qualified"},
+        "runtime_license": {"const": "GPL-2.0-only WITH Classpath-exception-2.0"},
+        "runtime_tree": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["file_count", "byte_count", "tree_sha256"],
+          "properties": {
+            "file_count": {"const": 315},
+            "byte_count": {"const": 151530953},
+            "tree_sha256": {"const": "057E582B6FAC90535C1A51A66856C7D7DCCE27B03536FA0FB019A7C7ADA56DC9"}
+          }
+        },
+        "java_executable": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["relative_path", "byte_count", "sha256", "authenticode_status", "signer_subject", "signer_thumbprint"],
+          "properties": {
+            "relative_path": {"const": "bin/java.exe"},
+            "byte_count": {"const": 50344},
+            "sha256": {"const": "5E0FAB9F07952CEB6E71EB9FD33E1ED69959904CA00CF70869B7BAF516A98016"},
+            "authenticode_status": {"const": "Valid"},
+            "signer_subject": {"const": "CN=\"Eclipse.org Foundation, Inc.\", O=\"Eclipse.org Foundation, Inc.\", L=Ottawa, S=Ontario, C=CA"},
+            "signer_thumbprint": {"const": "C56B94C0AFC77271D6D5A295DA212F5D093FA00B"}
+          }
+        },
+        "version_lines": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "string"}}
+      }
+    },
+    "supply_chain_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workspace_local_only", "global_installation_performed", "global_path_mutated", "tlc_source_build_performed", "java_source_build_performed", "second_host_reproduction_performed", "vulnerability_review_complete", "sbom_review_complete", "redistribution_review_complete"],
+      "properties": {
+        "workspace_local_only": {"const": true},
+        "global_installation_performed": {"const": false},
+        "global_path_mutated": {"const": false},
+        "tlc_source_build_performed": {"const": false},
+        "java_source_build_performed": {"const": false},
+        "second_host_reproduction_performed": {"const": false},
+        "vulnerability_review_complete": {"const": false},
+        "sbom_review_complete": {"const": false},
+        "redistribution_review_complete": {"const": false}
+      }
+    }
+  }
+}

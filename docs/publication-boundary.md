@@ -31,6 +31,8 @@ The historical Buildroot source tree is not published as PooleOS source and cann
 
 The public native Tier 0 lock, profile, schemas, tools, guide, and readiness ledger may identify third-party QEMU/EDK II inputs by version, source commit, digest, relative runtime role, license metadata, and bounded probe result. Installers, extracted runtime trees, writable firmware-variable copies, launch media, traces, and local run directories remain ignored and unpublished. A public hash or qualification receipt neither grants redistribution rights nor promotes a third-party host tool into PooleOS production media.
 
+The public native-model lock, contract, original TLA+ model sources/configurations, schemas, host tools, guide, normalized counterexample traces, and readiness ledger may identify TLC and Java inputs by version, commit, digest, license metadata, and bounded result. The JRE, `tla2tools.jar`, archives, detached signatures, TLC metadata, and raw output remain ignored and unpublished. Model evidence must preserve finite bounds, assumptions, unmodeled domains, fingerprint limitations, and implementation-trace gaps; it cannot be described as a proof of PooleOS or authorization to freeze an ABI.
+
 ## Publication Gate
 
 Before every push or release:

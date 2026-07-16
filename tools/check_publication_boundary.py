@@ -29,6 +29,7 @@ ALLOWED_RUNS = {
     "runs/adr_ratification_receipt.json",
     "runs/hardware_target_readiness.json",
     "runs/native_architecture_baseline.json",
+    "runs/native_model_readiness.json",
     "runs/native_toolchain_qualification.json",
     "runs/native_tier0_readiness.json",
     "runs/native_v1_objectives_readiness.json",
