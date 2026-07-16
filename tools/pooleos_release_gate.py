@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from runtime import pgb2_bundle as pgb2  # noqa: E402
+from runtime import adr_ratification  # noqa: E402
 from runtime import lab_readiness  # noqa: E402
 from runtime import readiness  # noqa: E402
 from runtime.schema_validation import validate_json  # noqa: E402
@@ -24,11 +25,12 @@ MASTER_CHECKLIST_SHA256 = "A8C94719FAF9428C1F133010BA2603C0270C4E1EFD7327AF8EAB9
 NATIVE_ROADMAP = ROOT / "runs" / "pdc_production_roadmap.json"
 NATIVE_COVERAGE = ROOT / "runs" / "pooleos_native_checklist_coverage.json"
 NATIVE_ARCHITECTURE_BASELINE = ROOT / "runs" / "native_architecture_baseline.json"
+ADR_RATIFICATION_READINESS = ROOT / "runs" / "adr_ratification_readiness.json"
 NATIVE_TOOLCHAIN_QUALIFICATION = ROOT / "runs" / "native_toolchain_qualification.json"
 
 
 DEFAULT_GAPS = [
-    "The native repository is public and main is protected, but signed tags, immutable release refs, retained CI review evidence, and cryptographically signed ADR ratification remain open.",
+    "The ADR ceremony and fail-closed verifier are ready, but owner disposition, signing custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
     "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
     "No native-only QEMU/OVMF/VIRTIO reference profile or executable formal state models.",
     "No PooleBoot PE32+ UEFI loader or frozen native boot protocol.",
@@ -257,6 +259,80 @@ def check_native_architecture_baseline(path: Path = NATIVE_ARCHITECTURE_BASELINE
     )
     return readiness.make_check(
         "native_architecture_baseline",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_adr_ratification_readiness(path: Path = ADR_RATIFICATION_READINESS) -> dict:
+    artifact, schema_errors = _load_schema_artifact(path, "adr-ratification-readiness.schema.json")
+    errors = [f"ratification readiness {error.path}: {error.message}" for error in schema_errors[:8]]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "adr_ratification_readiness",
+            False,
+            "; ".join(errors) or "ADR ratification readiness is not an object",
+        )
+
+    try:
+        regenerated = adr_ratification.build_readiness(ROOT)
+        if path.read_bytes() != adr_ratification.canonical_json_bytes(regenerated):
+            errors.append("readiness ledger is not the exact deterministic regeneration")
+        receipt = adr_ratification.build_receipt(ROOT, observed_at_utc="1970-01-01T00:00:00Z")
+    except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
+        errors.append(f"ratification verifier failed closed: {type(error).__name__}: {error}")
+        receipt = {"status": "invalid", "production_promotion_allowed": False}
+
+    if artifact.get("status") != "pending_owner_action":
+        errors.append("current readiness status must remain pending_owner_action until owner evidence exists")
+    if artifact.get("selected_move_id") != "N0-RATIFY-001":
+        errors.append("readiness does not bind N0-RATIFY-001")
+    if artifact.get("production_ready") is not False or artifact.get("production_promotion_allowed") is not False:
+        errors.append("readiness overclaims production or architecture promotion")
+    adr_set = artifact.get("adr_set", {})
+    if adr_set.get("required_count") != 7 or adr_set.get("present_count") != 7:
+        errors.append("readiness does not bind all seven ADRs")
+    if adr_set.get("pending_owner_disposition") != ["ADR-0003", "ADR-0004"]:
+        errors.append("readiness does not preserve the two proposed ADR dispositions")
+    if adr_set.get("cryptographically_ratified_count") != 0:
+        errors.append("readiness overclaims cryptographic ADR ratification")
+    trust = artifact.get("trust_bootstrap", {})
+    if trust.get("trusted_signer_count") != 0 or trust.get("signer_file_errors") != []:
+        errors.append("current public trust bootstrap does not match the deliberate zero-signer state")
+    summary = artifact.get("summary", {})
+    if summary.get("ready_for_owner_action") is not True or summary.get("ready_for_signature") is not False:
+        errors.append("readiness owner/signature boundary is inconsistent")
+    if summary.get("defined_negative_control_count") != 10:
+        errors.append("ratification negative-control inventory is incomplete")
+    if receipt.get("status") == "invalid":
+        errors.append("live ratification verifier reports an invalid partial ceremony")
+    if receipt.get("status") != "pending_owner_action" or receipt.get("production_promotion_allowed") is not False:
+        errors.append("current live ratification state is not a bounded non-promoting owner-action wait")
+
+    for binding in [artifact.get("policy", {}), *adr_set.get("adrs", [])]:
+        relative = binding.get("path")
+        if not isinstance(relative, str):
+            errors.append("ratification binding is missing a relative path")
+            continue
+        try:
+            bound = (ROOT / relative).resolve()
+            bound.relative_to(ROOT.resolve())
+        except ValueError:
+            errors.append(f"ratification binding escapes repository: {relative}")
+            continue
+        if not bound.is_file():
+            errors.append(f"ratification-bound file is missing: {relative}")
+            continue
+        data = bound.read_bytes()
+        if hashlib.sha256(data).hexdigest().upper() != binding.get("sha256") or len(data) != binding.get("byte_count"):
+            errors.append(f"ratification binding mismatch: {relative}")
+
+    detail = (
+        "policy=frozen; adrs=7; proposed=2; trusted_signers=0; negative_controls=10; "
+        "owner_actions=5; status=pending_owner_action; production_promotion_allowed=false"
+    )
+    return readiness.make_check(
+        "adr_ratification_readiness",
         not errors,
         detail if not errors else "; ".join(errors[:8]),
     )
@@ -3126,6 +3202,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--native-roadmap", type=Path, default=NATIVE_ROADMAP)
     parser.add_argument("--native-checklist-coverage", type=Path, default=NATIVE_COVERAGE)
     parser.add_argument("--native-architecture-baseline", type=Path, default=NATIVE_ARCHITECTURE_BASELINE)
+    parser.add_argument("--adr-ratification-readiness", type=Path, default=ADR_RATIFICATION_READINESS)
     parser.add_argument("--native-toolchain-qualification", type=Path, default=NATIVE_TOOLCHAIN_QUALIFICATION)
     parser.add_argument("--out", type=Path, default=ROOT / "runs" / "release_gate.json")
     parser.add_argument("--include-runtime", action="store_true", help="Include PooleGlyph runtime checks in doctor.")
@@ -3135,6 +3212,7 @@ def main(argv: list[str] | None = None) -> int:
         run_doctor(include_runtime=args.include_runtime),
         check_native_architecture_plan(args.native_roadmap, args.native_checklist_coverage),
         check_native_architecture_baseline(args.native_architecture_baseline),
+        check_adr_ratification_readiness(args.adr_ratification_readiness),
         check_native_toolchain_qualification(args.native_toolchain_qualification),
         check_publication_boundary(),
         check_bundle(args.bundle),
@@ -3314,6 +3392,7 @@ def main(argv: list[str] | None = None) -> int:
             args.native_roadmap,
             args.native_checklist_coverage,
             args.native_architecture_baseline,
+            args.adr_ratification_readiness,
             args.native_toolchain_qualification,
         )
         if path is not None

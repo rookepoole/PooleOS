@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.example/specs/adr-ratification-manifest.schema.json",
+  "title": "PooleOS ADR Ratification Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "canonicalization", "repository", "decision_owner", "owner_acceptance", "bound_sources", "policy_binding", "signer", "signature_contract", "tag_contract", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_adr_ratification_manifest"},
+    "canonicalization": {"type": "object", "required": ["serialization", "encoding", "key_order", "indent_spaces", "line_endings", "trailing_newline_count", "unicode_escaping"]},
+    "repository": {"type": "object", "required": ["owner", "name", "remote_url", "default_branch"]},
+    "decision_owner": {"type": "object", "required": ["name", "github", "signer_principal"]},
+    "owner_acceptance": {
+      "type": "object",
+      "required": ["action", "statement", "required_adr_count", "accepted_exact_count", "decisions"],
+      "properties": {
+        "action": {"const": "accept_exact_bytes"},
+        "statement": {"type": "string"},
+        "required_adr_count": {"const": 7},
+        "accepted_exact_count": {"const": 7},
+        "decisions": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"type": "object", "required": ["id", "title", "path", "source_status", "source_ratification", "decision_owner", "sha256", "byte_count", "disposition", "effective_status_after_valid_signature"]}}
+      }
+    },
+    "bound_sources": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "object", "required": ["path", "sha256", "byte_count"]}},
+    "policy_binding": {"type": "object", "required": ["path", "sha256", "byte_count"]},
+    "signer": {"type": "object", "required": ["principal", "key_type", "key_profile", "public_key_fingerprint", "software_key_risk_explicitly_accepted"]},
+    "signature_contract": {"type": "object", "required": ["backend", "format", "namespace", "hash_algorithm", "allowed_signers_path", "revocation_path"]},
+    "tag_contract": {"type": "object", "required": ["name", "annotated", "signed", "force_update_allowed", "target_branch", "target_must_contain_manifest", "target_must_contain_detached_signature"]},
+    "claim_boundary": {"type": "array", "minItems": 3, "items": {"type": "string"}}
+  }
+}

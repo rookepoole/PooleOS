@@ -21,6 +21,8 @@ The public repository must not contain:
 
 Content-addressed public manifests may preserve an excluded input's stable ID, byte count, digest, classification, and claim boundary. They must not expose private local paths or reconstructable private content.
 
+Public signing evidence may include public keys, public-key fingerprints, allowed-signers policy, revocation records, detached signatures, signed tags, and verification receipts. It must never include a private key, hardware-key recovery material, passphrase, seed, TPM object, credential, or secret-bearing command output. The reserved ADR evidence paths are individually allowlisted and remain absent until owner-authorized signing.
+
 ## Third-Party Material
 
 Third-party code and data require an allowlisted license, provenance record, exact version and digest, notices, modification record, and assigned owner before publication. Studying a public implementation does not make copied code Poole-authored. Third-party code that is deliberately reused remains under `third_party/` or another clearly attributed boundary.

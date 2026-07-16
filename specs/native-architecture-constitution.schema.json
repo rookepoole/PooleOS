@@ -42,12 +42,16 @@
     },
     "ratification": {
       "type": "object",
-      "required": ["owner_direction_recorded", "owner_direction_source", "cryptographic_signature_present", "production_promotion_allowed"],
+      "required": ["model", "policy_path", "readiness_path", "owner_direction_recorded", "owner_direction_source", "cryptographic_signature_present", "production_promotion_allowed", "source_status_is_pre_signature_snapshot"],
       "properties": {
+        "model": {"const": "detached_namespaced_manifest_plus_signed_annotated_tag"},
+        "policy_path": {"const": "specs/adr-ratification-policy.json"},
+        "readiness_path": {"const": "runs/adr_ratification_readiness.json"},
         "owner_direction_recorded": {"const": true},
         "owner_direction_source": {"type": "string"},
         "cryptographic_signature_present": {"const": false},
-        "production_promotion_allowed": {"const": false}
+        "production_promotion_allowed": {"const": false},
+        "source_status_is_pre_signature_snapshot": {"const": true}
       }
     },
     "repository": {
@@ -123,4 +127,3 @@
     "open_items": {"type": "array", "minItems": 8, "items": {"type": "string"}}
   }
 }
-

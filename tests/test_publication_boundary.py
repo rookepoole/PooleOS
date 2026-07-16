@@ -57,7 +57,7 @@ class PublicationBoundaryTests(unittest.TestCase):
                 )
                 self.assertEqual(completed.returncode, 0)
 
-    def test_native_toolchain_ledger_is_the_only_new_public_run(self) -> None:
+    def test_native_toolchain_ledger_remains_explicitly_public(self) -> None:
         path = "runs/native_toolchain_qualification.json"
         self.assertIn(path, publication.ALLOWED_RUNS)
         completed = subprocess.run(
@@ -67,6 +67,24 @@ class PublicationBoundaryTests(unittest.TestCase):
         )
         self.assertEqual(completed.returncode, 1)
         self.assertEqual(publication.inspect_public_blob(path, b"{}"), [])
+
+    def test_adr_ratification_public_evidence_paths_are_explicitly_allowlisted(self) -> None:
+        paths = (
+            "runs/adr_ratification_readiness.json",
+            "runs/adr_ratification_manifest.json",
+            "runs/adr_ratification_manifest.json.sig",
+            "runs/adr_ratification_receipt.json",
+        )
+        for path in paths:
+            with self.subTest(path=path):
+                self.assertIn(path, publication.ALLOWED_RUNS)
+                completed = subprocess.run(
+                    ["git", "check-ignore", "--quiet", path],
+                    cwd=ROOT,
+                    check=False,
+                )
+                self.assertEqual(completed.returncode, 1)
+                self.assertEqual(publication.inspect_public_blob(path, b"public ratification evidence"), [])
 
     def test_release_gate_carries_publication_boundary(self) -> None:
         check = pooleos_release_gate.check_publication_boundary()
