@@ -19,6 +19,7 @@ from runtime import adr_ratification  # noqa: E402
 from runtime import hardware_target  # noqa: E402
 from runtime import lab_readiness  # noqa: E402
 from runtime import native_models  # noqa: E402
+from runtime import n0_owner_decision_packet  # noqa: E402
 from runtime import native_tier0  # noqa: E402
 from runtime import native_v1_objectives  # noqa: E402
 from runtime import readiness  # noqa: E402
@@ -31,6 +32,7 @@ NATIVE_COVERAGE = ROOT / "runs" / "pooleos_native_checklist_coverage.json"
 NATIVE_ARCHITECTURE_BASELINE = ROOT / "runs" / "native_architecture_baseline.json"
 NATIVE_V1_OBJECTIVES_READINESS = ROOT / "runs" / "native_v1_objectives_readiness.json"
 ADR_RATIFICATION_READINESS = ROOT / "runs" / "adr_ratification_readiness.json"
+N0_OWNER_DECISION_PACKET = ROOT / "runs" / "n0_owner_decision_packet.json"
 NATIVE_TOOLCHAIN_QUALIFICATION = ROOT / "runs" / "native_toolchain_qualification.json"
 HARDWARE_TARGET_READINESS = ROOT / "runs" / "hardware_target_readiness.json"
 NATIVE_MODEL_READINESS = ROOT / "runs" / "native_model_readiness.json"
@@ -40,7 +42,7 @@ NATIVE_TIER0_READINESS = ROOT / "runs" / "native_tier0_readiness.json"
 DEFAULT_GAPS = [
     "The scope-hardened ADR ceremony binds the exact 38-target candidate objectives contract and schema, but all target measurements, owner target acceptance and ADR disposition, signing custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
     "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
-    "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, and two bounded TLC models detect their required boot-slot and capability counterexamples; current source rebuilds, real PooleBoot launch evidence, complete reference devices/fault campaigns, four model domains, all implementation-trace cross-checks, and second-host reproduction remain open.",
+    "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, and three bounded TLC models detect required boot-slot, capability, stale-mapping, and early-reuse counterexamples; current source rebuilds, real PooleBoot launch evidence, complete reference devices/fault campaigns, IPC/scheduler/PooleFS models, all implementation-trace cross-checks, and second-host reproduction remain open.",
     "No PooleBoot PE32+ UEFI loader or frozen native boot protocol.",
     "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path.",
     "No native CPU, interrupt, time, SMP, physical-memory, virtual-memory, or reclaim implementation.",
@@ -420,6 +422,59 @@ def check_adr_ratification_readiness(path: Path = ADR_RATIFICATION_READINESS) ->
         "adr_ratification_readiness",
         not errors,
         detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_n0_owner_decision_packet(path: Path = N0_OWNER_DECISION_PACKET) -> dict:
+    artifact, schema_errors = _load_schema_artifact(path, "n0-owner-decision-packet.schema.json")
+    errors = [f"N0 owner packet {error.path}: {error.message}" for error in schema_errors[:8]]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "n0_owner_decision_packet",
+            False,
+            "; ".join(errors) or "N0 owner decision packet is not an object",
+        )
+
+    try:
+        regenerated = n0_owner_decision_packet.build_packet(ROOT)
+        if path.read_bytes() != n0_owner_decision_packet.canonical_json_bytes(regenerated):
+            errors.append("packet is not the exact deterministic regeneration")
+        errors.extend(n0_owner_decision_packet.packet_rejection_reasons(artifact, ROOT))
+    except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
+        errors.append(f"packet verifier failed closed: {type(error).__name__}: {error}")
+
+    current = artifact.get("current_state", {})
+    decisions = artifact.get("decisions", {})
+    objectives = decisions.get("objectives", {})
+    custody = decisions.get("custody", {})
+    validation = artifact.get("validation", {})
+    if artifact.get("status") != "awaiting_owner_response":
+        errors.append("packet must remain awaiting_owner_response")
+    if current.get("pending_owner_action_count") != 6:
+        errors.append("packet must retain all six pending owner actions")
+    if current.get("objective_target_count") != 38 or current.get("measured_target_count") != 0:
+        errors.append("packet must bind 38 targets and zero measurements")
+    if objectives.get("selection") != n0_owner_decision_packet.UNSELECTED:
+        errors.append("packet inferred an objectives disposition")
+    if custody.get("selection") != n0_owner_decision_packet.UNSELECTED:
+        errors.append("packet inferred a custody profile")
+    if validation.get("negative_control_pass_count") != 12:
+        errors.append("packet negative controls are incomplete")
+    for field in ("owner_acceptance_recorded", "signature_authorized", "publication_authorized", "production_promotion_allowed"):
+        if artifact.get(field) is not False:
+            errors.append(f"packet overclaims {field}")
+
+    detail = (
+        f"sources={artifact.get('source_set', {}).get('binding_count')}; "
+        f"targets={current.get('objective_target_count')}; measured={current.get('measured_target_count')}; "
+        f"owner_actions={current.get('pending_owner_action_count')}; "
+        f"negatives={validation.get('negative_control_pass_count')}/{validation.get('negative_control_count')}; "
+        "acceptance=false; signing=false; publication=false; promotion=false"
+    )
+    return readiness.make_check(
+        "n0_owner_decision_packet",
+        not errors,
+        detail if not errors else "; ".join(dict.fromkeys(errors))[:2000],
     )
 
 
@@ -3436,6 +3491,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--native-architecture-baseline", type=Path, default=NATIVE_ARCHITECTURE_BASELINE)
     parser.add_argument("--native-v1-objectives-readiness", type=Path, default=NATIVE_V1_OBJECTIVES_READINESS)
     parser.add_argument("--adr-ratification-readiness", type=Path, default=ADR_RATIFICATION_READINESS)
+    parser.add_argument("--n0-owner-decision-packet", type=Path, default=N0_OWNER_DECISION_PACKET)
     parser.add_argument("--native-toolchain-qualification", type=Path, default=NATIVE_TOOLCHAIN_QUALIFICATION)
     parser.add_argument("--hardware-target-readiness", type=Path, default=HARDWARE_TARGET_READINESS)
     parser.add_argument("--native-tier0-readiness", type=Path, default=NATIVE_TIER0_READINESS)
@@ -3450,6 +3506,7 @@ def main(argv: list[str] | None = None) -> int:
         check_native_architecture_baseline(args.native_architecture_baseline),
         check_native_v1_objectives_readiness(args.native_v1_objectives_readiness),
         check_adr_ratification_readiness(args.adr_ratification_readiness),
+        check_n0_owner_decision_packet(args.n0_owner_decision_packet),
         check_native_toolchain_qualification(args.native_toolchain_qualification),
         check_hardware_target_readiness(args.hardware_target_readiness),
         check_native_tier0_readiness(args.native_tier0_readiness),
@@ -3634,6 +3691,7 @@ def main(argv: list[str] | None = None) -> int:
             args.native_architecture_baseline,
             args.native_v1_objectives_readiness,
             args.adr_ratification_readiness,
+            args.n0_owner_decision_packet,
             args.native_toolchain_qualification,
             args.hardware_target_readiness,
             args.native_tier0_readiness,

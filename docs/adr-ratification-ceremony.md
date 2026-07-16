@@ -17,9 +17,12 @@ The ceremony does not generate or approve a Secure Boot key, release-media key, 
 - ADR-0003 and ADR-0004 remain `proposed` and require explicit owner disposition.
 - `POOLEOS-WORKSTATION-V1-CANDIDATE` defines 38 candidate target values. Rooke Poole has not accepted those values and zero targets have measured implementation evidence.
 - The public allowed-signers file has zero keys. No local Git signing key, GPG backend, or GitHub SSH signing key was configured when this package was generated.
-- The Cycle 82 toolchain work was merged through PR #1. Cycle 83 ceremony readiness is isolated in draft PR #2. Required signed-commit enforcement must not be enabled until the remaining pre-signing history and merge strategy are resolved under `N1-SCM-CLOSE-001`.
+- PRs #1 through #5 are merged into public `main`. Required signed-commit enforcement must not be enabled until the remaining pre-signing history and merge strategy are resolved under `N1-SCM-CLOSE-001`.
+- `docs/n0-owner-decision-packet.md` and `runs/n0_owner_decision_packet.json` provide a deterministic review surface over 16 exact sources, both proposed ADRs, all 38 targets, all allowed custody profiles, and 12 fail-closed controls. Every selection remains unselected; the packet is not acceptance, signing authorization, or publication authorization.
 
 ## Owner Decisions Required
+
+Review and complete the response form in `docs/n0-owner-decision-packet.md` before changing an ADR status or preparing a manifest. The packet's recommendations are advisory. A response must explicitly dispose every listed decision and must not be inferred from general project direction.
 
 1. Dispose ADR-0003 and ADR-0004 as `accept exactly as written`, `amend before acceptance`, or `reject and supersede`.
 2. Dispose the exact candidate Workstation v1 profile and all 38 target values as `accept exactly as written`, `amend before acceptance`, or `reject`. Accepting definitions does not accept measurements or claim that PooleOS meets them.

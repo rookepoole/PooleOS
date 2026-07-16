@@ -115,6 +115,7 @@ PHASE_EVIDENCE = {
         "tools/verify_native_v1_objectives.py with ten fail-closed negative controls",
         "specs/adr-ratification-policy.json and docs/adr-ratification-ceremony.md: scope-hardened contract binding six exact decision sources and all 38 objective definitions without accepting measurements",
         "runs/adr_ratification_readiness.json: deterministic six-source owner-action boundary with zero trusted signers, 12 declared negative controls, and six owner actions",
+        "runs/n0_owner_decision_packet.json and docs/n0-owner-decision-packet.md: deterministic 16-source review packet covering both proposed ADRs, all 38 targets, every allowed custody profile, an unfilled response form, and 12/12 fail-closed controls without recording acceptance or authorization",
         "tools/prepare_adr_ratification.py and tools/verify_adr_ratification.py with eleven focused adversarial and signature-path tests",
         "specs/native-release-architecture-policy.json",
         "tools/check_native_release_architecture.py",
@@ -162,14 +163,14 @@ PHASE_EVIDENCE = {
     "N33": ["existing PDC receipt schemas and guarded-route source documents; no native services"],
     "N34": ["PooleGlyph Phase 65 checkpoint", "draft PGB2/PGVM2 trap evidence"],
     "N35": ["bounded static capability and trap simulations; no native containment"],
-    "N36": ["Cycle 90 host baseline: 482 tests with one Windows symlink-permission skip", "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, hardware privacy, malformed-CPUID, Tier 0 profile/provenance/path/overclaim, bounded-model multi-case mutation/trace/claim controls, and collector-smoke negatives"],
-    "N37": ["Cycle 90 consistency release gate: 67/67 checks over 62 artifacts", "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, native-toolchain, bounded hardware-readiness, native Tier 0 readiness, and native model-readiness artifacts"],
+    "N36": ["Cycle 91 host baseline: 493 tests with one Windows symlink-permission skip", "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, owner-packet omission/staleness/acceptance/key/signing/publication controls, hardware privacy, malformed-CPUID, Tier 0 profile/provenance/path/overclaim, bounded-model multi-case mutation/trace/claim controls, and collector-smoke negatives"],
+    "N37": ["Cycle 91 consistency release gate: 68/68 checks over 63 artifacts", "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, deterministic N0 owner packet, native-toolchain, bounded hardware-readiness, native Tier 0 readiness, and native model-readiness artifacts"],
 }
 
 
 PHASE_GAPS = {
     "N0": [
-        "The canonical ceremony now binds all six decision sources, including the exact 38-target objective contract and schema, but none of seven ADRs is cryptographically signed; ADR-0003 and ADR-0004 still require owner disposition",
+        "The canonical ceremony and deterministic owner packet bind all six decision sources, both proposed ADRs, and the exact 38-target objective contract and schema, but no owner selection or signature exists; ADR-0003 and ADR-0004 still require owner disposition",
         "The 38 reliability, accessibility, compatibility, privacy, and performance target definitions remain candidate-only; owner acceptance and all implementation-bound measurements remain open",
         "The extracted-tree scanner does not yet parse ISO/GPT/ESP/El Torito/signature structures",
     ],
@@ -249,7 +250,7 @@ FLAGS = [
 
 
 PROGRAM_GAPS = [
-    "The native repository, protected workflow, and scope-hardened ADR ceremony bind the 38-target candidate objectives contract exactly, but target acceptance, all measurements, owner disposition, trusted key custody, signatures, signed tags, immutable release refs, and retained CI review evidence remain open",
+    "The native repository, protected workflow, scope-hardened ADR ceremony, and deterministic 16-source owner packet bind the 38-target candidate objectives contract exactly, but every packet selection, target acceptance, all measurements, owner disposition, trusted key custody, signatures, signed tags, immutable release refs, and retained CI review evidence remain open",
     "Rust PE32+/ELF64 fixtures pass one-host qualification, but second-host reproduction, source provenance, C17/assembly/ABI tools, and image tooling remain open",
     "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls and bounded boot-slot/capability/virtual-memory state checks detect their required hostile violations, but source-rebuilt current QEMU/EDK II, real PooleBoot launch evidence, complete reference devices/fault campaigns, IPC/scheduler/PooleFS models, implementation-trace cross-checks, liveness/refinement work, and second-host reproduction remain open",
     "No PooleBoot PE32+ UEFI loader or frozen boot protocol",
@@ -381,7 +382,9 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 ]
             )
         if flag_id == "FLAG-N0-OBJECTIVES-001":
-            evidence.extend(["specs/native-v1-objectives.json", "runs/native_v1_objectives_readiness.json"])
+            evidence.extend(["specs/native-v1-objectives.json", "runs/native_v1_objectives_readiness.json", "runs/n0_owner_decision_packet.json"])
+        if flag_id == "FLAG-NATIVE-ADR-001":
+            evidence.extend(["runs/adr_ratification_readiness.json", "runs/n0_owner_decision_packet.json", "docs/n0-owner-decision-packet.md"])
         if flag_id == "FLAG-N0-RATIFICATION-SCOPE-001":
             evidence.extend(
                 [
@@ -435,8 +438,8 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "inspect_live_pooleglyph_each_turn": True,
             "verify_master_checklist_coverage_each_turn": True,
             "new_work_must_be_flagged": True,
-            "last_updated_cycle": 90,
-            "selected_move_id": "N4-VM-MODEL-001",
+            "last_updated_cycle": 91,
+            "selected_move_id": "N0-OWNER-PACKET-001",
             "immediate_next_move_id": "N0-RATIFY-001",
             "required_records": [
                 "docs/production-goal-charter.md",
@@ -445,6 +448,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 "runs/pooleos_native_checklist_coverage.json",
                 "runs/native_toolchain_qualification.json",
                 "runs/adr_ratification_readiness.json",
+                "runs/n0_owner_decision_packet.json",
                 "runs/hardware_target_readiness.json",
                 "runs/native_tier0_readiness.json",
                 "runs/native_model_readiness.json",
@@ -469,7 +473,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "added_requirement_count": len(coverage["added_requirements"]),
         },
         "baseline": {
-            "pooleos_cycle": 90,
+            "pooleos_cycle": 91,
             "entry_cycle": 79,
             "pooleos_test_count": test_count,
             "historical_consistency_release_gate": {
@@ -481,9 +485,9 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 "native_promotion_role": "historical_non_promoting",
             },
             "native_consistency_release_gate": {
-                "passed_checks": 67,
-                "total_checks": 67,
-                "artifact_count": 62,
+                "passed_checks": 68,
+                "total_checks": 68,
+                "artifact_count": 63,
                 "explicit_gap_count": len(PROGRAM_GAPS),
                 "production_ready": False,
                 "native_promotion_role": "planning_and_evidence_consistency_non_promoting",
@@ -525,7 +529,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "id": "N0-RATIFY-001",
             "phase_ids": ["N0", "N1"],
             "title": "Complete owner objective acceptance, ADR disposition, key custody, signatures, signed tag, and publication receipt for the exact six-source architecture set",
-            "entry_evidence": ["docs/adr/0001-native-pooleos-constitution.md through ADR-0007", "runs/native_architecture_baseline.json", "runs/native_v1_objectives_readiness.json", "runs/adr_ratification_readiness.json", "docs/adr-ratification-ceremony.md", "runs/native_toolchain_qualification.json"],
+            "entry_evidence": ["docs/adr/0001-native-pooleos-constitution.md through ADR-0007", "runs/native_architecture_baseline.json", "runs/native_v1_objectives_readiness.json", "runs/adr_ratification_readiness.json", "runs/n0_owner_decision_packet.json", "docs/n0-owner-decision-packet.md", "docs/adr-ratification-ceremony.md", "runs/native_toolchain_qualification.json"],
             "exit_evidence": ["owner acceptance or amendment of the native v1 profile and all 38 target values", "owner disposition of ADR-0003 and ADR-0004", "owner-controlled signatures for the accepted ADR set", "documented signing custody and verification procedure", "signed baseline tag and publication receipt"],
             "blocked": True,
         },
@@ -547,7 +551,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=482)
+    parser.add_argument("--test-count", type=int, default=493)
     parser.add_argument("--status-date", default="2026-07-16")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)
