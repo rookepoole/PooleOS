@@ -3,20 +3,615 @@
 #![deny(warnings)]
 #![forbid(unsafe_op_in_unsafe_fn)]
 
+use core::arch::asm;
 use core::ffi::c_void;
+use core::fmt::{self, Write};
+use core::mem::{size_of, transmute_copy};
 use core::panic::PanicInfo;
+use core::ptr::{null, null_mut, write_volatile};
+use core::slice::from_raw_parts;
+
+use pooleboot::{
+    ContractError, EFI_BUFFER_TOO_SMALL, FramebufferLayout, MemoryMapSummary, identity_rgb,
+    pack_pixel, plan_memory_map, validate_configuration_tables, validate_framebuffer,
+    validate_memory_map_result, validate_table_header,
+};
+
+type EfiStatus = usize;
+type EfiHandle = *mut c_void;
+
+const EFI_SUCCESS: EfiStatus = 0;
+const EFI_INVALID_PARAMETER: EfiStatus = pooleboot::EFI_ERROR_BIT | 2;
+const EFI_UNSUPPORTED: EfiStatus = pooleboot::EFI_ERROR_BIT | 3;
+const EFI_DEVICE_ERROR: EfiStatus = pooleboot::EFI_ERROR_BIT | 7;
+const EFI_OUT_OF_RESOURCES: EfiStatus = pooleboot::EFI_ERROR_BIT | 9;
+const EFI_COMPROMISED_DATA: EfiStatus = pooleboot::EFI_ERROR_BIT | 33;
+const EFI_LOADER_DATA: u32 = 2;
+const EFI_SYSTEM_TABLE_SIGNATURE: u64 = 0x5453_5953_2049_4249;
+const EFI_BOOT_SERVICES_SIGNATURE: u64 = 0x5652_4553_544f_4f42;
+const COM1_BASE: u16 = 0x03f8;
+const DEBUGCON_PORT: u16 = 0x0402;
+const DEBUG_EXIT_PORT: u16 = 0x00f4;
+const FRAME_HOLD_MICROSECONDS: usize = 250_000;
+
+#[repr(C)]
+#[derive(Clone, Copy)]
+struct EfiTableHeader {
+    signature: u64,
+    revision: u32,
+    header_size: u32,
+    crc32: u32,
+    reserved: u32,
+}
+
+#[repr(C)]
+struct EfiSimpleTextOutputProtocol {
+    reset: usize,
+    output_string: usize,
+    test_string: usize,
+    query_mode: usize,
+    set_mode: usize,
+    set_attribute: usize,
+    clear_screen: usize,
+    set_cursor_position: usize,
+    enable_cursor: usize,
+    mode: usize,
+}
+
+#[repr(C)]
+struct EfiSystemTable {
+    header: EfiTableHeader,
+    firmware_vendor: *const u16,
+    firmware_revision: u32,
+    console_in_handle: EfiHandle,
+    console_in: *mut c_void,
+    console_out_handle: EfiHandle,
+    console_out: *mut EfiSimpleTextOutputProtocol,
+    standard_error_handle: EfiHandle,
+    standard_error: *mut EfiSimpleTextOutputProtocol,
+    runtime_services: *mut c_void,
+    boot_services: *mut EfiBootServices,
+    configuration_table_count: usize,
+    configuration_tables: *const EfiConfigurationTable,
+}
+
+#[repr(C)]
+struct EfiBootServices {
+    header: EfiTableHeader,
+    raise_tpl: usize,
+    restore_tpl: usize,
+    allocate_pages: usize,
+    free_pages: usize,
+    get_memory_map: usize,
+    allocate_pool: usize,
+    free_pool: usize,
+    create_event: usize,
+    set_timer: usize,
+    wait_for_event: usize,
+    signal_event: usize,
+    close_event: usize,
+    check_event: usize,
+    install_protocol_interface: usize,
+    reinstall_protocol_interface: usize,
+    uninstall_protocol_interface: usize,
+    handle_protocol: usize,
+    reserved: usize,
+    register_protocol_notify: usize,
+    locate_handle: usize,
+    locate_device_path: usize,
+    install_configuration_table: usize,
+    load_image: usize,
+    start_image: usize,
+    exit: usize,
+    unload_image: usize,
+    exit_boot_services: usize,
+    get_next_monotonic_count: usize,
+    stall: usize,
+    set_watchdog_timer: usize,
+    connect_controller: usize,
+    disconnect_controller: usize,
+    open_protocol: usize,
+    close_protocol: usize,
+    open_protocol_information: usize,
+    protocols_per_handle: usize,
+    locate_handle_buffer: usize,
+    locate_protocol: usize,
+    install_multiple_protocol_interfaces: usize,
+    uninstall_multiple_protocol_interfaces: usize,
+    calculate_crc32: usize,
+    copy_mem: usize,
+    set_mem: usize,
+    create_event_ex: usize,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Eq, PartialEq)]
+struct EfiGuid {
+    data1: u32,
+    data2: u16,
+    data3: u16,
+    data4: [u8; 8],
+}
+
+#[repr(C)]
+struct EfiConfigurationTable {
+    vendor_guid: EfiGuid,
+    vendor_table: *const c_void,
+}
+
+#[repr(C)]
+struct EfiGraphicsOutputProtocol {
+    query_mode: usize,
+    set_mode: usize,
+    blt: usize,
+    mode: *const EfiGraphicsOutputProtocolMode,
+}
+
+#[repr(C)]
+struct EfiGraphicsOutputProtocolMode {
+    max_mode: u32,
+    mode: u32,
+    info: *const EfiGraphicsOutputModeInformation,
+    size_of_info: usize,
+    framebuffer_base: u64,
+    framebuffer_size: usize,
+}
+
+#[repr(C)]
+struct EfiGraphicsOutputModeInformation {
+    version: u32,
+    horizontal_resolution: u32,
+    vertical_resolution: u32,
+    pixel_format: u32,
+    red_mask: u32,
+    green_mask: u32,
+    blue_mask: u32,
+    reserved_mask: u32,
+    pixels_per_scan_line: u32,
+}
+
+const GOP_GUID: EfiGuid = EfiGuid {
+    data1: 0x9042_a9de,
+    data2: 0x23dc,
+    data3: 0x4a38,
+    data4: [0x96, 0xfb, 0x7a, 0xde, 0xd0, 0x80, 0x51, 0x6a],
+};
+const ACPI_20_GUID: EfiGuid = EfiGuid {
+    data1: 0x8868_e871,
+    data2: 0xe4f1,
+    data3: 0x11d3,
+    data4: [0xbc, 0x22, 0x00, 0x80, 0xc7, 0x3c, 0x88, 0x81],
+};
+const SMBIOS3_GUID: EfiGuid = EfiGuid {
+    data1: 0xf2fd_1544,
+    data2: 0x9794,
+    data3: 0x4a2c,
+    data4: [0x99, 0x2e, 0xe5, 0xbb, 0xcf, 0x20, 0xe3, 0x94],
+};
+const SMBIOS_GUID: EfiGuid = EfiGuid {
+    data1: 0xeb9d_2d31,
+    data2: 0x2d88,
+    data3: 0x11d3,
+    data4: [0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d],
+};
+
+type OutputString = extern "efiapi" fn(*mut EfiSimpleTextOutputProtocol, *const u16) -> EfiStatus;
+type GetMemoryMap = extern "efiapi" fn(
+    *mut usize,
+    *mut c_void,
+    *mut usize,
+    *mut usize,
+    *mut u32,
+) -> EfiStatus;
+type AllocatePool = extern "efiapi" fn(u32, usize, *mut *mut c_void) -> EfiStatus;
+type FreePool = extern "efiapi" fn(*mut c_void) -> EfiStatus;
+type LocateProtocol =
+    extern "efiapi" fn(*const EfiGuid, *mut c_void, *mut *mut c_void) -> EfiStatus;
+type Stall = extern "efiapi" fn(usize) -> EfiStatus;
+type SetWatchdogTimer = extern "efiapi" fn(usize, u64, usize, *const u16) -> EfiStatus;
+
+struct DiagnosticWriter;
+
+impl Write for DiagnosticWriter {
+    fn write_str(&mut self, value: &str) -> fmt::Result {
+        emit_bytes(value.as_bytes());
+        Ok(())
+    }
+}
+
+#[derive(Clone, Copy)]
+struct ConfigSummary {
+    count: usize,
+    acpi20: bool,
+    smbios3: bool,
+    smbios2: bool,
+}
+
+#[derive(Clone, Copy)]
+struct GopSummary {
+    layout: FramebufferLayout,
+    mode: u32,
+}
 
 #[panic_handler]
 fn panic(_info: &PanicInfo<'_>) -> ! {
+    emit_bytes(b"POOLEBOOT/0.1 PANIC\n");
+    unsafe {
+        out_byte(DEBUG_EXIT_PORT, 0x21);
+    }
     loop {
         core::hint::spin_loop();
     }
 }
 
+unsafe fn out_byte(port: u16, value: u8) {
+    unsafe {
+        asm!("out dx, al", in("dx") port, in("al") value, options(nomem, nostack, preserves_flags));
+    }
+}
+
+unsafe fn in_byte(port: u16) -> u8 {
+    let value: u8;
+    unsafe {
+        asm!("in al, dx", in("dx") port, out("al") value, options(nomem, nostack, preserves_flags));
+    }
+    value
+}
+
+fn initialize_serial() {
+    unsafe {
+        out_byte(COM1_BASE + 1, 0x00);
+        out_byte(COM1_BASE + 3, 0x80);
+        out_byte(COM1_BASE, 0x03);
+        out_byte(COM1_BASE + 1, 0x00);
+        out_byte(COM1_BASE + 3, 0x03);
+        out_byte(COM1_BASE + 2, 0xc7);
+        out_byte(COM1_BASE + 4, 0x0b);
+    }
+}
+
+fn emit_byte(byte: u8) {
+    unsafe {
+        out_byte(DEBUGCON_PORT, byte);
+    }
+    for _ in 0..100_000 {
+        if unsafe { in_byte(COM1_BASE + 5) } & 0x20 != 0 {
+            unsafe {
+                out_byte(COM1_BASE, byte);
+            }
+            return;
+        }
+        core::hint::spin_loop();
+    }
+}
+
+fn emit_bytes(bytes: &[u8]) {
+    for byte in bytes {
+        if *byte == b'\n' {
+            emit_byte(b'\r');
+        }
+        emit_byte(*byte);
+    }
+}
+
+fn diagnostic(args: fmt::Arguments<'_>) {
+    let _ = DiagnosticWriter.write_fmt(args);
+}
+
+fn fail(stage: &str, status: EfiStatus) -> EfiStatus {
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 ERROR stage={} status=0x{:016X}\n",
+        stage, status as u64
+    ));
+    status
+}
+
+unsafe fn table_slice<'a>(pointer: *const u8, header_size: u32) -> Result<&'a [u8], ContractError> {
+    if pointer.is_null() || header_size < pooleboot::TABLE_HEADER_BYTES as u32 {
+        return Err(ContractError::BufferTooSmall);
+    }
+    let size = header_size as usize;
+    if size > pooleboot::MAX_FIRMWARE_TABLE_BYTES {
+        return Err(ContractError::HeaderSize);
+    }
+    Ok(unsafe { from_raw_parts(pointer, size) })
+}
+
+unsafe fn function<T: Copy>(address: usize) -> Result<T, EfiStatus> {
+    if address == 0 || size_of::<T>() != size_of::<usize>() {
+        return Err(EFI_COMPROMISED_DATA);
+    }
+    Ok(unsafe { transmute_copy::<usize, T>(&address) })
+}
+
+fn console_message(console: *mut EfiSimpleTextOutputProtocol) -> Result<(), EfiStatus> {
+    if console.is_null() {
+        return Err(EFI_UNSUPPORTED);
+    }
+    let output_address = unsafe { (*console).output_string };
+    let output: OutputString = unsafe { function(output_address)? };
+    const MESSAGE: &[u16] = &[
+        0x0050, 0x006f, 0x006f, 0x006c, 0x0065, 0x004f, 0x0053, 0x0020, 0x006e, 0x0061,
+        0x0074, 0x0069, 0x0076, 0x0065, 0x0020, 0x0055, 0x0045, 0x0046, 0x0049, 0x0020,
+        0x0070, 0x0072, 0x006f, 0x006f, 0x0066, 0x0020, 0x006f, 0x0066, 0x0020, 0x006c,
+        0x0069, 0x0066, 0x0065, 0x000d, 0x000a, 0x0000,
+    ];
+    let status = output(console, MESSAGE.as_ptr());
+    if status == EFI_SUCCESS {
+        Ok(())
+    } else {
+        Err(status)
+    }
+}
+
+fn summarize_configuration_tables(system: &EfiSystemTable) -> Result<ConfigSummary, EfiStatus> {
+    let count = validate_configuration_tables(
+        system.configuration_table_count,
+        !system.configuration_tables.is_null(),
+    )
+    .map_err(|_| EFI_COMPROMISED_DATA)?;
+    let mut summary = ConfigSummary {
+        count,
+        acpi20: false,
+        smbios3: false,
+        smbios2: false,
+    };
+    if count == 0 {
+        return Ok(summary);
+    }
+    let tables = unsafe { from_raw_parts(system.configuration_tables, count) };
+    for table in tables {
+        summary.acpi20 |= table.vendor_guid == ACPI_20_GUID;
+        summary.smbios3 |= table.vendor_guid == SMBIOS3_GUID;
+        summary.smbios2 |= table.vendor_guid == SMBIOS_GUID;
+    }
+    Ok(summary)
+}
+
+fn discover_gop(boot_services: &EfiBootServices) -> Result<GopSummary, EfiStatus> {
+    let locate: LocateProtocol = unsafe { function(boot_services.locate_protocol)? };
+    let mut interface = null_mut();
+    let status = locate(&GOP_GUID, null_mut(), &mut interface);
+    if status != EFI_SUCCESS || interface.is_null() {
+        return Err(if status == EFI_SUCCESS {
+            EFI_COMPROMISED_DATA
+        } else {
+            status
+        });
+    }
+    let protocol = unsafe { &*(interface as *const EfiGraphicsOutputProtocol) };
+    if protocol.mode.is_null() {
+        return Err(EFI_COMPROMISED_DATA);
+    }
+    let mode = unsafe { &*protocol.mode };
+    if mode.info.is_null() || mode.size_of_info < size_of::<EfiGraphicsOutputModeInformation>() {
+        return Err(EFI_COMPROMISED_DATA);
+    }
+    let info = unsafe { &*mode.info };
+    let layout = validate_framebuffer(
+        info.horizontal_resolution as usize,
+        info.vertical_resolution as usize,
+        info.pixels_per_scan_line as usize,
+        info.pixel_format,
+        mode.framebuffer_base,
+        mode.framebuffer_size,
+    )
+    .map_err(|_| EFI_UNSUPPORTED)?;
+    if mode.framebuffer_base > usize::MAX as u64 {
+        return Err(EFI_UNSUPPORTED);
+    }
+    let framebuffer = mode.framebuffer_base as usize as *mut u32;
+    for y in 0..layout.height {
+        for x in 0..layout.width {
+            let pixel = pack_pixel(identity_rgb(x, y, layout.width, layout.height), layout.format);
+            let index = y * layout.stride + x;
+            unsafe {
+                write_volatile(framebuffer.wrapping_add(index), pixel);
+            }
+        }
+    }
+    Ok(GopSummary {
+        layout,
+        mode: mode.mode,
+    })
+}
+
+fn capture_memory_map(boot_services: &EfiBootServices) -> Result<MemoryMapSummary, EfiStatus> {
+    let get_memory_map: GetMemoryMap = unsafe { function(boot_services.get_memory_map)? };
+    let allocate_pool: AllocatePool = unsafe { function(boot_services.allocate_pool)? };
+    let free_pool: FreePool = unsafe { function(boot_services.free_pool)? };
+
+    let mut required_size = 0usize;
+    let mut map_key = 0usize;
+    let mut descriptor_size = 0usize;
+    let mut descriptor_version = 0u32;
+    let probe_status = get_memory_map(
+        &mut required_size,
+        null_mut(),
+        &mut map_key,
+        &mut descriptor_size,
+        &mut descriptor_version,
+    );
+    let plan = plan_memory_map(probe_status, required_size, descriptor_size)
+        .map_err(|_| EFI_COMPROMISED_DATA)?;
+    let mut buffer = null_mut();
+    let allocation_status = allocate_pool(EFI_LOADER_DATA, plan.allocation_size, &mut buffer);
+    if allocation_status != EFI_SUCCESS || buffer.is_null() {
+        return Err(if allocation_status == EFI_SUCCESS {
+            EFI_OUT_OF_RESOURCES
+        } else {
+            allocation_status
+        });
+    }
+
+    let mut map_size = plan.allocation_size;
+    let final_status = get_memory_map(
+        &mut map_size,
+        buffer,
+        &mut map_key,
+        &mut descriptor_size,
+        &mut descriptor_version,
+    );
+    let summary = validate_memory_map_result(
+        final_status,
+        map_size,
+        plan.allocation_size,
+        descriptor_size,
+    )
+    .map_err(|error| {
+        if error == ContractError::FinalMemoryMapStatus && final_status == EFI_BUFFER_TOO_SMALL {
+            EFI_BUFFER_TOO_SMALL
+        } else {
+            EFI_COMPROMISED_DATA
+        }
+    });
+    let free_status = free_pool(buffer);
+    if free_status != EFI_SUCCESS {
+        return Err(EFI_DEVICE_ERROR);
+    }
+    summary
+}
+
+fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus {
+    initialize_serial();
+    diagnostic(format_args!("POOLEBOOT/0.1 ENTRY\n"));
+    if image_handle.is_null() || system_table.is_null() {
+        return fail("entry", EFI_INVALID_PARAMETER);
+    }
+
+    let system = unsafe { &*system_table };
+    let system_bytes = match unsafe {
+        table_slice(
+            system_table.cast::<u8>(),
+            system.header.header_size,
+        )
+    } {
+        Ok(bytes) => bytes,
+        Err(_) => return fail("system_table_bounds", EFI_COMPROMISED_DATA),
+    };
+    if validate_table_header(
+        system_bytes,
+        EFI_SYSTEM_TABLE_SIGNATURE,
+        size_of::<EfiSystemTable>(),
+    )
+    .is_err()
+    {
+        return fail("system_table", EFI_COMPROMISED_DATA);
+    }
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 SYSTEM_TABLE PASS revision=0x{:08X}\n",
+        system.header.revision
+    ));
+
+    if system.boot_services.is_null() {
+        return fail("boot_services_pointer", EFI_COMPROMISED_DATA);
+    }
+    let boot_services = unsafe { &*system.boot_services };
+    let boot_bytes = match unsafe {
+        table_slice(
+            system.boot_services.cast::<u8>(),
+            boot_services.header.header_size,
+        )
+    } {
+        Ok(bytes) => bytes,
+        Err(_) => return fail("boot_services_bounds", EFI_COMPROMISED_DATA),
+    };
+    if validate_table_header(
+        boot_bytes,
+        EFI_BOOT_SERVICES_SIGNATURE,
+        size_of::<EfiBootServices>(),
+    )
+    .is_err()
+    {
+        return fail("boot_services", EFI_COMPROMISED_DATA);
+    }
+    diagnostic(format_args!("POOLEBOOT/0.1 BOOT_SERVICES PASS\n"));
+
+    let watchdog: SetWatchdogTimer = match unsafe { function(boot_services.set_watchdog_timer) } {
+        Ok(function) => function,
+        Err(status) => return fail("watchdog_pointer", status),
+    };
+    let watchdog_status = watchdog(0, 0, 0, null());
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 WATCHDOG status=0x{:016X}\n",
+        watchdog_status as u64
+    ));
+
+    match console_message(system.console_out) {
+        Ok(()) => diagnostic(format_args!("POOLEBOOT/0.1 CONSOLE PASS\n")),
+        Err(status) => diagnostic(format_args!(
+            "POOLEBOOT/0.1 CONSOLE FALLBACK status=0x{:016X}\n",
+            status as u64
+        )),
+    }
+
+    let config = match summarize_configuration_tables(system) {
+        Ok(summary) => summary,
+        Err(status) => return fail("configuration_tables", status),
+    };
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 CONFIG PASS count={} acpi20={} smbios3={} smbios2={}\n",
+        config.count,
+        u8::from(config.acpi20),
+        u8::from(config.smbios3),
+        u8::from(config.smbios2)
+    ));
+
+    let gop = match discover_gop(boot_services) {
+        Ok(summary) => {
+            diagnostic(format_args!(
+                "POOLEBOOT/0.1 GOP PASS width={} height={} stride={} mode={} format={}\n",
+                summary.layout.width,
+                summary.layout.height,
+                summary.layout.stride,
+                summary.mode,
+                match summary.layout.format {
+                    pooleboot::PixelFormat::Rgb => "RGB",
+                    pooleboot::PixelFormat::Bgr => "BGR",
+                }
+            ));
+            Some(summary)
+        }
+        Err(status) => {
+            diagnostic(format_args!(
+                "POOLEBOOT/0.1 GOP FALLBACK status=0x{:016X}\n",
+                status as u64
+            ));
+            None
+        }
+    };
+
+    let memory_map = match capture_memory_map(boot_services) {
+        Ok(summary) => summary,
+        Err(status) => return fail("memory_map", status),
+    };
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 MEMORY_MAP PASS bytes={} descriptor_bytes={} descriptors={}\n",
+        memory_map.map_size, memory_map.descriptor_size, memory_map.descriptor_count
+    ));
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested kernel=not_loaded exit_boot_services=not_called\n"
+    ));
+
+    if gop.is_some() {
+        diagnostic(format_args!("POOLEBOOT/0.1 FRAME READY\n"));
+        let stall: Stall = match unsafe { function(boot_services.stall) } {
+            Ok(function) => function,
+            Err(status) => return fail("stall_pointer", status),
+        };
+        let stall_status = stall(FRAME_HOLD_MICROSECONDS);
+        if stall_status != EFI_SUCCESS {
+            return fail("stall", stall_status);
+        }
+    }
+    diagnostic(format_args!("POOLEBOOT/0.1 RETURN EFI_SUCCESS\n"));
+    EFI_SUCCESS
+}
+
 #[unsafe(export_name = "efi_main")]
-pub extern "efiapi" fn qualification_entry(
-    _image_handle: *mut c_void,
-    _system_table: *mut c_void,
-) -> usize {
-    0
+pub extern "efiapi" fn efi_entry(
+    image_handle: EfiHandle,
+    system_table: *mut c_void,
+) -> EfiStatus {
+    run(image_handle, system_table.cast::<EfiSystemTable>())
 }

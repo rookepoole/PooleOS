@@ -30,6 +30,7 @@ ALLOWED_RUNS = {
     "runs/hardware_target_readiness.json",
     "runs/native_architecture_baseline.json",
     "runs/native_model_readiness.json",
+    "runs/native_pooleboot_readiness.json",
     "runs/n0_owner_decision_packet.json",
     "runs/n0_owner_response_receipt.json",
     "runs/native_toolchain_qualification.json",

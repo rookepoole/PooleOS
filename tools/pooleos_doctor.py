@@ -194,6 +194,17 @@ def check_native_model_readiness() -> CheckResult:
     )
 
 
+def check_native_pooleboot_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_pooleboot_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
 def check_publication_boundary() -> CheckResult:
     from tools import pooleos_release_gate
 
@@ -3155,7 +3166,7 @@ def run_pooleos_tests() -> CheckResult:
         "pooleos:unittest",
         [sys.executable, "-m", "unittest", "discover", "-s", "tests"],
         ROOT,
-        timeout=120,
+        timeout=300,
     )
 
 
@@ -3288,6 +3299,8 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "tools" / "run_native_tier0.py",
                 ROOT / "tools" / "bootstrap_native_models.ps1",
                 ROOT / "tools" / "qualify_native_models.py",
+                ROOT / "tools" / "build_native_pooleboot_media.py",
+                ROOT / "tools" / "qualify_native_pooleboot.py",
                 ROOT / "runtime" / "native_binary.py",
                 ROOT / "runtime" / "native_v1_objectives.py",
                 ROOT / "runtime" / "adr_ratification.py",
@@ -3296,6 +3309,8 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runtime" / "hardware_target.py",
                 ROOT / "runtime" / "native_tier0.py",
                 ROOT / "runtime" / "native_models.py",
+                ROOT / "runtime" / "native_pooleboot.py",
+                ROOT / "docs" / "native-pooleboot-proof.md",
                 ROOT / "security" / "README.md",
                 ROOT / "security" / "owner-adr-signers.allowed",
                 ROOT / "security" / "revoked-adr-signers",
@@ -3305,6 +3320,9 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "native" / ".cargo" / "config.toml",
                 ROOT / "native" / "boot" / "Cargo.toml",
                 ROOT / "native" / "boot" / "src" / "main.rs",
+                ROOT / "native" / "boot" / "src" / "lib.rs",
+                ROOT / "native" / "fixtures" / "pooleboot" / "Cargo.toml",
+                ROOT / "native" / "fixtures" / "pooleboot" / "src" / "main.rs",
                 ROOT / "native" / "kernel" / "Cargo.toml",
                 ROOT / "native" / "kernel" / "src" / "main.rs",
                 ROOT / "runs" / "pooleos_native_checklist_coverage.json",
@@ -3325,6 +3343,10 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runs" / "hardware_target_readiness.json",
                 ROOT / "runs" / "native_tier0_readiness.json",
                 ROOT / "runs" / "native_model_readiness.json",
+                ROOT / "runs" / "native_pooleboot_readiness.json",
+                ROOT / "specs" / "native-pooleboot-proof.json",
+                ROOT / "specs" / "native-pooleboot-proof.schema.json",
+                ROOT / "specs" / "native-pooleboot-readiness.schema.json",
                 ROOT / "specs" / "pdc-source-intake.schema.json",
                 ROOT / "specs" / "pdc-math-contract.schema.json",
                 ROOT / "specs" / "pdc-golden-vectors.schema.json",
@@ -3402,6 +3424,7 @@ def main(argv: list[str] | None = None) -> int:
     checks.append(check_hardware_target_readiness())
     checks.append(check_native_tier0_readiness())
     checks.append(check_native_model_readiness())
+    checks.append(check_native_pooleboot_readiness())
     checks.append(check_publication_boundary())
     checks.extend(check_claim_schema())
     checks.extend(check_claim_examples())

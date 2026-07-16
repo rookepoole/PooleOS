@@ -109,7 +109,7 @@
     {
       "phase_id": "N5",
       "title": "Boot Media, Boot Protocol, and PooleBoot UEFI Loader",
-      "status": "not_started",
+      "status": "partial",
       "source_section_ids": [
         "013",
         "014",
@@ -817,7 +817,7 @@
       "subheading_count": 0,
       "checkbox_count": 39,
       "phase_id": "N5",
-      "phase_status": "not_started",
+      "phase_status": "partial",
       "completion_inferred": false
     },
     {
@@ -829,7 +829,7 @@
       "subheading_count": 0,
       "checkbox_count": 34,
       "phase_id": "N5",
-      "phase_status": "not_started",
+      "phase_status": "partial",
       "completion_inferred": false
     },
     {
@@ -841,7 +841,7 @@
       "subheading_count": 8,
       "checkbox_count": 168,
       "phase_id": "N5",
-      "phase_status": "not_started",
+      "phase_status": "partial",
       "completion_inferred": false
     },
     {

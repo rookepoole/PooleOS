@@ -43,15 +43,16 @@
     "execution_protocol": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["updates_required_each_goal_turn", "inspect_live_pooleglyph_each_turn", "verify_master_checklist_coverage_each_turn", "new_work_must_be_flagged", "last_updated_cycle", "selected_move_id", "immediate_next_move_id", "required_records", "flag_classes"],
+      "required": ["updates_required_each_goal_turn", "inspect_live_pooleglyph_each_turn", "verify_master_checklist_coverage_each_turn", "new_work_must_be_flagged", "last_updated_cycle", "selected_move_id", "immediate_next_move_id", "owner_independent_next_move_id", "required_records", "flag_classes"],
       "properties": {
         "updates_required_each_goal_turn": {"const": true},
         "inspect_live_pooleglyph_each_turn": {"const": true},
         "verify_master_checklist_coverage_each_turn": {"const": true},
         "new_work_must_be_flagged": {"const": true},
-        "last_updated_cycle": {"const": 96},
-        "selected_move_id": {"const": "N4-POOLEFS-MODEL-001"},
+        "last_updated_cycle": {"const": 97},
+        "selected_move_id": {"const": "N5-POOLEBOOT-001"},
         "immediate_next_move_id": {"const": "N0-HW-KEY-ACQUIRE-001"},
+        "owner_independent_next_move_id": {"const": "N5-BOOTPROTO-001"},
         "required_records": {"type": "array", "minItems": 7, "items": {"type": "string"}, "uniqueItems": true},
         "flag_classes": {"type": "array", "minItems": 8, "items": {"type": "string"}, "uniqueItems": true}
       }
@@ -91,9 +92,9 @@
       "properties": {
         "total": {"const": 40},
         "complete": {"const": 0},
-        "partial": {"const": 12},
+        "partial": {"const": 13},
         "blocked": {"const": 1},
-        "not_started": {"const": 27},
+        "not_started": {"const": 26},
         "subphase_total": {"const": 301}
       }
     },
@@ -135,8 +136,8 @@
     },
     "implementation_flags": {
       "type": "array",
-      "minItems": 33,
-      "maxItems": 33,
+      "minItems": 34,
+      "maxItems": 34,
       "items": {
         "type": "object",
         "additionalProperties": false,

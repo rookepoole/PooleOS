@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_pooleboot_proof_contract",
+  "contract_id": "POOLEOS-N5-POOLEBOOT-1",
+  "status": "bounded_unsigned_non_promoting_proof",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "selected_move_id": "N5-POOLEBOOT-001",
+  "phase_mapping": [
+    "N5.1",
+    "N5.2",
+    "N5.3",
+    "N5.7"
+  ],
+  "source_requirement_ids": [
+    "013",
+    "015.1",
+    "015.2",
+    "015.5",
+    "015.6"
+  ],
+  "binary": {
+    "package": "pooleboot",
+    "binary_name": "PooleBoot.efi",
+    "target": "x86_64-unknown-uefi",
+    "format": "PE32+",
+    "machine": 34404,
+    "subsystem": 10,
+    "timestamp": 0,
+    "entry_symbol": "efi_main",
+    "calling_convention": "efiapi",
+    "imports_allowed": false,
+    "debug_directory_allowed": false,
+    "maximum_byte_count": 262144,
+    "clean_build_count": 2,
+    "exact_clean_build_match_required": true
+  },
+  "media": {
+    "container": "raw disk image",
+    "byte_count": 67108864,
+    "sector_bytes": 512,
+    "protective_mbr_required": true,
+    "primary_and_backup_gpt_required": true,
+    "gpt_crc_required": true,
+    "disk_guid": "504F4F4C-454F-534E-8000-000000000097",
+    "esp_type_guid": "C12A7328-F81F-11D2-BA4B-00A0C93EC93B",
+    "esp_unique_guid": "504F4F4C-4553-5000-8000-000000000001",
+    "esp_start_lba": 2048,
+    "esp_label": "POOLEOS ESP",
+    "filesystem": "FAT32",
+    "fallback_path": "EFI/BOOT/BOOTX64.EFI",
+    "ordinary_workspace_file_only": true,
+    "allowed_output_roots": [
+      "tmp",
+      "runs/native-tier0"
+    ],
+    "input_must_be_workspace_regular_file": true,
+    "device_namespace_allowed": false,
+    "alternate_data_stream_allowed": false,
+    "reserved_device_name_allowed": false,
+    "symlink_paths_allowed": false,
+    "physical_media_write_allowed": false
+  },
+  "firmware_interfaces": {
+    "maximum_table_bytes": 4096,
+    "maximum_configuration_table_count": 256,
+    "maximum_memory_map_bytes": 1048576,
+    "minimum_memory_descriptor_bytes": 40,
+    "maximum_memory_descriptor_bytes": 256,
+    "allowed_gop_pixel_formats": [
+      "PixelRedGreenBlueReserved8BitPerColor",
+      "PixelBlueGreenRedReserved8BitPerColor"
+    ],
+    "blt_only_framebuffer_allowed": false,
+    "maximum_framebuffer_bytes": 536870912,
+    "table_crc_required": true,
+    "serial_transport": "16550A COM1 polling",
+    "debug_transport": "QEMU isa-debugcon 0x402",
+    "network_protocols_discovered": false
+  },
+  "execution": {
+    "tier0_profile": "bootstrap-debug",
+    "machine": "pc-q35-11.0",
+    "accelerator": "tcg,thread=single",
+    "guest_network": false,
+    "host_acceleration": false,
+    "media_read_only": true,
+    "fresh_vars_copy_per_run": true,
+    "gop_device": "VGA",
+    "qmp_bind_address": "127.0.0.1",
+    "qmp_screenshot_format": "ppm",
+    "run_count": 2,
+    "exact_marker_match_required": true,
+    "exact_screenshot_match_required": true,
+    "maximum_seconds_per_run": 30
+  },
+  "required_markers": [
+    "ENTRY",
+    "SYSTEM_TABLE PASS",
+    "BOOT_SERVICES PASS",
+    "WATCHDOG",
+    "CONSOLE PASS_OR_FALLBACK",
+    "CONFIG PASS",
+    "GOP PASS",
+    "MEMORY_MAP PASS",
+    "BOUNDARY",
+    "FRAME READY",
+    "RETURN EFI_SUCCESS"
+  ],
+  "required_negative_controls": [
+    "NEG-N5-PE-SUBSYSTEM",
+    "NEG-N5-PE-MACHINE",
+    "NEG-N5-PE-DEBUG-DIRECTORY",
+    "NEG-N5-GPT-PRIMARY-CRC",
+    "NEG-N5-GPT-BACKUP-CRC",
+    "NEG-N5-GPT-ENTRY-CRC",
+    "NEG-N5-ESP-TYPE",
+    "NEG-N5-FAT-COPY",
+    "NEG-N5-FAT-CHAIN-LOOP",
+    "NEG-N5-FALLBACK-PATH",
+    "NEG-N5-MEDIA-OUTPUT-PATH",
+    "NEG-N5-MARKER-OMISSION",
+    "NEG-N5-MARKER-ORDER",
+    "NEG-N5-SCREENSHOT-BLANK",
+    "NEG-N5-CLAIM-OVERREACH"
+  ],
+  "claim_boundary": [
+    "This contract covers one unsigned UEFI proof application, not the complete PooleBoot loader.",
+    "The proof does not load, authenticate, relocate, or enter PooleKernel or an initial-system bundle.",
+    "The proof obtains a bounded memory map but does not call ExitBootServices or define the kernel handoff ABI.",
+    "The proof does not enroll keys, enforce Secure Boot, perform measured boot, use TPM state, or create a signature.",
+    "The deterministic raw image is development media, not an ISO, installer, recovery image, or physical-media qualification.",
+    "A return-path marker immediately precedes the Rust return; it does not prove subsequent firmware policy or target-firmware behavior.",
+    "QEMU and OVMF remain exact non-promoting development inputs with the provenance gaps recorded by the Tier 0 lock.",
+    "The static framebuffer identity is not the final animated PooleGlass boot identity or an accessibility acceptance result.",
+    "No N5 exit gate, production readiness, signing, release, or physical hardware claim follows."
+  ],
+  "official_references": [
+    "https://uefi.org/specs/UEFI/2.11/",
+    "https://doc.rust-lang.org/rustc/platform-support/unknown-uefi.html",
+    "https://www.qemu.org/docs/master/interop/qemu-qmp-ref.html"
+  ]
+}
