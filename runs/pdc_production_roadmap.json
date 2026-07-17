@@ -43,10 +43,10 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 100,
-    "selected_move_id": "N5-ELF-001",
+    "last_updated_cycle": 101,
+    "selected_move_id": "N6-KENTRY-001",
     "immediate_next_move_id": "N0-HW-KEY-ACQUIRE-001",
-    "owner_independent_next_move_id": "N6-KENTRY-001",
+    "owner_independent_next_move_id": "N5-KLOAD-001",
     "required_records": [
       "docs/production-goal-charter.md",
       "docs/pdc-production-build-plan.md",
@@ -63,6 +63,7 @@
       "runs/native_boot_handoff_readiness.json",
       "runs/native_boot_config_readiness.json",
       "runs/native_elf_loader_readiness.json",
+      "runs/native_kernel_entry_readiness.json",
       "runs/native_v1_objectives_readiness.json",
       "runs/release_gate.json",
       "docs/cycle_log.md",
@@ -88,14 +89,14 @@
     "implementation_item_count": 8996,
     "section_count": 171,
     "coverage_path": "runs/pooleos_native_checklist_coverage.json",
-    "coverage_sha256": "7B49729139EF7D4832B0F112176C516CA7FC8C7A73F13FAC7DBFC72CB1164A19",
+    "coverage_sha256": "6EC79F9BFDE55BD154E9D30206EE8DB72C1E9814C0FEDA44EE2950299D783F41",
     "coverage_status": "pass",
-    "added_requirement_count": 32
+    "added_requirement_count": 33
   },
   "baseline": {
-    "pooleos_cycle": 100,
+    "pooleos_cycle": 101,
     "entry_cycle": 79,
-    "pooleos_test_count": 557,
+    "pooleos_test_count": 565,
     "historical_consistency_release_gate": {
       "passed_checks": 58,
       "total_checks": 58,
@@ -105,9 +106,9 @@
       "native_promotion_role": "historical_non_promoting"
     },
     "native_consistency_release_gate": {
-      "passed_checks": 73,
-      "total_checks": 73,
-      "artifact_count": 68,
+      "passed_checks": 74,
+      "total_checks": 74,
+      "artifact_count": 69,
       "explicit_gap_count": 20,
       "production_ready": false,
       "native_promotion_role": "planning_and_evidence_consistency_non_promoting"
@@ -115,7 +116,7 @@
     "native": {
       "source_controlled": true,
       "pooleboot_exists": false,
-      "poolekernel_exists": false,
+      "poolekernel_exists": true,
       "native_qemu_boot": false,
       "native_physical_boot": false,
       "ring3_execution": false,
@@ -288,9 +289,9 @@
   "phase_summary": {
     "total": 40,
     "complete": 0,
-    "partial": 13,
+    "partial": 14,
     "blocked": 1,
-    "not_started": 26,
+    "not_started": 25,
     "subphase_total": 301
   },
   "phases": [
@@ -722,14 +723,14 @@
         "runs/native_elf_loader_readiness.json: 12/12 Rust tests, 2/2 no_std target builds, 2/2 PooleBoot integration builds, 3/3 exact loaded-byte vectors, 129/129 hostile controls, and 16,384 Rust/Python differential cases with zero mismatches"
       ],
       "current_gaps": [
-        "A reproducible unsigned PooleBoot PE32+ proof application and deterministic GPT/FAT32 development medium execute twice under pinned OVMF, while PBP1, PBC1, and the bounded PKELF1 synthetic loader have qualified Rust/Python implementations and exact vectors; however, live configuration and kernel-file discovery/read, authenticated artifact selection, firmware page allocation, page-table installation, a functional PooleKernel image, menu policy, live handoff population and consumption, ExitBootServices transfer, second host, target firmware, physical media, and N5 exit remain open"
+        "A reproducible unsigned PooleBoot proof, PBP1, PBC1, PKELF1, and a separately qualified real PooleKernel product image exist; however, live configuration and kernel-file discovery/read, authenticated artifact selection, firmware page allocation, page-table installation, menu policy, live handoff population and consumption, ExitBootServices transfer, second host, target firmware, physical media, and N5 exit remain open"
       ],
       "exit_gate": "PooleBoot reproducibly boots under pinned OVMF and target firmware, validates all artifacts, exits boot services, transfers through a versioned golden-tested handoff, and rejects the complete hostile loader corpus."
     },
     {
       "id": "N6",
       "title": "Boot Trust, Kernel Image, Early Runtime, and Emergency Diagnostics",
-      "status": "not_started",
+      "status": "partial",
       "subphases": [
         {
           "id": "N6.1",
@@ -748,17 +749,17 @@
         },
         {
           "id": "N6.4",
-          "status": "not_started",
+          "status": "partial",
           "description": "Freeze kernel ELF layout, relocation, KASLR policy, section permissions, debug symbols, map files, build ID, unwind strategy, and read-only-after-init behavior."
         },
         {
           "id": "N6.5",
-          "status": "not_started",
+          "status": "partial",
           "description": "Enter on a known stack with interrupts disabled; validate handoff, reserve every range, establish canonical mappings, initialize bootstrap GDT/IDT/TSS, and run early self-tests."
         },
         {
           "id": "N6.6",
-          "status": "not_started",
+          "status": "partial",
           "description": "Implement allocation-independent serial, framebuffer, and ring-buffer logs; bounded formatting; panic codes; register/control-state/page-fault dumps; nested panic; double-fault/NMI paths; and next-boot panic summary."
         },
         {
@@ -780,11 +781,18 @@
       ],
       "source_checkbox_count": 291,
       "added_requirement_ids": [
-        "ADD-BOOT-002"
+        "ADD-BOOT-002",
+        "ADD-KERNEL-001"
       ],
-      "current_evidence": [],
+      "current_evidence": [
+        "specs/native-kernel-entry-contract.json and docs/native-kernel-entry.md: PKENTRY1 transfer, mapping, diagnostic, panic, build, and explicit nonclaim boundary",
+        "native/kernel: real freestanding PooleKernel product with fixed entry assembly, allocation-free PBP1 intake, static early ring, bounded COM1 candidate, optional volatile framebuffer sink, and terminal panic path",
+        "runtime/native_kernel_image.py: fail-closed pinned-LLD input validation and deterministic PKELF1 canonicalization",
+        "runs/native_kernel_entry_readiness.json: 13/13 host tests, 2/2 exact clean linked and canonical builds, 43/43 hostile controls, exact independent Rust/Python loaded bytes, and canonical SHA-256 8D79F687B92EE4C3592F45BB8B2C33E805D3D246319D54AB7EC354458490CA5B",
+        "ADD-KERNEL-001: explicit temporary framebuffer identity mapping, cache-policy preservation, lifetime, replacement, and revocation dependency"
+      ],
       "current_gaps": [
-        "No functional native PooleKernel image, boot trust, measured boot, entry path, serial panic, or crash path exists"
+        "A reproducible real PooleKernel PKELF1 image, candidate PKENTRY1 intake, bounded ring/COM1/framebuffer diagnostics, and panic classes exist only as single-host product/static evidence; boot trust, measured boot, live mappings and transfer, framebuffer mapping proof, GDT/IDT/TSS, exception and retained-crash paths, kernel runtime, target execution, and N6 exit remain open"
       ],
       "exit_gate": "every accepted boot is signature/digest/version bound; revocation and malformed signatures fail closed into recovery; deliberate failures at every early stage yield retained serial evidence without silent reset loops."
     },
@@ -2709,8 +2717,8 @@
         "ADD-TEST-001"
       ],
       "current_evidence": [
-        "Cycle 100 host baseline: 557 tests with one Windows symlink-permission skip",
-        "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, frozen owner-packet and completed owner-response omission/staleness/placeholder/custody/private-material/authorization controls, hardware privacy, malformed-CPUID, Tier 0 profile/provenance/path/overclaim, bounded-model multi-case mutation/trace/claim controls including six independent PooleFS mutants, deterministic GPT/FAT32 inspection, media path-policy rejection, PE mutation, marker/frame, PBP1, PBC1, and PKELF1 layout/golden/version/differential-fuzz/staleness/claim controls, PooleGlyph roadmap bindings, and collector-smoke negatives"
+        "Cycle 101 host baseline: 565 tests with one Windows symlink-permission skip",
+        "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, frozen owner-packet and completed owner-response omission/staleness/placeholder/custody/private-material/authorization controls, hardware privacy, malformed-CPUID, Tier 0 profile/provenance/path/overclaim, bounded-model multi-case mutation/trace/claim controls including six independent PooleFS mutants, deterministic GPT/FAT32 inspection, media path-policy rejection, PE mutation, marker/frame, PBP1, PBC1, PKELF1, and PKENTRY1 product/reproduction/intake/logging/panic/hostile/exact-byte/claim controls, PooleGlyph roadmap bindings, and collector-smoke negatives"
       ],
       "current_gaps": [
         "No native system, power-loss, hardware, accessibility, soak, or external security suite exists"
@@ -2777,8 +2785,8 @@
         "ADD-SUPPLY-001"
       ],
       "current_evidence": [
-        "Cycle 100 consistency release gate: 73/73 checks over 68 artifacts",
-        "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, frozen N0 owner packet, deterministic owner-response receipt, native-toolchain, bounded hardware-readiness, native Tier 0 readiness, native model-readiness, bounded PooleBoot readiness, PBP1 readiness, PBC1 readiness, PKELF1 readiness, and PooleGlyph planning artifacts"
+        "Cycle 101 consistency release gate: 74/74 checks over 69 artifacts",
+        "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, frozen N0 owner packet, deterministic owner-response receipt, native-toolchain, bounded hardware-readiness, native Tier 0 readiness, native model-readiness, bounded PooleBoot readiness, PBP1 readiness, PBC1 readiness, PKELF1 readiness, PKENTRY1 readiness, and PooleGlyph planning artifacts"
       ],
       "current_gaps": [
         "No native SBOM/provenance/signing ceremony/release manifest or source-controlled release exists"
@@ -3163,6 +3171,46 @@
       ]
     },
     {
+      "id": "FLAG-N6-KENTRY-001",
+      "class": "REQUIRED",
+      "status": "closed",
+      "phase_id": "N6",
+      "closure_condition": "Qualify a real reproducible PooleKernel PKELF1 product with PKENTRY1 intake, bounded early diagnostics, panic taxonomy, hostile controls, manifest continuity, and explicit live-transfer nonclaims",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json",
+        "specs/native-kernel-entry-contract.json",
+        "runs/native_kernel_entry_readiness.json",
+        "docs/native-kernel-entry.md",
+        "native/kernel/src/main.rs",
+        "native/kernel/src/lib.rs",
+        "runtime/native_kernel_image.py",
+        "runtime/native_kernel_entry.py",
+        "tools/qualify_native_kernel_entry.py",
+        "tests/test_native_kernel_entry.py"
+      ]
+    },
+    {
+      "id": "FLAG-N6-FRAMEBUFFER-MAP-001",
+      "class": "REQUIRED",
+      "status": "open",
+      "phase_id": "N6",
+      "closure_condition": "Install and record the exact temporary framebuffer identity mapping, preserve effective cache policy, and replace and revoke that mapping before graphics capability delegation",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json",
+        "specs/native-kernel-entry-contract.json",
+        "runs/native_kernel_entry_readiness.json",
+        "docs/native-kernel-entry.md",
+        "native/kernel/src/main.rs",
+        "native/kernel/src/lib.rs",
+        "runtime/native_kernel_image.py",
+        "runtime/native_kernel_entry.py",
+        "tools/qualify_native_kernel_entry.py",
+        "tests/test_native_kernel_entry.py"
+      ]
+    },
+    {
       "id": "FLAG-NATIVE-KERNEL-001",
       "class": "STOP_SHIP",
       "status": "open",
@@ -3543,8 +3591,8 @@
       "The native repository, protected workflow, scope-hardened ADR ceremony, frozen 16-source packet, and completed response receipt record 2/2 ADR and 38/38 definition dispositions, but all measurements, compatible hardware-key acquisition, trusted public key custody, signatures, signed tags, immutable release refs, and retained CI review evidence remain open",
       "Rust PE32+/ELF64 fixtures pass one-host qualification, but second-host reproduction, source provenance, C17/assembly/ABI tools, and image tooling remain open",
       "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, bounded checks for all seven required boot-slot/capability/virtual-memory/IPC/scheduler/update/PooleFS domains detect their required hostile violations, and a bounded PooleBoot proof executes under pinned OVMF, but source-rebuilt current QEMU/EDK II, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open",
-      "A reproducible unsigned PooleBoot PE32+ proof application boots twice with deterministic GPT/FAT32 media, ordered dual-channel markers, and exact GOP frames, while canonical PBP1, PBC1, and bounded PKELF1 implementations pass golden, hostile, exact-loaded-byte, and differential gates; live file I/O, trusted selection, signed-artifact authentication, firmware allocation, page-table installation, a functional PooleKernel image, live handoff producer/consumer, ExitBootServices transfer, target firmware, physical-media qualification, and N5 exit remain open",
-      "No functional native PooleKernel image, boot trust, measured boot, early runtime, serial panic, or crash path",
+      "A reproducible unsigned PooleBoot proof application boots twice with deterministic GPT/FAT32 media, ordered dual-channel markers, and exact GOP frames, while canonical PBP1, PBC1, bounded PKELF1, and a separately qualified real PooleKernel product pass their declared gates; live file I/O, trusted selection, signed-artifact authentication, firmware allocation, page-table installation, live handoff producer/consumer, ExitBootServices transfer, target firmware, physical-media qualification, and N5 exit remain open",
+      "A real reproducible PooleKernel image, PKENTRY1 intake, bounded early ring/COM1/framebuffer paths, and panic classes exist, but boot trust, measured boot, live mappings and transfer, descriptor/exception setup, retained crash evidence, kernel runtime, target execution, and N6 exit remain open",
       "No native CPU, interrupts, time, SMP, physical memory, virtual memory, or reclaim implementation",
       "The exact Tier 1 identity passes 24/24 required checks and 16 allowlisted user-mode CPUID records are captured with zero public raw registers, but seven required channels remain non-complete in total, including partial CPU/MSR and SPD/topology; 15 standards hashes, ten lab-safety prerequisites, native parsing, and physical qualification also remain open",
       "No native DMA/IOMMU/interrupt-remapping confinement",
@@ -3594,6 +3642,7 @@
     "The Cycle 98 PBP1 receipt proves canonical synthetic bytes, no_std Rust and independent Python decoding, bounded downgrade and malformed controls, and finite differential agreement; it does not prove live PooleBoot population, ExitBootServices, PooleKernel consumption or execution, ABI ratification, target firmware, or N5 exit.",
     "The Cycle 99 PBC1 receipt proves a bounded candidate grammar, allocation-free no_std Rust parsing, an independent Python oracle, root-confined synthetic paths, named hostile controls, and finite differential agreement; it does not prove live firmware file I/O, trusted entry selection, artifact verification/loading, ABI ratification, target firmware, or N5 exit.",
     "The Cycle 100 PKELF1 receipt proves bounded synthetic ELF64 validation/loading, exact segment/BSS/relative-relocation bytes, a post-relocation W^X plan, named hostile controls, and finite Rust/Python differential agreement; it does not prove live firmware file I/O, signed-manifest authentication, firmware allocation, installed page tables, a functional PooleKernel image, ExitBootServices, kernel transfer or execution, ABI ratification, target firmware, physical media, or N5 exit.",
+    "The Cycle 101 PKENTRY1 receipt proves a real reproducible PooleKernel product image, allocation-free candidate PBP1 intake helpers, bounded static diagnostics, deterministic panic classes, hostile linked/canonical rejection, and exact Rust/Python loaded bytes; it does not prove a live PooleBoot caller, ExitBootServices, installed mappings or W^X, privileged diagnostics execution, descriptor/exception setup, kernel runtime, target firmware, N6 exit, or production readiness.",
     "Sixteen allowlisted user-mode CPUID records prove only a bounded host observation; they do not prove MSR access, privileged probes, native parsing, driver safety, or Tier 1 qualification.",
     "Owner-directed acceptance of thirty-eight objective definitions while binding zero measurements is not a cryptographic signature or implementation evidence.",
     "PooleGlyph Phase 65 proves a metadata, parser, AST, and diagnostic foundation only; no source form, Core IR, PGASM, PGB2, PGVM2, host call, policy, optimization, or version label is promoted without its own frozen contract and evidence gate.",

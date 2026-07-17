@@ -70,6 +70,7 @@ PHASE_STATUS = {
     "N3": "partial",
     "N4": "partial",
     "N5": "partial",
+    "N6": "partial",
     "N15": "partial",
     "N31": "partial",
     "N32": "partial",
@@ -155,6 +156,16 @@ ADDED_REQUIREMENTS = [
         "phase_id": "N6",
         "requirement": "Model UEFI PK, KEK, db, dbx, image signer revocation, minimum secure version, authenticated boot state, recovery-key rotation, and development-key containment as one boot-trust state machine.",
         "basis": ["https://uefi.org/specs/UEFI/2.11/32_Secure_Boot_and_Driver_Signing.html"],
+    },
+    {
+        "id": "ADD-KERNEL-001",
+        "phase_id": "N6",
+        "requirement": "Declare the exact temporary mapping, lifetime, cache policy, write permission, and revocation transition for every physical address passed to early PooleKernel diagnostics; in particular, no PBP1 framebuffer physical address may be dereferenced until the entry contract proves that mapping is present.",
+        "basis": [
+            "PBP1 framebuffer physical-address contract",
+            "master checklist section 018 early framebuffer requirements",
+            "Cycle101 N6-KENTRY-001 mapping-gap analysis",
+        ],
     },
     {
         "id": "ADD-TIME-001",

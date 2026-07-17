@@ -1,0 +1,220 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_kernel_entry_contract",
+  "contract_id": "PKENTRY1",
+  "selected_move_id": "N6-KENTRY-001",
+  "status_date": "2026-07-16",
+  "status": "candidate_product_image_single_host_non_promoting",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "phase_mapping": [
+    "N6.4",
+    "N6.5",
+    "N6.6"
+  ],
+  "source_requirement_ids": [
+    "016",
+    "017",
+    "018",
+    "019",
+    "ADD-KERNEL-001"
+  ],
+  "authorities": [
+    {
+      "role": "freestanding target, kernel code model, disabled red zone, and System V C ABI",
+      "title": "Rust x86_64-unknown-none platform support",
+      "url": "https://doc.rust-lang.org/rustc/platform-support/x86_64-unknown-none.html"
+    },
+    {
+      "role": "entry assembly semantics",
+      "title": "Rust inline assembly reference",
+      "url": "https://doc.rust-lang.org/reference/inline-assembly.html"
+    },
+    {
+      "role": "linker-script and program-header semantics",
+      "title": "LLD ELF linker documentation",
+      "url": "https://lld.llvm.org/ELF/linker_script.html"
+    },
+    {
+      "role": "x86-64 register calling convention and stack alignment",
+      "title": "System V x86-64 psABI",
+      "url": "https://gitlab.com/x86-psABIs/x86-64-ABI/-/blob/master/x86-64-ABI/low-level-sys-info.tex"
+    }
+  ],
+  "product": {
+    "package": "poolekernel",
+    "binary_name": "PooleKernelLinked",
+    "published_file_name": "PooleKernel.pkelf",
+    "target": "x86_64-unknown-none",
+    "architecture": "x86_64",
+    "format_contract": "PKELF1",
+    "handoff_contract": "PBP1",
+    "entry_symbol": "poole_kernel_entry",
+    "entry_offset": 16384,
+    "image_memory_bytes": 196608,
+    "canonical_file_bytes": 139264,
+    "maximum_linked_file_bytes": 1048576,
+    "maximum_relocations": 4096,
+    "build_id": "PKBUILD1-CYCLE101-N6-KENTRY-001",
+    "manifest_path": "native/kernel/manifest.pkm",
+    "manifest_contract_bindings": [
+      "PKENTRY1",
+      "PKELF1",
+      "PBP1"
+    ],
+    "manifest_exactly_once_in_read_only_load": true
+  },
+  "build_profile": {
+    "language": "Rust no_std no_main",
+    "panic_strategy": "abort",
+    "relocation_model": "pic",
+    "code_model": "small",
+    "frame_pointers": "forced",
+    "red_zone": false,
+    "default_vector_or_floating_point_use": false,
+    "linker": "workspace-local pinned rust-lld",
+    "linker_script": "native/kernel/linker.ld",
+    "position_independent_executable": true,
+    "dynamic_interpreter": false,
+    "imported_libraries": false,
+    "section_table_in_canonical_product": false,
+    "clean_build_count": 2,
+    "exact_linked_bytes_match_required": true,
+    "exact_canonical_bytes_match_required": true,
+    "canonicalizer": "runtime/native_kernel_image.py"
+  },
+  "transfer": {
+    "architecture_mode": "x86-64 long mode at privilege level 0 with paging enabled",
+    "entry_kind": "direct jump after successful ExitBootServices",
+    "calling_convention": "System V AMD64",
+    "registers": {
+      "rdi": "canonical virtual address of the immutable PBP1 header",
+      "rsi": "exact PBP1 total byte count",
+      "rdx": "little-endian u64 value of PBP1 magic bytes",
+      "rsp": "PBP1 initial_stack_top_virtual, nonzero canonical and 16-byte aligned before the wrapper call",
+      "cr3": "PBP1 page_table_root_physical",
+      "other": "unspecified"
+    },
+    "interrupt_flag_at_entry": "clear",
+    "direction_flag_at_entry": "clear",
+    "wrapper_reasserts_cli_and_cld": true,
+    "wrapper_stack_failure": "halt without a language call because no ABI call is safe before stack validation",
+    "floating_point_state": "not initialized or used by this boundary",
+    "return_permitted": false
+  },
+  "mapping_preconditions": {
+    "kernel_image": "All PKELF1 loads and relative relocations are complete; final header/rodata, text, RELRO, and data/BSS permissions are r, rx, r, and rw with no writable-executable page.",
+    "handoff": "The complete PBP1 range is mapped supervisor-readable and non-executable at the RDI virtual address and remains immutable through intake.",
+    "stack": "The PBP1 bootstrap stack range is mapped supervisor-readable/writable and non-executable; RSP names its exclusive top and sufficient mapped space exists for the System V call.",
+    "framebuffer": {
+      "presence_rule": "The optional PBP1 framebuffer record is usable only when the complete aperture is identity-mapped at its physical base.",
+      "permissions": "supervisor-readable/writable and non-executable",
+      "address_checks": "base and inclusive end must be canonical identity virtual addresses; base and byte count must be four-byte aligned and the range must not overflow",
+      "cache_policy": "preserve the effective firmware/GOP memory type; do not promote to write-back without a validated platform rule",
+      "lifetime_start": "after final entry page tables are installed and before transfer",
+      "lifetime_end": "before delegation to the graphics service",
+      "revocation": "replace with the capability-confined graphics mapping and revoke the temporary identity mapping",
+      "failure_behavior": "omit or ignore framebuffer output and retain serial/ring diagnostics"
+    },
+    "firmware_services": "No UEFI boot-service pointer is retained or callable after transfer."
+  },
+  "intake": {
+    "validation_order": [
+      "register-only stack validation",
+      "handoff pointer, size, canonical-range, and magic envelope",
+      "allocation-free PBP1 decode",
+      "PBP1 kernel-entry profile",
+      "runtime entry equals PBP1 kernel entry",
+      "entry offset equals 0x4000",
+      "captured stack equals PBP1 initial stack top",
+      "optional framebuffer identity-range checks"
+    ],
+    "maximum_handoff_bytes": 1048576,
+    "allocation_permitted": false,
+    "mutable_handoff_access_permitted": false,
+    "failure_behavior": "emit the stable panic class where a validated stack permits diagnostics, then disable interrupts and halt"
+  },
+  "early_diagnostics": {
+    "ring_bytes": 4096,
+    "ring_allocation": "static",
+    "formatting": "bounded hexadecimal, decimal, and fixed ASCII only",
+    "serial": {
+      "candidate": "legacy COM1",
+      "base_port": 1016,
+      "loopback_test": true,
+      "maximum_ready_polls_per_byte": 4096,
+      "failure_behavior": "disable the serial sink and continue with the ring"
+    },
+    "framebuffer": {
+      "pixel_access": "volatile u32 writes",
+      "font": "embedded bounded 5x7 ASCII subset",
+      "mapping_dependency": "ADD-KERNEL-001 and mapping_preconditions.framebuffer",
+      "fallback": "serial and ring"
+    },
+    "required_markers": [
+      "POOLEOS:KERNEL:ENTRY",
+      "PBP1:VALID",
+      "POOLEOS:KERNEL:ENTRY-READY"
+    ]
+  },
+  "panic_profile": {
+    "codes": {
+      "0x1001": "Rust panic",
+      "0x1002": "stack contract",
+      "0x1003": "handoff envelope",
+      "0x1004": "handoff decode",
+      "0x1005": "handoff kernel-entry profile",
+      "0x1006": "runtime continuity",
+      "0x10ff": "unexpected return or unknown code"
+    },
+    "nested_panic_detected": true,
+    "heap_or_lock_dependency": false,
+    "terminal_state": "interrupts disabled; halt loop"
+  },
+  "required_negative_controls": [
+    "null, misaligned, oversized, overflowing, or noncanonical PBP1 envelope",
+    "wrong PBP1 magic",
+    "null, misaligned, or noncanonical initial stack",
+    "malformed PBP1 bytes and missing kernel-entry profile state",
+    "runtime entry, entry offset, and stack continuity mismatch",
+    "framebuffer zero, unaligned, overflowing, noncanonical, or undersized range",
+    "linked ELF identification, header, program-header, segment, dynamic, relocation, manifest, and entry mutations",
+    "canonical PKELF1 hostile corpus",
+    "host-path and host-binary leakage scan",
+    "two clean-build byte comparison",
+    "Rust and independent Python loaded-byte comparison"
+  ],
+  "claims": {
+    "real_poolekernel_product_image": true,
+    "legacy_empty_fixture_isolated": true,
+    "allocation_free_pbp1_consumer": true,
+    "bounded_early_ring": true,
+    "bounded_com1_candidate": true,
+    "optional_framebuffer_sink": true,
+    "deterministic_panic_taxonomy": true,
+    "reproducible_single_host_image": true,
+    "live_pooleboot_transfer": false,
+    "exit_boot_services_executed": false,
+    "page_tables_installed": false,
+    "final_wx_permissions_installed": false,
+    "hardware_serial_executed": false,
+    "hardware_framebuffer_executed": false,
+    "gdt_idt_tss_initialized": false,
+    "kernel_runtime_initialized": false,
+    "qemu_kernel_execution": false,
+    "target_firmware_tested": false,
+    "second_host_reproduced": false,
+    "bootable_iso": false,
+    "n6_exit_gate_satisfied": false,
+    "production_ready": false
+  },
+  "claim_boundary": [
+    "This slice produces and qualifies a real freestanding PooleKernel PKELF1 product image and host-executed entry helpers; it is not the former empty fixture.",
+    "No current PooleBoot path reads this file, allocates its pages, installs its page tables, populates its live PBP1 input, exits boot services, or transfers control to it.",
+    "The temporary framebuffer identity mapping is a mandatory caller precondition discovered in Cycle101; the PBP1 bytes alone do not prove that mapping or its cache policy.",
+    "COM1 and framebuffer code is statically built and host tested only; no privileged port I/O or physical framebuffer write is executed by this qualification.",
+    "The image halts after validated entry diagnostics and does not initialize descriptor tables, interrupts, memory management, capabilities, scheduling, IPC, services, drivers, PooleGlyph, PDC, or PooleGlass.",
+    "Single-host exact reproduction and finite hostile controls do not establish second-host reproducibility, universal correctness, target-firmware support, N6 completion, a bootable ISO, or production readiness.",
+    "No signing, key generation, tag, release, merge, firmware change, privileged probe, driver load, or physical-media write is authorized or performed."
+  ]
+}

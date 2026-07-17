@@ -15,8 +15,8 @@
   "bindings": {
     "contract": {
       "path": "specs/native-boot-handoff-contract.json",
-      "sha256": "AE4D6AF8E29E74CE8D993D7E10085C419465333491B4344E645AD54441647635",
-      "byte_count": 14211
+      "sha256": "A707392B66D3C0C24A79149071E20671BF8B77F2B185E8319D03B926CC716448",
+      "byte_count": 15033
     },
     "contract_schema": {
       "path": "specs/native-boot-handoff-contract.schema.json",
@@ -41,13 +41,13 @@
     "implementation_inputs": [
       {
         "path": "native/Cargo.toml",
-        "sha256": "28E18C4ED69537CD54707A96031E9B879EA82B8A209BCCDCAA7AE1B437D4D632",
-        "byte_count": 359
+        "sha256": "D373FAFB21D868925EE229F12AC3569EB10F59D3704FB8D182CD176E288322EE",
+        "byte_count": 400
       },
       {
         "path": "native/Cargo.lock",
-        "sha256": "645F5C0D0191DDC53CEE7C00630B70F0ABDC1A2A0DC1B9976201C5A4982929E4",
-        "byte_count": 488
+        "sha256": "89874EF272806FE7C6A73F83AE9BF53F9AB68D37515A3E025D714E54F9951BB5",
+        "byte_count": 577
       },
       {
         "path": "native/handoff/Cargo.toml",

@@ -1,0 +1,619 @@
+{
+  "artifact_kind": "pooleos_native_kernel_entry_readiness",
+  "bindings": {
+    "contract": {
+      "byte_count": 10064,
+      "path": "specs/native-kernel-entry-contract.json",
+      "sha256": "D61F792B5D873DE338FCC365109C6286FAF2BE438CFD8CFE1C63543EB6E8E2D2"
+    },
+    "contract_schema": {
+      "byte_count": 3453,
+      "path": "specs/native-kernel-entry-contract.schema.json",
+      "sha256": "EB03B7DFEB773583E8C15EAEC6A238312F6B2ABDA5CBFF00DED49327FE0B95BC"
+    },
+    "implementation_inputs": [
+      {
+        "byte_count": 400,
+        "path": "native/Cargo.toml",
+        "sha256": "D373FAFB21D868925EE229F12AC3569EB10F59D3704FB8D182CD176E288322EE"
+      },
+      {
+        "byte_count": 577,
+        "path": "native/Cargo.lock",
+        "sha256": "89874EF272806FE7C6A73F83AE9BF53F9AB68D37515A3E025D714E54F9951BB5"
+      },
+      {
+        "byte_count": 249,
+        "path": "native/kernel/Cargo.toml",
+        "sha256": "EFCA98B3722831ABFE562DA3F54FF830AD19C15C30EC4094D61AE0E6A7147522"
+      },
+      {
+        "byte_count": 877,
+        "path": "native/kernel/README.md",
+        "sha256": "901EA785520A5FCD891B5EADC492204ABF8E3A0796577CDBEE80EDB4C307F717"
+      },
+      {
+        "byte_count": 523,
+        "path": "native/kernel/arch/x86_64/README.md",
+        "sha256": "ADA13DC10FC6D81381A7375EFAFF17D7801C22F1404C7147ABC7FFA701388E8F"
+      },
+      {
+        "byte_count": 2048,
+        "path": "native/kernel/linker.ld",
+        "sha256": "EF6B5CECC580C1F976EEBEEDFCBDEA112D908B21BE25453C151EAF6CD85378F7"
+      },
+      {
+        "byte_count": 434,
+        "path": "native/kernel/manifest.pkm",
+        "sha256": "69DCD3BA9FCAACF442BF8535449E002769EFC263E5D22CFEED31BDC581E2B58F"
+      },
+      {
+        "byte_count": 21598,
+        "path": "native/kernel/src/lib.rs",
+        "sha256": "E1AF1C3B8AA9FCEB56131DBA1BA28009031DF10FCD81E85A719B1E7111948429"
+      },
+      {
+        "byte_count": 6089,
+        "path": "native/kernel/src/main.rs",
+        "sha256": "005809CDC8529B0C0BA5966EBA0EA2EF2FAD91E256585472CBB5D83B599ABBA0"
+      },
+      {
+        "byte_count": 2731,
+        "path": "native/kernel/src/arch/x86_64.rs",
+        "sha256": "8BA694E0D998AA8A0AB979BBBCA0FB56E1C260790F7F7B5C67C691AF0BF2A729"
+      },
+      {
+        "byte_count": 218,
+        "path": "native/fixtures/poolekernel/Cargo.toml",
+        "sha256": "6D0DDE25F74DEEEDA7794077273B85A4A8B099E73C68939C686173716D20FF46"
+      },
+      {
+        "byte_count": 252,
+        "path": "native/fixtures/poolekernel/README.md",
+        "sha256": "DE43978E1E9B8A3972DC1BD8D2DA6CC0690325664C0B170460C261E3A0713BDD"
+      },
+      {
+        "byte_count": 349,
+        "path": "native/fixtures/poolekernel/src/main.rs",
+        "sha256": "C211A93BF7EDF8CCFC1E1EBBF03063825D63AC52A330A71F41CD43D27664CFD7"
+      },
+      {
+        "byte_count": 15101,
+        "path": "runtime/native_kernel_image.py",
+        "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
+      },
+      {
+        "byte_count": 7214,
+        "path": "runtime/native_kernel_entry.py",
+        "sha256": "6E62FF08F533E4BB4D295F0691145D29D985DACE82028D72FDCB247F3EC5493A"
+      },
+      {
+        "byte_count": 24625,
+        "path": "tools/qualify_native_kernel_entry.py",
+        "sha256": "9C3FBD3764EA99ECC17C59E1C23F0BACE989541D0F6B0D441A71A77BEA98B2D5"
+      },
+      {
+        "byte_count": 6041,
+        "path": "tests/test_native_kernel_entry.py",
+        "sha256": "717812C21AF6A435878EE549225967A0B7D7BF9ADA7CBDECE9E6283DB987703B"
+      },
+      {
+        "byte_count": 3299,
+        "path": "docs/native-kernel-entry.md",
+        "sha256": "3F355BD2CC8A20F8DC99E4B62EAC5A396794EC53A1DB64E41ED7C8C13E159EF3"
+      }
+    ],
+    "pbp1_contract": {
+      "byte_count": 15033,
+      "path": "specs/native-boot-handoff-contract.json",
+      "sha256": "A707392B66D3C0C24A79149071E20671BF8B77F2B185E8319D03B926CC716448"
+    },
+    "pkelf1_contract": {
+      "byte_count": 5797,
+      "path": "specs/native-elf-loader-contract.json",
+      "sha256": "A0CE48E9EF992B97333D84ECB2850E221D482E2ACF11BB312B5F769DAFF992AA"
+    },
+    "readiness_schema": {
+      "byte_count": 1258,
+      "path": "specs/native-kernel-entry-readiness.schema.json",
+      "sha256": "AAEB429160252FE060A3330D8056DE129FA608EA1E56A1DD0B0DDF8CED67ABF4"
+    },
+    "toolchain_lock": {
+      "byte_count": 4017,
+      "path": "specs/native-toolchain-lock.json",
+      "sha256": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E"
+    }
+  },
+  "builds": {
+    "canonical_exact_match": true,
+    "cargo_locked": true,
+    "cargo_offline": true,
+    "clean_build_count": 2,
+    "fresh_target_directories": true,
+    "linked_exact_match": true,
+    "source_date_epoch": 0
+  },
+  "claim_boundary": [
+    "This slice produces and qualifies a real freestanding PooleKernel PKELF1 product image and host-executed entry helpers; it is not the former empty fixture.",
+    "No current PooleBoot path reads this file, allocates its pages, installs its page tables, populates its live PBP1 input, exits boot services, or transfers control to it.",
+    "The temporary framebuffer identity mapping is a mandatory caller precondition discovered in Cycle101; the PBP1 bytes alone do not prove that mapping or its cache policy.",
+    "COM1 and framebuffer code is statically built and host tested only; no privileged port I/O or physical framebuffer write is executed by this qualification.",
+    "The image halts after validated entry diagnostics and does not initialize descriptor tables, interrupts, memory management, capabilities, scheduling, IPC, services, drivers, PooleGlyph, PDC, or PooleGlass.",
+    "Single-host exact reproduction and finite hostile controls do not establish second-host reproducibility, universal correctness, target-firmware support, N6 completion, a bootable ISO, or production readiness.",
+    "No signing, key generation, tag, release, merge, firmware change, privileged probe, driver load, or physical-media write is authorized or performed."
+  ],
+  "claims": {
+    "allocation_free_pbp1_consumer": true,
+    "bootable_iso": false,
+    "bounded_com1_candidate": true,
+    "bounded_early_ring": true,
+    "deterministic_panic_taxonomy": true,
+    "exit_boot_services_executed": false,
+    "final_wx_permissions_installed": false,
+    "gdt_idt_tss_initialized": false,
+    "hardware_framebuffer_executed": false,
+    "hardware_serial_executed": false,
+    "kernel_runtime_initialized": false,
+    "legacy_empty_fixture_isolated": true,
+    "live_pooleboot_transfer": false,
+    "n6_exit_gate_satisfied": false,
+    "optional_framebuffer_sink": true,
+    "page_tables_installed": false,
+    "production_ready": false,
+    "qemu_kernel_execution": false,
+    "real_poolekernel_product_image": true,
+    "reproducible_single_host_image": true,
+    "second_host_reproduced": false,
+    "target_firmware_tested": false
+  },
+  "contract_id": "PKENTRY1",
+  "host_tests": {
+    "clippy_targets": [
+      "x86_64-pc-windows-msvc",
+      "x86_64-unknown-none"
+    ],
+    "rustfmt_packages": [
+      "poolekernel",
+      "poolekernel-fixture"
+    ],
+    "status": "pass",
+    "test_count": 13,
+    "test_pass_count": 13
+  },
+  "n6_exit_gate_satisfied": false,
+  "negative_controls": [
+    {
+      "expected": "header_bounds",
+      "id": "NEG-N6-KENTRY-LINKED-TRUNCATED",
+      "layer": "linked_lld_input",
+      "observed": "header_bounds",
+      "status": "pass"
+    },
+    {
+      "expected": "elf_ident",
+      "id": "NEG-N6-KENTRY-LINKED-IDENT",
+      "layer": "linked_lld_input",
+      "observed": "elf_ident",
+      "status": "pass"
+    },
+    {
+      "expected": "elf_header",
+      "id": "NEG-N6-KENTRY-LINKED-TYPE",
+      "layer": "linked_lld_input",
+      "observed": "elf_header",
+      "status": "pass"
+    },
+    {
+      "expected": "program_header_geometry",
+      "id": "NEG-N6-KENTRY-LINKED-PHOFF",
+      "layer": "linked_lld_input",
+      "observed": "program_header_geometry",
+      "status": "pass"
+    },
+    {
+      "expected": "source_section_table",
+      "id": "NEG-N6-KENTRY-LINKED-SHOFF-ZERO",
+      "layer": "linked_lld_input",
+      "observed": "source_section_table",
+      "status": "pass"
+    },
+    {
+      "expected": "program_header_order",
+      "id": "NEG-N6-KENTRY-LINKED-PHDR-ORDER",
+      "layer": "linked_lld_input",
+      "observed": "program_header_order",
+      "status": "pass"
+    },
+    {
+      "expected": "phdr_segment",
+      "id": "NEG-N6-KENTRY-LINKED-PHDR-PADDR",
+      "layer": "linked_lld_input",
+      "observed": "phdr_segment",
+      "status": "pass"
+    },
+    {
+      "expected": "load_flags",
+      "id": "NEG-N6-KENTRY-LINKED-RO-FLAGS",
+      "layer": "linked_lld_input",
+      "observed": "load_flags",
+      "status": "pass"
+    },
+    {
+      "expected": "load_geometry",
+      "id": "NEG-N6-KENTRY-LINKED-RO-PADDR",
+      "layer": "linked_lld_input",
+      "observed": "load_geometry",
+      "status": "pass"
+    },
+    {
+      "expected": "load_geometry",
+      "id": "NEG-N6-KENTRY-LINKED-TEXT-OFFSET",
+      "layer": "linked_lld_input",
+      "observed": "load_geometry",
+      "status": "pass"
+    },
+    {
+      "expected": "load_geometry",
+      "id": "NEG-N6-KENTRY-LINKED-DATA-FILESZ",
+      "layer": "linked_lld_input",
+      "observed": "load_geometry",
+      "status": "pass"
+    },
+    {
+      "expected": "load_layout",
+      "id": "NEG-N6-KENTRY-LINKED-LOAD-LAYOUT",
+      "layer": "linked_lld_input",
+      "observed": "load_layout",
+      "status": "pass"
+    },
+    {
+      "expected": "entry_range",
+      "id": "NEG-N6-KENTRY-LINKED-ENTRY-RANGE",
+      "layer": "linked_lld_input",
+      "observed": "entry_range",
+      "status": "pass"
+    },
+    {
+      "expected": "entry_prefix",
+      "id": "NEG-N6-KENTRY-LINKED-ENTRY-PREFIX",
+      "layer": "linked_lld_input",
+      "observed": "entry_prefix",
+      "status": "pass"
+    },
+    {
+      "expected": "source_dynamic_segment",
+      "id": "NEG-N6-KENTRY-LINKED-DYNAMIC-FLAGS",
+      "layer": "linked_lld_input",
+      "observed": "source_dynamic_segment",
+      "status": "pass"
+    },
+    {
+      "expected": "source_relro_segment",
+      "id": "NEG-N6-KENTRY-LINKED-RELRO-FLAGS",
+      "layer": "linked_lld_input",
+      "observed": "source_relro_segment",
+      "status": "pass"
+    },
+    {
+      "expected": "source_stack_segment",
+      "id": "NEG-N6-KENTRY-LINKED-STACK-SIZE",
+      "layer": "linked_lld_input",
+      "observed": "source_stack_segment",
+      "status": "pass"
+    },
+    {
+      "expected": "source_dynamic_tag",
+      "id": "NEG-N6-KENTRY-LINKED-DYNAMIC-TAG",
+      "layer": "linked_lld_input",
+      "observed": "source_dynamic_tag",
+      "status": "pass"
+    },
+    {
+      "expected": "source_relocation_layout",
+      "id": "NEG-N6-KENTRY-LINKED-RELA-OFFSET",
+      "layer": "linked_lld_input",
+      "observed": "source_relocation_layout",
+      "status": "pass"
+    },
+    {
+      "expected": "source_relocation_geometry",
+      "id": "NEG-N6-KENTRY-LINKED-RELA-SIZE",
+      "layer": "linked_lld_input",
+      "observed": "source_relocation_geometry",
+      "status": "pass"
+    },
+    {
+      "expected": "source_relocation_geometry",
+      "id": "NEG-N6-KENTRY-LINKED-RELA-ENTRY",
+      "layer": "linked_lld_input",
+      "observed": "source_relocation_geometry",
+      "status": "pass"
+    },
+    {
+      "expected": "source_relocation_type",
+      "id": "NEG-N6-KENTRY-LINKED-RELOCATION-TYPE",
+      "layer": "linked_lld_input",
+      "observed": "source_relocation_type",
+      "status": "pass"
+    },
+    {
+      "expected": "source_relocation_order",
+      "id": "NEG-N6-KENTRY-LINKED-RELOCATION-ORDER",
+      "layer": "linked_lld_input",
+      "observed": "source_relocation_order",
+      "status": "pass"
+    },
+    {
+      "expected": "source_relocation_target",
+      "id": "NEG-N6-KENTRY-LINKED-RELOCATION-TARGET",
+      "layer": "linked_lld_input",
+      "observed": "source_relocation_target",
+      "status": "pass"
+    },
+    {
+      "expected": "source_relocation_target_value",
+      "id": "NEG-N6-KENTRY-LINKED-RELOCATION-TARGET-VALUE",
+      "layer": "linked_lld_input",
+      "observed": "source_relocation_target_value",
+      "status": "pass"
+    },
+    {
+      "expected": "source_relocation_addend",
+      "id": "NEG-N6-KENTRY-LINKED-RELOCATION-ADDEND",
+      "layer": "linked_lld_input",
+      "observed": "source_relocation_addend",
+      "status": "pass"
+    },
+    {
+      "expected": "manifest_presence",
+      "id": "NEG-N6-KENTRY-LINKED-MANIFEST-MISSING",
+      "layer": "linked_lld_input",
+      "observed": "manifest_presence",
+      "status": "pass"
+    },
+    {
+      "expected": "manifest_presence",
+      "id": "NEG-N6-KENTRY-LINKED-MANIFEST-DUPLICATE",
+      "layer": "linked_lld_input",
+      "observed": "manifest_presence",
+      "status": "pass"
+    },
+    {
+      "expected": "source_section_bounds",
+      "id": "NEG-N6-KENTRY-LINKED-SECTION-BOUNDS",
+      "layer": "linked_lld_input",
+      "observed": "source_section_bounds",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N6-KENTRY-PKELF-TRUNCATED",
+      "layer": "canonical_pkelf1",
+      "observed": "header_truncated",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N6-KENTRY-PKELF-IDENT",
+      "layer": "canonical_pkelf1",
+      "observed": "magic",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N6-KENTRY-PKELF-SECTIONS",
+      "layer": "canonical_pkelf1",
+      "observed": "section_table",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N6-KENTRY-PKELF-PADDR",
+      "layer": "canonical_pkelf1",
+      "observed": "load_address",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N6-KENTRY-PKELF-TEXT-WRITABLE",
+      "layer": "canonical_pkelf1",
+      "observed": "load_flags",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N6-KENTRY-PKELF-STACK-EXECUTABLE",
+      "layer": "canonical_pkelf1",
+      "observed": "stack_segment",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N6-KENTRY-PKELF-DYNAMIC-TAG",
+      "layer": "canonical_pkelf1",
+      "observed": "dynamic_order",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N6-KENTRY-PKELF-RELOCATION-TYPE",
+      "layer": "canonical_pkelf1",
+      "observed": "relocation_type",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N6-KENTRY-PKELF-RELOCATION-TARGET-VALUE",
+      "layer": "canonical_pkelf1",
+      "observed": "relocation_target",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N6-KENTRY-PKELF-RELOCATION-ADDEND",
+      "layer": "canonical_pkelf1",
+      "observed": "relocation_addend",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N6-KENTRY-PKELF-PHYSICAL-BASE",
+      "layer": "canonical_pkelf1",
+      "observed": "physical_base",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N6-KENTRY-PKELF-VIRTUAL-BASE",
+      "layer": "canonical_pkelf1",
+      "observed": "virtual_base",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N6-KENTRY-PKELF-CAPACITY",
+      "layer": "canonical_pkelf1",
+      "observed": "output_capacity",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N6-KENTRY-HOST-MARKER-INJECTED",
+      "layer": "publication_boundary",
+      "observed": "marker_detected",
+      "status": "pass"
+    }
+  ],
+  "open_items": [
+    "Wire authenticated PooleKernel file discovery, bounded reads, and PKELF1 allocation into PooleBoot.",
+    "Install and inspect final page tables, W^X/RELRO permissions, bootstrap stack, read-only PBP1 mapping, and temporary framebuffer mapping.",
+    "Populate a live PBP1 kernel-entry profile, complete ExitBootServices retry policy, and execute the PKENTRY1 transfer under pinned QEMU/OVMF.",
+    "Implement GDT, IDT, TSS, exception containment, memory initialization, capability bootstrap, scheduler, IPC, and the initial user-space system.",
+    "Reproduce exact product bytes on a second independent builder and qualify target firmware and separately authorized physical media.",
+    "Complete the remaining N6 requirements and all downstream N7-N39 production gates."
+  ],
+  "phase_status": {
+    "N6": "partial",
+    "N6.4": "partial",
+    "N6.5": "partial",
+    "N6.6": "partial"
+  },
+  "product": {
+    "canonical_byte_count": 139264,
+    "canonical_sha256": "8D79F687B92EE4C3592F45BB8B2C33E805D3D246319D54AB7EC354458490CA5B",
+    "entry_offset": 16384,
+    "entry_prefix_hex": "FAFC4889E14885C9742C48F7C10F00000075234889C848C1E01048C1F8104839C87513E8C0020000",
+    "host_leakage_hits": [],
+    "image_byte_count": 196608,
+    "linked_byte_count": 140208,
+    "linked_sha256": "45D05291E563EE9BAF50CEB4E109CF35E64BEDBA36E5F246E9C6ED4D59D75CBA",
+    "loaded_sha256": "8AE4CBB6DCAF9FD091C09B1421067353EA467DF9FF9261AD47DC71A3EB77D191",
+    "manifest_fields": {
+      "build_id": "PKBUILD1-CYCLE101-N6-KENTRY-001",
+      "entry_contract": "PKENTRY1",
+      "entry_offset": "0x00004000",
+      "handoff_contract": "PBP1",
+      "image_contract": "PKELF1",
+      "pbp1_contract_sha256": "A707392B66D3C0C24A79149071E20671BF8B77F2B185E8319D03B926CC716448",
+      "pkelf1_contract_sha256": "A0CE48E9EF992B97333D84ECB2850E221D482E2ACF11BB312B5F769DAFF992AA",
+      "pkentry1_contract_sha256": "D61F792B5D873DE338FCC365109C6286FAF2BE438CFD8CFE1C63543EB6E8E2D2"
+    },
+    "manifest_offset": 532,
+    "relocation_canonical_offset": 131136,
+    "relocation_count": 40,
+    "relocation_source_offset": 131296,
+    "relro_byte_count": 8192,
+    "relro_offset": 131072
+  },
+  "production_promotion_allowed": false,
+  "production_ready": false,
+  "schema_version": "1.0",
+  "selected_move_id": "N6-KENTRY-001",
+  "status": "pass_single_host_product_image_non_promoting",
+  "status_date": "2026-07-16",
+  "summary": {
+    "clean_builds_matched": 2,
+    "clean_builds_total": 2,
+    "clippy_runs_passed": 2,
+    "clippy_runs_total": 2,
+    "exact_loaded_byte_implementations_matched": 2,
+    "exact_loaded_byte_implementations_total": 2,
+    "negative_controls_passed": 43,
+    "negative_controls_total": 43,
+    "production_claim_count": 0,
+    "rust_host_tests_passed": 13,
+    "rust_host_tests_total": 13,
+    "rustfmt_packages_passed": 2
+  },
+  "toolchain": {
+    "pkelf1_probe_qualification": {
+      "clippy_runs": [
+        {
+          "status": "pass",
+          "target": "x86_64-pc-windows-msvc"
+        },
+        {
+          "status": "pass",
+          "target": "x86_64-unknown-uefi"
+        },
+        {
+          "status": "pass",
+          "target": "x86_64-unknown-none"
+        }
+      ],
+      "host_probe_artifact_identity_recorded": false,
+      "host_probe_byte_count": 148480,
+      "host_probe_role": "ephemeral host-only differential and exact-byte transport",
+      "no_std_target_builds": [
+        {
+          "byte_count": 93930,
+          "sha256": "F7FF6F000CF873462965AE03BF24BD108301BEE0C48E114CA7C515068A9F3BC3",
+          "status": "pass",
+          "target": "x86_64-unknown-uefi"
+        },
+        {
+          "byte_count": 97144,
+          "sha256": "6F30B8A85850C97A6A5B337EE202393B346B9AD26C1D2880926A5EB75E40A193",
+          "status": "pass",
+          "target": "x86_64-unknown-none"
+        }
+      ],
+      "pooleboot_compile_time_integration_builds": [
+        {
+          "pooleboot_rlib_byte_count": 55126,
+          "pooleboot_rlib_sha256": "C0F5991871F95BE30C6BB4A4DF48878F67C41AE76865E935C9ACB0397ACF084A",
+          "status": "pass",
+          "target": "x86_64-unknown-uefi"
+        },
+        {
+          "pooleboot_rlib_byte_count": 57164,
+          "pooleboot_rlib_sha256": "F4FFDA9A52E06D7B16A1C683CAF382F78CDA73668E61F10CE41BD4C02F0D0C5D",
+          "status": "pass",
+          "target": "x86_64-unknown-none"
+        }
+      ],
+      "rust_host_target": "x86_64-pc-windows-msvc",
+      "rust_host_test_count": 12,
+      "rust_host_test_pass_count": 12,
+      "rustc_version_sha256": "F3C960598A5E9037C4CF8E4AA06C018171ABF07C381D165C3986C6A954DEA1BB",
+      "rustfmt_status": "pass"
+    },
+    "product_rustflags": [
+      "-Cpanic=abort",
+      "-Crelocation-model=pic",
+      "-Ccode-model=small",
+      "-Cforce-frame-pointers=yes",
+      "-Cno-redzone=yes",
+      "-Clink-arg=-pie",
+      "-Clink-arg=--no-dynamic-linker",
+      "-Clink-arg=--no-eh-frame-hdr",
+      "-Clink-arg=--build-id=none",
+      "-Clink-arg=--gc-sections",
+      "-Clink-arg=-TC:\\Users\\rookp\\Documents\\Codex\\2026-06-29\\i\\work\\PooleOS\\native\\kernel\\linker.ld",
+      "-Clink-arg=--entry=poole_kernel_entry"
+    ],
+    "root_policy": "workspace-local untracked",
+    "rustc_version_sha256": "F3C960598A5E9037C4CF8E4AA06C018171ABF07C381D165C3986C6A954DEA1BB",
+    "target": "x86_64-unknown-none"
+  }
+}

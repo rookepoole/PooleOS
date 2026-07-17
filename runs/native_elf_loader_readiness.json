@@ -38,14 +38,14 @@
         "sha256": "5D75C4150FD4CAEFF40ACAD5A9AFF38CD6DCD0519060E1407EB24DF73531DCCE"
       },
       {
-        "byte_count": 359,
+        "byte_count": 400,
         "path": "native/Cargo.toml",
-        "sha256": "28E18C4ED69537CD54707A96031E9B879EA82B8A209BCCDCAA7AE1B437D4D632"
+        "sha256": "D373FAFB21D868925EE229F12AC3569EB10F59D3704FB8D182CD176E288322EE"
       },
       {
-        "byte_count": 488,
+        "byte_count": 577,
         "path": "native/Cargo.lock",
-        "sha256": "645F5C0D0191DDC53CEE7C00630B70F0ABDC1A2A0DC1B9976201C5A4982929E4"
+        "sha256": "89874EF272806FE7C6A73F83AE9BF53F9AB68D37515A3E025D714E54F9951BB5"
       },
       {
         "byte_count": 321,

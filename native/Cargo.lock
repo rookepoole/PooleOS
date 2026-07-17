@@ -27,5 +27,12 @@ name = "pooleboot-fixture"
 version = "0.0.0"
 
 [[package]]
+name = "poolekernel"
+version = "0.0.0"
+dependencies = [
+ "poole-handoff",
+]
+
+[[package]]
 name = "poolekernel-fixture"
 version = "0.0.0"

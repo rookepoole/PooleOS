@@ -21,6 +21,7 @@ from runtime import lab_readiness  # noqa: E402
 from runtime import native_boot_config  # noqa: E402
 from runtime import native_boot_handoff  # noqa: E402
 from runtime import native_elf_loader  # noqa: E402
+from runtime import native_kernel_entry  # noqa: E402
 from runtime import native_models  # noqa: E402
 from runtime import native_pooleboot  # noqa: E402
 from runtime import n0_owner_decision_packet  # noqa: E402
@@ -45,6 +46,7 @@ NATIVE_MODEL_READINESS = ROOT / "runs" / "native_model_readiness.json"
 NATIVE_BOOT_CONFIG_READINESS = ROOT / "runs" / "native_boot_config_readiness.json"
 NATIVE_BOOT_HANDOFF_READINESS = ROOT / "runs" / "native_boot_handoff_readiness.json"
 NATIVE_ELF_LOADER_READINESS = ROOT / "runs" / "native_elf_loader_readiness.json"
+NATIVE_KERNEL_ENTRY_READINESS = ROOT / "runs" / "native_kernel_entry_readiness.json"
 NATIVE_POOLEBOOT_READINESS = ROOT / "runs" / "native_pooleboot_readiness.json"
 NATIVE_TIER0_READINESS = ROOT / "runs" / "native_tier0_readiness.json"
 
@@ -53,8 +55,8 @@ DEFAULT_GAPS = [
     "The completed owner response records both ADR dispositions and all 38 objective definitions while accepting zero measurements, but the selected FIDO2 hardware key is unavailable; trusted public-key custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
     "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
     "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, six bounded TLC models cover all seven required domains and detect twenty-one required counterexamples, and a bounded PooleBoot proof executes under the pinned profile; current source rebuilds, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open.",
-    "A reproducible unsigned PooleBoot PE32+ proof application boots twice under pinned non-promoting OVMF with deterministic GPT/FAT32 media, eleven ordered serial/debugcon markers, and exact GOP frames; PBP1, PBC1, and the bounded PKELF1 synthetic loader boundary have qualified Rust/Python implementations and golden bytes, but live file I/O, signed-artifact authentication, firmware allocation, page-table installation, producer/consumer integration, ExitBootServices transfer, second host, target firmware, and physical-media qualification remain open.",
-    "No functional native PooleKernel image, boot trust, measured boot, early runtime, serial panic, or crash path.",
+    "A reproducible unsigned PooleBoot proof application boots twice under pinned non-promoting OVMF with deterministic GPT/FAT32 media, eleven ordered serial/debugcon markers, and exact GOP frames; PBP1, PBC1, PKELF1, and a separately qualified real PooleKernel product image pass their bounded gates, but live file I/O, signed-artifact authentication, firmware allocation, page-table installation, producer/consumer integration, ExitBootServices transfer, second host, target firmware, and physical-media qualification remain open.",
+    "A real reproducible PooleKernel image, PKENTRY1 intake, bounded early ring/COM1/framebuffer paths, and panic classes exist, but boot trust, measured boot, live mappings and transfer, descriptor/exception setup, retained crash evidence, kernel runtime, target execution, and N6 exit remain open.",
     "No native CPU, interrupt, time, SMP, physical-memory, virtual-memory, or reclaim implementation.",
     "The sanitized Tier 1 identity and bounded user-mode CPUID transcript match, but MSR, PCI configuration-space, Secure Boot, TPM, SPD, sensor/power, standards-hash, lab-safety, native enumeration, and physical qualification evidence remain open.",
     "No native DMA/IOMMU/interrupt-remapping confinement.",
@@ -948,6 +950,56 @@ def check_native_elf_loader_readiness(path: Path = NATIVE_ELF_LOADER_READINESS) 
     )
     return readiness.make_check(
         "native_elf_loader_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINESS) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(path, "native-kernel-entry-readiness.schema.json")
+    errors = [f"native kernel entry readiness {error.path}: {error.message}" for error in artifact_schema_errors[:8]]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_kernel_entry_readiness",
+            False,
+            "; ".join(errors) or "native kernel entry readiness is not an object",
+        )
+    errors.extend(native_kernel_entry.readiness_errors(artifact))
+    expected_summary = {
+        "rust_host_tests_passed": 13,
+        "rust_host_tests_total": 13,
+        "rustfmt_packages_passed": 2,
+        "clippy_runs_passed": 2,
+        "clippy_runs_total": 2,
+        "clean_builds_matched": 2,
+        "clean_builds_total": 2,
+        "negative_controls_passed": 43,
+        "negative_controls_total": 43,
+        "exact_loaded_byte_implementations_matched": 2,
+        "exact_loaded_byte_implementations_total": 2,
+        "production_claim_count": 0,
+    }
+    if artifact.get("summary") != expected_summary:
+        errors.append("PKENTRY1 qualification summary changed")
+    product = artifact.get("product", {})
+    if (
+        product.get("canonical_byte_count") != 139_264
+        or product.get("image_byte_count") != 196_608
+        or product.get("entry_offset") != 0x4000
+        or product.get("relocation_count") != 40
+        or product.get("canonical_sha256")
+        != "8D79F687B92EE4C3592F45BB8B2C33E805D3D246319D54AB7EC354458490CA5B"
+    ):
+        errors.append("PKENTRY1 product identity changed")
+    if artifact.get("claims") != native_kernel_entry.expected_claims():
+        errors.append("PKENTRY1 claim boundary changed")
+    detail = (
+        "contract=PKENTRY1; kernel_tests=13/13; clean_builds=2/2; negative=43/43; "
+        "exact_loaded=2/2; bytes=139264; relocations=40; live_transfer=false; "
+        "target_execution=false; n6_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_kernel_entry_readiness",
         not errors,
         detail if not errors else "; ".join(errors[:8]),
     )
@@ -3752,6 +3804,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--native-boot-handoff-readiness", type=Path, default=NATIVE_BOOT_HANDOFF_READINESS)
     parser.add_argument("--native-boot-config-readiness", type=Path, default=NATIVE_BOOT_CONFIG_READINESS)
     parser.add_argument("--native-elf-loader-readiness", type=Path, default=NATIVE_ELF_LOADER_READINESS)
+    parser.add_argument("--native-kernel-entry-readiness", type=Path, default=NATIVE_KERNEL_ENTRY_READINESS)
     parser.add_argument("--out", type=Path, default=ROOT / "runs" / "release_gate.json")
     parser.add_argument("--include-runtime", action="store_true", help="Include PooleGlyph runtime checks in doctor.")
     args = parser.parse_args(argv)
@@ -3772,6 +3825,7 @@ def main(argv: list[str] | None = None) -> int:
         check_native_boot_handoff_readiness(args.native_boot_handoff_readiness),
         check_native_boot_config_readiness(args.native_boot_config_readiness),
         check_native_elf_loader_readiness(args.native_elf_loader_readiness),
+        check_native_kernel_entry_readiness(args.native_kernel_entry_readiness),
         check_publication_boundary(),
         check_bundle(args.bundle),
         check_replay_proof(args.replay_proof),
@@ -3962,6 +4016,7 @@ def main(argv: list[str] | None = None) -> int:
             args.native_boot_handoff_readiness,
             args.native_boot_config_readiness,
             args.native_elf_loader_readiness,
+            args.native_kernel_entry_readiness,
         )
         if path is not None
     ]
