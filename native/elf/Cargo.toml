@@ -1,0 +1,21 @@
+[package]
+name = "poole-elf"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+publish.workspace = true
+
+[lib]
+name = "poole_elf"
+path = "src/lib.rs"
+
+[features]
+default = []
+host-probe = []
+
+[[bin]]
+name = "poole-elf-probe"
+path = "src/bin/poole_elf_probe.rs"
+required-features = ["host-probe"]
+
+[dependencies]

@@ -1,0 +1,169 @@
+{
+  "address_profile": {
+    "maximum_physical_exclusive": 4503599627370496,
+    "maximum_virtual_exclusive": 18446744072635809792,
+    "minimum_physical_base": 1048576,
+    "minimum_virtual_base": 18446744071562067968,
+    "physical_base_alignment": 4096,
+    "virtual_base_alignment": 2097152
+  },
+  "artifact_kind": "pooleos_native_elf_loader_contract",
+  "authorities": [
+    {
+      "role": "ELF header, program header, load-segment, base-address, and dynamic-array semantics",
+      "title": "System V Generic ABI ELF Object File Format",
+      "urls": [
+        "https://gabi.xinuos.com/elf/02-eheader.html",
+        "https://gabi.xinuos.com/elf/08-pheader.html",
+        "https://gabi.xinuos.com/elf/09-dynamic.html"
+      ]
+    },
+    {
+      "role": "x86-64 LP64 identification and R_X86_64_RELATIVE calculation",
+      "title": "System V x86-64 psABI",
+      "urls": [
+        "https://gitlab.com/x86-psABIs/x86-64-ABI/-/tree/master",
+        "https://gitlab.com/x86-psABIs/x86-64-ABI/-/raw/master/x86-64-ABI/object-files.tex"
+      ]
+    },
+    {
+      "role": "future firmware allocation boundary only",
+      "title": "UEFI Specification 2.11 Boot Services",
+      "urls": [
+        "https://uefi.org/specs/UEFI/2.11/07_Services_Boot_Services.html"
+      ]
+    }
+  ],
+  "bounds": {
+    "load_segment_count": 3,
+    "mapping_count": 4,
+    "max_file_bytes": 1048576,
+    "max_image_bytes": 67108864,
+    "max_relocations": 4096,
+    "program_header_count": 7
+  },
+  "claim_boundary": [
+    "This contract qualifies an allocation-free parser and caller-buffer loader boundary over synthetic ET_DYN images.",
+    "The file is not authenticated by this layer; a future signed-manifest gate must authenticate exact bytes before loading.",
+    "No UEFI filesystem read, AllocatePages call, page-table update, final memory map, ExitBootServices call, transfer assembly, or PooleKernel execution is exercised.",
+    "The four mapping ranges are a required post-relocation plan, not evidence that hardware page permissions were installed.",
+    "The accepted subset is intentionally not a general ELF dynamic linker and does not establish ABI ratification or production readiness."
+  ],
+  "claims": {
+    "abi_ratified": false,
+    "allocation_free_no_std_loader_boundary": true,
+    "bss_zero_fill": true,
+    "exact_loaded_bytes_compared": true,
+    "exit_boot_services": false,
+    "kernel_entry_transfer": false,
+    "live_uefi_file_read": false,
+    "page_table_mapping": false,
+    "poolekernel_execution": false,
+    "post_relocation_wx_plan": true,
+    "production_ready": false,
+    "program_headers_authoritative": true,
+    "relative_relocations_only": true,
+    "second_host_reproduced": false,
+    "signed_manifest_verification": false,
+    "synthetic_kernel_image_only": true,
+    "target_firmware_tested": false,
+    "three_load_segment_profile": true,
+    "uefi_page_allocation": false,
+    "physical_media_written": false
+  },
+  "contract_id": "PKELF1",
+  "dynamic_profile": {
+    "entry_bytes": 16,
+    "exact_order": [
+      "DT_RELA",
+      "DT_RELASZ",
+      "DT_RELAENT",
+      "DT_NULL"
+    ],
+    "segment_bytes": 64,
+    "segment_permissions_during_load": "rw",
+    "terminal_null_value": 0
+  },
+  "elf_header_profile": {
+    "abi_version": 0,
+    "class": "ELFCLASS64",
+    "data": "ELFDATA2LSB",
+    "elf_version": 1,
+    "file_type": "ET_DYN",
+    "flags": 0,
+    "header_bytes": 64,
+    "ident_padding_zero": true,
+    "machine": "EM_X86_64",
+    "machine_value": 62,
+    "osabi": "ELFOSABI_NONE",
+    "program_header_bytes": 56,
+    "program_header_offset": 64,
+    "section_headers_permitted": false
+  },
+  "error_precedence": [
+    "file and ELF identification",
+    "ELF header geometry",
+    "program-header type and order",
+    "PT_PHDR",
+    "PT_LOAD permissions, bounds, and canonical layout",
+    "physical and virtual base bounds",
+    "entry point",
+    "PT_GNU_RELRO, PT_GNU_STACK, and PT_DYNAMIC",
+    "dynamic tags and relocation-table geometry",
+    "individual relocations",
+    "caller output capacity"
+  ],
+  "load_profile": {
+    "bss_rule": "zero every destination image byte before copying file-backed PT_LOAD bytes",
+    "canonical_file_coverage": "the first two loads are page-complete and the final load ends at exact EOF",
+    "canonical_layout": "p_offset equals p_vaddr, the first load starts at zero, and all three memory ranges are contiguous",
+    "load_alignment": 4096,
+    "load_order": [
+      "r",
+      "rx",
+      "rw"
+    ],
+    "physical_address_field": 0,
+    "transactional_failure": "validate the complete image and output capacity before modifying destination bytes"
+  },
+  "mapping_profile": {
+    "post_relocation_order": [
+      "header_and_rodata:r",
+      "text:rx",
+      "relro:r",
+      "data_and_bss:rw"
+    ],
+    "writable_executable_permitted": false
+  },
+  "program_header_profile": {
+    "exact_order": [
+      "PT_PHDR",
+      "PT_LOAD",
+      "PT_LOAD",
+      "PT_LOAD",
+      "PT_DYNAMIC",
+      "PT_GNU_RELRO",
+      "PT_GNU_STACK"
+    ],
+    "executable_stack_permitted": false,
+    "interpreter_permitted": false,
+    "notes_permitted": false,
+    "tls_permitted": false,
+    "unknown_types_permitted": false
+  },
+  "relocation_profile": {
+    "addend_rule": "nonnegative image-relative address of one loaded byte",
+    "entry_bytes": 24,
+    "exact_type": "R_X86_64_RELATIVE",
+    "formula": "virtual_base + r_addend",
+    "initial_target_bytes_zero": true,
+    "relocation_targets_sorted_unique": true,
+    "symbol_index": 0,
+    "target_alignment": 8,
+    "target_range": "file-backed PT_GNU_RELRO excluding dynamic and relocation tables",
+    "text_relocations_permitted": false
+  },
+  "schema_version": "1.0",
+  "status": "candidate_preproduction_non_promoting",
+  "status_date": "2026-07-16"
+}

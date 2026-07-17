@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifact_kind": {
+      "const": "pooleos_native_elf_loader_golden_vectors"
+    },
+    "contract_id": {
+      "const": "PKELF1"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "status_date": {
+      "type": "string"
+    },
+    "vectors": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "expected_plan": {
+            "type": "object"
+          },
+          "file_byte_count": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "file_hex": {
+            "pattern": "^[0-9a-f]+$",
+            "type": "string"
+          },
+          "file_sha256": {
+            "pattern": "^[0-9A-F]{64}$",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "image_byte_count": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "loaded_sha256": {
+            "pattern": "^[0-9A-F]{64}$",
+            "type": "string"
+          },
+          "physical_base": {
+            "minimum": 1048576,
+            "type": "integer"
+          },
+          "semantic_summary": {
+            "pattern": "^OK;",
+            "type": "string"
+          },
+          "synthetic": {
+            "const": true
+          },
+          "virtual_base": {
+            "minimum": 18446744071562067968,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "description",
+          "synthetic",
+          "physical_base",
+          "virtual_base",
+          "file_byte_count",
+          "file_sha256",
+          "file_hex",
+          "image_byte_count",
+          "loaded_sha256",
+          "semantic_summary",
+          "expected_plan"
+        ],
+        "type": "object"
+      },
+      "maxItems": 3,
+      "minItems": 3,
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "contract_id",
+    "vectors"
+  ],
+  "type": "object"
+}
