@@ -62,9 +62,14 @@ TRUE_PROOF_CLAIMS = (
     "bounded_memory_map_observed",
     "efi_success_return_path_marker_observed",
     "poolekernel_loaded",
+    "system_manifest_parsed",
+    "manifest_selected_kernel_path",
+    "manifest_kernel_sha256_matched",
 )
 FALSE_PROOF_CLAIMS = (
     "complete_pooleboot_loader",
+    "manifest_trusted",
+    "persistent_rollback_state_enforced",
     "poolekernel_executed",
     "exit_boot_services_called",
     "secure_boot_enforced",
@@ -81,6 +86,10 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-KLOAD-CONFIG-EMPTY",
     "NEG-N5-KLOAD-CONFIG-OVERSIZE",
     "NEG-N5-KLOAD-CONFIG-MALFORMED",
+    "NEG-N5-KLOAD-MANIFEST-MISSING",
+    "NEG-N5-KLOAD-MANIFEST-EMPTY",
+    "NEG-N5-KLOAD-MANIFEST-OVERSIZE",
+    "NEG-N5-KLOAD-MANIFEST-MALFORMED",
     "NEG-N5-KLOAD-KERNEL-MISSING",
     "NEG-N5-KLOAD-KERNEL-EMPTY",
     "NEG-N5-KLOAD-KERNEL-OVERSIZE",
@@ -89,12 +98,17 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-KLOAD-FAT-CHAIN-LOOP",
     "NEG-N5-KLOAD-DIRECTORY-PATH",
     "NEG-N5-KLOAD-CONFIG-PATH",
+    "NEG-N5-KLOAD-MANIFEST-PATH",
     "NEG-N5-KLOAD-KERNEL-PATH",
     "NEG-N5-KLOAD-CONFIG-CONTENT",
+    "NEG-N5-KLOAD-MANIFEST-CONTENT",
     "NEG-N5-KLOAD-KERNEL-CONTENT",
     "NEG-N5-KLOAD-MARKER-OMISSION",
     "NEG-N5-KLOAD-MARKER-ORDER",
     "NEG-N5-KLOAD-MARKER-CONFIG-BOUND",
+    "NEG-N5-KLOAD-MARKER-MANIFEST-BOUND",
+    "NEG-N5-KLOAD-MARKER-MANIFEST-SLOT",
+    "NEG-N5-KLOAD-MARKER-DIGEST",
     "NEG-N5-KLOAD-MARKER-KERNEL-BOUND",
     "NEG-N5-KLOAD-MARKER-PAGE-MATH",
     "NEG-N5-KLOAD-MARKER-ENTRY-BOUND",
@@ -103,6 +117,7 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-KLOAD-MARKER-RELEASE-COUNT",
     "NEG-N5-KLOAD-MARKER-BOUNDARY",
     "NEG-N5-KLOAD-CONFIG-ORACLE-DIVERGENCE",
+    "NEG-N5-KLOAD-MANIFEST-ORACLE-DIVERGENCE",
     "NEG-N5-KLOAD-ELF-ORACLE-DIVERGENCE",
     "NEG-N5-KLOAD-LOADED-HASH-DIVERGENCE",
     "NEG-N5-KLOAD-CLAIM-OVERREACH",
@@ -123,6 +138,8 @@ PROOF_IMPLEMENTATION_INPUTS = (
     "native/boot/src/kload.rs",
     "native/bootload/Cargo.toml",
     "native/bootload/src/lib.rs",
+    "native/manifest/Cargo.toml",
+    "native/manifest/src/lib.rs",
     "native/kernel/Cargo.toml",
     "native/kernel/linker.ld",
     "native/kernel/manifest.pkm",
@@ -131,6 +148,7 @@ PROOF_IMPLEMENTATION_INPUTS = (
     "runtime/native_binary.py",
     "runtime/native_kernel_load.py",
     "runtime/native_pooleboot.py",
+    "runtime/native_system_manifest.py",
     "runtime/native_tier0.py",
     "specs/native-pooleboot-proof.json",
     "specs/native-pooleboot-proof.schema.json",
@@ -138,13 +156,20 @@ PROOF_IMPLEMENTATION_INPUTS = (
     "specs/native-kernel-load-contract.json",
     "specs/native-kernel-load-contract.schema.json",
     "specs/native-kernel-load-readiness.schema.json",
+    "specs/native-boot-digest-provider.json",
+    "specs/native-boot-digest-provider.schema.json",
+    "specs/native-system-manifest-contract.json",
+    "specs/native-system-manifest-contract.schema.json",
+    "specs/native-system-manifest-readiness.schema.json",
     "specs/native-tier0-lock.json",
     "specs/native-tier0-profile.json",
     "runs/native_tier0_readiness.json",
+    "runs/native_system_manifest_readiness.json",
     "tools/build_native_pooleboot_media.py",
     "tools/qualify_native_pooleboot.py",
     "tools/qualify_native_kernel_entry.py",
     "tools/qualify_native_kernel_load.py",
+    "tools/qualify_native_system_manifest.py",
 )
 ABSOLUTE_USER_PATH = re.compile(
     r"(?:[A-Za-z]:[\\/](?:Users|Documents and Settings)[\\/][^\\/\s]+|/(?:Users|home)/[^/\s]+)",
@@ -886,6 +911,8 @@ def proof_contract_errors(contract: dict[str, Any], root: Path) -> list[str]:
         "CONFIG PASS",
         "FILESYSTEM PASS",
         "BOOTCFG PASS",
+        "MANIFEST PASS",
+        "KERNEL_BINDING PASS",
         "KERNEL_FILE PASS",
         "KERNEL_LOAD PASS",
         "KERNEL_MAP PASS",
@@ -956,6 +983,8 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str
         "kernel_entry_readiness": "runs/native_kernel_entry_readiness.json",
         "kernel_load_contract": "specs/native-kernel-load-contract.json",
         "kernel_load_readiness": "runs/native_kernel_load_readiness.json",
+        "system_manifest_contract": "specs/native-system-manifest-contract.json",
+        "system_manifest_readiness": "runs/native_system_manifest_readiness.json",
     }
     for name, relative_path in expected_bindings.items():
         _check_binding(errors, bindings.get(name), root, relative_path, name)
@@ -987,8 +1016,8 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str
     media_inspection = media.get("inspection", {})
     files = media_inspection.get("files", [])
     embedded = media_inspection.get("embedded_efi", {})
-    if not isinstance(files, list) or len(files) != 3:
-        errors.append("PooleBoot media file manifest does not contain exactly three files")
+    if not isinstance(files, list) or len(files) != 4:
+        errors.append("PooleBoot media file manifest does not contain exactly four files")
     else:
         file_item = files[0]
         if (
@@ -1000,6 +1029,7 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str
         if [item.get("path") for item in files] != [
             FALLBACK_PATH,
             "EFI/POOLEOS/BOOT.CFG",
+            "EFI/POOLEOS/SYSTEM_A.PBM",
             "EFI/POOLEOS/KERNEL.ELF",
         ]:
             errors.append("PooleBoot media file paths changed")

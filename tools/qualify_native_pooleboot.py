@@ -118,6 +118,28 @@ def _toolchain(toolchain_root: Path) -> tuple[Path, Path, dict[str, str]]:
             "TZ": "UTC",
         }
     )
+    native_root = NATIVE_ROOT.resolve()
+    env["CARGO_TARGET_X86_64_UNKNOWN_UEFI_RUSTFLAGS"] = " ".join(
+        (
+            "-Cpanic=abort",
+            "-Clink-arg=/debug:none",
+            "-Clink-arg=/timestamp:0",
+            '--cfg=sha2_backend="soft"',
+            '--cfg=sha2_backend_soft="compact"',
+            f"--remap-path-prefix={native_root}=/pooleos/native",
+        )
+    )
+    env["CARGO_TARGET_X86_64_UNKNOWN_NONE_RUSTFLAGS"] = " ".join(
+        (
+            "-Cpanic=abort",
+            "-Crelocation-model=static",
+            "-Clink-arg=--entry=_start",
+            "-Clink-arg=--build-id=none",
+            "-Clink-arg=--gc-sections",
+            "-Clink-arg=-static",
+            f"--remap-path-prefix={native_root}=/pooleos/native",
+        )
+    )
     version = _run_checked([str(rustc), "--version", "--verbose"], cwd=ROOT, env=env)
     if lock["channel_manifest"]["rust_version"] not in version or host not in version:
         raise QualificationError("workspace-local rustc does not match the native toolchain lock")
@@ -687,12 +709,12 @@ def make_report(
     kernel_load_readiness_path = ROOT / native_kernel_load.READINESS_RELATIVE
     if not kernel_load_readiness_path.is_file():
         raise QualificationError(
-            "current PKLOAD1 readiness is required before the aggregate PooleBoot receipt"
+            "current PKLOAD2 readiness is required before the aggregate PooleBoot receipt"
         )
     current_kernel_load = native_kernel_load.read_json(kernel_load_readiness_path)
     current_errors = native_kernel_load.readiness_errors(current_kernel_load, ROOT)
     if current_errors:
-        raise QualificationError("current PKLOAD1 readiness is stale: " + "; ".join(current_errors))
+        raise QualificationError("current PKLOAD2 readiness is stale: " + "; ".join(current_errors))
     kernel_load, screenshot = qualify_native_kernel_load.make_readiness(
         toolchain_root,
         qemu_root,
@@ -705,7 +727,7 @@ def make_report(
         "schema_version": "1.0",
         "artifact_kind": "pooleos_native_pooleboot_readiness",
         "status_date": status_date,
-        "status": "pass_single_host_two_run_unsigned_live_load_then_release_non_promoting",
+        "status": "pass_single_host_two_run_unsigned_live_manifest_load_then_release_non_promoting",
         "contract_id": contract["contract_id"],
         "selected_move_id": contract["selected_move_id"],
         "production_ready": False,
@@ -744,6 +766,12 @@ def make_report(
             "kernel_load_readiness": native_pooleboot.file_binding(
                 ROOT, native_kernel_load.READINESS_RELATIVE
             ),
+            "system_manifest_contract": native_pooleboot.file_binding(
+                ROOT, "specs/native-system-manifest-contract.json"
+            ),
+            "system_manifest_readiness": native_pooleboot.file_binding(
+                ROOT, "runs/native_system_manifest_readiness.json"
+            ),
             "implementation_inputs": [
                 native_pooleboot.file_binding(ROOT, path) for path in BUILD_INPUTS
             ],
@@ -762,11 +790,11 @@ def make_report(
             "clean_media_generations_exact": 2,
             "guest_runs_passed": 2,
             "guest_runs_total": 2,
-            "ordered_marker_count": 17,
+            "ordered_marker_count": len(kernel_load["execution"]["runs"][0]["markers"]),
             "serial_debugcon_match_count": 2,
             "gop_frame_match_count": 2,
-            "negative_controls_passed": 30,
-            "negative_controls_total": 30,
+            "negative_controls_passed": len(kernel_load["negative_controls"]),
+            "negative_controls_total": len(kernel_load["negative_controls"]),
             "production_claim_count": 0,
         },
         "open_items": kernel_load["open_items"],
@@ -784,7 +812,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--qemu-root", type=Path, default=DEFAULT_QEMU_ROOT)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--screenshot-out", type=Path)
-    parser.add_argument("--status-date", default="2026-07-16")
+    parser.add_argument("--status-date", default="2026-07-17")
     parser.add_argument("--timeout", type=int, default=30)
     args = parser.parse_args(argv)
     if args.timeout < 5 or args.timeout > 120:

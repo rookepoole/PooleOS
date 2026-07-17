@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-boot-digest-provider.schema.json",
+  "title": "PooleOS boot digest provider contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "contract_id", "status", "production_ready", "algorithm", "provider", "locked_packages", "qualification", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_boot_digest_provider"},
+    "contract_id": {"const": "PBDIGEST1"},
+    "status": {"const": "candidate_pre_security_review_non_promoting"},
+    "production_ready": {"const": false},
+    "algorithm": {"type": "object"},
+    "provider": {"type": "object"},
+    "locked_packages": {"type": "array", "minItems": 9, "maxItems": 9, "items": {"type": "object"}},
+    "qualification": {"type": "object"},
+    "claim_boundary": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "string"}}
+  }
+}

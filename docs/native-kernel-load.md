@@ -1,12 +1,14 @@
-# PKLOAD1 Live Kernel Load Proof
+# PKLOAD2 Live Manifest-Bound Kernel Load Proof
 
 ## Scope
 
-`N5-KLOAD-001` advances N5.1, N5.4, and N5.5 with one bounded live UEFI
-proof. PooleBoot discovers the filesystem that contains its own loaded image,
-opens and parses `PBC1`, reads the real Cycle 101 `PKELF1` PooleKernel product,
-allocates firmware pages, materializes segments/BSS/relative relocations, checks
-the mapping plan, and releases every acquired resource before returning.
+Cycle 103 composes `N5-KLOAD-001` and `N5-MANIFEST-001` across N5.1, N5.4,
+and N5.5. PooleBoot discovers the filesystem that contains its own loaded
+image, opens and parses live PBC1, opens and parses its selected PSM1 manifest,
+binds slot/version/path/file/image/SHA-256/entry fields, reads the real Cycle
+101 PKELF1 PooleKernel product, verifies its digest, allocates firmware pages,
+materializes segments/BSS/relative relocations, repeats the digest check,
+validates the mapping plan, and releases every acquired resource.
 
 This is a load-then-release proof. It is deliberately not a transfer proof.
 
@@ -19,18 +21,23 @@ This is a load-then-release proof. It is deliberately not a transfer proof.
    filesystem interface.
 4. `OpenVolume()` obtains the root file handle.
 5. Read-only `Open`, bounded `GetInfo`, exact `Read`, and `Close` operations
-   consume `\EFI\POOLEOS\BOOT.CFG` and `\EFI\POOLEOS\KERNEL.ELF`.
+   consume `\EFI\POOLEOS\BOOT.CFG`, its selected
+   `\EFI\POOLEOS\SYSTEM_A.PBM`, and the manifest-selected kernel path.
 
 The GUIDs, layouts, paths, limits, and required cleanup are frozen in
 `specs/native-kernel-load-contract.json`.
 
 ## Trust Boundary
 
-The live `BOOT.CFG` is parsed by PBC1 and its default entry is observed. PBC1
-names a manifest, not a direct kernel path. This bounded cycle therefore uses
-the fixed `KERNEL.ELF` development path and marks it `fixed_untrusted` in the
-guest transcript. No manifest is opened, and no hash, signature, revocation,
-Secure Boot, TCG2, or TPM policy promotes the kernel to trusted state.
+The live `BOOT.CFG` selects a PSM1 manifest and slot. PSM1 binds the exact
+kernel path, version, file and image sizes, SHA-256 digest, PKELF1 format, and
+PKENTRY1 contract. PooleBoot rejects any disagreement and reports
+`selection=manifest_digest_untrusted`.
+
+The manifest is unsigned. Hashing proves equality to the bytes named by that
+unsigned manifest; it does not authenticate who selected those bytes. No
+signature, revocation, persistent rollback state, Secure Boot, TCG2, or TPM
+policy promotes the selection to trusted state.
 
 ## Allocation And Load
 
@@ -45,11 +52,10 @@ future mappings, not evidence that hardware permissions were enforced.
 
 ## Cleanup
 
-The success path closes the config file, kernel file, and root handle; frees
-the config and kernel pools; and frees all kernel pages. Cleanup is attempted on
-every handled failure path, and cleanup failure is itself fatal. The successful
-marker reports exact counts. Because pages are released, the kernel is not
-resident when PooleBoot returns.
+The success path closes the config, manifest, kernel, and root handles; frees
+the config, manifest, and kernel pools; and frees all kernel pages. Cleanup is
+attempted on every handled failure path, and cleanup failure is itself fatal.
+Because pages are released, the kernel is not resident when PooleBoot returns.
 
 ## Qualification
 
@@ -59,20 +65,21 @@ Run:
 python tools/qualify_native_kernel_load.py
 ```
 
-The qualifier performs strict Rust formatting and Clippy checks, 33 Rust host
-tests across bootload/PooleBoot/PooleKernel, two clean PooleBoot builds, two
-clean PooleKernel builds, two exact media generations, and two fresh-vars
-QEMU/OVMF runs. The independent Python PBC1 and PKELF1 implementations must
-match the live guest markers and loaded-image FNV-1a digest. Thirty negative
-controls cover missing, empty, oversized, malformed, path, FAT, marker, W^X,
-cleanup, oracle-divergence, claim-overreach, and stale-binding failures.
+The qualifier performs strict Rust formatting and Clippy checks, 35 Rust host
+tests across manifest/bootload/PooleBoot/PooleKernel, two exact 61,440-byte
+PooleBoot builds, two clean PooleKernel builds, two exact four-file media
+generations, and two fresh-vars QEMU/OVMF runs. Independent Python PBC1, PSM1,
+PKELF1, and SHA-256 decisions must match nineteen live guest markers. Forty
+negative controls cover file, FAT, path, config, manifest, digest, kernel,
+marker, W^X, cleanup, oracle-divergence, overclaim, and stale-binding failures.
 
 The signed receipt is not produced in this cycle. The generated readiness file
 remains an unsigned, single-host, non-promoting development record.
 
 ## Nonclaims
 
-- No manifest-driven or authenticated selection.
+- Manifest-driven digest equality is proved; signature-backed authentication is not.
+- No completed digest-provider security review or persistent rollback state.
 - No retained kernel allocation or installed page tables.
 - No PBP1 producer, final memory-map retry, or `ExitBootServices` call.
 - No kernel entry, panic, recovery, or reset execution evidence.

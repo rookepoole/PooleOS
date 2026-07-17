@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-system-manifest-readiness.schema.json",
+  "title": "PooleOS PSM1 parser qualification readiness",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "status_date", "status", "contract_id", "selected_move_id", "production_ready", "production_promotion_allowed", "n5_exit_gate_satisfied", "phase_status", "bindings", "parser_qualification", "golden_vectors", "negative_controls", "differential_fuzz", "digest_qualification", "claims", "summary", "open_items", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_system_manifest_readiness"},
+    "status_date": {"const": "2026-07-17"},
+    "status": {"const": "pass_single_host_synthetic_non_promoting"},
+    "contract_id": {"const": "PSM1"},
+    "selected_move_id": {"const": "N5-MANIFEST-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "n5_exit_gate_satisfied": {"const": false},
+    "phase_status": {"type": "object"},
+    "bindings": {"type": "object"},
+    "parser_qualification": {"type": "object"},
+    "golden_vectors": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "object"}},
+    "negative_controls": {"type": "array", "minItems": 64, "maxItems": 64, "items": {"type": "object"}},
+    "differential_fuzz": {"type": "object"},
+    "digest_qualification": {"type": "object"},
+    "claims": {"type": "object"},
+    "summary": {"type": "object"},
+    "open_items": {"type": "array", "minItems": 8, "items": {"type": "string"}},
+    "claim_boundary": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"type": "string"}}
+  }
+}

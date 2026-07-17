@@ -158,6 +158,16 @@ ADDED_REQUIREMENTS = [
         "basis": ["https://uefi.org/specs/UEFI/2.11/32_Secure_Boot_and_Driver_Signing.html"],
     },
     {
+        "id": "ADD-BOOT-003",
+        "phase_id": "N6",
+        "requirement": "Pin and vendor every boot-time digest provider, remove absolute build paths reproducibly, qualify standard, differential, and artifact-mutation vectors, and require independent cryptographic review plus target-backend qualification before trust promotion; digest equality against an unsigned manifest is not authentication.",
+        "basis": [
+            "Cycle 103 PBDIGEST1 boot-time SHA-256 provider integration",
+            "specs/native-boot-digest-provider.json",
+            "master checklist sections 016, 017, 099, and 170",
+        ],
+    },
+    {
         "id": "ADD-KERNEL-001",
         "phase_id": "N6",
         "requirement": "Declare the exact temporary mapping, lifetime, cache policy, write permission, and revocation transition for every physical address passed to early PooleKernel diagnostics; in particular, no PBP1 framebuffer physical address may be dereferenced until the entry contract proves that mapping is present.",

@@ -105,6 +105,28 @@ def _toolchain(toolchain_root: Path) -> tuple[Path, Path, dict[str, str]]:
             "TZ": "UTC",
         }
     )
+    native_root = NATIVE_ROOT.resolve()
+    env["CARGO_TARGET_X86_64_UNKNOWN_UEFI_RUSTFLAGS"] = " ".join(
+        (
+            "-Cpanic=abort",
+            "-Clink-arg=/debug:none",
+            "-Clink-arg=/timestamp:0",
+            '--cfg=sha2_backend="soft"',
+            '--cfg=sha2_backend_soft="compact"',
+            f"--remap-path-prefix={native_root}=/pooleos/native",
+        )
+    )
+    env["CARGO_TARGET_X86_64_UNKNOWN_NONE_RUSTFLAGS"] = " ".join(
+        (
+            "-Cpanic=abort",
+            "-Crelocation-model=static",
+            "-Clink-arg=--entry=_start",
+            "-Clink-arg=--build-id=none",
+            "-Clink-arg=--gc-sections",
+            "-Clink-arg=-static",
+            f"--remap-path-prefix={native_root}=/pooleos/native",
+        )
+    )
     version = _run([str(rustc), "--version", "--verbose"], cwd=ROOT, env=env)
     if lock["channel_manifest"]["rust_version"] not in version or host not in version:
         raise QualificationError("workspace-local rustc does not match the native toolchain lock")

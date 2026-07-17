@@ -1,4 +1,4 @@
-"""Deterministic PKLOAD1 media, independent oracles, markers, and claims."""
+"""Deterministic PKLOAD2 manifest-driven media, oracles, markers, and claims."""
 
 from __future__ import annotations
 
@@ -10,15 +10,17 @@ import struct
 from pathlib import Path
 from typing import Any
 
-from runtime import native_boot_config, native_elf_loader, native_pooleboot
+from runtime import native_boot_config, native_elf_loader, native_pooleboot, native_system_manifest
 from runtime.schema_validation import validate_json
 
 
-CONTRACT_ID = "PKLOAD1"
+CONTRACT_ID = "PKLOAD2"
 CONFIG_PATH = "EFI/POOLEOS/BOOT.CFG"
+MANIFEST_PATH = "EFI/POOLEOS/SYSTEM_A.PBM"
 KERNEL_PATH = "EFI/POOLEOS/KERNEL.ELF"
 POOLEOS_DIRECTORY_NAME = b"POOLEOS    "
 CONFIG_SHORT_NAME = b"BOOT    CFG"
+MANIFEST_SHORT_NAME = b"SYSTEM_APBM"
 KERNEL_SHORT_NAME = b"KERNEL  ELF"
 PHYSICAL_ORACLE_BASE = 0x0200_0000
 CONTRACT_RELATIVE = "specs/native-kernel-load-contract.json"
@@ -36,6 +38,8 @@ IMPLEMENTATION_INPUTS = (
     "native/bootload/Cargo.toml",
     "native/bootload/src/lib.rs",
     "native/bootcfg/src/lib.rs",
+    "native/manifest/Cargo.toml",
+    "native/manifest/src/lib.rs",
     "native/elf/src/lib.rs",
     "native/kernel/Cargo.toml",
     "native/kernel/linker.ld",
@@ -47,9 +51,13 @@ IMPLEMENTATION_INPUTS = (
     "runtime/native_kernel_image.py",
     "runtime/native_kernel_load.py",
     "runtime/native_pooleboot.py",
+    "runtime/native_system_manifest.py",
+    "specs/native-boot-digest-provider.json",
+    "specs/native-boot-digest-provider.schema.json",
     "specs/native-kernel-load-contract.json",
     "specs/native-kernel-load-contract.schema.json",
     "specs/native-kernel-load-readiness.schema.json",
+    "tools/qualify_native_pooleboot.py",
     "tools/qualify_native_kernel_load.py",
 )
 
@@ -57,6 +65,12 @@ TRUE_CLAIMS = (
     "loaded_image_protocol_observed",
     "simple_filesystem_protocol_observed",
     "live_pbc1_file_parsed",
+    "live_psm1_file_parsed",
+    "manifest_selected_kernel_path",
+    "manifest_slot_bound",
+    "manifest_version_floor_validated",
+    "manifest_kernel_size_bound",
+    "manifest_kernel_sha256_matched",
     "live_pkelf1_file_read",
     "pkelf1_relocated_into_firmware_pages",
     "pkelf1_mapping_plan_validated",
@@ -64,7 +78,9 @@ TRUE_CLAIMS = (
     "two_qemu_runs_exact",
 )
 FALSE_CLAIMS = (
-    "manifest_authenticated_selection",
+    "manifest_signature_verified",
+    "manifest_trusted",
+    "persistent_rollback_state_enforced",
     "kernel_signature_verified",
     "kernel_pages_retained",
     "page_tables_activated",
@@ -83,6 +99,10 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-KLOAD-CONFIG-EMPTY",
     "NEG-N5-KLOAD-CONFIG-OVERSIZE",
     "NEG-N5-KLOAD-CONFIG-MALFORMED",
+    "NEG-N5-KLOAD-MANIFEST-MISSING",
+    "NEG-N5-KLOAD-MANIFEST-EMPTY",
+    "NEG-N5-KLOAD-MANIFEST-OVERSIZE",
+    "NEG-N5-KLOAD-MANIFEST-MALFORMED",
     "NEG-N5-KLOAD-KERNEL-MISSING",
     "NEG-N5-KLOAD-KERNEL-EMPTY",
     "NEG-N5-KLOAD-KERNEL-OVERSIZE",
@@ -91,12 +111,17 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-KLOAD-FAT-CHAIN-LOOP",
     "NEG-N5-KLOAD-DIRECTORY-PATH",
     "NEG-N5-KLOAD-CONFIG-PATH",
+    "NEG-N5-KLOAD-MANIFEST-PATH",
     "NEG-N5-KLOAD-KERNEL-PATH",
     "NEG-N5-KLOAD-CONFIG-CONTENT",
+    "NEG-N5-KLOAD-MANIFEST-CONTENT",
     "NEG-N5-KLOAD-KERNEL-CONTENT",
     "NEG-N5-KLOAD-MARKER-OMISSION",
     "NEG-N5-KLOAD-MARKER-ORDER",
     "NEG-N5-KLOAD-MARKER-CONFIG-BOUND",
+    "NEG-N5-KLOAD-MARKER-MANIFEST-BOUND",
+    "NEG-N5-KLOAD-MARKER-MANIFEST-SLOT",
+    "NEG-N5-KLOAD-MARKER-DIGEST",
     "NEG-N5-KLOAD-MARKER-KERNEL-BOUND",
     "NEG-N5-KLOAD-MARKER-PAGE-MATH",
     "NEG-N5-KLOAD-MARKER-ENTRY-BOUND",
@@ -105,6 +130,7 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-KLOAD-MARKER-RELEASE-COUNT",
     "NEG-N5-KLOAD-MARKER-BOUNDARY",
     "NEG-N5-KLOAD-CONFIG-ORACLE-DIVERGENCE",
+    "NEG-N5-KLOAD-MANIFEST-ORACLE-DIVERGENCE",
     "NEG-N5-KLOAD-ELF-ORACLE-DIVERGENCE",
     "NEG-N5-KLOAD-LOADED-HASH-DIVERGENCE",
     "NEG-N5-KLOAD-CLAIM-OVERREACH",
@@ -124,7 +150,13 @@ MARKER_PATTERNS = (
     re.compile(
         r"^POOLEBOOT/0\.1 BOOTCFG PASS bytes=([0-9]+) entries=([0-9]+) default_hash=([0-9A-F]{16}) timeout_ms=([0-9]+) attempts=([0-9]+) slot=([0-9]+) manifest_max_bytes=([0-9]+)$"
     ),
-    re.compile(r"^POOLEBOOT/0\.1 KERNEL_FILE PASS bytes=([0-9]+) path=fixed_development$"),
+    re.compile(
+        r"^POOLEBOOT/0\.1 MANIFEST PASS bytes=([0-9]+) artifacts=([0-9]+) id_hash=([0-9A-F]{16}) slot=([0-9]+) version=([0-9]+) minimum_secure_version=([0-9]+)$"
+    ),
+    re.compile(
+        r"^POOLEBOOT/0\.1 KERNEL_BINDING PASS version=([0-9]+) file_bytes=([0-9]+) image_bytes=([0-9]+) sha256_prefix=([0-9A-F]{16}) path=manifest$"
+    ),
+    re.compile(r"^POOLEBOOT/0\.1 KERNEL_FILE PASS bytes=([0-9]+) path=manifest_development$"),
     re.compile(
         r"^POOLEBOOT/0\.1 KERNEL_LOAD PASS image_bytes=([0-9]+) pages=([0-9]+) entry_offset=([0-9]+) relocations=([0-9]+) fnv1a64=([0-9A-F]{16})$"
     ),
@@ -141,7 +173,7 @@ MARKER_PATTERNS = (
         r"^POOLEBOOT/0\.1 MEMORY_MAP PASS bytes=([0-9]+) descriptor_bytes=([0-9]+) descriptors=([0-9]+)$"
     ),
     re.compile(
-        r"^POOLEBOOT/0\.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=fixed_untrusted kernel=loaded_then_released mappings=planned_not_activated entry=not_called exit_boot_services=not_called$"
+        r"^POOLEBOOT/0\.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted kernel=loaded_then_released mappings=planned_not_activated entry=not_called exit_boot_services=not_called$"
     ),
     re.compile(r"^POOLEBOOT/0\.1 FRAME READY$"),
     re.compile(r"^POOLEBOOT/0\.1 RETURN EFI_SUCCESS$"),
@@ -149,7 +181,7 @@ MARKER_PATTERNS = (
 
 
 class KernelLoadError(RuntimeError):
-    """Raised when a PKLOAD1 proof input violates its bounded contract."""
+    """Raised when a PKLOAD2 proof input violates its bounded contract."""
 
 
 def canonical_config_bytes() -> bytes:
@@ -159,13 +191,29 @@ def canonical_config_bytes() -> bytes:
                 "normal",
                 "normal",
                 1,
-                r"\EFI\POOLEOS\MANIFEST_A.PBM",
+                r"\EFI\POOLEOS\SYSTEM_A.PBM",
                 65_536,
             ),
         ),
         default_entry="normal",
         timeout_ms=0,
         boot_attempt_limit=3,
+    )
+
+
+def canonical_manifest_bytes(kernel_data: bytes) -> bytes:
+    plan, _ = native_elf_loader.load(
+        kernel_data,
+        PHYSICAL_ORACLE_BASE,
+        native_elf_loader.MIN_VIRTUAL_BASE,
+    )
+    return native_system_manifest.canonical_kernel_manifest(
+        kernel_data,
+        plan.image_size,
+        slot=1,
+        manifest_version=1,
+        minimum_secure_version=1,
+        kernel_version=1,
     )
 
 
@@ -194,18 +242,44 @@ def _write_chain(
     return count, last_cluster
 
 
-def build_media_bytes(efi_data: bytes, config_data: bytes, kernel_data: bytes) -> bytes:
+def build_media_bytes(
+    efi_data: bytes,
+    config_data: bytes,
+    manifest_data: bytes,
+    kernel_data: bytes,
+) -> bytes:
     try:
-        native_boot_config.parse(config_data)
+        config = native_boot_config.parse(config_data)
+        selected = next(entry for entry in config.entries if entry.id == config.default_entry)
+        manifest = native_system_manifest.parse(manifest_data)
+        kernel = manifest.kernel
+        if selected.manifest != r"\EFI\POOLEOS\SYSTEM_A.PBM":
+            raise KernelLoadError("PBC1 selected manifest path is not canonical")
+        if len(manifest_data) > selected.manifest_max_bytes:
+            raise KernelLoadError("PSM1 exceeds the selected PBC1 manifest bound")
+        if manifest.slot != selected.slot:
+            raise KernelLoadError("PSM1 slot differs from the selected PBC1 slot")
+        if kernel.path != r"\EFI\POOLEOS\KERNEL.ELF":
+            raise KernelLoadError("PSM1 kernel path is not canonical")
+        native_system_manifest.verify_file(kernel, kernel_data)
         kernel_plan, _ = native_elf_loader.load(
             kernel_data,
             PHYSICAL_ORACLE_BASE,
             native_elf_loader.MIN_VIRTUAL_BASE,
         )
-    except (native_boot_config.BootConfigError, native_elf_loader.ElfError) as error:
-        raise KernelLoadError(f"PKLOAD1 input validation failed: {error}") from error
+        if kernel_plan.image_size != kernel.image_bytes:
+            raise KernelLoadError("PSM1 kernel image size differs from PKELF1")
+    except (
+        native_boot_config.BootConfigError,
+        native_system_manifest.ManifestError,
+        native_elf_loader.ElfError,
+        StopIteration,
+    ) as error:
+        raise KernelLoadError(f"PKLOAD2 input validation failed: {error}") from error
     if len(config_data) > native_boot_config.MAX_CONFIG_BYTES:
         raise KernelLoadError("PBC1 input exceeds its file bound")
+    if len(manifest_data) > native_system_manifest.MAX_MANIFEST_BYTES:
+        raise KernelLoadError("PSM1 input exceeds its file bound")
     if len(kernel_data) > native_elf_loader.MAX_FILE_BYTES:
         raise KernelLoadError("PKELF1 input exceeds its file bound")
     if kernel_plan.image_size > native_elf_loader.MAX_IMAGE_BYTES:
@@ -229,12 +303,16 @@ def build_media_bytes(efi_data: bytes, config_data: bytes, kernel_data: bytes) -
     config_clusters, config_last = _write_chain(
         image, fat, data_start_lba, config_first, config_data
     )
-    kernel_first = config_last + 1
+    manifest_first = config_last + 1
+    manifest_clusters, manifest_last = _write_chain(
+        image, fat, data_start_lba, manifest_first, manifest_data
+    )
+    kernel_first = manifest_last + 1
     kernel_clusters, kernel_last = _write_chain(
         image, fat, data_start_lba, kernel_first, kernel_data
     )
     if kernel_last > cluster_count + 1:
-        raise KernelLoadError("PKLOAD1 files do not fit in the deterministic ESP")
+        raise KernelLoadError("PKLOAD2 files do not fit in the deterministic ESP")
     struct.pack_into("<I", fat, pooleos_cluster * 4, native_pooleboot.FAT_END)
 
     efi_directory = bytearray(
@@ -254,6 +332,9 @@ def build_media_bytes(efi_data: bytes, config_data: bytes, kernel_data: bytes) -
         CONFIG_SHORT_NAME, 0x20, config_first, len(config_data)
     )
     pooleos_directory[96:128] = native_pooleboot._directory_entry(
+        MANIFEST_SHORT_NAME, 0x20, manifest_first, len(manifest_data)
+    )
+    pooleos_directory[128:160] = native_pooleboot._directory_entry(
         KERNEL_SHORT_NAME, 0x20, kernel_first, len(kernel_data)
     )
     native_pooleboot._write_cluster(image, data_start_lba, pooleos_cluster, pooleos_directory)
@@ -261,7 +342,9 @@ def build_media_bytes(efi_data: bytes, config_data: bytes, kernel_data: bytes) -
     for index in range(native_pooleboot.FAT_COUNT):
         copy_offset = fat_offset + index * fat_byte_count
         image[copy_offset : copy_offset + fat_byte_count] = fat
-    allocated_clusters = 4 + efi_clusters + config_clusters + kernel_clusters
+    allocated_clusters = (
+        4 + efi_clusters + config_clusters + manifest_clusters + kernel_clusters
+    )
     free_clusters = cluster_count - allocated_clusters
     next_free = kernel_last + 1 if kernel_last + 1 <= cluster_count + 1 else 0xFFFF_FFFF
     for sector in (1, 7):
@@ -297,7 +380,7 @@ def _file_bytes(
 
 def inspect_media_bytes(data: bytes) -> dict[str, Any]:
     if len(data) != native_pooleboot.IMAGE_BYTES:
-        raise KernelLoadError("PKLOAD1 image byte count is not canonical")
+        raise KernelLoadError("PKLOAD2 image byte count is not canonical")
     try:
         primary = native_pooleboot._parse_gpt_header(
             data,
@@ -318,12 +401,12 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
             native_pooleboot.ESP_START_LBA + native_pooleboot.FAT_RESERVED_SECTORS
         ) * native_pooleboot.SECTOR_BYTES
         fat_bytes = fat_sectors * native_pooleboot.SECTOR_BYTES
-        first_fat = native_pooleboot._slice(data, fat_offset, fat_bytes, "PKLOAD1 first FAT")
+        first_fat = native_pooleboot._slice(data, fat_offset, fat_bytes, "PKLOAD2 first FAT")
         second_fat = native_pooleboot._slice(
-            data, fat_offset + fat_bytes, fat_bytes, "PKLOAD1 second FAT"
+            data, fat_offset + fat_bytes, fat_bytes, "PKLOAD2 second FAT"
         )
         if first_fat != second_fat:
-            raise KernelLoadError("PKLOAD1 FAT copies differ")
+            raise KernelLoadError("PKLOAD2 FAT copies differ")
         data_start_lba = (
             native_pooleboot.ESP_START_LBA
             + native_pooleboot.FAT_RESERVED_SECTORS
@@ -333,7 +416,7 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
             native_pooleboot._cluster_bytes(data, data_start_lba, 2)
         )
         if set(root_entries) != {native_pooleboot.VOLUME_LABEL, b"EFI        "}:
-            raise KernelLoadError("PKLOAD1 root directory changed")
+            raise KernelLoadError("PKLOAD2 root directory changed")
         efi_entries = native_pooleboot._directory_entries(
             native_pooleboot._cluster_bytes(data, data_start_lba, 3)
         )
@@ -344,12 +427,12 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
             POOLEOS_DIRECTORY_NAME,
         }
         if set(efi_entries) != expected_efi_names:
-            raise KernelLoadError("PKLOAD1 EFI directory changed")
+            raise KernelLoadError("PKLOAD2 EFI directory changed")
         boot_entries = native_pooleboot._directory_entries(
             native_pooleboot._cluster_bytes(data, data_start_lba, 4)
         )
         if set(boot_entries) != {b".          ", b"..         ", b"BOOTX64 EFI"}:
-            raise KernelLoadError("PKLOAD1 EFI/BOOT directory changed")
+            raise KernelLoadError("PKLOAD2 EFI/BOOT directory changed")
         efi_data, efi_chain = _file_bytes(
             data,
             first_fat,
@@ -366,7 +449,7 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
             "cluster": expected_pooleos_cluster,
             "size": 0,
         }:
-            raise KernelLoadError("PKLOAD1 POOLEOS directory placement changed")
+            raise KernelLoadError("PKLOAD2 POOLEOS directory placement changed")
         pooleos_entries = native_pooleboot._directory_entries(
             native_pooleboot._cluster_bytes(data, data_start_lba, expected_pooleos_cluster)
         )
@@ -374,9 +457,10 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
             b".          ",
             b"..         ",
             CONFIG_SHORT_NAME,
+            MANIFEST_SHORT_NAME,
             KERNEL_SHORT_NAME,
         }:
-            raise KernelLoadError("PKLOAD1 POOLEOS directory changed")
+            raise KernelLoadError("PKLOAD2 POOLEOS directory changed")
         config_data, config_chain = _file_bytes(
             data,
             first_fat,
@@ -385,6 +469,15 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
             cluster_count,
             native_boot_config.MAX_CONFIG_BYTES,
             "PBC1",
+        )
+        manifest_data, manifest_chain = _file_bytes(
+            data,
+            first_fat,
+            data_start_lba,
+            pooleos_entries[MANIFEST_SHORT_NAME],
+            cluster_count,
+            native_system_manifest.MAX_MANIFEST_BYTES,
+            "PSM1",
         )
         kernel_data, kernel_chain = _file_bytes(
             data,
@@ -395,9 +488,23 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
             native_elf_loader.MAX_FILE_BYTES,
             "PKELF1",
         )
-        if config_chain[0] != expected_pooleos_cluster + 1 or kernel_chain[0] != config_chain[-1] + 1:
-            raise KernelLoadError("PKLOAD1 file cluster placement changed")
+        if (
+            config_chain[0] != expected_pooleos_cluster + 1
+            or manifest_chain[0] != config_chain[-1] + 1
+            or kernel_chain[0] != manifest_chain[-1] + 1
+        ):
+            raise KernelLoadError("PKLOAD2 file cluster placement changed")
         config = native_boot_config.parse(config_data)
+        selected = next(entry for entry in config.entries if entry.id == config.default_entry)
+        manifest = native_system_manifest.parse(manifest_data)
+        if selected.manifest != r"\EFI\POOLEOS\SYSTEM_A.PBM":
+            raise KernelLoadError("PBC1 selected manifest path changed")
+        if len(manifest_data) > selected.manifest_max_bytes or manifest.slot != selected.slot:
+            raise KernelLoadError("PSM1 selection binding changed")
+        kernel_artifact = manifest.kernel
+        if kernel_artifact.path != r"\EFI\POOLEOS\KERNEL.ELF":
+            raise KernelLoadError("PSM1 kernel path changed")
+        native_system_manifest.verify_file(kernel_artifact, kernel_data)
         kernel_plan, loaded = native_elf_loader.load(
             kernel_data,
             PHYSICAL_ORACLE_BASE,
@@ -407,17 +514,23 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
         native_pooleboot.PooleBootError,
         native_boot_config.BootConfigError,
         native_elf_loader.ElfError,
+        native_system_manifest.ManifestError,
+        StopIteration,
         KeyError,
         IndexError,
         struct.error,
     ) as error:
-        raise KernelLoadError(f"PKLOAD1 media inspection failed: {error}") from error
+        raise KernelLoadError(f"PKLOAD2 media inspection failed: {error}") from error
 
     if config_data != canonical_config_bytes():
-        raise KernelLoadError("PKLOAD1 config differs from the canonical development profile")
-    expected = build_media_bytes(efi_data, config_data, kernel_data)
+        raise KernelLoadError("PKLOAD2 config differs from the canonical development profile")
+    if manifest_data != canonical_manifest_bytes(kernel_data):
+        raise KernelLoadError("PKLOAD2 manifest differs from the canonical development profile")
+    if kernel_plan.image_size != kernel_artifact.image_bytes:
+        raise KernelLoadError("PSM1 kernel image size differs from PKELF1")
+    expected = build_media_bytes(efi_data, config_data, manifest_data, kernel_data)
     if data != expected:
-        raise KernelLoadError("PKLOAD1 media differs from its canonical reconstruction")
+        raise KernelLoadError("PKLOAD2 media differs from its canonical reconstruction")
     base = native_pooleboot.inspect_media_bytes(native_pooleboot.build_media_bytes(efi_data))
     base["image"]["sha256"] = native_pooleboot.sha256_bytes(data)
     base["files"] = [
@@ -432,6 +545,12 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
             "sha256": native_pooleboot.sha256_bytes(config_data),
             "byte_count": len(config_data),
             "cluster_count": len(config_chain),
+        },
+        {
+            "path": MANIFEST_PATH,
+            "sha256": native_pooleboot.sha256_bytes(manifest_data),
+            "byte_count": len(manifest_data),
+            "cluster_count": len(manifest_chain),
         },
         {
             "path": KERNEL_PATH,
@@ -452,6 +571,14 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
         "manifest_max_bytes": next(
             entry.manifest_max_bytes for entry in config.entries if entry.id == config.default_entry
         ),
+        "selected_manifest_path": selected.manifest,
+    }
+    base["manifest"] = {
+        **native_system_manifest.summary(manifest),
+        "byte_count": len(manifest_data),
+        "sha256": native_pooleboot.sha256_bytes(manifest_data),
+        "manifest_id_hash": f"{native_elf_loader.fnv1a64(manifest.manifest_id.encode('ascii')):016X}",
+        "kernel_sha256_prefix": kernel_artifact.sha256[:16],
     }
     base["kernel"] = {
         "plan": dataclasses.asdict(kernel_plan),
@@ -465,13 +592,13 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
 def validate_markers(markers: list[str]) -> dict[str, Any]:
     if len(markers) != len(MARKER_PATTERNS):
         raise KernelLoadError(
-            f"expected {len(MARKER_PATTERNS)} PKLOAD1 markers, observed {len(markers)}"
+            f"expected {len(MARKER_PATTERNS)} PKLOAD2 markers, observed {len(markers)}"
         )
     matches = []
     for index, (pattern, marker) in enumerate(zip(MARKER_PATTERNS, markers, strict=True)):
         match = pattern.fullmatch(marker)
         if match is None:
-            raise KernelLoadError(f"PKLOAD1 marker {index} violates its contract: {marker!r}")
+            raise KernelLoadError(f"PKLOAD2 marker {index} violates its contract: {marker!r}")
         matches.append(match)
 
     config_bytes = int(matches[7].group(1))
@@ -481,48 +608,71 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
     slot = int(matches[7].group(6))
     manifest_max = int(matches[7].group(7))
     if not 1 <= config_bytes <= native_boot_config.MAX_CONFIG_BYTES:
-        raise KernelLoadError("PKLOAD1 config marker exceeds its byte bound")
+        raise KernelLoadError("PKLOAD2 config marker exceeds its byte bound")
     if not 1 <= config_entries <= native_boot_config.MAX_ENTRIES:
-        raise KernelLoadError("PKLOAD1 config marker exceeds its entry bound")
+        raise KernelLoadError("PKLOAD2 config marker exceeds its entry bound")
     if timeout_ms > native_boot_config.MAX_TIMEOUT_MS or not 1 <= attempts <= 8 or not 1 <= slot <= 4:
-        raise KernelLoadError("PKLOAD1 config marker exceeds its policy bounds")
+        raise KernelLoadError("PKLOAD2 config marker exceeds its policy bounds")
     if not 1 <= manifest_max <= native_boot_config.MAX_MANIFEST_BYTES:
-        raise KernelLoadError("PKLOAD1 config marker exceeds its manifest bound")
+        raise KernelLoadError("PKLOAD2 config marker exceeds its manifest bound")
 
-    kernel_file_bytes = int(matches[8].group(1))
-    image_bytes = int(matches[9].group(1))
-    pages = int(matches[9].group(2))
-    entry_offset = int(matches[9].group(3))
-    relocations = int(matches[9].group(4))
+    manifest_bytes = int(matches[8].group(1))
+    artifact_count = int(matches[8].group(2))
+    manifest_slot = int(matches[8].group(4))
+    manifest_version = int(matches[8].group(5))
+    minimum_secure_version = int(matches[8].group(6))
+    if not 1 <= manifest_bytes <= min(
+        manifest_max, native_system_manifest.MAX_MANIFEST_BYTES
+    ):
+        raise KernelLoadError("PKLOAD2 manifest marker exceeds its selected byte bound")
+    if not 1 <= artifact_count <= native_system_manifest.MAX_ARTIFACTS:
+        raise KernelLoadError("PKLOAD2 manifest marker exceeds its artifact bound")
+    if manifest_slot != slot:
+        raise KernelLoadError("PKLOAD2 manifest marker differs from the selected slot")
+    if not 1 <= manifest_version or minimum_secure_version > manifest_version:
+        raise KernelLoadError("PKLOAD2 manifest marker violates its version floor")
+
+    kernel_version = int(matches[9].group(1))
+    bound_file_bytes = int(matches[9].group(2))
+    bound_image_bytes = int(matches[9].group(3))
+    kernel_file_bytes = int(matches[10].group(1))
+    image_bytes = int(matches[11].group(1))
+    pages = int(matches[11].group(2))
+    entry_offset = int(matches[11].group(3))
+    relocations = int(matches[11].group(4))
+    if kernel_version < max(1, minimum_secure_version):
+        raise KernelLoadError("PKLOAD2 kernel marker violates the manifest version floor")
+    if bound_file_bytes != kernel_file_bytes or bound_image_bytes != image_bytes:
+        raise KernelLoadError("PKLOAD2 kernel markers diverge from the manifest binding")
     if not 1 <= kernel_file_bytes <= native_elf_loader.MAX_FILE_BYTES:
-        raise KernelLoadError("PKLOAD1 kernel marker exceeds its file bound")
+        raise KernelLoadError("PKLOAD2 kernel marker exceeds its file bound")
     if not 1 <= image_bytes <= native_elf_loader.MAX_IMAGE_BYTES:
-        raise KernelLoadError("PKLOAD1 kernel marker exceeds its image bound")
+        raise KernelLoadError("PKLOAD2 kernel marker exceeds its image bound")
     if pages <= 0 or pages * native_elf_loader.PAGE_SIZE != image_bytes:
-        raise KernelLoadError("PKLOAD1 marker page math is inconsistent")
+        raise KernelLoadError("PKLOAD2 marker page math is inconsistent")
     if not 0 <= entry_offset < image_bytes or relocations > native_elf_loader.MAX_RELOCATIONS:
-        raise KernelLoadError("PKLOAD1 entry or relocation marker exceeds its bound")
+        raise KernelLoadError("PKLOAD2 entry or relocation marker exceeds its bound")
 
-    mappings = int(matches[10].group(1))
-    read_execute = int(matches[10].group(2))
-    read_write = int(matches[10].group(3))
-    writable_executable = int(matches[10].group(4))
+    mappings = int(matches[12].group(1))
+    read_execute = int(matches[12].group(2))
+    read_write = int(matches[12].group(3))
+    writable_executable = int(matches[12].group(4))
     if (mappings, read_execute, read_write, writable_executable) != (4, 1, 1, 0):
-        raise KernelLoadError("PKLOAD1 mapping marker violates W^X or shape")
+        raise KernelLoadError("PKLOAD2 mapping marker violates W^X or shape")
     if (
-        int(matches[11].group(1)),
-        int(matches[11].group(2)),
-        int(matches[11].group(3)),
-    ) != (3, 2, pages):
-        raise KernelLoadError("PKLOAD1 release marker does not account for every resource")
+        int(matches[13].group(1)),
+        int(matches[13].group(2)),
+        int(matches[13].group(3)),
+    ) != (4, 3, pages):
+        raise KernelLoadError("PKLOAD2 release marker does not account for every resource")
 
     config_table_count = int(matches[5].group(1))
-    width = int(matches[12].group(1))
-    height = int(matches[12].group(2))
-    stride = int(matches[12].group(3))
-    map_bytes = int(matches[13].group(1))
-    descriptor_bytes = int(matches[13].group(2))
-    descriptor_count = int(matches[13].group(3))
+    width = int(matches[14].group(1))
+    height = int(matches[14].group(2))
+    stride = int(matches[14].group(3))
+    map_bytes = int(matches[15].group(1))
+    descriptor_bytes = int(matches[15].group(2))
+    descriptor_count = int(matches[15].group(3))
     if config_table_count > 256:
         raise KernelLoadError("configuration-table marker exceeds its bound")
     if width < 320 or height < 200 or stride < width or stride > 16_384:
@@ -544,13 +694,25 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
             "selected_slot": slot,
             "manifest_max_bytes": manifest_max,
         },
+        "manifest": {
+            "byte_count": manifest_bytes,
+            "artifact_count": artifact_count,
+            "manifest_id_hash": matches[8].group(3),
+            "slot": manifest_slot,
+            "manifest_version": manifest_version,
+            "minimum_secure_version": minimum_secure_version,
+            "kernel_version": kernel_version,
+            "kernel_file_byte_count": bound_file_bytes,
+            "kernel_image_byte_count": bound_image_bytes,
+            "kernel_sha256_prefix": matches[9].group(4),
+        },
         "kernel": {
             "file_byte_count": kernel_file_bytes,
             "image_byte_count": image_bytes,
             "page_count": pages,
             "entry_offset": entry_offset,
             "relocation_count": relocations,
-            "loaded_fnv1a64": matches[9].group(5),
+            "loaded_fnv1a64": matches[11].group(5),
             "mapping_count": mappings,
             "read_execute_count": read_execute,
             "read_write_count": read_write,
@@ -561,8 +723,8 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
             "width": width,
             "height": height,
             "stride": stride,
-            "mode": int(matches[12].group(4)),
-            "format": matches[12].group(5),
+            "mode": int(matches[14].group(4)),
+            "format": matches[14].group(5),
         },
         "memory_map": {
             "byte_count": map_bytes,
@@ -589,9 +751,29 @@ def validate_oracle_binding(
         or config["manifest_max_bytes"] != media_config["manifest_max_bytes"]
     ):
         raise KernelLoadError("firmware PBC1 markers diverge from the independent media oracle")
+    manifest = marker_summary["manifest"]
+    media_manifest = media_inspection["manifest"]
+    manifest_file = media_inspection["files"][2]
+    kernel_artifact = next(
+        item for item in media_manifest["artifacts"] if item["type"] == "kernel"
+    )
+    if (
+        manifest["byte_count"] != manifest_file["byte_count"]
+        or manifest["artifact_count"] != media_manifest["artifact_count"]
+        or manifest["manifest_id_hash"] != media_manifest["manifest_id_hash"]
+        or manifest["slot"] != media_manifest["slot"]
+        or manifest["manifest_version"] != media_manifest["manifest_version"]
+        or manifest["minimum_secure_version"]
+        != media_manifest["minimum_secure_version"]
+        or manifest["kernel_version"] != kernel_artifact["version"]
+        or manifest["kernel_file_byte_count"] != kernel_artifact["file_bytes"]
+        or manifest["kernel_image_byte_count"] != kernel_artifact["image_bytes"]
+        or manifest["kernel_sha256_prefix"] != kernel_artifact["sha256"][:16]
+    ):
+        raise KernelLoadError("firmware PSM1 markers diverge from the independent media oracle")
     kernel = marker_summary["kernel"]
     media_kernel = media_inspection["kernel"]
-    kernel_file = media_inspection["files"][2]
+    kernel_file = media_inspection["files"][3]
     plan = media_kernel["plan"]
     if (
         kernel["file_byte_count"] != kernel_file["byte_count"]
@@ -613,7 +795,7 @@ def expected_claims() -> dict[str, bool]:
 def validate_claims(claims: dict[str, Any]) -> None:
     expected = expected_claims()
     if claims != expected:
-        raise KernelLoadError("PKLOAD1 claim set contains an omission or overreach")
+        raise KernelLoadError("PKLOAD2 claim set contains an omission or overreach")
 
 
 def canonical_json_bytes(value: object) -> bytes:
@@ -664,14 +846,18 @@ def _schema_errors(value: dict[str, Any], root: Path, schema_relative: str) -> l
 def contract_errors(contract: dict[str, Any], root: Path) -> list[str]:
     errors = _schema_errors(contract, root, CONTRACT_SCHEMA_RELATIVE)
     if contract.get("phase_mapping") != ["N5.1", "N5.4", "N5.5"]:
-        errors.append("PKLOAD1 phase mapping changed")
+        errors.append("PKLOAD2 phase mapping changed")
     if contract.get("required_negative_controls") != list(NEGATIVE_CONTROL_IDS):
-        errors.append("PKLOAD1 negative-control register changed")
+        errors.append("PKLOAD2 negative-control register changed")
     if contract.get("required_marker_count") != len(MARKER_PATTERNS):
-        errors.append("PKLOAD1 marker count changed")
+        errors.append("PKLOAD2 marker count changed")
     media = contract.get("media", {})
-    if media.get("config_path") != CONFIG_PATH or media.get("kernel_path") != KERNEL_PATH:
-        errors.append("PKLOAD1 fixed development paths changed")
+    if (
+        media.get("config_path") != CONFIG_PATH
+        or media.get("manifest_path") != MANIFEST_PATH
+        or media.get("kernel_path") != KERNEL_PATH
+    ):
+        errors.append("PKLOAD2 development media paths changed")
     try:
         validate_claims(contract.get("claims", {}))
     except KernelLoadError as error:
@@ -684,7 +870,7 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
     try:
         contract = read_json(root / CONTRACT_RELATIVE)
     except (OSError, json.JSONDecodeError, KernelLoadError) as error:
-        return errors + [f"PKLOAD1 contract cannot be read: {error}"]
+        return errors + [f"PKLOAD2 contract cannot be read: {error}"]
     errors.extend(contract_errors(contract, root))
     bindings = readiness.get("bindings", {})
     expected_bindings = {
@@ -696,6 +882,9 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
         "tier0_readiness": "runs/native_tier0_readiness.json",
         "kernel_entry_contract": "specs/native-kernel-entry-contract.json",
         "kernel_entry_readiness": "runs/native_kernel_entry_readiness.json",
+        "system_manifest_contract": native_system_manifest.CONTRACT_RELATIVE,
+        "system_manifest_readiness": native_system_manifest.READINESS_RELATIVE,
+        "digest_provider": native_system_manifest.DIGEST_PROVIDER_RELATIVE,
     }
     for name, path in expected_bindings.items():
         if not binding_matches(bindings.get(name), root, path):
@@ -704,7 +893,7 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
     if not isinstance(implementation, list) or [
         item.get("path") for item in implementation if isinstance(item, dict)
     ] != list(IMPLEMENTATION_INPUTS):
-        errors.append("PKLOAD1 implementation-input order changed")
+        errors.append("PKLOAD2 implementation-input order changed")
     else:
         for item, path in zip(implementation, IMPLEMENTATION_INPUTS, strict=True):
             if not binding_matches(item, root, path):
@@ -714,50 +903,57 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
     files = media.get("files", [])
     build = readiness.get("build", {})
     kernel_product = readiness.get("kernel_product", {})
-    if not isinstance(files, list) or len(files) != 3:
-        errors.append("PKLOAD1 media must contain exactly three files")
+    if not isinstance(files, list) or len(files) != 4:
+        errors.append("PKLOAD2 media must contain exactly four files")
     else:
-        expected_paths = [native_pooleboot.FALLBACK_PATH, CONFIG_PATH, KERNEL_PATH]
+        expected_paths = [
+            native_pooleboot.FALLBACK_PATH,
+            CONFIG_PATH,
+            MANIFEST_PATH,
+            KERNEL_PATH,
+        ]
         if [item.get("path") for item in files] != expected_paths:
-            errors.append("PKLOAD1 media path order changed")
+            errors.append("PKLOAD2 media path order changed")
         if files[0].get("sha256") != build.get("sha256"):
             errors.append("embedded PooleBoot does not match its build")
-        if files[2].get("sha256") != kernel_product.get("canonical_sha256"):
+        if files[2].get("sha256") != media.get("manifest", {}).get("sha256"):
+            errors.append("embedded PSM1 does not match its independent parse")
+        if files[3].get("sha256") != kernel_product.get("canonical_sha256"):
             errors.append("embedded PooleKernel does not match PKENTRY1")
     runs = readiness.get("execution", {}).get("runs", [])
     marker_sets: list[list[str]] = []
     if not isinstance(runs, list) or len(runs) != 2:
-        errors.append("PKLOAD1 execution must contain exactly two runs")
+        errors.append("PKLOAD2 execution must contain exactly two runs")
     else:
         for index, run in enumerate(runs):
             try:
                 summary = validate_markers(run.get("markers", []))
                 validate_oracle_binding(summary, media)
             except (KernelLoadError, KeyError, TypeError) as error:
-                errors.append(f"PKLOAD1 run {index} validation failed: {error}")
+                errors.append(f"PKLOAD2 run {index} validation failed: {error}")
                 continue
             marker_sets.append(run["markers"])
             if run.get("marker_summary") != summary:
-                errors.append(f"PKLOAD1 run {index} marker summary changed")
+                errors.append(f"PKLOAD2 run {index} marker summary changed")
             if run.get("marker_sha256") != sha256_bytes(
                 native_pooleboot.canonical_json_bytes(run["markers"])
             ):
-                errors.append(f"PKLOAD1 run {index} marker digest changed")
+                errors.append(f"PKLOAD2 run {index} marker digest changed")
     if len(marker_sets) == 2 and marker_sets[0] != marker_sets[1]:
-        errors.append("PKLOAD1 run markers differ")
+        errors.append("PKLOAD2 run markers differ")
 
     execution = readiness.get("execution", {})
     normalized = execution.get("normalized_command", [])
     if execution.get("normalized_command_sha256") != sha256_bytes(
         native_pooleboot.canonical_json_bytes(normalized)
     ):
-        errors.append("PKLOAD1 normalized command digest mismatch")
+        errors.append("PKLOAD2 normalized command digest mismatch")
 
     controls = readiness.get("negative_controls", [])
     if [item.get("id") for item in controls if isinstance(item, dict)] != list(
         NEGATIVE_CONTROL_IDS
     ):
-        errors.append("PKLOAD1 readiness negative-control register changed")
+        errors.append("PKLOAD2 readiness negative-control register changed")
     if any(
         item.get("expected") != "reject"
         or item.get("observed") != "reject"
@@ -765,13 +961,13 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
         for item in controls
         if isinstance(item, dict)
     ):
-        errors.append("PKLOAD1 readiness has a failing negative control")
+        errors.append("PKLOAD2 readiness has a failing negative control")
     try:
         validate_claims(readiness.get("claims", {}))
     except KernelLoadError as error:
         errors.append(str(error))
     if readiness.get("claim_boundary") != contract.get("claim_boundary"):
-        errors.append("PKLOAD1 readiness claim boundary differs from its contract")
+        errors.append("PKLOAD2 readiness claim boundary differs from its contract")
     if native_pooleboot.ABSOLUTE_USER_PATH.search(json.dumps(readiness, ensure_ascii=True)):
-        errors.append("absolute user path leaked into PKLOAD1 readiness")
+        errors.append("absolute user path leaked into PKLOAD2 readiness")
     return errors
