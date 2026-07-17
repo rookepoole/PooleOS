@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "artifact_kind": {
+      "const": "pooleos_native_elf_loader_readiness"
+    },
+    "claims": {
+      "type": "object"
+    },
+    "contract_id": {
+      "const": "PKELF1"
+    },
+    "n5_exit_gate_satisfied": {
+      "const": false
+    },
+    "negative_controls": {
+      "minItems": 64,
+      "type": "array"
+    },
+    "production_promotion_allowed": {
+      "const": false
+    },
+    "production_ready": {
+      "const": false
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "selected_move_id": {
+      "const": "N5-ELF-001"
+    },
+    "status": {
+      "const": "pass_single_host_synthetic_non_promoting"
+    },
+    "summary": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "status",
+    "contract_id",
+    "selected_move_id",
+    "production_ready",
+    "production_promotion_allowed",
+    "n5_exit_gate_satisfied",
+    "phase_status",
+    "bindings",
+    "parser_qualification",
+    "golden_vectors",
+    "negative_controls",
+    "differential_fuzz",
+    "claims",
+    "summary",
+    "open_items",
+    "claim_boundary"
+  ],
+  "type": "object"
+}

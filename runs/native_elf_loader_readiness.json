@@ -1,0 +1,1166 @@
+{
+  "artifact_kind": "pooleos_native_elf_loader_readiness",
+  "bindings": {
+    "contract": {
+      "byte_count": 5797,
+      "path": "specs/native-elf-loader-contract.json",
+      "sha256": "A0CE48E9EF992B97333D84ECB2850E221D482E2ACF11BB312B5F769DAFF992AA"
+    },
+    "contract_schema": {
+      "byte_count": 2190,
+      "path": "specs/native-elf-loader-contract.schema.json",
+      "sha256": "D234CED50DD796054026904B47B738C681D8E8C63D432288B65AE267FEC728FF"
+    },
+    "golden_schema": {
+      "byte_count": 2165,
+      "path": "specs/native-elf-loader-golden-vectors.schema.json",
+      "sha256": "314D4A03DD0E5C201A9C61C050DA7987A75EF2BEFE972DBE11D7EEA440CA45C1"
+    },
+    "golden_vectors": {
+      "byte_count": 351435,
+      "path": "specs/native-elf-loader-golden-vectors.json",
+      "sha256": "83927B1829247CFA8E44A5C23DE5FB92F936794F6CC8F76342FD7CCDD3883B08"
+    },
+    "implementation_inputs": [
+      {
+        "byte_count": 342,
+        "path": "native/elf/Cargo.toml",
+        "sha256": "FD1F6C50EF6C3CE82C5602386BB68A7BED933819C89284FADAECEE7434654389"
+      },
+      {
+        "byte_count": 36472,
+        "path": "native/elf/src/lib.rs",
+        "sha256": "15CEF64F884F17A97F7581A794555E23F80D099C1B2E152B42CD59D64A884DA4"
+      },
+      {
+        "byte_count": 5760,
+        "path": "native/elf/src/bin/poole_elf_probe.rs",
+        "sha256": "5D75C4150FD4CAEFF40ACAD5A9AFF38CD6DCD0519060E1407EB24DF73531DCCE"
+      },
+      {
+        "byte_count": 359,
+        "path": "native/Cargo.toml",
+        "sha256": "28E18C4ED69537CD54707A96031E9B879EA82B8A209BCCDCAA7AE1B437D4D632"
+      },
+      {
+        "byte_count": 488,
+        "path": "native/Cargo.lock",
+        "sha256": "645F5C0D0191DDC53CEE7C00630B70F0ABDC1A2A0DC1B9976201C5A4982929E4"
+      },
+      {
+        "byte_count": 321,
+        "path": "native/boot/Cargo.toml",
+        "sha256": "B17FB0517679B6C007CA58C74BEAB2054472C11C27898B98D71F2276D80FD262"
+      },
+      {
+        "byte_count": 16230,
+        "path": "native/boot/src/lib.rs",
+        "sha256": "CC1253505E6FEA3BEA3B2C0EC129CDF250B3DEBA337C35B5E3DD35F5D45976C2"
+      },
+      {
+        "byte_count": 30903,
+        "path": "runtime/native_elf_loader.py",
+        "sha256": "AD180E0C5B4139DE61FA0889F19AE3DE4922906818720D9C0EA6ECDF0EC55F2D"
+      },
+      {
+        "byte_count": 3946,
+        "path": "tools/generate_native_elf_loader_vectors.py",
+        "sha256": "8A28A89C340BC4B59E532E16E52B89FA78B91D111D9A3289F158E7D3459CFD74"
+      },
+      {
+        "byte_count": 33464,
+        "path": "tools/qualify_native_elf_loader.py",
+        "sha256": "759985D99657DEC333C7EF7E5734D66C3F3FE74AD35F2E2309A487A94D0DCCE6"
+      },
+      {
+        "byte_count": 5201,
+        "path": "docs/native-elf-loader.md",
+        "sha256": "2323B59A9CD4B010E4777EC5B26BFB6197D931D2BC8609981FE00E4ABF2C02F5"
+      }
+    ],
+    "readiness_schema": {
+      "byte_count": 1252,
+      "path": "specs/native-elf-loader-readiness.schema.json",
+      "sha256": "5F336281A7DBFB0D2DC9577BB5E5B2C40CCE6B91031502472D399ADC37130C30"
+    }
+  },
+  "claim_boundary": [
+    "This contract qualifies an allocation-free parser and caller-buffer loader boundary over synthetic ET_DYN images.",
+    "The file is not authenticated by this layer; a future signed-manifest gate must authenticate exact bytes before loading.",
+    "No UEFI filesystem read, AllocatePages call, page-table update, final memory map, ExitBootServices call, transfer assembly, or PooleKernel execution is exercised.",
+    "The four mapping ranges are a required post-relocation plan, not evidence that hardware page permissions were installed.",
+    "The accepted subset is intentionally not a general ELF dynamic linker and does not establish ABI ratification or production readiness."
+  ],
+  "claims": {
+    "abi_ratified": false,
+    "allocation_free_no_std_loader_boundary": true,
+    "bss_zero_fill": true,
+    "exact_loaded_bytes_compared": true,
+    "exit_boot_services": false,
+    "kernel_entry_transfer": false,
+    "live_uefi_file_read": false,
+    "page_table_mapping": false,
+    "physical_media_written": false,
+    "poolekernel_execution": false,
+    "post_relocation_wx_plan": true,
+    "production_ready": false,
+    "program_headers_authoritative": true,
+    "relative_relocations_only": true,
+    "second_host_reproduced": false,
+    "signed_manifest_verification": false,
+    "synthetic_kernel_image_only": true,
+    "target_firmware_tested": false,
+    "three_load_segment_profile": true,
+    "uefi_page_allocation": false
+  },
+  "contract_id": "PKELF1",
+  "differential_fuzz": {
+    "campaign_id": "PKELF1-DIFF-1",
+    "case_count": 16384,
+    "corpus_published": false,
+    "generator": "cached exact base image plus deterministic byte replacement, truncation, address, capacity, structural, and accepted-payload mutations",
+    "mismatch_count": 0,
+    "outcome_sha256": "BCCEF101AF54A7C4B6E143F58BFD34A82B37B67D27586064529DAFD9359BDE0B",
+    "rejected_result_count": 8313,
+    "seed": 88284215395889,
+    "status": "pass",
+    "valid_result_count": 8071
+  },
+  "golden_vectors": [
+    {
+      "exact_loaded_bytes_match": true,
+      "file_byte_count": 12288,
+      "file_sha256": "2220757D0CC18EA32EC0D426DEBB7158B7390CC01BDF2F43CD14B2D143C5F7BA",
+      "id": "minimal_relative_v1",
+      "image_byte_count": 16384,
+      "loaded_sha256": "94AF8E9FDF78E7698B7FF79B0C9CEF8C0A9CA919FD8516609D00550E49B5E122",
+      "python_semantics_match": true,
+      "relocation_count": 2,
+      "rust_semantics_match": true,
+      "status": "pass"
+    },
+    {
+      "exact_loaded_bytes_match": true,
+      "file_byte_count": 16384,
+      "file_sha256": "EA54EB9A6EC0F2001F19EFA98AEFD26F80F764B2B78302840C0F48A0B92B33BC",
+      "id": "alternate_base_v1",
+      "image_byte_count": 20480,
+      "loaded_sha256": "091D94662ACC294591683BCC084DA33C5710C1742240D9F4812F978BC56F50D9",
+      "python_semantics_match": true,
+      "relocation_count": 32,
+      "rust_semantics_match": true,
+      "status": "pass"
+    },
+    {
+      "exact_loaded_bytes_match": true,
+      "file_byte_count": 143360,
+      "file_sha256": "2788E15ABB0E460A3C67CFAE508BF2C94C80414DD00AC53BA7665187F0E359D2",
+      "id": "maximum_relocations_v1",
+      "image_byte_count": 147456,
+      "loaded_sha256": "07AD854B03C1FD36937E46EDD151CE7CFBB60F63A9DD7C57C40DCF8F7BDFF960",
+      "python_semantics_match": true,
+      "relocation_count": 4096,
+      "rust_semantics_match": true,
+      "status": "pass"
+    }
+  ],
+  "n5_exit_gate_satisfied": false,
+  "negative_controls": [
+    {
+      "expected_result": "ERR:empty",
+      "id": "empty",
+      "python_result": "ERR:empty",
+      "rust_result": "ERR:empty",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:header_truncated",
+      "id": "header_truncated_one",
+      "python_result": "ERR:header_truncated",
+      "rust_result": "ERR:header_truncated",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:header_truncated",
+      "id": "header_truncated_sixty_three",
+      "python_result": "ERR:header_truncated",
+      "rust_result": "ERR:header_truncated",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:program_header_bounds",
+      "id": "program_table_truncated",
+      "python_result": "ERR:program_header_bounds",
+      "rust_result": "ERR:program_header_bounds",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:file_too_large",
+      "id": "file_too_large",
+      "python_result": "ERR:file_too_large",
+      "rust_result": "ERR:file_too_large",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:magic",
+      "id": "bad_magic_first",
+      "python_result": "ERR:magic",
+      "rust_result": "ERR:magic",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:magic",
+      "id": "bad_magic_last",
+      "python_result": "ERR:magic",
+      "rust_result": "ERR:magic",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:class",
+      "id": "elf32_class",
+      "python_result": "ERR:class",
+      "rust_result": "ERR:class",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:class",
+      "id": "invalid_class",
+      "python_result": "ERR:class",
+      "rust_result": "ERR:class",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:encoding",
+      "id": "big_endian",
+      "python_result": "ERR:encoding",
+      "rust_result": "ERR:encoding",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:encoding",
+      "id": "invalid_encoding",
+      "python_result": "ERR:encoding",
+      "rust_result": "ERR:encoding",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:ident_version",
+      "id": "ident_version_zero",
+      "python_result": "ERR:ident_version",
+      "rust_result": "ERR:ident_version",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:osabi",
+      "id": "linux_osabi",
+      "python_result": "ERR:osabi",
+      "rust_result": "ERR:osabi",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:abi_version",
+      "id": "abi_version_one",
+      "python_result": "ERR:abi_version",
+      "rust_result": "ERR:abi_version",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:ident_padding",
+      "id": "ident_padding_first",
+      "python_result": "ERR:ident_padding",
+      "rust_result": "ERR:ident_padding",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:ident_padding",
+      "id": "ident_padding_last",
+      "python_result": "ERR:ident_padding",
+      "rust_result": "ERR:ident_padding",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:file_type",
+      "id": "et_exec",
+      "python_result": "ERR:file_type",
+      "rust_result": "ERR:file_type",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:file_type",
+      "id": "et_rel",
+      "python_result": "ERR:file_type",
+      "rust_result": "ERR:file_type",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:machine",
+      "id": "machine_i386",
+      "python_result": "ERR:machine",
+      "rust_result": "ERR:machine",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:machine",
+      "id": "machine_aarch64",
+      "python_result": "ERR:machine",
+      "rust_result": "ERR:machine",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:version",
+      "id": "header_version_zero",
+      "python_result": "ERR:version",
+      "rust_result": "ERR:version",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:header_flags",
+      "id": "entry_header_flags",
+      "python_result": "ERR:header_flags",
+      "rust_result": "ERR:header_flags",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:header_size",
+      "id": "header_size_short",
+      "python_result": "ERR:header_size",
+      "rust_result": "ERR:header_size",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:program_header_offset",
+      "id": "program_offset_zero",
+      "python_result": "ERR:program_header_offset",
+      "rust_result": "ERR:program_header_offset",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:program_header_offset",
+      "id": "program_offset_shifted",
+      "python_result": "ERR:program_header_offset",
+      "rust_result": "ERR:program_header_offset",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:program_header_size",
+      "id": "program_entry_short",
+      "python_result": "ERR:program_header_size",
+      "rust_result": "ERR:program_header_size",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:program_header_count",
+      "id": "program_count_short",
+      "python_result": "ERR:program_header_count",
+      "rust_result": "ERR:program_header_count",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:program_header_count",
+      "id": "program_count_long",
+      "python_result": "ERR:program_header_count",
+      "rust_result": "ERR:program_header_count",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:section_table",
+      "id": "section_offset_present",
+      "python_result": "ERR:section_table",
+      "rust_result": "ERR:section_table",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:section_table",
+      "id": "section_entry_invalid",
+      "python_result": "ERR:section_table",
+      "rust_result": "ERR:section_table",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:section_table",
+      "id": "section_count_present",
+      "python_result": "ERR:section_table",
+      "rust_result": "ERR:section_table",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:section_table",
+      "id": "section_name_present",
+      "python_result": "ERR:section_table",
+      "rust_result": "ERR:section_table",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:unsupported_segment",
+      "id": "unsupported_interp",
+      "python_result": "ERR:unsupported_segment",
+      "rust_result": "ERR:unsupported_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:unsupported_segment",
+      "id": "unsupported_note",
+      "python_result": "ERR:unsupported_segment",
+      "rust_result": "ERR:unsupported_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:unsupported_segment",
+      "id": "unsupported_shlib",
+      "python_result": "ERR:unsupported_segment",
+      "rust_result": "ERR:unsupported_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:unsupported_segment",
+      "id": "unsupported_tls",
+      "python_result": "ERR:unsupported_segment",
+      "rust_result": "ERR:unsupported_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:unsupported_segment",
+      "id": "unsupported_processor_specific",
+      "python_result": "ERR:unsupported_segment",
+      "rust_result": "ERR:unsupported_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:program_header_order",
+      "id": "program_header_order_first",
+      "python_result": "ERR:program_header_order",
+      "rust_result": "ERR:program_header_order",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:program_header_order",
+      "id": "program_header_order_dynamic",
+      "python_result": "ERR:program_header_order",
+      "rust_result": "ERR:program_header_order",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:phdr_segment",
+      "id": "phdr_flags",
+      "python_result": "ERR:phdr_segment",
+      "rust_result": "ERR:phdr_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:phdr_segment",
+      "id": "phdr_offset",
+      "python_result": "ERR:phdr_segment",
+      "rust_result": "ERR:phdr_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:phdr_segment",
+      "id": "phdr_vaddr",
+      "python_result": "ERR:phdr_segment",
+      "rust_result": "ERR:phdr_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:phdr_segment",
+      "id": "phdr_paddr",
+      "python_result": "ERR:phdr_segment",
+      "rust_result": "ERR:phdr_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:phdr_segment",
+      "id": "phdr_filesz",
+      "python_result": "ERR:phdr_segment",
+      "rust_result": "ERR:phdr_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:phdr_segment",
+      "id": "phdr_memsz",
+      "python_result": "ERR:phdr_segment",
+      "rust_result": "ERR:phdr_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:phdr_segment",
+      "id": "phdr_align",
+      "python_result": "ERR:phdr_segment",
+      "rust_result": "ERR:phdr_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:load_flags",
+      "id": "load_r_missing_read",
+      "python_result": "ERR:load_flags",
+      "rust_result": "ERR:load_flags",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:load_flags",
+      "id": "load_rx_writable",
+      "python_result": "ERR:load_flags",
+      "rust_result": "ERR:load_flags",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:load_flags",
+      "id": "load_rw_missing_write",
+      "python_result": "ERR:load_flags",
+      "rust_result": "ERR:load_flags",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:load_alignment",
+      "id": "load_alignment_small",
+      "python_result": "ERR:load_alignment",
+      "rust_result": "ERR:load_alignment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:load_alignment",
+      "id": "load_offset_unaligned",
+      "python_result": "ERR:load_alignment",
+      "rust_result": "ERR:load_alignment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:load_alignment",
+      "id": "load_vaddr_unaligned",
+      "python_result": "ERR:load_alignment",
+      "rust_result": "ERR:load_alignment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:load_alignment",
+      "id": "load_offset_vaddr_mismatch",
+      "python_result": "ERR:load_alignment",
+      "rust_result": "ERR:load_alignment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:load_address",
+      "id": "load_physical_address",
+      "python_result": "ERR:load_address",
+      "rust_result": "ERR:load_address",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:segment_size",
+      "id": "load_file_size_zero",
+      "python_result": "ERR:segment_size",
+      "rust_result": "ERR:segment_size",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:segment_size",
+      "id": "load_memory_size_zero",
+      "python_result": "ERR:segment_size",
+      "rust_result": "ERR:segment_size",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:segment_size",
+      "id": "load_file_larger_than_memory",
+      "python_result": "ERR:segment_size",
+      "rust_result": "ERR:segment_size",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:segment_size",
+      "id": "load_memory_not_page_multiple",
+      "python_result": "ERR:segment_size",
+      "rust_result": "ERR:segment_size",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:segment_bounds",
+      "id": "load_memory_outside_profile",
+      "python_result": "ERR:segment_bounds",
+      "rust_result": "ERR:segment_bounds",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:segment_bounds",
+      "id": "load_memory_add_overflow",
+      "python_result": "ERR:segment_bounds",
+      "rust_result": "ERR:segment_bounds",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:load_alignment",
+      "id": "first_load_not_zero",
+      "python_result": "ERR:load_alignment",
+      "rust_result": "ERR:load_alignment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:load_alignment",
+      "id": "noncontiguous_rx",
+      "python_result": "ERR:load_alignment",
+      "rust_result": "ERR:load_alignment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:segment_layout",
+      "id": "first_load_overlap",
+      "python_result": "ERR:segment_layout",
+      "rust_result": "ERR:segment_layout",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:segment_size",
+      "id": "rw_only_one_page",
+      "python_result": "ERR:segment_size",
+      "rust_result": "ERR:segment_size",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:segment_bounds",
+      "id": "load_file_outside",
+      "python_result": "ERR:segment_bounds",
+      "rust_result": "ERR:segment_bounds",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:file_coverage",
+      "id": "trailing_unclaimed_byte",
+      "python_result": "ERR:file_coverage",
+      "rust_result": "ERR:file_coverage",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:segment_bounds",
+      "id": "final_load_truncated",
+      "python_result": "ERR:segment_bounds",
+      "rust_result": "ERR:segment_bounds",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:entry_point",
+      "id": "entry_zero",
+      "python_result": "ERR:entry_point",
+      "rust_result": "ERR:entry_point",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:entry_point",
+      "id": "entry_in_header",
+      "python_result": "ERR:entry_point",
+      "rust_result": "ERR:entry_point",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:entry_point",
+      "id": "entry_at_text_end",
+      "python_result": "ERR:entry_point",
+      "rust_result": "ERR:entry_point",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:entry_point",
+      "id": "entry_in_writable",
+      "python_result": "ERR:entry_point",
+      "rust_result": "ERR:entry_point",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relro_segment",
+      "id": "relro_flags",
+      "python_result": "ERR:relro_segment",
+      "rust_result": "ERR:relro_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relro_segment",
+      "id": "relro_offset",
+      "python_result": "ERR:relro_segment",
+      "rust_result": "ERR:relro_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relro_segment",
+      "id": "relro_vaddr",
+      "python_result": "ERR:relro_segment",
+      "rust_result": "ERR:relro_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relro_segment",
+      "id": "relro_paddr",
+      "python_result": "ERR:relro_segment",
+      "rust_result": "ERR:relro_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relro_segment",
+      "id": "relro_filesz",
+      "python_result": "ERR:relro_segment",
+      "rust_result": "ERR:relro_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relro_segment",
+      "id": "relro_memsz",
+      "python_result": "ERR:relro_segment",
+      "rust_result": "ERR:relro_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relro_segment",
+      "id": "relro_alignment",
+      "python_result": "ERR:relro_segment",
+      "rust_result": "ERR:relro_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relro_segment",
+      "id": "relro_covers_writable",
+      "python_result": "ERR:relro_segment",
+      "rust_result": "ERR:relro_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relro_segment",
+      "id": "relro_exceeds_file",
+      "python_result": "ERR:relro_segment",
+      "rust_result": "ERR:relro_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:stack_segment",
+      "id": "stack_executable",
+      "python_result": "ERR:stack_segment",
+      "rust_result": "ERR:stack_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:stack_segment",
+      "id": "stack_offset",
+      "python_result": "ERR:stack_segment",
+      "rust_result": "ERR:stack_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:stack_segment",
+      "id": "stack_vaddr",
+      "python_result": "ERR:stack_segment",
+      "rust_result": "ERR:stack_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:stack_segment",
+      "id": "stack_paddr",
+      "python_result": "ERR:stack_segment",
+      "rust_result": "ERR:stack_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:stack_segment",
+      "id": "stack_filesz",
+      "python_result": "ERR:stack_segment",
+      "rust_result": "ERR:stack_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:stack_segment",
+      "id": "stack_memsz",
+      "python_result": "ERR:stack_segment",
+      "rust_result": "ERR:stack_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:stack_segment",
+      "id": "stack_alignment",
+      "python_result": "ERR:stack_segment",
+      "rust_result": "ERR:stack_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:dynamic_segment",
+      "id": "dynamic_flags",
+      "python_result": "ERR:dynamic_segment",
+      "rust_result": "ERR:dynamic_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:dynamic_segment",
+      "id": "dynamic_offset",
+      "python_result": "ERR:dynamic_segment",
+      "rust_result": "ERR:dynamic_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:dynamic_segment",
+      "id": "dynamic_vaddr",
+      "python_result": "ERR:dynamic_segment",
+      "rust_result": "ERR:dynamic_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:dynamic_segment",
+      "id": "dynamic_paddr",
+      "python_result": "ERR:dynamic_segment",
+      "rust_result": "ERR:dynamic_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:dynamic_segment",
+      "id": "dynamic_filesz",
+      "python_result": "ERR:dynamic_segment",
+      "rust_result": "ERR:dynamic_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:dynamic_segment",
+      "id": "dynamic_memsz",
+      "python_result": "ERR:dynamic_segment",
+      "rust_result": "ERR:dynamic_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:dynamic_segment",
+      "id": "dynamic_alignment",
+      "python_result": "ERR:dynamic_segment",
+      "rust_result": "ERR:dynamic_segment",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:dynamic_order",
+      "id": "dynamic_first_tag",
+      "python_result": "ERR:dynamic_order",
+      "rust_result": "ERR:dynamic_order",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:dynamic_order",
+      "id": "dynamic_second_tag",
+      "python_result": "ERR:dynamic_order",
+      "rust_result": "ERR:dynamic_order",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:dynamic_order",
+      "id": "dynamic_third_tag",
+      "python_result": "ERR:dynamic_order",
+      "rust_result": "ERR:dynamic_order",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:dynamic_order",
+      "id": "dynamic_terminal_tag",
+      "python_result": "ERR:dynamic_order",
+      "rust_result": "ERR:dynamic_order",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:dynamic_entry",
+      "id": "dynamic_terminal_value",
+      "python_result": "ERR:dynamic_entry",
+      "rust_result": "ERR:dynamic_entry",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relocation_entry_size",
+      "id": "rela_entry_size_short",
+      "python_result": "ERR:relocation_entry_size",
+      "rust_result": "ERR:relocation_entry_size",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relocation_table",
+      "id": "rela_size_zero",
+      "python_result": "ERR:relocation_table",
+      "rust_result": "ERR:relocation_table",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relocation_table",
+      "id": "rela_size_partial",
+      "python_result": "ERR:relocation_table",
+      "rust_result": "ERR:relocation_table",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relocation_count",
+      "id": "rela_count_over_limit",
+      "python_result": "ERR:relocation_count",
+      "rust_result": "ERR:relocation_count",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relocation_table",
+      "id": "rela_address_unaligned",
+      "python_result": "ERR:relocation_table",
+      "rust_result": "ERR:relocation_table",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relocation_table",
+      "id": "rela_overlaps_dynamic",
+      "python_result": "ERR:relocation_table",
+      "rust_result": "ERR:relocation_table",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relocation_table",
+      "id": "rela_outside_relro",
+      "python_result": "ERR:relocation_table",
+      "rust_result": "ERR:relocation_table",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relocation_table",
+      "id": "rela_crosses_relro_end",
+      "python_result": "ERR:relocation_table",
+      "rust_result": "ERR:relocation_table",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relocation_type",
+      "id": "relocation_wrong_type",
+      "python_result": "ERR:relocation_type",
+      "rust_result": "ERR:relocation_type",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relocation_symbol",
+      "id": "relocation_symbol",
+      "python_result": "ERR:relocation_symbol",
+      "rust_result": "ERR:relocation_symbol",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relocation_target",
+      "id": "relocation_target_unaligned",
+      "python_result": "ERR:relocation_target",
+      "rust_result": "ERR:relocation_target",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relocation_target",
+      "id": "relocation_target_text",
+      "python_result": "ERR:relocation_target",
+      "rust_result": "ERR:relocation_target",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relocation_target",
+      "id": "relocation_target_dynamic",
+      "python_result": "ERR:relocation_target",
+      "rust_result": "ERR:relocation_target",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relocation_target",
+      "id": "relocation_target_table",
+      "python_result": "ERR:relocation_target",
+      "rust_result": "ERR:relocation_target",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relocation_target",
+      "id": "relocation_target_bss",
+      "python_result": "ERR:relocation_target",
+      "rust_result": "ERR:relocation_target",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relocation_addend",
+      "id": "relocation_negative_addend",
+      "python_result": "ERR:relocation_addend",
+      "rust_result": "ERR:relocation_addend",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relocation_addend",
+      "id": "relocation_addend_at_end",
+      "python_result": "ERR:relocation_addend",
+      "rust_result": "ERR:relocation_addend",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relocation_addend",
+      "id": "relocation_addend_large",
+      "python_result": "ERR:relocation_addend",
+      "rust_result": "ERR:relocation_addend",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relocation_order",
+      "id": "relocation_duplicate_target",
+      "python_result": "ERR:relocation_order",
+      "rust_result": "ERR:relocation_order",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relocation_order",
+      "id": "relocation_descending_target",
+      "python_result": "ERR:relocation_order",
+      "rust_result": "ERR:relocation_order",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:relocation_target",
+      "id": "relocation_target_nonzero",
+      "python_result": "ERR:relocation_target",
+      "rust_result": "ERR:relocation_target",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:physical_base",
+      "id": "physical_below_minimum",
+      "python_result": "ERR:physical_base",
+      "rust_result": "ERR:physical_base",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:physical_base",
+      "id": "physical_unaligned",
+      "python_result": "ERR:physical_base",
+      "rust_result": "ERR:physical_base",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:physical_base",
+      "id": "physical_exceeds_ceiling",
+      "python_result": "ERR:physical_base",
+      "rust_result": "ERR:physical_base",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:virtual_base",
+      "id": "virtual_below_window",
+      "python_result": "ERR:virtual_base",
+      "rust_result": "ERR:virtual_base",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:virtual_base",
+      "id": "virtual_unaligned",
+      "python_result": "ERR:virtual_base",
+      "rust_result": "ERR:virtual_base",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:virtual_base",
+      "id": "virtual_at_window_end",
+      "python_result": "ERR:virtual_base",
+      "rust_result": "ERR:virtual_base",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:virtual_base",
+      "id": "virtual_image_crosses_window",
+      "python_result": "ERR:virtual_base",
+      "rust_result": "ERR:virtual_base",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:output_capacity",
+      "id": "output_one_byte_short",
+      "python_result": "ERR:output_capacity",
+      "rust_result": "ERR:output_capacity",
+      "status": "pass"
+    },
+    {
+      "expected_result": "ERR:output_capacity",
+      "id": "output_zero",
+      "python_result": "ERR:output_capacity",
+      "rust_result": "ERR:output_capacity",
+      "status": "pass"
+    }
+  ],
+  "open_items": [
+    "Ratify or replace PKELF1 before declaring a stable kernel-image ABI.",
+    "Produce a source-built functional PooleKernel ET_DYN image that conforms to PKELF1.",
+    "Authenticate exact kernel bytes through the signed manifest before parsing or loading.",
+    "Implement bounded UEFI file reads and EfiLoaderData page allocation with cleanup on every failure.",
+    "Build page tables from the returned W^X and RELRO plan and verify hardware-enforced permissions.",
+    "Bind exact file and loaded-memory hashes plus mapping metadata into live PBP1 records.",
+    "Retrieve the final memory map, exit boot services, transfer to kernel entry, and consume PBP1.",
+    "Reproduce on a second independent builder and execute on target firmware.",
+    "Complete separately authorized physical-media qualification and signed ISO release gates."
+  ],
+  "parser_qualification": {
+    "clippy_runs": [
+      {
+        "status": "pass",
+        "target": "x86_64-pc-windows-msvc"
+      },
+      {
+        "status": "pass",
+        "target": "x86_64-unknown-uefi"
+      },
+      {
+        "status": "pass",
+        "target": "x86_64-unknown-none"
+      }
+    ],
+    "host_probe_artifact_identity_recorded": false,
+    "host_probe_byte_count": 148480,
+    "host_probe_role": "ephemeral host-only differential and exact-byte transport",
+    "no_std_target_builds": [
+      {
+        "byte_count": 93930,
+        "sha256": "F7FF6F000CF873462965AE03BF24BD108301BEE0C48E114CA7C515068A9F3BC3",
+        "status": "pass",
+        "target": "x86_64-unknown-uefi"
+      },
+      {
+        "byte_count": 97144,
+        "sha256": "6F30B8A85850C97A6A5B337EE202393B346B9AD26C1D2880926A5EB75E40A193",
+        "status": "pass",
+        "target": "x86_64-unknown-none"
+      }
+    ],
+    "pooleboot_compile_time_integration_builds": [
+      {
+        "pooleboot_rlib_byte_count": 55126,
+        "pooleboot_rlib_sha256": "C0F5991871F95BE30C6BB4A4DF48878F67C41AE76865E935C9ACB0397ACF084A",
+        "status": "pass",
+        "target": "x86_64-unknown-uefi"
+      },
+      {
+        "pooleboot_rlib_byte_count": 57164,
+        "pooleboot_rlib_sha256": "F4FFDA9A52E06D7B16A1C683CAF382F78CDA73668E61F10CE41BD4C02F0D0C5D",
+        "status": "pass",
+        "target": "x86_64-unknown-none"
+      }
+    ],
+    "rust_host_target": "x86_64-pc-windows-msvc",
+    "rust_host_test_count": 12,
+    "rust_host_test_pass_count": 12,
+    "rustc_version_sha256": "F3C960598A5E9037C4CF8E4AA06C018171ABF07C381D165C3986C6A954DEA1BB",
+    "rustfmt_status": "pass"
+  },
+  "phase_status": {
+    "N5": "partial",
+    "N5.5": "partial"
+  },
+  "production_promotion_allowed": false,
+  "production_ready": false,
+  "schema_version": "1.0",
+  "selected_move_id": "N5-ELF-001",
+  "status": "pass_single_host_synthetic_non_promoting",
+  "status_date": "2026-07-16",
+  "summary": {
+    "clippy_runs_passed": 3,
+    "clippy_runs_total": 3,
+    "differential_fuzz_cases": 16384,
+    "differential_mismatches": 0,
+    "exact_loaded_byte_vectors_matched": 3,
+    "golden_vectors_matched": 3,
+    "golden_vectors_total": 3,
+    "maximum_relocations_exercised": 4096,
+    "negative_controls_passed": 129,
+    "negative_controls_total": 129,
+    "no_std_target_builds_passed": 2,
+    "no_std_target_builds_total": 2,
+    "pooleboot_integration_builds_passed": 2,
+    "pooleboot_integration_builds_total": 2,
+    "production_claim_count": 0,
+    "rust_host_tests_passed": 12,
+    "rust_host_tests_total": 12,
+    "rustfmt_passed": 1
+  }
+}
