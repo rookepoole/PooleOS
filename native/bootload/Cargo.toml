@@ -1,19 +1,10 @@
 [package]
-name = "pooleboot"
+name = "poole-bootload"
 version.workspace = true
 edition.workspace = true
 license-file.workspace = true
 publish.workspace = true
 
-[lib]
-name = "pooleboot"
-path = "src/lib.rs"
-
-[[bin]]
-name = "PooleBoot"
-path = "src/main.rs"
-
 [dependencies]
-poole-bootload = { path = "../bootload" }
 poole-boot-config = { path = "../bootcfg" }
 poole-elf = { path = "../elf" }

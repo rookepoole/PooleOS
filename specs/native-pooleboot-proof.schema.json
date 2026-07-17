@@ -26,12 +26,12 @@
   "properties": {
     "schema_version": {"const": "1.0"},
     "artifact_kind": {"const": "pooleos_native_pooleboot_proof_contract"},
-    "contract_id": {"const": "POOLEOS-N5-POOLEBOOT-1"},
-    "status": {"const": "bounded_unsigned_non_promoting_proof"},
+    "contract_id": {"const": "POOLEOS-N5-POOLEBOOT-2"},
+    "status": {"const": "bounded_unsigned_live_load_then_release_non_promoting_proof"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
-    "selected_move_id": {"const": "N5-POOLEBOOT-001"},
-    "phase_mapping": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "string"}},
+    "selected_move_id": {"const": "N5-KLOAD-001"},
+    "phase_mapping": {"type": "array", "minItems": 6, "maxItems": 6, "items": {"type": "string"}},
     "source_requirement_ids": {"type": "array", "minItems": 5, "maxItems": 5, "items": {"type": "string"}},
     "binary": {
       "type": "object",
@@ -57,7 +57,7 @@
     "media": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["container", "byte_count", "sector_bytes", "protective_mbr_required", "primary_and_backup_gpt_required", "gpt_crc_required", "disk_guid", "esp_type_guid", "esp_unique_guid", "esp_start_lba", "esp_label", "filesystem", "fallback_path", "ordinary_workspace_file_only", "allowed_output_roots", "input_must_be_workspace_regular_file", "device_namespace_allowed", "alternate_data_stream_allowed", "reserved_device_name_allowed", "symlink_paths_allowed", "physical_media_write_allowed"],
+      "required": ["container", "byte_count", "sector_bytes", "protective_mbr_required", "primary_and_backup_gpt_required", "gpt_crc_required", "disk_guid", "esp_type_guid", "esp_unique_guid", "esp_start_lba", "esp_label", "filesystem", "fallback_path", "config_path", "kernel_path", "ordinary_workspace_file_only", "allowed_output_roots", "input_must_be_workspace_regular_file", "device_namespace_allowed", "alternate_data_stream_allowed", "reserved_device_name_allowed", "symlink_paths_allowed", "physical_media_write_allowed"],
       "properties": {
         "container": {"const": "raw disk image"},
         "byte_count": {"const": 67108864},
@@ -72,6 +72,8 @@
         "esp_label": {"const": "POOLEOS ESP"},
         "filesystem": {"const": "FAT32"},
         "fallback_path": {"const": "EFI/BOOT/BOOTX64.EFI"},
+        "config_path": {"const": "EFI/POOLEOS/BOOT.CFG"},
+        "kernel_path": {"const": "EFI/POOLEOS/KERNEL.ELF"},
         "ordinary_workspace_file_only": {"const": true},
         "allowed_output_roots": {"type": "array", "minItems": 2, "maxItems": 2, "uniqueItems": true, "items": {"enum": ["tmp", "runs/native-tier0"]}},
         "input_must_be_workspace_regular_file": {"const": true},
@@ -116,9 +118,9 @@
         "exact_screenshot_match_required": {"const": true}
       }
     },
-    "required_markers": {"type": "array", "minItems": 11, "maxItems": 11, "items": {"type": "string"}},
-    "required_negative_controls": {"type": "array", "minItems": 15, "maxItems": 15, "items": {"type": "string"}},
-    "claim_boundary": {"type": "array", "minItems": 9, "items": {"type": "string"}},
+    "required_markers": {"type": "array", "minItems": 17, "maxItems": 17, "items": {"type": "string"}},
+    "required_negative_controls": {"type": "array", "minItems": 30, "maxItems": 30, "items": {"type": "string"}},
+    "claim_boundary": {"type": "array", "minItems": 10, "items": {"type": "string"}},
     "official_references": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "string"}}
   }
 }

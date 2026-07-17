@@ -4,6 +4,7 @@
 use core::cmp::min;
 
 pub use poole_boot_config as boot_config;
+pub use poole_bootload as bootload;
 pub use poole_elf as elf;
 
 pub const EFI_ERROR_BIT: usize = 1usize << (usize::BITS - 1);

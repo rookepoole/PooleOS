@@ -205,6 +205,17 @@ def check_native_pooleboot_readiness() -> CheckResult:
     )
 
 
+def check_native_kernel_load_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_kernel_load_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
 def check_native_boot_handoff_readiness() -> CheckResult:
     from tools import pooleos_release_gate
 
@@ -3345,6 +3356,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "tools" / "qualify_native_models.py",
                 ROOT / "tools" / "build_native_pooleboot_media.py",
                 ROOT / "tools" / "qualify_native_pooleboot.py",
+                ROOT / "tools" / "qualify_native_kernel_load.py",
                 ROOT / "tools" / "generate_native_boot_handoff_vectors.py",
                 ROOT / "tools" / "qualify_native_boot_handoff.py",
                 ROOT / "tools" / "generate_native_boot_config_vectors.py",
@@ -3361,12 +3373,14 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runtime" / "native_tier0.py",
                 ROOT / "runtime" / "native_models.py",
                 ROOT / "runtime" / "native_pooleboot.py",
+                ROOT / "runtime" / "native_kernel_load.py",
                 ROOT / "runtime" / "native_boot_handoff.py",
                 ROOT / "runtime" / "native_boot_config.py",
                 ROOT / "runtime" / "native_elf_loader.py",
                 ROOT / "runtime" / "native_kernel_image.py",
                 ROOT / "runtime" / "native_kernel_entry.py",
                 ROOT / "docs" / "native-pooleboot-proof.md",
+                ROOT / "docs" / "native-kernel-load.md",
                 ROOT / "docs" / "native-boot-handoff.md",
                 ROOT / "docs" / "native-boot-config.md",
                 ROOT / "docs" / "native-elf-loader.md",
@@ -3381,6 +3395,10 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "native" / "boot" / "Cargo.toml",
                 ROOT / "native" / "boot" / "src" / "main.rs",
                 ROOT / "native" / "boot" / "src" / "lib.rs",
+                ROOT / "native" / "boot" / "src" / "kload.rs",
+                ROOT / "native" / "bootload" / "Cargo.toml",
+                ROOT / "native" / "bootload" / "README.md",
+                ROOT / "native" / "bootload" / "src" / "lib.rs",
                 ROOT / "native" / "handoff" / "Cargo.toml",
                 ROOT / "native" / "handoff" / "README.md",
                 ROOT / "native" / "handoff" / "src" / "lib.rs",
@@ -3425,6 +3443,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runs" / "native_tier0_readiness.json",
                 ROOT / "runs" / "native_model_readiness.json",
                 ROOT / "runs" / "native_pooleboot_readiness.json",
+                ROOT / "runs" / "native_kernel_load_readiness.json",
                 ROOT / "runs" / "native_boot_handoff_readiness.json",
                 ROOT / "runs" / "native_boot_config_readiness.json",
                 ROOT / "runs" / "native_elf_loader_readiness.json",
@@ -3432,6 +3451,9 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "specs" / "native-pooleboot-proof.json",
                 ROOT / "specs" / "native-pooleboot-proof.schema.json",
                 ROOT / "specs" / "native-pooleboot-readiness.schema.json",
+                ROOT / "specs" / "native-kernel-load-contract.json",
+                ROOT / "specs" / "native-kernel-load-contract.schema.json",
+                ROOT / "specs" / "native-kernel-load-readiness.schema.json",
                 ROOT / "specs" / "native-boot-handoff-contract.json",
                 ROOT / "specs" / "native-boot-handoff-contract.schema.json",
                 ROOT / "specs" / "native-boot-handoff-golden-vectors.json",
@@ -3528,6 +3550,7 @@ def main(argv: list[str] | None = None) -> int:
     checks.append(check_native_tier0_readiness())
     checks.append(check_native_model_readiness())
     checks.append(check_native_pooleboot_readiness())
+    checks.append(check_native_kernel_load_readiness())
     checks.append(check_native_boot_handoff_readiness())
     checks.append(check_native_boot_config_readiness())
     checks.append(check_native_elf_loader_readiness())

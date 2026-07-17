@@ -1,13 +1,13 @@
 # Native PooleBoot UEFI Proof
 
-Status: bounded unsigned non-promoting proof
-Contract: `POOLEOS-N5-POOLEBOOT-1`
-Phase mapping: N5.1, N5.2, N5.3, and N5.7 partial
+Status: bounded unsigned live-load-then-release non-promoting proof
+Contract: `POOLEOS-N5-POOLEBOOT-2`
+Phase mapping: N5.1, N5.2, N5.3, N5.4, N5.5, and N5.7 partial
 Receipt: `runs/native_pooleboot_readiness.json`
 
 ## Purpose
 
-Cycle 97 replaces the empty PooleBoot compiler fixture with a separate product crate while preserving the empty fixture under `native/fixtures/pooleboot`. The product is the first Poole-authored freestanding x86-64 UEFI application in the native boot path. It provides proof-strength evidence for deterministic PE32+ production, deterministic GPT/FAT32 development media, bounded firmware-interface use, observable guest execution, GOP output, and a clean Rust return path.
+Cycle 97 replaced the empty compiler fixture with the first Poole-authored freestanding x86-64 UEFI product. Cycle 102 extends that same product with bounded live PBC1 and PKELF1 reads, firmware-page allocation, kernel materialization, mapping-plan validation, and complete load-then-release cleanup. The aggregate receipt provides deterministic PE32+ and GPT/FAT32 media evidence, observable guest execution, GOP output, guest/oracle load agreement, and a clean Rust return path.
 
 This proof is deliberately smaller than the complete loader. Its evidence can be consumed by later work, but it cannot satisfy the N5 exit gate.
 
@@ -24,7 +24,7 @@ The `native/boot` product crate:
 - follows the two-call UEFI memory-map pattern, adds descriptor headroom, validates descriptor size and result bounds, and frees the pool allocation; and
 - emits a fixed non-claim marker and returns `EFI_SUCCESS` without calling `ExitBootServices`.
 
-The media builder emits exactly one 64 MiB ordinary workspace file with a protective MBR, mirrored primary and backup GPT headers and entries, CRC32 validation, one FAT32 ESP, two identical FATs, fixed GUIDs and timestamps, and exactly one fallback executable at `EFI/BOOT/BOOTX64.EFI`. Its CLI accepts only an existing regular workspace `.efi` input at or below the frozen 256 KiB ceiling and `.img` or `.json` outputs under `tmp` or `runs/native-tier0`; it rejects oversized inputs, workspace escapes, device namespaces, alternate data streams, reserved device names, symlinks, and non-file replacements before writing.
+The Cycle 102 media builder emits a 64 MiB ordinary workspace file with a protective MBR, mirrored GPT structures, one FAT32 ESP, two identical FATs, fixed metadata, and exactly three files: `EFI/BOOT/BOOTX64.EFI`, `EFI/POOLEOS/BOOT.CFG`, and `EFI/POOLEOS/KERNEL.ELF`. The ordinary-file boundary rejects oversized inputs, workspace escapes, device namespaces, alternate data streams, reserved device names, symlinks, and non-file replacements. It has no physical-media output mode.
 
 ## Qualification Contract
 
@@ -36,23 +36,23 @@ The media builder emits exactly one 64 MiB ordinary workspace file with a protec
 4. Generate and independently inspect two media images and require exact bytes.
 5. Verify the pinned Tier 0 QEMU/OVMF runtime closure and launch profile.
 6. Execute two Q35/TCG runs with read-only media, fresh OVMF variables, no guest network, no host acceleration, and loopback-only QMP.
-7. Require eleven ordered markers, exact serial/debugcon agreement, a nonblank Poole-identity GOP frame, exact marker and frame matches across runs, clean QMP quit, and empty QEMU stderr.
-8. Execute all fifteen negative controls and fail on any unexpected acceptance.
+7. Require seventeen ordered markers covering filesystem/config/kernel intake, load, mapping plan, cleanup, GOP, memory map, and return; require exact serial/debugcon agreement, a nonblank Poole-identity GOP frame, exact marker and frame matches, clean QMP quit, and empty QEMU stderr.
+8. Execute all thirty negative controls and fail on any unexpected acceptance.
 9. Bind every contract, implementation, toolchain, Tier 0, result, command, and claim-boundary input into the public readiness receipt.
 
 The current exact evidence is:
 
 - host contract tests: 8/8;
-- clean PE32+ builds: 2/2 exact, 13,312 bytes, SHA-256 `B4EF888C588807CBF715E33831A0B52B07CEF5F8BEAFA4FD74D65BD9AA4919B8`;
-- clean media generations: 2/2 exact, 67,108,864 bytes, SHA-256 `E8175F70270D6E0A9D4BD1FB16A8814D9B30DD460CE1E6219CCF7AC528600FCA`;
-- guest runs: 2/2, with 11/11 ordered markers in each run;
+- clean PE32+ builds: 2/2 exact, 45,056 bytes, SHA-256 `B97B4A40BACC7BEA7E5C344B8C1FF6A2AEE7985E379749270EE193ADA95E5C4C`;
+- clean media generations: 2/2 exact, 67,108,864 bytes, SHA-256 `311A2133174105974FECDAE4CE0122F94E3DF1911176DFFCB2BD8D6A2415E364`;
+- guest runs: 2/2, with 17/17 ordered markers in each run;
 - serial/debugcon matches: 2/2;
 - GOP frames: 2/2 exact at 1280x800, screenshot SHA-256 `E9D4CFD48C23DBA760AED5B2049B39DCA49A0D172F680D570082EB0680FDFDBD`;
-- hostile controls: 15/15; and
+- hostile controls: 30/30; and
 - production claims: zero; and
-- deterministic readiness receipt: 22,541 bytes, SHA-256 `D31B029FAFE523C85E20164BAE2F712107FE9E0BDF4DFE151CE07682E04410C8` on two consecutive complete qualifier runs.
+- deterministic readiness receipt: 33,689 bytes, SHA-256 `6604FE8D1D54E622AD3B0537D88CAAEAAC32E510522616A9E855C08A7B565508`.
 
-The hostile corpus rejects a wrong PE subsystem, wrong machine, debug directory, corrupt primary GPT CRC, corrupt backup GPT CRC, corrupt partition-entry CRC, wrong ESP type with internally recomputed GPT CRCs, mismatched FAT copies, a FAT chain loop, a mutated fallback path, device/outside/source/reserved-name/alternate-stream media targets, marker omission, marker reordering, a blank screenshot, and production-claim overreach.
+The hostile corpus covers missing, empty, oversized, malformed, short-read, path, FAT, PBC1, PKELF1, allocation, relocation, W^X, cleanup, marker, oracle-divergence, stale-binding, and claim-overreach failures.
 
 ## Reproduction
 
@@ -83,6 +83,12 @@ BOOT_SERVICES PASS
 WATCHDOG
 CONSOLE PASS_OR_FALLBACK
 CONFIG PASS
+FILESYSTEM PASS
+BOOTCFG PASS
+KERNEL_FILE PASS
+KERNEL_LOAD PASS
+KERNEL_MAP PASS
+KERNEL_RELEASE PASS
 GOP PASS
 MEMORY_MAP PASS
 BOUNDARY
@@ -94,13 +100,13 @@ The markers prove only that the instrumented application reached each point unde
 
 ## Open N5 Work
 
-Cycles 98 and 99 complete the bounded candidate PBP1 handoff and PBC1 parser qualifications without live producer, consumer, or filesystem claims. The next chronological move is `N5-ELF-001`: define and qualify bounded ELF64 validation and load planning before PooleBoot can consume a trusted manifest entry.
+Cycles 98-101 qualify PBP1, PBC1, PKELF1, and the real PKENTRY1 PooleKernel product. Cycle 102 proves bounded live load then release. The next chronological move is `N5-MANIFEST-001`: freeze a canonical manifest and replace the fixed development path with digest-bound manifest-driven selection without claiming signature trust.
 
-N5 still requires live configuration-file discovery and bounded reads; complete filesystem and RNG/TCG2 handling; ELF64 validation, relocation, and loading; signed kernel and system-artifact verification; normal/safe/previous/recovery/diagnostic selection; memory-map normalization; `ExitBootServices` retry behavior; immutable handoff transfer; hostile loader coverage; second-host reproduction; exact target-firmware execution; and separately authorized physical-media qualification.
+N5 still requires authenticated manifest and system-artifact selection; retained kernel pages and installed W^X mappings; complete menu, rollback, RNG, and TCG2 handling; live PBP1 population; final memory-map normalization; `ExitBootServices` retry behavior; immutable handoff transfer; second-host reproduction; target-firmware execution; and separately authorized physical-media qualification.
 
 ## Claim Boundary
 
-This is an unsigned UEFI proof application, not the complete PooleBoot loader. It does not authenticate, relocate, load, or enter PooleKernel; define or transfer a boot handoff; call `ExitBootServices`; enforce Secure Boot; perform measured boot; use TPM state; generate or use a key; create a signature; test target firmware; write physical media; build an ISO; or satisfy N5, N38, N39, release, or production gates. The static framebuffer identity is not the final animated PooleGlass boot identity or an accessibility acceptance result.
+This is an unsigned live-load-then-release UEFI proof, not the complete PooleBoot loader. It loads and relocates PooleKernel only at a fixed untrusted development path, validates but does not install a mapping plan, then releases the pages. It does not authenticate a manifest, retain the kernel, define or transfer a live handoff, call `ExitBootServices`, enter PooleKernel, enforce Secure Boot, perform measured boot, use TPM state, generate or use a key, create a signature, test target firmware, write physical media, build an ISO, or satisfy N5, N38, N39, release, or production gates. The static framebuffer identity is not the final animated PooleGlass boot identity or an accessibility acceptance result.
 
 ## Primary References
 

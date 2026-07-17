@@ -22,6 +22,7 @@ from runtime import native_boot_config  # noqa: E402
 from runtime import native_boot_handoff  # noqa: E402
 from runtime import native_elf_loader  # noqa: E402
 from runtime import native_kernel_entry  # noqa: E402
+from runtime import native_kernel_load  # noqa: E402
 from runtime import native_models  # noqa: E402
 from runtime import native_pooleboot  # noqa: E402
 from runtime import n0_owner_decision_packet  # noqa: E402
@@ -47,6 +48,7 @@ NATIVE_BOOT_CONFIG_READINESS = ROOT / "runs" / "native_boot_config_readiness.jso
 NATIVE_BOOT_HANDOFF_READINESS = ROOT / "runs" / "native_boot_handoff_readiness.json"
 NATIVE_ELF_LOADER_READINESS = ROOT / "runs" / "native_elf_loader_readiness.json"
 NATIVE_KERNEL_ENTRY_READINESS = ROOT / "runs" / "native_kernel_entry_readiness.json"
+NATIVE_KERNEL_LOAD_READINESS = ROOT / "runs" / "native_kernel_load_readiness.json"
 NATIVE_POOLEBOOT_READINESS = ROOT / "runs" / "native_pooleboot_readiness.json"
 NATIVE_TIER0_READINESS = ROOT / "runs" / "native_tier0_readiness.json"
 
@@ -806,11 +808,11 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
         "clean_media_generations_exact": 2,
         "guest_runs_total": 2,
         "guest_runs_passed": 2,
-        "ordered_marker_count": 11,
+        "ordered_marker_count": 17,
         "serial_debugcon_match_count": 2,
         "gop_frame_match_count": 2,
-        "negative_controls_total": 15,
-        "negative_controls_passed": 15,
+        "negative_controls_total": 30,
+        "negative_controls_passed": 30,
         "production_claim_count": 0,
     }
     if artifact.get("summary") != expected_summary:
@@ -820,12 +822,54 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
     if artifact.get("n5_exit_gate_satisfied") is not False or artifact.get("production_ready") is not False:
         errors.append("PooleBoot proof overclaims N5 exit or production readiness")
     detail = (
-        "contract=POOLEOS-N5-POOLEBOOT-1; host_tests=8/8; builds=2/2; media=2/2; "
-        "guest_runs=2/2; markers=11; serial_debugcon=2/2; gop_frames=2/2; "
-        "negatives=15/15; production_claims=0; n5_exit=false; production_ready=false"
+        "contract=POOLEOS-N5-POOLEBOOT-2; host_tests=8/8; builds=2/2; media=2/2; "
+        "guest_runs=2/2; markers=17; serial_debugcon=2/2; gop_frames=2/2; "
+        "negatives=30/30; production_claims=0; n5_exit=false; production_ready=false"
     )
     return readiness.make_check(
         "native_pooleboot_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-kernel-load-readiness.schema.json"
+    )
+    errors = [
+        f"native kernel load readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_kernel_load_readiness",
+            False,
+            "; ".join(errors) or "native kernel load readiness is not an object",
+        )
+    errors.extend(native_kernel_load.readiness_errors(artifact, ROOT))
+    summary = artifact.get("summary", {})
+    if summary.get("guest_runs_passed") != 2 or summary.get("guest_runs_total") != 2:
+        errors.append("PKLOAD1 guest-run evidence is incomplete")
+    if summary.get("ordered_marker_count") != 17:
+        errors.append("PKLOAD1 marker evidence is incomplete")
+    if summary.get("negative_controls_passed") != 30 or summary.get(
+        "negative_controls_total"
+    ) != 30:
+        errors.append("PKLOAD1 negative controls are incomplete")
+    if artifact.get("claims") != native_kernel_load.expected_claims():
+        errors.append("PKLOAD1 claim boundary changed")
+    if artifact.get("n5_exit_gate_satisfied") is not False or artifact.get(
+        "production_ready"
+    ) is not False:
+        errors.append("PKLOAD1 overclaims N5 exit or production readiness")
+    detail = (
+        "contract=PKLOAD1; rust_tests=33/33; boot_builds=2/2; kernel_builds=2/2; "
+        "media=2/2; guest_runs=2/2; markers=17; oracle=2/2; cleanup=all; "
+        "negatives=30/30; transfer=false; n5_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_kernel_load_readiness",
         not errors,
         detail if not errors else "; ".join(errors[:8]),
     )
@@ -3801,6 +3845,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--native-tier0-readiness", type=Path, default=NATIVE_TIER0_READINESS)
     parser.add_argument("--native-model-readiness", type=Path, default=NATIVE_MODEL_READINESS)
     parser.add_argument("--native-pooleboot-readiness", type=Path, default=NATIVE_POOLEBOOT_READINESS)
+    parser.add_argument("--native-kernel-load-readiness", type=Path, default=NATIVE_KERNEL_LOAD_READINESS)
     parser.add_argument("--native-boot-handoff-readiness", type=Path, default=NATIVE_BOOT_HANDOFF_READINESS)
     parser.add_argument("--native-boot-config-readiness", type=Path, default=NATIVE_BOOT_CONFIG_READINESS)
     parser.add_argument("--native-elf-loader-readiness", type=Path, default=NATIVE_ELF_LOADER_READINESS)
@@ -3822,6 +3867,7 @@ def main(argv: list[str] | None = None) -> int:
         check_native_tier0_readiness(args.native_tier0_readiness),
         check_native_model_readiness(args.native_model_readiness),
         check_native_pooleboot_readiness(args.native_pooleboot_readiness),
+        check_native_kernel_load_readiness(args.native_kernel_load_readiness),
         check_native_boot_handoff_readiness(args.native_boot_handoff_readiness),
         check_native_boot_config_readiness(args.native_boot_config_readiness),
         check_native_elf_loader_readiness(args.native_elf_loader_readiness),
@@ -4013,6 +4059,7 @@ def main(argv: list[str] | None = None) -> int:
             args.native_tier0_readiness,
             args.native_model_readiness,
             args.native_pooleboot_readiness,
+            args.native_kernel_load_readiness,
             args.native_boot_handoff_readiness,
             args.native_boot_config_readiness,
             args.native_elf_loader_readiness,

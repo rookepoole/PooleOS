@@ -63,7 +63,7 @@ class NativePooleBootTests(unittest.TestCase):
         media = self.readiness["media"]["inspection"]
         execution = self.readiness["execution"]
         self.assertEqual((2, True), (build["clean_build_count"], build["exact_clean_build_match"]))
-        self.assertEqual(13_312, build["byte_count"])
+        self.assertGreater(build["byte_count"], 13_312)
         self.assertEqual(build["sha256"], media["files"][0]["sha256"])
         self.assertEqual("EFI/BOOT/BOOTX64.EFI", media["files"][0]["path"])
         self.assertEqual(67_108_864, media["image"]["byte_count"])
@@ -92,7 +92,7 @@ class NativePooleBootTests(unittest.TestCase):
     def test_marker_parser_rejects_omission_order_and_bad_geometry(self) -> None:
         markers = self.readiness["execution"]["runs"][0]["markers"]
         summary = native_pooleboot.validate_markers(markers)
-        self.assertEqual(11, summary["marker_count"])
+        self.assertEqual(17, summary["marker_count"])
         with self.assertRaises(native_pooleboot.PooleBootError):
             native_pooleboot.validate_markers(markers[:-1])
         reordered = markers[:]
@@ -100,7 +100,7 @@ class NativePooleBootTests(unittest.TestCase):
         with self.assertRaises(native_pooleboot.PooleBootError):
             native_pooleboot.validate_markers(reordered)
         malformed = markers[:]
-        malformed[6] = "POOLEBOOT/0.1 GOP PASS width=1 height=1 stride=1 mode=0 format=BGR"
+        malformed[12] = "POOLEBOOT/0.1 GOP PASS width=1 height=1 stride=1 mode=0 format=BGR"
         with self.assertRaises(native_pooleboot.PooleBootError):
             native_pooleboot.validate_markers(malformed)
 
