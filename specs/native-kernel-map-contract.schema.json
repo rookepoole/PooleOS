@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-kernel-map-contract.schema.json",
+  "title": "PooleOS PKMAP1 contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "contract_id",
+    "selected_move_id",
+    "status_date",
+    "status",
+    "production_ready",
+    "production_promotion_allowed",
+    "phase_mapping",
+    "source_requirement_ids",
+    "cpu_preconditions",
+    "bounded_layout",
+    "verification",
+    "lifecycle",
+    "required_negative_controls",
+    "claims",
+    "claim_boundary",
+    "official_references"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_map_contract"},
+    "contract_id": {"const": "PKMAP1"},
+    "selected_move_id": {"const": "N5-KMAP-001"},
+    "status_date": {"const": "2026-07-17"},
+    "status": {"const": "bounded_temporary_activation_and_rollback_non_promoting"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "phase_mapping": {"const": ["N5.5", "N5.8"]},
+    "source_requirement_ids": {"const": ["013", "014", "015", "ADD-BOOT-001"]},
+    "cpu_preconditions": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["architecture", "paging_required", "pae_required", "long_mode_active_required", "cr0_write_protect_required", "nx_cpuid_required", "efer_nxe_required", "physical_address_bits_minimum", "physical_address_bits_maximum", "five_level_paging_allowed", "pcid_allowed"],
+      "properties": {
+        "architecture": {"const": "x86-64"},
+        "paging_required": {"const": true},
+        "pae_required": {"const": true},
+        "long_mode_active_required": {"const": true},
+        "cr0_write_protect_required": {"const": true},
+        "nx_cpuid_required": {"const": true},
+        "efer_nxe_required": {"const": true},
+        "physical_address_bits_minimum": {"const": 36},
+        "physical_address_bits_maximum": {"const": 52},
+        "five_level_paging_allowed": {"const": false},
+        "pcid_allowed": {"const": false}
+      }
+    },
+    "bounded_layout": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["paging_levels", "kernel_leaf_bytes", "maximum_window_bytes", "private_table_pages", "virtual_base", "pml4_index", "pdpt_index", "page_directory_index", "first_page_table_index", "active_root_cloned", "target_root_slot_must_be_zero", "kernel_permissions", "writable_executable_leaf_allowed", "supervisor_only", "kernel_pat", "kernel_pcd", "kernel_pwt"],
+      "properties": {
+        "paging_levels": {"const": 4},
+        "kernel_leaf_bytes": {"const": 4096},
+        "maximum_window_bytes": {"const": 2097152},
+        "private_table_pages": {"const": 4},
+        "virtual_base": {"const": "0xFFFFFFFF80000000"},
+        "pml4_index": {"const": 511},
+        "pdpt_index": {"const": 510},
+        "page_directory_index": {"const": 0},
+        "first_page_table_index": {"const": 0},
+        "active_root_cloned": {"const": true},
+        "target_root_slot_must_be_zero": {"const": true},
+        "kernel_permissions": {"const": ["r", "rx", "r", "rw"]},
+        "writable_executable_leaf_allowed": {"const": false},
+        "supervisor_only": {"const": true},
+        "kernel_pat": {"const": false},
+        "kernel_pcd": {"const": false},
+        "kernel_pwt": {"const": false}
+      }
+    },
+    "verification": {"type": "object", "additionalProperties": {"type": "boolean"}},
+    "lifecycle": {"type": "object", "additionalProperties": true},
+    "required_negative_controls": {"type": "array", "minItems": 25, "maxItems": 25, "uniqueItems": true, "items": {"type": "string"}},
+    "claims": {
+      "type": "object",
+      "additionalProperties": {"type": "boolean"},
+      "minProperties": 16
+    },
+    "claim_boundary": {"type": "array", "minItems": 8, "items": {"type": "string"}},
+    "official_references": {"type": "array", "minItems": 3, "items": {"type": "string", "format": "uri"}}
+  }
+}

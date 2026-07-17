@@ -44,13 +44,15 @@ def valid_markers() -> list[str]:
         "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=139264 image_bytes=196608 sha256_prefix=2220757D0CC18EA3 path=manifest",
         "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=139264 path=manifest_development",
         "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=196608 pages=48 entry_offset=16384 relocations=40 fnv1a64=5D48CA3E327C4BF2",
-        "POOLEBOOT/0.1 KERNEL_MAP PASS mappings=4 rx=1 rw=1 wx=0 activation=not_performed",
         "POOLEBOOT/0.1 PBP1 PASS bytes=4248 records=4 memory_entries=95 framebuffer=1 artifacts=1 descriptor_bytes=48 map_attempts=1 message_crc32=8BEB8BE2 fnv1a64=83C0C38E587A3C9F state=pre_exit",
         "POOLEBOOT/0.1 PBP1_RELEASE PASS pools_freed=3 bytes_unchanged=1",
+        "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP1 mappings=4 pages=48 ro=6 rx=28 rw=14 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=A671D0D8901064A5",
+        "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 mapped_pages=48 physical_bits=40 mapped_fnv1a64=5D48CA3E327C4BF2 framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
+        "POOLEBOOT/0.1 KERNEL_MAP_ROLLBACK PASS original_cr3=restored tables_freed=4 firmware_calls_while_active=0",
         "POOLEBOOT/0.1 KERNEL_RELEASE PASS files_closed=4 pools_freed=3 pages_freed=48",
         "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
         "POOLEBOOT/0.1 MEMORY_MAP PASS bytes=4512 descriptor_bytes=48 descriptors=94",
-        "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted kernel=loaded_then_released handoff=pre_exit_produced_then_released mappings=planned_not_activated entry=not_called exit_boot_services=not_called",
+        "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted kernel=loaded_then_released handoff=pre_exit_produced_then_released mappings=activated_then_rolled_back entry=not_called exit_boot_services=not_called",
         "POOLEBOOT/0.1 FRAME READY",
         "POOLEBOOT/0.1 RETURN EFI_SUCCESS",
     ]
@@ -140,9 +142,12 @@ class NativeKernelLoadTests(unittest.TestCase):
 
     def test_marker_contract_captures_load_mapping_and_cleanup(self) -> None:
         summary = native_kernel_load.validate_markers(valid_markers())
-        self.assertEqual(21, summary["marker_count"])
+        self.assertEqual(23, summary["marker_count"])
         self.assertEqual(48, summary["kernel"]["page_count"])
-        self.assertEqual(0, summary["kernel"]["writable_executable_count"])
+        self.assertEqual(0, summary["kernel_map"]["writable_executable_page_count"])
+        self.assertEqual(48, summary["kernel_map"]["mapped_page_count"])
+        self.assertTrue(summary["kernel_map"]["original_cr3_restored"])
+        self.assertEqual(4, summary["kernel_map"]["tables_freed"])
         self.assertTrue(summary["kernel"]["resources_released"])
         self.assertTrue(summary["pbp1"]["pre_exit"])
         self.assertTrue(summary["pbp1"]["temporary_pools_released"])
@@ -152,13 +157,26 @@ class NativeKernelLoadTests(unittest.TestCase):
         with self.assertRaises(native_kernel_load.KernelLoadError):
             native_kernel_load.validate_markers(markers[:-1])
         writable = markers[:]
-        writable[12] = writable[12].replace("wx=0", "wx=1")
+        writable[14] = writable[14].replace("wx=0", "wx=1")
         with self.assertRaises(native_kernel_load.KernelLoadError):
             native_kernel_load.validate_markers(writable)
         page_mismatch = markers[:]
         page_mismatch[11] = page_mismatch[11].replace("pages=48", "pages=49")
         with self.assertRaises(native_kernel_load.KernelLoadError):
             native_kernel_load.validate_markers(page_mismatch)
+        active_mismatch = markers[:]
+        active_mismatch[15] = active_mismatch[15].replace(
+            "mapped_fnv1a64=5D48CA3E327C4BF2",
+            "mapped_fnv1a64=0000000000000000",
+        )
+        with self.assertRaises(native_kernel_load.KernelLoadError):
+            native_kernel_load.validate_markers(active_mismatch)
+        rollback_mismatch = markers[:]
+        rollback_mismatch[16] = rollback_mismatch[16].replace(
+            "firmware_calls_while_active=0", "firmware_calls_while_active=1"
+        )
+        with self.assertRaises(native_kernel_load.KernelLoadError):
+            native_kernel_load.validate_markers(rollback_mismatch)
 
     def test_claim_overreach_is_rejected(self) -> None:
         claims = native_kernel_load.expected_claims()

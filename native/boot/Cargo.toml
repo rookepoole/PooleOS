@@ -18,4 +18,5 @@ poole-bootload = { path = "../bootload" }
 poole-boot-config = { path = "../bootcfg" }
 poole-elf = { path = "../elf" }
 poole-handoff = { path = "../handoff" }
+poole-kmap = { path = "../kmap" }
 poole-live-handoff = { path = "../livehandoff" }

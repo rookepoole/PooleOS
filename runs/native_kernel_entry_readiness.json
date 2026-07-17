@@ -13,14 +13,14 @@
     },
     "implementation_inputs": [
       {
-        "byte_count": 445,
+        "byte_count": 455,
         "path": "native/Cargo.toml",
-        "sha256": "36AD545F9AC660BC7C03D9135C9EBC51DE3B61CCC9B8219F66ED76A3E39C2C02"
+        "sha256": "60805416DCE7177CAF6DB2B72CBF6E817F6FE99E6ABB94D7CC55C89C5A8E90F1"
       },
       {
-        "byte_count": 2925,
+        "byte_count": 2991,
         "path": "native/Cargo.lock",
-        "sha256": "AE912B0950F2AA643FA9F3DB5B050A2F9D4D2DA0204B70A1F8A8447C6A71B332"
+        "sha256": "E7747B3E708EBA92E98D8AC0999A15B346A0269FDE85416384C4C6086047C623"
       },
       {
         "byte_count": 249,
@@ -28,9 +28,9 @@
         "sha256": "EFCA98B3722831ABFE562DA3F54FF830AD19C15C30EC4094D61AE0E6A7147522"
       },
       {
-        "byte_count": 1278,
+        "byte_count": 1356,
         "path": "native/kernel/README.md",
-        "sha256": "24381280F339E9CC460D2244F6E4ADC2FA415171BEF7A56738E97472E54A64CF"
+        "sha256": "B47BD4008A3C64442B9A23D2959B14D784DC63C43FC867E1E56BC02962009973"
       },
       {
         "byte_count": 523,
@@ -98,9 +98,9 @@
         "sha256": "19E05DBDD78C9EBDF30E9573863B67448C632568290AA07A1A2E1EE2AB2653FE"
       },
       {
-        "byte_count": 3503,
+        "byte_count": 3626,
         "path": "docs/native-kernel-entry.md",
-        "sha256": "58B09783361BB1F7D218435CCC124516A2CC75F815857444993957F9C05D0360"
+        "sha256": "E2941EF2B07A9C78F4C0AE15BA98FF89E36318867E7FF201496A9DCFD906AF68"
       }
     ],
     "pbp1_contract": {
@@ -581,13 +581,13 @@
       "pooleboot_compile_time_integration_builds": [
         {
           "pooleboot_rlib_byte_count": 55708,
-          "pooleboot_rlib_sha256": "ABEDCA138A104969F365F9DF040B4773CC5852B277531A1955D1C23C99A2A86C",
+          "pooleboot_rlib_sha256": "B7FFAFA53D239BB56C95A5AF6AA6FD10D3AC4DE4E785054896D2FB7DE71E64FE",
           "status": "pass",
           "target": "x86_64-unknown-uefi"
         },
         {
           "pooleboot_rlib_byte_count": 57796,
-          "pooleboot_rlib_sha256": "82E693B401737CEC5CCEB9CE2F63B96C957DC633B4590A882468B34C9CC0901C",
+          "pooleboot_rlib_sha256": "60D8D9D4E50C17E16FEE32CC2A8D965066C4150789355CA460F69A8DCAF41C4A",
           "status": "pass",
           "target": "x86_64-unknown-none"
         }
