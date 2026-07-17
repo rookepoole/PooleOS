@@ -3,6 +3,8 @@
 
 use core::cmp::min;
 
+pub use poole_boot_config as boot_config;
+
 pub const EFI_ERROR_BIT: usize = 1usize << (usize::BITS - 1);
 pub const EFI_BUFFER_TOO_SMALL: usize = EFI_ERROR_BIT | 5;
 pub const TABLE_HEADER_BYTES: usize = 24;
@@ -84,7 +86,9 @@ fn read_u32(bytes: &[u8], offset: usize) -> Result<u32, ContractError> {
     let source = bytes
         .get(offset..offset + 4)
         .ok_or(ContractError::BufferTooSmall)?;
-    Ok(u32::from_le_bytes([source[0], source[1], source[2], source[3]]))
+    Ok(u32::from_le_bytes([
+        source[0], source[1], source[2], source[3],
+    ]))
 }
 
 fn read_u64(bytes: &[u8], offset: usize) -> Result<u64, ContractError> {
@@ -180,9 +184,8 @@ pub fn plan_memory_map(
     if required_size == 0 || required_size > MAX_MEMORY_MAP_BYTES {
         return Err(ContractError::MemoryMapSize);
     }
-    if !(MIN_MEMORY_DESCRIPTOR_BYTES..=MAX_MEMORY_DESCRIPTOR_BYTES)
-        .contains(&descriptor_size)
-        || descriptor_size % 8 != 0
+    if !(MIN_MEMORY_DESCRIPTOR_BYTES..=MAX_MEMORY_DESCRIPTOR_BYTES).contains(&descriptor_size)
+        || !descriptor_size.is_multiple_of(8)
     {
         return Err(ContractError::DescriptorSize);
     }
@@ -213,13 +216,12 @@ pub fn validate_memory_map_result(
     if map_size == 0 || map_size > allocation_size || map_size > MAX_MEMORY_MAP_BYTES {
         return Err(ContractError::MemoryMapSize);
     }
-    if !(MIN_MEMORY_DESCRIPTOR_BYTES..=MAX_MEMORY_DESCRIPTOR_BYTES)
-        .contains(&descriptor_size)
-        || descriptor_size % 8 != 0
+    if !(MIN_MEMORY_DESCRIPTOR_BYTES..=MAX_MEMORY_DESCRIPTOR_BYTES).contains(&descriptor_size)
+        || !descriptor_size.is_multiple_of(8)
     {
         return Err(ContractError::DescriptorSize);
     }
-    if map_size % descriptor_size != 0 {
+    if !map_size.is_multiple_of(descriptor_size) {
         return Err(ContractError::MemoryMapShape);
     }
     Ok(MemoryMapSummary {
@@ -260,8 +262,8 @@ pub fn validate_framebuffer(
     if required_bytes > framebuffer_size || required_bytes > MAX_FRAMEBUFFER_BYTES {
         return Err(ContractError::FramebufferSize);
     }
-    let required_bytes_u64 = u64::try_from(required_bytes)
-        .map_err(|_| ContractError::FramebufferAddressRange)?;
+    let required_bytes_u64 =
+        u64::try_from(required_bytes).map_err(|_| ContractError::FramebufferAddressRange)?;
     if framebuffer_base > usize::MAX as u64
         || framebuffer_base.checked_add(required_bytes_u64).is_none()
     {
@@ -403,7 +405,9 @@ mod tests {
         let signature = 0x5453_5953_2049_4249;
         let bytes = table(signature, 120);
         assert_eq!(
-            validate_table_header(&bytes, signature, 120).unwrap().header_size,
+            validate_table_header(&bytes, signature, 120)
+                .unwrap()
+                .header_size,
             120
         );
         let mut wrong_signature = bytes.clone();
@@ -489,8 +493,7 @@ mod tests {
 
     #[test]
     fn framebuffer_contract_rejects_blt_only_and_short_storage() {
-        let layout = validate_framebuffer(1024, 768, 1024, 1, 0x8000_0000, 1024 * 768 * 4)
-            .unwrap();
+        let layout = validate_framebuffer(1024, 768, 1024, 1, 0x8000_0000, 1024 * 768 * 4).unwrap();
         assert_eq!(layout.format, PixelFormat::Bgr);
         assert_eq!(
             validate_framebuffer(1024, 768, 1024, 3, 0x8000_0000, 1024 * 768 * 4),

@@ -3,12 +3,19 @@
 version = 4
 
 [[package]]
+name = "poole-boot-config"
+version = "0.0.0"
+
+[[package]]
 name = "poole-handoff"
 version = "0.0.0"
 
 [[package]]
 name = "pooleboot"
 version = "0.0.0"
+dependencies = [
+ "poole-boot-config",
+]
 
 [[package]]
 name = "pooleboot-fixture"

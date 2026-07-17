@@ -1,0 +1,21 @@
+[package]
+name = "poole-boot-config"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+publish.workspace = true
+
+[lib]
+name = "poole_boot_config"
+path = "src/lib.rs"
+
+[features]
+default = []
+host-probe = []
+
+[[bin]]
+name = "pbc1-probe"
+path = "src/bin/pbc1_probe.rs"
+required-features = ["host-probe"]
+
+[dependencies]

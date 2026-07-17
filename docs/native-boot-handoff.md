@@ -56,4 +56,4 @@ Qualification compiles and tests the Rust codec on the pinned host target, build
 
 ## Nonclaims
 
-This cycle does not wire PBP1 into PooleBoot, load or authenticate PooleKernel, retrieve a final production memory map, call `ExitBootServices`, execute transfer assembly, consume PBP1 in PooleKernel, test target firmware, or satisfy N5. CRC-32 is corruption detection, not authentication. Finite corpus and fuzz agreement is not a proof over every input. No production, signing, Secure Boot, measured-boot, TPM, release, or physical-hardware claim follows.
+Cycle 99 adds a separately qualified PBC1 parser and a compile-time PooleBoot dependency, but it does not wire PBP1 into PooleBoot, open a live configuration, load or authenticate PooleKernel, retrieve a final production memory map, call `ExitBootServices`, execute transfer assembly, consume PBP1 in PooleKernel, test target firmware, or satisfy N5. CRC-32 is corruption detection, not authentication. Finite corpus and fuzz agreement is not a proof over every input. No production, signing, Secure Boot, measured-boot, TPM, release, or physical-hardware claim follows.

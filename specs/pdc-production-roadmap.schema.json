@@ -49,10 +49,10 @@
         "inspect_live_pooleglyph_each_turn": {"const": true},
         "verify_master_checklist_coverage_each_turn": {"const": true},
         "new_work_must_be_flagged": {"const": true},
-        "last_updated_cycle": {"const": 98},
-        "selected_move_id": {"const": "N5-BOOTPROTO-001"},
+        "last_updated_cycle": {"const": 99},
+        "selected_move_id": {"const": "N5-BOOTCFG-001"},
         "immediate_next_move_id": {"const": "N0-HW-KEY-ACQUIRE-001"},
-        "owner_independent_next_move_id": {"const": "N5-BOOTCFG-001"},
+        "owner_independent_next_move_id": {"const": "N5-ELF-001"},
         "required_records": {"type": "array", "minItems": 7, "items": {"type": "string"}, "uniqueItems": true},
         "flag_classes": {"type": "array", "minItems": 8, "items": {"type": "string"}, "uniqueItems": true}
       }
@@ -136,8 +136,8 @@
     },
     "implementation_flags": {
       "type": "array",
-      "minItems": 35,
-      "maxItems": 35,
+      "minItems": 36,
+      "maxItems": 36,
       "items": {
         "type": "object",
         "additionalProperties": false,

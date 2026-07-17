@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_boot_config_contract",
+  "contract_id": "PBC1",
+  "status": "candidate_pre_abi_non_promoting",
+  "production_ready": false,
+  "encoding": {
+    "character_set": "ASCII bytes 0x21..0x7E plus LF line terminators",
+    "line_ending": "LF",
+    "final_lf_required": true,
+    "bom_allowed": false,
+    "comments_allowed": false,
+    "blank_lines_allowed": false,
+    "whitespace_allowed": false
+  },
+  "grammar": {
+    "magic": "POOLEOS-BOOTCFG/1.0",
+    "fixed_keys": [
+      "entry_count",
+      "default_entry",
+      "timeout_ms",
+      "boot_attempt_limit"
+    ],
+    "entry_key_template": "entry.<id>.<mode|slot|manifest|manifest_max_bytes>",
+    "entry_field_order": [
+      "mode",
+      "slot",
+      "manifest",
+      "manifest_max_bytes"
+    ],
+    "terminal": "end=PBC1",
+    "entry_order": "strict ascending ASCII identifier order",
+    "duplicate_policy": "reject every repeated full key before semantic interpretation",
+    "unknown_key_policy": "reject",
+    "number_policy": "canonical unsigned decimal u64; no sign or leading zero except zero"
+  },
+  "limits": {
+    "config_bytes": 16384,
+    "line_bytes": 320,
+    "lines": 64,
+    "entries": 8,
+    "identifier_bytes": 31,
+    "timeout_ms": 30000,
+    "boot_attempts": 8,
+    "slot": 4,
+    "manifest_path_bytes": 240,
+    "manifest_bytes": 1048576
+  },
+  "entry_modes": [
+    "normal",
+    "safe",
+    "previous",
+    "recovery",
+    "diagnostic"
+  ],
+  "path_policy": {
+    "root": "\\EFI\\POOLEOS\\",
+    "separator": "\\",
+    "case": "uppercase ASCII path components",
+    "component_characters": "A-Z 0-9 underscore hyphen",
+    "component_bytes": 64,
+    "required_suffix": ".PBM",
+    "dot_components_allowed": false,
+    "forward_slash_allowed": false,
+    "absolute_paths_outside_root_allowed": false
+  },
+  "version_policy": {
+    "accepted": "1.0",
+    "incompatible_major": "reject",
+    "unknown_minor": "reject until an explicit compatibility contract exists"
+  },
+  "artifact_size_policy": {
+    "zero_length_allowed": false,
+    "configured_limit_required": true,
+    "observed_size_must_not_exceed_configured_limit": true,
+    "absolute_maximum_bytes": 1048576
+  },
+  "production_claims": {
+    "canonical_grammar_defined": true,
+    "rust_no_std_parser_executed": true,
+    "independent_python_parser_executed": true,
+    "pooleboot_compile_time_dependency": true,
+    "golden_semantic_agreement": true,
+    "hostile_controls_executed": true,
+    "deterministic_differential_fuzz_executed": true,
+    "live_config_file_opened": false,
+    "live_config_parsed_by_pooleboot": false,
+    "boot_entry_selected": false,
+    "artifact_loaded": false,
+    "artifact_signature_verified": false,
+    "target_firmware_tested": false,
+    "n5_exit_gate_satisfied": false,
+    "production_ready": false
+  },
+  "claim_boundary": [
+    "PBC1 is a candidate parser contract and is not an owner-ratified stable ABI.",
+    "PooleBoot compiles against the parser but does not yet open or parse a live configuration file.",
+    "No vector or receipt proves filesystem discovery, artifact existence, hashing, signature verification, or loading.",
+    "No receipt proves boot-menu input, timeout behavior, slot health, fallback, recovery, or diagnostic execution.",
+    "No receipt proves ExitBootServices, PBP1 population, PooleKernel transfer, target firmware, or physical media.",
+    "No key was generated or used, and no signing, merge, tag, release, firmware mutation, or media write is authorized.",
+    "N5 and production readiness remain false."
+  ]
+}

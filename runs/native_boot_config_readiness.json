@@ -1,0 +1,615 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_boot_config_readiness",
+  "status_date": "2026-07-16",
+  "status": "pass_single_host_synthetic_non_promoting",
+  "contract_id": "PBC1",
+  "selected_move_id": "N5-BOOTCFG-001",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "n5_exit_gate_satisfied": false,
+  "phase_status": {
+    "N5": "partial",
+    "N5.4": "partial"
+  },
+  "bindings": {
+    "contract": {
+      "path": "specs/native-boot-config-contract.json",
+      "sha256": "A4856E62D595F53B2EC356BEE4B8BAE7C69D43E6844965FBF1F246264CBBF1AE",
+      "byte_count": 3590
+    },
+    "contract_schema": {
+      "path": "specs/native-boot-config-contract.schema.json",
+      "sha256": "47908DB1AF7AAE2824DC886446253CB7EEA01DC7D75A6360E0F15C4EA059C3E9",
+      "byte_count": 3255
+    },
+    "golden_vectors": {
+      "path": "specs/native-boot-config-golden-vectors.json",
+      "sha256": "6D48B0A5F4C61E24AD6F08DCC14EAA78306BBB838A45D967B68192038147E976",
+      "byte_count": 7410
+    },
+    "golden_schema": {
+      "path": "specs/native-boot-config-golden-vectors.schema.json",
+      "sha256": "585DE5868F7FAD6C89C8B1A2CB705F7BDA86186A03AE72343695D32A8838B861",
+      "byte_count": 1482
+    },
+    "readiness_schema": {
+      "path": "specs/native-boot-config-readiness.schema.json",
+      "sha256": "ACE192A63646D3DD1F43BA25ADC41F0C3F8C28B3880092328B447B02E4686C20",
+      "byte_count": 2493
+    },
+    "implementation_inputs": [
+      {
+        "path": "native/Cargo.toml",
+        "sha256": "8774A0A626022A7CF74789920CC67E1F7EAC7E5F0C5F6663777FB65DFFC8E84F",
+        "byte_count": 352
+      },
+      {
+        "path": "native/Cargo.lock",
+        "sha256": "E61A04C894A359C3F1FFCEED59FC724BFDE9F42781D7AF7AFA690E937B2E9E4E",
+        "byte_count": 424
+      },
+      {
+        "path": "native/boot/Cargo.toml",
+        "sha256": "2E63BA506503773FF7CC49C8770D0C7DDBDC0A43746231B8AB609760F13D76CE",
+        "byte_count": 289
+      },
+      {
+        "path": "native/boot/src/lib.rs",
+        "sha256": "6250EC1E6973F350A715958AE96F7645EBF957C82D917CACEA123E5E7909B5E6",
+        "byte_count": 16204
+      },
+      {
+        "path": "native/bootcfg/Cargo.toml",
+        "sha256": "168CC21B1B48FD1E3D125DFB7B7EB7F008143AA414A85C7306CC78206490EEBF",
+        "byte_count": 348
+      },
+      {
+        "path": "native/bootcfg/README.md",
+        "sha256": "F7519C0648798F67D975832B979A010F45C7A942D786E4307E18960D67A61178",
+        "byte_count": 612
+      },
+      {
+        "path": "native/bootcfg/src/lib.rs",
+        "sha256": "5457ED909B36FE7ED25C96DA4EB40D33F0137F2909FC7B7B9DE1E008716C2AD9",
+        "byte_count": 19366
+      },
+      {
+        "path": "native/bootcfg/src/bin/pbc1_probe.rs",
+        "sha256": "7AC7BEDF6DC1EB408AA2070CF0E677A85DB4745B6E6CA5470DCD332E6A2AD67F",
+        "byte_count": 2620
+      },
+      {
+        "path": "runtime/native_boot_config.py",
+        "sha256": "F6915CAC71694F66AC74D2B48EE72DD63A6FD33A4E9530E835589AF434B4698E",
+        "byte_count": 25075
+      },
+      {
+        "path": "tools/generate_native_boot_config_vectors.py",
+        "sha256": "7E1B2A93FC5905341DD5E2F8C95CCC98692B5DD184D990126F890234D8EE6D83",
+        "byte_count": 865
+      },
+      {
+        "path": "tools/qualify_native_boot_config.py",
+        "sha256": "9AC6CFED7D7A235EB17DEB9AE166CB3D1AFE5AC342AA0AB07379361600E5453D",
+        "byte_count": 25760
+      },
+      {
+        "path": "tests/test_native_boot_config.py",
+        "sha256": "404275548FEBF8B088B7B2F17EC8E6618AC6A3C239EB7CDFA55FE0BB9C8F33D9",
+        "byte_count": 6173
+      },
+      {
+        "path": "docs/native-boot-config.md",
+        "sha256": "28F681C2E5ADE65E905932C28F8C9377BA3BC66D36DC56DFD284F3319442F074",
+        "byte_count": 4718
+      }
+    ]
+  },
+  "parser_qualification": {
+    "rustc_version_sha256": "F3C960598A5E9037C4CF8E4AA06C018171ABF07C381D165C3986C6A954DEA1BB",
+    "rust_host_target": "x86_64-pc-windows-msvc",
+    "rust_host_test_count": 12,
+    "rust_host_test_pass_count": 12,
+    "no_std_target_builds": [
+      {
+        "target": "x86_64-unknown-uefi",
+        "status": "pass",
+        "byte_count": 71818,
+        "sha256": "B5265F3BA9F0C567966BD88F02EFB74857E609494F2330A6C317D700FFACD35E"
+      },
+      {
+        "target": "x86_64-unknown-none",
+        "status": "pass",
+        "byte_count": 74764,
+        "sha256": "E88951CA3F2BFF0EC0B8188C9497F0A97D60028081F10746CADFF21E2982734A"
+      }
+    ],
+    "pooleboot_compile_time_integration_builds": [
+      {
+        "target": "x86_64-unknown-uefi",
+        "status": "pass",
+        "pooleboot_rlib_byte_count": 54954,
+        "pooleboot_rlib_sha256": "D2F3FC9D16EA2A955EC554ED5E09AB5162321C9611175C7DE29CDC7C2E1AC0F9"
+      },
+      {
+        "target": "x86_64-unknown-none",
+        "status": "pass",
+        "pooleboot_rlib_byte_count": 56988,
+        "pooleboot_rlib_sha256": "4DB9FC9EEF9C5314BF0AC3FF0368EE206A1DD46CB1BBACB4C8B2CA5A421E4D76"
+      }
+    ],
+    "host_probe_byte_count": 142848,
+    "host_probe_artifact_identity_recorded": false,
+    "host_probe_role": "ephemeral host-only differential transport"
+  },
+  "golden_vectors": [
+    {
+      "id": "minimal_v1",
+      "status": "pass",
+      "byte_count": 231,
+      "sha256": "803FA3D0F4D4A9B7A31FEBE7D3902BFF10F3CE95F484ECEAFDBC8BDFE70B81AD",
+      "semantic_summary_matched": true
+    },
+    {
+      "id": "multi_mode_v1",
+      "status": "pass",
+      "byte_count": 787,
+      "sha256": "809E414CD81A01CA374D75F57C094505797333294E8803CF005D87ED1A59BF5C",
+      "semantic_summary_matched": true
+    },
+    {
+      "id": "bounded_maxima_v1",
+      "status": "pass",
+      "byte_count": 1373,
+      "sha256": "DF3B25D083F738D942F55337B759F8A74F4B5A340B7FC002D7A52B000315D36C",
+      "semantic_summary_matched": true
+    }
+  ],
+  "negative_controls": [
+    {
+      "id": "NEG-N5-PBC1-EMPTY",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:empty"
+    },
+    {
+      "id": "NEG-N5-PBC1-CONFIG-OVERSIZED",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:config_too_large"
+    },
+    {
+      "id": "NEG-N5-PBC1-FINAL-LF",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:missing_final_lf"
+    },
+    {
+      "id": "NEG-N5-PBC1-NUL",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:character"
+    },
+    {
+      "id": "NEG-N5-PBC1-BOM",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:character"
+    },
+    {
+      "id": "NEG-N5-PBC1-CRLF",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:character"
+    },
+    {
+      "id": "NEG-N5-PBC1-NON-ASCII",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:character"
+    },
+    {
+      "id": "NEG-N5-PBC1-SPACE",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:character"
+    },
+    {
+      "id": "NEG-N5-PBC1-EMPTY-LINE",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:empty_line"
+    },
+    {
+      "id": "NEG-N5-PBC1-LINE-OVERSIZED",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:line_too_long"
+    },
+    {
+      "id": "NEG-N5-PBC1-LINE-COUNT",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:too_many_lines"
+    },
+    {
+      "id": "NEG-N5-PBC1-MAGIC",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:magic"
+    },
+    {
+      "id": "NEG-N5-PBC1-MAJOR-VERSION",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:version"
+    },
+    {
+      "id": "NEG-N5-PBC1-MINOR-VERSION",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:version"
+    },
+    {
+      "id": "NEG-N5-PBC1-NO-EQUALS",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:syntax"
+    },
+    {
+      "id": "NEG-N5-PBC1-EMPTY-KEY",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:syntax"
+    },
+    {
+      "id": "NEG-N5-PBC1-EMPTY-VALUE",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:syntax"
+    },
+    {
+      "id": "NEG-N5-PBC1-MULTIPLE-EQUALS",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:syntax"
+    },
+    {
+      "id": "NEG-N5-PBC1-DUPLICATE-STATIC",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:duplicate_key"
+    },
+    {
+      "id": "NEG-N5-PBC1-DUPLICATE-ENTRY",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:duplicate_key"
+    },
+    {
+      "id": "NEG-N5-PBC1-UNKNOWN-STATIC",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:unknown_key"
+    },
+    {
+      "id": "NEG-N5-PBC1-UNKNOWN-ENTRY",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:unknown_key"
+    },
+    {
+      "id": "NEG-N5-PBC1-HEADER-ORDER",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:key_order"
+    },
+    {
+      "id": "NEG-N5-PBC1-ENTRY-FIELD-ORDER",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:key_order"
+    },
+    {
+      "id": "NEG-N5-PBC1-TRUNCATED-HEADER",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:truncated"
+    },
+    {
+      "id": "NEG-N5-PBC1-TRUNCATED-ENTRY",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:truncated"
+    },
+    {
+      "id": "NEG-N5-PBC1-END-MISSING",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:end_marker"
+    },
+    {
+      "id": "NEG-N5-PBC1-END-WRONG",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:end_marker"
+    },
+    {
+      "id": "NEG-N5-PBC1-ENTRY-COUNT-ZERO",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:range"
+    },
+    {
+      "id": "NEG-N5-PBC1-ENTRY-COUNT-HIGH",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:range"
+    },
+    {
+      "id": "NEG-N5-PBC1-ENTRY-COUNT-LEADING-ZERO",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:number_canonical"
+    },
+    {
+      "id": "NEG-N5-PBC1-ENTRY-COUNT-NONNUMERIC",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:number"
+    },
+    {
+      "id": "NEG-N5-PBC1-TIMEOUT-HIGH",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:range"
+    },
+    {
+      "id": "NEG-N5-PBC1-TIMEOUT-NEGATIVE",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:number"
+    },
+    {
+      "id": "NEG-N5-PBC1-TIMEOUT-OVERFLOW",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:numeric_overflow"
+    },
+    {
+      "id": "NEG-N5-PBC1-ATTEMPTS-ZERO",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:range"
+    },
+    {
+      "id": "NEG-N5-PBC1-ATTEMPTS-HIGH",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:range"
+    },
+    {
+      "id": "NEG-N5-PBC1-DEFAULT-ID",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:identifier"
+    },
+    {
+      "id": "NEG-N5-PBC1-DEFAULT-MISSING",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:default_entry"
+    },
+    {
+      "id": "NEG-N5-PBC1-ENTRY-ID-START",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:identifier"
+    },
+    {
+      "id": "NEG-N5-PBC1-ENTRY-ID-LENGTH",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:identifier"
+    },
+    {
+      "id": "NEG-N5-PBC1-ENTRY-ORDER",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:entry_order"
+    },
+    {
+      "id": "NEG-N5-PBC1-MODE",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:mode"
+    },
+    {
+      "id": "NEG-N5-PBC1-SLOT-ZERO",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:range"
+    },
+    {
+      "id": "NEG-N5-PBC1-SLOT-HIGH",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:range"
+    },
+    {
+      "id": "NEG-N5-PBC1-SLOT-LEADING-ZERO",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:number_canonical"
+    },
+    {
+      "id": "NEG-N5-PBC1-PATH-RELATIVE",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:path"
+    },
+    {
+      "id": "NEG-N5-PBC1-PATH-ROOT",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:path"
+    },
+    {
+      "id": "NEG-N5-PBC1-PATH-SLASH",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:path"
+    },
+    {
+      "id": "NEG-N5-PBC1-PATH-TRAVERSAL",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:path"
+    },
+    {
+      "id": "NEG-N5-PBC1-PATH-EMPTY-SEGMENT",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:path"
+    },
+    {
+      "id": "NEG-N5-PBC1-PATH-LOWERCASE",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:path"
+    },
+    {
+      "id": "NEG-N5-PBC1-PATH-SUFFIX",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:path"
+    },
+    {
+      "id": "NEG-N5-PBC1-PATH-LENGTH",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:path"
+    },
+    {
+      "id": "NEG-N5-PBC1-MANIFEST-LIMIT-ZERO",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:range"
+    },
+    {
+      "id": "NEG-N5-PBC1-MANIFEST-LIMIT-HIGH",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:range"
+    },
+    {
+      "id": "NEG-N5-PBC1-MANIFEST-LIMIT-OVERFLOW",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:numeric_overflow"
+    },
+    {
+      "id": "NEG-N5-PBC1-OUTPUT-CAPACITY",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:output_capacity"
+    },
+    {
+      "id": "NEG-N5-PBC1-ARTIFACT-ZERO",
+      "surface": "artifact_size",
+      "status": "pass",
+      "rust_python_result": "ERR:artifact_size"
+    },
+    {
+      "id": "NEG-N5-PBC1-ARTIFACT-OVER-CONFIGURED",
+      "surface": "artifact_size",
+      "status": "pass",
+      "rust_python_result": "ERR:artifact_size"
+    },
+    {
+      "id": "NEG-N5-PBC1-ARTIFACT-OVER-ABSOLUTE",
+      "surface": "artifact_size",
+      "status": "pass",
+      "rust_python_result": "ERR:artifact_size"
+    },
+    {
+      "id": "NEG-N5-PBC1-DECLARED-COUNT-SHORT",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:truncated"
+    },
+    {
+      "id": "NEG-N5-PBC1-DECLARED-COUNT-EXTRA",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:key_order"
+    },
+    {
+      "id": "NEG-N5-PBC1-TRAILING-KEY",
+      "surface": "parse",
+      "status": "pass",
+      "rust_python_result": "ERR:unknown_key"
+    }
+  ],
+  "differential_fuzz": {
+    "campaign_id": "PBC1-DIFF-1",
+    "generator": "deterministic valid configurations plus byte deletion, replacement, truncation, insertion, CR, suffix, and trailing-key mutations",
+    "case_count": 16384,
+    "valid_result_count": 8346,
+    "rejected_result_count": 8038,
+    "mismatch_count": 0,
+    "corpus_published": false,
+    "status": "pass"
+  },
+  "claims": {
+    "canonical_grammar_defined": true,
+    "rust_no_std_parser_executed": true,
+    "independent_python_parser_executed": true,
+    "pooleboot_compile_time_dependency": true,
+    "golden_semantic_agreement": true,
+    "hostile_controls_executed": true,
+    "deterministic_differential_fuzz_executed": true,
+    "live_config_file_opened": false,
+    "live_config_parsed_by_pooleboot": false,
+    "boot_entry_selected": false,
+    "artifact_loaded": false,
+    "artifact_signature_verified": false,
+    "target_firmware_tested": false,
+    "n5_exit_gate_satisfied": false,
+    "production_ready": false
+  },
+  "summary": {
+    "rust_host_tests_passed": 12,
+    "rust_host_tests_total": 12,
+    "no_std_target_builds_passed": 2,
+    "no_std_target_builds_total": 2,
+    "golden_vectors_matched": 3,
+    "golden_vectors_total": 3,
+    "negative_controls_passed": 64,
+    "negative_controls_total": 64,
+    "differential_fuzz_cases": 16384,
+    "differential_mismatches": 0,
+    "production_claim_count": 0
+  },
+  "open_items": [
+    "Ratify or replace PBC1 before declaring a stable boot ABI.",
+    "Implement Loaded Image and Simple File System discovery in PooleBoot.",
+    "Read the bounded configuration file with exact truncation and size checks.",
+    "Bind selected entries to signed manifest verification and rollback policy.",
+    "Implement boot-menu input, timeout, safe, previous, recovery, and diagnostic behavior.",
+    "Implement ELF64 loading and exact loaded-artifact hashing.",
+    "Populate PBP1 from live firmware state and transfer only after ExitBootServices.",
+    "Reproduce on a second independent builder and execute on target firmware.",
+    "Complete separately authorized physical-media qualification and signed ISO release gates."
+  ],
+  "claim_boundary": [
+    "PBC1 is a candidate parser contract and is not an owner-ratified stable ABI.",
+    "PooleBoot compiles against the parser but does not yet open or parse a live configuration file.",
+    "No vector or receipt proves filesystem discovery, artifact existence, hashing, signature verification, or loading.",
+    "No receipt proves boot-menu input, timeout behavior, slot health, fallback, recovery, or diagnostic execution.",
+    "No receipt proves ExitBootServices, PBP1 population, PooleKernel transfer, target firmware, or physical media.",
+    "No key was generated or used, and no signing, merge, tag, release, firmware mutation, or media write is authorized.",
+    "N5 and production readiness remain false."
+  ]
+}
