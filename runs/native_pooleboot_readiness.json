@@ -8,14 +8,14 @@
     },
     "implementation_inputs": [
       {
-        "byte_count": 352,
+        "byte_count": 359,
         "path": "native/Cargo.toml",
-        "sha256": "8774A0A626022A7CF74789920CC67E1F7EAC7E5F0C5F6663777FB65DFFC8E84F"
+        "sha256": "28E18C4ED69537CD54707A96031E9B879EA82B8A209BCCDCAA7AE1B437D4D632"
       },
       {
-        "byte_count": 424,
+        "byte_count": 488,
         "path": "native/Cargo.lock",
-        "sha256": "E61A04C894A359C3F1FFCEED59FC724BFDE9F42781D7AF7AFA690E937B2E9E4E"
+        "sha256": "645F5C0D0191DDC53CEE7C00630B70F0ABDC1A2A0DC1B9976201C5A4982929E4"
       },
       {
         "byte_count": 131,
@@ -28,14 +28,14 @@
         "sha256": "98D1AD53467848CFE31349BE720C58CC1432570F5564FA9B8F727482BBBD2A23"
       },
       {
-        "byte_count": 289,
+        "byte_count": 321,
         "path": "native/boot/Cargo.toml",
-        "sha256": "2E63BA506503773FF7CC49C8770D0C7DDBDC0A43746231B8AB609760F13D76CE"
+        "sha256": "B17FB0517679B6C007CA58C74BEAB2054472C11C27898B98D71F2276D80FD262"
       },
       {
-        "byte_count": 16204,
+        "byte_count": 16230,
         "path": "native/boot/src/lib.rs",
-        "sha256": "6250EC1E6973F350A715958AE96F7645EBF957C82D917CACEA123E5E7909B5E6"
+        "sha256": "CC1253505E6FEA3BEA3B2C0EC129CDF250B3DEBA337C35B5E3DD35F5D45976C2"
       },
       {
         "byte_count": 18466,
@@ -121,7 +121,7 @@
     "toolchain_qualification": {
       "byte_count": 14394,
       "path": "runs/native_toolchain_qualification.json",
-      "sha256": "0D661BC30C777221FA85DDFD9556616824B6A2E3784519DD3B4065455D721FDA"
+      "sha256": "E8477D2DEFA64DBA7FB4B202B8DEB9B95127385076B192A5290270272C6D53B0"
     }
   },
   "build": {
@@ -190,11 +190,11 @@
           "virtual_size": 44
         }
       ],
-      "sha256": "AACDED830A7458D2F4355D6F5C20A77E1CF67310DBA33E3C9F83E521125F0D5A",
+      "sha256": "41C8BED3FF977C3FEE103D0B958973A767CE26FAF135F0011F591355F5F57335",
       "subsystem": 10,
       "timestamp": 0
     },
-    "sha256": "AACDED830A7458D2F4355D6F5C20A77E1CF67310DBA33E3C9F83E521125F0D5A"
+    "sha256": "41C8BED3FF977C3FEE103D0B958973A767CE26FAF135F0011F591355F5F57335"
   },
   "claim_boundary": [
     "This contract covers one unsigned UEFI proof application, not the complete PooleBoot loader.",
@@ -507,7 +507,7 @@
             "virtual_size": 44
           }
         ],
-        "sha256": "AACDED830A7458D2F4355D6F5C20A77E1CF67310DBA33E3C9F83E521125F0D5A",
+        "sha256": "41C8BED3FF977C3FEE103D0B958973A767CE26FAF135F0011F591355F5F57335",
         "subsystem": 10,
         "timestamp": 0
       },
@@ -534,7 +534,7 @@
           "byte_count": 13312,
           "cluster_count": 26,
           "path": "EFI/BOOT/BOOTX64.EFI",
-          "sha256": "AACDED830A7458D2F4355D6F5C20A77E1CF67310DBA33E3C9F83E521125F0D5A"
+          "sha256": "41C8BED3FF977C3FEE103D0B958973A767CE26FAF135F0011F591355F5F57335"
         }
       ],
       "gpt": {
@@ -549,7 +549,7 @@
         "protective_mbr_valid": true,
         "sector_bytes": 512,
         "sector_count": 131072,
-        "sha256": "D8B480E5448B9C4B961900F1F9F1DD827743DB227DC54CC023EB244131875C93"
+        "sha256": "601AD60A4ADE586CB512A4A262DB043B879653FD0EE545F56265797F4E1831BE"
       }
     },
     "ordinary_workspace_file_only": true,

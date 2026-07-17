@@ -1,6 +1,6 @@
 # PKELF1 PooleKernel ELF64 Loader Boundary
 
-Status: Cycle 100 candidate, pre-production and non-promoting
+Status: Cycle 100 qualified candidate, pre-production and non-promoting
 Requirement: `N5-ELF-001`, source section `015`, subphase `N5.5`
 
 ## Purpose
