@@ -3,14 +3,16 @@
 
 pub use poole_boot_config as boot_config;
 pub use poole_elf as elf;
+pub use poole_manifest as manifest;
 
-pub const CONTRACT_ID: &str = "PKLOAD1";
+pub const CONTRACT_ID: &str = "PKLOAD2";
 pub const VIRTUAL_BASE: u64 = poole_elf::MIN_VIRTUAL_BASE;
 pub const EFI_FILE_INFO_FIXED_BYTES: usize = 80;
 pub const MAX_FILE_INFO_BYTES: usize = 512;
 pub const EFI_FILE_ATTRIBUTE_DIRECTORY: u64 = 0x10;
 pub const EFI_FILE_VALID_ATTRIBUTES: u64 = 0x37;
-pub const MAX_RESOURCE_DEPTH: usize = 6;
+pub const MAX_RESOURCE_DEPTH: usize = 8;
+pub const MAX_UEFI_PATH_UNITS: usize = poole_manifest::MAX_PATH_BYTES + 1;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Error {
@@ -25,7 +27,10 @@ pub enum Error {
     ResourceOverflow,
     ResourceOrder,
     ResourceLeak,
+    PathEncoding,
+    ManifestBinding,
     BootConfig(poole_boot_config::Error),
+    Manifest(poole_manifest::Error),
     Elf(poole_elf::Error),
 }
 
@@ -43,9 +48,44 @@ impl Error {
             Self::ResourceOverflow => "resource_overflow",
             Self::ResourceOrder => "resource_order",
             Self::ResourceLeak => "resource_leak",
+            Self::PathEncoding => "path_encoding",
+            Self::ManifestBinding => "manifest_binding",
             Self::BootConfig(error) => error.code(),
+            Self::Manifest(error) => error.code(),
             Self::Elf(error) => error.code(),
         }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct OwnedPath {
+    bytes: [u8; poole_manifest::MAX_PATH_BYTES],
+    length: u16,
+}
+
+impl OwnedPath {
+    pub fn copy_from(value: &str) -> Result<Self, Error> {
+        if value.is_empty() || value.len() > poole_manifest::MAX_PATH_BYTES || !value.is_ascii() {
+            return Err(Error::PathEncoding);
+        }
+        let mut bytes = [0u8; poole_manifest::MAX_PATH_BYTES];
+        bytes[..value.len()].copy_from_slice(value.as_bytes());
+        Ok(Self {
+            bytes,
+            length: value.len() as u16,
+        })
+    }
+
+    pub fn as_bytes(&self) -> &[u8] {
+        &self.bytes[..usize::from(self.length)]
+    }
+
+    pub const fn len(&self) -> usize {
+        self.length as usize
+    }
+
+    pub const fn is_empty(&self) -> bool {
+        self.length == 0
     }
 }
 
@@ -65,6 +105,22 @@ pub struct ConfigSummary {
     pub boot_attempt_limit: u8,
     pub selected_slot: u8,
     pub manifest_max_bytes: u32,
+    pub manifest_path: OwnedPath,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ManifestSummary {
+    pub byte_count: usize,
+    pub artifact_count: usize,
+    pub manifest_id_hash: u64,
+    pub slot: u8,
+    pub manifest_version: u64,
+    pub minimum_secure_version: u64,
+    pub kernel_version: u64,
+    pub kernel_path: OwnedPath,
+    pub kernel_file_bytes: usize,
+    pub kernel_image_bytes: usize,
+    pub kernel_sha256: [u8; 32],
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -88,6 +144,8 @@ pub enum ResourceKind {
     RootFile,
     ConfigFile,
     ConfigPool,
+    ManifestFile,
+    ManifestPool,
     KernelFile,
     KernelPool,
     KernelPages,
@@ -225,7 +283,66 @@ pub fn parse_config(bytes: &[u8]) -> Result<ConfigSummary, Error> {
         boot_attempt_limit: config.boot_attempt_limit,
         selected_slot: selected.slot,
         manifest_max_bytes: selected.manifest_max_bytes,
+        manifest_path: OwnedPath::copy_from(selected.manifest)?,
     })
+}
+
+pub fn encode_uefi_path(path: &OwnedPath) -> Result<[u16; MAX_UEFI_PATH_UNITS], Error> {
+    if path.is_empty() || path.len() + 1 > MAX_UEFI_PATH_UNITS {
+        return Err(Error::PathEncoding);
+    }
+    let mut units = [0u16; MAX_UEFI_PATH_UNITS];
+    for (index, byte) in path.as_bytes().iter().copied().enumerate() {
+        if !(b'!'..=b'~').contains(&byte) {
+            return Err(Error::PathEncoding);
+        }
+        units[index] = u16::from(byte);
+    }
+    Ok(units)
+}
+
+pub fn parse_manifest(bytes: &[u8], selected_slot: u8) -> Result<ManifestSummary, Error> {
+    let mut storage = [poole_manifest::Artifact::EMPTY; poole_manifest::MAX_ARTIFACTS];
+    let manifest = poole_manifest::parse(bytes, &mut storage).map_err(Error::Manifest)?;
+    if manifest.slot != selected_slot {
+        return Err(Error::ManifestBinding);
+    }
+    let kernel = manifest.kernel().map_err(Error::Manifest)?;
+    let kernel_file_bytes =
+        usize::try_from(kernel.file_bytes).map_err(|_| Error::ManifestBinding)?;
+    let kernel_image_bytes =
+        usize::try_from(kernel.image_bytes).map_err(|_| Error::ManifestBinding)?;
+    if kernel_file_bytes == 0
+        || kernel_file_bytes > poole_elf::MAX_FILE_BYTES
+        || kernel_image_bytes == 0
+        || kernel_image_bytes > poole_elf::MAX_IMAGE_BYTES as usize
+    {
+        return Err(Error::ManifestBinding);
+    }
+    Ok(ManifestSummary {
+        byte_count: bytes.len(),
+        artifact_count: manifest.artifacts.len(),
+        manifest_id_hash: poole_elf::fnv1a64(manifest.manifest_id.as_bytes()),
+        slot: manifest.slot,
+        manifest_version: manifest.manifest_version,
+        minimum_secure_version: manifest.minimum_secure_version,
+        kernel_version: kernel.version,
+        kernel_path: OwnedPath::copy_from(kernel.path)?,
+        kernel_file_bytes,
+        kernel_image_bytes,
+        kernel_sha256: kernel.sha256,
+    })
+}
+
+pub fn verify_manifest_kernel(manifest: &ManifestSummary, bytes: &[u8]) -> Result<[u8; 32], Error> {
+    if bytes.len() != manifest.kernel_file_bytes {
+        return Err(Error::ManifestBinding);
+    }
+    let digest = poole_manifest::sha256(bytes);
+    if digest != manifest.kernel_sha256 {
+        return Err(Error::ManifestBinding);
+    }
+    Ok(digest)
 }
 
 pub fn validate_image_plan(plan: &poole_elf::ImagePlan) -> Result<(), Error> {
@@ -296,6 +413,20 @@ pub fn plan_kernel(bytes: &[u8]) -> Result<KernelAllocationPlan, Error> {
     })
 }
 
+pub fn plan_manifest_kernel(
+    bytes: &[u8],
+    manifest: &ManifestSummary,
+) -> Result<KernelAllocationPlan, Error> {
+    verify_manifest_kernel(manifest, bytes)?;
+    let plan = plan_kernel(bytes)?;
+    if plan.file_size != manifest.kernel_file_bytes
+        || plan.image_size != manifest.kernel_image_bytes
+    {
+        return Err(Error::ManifestBinding);
+    }
+    Ok(plan)
+}
+
 pub fn load_kernel(
     bytes: &[u8],
     physical_base: u64,
@@ -318,6 +449,20 @@ pub fn load_kernel(
     })
 }
 
+pub fn load_manifest_kernel(
+    bytes: &[u8],
+    manifest: &ManifestSummary,
+    physical_base: u64,
+    destination: &mut [u8],
+) -> Result<LoadedKernel, Error> {
+    verify_manifest_kernel(manifest, bytes)?;
+    let loaded = load_kernel(bytes, physical_base, destination)?;
+    if loaded.image.image_size as usize != manifest.kernel_image_bytes {
+        return Err(Error::ManifestBinding);
+    }
+    Ok(loaded)
+}
+
 #[cfg(test)]
 mod tests {
     extern crate std;
@@ -325,6 +470,7 @@ mod tests {
     use super::*;
 
     const CONFIG: &[u8] = b"POOLEOS-BOOTCFG/1.0\nentry_count=1\ndefault_entry=normal\ntimeout_ms=0\nboot_attempt_limit=3\nentry.normal.mode=normal\nentry.normal.slot=1\nentry.normal.manifest=\\EFI\\POOLEOS\\MANIFEST_A.PBM\nentry.normal.manifest_max_bytes=65536\nend=PBC1\n";
+    const MANIFEST: &[u8] = b"POOLEOS-SYSTEM-MANIFEST/1.0\nmanifest_id=PSM-CYCLE103-SLOT1\nslot=1\nmanifest_version=1\nminimum_secure_version=1\nartifact_count=1\nartifact.kernel.type=kernel\nartifact.kernel.format=PKELF1\nartifact.kernel.version=1\nartifact.kernel.path=\\EFI\\POOLEOS\\KERNEL.ELF\nartifact.kernel.file_bytes=3\nartifact.kernel.image_bytes=4096\nartifact.kernel.sha256=BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD\nartifact.kernel.entry_contract=PKENTRY1\nend=PSM1\n";
 
     fn file_info(file_size: u64, physical_size: u64, attributes: u64) -> [u8; 84] {
         let mut bytes = [0u8; 84];
@@ -463,6 +609,46 @@ mod tests {
         assert_eq!(summary.boot_attempt_limit, 3);
         assert_eq!(summary.selected_slot, 1);
         assert_eq!(summary.manifest_max_bytes, 65_536);
+        assert_eq!(
+            summary.manifest_path.as_bytes(),
+            b"\\EFI\\POOLEOS\\MANIFEST_A.PBM"
+        );
+    }
+
+    #[test]
+    fn manifest_summary_binds_slot_path_size_version_and_digest() {
+        let summary = parse_manifest(MANIFEST, 1).unwrap();
+        assert_eq!(summary.byte_count, MANIFEST.len());
+        assert_eq!(summary.artifact_count, 1);
+        assert_eq!(summary.slot, 1);
+        assert_eq!(summary.manifest_version, 1);
+        assert_eq!(summary.minimum_secure_version, 1);
+        assert_eq!(summary.kernel_version, 1);
+        assert_eq!(
+            summary.kernel_path.as_bytes(),
+            b"\\EFI\\POOLEOS\\KERNEL.ELF"
+        );
+        assert_eq!(summary.kernel_file_bytes, 3);
+        assert_eq!(summary.kernel_image_bytes, 4096);
+        assert_eq!(
+            verify_manifest_kernel(&summary, b"abc"),
+            Ok(summary.kernel_sha256)
+        );
+        assert_eq!(
+            verify_manifest_kernel(&summary, b"abd"),
+            Err(Error::ManifestBinding)
+        );
+        assert_eq!(parse_manifest(MANIFEST, 2), Err(Error::ManifestBinding));
+    }
+
+    #[test]
+    fn owned_paths_encode_to_bounded_nul_terminated_uefi_units() {
+        let path = OwnedPath::copy_from("\\EFI\\POOLEOS\\SYSTEM_A.PBM").unwrap();
+        let units = encode_uefi_path(&path).unwrap();
+        assert_eq!(units[path.len()], 0);
+        assert_eq!(units[0], u16::from(b'\\'));
+        assert_eq!(units[path.len() - 1], u16::from(b'M'));
+        assert!(units[path.len() + 1..].iter().all(|unit| *unit == 0));
     }
 
     #[test]

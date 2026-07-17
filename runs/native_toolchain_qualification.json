@@ -28,13 +28,13 @@
     "build_inputs": [
       {
         "path": "native/Cargo.toml",
-        "sha256": "EB0CCD413A70BECC8009720465FE3CE859C419676BCC95816D71A8E6FE06DA50",
-        "byte_count": 414
+        "sha256": "A3AC7F136CE84828052542F8A1115CB2194154EF91667C83A993A8DD6B4F67AA",
+        "byte_count": 428
       },
       {
         "path": "native/Cargo.lock",
-        "sha256": "B30C31CC724042D667FF858C1304B2913727870B97F7661C462D95DEB18B95B8",
-        "byte_count": 706
+        "sha256": "2F366F1D10615F43233B6A853CAF3995B7743E002C5F03EA3DACC255720602FB",
+        "byte_count": 2788
       },
       {
         "path": "native/rust-toolchain.toml",
@@ -43,8 +43,8 @@
       },
       {
         "path": "native/.cargo/config.toml",
-        "sha256": "98D1AD53467848CFE31349BE720C58CC1432570F5564FA9B8F727482BBBD2A23",
-        "byte_count": 363
+        "sha256": "7983881C5CAD2B909CCA64BFA7F5895EC56377B0E52967444CB2818A69FA4FE1",
+        "byte_count": 539
       },
       {
         "path": "native/fixtures/pooleboot/Cargo.toml",

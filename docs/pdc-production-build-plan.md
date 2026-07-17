@@ -1,8 +1,8 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-07-16  
-Plan version: 2.9.0-native-kernel-load
-Roadmap cycle: PooleOS Cycle 102
+Status date: 2026-07-17
+Plan version: 2.10.0-native-system-manifest
+Roadmap cycle: PooleOS Cycle 103
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
@@ -110,7 +110,7 @@ Recovery boots from a separately signed immutable image and remains usable witho
 
 ## 5. Current Evidence Baseline
 
-Cycle 80 reset architecture claims without discarding validated component evidence. Cycles 81-96 established the native constitution, source boundary, pinned one-host toolchain, owner-controlled governance state, hardware and Tier 0 profiles, bounded formal models, and the PooleGlyph co-development lane. Cycles 97-100 qualified the first PooleBoot proof, PBP1, PBC1, and PKELF1. Cycle 101 produced the real reproducible PKENTRY1 PooleKernel image. Cycle 102 executes `N5-KLOAD-001`: PooleBoot now discovers its own UEFI filesystem, performs exact bounded reads of live PBC1 and PKELF1 files, allocates firmware pages, materializes the canonical kernel image and relative relocations, validates a four-range W^X mapping plan, and releases every file, pool, and page before returning. Two exact QEMU/OVMF runs agree with an independent host oracle across 17 ordered markers and 30 hostile controls. The path remains fixed and untrusted; no manifest authentication, retained mappings, PBP1 production, `ExitBootServices`, or transfer follows.
+Cycle 80 reset architecture claims without discarding validated component evidence. Cycles 81-96 established the native constitution, source boundary, pinned one-host toolchain, owner-controlled governance state, hardware and Tier 0 profiles, bounded formal models, and the PooleGlyph co-development lane. Cycles 97-100 qualified the first PooleBoot proof, PBP1, PBC1, and PKELF1. Cycle 101 produced the real reproducible PKENTRY1 PooleKernel image, and Cycle 102 qualified bounded live load then release. Cycle 103 executes `N5-MANIFEST-001`: canonical PSM1 now binds live PBC1 selection to exact slot/version/path/file/image/SHA-256/PKENTRY1 fields, and PooleBoot verifies the real kernel before allocation and again before materialization. Two exact QEMU/OVMF runs agree with independent host oracles across 19 ordered markers and 40 hostile integration controls. The manifest remains unsigned and attacker-controllable; no signature trust, persistent rollback, provider security promotion, retained mappings, live PBP1, `ExitBootServices`, or transfer follows.
 
 | Area | Current evidence | Native status | Boundary |
 |---|---|---|---|
@@ -126,22 +126,23 @@ Cycle 80 reset architecture claims without discarding validated component eviden
 | QEMU/Buildroot | Historical lab scaffolding and evidence contracts | Reference only | Cannot satisfy native boot, kernel, driver, or ISO gates |
 | Native Tier 0 | `POOLEOS-TIER0-Q35-1`; exact 1,180,772,298-byte QEMU runtime closure; two profiles; 4/4 paused q35/QMP probes; 18/18 negative controls | Partial N4.1-N4.4 | No guest CPU execution, native media, PooleBoot boot, current source rebuild, driver execution, Secure Boot, formal model, or N4 exit claim |
 | Native formal models | `POOLEOS-N4-MODELS-5`; six safe state spaces drained; twenty-one required hostile invariant violations; 27/27 repeat matches; 31/31 negative controls | Partial N4.5-N4.6 | All seven required domains have bounded safety models; all six implementation-trace comparisons, liveness, refinement, ABI-freeze, kernel/filesystem execution, hardware durability, and promotion remain open |
-| Native PooleBoot proof | `POOLEOS-N5-POOLEBOOT-2`; 8/8 host tests; 2/2 exact 45,056-byte PE32+ builds; 2/2 exact three-file GPT/FAT32 images; 2/2 pinned OVMF runs; seventeen ordered markers; 2/2 dual-channel and GOP-frame matches; 30/30 hostile controls | Partial N5.1-N5.5/N5.7 | Unsigned load-then-release proof; no manifest authentication, retained mappings, handoff, `ExitBootServices`, transfer, target firmware, physical media, N5 exit, or production claim |
+| Native PooleBoot proof | `POOLEOS-N5-POOLEBOOT-3`; 8/8 host tests; 2/2 exact 61,440-byte PE32+ builds; 2/2 exact four-file GPT/FAT32 images; 2/2 pinned OVMF runs; nineteen ordered markers; 2/2 dual-channel and GOP-frame matches; 40/40 hostile controls | Partial N5.1-N5.5/N5.7 | Unsigned manifest-bound load-then-release proof; no signature trust, persistent rollback, retained mappings, handoff, `ExitBootServices`, transfer, target firmware, physical media, N5 exit, or production claim |
 | Native PBP1 handoff | Canonical 64-byte header and 32-byte descriptors; twelve typed records; 8/8 Rust tests; 2/2 `no_std` target builds; 3/3 golden vectors; 32/32 controls; 16,384 Rust/Python differential cases with zero mismatches | Partial N5.8 | Synthetic protocol qualification only; no live producer, `ExitBootServices`, transfer, kernel consumer, ABI ratification, target firmware, or N5 exit |
-| Native PBC1 boot configuration | Canonical ASCII/LF grammar; allocation-free `no_std` parser; independent Python oracle; 12/12 Rust tests; 2/2 parser and 2/2 PooleBoot integration target builds; 3/3 vectors; 64/64 controls; 16,384 differential cases with zero mismatches | Partial N5.4 | Standalone PBC1 receipt remains parser-only; PKLOAD1 separately proves a live exact read and parse, but not trusted selection or manifest consumption |
-| Native PKELF1 kernel loader | Bounded ELF64 `ET_DYN` profile; dependency-free `no_std` loader; independent Python oracle; 12/12 Rust tests; 2/2 target and 2/2 PooleBoot integration builds; 3/3 exact loaded images; 129/129 controls; 16,384 differential cases with zero mismatches | Partial N5.5 | Standalone PKELF1 receipt remains caller-buffer evidence; PKLOAD1 separately proves live allocation/load/release, but no installed page tables or transfer |
-| Native PKLOAD1 integration | Exact live PBC1 and real 139,264-byte PKELF1 reads; 33/33 Rust host tests; 2/2 exact PooleBoot, kernel, media, and QEMU runs; 17 markers; 30/30 controls; exact guest/oracle load agreement | Partial N5.1/N5.4/N5.5 | Fixed untrusted development path; load then release; no manifest authentication, retained pages, installed mappings, PBP1, `ExitBootServices`, or entry |
+| Native PBC1 boot configuration | Canonical ASCII/LF grammar; allocation-free `no_std` parser; independent Python oracle; 12/12 Rust tests; 2/2 parser and 2/2 PooleBoot integration target builds; 3/3 vectors; 64/64 controls; 16,384 differential cases with zero mismatches | Partial N5.4 | Standalone PBC1 receipt remains parser-only; PKLOAD2 separately proves a live exact read and PSM1 selection, but not signature trust or persistent rollback |
+| Native PSM1 system manifest | Canonical bounded ASCII/LF grammar; allocation-free `no_std` parser; independent Python oracle; exact slot/version/path/file/image/SHA-256/entry binding; 8/8 Rust tests; 2/2 `no_std` targets; one PooleBoot integration build; 3/3 vectors; 64/64 controls; 16,384 differential and 1,027 digest cases with zero mismatches | Partial N5.4-N5.5 | Unsigned digest-bound development selection only; PBDIGEST1 security review, signatures, signer/revocation policy, and persistent rollback remain open |
+| Native PKELF1 kernel loader | Bounded ELF64 `ET_DYN` profile; dependency-free `no_std` loader; independent Python oracle; 12/12 Rust tests; 2/2 target and 2/2 PooleBoot integration builds; 3/3 exact loaded images; 129/129 controls; 16,384 differential cases with zero mismatches | Partial N5.5 | Standalone PKELF1 receipt remains caller-buffer evidence; PKLOAD2 separately proves manifest-bound live allocation/load/release, but no installed page tables or transfer |
+| Native PKLOAD2 integration | Exact live PBC1, PSM1, and real 139,264-byte PKELF1 reads; 35/35 Rust host tests; 2/2 exact PooleBoot, kernel, media, and QEMU runs; 19 markers; 40/40 controls; exact guest/oracle manifest/digest/load agreement | Partial N5.1/N5.4/N5.5 | Unsigned digest-bound development path; load then release; no signature trust, retained pages, installed mappings, live PBP1, `ExitBootServices`, or entry |
 | Native PKENTRY1 PooleKernel | Real 139,264-byte canonical PKELF1 product; fixed 0x4000 entry; 40 relative relocations; 13/13 host tests; 2/2 exact clean builds; 43/43 hostile controls; exact Rust/Python loaded bytes | Partial N6.4-N6.6 | Live PooleBoot load is now proved only through release; authentication, retained page tables, `ExitBootServices`, transfer, privileged diagnostics execution, descriptor tables, runtime, target firmware, and N6 exit remain open |
 | Native v1 objectives | 38 measurable owner-directed definitions: 7 reliability, 8 accessibility, 6 compatibility, 7 privacy, and 10 performance; ten negative controls pass | Partial N0.6 | Zero targets measured; cryptographic signature and all implementation evidence remain open |
-| Test suite | Cycle 102: 575 tests pass with one Windows symlink-permission skip, including PKLOAD1 live-file/allocation/load/cleanup/marker/oracle/claim controls | Partial N36 | Predominantly host/reference, bounded-model, emulator, and artifact tests; no PooleKernel entry trace exists |
-| Release gate | Cycle 102: 75/75 consistency checks over 70 artifacts; 20 native gaps | Partial N37 | `production_ready=false`; not a release acceptance gate |
+| Test suite | Cycle 103: 581 tests pass with one Windows symlink-permission skip, including PSM1 and PKLOAD2 manifest/digest/live-file/allocation/load/cleanup/marker/oracle/claim controls | Partial N36 | Predominantly host/reference, bounded-model, emulator, and artifact tests; no PooleKernel entry trace exists |
+| Release gate | Cycle 103: 76/76 consistency checks over 71 artifacts; 20 native gaps | Partial N37 | `production_ready=false`; not a release acceptance gate |
 | Source control | Public `rookepoole/PooleOS`, protected `main`, topic-branch workflow, private vulnerability reporting | Partial N1/N37 | Initial commit unsigned; signed tags, immutable release refs, retained CI, and full review policy remain open |
 | ADR ratification | Frozen 16-source owner packet, completed public-safe response receipt, 2/2 ADR dispositions, 38/38 definition dispositions, canonical OpenSSH `SSHSIG` contract, public trust/revocation files, signed-tag/remote verifier, and 38 combined packet/response/ceremony controls | Partial N0/N1/N37 | Packet stays historically unselected; all seven ADRs are owner-directed but unsigned; selected hardware key unavailable; zero trusted keys; key generation, signing, merge, tag, and publication unauthorized |
 | Native toolchain | Rust 1.97.0/Cargo 1.97.0/LLD 22.1.6; dedicated empty PE32+/ELF64 fixtures and the PooleBoot product each reproduce exactly on one host | Partial N3 | Second host, source provenance, and remaining tool families are open |
 | Tier 1 hardware | Exact target matches 24/24 required identity checks; 16 allowlisted user-mode CPUID records are captured and decoded; 14/14 negative controls pass with zero privacy violations | Partial N2 | Seven required channels remain non-complete, including partial CPU/MSR and SPD/topology; 15 standards hashes, ten lab prerequisites, and native comparison remain open |
-| Native bootloader | Reproducible unsigned Poole-authored PE32+ UEFI application with bounded live PBC1/PKELF1 intake, load-plan validation, cleanup, firmware-table/map/GOP behavior | Partial N5.1-N5.5/N5.7 | No authenticated manifest, retained mappings, handoff, transfer, target firmware, or N5 exit |
+| Native bootloader | Reproducible unsigned Poole-authored PE32+ UEFI application with bounded live PBC1/PSM1/PKELF1 intake, digest and load-plan validation, cleanup, firmware-table/map/GOP behavior | Partial N5.1-N5.5/N5.7 | No signature-authenticated manifest, trusted rollback state, retained mappings, handoff, transfer, target firmware, or N5 exit |
 | Native kernel | Real reproducible PooleKernel PKELF1 source and image, loaded then released by PooleBoot under OVMF | Partial N6.4-N6.6 | No entry, descriptor/exception runtime, ring 3, IPC, capability, or driver-domain execution |
-| Native media | Deterministic 64 MiB protective-MBR/GPT/FAT32 development image with exact fallback EFI, PBC1 config, and PKELF1 kernel | Partial N5.1/N5.4/N5.5 | Ordinary-file proof media; no El Torito ISO, installer, signature, physical write, or N39 evidence |
+| Native media | Deterministic 64 MiB protective-MBR/GPT/FAT32 development image with exact fallback EFI, PBC1 config, PSM1 system manifest, and PKELF1 kernel | Partial N5.1/N5.4/N5.5 | Ordinary-file proof media; no El Torito ISO, installer, signature, physical write, or N39 evidence |
 
 ### 5.1 Exact Tier 1 machine facts observed on 2026-07-15
 
@@ -393,7 +394,7 @@ Cycle 82 qualification evidence:
 
 Open N3 work: a second clean host, detached-signature and source-rebuild provenance, freestanding C17, bounded assembly, ABI probes/headers, archive and image tools, QEMU/OVMF source-build integration, generated ABI tables, complete build graph, static analysis, unsafe inventory, and the remaining section 008-011 requirements.
 
-Cycle 102 control-plane validation passes 575 tests with one Windows symlink-permission skip, Doctor passes 380/380 checks against live PooleGlyph Phase 65, and the complete consistency release gate passes 75/75 checks over 70 artifacts while retaining 20 explicit gaps and `production_ready=false`. Exact public-index, release-gate, and handoff hashes are recorded in the Cycle 102 log after staging.
+Cycle 103 control-plane validation passes 581 tests with one Windows symlink-permission skip, Doctor passes 398/398 checks against live PooleGlyph Phase 65 without runtime mutation, and the complete consistency release gate passes 76/76 checks over 71 artifacts while retaining 20 explicit gaps and `production_ready=false`. Exact public-index, release-gate, and handoff hashes are recorded in the Cycle 103 log after staging.
 
 Exit gate: two clean host environments reproduce bootstrap tools and empty native images; host headers/libraries cannot leak; ABI fixtures pass independently; all generated inputs are declared.
 
@@ -503,13 +504,21 @@ Cycle 102 PKLOAD1 evidence:
 - `runtime/native_kernel_load.py` independently builds and inspects exact three-file GPT/FAT32 media, parses PBC1 and PKELF1, reconstructs loaded bytes, and binds the guest FNV-1a result without entering the production boot chain;
 - `runs/native_kernel_load_readiness.json` records 33/33 Rust host tests, two exact 45,056-byte PooleBoot builds, two exact canonical kernel builds, two exact 67,108,864-byte media generations, two fresh-vars QEMU/OVMF runs, 17/17 ordered markers, 30/30 hostile controls, exact guest/oracle agreement, zero production claims, and `n5_exit_gate_satisfied=false`.
 
-N5.1-N5.5, N5.7, and N5.8 are partial. N5.6 and N5.9 remain not started. PooleBoot now performs bounded live PBC1 and PKELF1 reads, exact firmware-page allocation, relocation, mapping-plan validation, and full load-then-release cleanup. It still does not consume a manifest, authenticate or retain the kernel, install or activate page tables, load system artifacts, populate PBP1 from live firmware, call `ExitBootServices`, transfer to or execute PooleKernel, enforce Secure Boot, measure through TCG2, use TPM state, create a signature, test target firmware, write physical media, build an ISO, or satisfy the N5 exit gate. The static identity is not the final animated PooleGlass boot experience or an accessibility result.
+Cycle 103 PSM1 and PKLOAD2 evidence:
+
+- `specs/native-system-manifest-contract.json` freezes strict printable-ASCII/LF PSM1, 65,536-byte/192-line/16-artifact bounds, exact canonical field order, root-confined uppercase paths, one PKELF1/PKENTRY1 kernel, and slot/version/file/image/SHA-256 binding;
+- `native/manifest` is the allocation-free `no_std` Rust parser and digest adapter; `runtime/native_system_manifest.py` is the independent host oracle; 8/8 Rust tests, two `no_std` targets, one PooleBoot integration build, 3/3 vectors, 64/64 controls, 16,384 differential cases, and 1,027 independent SHA-256 cases pass with zero mismatch;
+- PBDIGEST1 pins vendored RustCrypto `sha2` 0.11.0, default features off, the `soft-compact` UEFI backend, locked checksums, and `/pooleos/native` path remapping; independent cryptographic/supply-chain review and target-backend promotion remain open under `ADD-BOOT-003` and `FLAG-N6-BOOT-DIGEST-001`;
+- PooleBoot opens live PBC1, then its selected 462-byte `SYSTEM_A.PBM`, binds slot/version/path/file/image/digest/entry fields, hashes the 139,264-byte kernel before allocation and again before loading, materializes 196,608 bytes with 40 relocations, validates four W^X-safe mapping ranges, then closes four handles, frees three pools, and frees all 48 pages;
+- two exact 61,440-byte PooleBoot builds, two exact kernel builds, two exact four-file 64 MiB media images, two fresh-vars QEMU/OVMF runs, 19 ordered markers, 40/40 integration controls, and exact guest/oracle agreement pass with `selection=manifest_digest_untrusted`, `entry=not_called`, and `n5_exit_gate_satisfied=false`.
+
+N5.1-N5.5, N5.7, and N5.8 are partial. N5.6 and N5.9 remain not started. PooleBoot now performs bounded live PBC1/PSM1/PKELF1 reads, exact unsigned manifest and digest binding, firmware-page allocation, relocation, mapping-plan validation, and full load-then-release cleanup. It still does not authenticate a signer, enforce persistent rollback, retain the kernel, install or activate page tables, load the initial system bundle, populate PBP1 from live firmware, call `ExitBootServices`, transfer to or execute PooleKernel, enforce Secure Boot, measure through TCG2, use TPM state, test target firmware, write physical media, build an ISO, or satisfy the N5 exit gate. The static identity is not the final animated PooleGlass boot experience or an accessibility result.
 
 Exit gate: PooleBoot reproducibly boots under pinned OVMF and target firmware, validates all artifacts, exits boot services, transfers through a versioned golden-tested handoff, and rejects the complete hostile loader corpus.
 
 ### N6 - Boot Trust, Kernel Image, Early Runtime, and Emergency Diagnostics (`partial`)
 
-Inherited sections: `016-019`, `148-149`. Added: `ADD-BOOT-002`, `ADD-KERNEL-001`.
+Inherited sections: `016-019`, `148-149`. Added: `ADD-BOOT-002`, `ADD-BOOT-003`, `ADD-KERNEL-001`.
 Goal: make the earliest native path authenticated, measurable, diagnosable, and recoverable before higher services exist.
 
 Subphases:
@@ -1115,7 +1124,7 @@ Exit gate: all N0-N39 required gates are complete; independent clean builds repr
 
 ## 10. Added Research Requirements
 
-The coverage ledger records 32 additions with phase, requirement text, and basis. The most consequential additions are:
+The coverage ledger records 34 additions with phase, requirement text, and basis. The most consequential additions are:
 
 - an explicit microkernel TCB partition and Linux/Buildroot exclusion;
 - formal models and proof-assumption records for capabilities, IPC, VM, scheduler, boot/update, and filesystem state;
@@ -1123,6 +1132,7 @@ The coverage ledger records 32 additions with phase, requirement text, and basis
 - capability derivation, attenuation, transfer, revocation, and no ambient authority;
 - user-space driver domains with DMA/IRQ/MMIO leases and no v1 loadable kernel modules;
 - Secure Boot key/revocation/antirollback state modeling;
+- pinned, vendored, reproducibly path-remapped boot digest providers with independent review and no authentication claim from unsigned digest equality;
 - CPU transient-execution/control-flow mitigation matrix tied to exact microcode;
 - TUF-style compromise-resilient update roles;
 - in-toto links, SLSA 1.2 provenance, and SPDX 3.0.1 SBOM;
@@ -1165,7 +1175,9 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 | `FLAG-N5-BOOTCFG-001` | REQUIRED | Closed in Cycle 99 | Canonical bounded PBC1 grammar, allocation-free `no_std` parser, independent oracle, full semantic vectors, 64 hostile controls, and 16,384-case differential receipt reproduce exactly without a live-file claim |
 | `FLAG-N5-ELF-001` | REQUIRED | Closed in Cycle 100 | Bounded PKELF1 profile, allocation-free `no_std` loader, independent oracle, three exact loaded images, 129 hostile controls, 16,384-case differential receipt, and transactional non-mutation reproduce without live firmware, paging, or transfer claims |
 | `FLAG-N5-KLOAD-001` | REQUIRED | Closed in Cycle 102 | Live bounded PBC1/PKELF1 reads, exact page allocation, relocation, W^X plan validation, deterministic cleanup, 17 markers, 30 hostile controls, and guest/oracle agreement reproduce without authentication, retained mappings, transfer, or N5-exit claims |
+| `FLAG-N5-MANIFEST-001` | REQUIRED | Closed in Cycle 103 | Canonical PSM1 parsing, exact slot/version/path/size/digest/entry binding, live manifest-driven selection, kernel hashing, 19 aggregate markers, 40 integration controls, and independent agreement reproduce without signature trust, persistent rollback, retained mappings, transfer, or N5-exit claims |
 | `FLAG-N6-KENTRY-001` | REQUIRED | Closed in Cycle 101 | Real PooleKernel PKELF1 product, PKENTRY1 contract, exact two-build reproduction, PBP1 intake, bounded early diagnostics, deterministic panic taxonomy, 43 hostile controls, and independent loaded-byte comparison reproduce without a live-transfer claim |
+| `FLAG-N6-BOOT-DIGEST-001` | REQUIRED | Open in Cycle 103 | Independent cryptographic/supply-chain review and exact target-backend qualification accept PBDIGEST1 before any boot-trust promotion |
 | `FLAG-N6-FRAMEBUFFER-MAP-001` | REQUIRED | Open in Cycle 101 | PooleBoot installs and records the exact temporary framebuffer identity mapping, preserves cache policy, and PooleKernel replaces and revokes it before graphics capability delegation |
 | `FLAG-NATIVE-KERNEL-001` | STOP_SHIP | Open | PooleKernel boots, enforces memory/capabilities/IPC, and runs ring 3 |
 | `FLAG-NATIVE-IOMMU-001` | STOP_SHIP | Open | DMA and interrupt remapping confine every bus-mastering driver |
@@ -1197,7 +1209,7 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 
 ## 12. Near-Term Execution Sequence
 
-Cycle 102 completes only the bounded `N5-KLOAD-001` load-then-release qualification and closes only `FLAG-N5-KLOAD-001`. N5 remains partial: the fixed development kernel path is untrusted, loaded pages are deliberately released, page tables are not installed, and no PBP1, `ExitBootServices`, or transfer occurs. N6.4-N6.6 remain partial because no PooleKernel instruction executes under the live caller. `FLAG-N6-FRAMEBUFFER-MAP-001` retains the temporary mapping/cache/revocation dependency, and `FLAG-NATIVE-BOOT-001` remains open until authenticated manifest selection, retained exact mappings, live PBP1, final memory-map retry, successful `ExitBootServices`, and transfer are proved. The selected `hardware_fido2_ed25519_sk` device remains unavailable, so `N0-HW-KEY-ACQUIRE-001` remains the immediate blocked owner move and `FLAG-N0-GOVERNANCE-KEY-001` stays open. Codex has no authorization to generate or use keys, sign, merge, tag, register a public key, or publish a release. `FLAG-N4-MODELS-001` also remains open. The next owner-independent engineering move is `N5-MANIFEST-001`: freeze and qualify a canonical bounded manifest and replace the fixed path with digest-bound manifest-driven development selection while retaining explicit unsigned/untrusted and no-transfer boundaries. PooleGlyph Phase 66 may advance in parallel without outranking N0-N6.
+Cycle 103 completes only bounded `N5-MANIFEST-001` and closes only `FLAG-N5-MANIFEST-001`. N5 remains partial: PSM1 is unsigned and untrusted, PBDIGEST1 review and promotion remain open, loaded pages are deliberately released, page tables are not installed, and no live PBP1, `ExitBootServices`, or transfer occurs. N6.4-N6.6 remain partial because no PooleKernel instruction executes under the live caller. `FLAG-N6-BOOT-DIGEST-001` and `FLAG-N6-FRAMEBUFFER-MAP-001` retain provider-review and mapping/cache/revocation dependencies, and `FLAG-NATIVE-BOOT-001` remains open until signature-authenticated manifest selection, trusted rollback state, retained exact mappings, live PBP1, final memory-map retry, successful `ExitBootServices`, and transfer are proved. The selected `hardware_fido2_ed25519_sk` device remains unavailable, so `N0-HW-KEY-ACQUIRE-001` remains the immediate blocked owner move and `FLAG-N0-GOVERNANCE-KEY-001` stays open. Codex has no authorization to generate or use keys, sign, merge, tag, register a public key, or publish a release. `FLAG-N4-MODELS-001` also remains open. The next owner-independent engineering move is `N5-PBP1-LIVE-001`: construct immutable live PBP1 bytes from normalized firmware and manifest bindings with hostile mutation, lifetime, and cleanup evidence while retaining explicit pre-`ExitBootServices`, no-transfer, and no-kernel-entry boundaries. PooleGlyph Phase 66 may advance in parallel without outranking N0-N6.
 
 | Order | Move | Required output |
 |---:|---|---|
@@ -1208,16 +1220,17 @@ Cycle 102 completes only the bounded `N5-KLOAD-001` load-then-release qualificat
 | 5 | `N5-ELF-001` | Cycle 100 complete boundary: bounded PKELF1 validation/loading with exact bytes, hostile corpus, and explicit live-integration nonclaims |
 | 6 | `N6-KENTRY-001` | Cycle 101 complete boundary: real reproducible PKELF1 PooleKernel product, PKENTRY1 intake, bounded early diagnostics, panic taxonomy, and explicit transfer nonclaims |
 | 7 | `N5-KLOAD-001` | Cycle 102 complete boundary: bounded live PBC1/PKELF1 reads, exact page allocation/load, W^X plan validation, cleanup, and explicit authentication/transfer nonclaims |
-| 8 | `N5-MANIFEST-001` | Next: canonical bounded manifest grammar, independent parser, digest/version/size/slot binding, hostile corpus, and manifest-driven development selection without a signature or trust claim |
-| 9 | `N5-KMAP-001` | Retain exact kernel pages, construct and activate required W^X mappings, preserve framebuffer cache policy, and prove rollback without entering the kernel |
-| 10 | `N5-HANDOFF-001` | Populate live PBP1, normalize and retry the final memory map, call `ExitBootServices`, and prove no later boot-service call before transfer work |
-| 11 | `N7-TRAP-001` | GDT/TSS/IDT and deliberate breakpoint/page-fault evidence after bounded transfer exists |
-| 12 | `N9-PMM-001` | Normalized map, bootstrap allocator, physical allocator, guarded mappings |
-| 13 | `N8-IRQ-001` | Local APIC, timer, monotonic clock, and first SMP application processor |
-| 14 | `N12-SCHED-001` | Neutral scheduler and context switch under SMP stress |
-| 15 | `N13-RING3-001` | First user task, syscall, capability object, exception, and clean exit |
-| 16 | `N14-IPC-001` | Capability-mediated call/reply, cancellation, quota, and hostile message tests |
-| 17 | `N16-VIRTIO-001` | Isolated virtio console/RNG driver domain with revocation and restart |
+| 8 | `N5-MANIFEST-001` | Cycle 103 complete boundary: canonical bounded PSM1, independent parser, digest/version/size/slot/path/entry binding, hostile corpus, and manifest-driven development selection without a signature or trust claim |
+| 9 | `N5-PBP1-LIVE-001` | Next: immutable live PBP1 population from normalized firmware and manifest bindings, hostile mutation/lifetime/cleanup evidence, and explicit pre-`ExitBootServices`/no-transfer boundary |
+| 10 | `N5-KMAP-001` | Retain exact kernel pages, construct and activate required W^X mappings, preserve framebuffer cache policy, and prove rollback without entering the kernel |
+| 11 | `N5-HANDOFF-001` | Bind the qualified live PBP1 to retained ranges, normalize and retry the final memory map, call `ExitBootServices`, and prove no later boot-service call before transfer work |
+| 12 | `N7-TRAP-001` | GDT/TSS/IDT and deliberate breakpoint/page-fault evidence after bounded transfer exists |
+| 13 | `N9-PMM-001` | Normalized map, bootstrap allocator, physical allocator, guarded mappings |
+| 14 | `N8-IRQ-001` | Local APIC, timer, monotonic clock, and first SMP application processor |
+| 15 | `N12-SCHED-001` | Neutral scheduler and context switch under SMP stress |
+| 16 | `N13-RING3-001` | First user task, syscall, capability object, exception, and clean exit |
+| 17 | `N14-IPC-001` | Capability-mediated call/reply, cancellation, quota, and hostile message tests |
+| 18 | `N16-VIRTIO-001` | Isolated virtio console/RNG driver domain with revocation and restart |
 
 PDC-SIGNED-001 and the PooleGlyph machine-language lane beginning with Phase 66 may proceed as parallel component lanes, but neither outranks N0-N5 on the native critical path. Every PooleGlyph cycle must update the exact checkpoint anchor, representation compatibility matrix, N34 status, relevant `ADD-PGL-*` requirements, and open PooleGlyph flags before PooleOS consumes changed outputs.
 

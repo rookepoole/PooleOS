@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Qualify live PKLOAD1 UEFI file intake, relocation, mapping, and cleanup."""
+"""Qualify live PKLOAD2 manifest selection, relocation, mapping, and cleanup."""
 
 from __future__ import annotations
 
@@ -28,7 +28,7 @@ NATIVE_ROOT = ROOT / "native"
 
 
 class QualificationError(RuntimeError):
-    """Raised when the PKLOAD1 qualification fails closed."""
+    """Raised when the PKLOAD2 qualification fails closed."""
 
 
 def _host_checks(toolchain_root: Path, temporary_root: Path) -> dict[str, Any]:
@@ -54,8 +54,8 @@ def _host_checks(toolchain_root: Path, temporary_root: Path) -> dict[str, Any]:
         env=environment,
     )
     match = re.search(r"test result: ok\. ([0-9]+) passed; 0 failed", output)
-    if match is None or int(match.group(1)) < 12:
-        raise QualificationError("expected at least twelve poole-bootload host tests")
+    if match is None or int(match.group(1)) < 14:
+        raise QualificationError("expected at least fourteen poole-bootload host tests")
     bootload_tests = int(match.group(1))
     for package in ("poole-bootload", "pooleboot"):
         qualify_native_pooleboot._run_checked(
@@ -179,7 +179,8 @@ def _negative_controls(
     efi_clusters = inspection["files"][0]["cluster_count"]
     pooleos_cluster = 5 + efi_clusters
     config_cluster = pooleos_cluster + 1
-    kernel_cluster = config_cluster + inspection["files"][1]["cluster_count"]
+    manifest_cluster = config_cluster + inspection["files"][1]["cluster_count"]
+    kernel_cluster = manifest_cluster + inspection["files"][2]["cluster_count"]
     efi_directory_offset = (
         data_start_lba + (3 - 2) * native_pooleboot.FAT_SECTORS_PER_CLUSTER
     ) * native_pooleboot.SECTOR_BYTES
@@ -189,6 +190,9 @@ def _negative_controls(
     config_offset = (
         data_start_lba + (config_cluster - 2) * native_pooleboot.FAT_SECTORS_PER_CLUSTER
     ) * native_pooleboot.SECTOR_BYTES
+    manifest_offset = (
+        data_start_lba + (manifest_cluster - 2) * native_pooleboot.FAT_SECTORS_PER_CLUSTER
+    ) * native_pooleboot.SECTOR_BYTES
     kernel_offset = (
         data_start_lba + (kernel_cluster - 2) * native_pooleboot.FAT_SECTORS_PER_CLUSTER
     ) * native_pooleboot.SECTOR_BYTES
@@ -196,13 +200,15 @@ def _negative_controls(
         raise QualificationError("negative controls assume the frozen one-sector cluster profile")
 
     expected_config_hash = inspection["files"][1]["sha256"]
-    expected_kernel_hash = inspection["files"][2]["sha256"]
+    expected_manifest_hash = inspection["files"][2]["sha256"]
+    expected_kernel_hash = inspection["files"][3]["sha256"]
 
     def inspect_expected(candidate: bytes) -> dict[str, Any]:
         observed = native_kernel_load.inspect_media_bytes(candidate)
         if (
             observed["files"][1]["sha256"] != expected_config_hash
-            or observed["files"][2]["sha256"] != expected_kernel_hash
+            or observed["files"][2]["sha256"] != expected_manifest_hash
+            or observed["files"][3]["sha256"] != expected_kernel_hash
         ):
             raise native_kernel_load.KernelLoadError("qualified product binding changed")
         return observed
@@ -215,11 +221,19 @@ def _negative_controls(
         native_kernel_load.native_boot_config.MAX_CONFIG_BYTES + 1,
     )
     config_malformed = _mutate(media, config_offset, ord("X"))
-    kernel_missing = _mutate(media, pooleos_directory_offset + 96, 0)
-    kernel_empty = _set_u32(media, pooleos_directory_offset + 96 + 28, 0)
-    kernel_oversize = _set_u32(
+    manifest_missing = _mutate(media, pooleos_directory_offset + 96, 0)
+    manifest_empty = _set_u32(media, pooleos_directory_offset + 96 + 28, 0)
+    manifest_oversize = _set_u32(
         media,
         pooleos_directory_offset + 96 + 28,
+        native_kernel_load.native_system_manifest.MAX_MANIFEST_BYTES + 1,
+    )
+    manifest_malformed = _mutate(media, manifest_offset, ord("X"))
+    kernel_missing = _mutate(media, pooleos_directory_offset + 128, 0)
+    kernel_empty = _set_u32(media, pooleos_directory_offset + 128 + 28, 0)
+    kernel_oversize = _set_u32(
+        media,
+        pooleos_directory_offset + 128 + 28,
         native_kernel_load.native_elf_loader.MAX_FILE_BYTES + 1,
     )
     kernel_malformed = _mutate(media, kernel_offset, 0)
@@ -233,18 +247,28 @@ def _negative_controls(
     fat_loop = _set_fat_entry_both(media, config_cluster, config_cluster)
     directory_path = _mutate(media, efi_directory_offset + 96, ord("X"))
     config_path = _mutate(media, pooleos_directory_offset + 64, ord("X"))
-    kernel_path = _mutate(media, pooleos_directory_offset + 96, ord("X"))
+    manifest_path = _mutate(media, pooleos_directory_offset + 96, ord("X"))
+    kernel_path = _mutate(media, pooleos_directory_offset + 128, ord("X"))
     config_content = bytearray(media)
     timeout = config_content.find(b"timeout_ms=0", config_offset, config_offset + cluster_bytes)
     if timeout < 0:
         raise QualificationError("canonical timeout field is absent")
     config_content[timeout + len("timeout_ms=")] = ord("1")
+    manifest_content = bytearray(media)
+    manifest_version = manifest_content.find(
+        b"manifest_version=1", manifest_offset, manifest_offset + inspection["files"][2]["byte_count"]
+    )
+    if manifest_version < 0:
+        raise QualificationError("canonical manifest version field is absent")
+    manifest_content[manifest_version + len("manifest_version=")] = ord("2")
     kernel_content = bytearray(media)
     kernel_content[kernel_offset + 0x1000] ^= 1
 
     marker_summary = native_kernel_load.validate_markers(markers)
     config_oracle = copy.deepcopy(inspection)
     config_oracle["config"]["timeout_ms"] += 1
+    manifest_oracle = copy.deepcopy(inspection)
+    manifest_oracle["manifest"]["manifest_version"] += 1
     elf_oracle = copy.deepcopy(inspection)
     elf_oracle["kernel"]["plan"]["image_size"] += native_pooleboot.SECTOR_BYTES
     hash_oracle = copy.deepcopy(inspection)
@@ -259,6 +283,10 @@ def _negative_controls(
         ("NEG-N5-KLOAD-CONFIG-EMPTY", _rejected(lambda: inspect_expected(config_empty))),
         ("NEG-N5-KLOAD-CONFIG-OVERSIZE", _rejected(lambda: inspect_expected(config_oversize))),
         ("NEG-N5-KLOAD-CONFIG-MALFORMED", _rejected(lambda: inspect_expected(config_malformed))),
+        ("NEG-N5-KLOAD-MANIFEST-MISSING", _rejected(lambda: inspect_expected(manifest_missing))),
+        ("NEG-N5-KLOAD-MANIFEST-EMPTY", _rejected(lambda: inspect_expected(manifest_empty))),
+        ("NEG-N5-KLOAD-MANIFEST-OVERSIZE", _rejected(lambda: inspect_expected(manifest_oversize))),
+        ("NEG-N5-KLOAD-MANIFEST-MALFORMED", _rejected(lambda: inspect_expected(manifest_malformed))),
         ("NEG-N5-KLOAD-KERNEL-MISSING", _rejected(lambda: inspect_expected(kernel_missing))),
         ("NEG-N5-KLOAD-KERNEL-EMPTY", _rejected(lambda: inspect_expected(kernel_empty))),
         ("NEG-N5-KLOAD-KERNEL-OVERSIZE", _rejected(lambda: inspect_expected(kernel_oversize))),
@@ -267,20 +295,26 @@ def _negative_controls(
         ("NEG-N5-KLOAD-FAT-CHAIN-LOOP", _rejected(lambda: inspect_expected(fat_loop))),
         ("NEG-N5-KLOAD-DIRECTORY-PATH", _rejected(lambda: inspect_expected(directory_path))),
         ("NEG-N5-KLOAD-CONFIG-PATH", _rejected(lambda: inspect_expected(config_path))),
+        ("NEG-N5-KLOAD-MANIFEST-PATH", _rejected(lambda: inspect_expected(manifest_path))),
         ("NEG-N5-KLOAD-KERNEL-PATH", _rejected(lambda: inspect_expected(kernel_path))),
         ("NEG-N5-KLOAD-CONFIG-CONTENT", _rejected(lambda: inspect_expected(bytes(config_content)))),
+        ("NEG-N5-KLOAD-MANIFEST-CONTENT", _rejected(lambda: inspect_expected(bytes(manifest_content)))),
         ("NEG-N5-KLOAD-KERNEL-CONTENT", _rejected(lambda: inspect_expected(bytes(kernel_content)))),
         ("NEG-N5-KLOAD-MARKER-OMISSION", _rejected(lambda: native_kernel_load.validate_markers(markers[:-1]))),
         ("NEG-N5-KLOAD-MARKER-ORDER", _rejected(lambda: native_kernel_load.validate_markers([markers[1], markers[0], *markers[2:]]))),
-        ("NEG-N5-KLOAD-MARKER-CONFIG-BOUND", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 7, "bytes=231", "bytes=16385")))),
-        ("NEG-N5-KLOAD-MARKER-KERNEL-BOUND", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 8, "bytes=139264", "bytes=1048577")))),
-        ("NEG-N5-KLOAD-MARKER-PAGE-MATH", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 9, "pages=48", "pages=49")))),
-        ("NEG-N5-KLOAD-MARKER-ENTRY-BOUND", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 9, "entry_offset=16384", "entry_offset=196608")))),
-        ("NEG-N5-KLOAD-MARKER-MAPPING-COUNT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 10, "mappings=4", "mappings=3")))),
-        ("NEG-N5-KLOAD-MARKER-WX", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 10, "wx=0", "wx=1")))),
-        ("NEG-N5-KLOAD-MARKER-RELEASE-COUNT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 11, "files_closed=3", "files_closed=2")))),
-        ("NEG-N5-KLOAD-MARKER-BOUNDARY", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 14, "selection=fixed_untrusted", "selection=trusted")))),
+        ("NEG-N5-KLOAD-MARKER-CONFIG-BOUND", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 7, f"bytes={marker_summary['boot_config']['byte_count']}", "bytes=16385")))),
+        ("NEG-N5-KLOAD-MARKER-MANIFEST-BOUND", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 8, f"bytes={marker_summary['manifest']['byte_count']}", "bytes=65537")))),
+        ("NEG-N5-KLOAD-MARKER-MANIFEST-SLOT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 8, f"slot={marker_summary['manifest']['slot']}", "slot=4" if marker_summary['manifest']['slot'] != 4 else "slot=3")))),
+        ("NEG-N5-KLOAD-MARKER-DIGEST", _rejected(lambda: native_kernel_load.validate_oracle_binding(native_kernel_load.validate_markers(_replace_marker(markers, 9, f"sha256_prefix={marker_summary['manifest']['kernel_sha256_prefix']}", "sha256_prefix=0000000000000000")), inspection))),
+        ("NEG-N5-KLOAD-MARKER-KERNEL-BOUND", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 10, f"bytes={marker_summary['kernel']['file_byte_count']}", "bytes=1048577")))),
+        ("NEG-N5-KLOAD-MARKER-PAGE-MATH", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 11, f"pages={marker_summary['kernel']['page_count']}", f"pages={marker_summary['kernel']['page_count'] + 1}")))),
+        ("NEG-N5-KLOAD-MARKER-ENTRY-BOUND", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 11, f"entry_offset={marker_summary['kernel']['entry_offset']}", f"entry_offset={marker_summary['kernel']['image_byte_count']}")))),
+        ("NEG-N5-KLOAD-MARKER-MAPPING-COUNT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 12, "mappings=4", "mappings=3")))),
+        ("NEG-N5-KLOAD-MARKER-WX", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 12, "wx=0", "wx=1")))),
+        ("NEG-N5-KLOAD-MARKER-RELEASE-COUNT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 13, "files_closed=4", "files_closed=3")))),
+        ("NEG-N5-KLOAD-MARKER-BOUNDARY", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 16, "selection=manifest_digest_untrusted", "selection=trusted")))),
         ("NEG-N5-KLOAD-CONFIG-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, config_oracle))),
+        ("NEG-N5-KLOAD-MANIFEST-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, manifest_oracle))),
         ("NEG-N5-KLOAD-ELF-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, elf_oracle))),
         ("NEG-N5-KLOAD-LOADED-HASH-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, hash_oracle))),
         ("NEG-N5-KLOAD-CLAIM-OVERREACH", _rejected(lambda: native_kernel_load.validate_claims(overreach))),
@@ -296,10 +330,10 @@ def _negative_controls(
         for control_id, rejected in observations
     ]
     if [item["id"] for item in controls] != list(native_kernel_load.NEGATIVE_CONTROL_IDS):
-        raise QualificationError("PKLOAD1 negative-control order changed")
+        raise QualificationError("PKLOAD2 negative-control order changed")
     if any(item["status"] != "pass" for item in controls):
         failed = [item["id"] for item in controls if item["status"] != "pass"]
-        raise QualificationError("PKLOAD1 negative controls failed: " + ", ".join(failed))
+        raise QualificationError("PKLOAD2 negative controls failed: " + ", ".join(failed))
     return controls
 
 
@@ -313,13 +347,21 @@ def make_readiness(
     contract_failures = native_kernel_load.contract_errors(contract, ROOT)
     if contract_failures:
         raise QualificationError("; ".join(contract_failures))
+    manifest_readiness = native_kernel_load.native_system_manifest.read_json(
+        ROOT / native_kernel_load.native_system_manifest.READINESS_RELATIVE
+    )
+    manifest_failures = native_kernel_load.native_system_manifest.readiness_errors(
+        manifest_readiness, ROOT
+    )
+    if manifest_failures:
+        raise QualificationError("current PSM1 readiness is stale: " + "; ".join(manifest_failures))
     lock, profile = native_tier0.validate_contracts(ROOT)
     qemu_root = native_tier0._require_workspace_tool_path(qemu_root, ROOT)
     native_tier0.verify_local_launch_runtime(lock, qemu_root, ROOT)
     (ROOT / "tmp").mkdir(parents=True, exist_ok=True)
     (ROOT / "runs" / "native-tier0").mkdir(parents=True, exist_ok=True)
 
-    with tempfile.TemporaryDirectory(prefix="pkload1-qualification-", dir=ROOT / "tmp") as temporary:
+    with tempfile.TemporaryDirectory(prefix="pkload2-qualification-", dir=ROOT / "tmp") as temporary:
         temporary_root = Path(temporary)
         host_tests = _host_checks(toolchain_root, temporary_root)
         binary, build = qualify_native_pooleboot._build_and_test(toolchain_root, temporary_root)
@@ -333,21 +375,22 @@ def make_readiness(
             }
         )
         config = native_kernel_load.canonical_config_bytes()
-        media_first = native_kernel_load.build_media_bytes(binary, config, kernel)
-        media_second = native_kernel_load.build_media_bytes(binary, config, kernel)
+        manifest = native_kernel_load.canonical_manifest_bytes(kernel)
+        media_first = native_kernel_load.build_media_bytes(binary, config, manifest, kernel)
+        media_second = native_kernel_load.build_media_bytes(binary, config, manifest, kernel)
         if media_first != media_second:
-            raise QualificationError("two PKLOAD1 media generations differ")
+            raise QualificationError("two PKLOAD2 media generations differ")
         media_inspection = native_kernel_load.inspect_media_bytes(media_first)
-        if media_inspection["files"][2]["sha256"] != kernel_readiness["product"]["canonical_sha256"]:
-            raise QualificationError("PKLOAD1 media kernel differs from the fresh PKENTRY1 product")
-        media_path = temporary_root / "pkload1.img"
+        if media_inspection["files"][3]["sha256"] != kernel_readiness["product"]["canonical_sha256"]:
+            raise QualificationError("PKLOAD2 media kernel differs from the fresh PKENTRY1 product")
+        media_path = temporary_root / "pkload2.img"
         media_path.write_bytes(media_first)
 
         runs: list[dict[str, Any]] = []
         screenshots: list[bytes] = []
         for run_index in (1, 2):
             with tempfile.TemporaryDirectory(
-                prefix=f"pkload1-run-{run_index}-",
+                prefix=f"pkload2-run-{run_index}-",
                 dir=ROOT / "runs" / "native-tier0",
             ) as run_temporary:
                 run, screenshot = qualify_native_pooleboot._execute_once(
@@ -364,9 +407,9 @@ def make_readiness(
                 runs.append(run)
                 screenshots.append(screenshot)
     if runs[0]["markers"] != runs[1]["markers"]:
-        raise QualificationError("two PKLOAD1 marker sequences differ")
+        raise QualificationError("two PKLOAD2 marker sequences differ")
     if screenshots[0] != screenshots[1]:
-        raise QualificationError("two PKLOAD1 screenshots differ")
+        raise QualificationError("two PKLOAD2 screenshots differ")
 
     claims = native_kernel_load.expected_claims()
     native_kernel_load.validate_claims(claims)
@@ -378,9 +421,9 @@ def make_readiness(
         "schema_version": "1.0",
         "artifact_kind": "pooleos_native_kernel_load_readiness",
         "status_date": status_date,
-        "status": "pass_single_host_two_run_live_load_then_release_non_promoting",
+        "status": "pass_single_host_two_run_live_manifest_load_then_release_non_promoting",
         "contract_id": native_kernel_load.CONTRACT_ID,
-        "selected_move_id": "N5-KLOAD-001",
+        "selected_move_id": "N5-MANIFEST-001",
         "production_ready": False,
         "production_promotion_allowed": False,
         "n5_exit_gate_satisfied": False,
@@ -394,6 +437,15 @@ def make_readiness(
             "tier0_readiness": native_kernel_load.file_binding(ROOT, native_tier0.READINESS_RELATIVE),
             "kernel_entry_contract": native_kernel_load.file_binding(ROOT, "specs/native-kernel-entry-contract.json"),
             "kernel_entry_readiness": native_kernel_load.file_binding(ROOT, "runs/native_kernel_entry_readiness.json"),
+            "system_manifest_contract": native_kernel_load.file_binding(
+                ROOT, native_kernel_load.native_system_manifest.CONTRACT_RELATIVE
+            ),
+            "system_manifest_readiness": native_kernel_load.file_binding(
+                ROOT, native_kernel_load.native_system_manifest.READINESS_RELATIVE
+            ),
+            "digest_provider": native_kernel_load.file_binding(
+                ROOT, native_kernel_load.native_system_manifest.DIGEST_PROVIDER_RELATIVE
+            ),
             "implementation_inputs": [native_kernel_load.file_binding(ROOT, path) for path in native_kernel_load.IMPLEMENTATION_INPUTS],
         },
         "host_tests": host_tests,
@@ -425,13 +477,15 @@ def make_readiness(
         },
         "oracle": {
             "pbc1_python_match": True,
+            "psm1_python_match": True,
+            "sha256_python_match": True,
             "pkelf1_python_plan_match": True,
             "loaded_fnv1a64_match": True,
             "media_reconstruction_exact": True,
         },
         "cleanup": {
-            "file_handles_closed": 3,
-            "pools_freed": 2,
+            "file_handles_closed": 4,
+            "pools_freed": 3,
             "pages_freed": True,
             "page_count": kernel_summary["page_count"],
             "all_resources_released": True,
@@ -455,8 +509,9 @@ def make_readiness(
             "production_claim_count": 0,
         },
         "open_items": [
-            "Replace the fixed development kernel path with manifest-driven trusted selection.",
-            "Define and implement signed manifest and kernel authentication with revocation policy.",
+            "Ratify or replace the candidate PSM1 format before stable boot ABI promotion.",
+            "Define and implement signed manifest authentication, trust anchors, algorithm agility, and revocation policy.",
+            "Persist and atomically enforce the minimum secure version across update and rollback.",
             "Retain allocated kernel pages and install the exact r, rx, r, and rw page-table permissions.",
             "Load and authenticate the initial-system, recovery, policy, symbols, and optional microcode artifacts.",
             "Populate an immutable live PBP1 handoff from normalized firmware observations.",
@@ -479,7 +534,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--qemu-root", type=Path, default=DEFAULT_QEMU_ROOT)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--screenshot-out", type=Path)
-    parser.add_argument("--status-date", default="2026-07-16")
+    parser.add_argument("--status-date", default="2026-07-17")
     parser.add_argument("--timeout", type=int, default=30)
     args = parser.parse_args(argv)
     if args.timeout < 5 or args.timeout > 120:
@@ -499,11 +554,11 @@ def main(argv: list[str] | None = None) -> int:
             screenshot_output.parent.mkdir(parents=True, exist_ok=True)
             screenshot_output.write_bytes(screenshot)
     except (OSError, ValueError, RuntimeError) as error:
-        print(f"PKLOAD1 FAIL {type(error).__name__}: {error}")
+        print(f"PKLOAD2 FAIL {type(error).__name__}: {error}")
         return 1
     summary = report["summary"]
     print(
-        "PKLOAD1 PASS "
+        "PKLOAD2 PASS "
         f"tests={summary['rust_host_tests_passed']}/{summary['rust_host_tests_total']} "
         f"runs={summary['guest_runs_passed']}/{summary['guest_runs_total']} "
         f"markers={summary['ordered_marker_count']} "

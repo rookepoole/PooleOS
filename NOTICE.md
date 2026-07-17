@@ -12,3 +12,10 @@ This repository is a public source-available research and development release. I
 
 See `docs/publication-boundary.md` and `TRADEMARKS.md`.
 
+## Third-Party Source Intakes
+
+The Cycle 103 candidate boot digest path vendors RustCrypto SHA-2 0.11.0 and
+its locked Cargo dependency closure under their upstream `MIT OR Apache-2.0`
+terms. Exact source, checksum, feature, backend, and non-audit boundaries are
+recorded in `native/third_party/rustcrypto-sha2-0.11.0.md` and
+`specs/native-boot-digest-provider.json`.

@@ -1,11 +1,19 @@
 [build]
 incremental = false
 
+[source.crates-io]
+replace-with = "vendored-sources"
+
+[source.vendored-sources]
+directory = "vendor"
+
 [target.x86_64-unknown-uefi]
 rustflags = [
   "-Cpanic=abort",
   "-Clink-arg=/debug:none",
   "-Clink-arg=/timestamp:0",
+  "--cfg=sha2_backend=\"soft\"",
+  "--cfg=sha2_backend_soft=\"compact\"",
 ]
 
 [target.x86_64-unknown-none]

@@ -8,3 +8,4 @@ publish.workspace = true
 [dependencies]
 poole-boot-config = { path = "../bootcfg" }
 poole-elf = { path = "../elf" }
+poole-manifest = { path = "../manifest" }

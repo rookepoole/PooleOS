@@ -39,14 +39,16 @@ def valid_markers() -> list[str]:
         "POOLEBOOT/0.1 CONSOLE PASS",
         "POOLEBOOT/0.1 CONFIG PASS count=10 acpi20=1 smbios3=0 smbios2=1",
         "POOLEBOOT/0.1 FILESYSTEM PASS loaded_image=1 simple_fs=1 root=1",
-        "POOLEBOOT/0.1 BOOTCFG PASS bytes=231 entries=1 default_hash=61053F0E3EBBD272 timeout_ms=0 attempts=3 slot=1 manifest_max_bytes=65536",
-        "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=139264 path=fixed_development",
+        "POOLEBOOT/0.1 BOOTCFG PASS bytes=229 entries=1 default_hash=61053F0E3EBBD272 timeout_ms=0 attempts=3 slot=1 manifest_max_bytes=65536",
+        "POOLEBOOT/0.1 MANIFEST PASS bytes=460 artifacts=1 id_hash=8D344F536A19B20A slot=1 version=1 minimum_secure_version=1",
+        "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=139264 image_bytes=196608 sha256_prefix=2220757D0CC18EA3 path=manifest",
+        "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=139264 path=manifest_development",
         "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=196608 pages=48 entry_offset=16384 relocations=40 fnv1a64=5D48CA3E327C4BF2",
         "POOLEBOOT/0.1 KERNEL_MAP PASS mappings=4 rx=1 rw=1 wx=0 activation=not_performed",
-        "POOLEBOOT/0.1 KERNEL_RELEASE PASS files_closed=3 pools_freed=2 pages_freed=48",
+        "POOLEBOOT/0.1 KERNEL_RELEASE PASS files_closed=4 pools_freed=3 pages_freed=48",
         "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
         "POOLEBOOT/0.1 MEMORY_MAP PASS bytes=4512 descriptor_bytes=48 descriptors=94",
-        "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=fixed_untrusted kernel=loaded_then_released mappings=planned_not_activated entry=not_called exit_boot_services=not_called",
+        "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted kernel=loaded_then_released mappings=planned_not_activated entry=not_called exit_boot_services=not_called",
         "POOLEBOOT/0.1 FRAME READY",
         "POOLEBOOT/0.1 RETURN EFI_SUCCESS",
     ]
@@ -74,7 +76,7 @@ class NativeKernelLoadTests(unittest.TestCase):
 
     def test_canonical_config_is_exact_pbc1(self) -> None:
         data = native_kernel_load.canonical_config_bytes()
-        self.assertEqual(231, len(data))
+        self.assertEqual(229, len(data))
         self.assertTrue(data.endswith(b"end=PBC1\n"))
         self.assertIn(b"default_entry=normal\n", data)
 
@@ -82,14 +84,16 @@ class NativeKernelLoadTests(unittest.TestCase):
         efi = synthetic_pooleboot()
         config = native_kernel_load.canonical_config_bytes()
         kernel = native_elf_loader.build_fixture("minimal_relative_v1")
-        first = native_kernel_load.build_media_bytes(efi, config, kernel)
-        second = native_kernel_load.build_media_bytes(efi, config, kernel)
+        manifest = native_kernel_load.canonical_manifest_bytes(kernel)
+        first = native_kernel_load.build_media_bytes(efi, config, manifest, kernel)
+        second = native_kernel_load.build_media_bytes(efi, config, manifest, kernel)
         self.assertEqual(first, second)
         inspection = native_kernel_load.inspect_media_bytes(first)
         self.assertEqual(
             [
                 native_pooleboot.FALLBACK_PATH,
                 native_kernel_load.CONFIG_PATH,
+                native_kernel_load.MANIFEST_PATH,
                 native_kernel_load.KERNEL_PATH,
             ],
             [item["path"] for item in inspection["files"]],
@@ -102,6 +106,9 @@ class NativeKernelLoadTests(unittest.TestCase):
             native_kernel_load.build_media_bytes(
                 synthetic_pooleboot(),
                 native_kernel_load.canonical_config_bytes(),
+                native_kernel_load.canonical_manifest_bytes(
+                    native_elf_loader.build_fixture("minimal_relative_v1")
+                ),
                 native_elf_loader.build_fixture("minimal_relative_v1"),
             )
         )
@@ -131,7 +138,7 @@ class NativeKernelLoadTests(unittest.TestCase):
 
     def test_marker_contract_captures_load_mapping_and_cleanup(self) -> None:
         summary = native_kernel_load.validate_markers(valid_markers())
-        self.assertEqual(17, summary["marker_count"])
+        self.assertEqual(19, summary["marker_count"])
         self.assertEqual(48, summary["kernel"]["page_count"])
         self.assertEqual(0, summary["kernel"]["writable_executable_count"])
         self.assertTrue(summary["kernel"]["resources_released"])
@@ -141,11 +148,11 @@ class NativeKernelLoadTests(unittest.TestCase):
         with self.assertRaises(native_kernel_load.KernelLoadError):
             native_kernel_load.validate_markers(markers[:-1])
         writable = markers[:]
-        writable[10] = writable[10].replace("wx=0", "wx=1")
+        writable[12] = writable[12].replace("wx=0", "wx=1")
         with self.assertRaises(native_kernel_load.KernelLoadError):
             native_kernel_load.validate_markers(writable)
         page_mismatch = markers[:]
-        page_mismatch[9] = page_mismatch[9].replace("pages=48", "pages=49")
+        page_mismatch[11] = page_mismatch[11].replace("pages=48", "pages=49")
         with self.assertRaises(native_kernel_load.KernelLoadError):
             native_kernel_load.validate_markers(page_mismatch)
 

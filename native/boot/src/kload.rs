@@ -2,7 +2,7 @@ use core::ffi::c_void;
 use core::ptr::null_mut;
 use core::slice::{from_raw_parts, from_raw_parts_mut};
 
-use pooleboot::bootload::{self, ConfigSummary};
+use pooleboot::bootload::{self, ConfigSummary, ManifestSummary};
 
 use super::{
     EFI_COMPROMISED_DATA, EFI_LOADER_DATA, EFI_OUT_OF_RESOURCES, EFI_SUCCESS, EfiBootServices,
@@ -39,11 +39,6 @@ const CONFIG_PATH: [u16; 22] = [
     0x005c, 0x0045, 0x0046, 0x0049, 0x005c, 0x0050, 0x004f, 0x004f, 0x004c, 0x0045, 0x004f, 0x0053,
     0x005c, 0x0042, 0x004f, 0x004f, 0x0054, 0x002e, 0x0043, 0x0046, 0x0047, 0x0000,
 ];
-const KERNEL_PATH: [u16; 24] = [
-    0x005c, 0x0045, 0x0046, 0x0049, 0x005c, 0x0050, 0x004f, 0x004f, 0x004c, 0x0045, 0x004f, 0x0053,
-    0x005c, 0x004b, 0x0045, 0x0052, 0x004e, 0x0045, 0x004c, 0x002e, 0x0045, 0x004c, 0x0046, 0x0000,
-];
-
 #[repr(C)]
 struct EfiLoadedImageProtocol {
     revision: u32,
@@ -125,6 +120,8 @@ pub(super) struct Failure {
 #[derive(Clone, Copy)]
 pub(super) struct Summary {
     pub config: ConfigSummary,
+    pub manifest: ManifestSummary,
+    pub kernel_digest_prefix: u64,
     pub kernel_file_bytes: usize,
     pub kernel_image_bytes: u32,
     pub page_count: usize,
@@ -368,7 +365,7 @@ fn release_kernel_resources(
         .map_or(Ok(()), Err)
 }
 
-pub(super) fn load_development_kernel(
+pub(super) fn load_manifest_kernel(
     image_handle: EfiHandle,
     boot_services: &EfiBootServices,
 ) -> Result<Summary, Failure> {
@@ -469,15 +466,66 @@ pub(super) fn load_development_kernel(
             ));
         }
     };
+    let manifest_path = match bootload::encode_uefi_path(&config.manifest_path) {
+        Ok(path) => path,
+        Err(error) => {
+            return Err(free_pool_and_close_root(
+                calls,
+                config_file.pointer,
+                root,
+                contract_failure("kload.config.manifest_path", error),
+            ));
+        }
+    };
     if let Err(failure) = free_pool(calls, config_file.pointer, "kload.config.pool_free") {
+        return Err(close_root_with_failure(root, failure));
+    }
+
+    let manifest_file = match read_file(
+        calls,
+        root,
+        &manifest_path,
+        config.manifest_max_bytes as usize,
+        "kload.manifest.open",
+        "kload.manifest.info",
+        "kload.manifest.read",
+    ) {
+        Ok(file) => file,
+        Err(failure) => return Err(close_root_with_failure(root, failure)),
+    };
+    let manifest_bytes =
+        unsafe { from_raw_parts(manifest_file.pointer.cast::<u8>(), manifest_file.byte_count) };
+    let manifest = match bootload::parse_manifest(manifest_bytes, config.selected_slot) {
+        Ok(manifest) => manifest,
+        Err(error) => {
+            return Err(free_pool_and_close_root(
+                calls,
+                manifest_file.pointer,
+                root,
+                contract_failure("kload.manifest.parse", error),
+            ));
+        }
+    };
+    let kernel_path = match bootload::encode_uefi_path(&manifest.kernel_path) {
+        Ok(path) => path,
+        Err(error) => {
+            return Err(free_pool_and_close_root(
+                calls,
+                manifest_file.pointer,
+                root,
+                contract_failure("kload.manifest.kernel_path", error),
+            ));
+        }
+    };
+    if let Err(failure) = free_pool(calls, manifest_file.pointer, "kload.manifest.pool_free") {
         return Err(close_root_with_failure(root, failure));
     }
 
     let kernel_file = match read_file(
         calls,
         root,
-        &KERNEL_PATH,
-        bootload::elf::MAX_FILE_BYTES,
+        &kernel_path,
+        manifest.kernel_file_bytes,
         "kload.kernel.open",
         "kload.kernel.info",
         "kload.kernel.read",
@@ -487,7 +535,7 @@ pub(super) fn load_development_kernel(
     };
     let kernel_bytes =
         unsafe { from_raw_parts(kernel_file.pointer.cast::<u8>(), kernel_file.byte_count) };
-    let allocation = match bootload::plan_kernel(kernel_bytes) {
+    let allocation = match bootload::plan_manifest_kernel(kernel_bytes, &manifest) {
         Ok(plan) => plan,
         Err(error) => {
             return Err(free_pool_and_close_root(
@@ -545,21 +593,22 @@ pub(super) fn load_development_kernel(
     }
     let destination =
         unsafe { from_raw_parts_mut(physical_base as usize as *mut u8, allocation_bytes) };
-    let loaded = match bootload::load_kernel(kernel_bytes, physical_base, destination) {
-        Ok(loaded) => loaded,
-        Err(error) => {
-            let failure = contract_failure("kload.kernel.load", error);
-            return Err(release_kernel_resources(
-                calls,
-                physical_base,
-                allocation.page_count,
-                kernel_file.pointer,
-                root,
-            )
-            .err()
-            .unwrap_or(failure));
-        }
-    };
+    let loaded =
+        match bootload::load_manifest_kernel(kernel_bytes, &manifest, physical_base, destination) {
+            Ok(loaded) => loaded,
+            Err(error) => {
+                let failure = contract_failure("kload.kernel.load", error);
+                return Err(release_kernel_resources(
+                    calls,
+                    physical_base,
+                    allocation.page_count,
+                    kernel_file.pointer,
+                    root,
+                )
+                .err()
+                .unwrap_or(failure));
+            }
+        };
 
     let mut read_execute_count = 0usize;
     let mut read_write_count = 0usize;
@@ -573,6 +622,8 @@ pub(super) fn load_development_kernel(
     }
     let summary = Summary {
         config,
+        manifest,
+        kernel_digest_prefix: bootload::manifest::digest_prefix(&manifest.kernel_sha256),
         kernel_file_bytes: kernel_file.byte_count,
         kernel_image_bytes: loaded.image.image_size,
         page_count: loaded.page_count,
@@ -583,8 +634,8 @@ pub(super) fn load_development_kernel(
         read_execute_count,
         read_write_count,
         writable_executable_count,
-        closed_file_count: 3,
-        freed_pool_count: 2,
+        closed_file_count: 4,
+        freed_pool_count: 3,
         freed_page_count: loaded.page_count,
     };
     release_kernel_resources(

@@ -25,6 +25,7 @@ from runtime import native_kernel_entry  # noqa: E402
 from runtime import native_kernel_load  # noqa: E402
 from runtime import native_models  # noqa: E402
 from runtime import native_pooleboot  # noqa: E402
+from runtime import native_system_manifest  # noqa: E402
 from runtime import n0_owner_decision_packet  # noqa: E402
 from runtime import n0_owner_response  # noqa: E402
 from runtime import native_tier0  # noqa: E402
@@ -50,6 +51,7 @@ NATIVE_ELF_LOADER_READINESS = ROOT / "runs" / "native_elf_loader_readiness.json"
 NATIVE_KERNEL_ENTRY_READINESS = ROOT / "runs" / "native_kernel_entry_readiness.json"
 NATIVE_KERNEL_LOAD_READINESS = ROOT / "runs" / "native_kernel_load_readiness.json"
 NATIVE_POOLEBOOT_READINESS = ROOT / "runs" / "native_pooleboot_readiness.json"
+NATIVE_SYSTEM_MANIFEST_READINESS = ROOT / "runs" / "native_system_manifest_readiness.json"
 NATIVE_TIER0_READINESS = ROOT / "runs" / "native_tier0_readiness.json"
 
 
@@ -57,7 +59,7 @@ DEFAULT_GAPS = [
     "The completed owner response records both ADR dispositions and all 38 objective definitions while accepting zero measurements, but the selected FIDO2 hardware key is unavailable; trusted public-key custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
     "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
     "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, six bounded TLC models cover all seven required domains and detect twenty-one required counterexamples, and a bounded PooleBoot proof executes under the pinned profile; current source rebuilds, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open.",
-    "A reproducible unsigned PooleBoot proof application boots twice under pinned non-promoting OVMF with deterministic GPT/FAT32 media, eleven ordered serial/debugcon markers, and exact GOP frames; PBP1, PBC1, PKELF1, and a separately qualified real PooleKernel product image pass their bounded gates, but live file I/O, signed-artifact authentication, firmware allocation, page-table installation, producer/consumer integration, ExitBootServices transfer, second host, target firmware, and physical-media qualification remain open.",
+    "A reproducible unsigned PooleBoot proof application boots twice under pinned non-promoting OVMF with deterministic four-file GPT/FAT32 media and nineteen ordered serial/debugcon markers; PBP1, PBC1, PSM1, PKELF1, and a separately qualified real PooleKernel product image pass their bounded gates, and PKLOAD2 proves digest-bound live load then release, but manifest signature trust, persistent rollback, digest-provider security promotion, retained mappings, producer/consumer integration, ExitBootServices transfer, second host, target firmware, and physical-media qualification remain open.",
     "A real reproducible PooleKernel image, PKENTRY1 intake, bounded early ring/COM1/framebuffer paths, and panic classes exist, but boot trust, measured boot, live mappings and transfer, descriptor/exception setup, retained crash evidence, kernel runtime, target execution, and N6 exit remain open.",
     "No native CPU, interrupt, time, SMP, physical-memory, virtual-memory, or reclaim implementation.",
     "The sanitized Tier 1 identity and bounded user-mode CPUID transcript match, but MSR, PCI configuration-space, Secure Boot, TPM, SPD, sensor/power, standards-hash, lab-safety, native enumeration, and physical qualification evidence remain open.",
@@ -808,11 +810,11 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
         "clean_media_generations_exact": 2,
         "guest_runs_total": 2,
         "guest_runs_passed": 2,
-        "ordered_marker_count": 17,
+        "ordered_marker_count": 19,
         "serial_debugcon_match_count": 2,
         "gop_frame_match_count": 2,
-        "negative_controls_total": 30,
-        "negative_controls_passed": 30,
+        "negative_controls_total": 40,
+        "negative_controls_passed": 40,
         "production_claim_count": 0,
     }
     if artifact.get("summary") != expected_summary:
@@ -822,9 +824,9 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
     if artifact.get("n5_exit_gate_satisfied") is not False or artifact.get("production_ready") is not False:
         errors.append("PooleBoot proof overclaims N5 exit or production readiness")
     detail = (
-        "contract=POOLEOS-N5-POOLEBOOT-2; host_tests=8/8; builds=2/2; media=2/2; "
-        "guest_runs=2/2; markers=17; serial_debugcon=2/2; gop_frames=2/2; "
-        "negatives=30/30; production_claims=0; n5_exit=false; production_ready=false"
+        "contract=POOLEOS-N5-POOLEBOOT-3; host_tests=8/8; builds=2/2; media=2/2; "
+        "guest_runs=2/2; markers=19; serial_debugcon=2/2; gop_frames=2/2; "
+        "negatives=40/40; production_claims=0; n5_exit=false; production_ready=false"
     )
     return readiness.make_check(
         "native_pooleboot_readiness",
@@ -850,26 +852,82 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     errors.extend(native_kernel_load.readiness_errors(artifact, ROOT))
     summary = artifact.get("summary", {})
     if summary.get("guest_runs_passed") != 2 or summary.get("guest_runs_total") != 2:
-        errors.append("PKLOAD1 guest-run evidence is incomplete")
-    if summary.get("ordered_marker_count") != 17:
-        errors.append("PKLOAD1 marker evidence is incomplete")
-    if summary.get("negative_controls_passed") != 30 or summary.get(
+        errors.append("PKLOAD2 guest-run evidence is incomplete")
+    if summary.get("ordered_marker_count") != 19:
+        errors.append("PKLOAD2 marker evidence is incomplete")
+    if summary.get("negative_controls_passed") != 40 or summary.get(
         "negative_controls_total"
-    ) != 30:
-        errors.append("PKLOAD1 negative controls are incomplete")
+    ) != 40:
+        errors.append("PKLOAD2 negative controls are incomplete")
     if artifact.get("claims") != native_kernel_load.expected_claims():
-        errors.append("PKLOAD1 claim boundary changed")
+        errors.append("PKLOAD2 claim boundary changed")
     if artifact.get("n5_exit_gate_satisfied") is not False or artifact.get(
         "production_ready"
     ) is not False:
-        errors.append("PKLOAD1 overclaims N5 exit or production readiness")
+        errors.append("PKLOAD2 overclaims N5 exit or production readiness")
     detail = (
-        "contract=PKLOAD1; rust_tests=33/33; boot_builds=2/2; kernel_builds=2/2; "
-        "media=2/2; guest_runs=2/2; markers=17; oracle=2/2; cleanup=all; "
-        "negatives=30/30; transfer=false; n5_exit=false; production_ready=false"
+        "contract=PKLOAD2; rust_tests=35/35; boot_builds=2/2; kernel_builds=2/2; "
+        "media=2/2; guest_runs=2/2; markers=19; oracle=2/2; cleanup=all; "
+        "negatives=40/40; transfer=false; n5_exit=false; production_ready=false"
     )
     return readiness.make_check(
         "native_kernel_load_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_system_manifest_readiness(
+    path: Path = NATIVE_SYSTEM_MANIFEST_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-system-manifest-readiness.schema.json"
+    )
+    errors = [
+        f"native system manifest readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_system_manifest_readiness",
+            False,
+            "; ".join(errors) or "native system manifest readiness is not an object",
+        )
+    errors.extend(native_system_manifest.readiness_errors(artifact, ROOT))
+    expected_summary = {
+        "differential_cases": 16384,
+        "digest_cases": 1027,
+        "golden_vectors_passed": 3,
+        "golden_vectors_total": 3,
+        "mismatch_count": 0,
+        "negative_controls_passed": 64,
+        "negative_controls_total": 64,
+        "no_std_target_builds_passed": 2,
+        "no_std_target_builds_total": 2,
+        "pooleboot_uefi_integration_builds_passed": 1,
+        "pooleboot_uefi_integration_builds_total": 1,
+        "production_claim_count": 0,
+        "rust_host_tests_passed": 8,
+        "rust_host_tests_total": 8,
+    }
+    if artifact.get("summary") != expected_summary:
+        errors.append("PSM1 readiness summary changed")
+    digest = artifact.get("digest_qualification", {})
+    if digest.get("security_review_complete") is not False or digest.get(
+        "provider_promotion_allowed"
+    ) is not False:
+        errors.append("PBDIGEST1 security-review boundary changed")
+    if artifact.get("n5_exit_gate_satisfied") is not False or artifact.get(
+        "production_ready"
+    ) is not False:
+        errors.append("PSM1 overclaims N5 exit or production readiness")
+    detail = (
+        "contract=PSM1; rust_tests=8/8; targets=2/2; pooleboot_integration=1/1; "
+        "vectors=3/3; negatives=64/64; differential=16384; digest_cases=1027; "
+        "mismatches=0; security_review=false; n5_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_system_manifest_readiness",
         not errors,
         detail if not errors else "; ".join(errors[:8]),
     )
@@ -3846,6 +3904,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--native-model-readiness", type=Path, default=NATIVE_MODEL_READINESS)
     parser.add_argument("--native-pooleboot-readiness", type=Path, default=NATIVE_POOLEBOOT_READINESS)
     parser.add_argument("--native-kernel-load-readiness", type=Path, default=NATIVE_KERNEL_LOAD_READINESS)
+    parser.add_argument(
+        "--native-system-manifest-readiness",
+        type=Path,
+        default=NATIVE_SYSTEM_MANIFEST_READINESS,
+    )
     parser.add_argument("--native-boot-handoff-readiness", type=Path, default=NATIVE_BOOT_HANDOFF_READINESS)
     parser.add_argument("--native-boot-config-readiness", type=Path, default=NATIVE_BOOT_CONFIG_READINESS)
     parser.add_argument("--native-elf-loader-readiness", type=Path, default=NATIVE_ELF_LOADER_READINESS)
@@ -3868,6 +3931,7 @@ def main(argv: list[str] | None = None) -> int:
         check_native_model_readiness(args.native_model_readiness),
         check_native_pooleboot_readiness(args.native_pooleboot_readiness),
         check_native_kernel_load_readiness(args.native_kernel_load_readiness),
+        check_native_system_manifest_readiness(args.native_system_manifest_readiness),
         check_native_boot_handoff_readiness(args.native_boot_handoff_readiness),
         check_native_boot_config_readiness(args.native_boot_config_readiness),
         check_native_elf_loader_readiness(args.native_elf_loader_readiness),
@@ -4060,6 +4124,7 @@ def main(argv: list[str] | None = None) -> int:
             args.native_model_readiness,
             args.native_pooleboot_readiness,
             args.native_kernel_load_readiness,
+            args.native_system_manifest_readiness,
             args.native_boot_handoff_readiness,
             args.native_boot_config_readiness,
             args.native_elf_loader_readiness,

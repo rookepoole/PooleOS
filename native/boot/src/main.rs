@@ -561,7 +561,7 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
         u8::from(config.smbios2)
     ));
 
-    let kernel = match kload::load_development_kernel(image_handle, boot_services) {
+    let kernel = match kload::load_manifest_kernel(image_handle, boot_services) {
         Ok(summary) => summary,
         Err(failure) => return fail_detail(failure),
     };
@@ -579,7 +579,23 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
         kernel.config.manifest_max_bytes
     ));
     diagnostic(format_args!(
-        "POOLEBOOT/0.1 KERNEL_FILE PASS bytes={} path=fixed_development\n",
+        "POOLEBOOT/0.1 MANIFEST PASS bytes={} artifacts={} id_hash={:016X} slot={} version={} minimum_secure_version={}\n",
+        kernel.manifest.byte_count,
+        kernel.manifest.artifact_count,
+        kernel.manifest.manifest_id_hash,
+        kernel.manifest.slot,
+        kernel.manifest.manifest_version,
+        kernel.manifest.minimum_secure_version
+    ));
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 KERNEL_BINDING PASS version={} file_bytes={} image_bytes={} sha256_prefix={:016X} path=manifest\n",
+        kernel.manifest.kernel_version,
+        kernel.manifest.kernel_file_bytes,
+        kernel.manifest.kernel_image_bytes,
+        kernel.kernel_digest_prefix
+    ));
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 KERNEL_FILE PASS bytes={} path=manifest_development\n",
         kernel.kernel_file_bytes
     ));
     diagnostic(format_args!(
@@ -635,7 +651,7 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
         memory_map.map_size, memory_map.descriptor_size, memory_map.descriptor_count
     ));
     diagnostic(format_args!(
-        "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=fixed_untrusted kernel=loaded_then_released mappings=planned_not_activated entry=not_called exit_boot_services=not_called\n"
+        "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted kernel=loaded_then_released mappings=planned_not_activated entry=not_called exit_boot_services=not_called\n"
     ));
 
     if gop.is_some() {
