@@ -41,13 +41,13 @@
     "implementation_inputs": [
       {
         "path": "native/Cargo.toml",
-        "sha256": "8774A0A626022A7CF74789920CC67E1F7EAC7E5F0C5F6663777FB65DFFC8E84F",
-        "byte_count": 352
+        "sha256": "28E18C4ED69537CD54707A96031E9B879EA82B8A209BCCDCAA7AE1B437D4D632",
+        "byte_count": 359
       },
       {
         "path": "native/Cargo.lock",
-        "sha256": "E61A04C894A359C3F1FFCEED59FC724BFDE9F42781D7AF7AFA690E937B2E9E4E",
-        "byte_count": 424
+        "sha256": "645F5C0D0191DDC53CEE7C00630B70F0ABDC1A2A0DC1B9976201C5A4982929E4",
+        "byte_count": 488
       },
       {
         "path": "native/handoff/Cargo.toml",
@@ -91,8 +91,8 @@
       },
       {
         "path": "docs/native-boot-handoff.md",
-        "sha256": "DD02D7FBE9FB3C5D6A512CBE94222250D712CF90DAEDBBBBA2122CCA7641DD8E",
-        "byte_count": 6459
+        "sha256": "8A07B79C47B3CBC2F243BE13829DC1510A869D68544ECEE94E6A7223974FC18D",
+        "byte_count": 6580
       }
     ]
   },

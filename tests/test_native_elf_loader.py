@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT))
 
 from runtime import native_elf_loader as elf  # noqa: E402
 from runtime.schema_validation import validate_json  # noqa: E402
+from tools import pooleos_release_gate  # noqa: E402
 
 
 class NativeElfLoaderTests(unittest.TestCase):
@@ -160,6 +161,11 @@ class NativeElfLoaderTests(unittest.TestCase):
         changed = copy.deepcopy(self.readiness)
         changed["bindings"]["implementation_inputs"][0]["sha256"] = "0" * 64
         self.assertIn("readiness input bindings are stale", elf.readiness_errors(changed))
+
+    def test_release_gate_accepts_exact_readiness(self) -> None:
+        check = pooleos_release_gate.check_native_elf_loader_readiness()
+        self.assertTrue(check["ok"], check["detail"])
+        self.assertIn("contract=PKELF1", check["detail"])
 
     def test_public_receipt_has_no_host_path_or_corpus(self) -> None:
         encoded = json.dumps(self.readiness, ensure_ascii=True)

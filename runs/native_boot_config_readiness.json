@@ -41,23 +41,23 @@
     "implementation_inputs": [
       {
         "path": "native/Cargo.toml",
-        "sha256": "8774A0A626022A7CF74789920CC67E1F7EAC7E5F0C5F6663777FB65DFFC8E84F",
-        "byte_count": 352
+        "sha256": "28E18C4ED69537CD54707A96031E9B879EA82B8A209BCCDCAA7AE1B437D4D632",
+        "byte_count": 359
       },
       {
         "path": "native/Cargo.lock",
-        "sha256": "E61A04C894A359C3F1FFCEED59FC724BFDE9F42781D7AF7AFA690E937B2E9E4E",
-        "byte_count": 424
+        "sha256": "645F5C0D0191DDC53CEE7C00630B70F0ABDC1A2A0DC1B9976201C5A4982929E4",
+        "byte_count": 488
       },
       {
         "path": "native/boot/Cargo.toml",
-        "sha256": "2E63BA506503773FF7CC49C8770D0C7DDBDC0A43746231B8AB609760F13D76CE",
-        "byte_count": 289
+        "sha256": "B17FB0517679B6C007CA58C74BEAB2054472C11C27898B98D71F2276D80FD262",
+        "byte_count": 321
       },
       {
         "path": "native/boot/src/lib.rs",
-        "sha256": "6250EC1E6973F350A715958AE96F7645EBF957C82D917CACEA123E5E7909B5E6",
-        "byte_count": 16204
+        "sha256": "CC1253505E6FEA3BEA3B2C0EC129CDF250B3DEBA337C35B5E3DD35F5D45976C2",
+        "byte_count": 16230
       },
       {
         "path": "native/bootcfg/Cargo.toml",
@@ -129,14 +129,14 @@
       {
         "target": "x86_64-unknown-uefi",
         "status": "pass",
-        "pooleboot_rlib_byte_count": 54954,
-        "pooleboot_rlib_sha256": "D2F3FC9D16EA2A955EC554ED5E09AB5162321C9611175C7DE29CDC7C2E1AC0F9"
+        "pooleboot_rlib_byte_count": 55126,
+        "pooleboot_rlib_sha256": "C0F5991871F95BE30C6BB4A4DF48878F67C41AE76865E935C9ACB0397ACF084A"
       },
       {
         "target": "x86_64-unknown-none",
         "status": "pass",
-        "pooleboot_rlib_byte_count": 56988,
-        "pooleboot_rlib_sha256": "4DB9FC9EEF9C5314BF0AC3FF0368EE206A1DD46CB1BBACB4C8B2CA5A421E4D76"
+        "pooleboot_rlib_byte_count": 57164,
+        "pooleboot_rlib_sha256": "F4FFDA9A52E06D7B16A1C683CAF382F78CDA73668E61F10CE41BD4C02F0D0C5D"
       }
     ],
     "host_probe_byte_count": 142848,
