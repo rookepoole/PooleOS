@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-kernel-load-readiness.schema.json",
+  "title": "PooleOS PKLOAD1 readiness",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "status",
+    "contract_id",
+    "selected_move_id",
+    "production_ready",
+    "production_promotion_allowed",
+    "n5_exit_gate_satisfied",
+    "phase_status",
+    "bindings",
+    "host_tests",
+    "build",
+    "kernel_product",
+    "media",
+    "execution",
+    "oracle",
+    "cleanup",
+    "negative_controls",
+    "claims",
+    "summary",
+    "open_items",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_load_readiness"},
+    "status_date": {"const": "2026-07-16"},
+    "status": {"const": "pass_single_host_two_run_live_load_then_release_non_promoting"},
+    "contract_id": {"const": "PKLOAD1"},
+    "selected_move_id": {"const": "N5-KLOAD-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "n5_exit_gate_satisfied": {"const": false},
+    "phase_status": {
+      "type": "object",
+      "required": ["N5", "N5.1", "N5.4", "N5.5"],
+      "properties": {
+        "N5": {"const": "partial"},
+        "N5.1": {"const": "partial"},
+        "N5.4": {"const": "partial"},
+        "N5.5": {"const": "partial"}
+      }
+    },
+    "bindings": {
+      "type": "object",
+      "required": ["contract", "toolchain_lock", "toolchain_qualification", "tier0_lock", "tier0_profile", "tier0_readiness", "kernel_entry_contract", "kernel_entry_readiness", "implementation_inputs"],
+      "properties": {
+        "contract": {"$ref": "#/$defs/binding"},
+        "toolchain_lock": {"$ref": "#/$defs/binding"},
+        "toolchain_qualification": {"$ref": "#/$defs/binding"},
+        "tier0_lock": {"$ref": "#/$defs/binding"},
+        "tier0_profile": {"$ref": "#/$defs/binding"},
+        "tier0_readiness": {"$ref": "#/$defs/binding"},
+        "kernel_entry_contract": {"$ref": "#/$defs/binding"},
+        "kernel_entry_readiness": {"$ref": "#/$defs/binding"},
+        "implementation_inputs": {"type": "array", "minItems": 24, "maxItems": 24, "items": {"$ref": "#/$defs/binding"}}
+      }
+    },
+    "host_tests": {
+      "type": "object",
+      "required": ["bootload_tests_passed", "bootload_tests_total", "pooleboot_tests_passed", "pooleboot_tests_total", "kernel_entry_tests_passed", "kernel_entry_tests_total", "rustfmt_passed", "clippy_passed"],
+      "properties": {
+        "bootload_tests_passed": {"minimum": 12},
+        "bootload_tests_total": {"minimum": 12},
+        "pooleboot_tests_passed": {"minimum": 8},
+        "pooleboot_tests_total": {"minimum": 8},
+        "kernel_entry_tests_passed": {"minimum": 13},
+        "kernel_entry_tests_total": {"minimum": 13},
+        "rustfmt_passed": {"const": true},
+        "clippy_passed": {"const": true}
+      }
+    },
+    "build": {
+      "type": "object",
+      "required": ["clean_build_count", "exact_clean_build_match", "sha256", "byte_count"],
+      "properties": {
+        "clean_build_count": {"const": 2},
+        "exact_clean_build_match": {"const": true},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "byte_count": {"type": "integer", "minimum": 1, "maximum": 262144}
+      }
+    },
+    "kernel_product": {
+      "type": "object",
+      "required": ["canonical_sha256", "canonical_byte_count", "image_byte_count", "entry_offset", "relocation_count"],
+      "properties": {
+        "canonical_sha256": {"$ref": "#/$defs/sha256"},
+        "canonical_byte_count": {"type": "integer", "minimum": 1, "maximum": 1048576},
+        "image_byte_count": {"type": "integer", "minimum": 1, "maximum": 67108864},
+        "entry_offset": {"type": "integer", "minimum": 0},
+        "relocation_count": {"type": "integer", "minimum": 0, "maximum": 4096}
+      }
+    },
+    "media": {
+      "type": "object",
+      "required": ["clean_generation_count", "exact_clean_generation_match", "ordinary_workspace_file_only", "physical_media_write_performed", "inspection"],
+      "properties": {
+        "clean_generation_count": {"const": 2},
+        "exact_clean_generation_match": {"const": true},
+        "ordinary_workspace_file_only": {"const": true},
+        "physical_media_write_performed": {"const": false},
+        "inspection": {
+          "type": "object",
+          "required": ["image", "gpt", "esp", "fat32", "files", "config", "kernel"],
+          "properties": {
+            "files": {"type": "array", "minItems": 3, "maxItems": 3}
+          }
+        }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "required": ["host_environment_count", "run_count", "profile_id", "machine", "exact_marker_match", "exact_screenshot_match", "runs"],
+      "properties": {
+        "host_environment_count": {"const": 1},
+        "run_count": {"const": 2},
+        "profile_id": {"const": "bootstrap-debug"},
+        "machine": {"const": "pc-q35-11.0"},
+        "exact_marker_match": {"const": true},
+        "exact_screenshot_match": {"const": true},
+        "runs": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/run"}}
+      }
+    },
+    "oracle": {
+      "type": "object",
+      "required": ["pbc1_python_match", "pkelf1_python_plan_match", "loaded_fnv1a64_match", "media_reconstruction_exact"],
+      "properties": {
+        "pbc1_python_match": {"const": true},
+        "pkelf1_python_plan_match": {"const": true},
+        "loaded_fnv1a64_match": {"const": true},
+        "media_reconstruction_exact": {"const": true}
+      }
+    },
+    "cleanup": {
+      "type": "object",
+      "required": ["file_handles_closed", "pools_freed", "pages_freed", "page_count", "all_resources_released"],
+      "properties": {
+        "file_handles_closed": {"const": 3},
+        "pools_freed": {"const": 2},
+        "pages_freed": {"const": true},
+        "page_count": {"type": "integer", "minimum": 1},
+        "all_resources_released": {"const": true}
+      }
+    },
+    "negative_controls": {"type": "array", "minItems": 30, "maxItems": 30, "items": {"$ref": "#/$defs/control"}},
+    "claims": {"type": "object"},
+    "summary": {"type": "object"},
+    "open_items": {"type": "array", "minItems": 8, "items": {"type": "string"}},
+    "claim_boundary": {"type": "array", "minItems": 10, "items": {"type": "string"}}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "byte_count"],
+      "properties": {
+        "path": {"type": "string"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "byte_count": {"type": "integer", "minimum": 1}
+      }
+    },
+    "control": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "expected", "observed", "status"],
+      "properties": {
+        "id": {"type": "string"},
+        "expected": {"const": "reject"},
+        "observed": {"const": "reject"},
+        "status": {"const": "pass"}
+      }
+    },
+    "run": {
+      "type": "object",
+      "required": ["markers", "marker_sha256", "marker_summary", "serial_debugcon_exact_match", "screenshot", "qemu_exit_code"],
+      "properties": {
+        "markers": {"type": "array", "minItems": 17, "maxItems": 17, "items": {"type": "string"}},
+        "marker_sha256": {"$ref": "#/$defs/sha256"},
+        "serial_debugcon_exact_match": {"const": true},
+        "qemu_exit_code": {"const": 0}
+      }
+    }
+  }
+}

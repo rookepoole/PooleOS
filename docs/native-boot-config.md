@@ -12,7 +12,10 @@ work from section 015.7.
 The authoritative machine-readable contract is
 `specs/native-boot-config-contract.json`. PooleBoot has a compile-time path
 dependency on `native/bootcfg` and re-exports it as `pooleboot::boot_config`.
-The current UEFI executable does not open or parse a live configuration file.
+The standalone Cycle 99 receipt proves only parser and compile-time integration.
+Cycle 102 PKLOAD1 separately proves that the current UEFI executable opens and
+parses the exact live `\EFI\POOLEOS\BOOT.CFG` bytes; that later proof does not
+make this parser receipt a trusted-selection or manifest-consumption result.
 
 ## Firmware-path basis
 
@@ -99,14 +102,15 @@ capacity, declared-count mismatch, and configured/observed artifact sizes.
 
 ## Non-claims and next dependency
 
-This evidence does not prove live filesystem discovery, configuration reads,
-trusted entry selection, boot-menu behavior, artifact existence, hashing,
-signature verification, loading, rollback, PBP1 population, ExitBootServices,
+This standalone PBC1 evidence does not itself prove live filesystem discovery,
+trusted entry selection, boot-menu behavior, manifest consumption, hashing,
+signature verification, rollback, PBP1 population, ExitBootServices,
 PooleKernel execution, target firmware, physical media, or production
-readiness. PBC1 remains a pre-ABI candidate until separately ratified.
+readiness. PKLOAD1 separately proves one fixed-untrusted live read and parse.
+PBC1 remains a pre-ABI candidate until separately ratified.
 
-The next owner-independent N5 dependency after this cycle is `N5-ELF-001`: a
-bounded ELF64 validation and load-plan contract with hostile headers, segments,
-relocations, range arithmetic, W^X planning, and an independent oracle. Live
+The current owner-independent N5 dependency is `N5-MANIFEST-001`: a canonical
+bounded manifest, independent parser, digest/version/size/slot binding, and
+manifest-driven development selection with no signature or trust claim. Live
 configuration loading should follow only when filesystem discovery and signed
 manifest policy can be integrated without weakening these boundaries.

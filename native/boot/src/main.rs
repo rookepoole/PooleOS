@@ -3,6 +3,8 @@
 #![deny(warnings)]
 #![forbid(unsafe_op_in_unsafe_fn)]
 
+mod kload;
+
 use core::arch::asm;
 use core::ffi::c_void;
 use core::fmt::{self, Write};
@@ -196,13 +198,8 @@ const SMBIOS_GUID: EfiGuid = EfiGuid {
 };
 
 type OutputString = extern "efiapi" fn(*mut EfiSimpleTextOutputProtocol, *const u16) -> EfiStatus;
-type GetMemoryMap = extern "efiapi" fn(
-    *mut usize,
-    *mut c_void,
-    *mut usize,
-    *mut usize,
-    *mut u32,
-) -> EfiStatus;
+type GetMemoryMap =
+    extern "efiapi" fn(*mut usize, *mut c_void, *mut usize, *mut usize, *mut u32) -> EfiStatus;
 type AllocatePool = extern "efiapi" fn(u32, usize, *mut *mut c_void) -> EfiStatus;
 type FreePool = extern "efiapi" fn(*mut c_void) -> EfiStatus;
 type LocateProtocol =
@@ -306,6 +303,14 @@ fn fail(stage: &str, status: EfiStatus) -> EfiStatus {
     status
 }
 
+fn fail_detail(failure: kload::Failure) -> EfiStatus {
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 ERROR stage={} code={} status=0x{:016X}\n",
+        failure.stage, failure.code, failure.status as u64
+    ));
+    failure.status
+}
+
 unsafe fn table_slice<'a>(pointer: *const u8, header_size: u32) -> Result<&'a [u8], ContractError> {
     if pointer.is_null() || header_size < pooleboot::TABLE_HEADER_BYTES as u32 {
         return Err(ContractError::BufferTooSmall);
@@ -331,10 +336,10 @@ fn console_message(console: *mut EfiSimpleTextOutputProtocol) -> Result<(), EfiS
     let output_address = unsafe { (*console).output_string };
     let output: OutputString = unsafe { function(output_address)? };
     const MESSAGE: &[u16] = &[
-        0x0050, 0x006f, 0x006f, 0x006c, 0x0065, 0x004f, 0x0053, 0x0020, 0x006e, 0x0061,
-        0x0074, 0x0069, 0x0076, 0x0065, 0x0020, 0x0055, 0x0045, 0x0046, 0x0049, 0x0020,
-        0x0070, 0x0072, 0x006f, 0x006f, 0x0066, 0x0020, 0x006f, 0x0066, 0x0020, 0x006c,
-        0x0069, 0x0066, 0x0065, 0x000d, 0x000a, 0x0000,
+        0x0050, 0x006f, 0x006f, 0x006c, 0x0065, 0x004f, 0x0053, 0x0020, 0x006e, 0x0061, 0x0074,
+        0x0069, 0x0076, 0x0065, 0x0020, 0x0055, 0x0045, 0x0046, 0x0049, 0x0020, 0x0070, 0x0072,
+        0x006f, 0x006f, 0x0066, 0x0020, 0x006f, 0x0066, 0x0020, 0x006c, 0x0069, 0x0066, 0x0065,
+        0x000d, 0x000a, 0x0000,
     ];
     let status = output(console, MESSAGE.as_ptr());
     if status == EFI_SUCCESS {
@@ -403,7 +408,10 @@ fn discover_gop(boot_services: &EfiBootServices) -> Result<GopSummary, EfiStatus
     let framebuffer = mode.framebuffer_base as usize as *mut u32;
     for y in 0..layout.height {
         for x in 0..layout.width {
-            let pixel = pack_pixel(identity_rgb(x, y, layout.width, layout.height), layout.format);
+            let pixel = pack_pixel(
+                identity_rgb(x, y, layout.width, layout.height),
+                layout.format,
+            );
             let index = y * layout.stride + x;
             unsafe {
                 write_volatile(framebuffer.wrapping_add(index), pixel);
@@ -480,15 +488,11 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
     }
 
     let system = unsafe { &*system_table };
-    let system_bytes = match unsafe {
-        table_slice(
-            system_table.cast::<u8>(),
-            system.header.header_size,
-        )
-    } {
-        Ok(bytes) => bytes,
-        Err(_) => return fail("system_table_bounds", EFI_COMPROMISED_DATA),
-    };
+    let system_bytes =
+        match unsafe { table_slice(system_table.cast::<u8>(), system.header.header_size) } {
+            Ok(bytes) => bytes,
+            Err(_) => return fail("system_table_bounds", EFI_COMPROMISED_DATA),
+        };
     if validate_table_header(
         system_bytes,
         EFI_SYSTEM_TABLE_SIGNATURE,
@@ -557,6 +561,47 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
         u8::from(config.smbios2)
     ));
 
+    let kernel = match kload::load_development_kernel(image_handle, boot_services) {
+        Ok(summary) => summary,
+        Err(failure) => return fail_detail(failure),
+    };
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 FILESYSTEM PASS loaded_image=1 simple_fs=1 root=1\n"
+    ));
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 BOOTCFG PASS bytes={} entries={} default_hash={:016X} timeout_ms={} attempts={} slot={} manifest_max_bytes={}\n",
+        kernel.config.byte_count,
+        kernel.config.entry_count,
+        kernel.config.default_entry_hash,
+        kernel.config.timeout_ms,
+        kernel.config.boot_attempt_limit,
+        kernel.config.selected_slot,
+        kernel.config.manifest_max_bytes
+    ));
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 KERNEL_FILE PASS bytes={} path=fixed_development\n",
+        kernel.kernel_file_bytes
+    ));
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes={} pages={} entry_offset={} relocations={} fnv1a64={:016X}\n",
+        kernel.kernel_image_bytes,
+        kernel.page_count,
+        kernel.entry_offset,
+        kernel.relocation_count,
+        kernel.loaded_fnv1a64
+    ));
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 KERNEL_MAP PASS mappings={} rx={} rw={} wx={} activation=not_performed\n",
+        kernel.mapping_count,
+        kernel.read_execute_count,
+        kernel.read_write_count,
+        kernel.writable_executable_count
+    ));
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 KERNEL_RELEASE PASS files_closed={} pools_freed={} pages_freed={}\n",
+        kernel.closed_file_count, kernel.freed_pool_count, kernel.freed_page_count
+    ));
+
     let gop = match discover_gop(boot_services) {
         Ok(summary) => {
             diagnostic(format_args!(
@@ -590,7 +635,7 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
         memory_map.map_size, memory_map.descriptor_size, memory_map.descriptor_count
     ));
     diagnostic(format_args!(
-        "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested kernel=not_loaded exit_boot_services=not_called\n"
+        "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=fixed_untrusted kernel=loaded_then_released mappings=planned_not_activated entry=not_called exit_boot_services=not_called\n"
     ));
 
     if gop.is_some() {
@@ -609,9 +654,6 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
 }
 
 #[unsafe(export_name = "efi_main")]
-pub extern "efiapi" fn efi_entry(
-    image_handle: EfiHandle,
-    system_table: *mut c_void,
-) -> EfiStatus {
+pub extern "efiapi" fn efi_entry(image_handle: EfiHandle, system_table: *mut c_void) -> EfiStatus {
     run(image_handle, system_table.cast::<EfiSystemTable>())
 }

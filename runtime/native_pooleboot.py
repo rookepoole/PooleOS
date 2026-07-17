@@ -61,10 +61,10 @@ TRUE_PROOF_CLAIMS = (
     "gop_frame_observed",
     "bounded_memory_map_observed",
     "efi_success_return_path_marker_observed",
+    "poolekernel_loaded",
 )
 FALSE_PROOF_CLAIMS = (
     "complete_pooleboot_loader",
-    "poolekernel_loaded",
     "poolekernel_executed",
     "exit_boot_services_called",
     "secure_boot_enforced",
@@ -77,21 +77,36 @@ FALSE_PROOF_CLAIMS = (
     "production_ready",
 )
 NEGATIVE_CONTROL_IDS = (
-    "NEG-N5-PE-SUBSYSTEM",
-    "NEG-N5-PE-MACHINE",
-    "NEG-N5-PE-DEBUG-DIRECTORY",
-    "NEG-N5-GPT-PRIMARY-CRC",
-    "NEG-N5-GPT-BACKUP-CRC",
-    "NEG-N5-GPT-ENTRY-CRC",
-    "NEG-N5-ESP-TYPE",
-    "NEG-N5-FAT-COPY",
-    "NEG-N5-FAT-CHAIN-LOOP",
-    "NEG-N5-FALLBACK-PATH",
-    "NEG-N5-MEDIA-OUTPUT-PATH",
-    "NEG-N5-MARKER-OMISSION",
-    "NEG-N5-MARKER-ORDER",
-    "NEG-N5-SCREENSHOT-BLANK",
-    "NEG-N5-CLAIM-OVERREACH",
+    "NEG-N5-KLOAD-CONFIG-MISSING",
+    "NEG-N5-KLOAD-CONFIG-EMPTY",
+    "NEG-N5-KLOAD-CONFIG-OVERSIZE",
+    "NEG-N5-KLOAD-CONFIG-MALFORMED",
+    "NEG-N5-KLOAD-KERNEL-MISSING",
+    "NEG-N5-KLOAD-KERNEL-EMPTY",
+    "NEG-N5-KLOAD-KERNEL-OVERSIZE",
+    "NEG-N5-KLOAD-KERNEL-MALFORMED",
+    "NEG-N5-KLOAD-FAT-COPY",
+    "NEG-N5-KLOAD-FAT-CHAIN-LOOP",
+    "NEG-N5-KLOAD-DIRECTORY-PATH",
+    "NEG-N5-KLOAD-CONFIG-PATH",
+    "NEG-N5-KLOAD-KERNEL-PATH",
+    "NEG-N5-KLOAD-CONFIG-CONTENT",
+    "NEG-N5-KLOAD-KERNEL-CONTENT",
+    "NEG-N5-KLOAD-MARKER-OMISSION",
+    "NEG-N5-KLOAD-MARKER-ORDER",
+    "NEG-N5-KLOAD-MARKER-CONFIG-BOUND",
+    "NEG-N5-KLOAD-MARKER-KERNEL-BOUND",
+    "NEG-N5-KLOAD-MARKER-PAGE-MATH",
+    "NEG-N5-KLOAD-MARKER-ENTRY-BOUND",
+    "NEG-N5-KLOAD-MARKER-MAPPING-COUNT",
+    "NEG-N5-KLOAD-MARKER-WX",
+    "NEG-N5-KLOAD-MARKER-RELEASE-COUNT",
+    "NEG-N5-KLOAD-MARKER-BOUNDARY",
+    "NEG-N5-KLOAD-CONFIG-ORACLE-DIVERGENCE",
+    "NEG-N5-KLOAD-ELF-ORACLE-DIVERGENCE",
+    "NEG-N5-KLOAD-LOADED-HASH-DIVERGENCE",
+    "NEG-N5-KLOAD-CLAIM-OVERREACH",
+    "NEG-N5-KLOAD-STALE-BINDING",
 )
 CONTRACT_RELATIVE = "specs/native-pooleboot-proof.json"
 CONTRACT_SCHEMA_RELATIVE = "specs/native-pooleboot-proof.schema.json"
@@ -105,17 +120,31 @@ PROOF_IMPLEMENTATION_INPUTS = (
     "native/boot/Cargo.toml",
     "native/boot/src/lib.rs",
     "native/boot/src/main.rs",
+    "native/boot/src/kload.rs",
+    "native/bootload/Cargo.toml",
+    "native/bootload/src/lib.rs",
+    "native/kernel/Cargo.toml",
+    "native/kernel/linker.ld",
+    "native/kernel/manifest.pkm",
+    "native/kernel/src/lib.rs",
+    "native/kernel/src/main.rs",
     "runtime/native_binary.py",
+    "runtime/native_kernel_load.py",
     "runtime/native_pooleboot.py",
     "runtime/native_tier0.py",
     "specs/native-pooleboot-proof.json",
     "specs/native-pooleboot-proof.schema.json",
     "specs/native-pooleboot-readiness.schema.json",
+    "specs/native-kernel-load-contract.json",
+    "specs/native-kernel-load-contract.schema.json",
+    "specs/native-kernel-load-readiness.schema.json",
     "specs/native-tier0-lock.json",
     "specs/native-tier0-profile.json",
     "runs/native_tier0_readiness.json",
     "tools/build_native_pooleboot_media.py",
     "tools/qualify_native_pooleboot.py",
+    "tools/qualify_native_kernel_entry.py",
+    "tools/qualify_native_kernel_load.py",
 )
 ABSOLUTE_USER_PATH = re.compile(
     r"(?:[A-Za-z]:[\\/](?:Users|Documents and Settings)[\\/][^\\/\s]+|/(?:Users|home)/[^/\s]+)",
@@ -745,48 +774,12 @@ def extract_markers(raw: bytes) -> list[str]:
 
 
 def validate_markers(markers: list[str]) -> dict[str, Any]:
-    if len(markers) != len(MARKER_PATTERNS):
-        raise PooleBootError(
-            f"expected {len(MARKER_PATTERNS)} ordered PooleBoot markers, observed {len(markers)}"
-        )
-    matches = []
-    for index, (pattern, marker) in enumerate(zip(MARKER_PATTERNS, markers, strict=True)):
-        match = pattern.fullmatch(marker)
-        if match is None:
-            raise PooleBootError(f"PooleBoot marker {index} does not match its contract: {marker!r}")
-        matches.append(match)
-    config_count = int(matches[5].group(1))
-    width = int(matches[6].group(1))
-    height = int(matches[6].group(2))
-    stride = int(matches[6].group(3))
-    map_bytes = int(matches[7].group(1))
-    descriptor_bytes = int(matches[7].group(2))
-    descriptor_count = int(matches[7].group(3))
-    if config_count > 256:
-        raise PooleBootError("configuration-table marker exceeds the bounded count")
-    if width < 320 or height < 200 or stride < width or stride > 16_384:
-        raise PooleBootError("GOP marker geometry is outside the bounded contract")
-    if descriptor_bytes < 40 or descriptor_bytes > 256 or descriptor_bytes % 8:
-        raise PooleBootError("memory-map descriptor marker is outside the bounded contract")
-    if map_bytes != descriptor_bytes * descriptor_count or map_bytes > 1024 * 1024:
-        raise PooleBootError("memory-map marker shape is inconsistent")
-    return {
-        "marker_count": len(markers),
-        "ordered_contract_match": True,
-        "config_table_count": config_count,
-        "gop": {
-            "width": width,
-            "height": height,
-            "stride": stride,
-            "mode": int(matches[6].group(4)),
-            "format": matches[6].group(5),
-        },
-        "memory_map": {
-            "byte_count": map_bytes,
-            "descriptor_bytes": descriptor_bytes,
-            "descriptor_count": descriptor_count,
-        },
-    }
+    from runtime import native_kernel_load
+
+    try:
+        return native_kernel_load.validate_markers(markers)
+    except native_kernel_load.KernelLoadError as error:
+        raise PooleBootError(str(error)) from error
 
 
 def inspect_ppm(data: bytes) -> dict[str, Any]:
@@ -880,7 +873,7 @@ def _schema_errors(value: dict[str, Any], root: Path, schema_relative: str) -> l
 
 def proof_contract_errors(contract: dict[str, Any], root: Path) -> list[str]:
     errors = _schema_errors(contract, root, CONTRACT_SCHEMA_RELATIVE)
-    if contract.get("phase_mapping") != ["N5.1", "N5.2", "N5.3", "N5.7"]:
+    if contract.get("phase_mapping") != ["N5.1", "N5.2", "N5.3", "N5.4", "N5.5", "N5.7"]:
         errors.append("PooleBoot proof phase mapping changed")
     if contract.get("required_negative_controls") != list(NEGATIVE_CONTROL_IDS):
         errors.append("PooleBoot proof negative-control register changed")
@@ -891,6 +884,12 @@ def proof_contract_errors(contract: dict[str, Any], root: Path) -> list[str]:
         "WATCHDOG",
         "CONSOLE PASS_OR_FALLBACK",
         "CONFIG PASS",
+        "FILESYSTEM PASS",
+        "BOOTCFG PASS",
+        "KERNEL_FILE PASS",
+        "KERNEL_LOAD PASS",
+        "KERNEL_MAP PASS",
+        "KERNEL_RELEASE PASS",
         "GOP PASS",
         "MEMORY_MAP PASS",
         "BOUNDARY",
@@ -938,6 +937,8 @@ def _check_binding(
 
 
 def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str]:
+    from runtime import native_kernel_load
+
     errors = _schema_errors(readiness, root, READINESS_SCHEMA_RELATIVE)
     try:
         contract = read_json(root / CONTRACT_RELATIVE)
@@ -952,6 +953,9 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str
         "tier0_lock": "specs/native-tier0-lock.json",
         "tier0_profile": "specs/native-tier0-profile.json",
         "tier0_readiness": "runs/native_tier0_readiness.json",
+        "kernel_entry_readiness": "runs/native_kernel_entry_readiness.json",
+        "kernel_load_contract": "specs/native-kernel-load-contract.json",
+        "kernel_load_readiness": "runs/native_kernel_load_readiness.json",
     }
     for name, relative_path in expected_bindings.items():
         _check_binding(errors, bindings.get(name), root, relative_path, name)
@@ -983,8 +987,8 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str
     media_inspection = media.get("inspection", {})
     files = media_inspection.get("files", [])
     embedded = media_inspection.get("embedded_efi", {})
-    if not isinstance(files, list) or len(files) != 1:
-        errors.append("PooleBoot media file manifest is not singular")
+    if not isinstance(files, list) or len(files) != 3:
+        errors.append("PooleBoot media file manifest does not contain exactly three files")
     else:
         file_item = files[0]
         if (
@@ -993,6 +997,12 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str
             or file_item.get("byte_count") != build.get("byte_count")
         ):
             errors.append("embedded fallback EFI does not match the clean PooleBoot build")
+        if [item.get("path") for item in files] != [
+            FALLBACK_PATH,
+            "EFI/POOLEOS/BOOT.CFG",
+            "EFI/POOLEOS/KERNEL.ELF",
+        ]:
+            errors.append("PooleBoot media file paths changed")
     if embedded.get("sha256") != build.get("sha256") or embedded.get("byte_count") != build.get(
         "byte_count"
     ):
@@ -1016,7 +1026,8 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str
             markers = run.get("markers", [])
             try:
                 summary = validate_markers(markers)
-            except PooleBootError as error:
+                native_kernel_load.validate_oracle_binding(summary, media_inspection)
+            except (PooleBootError, native_kernel_load.KernelLoadError) as error:
                 errors.append(f"PooleBoot run {index} marker failure: {error}")
                 continue
             marker_sets.append(markers)

@@ -17,7 +17,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -285,6 +285,7 @@ def _execute_once(
     media_path: Path,
     run_dir: Path,
     timeout: int,
+    marker_validator: Callable[[list[str]], dict[str, Any]] = native_pooleboot.validate_markers,
 ) -> tuple[dict[str, Any], bytes]:
     firmware = {item["role"]: item for item in lock["firmware"]["files"]}
     vars_source = qemu_root / firmware["vars_template_copy_only"]["relative_path"]
@@ -346,7 +347,7 @@ def _execute_once(
         time.sleep(0.05)
         debug_markers = native_pooleboot.extract_markers(debug_path.read_bytes())
         serial_markers = native_pooleboot.extract_markers(serial_path.read_bytes())
-        marker_summary = native_pooleboot.validate_markers(debug_markers)
+        marker_summary = marker_validator(debug_markers)
         if serial_markers != debug_markers:
             raise QualificationError("serial and debugcon PooleBoot marker sequences differ")
         screenshot_data = screenshot_path.read_bytes()
@@ -530,7 +531,7 @@ def _normalized_command(profile: dict[str, Any]) -> list[str]:
     return command
 
 
-def make_report(
+def _make_legacy_report(
     toolchain_root: Path,
     qemu_root: Path,
     status_date: str,
@@ -668,6 +669,113 @@ def make_report(
     if native_tier0.ABSOLUTE_USER_PATH.search(encoded):
         raise QualificationError("absolute user path leaked into the public PooleBoot readiness report")
     return report, screenshots[0]
+
+
+def make_report(
+    toolchain_root: Path,
+    qemu_root: Path,
+    status_date: str,
+    timeout: int,
+) -> tuple[dict[str, Any], bytes]:
+    from runtime import native_kernel_load
+    from tools import qualify_native_kernel_load
+
+    contract = native_pooleboot.read_json(CONTRACT_PATH)
+    contract_errors = native_pooleboot.proof_contract_errors(contract, ROOT)
+    if contract_errors:
+        raise QualificationError("; ".join(contract_errors))
+    kernel_load_readiness_path = ROOT / native_kernel_load.READINESS_RELATIVE
+    if not kernel_load_readiness_path.is_file():
+        raise QualificationError(
+            "current PKLOAD1 readiness is required before the aggregate PooleBoot receipt"
+        )
+    current_kernel_load = native_kernel_load.read_json(kernel_load_readiness_path)
+    current_errors = native_kernel_load.readiness_errors(current_kernel_load, ROOT)
+    if current_errors:
+        raise QualificationError("current PKLOAD1 readiness is stale: " + "; ".join(current_errors))
+    kernel_load, screenshot = qualify_native_kernel_load.make_readiness(
+        toolchain_root,
+        qemu_root,
+        status_date,
+        timeout,
+    )
+    claims = native_pooleboot.expected_claims()
+    native_pooleboot.validate_claims(claims)
+    report = {
+        "schema_version": "1.0",
+        "artifact_kind": "pooleos_native_pooleboot_readiness",
+        "status_date": status_date,
+        "status": "pass_single_host_two_run_unsigned_live_load_then_release_non_promoting",
+        "contract_id": contract["contract_id"],
+        "selected_move_id": contract["selected_move_id"],
+        "production_ready": False,
+        "production_promotion_allowed": False,
+        "n5_exit_gate_satisfied": False,
+        "phase_status": {
+            "N5": "partial",
+            "N5.1": "partial",
+            "N5.2": "partial",
+            "N5.3": "partial",
+            "N5.4": "partial",
+            "N5.5": "partial",
+            "N5.7": "partial",
+        },
+        "bindings": {
+            "contract": native_pooleboot.file_binding(ROOT, CONTRACT_RELATIVE),
+            "toolchain_lock": native_pooleboot.file_binding(
+                ROOT, "specs/native-toolchain-lock.json"
+            ),
+            "toolchain_qualification": native_pooleboot.file_binding(
+                ROOT, "runs/native_toolchain_qualification.json"
+            ),
+            "tier0_lock": native_pooleboot.file_binding(ROOT, native_tier0.LOCK_RELATIVE),
+            "tier0_profile": native_pooleboot.file_binding(
+                ROOT, native_tier0.PROFILE_RELATIVE
+            ),
+            "tier0_readiness": native_pooleboot.file_binding(
+                ROOT, native_tier0.READINESS_RELATIVE
+            ),
+            "kernel_entry_readiness": native_pooleboot.file_binding(
+                ROOT, "runs/native_kernel_entry_readiness.json"
+            ),
+            "kernel_load_contract": native_pooleboot.file_binding(
+                ROOT, native_kernel_load.CONTRACT_RELATIVE
+            ),
+            "kernel_load_readiness": native_pooleboot.file_binding(
+                ROOT, native_kernel_load.READINESS_RELATIVE
+            ),
+            "implementation_inputs": [
+                native_pooleboot.file_binding(ROOT, path) for path in BUILD_INPUTS
+            ],
+        },
+        "build": kernel_load["build"],
+        "media": kernel_load["media"],
+        "execution": kernel_load["execution"],
+        "negative_controls": kernel_load["negative_controls"],
+        "claims": claims,
+        "summary": {
+            "host_contract_tests_passed": kernel_load["build"][
+                "host_contract_test_pass_count"
+            ],
+            "host_contract_tests_total": kernel_load["build"]["host_contract_test_count"],
+            "clean_builds_exact": 2,
+            "clean_media_generations_exact": 2,
+            "guest_runs_passed": 2,
+            "guest_runs_total": 2,
+            "ordered_marker_count": 17,
+            "serial_debugcon_match_count": 2,
+            "gop_frame_match_count": 2,
+            "negative_controls_passed": 30,
+            "negative_controls_total": 30,
+            "production_claim_count": 0,
+        },
+        "open_items": kernel_load["open_items"],
+        "claim_boundary": contract["claim_boundary"],
+    }
+    errors = native_pooleboot.readiness_contract_errors(report, ROOT)
+    if errors:
+        raise QualificationError("; ".join(errors))
+    return report, screenshot
 
 
 def main(argv: list[str] | None = None) -> int:

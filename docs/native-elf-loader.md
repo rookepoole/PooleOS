@@ -15,7 +15,7 @@ The [ELF header](https://gabi.xinuos.com/elf/02-eheader.html) identifies class, 
 
 The official [x86-64 psABI source](https://gitlab.com/x86-psABIs/x86-64-ABI/-/raw/master/x86-64-ABI/object-files.tex) requires ELF64 little-endian `EM_X86_64` objects for LP64, uses `Elf64_Rela` explicit addends, and defines `R_X86_64_RELATIVE` as load base plus addend.
 
-UEFI integration is intentionally later. UEFI 2.11 defines `AllocatePages` as contiguous 4 KiB page allocation and identifies `EfiLoaderData` as the normal OS-loader allocation type. See [UEFI Boot Services](https://uefi.org/specs/UEFI/2.11/07_Services_Boot_Services.html). No firmware allocation occurs in this boundary.
+The standalone Cycle 100 boundary performs no firmware allocation. Cycle 102 PKLOAD1 separately uses UEFI `AllocatePages` with contiguous 4 KiB `EfiLoaderData` pages, invokes this loader on the real PooleKernel image, validates the returned plan, and releases the pages. See [UEFI Boot Services](https://uefi.org/specs/UEFI/2.11/07_Services_Boot_Services.html).
 
 ## Accepted Profile
 
@@ -51,4 +51,4 @@ The three golden images cover a minimal two-relocation image, a different physic
 
 ## Nonclaims
 
-All current images are synthetic containers, not a functional PooleKernel. PooleBoot does not open a live file, authenticate a signed manifest, allocate firmware pages, install mappings, hash an exact loaded artifact into PBP1, exit boot services, jump to kernel entry, or execute PooleKernel. There is no second-host, target-firmware, physical-media, Secure Boot, signing, ABI-ratification, or production-readiness result. Finite vectors and differential tests are not proof over all ELF files or machine states.
+The standalone PKELF1 vectors are synthetic containers and do not themselves prove a functional PooleKernel or live firmware integration. PKENTRY1 separately qualifies the real product, and PKLOAD1 separately proves one live fixed-untrusted read, allocation, load, plan validation, and release. No current evidence authenticates a signed manifest, retains the pages, installs mappings, hashes a live loaded artifact into PBP1, exits boot services, jumps to kernel entry, or executes PooleKernel. There is no second-host, target-firmware, physical-media, Secure Boot, signing, ABI-ratification, or production-readiness result. Finite vectors and differential tests are not proof over all ELF files or machine states.

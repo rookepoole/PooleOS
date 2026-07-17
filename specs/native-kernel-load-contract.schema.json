@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-kernel-load-contract.schema.json",
+  "title": "PooleOS PKLOAD1 contract",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "contract_id",
+    "selected_move_id",
+    "status_date",
+    "status",
+    "production_ready",
+    "production_promotion_allowed",
+    "phase_mapping",
+    "firmware_protocols",
+    "media",
+    "selection",
+    "file_intake",
+    "kernel_load",
+    "cleanup",
+    "execution",
+    "required_marker_count",
+    "required_markers",
+    "required_negative_controls",
+    "claims",
+    "claim_boundary",
+    "official_references"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_load_contract"},
+    "contract_id": {"const": "PKLOAD1"},
+    "selected_move_id": {"const": "N5-KLOAD-001"},
+    "status_date": {"const": "2026-07-16"},
+    "status": {"const": "bounded_live_uefi_load_then_release_non_promoting"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "phase_mapping": {"const": ["N5.1", "N5.4", "N5.5"]},
+    "media": {
+      "type": "object",
+      "required": ["boot_path", "config_path", "kernel_path", "config_maximum_bytes", "kernel_file_maximum_bytes", "physical_media_write_allowed"],
+      "properties": {
+        "boot_path": {"const": "EFI/BOOT/BOOTX64.EFI"},
+        "config_path": {"const": "EFI/POOLEOS/BOOT.CFG"},
+        "kernel_path": {"const": "EFI/POOLEOS/KERNEL.ELF"},
+        "config_maximum_bytes": {"const": 16384},
+        "kernel_file_maximum_bytes": {"const": 1048576},
+        "physical_media_write_allowed": {"const": false}
+      }
+    },
+    "selection": {
+      "type": "object",
+      "required": ["pbc1_file_is_opened_read_and_parsed_live", "kernel_path_source", "kernel_path_trusted", "kernel_manifest_authenticated", "kernel_signature_verified"],
+      "properties": {
+        "pbc1_file_is_opened_read_and_parsed_live": {"const": true},
+        "kernel_path_source": {"const": "fixed development-only path"},
+        "kernel_path_trusted": {"const": false},
+        "kernel_manifest_authenticated": {"const": false},
+        "kernel_signature_verified": {"const": false}
+      }
+    },
+    "kernel_load": {
+      "type": "object",
+      "required": ["format_contract", "page_bytes", "mapping_plan_permissions", "writable_executable_mapping_allowed", "page_tables_activated", "entry_called", "kernel_pages_retained"],
+      "properties": {
+        "format_contract": {"const": "PKELF1"},
+        "page_bytes": {"const": 4096},
+        "mapping_plan_permissions": {"const": ["r", "rx", "r", "rw"]},
+        "writable_executable_mapping_allowed": {"const": false},
+        "page_tables_activated": {"const": false},
+        "entry_called": {"const": false},
+        "kernel_pages_retained": {"const": false}
+      }
+    },
+    "required_marker_count": {"const": 17},
+    "required_markers": {"type": "array", "minItems": 17, "maxItems": 17, "items": {"type": "string"}},
+    "required_negative_controls": {"type": "array", "minItems": 30, "maxItems": 30, "uniqueItems": true, "items": {"type": "string"}},
+    "claims": {"$ref": "#/$defs/claims"},
+    "claim_boundary": {"type": "array", "minItems": 10, "items": {"type": "string"}},
+    "official_references": {"type": "array", "minItems": 3, "items": {"type": "string", "format": "uri"}}
+  },
+  "$defs": {
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "loaded_image_protocol_observed",
+        "simple_filesystem_protocol_observed",
+        "live_pbc1_file_parsed",
+        "live_pkelf1_file_read",
+        "pkelf1_relocated_into_firmware_pages",
+        "pkelf1_mapping_plan_validated",
+        "all_kload_resources_released",
+        "two_qemu_runs_exact",
+        "manifest_authenticated_selection",
+        "kernel_signature_verified",
+        "kernel_pages_retained",
+        "page_tables_activated",
+        "kernel_entry_called",
+        "pbp1_handoff_produced",
+        "exit_boot_services_called",
+        "secure_boot_enforced",
+        "measured_boot_performed",
+        "physical_hardware_tested",
+        "n5_exit_gate_satisfied",
+        "production_ready"
+      ],
+      "properties": {
+        "loaded_image_protocol_observed": {"const": true},
+        "simple_filesystem_protocol_observed": {"const": true},
+        "live_pbc1_file_parsed": {"const": true},
+        "live_pkelf1_file_read": {"const": true},
+        "pkelf1_relocated_into_firmware_pages": {"const": true},
+        "pkelf1_mapping_plan_validated": {"const": true},
+        "all_kload_resources_released": {"const": true},
+        "two_qemu_runs_exact": {"const": true},
+        "manifest_authenticated_selection": {"const": false},
+        "kernel_signature_verified": {"const": false},
+        "kernel_pages_retained": {"const": false},
+        "page_tables_activated": {"const": false},
+        "kernel_entry_called": {"const": false},
+        "pbp1_handoff_produced": {"const": false},
+        "exit_boot_services_called": {"const": false},
+        "secure_boot_enforced": {"const": false},
+        "measured_boot_performed": {"const": false},
+        "physical_hardware_tested": {"const": false},
+        "n5_exit_gate_satisfied": {"const": false},
+        "production_ready": {"const": false}
+      }
+    }
+  }
+}
