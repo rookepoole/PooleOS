@@ -721,12 +721,12 @@ def make_report(
     kernel_load_readiness_path = ROOT / native_kernel_load.READINESS_RELATIVE
     if not kernel_load_readiness_path.is_file():
         raise QualificationError(
-            "current PKLOAD3 readiness is required before the aggregate PooleBoot receipt"
+            "current PKLOAD4 readiness is required before the aggregate PooleBoot receipt"
         )
     current_kernel_load = native_kernel_load.read_json(kernel_load_readiness_path)
     current_errors = native_kernel_load.readiness_errors(current_kernel_load, ROOT)
     if current_errors:
-        raise QualificationError("current PKLOAD3 readiness is stale: " + "; ".join(current_errors))
+        raise QualificationError("current PKLOAD4 readiness is stale: " + "; ".join(current_errors))
     kernel_load, screenshot = qualify_native_kernel_load.make_readiness(
         toolchain_root,
         qemu_root,
@@ -739,7 +739,7 @@ def make_report(
         "schema_version": "1.0",
         "artifact_kind": "pooleos_native_pooleboot_readiness",
         "status_date": status_date,
-        "status": "pass_single_host_two_run_unsigned_live_manifest_pre_exit_pbp1_then_release_non_promoting",
+        "status": "pass_single_host_two_run_unsigned_live_manifest_pre_exit_pbp1_temporary_kmap_rollback_release_non_promoting",
         "contract_id": contract["contract_id"],
         "selected_move_id": contract["selected_move_id"],
         "production_ready": False,

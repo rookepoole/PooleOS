@@ -49,10 +49,10 @@
         "inspect_live_pooleglyph_each_turn": {"const": true},
         "verify_master_checklist_coverage_each_turn": {"const": true},
         "new_work_must_be_flagged": {"const": true},
-        "last_updated_cycle": {"const": 104},
-        "selected_move_id": {"const": "N5-PBP1-LIVE-001"},
+        "last_updated_cycle": {"const": 105},
+        "selected_move_id": {"const": "N5-KMAP-001"},
         "immediate_next_move_id": {"const": "N0-HW-KEY-ACQUIRE-001"},
-        "owner_independent_next_move_id": {"const": "N5-KMAP-001"},
+        "owner_independent_next_move_id": {"const": "N5-HANDOFF-001"},
         "required_records": {"type": "array", "minItems": 7, "items": {"type": "string"}, "uniqueItems": true},
         "flag_classes": {"type": "array", "minItems": 8, "items": {"type": "string"}, "uniqueItems": true}
       }
@@ -136,8 +136,8 @@
     },
     "implementation_flags": {
       "type": "array",
-      "minItems": 43,
-      "maxItems": 43,
+      "minItems": 44,
+      "maxItems": 44,
       "items": {
         "type": "object",
         "additionalProperties": false,

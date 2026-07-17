@@ -82,6 +82,10 @@ name = "poole-handoff"
 version = "0.0.0"
 
 [[package]]
+name = "poole-kmap"
+version = "0.0.0"
+
+[[package]]
 name = "poole-live-handoff"
 version = "0.0.0"
 dependencies = [
@@ -103,6 +107,7 @@ dependencies = [
  "poole-bootload",
  "poole-elf",
  "poole-handoff",
+ "poole-kmap",
  "poole-live-handoff",
 ]
 

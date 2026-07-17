@@ -41,13 +41,13 @@
     "implementation_inputs": [
       {
         "path": "native/Cargo.toml",
-        "sha256": "36AD545F9AC660BC7C03D9135C9EBC51DE3B61CCC9B8219F66ED76A3E39C2C02",
-        "byte_count": 445
+        "sha256": "60805416DCE7177CAF6DB2B72CBF6E817F6FE99E6ABB94D7CC55C89C5A8E90F1",
+        "byte_count": 455
       },
       {
         "path": "native/Cargo.lock",
-        "sha256": "AE912B0950F2AA643FA9F3DB5B050A2F9D4D2DA0204B70A1F8A8447C6A71B332",
-        "byte_count": 2925
+        "sha256": "E7747B3E708EBA92E98D8AC0999A15B346A0269FDE85416384C4C6086047C623",
+        "byte_count": 2991
       },
       {
         "path": "native/handoff/Cargo.toml",
@@ -56,8 +56,8 @@
       },
       {
         "path": "native/handoff/README.md",
-        "sha256": "797D18CEF5E8A8C4648531DB796529D4561AD65E5E20526F6F450CACE9DD6F6A",
-        "byte_count": 921
+        "sha256": "D307E6716E031DF49E1901771F15AEC3FF9973AA44FD0144F7FFE718184820FE",
+        "byte_count": 967
       },
       {
         "path": "native/handoff/src/lib.rs",
@@ -81,8 +81,8 @@
       },
       {
         "path": "tools/qualify_native_boot_handoff.py",
-        "sha256": "6AC2EA8F434360B59E405AAC71412141B82D3F2F09EBF101C08F77747CB58630",
-        "byte_count": 25083
+        "sha256": "13742F6DA2B186C8497AA7BE0BE855FCD2E0CA349B43E2FE7B768B3C948A9214",
+        "byte_count": 25129
       },
       {
         "path": "tests/test_native_boot_handoff.py",
@@ -91,8 +91,8 @@
       },
       {
         "path": "docs/native-boot-handoff.md",
-        "sha256": "19B04972C9D182790E39C6E869D6A26438CF2CC86F1F47A7A0E6C748EBFFF963",
-        "byte_count": 7817
+        "sha256": "9093CF319147E13E922B6959F6A6DC1C8DDA45C543B5335648668BB52BD19903",
+        "byte_count": 7878
       }
     ]
   },
@@ -527,7 +527,7 @@
   ],
   "claim_boundary": [
     "The full kernel-entry vector is synthetic and does not prove successful ExitBootServices or PooleKernel execution.",
-    "The Rust library compiles for UEFI and freestanding targets; PKLOAD3 separately proves a temporary pre-exit PooleBoot producer, while this standalone receipt does not claim a transferable live handoff.",
+    "The Rust library compiles for UEFI and freestanding targets; PKLOAD4 separately proves a temporary pre-exit PooleBoot producer plus temporary PKMAP1 activation and rollback, while this standalone receipt does not claim a transferable live handoff.",
     "The Python implementation is an independent host oracle and is prohibited from the production boot chain.",
     "CRC-32 is corruption detection, not authentication or signed-manifest verification.",
     "Finite negative and deterministic fuzz corpora do not prove correctness for all byte strings or hardware states.",

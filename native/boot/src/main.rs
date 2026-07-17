@@ -4,6 +4,7 @@
 #![forbid(unsafe_op_in_unsafe_fn)]
 
 mod kload;
+mod kmap;
 mod livehandoff;
 
 use core::arch::asm;
@@ -315,6 +316,14 @@ fn fail_detail(failure: kload::Failure) -> EfiStatus {
 }
 
 fn fail_handoff_detail(failure: livehandoff::Failure) -> EfiStatus {
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 ERROR stage={} code={} status=0x{:016X}\n",
+        failure.stage, failure.code, failure.status as u64
+    ));
+    failure.status
+}
+
+fn fail_kmap_detail(failure: kmap::Failure) -> EfiStatus {
     diagnostic(format_args!(
         "POOLEBOOT/0.1 ERROR stage={} code={} status=0x{:016X}\n",
         failure.stage, failure.code, failure.status as u64
@@ -634,29 +643,20 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
         kernel.relocation_count,
         kernel.loaded_fnv1a64
     ));
-    diagnostic(format_args!(
-        "POOLEBOOT/0.1 KERNEL_MAP PASS mappings={} rx={} rw={} wx={} activation=not_performed\n",
-        kernel.mapping_count,
-        kernel.read_execute_count,
-        kernel.read_write_count,
-        kernel.writable_executable_count
-    ));
-
     let handoff_result = livehandoff::produce(
         boot_services,
         &kernel,
         gop_result.ok(),
         system.header.revision,
     );
-    let release_result = kload::release_kernel_pages(
-        boot_services,
-        kernel.kernel_physical_base,
-        kernel.page_count,
-    );
     let handoff = match handoff_result {
         Ok(summary) => summary,
         Err(failure) => {
-            if let Err(release_failure) = release_result {
+            if let Err(release_failure) = kload::release_kernel_pages(
+                boot_services,
+                kernel.kernel_physical_base,
+                kernel.page_count,
+            ) {
                 return fail_detail(release_failure);
             }
             return fail_handoff_detail(failure);
@@ -678,6 +678,51 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
         "POOLEBOOT/0.1 PBP1_RELEASE PASS pools_freed={} bytes_unchanged={}\n",
         handoff.pools_freed,
         u8::from(handoff.bytes_unchanged)
+    ));
+
+    let mapping_result = kmap::activate_and_restore(boot_services, &kernel, gop_result.ok());
+    let release_result = kload::release_kernel_pages(
+        boot_services,
+        kernel.kernel_physical_base,
+        kernel.page_count,
+    );
+    let mapping = match mapping_result {
+        Ok(summary) => summary,
+        Err(failure) => {
+            if let Err(release_failure) = release_result {
+                return fail_detail(release_failure);
+            }
+            return fail_kmap_detail(failure);
+        }
+    };
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract={} mappings={} pages={} ro={} rx={} rw={} wx={} pml4={} pdpt={} pd={} pt={} leaf_fnv1a64={:016X}\n",
+        poole_kmap::CONTRACT_ID,
+        kernel.mapping_count,
+        mapping.plan.mapped_page_count,
+        mapping.plan.read_only_page_count,
+        mapping.plan.read_execute_page_count,
+        mapping.plan.read_write_page_count,
+        mapping.plan.writable_executable_page_count,
+        mapping.plan.pml4_index,
+        mapping.plan.pdpt_index,
+        mapping.plan.page_directory_index,
+        mapping.plan.first_page_table_index,
+        mapping.plan.leaf_fingerprint
+    ));
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages={} mapped_pages={} physical_bits={} mapped_fnv1a64={:016X} framebuffer=preserved cache_signature={:02X} first_page_bytes={} last_page_bytes={}\n",
+        mapping.table_page_count,
+        mapping.plan.mapped_page_count,
+        mapping.physical_address_bits,
+        mapping.mapped_fnv1a64,
+        mapping.framebuffer_cache_signature,
+        mapping.framebuffer_first_page_size,
+        mapping.framebuffer_last_page_size
+    ));
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 KERNEL_MAP_ROLLBACK PASS original_cr3=restored tables_freed={} firmware_calls_while_active={}\n",
+        mapping.tables_freed, mapping.firmware_calls_while_active
     ));
     if let Err(failure) = release_result {
         return fail_detail(failure);
@@ -720,7 +765,7 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
         memory_map.map_size, memory_map.descriptor_size, memory_map.descriptor_count
     ));
     diagnostic(format_args!(
-        "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted kernel=loaded_then_released handoff=pre_exit_produced_then_released mappings=planned_not_activated entry=not_called exit_boot_services=not_called\n"
+        "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted kernel=loaded_then_released handoff=pre_exit_produced_then_released mappings=activated_then_rolled_back entry=not_called exit_boot_services=not_called\n"
     ));
 
     if gop.is_some() {

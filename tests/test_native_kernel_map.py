@@ -1,0 +1,183 @@
+from __future__ import annotations
+
+import copy
+import json
+import sys
+import unittest
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from runtime import native_kernel_map  # noqa: E402
+from runtime.schema_validation import validate_json  # noqa: E402
+
+
+def plan() -> dict[str, object]:
+    return {
+        "physical_base": 0x0200_0000,
+        "virtual_base": native_kernel_map.MIN_VIRTUAL_BASE,
+        "image_size": 0x30000,
+        "entry_virtual": native_kernel_map.MIN_VIRTUAL_BASE + 0x4000,
+        "mappings": [
+            {"virtual_offset": 0, "memory_size": 0x4000, "permissions": "r"},
+            {"virtual_offset": 0x4000, "memory_size": 0x1C000, "permissions": "rx"},
+            {"virtual_offset": 0x20000, "memory_size": 0x2000, "permissions": "r"},
+            {"virtual_offset": 0x22000, "memory_size": 0xE000, "permissions": "rw"},
+        ],
+    }
+
+
+class NativeKernelMapTests(unittest.TestCase):
+    def test_contract_matches_schema_and_control_register(self) -> None:
+        contract = json.loads(
+            (ROOT / "specs" / "native-kernel-map-contract.json").read_text(encoding="utf-8")
+        )
+        schema = json.loads(
+            (ROOT / "specs" / "native-kernel-map-contract.schema.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual([], list(validate_json(contract, schema)))
+        self.assertEqual(native_kernel_map.CONTRACT_ID, contract["contract_id"])
+        self.assertEqual(25, len(contract["required_negative_controls"]))
+
+    def test_exact_product_model_matches_frozen_summary(self) -> None:
+        model = native_kernel_map.build_model(native_kernel_map.request_from_elf_plan(plan(), 48))
+        self.assertEqual(48, model["mapped_page_count"])
+        self.assertEqual(6, model["read_only_page_count"])
+        self.assertEqual(28, model["read_execute_page_count"])
+        self.assertEqual(14, model["read_write_page_count"])
+        self.assertEqual(0, model["writable_executable_page_count"])
+        self.assertEqual(
+            {"pml4": 511, "pdpt": 510, "page_directory": 0, "first_page_table": 0},
+            model["indices"],
+        )
+        self.assertEqual("A671D0D8901064A5", model["leaf_fingerprint"])
+        native_kernel_map.validate_model(model)
+
+    def test_cpu_profile_requires_wp_nx_and_four_level_non_pcid_mode(self) -> None:
+        profile = {
+            "paging": True,
+            "pae": True,
+            "long_mode": True,
+            "write_protect": True,
+            "nx_supported": True,
+            "nx_enabled": True,
+            "five_level_paging": False,
+            "pcid_enabled": False,
+            "physical_address_bits": 40,
+        }
+        native_kernel_map.validate_cpu(profile)
+        for field in ("write_protect", "nx_supported", "nx_enabled"):
+            hostile = dict(profile)
+            hostile[field] = False
+            with self.assertRaises(native_kernel_map.KernelMapError):
+                native_kernel_map.validate_cpu(hostile)
+        for field in ("five_level_paging", "pcid_enabled"):
+            hostile = dict(profile)
+            hostile[field] = True
+            with self.assertRaises(native_kernel_map.KernelMapError):
+                native_kernel_map.validate_cpu(hostile)
+
+    def test_rejects_occupied_high_half_slot(self) -> None:
+        root = [0] * native_kernel_map.TABLE_ENTRIES
+        root[511] = 0x4003
+        with self.assertRaises(native_kernel_map.KernelMapError):
+            native_kernel_map.build_model(
+                native_kernel_map.request_from_elf_plan(plan(), 48), original_root=root
+            )
+
+    def test_rejects_alignment_gap_overlap_and_window_overflow(self) -> None:
+        for mutate in (
+            lambda value: value["mappings"][1].__setitem__("virtual_offset", 0x4001),
+            lambda value: value["mappings"][1].__setitem__("virtual_offset", 0x5000),
+            lambda value: value["mappings"][1].__setitem__("virtual_offset", 0x3000),
+            lambda value: value.__setitem__("image_size", native_kernel_map.WINDOW_BYTES + 0x1000),
+        ):
+            hostile = copy.deepcopy(plan())
+            mutate(hostile)
+            with self.assertRaises(native_kernel_map.KernelMapError):
+                native_kernel_map.build_model(
+                    native_kernel_map.request_from_elf_plan(hostile, 48)
+                )
+
+    def test_rejects_writable_executable_and_nonexecutable_entry(self) -> None:
+        hostile = copy.deepcopy(plan())
+        hostile["mappings"][3]["permissions"] = "rwx"
+        with self.assertRaises(native_kernel_map.KernelMapError):
+            native_kernel_map.build_model(native_kernel_map.request_from_elf_plan(hostile, 48))
+        hostile = copy.deepcopy(plan())
+        hostile["entry_virtual"] = native_kernel_map.MIN_VIRTUAL_BASE
+        with self.assertRaises(native_kernel_map.KernelMapError):
+            native_kernel_map.build_model(native_kernel_map.request_from_elf_plan(hostile, 48))
+
+    def test_rejects_wrong_physical_and_table_overlap(self) -> None:
+        hostile = copy.deepcopy(plan())
+        hostile["physical_base"] += 1
+        with self.assertRaises(native_kernel_map.KernelMapError):
+            native_kernel_map.build_model(native_kernel_map.request_from_elf_plan(hostile, 48))
+        request = native_kernel_map.request_from_elf_plan(plan(), 48)
+        with self.assertRaises(native_kernel_map.KernelMapError):
+            native_kernel_map.build_model(request, table_base=request.physical_base)
+
+    def test_model_validator_rejects_leaf_physical_flag_and_index_drift(self) -> None:
+        model = native_kernel_map.build_model(native_kernel_map.request_from_elf_plan(plan(), 48))
+        hostile_values = (
+            native_kernel_map.mutated_model(model, ("leaves", 1, "physical_offset"), 0),
+            native_kernel_map.mutated_model(model, ("leaves", 1, "normalized_flags"), "8000000000000003"),
+            native_kernel_map.mutated_model(model, ("indices", "pdpt"), 509),
+        )
+        for hostile in hostile_values:
+            with self.assertRaises(native_kernel_map.KernelMapError):
+                native_kernel_map.validate_model(hostile)
+
+    def test_probe_parser_requires_exact_order_and_fingerprint(self) -> None:
+        line = (
+            "PKMAP1 PASS mappings=4 pages=48 ro=6 rx=28 rw=14 wx=0 "
+            "pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=A671D0D8901064A5"
+        )
+        observed = native_kernel_map.parse_probe_output(line)
+        expected = native_kernel_map.marker_expectation(plan(), 48)
+        self.assertEqual(expected, observed)
+        with self.assertRaises(native_kernel_map.KernelMapError):
+            native_kernel_map.parse_probe_output(line.replace("wx=0", "wx=1"))
+
+    def test_lifecycle_rejects_firmware_call_activation_and_rollback_drift(self) -> None:
+        events = [
+            {"state": "prepared", "original_cr3": 0x1000},
+            {"state": "candidate_active", "firmware_call_count": 0},
+            {"state": "restored", "observed_cr3": 0x1000},
+            {"state": "released", "table_pages_freed": 4},
+        ]
+        native_kernel_map.validate_lifecycle(events)
+        for index, field, value in (
+            (1, "firmware_call_count", 1),
+            (2, "observed_cr3", 0x2000),
+            (3, "table_pages_freed", 3),
+        ):
+            hostile = copy.deepcopy(events)
+            hostile[index][field] = value
+            with self.assertRaises(native_kernel_map.KernelMapError):
+                native_kernel_map.validate_lifecycle(hostile)
+
+    def test_framebuffer_snapshot_rejects_translation_and_cache_drift(self) -> None:
+        snapshot = {
+            "first_physical": 0x8000_0000,
+            "last_physical": 0x803F_FFFF,
+            "first_page_size": 0x20_0000,
+            "last_page_size": 0x20_0000,
+            "cache_signature": 0,
+        }
+        native_kernel_map.validate_framebuffer_preserved(snapshot, snapshot)
+        for field in snapshot:
+            hostile = dict(snapshot)
+            hostile[field] += 1
+            with self.assertRaises(native_kernel_map.KernelMapError):
+                native_kernel_map.validate_framebuffer_preserved(snapshot, hostile)
+
+
+if __name__ == "__main__":
+    unittest.main()

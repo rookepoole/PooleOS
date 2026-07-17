@@ -1,13 +1,13 @@
 # Native PooleBoot UEFI Proof
 
-Status: bounded unsigned manifest-bound live-load/pre-exit-PBP1/then-release non-promoting proof
-Contract: `POOLEOS-N5-POOLEBOOT-4`
+Status: bounded unsigned live-load/pre-exit-PBP1/temporary-PKMAP1/rollback/release non-promoting proof
+Contract: `POOLEOS-N5-POOLEBOOT-5`
 Phase mapping: N5.1, N5.2, N5.3, N5.4, N5.5, N5.7, and N5.8 partial
 Receipt: `runs/native_pooleboot_readiness.json`
 
 ## Purpose
 
-Cycle 97 replaced the empty compiler fixture with the first Poole-authored freestanding x86-64 UEFI product. Cycles 102-103 added bounded live PBC1/PSM1/PKELF1 selection and load then release. Cycle 104 keeps the kernel allocation live while producing PBLIVE1 bytes from normalized UEFI descriptors, GOP, PBC1 policy, and the PSM1 kernel digest. The aggregate receipt reconstructs exact PBP1 bytes independently from serial and debugcon before all temporary resources are released.
+Cycle 97 replaced the empty compiler fixture with the first Poole-authored freestanding x86-64 UEFI product. Cycles 102-104 added bounded live PBC1/PSM1/PKELF1 selection, temporary PBP1 production, and complete release. Cycle 105 adds PKMAP1: an exact temporary higher-half kernel mapping is activated under a cloned four-level root, audited in place, rolled back to the exact original CR3, and fully released. The aggregate receipt reconstructs PBP1 and PKMAP1 state independently from serial and debugcon before accepting the return path.
 
 This proof is deliberately smaller than the complete loader. Its evidence can be consumed by later work, but it cannot satisfy the N5 exit gate.
 
@@ -22,10 +22,11 @@ The `native/boot` product crate:
 - enumerates at most 256 configuration-table entries and recognizes bounded ACPI and SMBIOS GUIDs without parsing their payloads;
 - locates GOP, accepts only direct RGB or BGR framebuffers, validates dimensions, stride, base alignment, byte bounds, and end-address overflow, and draws a deterministic static Poole identity;
 - follows the two-call UEFI memory-map pattern, adds descriptor headroom, validates descriptor size and result bounds, and frees the pool allocation;
-- builds a four-record pre-exit PBP1 with zero stack/CR3, 95 normalized memory entries, GOP metadata, and one live kernel artifact; requires the kernel-entry profile to reject; transcripts and rechecks exact bytes; and frees all three PBP1 pools; and
+- builds a four-record pre-exit PBP1 with zero stack/CR3, 95 normalized memory entries, GOP metadata, and one live kernel artifact; requires the kernel-entry profile to reject; transcripts and rechecks exact bytes; and frees all three PBP1 pools;
+- requires CR0.WP and processor/EFER NX, clones the active PML4 into four private table pages, installs 48 exact supervisor 4 KiB higher-half leaves with zero W+X, activates and audits the candidate CR3, preserves framebuffer translation/cache bits, restores the exact original CR3 before firmware use, and frees all table pages; and
 - emits a fixed non-claim marker and returns `EFI_SUCCESS` without calling `ExitBootServices`.
 
-The Cycle 104 media builder emits a 64 MiB ordinary workspace file with a protective MBR, mirrored GPT structures, one FAT32 ESP, two identical FATs, fixed metadata, and exactly four files: `EFI/BOOT/BOOTX64.EFI`, `EFI/POOLEOS/BOOT.CFG`, `EFI/POOLEOS/SYSTEM_A.PBM`, and `EFI/POOLEOS/KERNEL.ELF`. The ordinary-file boundary rejects oversized inputs, workspace escapes, device namespaces, alternate data streams, reserved device names, symlinks, and non-file replacements. It has no physical-media output mode.
+The Cycle 105 media builder emits a 64 MiB ordinary workspace file with a protective MBR, mirrored GPT structures, one FAT32 ESP, two identical FATs, fixed metadata, and exactly four files: `EFI/BOOT/BOOTX64.EFI`, `EFI/POOLEOS/BOOT.CFG`, `EFI/POOLEOS/SYSTEM_A.PBM`, and `EFI/POOLEOS/KERNEL.ELF`. The ordinary-file boundary rejects oversized inputs, workspace escapes, device namespaces, alternate data streams, reserved device names, symlinks, and non-file replacements. It has no physical-media output mode.
 
 ## Qualification Contract
 
@@ -37,24 +38,25 @@ The Cycle 104 media builder emits a 64 MiB ordinary workspace file with a protec
 4. Generate and independently inspect two media images and require exact bytes.
 5. Verify the pinned Tier 0 QEMU/OVMF runtime closure and launch profile.
 6. Execute two Q35/TCG runs with read-only media, fresh OVMF variables, no guest network, no host acceleration, and loopback-only QMP.
-7. Require 21 ordered markers covering filesystem/config/manifest/kernel binding and intake, load, mapping plan, PBP1 production/release, kernel release, GOP, memory map, and return; independently reconstruct exact PBP1 bytes from both transports; require a nonblank Poole-identity GOP frame, exact marker/frame/PBP1 matches, clean QMP quit, and empty QEMU stderr.
-8. Execute all 52 negative controls and fail on any unexpected acceptance.
+7. Require 23 ordered markers covering filesystem/config/manifest/kernel binding and intake, load, PBP1 production/release, PKMAP1 plan/activation/rollback, kernel release, GOP, memory map, and return; independently reconstruct exact PBP1 and PKMAP1 evidence from both transports; require a nonblank Poole-identity GOP frame, exact marker/frame/PBP1 matches, clean QMP quit, and empty QEMU stderr.
+8. Execute all 77 negative controls and fail on any unexpected acceptance.
 9. Bind every contract, implementation, toolchain, Tier 0, result, command, and claim-boundary input into the public readiness receipt.
 
 The current exact evidence is:
 
 - host contract tests: 8/8;
-- clean PE32+ builds: 2/2 exact, 81,408 bytes, SHA-256 `C836D82D7E94E3360DD24C52C830CC298250E5E0DC797FD09003A8AC94FEAB07`;
-- clean media generations: 2/2 exact, 67,108,864 bytes, SHA-256 `877D1E4F78479873090630E203C1F9CD7259D44528D8E9A27D4911A9948DABDA`;
-- guest runs: 2/2, with 21/21 ordered markers in each run;
+- clean PE32+ builds: 2/2 exact, 94,720 bytes, SHA-256 `7C3365BDC88D9E3B9D8CA9C0832E52527650C11563C48C2AD81233F5E123B4AD`;
+- clean media generations: 2/2 exact, 67,108,864 bytes, SHA-256 `26AC661BEEE8EC1E2FA9D38EC610FC38677709E136E750A5352D1AEF5FA9EE90`;
+- guest runs: 2/2, with 23/23 ordered markers in each run;
 - serial/debugcon matches: 2/2;
-- exact pre-exit PBP1 matches: 2/2, 4,248 bytes, SHA-256 `5E213BF701454BC597AA028D5C65E6C8EAE53978C29C7572E429BADFFEE9F2D8`;
+- exact pre-exit PBP1 matches: 2/2, 4,248 bytes, SHA-256 `7643A0C05838F2E6862CE9FA6DA604B02EDC7F3B7CC4F731ECAEC5C90C8E2279`;
+- exact PKMAP1 matches: 2/2, with 48 leaves, `6/28/14` read-only/read-execute/read-write pages, leaf fingerprint `A671D0D8901064A5`, full-image FNV-1a `80F8CD80B30B2EBA`, exact original-CR3 restoration, and four freed table pages;
 - GOP frames: 2/2 exact at 1280x800, screenshot SHA-256 `E9D4CFD48C23DBA760AED5B2049B39DCA49A0D172F680D570082EB0680FDFDBD`;
-- hostile controls: 52/52; and
+- hostile controls: 77/77; and
 - production claims: zero; and
-- deterministic readiness receipt: 49,989 bytes, SHA-256 `BC8EAD11CDF63EB44DCB68D8C25B92604FF56F6318C61313B9F80E9E2D35BD32`.
+- deterministic readiness receipt: 59,749 bytes, SHA-256 `874D85A0C49784C917C5E4BAB5166A54791DB09ED38DD339A2FE76FE229D980C`.
 
-The hostile corpus covers missing, empty, oversized, malformed, path, FAT, PBC1, PSM1, manifest binding, digest, PKELF1, allocation, relocation, W^X, cleanup, marker, oracle-divergence, stale-binding, and claim-overreach failures.
+The hostile corpus covers missing, empty, oversized, malformed, path, FAT, PBC1, PSM1, manifest binding, digest, PKELF1, allocation, relocation, W^X, cleanup, marker, oracle-divergence, stale-binding, claim-overreach, WP/NX/LA57/PCID profile drift, occupied roots, malformed map coverage/ranges, table overlap, wrong leaves, large pages, framebuffer drift, activation/rollback failure, firmware calls while active, and table cleanup failure.
 
 ## Reproduction
 
@@ -91,9 +93,11 @@ MANIFEST PASS
 KERNEL_BINDING PASS
 KERNEL_FILE PASS
 KERNEL_LOAD PASS
-KERNEL_MAP PASS
 PBP1 PASS
 PBP1_RELEASE PASS
+KERNEL_MAP_PLAN PASS
+KERNEL_MAP_ACTIVE PASS
+KERNEL_MAP_ROLLBACK PASS
 KERNEL_RELEASE PASS
 GOP PASS
 MEMORY_MAP PASS
@@ -106,13 +110,13 @@ The markers prove only that the instrumented application reached each point unde
 
 ## Open N5 Work
 
-Cycles 98-103 qualify PBP1, PBC1, PKELF1, PKENTRY1, live load, and PSM1. Cycle 104 closes `N5-PBP1-LIVE-001` with a temporary, logically finalized pre-exit PBP1 producer. The next chronological owner-independent move is `N5-KMAP-001`: retain the kernel and handoff allocations while constructing and auditing the exact page-table ownership and W^X/RELRO mapping plan, still without claiming `ExitBootServices` or transfer.
+Cycles 98-104 qualify PBP1, PBC1, PKELF1, PKENTRY1, live load, PSM1, and the temporary live handoff. Cycle 105 closes `N5-KMAP-001` with temporary candidate-root activation, complete alias verification, and exact rollback. The next chronological owner-independent move is `N5-HANDOFF-001`: retain the qualified kernel mappings and immutable PBP1, normalize and retry the final memory map, call `ExitBootServices`, and prove that no later boot-service call occurs, still without claiming kernel transfer.
 
-N5 still requires signature-authenticated manifest and system-artifact selection, persistent rollback enforcement, independent digest-provider review, retained kernel/PBP1 pages and installed W^X/read-only mappings, complete menu/RNG/TCG2 handling, final memory-map normalization, `ExitBootServices` retry behavior, immutable handoff transfer, second-host reproduction, target-firmware execution, and separately authorized physical-media qualification.
+N5 still requires signature-authenticated manifest and system-artifact selection, persistent rollback enforcement, independent digest-provider review, retained kernel/PBP1/page-table pages, final framebuffer cache policy, complete menu/RNG/TCG2 handling, final memory-map normalization, `ExitBootServices` retry behavior, immutable handoff transfer, second-host reproduction, target-firmware execution, and separately authorized physical-media qualification.
 
 ## Claim Boundary
 
-This is an unsigned manifest-bound live-load/pre-exit-PBP1/then-release UEFI proof, not the complete PooleBoot loader. It proves exact digest equality to an attacker-controllable manifest and an exact temporary PBP1 snapshot, validates but does not install a mapping plan, then releases all pages. It does not authenticate the manifest or provider, enforce persistent rollback, retain the kernel/PBP1, establish hardware read-only mappings, produce a transferable handoff, call `ExitBootServices`, enter PooleKernel, enforce Secure Boot, perform measured boot, use TPM state, generate or use a key, create a signature, test target firmware, write physical media, build an ISO, or satisfy N5, N38, N39, release, or production gates. The static framebuffer identity is not the final animated PooleGlass boot identity or an accessibility acceptance result.
+This is an unsigned manifest-bound live-load/pre-exit-PBP1/temporary-PKMAP1/rollback/release UEFI proof, not the complete PooleBoot loader. It proves exact digest equality to an attacker-controllable manifest, an exact temporary PBP1 snapshot, and temporary hardware activation of an exact higher-half W^X map whose complete alias and framebuffer invariants are audited before exact rollback and release. It does not authenticate the manifest or provider, enforce persistent rollback, retain the kernel/PBP1/page tables, establish the final address space or framebuffer cache policy, produce a transferable handoff, call `ExitBootServices`, enter PooleKernel, enforce Secure Boot, perform measured boot, use TPM state, generate or use a key, create a signature, test target firmware, write physical media, build an ISO, or satisfy N5, N38, N39, release, or production gates. The static framebuffer identity is not the final animated PooleGlass boot identity or an accessibility acceptance result.
 
 ## Primary References
 
@@ -120,3 +124,5 @@ This is an unsigned manifest-bound live-load/pre-exit-PBP1/then-release UEFI pro
 - UEFI 2.11 Graphics Output Protocol: `https://uefi.org/specs/UEFI/2.11/12_Protocols_Console_Support.html`
 - Rust UEFI target support: `https://doc.rust-lang.org/rustc/platform-support/unknown-uefi.html`
 - QEMU QMP screenshot command: `https://www.qemu.org/docs/master/interop/qemu-qmp-ref.html`
+- Intel 64 and IA-32 Architectures Software Developer's Manual: `https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html`
+- AMD64 Architecture Programmer's Manual, Volume 2: `https://docs.amd.com/v/u/en-US/24593_3.44_APM_Vol2`

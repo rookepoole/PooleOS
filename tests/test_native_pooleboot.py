@@ -92,7 +92,7 @@ class NativePooleBootTests(unittest.TestCase):
     def test_marker_parser_rejects_omission_order_and_bad_geometry(self) -> None:
         markers = self.readiness["execution"]["runs"][0]["markers"]
         summary = native_pooleboot.validate_markers(markers)
-        self.assertEqual(21, summary["marker_count"])
+        self.assertEqual(23, summary["marker_count"])
         with self.assertRaises(native_pooleboot.PooleBootError):
             native_pooleboot.validate_markers(markers[:-1])
         reordered = markers[:]

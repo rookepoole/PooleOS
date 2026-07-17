@@ -129,9 +129,7 @@ pub(super) struct Summary {
     pub relocation_count: u32,
     pub loaded_fnv1a64: u64,
     pub mapping_count: usize,
-    pub read_execute_count: usize,
-    pub read_write_count: usize,
-    pub writable_executable_count: usize,
+    pub mappings: [bootload::elf::MappingPlan; bootload::elf::MAPPING_COUNT],
     pub kernel_physical_base: u64,
     pub kernel_virtual_base: u64,
     pub kernel_entry_virtual: u64,
@@ -641,16 +639,6 @@ pub(super) fn load_manifest_kernel(
             }
         };
 
-    let mut read_execute_count = 0usize;
-    let mut read_write_count = 0usize;
-    let mut writable_executable_count = 0usize;
-    for mapping in loaded.image.mappings {
-        read_execute_count +=
-            usize::from(mapping.permissions.execute && !mapping.permissions.write);
-        read_write_count += usize::from(mapping.permissions.write && !mapping.permissions.execute);
-        writable_executable_count +=
-            usize::from(mapping.permissions.write && mapping.permissions.execute);
-    }
     let summary = Summary {
         config,
         manifest,
@@ -662,9 +650,7 @@ pub(super) fn load_manifest_kernel(
         relocation_count: loaded.image.relocation_count,
         loaded_fnv1a64: loaded.loaded_fnv1a64,
         mapping_count: loaded.image.mappings.len(),
-        read_execute_count,
-        read_write_count,
-        writable_executable_count,
+        mappings: loaded.image.mappings,
         kernel_physical_base: loaded.image.physical_base,
         kernel_virtual_base: loaded.image.virtual_base,
         kernel_entry_virtual: loaded.image.entry_virtual,

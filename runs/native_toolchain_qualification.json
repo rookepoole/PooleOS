@@ -28,13 +28,13 @@
     "build_inputs": [
       {
         "path": "native/Cargo.toml",
-        "sha256": "36AD545F9AC660BC7C03D9135C9EBC51DE3B61CCC9B8219F66ED76A3E39C2C02",
-        "byte_count": 445
+        "sha256": "60805416DCE7177CAF6DB2B72CBF6E817F6FE99E6ABB94D7CC55C89C5A8E90F1",
+        "byte_count": 455
       },
       {
         "path": "native/Cargo.lock",
-        "sha256": "AE912B0950F2AA643FA9F3DB5B050A2F9D4D2DA0204B70A1F8A8447C6A71B332",
-        "byte_count": 2925
+        "sha256": "E7747B3E708EBA92E98D8AC0999A15B346A0269FDE85416384C4C6086047C623",
+        "byte_count": 2991
       },
       {
         "path": "native/rust-toolchain.toml",
