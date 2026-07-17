@@ -45,10 +45,12 @@ def valid_markers() -> list[str]:
         "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=139264 path=manifest_development",
         "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=196608 pages=48 entry_offset=16384 relocations=40 fnv1a64=5D48CA3E327C4BF2",
         "POOLEBOOT/0.1 KERNEL_MAP PASS mappings=4 rx=1 rw=1 wx=0 activation=not_performed",
+        "POOLEBOOT/0.1 PBP1 PASS bytes=4248 records=4 memory_entries=95 framebuffer=1 artifacts=1 descriptor_bytes=48 map_attempts=1 message_crc32=8BEB8BE2 fnv1a64=83C0C38E587A3C9F state=pre_exit",
+        "POOLEBOOT/0.1 PBP1_RELEASE PASS pools_freed=3 bytes_unchanged=1",
         "POOLEBOOT/0.1 KERNEL_RELEASE PASS files_closed=4 pools_freed=3 pages_freed=48",
         "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
         "POOLEBOOT/0.1 MEMORY_MAP PASS bytes=4512 descriptor_bytes=48 descriptors=94",
-        "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted kernel=loaded_then_released mappings=planned_not_activated entry=not_called exit_boot_services=not_called",
+        "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted kernel=loaded_then_released handoff=pre_exit_produced_then_released mappings=planned_not_activated entry=not_called exit_boot_services=not_called",
         "POOLEBOOT/0.1 FRAME READY",
         "POOLEBOOT/0.1 RETURN EFI_SUCCESS",
     ]
@@ -138,10 +140,12 @@ class NativeKernelLoadTests(unittest.TestCase):
 
     def test_marker_contract_captures_load_mapping_and_cleanup(self) -> None:
         summary = native_kernel_load.validate_markers(valid_markers())
-        self.assertEqual(19, summary["marker_count"])
+        self.assertEqual(21, summary["marker_count"])
         self.assertEqual(48, summary["kernel"]["page_count"])
         self.assertEqual(0, summary["kernel"]["writable_executable_count"])
         self.assertTrue(summary["kernel"]["resources_released"])
+        self.assertTrue(summary["pbp1"]["pre_exit"])
+        self.assertTrue(summary["pbp1"]["temporary_pools_released"])
 
     def test_marker_contract_rejects_omission_wx_and_page_mismatch(self) -> None:
         markers = valid_markers()

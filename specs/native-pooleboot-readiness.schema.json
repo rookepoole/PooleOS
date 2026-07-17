@@ -29,16 +29,16 @@
     "schema_version": {"const": "1.0"},
     "artifact_kind": {"const": "pooleos_native_pooleboot_readiness"},
     "status_date": {"const": "2026-07-17"},
-    "status": {"const": "pass_single_host_two_run_unsigned_live_manifest_load_then_release_non_promoting"},
-    "contract_id": {"const": "POOLEOS-N5-POOLEBOOT-3"},
-    "selected_move_id": {"const": "N5-MANIFEST-001"},
+    "status": {"const": "pass_single_host_two_run_unsigned_live_manifest_pre_exit_pbp1_then_release_non_promoting"},
+    "contract_id": {"const": "POOLEOS-N5-POOLEBOOT-4"},
+    "selected_move_id": {"const": "N5-PBP1-LIVE-001"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
     "n5_exit_gate_satisfied": {"const": false},
     "phase_status": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["N5", "N5.1", "N5.2", "N5.3", "N5.4", "N5.5", "N5.7"],
+      "required": ["N5", "N5.1", "N5.2", "N5.3", "N5.4", "N5.5", "N5.7", "N5.8"],
       "properties": {
         "N5": {"const": "partial"},
         "N5.1": {"const": "partial"},
@@ -46,7 +46,8 @@
         "N5.3": {"const": "partial"},
         "N5.4": {"const": "partial"},
         "N5.5": {"const": "partial"},
-        "N5.7": {"const": "partial"}
+        "N5.7": {"const": "partial"},
+        "N5.8": {"const": "partial"}
       }
     },
     "bindings": {
@@ -65,7 +66,7 @@
         "kernel_load_readiness": {"$ref": "#/$defs/binding"},
         "system_manifest_contract": {"$ref": "#/$defs/binding"},
         "system_manifest_readiness": {"$ref": "#/$defs/binding"},
-        "implementation_inputs": {"type": "array", "minItems": 42, "maxItems": 42, "items": {"$ref": "#/$defs/binding"}}
+        "implementation_inputs": {"type": "array", "minItems": 48, "maxItems": 48, "items": {"$ref": "#/$defs/binding"}}
       }
     },
     "build": {
@@ -127,11 +128,11 @@
         "runs": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/run"}}
       }
     },
-    "negative_controls": {"type": "array", "minItems": 40, "maxItems": 40, "items": {"$ref": "#/$defs/control"}},
+    "negative_controls": {"type": "array", "minItems": 52, "maxItems": 52, "items": {"$ref": "#/$defs/control"}},
     "claims": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["one_host_pe32_reproducible", "deterministic_gpt_esp_observed", "pooleboot_guest_entry_observed", "gop_frame_observed", "bounded_memory_map_observed", "efi_success_return_path_marker_observed", "poolekernel_loaded", "system_manifest_parsed", "manifest_selected_kernel_path", "manifest_kernel_sha256_matched", "complete_pooleboot_loader", "manifest_trusted", "persistent_rollback_state_enforced", "poolekernel_executed", "exit_boot_services_called", "secure_boot_enforced", "measured_boot_performed", "owner_signature_present", "target_firmware_tested", "physical_media_tested", "n5_exit_gate_satisfied", "production_boot_evidence", "production_ready"],
+      "required": ["one_host_pe32_reproducible", "deterministic_gpt_esp_observed", "pooleboot_guest_entry_observed", "gop_frame_observed", "bounded_memory_map_observed", "efi_success_return_path_marker_observed", "poolekernel_loaded", "system_manifest_parsed", "manifest_selected_kernel_path", "manifest_kernel_sha256_matched", "live_pbp1_pre_exit_observed", "pbp1_serial_debugcon_exact", "pbp1_kernel_manifest_cross_bound", "complete_pooleboot_loader", "manifest_trusted", "persistent_rollback_state_enforced", "poolekernel_executed", "transferable_pbp1_handoff_produced", "exit_boot_services_called", "secure_boot_enforced", "measured_boot_performed", "owner_signature_present", "target_firmware_tested", "physical_media_tested", "n5_exit_gate_satisfied", "production_boot_evidence", "production_ready"],
       "properties": {
         "one_host_pe32_reproducible": {"const": true},
         "deterministic_gpt_esp_observed": {"const": true},
@@ -144,7 +145,11 @@
         "system_manifest_parsed": {"const": true},
         "manifest_selected_kernel_path": {"const": true},
         "manifest_kernel_sha256_matched": {"const": true},
+        "live_pbp1_pre_exit_observed": {"const": true},
+        "pbp1_serial_debugcon_exact": {"const": true},
+        "pbp1_kernel_manifest_cross_bound": {"const": true},
         "poolekernel_executed": {"const": false},
+        "transferable_pbp1_handoff_produced": {"const": false},
         "manifest_trusted": {"const": false},
         "persistent_rollback_state_enforced": {"const": false},
         "exit_boot_services_called": {"const": false},
@@ -169,11 +174,11 @@
         "clean_media_generations_exact": {"const": 2},
         "guest_runs_passed": {"const": 2},
         "guest_runs_total": {"const": 2},
-        "ordered_marker_count": {"const": 19},
+        "ordered_marker_count": {"const": 21},
         "serial_debugcon_match_count": {"const": 2},
         "gop_frame_match_count": {"const": 2},
-        "negative_controls_passed": {"const": 40},
-        "negative_controls_total": {"const": 40},
+        "negative_controls_passed": {"const": 52},
+        "negative_controls_total": {"const": 52},
         "production_claim_count": {"const": 0}
       }
     },
@@ -195,7 +200,7 @@
     "run": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["run_id", "fresh_vars_copy", "media_read_only", "guest_network", "host_acceleration", "qmp_loopback_only", "qmp_greeting", "timestamped_qmp_events_excluded_from_equality", "qmp_quit_requested", "qemu_exit_code", "markers", "marker_sha256", "serial_debugcon_exact_match", "marker_summary", "screenshot", "stderr_sha256", "stderr_byte_count", "local_paths_recorded"],
+      "required": ["run_id", "fresh_vars_copy", "media_read_only", "guest_network", "host_acceleration", "qmp_loopback_only", "qmp_greeting", "timestamped_qmp_events_excluded_from_equality", "qmp_quit_requested", "qemu_exit_code", "markers", "marker_sha256", "serial_debugcon_exact_match", "marker_summary", "pbp1_transcript", "pbp1_serial_debugcon_exact_match", "screenshot", "stderr_sha256", "stderr_byte_count", "local_paths_recorded"],
       "properties": {
         "fresh_vars_copy": {"const": true},
         "media_read_only": {"const": true},
@@ -205,9 +210,11 @@
         "timestamped_qmp_events_excluded_from_equality": {"const": true},
         "qmp_quit_requested": {"const": true},
         "qemu_exit_code": {"const": 0},
-        "markers": {"type": "array", "minItems": 19, "maxItems": 19, "items": {"type": "string"}},
+        "markers": {"type": "array", "minItems": 21, "maxItems": 21, "items": {"type": "string"}},
         "marker_sha256": {"$ref": "#/$defs/sha256"},
         "serial_debugcon_exact_match": {"const": true},
+        "pbp1_transcript": {"type": "object", "required": ["contract_id", "byte_count", "sha256", "record_count", "memory_entry_count", "pre_exit_profile_validated", "kernel_entry_profile_rejected"]},
+        "pbp1_serial_debugcon_exact_match": {"const": true},
         "screenshot": {"type": "object", "required": ["sha256", "byte_count", "width", "height", "pixel_count", "sampled_unique_color_count", "bright_cyan_pixel_count", "dark_pixel_count", "nonblank", "poole_identity_palette_observed"]},
         "stderr_sha256": {"$ref": "#/$defs/sha256"},
         "stderr_byte_count": {"const": 0},

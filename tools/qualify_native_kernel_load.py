@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Qualify live PKLOAD2 manifest selection, relocation, mapping, and cleanup."""
+"""Qualify live PKLOAD3 manifest selection, pre-exit PBP1, and cleanup."""
 
 from __future__ import annotations
 
@@ -17,7 +17,13 @@ from typing import Any, Callable
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from runtime import native_kernel_load, native_pooleboot, native_tier0  # noqa: E402
+from runtime import (  # noqa: E402
+    native_boot_handoff,
+    native_kernel_load,
+    native_live_boot_handoff,
+    native_pooleboot,
+    native_tier0,
+)
 from tools import qualify_native_kernel_entry, qualify_native_pooleboot  # noqa: E402
 
 
@@ -28,7 +34,7 @@ NATIVE_ROOT = ROOT / "native"
 
 
 class QualificationError(RuntimeError):
-    """Raised when the PKLOAD2 qualification fails closed."""
+    """Raised when the PKLOAD3 qualification fails closed."""
 
 
 def _host_checks(toolchain_root: Path, temporary_root: Path) -> dict[str, Any]:
@@ -57,7 +63,35 @@ def _host_checks(toolchain_root: Path, temporary_root: Path) -> dict[str, Any]:
     if match is None or int(match.group(1)) < 14:
         raise QualificationError("expected at least fourteen poole-bootload host tests")
     bootload_tests = int(match.group(1))
-    for package in ("poole-bootload", "pooleboot"):
+    handoff_tests: dict[str, int] = {}
+    for package, minimum in (("poole-handoff", 8), ("poole-live-handoff", 6)):
+        package_output = qualify_native_pooleboot._run_checked(
+            [
+                str(cargo),
+                "test",
+                "--manifest-path",
+                str(NATIVE_ROOT / "Cargo.toml"),
+                "--package",
+                package,
+                "--lib",
+                "--target",
+                "x86_64-pc-windows-msvc",
+                "--locked",
+                "--offline",
+                "--target-dir",
+                str(temporary_root / f"{package}-tests"),
+                "--",
+                "--test-threads=1",
+            ],
+            cwd=NATIVE_ROOT,
+            env=environment,
+        )
+        package_match = re.search(r"test result: ok\. ([0-9]+) passed; 0 failed", package_output)
+        if package_match is None or int(package_match.group(1)) < minimum:
+            raise QualificationError(f"expected at least {minimum} {package} host tests")
+        handoff_tests[package] = int(package_match.group(1))
+    fmt_packages = ("poole-bootload", "poole-handoff", "poole-live-handoff", "pooleboot")
+    for package in fmt_packages:
         qualify_native_pooleboot._run_checked(
             [
                 str(cargo),
@@ -75,6 +109,10 @@ def _host_checks(toolchain_root: Path, temporary_root: Path) -> dict[str, Any]:
     clippy_profiles = (
         ("poole-bootload", "--lib", "x86_64-pc-windows-msvc", "clippy-bootload-host"),
         ("poole-bootload", "--lib", "x86_64-unknown-uefi", "clippy-bootload-uefi"),
+        ("poole-handoff", "--lib", "x86_64-pc-windows-msvc", "clippy-handoff-host"),
+        ("poole-handoff", "--lib", "x86_64-unknown-uefi", "clippy-handoff-uefi"),
+        ("poole-live-handoff", "--lib", "x86_64-pc-windows-msvc", "clippy-live-handoff-host"),
+        ("poole-live-handoff", "--lib", "x86_64-unknown-uefi", "clippy-live-handoff-uefi"),
         ("pooleboot", "--bin", "x86_64-unknown-uefi", "clippy-pooleboot-uefi"),
     )
     for package, kind, target, target_dir in clippy_profiles:
@@ -111,8 +149,12 @@ def _host_checks(toolchain_root: Path, temporary_root: Path) -> dict[str, Any]:
     return {
         "bootload_tests_passed": bootload_tests,
         "bootload_tests_total": bootload_tests,
+        "handoff_tests_passed": handoff_tests["poole-handoff"],
+        "handoff_tests_total": handoff_tests["poole-handoff"],
+        "live_handoff_tests_passed": handoff_tests["poole-live-handoff"],
+        "live_handoff_tests_total": handoff_tests["poole-live-handoff"],
         "rustfmt_passed": True,
-        "rustfmt_packages": ["poole-bootload", "pooleboot"],
+        "rustfmt_packages": list(fmt_packages),
         "clippy_passed": True,
         "clippy_run_count": len(clippy_profiles),
     }
@@ -163,10 +205,46 @@ def _replace_marker(markers: list[str], index: int, old: str, new: str) -> list[
     return changed
 
 
+def _repair_pbp1_record(value: bytearray, record_index: int) -> None:
+    descriptor = native_boot_handoff.HEADER_BYTES + record_index * native_boot_handoff.DESCRIPTOR_BYTES
+    offset, length = struct.unpack_from("<II", value, descriptor + 8)
+    struct.pack_into(
+        "<I",
+        value,
+        descriptor + 20,
+        native_boot_handoff._crc32(bytes(value[offset : offset + length])),
+    )
+    value[48:52] = b"\0" * 4
+    struct.pack_into("<I", value, 48, native_boot_handoff._message_crc(bytes(value)))
+
+
+def _mutated_pbp1(data: bytes, *, transfer_state: bool = False, artifact_digest: bool = False) -> bytes:
+    handoff = native_boot_handoff.decode(data)
+    changed = bytearray(data)
+    if transfer_state:
+        core = handoff.record(native_boot_handoff.RECORD_CORE)
+        if core is None:
+            raise QualificationError("live PBP1 core record is absent")
+        struct.pack_into("<Q", changed, core.offset + 56, 0x0040_0000)
+        _repair_pbp1_record(changed, 0)
+    if artifact_digest:
+        artifact = handoff.record(native_boot_handoff.RECORD_LOADED_ARTIFACTS)
+        if artifact is None:
+            raise QualificationError("live PBP1 artifact record is absent")
+        record_index = [item.record_type for item in handoff.records].index(
+            native_boot_handoff.RECORD_LOADED_ARTIFACTS
+        )
+        changed[artifact.offset + 48] ^= 1
+        _repair_pbp1_record(changed, record_index)
+    return bytes(changed)
+
+
 def _negative_controls(
     media: bytes,
     inspection: dict[str, Any],
     markers: list[str],
+    pbp1_data: bytes,
+    pbp1_transcript: dict[str, Any],
     claims: dict[str, bool],
 ) -> list[dict[str, str]]:
     fat_sectors, _ = native_pooleboot._fat_sector_count()
@@ -278,6 +356,47 @@ def _negative_controls(
     stale_binding = native_kernel_load.file_binding(ROOT, native_kernel_load.CONTRACT_RELATIVE)
     stale_binding["sha256"] = "0" * 64
 
+    transcript = native_live_boot_handoff.format_transcript(pbp1_data)
+    transcript_lines = transcript.decode("ascii").splitlines()
+    duplicate_begin = ("\n".join([transcript_lines[0], transcript_lines[0], *transcript_lines[1:]]) + "\n").encode("ascii")
+    offset_gap_lines = transcript_lines[:]
+    offset_gap_lines[1] = offset_gap_lines[1].replace("offset=0", "offset=1", 1)
+    offset_gap = ("\n".join(offset_gap_lines) + "\n").encode("ascii")
+    nonhex_lines = transcript_lines[:]
+    nonhex_lines[1] = nonhex_lines[1][:-1] + "G"
+    nonhex = ("\n".join(nonhex_lines) + "\n").encode("ascii")
+    byte_count_lines = transcript_lines[:]
+    byte_count_lines[0] = byte_count_lines[0].replace(
+        f"bytes={len(pbp1_data)}", f"bytes={len(pbp1_data) + 1}", 1
+    )
+    byte_count = ("\n".join(byte_count_lines) + "\n").encode("ascii")
+    crc_lines = transcript_lines[:]
+    crc_lines[-1] = crc_lines[-1].replace(
+        f"message_crc32={native_boot_handoff._u32(pbp1_data, 48):08X}",
+        "message_crc32=00000000",
+        1,
+    )
+    wrong_crc = ("\n".join(crc_lines) + "\n").encode("ascii")
+    fnv_lines = transcript_lines[:]
+    fnv_lines[-1] = fnv_lines[-1].replace(
+        f"fnv1a64={native_live_boot_handoff.fnv1a64(pbp1_data):016X}",
+        "fnv1a64=0000000000000000",
+        1,
+    )
+    wrong_fnv = ("\n".join(fnv_lines) + "\n").encode("ascii")
+    transfer_state = native_live_boot_handoff.format_transcript(
+        _mutated_pbp1(pbp1_data, transfer_state=True)
+    )
+    artifact_digest_summary = native_live_boot_handoff.extract_transcript(
+        native_live_boot_handoff.format_transcript(
+            _mutated_pbp1(pbp1_data, artifact_digest=True)
+        )
+    ).summary
+    marker_byte_divergence = copy.deepcopy(marker_summary)
+    marker_byte_divergence["pbp1"]["byte_count"] += 8
+    marker_memory_divergence = copy.deepcopy(marker_summary)
+    marker_memory_divergence["pbp1"]["memory_entry_count"] += 1
+
     observations = [
         ("NEG-N5-KLOAD-CONFIG-MISSING", _rejected(lambda: inspect_expected(config_missing))),
         ("NEG-N5-KLOAD-CONFIG-EMPTY", _rejected(lambda: inspect_expected(config_empty))),
@@ -305,20 +424,32 @@ def _negative_controls(
         ("NEG-N5-KLOAD-MARKER-CONFIG-BOUND", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 7, f"bytes={marker_summary['boot_config']['byte_count']}", "bytes=16385")))),
         ("NEG-N5-KLOAD-MARKER-MANIFEST-BOUND", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 8, f"bytes={marker_summary['manifest']['byte_count']}", "bytes=65537")))),
         ("NEG-N5-KLOAD-MARKER-MANIFEST-SLOT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 8, f"slot={marker_summary['manifest']['slot']}", "slot=4" if marker_summary['manifest']['slot'] != 4 else "slot=3")))),
-        ("NEG-N5-KLOAD-MARKER-DIGEST", _rejected(lambda: native_kernel_load.validate_oracle_binding(native_kernel_load.validate_markers(_replace_marker(markers, 9, f"sha256_prefix={marker_summary['manifest']['kernel_sha256_prefix']}", "sha256_prefix=0000000000000000")), inspection))),
+        ("NEG-N5-KLOAD-MARKER-DIGEST", _rejected(lambda: native_kernel_load.validate_oracle_binding(native_kernel_load.validate_markers(_replace_marker(markers, 9, f"sha256_prefix={marker_summary['manifest']['kernel_sha256_prefix']}", "sha256_prefix=0000000000000000")), inspection, pbp1_transcript))),
         ("NEG-N5-KLOAD-MARKER-KERNEL-BOUND", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 10, f"bytes={marker_summary['kernel']['file_byte_count']}", "bytes=1048577")))),
         ("NEG-N5-KLOAD-MARKER-PAGE-MATH", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 11, f"pages={marker_summary['kernel']['page_count']}", f"pages={marker_summary['kernel']['page_count'] + 1}")))),
         ("NEG-N5-KLOAD-MARKER-ENTRY-BOUND", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 11, f"entry_offset={marker_summary['kernel']['entry_offset']}", f"entry_offset={marker_summary['kernel']['image_byte_count']}")))),
         ("NEG-N5-KLOAD-MARKER-MAPPING-COUNT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 12, "mappings=4", "mappings=3")))),
         ("NEG-N5-KLOAD-MARKER-WX", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 12, "wx=0", "wx=1")))),
-        ("NEG-N5-KLOAD-MARKER-RELEASE-COUNT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 13, "files_closed=4", "files_closed=3")))),
-        ("NEG-N5-KLOAD-MARKER-BOUNDARY", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 16, "selection=manifest_digest_untrusted", "selection=trusted")))),
-        ("NEG-N5-KLOAD-CONFIG-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, config_oracle))),
-        ("NEG-N5-KLOAD-MANIFEST-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, manifest_oracle))),
-        ("NEG-N5-KLOAD-ELF-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, elf_oracle))),
-        ("NEG-N5-KLOAD-LOADED-HASH-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, hash_oracle))),
+        ("NEG-N5-KLOAD-MARKER-RELEASE-COUNT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 15, "files_closed=4", "files_closed=3")))),
+        ("NEG-N5-KLOAD-MARKER-BOUNDARY", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 18, "selection=manifest_digest_untrusted", "selection=trusted")))),
+        ("NEG-N5-KLOAD-CONFIG-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, config_oracle, pbp1_transcript))),
+        ("NEG-N5-KLOAD-MANIFEST-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, manifest_oracle, pbp1_transcript))),
+        ("NEG-N5-KLOAD-ELF-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, elf_oracle, pbp1_transcript))),
+        ("NEG-N5-KLOAD-LOADED-HASH-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, hash_oracle, pbp1_transcript))),
         ("NEG-N5-KLOAD-CLAIM-OVERREACH", _rejected(lambda: native_kernel_load.validate_claims(overreach))),
         ("NEG-N5-KLOAD-STALE-BINDING", _rejected(lambda: _require(native_kernel_load.binding_matches(stale_binding, ROOT, native_kernel_load.CONTRACT_RELATIVE), "stale binding accepted"))),
+        ("NEG-N5-PBP1-TRANSCRIPT-MISSING", _rejected(lambda: native_live_boot_handoff.extract_transcript(b""))),
+        ("NEG-N5-PBP1-TRANSCRIPT-DUPLICATE-BEGIN", _rejected(lambda: native_live_boot_handoff.extract_transcript(duplicate_begin))),
+        ("NEG-N5-PBP1-TRANSCRIPT-OFFSET-GAP", _rejected(lambda: native_live_boot_handoff.extract_transcript(offset_gap))),
+        ("NEG-N5-PBP1-TRANSCRIPT-NONHEX", _rejected(lambda: native_live_boot_handoff.extract_transcript(nonhex))),
+        ("NEG-N5-PBP1-TRANSCRIPT-BYTE-COUNT", _rejected(lambda: native_live_boot_handoff.extract_transcript(byte_count))),
+        ("NEG-N5-PBP1-TRANSCRIPT-MESSAGE-CRC", _rejected(lambda: native_live_boot_handoff.extract_transcript(wrong_crc))),
+        ("NEG-N5-PBP1-TRANSCRIPT-FNV", _rejected(lambda: native_live_boot_handoff.extract_transcript(wrong_fnv))),
+        ("NEG-N5-PBP1-PREEXIT-TRANSFER-STATE", _rejected(lambda: native_live_boot_handoff.extract_transcript(transfer_state))),
+        ("NEG-N5-PBP1-ARTIFACT-DIGEST-ORACLE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, inspection, artifact_digest_summary))),
+        ("NEG-N5-PBP1-MARKER-BYTE-DIVERGENCE", _rejected(lambda: native_live_boot_handoff.validate_oracle_binding(pbp1_transcript, marker_byte_divergence, inspection))),
+        ("NEG-N5-PBP1-MARKER-MEMORY-DIVERGENCE", _rejected(lambda: native_live_boot_handoff.validate_oracle_binding(pbp1_transcript, marker_memory_divergence, inspection))),
+        ("NEG-N5-PBP1-RELEASE-COUNT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 14, "pools_freed=3", "pools_freed=2")))),
     ]
     controls = [
         {
@@ -330,10 +461,10 @@ def _negative_controls(
         for control_id, rejected in observations
     ]
     if [item["id"] for item in controls] != list(native_kernel_load.NEGATIVE_CONTROL_IDS):
-        raise QualificationError("PKLOAD2 negative-control order changed")
+        raise QualificationError("PKLOAD3 negative-control order changed")
     if any(item["status"] != "pass" for item in controls):
         failed = [item["id"] for item in controls if item["status"] != "pass"]
-        raise QualificationError("PKLOAD2 negative controls failed: " + ", ".join(failed))
+        raise QualificationError("PKLOAD3 negative controls failed: " + ", ".join(failed))
     return controls
 
 
@@ -379,21 +510,22 @@ def make_readiness(
         media_first = native_kernel_load.build_media_bytes(binary, config, manifest, kernel)
         media_second = native_kernel_load.build_media_bytes(binary, config, manifest, kernel)
         if media_first != media_second:
-            raise QualificationError("two PKLOAD2 media generations differ")
+            raise QualificationError("two PKLOAD3 media generations differ")
         media_inspection = native_kernel_load.inspect_media_bytes(media_first)
         if media_inspection["files"][3]["sha256"] != kernel_readiness["product"]["canonical_sha256"]:
-            raise QualificationError("PKLOAD2 media kernel differs from the fresh PKENTRY1 product")
+            raise QualificationError("PKLOAD3 media kernel differs from the fresh PKENTRY1 product")
         media_path = temporary_root / "pkload2.img"
         media_path.write_bytes(media_first)
 
         runs: list[dict[str, Any]] = []
         screenshots: list[bytes] = []
+        pbp1_payloads: list[bytes] = []
         for run_index in (1, 2):
             with tempfile.TemporaryDirectory(
                 prefix=f"pkload2-run-{run_index}-",
                 dir=ROOT / "runs" / "native-tier0",
             ) as run_temporary:
-                run, screenshot = qualify_native_pooleboot._execute_once(
+                run, screenshot, pbp1_data = qualify_native_pooleboot._execute_once(
                     f"run-{run_index}",
                     lock,
                     profile,
@@ -403,17 +535,31 @@ def make_readiness(
                     timeout,
                     native_kernel_load.validate_markers,
                 )
-                native_kernel_load.validate_oracle_binding(run["marker_summary"], media_inspection)
+                native_kernel_load.validate_oracle_binding(
+                    run["marker_summary"],
+                    media_inspection,
+                    run["pbp1_transcript"],
+                )
                 runs.append(run)
                 screenshots.append(screenshot)
+                pbp1_payloads.append(pbp1_data)
     if runs[0]["markers"] != runs[1]["markers"]:
-        raise QualificationError("two PKLOAD2 marker sequences differ")
+        raise QualificationError("two PKLOAD3 marker sequences differ")
     if screenshots[0] != screenshots[1]:
-        raise QualificationError("two PKLOAD2 screenshots differ")
+        raise QualificationError("two PKLOAD3 screenshots differ")
+    if pbp1_payloads[0] != pbp1_payloads[1]:
+        raise QualificationError("two PKLOAD3 PBP1 byte streams differ")
 
     claims = native_kernel_load.expected_claims()
     native_kernel_load.validate_claims(claims)
-    controls = _negative_controls(media_first, media_inspection, runs[0]["markers"], claims)
+    controls = _negative_controls(
+        media_first,
+        media_inspection,
+        runs[0]["markers"],
+        pbp1_payloads[0],
+        runs[0]["pbp1_transcript"],
+        claims,
+    )
     firmware = {item["role"]: item for item in lock["firmware"]["files"]}
     command = qualify_native_pooleboot._normalized_command(profile)
     kernel_summary = runs[0]["marker_summary"]["kernel"]
@@ -421,13 +567,19 @@ def make_readiness(
         "schema_version": "1.0",
         "artifact_kind": "pooleos_native_kernel_load_readiness",
         "status_date": status_date,
-        "status": "pass_single_host_two_run_live_manifest_load_then_release_non_promoting",
+        "status": "pass_single_host_two_run_live_manifest_pre_exit_pbp1_then_release_non_promoting",
         "contract_id": native_kernel_load.CONTRACT_ID,
-        "selected_move_id": "N5-MANIFEST-001",
+        "selected_move_id": "N5-PBP1-LIVE-001",
         "production_ready": False,
         "production_promotion_allowed": False,
         "n5_exit_gate_satisfied": False,
-        "phase_status": {"N5": "partial", "N5.1": "partial", "N5.4": "partial", "N5.5": "partial"},
+        "phase_status": {
+            "N5": "partial",
+            "N5.1": "partial",
+            "N5.4": "partial",
+            "N5.5": "partial",
+            "N5.8": "partial",
+        },
         "bindings": {
             "contract": native_kernel_load.file_binding(ROOT, native_kernel_load.CONTRACT_RELATIVE),
             "toolchain_lock": native_kernel_load.file_binding(ROOT, "specs/native-toolchain-lock.json"),
@@ -481,11 +633,15 @@ def make_readiness(
             "sha256_python_match": True,
             "pkelf1_python_plan_match": True,
             "loaded_fnv1a64_match": True,
+            "pbp1_python_decode_match": True,
+            "pbp1_serial_debugcon_exact": True,
+            "pbp1_kernel_manifest_cross_binding": True,
             "media_reconstruction_exact": True,
         },
         "cleanup": {
             "file_handles_closed": 4,
-            "pools_freed": 3,
+            "file_pools_freed": 3,
+            "pbp1_pools_freed": 3,
             "pages_freed": True,
             "page_count": kernel_summary["page_count"],
             "all_resources_released": True,
@@ -493,8 +649,26 @@ def make_readiness(
         "negative_controls": controls,
         "claims": claims,
         "summary": {
-            "rust_host_tests_passed": host_tests["bootload_tests_passed"] + host_tests["pooleboot_tests_passed"] + host_tests["kernel_entry_tests_passed"],
-            "rust_host_tests_total": host_tests["bootload_tests_total"] + host_tests["pooleboot_tests_total"] + host_tests["kernel_entry_tests_total"],
+            "rust_host_tests_passed": sum(
+                host_tests[name]
+                for name in (
+                    "bootload_tests_passed",
+                    "handoff_tests_passed",
+                    "live_handoff_tests_passed",
+                    "pooleboot_tests_passed",
+                    "kernel_entry_tests_passed",
+                )
+            ),
+            "rust_host_tests_total": sum(
+                host_tests[name]
+                for name in (
+                    "bootload_tests_total",
+                    "handoff_tests_total",
+                    "live_handoff_tests_total",
+                    "pooleboot_tests_total",
+                    "kernel_entry_tests_total",
+                )
+            ),
             "clean_pooleboot_builds_exact": 2,
             "clean_kernel_builds_exact": 2,
             "clean_media_generations_exact": 2,
@@ -504,6 +678,7 @@ def make_readiness(
             "serial_debugcon_match_count": 2,
             "gop_frame_match_count": 2,
             "oracle_match_count": 2,
+            "exact_pbp1_match_count": 2,
             "negative_controls_passed": len(controls),
             "negative_controls_total": len(controls),
             "production_claim_count": 0,
@@ -514,8 +689,8 @@ def make_readiness(
             "Persist and atomically enforce the minimum secure version across update and rollback.",
             "Retain allocated kernel pages and install the exact r, rx, r, and rw page-table permissions.",
             "Load and authenticate the initial-system, recovery, policy, symbols, and optional microcode artifacts.",
-            "Populate an immutable live PBP1 handoff from normalized firmware observations.",
-            "Implement the final memory-map retry and prove no boot-service call after ExitBootServices.",
+            "Retain and map the finalized PBP1 container read-only only after kernel mappings and transfer state exist.",
+            "Recapture the final memory map and prove the exact ExitBootServices retry/no-later-boot-service sequence.",
             "Transfer to PooleKernel and capture entry, panic, recovery, and reset evidence.",
             "Qualify hostile firmware behavior, target firmware, physical hardware, and a second clean builder.",
             "Complete Secure Boot, measured boot, TPM policy, signing, ISO, installer, and recovery gates.",
@@ -554,11 +729,11 @@ def main(argv: list[str] | None = None) -> int:
             screenshot_output.parent.mkdir(parents=True, exist_ok=True)
             screenshot_output.write_bytes(screenshot)
     except (OSError, ValueError, RuntimeError) as error:
-        print(f"PKLOAD2 FAIL {type(error).__name__}: {error}")
+        print(f"PKLOAD3 FAIL {type(error).__name__}: {error}")
         return 1
     summary = report["summary"]
     print(
-        "PKLOAD2 PASS "
+        "PKLOAD3 PASS "
         f"tests={summary['rust_host_tests_passed']}/{summary['rust_host_tests_total']} "
         f"runs={summary['guest_runs_passed']}/{summary['guest_runs_total']} "
         f"markers={summary['ordered_marker_count']} "

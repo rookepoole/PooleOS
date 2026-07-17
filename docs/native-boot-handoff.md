@@ -1,13 +1,13 @@
 # PBP1 Poole Boot Handoff
 
-Status: Cycle 98 qualified protocol candidate, pre-production and non-promoting
+Status: Cycle 104 qualified protocol plus temporary live pre-exit producer, pre-production and non-promoting
 Requirement: `N5-BOOTPROTO-001`, `ADD-BOOT-001`, source section `014`, subphase `N5.8`
 
 ## Boundary
 
-PBP1 is the byte contract that the future PooleBoot producer will finalize before transfer and that the future PooleKernel consumer will reject before dereferencing untrusted boot data. It is not a Rust ABI structure. Every integer is manually encoded little-endian, every offset is relative to the start of the bounded container, and all persistent layout is independent of compiler structure padding.
+PBP1 is the byte contract that PooleBoot constructs and that the future PooleKernel consumer will reject before dereferencing untrusted boot data. It is not a Rust ABI structure. Every integer is manually encoded little-endian, every offset is relative to the start of the bounded container, and all persistent layout is independent of compiler structure padding.
 
-The current implementation is deliberately earlier than the loader and kernel entry paths. `native/handoff` is a dependency-free `no_std` encoder and decoder. `runtime/native_boot_handoff.py` is a separately written Python encoder and decoder. The host probe permits deterministic differential testing without putting Python in the production chain.
+`native/handoff` is the dependency-free `no_std` encoder and decoder. `native/livehandoff` adds a bounded allocation-free producer that honors the firmware-reported UEFI descriptor stride, normalizes and sorts every range, and builds a development-only pre-exit profile. `native/boot/src/livehandoff.rs` supplies the live UEFI allocation and transcript adapter. `runtime/native_boot_handoff.py` and `runtime/native_live_boot_handoff.py` are independent host oracles; neither enters the firmware chain.
 
 ## Wire Contract
 
@@ -29,17 +29,21 @@ Field names distinguish physical and virtual addresses. Memory-map, framebuffer,
 
 The future transfer convention is a direct jump after successful `ExitBootServices`: `RDI` is `handoff_virtual_base`, `RSI` is exact byte count, `RDX` is the little-endian PBP1 magic value, `RSP` is the 16-byte-aligned initial stack top, and `CR3` is `page_table_root_physical`. Interrupts and the direction flag are clear. Other registers and floating-point state are unspecified. The handoff mapping is read-only at entry.
 
+PBP1 core state is phase-sensitive. Before `ExitBootServices`, `BOOT_SERVICES_EXITED` is clear and both stack and CR3 must be zero; such bytes are a construction snapshot and can never be transferred. After successful exit, both fields must be nonzero and correctly aligned. Cycle 104 exercises only the pre-exit form, verifies that the kernel-entry profile rejects it, transcripts and rechecks its exact bytes, and releases the temporary container.
+
 PooleKernel's kernel-entry profile additionally requires core, normalized memory map, firmware tables, loaded artifacts, boot device, random seed, and CPU bootstrap records; successful boot-services exit; at least firmware-RNG entropy quality; and hash plus signature verification for the kernel and initial system. This validator is a policy precondition, not evidence that those actions occurred.
 
 ## Firmware Rationale
 
-UEFI's memory-map descriptor size is explicitly extensible, and the current map key must be used for `ExitBootServices`. PBP1 therefore does not expose the volatile map key or copy raw descriptor strides into the kernel ABI. PooleBoot must retrieve the final map, use its returned descriptor size while iterating, classify every range, call `ExitBootServices` with the current key, and only then finalize immutable normalized records. The official UEFI 2.11 requirements are [GetMemoryMap and ExitBootServices](https://uefi.org/specs/UEFI/2.11/07_Services_Boot_Services.html).
+UEFI's memory-map descriptor size is explicitly extensible, and the current map key must be used for `ExitBootServices`. PBP1 therefore does not expose the volatile map key or copy raw descriptor strides into the kernel ABI. PBLIVE1 uses the returned descriptor size and version, preserves source type and attributes, rejects malformed or overlapping ranges, and records no volatile key. This snapshot is provisional because its pools and kernel pages are subsequently freed. The future transfer path must allocate final retained objects, recapture the current map after those allocations, use its current key for `ExitBootServices`, make no later boot-service call, and retain read-only PBP1 bytes. The official UEFI 2.11 requirements are [GetMemoryMap and ExitBootServices](https://uefi.org/specs/UEFI/2.11/07_Services_Boot_Services.html).
 
 UEFI configuration tables are GUID/pointer pairs and may grow over time. PBP1 retains canonical GUID bytes plus validated physical range metadata instead of fixing ACPI and SMBIOS to host-language pointer structures. See the [UEFI System Table and Configuration Table](https://uefi.org/specs/UEFI/2.11/04_EFI_System_Table.html).
 
 ## Ownership
 
 PooleBoot owns the container until the transfer jump; PooleKernel owns it afterward. The container and embedded records are immutable after finalization. Pointed-to external physical ranges transfer to PooleKernel and remain reserved until a later typed owner copies, parses, or delegates them. No UEFI boot-service pointer is retained. Runtime-service pointers are both present only when the retained-runtime flag is set.
+
+The Cycle 104 PBLIVE1 container has a narrower lifetime: PooleBoot owns it, performs no writes after logical finalization, proves its bytes unchanged across transcript emission, and then frees it before returning. This is logical immutability evidence, not a hardware read-only mapping or ownership transfer.
 
 Random-seed bytes are confidential and marked `redact`. They must never enter diagnostics, crash records, receipts, or public evidence and must be zeroized after key derivation. Golden-vector seed bytes are deterministic public test data, not entropy.
 
@@ -56,4 +60,4 @@ Qualification compiles and tests the Rust codec on the pinned host target, build
 
 ## Nonclaims
 
-Cycle 100 adds a separately qualified PKELF1 synthetic loader and a compile-time PooleBoot dependency alongside PBC1, but it does not wire PBP1 into PooleBoot, open a live configuration or kernel file, authenticate PooleKernel, allocate firmware pages, install page tables, load a functional kernel image, retrieve a final production memory map, call `ExitBootServices`, execute transfer assembly, consume PBP1 in PooleKernel, test target firmware, or satisfy N5. CRC-32 is corruption detection, not authentication. Finite corpus and differential agreement is not a proof over every input. No production, signing, Secure Boot, measured-boot, TPM, release, or physical-hardware claim follows.
+PKLOAD3 separately proves that PooleBoot opens live PBC1/PSM1/PKELF1 inputs, retains the kernel while producing one exact PBLIVE1 snapshot, reconstructs identical bytes from serial and debugcon, cross-binds the kernel digest and framebuffer, and releases all resources. It does not authenticate the manifest, install page tables, retain kernel or PBP1 pages, retrieve the final ExitBootServices map, call `ExitBootServices`, execute transfer assembly, consume PBP1 in PooleKernel, test target firmware, or satisfy N5. CRC-32 and FNV are corruption/equality checks, not authentication. Finite corpus and differential agreement is not a proof over every input. No production, signing, Secure Boot, measured-boot, TPM, release, or physical-hardware claim follows.

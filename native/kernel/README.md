@@ -6,4 +6,4 @@ The x86-64 implementation boundary is `arch/x86_64/`. Cycle 101 introduces the f
 
 This boundary validates PBP1 before using records, writes allocation-free early ring and bounded COM1 logs, can render a fixed early framebuffer alphabet when PKENTRY1's temporary identity mapping is present, records a deterministic build identity, and halts after the entry proof. It does not establish page tables, descriptor tables, interrupts, memory management, user mode, live PooleBoot transfer, or N6 completion.
 
-Cycle 102's bounded PKLOAD1 path now reads this canonical product through live UEFI filesystem calls, materializes and validates it in firmware pages, hashes the loaded bytes, and then releases those pages. No live PBP1 transfer or PooleKernel execution occurs yet.
+Cycle 104's bounded PKLOAD3 path reads this canonical product through live UEFI filesystem calls, materializes and validates it in firmware pages, hashes it, and binds its live allocation into a temporary pre-exit PBP1 snapshot before releasing both snapshot and kernel pages. Stack and CR3 remain zero, the kernel-entry profile rejects, and no transferable PBP1 or PooleKernel execution occurs yet.

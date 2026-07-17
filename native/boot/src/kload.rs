@@ -132,9 +132,12 @@ pub(super) struct Summary {
     pub read_execute_count: usize,
     pub read_write_count: usize,
     pub writable_executable_count: usize,
+    pub kernel_physical_base: u64,
+    pub kernel_virtual_base: u64,
+    pub kernel_entry_virtual: u64,
+    pub kernel_sha256: [u8; 32],
     pub closed_file_count: usize,
     pub freed_pool_count: usize,
-    pub freed_page_count: usize,
 }
 
 fn firmware_failure(stage: &'static str, status: EfiStatus) -> Failure {
@@ -358,6 +361,34 @@ fn release_kernel_resources(
     };
     let pool_result = free_pool(calls, kernel_pool, "kload.kernel.pool_free");
     let root_result = close_file(root, "kload.root.close");
+    page_result
+        .err()
+        .or_else(|| pool_result.err())
+        .or_else(|| root_result.err())
+        .map_or(Ok(()), Err)
+}
+
+fn release_file_resources_or_kernel(
+    calls: Calls,
+    physical_base: u64,
+    page_count: usize,
+    kernel_pool: *mut c_void,
+    root: *mut EfiFileProtocol,
+) -> Result<(), Failure> {
+    let pool_result = free_pool(calls, kernel_pool, "kload.kernel.pool_free");
+    let root_result = close_file(root, "kload.root.close");
+    if pool_result.is_ok() && root_result.is_ok() {
+        return Ok(());
+    }
+    let page_status = (calls.free_pages)(physical_base, page_count);
+    let page_result = if page_status == EFI_SUCCESS {
+        Ok(())
+    } else {
+        Err(firmware_failure(
+            "kload.kernel.pages_cleanup_after_file_release",
+            page_status,
+        ))
+    };
     page_result
         .err()
         .or_else(|| pool_result.err())
@@ -634,11 +665,14 @@ pub(super) fn load_manifest_kernel(
         read_execute_count,
         read_write_count,
         writable_executable_count,
+        kernel_physical_base: loaded.image.physical_base,
+        kernel_virtual_base: loaded.image.virtual_base,
+        kernel_entry_virtual: loaded.image.entry_virtual,
+        kernel_sha256: manifest.kernel_sha256,
         closed_file_count: 4,
         freed_pool_count: 3,
-        freed_page_count: loaded.page_count,
     };
-    release_kernel_resources(
+    release_file_resources_or_kernel(
         calls,
         physical_base,
         allocation.page_count,
@@ -646,4 +680,25 @@ pub(super) fn load_manifest_kernel(
         root,
     )?;
     Ok(summary)
+}
+
+pub(super) fn release_kernel_pages(
+    boot_services: &EfiBootServices,
+    physical_base: u64,
+    page_count: usize,
+) -> Result<(), Failure> {
+    if physical_base == 0 || page_count == 0 {
+        return Err(contract_failure(
+            "kload.kernel.pages_release_shape",
+            bootload::Error::ResourceLeak,
+        ));
+    }
+    let free_pages: FreePages = unsafe { function(boot_services.free_pages) }
+        .map_err(|status| firmware_failure("kload.free_pages_pointer", status))?;
+    let status = free_pages(physical_base, page_count);
+    if status == EFI_SUCCESS {
+        Ok(())
+    } else {
+        Err(firmware_failure("kload.kernel.pages_free", status))
+    }
 }

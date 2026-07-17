@@ -267,6 +267,20 @@
     },
     "profile_validation_is_execution_evidence": false
   },
+  "pre_exit_snapshot_profile": {
+    "purpose": "bounded PooleBoot construction and evidence before final mappings and ExitBootServices",
+    "required_features": ["core", "memory_map", "loaded_artifacts"],
+    "optional_features": ["framebuffer"],
+    "forbidden_secret_bearing_features": ["random_seed", "early_log", "tcg_event_log"],
+    "required_state": ["DEVELOPMENT_MODE", "initial_stack_top_virtual equals zero", "page_table_root_physical equals zero", "BOOT_SERVICES_EXITED clear"],
+    "kernel_artifact_state": ["HASH_VERIFIED", "EXECUTABLE", "SIGNATURE_VERIFIED clear", "MEASURED clear"],
+    "kernel_entry_profile_must_reject": true,
+    "transfer_allowed": false,
+    "container_lifetime": "loader-owned temporary allocation released before PooleBoot returns in PBLIVE1",
+    "final_exit_map_claimed": false,
+    "hardware_read_only_mapping_claimed": false,
+    "live_evidence_contract": "PKLOAD3/PBLIVE1"
+  },
   "compatibility": {
     "major_rule": "reader accepts exactly major 1",
     "minor_rule": "reader rejects minimum_reader_minor greater than its supported minor",
@@ -284,7 +298,8 @@
     "overlapping or overflowing memory and artifact ranges",
     "malformed UTF-8, geometry, GUID order, digest, entropy, CPU, timestamp, and TCG records",
     "cross-record kernel identity mismatch",
-    "kernel-entry profile without successful ExitBootServices"
+    "kernel-entry profile without successful ExitBootServices",
+    "pre-exit core with nonzero stack or CR3, and exited core with missing transfer state"
   ],
   "production_claims": {
     "schema_defined": true,

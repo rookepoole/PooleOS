@@ -438,7 +438,7 @@ def qualify(toolchain_root: Path, temporary_root: Path) -> dict[str, Any]:
             "production_claim_count": 0,
         },
         "open_items": [
-            "Wire the qualified PBP1 encoder into PooleBoot only after boot configuration, ELF, artifact verification, memory-map finalization, and retry policy are implemented.",
+            "Retain the live PBP1 container only after kernel mappings, final memory-map capture, and ExitBootServices retry policy are implemented.",
             "Implement the PooleKernel PBP1 intake path with read-only mapping, early copy policy, serial-first rejection, and exact entry assembly.",
             "Cross-check normalized memory-map records against captured UEFI descriptor streams, including larger future descriptor sizes.",
             "Exercise the final GetMemoryMap and ExitBootServices retry loop under malformed and map-changing firmware fixtures.",
@@ -449,7 +449,7 @@ def qualify(toolchain_root: Path, temporary_root: Path) -> dict[str, Any]:
         ],
         "claim_boundary": [
             "The full kernel-entry vector is synthetic and does not prove successful ExitBootServices or PooleKernel execution.",
-            "The Rust library compiles for UEFI and freestanding targets but is not called by current PooleBoot or PooleKernel code.",
+            "The Rust library compiles for UEFI and freestanding targets; PKLOAD3 separately proves a temporary pre-exit PooleBoot producer, while this standalone receipt does not claim a transferable live handoff.",
             "The Python implementation is an independent host oracle and is prohibited from the production boot chain.",
             "CRC-32 is corruption detection, not authentication or signed-manifest verification.",
             "Finite negative and deterministic fuzz corpora do not prove correctness for all byte strings or hardware states.",

@@ -17,3 +17,5 @@ path = "src/main.rs"
 poole-bootload = { path = "../bootload" }
 poole-boot-config = { path = "../bootcfg" }
 poole-elf = { path = "../elf" }
+poole-handoff = { path = "../handoff" }
+poole-live-handoff = { path = "../livehandoff" }

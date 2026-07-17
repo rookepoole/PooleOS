@@ -65,12 +65,16 @@ TRUE_PROOF_CLAIMS = (
     "system_manifest_parsed",
     "manifest_selected_kernel_path",
     "manifest_kernel_sha256_matched",
+    "live_pbp1_pre_exit_observed",
+    "pbp1_serial_debugcon_exact",
+    "pbp1_kernel_manifest_cross_bound",
 )
 FALSE_PROOF_CLAIMS = (
     "complete_pooleboot_loader",
     "manifest_trusted",
     "persistent_rollback_state_enforced",
     "poolekernel_executed",
+    "transferable_pbp1_handoff_produced",
     "exit_boot_services_called",
     "secure_boot_enforced",
     "measured_boot_performed",
@@ -122,6 +126,18 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-KLOAD-LOADED-HASH-DIVERGENCE",
     "NEG-N5-KLOAD-CLAIM-OVERREACH",
     "NEG-N5-KLOAD-STALE-BINDING",
+    "NEG-N5-PBP1-TRANSCRIPT-MISSING",
+    "NEG-N5-PBP1-TRANSCRIPT-DUPLICATE-BEGIN",
+    "NEG-N5-PBP1-TRANSCRIPT-OFFSET-GAP",
+    "NEG-N5-PBP1-TRANSCRIPT-NONHEX",
+    "NEG-N5-PBP1-TRANSCRIPT-BYTE-COUNT",
+    "NEG-N5-PBP1-TRANSCRIPT-MESSAGE-CRC",
+    "NEG-N5-PBP1-TRANSCRIPT-FNV",
+    "NEG-N5-PBP1-PREEXIT-TRANSFER-STATE",
+    "NEG-N5-PBP1-ARTIFACT-DIGEST-ORACLE",
+    "NEG-N5-PBP1-MARKER-BYTE-DIVERGENCE",
+    "NEG-N5-PBP1-MARKER-MEMORY-DIVERGENCE",
+    "NEG-N5-PBP1-RELEASE-COUNT",
 )
 CONTRACT_RELATIVE = "specs/native-pooleboot-proof.json"
 CONTRACT_SCHEMA_RELATIVE = "specs/native-pooleboot-proof.schema.json"
@@ -136,8 +152,11 @@ PROOF_IMPLEMENTATION_INPUTS = (
     "native/boot/src/lib.rs",
     "native/boot/src/main.rs",
     "native/boot/src/kload.rs",
+    "native/boot/src/livehandoff.rs",
     "native/bootload/Cargo.toml",
     "native/bootload/src/lib.rs",
+    "native/handoff/Cargo.toml",
+    "native/handoff/src/lib.rs",
     "native/manifest/Cargo.toml",
     "native/manifest/src/lib.rs",
     "native/kernel/Cargo.toml",
@@ -145,8 +164,11 @@ PROOF_IMPLEMENTATION_INPUTS = (
     "native/kernel/manifest.pkm",
     "native/kernel/src/lib.rs",
     "native/kernel/src/main.rs",
+    "native/livehandoff/Cargo.toml",
+    "native/livehandoff/src/lib.rs",
     "runtime/native_binary.py",
     "runtime/native_kernel_load.py",
+    "runtime/native_live_boot_handoff.py",
     "runtime/native_pooleboot.py",
     "runtime/native_system_manifest.py",
     "runtime/native_tier0.py",
@@ -898,7 +920,15 @@ def _schema_errors(value: dict[str, Any], root: Path, schema_relative: str) -> l
 
 def proof_contract_errors(contract: dict[str, Any], root: Path) -> list[str]:
     errors = _schema_errors(contract, root, CONTRACT_SCHEMA_RELATIVE)
-    if contract.get("phase_mapping") != ["N5.1", "N5.2", "N5.3", "N5.4", "N5.5", "N5.7"]:
+    if contract.get("phase_mapping") != [
+        "N5.1",
+        "N5.2",
+        "N5.3",
+        "N5.4",
+        "N5.5",
+        "N5.7",
+        "N5.8",
+    ]:
         errors.append("PooleBoot proof phase mapping changed")
     if contract.get("required_negative_controls") != list(NEGATIVE_CONTROL_IDS):
         errors.append("PooleBoot proof negative-control register changed")
@@ -916,6 +946,8 @@ def proof_contract_errors(contract: dict[str, Any], root: Path) -> list[str]:
         "KERNEL_FILE PASS",
         "KERNEL_LOAD PASS",
         "KERNEL_MAP PASS",
+        "PBP1 PASS",
+        "PBP1_RELEASE PASS",
         "KERNEL_RELEASE PASS",
         "GOP PASS",
         "MEMORY_MAP PASS",
@@ -1056,7 +1088,11 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str
             markers = run.get("markers", [])
             try:
                 summary = validate_markers(markers)
-                native_kernel_load.validate_oracle_binding(summary, media_inspection)
+                native_kernel_load.validate_oracle_binding(
+                    summary,
+                    media_inspection,
+                    run.get("pbp1_transcript"),
+                )
             except (PooleBootError, native_kernel_load.KernelLoadError) as error:
                 errors.append(f"PooleBoot run {index} marker failure: {error}")
                 continue

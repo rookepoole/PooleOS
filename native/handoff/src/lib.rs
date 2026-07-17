@@ -338,17 +338,23 @@ fn validate_core(payload: &[u8], total_size: Option<usize>) -> Result<CoreRecord
         selected_entry: read_u32(payload, 116)?,
         uefi_revision: read_u32(payload, 120)?,
     };
+    let boot_services_exited = core.boot_flags & BOOT_SERVICES_EXITED != 0;
+    let transfer_state_valid = if boot_services_exited {
+        core.page_table_root_physical != 0
+            && core.page_table_root_physical.is_multiple_of(PAGE_BYTES)
+            && core.initial_stack_top_virtual != 0
+            && core.initial_stack_top_virtual.is_multiple_of(16)
+    } else {
+        core.page_table_root_physical == 0 && core.initial_stack_top_virtual == 0
+    };
     if core.boot_flags & !KNOWN_BOOT_FLAGS != 0
         || !core.kernel_physical_base.is_multiple_of(PAGE_BYTES)
         || !core.kernel_virtual_base.is_multiple_of(PAGE_BYTES)
-        || core.page_table_root_physical == 0
-        || !core.page_table_root_physical.is_multiple_of(PAGE_BYTES)
+        || !transfer_state_valid
         || core.handoff_physical_base == 0
         || !core.handoff_physical_base.is_multiple_of(ALIGNMENT as u64)
         || core.handoff_virtual_base == 0
         || !core.handoff_virtual_base.is_multiple_of(ALIGNMENT as u64)
-        || core.initial_stack_top_virtual == 0
-        || !core.initial_stack_top_virtual.is_multiple_of(16)
         || core.boot_attempt_limit == 0
         || core.boot_attempt_limit > 32
         || core.boot_attempt > core.boot_attempt_limit
@@ -1259,6 +1265,58 @@ mod tests {
             validate_kernel_entry_profile(&decoded),
             Err(Error::KernelProfile)
         );
+
+        let memory = memory_map();
+        let total = encoded_size(2, &[CORE_BYTES, memory.len()]).unwrap();
+        let mut pre_exit_core = core(total, DEVELOPMENT_MODE);
+        put_u64(&mut pre_exit_core, 48, 0);
+        put_u64(&mut pre_exit_core, 56, 0);
+        let mut pre_exit = vec![0u8; total];
+        let mut encoder = Encoder::new(&mut pre_exit, 2, 0, 0).unwrap();
+        encoder
+            .push(
+                RECORD_CORE,
+                1,
+                RECORD_REQUIRED,
+                CORE_BYTES,
+                1,
+                &pre_exit_core,
+            )
+            .unwrap();
+        encoder
+            .push(
+                RECORD_MEMORY_MAP,
+                1,
+                RECORD_REQUIRED | RECORD_ARRAY,
+                MEMORY_ENTRY_BYTES,
+                memory.len() / MEMORY_ENTRY_BYTES,
+                &memory,
+            )
+            .unwrap();
+        let pre_exit = encoder.finish().unwrap();
+        assert_eq!(
+            decode(pre_exit)
+                .unwrap()
+                .core()
+                .unwrap()
+                .page_table_root_physical,
+            0
+        );
+
+        let mut invalid = pre_exit.to_vec();
+        let core_offset = decode(&invalid)
+            .unwrap()
+            .record(RECORD_CORE)
+            .unwrap()
+            .descriptor
+            .offset;
+        put_u64(&mut invalid, core_offset + 56, 0x003f_0000);
+        let core_checksum = crc32(&invalid[core_offset..core_offset + CORE_BYTES]);
+        put_u32(&mut invalid, HEADER_BYTES + 20, core_checksum);
+        put_u32(&mut invalid, 48, 0);
+        let checksum = message_crc32(&invalid);
+        put_u32(&mut invalid, 48, checksum);
+        assert_eq!(decode(&invalid).map(|_| ()), Err(Error::PayloadValue));
     }
 
     #[test]

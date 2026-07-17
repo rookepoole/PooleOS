@@ -1,16 +1,18 @@
-# PKLOAD2 Live Manifest-Bound Kernel Load Proof
+# PKLOAD3 Live Manifest-Bound Pre-Exit PBP1 Proof
 
 ## Scope
 
-Cycle 103 composes `N5-KLOAD-001` and `N5-MANIFEST-001` across N5.1, N5.4,
-and N5.5. PooleBoot discovers the filesystem that contains its own loaded
+Cycle 104 composes `N5-KLOAD-001`, `N5-MANIFEST-001`, and
+`N5-PBP1-LIVE-001` across N5.1, N5.4, N5.5, and N5.8. PooleBoot discovers the filesystem that contains its own loaded
 image, opens and parses live PBC1, opens and parses its selected PSM1 manifest,
 binds slot/version/path/file/image/SHA-256/entry fields, reads the real Cycle
 101 PKELF1 PooleKernel product, verifies its digest, allocates firmware pages,
 materializes segments/BSS/relative relocations, repeats the digest check,
-validates the mapping plan, and releases every acquired resource.
+validates the mapping plan, keeps the kernel allocation live while producing a
+temporary PBP1 snapshot, then releases every acquired resource.
 
-This is a load-then-release proof. It is deliberately not a transfer proof.
+This is a load, pre-exit-snapshot, then release proof. It is deliberately not a
+mapping, `ExitBootServices`, retained-handoff, or transfer proof.
 
 ## Firmware Call Chain
 
@@ -50,10 +52,33 @@ and `rw`; any writable-executable mapping fails closed.
 Page tables are not created or activated. The plan is evidence about required
 future mappings, not evidence that hardware permissions were enforced.
 
+## Pre-Exit PBP1
+
+Before the snapshot, PooleBoot allocates bounded raw-map, normalized-map, and
+PBP1 container pools. The final call for this provisional snapshot therefore
+observes those allocations and the still-live kernel pages. PBLIVE1 honors the
+returned descriptor stride and version, maps every standard UEFI memory type,
+preserves attributes and source type, sorts by physical start, and rejects zero,
+overflowing, unsupported, or overlapping ranges.
+
+The exact PBP1 records are required core, required normalized memory map,
+optional GOP framebuffer, and one required kernel artifact. The artifact binds
+the live physical allocation, PKELF1 virtual bounds and entry, and full PSM1
+SHA-256. Core binds the PBC1 attempt limit and slot. Because this is pre-exit,
+`BOOT_SERVICES_EXITED` is clear and stack and CR3 are zero; the kernel-entry
+profile must reject. No random seed, early log, TCG log, signature, or measured
+state enters the public transcript.
+
+PooleBoot emits the exact bytes over both serial and debugcon, recomputes the
+FNV and PBP1 decode/profile after emission, and only then frees all three pools.
+This proves logical byte stability during the bounded observation, not a
+hardware read-only mapping. A later transfer implementation must recapture the
+current map and MapKey after all retained allocations are final.
+
 ## Cleanup
 
 The success path closes the config, manifest, kernel, and root handles; frees
-the config, manifest, and kernel pools; and frees all kernel pages. Cleanup is
+the three file pools and three PBP1 pools; and frees all kernel pages. Cleanup is
 attempted on every handled failure path, and cleanup failure is itself fatal.
 Because pages are released, the kernel is not resident when PooleBoot returns.
 
@@ -65,13 +90,16 @@ Run:
 python tools/qualify_native_kernel_load.py
 ```
 
-The qualifier performs strict Rust formatting and Clippy checks, 35 Rust host
-tests across manifest/bootload/PooleBoot/PooleKernel, two exact 61,440-byte
+The qualifier performs strict Rust formatting and Clippy checks, 49 Rust host
+tests across PBP1/PBLIVE1/manifest/bootload/PooleBoot/PooleKernel, two exact 81,408-byte
 PooleBoot builds, two clean PooleKernel builds, two exact four-file media
 generations, and two fresh-vars QEMU/OVMF runs. Independent Python PBC1, PSM1,
-PKELF1, and SHA-256 decisions must match nineteen live guest markers. Forty
+PKELF1, PBP1, and SHA-256 decisions must match 21 live guest markers. Fifty-two
 negative controls cover file, FAT, path, config, manifest, digest, kernel,
-marker, W^X, cleanup, oracle-divergence, overclaim, and stale-binding failures.
+marker, W^X, cleanup, descriptor/profile/transcript mutation,
+oracle-divergence, overclaim, and stale-binding failures. Both runs reconstruct
+the same 4,248-byte PBP1 (`5E213BF701454BC597AA028D5C65E6C8EAE53978C29C7572E429BADFFEE9F2D8`)
+with 95 normalized memory entries.
 
 The signed receipt is not produced in this cycle. The generated readiness file
 remains an unsigned, single-host, non-promoting development record.
@@ -80,8 +108,9 @@ remains an unsigned, single-host, non-promoting development record.
 
 - Manifest-driven digest equality is proved; signature-backed authentication is not.
 - No completed digest-provider security review or persistent rollback state.
-- No retained kernel allocation or installed page tables.
-- No PBP1 producer, final memory-map retry, or `ExitBootServices` call.
+- No retained kernel allocation, retained PBP1 container, or installed page tables.
+- A temporary pre-exit PBP1 producer is proved; no transferable handoff, final
+  memory-map/MapKey sequence, or `ExitBootServices` call is proved.
 - No kernel entry, panic, recovery, or reset execution evidence.
 - No target-firmware, physical-hardware, second-builder, signing, ISO, N5 exit,
   or production-readiness claim.
