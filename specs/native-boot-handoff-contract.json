@@ -259,6 +259,12 @@
     "required_features": ["core", "memory_map", "firmware_tables", "loaded_artifacts", "boot_device", "random_seed", "cpu_bootstrap"],
     "required_state": ["BOOT_SERVICES_EXITED", "entropy quality at least firmware RNG", "kernel and initial-system hashes and signatures verified"],
     "conditional_state": ["MEASURED_BOOT_ACTIVE requires a TCG event-log record", "RUNTIME_SERVICES_RETAINED requires both UEFI system-table and runtime-services physical pointers"],
+    "framebuffer_entry_mapping": {
+      "rule": "A framebuffer record is usable by PKENTRY1 only when its complete physical range is also temporarily identity-mapped supervisor-writable and non-executable at entry; otherwise PooleBoot must omit the record or PooleKernel must ignore it.",
+      "cache_policy": "Preserve the effective firmware/GOP memory type; write-back is forbidden unless a validated platform contract explicitly permits it.",
+      "lifetime": "Install before transfer, retain only through early diagnostics, then replace with the graphics-service mapping and revoke the identity mapping before capability delegation.",
+      "evidence_boundary": "The PBP1 bytes identify the aperture but do not prove that page-table mapping; live transfer qualification must bind separate mapping evidence."
+    },
     "profile_validation_is_execution_evidence": false
   },
   "compatibility": {

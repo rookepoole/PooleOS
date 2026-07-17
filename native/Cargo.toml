@@ -1,5 +1,13 @@
 [workspace]
-members = ["boot", "bootcfg", "elf", "fixtures/pooleboot", "handoff", "kernel"]
+members = [
+  "boot",
+  "bootcfg",
+  "elf",
+  "fixtures/pooleboot",
+  "fixtures/poolekernel",
+  "handoff",
+  "kernel",
+]
 resolver = "3"
 
 [workspace.package]

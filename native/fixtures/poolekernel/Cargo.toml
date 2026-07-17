@@ -1,13 +1,12 @@
 [package]
-name = "poolekernel"
+name = "poolekernel-fixture"
 version.workspace = true
 edition.workspace = true
 license-file.workspace = true
 publish.workspace = true
 
 [[bin]]
-name = "PooleKernelLinked"
+name = "PooleKernelFixture"
 path = "src/main.rs"
 
 [dependencies]
-poole-handoff = { path = "../handoff" }

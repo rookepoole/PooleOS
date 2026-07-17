@@ -238,6 +238,17 @@ def check_native_elf_loader_readiness() -> CheckResult:
     )
 
 
+def check_native_kernel_entry_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_kernel_entry_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
 def check_publication_boundary() -> CheckResult:
     from tools import pooleos_release_gate
 
@@ -3340,6 +3351,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "tools" / "qualify_native_boot_config.py",
                 ROOT / "tools" / "generate_native_elf_loader_vectors.py",
                 ROOT / "tools" / "qualify_native_elf_loader.py",
+                ROOT / "tools" / "qualify_native_kernel_entry.py",
                 ROOT / "runtime" / "native_binary.py",
                 ROOT / "runtime" / "native_v1_objectives.py",
                 ROOT / "runtime" / "adr_ratification.py",
@@ -3352,10 +3364,13 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runtime" / "native_boot_handoff.py",
                 ROOT / "runtime" / "native_boot_config.py",
                 ROOT / "runtime" / "native_elf_loader.py",
+                ROOT / "runtime" / "native_kernel_image.py",
+                ROOT / "runtime" / "native_kernel_entry.py",
                 ROOT / "docs" / "native-pooleboot-proof.md",
                 ROOT / "docs" / "native-boot-handoff.md",
                 ROOT / "docs" / "native-boot-config.md",
                 ROOT / "docs" / "native-elf-loader.md",
+                ROOT / "docs" / "native-kernel-entry.md",
                 ROOT / "security" / "README.md",
                 ROOT / "security" / "owner-adr-signers.allowed",
                 ROOT / "security" / "revoked-adr-signers",
@@ -3381,7 +3396,16 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "native" / "fixtures" / "pooleboot" / "Cargo.toml",
                 ROOT / "native" / "fixtures" / "pooleboot" / "src" / "main.rs",
                 ROOT / "native" / "kernel" / "Cargo.toml",
+                ROOT / "native" / "kernel" / "README.md",
+                ROOT / "native" / "kernel" / "arch" / "x86_64" / "README.md",
+                ROOT / "native" / "kernel" / "linker.ld",
+                ROOT / "native" / "kernel" / "manifest.pkm",
+                ROOT / "native" / "kernel" / "src" / "lib.rs",
                 ROOT / "native" / "kernel" / "src" / "main.rs",
+                ROOT / "native" / "kernel" / "src" / "arch" / "x86_64.rs",
+                ROOT / "native" / "fixtures" / "poolekernel" / "Cargo.toml",
+                ROOT / "native" / "fixtures" / "poolekernel" / "README.md",
+                ROOT / "native" / "fixtures" / "poolekernel" / "src" / "main.rs",
                 ROOT / "runs" / "pooleos_native_checklist_coverage.json",
                 ROOT / "runs" / "pdc_production_roadmap.json",
                 ROOT / "runs" / "native_architecture_baseline.json",
@@ -3404,6 +3428,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runs" / "native_boot_handoff_readiness.json",
                 ROOT / "runs" / "native_boot_config_readiness.json",
                 ROOT / "runs" / "native_elf_loader_readiness.json",
+                ROOT / "runs" / "native_kernel_entry_readiness.json",
                 ROOT / "specs" / "native-pooleboot-proof.json",
                 ROOT / "specs" / "native-pooleboot-proof.schema.json",
                 ROOT / "specs" / "native-pooleboot-readiness.schema.json",
@@ -3422,6 +3447,9 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "specs" / "native-elf-loader-golden-vectors.json",
                 ROOT / "specs" / "native-elf-loader-golden-vectors.schema.json",
                 ROOT / "specs" / "native-elf-loader-readiness.schema.json",
+                ROOT / "specs" / "native-kernel-entry-contract.json",
+                ROOT / "specs" / "native-kernel-entry-contract.schema.json",
+                ROOT / "specs" / "native-kernel-entry-readiness.schema.json",
                 ROOT / "specs" / "pdc-source-intake.schema.json",
                 ROOT / "specs" / "pdc-math-contract.schema.json",
                 ROOT / "specs" / "pdc-golden-vectors.schema.json",
@@ -3503,6 +3531,7 @@ def main(argv: list[str] | None = None) -> int:
     checks.append(check_native_boot_handoff_readiness())
     checks.append(check_native_boot_config_readiness())
     checks.append(check_native_elf_loader_readiness())
+    checks.append(check_native_kernel_entry_readiness())
     checks.append(check_publication_boundary())
     checks.extend(check_claim_schema())
     checks.extend(check_claim_examples())

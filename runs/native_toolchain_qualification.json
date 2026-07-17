@@ -28,13 +28,13 @@
     "build_inputs": [
       {
         "path": "native/Cargo.toml",
-        "sha256": "28E18C4ED69537CD54707A96031E9B879EA82B8A209BCCDCAA7AE1B437D4D632",
-        "byte_count": 359
+        "sha256": "D373FAFB21D868925EE229F12AC3569EB10F59D3704FB8D182CD176E288322EE",
+        "byte_count": 400
       },
       {
         "path": "native/Cargo.lock",
-        "sha256": "645F5C0D0191DDC53CEE7C00630B70F0ABDC1A2A0DC1B9976201C5A4982929E4",
-        "byte_count": 488
+        "sha256": "89874EF272806FE7C6A73F83AE9BF53F9AB68D37515A3E025D714E54F9951BB5",
+        "byte_count": 577
       },
       {
         "path": "native/rust-toolchain.toml",
@@ -57,12 +57,12 @@
         "byte_count": 404
       },
       {
-        "path": "native/kernel/Cargo.toml",
+        "path": "native/fixtures/poolekernel/Cargo.toml",
         "sha256": "6D0DDE25F74DEEEDA7794077273B85A4A8B099E73C68939C686173716D20FF46",
         "byte_count": 218
       },
       {
-        "path": "native/kernel/src/main.rs",
+        "path": "native/fixtures/poolekernel/src/main.rs",
         "sha256": "C211A93BF7EDF8CCFC1E1EBBF03063825D63AC52A330A71F41CD43D27664CFD7",
         "byte_count": 349
       },
@@ -78,8 +78,8 @@
       },
       {
         "path": "tools/qualify_native_toolchain.py",
-        "sha256": "0DB4E0D15E2124FBAE2D519C7963FC7CBF1EC6C106CF12BC4A6ED5715453B254",
-        "byte_count": 16638
+        "sha256": "8C9F975F483DF6CF3337475EAE9D777BF707B52C1E719C4BA5FFD7BFAEDF63F1",
+        "byte_count": 16666
       }
     ]
   },
