@@ -15,13 +15,13 @@
   "bindings": {
     "contract": {
       "path": "specs/native-boot-handoff-contract.json",
-      "sha256": "A707392B66D3C0C24A79149071E20671BF8B77F2B185E8319D03B926CC716448",
-      "byte_count": 15033
+      "sha256": "03CBD2E3E8D5EDCC2D9088ECE739A1AD0B8E1FBBA1F7625E70346527969B3EBD",
+      "byte_count": 16049
     },
     "contract_schema": {
       "path": "specs/native-boot-handoff-contract.schema.json",
-      "sha256": "C1FC90DFCA0320CB0B637C7284D637C8049A262D6A301E3100C6CF4EBCB8E653",
-      "byte_count": 3914
+      "sha256": "CCC8FB6B593BD737DA0903FB98C1FF7368A2B783A50924C7196A864BAA170344",
+      "byte_count": 3996
     },
     "golden_vectors": {
       "path": "specs/native-boot-handoff-golden-vectors.json",
@@ -41,13 +41,13 @@
     "implementation_inputs": [
       {
         "path": "native/Cargo.toml",
-        "sha256": "A3AC7F136CE84828052542F8A1115CB2194154EF91667C83A993A8DD6B4F67AA",
-        "byte_count": 428
+        "sha256": "36AD545F9AC660BC7C03D9135C9EBC51DE3B61CCC9B8219F66ED76A3E39C2C02",
+        "byte_count": 445
       },
       {
         "path": "native/Cargo.lock",
-        "sha256": "2F366F1D10615F43233B6A853CAF3995B7743E002C5F03EA3DACC255720602FB",
-        "byte_count": 2788
+        "sha256": "AE912B0950F2AA643FA9F3DB5B050A2F9D4D2DA0204B70A1F8A8447C6A71B332",
+        "byte_count": 2925
       },
       {
         "path": "native/handoff/Cargo.toml",
@@ -56,13 +56,13 @@
       },
       {
         "path": "native/handoff/README.md",
-        "sha256": "A58B13C2A16DEDFD93A2A50C5752DC3DE5AD5DB9155F874880067D50A50077F2",
-        "byte_count": 599
+        "sha256": "797D18CEF5E8A8C4648531DB796529D4561AD65E5E20526F6F450CACE9DD6F6A",
+        "byte_count": 921
       },
       {
         "path": "native/handoff/src/lib.rs",
-        "sha256": "82BD79430F377BAF686839B517C26520F76F69AA8F4F008603012012988CD6CE",
-        "byte_count": 46434
+        "sha256": "44A0F4E99A035F857EC17503656BE6ABD7C9DF928594FC5AA2C06374813C290E",
+        "byte_count": 48479
       },
       {
         "path": "native/handoff/src/bin/pbp1_probe.rs",
@@ -71,8 +71,8 @@
       },
       {
         "path": "runtime/native_boot_handoff.py",
-        "sha256": "F81645F6858B4F18E7586ACCE23FB751FCC88EB50A108808407EAB228FA03ECE",
-        "byte_count": 47057
+        "sha256": "77B6102270FC1CCD13622C4785163F8CF91164952732FA45963DA70E48BF8372",
+        "byte_count": 47351
       },
       {
         "path": "tools/generate_native_boot_handoff_vectors.py",
@@ -81,8 +81,8 @@
       },
       {
         "path": "tools/qualify_native_boot_handoff.py",
-        "sha256": "F30F6A3D64459159F87D3CB0EF5F920D5AA101F069339D71A172C78DD792D2B9",
-        "byte_count": 25030
+        "sha256": "6AC2EA8F434360B59E405AAC71412141B82D3F2F09EBF101C08F77747CB58630",
+        "byte_count": 25083
       },
       {
         "path": "tests/test_native_boot_handoff.py",
@@ -91,8 +91,8 @@
       },
       {
         "path": "docs/native-boot-handoff.md",
-        "sha256": "8A07B79C47B3CBC2F243BE13829DC1510A869D68544ECEE94E6A7223974FC18D",
-        "byte_count": 6580
+        "sha256": "19B04972C9D182790E39C6E869D6A26438CF2CC86F1F47A7A0E6C748EBFFF963",
+        "byte_count": 7817
       }
     ]
   },
@@ -105,14 +105,14 @@
       {
         "target": "x86_64-unknown-uefi",
         "status": "pass",
-        "byte_count": 100546,
-        "sha256": "7816967668D4B3CA3206FC48FF45AF75CF3C1BC2A07407FE537637AAAF16E176"
+        "byte_count": 100608,
+        "sha256": "AE45B8559D019DFCB0B7B067BECC183505D4BC44121B8F33D38A2BB29A37D719"
       },
       {
         "target": "x86_64-unknown-none",
         "status": "pass",
-        "byte_count": 105534,
-        "sha256": "4A289471995969FB992831F799D75D2AA97BDE07ABBB5BDFD385D37B8F13D897"
+        "byte_count": 105614,
+        "sha256": "0B0A015794C8117FED6625DEA5A85AF16EE66C83B6FC3E070F9454929B7B1F63"
       }
     ],
     "layout_assertion_count": 12,
@@ -516,7 +516,7 @@
     "production_claim_count": 0
   },
   "open_items": [
-    "Wire the qualified PBP1 encoder into PooleBoot only after boot configuration, ELF, artifact verification, memory-map finalization, and retry policy are implemented.",
+    "Retain the live PBP1 container only after kernel mappings, final memory-map capture, and ExitBootServices retry policy are implemented.",
     "Implement the PooleKernel PBP1 intake path with read-only mapping, early copy policy, serial-first rejection, and exact entry assembly.",
     "Cross-check normalized memory-map records against captured UEFI descriptor streams, including larger future descriptor sizes.",
     "Exercise the final GetMemoryMap and ExitBootServices retry loop under malformed and map-changing firmware fixtures.",
@@ -527,7 +527,7 @@
   ],
   "claim_boundary": [
     "The full kernel-entry vector is synthetic and does not prove successful ExitBootServices or PooleKernel execution.",
-    "The Rust library compiles for UEFI and freestanding targets but is not called by current PooleBoot or PooleKernel code.",
+    "The Rust library compiles for UEFI and freestanding targets; PKLOAD3 separately proves a temporary pre-exit PooleBoot producer, while this standalone receipt does not claim a transferable live handoff.",
     "The Python implementation is an independent host oracle and is prohibited from the production boot chain.",
     "CRC-32 is corruption detection, not authentication or signed-manifest verification.",
     "Finite negative and deterministic fuzz corpora do not prove correctness for all byte strings or hardware states.",

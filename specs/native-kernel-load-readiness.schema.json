@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://pooleos.local/specs/native-kernel-load-readiness.schema.json",
-  "title": "PooleOS PKLOAD2 readiness",
+  "title": "PooleOS PKLOAD3 readiness",
   "type": "object",
   "additionalProperties": true,
   "required": [
@@ -33,20 +33,21 @@
     "schema_version": {"const": "1.0"},
     "artifact_kind": {"const": "pooleos_native_kernel_load_readiness"},
     "status_date": {"const": "2026-07-17"},
-    "status": {"const": "pass_single_host_two_run_live_manifest_load_then_release_non_promoting"},
-    "contract_id": {"const": "PKLOAD2"},
-    "selected_move_id": {"const": "N5-MANIFEST-001"},
+    "status": {"const": "pass_single_host_two_run_live_manifest_pre_exit_pbp1_then_release_non_promoting"},
+    "contract_id": {"const": "PKLOAD3"},
+    "selected_move_id": {"const": "N5-PBP1-LIVE-001"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
     "n5_exit_gate_satisfied": {"const": false},
     "phase_status": {
       "type": "object",
-      "required": ["N5", "N5.1", "N5.4", "N5.5"],
+      "required": ["N5", "N5.1", "N5.4", "N5.5", "N5.8"],
       "properties": {
         "N5": {"const": "partial"},
         "N5.1": {"const": "partial"},
         "N5.4": {"const": "partial"},
-        "N5.5": {"const": "partial"}
+        "N5.5": {"const": "partial"},
+        "N5.8": {"const": "partial"}
       }
     },
     "bindings": {
@@ -64,15 +65,19 @@
         "system_manifest_contract": {"$ref": "#/$defs/binding"},
         "system_manifest_readiness": {"$ref": "#/$defs/binding"},
         "digest_provider": {"$ref": "#/$defs/binding"},
-        "implementation_inputs": {"type": "array", "minItems": 30, "maxItems": 30, "items": {"$ref": "#/$defs/binding"}}
+        "implementation_inputs": {"type": "array", "minItems": 36, "maxItems": 36, "items": {"$ref": "#/$defs/binding"}}
       }
     },
     "host_tests": {
       "type": "object",
-      "required": ["bootload_tests_passed", "bootload_tests_total", "pooleboot_tests_passed", "pooleboot_tests_total", "kernel_entry_tests_passed", "kernel_entry_tests_total", "rustfmt_passed", "clippy_passed"],
+      "required": ["bootload_tests_passed", "bootload_tests_total", "handoff_tests_passed", "handoff_tests_total", "live_handoff_tests_passed", "live_handoff_tests_total", "pooleboot_tests_passed", "pooleboot_tests_total", "kernel_entry_tests_passed", "kernel_entry_tests_total", "rustfmt_passed", "clippy_passed"],
       "properties": {
         "bootload_tests_passed": {"minimum": 12},
         "bootload_tests_total": {"minimum": 12},
+        "handoff_tests_passed": {"minimum": 8},
+        "handoff_tests_total": {"minimum": 8},
+        "live_handoff_tests_passed": {"minimum": 6},
+        "live_handoff_tests_total": {"minimum": 6},
         "pooleboot_tests_passed": {"minimum": 8},
         "pooleboot_tests_total": {"minimum": 8},
         "kernel_entry_tests_passed": {"minimum": 13},
@@ -134,28 +139,32 @@
     },
     "oracle": {
       "type": "object",
-      "required": ["pbc1_python_match", "psm1_python_match", "sha256_python_match", "pkelf1_python_plan_match", "loaded_fnv1a64_match", "media_reconstruction_exact"],
+      "required": ["pbc1_python_match", "psm1_python_match", "sha256_python_match", "pkelf1_python_plan_match", "loaded_fnv1a64_match", "pbp1_python_decode_match", "pbp1_serial_debugcon_exact", "pbp1_kernel_manifest_cross_binding", "media_reconstruction_exact"],
       "properties": {
         "pbc1_python_match": {"const": true},
         "psm1_python_match": {"const": true},
         "sha256_python_match": {"const": true},
         "pkelf1_python_plan_match": {"const": true},
         "loaded_fnv1a64_match": {"const": true},
+        "pbp1_python_decode_match": {"const": true},
+        "pbp1_serial_debugcon_exact": {"const": true},
+        "pbp1_kernel_manifest_cross_binding": {"const": true},
         "media_reconstruction_exact": {"const": true}
       }
     },
     "cleanup": {
       "type": "object",
-      "required": ["file_handles_closed", "pools_freed", "pages_freed", "page_count", "all_resources_released"],
+      "required": ["file_handles_closed", "file_pools_freed", "pbp1_pools_freed", "pages_freed", "page_count", "all_resources_released"],
       "properties": {
         "file_handles_closed": {"const": 4},
-        "pools_freed": {"const": 3},
+        "file_pools_freed": {"const": 3},
+        "pbp1_pools_freed": {"const": 3},
         "pages_freed": {"const": true},
         "page_count": {"type": "integer", "minimum": 1},
         "all_resources_released": {"const": true}
       }
     },
-    "negative_controls": {"type": "array", "minItems": 40, "maxItems": 40, "items": {"$ref": "#/$defs/control"}},
+    "negative_controls": {"type": "array", "minItems": 52, "maxItems": 52, "items": {"$ref": "#/$defs/control"}},
     "claims": {"type": "object"},
     "summary": {"type": "object"},
     "open_items": {"type": "array", "minItems": 8, "items": {"type": "string"}},
@@ -186,11 +195,13 @@
     },
     "run": {
       "type": "object",
-      "required": ["markers", "marker_sha256", "marker_summary", "serial_debugcon_exact_match", "screenshot", "qemu_exit_code"],
+      "required": ["markers", "marker_sha256", "marker_summary", "serial_debugcon_exact_match", "pbp1_transcript", "pbp1_serial_debugcon_exact_match", "screenshot", "qemu_exit_code"],
       "properties": {
-        "markers": {"type": "array", "minItems": 19, "maxItems": 19, "items": {"type": "string"}},
+        "markers": {"type": "array", "minItems": 21, "maxItems": 21, "items": {"type": "string"}},
         "marker_sha256": {"$ref": "#/$defs/sha256"},
         "serial_debugcon_exact_match": {"const": true},
+        "pbp1_transcript": {"type": "object", "required": ["contract_id", "byte_count", "sha256", "record_count", "memory_entry_count", "pre_exit_profile_validated", "kernel_entry_profile_rejected"]},
+        "pbp1_serial_debugcon_exact_match": {"const": true},
         "qemu_exit_code": {"const": 0}
       }
     }

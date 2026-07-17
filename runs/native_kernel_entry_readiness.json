@@ -13,14 +13,14 @@
     },
     "implementation_inputs": [
       {
-        "byte_count": 428,
+        "byte_count": 445,
         "path": "native/Cargo.toml",
-        "sha256": "A3AC7F136CE84828052542F8A1115CB2194154EF91667C83A993A8DD6B4F67AA"
+        "sha256": "36AD545F9AC660BC7C03D9135C9EBC51DE3B61CCC9B8219F66ED76A3E39C2C02"
       },
       {
-        "byte_count": 2788,
+        "byte_count": 2925,
         "path": "native/Cargo.lock",
-        "sha256": "2F366F1D10615F43233B6A853CAF3995B7743E002C5F03EA3DACC255720602FB"
+        "sha256": "AE912B0950F2AA643FA9F3DB5B050A2F9D4D2DA0204B70A1F8A8447C6A71B332"
       },
       {
         "byte_count": 249,
@@ -28,9 +28,9 @@
         "sha256": "EFCA98B3722831ABFE562DA3F54FF830AD19C15C30EC4094D61AE0E6A7147522"
       },
       {
-        "byte_count": 1144,
+        "byte_count": 1278,
         "path": "native/kernel/README.md",
-        "sha256": "D61F9CEB60BBA0FFAB1A17CB06F6A39DD2623F4CCA2CB3B6E85017B755C824D4"
+        "sha256": "24381280F339E9CC460D2244F6E4ADC2FA415171BEF7A56738E97472E54A64CF"
       },
       {
         "byte_count": 523,
@@ -45,7 +45,7 @@
       {
         "byte_count": 434,
         "path": "native/kernel/manifest.pkm",
-        "sha256": "69DCD3BA9FCAACF442BF8535449E002769EFC263E5D22CFEED31BDC581E2B58F"
+        "sha256": "69F3CFAF14D49560212E7E825E275A36D80F739F0EDFC636AD81F2CDF2AB08B6"
       },
       {
         "byte_count": 21598,
@@ -95,18 +95,18 @@
       {
         "byte_count": 6041,
         "path": "tests/test_native_kernel_entry.py",
-        "sha256": "717812C21AF6A435878EE549225967A0B7D7BF9ADA7CBDECE9E6283DB987703B"
+        "sha256": "19E05DBDD78C9EBDF30E9573863B67448C632568290AA07A1A2E1EE2AB2653FE"
       },
       {
-        "byte_count": 3299,
+        "byte_count": 3503,
         "path": "docs/native-kernel-entry.md",
-        "sha256": "3F355BD2CC8A20F8DC99E4B62EAC5A396794EC53A1DB64E41ED7C8C13E159EF3"
+        "sha256": "58B09783361BB1F7D218435CCC124516A2CC75F815857444993957F9C05D0360"
       }
     ],
     "pbp1_contract": {
-      "byte_count": 15033,
+      "byte_count": 16049,
       "path": "specs/native-boot-handoff-contract.json",
-      "sha256": "A707392B66D3C0C24A79149071E20671BF8B77F2B185E8319D03B926CC716448"
+      "sha256": "03CBD2E3E8D5EDCC2D9088ECE739A1AD0B8E1FBBA1F7625E70346527969B3EBD"
     },
     "pkelf1_contract": {
       "byte_count": 5797,
@@ -500,21 +500,21 @@
   },
   "product": {
     "canonical_byte_count": 139264,
-    "canonical_sha256": "8D79F687B92EE4C3592F45BB8B2C33E805D3D246319D54AB7EC354458490CA5B",
+    "canonical_sha256": "BF1176019E9E4AF1C588898F565A6B1F66737517C2D3CA804510C4B0AC1B2E9D",
     "entry_offset": 16384,
     "entry_prefix_hex": "FAFC4889E14885C9742C48F7C10F00000075234889C848C1E01048C1F8104839C87513E8C0020000",
     "host_leakage_hits": [],
     "image_byte_count": 196608,
     "linked_byte_count": 140208,
-    "linked_sha256": "45D05291E563EE9BAF50CEB4E109CF35E64BEDBA36E5F246E9C6ED4D59D75CBA",
-    "loaded_sha256": "8AE4CBB6DCAF9FD091C09B1421067353EA467DF9FF9261AD47DC71A3EB77D191",
+    "linked_sha256": "2B24A9033151FD1CB92B0201200EBC619BA800B1044F6C6E8AB7814BE561D90A",
+    "loaded_sha256": "AE10F03BA413BB6D31EE562757EF16E898109F587D40A3AB42E90CF813FCB0D1",
     "manifest_fields": {
       "build_id": "PKBUILD1-CYCLE101-N6-KENTRY-001",
       "entry_contract": "PKENTRY1",
       "entry_offset": "0x00004000",
       "handoff_contract": "PBP1",
       "image_contract": "PKELF1",
-      "pbp1_contract_sha256": "A707392B66D3C0C24A79149071E20671BF8B77F2B185E8319D03B926CC716448",
+      "pbp1_contract_sha256": "03CBD2E3E8D5EDCC2D9088ECE739A1AD0B8E1FBBA1F7625E70346527969B3EBD",
       "pkelf1_contract_sha256": "A0CE48E9EF992B97333D84ECB2850E221D482E2ACF11BB312B5F769DAFF992AA",
       "pkentry1_contract_sha256": "D61F792B5D873DE338FCC365109C6286FAF2BE438CFD8CFE1C63543EB6E8E2D2"
     },
@@ -581,13 +581,13 @@
       "pooleboot_compile_time_integration_builds": [
         {
           "pooleboot_rlib_byte_count": 55708,
-          "pooleboot_rlib_sha256": "9B9C7CE18C789E0EEBACD3F59BDBB5EBF7FAD90F0B5A7F4CE606EC69D49CAE93",
+          "pooleboot_rlib_sha256": "ABEDCA138A104969F365F9DF040B4773CC5852B277531A1955D1C23C99A2A86C",
           "status": "pass",
           "target": "x86_64-unknown-uefi"
         },
         {
           "pooleboot_rlib_byte_count": 57796,
-          "pooleboot_rlib_sha256": "DE62243FA83841A4A2DE40AA4C03A18F240ABFBCAA16F6020ABB6FB0DE7F38FA",
+          "pooleboot_rlib_sha256": "82E693B401737CEC5CCEB9CE2F63B96C957DC633B4590A882468B34C9CC0901C",
           "status": "pass",
           "target": "x86_64-unknown-none"
         }

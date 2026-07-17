@@ -23,7 +23,7 @@ from typing import Any, Callable
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from runtime import native_pooleboot, native_tier0  # noqa: E402
+from runtime import native_live_boot_handoff, native_pooleboot, native_tier0  # noqa: E402
 from runtime.native_binary import inspect_binary, scan_forbidden_markers, validate_binary  # noqa: E402
 
 
@@ -308,7 +308,7 @@ def _execute_once(
     run_dir: Path,
     timeout: int,
     marker_validator: Callable[[list[str]], dict[str, Any]] = native_pooleboot.validate_markers,
-) -> tuple[dict[str, Any], bytes]:
+) -> tuple[dict[str, Any], bytes, bytes]:
     firmware = {item["role"]: item for item in lock["firmware"]["files"]}
     vars_source = qemu_root / firmware["vars_template_copy_only"]["relative_path"]
     shutil.copyfile(vars_source, run_dir / profile["evidence_contract"]["vars_copy"])
@@ -367,11 +367,20 @@ def _execute_once(
         if not screenshot_captured or not return_marker_observed:
             raise QualificationError("PooleBoot frame or return marker timed out")
         time.sleep(0.05)
-        debug_markers = native_pooleboot.extract_markers(debug_path.read_bytes())
-        serial_markers = native_pooleboot.extract_markers(serial_path.read_bytes())
+        debug_raw = debug_path.read_bytes()
+        serial_raw = serial_path.read_bytes()
+        debug_markers = native_pooleboot.extract_markers(debug_raw)
+        serial_markers = native_pooleboot.extract_markers(serial_raw)
         marker_summary = marker_validator(debug_markers)
         if serial_markers != debug_markers:
             raise QualificationError("serial and debugcon PooleBoot marker sequences differ")
+        try:
+            debug_transcript = native_live_boot_handoff.extract_transcript(debug_raw)
+            serial_transcript = native_live_boot_handoff.extract_transcript(serial_raw)
+        except native_live_boot_handoff.LiveHandoffError as error:
+            raise QualificationError(str(error)) from error
+        if debug_transcript.data != serial_transcript.data:
+            raise QualificationError("serial and debugcon PBP1 transcripts differ")
         screenshot_data = screenshot_path.read_bytes()
         screenshot = native_pooleboot.inspect_ppm(screenshot_data)
         client.execute("quit")
@@ -396,12 +405,15 @@ def _execute_once(
                 "marker_sha256": native_pooleboot.sha256_bytes(marker_bytes),
                 "serial_debugcon_exact_match": True,
                 "marker_summary": marker_summary,
+                "pbp1_transcript": debug_transcript.summary,
+                "pbp1_serial_debugcon_exact_match": True,
                 "screenshot": screenshot,
                 "stderr_sha256": native_pooleboot.sha256_bytes(stderr),
                 "stderr_byte_count": len(stderr),
                 "local_paths_recorded": False,
             },
             screenshot_data,
+            debug_transcript.data,
         )
     finally:
         if client is not None:
@@ -582,7 +594,7 @@ def _make_legacy_report(
         screenshots: list[bytes] = []
         for run_index in (1, 2):
             with tempfile.TemporaryDirectory(prefix=f"pooleboot-run-{run_index}-", dir=run_root) as run_temporary:
-                run, screenshot = _execute_once(
+                run, screenshot, _ = _execute_once(
                     f"run-{run_index}",
                     lock,
                     profile,
@@ -709,12 +721,12 @@ def make_report(
     kernel_load_readiness_path = ROOT / native_kernel_load.READINESS_RELATIVE
     if not kernel_load_readiness_path.is_file():
         raise QualificationError(
-            "current PKLOAD2 readiness is required before the aggregate PooleBoot receipt"
+            "current PKLOAD3 readiness is required before the aggregate PooleBoot receipt"
         )
     current_kernel_load = native_kernel_load.read_json(kernel_load_readiness_path)
     current_errors = native_kernel_load.readiness_errors(current_kernel_load, ROOT)
     if current_errors:
-        raise QualificationError("current PKLOAD2 readiness is stale: " + "; ".join(current_errors))
+        raise QualificationError("current PKLOAD3 readiness is stale: " + "; ".join(current_errors))
     kernel_load, screenshot = qualify_native_kernel_load.make_readiness(
         toolchain_root,
         qemu_root,
@@ -727,7 +739,7 @@ def make_report(
         "schema_version": "1.0",
         "artifact_kind": "pooleos_native_pooleboot_readiness",
         "status_date": status_date,
-        "status": "pass_single_host_two_run_unsigned_live_manifest_load_then_release_non_promoting",
+        "status": "pass_single_host_two_run_unsigned_live_manifest_pre_exit_pbp1_then_release_non_promoting",
         "contract_id": contract["contract_id"],
         "selected_move_id": contract["selected_move_id"],
         "production_ready": False,
@@ -741,6 +753,7 @@ def make_report(
             "N5.4": "partial",
             "N5.5": "partial",
             "N5.7": "partial",
+            "N5.8": "partial",
         },
         "bindings": {
             "contract": native_pooleboot.file_binding(ROOT, CONTRACT_RELATIVE),

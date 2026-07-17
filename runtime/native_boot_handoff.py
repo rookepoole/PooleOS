@@ -316,18 +316,25 @@ def _validate_core(payload: bytes, total_size: int | None) -> dict[str, int]:
         selected_entry=_u32(payload, 116),
         uefi_revision=_u32(payload, 120),
     )
+    boot_services_exited = bool(core["boot_flags"] & BOOT_SERVICES_EXITED)
+    transfer_state_valid = (
+        bool(core["page_table_root_physical"])
+        and core["page_table_root_physical"] % PAGE_BYTES == 0
+        and bool(core["initial_stack_top_virtual"])
+        and core["initial_stack_top_virtual"] % 16 == 0
+        if boot_services_exited
+        else core["page_table_root_physical"] == 0
+        and core["initial_stack_top_virtual"] == 0
+    )
     if (
         core["boot_flags"] & ~KNOWN_BOOT_FLAGS
         or core["kernel_physical_base"] % PAGE_BYTES
         or core["kernel_virtual_base"] % PAGE_BYTES
-        or not core["page_table_root_physical"]
-        or core["page_table_root_physical"] % PAGE_BYTES
+        or not transfer_state_valid
         or not core["handoff_physical_base"]
         or core["handoff_physical_base"] % ALIGNMENT
         or not core["handoff_virtual_base"]
         or core["handoff_virtual_base"] % ALIGNMENT
-        or not core["initial_stack_top_virtual"]
-        or core["initial_stack_top_virtual"] % 16
         or not 1 <= core["boot_attempt_limit"] <= 32
         or core["boot_attempt"] > core["boot_attempt_limit"]
         or core["boot_slot"] not in {1, 2, 3, 4}

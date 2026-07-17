@@ -4,6 +4,7 @@
 #![forbid(unsafe_op_in_unsafe_fn)]
 
 mod kload;
+mod livehandoff;
 
 use core::arch::asm;
 use core::ffi::c_void;
@@ -228,6 +229,8 @@ struct ConfigSummary {
 struct GopSummary {
     layout: FramebufferLayout,
     mode: u32,
+    physical_base: u64,
+    byte_count: usize,
 }
 
 #[panic_handler]
@@ -309,6 +312,27 @@ fn fail_detail(failure: kload::Failure) -> EfiStatus {
         failure.stage, failure.code, failure.status as u64
     ));
     failure.status
+}
+
+fn fail_handoff_detail(failure: livehandoff::Failure) -> EfiStatus {
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 ERROR stage={} code={} status=0x{:016X}\n",
+        failure.stage, failure.code, failure.status as u64
+    ));
+    failure.status
+}
+
+fn allocate_pool_call(
+    call: AllocatePool,
+    memory_type: u32,
+    byte_count: usize,
+    pointer: *mut *mut c_void,
+) -> EfiStatus {
+    call(memory_type, byte_count, pointer)
+}
+
+fn free_pool_call(call: FreePool, pointer: *mut c_void) -> EfiStatus {
+    call(pointer)
 }
 
 unsafe fn table_slice<'a>(pointer: *const u8, header_size: u32) -> Result<&'a [u8], ContractError> {
@@ -421,6 +445,8 @@ fn discover_gop(boot_services: &EfiBootServices) -> Result<GopSummary, EfiStatus
     Ok(GopSummary {
         layout,
         mode: mode.mode,
+        physical_base: mode.framebuffer_base,
+        byte_count: mode.framebuffer_size,
     })
 }
 
@@ -561,6 +587,8 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
         u8::from(config.smbios2)
     ));
 
+    let gop_result = discover_gop(boot_services);
+
     let kernel = match kload::load_manifest_kernel(image_handle, boot_services) {
         Ok(summary) => summary,
         Err(failure) => return fail_detail(failure),
@@ -613,12 +641,53 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
         kernel.read_write_count,
         kernel.writable_executable_count
     ));
+
+    let handoff_result = livehandoff::produce(
+        boot_services,
+        &kernel,
+        gop_result.ok(),
+        system.header.revision,
+    );
+    let release_result = kload::release_kernel_pages(
+        boot_services,
+        kernel.kernel_physical_base,
+        kernel.page_count,
+    );
+    let handoff = match handoff_result {
+        Ok(summary) => summary,
+        Err(failure) => {
+            if let Err(release_failure) = release_result {
+                return fail_detail(release_failure);
+            }
+            return fail_handoff_detail(failure);
+        }
+    };
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 PBP1 PASS bytes={} records={} memory_entries={} framebuffer={} artifacts={} descriptor_bytes={} map_attempts={} message_crc32={:08X} fnv1a64={:016X} state=pre_exit\n",
+        handoff.handoff.total_bytes,
+        handoff.handoff.record_count,
+        handoff.handoff.memory_entry_count,
+        u8::from(handoff.handoff.framebuffer_present),
+        handoff.handoff.artifact_count,
+        handoff.descriptor_size,
+        handoff.map_attempts,
+        handoff.handoff.message_crc32,
+        handoff.handoff.fnv1a64
+    ));
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 PBP1_RELEASE PASS pools_freed={} bytes_unchanged={}\n",
+        handoff.pools_freed,
+        u8::from(handoff.bytes_unchanged)
+    ));
+    if let Err(failure) = release_result {
+        return fail_detail(failure);
+    }
     diagnostic(format_args!(
         "POOLEBOOT/0.1 KERNEL_RELEASE PASS files_closed={} pools_freed={} pages_freed={}\n",
-        kernel.closed_file_count, kernel.freed_pool_count, kernel.freed_page_count
+        kernel.closed_file_count, kernel.freed_pool_count, kernel.page_count
     ));
 
-    let gop = match discover_gop(boot_services) {
+    let gop = match gop_result {
         Ok(summary) => {
             diagnostic(format_args!(
                 "POOLEBOOT/0.1 GOP PASS width={} height={} stride={} mode={} format={}\n",
@@ -651,7 +720,7 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
         memory_map.map_size, memory_map.descriptor_size, memory_map.descriptor_count
     ));
     diagnostic(format_args!(
-        "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted kernel=loaded_then_released mappings=planned_not_activated entry=not_called exit_boot_services=not_called\n"
+        "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted kernel=loaded_then_released handoff=pre_exit_produced_then_released mappings=planned_not_activated entry=not_called exit_boot_services=not_called\n"
     ));
 
     if gop.is_some() {

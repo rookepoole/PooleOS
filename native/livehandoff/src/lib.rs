@@ -1,0 +1,583 @@
+#![no_std]
+#![deny(warnings)]
+
+use core::cmp::Ordering;
+
+use poole_handoff::{
+    self as pbp1, ARTIFACT_ENTRY_BYTES, ARTIFACT_EXECUTABLE, ARTIFACT_HASH_VERIFIED,
+    ARTIFACT_KERNEL, CORE_BYTES, DEVELOPMENT_MODE, Encoder, FRAMEBUFFER_BYTES, MEMORY_ACPI_NVS,
+    MEMORY_ACPI_RECLAIMABLE, MEMORY_BOOT_RECLAIMABLE, MEMORY_ENTRY_BYTES, MEMORY_LOADER_RESERVED,
+    MEMORY_MMIO, MEMORY_PERSISTENT, MEMORY_RESERVED, MEMORY_RUNTIME_CODE, MEMORY_RUNTIME_DATA,
+    MEMORY_UNUSABLE, MEMORY_USABLE, RECORD_ARRAY, RECORD_CORE, RECORD_FRAMEBUFFER,
+    RECORD_LOADED_ARTIFACTS, RECORD_MEMORY_MAP, RECORD_REQUIRED,
+};
+
+pub const CONTRACT_ID: &str = "PBLIVE1";
+pub const UEFI_DESCRIPTOR_VERSION: u32 = 1;
+pub const MIN_DESCRIPTOR_BYTES: usize = 40;
+pub const MAX_DESCRIPTOR_BYTES: usize = 256;
+pub const MAX_MEMORY_ENTRIES: usize = 16_384;
+pub const MAX_TRANSCRIPT_CHUNK_BYTES: usize = 64;
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Error {
+    DescriptorSize,
+    DescriptorVersion,
+    MemoryMapShape,
+    MemoryType,
+    MemoryRange,
+    MemoryOverlap,
+    ScratchCapacity,
+    OutputCapacity,
+    Handoff(pbp1::Error),
+    PreExitProfile,
+}
+
+impl From<pbp1::Error> for Error {
+    fn from(value: pbp1::Error) -> Self {
+        Self::Handoff(value)
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct KernelInput {
+    pub physical_base: u64,
+    pub physical_size: u64,
+    pub virtual_base: u64,
+    pub virtual_size: u64,
+    pub entry_virtual: u64,
+    pub sha256: [u8; 32],
+    pub boot_attempt: u32,
+    pub boot_attempt_limit: u32,
+    pub boot_slot: u32,
+    pub selected_entry: u32,
+    pub uefi_revision: u32,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct FramebufferInput {
+    pub physical_base: u64,
+    pub byte_count: u64,
+    pub width: u32,
+    pub height: u32,
+    pub stride: u32,
+    pub pixel_format: u32,
+    pub red_mask: u32,
+    pub green_mask: u32,
+    pub blue_mask: u32,
+    pub reserved_mask: u32,
+}
+
+#[derive(Clone, Copy)]
+pub struct BuildInput<'a> {
+    pub raw_memory_map: &'a [u8],
+    pub descriptor_size: usize,
+    pub descriptor_version: u32,
+    pub handoff_physical_base: u64,
+    pub kernel: KernelInput,
+    pub framebuffer: Option<FramebufferInput>,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Summary {
+    pub total_bytes: usize,
+    pub record_count: usize,
+    pub memory_entry_count: usize,
+    pub framebuffer_present: bool,
+    pub artifact_count: usize,
+    pub message_crc32: u32,
+    pub fnv1a64: u64,
+}
+
+fn read_u32(bytes: &[u8], offset: usize) -> Result<u32, Error> {
+    let value = bytes.get(offset..offset + 4).ok_or(Error::MemoryMapShape)?;
+    Ok(u32::from_le_bytes([value[0], value[1], value[2], value[3]]))
+}
+
+fn read_u64(bytes: &[u8], offset: usize) -> Result<u64, Error> {
+    let value = bytes.get(offset..offset + 8).ok_or(Error::MemoryMapShape)?;
+    Ok(u64::from_le_bytes([
+        value[0], value[1], value[2], value[3], value[4], value[5], value[6], value[7],
+    ]))
+}
+
+fn write_u32(bytes: &mut [u8], offset: usize, value: u32) {
+    bytes[offset..offset + 4].copy_from_slice(&value.to_le_bytes());
+}
+
+fn write_u64(bytes: &mut [u8], offset: usize, value: u64) {
+    bytes[offset..offset + 8].copy_from_slice(&value.to_le_bytes());
+}
+
+fn normalized_kind(source_type: u32) -> Result<u32, Error> {
+    match source_type {
+        0 | 13 | 15 => Ok(MEMORY_RESERVED),
+        1 | 2 => Ok(MEMORY_LOADER_RESERVED),
+        3 | 4 => Ok(MEMORY_BOOT_RECLAIMABLE),
+        5 => Ok(MEMORY_RUNTIME_CODE),
+        6 => Ok(MEMORY_RUNTIME_DATA),
+        7 => Ok(MEMORY_USABLE),
+        8 => Ok(MEMORY_UNUSABLE),
+        9 => Ok(MEMORY_ACPI_RECLAIMABLE),
+        10 => Ok(MEMORY_ACPI_NVS),
+        11 | 12 => Ok(MEMORY_MMIO),
+        14 => Ok(MEMORY_PERSISTENT),
+        _ => Err(Error::MemoryType),
+    }
+}
+
+fn entry_start(bytes: &[u8], index: usize) -> Result<u64, Error> {
+    read_u64(bytes, index * MEMORY_ENTRY_BYTES)
+}
+
+fn swap_entries(bytes: &mut [u8], left: usize, right: usize) {
+    if left == right {
+        return;
+    }
+    for offset in 0..MEMORY_ENTRY_BYTES {
+        bytes.swap(
+            left * MEMORY_ENTRY_BYTES + offset,
+            right * MEMORY_ENTRY_BYTES + offset,
+        );
+    }
+}
+
+pub fn normalize_memory_map(
+    raw: &[u8],
+    descriptor_size: usize,
+    descriptor_version: u32,
+    output: &mut [u8],
+) -> Result<usize, Error> {
+    if !(MIN_DESCRIPTOR_BYTES..=MAX_DESCRIPTOR_BYTES).contains(&descriptor_size)
+        || !descriptor_size.is_multiple_of(8)
+    {
+        return Err(Error::DescriptorSize);
+    }
+    if descriptor_version != UEFI_DESCRIPTOR_VERSION {
+        return Err(Error::DescriptorVersion);
+    }
+    if raw.is_empty() || !raw.len().is_multiple_of(descriptor_size) {
+        return Err(Error::MemoryMapShape);
+    }
+    let count = raw.len() / descriptor_size;
+    if count == 0 || count > MAX_MEMORY_ENTRIES {
+        return Err(Error::MemoryMapShape);
+    }
+    let required = count
+        .checked_mul(MEMORY_ENTRY_BYTES)
+        .ok_or(Error::ScratchCapacity)?;
+    if output.len() < required {
+        return Err(Error::ScratchCapacity);
+    }
+    let output = &mut output[..required];
+    output.fill(0);
+    for index in 0..count {
+        let descriptor = &raw[index * descriptor_size..(index + 1) * descriptor_size];
+        let source_type = read_u32(descriptor, 0)?;
+        let start = read_u64(descriptor, 8)?;
+        let pages = read_u64(descriptor, 24)?;
+        let attributes = read_u64(descriptor, 32)?;
+        if !start.is_multiple_of(pbp1::PAGE_BYTES) || pages == 0 {
+            return Err(Error::MemoryRange);
+        }
+        let byte_count = pages
+            .checked_mul(pbp1::PAGE_BYTES)
+            .ok_or(Error::MemoryRange)?;
+        start.checked_add(byte_count).ok_or(Error::MemoryRange)?;
+        let base = index * MEMORY_ENTRY_BYTES;
+        write_u64(output, base, start);
+        write_u64(output, base + 8, pages);
+        write_u64(output, base + 16, attributes);
+        write_u32(output, base + 24, normalized_kind(source_type)?);
+        write_u32(output, base + 28, source_type);
+    }
+
+    for index in 1..count {
+        let mut cursor = index;
+        while cursor > 0 {
+            let left = entry_start(output, cursor - 1)?;
+            let right = entry_start(output, cursor)?;
+            if left.cmp(&right) != Ordering::Greater {
+                break;
+            }
+            swap_entries(output, cursor - 1, cursor);
+            cursor -= 1;
+        }
+    }
+
+    let mut previous_end = 0u64;
+    for index in 0..count {
+        let base = index * MEMORY_ENTRY_BYTES;
+        let start = read_u64(output, base)?;
+        let pages = read_u64(output, base + 8)?;
+        let end = start
+            .checked_add(
+                pages
+                    .checked_mul(pbp1::PAGE_BYTES)
+                    .ok_or(Error::MemoryRange)?,
+            )
+            .ok_or(Error::MemoryRange)?;
+        if index != 0 && start < previous_end {
+            return Err(Error::MemoryOverlap);
+        }
+        previous_end = end;
+    }
+    Ok(count)
+}
+
+fn core_payload(input: &BuildInput<'_>, total_bytes: usize) -> [u8; CORE_BYTES] {
+    let mut value = [0u8; CORE_BYTES];
+    write_u64(&mut value, 0, DEVELOPMENT_MODE);
+    write_u64(&mut value, 8, input.kernel.physical_base);
+    write_u64(&mut value, 16, input.kernel.physical_size);
+    write_u64(&mut value, 24, input.kernel.virtual_base);
+    write_u64(&mut value, 32, input.kernel.virtual_size);
+    write_u64(&mut value, 40, input.kernel.entry_virtual);
+    write_u64(&mut value, 64, input.handoff_physical_base);
+    write_u64(&mut value, 72, input.handoff_physical_base);
+    write_u64(&mut value, 80, total_bytes as u64);
+    write_u32(&mut value, 104, input.kernel.boot_attempt);
+    write_u32(&mut value, 108, input.kernel.boot_attempt_limit);
+    write_u32(&mut value, 112, input.kernel.boot_slot);
+    write_u32(&mut value, 116, input.kernel.selected_entry);
+    write_u32(&mut value, 120, input.kernel.uefi_revision);
+    value
+}
+
+fn framebuffer_payload(input: FramebufferInput) -> [u8; FRAMEBUFFER_BYTES] {
+    let mut value = [0u8; FRAMEBUFFER_BYTES];
+    write_u64(&mut value, 0, input.physical_base);
+    write_u64(&mut value, 8, input.byte_count);
+    write_u32(&mut value, 16, input.width);
+    write_u32(&mut value, 20, input.height);
+    write_u32(&mut value, 24, input.stride);
+    write_u32(&mut value, 28, input.pixel_format);
+    write_u32(&mut value, 32, input.red_mask);
+    write_u32(&mut value, 36, input.green_mask);
+    write_u32(&mut value, 40, input.blue_mask);
+    write_u32(&mut value, 44, input.reserved_mask);
+    value
+}
+
+fn artifact_payload(input: KernelInput) -> [u8; ARTIFACT_ENTRY_BYTES] {
+    let mut value = [0u8; ARTIFACT_ENTRY_BYTES];
+    write_u32(&mut value, 0, ARTIFACT_KERNEL);
+    write_u32(&mut value, 4, ARTIFACT_HASH_VERIFIED | ARTIFACT_EXECUTABLE);
+    write_u64(&mut value, 8, input.physical_base);
+    write_u64(&mut value, 16, input.physical_size);
+    write_u64(&mut value, 24, input.virtual_base);
+    write_u64(&mut value, 32, input.virtual_size);
+    write_u64(&mut value, 40, input.entry_virtual);
+    value[48..80].copy_from_slice(&input.sha256);
+    value
+}
+
+pub fn validate_pre_exit_profile(handoff: &pbp1::Handoff<'_>) -> Result<(), Error> {
+    let expected_features = pbp1::FEATURE_CORE
+        | pbp1::FEATURE_MEMORY_MAP
+        | pbp1::FEATURE_LOADED_ARTIFACTS
+        | if handoff.record(RECORD_FRAMEBUFFER).is_some() {
+            pbp1::FEATURE_FRAMEBUFFER
+        } else {
+            0
+        };
+    let expected_required =
+        pbp1::FEATURE_CORE | pbp1::FEATURE_MEMORY_MAP | pbp1::FEATURE_LOADED_ARTIFACTS;
+    let header = handoff.header();
+    let core = handoff.core()?;
+    if header.features != expected_features
+        || header.required_features != expected_required
+        || !matches!(header.record_count, 3 | 4)
+        || core.boot_flags != DEVELOPMENT_MODE
+        || core.initial_stack_top_virtual != 0
+        || core.page_table_root_physical != 0
+        || core.uefi_system_table_physical != 0
+        || core.uefi_runtime_services_physical != 0
+    {
+        return Err(Error::PreExitProfile);
+    }
+    let artifacts = handoff
+        .record(RECORD_LOADED_ARTIFACTS)
+        .ok_or(Error::PreExitProfile)?;
+    if artifacts.descriptor.element_count != 1
+        || read_u32(artifacts.payload, 0)? != ARTIFACT_KERNEL
+        || read_u32(artifacts.payload, 4)? != ARTIFACT_HASH_VERIFIED | ARTIFACT_EXECUTABLE
+    {
+        return Err(Error::PreExitProfile);
+    }
+    if pbp1::validate_kernel_entry_profile(handoff).is_ok() {
+        return Err(Error::PreExitProfile);
+    }
+    Ok(())
+}
+
+pub fn build_pre_exit<'a>(
+    input: BuildInput<'_>,
+    normalized_memory: &mut [u8],
+    output: &'a mut [u8],
+) -> Result<(&'a [u8], Summary), Error> {
+    if input.handoff_physical_base == 0
+        || !input
+            .handoff_physical_base
+            .is_multiple_of(pbp1::ALIGNMENT as u64)
+    {
+        return Err(Error::OutputCapacity);
+    }
+    let memory_count = normalize_memory_map(
+        input.raw_memory_map,
+        input.descriptor_size,
+        input.descriptor_version,
+        normalized_memory,
+    )?;
+    let memory_bytes = memory_count * MEMORY_ENTRY_BYTES;
+    let record_count = if input.framebuffer.is_some() { 4 } else { 3 };
+    let mut lengths = [CORE_BYTES, memory_bytes, ARTIFACT_ENTRY_BYTES, 0];
+    if input.framebuffer.is_some() {
+        lengths[2] = FRAMEBUFFER_BYTES;
+        lengths[3] = ARTIFACT_ENTRY_BYTES;
+    }
+    let total_bytes = pbp1::encoded_size(record_count, &lengths[..record_count])?;
+    if output.len() < total_bytes {
+        return Err(Error::OutputCapacity);
+    }
+    let core = core_payload(&input, total_bytes);
+    let artifact = artifact_payload(input.kernel);
+    let mut encoder = Encoder::new(&mut output[..total_bytes], record_count, 0, 0)?;
+    encoder.push(RECORD_CORE, 1, RECORD_REQUIRED, CORE_BYTES, 1, &core)?;
+    encoder.push(
+        RECORD_MEMORY_MAP,
+        1,
+        RECORD_REQUIRED | RECORD_ARRAY,
+        MEMORY_ENTRY_BYTES,
+        memory_count,
+        &normalized_memory[..memory_bytes],
+    )?;
+    if let Some(framebuffer) = input.framebuffer {
+        let framebuffer = framebuffer_payload(framebuffer);
+        encoder.push(RECORD_FRAMEBUFFER, 1, 0, FRAMEBUFFER_BYTES, 1, &framebuffer)?;
+    }
+    encoder.push(
+        RECORD_LOADED_ARTIFACTS,
+        1,
+        RECORD_REQUIRED | RECORD_ARRAY,
+        ARTIFACT_ENTRY_BYTES,
+        1,
+        &artifact,
+    )?;
+    let bytes = encoder.finish()?;
+    let handoff = pbp1::decode(bytes)?;
+    validate_pre_exit_profile(&handoff)?;
+    let summary = Summary {
+        total_bytes: bytes.len(),
+        record_count,
+        memory_entry_count: memory_count,
+        framebuffer_present: input.framebuffer.is_some(),
+        artifact_count: 1,
+        message_crc32: read_u32(bytes, 48)?,
+        fnv1a64: fnv1a64(bytes),
+    };
+    Ok((bytes, summary))
+}
+
+pub fn fnv1a64(bytes: &[u8]) -> u64 {
+    let mut value = 0xcbf2_9ce4_8422_2325u64;
+    for byte in bytes {
+        value ^= u64::from(*byte);
+        value = value.wrapping_mul(0x0000_0100_0000_01b3);
+    }
+    value
+}
+
+#[cfg(test)]
+mod tests {
+    extern crate std;
+
+    use super::*;
+    use std::vec;
+
+    fn descriptor(
+        source_type: u32,
+        start: u64,
+        pages: u64,
+        attributes: u64,
+        stride: usize,
+    ) -> std::vec::Vec<u8> {
+        let mut value = vec![0xa5; stride];
+        write_u32(&mut value, 0, source_type);
+        write_u64(&mut value, 8, start);
+        write_u64(&mut value, 16, 0);
+        write_u64(&mut value, 24, pages);
+        write_u64(&mut value, 32, attributes);
+        value
+    }
+
+    fn raw_map(stride: usize) -> std::vec::Vec<u8> {
+        let mut value = descriptor(7, 0x0040_0000, 16, 8, stride);
+        value.extend(descriptor(2, 0x0020_0000, 32, 4, stride));
+        value.extend(descriptor(11, 0x8000_0000, 256, 1, stride));
+        value
+    }
+
+    fn kernel() -> KernelInput {
+        KernelInput {
+            physical_base: 0x0020_0000,
+            physical_size: 0x0002_0000,
+            virtual_base: 0xffff_ffff_8000_0000,
+            virtual_size: 0x0002_0000,
+            entry_virtual: 0xffff_ffff_8000_4000,
+            sha256: [0x5a; 32],
+            boot_attempt: 0,
+            boot_attempt_limit: 3,
+            boot_slot: 1,
+            selected_entry: 1,
+            uefi_revision: 0x0002_0064,
+        }
+    }
+
+    fn framebuffer() -> FramebufferInput {
+        FramebufferInput {
+            physical_base: 0x8000_0000,
+            byte_count: 0x0040_0000,
+            width: 1024,
+            height: 768,
+            stride: 1024,
+            pixel_format: 1,
+            red_mask: 0x0000_00ff,
+            green_mask: 0x0000_ff00,
+            blue_mask: 0x00ff_0000,
+            reserved_mask: 0xff00_0000,
+        }
+    }
+
+    #[test]
+    fn descriptor_stride_is_honored_and_entries_are_sorted() {
+        let raw = raw_map(48);
+        let mut output = [0u8; 3 * MEMORY_ENTRY_BYTES];
+        assert_eq!(
+            normalize_memory_map(&raw, 48, UEFI_DESCRIPTOR_VERSION, &mut output),
+            Ok(3)
+        );
+        assert_eq!(read_u64(&output, 0).unwrap(), 0x0020_0000);
+        assert_eq!(read_u64(&output, MEMORY_ENTRY_BYTES).unwrap(), 0x0040_0000);
+        assert_eq!(read_u32(&output, 24).unwrap(), MEMORY_LOADER_RESERVED);
+        assert_eq!(read_u32(&output, 28).unwrap(), 2);
+        assert_eq!(read_u64(&output, 16).unwrap(), 4);
+    }
+
+    #[test]
+    fn all_standard_uefi_types_have_a_fail_closed_mapping() {
+        let expected = [
+            MEMORY_RESERVED,
+            MEMORY_LOADER_RESERVED,
+            MEMORY_LOADER_RESERVED,
+            MEMORY_BOOT_RECLAIMABLE,
+            MEMORY_BOOT_RECLAIMABLE,
+            MEMORY_RUNTIME_CODE,
+            MEMORY_RUNTIME_DATA,
+            MEMORY_USABLE,
+            MEMORY_UNUSABLE,
+            MEMORY_ACPI_RECLAIMABLE,
+            MEMORY_ACPI_NVS,
+            MEMORY_MMIO,
+            MEMORY_MMIO,
+            MEMORY_RESERVED,
+            MEMORY_PERSISTENT,
+            MEMORY_RESERVED,
+        ];
+        for (source, expected) in expected.into_iter().enumerate() {
+            assert_eq!(normalized_kind(source as u32), Ok(expected));
+        }
+        assert_eq!(normalized_kind(16), Err(Error::MemoryType));
+    }
+
+    #[test]
+    fn malformed_descriptor_geometry_and_ranges_fail_closed() {
+        let mut scratch = [0u8; MEMORY_ENTRY_BYTES];
+        let raw = descriptor(7, 0x1000, 1, 0, 40);
+        assert_eq!(
+            normalize_memory_map(&raw, 39, 1, &mut scratch),
+            Err(Error::DescriptorSize)
+        );
+        assert_eq!(
+            normalize_memory_map(&raw, 40, 2, &mut scratch),
+            Err(Error::DescriptorVersion)
+        );
+        assert_eq!(
+            normalize_memory_map(&raw[..39], 40, 1, &mut scratch),
+            Err(Error::MemoryMapShape)
+        );
+        let raw = descriptor(7, 0x1001, 1, 0, 40);
+        assert_eq!(
+            normalize_memory_map(&raw, 40, 1, &mut scratch),
+            Err(Error::MemoryRange)
+        );
+        let raw = descriptor(7, 0x1000, 0, 0, 40);
+        assert_eq!(
+            normalize_memory_map(&raw, 40, 1, &mut scratch),
+            Err(Error::MemoryRange)
+        );
+    }
+
+    #[test]
+    fn overlap_and_capacity_fail_closed() {
+        let mut raw = descriptor(7, 0x1000, 2, 0, 40);
+        raw.extend(descriptor(2, 0x2000, 1, 0, 40));
+        let mut scratch = [0u8; 2 * MEMORY_ENTRY_BYTES];
+        assert_eq!(
+            normalize_memory_map(&raw, 40, 1, &mut scratch),
+            Err(Error::MemoryOverlap)
+        );
+        assert_eq!(
+            normalize_memory_map(&raw_map(40), 40, 1, &mut scratch),
+            Err(Error::ScratchCapacity)
+        );
+    }
+
+    #[test]
+    fn pre_exit_snapshot_with_framebuffer_is_exact_and_non_transferable() {
+        let raw = raw_map(48);
+        let mut scratch = [0u8; 3 * MEMORY_ENTRY_BYTES];
+        let mut output = [0u8; 2048];
+        let input = BuildInput {
+            raw_memory_map: &raw,
+            descriptor_size: 48,
+            descriptor_version: 1,
+            handoff_physical_base: 0x0030_0000,
+            kernel: kernel(),
+            framebuffer: Some(framebuffer()),
+        };
+        let (bytes, summary) = build_pre_exit(input, &mut scratch, &mut output).unwrap();
+        assert_eq!(summary.record_count, 4);
+        assert_eq!(summary.memory_entry_count, 3);
+        assert!(summary.framebuffer_present);
+        assert_eq!(summary.fnv1a64, fnv1a64(bytes));
+        let decoded = pbp1::decode(bytes).unwrap();
+        assert_eq!(validate_pre_exit_profile(&decoded), Ok(()));
+        assert_eq!(
+            pbp1::validate_kernel_entry_profile(&decoded),
+            Err(pbp1::Error::KernelProfile)
+        );
+    }
+
+    #[test]
+    fn framebuffer_is_optional_and_output_capacity_is_bounded() {
+        let raw = raw_map(40);
+        let mut scratch = [0u8; 3 * MEMORY_ENTRY_BYTES];
+        let mut output = [0u8; 2048];
+        let input = BuildInput {
+            raw_memory_map: &raw,
+            descriptor_size: 40,
+            descriptor_version: 1,
+            handoff_physical_base: 0x0030_0000,
+            kernel: kernel(),
+            framebuffer: None,
+        };
+        let (_, summary) = build_pre_exit(input, &mut scratch, &mut output).unwrap();
+        assert_eq!(summary.record_count, 3);
+        let mut tiny = [0u8; 128];
+        assert_eq!(
+            build_pre_exit(input, &mut scratch, &mut tiny).map(|_| ()),
+            Err(Error::OutputCapacity)
+        );
+    }
+}

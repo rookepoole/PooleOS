@@ -34,8 +34,8 @@ fn parse_request(value: &str) -> Result<String, &'static str> {
     }
     let bytes = decode_hex(encoded).map_err(|_| "transport")?;
     let mut storage = [poole_manifest::Artifact::EMPTY; poole_manifest::MAX_ARTIFACTS];
-    let manifest = poole_manifest::parse(&bytes, &mut storage[..capacity])
-        .map_err(|error| error.code())?;
+    let manifest =
+        poole_manifest::parse(&bytes, &mut storage[..capacity]).map_err(|error| error.code())?;
     let mut summary = format!(
         "OK;manifest_id={};slot={};manifest_version={};minimum_secure_version={};artifact_count={}",
         manifest.manifest_id,
@@ -64,9 +64,12 @@ fn parse_request(value: &str) -> Result<String, &'static str> {
 }
 
 fn digest_request(value: &str) -> Result<String, &'static str> {
-    let bytes = decode_hex(value.strip_prefix("D:").ok_or("transport")?)
-        .map_err(|_| "transport")?;
-    Ok(format!("OK;sha256={}", encode_digest(&poole_manifest::sha256(&bytes))))
+    let bytes =
+        decode_hex(value.strip_prefix("D:").ok_or("transport")?).map_err(|_| "transport")?;
+    Ok(format!(
+        "OK;sha256={}",
+        encode_digest(&poole_manifest::sha256(&bytes))
+    ))
 }
 
 fn main() {

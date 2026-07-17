@@ -1,4 +1,4 @@
-"""Deterministic PKLOAD2 manifest-driven media, oracles, markers, and claims."""
+"""Deterministic PKLOAD3 manifest/PBP1 media, oracles, markers, and claims."""
 
 from __future__ import annotations
 
@@ -10,11 +10,17 @@ import struct
 from pathlib import Path
 from typing import Any
 
-from runtime import native_boot_config, native_elf_loader, native_pooleboot, native_system_manifest
+from runtime import (
+    native_boot_config,
+    native_elf_loader,
+    native_live_boot_handoff,
+    native_pooleboot,
+    native_system_manifest,
+)
 from runtime.schema_validation import validate_json
 
 
-CONTRACT_ID = "PKLOAD2"
+CONTRACT_ID = "PKLOAD3"
 CONFIG_PATH = "EFI/POOLEOS/BOOT.CFG"
 MANIFEST_PATH = "EFI/POOLEOS/SYSTEM_A.PBM"
 KERNEL_PATH = "EFI/POOLEOS/KERNEL.ELF"
@@ -35,21 +41,27 @@ IMPLEMENTATION_INPUTS = (
     "native/boot/src/lib.rs",
     "native/boot/src/main.rs",
     "native/boot/src/kload.rs",
+    "native/boot/src/livehandoff.rs",
     "native/bootload/Cargo.toml",
     "native/bootload/src/lib.rs",
     "native/bootcfg/src/lib.rs",
     "native/manifest/Cargo.toml",
     "native/manifest/src/lib.rs",
     "native/elf/src/lib.rs",
+    "native/handoff/Cargo.toml",
+    "native/handoff/src/lib.rs",
     "native/kernel/Cargo.toml",
     "native/kernel/linker.ld",
     "native/kernel/manifest.pkm",
     "native/kernel/src/lib.rs",
     "native/kernel/src/main.rs",
+    "native/livehandoff/Cargo.toml",
+    "native/livehandoff/src/lib.rs",
     "runtime/native_boot_config.py",
     "runtime/native_elf_loader.py",
     "runtime/native_kernel_image.py",
     "runtime/native_kernel_load.py",
+    "runtime/native_live_boot_handoff.py",
     "runtime/native_pooleboot.py",
     "runtime/native_system_manifest.py",
     "specs/native-boot-digest-provider.json",
@@ -74,6 +86,13 @@ TRUE_CLAIMS = (
     "live_pkelf1_file_read",
     "pkelf1_relocated_into_firmware_pages",
     "pkelf1_mapping_plan_validated",
+    "kernel_pages_live_during_pbp1",
+    "live_pbp1_pre_exit_produced",
+    "live_pbp1_transcript_reconstructed",
+    "uefi_descriptor_stride_honored",
+    "pbp1_kernel_manifest_cross_bound",
+    "pbp1_logical_finalization_verified",
+    "all_pbp1_temporary_pools_released",
     "all_kload_resources_released",
     "two_qemu_runs_exact",
 )
@@ -85,7 +104,7 @@ FALSE_CLAIMS = (
     "kernel_pages_retained",
     "page_tables_activated",
     "kernel_entry_called",
-    "pbp1_handoff_produced",
+    "transferable_pbp1_handoff_produced",
     "exit_boot_services_called",
     "secure_boot_enforced",
     "measured_boot_performed",
@@ -135,11 +154,23 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-KLOAD-LOADED-HASH-DIVERGENCE",
     "NEG-N5-KLOAD-CLAIM-OVERREACH",
     "NEG-N5-KLOAD-STALE-BINDING",
+    "NEG-N5-PBP1-TRANSCRIPT-MISSING",
+    "NEG-N5-PBP1-TRANSCRIPT-DUPLICATE-BEGIN",
+    "NEG-N5-PBP1-TRANSCRIPT-OFFSET-GAP",
+    "NEG-N5-PBP1-TRANSCRIPT-NONHEX",
+    "NEG-N5-PBP1-TRANSCRIPT-BYTE-COUNT",
+    "NEG-N5-PBP1-TRANSCRIPT-MESSAGE-CRC",
+    "NEG-N5-PBP1-TRANSCRIPT-FNV",
+    "NEG-N5-PBP1-PREEXIT-TRANSFER-STATE",
+    "NEG-N5-PBP1-ARTIFACT-DIGEST-ORACLE",
+    "NEG-N5-PBP1-MARKER-BYTE-DIVERGENCE",
+    "NEG-N5-PBP1-MARKER-MEMORY-DIVERGENCE",
+    "NEG-N5-PBP1-RELEASE-COUNT",
 )
 
 MARKER_PATTERNS = (
     re.compile(r"^POOLEBOOT/0\.1 ENTRY$"),
-    re.compile(r"^POOLEBOOT/0\.1 SYSTEM_TABLE PASS revision=0x[0-9A-F]{8}$"),
+    re.compile(r"^POOLEBOOT/0\.1 SYSTEM_TABLE PASS revision=0x([0-9A-F]{8})$"),
     re.compile(r"^POOLEBOOT/0\.1 BOOT_SERVICES PASS$"),
     re.compile(r"^POOLEBOOT/0\.1 WATCHDOG status=0x[0-9A-F]{16}$"),
     re.compile(r"^POOLEBOOT/0\.1 CONSOLE (?:PASS|FALLBACK status=0x[0-9A-F]{16})$"),
@@ -164,6 +195,10 @@ MARKER_PATTERNS = (
         r"^POOLEBOOT/0\.1 KERNEL_MAP PASS mappings=([0-9]+) rx=([0-9]+) rw=([0-9]+) wx=([0-9]+) activation=not_performed$"
     ),
     re.compile(
+        r"^POOLEBOOT/0\.1 PBP1 PASS bytes=([0-9]+) records=([0-9]+) memory_entries=([0-9]+) framebuffer=([01]) artifacts=([0-9]+) descriptor_bytes=([0-9]+) map_attempts=([0-9]+) message_crc32=([0-9A-F]{8}) fnv1a64=([0-9A-F]{16}) state=pre_exit$"
+    ),
+    re.compile(r"^POOLEBOOT/0\.1 PBP1_RELEASE PASS pools_freed=([0-9]+) bytes_unchanged=([01])$"),
+    re.compile(
         r"^POOLEBOOT/0\.1 KERNEL_RELEASE PASS files_closed=([0-9]+) pools_freed=([0-9]+) pages_freed=([0-9]+)$"
     ),
     re.compile(
@@ -173,7 +208,7 @@ MARKER_PATTERNS = (
         r"^POOLEBOOT/0\.1 MEMORY_MAP PASS bytes=([0-9]+) descriptor_bytes=([0-9]+) descriptors=([0-9]+)$"
     ),
     re.compile(
-        r"^POOLEBOOT/0\.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted kernel=loaded_then_released mappings=planned_not_activated entry=not_called exit_boot_services=not_called$"
+        r"^POOLEBOOT/0\.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted kernel=loaded_then_released handoff=pre_exit_produced_then_released mappings=planned_not_activated entry=not_called exit_boot_services=not_called$"
     ),
     re.compile(r"^POOLEBOOT/0\.1 FRAME READY$"),
     re.compile(r"^POOLEBOOT/0\.1 RETURN EFI_SUCCESS$"),
@@ -181,7 +216,7 @@ MARKER_PATTERNS = (
 
 
 class KernelLoadError(RuntimeError):
-    """Raised when a PKLOAD2 proof input violates its bounded contract."""
+    """Raised when a PKLOAD3 proof input violates its bounded contract."""
 
 
 def canonical_config_bytes() -> bytes:
@@ -592,13 +627,13 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
 def validate_markers(markers: list[str]) -> dict[str, Any]:
     if len(markers) != len(MARKER_PATTERNS):
         raise KernelLoadError(
-            f"expected {len(MARKER_PATTERNS)} PKLOAD2 markers, observed {len(markers)}"
+            f"expected {len(MARKER_PATTERNS)} PKLOAD3 markers, observed {len(markers)}"
         )
     matches = []
     for index, (pattern, marker) in enumerate(zip(MARKER_PATTERNS, markers, strict=True)):
         match = pattern.fullmatch(marker)
         if match is None:
-            raise KernelLoadError(f"PKLOAD2 marker {index} violates its contract: {marker!r}")
+            raise KernelLoadError(f"PKLOAD3 marker {index} violates its contract: {marker!r}")
         matches.append(match)
 
     config_bytes = int(matches[7].group(1))
@@ -659,20 +694,40 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
     writable_executable = int(matches[12].group(4))
     if (mappings, read_execute, read_write, writable_executable) != (4, 1, 1, 0):
         raise KernelLoadError("PKLOAD2 mapping marker violates W^X or shape")
+    pbp1_bytes = int(matches[13].group(1))
+    pbp1_records = int(matches[13].group(2))
+    pbp1_memory_entries = int(matches[13].group(3))
+    pbp1_framebuffer = int(matches[13].group(4))
+    pbp1_artifacts = int(matches[13].group(5))
+    pbp1_descriptor_bytes = int(matches[13].group(6))
+    pbp1_map_attempts = int(matches[13].group(7))
     if (
-        int(matches[13].group(1)),
-        int(matches[13].group(2)),
-        int(matches[13].group(3)),
+        not 1 <= pbp1_bytes <= 1024 * 1024
+        or pbp1_records not in {3, 4}
+        or not 1 <= pbp1_memory_entries <= 16_384
+        or pbp1_framebuffer != 1
+        or pbp1_artifacts != 1
+        or not 40 <= pbp1_descriptor_bytes <= 256
+        or pbp1_descriptor_bytes % 8
+        or not 1 <= pbp1_map_attempts <= 4
+    ):
+        raise KernelLoadError("PKLOAD3 PBP1 marker violates its bounded pre-exit profile")
+    if (int(matches[14].group(1)), int(matches[14].group(2))) != (3, 1):
+        raise KernelLoadError("PKLOAD3 PBP1 release marker does not account for every pool")
+    if (
+        int(matches[15].group(1)),
+        int(matches[15].group(2)),
+        int(matches[15].group(3)),
     ) != (4, 3, pages):
-        raise KernelLoadError("PKLOAD2 release marker does not account for every resource")
+        raise KernelLoadError("PKLOAD3 release marker does not account for every resource")
 
     config_table_count = int(matches[5].group(1))
-    width = int(matches[14].group(1))
-    height = int(matches[14].group(2))
-    stride = int(matches[14].group(3))
-    map_bytes = int(matches[15].group(1))
-    descriptor_bytes = int(matches[15].group(2))
-    descriptor_count = int(matches[15].group(3))
+    width = int(matches[16].group(1))
+    height = int(matches[16].group(2))
+    stride = int(matches[16].group(3))
+    map_bytes = int(matches[17].group(1))
+    descriptor_bytes = int(matches[17].group(2))
+    descriptor_count = int(matches[17].group(3))
     if config_table_count > 256:
         raise KernelLoadError("configuration-table marker exceeds its bound")
     if width < 320 or height < 200 or stride < width or stride > 16_384:
@@ -684,6 +739,7 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
     return {
         "marker_count": len(markers),
         "ordered_contract_match": True,
+        "uefi_revision": int(matches[1].group(1), 16),
         "config_table_count": config_table_count,
         "boot_config": {
             "byte_count": config_bytes,
@@ -719,12 +775,26 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
             "writable_executable_count": writable_executable,
             "resources_released": True,
         },
+        "pbp1": {
+            "byte_count": pbp1_bytes,
+            "record_count": pbp1_records,
+            "memory_entry_count": pbp1_memory_entries,
+            "framebuffer_present": pbp1_framebuffer,
+            "artifact_count": pbp1_artifacts,
+            "descriptor_bytes": pbp1_descriptor_bytes,
+            "map_attempts": pbp1_map_attempts,
+            "message_crc32": matches[13].group(8),
+            "fnv1a64": matches[13].group(9),
+            "pre_exit": True,
+            "temporary_pools_released": True,
+            "bytes_unchanged": True,
+        },
         "gop": {
             "width": width,
             "height": height,
             "stride": stride,
-            "mode": int(matches[14].group(4)),
-            "format": matches[14].group(5),
+            "mode": int(matches[16].group(4)),
+            "format": matches[16].group(5),
         },
         "memory_map": {
             "byte_count": map_bytes,
@@ -737,6 +807,7 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
 def validate_oracle_binding(
     marker_summary: dict[str, Any],
     media_inspection: dict[str, Any],
+    pbp1_transcript: dict[str, Any] | None = None,
 ) -> None:
     config = marker_summary["boot_config"]
     media_config = media_inspection["config"]
@@ -783,6 +854,16 @@ def validate_oracle_binding(
         or kernel["loaded_fnv1a64"] != media_kernel["loaded_fnv1a64"]
     ):
         raise KernelLoadError("firmware PKELF1 markers diverge from the independent media oracle")
+    if pbp1_transcript is None:
+        raise KernelLoadError("live PBP1 transcript oracle is missing")
+    try:
+        native_live_boot_handoff.validate_oracle_binding(
+            pbp1_transcript,
+            marker_summary,
+            media_inspection,
+        )
+    except native_live_boot_handoff.LiveHandoffError as error:
+        raise KernelLoadError(str(error)) from error
 
 
 def expected_claims() -> dict[str, bool]:
@@ -795,7 +876,7 @@ def expected_claims() -> dict[str, bool]:
 def validate_claims(claims: dict[str, Any]) -> None:
     expected = expected_claims()
     if claims != expected:
-        raise KernelLoadError("PKLOAD2 claim set contains an omission or overreach")
+        raise KernelLoadError("PKLOAD3 claim set contains an omission or overreach")
 
 
 def canonical_json_bytes(value: object) -> bytes:
@@ -845,19 +926,19 @@ def _schema_errors(value: dict[str, Any], root: Path, schema_relative: str) -> l
 
 def contract_errors(contract: dict[str, Any], root: Path) -> list[str]:
     errors = _schema_errors(contract, root, CONTRACT_SCHEMA_RELATIVE)
-    if contract.get("phase_mapping") != ["N5.1", "N5.4", "N5.5"]:
-        errors.append("PKLOAD2 phase mapping changed")
+    if contract.get("phase_mapping") != ["N5.1", "N5.4", "N5.5", "N5.8"]:
+        errors.append("PKLOAD3 phase mapping changed")
     if contract.get("required_negative_controls") != list(NEGATIVE_CONTROL_IDS):
-        errors.append("PKLOAD2 negative-control register changed")
+        errors.append("PKLOAD3 negative-control register changed")
     if contract.get("required_marker_count") != len(MARKER_PATTERNS):
-        errors.append("PKLOAD2 marker count changed")
+        errors.append("PKLOAD3 marker count changed")
     media = contract.get("media", {})
     if (
         media.get("config_path") != CONFIG_PATH
         or media.get("manifest_path") != MANIFEST_PATH
         or media.get("kernel_path") != KERNEL_PATH
     ):
-        errors.append("PKLOAD2 development media paths changed")
+        errors.append("PKLOAD3 development media paths changed")
     try:
         validate_claims(contract.get("claims", {}))
     except KernelLoadError as error:
@@ -870,7 +951,7 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
     try:
         contract = read_json(root / CONTRACT_RELATIVE)
     except (OSError, json.JSONDecodeError, KernelLoadError) as error:
-        return errors + [f"PKLOAD2 contract cannot be read: {error}"]
+        return errors + [f"PKLOAD3 contract cannot be read: {error}"]
     errors.extend(contract_errors(contract, root))
     bindings = readiness.get("bindings", {})
     expected_bindings = {
@@ -893,7 +974,7 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
     if not isinstance(implementation, list) or [
         item.get("path") for item in implementation if isinstance(item, dict)
     ] != list(IMPLEMENTATION_INPUTS):
-        errors.append("PKLOAD2 implementation-input order changed")
+        errors.append("PKLOAD3 implementation-input order changed")
     else:
         for item, path in zip(implementation, IMPLEMENTATION_INPUTS, strict=True):
             if not binding_matches(item, root, path):
@@ -904,7 +985,7 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
     build = readiness.get("build", {})
     kernel_product = readiness.get("kernel_product", {})
     if not isinstance(files, list) or len(files) != 4:
-        errors.append("PKLOAD2 media must contain exactly four files")
+        errors.append("PKLOAD3 media must contain exactly four files")
     else:
         expected_paths = [
             native_pooleboot.FALLBACK_PATH,
@@ -913,7 +994,7 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
             KERNEL_PATH,
         ]
         if [item.get("path") for item in files] != expected_paths:
-            errors.append("PKLOAD2 media path order changed")
+            errors.append("PKLOAD3 media path order changed")
         if files[0].get("sha256") != build.get("sha256"):
             errors.append("embedded PooleBoot does not match its build")
         if files[2].get("sha256") != media.get("manifest", {}).get("sha256"):
@@ -923,37 +1004,37 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
     runs = readiness.get("execution", {}).get("runs", [])
     marker_sets: list[list[str]] = []
     if not isinstance(runs, list) or len(runs) != 2:
-        errors.append("PKLOAD2 execution must contain exactly two runs")
+        errors.append("PKLOAD3 execution must contain exactly two runs")
     else:
         for index, run in enumerate(runs):
             try:
                 summary = validate_markers(run.get("markers", []))
-                validate_oracle_binding(summary, media)
+                validate_oracle_binding(summary, media, run.get("pbp1_transcript"))
             except (KernelLoadError, KeyError, TypeError) as error:
-                errors.append(f"PKLOAD2 run {index} validation failed: {error}")
+                errors.append(f"PKLOAD3 run {index} validation failed: {error}")
                 continue
             marker_sets.append(run["markers"])
             if run.get("marker_summary") != summary:
-                errors.append(f"PKLOAD2 run {index} marker summary changed")
+                errors.append(f"PKLOAD3 run {index} marker summary changed")
             if run.get("marker_sha256") != sha256_bytes(
                 native_pooleboot.canonical_json_bytes(run["markers"])
             ):
-                errors.append(f"PKLOAD2 run {index} marker digest changed")
+                errors.append(f"PKLOAD3 run {index} marker digest changed")
     if len(marker_sets) == 2 and marker_sets[0] != marker_sets[1]:
-        errors.append("PKLOAD2 run markers differ")
+        errors.append("PKLOAD3 run markers differ")
 
     execution = readiness.get("execution", {})
     normalized = execution.get("normalized_command", [])
     if execution.get("normalized_command_sha256") != sha256_bytes(
         native_pooleboot.canonical_json_bytes(normalized)
     ):
-        errors.append("PKLOAD2 normalized command digest mismatch")
+        errors.append("PKLOAD3 normalized command digest mismatch")
 
     controls = readiness.get("negative_controls", [])
     if [item.get("id") for item in controls if isinstance(item, dict)] != list(
         NEGATIVE_CONTROL_IDS
     ):
-        errors.append("PKLOAD2 readiness negative-control register changed")
+        errors.append("PKLOAD3 readiness negative-control register changed")
     if any(
         item.get("expected") != "reject"
         or item.get("observed") != "reject"
@@ -961,13 +1042,13 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
         for item in controls
         if isinstance(item, dict)
     ):
-        errors.append("PKLOAD2 readiness has a failing negative control")
+        errors.append("PKLOAD3 readiness has a failing negative control")
     try:
         validate_claims(readiness.get("claims", {}))
     except KernelLoadError as error:
         errors.append(str(error))
     if readiness.get("claim_boundary") != contract.get("claim_boundary"):
-        errors.append("PKLOAD2 readiness claim boundary differs from its contract")
+        errors.append("PKLOAD3 readiness claim boundary differs from its contract")
     if native_pooleboot.ABSOLUTE_USER_PATH.search(json.dumps(readiness, ensure_ascii=True)):
-        errors.append("absolute user path leaked into PKLOAD2 readiness")
+        errors.append("absolute user path leaked into PKLOAD3 readiness")
     return errors

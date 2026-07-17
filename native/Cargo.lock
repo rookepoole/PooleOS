@@ -82,6 +82,13 @@ name = "poole-handoff"
 version = "0.0.0"
 
 [[package]]
+name = "poole-live-handoff"
+version = "0.0.0"
+dependencies = [
+ "poole-handoff",
+]
+
+[[package]]
 name = "poole-manifest"
 version = "0.0.0"
 dependencies = [
@@ -95,6 +102,8 @@ dependencies = [
  "poole-boot-config",
  "poole-bootload",
  "poole-elf",
+ "poole-handoff",
+ "poole-live-handoff",
 ]
 
 [[package]]
