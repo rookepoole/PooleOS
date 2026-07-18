@@ -4,15 +4,17 @@
 use core::cmp::Ordering;
 
 use poole_handoff::{
-    self as pbp1, ARTIFACT_ENTRY_BYTES, ARTIFACT_EXECUTABLE, ARTIFACT_HASH_VERIFIED,
-    ARTIFACT_KERNEL, BOOT_SERVICES_EXITED, CORE_BYTES, DEVELOPMENT_MODE, Encoder,
-    FRAMEBUFFER_BYTES, MEMORY_ACPI_NVS, MEMORY_ACPI_RECLAIMABLE, MEMORY_BOOT_RECLAIMABLE,
-    MEMORY_ENTRY_BYTES, MEMORY_LOADER_RESERVED, MEMORY_MMIO, MEMORY_PERSISTENT, MEMORY_RESERVED,
-    MEMORY_RUNTIME_CODE, MEMORY_RUNTIME_DATA, MEMORY_UNUSABLE, MEMORY_USABLE, RECORD_ARRAY,
-    RECORD_CORE, RECORD_FRAMEBUFFER, RECORD_LOADED_ARTIFACTS, RECORD_MEMORY_MAP, RECORD_REQUIRED,
+    self as pbp1, ARTIFACT_ENTRY_BYTES, ARTIFACT_EXECUTABLE, ARTIFACT_FIRMWARE_MANIFEST,
+    ARTIFACT_HASH_VERIFIED, ARTIFACT_INITIAL_SYSTEM, ARTIFACT_KERNEL, ARTIFACT_MICROCODE,
+    ARTIFACT_POLICY_BUNDLE, ARTIFACT_RECOVERY, ARTIFACT_SYMBOLS, BOOT_SERVICES_EXITED, CORE_BYTES,
+    DEVELOPMENT_MODE, Encoder, FRAMEBUFFER_BYTES, MEMORY_ACPI_NVS, MEMORY_ACPI_RECLAIMABLE,
+    MEMORY_BOOT_RECLAIMABLE, MEMORY_ENTRY_BYTES, MEMORY_LOADER_RESERVED, MEMORY_MMIO,
+    MEMORY_PERSISTENT, MEMORY_RESERVED, MEMORY_RUNTIME_CODE, MEMORY_RUNTIME_DATA, MEMORY_UNUSABLE,
+    MEMORY_USABLE, RECORD_ARRAY, RECORD_CORE, RECORD_FRAMEBUFFER, RECORD_LOADED_ARTIFACTS,
+    RECORD_MEMORY_MAP, RECORD_REQUIRED,
 };
 
-pub const CONTRACT_ID: &str = "PBLIVE2";
+pub const CONTRACT_ID: &str = "PBLIVE3";
 pub const UEFI_DESCRIPTOR_VERSION: u32 = 1;
 pub const MIN_DESCRIPTOR_BYTES: usize = 40;
 pub const MAX_DESCRIPTOR_BYTES: usize = 256;
@@ -20,6 +22,16 @@ pub const MAX_MEMORY_ENTRIES: usize = 16_384;
 pub const MAX_TRANSCRIPT_CHUNK_BYTES: usize = 64;
 pub const RETAINED_TABLE_PAGE_COUNT: u32 = 4;
 pub const RETAINED_STACK_PAGE_COUNT: u32 = 8;
+pub const PROFILE_ARTIFACT_COUNT: usize = 7;
+pub const PROFILE_ARTIFACT_ROLES: [u32; PROFILE_ARTIFACT_COUNT] = [
+    ARTIFACT_KERNEL,
+    ARTIFACT_INITIAL_SYSTEM,
+    ARTIFACT_RECOVERY,
+    ARTIFACT_SYMBOLS,
+    ARTIFACT_MICROCODE,
+    ARTIFACT_FIRMWARE_MANIFEST,
+    ARTIFACT_POLICY_BUNDLE,
+];
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Error {
@@ -35,6 +47,7 @@ pub enum Error {
     PreExitProfile,
     ExitProfile,
     RetainedRange,
+    ArtifactSet,
 }
 
 impl From<pbp1::Error> for Error {
@@ -72,6 +85,18 @@ pub struct FramebufferInput {
     pub reserved_mask: u32,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ArtifactInput {
+    pub role: u32,
+    pub flags: u32,
+    pub physical_base: u64,
+    pub physical_size: u64,
+    pub virtual_base: u64,
+    pub virtual_size: u64,
+    pub entry_virtual: u64,
+    pub sha256: [u8; 32],
+}
+
 #[derive(Clone, Copy)]
 pub struct BuildInput<'a> {
     pub raw_memory_map: &'a [u8],
@@ -79,6 +104,7 @@ pub struct BuildInput<'a> {
     pub descriptor_version: u32,
     pub handoff_physical_base: u64,
     pub kernel: KernelInput,
+    pub artifacts: [ArtifactInput; PROFILE_ARTIFACT_COUNT],
     pub framebuffer: Option<FramebufferInput>,
 }
 
@@ -100,6 +126,7 @@ pub struct ExitBuildInput<'a> {
     pub descriptor_version: u32,
     pub handoff_physical_base: u64,
     pub kernel: KernelInput,
+    pub artifacts: [ArtifactInput; PROFILE_ARTIFACT_COUNT],
     pub framebuffer: Option<FramebufferInput>,
     pub retained: RetainedInput,
 }
@@ -295,7 +322,64 @@ fn overlaps(first: u64, first_bytes: u64, second: u64, second_bytes: u64) -> boo
     first < second.saturating_add(second_bytes) && second < first.saturating_add(first_bytes)
 }
 
+fn validate_artifact_set(
+    kernel: KernelInput,
+    artifacts: &[ArtifactInput; PROFILE_ARTIFACT_COUNT],
+) -> Result<(), Error> {
+    for (index, artifact) in artifacts.iter().enumerate() {
+        let expected_flags = if index == 0 {
+            ARTIFACT_HASH_VERIFIED | ARTIFACT_EXECUTABLE
+        } else {
+            ARTIFACT_HASH_VERIFIED
+        };
+        if artifact.role != PROFILE_ARTIFACT_ROLES[index]
+            || artifact.flags != expected_flags
+            || artifact.physical_base == 0
+            || !artifact.physical_base.is_multiple_of(pbp1::PAGE_BYTES)
+            || artifact.physical_size == 0
+            || !artifact.physical_size.is_multiple_of(pbp1::PAGE_BYTES)
+            || artifact
+                .physical_base
+                .checked_add(artifact.physical_size)
+                .is_none()
+            || artifact.sha256.iter().all(|byte| *byte == 0)
+        {
+            return Err(Error::ArtifactSet);
+        }
+        if index == 0 {
+            if artifact.physical_base != kernel.physical_base
+                || artifact.physical_size != kernel.physical_size
+                || artifact.virtual_base != kernel.virtual_base
+                || artifact.virtual_size != kernel.virtual_size
+                || artifact.entry_virtual != kernel.entry_virtual
+                || artifact.sha256 != kernel.sha256
+            {
+                return Err(Error::ArtifactSet);
+            }
+        } else if artifact.virtual_base != 0
+            || artifact.virtual_size != 0
+            || artifact.entry_virtual != 0
+        {
+            return Err(Error::ArtifactSet);
+        }
+    }
+    for first in 0..artifacts.len() {
+        for second in first + 1..artifacts.len() {
+            if overlaps(
+                artifacts[first].physical_base,
+                artifacts[first].physical_size,
+                artifacts[second].physical_base,
+                artifacts[second].physical_size,
+            ) {
+                return Err(Error::ArtifactSet);
+            }
+        }
+    }
+    Ok(())
+}
+
 fn validate_retained_shape(input: &ExitBuildInput<'_>) -> Result<(), Error> {
+    validate_artifact_set(input.kernel, &input.artifacts)?;
     let retained = input.retained;
     if retained.page_table_root_physical == 0
         || !retained
@@ -319,21 +403,22 @@ fn validate_retained_shape(input: &ExitBuildInput<'_>) -> Result<(), Error> {
     {
         return Err(Error::RetainedRange);
     }
-    let ranges = [
-        (input.kernel.physical_base, input.kernel.physical_size),
-        (
-            retained.page_table_root_physical,
-            u64::from(retained.table_page_count) * pbp1::PAGE_BYTES,
-        ),
-        (
-            retained.stack_physical_base,
-            u64::from(retained.stack_page_count) * pbp1::PAGE_BYTES,
-        ),
-        (
-            input.handoff_physical_base,
-            u64::from(retained.handoff_capacity_bytes),
-        ),
-    ];
+    let mut ranges = [(0u64, 0u64); PROFILE_ARTIFACT_COUNT + 3];
+    for (index, artifact) in input.artifacts.iter().enumerate() {
+        ranges[index] = (artifact.physical_base, artifact.physical_size);
+    }
+    ranges[PROFILE_ARTIFACT_COUNT] = (
+        retained.page_table_root_physical,
+        u64::from(retained.table_page_count) * pbp1::PAGE_BYTES,
+    );
+    ranges[PROFILE_ARTIFACT_COUNT + 1] = (
+        retained.stack_physical_base,
+        u64::from(retained.stack_page_count) * pbp1::PAGE_BYTES,
+    );
+    ranges[PROFILE_ARTIFACT_COUNT + 2] = (
+        input.handoff_physical_base,
+        u64::from(retained.handoff_capacity_bytes),
+    );
     for (start, byte_count) in ranges {
         if start == 0 || byte_count == 0 || start.checked_add(byte_count).is_none() {
             return Err(Error::RetainedRange);
@@ -396,21 +481,22 @@ fn validate_retained_coverage(
     count: usize,
 ) -> Result<(), Error> {
     let retained = input.retained;
-    let ranges = [
-        (input.kernel.physical_base, input.kernel.physical_size),
-        (
-            retained.page_table_root_physical,
-            u64::from(retained.table_page_count) * pbp1::PAGE_BYTES,
-        ),
-        (
-            retained.stack_physical_base,
-            u64::from(retained.stack_page_count) * pbp1::PAGE_BYTES,
-        ),
-        (
-            input.handoff_physical_base,
-            u64::from(retained.handoff_capacity_bytes),
-        ),
-    ];
+    let mut ranges = [(0u64, 0u64); PROFILE_ARTIFACT_COUNT + 3];
+    for (index, artifact) in input.artifacts.iter().enumerate() {
+        ranges[index] = (artifact.physical_base, artifact.physical_size);
+    }
+    ranges[PROFILE_ARTIFACT_COUNT] = (
+        retained.page_table_root_physical,
+        u64::from(retained.table_page_count) * pbp1::PAGE_BYTES,
+    );
+    ranges[PROFILE_ARTIFACT_COUNT + 1] = (
+        retained.stack_physical_base,
+        u64::from(retained.stack_page_count) * pbp1::PAGE_BYTES,
+    );
+    ranges[PROFILE_ARTIFACT_COUNT + 2] = (
+        input.handoff_physical_base,
+        u64::from(retained.handoff_capacity_bytes),
+    );
     for (start, byte_count) in ranges {
         if !loader_range_covered(normalized, count, start, byte_count)? {
             return Err(Error::RetainedRange);
@@ -434,17 +520,49 @@ fn framebuffer_payload(input: FramebufferInput) -> [u8; FRAMEBUFFER_BYTES] {
     value
 }
 
-fn artifact_payload(input: KernelInput) -> [u8; ARTIFACT_ENTRY_BYTES] {
-    let mut value = [0u8; ARTIFACT_ENTRY_BYTES];
-    write_u32(&mut value, 0, ARTIFACT_KERNEL);
-    write_u32(&mut value, 4, ARTIFACT_HASH_VERIFIED | ARTIFACT_EXECUTABLE);
-    write_u64(&mut value, 8, input.physical_base);
-    write_u64(&mut value, 16, input.physical_size);
-    write_u64(&mut value, 24, input.virtual_base);
-    write_u64(&mut value, 32, input.virtual_size);
-    write_u64(&mut value, 40, input.entry_virtual);
-    value[48..80].copy_from_slice(&input.sha256);
+fn artifact_payload(
+    input: &[ArtifactInput; PROFILE_ARTIFACT_COUNT],
+) -> [u8; ARTIFACT_ENTRY_BYTES * PROFILE_ARTIFACT_COUNT] {
+    let mut value = [0u8; ARTIFACT_ENTRY_BYTES * PROFILE_ARTIFACT_COUNT];
+    for (index, artifact) in input.iter().enumerate() {
+        let base = index * ARTIFACT_ENTRY_BYTES;
+        write_u32(&mut value, base, artifact.role);
+        write_u32(&mut value, base + 4, artifact.flags);
+        write_u64(&mut value, base + 8, artifact.physical_base);
+        write_u64(&mut value, base + 16, artifact.physical_size);
+        write_u64(&mut value, base + 24, artifact.virtual_base);
+        write_u64(&mut value, base + 32, artifact.virtual_size);
+        write_u64(&mut value, base + 40, artifact.entry_virtual);
+        value[base + 48..base + 80].copy_from_slice(&artifact.sha256);
+    }
     value
+}
+
+fn validate_profile_artifact_record(
+    artifacts: &pbp1::Record<'_>,
+    profile_error: Error,
+) -> Result<(), Error> {
+    if artifacts.descriptor.element_count != PROFILE_ARTIFACT_COUNT {
+        return Err(profile_error);
+    }
+    for (index, role) in PROFILE_ARTIFACT_ROLES.iter().copied().enumerate() {
+        let base = index * ARTIFACT_ENTRY_BYTES;
+        let expected_flags = if index == 0 {
+            ARTIFACT_HASH_VERIFIED | ARTIFACT_EXECUTABLE
+        } else {
+            ARTIFACT_HASH_VERIFIED
+        };
+        if read_u32(artifacts.payload, base)? != role
+            || read_u32(artifacts.payload, base + 4)? != expected_flags
+            || (index != 0
+                && (read_u64(artifacts.payload, base + 24)? != 0
+                    || read_u64(artifacts.payload, base + 32)? != 0
+                    || read_u64(artifacts.payload, base + 40)? != 0))
+        {
+            return Err(profile_error);
+        }
+    }
+    Ok(())
 }
 
 pub fn validate_pre_exit_profile(handoff: &pbp1::Handoff<'_>) -> Result<(), Error> {
@@ -474,12 +592,7 @@ pub fn validate_pre_exit_profile(handoff: &pbp1::Handoff<'_>) -> Result<(), Erro
     let artifacts = handoff
         .record(RECORD_LOADED_ARTIFACTS)
         .ok_or(Error::PreExitProfile)?;
-    if artifacts.descriptor.element_count != 1
-        || read_u32(artifacts.payload, 0)? != ARTIFACT_KERNEL
-        || read_u32(artifacts.payload, 4)? != ARTIFACT_HASH_VERIFIED | ARTIFACT_EXECUTABLE
-    {
-        return Err(Error::PreExitProfile);
-    }
+    validate_profile_artifact_record(&artifacts, Error::PreExitProfile)?;
     if pbp1::validate_kernel_entry_profile(handoff).is_ok() {
         return Err(Error::PreExitProfile);
     }
@@ -517,11 +630,8 @@ pub fn validate_exit_development_profile(handoff: &pbp1::Handoff<'_>) -> Result<
     let artifacts = handoff
         .record(RECORD_LOADED_ARTIFACTS)
         .ok_or(Error::ExitProfile)?;
-    if artifacts.descriptor.element_count != 1
-        || read_u32(artifacts.payload, 0)? != ARTIFACT_KERNEL
-        || read_u32(artifacts.payload, 4)? != ARTIFACT_HASH_VERIFIED | ARTIFACT_EXECUTABLE
-        || pbp1::validate_kernel_entry_profile(handoff).is_ok()
-    {
+    validate_profile_artifact_record(&artifacts, Error::ExitProfile)?;
+    if pbp1::validate_kernel_entry_profile(handoff).is_ok() {
         return Err(Error::ExitProfile);
     }
     Ok(())
@@ -532,6 +642,7 @@ pub fn build_pre_exit<'a>(
     normalized_memory: &mut [u8],
     output: &'a mut [u8],
 ) -> Result<(&'a [u8], Summary), Error> {
+    validate_artifact_set(input.kernel, &input.artifacts)?;
     if input.handoff_physical_base == 0
         || !input
             .handoff_physical_base
@@ -547,17 +658,18 @@ pub fn build_pre_exit<'a>(
     )?;
     let memory_bytes = memory_count * MEMORY_ENTRY_BYTES;
     let record_count = if input.framebuffer.is_some() { 4 } else { 3 };
-    let mut lengths = [CORE_BYTES, memory_bytes, ARTIFACT_ENTRY_BYTES, 0];
+    let artifact_bytes = ARTIFACT_ENTRY_BYTES * PROFILE_ARTIFACT_COUNT;
+    let mut lengths = [CORE_BYTES, memory_bytes, artifact_bytes, 0];
     if input.framebuffer.is_some() {
         lengths[2] = FRAMEBUFFER_BYTES;
-        lengths[3] = ARTIFACT_ENTRY_BYTES;
+        lengths[3] = artifact_bytes;
     }
     let total_bytes = pbp1::encoded_size(record_count, &lengths[..record_count])?;
     if output.len() < total_bytes {
         return Err(Error::OutputCapacity);
     }
     let core = core_payload(&input, total_bytes);
-    let artifact = artifact_payload(input.kernel);
+    let artifacts = artifact_payload(&input.artifacts);
     let mut encoder = Encoder::new(&mut output[..total_bytes], record_count, 0, 0)?;
     encoder.push(RECORD_CORE, 1, RECORD_REQUIRED, CORE_BYTES, 1, &core)?;
     encoder.push(
@@ -577,8 +689,8 @@ pub fn build_pre_exit<'a>(
         1,
         RECORD_REQUIRED | RECORD_ARRAY,
         ARTIFACT_ENTRY_BYTES,
-        1,
-        &artifact,
+        PROFILE_ARTIFACT_COUNT,
+        &artifacts,
     )?;
     let bytes = encoder.finish()?;
     let handoff = pbp1::decode(bytes)?;
@@ -588,7 +700,7 @@ pub fn build_pre_exit<'a>(
         record_count,
         memory_entry_count: memory_count,
         framebuffer_present: input.framebuffer.is_some(),
-        artifact_count: 1,
+        artifact_count: PROFILE_ARTIFACT_COUNT,
         message_crc32: read_u32(bytes, 48)?,
         fnv1a64: fnv1a64(bytes),
     };
@@ -610,10 +722,11 @@ pub fn build_exit_candidate<'a>(
     let memory_bytes = memory_count * MEMORY_ENTRY_BYTES;
     validate_retained_coverage(&input, &normalized_memory[..memory_bytes], memory_count)?;
     let record_count = if input.framebuffer.is_some() { 4 } else { 3 };
-    let mut lengths = [CORE_BYTES, memory_bytes, ARTIFACT_ENTRY_BYTES, 0];
+    let artifact_bytes = ARTIFACT_ENTRY_BYTES * PROFILE_ARTIFACT_COUNT;
+    let mut lengths = [CORE_BYTES, memory_bytes, artifact_bytes, 0];
     if input.framebuffer.is_some() {
         lengths[2] = FRAMEBUFFER_BYTES;
-        lengths[3] = ARTIFACT_ENTRY_BYTES;
+        lengths[3] = artifact_bytes;
     }
     let total_bytes = pbp1::encoded_size(record_count, &lengths[..record_count])?;
     if output.len() < total_bytes
@@ -624,7 +737,7 @@ pub fn build_exit_candidate<'a>(
         return Err(Error::OutputCapacity);
     }
     let core = exit_core_payload(&input, total_bytes);
-    let artifact = artifact_payload(input.kernel);
+    let artifacts = artifact_payload(&input.artifacts);
     let mut encoder = Encoder::new(&mut output[..total_bytes], record_count, 0, 0)?;
     encoder.push(RECORD_CORE, 1, RECORD_REQUIRED, CORE_BYTES, 1, &core)?;
     encoder.push(
@@ -644,8 +757,8 @@ pub fn build_exit_candidate<'a>(
         1,
         RECORD_REQUIRED | RECORD_ARRAY,
         ARTIFACT_ENTRY_BYTES,
-        1,
-        &artifact,
+        PROFILE_ARTIFACT_COUNT,
+        &artifacts,
     )?;
     let bytes = encoder.finish()?;
     let handoff = pbp1::decode(bytes)?;
@@ -655,7 +768,7 @@ pub fn build_exit_candidate<'a>(
         record_count,
         memory_entry_count: memory_count,
         framebuffer_present: input.framebuffer.is_some(),
-        artifact_count: 1,
+        artifact_count: PROFILE_ARTIFACT_COUNT,
         message_crc32: read_u32(bytes, 48)?,
         fnv1a64: fnv1a64(bytes),
     };
@@ -696,13 +809,13 @@ mod tests {
 
     fn raw_map(stride: usize) -> std::vec::Vec<u8> {
         let mut value = descriptor(7, 0x0040_0000, 16, 8, stride);
-        value.extend(descriptor(2, 0x0020_0000, 32, 4, stride));
+        value.extend(descriptor(2, 0x0020_0000, 38, 4, stride));
         value.extend(descriptor(11, 0x8000_0000, 256, 1, stride));
         value
     }
 
     fn exit_raw_map(stride: usize) -> std::vec::Vec<u8> {
-        let mut value = descriptor(2, 0x0020_0000, 32, 4, stride);
+        let mut value = descriptor(2, 0x0020_0000, 38, 4, stride);
         value.extend(descriptor(2, 0x0030_0000, 4, 4, stride));
         value.extend(descriptor(2, 0x0040_0000, 8, 4, stride));
         value.extend(descriptor(2, 0x0050_0000, 256, 4, stride));
@@ -724,6 +837,33 @@ mod tests {
             selected_entry: 1,
             uefi_revision: 0x0002_0064,
         }
+    }
+
+    fn artifacts() -> [ArtifactInput; PROFILE_ARTIFACT_COUNT] {
+        let kernel = kernel();
+        let mut values = [ArtifactInput {
+            role: ARTIFACT_KERNEL,
+            flags: ARTIFACT_HASH_VERIFIED | ARTIFACT_EXECUTABLE,
+            physical_base: kernel.physical_base,
+            physical_size: kernel.physical_size,
+            virtual_base: kernel.virtual_base,
+            virtual_size: kernel.virtual_size,
+            entry_virtual: kernel.entry_virtual,
+            sha256: kernel.sha256,
+        }; PROFILE_ARTIFACT_COUNT];
+        for index in 1..PROFILE_ARTIFACT_COUNT {
+            values[index] = ArtifactInput {
+                role: PROFILE_ARTIFACT_ROLES[index],
+                flags: ARTIFACT_HASH_VERIFIED,
+                physical_base: 0x0022_0000 + (index as u64 - 1) * pbp1::PAGE_BYTES,
+                physical_size: pbp1::PAGE_BYTES,
+                virtual_base: 0,
+                virtual_size: 0,
+                entry_virtual: 0,
+                sha256: [PROFILE_ARTIFACT_ROLES[index] as u8; 32],
+            };
+        }
+        values
     }
 
     fn framebuffer() -> FramebufferInput {
@@ -848,12 +988,14 @@ mod tests {
             descriptor_version: 1,
             handoff_physical_base: 0x0030_0000,
             kernel: kernel(),
+            artifacts: artifacts(),
             framebuffer: Some(framebuffer()),
         };
         let (bytes, summary) = build_pre_exit(input, &mut scratch, &mut output).unwrap();
         assert_eq!(summary.record_count, 4);
         assert_eq!(summary.memory_entry_count, 3);
         assert!(summary.framebuffer_present);
+        assert_eq!(summary.artifact_count, PROFILE_ARTIFACT_COUNT);
         assert_eq!(summary.fnv1a64, fnv1a64(bytes));
         let decoded = pbp1::decode(bytes).unwrap();
         assert_eq!(validate_pre_exit_profile(&decoded), Ok(()));
@@ -874,6 +1016,7 @@ mod tests {
             descriptor_version: 1,
             handoff_physical_base: 0x0030_0000,
             kernel: kernel(),
+            artifacts: artifacts(),
             framebuffer: None,
         };
         let (_, summary) = build_pre_exit(input, &mut scratch, &mut output).unwrap();
@@ -896,12 +1039,14 @@ mod tests {
             descriptor_version: 1,
             handoff_physical_base: 0x0050_0000,
             kernel: kernel(),
+            artifacts: artifacts(),
             framebuffer: Some(framebuffer()),
             retained: retained(),
         };
         let (bytes, summary) = build_exit_candidate(input, &mut scratch, &mut output).unwrap();
         assert_eq!(summary.record_count, 4);
         assert_eq!(summary.memory_entry_count, 5);
+        assert_eq!(summary.artifact_count, PROFILE_ARTIFACT_COUNT);
         let decoded = pbp1::decode(bytes).unwrap();
         assert_eq!(validate_exit_development_profile(&decoded), Ok(()));
         let core = decoded.core().unwrap();
@@ -930,6 +1075,7 @@ mod tests {
             descriptor_version: 1,
             handoff_physical_base: 0x0050_0000,
             kernel: kernel(),
+            artifacts: artifacts(),
             framebuffer: Some(framebuffer()),
             retained: retained(),
         };
@@ -946,6 +1092,16 @@ mod tests {
         assert_eq!(
             build_exit_candidate(input, &mut scratch, &mut output).map(|_| ()),
             Err(Error::RetainedRange)
+        );
+        let mut overlapping_artifacts = artifacts();
+        overlapping_artifacts[2].physical_base = overlapping_artifacts[1].physical_base;
+        let input = ExitBuildInput {
+            artifacts: overlapping_artifacts,
+            ..input
+        };
+        assert_eq!(
+            build_exit_candidate(input, &mut scratch, &mut output).map(|_| ()),
+            Err(Error::ArtifactSet)
         );
     }
 }

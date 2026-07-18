@@ -11,6 +11,7 @@ from runtime import native_live_boot_handoff
 KERNEL_PHYSICAL = 0x0200_0000
 KERNEL_SIZE = 0x0003_0000
 KERNEL_VIRTUAL = 0xFFFF_FFFF_8000_0000
+ARTIFACT_PHYSICAL = 0x0210_0000
 ROOT_PHYSICAL = 0x0300_0000
 STACK_PHYSICAL = 0x0400_0000
 STACK_TOP = KERNEL_VIRTUAL + 57 * 4096
@@ -21,6 +22,7 @@ HANDOFF_VIRTUAL = KERNEL_VIRTUAL + 64 * 4096
 def exited_handoff() -> bytes:
     memory_entries = (
         (KERNEL_PHYSICAL, 48, 0, pbp1.MEMORY_LOADER_RESERVED, 2, 0),
+        (ARTIFACT_PHYSICAL, 6, 0, pbp1.MEMORY_LOADER_RESERVED, 2, 0),
         (ROOT_PHYSICAL, 4, 0, pbp1.MEMORY_LOADER_RESERVED, 2, 0),
         (STACK_PHYSICAL, 8, 0, pbp1.MEMORY_LOADER_RESERVED, 2, 0),
         (HANDOFF_PHYSICAL, 256, 0, pbp1.MEMORY_LOADER_RESERVED, 2, 0),
@@ -41,17 +43,34 @@ def exited_handoff() -> bytes:
         0xFF00_0000,
     )
     digest = hashlib.sha256(b"PKLOAD5 kernel").digest()
-    artifact = struct.pack(
-        "<IIQQQQQ32s",
-        pbp1.ARTIFACT_KERNEL,
-        pbp1.ARTIFACT_HASH_VERIFIED | pbp1.ARTIFACT_EXECUTABLE,
-        KERNEL_PHYSICAL,
-        KERNEL_SIZE,
-        KERNEL_VIRTUAL,
-        KERNEL_SIZE,
-        KERNEL_VIRTUAL + 0x4000,
-        digest,
-    )
+    artifacts = [
+        struct.pack(
+            "<IIQQQQQ32s",
+            pbp1.ARTIFACT_KERNEL,
+            pbp1.ARTIFACT_HASH_VERIFIED | pbp1.ARTIFACT_EXECUTABLE,
+            KERNEL_PHYSICAL,
+            KERNEL_SIZE,
+            KERNEL_VIRTUAL,
+            KERNEL_SIZE,
+            KERNEL_VIRTUAL + 0x4000,
+            digest,
+        )
+    ]
+    for index, role in enumerate(native_live_boot_handoff.PROFILE_ARTIFACT_ROLES[1:]):
+        artifacts.append(
+            struct.pack(
+                "<IIQQQQQ32s",
+                role,
+                pbp1.ARTIFACT_HASH_VERIFIED,
+                ARTIFACT_PHYSICAL + index * pbp1.PAGE_BYTES,
+                pbp1.PAGE_BYTES,
+                0,
+                0,
+                0,
+                hashlib.sha256(f"PBART1 role {role}".encode("ascii")).digest(),
+            )
+        )
+    artifact = b"".join(artifacts)
     total = pbp1.encoded_size((pbp1.CORE_BYTES, len(memory), len(framebuffer), len(artifact)))
     core_values = (
         pbp1.DEVELOPMENT_MODE | pbp1.BOOT_SERVICES_EXITED,
@@ -95,7 +114,7 @@ def exited_handoff() -> bytes:
                 "record_type": pbp1.RECORD_LOADED_ARTIFACTS,
                 "flags": pbp1.RECORD_REQUIRED | pbp1.RECORD_ARRAY,
                 "element_size": pbp1.ARTIFACT_ENTRY_BYTES,
-                "element_count": 1,
+                "element_count": len(artifacts),
                 "payload": artifact,
             },
         )
@@ -108,11 +127,12 @@ class NativeLiveBootHandoffTests(unittest.TestCase):
         transcript = native_live_boot_handoff.extract_transcript(
             native_live_boot_handoff.format_transcript(data)
         )
-        self.assertEqual("PBLIVE2", transcript.summary["contract_id"])
+        self.assertEqual("PBLIVE3", transcript.summary["contract_id"])
         self.assertTrue(transcript.summary["boot_services_exited"])
         self.assertTrue(transcript.summary["exit_development_profile_validated"])
         self.assertFalse(transcript.summary["transferable"])
-        self.assertEqual(5, transcript.summary["memory_entry_count"])
+        self.assertEqual(6, transcript.summary["memory_entry_count"])
+        self.assertEqual(7, transcript.summary["artifact_count"])
 
     def test_exited_profile_rejects_transfer_overclaim(self) -> None:
         handoff = pbp1.decode(exited_handoff())
@@ -150,7 +170,7 @@ class NativeLiveBootHandoffTests(unittest.TestCase):
         entries = summary["memory_entries"]
         self.assertTrue(native_live_boot_handoff._loader_range_covered(entries, STACK_PHYSICAL, 8 * 4096))
         hostile = [dict(item) for item in entries]
-        hostile[2]["kind"] = pbp1.MEMORY_USABLE
+        hostile[3]["kind"] = pbp1.MEMORY_USABLE
         self.assertFalse(native_live_boot_handoff._loader_range_covered(hostile, STACK_PHYSICAL, 8 * 4096))
         self.assertFalse(native_live_boot_handoff._loader_range_covered(entries, 0x0600_0000, 4096))
 

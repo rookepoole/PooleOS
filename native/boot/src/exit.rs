@@ -74,6 +74,7 @@ fn live_failure(stage: &'static str, error: live::Error) -> Failure {
         live::Error::PreExitProfile => "pre_exit_profile",
         live::Error::ExitProfile => "exit_profile",
         live::Error::RetainedRange => "retained_range",
+        live::Error::ArtifactSet => "artifact_set",
     };
     Failure {
         stage,
@@ -427,6 +428,24 @@ pub(super) fn exit_and_stop(
             ));
         }
     };
+    let artifact_inputs = match livehandoff::artifacts(kernel) {
+        Ok(value) => value,
+        Err(error) => {
+            let failure = live_failure("exit.artifact_set", error);
+            return Err(release_pre_attempt(
+                boot_services,
+                calls,
+                PreAttemptResources {
+                    retained: Some(retained),
+                    stack,
+                    handoff,
+                    normalized,
+                    raw,
+                },
+                failure,
+            ));
+        }
+    };
     let mut lifecycle = Lifecycle::new();
     for _ in 0..contract::MAX_EXIT_ATTEMPTS {
         let mut map_size = contract::RAW_MEMORY_MAP_CAPACITY;
@@ -501,6 +520,7 @@ pub(super) fn exit_and_stop(
             descriptor_version,
             handoff_physical_base: handoff,
             kernel: kernel_input,
+            artifacts: artifact_inputs,
             framebuffer: livehandoff::framebuffer(gop),
             retained: RetainedInput {
                 page_table_root_physical: retained.table_physical_base,
@@ -619,15 +639,16 @@ pub(super) fn exit_and_stop(
             final_map.descriptor_count(),
         ));
         diagnostic(format_args!(
-            "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit={} kernel_pages={} table_pages={} stack_pages={} handoff_pages={}\n",
+            "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit={} kernel_pages={} artifact_pages={} table_pages={} stack_pages={} handoff_pages={}\n",
             lifecycle.firmware_calls_after_exit(),
             kernel.page_count,
+            kernel.artifact_page_count,
             retained.summary.table_page_count,
             retained_plan.stack_page_count,
             retained_plan.handoff_page_count,
         ));
         diagnostic(format_args!(
-            "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted kernel=retained handoff=retained mappings=retained entry=not_called exit_boot_services=called transfer=stopped\n"
+            "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=not_applied kernel=retained handoff=retained mappings=retained entry=not_called exit_boot_services=called transfer=stopped\n"
         ));
         diagnostic(format_args!("POOLEBOOT/0.1 STOP BEFORE TRANSFER\n"));
         stop_before_transfer();

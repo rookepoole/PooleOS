@@ -134,8 +134,33 @@ pub(super) struct Summary {
     pub kernel_virtual_base: u64,
     pub kernel_entry_virtual: u64,
     pub kernel_sha256: [u8; 32],
+    pub artifacts: [LoadedArtifactSummary; bootload::AUXILIARY_ARTIFACT_COUNT],
+    pub artifact_file_bytes: usize,
+    pub artifact_page_count: usize,
+    pub artifact_set_fnv1a64: u64,
     pub closed_file_count: usize,
     pub freed_pool_count: usize,
+}
+
+#[derive(Clone, Copy)]
+pub(super) struct LoadedArtifactSummary {
+    pub role: bootload::artifact::Role,
+    pub physical_base: u64,
+    pub page_count: usize,
+    pub file_bytes: usize,
+    pub sha256: [u8; 32],
+    pub loaded_fnv1a64: u64,
+}
+
+impl LoadedArtifactSummary {
+    const EMPTY: Self = Self {
+        role: bootload::artifact::Role::InitialSystem,
+        physical_base: 0,
+        page_count: 0,
+        file_bytes: 0,
+        sha256: [0; 32],
+        loaded_fnv1a64: 0,
+    };
 }
 
 fn firmware_failure(stage: &'static str, status: EfiStatus) -> Failure {
@@ -344,54 +369,81 @@ fn free_pool_and_close_root(
         .unwrap_or(failure)
 }
 
-fn release_kernel_resources(
+fn release_loaded_page_ranges(
     calls: Calls,
-    physical_base: u64,
-    page_count: usize,
-    kernel_pool: *mut c_void,
+    kernel_physical_base: u64,
+    kernel_page_count: usize,
+    artifacts: &[LoadedArtifactSummary; bootload::AUXILIARY_ARTIFACT_COUNT],
+) -> Result<(), Failure> {
+    let mut failure = None;
+    for artifact in artifacts.iter().rev() {
+        if artifact.page_count == 0 {
+            continue;
+        }
+        let status = (calls.free_pages)(artifact.physical_base, artifact.page_count);
+        if status != EFI_SUCCESS && failure.is_none() {
+            failure = Some(firmware_failure("kload.artifact.pages_free", status));
+        }
+    }
+    if kernel_page_count != 0 {
+        let status = (calls.free_pages)(kernel_physical_base, kernel_page_count);
+        if status != EFI_SUCCESS && failure.is_none() {
+            failure = Some(firmware_failure("kload.kernel.pages_free", status));
+        }
+    }
+    failure.map_or(Ok(()), Err)
+}
+
+fn cleanup_loaded_transaction(
+    calls: Calls,
+    kernel_physical_base: u64,
+    kernel_page_count: usize,
+    artifacts: &[LoadedArtifactSummary; bootload::AUXILIARY_ARTIFACT_COUNT],
+    pool: *mut c_void,
     root: *mut EfiFileProtocol,
 ) -> Result<(), Failure> {
-    let page_status = (calls.free_pages)(physical_base, page_count);
-    let page_result = if page_status == EFI_SUCCESS {
+    let pool_result = if pool.is_null() {
         Ok(())
     } else {
-        Err(firmware_failure("kload.kernel.pages_free", page_status))
+        free_pool(calls, pool, "kload.transaction.pool_cleanup")
     };
-    let pool_result = free_pool(calls, kernel_pool, "kload.kernel.pool_free");
-    let root_result = close_file(root, "kload.root.close");
-    page_result
+    let page_result =
+        release_loaded_page_ranges(calls, kernel_physical_base, kernel_page_count, artifacts);
+    let root_result = close_file(root, "kload.root.close_cleanup");
+    pool_result
         .err()
-        .or_else(|| pool_result.err())
+        .or_else(|| page_result.err())
         .or_else(|| root_result.err())
         .map_or(Ok(()), Err)
 }
 
-fn release_file_resources_or_kernel(
+fn transaction_failure(
     calls: Calls,
-    physical_base: u64,
-    page_count: usize,
-    kernel_pool: *mut c_void,
+    kernel_physical_base: u64,
+    kernel_page_count: usize,
+    artifacts: &[LoadedArtifactSummary; bootload::AUXILIARY_ARTIFACT_COUNT],
+    pool: *mut c_void,
     root: *mut EfiFileProtocol,
-) -> Result<(), Failure> {
-    let pool_result = free_pool(calls, kernel_pool, "kload.kernel.pool_free");
-    let root_result = close_file(root, "kload.root.close");
-    if pool_result.is_ok() && root_result.is_ok() {
-        return Ok(());
+    primary: Failure,
+) -> Failure {
+    cleanup_loaded_transaction(
+        calls,
+        kernel_physical_base,
+        kernel_page_count,
+        artifacts,
+        pool,
+        root,
+    )
+    .err()
+    .unwrap_or(primary)
+}
+
+fn fnv1a64_extend(mut value: u64, bytes: &[u8]) -> u64 {
+    for byte in bytes {
+        value ^= u64::from(*byte);
+        value = value.wrapping_mul(0x0000_0100_0000_01b3);
     }
-    let page_status = (calls.free_pages)(physical_base, page_count);
-    let page_result = if page_status == EFI_SUCCESS {
-        Ok(())
-    } else {
-        Err(firmware_failure(
-            "kload.kernel.pages_cleanup_after_file_release",
-            page_status,
-        ))
-    };
-    page_result
-        .err()
-        .or_else(|| pool_result.err())
-        .or_else(|| root_result.err())
-        .map_or(Ok(()), Err)
+    value
 }
 
 pub(super) fn load_manifest_kernel(
@@ -575,6 +627,7 @@ pub(super) fn load_manifest_kernel(
             ));
         }
     };
+    let mut artifacts = [LoadedArtifactSummary::EMPTY; bootload::AUXILIARY_ARTIFACT_COUNT];
     let mut physical_base = 0u64;
     let allocate_status = (calls.allocate_pages)(
         EFI_ALLOCATE_ANY_PAGES,
@@ -597,28 +650,28 @@ pub(super) fn load_manifest_kernel(
         Some(value) => value,
         None => {
             let failure = contract_failure("kload.kernel.pages_shape", bootload::Error::PageCount);
-            return Err(release_kernel_resources(
+            return Err(transaction_failure(
                 calls,
                 physical_base,
                 allocation.page_count,
+                &artifacts,
                 kernel_file.pointer,
                 root,
-            )
-            .err()
-            .unwrap_or(failure));
+                failure,
+            ));
         }
     };
-    if physical_base > usize::MAX as u64 {
+    if physical_base == 0 || physical_base > usize::MAX as u64 {
         let failure = contract_failure("kload.kernel.pages_address", bootload::Error::AddressRange);
-        return Err(release_kernel_resources(
+        return Err(transaction_failure(
             calls,
             physical_base,
             allocation.page_count,
+            &artifacts,
             kernel_file.pointer,
             root,
-        )
-        .err()
-        .unwrap_or(failure));
+            failure,
+        ));
     }
     let destination =
         unsafe { from_raw_parts_mut(physical_base as usize as *mut u8, allocation_bytes) };
@@ -627,19 +680,252 @@ pub(super) fn load_manifest_kernel(
             Ok(loaded) => loaded,
             Err(error) => {
                 let failure = contract_failure("kload.kernel.load", error);
-                return Err(release_kernel_resources(
+                return Err(transaction_failure(
                     calls,
                     physical_base,
                     allocation.page_count,
+                    &artifacts,
                     kernel_file.pointer,
                     root,
-                )
-                .err()
-                .unwrap_or(failure));
+                    failure,
+                ));
             }
         };
+    if let Err(failure) = free_pool(calls, kernel_file.pointer, "kload.kernel.pool_free") {
+        return Err(transaction_failure(
+            calls,
+            physical_base,
+            allocation.page_count,
+            &artifacts,
+            null_mut(),
+            root,
+            failure,
+        ));
+    }
 
-    let summary = Summary {
+    let mut artifact_file_bytes = 0usize;
+    let mut artifact_page_count = 0usize;
+    let mut artifact_set_fnv1a64 = 0xcbf2_9ce4_8422_2325u64;
+    for index in 0..bootload::AUXILIARY_ARTIFACT_COUNT {
+        let manifest_artifact = manifest.artifacts[index];
+        let artifact_path = match bootload::encode_uefi_path(&manifest_artifact.path) {
+            Ok(path) => path,
+            Err(error) => {
+                let failure = contract_failure("kload.artifact.path", error);
+                return Err(transaction_failure(
+                    calls,
+                    physical_base,
+                    allocation.page_count,
+                    &artifacts,
+                    null_mut(),
+                    root,
+                    failure,
+                ));
+            }
+        };
+        let artifact_file = match read_file(
+            calls,
+            root,
+            &artifact_path,
+            manifest_artifact.file_bytes,
+            "kload.artifact.open",
+            "kload.artifact.info",
+            "kload.artifact.read",
+        ) {
+            Ok(file) => file,
+            Err(failure) => {
+                return Err(transaction_failure(
+                    calls,
+                    physical_base,
+                    allocation.page_count,
+                    &artifacts,
+                    null_mut(),
+                    root,
+                    failure,
+                ));
+            }
+        };
+        let artifact_bytes =
+            unsafe { from_raw_parts(artifact_file.pointer.cast::<u8>(), artifact_file.byte_count) };
+        if let Err(error) = bootload::verify_manifest_artifact(&manifest_artifact, artifact_bytes) {
+            let failure = contract_failure("kload.artifact.verify", error);
+            return Err(transaction_failure(
+                calls,
+                physical_base,
+                allocation.page_count,
+                &artifacts,
+                artifact_file.pointer,
+                root,
+                failure,
+            ));
+        }
+        let artifact_pages = match bootload::page_count(artifact_file.byte_count) {
+            Ok(value) => value,
+            Err(error) => {
+                let failure = contract_failure("kload.artifact.pages_shape", error);
+                return Err(transaction_failure(
+                    calls,
+                    physical_base,
+                    allocation.page_count,
+                    &artifacts,
+                    artifact_file.pointer,
+                    root,
+                    failure,
+                ));
+            }
+        };
+        let mut artifact_physical_base = 0u64;
+        let artifact_allocate_status = (calls.allocate_pages)(
+            EFI_ALLOCATE_ANY_PAGES,
+            EFI_LOADER_DATA,
+            artifact_pages,
+            &mut artifact_physical_base,
+        );
+        if artifact_allocate_status != EFI_SUCCESS {
+            let failure =
+                firmware_failure("kload.artifact.pages_allocate", artifact_allocate_status);
+            return Err(transaction_failure(
+                calls,
+                physical_base,
+                allocation.page_count,
+                &artifacts,
+                artifact_file.pointer,
+                root,
+                failure,
+            ));
+        }
+        artifacts[index] = LoadedArtifactSummary {
+            role: manifest_artifact.role,
+            physical_base: artifact_physical_base,
+            page_count: artifact_pages,
+            file_bytes: artifact_file.byte_count,
+            sha256: manifest_artifact.sha256,
+            loaded_fnv1a64: 0,
+        };
+        let artifact_allocation_bytes =
+            match artifact_pages.checked_mul(bootload::elf::PAGE_SIZE as usize) {
+                Some(value) => value,
+                None => {
+                    let failure =
+                        contract_failure("kload.artifact.pages_shape", bootload::Error::PageCount);
+                    return Err(transaction_failure(
+                        calls,
+                        physical_base,
+                        allocation.page_count,
+                        &artifacts,
+                        artifact_file.pointer,
+                        root,
+                        failure,
+                    ));
+                }
+            };
+        if artifact_physical_base == 0 || artifact_physical_base > usize::MAX as u64 {
+            let failure = contract_failure(
+                "kload.artifact.pages_address",
+                bootload::Error::AddressRange,
+            );
+            return Err(transaction_failure(
+                calls,
+                physical_base,
+                allocation.page_count,
+                &artifacts,
+                artifact_file.pointer,
+                root,
+                failure,
+            ));
+        }
+        let artifact_destination = unsafe {
+            from_raw_parts_mut(
+                artifact_physical_base as usize as *mut u8,
+                artifact_allocation_bytes,
+            )
+        };
+        let artifact_loaded = match bootload::load_manifest_artifact(
+            artifact_bytes,
+            &manifest_artifact,
+            artifact_destination,
+        ) {
+            Ok(value) => value,
+            Err(error) => {
+                let failure = contract_failure("kload.artifact.load", error);
+                return Err(transaction_failure(
+                    calls,
+                    physical_base,
+                    allocation.page_count,
+                    &artifacts,
+                    artifact_file.pointer,
+                    root,
+                    failure,
+                ));
+            }
+        };
+        artifacts[index].loaded_fnv1a64 = artifact_loaded.loaded_fnv1a64;
+        if let Err(failure) = free_pool(calls, artifact_file.pointer, "kload.artifact.pool_free") {
+            return Err(transaction_failure(
+                calls,
+                physical_base,
+                allocation.page_count,
+                &artifacts,
+                null_mut(),
+                root,
+                failure,
+            ));
+        }
+        artifact_file_bytes = match artifact_file_bytes.checked_add(artifact_loaded.file_size) {
+            Some(value) => value,
+            None => {
+                let failure =
+                    contract_failure("kload.artifact.total_bytes", bootload::Error::FileSize);
+                return Err(transaction_failure(
+                    calls,
+                    physical_base,
+                    allocation.page_count,
+                    &artifacts,
+                    null_mut(),
+                    root,
+                    failure,
+                ));
+            }
+        };
+        artifact_page_count = match artifact_page_count.checked_add(artifact_loaded.page_count) {
+            Some(value) => value,
+            None => {
+                let failure =
+                    contract_failure("kload.artifact.total_pages", bootload::Error::PageCount);
+                return Err(transaction_failure(
+                    calls,
+                    physical_base,
+                    allocation.page_count,
+                    &artifacts,
+                    null_mut(),
+                    root,
+                    failure,
+                ));
+            }
+        };
+        artifact_set_fnv1a64 = fnv1a64_extend(
+            artifact_set_fnv1a64,
+            &manifest_artifact.role.code().to_le_bytes(),
+        );
+        artifact_set_fnv1a64 = fnv1a64_extend(
+            artifact_set_fnv1a64,
+            &(artifact_loaded.file_size as u64).to_le_bytes(),
+        );
+        artifact_set_fnv1a64 = fnv1a64_extend(artifact_set_fnv1a64, &manifest_artifact.sha256);
+    }
+
+    if let Err(failure) = close_file(root, "kload.root.close") {
+        return Err(release_loaded_page_ranges(
+            calls,
+            physical_base,
+            allocation.page_count,
+            &artifacts,
+        )
+        .err()
+        .unwrap_or(failure));
+    }
+
+    Ok(Summary {
         config,
         manifest,
         kernel_digest_prefix: bootload::manifest::digest_prefix(&manifest.kernel_sha256),
@@ -655,36 +941,43 @@ pub(super) fn load_manifest_kernel(
         kernel_virtual_base: loaded.image.virtual_base,
         kernel_entry_virtual: loaded.image.entry_virtual,
         kernel_sha256: manifest.kernel_sha256,
-        closed_file_count: 4,
-        freed_pool_count: 3,
-    };
-    release_file_resources_or_kernel(
-        calls,
-        physical_base,
-        allocation.page_count,
-        kernel_file.pointer,
-        root,
-    )?;
-    Ok(summary)
+        artifacts,
+        artifact_file_bytes,
+        artifact_page_count,
+        artifact_set_fnv1a64,
+        closed_file_count: 10,
+        freed_pool_count: 9,
+    })
 }
 
-pub(super) fn release_kernel_pages(
+pub(super) fn release_loaded_pages(
     boot_services: &EfiBootServices,
-    physical_base: u64,
-    page_count: usize,
+    summary: &Summary,
 ) -> Result<(), Failure> {
-    if physical_base == 0 || page_count == 0 {
+    if summary.kernel_physical_base == 0
+        || summary.page_count == 0
+        || summary
+            .artifacts
+            .iter()
+            .any(|artifact| artifact.physical_base == 0 || artifact.page_count == 0)
+    {
         return Err(contract_failure(
-            "kload.kernel.pages_release_shape",
+            "kload.loaded_pages_release_shape",
             bootload::Error::ResourceLeak,
         ));
     }
     let free_pages: FreePages = unsafe { function(boot_services.free_pages) }
         .map_err(|status| firmware_failure("kload.free_pages_pointer", status))?;
-    let status = free_pages(physical_base, page_count);
-    if status == EFI_SUCCESS {
-        Ok(())
-    } else {
-        Err(firmware_failure("kload.kernel.pages_free", status))
+    let mut failure = None;
+    for artifact in summary.artifacts.iter().rev() {
+        let status = free_pages(artifact.physical_base, artifact.page_count);
+        if status != EFI_SUCCESS && failure.is_none() {
+            failure = Some(firmware_failure("kload.artifact.pages_free", status));
+        }
     }
+    let status = free_pages(summary.kernel_physical_base, summary.page_count);
+    if status != EFI_SUCCESS && failure.is_none() {
+        failure = Some(firmware_failure("kload.kernel.pages_free", status));
+    }
+    failure.map_or(Ok(()), Err)
 }

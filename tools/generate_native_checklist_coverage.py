@@ -152,6 +152,16 @@ ADDED_REQUIREMENTS = [
         "basis": ["https://uefi.org/specs/UEFI/2.11/"],
     },
     {
+        "id": "ADD-BOOT-004",
+        "phase_id": "N5",
+        "requirement": "Define a bounded typed envelope and exact profile for every non-kernel boot artifact; independently validate role, version, size, payload and whole-file digests, transactional loading, zero padding, retained-range ownership, cleanup, and PBP1 cross-binding while keeping authentication and each payload's executable or device-changing semantics separately gated.",
+        "basis": [
+            "Cycle 107 PBART1 and PBASET1 integration",
+            "master checklist sections 013-015",
+            "N5.6 initial-system, recovery, symbol, microcode, firmware-manifest, and policy artifact requirements",
+        ],
+    },
+    {
         "id": "ADD-BOOT-002",
         "phase_id": "N6",
         "requirement": "Model UEFI PK, KEK, db, dbx, image signer revocation, minimum secure version, authenticated boot state, recovery-key rotation, and development-key containment as one boot-trust state machine.",

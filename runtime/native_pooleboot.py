@@ -64,6 +64,11 @@ TRUE_PROOF_CLAIMS = (
     "system_manifest_parsed",
     "manifest_selected_kernel_path",
     "manifest_kernel_sha256_matched",
+    "live_pbart1_files_read",
+    "pbart1_role_version_payload_digest_validated",
+    "artifact_set_manifest_sha256_matched",
+    "artifact_pages_retained",
+    "pbp1_profile_artifacts_cross_bound",
     "live_pbp1_post_exit_development_observed",
     "pbp1_serial_debugcon_exact",
     "pbp1_kernel_manifest_cross_bound",
@@ -89,6 +94,10 @@ FALSE_PROOF_CLAIMS = (
     "manifest_trusted",
     "persistent_rollback_state_enforced",
     "kernel_signature_verified",
+    "artifact_signatures_verified",
+    "artifact_semantics_applied",
+    "initial_system_executed",
+    "microcode_applied",
     "poolekernel_executed",
     "all_kload_resources_released",
     "final_kernel_address_space_established",
@@ -127,6 +136,15 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-KLOAD-CONFIG-CONTENT",
     "NEG-N5-KLOAD-MANIFEST-CONTENT",
     "NEG-N5-KLOAD-KERNEL-CONTENT",
+    "NEG-N5-KLOAD-ARTIFACT-MISSING",
+    "NEG-N5-KLOAD-ARTIFACT-EMPTY",
+    "NEG-N5-KLOAD-ARTIFACT-OVERSIZE",
+    "NEG-N5-KLOAD-ARTIFACT-PATH",
+    "NEG-N5-KLOAD-ARTIFACT-CONTENT",
+    "NEG-N5-KLOAD-ARTIFACT-ROLE",
+    "NEG-N5-KLOAD-ARTIFACT-VERSION",
+    "NEG-N5-KLOAD-ARTIFACT-PAYLOAD-DIGEST",
+    "NEG-N5-KLOAD-ARTIFACT-MANIFEST-DIGEST",
     "NEG-N5-KLOAD-MARKER-OMISSION",
     "NEG-N5-KLOAD-MARKER-ORDER",
     "NEG-N5-KLOAD-MARKER-CONFIG-BOUND",
@@ -136,6 +154,8 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-KLOAD-MARKER-KERNEL-BOUND",
     "NEG-N5-KLOAD-MARKER-PAGE-MATH",
     "NEG-N5-KLOAD-MARKER-ENTRY-BOUND",
+    "NEG-N5-KLOAD-MARKER-ARTIFACT-COUNT",
+    "NEG-N5-KLOAD-MARKER-ARTIFACT-SIGNATURE",
     "NEG-N5-KLOAD-MARKER-MAPPING-COUNT",
     "NEG-N5-KLOAD-MARKER-WX",
     "NEG-N5-KLOAD-MARKER-RETAIN-COUNT",
@@ -144,6 +164,7 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-KLOAD-MANIFEST-ORACLE-DIVERGENCE",
     "NEG-N5-KLOAD-ELF-ORACLE-DIVERGENCE",
     "NEG-N5-KLOAD-LOADED-HASH-DIVERGENCE",
+    "NEG-N5-KLOAD-ARTIFACT-ORACLE-DIVERGENCE",
     "NEG-N5-KLOAD-CLAIM-OVERREACH",
     "NEG-N5-KLOAD-STALE-BINDING",
     "NEG-N5-PBP1-TRANSCRIPT-MISSING",
@@ -155,6 +176,11 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-PBP1-TRANSCRIPT-FNV",
     "NEG-N5-PBP1-EXIT-STATE",
     "NEG-N5-PBP1-ARTIFACT-DIGEST-ORACLE",
+    "NEG-N5-PBP1-ARTIFACT-ROLE",
+    "NEG-N5-PBP1-ARTIFACT-OMISSION",
+    "NEG-N5-PBP1-ARTIFACT-OVERLAP",
+    "NEG-N5-PBP1-ARTIFACT-SIGNATURE",
+    "NEG-N5-PBP1-ARTIFACT-RANGE-COVERAGE",
     "NEG-N5-PBP1-MARKER-BYTE-DIVERGENCE",
     "NEG-N5-PBP1-MARKER-MEMORY-DIVERGENCE",
     "NEG-N5-PBP1-RETAINED-RANGE-OMISSION",
@@ -211,6 +237,9 @@ PROOF_IMPLEMENTATION_INPUTS = (
     "native/Cargo.lock",
     "native/rust-toolchain.toml",
     "native/.cargo/config.toml",
+    "native/artifact/Cargo.toml",
+    "native/artifact/src/lib.rs",
+    "native/artifact/src/bin/pbart1_probe.rs",
     "native/boot/Cargo.toml",
     "native/boot/src/lib.rs",
     "native/boot/src/main.rs",
@@ -243,6 +272,7 @@ PROOF_IMPLEMENTATION_INPUTS = (
     "native/bootexit/README.md",
     "native/bootexit/src/lib.rs",
     "runtime/native_binary.py",
+    "runtime/native_boot_artifact.py",
     "runtime/native_boot_exit.py",
     "runtime/native_boot_config.py",
     "runtime/native_elf_loader.py",
@@ -253,6 +283,7 @@ PROOF_IMPLEMENTATION_INPUTS = (
     "runtime/native_pooleboot.py",
     "runtime/native_system_manifest.py",
     "runtime/native_tier0.py",
+    "docs/native-initial-system-profile.md",
     "specs/native-pooleboot-proof.json",
     "specs/native-pooleboot-proof.schema.json",
     "specs/native-pooleboot-readiness.schema.json",
@@ -990,6 +1021,7 @@ def proof_contract_errors(contract: dict[str, Any], root: Path) -> list[str]:
         "N5.3",
         "N5.4",
         "N5.5",
+        "N5.6",
         "N5.7",
         "N5.8",
     ]:
@@ -1009,6 +1041,7 @@ def proof_contract_errors(contract: dict[str, Any], root: Path) -> list[str]:
         "KERNEL_BINDING PASS",
         "KERNEL_FILE PASS",
         "KERNEL_LOAD PASS",
+        "ARTIFACT_SET PASS",
         "GOP PASS",
         "FRAME READY",
         "KERNEL_MAP_PLAN PASS",
@@ -1022,6 +1055,15 @@ def proof_contract_errors(contract: dict[str, Any], root: Path) -> list[str]:
     ]:
         errors.append("PooleBoot proof marker register changed")
     media = contract.get("media", {})
+    if media.get("artifact_paths") != [
+        "EFI/POOLEOS/INITIAL.PBA",
+        "EFI/POOLEOS/RECOVERY.PBA",
+        "EFI/POOLEOS/SYMBOLS.PBA",
+        "EFI/POOLEOS/MICROCOD.PBA",
+        "EFI/POOLEOS/FIRMWARE.PBA",
+        "EFI/POOLEOS/POLICY.PBA",
+    ]:
+        errors.append("PooleBoot proof artifact path register changed")
     expected_media_policy = {
         "ordinary_workspace_file_only": True,
         "allowed_output_roots": list(SAFE_MEDIA_OUTPUT_ROOTS),
@@ -1113,8 +1155,8 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str
     media_inspection = media.get("inspection", {})
     files = media_inspection.get("files", [])
     embedded = media_inspection.get("embedded_efi", {})
-    if not isinstance(files, list) or len(files) != 4:
-        errors.append("PooleBoot media file manifest does not contain exactly four files")
+    if not isinstance(files, list) or len(files) != 10:
+        errors.append("PooleBoot media file manifest does not contain exactly ten files")
     else:
         file_item = files[0]
         if (
@@ -1128,8 +1170,23 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str
             "EFI/POOLEOS/BOOT.CFG",
             "EFI/POOLEOS/SYSTEM_A.PBM",
             "EFI/POOLEOS/KERNEL.ELF",
+            "EFI/POOLEOS/INITIAL.PBA",
+            "EFI/POOLEOS/RECOVERY.PBA",
+            "EFI/POOLEOS/SYMBOLS.PBA",
+            "EFI/POOLEOS/MICROCOD.PBA",
+            "EFI/POOLEOS/FIRMWARE.PBA",
+            "EFI/POOLEOS/POLICY.PBA",
         ]:
             errors.append("PooleBoot media file paths changed")
+        artifact_set = media_inspection.get("artifact_set", {})
+        if (
+            artifact_set.get("contract_id") != "PBART1"
+            or artifact_set.get("artifact_count") != 6
+            or artifact_set.get("signatures_verified") is not False
+            or artifact_set.get("measured") is not False
+            or artifact_set.get("semantics_applied") is not False
+        ):
+            errors.append("PooleBoot artifact-set boundary changed")
     if embedded.get("sha256") != build.get("sha256") or embedded.get("byte_count") != build.get(
         "byte_count"
     ):

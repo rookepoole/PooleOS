@@ -74,7 +74,7 @@ class NativeBootExitTests(unittest.TestCase):
     def test_validates_exact_live_boundary_markers(self) -> None:
         summary = native_boot_exit.validate_live_markers(
             "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4608 descriptor_bytes=48 descriptors=96",
-            "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=48 table_pages=4 stack_pages=8 handoff_pages=256",
+            "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=48 artifact_pages=6 table_pages=4 stack_pages=8 handoff_pages=256",
             native_boot_exit.DEVELOPMENT_BOUNDARY,
             native_boot_exit.STOP_MARKER,
         )
@@ -82,7 +82,7 @@ class NativeBootExitTests(unittest.TestCase):
         with self.assertRaises(native_boot_exit.BootExitError):
             native_boot_exit.validate_live_markers(
                 "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4608 descriptor_bytes=48 descriptors=96",
-                "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=1 kernel_pages=48 table_pages=4 stack_pages=8 handoff_pages=256",
+                "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=1 kernel_pages=48 artifact_pages=6 table_pages=4 stack_pages=8 handoff_pages=256",
                 native_boot_exit.DEVELOPMENT_BOUNDARY,
                 native_boot_exit.STOP_MARKER,
             )
