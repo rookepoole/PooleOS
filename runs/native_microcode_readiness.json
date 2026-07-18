@@ -1,0 +1,1462 @@
+{
+  "activation_qualification": {
+    "current_unsigned_development_activation_allowed": false,
+    "individual_rejecting_context_count": 36,
+    "privileged_apply_function_present": false,
+    "status": "pass",
+    "synthetic_all_true_context_is_trust_evidence": false,
+    "synthetic_all_true_result": "apply_plan_only"
+  },
+  "artifact_kind": "pooleos_native_microcode_readiness",
+  "bindings": {
+    "contract": {
+      "byte_count": 5229,
+      "path": "specs/native-microcode-contract.json",
+      "sha256": "6CAA7167E84C72CC5ABCDD3D329843B8AF5156C8C3EE1E7E5D201B6540A75BDE"
+    },
+    "contract_schema": {
+      "byte_count": 1937,
+      "path": "specs/native-microcode-contract.schema.json",
+      "sha256": "855370A733A68A21DD677D467E02B075E01F9AC21AFB700DA88894FDF946B2CA"
+    },
+    "golden_schema": {
+      "byte_count": 1809,
+      "path": "specs/native-microcode-golden-vectors.schema.json",
+      "sha256": "EABAA5CB59FA10BFFF73F0EF305BABEEC84B86E7882C9B5C97378B473573A1AB"
+    },
+    "golden_vectors": {
+      "byte_count": 18730,
+      "path": "specs/native-microcode-golden-vectors.json",
+      "sha256": "AB62864D4FA2FEA72DD8980BF29BA529FFB653B44E456EBEB32017F47F69D57E"
+    },
+    "implementation_inputs": [
+      {
+        "byte_count": 538,
+        "path": "native/Cargo.toml",
+        "sha256": "35A5670D9B078405A8F65A07DD93D24DC3EF20F949C4BA0CC0A9E0421625D8A9"
+      },
+      {
+        "byte_count": 3517,
+        "path": "native/Cargo.lock",
+        "sha256": "2C6C3927C5442502A9958EAA14F65158226B10BA2AE5627202F559F771494512"
+      },
+      {
+        "byte_count": 351,
+        "path": "native/microcode/Cargo.toml",
+        "sha256": "AC51A38A8575C77E5AA2AA68A265935F88A4931286A02305F9FF29590B450FB4"
+      },
+      {
+        "byte_count": 48884,
+        "path": "native/microcode/src/lib.rs",
+        "sha256": "78D64E5791D79A88595DD209011E51E194DD13D84B95FAB4AA7E104C76F93936"
+      },
+      {
+        "byte_count": 9114,
+        "path": "native/microcode/src/bin/pmcu1_probe.rs",
+        "sha256": "D4849E5849A09141C5E64921F66DED6083ADAEA5EBF77CA439C407C7DAC53C64"
+      },
+      {
+        "byte_count": 52599,
+        "path": "runtime/native_microcode.py",
+        "sha256": "8311DF70FB9CFC5D3832C0B1662CA258E91F14638333771A25F7194BC558EEA8"
+      },
+      {
+        "byte_count": 7295,
+        "path": "runtime/native_boot_artifact.py",
+        "sha256": "6CC1DFBD2B44140983ED46FCDF8AD933B10856DD20F76ADCB7C263A2DB2F6C39"
+      },
+      {
+        "byte_count": 1693,
+        "path": "tools/generate_native_microcode_vectors.py",
+        "sha256": "095B0390C992C5FE459E5078E4775652BD176BFDAA03B1AFB31AC5C71F05FEA5"
+      },
+      {
+        "byte_count": 35939,
+        "path": "tools/qualify_native_microcode.py",
+        "sha256": "E8A4FCC457186D935C17E8E80B4B97A58449D08B1D66CA6A3F24CC08739498A4"
+      },
+      {
+        "byte_count": 7023,
+        "path": "tests/test_native_microcode.py",
+        "sha256": "CF6EE8FAFE154D51AC54525CFDAD37BA72EEC789245487DC7FFE4C2C12DE2CAC"
+      },
+      {
+        "byte_count": 7820,
+        "path": "docs/native-microcode-bundle.md",
+        "sha256": "59E59B4D5D3639BBF1F6878E4CFF6108935502BFDF0B729BC14C56A91587BAB5"
+      }
+    ],
+    "readiness_schema": {
+      "byte_count": 2007,
+      "path": "specs/native-microcode-readiness.schema.json",
+      "sha256": "3AE2C85127201A1F4F775C2EBF253163BA53217F044BE8112B965A31620CADD5"
+    }
+  },
+  "claim_boundary": [
+    "PMCU1 is not owner-ratified and is not a stable ABI.",
+    "Parsing, selection, and verification planning grant no CPU or kernel authority.",
+    "Opaque vendor bytes are not interpreted or authenticated by the PMCU1 parser.",
+    "All checked-in payloads and revisions are synthetic and must never be applied.",
+    "No privileged MSR or microcode-revision probe is performed.",
+    "No WRMSR, firmware call, driver load, CPU rendezvous, or update is implemented.",
+    "Rollback means reset-based known-good selection, never in-session downgrade.",
+    "Development artifacts are unsigned and fail the apply-plan gate.",
+    "No firmware setting, physical disk, media, or boot state is modified.",
+    "Synthetic all-true qualification is test scaffolding, not trust evidence.",
+    "N5 exit, physical qualification, ISO, and production readiness remain open."
+  ],
+  "claims": {
+    "bounded_selection_implemented": true,
+    "development_activation_denied": true,
+    "format_frozen": true,
+    "microcode_applied": false,
+    "n5_exit_gate_satisfied": false,
+    "no_std_parser_implemented": true,
+    "pooleboot_enforced": false,
+    "poolekernel_enforced": false,
+    "post_apply_verification_model_implemented": true,
+    "privileged_revision_observed": false,
+    "production_ready": false,
+    "python_oracle_implemented": true,
+    "vendor_container_parser_implemented": false,
+    "vendor_payload_included": false
+  },
+  "contract_id": "PMCU1",
+  "golden_vectors": [
+    {
+      "bundle_sha256": "D1EF85112EC9834E972C7CC49892B3CE81FE3464F1D143A94DBE37D59843ACE6",
+      "id": "PMCU1-CANONICAL",
+      "python_result": "pass",
+      "rust_result": "pass",
+      "selection_sample_count": 3,
+      "status": "pass"
+    },
+    {
+      "bundle_sha256": "AA62F53A0368A435A18B072538257EA2659638EE4951ABDD9C6108A7BB3FEC03",
+      "id": "PMCU1-MINIMAL",
+      "python_result": "pass",
+      "rust_result": "pass",
+      "selection_sample_count": 1,
+      "status": "pass"
+    },
+    {
+      "bundle_sha256": "91668E3FB2634B115BF17229ED23D22ED092F1D6F3AFBD53A4390E33AFC57318",
+      "id": "PMCU1-BOUNDARY",
+      "python_result": "pass",
+      "rust_result": "pass",
+      "selection_sample_count": 2,
+      "status": "pass"
+    }
+  ],
+  "n5_exit_gate_satisfied": false,
+  "negative_controls": [
+    {
+      "expected": "ERR:pmcu_reserved",
+      "id": "NEG-PMCU1-PARSER-001",
+      "observed": "ERR:pmcu_reserved",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-002",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_magic",
+      "id": "NEG-PMCU1-PARSER-003",
+      "observed": "ERR:pmcu_magic",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_header_digest",
+      "id": "NEG-PMCU1-PARSER-004",
+      "observed": "ERR:pmcu_header_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_header_digest",
+      "id": "NEG-PMCU1-PARSER-005",
+      "observed": "ERR:pmcu_header_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-006",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-007",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_total_size",
+      "id": "NEG-PMCU1-PARSER-008",
+      "observed": "ERR:pmcu_total_size",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_reserved",
+      "id": "NEG-PMCU1-PARSER-009",
+      "observed": "ERR:pmcu_reserved",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-010",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-011",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_metadata_digest",
+      "id": "NEG-PMCU1-PARSER-012",
+      "observed": "ERR:pmcu_patch_metadata_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_header_size",
+      "id": "NEG-PMCU1-PARSER-013",
+      "observed": "ERR:pmcu_header_size",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-014",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-015",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_policy",
+      "id": "NEG-PMCU1-PARSER-016",
+      "observed": "ERR:pmcu_policy",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-017",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-018",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_reserved",
+      "id": "NEG-PMCU1-PARSER-019",
+      "observed": "ERR:pmcu_reserved",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-020",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-021",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-022",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_payload_size",
+      "id": "NEG-PMCU1-PARSER-023",
+      "observed": "ERR:pmcu_payload_size",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-024",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-025",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-026",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-027",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_reserved",
+      "id": "NEG-PMCU1-PARSER-028",
+      "observed": "ERR:pmcu_reserved",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-029",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-030",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_header_digest",
+      "id": "NEG-PMCU1-PARSER-031",
+      "observed": "ERR:pmcu_header_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-032",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-033",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-034",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-035",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-036",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-037",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_reserved",
+      "id": "NEG-PMCU1-PARSER-038",
+      "observed": "ERR:pmcu_reserved",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-039",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-040",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_table_layout",
+      "id": "NEG-PMCU1-PARSER-041",
+      "observed": "ERR:pmcu_table_layout",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-042",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_counts",
+      "id": "NEG-PMCU1-PARSER-043",
+      "observed": "ERR:pmcu_counts",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-044",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_platform",
+      "id": "NEG-PMCU1-PARSER-045",
+      "observed": "ERR:pmcu_platform",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-046",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_flags",
+      "id": "NEG-PMCU1-PARSER-047",
+      "observed": "ERR:pmcu_flags",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-048",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-049",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-050",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-051",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-052",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-053",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-054",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_metadata_digest",
+      "id": "NEG-PMCU1-PARSER-055",
+      "observed": "ERR:pmcu_patch_metadata_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-056",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-057",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_identity",
+      "id": "NEG-PMCU1-PARSER-058",
+      "observed": "ERR:pmcu_patch_identity",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-059",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-060",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_metadata_digest",
+      "id": "NEG-PMCU1-PARSER-061",
+      "observed": "ERR:pmcu_patch_metadata_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-062",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-063",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_counts",
+      "id": "NEG-PMCU1-PARSER-064",
+      "observed": "ERR:pmcu_counts",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-065",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-066",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_policy",
+      "id": "NEG-PMCU1-PARSER-067",
+      "observed": "ERR:pmcu_policy",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-068",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-069",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_header_digest",
+      "id": "NEG-PMCU1-PARSER-070",
+      "observed": "ERR:pmcu_header_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-071",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-072",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-073",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-074",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-075",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-076",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-077",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-078",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-079",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-080",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-081",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-082",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-083",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-084",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-085",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_target_identity",
+      "id": "NEG-PMCU1-PARSER-086",
+      "observed": "ERR:pmcu_target_identity",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-087",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-088",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-089",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-090",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_metadata_digest",
+      "id": "NEG-PMCU1-PARSER-091",
+      "observed": "ERR:pmcu_patch_metadata_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-092",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_header_digest",
+      "id": "NEG-PMCU1-PARSER-093",
+      "observed": "ERR:pmcu_header_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_metadata_digest",
+      "id": "NEG-PMCU1-PARSER-094",
+      "observed": "ERR:pmcu_patch_metadata_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_header_digest",
+      "id": "NEG-PMCU1-PARSER-095",
+      "observed": "ERR:pmcu_header_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-096",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-097",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_reserved",
+      "id": "NEG-PMCU1-PARSER-098",
+      "observed": "ERR:pmcu_reserved",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-099",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_identity",
+      "id": "NEG-PMCU1-PARSER-100",
+      "observed": "ERR:pmcu_patch_identity",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-101",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-102",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_policy",
+      "id": "NEG-PMCU1-PARSER-103",
+      "observed": "ERR:pmcu_policy",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-104",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-105",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-106",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-107",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-108",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-109",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-110",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-111",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-112",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_header_digest",
+      "id": "NEG-PMCU1-PARSER-113",
+      "observed": "ERR:pmcu_header_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-114",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-115",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-116",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-117",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-118",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-119",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_platform",
+      "id": "NEG-PMCU1-PARSER-120",
+      "observed": "ERR:pmcu_platform",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-121",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_reserved",
+      "id": "NEG-PMCU1-PARSER-122",
+      "observed": "ERR:pmcu_reserved",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-123",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-124",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-125",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-126",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_body_digest",
+      "id": "NEG-PMCU1-PARSER-127",
+      "observed": "ERR:pmcu_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_patch_digest",
+      "id": "NEG-PMCU1-PARSER-128",
+      "observed": "ERR:pmcu_patch_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:pmcu_activation_outer_signature",
+      "id": "NEG-PMCU1-ACTIVATION-001",
+      "observed": "ERR:pmcu_activation_outer_signature",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_outer_signature",
+      "id": "NEG-PMCU1-ACTIVATION-002",
+      "observed": "ERR:pmcu_activation_outer_signature",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_inner_signature",
+      "id": "NEG-PMCU1-ACTIVATION-003",
+      "observed": "ERR:pmcu_activation_inner_signature",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_manifest_signature",
+      "id": "NEG-PMCU1-ACTIVATION-004",
+      "observed": "ERR:pmcu_activation_manifest_signature",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_vendor_signature",
+      "id": "NEG-PMCU1-ACTIVATION-005",
+      "observed": "ERR:pmcu_activation_vendor_signature",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_vendor_container",
+      "id": "NEG-PMCU1-ACTIVATION-006",
+      "observed": "ERR:pmcu_activation_vendor_container",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_vendor_source",
+      "id": "NEG-PMCU1-ACTIVATION-007",
+      "observed": "ERR:pmcu_activation_vendor_source",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_redistribution",
+      "id": "NEG-PMCU1-ACTIVATION-008",
+      "observed": "ERR:pmcu_activation_redistribution",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_revocation_state",
+      "id": "NEG-PMCU1-ACTIVATION-009",
+      "observed": "ERR:pmcu_activation_revocation_state",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_hardware_evidence",
+      "id": "NEG-PMCU1-ACTIVATION-010",
+      "observed": "ERR:pmcu_activation_hardware_evidence",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_cpuid_observation",
+      "id": "NEG-PMCU1-ACTIVATION-011",
+      "observed": "ERR:pmcu_activation_cpuid_observation",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_revision_observation",
+      "id": "NEG-PMCU1-ACTIVATION-012",
+      "observed": "ERR:pmcu_activation_revision_observation",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_outer_role",
+      "id": "NEG-PMCU1-ACTIVATION-013",
+      "observed": "ERR:pmcu_activation_outer_role",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_outer_version",
+      "id": "NEG-PMCU1-ACTIVATION-014",
+      "observed": "ERR:pmcu_activation_outer_version",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_outer_payload_digest",
+      "id": "NEG-PMCU1-ACTIVATION-015",
+      "observed": "ERR:pmcu_activation_outer_payload_digest",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_outer_file_digest",
+      "id": "NEG-PMCU1-ACTIVATION-016",
+      "observed": "ERR:pmcu_activation_outer_file_digest",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_vendor_id",
+      "id": "NEG-PMCU1-ACTIVATION-017",
+      "observed": "ERR:pmcu_activation_vendor_id",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_cpuid",
+      "id": "NEG-PMCU1-ACTIVATION-018",
+      "observed": "ERR:pmcu_activation_cpuid",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_platform",
+      "id": "NEG-PMCU1-ACTIVATION-019",
+      "observed": "ERR:pmcu_activation_platform",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_processor_count",
+      "id": "NEG-PMCU1-ACTIVATION-020",
+      "observed": "ERR:pmcu_activation_processor_count",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_mixed_before",
+      "id": "NEG-PMCU1-ACTIVATION-021",
+      "observed": "ERR:pmcu_activation_mixed_before",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_rollback_floor",
+      "id": "NEG-PMCU1-ACTIVATION-022",
+      "observed": "ERR:pmcu_activation_rollback_floor",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_boot_mode",
+      "id": "NEG-PMCU1-ACTIVATION-023",
+      "observed": "ERR:pmcu_activation_boot_mode",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_stage",
+      "id": "NEG-PMCU1-ACTIVATION-024",
+      "observed": "ERR:pmcu_activation_stage",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_feature_timing",
+      "id": "NEG-PMCU1-ACTIVATION-025",
+      "observed": "ERR:pmcu_activation_feature_timing",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_schedule_timing",
+      "id": "NEG-PMCU1-ACTIVATION-026",
+      "observed": "ERR:pmcu_activation_schedule_timing",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_processor_inventory",
+      "id": "NEG-PMCU1-ACTIVATION-027",
+      "observed": "ERR:pmcu_activation_processor_inventory",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_quiescence",
+      "id": "NEG-PMCU1-ACTIVATION-028",
+      "observed": "ERR:pmcu_activation_quiescence",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_payload_capacity",
+      "id": "NEG-PMCU1-ACTIVATION-029",
+      "observed": "ERR:pmcu_activation_payload_capacity",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_patch_capacity",
+      "id": "NEG-PMCU1-ACTIVATION-030",
+      "observed": "ERR:pmcu_activation_patch_capacity",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_processor_capacity",
+      "id": "NEG-PMCU1-ACTIVATION-031",
+      "observed": "ERR:pmcu_activation_processor_capacity",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_receipt_capacity",
+      "id": "NEG-PMCU1-ACTIVATION-032",
+      "observed": "ERR:pmcu_activation_receipt_capacity",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_apply_authority",
+      "id": "NEG-PMCU1-ACTIVATION-033",
+      "observed": "ERR:pmcu_activation_apply_authority",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_firmware_mutation",
+      "id": "NEG-PMCU1-ACTIVATION-034",
+      "observed": "ERR:pmcu_activation_firmware_mutation",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_physical_media",
+      "id": "NEG-PMCU1-ACTIVATION-035",
+      "observed": "ERR:pmcu_activation_physical_media",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_activation_not_implemented",
+      "id": "NEG-PMCU1-ACTIVATION-036",
+      "observed": "ERR:pmcu_activation_not_implemented",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "expected": "ERR:pmcu_select_cpuid",
+      "id": "NEG-PMCU1-SELECTION-001",
+      "observed": "ERR:pmcu_select_cpuid",
+      "status": "pass",
+      "surface": "selection"
+    },
+    {
+      "expected": "ERR:pmcu_select_mode",
+      "id": "NEG-PMCU1-SELECTION-002",
+      "observed": "ERR:pmcu_select_mode",
+      "status": "pass",
+      "surface": "selection"
+    },
+    {
+      "expected": "ERR:pmcu_select_rollback_floor",
+      "id": "NEG-PMCU1-SELECTION-003",
+      "observed": "ERR:pmcu_select_rollback_floor",
+      "status": "pass",
+      "surface": "selection"
+    },
+    {
+      "expected": "ERR:pmcu_select_no_eligible",
+      "id": "NEG-PMCU1-SELECTION-004",
+      "observed": "ERR:pmcu_select_no_eligible",
+      "status": "pass",
+      "surface": "selection"
+    },
+    {
+      "expected": "ERR:pmcu_verify_revision",
+      "id": "NEG-PMCU1-VERIFY-001",
+      "observed": "ERR:pmcu_verify_revision",
+      "status": "pass",
+      "surface": "post_apply"
+    },
+    {
+      "expected": "ERR:pmcu_verify_mixed_quarantine",
+      "id": "NEG-PMCU1-VERIFY-002",
+      "observed": "ERR:pmcu_verify_mixed_quarantine",
+      "status": "pass",
+      "surface": "post_apply"
+    },
+    {
+      "expected": "ERR:pmcu_verify_feature_policy",
+      "id": "NEG-PMCU1-VERIFY-003",
+      "observed": "ERR:pmcu_verify_feature_policy",
+      "status": "pass",
+      "surface": "post_apply"
+    },
+    {
+      "expected": "ERR:pmcu_verify_mitigation_policy",
+      "id": "NEG-PMCU1-VERIFY-004",
+      "observed": "ERR:pmcu_verify_mitigation_policy",
+      "status": "pass",
+      "surface": "post_apply"
+    },
+    {
+      "expected": "ERR:pmcu_verify_receipt",
+      "id": "NEG-PMCU1-VERIFY-005",
+      "observed": "ERR:pmcu_verify_receipt",
+      "status": "pass",
+      "surface": "post_apply"
+    },
+    {
+      "expected": "ERR:pmcu_verify_schedule_started",
+      "id": "NEG-PMCU1-VERIFY-006",
+      "observed": "ERR:pmcu_verify_schedule_started",
+      "status": "pass",
+      "surface": "post_apply"
+    }
+  ],
+  "open_items": [
+    "Ratify or replace PMCU1 before declaring a stable microcode ABI.",
+    "Obtain exact AMD Family 1Ah Model 44h vendor update guidance and redistribution terms.",
+    "Acquire approved vendor microcode through a trusted source or user-supplied intake path.",
+    "Implement and independently review the exact AMD vendor-container validator.",
+    "Capture the current revision through a separately approved privileged native observation.",
+    "Bind real security floors, errata, revocation state, firmware revision, and reset behavior.",
+    "Sign PBART1 role 5, PMCU1, its manifest, and policy under approved roots.",
+    "Implement PMCU1 parsing and fail-closed staging inside PooleBoot.",
+    "Implement the minimal PooleKernel BSP/AP apply mechanism and per-CPU rendezvous.",
+    "Prove apply timing before affected features and before application processors enter scheduling.",
+    "Prove per-CPU post-apply revision, CPUID, mitigation, mixed-state, and retained-receipt behavior.",
+    "Qualify reset-based previous-known-good recovery without in-session downgrade.",
+    "Reproduce qualification on an independent builder and target firmware.",
+    "Complete physical-hardware, signed-media, production ISO, and N5-N39 exit gates."
+  ],
+  "parser_differential": {
+    "accepted_count": 460,
+    "campaign_id": "PMCU1-PARSER-DIFF-1",
+    "case_count": 16384,
+    "corpus_published": false,
+    "digest_repaired_deep_mutations": true,
+    "mismatch_count": 0,
+    "rejected_count": 15924,
+    "seed": "0x504D43553101",
+    "status": "pass"
+  },
+  "phase_status": {
+    "N24.4": "partial",
+    "N5": "partial",
+    "N5.6": "partial",
+    "N7.2": "partial"
+  },
+  "post_apply_differential": {
+    "accepted_count": 2709,
+    "campaign_id": "PMCU1-POST-APPLY-DIFF-1",
+    "case_count": 8192,
+    "corpus_published": false,
+    "mismatch_count": 0,
+    "mixed_revision_case_count": 1439,
+    "rejected_count": 5483,
+    "seed": "0x504D43553103",
+    "status": "pass"
+  },
+  "production_promotion_allowed": false,
+  "production_ready": false,
+  "schema_version": "1.0",
+  "selected_move_id": "N5-MICROCODE-SEMANTICS-001",
+  "selection_differential": {
+    "apply_count": 8377,
+    "campaign_id": "PMCU1-SELECTION-DIFF-1",
+    "case_count": 16384,
+    "corpus_published": false,
+    "mismatch_count": 0,
+    "rejected_count": 4600,
+    "reset_required_count": 610,
+    "seed": "0x504D43553102",
+    "skip_count": 2797,
+    "status": "pass"
+  },
+  "status": "pass",
+  "status_date": "2026-07-18",
+  "summary": {
+    "differential_mismatches": 0,
+    "golden_vectors_matched": 3,
+    "golden_vectors_total": 3,
+    "negative_controls_passed": 174,
+    "negative_controls_total": 174,
+    "no_std_target_builds_passed": 2,
+    "no_std_target_builds_total": 2,
+    "parser_differential_cases": 16384,
+    "post_apply_differential_cases": 8192,
+    "production_claim_count": 0,
+    "production_vendor_payload_count": 0,
+    "rust_host_tests_passed": 4,
+    "rust_host_tests_total": 4,
+    "selection_differential_cases": 16384,
+    "synthetic_payload_count": 35
+  },
+  "validator_qualification": {
+    "clippy_targets": 1,
+    "host_tests": 4,
+    "no_std_targets": [
+      "x86_64-unknown-none",
+      "x86_64-unknown-uefi"
+    ],
+    "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+    "rustfmt_packages": 1,
+    "status": "pass"
+  }
+}

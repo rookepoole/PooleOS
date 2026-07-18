@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-microcode-golden-vectors.schema.json",
+  "title": "PooleOS PMCU1 golden vectors",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "contract_id", "synthetic_test_payloads_only", "vectors"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_microcode_golden_vectors"},
+    "contract_id": {"const": "PMCU1"},
+    "synthetic_test_payloads_only": {"const": true},
+    "vectors": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "bundle_bytes",
+          "bundle_sha256",
+          "bundle_hex",
+          "patch_count",
+          "security_revision_floor",
+          "known_good_revision",
+          "preferred_revision",
+          "selection_samples"
+        ],
+        "properties": {
+          "id": {"type": "string", "pattern": "^PMCU1-"},
+          "bundle_bytes": {"type": "integer", "minimum": 640, "maximum": 1048448},
+          "bundle_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+          "bundle_hex": {"type": "string", "pattern": "^[0-9A-F]+$"},
+          "patch_count": {"type": "integer", "minimum": 1, "maximum": 32},
+          "security_revision_floor": {"type": "integer", "minimum": 1, "maximum": 4294967295},
+          "known_good_revision": {"type": "integer", "minimum": 1, "maximum": 4294967295},
+          "preferred_revision": {"type": "integer", "minimum": 1, "maximum": 4294967295},
+          "selection_samples": {"type": "array", "minItems": 1, "items": {"type": "object"}}
+        }
+      }
+    }
+  }
+}

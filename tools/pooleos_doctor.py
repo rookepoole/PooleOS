@@ -249,6 +249,17 @@ def check_native_symbol_readiness() -> CheckResult:
     )
 
 
+def check_native_microcode_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_microcode_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
 def check_native_system_manifest_readiness() -> CheckResult:
     from tools import pooleos_release_gate
 
@@ -3418,6 +3429,8 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "tools" / "qualify_native_recovery.py",
                 ROOT / "tools" / "generate_native_symbol_vectors.py",
                 ROOT / "tools" / "qualify_native_symbols.py",
+                ROOT / "tools" / "generate_native_microcode_vectors.py",
+                ROOT / "tools" / "qualify_native_microcode.py",
                 ROOT / "tools" / "generate_native_system_manifest_vectors.py",
                 ROOT / "tools" / "qualify_native_system_manifest.py",
                 ROOT / "tools" / "generate_native_boot_handoff_vectors.py",
@@ -3440,6 +3453,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runtime" / "native_initial_system.py",
                 ROOT / "runtime" / "native_recovery.py",
                 ROOT / "runtime" / "native_symbols.py",
+                ROOT / "runtime" / "native_microcode.py",
                 ROOT / "runtime" / "native_system_manifest.py",
                 ROOT / "runtime" / "native_boot_handoff.py",
                 ROOT / "runtime" / "native_boot_config.py",
@@ -3451,6 +3465,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "docs" / "native-initial-system-bundle.md",
                 ROOT / "docs" / "native-recovery-bundle.md",
                 ROOT / "docs" / "native-symbol-bundle.md",
+                ROOT / "docs" / "native-microcode-bundle.md",
                 ROOT / "docs" / "native-system-manifest.md",
                 ROOT / "docs" / "native-boot-handoff.md",
                 ROOT / "docs" / "native-boot-config.md",
@@ -3480,6 +3495,9 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "native" / "symbols" / "Cargo.toml",
                 ROOT / "native" / "symbols" / "src" / "lib.rs",
                 ROOT / "native" / "symbols" / "src" / "bin" / "psym1_probe.rs",
+                ROOT / "native" / "microcode" / "Cargo.toml",
+                ROOT / "native" / "microcode" / "src" / "lib.rs",
+                ROOT / "native" / "microcode" / "src" / "bin" / "pmcu1_probe.rs",
                 ROOT / "native" / "manifest" / "Cargo.toml",
                 ROOT / "native" / "manifest" / "README.md",
                 ROOT / "native" / "manifest" / "src" / "lib.rs",
@@ -3533,6 +3551,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runs" / "native_initial_system_readiness.json",
                 ROOT / "runs" / "native_recovery_readiness.json",
                 ROOT / "runs" / "native_symbol_readiness.json",
+                ROOT / "runs" / "native_microcode_readiness.json",
                 ROOT / "runs" / "native_system_manifest_readiness.json",
                 ROOT / "runs" / "native_boot_handoff_readiness.json",
                 ROOT / "runs" / "native_boot_config_readiness.json",
@@ -3565,6 +3584,15 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "specs" / "fixtures" / "psym1-minimal.bin",
                 ROOT / "specs" / "fixtures" / "psym1-boundary.bin",
                 ROOT / "tests" / "test_native_symbols.py",
+                ROOT / "specs" / "native-microcode-contract.json",
+                ROOT / "specs" / "native-microcode-contract.schema.json",
+                ROOT / "specs" / "native-microcode-golden-vectors.json",
+                ROOT / "specs" / "native-microcode-golden-vectors.schema.json",
+                ROOT / "specs" / "native-microcode-readiness.schema.json",
+                ROOT / "specs" / "fixtures" / "pmcu1-canonical.bin",
+                ROOT / "specs" / "fixtures" / "pmcu1-minimal.bin",
+                ROOT / "specs" / "fixtures" / "pmcu1-boundary.bin",
+                ROOT / "tests" / "test_native_microcode.py",
                 ROOT / "specs" / "native-boot-digest-provider.json",
                 ROOT / "specs" / "native-boot-digest-provider.schema.json",
                 ROOT / "specs" / "native-system-manifest-contract.json",
@@ -3672,6 +3700,7 @@ def main(argv: list[str] | None = None) -> int:
     checks.append(check_native_initial_system_readiness())
     checks.append(check_native_recovery_readiness())
     checks.append(check_native_symbol_readiness())
+    checks.append(check_native_microcode_readiness())
     checks.append(check_native_system_manifest_readiness())
     checks.append(check_native_boot_handoff_readiness())
     checks.append(check_native_boot_config_readiness())

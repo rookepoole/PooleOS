@@ -196,6 +196,18 @@ ADDED_REQUIREMENTS = [
         ],
     },
     {
+        "id": "ADD-BOOT-008",
+        "phase_id": "N5",
+        "requirement": "Define the processor-microcode payload as a deterministic package around opaque vendor-authenticated bytes, bound to exact vendor and CPUID identity, platform selectors, per-patch digests, security and authenticated rollback floors, revocation state, redistribution policy, and target-hardware evidence; require highest-eligible normal selection, reset-based exact known-good recovery without in-session downgrade, early bootstrap-processor and application-processor sequencing before affected features or user scheduling, complete per-processor post-apply revision and CPUID verification, mixed-revision fail-closed handling, durable receipts, independent no_std Rust/Python differential evidence, and an explicit PooleKernel authority gate before any real payload is staged or applied.",
+        "basis": [
+            "Cycle 111 PMCU1 microcode-package and apply-policy qualification",
+            "https://www.amd.com/content/dam/amd/en/documents/processor-tech-docs/revision-guides/58251.pdf",
+            "https://www.amd.com/content/dam/amd/en/documents/processor-tech-docs/programmer-references/24593.pdf",
+            "https://www.intel.com/content/www/us/en/developer/articles/technical/software-security-guidance/best-practices/microcode-update-guidance.html",
+            "https://uefi.org/specs/PI/1.8/V2_DXE_Boot_Services_Protocols.html",
+        ],
+    },
+    {
         "id": "ADD-BOOT-002",
         "phase_id": "N6",
         "requirement": "Model UEFI PK, KEK, db, dbx, image signer revocation, minimum secure version, authenticated boot state, recovery-key rotation, and development-key containment as one boot-trust state machine.",

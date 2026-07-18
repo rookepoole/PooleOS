@@ -1,0 +1,102 @@
+{
+  "activation_preconditions": [
+    "outer role, version, payload digest, and file digest match",
+    "outer, inner, manifest, and vendor trust checks pass",
+    "redistribution or user-supplied intake is approved",
+    "revocation and rollback state is authenticated and monotonic",
+    "exact trusted CPU identity and per-processor revision observations exist",
+    "all processors are inventoried, homogeneous, and quiesced",
+    "execution is the early PooleKernel stage before affected features and user work",
+    "payload, patch, processor, and receipt capacities are sufficient",
+    "an explicit kernel apply authority exists",
+    "no firmware mutation or physical-media write is requested"
+  ],
+  "apply_sequence": [
+    "verify outer, inner, manifest, vendor, revocation, license, and hardware evidence",
+    "stage immutable aligned bytes without granting authority",
+    "PooleKernel revalidates identity, digest, revision, capacity, and apply authority",
+    "apply on the bootstrap processor before affected features are enabled",
+    "apply on every application processor before it enters the online scheduling set",
+    "read every processor revision and reject mixed, lower, revoked, or failed state",
+    "rerun CPUID and mitigation policy before user scheduling",
+    "persist an exact receipt and preserve reset-based known-good recovery"
+  ],
+  "artifact_kind": "pooleos_native_microcode_contract",
+  "claim_boundary": [
+    "PMCU1 is not owner-ratified and is not a stable ABI.",
+    "Parsing, selection, and verification planning grant no CPU or kernel authority.",
+    "Opaque vendor bytes are not interpreted or authenticated by the PMCU1 parser.",
+    "All checked-in payloads and revisions are synthetic and must never be applied.",
+    "No privileged MSR or microcode-revision probe is performed.",
+    "No WRMSR, firmware call, driver load, CPU rendezvous, or update is implemented.",
+    "Rollback means reset-based known-good selection, never in-session downgrade.",
+    "Development artifacts are unsigned and fail the apply-plan gate.",
+    "No firmware setting, physical disk, media, or boot state is modified.",
+    "Synthetic all-true qualification is test scaffolding, not trust evidence.",
+    "N5 exit, physical qualification, ISO, and production readiness remain open."
+  ],
+  "claims": {
+    "bounded_selection_implemented": true,
+    "format_frozen": true,
+    "microcode_applied": false,
+    "no_std_parser_implemented": true,
+    "pooleboot_enforcement": false,
+    "poolekernel_enforcement": false,
+    "post_apply_verification_model_implemented": true,
+    "privileged_revision_observed": false,
+    "production_ready": false,
+    "python_oracle_implemented": true,
+    "vendor_container_parser_implemented": false,
+    "vendor_payload_included": false
+  },
+  "contract_id": "PMCU1",
+  "layout": {
+    "body_digest": "SHA-256",
+    "byte_order": "little_endian",
+    "header_bytes": 512,
+    "header_digest": "SHA-256 with self field zeroed",
+    "maximum_bundle_bytes": 1048448,
+    "maximum_patch_bytes": 524288,
+    "maximum_patch_count": 32,
+    "patch_record_bytes": 128,
+    "payload_alignment": 16,
+    "payload_digest": "SHA-256 per opaque vendor payload"
+  },
+  "production_ready": false,
+  "research_basis": [
+    "https://www.amd.com/en/products/processors/desktops/ryzen/9000-series/amd-ryzen-7-9800x3d.html",
+    "https://www.amd.com/content/dam/amd/en/documents/processor-tech-docs/revision-guides/58251.pdf",
+    "https://www.amd.com/content/dam/amd/en/documents/processor-tech-docs/programmer-references/24593.pdf",
+    "https://www.intel.com/content/www/us/en/developer/articles/technical/software-security-guidance/best-practices/microcode-update-guidance.html",
+    "https://www.intel.com/content/www/us/en/developer/articles/technical/software-security-guidance/secure-coding/minimum-runtime-ucode-update-revision.html",
+    "https://uefi.org/specs/PI/1.8/V2_DXE_Boot_Services_Protocols.html"
+  ],
+  "schema_version": "1.0",
+  "selection_policy": {
+    "already_equal_or_newer": "verify and skip",
+    "downgrade": "never in session",
+    "mixed_revision": "fatal or quarantined before user scheduling",
+    "normal": "highest eligible non-revoked revision at or above authenticated floors",
+    "previous_known_good": "exact known-good record only",
+    "recovery_from_newer_revision": "reset then select authenticated known-good package when platform behavior permits"
+  },
+  "status": "candidate_pre_abi_non_promoting",
+  "target": {
+    "architecture": "x86_64",
+    "cpuid_signature": "0x00B40F40",
+    "decoded_family": "0x1A",
+    "decoded_model": "0x44",
+    "decoded_stepping": "0x0",
+    "hardware_profile": "TIER1-B650M-9800X3D-RTX5070-001",
+    "identity_status": "user_mode_cpuid_observed_privileged_revision_open",
+    "vendor_id": "AuthenticAMD"
+  },
+  "vendor_container_policy": {
+    "checked_in_payloads": "synthetic_test_only_never_apply",
+    "profile": "amd_opaque_signed_patch",
+    "redistribution_or_user_supplied_intake_must_be_approved": true,
+    "vendor_bytes_interpreted_by_pmcu1_parser": false,
+    "vendor_container_validator_required_before_apply": true,
+    "vendor_signature_or_processor_authentication_required": true
+  }
+}

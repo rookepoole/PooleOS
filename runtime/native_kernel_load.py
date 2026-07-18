@@ -18,6 +18,7 @@ from runtime import (
     native_initial_system,
     native_kernel_map,
     native_live_boot_handoff,
+    native_microcode,
     native_pooleboot,
     native_recovery,
     native_symbols,
@@ -139,6 +140,9 @@ IMPLEMENTATION_INPUTS = (
     "native/kmap/src/lib.rs",
     "native/livehandoff/Cargo.toml",
     "native/livehandoff/src/lib.rs",
+    "native/microcode/Cargo.toml",
+    "native/microcode/src/lib.rs",
+    "native/microcode/src/bin/pmcu1_probe.rs",
     "native/recovery/Cargo.toml",
     "native/recovery/src/lib.rs",
     "native/recovery/src/bin/prec1_probe.rs",
@@ -154,6 +158,7 @@ IMPLEMENTATION_INPUTS = (
     "runtime/native_elf_loader.py",
     "runtime/native_kernel_image.py",
     "runtime/native_initial_system.py",
+    "runtime/native_microcode.py",
     "runtime/native_recovery.py",
     "runtime/native_symbols.py",
     "runtime/native_kernel_load.py",
@@ -190,6 +195,16 @@ IMPLEMENTATION_INPUTS = (
     "specs/fixtures/psym1-minimal.bin",
     "specs/fixtures/psym1-boundary.bin",
     "runs/native_symbol_readiness.json",
+    "docs/native-microcode-bundle.md",
+    "specs/native-microcode-contract.json",
+    "specs/native-microcode-contract.schema.json",
+    "specs/native-microcode-golden-vectors.json",
+    "specs/native-microcode-golden-vectors.schema.json",
+    "specs/native-microcode-readiness.schema.json",
+    "specs/fixtures/pmcu1-canonical.bin",
+    "specs/fixtures/pmcu1-minimal.bin",
+    "specs/fixtures/pmcu1-boundary.bin",
+    "runs/native_microcode_readiness.json",
     "specs/native-kernel-load-contract.json",
     "specs/native-kernel-load-contract.schema.json",
     "specs/native-kernel-load-readiness.schema.json",
@@ -201,10 +216,13 @@ IMPLEMENTATION_INPUTS = (
     "tools/qualify_native_recovery.py",
     "tools/generate_native_symbol_vectors.py",
     "tools/qualify_native_symbols.py",
+    "tools/generate_native_microcode_vectors.py",
+    "tools/qualify_native_microcode.py",
     "tests/test_native_boot_artifact.py",
     "tests/test_native_initial_system.py",
     "tests/test_native_recovery.py",
     "tests/test_native_symbols.py",
+    "tests/test_native_microcode.py",
     "tests/test_native_live_boot_handoff.py",
 )
 
@@ -229,6 +247,8 @@ TRUE_CLAIMS = (
     "recovery_development_activation_denied",
     "symbols_inner_oracle_validated",
     "symbols_development_activation_denied",
+    "microcode_inner_oracle_validated",
+    "microcode_development_activation_denied",
     "artifact_set_manifest_sha256_matched",
     "artifact_pages_retained",
     "pbp1_profile_artifacts_cross_bound",
@@ -270,6 +290,8 @@ FALSE_CLAIMS = (
     "pooleboot_symbols_semantics_enforced",
     "poolekernel_symbols_activation_enforced",
     "symbols_consumed",
+    "pooleboot_microcode_semantics_enforced",
+    "poolekernel_microcode_apply_enforced",
     "microcode_applied",
     "all_pbp1_temporary_pools_released",
     "all_kmap_table_pages_released",
@@ -325,6 +347,9 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-KLOAD-SYMBOLS-INNER-SEMANTICS",
     "NEG-N5-KLOAD-SYMBOLS-INNER-VERSION",
     "NEG-N5-KLOAD-SYMBOLS-ACTIVATION-OVERREACH",
+    "NEG-N5-KLOAD-MICROCODE-INNER-SEMANTICS",
+    "NEG-N5-KLOAD-MICROCODE-INNER-VERSION",
+    "NEG-N5-KLOAD-MICROCODE-ACTIVATION-OVERREACH",
     "NEG-N5-KLOAD-MARKER-OMISSION",
     "NEG-N5-KLOAD-MARKER-ORDER",
     "NEG-N5-KLOAD-MARKER-CONFIG-BOUND",
@@ -588,6 +613,45 @@ def symbols_oracle(data: bytes, expected_version: int) -> dict[str, Any]:
     }
 
 
+def microcode_oracle(data: bytes, expected_version: int) -> dict[str, Any]:
+    artifact = native_boot_artifact.parse_bound(
+        data, native_boot_artifact.ROLE_MICROCODE, expected_version
+    )
+    _, bundle = native_boot_artifact.parse_microcode(data)
+    errors = native_microcode.apply_plan_errors(
+        bundle,
+        native_microcode.development_apply_context(
+            bundle, outer_file_sha256=artifact.file_sha256
+        ),
+    )
+    if not errors or errors[0] != "pmcu_activation_outer_signature":
+        raise KernelLoadError("PMCU1 development activation boundary changed")
+    return {
+        "contract_id": native_microcode.CONTRACT_ID,
+        "summary": native_microcode.summary(bundle),
+        "bundle_sha256": hashlib.sha256(bundle.raw).hexdigest().upper(),
+        "bundle_version": native_microcode.MAJOR_VERSION,
+        "patch_count": len(bundle.patches),
+        "security_revision_floor": bundle.security_revision_floor,
+        "known_good_revision": bundle.known_good_revision,
+        "preferred_revision": bundle.preferred_revision,
+        "outer_payload_sha256": artifact.payload_sha256,
+        "activation_allowed": False,
+        "activation_errors": list(errors),
+        "validated_by": "independent_host_media_oracle",
+        "pooleboot_enforced": False,
+        "poolekernel_enforced": False,
+        "vendor_container_validated": False,
+        "production_vendor_payload_included": False,
+        "privileged_revision_observed": False,
+        "microcode_applied": False,
+        "firmware_mutated": False,
+        "physical_media_written": False,
+        "synthetic_payloads_only": True,
+        "authority_created": False,
+    }
+
+
 def canonical_manifest_bytes(
     kernel_data: bytes, artifact_files: dict[str, bytes] | None = None
 ) -> bytes:
@@ -621,6 +685,8 @@ def canonical_manifest_bytes(
             recovery_oracle(data, 1)
         elif role == native_boot_artifact.ROLE_SYMBOLS:
             symbols_oracle(data, 1)
+        elif role == native_boot_artifact.ROLE_MICROCODE:
+            microcode_oracle(data, 1)
         artifacts.append(
             native_system_manifest.Artifact(
                 id=artifact_id,
@@ -753,6 +819,8 @@ def build_media_bytes(
                 recovery_oracle(artifact_data, profile[index].version)
             elif role == native_boot_artifact.ROLE_SYMBOLS:
                 symbols_oracle(artifact_data, profile[index].version)
+            elif role == native_boot_artifact.ROLE_MICROCODE:
+                microcode_oracle(artifact_data, profile[index].version)
         kernel_plan, _ = native_elf_loader.load(
             kernel_data,
             PHYSICAL_ORACLE_BASE,
@@ -768,6 +836,7 @@ def build_media_bytes(
         native_initial_system.InitialSystemError,
         native_recovery.RecoveryError,
         native_symbols.SymbolError,
+        native_microcode.MicrocodeError,
         StopIteration,
     ) as error:
         raise KernelLoadError(f"PKLOAD6 input validation failed: {error}") from error
@@ -1031,6 +1100,8 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
                 recovery_oracle(artifact_data, profile[index].version)
             elif role == native_boot_artifact.ROLE_SYMBOLS:
                 symbols_oracle(artifact_data, profile[index].version)
+            elif role == native_boot_artifact.ROLE_MICROCODE:
+                microcode_oracle(artifact_data, profile[index].version)
         kernel_plan, loaded = native_elf_loader.load(
             kernel_data,
             PHYSICAL_ORACLE_BASE,
@@ -1045,6 +1116,7 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
         native_initial_system.InitialSystemError,
         native_recovery.RecoveryError,
         native_symbols.SymbolError,
+        native_microcode.MicrocodeError,
         StopIteration,
         KeyError,
         IndexError,
@@ -1164,6 +1236,9 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
     )
     base["symbols"] = symbols_oracle(
         artifact_files[SYMBOLS_PATH], profile[3].version
+    )
+    base["microcode"] = microcode_oracle(
+        artifact_files[MICROCODE_PATH], profile[4].version
     )
     base["fat32"]["cluster_count"] = cluster_count
     return base
@@ -1623,6 +1698,25 @@ def validate_oracle_binding(
         or symbols["activation_errors"][0] != "psym_activation_outer_signature"
     ):
         raise KernelLoadError("PSYM1 oracle or activation boundary changed")
+    microcode = media_inspection.get("microcode", {})
+    if (
+        microcode.get("contract_id") != native_microcode.CONTRACT_ID
+        or microcode.get("validated_by") != "independent_host_media_oracle"
+        or microcode.get("activation_allowed") is not False
+        or microcode.get("pooleboot_enforced") is not False
+        or microcode.get("poolekernel_enforced") is not False
+        or microcode.get("vendor_container_validated") is not False
+        or microcode.get("production_vendor_payload_included") is not False
+        or microcode.get("privileged_revision_observed") is not False
+        or microcode.get("microcode_applied") is not False
+        or microcode.get("firmware_mutated") is not False
+        or microcode.get("physical_media_written") is not False
+        or microcode.get("synthetic_payloads_only") is not True
+        or microcode.get("authority_created") is not False
+        or not microcode.get("activation_errors")
+        or microcode["activation_errors"][0] != "pmcu_activation_outer_signature"
+    ):
+        raise KernelLoadError("PMCU1 oracle or activation boundary changed")
     kernel_map = marker_summary["kernel_map"]
     expected_map = native_kernel_map.marker_expectation(
         plan, kernel_map["physical_address_bits"]
@@ -1817,6 +1911,8 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
         "recovery_readiness": native_recovery.READINESS_RELATIVE.as_posix(),
         "symbols_contract": native_symbols.CONTRACT_RELATIVE.as_posix(),
         "symbols_readiness": native_symbols.READINESS_RELATIVE.as_posix(),
+        "microcode_contract": native_microcode.CONTRACT_RELATIVE.as_posix(),
+        "microcode_readiness": native_microcode.READINESS_RELATIVE.as_posix(),
     }
     for name, path in expected_bindings.items():
         if not binding_matches(bindings.get(name), root, path):
@@ -1914,6 +2010,19 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
         else:
             if media.get("symbols") != expected_symbols:
                 errors.append("PKLOAD6 PSYM1 independent-oracle summary changed")
+        try:
+            expected_microcode = microcode_oracle(
+                canonical_artifact_files()[MICROCODE_PATH], 1
+            )
+        except (
+            KernelLoadError,
+            native_boot_artifact.BootArtifactError,
+            native_microcode.MicrocodeError,
+        ) as error:
+            errors.append(f"canonical PMCU1 oracle failed: {error}")
+        else:
+            if media.get("microcode") != expected_microcode:
+                errors.append("PKLOAD6 PMCU1 independent-oracle summary changed")
     runs = readiness.get("execution", {}).get("runs", [])
     marker_sets: list[list[str]] = []
     if not isinstance(runs, list) or len(runs) != 2:
