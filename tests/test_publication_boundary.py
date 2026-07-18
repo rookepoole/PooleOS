@@ -66,6 +66,7 @@ class PublicationBoundaryTests(unittest.TestCase):
             "runs/native_boot_handoff_readiness.json",
             "runs/native_elf_loader_readiness.json",
             "runs/native_firmware_readiness.json",
+            "runs/native_policy_readiness.json",
             "runs/native_initial_system_readiness.json",
             "runs/native_kernel_entry_readiness.json",
             "runs/native_kernel_load_readiness.json",

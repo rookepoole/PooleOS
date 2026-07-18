@@ -120,7 +120,7 @@ halts permanently at `STOP BEFORE TRANSFER`.
 
 ## Qualified Evidence
 
-The Cycle 112 receipt records:
+The Cycle 113 receipt records:
 
 - 76/76 Rust host tests across PooleBoot, PBART1, PBC1/PSM1/PKELF1/PBP1, PKMAP2,
   PBEXIT1, and PKENTRY1;
@@ -131,7 +131,7 @@ The Cycle 112 receipt records:
 - exact static GOP frames;
 - exact 4,728-byte post-exit PBP1 reconstruction with 95 memory entries and
   seven artifact descriptors;
-- six PBART1 files totaling 5,593 bytes and six retained pages, independently
+- six PBART1 files totaling 8,761 bytes and six retained pages, independently
   cross-bound to PSM1, guest markers, and final PBP1;
 - exact PINIT1 host-oracle validation of the 1,764-byte payload, deterministic
   start order `1,2,3`, and mandatory development activation denial;
@@ -150,8 +150,13 @@ The Cycle 112 receipt records:
   three external-payload components, two dependency edges, exact hardware and
   version floors, one-at-a-time dry-run ordering, post-reset receipt rules, and
   mandatory development activation denial;
-- 127/127 integrated negative controls, including PINIT1, PREC1, PSYM1, PMCU1,
-  and PFWM1 inner
+- exact qualification-only PPOL1 host-oracle validation of the 1,984-byte
+  payload, six exact modes, eleven PINIT1-cross-bound capability rules,
+  default-deny authority intersection, safe/recovery floors, firmware
+  physical-presence separation, durable receipt rules, and mandatory
+  development activation denial;
+- 130/130 integrated negative controls, including PINIT1, PREC1, PSYM1, PMCU1,
+  PFWM1, and PPOL1 inner
   semantic mutation, outer/inner version mismatch, activation overreach,
   artifact omission, path, role, version,
   payload digest, whole-file digest, overlap, signature overclaim, final-map
@@ -168,22 +173,23 @@ receipt does not claim that this OVMF run naturally produced a stale map key.
 PKLOAD6 does not authenticate PSM1 or any loaded artifact, enforce authenticated
 persistent rollback,
 establish the final active kernel address space or framebuffer cache policy,
-switch to the guarded stack, call PooleKernel, enforce PINIT1, PREC1, PSYM1, PMCU1, or PFWM1
+switch to the guarded stack, call PooleKernel, enforce PINIT1, PREC1, PSYM1, PMCU1, PFWM1, or PPOL1
 in PooleBoot, persist PREC1 mutable state, activate or execute the initial
 system or recovery in PooleKernel, consume symbols or create diagnostic
 authority, validate a real vendor microcode or firmware payload, observe privileged
 per-processor revisions or live firmware inventory, load an updater, apply microcode or
-firmware, enforce policy payloads, enforce Secure
+firmware, create a capability, apply a policy decision, grant PooleGlyph
+executable authority, enforce Secure
 Boot, perform measured boot, test a second host, test target firmware, touch
 physical media, satisfy N5, or establish production readiness.
 
 The next chronological owner-independent move is
-`N5-POLICY-SEMANTICS-001`: define and independently validate the role-7 policy
-format's scope, precedence, default-deny behavior, capability attenuation,
-version and rollback binding, safe/recovery overrides, and audit rules without
-enforcing policy in PooleBoot or PooleKernel. Transfer-state,
-signature-trust, and production
-transfer remain separately gated by the N5/N6 and owner-controlled N0 work.
+`N5-INNER-ENFORCEMENT-001`: integrate the six frozen inner validators into live
+PooleBoot, authenticate and persist their required state, enforce exact
+cross-bindings and fail-closed decisions before exit, and pass only authorized
+attenuated inputs toward PooleKernel. Capability creation, lifecycle execution,
+transfer state, signature trust, and production transfer remain separately
+gated by the N5/N6 and owner-controlled N0 work.
 
 ## Primary Reference
 

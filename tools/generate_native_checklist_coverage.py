@@ -220,6 +220,21 @@ ADDED_REQUIREMENTS = [
         ],
     },
     {
+        "id": "ADD-BOOT-010",
+        "phase_id": "N5",
+        "requirement": "Define the role-7 system policy as a deterministic, bounded, default-deny contract whose effective authority is the intersection of the compiled-in ceiling, authenticated policy, selected boot mode, issued capability, and request; require exact PINIT1 route cross-binding, monotonic attenuation, immutable safe and recovery floors, separate physical-presence and firmware authority, authenticated version and rollback state, durable decision receipts, independent allocation-free Rust/Python hostile and differential evidence, and explicit separation from PooleGlyph metadata before any PooleBoot or PooleKernel enforcement, capability creation, state mutation, executable transfer, or physical-media action.",
+        "basis": [
+            "Cycle 113 PPOL1 policy-bundle and authority-intersection qualification",
+            "https://docs.sel4.systems/projects/capdl/lang-spec.html",
+            "https://fuchsia.dev/fuchsia-src/concepts/components/v2/capabilities",
+            "https://fuchsia.dev/fuchsia-src/concepts/components/v2/lifecycle",
+            "https://uefi.org/specs/UEFI/2.11/03_Boot_Manager.html",
+            "https://theupdateframework.github.io/specification/v1.0.35/",
+            "https://csrc.nist.gov/pubs/sp/800/193/final",
+            "https://csrc.nist.gov/pubs/sp/800/207/final",
+        ],
+    },
+    {
         "id": "ADD-BOOT-002",
         "phase_id": "N6",
         "requirement": "Model UEFI PK, KEK, db, dbx, image signer revocation, minimum secure version, authenticated boot state, recovery-key rotation, and development-key containment as one boot-trust state machine.",
@@ -490,7 +505,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path, default=ROOT / SOURCE_RELATIVE)
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pooleos_native_checklist_coverage.json")
-    parser.add_argument("--status-date", default="2026-07-17")
+    parser.add_argument("--status-date", default="2026-07-18")
     args = parser.parse_args()
     artifact = build_coverage(args.source, args.status_date)
     args.out.parent.mkdir(parents=True, exist_ok=True)

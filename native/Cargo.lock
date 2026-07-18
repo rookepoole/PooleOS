@@ -133,6 +133,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "poole-policy"
+version = "0.0.0"
+dependencies = [
+ "poole-initial-system",
+ "sha2",
+]
+
+[[package]]
 name = "poole-recovery"
 version = "0.0.0"
 dependencies = [

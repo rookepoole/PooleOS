@@ -16,6 +16,7 @@ members = [
   "livehandoff",
   "manifest",
   "microcode",
+  "policy",
   "recovery",
   "symbols",
 ]
