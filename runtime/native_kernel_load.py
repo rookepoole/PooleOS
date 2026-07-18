@@ -19,6 +19,7 @@ from runtime import (
     native_kernel_map,
     native_live_boot_handoff,
     native_pooleboot,
+    native_recovery,
     native_system_manifest,
 )
 from runtime.schema_validation import validate_json
@@ -137,6 +138,9 @@ IMPLEMENTATION_INPUTS = (
     "native/kmap/src/lib.rs",
     "native/livehandoff/Cargo.toml",
     "native/livehandoff/src/lib.rs",
+    "native/recovery/Cargo.toml",
+    "native/recovery/src/lib.rs",
+    "native/recovery/src/bin/prec1_probe.rs",
     "native/bootexit/Cargo.toml",
     "native/bootexit/README.md",
     "native/bootexit/src/lib.rs",
@@ -146,6 +150,7 @@ IMPLEMENTATION_INPUTS = (
     "runtime/native_elf_loader.py",
     "runtime/native_kernel_image.py",
     "runtime/native_initial_system.py",
+    "runtime/native_recovery.py",
     "runtime/native_kernel_load.py",
     "runtime/native_kernel_map.py",
     "runtime/native_live_boot_handoff.py",
@@ -161,6 +166,15 @@ IMPLEMENTATION_INPUTS = (
     "specs/native-initial-system-golden-vectors.schema.json",
     "specs/native-initial-system-readiness.schema.json",
     "runs/native_initial_system_readiness.json",
+    "docs/native-recovery-bundle.md",
+    "specs/native-recovery-contract.json",
+    "specs/native-recovery-contract.schema.json",
+    "specs/native-recovery-golden-vectors.json",
+    "specs/native-recovery-golden-vectors.schema.json",
+    "specs/native-recovery-readiness.schema.json",
+    "specs/fixtures/prec1-canonical.bin",
+    "specs/fixtures/prec1-canonical-state.bin",
+    "runs/native_recovery_readiness.json",
     "specs/native-kernel-load-contract.json",
     "specs/native-kernel-load-contract.schema.json",
     "specs/native-kernel-load-readiness.schema.json",
@@ -168,8 +182,11 @@ IMPLEMENTATION_INPUTS = (
     "specs/native-kernel-map-contract.schema.json",
     "tools/qualify_native_pooleboot.py",
     "tools/qualify_native_kernel_load.py",
+    "tools/generate_native_recovery_vectors.py",
+    "tools/qualify_native_recovery.py",
     "tests/test_native_boot_artifact.py",
     "tests/test_native_initial_system.py",
+    "tests/test_native_recovery.py",
     "tests/test_native_live_boot_handoff.py",
 )
 
@@ -190,6 +207,8 @@ TRUE_CLAIMS = (
     "pbart1_role_version_payload_digest_validated",
     "initial_system_inner_oracle_validated",
     "initial_system_development_activation_denied",
+    "recovery_inner_oracle_validated",
+    "recovery_development_activation_denied",
     "artifact_set_manifest_sha256_matched",
     "artifact_pages_retained",
     "pbp1_profile_artifacts_cross_bound",
@@ -225,6 +244,9 @@ FALSE_CLAIMS = (
     "pooleboot_initial_system_semantics_enforced",
     "poolekernel_initial_system_activation_enforced",
     "initial_system_executed",
+    "pooleboot_recovery_semantics_enforced",
+    "poolekernel_recovery_activation_enforced",
+    "recovery_executed",
     "microcode_applied",
     "all_pbp1_temporary_pools_released",
     "all_kmap_table_pages_released",
@@ -274,6 +296,9 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-KLOAD-INITIAL-SYSTEM-INNER-SEMANTICS",
     "NEG-N5-KLOAD-INITIAL-SYSTEM-INNER-VERSION",
     "NEG-N5-KLOAD-INITIAL-SYSTEM-ACTIVATION-OVERREACH",
+    "NEG-N5-KLOAD-RECOVERY-INNER-SEMANTICS",
+    "NEG-N5-KLOAD-RECOVERY-INNER-VERSION",
+    "NEG-N5-KLOAD-RECOVERY-ACTIVATION-OVERREACH",
     "NEG-N5-KLOAD-MARKER-OMISSION",
     "NEG-N5-KLOAD-MARKER-ORDER",
     "NEG-N5-KLOAD-MARKER-CONFIG-BOUND",
@@ -475,6 +500,36 @@ def initial_system_oracle(data: bytes, expected_version: int) -> dict[str, Any]:
     }
 
 
+def recovery_oracle(data: bytes, expected_version: int) -> dict[str, Any]:
+    artifact = native_boot_artifact.parse_bound(
+        data, native_boot_artifact.ROLE_RECOVERY, expected_version
+    )
+    _, bundle = native_boot_artifact.parse_recovery(data)
+    errors = native_recovery.activation_errors(
+        bundle, native_recovery.development_activation_context()
+    )
+    if not errors or errors[0] != "prec_activation_outer_signature":
+        raise KernelLoadError("PREC1 development activation boundary changed")
+    return {
+        "contract_id": native_recovery.CONTRACT_ID,
+        "summary": native_recovery.summary(bundle),
+        "bundle_sha256": native_recovery.sha256_bytes(bundle.raw),
+        "bundle_version": bundle.bundle_version,
+        "slot_count": len(bundle.slots),
+        "failure_rule_count": len(bundle.failure_rules),
+        "authority_rule_count": len(bundle.authority_rules),
+        "max_attempts": bundle.max_attempts,
+        "mutable_state_bytes": native_recovery.STATE_BYTES,
+        "outer_payload_sha256": artifact.payload_sha256,
+        "activation_allowed": False,
+        "activation_errors": list(errors),
+        "validated_by": "independent_host_media_oracle",
+        "pooleboot_enforced": False,
+        "poolekernel_enforced": False,
+        "recovery_executed": False,
+    }
+
+
 def canonical_manifest_bytes(
     kernel_data: bytes, artifact_files: dict[str, bytes] | None = None
 ) -> bytes:
@@ -504,6 +559,8 @@ def canonical_manifest_bytes(
         native_boot_artifact.parse_bound(data, role, 1)
         if role == native_boot_artifact.ROLE_INITIAL_SYSTEM:
             initial_system_oracle(data, 1)
+        elif role == native_boot_artifact.ROLE_RECOVERY:
+            recovery_oracle(data, 1)
         artifacts.append(
             native_system_manifest.Artifact(
                 id=artifact_id,
@@ -632,6 +689,8 @@ def build_media_bytes(
             native_boot_artifact.parse_bound(artifact_data, role, profile[index].version)
             if role == native_boot_artifact.ROLE_INITIAL_SYSTEM:
                 initial_system_oracle(artifact_data, profile[index].version)
+            elif role == native_boot_artifact.ROLE_RECOVERY:
+                recovery_oracle(artifact_data, profile[index].version)
         kernel_plan, _ = native_elf_loader.load(
             kernel_data,
             PHYSICAL_ORACLE_BASE,
@@ -645,6 +704,7 @@ def build_media_bytes(
         native_elf_loader.ElfError,
         native_boot_artifact.BootArtifactError,
         native_initial_system.InitialSystemError,
+        native_recovery.RecoveryError,
         StopIteration,
     ) as error:
         raise KernelLoadError(f"PKLOAD6 input validation failed: {error}") from error
@@ -904,6 +964,8 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
             )
             if role == native_boot_artifact.ROLE_INITIAL_SYSTEM:
                 initial_system_oracle(artifact_data, profile[index].version)
+            elif role == native_boot_artifact.ROLE_RECOVERY:
+                recovery_oracle(artifact_data, profile[index].version)
         kernel_plan, loaded = native_elf_loader.load(
             kernel_data,
             PHYSICAL_ORACLE_BASE,
@@ -916,6 +978,7 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
         native_system_manifest.ManifestError,
         native_boot_artifact.BootArtifactError,
         native_initial_system.InitialSystemError,
+        native_recovery.RecoveryError,
         StopIteration,
         KeyError,
         IndexError,
@@ -1029,6 +1092,9 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
     }
     base["initial_system"] = initial_system_oracle(
         artifact_files[INITIAL_SYSTEM_PATH], profile[1].version
+    )
+    base["recovery"] = recovery_oracle(
+        artifact_files[RECOVERY_PATH], profile[2].version
     )
     base["fat32"]["cluster_count"] = cluster_count
     return base
@@ -1461,6 +1527,18 @@ def validate_oracle_binding(
         != "pinit_activation_outer_signature_verified"
     ):
         raise KernelLoadError("PINIT1 oracle or activation boundary changed")
+    recovery = media_inspection.get("recovery", {})
+    if (
+        recovery.get("contract_id") != native_recovery.CONTRACT_ID
+        or recovery.get("validated_by") != "independent_host_media_oracle"
+        or recovery.get("activation_allowed") is not False
+        or recovery.get("pooleboot_enforced") is not False
+        or recovery.get("poolekernel_enforced") is not False
+        or recovery.get("recovery_executed") is not False
+        or not recovery.get("activation_errors")
+        or recovery["activation_errors"][0] != "prec_activation_outer_signature"
+    ):
+        raise KernelLoadError("PREC1 oracle or activation boundary changed")
     kernel_map = marker_summary["kernel_map"]
     expected_map = native_kernel_map.marker_expectation(
         plan, kernel_map["physical_address_bits"]
@@ -1587,7 +1665,7 @@ def _schema_errors(value: dict[str, Any], root: Path, schema_relative: str) -> l
 
 def contract_errors(contract: dict[str, Any], root: Path) -> list[str]:
     errors = _schema_errors(contract, root, CONTRACT_SCHEMA_RELATIVE)
-    if contract.get("phase_mapping") != ["N5.1", "N5.4", "N5.5", "N5.6", "N5.8"]:
+    if contract.get("phase_mapping") != ["N5.1", "N5.4", "N5.5", "N5.6", "N5.8", "N5.9"]:
         errors.append("PKLOAD6 phase mapping changed")
     if contract.get("required_negative_controls") != list(NEGATIVE_CONTROL_IDS):
         errors.append("PKLOAD6 negative-control register changed")
@@ -1651,6 +1729,8 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
         "digest_provider": native_system_manifest.DIGEST_PROVIDER_RELATIVE,
         "initial_system_contract": native_initial_system.CONTRACT_RELATIVE.as_posix(),
         "initial_system_readiness": native_initial_system.READINESS_RELATIVE.as_posix(),
+        "recovery_contract": native_recovery.CONTRACT_RELATIVE.as_posix(),
+        "recovery_readiness": native_recovery.READINESS_RELATIVE.as_posix(),
     }
     for name, path in expected_bindings.items():
         if not binding_matches(bindings.get(name), root, path):
@@ -1722,6 +1802,19 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
         else:
             if media.get("initial_system") != expected_initial_system:
                 errors.append("PKLOAD6 PINIT1 independent-oracle summary changed")
+        try:
+            expected_recovery = recovery_oracle(
+                canonical_artifact_files()[RECOVERY_PATH], 1
+            )
+        except (
+            KernelLoadError,
+            native_boot_artifact.BootArtifactError,
+            native_recovery.RecoveryError,
+        ) as error:
+            errors.append(f"canonical PREC1 oracle failed: {error}")
+        else:
+            if media.get("recovery") != expected_recovery:
+                errors.append("PKLOAD6 PREC1 independent-oracle summary changed")
     runs = readiness.get("execution", {}).get("runs", [])
     marker_sets: list[list[str]] = []
     if not isinstance(runs, list) or len(runs) != 2:

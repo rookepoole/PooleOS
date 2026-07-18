@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-recovery-golden-vectors.schema.json",
+  "title": "PooleOS PREC1 recovery golden vectors",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "contract_id",
+    "status",
+    "production_ready",
+    "vectors",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_recovery_golden_vectors"},
+    "contract_id": {"const": "PREC1"},
+    "status": {"const": "synthetic_non_promoting_golden_bytes"},
+    "production_ready": {"const": false},
+    "vectors": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "purpose",
+          "policy_byte_count",
+          "policy_sha256",
+          "policy_summary",
+          "policy_hex",
+          "state_byte_count",
+          "state_sha256",
+          "state_summary",
+          "state_hex",
+          "requested_mode",
+          "boot_nonce",
+          "decision_summary",
+          "next_state_hex"
+        ],
+        "properties": {
+          "id": {"type": "string"},
+          "purpose": {"type": "string"},
+          "policy_byte_count": {"const": 992},
+          "policy_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+          "policy_summary": {"type": "string", "pattern": "^OK;"},
+          "policy_hex": {"type": "string", "pattern": "^[0-9A-F]+$"},
+          "state_byte_count": {"const": 128},
+          "state_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+          "state_summary": {"type": "string", "pattern": "^OK;"},
+          "state_hex": {"type": "string", "pattern": "^[0-9A-F]+$"},
+          "requested_mode": {"type": "integer", "minimum": 0, "maximum": 6},
+          "boot_nonce": {"type": "integer", "minimum": 1},
+          "decision_summary": {"type": "string", "pattern": "^OK;"},
+          "next_state_hex": {"type": "string", "pattern": "^[0-9A-F]+$"}
+        }
+      }
+    },
+    "claim_boundary": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"type": "string"}
+    }
+  }
+}

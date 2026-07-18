@@ -1,0 +1,744 @@
+{
+  "artifact_kind": "pooleos_native_system_manifest_readiness",
+  "bindings": {
+    "contract": {
+      "byte_count": 6467,
+      "path": "specs/native-system-manifest-contract.json",
+      "sha256": "4C5E384D59696C851308355DB2C2116DAA9D0BC62ABF64E2EE3F8B9B09CA793C"
+    },
+    "contract_schema": {
+      "byte_count": 1810,
+      "path": "specs/native-system-manifest-contract.schema.json",
+      "sha256": "D4627EE9A80899AEB8F028FC88B10755A4C5725D93DE59D7AB7636A72192766A"
+    },
+    "digest_provider": {
+      "byte_count": 2998,
+      "path": "specs/native-boot-digest-provider.json",
+      "sha256": "26B0C3C0C4ECBC0C31EA2294388E1B160CD78AA5E530146763B62BD48B7C262D"
+    },
+    "digest_provider_schema": {
+      "byte_count": 1029,
+      "path": "specs/native-boot-digest-provider.schema.json",
+      "sha256": "96E168A9D674EEE844CBB3AB6F8224477A6FCB8D5F09D0CB32B8A96D6FE78774"
+    },
+    "golden_schema": {
+      "byte_count": 1423,
+      "path": "specs/native-system-manifest-golden-vectors.schema.json",
+      "sha256": "53C330215BE2DB1E80FFE5FD6717FB9801D06F29F7CA8D93D9D6D3511C847BD2"
+    },
+    "golden_vectors": {
+      "byte_count": 17845,
+      "path": "specs/native-system-manifest-golden-vectors.json",
+      "sha256": "807FE621CE924787382D6071CDFDA65ABAE81B054CC7195DB1C0919E737C460E"
+    },
+    "implementation_inputs": [
+      {
+        "byte_count": 539,
+        "path": "native/.cargo/config.toml",
+        "sha256": "7983881C5CAD2B909CCA64BFA7F5895EC56377B0E52967444CB2818A69FA4FE1"
+      },
+      {
+        "byte_count": 510,
+        "path": "native/Cargo.toml",
+        "sha256": "D9F54C1A6590AE56F5E4061319341E5463B45E857CC4024E1DBAAA349E2989B4"
+      },
+      {
+        "byte_count": 3351,
+        "path": "native/Cargo.lock",
+        "sha256": "678D2FFCC79D6B5D2C524BB15339847641C1B58D93C11B6B37F37B9DD51FAB29"
+      },
+      {
+        "byte_count": 348,
+        "path": "native/manifest/Cargo.toml",
+        "sha256": "611AD430FFB68757732B04F0E098ADFB9A0535EE8D25A1FD41C48306CA6EF4FE"
+      },
+      {
+        "byte_count": 26847,
+        "path": "native/manifest/src/lib.rs",
+        "sha256": "0885955BA8CA7F943D0E607BA4302D76660B38F541FA1B01A641DD6F534D4268"
+      },
+      {
+        "byte_count": 2864,
+        "path": "native/manifest/src/bin/psm1_probe.rs",
+        "sha256": "98596BBD25E963F7CB37E18E8EA725A2130B7BFF5ED4B6FC0C11E2FF426F48BD"
+      },
+      {
+        "byte_count": 320,
+        "path": "native/bootload/Cargo.toml",
+        "sha256": "FABFC29719E254475396C85D7064C5FB20EA1700CC1FEABB2DE0CB659CC66B12"
+      },
+      {
+        "byte_count": 32632,
+        "path": "native/bootload/src/lib.rs",
+        "sha256": "8389BB739D92164DD52F94126D04909A441C5862DB811AAF925D5BF8FB5399AC"
+      },
+      {
+        "byte_count": 32452,
+        "path": "native/boot/src/kload.rs",
+        "sha256": "A721D92180ED46E766B1BA43F4CE3653C6DB30D1C845780470DD829978F71FC4"
+      },
+      {
+        "byte_count": 31153,
+        "path": "runtime/native_system_manifest.py",
+        "sha256": "D2B44375B5BA06783CD2147FF1877C07858C285F0B0E9628CE157F46D02C6785"
+      },
+      {
+        "byte_count": 2998,
+        "path": "specs/native-boot-digest-provider.json",
+        "sha256": "26B0C3C0C4ECBC0C31EA2294388E1B160CD78AA5E530146763B62BD48B7C262D"
+      },
+      {
+        "byte_count": 1029,
+        "path": "specs/native-boot-digest-provider.schema.json",
+        "sha256": "96E168A9D674EEE844CBB3AB6F8224477A6FCB8D5F09D0CB32B8A96D6FE78774"
+      },
+      {
+        "byte_count": 6467,
+        "path": "specs/native-system-manifest-contract.json",
+        "sha256": "4C5E384D59696C851308355DB2C2116DAA9D0BC62ABF64E2EE3F8B9B09CA793C"
+      },
+      {
+        "byte_count": 1810,
+        "path": "specs/native-system-manifest-contract.schema.json",
+        "sha256": "D4627EE9A80899AEB8F028FC88B10755A4C5725D93DE59D7AB7636A72192766A"
+      },
+      {
+        "byte_count": 17845,
+        "path": "specs/native-system-manifest-golden-vectors.json",
+        "sha256": "807FE621CE924787382D6071CDFDA65ABAE81B054CC7195DB1C0919E737C460E"
+      },
+      {
+        "byte_count": 1423,
+        "path": "specs/native-system-manifest-golden-vectors.schema.json",
+        "sha256": "53C330215BE2DB1E80FFE5FD6717FB9801D06F29F7CA8D93D9D6D3511C847BD2"
+      },
+      {
+        "byte_count": 1797,
+        "path": "specs/native-system-manifest-readiness.schema.json",
+        "sha256": "4CCFFD019F0E9FF3A378876AD37A32DC0B27486AAD5B980761692DC7E5F98101"
+      },
+      {
+        "byte_count": 1205,
+        "path": "tools/generate_native_system_manifest_vectors.py",
+        "sha256": "524277E981E9BF7E618DBCFBBA849580BDCD6D30366A6986834482CE655A04FE"
+      },
+      {
+        "byte_count": 26539,
+        "path": "tools/qualify_native_boot_config.py",
+        "sha256": "4A4A99EFD0F0FFFC8FE47053DD7528CB0B5E473DECF6E93835C7DB041C24B432"
+      },
+      {
+        "byte_count": 26041,
+        "path": "tools/qualify_native_system_manifest.py",
+        "sha256": "BAEF7FC8C9DA068E67D1CAA607BC24499E744FEF58FA58AD63049E51F4701940"
+      },
+      {
+        "byte_count": 3280,
+        "path": "tests/test_native_system_manifest.py",
+        "sha256": "FDA55626A54C2CF132C21B918287AA1A9F6CA06F6A0F836CEE469912DB53E5AC"
+      }
+    ],
+    "readiness_schema": {
+      "byte_count": 1797,
+      "path": "specs/native-system-manifest-readiness.schema.json",
+      "sha256": "4CCFFD019F0E9FF3A378876AD37A32DC0B27486AAD5B980761692DC7E5F98101"
+    }
+  },
+  "claim_boundary": [
+    "PSM1 is a candidate parser and binding contract, not an owner-ratified stable ABI.",
+    "A SHA-256 match proves equality to manifest bytes only; this contract has no signature or trust anchor.",
+    "The minimum secure version is parsed and compared inside one manifest but no persistent rollback state is enforced.",
+    "Parser qualification does not prove live firmware file I/O; the separate PKLOAD2 receipt owns that claim.",
+    "No receipt here proves retained mappings, ExitBootServices, kernel entry, target firmware, or physical media.",
+    "No key is generated or used, and no signing, merge, tag, release, firmware mutation, or media write is authorized.",
+    "N5 and production readiness remain false."
+  ],
+  "claims": {
+    "canonical_manifest_grammar_defined": true,
+    "deterministic_differential_fuzz_executed": true,
+    "exit_boot_services_called": false,
+    "golden_semantic_agreement": true,
+    "hostile_controls_executed": true,
+    "independent_python_parser_executed": true,
+    "kernel_digest_verified": false,
+    "kernel_entry_called": false,
+    "kernel_pages_retained": false,
+    "live_manifest_file_opened": false,
+    "live_manifest_parsed_by_pooleboot": false,
+    "manifest_selected_kernel_path": false,
+    "manifest_signature_verified": false,
+    "manifest_trusted": false,
+    "measured_boot_performed": false,
+    "n5_exit_gate_satisfied": false,
+    "page_tables_activated": false,
+    "pooleboot_compile_time_dependency": true,
+    "production_ready": false,
+    "rollback_enforced": false,
+    "rust_no_std_parser_executed": true,
+    "secure_boot_enforced": false,
+    "sha256_standard_vectors_matched": true,
+    "target_firmware_tested": false
+  },
+  "contract_id": "PSM1",
+  "differential_fuzz": {
+    "acceptance_mismatch_count": 0,
+    "accepted_result_count": 9087,
+    "accepted_semantic_mismatch_count": 0,
+    "campaign_id": "PSM1-DIFF-1",
+    "case_count": 16384,
+    "corpus_published": false,
+    "rejected_result_count": 7297,
+    "seed": "0x50534D31",
+    "status": "pass"
+  },
+  "digest_qualification": {
+    "algorithm": "SHA-256",
+    "deterministic_differential_case_count": 1024,
+    "provider_contract": "PBDIGEST1",
+    "provider_promotion_allowed": false,
+    "python_hashlib_mismatch_count": 0,
+    "security_review_complete": false,
+    "standard_vector_count": 3,
+    "status": "pass"
+  },
+  "golden_vectors": [
+    {
+      "byte_count": 453,
+      "id": "minimal_kernel_v1",
+      "semantic_summary_matched": true,
+      "sha256": "1668165D5406DA883D5E006B39E9738364585840020A62AEFE612B6E5CEB73AF",
+      "status": "pass"
+    },
+    {
+      "byte_count": 774,
+      "id": "multi_artifact_v1",
+      "semantic_summary_matched": true,
+      "sha256": "7AE24C4A66F534954513F27D9BAC98E669C1629DF62FFF82F457115E741B94A5",
+      "status": "pass"
+    },
+    {
+      "byte_count": 5299,
+      "id": "bounded_maxima_v1",
+      "semantic_summary_matched": true,
+      "sha256": "CB9DEC2B4261B0FCC5DDD9B3FDDE8B33EC8E54ED32226B3084715287ED7FA773",
+      "status": "pass"
+    }
+  ],
+  "n5_exit_gate_satisfied": false,
+  "negative_controls": [
+    {
+      "id": "NEG-N5-PSM1-EMPTY",
+      "python_result": "ERR:manifest_empty",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_empty",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-OVERSIZED",
+      "python_result": "ERR:manifest_too_large",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_too_large",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-FINAL-LF",
+      "python_result": "ERR:manifest_missing_final_lf",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_missing_final_lf",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-NUL",
+      "python_result": "ERR:manifest_character",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_character",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-BOM",
+      "python_result": "ERR:manifest_character",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_character",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-CRLF",
+      "python_result": "ERR:manifest_character",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_character",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-NON-ASCII",
+      "python_result": "ERR:manifest_character",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_character",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-WHITESPACE",
+      "python_result": "ERR:manifest_character",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_character",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-EMPTY-LINE",
+      "python_result": "ERR:manifest_empty_line",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_empty_line",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-LINE-OVERSIZED",
+      "python_result": "ERR:manifest_line_too_long",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_line_too_long",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-LINE-COUNT",
+      "python_result": "ERR:manifest_too_many_lines",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_too_many_lines",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-MAGIC",
+      "python_result": "ERR:manifest_magic",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_magic",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-MAJOR-VERSION",
+      "python_result": "ERR:manifest_version",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_version",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-MINOR-VERSION",
+      "python_result": "ERR:manifest_version",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_version",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-NO-EQUALS",
+      "python_result": "ERR:manifest_syntax",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_syntax",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-EMPTY-KEY",
+      "python_result": "ERR:manifest_syntax",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_syntax",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-EMPTY-VALUE",
+      "python_result": "ERR:manifest_syntax",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_syntax",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-MULTIPLE-EQUALS",
+      "python_result": "ERR:manifest_syntax",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_syntax",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-DUPLICATE-STATIC",
+      "python_result": "ERR:manifest_duplicate_key",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_duplicate_key",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-DUPLICATE-ARTIFACT",
+      "python_result": "ERR:manifest_duplicate_key",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_duplicate_key",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-UNKNOWN-STATIC",
+      "python_result": "ERR:manifest_unknown_key",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_unknown_key",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-UNKNOWN-ARTIFACT",
+      "python_result": "ERR:manifest_unknown_key",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_unknown_key",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-HEADER-ORDER",
+      "python_result": "ERR:manifest_key_order",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_key_order",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-ARTIFACT-FIELD-ORDER",
+      "python_result": "ERR:manifest_key_order",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_key_order",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-TRUNCATED-HEADER",
+      "python_result": "ERR:manifest_truncated",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_truncated",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-TRUNCATED-ARTIFACT",
+      "python_result": "ERR:manifest_truncated",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_truncated",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-END-MISSING",
+      "python_result": "ERR:manifest_end_marker",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_end_marker",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-END-WRONG",
+      "python_result": "ERR:manifest_end_marker",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_end_marker",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-MANIFEST-ID",
+      "python_result": "ERR:manifest_identifier",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_identifier",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-SLOT-ZERO",
+      "python_result": "ERR:manifest_range",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_range",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-SLOT-HIGH",
+      "python_result": "ERR:manifest_range",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_range",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-SLOT-LEADING-ZERO",
+      "python_result": "ERR:manifest_number_canonical",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_number_canonical",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-MANIFEST-VERSION-ZERO",
+      "python_result": "ERR:manifest_range",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_range",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-VERSION-FLOOR",
+      "python_result": "ERR:manifest_version_floor",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_version_floor",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-COUNT-ZERO",
+      "python_result": "ERR:manifest_range",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_range",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-COUNT-HIGH",
+      "python_result": "ERR:manifest_range",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_range",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-COUNT-SHORT",
+      "python_result": "ERR:manifest_truncated",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_truncated",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-COUNT-EXTRA",
+      "python_result": "ERR:manifest_key_order",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_key_order",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-ARTIFACT-ID-START",
+      "python_result": "ERR:manifest_identifier",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_identifier",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-ARTIFACT-ID-LENGTH",
+      "python_result": "ERR:manifest_identifier",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_identifier",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-ARTIFACT-ORDER",
+      "python_result": "ERR:manifest_artifact_order",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_artifact_order",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-ARTIFACT-TYPE",
+      "python_result": "ERR:manifest_artifact_type",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_artifact_type",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-FORMAT",
+      "python_result": "ERR:manifest_format",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_format",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-ARTIFACT-VERSION-FLOOR",
+      "python_result": "ERR:manifest_version_floor",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_version_floor",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-PATH-RELATIVE",
+      "python_result": "ERR:manifest_path",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_path",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-PATH-ROOT",
+      "python_result": "ERR:manifest_path",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_path",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-PATH-SLASH",
+      "python_result": "ERR:manifest_path",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_path",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-PATH-TRAVERSAL",
+      "python_result": "ERR:manifest_path",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_path",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-PATH-EMPTY-SEGMENT",
+      "python_result": "ERR:manifest_path",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_path",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-PATH-LOWERCASE",
+      "python_result": "ERR:manifest_path",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_path",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-PATH-LENGTH",
+      "python_result": "ERR:manifest_path",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_path",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-FILE-ZERO",
+      "python_result": "ERR:manifest_range",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_range",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-FILE-HIGH",
+      "python_result": "ERR:manifest_range",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_range",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-IMAGE-HIGH",
+      "python_result": "ERR:manifest_range",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_range",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-DIGEST-LENGTH",
+      "python_result": "ERR:manifest_digest",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-DIGEST-LOWERCASE",
+      "python_result": "ERR:manifest_digest",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-ENTRY-CONTRACT",
+      "python_result": "ERR:manifest_entry_contract",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_entry_contract",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-KERNEL-FORMAT",
+      "python_result": "ERR:manifest_binding",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_binding",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-KERNEL-ENTRY",
+      "python_result": "ERR:manifest_binding",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_binding",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-KERNEL-IMAGE-ZERO",
+      "python_result": "ERR:manifest_binding",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_binding",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-KERNEL-MISSING",
+      "python_result": "ERR:manifest_kernel_count",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_kernel_count",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-KERNEL-DUPLICATE",
+      "python_result": "ERR:manifest_kernel_count",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_kernel_count",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-DUPLICATE-PATH",
+      "python_result": "ERR:manifest_duplicate_path",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_duplicate_path",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PSM1-OUTPUT-CAPACITY",
+      "python_result": "ERR:manifest_output_capacity",
+      "rejection_agreement": true,
+      "rust_result": "ERR:manifest_output_capacity",
+      "status": "pass"
+    }
+  ],
+  "open_items": [
+    "Ratify or replace PSM1 before treating it as a stable boot ABI.",
+    "Define signed manifest envelopes, trust anchors, algorithm agility, and revocation policy.",
+    "Persist and atomically enforce minimum secure version state across updates and rollback.",
+    "Complete independent cryptographic review of the vendored SHA-256 provider and target backend.",
+    "Prove live PSM1 file discovery, size bounds, parsing, path selection, and digest binding in PKLOAD2.",
+    "Load and authenticate initial-system, recovery, policy, symbols, microcode, firmware, and PooleGlyph artifacts.",
+    "Retain exact mappings, construct PBP1, exit boot services, and transfer to PooleKernel.",
+    "Qualify target firmware, physical hardware, a second clean builder, signing, ISO, installer, and recovery."
+  ],
+  "parser_qualification": {
+    "host_probe_artifact_identity_recorded": false,
+    "host_probe_byte_count": 160768,
+    "host_probe_role": "ephemeral host-only differential transport",
+    "no_std_target_builds": [
+      {
+        "byte_count": 103168,
+        "sha256": "3469E4C6D20FF117E789F707717ED164B4852E471245B5EBCFEB16C1DB3831AD",
+        "status": "pass",
+        "target": "x86_64-unknown-uefi"
+      },
+      {
+        "byte_count": 106342,
+        "sha256": "F305272CEC6948EAE9BE91C08E494CB0C5859CDDBA27E27883E1FA0A722AA250",
+        "status": "pass",
+        "target": "x86_64-unknown-none"
+      }
+    ],
+    "pooleboot_uefi_integration": {
+      "byte_count": 113664,
+      "sha256": "AE005F03751250E86D617A1224D912B543C2FE0607B1E26FD32D7D8E9ACF0115",
+      "status": "pass"
+    },
+    "rust_host_target": "x86_64-pc-windows-msvc",
+    "rust_host_test_count": 8,
+    "rust_host_test_pass_count": 8,
+    "rustc_version_sha256": "F3C960598A5E9037C4CF8E4AA06C018171ABF07C381D165C3986C6A954DEA1BB"
+  },
+  "phase_status": {
+    "N5": "partial",
+    "N5.1": "partial",
+    "N5.4": "partial",
+    "N5.5": "partial"
+  },
+  "production_promotion_allowed": false,
+  "production_ready": false,
+  "schema_version": "1.0",
+  "selected_move_id": "N5-MANIFEST-001",
+  "status": "pass_single_host_synthetic_non_promoting",
+  "status_date": "2026-07-17",
+  "summary": {
+    "differential_cases": 16384,
+    "digest_cases": 1027,
+    "golden_vectors_passed": 3,
+    "golden_vectors_total": 3,
+    "mismatch_count": 0,
+    "negative_controls_passed": 64,
+    "negative_controls_total": 64,
+    "no_std_target_builds_passed": 2,
+    "no_std_target_builds_total": 2,
+    "pooleboot_uefi_integration_builds_passed": 1,
+    "pooleboot_uefi_integration_builds_total": 1,
+    "production_claim_count": 0,
+    "rust_host_tests_passed": 8,
+    "rust_host_tests_total": 8
+  }
+}

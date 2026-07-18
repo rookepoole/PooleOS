@@ -133,9 +133,9 @@
         "sha256": "F8B6D491A28D72E3C9B36FAB5B24D446FBD67CD760A9A8B05C7774EB3A691DE5"
       },
       {
-        "byte_count": 4830,
+        "byte_count": 5168,
         "path": "docs/publication-boundary.md",
-        "sha256": "B88AE8ABA4451DC49CD4012ADF29B740D84EE05420D87DE40896E790DB8FF1D3"
+        "sha256": "C6379CF28735C4169582CC1A29F79B022E17BCC0922417822D9206FEB567A11A"
       }
     ],
     "objectives": {

@@ -100,6 +100,7 @@ SUBPHASE_OVERRIDES = {
     "N5.6": "partial",
     "N5.7": "partial",
     "N5.8": "partial",
+    "N5.9": "partial",
     "N6.4": "partial",
     "N6.5": "partial",
     "N6.6": "partial",
@@ -173,14 +174,17 @@ PHASE_EVIDENCE = {
         "docs/native-formal-models.md: frozen assumptions, reproduction, trace normalization, open domains, and explicit non-proof boundary",
     ],
     "N5": [
-        "specs/native-pooleboot-proof.json: POOLEOS-N5-POOLEBOOT-7 bounded unsigned aggregate contract across N5.1-N5.8",
+        "specs/native-pooleboot-proof.json: POOLEOS-N5-POOLEBOOT-7 bounded unsigned aggregate contract across N5.1-N5.9",
         "native/boot: Poole-authored no_std PE32+ UEFI application with reviewed firmware bindings, live bounded filesystem/config/kernel/PBART1 intake, GOP identity, retained PKMAP2 kernel/artifact/table/guarded-stack/handoff storage, final PBLIVE3 production, bounded PBEXIT1 retry, successful ExitBootServices, direct post-exit serial/debugcon diagnostics, and permanent stop before transfer",
         "native/artifact, runtime/native_boot_artifact.py, and docs/native-initial-system-profile.md: PBART1 fixed envelope, exact PBASET1 seven-role development profile, independent parser/oracle, role/version/payload/whole-file digest boundaries, and explicit no-signature/no-semantics contract",
         "specs/native-initial-system-contract.json and docs/native-initial-system-bundle.md: PINIT1 deterministic component, service, dependency, abstract-resource, attenuated-capability, lifecycle, transaction, rollback, and activation-separation contract",
         "native/initsys and runtime/native_initial_system.py: allocation-free no_std Rust validator plus independent Python encoder/oracle with declarations that cannot confer kernel authority",
         "runs/native_initial_system_readiness.json: 3/3 Rust tests, 2/2 no_std target builds, 3/3 golden vectors, 120/120 parser and activation controls, mandatory unsigned-development activation denial, and 16,384 Rust/Python differential cases with zero mismatches",
+        "specs/native-recovery-contract.json and docs/native-recovery-bundle.md: PREC1 immutable recovery policy, separately mutable boot-attempt state, exact A/B eligibility and known-good fallback, failure routing, authority separation, activation preconditions, and recovery-loop bounds",
+        "native/recovery and runtime/native_recovery.py: allocation-free no_std Rust validator and transition engine plus independent Python encoder, parser, state machine, receipt validator, and activation oracle",
+        "runs/native_recovery_readiness.json: 3/3 Rust tests, 2/2 no_std target builds, 3/3 golden policy/state/transition vectors, 144/144 controls, 16,384 parser/state and 8,192 transition differential cases with zero mismatches, and mandatory development activation denial",
         "runtime/native_kernel_load.py and tools/qualify_native_kernel_load.py: deterministic 64 MiB protective-MBR/GPT/FAT32 ordinary-file media with exact fallback EFI, PBC1 config, PSM1 system manifest, PKELF1 PooleKernel, six PBART1 artifacts, and no physical-media output mode",
-        "runs/native_pooleboot_readiness.json: 8/8 host tests, 2/2 exact 113,664-byte PE builds, 2/2 exact ten-file media generations, 2/2 exact QEMU/OVMF runs, twenty-three ordered markers, 2/2 serial/debugcon matches, 2/2 exact GOP frames, and 115/115 integrated hostile controls",
+        "runs/native_pooleboot_readiness.json: 8/8 host tests, 2/2 exact 113,664-byte PE builds, 2/2 exact ten-file media generations, 2/2 exact QEMU/OVMF runs, twenty-three ordered markers, 2/2 serial/debugcon matches, 2/2 exact GOP frames, and 118/118 integrated hostile controls",
         "docs/native-pooleboot-proof.md: reproduction procedure, observed firmware boundary, hostile corpus, exact evidence, and N5 nonclaims",
         "specs/native-boot-handoff-contract.json and docs/native-boot-handoff.md: canonical PBP1 little-endian header, descriptors, twelve typed records, x86-64 transfer state, ownership/lifetime rules, version negotiation, and explicit nonclaims",
         "native/handoff and runtime/native_boot_handoff.py: dependency-free no_std Rust codec plus independently implemented Python host oracle",
@@ -199,7 +203,7 @@ PHASE_EVIDENCE = {
         "native/bootload, native/boot/src/kload.rs, native/boot/src/kmap.rs, native/boot/src/exit.rs, native/bootexit, and runtime/native_kernel_load.py: dependency-free contracts, reviewed raw UEFI adapters, and independent media/map/exit oracle implementation",
         "specs/native-kernel-map-contract.json, native/kmap, runtime/native_kernel_map.py, and docs/native-kernel-map.md: PKMAP2 exact 4 KiB supervisor kernel mapping, guarded stack, read-only handoff, W^X/WP/NX, active-root audit, framebuffer preservation, retention, and nonclaim contract",
         "specs/native-boot-exit-contract.json, native/bootexit, runtime/native_boot_exit.py, and docs/native-boot-exit.md: PBEXIT1 final-map, current-key, bounded stale-key retry, no-post-attempt-service, no-post-exit-firmware, and permanent pre-transfer-stop contract",
-        "runs/native_kernel_load_readiness.json: 76/76 Rust host tests, 2/2 exact PooleBoot builds, 2/2 exact PooleKernel builds, 2/2 exact ten-file media generations, 2/2 QEMU/OVMF runs, 23 ordered markers, 115/115 integrated hostile controls, exact PINIT1 host-oracle binding with development activation denied, two exact 4,728-byte post-exit PBP1 reconstructions, exact 48-page kernel plus six artifact/table/stack/handoff retained-range agreement, successful ExitBootServices, zero later firmware calls, and exact guest/oracle agreement",
+        "runs/native_kernel_load_readiness.json: 76/76 Rust host tests, 2/2 exact PooleBoot builds, 2/2 exact PooleKernel builds, 2/2 exact ten-file media generations, 2/2 QEMU/OVMF runs, 23 ordered markers, 118/118 integrated hostile controls, exact PINIT1 and PREC1 host-oracle binding with development activation denied, two exact 4,728-byte post-exit PBP1 reconstructions, exact 48-page kernel plus six artifact/table/stack/handoff retained-range agreement, successful ExitBootServices, zero later firmware calls, and exact guest/oracle agreement",
     ],
     "N6": [
         "specs/native-kernel-entry-contract.json and docs/native-kernel-entry.md: PKENTRY1 transfer, mapping, diagnostic, panic, build, and explicit nonclaim boundary",
@@ -222,8 +226,8 @@ PHASE_EVIDENCE = {
         "Cycle 92 N34 machine-language co-development plan with six ADD-PGL requirements and explicit drift, Core IR, and IP flags",
     ],
     "N35": ["bounded static capability and trap simulations; no native containment"],
-    "N36": ["Cycle 108 host baseline: 624 tests with one Windows symlink-permission skip", "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, frozen owner-packet and completed owner-response omission/staleness/placeholder/custody/private-material/authorization controls, hardware privacy, malformed-CPUID, Tier 0 profile/provenance/path/overclaim, bounded-model multi-case mutation/trace/claim controls including six independent PooleFS mutants, deterministic GPT/FAT32 inspection, media path-policy rejection, PE mutation, marker/frame, PBP1, PBC1, PSM1, PBART1, PINIT1 parser/graph/activation, PKELF1, PKENTRY1, and PKLOAD6/PBLIVE3/PKMAP2/PBEXIT1 live-file/manifest/digest/allocation/final-map/retention/exit/firmware-boundary/oracle/claim controls, PooleGlyph roadmap bindings, Doctor external-report nonmutation, and collector-smoke negatives"],
-    "N37": ["Cycle 108 consistency release gate: 77/77 checks over 72 artifacts", "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, frozen N0 owner packet, deterministic owner-response receipt, native-toolchain, bounded hardware-readiness, native Tier 0 readiness, native model-readiness, bounded PooleBoot readiness, PBP1 readiness, PBC1 readiness, PSM1 readiness, PBART1 readiness, PINIT1 readiness, PKELF1 readiness, PKENTRY1 readiness, PKLOAD6/PKMAP2/PBEXIT1 readiness, and PooleGlyph planning artifacts"],
+    "N36": ["Cycle 109 host baseline: 643 tests with one Windows symlink-permission skip", "native binary parser, reproduction, leakage, malformed, substitution, objectives, ADR-signing, ratification-scope, frozen owner-packet and completed owner-response omission/staleness/placeholder/custody/private-material/authorization controls, hardware privacy, malformed-CPUID, Tier 0 profile/provenance/path/overclaim, bounded-model multi-case mutation/trace/claim controls including six independent PooleFS mutants, deterministic GPT/FAT32 inspection, media path-policy rejection, PE mutation, marker/frame, PBP1, PBC1, PSM1, PBART1, PINIT1 parser/graph/activation, PREC1 policy/state/transition/receipt/activation, PKELF1, PKENTRY1, and PKLOAD6/PBLIVE3/PKMAP2/PBEXIT1 live-file/manifest/digest/allocation/final-map/retention/exit/firmware-boundary/oracle/claim controls, PooleGlyph roadmap bindings, Doctor external-report nonmutation, and collector-smoke negatives"],
+    "N37": ["Cycle 109 consistency release gate: 78/78 checks over 73 artifacts", "content-addressed source, objectives-readiness, scope-hardened ADR-readiness, frozen N0 owner packet, deterministic owner-response receipt, native-toolchain, bounded hardware-readiness, native Tier 0 readiness, native model-readiness, bounded PooleBoot readiness, PBP1 readiness, PBC1 readiness, PSM1 readiness, PBART1 readiness, PINIT1 readiness, PREC1 readiness, PKELF1 readiness, PKENTRY1 readiness, PKLOAD6/PKMAP2/PBEXIT1 readiness, and PooleGlyph planning artifacts"],
 }
 
 
@@ -240,7 +244,7 @@ PHASE_GAPS = {
     "N2": ["Exact identity passes 24/24 required checks and 16 allowlisted user-mode CPUID records close the bounded CPUID sub-capability, but MSR access remains pending a reviewed privileged mechanism; seven required evidence channels, 15 exact standards artifact hashes, ten destructive-lab prerequisites, and native-parser comparison remain open"],
     "N3": ["One-host Rust PE32+/ELF64 qualification passes; second-host reproduction, source provenance, C17/assembly/ABI/image tools, complete build graph, and low-level safety gates remain open"],
     "N4": ["A pinned one-host q35/QEMU/OVMF/VIRTIO profile, paused-instantiation evidence, bounded checks for all seven required boot-slot/capability/virtual-memory/IPC/scheduler/update/PooleFS domains, and two bounded PooleBoot guest runs exist, but current upstream source rebuilds, debug-exit/GDB/reset/fault evidence, remaining VIRTIO profiles, malformed-device campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open"],
-    "N5": ["A reproducible unsigned PooleBoot, PBP1, PBC1, PSM1, PKELF1, PBART1, PINIT1, PKMAP2, PBEXIT1, and real PooleKernel path now loads and retains the exact seven-artifact development profile plus table/guarded-stack/handoff storage, independently validates the initial-system declaration graph while denying development activation, binds final post-exit PBP1 bytes to the successful memory map, calls ExitBootServices, proves zero later firmware calls, and stops before transfer; however, PooleBoot PINIT1 enforcement, PooleKernel activation, signature-backed trusted selection, persistent rollback enforcement, recovery/symbol/microcode/firmware/policy payload semantics, initial-system execution, microcode application, final framebuffer cache policy, menu/rollback policy, transferable kernel-entry PBP1, retained CR3/RSP installation, kernel consumption, second host, target firmware, physical media, and N5 exit remain open"],
+    "N5": ["A reproducible unsigned PooleBoot, PBP1, PBC1, PSM1, PKELF1, PBART1, PINIT1, PREC1, PKMAP2, PBEXIT1, and real PooleKernel path now loads and retains the exact seven-artifact development profile plus table/guarded-stack/handoff storage, independently validates the initial-system declarations and recovery policy/state transitions while denying development activation, binds final post-exit PBP1 bytes to the successful memory map, calls ExitBootServices, proves zero later firmware calls, and stops before transfer; however, PooleBoot PINIT1/PREC1 enforcement, PooleKernel activation or recovery execution, authenticated persistent rollback state, signature-backed trusted selection, symbol/microcode/firmware/policy payload semantics, initial-system execution, microcode application, final framebuffer cache policy, live menu/rollback policy, transferable kernel-entry PBP1, retained CR3/RSP installation, kernel consumption, second host, target firmware, physical media, and N5 exit remain open"],
     "N6": ["A reproducible real PooleKernel PKELF1 image, candidate PKENTRY1 intake, bounded ring/COM1/framebuffer diagnostics, and panic classes exist only as single-host product/static evidence; boot trust, measured boot, live mappings and transfer, framebuffer mapping proof, GDT/IDT/TSS, exception and retained-crash paths, kernel runtime, target execution, and N6 exit remain open"],
     "N7": ["No native CPU/descriptor/exception implementation exists"],
     "N8": ["No native APIC/timer/SMP implementation exists"],
@@ -300,6 +304,7 @@ FLAGS = [
     ("FLAG-N5-HANDOFF-EXIT-001", "REQUIRED", "N5", "Qualify retained kernel, page-table, guarded-stack, and immutable development-handoff ranges; final-map normalization and current-key binding; bounded ExitBootServices retry; zero post-exit firmware calls; and permanent stop before transfer without signature, entry, or N5-exit claims"),
     ("FLAG-N5-INIT-SYSTEM-001", "REQUIRED", "N5", "Qualify the exact seven-artifact PSM1 development profile, PBART1 role/version/payload envelope, whole-file digest binding, transactional page loading and cleanup, zero padding, retention, final-map coverage, and PBP1 cross-binding without signature, measurement, payload-semantics, execution, microcode, transfer, or N5-exit claims"),
     ("FLAG-N5-INIT-BUNDLE-001", "REQUIRED", "N5", "Qualify a deterministic initial-system declaration bundle with independent no_std Rust and Python validators, exact dependency and lifecycle ordering, abstract resources, attenuated capability routes, parser and activation hostile controls, declaration-versus-authority separation, and mandatory unsigned-development activation denial without claiming PooleBoot enforcement, PooleKernel activation, execution, or N5 exit"),
+    ("FLAG-N5-RECOVERY-BUNDLE-001", "REQUIRED", "N5", "Qualify deterministic PREC1 immutable policy and mutable state formats with independent no_std Rust and Python validators, exact A/B selection and attempt persistence, known-good fallback, bounded safe and recovery transitions, authenticated success-receipt binding, authority and physical-presence separation, activation denial, hostile controls, and parser/transition differential evidence without claiming PooleBoot enforcement, PooleKernel recovery execution, persistent-state I/O, disk writes, or N5 exit"),
     ("FLAG-N5-INIT-SEMANTICS-001", "REQUIRED", "N5", "Freeze and independently validate the inner initial-system, recovery, symbols, microcode, firmware-manifest, and policy formats, capability/resource declarations, dependency graph, lifecycle, rollback behavior, and apply/execute preconditions before PooleBoot or PooleKernel interprets any payload"),
     ("FLAG-N6-KENTRY-001", "REQUIRED", "N6", "Qualify a real reproducible PooleKernel PKELF1 product with PKENTRY1 intake, bounded early diagnostics, panic taxonomy, hostile controls, manifest continuity, and explicit live-transfer nonclaims"),
     ("FLAG-N6-BOOT-DIGEST-001", "REQUIRED", "N6", "Complete independent cryptographic and supply-chain review of the pinned PBDIGEST1 provider, qualify its exact target backend, and prohibit trust promotion until the review and provider-promotion gates pass"),
@@ -338,7 +343,7 @@ PROGRAM_GAPS = [
     "The native repository, protected workflow, scope-hardened ADR ceremony, frozen 16-source packet, and completed response receipt record 2/2 ADR and 38/38 definition dispositions, but all measurements, compatible hardware-key acquisition, trusted public key custody, signatures, signed tags, immutable release refs, and retained CI review evidence remain open",
     "Rust PE32+/ELF64 fixtures pass one-host qualification, but second-host reproduction, source provenance, C17/assembly/ABI tools, and image tooling remain open",
     "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, bounded checks for all seven required boot-slot/capability/virtual-memory/IPC/scheduler/update/PooleFS domains detect their required hostile violations, and a bounded PooleBoot proof executes under pinned OVMF, but source-rebuilt current QEMU/EDK II, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open",
-    "A reproducible unsigned PooleBoot proof application boots twice with deterministic ten-file GPT/FAT32 media, exact GOP frames, retained PKMAP2 kernel/six-artifact/table/guarded-stack/handoff storage, independently reconstructed final PBLIVE3 bytes, bounded PBEXIT1 retry, successful ExitBootServices, zero later firmware calls, and permanent stop before transfer. PINIT1 independently validates the initial-system declaration graph and denies unsigned development activation, but PooleBoot enforcement, PooleKernel activation, trusted signature selection, rollback persistence, recovery/symbol/microcode/firmware/policy semantics, initial-system execution, microcode application, final framebuffer cache policy, kernel-entry profile, retained CR3/RSP installation, kernel consumption, target-firmware and physical-media qualification, and N5 exit remain open",
+    "A reproducible unsigned PooleBoot proof application boots twice with deterministic ten-file GPT/FAT32 media, exact GOP frames, retained PKMAP2 kernel/six-artifact/table/guarded-stack/handoff storage, independently reconstructed final PBLIVE3 bytes, bounded PBEXIT1 retry, successful ExitBootServices, zero later firmware calls, and permanent stop before transfer. PINIT1 independently validates the initial-system declaration graph, while PREC1 independently validates immutable recovery policy, separately mutable state, bounded A/B and safe/recovery transitions, receipt binding, and activation denial. PooleBoot enforcement, PooleKernel activation or recovery execution, authenticated rollback persistence, trusted signature selection, symbol/microcode/firmware/policy semantics, initial-system execution, microcode application, final framebuffer cache policy, kernel-entry profile, retained CR3/RSP installation, kernel consumption, target-firmware and physical-media qualification, and N5 exit remain open",
     "A real reproducible PooleKernel image, PKENTRY1 intake, bounded early ring/COM1/framebuffer paths, and panic classes exist, but boot trust, measured boot, live mappings and transfer, descriptor/exception setup, retained crash evidence, kernel runtime, target execution, and N6 exit remain open",
     "No native CPU, interrupts, time, SMP, physical memory, virtual memory, or reclaim implementation",
     "The exact Tier 1 identity passes 24/24 required checks and 16 allowlisted user-mode CPUID records are captured with zero public raw registers, but seven required channels remain non-complete in total, including partial CPU/MSR and SPD/topology; 15 standards hashes, ten lab-safety prerequisites, native parsing, and physical qualification also remain open",
@@ -483,6 +488,11 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                     "runs/native_initial_system_readiness.json",
                     "docs/native-initial-system-bundle.md",
                     "native/initsys/src/lib.rs",
+                    "specs/native-recovery-contract.json",
+                    "specs/native-recovery-golden-vectors.json",
+                    "runs/native_recovery_readiness.json",
+                    "docs/native-recovery-bundle.md",
+                    "native/recovery/src/lib.rs",
                 ]
             )
         if phase_id == "N6":
@@ -665,6 +675,22 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                     "runs/native_pooleboot_readiness.json",
                 ]
             )
+        if flag_id == "FLAG-N5-RECOVERY-BUNDLE-001":
+            evidence.extend(
+                [
+                    "specs/native-recovery-contract.json",
+                    "specs/native-recovery-golden-vectors.json",
+                    "native/recovery/src/lib.rs",
+                    "native/recovery/src/bin/prec1_probe.rs",
+                    "runtime/native_recovery.py",
+                    "tools/qualify_native_recovery.py",
+                    "tests/test_native_recovery.py",
+                    "docs/native-recovery-bundle.md",
+                    "runs/native_recovery_readiness.json",
+                    "runs/native_kernel_load_readiness.json",
+                    "runs/native_pooleboot_readiness.json",
+                ]
+            )
         if flag_id == "FLAG-N6-BOOT-DIGEST-001":
             evidence.extend(
                 [
@@ -681,7 +707,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 "class": flag_class,
                 "status": "closed"
                 if flag_class == "SUPERSEDED"
-                or flag_id in {"FLAG-N0-RATIFICATION-SCOPE-001", "FLAG-N2-CPUID-001", "FLAG-N4-PROFILE-001", "FLAG-N4-IPC-MODEL-001", "FLAG-N4-SCHEDULER-MODEL-001", "FLAG-N4-POOLEFS-MODEL-001", "FLAG-N5-POOLEBOOT-PROOF-001", "FLAG-N5-BOOTPROTO-001", "FLAG-N5-BOOTCFG-001", "FLAG-N5-ELF-001", "FLAG-N5-KLOAD-001", "FLAG-N5-MANIFEST-001", "FLAG-N5-PBP1-LIVE-001", "FLAG-N5-KMAP-001", "FLAG-N5-HANDOFF-EXIT-001", "FLAG-N5-INIT-SYSTEM-001", "FLAG-N5-INIT-BUNDLE-001", "FLAG-N6-KENTRY-001"}
+                or flag_id in {"FLAG-N0-RATIFICATION-SCOPE-001", "FLAG-N2-CPUID-001", "FLAG-N4-PROFILE-001", "FLAG-N4-IPC-MODEL-001", "FLAG-N4-SCHEDULER-MODEL-001", "FLAG-N4-POOLEFS-MODEL-001", "FLAG-N5-POOLEBOOT-PROOF-001", "FLAG-N5-BOOTPROTO-001", "FLAG-N5-BOOTCFG-001", "FLAG-N5-ELF-001", "FLAG-N5-KLOAD-001", "FLAG-N5-MANIFEST-001", "FLAG-N5-PBP1-LIVE-001", "FLAG-N5-KMAP-001", "FLAG-N5-HANDOFF-EXIT-001", "FLAG-N5-INIT-SYSTEM-001", "FLAG-N5-INIT-BUNDLE-001", "FLAG-N5-RECOVERY-BUNDLE-001", "FLAG-N6-KENTRY-001"}
                 else "open",
                 "phase_id": phase_id,
                 "closure_condition": closure,
@@ -719,10 +745,10 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "inspect_live_pooleglyph_each_turn": True,
             "verify_master_checklist_coverage_each_turn": True,
             "new_work_must_be_flagged": True,
-            "last_updated_cycle": 108,
-            "selected_move_id": "N5-INIT-BUNDLE-001",
+            "last_updated_cycle": 109,
+            "selected_move_id": "N5-RECOVERY-SEMANTICS-001",
             "immediate_next_move_id": "N0-HW-KEY-ACQUIRE-001",
-            "owner_independent_next_move_id": "N5-RECOVERY-SEMANTICS-001",
+            "owner_independent_next_move_id": "N5-SYMBOLS-SEMANTICS-001",
             "required_records": [
                 "docs/production-goal-charter.md",
                 "docs/pdc-production-build-plan.md",
@@ -742,6 +768,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 "runs/native_kernel_entry_readiness.json",
                 "runs/native_kernel_load_readiness.json",
                 "runs/native_initial_system_readiness.json",
+                "runs/native_recovery_readiness.json",
                 "runs/native_system_manifest_readiness.json",
                 "runs/native_v1_objectives_readiness.json",
                 "runs/release_gate.json",
@@ -764,7 +791,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "added_requirement_count": len(coverage["added_requirements"]),
         },
         "baseline": {
-            "pooleos_cycle": 108,
+            "pooleos_cycle": 109,
             "entry_cycle": 79,
             "pooleos_test_count": test_count,
             "historical_consistency_release_gate": {
@@ -776,9 +803,9 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 "native_promotion_role": "historical_non_promoting",
             },
             "native_consistency_release_gate": {
-                "passed_checks": 77,
-                "total_checks": 77,
-                "artifact_count": 72,
+                "passed_checks": 78,
+                "total_checks": 78,
+                "artifact_count": 73,
                 "explicit_gap_count": len(PROGRAM_GAPS),
                 "production_ready": False,
                 "native_promotion_role": "planning_and_evidence_consistency_non_promoting",
@@ -842,6 +869,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "The Cycle 106 PKLOAD5/PooleBoot6 receipts prove retained kernel, four-table-page, guarded eight-page stack, and one-MiB read-only handoff storage; exact final-map-bound post-exit development PBP1 bytes; bounded stale-key retry semantics; successful ExitBootServices; zero later firmware calls; and a permanent stop before transfer. They do not prove signatures or trust, profile artifact loading, the kernel-entry PBP1 profile, final CR3/RSP installation, kernel consumption or execution, final framebuffer cache policy, target firmware, N5 exit, or production readiness.",
             "The Cycle 107 PKLOAD6/PooleBoot7 receipts prove an exact seven-artifact PSM1 development profile, independent PBART1 role/version/payload and whole-file digest checks, distinct zero-padded loader ranges, final-map retention, seven-role PBP1 cross-binding, two exact OVMF runs, and fail-closed artifact controls. They do not prove signatures, authentication, payload semantics, initial-system execution, microcode application, kernel transfer, target firmware, N5 exit, or production readiness.",
             "The Cycle 108 PINIT1 receipt proves a deterministic initial-system declaration format, exact component/service/dependency/resource/capability graph validation, canonical start ordering, lifecycle and rollback policy checks, 120 fail-closed parser and activation controls, mandatory unsigned-development activation denial, and 16,384-case Rust/Python agreement. The PKLOAD6 and PooleBoot7 aggregate receipts bind those bytes and host-oracle results into two exact development-media boots, but PooleBoot does not enforce PINIT1 semantics, PooleKernel does not allocate or activate the declarations, no component executes, and no signature, rollback-state, target-firmware, N5-exit, or production claim follows.",
+            "The Cycle 109 PREC1 receipt proves a deterministic 992-byte immutable recovery policy, a separately mutable 128-byte state record, exact A/B eligibility and decrement-before-handoff transitions, known-good fallback, bounded safe and recovery loops, authenticated success-receipt binding, failure routing, physical-presence authority separation, 144 fail-closed controls, 16,384 parser/state and 8,192 transition differential cases, and mandatory unsigned-development activation denial. PKLOAD6 and PooleBoot7 bind those policy bytes and host-oracle results into two exact development-media boots, but PooleBoot does not enforce PREC1, PooleKernel does not execute recovery, the checksum is not authentication, no persistent UEFI/disk state is read or written, and no signature, target-firmware, N5-exit, or production claim follows.",
             "Sixteen allowlisted user-mode CPUID records prove only a bounded host observation; they do not prove MSR access, privileged probes, native parsing, driver safety, or Tier 1 qualification.",
             "Owner-directed acceptance of thirty-eight objective definitions while binding zero measurements is not a cryptographic signature or implementation evidence.",
             "PooleGlyph Phase 65 proves a metadata, parser, AST, and diagnostic foundation only; no source form, Core IR, PGASM, PGB2, PGVM2, host call, policy, optimization, or version label is promoted without its own frozen contract and evidence gate.",
@@ -855,7 +883,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=624)
+    parser.add_argument("--test-count", type=int, default=643)
     parser.add_argument("--status-date", default="2026-07-18")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

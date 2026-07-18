@@ -35,6 +35,12 @@ The public native Tier 0 lock, profile, schemas, tools, guide, and readiness led
 
 The public native-model lock, contract, original TLA+ model sources/configurations, schemas, host tools, guide, normalized counterexample traces, and readiness ledger may identify TLC and Java inputs by version, commit, digest, license metadata, and bounded result. The JRE, `tla2tools.jar`, archives, detached signatures, TLC metadata, and raw output remain ignored and unpublished. Model evidence must preserve finite bounds, assumptions, unmodeled domains, fingerprint limitations, and implementation-trace gaps; it cannot be described as a proof of PooleOS or authorization to freeze an ABI.
 
+Deterministic PSM1, PINIT1, and PREC1 readiness ledgers may be public when they
+contain only relative source bindings, canonical public vectors, bounded result
+counts, and explicit nonclaims. Differential corpora, ephemeral host probes,
+signing material, authenticated mutable state, raw boot logs, and private media
+remain unpublished.
+
 ## Publication Gate
 
 Before every push or release:

@@ -41,13 +41,13 @@
     "implementation_inputs": [
       {
         "path": "native/Cargo.toml",
-        "sha256": "5CE871C1BC9C047F6131D5E7CB37CC7C6C7E231AAD90D46E9218D066618AD3A9",
-        "byte_count": 496
+        "sha256": "D9F54C1A6590AE56F5E4061319341E5463B45E857CC4024E1DBAAA349E2989B4",
+        "byte_count": 510
       },
       {
         "path": "native/Cargo.lock",
-        "sha256": "C8B76120E0F6430C1DB35223A846BC0244DA9A5588D2ABE755CD2EE0E66135C8",
-        "byte_count": 3268
+        "sha256": "678D2FFCC79D6B5D2C524BB15339847641C1B58D93C11B6B37F37B9DD51FAB29",
+        "byte_count": 3351
       },
       {
         "path": "native/handoff/Cargo.toml",
