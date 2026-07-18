@@ -548,6 +548,32 @@ def _negative_controls(
     artifact_manifest_digest[
         artifact_offset + 48 : artifact_offset + 80
     ] = hashlib.sha256(payload).digest()
+    invalid_inner = bytearray(
+        canonical_artifact[native_kernel_load.native_boot_artifact.HEADER_BYTES :]
+    )
+    service2_flags = (
+        native_kernel_load.native_initial_system.HEADER_BYTES
+        + 3 * native_kernel_load.native_initial_system.COMPONENT_BYTES
+        + native_kernel_load.native_initial_system.SERVICE_BYTES
+        + 14
+    )
+    struct.pack_into("<H", invalid_inner, service2_flags, 1 << 15)
+    invalid_inner[120:152] = hashlib.sha256(
+        invalid_inner[native_kernel_load.native_initial_system.HEADER_BYTES :]
+    ).digest()
+    invalid_inner_artifact = native_kernel_load.native_boot_artifact.encode(
+        native_kernel_load.native_boot_artifact.ROLE_INITIAL_SYSTEM,
+        1,
+        bytes(invalid_inner),
+    )
+    mismatched_inner_version = native_kernel_load.native_boot_artifact.encode(
+        native_kernel_load.native_boot_artifact.ROLE_INITIAL_SYSTEM,
+        2,
+        native_kernel_load.native_initial_system.canonical_bundle(),
+    )
+    initial_bundle = native_kernel_load.native_initial_system.parse(
+        native_kernel_load.native_initial_system.canonical_bundle()
+    )
 
     marker_summary = native_kernel_load.validate_markers(markers)
     config_oracle = copy.deepcopy(inspection)
@@ -803,6 +829,9 @@ def _negative_controls(
         ("NEG-N5-KLOAD-ARTIFACT-VERSION", _rejected(lambda: native_kernel_load.native_boot_artifact.parse(bytes(artifact_version)))),
         ("NEG-N5-KLOAD-ARTIFACT-PAYLOAD-DIGEST", _rejected(lambda: native_kernel_load.native_boot_artifact.parse(bytes(artifact_payload_digest)))),
         ("NEG-N5-KLOAD-ARTIFACT-MANIFEST-DIGEST", _rejected(lambda: inspect_expected(bytes(artifact_manifest_digest)))),
+        ("NEG-N5-KLOAD-INITIAL-SYSTEM-INNER-SEMANTICS", _rejected(lambda: native_kernel_load.initial_system_oracle(invalid_inner_artifact, 1))),
+        ("NEG-N5-KLOAD-INITIAL-SYSTEM-INNER-VERSION", _rejected(lambda: native_kernel_load.initial_system_oracle(mismatched_inner_version, 2))),
+        ("NEG-N5-KLOAD-INITIAL-SYSTEM-ACTIVATION-OVERREACH", _rejected(lambda: native_kernel_load.native_initial_system.authorize_activation(initial_bundle, native_kernel_load.native_initial_system.development_activation_context()))),
         ("NEG-N5-KLOAD-MARKER-OMISSION", _rejected(lambda: native_kernel_load.validate_markers(markers[:-1]))),
         ("NEG-N5-KLOAD-MARKER-ORDER", _rejected(lambda: native_kernel_load.validate_markers([markers[1], markers[0], *markers[2:]]))),
         ("NEG-N5-KLOAD-MARKER-CONFIG-BOUND", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 7, f"bytes={marker_summary['boot_config']['byte_count']}", "bytes=16385")))),
@@ -1009,7 +1038,7 @@ def make_readiness(
         "status_date": status_date,
         "status": "pass_single_host_two_run_live_pbart1_pkmap2_exit_then_stop_non_promoting",
         "contract_id": native_kernel_load.CONTRACT_ID,
-        "selected_move_id": "N5-INIT-SYSTEM-001",
+        "selected_move_id": "N5-INIT-BUNDLE-001",
         "production_ready": False,
         "production_promotion_allowed": False,
         "n5_exit_gate_satisfied": False,
@@ -1044,6 +1073,12 @@ def make_readiness(
             ),
             "digest_provider": native_kernel_load.file_binding(
                 ROOT, native_kernel_load.native_system_manifest.DIGEST_PROVIDER_RELATIVE
+            ),
+            "initial_system_contract": native_kernel_load.file_binding(
+                ROOT, native_kernel_load.native_initial_system.CONTRACT_RELATIVE.as_posix()
+            ),
+            "initial_system_readiness": native_kernel_load.file_binding(
+                ROOT, native_kernel_load.native_initial_system.READINESS_RELATIVE.as_posix()
             ),
             "implementation_inputs": [native_kernel_load.file_binding(ROOT, path) for path in native_kernel_load.IMPLEMENTATION_INPUTS],
         },
@@ -1080,6 +1115,8 @@ def make_readiness(
             "pbart1_python_match": True,
             "pbart1_rust_python_match": True,
             "pbart1_manifest_cross_binding": True,
+            "pinit1_host_oracle_match": True,
+            "pinit1_development_activation_denied": True,
             "pbp1_profile_artifact_cross_binding": True,
             "sha256_python_match": True,
             "pkelf1_python_plan_match": True,
@@ -1162,7 +1199,9 @@ def make_readiness(
             "Persist and atomically enforce the minimum secure version across update and rollback.",
             "Define the final transfer-time CR3 activation, stack switch, register ABI, and explicit revocation plan.",
             "Authenticate the loaded initial-system, recovery, policy, symbols, microcode, and firmware artifacts through a ratified trust policy.",
-            "Define and implement each loaded artifact's semantics, parser hardening, capability boundary, and lifecycle policy before execution or application.",
+            "Implement PINIT1 parsing and semantic enforcement in PooleBoot before initial-system declarations can cross the firmware boundary.",
+            "Implement PooleKernel activation, capability issuance, transactional startup, rollback, and lifecycle enforcement for qualified PINIT1 declarations.",
+            "Define and implement each remaining loaded artifact's semantics, parser hardening, capability boundary, and lifecycle policy before execution or application.",
             "Transfer to PooleKernel and capture entry, panic, recovery, and reset evidence.",
             "Add fault-injected live EFI_INVALID_PARAMETER retry evidence rather than lifecycle-model evidence alone.",
             "Define how PooleKernel reclaims final-map scratch pools after consuming PBP1.",

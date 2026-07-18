@@ -35,7 +35,7 @@
     "status_date": {"const": "2026-07-18"},
     "status": {"const": "pass_single_host_two_run_live_pbart1_pkmap2_exit_then_stop_non_promoting"},
     "contract_id": {"const": "PKLOAD6"},
-    "selected_move_id": {"const": "N5-INIT-SYSTEM-001"},
+    "selected_move_id": {"const": "N5-INIT-BUNDLE-001"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
     "n5_exit_gate_satisfied": {"const": false},
@@ -53,7 +53,7 @@
     },
     "bindings": {
       "type": "object",
-      "required": ["contract", "kernel_map_contract", "boot_exit_contract", "toolchain_lock", "toolchain_qualification", "tier0_lock", "tier0_profile", "tier0_readiness", "kernel_entry_contract", "kernel_entry_readiness", "system_manifest_contract", "system_manifest_readiness", "digest_provider", "implementation_inputs"],
+      "required": ["contract", "kernel_map_contract", "boot_exit_contract", "toolchain_lock", "toolchain_qualification", "tier0_lock", "tier0_profile", "tier0_readiness", "kernel_entry_contract", "kernel_entry_readiness", "system_manifest_contract", "system_manifest_readiness", "digest_provider", "initial_system_contract", "initial_system_readiness", "implementation_inputs"],
       "properties": {
         "contract": {"$ref": "#/$defs/binding"},
         "kernel_map_contract": {"$ref": "#/$defs/binding"},
@@ -68,7 +68,9 @@
         "system_manifest_contract": {"$ref": "#/$defs/binding"},
         "system_manifest_readiness": {"$ref": "#/$defs/binding"},
         "digest_provider": {"$ref": "#/$defs/binding"},
-        "implementation_inputs": {"type": "array", "minItems": 57, "maxItems": 57, "items": {"$ref": "#/$defs/binding"}}
+        "initial_system_contract": {"$ref": "#/$defs/binding"},
+        "initial_system_readiness": {"$ref": "#/$defs/binding"},
+        "implementation_inputs": {"type": "array", "minItems": 66, "maxItems": 66, "items": {"$ref": "#/$defs/binding"}}
       }
     },
     "host_tests": {
@@ -117,7 +119,7 @@
         "physical_media_write_performed": {"const": false},
         "inspection": {
           "type": "object",
-          "required": ["files", "manifest", "kernel", "artifact_set"],
+          "required": ["files", "manifest", "kernel", "artifact_set", "initial_system"],
           "properties": {
             "files": {"type": "array", "minItems": 10, "maxItems": 10},
             "artifact_set": {
@@ -132,6 +134,25 @@
                 "measured": {"const": false},
                 "semantics_applied": {"const": false},
                 "artifacts": {"type": "array", "minItems": 6, "maxItems": 6}
+              }
+            },
+            "initial_system": {
+              "type": "object",
+              "required": ["contract_id", "summary", "bundle_sha256", "bundle_version", "component_count", "service_count", "dependency_count", "resource_count", "capability_count", "start_order", "outer_payload_sha256", "activation_allowed", "activation_errors", "validated_by", "pooleboot_enforced", "poolekernel_enforced"],
+              "properties": {
+                "contract_id": {"const": "PINIT1"},
+                "bundle_version": {"const": 1},
+                "component_count": {"const": 3},
+                "service_count": {"const": 3},
+                "dependency_count": {"const": 3},
+                "resource_count": {"const": 4},
+                "capability_count": {"const": 11},
+                "start_order": {"const": [1, 2, 3]},
+                "activation_allowed": {"const": false},
+                "activation_errors": {"type": "array", "minItems": 1},
+                "validated_by": {"const": "independent_host_media_oracle"},
+                "pooleboot_enforced": {"const": false},
+                "poolekernel_enforced": {"const": false}
               }
             }
           }
@@ -172,8 +193,8 @@
         "all_resources_released": {"const": false}
       }
     },
-    "negative_controls": {"type": "array", "minItems": 112, "maxItems": 112, "items": {"$ref": "#/$defs/control"}},
-    "claims": {"type": "object", "minProperties": 58, "maxProperties": 58},
+    "negative_controls": {"type": "array", "minItems": 115, "maxItems": 115, "items": {"$ref": "#/$defs/control"}},
+    "claims": {"type": "object", "minProperties": 62, "maxProperties": 62},
     "summary": {"type": "object"},
     "open_items": {"type": "array", "minItems": 8, "items": {"type": "string"}},
     "claim_boundary": {"type": "array", "minItems": 10, "items": {"type": "string"}}

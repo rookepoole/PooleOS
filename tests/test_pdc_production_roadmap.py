@@ -103,7 +103,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(checklist["section_count"], 171)
         self.assertEqual(checklist["coverage_status"], "pass")
         self.assertEqual(checklist["coverage_sha256"], hashlib.sha256(self.coverage_path.read_bytes()).hexdigest().upper())
-        self.assertEqual(checklist["added_requirement_count"], 35)
+        self.assertEqual(checklist["added_requirement_count"], 36)
 
     def test_phase_checklist_mapping_matches_coverage(self) -> None:
         coverage_by_phase = {item["phase_id"]: item for item in self.coverage["phase_coverage"]}
@@ -118,8 +118,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 107)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 608)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 108)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 624)
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
         self.assertTrue(native["pooleboot_exists"])
@@ -135,9 +135,9 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertFalse(historical["production_ready"])
         self.assertEqual(historical["native_promotion_role"], "historical_non_promoting")
         current = self.roadmap["baseline"]["native_consistency_release_gate"]
-        self.assertEqual(current["passed_checks"], 76)
-        self.assertEqual(current["total_checks"], 76)
-        self.assertEqual(current["artifact_count"], 71)
+        self.assertEqual(current["passed_checks"], 77)
+        self.assertEqual(current["total_checks"], 77)
+        self.assertEqual(current["artifact_count"], 72)
         self.assertEqual(current["explicit_gap_count"], 20)
         self.assertFalse(current["production_ready"])
         self.assertEqual(self.roadmap["immediate_next_move"]["id"], "N0-HW-KEY-ACQUIRE-001")
@@ -159,8 +159,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N5-INIT-SYSTEM-001")
-        self.assertEqual(protocol["owner_independent_next_move_id"], "N5-INIT-SEMANTICS-001")
+        self.assertEqual(protocol["selected_move_id"], "N5-INIT-BUNDLE-001")
+        self.assertEqual(protocol["owner_independent_next_move_id"], "N5-RECOVERY-SEMANTICS-001")
         self.assertIn("runs/hardware_target_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_tier0_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_model_readiness.json", protocol["required_records"])
@@ -170,6 +170,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertIn("runs/native_elf_loader_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_kernel_entry_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_kernel_load_readiness.json", protocol["required_records"])
+        self.assertIn("runs/native_initial_system_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_system_manifest_readiness.json", protocol["required_records"])
         self.assertIn("runs/n0_owner_decision_packet.json", protocol["required_records"])
         self.assertIn("runs/n0_owner_response_receipt.json", protocol["required_records"])
@@ -180,8 +181,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
     def test_flags_and_gaps_are_native_and_traceable(self) -> None:
         phase_ids = {phase["id"] for phase in self.roadmap["phases"]}
         flags = self.roadmap["implementation_flags"]
-        self.assertEqual(len(flags), 47)
-        self.assertEqual(len({flag["id"] for flag in flags}), 47)
+        self.assertEqual(len(flags), 48)
+        self.assertEqual(len({flag["id"] for flag in flags}), 48)
         self.assertTrue(any(flag["class"] == "STOP_SHIP" and flag["status"] == "open" for flag in flags))
         self.assertEqual(next(flag for flag in flags if flag["id"] == "FLAG-BUILDROOT-LEGACY-001")["status"], "closed")
         objectives_flag = next(flag for flag in flags if flag["id"] == "FLAG-N0-OBJECTIVES-001")
@@ -247,6 +248,13 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(kernel_load_flag["status"], "closed")
         self.assertIn("runs/native_kernel_load_readiness.json", kernel_load_flag["evidence"])
         self.assertIn("tools/qualify_native_kernel_load.py", kernel_load_flag["evidence"])
+        initial_bundle_flag = next(
+            flag for flag in flags if flag["id"] == "FLAG-N5-INIT-BUNDLE-001"
+        )
+        self.assertEqual(initial_bundle_flag["class"], "REQUIRED")
+        self.assertEqual(initial_bundle_flag["status"], "closed")
+        self.assertIn("runs/native_initial_system_readiness.json", initial_bundle_flag["evidence"])
+        self.assertIn("tools/qualify_native_initial_system.py", initial_bundle_flag["evidence"])
         manifest_flag = next(flag for flag in flags if flag["id"] == "FLAG-N5-MANIFEST-001")
         self.assertEqual(manifest_flag["class"], "REQUIRED")
         self.assertEqual(manifest_flag["status"], "closed")
@@ -339,6 +347,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(any(item.startswith("runs/native_boot_config_readiness.json:") for item in n5["current_evidence"]))
         self.assertTrue(any(item.startswith("runs/native_elf_loader_readiness.json:") for item in n5["current_evidence"]))
         self.assertTrue(any(item.startswith("runs/native_kernel_load_readiness.json:") for item in n5["current_evidence"]))
+        self.assertTrue(any(item.startswith("runs/native_initial_system_readiness.json:") for item in n5["current_evidence"]))
         self.assertTrue(any("signature-backed trusted selection" in item for item in n5["current_gaps"]))
 
         n6 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N6")

@@ -68,7 +68,7 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 83)
+        self.assertEqual(len(self.artifact["bound_sources"]), 91)
         bound_paths = {binding["path"] for binding in self.artifact["bound_sources"]}
         self.assertIn(
             "runs/adr_ratification_readiness.json",
@@ -99,6 +99,7 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertIn("runs/native_boot_handoff_readiness.json", bound_paths)
         self.assertIn("runs/native_boot_config_readiness.json", bound_paths)
         self.assertIn("runs/native_elf_loader_readiness.json", bound_paths)
+        self.assertIn("runs/native_initial_system_readiness.json", bound_paths)
         self.assertIn("runs/native_kernel_entry_readiness.json", bound_paths)
         self.assertIn("runs/native_kernel_load_readiness.json", bound_paths)
         self.assertIn("runs/native_system_manifest_readiness.json", bound_paths)
@@ -111,6 +112,13 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertIn("specs/native-elf-loader-golden-vectors.schema.json", bound_paths)
         self.assertIn("specs/native-elf-loader-readiness.schema.json", bound_paths)
         self.assertIn("docs/native-elf-loader.md", bound_paths)
+        self.assertIn("specs/native-initial-system-contract.json", bound_paths)
+        self.assertIn("specs/native-initial-system-contract.schema.json", bound_paths)
+        self.assertIn("specs/native-initial-system-golden-vectors.json", bound_paths)
+        self.assertIn("specs/native-initial-system-golden-vectors.schema.json", bound_paths)
+        self.assertIn("specs/native-initial-system-readiness.schema.json", bound_paths)
+        self.assertIn("docs/native-initial-system-bundle.md", bound_paths)
+        self.assertIn("docs/native-initial-system-profile.md", bound_paths)
         self.assertIn("specs/native-kernel-entry-contract.json", bound_paths)
         self.assertIn("specs/native-kernel-entry-contract.schema.json", bound_paths)
         self.assertIn("specs/native-kernel-entry-readiness.schema.json", bound_paths)

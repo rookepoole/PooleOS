@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-initial-system-contract.schema.json",
+  "title": "PooleOS PINIT1 initial-system declaration contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "contract_id",
+    "status",
+    "production_ready",
+    "encoding",
+    "header",
+    "limits",
+    "component_policy",
+    "dependency_policy",
+    "resource_policy",
+    "capability_policy",
+    "transaction_policy",
+    "activation_preconditions",
+    "research_basis",
+    "production_claims",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_initial_system_contract"},
+    "contract_id": {"const": "PINIT1"},
+    "status": {"const": "candidate_pre_abi_non_promoting"},
+    "production_ready": {"const": false},
+    "encoding": {"type": "object"},
+    "header": {"type": "object"},
+    "limits": {"type": "object"},
+    "component_policy": {"type": "object"},
+    "dependency_policy": {"type": "object"},
+    "resource_policy": {"type": "object"},
+    "capability_policy": {"type": "object"},
+    "transaction_policy": {"type": "object"},
+    "activation_preconditions": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {"type": "string"}
+    },
+    "research_basis": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {"type": "string", "format": "uri"}
+    },
+    "production_claims": {"type": "object"},
+    "claim_boundary": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {"type": "string"}
+    }
+  }
+}

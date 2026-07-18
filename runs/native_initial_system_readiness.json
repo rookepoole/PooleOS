@@ -1,0 +1,949 @@
+{
+  "activation_qualification": {
+    "current_unsigned_development_activation_allowed": false,
+    "current_unsigned_development_context_result": "ERR:pinit_activation_outer_signature_verified",
+    "individual_precondition_negative_count": 16,
+    "status": "pass",
+    "synthetic_all_true_context_is_trust_evidence": false,
+    "synthetic_all_true_context_result": "OK:activation"
+  },
+  "artifact_kind": "pooleos_native_initial_system_readiness",
+  "bindings": {
+    "contract": {
+      "byte_count": 5678,
+      "path": "specs/native-initial-system-contract.json",
+      "sha256": "8F932F5987E2EFB76D4CEC7574C711066C18C9B9A8A7B17D373E63A264EB0D8A"
+    },
+    "contract_schema": {
+      "byte_count": 1720,
+      "path": "specs/native-initial-system-contract.schema.json",
+      "sha256": "731F662FBAAE365765B9EF9D198F3B9B16128BB0D13C022410D29E799185EF43"
+    },
+    "golden_schema": {
+      "byte_count": 1609,
+      "path": "specs/native-initial-system-golden-vectors.schema.json",
+      "sha256": "7723E925F08D135D0D4DD8C9840F4D4CECF63427A6ADE9C9D71E4477360AC30E"
+    },
+    "golden_vectors": {
+      "byte_count": 8167,
+      "path": "specs/native-initial-system-golden-vectors.json",
+      "sha256": "C2759FEB85D48B95532EF6AC9BEA281321121A70BD8A540F5EFD38FEB577F479"
+    },
+    "implementation_inputs": [
+      {
+        "byte_count": 496,
+        "path": "native/Cargo.toml",
+        "sha256": "5CE871C1BC9C047F6131D5E7CB37CC7C6C7E231AAD90D46E9218D066618AD3A9"
+      },
+      {
+        "byte_count": 3268,
+        "path": "native/Cargo.lock",
+        "sha256": "C8B76120E0F6430C1DB35223A846BC0244DA9A5588D2ABE755CD2EE0E66135C8"
+      },
+      {
+        "byte_count": 358,
+        "path": "native/initsys/Cargo.toml",
+        "sha256": "4571F9B89577AF75BE84F68D18F585B076AA993920C83DE0266E687A7EBAE13D"
+      },
+      {
+        "byte_count": 59087,
+        "path": "native/initsys/src/lib.rs",
+        "sha256": "F341ED44A67E25356361C83445E021AEBCCB640A906E35469B56707441A0ECF0"
+      },
+      {
+        "byte_count": 3956,
+        "path": "native/initsys/src/bin/pinit1_probe.rs",
+        "sha256": "124C87D6514076A3A45B80088332FCF875C43F955315A46950A1393ECA65F7B3"
+      },
+      {
+        "byte_count": 68796,
+        "path": "runtime/native_initial_system.py",
+        "sha256": "C7213D00230A8A4BC4423CA63893663ADC637ACD5BC107C6C6A2E89D43387A7E"
+      },
+      {
+        "byte_count": 5685,
+        "path": "runtime/native_boot_artifact.py",
+        "sha256": "792EC79A19D025C76D49607D275CF7A32DC083A3F45FB37DBFB91B50686B52BE"
+      },
+      {
+        "byte_count": 1224,
+        "path": "tools/generate_native_initial_system_vectors.py",
+        "sha256": "1E8456CEA64DCAD7914C14C654F79976862E1A902F4D96D334E94B5D1DFE88E2"
+      },
+      {
+        "byte_count": 33433,
+        "path": "tools/qualify_native_initial_system.py",
+        "sha256": "56C9C84F595816C7E91F56E94B8C8CDDDE82DD08D4C1B173FA21E719F0DD733A"
+      },
+      {
+        "byte_count": 8754,
+        "path": "tests/test_native_initial_system.py",
+        "sha256": "EB5354B0D2A60226F8EA4466D998CCB0FF8AC5C7F9A0BD24F87623808BB2DD0B"
+      },
+      {
+        "byte_count": 9108,
+        "path": "docs/native-initial-system-bundle.md",
+        "sha256": "756FD63FD3533FEE90AD0577BDA5563443CB98088B94A8E19002D7D33BC92C5E"
+      }
+    ],
+    "readiness_schema": {
+      "byte_count": 2010,
+      "path": "specs/native-initial-system-readiness.schema.json",
+      "sha256": "F55C330269D25B3A29A695374BBBC916B1D6D0FCB70970B2DB87AAE247FE8AE5"
+    }
+  },
+  "claim_boundary": [
+    "PINIT1 is a candidate declaration and activation-precondition contract, not an owner-ratified stable ABI.",
+    "PINIT1 declaration IDs are not PooleKernel object handles and confer no authority.",
+    "The Rust and Python validators execute on the host; PooleBoot and PooleKernel do not yet interpret PINIT1.",
+    "The current PBART1 and PSM1 development media are unsigned and attacker-controllable, so activation must fail.",
+    "The synthetic all-true activation context proves branch behavior only; it is not signature, rollback, ABI, allocator, broker, or capacity evidence.",
+    "No component ABI is frozen, no component instruction executes, and no capability or resource is allocated.",
+    "Recovery, symbols, microcode, firmware-manifest, and policy inner formats remain outside this slice.",
+    "No key is generated or used and no signing, merge, tag, release, firmware mutation, or media write is authorized.",
+    "N5.6, N5, the broad initial-semantics flag, and production readiness remain incomplete."
+  ],
+  "claims": {
+    "canonical_binary_format_defined": true,
+    "component_abi_verified": false,
+    "component_executed": false,
+    "declaration_activation_separation_enforced": true,
+    "deterministic_differential_fuzz_executed": true,
+    "golden_semantic_agreement": true,
+    "hostile_controls_executed": true,
+    "independent_python_validator_executed": true,
+    "initial_system_active": false,
+    "kernel_capabilities_allocated": false,
+    "manifest_signature_verified": false,
+    "n5_exit_gate_satisfied": false,
+    "outer_signature_verified": false,
+    "persistent_rollback_state_enforced": false,
+    "pooleboot_inner_semantics_enforced": false,
+    "poolekernel_activation_enforced": false,
+    "production_ready": false,
+    "resources_allocated": false,
+    "rust_no_std_validator_executed": true,
+    "unsigned_development_activation_denied": true
+  },
+  "contract_id": "PINIT1",
+  "differential_fuzz": {
+    "campaign_id": "PINIT1-DIFF-1",
+    "case_count": 16384,
+    "corpus_published": false,
+    "generator": "deterministic valid minimal, canonical, and data-bearing bundles plus deletion, bit flip, truncation, insertion, suffix, flag, body-with-repaired-digest, and digest mutations",
+    "mismatch_count": 0,
+    "rejected_result_count": 8031,
+    "seed": "0x50494E495431",
+    "status": "pass",
+    "valid_result_count": 8353
+  },
+  "golden_vectors": [
+    {
+      "byte_count": 555,
+      "id": "minimal_v1",
+      "semantic_summary_matched": true,
+      "sha256": "9DBFEB454EB91F0AC8576C037EBF66AE3D774900992A2D5D993939BF6A452CF4",
+      "status": "pass"
+    },
+    {
+      "byte_count": 1764,
+      "id": "canonical_launch_v1",
+      "semantic_summary_matched": true,
+      "sha256": "FFE7243CEE75963D84905E6C9BF9F0D04310EEDBF097757C32E0EBE30FA0C3ED",
+      "status": "pass"
+    },
+    {
+      "byte_count": 692,
+      "id": "data_component_v1",
+      "semantic_summary_matched": true,
+      "sha256": "95AB3B67DD87D5A53ABFB234DF13AB2243057B86D4B32C700306F47BCAFDA288",
+      "status": "pass"
+    }
+  ],
+  "n5_exit_gate_satisfied": false,
+  "negative_controls": [
+    {
+      "id": "NEG-N5-PINIT1-EMPTY",
+      "rust_python_result": "ERR:pinit_truncated",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-TRUNCATED-HEADER",
+      "rust_python_result": "ERR:pinit_truncated",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-OVERSIZED",
+      "rust_python_result": "ERR:pinit_oversized",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-MAGIC",
+      "rust_python_result": "ERR:pinit_magic",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-MAJOR-VERSION",
+      "rust_python_result": "ERR:pinit_version",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-MINOR-VERSION",
+      "rust_python_result": "ERR:pinit_version",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-HEADER-BYTES",
+      "rust_python_result": "ERR:pinit_header_size",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-ALIGNMENT",
+      "rust_python_result": "ERR:pinit_header_size",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-TOTAL-SIZE",
+      "rust_python_result": "ERR:pinit_total_size",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-FLAGS-MISSING",
+      "rust_python_result": "ERR:pinit_flags",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-FLAGS-UNKNOWN",
+      "rust_python_result": "ERR:pinit_flags",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-BUNDLE-VERSION-ZERO",
+      "rust_python_result": "ERR:pinit_version_floor",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SECURE-VERSION-ZERO",
+      "rust_python_result": "ERR:pinit_version_floor",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-ROLLBACK-FLOOR",
+      "rust_python_result": "ERR:pinit_version_floor",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-ROOT-ZERO",
+      "rust_python_result": "ERR:pinit_root_service",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-ROOT-OUT-OF-RANGE",
+      "rust_python_result": "ERR:pinit_capability_source",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-BOOT-MODES-ZERO",
+      "rust_python_result": "ERR:pinit_boot_modes",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-BOOT-MODES-UNKNOWN",
+      "rust_python_result": "ERR:pinit_boot_modes",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-KERNEL-ABI-ZERO",
+      "rust_python_result": "ERR:pinit_abi",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-PBP-ABI-ZERO",
+      "rust_python_result": "ERR:pinit_abi",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-HEADER-RESERVED",
+      "rust_python_result": "ERR:pinit_reserved",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-COMPONENT-COUNT-ZERO",
+      "rust_python_result": "ERR:pinit_count",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SERVICE-COUNT-HIGH",
+      "rust_python_result": "ERR:pinit_count",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-DEPENDENCY-COUNT-HIGH",
+      "rust_python_result": "ERR:pinit_count",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-RESOURCE-COUNT-ZERO",
+      "rust_python_result": "ERR:pinit_count",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-CAPABILITY-COUNT-ZERO",
+      "rust_python_result": "ERR:pinit_count",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-STRING-BYTES-ZERO",
+      "rust_python_result": "ERR:pinit_table_size",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-BLOB-BYTES-ZERO",
+      "rust_python_result": "ERR:pinit_table_size",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-BLOB-BYTES-HIGH",
+      "rust_python_result": "ERR:pinit_component_blob_size",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-TABLE-OFFSET",
+      "rust_python_result": "ERR:pinit_table_layout",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-BLOB-OFFSET",
+      "rust_python_result": "ERR:pinit_table_layout",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-PADDING",
+      "rust_python_result": "ERR:pinit_padding",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-BODY-DIGEST",
+      "rust_python_result": "ERR:pinit_body_digest",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-COMPONENT-ID",
+      "rust_python_result": "ERR:pinit_component_record",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-COMPONENT-KIND",
+      "rust_python_result": "ERR:pinit_component_kind",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-COMPONENT-FLAGS",
+      "rust_python_result": "ERR:pinit_component_kind",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-COMPONENT-FORMAT",
+      "rust_python_result": "ERR:pinit_component_kind",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-COMPONENT-IMAGE-SIZE",
+      "rust_python_result": "ERR:pinit_component_image_size",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-COMPONENT-ALIGNMENT-ZERO",
+      "rust_python_result": "ERR:pinit_component_alignment",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-COMPONENT-ALIGNMENT-NONPOWER",
+      "rust_python_result": "ERR:pinit_component_alignment",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-COMPONENT-BLOB-OFFSET",
+      "rust_python_result": "ERR:pinit_component_blob_bounds",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-COMPONENT-BLOB-ZERO",
+      "rust_python_result": "ERR:pinit_component_blob_bounds",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-COMPONENT-DIGEST",
+      "rust_python_result": "ERR:pinit_component_digest",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-COMPONENT-RESERVED",
+      "rust_python_result": "ERR:pinit_component_record",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-COMPONENT-NAME",
+      "rust_python_result": "ERR:pinit_string_bounds",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-COMPONENT-NAME-DUPLICATE",
+      "rust_python_result": "ERR:pinit_name_duplicate",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-STRING-TABLE",
+      "rust_python_result": "ERR:pinit_string_table",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SERVICE-ID",
+      "rust_python_result": "ERR:pinit_service_record",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SERVICE-COMPONENT",
+      "rust_python_result": "ERR:pinit_service_record",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SERVICE-FLAGS-UNKNOWN",
+      "rust_python_result": "ERR:pinit_service_flags",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SERVICE-CRITICAL-OPTIONAL",
+      "rust_python_result": "ERR:pinit_service_flags",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SERVICE-REQUIRED-DEGRADED",
+      "rust_python_result": "ERR:pinit_service_flags",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SERVICE-START-TIMEOUT",
+      "rust_python_result": "ERR:pinit_timeout",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SERVICE-STOP-TIMEOUT",
+      "rust_python_result": "ERR:pinit_timeout",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SERVICE-RESTART-POLICY",
+      "rust_python_result": "ERR:pinit_restart_policy",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SERVICE-RESTART-PARAMETERS",
+      "rust_python_result": "ERR:pinit_restart_policy",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SERVICE-FAILURE-POLICY",
+      "rust_python_result": "ERR:pinit_failure_policy",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SERVICE-REQUIRED-FAILURE",
+      "rust_python_result": "ERR:pinit_failure_policy",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SERVICE-READINESS-POLICY",
+      "rust_python_result": "ERR:pinit_lifecycle",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SERVICE-SHUTDOWN-POLICY",
+      "rust_python_result": "ERR:pinit_lifecycle",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SERVICE-HEALTH-TIMEOUT",
+      "rust_python_result": "ERR:pinit_health_policy",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SERVICE-READY-RESOURCE",
+      "rust_python_result": "ERR:pinit_health_policy",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SERVICE-STATE-SCHEMA",
+      "rust_python_result": "ERR:pinit_state_schema",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SERVICE-RESERVED",
+      "rust_python_result": "ERR:pinit_service_record",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-DEPENDENCY-ORDER",
+      "rust_python_result": "ERR:pinit_dependency_record",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-DEPENDENCY-SELF",
+      "rust_python_result": "ERR:pinit_dependency_record",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-DEPENDENCY-KIND",
+      "rust_python_result": "ERR:pinit_dependency_kind",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-DEPENDENCY-CYCLE",
+      "rust_python_result": "ERR:pinit_dependency_cycle",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-DEPENDENCY-REACHABILITY",
+      "rust_python_result": "ERR:pinit_dependency_reachability",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-DEPENDENCY-AVAILABILITY",
+      "rust_python_result": "ERR:pinit_dependency_availability",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-STARTUP-RANK",
+      "rust_python_result": "ERR:pinit_startup_rank",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-RESOURCE-ID",
+      "rust_python_result": "ERR:pinit_resource_record",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-RESOURCE-PROVIDER",
+      "rust_python_result": "ERR:pinit_resource_record",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-RESOURCE-KIND",
+      "rust_python_result": "ERR:pinit_resource_record",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-RESOURCE-FLAGS-UNKNOWN",
+      "rust_python_result": "ERR:pinit_resource_flags",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-RESOURCE-NOT-REVOCABLE",
+      "rust_python_result": "ERR:pinit_resource_flags",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-RESOURCE-SHARE-EXCLUSIVE",
+      "rust_python_result": "ERR:pinit_resource_flags",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-RESOURCE-ZERO-ON-ENDPOINT",
+      "rust_python_result": "ERR:pinit_resource_flags",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-RESOURCE-MINIMUM-ZERO",
+      "rust_python_result": "ERR:pinit_resource_bounds",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-RESOURCE-MAXIMUM-LIMIT",
+      "rust_python_result": "ERR:pinit_resource_bounds",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-RESOURCE-GENERATION",
+      "rust_python_result": "ERR:pinit_resource_bounds",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-CAPABILITY-ID",
+      "rust_python_result": "ERR:pinit_capability_record",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-CAPABILITY-PARENT-FORWARD",
+      "rust_python_result": "ERR:pinit_capability_parent",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-CAPABILITY-HOLDER",
+      "rust_python_result": "ERR:pinit_capability_record",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-CAPABILITY-RESOURCE",
+      "rust_python_result": "ERR:pinit_capability_record",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-CAPABILITY-RIGHTS-ZERO",
+      "rust_python_result": "ERR:pinit_capability_rights",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-CAPABILITY-RIGHTS-UNKNOWN",
+      "rust_python_result": "ERR:pinit_capability_rights",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-CAPABILITY-FLAGS-UNKNOWN",
+      "rust_python_result": "ERR:pinit_capability_flags",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-CAPABILITY-NOT-REVOCABLE",
+      "rust_python_result": "ERR:pinit_capability_flags",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-CAPABILITY-NOT-LIFECYCLE",
+      "rust_python_result": "ERR:pinit_capability_flags",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-CAPABILITY-REVOKE-GROUP",
+      "rust_python_result": "ERR:pinit_capability_lifecycle",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-CAPABILITY-LEASE",
+      "rust_python_result": "ERR:pinit_capability_lifecycle",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-CAPABILITY-DERIVATION-LIMIT",
+      "rust_python_result": "ERR:pinit_capability_lifecycle",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-CAPABILITY-AVAILABILITY",
+      "rust_python_result": "ERR:pinit_capability_availability",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-CAPABILITY-SOURCE",
+      "rust_python_result": "ERR:pinit_capability_source",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-CAPABILITY-ATTENUATION-RIGHTS",
+      "rust_python_result": "ERR:pinit_capability_attenuation",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-CAPABILITY-ATTENUATION-RESOURCE",
+      "rust_python_result": "ERR:pinit_capability_attenuation",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-CAPABILITY-REVOCATION",
+      "rust_python_result": "ERR:pinit_capability_revocation",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-CAPABILITY-AVAILABILITY-UPGRADE",
+      "rust_python_result": "ERR:pinit_capability_availability",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-CAPABILITY-ROUTE",
+      "rust_python_result": "ERR:pinit_capability_route",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SERVICE-CAPABILITY-BUDGET",
+      "rust_python_result": "ERR:pinit_service_budget",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SERVICE-RESOURCE-BUDGET",
+      "rust_python_result": "ERR:pinit_service_budget",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-SERVICE-DEPENDENCY-BUDGET",
+      "rust_python_result": "ERR:pinit_service_budget",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-TOTAL-RESTART-BUDGET",
+      "rust_python_result": "ERR:pinit_lifecycle",
+      "status": "pass",
+      "surface": "parse"
+    },
+    {
+      "id": "NEG-N5-PINIT1-ACTIVATION-DEVELOPMENT",
+      "rust_python_result": "ERR:pinit_activation_outer_signature_verified",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "id": "NEG-N5-PINIT1-ACTIVATION-ROLE",
+      "rust_python_result": "ERR:pinit_activation_role",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "id": "NEG-N5-PINIT1-ACTIVATION-VERSION",
+      "rust_python_result": "ERR:pinit_activation_version",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "id": "NEG-N5-PINIT1-ACTIVATION-PAYLOAD-DIGEST",
+      "rust_python_result": "ERR:pinit_activation_outer_payload_digest_verified",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "id": "NEG-N5-PINIT1-ACTIVATION-FILE-DIGEST",
+      "rust_python_result": "ERR:pinit_activation_outer_file_digest_verified",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "id": "NEG-N5-PINIT1-ACTIVATION-OUTER-SIGNATURE",
+      "rust_python_result": "ERR:pinit_activation_outer_signature_verified",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "id": "NEG-N5-PINIT1-ACTIVATION-MANIFEST-SIGNATURE",
+      "rust_python_result": "ERR:pinit_activation_manifest_signature_verified",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "id": "NEG-N5-PINIT1-ACTIVATION-ROLLBACK-STATE",
+      "rust_python_result": "ERR:pinit_activation_rollback_state_authenticated",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "id": "NEG-N5-PINIT1-ACTIVATION-ROLLBACK-FLOOR",
+      "rust_python_result": "ERR:pinit_activation_rollback",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "id": "NEG-N5-PINIT1-ACTIVATION-KERNEL-ABI",
+      "rust_python_result": "ERR:pinit_activation_kernel_abi",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "id": "NEG-N5-PINIT1-ACTIVATION-PBP",
+      "rust_python_result": "ERR:pinit_activation_pbp",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "id": "NEG-N5-PINIT1-ACTIVATION-BOOT-MODE",
+      "rust_python_result": "ERR:pinit_activation_boot_mode",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "id": "NEG-N5-PINIT1-ACTIVATION-CAPABILITY-ALLOCATOR",
+      "rust_python_result": "ERR:pinit_activation_capability_allocator_ready",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "id": "NEG-N5-PINIT1-ACTIVATION-RESOURCE-BROKER",
+      "rust_python_result": "ERR:pinit_activation_resource_broker_ready",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "id": "NEG-N5-PINIT1-ACTIVATION-COMPONENT-CONTRACTS",
+      "rust_python_result": "ERR:pinit_activation_component_contracts_verified",
+      "status": "pass",
+      "surface": "activation"
+    },
+    {
+      "id": "NEG-N5-PINIT1-ACTIVATION-TRANSACTION-CAPACITY",
+      "rust_python_result": "ERR:pinit_activation_transaction_capacity_verified",
+      "status": "pass",
+      "surface": "activation"
+    }
+  ],
+  "open_items": [
+    "Ratify or replace PINIT1 before declaring a stable initial-system ABI.",
+    "Freeze and verify PXABI1 component bytes before any component can execute.",
+    "Implement PooleKernel capability objects, derivation, attenuation, and transitive revocation.",
+    "Implement abstract resource allocation, quotas, deterministic rollback, and teardown.",
+    "Implement an initial-system transaction engine in native user space after kernel entry exists.",
+    "Authenticate PSM1 and PBART1 with an approved trust root and independent signature review.",
+    "Persist and authenticate rollback state across normal, previous, safe, and recovery boots.",
+    "Bind live kernel ABI, PBP, boot mode, allocator, broker, component, and capacity evidence.",
+    "Freeze recovery, symbols, microcode, firmware-manifest, and policy inner formats.",
+    "Run fault injection for partial allocation, launch timeout, readiness failure, restart exhaustion, and rollback timeout.",
+    "Reproduce validators on a second independent builder and target firmware.",
+    "Complete kernel transfer, native execution, physical-media, signed ISO, and N5-N39 gates."
+  ],
+  "phase_status": {
+    "N21": "not_started",
+    "N5": "partial",
+    "N5.6": "partial"
+  },
+  "production_promotion_allowed": false,
+  "production_ready": false,
+  "schema_version": "1.0",
+  "selected_move_id": "N5-INIT-BUNDLE-001",
+  "status": "pass_single_host_synthetic_non_promoting",
+  "status_date": "2026-07-18",
+  "summary": {
+    "development_activation_denied": true,
+    "differential_fuzz_cases": 16384,
+    "differential_mismatches": 0,
+    "golden_vectors_matched": 3,
+    "golden_vectors_total": 3,
+    "negative_controls_passed": 120,
+    "negative_controls_total": 120,
+    "no_std_target_builds_passed": 2,
+    "no_std_target_builds_total": 2,
+    "production_claim_count": 0,
+    "rust_host_tests_passed": 3,
+    "rust_host_tests_total": 3,
+    "synthetic_activation_passed": true
+  },
+  "validator_qualification": {
+    "host_probe_artifact_identity_recorded": false,
+    "host_probe_byte_count": 164352,
+    "host_probe_role": "ephemeral host-only differential transport",
+    "no_std_target_builds": [
+      {
+        "byte_count": 189366,
+        "sha256": "5D864DBF2EDA488EE0A70C20663A176E8A914E931EF7468A7CC729F20E71F381",
+        "status": "pass",
+        "target": "x86_64-unknown-uefi"
+      },
+      {
+        "byte_count": 197814,
+        "sha256": "13ECA3BA4A3F80C26A4996F9CD3A2942137283B1E2F7E6F0851861B553B95ED5",
+        "status": "pass",
+        "target": "x86_64-unknown-none"
+      }
+    ],
+    "rust_host_target": "x86_64-pc-windows-msvc",
+    "rust_host_test_count": 3,
+    "rust_host_test_pass_count": 3,
+    "rustc_version_sha256": "F3C960598A5E9037C4CF8E4AA06C018171ABF07C381D165C3986C6A954DEA1BB"
+  }
+}

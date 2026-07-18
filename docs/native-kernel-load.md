@@ -5,7 +5,8 @@
 PKLOAD6 is the bounded live integration proof for PooleBoot's current N5.6 and
 N5.8 development boundary. It reads PBC1 and unsigned PSM1 from the EFI system
 partition, selects and digest-binds the real PKELF1 PooleKernel plus six exact
-profile artifacts, validates each non-kernel PBART1 envelope, retains every
+profile artifacts, validates each non-kernel PBART1 envelope, independently
+validates the PINIT1 initial-system payload in the host oracle, retains every
 loaded page range and PKMAP2 transfer allocation, creates final
 development-profile PBP1 bytes, exits UEFI boot services, and halts before
 kernel transfer.
@@ -47,8 +48,10 @@ Every file and temporary intake pool is closed or freed before the final map.
 Each non-kernel file has a fixed 96-byte PBART1 header. PooleBoot validates its
 magic, format version, role, artifact version, reserved-zero bytes, payload
 length, and payload SHA-256 before allocating a distinct `EfiLoaderData` page
-range. The exact file bytes are copied and page padding is zeroed. No payload
-parser is invoked, no microcode is applied, and no initial-system instruction
+range. The exact file bytes are copied and page padding is zeroed. PooleBoot
+does not invoke an inner payload parser. The independent host media oracle
+parses PINIT1, cross-binds its version, and requires unsigned-development
+activation denial; no microcode is applied and no initial-system instruction
 executes.
 
 ## Retained Transfer Storage
@@ -114,7 +117,7 @@ halts permanently at `STOP BEFORE TRANSFER`.
 
 ## Qualified Evidence
 
-The Cycle 107 receipt records:
+The Cycle 108 receipt records:
 
 - 76/76 Rust host tests across PooleBoot, PBART1, PBC1/PSM1/PKELF1/PBP1, PKMAP2,
   PBEXIT1, and PKENTRY1;
@@ -125,9 +128,12 @@ The Cycle 107 receipt records:
 - exact static GOP frames;
 - exact 4,728-byte post-exit PBP1 reconstruction with 95 memory entries and
   seven artifact descriptors;
-- six PBART1 files totaling 970 bytes and six retained pages, independently
+- six PBART1 files totaling 2,663 bytes and six retained pages, independently
   cross-bound to PSM1, guest markers, and final PBP1;
-- 112/112 negative controls, including artifact omission, path, role, version,
+- exact PINIT1 host-oracle validation of the 1,764-byte payload, deterministic
+  start order `1,2,3`, and mandatory development activation denial;
+- 115/115 integrated negative controls, including inner semantic mutation,
+  outer/inner version mismatch, activation overreach, artifact omission, path, role, version,
   payload digest, whole-file digest, overlap, signature overclaim, final-map
   coverage, stale keys, retry exhaustion, descriptor drift, guard mutation,
   post-exit firmware use, transfer overreach, marker drift, and oracle
@@ -141,17 +147,16 @@ receipt does not claim that this OVMF run naturally produced a stale map key.
 
 PKLOAD6 does not authenticate PSM1 or any loaded artifact, enforce persistent rollback,
 establish the final active kernel address space or framebuffer cache policy,
-switch to the guarded stack, call PooleKernel, parse or execute the initial
-system, apply microcode or firmware, enforce policy payloads, enforce Secure
+switch to the guarded stack, call PooleKernel, enforce PINIT1 in PooleBoot,
+activate or execute the initial system in PooleKernel, apply microcode or firmware, enforce policy payloads, enforce Secure
 Boot, perform measured boot, test a second host, test target firmware, touch
 physical media, satisfy N5, or establish production readiness.
 
-The next chronological owner-independent transfer slice must define the
-pre-transfer CR3/RSP and framebuffer state, preserve the unsigned-development
-rejection boundary, install the retained state without firmware use, and add a
-bounded entry probe only when its required PBP1 profile is valid. Signature
-trust and production transfer remain separately gated by the owner-controlled
-N0/N6 work.
+The next chronological owner-independent move is
+`N5-RECOVERY-SEMANTICS-001`: define and independently validate the recovery
+payload contract and its fail-closed selection, lifecycle, and rollback rules
+without entering recovery. Transfer-state, signature-trust, and production
+transfer remain separately gated by the N5/N6 and owner-controlled N0 work.
 
 ## Primary Reference
 

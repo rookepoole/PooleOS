@@ -1,0 +1,139 @@
+{
+  "activation_preconditions": [
+    "outer role and artifact version match",
+    "outer payload and whole-file digests verified",
+    "outer artifact and manifest signatures verified",
+    "persistent rollback state authenticated and version floor satisfied",
+    "kernel ABI and PBP compatibility satisfied",
+    "one allowed boot mode selected",
+    "capability allocator and resource broker ready",
+    "every component contract independently verified",
+    "transaction and rollback capacity verified"
+  ],
+  "artifact_kind": "pooleos_native_initial_system_contract",
+  "capability_policy": {
+    "all_capabilities_revocable_and_lifecycle_bound": true,
+    "ambient_authority_allowed": false,
+    "availability_upgrade_allowed": false,
+    "declaration_ids_are_kernel_handles": false,
+    "parent_must_precede_child": true,
+    "provider_route_requires_direct_dependency_and_earlier_start": true,
+    "revoke_group_changes_across_derivation_allowed": false,
+    "rights_amplification_allowed": false
+  },
+  "claim_boundary": [
+    "PINIT1 is a candidate declaration and activation-precondition contract, not an owner-ratified stable ABI.",
+    "PINIT1 declaration IDs are not PooleKernel object handles and confer no authority.",
+    "The Rust and Python validators execute on the host; PooleBoot and PooleKernel do not yet interpret PINIT1.",
+    "The current PBART1 and PSM1 development media are unsigned and attacker-controllable, so activation must fail.",
+    "The synthetic all-true activation context proves branch behavior only; it is not signature, rollback, ABI, allocator, broker, or capacity evidence.",
+    "No component ABI is frozen, no component instruction executes, and no capability or resource is allocated.",
+    "Recovery, symbols, microcode, firmware-manifest, and policy inner formats remain outside this slice.",
+    "No key is generated or used and no signing, merge, tag, release, firmware mutation, or media write is authorized.",
+    "N5.6, N5, the broad initial-semantics flag, and production readiness remain incomplete."
+  ],
+  "component_policy": {
+    "data_format": "PINITD1",
+    "embedded_component_bytes_are_opaque_until_separate_abi_verification": true,
+    "executable_format": "PXABI1",
+    "physical_or_virtual_addresses_allowed": false,
+    "service_targets_must_be_executable": true
+  },
+  "contract_id": "PINIT1",
+  "dependency_policy": {
+    "canonical_start_order": "lowest service ID deterministic Kahn order",
+    "every_service_strongly_reachable_from_root": true,
+    "full_graph_must_be_acyclic": true,
+    "kinds": {
+      "strong": 1,
+      "weak": 2
+    },
+    "required_service_may_require_optional_prerequisite": false,
+    "shutdown_order": "reverse dependency order"
+  },
+  "encoding": {
+    "body_digest": "SHA-256 over bytes from header_bytes through total_bytes",
+    "byte_order": "little-endian",
+    "canonical_layout": "fixed tables, canonical NUL-terminated ASCII name table, zero alignment padding, component blobs",
+    "header_bytes": 192,
+    "record_alignment": 8,
+    "total_bytes_maximum": 1048480
+  },
+  "header": {
+    "magic_hex": "50494E4954310000",
+    "record_sizes": {
+      "capability": 48,
+      "component": 80,
+      "dependency": 16,
+      "resource": 48,
+      "service": 96
+    },
+    "required_flags": 255,
+    "version": [
+      1,
+      0
+    ]
+  },
+  "limits": {
+    "capabilities": 256,
+    "component_blob_bytes": 524288,
+    "component_image_bytes": 67108864,
+    "components": 32,
+    "dependencies": 128,
+    "name_bytes": 63,
+    "resources": 128,
+    "services": 32,
+    "string_bytes": 8192
+  },
+  "production_claims": {
+    "canonical_binary_format_defined": true,
+    "component_abi_verified": false,
+    "component_executed": false,
+    "declaration_activation_separation_enforced": true,
+    "deterministic_differential_fuzz_executed": true,
+    "golden_semantic_agreement": true,
+    "hostile_controls_executed": true,
+    "independent_python_validator_executed": true,
+    "initial_system_active": false,
+    "kernel_capabilities_allocated": false,
+    "manifest_signature_verified": false,
+    "n5_exit_gate_satisfied": false,
+    "outer_signature_verified": false,
+    "persistent_rollback_state_enforced": false,
+    "pooleboot_inner_semantics_enforced": false,
+    "poolekernel_activation_enforced": false,
+    "production_ready": false,
+    "resources_allocated": false,
+    "rust_no_std_validator_executed": true,
+    "unsigned_development_activation_denied": true
+  },
+  "production_ready": false,
+  "research_basis": [
+    "https://docs.sel4.systems/projects/capdl/lang-spec.html",
+    "https://fuchsia.dev/fuchsia-src/concepts/components/v2/capabilities",
+    "https://fuchsia.dev/fuchsia-src/concepts/components/v2/capabilities/availability",
+    "https://fuchsia.dev/fuchsia-src/concepts/components/v2/lifecycle",
+    "https://theupdateframework.github.io/specification/v1.0.26/"
+  ],
+  "resource_policy": {
+    "abstract_declaration_only": true,
+    "all_resources_revocable": true,
+    "exactly_one_of_shareable_or_exclusive": true,
+    "kinds": {
+      "address_space": 4,
+      "endpoint_slots": 3,
+      "log_sink": 5,
+      "memory_pages": 1,
+      "thread_slots": 2
+    },
+    "physical_addresses_allowed": false
+  },
+  "schema_version": "1.0",
+  "status": "candidate_pre_abi_non_promoting",
+  "transaction_policy": {
+    "failure": "stop started services in reverse dependency order, revoke all issued capabilities, release all resources",
+    "partial_commit_allowed": false,
+    "root_bootstrap_authority": "must be dropped after successful commit",
+    "start": "validate all declarations and preconditions before allocation or launch"
+  }
+}

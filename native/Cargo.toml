@@ -9,6 +9,7 @@ members = [
   "fixtures/pooleboot",
   "fixtures/poolekernel",
   "handoff",
+  "initsys",
   "kernel",
   "kmap",
   "livehandoff",

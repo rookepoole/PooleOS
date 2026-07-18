@@ -162,6 +162,18 @@ ADDED_REQUIREMENTS = [
         ],
     },
     {
+        "id": "ADD-BOOT-005",
+        "phase_id": "N5",
+        "requirement": "Define every executable initial-system bundle as a deterministic declaration contract whose parsing and graph validation cannot confer authority; gate activation separately on authenticated outer and manifest signatures, persistent rollback state, ABI compatibility, resource and capability allocator readiness, complete component verification, transactional capacity, and fail-closed rollback before any allocation, capability issuance, or instruction execution.",
+        "basis": [
+            "Cycle 108 PINIT1 declaration and activation-separation qualification",
+            "https://docs.sel4.systems/projects/capdl/lang-spec.html",
+            "https://fuchsia.dev/fuchsia-src/concepts/components/v2/capabilities",
+            "https://fuchsia.dev/fuchsia-src/concepts/components/v2/lifecycle",
+            "https://theupdateframework.github.io/specification/v1.0.26/",
+        ],
+    },
+    {
         "id": "ADD-BOOT-002",
         "phase_id": "N6",
         "requirement": "Model UEFI PK, KEK, db, dbx, image signer revocation, minimum secure version, authenticated boot state, recovery-key rotation, and development-key containment as one boot-trust state machine.",
