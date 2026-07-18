@@ -27,12 +27,12 @@
     "schema_version": {"const": "1.0"},
     "artifact_kind": {"const": "pooleos_native_pooleboot_proof_contract"},
     "contract_id": {"const": "POOLEOS-N5-POOLEBOOT-7"},
-    "status": {"const": "bounded_unsigned_live_profile_artifacts_inner_parsed_post_exit_pbp1_retained_pkmap2_stop_before_transfer_non_promoting_proof"},
+    "status": {"const": "bounded_unsigned_live_profile_artifacts_pbtrust1_denied_post_exit_pbp1_retained_pkmap2_stop_before_transfer_non_promoting_proof"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
-    "selected_move_id": {"const": "N5-INNER-LIVE-PARSE-001"},
+    "selected_move_id": {"const": "N5-INNER-TRUST-STATE-001"},
     "phase_mapping": {"type": "array", "minItems": 9, "maxItems": 9, "items": {"type": "string"}},
-    "source_requirement_ids": {"type": "array", "minItems": 12, "maxItems": 12, "items": {"type": "string"}},
+    "source_requirement_ids": {"type": "array", "minItems": 13, "maxItems": 13, "items": {"type": "string"}},
     "binary": {
       "type": "object",
       "additionalProperties": false,
@@ -57,7 +57,7 @@
     "media": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["container", "byte_count", "sector_bytes", "protective_mbr_required", "primary_and_backup_gpt_required", "gpt_crc_required", "disk_guid", "esp_type_guid", "esp_unique_guid", "esp_start_lba", "esp_label", "filesystem", "fallback_path", "config_path", "manifest_path", "kernel_path", "artifact_paths", "ordinary_workspace_file_only", "allowed_output_roots", "input_must_be_workspace_regular_file", "device_namespace_allowed", "alternate_data_stream_allowed", "reserved_device_name_allowed", "symlink_paths_allowed", "physical_media_write_allowed"],
+      "required": ["container", "byte_count", "sector_bytes", "protective_mbr_required", "primary_and_backup_gpt_required", "gpt_crc_required", "disk_guid", "esp_type_guid", "esp_unique_guid", "esp_start_lba", "esp_label", "filesystem", "fallback_path", "config_path", "manifest_path", "kernel_path", "artifact_paths", "trust_policy_path", "trust_state_path", "file_count", "ordinary_workspace_file_only", "allowed_output_roots", "input_must_be_workspace_regular_file", "device_namespace_allowed", "alternate_data_stream_allowed", "reserved_device_name_allowed", "symlink_paths_allowed", "physical_media_write_allowed"],
       "properties": {
         "container": {"const": "raw disk image"},
         "byte_count": {"const": 67108864},
@@ -76,6 +76,9 @@
         "manifest_path": {"const": "EFI/POOLEOS/SYSTEM_A.PBM"},
         "kernel_path": {"const": "EFI/POOLEOS/KERNEL.ELF"},
         "artifact_paths": {"type": "array", "minItems": 6, "maxItems": 6, "items": {"type": "string"}},
+        "trust_policy_path": {"const": "EFI/POOLEOS/TRUST.PBT"},
+        "trust_state_path": {"const": "EFI/POOLEOS/TRUSTST.PBS"},
+        "file_count": {"const": 12},
         "ordinary_workspace_file_only": {"const": true},
         "allowed_output_roots": {"type": "array", "minItems": 2, "maxItems": 2, "uniqueItems": true, "items": {"enum": ["tmp", "runs/native-tier0"]}},
         "input_must_be_workspace_regular_file": {"const": true},
@@ -120,8 +123,8 @@
         "exact_screenshot_match_required": {"const": true}
       }
     },
-    "required_markers": {"type": "array", "minItems": 24, "maxItems": 24, "items": {"type": "string"}},
-    "required_negative_controls": {"type": "array", "minItems": 139, "maxItems": 139, "items": {"type": "string"}},
+    "required_markers": {"type": "array", "minItems": 25, "maxItems": 25, "items": {"type": "string"}},
+    "required_negative_controls": {"type": "array", "minItems": 148, "maxItems": 148, "items": {"type": "string"}},
     "claim_boundary": {"type": "array", "minItems": 11, "items": {"type": "string"}},
     "official_references": {"type": "array", "minItems": 8, "maxItems": 8, "items": {"type": "string"}}
   }

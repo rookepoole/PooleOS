@@ -31,14 +31,14 @@
     },
     "implementation_inputs": [
       {
-        "byte_count": 575,
+        "byte_count": 586,
         "path": "native/Cargo.toml",
-        "sha256": "099B29615AA2825C96F89BF993A6739B55EA3789D0CEEAC0E065707A4692C252"
+        "sha256": "1741AC8F565F5849F8C86D77BD16E06ED195E76D32FFA62492E1928B8FAA8C1E"
       },
       {
-        "byte_count": 3954,
+        "byte_count": 4060,
         "path": "native/Cargo.lock",
-        "sha256": "5E707EFDDDAB6FE8EE7AA630EEA101B2EEC648415FC9CDB1150EBD491C146445"
+        "sha256": "88017EDF93CD2DBF5F298E612E9A50601FDCC657FF97CC841E08FBD8355090C6"
       },
       {
         "byte_count": 358,

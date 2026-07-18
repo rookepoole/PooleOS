@@ -121,6 +121,7 @@ pub struct ConfigSummary {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ManifestSummary {
     pub byte_count: usize,
+    pub manifest_sha256: [u8; 32],
     pub artifact_count: usize,
     pub manifest_id_hash: u64,
     pub slot: u8,
@@ -413,6 +414,7 @@ pub fn parse_manifest(bytes: &[u8], selected_slot: u8) -> Result<ManifestSummary
     }
     Ok(ManifestSummary {
         byte_count: bytes.len(),
+        manifest_sha256: poole_manifest::sha256(bytes),
         artifact_count: manifest.artifacts.len(),
         manifest_id_hash: poole_elf::fnv1a64(manifest.manifest_id.as_bytes()),
         slot: manifest.slot,

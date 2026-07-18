@@ -20,6 +20,7 @@
     "file_intake",
     "kernel_load",
     "artifact_load",
+    "boot_trust",
     "retained_kernel_mapping",
     "final_exit_pbp1",
     "cleanup",
@@ -35,25 +36,30 @@
     "schema_version": {"const": "1.0"},
     "artifact_kind": {"const": "pooleos_native_kernel_load_contract"},
     "contract_id": {"const": "PKLOAD6"},
-    "selected_move_id": {"const": "N5-INNER-LIVE-PARSE-001"},
+    "selected_move_id": {"const": "N5-INNER-TRUST-STATE-001"},
     "status_date": {"const": "2026-07-18"},
-    "status": {"const": "bounded_unsigned_live_inner_parse_retention_exit_then_stop_non_promoting"},
+    "status": {"const": "bounded_unsigned_live_pbtrust1_denial_retention_exit_then_stop_non_promoting"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
     "phase_mapping": {"const": ["N5.1", "N5.4", "N5.5", "N5.6", "N5.8", "N5.9"]},
     "media": {
       "type": "object",
-      "required": ["boot_path", "config_path", "manifest_path", "kernel_path", "artifact_paths", "config_maximum_bytes", "manifest_maximum_bytes", "kernel_file_maximum_bytes", "artifact_file_maximum_bytes", "physical_media_write_allowed"],
+      "required": ["boot_path", "config_path", "manifest_path", "kernel_path", "artifact_paths", "trust_policy_path", "trust_state_path", "file_count", "config_maximum_bytes", "manifest_maximum_bytes", "kernel_file_maximum_bytes", "artifact_file_maximum_bytes", "trust_policy_maximum_bytes", "trust_state_maximum_bytes", "physical_media_write_allowed"],
       "properties": {
         "boot_path": {"const": "EFI/BOOT/BOOTX64.EFI"},
         "config_path": {"const": "EFI/POOLEOS/BOOT.CFG"},
         "manifest_path": {"const": "EFI/POOLEOS/SYSTEM_A.PBM"},
         "kernel_path": {"const": "EFI/POOLEOS/KERNEL.ELF"},
         "artifact_paths": {"const": ["EFI/POOLEOS/INITIAL.PBA", "EFI/POOLEOS/RECOVERY.PBA", "EFI/POOLEOS/SYMBOLS.PBA", "EFI/POOLEOS/MICROCOD.PBA", "EFI/POOLEOS/FIRMWARE.PBA", "EFI/POOLEOS/POLICY.PBA"]},
+        "trust_policy_path": {"const": "EFI/POOLEOS/TRUST.PBT"},
+        "trust_state_path": {"const": "EFI/POOLEOS/TRUSTST.PBS"},
+        "file_count": {"const": 12},
         "config_maximum_bytes": {"const": 16384},
         "manifest_maximum_bytes": {"const": 65536},
         "kernel_file_maximum_bytes": {"const": 1048576},
         "artifact_file_maximum_bytes": {"const": 1048576},
+        "trust_policy_maximum_bytes": {"const": 320},
+        "trust_state_maximum_bytes": {"const": 256},
         "physical_media_write_allowed": {"const": false}
       }
     },
@@ -131,6 +137,27 @@
         "kernel_pages_retained_after_exit": {"const": true}
       }
     },
+    "boot_trust": {
+      "type": "object",
+      "required": ["contract", "policy_file_read_live", "state_candidate_file_read_live", "policy_bytes", "state_bytes", "binding_and_rollback_check_count", "development_denial", "state_source", "policy_signature_verified", "state_authenticated", "state_monotonic", "state_backend_written", "authority_grants", "state_writes", "poolekernel_revalidation_performed"],
+      "properties": {
+        "contract": {"const": "PBTRUST1"},
+        "policy_file_read_live": {"const": true},
+        "state_candidate_file_read_live": {"const": true},
+        "policy_bytes": {"const": 320},
+        "state_bytes": {"const": 256},
+        "binding_and_rollback_check_count": {"const": 14},
+        "development_denial": {"const": "pbtrust_policy_unsigned"},
+        "state_source": {"const": "esp_candidate_not_persistent_authority"},
+        "policy_signature_verified": {"const": false},
+        "state_authenticated": {"const": false},
+        "state_monotonic": {"const": false},
+        "state_backend_written": {"const": false},
+        "authority_grants": {"const": 0},
+        "state_writes": {"const": 0},
+        "poolekernel_revalidation_performed": {"const": false}
+      }
+    },
     "retained_kernel_mapping": {
       "type": "object",
       "required": ["contract", "private_table_page_count", "guarded_stack_page_count", "guard_page_count", "read_only_handoff_page_count", "candidate_tables_retained_through_exit", "kernel_entry_called"],
@@ -158,10 +185,10 @@
         "transferable": {"const": false}
       }
     },
-    "required_marker_count": {"const": 24},
-    "required_markers": {"type": "array", "minItems": 24, "maxItems": 24, "items": {"type": "string"}},
-    "required_negative_controls": {"type": "array", "minItems": 139, "maxItems": 139, "uniqueItems": true, "items": {"type": "string"}},
-    "claims": {"type": "object", "additionalProperties": {"type": "boolean"}, "minProperties": 96, "maxProperties": 96},
+    "required_marker_count": {"const": 25},
+    "required_markers": {"type": "array", "minItems": 25, "maxItems": 25, "items": {"type": "string"}},
+    "required_negative_controls": {"type": "array", "minItems": 148, "maxItems": 148, "uniqueItems": true, "items": {"type": "string"}},
+    "claims": {"type": "object", "additionalProperties": {"type": "boolean"}, "minProperties": 104, "maxProperties": 104},
     "claim_boundary": {"type": "array", "minItems": 11, "items": {"type": "string"}},
     "official_references": {"type": "array", "minItems": 3, "items": {"type": "string", "format": "uri"}}
   }

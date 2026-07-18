@@ -43,9 +43,10 @@ def valid_markers() -> list[str]:
         "POOLEBOOT/0.1 MANIFEST PASS bytes=2611 artifacts=7 id_hash=4A2625333244591C slot=1 version=1 minimum_secure_version=1",
         "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=139264 image_bytes=196608 sha256_prefix=BF1176019E9E4AF1 path=manifest",
         "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=139264 path=manifest_development",
-        "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=196608 pages=48 entry_offset=16384 relocations=40 files_closed=10 pools_freed=9 fnv1a64=80F8CD80B30B2EBA",
+        "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=196608 pages=48 entry_offset=16384 relocations=40 files_closed=12 pools_freed=11 fnv1a64=80F8CD80B30B2EBA",
         "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=2663 pages=6 roles=2-7 fnv1a64=82B3843AECD6EEE5 retained=1 signatures=0 measured=0",
         "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=2663 payload_bytes=2087 sha256=A1B2C3D4E5F60718A1B2C3D4E5F60718A1B2C3D4E5F60718A1B2C3D4E5F60718 retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
+        "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=1111111111111111111111111111111111111111111111111111111111111111 state_sha256=2222222222222222222222222222222222222222222222222222222222222222 source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
         "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
         "POOLEBOOT/0.1 FRAME READY",
         "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=48 ro=6 rx=28 rw=14 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=A671D0D8901064A5",
@@ -106,6 +107,8 @@ class NativeKernelLoadTests(unittest.TestCase):
                 native_kernel_load.MICROCODE_PATH,
                 native_kernel_load.FIRMWARE_PATH,
                 native_kernel_load.POLICY_PATH,
+                native_kernel_load.TRUST_POLICY_PATH,
+                native_kernel_load.TRUST_STATE_PATH,
             ],
             [item["path"] for item in inspection["files"]],
         )
@@ -155,6 +158,11 @@ class NativeKernelLoadTests(unittest.TestCase):
         self.assertEqual(6, inspection["inner_set"]["cross_binding_count"])
         self.assertEqual(6, inspection["inner_set"]["development_denial_count"])
         self.assertEqual(0, inspection["inner_set"]["actions_authorized"])
+        self.assertEqual("PBTRUST1", inspection["trust_state"]["contract_id"])
+        self.assertEqual("pbtrust_policy_unsigned", inspection["trust_state"]["denial"])
+        self.assertEqual(14, inspection["trust_state"]["binding_count"])
+        self.assertEqual(0, inspection["trust_state"]["authority_grants"])
+        self.assertEqual(0, inspection["trust_state"]["state_writes"])
 
     def test_extended_media_rejects_fat_and_config_mutations(self) -> None:
         media = bytearray(
@@ -193,10 +201,12 @@ class NativeKernelLoadTests(unittest.TestCase):
 
     def test_marker_contract_captures_load_mapping_and_cleanup(self) -> None:
         summary = native_kernel_load.validate_markers(valid_markers())
-        self.assertEqual(24, summary["marker_count"])
+        self.assertEqual(25, summary["marker_count"])
         self.assertEqual(6, summary["artifact_set"]["artifact_count"])
         self.assertEqual(6, summary["inner_set"]["parser_count"])
         self.assertEqual(0, summary["inner_set"]["authority_grants"])
+        self.assertEqual("pbtrust_policy_unsigned", summary["trust_state"]["denial"])
+        self.assertEqual(0, summary["trust_state"]["authority_grants"])
         self.assertEqual(48, summary["kernel"]["page_count"])
         self.assertEqual(0, summary["kernel_map"]["writable_executable_page_count"])
         self.assertEqual(48, summary["kernel_map"]["mapped_page_count"])
@@ -212,7 +222,7 @@ class NativeKernelLoadTests(unittest.TestCase):
         with self.assertRaises(native_kernel_load.KernelLoadError):
             native_kernel_load.validate_markers(markers[:-1])
         writable = markers[:]
-        writable[16] = writable[16].replace("wx=0", "wx=1")
+        writable[17] = writable[17].replace("wx=0", "wx=1")
         with self.assertRaises(native_kernel_load.KernelLoadError):
             native_kernel_load.validate_markers(writable)
         page_mismatch = markers[:]
@@ -220,14 +230,14 @@ class NativeKernelLoadTests(unittest.TestCase):
         with self.assertRaises(native_kernel_load.KernelLoadError):
             native_kernel_load.validate_markers(page_mismatch)
         active_mismatch = markers[:]
-        active_mismatch[17] = active_mismatch[17].replace(
+        active_mismatch[18] = active_mismatch[18].replace(
             "mapped_fnv1a64=80F8CD80B30B2EBA",
             "mapped_fnv1a64=0000000000000000",
         )
         with self.assertRaises(native_kernel_load.KernelLoadError):
             native_kernel_load.validate_markers(active_mismatch)
         retained_mismatch = markers[:]
-        retained_mismatch[18] = retained_mismatch[18].replace(
+        retained_mismatch[19] = retained_mismatch[19].replace(
             "firmware_calls_while_active=0", "firmware_calls_while_active=1"
         )
         with self.assertRaises(native_kernel_load.KernelLoadError):

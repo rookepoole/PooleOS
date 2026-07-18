@@ -7,21 +7,26 @@ N5.8 development boundary. It reads PBC1 and unsigned PSM1 from the EFI system
 partition, selects and digest-binds the real PKELF1 PooleKernel plus six exact
 profile artifacts, validates each non-kernel PBART1 envelope, reparses all six
 inner payloads from their exact retained firmware-page copies, independently
-reconstructs that result in the host oracle, retains every
+reconstructs that result in the host oracle, parses separate PBTRUST1 immutable
+policy and mutable acceptance-state development candidates, cross-binds them
+to the exact manifest, kernel, retained set, revocation set, roles, and rollback
+floors, requires unsigned-policy denial with zero effects, retains every
 loaded page range and PKMAP2 transfer allocation, creates final
 development-profile PBP1 bytes, exits UEFI boot services, and halts before
 kernel transfer.
 
 The machine-readable contract is `specs/native-kernel-load-contract.json`.
 `native/inner` is the allocation-free target validator.
-`runtime/native_inner_live.py` and `runtime/native_kernel_load.py` are the
-independent retained-set, media, marker, PBP1, map, and claim oracles.
+`native/trust` is the allocation-free PBTRUST1 validator.
+`runtime/native_inner_live.py`, `runtime/native_boot_trust.py`, and
+`runtime/native_kernel_load.py` are the independent retained-set, trust, media,
+marker, PBP1, map, and claim oracles.
 `tools/qualify_native_kernel_load.py` builds and boots the product twice and
 emits `runs/native_kernel_load_readiness.json`.
 
 ## Live Intake
 
-The qualified media contains exactly ten deterministic files:
+The qualified media contains exactly twelve deterministic files:
 
 - `EFI/BOOT/BOOTX64.EFI`;
 - `EFI/POOLEOS/BOOT.CFG`;
@@ -32,7 +37,9 @@ The qualified media contains exactly ten deterministic files:
 - `EFI/POOLEOS/SYMBOLS.PBA`;
 - `EFI/POOLEOS/MICROCOD.PBA`;
 - `EFI/POOLEOS/FIRMWARE.PBA`;
-- `EFI/POOLEOS/POLICY.PBA`.
+- `EFI/POOLEOS/POLICY.PBA`;
+- `EFI/POOLEOS/TRUST.PBT`;
+- `EFI/POOLEOS/TRUSTST.PBS`.
 
 PooleBoot obtains Loaded Image and Simple File System protocols, opens the root,
 parses bounded PBC1 configuration, then parses bounded PSM1. PSM1 selects slot
@@ -63,6 +70,17 @@ hardware observations. The independent host media oracle reconstructs the
 same result from the media. PREC1 state transitions remain host-model evidence;
 PooleBoot neither reads nor writes persistent state. No recovery,
 initial-system, symbol, policy, microcode, or firmware action executes.
+
+PBTRUST1 then parses a 320-byte PBTP1 immutable-policy candidate and a 256-byte
+PBTS1 mutable acceptance-state candidate. It validates fixed geometry, body
+digests, signer/revocation shapes, redundant-copy and previous-state-chain
+shapes, and fourteen exact policy/state/observed-boot bindings. The live
+development records bind the exact PSM1, PooleKernel, retained-set digest,
+revocation-set identity, seven artifact roles, policy version, secure-version
+floor, trust epoch, and state generation, then deny exactly at
+`pbtrust_policy_unsigned`. The ESP files are candidates only: they are not
+authenticated, monotonic, writable, selected, repaired, migrated, or accepted
+as persistent authority. PBTRUST1 is separate from PREC1 boot-attempt state.
 
 ## Retained Transfer Storage
 
@@ -127,19 +145,22 @@ halts permanently at `STOP BEFORE TRANSFER`.
 
 ## Qualified Evidence
 
-The Cycle 114 receipt records:
+The Cycle 115 receipt records:
 
-- 81/81 Rust host tests across PooleBoot, PBART1, the six-format retained-set
-  validator, PBC1/PSM1/PKELF1/PBP1, PKMAP2, PBEXIT1, and PKENTRY1;
+- 85/85 Rust host tests across PooleBoot, PBART1, the six-format retained-set
+  validator, PBTRUST1, PBC1/PSM1/PKELF1/PBP1, PKMAP2, PBEXIT1, and PKENTRY1;
 - two byte-identical PooleBoot builds, PooleKernel builds, and GPT/FAT32 media
   generations;
 - two fresh-vars, read-only-media, network-disabled QEMU/OVMF boots;
-- 24 identical ordered serial/debugcon markers;
+- 25 identical ordered serial/debugcon markers;
 - exact static GOP frames;
 - exact 4,728-byte post-exit PBP1 reconstruction with 95 memory entries and
   seven artifact descriptors;
 - six PBART1 files totaling 8,761 bytes and six retained pages, independently
   cross-bound to PSM1, guest markers, and final PBP1;
+- exact 320-byte PBTP1 and 256-byte PBTS1 candidates, fourteen cross-bindings,
+  one unsigned-policy denial, and zero signature verifications, authority
+  grants, or state writes;
 - exact PINIT1 host-oracle validation of the 1,764-byte payload, deterministic
   start order `1,2,3`, and mandatory development activation denial;
 - exact PREC1 host-oracle validation of the 992-byte policy, two slots, ten
@@ -166,13 +187,14 @@ The Cycle 114 receipt records:
   `F3154B354C77D0567207994EFDDA4FE2D203611CA21D60B63872BC9FFC73C675`, six
   target parsers, six cross-bindings, six mandatory denials, and zero
   authority/action/state/hardware effects;
-- 139/139 integrated negative controls, including PINIT1, PREC1, PSYM1, PMCU1,
+- 148/148 integrated negative controls, including PINIT1, PREC1, PSYM1, PMCU1,
   PFWM1, and PPOL1 inner
   semantic mutation, outer/inner version mismatch, activation overreach,
   artifact omission, path, role, version,
   payload digest, whole-file digest, overlap, signature overclaim, final-map
   coverage, stale keys, retry exhaustion, descriptor drift, guard mutation,
-  post-exit firmware use, transfer overreach, marker drift, and oracle
+  post-exit firmware use, transfer overreach, PBTRUST1 policy/state
+  substitution, rollback, authority overreach, marker drift, and oracle
   divergence.
 
 The observed emulator path succeeds on its first exit attempt. Retry behavior
@@ -181,8 +203,10 @@ receipt does not claim that this OVMF run naturally produced a stale map key.
 
 ## Nonclaims And Next Boundary
 
-PKLOAD6 does not authenticate PSM1 or any loaded artifact, verify or update
-authenticated persistent rollback state,
+PKLOAD6 does not authenticate PSM1, any loaded artifact, PBTP1, PBTS1, or a
+revocation store; verify policy signatures, Secure Boot state, or an
+authenticated redundant monotonic backend; select, repair, migrate, or update
+persistent rollback state;
 establish the final active kernel address space or framebuffer cache policy,
 switch to the guarded stack, call PooleKernel, grant authority from PINIT1,
 PREC1, PSYM1, PMCU1, PFWM1, or PPOL1, independently reparse those files in
@@ -196,9 +220,10 @@ Boot, perform measured boot, test a second host, test target firmware, touch
 physical media, satisfy N5, or establish production readiness.
 
 The next chronological owner-independent move is
-`N5-INNER-TRUST-STATE-001`: freeze and enforce the authenticated artifact-trust
-and monotonic persistent-state boundary over these exact retained bytes without
-generating or using a governance key. Independent PooleKernel retained-byte
+`N5-INNER-TRUST-BACKEND-001`: implement the read/select/validate/repair model for
+an authenticated redundant monotonic acceptance-state backend, including
+torn-write and power-loss cases, while preserving the no-key, no-signing, and
+zero-authority boundary. Independent PooleKernel retained-byte and selected-state
 revalidation, capability creation, lifecycle execution, transfer state,
 signature trust, and production transfer remain separately gated by N5/N6 and
 the owner-controlled N0 work.

@@ -82,6 +82,10 @@ TRUE_PROOF_CLAIMS = (
     "pooleboot_policy_payload_bindings_enforced",
     "pooleboot_initial_routes_cross_bound",
     "pooleboot_development_denials_enforced",
+    "live_pbtrust1_policy_read",
+    "live_pbtrust1_state_candidate_read",
+    "pooleboot_trust_cross_bindings_enforced",
+    "pooleboot_trust_development_denial_enforced",
     "artifact_set_manifest_sha256_matched",
     "artifact_pages_retained",
     "pbp1_profile_artifacts_cross_bound",
@@ -136,6 +140,10 @@ FALSE_PROOF_CLAIMS = (
     "poolekernel_policy_enforced",
     "policy_decision_applied",
     "pooleglyph_policy_authority_created",
+    "trust_policy_signature_verified",
+    "trust_state_authenticated",
+    "trust_state_monotonic",
+    "trust_state_backend_written",
     "poolekernel_executed",
     "all_kload_resources_released",
     "final_kernel_address_space_established",
@@ -221,6 +229,15 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-KLOAD-MARKER-INNER-STATE",
     "NEG-N5-KLOAD-MARKER-INNER-HARDWARE",
     "NEG-N5-KLOAD-INNER-ORACLE-DIVERGENCE",
+    "NEG-N5-KLOAD-TRUST-POLICY-MISSING",
+    "NEG-N5-KLOAD-TRUST-STATE-MISSING",
+    "NEG-N5-KLOAD-TRUST-POLICY-CORRUPT",
+    "NEG-N5-KLOAD-TRUST-STATE-CORRUPT",
+    "NEG-N5-KLOAD-TRUST-POLICY-KERNEL-BINDING",
+    "NEG-N5-KLOAD-TRUST-STATE-POLICY-BINDING",
+    "NEG-N5-KLOAD-MARKER-TRUST-DENIAL",
+    "NEG-N5-KLOAD-MARKER-TRUST-AUTHORITY",
+    "NEG-N5-KLOAD-TRUST-ORACLE-DIVERGENCE",
     "NEG-N5-KLOAD-MARKER-MAPPING-COUNT",
     "NEG-N5-KLOAD-MARKER-WX",
     "NEG-N5-KLOAD-MARKER-RETAIN-COUNT",
@@ -316,6 +333,9 @@ PROOF_IMPLEMENTATION_INPUTS = (
     "native/bootcfg/src/lib.rs",
     "native/bootload/Cargo.toml",
     "native/bootload/src/lib.rs",
+    "native/trust/Cargo.toml",
+    "native/trust/src/lib.rs",
+    "native/trust/src/bin/pbtrust1_probe.rs",
     "native/elf/Cargo.toml",
     "native/elf/src/lib.rs",
     "native/firmware/Cargo.toml",
@@ -352,6 +372,7 @@ PROOF_IMPLEMENTATION_INPUTS = (
     "runtime/native_boot_artifact.py",
     "runtime/native_boot_exit.py",
     "runtime/native_boot_config.py",
+    "runtime/native_boot_trust.py",
     "runtime/native_elf_loader.py",
     "runtime/native_firmware.py",
     "runtime/native_kernel_image.py",
@@ -423,6 +444,11 @@ PROOF_IMPLEMENTATION_INPUTS = (
     "specs/fixtures/ppol1-boundary.bin",
     "specs/fixtures/ppol1-canonical-pinit.bin",
     "runs/native_policy_readiness.json",
+    "docs/native-boot-trust.md",
+    "specs/native-boot-trust-contract.json",
+    "specs/native-boot-trust-contract.schema.json",
+    "specs/native-boot-trust-readiness.schema.json",
+    "runs/native_boot_trust_readiness.json",
     "specs/native-pooleboot-proof.json",
     "specs/native-pooleboot-proof.schema.json",
     "specs/native-pooleboot-readiness.schema.json",
@@ -456,6 +482,7 @@ PROOF_IMPLEMENTATION_INPUTS = (
     "tools/qualify_native_firmware.py",
     "tools/generate_native_policy_vectors.py",
     "tools/qualify_native_policy.py",
+    "tools/qualify_native_boot_trust.py",
     "tools/qualify_native_system_manifest.py",
     "tests/test_native_recovery.py",
     "tests/test_native_symbols.py",
@@ -463,6 +490,7 @@ PROOF_IMPLEMENTATION_INPUTS = (
     "tests/test_native_firmware.py",
     "tests/test_native_inner_live.py",
     "tests/test_native_policy.py",
+    "tests/test_native_boot_trust.py",
 )
 ABSOLUTE_USER_PATH = re.compile(
     r"(?:[A-Za-z]:[\\/](?:Users|Documents and Settings)[\\/][^\\/\s]+|/(?:Users|home)/[^/\s]+)",
@@ -1199,6 +1227,7 @@ def proof_contract_errors(contract: dict[str, Any], root: Path) -> list[str]:
         "KERNEL_LOAD PASS",
         "ARTIFACT_SET PASS",
         "INNER_SET PASS",
+        "TRUST_STATE DENY",
         "GOP PASS",
         "FRAME READY",
         "KERNEL_MAP_PLAN PASS",
@@ -1221,6 +1250,12 @@ def proof_contract_errors(contract: dict[str, Any], root: Path) -> list[str]:
         "EFI/POOLEOS/POLICY.PBA",
     ]:
         errors.append("PooleBoot proof artifact path register changed")
+    if (
+        media.get("trust_policy_path") != "EFI/POOLEOS/TRUST.PBT"
+        or media.get("trust_state_path") != "EFI/POOLEOS/TRUSTST.PBS"
+        or media.get("file_count") != 12
+    ):
+        errors.append("PooleBoot proof trust media register changed")
     expected_media_policy = {
         "ordinary_workspace_file_only": True,
         "allowed_output_roots": list(SAFE_MEDIA_OUTPUT_ROOTS),
@@ -1293,6 +1328,8 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str
         "firmware_readiness": "runs/native_firmware_readiness.json",
         "policy_contract": "specs/native-policy-contract.json",
         "policy_readiness": "runs/native_policy_readiness.json",
+        "boot_trust_contract": "specs/native-boot-trust-contract.json",
+        "boot_trust_readiness": "runs/native_boot_trust_readiness.json",
     }
     for name, relative_path in expected_bindings.items():
         _check_binding(errors, bindings.get(name), root, relative_path, name)
@@ -1324,8 +1361,8 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str
     media_inspection = media.get("inspection", {})
     files = media_inspection.get("files", [])
     embedded = media_inspection.get("embedded_efi", {})
-    if not isinstance(files, list) or len(files) != 10:
-        errors.append("PooleBoot media file manifest does not contain exactly ten files")
+    if not isinstance(files, list) or len(files) != 12:
+        errors.append("PooleBoot media file manifest does not contain exactly twelve files")
     else:
         file_item = files[0]
         if (
@@ -1345,6 +1382,8 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str
             "EFI/POOLEOS/MICROCOD.PBA",
             "EFI/POOLEOS/FIRMWARE.PBA",
             "EFI/POOLEOS/POLICY.PBA",
+            "EFI/POOLEOS/TRUST.PBT",
+            "EFI/POOLEOS/TRUSTST.PBS",
         ]:
             errors.append("PooleBoot media file paths changed")
         artifact_set = media_inspection.get("artifact_set", {})
@@ -1368,6 +1407,20 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str
             or symbols.get("authority_created") is not False
         ):
             errors.append("PooleBoot PSYM1 media boundary changed")
+        trust_state = media_inspection.get("trust_state", {})
+        if (
+            trust_state.get("contract_id") != "PBTRUST1"
+            or trust_state.get("binding_count") != 14
+            or trust_state.get("denial") != "pbtrust_policy_unsigned"
+            or trust_state.get("state_source")
+            != "esp_candidate_not_persistent_authority"
+            or trust_state.get("state_authenticated") is not False
+            or trust_state.get("state_monotonic") is not False
+            or trust_state.get("state_backend_writable") is not False
+            or trust_state.get("authority_grants") != 0
+            or trust_state.get("state_writes") != 0
+        ):
+            errors.append("PooleBoot PBTRUST1 media boundary changed")
     if embedded.get("sha256") != build.get("sha256") or embedded.get("byte_count") != build.get(
         "byte_count"
     ):

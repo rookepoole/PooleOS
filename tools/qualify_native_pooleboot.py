@@ -736,11 +736,12 @@ def make_report(
     claims = native_pooleboot.expected_claims()
     native_pooleboot.validate_claims(claims)
     inner_set = kernel_load["media"]["inspection"]["inner_set"]
+    trust_state = kernel_load["media"]["inspection"]["trust_state"]
     report = {
         "schema_version": "1.0",
         "artifact_kind": "pooleos_native_pooleboot_readiness",
         "status_date": status_date,
-        "status": "pass_single_host_two_run_unsigned_live_profile_artifacts_inner_parsed_post_exit_pbp1_retained_pkmap2_stop_before_transfer_non_promoting",
+        "status": "pass_single_host_two_run_unsigned_live_profile_artifacts_pbtrust1_denied_post_exit_pbp1_retained_pkmap2_stop_before_transfer_non_promoting",
         "contract_id": contract["contract_id"],
         "selected_move_id": contract["selected_move_id"],
         "production_ready": False,
@@ -824,6 +825,12 @@ def make_report(
             "policy_readiness": native_pooleboot.file_binding(
                 ROOT, "runs/native_policy_readiness.json"
             ),
+            "boot_trust_contract": native_pooleboot.file_binding(
+                ROOT, "specs/native-boot-trust-contract.json"
+            ),
+            "boot_trust_readiness": native_pooleboot.file_binding(
+                ROOT, "runs/native_boot_trust_readiness.json"
+            ),
             "implementation_inputs": [
                 native_pooleboot.file_binding(ROOT, path) for path in BUILD_INPUTS
             ],
@@ -858,6 +865,12 @@ def make_report(
             "inner_set_actions_authorized": inner_set["actions_authorized"],
             "inner_set_state_writes": inner_set["state_writes"],
             "inner_set_hardware_observations": inner_set["hardware_observations"],
+            "trust_binding_count": trust_state["binding_count"],
+            "trust_denial": trust_state["denial"],
+            "trust_policy_sha256": trust_state["policy_sha256"],
+            "trust_state_sha256": trust_state["state_sha256"],
+            "trust_authority_grants": trust_state["authority_grants"],
+            "trust_state_writes": trust_state["state_writes"],
             "microcode_patch_count": kernel_load["media"]["inspection"]["microcode"][
                 "patch_count"
             ],

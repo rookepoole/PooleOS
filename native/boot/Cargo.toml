@@ -17,6 +17,7 @@ path = "src/main.rs"
 poole-boot-exit = { path = "../bootexit" }
 poole-bootload = { path = "../bootload" }
 poole-boot-config = { path = "../bootcfg" }
+poole-boot-trust = { path = "../trust" }
 poole-elf = { path = "../elf" }
 poole-handoff = { path = "../handoff" }
 poole-inner-live = { path = "../inner" }

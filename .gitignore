@@ -54,6 +54,7 @@ runs/*
 !runs/native_tier0_readiness.json
 !runs/native_model_readiness.json
 !runs/native_pooleboot_readiness.json
+!runs/native_boot_trust_readiness.json
 !runs/native_policy_readiness.json
 !runs/native_boot_handoff_readiness.json
 !runs/native_boot_config_readiness.json

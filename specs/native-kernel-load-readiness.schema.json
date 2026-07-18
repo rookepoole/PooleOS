@@ -33,9 +33,9 @@
     "schema_version": {"const": "1.0"},
     "artifact_kind": {"const": "pooleos_native_kernel_load_readiness"},
     "status_date": {"const": "2026-07-18"},
-    "status": {"const": "pass_single_host_two_run_live_inner_parse_pkmap2_exit_then_stop_non_promoting"},
+    "status": {"const": "pass_single_host_two_run_live_pbtrust1_denial_pkmap2_exit_then_stop_non_promoting"},
     "contract_id": {"const": "PKLOAD6"},
-    "selected_move_id": {"const": "N5-INNER-LIVE-PARSE-001"},
+    "selected_move_id": {"const": "N5-INNER-TRUST-STATE-001"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
     "n5_exit_gate_satisfied": {"const": false},
@@ -54,7 +54,7 @@
     },
     "bindings": {
       "type": "object",
-      "required": ["contract", "kernel_map_contract", "boot_exit_contract", "toolchain_lock", "toolchain_qualification", "tier0_lock", "tier0_profile", "tier0_readiness", "system_manifest_contract", "system_manifest_readiness", "digest_provider", "initial_system_contract", "initial_system_readiness", "recovery_contract", "recovery_readiness", "symbols_contract", "symbols_readiness", "microcode_contract", "microcode_readiness", "firmware_contract", "firmware_readiness", "policy_contract", "policy_readiness", "kernel_entry_contract", "kernel_entry_readiness", "implementation_inputs"],
+      "required": ["contract", "kernel_map_contract", "boot_exit_contract", "toolchain_lock", "toolchain_qualification", "tier0_lock", "tier0_profile", "tier0_readiness", "system_manifest_contract", "system_manifest_readiness", "digest_provider", "initial_system_contract", "initial_system_readiness", "recovery_contract", "recovery_readiness", "symbols_contract", "symbols_readiness", "microcode_contract", "microcode_readiness", "firmware_contract", "firmware_readiness", "policy_contract", "policy_readiness", "boot_trust_contract", "boot_trust_readiness", "kernel_entry_contract", "kernel_entry_readiness", "implementation_inputs"],
       "properties": {
         "contract": {"$ref": "#/$defs/binding"},
         "kernel_map_contract": {"$ref": "#/$defs/binding"},
@@ -81,12 +81,14 @@
         "firmware_readiness": {"$ref": "#/$defs/binding"},
         "policy_contract": {"$ref": "#/$defs/binding"},
         "policy_readiness": {"$ref": "#/$defs/binding"},
-        "implementation_inputs": {"type": "array", "minItems": 154, "maxItems": 154, "items": {"$ref": "#/$defs/binding"}}
+        "boot_trust_contract": {"$ref": "#/$defs/binding"},
+        "boot_trust_readiness": {"$ref": "#/$defs/binding"},
+        "implementation_inputs": {"type": "array", "minItems": 165, "maxItems": 165, "items": {"$ref": "#/$defs/binding"}}
       }
     },
     "host_tests": {
       "type": "object",
-      "required": ["bootload_tests_passed", "bootload_tests_total", "artifact_tests_passed", "artifact_tests_total", "artifact_differential_cases", "inner_tests_passed", "inner_tests_total", "inner_differential_cases", "handoff_tests_passed", "handoff_tests_total", "live_handoff_tests_passed", "live_handoff_tests_total", "kernel_map_tests_passed", "kernel_map_tests_total", "boot_exit_tests_passed", "boot_exit_tests_total", "kernel_map_probe", "pooleboot_tests_passed", "pooleboot_tests_total", "kernel_entry_tests_passed", "kernel_entry_tests_total", "rustfmt_passed", "clippy_passed"],
+      "required": ["bootload_tests_passed", "bootload_tests_total", "artifact_tests_passed", "artifact_tests_total", "artifact_differential_cases", "inner_tests_passed", "inner_tests_total", "inner_differential_cases", "trust_tests_passed", "trust_tests_total", "handoff_tests_passed", "handoff_tests_total", "live_handoff_tests_passed", "live_handoff_tests_total", "kernel_map_tests_passed", "kernel_map_tests_total", "boot_exit_tests_passed", "boot_exit_tests_total", "kernel_map_probe", "pooleboot_tests_passed", "pooleboot_tests_total", "kernel_entry_tests_passed", "kernel_entry_tests_total", "rustfmt_passed", "clippy_passed"],
       "properties": {
         "bootload_tests_passed": {"minimum": 16},
         "bootload_tests_total": {"minimum": 16},
@@ -96,6 +98,8 @@
         "inner_tests_passed": {"minimum": 5},
         "inner_tests_total": {"minimum": 5},
         "inner_differential_cases": {"const": 5},
+        "trust_tests_passed": {"const": 4},
+        "trust_tests_total": {"const": 4},
         "handoff_tests_passed": {"minimum": 8},
         "handoff_tests_total": {"minimum": 8},
         "live_handoff_tests_passed": {"minimum": 8},
@@ -133,9 +137,9 @@
         "physical_media_write_performed": {"const": false},
         "inspection": {
           "type": "object",
-          "required": ["files", "manifest", "kernel", "artifact_set", "inner_set", "initial_system", "recovery", "symbols", "microcode", "firmware", "policy"],
+          "required": ["files", "manifest", "kernel", "artifact_set", "inner_set", "trust_state", "initial_system", "recovery", "symbols", "microcode", "firmware", "policy"],
           "properties": {
-            "files": {"type": "array", "minItems": 10, "maxItems": 10},
+            "files": {"type": "array", "minItems": 12, "maxItems": 12},
             "artifact_set": {
               "type": "object",
               "required": ["contract_id", "artifact_count", "file_bytes", "page_count", "fnv1a64", "signatures_verified", "measured", "semantics_applied", "artifacts"],
@@ -170,6 +174,29 @@
                 "actions_authorized": {"const": 0},
                 "state_writes": {"const": 0},
                 "hardware_observations": {"const": 0}
+              }
+            },
+            "trust_state": {
+              "type": "object",
+              "required": ["contract_id", "policy_bytes", "state_bytes", "binding_count", "denial_count", "denial", "policy_sha256", "state_sha256", "development_unsigned", "state_source", "state_authenticated", "state_monotonic", "state_backend_writable", "authority_grants", "state_writes", "signature_verifications", "monotonic_backend_observations"],
+              "properties": {
+                "contract_id": {"const": "PBTRUST1"},
+                "policy_bytes": {"const": 320},
+                "state_bytes": {"const": 256},
+                "binding_count": {"const": 14},
+                "denial_count": {"const": 1},
+                "denial": {"const": "pbtrust_policy_unsigned"},
+                "policy_sha256": {"$ref": "#/$defs/sha256"},
+                "state_sha256": {"$ref": "#/$defs/sha256"},
+                "development_unsigned": {"const": true},
+                "state_source": {"const": "esp_candidate_not_persistent_authority"},
+                "state_authenticated": {"const": false},
+                "state_monotonic": {"const": false},
+                "state_backend_writable": {"const": false},
+                "authority_grants": {"const": 0},
+                "state_writes": {"const": 0},
+                "signature_verifications": {"const": 0},
+                "monotonic_backend_observations": {"const": 0}
               }
             },
             "initial_system": {
@@ -348,8 +375,8 @@
       "type": "object",
       "required": ["file_handles_closed", "file_pools_freed", "kmap_table_pages_retained", "stack_pages_retained", "handoff_pages_retained", "artifact_pages_retained", "firmware_calls_after_exit", "pages_freed", "all_resources_released"],
       "properties": {
-        "file_handles_closed": {"const": 10},
-        "file_pools_freed": {"const": 9},
+        "file_handles_closed": {"const": 12},
+        "file_pools_freed": {"const": 11},
         "kmap_table_pages_retained": {"const": 4},
         "stack_pages_retained": {"const": 8},
         "handoff_pages_retained": {"const": 256},
@@ -359,8 +386,8 @@
         "all_resources_released": {"const": false}
       }
     },
-    "negative_controls": {"type": "array", "minItems": 139, "maxItems": 139, "items": {"$ref": "#/$defs/control"}},
-    "claims": {"type": "object", "minProperties": 96, "maxProperties": 96},
+    "negative_controls": {"type": "array", "minItems": 148, "maxItems": 148, "items": {"$ref": "#/$defs/control"}},
+    "claims": {"type": "object", "minProperties": 104, "maxProperties": 104},
     "summary": {"type": "object"},
     "open_items": {"type": "array", "minItems": 8, "items": {"type": "string"}},
     "claim_boundary": {"type": "array", "minItems": 10, "items": {"type": "string"}}
@@ -392,7 +419,7 @@
       "type": "object",
       "required": ["markers", "marker_sha256", "marker_summary", "serial_debugcon_exact_match", "pbp1_transcript", "pbp1_serial_debugcon_exact_match", "screenshot", "qemu_exit_code"],
       "properties": {
-        "markers": {"type": "array", "minItems": 24, "maxItems": 24, "items": {"type": "string"}},
+        "markers": {"type": "array", "minItems": 25, "maxItems": 25, "items": {"type": "string"}},
         "marker_sha256": {"$ref": "#/$defs/sha256"},
         "serial_debugcon_exact_match": {"const": true},
         "pbp1_transcript": {

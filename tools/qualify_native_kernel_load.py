@@ -72,6 +72,7 @@ def _host_checks(toolchain_root: Path, temporary_root: Path) -> dict[str, Any]:
     for package, minimum in (
         ("poole-boot-artifact", 4),
         ("poole-inner-live", 5),
+        ("poole-boot-trust", 4),
         ("poole-handoff", 8),
         ("poole-live-handoff", 8),
         ("poole-kmap", 14),
@@ -105,6 +106,7 @@ def _host_checks(toolchain_root: Path, temporary_root: Path) -> dict[str, Any]:
     fmt_packages = (
         "poole-boot-artifact",
         "poole-inner-live",
+        "poole-boot-trust",
         "poole-bootload",
         "poole-handoff",
         "poole-live-handoff",
@@ -133,6 +135,9 @@ def _host_checks(toolchain_root: Path, temporary_root: Path) -> dict[str, Any]:
         ("poole-inner-live", "--lib", "x86_64-pc-windows-msvc", "clippy-inner-host"),
         ("poole-inner-live", "--lib", "x86_64-unknown-none", "clippy-inner-none"),
         ("poole-inner-live", "--lib", "x86_64-unknown-uefi", "clippy-inner-uefi"),
+        ("poole-boot-trust", "--lib", "x86_64-pc-windows-msvc", "clippy-trust-host"),
+        ("poole-boot-trust", "--lib", "x86_64-unknown-none", "clippy-trust-none"),
+        ("poole-boot-trust", "--lib", "x86_64-unknown-uefi", "clippy-trust-uefi"),
         ("poole-bootload", "--lib", "x86_64-pc-windows-msvc", "clippy-bootload-host"),
         ("poole-bootload", "--lib", "x86_64-unknown-uefi", "clippy-bootload-uefi"),
         ("poole-handoff", "--lib", "x86_64-pc-windows-msvc", "clippy-handoff-host"),
@@ -378,6 +383,8 @@ def _host_checks(toolchain_root: Path, temporary_root: Path) -> dict[str, Any]:
         "inner_tests_passed": package_tests["poole-inner-live"],
         "inner_tests_total": package_tests["poole-inner-live"],
         "inner_differential_cases": len(inner_expected),
+        "trust_tests_passed": package_tests["poole-boot-trust"],
+        "trust_tests_total": package_tests["poole-boot-trust"],
         "handoff_tests_passed": package_tests["poole-handoff"],
         "handoff_tests_total": package_tests["poole-handoff"],
         "live_handoff_tests_passed": package_tests["poole-live-handoff"],
@@ -557,6 +564,23 @@ def _negative_controls(
     artifact_offset = (
         data_start_lba + (artifact_cluster - 2) * native_pooleboot.FAT_SECTORS_PER_CLUSTER
     ) * native_pooleboot.SECTOR_BYTES
+    trust_policy_cluster = artifact_cluster + sum(
+        item["cluster_count"]
+        for item in inspection["files"][
+            4 : 4 + len(native_kernel_load.ARTIFACT_DEFINITIONS)
+        ]
+    )
+    trust_state_cluster = (
+        trust_policy_cluster + inspection["files"][-2]["cluster_count"]
+    )
+    trust_policy_offset = (
+        data_start_lba
+        + (trust_policy_cluster - 2) * native_pooleboot.FAT_SECTORS_PER_CLUSTER
+    ) * native_pooleboot.SECTOR_BYTES
+    trust_state_offset = (
+        data_start_lba
+        + (trust_state_cluster - 2) * native_pooleboot.FAT_SECTORS_PER_CLUSTER
+    ) * native_pooleboot.SECTOR_BYTES
     if cluster_bytes != 512:
         raise QualificationError("negative controls assume the frozen one-sector cluster profile")
 
@@ -660,6 +684,51 @@ def _negative_controls(
     artifact_manifest_digest[
         artifact_offset + 48 : artifact_offset + 80
     ] = hashlib.sha256(payload).digest()
+    trust_policy_directory_offset = pooleos_directory_offset + 64 + 9 * 32
+    trust_state_directory_offset = trust_policy_directory_offset + 32
+    trust_policy_missing = _mutate(media, trust_policy_directory_offset, 0)
+    trust_state_missing = _mutate(media, trust_state_directory_offset, 0)
+    trust_policy_corrupt = _mutate(
+        media,
+        trust_policy_offset + 96,
+        media[trust_policy_offset + 96] ^ 1,
+    )
+    trust_state_corrupt = _mutate(
+        media,
+        trust_state_offset + 96,
+        media[trust_state_offset + 96] ^ 1,
+    )
+    trust_policy = bytes(
+        media[
+            trust_policy_offset : trust_policy_offset
+            + native_kernel_load.native_boot_trust.POLICY_BYTES
+        ]
+    )
+    trust_state = bytes(
+        media[
+            trust_state_offset : trust_state_offset
+            + native_kernel_load.native_boot_trust.STATE_BYTES
+        ]
+    )
+    trust_observed = native_kernel_load.native_boot_trust.ObservedBoot(
+        manifest_sha256=inspection["manifest"]["sha256"],
+        kernel_sha256=inspection["files"][3]["sha256"],
+        retained_set_sha256=inspection["inner_set"]["retained_set_sha256"],
+        revocation_set_sha256=native_kernel_load.native_boot_trust.sha256_bytes(b""),
+        manifest_version=inspection["manifest"]["manifest_version"],
+        minimum_secure_version=inspection["manifest"]["minimum_secure_version"],
+    )
+    substituted_policy = bytearray(trust_policy)
+    substituted_policy[96] ^= 1
+    substituted_policy[224:256] = hashlib.sha256(substituted_policy[:224]).digest()
+    substituted_state = bytearray(trust_state)
+    substituted_state[64:96] = hashlib.sha256(substituted_policy).digest()
+    substituted_state[224:256] = hashlib.sha256(substituted_state[:224]).digest()
+    substituted_state_policy = bytearray(trust_state)
+    substituted_state_policy[64] ^= 1
+    substituted_state_policy[224:256] = hashlib.sha256(
+        substituted_state_policy[:224]
+    ).digest()
     invalid_inner = bytearray(
         canonical_artifact[native_kernel_load.native_boot_artifact.HEADER_BYTES :]
     )
@@ -847,6 +916,8 @@ def _negative_controls(
     artifact_oracle["artifact_set"]["fnv1a64"] = "0" * 16
     inner_oracle = copy.deepcopy(inspection)
     inner_oracle["inner_set"]["retained_set_sha256"] = "0" * 64
+    trust_oracle = copy.deepcopy(inspection)
+    trust_oracle["trust_state"]["policy_sha256"] = "0" * 64
     overreach = dict(claims)
     overreach["kernel_entry_called"] = True
     stale_binding = native_kernel_load.file_binding(ROOT, native_kernel_load.CONTRACT_RELATIVE)
@@ -1128,10 +1199,19 @@ def _negative_controls(
         ("NEG-N5-KLOAD-MARKER-INNER-STATE", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 13, "state_writes=0", "state_writes=1")))),
         ("NEG-N5-KLOAD-MARKER-INNER-HARDWARE", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 13, "hardware_observations=0", "hardware_observations=1")))),
         ("NEG-N5-KLOAD-INNER-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, inner_oracle, pbp1_transcript))),
-        ("NEG-N5-KLOAD-MARKER-MAPPING-COUNT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 16, "mappings=4", "mappings=3")))),
-        ("NEG-N5-KLOAD-MARKER-WX", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 16, "wx=0", "wx=1")))),
-        ("NEG-N5-KLOAD-MARKER-RETAIN-COUNT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 18, "stack_pages=8", "stack_pages=7")))),
-        ("NEG-N5-KLOAD-MARKER-BOUNDARY", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 22, "selection=manifest_digest_untrusted", "selection=trusted")))),
+        ("NEG-N5-KLOAD-TRUST-POLICY-MISSING", _rejected(lambda: inspect_expected(trust_policy_missing))),
+        ("NEG-N5-KLOAD-TRUST-STATE-MISSING", _rejected(lambda: inspect_expected(trust_state_missing))),
+        ("NEG-N5-KLOAD-TRUST-POLICY-CORRUPT", _rejected(lambda: inspect_expected(trust_policy_corrupt))),
+        ("NEG-N5-KLOAD-TRUST-STATE-CORRUPT", _rejected(lambda: inspect_expected(trust_state_corrupt))),
+        ("NEG-N5-KLOAD-TRUST-POLICY-KERNEL-BINDING", _rejected(lambda: native_kernel_load.native_boot_trust.validate_development(bytes(substituted_policy), bytes(substituted_state), trust_observed))),
+        ("NEG-N5-KLOAD-TRUST-STATE-POLICY-BINDING", _rejected(lambda: native_kernel_load.native_boot_trust.validate_development(trust_policy, bytes(substituted_state_policy), trust_observed))),
+        ("NEG-N5-KLOAD-MARKER-TRUST-DENIAL", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 14, "denial=pbtrust_policy_unsigned", "denial=pbtrust_policy_authentication")))),
+        ("NEG-N5-KLOAD-MARKER-TRUST-AUTHORITY", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 14, "authority_grants=0", "authority_grants=1")))),
+        ("NEG-N5-KLOAD-TRUST-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, trust_oracle, pbp1_transcript))),
+        ("NEG-N5-KLOAD-MARKER-MAPPING-COUNT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 17, "mappings=4", "mappings=3")))),
+        ("NEG-N5-KLOAD-MARKER-WX", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 17, "wx=0", "wx=1")))),
+        ("NEG-N5-KLOAD-MARKER-RETAIN-COUNT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 19, "stack_pages=8", "stack_pages=7")))),
+        ("NEG-N5-KLOAD-MARKER-BOUNDARY", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 23, "selection=manifest_digest_untrusted", "selection=trusted")))),
         ("NEG-N5-KLOAD-CONFIG-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, config_oracle, pbp1_transcript))),
         ("NEG-N5-KLOAD-MANIFEST-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, manifest_oracle, pbp1_transcript))),
         ("NEG-N5-KLOAD-ELF-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, elf_oracle, pbp1_transcript))),
@@ -1177,9 +1257,9 @@ def _negative_controls(
         ("NEG-N5-KMAP-ROLLBACK", _rejected(lambda: native_kernel_map.validate_retained_lifecycle(rollback_lifecycle))),
         ("NEG-N5-KMAP-FIRMWARE-ACTIVE", _rejected(lambda: native_kernel_map.validate_retained_lifecycle(firmware_lifecycle))),
         ("NEG-N5-KMAP-RETENTION", _rejected(lambda: native_kernel_map.validate_retained_lifecycle(retention_lifecycle))),
-        ("NEG-N5-KMAP-MARKER-PLAN", _rejected(lambda: native_kernel_load.validate_oracle_binding(native_kernel_load.validate_markers(_replace_marker(markers, 16, f"leaf_fnv1a64={marker_summary['kernel_map']['leaf_fingerprint']}", "leaf_fnv1a64=0000000000000000")), inspection, pbp1_transcript))),
-        ("NEG-N5-KMAP-MARKER-ACTIVE", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 17, f"mapped_fnv1a64={marker_summary['kernel_map']['mapped_fnv1a64']}", "mapped_fnv1a64=0000000000000000")))),
-        ("NEG-N5-KMAP-MARKER-RETAIN", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 18, "firmware_calls_while_active=0", "firmware_calls_while_active=1")))),
+        ("NEG-N5-KMAP-MARKER-PLAN", _rejected(lambda: native_kernel_load.validate_oracle_binding(native_kernel_load.validate_markers(_replace_marker(markers, 17, f"leaf_fnv1a64={marker_summary['kernel_map']['leaf_fingerprint']}", "leaf_fnv1a64=0000000000000000")), inspection, pbp1_transcript))),
+        ("NEG-N5-KMAP-MARKER-ACTIVE", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 18, f"mapped_fnv1a64={marker_summary['kernel_map']['mapped_fnv1a64']}", "mapped_fnv1a64=0000000000000000")))),
+        ("NEG-N5-KMAP-MARKER-RETAIN", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 19, "firmware_calls_while_active=0", "firmware_calls_while_active=1")))),
         ("NEG-N5-KMAP-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, map_oracle, pbp1_transcript))),
         ("NEG-N5-PBP1-RETAINED-RANGE-KIND", _rejected(lambda: native_live_boot_handoff.validate_oracle_binding(range_kind, marker_summary, inspection))),
         ("NEG-N5-PBP1-ROOT-BINDING", _rejected(lambda: native_kernel_load.validate_oracle_binding(root_binding, inspection, pbp1_transcript))),
@@ -1195,9 +1275,9 @@ def _negative_controls(
         ("NEG-N5-PBEXIT-RETRY-EXHAUSTED", _rejected(lambda: native_boot_exit.validate_trace(sum((exit_attempt(index, "invalid_parameter") for index in range(4)), [])))),
         ("NEG-N5-PBEXIT-POST-ATTEMPT-FIRMWARE", _rejected(lambda: native_boot_exit.validate_trace([*exit_attempt(1, "invalid_parameter"), {"operation": "other_firmware"}, *exit_attempt(2, "success")]))),
         ("NEG-N5-PBEXIT-POST-EXIT-FIRMWARE", _rejected(lambda: native_boot_exit.validate_trace([*success_trace, {"operation": "get_memory_map", "map": exit_map}]))),
-        ("NEG-N5-PBEXIT-MARKER-ATTEMPTS", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 20, "attempts=1", "attempts=2")))),
-        ("NEG-N5-PBEXIT-MARKER-DESCRIPTOR", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 20, "descriptor_bytes=48", "descriptor_bytes=56")))),
-        ("NEG-N5-PBEXIT-FIRMWARE-BOUNDARY", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 21, "calls_after_exit=0", "calls_after_exit=1")))),
+        ("NEG-N5-PBEXIT-MARKER-ATTEMPTS", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 21, "attempts=1", "attempts=2")))),
+        ("NEG-N5-PBEXIT-MARKER-DESCRIPTOR", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 21, "descriptor_bytes=48", "descriptor_bytes=56")))),
+        ("NEG-N5-PBEXIT-FIRMWARE-BOUNDARY", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 22, "calls_after_exit=0", "calls_after_exit=1")))),
         ("NEG-N5-PBEXIT-TRANSFER", _rejected(lambda: native_boot_exit.validate_trace([*success_trace, {"operation": "transfer"}]))),
     ]
     controls = [
@@ -1275,13 +1355,23 @@ def make_readiness(
         raise QualificationError(
             "current PPOL1 readiness is stale: " + "; ".join(policy_failures)
         )
+    trust_readiness = native_kernel_load.native_boot_trust.read_json(
+        ROOT / native_kernel_load.native_boot_trust.READINESS_RELATIVE
+    )
+    trust_failures = native_kernel_load.native_boot_trust.readiness_errors(
+        trust_readiness, ROOT
+    )
+    if trust_failures:
+        raise QualificationError(
+            "current PBTRUST1 readiness is stale: " + "; ".join(trust_failures)
+        )
     lock, profile = native_tier0.validate_contracts(ROOT)
     qemu_root = native_tier0._require_workspace_tool_path(qemu_root, ROOT)
     native_tier0.verify_local_launch_runtime(lock, qemu_root, ROOT)
     (ROOT / "tmp").mkdir(parents=True, exist_ok=True)
     (ROOT / "runs" / "native-tier0").mkdir(parents=True, exist_ok=True)
 
-    with tempfile.TemporaryDirectory(prefix="pkload5-qualification-", dir=ROOT / "tmp") as temporary:
+    with tempfile.TemporaryDirectory(prefix="pkload6-trust-qualification-", dir=ROOT / "tmp") as temporary:
         temporary_root = Path(temporary)
         host_tests = _host_checks(toolchain_root, temporary_root)
         binary, build = qualify_native_pooleboot._build_and_test(toolchain_root, temporary_root)
@@ -1308,7 +1398,7 @@ def make_readiness(
         )
         if host_tests["kernel_map_probe"] != probe_expected:
             raise QualificationError("Rust PKMAP2 probe diverges from the independent Python oracle")
-        media_path = temporary_root / "pkload5.img"
+        media_path = temporary_root / "pkload6-trust.img"
         media_path.write_bytes(media_first)
 
         runs: list[dict[str, Any]] = []
@@ -1316,7 +1406,7 @@ def make_readiness(
         pbp1_payloads: list[bytes] = []
         for run_index in (1, 2):
             with tempfile.TemporaryDirectory(
-                prefix=f"pkload5-run-{run_index}-",
+                prefix=f"pkload6-trust-run-{run_index}-",
                 dir=ROOT / "runs" / "native-tier0",
             ) as run_temporary:
                 run, screenshot, pbp1_data = qualify_native_pooleboot._execute_once(
@@ -1361,9 +1451,9 @@ def make_readiness(
         "schema_version": "1.0",
         "artifact_kind": "pooleos_native_kernel_load_readiness",
         "status_date": status_date,
-        "status": "pass_single_host_two_run_live_inner_parse_pkmap2_exit_then_stop_non_promoting",
+        "status": "pass_single_host_two_run_live_pbtrust1_denial_pkmap2_exit_then_stop_non_promoting",
         "contract_id": native_kernel_load.CONTRACT_ID,
-        "selected_move_id": "N5-INNER-LIVE-PARSE-001",
+        "selected_move_id": "N5-INNER-TRUST-STATE-001",
         "production_ready": False,
         "production_promotion_allowed": False,
         "n5_exit_gate_satisfied": False,
@@ -1436,6 +1526,12 @@ def make_readiness(
             "policy_readiness": native_kernel_load.file_binding(
                 ROOT, native_kernel_load.native_policy.READINESS_RELATIVE.as_posix()
             ),
+            "boot_trust_contract": native_kernel_load.file_binding(
+                ROOT, native_kernel_load.native_boot_trust.CONTRACT_RELATIVE
+            ),
+            "boot_trust_readiness": native_kernel_load.file_binding(
+                ROOT, native_kernel_load.native_boot_trust.READINESS_RELATIVE
+            ),
             "implementation_inputs": [native_kernel_load.file_binding(ROOT, path) for path in native_kernel_load.IMPLEMENTATION_INPUTS],
         },
         "host_tests": host_tests,
@@ -1498,6 +1594,10 @@ def make_readiness(
             "live_inner_set_authority_grants": 0,
             "live_inner_set_actions_authorized": 0,
             "live_inner_set_state_writes": 0,
+            "pbtrust1_host_oracle_match": True,
+            "pbtrust1_exact_artifact_cross_bindings": True,
+            "pbtrust1_development_unsigned_denied": True,
+            "pbtrust1_state_candidate_is_not_authority": True,
             "pbp1_profile_artifact_cross_binding": True,
             "sha256_python_match": True,
             "pkelf1_python_plan_match": True,
@@ -1517,8 +1617,8 @@ def make_readiness(
             "media_reconstruction_exact": True,
         },
         "cleanup": {
-            "file_handles_closed": 10,
-            "file_pools_freed": 9,
+            "file_handles_closed": 12,
+            "file_pools_freed": 11,
             "pbp1_pools_freed": 0,
             "final_map_work_pools_retained": 2,
             "kmap_table_pages_retained": native_kernel_map.TABLE_PAGE_COUNT,
@@ -1540,6 +1640,7 @@ def make_readiness(
                     "bootload_tests_passed",
                     "artifact_tests_passed",
                     "inner_tests_passed",
+                    "trust_tests_passed",
                     "handoff_tests_passed",
                     "live_handoff_tests_passed",
                     "kernel_map_tests_passed",
@@ -1554,6 +1655,7 @@ def make_readiness(
                     "bootload_tests_total",
                     "artifact_tests_total",
                     "inner_tests_total",
+                    "trust_tests_total",
                     "handoff_tests_total",
                     "live_handoff_tests_total",
                     "kernel_map_tests_total",
@@ -1587,12 +1689,20 @@ def make_readiness(
             "inner_retained_set_sha256": media_inspection["inner_set"][
                 "retained_set_sha256"
             ],
+            "trust_binding_count": media_inspection["trust_state"]["binding_count"],
+            "trust_denial": media_inspection["trust_state"]["denial"],
+            "trust_policy_sha256": media_inspection["trust_state"]["policy_sha256"],
+            "trust_state_sha256": media_inspection["trust_state"]["state_sha256"],
+            "trust_authority_grants": 0,
+            "trust_state_writes": 0,
             "production_claim_count": 0,
         },
         "open_items": [
             "Ratify or replace the candidate PSM1 format before stable boot ABI promotion.",
             "Define and implement signed manifest authentication, trust anchors, algorithm agility, and revocation policy.",
             "Persist and atomically enforce the minimum secure version across update and rollback.",
+            "Replace the ESP trust-state candidate with a redundant transactional authenticated monotonic backend, including copy selection, previous-state chaining, interrupted-write recovery, and fault evidence.",
+            "Implement real PBTRUST1 policy signature, threshold, revocation, Secure Boot, and TPM evidence providers without using parser success as authority.",
             "Define the final transfer-time CR3 activation, stack switch, register ABI, and explicit revocation plan.",
             "Authenticate the loaded initial-system, recovery, policy, symbols, microcode, and firmware artifacts through a ratified trust policy.",
             "Authenticate all six live inner contracts and bind authenticated trust, revocation, rollback, and audit state before any action gate can progress beyond the outer-signature denial.",

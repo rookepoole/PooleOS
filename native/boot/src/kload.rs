@@ -139,6 +139,7 @@ pub(super) struct Summary {
     pub artifact_page_count: usize,
     pub artifact_set_fnv1a64: u64,
     pub inner: poole_inner_live::Summary,
+    pub trust: poole_boot_trust::DevelopmentSummary,
     pub closed_file_count: usize,
     pub freed_pool_count: usize,
 }
@@ -184,6 +185,14 @@ fn inner_failure(error: poole_inner_live::Failure) -> Failure {
     Failure {
         stage: error.stage.code(),
         code: error.code,
+        status: EFI_COMPROMISED_DATA,
+    }
+}
+
+fn trust_failure(error: poole_boot_trust::Error) -> Failure {
+    Failure {
+        stage: "trust.development",
+        code: error.code(),
         status: EFI_COMPROMISED_DATA,
     }
 }
@@ -973,6 +982,171 @@ pub(super) fn load_manifest_kernel(
         }
     };
 
+    let trust_policy_path = match bootload::OwnedPath::copy_from("\\EFI\\POOLEOS\\TRUST.PBT")
+        .and_then(|path| bootload::encode_uefi_path(&path))
+    {
+        Ok(path) => path,
+        Err(error) => {
+            let failure = contract_failure("trust.policy.path", error);
+            return Err(transaction_failure(
+                calls,
+                physical_base,
+                allocation.page_count,
+                &artifacts,
+                null_mut(),
+                root,
+                failure,
+            ));
+        }
+    };
+    let trust_state_path = match bootload::OwnedPath::copy_from("\\EFI\\POOLEOS\\TRUSTST.PBS")
+        .and_then(|path| bootload::encode_uefi_path(&path))
+    {
+        Ok(path) => path,
+        Err(error) => {
+            let failure = contract_failure("trust.state.path", error);
+            return Err(transaction_failure(
+                calls,
+                physical_base,
+                allocation.page_count,
+                &artifacts,
+                null_mut(),
+                root,
+                failure,
+            ));
+        }
+    };
+    let trust_policy_file = match read_file(
+        calls,
+        root,
+        &trust_policy_path,
+        poole_boot_trust::POLICY_BYTES,
+        "trust.policy.open",
+        "trust.policy.info",
+        "trust.policy.read",
+    ) {
+        Ok(file) => file,
+        Err(failure) => {
+            return Err(transaction_failure(
+                calls,
+                physical_base,
+                allocation.page_count,
+                &artifacts,
+                null_mut(),
+                root,
+                failure,
+            ));
+        }
+    };
+    let trust_state_file = match read_file(
+        calls,
+        root,
+        &trust_state_path,
+        poole_boot_trust::STATE_BYTES,
+        "trust.state.open",
+        "trust.state.info",
+        "trust.state.read",
+    ) {
+        Ok(file) => file,
+        Err(failure) => {
+            let primary = free_pool(
+                calls,
+                trust_policy_file.pointer,
+                "trust.policy.pool_cleanup",
+            )
+            .err()
+            .unwrap_or(failure);
+            return Err(transaction_failure(
+                calls,
+                physical_base,
+                allocation.page_count,
+                &artifacts,
+                null_mut(),
+                root,
+                primary,
+            ));
+        }
+    };
+    let trust_policy_bytes = unsafe {
+        from_raw_parts(
+            trust_policy_file.pointer.cast::<u8>(),
+            trust_policy_file.byte_count,
+        )
+    };
+    let trust_state_bytes = unsafe {
+        from_raw_parts(
+            trust_state_file.pointer.cast::<u8>(),
+            trust_state_file.byte_count,
+        )
+    };
+    let trust_observed = poole_boot_trust::ObservedBoot {
+        manifest_sha256: manifest.manifest_sha256,
+        kernel_sha256: manifest.kernel_sha256,
+        retained_set_sha256: inner.retained_set_sha256,
+        revocation_set_sha256: poole_boot_trust::sha256(&[]),
+        manifest_version: manifest.manifest_version,
+        minimum_secure_version: manifest.minimum_secure_version,
+        artifact_role_mask: poole_boot_trust::ARTIFACT_ROLE_MASK,
+    };
+    let trust = match poole_boot_trust::validate_development(
+        trust_policy_bytes,
+        trust_state_bytes,
+        &trust_observed,
+    ) {
+        Ok(summary) => summary,
+        Err(error) => {
+            let state_result =
+                free_pool(calls, trust_state_file.pointer, "trust.state.pool_cleanup");
+            let policy_result = free_pool(
+                calls,
+                trust_policy_file.pointer,
+                "trust.policy.pool_cleanup",
+            );
+            let primary = state_result
+                .err()
+                .or_else(|| policy_result.err())
+                .unwrap_or_else(|| trust_failure(error));
+            return Err(transaction_failure(
+                calls,
+                physical_base,
+                allocation.page_count,
+                &artifacts,
+                null_mut(),
+                root,
+                primary,
+            ));
+        }
+    };
+    if let Err(failure) = free_pool(calls, trust_state_file.pointer, "trust.state.pool_free") {
+        let primary = free_pool(
+            calls,
+            trust_policy_file.pointer,
+            "trust.policy.pool_cleanup",
+        )
+        .err()
+        .unwrap_or(failure);
+        return Err(transaction_failure(
+            calls,
+            physical_base,
+            allocation.page_count,
+            &artifacts,
+            null_mut(),
+            root,
+            primary,
+        ));
+    }
+    if let Err(failure) = free_pool(calls, trust_policy_file.pointer, "trust.policy.pool_free") {
+        return Err(transaction_failure(
+            calls,
+            physical_base,
+            allocation.page_count,
+            &artifacts,
+            null_mut(),
+            root,
+            failure,
+        ));
+    }
+
     if let Err(failure) = close_file(root, "kload.root.close") {
         return Err(release_loaded_page_ranges(
             calls,
@@ -1005,8 +1179,9 @@ pub(super) fn load_manifest_kernel(
         artifact_page_count,
         artifact_set_fnv1a64,
         inner,
-        closed_file_count: 10,
-        freed_pool_count: 9,
+        trust,
+        closed_file_count: 12,
+        freed_pool_count: 11,
     })
 }
 
