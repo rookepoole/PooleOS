@@ -5,7 +5,7 @@
   "status": "bounded_unsigned_live_profile_artifacts_post_exit_pbp1_retained_pkmap2_stop_before_transfer_non_promoting_proof",
   "production_ready": false,
   "production_promotion_allowed": false,
-  "selected_move_id": "N5-MICROCODE-SEMANTICS-001",
+  "selected_move_id": "N5-FIRMWARE-SEMANTICS-001",
   "phase_mapping": [
     "N5.1",
     "N5.2",
@@ -26,7 +26,8 @@
     "ADD-BOOT-004",
     "ADD-BOOT-005",
     "ADD-BOOT-006",
-    "ADD-BOOT-007"
+    "ADD-BOOT-007",
+    "ADD-BOOT-009"
   ],
   "binary": {
     "package": "pooleboot",
@@ -182,6 +183,9 @@
     "NEG-N5-KLOAD-MICROCODE-INNER-SEMANTICS",
     "NEG-N5-KLOAD-MICROCODE-INNER-VERSION",
     "NEG-N5-KLOAD-MICROCODE-ACTIVATION-OVERREACH",
+    "NEG-N5-KLOAD-FIRMWARE-INNER-SEMANTICS",
+    "NEG-N5-KLOAD-FIRMWARE-INNER-VERSION",
+    "NEG-N5-KLOAD-FIRMWARE-ACTIVATION-OVERREACH",
     "NEG-N5-KLOAD-MARKER-OMISSION",
     "NEG-N5-KLOAD-MARKER-ORDER",
     "NEG-N5-KLOAD-MARKER-CONFIG-BOUND",
@@ -273,6 +277,7 @@
     "The recovery payload is a deterministic PREC1 policy bundle validated by an independent host oracle, and unsigned development activation is denied; PooleBoot still treats the inner bytes as opaque, authenticated mutable state does not exist, and PooleKernel grants no recovery authority.",
     "The symbols payload is a deterministic PSYM1 public diagnostic index validated by an independent host oracle, and unsigned consumption is denied; PooleBoot treats it as opaque, PooleKernel performs no lookup, runtime addresses remain undisclosed, private debug data stays off media, and no authority is created.",
     "The microcode payload is a deterministic PMCU1 package containing only synthetic never-apply bytes; exact target selection and reset-based known-good policy are validated by independent host and no_std oracles, while PooleBoot and PooleKernel enforce nothing and no privileged revision probe, vendor authentication, or CPU update occurs.",
+    "The firmware payload is a deterministic PFWM1 synthetic manifest; exact resource and hardware-instance identities, version floors, dependencies, dry-run prerequisites, and post-reset receipts are validated by independent host and no_std oracles, while PooleBoot and PooleKernel enforce nothing and no external payload bytes, live firmware inventory, updater driver, capsule submission, firmware mutation, or authority exists.",
     "Immediately before ExitBootServices, PooleBoot captures a bounded final UEFI memory map, normalizes descriptor-stride-aware entries, and finalizes development-profile PBP1 bytes inside the retained handoff allocation.",
     "PBEXIT1 permits at most four attempts, retries only EFI_INVALID_PARAMETER after obtaining a fresh map key, forbids unrelated firmware calls after the first attempt, and proves zero firmware calls after success.",
     "PKMAP2 requires CR0.WP, processor NX support, and EFER.NXE; it rejects LA57, PCID, occupied target slots, malformed coverage, writable-executable leaves, large leaves, retained overlap, and guard-layout drift.",
@@ -280,7 +285,7 @@
     "Framebuffer first and last translations, leaf sizes, effective permissions, and PAT, PCD, and PWT bits remain equal during validation; this proves no drift, not a final PooleOS cache policy.",
     "Both serial and debugcon reconstruct the exact post-exit PBP1 bytes and cross-bind all seven artifact roles and physical ranges, the retained root, guarded stack, handoff physical and virtual addresses, and loader-reserved final-map coverage.",
     "After ExitBootServices succeeds, PooleBoot disables interrupts, checks that the retained PBP1 bytes are unchanged, emits direct diagnostics without firmware, and halts permanently before changing CR3, RSP, or calling PooleKernel.",
-    "The retained PBP1 is development-only and intentionally fails the kernel-entry profile because signatures are absent; no artifact semantics, initial-system execution, microcode application, transferable production handoff, or final kernel address space is claimed.",
+    "The retained PBP1 is development-only and intentionally fails the kernel-entry profile because signatures are absent; no artifact semantics, initial-system execution, microcode or firmware application, transferable production handoff, or final kernel address space is claimed.",
     "The proof does not enroll keys, enforce Secure Boot, perform measured boot, use TPM state, or create a signature.",
     "The deterministic raw image is development media, not an ISO, installer, recovery image, or physical-media qualification.",
     "The stop marker proves the instrumented QEMU/OVMF path reached the post-exit halt boundary; it does not prove target-firmware behavior, physical hardware, or kernel execution.",

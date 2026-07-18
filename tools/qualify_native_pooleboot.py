@@ -811,6 +811,12 @@ def make_report(
             "microcode_readiness": native_pooleboot.file_binding(
                 ROOT, "runs/native_microcode_readiness.json"
             ),
+            "firmware_contract": native_pooleboot.file_binding(
+                ROOT, "specs/native-firmware-contract.json"
+            ),
+            "firmware_readiness": native_pooleboot.file_binding(
+                ROOT, "runs/native_firmware_readiness.json"
+            ),
             "implementation_inputs": [
                 native_pooleboot.file_binding(ROOT, path) for path in BUILD_INPUTS
             ],
@@ -838,6 +844,13 @@ def make_report(
                 "patch_count"
             ],
             "microcode_payload_profile": "synthetic_test_only_never_apply",
+            "firmware_component_count": kernel_load["media"]["inspection"]["firmware"][
+                "component_count"
+            ],
+            "firmware_dependency_count": kernel_load["media"]["inspection"]["firmware"][
+                "dependency_count"
+            ],
+            "firmware_manifest_profile": "synthetic_qualification_never_apply",
             "production_claim_count": 0,
         },
         "open_items": kernel_load["open_items"],

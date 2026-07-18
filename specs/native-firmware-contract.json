@@ -1,0 +1,224 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "pooleos_native_firmware_contract",
+  "contract_id": "PFWM1",
+  "version": {
+    "major": 1,
+    "minor": 0
+  },
+  "profile": "synthetic_qualification_never_apply",
+  "format": {
+    "header_bytes": 512,
+    "component_record_bytes": 256,
+    "dependency_record_bytes": 16,
+    "tables_are_contiguous": true,
+    "external_payload_bytes_embedded": false,
+    "hardware_instance_bound_by_manifest_signature": true
+  },
+  "limits": {
+    "manifest_bytes": 65536,
+    "components": 32,
+    "dependencies": 128,
+    "external_payload_bytes_per_component": 67108864,
+    "maximum_transaction_components": 1,
+    "apply_timeout_ms": 1800000,
+    "reset_timeout_ms": 900000,
+    "retry_limit": 3
+  },
+  "header_flags": [
+    "target_profile_bound",
+    "exact_identities",
+    "external_payload_digests",
+    "manifest_signature_required",
+    "package_signature_required",
+    "vendor_signature_required",
+    "license_policy_required",
+    "revocation_required",
+    "anti_rollback",
+    "dependency_dag",
+    "single_component_transaction",
+    "protected_staging",
+    "power_guard",
+    "recovery_required",
+    "physical_confirmation",
+    "post_reset_verify",
+    "durable_receipt",
+    "no_generic_flash",
+    "no_authority_from_parse",
+    "synthetic_qualification"
+  ],
+  "component_flags": [
+    "exact_target",
+    "updatable_required",
+    "authentication_required",
+    "reset_required",
+    "dependency_enforced",
+    "power_guard",
+    "quiesce_required",
+    "storage_guard",
+    "suspend_guard",
+    "shutdown_guard",
+    "reenumerate_required",
+    "self_test_required",
+    "recovery_route_required",
+    "physical_confirmation",
+    "no_generic_flash",
+    "post_reset_verify",
+    "receipt_required",
+    "rebind_after_verify",
+    "hardware_instance_manifest_bound"
+  ],
+  "transports": [
+    "uefi_capsule_esrt_normalized",
+    "exact_device_updater_plugin",
+    "pldm_firmware_update_normalized"
+  ],
+  "activation_error_order": [
+    "pfwm_activation_outer_signature",
+    "pfwm_activation_outer_role",
+    "pfwm_activation_outer_version",
+    "pfwm_activation_outer_payload_digest",
+    "pfwm_activation_outer_file_digest",
+    "pfwm_activation_manifest_signature",
+    "pfwm_activation_package_signature",
+    "pfwm_activation_vendor_signature",
+    "pfwm_activation_target_profile",
+    "pfwm_activation_hardware_inventory",
+    "pfwm_activation_device_identity",
+    "pfwm_activation_current_versions",
+    "pfwm_activation_transport_support",
+    "pfwm_activation_firmware_services",
+    "pfwm_activation_updater_plugins",
+    "pfwm_activation_plugin_authority",
+    "pfwm_activation_external_payloads",
+    "pfwm_activation_payload_digests",
+    "pfwm_activation_license_policy",
+    "pfwm_activation_redistribution",
+    "pfwm_activation_revocation_state",
+    "pfwm_activation_component_revoked",
+    "pfwm_activation_anti_rollback",
+    "pfwm_activation_recovery",
+    "pfwm_activation_recovery_backup",
+    "pfwm_activation_staging",
+    "pfwm_activation_staging_capacity",
+    "pfwm_activation_power",
+    "pfwm_activation_ac_power",
+    "pfwm_activation_battery",
+    "pfwm_activation_transaction_journal",
+    "pfwm_activation_quiescence",
+    "pfwm_activation_storage_guard",
+    "pfwm_activation_suspend_shutdown_guard",
+    "pfwm_activation_reset_authority",
+    "pfwm_activation_reboot_authority",
+    "pfwm_activation_user_confirmation",
+    "pfwm_activation_physical_presence",
+    "pfwm_activation_post_reset_verifier",
+    "pfwm_activation_receipt_storage",
+    "pfwm_activation_firmware_change_authority",
+    "pfwm_activation_not_qualification_only",
+    "pfwm_activation_live_firmware_call_requested",
+    "pfwm_activation_driver_load_requested",
+    "pfwm_activation_physical_media_write_requested",
+    "pfwm_activation_firmware_mutation_requested"
+  ],
+  "post_reset_error_order": [
+    "pfwm_post_reset_not_qualification_only",
+    "pfwm_post_reset_record_count",
+    "pfwm_post_reset_record_order",
+    "pfwm_post_reset_resource_identity",
+    "pfwm_post_reset_hardware_instance",
+    "pfwm_post_reset_version",
+    "pfwm_post_reset_last_attempt_version",
+    "pfwm_post_reset_last_attempt_status",
+    "pfwm_post_reset_reenumeration",
+    "pfwm_post_reset_self_test",
+    "pfwm_post_reset_recovery",
+    "pfwm_post_reset_receipt",
+    "pfwm_post_reset_boot_loop_guard",
+    "pfwm_post_reset_state_commit",
+    "pfwm_post_reset_driver_rebind"
+  ],
+  "claims": {
+    "allocation_free_no_std_parser": true,
+    "exact_identity_and_version_floor_validation": true,
+    "dependency_order_and_single_transaction_model": true,
+    "dry_run_prerequisite_gating": true,
+    "post_reset_receipt_validation": true,
+    "synthetic_manifest_only": true,
+    "external_payload_bytes_included": false,
+    "live_fmp_or_esrt_inventory_observed": false,
+    "uefi_capsule_submitted": false,
+    "device_updater_driver_loaded": false,
+    "vendor_payload_validated": false,
+    "firmware_mutated": false,
+    "physical_media_written": false,
+    "production_apply_authority_created": false,
+    "physical_hardware_qualified": false,
+    "production_ready": false
+  },
+  "non_claims": [
+    "No live UEFI FMP, ESRT, capsule, or PLDM parser is implemented or invoked.",
+    "No vendor firmware payload, updater driver, private key, or signature is included.",
+    "No firmware service call, reset, driver load, device detach, or media write occurs.",
+    "A valid parse or dry-run plan creates no production update authority.",
+    "The canonical profile is synthetic and prohibited from applying to hardware."
+  ],
+  "primary_references": [
+    "https://uefi.org/specs/UEFI/2.11/23_Firmware_Update_and_Reporting.html",
+    "https://csrc.nist.gov/pubs/sp/800/193/final",
+    "https://www.dmtf.org/sites/default/files/standards/documents/DSP0267_1.3.0.pdf",
+    "https://trustedcomputinggroup.org/resource/tcg-pc-client-reference-integrity-manifest-specification/"
+  ],
+  "implementation_bindings": [
+    {
+      "path": "native/Cargo.toml",
+      "bytes": 552,
+      "sha256": "D37A12801AC2C648A400A15FCEB482D2468A4E081F6489480049A4EC688C8B73"
+    },
+    {
+      "path": "native/Cargo.lock",
+      "bytes": 3600,
+      "sha256": "217EB13E456C253614E9A0D581D412F2769D8A23D9780CF973494F3D1C6A3D4B"
+    },
+    {
+      "path": "native/firmware/Cargo.toml",
+      "bytes": 350,
+      "sha256": "14CEE861F16A5F6E0A984F12036FA64422453178CBDA235622E0681C59C6C42E"
+    },
+    {
+      "path": "native/firmware/src/lib.rs",
+      "bytes": 46302,
+      "sha256": "3FAE1CE011532BF847BD5BBB9AB59347259CC1A38D5139AB19070E30BCE413FA"
+    },
+    {
+      "path": "native/firmware/src/bin/pfwm1_probe.rs",
+      "bytes": 9243,
+      "sha256": "6A51D820F088766F2AB466E9B1BFA5D40501447DD7925306F18B09F4C322E854"
+    },
+    {
+      "path": "runtime/native_firmware.py",
+      "bytes": 51184,
+      "sha256": "9787C5D73D8EA045E2F3CF088CFF39FABC453FC779DCD2D71FCD11393DC37808"
+    },
+    {
+      "path": "tools/generate_native_firmware_vectors.py",
+      "bytes": 1357,
+      "sha256": "1121B5DD2FD64B9B5080B8DAD4B068DD1D2329F7016DE034946D56935BF2B31D"
+    },
+    {
+      "path": "tools/qualify_native_firmware.py",
+      "bytes": 32432,
+      "sha256": "606CB491092892C92DB8ADFB5E23365C230742BA581D012755C9EA231B3A9DB9"
+    },
+    {
+      "path": "tests/test_native_firmware.py",
+      "bytes": 6191,
+      "sha256": "F4B230AA7D6D40C06B7281680417314C6BD3AA7A2EA0019EFE789E106FF9ABAB"
+    },
+    {
+      "path": "docs/native-firmware-manifest.md",
+      "bytes": 8893,
+      "sha256": "B211BE47D07391B81C247F258AE1F31A8EE494DD3FE0610F2DDA90C73256213E"
+    }
+  ]
+}

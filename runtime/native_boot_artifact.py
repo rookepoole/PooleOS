@@ -7,6 +7,7 @@ import hashlib
 import struct
 from typing import Final
 
+from runtime import native_firmware as pfwm1
 from runtime import native_initial_system as pinit1
 from runtime import native_microcode as pmcu1
 from runtime import native_recovery as prec1
@@ -154,6 +155,8 @@ def canonical_payload(role: int) -> bytes:
         return psym1.canonical_bundle()
     if role == ROLE_MICROCODE:
         return pmcu1.canonical_bundle()
+    if role == ROLE_FIRMWARE_MANIFEST:
+        return pfwm1.canonical_bundle()
     return (
         "POOLEOS-PBART1-DEVELOPMENT/1\n"
         f"role={ROLE_NAMES[role]}\n"
@@ -167,6 +170,7 @@ def canonical_artifacts(version: int = 1) -> dict[int, bytes]:
     parse_recovery(artifacts[ROLE_RECOVERY])
     parse_symbols(artifacts[ROLE_SYMBOLS])
     parse_microcode(artifacts[ROLE_MICROCODE])
+    parse_firmware(artifacts[ROLE_FIRMWARE_MANIFEST])
     return artifacts
 
 
@@ -206,6 +210,16 @@ def parse_microcode(data: bytes) -> tuple[Artifact, pmcu1.Bundle]:
         raise BootArtifactError("artifact_role_binding")
     bundle = pmcu1.parse(artifact.payload)
     if artifact.version != pmcu1.MAJOR_VERSION:
+        raise BootArtifactError("artifact_inner_version_binding")
+    return artifact, bundle
+
+
+def parse_firmware(data: bytes) -> tuple[Artifact, pfwm1.Bundle]:
+    artifact = parse(data)
+    if artifact.role != ROLE_FIRMWARE_MANIFEST:
+        raise BootArtifactError("artifact_role_binding")
+    bundle = pfwm1.parse(artifact.payload)
+    if artifact.version != pfwm1.MAJOR_VERSION:
         raise BootArtifactError("artifact_inner_version_binding")
     return artifact, bundle
 

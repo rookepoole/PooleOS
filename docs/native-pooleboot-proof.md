@@ -1,6 +1,6 @@
 # PooleBoot Aggregate Proof 7
 
-Status: bounded unsigned PBART1/PINIT1/PREC1/PSYM1/synthetic-only PMCU1/post-exit PBP1/retained PKMAP2/
+Status: bounded unsigned PBART1/PINIT1/PREC1/PSYM1/synthetic-only PMCU1/PFWM1/post-exit PBP1/retained PKMAP2/
 stop-before-transfer non-promoting proof
 
 ## What Exists
@@ -28,6 +28,11 @@ Cycle 111 adds the synthetic-only PMCU1 exact-CPU package, revision/floor and
 reset-known-good selection, apply-plan, mixed-revision, post-apply, and
 activation-denial oracle while leaving vendor validation, privileged revision
 observation, and PooleBoot/PooleKernel application disabled.
+Cycle 112 adds the synthetic-only PFWM1 three-component firmware manifest,
+two-edge dependency order, exact hardware and version identity, 47 dry-run
+prerequisites, recovery and post-reset receipt checks, and activation-denial
+oracle while leaving live inventory, payload validation, updater loading, and
+PooleBoot/PooleKernel application disabled.
 
 The normative aggregate contract is `specs/native-pooleboot-proof.json`.
 `tools/qualify_native_pooleboot.py` validates the current PKLOAD6 receipt,
@@ -74,8 +79,10 @@ acceleration, loopback-only QMP, and no shared folders. It requires:
   correspondence, and development consumption denial;
 - independent PMCU1 package/digest/selection/apply-plan/post-apply validation
   over visibly synthetic never-apply payloads and development activation denial;
+- independent PFWM1 identity/dependency/dry-run/recovery/post-reset validation
+  over a synthetic external-payload-only manifest and development activation denial;
 - exact seven-artifact, root, stack, handoff, map, and digest cross-bindings;
-- 124/124 integrated hostile controls;
+- 127/127 integrated hostile controls;
 - no absolute user path in public readiness artifacts;
 - a clean QMP shutdown of the intentionally halted guest.
 
@@ -118,6 +125,10 @@ The receipt proves, on the pinned profile:
   reset-known-good selection, no in-session downgrade, BSP/AP prerequisites,
   mixed-revision failure, post-apply checks, and fail-closed activation for the
   unsigned development context;
+- host-oracle validation of the synthetic-only PFWM1 manifest, three exact
+  components, two dependency edges, hardware and version floors, external
+  payload identities, dry-run ordering, recovery, post-reset receipts, and
+  fail-closed activation for the unsigned development context;
 - complete higher-half kernel alias verification with W^X, CR0.WP, and NX;
 - framebuffer translation and cache-bit preservation during the active audit;
 - retention of kernel and six profile artifact ranges, four table pages, an
@@ -132,7 +143,8 @@ The receipt proves, on the pinned profile:
 
 The manifest and all seven artifacts are unsigned and untrusted. The proof does
 not establish artifact authentication, PooleBoot inner semantics, initial-system
-or recovery execution, symbol consumption, microcode application, kernel exports, diagnostic authority,
+or recovery execution, symbol consumption, microcode or firmware application,
+live firmware inventory, updater loading, kernel exports, diagnostic authority,
 authenticated rollback persistence or state I/O,
 real vendor-container validation, redistribution approval, privileged
 per-processor revision observation, final active kernel CR3/RSP,
@@ -155,12 +167,14 @@ PREC1 policy/state/transition and activation-denial slice, and
 `N5-SYMBOLS-SEMANTICS-001` closes only the independent PSYM1
 format/identity/lookup/privacy/correspondence/consumption-denial slice, and
 `N5-MICROCODE-SEMANTICS-001` closes only the independent synthetic PMCU1
-format/selection/apply-plan/post-verify/activation-denial slice. N5.6
+format/selection/apply-plan/post-verify/activation-denial slice, and
+`N5-FIRMWARE-SEMANTICS-001` closes only the independent synthetic PFWM1
+manifest/dependency/dry-run/post-reset/activation-denial slice. N5.6
 and N5.9 remain partial because PooleBoot enforcement, PooleKernel activation,
-recovery execution, symbol consumption, or microcode application, trust,
-authenticated state persistence, and the firmware-manifest and policy formats
-are open. The next owner-independent move is
-`N5-FIRMWARE-SEMANTICS-001`. Hardware-key acquisition, artifact authentication,
+recovery execution, symbol consumption, microcode or firmware application,
+trust, authenticated state persistence, and the role-7 policy format are open.
+The next owner-independent move is
+`N5-POLICY-SEMANTICS-001`. Hardware-key acquisition, artifact authentication,
 and governance signing remain separate owner-controlled lanes.
 
 ## Primary References
