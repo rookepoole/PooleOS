@@ -6,7 +6,8 @@ PKLOAD6 is the bounded live integration proof for PooleBoot's current N5.6 and
 N5.8 development boundary. It reads PBC1 and unsigned PSM1 from the EFI system
 partition, selects and digest-binds the real PKELF1 PooleKernel plus six exact
 profile artifacts, validates each non-kernel PBART1 envelope, independently
-validates the PINIT1 initial-system payload in the host oracle, retains every
+validates the PINIT1 initial-system and PREC1 recovery payloads in the host
+oracle, retains every
 loaded page range and PKMAP2 transfer allocation, creates final
 development-profile PBP1 bytes, exits UEFI boot services, and halts before
 kernel transfer.
@@ -50,9 +51,11 @@ magic, format version, role, artifact version, reserved-zero bytes, payload
 length, and payload SHA-256 before allocating a distinct `EfiLoaderData` page
 range. The exact file bytes are copied and page padding is zeroed. PooleBoot
 does not invoke an inner payload parser. The independent host media oracle
-parses PINIT1, cross-binds its version, and requires unsigned-development
-activation denial; no microcode is applied and no initial-system instruction
-executes.
+parses PINIT1 and PREC1, cross-binds both versions, and requires
+unsigned-development activation denial for each. It also validates PREC1's
+separately mutable state and bounded transition rules; PooleBoot neither reads
+nor writes that state. No recovery or initial-system instruction executes and
+no microcode is applied.
 
 ## Retained Transfer Storage
 
@@ -117,7 +120,7 @@ halts permanently at `STOP BEFORE TRANSFER`.
 
 ## Qualified Evidence
 
-The Cycle 108 receipt records:
+The Cycle 109 receipt records:
 
 - 76/76 Rust host tests across PooleBoot, PBART1, PBC1/PSM1/PKELF1/PBP1, PKMAP2,
   PBEXIT1, and PKENTRY1;
@@ -128,12 +131,16 @@ The Cycle 108 receipt records:
 - exact static GOP frames;
 - exact 4,728-byte post-exit PBP1 reconstruction with 95 memory entries and
   seven artifact descriptors;
-- six PBART1 files totaling 2,663 bytes and six retained pages, independently
+- six PBART1 files totaling 3,590 bytes and six retained pages, independently
   cross-bound to PSM1, guest markers, and final PBP1;
 - exact PINIT1 host-oracle validation of the 1,764-byte payload, deterministic
   start order `1,2,3`, and mandatory development activation denial;
-- 115/115 integrated negative controls, including inner semantic mutation,
-  outer/inner version mismatch, activation overreach, artifact omission, path, role, version,
+- exact PREC1 host-oracle validation of the 992-byte policy, two slots, ten
+  failure routes, seven authority requirements, a 128-byte mutable state
+  contract, bounded transitions, and mandatory development activation denial;
+- 118/118 integrated negative controls, including PINIT1 and PREC1 inner
+  semantic mutation, outer/inner version mismatch, activation overreach,
+  artifact omission, path, role, version,
   payload digest, whole-file digest, overlap, signature overclaim, final-map
   coverage, stale keys, retry exhaustion, descriptor drift, guard mutation,
   post-exit firmware use, transfer overreach, marker drift, and oracle
@@ -145,17 +152,20 @@ receipt does not claim that this OVMF run naturally produced a stale map key.
 
 ## Nonclaims And Next Boundary
 
-PKLOAD6 does not authenticate PSM1 or any loaded artifact, enforce persistent rollback,
+PKLOAD6 does not authenticate PSM1 or any loaded artifact, enforce authenticated
+persistent rollback,
 establish the final active kernel address space or framebuffer cache policy,
-switch to the guarded stack, call PooleKernel, enforce PINIT1 in PooleBoot,
-activate or execute the initial system in PooleKernel, apply microcode or firmware, enforce policy payloads, enforce Secure
+switch to the guarded stack, call PooleKernel, enforce PINIT1 or PREC1 in
+PooleBoot, persist PREC1 mutable state, activate or execute the initial system
+or recovery in PooleKernel, apply microcode or firmware, enforce policy payloads, enforce Secure
 Boot, perform measured boot, test a second host, test target firmware, touch
 physical media, satisfy N5, or establish production readiness.
 
 The next chronological owner-independent move is
-`N5-RECOVERY-SEMANTICS-001`: define and independently validate the recovery
-payload contract and its fail-closed selection, lifecycle, and rollback rules
-without entering recovery. Transfer-state, signature-trust, and production
+`N5-SYMBOLS-SEMANTICS-001`: define and independently validate the symbol
+payload's address, identity, integrity, privacy, and bounded-consumption rules
+without consuming symbols in PooleBoot or PooleKernel. Transfer-state,
+signature-trust, and production
 transfer remain separately gated by the N5/N6 and owner-controlled N0 work.
 
 ## Primary Reference

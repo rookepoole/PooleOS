@@ -35,25 +35,26 @@
     "status_date": {"const": "2026-07-18"},
     "status": {"const": "pass_single_host_two_run_live_pbart1_pkmap2_exit_then_stop_non_promoting"},
     "contract_id": {"const": "PKLOAD6"},
-    "selected_move_id": {"const": "N5-INIT-BUNDLE-001"},
+    "selected_move_id": {"const": "N5-RECOVERY-SEMANTICS-001"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
     "n5_exit_gate_satisfied": {"const": false},
     "phase_status": {
       "type": "object",
-      "required": ["N5", "N5.1", "N5.4", "N5.5", "N5.6", "N5.8"],
+      "required": ["N5", "N5.1", "N5.4", "N5.5", "N5.6", "N5.8", "N5.9"],
       "properties": {
         "N5": {"const": "partial"},
         "N5.1": {"const": "partial"},
         "N5.4": {"const": "partial"},
         "N5.5": {"const": "partial"},
         "N5.6": {"const": "partial"},
-        "N5.8": {"const": "partial"}
+        "N5.8": {"const": "partial"},
+        "N5.9": {"const": "partial"}
       }
     },
     "bindings": {
       "type": "object",
-      "required": ["contract", "kernel_map_contract", "boot_exit_contract", "toolchain_lock", "toolchain_qualification", "tier0_lock", "tier0_profile", "tier0_readiness", "kernel_entry_contract", "kernel_entry_readiness", "system_manifest_contract", "system_manifest_readiness", "digest_provider", "initial_system_contract", "initial_system_readiness", "implementation_inputs"],
+      "required": ["contract", "kernel_map_contract", "boot_exit_contract", "toolchain_lock", "toolchain_qualification", "tier0_lock", "tier0_profile", "tier0_readiness", "kernel_entry_contract", "kernel_entry_readiness", "system_manifest_contract", "system_manifest_readiness", "digest_provider", "initial_system_contract", "initial_system_readiness", "recovery_contract", "recovery_readiness", "implementation_inputs"],
       "properties": {
         "contract": {"$ref": "#/$defs/binding"},
         "kernel_map_contract": {"$ref": "#/$defs/binding"},
@@ -70,7 +71,9 @@
         "digest_provider": {"$ref": "#/$defs/binding"},
         "initial_system_contract": {"$ref": "#/$defs/binding"},
         "initial_system_readiness": {"$ref": "#/$defs/binding"},
-        "implementation_inputs": {"type": "array", "minItems": 66, "maxItems": 66, "items": {"$ref": "#/$defs/binding"}}
+        "recovery_contract": {"$ref": "#/$defs/binding"},
+        "recovery_readiness": {"$ref": "#/$defs/binding"},
+        "implementation_inputs": {"type": "array", "minItems": 82, "maxItems": 82, "items": {"$ref": "#/$defs/binding"}}
       }
     },
     "host_tests": {
@@ -119,7 +122,7 @@
         "physical_media_write_performed": {"const": false},
         "inspection": {
           "type": "object",
-          "required": ["files", "manifest", "kernel", "artifact_set", "initial_system"],
+          "required": ["files", "manifest", "kernel", "artifact_set", "initial_system", "recovery"],
           "properties": {
             "files": {"type": "array", "minItems": 10, "maxItems": 10},
             "artifact_set": {
@@ -154,6 +157,25 @@
                 "pooleboot_enforced": {"const": false},
                 "poolekernel_enforced": {"const": false}
               }
+            },
+            "recovery": {
+              "type": "object",
+              "required": ["contract_id", "summary", "bundle_sha256", "bundle_version", "slot_count", "failure_rule_count", "authority_rule_count", "max_attempts", "mutable_state_bytes", "outer_payload_sha256", "activation_allowed", "activation_errors", "validated_by", "pooleboot_enforced", "poolekernel_enforced", "recovery_executed"],
+              "properties": {
+                "contract_id": {"const": "PREC1"},
+                "bundle_version": {"const": 1},
+                "slot_count": {"const": 2},
+                "failure_rule_count": {"const": 10},
+                "authority_rule_count": {"const": 7},
+                "max_attempts": {"const": 3},
+                "mutable_state_bytes": {"const": 128},
+                "activation_allowed": {"const": false},
+                "activation_errors": {"type": "array", "minItems": 1},
+                "validated_by": {"const": "independent_host_media_oracle"},
+                "pooleboot_enforced": {"const": false},
+                "poolekernel_enforced": {"const": false},
+                "recovery_executed": {"const": false}
+              }
             }
           }
         }
@@ -176,7 +198,7 @@
       "type": "object",
       "additionalProperties": {"const": true},
       "required": ["pbc1_python_match", "psm1_python_match", "pbart1_python_match", "pbart1_rust_python_match", "pbart1_manifest_cross_binding", "pbp1_profile_artifact_cross_binding", "sha256_python_match", "pkelf1_python_plan_match", "pbp1_python_decode_match", "pkmap2_rust_python_probe_match", "pbexit1_final_map_attempt_match", "media_reconstruction_exact"],
-      "minProperties": 22
+      "minProperties": 26
     },
     "cleanup": {
       "type": "object",
@@ -193,8 +215,8 @@
         "all_resources_released": {"const": false}
       }
     },
-    "negative_controls": {"type": "array", "minItems": 115, "maxItems": 115, "items": {"$ref": "#/$defs/control"}},
-    "claims": {"type": "object", "minProperties": 62, "maxProperties": 62},
+    "negative_controls": {"type": "array", "minItems": 118, "maxItems": 118, "items": {"$ref": "#/$defs/control"}},
+    "claims": {"type": "object", "minProperties": 67, "maxProperties": 67},
     "summary": {"type": "object"},
     "open_items": {"type": "array", "minItems": 8, "items": {"type": "string"}},
     "claim_boundary": {"type": "array", "minItems": 10, "items": {"type": "string"}}

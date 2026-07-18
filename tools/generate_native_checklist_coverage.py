@@ -174,6 +174,17 @@ ADDED_REQUIREMENTS = [
         ],
     },
     {
+        "id": "ADD-BOOT-006",
+        "phase_id": "N5",
+        "requirement": "Define recovery policy and mutable boot-attempt state as separate deterministic contracts; require authenticated monotonic state, exact attempt decrement before handoff, bounded safe-mode and recovery transitions, known-good fallback, authenticated success receipts, physical presence for firmware or destructive authority, and independently validated failure routing before any recovery payload executes or writes persistent state.",
+        "basis": [
+            "Cycle 109 PREC1 recovery-policy and transition qualification",
+            "https://uefi.org/specs/UEFI/2.11/03_Boot_Manager.html",
+            "https://source.android.com/docs/core/ota/ab",
+            "https://theupdateframework.github.io/specification/v1.0.26/",
+        ],
+    },
+    {
         "id": "ADD-BOOT-002",
         "phase_id": "N6",
         "requirement": "Model UEFI PK, KEK, db, dbx, image signer revocation, minimum secure version, authenticated boot state, recovery-key rotation, and development-key containment as one boot-trust state machine.",

@@ -68,6 +68,8 @@ TRUE_PROOF_CLAIMS = (
     "pbart1_role_version_payload_digest_validated",
     "initial_system_inner_oracle_validated",
     "initial_system_development_activation_denied",
+    "recovery_inner_oracle_validated",
+    "recovery_development_activation_denied",
     "artifact_set_manifest_sha256_matched",
     "artifact_pages_retained",
     "pbp1_profile_artifacts_cross_bound",
@@ -101,6 +103,9 @@ FALSE_PROOF_CLAIMS = (
     "pooleboot_initial_system_semantics_enforced",
     "poolekernel_initial_system_activation_enforced",
     "initial_system_executed",
+    "pooleboot_recovery_semantics_enforced",
+    "poolekernel_recovery_activation_enforced",
+    "recovery_executed",
     "microcode_applied",
     "poolekernel_executed",
     "all_kload_resources_released",
@@ -152,6 +157,9 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-KLOAD-INITIAL-SYSTEM-INNER-SEMANTICS",
     "NEG-N5-KLOAD-INITIAL-SYSTEM-INNER-VERSION",
     "NEG-N5-KLOAD-INITIAL-SYSTEM-ACTIVATION-OVERREACH",
+    "NEG-N5-KLOAD-RECOVERY-INNER-SEMANTICS",
+    "NEG-N5-KLOAD-RECOVERY-INNER-VERSION",
+    "NEG-N5-KLOAD-RECOVERY-ACTIVATION-OVERREACH",
     "NEG-N5-KLOAD-MARKER-OMISSION",
     "NEG-N5-KLOAD-MARKER-ORDER",
     "NEG-N5-KLOAD-MARKER-CONFIG-BOUND",
@@ -286,6 +294,10 @@ PROOF_IMPLEMENTATION_INPUTS = (
     "runtime/native_kernel_image.py",
     "runtime/native_kernel_load.py",
     "runtime/native_initial_system.py",
+    "native/recovery/Cargo.toml",
+    "native/recovery/src/lib.rs",
+    "native/recovery/src/bin/prec1_probe.rs",
+    "runtime/native_recovery.py",
     "runtime/native_kernel_map.py",
     "runtime/native_live_boot_handoff.py",
     "runtime/native_pooleboot.py",
@@ -293,6 +305,15 @@ PROOF_IMPLEMENTATION_INPUTS = (
     "runtime/native_tier0.py",
     "docs/native-initial-system-profile.md",
     "docs/native-initial-system-bundle.md",
+    "docs/native-recovery-bundle.md",
+    "specs/native-recovery-contract.json",
+    "specs/native-recovery-contract.schema.json",
+    "specs/native-recovery-golden-vectors.json",
+    "specs/native-recovery-golden-vectors.schema.json",
+    "specs/native-recovery-readiness.schema.json",
+    "specs/fixtures/prec1-canonical.bin",
+    "specs/fixtures/prec1-canonical-state.bin",
+    "runs/native_recovery_readiness.json",
     "specs/native-pooleboot-proof.json",
     "specs/native-pooleboot-proof.schema.json",
     "specs/native-pooleboot-readiness.schema.json",
@@ -316,7 +337,10 @@ PROOF_IMPLEMENTATION_INPUTS = (
     "tools/qualify_native_pooleboot.py",
     "tools/qualify_native_kernel_entry.py",
     "tools/qualify_native_kernel_load.py",
+    "tools/generate_native_recovery_vectors.py",
+    "tools/qualify_native_recovery.py",
     "tools/qualify_native_system_manifest.py",
+    "tests/test_native_recovery.py",
 )
 ABSOLUTE_USER_PATH = re.compile(
     r"(?:[A-Za-z]:[\\/](?:Users|Documents and Settings)[\\/][^\\/\s]+|/(?:Users|home)/[^/\s]+)",
@@ -1033,6 +1057,7 @@ def proof_contract_errors(contract: dict[str, Any], root: Path) -> list[str]:
         "N5.6",
         "N5.7",
         "N5.8",
+        "N5.9",
     ]:
         errors.append("PooleBoot proof phase mapping changed")
     if contract.get("required_negative_controls") != list(NEGATIVE_CONTROL_IDS):
@@ -1135,6 +1160,8 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str
         "system_manifest_readiness": "runs/native_system_manifest_readiness.json",
         "initial_system_contract": "specs/native-initial-system-contract.json",
         "initial_system_readiness": "runs/native_initial_system_readiness.json",
+        "recovery_contract": "specs/native-recovery-contract.json",
+        "recovery_readiness": "runs/native_recovery_readiness.json",
     }
     for name, relative_path in expected_bindings.items():
         _check_binding(errors, bindings.get(name), root, relative_path, name)

@@ -755,6 +755,7 @@ def make_report(
             "N5.6": "partial",
             "N5.7": "partial",
             "N5.8": "partial",
+            "N5.9": "partial",
         },
         "bindings": {
             "contract": native_pooleboot.file_binding(ROOT, CONTRACT_RELATIVE),
@@ -791,6 +792,12 @@ def make_report(
             ),
             "initial_system_readiness": native_pooleboot.file_binding(
                 ROOT, "runs/native_initial_system_readiness.json"
+            ),
+            "recovery_contract": native_pooleboot.file_binding(
+                ROOT, "specs/native-recovery-contract.json"
+            ),
+            "recovery_readiness": native_pooleboot.file_binding(
+                ROOT, "runs/native_recovery_readiness.json"
             ),
             "implementation_inputs": [
                 native_pooleboot.file_binding(ROOT, path) for path in BUILD_INPUTS

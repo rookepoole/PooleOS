@@ -110,6 +110,12 @@ class NativeKernelLoadTests(unittest.TestCase):
         )
         self.assertEqual("normal", inspection["config"]["default_entry"])
         self.assertEqual(4, len(inspection["kernel"]["plan"]["mappings"]))
+        self.assertEqual("PINIT1", inspection["initial_system"]["contract_id"])
+        self.assertEqual("PREC1", inspection["recovery"]["contract_id"])
+        self.assertFalse(inspection["recovery"]["activation_allowed"])
+        self.assertFalse(inspection["recovery"]["pooleboot_enforced"])
+        self.assertFalse(inspection["recovery"]["poolekernel_enforced"])
+        self.assertFalse(inspection["recovery"]["recovery_executed"])
 
     def test_extended_media_rejects_fat_and_config_mutations(self) -> None:
         media = bytearray(

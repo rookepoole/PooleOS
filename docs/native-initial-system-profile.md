@@ -2,7 +2,7 @@
 
 Status: candidate, unsigned, development-only, non-promoting  
 Profile move: `N5-INIT-SYSTEM-001`
-Current inner-format move: `N5-INIT-BUNDLE-001`
+Current inner-format move: `N5-SYMBOLS-SEMANTICS-001`
 Profile contract: `PBASET1`  
 Artifact envelope: `PBART1`  
 Manifest contract: `PSM1`  
@@ -23,7 +23,7 @@ the following strict ASCII order; PBP1 records use the numeric role order.
 | --- | --- | --- | --- | ---: |
 | `a_kernel` | `kernel` | `PKELF1` | `\EFI\POOLEOS\KERNEL.ELF` | 1 |
 | `b_initial_system` | `initial_system` | `PBART1` + `PINIT1` | `\EFI\POOLEOS\INITIAL.PBA` | 2 |
-| `c_recovery` | `recovery` | `PBART1` | `\EFI\POOLEOS\RECOVERY.PBA` | 3 |
+| `c_recovery` | `recovery` | `PBART1` + `PREC1` | `\EFI\POOLEOS\RECOVERY.PBA` | 3 |
 | `d_symbols` | `symbols` | `PBART1` | `\EFI\POOLEOS\SYMBOLS.PBA` | 4 |
 | `e_microcode` | `microcode` | `PBART1` | `\EFI\POOLEOS\MICROCOD.PBA` | 5 |
 | `f_firmware` | `firmware` | `PBART1` | `\EFI\POOLEOS\FIRMWARE.PBA` | 6 |
@@ -97,6 +97,26 @@ PooleBoot still validates only PBART1 and treats the inner bytes as opaque.
 PooleKernel does not yet parse or activate PINIT1. Those are explicit later
 gates rather than inferred consequences of the host qualification.
 
+## PREC1 Inner Bundle
+
+The canonical recovery payload is the 992-byte immutable `PREC1` policy in
+`docs/native-recovery-bundle.md`. A separate 128-byte mutable state record
+tracks authenticated generation, active and pending slots, known-good and
+unbootable masks, remaining attempts, safe-mode attempts, and the exact
+in-flight nonce. The state checksum detects accidental corruption only; it is
+not authentication.
+
+Independent Python and allocation-free `no_std` Rust implementations validate
+the policy, state, boot selection, decrement-before-handoff transition,
+known-good fallback, bounded safe/recovery routing, authenticated success
+receipt, physical-presence requirements, and activation prerequisites. The
+unsigned development context is denied before recovery authority or execution.
+
+PooleBoot still validates only the outer PBART1 envelope and does not read or
+write PREC1 state. PooleKernel does not execute recovery. No UEFI variable,
+disk, firmware, network, or device-changing operation follows from this host
+qualification.
+
 ## Qualification Gate
 
 The bounded move qualifies only when all of the following pass:
@@ -114,6 +134,6 @@ The bounded move qualifies only when all of the following pass:
 5. Two clean QEMU/OVMF runs from independently generated deterministic media
    produce exactly matching ordered markers and oracle-normalized receipts.
 6. Claims remain explicitly false for signatures, trust, persistent rollback,
-   PooleBoot inner-semantic enforcement, PooleKernel activation, component
-   execution, microcode application, kernel transfer, physical hardware, N5
-   completion, and production readiness.
+   PooleBoot inner-semantic enforcement, PooleKernel activation or recovery
+   execution, persistent-state I/O, component execution, microcode application,
+   kernel transfer, physical hardware, N5 completion, and production readiness.

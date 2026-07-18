@@ -1,6 +1,6 @@
 # PooleBoot Aggregate Proof 7
 
-Status: bounded unsigned PBART1/post-exit PBP1/retained PKMAP2/
+Status: bounded unsigned PBART1/PINIT1/PREC1/post-exit PBP1/retained PKMAP2/
 stop-before-transfer non-promoting proof
 
 ## What Exists
@@ -18,6 +18,8 @@ PBLIVE3, PKMAP2, and PBEXIT1: six additional profile artifact ranges, a guarded
 stack, final-map-bound development PBP1, successful `ExitBootServices`, zero
 post-exit firmware calls, and a permanent stop before transfer. Cycle 108 binds
 the deterministic PINIT1 initial-system declaration and host activation-denial
+oracle. Cycle 109 adds the PREC1 immutable recovery policy, separately mutable
+state, bounded boot transition, receipt, authority, and activation-denial
 oracle while leaving PooleBoot's inner payload handling opaque.
 
 The normative aggregate contract is `specs/native-pooleboot-proof.json`.
@@ -59,8 +61,10 @@ acceleration, loopback-only QMP, and no shared folders. It requires:
 - independent PBC1, PSM1, PBART1, PKELF1, PBP1, PKMAP2, and PBEXIT1
   reconstruction;
 - independent PINIT1 declaration validation and development activation denial;
+- independent PREC1 policy/state/transition validation and development
+  activation denial;
 - exact seven-artifact, root, stack, handoff, map, and digest cross-bindings;
-- 115/115 integrated hostile controls;
+- 118/118 integrated hostile controls;
 - no absolute user path in public readiness artifacts;
 - a clean QMP shutdown of the intentionally halted guest.
 
@@ -91,6 +95,9 @@ The receipt proves, on the pinned profile:
   initial-system, recovery, symbols, microcode, firmware, and policy files;
 - host-oracle validation of the PINIT1 graph and a fail-closed activation result
   for the unsigned development context;
+- host-oracle validation of the 992-byte PREC1 policy, 128-byte mutable state,
+  exact A/B and safe/recovery transitions, receipt binding, and fail-closed
+  activation result for the unsigned development context;
 - complete higher-half kernel alias verification with W^X, CR0.WP, and NX;
 - framebuffer translation and cache-bit preservation during the active audit;
 - retention of kernel and six profile artifact ranges, four table pages, an
@@ -105,7 +112,8 @@ The receipt proves, on the pinned profile:
 
 The manifest and all seven artifacts are unsigned and untrusted. The proof does
 not establish artifact authentication, PooleBoot inner semantics, initial-system
-execution, microcode application, rollback persistence, final active kernel CR3/RSP,
+or recovery execution, authenticated rollback persistence or state I/O,
+microcode application, final active kernel CR3/RSP,
 final framebuffer cache policy, a transferable kernel-entry handoff, initial
 system loading, PooleKernel execution, descriptor tables, interrupts, SMP,
 capabilities, userspace, native drivers, PooleFS, PooleGlass, Secure Boot,
@@ -120,10 +128,12 @@ release follows from this proof.
 
 `N5-INIT-SYSTEM-001` closes only its unsigned load/retain/PBP1-bind slice, and
 `N5-INIT-BUNDLE-001` closes only the independently validated declaration and
-activation-denial slice. N5.6 remains partial because PooleBoot enforcement,
-PooleKernel activation, trust, and the recovery/symbol/microcode/firmware/policy
-formats are open. The next owner-independent move is
-`N5-RECOVERY-SEMANTICS-001`. Hardware-key acquisition, artifact authentication,
+activation-denial slice. `N5-RECOVERY-SEMANTICS-001` closes only the independent
+PREC1 policy/state/transition and activation-denial slice. N5.6 and N5.9 remain
+partial because PooleBoot enforcement, PooleKernel activation or recovery
+execution, trust, authenticated state persistence, and the
+symbol/microcode/firmware/policy formats are open. The next owner-independent
+move is `N5-SYMBOLS-SEMANTICS-001`. Hardware-key acquisition, artifact authentication,
 and governance signing remain separate owner-controlled lanes.
 
 ## Primary References

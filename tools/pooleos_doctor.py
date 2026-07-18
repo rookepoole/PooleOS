@@ -227,6 +227,17 @@ def check_native_initial_system_readiness() -> CheckResult:
     )
 
 
+def check_native_recovery_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_recovery_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
 def check_native_system_manifest_readiness() -> CheckResult:
     from tools import pooleos_release_gate
 
@@ -3392,6 +3403,8 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "tools" / "qualify_native_kernel_load.py",
                 ROOT / "tools" / "generate_native_initial_system_vectors.py",
                 ROOT / "tools" / "qualify_native_initial_system.py",
+                ROOT / "tools" / "generate_native_recovery_vectors.py",
+                ROOT / "tools" / "qualify_native_recovery.py",
                 ROOT / "tools" / "generate_native_system_manifest_vectors.py",
                 ROOT / "tools" / "qualify_native_system_manifest.py",
                 ROOT / "tools" / "generate_native_boot_handoff_vectors.py",
@@ -3412,6 +3425,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runtime" / "native_pooleboot.py",
                 ROOT / "runtime" / "native_kernel_load.py",
                 ROOT / "runtime" / "native_initial_system.py",
+                ROOT / "runtime" / "native_recovery.py",
                 ROOT / "runtime" / "native_system_manifest.py",
                 ROOT / "runtime" / "native_boot_handoff.py",
                 ROOT / "runtime" / "native_boot_config.py",
@@ -3421,6 +3435,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "docs" / "native-pooleboot-proof.md",
                 ROOT / "docs" / "native-kernel-load.md",
                 ROOT / "docs" / "native-initial-system-bundle.md",
+                ROOT / "docs" / "native-recovery-bundle.md",
                 ROOT / "docs" / "native-system-manifest.md",
                 ROOT / "docs" / "native-boot-handoff.md",
                 ROOT / "docs" / "native-boot-config.md",
@@ -3443,6 +3458,10 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "native" / "initsys" / "Cargo.toml",
                 ROOT / "native" / "initsys" / "src" / "lib.rs",
                 ROOT / "native" / "initsys" / "src" / "bin" / "pinit1_probe.rs",
+                ROOT / "native" / "recovery" / "Cargo.toml",
+                ROOT / "native" / "recovery" / "README.md",
+                ROOT / "native" / "recovery" / "src" / "lib.rs",
+                ROOT / "native" / "recovery" / "src" / "bin" / "prec1_probe.rs",
                 ROOT / "native" / "manifest" / "Cargo.toml",
                 ROOT / "native" / "manifest" / "README.md",
                 ROOT / "native" / "manifest" / "src" / "lib.rs",
@@ -3494,6 +3513,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runs" / "native_pooleboot_readiness.json",
                 ROOT / "runs" / "native_kernel_load_readiness.json",
                 ROOT / "runs" / "native_initial_system_readiness.json",
+                ROOT / "runs" / "native_recovery_readiness.json",
                 ROOT / "runs" / "native_system_manifest_readiness.json",
                 ROOT / "runs" / "native_boot_handoff_readiness.json",
                 ROOT / "runs" / "native_boot_config_readiness.json",
@@ -3510,6 +3530,13 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "specs" / "native-initial-system-golden-vectors.json",
                 ROOT / "specs" / "native-initial-system-golden-vectors.schema.json",
                 ROOT / "specs" / "native-initial-system-readiness.schema.json",
+                ROOT / "specs" / "native-recovery-contract.json",
+                ROOT / "specs" / "native-recovery-contract.schema.json",
+                ROOT / "specs" / "native-recovery-golden-vectors.json",
+                ROOT / "specs" / "native-recovery-golden-vectors.schema.json",
+                ROOT / "specs" / "native-recovery-readiness.schema.json",
+                ROOT / "specs" / "fixtures" / "prec1-canonical.bin",
+                ROOT / "specs" / "fixtures" / "prec1-canonical-state.bin",
                 ROOT / "specs" / "native-boot-digest-provider.json",
                 ROOT / "specs" / "native-boot-digest-provider.schema.json",
                 ROOT / "specs" / "native-system-manifest-contract.json",
@@ -3615,6 +3642,7 @@ def main(argv: list[str] | None = None) -> int:
     checks.append(check_native_pooleboot_readiness())
     checks.append(check_native_kernel_load_readiness())
     checks.append(check_native_initial_system_readiness())
+    checks.append(check_native_recovery_readiness())
     checks.append(check_native_system_manifest_readiness())
     checks.append(check_native_boot_handoff_readiness())
     checks.append(check_native_boot_config_readiness())

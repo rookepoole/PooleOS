@@ -8,6 +8,7 @@ import struct
 from typing import Final
 
 from runtime import native_initial_system as pinit1
+from runtime import native_recovery as prec1
 
 
 CONTRACT_ID: Final = "PBART1"
@@ -145,6 +146,8 @@ def canonical_payload(role: int) -> bytes:
         raise BootArtifactError("artifact_role")
     if role == ROLE_INITIAL_SYSTEM:
         return pinit1.canonical_bundle()
+    if role == ROLE_RECOVERY:
+        return prec1.canonical_bundle()
     return (
         "POOLEOS-PBART1-DEVELOPMENT/1\n"
         f"role={ROLE_NAMES[role]}\n"
@@ -155,6 +158,7 @@ def canonical_payload(role: int) -> bytes:
 def canonical_artifacts(version: int = 1) -> dict[int, bytes]:
     artifacts = {role: encode(role, version, canonical_payload(role)) for role in ROLES}
     parse_initial_system(artifacts[ROLE_INITIAL_SYSTEM])
+    parse_recovery(artifacts[ROLE_RECOVERY])
     return artifacts
 
 
@@ -163,6 +167,16 @@ def parse_initial_system(data: bytes) -> tuple[Artifact, pinit1.Bundle]:
     if artifact.role != ROLE_INITIAL_SYSTEM:
         raise BootArtifactError("artifact_role_binding")
     bundle = pinit1.parse(artifact.payload)
+    if artifact.version != bundle.bundle_version:
+        raise BootArtifactError("artifact_inner_version_binding")
+    return artifact, bundle
+
+
+def parse_recovery(data: bytes) -> tuple[Artifact, prec1.Bundle]:
+    artifact = parse(data)
+    if artifact.role != ROLE_RECOVERY:
+        raise BootArtifactError("artifact_role_binding")
+    bundle = prec1.parse(artifact.payload)
     if artifact.version != bundle.bundle_version:
         raise BootArtifactError("artifact_inner_version_binding")
     return artifact, bundle
