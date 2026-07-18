@@ -648,7 +648,7 @@ pub(super) fn exit_and_stop(
             retained_plan.handoff_page_count,
         ));
         diagnostic(format_args!(
-            "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=not_applied kernel=retained handoff=retained mappings=retained entry=not_called exit_boot_services=called transfer=stopped\n"
+            "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=not_called exit_boot_services=called transfer=stopped\n"
         ));
         diagnostic(format_args!("POOLEBOOT/0.1 STOP BEFORE TRANSFER\n"));
         stop_before_transfer();

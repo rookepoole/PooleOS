@@ -72,7 +72,9 @@ PooleGlyph remains data-only and non-authoritative in PPOL1. The live source aud
 
 - No signatures or private keys are generated or used.
 - No live revocation, rollback, physical-presence, or persistent audit source is implemented.
-- No PooleBoot or PooleKernel interpreter enforces PPOL1 yet.
+- PooleBoot reparses the exact retained PPOL1 bytes, payload bindings, and
+  PINIT1 routes only to prove mandatory development denial; neither PooleBoot
+  nor PooleKernel applies a policy decision or creates authority.
 - No capability allocator, resource broker, policy daemon, or mode-transition engine exists yet.
 - No live execution, state write, firmware call, driver load, or media write occurs.
 - No production-readiness claim is made.

@@ -766,12 +766,11 @@ pub fn parse(data: &[u8]) -> Result<Bundle<'_>, Error> {
         if all_zero(&data[offset + 24..offset + 56]) || all_zero(&data[offset + 56..offset + 88]) {
             return Err(Error::SlotDigest);
         }
-        if index == 1 {
-            if data[offset + 24..offset + 56] == data[SLOT_OFFSET + 24..SLOT_OFFSET + 56]
-                || data[offset + 56..offset + 88] == data[SLOT_OFFSET + 56..SLOT_OFFSET + 88]
-            {
-                return Err(Error::SlotDigest);
-            }
+        if index == 1
+            && (data[offset + 24..offset + 56] == data[SLOT_OFFSET + 24..SLOT_OFFSET + 56]
+                || data[offset + 56..offset + 88] == data[SLOT_OFFSET + 56..SLOT_OFFSET + 88])
+        {
+            return Err(Error::SlotDigest);
         }
         if !all_zero(&data[offset + 88..offset + SLOT_BYTES]) {
             return Err(Error::SlotReserved);

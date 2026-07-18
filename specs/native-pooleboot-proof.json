@@ -2,10 +2,10 @@
   "schema_version": "1.0",
   "artifact_kind": "pooleos_native_pooleboot_proof_contract",
   "contract_id": "POOLEOS-N5-POOLEBOOT-7",
-  "status": "bounded_unsigned_live_profile_artifacts_post_exit_pbp1_retained_pkmap2_stop_before_transfer_non_promoting_proof",
+  "status": "bounded_unsigned_live_profile_artifacts_inner_parsed_post_exit_pbp1_retained_pkmap2_stop_before_transfer_non_promoting_proof",
   "production_ready": false,
   "production_promotion_allowed": false,
-  "selected_move_id": "N5-POLICY-SEMANTICS-001",
+  "selected_move_id": "N5-INNER-LIVE-PARSE-001",
   "phase_mapping": [
     "N5.1",
     "N5.2",
@@ -28,7 +28,8 @@
     "ADD-BOOT-006",
     "ADD-BOOT-007",
     "ADD-BOOT-009",
-    "ADD-BOOT-010"
+    "ADD-BOOT-010",
+    "ADD-BOOT-011"
   ],
   "binary": {
     "package": "pooleboot",
@@ -130,6 +131,7 @@
     "KERNEL_FILE PASS",
     "KERNEL_LOAD PASS",
     "ARTIFACT_SET PASS",
+    "INNER_SET PASS",
     "GOP PASS",
     "FRAME READY",
     "KERNEL_MAP_PLAN PASS",
@@ -201,6 +203,15 @@
     "NEG-N5-KLOAD-MARKER-ENTRY-BOUND",
     "NEG-N5-KLOAD-MARKER-ARTIFACT-COUNT",
     "NEG-N5-KLOAD-MARKER-ARTIFACT-SIGNATURE",
+    "NEG-N5-KLOAD-MARKER-INNER-PARSER",
+    "NEG-N5-KLOAD-MARKER-INNER-BINDING",
+    "NEG-N5-KLOAD-MARKER-INNER-DENIAL",
+    "NEG-N5-KLOAD-MARKER-INNER-DIGEST",
+    "NEG-N5-KLOAD-MARKER-INNER-AUTHORITY",
+    "NEG-N5-KLOAD-MARKER-INNER-ACTION",
+    "NEG-N5-KLOAD-MARKER-INNER-STATE",
+    "NEG-N5-KLOAD-MARKER-INNER-HARDWARE",
+    "NEG-N5-KLOAD-INNER-ORACLE-DIVERGENCE",
     "NEG-N5-KLOAD-MARKER-MAPPING-COUNT",
     "NEG-N5-KLOAD-MARKER-WX",
     "NEG-N5-KLOAD-MARKER-RETAIN-COUNT",
@@ -274,15 +285,16 @@
     "NEG-N5-PBEXIT-TRANSFER"
   ],
   "claim_boundary": [
-    "This contract covers one unsigned UEFI proof application with bounded live PBC1, PSM1, PKELF1, PBART1, PBLIVE3, PKMAP2, and PBEXIT1 integration, not the complete PooleBoot loader.",
+    "This contract covers one unsigned UEFI proof application with bounded live PBC1, PSM1, PKELF1, PBART1, PINIT1, PREC1, PSYM1, PMCU1, PFWM1, PPOL1, PBLIVE3, PKMAP2, and PBEXIT1 parsing and integration, not the complete PooleBoot loader.",
     "The proof loads and relocates PooleKernel, loads six exact-profile PBART1 envelopes into distinct zero-padded firmware page ranges, validates the kernel's supervisor W^X mapping plan, and retains every loaded range plus four private table pages, an eight-page guarded stack, and a one-MiB read-only handoff allocation.",
     "PSM1 selects and digest-binds the kernel and six profile artifacts; PBART1 additionally binds each non-kernel role, version, payload length, and payload digest, but all artifacts remain unsigned and untrusted.",
-    "The initial-system payload is a deterministic PINIT1 declaration bundle validated by an independent host oracle, and unsigned development activation is denied; PooleBoot still treats the inner bytes as opaque and PooleKernel does not activate them.",
-    "The recovery payload is a deterministic PREC1 policy bundle validated by an independent host oracle, and unsigned development activation is denied; PooleBoot still treats the inner bytes as opaque, authenticated mutable state does not exist, and PooleKernel grants no recovery authority.",
-    "The symbols payload is a deterministic PSYM1 public diagnostic index validated by an independent host oracle, and unsigned consumption is denied; PooleBoot treats it as opaque, PooleKernel performs no lookup, runtime addresses remain undisclosed, private debug data stays off media, and no authority is created.",
-    "The microcode payload is a deterministic PMCU1 package containing only synthetic never-apply bytes; exact target selection and reset-based known-good policy are validated by independent host and no_std oracles, while PooleBoot and PooleKernel enforce nothing and no privileged revision probe, vendor authentication, or CPU update occurs.",
-    "The firmware payload is a deterministic PFWM1 synthetic manifest; exact resource and hardware-instance identities, version floors, dependencies, dry-run prerequisites, and post-reset receipts are validated by independent host and no_std oracles, while PooleBoot and PooleKernel enforce nothing and no external payload bytes, live firmware inventory, updater driver, capsule submission, firmware mutation, or authority exists.",
-    "The policy payload is a deterministic PPOL1 qualification-only bundle; six mode ceilings and all 11 PINIT1 capability routes are validated by independent Python and no_std Rust oracles, while PooleBoot and PooleKernel enforce nothing, PooleGlyph remains non-authoritative, and no live decision, mutation, or authority exists.",
+    "PooleBoot reparses the exact retained PINIT1 bytes and requires the development activation gate to fail first at the missing outer signature; it creates no authority, starts no component, and PooleKernel does not reparse or activate the bundle.",
+    "PooleBoot reparses the exact retained PREC1 bytes and requires the development recovery gate to fail first at the missing outer signature; authenticated mutable state does not exist, no recovery state is written, and PooleKernel grants no recovery authority.",
+    "PooleBoot reparses the exact retained PSYM1 bytes and requires the development consumption gate to fail first at the missing outer signature; it performs no symbol lookup, runtime addresses remain undisclosed, private debug data stays off media, and no authority is created.",
+    "PooleBoot reparses the exact retained PMCU1 bytes and requires the development apply gate to fail first at the missing outer signature; payloads remain synthetic and no privileged revision probe, vendor authentication, hardware observation, or CPU update occurs.",
+    "PooleBoot reparses the exact retained PFWM1 bytes and requires the development update gate to fail first at the missing outer signature; no external payload bytes, live firmware inventory, updater driver, capsule submission, firmware mutation, state write, or authority exists.",
+    "PooleBoot reparses the exact retained PPOL1 bytes, binds its five payload digests and all 11 PINIT1 capability routes, and requires the development decision gate to fail first at the missing outer signature; PooleGlyph remains non-authoritative and no decision, mutation, action, or authority exists.",
+    "A domain-separated SHA-256 binds all six ordered retained PBART1 files after the firmware-page copies; the live receipt reports six parsers, six cross-bindings, six development denials, and zero authority grants, authorized actions, state writes, or hardware observations.",
     "Immediately before ExitBootServices, PooleBoot captures a bounded final UEFI memory map, normalizes descriptor-stride-aware entries, and finalizes development-profile PBP1 bytes inside the retained handoff allocation.",
     "PBEXIT1 permits at most four attempts, retries only EFI_INVALID_PARAMETER after obtaining a fresh map key, forbids unrelated firmware calls after the first attempt, and proves zero firmware calls after success.",
     "PKMAP2 requires CR0.WP, processor NX support, and EFER.NXE; it rejects LA57, PCID, occupied target slots, malformed coverage, writable-executable leaves, large leaves, retained overlap, and guard-layout drift.",
@@ -290,7 +302,7 @@
     "Framebuffer first and last translations, leaf sizes, effective permissions, and PAT, PCD, and PWT bits remain equal during validation; this proves no drift, not a final PooleOS cache policy.",
     "Both serial and debugcon reconstruct the exact post-exit PBP1 bytes and cross-bind all seven artifact roles and physical ranges, the retained root, guarded stack, handoff physical and virtual addresses, and loader-reserved final-map coverage.",
     "After ExitBootServices succeeds, PooleBoot disables interrupts, checks that the retained PBP1 bytes are unchanged, emits direct diagnostics without firmware, and halts permanently before changing CR3, RSP, or calling PooleKernel.",
-    "The retained PBP1 is development-only and intentionally fails the kernel-entry profile because signatures are absent; no artifact semantics, initial-system execution, microcode or firmware application, transferable production handoff, or final kernel address space is claimed.",
+    "The retained PBP1 is development-only and intentionally fails the kernel-entry profile because signatures are absent; parsing and mandatory denial do not authenticate an artifact or authorize semantic activation, initial-system execution, symbol consumption, policy application, microcode or firmware action, transferable production handoff, or a final kernel address space.",
     "The proof does not enroll keys, enforce Secure Boot, perform measured boot, use TPM state, or create a signature.",
     "The deterministic raw image is development media, not an ISO, installer, recovery image, or physical-media qualification.",
     "The stop marker proves the instrumented QEMU/OVMF path reached the post-exit halt boundary; it does not prove target-firmware behavior, physical hardware, or kernel execution.",
@@ -305,6 +317,7 @@
     "https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html",
     "https://docs.amd.com/v/u/en-US/24593_3.44_APM_Vol2",
     "https://docs.sel4.systems/projects/capdl/lang-spec.html",
-    "https://fuchsia.dev/fuchsia-src/concepts/components/v2/capabilities"
+    "https://fuchsia.dev/fuchsia-src/concepts/components/v2/capabilities",
+    "https://fuchsia.dev/docs/concepts/components/v2/lifecycle"
   ]
 }

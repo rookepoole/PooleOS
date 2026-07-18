@@ -587,6 +587,21 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
         kernel.artifact_page_count,
         kernel.artifact_set_fnv1a64,
     ));
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 INNER_SET PASS proof={} artifacts={} parsers={} bindings={} denials={} file_bytes={} payload_bytes={} sha256={} retained=1 authority_grants={} actions={} state_writes={} hardware_observations={}\n",
+        poole_inner_live::PROOF_ID,
+        kernel.inner.artifact_count,
+        kernel.inner.parser_count,
+        kernel.inner.cross_binding_count,
+        kernel.inner.development_denial_count,
+        kernel.inner.file_bytes,
+        kernel.inner.payload_bytes,
+        kernel.inner.digest_hex(),
+        kernel.inner.authority_grants,
+        kernel.inner.actions_authorized,
+        kernel.inner.state_writes,
+        kernel.inner.hardware_observations,
+    ));
     let gop = match gop_result {
         Ok(summary) => {
             diagnostic(format_args!(

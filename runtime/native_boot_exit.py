@@ -28,7 +28,8 @@ BOUNDARY_MARKER = re.compile(
 DEVELOPMENT_BOUNDARY = (
     "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested "
     "selection=manifest_digest_untrusted artifacts=digest_verified_untrusted "
-    "semantics=not_applied kernel=retained handoff=retained "
+    "semantics=parsed_live_unsigned_denied authority=none actions=none "
+    "kernel=retained handoff=retained "
     "mappings=retained entry=not_called exit_boot_services=called transfer=stopped"
 )
 STOP_MARKER = "POOLEBOOT/0.1 STOP BEFORE TRANSFER"

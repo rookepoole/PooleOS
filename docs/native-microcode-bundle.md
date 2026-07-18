@@ -156,6 +156,8 @@ security floor, errata closure, a privileged probe, a kernel apply mechanism,
 processor rendezvous, CPUID mitigation reconfiguration, resume/hotplug support,
 target-firmware behavior, physical-hardware evidence, or recovery execution.
 
-PooleBoot and PooleKernel do not enforce PMCU1. No CPU microcode, firmware,
-driver, disk, boot setting, or physical medium is changed. N5, N7, N24, N38,
-N39, the signed ISO, and production readiness remain open.
+Cycle 114 PooleBoot reparses the exact retained PMCU1 bytes and requires the
+development gate to fail at `pmcu_activation_outer_signature`, but neither
+PooleBoot nor PooleKernel authorizes or applies PMCU1. No CPU microcode,
+firmware, driver, disk, boot setting, or physical medium is changed. N5, N7,
+N24, N38, N39, the signed ISO, and production readiness remain open.

@@ -31,14 +31,14 @@
     },
     "implementation_inputs": [
       {
-        "byte_count": 564,
+        "byte_count": 575,
         "path": "native/Cargo.toml",
-        "sha256": "2CDB0F54A483023045D313F976D368C2201E6D447383D0959E88BEC210F95B68"
+        "sha256": "099B29615AA2825C96F89BF993A6739B55EA3789D0CEEAC0E065707A4692C252"
       },
       {
-        "byte_count": 3706,
+        "byte_count": 3954,
         "path": "native/Cargo.lock",
-        "sha256": "25AE81F5C2FAA70EDA07DD5E4008302206F199A0AF7F75D9275939454E5062EC"
+        "sha256": "5E707EFDDDAB6FE8EE7AA630EEA101B2EEC648415FC9CDB1150EBD491C146445"
       },
       {
         "byte_count": 358,
@@ -46,9 +46,9 @@
         "sha256": "4571F9B89577AF75BE84F68D18F585B076AA993920C83DE0266E687A7EBAE13D"
       },
       {
-        "byte_count": 59087,
+        "byte_count": 59144,
         "path": "native/initsys/src/lib.rs",
-        "sha256": "F341ED44A67E25356361C83445E021AEBCCB640A906E35469B56707441A0ECF0"
+        "sha256": "6DCE84103EFA535BE37189BAFEADF824BD02DEE8896C00C12FC96DE8A25124BB"
       },
       {
         "byte_count": 3956,
@@ -81,9 +81,9 @@
         "sha256": "EB5354B0D2A60226F8EA4466D998CCB0FF8AC5C7F9A0BD24F87623808BB2DD0B"
       },
       {
-        "byte_count": 9108,
+        "byte_count": 9366,
         "path": "docs/native-initial-system-bundle.md",
-        "sha256": "756FD63FD3533FEE90AD0577BDA5563443CB98088B94A8E19002D7D33BC92C5E"
+        "sha256": "B9B6BC31D79A19E6CF0B1B2B632AD1D6188170C077D2DB3C17E035839582AAE8"
       }
     ],
     "readiness_schema": {
@@ -929,14 +929,14 @@
     "host_probe_role": "ephemeral host-only differential transport",
     "no_std_target_builds": [
       {
-        "byte_count": 189366,
-        "sha256": "5D864DBF2EDA488EE0A70C20663A176E8A914E931EF7468A7CC729F20E71F381",
+        "byte_count": 190198,
+        "sha256": "688E05026A69C4EE34BD19708FCE13AFFEE681B3BAB8BCBD892591A26AA59BE0",
         "status": "pass",
         "target": "x86_64-unknown-uefi"
       },
       {
-        "byte_count": 197814,
-        "sha256": "13ECA3BA4A3F80C26A4996F9CD3A2942137283B1E2F7E6F0851861B553B95ED5",
+        "byte_count": 198678,
+        "sha256": "34C621E9E4637879F223FA4ECCCDCBCEDB1BC9585BC73B1E534E875641C3980D",
         "status": "pass",
         "target": "x86_64-unknown-none"
       }

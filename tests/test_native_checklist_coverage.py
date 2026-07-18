@@ -80,8 +80,8 @@ class NativeChecklistCoverageTests(unittest.TestCase):
         self.assertEqual(sum(phase["source_line_count"] for phase in phases) + 16, 10512)
         self.assertEqual(sum(phase["source_checkbox_count"] for phase in phases) + 10, 8996)
         additions = self.artifact["added_requirements"]
-        self.assertEqual(len(additions), 41)
-        self.assertEqual(len({item["id"] for item in additions}), 41)
+        self.assertEqual(len(additions), 42)
+        self.assertEqual(len({item["id"] for item in additions}), 42)
         digest_provider = next(item for item in additions if item["id"] == "ADD-BOOT-003")
         self.assertEqual(digest_provider["phase_id"], "N6")
         artifact_profile = next(item for item in additions if item["id"] == "ADD-BOOT-004")
@@ -103,6 +103,9 @@ class NativeChecklistCoverageTests(unittest.TestCase):
         policy = next(item for item in additions if item["id"] == "ADD-BOOT-010")
         self.assertEqual(policy["phase_id"], "N5")
         self.assertIn("compiled-in ceiling", policy["requirement"])
+        inner_reparse = next(item for item in additions if item["id"] == "ADD-BOOT-011")
+        self.assertEqual(inner_reparse["phase_id"], "N5")
+        self.assertIn("independently reparse the exact retained PBART1 bytes", inner_reparse["requirement"])
         phase_ids = {phase["phase_id"] for phase in phases}
         self.assertTrue(all(item["phase_id"] in phase_ids for item in additions))
         classes = Counter(item["id"].split("-")[1] for item in additions)

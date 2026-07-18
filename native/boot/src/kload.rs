@@ -138,6 +138,7 @@ pub(super) struct Summary {
     pub artifact_file_bytes: usize,
     pub artifact_page_count: usize,
     pub artifact_set_fnv1a64: u64,
+    pub inner: poole_inner_live::Summary,
     pub closed_file_count: usize,
     pub freed_pool_count: usize,
 }
@@ -177,6 +178,49 @@ fn contract_failure(stage: &'static str, error: bootload::Error) -> Failure {
         code: error.code(),
         status: EFI_COMPROMISED_DATA,
     }
+}
+
+fn inner_failure(error: poole_inner_live::Failure) -> Failure {
+    Failure {
+        stage: error.stage.code(),
+        code: error.code,
+        status: EFI_COMPROMISED_DATA,
+    }
+}
+
+fn validate_retained_inner_set(
+    artifacts: &[LoadedArtifactSummary; bootload::AUXILIARY_ARTIFACT_COUNT],
+) -> Result<poole_inner_live::Summary, Failure> {
+    let mut files: [&[u8]; poole_inner_live::ARTIFACT_COUNT] = [&[]; 6];
+    for (index, artifact) in artifacts.iter().enumerate() {
+        let expected_role = bootload::artifact::Role::ALL[index];
+        let allocation_bytes = artifact
+            .page_count
+            .checked_mul(bootload::elf::PAGE_SIZE as usize)
+            .ok_or_else(|| contract_failure("inner.retained.shape", bootload::Error::PageCount))?;
+        if artifact.role != expected_role
+            || artifact.physical_base == 0
+            || artifact.physical_base > usize::MAX as u64
+            || artifact.file_bytes == 0
+            || artifact.file_bytes > allocation_bytes
+            || artifact
+                .physical_base
+                .checked_add(artifact.file_bytes as u64)
+                .is_none()
+        {
+            return Err(contract_failure(
+                "inner.retained.shape",
+                bootload::Error::AddressRange,
+            ));
+        }
+        files[index] = unsafe {
+            from_raw_parts(
+                artifact.physical_base as usize as *const u8,
+                artifact.file_bytes,
+            )
+        };
+    }
+    poole_inner_live::validate_development_set(files).map_err(inner_failure)
 }
 
 fn close_file(file: *mut EfiFileProtocol, stage: &'static str) -> Result<(), Failure> {
@@ -914,6 +958,21 @@ pub(super) fn load_manifest_kernel(
         artifact_set_fnv1a64 = fnv1a64_extend(artifact_set_fnv1a64, &manifest_artifact.sha256);
     }
 
+    let inner = match validate_retained_inner_set(&artifacts) {
+        Ok(summary) => summary,
+        Err(failure) => {
+            return Err(transaction_failure(
+                calls,
+                physical_base,
+                allocation.page_count,
+                &artifacts,
+                null_mut(),
+                root,
+                failure,
+            ));
+        }
+    };
+
     if let Err(failure) = close_file(root, "kload.root.close") {
         return Err(release_loaded_page_ranges(
             calls,
@@ -945,6 +1004,7 @@ pub(super) fn load_manifest_kernel(
         artifact_file_bytes,
         artifact_page_count,
         artifact_set_fnv1a64,
+        inner,
         closed_file_count: 10,
         freed_pool_count: 9,
     })

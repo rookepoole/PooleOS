@@ -71,6 +71,7 @@ def _host_checks(toolchain_root: Path, temporary_root: Path) -> dict[str, Any]:
     package_tests: dict[str, int] = {}
     for package, minimum in (
         ("poole-boot-artifact", 4),
+        ("poole-inner-live", 5),
         ("poole-handoff", 8),
         ("poole-live-handoff", 8),
         ("poole-kmap", 14),
@@ -103,6 +104,7 @@ def _host_checks(toolchain_root: Path, temporary_root: Path) -> dict[str, Any]:
         package_tests[package] = int(package_match.group(1))
     fmt_packages = (
         "poole-boot-artifact",
+        "poole-inner-live",
         "poole-bootload",
         "poole-handoff",
         "poole-live-handoff",
@@ -128,6 +130,9 @@ def _host_checks(toolchain_root: Path, temporary_root: Path) -> dict[str, Any]:
     clippy_profiles = (
         ("poole-boot-artifact", "--lib", "x86_64-pc-windows-msvc", "clippy-artifact-host"),
         ("poole-boot-artifact", "--lib", "x86_64-unknown-uefi", "clippy-artifact-uefi"),
+        ("poole-inner-live", "--lib", "x86_64-pc-windows-msvc", "clippy-inner-host"),
+        ("poole-inner-live", "--lib", "x86_64-unknown-none", "clippy-inner-none"),
+        ("poole-inner-live", "--lib", "x86_64-unknown-uefi", "clippy-inner-uefi"),
         ("poole-bootload", "--lib", "x86_64-pc-windows-msvc", "clippy-bootload-host"),
         ("poole-bootload", "--lib", "x86_64-unknown-uefi", "clippy-bootload-uefi"),
         ("poole-handoff", "--lib", "x86_64-pc-windows-msvc", "clippy-handoff-host"),
@@ -260,12 +265,119 @@ def _host_checks(toolchain_root: Path, temporary_root: Path) -> dict[str, Any]:
     expected.append("ERR:artifact_digest")
     if observed != expected:
         raise QualificationError("PBART1 Rust and Python probe summaries diverge")
+    inner_probe_target = temporary_root / "inner-probe"
+    qualify_native_pooleboot._run_checked(
+        [
+            str(cargo),
+            "build",
+            "--manifest-path",
+            str(NATIVE_ROOT / "Cargo.toml"),
+            "--package",
+            "poole-inner-live",
+            "--bin",
+            "pinner1-probe",
+            "--features",
+            "host-probe",
+            "--release",
+            "--target",
+            "x86_64-pc-windows-msvc",
+            "--locked",
+            "--offline",
+            "--target-dir",
+            str(inner_probe_target),
+        ],
+        cwd=NATIVE_ROOT,
+        env=environment,
+    )
+    inner_probe = (
+        inner_probe_target
+        / "x86_64-pc-windows-msvc"
+        / "release"
+        / "pinner1-probe.exe"
+    )
+    canonical_files = [canonical_artifacts[role] for role in native_kernel_load.native_boot_artifact.ROLES]
+    reordered = canonical_files[:]
+    reordered[0], reordered[1] = reordered[1], reordered[0]
+    outer_mutation = canonical_files[:]
+    changed_outer = bytearray(outer_mutation[2])
+    changed_outer[-1] ^= 1
+    outer_mutation[2] = bytes(changed_outer)
+    inner_mutation = canonical_files[:]
+    changed_initial = bytearray(
+        native_kernel_load.native_boot_artifact.parse(inner_mutation[0]).payload
+    )
+    changed_initial[-1] ^= 1
+    inner_mutation[0] = native_kernel_load.native_boot_artifact.encode(
+        native_kernel_load.native_boot_artifact.ROLE_INITIAL_SYSTEM,
+        1,
+        bytes(changed_initial),
+    )
+    policy_mutation = canonical_files[:]
+    changed_policy = bytearray(
+        native_kernel_load.native_boot_artifact.parse(policy_mutation[5]).payload
+    )
+    changed_policy[160] ^= 1
+    policy_mutation[5] = native_kernel_load.native_boot_artifact.encode(
+        native_kernel_load.native_boot_artifact.ROLE_POLICY_BUNDLE,
+        1,
+        bytes(changed_policy),
+    )
+
+    def inner_request(files: list[bytes]) -> str:
+        return "V:" + ":".join(data.hex().upper() for data in files)
+
+    inner_requests = [
+        inner_request(canonical_files),
+        inner_request(reordered),
+        inner_request(outer_mutation),
+        inner_request(inner_mutation),
+        inner_request(policy_mutation),
+    ]
+    inner_completed = subprocess.run(
+        [str(inner_probe)],
+        input="\n".join(inner_requests) + "\n",
+        cwd=NATIVE_ROOT,
+        env=environment,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+    )
+    if inner_completed.returncode != 0:
+        raise QualificationError("live inner-set Rust probe failed")
+    inner_observed = (
+        inner_completed.stdout.replace("\r\n", "\n").strip().splitlines()
+    )
+    inner_summary = native_kernel_load.native_inner_live.validate_development_set(
+        canonical_files
+    )
+    inner_expected = [
+        "OK;"
+        f"artifacts={inner_summary['artifact_count']};"
+        f"parsers={inner_summary['parser_count']};"
+        f"bindings={inner_summary['cross_binding_count']};"
+        f"denials={inner_summary['development_denial_count']};"
+        f"file_bytes={inner_summary['file_bytes']};"
+        f"payload_bytes={inner_summary['payload_bytes']};"
+        f"set={inner_summary['retained_set_sha256']};"
+        "grants=0;actions=0;state_writes=0;hardware_observations=0",
+        "ERR:inner.initial.outer:artifact_role_binding",
+        "ERR:inner.symbols.outer:artifact_digest",
+        "ERR:inner.initial.parse:pinit_body_digest",
+        "ERR:inner.policy.recovery_digest:inner_policy_payload_digest",
+    ]
+    if inner_observed != inner_expected:
+        raise QualificationError("live inner-set Rust and Python probes diverge")
     return {
         "bootload_tests_passed": bootload_tests,
         "bootload_tests_total": bootload_tests,
         "artifact_tests_passed": package_tests["poole-boot-artifact"],
         "artifact_tests_total": package_tests["poole-boot-artifact"],
         "artifact_differential_cases": len(expected),
+        "inner_tests_passed": package_tests["poole-inner-live"],
+        "inner_tests_total": package_tests["poole-inner-live"],
+        "inner_differential_cases": len(inner_expected),
         "handoff_tests_passed": package_tests["poole-handoff"],
         "handoff_tests_total": package_tests["poole-handoff"],
         "live_handoff_tests_passed": package_tests["poole-live-handoff"],
@@ -733,6 +845,8 @@ def _negative_controls(
     hash_oracle["kernel"]["loaded_fnv1a64"] = "0" * 16
     artifact_oracle = copy.deepcopy(inspection)
     artifact_oracle["artifact_set"]["fnv1a64"] = "0" * 16
+    inner_oracle = copy.deepcopy(inspection)
+    inner_oracle["inner_set"]["retained_set_sha256"] = "0" * 64
     overreach = dict(claims)
     overreach["kernel_entry_called"] = True
     stale_binding = native_kernel_load.file_binding(ROOT, native_kernel_load.CONTRACT_RELATIVE)
@@ -1005,10 +1119,19 @@ def _negative_controls(
         ("NEG-N5-KLOAD-MARKER-ENTRY-BOUND", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 11, f"entry_offset={marker_summary['kernel']['entry_offset']}", f"entry_offset={marker_summary['kernel']['image_byte_count']}")))),
         ("NEG-N5-KLOAD-MARKER-ARTIFACT-COUNT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 12, "count=6", "count=5")))),
         ("NEG-N5-KLOAD-MARKER-ARTIFACT-SIGNATURE", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 12, "signatures=0", "signatures=1")))),
-        ("NEG-N5-KLOAD-MARKER-MAPPING-COUNT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 15, "mappings=4", "mappings=3")))),
-        ("NEG-N5-KLOAD-MARKER-WX", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 15, "wx=0", "wx=1")))),
-        ("NEG-N5-KLOAD-MARKER-RETAIN-COUNT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 17, "stack_pages=8", "stack_pages=7")))),
-        ("NEG-N5-KLOAD-MARKER-BOUNDARY", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 21, "selection=manifest_digest_untrusted", "selection=trusted")))),
+        ("NEG-N5-KLOAD-MARKER-INNER-PARSER", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 13, "parsers=6", "parsers=5")))),
+        ("NEG-N5-KLOAD-MARKER-INNER-BINDING", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 13, "bindings=6", "bindings=5")))),
+        ("NEG-N5-KLOAD-MARKER-INNER-DENIAL", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 13, "denials=6", "denials=5")))),
+        ("NEG-N5-KLOAD-MARKER-INNER-DIGEST", _rejected(lambda: native_kernel_load.validate_oracle_binding(native_kernel_load.validate_markers(_replace_marker(markers, 13, f"sha256={marker_summary['inner_set']['retained_set_sha256']}", "sha256=" + "0" * 64)), inspection, pbp1_transcript))),
+        ("NEG-N5-KLOAD-MARKER-INNER-AUTHORITY", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 13, "authority_grants=0", "authority_grants=1")))),
+        ("NEG-N5-KLOAD-MARKER-INNER-ACTION", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 13, "actions=0", "actions=1")))),
+        ("NEG-N5-KLOAD-MARKER-INNER-STATE", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 13, "state_writes=0", "state_writes=1")))),
+        ("NEG-N5-KLOAD-MARKER-INNER-HARDWARE", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 13, "hardware_observations=0", "hardware_observations=1")))),
+        ("NEG-N5-KLOAD-INNER-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, inner_oracle, pbp1_transcript))),
+        ("NEG-N5-KLOAD-MARKER-MAPPING-COUNT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 16, "mappings=4", "mappings=3")))),
+        ("NEG-N5-KLOAD-MARKER-WX", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 16, "wx=0", "wx=1")))),
+        ("NEG-N5-KLOAD-MARKER-RETAIN-COUNT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 18, "stack_pages=8", "stack_pages=7")))),
+        ("NEG-N5-KLOAD-MARKER-BOUNDARY", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 22, "selection=manifest_digest_untrusted", "selection=trusted")))),
         ("NEG-N5-KLOAD-CONFIG-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, config_oracle, pbp1_transcript))),
         ("NEG-N5-KLOAD-MANIFEST-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, manifest_oracle, pbp1_transcript))),
         ("NEG-N5-KLOAD-ELF-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, elf_oracle, pbp1_transcript))),
@@ -1054,9 +1177,9 @@ def _negative_controls(
         ("NEG-N5-KMAP-ROLLBACK", _rejected(lambda: native_kernel_map.validate_retained_lifecycle(rollback_lifecycle))),
         ("NEG-N5-KMAP-FIRMWARE-ACTIVE", _rejected(lambda: native_kernel_map.validate_retained_lifecycle(firmware_lifecycle))),
         ("NEG-N5-KMAP-RETENTION", _rejected(lambda: native_kernel_map.validate_retained_lifecycle(retention_lifecycle))),
-        ("NEG-N5-KMAP-MARKER-PLAN", _rejected(lambda: native_kernel_load.validate_oracle_binding(native_kernel_load.validate_markers(_replace_marker(markers, 15, f"leaf_fnv1a64={marker_summary['kernel_map']['leaf_fingerprint']}", "leaf_fnv1a64=0000000000000000")), inspection, pbp1_transcript))),
-        ("NEG-N5-KMAP-MARKER-ACTIVE", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 16, f"mapped_fnv1a64={marker_summary['kernel_map']['mapped_fnv1a64']}", "mapped_fnv1a64=0000000000000000")))),
-        ("NEG-N5-KMAP-MARKER-RETAIN", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 17, "firmware_calls_while_active=0", "firmware_calls_while_active=1")))),
+        ("NEG-N5-KMAP-MARKER-PLAN", _rejected(lambda: native_kernel_load.validate_oracle_binding(native_kernel_load.validate_markers(_replace_marker(markers, 16, f"leaf_fnv1a64={marker_summary['kernel_map']['leaf_fingerprint']}", "leaf_fnv1a64=0000000000000000")), inspection, pbp1_transcript))),
+        ("NEG-N5-KMAP-MARKER-ACTIVE", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 17, f"mapped_fnv1a64={marker_summary['kernel_map']['mapped_fnv1a64']}", "mapped_fnv1a64=0000000000000000")))),
+        ("NEG-N5-KMAP-MARKER-RETAIN", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 18, "firmware_calls_while_active=0", "firmware_calls_while_active=1")))),
         ("NEG-N5-KMAP-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, map_oracle, pbp1_transcript))),
         ("NEG-N5-PBP1-RETAINED-RANGE-KIND", _rejected(lambda: native_live_boot_handoff.validate_oracle_binding(range_kind, marker_summary, inspection))),
         ("NEG-N5-PBP1-ROOT-BINDING", _rejected(lambda: native_kernel_load.validate_oracle_binding(root_binding, inspection, pbp1_transcript))),
@@ -1072,9 +1195,9 @@ def _negative_controls(
         ("NEG-N5-PBEXIT-RETRY-EXHAUSTED", _rejected(lambda: native_boot_exit.validate_trace(sum((exit_attempt(index, "invalid_parameter") for index in range(4)), [])))),
         ("NEG-N5-PBEXIT-POST-ATTEMPT-FIRMWARE", _rejected(lambda: native_boot_exit.validate_trace([*exit_attempt(1, "invalid_parameter"), {"operation": "other_firmware"}, *exit_attempt(2, "success")]))),
         ("NEG-N5-PBEXIT-POST-EXIT-FIRMWARE", _rejected(lambda: native_boot_exit.validate_trace([*success_trace, {"operation": "get_memory_map", "map": exit_map}]))),
-        ("NEG-N5-PBEXIT-MARKER-ATTEMPTS", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 19, "attempts=1", "attempts=2")))),
-        ("NEG-N5-PBEXIT-MARKER-DESCRIPTOR", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 19, "descriptor_bytes=48", "descriptor_bytes=56")))),
-        ("NEG-N5-PBEXIT-FIRMWARE-BOUNDARY", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 20, "calls_after_exit=0", "calls_after_exit=1")))),
+        ("NEG-N5-PBEXIT-MARKER-ATTEMPTS", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 20, "attempts=1", "attempts=2")))),
+        ("NEG-N5-PBEXIT-MARKER-DESCRIPTOR", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 20, "descriptor_bytes=48", "descriptor_bytes=56")))),
+        ("NEG-N5-PBEXIT-FIRMWARE-BOUNDARY", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 21, "calls_after_exit=0", "calls_after_exit=1")))),
         ("NEG-N5-PBEXIT-TRANSFER", _rejected(lambda: native_boot_exit.validate_trace([*success_trace, {"operation": "transfer"}]))),
     ]
     controls = [
@@ -1238,9 +1361,9 @@ def make_readiness(
         "schema_version": "1.0",
         "artifact_kind": "pooleos_native_kernel_load_readiness",
         "status_date": status_date,
-        "status": "pass_single_host_two_run_live_pbart1_pkmap2_exit_then_stop_non_promoting",
+        "status": "pass_single_host_two_run_live_inner_parse_pkmap2_exit_then_stop_non_promoting",
         "contract_id": native_kernel_load.CONTRACT_ID,
-        "selected_move_id": "N5-POLICY-SEMANTICS-001",
+        "selected_move_id": "N5-INNER-LIVE-PARSE-001",
         "production_ready": False,
         "production_promotion_allowed": False,
         "n5_exit_gate_satisfied": False,
@@ -1367,6 +1490,14 @@ def make_readiness(
             "ppol1_initial_system_cross_bound": True,
             "ppol1_live_policy_enforcement": False,
             "ppol1_pooleglyph_executable_authority": False,
+            "live_inner_set_rust_python_match": True,
+            "live_inner_set_exact_retained_bytes": True,
+            "live_inner_set_policy_payload_bindings": True,
+            "live_inner_set_initial_routes_cross_bound": True,
+            "live_inner_set_development_denials": True,
+            "live_inner_set_authority_grants": 0,
+            "live_inner_set_actions_authorized": 0,
+            "live_inner_set_state_writes": 0,
             "pbp1_profile_artifact_cross_binding": True,
             "sha256_python_match": True,
             "pkelf1_python_plan_match": True,
@@ -1408,6 +1539,7 @@ def make_readiness(
                 for name in (
                     "bootload_tests_passed",
                     "artifact_tests_passed",
+                    "inner_tests_passed",
                     "handoff_tests_passed",
                     "live_handoff_tests_passed",
                     "kernel_map_tests_passed",
@@ -1421,6 +1553,7 @@ def make_readiness(
                 for name in (
                     "bootload_tests_total",
                     "artifact_tests_total",
+                    "inner_tests_total",
                     "handoff_tests_total",
                     "live_handoff_tests_total",
                     "kernel_map_tests_total",
@@ -1451,6 +1584,9 @@ def make_readiness(
                 "capability_rule_count"
             ],
             "policy_profile": "synthetic_qualification_only",
+            "inner_retained_set_sha256": media_inspection["inner_set"][
+                "retained_set_sha256"
+            ],
             "production_claim_count": 0,
         },
         "open_items": [
@@ -1459,7 +1595,8 @@ def make_readiness(
             "Persist and atomically enforce the minimum secure version across update and rollback.",
             "Define the final transfer-time CR3 activation, stack switch, register ABI, and explicit revocation plan.",
             "Authenticate the loaded initial-system, recovery, policy, symbols, microcode, and firmware artifacts through a ratified trust policy.",
-            "Implement PINIT1 parsing and semantic enforcement in PooleBoot before initial-system declarations can cross the firmware boundary.",
+            "Authenticate all six live inner contracts and bind authenticated trust, revocation, rollback, and audit state before any action gate can progress beyond the outer-signature denial.",
+            "Revalidate the exact retained inner-set bytes in PooleKernel before capability issuance to close the loader-to-kernel TOCTOU boundary.",
             "Implement PooleKernel activation, capability issuance, transactional startup, rollback, and lifecycle enforcement for qualified PINIT1 declarations.",
             "Implement authenticated PREC1 state persistence, PooleBoot enforcement, handoff binding, and PooleKernel-mediated recovery without ambient authority.",
             "Implement signed PSYM1 parsing and bounded capability-authorized diagnostic consumption in PooleBoot and PooleKernel without staging private debug data.",

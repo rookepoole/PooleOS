@@ -5,17 +5,19 @@
 PKLOAD6 is the bounded live integration proof for PooleBoot's current N5.6 and
 N5.8 development boundary. It reads PBC1 and unsigned PSM1 from the EFI system
 partition, selects and digest-binds the real PKELF1 PooleKernel plus six exact
-profile artifacts, validates each non-kernel PBART1 envelope, independently
-validates the PINIT1 initial-system and PREC1 recovery payloads in the host
-oracle, retains every
+profile artifacts, validates each non-kernel PBART1 envelope, reparses all six
+inner payloads from their exact retained firmware-page copies, independently
+reconstructs that result in the host oracle, retains every
 loaded page range and PKMAP2 transfer allocation, creates final
 development-profile PBP1 bytes, exits UEFI boot services, and halts before
 kernel transfer.
 
 The machine-readable contract is `specs/native-kernel-load-contract.json`.
-`runtime/native_kernel_load.py` is the independent media, marker, PBP1, map,
-and claim oracle. `tools/qualify_native_kernel_load.py` builds and boots the
-product twice and emits `runs/native_kernel_load_readiness.json`.
+`native/inner` is the allocation-free target validator.
+`runtime/native_inner_live.py` and `runtime/native_kernel_load.py` are the
+independent retained-set, media, marker, PBP1, map, and claim oracles.
+`tools/qualify_native_kernel_load.py` builds and boots the product twice and
+emits `runs/native_kernel_load_readiness.json`.
 
 ## Live Intake
 
@@ -49,13 +51,18 @@ Every file and temporary intake pool is closed or freed before the final map.
 Each non-kernel file has a fixed 96-byte PBART1 header. PooleBoot validates its
 magic, format version, role, artifact version, reserved-zero bytes, payload
 length, and payload SHA-256 before allocating a distinct `EfiLoaderData` page
-range. The exact file bytes are copied and page padding is zeroed. PooleBoot
-does not invoke an inner payload parser. The independent host media oracle
-parses PINIT1 and PREC1, cross-binds both versions, and requires
-unsigned-development activation denial for each. It also validates PREC1's
-separately mutable state and bounded transition rules; PooleBoot neither reads
-nor writes that state. No recovery or initial-system instruction executes and
-no microcode is applied.
+range. The exact file bytes are copied and page padding is zeroed. After every
+copy, PooleBoot reconstructs slices directly from the retained page addresses
+and reparses PINIT1, PREC1, PSYM1, PMCU1, PFWM1, and PPOL1. It binds PPOL1's
+five payload digests to roles 2 through 6, binds all eleven policy routes to the
+exact PINIT1 capabilities, and requires each development activation or
+consumption gate to fail first at the missing outer signature. A
+domain-separated SHA-256 binds the six ordered retained PBART1 files. The live
+receipt reports zero authority grants, authorized actions, state writes, and
+hardware observations. The independent host media oracle reconstructs the
+same result from the media. PREC1 state transitions remain host-model evidence;
+PooleBoot neither reads nor writes persistent state. No recovery,
+initial-system, symbol, policy, microcode, or firmware action executes.
 
 ## Retained Transfer Storage
 
@@ -120,14 +127,14 @@ halts permanently at `STOP BEFORE TRANSFER`.
 
 ## Qualified Evidence
 
-The Cycle 113 receipt records:
+The Cycle 114 receipt records:
 
-- 76/76 Rust host tests across PooleBoot, PBART1, PBC1/PSM1/PKELF1/PBP1, PKMAP2,
-  PBEXIT1, and PKENTRY1;
+- 81/81 Rust host tests across PooleBoot, PBART1, the six-format retained-set
+  validator, PBC1/PSM1/PKELF1/PBP1, PKMAP2, PBEXIT1, and PKENTRY1;
 - two byte-identical PooleBoot builds, PooleKernel builds, and GPT/FAT32 media
   generations;
 - two fresh-vars, read-only-media, network-disabled QEMU/OVMF boots;
-- 23 identical ordered serial/debugcon markers;
+- 24 identical ordered serial/debugcon markers;
 - exact static GOP frames;
 - exact 4,728-byte post-exit PBP1 reconstruction with 95 memory entries and
   seven artifact descriptors;
@@ -155,7 +162,11 @@ The Cycle 113 receipt records:
   default-deny authority intersection, safe/recovery floors, firmware
   physical-presence separation, durable receipt rules, and mandatory
   development activation denial;
-- 130/130 integrated negative controls, including PINIT1, PREC1, PSYM1, PMCU1,
+- an exact 8,761-byte retained set with SHA-256
+  `F3154B354C77D0567207994EFDDA4FE2D203611CA21D60B63872BC9FFC73C675`, six
+  target parsers, six cross-bindings, six mandatory denials, and zero
+  authority/action/state/hardware effects;
+- 139/139 integrated negative controls, including PINIT1, PREC1, PSYM1, PMCU1,
   PFWM1, and PPOL1 inner
   semantic mutation, outer/inner version mismatch, activation overreach,
   artifact omission, path, role, version,
@@ -170,11 +181,12 @@ receipt does not claim that this OVMF run naturally produced a stale map key.
 
 ## Nonclaims And Next Boundary
 
-PKLOAD6 does not authenticate PSM1 or any loaded artifact, enforce authenticated
-persistent rollback,
+PKLOAD6 does not authenticate PSM1 or any loaded artifact, verify or update
+authenticated persistent rollback state,
 establish the final active kernel address space or framebuffer cache policy,
-switch to the guarded stack, call PooleKernel, enforce PINIT1, PREC1, PSYM1, PMCU1, PFWM1, or PPOL1
-in PooleBoot, persist PREC1 mutable state, activate or execute the initial
+switch to the guarded stack, call PooleKernel, grant authority from PINIT1,
+PREC1, PSYM1, PMCU1, PFWM1, or PPOL1, independently reparse those files in
+PooleKernel, persist PREC1 mutable state, activate or execute the initial
 system or recovery in PooleKernel, consume symbols or create diagnostic
 authority, validate a real vendor microcode or firmware payload, observe privileged
 per-processor revisions or live firmware inventory, load an updater, apply microcode or
@@ -184,13 +196,15 @@ Boot, perform measured boot, test a second host, test target firmware, touch
 physical media, satisfy N5, or establish production readiness.
 
 The next chronological owner-independent move is
-`N5-INNER-ENFORCEMENT-001`: integrate the six frozen inner validators into live
-PooleBoot, authenticate and persist their required state, enforce exact
-cross-bindings and fail-closed decisions before exit, and pass only authorized
-attenuated inputs toward PooleKernel. Capability creation, lifecycle execution,
-transfer state, signature trust, and production transfer remain separately
-gated by the N5/N6 and owner-controlled N0 work.
+`N5-INNER-TRUST-STATE-001`: freeze and enforce the authenticated artifact-trust
+and monotonic persistent-state boundary over these exact retained bytes without
+generating or using a governance key. Independent PooleKernel retained-byte
+revalidation, capability creation, lifecycle execution, transfer state,
+signature trust, and production transfer remain separately gated by N5/N6 and
+the owner-controlled N0 work.
 
 ## Primary Reference
 
 - UEFI 2.11, [Boot Services](https://uefi.org/specs/UEFI/2.11/07_Services_Boot_Services.html)
+- seL4, [CapDL language specification](https://docs.sel4.systems/projects/capdl/lang-spec.html)
+- Fuchsia, [Component lifecycle](https://fuchsia.dev/docs/concepts/components/v2/lifecycle)

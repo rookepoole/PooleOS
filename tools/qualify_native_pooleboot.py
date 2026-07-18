@@ -735,11 +735,12 @@ def make_report(
     )
     claims = native_pooleboot.expected_claims()
     native_pooleboot.validate_claims(claims)
+    inner_set = kernel_load["media"]["inspection"]["inner_set"]
     report = {
         "schema_version": "1.0",
         "artifact_kind": "pooleos_native_pooleboot_readiness",
         "status_date": status_date,
-        "status": "pass_single_host_two_run_unsigned_live_profile_artifacts_post_exit_pbp1_retained_pkmap2_stop_before_transfer_non_promoting",
+        "status": "pass_single_host_two_run_unsigned_live_profile_artifacts_inner_parsed_post_exit_pbp1_retained_pkmap2_stop_before_transfer_non_promoting",
         "contract_id": contract["contract_id"],
         "selected_move_id": contract["selected_move_id"],
         "production_ready": False,
@@ -846,6 +847,17 @@ def make_report(
             "gop_frame_match_count": 2,
             "negative_controls_passed": len(kernel_load["negative_controls"]),
             "negative_controls_total": len(kernel_load["negative_controls"]),
+            "inner_set_artifact_count": inner_set["artifact_count"],
+            "inner_set_parser_count": inner_set["parser_count"],
+            "inner_set_cross_binding_count": inner_set["cross_binding_count"],
+            "inner_set_development_denial_count": inner_set[
+                "development_denial_count"
+            ],
+            "inner_set_retained_set_sha256": inner_set["retained_set_sha256"],
+            "inner_set_authority_grants": inner_set["authority_grants"],
+            "inner_set_actions_authorized": inner_set["actions_authorized"],
+            "inner_set_state_writes": inner_set["state_writes"],
+            "inner_set_hardware_observations": inner_set["hardware_observations"],
             "microcode_patch_count": kernel_load["media"]["inspection"]["microcode"][
                 "patch_count"
             ],

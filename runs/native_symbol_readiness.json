@@ -30,14 +30,14 @@
     },
     "implementation_inputs": [
       {
-        "byte_count": 564,
+        "byte_count": 575,
         "path": "native/Cargo.toml",
-        "sha256": "2CDB0F54A483023045D313F976D368C2201E6D447383D0959E88BEC210F95B68"
+        "sha256": "099B29615AA2825C96F89BF993A6739B55EA3789D0CEEAC0E065707A4692C252"
       },
       {
-        "byte_count": 3706,
+        "byte_count": 3954,
         "path": "native/Cargo.lock",
-        "sha256": "25AE81F5C2FAA70EDA07DD5E4008302206F199A0AF7F75D9275939454E5062EC"
+        "sha256": "5E707EFDDDAB6FE8EE7AA630EEA101B2EEC648415FC9CDB1150EBD491C146445"
       },
       {
         "byte_count": 349,
@@ -95,9 +95,9 @@
         "sha256": "DA0C096722FCD8A6CE1A3BAFCD637F24FC230FD66D6D7E869521CB9E041B8098"
       },
       {
-        "byte_count": 7268,
+        "byte_count": 7546,
         "path": "docs/native-symbol-bundle.md",
-        "sha256": "9CB234A67E769CEE3539841446064F40C15116E029028FE74E12D4EDA6A441A1"
+        "sha256": "5F1B0A0AB95A94C7EC7B4DACE316388119E3D29BD61567A068A42CDDE09EB957"
       }
     ],
     "readiness_schema": {

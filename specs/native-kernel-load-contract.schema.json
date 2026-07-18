@@ -35,9 +35,9 @@
     "schema_version": {"const": "1.0"},
     "artifact_kind": {"const": "pooleos_native_kernel_load_contract"},
     "contract_id": {"const": "PKLOAD6"},
-    "selected_move_id": {"const": "N5-POLICY-SEMANTICS-001"},
+    "selected_move_id": {"const": "N5-INNER-LIVE-PARSE-001"},
     "status_date": {"const": "2026-07-18"},
-    "status": {"const": "bounded_unsigned_profile_artifact_load_retention_exit_then_stop_non_promoting"},
+    "status": {"const": "bounded_unsigned_live_inner_parse_retention_exit_then_stop_non_promoting"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
     "phase_mapping": {"const": ["N5.1", "N5.4", "N5.5", "N5.6", "N5.8", "N5.9"]},
@@ -59,7 +59,7 @@
     },
     "artifact_load": {
       "type": "object",
-      "required": ["set_contract", "format_contract", "artifact_count", "pbp1_roles", "psm1_whole_file_sha256_matches", "pbart1_role_version_payload_sha256_matches", "initial_system_inner_contract", "initial_system_inner_oracle_validated", "initial_system_development_activation_allowed", "recovery_inner_contract", "recovery_inner_oracle_validated", "recovery_development_activation_allowed", "symbols_inner_contract", "symbols_inner_oracle_validated", "symbols_development_activation_allowed", "symbols_full_debug_file_on_media", "symbols_runtime_addresses_disclosed", "symbols_authority_created", "microcode_inner_contract", "microcode_inner_oracle_validated", "microcode_development_activation_allowed", "microcode_vendor_container_validated", "microcode_production_payload_included", "microcode_privileged_revision_observed", "microcode_authority_created", "firmware_inner_contract", "firmware_inner_oracle_validated", "firmware_development_activation_allowed", "firmware_live_inventory_observed", "firmware_external_payload_bytes_embedded", "firmware_production_payload_included", "firmware_authority_created", "policy_inner_contract", "policy_inner_oracle_validated", "policy_development_activation_allowed", "policy_initial_system_cross_bound", "policy_safe_floor_validated", "policy_recovery_floor_validated", "policy_pooleglyph_executable_authority", "policy_authority_created", "pooleboot_inner_semantics_enforced", "poolekernel_activation_enforced", "pages_retained_after_exit", "signature_verified", "measured", "semantics_applied"],
+      "required": ["set_contract", "format_contract", "artifact_count", "pbp1_roles", "psm1_whole_file_sha256_matches", "pbart1_role_version_payload_sha256_matches", "initial_system_inner_contract", "initial_system_inner_oracle_validated", "initial_system_development_activation_allowed", "recovery_inner_contract", "recovery_inner_oracle_validated", "recovery_development_activation_allowed", "symbols_inner_contract", "symbols_inner_oracle_validated", "symbols_development_activation_allowed", "symbols_full_debug_file_on_media", "symbols_runtime_addresses_disclosed", "symbols_authority_created", "microcode_inner_contract", "microcode_inner_oracle_validated", "microcode_development_activation_allowed", "microcode_vendor_container_validated", "microcode_production_payload_included", "microcode_privileged_revision_observed", "microcode_authority_created", "firmware_inner_contract", "firmware_inner_oracle_validated", "firmware_development_activation_allowed", "firmware_live_inventory_observed", "firmware_external_payload_bytes_embedded", "firmware_production_payload_included", "firmware_authority_created", "policy_inner_contract", "policy_inner_oracle_validated", "policy_development_activation_allowed", "policy_initial_system_cross_bound", "policy_safe_floor_validated", "policy_recovery_floor_validated", "policy_pooleglyph_executable_authority", "policy_authority_created", "pooleboot_retained_inner_set_parsed", "pooleboot_policy_payload_bindings_enforced", "pooleboot_initial_routes_cross_bound", "pooleboot_development_denials_enforced", "pooleboot_inner_authority_created", "pooleboot_inner_action_authorized", "pooleboot_inner_state_written", "pooleboot_inner_semantics_enforced", "poolekernel_activation_enforced", "pages_retained_after_exit", "signature_verified", "measured", "semantics_applied"],
       "properties": {
         "set_contract": {"const": "PBASET1"},
         "format_contract": {"const": "PBART1"},
@@ -101,6 +101,13 @@
         "policy_recovery_floor_validated": {"const": true},
         "policy_pooleglyph_executable_authority": {"const": false},
         "policy_authority_created": {"const": false},
+        "pooleboot_retained_inner_set_parsed": {"const": true},
+        "pooleboot_policy_payload_bindings_enforced": {"const": true},
+        "pooleboot_initial_routes_cross_bound": {"const": true},
+        "pooleboot_development_denials_enforced": {"const": true},
+        "pooleboot_inner_authority_created": {"const": false},
+        "pooleboot_inner_action_authorized": {"const": false},
+        "pooleboot_inner_state_written": {"const": false},
         "pooleboot_inner_semantics_enforced": {"const": false},
         "poolekernel_activation_enforced": {"const": false},
         "pages_retained_after_exit": {"const": true},
@@ -151,10 +158,10 @@
         "transferable": {"const": false}
       }
     },
-    "required_marker_count": {"const": 23},
-    "required_markers": {"type": "array", "minItems": 23, "maxItems": 23, "items": {"type": "string"}},
-    "required_negative_controls": {"type": "array", "minItems": 130, "maxItems": 130, "uniqueItems": true, "items": {"type": "string"}},
-    "claims": {"type": "object", "additionalProperties": {"type": "boolean"}, "minProperties": 89, "maxProperties": 89},
+    "required_marker_count": {"const": 24},
+    "required_markers": {"type": "array", "minItems": 24, "maxItems": 24, "items": {"type": "string"}},
+    "required_negative_controls": {"type": "array", "minItems": 139, "maxItems": 139, "uniqueItems": true, "items": {"type": "string"}},
+    "claims": {"type": "object", "additionalProperties": {"type": "boolean"}, "minProperties": 96, "maxProperties": 96},
     "claim_boundary": {"type": "array", "minItems": 11, "items": {"type": "string"}},
     "official_references": {"type": "array", "minItems": 3, "items": {"type": "string", "format": "uri"}}
   }

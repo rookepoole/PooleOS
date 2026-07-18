@@ -10,6 +10,7 @@ members = [
   "fixtures/pooleboot",
   "fixtures/poolekernel",
   "handoff",
+  "inner",
   "initsys",
   "kernel",
   "kmap",

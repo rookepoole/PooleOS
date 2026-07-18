@@ -125,7 +125,8 @@
         "ADD-BOOT-007",
         "ADD-BOOT-008",
         "ADD-BOOT-009",
-        "ADD-BOOT-010"
+        "ADD-BOOT-010",
+        "ADD-BOOT-011"
       ]
     },
     {
@@ -2882,6 +2883,17 @@
         "https://theupdateframework.github.io/specification/v1.0.35/",
         "https://csrc.nist.gov/pubs/sp/800/193/final",
         "https://csrc.nist.gov/pubs/sp/800/207/final"
+      ]
+    },
+    {
+      "id": "ADD-BOOT-011",
+      "phase_id": "N5",
+      "requirement": "PooleBoot and PooleKernel MUST independently reparse the exact retained PBART1 bytes before granting authority; parser summaries or pre-copy bytes are not substitutes, and digest, authentication, policy, and persistent-state bindings must close the loader-to-kernel time-of-check/time-of-use boundary before any capability creation, lifecycle activation, recovery transition, symbol consumption, microcode action, firmware action, policy decision, or state write.",
+      "basis": [
+        "Cycle 114 PooleBoot retained-page inner parsing qualification",
+        "https://uefi.org/specs/UEFI/2.11/07_Services_Boot_Services.html",
+        "https://docs.sel4.systems/projects/capdl/lang-spec.html",
+        "https://fuchsia.dev/docs/concepts/components/v2/lifecycle"
       ]
     },
     {

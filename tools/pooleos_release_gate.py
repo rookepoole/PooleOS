@@ -71,7 +71,7 @@ DEFAULT_GAPS = [
     "The completed owner response records both ADR dispositions and all 38 objective definitions while accepting zero measurements, but the selected FIDO2 hardware key is unavailable; trusted public-key custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
     "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
     "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, six bounded TLC models cover all seven required domains and detect twenty-one required counterexamples, and a bounded PooleBoot proof executes under the pinned profile; current source rebuilds, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open.",
-    "A reproducible unsigned PooleBoot proof application boots twice under pinned non-promoting OVMF with deterministic ten-file GPT/FAT32 media and twenty-three ordered serial/debugcon markers; PBP1, PBC1, PSM1, PKELF1, PBART1, PINIT1, PREC1, PSYM1, synthetic-only PMCU1, synthetic-only PFWM1, qualification-only PPOL1, PKMAP2, PBEXIT1, and a separately qualified real PooleKernel image pass their bounded gates, and PKLOAD6 proves retained kernel/six-artifact/table/guarded-stack/handoff storage, exact final-map PBP1, successful ExitBootServices, zero later firmware calls, and permanent stop before transfer. The six inner formats independently validate declarations, recovery transitions, public symbols, microcode and firmware plans, and default-deny policy intersection while denying development activation or consumption. PooleBoot inner enforcement, PooleKernel activation, recovery execution, symbol consumption, policy application, capability creation, live firmware inventory, privileged microcode-revision observation, real vendor-container or payload validation, signature trust, authenticated persistent rollback state, digest-provider promotion, initial-system execution, microcode or firmware application, final framebuffer cache policy, kernel-entry transfer state, second host, target firmware, and physical-media qualification remain open.",
+    "A reproducible unsigned PooleBoot proof application boots twice under pinned non-promoting OVMF with deterministic ten-file GPT/FAT32 media and twenty-four ordered serial/debugcon markers; PBP1, PBC1, PSM1, PKELF1, PBART1, PINIT1, PREC1, PSYM1, synthetic-only PMCU1, synthetic-only PFWM1, qualification-only PPOL1, PKMAP2, PBEXIT1, and a separately qualified real PooleKernel image pass their bounded gates. PKLOAD6 proves retained kernel/six-artifact/table/guarded-stack/handoff storage, reparses all six exact retained inner files, cross-binds PPOL1 payloads and PINIT1 routes, requires all six development gates to deny, reports zero authority/action/state/hardware effects, produces exact final-map PBP1, exits boot services, makes zero later firmware calls, and stops permanently before transfer. Artifact authentication, monotonic persistent state, independent PooleKernel retained-byte revalidation, activation, recovery execution, symbol consumption, policy application, capability creation, live firmware inventory, privileged microcode-revision observation, real vendor-container or payload validation, digest-provider promotion, initial-system execution, microcode or firmware application, final framebuffer cache policy, kernel-entry transfer state, second host, target firmware, and physical-media qualification remain open.",
     "A real reproducible PooleKernel image, PKENTRY1 intake, bounded early ring/COM1/framebuffer paths, and panic classes exist, but boot trust, measured boot, live mappings and transfer, descriptor/exception setup, retained crash evidence, kernel runtime, target execution, and N6 exit remain open.",
     "No native CPU, interrupt, time, SMP, physical-memory, virtual-memory, or reclaim implementation.",
     "The sanitized Tier 1 identity and bounded user-mode CPUID transcript match, but MSR, PCI configuration-space, Secure Boot, TPM, SPD, sensor/power, standards-hash, lab-safety, native enumeration, and physical qualification evidence remain open.",
@@ -822,11 +822,20 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
         "clean_media_generations_exact": 2,
         "guest_runs_total": 2,
         "guest_runs_passed": 2,
-        "ordered_marker_count": 23,
+        "ordered_marker_count": 24,
         "serial_debugcon_match_count": 2,
         "gop_frame_match_count": 2,
-        "negative_controls_total": 130,
-        "negative_controls_passed": 130,
+        "negative_controls_total": 139,
+        "negative_controls_passed": 139,
+        "inner_set_artifact_count": 6,
+        "inner_set_parser_count": 6,
+        "inner_set_cross_binding_count": 6,
+        "inner_set_development_denial_count": 6,
+        "inner_set_retained_set_sha256": "F3154B354C77D0567207994EFDDA4FE2D203611CA21D60B63872BC9FFC73C675",
+        "inner_set_authority_grants": 0,
+        "inner_set_actions_authorized": 0,
+        "inner_set_state_writes": 0,
+        "inner_set_hardware_observations": 0,
         "microcode_patch_count": 2,
         "microcode_payload_profile": "synthetic_test_only_never_apply",
         "firmware_component_count": 3,
@@ -845,8 +854,9 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
         errors.append("PooleBoot proof overclaims N5 exit or production readiness")
     detail = (
         "contract=POOLEOS-N5-POOLEBOOT-7; host_tests=8/8; builds=2/2; media=2/2; "
-        "guest_runs=2/2; markers=23; serial_debugcon=2/2; gop_frames=2/2; "
-        "pbp1=2/2; kmap=2/2; exit=2/2; negatives=130/130; pmcu1=synthetic-never-apply; pfwm1=synthetic-never-apply; ppol1=qualification-only; production_claims=0; n5_exit=false; production_ready=false"
+        "guest_runs=2/2; markers=24; serial_debugcon=2/2; gop_frames=2/2; "
+        "inner=6/6; inner_sha256=F3154B354C77D056; authority=0; actions=0; state=0; hardware=0; "
+        "pbp1=2/2; kmap=2/2; exit=2/2; negatives=139/139; pmcu1=synthetic-never-apply; pfwm1=synthetic-never-apply; ppol1=qualification-only; production_claims=0; n5_exit=false; production_ready=false"
     )
     return readiness.make_check(
         "native_pooleboot_readiness",
@@ -873,16 +883,22 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     summary = artifact.get("summary", {})
     if summary.get("guest_runs_passed") != 2 or summary.get("guest_runs_total") != 2:
         errors.append("PKLOAD6 guest-run evidence is incomplete")
-    if summary.get("ordered_marker_count") != 23:
+    if summary.get("rust_host_tests_passed") != 81 or summary.get("rust_host_tests_total") != 81:
+        errors.append("PKLOAD6 Rust host-test evidence is incomplete")
+    if summary.get("ordered_marker_count") != 24:
         errors.append("PKLOAD6 marker evidence is incomplete")
     if summary.get("exact_pbp1_match_count") != 2:
         errors.append("PKLOAD6 PBP1 evidence is incomplete")
     if summary.get("oracle_match_count") != 2:
         errors.append("PKLOAD6 PKMAP2/PBEXIT1 oracle evidence is incomplete")
-    if summary.get("negative_controls_passed") != 130 or summary.get(
+    if summary.get("negative_controls_passed") != 139 or summary.get(
         "negative_controls_total"
-    ) != 130:
+    ) != 139:
         errors.append("PKLOAD6 negative controls are incomplete")
+    if summary.get("inner_retained_set_sha256") != (
+        "F3154B354C77D0567207994EFDDA4FE2D203611CA21D60B63872BC9FFC73C675"
+    ):
+        errors.append("PKLOAD6 retained inner-set identity changed")
     if artifact.get("claims") != native_kernel_load.expected_claims():
         errors.append("PKLOAD6 claim boundary changed")
     if artifact.get("n5_exit_gate_satisfied") is not False or artifact.get(
@@ -890,9 +906,10 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     ) is not False:
         errors.append("PKLOAD6 overclaims N5 exit or production readiness")
     detail = (
-        "contract=PKLOAD6; rust_tests=76/76; boot_builds=2/2; kernel_builds=2/2; "
-        "media=2/2; guest_runs=2/2; markers=23; oracle=2/2; pbp1=2/2; kmap=2/2; "
-        "exit=2/2; firmware_after_exit=0; negatives=130/130; pmcu1=synthetic-never-apply; pfwm1=synthetic-never-apply; ppol1=qualification-only; transfer=false; n5_exit=false; production_ready=false"
+        "contract=PKLOAD6; rust_tests=81/81; boot_builds=2/2; kernel_builds=2/2; "
+        "media=2/2; guest_runs=2/2; markers=24; inner=6/6; inner_sha256=F3154B354C77D056; "
+        "oracle=2/2; pbp1=2/2; kmap=2/2; exit=2/2; firmware_after_exit=0; "
+        "negatives=139/139; pmcu1=synthetic-never-apply; pfwm1=synthetic-never-apply; ppol1=qualification-only; transfer=false; n5_exit=false; production_ready=false"
     )
     return readiness.make_check(
         "native_kernel_load_readiness",

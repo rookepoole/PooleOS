@@ -177,6 +177,12 @@ hostile, parser differential, prerequisite differential, and post-reset
 differential cases. The readiness report is
 `runs/native_firmware_readiness.json`.
 
+Cycle 114 PooleBoot reparses the exact retained PFWM1 bytes and requires the
+development gate to fail at `pfwm_activation_outer_signature`. It performs no
+live inventory, loads no updater, authorizes no transaction, writes no state,
+and submits no capsule. PooleKernel revalidation and all device-changing work
+remain open.
+
 ## Primary references
 
 - UEFI 2.11, Chapter 23, Firmware Update and Reporting:
