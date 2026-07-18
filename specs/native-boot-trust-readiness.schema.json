@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "contract_id",
+    "status",
+    "inputs",
+    "build",
+    "golden",
+    "negative_controls",
+    "differential",
+    "development_integration",
+    "claims",
+    "non_claims",
+    "production_ready"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "artifact_kind": {"const": "pooleos_native_boot_trust_readiness"},
+    "contract_id": {"const": "PBTRUST1"},
+    "status": {"const": "pass"},
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract", "toolchain_lock", "toolchain_qualification", "tier1_profile", "implementation_inputs"],
+      "properties": {
+        "contract": {"$ref": "#/$defs/binding"},
+        "toolchain_lock": {"$ref": "#/$defs/binding"},
+        "toolchain_qualification": {"$ref": "#/$defs/binding"},
+        "tier1_profile": {"$ref": "#/$defs/binding"},
+        "implementation_inputs": {"type": "array", "minItems": 15, "maxItems": 15, "items": {"$ref": "#/$defs/binding"}}
+      }
+    },
+    "build": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rustc", "rust_host_tests_passed", "rust_host_tests_total", "rustfmt_packages", "clippy_targets", "no_std_targets", "pooleboot_uefi_integration_builds_passed", "pooleboot_uefi_integration_builds_total"],
+      "properties": {
+        "rustc": {"type": "string"},
+        "rust_host_tests_passed": {"const": 4},
+        "rust_host_tests_total": {"const": 4},
+        "rustfmt_packages": {"const": 1},
+        "clippy_targets": {"const": 1},
+        "no_std_targets": {"const": ["x86_64-unknown-none", "x86_64-unknown-uefi"]},
+        "pooleboot_uefi_integration_builds_passed": {"const": 1},
+        "pooleboot_uefi_integration_builds_total": {"const": 1}
+      }
+    },
+    "golden": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["case_count", "development_policy_sha256", "development_state_sha256", "signed_shape_policy_sha256", "authenticated_shape_state_sha256", "generation_two_state_sha256", "synthetic_authorization_model_result"],
+      "properties": {
+        "case_count": {"const": 3},
+        "development_policy_sha256": {"$ref": "#/$defs/sha256"},
+        "development_state_sha256": {"$ref": "#/$defs/sha256"},
+        "signed_shape_policy_sha256": {"$ref": "#/$defs/sha256"},
+        "authenticated_shape_state_sha256": {"$ref": "#/$defs/sha256"},
+        "generation_two_state_sha256": {"$ref": "#/$defs/sha256"},
+        "synthetic_authorization_model_result": {"const": "qualified_shape_only_no_crypto_claim"}
+      }
+    },
+    "negative_controls": {"type": "array", "minItems": 70, "items": {"$ref": "#/$defs/control"}},
+    "differential": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_parser", "state_parser", "authorization"],
+      "properties": {
+        "policy_parser": {"$ref": "#/$defs/differential"},
+        "state_parser": {"$ref": "#/$defs/differential"},
+        "authorization": {"$ref": "#/$defs/differential"}
+      }
+    },
+    "development_integration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_bytes", "state_bytes", "binding_count", "denial_count", "denial", "state_source", "state_authenticated", "state_monotonic", "state_backend_writable", "signature_verifications", "authority_grants", "state_writes"],
+      "properties": {
+        "policy_bytes": {"const": 320},
+        "state_bytes": {"const": 256},
+        "binding_count": {"const": 14},
+        "denial_count": {"const": 1},
+        "denial": {"const": "pbtrust_policy_unsigned"},
+        "state_source": {"const": "esp_candidate_not_persistent_authority"},
+        "state_authenticated": {"const": false},
+        "state_monotonic": {"const": false},
+        "state_backend_writable": {"const": false},
+        "signature_verifications": {"const": 0},
+        "authority_grants": {"const": 0},
+        "state_writes": {"const": 0}
+      }
+    },
+    "claims": {"type": "object"},
+    "non_claims": {"type": "array", "minItems": 7, "items": {"type": "string"}},
+    "production_ready": {"const": false}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "byte_count", "sha256"],
+      "properties": {
+        "path": {"type": "string"},
+        "byte_count": {"type": "integer", "minimum": 1},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "control": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "expected", "python", "rust", "status"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^NEG-N5-PBTRUST-"},
+        "expected": {"type": "string", "pattern": "^(ERR:pbtrust_|OK;)"},
+        "python": {"type": "string"},
+        "rust": {"type": "string"},
+        "status": {"const": "pass"}
+      }
+    },
+    "differential": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cases", "mismatches", "seed"],
+      "properties": {
+        "cases": {"const": 8192},
+        "mismatches": {"const": 0},
+        "seed": {"type": "integer", "minimum": 1}
+      }
+    }
+  }
+}

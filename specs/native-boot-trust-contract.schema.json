@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "contract_id",
+    "version",
+    "status",
+    "selected_move",
+    "phase_mapping",
+    "formats",
+    "profiles",
+    "object_separation",
+    "authority_equation",
+    "policy_error_order",
+    "state_error_order",
+    "authorization_error_order",
+    "qualification",
+    "claims",
+    "non_claims",
+    "primary_references",
+    "implementation_bindings"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "artifact_kind": {"const": "pooleos_native_boot_trust_contract"},
+    "contract_id": {"const": "PBTRUST1"},
+    "version": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["major", "minor"],
+      "properties": {
+        "major": {"const": 1},
+        "minor": {"const": 0}
+      }
+    },
+    "status": {"const": "development_fail_closed"},
+    "selected_move": {"const": "N5-INNER-TRUST-STATE-001"},
+    "phase_mapping": {
+      "const": ["N5.1", "N5.4", "N5.5", "N5.8", "N5.9"]
+    },
+    "formats": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_magic", "state_magic", "policy_bytes", "state_bytes", "policy_body_bytes", "state_body_bytes", "signature_capacity", "artifact_role_mask", "maximum_signers", "copy_count", "commit_complete"],
+      "properties": {
+        "policy_magic": {"const": "PBTP1"},
+        "state_magic": {"const": "PBTS1"},
+        "policy_bytes": {"const": 320},
+        "state_bytes": {"const": 256},
+        "policy_body_bytes": {"const": 224},
+        "state_body_bytes": {"const": 224},
+        "signature_capacity": {"const": 64},
+        "artifact_role_mask": {"const": 127},
+        "maximum_signers": {"const": 8},
+        "copy_count": {"const": 2},
+        "commit_complete": {"const": 1}
+      }
+    },
+    "profiles": {"type": "object"},
+    "object_separation": {"type": "object"},
+    "authority_equation": {"type": "string", "minLength": 20},
+    "policy_error_order": {"type": "array", "minItems": 11, "uniqueItems": true, "items": {"type": "string", "pattern": "^pbtrust_policy_"}},
+    "state_error_order": {"type": "array", "minItems": 12, "uniqueItems": true, "items": {"type": "string", "pattern": "^pbtrust_state_"}},
+    "authorization_error_order": {"type": "array", "minItems": 24, "uniqueItems": true, "items": {"type": "string", "pattern": "^pbtrust_"}},
+    "qualification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_parser_cases", "state_parser_cases", "authorization_cases", "negative_control_count"],
+      "properties": {
+        "policy_parser_cases": {"const": 8192},
+        "state_parser_cases": {"const": 8192},
+        "authorization_cases": {"const": 8192},
+        "negative_control_count": {"type": "integer", "minimum": 70}
+      }
+    },
+    "claims": {"type": "object"},
+    "non_claims": {"type": "array", "minItems": 7, "items": {"type": "string"}},
+    "primary_references": {"type": "array", "minItems": 4, "items": {"type": "string", "format": "uri"}},
+    "implementation_bindings": {"type": "array", "minItems": 15, "maxItems": 15, "items": {"$ref": "#/$defs/binding"}}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "byte_count", "sha256"],
+      "properties": {
+        "path": {"type": "string"},
+        "byte_count": {"type": "integer", "minimum": 1},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

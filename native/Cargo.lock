@@ -76,6 +76,13 @@ name = "poole-boot-exit"
 version = "0.0.0"
 
 [[package]]
+name = "poole-boot-trust"
+version = "0.0.0"
+dependencies = [
+ "sha2",
+]
+
+[[package]]
 name = "poole-bootload"
 version = "0.0.0"
 dependencies = [
@@ -174,6 +181,7 @@ version = "0.0.0"
 dependencies = [
  "poole-boot-config",
  "poole-boot-exit",
+ "poole-boot-trust",
  "poole-bootload",
  "poole-elf",
  "poole-handoff",

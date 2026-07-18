@@ -1,0 +1,240 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "pooleos_native_boot_trust_contract",
+  "contract_id": "PBTRUST1",
+  "version": {
+    "major": 1,
+    "minor": 0
+  },
+  "status": "development_fail_closed",
+  "selected_move": "N5-INNER-TRUST-STATE-001",
+  "phase_mapping": [
+    "N5.1",
+    "N5.4",
+    "N5.5",
+    "N5.8",
+    "N5.9"
+  ],
+  "formats": {
+    "policy_magic": "PBTP1",
+    "state_magic": "PBTS1",
+    "policy_bytes": 320,
+    "state_bytes": 256,
+    "policy_body_bytes": 224,
+    "state_body_bytes": 224,
+    "signature_capacity": 64,
+    "artifact_role_mask": 127,
+    "maximum_signers": 8,
+    "copy_count": 2,
+    "commit_complete": 1
+  },
+  "profiles": {
+    "policy": [
+      "development_unsigned_always_denied",
+      "signed_shape_requires_external_verifier"
+    ],
+    "state": [
+      "esp_development_candidate_never_authority",
+      "authenticated_backend_shape_requires_external_evidence"
+    ],
+    "external_evidence": [
+      "policy_signature_verified",
+      "policy_threshold_verified",
+      "revocation_state_authenticated",
+      "policy_not_revoked",
+      "state_authenticated",
+      "state_monotonic",
+      "state_backend_writable",
+      "secure_boot_state_verified"
+    ]
+  },
+  "object_separation": {
+    "immutable_trust_policy": "PBTP1",
+    "mutable_boot_acceptance_state": "PBTS1",
+    "boot_attempt_and_slot_state": "PREC1",
+    "esp_file_is_persistent_authority": false,
+    "production_backend_requires_redundant_transactional_authenticated_storage": true,
+    "production_backend_requires_previous_state_chain_and_power_loss_recovery": true,
+    "poolekernel_independent_revalidation_required": true
+  },
+  "authority_equation": "parsed_shape & exact_artifact_bindings & rollback_floors & external_policy_authentication & authenticated_revocation & authenticated_monotonic_state & verified_secure_boot_state",
+  "policy_error_order": [
+    "pbtrust_policy_truncated",
+    "pbtrust_policy_size",
+    "pbtrust_policy_magic",
+    "pbtrust_policy_version",
+    "pbtrust_policy_flags",
+    "pbtrust_policy_numbers",
+    "pbtrust_policy_role_mask",
+    "pbtrust_policy_signer_shape",
+    "pbtrust_policy_digest",
+    "pbtrust_policy_body_digest",
+    "pbtrust_policy_signature"
+  ],
+  "state_error_order": [
+    "pbtrust_state_truncated",
+    "pbtrust_state_size",
+    "pbtrust_state_magic",
+    "pbtrust_state_version",
+    "pbtrust_state_flags",
+    "pbtrust_state_copy",
+    "pbtrust_state_commit",
+    "pbtrust_state_auth_profile",
+    "pbtrust_state_numbers",
+    "pbtrust_state_digest",
+    "pbtrust_state_previous",
+    "pbtrust_state_body_digest"
+  ],
+  "authorization_error_order": [
+    "pbtrust_binding_manifest",
+    "pbtrust_binding_kernel",
+    "pbtrust_binding_retained_set",
+    "pbtrust_binding_revocation_set",
+    "pbtrust_binding_role_mask",
+    "pbtrust_binding_policy_state",
+    "pbtrust_binding_state_manifest",
+    "pbtrust_binding_state_kernel",
+    "pbtrust_binding_state_retained_set",
+    "pbtrust_binding_policy_version",
+    "pbtrust_rollback_manifest_version",
+    "pbtrust_rollback_secure_version",
+    "pbtrust_rollback_state_generation",
+    "pbtrust_rollback_trust_epoch",
+    "pbtrust_policy_unsigned",
+    "pbtrust_policy_authentication",
+    "pbtrust_policy_threshold",
+    "pbtrust_policy_revocation",
+    "pbtrust_state_development_candidate",
+    "pbtrust_state_authentication",
+    "pbtrust_state_monotonicity",
+    "pbtrust_state_backend_writable",
+    "pbtrust_secure_boot_state",
+    "pbtrust_unexpected_authority"
+  ],
+  "qualification": {
+    "policy_parser_cases": 8192,
+    "state_parser_cases": 8192,
+    "authorization_cases": 8192,
+    "negative_control_count": 88
+  },
+  "claims": {
+    "allocation_free_no_std_parser": true,
+    "fixed_policy_record_validated": true,
+    "fixed_state_record_validated": true,
+    "boot_artifact_cross_bindings_modeled": true,
+    "rollback_floor_order_modeled": true,
+    "redundant_copy_shape_validated": true,
+    "previous_state_chain_shape_validated": true,
+    "external_evidence_required": true,
+    "unsigned_development_policy_denied": true,
+    "esp_candidate_rejected_as_persistent_authority": true,
+    "policy_signature_verified": false,
+    "policy_threshold_verified": false,
+    "revocation_state_authenticated": false,
+    "state_authenticated": false,
+    "state_monotonic": false,
+    "state_backend_writable": false,
+    "secure_boot_state_verified": false,
+    "trust_authority_granted": false,
+    "state_written": false,
+    "private_key_used": false,
+    "poolekernel_revalidated": false,
+    "physical_media_written": false,
+    "production_ready": false
+  },
+  "non_claims": [
+    "PBTRUST1 signed-policy bytes are a format shape; no cryptographic signature is verified.",
+    "No private key is generated, loaded, used, or requested.",
+    "No authenticated revocation store, threshold root, or signer registry is implemented.",
+    "The ESP state candidate is not authenticated, monotonic, rollback-resistant, or accepted as authority.",
+    "No trust state is selected, repaired, migrated, committed, or written.",
+    "No Secure Boot variable, TPM state, firmware inventory, or privileged hardware fact is observed.",
+    "PooleKernel does not independently revalidate or consume PBTRUST1 and no capability or executable authority is created.",
+    "No firmware, disk, driver, physical media, signing, tag, merge, release, or publication action occurs.",
+    "The synthetic qualified evidence helper is a host-only model input and is not authentication evidence.",
+    "The bounded development receipt does not satisfy N5 exit or production readiness."
+  ],
+  "primary_references": [
+    "https://uefi.org/specs/UEFI/2.11/08_Services_Runtime_Services.html",
+    "https://theupdateframework.github.io/specification/latest/",
+    "https://csrc.nist.gov/pubs/sp/800/193/final",
+    "https://trustedcomputinggroup.org/resource/tpm-library-specification/"
+  ],
+  "implementation_bindings": [
+    {
+      "path": "native/Cargo.toml",
+      "byte_count": 586,
+      "sha256": "1741AC8F565F5849F8C86D77BD16E06ED195E76D32FFA62492E1928B8FAA8C1E"
+    },
+    {
+      "path": "native/Cargo.lock",
+      "byte_count": 4060,
+      "sha256": "88017EDF93CD2DBF5F298E612E9A50601FDCC657FF97CC841E08FBD8355090C6"
+    },
+    {
+      "path": "native/trust/Cargo.toml",
+      "byte_count": 358,
+      "sha256": "E93435C23773EE33FC8757976903AA52C05985C0C4534D09EDADDCB8796D242C"
+    },
+    {
+      "path": "native/trust/src/lib.rs",
+      "byte_count": 27876,
+      "sha256": "90CE5080AB4242B22B82738F2B700D70201238E29B6B4980CE010D656A735F27"
+    },
+    {
+      "path": "native/trust/src/bin/pbtrust1_probe.rs",
+      "byte_count": 5714,
+      "sha256": "798600F8D1C622FB501FA09763009465079E930A38B739A7154DE10B31206FCE"
+    },
+    {
+      "path": "native/boot/Cargo.toml",
+      "byte_count": 611,
+      "sha256": "62F842DC7A91742124CDB09F96DA9F94DBE264F1AAB421114AC51EBFE1D0E82A"
+    },
+    {
+      "path": "native/boot/src/kload.rs",
+      "byte_count": 39757,
+      "sha256": "984A5A7C69727FC2F7677A8BC56AC56C348DF1505573F551CFA68D099BAA1C21"
+    },
+    {
+      "path": "native/boot/src/main.rs",
+      "byte_count": 20638,
+      "sha256": "6658C478FC24A797C26F70551291595D0BAE32D153F96AC414F886A20A4EED4E"
+    },
+    {
+      "path": "native/bootload/src/lib.rs",
+      "byte_count": 32723,
+      "sha256": "BA06EF5B0FCA2298B855E2C8FFBD7C831C6F6938234B9FD6C1E616C948D135C1"
+    },
+    {
+      "path": "runtime/native_boot_trust.py",
+      "byte_count": 28060,
+      "sha256": "ACCF4F5C8A4E069A668E56C2384D59E389FB4162AB4326D6EEF33920BFADB59F"
+    },
+    {
+      "path": "tests/test_native_boot_trust.py",
+      "byte_count": 7977,
+      "sha256": "FF563340A4243C8602FAEE806D9BEB51B8CC8E724069D04A796463F80602CBBA"
+    },
+    {
+      "path": "tools/qualify_native_boot_trust.py",
+      "byte_count": 38000,
+      "sha256": "C62F512C70475AF68F8930EAEE8EAC1EFF550264C2C8BA36AE7E73C2705E8F57"
+    },
+    {
+      "path": "docs/native-boot-trust.md",
+      "byte_count": 6879,
+      "sha256": "BA3C68D859562FB64246A5E1DBAC137239FF8E44560A383D01ABE4090E09ED3F"
+    },
+    {
+      "path": "specs/native-boot-trust-contract.schema.json",
+      "byte_count": 3666,
+      "sha256": "344E85E8AD90EE831F881C30557CDB975D6A83571A921FAAB1BA6B9EF8AC3F5A"
+    },
+    {
+      "path": "specs/native-boot-trust-readiness.schema.json",
+      "byte_count": 5403,
+      "sha256": "20635C4261E4EE5E280BDA9463D8FED1AE0171F358AB2EABD9B253E092857376"
+    }
+  ]
+}

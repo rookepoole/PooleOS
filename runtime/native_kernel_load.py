@@ -14,6 +14,7 @@ from runtime import (
     native_boot_artifact,
     native_boot_config,
     native_boot_exit,
+    native_boot_trust,
     native_elf_loader,
     native_firmware,
     native_initial_system,
@@ -40,6 +41,8 @@ SYMBOLS_PATH = "EFI/POOLEOS/SYMBOLS.PBA"
 MICROCODE_PATH = "EFI/POOLEOS/MICROCOD.PBA"
 FIRMWARE_PATH = "EFI/POOLEOS/FIRMWARE.PBA"
 POLICY_PATH = "EFI/POOLEOS/POLICY.PBA"
+TRUST_POLICY_PATH = native_boot_trust.POLICY_PATH
+TRUST_STATE_PATH = native_boot_trust.STATE_PATH
 POOLEOS_DIRECTORY_NAME = b"POOLEOS    "
 CONFIG_SHORT_NAME = b"BOOT    CFG"
 MANIFEST_SHORT_NAME = b"SYSTEM_APBM"
@@ -50,6 +53,8 @@ SYMBOLS_SHORT_NAME = b"SYMBOLS PBA"
 MICROCODE_SHORT_NAME = b"MICROCODPBA"
 FIRMWARE_SHORT_NAME = b"FIRMWAREPBA"
 POLICY_SHORT_NAME = b"POLICY  PBA"
+TRUST_POLICY_SHORT_NAME = b"TRUST   PBT"
+TRUST_STATE_SHORT_NAME = b"TRUSTST PBS"
 ARTIFACT_DEFINITIONS = (
     (
         native_boot_artifact.ROLE_INITIAL_SYSTEM,
@@ -126,6 +131,9 @@ IMPLEMENTATION_INPUTS = (
     "native/bootload/Cargo.toml",
     "native/bootload/src/lib.rs",
     "native/bootcfg/src/lib.rs",
+    "native/trust/Cargo.toml",
+    "native/trust/src/lib.rs",
+    "native/trust/src/bin/pbtrust1_probe.rs",
     "native/manifest/Cargo.toml",
     "native/manifest/src/lib.rs",
     "native/elf/src/lib.rs",
@@ -167,6 +175,7 @@ IMPLEMENTATION_INPUTS = (
     "runtime/native_boot_exit.py",
     "runtime/native_boot_artifact.py",
     "runtime/native_boot_config.py",
+    "runtime/native_boot_trust.py",
     "runtime/native_elf_loader.py",
     "runtime/native_firmware.py",
     "runtime/native_kernel_image.py",
@@ -183,6 +192,11 @@ IMPLEMENTATION_INPUTS = (
     "runtime/native_system_manifest.py",
     "specs/native-boot-digest-provider.json",
     "specs/native-boot-digest-provider.schema.json",
+    "docs/native-boot-trust.md",
+    "specs/native-boot-trust-contract.json",
+    "specs/native-boot-trust-contract.schema.json",
+    "specs/native-boot-trust-readiness.schema.json",
+    "runs/native_boot_trust_readiness.json",
     "docs/native-initial-system-profile.md",
     "docs/native-initial-system-bundle.md",
     "specs/native-initial-system-contract.json",
@@ -245,6 +259,7 @@ IMPLEMENTATION_INPUTS = (
     "specs/native-kernel-map-contract.json",
     "specs/native-kernel-map-contract.schema.json",
     "tools/qualify_native_pooleboot.py",
+    "tools/qualify_native_boot_trust.py",
     "tools/qualify_native_kernel_load.py",
     "tools/generate_native_recovery_vectors.py",
     "tools/qualify_native_recovery.py",
@@ -257,6 +272,7 @@ IMPLEMENTATION_INPUTS = (
     "tools/generate_native_policy_vectors.py",
     "tools/qualify_native_policy.py",
     "tests/test_native_boot_artifact.py",
+    "tests/test_native_boot_trust.py",
     "tests/test_native_initial_system.py",
     "tests/test_native_inner_live.py",
     "tests/test_native_recovery.py",
@@ -298,6 +314,10 @@ TRUE_CLAIMS = (
     "pooleboot_policy_payload_bindings_enforced",
     "pooleboot_initial_routes_cross_bound",
     "pooleboot_development_denials_enforced",
+    "live_pbtrust1_policy_read",
+    "live_pbtrust1_state_candidate_read",
+    "pooleboot_trust_cross_bindings_enforced",
+    "pooleboot_trust_development_denial_enforced",
     "artifact_set_manifest_sha256_matched",
     "artifact_pages_retained",
     "pbp1_profile_artifacts_cross_bound",
@@ -354,6 +374,10 @@ FALSE_CLAIMS = (
     "poolekernel_policy_enforced",
     "policy_decision_applied",
     "pooleglyph_policy_authority_created",
+    "trust_policy_signature_verified",
+    "trust_state_authenticated",
+    "trust_state_monotonic",
+    "trust_state_backend_written",
     "all_pbp1_temporary_pools_released",
     "all_kmap_table_pages_released",
     "all_kload_resources_released",
@@ -437,6 +461,15 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-KLOAD-MARKER-INNER-STATE",
     "NEG-N5-KLOAD-MARKER-INNER-HARDWARE",
     "NEG-N5-KLOAD-INNER-ORACLE-DIVERGENCE",
+    "NEG-N5-KLOAD-TRUST-POLICY-MISSING",
+    "NEG-N5-KLOAD-TRUST-STATE-MISSING",
+    "NEG-N5-KLOAD-TRUST-POLICY-CORRUPT",
+    "NEG-N5-KLOAD-TRUST-STATE-CORRUPT",
+    "NEG-N5-KLOAD-TRUST-POLICY-KERNEL-BINDING",
+    "NEG-N5-KLOAD-TRUST-STATE-POLICY-BINDING",
+    "NEG-N5-KLOAD-MARKER-TRUST-DENIAL",
+    "NEG-N5-KLOAD-MARKER-TRUST-AUTHORITY",
+    "NEG-N5-KLOAD-TRUST-ORACLE-DIVERGENCE",
     "NEG-N5-KLOAD-MARKER-MAPPING-COUNT",
     "NEG-N5-KLOAD-MARKER-WX",
     "NEG-N5-KLOAD-MARKER-RETAIN-COUNT",
@@ -546,6 +579,9 @@ MARKER_PATTERNS = (
         r"^POOLEBOOT/0\.1 INNER_SET PASS proof=(N5-INNER-LIVE-PARSE-001) artifacts=([0-9]+) parsers=([0-9]+) bindings=([0-9]+) denials=([0-9]+) file_bytes=([0-9]+) payload_bytes=([0-9]+) sha256=([0-9A-F]{64}) retained=([01]) authority_grants=([0-9]+) actions=([0-9]+) state_writes=([0-9]+) hardware_observations=([0-9]+)$"
     ),
     re.compile(
+        r"^POOLEBOOT/0\.1 TRUST_STATE DENY contract=(PBTRUST1) policy_bytes=([0-9]+) state_bytes=([0-9]+) bindings=([0-9]+) denials=([0-9]+) denial=(pbtrust_policy_unsigned) policy_sha256=([0-9A-F]{64}) state_sha256=([0-9A-F]{64}) source=(esp_candidate) auth=(missing) monotonic=(missing) signatures=([0-9]+) authority_grants=([0-9]+) state_writes=([0-9]+)$"
+    ),
+    re.compile(
         r"^POOLEBOOT/0\.1 GOP PASS width=([0-9]+) height=([0-9]+) stride=([0-9]+) mode=([0-9]+) format=(RGB|BGR)$"
     ),
     re.compile(r"^POOLEBOOT/0\.1 FRAME READY$"),
@@ -598,6 +634,28 @@ def canonical_config_bytes() -> bytes:
 def canonical_artifact_files() -> dict[str, bytes]:
     encoded = native_boot_artifact.canonical_artifacts()
     return {path: encoded[role] for role, _, _, _, path, _ in ARTIFACT_DEFINITIONS}
+
+
+def canonical_trust_files(
+    manifest_data: bytes,
+    kernel_data: bytes,
+    artifact_files: dict[str, bytes],
+) -> tuple[dict[str, bytes], native_boot_trust.ObservedBoot]:
+    manifest = native_system_manifest.parse(manifest_data)
+    retained = native_inner_live.retained_set_sha256(
+        [artifact_files[definition[4]] for definition in ARTIFACT_DEFINITIONS]
+    )
+    policy, state, observed = native_boot_trust.canonical_development_records(
+        manifest_data=manifest_data,
+        kernel_data=kernel_data,
+        retained_set_sha256=retained,
+        manifest_version=manifest.manifest_version,
+        minimum_secure_version=manifest.minimum_secure_version,
+    )
+    return {
+        TRUST_POLICY_PATH: policy,
+        TRUST_STATE_PATH: state,
+    }, observed
 
 
 def initial_system_oracle(data: bytes, expected_version: int) -> dict[str, Any]:
@@ -1002,6 +1060,14 @@ def build_media_bytes(
         )
         if kernel_plan.image_size != kernel.image_bytes:
             raise KernelLoadError("PSM1 kernel image size differs from PKELF1")
+        trust_files, trust_observed = canonical_trust_files(
+            manifest_data, kernel_data, files
+        )
+        native_boot_trust.validate_development(
+            trust_files[TRUST_POLICY_PATH],
+            trust_files[TRUST_STATE_PATH],
+            trust_observed,
+        )
     except (
         native_boot_config.BootConfigError,
         native_system_manifest.ManifestError,
@@ -1013,6 +1079,7 @@ def build_media_bytes(
         native_microcode.MicrocodeError,
         native_firmware.FirmwareError,
         native_policy.PolicyError,
+        native_boot_trust.BootTrustError,
         StopIteration,
     ) as error:
         raise KernelLoadError(f"PKLOAD6 input validation failed: {error}") from error
@@ -1026,6 +1093,11 @@ def build_media_bytes(
         raise KernelLoadError("PKELF1 image exceeds its allocation bound")
     if any(len(value) > native_boot_artifact.MAX_FILE_BYTES for value in files.values()):
         raise KernelLoadError("PBART1 input exceeds its file bound")
+    if (
+        len(trust_files[TRUST_POLICY_PATH]) != native_boot_trust.POLICY_BYTES
+        or len(trust_files[TRUST_STATE_PATH]) != native_boot_trust.STATE_BYTES
+    ):
+        raise KernelLoadError("PBTRUST1 candidate sizes changed")
 
     image = bytearray(native_pooleboot.build_media_bytes(efi_data))
     fat_sectors, cluster_count = native_pooleboot._fat_sector_count()
@@ -1046,6 +1118,8 @@ def build_media_bytes(
         (MANIFEST_SHORT_NAME, manifest_data),
         (KERNEL_SHORT_NAME, kernel_data),
         *[(definition[5], files[definition[4]]) for definition in ARTIFACT_DEFINITIONS],
+        (TRUST_POLICY_SHORT_NAME, trust_files[TRUST_POLICY_PATH]),
+        (TRUST_STATE_SHORT_NAME, trust_files[TRUST_STATE_PATH]),
     ]
     placements: list[tuple[bytes, bytes, int, int, int]] = []
     next_cluster = pooleos_cluster + 1
@@ -1197,6 +1271,8 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
             MANIFEST_SHORT_NAME,
             KERNEL_SHORT_NAME,
             *(definition[5] for definition in ARTIFACT_DEFINITIONS),
+            TRUST_POLICY_SHORT_NAME,
+            TRUST_STATE_SHORT_NAME,
         }:
             raise KernelLoadError("PKLOAD6 POOLEOS directory changed")
         config_data, config_chain = _file_bytes(
@@ -1240,11 +1316,31 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
             )
             artifact_files[media_path] = artifact_data
             artifact_chains[media_path] = artifact_chain
+        trust_policy_data, trust_policy_chain = _file_bytes(
+            data,
+            first_fat,
+            data_start_lba,
+            pooleos_entries[TRUST_POLICY_SHORT_NAME],
+            cluster_count,
+            native_boot_trust.POLICY_BYTES,
+            "PBTRUST1 policy candidate",
+        )
+        trust_state_data, trust_state_chain = _file_bytes(
+            data,
+            first_fat,
+            data_start_lba,
+            pooleos_entries[TRUST_STATE_SHORT_NAME],
+            cluster_count,
+            native_boot_trust.STATE_BYTES,
+            "PBTRUST1 state candidate",
+        )
         ordered_chains = [
             config_chain,
             manifest_chain,
             kernel_chain,
             *(artifact_chains[definition[4]] for definition in ARTIFACT_DEFINITIONS),
+            trust_policy_chain,
+            trust_state_chain,
         ]
         if ordered_chains[0][0] != expected_pooleos_cluster + 1 or any(
             current[0] != previous[-1] + 1
@@ -1282,6 +1378,16 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
                 firmware_oracle(artifact_data, profile[index].version)
             elif role == native_boot_artifact.ROLE_POLICY_BUNDLE:
                 policy_oracle(artifact_data, profile[index].version)
+        expected_trust_files, trust_observed = canonical_trust_files(
+            manifest_data, kernel_data, artifact_files
+        )
+        trust_summary = native_boot_trust.validate_development(
+            trust_policy_data, trust_state_data, trust_observed
+        )
+        if trust_policy_data != expected_trust_files[TRUST_POLICY_PATH]:
+            raise KernelLoadError("PBTRUST1 policy differs from the canonical candidate")
+        if trust_state_data != expected_trust_files[TRUST_STATE_PATH]:
+            raise KernelLoadError("PBTRUST1 state differs from the canonical candidate")
         kernel_plan, loaded = native_elf_loader.load(
             kernel_data,
             PHYSICAL_ORACLE_BASE,
@@ -1299,6 +1405,7 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
         native_microcode.MicrocodeError,
         native_firmware.FirmwareError,
         native_policy.PolicyError,
+        native_boot_trust.BootTrustError,
         StopIteration,
         KeyError,
         IndexError,
@@ -1355,6 +1462,18 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
             }
             for definition in ARTIFACT_DEFINITIONS
         ],
+        {
+            "path": TRUST_POLICY_PATH,
+            "sha256": native_pooleboot.sha256_bytes(trust_policy_data),
+            "byte_count": len(trust_policy_data),
+            "cluster_count": len(trust_policy_chain),
+        },
+        {
+            "path": TRUST_STATE_PATH,
+            "sha256": native_pooleboot.sha256_bytes(trust_state_data),
+            "byte_count": len(trust_state_data),
+            "cluster_count": len(trust_state_chain),
+        },
     ]
     base["config"] = {
         "default_entry": config.default_entry,
@@ -1431,6 +1550,7 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
     base["inner_set"] = native_inner_live.validate_development_set(
         [artifact_files[definition[4]] for definition in ARTIFACT_DEFINITIONS]
     )
+    base["trust_state"] = trust_summary
     base["fat32"]["cluster_count"] = cluster_count
     return base
 
@@ -1500,7 +1620,7 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         raise KernelLoadError("PKLOAD6 marker page math is inconsistent")
     if not 0 <= entry_offset < image_bytes or relocations > native_elf_loader.MAX_RELOCATIONS:
         raise KernelLoadError("PKLOAD6 entry or relocation marker exceeds its bound")
-    if (files_closed, pools_freed) != (10, 9):
+    if (files_closed, pools_freed) != (12, 11):
         raise KernelLoadError("PKLOAD6 file and pool cleanup accounting diverges")
 
     artifact_contract = matches[12].group(1)
@@ -1556,27 +1676,51 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
     ):
         raise KernelLoadError("PKLOAD6 live inner-set marker violates its fail-closed profile")
 
+    trust_contract = matches[14].group(1)
+    trust_policy_bytes = int(matches[14].group(2))
+    trust_state_bytes = int(matches[14].group(3))
+    trust_bindings = int(matches[14].group(4))
+    trust_denials = int(matches[14].group(5))
+    trust_denial = matches[14].group(6)
+    trust_policy_sha256 = matches[14].group(7)
+    trust_state_sha256 = matches[14].group(8)
+    trust_signatures = int(matches[14].group(12))
+    trust_authority = int(matches[14].group(13))
+    trust_writes = int(matches[14].group(14))
+    if (
+        trust_contract != native_boot_trust.CONTRACT_ID
+        or trust_policy_bytes != native_boot_trust.POLICY_BYTES
+        or trust_state_bytes != native_boot_trust.STATE_BYTES
+        or trust_bindings != 14
+        or trust_denials != 1
+        or trust_denial != "pbtrust_policy_unsigned"
+        or trust_signatures != 0
+        or trust_authority != 0
+        or trust_writes != 0
+    ):
+        raise KernelLoadError("PKLOAD6 trust-state marker violates its fail-closed profile")
+
     config_table_count = int(matches[5].group(1))
-    width = int(matches[14].group(1))
-    height = int(matches[14].group(2))
-    stride = int(matches[14].group(3))
+    width = int(matches[15].group(1))
+    height = int(matches[15].group(2))
+    stride = int(matches[15].group(3))
     if config_table_count > 256:
         raise KernelLoadError("configuration-table marker exceeds its bound")
     if width < 320 or height < 200 or stride < width or stride > 16_384:
         raise KernelLoadError("GOP marker geometry is outside its bound")
 
-    mapping_contract = matches[16].group(1)
-    mappings = int(matches[16].group(2))
-    mapped_pages = int(matches[16].group(3))
-    read_only_pages = int(matches[16].group(4))
-    read_execute_pages = int(matches[16].group(5))
-    read_write_pages = int(matches[16].group(6))
-    writable_executable_pages = int(matches[16].group(7))
-    pml4_index = int(matches[16].group(8))
-    pdpt_index = int(matches[16].group(9))
-    page_directory_index = int(matches[16].group(10))
-    first_page_table_index = int(matches[16].group(11))
-    leaf_fingerprint = matches[16].group(12)
+    mapping_contract = matches[17].group(1)
+    mappings = int(matches[17].group(2))
+    mapped_pages = int(matches[17].group(3))
+    read_only_pages = int(matches[17].group(4))
+    read_execute_pages = int(matches[17].group(5))
+    read_write_pages = int(matches[17].group(6))
+    writable_executable_pages = int(matches[17].group(7))
+    pml4_index = int(matches[17].group(8))
+    pdpt_index = int(matches[17].group(9))
+    page_directory_index = int(matches[17].group(10))
+    first_page_table_index = int(matches[17].group(11))
+    leaf_fingerprint = matches[17].group(12)
     if mapping_contract != native_kernel_map.RETAINED_CONTRACT_ID or mappings != 4:
         raise KernelLoadError("PKLOAD6 PKMAP2 contract or mapping count diverges")
     if mapped_pages != pages or (
@@ -1597,13 +1741,13 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
     ):
         raise KernelLoadError("PKLOAD6 PKMAP2 indices diverge from the bounded window")
 
-    table_pages = int(matches[17].group(1))
-    active_kernel_pages = int(matches[17].group(2))
-    physical_address_bits = int(matches[17].group(3))
-    mapped_fnv1a64 = matches[17].group(4)
-    cache_signature = int(matches[17].group(5), 16)
-    first_page_bytes = int(matches[17].group(6))
-    last_page_bytes = int(matches[17].group(7))
+    table_pages = int(matches[18].group(1))
+    active_kernel_pages = int(matches[18].group(2))
+    physical_address_bits = int(matches[18].group(3))
+    mapped_fnv1a64 = matches[18].group(4)
+    cache_signature = int(matches[18].group(5), 16)
+    first_page_bytes = int(matches[18].group(6))
+    last_page_bytes = int(matches[18].group(7))
     if table_pages != native_kernel_map.TABLE_PAGE_COUNT or active_kernel_pages != pages:
         raise KernelLoadError("PKLOAD6 PKMAP2 active page accounting diverges")
     if not 36 <= physical_address_bits <= 52:
@@ -1618,21 +1762,21 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
     ):
         raise KernelLoadError("PKLOAD6 PKMAP2 framebuffer translation summary is invalid")
 
-    retained_table_pages = int(matches[18].group(1))
-    stack_pages = int(matches[18].group(2))
-    handoff_pages = int(matches[18].group(3))
-    guard_pages = int(matches[18].group(4))
-    total_pages = int(matches[18].group(5))
-    stack_pt = int(matches[18].group(6))
-    handoff_pt = int(matches[18].group(7))
-    kernel_physical = int(matches[18].group(8), 16)
-    root_physical = int(matches[18].group(9), 16)
-    stack_physical = int(matches[18].group(10), 16)
-    stack_top = int(matches[18].group(11), 16)
-    handoff_physical = int(matches[18].group(12), 16)
-    handoff_virtual = int(matches[18].group(13), 16)
-    retained_fingerprint = matches[18].group(14)
-    firmware_calls_while_active = int(matches[18].group(15))
+    retained_table_pages = int(matches[19].group(1))
+    stack_pages = int(matches[19].group(2))
+    handoff_pages = int(matches[19].group(3))
+    guard_pages = int(matches[19].group(4))
+    total_pages = int(matches[19].group(5))
+    stack_pt = int(matches[19].group(6))
+    handoff_pt = int(matches[19].group(7))
+    kernel_physical = int(matches[19].group(8), 16)
+    root_physical = int(matches[19].group(9), 16)
+    stack_physical = int(matches[19].group(10), 16)
+    stack_top = int(matches[19].group(11), 16)
+    handoff_physical = int(matches[19].group(12), 16)
+    handoff_virtual = int(matches[19].group(13), 16)
+    retained_fingerprint = matches[19].group(14)
+    firmware_calls_while_active = int(matches[19].group(15))
     if (
         retained_table_pages != native_kernel_map.TABLE_PAGE_COUNT
         or stack_pages != native_kernel_map.STACK_PAGE_COUNT
@@ -1662,14 +1806,14 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
     if stack_top % 16 or handoff_virtual % native_kernel_map.PAGE_SIZE:
         raise KernelLoadError("PKLOAD6 retained virtual state is invalid")
 
-    pbp1_bytes = int(matches[19].group(1))
-    pbp1_records = int(matches[19].group(2))
-    pbp1_memory_entries = int(matches[19].group(3))
-    pbp1_framebuffer = int(matches[19].group(4))
-    pbp1_artifacts = int(matches[19].group(5))
-    pbp1_descriptor_bytes = int(matches[19].group(6))
-    pbp1_exit_attempts = int(matches[19].group(7))
-    pbp1_unchanged = int(matches[19].group(10))
+    pbp1_bytes = int(matches[20].group(1))
+    pbp1_records = int(matches[20].group(2))
+    pbp1_memory_entries = int(matches[20].group(3))
+    pbp1_framebuffer = int(matches[20].group(4))
+    pbp1_artifacts = int(matches[20].group(5))
+    pbp1_descriptor_bytes = int(matches[20].group(6))
+    pbp1_exit_attempts = int(matches[20].group(7))
+    pbp1_unchanged = int(matches[20].group(10))
     if (
         not 1 <= pbp1_bytes <= 1024 * 1024
         or pbp1_records not in {3, 4}
@@ -1685,7 +1829,7 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
 
     try:
         boot_exit = native_boot_exit.validate_live_markers(
-            markers[20], markers[21], markers[22], markers[23]
+            markers[21], markers[22], markers[23], markers[24]
         )
     except native_boot_exit.BootExitError as error:
         raise KernelLoadError(str(error)) from error
@@ -1760,6 +1904,22 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
             "state_writes": inner_state_writes,
             "hardware_observations": inner_hardware_observations,
         },
+        "trust_state": {
+            "contract_id": trust_contract,
+            "policy_bytes": trust_policy_bytes,
+            "state_bytes": trust_state_bytes,
+            "binding_count": trust_bindings,
+            "denial_count": trust_denials,
+            "denial": trust_denial,
+            "policy_sha256": trust_policy_sha256,
+            "state_sha256": trust_state_sha256,
+            "state_source": "esp_candidate_not_persistent_authority",
+            "signature_verifications": trust_signatures,
+            "authority_grants": trust_authority,
+            "state_writes": trust_writes,
+            "state_authenticated": False,
+            "state_monotonic": False,
+        },
         "pbp1": {
             "byte_count": pbp1_bytes,
             "record_count": pbp1_records,
@@ -1768,8 +1928,8 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
             "artifact_count": pbp1_artifacts,
             "descriptor_bytes": pbp1_descriptor_bytes,
             "exit_attempts": pbp1_exit_attempts,
-            "message_crc32": matches[19].group(8),
-            "fnv1a64": matches[19].group(9),
+            "message_crc32": matches[20].group(8),
+            "fnv1a64": matches[20].group(9),
             "pre_exit": False,
             "boot_services_exited": True,
             "development_mode_only": True,
@@ -1820,8 +1980,8 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
             "width": width,
             "height": height,
             "stride": stride,
-            "mode": int(matches[14].group(4)),
-            "format": matches[14].group(5),
+            "mode": int(matches[15].group(4)),
+            "format": matches[15].group(5),
         },
         "memory_map": {
             "byte_count": boot_exit["map_byte_count"],
@@ -1923,6 +2083,29 @@ def validate_oracle_binding(
     ):
         raise KernelLoadError(
             "firmware live inner-set marker diverges from the independent retained-byte oracle"
+        )
+    trust_state = marker_summary["trust_state"]
+    media_trust_state = media_inspection.get("trust_state", {})
+    if (
+        trust_state["contract_id"] != media_trust_state.get("contract_id")
+        or trust_state["policy_bytes"] != media_trust_state.get("policy_bytes")
+        or trust_state["state_bytes"] != media_trust_state.get("state_bytes")
+        or trust_state["binding_count"] != media_trust_state.get("binding_count")
+        or trust_state["denial_count"] != media_trust_state.get("denial_count")
+        or trust_state["denial"] != media_trust_state.get("denial")
+        or trust_state["policy_sha256"] != media_trust_state.get("policy_sha256")
+        or trust_state["state_sha256"] != media_trust_state.get("state_sha256")
+        or trust_state["signature_verifications"] != 0
+        or trust_state["authority_grants"] != 0
+        or trust_state["state_writes"] != 0
+        or media_trust_state.get("state_source")
+        != "esp_candidate_not_persistent_authority"
+        or media_trust_state.get("state_authenticated") is not False
+        or media_trust_state.get("state_monotonic") is not False
+        or media_trust_state.get("state_backend_writable") is not False
+    ):
+        raise KernelLoadError(
+            "firmware PBTRUST1 marker diverges from the independent trust-state oracle"
         )
     initial_system = media_inspection.get("initial_system", {})
     if (
@@ -2165,6 +2348,8 @@ def contract_errors(contract: dict[str, Any], root: Path) -> list[str]:
         or media.get("kernel_path") != KERNEL_PATH
         or media.get("artifact_paths")
         != [definition[4] for definition in ARTIFACT_DEFINITIONS]
+        or media.get("trust_policy_path") != TRUST_POLICY_PATH
+        or media.get("trust_state_path") != TRUST_STATE_PATH
     ):
         errors.append("PKLOAD6 development media paths changed")
     try:
@@ -2226,6 +2411,8 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
         "firmware_readiness": native_firmware.READINESS_RELATIVE.as_posix(),
         "policy_contract": native_policy.CONTRACT_RELATIVE.as_posix(),
         "policy_readiness": native_policy.READINESS_RELATIVE.as_posix(),
+        "boot_trust_contract": native_boot_trust.CONTRACT_RELATIVE,
+        "boot_trust_readiness": native_boot_trust.READINESS_RELATIVE,
     }
     for name, path in expected_bindings.items():
         if not binding_matches(bindings.get(name), root, path):
@@ -2244,8 +2431,8 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
     files = media.get("files", [])
     build = readiness.get("build", {})
     kernel_product = readiness.get("kernel_product", {})
-    if not isinstance(files, list) or len(files) != 4 + len(ARTIFACT_DEFINITIONS):
-        errors.append("PKLOAD6 media must contain exactly ten files")
+    if not isinstance(files, list) or len(files) != 6 + len(ARTIFACT_DEFINITIONS):
+        errors.append("PKLOAD6 media must contain exactly twelve files")
     else:
         expected_paths = [
             native_pooleboot.FALLBACK_PATH,
@@ -2253,6 +2440,8 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
             MANIFEST_PATH,
             KERNEL_PATH,
             *(definition[4] for definition in ARTIFACT_DEFINITIONS),
+            TRUST_POLICY_PATH,
+            TRUST_STATE_PATH,
         ]
         if [item.get("path") for item in files] != expected_paths:
             errors.append("PKLOAD6 media path order changed")
@@ -2273,7 +2462,10 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
             errors.append("PKLOAD6 artifact-set profile changed")
         else:
             for file_item, artifact, definition in zip(
-                files[4:], artifacts, ARTIFACT_DEFINITIONS, strict=True
+                files[4 : 4 + len(ARTIFACT_DEFINITIONS)],
+                artifacts,
+                ARTIFACT_DEFINITIONS,
+                strict=True,
             ):
                 role, manifest_id, _, _, media_path, _ = definition
                 if (
@@ -2284,6 +2476,19 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
                     or artifact.get("file_bytes") != file_item.get("byte_count")
                 ):
                     errors.append(f"PKLOAD6 artifact binding changed for {media_path}")
+        trust_state = media.get("trust_state", {})
+        if (
+            trust_state.get("contract_id") != native_boot_trust.CONTRACT_ID
+            or trust_state.get("denial") != "pbtrust_policy_unsigned"
+            or trust_state.get("binding_count") != 14
+            or trust_state.get("authority_grants") != 0
+            or trust_state.get("state_writes") != 0
+            or trust_state.get("policy_sha256")
+            != files[-2].get("sha256")
+            or trust_state.get("state_sha256")
+            != files[-1].get("sha256")
+        ):
+            errors.append("PKLOAD6 PBTRUST1 independent-oracle summary changed")
         try:
             expected_initial_system = initial_system_oracle(
                 canonical_artifact_files()[INITIAL_SYSTEM_PATH], 1

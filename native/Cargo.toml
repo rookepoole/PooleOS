@@ -20,6 +20,7 @@ members = [
   "policy",
   "recovery",
   "symbols",
+  "trust",
 ]
 resolver = "3"
 

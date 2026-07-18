@@ -602,6 +602,19 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
         kernel.inner.state_writes,
         kernel.inner.hardware_observations,
     ));
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 TRUST_STATE DENY contract={} policy_bytes={} state_bytes={} bindings={} denials={} denial={} policy_sha256={} state_sha256={} source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants={} state_writes={}\n",
+        poole_boot_trust::CONTRACT_ID,
+        kernel.trust.policy_bytes,
+        kernel.trust.state_bytes,
+        kernel.trust.binding_count,
+        kernel.trust.denial_count,
+        kernel.trust.denial,
+        poole_boot_trust::DigestHex::new(&kernel.trust.policy_sha256),
+        poole_boot_trust::DigestHex::new(&kernel.trust.state_sha256),
+        kernel.trust.authority_grants,
+        kernel.trust.state_writes,
+    ));
     let gop = match gop_result {
         Ok(summary) => {
             diagnostic(format_args!(

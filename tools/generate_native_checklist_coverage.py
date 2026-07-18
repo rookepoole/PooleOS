@@ -246,6 +246,18 @@ ADDED_REQUIREMENTS = [
         ],
     },
     {
+        "id": "ADD-BOOT-012",
+        "phase_id": "N5",
+        "requirement": "Keep immutable signed boot-trust policy, mutable monotonic boot-acceptance state, and PREC1 boot-attempt state as three separate contracts. An ESP file MUST NOT be accepted as persistent trust authority. Before authority, require an authenticated redundant transactional backend with deterministic copy selection, previous-state chaining, monotonic generation and rollback floors, revocation binding, torn-write and power-loss recovery, repair and migration rules, durable receipts, and independent PooleKernel revalidation of the exact selected state and retained artifacts.",
+        "basis": [
+            "Cycle 115 PBTRUST1 trust-policy and acceptance-state contract qualification",
+            "https://uefi.org/specs/UEFI/2.11/08_Services_Runtime_Services.html",
+            "https://uefi.org/specs/UEFI/2.11/32_Secure_Boot_and_Driver_Signing.html",
+            "https://theupdateframework.github.io/specification/v1.0.35/",
+            "https://csrc.nist.gov/pubs/sp/800/193/final",
+        ],
+    },
+    {
         "id": "ADD-BOOT-002",
         "phase_id": "N6",
         "requirement": "Model UEFI PK, KEK, db, dbx, image signer revocation, minimum secure version, authenticated boot state, recovery-key rotation, and development-key containment as one boot-trust state machine.",

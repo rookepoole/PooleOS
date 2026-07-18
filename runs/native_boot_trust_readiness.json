@@ -1,0 +1,814 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "pooleos_native_boot_trust_readiness",
+  "contract_id": "PBTRUST1",
+  "status": "pass",
+  "inputs": {
+    "contract": {
+      "path": "specs/native-boot-trust-contract.json",
+      "byte_count": 8474,
+      "sha256": "5392EE6623A17EF85706E6A4CEB877C6D5E8B7321CEBA5514CDD69FD80F854FB"
+    },
+    "toolchain_lock": {
+      "path": "specs/native-toolchain-lock.json",
+      "byte_count": 4017,
+      "sha256": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E"
+    },
+    "toolchain_qualification": {
+      "path": "runs/native_toolchain_qualification.json",
+      "byte_count": 14423,
+      "sha256": "4B0D7DE498891FB4A26C2002935948E46E8E87EA208305A0BA76A333380A3745"
+    },
+    "tier1_profile": {
+      "path": "runs/hardware_target_readiness.json",
+      "byte_count": 25648,
+      "sha256": "7696ACC6DFB8287ED241E6D574956DAFA716F0A2A79A0BABE362E4BC3A7BA987"
+    },
+    "implementation_inputs": [
+      {
+        "path": "native/Cargo.toml",
+        "byte_count": 586,
+        "sha256": "1741AC8F565F5849F8C86D77BD16E06ED195E76D32FFA62492E1928B8FAA8C1E"
+      },
+      {
+        "path": "native/Cargo.lock",
+        "byte_count": 4060,
+        "sha256": "88017EDF93CD2DBF5F298E612E9A50601FDCC657FF97CC841E08FBD8355090C6"
+      },
+      {
+        "path": "native/trust/Cargo.toml",
+        "byte_count": 358,
+        "sha256": "E93435C23773EE33FC8757976903AA52C05985C0C4534D09EDADDCB8796D242C"
+      },
+      {
+        "path": "native/trust/src/lib.rs",
+        "byte_count": 27876,
+        "sha256": "90CE5080AB4242B22B82738F2B700D70201238E29B6B4980CE010D656A735F27"
+      },
+      {
+        "path": "native/trust/src/bin/pbtrust1_probe.rs",
+        "byte_count": 5714,
+        "sha256": "798600F8D1C622FB501FA09763009465079E930A38B739A7154DE10B31206FCE"
+      },
+      {
+        "path": "native/boot/Cargo.toml",
+        "byte_count": 611,
+        "sha256": "62F842DC7A91742124CDB09F96DA9F94DBE264F1AAB421114AC51EBFE1D0E82A"
+      },
+      {
+        "path": "native/boot/src/kload.rs",
+        "byte_count": 39757,
+        "sha256": "984A5A7C69727FC2F7677A8BC56AC56C348DF1505573F551CFA68D099BAA1C21"
+      },
+      {
+        "path": "native/boot/src/main.rs",
+        "byte_count": 20638,
+        "sha256": "6658C478FC24A797C26F70551291595D0BAE32D153F96AC414F886A20A4EED4E"
+      },
+      {
+        "path": "native/bootload/src/lib.rs",
+        "byte_count": 32723,
+        "sha256": "BA06EF5B0FCA2298B855E2C8FFBD7C831C6F6938234B9FD6C1E616C948D135C1"
+      },
+      {
+        "path": "runtime/native_boot_trust.py",
+        "byte_count": 28060,
+        "sha256": "ACCF4F5C8A4E069A668E56C2384D59E389FB4162AB4326D6EEF33920BFADB59F"
+      },
+      {
+        "path": "tests/test_native_boot_trust.py",
+        "byte_count": 7977,
+        "sha256": "FF563340A4243C8602FAEE806D9BEB51B8CC8E724069D04A796463F80602CBBA"
+      },
+      {
+        "path": "tools/qualify_native_boot_trust.py",
+        "byte_count": 38000,
+        "sha256": "C62F512C70475AF68F8930EAEE8EAC1EFF550264C2C8BA36AE7E73C2705E8F57"
+      },
+      {
+        "path": "docs/native-boot-trust.md",
+        "byte_count": 6879,
+        "sha256": "BA3C68D859562FB64246A5E1DBAC137239FF8E44560A383D01ABE4090E09ED3F"
+      },
+      {
+        "path": "specs/native-boot-trust-contract.schema.json",
+        "byte_count": 3666,
+        "sha256": "344E85E8AD90EE831F881C30557CDB975D6A83571A921FAAB1BA6B9EF8AC3F5A"
+      },
+      {
+        "path": "specs/native-boot-trust-readiness.schema.json",
+        "byte_count": 5403,
+        "sha256": "20635C4261E4EE5E280BDA9463D8FED1AE0171F358AB2EABD9B253E092857376"
+      }
+    ]
+  },
+  "build": {
+    "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+    "rust_host_tests_passed": 4,
+    "rust_host_tests_total": 4,
+    "rustfmt_packages": 1,
+    "clippy_targets": 1,
+    "no_std_targets": [
+      "x86_64-unknown-none",
+      "x86_64-unknown-uefi"
+    ],
+    "pooleboot_uefi_integration_builds_passed": 1,
+    "pooleboot_uefi_integration_builds_total": 1
+  },
+  "golden": {
+    "case_count": 3,
+    "development_policy_sha256": "AA256F8CDAFB6AA7778062923323E75A100C12DB366028A7039EF23FB6EF85E6",
+    "development_state_sha256": "3FD0C11A8618A3E67E1A0D0486C2EE6757FEEEAE973382A904D916308BB8650D",
+    "signed_shape_policy_sha256": "23D66D75BCBAFAFEB6C8467B3C00D07528D77C7ED3E44D4A0ED7A7A4CF274D5B",
+    "authenticated_shape_state_sha256": "715A00CA7C845ECCDF06E1FBF2014CBE983388428F96CFFC4B7D4714A27D84A9",
+    "generation_two_state_sha256": "BE076052B03D9EA0951B06A1E7A85BCD13A8F62189ABBA69C2EC155F0FF85370",
+    "synthetic_authorization_model_result": "qualified_shape_only_no_crypto_claim"
+  },
+  "negative_controls": [
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-TRUNCATED",
+      "expected": "ERR:pbtrust_policy_truncated",
+      "python": "ERR:pbtrust_policy_truncated",
+      "rust": "ERR:pbtrust_policy_truncated",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-OVERSIZE",
+      "expected": "ERR:pbtrust_policy_size",
+      "python": "ERR:pbtrust_policy_size",
+      "rust": "ERR:pbtrust_policy_size",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-MAGIC",
+      "expected": "ERR:pbtrust_policy_magic",
+      "python": "ERR:pbtrust_policy_magic",
+      "rust": "ERR:pbtrust_policy_magic",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-MAJOR",
+      "expected": "ERR:pbtrust_policy_version",
+      "python": "ERR:pbtrust_policy_version",
+      "rust": "ERR:pbtrust_policy_version",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-MINOR",
+      "expected": "ERR:pbtrust_policy_version",
+      "python": "ERR:pbtrust_policy_version",
+      "rust": "ERR:pbtrust_policy_version",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-RECORD-BYTES",
+      "expected": "ERR:pbtrust_policy_size",
+      "python": "ERR:pbtrust_policy_size",
+      "rust": "ERR:pbtrust_policy_size",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-FLAGS-ZERO",
+      "expected": "ERR:pbtrust_policy_flags",
+      "python": "ERR:pbtrust_policy_flags",
+      "rust": "ERR:pbtrust_policy_flags",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-FLAGS-BOTH",
+      "expected": "ERR:pbtrust_policy_flags",
+      "python": "ERR:pbtrust_policy_flags",
+      "rust": "ERR:pbtrust_policy_flags",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-FLAGS-UNKNOWN",
+      "expected": "ERR:pbtrust_policy_flags",
+      "python": "ERR:pbtrust_policy_flags",
+      "rust": "ERR:pbtrust_policy_flags",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-VERSION-ZERO",
+      "expected": "ERR:pbtrust_policy_numbers",
+      "python": "ERR:pbtrust_policy_numbers",
+      "rust": "ERR:pbtrust_policy_numbers",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-EPOCH-ZERO",
+      "expected": "ERR:pbtrust_policy_numbers",
+      "python": "ERR:pbtrust_policy_numbers",
+      "rust": "ERR:pbtrust_policy_numbers",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-SECURE-FLOOR-ZERO",
+      "expected": "ERR:pbtrust_policy_numbers",
+      "python": "ERR:pbtrust_policy_numbers",
+      "rust": "ERR:pbtrust_policy_numbers",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-GENERATION-FLOOR-ZERO",
+      "expected": "ERR:pbtrust_policy_numbers",
+      "python": "ERR:pbtrust_policy_numbers",
+      "rust": "ERR:pbtrust_policy_numbers",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-ROLE-MASK",
+      "expected": "ERR:pbtrust_policy_role_mask",
+      "python": "ERR:pbtrust_policy_role_mask",
+      "rust": "ERR:pbtrust_policy_role_mask",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-RESERVED",
+      "expected": "ERR:pbtrust_policy_signer_shape",
+      "python": "ERR:pbtrust_policy_signer_shape",
+      "rust": "ERR:pbtrust_policy_signer_shape",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-MANIFEST-DIGEST",
+      "expected": "ERR:pbtrust_policy_digest",
+      "python": "ERR:pbtrust_policy_digest",
+      "rust": "ERR:pbtrust_policy_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-KERNEL-DIGEST",
+      "expected": "ERR:pbtrust_policy_digest",
+      "python": "ERR:pbtrust_policy_digest",
+      "rust": "ERR:pbtrust_policy_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-RETAINED-DIGEST",
+      "expected": "ERR:pbtrust_policy_digest",
+      "python": "ERR:pbtrust_policy_digest",
+      "rust": "ERR:pbtrust_policy_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-REVOCATION-DIGEST",
+      "expected": "ERR:pbtrust_policy_digest",
+      "python": "ERR:pbtrust_policy_digest",
+      "rust": "ERR:pbtrust_policy_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-BODY-DIGEST",
+      "expected": "ERR:pbtrust_policy_body_digest",
+      "python": "ERR:pbtrust_policy_body_digest",
+      "rust": "ERR:pbtrust_policy_body_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-DEVELOPMENT-SIGNER",
+      "expected": "ERR:pbtrust_policy_signer_shape",
+      "python": "ERR:pbtrust_policy_signer_shape",
+      "rust": "ERR:pbtrust_policy_signer_shape",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-DEVELOPMENT-ROOT",
+      "expected": "ERR:pbtrust_policy_signer_shape",
+      "python": "ERR:pbtrust_policy_signer_shape",
+      "rust": "ERR:pbtrust_policy_signer_shape",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-DEVELOPMENT-SIGNATURE",
+      "expected": "ERR:pbtrust_policy_signer_shape",
+      "python": "ERR:pbtrust_policy_signer_shape",
+      "rust": "ERR:pbtrust_policy_signer_shape",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-SIGNED-THRESHOLD-ZERO",
+      "expected": "ERR:pbtrust_policy_signer_shape",
+      "python": "ERR:pbtrust_policy_signer_shape",
+      "rust": "ERR:pbtrust_policy_signer_shape",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-SIGNED-THRESHOLD-COUNT",
+      "expected": "ERR:pbtrust_policy_signer_shape",
+      "python": "ERR:pbtrust_policy_signer_shape",
+      "rust": "ERR:pbtrust_policy_signer_shape",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-SIGNED-COUNT-MAX",
+      "expected": "ERR:pbtrust_policy_signer_shape",
+      "python": "ERR:pbtrust_policy_signer_shape",
+      "rust": "ERR:pbtrust_policy_signer_shape",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-SIGNED-AUTH-PROFILE",
+      "expected": "ERR:pbtrust_policy_signer_shape",
+      "python": "ERR:pbtrust_policy_signer_shape",
+      "rust": "ERR:pbtrust_policy_signer_shape",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-SIGNED-SIGNATURE-ZERO",
+      "expected": "ERR:pbtrust_policy_signer_shape",
+      "python": "ERR:pbtrust_policy_signer_shape",
+      "rust": "ERR:pbtrust_policy_signer_shape",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-SIGNED-SIGNATURE-OVERSIZE",
+      "expected": "ERR:pbtrust_policy_signer_shape",
+      "python": "ERR:pbtrust_policy_signer_shape",
+      "rust": "ERR:pbtrust_policy_signer_shape",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-SIGNED-ROOT-ZERO",
+      "expected": "ERR:pbtrust_policy_signer_shape",
+      "python": "ERR:pbtrust_policy_signer_shape",
+      "rust": "ERR:pbtrust_policy_signer_shape",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-SIGNED-SIGNER-ZERO",
+      "expected": "ERR:pbtrust_policy_signer_shape",
+      "python": "ERR:pbtrust_policy_signer_shape",
+      "rust": "ERR:pbtrust_policy_signer_shape",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-SIGNED-SIGNATURE-EMPTY",
+      "expected": "ERR:pbtrust_policy_signature",
+      "python": "ERR:pbtrust_policy_signature",
+      "rust": "ERR:pbtrust_policy_signature",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-SIGNED-SIGNATURE-PADDING",
+      "expected": "ERR:pbtrust_policy_signature",
+      "python": "ERR:pbtrust_policy_signature",
+      "rust": "ERR:pbtrust_policy_signature",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-TRUNCATED",
+      "expected": "ERR:pbtrust_state_truncated",
+      "python": "ERR:pbtrust_state_truncated",
+      "rust": "ERR:pbtrust_state_truncated",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-OVERSIZE",
+      "expected": "ERR:pbtrust_state_size",
+      "python": "ERR:pbtrust_state_size",
+      "rust": "ERR:pbtrust_state_size",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-MAGIC",
+      "expected": "ERR:pbtrust_state_magic",
+      "python": "ERR:pbtrust_state_magic",
+      "rust": "ERR:pbtrust_state_magic",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-MAJOR",
+      "expected": "ERR:pbtrust_state_version",
+      "python": "ERR:pbtrust_state_version",
+      "rust": "ERR:pbtrust_state_version",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-MINOR",
+      "expected": "ERR:pbtrust_state_version",
+      "python": "ERR:pbtrust_state_version",
+      "rust": "ERR:pbtrust_state_version",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-RECORD-BYTES",
+      "expected": "ERR:pbtrust_state_size",
+      "python": "ERR:pbtrust_state_size",
+      "rust": "ERR:pbtrust_state_size",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-FLAGS-NO-COMMIT",
+      "expected": "ERR:pbtrust_state_flags",
+      "python": "ERR:pbtrust_state_flags",
+      "rust": "ERR:pbtrust_state_flags",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-FLAGS-NO-PROFILE",
+      "expected": "ERR:pbtrust_state_flags",
+      "python": "ERR:pbtrust_state_flags",
+      "rust": "ERR:pbtrust_state_flags",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-FLAGS-BOTH-PROFILES",
+      "expected": "ERR:pbtrust_state_flags",
+      "python": "ERR:pbtrust_state_flags",
+      "rust": "ERR:pbtrust_state_flags",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-FLAGS-UNKNOWN",
+      "expected": "ERR:pbtrust_state_flags",
+      "python": "ERR:pbtrust_state_flags",
+      "rust": "ERR:pbtrust_state_flags",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-COPY-INDEX",
+      "expected": "ERR:pbtrust_state_copy",
+      "python": "ERR:pbtrust_state_copy",
+      "rust": "ERR:pbtrust_state_copy",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-COPY-COUNT",
+      "expected": "ERR:pbtrust_state_copy",
+      "python": "ERR:pbtrust_state_copy",
+      "rust": "ERR:pbtrust_state_copy",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-COMMIT",
+      "expected": "ERR:pbtrust_state_commit",
+      "python": "ERR:pbtrust_state_commit",
+      "rust": "ERR:pbtrust_state_commit",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-DEVELOPMENT-AUTH",
+      "expected": "ERR:pbtrust_state_auth_profile",
+      "python": "ERR:pbtrust_state_auth_profile",
+      "rust": "ERR:pbtrust_state_auth_profile",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-AUTHENTICATED-AUTH-ZERO",
+      "expected": "ERR:pbtrust_state_auth_profile",
+      "python": "ERR:pbtrust_state_auth_profile",
+      "rust": "ERR:pbtrust_state_auth_profile",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-RESERVED",
+      "expected": "ERR:pbtrust_state_auth_profile",
+      "python": "ERR:pbtrust_state_auth_profile",
+      "rust": "ERR:pbtrust_state_auth_profile",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-GENERATION-ZERO",
+      "expected": "ERR:pbtrust_state_numbers",
+      "python": "ERR:pbtrust_state_numbers",
+      "rust": "ERR:pbtrust_state_numbers",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-EPOCH-ZERO",
+      "expected": "ERR:pbtrust_state_numbers",
+      "python": "ERR:pbtrust_state_numbers",
+      "rust": "ERR:pbtrust_state_numbers",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-SECURE-FLOOR-ZERO",
+      "expected": "ERR:pbtrust_state_numbers",
+      "python": "ERR:pbtrust_state_numbers",
+      "rust": "ERR:pbtrust_state_numbers",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-MANIFEST-VERSION-ZERO",
+      "expected": "ERR:pbtrust_state_numbers",
+      "python": "ERR:pbtrust_state_numbers",
+      "rust": "ERR:pbtrust_state_numbers",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-POLICY-VERSION-ZERO",
+      "expected": "ERR:pbtrust_state_numbers",
+      "python": "ERR:pbtrust_state_numbers",
+      "rust": "ERR:pbtrust_state_numbers",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-MANIFEST-BELOW-FLOOR",
+      "expected": "ERR:pbtrust_state_numbers",
+      "python": "ERR:pbtrust_state_numbers",
+      "rust": "ERR:pbtrust_state_numbers",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-POLICY-DIGEST",
+      "expected": "ERR:pbtrust_state_digest",
+      "python": "ERR:pbtrust_state_digest",
+      "rust": "ERR:pbtrust_state_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-MANIFEST-DIGEST",
+      "expected": "ERR:pbtrust_state_digest",
+      "python": "ERR:pbtrust_state_digest",
+      "rust": "ERR:pbtrust_state_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-KERNEL-DIGEST",
+      "expected": "ERR:pbtrust_state_digest",
+      "python": "ERR:pbtrust_state_digest",
+      "rust": "ERR:pbtrust_state_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-RETAINED-DIGEST",
+      "expected": "ERR:pbtrust_state_digest",
+      "python": "ERR:pbtrust_state_digest",
+      "rust": "ERR:pbtrust_state_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-GENERATION-ONE-PREVIOUS",
+      "expected": "ERR:pbtrust_state_previous",
+      "python": "ERR:pbtrust_state_previous",
+      "rust": "ERR:pbtrust_state_previous",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-GENERATION-TWO-NO-PREVIOUS",
+      "expected": "ERR:pbtrust_state_previous",
+      "python": "ERR:pbtrust_state_previous",
+      "rust": "ERR:pbtrust_state_previous",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-BODY-DIGEST",
+      "expected": "ERR:pbtrust_state_body_digest",
+      "python": "ERR:pbtrust_state_body_digest",
+      "rust": "ERR:pbtrust_state_body_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BINDING-MANIFEST",
+      "expected": "ERR:pbtrust_binding_manifest",
+      "python": "ERR:pbtrust_binding_manifest",
+      "rust": "ERR:pbtrust_binding_manifest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BINDING-KERNEL",
+      "expected": "ERR:pbtrust_binding_kernel",
+      "python": "ERR:pbtrust_binding_kernel",
+      "rust": "ERR:pbtrust_binding_kernel",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BINDING-RETAINED",
+      "expected": "ERR:pbtrust_binding_retained_set",
+      "python": "ERR:pbtrust_binding_retained_set",
+      "rust": "ERR:pbtrust_binding_retained_set",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BINDING-REVOCATION",
+      "expected": "ERR:pbtrust_binding_revocation_set",
+      "python": "ERR:pbtrust_binding_revocation_set",
+      "rust": "ERR:pbtrust_binding_revocation_set",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BINDING-ROLE-MASK",
+      "expected": "ERR:pbtrust_binding_role_mask",
+      "python": "ERR:pbtrust_binding_role_mask",
+      "rust": "ERR:pbtrust_binding_role_mask",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BINDING-POLICY-STATE",
+      "expected": "ERR:pbtrust_binding_policy_state",
+      "python": "ERR:pbtrust_binding_policy_state",
+      "rust": "ERR:pbtrust_binding_policy_state",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BINDING-STATE-MANIFEST",
+      "expected": "ERR:pbtrust_binding_state_manifest",
+      "python": "ERR:pbtrust_binding_state_manifest",
+      "rust": "ERR:pbtrust_binding_state_manifest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BINDING-STATE-KERNEL",
+      "expected": "ERR:pbtrust_binding_state_kernel",
+      "python": "ERR:pbtrust_binding_state_kernel",
+      "rust": "ERR:pbtrust_binding_state_kernel",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BINDING-STATE-RETAINED",
+      "expected": "ERR:pbtrust_binding_state_retained_set",
+      "python": "ERR:pbtrust_binding_state_retained_set",
+      "rust": "ERR:pbtrust_binding_state_retained_set",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BINDING-POLICY-VERSION",
+      "expected": "ERR:pbtrust_binding_policy_version",
+      "python": "ERR:pbtrust_binding_policy_version",
+      "rust": "ERR:pbtrust_binding_policy_version",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-ROLLBACK-MANIFEST-VERSION",
+      "expected": "ERR:pbtrust_rollback_manifest_version",
+      "python": "ERR:pbtrust_rollback_manifest_version",
+      "rust": "ERR:pbtrust_rollback_manifest_version",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-ROLLBACK-POLICY-SECURE-FLOOR",
+      "expected": "ERR:pbtrust_rollback_secure_version",
+      "python": "ERR:pbtrust_rollback_secure_version",
+      "rust": "ERR:pbtrust_rollback_secure_version",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-ROLLBACK-STATE-SECURE-FLOOR",
+      "expected": "ERR:pbtrust_rollback_secure_version",
+      "python": "ERR:pbtrust_rollback_secure_version",
+      "rust": "ERR:pbtrust_rollback_secure_version",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-ROLLBACK-OBSERVED-SECURE-FLOOR",
+      "expected": "ERR:pbtrust_rollback_secure_version",
+      "python": "ERR:pbtrust_rollback_secure_version",
+      "rust": "ERR:pbtrust_rollback_secure_version",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-ROLLBACK-GENERATION",
+      "expected": "ERR:pbtrust_rollback_state_generation",
+      "python": "ERR:pbtrust_rollback_state_generation",
+      "rust": "ERR:pbtrust_rollback_state_generation",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-ROLLBACK-EPOCH",
+      "expected": "ERR:pbtrust_rollback_trust_epoch",
+      "python": "ERR:pbtrust_rollback_trust_epoch",
+      "rust": "ERR:pbtrust_rollback_trust_epoch",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-POLICY-UNSIGNED",
+      "expected": "ERR:pbtrust_policy_unsigned",
+      "python": "ERR:pbtrust_policy_unsigned",
+      "rust": "ERR:pbtrust_policy_unsigned",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-EVIDENCE-POLICY-SIGNATURE",
+      "expected": "ERR:pbtrust_policy_authentication",
+      "python": "ERR:pbtrust_policy_authentication",
+      "rust": "ERR:pbtrust_policy_authentication",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-EVIDENCE-POLICY-THRESHOLD",
+      "expected": "ERR:pbtrust_policy_threshold",
+      "python": "ERR:pbtrust_policy_threshold",
+      "rust": "ERR:pbtrust_policy_threshold",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-EVIDENCE-REVOCATION-AUTH",
+      "expected": "ERR:pbtrust_policy_revocation",
+      "python": "ERR:pbtrust_policy_revocation",
+      "rust": "ERR:pbtrust_policy_revocation",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-EVIDENCE-POLICY-REVOKED",
+      "expected": "ERR:pbtrust_policy_revocation",
+      "python": "ERR:pbtrust_policy_revocation",
+      "rust": "ERR:pbtrust_policy_revocation",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-EVIDENCE-STATE-AUTH",
+      "expected": "ERR:pbtrust_state_authentication",
+      "python": "ERR:pbtrust_state_authentication",
+      "rust": "ERR:pbtrust_state_authentication",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-EVIDENCE-STATE-MONOTONIC",
+      "expected": "ERR:pbtrust_state_monotonicity",
+      "python": "ERR:pbtrust_state_monotonicity",
+      "rust": "ERR:pbtrust_state_monotonicity",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-EVIDENCE-BACKEND-WRITABLE",
+      "expected": "ERR:pbtrust_state_backend_writable",
+      "python": "ERR:pbtrust_state_backend_writable",
+      "rust": "ERR:pbtrust_state_backend_writable",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-EVIDENCE-SECURE-BOOT",
+      "expected": "ERR:pbtrust_secure_boot_state",
+      "python": "ERR:pbtrust_secure_boot_state",
+      "rust": "ERR:pbtrust_secure_boot_state",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-STATE-DEVELOPMENT-CANDIDATE",
+      "expected": "ERR:pbtrust_state_development_candidate",
+      "python": "ERR:pbtrust_state_development_candidate",
+      "rust": "ERR:pbtrust_state_development_candidate",
+      "status": "pass"
+    }
+  ],
+  "differential": {
+    "policy_parser": {
+      "cases": 8192,
+      "mismatches": 0,
+      "seed": 5783277584092713985
+    },
+    "state_parser": {
+      "cases": 8192,
+      "mismatches": 0,
+      "seed": 5783277584092713986
+    },
+    "authorization": {
+      "cases": 8192,
+      "mismatches": 0,
+      "seed": 5783277584092713987
+    }
+  },
+  "development_integration": {
+    "policy_bytes": 320,
+    "state_bytes": 256,
+    "binding_count": 14,
+    "denial_count": 1,
+    "denial": "pbtrust_policy_unsigned",
+    "state_source": "esp_candidate_not_persistent_authority",
+    "state_authenticated": false,
+    "state_monotonic": false,
+    "state_backend_writable": false,
+    "signature_verifications": 0,
+    "authority_grants": 0,
+    "state_writes": 0
+  },
+  "claims": {
+    "allocation_free_no_std_parser": true,
+    "fixed_policy_record_validated": true,
+    "fixed_state_record_validated": true,
+    "boot_artifact_cross_bindings_modeled": true,
+    "rollback_floor_order_modeled": true,
+    "redundant_copy_shape_validated": true,
+    "previous_state_chain_shape_validated": true,
+    "external_evidence_required": true,
+    "unsigned_development_policy_denied": true,
+    "esp_candidate_rejected_as_persistent_authority": true,
+    "policy_signature_verified": false,
+    "policy_threshold_verified": false,
+    "revocation_state_authenticated": false,
+    "state_authenticated": false,
+    "state_monotonic": false,
+    "state_backend_writable": false,
+    "secure_boot_state_verified": false,
+    "trust_authority_granted": false,
+    "state_written": false,
+    "private_key_used": false,
+    "poolekernel_revalidated": false,
+    "physical_media_written": false,
+    "production_ready": false
+  },
+  "non_claims": [
+    "PBTRUST1 signed-policy bytes are a format shape; no cryptographic signature is verified.",
+    "No private key is generated, loaded, used, or requested.",
+    "No authenticated revocation store, threshold root, or signer registry is implemented.",
+    "The ESP state candidate is not authenticated, monotonic, rollback-resistant, or accepted as authority.",
+    "No trust state is selected, repaired, migrated, committed, or written.",
+    "No Secure Boot variable, TPM state, firmware inventory, or privileged hardware fact is observed.",
+    "PooleKernel does not independently revalidate or consume PBTRUST1 and no capability or executable authority is created.",
+    "No firmware, disk, driver, physical media, signing, tag, merge, release, or publication action occurs.",
+    "The synthetic qualified evidence helper is a host-only model input and is not authentication evidence.",
+    "The bounded development receipt does not satisfy N5 exit or production readiness."
+  ],
+  "production_ready": false
+}

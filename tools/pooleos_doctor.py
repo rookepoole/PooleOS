@@ -205,6 +205,17 @@ def check_native_pooleboot_readiness() -> CheckResult:
     )
 
 
+def check_native_boot_trust_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_boot_trust_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
 def check_native_kernel_load_readiness() -> CheckResult:
     from tools import pooleos_release_gate
 
@@ -3749,6 +3760,7 @@ def main(argv: list[str] | None = None) -> int:
     checks.append(check_hardware_target_readiness())
     checks.append(check_native_tier0_readiness())
     checks.append(check_native_model_readiness())
+    checks.append(check_native_boot_trust_readiness())
     checks.append(check_native_pooleboot_readiness())
     checks.append(check_native_kernel_load_readiness())
     checks.append(check_native_initial_system_readiness())

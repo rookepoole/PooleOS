@@ -1,7 +1,6 @@
 # PooleBoot Aggregate Proof 7
 
-Status: bounded unsigned PBART1/PINIT1/PREC1/PSYM1/synthetic-only PMCU1/PFWM1/qualification-only PPOL1/post-exit PBP1/retained PKMAP2/
-stop-before-transfer non-promoting proof
+Status: bounded unsigned PBART1/PINIT1/PREC1/PSYM1/synthetic-only PMCU1/PFWM1/qualification-only PPOL1/PBTRUST1-denial/post-exit PBP1/retained PKMAP2/stop-before-transfer non-promoting proof
 
 ## What Exists
 
@@ -42,6 +41,13 @@ Cycle 114 adds live `N5-INNER-LIVE-PARSE-001`: PooleBoot reparses all six exact
 retained PBART1 files from their allocated pages, binds PPOL1's five payload
 digests and eleven PINIT1 routes, requires six missing-signature denials, and
 emits one retained-set digest with explicit zero-effect counters.
+Cycle 115 adds `N5-INNER-TRUST-CONTRACT-001`: PBTRUST1 freezes separate
+immutable-policy and mutable acceptance-state records, exact artifact,
+revocation, rollback, redundant-copy, previous-state-chain, and external
+evidence boundaries, then integrates both development candidates into
+PooleBoot. The live path cross-binds fourteen facts and denies exactly at the
+unsigned policy without verifying a signature, granting authority, or writing
+state. PREC1 boot-attempt state remains a third, separate contract.
 
 The normative aggregate contract is `specs/native-pooleboot-proof.json`.
 `tools/qualify_native_pooleboot.py` validates the current PKLOAD6 receipt,
@@ -61,14 +67,17 @@ The qualified application:
    into a distinct zero-padded loader range;
 7. reparses all six retained files, cross-binds PPOL1 to the other payloads and
    PINIT1 routes, and requires every development gate to deny without effects;
-8. renders the static high-contrast PooleOS GOP identity;
-9. builds and actively audits PKMAP2, then restores the firmware CR3 while
+8. parses PBTP1/PBTS1 development candidates, cross-binds the exact manifest,
+   kernel, retained set, revocation identity, roles, and rollback floors, then
+   denies at `pbtrust_policy_unsigned` with zero effects;
+9. renders the static high-contrast PooleOS GOP identity;
+10. builds and actively audits PKMAP2, then restores the firmware CR3 while
    retaining the kernel, six profile ranges, private root, guarded stack, and
    handoff pages;
-10. obtains the final UEFI memory map and serializes PBLIVE3 into retained memory;
-11. calls `ExitBootServices`, retrying only stale-map-key failure within a bound;
-12. verifies immutable PBP1 state and zero post-exit firmware calls;
-13. emits the 24-marker dual-channel receipt and halts at
+11. obtains the final UEFI memory map and serializes PBLIVE3 into retained memory;
+12. calls `ExitBootServices`, retrying only stale-map-key failure within a bound;
+13. verifies immutable PBP1 state and zero post-exit firmware calls;
+14. emits the 25-marker dual-channel receipt and halts at
     `STOP BEFORE TRANSFER`.
 
 ## Evidence Method
@@ -97,8 +106,11 @@ acceleration, loopback-only QMP, and no shared folders. It requires:
 - exact target-side reparse of the six retained files, independently reproduced
   from media, with one domain-separated retained-set digest and zero authority,
   action, state-write, and hardware-observation counts;
+- exact PBTRUST1 policy/state candidate parsing, fourteen target/host
+  cross-bindings, deterministic unsigned-policy denial, and zero signature,
+  authority, or write effects;
 - exact seven-artifact, root, stack, handoff, map, and digest cross-bindings;
-- 139/139 integrated hostile controls;
+- 148/148 integrated hostile controls;
 - no absolute user path in public readiness artifacts;
 - a clean QMP shutdown of the intentionally halted guest.
 
@@ -123,7 +135,7 @@ entry point.
 
 The receipt proves, on the pinned profile:
 
-- reproducible PE32+ and deterministic ten-file GPT/FAT32 media;
+- reproducible PE32+ and deterministic twelve-file GPT/FAT32 media;
 - live PBC1/PSM1/PKELF1/PBART1 intake and exact manifest digest equality;
 - PBART1 role, version, payload length, and payload-digest validation for the
   initial-system, recovery, symbols, microcode, firmware, and policy files;
@@ -153,6 +165,9 @@ The receipt proves, on the pinned profile:
 - live reparse of all six exact retained PBART1 files, PPOL1 payload-digest and
   PINIT1 route cross-binding, six first-failure denials, and exact retained-set
   SHA-256 `F3154B354C77D0567207994EFDDA4FE2D203611CA21D60B63872BC9FFC73C675`;
+- live parse of the exact 320-byte PBTP1 policy and 256-byte PBTS1 acceptance
+  state, fourteen cross-bindings, rejection of the ESP candidate as persistent
+  authority, and exact unsigned-policy denial with zero effects;
 - complete higher-half kernel alias verification with W^X, CR0.WP, and NX;
 - framebuffer translation and cache-bit preservation during the active audit;
 - retention of kernel and six profile artifact ranges, four table pages, an
@@ -165,8 +180,12 @@ The receipt proves, on the pinned profile:
 
 ## Explicit Nonclaims
 
-The manifest and all seven artifacts are unsigned and untrusted. The proof does
-not establish artifact authentication, authorized semantic activation,
+The manifest, all seven artifacts, and both PBTRUST1 candidates are unsigned or
+unauthenticated and untrusted. The proof does not establish policy-signature or
+threshold verification, authenticated revocation, Secure Boot-state evidence,
+a redundant authenticated monotonic writable state backend, state selection,
+repair, migration, or power-loss durability, artifact authentication,
+authorized semantic activation,
 independent PooleKernel retained-byte parsing, initial-system or recovery
 execution, symbol consumption, policy application, capability
 creation, PooleGlyph executable authority, microcode or firmware application,
@@ -201,11 +220,13 @@ mode/precedence/attenuation/cross-binding/receipt/activation-denial slice.
 `FLAG-N5-INIT-SEMANTICS-001` is closed for independent semantics across all six
 formats. `FLAG-N5-INNER-PARSE-001` is closed only for exact retained-page
 PooleBoot parsing, cross-binding, development denial, and zero-effect evidence.
-N5.6 and N5.9 remain partial because artifact authentication, monotonic state,
+`FLAG-N5-INNER-TRUST-CONTRACT-001` is closed only for PBTRUST1 format,
+precedence, bounded-model, and live unsigned-denial evidence. N5.6 and N5.9
+remain partial because artifact authentication, monotonic durable state,
 independent PooleKernel revalidation, capability creation and activation,
 recovery execution, symbol consumption, policy application, and microcode or
 firmware application are open. The next owner-independent move is
-`N5-INNER-TRUST-STATE-001`. Hardware-key acquisition and governance signing
+`N5-INNER-TRUST-BACKEND-001`. Hardware-key acquisition and governance signing
 remain separate owner-controlled lanes.
 
 ## Primary References
