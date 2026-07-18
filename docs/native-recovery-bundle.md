@@ -191,7 +191,9 @@ the differential corpus are not public production artifacts.
 ## Explicit Nonclaims
 
 - `PREC1` is not ratified or stable.
-- PooleBoot does not parse or enforce `PREC1`.
+- PooleBoot reparses the exact retained `PREC1` bytes and requires the
+  development gate to deny, but it does not authenticate state, grant recovery
+  authority, execute a transition, or persist anything.
 - PooleKernel does not consume state, grant authority, or execute recovery.
 - The checksum is not authentication.
 - No UEFI variable has been defined, read, or written by this implementation.

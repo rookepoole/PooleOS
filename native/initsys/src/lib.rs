@@ -502,7 +502,7 @@ fn align(value: usize) -> Result<usize, Error> {
         .ok_or(Error::TableLayout)
 }
 
-fn table<'a>(data: &'a [u8], offset: usize, count: usize, size: usize) -> Result<&'a [u8], Error> {
+fn table(data: &[u8], offset: usize, count: usize, size: usize) -> Result<&[u8], Error> {
     let bytes = count.checked_mul(size).ok_or(Error::TableBounds)?;
     let end = offset.checked_add(bytes).ok_or(Error::TableBounds)?;
     if offset < HEADER_BYTES {
@@ -1228,7 +1228,11 @@ pub fn parse(data: &[u8]) -> Result<Bundle<'_>, Error> {
     }
     let mut start_order = [0u32; MAX_SERVICES];
     let mut selected = [false; MAX_SERVICES];
-    for rank in 0..header.service_count {
+    for (rank, start) in start_order
+        .iter_mut()
+        .enumerate()
+        .take(header.service_count)
+    {
         let mut ready = None;
         for service in 0..header.service_count {
             if !selected[service] && indegree[service] == 0 {
@@ -1239,7 +1243,7 @@ pub fn parse(data: &[u8]) -> Result<Bundle<'_>, Error> {
         let ready = ready.ok_or(Error::DependencyCycle)?;
         selected[ready] = true;
         let service_id = u32::try_from(ready + 1).map_err(|_| Error::DependencyCycle)?;
-        start_order[rank] = service_id;
+        *start = service_id;
         if usize::from(services[ready].startup_rank) != rank {
             return Err(Error::StartupRank);
         }

@@ -38,14 +38,14 @@
         "sha256": "7983881C5CAD2B909CCA64BFA7F5895EC56377B0E52967444CB2818A69FA4FE1"
       },
       {
-        "byte_count": 564,
+        "byte_count": 575,
         "path": "native/Cargo.toml",
-        "sha256": "2CDB0F54A483023045D313F976D368C2201E6D447383D0959E88BEC210F95B68"
+        "sha256": "099B29615AA2825C96F89BF993A6739B55EA3789D0CEEAC0E065707A4692C252"
       },
       {
-        "byte_count": 3706,
+        "byte_count": 3954,
         "path": "native/Cargo.lock",
-        "sha256": "25AE81F5C2FAA70EDA07DD5E4008302206F199A0AF7F75D9275939454E5062EC"
+        "sha256": "5E707EFDDDAB6FE8EE7AA630EEA101B2EEC648415FC9CDB1150EBD491C146445"
       },
       {
         "byte_count": 348,
@@ -73,9 +73,9 @@
         "sha256": "8389BB739D92164DD52F94126D04909A441C5862DB811AAF925D5BF8FB5399AC"
       },
       {
-        "byte_count": 32452,
+        "byte_count": 34482,
         "path": "native/boot/src/kload.rs",
-        "sha256": "A721D92180ED46E766B1BA43F4CE3653C6DB30D1C845780470DD829978F71FC4"
+        "sha256": "B7810AD32566C050D051DF3FBE612F018308F275860D89449662C8D17AC404B4"
       },
       {
         "byte_count": 31153,
@@ -704,8 +704,8 @@
       }
     ],
     "pooleboot_uefi_integration": {
-      "byte_count": 113664,
-      "sha256": "AE005F03751250E86D617A1224D912B543C2FE0607B1E26FD32D7D8E9ACF0115",
+      "byte_count": 192512,
+      "sha256": "F86D1073A28A3EEA487F75E9A85BC6955CAF0BFE58BE8C315EB75EC9AD66D52D",
       "status": "pass"
     },
     "rust_host_target": "x86_64-pc-windows-msvc",

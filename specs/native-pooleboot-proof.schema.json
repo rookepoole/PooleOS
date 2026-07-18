@@ -27,12 +27,12 @@
     "schema_version": {"const": "1.0"},
     "artifact_kind": {"const": "pooleos_native_pooleboot_proof_contract"},
     "contract_id": {"const": "POOLEOS-N5-POOLEBOOT-7"},
-    "status": {"const": "bounded_unsigned_live_profile_artifacts_post_exit_pbp1_retained_pkmap2_stop_before_transfer_non_promoting_proof"},
+    "status": {"const": "bounded_unsigned_live_profile_artifacts_inner_parsed_post_exit_pbp1_retained_pkmap2_stop_before_transfer_non_promoting_proof"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
-    "selected_move_id": {"const": "N5-POLICY-SEMANTICS-001"},
+    "selected_move_id": {"const": "N5-INNER-LIVE-PARSE-001"},
     "phase_mapping": {"type": "array", "minItems": 9, "maxItems": 9, "items": {"type": "string"}},
-    "source_requirement_ids": {"type": "array", "minItems": 11, "maxItems": 11, "items": {"type": "string"}},
+    "source_requirement_ids": {"type": "array", "minItems": 12, "maxItems": 12, "items": {"type": "string"}},
     "binary": {
       "type": "object",
       "additionalProperties": false,
@@ -120,9 +120,9 @@
         "exact_screenshot_match_required": {"const": true}
       }
     },
-    "required_markers": {"type": "array", "minItems": 23, "maxItems": 23, "items": {"type": "string"}},
-    "required_negative_controls": {"type": "array", "minItems": 130, "maxItems": 130, "items": {"type": "string"}},
+    "required_markers": {"type": "array", "minItems": 24, "maxItems": 24, "items": {"type": "string"}},
+    "required_negative_controls": {"type": "array", "minItems": 139, "maxItems": 139, "items": {"type": "string"}},
     "claim_boundary": {"type": "array", "minItems": 11, "items": {"type": "string"}},
-    "official_references": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"type": "string"}}
+    "official_references": {"type": "array", "minItems": 8, "maxItems": 8, "items": {"type": "string"}}
   }
 }

@@ -103,7 +103,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(checklist["section_count"], 171)
         self.assertEqual(checklist["coverage_status"], "pass")
         self.assertEqual(checklist["coverage_sha256"], hashlib.sha256(self.coverage_path.read_bytes()).hexdigest().upper())
-        self.assertEqual(checklist["added_requirement_count"], 41)
+        self.assertEqual(checklist["added_requirement_count"], 42)
 
     def test_phase_checklist_mapping_matches_coverage(self) -> None:
         coverage_by_phase = {item["phase_id"]: item for item in self.coverage["phase_coverage"]}
@@ -118,8 +118,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 113)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 691)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 114)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 696)
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
         self.assertTrue(native["pooleboot_exists"])
@@ -159,8 +159,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N5-POLICY-SEMANTICS-001")
-        self.assertEqual(protocol["owner_independent_next_move_id"], "N5-INNER-ENFORCEMENT-001")
+        self.assertEqual(protocol["selected_move_id"], "N5-INNER-LIVE-PARSE-001")
+        self.assertEqual(protocol["owner_independent_next_move_id"], "N5-INNER-TRUST-STATE-001")
         self.assertIn("runs/hardware_target_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_tier0_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_model_readiness.json", protocol["required_records"])
@@ -186,8 +186,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
     def test_flags_and_gaps_are_native_and_traceable(self) -> None:
         phase_ids = {phase["id"] for phase in self.roadmap["phases"]}
         flags = self.roadmap["implementation_flags"]
-        self.assertEqual(len(flags), 54)
-        self.assertEqual(len({flag["id"] for flag in flags}), 54)
+        self.assertEqual(len(flags), 56)
+        self.assertEqual(len({flag["id"] for flag in flags}), 56)
         self.assertTrue(any(flag["class"] == "STOP_SHIP" and flag["status"] == "open" for flag in flags))
         self.assertEqual(next(flag for flag in flags if flag["id"] == "FLAG-BUILDROOT-LEGACY-001")["status"], "closed")
         objectives_flag = next(flag for flag in flags if flag["id"] == "FLAG-N0-OBJECTIVES-001")
@@ -299,6 +299,17 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             flag for flag in flags if flag["id"] == "FLAG-N5-INIT-SEMANTICS-001"
         )
         self.assertEqual(inner_semantics_flag["status"], "closed")
+        inner_parse_flag = next(
+            flag for flag in flags if flag["id"] == "FLAG-N5-INNER-PARSE-001"
+        )
+        self.assertEqual(inner_parse_flag["class"], "REQUIRED")
+        self.assertEqual(inner_parse_flag["status"], "closed")
+        self.assertIn("runtime/native_inner_live.py", inner_parse_flag["evidence"])
+        inner_trust_state_flag = next(
+            flag for flag in flags if flag["id"] == "FLAG-N5-INNER-TRUST-STATE-001"
+        )
+        self.assertEqual(inner_trust_state_flag["class"], "BLOCKER")
+        self.assertEqual(inner_trust_state_flag["status"], "open")
         inner_enforcement_flag = next(
             flag for flag in flags if flag["id"] == "FLAG-N5-INNER-ENFORCEMENT-001"
         )
@@ -406,6 +417,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertIn("ADD-BOOT-008", n5["added_requirement_ids"])
         self.assertIn("ADD-BOOT-009", n5["added_requirement_ids"])
         self.assertIn("ADD-BOOT-010", n5["added_requirement_ids"])
+        self.assertIn("ADD-BOOT-011", n5["added_requirement_ids"])
         self.assertTrue(any("signature-backed trusted selection" in item for item in n5["current_gaps"]))
 
         n6 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N6")

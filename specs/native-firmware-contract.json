@@ -172,13 +172,13 @@
   "implementation_bindings": [
     {
       "path": "native/Cargo.toml",
-      "bytes": 564,
-      "sha256": "2CDB0F54A483023045D313F976D368C2201E6D447383D0959E88BEC210F95B68"
+      "bytes": 575,
+      "sha256": "099B29615AA2825C96F89BF993A6739B55EA3789D0CEEAC0E065707A4692C252"
     },
     {
       "path": "native/Cargo.lock",
-      "bytes": 3706,
-      "sha256": "25AE81F5C2FAA70EDA07DD5E4008302206F199A0AF7F75D9275939454E5062EC"
+      "bytes": 3954,
+      "sha256": "5E707EFDDDAB6FE8EE7AA630EEA101B2EEC648415FC9CDB1150EBD491C146445"
     },
     {
       "path": "native/firmware/Cargo.toml",
@@ -202,8 +202,8 @@
     },
     {
       "path": "tools/generate_native_firmware_vectors.py",
-      "bytes": 1357,
-      "sha256": "1121B5DD2FD64B9B5080B8DAD4B068DD1D2329F7016DE034946D56935BF2B31D"
+      "bytes": 1436,
+      "sha256": "475CAA14ED92D6C9ADB96EC19F08D13507767C9653CB9B653E5DEF5D45E9AA56"
     },
     {
       "path": "tools/qualify_native_firmware.py",
@@ -217,8 +217,8 @@
     },
     {
       "path": "docs/native-firmware-manifest.md",
-      "bytes": 8893,
-      "sha256": "B211BE47D07391B81C247F258AE1F31A8EE494DD3FE0610F2DDA90C73256213E"
+      "bytes": 9218,
+      "sha256": "C518E7772198AA8C85B8CB3961411B9FBB6B9351B1A4B0EDB5BF4759550D5A20"
     }
   ]
 }

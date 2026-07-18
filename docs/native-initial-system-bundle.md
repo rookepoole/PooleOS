@@ -148,10 +148,13 @@ body SHA-256
 `8AFA5770DBAC77ACB2D38A9B72C8AC663843A342759678B8DB3A667CD4AD7EA9`.
 It declares three components, three services, three dependency edges, four
 resources, eleven capabilities, root service 1, and startup order `1,2,3`.
-PKLOAD6 independently parses those exact bytes from `INITIAL.PBA`, cross-binds
-the inner and outer version, and records development activation denial. The
-live PooleBoot marker still reports `semantics=not_applied` because this check
-is performed by the host oracle, not by firmware code.
+Live PooleBoot reparses those exact retained bytes from `INITIAL.PBA`,
+cross-binds the inner and outer version, and requires development activation to
+fail first at the missing outer signature. The independent host oracle
+reconstructs the same retained-set result. The aggregate artifact marker keeps
+`semantics=not_applied` because parsing and mandatory denial do not authenticate
+or activate the declarations; the later boundary marker reports
+`semantics=parsed_live_unsigned_denied`.
 
 ## Research Basis
 
@@ -170,8 +173,9 @@ dependencies and do not imply API or implementation compatibility.
 
 ## Nonclaims
 
-PINIT1 is not signed or ratified. PooleBoot and PooleKernel do not yet parse it.
-No PXABI1 executable ABI is frozen, no embedded component is authenticated, no
+PINIT1 is not signed or ratified. PooleBoot reparses the development bytes, but
+PooleKernel does not independently reparse or activate them. No PXABI1
+executable ABI is frozen, no embedded component is authenticated, no
 service runs, and no capability or resource is created. No persistent rollback
 state, kernel transfer, target-firmware result, physical-media result, N5 exit,
 ISO, or production readiness follows from this receipt.

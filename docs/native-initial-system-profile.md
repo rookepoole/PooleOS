@@ -2,7 +2,7 @@
 
 Status: candidate, unsigned, development-only, non-promoting  
 Profile move: `N5-INIT-SYSTEM-001`
-Current inner-enforcement move: `N5-INNER-ENFORCEMENT-001`
+Current trust/state move: `N5-INNER-TRUST-STATE-001`
 Profile contract: `PBASET1`  
 Artifact envelope: `PBART1`  
 Manifest contract: `PSM1`  
@@ -93,9 +93,10 @@ its version to PBART1. Parsing does not allocate a kernel object or authorize
 activation. The unsigned development profile must fail activation before any
 allocation, capability issuance, or instruction execution.
 
-PooleBoot still validates only PBART1 and treats the inner bytes as opaque.
-PooleKernel does not yet parse or activate PINIT1. Those are explicit later
-gates rather than inferred consequences of the host qualification.
+PooleBoot reparses PINIT1 from the exact retained PBART1 pages and requires the
+development activation gate to fail at the missing outer signature. PooleKernel
+does not yet independently reparse or activate PINIT1. Authentication,
+capability creation, and lifecycle execution remain explicit later gates.
 
 ## PREC1 Inner Bundle
 
@@ -112,10 +113,11 @@ known-good fallback, bounded safe/recovery routing, authenticated success
 receipt, physical-presence requirements, and activation prerequisites. The
 unsigned development context is denied before recovery authority or execution.
 
-PooleBoot still validates only the outer PBART1 envelope and does not read or
-write PREC1 state. PooleKernel does not execute recovery. No UEFI variable,
-disk, firmware, network, or device-changing operation follows from this host
-qualification.
+PooleBoot reparses PREC1 from the exact retained PBART1 pages and requires the
+development recovery gate to fail at the missing outer signature, but it does
+not read or write PREC1 state. PooleKernel does not independently reparse the
+policy or execute recovery. No UEFI variable, disk, firmware, network, or
+device-changing operation follows from this qualification.
 
 ## PSYM1 Inner Bundle
 
@@ -132,10 +134,11 @@ and lookup behavior. The full debug ELF is not staged on boot media. The
 unsigned development context is denied before target consumption or address
 disclosure.
 
-PooleBoot still validates only the outer PBART1 envelope. PooleBoot and
-PooleKernel do not consume PSYM1, create a kernel export namespace, grant a
-diagnostic capability, or disclose runtime pointers. Those are explicit later
-gates rather than inferred consequences of host qualification.
+PooleBoot reparses PSYM1 from the exact retained PBART1 pages and requires the
+development consumption gate to fail at the missing outer signature. PooleBoot
+and PooleKernel do not consume symbols, create a kernel export namespace, grant
+a diagnostic capability, or disclose runtime pointers. Those are explicit
+later gates rather than inferred consequences of parsing.
 
 ## PMCU1 Inner Bundle
 
@@ -166,9 +169,10 @@ PINIT1 routes and can only attenuate declared and already-issued rights.
 Independent Python and allocation-free `no_std` Rust validators agree on the
 format, route cross-binding, activation boundaries, dry-run decisions, and
 durable receipts. The unsigned development context fails first at the missing
-outer signature. PooleBoot and PooleKernel do not enforce PPOL1, no decision is
-applied, and PooleGlyph remains non-authoritative pending its separate Core IR
-promotion gate.
+outer signature. PooleBoot also reparses those retained policy bytes and checks
+the five payload digests and eleven PINIT1 routes. Neither target applies a
+decision or creates authority, and PooleGlyph remains non-authoritative pending
+its separate Core IR promotion gate.
 
 ## Qualification Gate
 
@@ -187,7 +191,8 @@ The bounded move qualifies only when all of the following pass:
 5. Two clean QEMU/OVMF runs from independently generated deterministic media
    produce exactly matching ordered markers and oracle-normalized receipts.
 6. Claims remain explicitly false for signatures, trust, persistent rollback,
-   PooleBoot inner-semantic enforcement, PooleKernel activation, recovery
+   artifact authentication and authorized semantics, PooleKernel retained-byte
+   revalidation or activation, recovery
    execution or symbol consumption, persistent-state I/O, component execution,
    microcode or firmware application, PPOL1 enforcement, PooleGlyph executable
    authority, kernel transfer, physical hardware, N5 completion, and production

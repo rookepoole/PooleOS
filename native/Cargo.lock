@@ -108,6 +108,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "poole-inner-live"
+version = "0.0.0"
+dependencies = [
+ "poole-boot-artifact",
+ "poole-firmware",
+ "poole-initial-system",
+ "poole-microcode",
+ "poole-policy",
+ "poole-recovery",
+ "poole-symbols",
+ "sha2",
+]
+
+[[package]]
 name = "poole-kmap"
 version = "0.0.0"
 
@@ -163,6 +177,7 @@ dependencies = [
  "poole-bootload",
  "poole-elf",
  "poole-handoff",
+ "poole-inner-live",
  "poole-kmap",
  "poole-live-handoff",
 ]

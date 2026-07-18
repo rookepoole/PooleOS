@@ -109,3 +109,8 @@ The synthetic all-true context exists only to test that every gate can be reache
 - Exact public-symbol extraction and debug-to-PSYM1 regeneration.
 
 Passing this qualification closes `N5-SYMBOLS-SEMANTICS-001` only. N5 remains partial, PSYM1 remains pre-ABI and unsigned, and `production_ready` remains false.
+
+Cycle 114 PooleBoot reparses the exact retained PSYM1 bytes and requires this
+development gate to fail at `psym_activation_outer_signature`. It performs no
+lookup, discloses no address, and creates no diagnostic authority. PooleKernel
+revalidation and consumption remain open.

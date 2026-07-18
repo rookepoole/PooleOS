@@ -31,14 +31,14 @@
     },
     "implementation_inputs": [
       {
-        "byte_count": 564,
+        "byte_count": 575,
         "path": "native/Cargo.toml",
-        "sha256": "2CDB0F54A483023045D313F976D368C2201E6D447383D0959E88BEC210F95B68"
+        "sha256": "099B29615AA2825C96F89BF993A6739B55EA3789D0CEEAC0E065707A4692C252"
       },
       {
-        "byte_count": 3706,
+        "byte_count": 3954,
         "path": "native/Cargo.lock",
-        "sha256": "25AE81F5C2FAA70EDA07DD5E4008302206F199A0AF7F75D9275939454E5062EC"
+        "sha256": "5E707EFDDDAB6FE8EE7AA630EEA101B2EEC648415FC9CDB1150EBD491C146445"
       },
       {
         "byte_count": 351,
@@ -81,9 +81,9 @@
         "sha256": "CF6EE8FAFE154D51AC54525CFDAD37BA72EEC789245487DC7FFE4C2C12DE2CAC"
       },
       {
-        "byte_count": 7820,
+        "byte_count": 7979,
         "path": "docs/native-microcode-bundle.md",
-        "sha256": "59E59B4D5D3639BBF1F6878E4CFF6108935502BFDF0B729BC14C56A91587BAB5"
+        "sha256": "220A5D173386E093BB4E808090C739F9C6EE91E0017CA92B1F24BE47AF8EA0B4"
       }
     ],
     "readiness_schema": {

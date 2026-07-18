@@ -30,14 +30,14 @@
     },
     "implementation_inputs": [
       {
-        "byte_count": 564,
+        "byte_count": 575,
         "path": "native/Cargo.toml",
-        "sha256": "2CDB0F54A483023045D313F976D368C2201E6D447383D0959E88BEC210F95B68"
+        "sha256": "099B29615AA2825C96F89BF993A6739B55EA3789D0CEEAC0E065707A4692C252"
       },
       {
-        "byte_count": 3706,
+        "byte_count": 3954,
         "path": "native/Cargo.lock",
-        "sha256": "25AE81F5C2FAA70EDA07DD5E4008302206F199A0AF7F75D9275939454E5062EC"
+        "sha256": "5E707EFDDDAB6FE8EE7AA630EEA101B2EEC648415FC9CDB1150EBD491C146445"
       },
       {
         "byte_count": 350,
@@ -45,9 +45,9 @@
         "sha256": "B1DBA2F9364911F43A144A972BFEC1467EEE1F28382DA39E4045C282EE841F57"
       },
       {
-        "byte_count": 49465,
+        "byte_count": 49443,
         "path": "native/recovery/src/lib.rs",
-        "sha256": "C76865DD27BB01553474D6B8F9D9F26CFBFDD3DFCDF5504EA328810A8BB6613A"
+        "sha256": "5B959917CBAD76A757EBCE284CC49C72A2DC72C44B0EBC13B9CF8054EB370A4B"
       },
       {
         "byte_count": 9351,
@@ -80,9 +80,9 @@
         "sha256": "832ECA384BAFB01923C1F73270B10740961A85480391BF9E73B6A2A6A883AF23"
       },
       {
-        "byte_count": 8636,
+        "byte_count": 8795,
         "path": "docs/native-recovery-bundle.md",
-        "sha256": "61E0DBE671CC1F9F750D7E89D23A6354BF68B478572ECC3EE231250357D55687"
+        "sha256": "32011395293D2B524659870E80D3C03E1849490A5EA4D1206B96412A3B236760"
       }
     ],
     "readiness_schema": {
@@ -1086,13 +1086,13 @@
     "no_std_target_builds": [
       {
         "byte_count": 204790,
-        "sha256": "3ACE8579F656C9EFF20D876C59972FBE2E9367C931E7584068C1CE35F91A9B88",
+        "sha256": "04CC98628A64F1051088C5E02DDC6F67EDDCE0610E82657766A82A91240C1535",
         "status": "pass",
         "target": "x86_64-unknown-uefi"
       },
       {
         "byte_count": 209020,
-        "sha256": "7C91F73F52BEDEEF567E76CCA18441A4AACA3410E824A48C7105EC6B24E0B807",
+        "sha256": "8517F7C2131BD40F04488AF4891A9EC9F5EFFCCEA64C1BC9024C501808BCDA4A",
         "status": "pass",
         "target": "x86_64-unknown-none"
       }

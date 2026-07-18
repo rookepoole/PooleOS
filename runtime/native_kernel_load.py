@@ -17,6 +17,7 @@ from runtime import (
     native_elf_loader,
     native_firmware,
     native_initial_system,
+    native_inner_live,
     native_kernel_map,
     native_live_boot_handoff,
     native_microcode,
@@ -133,6 +134,9 @@ IMPLEMENTATION_INPUTS = (
     "native/firmware/src/bin/pfwm1_probe.rs",
     "native/handoff/Cargo.toml",
     "native/handoff/src/lib.rs",
+    "native/inner/Cargo.toml",
+    "native/inner/src/lib.rs",
+    "native/inner/src/bin/pinner1_probe.rs",
     "native/kernel/Cargo.toml",
     "native/kernel/linker.ld",
     "native/kernel/manifest.pkm",
@@ -167,6 +171,7 @@ IMPLEMENTATION_INPUTS = (
     "runtime/native_firmware.py",
     "runtime/native_kernel_image.py",
     "runtime/native_initial_system.py",
+    "runtime/native_inner_live.py",
     "runtime/native_microcode.py",
     "runtime/native_policy.py",
     "runtime/native_recovery.py",
@@ -221,6 +226,7 @@ IMPLEMENTATION_INPUTS = (
     "specs/native-firmware-golden-vectors.json",
     "specs/native-firmware-golden-vectors.schema.json",
     "specs/native-firmware-readiness.schema.json",
+    "specs/fixtures/pfwm1-canonical.bin",
     "runs/native_firmware_readiness.json",
     "docs/native-policy-bundle.md",
     "specs/native-policy-contract.json",
@@ -252,6 +258,7 @@ IMPLEMENTATION_INPUTS = (
     "tools/qualify_native_policy.py",
     "tests/test_native_boot_artifact.py",
     "tests/test_native_initial_system.py",
+    "tests/test_native_inner_live.py",
     "tests/test_native_recovery.py",
     "tests/test_native_symbols.py",
     "tests/test_native_microcode.py",
@@ -287,6 +294,10 @@ TRUE_CLAIMS = (
     "firmware_development_activation_denied",
     "policy_inner_oracle_validated",
     "policy_development_activation_denied",
+    "pooleboot_retained_inner_set_parsed",
+    "pooleboot_policy_payload_bindings_enforced",
+    "pooleboot_initial_routes_cross_bound",
+    "pooleboot_development_denials_enforced",
     "artifact_set_manifest_sha256_matched",
     "artifact_pages_retained",
     "pbp1_profile_artifacts_cross_bound",
@@ -319,6 +330,9 @@ FALSE_CLAIMS = (
     "kernel_signature_verified",
     "artifact_signatures_verified",
     "artifact_semantics_applied",
+    "pooleboot_inner_authority_created",
+    "pooleboot_inner_action_authorized",
+    "pooleboot_inner_state_written",
     "pooleboot_initial_system_semantics_enforced",
     "poolekernel_initial_system_activation_enforced",
     "initial_system_executed",
@@ -414,6 +428,15 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-KLOAD-MARKER-ENTRY-BOUND",
     "NEG-N5-KLOAD-MARKER-ARTIFACT-COUNT",
     "NEG-N5-KLOAD-MARKER-ARTIFACT-SIGNATURE",
+    "NEG-N5-KLOAD-MARKER-INNER-PARSER",
+    "NEG-N5-KLOAD-MARKER-INNER-BINDING",
+    "NEG-N5-KLOAD-MARKER-INNER-DENIAL",
+    "NEG-N5-KLOAD-MARKER-INNER-DIGEST",
+    "NEG-N5-KLOAD-MARKER-INNER-AUTHORITY",
+    "NEG-N5-KLOAD-MARKER-INNER-ACTION",
+    "NEG-N5-KLOAD-MARKER-INNER-STATE",
+    "NEG-N5-KLOAD-MARKER-INNER-HARDWARE",
+    "NEG-N5-KLOAD-INNER-ORACLE-DIVERGENCE",
     "NEG-N5-KLOAD-MARKER-MAPPING-COUNT",
     "NEG-N5-KLOAD-MARKER-WX",
     "NEG-N5-KLOAD-MARKER-RETAIN-COUNT",
@@ -520,6 +543,9 @@ MARKER_PATTERNS = (
         r"^POOLEBOOT/0\.1 ARTIFACT_SET PASS contract=(PBART1) count=([0-9]+) file_bytes=([0-9]+) pages=([0-9]+) roles=2-7 fnv1a64=([0-9A-F]{16}) retained=([01]) signatures=([01]) measured=([01])$"
     ),
     re.compile(
+        r"^POOLEBOOT/0\.1 INNER_SET PASS proof=(N5-INNER-LIVE-PARSE-001) artifacts=([0-9]+) parsers=([0-9]+) bindings=([0-9]+) denials=([0-9]+) file_bytes=([0-9]+) payload_bytes=([0-9]+) sha256=([0-9A-F]{64}) retained=([01]) authority_grants=([0-9]+) actions=([0-9]+) state_writes=([0-9]+) hardware_observations=([0-9]+)$"
+    ),
+    re.compile(
         r"^POOLEBOOT/0\.1 GOP PASS width=([0-9]+) height=([0-9]+) stride=([0-9]+) mode=([0-9]+) format=(RGB|BGR)$"
     ),
     re.compile(r"^POOLEBOOT/0\.1 FRAME READY$"),
@@ -542,7 +568,7 @@ MARKER_PATTERNS = (
         r"^POOLEBOOT/0\.1 FIRMWARE_BOUNDARY PASS calls_after_exit=([0-9]+) kernel_pages=([0-9]+) artifact_pages=([0-9]+) table_pages=([0-9]+) stack_pages=([0-9]+) handoff_pages=([0-9]+)$"
     ),
     re.compile(
-        r"^POOLEBOOT/0\.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=not_applied kernel=retained handoff=retained mappings=retained entry=not_called exit_boot_services=called transfer=stopped$"
+        r"^POOLEBOOT/0\.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=not_called exit_boot_services=called transfer=stopped$"
     ),
     re.compile(r"^POOLEBOOT/0\.1 STOP BEFORE TRANSFER$"),
 )
@@ -1402,6 +1428,9 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
     base["policy"] = policy_oracle(
         artifact_files[POLICY_PATH], profile[6].version
     )
+    base["inner_set"] = native_inner_live.validate_development_set(
+        [artifact_files[definition[4]] for definition in ARTIFACT_DEFINITIONS]
+    )
     base["fat32"]["cluster_count"] = cluster_count
     return base
 
@@ -1496,27 +1525,58 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
     ):
         raise KernelLoadError("PKLOAD6 PBART1 marker violates the unsigned retained profile")
 
+    inner_proof = matches[13].group(1)
+    inner_artifacts = int(matches[13].group(2))
+    inner_parsers = int(matches[13].group(3))
+    inner_bindings = int(matches[13].group(4))
+    inner_denials = int(matches[13].group(5))
+    inner_file_bytes = int(matches[13].group(6))
+    inner_payload_bytes = int(matches[13].group(7))
+    inner_sha256 = matches[13].group(8)
+    inner_retained = int(matches[13].group(9))
+    inner_authority_grants = int(matches[13].group(10))
+    inner_actions = int(matches[13].group(11))
+    inner_state_writes = int(matches[13].group(12))
+    inner_hardware_observations = int(matches[13].group(13))
+    if (
+        inner_proof != native_inner_live.PROOF_ID
+        or inner_artifacts != native_inner_live.ARTIFACT_COUNT
+        or inner_parsers != native_inner_live.PARSER_COUNT
+        or inner_bindings != native_inner_live.CROSS_BINDING_COUNT
+        or inner_denials != native_inner_live.DEVELOPMENT_DENIAL_COUNT
+        or inner_file_bytes != artifact_file_bytes
+        or inner_payload_bytes
+        != inner_file_bytes
+        - native_inner_live.ARTIFACT_COUNT * native_boot_artifact.HEADER_BYTES
+        or inner_retained != 1
+        or inner_authority_grants != 0
+        or inner_actions != 0
+        or inner_state_writes != 0
+        or inner_hardware_observations != 0
+    ):
+        raise KernelLoadError("PKLOAD6 live inner-set marker violates its fail-closed profile")
+
     config_table_count = int(matches[5].group(1))
-    width = int(matches[13].group(1))
-    height = int(matches[13].group(2))
-    stride = int(matches[13].group(3))
+    width = int(matches[14].group(1))
+    height = int(matches[14].group(2))
+    stride = int(matches[14].group(3))
     if config_table_count > 256:
         raise KernelLoadError("configuration-table marker exceeds its bound")
     if width < 320 or height < 200 or stride < width or stride > 16_384:
         raise KernelLoadError("GOP marker geometry is outside its bound")
 
-    mapping_contract = matches[15].group(1)
-    mappings = int(matches[15].group(2))
-    mapped_pages = int(matches[15].group(3))
-    read_only_pages = int(matches[15].group(4))
-    read_execute_pages = int(matches[15].group(5))
-    read_write_pages = int(matches[15].group(6))
-    writable_executable_pages = int(matches[15].group(7))
-    pml4_index = int(matches[15].group(8))
-    pdpt_index = int(matches[15].group(9))
-    page_directory_index = int(matches[15].group(10))
-    first_page_table_index = int(matches[15].group(11))
-    leaf_fingerprint = matches[15].group(12)
+    mapping_contract = matches[16].group(1)
+    mappings = int(matches[16].group(2))
+    mapped_pages = int(matches[16].group(3))
+    read_only_pages = int(matches[16].group(4))
+    read_execute_pages = int(matches[16].group(5))
+    read_write_pages = int(matches[16].group(6))
+    writable_executable_pages = int(matches[16].group(7))
+    pml4_index = int(matches[16].group(8))
+    pdpt_index = int(matches[16].group(9))
+    page_directory_index = int(matches[16].group(10))
+    first_page_table_index = int(matches[16].group(11))
+    leaf_fingerprint = matches[16].group(12)
     if mapping_contract != native_kernel_map.RETAINED_CONTRACT_ID or mappings != 4:
         raise KernelLoadError("PKLOAD6 PKMAP2 contract or mapping count diverges")
     if mapped_pages != pages or (
@@ -1537,13 +1597,13 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
     ):
         raise KernelLoadError("PKLOAD6 PKMAP2 indices diverge from the bounded window")
 
-    table_pages = int(matches[16].group(1))
-    active_kernel_pages = int(matches[16].group(2))
-    physical_address_bits = int(matches[16].group(3))
-    mapped_fnv1a64 = matches[16].group(4)
-    cache_signature = int(matches[16].group(5), 16)
-    first_page_bytes = int(matches[16].group(6))
-    last_page_bytes = int(matches[16].group(7))
+    table_pages = int(matches[17].group(1))
+    active_kernel_pages = int(matches[17].group(2))
+    physical_address_bits = int(matches[17].group(3))
+    mapped_fnv1a64 = matches[17].group(4)
+    cache_signature = int(matches[17].group(5), 16)
+    first_page_bytes = int(matches[17].group(6))
+    last_page_bytes = int(matches[17].group(7))
     if table_pages != native_kernel_map.TABLE_PAGE_COUNT or active_kernel_pages != pages:
         raise KernelLoadError("PKLOAD6 PKMAP2 active page accounting diverges")
     if not 36 <= physical_address_bits <= 52:
@@ -1558,21 +1618,21 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
     ):
         raise KernelLoadError("PKLOAD6 PKMAP2 framebuffer translation summary is invalid")
 
-    retained_table_pages = int(matches[17].group(1))
-    stack_pages = int(matches[17].group(2))
-    handoff_pages = int(matches[17].group(3))
-    guard_pages = int(matches[17].group(4))
-    total_pages = int(matches[17].group(5))
-    stack_pt = int(matches[17].group(6))
-    handoff_pt = int(matches[17].group(7))
-    kernel_physical = int(matches[17].group(8), 16)
-    root_physical = int(matches[17].group(9), 16)
-    stack_physical = int(matches[17].group(10), 16)
-    stack_top = int(matches[17].group(11), 16)
-    handoff_physical = int(matches[17].group(12), 16)
-    handoff_virtual = int(matches[17].group(13), 16)
-    retained_fingerprint = matches[17].group(14)
-    firmware_calls_while_active = int(matches[17].group(15))
+    retained_table_pages = int(matches[18].group(1))
+    stack_pages = int(matches[18].group(2))
+    handoff_pages = int(matches[18].group(3))
+    guard_pages = int(matches[18].group(4))
+    total_pages = int(matches[18].group(5))
+    stack_pt = int(matches[18].group(6))
+    handoff_pt = int(matches[18].group(7))
+    kernel_physical = int(matches[18].group(8), 16)
+    root_physical = int(matches[18].group(9), 16)
+    stack_physical = int(matches[18].group(10), 16)
+    stack_top = int(matches[18].group(11), 16)
+    handoff_physical = int(matches[18].group(12), 16)
+    handoff_virtual = int(matches[18].group(13), 16)
+    retained_fingerprint = matches[18].group(14)
+    firmware_calls_while_active = int(matches[18].group(15))
     if (
         retained_table_pages != native_kernel_map.TABLE_PAGE_COUNT
         or stack_pages != native_kernel_map.STACK_PAGE_COUNT
@@ -1602,14 +1662,14 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
     if stack_top % 16 or handoff_virtual % native_kernel_map.PAGE_SIZE:
         raise KernelLoadError("PKLOAD6 retained virtual state is invalid")
 
-    pbp1_bytes = int(matches[18].group(1))
-    pbp1_records = int(matches[18].group(2))
-    pbp1_memory_entries = int(matches[18].group(3))
-    pbp1_framebuffer = int(matches[18].group(4))
-    pbp1_artifacts = int(matches[18].group(5))
-    pbp1_descriptor_bytes = int(matches[18].group(6))
-    pbp1_exit_attempts = int(matches[18].group(7))
-    pbp1_unchanged = int(matches[18].group(10))
+    pbp1_bytes = int(matches[19].group(1))
+    pbp1_records = int(matches[19].group(2))
+    pbp1_memory_entries = int(matches[19].group(3))
+    pbp1_framebuffer = int(matches[19].group(4))
+    pbp1_artifacts = int(matches[19].group(5))
+    pbp1_descriptor_bytes = int(matches[19].group(6))
+    pbp1_exit_attempts = int(matches[19].group(7))
+    pbp1_unchanged = int(matches[19].group(10))
     if (
         not 1 <= pbp1_bytes <= 1024 * 1024
         or pbp1_records not in {3, 4}
@@ -1625,7 +1685,7 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
 
     try:
         boot_exit = native_boot_exit.validate_live_markers(
-            markers[19], markers[20], markers[21], markers[22]
+            markers[20], markers[21], markers[22], markers[23]
         )
     except native_boot_exit.BootExitError as error:
         raise KernelLoadError(str(error)) from error
@@ -1685,6 +1745,21 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
             "measured": bool(artifact_measured),
             "semantics_applied": False,
         },
+        "inner_set": {
+            "proof_id": inner_proof,
+            "artifact_count": inner_artifacts,
+            "parser_count": inner_parsers,
+            "cross_binding_count": inner_bindings,
+            "development_denial_count": inner_denials,
+            "file_bytes": inner_file_bytes,
+            "payload_bytes": inner_payload_bytes,
+            "retained_set_sha256": inner_sha256,
+            "exact_retained_bytes": bool(inner_retained),
+            "authority_grants": inner_authority_grants,
+            "actions_authorized": inner_actions,
+            "state_writes": inner_state_writes,
+            "hardware_observations": inner_hardware_observations,
+        },
         "pbp1": {
             "byte_count": pbp1_bytes,
             "record_count": pbp1_records,
@@ -1693,8 +1768,8 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
             "artifact_count": pbp1_artifacts,
             "descriptor_bytes": pbp1_descriptor_bytes,
             "exit_attempts": pbp1_exit_attempts,
-            "message_crc32": matches[18].group(8),
-            "fnv1a64": matches[18].group(9),
+            "message_crc32": matches[19].group(8),
+            "fnv1a64": matches[19].group(9),
             "pre_exit": False,
             "boot_services_exited": True,
             "development_mode_only": True,
@@ -1745,8 +1820,8 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
             "width": width,
             "height": height,
             "stride": stride,
-            "mode": int(matches[13].group(4)),
-            "format": matches[13].group(5),
+            "mode": int(matches[14].group(4)),
+            "format": matches[14].group(5),
         },
         "memory_map": {
             "byte_count": boot_exit["map_byte_count"],
@@ -1821,6 +1896,34 @@ def validate_oracle_binding(
         or artifact_set["semantics_applied"] is not False
     ):
         raise KernelLoadError("firmware PBART1 markers diverge from the independent media oracle")
+    inner_set = marker_summary["inner_set"]
+    media_inner_set = media_inspection.get("inner_set", {})
+    if (
+        inner_set["proof_id"] != media_inner_set.get("proof_id")
+        or inner_set["artifact_count"] != media_inner_set.get("artifact_count")
+        or inner_set["parser_count"] != media_inner_set.get("parser_count")
+        or inner_set["cross_binding_count"]
+        != media_inner_set.get("cross_binding_count")
+        or inner_set["development_denial_count"]
+        != media_inner_set.get("development_denial_count")
+        or inner_set["file_bytes"] != media_inner_set.get("file_bytes")
+        or inner_set["payload_bytes"] != media_inner_set.get("payload_bytes")
+        or inner_set["retained_set_sha256"]
+        != media_inner_set.get("retained_set_sha256")
+        or inner_set["exact_retained_bytes"] is not True
+        or media_inner_set.get("exact_retained_bytes") is not True
+        or media_inner_set.get("policy_payload_digests_bound") is not True
+        or media_inner_set.get("initial_routes_cross_bound") is not True
+        or inner_set["authority_grants"] != 0
+        or inner_set["actions_authorized"] != 0
+        or inner_set["state_writes"] != 0
+        or inner_set["hardware_observations"] != 0
+        or media_inner_set.get("development_denials")
+        != list(native_inner_live.EXPECTED_DENIALS)
+    ):
+        raise KernelLoadError(
+            "firmware live inner-set marker diverges from the independent retained-byte oracle"
+        )
     initial_system = media_inspection.get("initial_system", {})
     if (
         initial_system.get("contract_id") != native_initial_system.CONTRACT_ID
@@ -2259,6 +2362,27 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
         else:
             if media.get("policy") != expected_policy:
                 errors.append("PKLOAD6 PPOL1 independent-oracle summary changed")
+        try:
+            expected_inner_set = native_inner_live.validate_development_set(
+                [
+                    canonical_artifact_files()[definition[4]]
+                    for definition in ARTIFACT_DEFINITIONS
+                ]
+            )
+        except (
+            native_inner_live.InnerLiveError,
+            native_boot_artifact.BootArtifactError,
+            native_initial_system.InitialSystemError,
+            native_recovery.RecoveryError,
+            native_symbols.SymbolError,
+            native_microcode.MicrocodeError,
+            native_firmware.FirmwareError,
+            native_policy.PolicyError,
+        ) as error:
+            errors.append(f"canonical live inner-set oracle failed: {error}")
+        else:
+            if media.get("inner_set") != expected_inner_set:
+                errors.append("PKLOAD6 live inner-set independent-oracle summary changed")
     runs = readiness.get("execution", {}).get("runs", [])
     marker_sets: list[list[str]] = []
     if not isinstance(runs, list) or len(runs) != 2:

@@ -38,6 +38,10 @@ capability-route cross-binding, default-deny authority intersection,
 attenuation, safe/recovery floors, firmware physical-presence separation,
 durable decision receipts, and activation-denial oracle while leaving live
 PooleBoot/PooleKernel policy interpretation and authority creation disabled.
+Cycle 114 adds live `N5-INNER-LIVE-PARSE-001`: PooleBoot reparses all six exact
+retained PBART1 files from their allocated pages, binds PPOL1's five payload
+digests and eleven PINIT1 routes, requires six missing-signature denials, and
+emits one retained-set digest with explicit zero-effect counters.
 
 The normative aggregate contract is `specs/native-pooleboot-proof.json`.
 `tools/qualify_native_pooleboot.py` validates the current PKLOAD6 receipt,
@@ -53,16 +57,18 @@ The qualified application:
 3. opens the EFI system partition and parses bounded PBC1;
 4. parses unsigned PSM1 and requires the exact seven-artifact profile;
 5. reads, SHA-256 checks, allocates, relocates, and verifies PooleKernel;
-6. validates six PBART1 role/version/payload envelopes, copies each exact file
-   into a distinct zero-padded loader range, and applies no payload semantics;
-7. renders the static high-contrast PooleOS GOP identity;
-8. builds and actively audits PKMAP2, then restores the firmware CR3 while
+6. validates six PBART1 role/version/payload envelopes and copies each exact file
+   into a distinct zero-padded loader range;
+7. reparses all six retained files, cross-binds PPOL1 to the other payloads and
+   PINIT1 routes, and requires every development gate to deny without effects;
+8. renders the static high-contrast PooleOS GOP identity;
+9. builds and actively audits PKMAP2, then restores the firmware CR3 while
    retaining the kernel, six profile ranges, private root, guarded stack, and
    handoff pages;
-9. obtains the final UEFI memory map and serializes PBLIVE3 into retained memory;
-10. calls `ExitBootServices`, retrying only stale-map-key failure within a bound;
-11. verifies immutable PBP1 state and zero post-exit firmware calls;
-12. emits the 23-marker dual-channel receipt and halts at
+10. obtains the final UEFI memory map and serializes PBLIVE3 into retained memory;
+11. calls `ExitBootServices`, retrying only stale-map-key failure within a bound;
+12. verifies immutable PBP1 state and zero post-exit firmware calls;
+13. emits the 24-marker dual-channel receipt and halts at
     `STOP BEFORE TRANSFER`.
 
 ## Evidence Method
@@ -88,8 +94,11 @@ acceleration, loopback-only QMP, and no shared folders. It requires:
   over a synthetic external-payload-only manifest and development activation denial;
 - independent PPOL1 mode/precedence/attenuation/PINIT1-cross-binding/receipt
   validation over qualification-only policy bytes and development activation denial;
+- exact target-side reparse of the six retained files, independently reproduced
+  from media, with one domain-separated retained-set digest and zero authority,
+  action, state-write, and hardware-observation counts;
 - exact seven-artifact, root, stack, handoff, map, and digest cross-bindings;
-- 130/130 integrated hostile controls;
+- 139/139 integrated hostile controls;
 - no absolute user path in public readiness artifacts;
 - a clean QMP shutdown of the intentionally halted guest.
 
@@ -141,6 +150,9 @@ The receipt proves, on the pinned profile:
   authority intersection, safe/recovery floors, firmware physical-presence
   separation, durable decision receipts, and fail-closed activation for the
   unsigned development context;
+- live reparse of all six exact retained PBART1 files, PPOL1 payload-digest and
+  PINIT1 route cross-binding, six first-failure denials, and exact retained-set
+  SHA-256 `F3154B354C77D0567207994EFDDA4FE2D203611CA21D60B63872BC9FFC73C675`;
 - complete higher-half kernel alias verification with W^X, CR0.WP, and NX;
 - framebuffer translation and cache-bit preservation during the active audit;
 - retention of kernel and six profile artifact ranges, four table pages, an
@@ -154,8 +166,9 @@ The receipt proves, on the pinned profile:
 ## Explicit Nonclaims
 
 The manifest and all seven artifacts are unsigned and untrusted. The proof does
-not establish artifact authentication, PooleBoot inner semantics, initial-system
-or recovery execution, symbol consumption, policy application, capability
+not establish artifact authentication, authorized semantic activation,
+independent PooleKernel retained-byte parsing, initial-system or recovery
+execution, symbol consumption, policy application, capability
 creation, PooleGlyph executable authority, microcode or firmware application,
 live firmware inventory, updater loading, kernel exports, diagnostic authority,
 authenticated rollback persistence or state I/O,
@@ -186,15 +199,19 @@ manifest/dependency/dry-run/post-reset/activation-denial slice, and
 `N5-POLICY-SEMANTICS-001` closes only the independent PPOL1
 mode/precedence/attenuation/cross-binding/receipt/activation-denial slice.
 `FLAG-N5-INIT-SEMANTICS-001` is closed for independent semantics across all six
-formats. N5.6 and N5.9 remain partial because live PooleBoot enforcement,
-PooleKernel capability creation and activation, recovery execution, symbol
-consumption, policy application, microcode or firmware application, trust, and
-authenticated state persistence are open. The next owner-independent move is
-`N5-INNER-ENFORCEMENT-001`. Hardware-key acquisition, artifact authentication,
-and governance signing remain separate owner-controlled lanes.
+formats. `FLAG-N5-INNER-PARSE-001` is closed only for exact retained-page
+PooleBoot parsing, cross-binding, development denial, and zero-effect evidence.
+N5.6 and N5.9 remain partial because artifact authentication, monotonic state,
+independent PooleKernel revalidation, capability creation and activation,
+recovery execution, symbol consumption, policy application, and microcode or
+firmware application are open. The next owner-independent move is
+`N5-INNER-TRUST-STATE-001`. Hardware-key acquisition and governance signing
+remain separate owner-controlled lanes.
 
 ## Primary References
 
 - UEFI 2.11, [Boot Services](https://uefi.org/specs/UEFI/2.11/07_Services_Boot_Services.html)
 - Rust, [x86_64-unknown-uefi platform support](https://doc.rust-lang.org/rustc/platform-support/unknown-uefi.html)
 - QEMU, [QMP reference](https://www.qemu.org/docs/master/interop/qemu-qmp-ref.html)
+- seL4, [CapDL language specification](https://docs.sel4.systems/projects/capdl/lang-spec.html)
+- Fuchsia, [Component lifecycle](https://fuchsia.dev/docs/concepts/components/v2/lifecycle)

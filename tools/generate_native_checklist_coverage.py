@@ -235,6 +235,17 @@ ADDED_REQUIREMENTS = [
         ],
     },
     {
+        "id": "ADD-BOOT-011",
+        "phase_id": "N5",
+        "requirement": "PooleBoot and PooleKernel MUST independently reparse the exact retained PBART1 bytes before granting authority; parser summaries or pre-copy bytes are not substitutes, and digest, authentication, policy, and persistent-state bindings must close the loader-to-kernel time-of-check/time-of-use boundary before any capability creation, lifecycle activation, recovery transition, symbol consumption, microcode action, firmware action, policy decision, or state write.",
+        "basis": [
+            "Cycle 114 PooleBoot retained-page inner parsing qualification",
+            "https://uefi.org/specs/UEFI/2.11/07_Services_Boot_Services.html",
+            "https://docs.sel4.systems/projects/capdl/lang-spec.html",
+            "https://fuchsia.dev/docs/concepts/components/v2/lifecycle",
+        ],
+    },
+    {
         "id": "ADD-BOOT-002",
         "phase_id": "N6",
         "requirement": "Model UEFI PK, KEK, db, dbx, image signer revocation, minimum secure version, authenticated boot state, recovery-key rotation, and development-key containment as one boot-trust state machine.",

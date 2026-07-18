@@ -24,6 +24,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
     outputs = {
+        ROOT / "specs/fixtures/pfwm1-canonical.bin": pfwm1.canonical_bundle(),
         ROOT / pfwm1.CONTRACT_RELATIVE: _bytes(pfwm1.expected_contract(ROOT)),
         ROOT / pfwm1.GOLDEN_RELATIVE: _bytes(pfwm1.make_golden_vectors()),
     }
