@@ -721,12 +721,12 @@ def make_report(
     kernel_load_readiness_path = ROOT / native_kernel_load.READINESS_RELATIVE
     if not kernel_load_readiness_path.is_file():
         raise QualificationError(
-            "current PKLOAD5 readiness is required before the aggregate PooleBoot receipt"
+            "current PKLOAD6 readiness is required before the aggregate PooleBoot receipt"
         )
     current_kernel_load = native_kernel_load.read_json(kernel_load_readiness_path)
     current_errors = native_kernel_load.readiness_errors(current_kernel_load, ROOT)
     if current_errors:
-        raise QualificationError("current PKLOAD5 readiness is stale: " + "; ".join(current_errors))
+        raise QualificationError("current PKLOAD6 readiness is stale: " + "; ".join(current_errors))
     kernel_load, screenshot = qualify_native_kernel_load.make_readiness(
         toolchain_root,
         qemu_root,
@@ -739,7 +739,7 @@ def make_report(
         "schema_version": "1.0",
         "artifact_kind": "pooleos_native_pooleboot_readiness",
         "status_date": status_date,
-        "status": "pass_single_host_two_run_unsigned_live_manifest_post_exit_pbp1_retained_pkmap2_stop_before_transfer_non_promoting",
+        "status": "pass_single_host_two_run_unsigned_live_profile_artifacts_post_exit_pbp1_retained_pkmap2_stop_before_transfer_non_promoting",
         "contract_id": contract["contract_id"],
         "selected_move_id": contract["selected_move_id"],
         "production_ready": False,
@@ -752,6 +752,7 @@ def make_report(
             "N5.3": "partial",
             "N5.4": "partial",
             "N5.5": "partial",
+            "N5.6": "partial",
             "N5.7": "partial",
             "N5.8": "partial",
         },
@@ -825,7 +826,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--qemu-root", type=Path, default=DEFAULT_QEMU_ROOT)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--screenshot-out", type=Path)
-    parser.add_argument("--status-date", default="2026-07-17")
+    parser.add_argument("--status-date", default="2026-07-18")
     parser.add_argument("--timeout", type=int, default=30)
     args = parser.parse_args(argv)
     if args.timeout < 5 or args.timeout > 120:

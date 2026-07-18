@@ -103,7 +103,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(checklist["section_count"], 171)
         self.assertEqual(checklist["coverage_status"], "pass")
         self.assertEqual(checklist["coverage_sha256"], hashlib.sha256(self.coverage_path.read_bytes()).hexdigest().upper())
-        self.assertEqual(checklist["added_requirement_count"], 34)
+        self.assertEqual(checklist["added_requirement_count"], 35)
 
     def test_phase_checklist_mapping_matches_coverage(self) -> None:
         coverage_by_phase = {item["phase_id"]: item for item in self.coverage["phase_coverage"]}
@@ -118,8 +118,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 106)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 605)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 107)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 608)
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
         self.assertTrue(native["pooleboot_exists"])
@@ -159,8 +159,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N5-HANDOFF-001")
-        self.assertEqual(protocol["owner_independent_next_move_id"], "N5-INIT-SYSTEM-001")
+        self.assertEqual(protocol["selected_move_id"], "N5-INIT-SYSTEM-001")
+        self.assertEqual(protocol["owner_independent_next_move_id"], "N5-INIT-SEMANTICS-001")
         self.assertIn("runs/hardware_target_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_tier0_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_model_readiness.json", protocol["required_records"])
@@ -180,8 +180,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
     def test_flags_and_gaps_are_native_and_traceable(self) -> None:
         phase_ids = {phase["id"] for phase in self.roadmap["phases"]}
         flags = self.roadmap["implementation_flags"]
-        self.assertEqual(len(flags), 45)
-        self.assertEqual(len({flag["id"] for flag in flags}), 45)
+        self.assertEqual(len(flags), 47)
+        self.assertEqual(len({flag["id"] for flag in flags}), 47)
         self.assertTrue(any(flag["class"] == "STOP_SHIP" and flag["status"] == "open" for flag in flags))
         self.assertEqual(next(flag for flag in flags if flag["id"] == "FLAG-BUILDROOT-LEGACY-001")["status"], "closed")
         objectives_flag = next(flag for flag in flags if flag["id"] == "FLAG-N0-OBJECTIVES-001")
@@ -331,9 +331,9 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         n5_statuses = {subphase["id"]: subphase["status"] for subphase in n5["subphases"]}
         for subphase_id in ("N5.1", "N5.2", "N5.3", "N5.4", "N5.5", "N5.7"):
             self.assertEqual(n5_statuses[subphase_id], "partial")
+        self.assertEqual(n5_statuses["N5.6"], "partial")
         self.assertEqual(n5_statuses["N5.8"], "partial")
-        for subphase_id in ("N5.6", "N5.9"):
-            self.assertEqual(n5_statuses[subphase_id], "not_started")
+        self.assertEqual(n5_statuses["N5.9"], "not_started")
         self.assertTrue(any(item.startswith("runs/native_pooleboot_readiness.json:") for item in n5["current_evidence"]))
         self.assertTrue(any(item.startswith("runs/native_boot_handoff_readiness.json:") for item in n5["current_evidence"]))
         self.assertTrue(any(item.startswith("runs/native_boot_config_readiness.json:") for item in n5["current_evidence"]))

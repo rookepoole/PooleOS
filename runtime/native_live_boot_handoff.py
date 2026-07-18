@@ -10,7 +10,16 @@ from typing import Any
 from runtime import native_boot_handoff as pbp1
 
 
-CONTRACT_ID = "PBLIVE2"
+CONTRACT_ID = "PBLIVE3"
+PROFILE_ARTIFACT_ROLES = (
+    pbp1.ARTIFACT_KERNEL,
+    pbp1.ARTIFACT_INITIAL_SYSTEM,
+    pbp1.ARTIFACT_RECOVERY,
+    pbp1.ARTIFACT_SYMBOLS,
+    pbp1.ARTIFACT_MICROCODE,
+    pbp1.ARTIFACT_FIRMWARE_MANIFEST,
+    pbp1.ARTIFACT_POLICY_BUNDLE,
+)
 TRANSCRIPT_PREFIX = "PBP1HEX/0.1 "
 MAX_CHUNK_BYTES = 64
 BEGIN = re.compile(r"^PBP1HEX/0\.1 BEGIN bytes=([0-9]+)$")
@@ -60,7 +69,95 @@ def _record_types(handoff: pbp1.Handoff) -> list[int]:
     return [item.record_type for item in handoff.records]
 
 
-def validate_pre_exit_profile(handoff: pbp1.Handoff) -> dict[str, Any]:
+def _memory_entries(record: pbp1.Record) -> list[dict[str, Any]]:
+    values: list[dict[str, Any]] = []
+    for index in range(record.element_count):
+        base = index * pbp1.MEMORY_ENTRY_BYTES
+        start, pages, attributes = struct.unpack_from("<QQQ", record.payload, base)
+        values.append(
+            {
+                "physical_start": _hex64(start),
+                "page_count": pages,
+                "attributes": _hex64(attributes),
+                "kind": pbp1._u32(record.payload, base + 24),
+                "source_type": pbp1._u32(record.payload, base + 28),
+            }
+        )
+    return values
+
+
+def _artifact_entries(record: pbp1.Record) -> list[dict[str, Any]]:
+    if record.element_count != len(PROFILE_ARTIFACT_ROLES):
+        raise LiveHandoffError("live PBP1 must bind exactly seven profile artifacts")
+    values = []
+    ranges = []
+    for index, expected_role in enumerate(PROFILE_ARTIFACT_ROLES):
+        base = index * pbp1.ARTIFACT_ENTRY_BYTES
+        role, flags = struct.unpack_from("<II", record.payload, base)
+        physical_base, physical_size, virtual_base, virtual_size, entry_virtual = (
+            struct.unpack_from("<QQQQQ", record.payload, base + 8)
+        )
+        expected_flags = (
+            pbp1.ARTIFACT_HASH_VERIFIED | pbp1.ARTIFACT_EXECUTABLE
+            if index == 0
+            else pbp1.ARTIFACT_HASH_VERIFIED
+        )
+        digest = record.payload[base + 48 : base + 80]
+        if (
+            role != expected_role
+            or flags != expected_flags
+            or physical_base == 0
+            or physical_base % pbp1.PAGE_BYTES
+            or physical_size == 0
+            or physical_size % pbp1.PAGE_BYTES
+            or not any(digest)
+            or (
+                index != 0
+                and (virtual_base != 0 or virtual_size != 0 or entry_virtual != 0)
+            )
+        ):
+            raise LiveHandoffError("live PBP1 artifact role, flags, or range changed")
+        ranges.append((physical_base, physical_size))
+        values.append(
+            {
+                "role": role,
+                "flags": flags,
+                "physical_base": _hex64(physical_base),
+                "physical_size": physical_size,
+                "virtual_base": _hex64(virtual_base),
+                "virtual_size": virtual_size,
+                "entry_virtual": _hex64(entry_virtual),
+                "sha256": digest.hex().upper(),
+            }
+        )
+    for index, (start, size) in enumerate(ranges):
+        for other_start, other_size in ranges[index + 1 :]:
+            if start < other_start + other_size and other_start < start + size:
+                raise LiveHandoffError("live PBP1 artifact ranges overlap")
+    return values
+
+
+def _framebuffer_summary(record: pbp1.Record | None) -> dict[str, Any] | None:
+    if record is None:
+        return None
+    values = struct.unpack("<QQIIIIIIII", record.payload)
+    return {
+        "physical_base": _hex64(values[0]),
+        "byte_count": values[1],
+        "width": values[2],
+        "height": values[3],
+        "stride": values[4],
+        "pixel_format": values[5],
+        "red_mask": f"{values[6]:08X}",
+        "green_mask": f"{values[7]:08X}",
+        "blue_mask": f"{values[8]:08X}",
+        "reserved_mask": f"{values[9]:08X}",
+    }
+
+
+def _profile_records(
+    handoff: pbp1.Handoff,
+) -> tuple[dict[str, Any], pbp1.Record, list[dict[str, Any]], dict[str, Any] | None]:
     framebuffer = handoff.record(pbp1.RECORD_FRAMEBUFFER)
     expected_types = [pbp1.RECORD_CORE, pbp1.RECORD_MEMORY_MAP]
     if framebuffer is not None:
@@ -85,131 +182,18 @@ def validate_pre_exit_profile(handoff: pbp1.Handoff) -> dict[str, Any]:
     if core_record is None or memory is None or artifacts is None:
         raise LiveHandoffError("live PBP1 required record missing")
     core = pbp1._validate_core(core_record.payload, handoff.total_size)
-    if (
-        core["boot_flags"] != pbp1.DEVELOPMENT_MODE
-        or core["initial_stack_top_virtual"] != 0
-        or core["page_table_root_physical"] != 0
-        or core["uefi_system_table_physical"] != 0
-        or core["uefi_runtime_services_physical"] != 0
-    ):
-        raise LiveHandoffError("live PBP1 is not an honest pre-exit snapshot")
-    if artifacts.element_count != 1:
-        raise LiveHandoffError("live PBP1 must bind exactly one kernel artifact")
-    role, artifact_flags = struct.unpack_from("<II", artifacts.payload)
-    if role != pbp1.ARTIFACT_KERNEL or artifact_flags != (
-        pbp1.ARTIFACT_HASH_VERIFIED | pbp1.ARTIFACT_EXECUTABLE
-    ):
-        raise LiveHandoffError("live PBP1 artifact flags overclaim or omit digest verification")
-    try:
-        pbp1.validate_kernel_entry_profile(handoff)
-    except pbp1.BootHandoffError:
-        pass
-    else:
-        raise LiveHandoffError("pre-exit PBP1 unexpectedly satisfies the transfer profile")
-
-    artifact = {
-        "role": role,
-        "flags": artifact_flags,
-        "physical_base": _hex64(pbp1._u64(artifacts.payload, 8)),
-        "physical_size": pbp1._u64(artifacts.payload, 16),
-        "virtual_base": _hex64(pbp1._u64(artifacts.payload, 24)),
-        "virtual_size": pbp1._u64(artifacts.payload, 32),
-        "entry_virtual": _hex64(pbp1._u64(artifacts.payload, 40)),
-        "sha256": artifacts.payload[48:80].hex().upper(),
-    }
+    return core, memory, _artifact_entries(artifacts), _framebuffer_summary(framebuffer)
 
 
-def _memory_entries(record: pbp1.Record) -> list[dict[str, Any]]:
-    values: list[dict[str, Any]] = []
-    for index in range(record.element_count):
-        base = index * pbp1.MEMORY_ENTRY_BYTES
-        start, pages, attributes = struct.unpack_from("<QQQ", record.payload, base)
-        values.append(
-            {
-                "physical_start": _hex64(start),
-                "page_count": pages,
-                "attributes": _hex64(attributes),
-                "kind": pbp1._u32(record.payload, base + 24),
-                "source_type": pbp1._u32(record.payload, base + 28),
-            }
-        )
-    return values
-
-
-def validate_exit_development_profile(handoff: pbp1.Handoff) -> dict[str, Any]:
-    framebuffer = handoff.record(pbp1.RECORD_FRAMEBUFFER)
-    expected_types = [pbp1.RECORD_CORE, pbp1.RECORD_MEMORY_MAP]
-    if framebuffer is not None:
-        expected_types.append(pbp1.RECORD_FRAMEBUFFER)
-    expected_types.append(pbp1.RECORD_LOADED_ARTIFACTS)
-    expected_features = (
-        pbp1.FEATURE_CORE
-        | pbp1.FEATURE_MEMORY_MAP
-        | pbp1.FEATURE_LOADED_ARTIFACTS
-        | (pbp1.FEATURE_FRAMEBUFFER if framebuffer is not None else 0)
-    )
-    expected_required = pbp1.FEATURE_CORE | pbp1.FEATURE_MEMORY_MAP | pbp1.FEATURE_LOADED_ARTIFACTS
-    if (
-        _record_types(handoff) != expected_types
-        or handoff.features != expected_features
-        or handoff.required_features != expected_required
-    ):
-        raise LiveHandoffError("exited-development PBP1 record or feature profile changed")
-    core_record = handoff.record(pbp1.RECORD_CORE)
-    memory = handoff.record(pbp1.RECORD_MEMORY_MAP)
-    artifacts = handoff.record(pbp1.RECORD_LOADED_ARTIFACTS)
-    if core_record is None or memory is None or artifacts is None:
-        raise LiveHandoffError("exited-development PBP1 required record missing")
-    core = pbp1._validate_core(core_record.payload, handoff.total_size)
-    if (
-        core["boot_flags"] != pbp1.DEVELOPMENT_MODE | pbp1.BOOT_SERVICES_EXITED
-        or core["initial_stack_top_virtual"] == 0
-        or core["initial_stack_top_virtual"] % 16
-        or core["page_table_root_physical"] == 0
-        or core["page_table_root_physical"] % pbp1.PAGE_BYTES
-        or core["uefi_system_table_physical"] != 0
-        or core["uefi_runtime_services_physical"] != 0
-    ):
-        raise LiveHandoffError("exited-development PBP1 transfer state is malformed")
-    if artifacts.element_count != 1:
-        raise LiveHandoffError("exited-development PBP1 must bind exactly one kernel artifact")
-    role, artifact_flags = struct.unpack_from("<II", artifacts.payload)
-    if role != pbp1.ARTIFACT_KERNEL or artifact_flags != (
-        pbp1.ARTIFACT_HASH_VERIFIED | pbp1.ARTIFACT_EXECUTABLE
-    ):
-        raise LiveHandoffError("exited-development PBP1 artifact flags overclaim")
-    try:
-        pbp1.validate_kernel_entry_profile(handoff)
-    except pbp1.BootHandoffError:
-        pass
-    else:
-        raise LiveHandoffError("exited-development PBP1 unexpectedly satisfies kernel entry")
-
-    artifact = {
-        "role": role,
-        "flags": artifact_flags,
-        "physical_base": _hex64(pbp1._u64(artifacts.payload, 8)),
-        "physical_size": pbp1._u64(artifacts.payload, 16),
-        "virtual_base": _hex64(pbp1._u64(artifacts.payload, 24)),
-        "virtual_size": pbp1._u64(artifacts.payload, 32),
-        "entry_virtual": _hex64(pbp1._u64(artifacts.payload, 40)),
-        "sha256": artifacts.payload[48:80].hex().upper(),
-    }
-    framebuffer_summary = None
-    if framebuffer is not None:
-        values = struct.unpack("<QQIIIIIIII", framebuffer.payload)
-        framebuffer_summary = {
-            "physical_base": _hex64(values[0]),
-            "byte_count": values[1],
-            "width": values[2],
-            "height": values[3],
-            "stride": values[4],
-            "pixel_format": values[5],
-            "red_mask": f"{values[6]:08X}",
-            "green_mask": f"{values[7]:08X}",
-            "blue_mask": f"{values[8]:08X}",
-            "reserved_mask": f"{values[9]:08X}",
-        }
+def _profile_summary(
+    handoff: pbp1.Handoff,
+    core: dict[str, Any],
+    memory: pbp1.Record,
+    artifacts: list[dict[str, Any]],
+    framebuffer: dict[str, Any] | None,
+    *,
+    exited: bool,
+) -> dict[str, Any]:
     return {
         "record_count": len(handoff.records),
         "features": f"{handoff.features:016X}",
@@ -234,62 +218,62 @@ def validate_exit_development_profile(handoff: pbp1.Handoff) -> dict[str, Any]:
             "selected_entry": core["selected_entry"],
             "uefi_revision": f"{core['uefi_revision']:08X}",
         },
-        "kernel_artifact": artifact,
-        "framebuffer": framebuffer_summary,
+        "artifact_count": len(artifacts),
+        "artifacts": artifacts,
+        "kernel_artifact": artifacts[0],
+        "framebuffer": framebuffer,
         "development_mode_only": True,
-        "boot_services_exited": True,
+        "boot_services_exited": exited,
         "transferable": False,
         "secret_bearing_records_present": False,
-        "exit_development_profile_validated": True,
+        "exit_development_profile_validated": exited,
+        "pre_exit_profile_validated": not exited,
         "kernel_entry_profile_rejected": True,
     }
-    framebuffer_summary = None
-    if framebuffer is not None:
-        values = struct.unpack("<QQIIIIIIII", framebuffer.payload)
-        framebuffer_summary = {
-            "physical_base": _hex64(values[0]),
-            "byte_count": values[1],
-            "width": values[2],
-            "height": values[3],
-            "stride": values[4],
-            "pixel_format": values[5],
-            "red_mask": f"{values[6]:08X}",
-            "green_mask": f"{values[7]:08X}",
-            "blue_mask": f"{values[8]:08X}",
-            "reserved_mask": f"{values[9]:08X}",
-        }
-    return {
-        "record_count": len(handoff.records),
-        "features": f"{handoff.features:016X}",
-        "required_features": f"{handoff.required_features:016X}",
-        "memory_entry_count": memory.element_count,
-        "core": {
-            "boot_flags": f"{core['boot_flags']:016X}",
-            "kernel_physical_base": _hex64(core["kernel_physical_base"]),
-            "kernel_physical_size": core["kernel_physical_size"],
-            "kernel_virtual_base": _hex64(core["kernel_virtual_base"]),
-            "kernel_virtual_size": core["kernel_virtual_size"],
-            "kernel_entry_virtual": _hex64(core["kernel_entry_virtual"]),
-            "initial_stack_top_virtual": _hex64(core["initial_stack_top_virtual"]),
-            "page_table_root_physical": _hex64(core["page_table_root_physical"]),
-            "handoff_physical_base": _hex64(core["handoff_physical_base"]),
-            "handoff_virtual_base": _hex64(core["handoff_virtual_base"]),
-            "handoff_byte_count": core["handoff_byte_count"],
-            "boot_attempt": core["boot_attempt"],
-            "boot_attempt_limit": core["boot_attempt_limit"],
-            "boot_slot": core["boot_slot"],
-            "selected_entry": core["selected_entry"],
-            "uefi_revision": f"{core['uefi_revision']:08X}",
-        },
-        "kernel_artifact": artifact,
-        "framebuffer": framebuffer_summary,
-        "development_mode_only": True,
-        "boot_services_exited": False,
-        "transferable": False,
-        "secret_bearing_records_present": False,
-        "pre_exit_profile_validated": True,
-        "kernel_entry_profile_rejected": True,
-    }
+
+
+def validate_pre_exit_profile(handoff: pbp1.Handoff) -> dict[str, Any]:
+    core, memory, artifacts, framebuffer = _profile_records(handoff)
+    if (
+        core["boot_flags"] != pbp1.DEVELOPMENT_MODE
+        or core["initial_stack_top_virtual"] != 0
+        or core["page_table_root_physical"] != 0
+        or core["uefi_system_table_physical"] != 0
+        or core["uefi_runtime_services_physical"] != 0
+    ):
+        raise LiveHandoffError("live PBP1 is not an honest pre-exit snapshot")
+    try:
+        pbp1.validate_kernel_entry_profile(handoff)
+    except pbp1.BootHandoffError:
+        pass
+    else:
+        raise LiveHandoffError("pre-exit PBP1 unexpectedly satisfies the transfer profile")
+    return _profile_summary(
+        handoff, core, memory, artifacts, framebuffer, exited=False
+    )
+
+
+def validate_exit_development_profile(handoff: pbp1.Handoff) -> dict[str, Any]:
+    core, memory, artifacts, framebuffer = _profile_records(handoff)
+    if (
+        core["boot_flags"] != pbp1.DEVELOPMENT_MODE | pbp1.BOOT_SERVICES_EXITED
+        or core["initial_stack_top_virtual"] == 0
+        or core["initial_stack_top_virtual"] % 16
+        or core["page_table_root_physical"] == 0
+        or core["page_table_root_physical"] % pbp1.PAGE_BYTES
+        or core["uefi_system_table_physical"] != 0
+        or core["uefi_runtime_services_physical"] != 0
+    ):
+        raise LiveHandoffError("exited-development PBP1 transfer state is malformed")
+    try:
+        pbp1.validate_kernel_entry_profile(handoff)
+    except pbp1.BootHandoffError:
+        pass
+    else:
+        raise LiveHandoffError("exited-development PBP1 unexpectedly satisfies kernel entry")
+    return _profile_summary(
+        handoff, core, memory, artifacts, framebuffer, exited=True
+    )
 
 
 def extract_transcript(raw: bytes) -> Transcript:
@@ -386,13 +370,15 @@ def validate_oracle_binding(
         or transcript["record_count"] != marker["record_count"]
         or transcript["memory_entry_count"] != marker["memory_entry_count"]
         or int(transcript["framebuffer"] is not None) != marker["framebuffer_present"]
-        or marker["artifact_count"] != 1
+        or transcript["artifact_count"] != len(PROFILE_ARTIFACT_ROLES)
+        or marker["artifact_count"] != len(PROFILE_ARTIFACT_ROLES)
         or transcript["message_crc32"] != marker["message_crc32"]
         or transcript["fnv1a64"] != marker["fnv1a64"]
     ):
         raise LiveHandoffError("PBP1 marker and reconstructed transcript diverge")
     core = transcript["core"]
     artifact = transcript["kernel_artifact"]
+    artifacts = transcript["artifacts"]
     retained = marker_summary["kernel_map"]["retained"]
     plan = media_inspection["kernel"]["plan"]
     config = marker_summary["boot_config"]
@@ -425,8 +411,30 @@ def validate_oracle_binding(
         or artifact["sha256"][:16] != manifest["kernel_sha256_prefix"]
     ):
         raise LiveHandoffError("PBP1 kernel/config/manifest/entry cross-binding differs")
+    media_artifacts = media_inspection["artifact_set"]["artifacts"]
+    if len(media_artifacts) != len(artifacts) - 1:
+        raise LiveHandoffError("PBP1 and media artifact counts diverge")
+    for index, (entry, media_artifact) in enumerate(
+        zip(artifacts[1:], media_artifacts, strict=True), start=1
+    ):
+        if (
+            entry["role"] != PROFILE_ARTIFACT_ROLES[index]
+            or entry["flags"] != pbp1.ARTIFACT_HASH_VERIFIED
+            or entry["physical_size"]
+            != media_artifact["page_count"] * pbp1.PAGE_BYTES
+            or entry["physical_size"] < media_artifact["file_bytes"]
+            or entry["virtual_base"] != "0000000000000000"
+            or entry["virtual_size"] != 0
+            or entry["entry_virtual"] != "0000000000000000"
+            or entry["sha256"] != media_artifact["file_sha256"]
+        ):
+            raise LiveHandoffError("PBP1 PBART1 role, digest, or retained range diverges")
+    if sum(item["physical_size"] for item in artifacts[1:]) != (
+        marker_summary["artifact_set"]["page_count"] * pbp1.PAGE_BYTES
+    ):
+        raise LiveHandoffError("PBP1 PBART1 retained page accounting diverges")
     retained_ranges = (
-        (retained["kernel_physical_base"], core["kernel_physical_size"]),
+        *((int(item["physical_base"], 16), item["physical_size"]) for item in artifacts),
         (
             retained["page_table_root_physical"],
             retained["table_page_count"] * pbp1.PAGE_BYTES,

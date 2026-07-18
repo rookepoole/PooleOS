@@ -4,7 +4,8 @@ use core::ptr::null_mut;
 use core::slice::{from_raw_parts, from_raw_parts_mut};
 
 use poole_live_handoff::{
-    self as live, BuildInput, FramebufferInput, KernelInput, MAX_MEMORY_ENTRIES,
+    self as live, ArtifactInput, BuildInput, FramebufferInput, KernelInput, MAX_MEMORY_ENTRIES,
+    PROFILE_ARTIFACT_COUNT,
 };
 
 use super::{
@@ -71,6 +72,7 @@ fn contract_failure(stage: &'static str, error: live::Error) -> Failure {
         live::Error::PreExitProfile => "pre_exit_profile",
         live::Error::ExitProfile => "exit_profile",
         live::Error::RetainedRange => "retained_range",
+        live::Error::ArtifactSet => "artifact_set",
     };
     Failure {
         stage,
@@ -149,6 +151,43 @@ pub(super) fn framebuffer(gop: Option<GopSummary>) -> Option<FramebufferInput> {
             reserved_mask: 0xff00_0000,
         }
     })
+}
+
+pub(super) fn artifacts(
+    kernel: &super::kload::Summary,
+) -> Result<[ArtifactInput; PROFILE_ARTIFACT_COUNT], live::Error> {
+    let kernel_physical_size = (kernel.page_count as u64)
+        .checked_mul(poole_handoff::PAGE_BYTES)
+        .ok_or(live::Error::ArtifactSet)?;
+    let mut values = [ArtifactInput {
+        role: poole_handoff::ARTIFACT_KERNEL,
+        flags: poole_handoff::ARTIFACT_HASH_VERIFIED | poole_handoff::ARTIFACT_EXECUTABLE,
+        physical_base: kernel.kernel_physical_base,
+        physical_size: kernel_physical_size,
+        virtual_base: kernel.kernel_virtual_base,
+        virtual_size: kernel.kernel_image_bytes as u64,
+        entry_virtual: kernel.kernel_entry_virtual,
+        sha256: kernel.kernel_sha256,
+    }; PROFILE_ARTIFACT_COUNT];
+    for (index, artifact) in kernel.artifacts.iter().enumerate() {
+        let physical_size = (artifact.page_count as u64)
+            .checked_mul(poole_handoff::PAGE_BYTES)
+            .ok_or(live::Error::ArtifactSet)?;
+        if artifact.file_bytes == 0 || artifact.file_bytes as u64 > physical_size {
+            return Err(live::Error::ArtifactSet);
+        }
+        values[index + 1] = ArtifactInput {
+            role: artifact.role.code(),
+            flags: poole_handoff::ARTIFACT_HASH_VERIFIED,
+            physical_base: artifact.physical_base,
+            physical_size,
+            virtual_base: 0,
+            virtual_size: 0,
+            entry_virtual: 0,
+            sha256: artifact.sha256,
+        };
+    }
+    Ok(values)
 }
 
 pub(super) fn emit_transcript(bytes: &[u8], summary: live::Summary) {
@@ -278,6 +317,8 @@ pub(super) fn produce(
                 selected_entry: 1,
                 uefi_revision,
             },
+            artifacts: artifacts(kernel)
+                .map_err(|error| contract_failure("pbp1.artifact_set", error))?,
             framebuffer: framebuffer(gop),
         };
         let (bytes, handoff) = match live::build_pre_exit(input, normalized, output) {
