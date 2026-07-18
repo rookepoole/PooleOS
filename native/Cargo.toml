@@ -1,6 +1,7 @@
 [workspace]
 members = [
   "boot",
+  "bootexit",
   "bootload",
   "bootcfg",
   "elf",

@@ -5,19 +5,21 @@ use core::cmp::Ordering;
 
 use poole_handoff::{
     self as pbp1, ARTIFACT_ENTRY_BYTES, ARTIFACT_EXECUTABLE, ARTIFACT_HASH_VERIFIED,
-    ARTIFACT_KERNEL, CORE_BYTES, DEVELOPMENT_MODE, Encoder, FRAMEBUFFER_BYTES, MEMORY_ACPI_NVS,
-    MEMORY_ACPI_RECLAIMABLE, MEMORY_BOOT_RECLAIMABLE, MEMORY_ENTRY_BYTES, MEMORY_LOADER_RESERVED,
-    MEMORY_MMIO, MEMORY_PERSISTENT, MEMORY_RESERVED, MEMORY_RUNTIME_CODE, MEMORY_RUNTIME_DATA,
-    MEMORY_UNUSABLE, MEMORY_USABLE, RECORD_ARRAY, RECORD_CORE, RECORD_FRAMEBUFFER,
-    RECORD_LOADED_ARTIFACTS, RECORD_MEMORY_MAP, RECORD_REQUIRED,
+    ARTIFACT_KERNEL, BOOT_SERVICES_EXITED, CORE_BYTES, DEVELOPMENT_MODE, Encoder,
+    FRAMEBUFFER_BYTES, MEMORY_ACPI_NVS, MEMORY_ACPI_RECLAIMABLE, MEMORY_BOOT_RECLAIMABLE,
+    MEMORY_ENTRY_BYTES, MEMORY_LOADER_RESERVED, MEMORY_MMIO, MEMORY_PERSISTENT, MEMORY_RESERVED,
+    MEMORY_RUNTIME_CODE, MEMORY_RUNTIME_DATA, MEMORY_UNUSABLE, MEMORY_USABLE, RECORD_ARRAY,
+    RECORD_CORE, RECORD_FRAMEBUFFER, RECORD_LOADED_ARTIFACTS, RECORD_MEMORY_MAP, RECORD_REQUIRED,
 };
 
-pub const CONTRACT_ID: &str = "PBLIVE1";
+pub const CONTRACT_ID: &str = "PBLIVE2";
 pub const UEFI_DESCRIPTOR_VERSION: u32 = 1;
 pub const MIN_DESCRIPTOR_BYTES: usize = 40;
 pub const MAX_DESCRIPTOR_BYTES: usize = 256;
 pub const MAX_MEMORY_ENTRIES: usize = 16_384;
 pub const MAX_TRANSCRIPT_CHUNK_BYTES: usize = 64;
+pub const RETAINED_TABLE_PAGE_COUNT: u32 = 4;
+pub const RETAINED_STACK_PAGE_COUNT: u32 = 8;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Error {
@@ -31,6 +33,8 @@ pub enum Error {
     OutputCapacity,
     Handoff(pbp1::Error),
     PreExitProfile,
+    ExitProfile,
+    RetainedRange,
 }
 
 impl From<pbp1::Error> for Error {
@@ -76,6 +80,28 @@ pub struct BuildInput<'a> {
     pub handoff_physical_base: u64,
     pub kernel: KernelInput,
     pub framebuffer: Option<FramebufferInput>,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct RetainedInput {
+    pub page_table_root_physical: u64,
+    pub table_page_count: u32,
+    pub stack_physical_base: u64,
+    pub stack_page_count: u32,
+    pub stack_top_virtual: u64,
+    pub handoff_virtual_base: u64,
+    pub handoff_capacity_bytes: u32,
+}
+
+#[derive(Clone, Copy)]
+pub struct ExitBuildInput<'a> {
+    pub raw_memory_map: &'a [u8],
+    pub descriptor_size: usize,
+    pub descriptor_version: u32,
+    pub handoff_physical_base: u64,
+    pub kernel: KernelInput,
+    pub framebuffer: Option<FramebufferInput>,
+    pub retained: RetainedInput,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -244,6 +270,155 @@ fn core_payload(input: &BuildInput<'_>, total_bytes: usize) -> [u8; CORE_BYTES] 
     value
 }
 
+fn exit_core_payload(input: &ExitBuildInput<'_>, total_bytes: usize) -> [u8; CORE_BYTES] {
+    let mut value = [0u8; CORE_BYTES];
+    write_u64(&mut value, 0, DEVELOPMENT_MODE | BOOT_SERVICES_EXITED);
+    write_u64(&mut value, 8, input.kernel.physical_base);
+    write_u64(&mut value, 16, input.kernel.physical_size);
+    write_u64(&mut value, 24, input.kernel.virtual_base);
+    write_u64(&mut value, 32, input.kernel.virtual_size);
+    write_u64(&mut value, 40, input.kernel.entry_virtual);
+    write_u64(&mut value, 48, input.retained.stack_top_virtual);
+    write_u64(&mut value, 56, input.retained.page_table_root_physical);
+    write_u64(&mut value, 64, input.handoff_physical_base);
+    write_u64(&mut value, 72, input.retained.handoff_virtual_base);
+    write_u64(&mut value, 80, total_bytes as u64);
+    write_u32(&mut value, 104, input.kernel.boot_attempt);
+    write_u32(&mut value, 108, input.kernel.boot_attempt_limit);
+    write_u32(&mut value, 112, input.kernel.boot_slot);
+    write_u32(&mut value, 116, input.kernel.selected_entry);
+    write_u32(&mut value, 120, input.kernel.uefi_revision);
+    value
+}
+
+fn overlaps(first: u64, first_bytes: u64, second: u64, second_bytes: u64) -> bool {
+    first < second.saturating_add(second_bytes) && second < first.saturating_add(first_bytes)
+}
+
+fn validate_retained_shape(input: &ExitBuildInput<'_>) -> Result<(), Error> {
+    let retained = input.retained;
+    if retained.page_table_root_physical == 0
+        || !retained
+            .page_table_root_physical
+            .is_multiple_of(pbp1::PAGE_BYTES)
+        || retained.table_page_count != RETAINED_TABLE_PAGE_COUNT
+        || retained.stack_physical_base == 0
+        || !retained
+            .stack_physical_base
+            .is_multiple_of(pbp1::PAGE_BYTES)
+        || retained.stack_page_count != RETAINED_STACK_PAGE_COUNT
+        || retained.stack_top_virtual == 0
+        || !retained.stack_top_virtual.is_multiple_of(16)
+        || retained.handoff_virtual_base == 0
+        || !retained
+            .handoff_virtual_base
+            .is_multiple_of(pbp1::PAGE_BYTES)
+        || retained.handoff_capacity_bytes as usize != pbp1::MAX_TOTAL_BYTES
+        || input.handoff_physical_base == 0
+        || !input.handoff_physical_base.is_multiple_of(pbp1::PAGE_BYTES)
+    {
+        return Err(Error::RetainedRange);
+    }
+    let ranges = [
+        (input.kernel.physical_base, input.kernel.physical_size),
+        (
+            retained.page_table_root_physical,
+            u64::from(retained.table_page_count) * pbp1::PAGE_BYTES,
+        ),
+        (
+            retained.stack_physical_base,
+            u64::from(retained.stack_page_count) * pbp1::PAGE_BYTES,
+        ),
+        (
+            input.handoff_physical_base,
+            u64::from(retained.handoff_capacity_bytes),
+        ),
+    ];
+    for (start, byte_count) in ranges {
+        if start == 0 || byte_count == 0 || start.checked_add(byte_count).is_none() {
+            return Err(Error::RetainedRange);
+        }
+    }
+    for first in 0..ranges.len() {
+        for second in first + 1..ranges.len() {
+            if overlaps(
+                ranges[first].0,
+                ranges[first].1,
+                ranges[second].0,
+                ranges[second].1,
+            ) {
+                return Err(Error::RetainedRange);
+            }
+        }
+    }
+    Ok(())
+}
+
+fn loader_range_covered(
+    normalized: &[u8],
+    count: usize,
+    start: u64,
+    byte_count: u64,
+) -> Result<bool, Error> {
+    let end = start.checked_add(byte_count).ok_or(Error::RetainedRange)?;
+    let mut cursor = start;
+    for index in 0..count {
+        let base = index * MEMORY_ENTRY_BYTES;
+        let entry_start = read_u64(normalized, base)?;
+        let pages = read_u64(normalized, base + 8)?;
+        let entry_end = entry_start
+            .checked_add(
+                pages
+                    .checked_mul(pbp1::PAGE_BYTES)
+                    .ok_or(Error::RetainedRange)?,
+            )
+            .ok_or(Error::RetainedRange)?;
+        if cursor < entry_start {
+            return Ok(false);
+        }
+        if cursor >= entry_end {
+            continue;
+        }
+        if read_u32(normalized, base + 24)? != MEMORY_LOADER_RESERVED {
+            return Ok(false);
+        }
+        cursor = core::cmp::min(entry_end, end);
+        if cursor == end {
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
+fn validate_retained_coverage(
+    input: &ExitBuildInput<'_>,
+    normalized: &[u8],
+    count: usize,
+) -> Result<(), Error> {
+    let retained = input.retained;
+    let ranges = [
+        (input.kernel.physical_base, input.kernel.physical_size),
+        (
+            retained.page_table_root_physical,
+            u64::from(retained.table_page_count) * pbp1::PAGE_BYTES,
+        ),
+        (
+            retained.stack_physical_base,
+            u64::from(retained.stack_page_count) * pbp1::PAGE_BYTES,
+        ),
+        (
+            input.handoff_physical_base,
+            u64::from(retained.handoff_capacity_bytes),
+        ),
+    ];
+    for (start, byte_count) in ranges {
+        if !loader_range_covered(normalized, count, start, byte_count)? {
+            return Err(Error::RetainedRange);
+        }
+    }
+    Ok(())
+}
+
 fn framebuffer_payload(input: FramebufferInput) -> [u8; FRAMEBUFFER_BYTES] {
     let mut value = [0u8; FRAMEBUFFER_BYTES];
     write_u64(&mut value, 0, input.physical_base);
@@ -307,6 +482,47 @@ pub fn validate_pre_exit_profile(handoff: &pbp1::Handoff<'_>) -> Result<(), Erro
     }
     if pbp1::validate_kernel_entry_profile(handoff).is_ok() {
         return Err(Error::PreExitProfile);
+    }
+    Ok(())
+}
+
+pub fn validate_exit_development_profile(handoff: &pbp1::Handoff<'_>) -> Result<(), Error> {
+    let expected_features = pbp1::FEATURE_CORE
+        | pbp1::FEATURE_MEMORY_MAP
+        | pbp1::FEATURE_LOADED_ARTIFACTS
+        | if handoff.record(RECORD_FRAMEBUFFER).is_some() {
+            pbp1::FEATURE_FRAMEBUFFER
+        } else {
+            0
+        };
+    let expected_required =
+        pbp1::FEATURE_CORE | pbp1::FEATURE_MEMORY_MAP | pbp1::FEATURE_LOADED_ARTIFACTS;
+    let header = handoff.header();
+    let core = handoff.core()?;
+    if header.features != expected_features
+        || header.required_features != expected_required
+        || !matches!(header.record_count, 3 | 4)
+        || core.boot_flags != DEVELOPMENT_MODE | BOOT_SERVICES_EXITED
+        || core.initial_stack_top_virtual == 0
+        || !core.initial_stack_top_virtual.is_multiple_of(16)
+        || core.page_table_root_physical == 0
+        || !core
+            .page_table_root_physical
+            .is_multiple_of(pbp1::PAGE_BYTES)
+        || core.uefi_system_table_physical != 0
+        || core.uefi_runtime_services_physical != 0
+    {
+        return Err(Error::ExitProfile);
+    }
+    let artifacts = handoff
+        .record(RECORD_LOADED_ARTIFACTS)
+        .ok_or(Error::ExitProfile)?;
+    if artifacts.descriptor.element_count != 1
+        || read_u32(artifacts.payload, 0)? != ARTIFACT_KERNEL
+        || read_u32(artifacts.payload, 4)? != ARTIFACT_HASH_VERIFIED | ARTIFACT_EXECUTABLE
+        || pbp1::validate_kernel_entry_profile(handoff).is_ok()
+    {
+        return Err(Error::ExitProfile);
     }
     Ok(())
 }
@@ -379,6 +595,73 @@ pub fn build_pre_exit<'a>(
     Ok((bytes, summary))
 }
 
+pub fn build_exit_candidate<'a>(
+    input: ExitBuildInput<'_>,
+    normalized_memory: &mut [u8],
+    output: &'a mut [u8],
+) -> Result<(&'a [u8], Summary), Error> {
+    validate_retained_shape(&input)?;
+    let memory_count = normalize_memory_map(
+        input.raw_memory_map,
+        input.descriptor_size,
+        input.descriptor_version,
+        normalized_memory,
+    )?;
+    let memory_bytes = memory_count * MEMORY_ENTRY_BYTES;
+    validate_retained_coverage(&input, &normalized_memory[..memory_bytes], memory_count)?;
+    let record_count = if input.framebuffer.is_some() { 4 } else { 3 };
+    let mut lengths = [CORE_BYTES, memory_bytes, ARTIFACT_ENTRY_BYTES, 0];
+    if input.framebuffer.is_some() {
+        lengths[2] = FRAMEBUFFER_BYTES;
+        lengths[3] = ARTIFACT_ENTRY_BYTES;
+    }
+    let total_bytes = pbp1::encoded_size(record_count, &lengths[..record_count])?;
+    if output.len() < total_bytes
+        || total_bytes
+            > usize::try_from(input.retained.handoff_capacity_bytes)
+                .map_err(|_| Error::OutputCapacity)?
+    {
+        return Err(Error::OutputCapacity);
+    }
+    let core = exit_core_payload(&input, total_bytes);
+    let artifact = artifact_payload(input.kernel);
+    let mut encoder = Encoder::new(&mut output[..total_bytes], record_count, 0, 0)?;
+    encoder.push(RECORD_CORE, 1, RECORD_REQUIRED, CORE_BYTES, 1, &core)?;
+    encoder.push(
+        RECORD_MEMORY_MAP,
+        1,
+        RECORD_REQUIRED | RECORD_ARRAY,
+        MEMORY_ENTRY_BYTES,
+        memory_count,
+        &normalized_memory[..memory_bytes],
+    )?;
+    if let Some(framebuffer) = input.framebuffer {
+        let framebuffer = framebuffer_payload(framebuffer);
+        encoder.push(RECORD_FRAMEBUFFER, 1, 0, FRAMEBUFFER_BYTES, 1, &framebuffer)?;
+    }
+    encoder.push(
+        RECORD_LOADED_ARTIFACTS,
+        1,
+        RECORD_REQUIRED | RECORD_ARRAY,
+        ARTIFACT_ENTRY_BYTES,
+        1,
+        &artifact,
+    )?;
+    let bytes = encoder.finish()?;
+    let handoff = pbp1::decode(bytes)?;
+    validate_exit_development_profile(&handoff)?;
+    let summary = Summary {
+        total_bytes: bytes.len(),
+        record_count,
+        memory_entry_count: memory_count,
+        framebuffer_present: input.framebuffer.is_some(),
+        artifact_count: 1,
+        message_crc32: read_u32(bytes, 48)?,
+        fnv1a64: fnv1a64(bytes),
+    };
+    Ok((bytes, summary))
+}
+
 pub fn fnv1a64(bytes: &[u8]) -> u64 {
     let mut value = 0xcbf2_9ce4_8422_2325u64;
     for byte in bytes {
@@ -418,6 +701,15 @@ mod tests {
         value
     }
 
+    fn exit_raw_map(stride: usize) -> std::vec::Vec<u8> {
+        let mut value = descriptor(2, 0x0020_0000, 32, 4, stride);
+        value.extend(descriptor(2, 0x0030_0000, 4, 4, stride));
+        value.extend(descriptor(2, 0x0040_0000, 8, 4, stride));
+        value.extend(descriptor(2, 0x0050_0000, 256, 4, stride));
+        value.extend(descriptor(11, 0x8000_0000, 1024, 1, stride));
+        value
+    }
+
     fn kernel() -> KernelInput {
         KernelInput {
             physical_base: 0x0020_0000,
@@ -446,6 +738,18 @@ mod tests {
             green_mask: 0x0000_ff00,
             blue_mask: 0x00ff_0000,
             reserved_mask: 0xff00_0000,
+        }
+    }
+
+    fn retained() -> RetainedInput {
+        RetainedInput {
+            page_table_root_physical: 0x0030_0000,
+            table_page_count: RETAINED_TABLE_PAGE_COUNT,
+            stack_physical_base: 0x0040_0000,
+            stack_page_count: RETAINED_STACK_PAGE_COUNT,
+            stack_top_virtual: 0xffff_ffff_8003_9000,
+            handoff_virtual_base: 0xffff_ffff_8004_0000,
+            handoff_capacity_bytes: pbp1::MAX_TOTAL_BYTES as u32,
         }
     }
 
@@ -578,6 +882,70 @@ mod tests {
         assert_eq!(
             build_pre_exit(input, &mut scratch, &mut tiny).map(|_| ()),
             Err(Error::OutputCapacity)
+        );
+    }
+
+    #[test]
+    fn exited_development_handoff_binds_every_retained_range() {
+        let raw = exit_raw_map(48);
+        let mut scratch = [0u8; 5 * MEMORY_ENTRY_BYTES];
+        let mut output = [0u8; 4096];
+        let input = ExitBuildInput {
+            raw_memory_map: &raw,
+            descriptor_size: 48,
+            descriptor_version: 1,
+            handoff_physical_base: 0x0050_0000,
+            kernel: kernel(),
+            framebuffer: Some(framebuffer()),
+            retained: retained(),
+        };
+        let (bytes, summary) = build_exit_candidate(input, &mut scratch, &mut output).unwrap();
+        assert_eq!(summary.record_count, 4);
+        assert_eq!(summary.memory_entry_count, 5);
+        let decoded = pbp1::decode(bytes).unwrap();
+        assert_eq!(validate_exit_development_profile(&decoded), Ok(()));
+        let core = decoded.core().unwrap();
+        assert_eq!(core.boot_flags, DEVELOPMENT_MODE | BOOT_SERVICES_EXITED);
+        assert_eq!(core.initial_stack_top_virtual, retained().stack_top_virtual);
+        assert_eq!(
+            core.page_table_root_physical,
+            retained().page_table_root_physical
+        );
+        assert_eq!(core.handoff_virtual_base, retained().handoff_virtual_base);
+        assert_eq!(
+            pbp1::validate_kernel_entry_profile(&decoded),
+            Err(pbp1::Error::KernelProfile)
+        );
+    }
+
+    #[test]
+    fn exited_handoff_rejects_missing_or_overlapping_retained_ranges() {
+        let mut raw = exit_raw_map(48);
+        write_u32(&mut raw, 2 * 48, 7);
+        let mut scratch = [0u8; 5 * MEMORY_ENTRY_BYTES];
+        let mut output = [0u8; 4096];
+        let input = ExitBuildInput {
+            raw_memory_map: &raw,
+            descriptor_size: 48,
+            descriptor_version: 1,
+            handoff_physical_base: 0x0050_0000,
+            kernel: kernel(),
+            framebuffer: Some(framebuffer()),
+            retained: retained(),
+        };
+        assert_eq!(
+            build_exit_candidate(input, &mut scratch, &mut output).map(|_| ()),
+            Err(Error::RetainedRange)
+        );
+        let mut overlap = retained();
+        overlap.stack_physical_base = kernel().physical_base;
+        let input = ExitBuildInput {
+            retained: overlap,
+            ..input
+        };
+        assert_eq!(
+            build_exit_candidate(input, &mut scratch, &mut output).map(|_| ()),
+            Err(Error::RetainedRange)
         );
     }
 }

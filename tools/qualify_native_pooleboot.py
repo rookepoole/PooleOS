@@ -345,7 +345,7 @@ def _execute_once(
         screenshot_path = run_dir / "pooleboot-frame.ppm"
         deadline = time.monotonic() + timeout
         screenshot_captured = False
-        return_marker_observed = False
+        completion_marker_observed = False
         while time.monotonic() < deadline:
             raw_debug = debug_path.read_bytes() if debug_path.is_file() else b""
             if b"POOLEBOOT/0.1 ERROR" in raw_debug or b"POOLEBOOT/0.1 PANIC" in raw_debug:
@@ -358,14 +358,14 @@ def _execute_once(
                 if not screenshot_path.is_file():
                     raise QualificationError("QMP screendump did not create the proof frame")
                 screenshot_captured = True
-            if b"POOLEBOOT/0.1 RETURN EFI_SUCCESS" in raw_debug:
-                return_marker_observed = True
+            if b"POOLEBOOT/0.1 STOP BEFORE TRANSFER" in raw_debug:
+                completion_marker_observed = True
                 break
             if process.poll() is not None:
-                raise QualificationError(f"QEMU exited before the return marker: {process.returncode}")
+                raise QualificationError(f"QEMU exited before the stop marker: {process.returncode}")
             time.sleep(0.02)
-        if not screenshot_captured or not return_marker_observed:
-            raise QualificationError("PooleBoot frame or return marker timed out")
+        if not screenshot_captured or not completion_marker_observed:
+            raise QualificationError("PooleBoot frame or permanent stop marker timed out")
         time.sleep(0.05)
         debug_raw = debug_path.read_bytes()
         serial_raw = serial_path.read_bytes()
@@ -721,12 +721,12 @@ def make_report(
     kernel_load_readiness_path = ROOT / native_kernel_load.READINESS_RELATIVE
     if not kernel_load_readiness_path.is_file():
         raise QualificationError(
-            "current PKLOAD4 readiness is required before the aggregate PooleBoot receipt"
+            "current PKLOAD5 readiness is required before the aggregate PooleBoot receipt"
         )
     current_kernel_load = native_kernel_load.read_json(kernel_load_readiness_path)
     current_errors = native_kernel_load.readiness_errors(current_kernel_load, ROOT)
     if current_errors:
-        raise QualificationError("current PKLOAD4 readiness is stale: " + "; ".join(current_errors))
+        raise QualificationError("current PKLOAD5 readiness is stale: " + "; ".join(current_errors))
     kernel_load, screenshot = qualify_native_kernel_load.make_readiness(
         toolchain_root,
         qemu_root,
@@ -739,7 +739,7 @@ def make_report(
         "schema_version": "1.0",
         "artifact_kind": "pooleos_native_pooleboot_readiness",
         "status_date": status_date,
-        "status": "pass_single_host_two_run_unsigned_live_manifest_pre_exit_pbp1_temporary_kmap_rollback_release_non_promoting",
+        "status": "pass_single_host_two_run_unsigned_live_manifest_post_exit_pbp1_retained_pkmap2_stop_before_transfer_non_promoting",
         "contract_id": contract["contract_id"],
         "selected_move_id": contract["selected_move_id"],
         "production_ready": False,
@@ -862,7 +862,7 @@ def main(argv: list[str] | None = None) -> int:
         f"builds={summary['clean_builds_exact']} media={summary['clean_media_generations_exact']} "
         f"runs={summary['guest_runs_passed']}/{summary['guest_runs_total']} "
         f"markers={summary['ordered_marker_count']} controls={summary['negative_controls_passed']}/"
-        f"{summary['negative_controls_total']} n5_exit=false production_ready=false"
+        f"{summary['negative_controls_total']} exit_called=true n5_gate=false production_ready=false"
     )
     return 0
 

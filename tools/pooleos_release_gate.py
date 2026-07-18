@@ -59,7 +59,7 @@ DEFAULT_GAPS = [
     "The completed owner response records both ADR dispositions and all 38 objective definitions while accepting zero measurements, but the selected FIDO2 hardware key is unavailable; trusted public-key custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
     "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
     "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, six bounded TLC models cover all seven required domains and detect twenty-one required counterexamples, and a bounded PooleBoot proof executes under the pinned profile; current source rebuilds, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open.",
-    "A reproducible unsigned PooleBoot proof application boots twice under pinned non-promoting OVMF with deterministic four-file GPT/FAT32 media and twenty-three ordered serial/debugcon markers; PBP1, PBC1, PSM1, PKELF1, PKMAP1, and a separately qualified real PooleKernel product image pass their bounded gates, and PKLOAD4 proves digest-bound live load, exact temporary pre-exit PBP1 production, temporary higher-half CR3 activation with W^X and framebuffer-preservation checks, exact rollback, and complete release, but manifest signature trust, persistent rollback, digest-provider security promotion, retained mappings and handoff storage, final framebuffer cache policy, kernel consumption, final-map retry, ExitBootServices transfer, second host, target firmware, and physical-media qualification remain open.",
+    "A reproducible unsigned PooleBoot proof application boots twice under pinned non-promoting OVMF with deterministic four-file GPT/FAT32 media and twenty-two ordered serial/debugcon markers; PBP1, PBC1, PSM1, PKELF1, PKMAP2, PBEXIT1, and a separately qualified real PooleKernel image pass their bounded gates, and PKLOAD5 proves retained kernel/table/guarded-stack/handoff storage, exact final-map PBP1, successful ExitBootServices, zero later firmware calls, and permanent stop before transfer, but signature trust, persistent rollback, digest-provider promotion, initial-system loading, final framebuffer cache policy, kernel-entry transfer state, second host, target firmware, and physical-media qualification remain open.",
     "A real reproducible PooleKernel image, PKENTRY1 intake, bounded early ring/COM1/framebuffer paths, and panic classes exist, but boot trust, measured boot, live mappings and transfer, descriptor/exception setup, retained crash evidence, kernel runtime, target execution, and N6 exit remain open.",
     "No native CPU, interrupt, time, SMP, physical-memory, virtual-memory, or reclaim implementation.",
     "The sanitized Tier 1 identity and bounded user-mode CPUID transcript match, but MSR, PCI configuration-space, Secure Boot, TPM, SPD, sensor/power, standards-hash, lab-safety, native enumeration, and physical qualification evidence remain open.",
@@ -810,11 +810,11 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
         "clean_media_generations_exact": 2,
         "guest_runs_total": 2,
         "guest_runs_passed": 2,
-        "ordered_marker_count": 23,
+        "ordered_marker_count": 22,
         "serial_debugcon_match_count": 2,
         "gop_frame_match_count": 2,
-        "negative_controls_total": 77,
-        "negative_controls_passed": 77,
+        "negative_controls_total": 95,
+        "negative_controls_passed": 95,
         "production_claim_count": 0,
     }
     if artifact.get("summary") != expected_summary:
@@ -824,9 +824,9 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
     if artifact.get("n5_exit_gate_satisfied") is not False or artifact.get("production_ready") is not False:
         errors.append("PooleBoot proof overclaims N5 exit or production readiness")
     detail = (
-        "contract=POOLEOS-N5-POOLEBOOT-5; host_tests=8/8; builds=2/2; media=2/2; "
-        "guest_runs=2/2; markers=23; serial_debugcon=2/2; gop_frames=2/2; "
-        "pbp1=2/2; kmap=2/2; negatives=77/77; production_claims=0; n5_exit=false; production_ready=false"
+        "contract=POOLEOS-N5-POOLEBOOT-6; host_tests=8/8; builds=2/2; media=2/2; "
+        "guest_runs=2/2; markers=22; serial_debugcon=2/2; gop_frames=2/2; "
+        "pbp1=2/2; kmap=2/2; exit=2/2; negatives=95/95; production_claims=0; n5_exit=false; production_ready=false"
     )
     return readiness.make_check(
         "native_pooleboot_readiness",
@@ -852,27 +852,27 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     errors.extend(native_kernel_load.readiness_errors(artifact, ROOT))
     summary = artifact.get("summary", {})
     if summary.get("guest_runs_passed") != 2 or summary.get("guest_runs_total") != 2:
-        errors.append("PKLOAD4 guest-run evidence is incomplete")
-    if summary.get("ordered_marker_count") != 23:
-        errors.append("PKLOAD4 marker evidence is incomplete")
+        errors.append("PKLOAD5 guest-run evidence is incomplete")
+    if summary.get("ordered_marker_count") != 22:
+        errors.append("PKLOAD5 marker evidence is incomplete")
     if summary.get("exact_pbp1_match_count") != 2:
-        errors.append("PKLOAD4 PBP1 evidence is incomplete")
+        errors.append("PKLOAD5 PBP1 evidence is incomplete")
     if summary.get("oracle_match_count") != 2:
-        errors.append("PKLOAD4 PKMAP1 oracle evidence is incomplete")
-    if summary.get("negative_controls_passed") != 77 or summary.get(
+        errors.append("PKLOAD5 PKMAP2/PBEXIT1 oracle evidence is incomplete")
+    if summary.get("negative_controls_passed") != 95 or summary.get(
         "negative_controls_total"
-    ) != 77:
-        errors.append("PKLOAD4 negative controls are incomplete")
+    ) != 95:
+        errors.append("PKLOAD5 negative controls are incomplete")
     if artifact.get("claims") != native_kernel_load.expected_claims():
-        errors.append("PKLOAD4 claim boundary changed")
+        errors.append("PKLOAD5 claim boundary changed")
     if artifact.get("n5_exit_gate_satisfied") is not False or artifact.get(
         "production_ready"
     ) is not False:
-        errors.append("PKLOAD4 overclaims N5 exit or production readiness")
+        errors.append("PKLOAD5 overclaims N5 exit or production readiness")
     detail = (
-        "contract=PKLOAD4; rust_tests=59/59; boot_builds=2/2; kernel_builds=2/2; "
-        "media=2/2; guest_runs=2/2; markers=23; oracle=2/2; pbp1=2/2; kmap=2/2; "
-        "rollback=2/2; cleanup=all; negatives=77/77; transfer=false; n5_exit=false; production_ready=false"
+        "contract=PKLOAD5; rust_tests=70/70; boot_builds=2/2; kernel_builds=2/2; "
+        "media=2/2; guest_runs=2/2; markers=22; oracle=2/2; pbp1=2/2; kmap=2/2; "
+        "exit=2/2; firmware_after_exit=0; negatives=95/95; transfer=false; n5_exit=false; production_ready=false"
     )
     return readiness.make_check(
         "native_kernel_load_readiness",

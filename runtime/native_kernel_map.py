@@ -1,4 +1,4 @@
-"""Independent PKMAP1 page-table, lifecycle, and marker oracle."""
+"""Independent PKMAP1/PKMAP2 page-table, lifecycle, and marker oracle."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ from typing import Any, Iterable
 
 
 CONTRACT_ID = "PKMAP1"
+RETAINED_CONTRACT_ID = "PKMAP2"
 PAGE_SIZE = 4096
 TABLE_ENTRIES = 512
 TABLE_PAGE_COUNT = 4
@@ -27,11 +28,23 @@ FNV_OFFSET = 0xCBF2_9CE4_8422_2325
 FNV_PRIME = 0x0000_0100_0000_01B3
 ORACLE_ORIGINAL_ROOT = 0x0010_0000
 ORACLE_TABLE_BASE = 0x0300_0000
+STACK_GUARD_LOW_PAGE = 48
+STACK_FIRST_PAGE = 49
+STACK_PAGE_COUNT = 8
+STACK_GUARD_HIGH_PAGE = 57
+HANDOFF_FIRST_PAGE = 64
+HANDOFF_PAGE_COUNT = 256
+HANDOFF_CAPACITY_BYTES = HANDOFF_PAGE_COUNT * PAGE_SIZE
 
 PROBE_PATTERN = re.compile(
     r"^PKMAP1 PASS mappings=([0-9]+) pages=([0-9]+) ro=([0-9]+) "
     r"rx=([0-9]+) rw=([0-9]+) wx=([0-9]+) pml4=([0-9]+) "
     r"pdpt=([0-9]+) pd=([0-9]+) pt=([0-9]+) leaf_fnv1a64=([0-9A-F]{16})$"
+)
+RETAINED_PROBE_PATTERN = re.compile(
+    r"^PKMAP2 PASS kernel_pages=([0-9]+) stack_pages=([0-9]+) "
+    r"handoff_pages=([0-9]+) guards=([0-9]+) total_pages=([0-9]+) "
+    r"stack_pt=([0-9]+) handoff_pt=([0-9]+) retained_fnv1a64=([0-9A-F]{16})$"
 )
 
 
@@ -55,6 +68,14 @@ class Request:
     entry_virtual: int
     mappings: tuple[Mapping, ...]
     physical_address_bits: int
+
+
+@dataclasses.dataclass(frozen=True)
+class RetainedRequest:
+    stack_physical_base: int
+    stack_page_count: int
+    handoff_physical_base: int
+    handoff_capacity_bytes: int
 
 
 def _require(condition: bool, message: str) -> None:
@@ -340,6 +361,150 @@ def marker_expectation(plan: dict[str, Any], physical_address_bits: int) -> dict
     }
 
 
+def build_retained_model(
+    request: Request,
+    retained: RetainedRequest,
+    *,
+    original_root: Iterable[int] | None = None,
+    original_root_address: int = ORACLE_ORIGINAL_ROOT,
+    table_base: int = ORACLE_TABLE_BASE,
+) -> dict[str, Any]:
+    kernel = build_model(
+        request,
+        original_root=original_root,
+        original_root_address=original_root_address,
+        table_base=table_base,
+    )
+    _require(
+        request.page_count <= STACK_GUARD_LOW_PAGE and kernel["indices"]["first_page_table"] == 0,
+        "kernel collides with the retained stack guard",
+    )
+    _require(
+        retained.stack_physical_base > 0
+        and retained.stack_physical_base % PAGE_SIZE == 0
+        and retained.stack_page_count == STACK_PAGE_COUNT,
+        "retained stack range is invalid",
+    )
+    _require(
+        retained.handoff_physical_base > 0
+        and retained.handoff_physical_base % PAGE_SIZE == 0
+        and retained.handoff_capacity_bytes == HANDOFF_CAPACITY_BYTES,
+        "retained handoff range is invalid",
+    )
+    maximum_physical = 1 << request.physical_address_bits
+    ranges = (
+        (request.physical_base, request.image_bytes),
+        (table_base, TABLE_PAGE_COUNT * PAGE_SIZE),
+        (retained.stack_physical_base, retained.stack_page_count * PAGE_SIZE),
+        (retained.handoff_physical_base, retained.handoff_capacity_bytes),
+    )
+    for start, byte_count in ranges:
+        _require(start + byte_count <= maximum_physical, "retained physical range exceeds the CPU width")
+    for first, (first_start, first_size) in enumerate(ranges):
+        first_end = first_start + first_size
+        for second_start, second_size in ranges[first + 1 :]:
+            _require(
+                not (first_start < second_start + second_size and second_start < first_end),
+                "retained physical ranges overlap",
+            )
+    _require(
+        STACK_FIRST_PAGE + STACK_PAGE_COUNT == STACK_GUARD_HIGH_PAGE
+        and STACK_GUARD_HIGH_PAGE < HANDOFF_FIRST_PAGE
+        and HANDOFF_FIRST_PAGE + HANDOFF_PAGE_COUNT <= TABLE_ENTRIES,
+        "retained virtual layout is invalid",
+    )
+    stack_bottom = request.virtual_base + STACK_FIRST_PAGE * PAGE_SIZE
+    stack_top = stack_bottom + STACK_PAGE_COUNT * PAGE_SIZE
+    handoff_virtual = request.virtual_base + HANDOFF_FIRST_PAGE * PAGE_SIZE
+    handoff_end = handoff_virtual + HANDOFF_CAPACITY_BYTES
+    _require(
+        _canonical_48(stack_bottom)
+        and _canonical_48(stack_top - 1)
+        and _canonical_48(handoff_virtual)
+        and _canonical_48(handoff_end - 1)
+        and handoff_end <= request.virtual_base + WINDOW_BYTES,
+        "retained virtual range is invalid",
+    )
+    fingerprint = FNV_OFFSET
+    retained_leaves: list[dict[str, Any]] = []
+    for kind, first_page, page_count, physical_base, permissions in (
+        (1, STACK_FIRST_PAGE, STACK_PAGE_COUNT, retained.stack_physical_base, "rw"),
+        (2, HANDOFF_FIRST_PAGE, HANDOFF_PAGE_COUNT, retained.handoff_physical_base, "r"),
+    ):
+        for page in range(page_count):
+            page_index = first_page + page
+            physical = physical_base + page * PAGE_SIZE
+            fingerprint = _fnv_u64(fingerprint, kind)
+            fingerprint = _fnv_u64(fingerprint, page_index)
+            fingerprint = _fnv_u64(fingerprint, physical)
+            fingerprint = _fnv_u64(fingerprint, _permission_code(permissions))
+            retained_leaves.append(
+                {
+                    "page_table_index": page_index,
+                    "physical": physical,
+                    "permissions": permissions,
+                    "normalized_flags": f"{_leaf_flags(permissions):016X}",
+                }
+            )
+    return {
+        "contract_id": RETAINED_CONTRACT_ID,
+        "kernel": kernel,
+        "retained_request": dataclasses.asdict(retained),
+        "stack_first_page_table_index": STACK_FIRST_PAGE,
+        "stack_page_count": STACK_PAGE_COUNT,
+        "stack_bottom_virtual": stack_bottom,
+        "stack_top_virtual": stack_top,
+        "handoff_first_page_table_index": HANDOFF_FIRST_PAGE,
+        "handoff_page_count": HANDOFF_PAGE_COUNT,
+        "handoff_virtual_base": handoff_virtual,
+        "guard_page_indices": [STACK_GUARD_LOW_PAGE, STACK_GUARD_HIGH_PAGE],
+        "guard_page_count": 2,
+        "total_mapped_page_count": request.page_count + STACK_PAGE_COUNT + HANDOFF_PAGE_COUNT,
+        "retained_leaf_fingerprint": f"{fingerprint:016X}",
+        "retained_leaves": retained_leaves,
+    }
+
+
+def retained_marker_expectation(
+    plan: dict[str, Any],
+    physical_address_bits: int,
+    *,
+    kernel_physical_base: int,
+    stack_physical_base: int,
+    handoff_physical_base: int,
+    table_base: int,
+) -> dict[str, Any]:
+    runtime_plan = copy.deepcopy(plan)
+    runtime_plan["physical_base"] = kernel_physical_base
+    model = build_retained_model(
+        request_from_elf_plan(runtime_plan, physical_address_bits),
+        RetainedRequest(
+            stack_physical_base=stack_physical_base,
+            stack_page_count=STACK_PAGE_COUNT,
+            handoff_physical_base=handoff_physical_base,
+            handoff_capacity_bytes=HANDOFF_CAPACITY_BYTES,
+        ),
+        table_base=table_base,
+    )
+    return {
+        "contract_id": RETAINED_CONTRACT_ID,
+        "table_page_count": TABLE_PAGE_COUNT,
+        "stack_page_count": model["stack_page_count"],
+        "handoff_page_count": model["handoff_page_count"],
+        "guard_page_count": model["guard_page_count"],
+        "total_mapped_page_count": model["total_mapped_page_count"],
+        "stack_first_page_table_index": model["stack_first_page_table_index"],
+        "handoff_first_page_table_index": model["handoff_first_page_table_index"],
+        "page_table_root_physical": table_base,
+        "kernel_physical_base": kernel_physical_base,
+        "stack_physical_base": stack_physical_base,
+        "stack_top_virtual": model["stack_top_virtual"],
+        "handoff_physical_base": handoff_physical_base,
+        "handoff_virtual_base": model["handoff_virtual_base"],
+        "retained_leaf_fingerprint": model["retained_leaf_fingerprint"],
+    }
+
+
 def parse_probe_output(value: str) -> dict[str, Any]:
     match = PROBE_PATTERN.fullmatch(value.strip())
     _require(match is not None, "Rust PKMAP1 probe output is malformed")
@@ -362,6 +527,52 @@ def parse_probe_output(value: str) -> dict[str, Any]:
     }
 
 
+def parse_retained_probe_output(value: str) -> dict[str, Any]:
+    match = RETAINED_PROBE_PATTERN.fullmatch(value.strip())
+    _require(match is not None, "Rust PKMAP2 probe output is malformed")
+    assert match is not None
+    values = [int(item) for item in match.groups()[:-1]]
+    _require(
+        values[1:] == [STACK_PAGE_COUNT, HANDOFF_PAGE_COUNT, 2, values[0] + STACK_PAGE_COUNT + HANDOFF_PAGE_COUNT, STACK_FIRST_PAGE, HANDOFF_FIRST_PAGE],
+        "Rust PKMAP2 retained page accounting diverges",
+    )
+    return {
+        "contract_id": RETAINED_CONTRACT_ID,
+        "kernel_page_count": values[0],
+        "stack_page_count": values[1],
+        "handoff_page_count": values[2],
+        "guard_page_count": values[3],
+        "total_mapped_page_count": values[4],
+        "stack_first_page_table_index": values[5],
+        "handoff_first_page_table_index": values[6],
+        "retained_leaf_fingerprint": match.group(8),
+    }
+
+
+def retained_probe_expectation(plan: dict[str, Any], physical_address_bits: int) -> dict[str, Any]:
+    model = build_retained_model(
+        request_from_elf_plan(plan, physical_address_bits),
+        RetainedRequest(
+            stack_physical_base=0x0400_0000,
+            stack_page_count=STACK_PAGE_COUNT,
+            handoff_physical_base=0x0500_0000,
+            handoff_capacity_bytes=HANDOFF_CAPACITY_BYTES,
+        ),
+        table_base=ORACLE_TABLE_BASE,
+    )
+    return {
+        "contract_id": RETAINED_CONTRACT_ID,
+        "kernel_page_count": model["kernel"]["mapped_page_count"],
+        "stack_page_count": model["stack_page_count"],
+        "handoff_page_count": model["handoff_page_count"],
+        "guard_page_count": model["guard_page_count"],
+        "total_mapped_page_count": model["total_mapped_page_count"],
+        "stack_first_page_table_index": model["stack_first_page_table_index"],
+        "handoff_first_page_table_index": model["handoff_first_page_table_index"],
+        "retained_leaf_fingerprint": model["retained_leaf_fingerprint"],
+    }
+
+
 def validate_lifecycle(events: list[dict[str, Any]]) -> None:
     expected_states = ["prepared", "candidate_active", "restored", "released"]
     _require(
@@ -372,6 +583,17 @@ def validate_lifecycle(events: list[dict[str, Any]]) -> None:
     _require(active.get("firmware_call_count") == 0, "firmware was called while candidate CR3 was active")
     _require(events[2].get("observed_cr3") == events[0].get("original_cr3"), "CR3 rollback diverges")
     _require(events[3].get("table_pages_freed") == TABLE_PAGE_COUNT, "table cleanup diverges")
+
+
+def validate_retained_lifecycle(events: list[dict[str, Any]]) -> None:
+    expected_states = ["prepared", "candidate_active", "restored", "retained"]
+    _require(
+        [item.get("state") for item in events] == expected_states,
+        "retained mapping lifecycle order diverges",
+    )
+    _require(events[1].get("firmware_call_count") == 0, "firmware was called under candidate CR3")
+    _require(events[2].get("observed_cr3") == events[0].get("original_cr3"), "CR3 restore diverges")
+    _require(events[3].get("table_pages_freed") == 0, "retained page tables were released")
 
 
 def validate_framebuffer_preserved(original: dict[str, Any], candidate: dict[str, Any]) -> None:

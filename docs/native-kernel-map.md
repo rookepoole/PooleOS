@@ -1,83 +1,92 @@
-# PKMAP1 Native Kernel Mapping Contract
+# PKMAP2 Retained Kernel Mapping Contract
 
 ## Purpose
 
-PKMAP1 is the smallest live proof that PooleBoot can turn the current PKELF1
-mapping plan into hardware-active x86-64 page tables and return safely to UEFI.
-It covers one exact 2 MiB higher-half window and deliberately stops before a
-retained handoff, `ExitBootServices`, or PooleKernel entry.
+PKMAP2 extends the validated PKMAP1 kernel alias into retained boot-transfer
+storage. PooleBoot builds and audits an exact supervisor higher-half mapping,
+adds a guarded eight-page kernel stack and a one-MiB read-only handoff window,
+then preserves the kernel and all private page tables across
+`ExitBootServices`. The current slice stops before installing the retained CR3,
+changing RSP, or calling PooleKernel.
 
-The normative machine-readable contract is
-`specs/native-kernel-map-contract.json`. The allocation-free Rust core is
-`native/kmap`; the only CR3, CPUID, MSR, interrupt, and UEFI operations are in
-`native/boot/src/kmap.rs`; and `runtime/native_kernel_map.py` is the independent
-Python oracle.
+The normative contract is `specs/native-kernel-map-contract.json`. The
+allocation-free `no_std` model is `native/kmap`; privileged CPU and UEFI
+operations remain in `native/boot/src/kmap.rs`; and
+`runtime/native_kernel_map.py` is the independent oracle.
 
 ## Preconditions
 
-PKMAP1 fails closed unless paging, PAE, long mode, CR0.WP, CPUID NX, and
-EFER.NXE are active and the CPU reports 36-52 physical-address bits. Five-level
-paging and PCID are outside this bounded proof. The exact kernel physical,
-virtual, entry, image, and four mapping ranges must be aligned, nonoverlapping,
-fully covering, inside one 2 MiB window, and W^X-safe.
+PKMAP2 fails closed unless paging, PAE, long mode, CR0.WP, CPUID NX, and
+EFER.NXE are active and the CPU reports 36-52 physical-address bits. LA57 and
+PCID are outside this profile. PML4 slot 511 must be unused. Kernel mapping
+ranges must be aligned, nonoverlapping, complete, and W^X-safe.
 
-The active CR3 root and all newly allocated table and kernel endpoints must be
-identity reachable in the UEFI environment. PML4 slot 511 must be exactly zero;
-PKMAP1 never mutates or shares an occupied higher-half hierarchy.
+Retained physical ranges must also be aligned, nonzero, representable, and
+pairwise disjoint:
+
+- the 48-page PooleKernel allocation;
+- four private page-table pages;
+- eight writable, non-executable stack pages;
+- 256 handoff pages, covering one MiB.
+
+The virtual layout reserves low and high guard pages around the stack. Both
+guards remain non-present. The handoff range begins after a fixed alignment gap
+and is supervisor read-only and NX.
 
 ## Table Construction
 
-PooleBoot allocates four contiguous `EfiLoaderData` pages for a candidate PML4,
-PDPT, page directory, and page table. It clones all 512 active PML4 entries,
-adds PML4[511], PDPT[510], and PD[0], then emits one 4 KiB leaf per kernel page.
-Parent entries are present, writable, supervisor, and executable so effective
-leaf policy is controlled at the PT. Leaves are supervisor-only:
+PooleBoot allocates contiguous `EfiLoaderData` pages for a candidate PML4,
+PDPT, page directory, and page table. It clones the active PML4 and installs a
+private hierarchy at PML4[511], PDPT[510], and PD[0]. Exact 4 KiB leaves encode:
 
-- `r`: present, read-only, NX;
-- `rx`: present, read-only, executable;
-- `rw`: present, writable, NX;
-- `rwx`: rejected.
+- kernel `r`: present, read-only, NX;
+- kernel `rx`: present, read-only, executable;
+- kernel `rw`: present, writable, NX;
+- stack: present, writable, NX;
+- handoff: present, read-only, NX;
+- stack guards: absent;
+- any writable-executable request: rejected.
 
-Every unused private entry remains zero. The Rust verifier reconstructs every
-expected parent and leaf, including normalized virtual/physical offsets and an
-address-independent FNV fingerprint. The independent Python oracle reconstructs
-the same values without importing the Rust implementation.
+The Rust verifier and independent Python oracle reconstruct every parent and
+leaf. `pkmap2_probe` emits an address-independent retained-layout fingerprint;
+the qualified value is `DCA9DC32D914438D`.
 
-## Active Interval
+## Active Audit
 
-PooleBoot saves RFLAGS, disables maskable interrupts, issues a compiler fence,
-loads candidate CR3, and rereads CR3. During this interval it makes zero UEFI
-calls. It walks every high-half kernel page through the candidate root, checks
-the exact physical target and effective permissions, requires 4 KiB leaves,
-requires the entry to be RX, and hashes all mapped bytes through the live high
-alias.
+PooleBoot saves RFLAGS, disables maskable interrupts, loads the candidate CR3,
+and reads it back. No UEFI service is called while that root is active. The
+adapter walks every high-half kernel page, verifies physical targets and
+effective permissions, requires the entry page to be RX, and hashes the entire
+live alias.
 
-Before activation, PooleBoot snapshots the first and last GOP framebuffer
-translations through the firmware root. During activation, it repeats those
-walks through the candidate root and requires equality of physical addresses,
-page sizes, effective permissions, and PAT/PCD/PWT bits.
+The first and last framebuffer translations are compared between the firmware
+root and candidate root, including physical address, leaf size, effective
+permissions, and PAT/PCD/PWT bits. This proves preservation only; it does not
+qualify the final PooleOS framebuffer cache policy.
 
-## Rollback
+The original CR3 is restored and read-verified before the final firmware
+sequence. A rollback mismatch halts permanently. Successful restoration does
+not release the candidate tables: PKMAP2 retains them for the future transfer
+slice.
 
-PooleBoot always writes the original CR3 after the active observation, even if
-activation or verification reports failure. It rereads CR3 and treats any
-mismatch as non-returnable: a raw fatal marker is emitted and the CPU halts so
-no firmware service can run under an unverified root. Only after exact rollback
-does PooleBoot restore interrupts, free the four private pages, and later free
-the kernel allocation.
+## Retention And Final Map
 
-## Qualification And Limits
+PKLOAD5 binds the live PKMAP2 marker to the final PBP1 core record and to an
+independently normalized UEFI memory map. Kernel, root, stack, and handoff
+physical ranges must all remain covered by loader-reserved descriptors in the
+map used for the successful `ExitBootServices` call. Overlap, omission, wrong
+memory kind, guard drift, marker drift, or guest/oracle disagreement rejects
+the receipt.
 
-PKLOAD4 binds the Rust probe, Python oracle, 77 hostile controls, deterministic
-build/media reproduction, and two fresh QEMU/OVMF executions. The live marker
-sequence must include `KERNEL_MAP_PLAN`, `KERNEL_MAP_ACTIVE`, and
-`KERNEL_MAP_ROLLBACK`, and serial/debugcon streams must agree exactly.
+## Qualification Boundary
 
-This proves temporary activation and rollback for the current product under the
-pinned single-host emulator. It does not prove a final address space, dedicated
-handoff stack, final framebuffer cache policy, TLB/SMP shootdown, runtime-region
-mapping, `ExitBootServices`, kernel execution, target firmware, physical
-hardware, a second builder, N5 exit, or production readiness.
+The current receipt passes 14/14 `poole-kmap` tests, the Rust/Python probe
+comparison, two exact OVMF boots, and all PKMAP2 integration controls. It proves
+retention through successful `ExitBootServices` and a firmware-free halt.
+
+It does not prove final CR3 activation, stack switching, a transferable signed
+PBP1 profile, kernel entry, SMP/TLB policy, runtime-region policy, target
+firmware, physical hardware, N5 exit, or production readiness.
 
 ## Primary References
 

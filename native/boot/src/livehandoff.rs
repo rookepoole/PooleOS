@@ -69,6 +69,8 @@ fn contract_failure(stage: &'static str, error: live::Error) -> Failure {
         live::Error::OutputCapacity => "output_capacity",
         live::Error::Handoff(_) => "pbp1_codec",
         live::Error::PreExitProfile => "pre_exit_profile",
+        live::Error::ExitProfile => "exit_profile",
+        live::Error::RetainedRange => "retained_range",
     };
     Failure {
         stage,
@@ -128,7 +130,7 @@ fn release_pools(
     failure.map_or(Ok(()), Err)
 }
 
-fn framebuffer(gop: Option<GopSummary>) -> Option<FramebufferInput> {
+pub(super) fn framebuffer(gop: Option<GopSummary>) -> Option<FramebufferInput> {
     gop.map(|summary| {
         let (pixel_format, red_mask, green_mask, blue_mask) = match summary.layout.format {
             pooleboot::PixelFormat::Rgb => (1, 0x0000_00ff, 0x0000_ff00, 0x00ff_0000),
@@ -149,7 +151,7 @@ fn framebuffer(gop: Option<GopSummary>) -> Option<FramebufferInput> {
     })
 }
 
-fn emit_transcript(bytes: &[u8], summary: live::Summary) {
+pub(super) fn emit_transcript(bytes: &[u8], summary: live::Summary) {
     super::diagnostic(format_args!("PBP1HEX/0.1 BEGIN bytes={}\n", bytes.len()));
     for (index, chunk) in bytes.chunks(live::MAX_TRANSCRIPT_CHUNK_BYTES).enumerate() {
         super::diagnostic(format_args!(

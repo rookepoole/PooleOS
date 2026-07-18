@@ -41,8 +41,8 @@ class NativeKernelMapTests(unittest.TestCase):
             )
         )
         self.assertEqual([], list(validate_json(contract, schema)))
-        self.assertEqual(native_kernel_map.CONTRACT_ID, contract["contract_id"])
-        self.assertEqual(25, len(contract["required_negative_controls"]))
+        self.assertEqual(native_kernel_map.RETAINED_CONTRACT_ID, contract["contract_id"])
+        self.assertEqual(28, len(contract["required_negative_controls"]))
 
     def test_exact_product_model_matches_frozen_summary(self) -> None:
         model = native_kernel_map.build_model(native_kernel_map.request_from_elf_plan(plan(), 48))
@@ -144,6 +144,64 @@ class NativeKernelMapTests(unittest.TestCase):
         self.assertEqual(expected, observed)
         with self.assertRaises(native_kernel_map.KernelMapError):
             native_kernel_map.parse_probe_output(line.replace("wx=0", "wx=1"))
+
+    def test_retained_model_binds_guarded_stack_and_read_only_handoff(self) -> None:
+        model = native_kernel_map.build_retained_model(
+            native_kernel_map.request_from_elf_plan(plan(), 48),
+            native_kernel_map.RetainedRequest(
+                stack_physical_base=0x0400_0000,
+                stack_page_count=8,
+                handoff_physical_base=0x0500_0000,
+                handoff_capacity_bytes=1024 * 1024,
+            ),
+        )
+        self.assertEqual([48, 57], model["guard_page_indices"])
+        self.assertEqual(312, model["total_mapped_page_count"])
+        self.assertEqual("rw", model["retained_leaves"][0]["permissions"])
+        self.assertEqual("r", model["retained_leaves"][-1]["permissions"])
+
+    def test_retained_model_rejects_overlap_range_and_kernel_guard_collision(self) -> None:
+        request = native_kernel_map.request_from_elf_plan(plan(), 48)
+        for retained in (
+            native_kernel_map.RetainedRequest(request.physical_base, 8, 0x0500_0000, 1024 * 1024),
+            native_kernel_map.RetainedRequest(0x0400_0001, 8, 0x0500_0000, 1024 * 1024),
+            native_kernel_map.RetainedRequest(0x0400_0000, 7, 0x0500_0000, 1024 * 1024),
+        ):
+            with self.assertRaises(native_kernel_map.KernelMapError):
+                native_kernel_map.build_retained_model(request, retained)
+        hostile = copy.deepcopy(plan())
+        hostile["image_size"] = 49 * native_kernel_map.PAGE_SIZE
+        hostile["mappings"][-1]["memory_size"] += native_kernel_map.PAGE_SIZE
+        with self.assertRaises(native_kernel_map.KernelMapError):
+            native_kernel_map.build_retained_model(
+                native_kernel_map.request_from_elf_plan(hostile, 48),
+                native_kernel_map.RetainedRequest(0x0400_0000, 8, 0x0500_0000, 1024 * 1024),
+            )
+
+    def test_retained_probe_and_lifecycle_are_exact(self) -> None:
+        expected = native_kernel_map.build_retained_model(
+            native_kernel_map.request_from_elf_plan(plan(), 48),
+            native_kernel_map.RetainedRequest(0x0400_0000, 8, 0x0500_0000, 1024 * 1024),
+        )
+        line = (
+            "PKMAP2 PASS kernel_pages=48 stack_pages=8 handoff_pages=256 guards=2 "
+            f"total_pages=312 stack_pt=49 handoff_pt=64 retained_fnv1a64={expected['retained_leaf_fingerprint']}"
+        )
+        self.assertEqual(
+            expected["retained_leaf_fingerprint"],
+            native_kernel_map.parse_retained_probe_output(line)["retained_leaf_fingerprint"],
+        )
+        events = [
+            {"state": "prepared", "original_cr3": 0x1000},
+            {"state": "candidate_active", "firmware_call_count": 0},
+            {"state": "restored", "observed_cr3": 0x1000},
+            {"state": "retained", "table_pages_freed": 0},
+        ]
+        native_kernel_map.validate_retained_lifecycle(events)
+        hostile = copy.deepcopy(events)
+        hostile[-1]["table_pages_freed"] = 4
+        with self.assertRaises(native_kernel_map.KernelMapError):
+            native_kernel_map.validate_retained_lifecycle(hostile)
 
     def test_lifecycle_rejects_firmware_call_activation_and_rollback_drift(self) -> None:
         events = [

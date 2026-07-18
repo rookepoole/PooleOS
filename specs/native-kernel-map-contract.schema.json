@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://pooleos.local/specs/native-kernel-map-contract.schema.json",
-  "title": "PooleOS PKMAP1 contract",
+  "title": "PooleOS PKMAP2 contract",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -27,10 +27,10 @@
   "properties": {
     "schema_version": {"const": "1.0"},
     "artifact_kind": {"const": "pooleos_native_kernel_map_contract"},
-    "contract_id": {"const": "PKMAP1"},
-    "selected_move_id": {"const": "N5-KMAP-001"},
+    "contract_id": {"const": "PKMAP2"},
+    "selected_move_id": {"const": "N5-HANDOFF-001"},
     "status_date": {"const": "2026-07-17"},
-    "status": {"const": "bounded_temporary_activation_and_rollback_non_promoting"},
+    "status": {"const": "bounded_retained_kernel_stack_handoff_mapping_non_promoting"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
     "phase_mapping": {"const": ["N5.5", "N5.8"]},
@@ -79,11 +79,11 @@
     },
     "verification": {"type": "object", "additionalProperties": {"type": "boolean"}},
     "lifecycle": {"type": "object", "additionalProperties": true},
-    "required_negative_controls": {"type": "array", "minItems": 25, "maxItems": 25, "uniqueItems": true, "items": {"type": "string"}},
+    "required_negative_controls": {"type": "array", "minItems": 28, "maxItems": 28, "uniqueItems": true, "items": {"type": "string"}},
     "claims": {
       "type": "object",
       "additionalProperties": {"type": "boolean"},
-      "minProperties": 16
+      "minProperties": 17
     },
     "claim_boundary": {"type": "array", "minItems": 8, "items": {"type": "string"}},
     "official_references": {"type": "array", "minItems": 3, "items": {"type": "string", "format": "uri"}}

@@ -6,7 +6,7 @@ use core::sync::atomic::{Ordering, compiler_fence};
 
 use poole_kmap::{
     CacheBits, CpuProfile, Error, FramebufferSnapshot, Lifecycle, Mapping, Permissions, Request,
-    TABLE_ENTRIES, TABLE_PAGE_COUNT, TableAddresses, TableReader,
+    RetainedRequest, RetainedSummary, TABLE_ENTRIES, TABLE_PAGE_COUNT, TableAddresses, TableReader,
 };
 
 use super::{
@@ -42,6 +42,7 @@ pub(super) struct Failure {
 #[derive(Clone, Copy)]
 pub(super) struct Summary {
     pub plan: poole_kmap::Summary,
+    pub retained_plan: Option<RetainedSummary>,
     pub physical_address_bits: u8,
     pub table_page_count: usize,
     pub mapped_fnv1a64: u64,
@@ -50,6 +51,12 @@ pub(super) struct Summary {
     pub framebuffer_last_page_size: u64,
     pub tables_freed: usize,
     pub firmware_calls_while_active: usize,
+}
+
+pub(super) struct Retained {
+    pub summary: Summary,
+    pub table_physical_base: u64,
+    lifecycle: Lifecycle,
 }
 
 fn firmware_failure(stage: &'static str, status: EfiStatus) -> Failure {
@@ -298,6 +305,7 @@ fn prepare_and_activate(
     profile: CpuProfile,
     original_cr3: u64,
     allocation_base: u64,
+    retained: Option<RetainedRequest>,
 ) -> Result<(Summary, Lifecycle), Failure> {
     let mask = physical_mask(profile.physical_address_bits);
     if original_cr3 & !(mask | CR3_NON_PCID_FLAGS) != 0 {
@@ -346,6 +354,33 @@ fn prepare_and_activate(
         profile.physical_address_bits,
         "kmap.kernel_identity_last",
     )?;
+    if let Some(retained) = retained {
+        let stack_last = retained
+            .stack_physical_base
+            .checked_add(u64::from(retained.stack_page_count) * poole_kmap::PAGE_SIZE - 1)
+            .ok_or_else(|| contract_failure("kmap.stack_range", Error::RetainedRange))?;
+        let handoff_last = retained
+            .handoff_physical_base
+            .checked_add(u64::from(retained.handoff_capacity_bytes) - 1)
+            .ok_or_else(|| contract_failure("kmap.handoff_range", Error::RetainedRange))?;
+        for (address, stage) in [
+            (retained.stack_physical_base, "kmap.stack_identity_first"),
+            (stack_last, "kmap.stack_identity_last"),
+            (
+                retained.handoff_physical_base,
+                "kmap.handoff_identity_first",
+            ),
+            (handoff_last, "kmap.handoff_identity_last"),
+        ] {
+            require_identity(
+                &reader,
+                original_root,
+                address,
+                profile.physical_address_bits,
+                stage,
+            )?;
+        }
+    }
     let original_framebuffer = poole_kmap::snapshot_framebuffer(
         &reader,
         original_root,
@@ -360,16 +395,50 @@ fn prepare_and_activate(
     let pdpt = table_mut(addresses.pdpt)?;
     let page_directory = table_mut(addresses.page_directory)?;
     let page_table = table_mut(addresses.page_table)?;
-    let plan = poole_kmap::populate(
-        &request,
-        addresses,
-        original_root_table,
-        candidate_root_table,
-        pdpt,
-        page_directory,
-        page_table,
-    )
-    .map_err(|error| contract_failure("kmap.populate", error))?;
+    let retained_plan = match retained {
+        Some(retained) => Some(
+            poole_kmap::populate_retained(
+                &request,
+                retained,
+                addresses,
+                original_root_table,
+                candidate_root_table,
+                pdpt,
+                page_directory,
+                page_table,
+            )
+            .map_err(|error| contract_failure("kmap.populate_retained", error))?,
+        ),
+        None => {
+            poole_kmap::populate(
+                &request,
+                addresses,
+                original_root_table,
+                candidate_root_table,
+                pdpt,
+                page_directory,
+                page_table,
+            )
+            .map_err(|error| contract_failure("kmap.populate", error))?;
+            None
+        }
+    };
+    let plan = retained_plan
+        .map_or_else(
+            || {
+                poole_kmap::verify(
+                    &request,
+                    addresses,
+                    original_root_table,
+                    candidate_root_table,
+                    pdpt,
+                    page_directory,
+                    page_table,
+                )
+            },
+            |value| Ok(value.kernel),
+        )
+        .map_err(|error| contract_failure("kmap.verify_pre_activation", error))?;
 
     let mut lifecycle = Lifecycle::new(original_cr3, candidate_cr3);
     let interrupt_flags = capture_and_disable_interrupts();
@@ -380,9 +449,25 @@ fn prepare_and_activate(
         .observe_activation(observed_candidate)
         .map_err(|error| contract_failure("kmap.activate", error));
     let active_result = if activation.is_ok() {
-        let translation_result =
-            poole_kmap::verify_kernel_translations(&reader, addresses.candidate_root, &request)
-                .map_err(|error| contract_failure("kmap.verify_translations", error));
+        let translation_result = match (retained, retained_plan) {
+            (Some(retained), Some(expected)) => poole_kmap::verify_retained_translations(
+                &reader,
+                addresses.candidate_root,
+                &request,
+                retained,
+                expected,
+            )
+            .map(|()| expected.kernel)
+            .map_err(|error| contract_failure("kmap.verify_retained_translations", error)),
+            (None, None) => {
+                poole_kmap::verify_kernel_translations(&reader, addresses.candidate_root, &request)
+                    .map_err(|error| contract_failure("kmap.verify_translations", error))
+            }
+            _ => Err(contract_failure(
+                "kmap.retained_state",
+                Error::RetainedRange,
+            )),
+        };
         match translation_result {
             Ok(observed_plan) if observed_plan == plan => {
                 let mapped_bytes = unsafe {
@@ -453,6 +538,7 @@ fn prepare_and_activate(
     Ok((
         Summary {
             plan,
+            retained_plan,
             physical_address_bits: profile.physical_address_bits,
             table_page_count: TABLE_PAGE_COUNT,
             mapped_fnv1a64,
@@ -466,6 +552,7 @@ fn prepare_and_activate(
     ))
 }
 
+#[allow(dead_code)]
 pub(super) fn activate_and_restore(
     boot_services: &EfiBootServices,
     kernel: &kload::Summary,
@@ -495,7 +582,7 @@ pub(super) fn activate_and_restore(
             status: EFI_OUT_OF_RESOURCES,
         });
     }
-    let prepared = prepare_and_activate(kernel, gop, profile, original_cr3, allocation_base);
+    let prepared = prepare_and_activate(kernel, gop, profile, original_cr3, allocation_base, None);
     let (mut summary, mut lifecycle) = match prepared {
         Ok(value) => value,
         Err(failure) => {
@@ -509,4 +596,83 @@ pub(super) fn activate_and_restore(
         .map_err(|error| contract_failure("kmap.release_order", error))?;
     summary.tables_freed = TABLE_PAGE_COUNT;
     Ok(summary)
+}
+
+pub(super) fn prepare_and_retain(
+    boot_services: &EfiBootServices,
+    kernel: &kload::Summary,
+    gop: Option<GopSummary>,
+    stack_physical_base: u64,
+    handoff_physical_base: u64,
+) -> Result<Retained, Failure> {
+    let gop = gop.ok_or_else(missing_framebuffer)?;
+    let profile = cpu_profile()?;
+    let original_cr3 = read_cr3();
+    let allocate_pages: AllocatePages = unsafe { function(boot_services.allocate_pages) }
+        .map_err(|status| firmware_failure("kmap.allocate_pages_pointer", status))?;
+    let free_pages: FreePages = unsafe { function(boot_services.free_pages) }
+        .map_err(|status| firmware_failure("kmap.free_pages_pointer", status))?;
+    let mut allocation_base = 0u64;
+    let status = allocate_pages(
+        EFI_ALLOCATE_ANY_PAGES,
+        EFI_LOADER_DATA,
+        TABLE_PAGE_COUNT,
+        &mut allocation_base,
+    );
+    if status != EFI_SUCCESS {
+        return Err(firmware_failure("kmap.tables_allocate", status));
+    }
+    if allocation_base == 0 {
+        return Err(Failure {
+            stage: "kmap.tables_allocate_shape",
+            code: "zero_allocation",
+            status: EFI_OUT_OF_RESOURCES,
+        });
+    }
+    let retained_request = RetainedRequest {
+        stack_physical_base,
+        stack_page_count: poole_kmap::STACK_PAGE_COUNT as u32,
+        handoff_physical_base,
+        handoff_capacity_bytes: poole_kmap::HANDOFF_CAPACITY_BYTES as u32,
+    };
+    let prepared = prepare_and_activate(
+        kernel,
+        gop,
+        profile,
+        original_cr3,
+        allocation_base,
+        Some(retained_request),
+    );
+    let (summary, mut lifecycle) = match prepared {
+        Ok(value) => value,
+        Err(failure) => {
+            release_tables(free_pages, allocation_base, Some(failure))?;
+            return Err(failure);
+        }
+    };
+    if let Err(error) = lifecycle.observe_retention() {
+        let failure = contract_failure("kmap.retention_order", error);
+        release_tables(free_pages, allocation_base, Some(failure))?;
+        return Err(failure);
+    }
+    Ok(Retained {
+        summary,
+        table_physical_base: allocation_base,
+        lifecycle,
+    })
+}
+
+pub(super) fn release_retained(
+    boot_services: &EfiBootServices,
+    mut retained: Retained,
+) -> Result<Summary, Failure> {
+    let free_pages: FreePages = unsafe { function(boot_services.free_pages) }
+        .map_err(|status| firmware_failure("kmap.free_pages_pointer", status))?;
+    release_tables(free_pages, retained.table_physical_base, None)?;
+    retained
+        .lifecycle
+        .observe_release()
+        .map_err(|error| contract_failure("kmap.release_order", error))?;
+    retained.summary.tables_freed = TABLE_PAGE_COUNT;
+    Ok(retained.summary)
 }

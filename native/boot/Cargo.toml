@@ -14,6 +14,7 @@ name = "PooleBoot"
 path = "src/main.rs"
 
 [dependencies]
+poole-boot-exit = { path = "../bootexit" }
 poole-bootload = { path = "../bootload" }
 poole-boot-config = { path = "../bootcfg" }
 poole-elf = { path = "../elf" }

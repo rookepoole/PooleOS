@@ -65,6 +65,10 @@ name = "poole-boot-config"
 version = "0.0.0"
 
 [[package]]
+name = "poole-boot-exit"
+version = "0.0.0"
+
+[[package]]
 name = "poole-bootload"
 version = "0.0.0"
 dependencies = [
@@ -104,6 +108,7 @@ name = "pooleboot"
 version = "0.0.0"
 dependencies = [
  "poole-boot-config",
+ "poole-boot-exit",
  "poole-bootload",
  "poole-elf",
  "poole-handoff",
