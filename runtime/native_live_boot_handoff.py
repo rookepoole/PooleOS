@@ -1,4 +1,4 @@
-"""Independent oracle for live pre-exit PBP1 transcripts emitted by PooleBoot."""
+"""Independent oracle for live pre-exit and exited-development PBP1 transcripts."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from typing import Any
 from runtime import native_boot_handoff as pbp1
 
 
-CONTRACT_ID = "PBLIVE1"
+CONTRACT_ID = "PBLIVE2"
 TRANSCRIPT_PREFIX = "PBP1HEX/0.1 "
 MAX_CHUNK_BYTES = 64
 BEGIN = re.compile(r"^PBP1HEX/0\.1 BEGIN bytes=([0-9]+)$")
@@ -117,6 +117,132 @@ def validate_pre_exit_profile(handoff: pbp1.Handoff) -> dict[str, Any]:
         "entry_virtual": _hex64(pbp1._u64(artifacts.payload, 40)),
         "sha256": artifacts.payload[48:80].hex().upper(),
     }
+
+
+def _memory_entries(record: pbp1.Record) -> list[dict[str, Any]]:
+    values: list[dict[str, Any]] = []
+    for index in range(record.element_count):
+        base = index * pbp1.MEMORY_ENTRY_BYTES
+        start, pages, attributes = struct.unpack_from("<QQQ", record.payload, base)
+        values.append(
+            {
+                "physical_start": _hex64(start),
+                "page_count": pages,
+                "attributes": _hex64(attributes),
+                "kind": pbp1._u32(record.payload, base + 24),
+                "source_type": pbp1._u32(record.payload, base + 28),
+            }
+        )
+    return values
+
+
+def validate_exit_development_profile(handoff: pbp1.Handoff) -> dict[str, Any]:
+    framebuffer = handoff.record(pbp1.RECORD_FRAMEBUFFER)
+    expected_types = [pbp1.RECORD_CORE, pbp1.RECORD_MEMORY_MAP]
+    if framebuffer is not None:
+        expected_types.append(pbp1.RECORD_FRAMEBUFFER)
+    expected_types.append(pbp1.RECORD_LOADED_ARTIFACTS)
+    expected_features = (
+        pbp1.FEATURE_CORE
+        | pbp1.FEATURE_MEMORY_MAP
+        | pbp1.FEATURE_LOADED_ARTIFACTS
+        | (pbp1.FEATURE_FRAMEBUFFER if framebuffer is not None else 0)
+    )
+    expected_required = pbp1.FEATURE_CORE | pbp1.FEATURE_MEMORY_MAP | pbp1.FEATURE_LOADED_ARTIFACTS
+    if (
+        _record_types(handoff) != expected_types
+        or handoff.features != expected_features
+        or handoff.required_features != expected_required
+    ):
+        raise LiveHandoffError("exited-development PBP1 record or feature profile changed")
+    core_record = handoff.record(pbp1.RECORD_CORE)
+    memory = handoff.record(pbp1.RECORD_MEMORY_MAP)
+    artifacts = handoff.record(pbp1.RECORD_LOADED_ARTIFACTS)
+    if core_record is None or memory is None or artifacts is None:
+        raise LiveHandoffError("exited-development PBP1 required record missing")
+    core = pbp1._validate_core(core_record.payload, handoff.total_size)
+    if (
+        core["boot_flags"] != pbp1.DEVELOPMENT_MODE | pbp1.BOOT_SERVICES_EXITED
+        or core["initial_stack_top_virtual"] == 0
+        or core["initial_stack_top_virtual"] % 16
+        or core["page_table_root_physical"] == 0
+        or core["page_table_root_physical"] % pbp1.PAGE_BYTES
+        or core["uefi_system_table_physical"] != 0
+        or core["uefi_runtime_services_physical"] != 0
+    ):
+        raise LiveHandoffError("exited-development PBP1 transfer state is malformed")
+    if artifacts.element_count != 1:
+        raise LiveHandoffError("exited-development PBP1 must bind exactly one kernel artifact")
+    role, artifact_flags = struct.unpack_from("<II", artifacts.payload)
+    if role != pbp1.ARTIFACT_KERNEL or artifact_flags != (
+        pbp1.ARTIFACT_HASH_VERIFIED | pbp1.ARTIFACT_EXECUTABLE
+    ):
+        raise LiveHandoffError("exited-development PBP1 artifact flags overclaim")
+    try:
+        pbp1.validate_kernel_entry_profile(handoff)
+    except pbp1.BootHandoffError:
+        pass
+    else:
+        raise LiveHandoffError("exited-development PBP1 unexpectedly satisfies kernel entry")
+
+    artifact = {
+        "role": role,
+        "flags": artifact_flags,
+        "physical_base": _hex64(pbp1._u64(artifacts.payload, 8)),
+        "physical_size": pbp1._u64(artifacts.payload, 16),
+        "virtual_base": _hex64(pbp1._u64(artifacts.payload, 24)),
+        "virtual_size": pbp1._u64(artifacts.payload, 32),
+        "entry_virtual": _hex64(pbp1._u64(artifacts.payload, 40)),
+        "sha256": artifacts.payload[48:80].hex().upper(),
+    }
+    framebuffer_summary = None
+    if framebuffer is not None:
+        values = struct.unpack("<QQIIIIIIII", framebuffer.payload)
+        framebuffer_summary = {
+            "physical_base": _hex64(values[0]),
+            "byte_count": values[1],
+            "width": values[2],
+            "height": values[3],
+            "stride": values[4],
+            "pixel_format": values[5],
+            "red_mask": f"{values[6]:08X}",
+            "green_mask": f"{values[7]:08X}",
+            "blue_mask": f"{values[8]:08X}",
+            "reserved_mask": f"{values[9]:08X}",
+        }
+    return {
+        "record_count": len(handoff.records),
+        "features": f"{handoff.features:016X}",
+        "required_features": f"{handoff.required_features:016X}",
+        "memory_entry_count": memory.element_count,
+        "memory_entries": _memory_entries(memory),
+        "core": {
+            "boot_flags": f"{core['boot_flags']:016X}",
+            "kernel_physical_base": _hex64(core["kernel_physical_base"]),
+            "kernel_physical_size": core["kernel_physical_size"],
+            "kernel_virtual_base": _hex64(core["kernel_virtual_base"]),
+            "kernel_virtual_size": core["kernel_virtual_size"],
+            "kernel_entry_virtual": _hex64(core["kernel_entry_virtual"]),
+            "initial_stack_top_virtual": _hex64(core["initial_stack_top_virtual"]),
+            "page_table_root_physical": _hex64(core["page_table_root_physical"]),
+            "handoff_physical_base": _hex64(core["handoff_physical_base"]),
+            "handoff_virtual_base": _hex64(core["handoff_virtual_base"]),
+            "handoff_byte_count": core["handoff_byte_count"],
+            "boot_attempt": core["boot_attempt"],
+            "boot_attempt_limit": core["boot_attempt_limit"],
+            "boot_slot": core["boot_slot"],
+            "selected_entry": core["selected_entry"],
+            "uefi_revision": f"{core['uefi_revision']:08X}",
+        },
+        "kernel_artifact": artifact,
+        "framebuffer": framebuffer_summary,
+        "development_mode_only": True,
+        "boot_services_exited": True,
+        "transferable": False,
+        "secret_bearing_records_present": False,
+        "exit_development_profile_validated": True,
+        "kernel_entry_profile_rejected": True,
+    }
     framebuffer_summary = None
     if framebuffer is not None:
         values = struct.unpack("<QQIIIIIIII", framebuffer.payload)
@@ -207,7 +333,16 @@ def extract_transcript(raw: bytes) -> Transcript:
         handoff = pbp1.decode(data)
     except pbp1.BootHandoffError as error:
         raise LiveHandoffError(f"PBP1 transcript payload rejects: {error}") from error
-    profile = validate_pre_exit_profile(handoff)
+    core_record = handoff.record(pbp1.RECORD_CORE)
+    if core_record is None:
+        raise LiveHandoffError("PBP1 core record is missing")
+    boot_flags = pbp1._validate_core(core_record.payload, handoff.total_size)["boot_flags"]
+    if boot_flags == pbp1.DEVELOPMENT_MODE:
+        profile = validate_pre_exit_profile(handoff)
+    elif boot_flags == pbp1.DEVELOPMENT_MODE | pbp1.BOOT_SERVICES_EXITED:
+        profile = validate_exit_development_profile(handoff)
+    else:
+        raise LiveHandoffError("live PBP1 boot-state profile is unsupported")
     summary = {
         "contract_id": CONTRACT_ID,
         "byte_count": len(data),
@@ -219,6 +354,24 @@ def extract_transcript(raw: bytes) -> Transcript:
     return Transcript(data=data, summary=summary)
 
 
+def _loader_range_covered(entries: list[dict[str, Any]], start: int, byte_count: int) -> bool:
+    end = start + byte_count
+    cursor = start
+    for entry in entries:
+        entry_start = int(entry["physical_start"], 16)
+        entry_end = entry_start + entry["page_count"] * pbp1.PAGE_BYTES
+        if cursor < entry_start:
+            return False
+        if cursor >= entry_end:
+            continue
+        if entry["kind"] != pbp1.MEMORY_LOADER_RESERVED:
+            return False
+        cursor = min(entry_end, end)
+        if cursor == end:
+            return True
+    return False
+
+
 def validate_oracle_binding(
     transcript: dict[str, Any],
     marker_summary: dict[str, Any],
@@ -226,7 +379,10 @@ def validate_oracle_binding(
 ) -> None:
     marker = marker_summary["pbp1"]
     if (
-        transcript["byte_count"] != marker["byte_count"]
+        transcript.get("boot_services_exited") is not True
+        or transcript.get("exit_development_profile_validated") is not True
+        or transcript.get("transferable") is not False
+        or transcript["byte_count"] != marker["byte_count"]
         or transcript["record_count"] != marker["record_count"]
         or transcript["memory_entry_count"] != marker["memory_entry_count"]
         or int(transcript["framebuffer"] is not None) != marker["framebuffer_present"]
@@ -237,6 +393,7 @@ def validate_oracle_binding(
         raise LiveHandoffError("PBP1 marker and reconstructed transcript diverge")
     core = transcript["core"]
     artifact = transcript["kernel_artifact"]
+    retained = marker_summary["kernel_map"]["retained"]
     plan = media_inspection["kernel"]["plan"]
     config = marker_summary["boot_config"]
     manifest = marker_summary["manifest"]
@@ -253,6 +410,12 @@ def validate_oracle_binding(
         or core["boot_slot"] != config["selected_slot"]
         or core["selected_entry"] != 1
         or int(core["uefi_revision"], 16) != marker_summary["uefi_revision"]
+        or int(core["kernel_physical_base"], 16) != retained["kernel_physical_base"]
+        or int(core["initial_stack_top_virtual"], 16) != retained["stack_top_virtual"]
+        or int(core["page_table_root_physical"], 16)
+        != retained["page_table_root_physical"]
+        or int(core["handoff_physical_base"], 16) != retained["handoff_physical_base"]
+        or int(core["handoff_virtual_base"], 16) != retained["handoff_virtual_base"]
         or artifact["physical_base"] != core["kernel_physical_base"]
         or artifact["physical_size"] != core["kernel_physical_size"]
         or artifact["virtual_base"] != core["kernel_virtual_base"]
@@ -262,6 +425,26 @@ def validate_oracle_binding(
         or artifact["sha256"][:16] != manifest["kernel_sha256_prefix"]
     ):
         raise LiveHandoffError("PBP1 kernel/config/manifest/entry cross-binding differs")
+    retained_ranges = (
+        (retained["kernel_physical_base"], core["kernel_physical_size"]),
+        (
+            retained["page_table_root_physical"],
+            retained["table_page_count"] * pbp1.PAGE_BYTES,
+        ),
+        (
+            retained["stack_physical_base"],
+            retained["stack_page_count"] * pbp1.PAGE_BYTES,
+        ),
+        (
+            retained["handoff_physical_base"],
+            retained["handoff_page_count"] * pbp1.PAGE_BYTES,
+        ),
+    )
+    if not all(
+        _loader_range_covered(transcript["memory_entries"], start, size)
+        for start, size in retained_ranges
+    ):
+        raise LiveHandoffError("PBP1 final map omits a retained loader range")
     framebuffer = transcript["framebuffer"]
     gop = marker_summary["gop"]
     if framebuffer is None or (

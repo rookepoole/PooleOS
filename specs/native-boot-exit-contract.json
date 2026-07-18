@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_boot_exit_contract",
+  "contract_id": "PBEXIT1",
+  "selected_move_id": "N5-HANDOFF-001",
+  "status_date": "2026-07-17",
+  "status": "bounded_exit_boot_services_success_and_permanent_pre_transfer_stop_non_promoting",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "phase_mapping": ["N5.5", "N5.8"],
+  "source_requirement_ids": ["013", "014", "015", "ADD-BOOT-001"],
+  "preconditions": {
+    "tpl": "TPL_APPLICATION",
+    "kernel_pages_retained": true,
+    "page_table_pages_retained": true,
+    "guarded_stack_pages_retained": true,
+    "handoff_pages_retained": true,
+    "fallible_setup_completed_before_first_attempt": true,
+    "raw_memory_map_capacity_bytes": 1048576,
+    "normalized_memory_map_capacity_bytes": 655360,
+    "handoff_capacity_bytes": 1048576
+  },
+  "attempt_protocol": {
+    "maximum_attempts": 4,
+    "ordered_operations": [
+      "GetMemoryMap into preallocated storage",
+      "normalize exact final map and finalize PBP1 in retained storage",
+      "ExitBootServices with the returned MapKey"
+    ],
+    "retryable_status": "EFI_INVALID_PARAMETER",
+    "fresh_get_memory_map_required_after_retry": true,
+    "non_retryable_status_is_fatal": true,
+    "return_to_uefi_after_first_attempt_allowed": false,
+    "allocation_between_final_map_and_exit_allowed": false,
+    "non_memory_boot_service_after_first_attempt_allowed": false
+  },
+  "post_success_boundary": {
+    "boot_services_calls_allowed": false,
+    "device_protocol_calls_allowed": false,
+    "runtime_services_retained": false,
+    "diagnostic_transport": "direct COM1 and QEMU debugcon port I/O only",
+    "kernel_entry_called": false,
+    "transfer_allowed": false,
+    "terminal_state": "interrupts disabled and CPU halted before transfer"
+  },
+  "required_negative_controls": [
+    "NEG-N5-PBEXIT-MAP-SHAPE",
+    "NEG-N5-PBEXIT-DESCRIPTOR-VERSION",
+    "NEG-N5-PBEXIT-ORDER",
+    "NEG-N5-PBEXIT-NONRETRYABLE",
+    "NEG-N5-PBEXIT-RETRY-EXHAUSTED",
+    "NEG-N5-PBEXIT-POST-ATTEMPT-FIRMWARE",
+    "NEG-N5-PBEXIT-POST-EXIT-FIRMWARE",
+    "NEG-N5-PBEXIT-MARKER-ATTEMPTS",
+    "NEG-N5-PBEXIT-MARKER-DESCRIPTOR",
+    "NEG-N5-PBEXIT-FIRMWARE-BOUNDARY",
+    "NEG-N5-PBEXIT-TRANSFER"
+  ],
+  "claims": {
+    "fresh_final_memory_map_observed": true,
+    "bounded_retry_implemented": true,
+    "exit_boot_services_success_observed": true,
+    "zero_firmware_calls_after_exit_observed": true,
+    "permanent_pre_transfer_stop_observed": true,
+    "kernel_entry_called": false,
+    "transferable_handoff_produced": false,
+    "target_firmware_tested": false,
+    "physical_hardware_tested": false,
+    "n5_exit_gate_satisfied": false,
+    "production_ready": false
+  },
+  "claim_boundary": [
+    "PBEXIT1 proves one bounded development path through a successful UEFI ExitBootServices call under QEMU/OVMF.",
+    "A fresh memory map and PBP1 candidate precede every attempt; only EFI_INVALID_PARAMETER may trigger a bounded retry.",
+    "All fallible allocation and mapping setup occurs before the first attempt, and the implementation never returns to UEFI after an attempt begins.",
+    "After success, direct serial/debugcon I/O emits evidence without invoking firmware, interrupts remain disabled, and execution halts before kernel transfer.",
+    "The exited PBP1 remains development-only because signatures, initial-system state, entropy, and the kernel-entry profile are incomplete.",
+    "This does not qualify target firmware, physical hardware, kernel entry, installation, signing, or production readiness."
+  ],
+  "official_references": [
+    "https://uefi.org/specs/UEFI/2.11/07_Services_Boot_Services.html",
+    "https://uefi.org/specs/UEFI/2.11/02_Overview.html",
+    "https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html"
+  ]
+}

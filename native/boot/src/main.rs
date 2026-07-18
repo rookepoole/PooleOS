@@ -3,8 +3,10 @@
 #![deny(warnings)]
 #![forbid(unsafe_op_in_unsafe_fn)]
 
+mod exit;
 mod kload;
 mod kmap;
+#[allow(dead_code)]
 mod livehandoff;
 
 use core::arch::asm;
@@ -16,9 +18,8 @@ use core::ptr::{null, null_mut, write_volatile};
 use core::slice::from_raw_parts;
 
 use pooleboot::{
-    ContractError, EFI_BUFFER_TOO_SMALL, FramebufferLayout, MemoryMapSummary, identity_rgb,
-    pack_pixel, plan_memory_map, validate_configuration_tables, validate_framebuffer,
-    validate_memory_map_result, validate_table_header,
+    ContractError, EFI_BUFFER_TOO_SMALL, FramebufferLayout, identity_rgb, pack_pixel,
+    validate_configuration_tables, validate_framebuffer, validate_table_header,
 };
 
 type EfiStatus = usize;
@@ -27,7 +28,6 @@ type EfiHandle = *mut c_void;
 const EFI_SUCCESS: EfiStatus = 0;
 const EFI_INVALID_PARAMETER: EfiStatus = pooleboot::EFI_ERROR_BIT | 2;
 const EFI_UNSUPPORTED: EfiStatus = pooleboot::EFI_ERROR_BIT | 3;
-const EFI_DEVICE_ERROR: EfiStatus = pooleboot::EFI_ERROR_BIT | 7;
 const EFI_OUT_OF_RESOURCES: EfiStatus = pooleboot::EFI_ERROR_BIT | 9;
 const EFI_COMPROMISED_DATA: EfiStatus = pooleboot::EFI_ERROR_BIT | 33;
 const EFI_LOADER_DATA: u32 = 2;
@@ -36,7 +36,6 @@ const EFI_BOOT_SERVICES_SIGNATURE: u64 = 0x5652_4553_544f_4f42;
 const COM1_BASE: u16 = 0x03f8;
 const DEBUGCON_PORT: u16 = 0x0402;
 const DEBUG_EXIT_PORT: u16 = 0x00f4;
-const FRAME_HOLD_MICROSECONDS: usize = 250_000;
 
 #[repr(C)]
 #[derive(Clone, Copy)]
@@ -206,7 +205,6 @@ type AllocatePool = extern "efiapi" fn(u32, usize, *mut *mut c_void) -> EfiStatu
 type FreePool = extern "efiapi" fn(*mut c_void) -> EfiStatus;
 type LocateProtocol =
     extern "efiapi" fn(*const EfiGuid, *mut c_void, *mut *mut c_void) -> EfiStatus;
-type Stall = extern "efiapi" fn(usize) -> EfiStatus;
 type SetWatchdogTimer = extern "efiapi" fn(usize, u64, usize, *const u16) -> EfiStatus;
 
 struct DiagnosticWriter;
@@ -315,15 +313,7 @@ fn fail_detail(failure: kload::Failure) -> EfiStatus {
     failure.status
 }
 
-fn fail_handoff_detail(failure: livehandoff::Failure) -> EfiStatus {
-    diagnostic(format_args!(
-        "POOLEBOOT/0.1 ERROR stage={} code={} status=0x{:016X}\n",
-        failure.stage, failure.code, failure.status as u64
-    ));
-    failure.status
-}
-
-fn fail_kmap_detail(failure: kmap::Failure) -> EfiStatus {
+fn fail_exit_detail(failure: exit::Failure) -> EfiStatus {
     diagnostic(format_args!(
         "POOLEBOOT/0.1 ERROR stage={} code={} status=0x{:016X}\n",
         failure.stage, failure.code, failure.status as u64
@@ -459,62 +449,6 @@ fn discover_gop(boot_services: &EfiBootServices) -> Result<GopSummary, EfiStatus
     })
 }
 
-fn capture_memory_map(boot_services: &EfiBootServices) -> Result<MemoryMapSummary, EfiStatus> {
-    let get_memory_map: GetMemoryMap = unsafe { function(boot_services.get_memory_map)? };
-    let allocate_pool: AllocatePool = unsafe { function(boot_services.allocate_pool)? };
-    let free_pool: FreePool = unsafe { function(boot_services.free_pool)? };
-
-    let mut required_size = 0usize;
-    let mut map_key = 0usize;
-    let mut descriptor_size = 0usize;
-    let mut descriptor_version = 0u32;
-    let probe_status = get_memory_map(
-        &mut required_size,
-        null_mut(),
-        &mut map_key,
-        &mut descriptor_size,
-        &mut descriptor_version,
-    );
-    let plan = plan_memory_map(probe_status, required_size, descriptor_size)
-        .map_err(|_| EFI_COMPROMISED_DATA)?;
-    let mut buffer = null_mut();
-    let allocation_status = allocate_pool(EFI_LOADER_DATA, plan.allocation_size, &mut buffer);
-    if allocation_status != EFI_SUCCESS || buffer.is_null() {
-        return Err(if allocation_status == EFI_SUCCESS {
-            EFI_OUT_OF_RESOURCES
-        } else {
-            allocation_status
-        });
-    }
-
-    let mut map_size = plan.allocation_size;
-    let final_status = get_memory_map(
-        &mut map_size,
-        buffer,
-        &mut map_key,
-        &mut descriptor_size,
-        &mut descriptor_version,
-    );
-    let summary = validate_memory_map_result(
-        final_status,
-        map_size,
-        plan.allocation_size,
-        descriptor_size,
-    )
-    .map_err(|error| {
-        if error == ContractError::FinalMemoryMapStatus && final_status == EFI_BUFFER_TOO_SMALL {
-            EFI_BUFFER_TOO_SMALL
-        } else {
-            EFI_COMPROMISED_DATA
-        }
-    });
-    let free_status = free_pool(buffer);
-    if free_status != EFI_SUCCESS {
-        return Err(EFI_DEVICE_ERROR);
-    }
-    summary
-}
-
 fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus {
     initialize_serial();
     diagnostic(format_args!("POOLEBOOT/0.1 ENTRY\n"));
@@ -636,102 +570,15 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
         kernel.kernel_file_bytes
     ));
     diagnostic(format_args!(
-        "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes={} pages={} entry_offset={} relocations={} fnv1a64={:016X}\n",
+        "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes={} pages={} entry_offset={} relocations={} files_closed={} pools_freed={} fnv1a64={:016X}\n",
         kernel.kernel_image_bytes,
         kernel.page_count,
         kernel.entry_offset,
         kernel.relocation_count,
+        kernel.closed_file_count,
+        kernel.freed_pool_count,
         kernel.loaded_fnv1a64
     ));
-    let handoff_result = livehandoff::produce(
-        boot_services,
-        &kernel,
-        gop_result.ok(),
-        system.header.revision,
-    );
-    let handoff = match handoff_result {
-        Ok(summary) => summary,
-        Err(failure) => {
-            if let Err(release_failure) = kload::release_kernel_pages(
-                boot_services,
-                kernel.kernel_physical_base,
-                kernel.page_count,
-            ) {
-                return fail_detail(release_failure);
-            }
-            return fail_handoff_detail(failure);
-        }
-    };
-    diagnostic(format_args!(
-        "POOLEBOOT/0.1 PBP1 PASS bytes={} records={} memory_entries={} framebuffer={} artifacts={} descriptor_bytes={} map_attempts={} message_crc32={:08X} fnv1a64={:016X} state=pre_exit\n",
-        handoff.handoff.total_bytes,
-        handoff.handoff.record_count,
-        handoff.handoff.memory_entry_count,
-        u8::from(handoff.handoff.framebuffer_present),
-        handoff.handoff.artifact_count,
-        handoff.descriptor_size,
-        handoff.map_attempts,
-        handoff.handoff.message_crc32,
-        handoff.handoff.fnv1a64
-    ));
-    diagnostic(format_args!(
-        "POOLEBOOT/0.1 PBP1_RELEASE PASS pools_freed={} bytes_unchanged={}\n",
-        handoff.pools_freed,
-        u8::from(handoff.bytes_unchanged)
-    ));
-
-    let mapping_result = kmap::activate_and_restore(boot_services, &kernel, gop_result.ok());
-    let release_result = kload::release_kernel_pages(
-        boot_services,
-        kernel.kernel_physical_base,
-        kernel.page_count,
-    );
-    let mapping = match mapping_result {
-        Ok(summary) => summary,
-        Err(failure) => {
-            if let Err(release_failure) = release_result {
-                return fail_detail(release_failure);
-            }
-            return fail_kmap_detail(failure);
-        }
-    };
-    diagnostic(format_args!(
-        "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract={} mappings={} pages={} ro={} rx={} rw={} wx={} pml4={} pdpt={} pd={} pt={} leaf_fnv1a64={:016X}\n",
-        poole_kmap::CONTRACT_ID,
-        kernel.mapping_count,
-        mapping.plan.mapped_page_count,
-        mapping.plan.read_only_page_count,
-        mapping.plan.read_execute_page_count,
-        mapping.plan.read_write_page_count,
-        mapping.plan.writable_executable_page_count,
-        mapping.plan.pml4_index,
-        mapping.plan.pdpt_index,
-        mapping.plan.page_directory_index,
-        mapping.plan.first_page_table_index,
-        mapping.plan.leaf_fingerprint
-    ));
-    diagnostic(format_args!(
-        "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages={} mapped_pages={} physical_bits={} mapped_fnv1a64={:016X} framebuffer=preserved cache_signature={:02X} first_page_bytes={} last_page_bytes={}\n",
-        mapping.table_page_count,
-        mapping.plan.mapped_page_count,
-        mapping.physical_address_bits,
-        mapping.mapped_fnv1a64,
-        mapping.framebuffer_cache_signature,
-        mapping.framebuffer_first_page_size,
-        mapping.framebuffer_last_page_size
-    ));
-    diagnostic(format_args!(
-        "POOLEBOOT/0.1 KERNEL_MAP_ROLLBACK PASS original_cr3=restored tables_freed={} firmware_calls_while_active={}\n",
-        mapping.tables_freed, mapping.firmware_calls_while_active
-    ));
-    if let Err(failure) = release_result {
-        return fail_detail(failure);
-    }
-    diagnostic(format_args!(
-        "POOLEBOOT/0.1 KERNEL_RELEASE PASS files_closed={} pools_freed={} pages_freed={}\n",
-        kernel.closed_file_count, kernel.freed_pool_count, kernel.page_count
-    ));
-
     let gop = match gop_result {
         Ok(summary) => {
             diagnostic(format_args!(
@@ -755,32 +602,28 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
             None
         }
     };
-
-    let memory_map = match capture_memory_map(boot_services) {
-        Ok(summary) => summary,
-        Err(status) => return fail("memory_map", status),
-    };
-    diagnostic(format_args!(
-        "POOLEBOOT/0.1 MEMORY_MAP PASS bytes={} descriptor_bytes={} descriptors={}\n",
-        memory_map.map_size, memory_map.descriptor_size, memory_map.descriptor_count
-    ));
-    diagnostic(format_args!(
-        "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted kernel=loaded_then_released handoff=pre_exit_produced_then_released mappings=activated_then_rolled_back entry=not_called exit_boot_services=not_called\n"
-    ));
-
     if gop.is_some() {
         diagnostic(format_args!("POOLEBOOT/0.1 FRAME READY\n"));
-        let stall: Stall = match unsafe { function(boot_services.stall) } {
-            Ok(function) => function,
-            Err(status) => return fail("stall_pointer", status),
-        };
-        let stall_status = stall(FRAME_HOLD_MICROSECONDS);
-        if stall_status != EFI_SUCCESS {
-            return fail("stall", stall_status);
+    }
+    match exit::exit_and_stop(
+        image_handle,
+        boot_services,
+        &kernel,
+        gop,
+        system.header.revision,
+    ) {
+        Ok(()) => unreachable!(),
+        Err(failure) => {
+            if let Err(release_failure) = kload::release_kernel_pages(
+                boot_services,
+                kernel.kernel_physical_base,
+                kernel.page_count,
+            ) {
+                return fail_detail(release_failure);
+            }
+            fail_exit_detail(failure)
         }
     }
-    diagnostic(format_args!("POOLEBOOT/0.1 RETURN EFI_SUCCESS\n"));
-    EFI_SUCCESS
 }
 
 #[unsafe(export_name = "efi_main")]

@@ -2,6 +2,7 @@
 #![deny(warnings)]
 
 pub const CONTRACT_ID: &str = "PKMAP1";
+pub const RETAINED_CONTRACT_ID: &str = "PKMAP2";
 pub const PAGE_SIZE: u64 = 4096;
 pub const TABLE_ENTRIES: usize = 512;
 pub const TABLE_PAGE_COUNT: usize = 4;
@@ -9,6 +10,13 @@ pub const MAX_MAPPINGS: usize = 8;
 pub const WINDOW_BYTES: u64 = 2 * 1024 * 1024;
 pub const MIN_VIRTUAL_BASE: u64 = 0xffff_ffff_8000_0000;
 pub const MAX_VIRTUAL_EXCLUSIVE: u64 = 0xffff_ffff_c000_0000;
+pub const STACK_GUARD_LOW_PAGE: usize = 48;
+pub const STACK_FIRST_PAGE: usize = 49;
+pub const STACK_PAGE_COUNT: usize = 8;
+pub const STACK_GUARD_HIGH_PAGE: usize = 57;
+pub const HANDOFF_FIRST_PAGE: usize = 64;
+pub const HANDOFF_PAGE_COUNT: usize = 256;
+pub const HANDOFF_CAPACITY_BYTES: u64 = HANDOFF_PAGE_COUNT as u64 * PAGE_SIZE;
 
 pub const ENTRY_PRESENT: u64 = 1 << 0;
 pub const ENTRY_WRITABLE: u64 = 1 << 1;
@@ -63,6 +71,10 @@ pub enum Error {
     ActivationMismatch,
     RollbackMismatch,
     FirmwareBeforeRollback,
+    RetainedRange,
+    RetainedOverlap,
+    GuardPage,
+    RetentionOrder,
     ReleaseOrder,
 }
 
@@ -104,6 +116,10 @@ impl Error {
             Self::ActivationMismatch => "activation_mismatch",
             Self::RollbackMismatch => "rollback_mismatch",
             Self::FirmwareBeforeRollback => "firmware_before_rollback",
+            Self::RetainedRange => "retained_range",
+            Self::RetainedOverlap => "retained_overlap",
+            Self::GuardPage => "guard_page",
+            Self::RetentionOrder => "retention_order",
             Self::ReleaseOrder => "release_order",
         }
     }
@@ -248,6 +264,29 @@ pub struct Summary {
     pub read_write_page_count: u32,
     pub writable_executable_page_count: u32,
     pub leaf_fingerprint: u64,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct RetainedRequest {
+    pub stack_physical_base: u64,
+    pub stack_page_count: u32,
+    pub handoff_physical_base: u64,
+    pub handoff_capacity_bytes: u32,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct RetainedSummary {
+    pub kernel: Summary,
+    pub stack_first_page_table_index: u16,
+    pub stack_page_count: u32,
+    pub stack_bottom_virtual: u64,
+    pub stack_top_virtual: u64,
+    pub handoff_first_page_table_index: u16,
+    pub handoff_page_count: u32,
+    pub handoff_virtual_base: u64,
+    pub guard_page_count: u32,
+    pub total_mapped_page_count: u32,
+    pub retained_leaf_fingerprint: u64,
 }
 
 fn physical_mask(bits: u8) -> Result<u64, Error> {
@@ -615,6 +654,261 @@ pub fn verify(
     Ok(summary)
 }
 
+fn retained_summary(
+    request: &Request,
+    addresses: TableAddresses,
+    retained: RetainedRequest,
+) -> Result<RetainedSummary, Error> {
+    let kernel = request_summary(request, addresses)?;
+    if kernel.first_page_table_index != 0
+        || usize::try_from(request.page_count).map_err(|_| Error::PageCount)? > STACK_GUARD_LOW_PAGE
+        || retained.stack_physical_base == 0
+        || retained.stack_physical_base & (PAGE_SIZE - 1) != 0
+        || usize::try_from(retained.stack_page_count).map_err(|_| Error::RetainedRange)?
+            != STACK_PAGE_COUNT
+        || retained.handoff_physical_base == 0
+        || retained.handoff_physical_base & (PAGE_SIZE - 1) != 0
+        || u64::from(retained.handoff_capacity_bytes) != HANDOFF_CAPACITY_BYTES
+    {
+        return Err(Error::RetainedRange);
+    }
+    let maximum_physical = 1u64 << request.physical_address_bits;
+    let kernel_bytes = u64::from(request.image_bytes);
+    let table_bytes = TABLE_PAGE_COUNT as u64 * PAGE_SIZE;
+    let stack_bytes = retained.stack_page_count as u64 * PAGE_SIZE;
+    let handoff_bytes = u64::from(retained.handoff_capacity_bytes);
+    for (start, byte_count) in [
+        (retained.stack_physical_base, stack_bytes),
+        (retained.handoff_physical_base, handoff_bytes),
+    ] {
+        if range_end(start, byte_count, Error::RetainedRange)? > maximum_physical {
+            return Err(Error::RetainedRange);
+        }
+    }
+    let ranges = [
+        (request.physical_base, kernel_bytes),
+        (addresses.candidate_root, table_bytes),
+        (retained.stack_physical_base, stack_bytes),
+        (retained.handoff_physical_base, handoff_bytes),
+    ];
+    for first in 0..ranges.len() {
+        for second in first + 1..ranges.len() {
+            if ranges_overlap(
+                ranges[first].0,
+                ranges[first].1,
+                ranges[second].0,
+                ranges[second].1,
+            ) {
+                return Err(Error::RetainedOverlap);
+            }
+        }
+    }
+    let stack_bottom_virtual = request
+        .virtual_base
+        .checked_add(STACK_FIRST_PAGE as u64 * PAGE_SIZE)
+        .ok_or(Error::RetainedRange)?;
+    let stack_top_virtual = stack_bottom_virtual
+        .checked_add(stack_bytes)
+        .ok_or(Error::RetainedRange)?;
+    let handoff_virtual_base = request
+        .virtual_base
+        .checked_add(HANDOFF_FIRST_PAGE as u64 * PAGE_SIZE)
+        .ok_or(Error::RetainedRange)?;
+    let handoff_end = handoff_virtual_base
+        .checked_add(handoff_bytes)
+        .ok_or(Error::RetainedRange)?;
+    if !is_canonical_48(stack_bottom_virtual)
+        || !is_canonical_48(stack_top_virtual - 1)
+        || !is_canonical_48(handoff_virtual_base)
+        || !is_canonical_48(handoff_end - 1)
+        || handoff_end > request.virtual_base + WINDOW_BYTES
+        || STACK_FIRST_PAGE + STACK_PAGE_COUNT != STACK_GUARD_HIGH_PAGE
+        || STACK_GUARD_HIGH_PAGE >= HANDOFF_FIRST_PAGE
+        || HANDOFF_FIRST_PAGE + HANDOFF_PAGE_COUNT > TABLE_ENTRIES
+    {
+        return Err(Error::RetainedRange);
+    }
+    let mut fingerprint = FNV_OFFSET;
+    for page in 0..STACK_PAGE_COUNT {
+        fingerprint = fnv_u64(fingerprint, 1);
+        fingerprint = fnv_u64(fingerprint, (STACK_FIRST_PAGE + page) as u64);
+        fingerprint = fnv_u64(
+            fingerprint,
+            retained.stack_physical_base + page as u64 * PAGE_SIZE,
+        );
+        fingerprint = fnv_u64(fingerprint, permission_code(Permissions::READ_WRITE));
+    }
+    for page in 0..HANDOFF_PAGE_COUNT {
+        fingerprint = fnv_u64(fingerprint, 2);
+        fingerprint = fnv_u64(fingerprint, (HANDOFF_FIRST_PAGE + page) as u64);
+        fingerprint = fnv_u64(
+            fingerprint,
+            retained.handoff_physical_base + page as u64 * PAGE_SIZE,
+        );
+        fingerprint = fnv_u64(fingerprint, permission_code(Permissions::READ));
+    }
+    Ok(RetainedSummary {
+        kernel,
+        stack_first_page_table_index: STACK_FIRST_PAGE as u16,
+        stack_page_count: retained.stack_page_count,
+        stack_bottom_virtual,
+        stack_top_virtual,
+        handoff_first_page_table_index: HANDOFF_FIRST_PAGE as u16,
+        handoff_page_count: HANDOFF_PAGE_COUNT as u32,
+        handoff_virtual_base,
+        guard_page_count: 2,
+        total_mapped_page_count: request.page_count
+            + retained.stack_page_count
+            + HANDOFF_PAGE_COUNT as u32,
+        retained_leaf_fingerprint: fingerprint,
+    })
+}
+
+fn retained_leaf(request: &Request, retained: RetainedRequest, index: usize) -> Result<u64, Error> {
+    let first_kernel = page_table_index(request.virtual_base);
+    let kernel_pages = usize::try_from(request.page_count).map_err(|_| Error::PageCount)?;
+    if index >= first_kernel && index < first_kernel + kernel_pages {
+        let page = index - first_kernel;
+        let offset = page as u64 * PAGE_SIZE;
+        let permissions = mapping_for_offset(request, offset)?;
+        return Ok((request.physical_base + offset) | leaf_flags(permissions));
+    }
+    if (STACK_FIRST_PAGE..STACK_FIRST_PAGE + STACK_PAGE_COUNT).contains(&index) {
+        let page = index - STACK_FIRST_PAGE;
+        return Ok((retained.stack_physical_base + page as u64 * PAGE_SIZE)
+            | leaf_flags(Permissions::READ_WRITE));
+    }
+    if (HANDOFF_FIRST_PAGE..HANDOFF_FIRST_PAGE + HANDOFF_PAGE_COUNT).contains(&index) {
+        let page = index - HANDOFF_FIRST_PAGE;
+        return Ok((retained.handoff_physical_base + page as u64 * PAGE_SIZE)
+            | leaf_flags(Permissions::READ));
+    }
+    Ok(0)
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn populate_retained(
+    request: &Request,
+    retained: RetainedRequest,
+    addresses: TableAddresses,
+    original_root: &[u64; TABLE_ENTRIES],
+    candidate_root: &mut [u64; TABLE_ENTRIES],
+    pdpt: &mut [u64; TABLE_ENTRIES],
+    page_directory: &mut [u64; TABLE_ENTRIES],
+    page_table: &mut [u64; TABLE_ENTRIES],
+) -> Result<RetainedSummary, Error> {
+    let summary = retained_summary(request, addresses, retained)?;
+    populate(
+        request,
+        addresses,
+        original_root,
+        candidate_root,
+        pdpt,
+        page_directory,
+        page_table,
+    )?;
+    for (index, entry) in page_table
+        .iter_mut()
+        .enumerate()
+        .skip(STACK_FIRST_PAGE)
+        .take(STACK_PAGE_COUNT)
+    {
+        *entry = retained_leaf(request, retained, index)?;
+    }
+    for (index, entry) in page_table
+        .iter_mut()
+        .enumerate()
+        .skip(HANDOFF_FIRST_PAGE)
+        .take(HANDOFF_PAGE_COUNT)
+    {
+        *entry = retained_leaf(request, retained, index)?;
+    }
+    let observed = verify_retained(
+        request,
+        retained,
+        addresses,
+        original_root,
+        candidate_root,
+        pdpt,
+        page_directory,
+        page_table,
+    )?;
+    if observed != summary {
+        return Err(Error::LeafEntry);
+    }
+    Ok(summary)
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn verify_retained(
+    request: &Request,
+    retained: RetainedRequest,
+    addresses: TableAddresses,
+    original_root: &[u64; TABLE_ENTRIES],
+    candidate_root: &[u64; TABLE_ENTRIES],
+    pdpt: &[u64; TABLE_ENTRIES],
+    page_directory: &[u64; TABLE_ENTRIES],
+    page_table: &[u64; TABLE_ENTRIES],
+) -> Result<RetainedSummary, Error> {
+    let summary = retained_summary(request, addresses, retained)?;
+    let root_index = usize::from(summary.kernel.pml4_index);
+    if original_root[root_index] != 0 {
+        return Err(Error::RootSlotOccupied);
+    }
+    for (index, observed) in candidate_root.iter().enumerate() {
+        let expected = if index == root_index {
+            addresses.pdpt | PARENT_FLAGS
+        } else {
+            original_root[index]
+        };
+        if *observed != expected {
+            return Err(if index == root_index {
+                Error::ParentEntry
+            } else {
+                Error::UnexpectedEntry
+            });
+        }
+    }
+    let pdpt_target = usize::from(summary.kernel.pdpt_index);
+    let directory_target = usize::from(summary.kernel.page_directory_index);
+    for (index, (observed_pdpt, observed_directory)) in
+        pdpt.iter().zip(page_directory.iter()).enumerate()
+    {
+        let expected_pdpt = if index == pdpt_target {
+            addresses.page_directory | PARENT_FLAGS
+        } else {
+            0
+        };
+        let expected_directory = if index == directory_target {
+            addresses.page_table | PARENT_FLAGS
+        } else {
+            0
+        };
+        if *observed_pdpt != expected_pdpt || *observed_directory != expected_directory {
+            return Err(if index == pdpt_target || index == directory_target {
+                Error::ParentEntry
+            } else {
+                Error::UnexpectedEntry
+            });
+        }
+    }
+    for (index, observed) in page_table.iter().enumerate() {
+        let expected = retained_leaf(request, retained, index)?;
+        if *observed != expected {
+            return Err(
+                if matches!(index, STACK_GUARD_LOW_PAGE | STACK_GUARD_HIGH_PAGE) {
+                    Error::GuardPage
+                } else if expected != 0 {
+                    Error::LeafEntry
+                } else {
+                    Error::UnexpectedEntry
+                },
+            );
+        }
+    }
+    Ok(summary)
+}
+
 pub trait TableReader {
     fn read_entry(&self, table_address: u64, index: usize) -> Result<u64, Error>;
 }
@@ -784,6 +1078,89 @@ pub fn verify_kernel_translations<R: TableReader>(
     Ok(summary)
 }
 
+fn verify_retained_translation<R: TableReader>(
+    reader: &R,
+    root: u64,
+    virtual_address: u64,
+    physical_address: u64,
+    writable: bool,
+    physical_address_bits: u8,
+) -> Result<(), Error> {
+    let translation = translate(reader, root, virtual_address, physical_address_bits)?;
+    if translation.physical_address != physical_address
+        || translation.page_size != PAGE_SIZE
+        || translation.writable != writable
+        || translation.executable
+        || translation.user
+        || translation.cache
+            != (CacheBits {
+                pwt: false,
+                pcd: false,
+                pat: false,
+            })
+    {
+        return Err(Error::LeafEntry);
+    }
+    Ok(())
+}
+
+pub fn verify_retained_translations<R: TableReader>(
+    reader: &R,
+    root: u64,
+    request: &Request,
+    retained: RetainedRequest,
+    expected: RetainedSummary,
+) -> Result<(), Error> {
+    if verify_kernel_translations(reader, root, request)? != expected.kernel {
+        return Err(Error::LeafEntry);
+    }
+    let stack_bytes = retained.stack_page_count as u64 * PAGE_SIZE;
+    verify_retained_translation(
+        reader,
+        root,
+        expected.stack_bottom_virtual,
+        retained.stack_physical_base,
+        true,
+        request.physical_address_bits,
+    )?;
+    verify_retained_translation(
+        reader,
+        root,
+        expected.stack_top_virtual - 1,
+        retained.stack_physical_base + stack_bytes - 1,
+        true,
+        request.physical_address_bits,
+    )?;
+    verify_retained_translation(
+        reader,
+        root,
+        expected.handoff_virtual_base,
+        retained.handoff_physical_base,
+        false,
+        request.physical_address_bits,
+    )?;
+    verify_retained_translation(
+        reader,
+        root,
+        expected.handoff_virtual_base + u64::from(retained.handoff_capacity_bytes) - 1,
+        retained.handoff_physical_base + u64::from(retained.handoff_capacity_bytes) - 1,
+        false,
+        request.physical_address_bits,
+    )?;
+    for guard in [STACK_GUARD_LOW_PAGE, STACK_GUARD_HIGH_PAGE] {
+        if translate(
+            reader,
+            root,
+            request.virtual_base + guard as u64 * PAGE_SIZE,
+            request.physical_address_bits,
+        ) != Err(Error::TranslationMissing)
+        {
+            return Err(Error::GuardPage);
+        }
+    }
+    Ok(())
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct FramebufferSnapshot {
     pub first: Translation,
@@ -831,6 +1208,7 @@ pub enum LifecycleState {
     Prepared,
     CandidateActive,
     Restored,
+    Retained,
     Released,
 }
 
@@ -873,12 +1251,26 @@ impl Lifecycle {
     pub const fn firmware_call_allowed(self) -> bool {
         matches!(
             self.state,
-            LifecycleState::Prepared | LifecycleState::Restored | LifecycleState::Released
+            LifecycleState::Prepared
+                | LifecycleState::Restored
+                | LifecycleState::Retained
+                | LifecycleState::Released
         )
     }
 
-    pub fn observe_release(&mut self) -> Result<(), Error> {
+    pub fn observe_retention(&mut self) -> Result<(), Error> {
         if self.state != LifecycleState::Restored {
+            return Err(Error::RetentionOrder);
+        }
+        self.state = LifecycleState::Retained;
+        Ok(())
+    }
+
+    pub fn observe_release(&mut self) -> Result<(), Error> {
+        if !matches!(
+            self.state,
+            LifecycleState::Restored | LifecycleState::Retained
+        ) {
             return Err(Error::ReleaseOrder);
         }
         self.state = LifecycleState::Released;
@@ -951,6 +1343,15 @@ mod tests {
         TableAddresses::contiguous(ORIGINAL_ROOT, TABLE_BASE).unwrap()
     }
 
+    fn retained() -> RetainedRequest {
+        RetainedRequest {
+            stack_physical_base: 0x0400_0000,
+            stack_page_count: STACK_PAGE_COUNT as u32,
+            handoff_physical_base: 0x0500_0000,
+            handoff_capacity_bytes: HANDOFF_CAPACITY_BYTES as u32,
+        }
+    }
+
     #[test]
     fn validates_required_cpu_profile() {
         assert_eq!(validate_cpu(profile()), Ok(()));
@@ -999,10 +1400,85 @@ mod tests {
         assert_eq!(summary.writable_executable_page_count, 0);
         assert_eq!(root[511], addresses().pdpt | PARENT_FLAGS);
         assert_eq!(table[0], PHYSICAL | ENTRY_PRESENT | ENTRY_NO_EXECUTE);
-        assert_eq!(table[4], PHYSICAL + 4 * PAGE_SIZE | ENTRY_PRESENT);
+        assert_eq!(table[4], (PHYSICAL + 4 * PAGE_SIZE) | ENTRY_PRESENT);
         assert_eq!(
             table[47],
-            PHYSICAL + 47 * PAGE_SIZE | ENTRY_PRESENT | ENTRY_WRITABLE | ENTRY_NO_EXECUTE
+            (PHYSICAL + 47 * PAGE_SIZE) | ENTRY_PRESENT | ENTRY_WRITABLE | ENTRY_NO_EXECUTE
+        );
+    }
+
+    #[test]
+    fn builds_retained_stack_guards_and_read_only_handoff() {
+        let original = [0u64; TABLE_ENTRIES];
+        let mut root = [0u64; TABLE_ENTRIES];
+        let mut pdpt = [0u64; TABLE_ENTRIES];
+        let mut directory = [0u64; TABLE_ENTRIES];
+        let mut table = [0u64; TABLE_ENTRIES];
+        let summary = populate_retained(
+            &request(),
+            retained(),
+            addresses(),
+            &original,
+            &mut root,
+            &mut pdpt,
+            &mut directory,
+            &mut table,
+        )
+        .unwrap();
+        assert_eq!(summary.stack_page_count, STACK_PAGE_COUNT as u32);
+        assert_eq!(summary.handoff_page_count, HANDOFF_PAGE_COUNT as u32);
+        assert_eq!(summary.guard_page_count, 2);
+        assert_eq!(summary.total_mapped_page_count, 312);
+        assert_eq!(table[STACK_GUARD_LOW_PAGE], 0);
+        assert_eq!(table[STACK_GUARD_HIGH_PAGE], 0);
+        assert_eq!(
+            table[STACK_FIRST_PAGE],
+            retained().stack_physical_base | ENTRY_PRESENT | ENTRY_WRITABLE | ENTRY_NO_EXECUTE
+        );
+        assert_eq!(
+            table[HANDOFF_FIRST_PAGE],
+            retained().handoff_physical_base | ENTRY_PRESENT | ENTRY_NO_EXECUTE
+        );
+    }
+
+    #[test]
+    fn retained_layout_rejects_overlap_and_guard_mutation() {
+        let mut overlap = retained();
+        overlap.stack_physical_base = PHYSICAL;
+        assert_eq!(
+            retained_summary(&request(), addresses(), overlap),
+            Err(Error::RetainedOverlap)
+        );
+
+        let original = [0u64; TABLE_ENTRIES];
+        let mut root = [0u64; TABLE_ENTRIES];
+        let mut pdpt = [0u64; TABLE_ENTRIES];
+        let mut directory = [0u64; TABLE_ENTRIES];
+        let mut table = [0u64; TABLE_ENTRIES];
+        populate_retained(
+            &request(),
+            retained(),
+            addresses(),
+            &original,
+            &mut root,
+            &mut pdpt,
+            &mut directory,
+            &mut table,
+        )
+        .unwrap();
+        table[STACK_GUARD_LOW_PAGE] = 0x0700_0000 | ENTRY_PRESENT | ENTRY_NO_EXECUTE;
+        assert_eq!(
+            verify_retained(
+                &request(),
+                retained(),
+                addresses(),
+                &original,
+                &root,
+                &pdpt,
+                &directory,
+                &table,
+            ),
+            Err(Error::GuardPage)
         );
     }
 
@@ -1157,6 +1633,31 @@ mod tests {
         (Reader { tables }, summary)
     }
 
+    fn retained_reader() -> (Reader, RetainedSummary) {
+        let original = [0u64; TABLE_ENTRIES];
+        let mut root = [0u64; TABLE_ENTRIES];
+        let mut pdpt = [0u64; TABLE_ENTRIES];
+        let mut directory = [0u64; TABLE_ENTRIES];
+        let mut table = [0u64; TABLE_ENTRIES];
+        let summary = populate_retained(
+            &request(),
+            retained(),
+            addresses(),
+            &original,
+            &mut root,
+            &mut pdpt,
+            &mut directory,
+            &mut table,
+        )
+        .unwrap();
+        let mut tables = BTreeMap::new();
+        tables.insert(addresses().candidate_root, root);
+        tables.insert(addresses().pdpt, pdpt);
+        tables.insert(addresses().page_directory, directory);
+        tables.insert(addresses().page_table, table);
+        (Reader { tables }, summary)
+    }
+
     #[test]
     fn independently_walks_every_kernel_leaf() {
         let (reader, expected) = candidate_reader();
@@ -1174,6 +1675,37 @@ mod tests {
         assert!(text.executable);
         assert!(!text.writable);
         assert!(!text.user);
+    }
+
+    #[test]
+    fn independently_walks_retained_ranges_and_guards() {
+        let (reader, expected) = retained_reader();
+        verify_retained_translations(
+            &reader,
+            addresses().candidate_root,
+            &request(),
+            retained(),
+            expected,
+        )
+        .unwrap();
+        let stack = translate(
+            &reader,
+            addresses().candidate_root,
+            expected.stack_bottom_virtual,
+            48,
+        )
+        .unwrap();
+        assert!(stack.writable);
+        assert!(!stack.executable);
+        let handoff = translate(
+            &reader,
+            addresses().candidate_root,
+            expected.handoff_virtual_base,
+            48,
+        )
+        .unwrap();
+        assert!(!handoff.writable);
+        assert!(!handoff.executable);
     }
 
     #[test]
@@ -1239,6 +1771,19 @@ mod tests {
             Err(Error::RollbackMismatch)
         );
         lifecycle.observe_rollback(0x1000).unwrap();
+        assert!(lifecycle.firmware_call_allowed());
+        lifecycle.observe_release().unwrap();
+        assert_eq!(lifecycle.state(), LifecycleState::Released);
+    }
+
+    #[test]
+    fn lifecycle_retains_only_after_verified_rollback() {
+        let mut lifecycle = Lifecycle::new(0x1000, 0x2000);
+        assert_eq!(lifecycle.observe_retention(), Err(Error::RetentionOrder));
+        lifecycle.observe_activation(0x2000).unwrap();
+        lifecycle.observe_rollback(0x1000).unwrap();
+        lifecycle.observe_retention().unwrap();
+        assert_eq!(lifecycle.state(), LifecycleState::Retained);
         assert!(lifecycle.firmware_call_allowed());
         lifecycle.observe_release().unwrap();
         assert_eq!(lifecycle.state(), LifecycleState::Released);

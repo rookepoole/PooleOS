@@ -40,21 +40,20 @@ def valid_markers() -> list[str]:
         "POOLEBOOT/0.1 CONFIG PASS count=10 acpi20=1 smbios3=0 smbios2=1",
         "POOLEBOOT/0.1 FILESYSTEM PASS loaded_image=1 simple_fs=1 root=1",
         "POOLEBOOT/0.1 BOOTCFG PASS bytes=229 entries=1 default_hash=61053F0E3EBBD272 timeout_ms=0 attempts=3 slot=1 manifest_max_bytes=65536",
-        "POOLEBOOT/0.1 MANIFEST PASS bytes=460 artifacts=1 id_hash=8D344F536A19B20A slot=1 version=1 minimum_secure_version=1",
-        "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=139264 image_bytes=196608 sha256_prefix=2220757D0CC18EA3 path=manifest",
+        "POOLEBOOT/0.1 MANIFEST PASS bytes=462 artifacts=1 id_hash=A43F541D7FFCF2C8 slot=1 version=1 minimum_secure_version=1",
+        "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=139264 image_bytes=196608 sha256_prefix=BF1176019E9E4AF1 path=manifest",
         "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=139264 path=manifest_development",
-        "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=196608 pages=48 entry_offset=16384 relocations=40 fnv1a64=5D48CA3E327C4BF2",
-        "POOLEBOOT/0.1 PBP1 PASS bytes=4248 records=4 memory_entries=95 framebuffer=1 artifacts=1 descriptor_bytes=48 map_attempts=1 message_crc32=8BEB8BE2 fnv1a64=83C0C38E587A3C9F state=pre_exit",
-        "POOLEBOOT/0.1 PBP1_RELEASE PASS pools_freed=3 bytes_unchanged=1",
-        "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP1 mappings=4 pages=48 ro=6 rx=28 rw=14 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=A671D0D8901064A5",
-        "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 mapped_pages=48 physical_bits=40 mapped_fnv1a64=5D48CA3E327C4BF2 framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
-        "POOLEBOOT/0.1 KERNEL_MAP_ROLLBACK PASS original_cr3=restored tables_freed=4 firmware_calls_while_active=0",
-        "POOLEBOOT/0.1 KERNEL_RELEASE PASS files_closed=4 pools_freed=3 pages_freed=48",
+        "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=196608 pages=48 entry_offset=16384 relocations=40 files_closed=4 pools_freed=3 fnv1a64=80F8CD80B30B2EBA",
         "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
-        "POOLEBOOT/0.1 MEMORY_MAP PASS bytes=4512 descriptor_bytes=48 descriptors=94",
-        "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted kernel=loaded_then_released handoff=pre_exit_produced_then_released mappings=activated_then_rolled_back entry=not_called exit_boot_services=not_called",
         "POOLEBOOT/0.1 FRAME READY",
-        "POOLEBOOT/0.1 RETURN EFI_SUCCESS",
+        "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=48 ro=6 rx=28 rw=14 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=A671D0D8901064A5",
+        "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=48 physical_bits=40 mapped_fnv1a64=80F8CD80B30B2EBA framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
+        "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=8 handoff_pages=256 guards=2 total_pages=312 stack_pt=49 handoff_pt=64 kernel_phys=000000001DDDD000 root=000000001DE56000 stack_phys=000000001DE5A000 stack_top=FFFFFFFF80039000 handoff_phys=000000001DB3B000 handoff_virt=FFFFFFFF80040000 retained_fnv1a64=765993EE210948C5 original_cr3=restored firmware_calls_while_active=0",
+        "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=4208 records=4 memory_entries=94 framebuffer=1 artifacts=1 descriptor_bytes=48 exit_attempts=1 message_crc32=27212C80 fnv1a64=E1BFE7F38F0BF22C state=boot_services_exited bytes_unchanged=1",
+        "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4512 descriptor_bytes=48 descriptors=94",
+        "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=48 table_pages=4 stack_pages=8 handoff_pages=256",
+        "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted kernel=retained handoff=retained mappings=retained entry=not_called exit_boot_services=called transfer=stopped",
+        "POOLEBOOT/0.1 STOP BEFORE TRANSFER",
     ]
 
 
@@ -142,15 +141,16 @@ class NativeKernelLoadTests(unittest.TestCase):
 
     def test_marker_contract_captures_load_mapping_and_cleanup(self) -> None:
         summary = native_kernel_load.validate_markers(valid_markers())
-        self.assertEqual(23, summary["marker_count"])
+        self.assertEqual(22, summary["marker_count"])
         self.assertEqual(48, summary["kernel"]["page_count"])
         self.assertEqual(0, summary["kernel_map"]["writable_executable_page_count"])
         self.assertEqual(48, summary["kernel_map"]["mapped_page_count"])
         self.assertTrue(summary["kernel_map"]["original_cr3_restored"])
-        self.assertEqual(4, summary["kernel_map"]["tables_freed"])
-        self.assertTrue(summary["kernel"]["resources_released"])
-        self.assertTrue(summary["pbp1"]["pre_exit"])
-        self.assertTrue(summary["pbp1"]["temporary_pools_released"])
+        self.assertTrue(summary["kernel_map"]["tables_retained"])
+        self.assertTrue(summary["kernel"]["pages_retained"])
+        self.assertFalse(summary["pbp1"]["pre_exit"])
+        self.assertTrue(summary["pbp1"]["boot_services_exited"])
+        self.assertTrue(summary["boot_exit"]["stopped_before_transfer"])
 
     def test_marker_contract_rejects_omission_wx_and_page_mismatch(self) -> None:
         markers = valid_markers()
@@ -166,17 +166,17 @@ class NativeKernelLoadTests(unittest.TestCase):
             native_kernel_load.validate_markers(page_mismatch)
         active_mismatch = markers[:]
         active_mismatch[15] = active_mismatch[15].replace(
-            "mapped_fnv1a64=5D48CA3E327C4BF2",
+            "mapped_fnv1a64=80F8CD80B30B2EBA",
             "mapped_fnv1a64=0000000000000000",
         )
         with self.assertRaises(native_kernel_load.KernelLoadError):
             native_kernel_load.validate_markers(active_mismatch)
-        rollback_mismatch = markers[:]
-        rollback_mismatch[16] = rollback_mismatch[16].replace(
+        retained_mismatch = markers[:]
+        retained_mismatch[16] = retained_mismatch[16].replace(
             "firmware_calls_while_active=0", "firmware_calls_while_active=1"
         )
         with self.assertRaises(native_kernel_load.KernelLoadError):
-            native_kernel_load.validate_markers(rollback_mismatch)
+            native_kernel_load.validate_markers(retained_mismatch)
 
     def test_claim_overreach_is_rejected(self) -> None:
         claims = native_kernel_load.expected_claims()

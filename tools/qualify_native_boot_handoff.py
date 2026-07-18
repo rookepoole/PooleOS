@@ -449,7 +449,7 @@ def qualify(toolchain_root: Path, temporary_root: Path) -> dict[str, Any]:
         ],
         "claim_boundary": [
             "The full kernel-entry vector is synthetic and does not prove successful ExitBootServices or PooleKernel execution.",
-            "The Rust library compiles for UEFI and freestanding targets; PKLOAD4 separately proves a temporary pre-exit PooleBoot producer plus temporary PKMAP1 activation and rollback, while this standalone receipt does not claim a transferable live handoff.",
+            "The Rust library compiles for UEFI and freestanding targets; PKLOAD5 separately proves retained post-exit development PBP1 plus PKMAP2/PBEXIT1 stop-before-transfer behavior, while this standalone receipt does not claim a transferable live handoff.",
             "The Python implementation is an independent host oracle and is prohibited from the production boot chain.",
             "CRC-32 is corruption detection, not authentication or signed-manifest verification.",
             "Finite negative and deterministic fuzz corpora do not prove correctness for all byte strings or hardware states.",

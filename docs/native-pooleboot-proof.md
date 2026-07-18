@@ -1,128 +1,119 @@
-# Native PooleBoot UEFI Proof
+# PooleBoot Aggregate Proof 6
 
-Status: bounded unsigned live-load/pre-exit-PBP1/temporary-PKMAP1/rollback/release non-promoting proof
-Contract: `POOLEOS-N5-POOLEBOOT-5`
-Phase mapping: N5.1, N5.2, N5.3, N5.4, N5.5, N5.7, and N5.8 partial
-Receipt: `runs/native_pooleboot_readiness.json`
+Status: bounded unsigned post-exit PBP1/retained PKMAP2/stop-before-transfer
+non-promoting proof
 
-## Purpose
+## What Exists
 
-Cycle 97 replaced the empty compiler fixture with the first Poole-authored freestanding x86-64 UEFI product. Cycles 102-104 added bounded live PBC1/PSM1/PKELF1 selection, temporary PBP1 production, and complete release. Cycle 105 adds PKMAP1: an exact temporary higher-half kernel mapping is activated under a cloned four-level root, audited in place, rolled back to the exact original CR3, and fully released. The aggregate receipt reconstructs PBP1 and PKMAP1 state independently from serial and debugcon before accepting the return path.
+PooleBoot is a Poole-authored, dependency-minimal `no_std` x86-64 PE32+ UEFI
+application. The deterministic development image uses protective MBR, primary
+and backup GPT, a FAT32 EFI system partition, the standard fallback path, PBC1
+boot configuration, unsigned PSM1, and the real PKELF1 PooleKernel product.
 
-This proof is deliberately smaller than the complete loader. Its evidence can be consumed by later work, but it cannot satisfy the N5 exit gate.
+Cycles 97-105 established reproducible UEFI entry, PBP1, live configuration and
+manifest parsing, bounded ELF relocation, the real PooleKernel image, and exact
+temporary higher-half mapping validation. Cycle 106 evolves that path to
+PKLOAD5, PBLIVE2, PKMAP2, and PBEXIT1: retained transfer storage, a guarded
+stack, final-map-bound development PBP1, successful `ExitBootServices`, zero
+post-exit firmware calls, and a permanent stop before transfer.
 
-## Implemented Surface
+The normative aggregate contract is `specs/native-pooleboot-proof.json`.
+`tools/qualify_native_pooleboot.py` validates the current PKLOAD5 receipt,
+rebuilds and executes the live proof twice, and emits
+`runs/native_pooleboot_readiness.json`.
 
-The `native/boot` product crate:
+## Boot Sequence
 
-- uses Rust 2024 `no_std`, `no_main`, panic abort, static linking, `efiapi`, and the official `x86_64-unknown-uefi` target;
-- validates the UEFI System Table and Boot Services signatures, bounded header sizes, and CRC32 values before dereferencing service entries;
-- emits the same ordered diagnostics over polling 16550A COM1 and QEMU debugcon;
-- disables the watchdog, attempts firmware console output, and continues through an independently observable fallback path if the console is unavailable;
-- enumerates at most 256 configuration-table entries and recognizes bounded ACPI and SMBIOS GUIDs without parsing their payloads;
-- locates GOP, accepts only direct RGB or BGR framebuffers, validates dimensions, stride, base alignment, byte bounds, and end-address overflow, and draws a deterministic static Poole identity;
-- follows the two-call UEFI memory-map pattern, adds descriptor headroom, validates descriptor size and result bounds, and frees the pool allocation;
-- builds a four-record pre-exit PBP1 with zero stack/CR3, 95 normalized memory entries, GOP metadata, and one live kernel artifact; requires the kernel-entry profile to reject; transcripts and rechecks exact bytes; and frees all three PBP1 pools;
-- requires CR0.WP and processor/EFER NX, clones the active PML4 into four private table pages, installs 48 exact supervisor 4 KiB higher-half leaves with zero W+X, activates and audits the candidate CR3, preserves framebuffer translation/cache bits, restores the exact original CR3 before firmware use, and frees all table pages; and
-- emits a fixed non-claim marker and returns `EFI_SUCCESS` without calling `ExitBootServices`.
+The qualified application:
 
-The Cycle 105 media builder emits a 64 MiB ordinary workspace file with a protective MBR, mirrored GPT structures, one FAT32 ESP, two identical FATs, fixed metadata, and exactly four files: `EFI/BOOT/BOOTX64.EFI`, `EFI/POOLEOS/BOOT.CFG`, `EFI/POOLEOS/SYSTEM_A.PBM`, and `EFI/POOLEOS/KERNEL.ELF`. The ordinary-file boundary rejects oversized inputs, workspace escapes, device namespaces, alternate data streams, reserved device names, symlinks, and non-file replacements. It has no physical-media output mode.
+1. validates UEFI system and boot-service tables;
+2. disables the watchdog and initializes independent COM1/debugcon diagnostics;
+3. opens the EFI system partition and parses bounded PBC1;
+4. parses unsigned PSM1 and selects its kernel artifact;
+5. reads, SHA-256 checks, allocates, relocates, and verifies PooleKernel;
+6. renders the static high-contrast PooleOS GOP identity;
+7. builds and actively audits PKMAP2, then restores the firmware CR3 while
+   retaining the kernel, private root, guarded stack, and handoff pages;
+8. obtains the final UEFI memory map and serializes PBLIVE2 into retained memory;
+9. calls `ExitBootServices`, retrying only stale-map-key failure within a bound;
+10. verifies immutable PBP1 state and zero post-exit firmware calls;
+11. emits the 22-marker dual-channel receipt and halts at
+    `STOP BEFORE TRANSFER`.
 
-## Qualification Contract
+## Evidence Method
 
-`tools/qualify_native_pooleboot.py` performs the complete bounded qualification:
+Qualification uses the pinned single-threaded QEMU TCG and OVMF profile with a
+fresh variable-store copy, read-only media, no guest network, no host
+acceleration, loopback-only QMP, and no shared folders. It requires:
 
-1. Run eight host-side Rust contract tests.
-2. Build `PooleBoot.efi` in two clean target directories and require exact bytes.
-3. Independently inspect PE32+ machine, subsystem, entry point, timestamp, imports, debug directory, sections, and host leakage.
-4. Generate and independently inspect two media images and require exact bytes.
-5. Verify the pinned Tier 0 QEMU/OVMF runtime closure and launch profile.
-6. Execute two Q35/TCG runs with read-only media, fresh OVMF variables, no guest network, no host acceleration, and loopback-only QMP.
-7. Require 23 ordered markers covering filesystem/config/manifest/kernel binding and intake, load, PBP1 production/release, PKMAP1 plan/activation/rollback, kernel release, GOP, memory map, and return; independently reconstruct exact PBP1 and PKMAP1 evidence from both transports; require a nonblank Poole-identity GOP frame, exact marker/frame/PBP1 matches, clean QMP quit, and empty QEMU stderr.
-8. Execute all 77 negative controls and fail on any unexpected acceptance.
-9. Bind every contract, implementation, toolchain, Tier 0, result, command, and claim-boundary input into the public readiness receipt.
+- two byte-identical clean PooleBoot builds;
+- two byte-identical PooleKernel builds and media generations;
+- two exact marker streams and static GOP screenshots;
+- exact serial/debugcon agreement;
+- independent PBC1, PSM1, PKELF1, PBP1, PKMAP2, and PBEXIT1 reconstruction;
+- exact kernel, root, stack, handoff, map, and digest cross-bindings;
+- 95/95 hostile controls;
+- no absolute user path in public readiness artifacts;
+- a clean QMP shutdown of the intentionally halted guest.
 
-The current exact evidence is:
+The aggregate report records only claims frozen by its schema. The observed
+single-host emulator path is evidence, not promotion authority.
 
-- host contract tests: 8/8;
-- clean PE32+ builds: 2/2 exact, 94,720 bytes, SHA-256 `7C3365BDC88D9E3B9D8CA9C0832E52527650C11563C48C2AD81233F5E123B4AD`;
-- clean media generations: 2/2 exact, 67,108,864 bytes, SHA-256 `26AC661BEEE8EC1E2FA9D38EC610FC38677709E136E750A5352D1AEF5FA9EE90`;
-- guest runs: 2/2, with 23/23 ordered markers in each run;
-- serial/debugcon matches: 2/2;
-- exact pre-exit PBP1 matches: 2/2, 4,248 bytes, SHA-256 `7643A0C05838F2E6862CE9FA6DA604B02EDC7F3B7CC4F731ECAEC5C90C8E2279`;
-- exact PKMAP1 matches: 2/2, with 48 leaves, `6/28/14` read-only/read-execute/read-write pages, leaf fingerprint `A671D0D8901064A5`, full-image FNV-1a `80F8CD80B30B2EBA`, exact original-CR3 restoration, and four freed table pages;
-- GOP frames: 2/2 exact at 1280x800, screenshot SHA-256 `E9D4CFD48C23DBA760AED5B2049B39DCA49A0D172F680D570082EB0680FDFDBD`;
-- hostile controls: 77/77; and
-- production claims: zero; and
-- deterministic readiness receipt: 59,749 bytes, SHA-256 `874D85A0C49784C917C5E4BAB5166A54791DB09ED38DD339A2FE76FE229D980C`.
+## Exit Discipline
 
-The hostile corpus covers missing, empty, oversized, malformed, path, FAT, PBC1, PSM1, manifest binding, digest, PKELF1, allocation, relocation, W^X, cleanup, marker, oracle-divergence, stale-binding, claim-overreach, WP/NX/LA57/PCID profile drift, occupied roots, malformed map coverage/ranges, table overlap, wrong leaves, large pages, framebuffer drift, activation/rollback failure, firmware calls while active, and table cleanup failure.
+All allocations and fallible setup occur before the first exit attempt. After
+an attempt, the implementation permits no firmware service except a fresh
+`GetMemoryMap` followed by `ExitBootServices`; after success it permits none.
+Unexpected failures after the first attempt halt instead of returning into an
+ambiguous firmware state.
 
-## Reproduction
+The retained PBP1 says boot services have exited and includes real CR3, stack,
+handoff, kernel, GOP, and final-map state. It remains a development profile:
+signature fields are absent and the kernel-entry profile rejects it. Therefore
+the proof deliberately does not load the retained CR3, switch RSP, or call the
+entry point.
 
-From the repository root, with the workspace-local Rust and Tier 0 toolchains already qualified:
+## Current Claims
 
-```powershell
-python .\tools\qualify_native_pooleboot.py
-python -m unittest -v tests.test_native_pooleboot
-python .\tools\pooleos_doctor.py --no-runtime
-```
+The receipt proves, on the pinned profile:
 
-For an explicitly named ordinary-file image only:
+- reproducible PE32+ and deterministic four-file GPT/FAT32 media;
+- live PBC1/PSM1/PKELF1 intake and exact manifest digest equality;
+- complete higher-half kernel alias verification with W^X, CR0.WP, and NX;
+- framebuffer translation and cache-bit preservation during the active audit;
+- retention of kernel pages, four table pages, an eight-page guarded stack, and
+  a one-MiB read-only/NX handoff range;
+- a final-map-bound post-exit development PBP1 reconstructed identically from
+  both diagnostics transports;
+- successful `ExitBootServices`, zero later firmware calls, and a permanent
+  stop before transfer;
+- two exact QEMU/OVMF executions.
 
-```powershell
-python .\tools\build_native_pooleboot_media.py --efi <PooleBoot.efi> --out .\tmp\pooleboot-proof.img --inspection .\tmp\pooleboot-proof-inspection.json
-```
+## Explicit Nonclaims
 
-The command enforces the ordinary-workspace-file boundary and rejects physical disk, partition, volume, device-namespace, mounted-image, and firmware paths. Physical-media writing remains separately approval-gated.
+The manifest and kernel are unsigned and untrusted. The proof does not establish
+artifact authentication, rollback persistence, final active kernel CR3/RSP,
+final framebuffer cache policy, a transferable kernel-entry handoff, initial
+system loading, PooleKernel execution, descriptor tables, interrupts, SMP,
+capabilities, userspace, native drivers, PooleFS, PooleGlass, Secure Boot,
+measured boot, TPM policy, target-firmware behavior, physical hardware, physical
+media, an installer, an ISO, N5 exit, release acceptance, or production
+readiness.
 
-## Ordered Markers
+No key was generated or used, no signature was created, and no merge, tag, or
+release follows from this proof.
 
-The current run records these semantic stages in order:
+## Chronological Next Move
 
-```text
-ENTRY
-SYSTEM_TABLE PASS
-BOOT_SERVICES PASS
-WATCHDOG
-CONSOLE PASS_OR_FALLBACK
-CONFIG PASS
-FILESYSTEM PASS
-BOOTCFG PASS
-MANIFEST PASS
-KERNEL_BINDING PASS
-KERNEL_FILE PASS
-KERNEL_LOAD PASS
-PBP1 PASS
-PBP1_RELEASE PASS
-KERNEL_MAP_PLAN PASS
-KERNEL_MAP_ACTIVE PASS
-KERNEL_MAP_ROLLBACK PASS
-KERNEL_RELEASE PASS
-GOP PASS
-MEMORY_MAP PASS
-BOUNDARY
-FRAME READY
-RETURN EFI_SUCCESS
-```
-
-The markers prove only that the instrumented application reached each point under the pinned OVMF profile. The final marker precedes the Rust return and does not prove later firmware behavior.
-
-## Open N5 Work
-
-Cycles 98-104 qualify PBP1, PBC1, PKELF1, PKENTRY1, live load, PSM1, and the temporary live handoff. Cycle 105 closes `N5-KMAP-001` with temporary candidate-root activation, complete alias verification, and exact rollback. The next chronological owner-independent move is `N5-HANDOFF-001`: retain the qualified kernel mappings and immutable PBP1, normalize and retry the final memory map, call `ExitBootServices`, and prove that no later boot-service call occurs, still without claiming kernel transfer.
-
-N5 still requires signature-authenticated manifest and system-artifact selection, persistent rollback enforcement, independent digest-provider review, retained kernel/PBP1/page-table pages, final framebuffer cache policy, complete menu/RNG/TCG2 handling, final memory-map normalization, `ExitBootServices` retry behavior, immutable handoff transfer, second-host reproduction, target-firmware execution, and separately authorized physical-media qualification.
-
-## Claim Boundary
-
-This is an unsigned manifest-bound live-load/pre-exit-PBP1/temporary-PKMAP1/rollback/release UEFI proof, not the complete PooleBoot loader. It proves exact digest equality to an attacker-controllable manifest, an exact temporary PBP1 snapshot, and temporary hardware activation of an exact higher-half W^X map whose complete alias and framebuffer invariants are audited before exact rollback and release. It does not authenticate the manifest or provider, enforce persistent rollback, retain the kernel/PBP1/page tables, establish the final address space or framebuffer cache policy, produce a transferable handoff, call `ExitBootServices`, enter PooleKernel, enforce Secure Boot, perform measured boot, use TPM state, generate or use a key, create a signature, test target firmware, write physical media, build an ISO, or satisfy N5, N38, N39, release, or production gates. The static framebuffer identity is not the final animated PooleGlass boot identity or an accessibility acceptance result.
+`N5-HANDOFF-001` now closes only its bounded exit-and-stop slice. The next
+owner-independent N5 move should define authenticated transfer preconditions,
+load the initial-system artifact set, promote PBP1 to the kernel-entry profile,
+install retained CR3 and RSP state without firmware use, call the frozen entry
+ABI, and prove PooleKernel consumes the handoff. Hardware-key acquisition and
+governance signing remain a separate blocked owner lane.
 
 ## Primary References
 
-- UEFI 2.11 System Table and Boot Services: `https://uefi.org/specs/UEFI/2.11/04_EFI_System_Table.html` and `https://uefi.org/specs/UEFI/2.11/07_Services_Boot_Services.html`
-- UEFI 2.11 Graphics Output Protocol: `https://uefi.org/specs/UEFI/2.11/12_Protocols_Console_Support.html`
-- Rust UEFI target support: `https://doc.rust-lang.org/rustc/platform-support/unknown-uefi.html`
-- QEMU QMP screenshot command: `https://www.qemu.org/docs/master/interop/qemu-qmp-ref.html`
-- Intel 64 and IA-32 Architectures Software Developer's Manual: `https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html`
-- AMD64 Architecture Programmer's Manual, Volume 2: `https://docs.amd.com/v/u/en-US/24593_3.44_APM_Vol2`
+- UEFI 2.11, [Boot Services](https://uefi.org/specs/UEFI/2.11/07_Services_Boot_Services.html)
+- Rust, [x86_64-unknown-uefi platform support](https://doc.rust-lang.org/rustc/platform-support/unknown-uefi.html)
+- QEMU, [QMP reference](https://www.qemu.org/docs/master/interop/qemu-qmp-ref.html)

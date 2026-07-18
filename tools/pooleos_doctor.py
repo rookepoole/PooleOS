@@ -3211,20 +3211,31 @@ def run_pooleglyph_baseline(pooleglyph: Path, full: bool) -> list[CheckResult]:
             )
         ]
 
-    return [
+    results = [
         run_command(
             "pooleglyph:pgvm_selftest",
             [sys.executable, str(pooleglyph / "pooleglyph_pgvm.py"), "test"],
             pooleglyph,
             timeout=60,
-        ),
-        run_command(
-            "pooleglyph:conformance",
-            [sys.executable, str(pooleglyph / "pooleglyph_pgvm_conformance.py"), "run"],
-            pooleglyph,
-            timeout=60,
-        ),
+        )
     ]
+    with tempfile.TemporaryDirectory(prefix="pooleos-pooleglyph-conformance-") as temp_dir:
+        report_path = Path(temp_dir) / "conformance_report.json"
+        results.append(
+            run_command(
+                "pooleglyph:conformance",
+                [
+                    sys.executable,
+                    str(pooleglyph / "pooleglyph_pgvm_conformance.py"),
+                    "run",
+                    "--out",
+                    str(report_path),
+                ],
+                pooleglyph,
+                timeout=60,
+            )
+        )
+    return results
 
 
 def run_pooleos_tests() -> CheckResult:

@@ -13,14 +13,14 @@
     },
     "implementation_inputs": [
       {
-        "byte_count": 455,
+        "byte_count": 469,
         "path": "native/Cargo.toml",
-        "sha256": "60805416DCE7177CAF6DB2B72CBF6E817F6FE99E6ABB94D7CC55C89C5A8E90F1"
+        "sha256": "223805F78DD46001B12469DC692FBFCF49647E4CD1F1251168D2BE3F5F5023B9"
       },
       {
-        "byte_count": 2991,
+        "byte_count": 3067,
         "path": "native/Cargo.lock",
-        "sha256": "E7747B3E708EBA92E98D8AC0999A15B346A0269FDE85416384C4C6086047C623"
+        "sha256": "40417221D9F35AD69E7D746227FF2BC6B7C68523F67964444EAAC9AC44F10731"
       },
       {
         "byte_count": 249,
@@ -98,9 +98,9 @@
         "sha256": "19E05DBDD78C9EBDF30E9573863B67448C632568290AA07A1A2E1EE2AB2653FE"
       },
       {
-        "byte_count": 3626,
+        "byte_count": 3633,
         "path": "docs/native-kernel-entry.md",
-        "sha256": "E2941EF2B07A9C78F4C0AE15BA98FF89E36318867E7FF201496A9DCFD906AF68"
+        "sha256": "EF51208034300DABBE94B551A41B00AE2A9D45C0372369DB32737CDE3A9208B9"
       }
     ],
     "pbp1_contract": {
@@ -581,13 +581,13 @@
       "pooleboot_compile_time_integration_builds": [
         {
           "pooleboot_rlib_byte_count": 55708,
-          "pooleboot_rlib_sha256": "B7FFAFA53D239BB56C95A5AF6AA6FD10D3AC4DE4E785054896D2FB7DE71E64FE",
+          "pooleboot_rlib_sha256": "255FFF50CDBFF44254B8DDB51B9E6E430513A748634C6A57567D3D7CED52A7AD",
           "status": "pass",
           "target": "x86_64-unknown-uefi"
         },
         {
           "pooleboot_rlib_byte_count": 57796,
-          "pooleboot_rlib_sha256": "60D8D9D4E50C17E16FEE32CC2A8D965066C4150789355CA460F69A8DCAF41C4A",
+          "pooleboot_rlib_sha256": "90ABBFD2C7CEE334B52D10669F96C723CB3E5E883B3ED12B5E40BA6B94266983",
           "status": "pass",
           "target": "x86_64-unknown-none"
         }

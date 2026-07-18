@@ -41,13 +41,13 @@
     "implementation_inputs": [
       {
         "path": "native/Cargo.toml",
-        "sha256": "60805416DCE7177CAF6DB2B72CBF6E817F6FE99E6ABB94D7CC55C89C5A8E90F1",
-        "byte_count": 455
+        "sha256": "223805F78DD46001B12469DC692FBFCF49647E4CD1F1251168D2BE3F5F5023B9",
+        "byte_count": 469
       },
       {
         "path": "native/Cargo.lock",
-        "sha256": "E7747B3E708EBA92E98D8AC0999A15B346A0269FDE85416384C4C6086047C623",
-        "byte_count": 2991
+        "sha256": "40417221D9F35AD69E7D746227FF2BC6B7C68523F67964444EAAC9AC44F10731",
+        "byte_count": 3067
       },
       {
         "path": "native/handoff/Cargo.toml",
@@ -81,7 +81,7 @@
       },
       {
         "path": "tools/qualify_native_boot_handoff.py",
-        "sha256": "13742F6DA2B186C8497AA7BE0BE855FCD2E0CA349B43E2FE7B768B3C948A9214",
+        "sha256": "7E66F3EA70C8029AAF806A85CCCFC0E427A2378B8BEF9A07F2448A219E5D15CC",
         "byte_count": 25129
       },
       {
@@ -91,8 +91,8 @@
       },
       {
         "path": "docs/native-boot-handoff.md",
-        "sha256": "9093CF319147E13E922B6959F6A6DC1C8DDA45C543B5335648668BB52BD19903",
-        "byte_count": 7878
+        "sha256": "0DF5F2AEE5CFD650796765E1DC5F7E4B72AF24A4B4342D926028A944B723CB6E",
+        "byte_count": 7833
       }
     ]
   },
@@ -527,7 +527,7 @@
   ],
   "claim_boundary": [
     "The full kernel-entry vector is synthetic and does not prove successful ExitBootServices or PooleKernel execution.",
-    "The Rust library compiles for UEFI and freestanding targets; PKLOAD4 separately proves a temporary pre-exit PooleBoot producer plus temporary PKMAP1 activation and rollback, while this standalone receipt does not claim a transferable live handoff.",
+    "The Rust library compiles for UEFI and freestanding targets; PKLOAD5 separately proves retained post-exit development PBP1 plus PKMAP2/PBEXIT1 stop-before-transfer behavior, while this standalone receipt does not claim a transferable live handoff.",
     "The Python implementation is an independent host oracle and is prohibited from the production boot chain.",
     "CRC-32 is corruption detection, not authentication or signed-manifest verification.",
     "Finite negative and deterministic fuzz corpora do not prove correctness for all byte strings or hardware states.",

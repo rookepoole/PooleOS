@@ -1,11 +1,12 @@
-# PKMAP1
+# PKMAP2
 
-`poole-kmap` is the allocation-free, `no_std` page-table contract used by the
-bounded PooleBoot kernel-mapping proof. It validates one 2 MiB higher-half
-window, constructs exact 4 KiB supervisor leaves, walks existing four-level
-x86-64 mappings, compares framebuffer translation/cache state, and enforces
-activation/rollback/release ordering.
+`poole-kmap` is the allocation-free, `no_std` x86-64 page-table contract used
+by PooleBoot. It preserves the PKMAP1 exact 4 KiB supervisor kernel mapping and
+adds a retained eight-page guarded stack plus a one-MiB read-only/NX handoff
+window. Independent walkers and fingerprints cover kernel permissions, guard
+absence, retained-range overlap, framebuffer translation/cache preservation,
+and exact leaf contents.
 
-The crate does not allocate pages, write CR3, call UEFI, execute PooleKernel,
-or establish the final PooleOS address space. Those operations remain in the
-PooleBoot adapter and later native phases.
+The crate does not allocate firmware pages, write CR3, call UEFI, switch RSP,
+or execute PooleKernel. Those operations belong to the PooleBoot adapter and
+later native phases.
