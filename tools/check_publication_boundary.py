@@ -36,6 +36,7 @@ ALLOWED_RUNS = {
     "runs/native_kernel_entry_readiness.json",
     "runs/native_kernel_load_readiness.json",
     "runs/native_model_readiness.json",
+    "runs/native_microcode_readiness.json",
     "runs/native_pooleboot_readiness.json",
     "runs/native_recovery_readiness.json",
     "runs/native_symbol_readiness.json",

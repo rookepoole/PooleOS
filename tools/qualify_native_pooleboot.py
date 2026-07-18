@@ -805,6 +805,12 @@ def make_report(
             "symbols_readiness": native_pooleboot.file_binding(
                 ROOT, "runs/native_symbol_readiness.json"
             ),
+            "microcode_contract": native_pooleboot.file_binding(
+                ROOT, "specs/native-microcode-contract.json"
+            ),
+            "microcode_readiness": native_pooleboot.file_binding(
+                ROOT, "runs/native_microcode_readiness.json"
+            ),
             "implementation_inputs": [
                 native_pooleboot.file_binding(ROOT, path) for path in BUILD_INPUTS
             ],
@@ -828,6 +834,10 @@ def make_report(
             "gop_frame_match_count": 2,
             "negative_controls_passed": len(kernel_load["negative_controls"]),
             "negative_controls_total": len(kernel_load["negative_controls"]),
+            "microcode_patch_count": kernel_load["media"]["inspection"]["microcode"][
+                "patch_count"
+            ],
+            "microcode_payload_profile": "synthetic_test_only_never_apply",
             "production_claim_count": 0,
         },
         "open_items": kernel_load["open_items"],

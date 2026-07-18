@@ -35,7 +35,7 @@
     "status_date": {"const": "2026-07-18"},
     "status": {"const": "pass_single_host_two_run_live_pbart1_pkmap2_exit_then_stop_non_promoting"},
     "contract_id": {"const": "PKLOAD6"},
-    "selected_move_id": {"const": "N5-SYMBOLS-SEMANTICS-001"},
+    "selected_move_id": {"const": "N5-MICROCODE-SEMANTICS-001"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
     "n5_exit_gate_satisfied": {"const": false},
@@ -54,7 +54,7 @@
     },
     "bindings": {
       "type": "object",
-      "required": ["contract", "kernel_map_contract", "boot_exit_contract", "toolchain_lock", "toolchain_qualification", "tier0_lock", "tier0_profile", "tier0_readiness", "kernel_entry_contract", "kernel_entry_readiness", "system_manifest_contract", "system_manifest_readiness", "digest_provider", "initial_system_contract", "initial_system_readiness", "recovery_contract", "recovery_readiness", "symbols_contract", "symbols_readiness", "implementation_inputs"],
+      "required": ["contract", "kernel_map_contract", "boot_exit_contract", "toolchain_lock", "toolchain_qualification", "tier0_lock", "tier0_profile", "tier0_readiness", "system_manifest_contract", "system_manifest_readiness", "digest_provider", "initial_system_contract", "initial_system_readiness", "recovery_contract", "recovery_readiness", "symbols_contract", "symbols_readiness", "microcode_contract", "microcode_readiness", "kernel_entry_contract", "kernel_entry_readiness", "implementation_inputs"],
       "properties": {
         "contract": {"$ref": "#/$defs/binding"},
         "kernel_map_contract": {"$ref": "#/$defs/binding"},
@@ -75,7 +75,9 @@
         "recovery_readiness": {"$ref": "#/$defs/binding"},
         "symbols_contract": {"$ref": "#/$defs/binding"},
         "symbols_readiness": {"$ref": "#/$defs/binding"},
-        "implementation_inputs": {"type": "array", "minItems": 99, "maxItems": 99, "items": {"$ref": "#/$defs/binding"}}
+        "microcode_contract": {"$ref": "#/$defs/binding"},
+        "microcode_readiness": {"$ref": "#/$defs/binding"},
+        "implementation_inputs": {"type": "array", "minItems": 116, "maxItems": 116, "items": {"$ref": "#/$defs/binding"}}
       }
     },
     "host_tests": {
@@ -124,7 +126,7 @@
         "physical_media_write_performed": {"const": false},
         "inspection": {
           "type": "object",
-          "required": ["files", "manifest", "kernel", "artifact_set", "initial_system", "recovery", "symbols"],
+          "required": ["files", "manifest", "kernel", "artifact_set", "initial_system", "recovery", "symbols", "microcode"],
           "properties": {
             "files": {"type": "array", "minItems": 10, "maxItems": 10},
             "artifact_set": {
@@ -199,6 +201,31 @@
                 "full_debug_file_on_media": {"const": false},
                 "authority_created": {"const": false}
               }
+            },
+            "microcode": {
+              "type": "object",
+              "required": ["contract_id", "summary", "bundle_sha256", "bundle_version", "patch_count", "security_revision_floor", "known_good_revision", "preferred_revision", "outer_payload_sha256", "activation_allowed", "activation_errors", "validated_by", "pooleboot_enforced", "poolekernel_enforced", "vendor_container_validated", "production_vendor_payload_included", "privileged_revision_observed", "microcode_applied", "firmware_mutated", "physical_media_written", "synthetic_payloads_only", "authority_created"],
+              "properties": {
+                "contract_id": {"const": "PMCU1"},
+                "bundle_version": {"const": 1},
+                "patch_count": {"const": 2},
+                "security_revision_floor": {"const": 4054073376},
+                "known_good_revision": {"const": 4054073376},
+                "preferred_revision": {"const": 4054073408},
+                "activation_allowed": {"const": false},
+                "activation_errors": {"type": "array", "minItems": 1},
+                "validated_by": {"const": "independent_host_media_oracle"},
+                "pooleboot_enforced": {"const": false},
+                "poolekernel_enforced": {"const": false},
+                "vendor_container_validated": {"const": false},
+                "production_vendor_payload_included": {"const": false},
+                "privileged_revision_observed": {"const": false},
+                "microcode_applied": {"const": false},
+                "firmware_mutated": {"const": false},
+                "physical_media_written": {"const": false},
+                "synthetic_payloads_only": {"const": true},
+                "authority_created": {"const": false}
+              }
             }
           }
         }
@@ -238,8 +265,8 @@
         "all_resources_released": {"const": false}
       }
     },
-    "negative_controls": {"type": "array", "minItems": 121, "maxItems": 121, "items": {"$ref": "#/$defs/control"}},
-    "claims": {"type": "object", "minProperties": 72, "maxProperties": 72},
+    "negative_controls": {"type": "array", "minItems": 124, "maxItems": 124, "items": {"$ref": "#/$defs/control"}},
+    "claims": {"type": "object", "minProperties": 76, "maxProperties": 76},
     "summary": {"type": "object"},
     "open_items": {"type": "array", "minItems": 8, "items": {"type": "string"}},
     "claim_boundary": {"type": "array", "minItems": 10, "items": {"type": "string"}}
