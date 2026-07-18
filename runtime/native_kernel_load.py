@@ -15,6 +15,7 @@ from runtime import (
     native_boot_config,
     native_boot_exit,
     native_elf_loader,
+    native_firmware,
     native_initial_system,
     native_kernel_map,
     native_live_boot_handoff,
@@ -126,6 +127,9 @@ IMPLEMENTATION_INPUTS = (
     "native/manifest/Cargo.toml",
     "native/manifest/src/lib.rs",
     "native/elf/src/lib.rs",
+    "native/firmware/Cargo.toml",
+    "native/firmware/src/lib.rs",
+    "native/firmware/src/bin/pfwm1_probe.rs",
     "native/handoff/Cargo.toml",
     "native/handoff/src/lib.rs",
     "native/kernel/Cargo.toml",
@@ -156,6 +160,7 @@ IMPLEMENTATION_INPUTS = (
     "runtime/native_boot_artifact.py",
     "runtime/native_boot_config.py",
     "runtime/native_elf_loader.py",
+    "runtime/native_firmware.py",
     "runtime/native_kernel_image.py",
     "runtime/native_initial_system.py",
     "runtime/native_microcode.py",
@@ -205,6 +210,13 @@ IMPLEMENTATION_INPUTS = (
     "specs/fixtures/pmcu1-minimal.bin",
     "specs/fixtures/pmcu1-boundary.bin",
     "runs/native_microcode_readiness.json",
+    "docs/native-firmware-manifest.md",
+    "specs/native-firmware-contract.json",
+    "specs/native-firmware-contract.schema.json",
+    "specs/native-firmware-golden-vectors.json",
+    "specs/native-firmware-golden-vectors.schema.json",
+    "specs/native-firmware-readiness.schema.json",
+    "runs/native_firmware_readiness.json",
     "specs/native-kernel-load-contract.json",
     "specs/native-kernel-load-contract.schema.json",
     "specs/native-kernel-load-readiness.schema.json",
@@ -218,11 +230,14 @@ IMPLEMENTATION_INPUTS = (
     "tools/qualify_native_symbols.py",
     "tools/generate_native_microcode_vectors.py",
     "tools/qualify_native_microcode.py",
+    "tools/generate_native_firmware_vectors.py",
+    "tools/qualify_native_firmware.py",
     "tests/test_native_boot_artifact.py",
     "tests/test_native_initial_system.py",
     "tests/test_native_recovery.py",
     "tests/test_native_symbols.py",
     "tests/test_native_microcode.py",
+    "tests/test_native_firmware.py",
     "tests/test_native_live_boot_handoff.py",
 )
 
@@ -249,6 +264,8 @@ TRUE_CLAIMS = (
     "symbols_development_activation_denied",
     "microcode_inner_oracle_validated",
     "microcode_development_activation_denied",
+    "firmware_inner_oracle_validated",
+    "firmware_development_activation_denied",
     "artifact_set_manifest_sha256_matched",
     "artifact_pages_retained",
     "pbp1_profile_artifacts_cross_bound",
@@ -293,6 +310,11 @@ FALSE_CLAIMS = (
     "pooleboot_microcode_semantics_enforced",
     "poolekernel_microcode_apply_enforced",
     "microcode_applied",
+    "pooleboot_firmware_semantics_enforced",
+    "poolekernel_firmware_apply_enforced",
+    "firmware_update_applied",
+    "live_firmware_inventory_observed",
+    "production_firmware_payload_included",
     "all_pbp1_temporary_pools_released",
     "all_kmap_table_pages_released",
     "all_kload_resources_released",
@@ -350,6 +372,9 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-KLOAD-MICROCODE-INNER-SEMANTICS",
     "NEG-N5-KLOAD-MICROCODE-INNER-VERSION",
     "NEG-N5-KLOAD-MICROCODE-ACTIVATION-OVERREACH",
+    "NEG-N5-KLOAD-FIRMWARE-INNER-SEMANTICS",
+    "NEG-N5-KLOAD-FIRMWARE-INNER-VERSION",
+    "NEG-N5-KLOAD-FIRMWARE-ACTIVATION-OVERREACH",
     "NEG-N5-KLOAD-MARKER-OMISSION",
     "NEG-N5-KLOAD-MARKER-ORDER",
     "NEG-N5-KLOAD-MARKER-CONFIG-BOUND",
@@ -652,6 +677,49 @@ def microcode_oracle(data: bytes, expected_version: int) -> dict[str, Any]:
     }
 
 
+def firmware_oracle(data: bytes, expected_version: int) -> dict[str, Any]:
+    artifact = native_boot_artifact.parse_bound(
+        data, native_boot_artifact.ROLE_FIRMWARE_MANIFEST, expected_version
+    )
+    _, bundle = native_boot_artifact.parse_firmware(data)
+    errors = native_firmware.activation_errors(
+        bundle,
+        native_firmware.development_activation_context(
+            bundle, outer_file_sha256=artifact.file_sha256
+        ),
+    )
+    if not errors or errors[0] != "pfwm_activation_outer_signature":
+        raise KernelLoadError("PFWM1 development activation boundary changed")
+    return {
+        "contract_id": native_firmware.CONTRACT_ID,
+        "summary": native_firmware.summary(bundle),
+        "bundle_sha256": native_firmware.sha256_bytes(bundle.raw),
+        "bundle_version": native_firmware.MAJOR_VERSION,
+        "component_count": len(bundle.components),
+        "dependency_count": len(bundle.dependencies),
+        "declared_external_payload_bytes": sum(
+            item.external_payload_bytes for item in bundle.components
+        ),
+        "maximum_transaction_components": bundle.maximum_transaction_components,
+        "outer_payload_sha256": artifact.payload_sha256,
+        "activation_allowed": False,
+        "activation_errors": list(errors),
+        "validated_by": "independent_host_media_oracle",
+        "pooleboot_enforced": False,
+        "poolekernel_enforced": False,
+        "live_firmware_inventory_observed": False,
+        "vendor_payload_validated": False,
+        "production_vendor_payload_included": False,
+        "external_payload_bytes_embedded": False,
+        "updater_driver_loaded": False,
+        "capsule_submitted": False,
+        "firmware_mutated": False,
+        "physical_media_written": False,
+        "synthetic_manifest_only": True,
+        "authority_created": False,
+    }
+
+
 def canonical_manifest_bytes(
     kernel_data: bytes, artifact_files: dict[str, bytes] | None = None
 ) -> bytes:
@@ -687,6 +755,8 @@ def canonical_manifest_bytes(
             symbols_oracle(data, 1)
         elif role == native_boot_artifact.ROLE_MICROCODE:
             microcode_oracle(data, 1)
+        elif role == native_boot_artifact.ROLE_FIRMWARE_MANIFEST:
+            firmware_oracle(data, 1)
         artifacts.append(
             native_system_manifest.Artifact(
                 id=artifact_id,
@@ -821,6 +891,8 @@ def build_media_bytes(
                 symbols_oracle(artifact_data, profile[index].version)
             elif role == native_boot_artifact.ROLE_MICROCODE:
                 microcode_oracle(artifact_data, profile[index].version)
+            elif role == native_boot_artifact.ROLE_FIRMWARE_MANIFEST:
+                firmware_oracle(artifact_data, profile[index].version)
         kernel_plan, _ = native_elf_loader.load(
             kernel_data,
             PHYSICAL_ORACLE_BASE,
@@ -837,6 +909,7 @@ def build_media_bytes(
         native_recovery.RecoveryError,
         native_symbols.SymbolError,
         native_microcode.MicrocodeError,
+        native_firmware.FirmwareError,
         StopIteration,
     ) as error:
         raise KernelLoadError(f"PKLOAD6 input validation failed: {error}") from error
@@ -1102,6 +1175,8 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
                 symbols_oracle(artifact_data, profile[index].version)
             elif role == native_boot_artifact.ROLE_MICROCODE:
                 microcode_oracle(artifact_data, profile[index].version)
+            elif role == native_boot_artifact.ROLE_FIRMWARE_MANIFEST:
+                firmware_oracle(artifact_data, profile[index].version)
         kernel_plan, loaded = native_elf_loader.load(
             kernel_data,
             PHYSICAL_ORACLE_BASE,
@@ -1117,6 +1192,7 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
         native_recovery.RecoveryError,
         native_symbols.SymbolError,
         native_microcode.MicrocodeError,
+        native_firmware.FirmwareError,
         StopIteration,
         KeyError,
         IndexError,
@@ -1239,6 +1315,9 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
     )
     base["microcode"] = microcode_oracle(
         artifact_files[MICROCODE_PATH], profile[4].version
+    )
+    base["firmware"] = firmware_oracle(
+        artifact_files[FIRMWARE_PATH], profile[5].version
     )
     base["fat32"]["cluster_count"] = cluster_count
     return base
@@ -1717,6 +1796,27 @@ def validate_oracle_binding(
         or microcode["activation_errors"][0] != "pmcu_activation_outer_signature"
     ):
         raise KernelLoadError("PMCU1 oracle or activation boundary changed")
+    firmware = media_inspection.get("firmware", {})
+    if (
+        firmware.get("contract_id") != native_firmware.CONTRACT_ID
+        or firmware.get("validated_by") != "independent_host_media_oracle"
+        or firmware.get("activation_allowed") is not False
+        or firmware.get("pooleboot_enforced") is not False
+        or firmware.get("poolekernel_enforced") is not False
+        or firmware.get("live_firmware_inventory_observed") is not False
+        or firmware.get("vendor_payload_validated") is not False
+        or firmware.get("production_vendor_payload_included") is not False
+        or firmware.get("external_payload_bytes_embedded") is not False
+        or firmware.get("updater_driver_loaded") is not False
+        or firmware.get("capsule_submitted") is not False
+        or firmware.get("firmware_mutated") is not False
+        or firmware.get("physical_media_written") is not False
+        or firmware.get("synthetic_manifest_only") is not True
+        or firmware.get("authority_created") is not False
+        or not firmware.get("activation_errors")
+        or firmware["activation_errors"][0] != "pfwm_activation_outer_signature"
+    ):
+        raise KernelLoadError("PFWM1 oracle or activation boundary changed")
     kernel_map = marker_summary["kernel_map"]
     expected_map = native_kernel_map.marker_expectation(
         plan, kernel_map["physical_address_bits"]
@@ -1913,6 +2013,8 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
         "symbols_readiness": native_symbols.READINESS_RELATIVE.as_posix(),
         "microcode_contract": native_microcode.CONTRACT_RELATIVE.as_posix(),
         "microcode_readiness": native_microcode.READINESS_RELATIVE.as_posix(),
+        "firmware_contract": native_firmware.CONTRACT_RELATIVE.as_posix(),
+        "firmware_readiness": native_firmware.READINESS_RELATIVE.as_posix(),
     }
     for name, path in expected_bindings.items():
         if not binding_matches(bindings.get(name), root, path):
@@ -2023,6 +2125,19 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
         else:
             if media.get("microcode") != expected_microcode:
                 errors.append("PKLOAD6 PMCU1 independent-oracle summary changed")
+        try:
+            expected_firmware = firmware_oracle(
+                canonical_artifact_files()[FIRMWARE_PATH], 1
+            )
+        except (
+            KernelLoadError,
+            native_boot_artifact.BootArtifactError,
+            native_firmware.FirmwareError,
+        ) as error:
+            errors.append(f"canonical PFWM1 oracle failed: {error}")
+        else:
+            if media.get("firmware") != expected_firmware:
+                errors.append("PKLOAD6 PFWM1 independent-oracle summary changed")
     runs = readiness.get("execution", {}).get("runs", [])
     marker_sets: list[list[str]] = []
     if not isinstance(runs, list) or len(runs) != 2:

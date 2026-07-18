@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from runtime import native_boot_artifact  # noqa: E402
+from runtime import native_firmware  # noqa: E402
 from runtime import native_initial_system  # noqa: E402
 from runtime import native_microcode  # noqa: E402
 from runtime import native_recovery  # noqa: E402
@@ -35,6 +36,9 @@ class NativeBootArtifactTests(unittest.TestCase):
                 elif role == native_boot_artifact.ROLE_MICROCODE:
                     _, bundle = native_boot_artifact.parse_microcode(data)
                     self.assertEqual(native_microcode.canonical_bundle(), bundle.raw)
+                elif role == native_boot_artifact.ROLE_FIRMWARE_MANIFEST:
+                    _, bundle = native_boot_artifact.parse_firmware(data)
+                    self.assertEqual(native_firmware.canonical_bundle(), bundle.raw)
                 else:
                     self.assertIn(native_boot_artifact.ROLE_NAMES[role].encode("ascii"), decoded.payload)
 
@@ -81,6 +85,17 @@ class NativeBootArtifactTests(unittest.TestCase):
             native_boot_artifact.BootArtifactError, "artifact_inner_version_binding"
         ):
             native_boot_artifact.parse_microcode(data)
+
+    def test_firmware_outer_and_inner_versions_are_cross_bound(self) -> None:
+        data = native_boot_artifact.encode(
+            native_boot_artifact.ROLE_FIRMWARE_MANIFEST,
+            2,
+            native_firmware.canonical_bundle(),
+        )
+        with self.assertRaisesRegex(
+            native_boot_artifact.BootArtifactError, "artifact_inner_version_binding"
+        ):
+            native_boot_artifact.parse_firmware(data)
 
     def test_role_version_digest_and_reserved_substitution_fail_closed(self) -> None:
         data = bytearray(

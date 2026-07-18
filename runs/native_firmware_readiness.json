@@ -1,0 +1,676 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "pooleos_native_firmware_readiness",
+  "contract_id": "PFWM1",
+  "status": "pass",
+  "inputs": {
+    "contract": {
+      "path": "specs/native-firmware-contract.json",
+      "bytes": 7613,
+      "sha256": "F9147AF493537429FBC90596E13FF2372D93F27E153F5917947067216F39D307"
+    },
+    "golden_vectors": {
+      "path": "specs/native-firmware-golden-vectors.json",
+      "bytes": 24813,
+      "sha256": "AAF62CD7D31C15E05CC208BD3E0C0E6A19A834F360F71E166085075850BFD92D"
+    },
+    "toolchain_lock": {
+      "path": "specs/native-toolchain-lock.json",
+      "bytes": 4017,
+      "sha256": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E"
+    },
+    "toolchain_qualification": {
+      "path": "runs/native_toolchain_qualification.json",
+      "bytes": 14423,
+      "sha256": "11840E0C69449A5934254959E3797CFCC7D73F5E426542B1F08CF522076DFBFA"
+    },
+    "tier1_profile": {
+      "path": "specs/tier1-hardware-target.json",
+      "bytes": 9005,
+      "sha256": "E6976539E72D32974918B2ABA7AB53043AB44AB478D8CBA0ABF9E30E66869F89"
+    },
+    "implementation_inputs": [
+      {
+        "path": "native/Cargo.toml",
+        "bytes": 552,
+        "sha256": "D37A12801AC2C648A400A15FCEB482D2468A4E081F6489480049A4EC688C8B73"
+      },
+      {
+        "path": "native/Cargo.lock",
+        "bytes": 3600,
+        "sha256": "217EB13E456C253614E9A0D581D412F2769D8A23D9780CF973494F3D1C6A3D4B"
+      },
+      {
+        "path": "native/firmware/Cargo.toml",
+        "bytes": 350,
+        "sha256": "14CEE861F16A5F6E0A984F12036FA64422453178CBDA235622E0681C59C6C42E"
+      },
+      {
+        "path": "native/firmware/src/lib.rs",
+        "bytes": 46302,
+        "sha256": "3FAE1CE011532BF847BD5BBB9AB59347259CC1A38D5139AB19070E30BCE413FA"
+      },
+      {
+        "path": "native/firmware/src/bin/pfwm1_probe.rs",
+        "bytes": 9243,
+        "sha256": "6A51D820F088766F2AB466E9B1BFA5D40501447DD7925306F18B09F4C322E854"
+      },
+      {
+        "path": "runtime/native_firmware.py",
+        "bytes": 51184,
+        "sha256": "9787C5D73D8EA045E2F3CF088CFF39FABC453FC779DCD2D71FCD11393DC37808"
+      },
+      {
+        "path": "tools/generate_native_firmware_vectors.py",
+        "bytes": 1357,
+        "sha256": "1121B5DD2FD64B9B5080B8DAD4B068DD1D2329F7016DE034946D56935BF2B31D"
+      },
+      {
+        "path": "tools/qualify_native_firmware.py",
+        "bytes": 32432,
+        "sha256": "606CB491092892C92DB8ADFB5E23365C230742BA581D012755C9EA231B3A9DB9"
+      },
+      {
+        "path": "tests/test_native_firmware.py",
+        "bytes": 6191,
+        "sha256": "F4B230AA7D6D40C06B7281680417314C6BD3AA7A2EA0019EFE789E106FF9ABAB"
+      },
+      {
+        "path": "docs/native-firmware-manifest.md",
+        "bytes": 8893,
+        "sha256": "B211BE47D07391B81C247F258AE1F31A8EE494DD3FE0610F2DDA90C73256213E"
+      }
+    ]
+  },
+  "build": {
+    "status": "pass",
+    "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+    "host_tests": 5,
+    "rustfmt_packages": 1,
+    "clippy_targets": 1,
+    "no_std_targets": [
+      "x86_64-unknown-none",
+      "x86_64-unknown-uefi"
+    ]
+  },
+  "golden": {
+    "status": "pass",
+    "vector_count": 3,
+    "python_vectors": 3,
+    "rust_vectors": 3
+  },
+  "negative_controls": [
+    {
+      "id": "NEG-N5-PFWM-PARSE-TRUNCATED",
+      "expected": "pfwm_truncated",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-OVERSIZED",
+      "expected": "pfwm_oversized",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-MAGIC",
+      "expected": "pfwm_magic",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-VERSION",
+      "expected": "pfwm_version",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-HEADER-SIZE",
+      "expected": "pfwm_header_size",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-RECORD-SIZE",
+      "expected": "pfwm_record_size",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-PROFILE",
+      "expected": "pfwm_profile",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-FLAGS",
+      "expected": "pfwm_flags",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-MANIFEST-VERSION",
+      "expected": "pfwm_manifest_version",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-COUNTS",
+      "expected": "pfwm_counts",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-COMPONENT-OFFSET",
+      "expected": "pfwm_table_layout",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-DEPENDENCY-OFFSET",
+      "expected": "pfwm_table_layout",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-TOTAL-SIZE",
+      "expected": "pfwm_truncated",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-TRAILING",
+      "expected": "pfwm_trailing_bytes",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-LIMITS",
+      "expected": "pfwm_limits",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-DIGEST-ZERO",
+      "expected": "pfwm_digest_zero",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-MANIFEST-ID",
+      "expected": "pfwm_manifest_id",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-RESERVED",
+      "expected": "pfwm_reserved",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-BODY-DIGEST",
+      "expected": "pfwm_body_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-COMPONENT-ID",
+      "expected": "pfwm_component_id",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-COMPONENT-DUPLICATE-ID",
+      "expected": "pfwm_component_id",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-COMPONENT-ORDER",
+      "expected": "pfwm_component_order",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-COMPONENT-KIND",
+      "expected": "pfwm_component_kind",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-COMPONENT-TRANSPORT",
+      "expected": "pfwm_component_transport",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-COMPONENT-MAPPING",
+      "expected": "pfwm_component_mapping",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-COMPONENT-FLAGS",
+      "expected": "pfwm_component_flags",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-COMPONENT-RESERVED",
+      "expected": "pfwm_component_reserved",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-COMPONENT-GUID",
+      "expected": "pfwm_component_guid",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-COMPONENT-DUPLICATE-GUID",
+      "expected": "pfwm_component_guid",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-COMPONENT-HARDWARE-INSTANCE",
+      "expected": "pfwm_component_hardware_instance",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-COMPONENT-VERSIONS",
+      "expected": "pfwm_component_versions",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-COMPONENT-PAYLOAD-SIZE",
+      "expected": "pfwm_component_payload_size",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-COMPONENT-DIGEST",
+      "expected": "pfwm_component_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-DEPENDENCY-LAYOUT",
+      "expected": "pfwm_dependency_layout",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-DEPENDENCY-ID",
+      "expected": "pfwm_dependency_id",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-DEPENDENCY-VERSION",
+      "expected": "pfwm_dependency_version",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-DEPENDENCY-PHASE",
+      "expected": "pfwm_dependency_phase",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-PHASE-GAP",
+      "expected": "pfwm_phase_order",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-PARSE-MANIFEST-PAYLOAD-LIMIT",
+      "expected": "pfwm_component_payload_size",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-DEVELOPMENT",
+      "expected": "pfwm_activation_outer_signature",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-OUTER-SIGNATURE",
+      "expected": "pfwm_activation_outer_signature",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-OUTER-ROLE",
+      "expected": "pfwm_activation_outer_role",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-OUTER-VERSION",
+      "expected": "pfwm_activation_outer_version",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-OUTER-PAYLOAD",
+      "expected": "pfwm_activation_outer_payload_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-OUTER-FILE",
+      "expected": "pfwm_activation_outer_file_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-MANIFEST-SIGNATURE",
+      "expected": "pfwm_activation_manifest_signature",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-PACKAGE-SIGNATURE",
+      "expected": "pfwm_activation_package_signature",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-VENDOR-SIGNATURE",
+      "expected": "pfwm_activation_vendor_signature",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-TARGET-PROFILE",
+      "expected": "pfwm_activation_target_profile",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-HARDWARE-INVENTORY",
+      "expected": "pfwm_activation_hardware_inventory",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-DEVICE-IDENTITY",
+      "expected": "pfwm_activation_device_identity",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-CURRENT-VERSIONS",
+      "expected": "pfwm_activation_current_versions",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-TRANSPORT-SUPPORT",
+      "expected": "pfwm_activation_transport_support",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-FIRMWARE-SERVICES",
+      "expected": "pfwm_activation_firmware_services",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-UPDATER-PLUGINS",
+      "expected": "pfwm_activation_updater_plugins",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-PLUGIN-AUTHORITY",
+      "expected": "pfwm_activation_plugin_authority",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-EXTERNAL-PAYLOADS",
+      "expected": "pfwm_activation_external_payloads",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-PAYLOAD-DIGESTS",
+      "expected": "pfwm_activation_payload_digests",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-LICENSE-POLICY",
+      "expected": "pfwm_activation_license_policy",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-REDISTRIBUTION",
+      "expected": "pfwm_activation_redistribution",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-REVOCATION-STATE",
+      "expected": "pfwm_activation_revocation_state",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-COMPONENT-REVOKED",
+      "expected": "pfwm_activation_component_revoked",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-ANTI-ROLLBACK",
+      "expected": "pfwm_activation_anti_rollback",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-RECOVERY",
+      "expected": "pfwm_activation_recovery",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-RECOVERY-BACKUP",
+      "expected": "pfwm_activation_recovery_backup",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-STAGING",
+      "expected": "pfwm_activation_staging",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-STAGING-CAPACITY",
+      "expected": "pfwm_activation_staging_capacity",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-POWER",
+      "expected": "pfwm_activation_power",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-AC-POWER",
+      "expected": "pfwm_activation_ac_power",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-BATTERY",
+      "expected": "pfwm_activation_battery",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-TRANSACTION-JOURNAL",
+      "expected": "pfwm_activation_transaction_journal",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-QUIESCENCE",
+      "expected": "pfwm_activation_quiescence",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-STORAGE-GUARD",
+      "expected": "pfwm_activation_storage_guard",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-SUSPEND-SHUTDOWN",
+      "expected": "pfwm_activation_suspend_shutdown_guard",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-RESET-AUTHORITY",
+      "expected": "pfwm_activation_reset_authority",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-REBOOT-AUTHORITY",
+      "expected": "pfwm_activation_reboot_authority",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-USER-CONFIRMATION",
+      "expected": "pfwm_activation_user_confirmation",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-PHYSICAL-PRESENCE",
+      "expected": "pfwm_activation_physical_presence",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-POST-RESET-VERIFIER",
+      "expected": "pfwm_activation_post_reset_verifier",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-RECEIPT-STORAGE",
+      "expected": "pfwm_activation_receipt_storage",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-FIRMWARE-AUTHORITY",
+      "expected": "pfwm_activation_firmware_change_authority",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-NOT-QUALIFICATION",
+      "expected": "pfwm_activation_not_qualification_only",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-LIVE-CALL",
+      "expected": "pfwm_activation_live_firmware_call_requested",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-DRIVER-LOAD",
+      "expected": "pfwm_activation_driver_load_requested",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-MEDIA-WRITE",
+      "expected": "pfwm_activation_physical_media_write_requested",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-ACTIVATE-FIRMWARE-MUTATION",
+      "expected": "pfwm_activation_firmware_mutation_requested",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-POST-NOT-QUALIFICATION",
+      "expected": "pfwm_post_reset_not_qualification_only",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-POST-COUNT",
+      "expected": "pfwm_post_reset_record_count",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-POST-ORDER",
+      "expected": "pfwm_post_reset_record_order",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-POST-RESOURCE",
+      "expected": "pfwm_post_reset_resource_identity",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-POST-HARDWARE-INSTANCE",
+      "expected": "pfwm_post_reset_hardware_instance",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-POST-VERSION",
+      "expected": "pfwm_post_reset_version",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-POST-LAST-VERSION",
+      "expected": "pfwm_post_reset_last_attempt_version",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-POST-LAST-STATUS",
+      "expected": "pfwm_post_reset_last_attempt_status",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-POST-REENUMERATION",
+      "expected": "pfwm_post_reset_reenumeration",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-POST-SELF-TEST",
+      "expected": "pfwm_post_reset_self_test",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-POST-RECOVERY",
+      "expected": "pfwm_post_reset_recovery",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-POST-RECEIPT",
+      "expected": "pfwm_post_reset_receipt",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-POST-BOOT-LOOP",
+      "expected": "pfwm_post_reset_boot_loop_guard",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-POST-STATE-COMMIT",
+      "expected": "pfwm_post_reset_state_commit",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PFWM-POST-DRIVER-REBIND",
+      "expected": "pfwm_post_reset_driver_rebind",
+      "status": "pass"
+    }
+  ],
+  "differential": {
+    "parser": {
+      "cases": 16384,
+      "mismatches": 0,
+      "seed": 88263042609409
+    },
+    "activation": {
+      "cases": 8192,
+      "mismatches": 0,
+      "seed": 88263042609410
+    },
+    "post_reset": {
+      "cases": 8192,
+      "mismatches": 0,
+      "seed": 88263042609411
+    }
+  },
+  "activation": {
+    "canonical_profile": "synthetic_qualification_never_apply",
+    "development_first_error": "pfwm_activation_outer_signature",
+    "qualified_dry_run": {
+      "component_order": [
+        100,
+        200,
+        300
+      ],
+      "maximum_parallel_components": 1,
+      "external_payload_bytes": 12888,
+      "reset_required": true,
+      "qualification_only": true
+    },
+    "live_apply_implementation_present": false,
+    "production_apply_authority_created": false
+  },
+  "payloads": {
+    "component_count": 3,
+    "declared_external_payload_bytes": 12888,
+    "embedded_payload_count": 0,
+    "embedded_payload_bytes": 0,
+    "production_vendor_payload_count": 0
+  },
+  "claims": {
+    "allocation_free_no_std_parser": true,
+    "exact_identity_and_version_floor_validation": true,
+    "dependency_order_and_single_transaction_model": true,
+    "dry_run_prerequisite_gating": true,
+    "post_reset_receipt_validation": true,
+    "synthetic_manifest_only": true,
+    "external_payload_bytes_included": false,
+    "live_fmp_or_esrt_inventory_observed": false,
+    "uefi_capsule_submitted": false,
+    "device_updater_driver_loaded": false,
+    "vendor_payload_validated": false,
+    "firmware_mutated": false,
+    "physical_media_written": false,
+    "production_apply_authority_created": false,
+    "physical_hardware_qualified": false,
+    "production_ready": false
+  },
+  "non_claims": [
+    "No live UEFI FMP, ESRT, capsule, or PLDM parser is implemented or invoked.",
+    "No vendor firmware payload, updater driver, private key, or signature is included.",
+    "No firmware service call, reset, driver load, device detach, or media write occurs.",
+    "A valid parse or dry-run plan creates no production update authority.",
+    "The canonical profile is synthetic and prohibited from applying to hardware."
+  ],
+  "production_ready": false
+}

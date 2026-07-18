@@ -90,6 +90,13 @@ name = "poole-elf"
 version = "0.0.0"
 
 [[package]]
+name = "poole-firmware"
+version = "0.0.0"
+dependencies = [
+ "sha2",
+]
+
+[[package]]
 name = "poole-handoff"
 version = "0.0.0"
 

@@ -120,7 +120,7 @@ halts permanently at `STOP BEFORE TRANSFER`.
 
 ## Qualified Evidence
 
-The Cycle 111 receipt records:
+The Cycle 112 receipt records:
 
 - 76/76 Rust host tests across PooleBoot, PBART1, PBC1/PSM1/PKELF1/PBP1, PKMAP2,
   PBEXIT1, and PKENTRY1;
@@ -146,8 +146,12 @@ The Cycle 111 receipt records:
   two patches for `AuthenticAMD` CPUID `0x00B40F40`, bounded revision/floor and
   reset-known-good selection, BSP/AP apply prerequisites, mixed-revision and
   post-apply checks, and mandatory development activation denial;
-- 124/124 integrated negative controls, including PINIT1, PREC1, PSYM1, and
-  PMCU1 inner
+- exact synthetic-only PFWM1 host-oracle validation of the 1,312-byte payload,
+  three external-payload components, two dependency edges, exact hardware and
+  version floors, one-at-a-time dry-run ordering, post-reset receipt rules, and
+  mandatory development activation denial;
+- 127/127 integrated negative controls, including PINIT1, PREC1, PSYM1, PMCU1,
+  and PFWM1 inner
   semantic mutation, outer/inner version mismatch, activation overreach,
   artifact omission, path, role, version,
   payload digest, whole-file digest, overlap, signature overclaim, final-map
@@ -164,20 +168,20 @@ receipt does not claim that this OVMF run naturally produced a stale map key.
 PKLOAD6 does not authenticate PSM1 or any loaded artifact, enforce authenticated
 persistent rollback,
 establish the final active kernel address space or framebuffer cache policy,
-switch to the guarded stack, call PooleKernel, enforce PINIT1, PREC1, PSYM1, or PMCU1
+switch to the guarded stack, call PooleKernel, enforce PINIT1, PREC1, PSYM1, PMCU1, or PFWM1
 in PooleBoot, persist PREC1 mutable state, activate or execute the initial
 system or recovery in PooleKernel, consume symbols or create diagnostic
-authority, validate a real vendor microcode container, observe privileged
-per-processor revisions, apply microcode or firmware, enforce policy payloads, enforce Secure
+authority, validate a real vendor microcode or firmware payload, observe privileged
+per-processor revisions or live firmware inventory, load an updater, apply microcode or
+firmware, enforce policy payloads, enforce Secure
 Boot, perform measured boot, test a second host, test target firmware, touch
 physical media, satisfy N5, or establish production readiness.
 
 The next chronological owner-independent move is
-`N5-FIRMWARE-SEMANTICS-001`: define and independently validate the role-6
-firmware manifest's component and hardware identity, compatibility graph,
-update order, trust/license inputs, rollback floors, authority, staging,
-recovery, receipt, and post-update verification rules without calling firmware
-services or mutating firmware. Transfer-state,
+`N5-POLICY-SEMANTICS-001`: define and independently validate the role-7 policy
+format's scope, precedence, default-deny behavior, capability attenuation,
+version and rollback binding, safe/recovery overrides, and audit rules without
+enforcing policy in PooleBoot or PooleKernel. Transfer-state,
 signature-trust, and production
 transfer remain separately gated by the N5/N6 and owner-controlled N0 work.
 

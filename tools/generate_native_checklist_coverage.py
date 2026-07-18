@@ -208,6 +208,18 @@ ADDED_REQUIREMENTS = [
         ],
     },
     {
+        "id": "ADD-BOOT-009",
+        "phase_id": "N5",
+        "requirement": "Define firmware update intent as a deterministic manifest separate from vendor payload bytes and execution authority, bound by signature to exact component, resource GUID, hardware instance, device identity, current and target versions, lowest-supported and rollback floors, payload digest, vendor signer, updater plugin, recovery route, license, revocation, and target-hardware evidence; normalize UEFI FMP/ESRT/capsule, exact device-plugin, and PLDM transports without generic flashing; require an acyclic topological order, one active component per durable transaction, protected staging, power/quiesce/storage/suspend/shutdown guards, recovery and physical confirmation, stop-on-failure and reboot-loop prevention, post-reset version/status/re-enumeration/self-test verification, driver rebinding only after validation, independent allocation-free Rust/Python hostile and differential evidence, and separately approved authority before any live inventory, driver load, reset, payload transfer, capsule submission, firmware mutation, or physical-media action.",
+        "basis": [
+            "Cycle 112 PFWM1 synthetic firmware-manifest and dry-run-policy qualification",
+            "https://uefi.org/specs/UEFI/2.11/23_Firmware_Update_and_Reporting.html",
+            "https://csrc.nist.gov/pubs/sp/800/193/final",
+            "https://www.dmtf.org/sites/default/files/standards/documents/DSP0267_1.3.0.pdf",
+            "https://trustedcomputinggroup.org/resource/tcg-pc-client-reference-integrity-manifest-specification/",
+        ],
+    },
+    {
         "id": "ADD-BOOT-002",
         "phase_id": "N6",
         "requirement": "Model UEFI PK, KEK, db, dbx, image signer revocation, minimum secure version, authenticated boot state, recovery-key rotation, and development-key containment as one boot-trust state machine.",

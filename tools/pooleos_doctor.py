@@ -260,6 +260,17 @@ def check_native_microcode_readiness() -> CheckResult:
     )
 
 
+def check_native_firmware_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_firmware_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
 def check_native_system_manifest_readiness() -> CheckResult:
     from tools import pooleos_release_gate
 
@@ -3431,6 +3442,8 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "tools" / "qualify_native_symbols.py",
                 ROOT / "tools" / "generate_native_microcode_vectors.py",
                 ROOT / "tools" / "qualify_native_microcode.py",
+                ROOT / "tools" / "generate_native_firmware_vectors.py",
+                ROOT / "tools" / "qualify_native_firmware.py",
                 ROOT / "tools" / "generate_native_system_manifest_vectors.py",
                 ROOT / "tools" / "qualify_native_system_manifest.py",
                 ROOT / "tools" / "generate_native_boot_handoff_vectors.py",
@@ -3454,6 +3467,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runtime" / "native_recovery.py",
                 ROOT / "runtime" / "native_symbols.py",
                 ROOT / "runtime" / "native_microcode.py",
+                ROOT / "runtime" / "native_firmware.py",
                 ROOT / "runtime" / "native_system_manifest.py",
                 ROOT / "runtime" / "native_boot_handoff.py",
                 ROOT / "runtime" / "native_boot_config.py",
@@ -3466,11 +3480,15 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "docs" / "native-recovery-bundle.md",
                 ROOT / "docs" / "native-symbol-bundle.md",
                 ROOT / "docs" / "native-microcode-bundle.md",
+                ROOT / "docs" / "native-firmware-manifest.md",
                 ROOT / "docs" / "native-system-manifest.md",
                 ROOT / "docs" / "native-boot-handoff.md",
                 ROOT / "docs" / "native-boot-config.md",
                 ROOT / "docs" / "native-elf-loader.md",
                 ROOT / "docs" / "native-kernel-entry.md",
+                ROOT / "native" / "firmware" / "Cargo.toml",
+                ROOT / "native" / "firmware" / "src" / "lib.rs",
+                ROOT / "native" / "firmware" / "src" / "bin" / "pfwm1_probe.rs",
                 ROOT / "security" / "README.md",
                 ROOT / "security" / "owner-adr-signers.allowed",
                 ROOT / "security" / "revoked-adr-signers",
@@ -3552,6 +3570,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runs" / "native_recovery_readiness.json",
                 ROOT / "runs" / "native_symbol_readiness.json",
                 ROOT / "runs" / "native_microcode_readiness.json",
+                ROOT / "runs" / "native_firmware_readiness.json",
                 ROOT / "runs" / "native_system_manifest_readiness.json",
                 ROOT / "runs" / "native_boot_handoff_readiness.json",
                 ROOT / "runs" / "native_boot_config_readiness.json",
@@ -3593,6 +3612,12 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "specs" / "fixtures" / "pmcu1-minimal.bin",
                 ROOT / "specs" / "fixtures" / "pmcu1-boundary.bin",
                 ROOT / "tests" / "test_native_microcode.py",
+                ROOT / "specs" / "native-firmware-contract.json",
+                ROOT / "specs" / "native-firmware-contract.schema.json",
+                ROOT / "specs" / "native-firmware-golden-vectors.json",
+                ROOT / "specs" / "native-firmware-golden-vectors.schema.json",
+                ROOT / "specs" / "native-firmware-readiness.schema.json",
+                ROOT / "tests" / "test_native_firmware.py",
                 ROOT / "specs" / "native-boot-digest-provider.json",
                 ROOT / "specs" / "native-boot-digest-provider.schema.json",
                 ROOT / "specs" / "native-system-manifest-contract.json",
@@ -3701,6 +3726,7 @@ def main(argv: list[str] | None = None) -> int:
     checks.append(check_native_recovery_readiness())
     checks.append(check_native_symbol_readiness())
     checks.append(check_native_microcode_readiness())
+    checks.append(check_native_firmware_readiness())
     checks.append(check_native_system_manifest_readiness())
     checks.append(check_native_boot_handoff_readiness())
     checks.append(check_native_boot_config_readiness())

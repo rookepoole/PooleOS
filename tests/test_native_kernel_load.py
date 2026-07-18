@@ -125,6 +125,15 @@ class NativeKernelLoadTests(unittest.TestCase):
         self.assertFalse(inspection["symbols"]["runtime_addresses_disclosed"])
         self.assertFalse(inspection["symbols"]["full_debug_file_on_media"])
         self.assertFalse(inspection["symbols"]["authority_created"])
+        self.assertEqual("PFWM1", inspection["firmware"]["contract_id"])
+        self.assertEqual(3, inspection["firmware"]["component_count"])
+        self.assertEqual(2, inspection["firmware"]["dependency_count"])
+        self.assertFalse(inspection["firmware"]["activation_allowed"])
+        self.assertFalse(inspection["firmware"]["live_firmware_inventory_observed"])
+        self.assertFalse(inspection["firmware"]["external_payload_bytes_embedded"])
+        self.assertFalse(inspection["firmware"]["firmware_mutated"])
+        self.assertTrue(inspection["firmware"]["synthetic_manifest_only"])
+        self.assertFalse(inspection["firmware"]["authority_created"])
 
     def test_extended_media_rejects_fat_and_config_mutations(self) -> None:
         media = bytearray(

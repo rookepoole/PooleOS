@@ -31,14 +31,14 @@
     },
     "implementation_inputs": [
       {
-        "byte_count": 538,
+        "byte_count": 552,
         "path": "native/Cargo.toml",
-        "sha256": "35A5670D9B078405A8F65A07DD93D24DC3EF20F949C4BA0CC0A9E0421625D8A9"
+        "sha256": "D37A12801AC2C648A400A15FCEB482D2468A4E081F6489480049A4EC688C8B73"
       },
       {
-        "byte_count": 3517,
+        "byte_count": 3600,
         "path": "native/Cargo.lock",
-        "sha256": "2C6C3927C5442502A9958EAA14F65158226B10BA2AE5627202F559F771494512"
+        "sha256": "217EB13E456C253614E9A0D581D412F2769D8A23D9780CF973494F3D1C6A3D4B"
       },
       {
         "byte_count": 351,
@@ -61,9 +61,9 @@
         "sha256": "8311DF70FB9CFC5D3832C0B1662CA258E91F14638333771A25F7194BC558EEA8"
       },
       {
-        "byte_count": 7295,
+        "byte_count": 7858,
         "path": "runtime/native_boot_artifact.py",
-        "sha256": "6CC1DFBD2B44140983ED46FCDF8AD933B10856DD20F76ADCB7C263A2DB2F6C39"
+        "sha256": "75DA31DC1799B05D88BBA31E5DBCEA116F145CD09BC35D8D6A405F342C7DA667"
       },
       {
         "byte_count": 1693,

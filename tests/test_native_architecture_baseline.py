@@ -68,7 +68,7 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 112)
+        self.assertEqual(len(self.artifact["bound_sources"]), 119)
         bound_paths = {binding["path"] for binding in self.artifact["bound_sources"]}
         self.assertIn(
             "runs/adr_ratification_readiness.json",
@@ -103,6 +103,7 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertIn("runs/native_recovery_readiness.json", bound_paths)
         self.assertIn("runs/native_symbol_readiness.json", bound_paths)
         self.assertIn("runs/native_microcode_readiness.json", bound_paths)
+        self.assertIn("runs/native_firmware_readiness.json", bound_paths)
         self.assertIn("runs/native_kernel_entry_readiness.json", bound_paths)
         self.assertIn("runs/native_kernel_load_readiness.json", bound_paths)
         self.assertIn("runs/native_system_manifest_readiness.json", bound_paths)
@@ -136,6 +137,9 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertIn("specs/native-kernel-load-contract.schema.json", bound_paths)
         self.assertIn("specs/native-kernel-load-readiness.schema.json", bound_paths)
         self.assertIn("docs/native-kernel-load.md", bound_paths)
+        self.assertIn("specs/native-firmware-contract.json", bound_paths)
+        self.assertIn("specs/native-firmware-golden-vectors.json", bound_paths)
+        self.assertIn("docs/native-firmware-manifest.md", bound_paths)
         self.assertIn("specs/native-system-manifest-contract.json", bound_paths)
         self.assertIn("specs/native-system-manifest-golden-vectors.json", bound_paths)
         self.assertIn("specs/native-boot-digest-provider.json", bound_paths)

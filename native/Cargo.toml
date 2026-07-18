@@ -6,6 +6,7 @@ members = [
   "bootload",
   "bootcfg",
   "elf",
+  "firmware",
   "fixtures/pooleboot",
   "fixtures/poolekernel",
   "handoff",
