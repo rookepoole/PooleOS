@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "contract_id", "version", "profile", "format", "limits", "header_flags", "modes", "effects", "authority_equation", "activation_error_order", "receipt_error_order", "claims", "non_claims", "primary_references", "implementation_bindings"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "artifact_kind": {"const": "pooleos_native_policy_contract"},
+    "contract_id": {"const": "PPOL1"},
+    "version": {"type": "object"},
+    "profile": {"const": "synthetic_qualification_only"},
+    "format": {"type": "object"},
+    "limits": {"type": "object"},
+    "header_flags": {"type": "array", "minItems": 22, "uniqueItems": true, "items": {"type": "string"}},
+    "modes": {"type": "array", "minItems": 6, "maxItems": 6, "uniqueItems": true, "items": {"type": "string"}},
+    "effects": {"type": "array", "minItems": 16, "uniqueItems": true, "items": {"type": "string"}},
+    "authority_equation": {"type": "string"},
+    "activation_error_order": {"type": "array", "minItems": 45, "uniqueItems": true, "items": {"type": "string", "pattern": "^ppol_activation_"}},
+    "receipt_error_order": {"type": "array", "minItems": 11, "uniqueItems": true, "items": {"type": "string", "pattern": "^ppol_receipt_"}},
+    "claims": {"type": "object"},
+    "non_claims": {"type": "array", "minItems": 5, "items": {"type": "string"}},
+    "primary_references": {"type": "array", "minItems": 7, "items": {"type": "string", "format": "uri"}},
+    "implementation_bindings": {"type": "array", "minItems": 11, "items": {"$ref": "#/$defs/binding"}}
+  },
+  "$defs": {
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "bytes", "sha256"],
+      "properties": {
+        "path": {"type": "string"},
+        "bytes": {"type": "integer", "minimum": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"}
+      }
+    }
+  }
+}

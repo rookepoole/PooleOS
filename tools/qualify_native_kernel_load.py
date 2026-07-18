@@ -699,6 +699,28 @@ def _negative_controls(
     firmware_bundle = native_kernel_load.native_firmware.parse(
         native_kernel_load.native_firmware.canonical_bundle()
     )
+    canonical_policy_artifact = native_kernel_load.canonical_artifact_files()[
+        native_kernel_load.POLICY_PATH
+    ]
+    invalid_policy_inner = bytearray(
+        canonical_policy_artifact[
+            native_kernel_load.native_boot_artifact.HEADER_BYTES :
+        ]
+    )
+    invalid_policy_inner[-1] ^= 1
+    invalid_policy_artifact = native_kernel_load.native_boot_artifact.encode(
+        native_kernel_load.native_boot_artifact.ROLE_POLICY_BUNDLE,
+        1,
+        bytes(invalid_policy_inner),
+    )
+    mismatched_policy_version = native_kernel_load.native_boot_artifact.encode(
+        native_kernel_load.native_boot_artifact.ROLE_POLICY_BUNDLE,
+        2,
+        native_kernel_load.native_policy.canonical_bundle(),
+    )
+    policy_bundle = native_kernel_load.native_policy.parse(
+        native_kernel_load.native_policy.canonical_bundle()
+    )
 
     marker_summary = native_kernel_load.validate_markers(markers)
     config_oracle = copy.deepcopy(inspection)
@@ -969,6 +991,9 @@ def _negative_controls(
         ("NEG-N5-KLOAD-FIRMWARE-INNER-SEMANTICS", _rejected(lambda: native_kernel_load.firmware_oracle(invalid_firmware_artifact, 1))),
         ("NEG-N5-KLOAD-FIRMWARE-INNER-VERSION", _rejected(lambda: native_kernel_load.firmware_oracle(mismatched_firmware_version, 2))),
         ("NEG-N5-KLOAD-FIRMWARE-ACTIVATION-OVERREACH", _rejected(lambda: native_kernel_load.native_firmware.authorize_dry_run_plan(firmware_bundle, native_kernel_load.native_firmware.development_activation_context(firmware_bundle)))),
+        ("NEG-N5-KLOAD-POLICY-INNER-SEMANTICS", _rejected(lambda: native_kernel_load.policy_oracle(invalid_policy_artifact, 1))),
+        ("NEG-N5-KLOAD-POLICY-INNER-VERSION", _rejected(lambda: native_kernel_load.policy_oracle(mismatched_policy_version, 2))),
+        ("NEG-N5-KLOAD-POLICY-ACTIVATION-OVERREACH", _rejected(lambda: native_kernel_load.native_policy.authorize_dry_run_decision(policy_bundle, native_kernel_load.native_policy.development_activation_context(policy_bundle)))),
         ("NEG-N5-KLOAD-MARKER-OMISSION", _rejected(lambda: native_kernel_load.validate_markers(markers[:-1]))),
         ("NEG-N5-KLOAD-MARKER-ORDER", _rejected(lambda: native_kernel_load.validate_markers([markers[1], markers[0], *markers[2:]]))),
         ("NEG-N5-KLOAD-MARKER-CONFIG-BOUND", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 7, f"bytes={marker_summary['boot_config']['byte_count']}", "bytes=16385")))),
@@ -1117,6 +1142,16 @@ def make_readiness(
         raise QualificationError(
             "current PFWM1 readiness is stale: " + "; ".join(firmware_failures)
         )
+    policy_readiness = native_kernel_load.native_policy.read_json(
+        ROOT / native_kernel_load.native_policy.READINESS_RELATIVE
+    )
+    policy_failures = native_kernel_load.native_policy.readiness_errors(
+        policy_readiness, ROOT
+    )
+    if policy_failures:
+        raise QualificationError(
+            "current PPOL1 readiness is stale: " + "; ".join(policy_failures)
+        )
     lock, profile = native_tier0.validate_contracts(ROOT)
     qemu_root = native_tier0._require_workspace_tool_path(qemu_root, ROOT)
     native_tier0.verify_local_launch_runtime(lock, qemu_root, ROOT)
@@ -1205,7 +1240,7 @@ def make_readiness(
         "status_date": status_date,
         "status": "pass_single_host_two_run_live_pbart1_pkmap2_exit_then_stop_non_promoting",
         "contract_id": native_kernel_load.CONTRACT_ID,
-        "selected_move_id": "N5-FIRMWARE-SEMANTICS-001",
+        "selected_move_id": "N5-POLICY-SEMANTICS-001",
         "production_ready": False,
         "production_promotion_allowed": False,
         "n5_exit_gate_satisfied": False,
@@ -1272,6 +1307,12 @@ def make_readiness(
             "firmware_readiness": native_kernel_load.file_binding(
                 ROOT, native_kernel_load.native_firmware.READINESS_RELATIVE.as_posix()
             ),
+            "policy_contract": native_kernel_load.file_binding(
+                ROOT, native_kernel_load.native_policy.CONTRACT_RELATIVE.as_posix()
+            ),
+            "policy_readiness": native_kernel_load.file_binding(
+                ROOT, native_kernel_load.native_policy.READINESS_RELATIVE.as_posix()
+            ),
             "implementation_inputs": [native_kernel_load.file_binding(ROOT, path) for path in native_kernel_load.IMPLEMENTATION_INPUTS],
         },
         "host_tests": host_tests,
@@ -1321,6 +1362,11 @@ def make_readiness(
             "pfwm1_external_payload_bytes_embedded": False,
             "pfwm1_live_firmware_inventory_observed": False,
             "pfwm1_firmware_mutated": False,
+            "ppol1_host_oracle_match": True,
+            "ppol1_development_activation_denied": True,
+            "ppol1_initial_system_cross_bound": True,
+            "ppol1_live_policy_enforcement": False,
+            "ppol1_pooleglyph_executable_authority": False,
             "pbp1_profile_artifact_cross_binding": True,
             "sha256_python_match": True,
             "pkelf1_python_plan_match": True,
@@ -1400,6 +1446,11 @@ def make_readiness(
             "firmware_component_count": media_inspection["firmware"]["component_count"],
             "firmware_dependency_count": media_inspection["firmware"]["dependency_count"],
             "firmware_manifest_profile": "synthetic_qualification_never_apply",
+            "policy_mode_count": media_inspection["policy"]["mode_count"],
+            "policy_capability_rule_count": media_inspection["policy"][
+                "capability_rule_count"
+            ],
+            "policy_profile": "synthetic_qualification_only",
             "production_claim_count": 0,
         },
         "open_items": [
@@ -1414,7 +1465,7 @@ def make_readiness(
             "Implement signed PSYM1 parsing and bounded capability-authorized diagnostic consumption in PooleBoot and PooleKernel without staging private debug data.",
             "Authenticate PMCU1, validate real vendor containers and licenses, observe privileged per-processor revisions, and implement early PooleKernel apply and post-verify enforcement before any production payload is included or applied.",
             "Implement live bounded FMP, ESRT, capsule, and exact device-plugin inventory adapters, vendor package validation, recovery evidence, and separately authorized update execution before PFWM1 can move beyond synthetic dry-run qualification.",
-            "Define and implement the remaining policy artifact's semantics, parser hardening, capability boundary, and lifecycle policy before execution or application.",
+            "Implement signed PPOL1 verification and live PooleBoot/PooleKernel intersection enforcement, mode transitions, capability issuance, revocation, rollback, and durable audit before policy decisions can be applied.",
             "Transfer to PooleKernel and capture entry, panic, recovery, and reset evidence.",
             "Add fault-injected live EFI_INVALID_PARAMETER retry evidence rather than lifecycle-model evidence alone.",
             "Define how PooleKernel reclaims final-map scratch pools after consuming PBP1.",

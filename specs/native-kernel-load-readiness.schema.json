@@ -35,7 +35,7 @@
     "status_date": {"const": "2026-07-18"},
     "status": {"const": "pass_single_host_two_run_live_pbart1_pkmap2_exit_then_stop_non_promoting"},
     "contract_id": {"const": "PKLOAD6"},
-    "selected_move_id": {"const": "N5-FIRMWARE-SEMANTICS-001"},
+    "selected_move_id": {"const": "N5-POLICY-SEMANTICS-001"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
     "n5_exit_gate_satisfied": {"const": false},
@@ -54,7 +54,7 @@
     },
     "bindings": {
       "type": "object",
-      "required": ["contract", "kernel_map_contract", "boot_exit_contract", "toolchain_lock", "toolchain_qualification", "tier0_lock", "tier0_profile", "tier0_readiness", "system_manifest_contract", "system_manifest_readiness", "digest_provider", "initial_system_contract", "initial_system_readiness", "recovery_contract", "recovery_readiness", "symbols_contract", "symbols_readiness", "microcode_contract", "microcode_readiness", "firmware_contract", "firmware_readiness", "kernel_entry_contract", "kernel_entry_readiness", "implementation_inputs"],
+      "required": ["contract", "kernel_map_contract", "boot_exit_contract", "toolchain_lock", "toolchain_qualification", "tier0_lock", "tier0_profile", "tier0_readiness", "system_manifest_contract", "system_manifest_readiness", "digest_provider", "initial_system_contract", "initial_system_readiness", "recovery_contract", "recovery_readiness", "symbols_contract", "symbols_readiness", "microcode_contract", "microcode_readiness", "firmware_contract", "firmware_readiness", "policy_contract", "policy_readiness", "kernel_entry_contract", "kernel_entry_readiness", "implementation_inputs"],
       "properties": {
         "contract": {"$ref": "#/$defs/binding"},
         "kernel_map_contract": {"$ref": "#/$defs/binding"},
@@ -79,7 +79,9 @@
         "microcode_readiness": {"$ref": "#/$defs/binding"},
         "firmware_contract": {"$ref": "#/$defs/binding"},
         "firmware_readiness": {"$ref": "#/$defs/binding"},
-        "implementation_inputs": {"type": "array", "minItems": 130, "maxItems": 130, "items": {"$ref": "#/$defs/binding"}}
+        "policy_contract": {"$ref": "#/$defs/binding"},
+        "policy_readiness": {"$ref": "#/$defs/binding"},
+        "implementation_inputs": {"type": "array", "minItems": 148, "maxItems": 148, "items": {"$ref": "#/$defs/binding"}}
       }
     },
     "host_tests": {
@@ -128,7 +130,7 @@
         "physical_media_write_performed": {"const": false},
         "inspection": {
           "type": "object",
-          "required": ["files", "manifest", "kernel", "artifact_set", "initial_system", "recovery", "symbols", "microcode", "firmware"],
+          "required": ["files", "manifest", "kernel", "artifact_set", "initial_system", "recovery", "symbols", "microcode", "firmware", "policy"],
           "properties": {
             "files": {"type": "array", "minItems": 10, "maxItems": 10},
             "artifact_set": {
@@ -254,6 +256,33 @@
                 "synthetic_manifest_only": {"const": true},
                 "authority_created": {"const": false}
               }
+            },
+            "policy": {
+              "type": "object",
+              "required": ["contract_id", "summary", "bundle_sha256", "bundle_version", "mode_count", "capability_rule_count", "initial_system_sha256", "outer_payload_sha256", "activation_allowed", "activation_errors", "validated_by", "initial_system_cross_bound", "safe_floor_validated", "recovery_floor_validated", "firmware_physical_presence_modeled", "firmware_separate_authority_modeled", "pooleboot_enforced", "poolekernel_enforced", "policy_decision_applied", "pooleglyph_executable_authority", "signature_verified", "state_mutated", "physical_media_written", "synthetic_policy_only", "authority_created"],
+              "properties": {
+                "contract_id": {"const": "PPOL1"},
+                "bundle_version": {"const": 1},
+                "mode_count": {"const": 6},
+                "capability_rule_count": {"const": 11},
+                "activation_allowed": {"const": false},
+                "activation_errors": {"type": "array", "minItems": 1},
+                "validated_by": {"const": "independent_host_media_oracle"},
+                "initial_system_cross_bound": {"const": true},
+                "safe_floor_validated": {"const": true},
+                "recovery_floor_validated": {"const": true},
+                "firmware_physical_presence_modeled": {"const": true},
+                "firmware_separate_authority_modeled": {"const": true},
+                "pooleboot_enforced": {"const": false},
+                "poolekernel_enforced": {"const": false},
+                "policy_decision_applied": {"const": false},
+                "pooleglyph_executable_authority": {"const": false},
+                "signature_verified": {"const": false},
+                "state_mutated": {"const": false},
+                "physical_media_written": {"const": false},
+                "synthetic_policy_only": {"const": true},
+                "authority_created": {"const": false}
+              }
             }
           }
         }
@@ -275,13 +304,18 @@
     "oracle": {
       "type": "object",
       "additionalProperties": {"const": true},
-      "required": ["pbc1_python_match", "psm1_python_match", "pbart1_python_match", "pbart1_rust_python_match", "pbart1_manifest_cross_binding", "pfwm1_host_oracle_match", "pfwm1_development_activation_denied", "pbp1_profile_artifact_cross_binding", "sha256_python_match", "pkelf1_python_plan_match", "pbp1_python_decode_match", "pkmap2_rust_python_probe_match", "pbexit1_final_map_attempt_match", "media_reconstruction_exact"],
+      "required": ["pbc1_python_match", "psm1_python_match", "pbart1_python_match", "pbart1_rust_python_match", "pbart1_manifest_cross_binding", "pfwm1_host_oracle_match", "pfwm1_development_activation_denied", "ppol1_host_oracle_match", "ppol1_development_activation_denied", "ppol1_initial_system_cross_bound", "pbp1_profile_artifact_cross_binding", "sha256_python_match", "pkelf1_python_plan_match", "pbp1_python_decode_match", "pkmap2_rust_python_probe_match", "pbexit1_final_map_attempt_match", "media_reconstruction_exact"],
       "properties": {
         "pfwm1_host_oracle_match": {"const": true},
         "pfwm1_development_activation_denied": {"const": true},
         "pfwm1_external_payload_bytes_embedded": {"const": false},
         "pfwm1_live_firmware_inventory_observed": {"const": false},
-        "pfwm1_firmware_mutated": {"const": false}
+        "pfwm1_firmware_mutated": {"const": false},
+        "ppol1_host_oracle_match": {"const": true},
+        "ppol1_development_activation_denied": {"const": true},
+        "ppol1_initial_system_cross_bound": {"const": true},
+        "ppol1_live_policy_enforcement": {"const": false},
+        "ppol1_pooleglyph_executable_authority": {"const": false}
       },
       "minProperties": 36
     },
@@ -300,8 +334,8 @@
         "all_resources_released": {"const": false}
       }
     },
-    "negative_controls": {"type": "array", "minItems": 127, "maxItems": 127, "items": {"$ref": "#/$defs/control"}},
-    "claims": {"type": "object", "minProperties": 83, "maxProperties": 83},
+    "negative_controls": {"type": "array", "minItems": 130, "maxItems": 130, "items": {"$ref": "#/$defs/control"}},
+    "claims": {"type": "object", "minProperties": 89, "maxProperties": 89},
     "summary": {"type": "object"},
     "open_items": {"type": "array", "minItems": 8, "items": {"type": "string"}},
     "claim_boundary": {"type": "array", "minItems": 10, "items": {"type": "string"}}

@@ -817,6 +817,12 @@ def make_report(
             "firmware_readiness": native_pooleboot.file_binding(
                 ROOT, "runs/native_firmware_readiness.json"
             ),
+            "policy_contract": native_pooleboot.file_binding(
+                ROOT, "specs/native-policy-contract.json"
+            ),
+            "policy_readiness": native_pooleboot.file_binding(
+                ROOT, "runs/native_policy_readiness.json"
+            ),
             "implementation_inputs": [
                 native_pooleboot.file_binding(ROOT, path) for path in BUILD_INPUTS
             ],
@@ -851,6 +857,13 @@ def make_report(
                 "dependency_count"
             ],
             "firmware_manifest_profile": "synthetic_qualification_never_apply",
+            "policy_mode_count": kernel_load["media"]["inspection"]["policy"][
+                "mode_count"
+            ],
+            "policy_capability_rule_count": kernel_load["media"]["inspection"][
+                "policy"
+            ]["capability_rule_count"],
+            "policy_profile": "synthetic_qualification_only",
             "production_claim_count": 0,
         },
         "open_items": kernel_load["open_items"],

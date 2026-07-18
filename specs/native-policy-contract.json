@@ -1,0 +1,226 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "pooleos_native_policy_contract",
+  "contract_id": "PPOL1",
+  "version": {
+    "major": 1,
+    "minor": 0
+  },
+  "profile": "synthetic_qualification_only",
+  "format": {
+    "header_bytes": 512,
+    "mode_record_bytes": 128,
+    "capability_record_bytes": 64,
+    "tables_are_contiguous": true,
+    "mode_count": 6
+  },
+  "limits": {
+    "bundle_bytes": 65536,
+    "capability_rules": 256,
+    "audit_receipts": 1000000,
+    "generation_advance": 1
+  },
+  "header_flags": [
+    "target_profile_bound",
+    "artifact_set_bound",
+    "exact_modes",
+    "default_deny",
+    "attenuation_only",
+    "no_wildcards",
+    "capability_route_complete",
+    "parent_monotonic",
+    "safe_floor",
+    "recovery_floor",
+    "firmware_physical_presence",
+    "firmware_separate_authority",
+    "revocation_authenticated",
+    "rollback_authenticated",
+    "receipt_required",
+    "durable_audit",
+    "zero_trust",
+    "mode_transition_authorized",
+    "deny_unknown",
+    "no_authority_from_parse",
+    "qualification_only",
+    "pooleglyph_non_authoritative"
+  ],
+  "modes": [
+    "normal",
+    "safe",
+    "previous",
+    "recovery",
+    "diagnostic",
+    "firmware"
+  ],
+  "effects": [
+    "audit",
+    "read_state",
+    "write_volatile",
+    "write_persistent",
+    "execute",
+    "ipc",
+    "network",
+    "device_io",
+    "dma",
+    "debug",
+    "pdc_compute",
+    "pdc_actuate",
+    "update",
+    "firmware",
+    "secret",
+    "power"
+  ],
+  "authority_equation": "builtin_ceiling & signed_policy & selected_mode & issued_capability & request",
+  "activation_error_order": [
+    "ppol_activation_outer_signature",
+    "ppol_activation_outer_role",
+    "ppol_activation_outer_version",
+    "ppol_activation_outer_payload_digest",
+    "ppol_activation_outer_file_digest",
+    "ppol_activation_policy_signature",
+    "ppol_activation_manifest_signature",
+    "ppol_activation_artifact_signatures",
+    "ppol_activation_target_profile",
+    "ppol_activation_initial_system_digest",
+    "ppol_activation_recovery_digest",
+    "ppol_activation_symbols_digest",
+    "ppol_activation_microcode_digest",
+    "ppol_activation_firmware_digest",
+    "ppol_activation_trust_policy",
+    "ppol_activation_revocation_state",
+    "ppol_activation_rollback_state",
+    "ppol_activation_audit_schema",
+    "ppol_activation_inner_contracts",
+    "ppol_activation_initial_system_cross_binding",
+    "ppol_activation_kernel_abi",
+    "ppol_activation_pbp",
+    "ppol_activation_mode",
+    "ppol_activation_mode_authority",
+    "ppol_activation_transition_authority",
+    "ppol_activation_capability_allocator",
+    "ppol_activation_resource_broker",
+    "ppol_activation_audit_sink",
+    "ppol_activation_receipt_store",
+    "ppol_activation_physical_presence",
+    "ppol_activation_separate_authority",
+    "ppol_activation_capability",
+    "ppol_activation_capability_mode",
+    "ppol_activation_capability_revoked",
+    "ppol_activation_generation",
+    "ppol_activation_issued_rights",
+    "ppol_activation_requested_rights",
+    "ppol_activation_requested_effects",
+    "ppol_activation_not_qualification_only",
+    "ppol_activation_live_execution_requested",
+    "ppol_activation_persistent_write_requested",
+    "ppol_activation_firmware_call_requested",
+    "ppol_activation_driver_load_requested",
+    "ppol_activation_physical_media_write_requested",
+    "ppol_activation_state_mutation_requested"
+  ],
+  "receipt_error_order": [
+    "ppol_receipt_not_qualification_only",
+    "ppol_receipt_policy_digest",
+    "ppol_receipt_mode",
+    "ppol_receipt_capability",
+    "ppol_receipt_rights",
+    "ppol_receipt_effects",
+    "ppol_receipt_generation",
+    "ppol_receipt_revocation_epoch",
+    "ppol_receipt_audit_sequence",
+    "ppol_receipt_not_durable",
+    "ppol_receipt_decision_id"
+  ],
+  "claims": {
+    "allocation_free_no_std_parser": true,
+    "six_mode_default_deny_model": true,
+    "capability_attenuation_and_parent_monotonicity": true,
+    "pinit1_route_cross_binding": true,
+    "safe_and_recovery_builtin_floors": true,
+    "firmware_physical_presence_and_separate_authority_modeled": true,
+    "durable_decision_receipt_validation": true,
+    "synthetic_policy_only": true,
+    "live_policy_enforcement": false,
+    "pooleboot_policy_enforced": false,
+    "poolekernel_policy_enforced": false,
+    "pooleglyph_executable_authority": false,
+    "signature_verified": false,
+    "authority_created": false,
+    "state_mutated": false,
+    "physical_media_written": false,
+    "production_ready": false
+  },
+  "non_claims": [
+    "No PPOL1 parse, cross-binding result, dry-run decision, or receipt grants authority.",
+    "No signature, private key, live revocation state, rollback state, or physical-presence signal is produced.",
+    "No PooleBoot or PooleKernel policy interpreter, capability allocator, resource broker, or audit store is implemented here.",
+    "No firmware call, driver load, state mutation, executable transfer, or physical-media write occurs.",
+    "PooleGlyph data remains non-authoritative pending its separately gated Core IR promotion evidence."
+  ],
+  "primary_references": [
+    "https://docs.sel4.systems/projects/capdl/lang-spec.html",
+    "https://fuchsia.dev/fuchsia-src/concepts/components/v2/capabilities",
+    "https://fuchsia.dev/fuchsia-src/concepts/components/v2/lifecycle",
+    "https://uefi.org/specs/UEFI/2.11/03_Boot_Manager.html",
+    "https://theupdateframework.github.io/specification/latest/",
+    "https://csrc.nist.gov/pubs/sp/800/193/final",
+    "https://csrc.nist.gov/pubs/sp/800/207/final"
+  ],
+  "implementation_bindings": [
+    {
+      "path": "native/Cargo.toml",
+      "bytes": 564,
+      "sha256": "2CDB0F54A483023045D313F976D368C2201E6D447383D0959E88BEC210F95B68"
+    },
+    {
+      "path": "native/Cargo.lock",
+      "bytes": 3706,
+      "sha256": "25AE81F5C2FAA70EDA07DD5E4008302206F199A0AF7F75D9275939454E5062EC"
+    },
+    {
+      "path": "native/policy/Cargo.toml",
+      "bytes": 395,
+      "sha256": "938D50FAE804F0618B12F1870A9FA869BADB42A2834B8628D2283E6E38B45593"
+    },
+    {
+      "path": "native/policy/src/lib.rs",
+      "bytes": 55054,
+      "sha256": "F8B0B214526ADF6867081B3E67F52ADCE47F444C0DD34BAB6EB797D18714E320"
+    },
+    {
+      "path": "native/policy/src/bin/ppol1_probe.rs",
+      "bytes": 9376,
+      "sha256": "8CC8D5572A6155559E92E2ECB4154DEDEA01335F15A977C5FF30EDE8ADEF597C"
+    },
+    {
+      "path": "runtime/native_policy.py",
+      "bytes": 57996,
+      "sha256": "28DC24E943BB0B7FA37C99FC9DFF14AB51E0C6E0028E0D6230DE5283C7E690A2"
+    },
+    {
+      "path": "runtime/native_boot_artifact.py",
+      "bytes": 8217,
+      "sha256": "518F0392D35DFDE8EB2A3971DA382E455822A7FD2344163FB65D0FCC95FC63ED"
+    },
+    {
+      "path": "tools/generate_native_policy_vectors.py",
+      "bytes": 2087,
+      "sha256": "2C43457AF5C7D4B0B8A1D157717AC668955D00DF9637E43ACCC3D9494E7A05E2"
+    },
+    {
+      "path": "tools/qualify_native_policy.py",
+      "bytes": 35406,
+      "sha256": "D6EFD20411001ADF59C6722784D579A94C2D725745B0C9DE7A7EFE8A25DB84CB"
+    },
+    {
+      "path": "tests/test_native_policy.py",
+      "bytes": 6251,
+      "sha256": "1C974EE8B1B116BDA4F201BD115F219B44EB170D3E2917BDA591AD0B1857EF68"
+    },
+    {
+      "path": "docs/native-policy-bundle.md",
+      "bytes": 6077,
+      "sha256": "CD7B9C39B0263269A2E88588D8CF975E221AF43174C0D07DB5C1034CA287691F"
+    }
+  ]
+}

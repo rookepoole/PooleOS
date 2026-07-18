@@ -2,7 +2,7 @@
 
 Status: candidate, unsigned, development-only, non-promoting  
 Profile move: `N5-INIT-SYSTEM-001`
-Current inner-format move: `N5-MICROCODE-SEMANTICS-001`
+Current inner-enforcement move: `N5-INNER-ENFORCEMENT-001`
 Profile contract: `PBASET1`  
 Artifact envelope: `PBART1`  
 Manifest contract: `PSM1`  
@@ -25,9 +25,9 @@ the following strict ASCII order; PBP1 records use the numeric role order.
 | `b_initial_system` | `initial_system` | `PBART1` + `PINIT1` | `\EFI\POOLEOS\INITIAL.PBA` | 2 |
 | `c_recovery` | `recovery` | `PBART1` + `PREC1` | `\EFI\POOLEOS\RECOVERY.PBA` | 3 |
 | `d_symbols` | `symbols` | `PBART1` + `PSYM1` | `\EFI\POOLEOS\SYMBOLS.PBA` | 4 |
-| `e_microcode` | `microcode` | `PBART1` | `\EFI\POOLEOS\MICROCOD.PBA` | 5 |
-| `f_firmware` | `firmware` | `PBART1` | `\EFI\POOLEOS\FIRMWARE.PBA` | 6 |
-| `g_policy` | `policy` | `PBART1` | `\EFI\POOLEOS\POLICY.PBA` | 7 |
+| `e_microcode` | `microcode` | `PBART1` + `PMCU1` | `\EFI\POOLEOS\MICROCOD.PBA` | 5 |
+| `f_firmware` | `firmware` | `PBART1` + `PFWM1` | `\EFI\POOLEOS\FIRMWARE.PBA` | 6 |
+| `g_policy` | `policy` | `PBART1` + `PPOL1` | `\EFI\POOLEOS\POLICY.PBA` | 7 |
 
 The kernel keeps `entry_contract=PKENTRY1` and a nonzero `image_bytes` value.
 Every PBART1 artifact uses `entry_contract=none` and `image_bytes=0`. Each
@@ -137,6 +137,39 @@ PooleKernel do not consume PSYM1, create a kernel export namespace, grant a
 diagnostic capability, or disclose runtime pointers. Those are explicit later
 gates rather than inferred consequences of host qualification.
 
+## PMCU1 Inner Bundle
+
+The microcode payload is the synthetic never-apply `PMCU1` package described
+in `docs/native-microcode-bundle.md`. Independent Python and allocation-free
+Rust validators model exact CPU selection, security revision floors,
+known-good fallback, reset handling, and receipts. No vendor production
+container is included, no privileged CPU revision is observed, and no update
+instruction executes.
+
+## PFWM1 Inner Bundle
+
+The firmware payload is the synthetic manifest-only `PFWM1` bundle described
+in `docs/native-firmware-manifest.md`. It binds exact component, hardware,
+version, dependency, signer, updater, recovery, and external-payload
+identities. Only a qualification dry-run and post-reset receipt model exist;
+no payload bytes, live inventory, updater driver, capsule call, reset, or
+firmware mutation occurs.
+
+## PPOL1 Inner Bundle
+
+The policy payload is the qualification-only `PPOL1` bundle described in
+`docs/native-policy-bundle.md`. Its six exact mode records provide compiled-in
+safe and recovery floors plus a firmware mode requiring physical presence and
+separate authority. Its 11 capability rules exactly cross-bind canonical
+PINIT1 routes and can only attenuate declared and already-issued rights.
+
+Independent Python and allocation-free `no_std` Rust validators agree on the
+format, route cross-binding, activation boundaries, dry-run decisions, and
+durable receipts. The unsigned development context fails first at the missing
+outer signature. PooleBoot and PooleKernel do not enforce PPOL1, no decision is
+applied, and PooleGlyph remains non-authoritative pending its separate Core IR
+promotion gate.
+
 ## Qualification Gate
 
 The bounded move qualifies only when all of the following pass:
@@ -156,5 +189,6 @@ The bounded move qualifies only when all of the following pass:
 6. Claims remain explicitly false for signatures, trust, persistent rollback,
    PooleBoot inner-semantic enforcement, PooleKernel activation, recovery
    execution or symbol consumption, persistent-state I/O, component execution,
-   microcode application, kernel transfer, physical hardware, N5 completion,
-   and production readiness.
+   microcode or firmware application, PPOL1 enforcement, PooleGlyph executable
+   authority, kernel transfer, physical hardware, N5 completion, and production
+   readiness.

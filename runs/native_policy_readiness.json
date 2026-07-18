@@ -1,0 +1,809 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "pooleos_native_policy_readiness",
+  "contract_id": "PPOL1",
+  "status": "pass",
+  "inputs": {
+    "contract": {
+      "path": "specs/native-policy-contract.json",
+      "bytes": 7406,
+      "sha256": "F142A2968857864F2FF36830F741727D52C92F8C06E7304C9F1CEE96B86EF9A9"
+    },
+    "golden_vectors": {
+      "path": "specs/native-policy-golden-vectors.json",
+      "bytes": 43996,
+      "sha256": "42C664541FBE2BA5B734240EA1995D203AED739A6F9E8D0F7CB0FCEE9150A7CA"
+    },
+    "toolchain_lock": {
+      "path": "specs/native-toolchain-lock.json",
+      "bytes": 4017,
+      "sha256": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E"
+    },
+    "toolchain_qualification": {
+      "path": "runs/native_toolchain_qualification.json",
+      "bytes": 14423,
+      "sha256": "8135351396A65762926803504C43EE5BF0CAA6A152F9EB2F192B77354B63A261"
+    },
+    "tier1_profile": {
+      "path": "specs/tier1-hardware-target.json",
+      "bytes": 9005,
+      "sha256": "E6976539E72D32974918B2ABA7AB53043AB44AB478D8CBA0ABF9E30E66869F89"
+    },
+    "implementation_inputs": [
+      {
+        "path": "native/Cargo.toml",
+        "bytes": 564,
+        "sha256": "2CDB0F54A483023045D313F976D368C2201E6D447383D0959E88BEC210F95B68"
+      },
+      {
+        "path": "native/Cargo.lock",
+        "bytes": 3706,
+        "sha256": "25AE81F5C2FAA70EDA07DD5E4008302206F199A0AF7F75D9275939454E5062EC"
+      },
+      {
+        "path": "native/policy/Cargo.toml",
+        "bytes": 395,
+        "sha256": "938D50FAE804F0618B12F1870A9FA869BADB42A2834B8628D2283E6E38B45593"
+      },
+      {
+        "path": "native/policy/src/lib.rs",
+        "bytes": 55054,
+        "sha256": "F8B0B214526ADF6867081B3E67F52ADCE47F444C0DD34BAB6EB797D18714E320"
+      },
+      {
+        "path": "native/policy/src/bin/ppol1_probe.rs",
+        "bytes": 9376,
+        "sha256": "8CC8D5572A6155559E92E2ECB4154DEDEA01335F15A977C5FF30EDE8ADEF597C"
+      },
+      {
+        "path": "runtime/native_policy.py",
+        "bytes": 57996,
+        "sha256": "28DC24E943BB0B7FA37C99FC9DFF14AB51E0C6E0028E0D6230DE5283C7E690A2"
+      },
+      {
+        "path": "runtime/native_boot_artifact.py",
+        "bytes": 8217,
+        "sha256": "518F0392D35DFDE8EB2A3971DA382E455822A7FD2344163FB65D0FCC95FC63ED"
+      },
+      {
+        "path": "tools/generate_native_policy_vectors.py",
+        "bytes": 2087,
+        "sha256": "2C43457AF5C7D4B0B8A1D157717AC668955D00DF9637E43ACCC3D9494E7A05E2"
+      },
+      {
+        "path": "tools/qualify_native_policy.py",
+        "bytes": 35406,
+        "sha256": "D6EFD20411001ADF59C6722784D579A94C2D725745B0C9DE7A7EFE8A25DB84CB"
+      },
+      {
+        "path": "tests/test_native_policy.py",
+        "bytes": 6251,
+        "sha256": "1C974EE8B1B116BDA4F201BD115F219B44EB170D3E2917BDA591AD0B1857EF68"
+      },
+      {
+        "path": "docs/native-policy-bundle.md",
+        "bytes": 6077,
+        "sha256": "CD7B9C39B0263269A2E88588D8CF975E221AF43174C0D07DB5C1034CA287691F"
+      }
+    ]
+  },
+  "build": {
+    "status": "pass",
+    "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+    "host_tests": 6,
+    "rustfmt_packages": 1,
+    "clippy_targets": 1,
+    "no_std_targets": [
+      "x86_64-unknown-none",
+      "x86_64-unknown-uefi"
+    ]
+  },
+  "golden": {
+    "status": "pass",
+    "vectors": 3,
+    "python_rust_exact": true
+  },
+  "negative_controls": [
+    {
+      "id": "NEG-N5-PPOL-PARSER-EMPTY",
+      "expected": "ppol_truncated",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-TRUNCATED",
+      "expected": "ppol_truncated",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-OVERSIZED",
+      "expected": "ppol_oversized",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-MAGIC",
+      "expected": "ppol_magic",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-MAJOR",
+      "expected": "ppol_version",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-MINOR",
+      "expected": "ppol_version",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-HEADER-SIZE",
+      "expected": "ppol_record_size",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-MODE-RECORD-SIZE",
+      "expected": "ppol_record_size",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-CAP-RECORD-SIZE",
+      "expected": "ppol_record_size",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-PROFILE",
+      "expected": "ppol_profile",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-FLAGS",
+      "expected": "ppol_flags",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-POLICY-VERSION",
+      "expected": "ppol_version_floor",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-SECURE-VERSION",
+      "expected": "ppol_version_floor",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-ROLLBACK-FLOOR",
+      "expected": "ppol_version_floor",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-MODE-COUNT",
+      "expected": "ppol_counts",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-CAP-COUNT",
+      "expected": "ppol_counts",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-REQUIRED-MODES",
+      "expected": "ppol_required_modes",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-MODE-OFFSET",
+      "expected": "ppol_table_layout",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-CAP-OFFSET",
+      "expected": "ppol_table_layout",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-TRAILING",
+      "expected": "ppol_trailing_bytes",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-AUDIT-LIMIT",
+      "expected": "ppol_limits",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-GENERATION-ADVANCE",
+      "expected": "ppol_limits",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-DEFAULT-CEILING",
+      "expected": "ppol_default_ceiling",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-HEADER-RESERVED",
+      "expected": "ppol_default_ceiling",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-IDENTITY-DIGEST",
+      "expected": "ppol_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-BODY-DIGEST",
+      "expected": "ppol_body_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-POLICY-ID",
+      "expected": "ppol_policy_id",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-RESERVED",
+      "expected": "ppol_reserved",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-MODE-ORDER",
+      "expected": "ppol_mode_order",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-MODE-FLAGS",
+      "expected": "ppol_mode_flags",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-MODE-RESERVED",
+      "expected": "ppol_mode_reserved",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-MODE-CAP-COUNT",
+      "expected": "ppol_mode_capability_count",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-MODE-EFFECTS",
+      "expected": "ppol_mode_effects",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-MODE-PROHIBITED",
+      "expected": "ppol_mode_prohibited_effects",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-MODE-EVIDENCE",
+      "expected": "ppol_mode_evidence",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-MODE-RESOURCE",
+      "expected": "ppol_mode_resource_ceiling",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-MODE-CAP-FLAGS",
+      "expected": "ppol_mode_capability_flags",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-MODE-RIGHTS",
+      "expected": "ppol_mode_rights",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-MODE-ARTIFACTS",
+      "expected": "ppol_mode_artifacts",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-MODE-TRANSITIONS",
+      "expected": "ppol_mode_transitions",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-MODE-AUDIT",
+      "expected": "ppol_mode_audit",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-SAFE-FLOOR",
+      "expected": "ppol_safe_floor",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-RECOVERY-FLOOR",
+      "expected": "ppol_recovery_floor",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-FIRMWARE-BOUNDARY",
+      "expected": "ppol_firmware_boundary",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-CAP-ORDER",
+      "expected": "ppol_capability_order",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-CAP-PARENT",
+      "expected": "ppol_capability_parent",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-CAP-ROUTE",
+      "expected": "ppol_capability_route",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-CAP-DECLARED-RIGHTS",
+      "expected": "ppol_capability_declared_rights",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-CAP-CEILING-RIGHTS",
+      "expected": "ppol_capability_ceiling_rights",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-CAP-DECLARED-FLAGS",
+      "expected": "ppol_capability_declared_flags",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-CAP-CEILING-FLAGS",
+      "expected": "ppol_capability_ceiling_flags",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-CAP-REVOKE",
+      "expected": "ppol_capability_revoke_group",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-CAP-MODES",
+      "expected": "ppol_capability_modes",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-CAP-EFFECTS",
+      "expected": "ppol_capability_effects",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-CAP-AVAILABILITY",
+      "expected": "ppol_capability_availability",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-CAP-GENERATION",
+      "expected": "ppol_capability_generation",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-PARSER-CAP-PARENT-ATTENUATION",
+      "expected": "ppol_capability_parent_attenuation",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-DEVELOPMENT",
+      "expected": "ppol_activation_outer_signature",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-OUTER-SIGNATURE",
+      "expected": "ppol_activation_outer_signature",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-OUTER-ROLE",
+      "expected": "ppol_activation_outer_role",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-OUTER-VERSION",
+      "expected": "ppol_activation_outer_version",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-OUTER-PAYLOAD",
+      "expected": "ppol_activation_outer_payload_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-OUTER-FILE",
+      "expected": "ppol_activation_outer_file_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-POLICY-SIGNATURE",
+      "expected": "ppol_activation_policy_signature",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-MANIFEST-SIGNATURE",
+      "expected": "ppol_activation_manifest_signature",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-ARTIFACT-SIGNATURES",
+      "expected": "ppol_activation_artifact_signatures",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-TARGET-PROFILE",
+      "expected": "ppol_activation_target_profile",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-INITIAL-DIGEST",
+      "expected": "ppol_activation_initial_system_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-RECOVERY-DIGEST",
+      "expected": "ppol_activation_recovery_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-SYMBOLS-DIGEST",
+      "expected": "ppol_activation_symbols_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-MICROCODE-DIGEST",
+      "expected": "ppol_activation_microcode_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-FIRMWARE-DIGEST",
+      "expected": "ppol_activation_firmware_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-TRUST-POLICY",
+      "expected": "ppol_activation_trust_policy",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-REVOCATION-STATE",
+      "expected": "ppol_activation_revocation_state",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-ROLLBACK-STATE",
+      "expected": "ppol_activation_rollback_state",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-AUDIT-SCHEMA",
+      "expected": "ppol_activation_audit_schema",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-INNER-CONTRACTS",
+      "expected": "ppol_activation_inner_contracts",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-PINIT-CROSS-BINDING",
+      "expected": "ppol_activation_initial_system_cross_binding",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-KERNEL-ABI",
+      "expected": "ppol_activation_kernel_abi",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-PBP",
+      "expected": "ppol_activation_pbp",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-MODE",
+      "expected": "ppol_activation_mode",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-MODE-AUTHORITY",
+      "expected": "ppol_activation_mode_authority",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-TRANSITION-AUTHORITY",
+      "expected": "ppol_activation_transition_authority",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-CAPABILITY-ALLOCATOR",
+      "expected": "ppol_activation_capability_allocator",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-RESOURCE-BROKER",
+      "expected": "ppol_activation_resource_broker",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-AUDIT-SINK",
+      "expected": "ppol_activation_audit_sink",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-RECEIPT-STORE",
+      "expected": "ppol_activation_receipt_store",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-PHYSICAL-PRESENCE",
+      "expected": "ppol_activation_physical_presence",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-SEPARATE-AUTHORITY",
+      "expected": "ppol_activation_separate_authority",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-CAPABILITY",
+      "expected": "ppol_activation_capability",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-CAPABILITY-MODE",
+      "expected": "ppol_activation_capability_mode",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-CAPABILITY-REVOKED",
+      "expected": "ppol_activation_capability_revoked",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-GENERATION",
+      "expected": "ppol_activation_generation",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-ISSUED-RIGHTS",
+      "expected": "ppol_activation_issued_rights",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-REQUESTED-RIGHTS",
+      "expected": "ppol_activation_requested_rights",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-REQUESTED-EFFECTS",
+      "expected": "ppol_activation_requested_effects",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-NOT-QUALIFICATION",
+      "expected": "ppol_activation_not_qualification_only",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-LIVE-EXECUTION",
+      "expected": "ppol_activation_live_execution_requested",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-PERSISTENT-WRITE",
+      "expected": "ppol_activation_persistent_write_requested",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-FIRMWARE-CALL",
+      "expected": "ppol_activation_firmware_call_requested",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-DRIVER-LOAD",
+      "expected": "ppol_activation_driver_load_requested",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-MEDIA-WRITE",
+      "expected": "ppol_activation_physical_media_write_requested",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-ACTIVATION-STATE-MUTATION",
+      "expected": "ppol_activation_state_mutation_requested",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-RECEIPT-NOT-QUALIFICATION",
+      "expected": "ppol_receipt_not_qualification_only",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-RECEIPT-POLICY-DIGEST",
+      "expected": "ppol_receipt_policy_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-RECEIPT-MODE",
+      "expected": "ppol_receipt_mode",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-RECEIPT-CAPABILITY",
+      "expected": "ppol_receipt_capability",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-RECEIPT-RIGHTS",
+      "expected": "ppol_receipt_rights",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-RECEIPT-EFFECTS",
+      "expected": "ppol_receipt_effects",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-RECEIPT-GENERATION",
+      "expected": "ppol_receipt_generation",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-RECEIPT-REVOCATION-EPOCH",
+      "expected": "ppol_receipt_revocation_epoch",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-RECEIPT-AUDIT-SEQUENCE",
+      "expected": "ppol_receipt_audit_sequence",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-RECEIPT-NOT-DURABLE",
+      "expected": "ppol_receipt_not_durable",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-RECEIPT-DECISION-ID",
+      "expected": "ppol_receipt_decision_id",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-CROSS-PINIT-DIGEST",
+      "expected": "ppol_pinit_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PPOL-CROSS-PINIT-ROUTE",
+      "expected": "ppol_pinit_capability_route",
+      "status": "pass"
+    }
+  ],
+  "differential": {
+    "parser": {
+      "cases": 8192,
+      "mismatches": 0,
+      "seed": 88305857999105
+    },
+    "cross_binding": {
+      "cases": 4096,
+      "mismatches": 0,
+      "seed": 88305857999106
+    },
+    "activation": {
+      "cases": 12288,
+      "mismatches": 0,
+      "seed": 88305857999107
+    },
+    "receipt": {
+      "cases": 8192,
+      "mismatches": 0,
+      "seed": 88305857999108
+    }
+  },
+  "activation": {
+    "development_allowed": false,
+    "development_first_error": "ppol_activation_outer_signature",
+    "synthetic_mode_decisions": [
+      {
+        "mode": "normal",
+        "capability_id": 1,
+        "effective_rights": 15,
+        "effective_effects": 6,
+        "allowed_capability_count": 11,
+        "qualification_only": true
+      },
+      {
+        "mode": "safe",
+        "capability_id": 1,
+        "effective_rights": 7,
+        "effective_effects": 6,
+        "allowed_capability_count": 11,
+        "qualification_only": true
+      },
+      {
+        "mode": "previous",
+        "capability_id": 1,
+        "effective_rights": 15,
+        "effective_effects": 6,
+        "allowed_capability_count": 11,
+        "qualification_only": true
+      },
+      {
+        "mode": "recovery",
+        "capability_id": 0,
+        "effective_rights": 0,
+        "effective_effects": 1,
+        "allowed_capability_count": 0,
+        "qualification_only": true
+      },
+      {
+        "mode": "diagnostic",
+        "capability_id": 1,
+        "effective_rights": 7,
+        "effective_effects": 6,
+        "allowed_capability_count": 11,
+        "qualification_only": true
+      },
+      {
+        "mode": "firmware",
+        "capability_id": 0,
+        "effective_rights": 0,
+        "effective_effects": 1,
+        "allowed_capability_count": 0,
+        "qualification_only": true
+      }
+    ],
+    "authority_equation": "builtin_ceiling & signed_policy & selected_mode & issued_capability & request",
+    "live_effects_requested": false
+  },
+  "cross_binding": {
+    "status": "pass",
+    "initial_system_sha256": "FFE7243CEE75963D84905E6C9BF9F0D04310EEDBF097757C32E0EBE30FA0C3ED",
+    "capability_routes": 11,
+    "complete_exact_route_set": true,
+    "parent_monotonic": true,
+    "amplification_observed": false
+  },
+  "receipts": {
+    "status": "pass",
+    "policy_digest_bound": true,
+    "mode_and_capability_bound": true,
+    "generation_and_revocation_epoch_bound": true,
+    "durability_required": true,
+    "persistent_receipt_written": false
+  },
+  "claims": {
+    "allocation_free_no_std_parser": true,
+    "six_mode_default_deny_model": true,
+    "capability_attenuation_and_parent_monotonicity": true,
+    "pinit1_route_cross_binding": true,
+    "safe_and_recovery_builtin_floors": true,
+    "firmware_physical_presence_and_separate_authority_modeled": true,
+    "durable_decision_receipt_validation": true,
+    "synthetic_policy_only": true,
+    "live_policy_enforcement": false,
+    "pooleboot_policy_enforced": false,
+    "poolekernel_policy_enforced": false,
+    "pooleglyph_executable_authority": false,
+    "signature_verified": false,
+    "authority_created": false,
+    "state_mutated": false,
+    "physical_media_written": false,
+    "production_ready": false
+  },
+  "non_claims": [
+    "No PPOL1 parse, cross-binding result, dry-run decision, or receipt grants authority.",
+    "No signature, private key, live revocation state, rollback state, or physical-presence signal is produced.",
+    "No PooleBoot or PooleKernel policy interpreter, capability allocator, resource broker, or audit store is implemented here.",
+    "No firmware call, driver load, state mutation, executable transfer, or physical-media write occurs.",
+    "PooleGlyph data remains non-authoritative pending its separately gated Core IR promotion evidence."
+  ],
+  "production_ready": false
+}

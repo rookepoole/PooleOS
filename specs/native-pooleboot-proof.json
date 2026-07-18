@@ -5,7 +5,7 @@
   "status": "bounded_unsigned_live_profile_artifacts_post_exit_pbp1_retained_pkmap2_stop_before_transfer_non_promoting_proof",
   "production_ready": false,
   "production_promotion_allowed": false,
-  "selected_move_id": "N5-FIRMWARE-SEMANTICS-001",
+  "selected_move_id": "N5-POLICY-SEMANTICS-001",
   "phase_mapping": [
     "N5.1",
     "N5.2",
@@ -27,7 +27,8 @@
     "ADD-BOOT-005",
     "ADD-BOOT-006",
     "ADD-BOOT-007",
-    "ADD-BOOT-009"
+    "ADD-BOOT-009",
+    "ADD-BOOT-010"
   ],
   "binary": {
     "package": "pooleboot",
@@ -186,6 +187,9 @@
     "NEG-N5-KLOAD-FIRMWARE-INNER-SEMANTICS",
     "NEG-N5-KLOAD-FIRMWARE-INNER-VERSION",
     "NEG-N5-KLOAD-FIRMWARE-ACTIVATION-OVERREACH",
+    "NEG-N5-KLOAD-POLICY-INNER-SEMANTICS",
+    "NEG-N5-KLOAD-POLICY-INNER-VERSION",
+    "NEG-N5-KLOAD-POLICY-ACTIVATION-OVERREACH",
     "NEG-N5-KLOAD-MARKER-OMISSION",
     "NEG-N5-KLOAD-MARKER-ORDER",
     "NEG-N5-KLOAD-MARKER-CONFIG-BOUND",
@@ -278,6 +282,7 @@
     "The symbols payload is a deterministic PSYM1 public diagnostic index validated by an independent host oracle, and unsigned consumption is denied; PooleBoot treats it as opaque, PooleKernel performs no lookup, runtime addresses remain undisclosed, private debug data stays off media, and no authority is created.",
     "The microcode payload is a deterministic PMCU1 package containing only synthetic never-apply bytes; exact target selection and reset-based known-good policy are validated by independent host and no_std oracles, while PooleBoot and PooleKernel enforce nothing and no privileged revision probe, vendor authentication, or CPU update occurs.",
     "The firmware payload is a deterministic PFWM1 synthetic manifest; exact resource and hardware-instance identities, version floors, dependencies, dry-run prerequisites, and post-reset receipts are validated by independent host and no_std oracles, while PooleBoot and PooleKernel enforce nothing and no external payload bytes, live firmware inventory, updater driver, capsule submission, firmware mutation, or authority exists.",
+    "The policy payload is a deterministic PPOL1 qualification-only bundle; six mode ceilings and all 11 PINIT1 capability routes are validated by independent Python and no_std Rust oracles, while PooleBoot and PooleKernel enforce nothing, PooleGlyph remains non-authoritative, and no live decision, mutation, or authority exists.",
     "Immediately before ExitBootServices, PooleBoot captures a bounded final UEFI memory map, normalizes descriptor-stride-aware entries, and finalizes development-profile PBP1 bytes inside the retained handoff allocation.",
     "PBEXIT1 permits at most four attempts, retries only EFI_INVALID_PARAMETER after obtaining a fresh map key, forbids unrelated firmware calls after the first attempt, and proves zero firmware calls after success.",
     "PKMAP2 requires CR0.WP, processor NX support, and EFER.NXE; it rejects LA57, PCID, occupied target slots, malformed coverage, writable-executable leaves, large leaves, retained overlap, and guard-layout drift.",
@@ -298,6 +303,8 @@
     "https://doc.rust-lang.org/rustc/platform-support/unknown-uefi.html",
     "https://www.qemu.org/docs/master/interop/qemu-qmp-ref.html",
     "https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html",
-    "https://docs.amd.com/v/u/en-US/24593_3.44_APM_Vol2"
+    "https://docs.amd.com/v/u/en-US/24593_3.44_APM_Vol2",
+    "https://docs.sel4.systems/projects/capdl/lang-spec.html",
+    "https://fuchsia.dev/fuchsia-src/concepts/components/v2/capabilities"
   ]
 }

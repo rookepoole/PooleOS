@@ -20,6 +20,7 @@ from runtime import (
     native_kernel_map,
     native_live_boot_handoff,
     native_microcode,
+    native_policy,
     native_pooleboot,
     native_recovery,
     native_symbols,
@@ -147,6 +148,9 @@ IMPLEMENTATION_INPUTS = (
     "native/microcode/Cargo.toml",
     "native/microcode/src/lib.rs",
     "native/microcode/src/bin/pmcu1_probe.rs",
+    "native/policy/Cargo.toml",
+    "native/policy/src/lib.rs",
+    "native/policy/src/bin/ppol1_probe.rs",
     "native/recovery/Cargo.toml",
     "native/recovery/src/lib.rs",
     "native/recovery/src/bin/prec1_probe.rs",
@@ -164,6 +168,7 @@ IMPLEMENTATION_INPUTS = (
     "runtime/native_kernel_image.py",
     "runtime/native_initial_system.py",
     "runtime/native_microcode.py",
+    "runtime/native_policy.py",
     "runtime/native_recovery.py",
     "runtime/native_symbols.py",
     "runtime/native_kernel_load.py",
@@ -217,6 +222,17 @@ IMPLEMENTATION_INPUTS = (
     "specs/native-firmware-golden-vectors.schema.json",
     "specs/native-firmware-readiness.schema.json",
     "runs/native_firmware_readiness.json",
+    "docs/native-policy-bundle.md",
+    "specs/native-policy-contract.json",
+    "specs/native-policy-contract.schema.json",
+    "specs/native-policy-golden-vectors.json",
+    "specs/native-policy-golden-vectors.schema.json",
+    "specs/native-policy-readiness.schema.json",
+    "specs/fixtures/ppol1-canonical.bin",
+    "specs/fixtures/ppol1-minimal.bin",
+    "specs/fixtures/ppol1-boundary.bin",
+    "specs/fixtures/ppol1-canonical-pinit.bin",
+    "runs/native_policy_readiness.json",
     "specs/native-kernel-load-contract.json",
     "specs/native-kernel-load-contract.schema.json",
     "specs/native-kernel-load-readiness.schema.json",
@@ -232,12 +248,15 @@ IMPLEMENTATION_INPUTS = (
     "tools/qualify_native_microcode.py",
     "tools/generate_native_firmware_vectors.py",
     "tools/qualify_native_firmware.py",
+    "tools/generate_native_policy_vectors.py",
+    "tools/qualify_native_policy.py",
     "tests/test_native_boot_artifact.py",
     "tests/test_native_initial_system.py",
     "tests/test_native_recovery.py",
     "tests/test_native_symbols.py",
     "tests/test_native_microcode.py",
     "tests/test_native_firmware.py",
+    "tests/test_native_policy.py",
     "tests/test_native_live_boot_handoff.py",
 )
 
@@ -266,6 +285,8 @@ TRUE_CLAIMS = (
     "microcode_development_activation_denied",
     "firmware_inner_oracle_validated",
     "firmware_development_activation_denied",
+    "policy_inner_oracle_validated",
+    "policy_development_activation_denied",
     "artifact_set_manifest_sha256_matched",
     "artifact_pages_retained",
     "pbp1_profile_artifacts_cross_bound",
@@ -315,6 +336,10 @@ FALSE_CLAIMS = (
     "firmware_update_applied",
     "live_firmware_inventory_observed",
     "production_firmware_payload_included",
+    "pooleboot_policy_semantics_enforced",
+    "poolekernel_policy_enforced",
+    "policy_decision_applied",
+    "pooleglyph_policy_authority_created",
     "all_pbp1_temporary_pools_released",
     "all_kmap_table_pages_released",
     "all_kload_resources_released",
@@ -375,6 +400,9 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-KLOAD-FIRMWARE-INNER-SEMANTICS",
     "NEG-N5-KLOAD-FIRMWARE-INNER-VERSION",
     "NEG-N5-KLOAD-FIRMWARE-ACTIVATION-OVERREACH",
+    "NEG-N5-KLOAD-POLICY-INNER-SEMANTICS",
+    "NEG-N5-KLOAD-POLICY-INNER-VERSION",
+    "NEG-N5-KLOAD-POLICY-ACTIVATION-OVERREACH",
     "NEG-N5-KLOAD-MARKER-OMISSION",
     "NEG-N5-KLOAD-MARKER-ORDER",
     "NEG-N5-KLOAD-MARKER-CONFIG-BOUND",
@@ -720,6 +748,50 @@ def firmware_oracle(data: bytes, expected_version: int) -> dict[str, Any]:
     }
 
 
+def policy_oracle(data: bytes, expected_version: int) -> dict[str, Any]:
+    artifact = native_boot_artifact.parse_bound(
+        data, native_boot_artifact.ROLE_POLICY_BUNDLE, expected_version
+    )
+    _, bundle = native_boot_artifact.parse_policy(data)
+    initial = native_initial_system.parse(native_initial_system.canonical_bundle())
+    native_policy.validate_initial_system(bundle, initial)
+    errors = native_policy.activation_errors(
+        bundle,
+        native_policy.development_activation_context(
+            bundle, outer_file_sha256=artifact.file_sha256
+        ),
+    )
+    if not errors or errors[0] != "ppol_activation_outer_signature":
+        raise KernelLoadError("PPOL1 development activation boundary changed")
+    return {
+        "contract_id": native_policy.CONTRACT_ID,
+        "summary": native_policy.summary(bundle),
+        "bundle_sha256": native_policy.sha256_bytes(bundle.raw),
+        "bundle_version": native_policy.MAJOR_VERSION,
+        "mode_count": len(bundle.modes),
+        "capability_rule_count": len(bundle.capability_rules),
+        "initial_system_sha256": bundle.initial_system_sha256,
+        "outer_payload_sha256": artifact.payload_sha256,
+        "activation_allowed": False,
+        "activation_errors": list(errors),
+        "validated_by": "independent_host_media_oracle",
+        "initial_system_cross_bound": True,
+        "safe_floor_validated": True,
+        "recovery_floor_validated": True,
+        "firmware_physical_presence_modeled": True,
+        "firmware_separate_authority_modeled": True,
+        "pooleboot_enforced": False,
+        "poolekernel_enforced": False,
+        "policy_decision_applied": False,
+        "pooleglyph_executable_authority": False,
+        "signature_verified": False,
+        "state_mutated": False,
+        "physical_media_written": False,
+        "synthetic_policy_only": True,
+        "authority_created": False,
+    }
+
+
 def canonical_manifest_bytes(
     kernel_data: bytes, artifact_files: dict[str, bytes] | None = None
 ) -> bytes:
@@ -757,6 +829,8 @@ def canonical_manifest_bytes(
             microcode_oracle(data, 1)
         elif role == native_boot_artifact.ROLE_FIRMWARE_MANIFEST:
             firmware_oracle(data, 1)
+        elif role == native_boot_artifact.ROLE_POLICY_BUNDLE:
+            policy_oracle(data, 1)
         artifacts.append(
             native_system_manifest.Artifact(
                 id=artifact_id,
@@ -893,6 +967,8 @@ def build_media_bytes(
                 microcode_oracle(artifact_data, profile[index].version)
             elif role == native_boot_artifact.ROLE_FIRMWARE_MANIFEST:
                 firmware_oracle(artifact_data, profile[index].version)
+            elif role == native_boot_artifact.ROLE_POLICY_BUNDLE:
+                policy_oracle(artifact_data, profile[index].version)
         kernel_plan, _ = native_elf_loader.load(
             kernel_data,
             PHYSICAL_ORACLE_BASE,
@@ -910,6 +986,7 @@ def build_media_bytes(
         native_symbols.SymbolError,
         native_microcode.MicrocodeError,
         native_firmware.FirmwareError,
+        native_policy.PolicyError,
         StopIteration,
     ) as error:
         raise KernelLoadError(f"PKLOAD6 input validation failed: {error}") from error
@@ -1177,6 +1254,8 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
                 microcode_oracle(artifact_data, profile[index].version)
             elif role == native_boot_artifact.ROLE_FIRMWARE_MANIFEST:
                 firmware_oracle(artifact_data, profile[index].version)
+            elif role == native_boot_artifact.ROLE_POLICY_BUNDLE:
+                policy_oracle(artifact_data, profile[index].version)
         kernel_plan, loaded = native_elf_loader.load(
             kernel_data,
             PHYSICAL_ORACLE_BASE,
@@ -1193,6 +1272,7 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
         native_symbols.SymbolError,
         native_microcode.MicrocodeError,
         native_firmware.FirmwareError,
+        native_policy.PolicyError,
         StopIteration,
         KeyError,
         IndexError,
@@ -1318,6 +1398,9 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
     )
     base["firmware"] = firmware_oracle(
         artifact_files[FIRMWARE_PATH], profile[5].version
+    )
+    base["policy"] = policy_oracle(
+        artifact_files[POLICY_PATH], profile[6].version
     )
     base["fat32"]["cluster_count"] = cluster_count
     return base
@@ -1817,6 +1900,29 @@ def validate_oracle_binding(
         or firmware["activation_errors"][0] != "pfwm_activation_outer_signature"
     ):
         raise KernelLoadError("PFWM1 oracle or activation boundary changed")
+    policy = media_inspection.get("policy", {})
+    if (
+        policy.get("contract_id") != native_policy.CONTRACT_ID
+        or policy.get("validated_by") != "independent_host_media_oracle"
+        or policy.get("activation_allowed") is not False
+        or policy.get("initial_system_cross_bound") is not True
+        or policy.get("safe_floor_validated") is not True
+        or policy.get("recovery_floor_validated") is not True
+        or policy.get("firmware_physical_presence_modeled") is not True
+        or policy.get("firmware_separate_authority_modeled") is not True
+        or policy.get("pooleboot_enforced") is not False
+        or policy.get("poolekernel_enforced") is not False
+        or policy.get("policy_decision_applied") is not False
+        or policy.get("pooleglyph_executable_authority") is not False
+        or policy.get("signature_verified") is not False
+        or policy.get("state_mutated") is not False
+        or policy.get("physical_media_written") is not False
+        or policy.get("synthetic_policy_only") is not True
+        or policy.get("authority_created") is not False
+        or not policy.get("activation_errors")
+        or policy["activation_errors"][0] != "ppol_activation_outer_signature"
+    ):
+        raise KernelLoadError("PPOL1 oracle or activation boundary changed")
     kernel_map = marker_summary["kernel_map"]
     expected_map = native_kernel_map.marker_expectation(
         plan, kernel_map["physical_address_bits"]
@@ -2015,6 +2121,8 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
         "microcode_readiness": native_microcode.READINESS_RELATIVE.as_posix(),
         "firmware_contract": native_firmware.CONTRACT_RELATIVE.as_posix(),
         "firmware_readiness": native_firmware.READINESS_RELATIVE.as_posix(),
+        "policy_contract": native_policy.CONTRACT_RELATIVE.as_posix(),
+        "policy_readiness": native_policy.READINESS_RELATIVE.as_posix(),
     }
     for name, path in expected_bindings.items():
         if not binding_matches(bindings.get(name), root, path):
@@ -2138,6 +2246,19 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
         else:
             if media.get("firmware") != expected_firmware:
                 errors.append("PKLOAD6 PFWM1 independent-oracle summary changed")
+        try:
+            expected_policy = policy_oracle(
+                canonical_artifact_files()[POLICY_PATH], 1
+            )
+        except (
+            KernelLoadError,
+            native_boot_artifact.BootArtifactError,
+            native_policy.PolicyError,
+        ) as error:
+            errors.append(f"canonical PPOL1 oracle failed: {error}")
+        else:
+            if media.get("policy") != expected_policy:
+                errors.append("PKLOAD6 PPOL1 independent-oracle summary changed")
     runs = readiness.get("execution", {}).get("runs", [])
     marker_sets: list[list[str]] = []
     if not isinstance(runs, list) or len(runs) != 2:

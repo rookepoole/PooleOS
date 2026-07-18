@@ -134,6 +134,18 @@ class NativeKernelLoadTests(unittest.TestCase):
         self.assertFalse(inspection["firmware"]["firmware_mutated"])
         self.assertTrue(inspection["firmware"]["synthetic_manifest_only"])
         self.assertFalse(inspection["firmware"]["authority_created"])
+        self.assertEqual("PPOL1", inspection["policy"]["contract_id"])
+        self.assertEqual(6, inspection["policy"]["mode_count"])
+        self.assertEqual(11, inspection["policy"]["capability_rule_count"])
+        self.assertTrue(inspection["policy"]["initial_system_cross_bound"])
+        self.assertTrue(inspection["policy"]["safe_floor_validated"])
+        self.assertTrue(inspection["policy"]["recovery_floor_validated"])
+        self.assertFalse(inspection["policy"]["activation_allowed"])
+        self.assertFalse(inspection["policy"]["pooleboot_enforced"])
+        self.assertFalse(inspection["policy"]["poolekernel_enforced"])
+        self.assertFalse(inspection["policy"]["policy_decision_applied"])
+        self.assertFalse(inspection["policy"]["pooleglyph_executable_authority"])
+        self.assertFalse(inspection["policy"]["authority_created"])
 
     def test_extended_media_rejects_fat_and_config_mutations(self) -> None:
         media = bytearray(

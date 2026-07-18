@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_kind": "pooleos_native_checklist_coverage",
-  "status_date": "2026-07-17",
+  "status_date": "2026-07-18",
   "status": "pass",
   "source": {
     "path": "sources/requirements/sha256/a8c94719faf9428c1f133010ba2603c0270c4e1efd7327af8eab9c8c362abb3d/PooleOS_From_Scratch_Master_Checklist.md",
@@ -124,7 +124,8 @@
         "ADD-BOOT-006",
         "ADD-BOOT-007",
         "ADD-BOOT-008",
-        "ADD-BOOT-009"
+        "ADD-BOOT-009",
+        "ADD-BOOT-010"
       ]
     },
     {
@@ -2866,6 +2867,21 @@
         "https://csrc.nist.gov/pubs/sp/800/193/final",
         "https://www.dmtf.org/sites/default/files/standards/documents/DSP0267_1.3.0.pdf",
         "https://trustedcomputinggroup.org/resource/tcg-pc-client-reference-integrity-manifest-specification/"
+      ]
+    },
+    {
+      "id": "ADD-BOOT-010",
+      "phase_id": "N5",
+      "requirement": "Define the role-7 system policy as a deterministic, bounded, default-deny contract whose effective authority is the intersection of the compiled-in ceiling, authenticated policy, selected boot mode, issued capability, and request; require exact PINIT1 route cross-binding, monotonic attenuation, immutable safe and recovery floors, separate physical-presence and firmware authority, authenticated version and rollback state, durable decision receipts, independent allocation-free Rust/Python hostile and differential evidence, and explicit separation from PooleGlyph metadata before any PooleBoot or PooleKernel enforcement, capability creation, state mutation, executable transfer, or physical-media action.",
+      "basis": [
+        "Cycle 113 PPOL1 policy-bundle and authority-intersection qualification",
+        "https://docs.sel4.systems/projects/capdl/lang-spec.html",
+        "https://fuchsia.dev/fuchsia-src/concepts/components/v2/capabilities",
+        "https://fuchsia.dev/fuchsia-src/concepts/components/v2/lifecycle",
+        "https://uefi.org/specs/UEFI/2.11/03_Boot_Manager.html",
+        "https://theupdateframework.github.io/specification/v1.0.35/",
+        "https://csrc.nist.gov/pubs/sp/800/193/final",
+        "https://csrc.nist.gov/pubs/sp/800/207/final"
       ]
     },
     {
