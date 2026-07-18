@@ -5,7 +5,7 @@
   "status": "bounded_unsigned_live_profile_artifacts_post_exit_pbp1_retained_pkmap2_stop_before_transfer_non_promoting_proof",
   "production_ready": false,
   "production_promotion_allowed": false,
-  "selected_move_id": "N5-RECOVERY-SEMANTICS-001",
+  "selected_move_id": "N5-SYMBOLS-SEMANTICS-001",
   "phase_mapping": [
     "N5.1",
     "N5.2",
@@ -25,7 +25,8 @@
     "015.6",
     "ADD-BOOT-004",
     "ADD-BOOT-005",
-    "ADD-BOOT-006"
+    "ADD-BOOT-006",
+    "ADD-BOOT-007"
   ],
   "binary": {
     "package": "pooleboot",
@@ -175,6 +176,9 @@
     "NEG-N5-KLOAD-RECOVERY-INNER-SEMANTICS",
     "NEG-N5-KLOAD-RECOVERY-INNER-VERSION",
     "NEG-N5-KLOAD-RECOVERY-ACTIVATION-OVERREACH",
+    "NEG-N5-KLOAD-SYMBOLS-INNER-SEMANTICS",
+    "NEG-N5-KLOAD-SYMBOLS-INNER-VERSION",
+    "NEG-N5-KLOAD-SYMBOLS-ACTIVATION-OVERREACH",
     "NEG-N5-KLOAD-MARKER-OMISSION",
     "NEG-N5-KLOAD-MARKER-ORDER",
     "NEG-N5-KLOAD-MARKER-CONFIG-BOUND",
@@ -264,6 +268,7 @@
     "PSM1 selects and digest-binds the kernel and six profile artifacts; PBART1 additionally binds each non-kernel role, version, payload length, and payload digest, but all artifacts remain unsigned and untrusted.",
     "The initial-system payload is a deterministic PINIT1 declaration bundle validated by an independent host oracle, and unsigned development activation is denied; PooleBoot still treats the inner bytes as opaque and PooleKernel does not activate them.",
     "The recovery payload is a deterministic PREC1 policy bundle validated by an independent host oracle, and unsigned development activation is denied; PooleBoot still treats the inner bytes as opaque, authenticated mutable state does not exist, and PooleKernel grants no recovery authority.",
+    "The symbols payload is a deterministic PSYM1 public diagnostic index validated by an independent host oracle, and unsigned consumption is denied; PooleBoot treats it as opaque, PooleKernel performs no lookup, runtime addresses remain undisclosed, private debug data stays off media, and no authority is created.",
     "Immediately before ExitBootServices, PooleBoot captures a bounded final UEFI memory map, normalizes descriptor-stride-aware entries, and finalizes development-profile PBP1 bytes inside the retained handoff allocation.",
     "PBEXIT1 permits at most four attempts, retries only EFI_INVALID_PARAMETER after obtaining a fresh map key, forbids unrelated firmware calls after the first attempt, and proves zero firmware calls after success.",
     "PKMAP2 requires CR0.WP, processor NX support, and EFER.NXE; it rejects LA57, PCID, occupied target slots, malformed coverage, writable-executable leaves, large leaves, retained overlap, and guard-layout drift.",

@@ -31,7 +31,7 @@
     "status_date": {"const": "2026-07-18"},
     "status": {"const": "pass_single_host_two_run_unsigned_live_profile_artifacts_post_exit_pbp1_retained_pkmap2_stop_before_transfer_non_promoting"},
     "contract_id": {"const": "POOLEOS-N5-POOLEBOOT-7"},
-    "selected_move_id": {"const": "N5-RECOVERY-SEMANTICS-001"},
+    "selected_move_id": {"const": "N5-SYMBOLS-SEMANTICS-001"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
     "n5_exit_gate_satisfied": {"const": false},
@@ -55,7 +55,7 @@
     "bindings": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["contract", "toolchain_lock", "toolchain_qualification", "tier0_lock", "tier0_profile", "tier0_readiness", "kernel_entry_readiness", "kernel_load_contract", "kernel_load_readiness", "system_manifest_contract", "system_manifest_readiness", "initial_system_contract", "initial_system_readiness", "recovery_contract", "recovery_readiness", "implementation_inputs"],
+      "required": ["contract", "toolchain_lock", "toolchain_qualification", "tier0_lock", "tier0_profile", "tier0_readiness", "kernel_entry_readiness", "kernel_load_contract", "kernel_load_readiness", "system_manifest_contract", "system_manifest_readiness", "initial_system_contract", "initial_system_readiness", "recovery_contract", "recovery_readiness", "symbols_contract", "symbols_readiness", "implementation_inputs"],
       "properties": {
         "contract": {"$ref": "#/$defs/binding"},
         "toolchain_lock": {"$ref": "#/$defs/binding"},
@@ -72,7 +72,9 @@
         "initial_system_readiness": {"$ref": "#/$defs/binding"},
         "recovery_contract": {"$ref": "#/$defs/binding"},
         "recovery_readiness": {"$ref": "#/$defs/binding"},
-        "implementation_inputs": {"type": "array", "minItems": 93, "maxItems": 93, "items": {"$ref": "#/$defs/binding"}}
+        "symbols_contract": {"$ref": "#/$defs/binding"},
+        "symbols_readiness": {"$ref": "#/$defs/binding"},
+        "implementation_inputs": {"type": "array", "minItems": 110, "maxItems": 110, "items": {"$ref": "#/$defs/binding"}}
       }
     },
     "build": {
@@ -102,7 +104,7 @@
         "physical_media_write_performed": {"const": false},
         "inspection": {
           "type": "object",
-          "required": ["image", "gpt", "esp", "fat32", "files", "embedded_efi", "config", "manifest", "kernel", "artifact_set", "initial_system", "recovery"],
+          "required": ["image", "gpt", "esp", "fat32", "files", "embedded_efi", "config", "manifest", "kernel", "artifact_set", "initial_system", "recovery", "symbols"],
           "properties": {
             "image": {"type": "object", "required": ["sha256", "byte_count", "sector_bytes", "sector_count", "protective_mbr_valid"]},
             "gpt": {"type": "object", "required": ["disk_guid", "primary_header_crc32", "backup_header_crc32", "partition_entries_crc32", "primary_backup_entries_exact_match"]},
@@ -159,6 +161,27 @@
                 "poolekernel_enforced": {"const": false},
                 "recovery_executed": {"const": false}
               }
+            },
+            "symbols": {
+              "type": "object",
+              "required": ["contract_id", "bundle_version", "segment_count", "symbol_count", "string_bytes", "maximum_lookup_steps", "activation_allowed", "activation_errors", "validated_by", "pooleboot_enforced", "poolekernel_enforced", "symbols_consumed", "runtime_addresses_disclosed", "full_debug_file_on_media", "authority_created"],
+              "properties": {
+                "contract_id": {"const": "PSYM1"},
+                "bundle_version": {"const": 1},
+                "segment_count": {"const": 4},
+                "symbol_count": {"const": 3},
+                "string_bytes": {"const": 69},
+                "maximum_lookup_steps": {"const": 13},
+                "activation_allowed": {"const": false},
+                "activation_errors": {"type": "array", "minItems": 1},
+                "validated_by": {"const": "independent_host_media_oracle"},
+                "pooleboot_enforced": {"const": false},
+                "poolekernel_enforced": {"const": false},
+                "symbols_consumed": {"const": false},
+                "runtime_addresses_disclosed": {"const": false},
+                "full_debug_file_on_media": {"const": false},
+                "authority_created": {"const": false}
+              }
             }
           }
         }
@@ -184,11 +207,11 @@
         "runs": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/run"}}
       }
     },
-    "negative_controls": {"type": "array", "minItems": 118, "maxItems": 118, "items": {"$ref": "#/$defs/control"}},
+    "negative_controls": {"type": "array", "minItems": 121, "maxItems": 121, "items": {"$ref": "#/$defs/control"}},
     "claims": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["one_host_pe32_reproducible", "deterministic_gpt_esp_observed", "pooleboot_guest_entry_observed", "gop_frame_observed", "bounded_final_memory_map_observed", "poolekernel_loaded", "system_manifest_parsed", "manifest_selected_kernel_path", "manifest_kernel_sha256_matched", "live_pbart1_files_read", "pbart1_role_version_payload_digest_validated", "initial_system_inner_oracle_validated", "initial_system_development_activation_denied", "recovery_inner_oracle_validated", "recovery_development_activation_denied", "artifact_set_manifest_sha256_matched", "artifact_pages_retained", "pbp1_profile_artifacts_cross_bound", "live_pbp1_post_exit_development_observed", "pbp1_serial_debugcon_exact", "pbp1_kernel_manifest_cross_bound", "pkmap2_exact_4k_leaves_observed", "pkmap2_guarded_stack_retained", "pkmap2_read_only_handoff_retained", "temporary_candidate_cr3_activated", "higher_half_kernel_alias_verified", "wp_nx_wx_enforced", "framebuffer_translation_cache_preserved", "original_cr3_restored_before_exit", "kernel_pages_retained", "page_tables_retained", "zero_firmware_calls_while_candidate_active", "exit_boot_services_called", "no_firmware_calls_after_exit", "stop_before_transfer_observed", "two_qemu_runs_exact", "complete_pooleboot_loader", "manifest_signature_verified", "manifest_trusted", "persistent_rollback_state_enforced", "kernel_signature_verified", "artifact_signatures_verified", "artifact_semantics_applied", "pooleboot_initial_system_semantics_enforced", "poolekernel_initial_system_activation_enforced", "initial_system_executed", "pooleboot_recovery_semantics_enforced", "poolekernel_recovery_activation_enforced", "recovery_executed", "microcode_applied", "poolekernel_executed", "all_kload_resources_released", "final_kernel_address_space_established", "final_framebuffer_cache_policy_qualified", "kernel_entry_called", "transferable_pbp1_handoff_produced", "secure_boot_enforced", "measured_boot_performed", "owner_signature_present", "physical_hardware_tested", "target_firmware_tested", "physical_media_tested", "n5_exit_gate_satisfied", "production_boot_evidence", "production_ready"],
+      "required": ["one_host_pe32_reproducible", "deterministic_gpt_esp_observed", "pooleboot_guest_entry_observed", "gop_frame_observed", "bounded_final_memory_map_observed", "poolekernel_loaded", "system_manifest_parsed", "manifest_selected_kernel_path", "manifest_kernel_sha256_matched", "live_pbart1_files_read", "pbart1_role_version_payload_digest_validated", "initial_system_inner_oracle_validated", "initial_system_development_activation_denied", "recovery_inner_oracle_validated", "recovery_development_activation_denied", "symbols_inner_oracle_validated", "symbols_development_activation_denied", "artifact_set_manifest_sha256_matched", "artifact_pages_retained", "pbp1_profile_artifacts_cross_bound", "live_pbp1_post_exit_development_observed", "pbp1_serial_debugcon_exact", "pbp1_kernel_manifest_cross_bound", "pkmap2_exact_4k_leaves_observed", "pkmap2_guarded_stack_retained", "pkmap2_read_only_handoff_retained", "temporary_candidate_cr3_activated", "higher_half_kernel_alias_verified", "wp_nx_wx_enforced", "framebuffer_translation_cache_preserved", "original_cr3_restored_before_exit", "kernel_pages_retained", "page_tables_retained", "zero_firmware_calls_while_candidate_active", "exit_boot_services_called", "no_firmware_calls_after_exit", "stop_before_transfer_observed", "two_qemu_runs_exact", "complete_pooleboot_loader", "manifest_signature_verified", "manifest_trusted", "persistent_rollback_state_enforced", "kernel_signature_verified", "artifact_signatures_verified", "artifact_semantics_applied", "pooleboot_initial_system_semantics_enforced", "poolekernel_initial_system_activation_enforced", "initial_system_executed", "pooleboot_recovery_semantics_enforced", "poolekernel_recovery_activation_enforced", "recovery_executed", "pooleboot_symbols_semantics_enforced", "poolekernel_symbols_activation_enforced", "symbols_consumed", "microcode_applied", "poolekernel_executed", "all_kload_resources_released", "final_kernel_address_space_established", "final_framebuffer_cache_policy_qualified", "kernel_entry_called", "transferable_pbp1_handoff_produced", "secure_boot_enforced", "measured_boot_performed", "owner_signature_present", "physical_hardware_tested", "target_firmware_tested", "physical_media_tested", "n5_exit_gate_satisfied", "production_boot_evidence", "production_ready"],
       "properties": {
         "one_host_pe32_reproducible": {"const": true},
         "deterministic_gpt_esp_observed": {"const": true},
@@ -205,6 +228,8 @@
         "initial_system_development_activation_denied": {"const": true},
         "recovery_inner_oracle_validated": {"const": true},
         "recovery_development_activation_denied": {"const": true},
+        "symbols_inner_oracle_validated": {"const": true},
+        "symbols_development_activation_denied": {"const": true},
         "artifact_set_manifest_sha256_matched": {"const": true},
         "artifact_pages_retained": {"const": true},
         "pbp1_profile_artifacts_cross_bound": {"const": true},
@@ -239,6 +264,9 @@
         "pooleboot_recovery_semantics_enforced": {"const": false},
         "poolekernel_recovery_activation_enforced": {"const": false},
         "recovery_executed": {"const": false},
+        "pooleboot_symbols_semantics_enforced": {"const": false},
+        "poolekernel_symbols_activation_enforced": {"const": false},
+        "symbols_consumed": {"const": false},
         "microcode_applied": {"const": false},
         "poolekernel_executed": {"const": false},
         "all_kload_resources_released": {"const": false},
@@ -271,8 +299,8 @@
         "ordered_marker_count": {"const": 23},
         "serial_debugcon_match_count": {"const": 2},
         "gop_frame_match_count": {"const": 2},
-        "negative_controls_passed": {"const": 118},
-        "negative_controls_total": {"const": 118},
+        "negative_controls_passed": {"const": 121},
+        "negative_controls_total": {"const": 121},
         "production_claim_count": {"const": 0}
       }
     },

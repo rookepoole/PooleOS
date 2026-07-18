@@ -185,6 +185,17 @@ ADDED_REQUIREMENTS = [
         ],
     },
     {
+        "id": "ADD-BOOT-007",
+        "phase_id": "N5",
+        "requirement": "Define the public boot symbol payload as a deterministic image-relative diagnostic index bound to one exact stripped PooleKernel, preferred loaded image, build ID, private split-debug product, and source manifest; require bounded parsing and lookup, explicit KASLR base input, public-only names, source-path exclusion, pointer redaction, independent Rust/Python differential evidence, and authenticated diagnostic authorization before any target consumes it.",
+        "basis": [
+            "Cycle 110 PSYM1 public symbol and split-debug qualification",
+            "https://gabi.xinuos.com/elf/05-symtab.html",
+            "https://dwarfstd.org/doc/DWARF5.pdf",
+            "https://sourceware.org/gdb/current/onlinedocs/gdb.html/Separate-Debug-Files.html",
+        ],
+    },
+    {
         "id": "ADD-BOOT-002",
         "phase_id": "N6",
         "requirement": "Model UEFI PK, KEK, db, dbx, image signer revocation, minimum secure version, authenticated boot state, recovery-key rotation, and development-key containment as one boot-trust state machine.",

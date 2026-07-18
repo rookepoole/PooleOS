@@ -238,6 +238,17 @@ def check_native_recovery_readiness() -> CheckResult:
     )
 
 
+def check_native_symbol_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_symbol_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
 def check_native_system_manifest_readiness() -> CheckResult:
     from tools import pooleos_release_gate
 
@@ -3405,6 +3416,8 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "tools" / "qualify_native_initial_system.py",
                 ROOT / "tools" / "generate_native_recovery_vectors.py",
                 ROOT / "tools" / "qualify_native_recovery.py",
+                ROOT / "tools" / "generate_native_symbol_vectors.py",
+                ROOT / "tools" / "qualify_native_symbols.py",
                 ROOT / "tools" / "generate_native_system_manifest_vectors.py",
                 ROOT / "tools" / "qualify_native_system_manifest.py",
                 ROOT / "tools" / "generate_native_boot_handoff_vectors.py",
@@ -3426,6 +3439,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runtime" / "native_kernel_load.py",
                 ROOT / "runtime" / "native_initial_system.py",
                 ROOT / "runtime" / "native_recovery.py",
+                ROOT / "runtime" / "native_symbols.py",
                 ROOT / "runtime" / "native_system_manifest.py",
                 ROOT / "runtime" / "native_boot_handoff.py",
                 ROOT / "runtime" / "native_boot_config.py",
@@ -3436,6 +3450,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "docs" / "native-kernel-load.md",
                 ROOT / "docs" / "native-initial-system-bundle.md",
                 ROOT / "docs" / "native-recovery-bundle.md",
+                ROOT / "docs" / "native-symbol-bundle.md",
                 ROOT / "docs" / "native-system-manifest.md",
                 ROOT / "docs" / "native-boot-handoff.md",
                 ROOT / "docs" / "native-boot-config.md",
@@ -3462,6 +3477,9 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "native" / "recovery" / "README.md",
                 ROOT / "native" / "recovery" / "src" / "lib.rs",
                 ROOT / "native" / "recovery" / "src" / "bin" / "prec1_probe.rs",
+                ROOT / "native" / "symbols" / "Cargo.toml",
+                ROOT / "native" / "symbols" / "src" / "lib.rs",
+                ROOT / "native" / "symbols" / "src" / "bin" / "psym1_probe.rs",
                 ROOT / "native" / "manifest" / "Cargo.toml",
                 ROOT / "native" / "manifest" / "README.md",
                 ROOT / "native" / "manifest" / "src" / "lib.rs",
@@ -3514,6 +3532,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runs" / "native_kernel_load_readiness.json",
                 ROOT / "runs" / "native_initial_system_readiness.json",
                 ROOT / "runs" / "native_recovery_readiness.json",
+                ROOT / "runs" / "native_symbol_readiness.json",
                 ROOT / "runs" / "native_system_manifest_readiness.json",
                 ROOT / "runs" / "native_boot_handoff_readiness.json",
                 ROOT / "runs" / "native_boot_config_readiness.json",
@@ -3537,6 +3556,15 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "specs" / "native-recovery-readiness.schema.json",
                 ROOT / "specs" / "fixtures" / "prec1-canonical.bin",
                 ROOT / "specs" / "fixtures" / "prec1-canonical-state.bin",
+                ROOT / "specs" / "native-symbol-contract.json",
+                ROOT / "specs" / "native-symbol-contract.schema.json",
+                ROOT / "specs" / "native-symbol-golden-vectors.json",
+                ROOT / "specs" / "native-symbol-golden-vectors.schema.json",
+                ROOT / "specs" / "native-symbol-readiness.schema.json",
+                ROOT / "specs" / "fixtures" / "psym1-canonical.bin",
+                ROOT / "specs" / "fixtures" / "psym1-minimal.bin",
+                ROOT / "specs" / "fixtures" / "psym1-boundary.bin",
+                ROOT / "tests" / "test_native_symbols.py",
                 ROOT / "specs" / "native-boot-digest-provider.json",
                 ROOT / "specs" / "native-boot-digest-provider.schema.json",
                 ROOT / "specs" / "native-system-manifest-contract.json",
@@ -3643,6 +3671,7 @@ def main(argv: list[str] | None = None) -> int:
     checks.append(check_native_kernel_load_readiness())
     checks.append(check_native_initial_system_readiness())
     checks.append(check_native_recovery_readiness())
+    checks.append(check_native_symbol_readiness())
     checks.append(check_native_system_manifest_readiness())
     checks.append(check_native_boot_handoff_readiness())
     checks.append(check_native_boot_config_readiness())

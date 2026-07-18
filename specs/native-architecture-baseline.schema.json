@@ -71,7 +71,7 @@
       "maxItems": 7,
       "items": {"type": "object", "required": ["id", "title", "path", "status", "date", "decision_owner", "ratification", "supersedes", "superseded_by", "requirement_mappings", "sha256", "byte_count", "line_count"]}
     },
-    "bound_sources": {"type": "array", "minItems": 98, "maxItems": 98, "items": {"type": "object", "required": ["path", "sha256", "byte_count", "line_count"]}},
+    "bound_sources": {"type": "array", "minItems": 105, "maxItems": 105, "items": {"type": "object", "required": ["path", "sha256", "byte_count", "line_count"]}},
     "primary_toolchain_references": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "object", "required": ["topic", "url", "authority"]}},
     "open_items": {"type": "array", "minItems": 8, "items": {"type": "string"}},
     "claim_boundary": {

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-symbol-contract.schema.json",
+  "title": "PooleOS PSYM1 public diagnostic symbol contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "contract_id",
+    "status",
+    "production_ready",
+    "layout",
+    "address_model",
+    "identity_policy",
+    "debug_policy",
+    "name_policy",
+    "privacy_policy",
+    "lookup_policy",
+    "activation_preconditions",
+    "research_basis",
+    "claims",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_symbol_contract"},
+    "contract_id": {"const": "PSYM1"},
+    "status": {"const": "candidate_pre_abi_non_promoting"},
+    "production_ready": {"const": false},
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["byte_order", "header_bytes", "segment_record_bytes", "symbol_record_bytes", "maximum_bundle_bytes", "maximum_image_bytes", "maximum_segments", "maximum_symbols", "maximum_name_bytes", "maximum_string_bytes", "body_digest"],
+      "properties": {
+        "byte_order": {"const": "little_endian"},
+        "header_bytes": {"const": 384},
+        "segment_record_bytes": {"const": 32},
+        "symbol_record_bytes": {"const": 48},
+        "maximum_bundle_bytes": {"const": 524288},
+        "maximum_image_bytes": {"const": 67108864},
+        "maximum_segments": {"const": 16},
+        "maximum_symbols": {"const": 4096},
+        "maximum_name_bytes": {"const": 127},
+        "maximum_string_bytes": {"const": 262144},
+        "body_digest": {"const": "SHA-256"}
+      }
+    },
+    "address_model": {"type": "object"},
+    "identity_policy": {"type": "object"},
+    "debug_policy": {"type": "object"},
+    "name_policy": {"type": "object"},
+    "privacy_policy": {"type": "object"},
+    "lookup_policy": {"type": "object"},
+    "activation_preconditions": {"type": "array", "minItems": 9, "maxItems": 9, "items": {"type": "string"}},
+    "research_basis": {"type": "array", "minItems": 5, "maxItems": 5, "items": {"type": "string", "format": "uri"}},
+    "claims": {"type": "object"},
+    "claim_boundary": {"type": "array", "minItems": 9, "maxItems": 9, "items": {"type": "string"}}
+  }
+}

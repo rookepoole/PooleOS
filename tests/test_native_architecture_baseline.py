@@ -68,7 +68,7 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 98)
+        self.assertEqual(len(self.artifact["bound_sources"]), 105)
         bound_paths = {binding["path"] for binding in self.artifact["bound_sources"]}
         self.assertIn(
             "runs/adr_ratification_readiness.json",
@@ -101,6 +101,7 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertIn("runs/native_elf_loader_readiness.json", bound_paths)
         self.assertIn("runs/native_initial_system_readiness.json", bound_paths)
         self.assertIn("runs/native_recovery_readiness.json", bound_paths)
+        self.assertIn("runs/native_symbol_readiness.json", bound_paths)
         self.assertIn("runs/native_kernel_entry_readiness.json", bound_paths)
         self.assertIn("runs/native_kernel_load_readiness.json", bound_paths)
         self.assertIn("runs/native_system_manifest_readiness.json", bound_paths)

@@ -1,6 +1,6 @@
 # PooleBoot Aggregate Proof 7
 
-Status: bounded unsigned PBART1/PINIT1/PREC1/post-exit PBP1/retained PKMAP2/
+Status: bounded unsigned PBART1/PINIT1/PREC1/PSYM1/post-exit PBP1/retained PKMAP2/
 stop-before-transfer non-promoting proof
 
 ## What Exists
@@ -21,6 +21,9 @@ the deterministic PINIT1 initial-system declaration and host activation-denial
 oracle. Cycle 109 adds the PREC1 immutable recovery policy, separately mutable
 state, bounded boot transition, receipt, authority, and activation-denial
 oracle while leaving PooleBoot's inner payload handling opaque.
+Cycle 110 adds the PSYM1 public-symbol identity, image-relative address,
+bounded lookup, split-debug correspondence, privacy, and consumption-denial
+oracle while leaving both PooleBoot and PooleKernel symbol consumption disabled.
 
 The normative aggregate contract is `specs/native-pooleboot-proof.json`.
 `tools/qualify_native_pooleboot.py` validates the current PKLOAD6 receipt,
@@ -63,8 +66,10 @@ acceleration, loopback-only QMP, and no shared folders. It requires:
 - independent PINIT1 declaration validation and development activation denial;
 - independent PREC1 policy/state/transition validation and development
   activation denial;
+- independent PSYM1 identity/address/privacy/lookup validation, split-debug
+  correspondence, and development consumption denial;
 - exact seven-artifact, root, stack, handoff, map, and digest cross-bindings;
-- 118/118 integrated hostile controls;
+- 121/121 integrated hostile controls;
 - no absolute user path in public readiness artifacts;
 - a clean QMP shutdown of the intentionally halted guest.
 
@@ -98,6 +103,10 @@ The receipt proves, on the pinned profile:
 - host-oracle validation of the 992-byte PREC1 policy, 128-byte mutable state,
   exact A/B and safe/recovery transitions, receipt binding, and fail-closed
   activation result for the unsigned development context;
+- host-oracle validation of the PSYM1 public-only image-relative index, exact
+  five-part image/debug/source identity, three public functions, bounded
+  lookup, source-path exclusion, pointer redaction, and fail-closed consumption
+  for the unsigned development context;
 - complete higher-half kernel alias verification with W^X, CR0.WP, and NX;
 - framebuffer translation and cache-bit preservation during the active audit;
 - retention of kernel and six profile artifact ranges, four table pages, an
@@ -112,7 +121,8 @@ The receipt proves, on the pinned profile:
 
 The manifest and all seven artifacts are unsigned and untrusted. The proof does
 not establish artifact authentication, PooleBoot inner semantics, initial-system
-or recovery execution, authenticated rollback persistence or state I/O,
+or recovery execution, symbol consumption, kernel exports, diagnostic authority,
+authenticated rollback persistence or state I/O,
 microcode application, final active kernel CR3/RSP,
 final framebuffer cache policy, a transferable kernel-entry handoff, initial
 system loading, PooleKernel execution, descriptor tables, interrupts, SMP,
@@ -129,11 +139,13 @@ release follows from this proof.
 `N5-INIT-SYSTEM-001` closes only its unsigned load/retain/PBP1-bind slice, and
 `N5-INIT-BUNDLE-001` closes only the independently validated declaration and
 activation-denial slice. `N5-RECOVERY-SEMANTICS-001` closes only the independent
-PREC1 policy/state/transition and activation-denial slice. N5.6 and N5.9 remain
-partial because PooleBoot enforcement, PooleKernel activation or recovery
-execution, trust, authenticated state persistence, and the
-symbol/microcode/firmware/policy formats are open. The next owner-independent
-move is `N5-SYMBOLS-SEMANTICS-001`. Hardware-key acquisition, artifact authentication,
+PREC1 policy/state/transition and activation-denial slice, and
+`N5-SYMBOLS-SEMANTICS-001` closes only the independent PSYM1
+format/identity/lookup/privacy/correspondence/consumption-denial slice. N5.6
+and N5.9 remain partial because PooleBoot enforcement, PooleKernel activation,
+recovery execution or symbol consumption, trust, authenticated state
+persistence, and the microcode/firmware/policy formats are open. The next
+owner-independent move is `N5-MICROCODE-SEMANTICS-001`. Hardware-key acquisition, artifact authentication,
 and governance signing remain separate owner-controlled lanes.
 
 ## Primary References

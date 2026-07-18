@@ -126,6 +126,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "poole-symbols"
+version = "0.0.0"
+dependencies = [
+ "sha2",
+]
+
+[[package]]
 name = "pooleboot"
 version = "0.0.0"
 dependencies = [

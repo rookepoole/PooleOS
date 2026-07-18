@@ -121,7 +121,8 @@
         "ADD-BOOT-001",
         "ADD-BOOT-004",
         "ADD-BOOT-005",
-        "ADD-BOOT-006"
+        "ADD-BOOT-006",
+        "ADD-BOOT-007"
       ]
     },
     {
@@ -2828,6 +2829,17 @@
         "https://uefi.org/specs/UEFI/2.11/03_Boot_Manager.html",
         "https://source.android.com/docs/core/ota/ab",
         "https://theupdateframework.github.io/specification/v1.0.26/"
+      ]
+    },
+    {
+      "id": "ADD-BOOT-007",
+      "phase_id": "N5",
+      "requirement": "Define the public boot symbol payload as a deterministic image-relative diagnostic index bound to one exact stripped PooleKernel, preferred loaded image, build ID, private split-debug product, and source manifest; require bounded parsing and lookup, explicit KASLR base input, public-only names, source-path exclusion, pointer redaction, independent Rust/Python differential evidence, and authenticated diagnostic authorization before any target consumes it.",
+      "basis": [
+        "Cycle 110 PSYM1 public symbol and split-debug qualification",
+        "https://gabi.xinuos.com/elf/05-symtab.html",
+        "https://dwarfstd.org/doc/DWARF5.pdf",
+        "https://sourceware.org/gdb/current/onlinedocs/gdb.html/Separate-Debug-Files.html"
       ]
     },
     {

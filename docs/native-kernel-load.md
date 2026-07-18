@@ -120,7 +120,7 @@ halts permanently at `STOP BEFORE TRANSFER`.
 
 ## Qualified Evidence
 
-The Cycle 109 receipt records:
+The Cycle 110 receipt records:
 
 - 76/76 Rust host tests across PooleBoot, PBART1, PBC1/PSM1/PKELF1/PBP1, PKMAP2,
   PBEXIT1, and PKENTRY1;
@@ -138,7 +138,11 @@ The Cycle 109 receipt records:
 - exact PREC1 host-oracle validation of the 992-byte policy, two slots, ten
   failure routes, seven authority requirements, a 128-byte mutable state
   contract, bounded transitions, and mandatory development activation denial;
-- 118/118 integrated negative controls, including PINIT1 and PREC1 inner
+- exact PSYM1 host-oracle validation of the public-only image-relative index,
+  five-part image/debug/source identity, three public symbols, bounded lookup,
+  source-path exclusion, pointer redaction, split-debug correspondence, and
+  mandatory development consumption denial;
+- 121/121 integrated negative controls, including PINIT1, PREC1, and PSYM1 inner
   semantic mutation, outer/inner version mismatch, activation overreach,
   artifact omission, path, role, version,
   payload digest, whole-file digest, overlap, signature overclaim, final-map
@@ -155,16 +159,18 @@ receipt does not claim that this OVMF run naturally produced a stale map key.
 PKLOAD6 does not authenticate PSM1 or any loaded artifact, enforce authenticated
 persistent rollback,
 establish the final active kernel address space or framebuffer cache policy,
-switch to the guarded stack, call PooleKernel, enforce PINIT1 or PREC1 in
-PooleBoot, persist PREC1 mutable state, activate or execute the initial system
-or recovery in PooleKernel, apply microcode or firmware, enforce policy payloads, enforce Secure
+switch to the guarded stack, call PooleKernel, enforce PINIT1, PREC1, or PSYM1
+in PooleBoot, persist PREC1 mutable state, activate or execute the initial
+system or recovery in PooleKernel, consume symbols or create diagnostic
+authority, apply microcode or firmware, enforce policy payloads, enforce Secure
 Boot, perform measured boot, test a second host, test target firmware, touch
 physical media, satisfy N5, or establish production readiness.
 
 The next chronological owner-independent move is
-`N5-SYMBOLS-SEMANTICS-001`: define and independently validate the symbol
-payload's address, identity, integrity, privacy, and bounded-consumption rules
-without consuming symbols in PooleBoot or PooleKernel. Transfer-state,
+`N5-MICROCODE-SEMANTICS-001`: define and independently validate the role-5
+microcode payload's CPU identity, vendor container, revision floor, trust,
+staging, apply timing, rollback, and post-apply verification rules without
+executing an update. Transfer-state,
 signature-trust, and production
 transfer remain separately gated by the N5/N6 and owner-controlled N0 work.
 

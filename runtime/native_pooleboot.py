@@ -70,6 +70,8 @@ TRUE_PROOF_CLAIMS = (
     "initial_system_development_activation_denied",
     "recovery_inner_oracle_validated",
     "recovery_development_activation_denied",
+    "symbols_inner_oracle_validated",
+    "symbols_development_activation_denied",
     "artifact_set_manifest_sha256_matched",
     "artifact_pages_retained",
     "pbp1_profile_artifacts_cross_bound",
@@ -106,6 +108,9 @@ FALSE_PROOF_CLAIMS = (
     "pooleboot_recovery_semantics_enforced",
     "poolekernel_recovery_activation_enforced",
     "recovery_executed",
+    "pooleboot_symbols_semantics_enforced",
+    "poolekernel_symbols_activation_enforced",
+    "symbols_consumed",
     "microcode_applied",
     "poolekernel_executed",
     "all_kload_resources_released",
@@ -160,6 +165,9 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-KLOAD-RECOVERY-INNER-SEMANTICS",
     "NEG-N5-KLOAD-RECOVERY-INNER-VERSION",
     "NEG-N5-KLOAD-RECOVERY-ACTIVATION-OVERREACH",
+    "NEG-N5-KLOAD-SYMBOLS-INNER-SEMANTICS",
+    "NEG-N5-KLOAD-SYMBOLS-INNER-VERSION",
+    "NEG-N5-KLOAD-SYMBOLS-ACTIVATION-OVERREACH",
     "NEG-N5-KLOAD-MARKER-OMISSION",
     "NEG-N5-KLOAD-MARKER-ORDER",
     "NEG-N5-KLOAD-MARKER-CONFIG-BOUND",
@@ -298,6 +306,10 @@ PROOF_IMPLEMENTATION_INPUTS = (
     "native/recovery/src/lib.rs",
     "native/recovery/src/bin/prec1_probe.rs",
     "runtime/native_recovery.py",
+    "native/symbols/Cargo.toml",
+    "native/symbols/src/lib.rs",
+    "native/symbols/src/bin/psym1_probe.rs",
+    "runtime/native_symbols.py",
     "runtime/native_kernel_map.py",
     "runtime/native_live_boot_handoff.py",
     "runtime/native_pooleboot.py",
@@ -314,6 +326,16 @@ PROOF_IMPLEMENTATION_INPUTS = (
     "specs/fixtures/prec1-canonical.bin",
     "specs/fixtures/prec1-canonical-state.bin",
     "runs/native_recovery_readiness.json",
+    "docs/native-symbol-bundle.md",
+    "specs/native-symbol-contract.json",
+    "specs/native-symbol-contract.schema.json",
+    "specs/native-symbol-golden-vectors.json",
+    "specs/native-symbol-golden-vectors.schema.json",
+    "specs/native-symbol-readiness.schema.json",
+    "specs/fixtures/psym1-canonical.bin",
+    "specs/fixtures/psym1-minimal.bin",
+    "specs/fixtures/psym1-boundary.bin",
+    "runs/native_symbol_readiness.json",
     "specs/native-pooleboot-proof.json",
     "specs/native-pooleboot-proof.schema.json",
     "specs/native-pooleboot-readiness.schema.json",
@@ -339,8 +361,11 @@ PROOF_IMPLEMENTATION_INPUTS = (
     "tools/qualify_native_kernel_load.py",
     "tools/generate_native_recovery_vectors.py",
     "tools/qualify_native_recovery.py",
+    "tools/generate_native_symbol_vectors.py",
+    "tools/qualify_native_symbols.py",
     "tools/qualify_native_system_manifest.py",
     "tests/test_native_recovery.py",
+    "tests/test_native_symbols.py",
 )
 ABSOLUTE_USER_PATH = re.compile(
     r"(?:[A-Za-z]:[\\/](?:Users|Documents and Settings)[\\/][^\\/\s]+|/(?:Users|home)/[^/\s]+)",
@@ -1162,6 +1187,8 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str
         "initial_system_readiness": "runs/native_initial_system_readiness.json",
         "recovery_contract": "specs/native-recovery-contract.json",
         "recovery_readiness": "runs/native_recovery_readiness.json",
+        "symbols_contract": "specs/native-symbol-contract.json",
+        "symbols_readiness": "runs/native_symbol_readiness.json",
     }
     for name, relative_path in expected_bindings.items():
         _check_binding(errors, bindings.get(name), root, relative_path, name)
@@ -1225,6 +1252,18 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str
             or artifact_set.get("semantics_applied") is not False
         ):
             errors.append("PooleBoot artifact-set boundary changed")
+        symbols = media_inspection.get("symbols", {})
+        if (
+            symbols.get("contract_id") != "PSYM1"
+            or symbols.get("activation_allowed") is not False
+            or symbols.get("pooleboot_enforced") is not False
+            or symbols.get("poolekernel_enforced") is not False
+            or symbols.get("symbols_consumed") is not False
+            or symbols.get("runtime_addresses_disclosed") is not False
+            or symbols.get("full_debug_file_on_media") is not False
+            or symbols.get("authority_created") is not False
+        ):
+            errors.append("PooleBoot PSYM1 media boundary changed")
     if embedded.get("sha256") != build.get("sha256") or embedded.get("byte_count") != build.get(
         "byte_count"
     ):

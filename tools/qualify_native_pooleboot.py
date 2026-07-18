@@ -799,6 +799,12 @@ def make_report(
             "recovery_readiness": native_pooleboot.file_binding(
                 ROOT, "runs/native_recovery_readiness.json"
             ),
+            "symbols_contract": native_pooleboot.file_binding(
+                ROOT, "specs/native-symbol-contract.json"
+            ),
+            "symbols_readiness": native_pooleboot.file_binding(
+                ROOT, "runs/native_symbol_readiness.json"
+            ),
             "implementation_inputs": [
                 native_pooleboot.file_binding(ROOT, path) for path in BUILD_INPUTS
             ],

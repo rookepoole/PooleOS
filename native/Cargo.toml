@@ -15,6 +15,7 @@ members = [
   "livehandoff",
   "manifest",
   "recovery",
+  "symbols",
 ]
 resolver = "3"
 
