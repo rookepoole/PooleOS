@@ -604,6 +604,37 @@ def _negative_controls(
     recovery_bundle = native_kernel_load.native_recovery.parse(
         native_kernel_load.native_recovery.canonical_bundle()
     )
+    canonical_symbols_artifact = native_kernel_load.canonical_artifact_files()[
+        native_kernel_load.SYMBOLS_PATH
+    ]
+    invalid_symbols_inner = bytearray(
+        canonical_symbols_artifact[
+            native_kernel_load.native_boot_artifact.HEADER_BYTES :
+        ]
+    )
+    first_symbol_flags = (
+        native_kernel_load.native_symbols.HEADER_BYTES
+        + len(native_kernel_load.native_symbols.canonical_segments())
+        * native_kernel_load.native_symbols.SEGMENT_BYTES
+        + 10
+    )
+    struct.pack_into("<H", invalid_symbols_inner, first_symbol_flags, 1 << 15)
+    invalid_symbols_inner[304:336] = hashlib.sha256(
+        invalid_symbols_inner[native_kernel_load.native_symbols.HEADER_BYTES :]
+    ).digest()
+    invalid_symbols_artifact = native_kernel_load.native_boot_artifact.encode(
+        native_kernel_load.native_boot_artifact.ROLE_SYMBOLS,
+        1,
+        bytes(invalid_symbols_inner),
+    )
+    mismatched_symbols_version = native_kernel_load.native_boot_artifact.encode(
+        native_kernel_load.native_boot_artifact.ROLE_SYMBOLS,
+        2,
+        native_kernel_load.native_symbols.canonical_bundle(),
+    )
+    symbols_bundle = native_kernel_load.native_symbols.parse(
+        native_kernel_load.native_symbols.canonical_bundle()
+    )
 
     marker_summary = native_kernel_load.validate_markers(markers)
     config_oracle = copy.deepcopy(inspection)
@@ -865,6 +896,9 @@ def _negative_controls(
         ("NEG-N5-KLOAD-RECOVERY-INNER-SEMANTICS", _rejected(lambda: native_kernel_load.recovery_oracle(invalid_recovery_artifact, 1))),
         ("NEG-N5-KLOAD-RECOVERY-INNER-VERSION", _rejected(lambda: native_kernel_load.recovery_oracle(mismatched_recovery_version, 2))),
         ("NEG-N5-KLOAD-RECOVERY-ACTIVATION-OVERREACH", _rejected(lambda: native_kernel_load.native_recovery.authorize_activation(recovery_bundle, native_kernel_load.native_recovery.development_activation_context()))),
+        ("NEG-N5-KLOAD-SYMBOLS-INNER-SEMANTICS", _rejected(lambda: native_kernel_load.symbols_oracle(invalid_symbols_artifact, 1))),
+        ("NEG-N5-KLOAD-SYMBOLS-INNER-VERSION", _rejected(lambda: native_kernel_load.symbols_oracle(mismatched_symbols_version, 2))),
+        ("NEG-N5-KLOAD-SYMBOLS-ACTIVATION-OVERREACH", _rejected(lambda: native_kernel_load.native_symbols.authorize_consumption(symbols_bundle, native_kernel_load.native_symbols.development_consumption_context(symbols_bundle)))),
         ("NEG-N5-KLOAD-MARKER-OMISSION", _rejected(lambda: native_kernel_load.validate_markers(markers[:-1]))),
         ("NEG-N5-KLOAD-MARKER-ORDER", _rejected(lambda: native_kernel_load.validate_markers([markers[1], markers[0], *markers[2:]]))),
         ("NEG-N5-KLOAD-MARKER-CONFIG-BOUND", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 7, f"bytes={marker_summary['boot_config']['byte_count']}", "bytes=16385")))),
@@ -983,6 +1017,16 @@ def make_readiness(
     )
     if manifest_failures:
         raise QualificationError("current PSM1 readiness is stale: " + "; ".join(manifest_failures))
+    symbol_readiness = native_kernel_load.native_symbols.read_json(
+        ROOT / native_kernel_load.native_symbols.READINESS_RELATIVE
+    )
+    symbol_failures = native_kernel_load.native_symbols.readiness_errors(
+        symbol_readiness, ROOT
+    )
+    if symbol_failures:
+        raise QualificationError(
+            "current PSYM1 readiness is stale: " + "; ".join(symbol_failures)
+        )
     lock, profile = native_tier0.validate_contracts(ROOT)
     qemu_root = native_tier0._require_workspace_tool_path(qemu_root, ROOT)
     native_tier0.verify_local_launch_runtime(lock, qemu_root, ROOT)
@@ -1071,7 +1115,7 @@ def make_readiness(
         "status_date": status_date,
         "status": "pass_single_host_two_run_live_pbart1_pkmap2_exit_then_stop_non_promoting",
         "contract_id": native_kernel_load.CONTRACT_ID,
-        "selected_move_id": "N5-RECOVERY-SEMANTICS-001",
+        "selected_move_id": "N5-SYMBOLS-SEMANTICS-001",
         "production_ready": False,
         "production_promotion_allowed": False,
         "n5_exit_gate_satisfied": False,
@@ -1120,6 +1164,12 @@ def make_readiness(
             "recovery_readiness": native_kernel_load.file_binding(
                 ROOT, native_kernel_load.native_recovery.READINESS_RELATIVE.as_posix()
             ),
+            "symbols_contract": native_kernel_load.file_binding(
+                ROOT, native_kernel_load.native_symbols.CONTRACT_RELATIVE.as_posix()
+            ),
+            "symbols_readiness": native_kernel_load.file_binding(
+                ROOT, native_kernel_load.native_symbols.READINESS_RELATIVE.as_posix()
+            ),
             "implementation_inputs": [native_kernel_load.file_binding(ROOT, path) for path in native_kernel_load.IMPLEMENTATION_INPUTS],
         },
         "host_tests": host_tests,
@@ -1159,6 +1209,9 @@ def make_readiness(
             "pinit1_development_activation_denied": True,
             "prec1_host_oracle_match": True,
             "prec1_development_activation_denied": True,
+            "psym1_host_oracle_match": True,
+            "psym1_development_activation_denied": True,
+            "psym1_debug_file_on_media": False,
             "pbp1_profile_artifact_cross_binding": True,
             "sha256_python_match": True,
             "pkelf1_python_plan_match": True,
@@ -1244,7 +1297,8 @@ def make_readiness(
             "Implement PINIT1 parsing and semantic enforcement in PooleBoot before initial-system declarations can cross the firmware boundary.",
             "Implement PooleKernel activation, capability issuance, transactional startup, rollback, and lifecycle enforcement for qualified PINIT1 declarations.",
             "Implement authenticated PREC1 state persistence, PooleBoot enforcement, handoff binding, and PooleKernel-mediated recovery without ambient authority.",
-            "Define and implement each remaining symbols, microcode, firmware-manifest, and policy artifact's semantics, parser hardening, capability boundary, and lifecycle policy before execution or application.",
+            "Implement signed PSYM1 parsing and bounded capability-authorized diagnostic consumption in PooleBoot and PooleKernel without staging private debug data.",
+            "Define and implement each remaining microcode, firmware-manifest, and policy artifact's semantics, parser hardening, capability boundary, and lifecycle policy before execution or application.",
             "Transfer to PooleKernel and capture entry, panic, recovery, and reset evidence.",
             "Add fault-injected live EFI_INVALID_PARAMETER retry evidence rather than lifecycle-model evidence alone.",
             "Define how PooleKernel reclaims final-map scratch pools after consuming PBP1.",

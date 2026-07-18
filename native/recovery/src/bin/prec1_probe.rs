@@ -133,7 +133,11 @@ fn evaluate_success(value: &str) -> Result<String, &'static str> {
     let next = poole_recovery::report_boot_success(&policy, &state, &receipt)
         .map_err(|error| error.code())?;
     let bytes = poole_recovery::encode_state(&next);
-    Ok(format!("{};state={}", state_summary(&next), encode_hex(&bytes)))
+    Ok(format!(
+        "{};state={}",
+        state_summary(&next),
+        encode_hex(&bytes)
+    ))
 }
 
 fn evaluate_failure(value: &str) -> Result<String, &'static str> {
@@ -165,7 +169,9 @@ fn activation_result(mode: &str, bytes: &[u8]) -> Result<String, &'static str> {
         "qualified" => {}
         "development" => context = poole_recovery::ActivationContext::development(),
         "role" => context.outer_role = 2,
-        "version" => context.outer_artifact_version = context.outer_artifact_version.wrapping_add(1),
+        "version" => {
+            context.outer_artifact_version = context.outer_artifact_version.wrapping_add(1)
+        }
         "payload-digest" => context.outer_payload_digest_verified = false,
         "file-digest" => context.outer_file_digest_verified = false,
         "outer-signature" => context.outer_signature_verified = false,

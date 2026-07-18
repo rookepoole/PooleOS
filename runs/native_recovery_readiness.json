@@ -30,14 +30,14 @@
     },
     "implementation_inputs": [
       {
-        "byte_count": 510,
+        "byte_count": 523,
         "path": "native/Cargo.toml",
-        "sha256": "D9F54C1A6590AE56F5E4061319341E5463B45E857CC4024E1DBAAA349E2989B4"
+        "sha256": "84452BF03FF8873F5065AD0615C6414BFFC537CEE40D2FEDEA4DC777D13885EA"
       },
       {
-        "byte_count": 3351,
+        "byte_count": 3433,
         "path": "native/Cargo.lock",
-        "sha256": "678D2FFCC79D6B5D2C524BB15339847641C1B58D93C11B6B37F37B9DD51FAB29"
+        "sha256": "5AD40FB8F7330BA0E3CC3998501BE1B3CF7AACED70FBDFEC06D6D20DF4C3DD05"
       },
       {
         "byte_count": 350,
@@ -45,14 +45,14 @@
         "sha256": "B1DBA2F9364911F43A144A972BFEC1467EEE1F28382DA39E4045C282EE841F57"
       },
       {
-        "byte_count": 48169,
+        "byte_count": 49465,
         "path": "native/recovery/src/lib.rs",
-        "sha256": "9D9612CA13948228B63EB095F20F9F4A430EE018DB738C7480D99641B15DEC70"
+        "sha256": "C76865DD27BB01553474D6B8F9D9F26CFBFDD3DFCDF5504EA328810A8BB6613A"
       },
       {
-        "byte_count": 9298,
+        "byte_count": 9351,
         "path": "native/recovery/src/bin/prec1_probe.rs",
-        "sha256": "848355F6DCADBA3D76A12884235764004408969CFB0DD08C75F97AAB12D0681F"
+        "sha256": "B6D62AABA1508EAE83152BF29D20ACE4A3D2D3453BD330FEC23C96D5CA334CE1"
       },
       {
         "byte_count": 60364,
@@ -60,9 +60,9 @@
         "sha256": "9FE923CB2A1DA1083858750FE324321ADB4CB56D9D69DC33B2DBA7D36625E95D"
       },
       {
-        "byte_count": 6223,
+        "byte_count": 6753,
         "path": "runtime/native_boot_artifact.py",
-        "sha256": "5F559C40E6193F1B545299453B58FDA9AA69F4519464B028AF719FCDB2E3C63D"
+        "sha256": "37A91ABCEF896E547A118DFF95BB719F6AAA76D3E9E664F2BB015B01B2601B47"
       },
       {
         "byte_count": 1520,
@@ -1085,14 +1085,14 @@
     "host_probe_role": "ephemeral host-only differential and transition transport",
     "no_std_target_builds": [
       {
-        "byte_count": 204662,
-        "sha256": "B27113DE93BF4F788EBB80ABAB8A6F6D306CB2809104A7390AAD5F783274D1A1",
+        "byte_count": 204790,
+        "sha256": "3ACE8579F656C9EFF20D876C59972FBE2E9367C931E7584068C1CE35F91A9B88",
         "status": "pass",
         "target": "x86_64-unknown-uefi"
       },
       {
-        "byte_count": 208892,
-        "sha256": "AC4790CFCA5D1E3796CB8CEAAFE68CB4C27E8D0355B54E3F94BA9F1110648ADB",
+        "byte_count": 209020,
+        "sha256": "7C91F73F52BEDEEF567E76CCA18441A4AACA3410E824A48C7105EC6B24E0B807",
         "status": "pass",
         "target": "x86_64-unknown-none"
       }

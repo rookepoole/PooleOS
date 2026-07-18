@@ -38,6 +38,7 @@ ALLOWED_RUNS = {
     "runs/native_model_readiness.json",
     "runs/native_pooleboot_readiness.json",
     "runs/native_recovery_readiness.json",
+    "runs/native_symbol_readiness.json",
     "runs/native_system_manifest_readiness.json",
     "runs/n0_owner_decision_packet.json",
     "runs/n0_owner_response_receipt.json",

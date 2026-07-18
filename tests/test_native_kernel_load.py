@@ -116,6 +116,15 @@ class NativeKernelLoadTests(unittest.TestCase):
         self.assertFalse(inspection["recovery"]["pooleboot_enforced"])
         self.assertFalse(inspection["recovery"]["poolekernel_enforced"])
         self.assertFalse(inspection["recovery"]["recovery_executed"])
+        self.assertEqual("PSYM1", inspection["symbols"]["contract_id"])
+        self.assertEqual(3, inspection["symbols"]["symbol_count"])
+        self.assertFalse(inspection["symbols"]["activation_allowed"])
+        self.assertFalse(inspection["symbols"]["pooleboot_enforced"])
+        self.assertFalse(inspection["symbols"]["poolekernel_enforced"])
+        self.assertFalse(inspection["symbols"]["symbols_consumed"])
+        self.assertFalse(inspection["symbols"]["runtime_addresses_disclosed"])
+        self.assertFalse(inspection["symbols"]["full_debug_file_on_media"])
+        self.assertFalse(inspection["symbols"]["authority_created"])
 
     def test_extended_media_rejects_fat_and_config_mutations(self) -> None:
         media = bytearray(

@@ -85,10 +85,8 @@ const SLOT_BOOTABLE: u16 = 1 << 0;
 const SLOT_CANDIDATE_ALLOWED: u16 = 1 << 1;
 const SLOT_SAFE_ELIGIBLE: u16 = 1 << 2;
 const SLOT_FALLBACK_ELIGIBLE: u16 = 1 << 3;
-const SLOT_REQUIRED_FLAGS: u16 = SLOT_BOOTABLE
-    | SLOT_CANDIDATE_ALLOWED
-    | SLOT_SAFE_ELIGIBLE
-    | SLOT_FALLBACK_ELIGIBLE;
+const SLOT_REQUIRED_FLAGS: u16 =
+    SLOT_BOOTABLE | SLOT_CANDIDATE_ALLOWED | SLOT_SAFE_ELIGIBLE | SLOT_FALLBACK_ELIGIBLE;
 
 const FAILURE_PRESERVE_EVIDENCE: u16 = 1 << 0;
 const FAILURE_CLEAR_PENDING: u16 = 1 << 1;
@@ -502,8 +500,20 @@ fn mode_bit(mode: u8) -> Result<u32, Error> {
 }
 
 const FAILURE_ROWS: [(u16, u16, u16, u16, u32); FAILURE_COUNT] = [
-    (ACTION_RECOVERY, ACTION_HALT, FAILURE_PRESERVE_EVIDENCE, 0, MODE_MASK_ALL),
-    (ACTION_RECOVERY, ACTION_HALT, FAILURE_PRESERVE_EVIDENCE, 0, MODE_MASK_ALL),
+    (
+        ACTION_RECOVERY,
+        ACTION_HALT,
+        FAILURE_PRESERVE_EVIDENCE,
+        0,
+        MODE_MASK_ALL,
+    ),
+    (
+        ACTION_RECOVERY,
+        ACTION_HALT,
+        FAILURE_PRESERVE_EVIDENCE,
+        0,
+        MODE_MASK_ALL,
+    ),
     (
         ACTION_RECOVERY,
         ACTION_HALT,
@@ -525,7 +535,13 @@ const FAILURE_ROWS: [(u16, u16, u16, u16, u32); FAILURE_COUNT] = [
         0,
         MODE_MASK_ALL,
     ),
-    (ACTION_SAFE, ACTION_PREVIOUS, FAILURE_PRESERVE_EVIDENCE, 1, MODE_MASK_ALL),
+    (
+        ACTION_SAFE,
+        ACTION_PREVIOUS,
+        FAILURE_PRESERVE_EVIDENCE,
+        1,
+        MODE_MASK_ALL,
+    ),
     (
         ACTION_RETRY_CANDIDATE,
         ACTION_PREVIOUS,
@@ -540,12 +556,30 @@ const FAILURE_ROWS: [(u16, u16, u16, u16, u32); FAILURE_COUNT] = [
         0,
         MODE_MASK_ALL,
     ),
-    (ACTION_SAFE, ACTION_RECOVERY, FAILURE_PRESERVE_EVIDENCE, 1, MODE_MASK_ALL),
-    (ACTION_RECOVERY, ACTION_FIRMWARE, FAILURE_PRESERVE_EVIDENCE, 0, MODE_MASK_ALL),
+    (
+        ACTION_SAFE,
+        ACTION_RECOVERY,
+        FAILURE_PRESERVE_EVIDENCE,
+        1,
+        MODE_MASK_ALL,
+    ),
+    (
+        ACTION_RECOVERY,
+        ACTION_FIRMWARE,
+        FAILURE_PRESERVE_EVIDENCE,
+        0,
+        MODE_MASK_ALL,
+    ),
 ];
 
 const AUTHORITY_ROWS: [(u16, u32, u32, u16, u32); AUTHORITY_COUNT] = [
-    (AUTH_READ_ONLY | AUTH_OFFLINE_ONLY | AUTH_AUDITED, 0, 0x18, 0, 201),
+    (
+        AUTH_READ_ONLY | AUTH_OFFLINE_ONLY | AUTH_AUDITED,
+        0,
+        0x18,
+        0,
+        201,
+    ),
     (
         AUTH_READ_ONLY | AUTH_OFFLINE_ONLY | AUTH_AUDITED,
         FACTOR_OPERATOR_AUTH,
@@ -560,7 +594,13 @@ const AUTHORITY_ROWS: [(u16, u32, u32, u16, u32); AUTHORITY_COUNT] = [
         1,
         203,
     ),
-    (AUTH_OFFLINE_ONLY | AUTH_AUDITED, FACTOR_OPERATOR_AUTH, 0x08, 1, 204),
+    (
+        AUTH_OFFLINE_ONLY | AUTH_AUDITED,
+        FACTOR_OPERATOR_AUTH,
+        0x08,
+        1,
+        204,
+    ),
     (
         AUTH_OFFLINE_ONLY | AUTH_AUDITED,
         FACTOR_PHYSICAL_PRESENCE | FACTOR_OPERATOR_AUTH | FACTOR_VOLUME_UNLOCKED,
@@ -570,14 +610,20 @@ const AUTHORITY_ROWS: [(u16, u32, u32, u16, u32); AUTHORITY_COUNT] = [
     ),
     (
         AUTH_DESTRUCTIVE | AUTH_OFFLINE_ONLY | AUTH_AUDITED,
-        FACTOR_PHYSICAL_PRESENCE | FACTOR_OPERATOR_AUTH | FACTOR_VERIFIED_BACKUP | FACTOR_SIGNATURE_VERIFIED,
+        FACTOR_PHYSICAL_PRESENCE
+            | FACTOR_OPERATOR_AUTH
+            | FACTOR_VERIFIED_BACKUP
+            | FACTOR_SIGNATURE_VERIFIED,
         0x08,
         1,
         206,
     ),
     (
         AUTH_DESTRUCTIVE | AUTH_OFFLINE_ONLY | AUTH_AUDITED,
-        FACTOR_PHYSICAL_PRESENCE | FACTOR_OPERATOR_AUTH | FACTOR_VERIFIED_BACKUP | FACTOR_SIGNATURE_VERIFIED,
+        FACTOR_PHYSICAL_PRESENCE
+            | FACTOR_OPERATOR_AUTH
+            | FACTOR_VERIFIED_BACKUP
+            | FACTOR_SIGNATURE_VERIFIED,
         0x08,
         1,
         207,
@@ -611,7 +657,8 @@ pub fn parse(data: &[u8]) -> Result<Bundle<'_>, Error> {
     }
     let bundle_version = u64_at(data, 24)?;
     let minimum_secure_version = u64_at(data, 32)?;
-    if bundle_version == 0 || minimum_secure_version == 0 || bundle_version < minimum_secure_version {
+    if bundle_version == 0 || minimum_secure_version == 0 || bundle_version < minimum_secure_version
+    {
         return Err(Error::VersionFloor);
     }
     let required_pbp_major = u16_at(data, 40)?;
@@ -671,9 +718,17 @@ pub fn parse(data: &[u8]) -> Result<Bundle<'_>, Error> {
     if all_zero(&data[168..184]) {
         return Err(Error::StateStoreId);
     }
-    if (u16_at(data, 184)?, u16_at(data, 186)?, u16_at(data, 188)?, u16_at(data, 190)?)
-        != (ACTION_PREVIOUS, ACTION_RECOVERY, ACTION_RECOVERY, ACTION_RECOVERY)
-    {
+    if (
+        u16_at(data, 184)?,
+        u16_at(data, 186)?,
+        u16_at(data, 188)?,
+        u16_at(data, 190)?,
+    ) != (
+        ACTION_PREVIOUS,
+        ACTION_RECOVERY,
+        ACTION_RECOVERY,
+        ACTION_RECOVERY,
+    ) {
         return Err(Error::FallbackPolicy);
     }
     if u32_at(data, 192)? != AUTHORITY_CEILING {
@@ -702,7 +757,10 @@ pub fn parse(data: &[u8]) -> Result<Bundle<'_>, Error> {
         previous_priority = priority;
         let version = u64_at(data, offset + 8)?;
         let minimum_recovery = u64_at(data, offset + 16)?;
-        if version < minimum_secure_version || minimum_recovery == 0 || minimum_recovery > bundle_version {
+        if version < minimum_secure_version
+            || minimum_recovery == 0
+            || minimum_recovery > bundle_version
+        {
             return Err(Error::SlotVersion);
         }
         if all_zero(&data[offset + 24..offset + 56]) || all_zero(&data[offset + 56..offset + 88]) {
@@ -757,13 +815,18 @@ pub fn parse(data: &[u8]) -> Result<Bundle<'_>, Error> {
             u16_at(data, offset + 16)?,
             u32_at(data, offset + 20)?,
         );
-        if actual != *expected || flags & !AUTH_KNOWN_FLAGS != 0 || factors & !FACTOR_KNOWN_MASK != 0 {
+        if actual != *expected
+            || flags & !AUTH_KNOWN_FLAGS != 0
+            || factors & !FACTOR_KNOWN_MASK != 0
+        {
             return Err(Error::AuthorityRule);
         }
         if u32_at(data, offset + 8)? != PROHIBIT_AMBIENT_ALL {
             return Err(Error::AuthorityAmbient);
         }
-        if u16_at(data, offset + 18)? != 0 || !all_zero(&data[offset + 24..offset + AUTHORITY_BYTES]) {
+        if u16_at(data, offset + 18)? != 0
+            || !all_zero(&data[offset + 24..offset + AUTHORITY_BYTES])
+        {
             return Err(Error::AuthorityReserved);
         }
     }
@@ -827,10 +890,7 @@ pub fn parse_state(data: &[u8]) -> Result<State, Error> {
     let attempts_b = data[37];
     let safe_attempted_mask = data[38];
     let current_mode = data[39];
-    if !(1..=2).contains(&active_slot)
-        || pending_slot > 2
-        || pending_slot == active_slot
-    {
+    if !(1..=2).contains(&active_slot) || pending_slot > 2 || pending_slot == active_slot {
         return Err(Error::StateSlot);
     }
     if known_good_mask == 0
@@ -885,7 +945,11 @@ pub fn parse_state(data: &[u8]) -> Result<State, Error> {
         {
             return Err(Error::StateInflight);
         }
-    } else if boot_nonce != 0 || inflight_generation != 0 || inflight_slot != 0 || inflight_mode != 0 {
+    } else if boot_nonce != 0
+        || inflight_generation != 0
+        || inflight_slot != 0
+        || inflight_mode != 0
+    {
         return Err(Error::StateInflight);
     }
     if data[71] != 0 || u64_at(data, 104)? != 0 {
@@ -968,7 +1032,10 @@ fn validate_state_for_policy(policy: &Bundle<'_>, state: &State) -> Result<(), E
 }
 
 fn next_generation(state: &State) -> Result<u64, Error> {
-    state.generation.checked_add(1).ok_or(Error::TransitionGeneration)
+    state
+        .generation
+        .checked_add(1)
+        .ok_or(Error::TransitionGeneration)
 }
 
 fn slot_bit(slot: u8) -> Result<u8, Error> {
@@ -986,7 +1053,8 @@ fn slot_version(policy: &Bundle<'_>, slot: u8) -> Result<u64, Error> {
 fn eligible(policy: &Bundle<'_>, state: &State, slot: u8, known_good: bool) -> Result<bool, Error> {
     let bit = slot_bit(slot)?;
     if state.unbootable_mask & bit != 0
-        || slot_version(policy, slot)? < core::cmp::max(policy.minimum_secure_version, state.minimum_secure_version)
+        || slot_version(policy, slot)?
+            < core::cmp::max(policy.minimum_secure_version, state.minimum_secure_version)
     {
         return Ok(false);
     }
@@ -994,7 +1062,11 @@ fn eligible(policy: &Bundle<'_>, state: &State, slot: u8, known_good: bool) -> R
 }
 
 fn attempts(state: &State, slot: u8) -> u8 {
-    if slot == 1 { state.attempts_a } else { state.attempts_b }
+    if slot == 1 {
+        state.attempts_a
+    } else {
+        state.attempts_b
+    }
 }
 
 fn set_attempts(state: &mut State, slot: u8, value: u8) {
@@ -1037,7 +1109,8 @@ fn select_slot(
         return Err(Error::TransitionNonce);
     }
     state.generation = next_generation(&state)?;
-    state.flags = (state.flags | STATE_INFLIGHT) & !(STATE_RECOVERY_REQUESTED | STATE_SAFE_REQUESTED);
+    state.flags =
+        (state.flags | STATE_INFLIGHT) & !(STATE_RECOVERY_REQUESTED | STATE_SAFE_REQUESTED);
     state.current_mode = mode;
     state.boot_nonce = nonce;
     state.inflight_generation = state.generation;
@@ -1131,7 +1204,14 @@ pub fn select_boot(
         for slot in candidates {
             let bit = slot_bit(slot)?;
             if eligible(policy, &next, slot, true)? && next.safe_attempted_mask & bit == 0 {
-                return select_slot(next, slot, mode, false, boot_nonce, Some(next.safe_attempted_mask | bit));
+                return select_slot(
+                    next,
+                    slot,
+                    mode,
+                    false,
+                    boot_nonce,
+                    Some(next.safe_attempted_mask | bit),
+                );
             }
         }
         return recovery_decision(next, FAIL_ATTEMPT_EXHAUSTED);
@@ -1173,7 +1253,8 @@ pub fn report_boot_success(
     let pending_success = next.pending_slot == receipt.slot;
     next.flags &= !(STATE_INFLIGHT | STATE_RECOVERY_REQUESTED | STATE_SAFE_REQUESTED);
     next.generation = next_generation(&next)?;
-    next.minimum_secure_version = core::cmp::max(next.minimum_secure_version, policy.minimum_secure_version);
+    next.minimum_secure_version =
+        core::cmp::max(next.minimum_secure_version, policy.minimum_secure_version);
     next.active_slot = receipt.slot;
     if pending_success {
         next.pending_slot = 0;
@@ -1199,7 +1280,11 @@ fn failure_rule(policy: &Bundle<'_>, failure_id: u16) -> Result<(u16, u16, u16),
         return Err(Error::FailureReceiptId);
     }
     let offset = FAILURE_OFFSET + usize::from(failure_id - 1) * FAILURE_BYTES;
-    Ok((u16_at(policy.raw, offset + 2)?, u16_at(policy.raw, offset + 4)?, u16_at(policy.raw, offset + 6)?))
+    Ok((
+        u16_at(policy.raw, offset + 2)?,
+        u16_at(policy.raw, offset + 4)?,
+        u16_at(policy.raw, offset + 6)?,
+    ))
 }
 
 pub fn report_boot_failure(
@@ -1255,24 +1340,55 @@ pub fn report_boot_failure(
     next.inflight_slot = 0;
     next.inflight_mode = 0;
     next.evidence_sequence = next.evidence_sequence.wrapping_add(1);
-    Ok(FailureDecision { action, state: next })
+    Ok(FailureDecision {
+        action,
+        state: next,
+    })
 }
 
 pub fn authorize_activation(bundle: &Bundle<'_>, context: &ActivationContext) -> Result<(), Error> {
     let checks = [
         (context.outer_role == 3, Error::ActivationRole),
-        (context.outer_artifact_version == bundle.bundle_version, Error::ActivationVersion),
-        (context.outer_payload_digest_verified, Error::ActivationOuterPayloadDigest),
-        (context.outer_file_digest_verified, Error::ActivationOuterFileDigest),
-        (context.outer_signature_verified, Error::ActivationOuterSignature),
-        (context.inner_signature_verified, Error::ActivationInnerSignature),
-        (context.manifest_signature_verified, Error::ActivationManifestSignature),
-        (context.state_authenticated, Error::ActivationStateAuth),
-        (context.state_generation_monotonic, Error::ActivationStateGeneration),
-        (context.version_floor_persisted, Error::ActivationVersionFloor),
-        (context.manifest_and_components_verified, Error::ActivationComponents),
         (
-            context.pbp_major == bundle.required_pbp_major && context.pbp_minor >= bundle.minimum_pbp_minor,
+            context.outer_artifact_version == bundle.bundle_version,
+            Error::ActivationVersion,
+        ),
+        (
+            context.outer_payload_digest_verified,
+            Error::ActivationOuterPayloadDigest,
+        ),
+        (
+            context.outer_file_digest_verified,
+            Error::ActivationOuterFileDigest,
+        ),
+        (
+            context.outer_signature_verified,
+            Error::ActivationOuterSignature,
+        ),
+        (
+            context.inner_signature_verified,
+            Error::ActivationInnerSignature,
+        ),
+        (
+            context.manifest_signature_verified,
+            Error::ActivationManifestSignature,
+        ),
+        (context.state_authenticated, Error::ActivationStateAuth),
+        (
+            context.state_generation_monotonic,
+            Error::ActivationStateGeneration,
+        ),
+        (
+            context.version_floor_persisted,
+            Error::ActivationVersionFloor,
+        ),
+        (
+            context.manifest_and_components_verified,
+            Error::ActivationComponents,
+        ),
+        (
+            context.pbp_major == bundle.required_pbp_major
+                && context.pbp_minor >= bundle.minimum_pbp_minor,
             Error::ActivationPbp,
         ),
         (
@@ -1282,10 +1398,22 @@ pub fn authorize_activation(bundle: &Bundle<'_>, context: &ActivationContext) ->
         ),
         (context.offline_path, Error::ActivationOffline),
         (context.pdc_disabled, Error::ActivationPdcDisabled),
-        (context.pooleglyph_independent, Error::ActivationPooleGlyphIndependent),
-        (context.serial_or_gop_software_path, Error::ActivationDisplayPath),
-        (context.transaction_capacity_verified, Error::ActivationTransactionCapacity),
-        (context.evidence_preservation_ready, Error::ActivationEvidence),
+        (
+            context.pooleglyph_independent,
+            Error::ActivationPooleGlyphIndependent,
+        ),
+        (
+            context.serial_or_gop_software_path,
+            Error::ActivationDisplayPath,
+        ),
+        (
+            context.transaction_capacity_verified,
+            Error::ActivationTransactionCapacity,
+        ),
+        (
+            context.evidence_preservation_ready,
+            Error::ActivationEvidence,
+        ),
         (context.rollback_available, Error::ActivationRollback),
         (context.state_writable, Error::ActivationStateWritable),
     ];

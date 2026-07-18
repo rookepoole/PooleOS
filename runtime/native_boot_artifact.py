@@ -9,6 +9,7 @@ from typing import Final
 
 from runtime import native_initial_system as pinit1
 from runtime import native_recovery as prec1
+from runtime import native_symbols as psym1
 
 
 CONTRACT_ID: Final = "PBART1"
@@ -148,6 +149,8 @@ def canonical_payload(role: int) -> bytes:
         return pinit1.canonical_bundle()
     if role == ROLE_RECOVERY:
         return prec1.canonical_bundle()
+    if role == ROLE_SYMBOLS:
+        return psym1.canonical_bundle()
     return (
         "POOLEOS-PBART1-DEVELOPMENT/1\n"
         f"role={ROLE_NAMES[role]}\n"
@@ -159,6 +162,7 @@ def canonical_artifacts(version: int = 1) -> dict[int, bytes]:
     artifacts = {role: encode(role, version, canonical_payload(role)) for role in ROLES}
     parse_initial_system(artifacts[ROLE_INITIAL_SYSTEM])
     parse_recovery(artifacts[ROLE_RECOVERY])
+    parse_symbols(artifacts[ROLE_SYMBOLS])
     return artifacts
 
 
@@ -178,6 +182,16 @@ def parse_recovery(data: bytes) -> tuple[Artifact, prec1.Bundle]:
         raise BootArtifactError("artifact_role_binding")
     bundle = prec1.parse(artifact.payload)
     if artifact.version != bundle.bundle_version:
+        raise BootArtifactError("artifact_inner_version_binding")
+    return artifact, bundle
+
+
+def parse_symbols(data: bytes) -> tuple[Artifact, psym1.Bundle]:
+    artifact = parse(data)
+    if artifact.role != ROLE_SYMBOLS:
+        raise BootArtifactError("artifact_role_binding")
+    bundle = psym1.parse(artifact.payload)
+    if artifact.version != psym1.MAJOR_VERSION:
         raise BootArtifactError("artifact_inner_version_binding")
     return artifact, bundle
 
