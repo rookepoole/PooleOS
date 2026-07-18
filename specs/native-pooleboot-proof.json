@@ -5,7 +5,7 @@
   "status": "bounded_unsigned_live_profile_artifacts_post_exit_pbp1_retained_pkmap2_stop_before_transfer_non_promoting_proof",
   "production_ready": false,
   "production_promotion_allowed": false,
-  "selected_move_id": "N5-INIT-SYSTEM-001",
+  "selected_move_id": "N5-INIT-BUNDLE-001",
   "phase_mapping": [
     "N5.1",
     "N5.2",
@@ -22,7 +22,8 @@
     "015.2",
     "015.5",
     "015.6",
-    "ADD-BOOT-004"
+    "ADD-BOOT-004",
+    "ADD-BOOT-005"
   ],
   "binary": {
     "package": "pooleboot",
@@ -166,6 +167,9 @@
     "NEG-N5-KLOAD-ARTIFACT-VERSION",
     "NEG-N5-KLOAD-ARTIFACT-PAYLOAD-DIGEST",
     "NEG-N5-KLOAD-ARTIFACT-MANIFEST-DIGEST",
+    "NEG-N5-KLOAD-INITIAL-SYSTEM-INNER-SEMANTICS",
+    "NEG-N5-KLOAD-INITIAL-SYSTEM-INNER-VERSION",
+    "NEG-N5-KLOAD-INITIAL-SYSTEM-ACTIVATION-OVERREACH",
     "NEG-N5-KLOAD-MARKER-OMISSION",
     "NEG-N5-KLOAD-MARKER-ORDER",
     "NEG-N5-KLOAD-MARKER-CONFIG-BOUND",
@@ -253,6 +257,7 @@
     "This contract covers one unsigned UEFI proof application with bounded live PBC1, PSM1, PKELF1, PBART1, PBLIVE3, PKMAP2, and PBEXIT1 integration, not the complete PooleBoot loader.",
     "The proof loads and relocates PooleKernel, loads six exact-profile PBART1 envelopes into distinct zero-padded firmware page ranges, validates the kernel's supervisor W^X mapping plan, and retains every loaded range plus four private table pages, an eight-page guarded stack, and a one-MiB read-only handoff allocation.",
     "PSM1 selects and digest-binds the kernel and six profile artifacts; PBART1 additionally binds each non-kernel role, version, payload length, and payload digest, but all artifacts remain unsigned and untrusted.",
+    "The initial-system payload is a deterministic PINIT1 declaration bundle validated by an independent host oracle, and unsigned development activation is denied; PooleBoot still treats the inner bytes as opaque and PooleKernel does not activate them.",
     "Immediately before ExitBootServices, PooleBoot captures a bounded final UEFI memory map, normalizes descriptor-stride-aware entries, and finalizes development-profile PBP1 bytes inside the retained handoff allocation.",
     "PBEXIT1 permits at most four attempts, retries only EFI_INVALID_PARAMETER after obtaining a fresh map key, forbids unrelated firmware calls after the first attempt, and proves zero firmware calls after success.",
     "PKMAP2 requires CR0.WP, processor NX support, and EFER.NXE; it rejects LA57, PCID, occupied target slots, malformed coverage, writable-executable leaves, large leaves, retained overlap, and guard-layout drift.",

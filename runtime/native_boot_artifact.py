@@ -7,6 +7,8 @@ import hashlib
 import struct
 from typing import Final
 
+from runtime import native_initial_system as pinit1
+
 
 CONTRACT_ID: Final = "PBART1"
 MAGIC: Final = b"PBART1\0\0"
@@ -141,6 +143,8 @@ def encode(role: int, version: int, payload: bytes) -> bytes:
 def canonical_payload(role: int) -> bytes:
     if role not in ROLES:
         raise BootArtifactError("artifact_role")
+    if role == ROLE_INITIAL_SYSTEM:
+        return pinit1.canonical_bundle()
     return (
         "POOLEOS-PBART1-DEVELOPMENT/1\n"
         f"role={ROLE_NAMES[role]}\n"
@@ -149,7 +153,19 @@ def canonical_payload(role: int) -> bytes:
 
 
 def canonical_artifacts(version: int = 1) -> dict[int, bytes]:
-    return {role: encode(role, version, canonical_payload(role)) for role in ROLES}
+    artifacts = {role: encode(role, version, canonical_payload(role)) for role in ROLES}
+    parse_initial_system(artifacts[ROLE_INITIAL_SYSTEM])
+    return artifacts
+
+
+def parse_initial_system(data: bytes) -> tuple[Artifact, pinit1.Bundle]:
+    artifact = parse(data)
+    if artifact.role != ROLE_INITIAL_SYSTEM:
+        raise BootArtifactError("artifact_role_binding")
+    bundle = pinit1.parse(artifact.payload)
+    if artifact.version != bundle.bundle_version:
+        raise BootArtifactError("artifact_inner_version_binding")
+    return artifact, bundle
 
 
 def summary(data: bytes) -> dict[str, object]:

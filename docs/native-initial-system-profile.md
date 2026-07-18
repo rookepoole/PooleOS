@@ -1,7 +1,8 @@
 # Native Initial-System Artifact Profile
 
 Status: candidate, unsigned, development-only, non-promoting  
-Move: `N5-INIT-SYSTEM-001`  
+Profile move: `N5-INIT-SYSTEM-001`
+Current inner-format move: `N5-INIT-BUNDLE-001`
 Profile contract: `PBASET1`  
 Artifact envelope: `PBART1`  
 Manifest contract: `PSM1`  
@@ -21,7 +22,7 @@ the following strict ASCII order; PBP1 records use the numeric role order.
 | PSM1 ID | PSM1 type | Format | Canonical path | PBP1 role |
 | --- | --- | --- | --- | ---: |
 | `a_kernel` | `kernel` | `PKELF1` | `\EFI\POOLEOS\KERNEL.ELF` | 1 |
-| `b_initial_system` | `initial_system` | `PBART1` | `\EFI\POOLEOS\INITIAL.PBA` | 2 |
+| `b_initial_system` | `initial_system` | `PBART1` + `PINIT1` | `\EFI\POOLEOS\INITIAL.PBA` | 2 |
 | `c_recovery` | `recovery` | `PBART1` | `\EFI\POOLEOS\RECOVERY.PBA` | 3 |
 | `d_symbols` | `symbols` | `PBART1` | `\EFI\POOLEOS\SYMBOLS.PBA` | 4 |
 | `e_microcode` | `microcode` | `PBART1` | `\EFI\POOLEOS\MICROCOD.PBA` | 5 |
@@ -81,6 +82,21 @@ loader-reserved entries in the final normalized memory map.
 No `SIGNATURE_VERIFIED` or `MEASURED` flag may be emitted in this profile.
 The PBP1 kernel-entry profile must continue to reject the handoff.
 
+## PINIT1 Inner Bundle
+
+The canonical initial-system payload is no longer an arbitrary text fixture.
+It is the 1,764-byte `PINIT1` declaration bundle defined by
+`docs/native-initial-system-bundle.md`. An independent host oracle validates
+its exact component, service, dependency, abstract-resource, attenuated-
+capability, lifecycle, transaction, and rollback declarations and cross-binds
+its version to PBART1. Parsing does not allocate a kernel object or authorize
+activation. The unsigned development profile must fail activation before any
+allocation, capability issuance, or instruction execution.
+
+PooleBoot still validates only PBART1 and treats the inner bytes as opaque.
+PooleKernel does not yet parse or activate PINIT1. Those are explicit later
+gates rather than inferred consequences of the host qualification.
+
 ## Qualification Gate
 
 The bounded move qualifies only when all of the following pass:
@@ -98,5 +114,6 @@ The bounded move qualifies only when all of the following pass:
 5. Two clean QEMU/OVMF runs from independently generated deterministic media
    produce exactly matching ordered markers and oracle-normalized receipts.
 6. Claims remain explicitly false for signatures, trust, persistent rollback,
-   artifact semantics, microcode application, kernel transfer, physical
-   hardware, N5 completion, and production readiness.
+   PooleBoot inner-semantic enforcement, PooleKernel activation, component
+   execution, microcode application, kernel transfer, physical hardware, N5
+   completion, and production readiness.

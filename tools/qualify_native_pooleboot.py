@@ -786,6 +786,12 @@ def make_report(
             "system_manifest_readiness": native_pooleboot.file_binding(
                 ROOT, "runs/native_system_manifest_readiness.json"
             ),
+            "initial_system_contract": native_pooleboot.file_binding(
+                ROOT, "specs/native-initial-system-contract.json"
+            ),
+            "initial_system_readiness": native_pooleboot.file_binding(
+                ROOT, "runs/native_initial_system_readiness.json"
+            ),
             "implementation_inputs": [
                 native_pooleboot.file_binding(ROOT, path) for path in BUILD_INPUTS
             ],

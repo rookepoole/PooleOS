@@ -30,9 +30,9 @@
     "status": {"const": "bounded_unsigned_live_profile_artifacts_post_exit_pbp1_retained_pkmap2_stop_before_transfer_non_promoting_proof"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
-    "selected_move_id": {"const": "N5-INIT-SYSTEM-001"},
+    "selected_move_id": {"const": "N5-INIT-BUNDLE-001"},
     "phase_mapping": {"type": "array", "minItems": 8, "maxItems": 8, "items": {"type": "string"}},
-    "source_requirement_ids": {"type": "array", "minItems": 6, "maxItems": 6, "items": {"type": "string"}},
+    "source_requirement_ids": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"type": "string"}},
     "binary": {
       "type": "object",
       "additionalProperties": false,
@@ -121,7 +121,7 @@
       }
     },
     "required_markers": {"type": "array", "minItems": 23, "maxItems": 23, "items": {"type": "string"}},
-    "required_negative_controls": {"type": "array", "minItems": 112, "maxItems": 112, "items": {"type": "string"}},
+    "required_negative_controls": {"type": "array", "minItems": 115, "maxItems": 115, "items": {"type": "string"}},
     "claim_boundary": {"type": "array", "minItems": 10, "items": {"type": "string"}},
     "official_references": {"type": "array", "minItems": 5, "maxItems": 5, "items": {"type": "string"}}
   }

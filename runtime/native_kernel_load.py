@@ -15,6 +15,7 @@ from runtime import (
     native_boot_config,
     native_boot_exit,
     native_elf_loader,
+    native_initial_system,
     native_kernel_map,
     native_live_boot_handoff,
     native_pooleboot,
@@ -144,6 +145,7 @@ IMPLEMENTATION_INPUTS = (
     "runtime/native_boot_config.py",
     "runtime/native_elf_loader.py",
     "runtime/native_kernel_image.py",
+    "runtime/native_initial_system.py",
     "runtime/native_kernel_load.py",
     "runtime/native_kernel_map.py",
     "runtime/native_live_boot_handoff.py",
@@ -152,6 +154,13 @@ IMPLEMENTATION_INPUTS = (
     "specs/native-boot-digest-provider.json",
     "specs/native-boot-digest-provider.schema.json",
     "docs/native-initial-system-profile.md",
+    "docs/native-initial-system-bundle.md",
+    "specs/native-initial-system-contract.json",
+    "specs/native-initial-system-contract.schema.json",
+    "specs/native-initial-system-golden-vectors.json",
+    "specs/native-initial-system-golden-vectors.schema.json",
+    "specs/native-initial-system-readiness.schema.json",
+    "runs/native_initial_system_readiness.json",
     "specs/native-kernel-load-contract.json",
     "specs/native-kernel-load-contract.schema.json",
     "specs/native-kernel-load-readiness.schema.json",
@@ -160,6 +169,7 @@ IMPLEMENTATION_INPUTS = (
     "tools/qualify_native_pooleboot.py",
     "tools/qualify_native_kernel_load.py",
     "tests/test_native_boot_artifact.py",
+    "tests/test_native_initial_system.py",
     "tests/test_native_live_boot_handoff.py",
 )
 
@@ -178,6 +188,8 @@ TRUE_CLAIMS = (
     "pkelf1_mapping_plan_validated",
     "live_pbart1_files_read",
     "pbart1_role_version_payload_digest_validated",
+    "initial_system_inner_oracle_validated",
+    "initial_system_development_activation_denied",
     "artifact_set_manifest_sha256_matched",
     "artifact_pages_retained",
     "pbp1_profile_artifacts_cross_bound",
@@ -210,6 +222,8 @@ FALSE_CLAIMS = (
     "kernel_signature_verified",
     "artifact_signatures_verified",
     "artifact_semantics_applied",
+    "pooleboot_initial_system_semantics_enforced",
+    "poolekernel_initial_system_activation_enforced",
     "initial_system_executed",
     "microcode_applied",
     "all_pbp1_temporary_pools_released",
@@ -257,6 +271,9 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-KLOAD-ARTIFACT-VERSION",
     "NEG-N5-KLOAD-ARTIFACT-PAYLOAD-DIGEST",
     "NEG-N5-KLOAD-ARTIFACT-MANIFEST-DIGEST",
+    "NEG-N5-KLOAD-INITIAL-SYSTEM-INNER-SEMANTICS",
+    "NEG-N5-KLOAD-INITIAL-SYSTEM-INNER-VERSION",
+    "NEG-N5-KLOAD-INITIAL-SYSTEM-ACTIVATION-OVERREACH",
     "NEG-N5-KLOAD-MARKER-OMISSION",
     "NEG-N5-KLOAD-MARKER-ORDER",
     "NEG-N5-KLOAD-MARKER-CONFIG-BOUND",
@@ -428,6 +445,36 @@ def canonical_artifact_files() -> dict[str, bytes]:
     return {path: encoded[role] for role, _, _, _, path, _ in ARTIFACT_DEFINITIONS}
 
 
+def initial_system_oracle(data: bytes, expected_version: int) -> dict[str, Any]:
+    artifact = native_boot_artifact.parse_bound(
+        data, native_boot_artifact.ROLE_INITIAL_SYSTEM, expected_version
+    )
+    _, bundle = native_boot_artifact.parse_initial_system(data)
+    errors = native_initial_system.activation_errors(
+        bundle, native_initial_system.development_activation_context()
+    )
+    if not errors or errors[0] != "pinit_activation_outer_signature_verified":
+        raise KernelLoadError("PINIT1 development activation boundary changed")
+    return {
+        "contract_id": native_initial_system.CONTRACT_ID,
+        "summary": native_initial_system.summary(bundle),
+        "bundle_sha256": native_initial_system.sha256_bytes(bundle.raw),
+        "bundle_version": bundle.bundle_version,
+        "component_count": len(bundle.components),
+        "service_count": len(bundle.services),
+        "dependency_count": len(bundle.dependencies),
+        "resource_count": len(bundle.resources),
+        "capability_count": len(bundle.capabilities),
+        "start_order": list(bundle.start_order),
+        "outer_payload_sha256": artifact.payload_sha256,
+        "activation_allowed": False,
+        "activation_errors": list(errors),
+        "validated_by": "independent_host_media_oracle",
+        "pooleboot_enforced": False,
+        "poolekernel_enforced": False,
+    }
+
+
 def canonical_manifest_bytes(
     kernel_data: bytes, artifact_files: dict[str, bytes] | None = None
 ) -> bytes:
@@ -455,6 +502,8 @@ def canonical_manifest_bytes(
     for role, artifact_id, kind, manifest_path, media_path, _ in ARTIFACT_DEFINITIONS:
         data = files[media_path]
         native_boot_artifact.parse_bound(data, role, 1)
+        if role == native_boot_artifact.ROLE_INITIAL_SYSTEM:
+            initial_system_oracle(data, 1)
         artifacts.append(
             native_system_manifest.Artifact(
                 id=artifact_id,
@@ -581,6 +630,8 @@ def build_media_bytes(
             artifact_data = files[media_path]
             native_system_manifest.verify_file(profile[index], artifact_data)
             native_boot_artifact.parse_bound(artifact_data, role, profile[index].version)
+            if role == native_boot_artifact.ROLE_INITIAL_SYSTEM:
+                initial_system_oracle(artifact_data, profile[index].version)
         kernel_plan, _ = native_elf_loader.load(
             kernel_data,
             PHYSICAL_ORACLE_BASE,
@@ -593,6 +644,7 @@ def build_media_bytes(
         native_system_manifest.ManifestError,
         native_elf_loader.ElfError,
         native_boot_artifact.BootArtifactError,
+        native_initial_system.InitialSystemError,
         StopIteration,
     ) as error:
         raise KernelLoadError(f"PKLOAD6 input validation failed: {error}") from error
@@ -850,6 +902,8 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
             native_boot_artifact.parse_bound(
                 artifact_data, role, profile[index].version
             )
+            if role == native_boot_artifact.ROLE_INITIAL_SYSTEM:
+                initial_system_oracle(artifact_data, profile[index].version)
         kernel_plan, loaded = native_elf_loader.load(
             kernel_data,
             PHYSICAL_ORACLE_BASE,
@@ -861,6 +915,7 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
         native_elf_loader.ElfError,
         native_system_manifest.ManifestError,
         native_boot_artifact.BootArtifactError,
+        native_initial_system.InitialSystemError,
         StopIteration,
         KeyError,
         IndexError,
@@ -972,6 +1027,9 @@ def inspect_media_bytes(data: bytes) -> dict[str, Any]:
         "semantics_applied": False,
         "artifacts": artifact_summaries,
     }
+    base["initial_system"] = initial_system_oracle(
+        artifact_files[INITIAL_SYSTEM_PATH], profile[1].version
+    )
     base["fat32"]["cluster_count"] = cluster_count
     return base
 
@@ -1391,6 +1449,18 @@ def validate_oracle_binding(
         or artifact_set["semantics_applied"] is not False
     ):
         raise KernelLoadError("firmware PBART1 markers diverge from the independent media oracle")
+    initial_system = media_inspection.get("initial_system", {})
+    if (
+        initial_system.get("contract_id") != native_initial_system.CONTRACT_ID
+        or initial_system.get("validated_by") != "independent_host_media_oracle"
+        or initial_system.get("activation_allowed") is not False
+        or initial_system.get("pooleboot_enforced") is not False
+        or initial_system.get("poolekernel_enforced") is not False
+        or not initial_system.get("activation_errors")
+        or initial_system["activation_errors"][0]
+        != "pinit_activation_outer_signature_verified"
+    ):
+        raise KernelLoadError("PINIT1 oracle or activation boundary changed")
     kernel_map = marker_summary["kernel_map"]
     expected_map = native_kernel_map.marker_expectation(
         plan, kernel_map["physical_address_bits"]
@@ -1579,6 +1649,8 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
         "system_manifest_contract": native_system_manifest.CONTRACT_RELATIVE,
         "system_manifest_readiness": native_system_manifest.READINESS_RELATIVE,
         "digest_provider": native_system_manifest.DIGEST_PROVIDER_RELATIVE,
+        "initial_system_contract": native_initial_system.CONTRACT_RELATIVE.as_posix(),
+        "initial_system_readiness": native_initial_system.READINESS_RELATIVE.as_posix(),
     }
     for name, path in expected_bindings.items():
         if not binding_matches(bindings.get(name), root, path):
@@ -1637,6 +1709,19 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
                     or artifact.get("file_bytes") != file_item.get("byte_count")
                 ):
                     errors.append(f"PKLOAD6 artifact binding changed for {media_path}")
+        try:
+            expected_initial_system = initial_system_oracle(
+                canonical_artifact_files()[INITIAL_SYSTEM_PATH], 1
+            )
+        except (
+            KernelLoadError,
+            native_boot_artifact.BootArtifactError,
+            native_initial_system.InitialSystemError,
+        ) as error:
+            errors.append(f"canonical PINIT1 oracle failed: {error}")
+        else:
+            if media.get("initial_system") != expected_initial_system:
+                errors.append("PKLOAD6 PINIT1 independent-oracle summary changed")
     runs = readiness.get("execution", {}).get("runs", [])
     marker_sets: list[list[str]] = []
     if not isinstance(runs, list) or len(runs) != 2:
