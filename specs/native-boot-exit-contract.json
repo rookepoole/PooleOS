@@ -74,7 +74,7 @@
     "A fresh memory map and PBP1 candidate precede every attempt; only EFI_INVALID_PARAMETER may trigger a bounded retry.",
     "All fallible allocation and mapping setup occurs before the first attempt, and the implementation never returns to UEFI after an attempt begins.",
     "After success, direct serial/debugcon I/O emits evidence without invoking firmware, interrupts remain disabled, and execution halts before kernel transfer.",
-    "The exited PBP1 remains development-only because signatures, initial-system state, entropy, and the kernel-entry profile are incomplete.",
+    "The exited PBP1 remains development-only because signatures, artifact semantics, entropy, and the kernel-entry profile are incomplete.",
     "This does not qualify target firmware, physical hardware, kernel entry, installation, signing, or production readiness."
   ],
   "official_references": [

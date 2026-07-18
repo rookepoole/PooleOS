@@ -1,11 +1,12 @@
 #![no_std]
 #![deny(warnings)]
 
+pub use poole_boot_artifact as artifact;
 pub use poole_boot_config as boot_config;
 pub use poole_elf as elf;
 pub use poole_manifest as manifest;
 
-pub const CONTRACT_ID: &str = "PKLOAD2";
+pub const CONTRACT_ID: &str = "PKLOAD6";
 pub const VIRTUAL_BASE: u64 = poole_elf::MIN_VIRTUAL_BASE;
 pub const EFI_FILE_INFO_FIXED_BYTES: usize = 80;
 pub const MAX_FILE_INFO_BYTES: usize = 512;
@@ -13,6 +14,8 @@ pub const EFI_FILE_ATTRIBUTE_DIRECTORY: u64 = 0x10;
 pub const EFI_FILE_VALID_ATTRIBUTES: u64 = 0x37;
 pub const MAX_RESOURCE_DEPTH: usize = 8;
 pub const MAX_UEFI_PATH_UNITS: usize = poole_manifest::MAX_PATH_BYTES + 1;
+pub const PROFILE_ARTIFACT_COUNT: usize = 7;
+pub const AUXILIARY_ARTIFACT_COUNT: usize = PROFILE_ARTIFACT_COUNT - 1;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Error {
@@ -29,6 +32,7 @@ pub enum Error {
     ResourceLeak,
     PathEncoding,
     ManifestBinding,
+    Artifact(poole_boot_artifact::Error),
     BootConfig(poole_boot_config::Error),
     Manifest(poole_manifest::Error),
     Elf(poole_elf::Error),
@@ -50,6 +54,7 @@ impl Error {
             Self::ResourceLeak => "resource_leak",
             Self::PathEncoding => "path_encoding",
             Self::ManifestBinding => "manifest_binding",
+            Self::Artifact(error) => error.code(),
             Self::BootConfig(error) => error.code(),
             Self::Manifest(error) => error.code(),
             Self::Elf(error) => error.code(),
@@ -64,6 +69,11 @@ pub struct OwnedPath {
 }
 
 impl OwnedPath {
+    pub const EMPTY: Self = Self {
+        bytes: [0; poole_manifest::MAX_PATH_BYTES],
+        length: 0,
+    };
+
     pub fn copy_from(value: &str) -> Result<Self, Error> {
         if value.is_empty() || value.len() > poole_manifest::MAX_PATH_BYTES || !value.is_ascii() {
             return Err(Error::PathEncoding);
@@ -121,6 +131,26 @@ pub struct ManifestSummary {
     pub kernel_file_bytes: usize,
     pub kernel_image_bytes: usize,
     pub kernel_sha256: [u8; 32],
+    pub artifacts: [ArtifactSummary; AUXILIARY_ARTIFACT_COUNT],
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ArtifactSummary {
+    pub role: poole_boot_artifact::Role,
+    pub version: u64,
+    pub path: OwnedPath,
+    pub file_bytes: usize,
+    pub sha256: [u8; 32],
+}
+
+impl ArtifactSummary {
+    pub const EMPTY: Self = Self {
+        role: poole_boot_artifact::Role::InitialSystem,
+        version: 1,
+        path: OwnedPath::EMPTY,
+        file_bytes: 1,
+        sha256: [0; 32],
+    };
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -136,6 +166,13 @@ pub struct KernelAllocationPlan {
 pub struct LoadedKernel {
     pub image: poole_elf::ImagePlan,
     pub page_count: usize,
+    pub loaded_fnv1a64: u64,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct LoadedArtifact {
+    pub page_count: usize,
+    pub file_size: usize,
     pub loaded_fnv1a64: u64,
 }
 
@@ -307,7 +344,52 @@ pub fn parse_manifest(bytes: &[u8], selected_slot: u8) -> Result<ManifestSummary
     if manifest.slot != selected_slot {
         return Err(Error::ManifestBinding);
     }
-    let kernel = manifest.kernel().map_err(Error::Manifest)?;
+    if manifest.artifacts.len() != PROFILE_ARTIFACT_COUNT {
+        return Err(Error::ManifestBinding);
+    }
+    let expected_ids = [
+        "a_kernel",
+        "b_initial_system",
+        "c_recovery",
+        "d_symbols",
+        "e_microcode",
+        "f_firmware",
+        "g_policy",
+    ];
+    let expected_kinds = [
+        poole_manifest::ArtifactKind::Kernel,
+        poole_manifest::ArtifactKind::InitialSystem,
+        poole_manifest::ArtifactKind::Recovery,
+        poole_manifest::ArtifactKind::Symbols,
+        poole_manifest::ArtifactKind::Microcode,
+        poole_manifest::ArtifactKind::Firmware,
+        poole_manifest::ArtifactKind::Policy,
+    ];
+    let expected_paths = [
+        "\\EFI\\POOLEOS\\KERNEL.ELF",
+        "\\EFI\\POOLEOS\\INITIAL.PBA",
+        "\\EFI\\POOLEOS\\RECOVERY.PBA",
+        "\\EFI\\POOLEOS\\SYMBOLS.PBA",
+        "\\EFI\\POOLEOS\\MICROCOD.PBA",
+        "\\EFI\\POOLEOS\\FIRMWARE.PBA",
+        "\\EFI\\POOLEOS\\POLICY.PBA",
+    ];
+    for (index, artifact) in manifest.artifacts.iter().enumerate() {
+        let expected_format = if index == 0 { "PKELF1" } else { "PBART1" };
+        let expected_entry = if index == 0 { "PKENTRY1" } else { "none" };
+        if artifact.id != expected_ids[index]
+            || artifact.kind != expected_kinds[index]
+            || artifact.format != expected_format
+            || artifact.path != expected_paths[index]
+            || artifact.entry_contract != expected_entry
+            || (index != 0
+                && (artifact.image_bytes != 0
+                    || artifact.file_bytes > poole_boot_artifact::MAX_FILE_BYTES as u64))
+        {
+            return Err(Error::ManifestBinding);
+        }
+    }
+    let kernel = &manifest.artifacts[0];
     let kernel_file_bytes =
         usize::try_from(kernel.file_bytes).map_err(|_| Error::ManifestBinding)?;
     let kernel_image_bytes =
@@ -318,6 +400,16 @@ pub fn parse_manifest(bytes: &[u8], selected_slot: u8) -> Result<ManifestSummary
         || kernel_image_bytes > poole_elf::MAX_IMAGE_BYTES as usize
     {
         return Err(Error::ManifestBinding);
+    }
+    let mut artifacts = [ArtifactSummary::EMPTY; AUXILIARY_ARTIFACT_COUNT];
+    for (index, source) in manifest.artifacts[1..].iter().enumerate() {
+        artifacts[index] = ArtifactSummary {
+            role: poole_boot_artifact::Role::ALL[index],
+            version: source.version,
+            path: OwnedPath::copy_from(source.path)?,
+            file_bytes: usize::try_from(source.file_bytes).map_err(|_| Error::ManifestBinding)?,
+            sha256: source.sha256,
+        };
     }
     Ok(ManifestSummary {
         byte_count: bytes.len(),
@@ -331,6 +423,7 @@ pub fn parse_manifest(bytes: &[u8], selected_slot: u8) -> Result<ManifestSummary
         kernel_file_bytes,
         kernel_image_bytes,
         kernel_sha256: kernel.sha256,
+        artifacts,
     })
 }
 
@@ -343,6 +436,44 @@ pub fn verify_manifest_kernel(manifest: &ManifestSummary, bytes: &[u8]) -> Resul
         return Err(Error::ManifestBinding);
     }
     Ok(digest)
+}
+
+pub fn verify_manifest_artifact(
+    artifact: &ArtifactSummary,
+    bytes: &[u8],
+) -> Result<[u8; 32], Error> {
+    if bytes.len() != artifact.file_bytes {
+        return Err(Error::ManifestBinding);
+    }
+    let digest = poole_manifest::sha256(bytes);
+    if digest != artifact.sha256 {
+        return Err(Error::ManifestBinding);
+    }
+    poole_boot_artifact::parse_bound(bytes, artifact.role, artifact.version)
+        .map_err(Error::Artifact)?;
+    Ok(digest)
+}
+
+pub fn load_manifest_artifact(
+    bytes: &[u8],
+    artifact: &ArtifactSummary,
+    destination: &mut [u8],
+) -> Result<LoadedArtifact, Error> {
+    verify_manifest_artifact(artifact, bytes)?;
+    let pages = page_count(bytes.len())?;
+    let allocated_bytes = pages
+        .checked_mul(poole_elf::PAGE_SIZE as usize)
+        .ok_or(Error::PageCount)?;
+    if destination.len() < allocated_bytes {
+        return Err(Error::PageCount);
+    }
+    destination[..allocated_bytes].fill(0);
+    destination[..bytes.len()].copy_from_slice(bytes);
+    Ok(LoadedArtifact {
+        page_count: pages,
+        file_size: bytes.len(),
+        loaded_fnv1a64: poole_elf::fnv1a64(&destination[..allocated_bytes]),
+    })
 }
 
 pub fn validate_image_plan(plan: &poole_elf::ImagePlan) -> Result<(), Error> {
@@ -468,9 +599,9 @@ mod tests {
     extern crate std;
 
     use super::*;
+    use std::fmt::Write as _;
 
     const CONFIG: &[u8] = b"POOLEOS-BOOTCFG/1.0\nentry_count=1\ndefault_entry=normal\ntimeout_ms=0\nboot_attempt_limit=3\nentry.normal.mode=normal\nentry.normal.slot=1\nentry.normal.manifest=\\EFI\\POOLEOS\\MANIFEST_A.PBM\nentry.normal.manifest_max_bytes=65536\nend=PBC1\n";
-    const MANIFEST: &[u8] = b"POOLEOS-SYSTEM-MANIFEST/1.0\nmanifest_id=PSM-CYCLE103-SLOT1\nslot=1\nmanifest_version=1\nminimum_secure_version=1\nartifact_count=1\nartifact.kernel.type=kernel\nartifact.kernel.format=PKELF1\nartifact.kernel.version=1\nartifact.kernel.path=\\EFI\\POOLEOS\\KERNEL.ELF\nartifact.kernel.file_bytes=3\nartifact.kernel.image_bytes=4096\nartifact.kernel.sha256=BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD\nartifact.kernel.entry_contract=PKENTRY1\nend=PSM1\n";
 
     fn file_info(file_size: u64, physical_size: u64, attributes: u64) -> [u8; 84] {
         let mut bytes = [0u8; 84];
@@ -480,6 +611,48 @@ mod tests {
         bytes[72..80].copy_from_slice(&attributes.to_le_bytes());
         bytes[80..82].copy_from_slice(&[b'X', 0]);
         bytes
+    }
+
+    fn artifact_bytes(role: poole_boot_artifact::Role) -> std::vec::Vec<u8> {
+        let payload = role.as_str().as_bytes();
+        let mut output = std::vec![0u8; poole_boot_artifact::HEADER_BYTES + payload.len()];
+        poole_boot_artifact::encode(role, 1, payload, &mut output)
+            .unwrap()
+            .to_vec()
+    }
+
+    fn digest_hex(bytes: &[u8]) -> std::string::String {
+        let mut value = std::string::String::new();
+        for byte in poole_manifest::sha256(bytes) {
+            write!(value, "{byte:02X}").unwrap();
+        }
+        value
+    }
+
+    fn profile_manifest() -> std::vec::Vec<u8> {
+        let definitions = [
+            ("b_initial_system", "initial_system", "INITIAL.PBA"),
+            ("c_recovery", "recovery", "RECOVERY.PBA"),
+            ("d_symbols", "symbols", "SYMBOLS.PBA"),
+            ("e_microcode", "microcode", "MICROCOD.PBA"),
+            ("f_firmware", "firmware", "FIRMWARE.PBA"),
+            ("g_policy", "policy", "POLICY.PBA"),
+        ];
+        let mut value = std::string::String::from(
+            "POOLEOS-SYSTEM-MANIFEST/1.0\nmanifest_id=PSM-CYCLE107-SLOT1\nslot=1\nmanifest_version=1\nminimum_secure_version=1\nartifact_count=7\nartifact.a_kernel.type=kernel\nartifact.a_kernel.format=PKELF1\nartifact.a_kernel.version=1\nartifact.a_kernel.path=\\EFI\\POOLEOS\\KERNEL.ELF\nartifact.a_kernel.file_bytes=3\nartifact.a_kernel.image_bytes=4096\nartifact.a_kernel.sha256=BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD\nartifact.a_kernel.entry_contract=PKENTRY1\n",
+        );
+        for (index, (id, kind, filename)) in definitions.iter().enumerate() {
+            let bytes = artifact_bytes(poole_boot_artifact::Role::ALL[index]);
+            write!(
+                value,
+                "artifact.{id}.type={kind}\nartifact.{id}.format=PBART1\nartifact.{id}.version=1\nartifact.{id}.path=\\EFI\\POOLEOS\\{filename}\nartifact.{id}.file_bytes={}\nartifact.{id}.image_bytes=0\nartifact.{id}.sha256={}\nartifact.{id}.entry_contract=none\n",
+                bytes.len(),
+                digest_hex(&bytes),
+            )
+            .unwrap();
+        }
+        value.push_str("end=PSM1\n");
+        value.into_bytes()
     }
 
     fn valid_plan() -> poole_elf::ImagePlan {
@@ -617,9 +790,10 @@ mod tests {
 
     #[test]
     fn manifest_summary_binds_slot_path_size_version_and_digest() {
-        let summary = parse_manifest(MANIFEST, 1).unwrap();
-        assert_eq!(summary.byte_count, MANIFEST.len());
-        assert_eq!(summary.artifact_count, 1);
+        let manifest = profile_manifest();
+        let summary = parse_manifest(&manifest, 1).unwrap();
+        assert_eq!(summary.byte_count, manifest.len());
+        assert_eq!(summary.artifact_count, PROFILE_ARTIFACT_COUNT);
         assert_eq!(summary.slot, 1);
         assert_eq!(summary.manifest_version, 1);
         assert_eq!(summary.minimum_secure_version, 1);
@@ -638,7 +812,61 @@ mod tests {
             verify_manifest_kernel(&summary, b"abd"),
             Err(Error::ManifestBinding)
         );
-        assert_eq!(parse_manifest(MANIFEST, 2), Err(Error::ManifestBinding));
+        for (index, artifact) in summary.artifacts.iter().enumerate() {
+            let bytes = artifact_bytes(poole_boot_artifact::Role::ALL[index]);
+            assert_eq!(
+                verify_manifest_artifact(artifact, &bytes),
+                Ok(artifact.sha256)
+            );
+        }
+        assert_eq!(parse_manifest(&manifest, 2), Err(Error::ManifestBinding));
+    }
+
+    #[test]
+    fn profile_manifest_rejects_missing_extra_and_substituted_roles() {
+        let manifest = profile_manifest();
+        let text = core::str::from_utf8(&manifest).unwrap();
+        assert_eq!(
+            parse_manifest(
+                text.replace("artifact_count=7", "artifact_count=6")
+                    .as_bytes(),
+                1
+            ),
+            Err(Error::Manifest(poole_manifest::Error::KeyOrder))
+        );
+        assert_eq!(
+            parse_manifest(
+                text.replace(
+                    "artifact.b_initial_system.type=initial_system",
+                    "artifact.b_initial_system.type=recovery"
+                )
+                .as_bytes(),
+                1,
+            ),
+            Err(Error::ManifestBinding)
+        );
+        assert_eq!(
+            parse_manifest(
+                text.replace("\\EFI\\POOLEOS\\POLICY.PBA", "\\EFI\\POOLEOS\\POLICY2.PBA")
+                    .as_bytes(),
+                1,
+            ),
+            Err(Error::ManifestBinding)
+        );
+    }
+
+    #[test]
+    fn artifact_load_copies_exact_bytes_and_zeroes_page_padding() {
+        let manifest = profile_manifest();
+        let summary = parse_manifest(&manifest, 1).unwrap();
+        let artifact = summary.artifacts[0];
+        let bytes = artifact_bytes(artifact.role);
+        let mut destination = std::vec![0xa5; poole_elf::PAGE_SIZE as usize];
+        let loaded = load_manifest_artifact(&bytes, &artifact, &mut destination).unwrap();
+        assert_eq!(loaded.page_count, 1);
+        assert_eq!(loaded.file_size, bytes.len());
+        assert_eq!(&destination[..bytes.len()], bytes);
+        assert!(destination[bytes.len()..].iter().all(|byte| *byte == 0));
     }
 
     #[test]

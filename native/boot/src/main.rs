@@ -579,6 +579,14 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
         kernel.freed_pool_count,
         kernel.loaded_fnv1a64
     ));
+    diagnostic(format_args!(
+        "POOLEBOOT/0.1 ARTIFACT_SET PASS contract={} count={} file_bytes={} pages={} roles=2-7 fnv1a64={:016X} retained=1 signatures=0 measured=0\n",
+        pooleboot::bootload::artifact::CONTRACT_ID,
+        kernel.artifacts.len(),
+        kernel.artifact_file_bytes,
+        kernel.artifact_page_count,
+        kernel.artifact_set_fnv1a64,
+    ));
     let gop = match gop_result {
         Ok(summary) => {
             diagnostic(format_args!(
@@ -614,11 +622,7 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
     ) {
         Ok(()) => unreachable!(),
         Err(failure) => {
-            if let Err(release_failure) = kload::release_kernel_pages(
-                boot_services,
-                kernel.kernel_physical_base,
-                kernel.page_count,
-            ) {
+            if let Err(release_failure) = kload::release_loaded_pages(boot_services, &kernel) {
                 return fail_detail(release_failure);
             }
             fail_exit_detail(failure)

@@ -22,12 +22,13 @@ EXIT_MARKER = re.compile(
 )
 BOUNDARY_MARKER = re.compile(
     r"^POOLEBOOT/0\.1 FIRMWARE_BOUNDARY PASS calls_after_exit=([0-9]+) "
-    r"kernel_pages=([0-9]+) table_pages=([0-9]+) stack_pages=([0-9]+) "
+    r"kernel_pages=([0-9]+) artifact_pages=([0-9]+) table_pages=([0-9]+) stack_pages=([0-9]+) "
     r"handoff_pages=([0-9]+)$"
 )
 DEVELOPMENT_BOUNDARY = (
     "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested "
-    "selection=manifest_digest_untrusted kernel=retained handoff=retained "
+    "selection=manifest_digest_untrusted artifacts=digest_verified_untrusted "
+    "semantics=not_applied kernel=retained handoff=retained "
     "mappings=retained entry=not_called exit_boot_services=called transfer=stopped"
 )
 STOP_MARKER = "POOLEBOOT/0.1 STOP BEFORE TRANSFER"
@@ -158,7 +159,8 @@ def validate_live_markers(
     values = [int(item) for item in boundary_match.groups()]
     _require(values[0] == 0, "firmware call followed successful ExitBootServices")
     _require(values[1] > 0, "kernel pages were not retained")
-    _require(values[2:] == [TABLE_PAGE_COUNT, STACK_PAGE_COUNT, HANDOFF_PAGE_COUNT], "retained page accounting diverges")
+    _require(values[2] > 0, "artifact pages were not retained")
+    _require(values[3:] == [TABLE_PAGE_COUNT, STACK_PAGE_COUNT, HANDOFF_PAGE_COUNT], "retained page accounting diverges")
     _require(development_boundary == DEVELOPMENT_BOUNDARY, "development claim boundary changed")
     _require(stop_marker == STOP_MARKER, "permanent pre-transfer stop marker is missing")
     return {
@@ -169,9 +171,10 @@ def validate_live_markers(
         "descriptor_count": descriptor_count,
         "firmware_calls_after_exit": 0,
         "kernel_page_count": values[1],
-        "table_page_count": values[2],
-        "stack_page_count": values[3],
-        "handoff_page_count": values[4],
+        "artifact_page_count": values[2],
+        "table_page_count": values[3],
+        "stack_page_count": values[4],
+        "handoff_page_count": values[5],
         "transfer_allowed": False,
         "stopped_before_transfer": True,
     }

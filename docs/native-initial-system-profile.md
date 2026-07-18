@@ -87,9 +87,9 @@ The bounded move qualifies only when all of the following pass:
 
 1. Rust `no_std` PBART1 parser tests and an independent Python parser agree on
    canonical, hostile, truncation, substitution, overflow, and digest cases.
-2. PooleBoot opens and closes all nine profile files, frees all nine temporary
-   pools, retains the kernel plus six PBART1 page ranges, and releases the full
-   transaction on every injected pre-exit failure.
+2. PooleBoot closes the root plus all nine opened file handles, frees all nine
+   temporary file pools, retains the kernel plus six PBART1 page ranges, and
+   releases the full transaction on every injected pre-exit failure.
 3. Independent media inspection binds all selected paths, bytes, sizes,
    versions, roles, digests, page counts, and final PBP1 records.
 4. Missing, duplicate, extra, reordered, path-substituted, role-substituted,
@@ -100,4 +100,3 @@ The bounded move qualifies only when all of the following pass:
 6. Claims remain explicitly false for signatures, trust, persistent rollback,
    artifact semantics, microcode application, kernel transfer, physical
    hardware, N5 completion, and production readiness.
-
