@@ -29,7 +29,7 @@
     "artifact_kind": {"const": "pooleos_native_kernel_map_contract"},
     "contract_id": {"const": "PKMAP2"},
     "selected_move_id": {"const": "N5-HANDOFF-001"},
-    "status_date": {"const": "2026-07-17"},
+    "status_date": {"const": "2026-07-18"},
     "status": {"const": "bounded_retained_kernel_stack_handoff_mapping_non_promoting"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},

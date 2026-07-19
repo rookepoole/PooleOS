@@ -642,7 +642,11 @@ pub(super) fn exit_and_stop(
             "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit={} kernel_pages={} artifact_pages={} table_pages={} stack_pages={} handoff_pages={}\n",
             lifecycle.firmware_calls_after_exit(),
             kernel.page_count,
-            kernel.artifact_page_count,
+            kernel
+                .artifacts
+                .iter()
+                .map(|artifact| artifact.page_count)
+                .sum::<usize>(),
             retained.summary.table_page_count,
             retained_plan.stack_page_count,
             retained_plan.handoff_page_count,

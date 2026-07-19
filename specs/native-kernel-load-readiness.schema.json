@@ -386,7 +386,7 @@
         "all_resources_released": {"const": false}
       }
     },
-    "negative_controls": {"type": "array", "minItems": 148, "maxItems": 148, "items": {"$ref": "#/$defs/control"}},
+    "negative_controls": {"type": "array", "minItems": 155, "maxItems": 155, "items": {"$ref": "#/$defs/control"}},
     "claims": {"type": "object", "minProperties": 104, "maxProperties": 104},
     "summary": {"type": "object"},
     "open_items": {"type": "array", "minItems": 8, "items": {"type": "string"}},

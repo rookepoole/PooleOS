@@ -6,7 +6,8 @@ use core::cmp::Ordering;
 use poole_handoff::{
     self as pbp1, ARTIFACT_ENTRY_BYTES, ARTIFACT_EXECUTABLE, ARTIFACT_FIRMWARE_MANIFEST,
     ARTIFACT_HASH_VERIFIED, ARTIFACT_INITIAL_SYSTEM, ARTIFACT_KERNEL, ARTIFACT_MICROCODE,
-    ARTIFACT_POLICY_BUNDLE, ARTIFACT_RECOVERY, ARTIFACT_SYMBOLS, BOOT_SERVICES_EXITED, CORE_BYTES,
+    ARTIFACT_POLICY_BUNDLE, ARTIFACT_RECOVERY, ARTIFACT_SYMBOLS, ARTIFACT_SYSTEM_MANIFEST,
+    ARTIFACT_TRUST_POLICY, ARTIFACT_TRUST_STATE, BOOT_SERVICES_EXITED, CORE_BYTES,
     DEVELOPMENT_MODE, Encoder, FRAMEBUFFER_BYTES, MEMORY_ACPI_NVS, MEMORY_ACPI_RECLAIMABLE,
     MEMORY_BOOT_RECLAIMABLE, MEMORY_ENTRY_BYTES, MEMORY_LOADER_RESERVED, MEMORY_MMIO,
     MEMORY_PERSISTENT, MEMORY_RESERVED, MEMORY_RUNTIME_CODE, MEMORY_RUNTIME_DATA, MEMORY_UNUSABLE,
@@ -22,7 +23,7 @@ pub const MAX_MEMORY_ENTRIES: usize = 16_384;
 pub const MAX_TRANSCRIPT_CHUNK_BYTES: usize = 64;
 pub const RETAINED_TABLE_PAGE_COUNT: u32 = 4;
 pub const RETAINED_STACK_PAGE_COUNT: u32 = 8;
-pub const PROFILE_ARTIFACT_COUNT: usize = 7;
+pub const PROFILE_ARTIFACT_COUNT: usize = 10;
 pub const PROFILE_ARTIFACT_ROLES: [u32; PROFILE_ARTIFACT_COUNT] = [
     ARTIFACT_KERNEL,
     ARTIFACT_INITIAL_SYSTEM,
@@ -31,6 +32,9 @@ pub const PROFILE_ARTIFACT_ROLES: [u32; PROFILE_ARTIFACT_COUNT] = [
     ARTIFACT_MICROCODE,
     ARTIFACT_FIRMWARE_MANIFEST,
     ARTIFACT_POLICY_BUNDLE,
+    ARTIFACT_SYSTEM_MANIFEST,
+    ARTIFACT_TRUST_POLICY,
+    ARTIFACT_TRUST_STATE,
 ];
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -337,7 +341,6 @@ fn validate_artifact_set(
             || artifact.physical_base == 0
             || !artifact.physical_base.is_multiple_of(pbp1::PAGE_BYTES)
             || artifact.physical_size == 0
-            || !artifact.physical_size.is_multiple_of(pbp1::PAGE_BYTES)
             || artifact
                 .physical_base
                 .checked_add(artifact.physical_size)
@@ -347,7 +350,8 @@ fn validate_artifact_set(
             return Err(Error::ArtifactSet);
         }
         if index == 0 {
-            if artifact.physical_base != kernel.physical_base
+            if !artifact.physical_size.is_multiple_of(pbp1::PAGE_BYTES)
+                || artifact.physical_base != kernel.physical_base
                 || artifact.physical_size != kernel.physical_size
                 || artifact.virtual_base != kernel.virtual_base
                 || artifact.virtual_size != kernel.virtual_size
@@ -809,13 +813,13 @@ mod tests {
 
     fn raw_map(stride: usize) -> std::vec::Vec<u8> {
         let mut value = descriptor(7, 0x0040_0000, 16, 8, stride);
-        value.extend(descriptor(2, 0x0020_0000, 38, 4, stride));
+        value.extend(descriptor(2, 0x0020_0000, 48, 4, stride));
         value.extend(descriptor(11, 0x8000_0000, 256, 1, stride));
         value
     }
 
     fn exit_raw_map(stride: usize) -> std::vec::Vec<u8> {
-        let mut value = descriptor(2, 0x0020_0000, 38, 4, stride);
+        let mut value = descriptor(2, 0x0020_0000, 48, 4, stride);
         value.extend(descriptor(2, 0x0030_0000, 4, 4, stride));
         value.extend(descriptor(2, 0x0040_0000, 8, 4, stride));
         value.extend(descriptor(2, 0x0050_0000, 256, 4, stride));
@@ -856,7 +860,7 @@ mod tests {
                 role: PROFILE_ARTIFACT_ROLES[index],
                 flags: ARTIFACT_HASH_VERIFIED,
                 physical_base: 0x0022_0000 + (index as u64 - 1) * pbp1::PAGE_BYTES,
-                physical_size: pbp1::PAGE_BYTES,
+                physical_size: 256 + index as u64,
                 virtual_base: 0,
                 virtual_size: 0,
                 entry_virtual: 0,

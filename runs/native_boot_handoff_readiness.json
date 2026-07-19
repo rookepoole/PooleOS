@@ -15,8 +15,8 @@
   "bindings": {
     "contract": {
       "path": "specs/native-boot-handoff-contract.json",
-      "sha256": "03CBD2E3E8D5EDCC2D9088ECE739A1AD0B8E1FBBA1F7625E70346527969B3EBD",
-      "byte_count": 16049
+      "sha256": "89EA7517EF7D2E30C7EBEC4C28D092E3F01D95519EC6768E7B4D5C0F586B58E7",
+      "byte_count": 16126
     },
     "contract_schema": {
       "path": "specs/native-boot-handoff-contract.schema.json",
@@ -46,8 +46,8 @@
       },
       {
         "path": "native/Cargo.lock",
-        "sha256": "88017EDF93CD2DBF5F298E612E9A50601FDCC657FF97CC841E08FBD8355090C6",
-        "byte_count": 4060
+        "sha256": "0E88ED49107E751E33C56A9992F36AA16BAA7EDD3E4A1CC296CC1BB814A3B5B5",
+        "byte_count": 4121
       },
       {
         "path": "native/handoff/Cargo.toml",
@@ -61,8 +61,8 @@
       },
       {
         "path": "native/handoff/src/lib.rs",
-        "sha256": "44A0F4E99A035F857EC17503656BE6ABD7C9DF928594FC5AA2C06374813C290E",
-        "byte_count": 48479
+        "sha256": "58421DA4B25DB172947DAF2A6AE5A08D2CAD57D51E8987BD9503E140878C3EA7",
+        "byte_count": 48608
       },
       {
         "path": "native/handoff/src/bin/pbp1_probe.rs",
@@ -71,8 +71,8 @@
       },
       {
         "path": "runtime/native_boot_handoff.py",
-        "sha256": "77B6102270FC1CCD13622C4785163F8CF91164952732FA45963DA70E48BF8372",
-        "byte_count": 47351
+        "sha256": "A670B9569840D6149040978AE1C8B1192F14FE1562F6496A007AD93EE023F419",
+        "byte_count": 47432
       },
       {
         "path": "tools/generate_native_boot_handoff_vectors.py",
@@ -91,8 +91,8 @@
       },
       {
         "path": "docs/native-boot-handoff.md",
-        "sha256": "7A2E19C0F2979E1C4C25C9B92A788EEDCAB9FA585D297CFFB68090D760F73245",
-        "byte_count": 8596
+        "sha256": "602454646CCBDCB6B36BBFD6779D3FBC54C0BBBA1F1FFA2A7618F208CB4C087B",
+        "byte_count": 8778
       }
     ]
   },
@@ -105,14 +105,14 @@
       {
         "target": "x86_64-unknown-uefi",
         "status": "pass",
-        "byte_count": 100608,
-        "sha256": "AE45B8559D019DFCB0B7B067BECC183505D4BC44121B8F33D38A2BB29A37D719"
+        "byte_count": 101068,
+        "sha256": "4A24A2FCA410781B0A87297ACF284D8F028080A71D3D7CFFA76A8EFC7DD02336"
       },
       {
         "target": "x86_64-unknown-none",
         "status": "pass",
-        "byte_count": 105614,
-        "sha256": "0B0A015794C8117FED6625DEA5A85AF16EE66C83B6FC3E070F9454929B7B1F63"
+        "byte_count": 106070,
+        "sha256": "971C448241CA9DA79EF41C84BFFB35BE766257FECF0406D864B23CA8BA41E5FB"
       }
     ],
     "layout_assertion_count": 12,

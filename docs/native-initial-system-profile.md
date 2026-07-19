@@ -2,7 +2,7 @@
 
 Status: candidate, unsigned, development-only, non-promoting  
 Profile move: `N5-INIT-SYSTEM-001`
-Current trust/state move: `N5-INNER-TRUST-STATE-001`
+Current transfer move: `N5-KERNEL-TRANSFER-001`
 Profile contract: `PBASET1`  
 Artifact envelope: `PBART1`  
 Manifest contract: `PSM1`  
@@ -16,8 +16,10 @@ continue. It does not authenticate a signer, establish persistent rollback
 state, apply microcode, execute firmware, enter recovery, consume symbols,
 enforce policy, execute the initial system, or authorize kernel transfer.
 
-The development profile contains exactly seven artifacts. PSM1 records use
-the following strict ASCII order; PBP1 records use the numeric role order.
+The PSM1 development profile contains exactly seven manifest artifacts. PSM1
+records use the following strict ASCII order; final PBP1 additionally retains
+PSM1, PBTP1, and PBTS1 as roles 9 through 11 after these seven roles. Role 8 is
+reserved for a crash kernel and remains absent.
 
 | PSM1 ID | PSM1 type | Format | Canonical path | PBP1 role |
 | --- | --- | --- | --- | ---: |
@@ -70,14 +72,15 @@ whole file, zeroes page padding, frees the temporary pool, and records the
 range. Any failure before `ExitBootServices` closes open handles, frees all
 temporary pools, and releases every page allocated by this load transaction.
 
-The final PBP1 loaded-artifacts record contains exactly roles 1 through 7 in
-strict order. The kernel entry has `HASH_VERIFIED | EXECUTABLE`; roles 2
-through 7 have only `HASH_VERIFIED`. Their physical ranges describe complete
-page allocations, their virtual range and entry fields are zero, and their
-SHA-256 values equal the corresponding PSM1 whole-file digests. All seven
-artifact ranges, the retained page tables, guarded stack, and handoff storage
-must be nonempty, page-aligned, pairwise nonoverlapping, and covered by
-loader-reserved entries in the final normalized memory map.
+The final PBP1 loaded-artifacts record contains roles 1 through 7 followed by
+roles 9 through 11 in strict order. The kernel entry has `HASH_VERIFIED |
+EXECUTABLE`; every non-kernel entry has only `HASH_VERIFIED`. Non-kernel
+`physical_size` is the exact file-byte count, not allocation padding. Their
+virtual range and entry fields are zero, and their SHA-256 values equal the
+corresponding exact file digests. All ten artifact allocations, retained page
+tables, guarded stack, and handoff storage must be nonempty, page-aligned,
+pairwise nonoverlapping after page rounding, and covered by loader-reserved
+entries in the final normalized memory map.
 
 No `SIGNATURE_VERIFIED` or `MEASURED` flag may be emitted in this profile.
 The PBP1 kernel-entry profile must continue to reject the handoff.
@@ -94,9 +97,10 @@ activation. The unsigned development profile must fail activation before any
 allocation, capability issuance, or instruction execution.
 
 PooleBoot reparses PINIT1 from the exact retained PBART1 pages and requires the
-development activation gate to fail at the missing outer signature. PooleKernel
-does not yet independently reparse or activate PINIT1. Authentication,
-capability creation, and lifecycle execution remain explicit later gates.
+development activation gate to fail at the missing outer signature. Cycle 117
+independently repeats the parse, route binding, and denial in host-executed
+PooleKernel code. Live kernel execution, authentication, capability creation,
+and lifecycle execution remain explicit later gates.
 
 ## PREC1 Inner Bundle
 
@@ -115,9 +119,10 @@ unsigned development context is denied before recovery authority or execution.
 
 PooleBoot reparses PREC1 from the exact retained PBART1 pages and requires the
 development recovery gate to fail at the missing outer signature, but it does
-not read or write PREC1 state. PooleKernel does not independently reparse the
-policy or execute recovery. No UEFI variable, disk, firmware, network, or
-device-changing operation follows from this qualification.
+not read or write PREC1 state. Cycle 117 independently repeats the policy parse
+and denial in host-executed PooleKernel code but does not execute recovery. No
+UEFI variable, disk, firmware, network, or device-changing operation follows
+from this qualification.
 
 ## PSYM1 Inner Bundle
 

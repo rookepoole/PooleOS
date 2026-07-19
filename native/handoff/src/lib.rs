@@ -72,6 +72,9 @@ pub const ARTIFACT_MICROCODE: u32 = 5;
 pub const ARTIFACT_FIRMWARE_MANIFEST: u32 = 6;
 pub const ARTIFACT_POLICY_BUNDLE: u32 = 7;
 pub const ARTIFACT_CRASH_KERNEL: u32 = 8;
+pub const ARTIFACT_SYSTEM_MANIFEST: u32 = 9;
+pub const ARTIFACT_TRUST_POLICY: u32 = 10;
+pub const ARTIFACT_TRUST_STATE: u32 = 11;
 pub const ARTIFACT_HASH_VERIFIED: u32 = 1 << 0;
 pub const ARTIFACT_SIGNATURE_VERIFIED: u32 = 1 << 1;
 pub const ARTIFACT_MEASURED: u32 = 1 << 2;
@@ -513,7 +516,7 @@ fn validate_artifacts(payload: &[u8], count: usize) -> Result<(), Error> {
         let entry = read_u64(payload, base + 40)?;
         let digest = &payload[base + 48..base + 80];
         if role == 0
-            || role > ARTIFACT_CRASH_KERNEL
+            || role > ARTIFACT_TRUST_STATE
             || role <= previous_role
             || flags & !KNOWN_ARTIFACT_FLAGS != 0
             || physical == 0

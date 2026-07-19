@@ -12,7 +12,7 @@ use core::panic::PanicInfo;
 use arch::x86_64::{Com1, halt_forever};
 use poolekernel::{
     BUILD_ID, ByteSink, EARLY_LOG_CAPACITY, EarlyLogger, EarlyRing, Framebuffer, PanicCode,
-    PanicDisposition, PanicState, validate_entry_envelope, validate_handoff,
+    PanicDisposition, PanicState, revalidation, validate_entry_envelope, validate_handoff,
 };
 
 #[used]
@@ -137,6 +137,12 @@ extern "C" fn poole_kernel_rust_entry(
         Ok(value) => value,
         Err(error) => poole_kernel_emergency_panic(error.panic_code() as u32),
     };
+    // SAFETY: PKENTRY1 requires every PBP1 retained-input range to remain
+    // immutable and identity-mapped until this independent revalidation ends.
+    let revalidated = match unsafe { revalidation::revalidate_development_from_handoff(handoff) } {
+        Ok(value) => value,
+        Err(_) => poole_kernel_emergency_panic(PanicCode::TrustRevalidation as u32),
+    };
 
     {
         let mut logger = EarlyLogger::new(BootSink {
@@ -147,6 +153,12 @@ extern "C" fn poole_kernel_rust_entry(
         logger.write_hex_u64(runtime_entry);
         logger.write_str("\nIMAGE-BYTES:");
         logger.write_decimal_u64(validated.core.kernel_virtual_size);
+        logger.write_str("\nREVALIDATION:");
+        logger.write_str(revalidation::CONTRACT_ID);
+        logger.write_str("\nRETAINED-FILES:");
+        logger.write_decimal_u64(u64::from(revalidated.retained_file_count));
+        logger.write_str("\nAUTHORITY-GRANTS:");
+        logger.write_decimal_u64(u64::from(revalidated.authority_grants));
         logger.write_str("\n");
     }
 

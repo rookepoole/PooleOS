@@ -78,6 +78,8 @@ def _product_flags() -> list[str]:
         "-Clink-arg=--gc-sections",
         f"-Clink-arg=-T{linker_script}",
         "-Clink-arg=--entry=poole_kernel_entry",
+        f"--remap-path-prefix={ROOT.resolve()}=/pooleos",
+        "-Cdwarf-version=5",
     ]
 
 
@@ -85,6 +87,8 @@ def _product_environment(base: dict[str, str]) -> dict[str, str]:
     env = dict(base)
     env.pop("RUSTFLAGS", None)
     env["CARGO_ENCODED_RUSTFLAGS"] = "\x1f".join(_product_flags())
+    env["CARGO_PROFILE_RELEASE_DEBUG"] = "2"
+    env["CARGO_PROFILE_RELEASE_STRIP"] = "none"
     return env
 
 
@@ -272,9 +276,9 @@ def _linked_negative_controls(
             ("NEG-N6-KENTRY-LINKED-PHDR-PADDR", _set(linked, _phdr(0, 24), "<Q", 0), "phdr_segment"),
             ("NEG-N6-KENTRY-LINKED-RO-FLAGS", _set(linked, _phdr(1, 4), "<I", 6), "load_flags"),
             ("NEG-N6-KENTRY-LINKED-RO-PADDR", _set(linked, _phdr(1, 24), "<Q", 1), "load_geometry"),
-            ("NEG-N6-KENTRY-LINKED-TEXT-OFFSET", _set(linked, _phdr(2, 8), "<Q", 0x4001), "load_geometry"),
+            ("NEG-N6-KENTRY-LINKED-TEXT-OFFSET", _set(linked, _phdr(2, 8), "<Q", 0x8001), "load_geometry"),
             ("NEG-N6-KENTRY-LINKED-DATA-FILESZ", _set(linked, _phdr(3, 32), "<Q", 0), "load_geometry"),
-            ("NEG-N6-KENTRY-LINKED-LOAD-LAYOUT", _set(linked, _phdr(1, 40), "<Q", 0x5000), "load_layout"),
+            ("NEG-N6-KENTRY-LINKED-LOAD-LAYOUT", _set(linked, _phdr(1, 40), "<Q", 0x9000), "load_layout"),
             ("NEG-N6-KENTRY-LINKED-ENTRY-RANGE", _set(linked, 24, "<Q", 0), "entry_range"),
             ("NEG-N6-KENTRY-LINKED-ENTRY-PREFIX", _set_byte(linked, plan.entry_offset, 0x90), "entry_prefix"),
             ("NEG-N6-KENTRY-LINKED-DYNAMIC-FLAGS", _set(linked, _phdr(4, 4), "<I", 4), "source_dynamic_segment"),
@@ -356,7 +360,7 @@ def _manifest_lines() -> list[str]:
 def _validate_manifest(contract: dict[str, Any]) -> dict[str, str]:
     expected = {
         "entry_contract": entry.CONTRACT_ID,
-        "entry_offset": "0x00004000",
+        "entry_offset": "0x00008000",
         "image_contract": elf.CONTRACT_ID,
         "handoff_contract": "PBP1",
         "build_id": contract["product"]["build_id"],

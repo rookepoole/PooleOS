@@ -15,6 +15,10 @@ const EFI_LOADED_IMAGE_PROTOCOL_REVISION: u32 = 0x1000;
 const EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_REVISION: u64 = 0x0001_0000;
 const EFI_FILE_PROTOCOL_REVISION: u64 = 0x0001_0000;
 const EFI_FILE_PROTOCOL_REVISION2: u64 = 0x0002_0000;
+pub(super) const RETAINED_INPUT_COUNT: usize = bootload::AUXILIARY_ARTIFACT_COUNT + 3;
+const MANIFEST_INPUT_INDEX: usize = bootload::AUXILIARY_ARTIFACT_COUNT;
+const TRUST_POLICY_INPUT_INDEX: usize = MANIFEST_INPUT_INDEX + 1;
+const TRUST_STATE_INPUT_INDEX: usize = MANIFEST_INPUT_INDEX + 2;
 
 const LOADED_IMAGE_GUID: EfiGuid = EfiGuid {
     data1: 0x5b1b_31a1,
@@ -134,7 +138,7 @@ pub(super) struct Summary {
     pub kernel_virtual_base: u64,
     pub kernel_entry_virtual: u64,
     pub kernel_sha256: [u8; 32],
-    pub artifacts: [LoadedArtifactSummary; bootload::AUXILIARY_ARTIFACT_COUNT],
+    pub artifacts: [LoadedArtifactSummary; RETAINED_INPUT_COUNT],
     pub artifact_file_bytes: usize,
     pub artifact_page_count: usize,
     pub artifact_set_fnv1a64: u64,
@@ -146,7 +150,7 @@ pub(super) struct Summary {
 
 #[derive(Clone, Copy)]
 pub(super) struct LoadedArtifactSummary {
-    pub role: bootload::artifact::Role,
+    pub role: u32,
     pub physical_base: u64,
     pub page_count: usize,
     pub file_bytes: usize,
@@ -156,7 +160,7 @@ pub(super) struct LoadedArtifactSummary {
 
 impl LoadedArtifactSummary {
     const EMPTY: Self = Self {
-        role: bootload::artifact::Role::InitialSystem,
+        role: 0,
         physical_base: 0,
         page_count: 0,
         file_bytes: 0,
@@ -198,16 +202,20 @@ fn trust_failure(error: poole_boot_trust::Error) -> Failure {
 }
 
 fn validate_retained_inner_set(
-    artifacts: &[LoadedArtifactSummary; bootload::AUXILIARY_ARTIFACT_COUNT],
+    artifacts: &[LoadedArtifactSummary; RETAINED_INPUT_COUNT],
 ) -> Result<poole_inner_live::Summary, Failure> {
     let mut files: [&[u8]; poole_inner_live::ARTIFACT_COUNT] = [&[]; 6];
-    for (index, artifact) in artifacts.iter().enumerate() {
+    for (index, artifact) in artifacts
+        .iter()
+        .take(bootload::AUXILIARY_ARTIFACT_COUNT)
+        .enumerate()
+    {
         let expected_role = bootload::artifact::Role::ALL[index];
         let allocation_bytes = artifact
             .page_count
             .checked_mul(bootload::elf::PAGE_SIZE as usize)
             .ok_or_else(|| contract_failure("inner.retained.shape", bootload::Error::PageCount))?;
-        if artifact.role != expected_role
+        if artifact.role != expected_role.code()
             || artifact.physical_base == 0
             || artifact.physical_base > usize::MAX as u64
             || artifact.file_bytes == 0
@@ -256,6 +264,54 @@ fn free_pool(calls: Calls, pointer: *mut c_void, stage: &'static str) -> Result<
     } else {
         Err(firmware_failure(stage, status))
     }
+}
+
+fn retain_pool_file(
+    calls: Calls,
+    file: &PoolFile,
+    role: u32,
+    stage: &'static str,
+) -> Result<LoadedArtifactSummary, Failure> {
+    let page_count =
+        bootload::page_count(file.byte_count).map_err(|error| contract_failure(stage, error))?;
+    let allocation_bytes = page_count
+        .checked_mul(bootload::elf::PAGE_SIZE as usize)
+        .ok_or_else(|| contract_failure(stage, bootload::Error::PageCount))?;
+    let mut physical_base = 0u64;
+    let status = (calls.allocate_pages)(
+        EFI_ALLOCATE_ANY_PAGES,
+        EFI_LOADER_DATA,
+        page_count,
+        &mut physical_base,
+    );
+    if status != EFI_SUCCESS {
+        return Err(firmware_failure(stage, status));
+    }
+    if physical_base == 0
+        || physical_base > usize::MAX as u64
+        || !physical_base.is_multiple_of(bootload::elf::PAGE_SIZE)
+    {
+        let cleanup_status = (calls.free_pages)(physical_base, page_count);
+        return Err(if cleanup_status != EFI_SUCCESS {
+            firmware_failure("kload.retained_input.pages_cleanup", cleanup_status)
+        } else {
+            contract_failure(stage, bootload::Error::AddressRange)
+        });
+    }
+    let source = unsafe { from_raw_parts(file.pointer.cast::<u8>(), file.byte_count) };
+    let destination =
+        unsafe { from_raw_parts_mut(physical_base as usize as *mut u8, allocation_bytes) };
+    destination.fill(0);
+    destination[..source.len()].copy_from_slice(source);
+    let retained = &destination[..source.len()];
+    Ok(LoadedArtifactSummary {
+        role,
+        physical_base,
+        page_count,
+        file_bytes: retained.len(),
+        sha256: poole_boot_trust::sha256(retained),
+        loaded_fnv1a64: fnv1a64_extend(0xcbf2_9ce4_8422_2325, retained),
+    })
 }
 
 fn cleanup_file_failure(
@@ -426,7 +482,7 @@ fn release_loaded_page_ranges(
     calls: Calls,
     kernel_physical_base: u64,
     kernel_page_count: usize,
-    artifacts: &[LoadedArtifactSummary; bootload::AUXILIARY_ARTIFACT_COUNT],
+    artifacts: &[LoadedArtifactSummary; RETAINED_INPUT_COUNT],
 ) -> Result<(), Failure> {
     let mut failure = None;
     for artifact in artifacts.iter().rev() {
@@ -451,7 +507,7 @@ fn cleanup_loaded_transaction(
     calls: Calls,
     kernel_physical_base: u64,
     kernel_page_count: usize,
-    artifacts: &[LoadedArtifactSummary; bootload::AUXILIARY_ARTIFACT_COUNT],
+    artifacts: &[LoadedArtifactSummary; RETAINED_INPUT_COUNT],
     pool: *mut c_void,
     root: *mut EfiFileProtocol,
 ) -> Result<(), Failure> {
@@ -474,7 +530,7 @@ fn transaction_failure(
     calls: Calls,
     kernel_physical_base: u64,
     kernel_page_count: usize,
-    artifacts: &[LoadedArtifactSummary; bootload::AUXILIARY_ARTIFACT_COUNT],
+    artifacts: &[LoadedArtifactSummary; RETAINED_INPUT_COUNT],
     pool: *mut c_void,
     root: *mut EfiFileProtocol,
     primary: Failure,
@@ -615,6 +671,8 @@ pub(super) fn load_manifest_kernel(
         return Err(close_root_with_failure(root, failure));
     }
 
+    let mut artifacts = [LoadedArtifactSummary::EMPTY; RETAINED_INPUT_COUNT];
+
     let manifest_file = match read_file(
         calls,
         root,
@@ -651,8 +709,52 @@ pub(super) fn load_manifest_kernel(
             ));
         }
     };
+    artifacts[MANIFEST_INPUT_INDEX] = match retain_pool_file(
+        calls,
+        &manifest_file,
+        poole_handoff::ARTIFACT_SYSTEM_MANIFEST,
+        "kload.manifest.pages_retain",
+    ) {
+        Ok(value) => value,
+        Err(failure) => {
+            return Err(free_pool_and_close_root(
+                calls,
+                manifest_file.pointer,
+                root,
+                failure,
+            ));
+        }
+    };
+    let retained_manifest_bytes = unsafe {
+        from_raw_parts(
+            artifacts[MANIFEST_INPUT_INDEX].physical_base as usize as *const u8,
+            artifacts[MANIFEST_INPUT_INDEX].file_bytes,
+        )
+    };
+    if bootload::parse_manifest(retained_manifest_bytes, config.selected_slot) != Ok(manifest) {
+        return Err(transaction_failure(
+            calls,
+            0,
+            0,
+            &artifacts,
+            manifest_file.pointer,
+            root,
+            contract_failure(
+                "kload.manifest.retained_reparse",
+                bootload::Error::ManifestBinding,
+            ),
+        ));
+    }
     if let Err(failure) = free_pool(calls, manifest_file.pointer, "kload.manifest.pool_free") {
-        return Err(close_root_with_failure(root, failure));
+        return Err(transaction_failure(
+            calls,
+            0,
+            0,
+            &artifacts,
+            null_mut(),
+            root,
+            failure,
+        ));
     }
 
     let kernel_file = match read_file(
@@ -665,22 +767,34 @@ pub(super) fn load_manifest_kernel(
         "kload.kernel.read",
     ) {
         Ok(file) => file,
-        Err(failure) => return Err(close_root_with_failure(root, failure)),
+        Err(failure) => {
+            return Err(transaction_failure(
+                calls,
+                0,
+                0,
+                &artifacts,
+                null_mut(),
+                root,
+                failure,
+            ));
+        }
     };
     let kernel_bytes =
         unsafe { from_raw_parts(kernel_file.pointer.cast::<u8>(), kernel_file.byte_count) };
     let allocation = match bootload::plan_manifest_kernel(kernel_bytes, &manifest) {
         Ok(plan) => plan,
         Err(error) => {
-            return Err(free_pool_and_close_root(
+            return Err(transaction_failure(
                 calls,
+                0,
+                0,
+                &artifacts,
                 kernel_file.pointer,
                 root,
                 contract_failure("kload.kernel.plan", error),
             ));
         }
     };
-    let mut artifacts = [LoadedArtifactSummary::EMPTY; bootload::AUXILIARY_ARTIFACT_COUNT];
     let mut physical_base = 0u64;
     let allocate_status = (calls.allocate_pages)(
         EFI_ALLOCATE_ANY_PAGES,
@@ -689,8 +803,11 @@ pub(super) fn load_manifest_kernel(
         &mut physical_base,
     );
     if allocate_status != EFI_SUCCESS {
-        return Err(free_pool_and_close_root(
+        return Err(transaction_failure(
             calls,
+            0,
+            0,
+            &artifacts,
             kernel_file.pointer,
             root,
             firmware_failure("kload.kernel.pages_allocate", allocate_status),
@@ -848,7 +965,7 @@ pub(super) fn load_manifest_kernel(
             ));
         }
         artifacts[index] = LoadedArtifactSummary {
-            role: manifest_artifact.role,
+            role: manifest_artifact.role.code(),
             physical_base: artifact_physical_base,
             page_count: artifact_pages,
             file_bytes: artifact_file.byte_count,
@@ -1067,16 +1184,60 @@ pub(super) fn load_manifest_kernel(
             ));
         }
     };
+    artifacts[TRUST_POLICY_INPUT_INDEX] = match retain_pool_file(
+        calls,
+        &trust_policy_file,
+        poole_handoff::ARTIFACT_TRUST_POLICY,
+        "trust.policy.pages_retain",
+    ) {
+        Ok(value) => value,
+        Err(failure) => {
+            let primary = free_pool(calls, trust_state_file.pointer, "trust.state.pool_cleanup")
+                .err()
+                .unwrap_or(failure);
+            return Err(transaction_failure(
+                calls,
+                physical_base,
+                allocation.page_count,
+                &artifacts,
+                trust_policy_file.pointer,
+                root,
+                primary,
+            ));
+        }
+    };
+    artifacts[TRUST_STATE_INPUT_INDEX] = match retain_pool_file(
+        calls,
+        &trust_state_file,
+        poole_handoff::ARTIFACT_TRUST_STATE,
+        "trust.state.pages_retain",
+    ) {
+        Ok(value) => value,
+        Err(failure) => {
+            let primary = free_pool(calls, trust_state_file.pointer, "trust.state.pool_cleanup")
+                .err()
+                .unwrap_or(failure);
+            return Err(transaction_failure(
+                calls,
+                physical_base,
+                allocation.page_count,
+                &artifacts,
+                trust_policy_file.pointer,
+                root,
+                primary,
+            ));
+        }
+    };
     let trust_policy_bytes = unsafe {
         from_raw_parts(
-            trust_policy_file.pointer.cast::<u8>(),
-            trust_policy_file.byte_count,
+            artifacts[TRUST_POLICY_INPUT_INDEX].physical_base as usize as *const u8,
+            artifacts[TRUST_POLICY_INPUT_INDEX].file_bytes,
         )
     };
     let trust_state_bytes = unsafe {
         from_raw_parts(
-            trust_state_file.pointer.cast::<u8>(),
-            trust_state_file.byte_count,
+            artifacts[TRUST_STATE_INPUT_INDEX].physical_base as usize as *const u8,
+            artifacts[TRUST_STATE_INPUT_INDEX].file_bytes,
         )
     };
     let trust_observed = poole_boot_trust::ObservedBoot {
@@ -1095,44 +1256,29 @@ pub(super) fn load_manifest_kernel(
     ) {
         Ok(summary) => summary,
         Err(error) => {
-            let state_result =
-                free_pool(calls, trust_state_file.pointer, "trust.state.pool_cleanup");
-            let policy_result = free_pool(
-                calls,
-                trust_policy_file.pointer,
-                "trust.policy.pool_cleanup",
-            );
-            let primary = state_result
+            let primary = free_pool(calls, trust_state_file.pointer, "trust.state.pool_cleanup")
                 .err()
-                .or_else(|| policy_result.err())
                 .unwrap_or_else(|| trust_failure(error));
             return Err(transaction_failure(
                 calls,
                 physical_base,
                 allocation.page_count,
                 &artifacts,
-                null_mut(),
+                trust_policy_file.pointer,
                 root,
                 primary,
             ));
         }
     };
     if let Err(failure) = free_pool(calls, trust_state_file.pointer, "trust.state.pool_free") {
-        let primary = free_pool(
-            calls,
-            trust_policy_file.pointer,
-            "trust.policy.pool_cleanup",
-        )
-        .err()
-        .unwrap_or(failure);
         return Err(transaction_failure(
             calls,
             physical_base,
             allocation.page_count,
             &artifacts,
-            null_mut(),
+            trust_policy_file.pointer,
             root,
-            primary,
+            failure,
         ));
     }
     if let Err(failure) = free_pool(calls, trust_policy_file.pointer, "trust.policy.pool_free") {

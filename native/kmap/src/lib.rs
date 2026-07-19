@@ -10,11 +10,11 @@ pub const MAX_MAPPINGS: usize = 8;
 pub const WINDOW_BYTES: u64 = 2 * 1024 * 1024;
 pub const MIN_VIRTUAL_BASE: u64 = 0xffff_ffff_8000_0000;
 pub const MAX_VIRTUAL_EXCLUSIVE: u64 = 0xffff_ffff_c000_0000;
-pub const STACK_GUARD_LOW_PAGE: usize = 48;
-pub const STACK_FIRST_PAGE: usize = 49;
+pub const STACK_GUARD_LOW_PAGE: usize = 64;
+pub const STACK_FIRST_PAGE: usize = 65;
 pub const STACK_PAGE_COUNT: usize = 8;
-pub const STACK_GUARD_HIGH_PAGE: usize = 57;
-pub const HANDOFF_FIRST_PAGE: usize = 64;
+pub const STACK_GUARD_HIGH_PAGE: usize = 73;
+pub const HANDOFF_FIRST_PAGE: usize = 80;
 pub const HANDOFF_PAGE_COUNT: usize = 256;
 pub const HANDOFF_CAPACITY_BYTES: u64 = HANDOFF_PAGE_COUNT as u64 * PAGE_SIZE;
 
@@ -1309,30 +1309,30 @@ mod tests {
         let mut mappings = [Mapping::EMPTY; MAX_MAPPINGS];
         mappings[0] = Mapping {
             virtual_offset: 0,
-            byte_count: 0x4000,
+            byte_count: 0x8000,
             permissions: Permissions::READ,
         };
         mappings[1] = Mapping {
-            virtual_offset: 0x4000,
-            byte_count: 0x1c000,
+            virtual_offset: 0x8000,
+            byte_count: 0x20000,
             permissions: Permissions::READ_EXECUTE,
         };
         mappings[2] = Mapping {
-            virtual_offset: 0x20000,
-            byte_count: 0x2000,
+            virtual_offset: 0x28000,
+            byte_count: 0x4000,
             permissions: Permissions::READ,
         };
         mappings[3] = Mapping {
-            virtual_offset: 0x22000,
-            byte_count: 0xe000,
+            virtual_offset: 0x2c000,
+            byte_count: 0x14000,
             permissions: Permissions::READ_WRITE,
         };
         Request {
             physical_base: PHYSICAL,
             virtual_base: VIRTUAL,
-            image_bytes: 0x30000,
-            page_count: 48,
-            entry_virtual: VIRTUAL + 0x4000,
+            image_bytes: 0x40000,
+            page_count: 64,
+            entry_virtual: VIRTUAL + 0x8000,
             mapping_count: 4,
             mappings,
             physical_address_bits: 48,
@@ -1393,17 +1393,17 @@ mod tests {
         assert_eq!(summary.pdpt_index, 510);
         assert_eq!(summary.page_directory_index, 0);
         assert_eq!(summary.first_page_table_index, 0);
-        assert_eq!(summary.mapped_page_count, 48);
-        assert_eq!(summary.read_only_page_count, 6);
-        assert_eq!(summary.read_execute_page_count, 28);
-        assert_eq!(summary.read_write_page_count, 14);
+        assert_eq!(summary.mapped_page_count, 64);
+        assert_eq!(summary.read_only_page_count, 12);
+        assert_eq!(summary.read_execute_page_count, 32);
+        assert_eq!(summary.read_write_page_count, 20);
         assert_eq!(summary.writable_executable_page_count, 0);
         assert_eq!(root[511], addresses().pdpt | PARENT_FLAGS);
         assert_eq!(table[0], PHYSICAL | ENTRY_PRESENT | ENTRY_NO_EXECUTE);
-        assert_eq!(table[4], (PHYSICAL + 4 * PAGE_SIZE) | ENTRY_PRESENT);
+        assert_eq!(table[8], (PHYSICAL + 8 * PAGE_SIZE) | ENTRY_PRESENT);
         assert_eq!(
-            table[47],
-            (PHYSICAL + 47 * PAGE_SIZE) | ENTRY_PRESENT | ENTRY_WRITABLE | ENTRY_NO_EXECUTE
+            table[63],
+            (PHYSICAL + 63 * PAGE_SIZE) | ENTRY_PRESENT | ENTRY_WRITABLE | ENTRY_NO_EXECUTE
         );
     }
 
@@ -1428,7 +1428,7 @@ mod tests {
         assert_eq!(summary.stack_page_count, STACK_PAGE_COUNT as u32);
         assert_eq!(summary.handoff_page_count, HANDOFF_PAGE_COUNT as u32);
         assert_eq!(summary.guard_page_count, 2);
-        assert_eq!(summary.total_mapped_page_count, 312);
+        assert_eq!(summary.total_mapped_page_count, 328);
         assert_eq!(table[STACK_GUARD_LOW_PAGE], 0);
         assert_eq!(table[STACK_GUARD_HIGH_PAGE], 0);
         assert_eq!(
@@ -1525,7 +1525,7 @@ mod tests {
             Err(Error::WritableExecutable)
         );
         let mut value = request();
-        value.entry_virtual = VIRTUAL + 0x20000;
+        value.entry_virtual = VIRTUAL + 0x28000;
         assert_eq!(request_summary(&value, addresses()), Err(Error::EntryPoint));
     }
 
@@ -1667,11 +1667,11 @@ mod tests {
         let text = translate(
             &reader,
             addresses().candidate_root,
-            VIRTUAL + 4 * PAGE_SIZE,
+            VIRTUAL + 8 * PAGE_SIZE,
             48,
         )
         .unwrap();
-        assert_eq!(text.physical_address, PHYSICAL + 4 * PAGE_SIZE);
+        assert_eq!(text.physical_address, PHYSICAL + 8 * PAGE_SIZE);
         assert!(text.executable);
         assert!(!text.writable);
         assert!(!text.user);

@@ -154,8 +154,10 @@ frees both candidate pools, emits one `TRUST_STATE DENY` marker with zero
 signatures, authority grants, and state writes, and continues to its permanent
 pre-transfer stop.
 
-This is fail-closed parser and binding evidence. PooleKernel does not yet reparse
-PBTRUST1, consume it, create capabilities from it, or enter the kernel.
+This is fail-closed parser and binding evidence. Cycle 117 independently
+reparses PBTP1 and PBTS1 and reconstructs exact unsigned-policy denial in
+host-executed PooleKernel code. The live caller still stops before entry, so
+PooleKernel does not consume authenticated state or create capabilities.
 
 ## Qualification
 

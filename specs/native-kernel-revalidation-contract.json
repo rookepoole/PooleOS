@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_kernel_revalidation_contract",
+  "contract_id": "PKREVAL1",
+  "selected_move_id": "N5-INNER-KERNEL-REVALIDATE-001",
+  "status_date": "2026-07-18",
+  "status": "candidate_exact_retained_byte_fail_closed",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "phase_mapping": ["N5.1", "N5.4", "N5.5", "N5.8", "N5.9", "N6.4"],
+  "source_requirement_ids": ["ADD-BOOT-011", "ADD-BOOT-012"],
+  "handoff_profile": {
+    "container": "PBP1",
+    "record": "loaded_artifacts",
+    "record_type": 5,
+    "profile_role_count": 10,
+    "retained_file_count": 9,
+    "roles": [
+      {"code": 1, "name": "kernel", "exact_file_reparse": false},
+      {"code": 2, "name": "initial_system_pbart1", "exact_file_reparse": true},
+      {"code": 3, "name": "recovery_pbart1", "exact_file_reparse": true},
+      {"code": 4, "name": "symbols_pbart1", "exact_file_reparse": true},
+      {"code": 5, "name": "microcode_pbart1", "exact_file_reparse": true},
+      {"code": 6, "name": "firmware_manifest_pbart1", "exact_file_reparse": true},
+      {"code": 7, "name": "policy_bundle_pbart1", "exact_file_reparse": true},
+      {"code": 9, "name": "system_manifest_psm1", "exact_file_reparse": true},
+      {"code": 10, "name": "trust_policy_pbtp1", "exact_file_reparse": true},
+      {"code": 11, "name": "trust_state_pbts1", "exact_file_reparse": true}
+    ],
+    "physical_base_rule": "page-aligned immutable identity-mapped retained range",
+    "non_kernel_size_rule": "exact file bytes, never allocation padding",
+    "digest_rule": "SHA-256 over the exact retained file bytes",
+    "loader_summary_is_authority": false
+  },
+  "producer_order": [
+    "parse source file under its bounded format",
+    "allocate final EFI_LOADER_DATA pages",
+    "zero allocation padding",
+    "copy exact bytes into final retained pages",
+    "reparse and cross-bind from the final retained pages",
+    "release the source pool",
+    "bind exact role, physical base, file length, and SHA-256 into PBP1",
+    "prove final-map coverage and identity translation before ExitBootServices"
+  ],
+  "kernel_order": [
+    "decode PBP1 and require successful ExitBootServices",
+    "require the exact ten-role profile and bounded flags",
+    "reject invalid, overflowing, or overlapping physical ranges",
+    "form slices only after the complete locator and size profile passes",
+    "match each exact slice to its PBP1 role, physical base, length, and digest",
+    "parse exact PSM1 and bind slot, kernel digest, image size, six roles, lengths, and digests",
+    "parse all six exact PBART1 envelopes and six inner contracts",
+    "reconstruct the retained-set digest",
+    "parse exact PBTP1 and PBTS1 and reconstruct all PBTRUST1 observations",
+    "require the exact pbtrust_policy_unsigned denial and zero authority, actions, and state writes"
+  ],
+  "authority_gate": {
+    "capability_creation_before_success": false,
+    "lifecycle_action_before_success": false,
+    "recovery_action_before_success": false,
+    "symbol_consumption_before_success": false,
+    "microcode_or_firmware_action_before_success": false,
+    "policy_or_state_write_before_success": false,
+    "development_result": "deny_pbtrust_policy_unsigned",
+    "authority_grants": 0,
+    "actions_authorized": 0,
+    "state_writes": 0
+  },
+  "qualification": {
+    "rust_host_test_count": 13,
+    "python_unit_test_count": 8,
+    "golden_cross_language_cases": 1,
+    "negative_control_count": 36,
+    "differential_mutation_cases": 32768,
+    "retained_role_coverage": 9,
+    "target_builds": ["x86_64-unknown-none", "x86_64-unknown-uefi"]
+  },
+  "claims": {
+    "allocation_free_no_std_kernel_verifier": true,
+    "exact_final_page_bytes_reparsed": true,
+    "psm1_reparsed_in_kernel": true,
+    "six_pbart1_files_reparsed_in_kernel": true,
+    "six_inner_contracts_reparsed_in_kernel": true,
+    "pbtp1_and_pbts1_reparsed_in_kernel": true,
+    "loader_summary_substitution_rejected": true,
+    "post_loader_byte_mutation_rejected": true,
+    "development_authority_denied": true,
+    "live_kernel_entry_executed": false,
+    "authenticated_persistent_state_selected": false,
+    "production_ready": false
+  },
+  "non_claims": [
+    "No private key was generated or used and no signature was created or verified by PKREVAL1.",
+    "The retained PBTS1 file remains an ESP development candidate, not selected PBSTATE1 persistent authority.",
+    "PooleBoot still stops before transfer, so QEMU evidence proves the producer and handoff bytes but not PooleKernel execution.",
+    "No capability, lifecycle, recovery, symbol, microcode, firmware, policy, or state-write authority is granted.",
+    "No target firmware, physical hardware, second builder, signed release, ISO, installer, or production promotion is claimed."
+  ]
+}

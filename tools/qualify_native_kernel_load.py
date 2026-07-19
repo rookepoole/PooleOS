@@ -963,6 +963,27 @@ def _negative_controls(
     artifact_omission_pbp1 = _mutated_pbp1(pbp1_data, artifact_omission=True)
     artifact_overlap_pbp1 = _mutated_pbp1(pbp1_data, artifact_overlap=True)
     artifact_signature_pbp1 = _mutated_pbp1(pbp1_data, artifact_signature=True)
+    manifest_index = native_live_boot_handoff.PROFILE_ARTIFACT_ROLES.index(
+        native_boot_handoff.ARTIFACT_SYSTEM_MANIFEST
+    )
+    policy_index = native_live_boot_handoff.PROFILE_ARTIFACT_ROLES.index(
+        native_boot_handoff.ARTIFACT_TRUST_POLICY
+    )
+    state_index = native_live_boot_handoff.PROFILE_ARTIFACT_ROLES.index(
+        native_boot_handoff.ARTIFACT_TRUST_STATE
+    )
+    manifest_size_summary = copy.deepcopy(pbp1_transcript)
+    manifest_size_summary["artifacts"][manifest_index]["physical_size"] += 1
+    manifest_digest_summary = copy.deepcopy(pbp1_transcript)
+    manifest_digest_summary["artifacts"][manifest_index]["sha256"] = "0" * 64
+    policy_size_summary = copy.deepcopy(pbp1_transcript)
+    policy_size_summary["artifacts"][policy_index]["physical_size"] += 1
+    policy_digest_summary = copy.deepcopy(pbp1_transcript)
+    policy_digest_summary["artifacts"][policy_index]["sha256"] = "0" * 64
+    state_size_summary = copy.deepcopy(pbp1_transcript)
+    state_size_summary["artifacts"][state_index]["physical_size"] += 1
+    state_digest_summary = copy.deepcopy(pbp1_transcript)
+    state_digest_summary["artifacts"][state_index]["sha256"] = "0" * 64
     marker_byte_divergence = copy.deepcopy(marker_summary)
     marker_byte_divergence["pbp1"]["byte_count"] += 8
     marker_memory_divergence = copy.deepcopy(marker_summary)
@@ -1232,6 +1253,12 @@ def _negative_controls(
         ("NEG-N5-PBP1-ARTIFACT-OMISSION", _rejected(lambda: native_live_boot_handoff.extract_transcript(native_live_boot_handoff.format_transcript(artifact_omission_pbp1)))),
         ("NEG-N5-PBP1-ARTIFACT-OVERLAP", _rejected(lambda: native_live_boot_handoff.extract_transcript(native_live_boot_handoff.format_transcript(artifact_overlap_pbp1)))),
         ("NEG-N5-PBP1-ARTIFACT-SIGNATURE", _rejected(lambda: native_live_boot_handoff.extract_transcript(native_live_boot_handoff.format_transcript(artifact_signature_pbp1)))),
+        ("NEG-N5-PBP1-MANIFEST-EXACT-SIZE", _rejected(lambda: native_live_boot_handoff.validate_oracle_binding(manifest_size_summary, marker_summary, inspection))),
+        ("NEG-N5-PBP1-MANIFEST-DIGEST", _rejected(lambda: native_live_boot_handoff.validate_oracle_binding(manifest_digest_summary, marker_summary, inspection))),
+        ("NEG-N5-PBP1-TRUST-POLICY-EXACT-SIZE", _rejected(lambda: native_live_boot_handoff.validate_oracle_binding(policy_size_summary, marker_summary, inspection))),
+        ("NEG-N5-PBP1-TRUST-POLICY-DIGEST", _rejected(lambda: native_live_boot_handoff.validate_oracle_binding(policy_digest_summary, marker_summary, inspection))),
+        ("NEG-N5-PBP1-TRUST-STATE-EXACT-SIZE", _rejected(lambda: native_live_boot_handoff.validate_oracle_binding(state_size_summary, marker_summary, inspection))),
+        ("NEG-N5-PBP1-TRUST-STATE-DIGEST", _rejected(lambda: native_live_boot_handoff.validate_oracle_binding(state_digest_summary, marker_summary, inspection))),
         ("NEG-N5-PBP1-ARTIFACT-RANGE-COVERAGE", _rejected(lambda: native_live_boot_handoff.validate_oracle_binding(artifact_range_omission, marker_summary, inspection))),
         ("NEG-N5-PBP1-MARKER-BYTE-DIVERGENCE", _rejected(lambda: native_live_boot_handoff.validate_oracle_binding(pbp1_transcript, marker_byte_divergence, inspection))),
         ("NEG-N5-PBP1-MARKER-MEMORY-DIVERGENCE", _rejected(lambda: native_live_boot_handoff.validate_oracle_binding(pbp1_transcript, marker_memory_divergence, inspection))),
@@ -1277,6 +1304,7 @@ def _negative_controls(
         ("NEG-N5-PBEXIT-POST-EXIT-FIRMWARE", _rejected(lambda: native_boot_exit.validate_trace([*success_trace, {"operation": "get_memory_map", "map": exit_map}]))),
         ("NEG-N5-PBEXIT-MARKER-ATTEMPTS", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 21, "attempts=1", "attempts=2")))),
         ("NEG-N5-PBEXIT-MARKER-DESCRIPTOR", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 21, "descriptor_bytes=48", "descriptor_bytes=56")))),
+        ("NEG-N5-PBP1-RETAINED-INPUT-PAGES", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 22, f"artifact_pages={marker_summary['boot_exit']['artifact_page_count']}", f"artifact_pages={marker_summary['boot_exit']['artifact_page_count'] - 1}")))),
         ("NEG-N5-PBEXIT-FIRMWARE-BOUNDARY", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 22, "calls_after_exit=0", "calls_after_exit=1")))),
         ("NEG-N5-PBEXIT-TRANSFER", _rejected(lambda: native_boot_exit.validate_trace([*success_trace, {"operation": "transfer"}]))),
     ]
@@ -1624,7 +1652,7 @@ def make_readiness(
             "kmap_table_pages_retained": native_kernel_map.TABLE_PAGE_COUNT,
             "stack_pages_retained": native_kernel_map.STACK_PAGE_COUNT,
             "handoff_pages_retained": native_kernel_map.HANDOFF_PAGE_COUNT,
-            "artifact_pages_retained": runs[0]["marker_summary"]["artifact_set"]["page_count"],
+            "artifact_pages_retained": runs[0]["marker_summary"]["boot_exit"]["artifact_page_count"],
             "firmware_calls_while_candidate_active": 0,
             "firmware_calls_after_exit": 0,
             "pages_freed": False,

@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -220,6 +221,17 @@ def check_native_kernel_load_readiness() -> CheckResult:
     from tools import pooleos_release_gate
 
     check = pooleos_release_gate.check_native_kernel_load_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_kernel_revalidation_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_kernel_revalidation_readiness()
     return CheckResult(
         name=check["name"],
         ok=check["ok"],
@@ -3279,14 +3291,21 @@ def run_command(name: str, cmd: list[str], cwd: Path, timeout: int) -> CheckResu
 
 def run_pooleglyph_baseline(pooleglyph: Path, full: bool) -> list[CheckResult]:
     if full:
-        return [
-            run_command(
-                "pooleglyph:full_test",
-                [str(pooleglyph / "pooleglyph.bat"), "test"],
+        with tempfile.TemporaryDirectory(prefix="pooleos-pooleglyph-full-") as temp_dir:
+            staged = Path(temp_dir) / "PooleGlyph"
+            shutil.copytree(
                 pooleglyph,
-                timeout=180,
+                staged,
+                ignore=shutil.ignore_patterns(".git", ".venv", "venv", "__pycache__", "*.pyc", "runs"),
             )
-        ]
+            return [
+                run_command(
+                    "pooleglyph:full_test",
+                    [str(staged / "pooleglyph.bat"), "test"],
+                    staged,
+                    timeout=180,
+                )
+            ]
 
     results = [
         run_command(
@@ -3456,6 +3475,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "tools" / "build_native_pooleboot_media.py",
                 ROOT / "tools" / "qualify_native_pooleboot.py",
                 ROOT / "tools" / "qualify_native_kernel_load.py",
+                ROOT / "tools" / "qualify_native_kernel_revalidation.py",
                 ROOT / "tools" / "generate_native_initial_system_vectors.py",
                 ROOT / "tools" / "qualify_native_initial_system.py",
                 ROOT / "tools" / "generate_native_recovery_vectors.py",
@@ -3487,6 +3507,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runtime" / "native_models.py",
                 ROOT / "runtime" / "native_pooleboot.py",
                 ROOT / "runtime" / "native_kernel_load.py",
+                ROOT / "runtime" / "native_kernel_revalidation.py",
                 ROOT / "runtime" / "native_initial_system.py",
                 ROOT / "runtime" / "native_recovery.py",
                 ROOT / "runtime" / "native_symbols.py",
@@ -3501,6 +3522,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runtime" / "native_kernel_entry.py",
                 ROOT / "docs" / "native-pooleboot-proof.md",
                 ROOT / "docs" / "native-kernel-load.md",
+                ROOT / "docs" / "native-kernel-revalidation.md",
                 ROOT / "docs" / "native-initial-system-bundle.md",
                 ROOT / "docs" / "native-recovery-bundle.md",
                 ROOT / "docs" / "native-symbol-bundle.md",
@@ -3571,6 +3593,8 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "native" / "kernel" / "manifest.pkm",
                 ROOT / "native" / "kernel" / "src" / "lib.rs",
                 ROOT / "native" / "kernel" / "src" / "main.rs",
+                ROOT / "native" / "kernel" / "src" / "revalidation.rs",
+                ROOT / "native" / "kernel" / "src" / "bin" / "pkreval1_probe.rs",
                 ROOT / "native" / "kernel" / "src" / "arch" / "x86_64.rs",
                 ROOT / "native" / "fixtures" / "poolekernel" / "Cargo.toml",
                 ROOT / "native" / "fixtures" / "poolekernel" / "README.md",
@@ -3595,6 +3619,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runs" / "native_model_readiness.json",
                 ROOT / "runs" / "native_pooleboot_readiness.json",
                 ROOT / "runs" / "native_kernel_load_readiness.json",
+                ROOT / "runs" / "native-kernel-revalidation-readiness.json",
                 ROOT / "runs" / "native_initial_system_readiness.json",
                 ROOT / "runs" / "native_recovery_readiness.json",
                 ROOT / "runs" / "native_symbol_readiness.json",
@@ -3612,6 +3637,8 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "specs" / "native-kernel-load-contract.json",
                 ROOT / "specs" / "native-kernel-load-contract.schema.json",
                 ROOT / "specs" / "native-kernel-load-readiness.schema.json",
+                ROOT / "specs" / "native-kernel-revalidation-contract.json",
+                ROOT / "specs" / "native-kernel-revalidation-readiness.schema.json",
                 ROOT / "specs" / "native-initial-system-contract.json",
                 ROOT / "specs" / "native-initial-system-contract.schema.json",
                 ROOT / "specs" / "native-initial-system-golden-vectors.json",
@@ -3763,6 +3790,7 @@ def main(argv: list[str] | None = None) -> int:
     checks.append(check_native_boot_trust_readiness())
     checks.append(check_native_pooleboot_readiness())
     checks.append(check_native_kernel_load_readiness())
+    checks.append(check_native_kernel_revalidation_readiness())
     checks.append(check_native_initial_system_readiness())
     checks.append(check_native_recovery_readiness())
     checks.append(check_native_symbol_readiness())

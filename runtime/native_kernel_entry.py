@@ -105,9 +105,9 @@ def contract_errors(contract: Any) -> list[str]:
         "target": "x86_64-unknown-none",
         "format_contract": "PKELF1",
         "handoff_contract": "PBP1",
-        "entry_offset": 0x4000,
-        "image_memory_bytes": 0x30000,
-        "canonical_file_bytes": 0x22000,
+        "entry_offset": 0x8000,
+        "image_memory_bytes": 0x40000,
+        "canonical_file_bytes": 0x2C000,
         "maximum_relocations": 4096,
     }
     for key, value in expected_product.items():
