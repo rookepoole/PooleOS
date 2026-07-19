@@ -16,6 +16,9 @@ class NativeBootTrustReleaseGateTests(unittest.TestCase):
         self.assertEqual([], trust.readiness_errors(artifact, ROOT))
         check = pooleos_release_gate.check_native_boot_trust_readiness()
         self.assertTrue(check["ok"], check["detail"])
+        self.assertIn("contract=PBTRUST1/PBSTATE1", check["detail"])
+        self.assertIn("power_loss=9/9", check["detail"])
+        self.assertIn("backend_io=false", check["detail"])
         self.assertIn("authority=0", check["detail"])
         self.assertIn("production_ready=false", check["detail"])
 

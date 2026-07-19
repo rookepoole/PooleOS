@@ -7,9 +7,9 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 115
+Last roadmap reconciliation: PooleOS Cycle 116
 
-Current reconciliation: the seven-record native constitution, public/private boundary, architecture baseline, and conformance policy remain partial evidence. The completed owner response directs ADR-0003, ADR-0004, and all 38 Workstation v1 definitions while accepting zero measurements. Rooke Poole selected `hardware_fido2_ed25519_sk`, reported no available key, accepted no software-key substitution, and deferred public-key publication. The trust store remains empty; no key was generated or used. Standing authorization permits commits, branch pushes, and draft pull requests, but not signing, merge, public-key registration, tags, releases, or release publication. `N0-HW-KEY-ACQUIRE-001` remains the blocked owner move. PooleGlyph remains at the Phase 65/66 boundary with its existing generated-report change preserved and no policy authority inferred from metadata. Cycles 97-114 qualified the bounded native boot chain through exact retained-page parsing and six mandatory inner denials. Cycle 115 freezes PBTRUST1 as separate 320-byte immutable-policy and 256-byte mutable acceptance-state records, distinct from PREC1 boot-attempt state. It models signer/revocation shape, fourteen artifact/state/rollback bindings, redundant-copy and previous-state-chain shape, and eight external evidence gates. Live PooleBoot reads exact PBTP1/PBTS1 development candidates, cross-binds the manifest, kernel, retained set, revocation identity, roles, policy/floor/epoch/generation values, and denies exactly at `pbtrust_policy_unsigned` with zero signature verification, authority grants, or state writes. PBTRUST1 passes 4/4 Rust tests, 88/88 hostile controls, and 24,576 differential cases; PKLOAD6 passes 85/85 Rust tests and 148/148 integrated controls, and two exact QEMU/OVMF runs emit 25 ordered markers. `FLAG-N5-INNER-TRUST-CONTRACT-001` closes only this format, binding, precedence, and unsigned-denial boundary. `FLAG-N5-INNER-TRUST-STATE-001`, `FLAG-N5-INNER-ENFORCEMENT-001`, `FLAG-NATIVE-BOOT-001`, `FLAG-N6-BOOT-DIGEST-001`, `FLAG-N6-FRAMEBUFFER-MAP-001`, and `FLAG-N4-MODELS-001` remain open. The ESP trust state is not authenticated, monotonic, writable, selected, repaired, migrated, or accepted as persistent authority; PooleKernel does not independently reparse retained bytes or selected state; no capability or lifecycle, recovery, symbol, policy, microcode, or firmware action occurs. `N5-INNER-TRUST-BACKEND-001` is the next owner-independent move, while PooleGlyph Phase 66 may advance in parallel without outranking N0-N6. No PooleKernel instruction, native userspace, driver, PooleFS implementation, desktop, installer, signed ISO, or production-ready system exists.
+Current reconciliation: the seven-record native constitution, public/private boundary, architecture baseline, and conformance policy remain partial evidence. The historical completed owner response directs ADR-0003, ADR-0004, and all 38 Workstation v1 definitions while accepting zero measurements. Rooke Poole selected `hardware_fido2_ed25519_sk`, reported no available key, accepted no software-key substitution, and deferred public-key publication. The trust store remains empty; no key was generated or used. Standing Authority Amendment V2 separately permits Codex to manage ordinary repository work, strengthen governance, and conditionally ready and merge a clean PR only after the canonical qualification suite, publication-boundary scan, release gate, all configured required checks, and review-thread gates pass. It does not authorize keys, signing, public-key publication, tags, releases, secrets, privileged probes, drivers, firmware, physical-media writes, weakened governance, or production promotion. `N0-HW-KEY-ACQUIRE-001` remains the blocked owner move. PooleGlyph remains at the Phase 65/66 boundary with its existing generated-report change preserved and no policy authority inferred from metadata. Cycles 97-115 qualified the bounded native boot chain through PBTRUST1 live unsigned-policy denial. Cycle 116 adds the pure PBSTATE1 backend model: an authenticated monotonic anchor, exactly two independently authenticated PBTS1 copies, domain-separated logical identity, deterministic stale/future/rollback/chain/digest rejection, repair and migration planning, and nine interrupted-transition recovery boundaries. PBTRUST1/PBSTATE1 passes 12/12 Rust tests, 105/105 hostile controls, four 8,192-case differential campaigns, both `no_std` targets, and one PooleBoot integration build with zero backend I/O, anchor writes, state writes, or authority grants. `FLAG-N5-INNER-TRUST-BACKEND-MODEL-001` closes only this model boundary. The ESP candidates remain unauthenticated and non-authoritative; no cryptographic backend, monotonic provider, persistent I/O, repair/migration execution, revocation or Secure Boot evidence, or PooleKernel revalidation exists. `FLAG-N5-INNER-TRUST-STATE-001`, `FLAG-N5-INNER-ENFORCEMENT-001`, `FLAG-NATIVE-BOOT-001`, `FLAG-N6-BOOT-DIGEST-001`, `FLAG-N6-FRAMEBUFFER-MAP-001`, and `FLAG-N4-MODELS-001` remain open. `N5-INNER-KERNEL-REVALIDATE-001` is the next owner-independent move, while PooleGlyph Phase 66 may advance in parallel without outranking N0-N6. No PooleKernel instruction, native userspace, driver, PooleFS implementation, desktop, installer, signed ISO, or production-ready system exists.
 
 ## 1. Objective
 
@@ -180,7 +180,20 @@ For every promoted requirement:
 - distinguish normative conformance, tested behavior, observed behavior, hypothesis, research, and unsupported behavior;
 - require independent reproduction where the Build Plan or release profile says so.
 
-## 11. Per-Turn Next-Best-Move Loop
+## 11. Standing Execution Authority
+
+Standing Authority Amendment V2 authorizes Codex to:
+
+- read, edit, build, test, document, commit, branch, push, and manage pull requests, issues, labels, milestones, project metadata, and draft release material needed by this charter;
+- install hash-pinned non-administrative tools under a dedicated PooleOS tools directory without changing global `PATH` or system-wide configuration, while recording source, version, hash, license, and provenance;
+- run read-only unprivileged hardware and operating-system inventory commands;
+- create or strengthen GitHub Actions, rulesets, required checks, branch protections, vulnerability reporting, and repository security controls;
+- mark a Codex-authored draft PR ready and merge it, including into `main`, only when the exact candidate passes the canonical qualification suite, publication-boundary scan, release gate, all configured required GitHub checks, clean-merge check, and review gates, with no blocking review request or unresolved thread;
+- merge into non-default `agent/*` integration branches and delete only Codex-created remote `agent/*` branches after merge.
+
+Codex may not force-push, bypass protections, rewrite shared history, delete `main` or a user-created branch, weaken governance, alter repository visibility/ownership/billing, expose or modify secrets, or treat a permitted merge as production promotion. Separate explicit approval remains mandatory before generating or using private keys, signing, publishing public keys, tags, or releases, using secrets, privileged hardware probes, driver loading, firmware access or mutation, and physical-media or disk writes. Historical owner packets and receipts remain immutable records of the authority that existed when they were created; this amendment is a separate current execution boundary.
+
+## 12. Per-Turn Next-Best-Move Loop
 
 Every active goal turn must:
 
@@ -199,7 +212,7 @@ Every active goal turn must:
 
 Architecture work N0-N5 outranks downstream optimization while those foundations remain unclosed. PDC signed dynamics and the PooleGlyph machine-language lane beginning with Phase 66 may proceed in parallel but cannot substitute for native boot progress.
 
-## 12. Phase Contract
+## 13. Phase Contract
 
 The authoritative completion range is `N0-N39`.
 
@@ -213,7 +226,7 @@ The authoritative completion range is `N0-N39`.
 
 A phase may be marked complete only when every mapped required item and applicable research addition passes its Build Plan exit gate with immutable evidence.
 
-## 13. Bootable ISO Contract
+## 14. Bootable ISO Contract
 
 The production `.iso` is UEFI-native and PooleOS-owned. It must define and verify:
 
@@ -227,7 +240,7 @@ The production `.iso` is UEFI-native and PooleOS-owned. It must define and verif
 - independent reproducibility, signatures, checksums, SBOM, provenance, source, support matrix, limitations, and release receipt;
 - proof that tested and signed ISO bytes are the distributed ISO bytes.
 
-## 14. Completion Gate
+## 15. Completion Gate
 
 Do not mark this goal complete until all of the following are true for the exact supported release profile:
 

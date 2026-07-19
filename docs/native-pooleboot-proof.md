@@ -48,6 +48,11 @@ evidence boundaries, then integrates both development candidates into
 PooleBoot. The live path cross-binds fourteen facts and denies exactly at the
 unsigned policy without verifying a signature, granting authority, or writing
 state. PREC1 boot-attempt state remains a third, separate contract.
+Cycle 116 adds `N5-INNER-TRUST-BACKEND-001`: the linked `native/trust` library
+now contains an allocation-free PBSTATE1 two-copy selection, repair, migration,
+and interrupted-transition planner rooted in externally authenticated monotonic
+evidence. Its source is included in both aggregate implementation-input ledgers,
+but PooleBoot does not invoke it; the live path and denial boundary are unchanged.
 
 The normative aggregate contract is `specs/native-pooleboot-proof.json`.
 `tools/qualify_native_pooleboot.py` validates the current PKLOAD6 receipt,
@@ -109,6 +114,8 @@ acceleration, loopback-only QMP, and no shared folders. It requires:
 - exact PBTRUST1 policy/state candidate parsing, fourteen target/host
   cross-bindings, deterministic unsigned-policy denial, and zero signature,
   authority, or write effects;
+- provenance binding of the pure PBSTATE1 backend model while requiring that
+  the live proof perform no backend selection, repair, migration, or I/O;
 - exact seven-artifact, root, stack, handoff, map, and digest cross-bindings;
 - 148/148 integrated hostile controls;
 - no absolute user path in public readiness artifacts;
@@ -183,8 +190,8 @@ The receipt proves, on the pinned profile:
 The manifest, all seven artifacts, and both PBTRUST1 candidates are unsigned or
 unauthenticated and untrusted. The proof does not establish policy-signature or
 threshold verification, authenticated revocation, Secure Boot-state evidence,
-a redundant authenticated monotonic writable state backend, state selection,
-repair, migration, or power-loss durability, artifact authentication,
+a live redundant authenticated monotonic writable state backend, performed
+state selection, repair, migration, or power-loss durability, artifact authentication,
 authorized semantic activation,
 independent PooleKernel retained-byte parsing, initial-system or recovery
 execution, symbol consumption, policy application, capability

@@ -6,8 +6,8 @@
   "inputs": {
     "contract": {
       "path": "specs/native-boot-trust-contract.json",
-      "byte_count": 8474,
-      "sha256": "5392EE6623A17EF85706E6A4CEB877C6D5E8B7321CEBA5514CDD69FD80F854FB"
+      "byte_count": 11117,
+      "sha256": "60830794EB41D44463C5F0BCB16BA05FAD1DAB6575B051B2556B13AEAE933BF8"
     },
     "toolchain_lock": {
       "path": "specs/native-toolchain-lock.json",
@@ -42,13 +42,18 @@
       },
       {
         "path": "native/trust/src/lib.rs",
-        "byte_count": 27876,
-        "sha256": "90CE5080AB4242B22B82738F2B700D70201238E29B6B4980CE010D656A735F27"
+        "byte_count": 27894,
+        "sha256": "E075E10153BC4987000F9C99931568165A3E8726786E6F5D69C164BCD833EE81"
+      },
+      {
+        "path": "native/trust/src/backend.rs",
+        "byte_count": 24056,
+        "sha256": "0C5DBF62CE26DEAD2241385578FDF76DBF9A235751FE2345DE53DBF29AC6C2BF"
       },
       {
         "path": "native/trust/src/bin/pbtrust1_probe.rs",
-        "byte_count": 5714,
-        "sha256": "798600F8D1C622FB501FA09763009465079E930A38B739A7154DE10B31206FCE"
+        "byte_count": 8631,
+        "sha256": "35B0CE8EC004E0F878F2E90969CA2317FC5335C765D8B5205E06E1D34608FCD8"
       },
       {
         "path": "native/boot/Cargo.toml",
@@ -72,40 +77,40 @@
       },
       {
         "path": "runtime/native_boot_trust.py",
-        "byte_count": 28060,
-        "sha256": "ACCF4F5C8A4E069A668E56C2384D59E389FB4162AB4326D6EEF33920BFADB59F"
+        "byte_count": 43001,
+        "sha256": "6E6202A0AE17146F120C98A70FFA99036DE0B1B9651F552305B42FD0FC367B1D"
       },
       {
         "path": "tests/test_native_boot_trust.py",
-        "byte_count": 7977,
-        "sha256": "FF563340A4243C8602FAEE806D9BEB51B8CC8E724069D04A796463F80602CBBA"
+        "byte_count": 15996,
+        "sha256": "FC9F4464DE0CD2CA79050C604E5C52F1CC710592EF57219C824147E8986BC966"
       },
       {
         "path": "tools/qualify_native_boot_trust.py",
-        "byte_count": 38000,
-        "sha256": "C62F512C70475AF68F8930EAEE8EAC1EFF550264C2C8BA36AE7E73C2705E8F57"
+        "byte_count": 58421,
+        "sha256": "AB2E152EA8A747D4C2C88FF8E36BDFB6F19A1F6EC9602D3940912CC9D218CC3A"
       },
       {
         "path": "docs/native-boot-trust.md",
-        "byte_count": 6879,
-        "sha256": "BA3C68D859562FB64246A5E1DBAC137239FF8E44560A383D01ABE4090E09ED3F"
+        "byte_count": 9787,
+        "sha256": "02D98E02AA855EDAE830437AE74BB7A438A9D1B8F123BCDA73AC66482866CBDC"
       },
       {
         "path": "specs/native-boot-trust-contract.schema.json",
-        "byte_count": 3666,
-        "sha256": "344E85E8AD90EE831F881C30557CDB975D6A83571A921FAAB1BA6B9EF8AC3F5A"
+        "byte_count": 4977,
+        "sha256": "617B8189F8DF28B5E2372DC7AF3E91DDDF1F2A4D08BC343A8C389A63E4F89ECE"
       },
       {
         "path": "specs/native-boot-trust-readiness.schema.json",
-        "byte_count": 5403,
-        "sha256": "20635C4261E4EE5E280BDA9463D8FED1AE0171F358AB2EABD9B253E092857376"
+        "byte_count": 8508,
+        "sha256": "2630B1C7D0E4FA556A12AAF4661A7F8A42650F030502E679A6BFA3CB19B71278"
       }
     ]
   },
   "build": {
     "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
-    "rust_host_tests_passed": 4,
-    "rust_host_tests_total": 4,
+    "rust_host_tests_passed": 12,
+    "rust_host_tests_total": 12,
     "rustfmt_packages": 1,
     "clippy_targets": 1,
     "no_std_targets": [
@@ -116,12 +121,15 @@
     "pooleboot_uefi_integration_builds_total": 1
   },
   "golden": {
-    "case_count": 3,
+    "case_count": 5,
     "development_policy_sha256": "AA256F8CDAFB6AA7778062923323E75A100C12DB366028A7039EF23FB6EF85E6",
     "development_state_sha256": "3FD0C11A8618A3E67E1A0D0486C2EE6757FEEEAE973382A904D916308BB8650D",
     "signed_shape_policy_sha256": "23D66D75BCBAFAFEB6C8467B3C00D07528D77C7ED3E44D4A0ED7A7A4CF274D5B",
     "authenticated_shape_state_sha256": "715A00CA7C845ECCDF06E1FBF2014CBE983388428F96CFFC4B7D4714A27D84A9",
     "generation_two_state_sha256": "BE076052B03D9EA0951B06A1E7A85BCD13A8F62189ABBA69C2EC155F0FF85370",
+    "backend_copy_zero_sha256": "A4DD75C70B22F80830C3473B48F7A06B590D0EF96FC5FC042146F432A4F9BF8E",
+    "backend_copy_one_sha256": "752CB73AB68C61770FBDE765FC586124154828551646DE32CABC6D75465BC3CA",
+    "backend_logical_state_sha256": "0900B1A0AC280F11AABB5C648F1B74A9073BC16F2675C69A2C4A1F74FD2C38B9",
     "synthetic_authorization_model_result": "qualified_shape_only_no_crypto_claim"
   },
   "negative_controls": [
@@ -740,6 +748,125 @@
       "python": "ERR:pbtrust_state_development_candidate",
       "rust": "ERR:pbtrust_state_development_candidate",
       "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BACKEND-ANCHOR-AUTH",
+      "expected": "ERR:pbtrust_backend_anchor_authentication",
+      "python": "ERR:pbtrust_backend_anchor_authentication",
+      "rust": "ERR:pbtrust_backend_anchor_authentication",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BACKEND-ANCHOR-MONOTONIC",
+      "expected": "ERR:pbtrust_backend_anchor_monotonicity",
+      "python": "ERR:pbtrust_backend_anchor_monotonicity",
+      "rust": "ERR:pbtrust_backend_anchor_monotonicity",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BACKEND-ANCHOR-GENERATION",
+      "expected": "ERR:pbtrust_backend_anchor_numbers",
+      "python": "ERR:pbtrust_backend_anchor_numbers",
+      "rust": "ERR:pbtrust_backend_anchor_numbers",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BACKEND-ANCHOR-PREVIOUS",
+      "expected": "ERR:pbtrust_backend_anchor_numbers",
+      "python": "ERR:pbtrust_backend_anchor_numbers",
+      "rust": "ERR:pbtrust_backend_anchor_numbers",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BACKEND-REQUIREMENTS-ZERO",
+      "expected": "ERR:pbtrust_backend_requirements",
+      "python": "ERR:pbtrust_backend_requirements",
+      "rust": "ERR:pbtrust_backend_requirements",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BACKEND-MIGRATION-ROLLBACK",
+      "expected": "ERR:pbtrust_backend_requirements",
+      "python": "ERR:pbtrust_backend_requirements",
+      "rust": "ERR:pbtrust_backend_requirements",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BACKEND-ANCHOR-ROLLBACK",
+      "expected": "ERR:pbtrust_backend_anchor_rollback",
+      "python": "ERR:pbtrust_backend_anchor_rollback",
+      "rust": "ERR:pbtrust_backend_anchor_rollback",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BACKEND-NO-COPIES",
+      "expected": "ERR:pbtrust_backend_no_authenticated_copy",
+      "python": "ERR:pbtrust_backend_no_authenticated_copy",
+      "rust": "ERR:pbtrust_backend_no_authenticated_copy",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BACKEND-COPY-AUTH",
+      "expected": "ERR:pbtrust_backend_no_authenticated_copy",
+      "python": "ERR:pbtrust_backend_no_authenticated_copy",
+      "rust": "ERR:pbtrust_backend_no_authenticated_copy",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BACKEND-DEVELOPMENT-COPIES",
+      "expected": "ERR:pbtrust_backend_no_authenticated_copy",
+      "python": "ERR:pbtrust_backend_no_authenticated_copy",
+      "rust": "ERR:pbtrust_backend_no_authenticated_copy",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BACKEND-PHYSICAL-INDEX",
+      "expected": "ERR:pbtrust_backend_no_authenticated_copy",
+      "python": "ERR:pbtrust_backend_no_authenticated_copy",
+      "rust": "ERR:pbtrust_backend_no_authenticated_copy",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BACKEND-ROLLBACK-COPIES",
+      "expected": "ERR:pbtrust_backend_state_rollback",
+      "python": "ERR:pbtrust_backend_state_rollback",
+      "rust": "ERR:pbtrust_backend_state_rollback",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BACKEND-FUTURE-COPIES",
+      "expected": "ERR:pbtrust_backend_future_state",
+      "python": "ERR:pbtrust_backend_future_state",
+      "rust": "ERR:pbtrust_backend_future_state",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BACKEND-ANCHOR-DIGEST",
+      "expected": "ERR:pbtrust_backend_anchor_digest",
+      "python": "ERR:pbtrust_backend_anchor_digest",
+      "rust": "ERR:pbtrust_backend_anchor_digest",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BACKEND-PREVIOUS-CHAIN",
+      "expected": "ERR:pbtrust_backend_previous_state",
+      "python": "ERR:pbtrust_backend_previous_state",
+      "rust": "ERR:pbtrust_backend_previous_state",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BACKEND-NOT-WRITABLE",
+      "expected": "ERR:pbtrust_backend_writable",
+      "python": "ERR:pbtrust_backend_writable",
+      "rust": "ERR:pbtrust_backend_writable",
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PBTRUST-BACKEND-NO-REPAIR-CAPACITY",
+      "expected": "ERR:pbtrust_backend_repair_capacity",
+      "python": "ERR:pbtrust_backend_repair_capacity",
+      "rust": "ERR:pbtrust_backend_repair_capacity",
+      "status": "pass"
     }
   ],
   "differential": {
@@ -757,6 +884,11 @@
       "cases": 8192,
       "mismatches": 0,
       "seed": 5783277584092713987
+    },
+    "backend_selection": {
+      "cases": 8192,
+      "mismatches": 0,
+      "seed": 5783277584092713988
     }
   },
   "development_integration": {
@@ -773,6 +905,120 @@
     "authority_grants": 0,
     "state_writes": 0
   },
+  "backend_model": {
+    "contract_id": "PBSTATE1",
+    "logical_digest_domain": "POOLEOS/PBTS1/LOGICAL/V1",
+    "selected_copy": 0,
+    "anchored_copy_mask": 3,
+    "repair_copy_mask": 0,
+    "migration_required": true,
+    "next_generation": 2,
+    "target_copy": 1,
+    "ordered_transition_steps": [
+      "write_target_uncommitted",
+      "flush_target_data",
+      "write_target_commit_and_authentication",
+      "flush_target_commit",
+      "advance_monotonic_anchor",
+      "verify_monotonic_anchor",
+      "repair_other_copy",
+      "flush_repaired_copy",
+      "verify_redundant_copies"
+    ],
+    "authority_grants": 0,
+    "state_writes_performed": 0,
+    "anchor_writes_performed": 0,
+    "power_loss": {
+      "case_count": 9,
+      "all_cases_passed": true,
+      "storage_io_performed": false,
+      "anchor_writes_performed": 0,
+      "state_writes_performed": 0,
+      "cases": [
+        {
+          "id": "before_target_write",
+          "selected_generation": 1,
+          "selected_copy": 0,
+          "repair_copy_mask": 0,
+          "authority_grants": 0,
+          "state_writes": 0,
+          "status": "pass"
+        },
+        {
+          "id": "after_target_body_write",
+          "selected_generation": 1,
+          "selected_copy": 0,
+          "repair_copy_mask": 2,
+          "authority_grants": 0,
+          "state_writes": 0,
+          "status": "pass"
+        },
+        {
+          "id": "after_target_data_flush",
+          "selected_generation": 1,
+          "selected_copy": 0,
+          "repair_copy_mask": 2,
+          "authority_grants": 0,
+          "state_writes": 0,
+          "status": "pass"
+        },
+        {
+          "id": "after_target_commit_auth",
+          "selected_generation": 1,
+          "selected_copy": 0,
+          "repair_copy_mask": 2,
+          "authority_grants": 0,
+          "state_writes": 0,
+          "status": "pass"
+        },
+        {
+          "id": "after_target_commit_flush",
+          "selected_generation": 1,
+          "selected_copy": 0,
+          "repair_copy_mask": 2,
+          "authority_grants": 0,
+          "state_writes": 0,
+          "status": "pass"
+        },
+        {
+          "id": "after_anchor_advance",
+          "selected_generation": 2,
+          "selected_copy": 1,
+          "repair_copy_mask": 1,
+          "authority_grants": 0,
+          "state_writes": 0,
+          "status": "pass"
+        },
+        {
+          "id": "after_anchor_verify",
+          "selected_generation": 2,
+          "selected_copy": 1,
+          "repair_copy_mask": 1,
+          "authority_grants": 0,
+          "state_writes": 0,
+          "status": "pass"
+        },
+        {
+          "id": "after_repair_write",
+          "selected_generation": 2,
+          "selected_copy": 1,
+          "repair_copy_mask": 1,
+          "authority_grants": 0,
+          "state_writes": 0,
+          "status": "pass"
+        },
+        {
+          "id": "after_final_verify",
+          "selected_generation": 2,
+          "selected_copy": 0,
+          "repair_copy_mask": 0,
+          "authority_grants": 0,
+          "state_writes": 0,
+          "status": "pass"
+        }
+      ]
+    }
+  },
   "claims": {
     "allocation_free_no_std_parser": true,
     "fixed_policy_record_validated": true,
@@ -784,6 +1030,13 @@
     "external_evidence_required": true,
     "unsigned_development_policy_denied": true,
     "esp_candidate_rejected_as_persistent_authority": true,
+    "authenticated_anchor_required": true,
+    "redundant_backend_selection_modeled": true,
+    "logical_copy_identity_bound": true,
+    "rollback_and_future_state_rejected": true,
+    "deterministic_repair_plan_modeled": true,
+    "migration_plan_modeled": true,
+    "power_loss_recovery_corpus_passed": true,
     "policy_signature_verified": false,
     "policy_threshold_verified": false,
     "revocation_state_authenticated": false,
@@ -796,6 +1049,10 @@
     "private_key_used": false,
     "poolekernel_revalidated": false,
     "physical_media_written": false,
+    "backend_crypto_verified": false,
+    "monotonic_provider_implemented": false,
+    "persistent_backend_io_implemented": false,
+    "repair_or_migration_executed": false,
     "production_ready": false
   },
   "non_claims": [
@@ -803,7 +1060,7 @@
     "No private key is generated, loaded, used, or requested.",
     "No authenticated revocation store, threshold root, or signer registry is implemented.",
     "The ESP state candidate is not authenticated, monotonic, rollback-resistant, or accepted as authority.",
-    "No trust state is selected, repaired, migrated, committed, or written.",
+    "PBSTATE1 selects only synthetic externally authenticated backend inputs and produces repair and migration plans; it performs no backend cryptography, persistence, anchor update, state write, or recovery action.",
     "No Secure Boot variable, TPM state, firmware inventory, or privileged hardware fact is observed.",
     "PooleKernel does not independently revalidate or consume PBTRUST1 and no capability or executable authority is created.",
     "No firmware, disk, driver, physical media, signing, tag, merge, release, or publication action occurs.",

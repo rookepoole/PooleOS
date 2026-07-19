@@ -2,14 +2,14 @@
   "artifact_kind": "pooleos_native_pooleboot_readiness",
   "bindings": {
     "boot_trust_contract": {
-      "byte_count": 8474,
+      "byte_count": 11117,
       "path": "specs/native-boot-trust-contract.json",
-      "sha256": "5392EE6623A17EF85706E6A4CEB877C6D5E8B7321CEBA5514CDD69FD80F854FB"
+      "sha256": "60830794EB41D44463C5F0BCB16BA05FAD1DAB6575B051B2556B13AEAE933BF8"
     },
     "boot_trust_readiness": {
-      "byte_count": 28684,
+      "byte_count": 37688,
       "path": "runs/native_boot_trust_readiness.json",
-      "sha256": "03535AD230641C52D1F77C2D4EB5135EDCB27541678E0DB23A764F8CFD0A7B01"
+      "sha256": "648C0E961D903179267B5D6AD69A106D45A3351BA4B68382F6CB38CAAECD604E"
     },
     "contract": {
       "byte_count": 16590,
@@ -123,14 +123,19 @@
         "sha256": "E93435C23773EE33FC8757976903AA52C05985C0C4534D09EDADDCB8796D242C"
       },
       {
-        "byte_count": 27876,
+        "byte_count": 27894,
         "path": "native/trust/src/lib.rs",
-        "sha256": "90CE5080AB4242B22B82738F2B700D70201238E29B6B4980CE010D656A735F27"
+        "sha256": "E075E10153BC4987000F9C99931568165A3E8726786E6F5D69C164BCD833EE81"
       },
       {
-        "byte_count": 5714,
+        "byte_count": 24056,
+        "path": "native/trust/src/backend.rs",
+        "sha256": "0C5DBF62CE26DEAD2241385578FDF76DBF9A235751FE2345DE53DBF29AC6C2BF"
+      },
+      {
+        "byte_count": 8631,
         "path": "native/trust/src/bin/pbtrust1_probe.rs",
-        "sha256": "798600F8D1C622FB501FA09763009465079E930A38B739A7154DE10B31206FCE"
+        "sha256": "35B0CE8EC004E0F878F2E90969CA2317FC5335C765D8B5205E06E1D34608FCD8"
       },
       {
         "byte_count": 342,
@@ -313,9 +318,9 @@
         "sha256": "F6915CAC71694F66AC74D2B48EE72DD63A6FD33A4E9530E835589AF434B4698E"
       },
       {
-        "byte_count": 28060,
+        "byte_count": 43001,
         "path": "runtime/native_boot_trust.py",
-        "sha256": "ACCF4F5C8A4E069A668E56C2384D59E389FB4162AB4326D6EEF33920BFADB59F"
+        "sha256": "6E6202A0AE17146F120C98A70FFA99036DE0B1B9651F552305B42FD0FC367B1D"
       },
       {
         "byte_count": 30903,
@@ -333,9 +338,9 @@
         "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
       },
       {
-        "byte_count": 117280,
+        "byte_count": 117315,
         "path": "runtime/native_kernel_load.py",
-        "sha256": "0560B8E5D544814D9A6340B2E99DA85E1D05F57D94CCF192484E1D331F13CD4B"
+        "sha256": "35F8E53096541B67C410113508A356CA6729571A5148D9BDF26CF26C8ED018BD"
       },
       {
         "byte_count": 68796,
@@ -408,9 +413,9 @@
         "sha256": "FF897E4891CD357625EBF8DEC8ACA09C5CE82D434E8BBAE049E45D8413B5FEC5"
       },
       {
-        "byte_count": 63972,
+        "byte_count": 64007,
         "path": "runtime/native_pooleboot.py",
-        "sha256": "E2BD0DB0370877834D5D6AA9124E258886D4C7BEF12590EB344732EEED26A536"
+        "sha256": "A0AEFB3C5F18F4645A99A6D9F10A67E4293D8E7D7DC6BC3E66823C70B16C1E8E"
       },
       {
         "byte_count": 31153,
@@ -673,29 +678,29 @@
         "sha256": "029C0EDD41032DD17C1BD0B6AB2451909CACE4690B873D3CAE45AD16A5006D9E"
       },
       {
-        "byte_count": 6879,
+        "byte_count": 9787,
         "path": "docs/native-boot-trust.md",
-        "sha256": "BA3C68D859562FB64246A5E1DBAC137239FF8E44560A383D01ABE4090E09ED3F"
+        "sha256": "02D98E02AA855EDAE830437AE74BB7A438A9D1B8F123BCDA73AC66482866CBDC"
       },
       {
-        "byte_count": 8474,
+        "byte_count": 11117,
         "path": "specs/native-boot-trust-contract.json",
-        "sha256": "5392EE6623A17EF85706E6A4CEB877C6D5E8B7321CEBA5514CDD69FD80F854FB"
+        "sha256": "60830794EB41D44463C5F0BCB16BA05FAD1DAB6575B051B2556B13AEAE933BF8"
       },
       {
-        "byte_count": 3666,
+        "byte_count": 4977,
         "path": "specs/native-boot-trust-contract.schema.json",
-        "sha256": "344E85E8AD90EE831F881C30557CDB975D6A83571A921FAAB1BA6B9EF8AC3F5A"
+        "sha256": "617B8189F8DF28B5E2372DC7AF3E91DDDF1F2A4D08BC343A8C389A63E4F89ECE"
       },
       {
-        "byte_count": 5403,
+        "byte_count": 8508,
         "path": "specs/native-boot-trust-readiness.schema.json",
-        "sha256": "20635C4261E4EE5E280BDA9463D8FED1AE0171F358AB2EABD9B253E092857376"
+        "sha256": "2630B1C7D0E4FA556A12AAF4661A7F8A42650F030502E679A6BFA3CB19B71278"
       },
       {
-        "byte_count": 28684,
+        "byte_count": 37688,
         "path": "runs/native_boot_trust_readiness.json",
-        "sha256": "03535AD230641C52D1F77C2D4EB5135EDCB27541678E0DB23A764F8CFD0A7B01"
+        "sha256": "648C0E961D903179267B5D6AD69A106D45A3351BA4B68382F6CB38CAAECD604E"
       },
       {
         "byte_count": 16590,
@@ -710,7 +715,7 @@
       {
         "byte_count": 33555,
         "path": "specs/native-pooleboot-readiness.schema.json",
-        "sha256": "AF5977C4B6C36D27F167EEEF72A32F86A919E949264410D19D1DDF334DA5DD34"
+        "sha256": "533363ABFABBABBC595C10B5ED5EF3296DC54FE935A0FB693DA869F7221A96C2"
       },
       {
         "byte_count": 27721,
@@ -723,9 +728,9 @@
         "sha256": "603E9E9F669246017BBC10B7E74BB2A2E6E3050707AAEDA21E07E3CC9BACB1A2"
       },
       {
-        "byte_count": 25333,
+        "byte_count": 25335,
         "path": "specs/native-kernel-load-readiness.schema.json",
-        "sha256": "A4DBF0CFF46E423F39409EB1044EB3075D29C4C05E3AF87CE5B7DBDAF3412B16"
+        "sha256": "44F4682DD64638C14FABC6E1AFD858CA9F1B04FA870B186456577C34920A4BE1"
       },
       {
         "byte_count": 6037,
@@ -790,7 +795,7 @@
       {
         "byte_count": 24495,
         "path": "runs/native_system_manifest_readiness.json",
-        "sha256": "CA6705B2E0F09C31F4D8B06854DB2CE0CDFDEA60F811DF1C9E148E8FC605E43B"
+        "sha256": "1D7DEBC474A0EA1BDED71C5426EA0F046A8D4F676F1B780AD86606E2E379FA5E"
       },
       {
         "byte_count": 2272,
@@ -863,9 +868,9 @@
         "sha256": "D6EFD20411001ADF59C6722784D579A94C2D725745B0C9DE7A7EFE8A25DB84CB"
       },
       {
-        "byte_count": 38000,
+        "byte_count": 58421,
         "path": "tools/qualify_native_boot_trust.py",
-        "sha256": "C62F512C70475AF68F8930EAEE8EAC1EFF550264C2C8BA36AE7E73C2705E8F57"
+        "sha256": "AB2E152EA8A747D4C2C88FF8E36BDFB6F19A1F6EC9602D3940912CC9D218CC3A"
       },
       {
         "byte_count": 26041,
@@ -903,9 +908,9 @@
         "sha256": "1C974EE8B1B116BDA4F201BD115F219B44EB170D3E2917BDA591AD0B1857EF68"
       },
       {
-        "byte_count": 7977,
+        "byte_count": 15996,
         "path": "tests/test_native_boot_trust.py",
-        "sha256": "FF563340A4243C8602FAEE806D9BEB51B8CC8E724069D04A796463F80602CBBA"
+        "sha256": "FC9F4464DE0CD2CA79050C604E5C52F1CC710592EF57219C824147E8986BC966"
       }
     ],
     "initial_system_contract": {
@@ -929,9 +934,9 @@
       "sha256": "06F653066F5DD34E3C7E9BA9C1CA5A0BFB71110A896B22AA7C9B965CBDF7701F"
     },
     "kernel_load_readiness": {
-      "byte_count": 183156,
+      "byte_count": 183339,
       "path": "runs/native_kernel_load_readiness.json",
-      "sha256": "325BE91E6D219B23D0CFF2CE73D6986BC2CA68241D8C5515D35536D8578B4807"
+      "sha256": "6085250DFED712BE79719D661AF2B3F42D024699AAED4FF664E4377A015B49FE"
     },
     "microcode_contract": {
       "byte_count": 5229,
@@ -981,7 +986,7 @@
     "system_manifest_readiness": {
       "byte_count": 24495,
       "path": "runs/native_system_manifest_readiness.json",
-      "sha256": "CA6705B2E0F09C31F4D8B06854DB2CE0CDFDEA60F811DF1C9E148E8FC605E43B"
+      "sha256": "1D7DEBC474A0EA1BDED71C5426EA0F046A8D4F676F1B780AD86606E2E379FA5E"
     },
     "tier0_lock": {
       "byte_count": 5641,
@@ -1075,11 +1080,11 @@
           "virtual_size": 732
         }
       ],
-      "sha256": "363F1D271DE93CB2E103C531C4036E2D3BB8254E870C25F7B71228300CDA69FD",
+      "sha256": "DA98525CB33C5DB755BE9486961FB1F72AE0908AFF53923A5338201FD098B4EA",
       "subsystem": 10,
       "timestamp": 0
     },
-    "sha256": "363F1D271DE93CB2E103C531C4036E2D3BB8254E870C25F7B71228300CDA69FD"
+    "sha256": "DA98525CB33C5DB755BE9486961FB1F72AE0908AFF53923A5338201FD098B4EA"
   },
   "claim_boundary": [
     "This contract covers one unsigned UEFI proof application with bounded live PBC1, PSM1, PKELF1, PBART1, PINIT1, PREC1, PSYM1, PMCU1, PFWM1, PPOL1, PBLIVE3, PKMAP2, and PBEXIT1 parsing and integration, not the complete PooleBoot loader.",
@@ -3505,7 +3510,7 @@
             "virtual_size": 732
           }
         ],
-        "sha256": "363F1D271DE93CB2E103C531C4036E2D3BB8254E870C25F7B71228300CDA69FD",
+        "sha256": "DA98525CB33C5DB755BE9486961FB1F72AE0908AFF53923A5338201FD098B4EA",
         "subsystem": 10,
         "timestamp": 0
       },
@@ -3532,7 +3537,7 @@
           "byte_count": 202752,
           "cluster_count": 396,
           "path": "EFI/BOOT/BOOTX64.EFI",
-          "sha256": "363F1D271DE93CB2E103C531C4036E2D3BB8254E870C25F7B71228300CDA69FD"
+          "sha256": "DA98525CB33C5DB755BE9486961FB1F72AE0908AFF53923A5338201FD098B4EA"
         },
         {
           "byte_count": 229,
@@ -3688,7 +3693,7 @@
         "protective_mbr_valid": true,
         "sector_bytes": 512,
         "sector_count": 131072,
-        "sha256": "A1E57BA3F54CF81A1BF39BC16B328382C6B1398F1BBFEFD45936326387F68614"
+        "sha256": "F5A198C93E0ECD2B2EC4784726E9F8DD6296642BCC38F7FECD6BC11C1D9BDE84"
       },
       "initial_system": {
         "activation_allowed": false,

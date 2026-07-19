@@ -13,6 +13,7 @@
     "negative_controls",
     "differential",
     "development_integration",
+    "backend_model",
     "claims",
     "non_claims",
     "production_ready"
@@ -31,7 +32,7 @@
         "toolchain_lock": {"$ref": "#/$defs/binding"},
         "toolchain_qualification": {"$ref": "#/$defs/binding"},
         "tier1_profile": {"$ref": "#/$defs/binding"},
-        "implementation_inputs": {"type": "array", "minItems": 15, "maxItems": 15, "items": {"$ref": "#/$defs/binding"}}
+        "implementation_inputs": {"type": "array", "minItems": 16, "maxItems": 16, "items": {"$ref": "#/$defs/binding"}}
       }
     },
     "build": {
@@ -40,8 +41,8 @@
       "required": ["rustc", "rust_host_tests_passed", "rust_host_tests_total", "rustfmt_packages", "clippy_targets", "no_std_targets", "pooleboot_uefi_integration_builds_passed", "pooleboot_uefi_integration_builds_total"],
       "properties": {
         "rustc": {"type": "string"},
-        "rust_host_tests_passed": {"const": 4},
-        "rust_host_tests_total": {"const": 4},
+        "rust_host_tests_passed": {"const": 12},
+        "rust_host_tests_total": {"const": 12},
         "rustfmt_packages": {"const": 1},
         "clippy_targets": {"const": 1},
         "no_std_targets": {"const": ["x86_64-unknown-none", "x86_64-unknown-uefi"]},
@@ -52,26 +53,30 @@
     "golden": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["case_count", "development_policy_sha256", "development_state_sha256", "signed_shape_policy_sha256", "authenticated_shape_state_sha256", "generation_two_state_sha256", "synthetic_authorization_model_result"],
+      "required": ["case_count", "development_policy_sha256", "development_state_sha256", "signed_shape_policy_sha256", "authenticated_shape_state_sha256", "generation_two_state_sha256", "backend_copy_zero_sha256", "backend_copy_one_sha256", "backend_logical_state_sha256", "synthetic_authorization_model_result"],
       "properties": {
-        "case_count": {"const": 3},
+        "case_count": {"const": 5},
         "development_policy_sha256": {"$ref": "#/$defs/sha256"},
         "development_state_sha256": {"$ref": "#/$defs/sha256"},
         "signed_shape_policy_sha256": {"$ref": "#/$defs/sha256"},
         "authenticated_shape_state_sha256": {"$ref": "#/$defs/sha256"},
         "generation_two_state_sha256": {"$ref": "#/$defs/sha256"},
+        "backend_copy_zero_sha256": {"$ref": "#/$defs/sha256"},
+        "backend_copy_one_sha256": {"$ref": "#/$defs/sha256"},
+        "backend_logical_state_sha256": {"$ref": "#/$defs/sha256"},
         "synthetic_authorization_model_result": {"const": "qualified_shape_only_no_crypto_claim"}
       }
     },
-    "negative_controls": {"type": "array", "minItems": 70, "items": {"$ref": "#/$defs/control"}},
+    "negative_controls": {"type": "array", "minItems": 105, "maxItems": 105, "items": {"$ref": "#/$defs/control"}},
     "differential": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["policy_parser", "state_parser", "authorization"],
+      "required": ["policy_parser", "state_parser", "authorization", "backend_selection"],
       "properties": {
         "policy_parser": {"$ref": "#/$defs/differential"},
         "state_parser": {"$ref": "#/$defs/differential"},
-        "authorization": {"$ref": "#/$defs/differential"}
+        "authorization": {"$ref": "#/$defs/differential"},
+        "backend_selection": {"$ref": "#/$defs/differential"}
       }
     },
     "development_integration": {
@@ -91,6 +96,38 @@
         "signature_verifications": {"const": 0},
         "authority_grants": {"const": 0},
         "state_writes": {"const": 0}
+      }
+    },
+    "backend_model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_id", "logical_digest_domain", "selected_copy", "anchored_copy_mask", "repair_copy_mask", "migration_required", "next_generation", "target_copy", "ordered_transition_steps", "authority_grants", "state_writes_performed", "anchor_writes_performed", "power_loss"],
+      "properties": {
+        "contract_id": {"const": "PBSTATE1"},
+        "logical_digest_domain": {"const": "POOLEOS/PBTS1/LOGICAL/V1"},
+        "selected_copy": {"const": 0},
+        "anchored_copy_mask": {"const": 3},
+        "repair_copy_mask": {"const": 0},
+        "migration_required": {"const": true},
+        "next_generation": {"const": 2},
+        "target_copy": {"const": 1},
+        "ordered_transition_steps": {"const": ["write_target_uncommitted", "flush_target_data", "write_target_commit_and_authentication", "flush_target_commit", "advance_monotonic_anchor", "verify_monotonic_anchor", "repair_other_copy", "flush_repaired_copy", "verify_redundant_copies"]},
+        "authority_grants": {"const": 0},
+        "state_writes_performed": {"const": 0},
+        "anchor_writes_performed": {"const": 0},
+        "power_loss": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["case_count", "all_cases_passed", "storage_io_performed", "anchor_writes_performed", "state_writes_performed", "cases"],
+          "properties": {
+            "case_count": {"const": 9},
+            "all_cases_passed": {"const": true},
+            "storage_io_performed": {"const": false},
+            "anchor_writes_performed": {"const": 0},
+            "state_writes_performed": {"const": 0},
+            "cases": {"type": "array", "minItems": 9, "maxItems": 9, "items": {"$ref": "#/$defs/power_case"}}
+          }
+        }
       }
     },
     "claims": {"type": "object"},
@@ -129,6 +166,20 @@
         "cases": {"const": 8192},
         "mismatches": {"const": 0},
         "seed": {"type": "integer", "minimum": 1}
+      }
+    },
+    "power_case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "selected_generation", "selected_copy", "repair_copy_mask", "authority_grants", "state_writes", "status"],
+      "properties": {
+        "id": {"enum": ["before_target_write", "after_target_body_write", "after_target_data_flush", "after_target_commit_auth", "after_target_commit_flush", "after_anchor_advance", "after_anchor_verify", "after_repair_write", "after_final_verify"]},
+        "selected_generation": {"type": "integer", "minimum": 1, "maximum": 2},
+        "selected_copy": {"type": "integer", "minimum": 0, "maximum": 1},
+        "repair_copy_mask": {"type": "integer", "minimum": 0, "maximum": 3},
+        "authority_grants": {"const": 0},
+        "state_writes": {"const": 0},
+        "status": {"const": "pass"}
       }
     }
   }

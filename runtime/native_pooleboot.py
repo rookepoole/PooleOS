@@ -335,6 +335,7 @@ PROOF_IMPLEMENTATION_INPUTS = (
     "native/bootload/src/lib.rs",
     "native/trust/Cargo.toml",
     "native/trust/src/lib.rs",
+    "native/trust/src/backend.rs",
     "native/trust/src/bin/pbtrust1_probe.rs",
     "native/elf/Cargo.toml",
     "native/elf/src/lib.rs",

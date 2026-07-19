@@ -4,6 +4,8 @@
 use core::fmt;
 use sha2::{Digest, Sha256};
 
+pub mod backend;
+
 pub const CONTRACT_ID: &str = "PBTRUST1";
 pub const POLICY_MAGIC: [u8; 8] = *b"PBTP1\0\0\0";
 pub const STATE_MAGIC: [u8; 8] = *b"PBTS1\0\0\0";

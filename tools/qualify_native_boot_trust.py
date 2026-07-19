@@ -30,9 +30,11 @@ HOST_TARGET = "x86_64-pc-windows-msvc"
 POLICY_PARSER_CASES = 8_192
 STATE_PARSER_CASES = 8_192
 AUTHORIZATION_CASES = 8_192
+BACKEND_SELECTION_CASES = 8_192
 POLICY_SEED = 0x5042_5452_5553_5401
 STATE_SEED = 0x5042_5452_5553_5402
 AUTHORIZATION_SEED = 0x5042_5452_5553_5403
+BACKEND_SELECTION_SEED = 0x5042_5452_5553_5404
 FULL_EVIDENCE_MASK = 0xFF
 
 
@@ -45,6 +47,7 @@ class ProbeCase:
     identifier: str
     request: str
     expected: str
+    python: str
 
 
 def _run(
@@ -169,8 +172,8 @@ def _build_validators(
         env=env,
     )
     match = re.search(r"test result: ok\. ([0-9]+) passed; 0 failed", test_output)
-    if match is None or int(match.group(1)) != 4:
-        raise QualificationError("expected exactly four PBTRUST1 Rust host tests")
+    if match is None or int(match.group(1)) != 12:
+        raise QualificationError("expected exactly twelve PBTRUST1 Rust host tests")
     _run(
         _cargo(cargo, "fmt", "--package", "poole-boot-trust", "--", "--check"),
         cwd=NATIVE_ROOT,
@@ -259,8 +262,8 @@ def _build_validators(
         raise QualificationError("PBTRUST1 host probe is missing")
     return probe, {
         "rustc": _run([str(rustc), "--version"], cwd=ROOT, env=env).strip(),
-        "rust_host_tests_passed": 4,
-        "rust_host_tests_total": 4,
+        "rust_host_tests_passed": 12,
+        "rust_host_tests_total": 12,
         "rustfmt_packages": 1,
         "clippy_targets": 1,
         "no_std_targets": targets,
@@ -374,6 +377,63 @@ def _authorization_request(
     )
 
 
+def _backend_result(
+    copies: tuple[trust.BackendCopy, trust.BackendCopy],
+    anchor: trust.MonotonicAnchor,
+    requirements: trust.BackendRequirements,
+    access: trust.BackendAccess,
+) -> str:
+    try:
+        selected = trust.select_backend_state(
+            copies, anchor, requirements, access
+        )
+    except trust.BootTrustError as error:
+        return f"ERR:{error.code}"
+    return (
+        f"OK;copy={selected.selected_copy};present={selected.present_copy_mask};"
+        f"parsed={selected.parsed_copy_mask};"
+        f"authenticated={selected.authenticated_copy_mask};"
+        f"anchored={selected.anchored_copy_mask};repair={selected.repair_copy_mask};"
+        f"stale={selected.stale_copy_mask};future={selected.future_copy_mask};"
+        f"generation={selected.state_generation};epoch={selected.store_epoch};"
+        f"profile={selected.auth_profile};logical={selected.logical_state_sha256};"
+        f"migration={int(selected.migration_required)};"
+        f"authority={selected.authority_grants};writes={selected.state_writes}"
+    )
+
+
+def _backend_request(
+    copies: tuple[trust.BackendCopy, trust.BackendCopy],
+    anchor: trust.MonotonicAnchor,
+    requirements: trust.BackendRequirements,
+    access: trust.BackendAccess,
+) -> str:
+    def encoded(copy: trust.BackendCopy) -> str:
+        return "-" if copy.data is None else copy.data.hex().upper()
+
+    return "B:" + ":".join(
+        (
+            str(anchor.state_generation),
+            str(anchor.store_epoch),
+            str(anchor.auth_profile),
+            anchor.logical_state_sha256,
+            anchor.previous_state_sha256,
+            str(int(anchor.authenticated)),
+            str(int(anchor.monotonic)),
+            str(requirements.minimum_state_generation),
+            str(requirements.minimum_store_epoch),
+            str(requirements.target_store_epoch),
+            str(requirements.target_auth_profile),
+            str(int(access.writable)),
+            str(int(access.repair_capacity)),
+            encoded(copies[0]),
+            str(int(copies[0].authentication_verified)),
+            encoded(copies[1]),
+            str(int(copies[1].authentication_verified)),
+        )
+    )
+
+
 def _rehash_policy(data: bytearray) -> bytes:
     data[224:256] = hashlib.sha256(data[:224]).digest()
     return bytes(data)
@@ -424,6 +484,70 @@ def _base_records(
     return policy, state, observed
 
 
+def _backend_state(
+    copy_index: int,
+    generation: int = 1,
+    *,
+    epoch: int = 1,
+    auth_profile: int = 1,
+    previous: str | None = None,
+) -> bytes:
+    return trust.encode_state(
+        policy_sha256="55" * 32,
+        manifest_sha256="11" * 32,
+        kernel_sha256="22" * 32,
+        retained_set_sha256="33" * 32,
+        state_generation=generation,
+        store_epoch=epoch,
+        authenticated_backend=True,
+        copy_index=copy_index,
+        auth_profile=auth_profile,
+        previous_state_sha256=previous,
+    )
+
+
+def _backend_anchor(
+    data: bytes,
+    *,
+    authenticated: bool = True,
+    monotonic: bool = True,
+) -> trust.MonotonicAnchor:
+    state = trust.parse_state(data)
+    return trust.MonotonicAnchor(
+        authenticated=authenticated,
+        monotonic=monotonic,
+        state_generation=state.state_generation,
+        store_epoch=state.store_epoch,
+        auth_profile=state.auth_profile,
+        logical_state_sha256=trust.logical_state_sha256(state),
+        previous_state_sha256=state.previous_state_sha256,
+    )
+
+
+def _backend_requirements(
+    *,
+    minimum_generation: int = 1,
+    minimum_epoch: int = 1,
+    target_epoch: int = 1,
+    target_profile: int = 1,
+) -> trust.BackendRequirements:
+    return trust.BackendRequirements(
+        minimum_state_generation=minimum_generation,
+        minimum_store_epoch=minimum_epoch,
+        target_store_epoch=target_epoch,
+        target_auth_profile=target_profile,
+    )
+
+
+def _backend_access(
+    *, writable: bool = True, repair_capacity: bool = True
+) -> trust.BackendAccess:
+    return trust.BackendAccess(
+        writable=writable,
+        repair_capacity=repair_capacity,
+    )
+
+
 def _negative_cases() -> list[ProbeCase]:
     development_policy, development_state, observed = _base_records(
         signed=False, authenticated=False
@@ -440,7 +564,7 @@ def _negative_cases() -> list[ProbeCase]:
             raise QualificationError(
                 f"negative control {identifier} expected {expected}, got {actual}"
             )
-        cases.append(ProbeCase(identifier, _policy_request(data), expected))
+        cases.append(ProbeCase(identifier, _policy_request(data), expected, actual))
 
     def add_state(identifier: str, data: bytes, code: str) -> None:
         expected = f"ERR:{code}"
@@ -449,7 +573,7 @@ def _negative_cases() -> list[ProbeCase]:
             raise QualificationError(
                 f"negative control {identifier} expected {expected}, got {actual}"
             )
-        cases.append(ProbeCase(identifier, _state_request(data), expected))
+        cases.append(ProbeCase(identifier, _state_request(data), expected, actual))
 
     def add_auth(
         identifier: str,
@@ -474,6 +598,30 @@ def _negative_cases() -> list[ProbeCase]:
                     policy_data, state_data, observed_value, mask
                 ),
                 expected,
+                actual,
+            )
+        )
+
+    def add_backend(
+        identifier: str,
+        copies: tuple[trust.BackendCopy, trust.BackendCopy],
+        anchor: trust.MonotonicAnchor,
+        requirements: trust.BackendRequirements,
+        access: trust.BackendAccess,
+        code: str,
+    ) -> None:
+        expected = f"ERR:{code}"
+        actual = _backend_result(copies, anchor, requirements, access)
+        if actual != expected:
+            raise QualificationError(
+                f"negative control {identifier} expected {expected}, got {actual}"
+            )
+        cases.append(
+            ProbeCase(
+                identifier,
+                _backend_request(copies, anchor, requirements, access),
+                expected,
+                actual,
             )
         )
 
@@ -602,6 +750,189 @@ def _negative_cases() -> list[ProbeCase]:
         authenticated_backend=False,
     )
     add_auth("NEG-N5-PBTRUST-STATE-DEVELOPMENT-CANDIDATE", signed_policy, signed_candidate_state, observed, FULL_EVIDENCE_MASK, "pbtrust_state_development_candidate")
+
+    backend0 = _backend_state(0)
+    backend1 = _backend_state(1)
+    backend_anchor = _backend_anchor(backend0)
+    backend_requirements = _backend_requirements()
+    backend_access = _backend_access()
+    backend_copies = (
+        trust.BackendCopy(backend0, True),
+        trust.BackendCopy(backend1, True),
+    )
+    add_backend(
+        "NEG-N5-PBTRUST-BACKEND-ANCHOR-AUTH",
+        backend_copies,
+        dataclasses.replace(backend_anchor, authenticated=False),
+        backend_requirements,
+        backend_access,
+        "pbtrust_backend_anchor_authentication",
+    )
+    add_backend(
+        "NEG-N5-PBTRUST-BACKEND-ANCHOR-MONOTONIC",
+        backend_copies,
+        dataclasses.replace(backend_anchor, monotonic=False),
+        backend_requirements,
+        backend_access,
+        "pbtrust_backend_anchor_monotonicity",
+    )
+    add_backend(
+        "NEG-N5-PBTRUST-BACKEND-ANCHOR-GENERATION",
+        backend_copies,
+        dataclasses.replace(backend_anchor, state_generation=0),
+        backend_requirements,
+        backend_access,
+        "pbtrust_backend_anchor_numbers",
+    )
+    add_backend(
+        "NEG-N5-PBTRUST-BACKEND-ANCHOR-PREVIOUS",
+        backend_copies,
+        dataclasses.replace(backend_anchor, previous_state_sha256="66" * 32),
+        backend_requirements,
+        backend_access,
+        "pbtrust_backend_anchor_numbers",
+    )
+    add_backend(
+        "NEG-N5-PBTRUST-BACKEND-REQUIREMENTS-ZERO",
+        backend_copies,
+        backend_anchor,
+        dataclasses.replace(backend_requirements, minimum_state_generation=0),
+        backend_access,
+        "pbtrust_backend_requirements",
+    )
+    epoch2_0 = _backend_state(0, epoch=2)
+    epoch2_1 = _backend_state(1, epoch=2)
+    add_backend(
+        "NEG-N5-PBTRUST-BACKEND-MIGRATION-ROLLBACK",
+        (
+            trust.BackendCopy(epoch2_0, True),
+            trust.BackendCopy(epoch2_1, True),
+        ),
+        _backend_anchor(epoch2_0),
+        backend_requirements,
+        backend_access,
+        "pbtrust_backend_requirements",
+    )
+    add_backend(
+        "NEG-N5-PBTRUST-BACKEND-ANCHOR-ROLLBACK",
+        backend_copies,
+        backend_anchor,
+        dataclasses.replace(backend_requirements, minimum_state_generation=2),
+        backend_access,
+        "pbtrust_backend_anchor_rollback",
+    )
+    add_backend(
+        "NEG-N5-PBTRUST-BACKEND-NO-COPIES",
+        (trust.BackendCopy(None, False), trust.BackendCopy(None, False)),
+        backend_anchor,
+        backend_requirements,
+        backend_access,
+        "pbtrust_backend_no_authenticated_copy",
+    )
+    add_backend(
+        "NEG-N5-PBTRUST-BACKEND-COPY-AUTH",
+        (
+            trust.BackendCopy(backend0, False),
+            trust.BackendCopy(backend1, False),
+        ),
+        backend_anchor,
+        backend_requirements,
+        backend_access,
+        "pbtrust_backend_no_authenticated_copy",
+    )
+    development0 = trust.encode_state(
+        policy_sha256="55" * 32,
+        manifest_sha256="11" * 32,
+        kernel_sha256="22" * 32,
+        retained_set_sha256="33" * 32,
+        copy_index=0,
+    )
+    development1 = trust.encode_state(
+        policy_sha256="55" * 32,
+        manifest_sha256="11" * 32,
+        kernel_sha256="22" * 32,
+        retained_set_sha256="33" * 32,
+        copy_index=1,
+    )
+    add_backend(
+        "NEG-N5-PBTRUST-BACKEND-DEVELOPMENT-COPIES",
+        (
+            trust.BackendCopy(development0, True),
+            trust.BackendCopy(development1, True),
+        ),
+        backend_anchor,
+        backend_requirements,
+        backend_access,
+        "pbtrust_backend_no_authenticated_copy",
+    )
+    add_backend(
+        "NEG-N5-PBTRUST-BACKEND-PHYSICAL-INDEX",
+        (trust.BackendCopy(None, False), trust.BackendCopy(backend0, True)),
+        backend_anchor,
+        backend_requirements,
+        backend_access,
+        "pbtrust_backend_no_authenticated_copy",
+    )
+    old_logical = trust.logical_state_sha256(trust.parse_state(backend0))
+    generation2_0 = _backend_state(0, 2, previous=old_logical)
+    generation2_1 = _backend_state(1, 2, previous=old_logical)
+    generation2_anchor = _backend_anchor(generation2_0)
+    add_backend(
+        "NEG-N5-PBTRUST-BACKEND-ROLLBACK-COPIES",
+        backend_copies,
+        generation2_anchor,
+        backend_requirements,
+        backend_access,
+        "pbtrust_backend_state_rollback",
+    )
+    add_backend(
+        "NEG-N5-PBTRUST-BACKEND-FUTURE-COPIES",
+        (
+            trust.BackendCopy(generation2_0, True),
+            trust.BackendCopy(generation2_1, True),
+        ),
+        backend_anchor,
+        backend_requirements,
+        backend_access,
+        "pbtrust_backend_future_state",
+    )
+    add_backend(
+        "NEG-N5-PBTRUST-BACKEND-ANCHOR-DIGEST",
+        backend_copies,
+        dataclasses.replace(backend_anchor, logical_state_sha256="77" * 32),
+        backend_requirements,
+        backend_access,
+        "pbtrust_backend_anchor_digest",
+    )
+    add_backend(
+        "NEG-N5-PBTRUST-BACKEND-PREVIOUS-CHAIN",
+        (
+            trust.BackendCopy(generation2_0, True),
+            trust.BackendCopy(generation2_1, True),
+        ),
+        dataclasses.replace(
+            generation2_anchor, previous_state_sha256="77" * 32
+        ),
+        backend_requirements,
+        backend_access,
+        "pbtrust_backend_previous_state",
+    )
+    add_backend(
+        "NEG-N5-PBTRUST-BACKEND-NOT-WRITABLE",
+        backend_copies,
+        backend_anchor,
+        backend_requirements,
+        _backend_access(writable=False),
+        "pbtrust_backend_writable",
+    )
+    add_backend(
+        "NEG-N5-PBTRUST-BACKEND-NO-REPAIR-CAPACITY",
+        (trust.BackendCopy(backend0, True), trust.BackendCopy(None, False)),
+        backend_anchor,
+        backend_requirements,
+        _backend_access(repair_capacity=False),
+        "pbtrust_backend_repair_capacity",
+    )
     return cases
 
 
@@ -610,12 +941,7 @@ def _run_negative_controls(probe: Path) -> list[dict[str, Any]]:
     rust_results = _probe_lines(probe, [case.request for case in cases])
     results: list[dict[str, Any]] = []
     for case, rust_result in zip(cases, rust_results, strict=True):
-        if case.request.startswith("P:"):
-            python_result = _policy_result(bytes.fromhex(case.request[2:]))
-        elif case.request.startswith("S:"):
-            python_result = _state_result(bytes.fromhex(case.request[2:]))
-        else:
-            python_result = case.expected
+        python_result = case.python
         status = (
             "pass"
             if python_result == rust_result == case.expected
@@ -708,6 +1034,233 @@ def _authorization_differential(probe: Path) -> dict[str, int]:
     }
 
 
+def _backend_selection_differential(probe: Path) -> dict[str, int]:
+    old0 = _backend_state(0)
+    old1 = _backend_state(1)
+    old_anchor = _backend_anchor(old0)
+    old_logical = trust.logical_state_sha256(trust.parse_state(old0))
+    new0 = _backend_state(0, 2, previous=old_logical)
+    new1 = _backend_state(1, 2, previous=old_logical)
+    new_anchor = _backend_anchor(new0)
+    default_requirements = _backend_requirements()
+    default_access = _backend_access()
+    randomizer = random.Random(BACKEND_SELECTION_SEED)
+    requests: list[str] = []
+    expected: list[str] = []
+    for _ in range(BACKEND_SELECTION_CASES):
+        selector = randomizer.randrange(16)
+        copies = (
+            trust.BackendCopy(old0, True),
+            trust.BackendCopy(old1, True),
+        )
+        anchor = old_anchor
+        requirements = default_requirements
+        access = default_access
+        if selector == 1:
+            copies = (copies[0], trust.BackendCopy(None, False))
+        elif selector == 2:
+            copies = (trust.BackendCopy(None, False), copies[1])
+        elif selector == 3:
+            copies = (copies[0], trust.BackendCopy(new1, True))
+        elif selector == 4:
+            copies = (copies[0], trust.BackendCopy(new1, True))
+            anchor = _backend_anchor(new1)
+        elif selector == 5:
+            copies = (
+                trust.BackendCopy(new0, True),
+                trust.BackendCopy(new1, True),
+            )
+            anchor = new_anchor
+        elif selector == 6:
+            copies = (
+                trust.BackendCopy(None, False),
+                trust.BackendCopy(None, False),
+            )
+        elif selector == 7:
+            copies = (
+                trust.BackendCopy(old0, False),
+                trust.BackendCopy(old1, False),
+            )
+        elif selector == 8:
+            anchor = dataclasses.replace(anchor, authenticated=False)
+        elif selector == 9:
+            anchor = dataclasses.replace(anchor, monotonic=False)
+        elif selector == 10:
+            value = randomizer.getrandbits(256) or 1
+            anchor = dataclasses.replace(
+                anchor, logical_state_sha256=f"{value:064X}"
+            )
+        elif selector == 11:
+            requirements = dataclasses.replace(
+                requirements, minimum_state_generation=2
+            )
+        elif selector == 12:
+            access = dataclasses.replace(access, writable=False)
+        elif selector == 13:
+            copies = (copies[0], trust.BackendCopy(None, False))
+            access = dataclasses.replace(access, repair_capacity=False)
+        elif selector == 14:
+            corrupt = bytearray(old1)
+            corrupt[224] ^= 1
+            copies = (copies[0], trust.BackendCopy(bytes(corrupt), True))
+        elif selector == 15:
+            requirements = dataclasses.replace(
+                requirements, target_store_epoch=2, target_auth_profile=2
+            )
+        requests.append(_backend_request(copies, anchor, requirements, access))
+        expected.append(_backend_result(copies, anchor, requirements, access))
+    observed = _probe_lines(probe, requests)
+    mismatches = sum(
+        left != right for left, right in zip(expected, observed, strict=True)
+    )
+    if mismatches:
+        raise QualificationError(
+            f"PBSTATE1 backend differential mismatches: {mismatches}"
+        )
+    return {
+        "cases": BACKEND_SELECTION_CASES,
+        "mismatches": 0,
+        "seed": BACKEND_SELECTION_SEED,
+    }
+
+
+def _power_loss_corpus(probe: Path) -> dict[str, Any]:
+    old0 = _backend_state(0)
+    old1 = _backend_state(1)
+    old_anchor = _backend_anchor(old0)
+    old_logical = trust.logical_state_sha256(trust.parse_state(old0))
+    new0 = _backend_state(0, 2, previous=old_logical)
+    new1 = _backend_state(1, 2, previous=old_logical)
+    new_anchor = _backend_anchor(new0)
+    uncommitted0 = _set_int(new0, 18, 2, 0, policy=False)
+    uncommitted1 = _set_int(new1, 18, 2, 0, policy=False)
+    requirements = _backend_requirements()
+    access = _backend_access()
+    cases = (
+        (
+            "before_target_write",
+            (trust.BackendCopy(old0, True), trust.BackendCopy(old1, True)),
+            old_anchor,
+            1,
+            0,
+            0,
+        ),
+        (
+            "after_target_body_write",
+            (trust.BackendCopy(old0, True), trust.BackendCopy(uncommitted1, False)),
+            old_anchor,
+            1,
+            0,
+            0b10,
+        ),
+        (
+            "after_target_data_flush",
+            (trust.BackendCopy(old0, True), trust.BackendCopy(uncommitted1, False)),
+            old_anchor,
+            1,
+            0,
+            0b10,
+        ),
+        (
+            "after_target_commit_auth",
+            (trust.BackendCopy(old0, True), trust.BackendCopy(new1, True)),
+            old_anchor,
+            1,
+            0,
+            0b10,
+        ),
+        (
+            "after_target_commit_flush",
+            (trust.BackendCopy(old0, True), trust.BackendCopy(new1, True)),
+            old_anchor,
+            1,
+            0,
+            0b10,
+        ),
+        (
+            "after_anchor_advance",
+            (trust.BackendCopy(old0, True), trust.BackendCopy(new1, True)),
+            _backend_anchor(new1),
+            2,
+            1,
+            0b01,
+        ),
+        (
+            "after_anchor_verify",
+            (trust.BackendCopy(old0, True), trust.BackendCopy(new1, True)),
+            _backend_anchor(new1),
+            2,
+            1,
+            0b01,
+        ),
+        (
+            "after_repair_write",
+            (
+                trust.BackendCopy(uncommitted0, False),
+                trust.BackendCopy(new1, True),
+            ),
+            new_anchor,
+            2,
+            1,
+            0b01,
+        ),
+        (
+            "after_final_verify",
+            (trust.BackendCopy(new0, True), trust.BackendCopy(new1, True)),
+            new_anchor,
+            2,
+            0,
+            0,
+        ),
+    )
+    requests: list[str] = []
+    expected: list[str] = []
+    results: list[dict[str, Any]] = []
+    for identifier, copies, anchor, generation, selected_copy, repair_mask in cases:
+        result = _backend_result(copies, anchor, requirements, access)
+        if result.startswith("ERR:"):
+            raise QualificationError(
+                f"PBSTATE1 power-loss case {identifier} failed: {result}"
+            )
+        selected = trust.select_backend_state(
+            copies, anchor, requirements, access
+        )
+        if (
+            selected.state_generation != generation
+            or selected.selected_copy != selected_copy
+            or selected.repair_copy_mask != repair_mask
+            or selected.authority_grants != 0
+            or selected.state_writes != 0
+        ):
+            raise QualificationError(
+                f"PBSTATE1 power-loss case {identifier} changed semantics"
+            )
+        requests.append(_backend_request(copies, anchor, requirements, access))
+        expected.append(result)
+        results.append(
+            {
+                "id": identifier,
+                "selected_generation": generation,
+                "selected_copy": selected_copy,
+                "repair_copy_mask": repair_mask,
+                "authority_grants": 0,
+                "state_writes": 0,
+                "status": "pass",
+            }
+        )
+    observed = _probe_lines(probe, requests)
+    if observed != expected:
+        raise QualificationError("PBSTATE1 power-loss Rust/Python evidence diverged")
+    return {
+        "case_count": len(results),
+        "all_cases_passed": True,
+        "storage_io_performed": False,
+        "anchor_writes_performed": 0,
+        "state_writes_performed": 0,
+        "cases": results,
+    }
+
+
 def make_readiness(toolchain_root: Path) -> dict[str, Any]:
     contract = trust.read_json(ROOT / trust.CONTRACT_RELATIVE)
     contract_failures = trust.contract_errors(contract, ROOT)
@@ -749,7 +1302,32 @@ def make_readiness(toolchain_root: Path) -> dict[str, Any]:
             previous_state_sha256=trust.sha256_bytes(authenticated_state),
         )
         trust.parse_state(generation_two)
+        backend0 = _backend_state(0)
+        backend1 = _backend_state(1)
+        backend_requirements = _backend_requirements(
+            target_epoch=2, target_profile=2
+        )
+        backend_selection = trust.select_backend_state(
+            (
+                trust.BackendCopy(backend0, True),
+                trust.BackendCopy(backend1, True),
+            ),
+            _backend_anchor(backend0),
+            backend_requirements,
+            _backend_access(),
+        )
+        backend_plan = trust.plan_backend_transition(backend_selection)
+        if (
+            backend_selection.authority_grants != 0
+            or backend_selection.state_writes != 0
+            or backend_plan.state_writes_performed != 0
+            or backend_plan.anchor_writes_performed != 0
+            or backend_plan.authority_grants != 0
+            or backend_plan.ordered_step_count != trust.TRANSITION_STEP_COUNT
+        ):
+            raise QualificationError("PBSTATE1 planning produced an unauthorized effect")
         controls = _run_negative_controls(probe)
+        power_loss = _power_loss_corpus(probe)
         differential = {
             "policy_parser": _parser_differential(
                 probe,
@@ -770,6 +1348,7 @@ def make_readiness(toolchain_root: Path) -> dict[str, Any]:
                 oracle=_state_result,
             ),
             "authorization": _authorization_differential(probe),
+            "backend_selection": _backend_selection_differential(probe),
         }
     expected_control_count = contract["qualification"]["negative_control_count"]
     if len(controls) != expected_control_count:
@@ -796,12 +1375,15 @@ def make_readiness(toolchain_root: Path) -> dict[str, Any]:
         },
         "build": build,
         "golden": {
-            "case_count": 3,
+            "case_count": 5,
             "development_policy_sha256": trust.sha256_bytes(development_policy),
             "development_state_sha256": trust.sha256_bytes(development_state),
             "signed_shape_policy_sha256": trust.sha256_bytes(signed_policy),
             "authenticated_shape_state_sha256": trust.sha256_bytes(authenticated_state),
             "generation_two_state_sha256": trust.sha256_bytes(generation_two),
+            "backend_copy_zero_sha256": trust.sha256_bytes(backend0),
+            "backend_copy_one_sha256": trust.sha256_bytes(backend1),
+            "backend_logical_state_sha256": backend_selection.logical_state_sha256,
             "synthetic_authorization_model_result": "qualified_shape_only_no_crypto_claim",
         },
         "negative_controls": controls,
@@ -822,6 +1404,21 @@ def make_readiness(toolchain_root: Path) -> dict[str, Any]:
                 "authority_grants",
                 "state_writes",
             )
+        },
+        "backend_model": {
+            "contract_id": trust.BACKEND_CONTRACT_ID,
+            "logical_digest_domain": trust.LOGICAL_DIGEST_DOMAIN.rstrip(b"\0").decode("ascii"),
+            "selected_copy": backend_selection.selected_copy,
+            "anchored_copy_mask": backend_selection.anchored_copy_mask,
+            "repair_copy_mask": backend_selection.repair_copy_mask,
+            "migration_required": backend_selection.migration_required,
+            "next_generation": backend_plan.next_generation,
+            "target_copy": backend_plan.target_copy,
+            "ordered_transition_steps": list(trust.BACKEND_TRANSITION_STEPS),
+            "authority_grants": 0,
+            "state_writes_performed": 0,
+            "anchor_writes_performed": 0,
+            "power_loss": power_loss,
         },
         "claims": trust.expected_claims(),
         "non_claims": contract["non_claims"],
