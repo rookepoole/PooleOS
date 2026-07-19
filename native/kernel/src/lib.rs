@@ -6,15 +6,23 @@ use core::marker::PhantomData;
 use core::ptr;
 use core::sync::atomic::{AtomicU8, AtomicU32, AtomicUsize, Ordering};
 
-use poole_handoff::{self, CoreRecord, Handoff, RECORD_FRAMEBUFFER, validate_kernel_entry_profile};
+use poole_handoff::{
+    self, BOOT_SERVICES_EXITED, CoreRecord, DEVELOPMENT_MODE, FEATURE_CORE, FEATURE_FRAMEBUFFER,
+    FEATURE_LOADED_ARTIFACTS, FEATURE_MEMORY_MAP, Handoff, RECORD_FRAMEBUFFER,
+    RECORD_LOADED_ARTIFACTS, validate_kernel_entry_profile,
+};
 
 pub mod revalidation;
 
 pub const ENTRY_CONTRACT_ID: &str = "PKENTRY1";
-pub const BUILD_ID: &[u8] = b"PKBUILD1-CYCLE117-N5-REVALIDATE-001";
-pub const ENTRY_OFFSET: u64 = 0x4000;
+pub const TRANSFER_CONTRACT_ID: &str = "PKXFER1";
+pub const BUILD_ID: &[u8] = b"PKBUILD1-CYCLE118-N5-TRANSFER-001";
+pub const ENTRY_OFFSET: u64 = 0x8000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
 pub const HANDOFF_MAGIC_U64: u64 = u64::from_le_bytes(poole_handoff::MAGIC);
+const CR3_ALLOWED_LOW_BITS: u64 = (1 << 3) | (1 << 4);
+const RFLAGS_INTERRUPT_ENABLE: u64 = 1 << 9;
+const RFLAGS_DIRECTION: u64 = 1 << 10;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(u32)]
@@ -26,6 +34,8 @@ pub enum PanicCode {
     HandoffProfile = 0x1005,
     RuntimeContinuity = 0x1006,
     TrustRevalidation = 0x1007,
+    TransferState = 0x1008,
+    Reentry = 0x1009,
     UnexpectedReturn = 0x10ff,
 }
 
@@ -88,6 +98,9 @@ pub enum EntryError {
     EntryMismatch,
     EntryOffset,
     StackMismatch,
+    HandoffAddressMismatch,
+    PageTableMismatch,
+    FlagState,
 }
 
 impl EntryError {
@@ -98,9 +111,12 @@ impl EntryError {
             }
             Self::Decode => PanicCode::HandoffDecode,
             Self::KernelProfile => PanicCode::HandoffProfile,
-            Self::EntryMismatch | Self::EntryOffset | Self::StackMismatch => {
-                PanicCode::RuntimeContinuity
-            }
+            Self::EntryMismatch
+            | Self::EntryOffset
+            | Self::StackMismatch
+            | Self::HandoffAddressMismatch
+            | Self::PageTableMismatch
+            | Self::FlagState => PanicCode::RuntimeContinuity,
             _ => PanicCode::HandoffEnvelope,
         }
     }
@@ -171,6 +187,24 @@ pub fn validate_handoff(
 ) -> Result<ValidatedEntry, EntryError> {
     let handoff = poole_handoff::decode(bytes).map_err(|_| EntryError::Decode)?;
     validate_kernel_entry_profile(&handoff).map_err(|_| EntryError::KernelProfile)?;
+    validate_handoff_continuity(&handoff, runtime_entry, stack_top)
+}
+
+pub fn validate_development_handoff(
+    bytes: &[u8],
+    runtime_entry: u64,
+    stack_top: u64,
+) -> Result<ValidatedEntry, EntryError> {
+    let handoff = poole_handoff::decode(bytes).map_err(|_| EntryError::Decode)?;
+    validate_development_transfer_profile(&handoff)?;
+    validate_handoff_continuity(&handoff, runtime_entry, stack_top)
+}
+
+fn validate_handoff_continuity(
+    handoff: &Handoff<'_>,
+    runtime_entry: u64,
+    stack_top: u64,
+) -> Result<ValidatedEntry, EntryError> {
     let core = handoff.core().map_err(|_| EntryError::Decode)?;
     if core.kernel_entry_virtual != runtime_entry {
         return Err(EntryError::EntryMismatch);
@@ -183,8 +217,66 @@ pub fn validate_handoff(
     }
     Ok(ValidatedEntry {
         core,
-        framebuffer: framebuffer_spec(&handoff),
+        framebuffer: framebuffer_spec(handoff),
     })
+}
+
+fn validate_development_transfer_profile(handoff: &Handoff<'_>) -> Result<(), EntryError> {
+    let has_framebuffer = handoff.record(RECORD_FRAMEBUFFER).is_some();
+    let expected_features = FEATURE_CORE
+        | FEATURE_MEMORY_MAP
+        | FEATURE_LOADED_ARTIFACTS
+        | if has_framebuffer {
+            FEATURE_FRAMEBUFFER
+        } else {
+            0
+        };
+    let expected_required = FEATURE_CORE | FEATURE_MEMORY_MAP | FEATURE_LOADED_ARTIFACTS;
+    let expected_record_count = if has_framebuffer { 4 } else { 3 };
+    let header = handoff.header();
+    let core = handoff.core().map_err(|_| EntryError::Decode)?;
+    let artifacts = handoff
+        .record(RECORD_LOADED_ARTIFACTS)
+        .ok_or(EntryError::KernelProfile)?;
+    if header.features != expected_features
+        || header.required_features != expected_required
+        || header.record_count != expected_record_count
+        || core.boot_flags != DEVELOPMENT_MODE | BOOT_SERVICES_EXITED
+        || core.uefi_system_table_physical != 0
+        || core.uefi_runtime_services_physical != 0
+        || artifacts.descriptor.element_count != revalidation::PROFILE_ROLE_COUNT
+        || validate_kernel_entry_profile(handoff).is_ok()
+    {
+        return Err(EntryError::KernelProfile);
+    }
+    Ok(())
+}
+
+pub fn validate_runtime_state(
+    entry: &ValidatedEntry,
+    handoff_address: u64,
+    handoff_length: usize,
+    observed_stack_top: u64,
+    observed_cr3: u64,
+    observed_rflags: u64,
+) -> Result<(), EntryError> {
+    if entry.core.handoff_virtual_base != handoff_address
+        || entry.core.handoff_byte_count != handoff_length as u64
+    {
+        return Err(EntryError::HandoffAddressMismatch);
+    }
+    if entry.core.initial_stack_top_virtual != observed_stack_top {
+        return Err(EntryError::StackMismatch);
+    }
+    if observed_cr3 & (poole_handoff::PAGE_BYTES - 1) & !CR3_ALLOWED_LOW_BITS != 0
+        || observed_cr3 & !(poole_handoff::PAGE_BYTES - 1) != entry.core.page_table_root_physical
+    {
+        return Err(EntryError::PageTableMismatch);
+    }
+    if observed_rflags & (RFLAGS_INTERRUPT_ENABLE | RFLAGS_DIRECTION) != 0 {
+        return Err(EntryError::FlagState);
+    }
+    Ok(())
 }
 
 fn read_u32(bytes: &[u8], offset: usize) -> u32 {
@@ -327,6 +419,14 @@ impl<S: ByteSink> EarlyLogger<S> {
         for shift in (0..16).rev() {
             self.sink
                 .write_byte(HEX[((value >> (shift * 4)) & 0xf) as usize]);
+        }
+    }
+
+    pub fn write_hex_bytes(&mut self, bytes: &[u8]) {
+        const HEX: &[u8; 16] = b"0123456789ABCDEF";
+        for byte in bytes {
+            self.sink.write_byte(HEX[(byte >> 4) as usize]);
+            self.sink.write_byte(HEX[(byte & 0x0f) as usize]);
         }
     }
 
@@ -697,8 +797,70 @@ mod tests {
         logger.write_hex_u64(0x1234);
         logger.write_str("/");
         logger.write_decimal_u64(18_446_744_073_709_551_615);
+        logger.write_str("/");
+        logger.write_hex_bytes(&[0xab, 0xcd, 0xef]);
         let output = logger.into_inner().0;
-        assert_eq!(output, b"0x0000000000001234/18446744073709551615");
+        assert_eq!(output, b"0x0000000000001234/18446744073709551615/ABCDEF");
+    }
+
+    #[test]
+    fn runtime_state_binds_handoff_stack_cr3_and_flags() {
+        let entry = ValidatedEntry {
+            core: CoreRecord {
+                boot_flags: DEVELOPMENT_MODE | BOOT_SERVICES_EXITED,
+                kernel_physical_base: 0x0100_0000,
+                kernel_physical_size: 0x40000,
+                kernel_virtual_base: 0xffff_ffff_8000_0000,
+                kernel_virtual_size: 0x40000,
+                kernel_entry_virtual: 0xffff_ffff_8000_8000,
+                initial_stack_top_virtual: 0xffff_ffff_8004_9000,
+                page_table_root_physical: 0x0200_0000,
+                handoff_physical_base: 0x0300_0000,
+                handoff_virtual_base: 0xffff_ffff_8005_0000,
+                handoff_byte_count: 5008,
+                uefi_system_table_physical: 0,
+                uefi_runtime_services_physical: 0,
+                boot_attempt: 0,
+                boot_attempt_limit: 3,
+                boot_slot: 1,
+                selected_entry: 1,
+                uefi_revision: 0x0002_0046,
+            },
+            framebuffer: None,
+        };
+        assert_eq!(
+            validate_runtime_state(
+                &entry,
+                0xffff_ffff_8005_0000,
+                5008,
+                0xffff_ffff_8004_9000,
+                0x0200_0018,
+                0x2,
+            ),
+            Ok(())
+        );
+        assert_eq!(
+            validate_runtime_state(
+                &entry,
+                0xffff_ffff_8005_0000,
+                5008,
+                0xffff_ffff_8004_9000,
+                0x0200_1000,
+                0x2,
+            ),
+            Err(EntryError::PageTableMismatch)
+        );
+        assert_eq!(
+            validate_runtime_state(
+                &entry,
+                0xffff_ffff_8005_0000,
+                5008,
+                0xffff_ffff_8004_9000,
+                0x0200_0000,
+                RFLAGS_INTERRUPT_ENABLE,
+            ),
+            Err(EntryError::FlagState)
+        );
     }
 
     #[test]

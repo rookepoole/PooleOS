@@ -154,10 +154,11 @@ frees both candidate pools, emits one `TRUST_STATE DENY` marker with zero
 signatures, authority grants, and state writes, and continues to its permanent
 pre-transfer stop.
 
-This is fail-closed parser and binding evidence. Cycle 117 independently
-reparses PBTP1 and PBTS1 and reconstructs exact unsigned-policy denial in
-host-executed PooleKernel code. The live caller still stops before entry, so
-PooleKernel does not consume authenticated state or create capabilities.
+This is fail-closed parser and binding evidence. Cycle 117 adds independent
+PooleKernel PBTP1/PBTS1 reparsing, and Cycle 118 executes that same path only
+under the opt-in QEMU development-transfer profile. It reconstructs exact
+unsigned-policy denial and halts; PooleKernel does not consume authenticated
+state or create capabilities.
 
 ## Qualification
 

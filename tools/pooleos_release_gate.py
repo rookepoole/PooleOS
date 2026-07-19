@@ -26,6 +26,7 @@ from runtime import native_firmware  # noqa: E402
 from runtime import native_kernel_entry  # noqa: E402
 from runtime import native_kernel_load  # noqa: E402
 from runtime import native_kernel_revalidation  # noqa: E402
+from runtime import native_kernel_transfer  # noqa: E402
 from runtime import native_initial_system  # noqa: E402
 from runtime import native_microcode  # noqa: E402
 from runtime import native_models  # noqa: E402
@@ -60,6 +61,7 @@ NATIVE_ELF_LOADER_READINESS = ROOT / "runs" / "native_elf_loader_readiness.json"
 NATIVE_KERNEL_ENTRY_READINESS = ROOT / "runs" / "native_kernel_entry_readiness.json"
 NATIVE_KERNEL_LOAD_READINESS = ROOT / "runs" / "native_kernel_load_readiness.json"
 NATIVE_KERNEL_REVALIDATION_READINESS = ROOT / "runs" / "native-kernel-revalidation-readiness.json"
+NATIVE_KERNEL_TRANSFER_READINESS = ROOT / "runs" / "native-kernel-transfer-readiness.json"
 NATIVE_INITIAL_SYSTEM_READINESS = ROOT / "runs" / "native_initial_system_readiness.json"
 NATIVE_FIRMWARE_READINESS = ROOT / "runs" / "native_firmware_readiness.json"
 NATIVE_MICROCODE_READINESS = ROOT / "runs" / "native_microcode_readiness.json"
@@ -928,7 +930,7 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
         "inner_set_parser_count": 6,
         "inner_set_cross_binding_count": 6,
         "inner_set_development_denial_count": 6,
-        "inner_set_retained_set_sha256": "FEE092995AF574AABDC329154E27E9464252923B87D58171DD4455B89FCBBA49",
+        "inner_set_retained_set_sha256": "652F3743DC6C033D41C8F634F359BF3A8A4B4AFF8D21F7EA329A0E349619A069",
         "inner_set_authority_grants": 0,
         "inner_set_actions_authorized": 0,
         "inner_set_state_writes": 0,
@@ -943,8 +945,8 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
         "policy_profile": "synthetic_qualification_only",
         "trust_binding_count": 14,
         "trust_denial": "pbtrust_policy_unsigned",
-        "trust_policy_sha256": "C9C12F3C0A9ECC1E45FB5E42EBEA6A22916F7B151075BD10CFEFDB12B375667E",
-        "trust_state_sha256": "13123FE394FA1630315F71B0E78AD667674ACCC05B0DAD1AD18209A3E925227D",
+        "trust_policy_sha256": "DED2480B00B488A0B65F176B977130052914ABA6CEE5E6770EFAF4A972B88973",
+        "trust_state_sha256": "D92025006EC9C7D522A4FBC0DEE6176B333CFCF9AAA3FF9D571C76214099719C",
         "trust_authority_grants": 0,
         "trust_state_writes": 0,
         "production_claim_count": 0,
@@ -958,7 +960,7 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
     detail = (
         "contract=POOLEOS-N5-POOLEBOOT-7; host_tests=8/8; builds=2/2; media=2/2; "
         "guest_runs=2/2; markers=25; serial_debugcon=2/2; gop_frames=2/2; "
-        "retained_files=9; inner=6/6; inner_sha256=FEE092995AF574AA; authority=0; actions=0; state=0; hardware=0; "
+        "retained_files=9; inner=6/6; inner_sha256=652F3743DC6C033D; authority=0; actions=0; state=0; hardware=0; "
         "trust=unsigned-deny; trust_bindings=14; trust_authority=0; trust_writes=0; "
         "pbp1=2/2; kmap=2/2; exit=2/2; negatives=155/155; pmcu1=synthetic-never-apply; pfwm1=synthetic-never-apply; ppol1=qualification-only; production_claims=0; n5_exit=false; production_ready=false"
     )
@@ -987,7 +989,7 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     summary = artifact.get("summary", {})
     if summary.get("guest_runs_passed") != 2 or summary.get("guest_runs_total") != 2:
         errors.append("PKLOAD6 guest-run evidence is incomplete")
-    if summary.get("rust_host_tests_passed") != 93 or summary.get("rust_host_tests_total") != 93:
+    if summary.get("rust_host_tests_passed") != 99 or summary.get("rust_host_tests_total") != 99:
         errors.append("PKLOAD6 Rust host-test evidence is incomplete")
     if summary.get("ordered_marker_count") != 25:
         errors.append("PKLOAD6 marker evidence is incomplete")
@@ -1000,7 +1002,7 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     ) != 155:
         errors.append("PKLOAD6 negative controls are incomplete")
     if summary.get("inner_retained_set_sha256") != (
-        "FEE092995AF574AABDC329154E27E9464252923B87D58171DD4455B89FCBBA49"
+        "652F3743DC6C033D41C8F634F359BF3A8A4B4AFF8D21F7EA329A0E349619A069"
     ):
         errors.append("PKLOAD6 retained inner-set identity changed")
     if artifact.get("claims") != native_kernel_load.expected_claims():
@@ -1010,9 +1012,9 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     ) is not False:
         errors.append("PKLOAD6 overclaims N5 exit or production readiness")
     detail = (
-        "contract=PKLOAD6; rust_tests=93/93; boot_builds=2/2; kernel_builds=2/2; "
+        "contract=PKLOAD6; rust_tests=99/99; boot_builds=2/2; kernel_builds=2/2; "
         "media=2/2; guest_runs=2/2; markers=25; retained_files=9; inner=6/6; "
-        "inner_sha256=FEE092995AF574AA; "
+        "inner_sha256=652F3743DC6C033D; "
         "trust=unsigned-deny; trust_bindings=14; trust_authority=0; trust_writes=0; "
         "oracle=2/2; pbp1=2/2; kmap=2/2; exit=2/2; firmware_after_exit=0; "
         "negatives=155/155; pmcu1=synthetic-never-apply; pfwm1=synthetic-never-apply; "
@@ -1043,7 +1045,7 @@ def check_native_kernel_revalidation_readiness(
         )
     errors.extend(native_kernel_revalidation.readiness_errors(artifact, ROOT))
     build = artifact.get("build", {})
-    if not isinstance(build, dict) or build.get("host_test_count") != 13:
+    if not isinstance(build, dict) or build.get("host_test_count") != 14:
         errors.append("PKREVAL1 host-test evidence is incomplete")
     controls = artifact.get("negative_controls", [])
     if (
@@ -1072,7 +1074,7 @@ def check_native_kernel_revalidation_readiness(
     ) != (
         9,
         9,
-        "FEE092995AF574AABDC329154E27E9464252923B87D58171DD4455B89FCBBA49",
+        "652F3743DC6C033D41C8F634F359BF3A8A4B4AFF8D21F7EA329A0E349619A069",
         "pbtrust_policy_unsigned",
         0,
         0,
@@ -1087,13 +1089,82 @@ def check_native_kernel_revalidation_readiness(
     ) is not False:
         errors.append("PKREVAL1 overclaims production readiness")
     detail = (
-        "contract=PKREVAL1; kernel_tests=13/13; python_tests=8/8; targets=2/2; "
+        "contract=PKREVAL1; kernel_tests=14/14; python_tests=8/8; targets=2/2; "
         "retained_files=9; parsers=9; controls=36/36; differential=32768/32768; "
         "denial=pbtrust_policy_unsigned; authority=0; actions=0; state_writes=0; "
         "live_kernel_entry=false; production_ready=false"
     )
     return readiness.make_check(
         "native_kernel_revalidation_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_kernel_transfer_readiness(
+    path: Path = NATIVE_KERNEL_TRANSFER_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-kernel-transfer-readiness.schema.json"
+    )
+    errors = [
+        f"native kernel transfer readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_kernel_transfer_readiness",
+            False,
+            "; ".join(errors) or "native kernel transfer readiness is not an object",
+        )
+    errors.extend(native_kernel_transfer.readiness_errors(artifact, ROOT))
+    summary = artifact.get("summary", {})
+    if not isinstance(summary, dict) or (
+        summary.get("marker_count"),
+        summary.get("kernel_marker_count"),
+        summary.get("retained_file_count"),
+        summary.get("negative_controls_passed"),
+        summary.get("signature_verifications"),
+        summary.get("authority_grants"),
+        summary.get("actions_authorized"),
+        summary.get("state_writes"),
+        summary.get("firmware_calls_after_exit"),
+    ) != (30, 5, 9, 57, 0, 0, 0, 0, 0):
+        errors.append("PKXFER1 summary changed")
+    execution = artifact.get("execution", {})
+    runs = execution.get("runs", []) if isinstance(execution, dict) else []
+    if (
+        len(runs) != 2
+        or any(
+            not isinstance(run, dict)
+            or run.get("serial_debugcon_exact_match") is not True
+            or run.get("pbp1_serial_debugcon_exact_match") is not True
+            or run.get("marker_summary", {}).get("kernel_terminal", {}).get("terminal") != "halt"
+            or run.get("independent_kernel_revalidation", {}).get("guest_host_exact_match") is not True
+            for run in runs
+        )
+    ):
+        errors.append("PKXFER1 live run evidence is incomplete")
+    build = artifact.get("build", {})
+    if (
+        not isinstance(build, dict)
+        or build.get("development_transfer_feature") is not True
+        or build.get("default_feature_enabled") is not False
+        or build.get("default_stop_marker_present") is not True
+        or build.get("default_transfer_marker_absent") is not True
+    ):
+        errors.append("PKXFER1 feature isolation changed")
+    if artifact.get("claims") != native_kernel_transfer.expected_claims():
+        errors.append("PKXFER1 claim boundary changed")
+    detail = (
+        "contract=PKXFER1; feature=development-transfer; default_transfer=false; "
+        "qemu_runs=2/2; markers=30/30; kernel_markers=5/5; channels=2/2; "
+        "pbp1=2/2; pkreval_files=9; controls=57/57; terminal=unsigned-denial-halt; "
+        "signatures=0; authority=0; actions=0; writes=0; firmware_after_exit=0; "
+        "target_firmware=false; physical_media=false; n5_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_kernel_transfer_readiness",
         not errors,
         detail if not errors else "; ".join(errors[:8]),
     )
@@ -1603,8 +1674,8 @@ def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINE
         )
     errors.extend(native_kernel_entry.readiness_errors(artifact))
     expected_summary = {
-        "rust_host_tests_passed": 13,
-        "rust_host_tests_total": 13,
+        "rust_host_tests_passed": 14,
+        "rust_host_tests_total": 14,
         "rustfmt_packages_passed": 2,
         "clippy_runs_passed": 2,
         "clippy_runs_total": 2,
@@ -1625,13 +1696,13 @@ def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINE
         or product.get("entry_offset") != 0x8000
         or product.get("relocation_count") != 302
         or product.get("canonical_sha256")
-        != "5CBB39B4BFF9A23E8D65E3115FE536D4CDB13EAA372E8DAA5071F1530210132E"
+        != "5D06ABFC9BD525931C63CC8A48FACD66A478640CE793E20E6D66EAEEB2BCEEEA"
     ):
         errors.append("PKENTRY1 product identity changed")
     if artifact.get("claims") != native_kernel_entry.expected_claims():
         errors.append("PKENTRY1 claim boundary changed")
     detail = (
-        "contract=PKENTRY1; kernel_tests=13/13; clean_builds=2/2; negative=43/43; "
+        "contract=PKENTRY1; kernel_tests=14/14; clean_builds=2/2; negative=43/43; "
         "exact_loaded=2/2; bytes=180224; image_bytes=262144; entry=0x8000; "
         "relocations=302; live_transfer=false; "
         "target_execution=false; n6_exit=false; production_ready=false"
@@ -4447,6 +4518,11 @@ def main(argv: list[str] | None = None) -> int:
         default=NATIVE_KERNEL_REVALIDATION_READINESS,
     )
     parser.add_argument(
+        "--native-kernel-transfer-readiness",
+        type=Path,
+        default=NATIVE_KERNEL_TRANSFER_READINESS,
+    )
+    parser.add_argument(
         "--native-initial-system-readiness",
         type=Path,
         default=NATIVE_INITIAL_SYSTEM_READINESS,
@@ -4505,6 +4581,7 @@ def main(argv: list[str] | None = None) -> int:
         check_native_pooleboot_readiness(args.native_pooleboot_readiness),
         check_native_kernel_load_readiness(args.native_kernel_load_readiness),
         check_native_kernel_revalidation_readiness(args.native_kernel_revalidation_readiness),
+        check_native_kernel_transfer_readiness(args.native_kernel_transfer_readiness),
         check_native_initial_system_readiness(args.native_initial_system_readiness),
         check_native_recovery_readiness(args.native_recovery_readiness),
         check_native_symbol_readiness(args.native_symbol_readiness),

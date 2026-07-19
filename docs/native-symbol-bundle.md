@@ -56,11 +56,11 @@ The canonical development bundle binds these exact SHA-256 identities:
 
 | Identity | SHA-256 |
 | --- | --- |
-| Canonical stripped PKELF1 | `5CBB39B4BFF9A23E8D65E3115FE536D4CDB13EAA372E8DAA5071F1530210132E` |
-| Preferred loaded image | `2E031002E303B22C9836F73636A6B6DF4061462293B62DA383A62060A386AA96` |
-| Build ID text | `4F29BB22D36F289A892E84DAB4C5C0C90093A61D91844E47CAE35F0A23EFCE48` |
-| Full split-debug ELF | `BBCCFB73249138C431F1262D0533297CC8B66614D560E2A1D531DD7EB15E2F1F` |
-| `native/kernel/manifest.pkm` | `AA05393FA6A1C33FFAD7AC143FF1E6F16391159E8B10222ECA9E0B1660ED34ED` |
+| Canonical stripped PKELF1 | `5D06ABFC9BD525931C63CC8A48FACD66A478640CE793E20E6D66EAEEB2BCEEEA` |
+| Preferred loaded image | `00BDAF54F9CCD98AE6752B9F610886AFF571320640D44103A5FC65A83D89367E` |
+| Build ID text | `6D3E21CBA8495B89D04247EA85835B06F7A0B790C4757F4135789C807CB05E19` |
+| Full split-debug ELF | `6AAA1CC5DF0192DE9FEB545CB269185246D7BC3161E953B19B897D12397E2B68` |
+| `native/kernel/manifest.pkm` | `618BEE498804DB09A0CB18281379B5045FBAD3F5D123767E7F8E6A7ED6C02FD0` |
 
 The qualification builds the full debug product twice and requires identical bytes. Both debug builds canonicalize to the exact stripped PKELF1 bytes. A separate release build must have no `.symtab` and no `.debug*` sections and must canonicalize to those same bytes.
 
@@ -72,9 +72,9 @@ Only these real global default-visible functions are selected today:
 
 | Symbol | Offset | Bytes | Policy |
 | --- | ---: | ---: | --- |
-| `poole_kernel_entry` | `0x8000` | 56 | entry, executable, public diagnostic |
-| `poole_kernel_emergency_panic` | `0x822A` | 190 | panic-safe, executable, public diagnostic |
-| `poole_kernel_rust_entry` | `0x82E8` | 1,085 | executable, public diagnostic |
+| `poole_kernel_entry` | `0x8000` | 63 | entry, executable, public diagnostic |
+| `poole_kernel_emergency_panic` | `0x82F5` | 198 | panic-safe, executable, public diagnostic |
+| `poole_kernel_rust_entry` | `0x83BB` | 2,718 | executable, public diagnostic |
 
 ## Name And Privacy Policy
 
@@ -111,7 +111,8 @@ The synthetic all-true context exists only to test that every gate can be reache
 Passing this qualification closes `N5-SYMBOLS-SEMANTICS-001` only. N5 remains partial, PSYM1 remains pre-ABI and unsigned, and `production_ready` remains false.
 
 Cycle 114 PooleBoot reparses the exact retained PSYM1 bytes and requires this
-development gate to fail at `psym_activation_outer_signature`. Cycle 117
-independently repeats the exact parse and denial in host-executed PooleKernel
-code. Neither path performs a lookup, discloses an address, or creates
-diagnostic authority; live PooleKernel execution and consumption remain open.
+development gate to fail at `psym_activation_outer_signature`. Cycle 117 adds
+the independent PooleKernel parser, and Cycle 118 executes that parse live in
+the opt-in QEMU development-transfer path before terminal denial. Neither path
+performs a lookup, discloses an address, or creates diagnostic authority;
+authenticated consumption remains open.

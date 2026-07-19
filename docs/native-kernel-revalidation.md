@@ -65,7 +65,7 @@ owned byte slices.
 The pinned single-host qualifier builds PooleKernel for
 `x86_64-unknown-none`, PooleBoot for `x86_64-unknown-uefi`, and a host probe from
 the same `no_std` verifier. Rust and an independent Python oracle must agree on
-the canonical nine-file result through 13 Rust tests, 8 Python tests, 36
+the canonical nine-file result through 14 Rust tests, 8 Python tests, 36
 targeted hostile controls, and 32,768
 deterministic post-loader mutations spanning every retained role. All mutation
 cases must reject at the exact-file digest boundary; controls also cover source
@@ -73,6 +73,11 @@ truncation, role reordering, locator substitution, writable/executable flags,
 range overlap, missing `ExitBootServices`, summary-size substitution,
 summary-digest substitution, and attempts to repair only the outer PBP1
 digest.
+
+The receipt binds the eight upstream PINIT1, PREC1, PSYM1, PMCU1, PFWM1,
+PPOL1, PBTRUST1/PBSTATE1, and PSM1 readiness ledgers used to form the canonical
+retained bundle. Refreshing any one of those ledgers makes PKREVAL1 stale until
+this qualifier is rerun.
 
 ## Boundary
 
@@ -82,15 +87,17 @@ snapshot. No signature is generated or verified, no capability is created,
 and no lifecycle, recovery, symbol, microcode, firmware, policy, or state-write
 action is authorized.
 
-PooleBoot still stops after successful `ExitBootServices` and before transfer.
-The firmware run therefore proves production of retained exact bytes and the
-final PBP1 ownership description, while the host probe proves the compiled
-PooleKernel consumer. It does not prove live PooleKernel execution, target
-firmware, physical hardware, a second builder, a signed ISO, installation,
-recovery, N5 exit, N6 exit, or production readiness.
+This standalone qualifier does not transfer control. The separate `PKXFER1`
+receipt proves the opt-in QEMU-only transfer and live guest execution of this
+same revalidation path; default PooleBoot still stops before transfer.
+The default firmware run proves production of retained exact bytes and the
+final PBP1 ownership description, while this standalone receipt proves the
+compiled PooleKernel consumer. PKXFER1 separately proves live execution only
+for the unsigned QEMU development profile. Neither receipt proves target
+firmware, physical hardware, a second builder, authenticated persistent state,
+capability creation, a signed ISO, installation, recovery, N5 exit, N6 exit, or
+production readiness.
 
-The next owner-independent move is `N5-KERNEL-TRANSFER-001`: install the final
-retained CR3 and guarded RSP, preserve required framebuffer and ABI state,
-enter PooleKernel exactly once, execute this verifier over the final retained
-bytes, and emit a terminal denial receipt with zero authority, actions, writes,
-or firmware calls.
+The next owner-independent move is `N7-TRAP-001`: install bounded GDT/TSS/IDT
+state and prove deliberate breakpoint and page-fault containment after the
+PKXFER1 handoff.

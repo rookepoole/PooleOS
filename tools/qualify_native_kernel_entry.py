@@ -123,8 +123,8 @@ def _host_checks(cargo: Path, env: dict[str, str], temporary_root: Path) -> dict
         env=env,
     )
     match = re.search(r"test result: ok\. ([0-9]+) passed; 0 failed", output)
-    if match is None or int(match.group(1)) != 13:
-        raise QualificationError("expected exactly thirteen PooleKernel host tests")
+    if match is None or int(match.group(1)) != 14:
+        raise QualificationError("expected exactly fourteen PooleKernel host tests")
     for package in ("poolekernel", "poolekernel-fixture"):
         _run(
             [
@@ -188,8 +188,8 @@ def _host_checks(cargo: Path, env: dict[str, str], temporary_root: Path) -> dict
         env=_product_environment(env),
     )
     return {
-        "test_count": 13,
-        "test_pass_count": 13,
+        "test_count": 14,
+        "test_pass_count": 14,
         "rustfmt_packages": ["poolekernel", "poolekernel-fixture"],
         "clippy_targets": [HOST_TARGET, PRODUCT_TARGET],
         "status": "pass",
@@ -502,8 +502,8 @@ def make_readiness(toolchain_root: Path) -> tuple[dict[str, Any], bytes]:
         "negative_controls": controls,
         "claims": entry.expected_claims(),
         "summary": {
-            "rust_host_tests_passed": 13,
-            "rust_host_tests_total": 13,
+            "rust_host_tests_passed": 14,
+            "rust_host_tests_total": 14,
             "rustfmt_packages_passed": 2,
             "clippy_runs_passed": 2,
             "clippy_runs_total": 2,
@@ -518,7 +518,7 @@ def make_readiness(toolchain_root: Path) -> tuple[dict[str, Any], bytes]:
         "open_items": [
             "Wire authenticated PooleKernel file discovery, bounded reads, and PKELF1 allocation into PooleBoot.",
             "Install and inspect final page tables, W^X/RELRO permissions, bootstrap stack, read-only PBP1 mapping, and temporary framebuffer mapping.",
-            "Populate a live PBP1 kernel-entry profile, complete ExitBootServices retry policy, and execute the PKENTRY1 transfer under pinned QEMU/OVMF.",
+            "Replace the QEMU-only unsigned development transfer with an authenticated production PKENTRY1 profile.",
             "Implement GDT, IDT, TSS, exception containment, memory initialization, capability bootstrap, scheduler, IPC, and the initial user-space system.",
             "Reproduce exact product bytes on a second independent builder and qualify target firmware and separately authorized physical media.",
             "Complete the remaining N6 requirements and all downstream N7-N39 production gates."

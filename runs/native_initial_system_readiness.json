@@ -81,9 +81,9 @@
         "sha256": "EB5354B0D2A60226F8EA4466D998CCB0FF8AC5C7F9A0BD24F87623808BB2DD0B"
       },
       {
-        "byte_count": 9444,
+        "byte_count": 9505,
         "path": "docs/native-initial-system-bundle.md",
-        "sha256": "7EB4B50779BC43A7FEED77A4A84E8359E987D771287AA0CD49C11E852C0B6096"
+        "sha256": "42812CB58B28060CC4AB8C364318F35B37A05D50BB97D8F1DB15589DC3768695"
       }
     ],
     "readiness_schema": {

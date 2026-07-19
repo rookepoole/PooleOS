@@ -2,6 +2,7 @@
 #![deny(warnings)]
 
 pub const CONTRACT_ID: &str = "PBEXIT1";
+pub const TRANSFER_CONTRACT_ID: &str = "PKXFER1";
 pub const MAX_EXIT_ATTEMPTS: usize = 4;
 pub const RAW_MEMORY_MAP_CAPACITY: usize = 1024 * 1024;
 pub const NORMALIZED_MEMORY_CAPACITY: usize = 16_384 * 40;
@@ -22,6 +23,29 @@ pub enum Error {
     FirmwareAfterExit,
     FirmwareAfterFirstAttempt,
     TransferForbidden,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TransferError {
+    ExitBoundary,
+    Envelope,
+    Address,
+    TransferState,
+    Authority,
+    Replay,
+}
+
+impl TransferError {
+    pub const fn code(self) -> &'static str {
+        match self {
+            Self::ExitBoundary => "transfer_exit_boundary",
+            Self::Envelope => "transfer_envelope",
+            Self::Address => "transfer_address",
+            Self::TransferState => "transfer_state",
+            Self::Authority => "transfer_authority",
+            Self::Replay => "transfer_replay",
+        }
+    }
 }
 
 impl Error {
@@ -235,6 +259,112 @@ impl Default for Lifecycle {
     }
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct DevelopmentTransfer {
+    pub kernel_entry_virtual: u64,
+    pub handoff_virtual: u64,
+    pub handoff_byte_count: usize,
+    pub stack_top_virtual: u64,
+    pub page_table_root_physical: u64,
+    pub transfer_cr3: u64,
+    pub boot_services_exited: bool,
+    pub development_mode: bool,
+    pub emulator_only: bool,
+    pub terminal_after_revalidation: bool,
+    pub production_kernel_entry_profile_valid: bool,
+    pub signature_verifications: u8,
+    pub authority_grants: u8,
+    pub actions_authorized: u8,
+    pub state_writes: u8,
+    pub firmware_calls_after_exit: usize,
+}
+
+impl DevelopmentTransfer {
+    pub fn validate(self) -> Result<(), TransferError> {
+        if self.handoff_byte_count < 64 || self.handoff_byte_count > HANDOFF_CAPACITY_BYTES {
+            return Err(TransferError::Envelope);
+        }
+        let handoff_last = self
+            .handoff_virtual
+            .checked_add(self.handoff_byte_count as u64 - 1)
+            .ok_or(TransferError::Address)?;
+        if self.kernel_entry_virtual == 0
+            || self.handoff_virtual == 0
+            || !self.handoff_virtual.is_multiple_of(PAGE_SIZE)
+            || self.stack_top_virtual == 0
+            || !self.stack_top_virtual.is_multiple_of(16)
+            || self.page_table_root_physical == 0
+            || !self.page_table_root_physical.is_multiple_of(PAGE_SIZE)
+            || self.transfer_cr3 & (PAGE_SIZE - 1) & !0x18 != 0
+            || self.transfer_cr3 & !(PAGE_SIZE - 1) != self.page_table_root_physical
+            || !is_canonical_x86_64(self.kernel_entry_virtual)
+            || !is_canonical_x86_64(self.handoff_virtual)
+            || !is_canonical_x86_64(handoff_last)
+            || !is_canonical_x86_64(self.stack_top_virtual)
+        {
+            return Err(TransferError::Address);
+        }
+        if !self.boot_services_exited
+            || !self.development_mode
+            || !self.emulator_only
+            || !self.terminal_after_revalidation
+            || self.production_kernel_entry_profile_valid
+        {
+            return Err(TransferError::TransferState);
+        }
+        if self.signature_verifications != 0
+            || self.authority_grants != 0
+            || self.actions_authorized != 0
+            || self.state_writes != 0
+            || self.firmware_calls_after_exit != 0
+        {
+            return Err(TransferError::Authority);
+        }
+        Ok(())
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum DevelopmentTransferState {
+    Armed,
+    Dispatched,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct DevelopmentTransferLifecycle {
+    state: DevelopmentTransferState,
+}
+
+impl DevelopmentTransferLifecycle {
+    pub fn arm(exit: Lifecycle, transfer: DevelopmentTransfer) -> Result<Self, TransferError> {
+        if exit.state() != State::Exited || exit.firmware_calls_after_exit() != 0 {
+            return Err(TransferError::ExitBoundary);
+        }
+        transfer.validate()?;
+        Ok(Self {
+            state: DevelopmentTransferState::Armed,
+        })
+    }
+
+    pub const fn state(self) -> DevelopmentTransferState {
+        self.state
+    }
+
+    pub fn observe_dispatch(&mut self) -> Result<(), TransferError> {
+        if self.state != DevelopmentTransferState::Armed {
+            return Err(TransferError::Replay);
+        }
+        self.state = DevelopmentTransferState::Dispatched;
+        Ok(())
+    }
+}
+
+const fn is_canonical_x86_64(address: u64) -> bool {
+    let sign = (address >> 47) & 1;
+    let upper = address >> 48;
+    (sign == 0 && upper == 0) || (sign == 1 && upper == 0xffff)
+}
+
 #[cfg(test)]
 extern crate std;
 
@@ -343,5 +473,90 @@ mod tests {
             lifecycle.observe_firmware_call(FirmwareCall::MemoryAllocation),
             Ok(())
         );
+    }
+
+    fn development_transfer() -> DevelopmentTransfer {
+        DevelopmentTransfer {
+            kernel_entry_virtual: 0xffff_ffff_8000_8000,
+            handoff_virtual: 0xffff_ffff_8005_0000,
+            handoff_byte_count: 5008,
+            stack_top_virtual: 0xffff_ffff_8004_9000,
+            page_table_root_physical: 0x0300_0000,
+            transfer_cr3: 0x0300_0000,
+            boot_services_exited: true,
+            development_mode: true,
+            emulator_only: true,
+            terminal_after_revalidation: true,
+            production_kernel_entry_profile_valid: false,
+            signature_verifications: 0,
+            authority_grants: 0,
+            actions_authorized: 0,
+            state_writes: 0,
+            firmware_calls_after_exit: 0,
+        }
+    }
+
+    fn exited() -> Lifecycle {
+        let mut lifecycle = Lifecycle::new();
+        lifecycle.observe_map(map(1)).unwrap();
+        lifecycle.observe_handoff(handoff()).unwrap();
+        lifecycle.observe_exit(ExitResult::Success).unwrap();
+        lifecycle
+    }
+
+    #[test]
+    fn arms_and_dispatches_one_terminal_development_transfer() {
+        let mut transfer =
+            DevelopmentTransferLifecycle::arm(exited(), development_transfer()).unwrap();
+        assert_eq!(transfer.state(), DevelopmentTransferState::Armed);
+        transfer.observe_dispatch().unwrap();
+        assert_eq!(transfer.state(), DevelopmentTransferState::Dispatched);
+        assert_eq!(transfer.observe_dispatch(), Err(TransferError::Replay));
+    }
+
+    #[test]
+    fn rejects_transfer_before_successful_exit() {
+        assert_eq!(
+            DevelopmentTransferLifecycle::arm(Lifecycle::new(), development_transfer()),
+            Err(TransferError::ExitBoundary)
+        );
+    }
+
+    #[test]
+    fn rejects_malformed_transfer_addresses() {
+        let mut transfer = development_transfer();
+        transfer.handoff_virtual += 1;
+        assert_eq!(transfer.validate(), Err(TransferError::Address));
+        transfer = development_transfer();
+        transfer.transfer_cr3 += PAGE_SIZE;
+        assert_eq!(transfer.validate(), Err(TransferError::Address));
+        transfer = development_transfer();
+        transfer.kernel_entry_virtual = 0x0000_8000_0000_0000;
+        assert_eq!(transfer.validate(), Err(TransferError::Address));
+    }
+
+    #[test]
+    fn rejects_production_profile_or_nonterminal_transfer() {
+        let mut transfer = development_transfer();
+        transfer.production_kernel_entry_profile_valid = true;
+        assert_eq!(transfer.validate(), Err(TransferError::TransferState));
+        transfer = development_transfer();
+        transfer.terminal_after_revalidation = false;
+        assert_eq!(transfer.validate(), Err(TransferError::TransferState));
+    }
+
+    #[test]
+    fn rejects_any_transfer_effect_or_firmware_call() {
+        for mutate in 0..5 {
+            let mut transfer = development_transfer();
+            match mutate {
+                0 => transfer.signature_verifications = 1,
+                1 => transfer.authority_grants = 1,
+                2 => transfer.actions_authorized = 1,
+                3 => transfer.state_writes = 1,
+                _ => transfer.firmware_calls_after_exit = 1,
+            }
+            assert_eq!(transfer.validate(), Err(TransferError::Authority));
+        }
     }
 }

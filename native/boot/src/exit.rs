@@ -5,6 +5,8 @@ use core::slice::{from_raw_parts, from_raw_parts_mut};
 use core::sync::atomic::{Ordering, compiler_fence};
 
 use poole_boot_exit::{self as contract, ExitResult, FinalMap, HandoffCandidate, Lifecycle};
+#[cfg(feature = "development-transfer")]
+use poole_boot_exit::{DevelopmentTransfer, DevelopmentTransferLifecycle};
 use poole_live_handoff::{self as live, ExitBuildInput, KernelInput, RetainedInput};
 
 use super::{
@@ -53,6 +55,15 @@ fn firmware_failure(stage: &'static str, status: EfiStatus) -> Failure {
 }
 
 fn contract_failure(stage: &'static str, error: contract::Error) -> Failure {
+    Failure {
+        stage,
+        code: error.code(),
+        status: EFI_COMPROMISED_DATA,
+    }
+}
+
+#[cfg(feature = "development-transfer")]
+fn transfer_failure(stage: &'static str, error: contract::TransferError) -> Failure {
     Failure {
         stage,
         code: error.code(),
@@ -231,6 +242,7 @@ fn fatal_after_attempt(failure: Failure) -> ! {
     }
 }
 
+#[cfg(not(feature = "development-transfer"))]
 fn stop_before_transfer() -> ! {
     unsafe {
         asm!("cli", options(nomem, nostack));
@@ -239,6 +251,30 @@ fn stop_before_transfer() -> ! {
         unsafe {
             asm!("hlt", options(nomem, nostack));
         }
+    }
+}
+
+#[cfg(feature = "development-transfer")]
+unsafe fn transfer_to_kernel(transfer: DevelopmentTransfer) -> ! {
+    compiler_fence(Ordering::SeqCst);
+    // SAFETY: PKXFER1 has validated the retained page-table root, canonical mapped
+    // destinations, aligned stack, immutable handoff, zero-authority profile, and
+    // successful ExitBootServices boundary. This is the one terminal dispatch.
+    unsafe {
+        asm!(
+            "cli",
+            "cld",
+            "mov cr3, rax",
+            "mov rsp, rcx",
+            "jmp r11",
+            in("rax") transfer.transfer_cr3,
+            in("rcx") transfer.stack_top_virtual,
+            in("rdi") transfer.handoff_virtual,
+            in("rsi") transfer.handoff_byte_count,
+            in("rdx") u64::from_le_bytes(poole_handoff::MAGIC),
+            in("r11") transfer.kernel_entry_virtual,
+            options(noreturn),
+        );
     }
 }
 
@@ -651,11 +687,61 @@ pub(super) fn exit_and_stop(
             retained_plan.stack_page_count,
             retained_plan.handoff_page_count,
         ));
-        diagnostic(format_args!(
-            "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=not_called exit_boot_services=called transfer=stopped\n"
-        ));
-        diagnostic(format_args!("POOLEBOOT/0.1 STOP BEFORE TRANSFER\n"));
-        stop_before_transfer();
+        #[cfg(not(feature = "development-transfer"))]
+        {
+            diagnostic(format_args!(
+                "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=not_called exit_boot_services=called transfer=stopped\n"
+            ));
+            diagnostic(format_args!("POOLEBOOT/0.1 STOP BEFORE TRANSFER\n"));
+            stop_before_transfer();
+        }
+        #[cfg(feature = "development-transfer")]
+        {
+            let transfer = DevelopmentTransfer {
+                kernel_entry_virtual: kernel.kernel_entry_virtual,
+                handoff_virtual: retained_plan.handoff_virtual_base,
+                handoff_byte_count: bytes.len(),
+                stack_top_virtual: retained_plan.stack_top_virtual,
+                page_table_root_physical: retained.table_physical_base,
+                transfer_cr3: retained.transfer_cr3,
+                boot_services_exited: true,
+                development_mode: true,
+                emulator_only: true,
+                terminal_after_revalidation: true,
+                production_kernel_entry_profile_valid: false,
+                signature_verifications: 0,
+                authority_grants: 0,
+                actions_authorized: 0,
+                state_writes: 0,
+                firmware_calls_after_exit: lifecycle.firmware_calls_after_exit(),
+            };
+            let mut transfer_lifecycle = DevelopmentTransferLifecycle::arm(lifecycle, transfer)
+                .unwrap_or_else(|error| {
+                    fatal_after_attempt(transfer_failure("transfer.arm", error))
+                });
+            transfer_lifecycle
+                .observe_dispatch()
+                .unwrap_or_else(|error| {
+                    fatal_after_attempt(transfer_failure("transfer.dispatch", error))
+                });
+            diagnostic(format_args!(
+                "POOLEBOOT/0.1 TRANSFER_ARM PASS contract={} mode=development emulator_only=1 entry={:016X} handoff={:016X} bytes={} stack_top={:016X} root={:016X} cr3={:016X} signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit={}\n",
+                contract::TRANSFER_CONTRACT_ID,
+                transfer.kernel_entry_virtual,
+                transfer.handoff_virtual,
+                transfer.handoff_byte_count,
+                transfer.stack_top_virtual,
+                transfer.page_table_root_physical,
+                transfer.transfer_cr3,
+                transfer.firmware_calls_after_exit,
+            ));
+            diagnostic(format_args!(
+                "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development\n"
+            ));
+            // SAFETY: arm and dispatch validation succeeded exactly once and no code
+            // after this call may execute under either firmware or kernel ownership.
+            unsafe { transfer_to_kernel(transfer) };
+        }
     }
     Err(firmware_failure(
         "exit.retry_exhausted",

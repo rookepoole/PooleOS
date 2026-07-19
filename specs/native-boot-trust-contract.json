@@ -249,8 +249,8 @@
     },
     {
       "path": "native/boot/Cargo.toml",
-      "byte_count": 611,
-      "sha256": "62F842DC7A91742124CDB09F96DA9F94DBE264F1AAB421114AC51EBFE1D0E82A"
+      "byte_count": 662,
+      "sha256": "9D36A396EED7B182B1E22169C92EC2A64E148C5250A2B66EAD4727457553CB34"
     },
     {
       "path": "native/boot/src/kload.rs",
@@ -284,8 +284,8 @@
     },
     {
       "path": "docs/native-boot-trust.md",
-      "byte_count": 9930,
-      "sha256": "889CD35311ADF9790CFD92D8DF89BDF8494C6BBA2742CF78C77CEEA117A63102"
+      "byte_count": 9968,
+      "sha256": "3B29ADAEA74AF3172D99B52CC15A70B2EF2AC0EE8737FDF1B785B4BFF84642C6"
     },
     {
       "path": "specs/native-boot-trust-contract.schema.json",

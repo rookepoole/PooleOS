@@ -146,27 +146,34 @@ def _toolchain(toolchain_root: Path) -> tuple[Path, Path, dict[str, str]]:
     return cargo, rustc, env
 
 
-def _build_and_test(toolchain_root: Path, temporary_root: Path) -> tuple[bytes, dict[str, Any]]:
+def _build_and_test(
+    toolchain_root: Path,
+    temporary_root: Path,
+    *,
+    development_transfer: bool = False,
+) -> tuple[bytes, dict[str, Any]]:
     cargo, _, env = _toolchain(toolchain_root)
     test_target = temporary_root / "host-contract-tests"
+    test_command = [
+        str(cargo),
+        "test",
+        "--manifest-path",
+        str(NATIVE_ROOT / "Cargo.toml"),
+        "--package",
+        "pooleboot",
+        "--lib",
+        "--target",
+        "x86_64-pc-windows-msvc",
+        "--locked",
+        "--offline",
+        "--target-dir",
+        str(test_target),
+    ]
+    if development_transfer:
+        test_command.extend(("--features", "development-transfer"))
+    test_command.extend(("--", "--test-threads=1"))
     test_output = _run_checked(
-        [
-            str(cargo),
-            "test",
-            "--manifest-path",
-            str(NATIVE_ROOT / "Cargo.toml"),
-            "--package",
-            "pooleboot",
-            "--lib",
-            "--target",
-            "x86_64-pc-windows-msvc",
-            "--locked",
-            "--offline",
-            "--target-dir",
-            str(test_target),
-            "--",
-            "--test-threads=1",
-        ],
+        test_command,
         cwd=NATIVE_ROOT,
         env=env,
     )
@@ -180,22 +187,25 @@ def _build_and_test(toolchain_root: Path, temporary_root: Path) -> tuple[bytes, 
     builds: list[bytes] = []
     for run_index in (1, 2):
         target_dir = temporary_root / f"clean-build-{run_index}"
+        build_command = [
+            str(cargo),
+            "build",
+            "--manifest-path",
+            str(NATIVE_ROOT / "Cargo.toml"),
+            "--package",
+            "pooleboot",
+            "--target",
+            "x86_64-unknown-uefi",
+            "--release",
+            "--locked",
+            "--offline",
+            "--target-dir",
+            str(target_dir),
+        ]
+        if development_transfer:
+            build_command.extend(("--features", "development-transfer"))
         _run_checked(
-            [
-                str(cargo),
-                "build",
-                "--manifest-path",
-                str(NATIVE_ROOT / "Cargo.toml"),
-                "--package",
-                "pooleboot",
-                "--target",
-                "x86_64-unknown-uefi",
-                "--release",
-                "--locked",
-                "--offline",
-                "--target-dir",
-                str(target_dir),
-            ],
+            build_command,
             cwd=NATIVE_ROOT,
             env=env,
         )
@@ -225,6 +235,7 @@ def _build_and_test(toolchain_root: Path, temporary_root: Path) -> tuple[bytes, 
     return builds[0], {
         "host_contract_test_count": test_count,
         "host_contract_test_pass_count": test_count,
+        "development_transfer_feature": development_transfer,
         "clean_build_count": 2,
         "exact_clean_build_match": True,
         "sha256": native_pooleboot.sha256_bytes(builds[0]),
@@ -308,6 +319,8 @@ def _execute_once(
     run_dir: Path,
     timeout: int,
     marker_validator: Callable[[list[str]], dict[str, Any]] = native_pooleboot.validate_markers,
+    marker_extractor: Callable[[bytes], list[str]] = native_pooleboot.extract_markers,
+    completion_marker: bytes = b"POOLEBOOT/0.1 STOP BEFORE TRANSFER",
 ) -> tuple[dict[str, Any], bytes, bytes]:
     firmware = {item["role"]: item for item in lock["firmware"]["files"]}
     vars_source = qemu_root / firmware["vars_template_copy_only"]["relative_path"]
@@ -348,7 +361,12 @@ def _execute_once(
         completion_marker_observed = False
         while time.monotonic() < deadline:
             raw_debug = debug_path.read_bytes() if debug_path.is_file() else b""
-            if b"POOLEBOOT/0.1 ERROR" in raw_debug or b"POOLEBOOT/0.1 PANIC" in raw_debug:
+            if (
+                b"POOLEBOOT/0.1 ERROR" in raw_debug
+                or b"POOLEBOOT/0.1 PANIC" in raw_debug
+                or b"POOLEOS:PANIC" in raw_debug
+                or b"POOLEOS:NESTED-PANIC" in raw_debug
+            ):
                 raise QualificationError("PooleBoot emitted an error or panic marker")
             if not screenshot_captured and b"POOLEBOOT/0.1 FRAME READY" in raw_debug:
                 client.execute(
@@ -358,19 +376,19 @@ def _execute_once(
                 if not screenshot_path.is_file():
                     raise QualificationError("QMP screendump did not create the proof frame")
                 screenshot_captured = True
-            if b"POOLEBOOT/0.1 STOP BEFORE TRANSFER" in raw_debug:
+            if completion_marker in raw_debug:
                 completion_marker_observed = True
                 break
             if process.poll() is not None:
-                raise QualificationError(f"QEMU exited before the stop marker: {process.returncode}")
+                raise QualificationError(f"QEMU exited before the completion marker: {process.returncode}")
             time.sleep(0.02)
         if not screenshot_captured or not completion_marker_observed:
-            raise QualificationError("PooleBoot frame or permanent stop marker timed out")
+            raise QualificationError("PooleBoot frame or completion marker timed out")
         time.sleep(0.05)
         debug_raw = debug_path.read_bytes()
         serial_raw = serial_path.read_bytes()
-        debug_markers = native_pooleboot.extract_markers(debug_raw)
-        serial_markers = native_pooleboot.extract_markers(serial_raw)
+        debug_markers = marker_extractor(debug_raw)
+        serial_markers = marker_extractor(serial_raw)
         marker_summary = marker_validator(debug_markers)
         if serial_markers != debug_markers:
             raise QualificationError("serial and debugcon PooleBoot marker sequences differ")
