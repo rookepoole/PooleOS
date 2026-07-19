@@ -98,9 +98,9 @@ allocation, capability issuance, or instruction execution.
 
 PooleBoot reparses PINIT1 from the exact retained PBART1 pages and requires the
 development activation gate to fail at the missing outer signature. Cycle 117
-independently repeats the parse, route binding, and denial in host-executed
-PooleKernel code. Live kernel execution, authentication, capability creation,
-and lifecycle execution remain explicit later gates.
+adds independent PooleKernel parse/route/denial logic; Cycle 118 executes it
+under the opt-in QEMU transfer and halts on denial. Authentication, capability
+creation, and lifecycle execution remain explicit later gates.
 
 ## PREC1 Inner Bundle
 
@@ -120,7 +120,8 @@ unsigned development context is denied before recovery authority or execution.
 PooleBoot reparses PREC1 from the exact retained PBART1 pages and requires the
 development recovery gate to fail at the missing outer signature, but it does
 not read or write PREC1 state. Cycle 117 independently repeats the policy parse
-and denial in host-executed PooleKernel code but does not execute recovery. No
+and denial in PooleKernel code, and Cycle 118 executes it only to deny and halt
+under QEMU; recovery is not executed. No
 UEFI variable, disk, firmware, network, or device-changing operation follows
 from this qualification.
 

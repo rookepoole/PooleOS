@@ -10,8 +10,8 @@
   "inputs": {
     "contract": {
       "path": "specs/native-kernel-revalidation-contract.json",
-      "sha256": "CDD94643060C2ABB84966C7A1E7BD0D3A129821B24B02B667C8852BEB99EC70F",
-      "byte_count": 4834
+      "sha256": "411F5B66A9F0DA89BE49F72B10B65198C9F54C3477DEC99D5B116DBDFEAE0B20",
+      "byte_count": 4856
     },
     "toolchain_lock": {
       "path": "specs/native-toolchain-lock.json",
@@ -41,8 +41,8 @@
       },
       {
         "path": "native/boot/src/kmap.rs",
-        "sha256": "161D734F06AF349AFF04DC63618A9419B4889AD139F2FA56FBA4CBEA227BCA59",
-        "byte_count": 24381
+        "sha256": "1B7EDF6DA5296A963B56A0D7F223976F68271949930B69CB452AAC902FE8F339",
+        "byte_count": 24579
       },
       {
         "path": "native/kernel/Cargo.toml",
@@ -51,13 +51,13 @@
       },
       {
         "path": "native/kernel/src/lib.rs",
-        "sha256": "F0FE4BC50CAF9E7255BE2E7A203994D3BD169FC4392DDFAC2CD03A706687E140",
-        "byte_count": 21657
+        "sha256": "C41F5DED37AB2BDA8026164E1BB78F632062A7EAA5C488090E8809DFB3C57017",
+        "byte_count": 27340
       },
       {
         "path": "native/kernel/src/main.rs",
-        "sha256": "0A59E472EF02A4DED2515F4AB5BB93FA53796EAB5F36C4740B713AE5E7B98D0D",
-        "byte_count": 6824
+        "sha256": "F61A7B6471FF08D312AFAD74A4043EAE65279EF6A91743FFC6B18DB88C30D6F0",
+        "byte_count": 10845
       },
       {
         "path": "native/kernel/src/revalidation.rs",
@@ -71,12 +71,12 @@
       },
       {
         "path": "runtime/native_kernel_revalidation.py",
-        "sha256": "92E1AD7747EA17D5B066D1EA0987C45398A2421E0494BC8D00CF5FCF0E64EC44",
-        "byte_count": 24603
+        "sha256": "5AB1C68FDFCF9304BFBF0B350E8BE0EC02FE8463577891D89169E0E07AD320EA",
+        "byte_count": 24959
       },
       {
         "path": "tools/qualify_native_kernel_revalidation.py",
-        "sha256": "CF7565C9A0F4E1822DE7F6CEAF8F60ECFA0125ED0DCC1140E7932A6150EE69D0",
+        "sha256": "3FEDB2A11B6298C76C6DF8C359691A855D9B87FE17C19A2EE52FB25ABE21CAFB",
         "byte_count": 18171
       },
       {
@@ -86,28 +86,68 @@
       },
       {
         "path": "docs/native-kernel-revalidation.md",
-        "sha256": "25D4D1635F71DDA4C097E8723B0F710E00108585A718124621B0006EF7995AEA",
-        "byte_count": 4922
+        "sha256": "9538D4334EBA3C0CEECD9C4CF849C3B70D454DD5EE0DED4B107AB9250290B527",
+        "byte_count": 5292
+      },
+      {
+        "path": "runs/native_initial_system_readiness.json",
+        "sha256": "D2B9103181158FB088ACF07BBADC817BED6953D4BB3492149D5F6668BC544A3B",
+        "byte_count": 29828
+      },
+      {
+        "path": "runs/native_recovery_readiness.json",
+        "sha256": "3FC4CAE788435A81ADC429D7AC931DF6E36F11D6DB6CE41297FC88157AC7ACE0",
+        "byte_count": 37731
+      },
+      {
+        "path": "runs/native_symbol_readiness.json",
+        "sha256": "01AC27CCFAE1331AB7066D103F89C21E8F2FAB114E4CF75DFD14B3C09A618104",
+        "byte_count": 39630
+      },
+      {
+        "path": "runs/native_microcode_readiness.json",
+        "sha256": "78108753ACF9D3C4CE7222B4C3F026055DD28F8D4651D210FAA16EA663AA45AD",
+        "byte_count": 42514
+      },
+      {
+        "path": "runs/native_firmware_readiness.json",
+        "sha256": "58A9056402D75ACAC3C7D621686A934F864C4554671FF03D72C1C566A6B0EE73",
+        "byte_count": 18880
+      },
+      {
+        "path": "runs/native_policy_readiness.json",
+        "sha256": "4750C291A2C02934900DC5E96B505ACAF3944BB36DE7F7CD13D5796E4207F26A",
+        "byte_count": 22539
+      },
+      {
+        "path": "runs/native_boot_trust_readiness.json",
+        "sha256": "0A9ADF60FEF022707FA90CEA095B8B304B68E7F4EC25606959D7556FD2EF2E31",
+        "byte_count": 37688
+      },
+      {
+        "path": "runs/native_system_manifest_readiness.json",
+        "sha256": "A3815AA0D692D7971DDD60EA6D532882E32BEA236711637525C72C4B592227AF",
+        "byte_count": 24495
       }
     ]
   },
   "build": {
     "rustc": "rustc.exe",
-    "host_test_count": 13,
+    "host_test_count": 14,
     "format_check": "pass",
-    "host_probe_sha256": "0FAB7B6EAAB01F5F85E2C456C8B497BF61CCD278F61C3C70AB66D603AC8B0403",
+    "host_probe_sha256": "CF754C019E00EE3EC25F62B8116F341107AF0AC7BD01BE43B0D4A494C22A8CC9",
     "targets": {
       "x86_64-unknown-none": {
         "package": "poolekernel",
         "binary": "PooleKernelLinked",
-        "byte_count": 1376,
-        "sha256": "D921132827FB903CA720DD86B151FA0F94A54EFB8B2538080556615A5D2BB92A"
+        "byte_count": 1368,
+        "sha256": "FDA60897E01FB4DF6897A27CC1EFB00FD64347F58D970AF1A60A2362E7EABF4D"
       },
       "x86_64-unknown-uefi": {
         "package": "pooleboot",
         "binary": "PooleBoot",
         "byte_count": 205824,
-        "sha256": "A359983A2A3D4C3746BA164FDD0C70E629F355232732985B90C8BAC976F32214"
+        "sha256": "73C10DF088158A8B2F66CD157C424787E0DCDF14F1DCB2E564C70040857C916F"
       }
     }
   },
@@ -118,26 +158,26 @@
     "parser_count": 9,
     "manifest_bytes": 2613,
     "retained_file_bytes": 11950,
-    "retained_set_sha256": "FEE092995AF574AABDC329154E27E9464252923B87D58171DD4455B89FCBBA49",
-    "policy_sha256": "DD017C3BE0264E7A5ECEFFAF2F59FBD4C58CF04C3E0E01959C03BF94604E1594",
-    "state_sha256": "44B51126A3902CCA64EEC498738D4789561E0EB64F3EF6A95AD906E05706FD74",
+    "retained_set_sha256": "652F3743DC6C033D41C8F634F359BF3A8A4B4AFF8D21F7EA329A0E349619A069",
+    "policy_sha256": "E0AA6C0840365B48C8F3D663BA0BDC70C8B844FBA9FF967813BB54D24FA4C55C",
+    "state_sha256": "2B1B959EF0708FF7DA908F40A210A6D671199F133DB98BABCA1474E71DB1086B",
     "denial": "pbtrust_policy_unsigned",
     "authority_grants": 0,
     "actions_authorized": 0,
     "state_writes": 0,
-    "handoff_sha256": "93AA769C3BA9B307B04AE57D74D70D4412AB93E7042A82CC2AFAE804A36C0944",
+    "handoff_sha256": "9CFFDEE51751C344B629650A10F242042DCE1F102AE623689671CB04CF30EC43",
     "retained_file_sha256": [
       "00C28AB2DE744281CEC0459598A29E8C608E95BC2AF5207D78B67F494EF1E2F8",
       "FFAC48737878D6D4986CBF1936F4A8BE7898D544D4C4043F4D51144AEC728B59",
-      "2B29E4B948523DE21268DCCC1D016E7B7D4E3E305D65BE52BF128A81BC0C166F",
+      "C7990B0DCEB3925A6AAC270013E7C48FE9D36F661A43CE4F1A29ACA205E06993",
       "04D5F70F88FE15BF747992390467BC8AE9E3BD0E28F6D131C427B73764641397",
       "BD162F099BB0145738BA3FAD57B0B903FDB12B0080BBC85812528DC9C1A7A728",
-      "7CFC7CC01D8DF4936E80FCE9AAD0C26FA91E254FB98C9D6285097311DFA80369",
-      "4BB527FEB6D366EFA7549558EED775E4D1AE4C9D6879BD13CF45CBB556C1B729",
-      "DD017C3BE0264E7A5ECEFFAF2F59FBD4C58CF04C3E0E01959C03BF94604E1594",
-      "44B51126A3902CCA64EEC498738D4789561E0EB64F3EF6A95AD906E05706FD74"
+      "BBEE4B8578ABF9B557A9C9766CC966A1064AF1E4AB45C7451266319E97A7EDE2",
+      "06EDE051769069240FFA4EEE9225F943ADCD39CD728C50F05727933FC156D892",
+      "E0AA6C0840365B48C8F3D663BA0BDC70C8B844FBA9FF967813BB54D24FA4C55C",
+      "2B1B959EF0708FF7DA908F40A210A6D671199F133DB98BABCA1474E71DB1086B"
     ],
-    "rust_marker": "PKREVAL1 PASS retained_files=9 artifacts=6 parsers=9 manifest_bytes=2613 file_bytes=11950 retained_sha256=FEE092995AF574AABDC329154E27E9464252923B87D58171DD4455B89FCBBA49 policy_sha256=DD017C3BE0264E7A5ECEFFAF2F59FBD4C58CF04C3E0E01959C03BF94604E1594 state_sha256=44B51126A3902CCA64EEC498738D4789561E0EB64F3EF6A95AD906E05706FD74 denial=pbtrust_policy_unsigned authority_grants=0 actions=0 state_writes=0",
+    "rust_marker": "PKREVAL1 PASS retained_files=9 artifacts=6 parsers=9 manifest_bytes=2613 file_bytes=11950 retained_sha256=652F3743DC6C033D41C8F634F359BF3A8A4B4AFF8D21F7EA329A0E349619A069 policy_sha256=E0AA6C0840365B48C8F3D663BA0BDC70C8B844FBA9FF967813BB54D24FA4C55C state_sha256=2B1B959EF0708FF7DA908F40A210A6D671199F133DB98BABCA1474E71DB1086B denial=pbtrust_policy_unsigned authority_grants=0 actions=0 state_writes=0",
     "rust_python_match": true
   },
   "negative_controls": [
@@ -418,7 +458,7 @@
   "non_claims": [
     "No private key was generated or used and no signature was created or verified by PKREVAL1.",
     "The retained PBTS1 file remains an ESP development candidate, not selected PBSTATE1 persistent authority.",
-    "PooleBoot still stops before transfer, so QEMU evidence proves the producer and handoff bytes but not PooleKernel execution.",
+    "This standalone PKREVAL1 receipt does not execute PooleKernel; the separate PKXFER1 receipt owns the QEMU live-entry and guest-revalidation claim.",
     "No capability, lifecycle, recovery, symbol, microcode, firmware, policy, or state-write authority is granted.",
     "No target firmware, physical hardware, second builder, signed release, ISO, installer, or production promotion is claimed."
   ],

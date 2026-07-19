@@ -1,0 +1,4511 @@
+{
+  "artifact_kind": "pooleos_native_kernel_transfer_readiness",
+  "build": {
+    "default_and_transfer_binaries_differ": true,
+    "default_feature_enabled": false,
+    "default_pooleboot": {
+      "byte_count": 205824,
+      "clean_build_count": 2,
+      "development_transfer_feature": false,
+      "exact_clean_build_match": true,
+      "host_contract_test_count": 8,
+      "host_contract_test_pass_count": 8,
+      "host_leakage_hit_count": 0,
+      "host_leakage_marker_count": 7,
+      "inspection": {
+        "byte_count": 205824,
+        "characteristics": 34,
+        "debug_directory": {
+          "rva": 0,
+          "size": 0
+        },
+        "debug_directory_present": false,
+        "dll_characteristics": 33120,
+        "entry_nonzero": true,
+        "entry_point": 35786,
+        "file_alignment": 512,
+        "format": "PE32+",
+        "header_size": 1024,
+        "image_base": 5368709120,
+        "image_size": 217088,
+        "import_directory": {
+          "rva": 0,
+          "size": 0
+        },
+        "imports_present": false,
+        "machine": 34404,
+        "section_alignment": 4096,
+        "section_count": 4,
+        "sections": [
+          {
+            "characteristics": 1610612768,
+            "name": ".text",
+            "raw_offset": 1024,
+            "raw_size": 151552,
+            "virtual_address": 4096,
+            "virtual_size": 151171
+          },
+          {
+            "characteristics": 1073741888,
+            "name": ".rdata",
+            "raw_offset": 152576,
+            "raw_size": 51712,
+            "virtual_address": 155648,
+            "virtual_size": 51316
+          },
+          {
+            "characteristics": 1073741888,
+            "name": ".eh_fram",
+            "raw_offset": 204288,
+            "raw_size": 512,
+            "virtual_address": 208896,
+            "virtual_size": 64
+          },
+          {
+            "characteristics": 1107296320,
+            "name": ".reloc",
+            "raw_offset": 204800,
+            "raw_size": 1024,
+            "virtual_address": 212992,
+            "virtual_size": 728
+          }
+        ],
+        "sha256": "73C10DF088158A8B2F66CD157C424787E0DCDF14F1DCB2E564C70040857C916F",
+        "subsystem": 10,
+        "timestamp": 0
+      },
+      "sha256": "73C10DF088158A8B2F66CD157C424787E0DCDF14F1DCB2E564C70040857C916F"
+    },
+    "default_stop_marker_present": true,
+    "default_transfer_marker_absent": true,
+    "development_transfer_feature": true,
+    "kernel_entry": {
+      "artifact_kind": "pooleos_native_kernel_entry_readiness",
+      "bindings": {
+        "contract": {
+          "byte_count": 10690,
+          "path": "specs/native-kernel-entry-contract.json",
+          "sha256": "6923B21206CBD25C1B15D699312874D678ED32513AF9618A10077289E44EA8BE"
+        },
+        "contract_schema": {
+          "byte_count": 3455,
+          "path": "specs/native-kernel-entry-contract.schema.json",
+          "sha256": "ABD066E7B506EF48E64404307371474CF2E1EF7C11FFF6FF1CBE4B16D96A901D"
+        },
+        "implementation_inputs": [
+          {
+            "byte_count": 586,
+            "path": "native/Cargo.toml",
+            "sha256": "1741AC8F565F5849F8C86D77BD16E06ED195E76D32FFA62492E1928B8FAA8C1E"
+          },
+          {
+            "byte_count": 4121,
+            "path": "native/Cargo.lock",
+            "sha256": "0E88ED49107E751E33C56A9992F36AA16BAA7EDD3E4A1CC296CC1BB814A3B5B5"
+          },
+          {
+            "byte_count": 517,
+            "path": "native/kernel/Cargo.toml",
+            "sha256": "62102EE51CA34DCB59F0BFC48508AE5BECA79448F977478F1F09EF34B1BC947C"
+          },
+          {
+            "byte_count": 1356,
+            "path": "native/kernel/README.md",
+            "sha256": "B47BD4008A3C64442B9A23D2959B14D784DC63C43FC867E1E56BC02962009973"
+          },
+          {
+            "byte_count": 523,
+            "path": "native/kernel/arch/x86_64/README.md",
+            "sha256": "ADA13DC10FC6D81381A7375EFAFF17D7801C22F1404C7147ABC7FFA701388E8F"
+          },
+          {
+            "byte_count": 2048,
+            "path": "native/kernel/linker.ld",
+            "sha256": "D74C10E7E9010D91B1A5C4378D8B9CFCE8669FEE28706C75734D81A822D62A90"
+          },
+          {
+            "byte_count": 436,
+            "path": "native/kernel/manifest.pkm",
+            "sha256": "618BEE498804DB09A0CB18281379B5045FBAD3F5D123767E7F8E6A7ED6C02FD0"
+          },
+          {
+            "byte_count": 27340,
+            "path": "native/kernel/src/lib.rs",
+            "sha256": "C41F5DED37AB2BDA8026164E1BB78F632062A7EAA5C488090E8809DFB3C57017"
+          },
+          {
+            "byte_count": 10845,
+            "path": "native/kernel/src/main.rs",
+            "sha256": "F61A7B6471FF08D312AFAD74A4043EAE65279EF6A91743FFC6B18DB88C30D6F0"
+          },
+          {
+            "byte_count": 3066,
+            "path": "native/kernel/src/arch/x86_64.rs",
+            "sha256": "8A21103B07FFD12220A5B7B4BBF7E1E51829C6B3EF3BF9E21F706AB9D8345266"
+          },
+          {
+            "byte_count": 218,
+            "path": "native/fixtures/poolekernel/Cargo.toml",
+            "sha256": "6D0DDE25F74DEEEDA7794077273B85A4A8B099E73C68939C686173716D20FF46"
+          },
+          {
+            "byte_count": 252,
+            "path": "native/fixtures/poolekernel/README.md",
+            "sha256": "DE43978E1E9B8A3972DC1BD8D2DA6CC0690325664C0B170460C261E3A0713BDD"
+          },
+          {
+            "byte_count": 349,
+            "path": "native/fixtures/poolekernel/src/main.rs",
+            "sha256": "C211A93BF7EDF8CCFC1E1EBBF03063825D63AC52A330A71F41CD43D27664CFD7"
+          },
+          {
+            "byte_count": 15101,
+            "path": "runtime/native_kernel_image.py",
+            "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
+          },
+          {
+            "byte_count": 7214,
+            "path": "runtime/native_kernel_entry.py",
+            "sha256": "BFAEDB7999289E22F1EC060D309D5E909EFA7D3D34A954540F6A7D80625F0550"
+          },
+          {
+            "byte_count": 24767,
+            "path": "tools/qualify_native_kernel_entry.py",
+            "sha256": "67F1BD0CB8F2E1B32B403AC0396AA9E64B7215313E317EF18182A3CD9B5812B6"
+          },
+          {
+            "byte_count": 6042,
+            "path": "tests/test_native_kernel_entry.py",
+            "sha256": "209B8B9627220B80A50CD5477768E475B2D4C44E2A508629683325D4ECF6AC30"
+          },
+          {
+            "byte_count": 4049,
+            "path": "docs/native-kernel-entry.md",
+            "sha256": "F900AAE5600640487B0E983F80ABA6419C60DB897D2EEEC32E558C8A3DD12611"
+          }
+        ],
+        "pbp1_contract": {
+          "byte_count": 16126,
+          "path": "specs/native-boot-handoff-contract.json",
+          "sha256": "89EA7517EF7D2E30C7EBEC4C28D092E3F01D95519EC6768E7B4D5C0F586B58E7"
+        },
+        "pkelf1_contract": {
+          "byte_count": 5797,
+          "path": "specs/native-elf-loader-contract.json",
+          "sha256": "A0CE48E9EF992B97333D84ECB2850E221D482E2ACF11BB312B5F769DAFF992AA"
+        },
+        "readiness_schema": {
+          "byte_count": 1258,
+          "path": "specs/native-kernel-entry-readiness.schema.json",
+          "sha256": "AAEB429160252FE060A3330D8056DE129FA608EA1E56A1DD0B0DDF8CED67ABF4"
+        },
+        "toolchain_lock": {
+          "byte_count": 4017,
+          "path": "specs/native-toolchain-lock.json",
+          "sha256": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E"
+        }
+      },
+      "builds": {
+        "canonical_exact_match": true,
+        "cargo_locked": true,
+        "cargo_offline": true,
+        "clean_build_count": 2,
+        "fresh_target_directories": true,
+        "linked_exact_match": true,
+        "source_date_epoch": 0
+      },
+      "claim_boundary": [
+        "This slice produces and qualifies a real freestanding PooleKernel PKELF1 product image and host-executed entry helpers; it is not the former empty fixture.",
+        "This standalone PKENTRY1 receipt qualifies image construction and host-executed helpers; the separate PKXFER1 receipt owns the QEMU-only live transfer claim.",
+        "The temporary framebuffer identity mapping is a mandatory caller precondition discovered in Cycle101; the PBP1 bytes alone do not prove that mapping or its cache policy.",
+        "This standalone qualification does not execute privileged port I/O or framebuffer writes; the separate PKXFER1 QEMU receipt executes only emulated devices.",
+        "The image halts after validated entry diagnostics and does not initialize descriptor tables, interrupts, memory management, capabilities, scheduling, IPC, services, drivers, PooleGlyph, PDC, or PooleGlass.",
+        "Single-host exact reproduction and finite hostile controls do not establish second-host reproducibility, universal correctness, target-firmware support, N6 completion, a bootable ISO, or production readiness.",
+        "No signing, key generation, tag, release, merge, firmware change, privileged probe, driver load, or physical-media write is authorized or performed."
+      ],
+      "claims": {
+        "allocation_free_pbp1_consumer": true,
+        "bootable_iso": false,
+        "bounded_com1_candidate": true,
+        "bounded_early_ring": true,
+        "deterministic_panic_taxonomy": true,
+        "exit_boot_services_executed": false,
+        "final_wx_permissions_installed": false,
+        "gdt_idt_tss_initialized": false,
+        "hardware_framebuffer_executed": false,
+        "hardware_serial_executed": false,
+        "kernel_runtime_initialized": false,
+        "legacy_empty_fixture_isolated": true,
+        "live_pooleboot_transfer": false,
+        "n6_exit_gate_satisfied": false,
+        "optional_framebuffer_sink": true,
+        "page_tables_installed": false,
+        "production_ready": false,
+        "qemu_kernel_execution": false,
+        "real_poolekernel_product_image": true,
+        "reproducible_single_host_image": true,
+        "second_host_reproduced": false,
+        "target_firmware_tested": false
+      },
+      "contract_id": "PKENTRY1",
+      "host_tests": {
+        "clippy_targets": [
+          "x86_64-pc-windows-msvc",
+          "x86_64-unknown-none"
+        ],
+        "rustfmt_packages": [
+          "poolekernel",
+          "poolekernel-fixture"
+        ],
+        "status": "pass",
+        "test_count": 14,
+        "test_pass_count": 14
+      },
+      "n6_exit_gate_satisfied": false,
+      "negative_controls": [
+        {
+          "expected": "header_bounds",
+          "id": "NEG-N6-KENTRY-LINKED-TRUNCATED",
+          "layer": "linked_lld_input",
+          "observed": "header_bounds",
+          "status": "pass"
+        },
+        {
+          "expected": "elf_ident",
+          "id": "NEG-N6-KENTRY-LINKED-IDENT",
+          "layer": "linked_lld_input",
+          "observed": "elf_ident",
+          "status": "pass"
+        },
+        {
+          "expected": "elf_header",
+          "id": "NEG-N6-KENTRY-LINKED-TYPE",
+          "layer": "linked_lld_input",
+          "observed": "elf_header",
+          "status": "pass"
+        },
+        {
+          "expected": "program_header_geometry",
+          "id": "NEG-N6-KENTRY-LINKED-PHOFF",
+          "layer": "linked_lld_input",
+          "observed": "program_header_geometry",
+          "status": "pass"
+        },
+        {
+          "expected": "source_section_table",
+          "id": "NEG-N6-KENTRY-LINKED-SHOFF-ZERO",
+          "layer": "linked_lld_input",
+          "observed": "source_section_table",
+          "status": "pass"
+        },
+        {
+          "expected": "program_header_order",
+          "id": "NEG-N6-KENTRY-LINKED-PHDR-ORDER",
+          "layer": "linked_lld_input",
+          "observed": "program_header_order",
+          "status": "pass"
+        },
+        {
+          "expected": "phdr_segment",
+          "id": "NEG-N6-KENTRY-LINKED-PHDR-PADDR",
+          "layer": "linked_lld_input",
+          "observed": "phdr_segment",
+          "status": "pass"
+        },
+        {
+          "expected": "load_flags",
+          "id": "NEG-N6-KENTRY-LINKED-RO-FLAGS",
+          "layer": "linked_lld_input",
+          "observed": "load_flags",
+          "status": "pass"
+        },
+        {
+          "expected": "load_geometry",
+          "id": "NEG-N6-KENTRY-LINKED-RO-PADDR",
+          "layer": "linked_lld_input",
+          "observed": "load_geometry",
+          "status": "pass"
+        },
+        {
+          "expected": "load_geometry",
+          "id": "NEG-N6-KENTRY-LINKED-TEXT-OFFSET",
+          "layer": "linked_lld_input",
+          "observed": "load_geometry",
+          "status": "pass"
+        },
+        {
+          "expected": "load_geometry",
+          "id": "NEG-N6-KENTRY-LINKED-DATA-FILESZ",
+          "layer": "linked_lld_input",
+          "observed": "load_geometry",
+          "status": "pass"
+        },
+        {
+          "expected": "load_layout",
+          "id": "NEG-N6-KENTRY-LINKED-LOAD-LAYOUT",
+          "layer": "linked_lld_input",
+          "observed": "load_layout",
+          "status": "pass"
+        },
+        {
+          "expected": "entry_range",
+          "id": "NEG-N6-KENTRY-LINKED-ENTRY-RANGE",
+          "layer": "linked_lld_input",
+          "observed": "entry_range",
+          "status": "pass"
+        },
+        {
+          "expected": "entry_prefix",
+          "id": "NEG-N6-KENTRY-LINKED-ENTRY-PREFIX",
+          "layer": "linked_lld_input",
+          "observed": "entry_prefix",
+          "status": "pass"
+        },
+        {
+          "expected": "source_dynamic_segment",
+          "id": "NEG-N6-KENTRY-LINKED-DYNAMIC-FLAGS",
+          "layer": "linked_lld_input",
+          "observed": "source_dynamic_segment",
+          "status": "pass"
+        },
+        {
+          "expected": "source_relro_segment",
+          "id": "NEG-N6-KENTRY-LINKED-RELRO-FLAGS",
+          "layer": "linked_lld_input",
+          "observed": "source_relro_segment",
+          "status": "pass"
+        },
+        {
+          "expected": "source_stack_segment",
+          "id": "NEG-N6-KENTRY-LINKED-STACK-SIZE",
+          "layer": "linked_lld_input",
+          "observed": "source_stack_segment",
+          "status": "pass"
+        },
+        {
+          "expected": "source_dynamic_tag",
+          "id": "NEG-N6-KENTRY-LINKED-DYNAMIC-TAG",
+          "layer": "linked_lld_input",
+          "observed": "source_dynamic_tag",
+          "status": "pass"
+        },
+        {
+          "expected": "source_relocation_layout",
+          "id": "NEG-N6-KENTRY-LINKED-RELA-OFFSET",
+          "layer": "linked_lld_input",
+          "observed": "source_relocation_layout",
+          "status": "pass"
+        },
+        {
+          "expected": "source_relocation_geometry",
+          "id": "NEG-N6-KENTRY-LINKED-RELA-SIZE",
+          "layer": "linked_lld_input",
+          "observed": "source_relocation_geometry",
+          "status": "pass"
+        },
+        {
+          "expected": "source_relocation_geometry",
+          "id": "NEG-N6-KENTRY-LINKED-RELA-ENTRY",
+          "layer": "linked_lld_input",
+          "observed": "source_relocation_geometry",
+          "status": "pass"
+        },
+        {
+          "expected": "source_relocation_type",
+          "id": "NEG-N6-KENTRY-LINKED-RELOCATION-TYPE",
+          "layer": "linked_lld_input",
+          "observed": "source_relocation_type",
+          "status": "pass"
+        },
+        {
+          "expected": "source_relocation_order",
+          "id": "NEG-N6-KENTRY-LINKED-RELOCATION-ORDER",
+          "layer": "linked_lld_input",
+          "observed": "source_relocation_order",
+          "status": "pass"
+        },
+        {
+          "expected": "source_relocation_target",
+          "id": "NEG-N6-KENTRY-LINKED-RELOCATION-TARGET",
+          "layer": "linked_lld_input",
+          "observed": "source_relocation_target",
+          "status": "pass"
+        },
+        {
+          "expected": "source_relocation_target_value",
+          "id": "NEG-N6-KENTRY-LINKED-RELOCATION-TARGET-VALUE",
+          "layer": "linked_lld_input",
+          "observed": "source_relocation_target_value",
+          "status": "pass"
+        },
+        {
+          "expected": "source_relocation_addend",
+          "id": "NEG-N6-KENTRY-LINKED-RELOCATION-ADDEND",
+          "layer": "linked_lld_input",
+          "observed": "source_relocation_addend",
+          "status": "pass"
+        },
+        {
+          "expected": "manifest_presence",
+          "id": "NEG-N6-KENTRY-LINKED-MANIFEST-MISSING",
+          "layer": "linked_lld_input",
+          "observed": "manifest_presence",
+          "status": "pass"
+        },
+        {
+          "expected": "manifest_presence",
+          "id": "NEG-N6-KENTRY-LINKED-MANIFEST-DUPLICATE",
+          "layer": "linked_lld_input",
+          "observed": "manifest_presence",
+          "status": "pass"
+        },
+        {
+          "expected": "source_section_bounds",
+          "id": "NEG-N6-KENTRY-LINKED-SECTION-BOUNDS",
+          "layer": "linked_lld_input",
+          "observed": "source_section_bounds",
+          "status": "pass"
+        },
+        {
+          "expected": "reject",
+          "id": "NEG-N6-KENTRY-PKELF-TRUNCATED",
+          "layer": "canonical_pkelf1",
+          "observed": "header_truncated",
+          "status": "pass"
+        },
+        {
+          "expected": "reject",
+          "id": "NEG-N6-KENTRY-PKELF-IDENT",
+          "layer": "canonical_pkelf1",
+          "observed": "magic",
+          "status": "pass"
+        },
+        {
+          "expected": "reject",
+          "id": "NEG-N6-KENTRY-PKELF-SECTIONS",
+          "layer": "canonical_pkelf1",
+          "observed": "section_table",
+          "status": "pass"
+        },
+        {
+          "expected": "reject",
+          "id": "NEG-N6-KENTRY-PKELF-PADDR",
+          "layer": "canonical_pkelf1",
+          "observed": "load_address",
+          "status": "pass"
+        },
+        {
+          "expected": "reject",
+          "id": "NEG-N6-KENTRY-PKELF-TEXT-WRITABLE",
+          "layer": "canonical_pkelf1",
+          "observed": "load_flags",
+          "status": "pass"
+        },
+        {
+          "expected": "reject",
+          "id": "NEG-N6-KENTRY-PKELF-STACK-EXECUTABLE",
+          "layer": "canonical_pkelf1",
+          "observed": "stack_segment",
+          "status": "pass"
+        },
+        {
+          "expected": "reject",
+          "id": "NEG-N6-KENTRY-PKELF-DYNAMIC-TAG",
+          "layer": "canonical_pkelf1",
+          "observed": "dynamic_order",
+          "status": "pass"
+        },
+        {
+          "expected": "reject",
+          "id": "NEG-N6-KENTRY-PKELF-RELOCATION-TYPE",
+          "layer": "canonical_pkelf1",
+          "observed": "relocation_type",
+          "status": "pass"
+        },
+        {
+          "expected": "reject",
+          "id": "NEG-N6-KENTRY-PKELF-RELOCATION-TARGET-VALUE",
+          "layer": "canonical_pkelf1",
+          "observed": "relocation_target",
+          "status": "pass"
+        },
+        {
+          "expected": "reject",
+          "id": "NEG-N6-KENTRY-PKELF-RELOCATION-ADDEND",
+          "layer": "canonical_pkelf1",
+          "observed": "relocation_addend",
+          "status": "pass"
+        },
+        {
+          "expected": "reject",
+          "id": "NEG-N6-KENTRY-PKELF-PHYSICAL-BASE",
+          "layer": "canonical_pkelf1",
+          "observed": "physical_base",
+          "status": "pass"
+        },
+        {
+          "expected": "reject",
+          "id": "NEG-N6-KENTRY-PKELF-VIRTUAL-BASE",
+          "layer": "canonical_pkelf1",
+          "observed": "virtual_base",
+          "status": "pass"
+        },
+        {
+          "expected": "reject",
+          "id": "NEG-N6-KENTRY-PKELF-CAPACITY",
+          "layer": "canonical_pkelf1",
+          "observed": "output_capacity",
+          "status": "pass"
+        },
+        {
+          "expected": "reject",
+          "id": "NEG-N6-KENTRY-HOST-MARKER-INJECTED",
+          "layer": "publication_boundary",
+          "observed": "marker_detected",
+          "status": "pass"
+        }
+      ],
+      "open_items": [
+        "Wire authenticated PooleKernel file discovery, bounded reads, and PKELF1 allocation into PooleBoot.",
+        "Install and inspect final page tables, W^X/RELRO permissions, bootstrap stack, read-only PBP1 mapping, and temporary framebuffer mapping.",
+        "Replace the QEMU-only unsigned development transfer with an authenticated production PKENTRY1 profile.",
+        "Implement GDT, IDT, TSS, exception containment, memory initialization, capability bootstrap, scheduler, IPC, and the initial user-space system.",
+        "Reproduce exact product bytes on a second independent builder and qualify target firmware and separately authorized physical media.",
+        "Complete the remaining N6 requirements and all downstream N7-N39 production gates."
+      ],
+      "phase_status": {
+        "N6": "partial",
+        "N6.4": "partial",
+        "N6.5": "partial",
+        "N6.6": "partial"
+      },
+      "product": {
+        "canonical_byte_count": 180224,
+        "canonical_sha256": "5D06ABFC9BD525931C63CC8A48FACD66A478640CE793E20E6D66EAEEB2BCEEEA",
+        "entry_offset": 32768,
+        "entry_prefix_hex": "FAFC4889E14885C9743348F7C10F000000752A4889C848C1E01048C1F8104839C8751A410F20D89C",
+        "host_leakage_hits": [],
+        "image_byte_count": 262144,
+        "linked_byte_count": 3449288,
+        "linked_sha256": "6AAA1CC5DF0192DE9FEB545CB269185246D7BC3161E953B19B897D12397E2B68",
+        "loaded_sha256": "00BDAF54F9CCD98AE6752B9F610886AFF571320640D44103A5FC65A83D89367E",
+        "manifest_fields": {
+          "build_id": "PKBUILD1-CYCLE118-N5-TRANSFER-001",
+          "entry_contract": "PKENTRY1",
+          "entry_offset": "0x00008000",
+          "handoff_contract": "PBP1",
+          "image_contract": "PKELF1",
+          "pbp1_contract_sha256": "89EA7517EF7D2E30C7EBEC4C28D092E3F01D95519EC6768E7B4D5C0F586B58E7",
+          "pkelf1_contract_sha256": "A0CE48E9EF992B97333D84ECB2850E221D482E2ACF11BB312B5F769DAFF992AA",
+          "pkentry1_contract_sha256": "6923B21206CBD25C1B15D699312874D678ED32513AF9618A10077289E44EA8BE"
+        },
+        "manifest_offset": 536,
+        "relocation_canonical_offset": 163904,
+        "relocation_count": 302,
+        "relocation_source_offset": 164064,
+        "relro_byte_count": 16384,
+        "relro_offset": 163840
+      },
+      "production_promotion_allowed": false,
+      "production_ready": false,
+      "schema_version": "1.0",
+      "selected_move_id": "N6-KENTRY-001",
+      "status": "pass_single_host_product_image_non_promoting",
+      "status_date": "2026-07-16",
+      "summary": {
+        "clean_builds_matched": 2,
+        "clean_builds_total": 2,
+        "clippy_runs_passed": 2,
+        "clippy_runs_total": 2,
+        "exact_loaded_byte_implementations_matched": 2,
+        "exact_loaded_byte_implementations_total": 2,
+        "negative_controls_passed": 43,
+        "negative_controls_total": 43,
+        "production_claim_count": 0,
+        "rust_host_tests_passed": 14,
+        "rust_host_tests_total": 14,
+        "rustfmt_packages_passed": 2
+      },
+      "toolchain": {
+        "pkelf1_probe_qualification": {
+          "clippy_runs": [
+            {
+              "status": "pass",
+              "target": "x86_64-pc-windows-msvc"
+            },
+            {
+              "status": "pass",
+              "target": "x86_64-unknown-uefi"
+            },
+            {
+              "status": "pass",
+              "target": "x86_64-unknown-none"
+            }
+          ],
+          "host_probe_artifact_identity_recorded": false,
+          "host_probe_byte_count": 148480,
+          "host_probe_role": "ephemeral host-only differential and exact-byte transport",
+          "no_std_target_builds": [
+            {
+              "byte_count": 93930,
+              "sha256": "B2DA69C66E0C7EA9CD359664D8497ED0869F965994DB921F309D2C4EF70E9EF9",
+              "status": "pass",
+              "target": "x86_64-unknown-uefi"
+            },
+            {
+              "byte_count": 97144,
+              "sha256": "6F30B8A85850C97A6A5B337EE202393B346B9AD26C1D2880926A5EB75E40A193",
+              "status": "pass",
+              "target": "x86_64-unknown-none"
+            }
+          ],
+          "pooleboot_compile_time_integration_builds": [
+            {
+              "pooleboot_rlib_byte_count": 55768,
+              "pooleboot_rlib_sha256": "DEFC02CFD09EFE1A34C956496E88D710167D4C240604EC1D62FBF8670A0E1F37",
+              "status": "pass",
+              "target": "x86_64-unknown-uefi"
+            },
+            {
+              "pooleboot_rlib_byte_count": 57860,
+              "pooleboot_rlib_sha256": "D0921C68FAEAE60523899561EB3823DADDA752EEFF954928CB82AE16BCBF72C7",
+              "status": "pass",
+              "target": "x86_64-unknown-none"
+            }
+          ],
+          "rust_host_target": "x86_64-pc-windows-msvc",
+          "rust_host_test_count": 12,
+          "rust_host_test_pass_count": 12,
+          "rustc_version_sha256": "F3C960598A5E9037C4CF8E4AA06C018171ABF07C381D165C3986C6A954DEA1BB",
+          "rustfmt_status": "pass"
+        },
+        "product_rustflags": [
+          "-Cpanic=abort",
+          "-Crelocation-model=pic",
+          "-Ccode-model=small",
+          "-Cforce-frame-pointers=yes",
+          "-Cno-redzone=yes",
+          "-Clink-arg=-pie",
+          "-Clink-arg=--no-dynamic-linker",
+          "-Clink-arg=--no-eh-frame-hdr",
+          "-Clink-arg=--build-id=none",
+          "-Clink-arg=--gc-sections",
+          "-Clink-arg=-TC:\\Users\\rookp\\Documents\\Codex\\2026-06-29\\i\\work\\PooleOS\\native\\kernel\\linker.ld",
+          "-Clink-arg=--entry=poole_kernel_entry",
+          "--remap-path-prefix=C:\\Users\\rookp\\Documents\\Codex\\2026-06-29\\i\\work\\PooleOS=/pooleos",
+          "-Cdwarf-version=5"
+        ],
+        "root_policy": "workspace-local untracked",
+        "rustc_version_sha256": "F3C960598A5E9037C4CF8E4AA06C018171ABF07C381D165C3986C6A954DEA1BB",
+        "target": "x86_64-unknown-none"
+      }
+    },
+    "transfer_pooleboot": {
+      "byte_count": 207360,
+      "clean_build_count": 2,
+      "development_transfer_feature": true,
+      "exact_clean_build_match": true,
+      "host_contract_test_count": 8,
+      "host_contract_test_pass_count": 8,
+      "host_leakage_hit_count": 0,
+      "host_leakage_marker_count": 7,
+      "inspection": {
+        "byte_count": 207360,
+        "characteristics": 34,
+        "debug_directory": {
+          "rva": 0,
+          "size": 0
+        },
+        "debug_directory_present": false,
+        "dll_characteristics": 33120,
+        "entry_nonzero": true,
+        "entry_point": 36457,
+        "file_alignment": 512,
+        "format": "PE32+",
+        "header_size": 1024,
+        "image_base": 5368709120,
+        "image_size": 221184,
+        "import_directory": {
+          "rva": 0,
+          "size": 0
+        },
+        "imports_present": false,
+        "machine": 34404,
+        "section_alignment": 4096,
+        "section_count": 4,
+        "sections": [
+          {
+            "characteristics": 1610612768,
+            "name": ".text",
+            "raw_offset": 1024,
+            "raw_size": 152576,
+            "virtual_address": 4096,
+            "virtual_size": 152339
+          },
+          {
+            "characteristics": 1073741888,
+            "name": ".rdata",
+            "raw_offset": 153600,
+            "raw_size": 52224,
+            "virtual_address": 159744,
+            "virtual_size": 51772
+          },
+          {
+            "characteristics": 1073741888,
+            "name": ".eh_fram",
+            "raw_offset": 205824,
+            "raw_size": 512,
+            "virtual_address": 212992,
+            "virtual_size": 64
+          },
+          {
+            "characteristics": 1107296320,
+            "name": ".reloc",
+            "raw_offset": 206336,
+            "raw_size": 1024,
+            "virtual_address": 217088,
+            "virtual_size": 748
+          }
+        ],
+        "sha256": "59EB676796210C76E0E4351384D9B05490D32547EBE9839B36000B6E46FCBF68",
+        "subsystem": 10,
+        "timestamp": 0
+      },
+      "sha256": "59EB676796210C76E0E4351384D9B05490D32547EBE9839B36000B6E46FCBF68"
+    }
+  },
+  "claims": {
+    "authenticated_kernel_entry_profile_valid": false,
+    "bootstrap_stack_installed": true,
+    "default_pooleboot_transfer_enabled": false,
+    "exact_pbp1_revalidated_in_kernel": true,
+    "exit_boot_services_succeeded_before_transfer": true,
+    "interrupts_and_direction_flag_cleared": true,
+    "live_poolekernel_entry_executed": true,
+    "nine_retained_files_revalidated_in_kernel": true,
+    "physical_media_written": false,
+    "production_ready": false,
+    "retained_cr3_installed": true,
+    "serial_debugcon_exact_match": true,
+    "sysv_register_contract_observed": true,
+    "target_firmware_qualified": false,
+    "terminal_unsigned_denial": true,
+    "two_qemu_runs_exact_match": true
+  },
+  "contract_id": "PKXFER1",
+  "execution": {
+    "exact_marker_match": true,
+    "exact_pbp1_match": true,
+    "exact_screenshot_match": true,
+    "firmware_code_sha256": "33090CC07675BAA5190D9F1E84BF5176B33BCBFA9BACAC522961150CDB6DBB2A",
+    "host_environment_count": 1,
+    "machine": "pc-q35-11.0",
+    "normalized_command": [
+      "$QEMU",
+      "-L",
+      "$QEMU_ROOT/share",
+      "-nodefaults",
+      "-no-user-config",
+      "-machine",
+      "pc-q35-11.0,smm=off,usb=off,vmport=off",
+      "-accel",
+      "tcg,thread=single",
+      "-cpu",
+      "qemu64",
+      "-smp",
+      "1,sockets=1,dies=1,clusters=1,cores=1,threads=1,maxcpus=1",
+      "-m",
+      "512M",
+      "-rtc",
+      "base=utc,clock=vm,driftfix=none",
+      "-icount",
+      "shift=0,align=off,sleep=off",
+      "-global",
+      "ICH9-LPC.disable_s3=1",
+      "-global",
+      "ICH9-LPC.disable_s4=1",
+      "-drive",
+      "if=pflash,format=raw,unit=0,readonly=on,file=$QEMU_ROOT/share/edk2-x86_64-code.fd",
+      "-drive",
+      "if=pflash,format=raw,unit=1,file=$RUN_DIR/OVMF_VARS.fd",
+      "-drive",
+      "if=none,id=pooleos_media,format=raw,readonly=on,file=$MEDIA_READ_ONLY",
+      "-device",
+      "virtio-blk-pci-non-transitional,drive=pooleos_media",
+      "-chardev",
+      "file,id=poole_serial,path=$RUN_DIR/pooleos.serial.log,append=off",
+      "-serial",
+      "chardev:poole_serial",
+      "-debugcon",
+      "file:$RUN_DIR/pooleos.debugcon.log",
+      "-global",
+      "isa-debugcon.iobase=0x402",
+      "-device",
+      "isa-debug-exit,iobase=0xf4,iosize=0x04",
+      "-display",
+      "none",
+      "-monitor",
+      "none",
+      "-nic",
+      "none",
+      "-no-reboot",
+      "-boot",
+      "strict=on,menu=off",
+      "-d",
+      "guest_errors,unimp",
+      "-D",
+      "$RUN_DIR/qemu.trace.log",
+      "-device",
+      "VGA,id=poole_gop",
+      "-qmp",
+      "tcp:127.0.0.1:$QMP_PORT,server=on,wait=off"
+    ],
+    "normalized_command_sha256": "BF26B10D53C21F195065BE2F2261FCDEED04E2013068AC329F1BB1D0A3766C32",
+    "profile_id": "bootstrap-debug",
+    "qemu_sha256": "A930E028F93D0FA47E4D58BDAD2432F7466DC2B6AF0AE376F77EF7A298FFDD02",
+    "run_count": 2,
+    "runs": [
+      {
+        "fresh_vars_copy": true,
+        "guest_network": false,
+        "host_acceleration": false,
+        "independent_kernel_revalidation": {
+          "actions_authorized": 0,
+          "artifact_count": 6,
+          "authority_grants": 0,
+          "contract_id": "PKREVAL1",
+          "denial": "pbtrust_policy_unsigned",
+          "guest_host_exact_match": true,
+          "manifest_bytes": 2615,
+          "parser_count": 9,
+          "policy_sha256": "DED2480B00B488A0B65F176B977130052914ABA6CEE5E6770EFAF4A972B88973",
+          "retained_file_bytes": 11952,
+          "retained_file_count": 9,
+          "retained_set_sha256": "652F3743DC6C033D41C8F634F359BF3A8A4B4AFF8D21F7EA329A0E349619A069",
+          "state_sha256": "D92025006EC9C7D522A4FBC0DEE6176B333CFCF9AAA3FF9D571C76214099719C",
+          "state_writes": 0
+        },
+        "local_paths_recorded": false,
+        "marker_sha256": "40F4B309291E47DC90A3B1FD6D5F86ECFF3B5650BFCEA4ED0E0CD5F9BDD34CBD",
+        "marker_summary": {
+          "boot_prefix": {
+            "artifact_set": {
+              "artifact_count": 6,
+              "contract_id": "PBART1",
+              "file_bytes": 8761,
+              "fnv1a64": "4083EDBC7C9D8759",
+              "measured": false,
+              "page_count": 6,
+              "pages_retained": true,
+              "retained_input_count": 9,
+              "retained_input_page_count": 9,
+              "semantics_applied": false,
+              "signatures_verified": false
+            },
+            "boot_config": {
+              "boot_attempt_limit": 3,
+              "byte_count": 229,
+              "default_entry_hash": "61053F0E3EBBD272",
+              "entry_count": 1,
+              "manifest_max_bytes": 65536,
+              "selected_slot": 1,
+              "timeout_ms": 0
+            },
+            "boot_exit": {
+              "artifact_page_count": 9,
+              "attempt_count": 1,
+              "contract_id": "PBEXIT1",
+              "descriptor_count": 96,
+              "descriptor_size": 48,
+              "firmware_calls_after_exit": 0,
+              "handoff_page_count": 256,
+              "kernel_page_count": 64,
+              "map_byte_count": 4608,
+              "stack_page_count": 8,
+              "successful_exit_prefix_validated": true,
+              "synthetic_stop_used_for_prefix_parser_only": true,
+              "table_page_count": 4
+            },
+            "config_table_count": 10,
+            "gop": {
+              "format": "BGR",
+              "height": 800,
+              "mode": 0,
+              "stride": 1280,
+              "width": 1280
+            },
+            "inner_set": {
+              "actions_authorized": 0,
+              "artifact_count": 6,
+              "authority_grants": 0,
+              "cross_binding_count": 6,
+              "development_denial_count": 6,
+              "exact_retained_bytes": true,
+              "file_bytes": 8761,
+              "hardware_observations": 0,
+              "parser_count": 6,
+              "payload_bytes": 8185,
+              "proof_id": "N5-INNER-LIVE-PARSE-001",
+              "retained_set_sha256": "652F3743DC6C033D41C8F634F359BF3A8A4B4AFF8D21F7EA329A0E349619A069",
+              "state_writes": 0
+            },
+            "kernel": {
+              "entry_offset": 32768,
+              "file_byte_count": 180224,
+              "file_handles_closed": 12,
+              "file_pools_freed": 11,
+              "image_byte_count": 262144,
+              "loaded_fnv1a64": "085F08EF4F73B645",
+              "page_count": 64,
+              "pages_retained": true,
+              "relocation_count": 302,
+              "resources_released": false
+            },
+            "kernel_map": {
+              "contract_id": "PKMAP2",
+              "firmware_calls_while_active": 0,
+              "first_page_table_index": 0,
+              "framebuffer_cache_signature": "00",
+              "framebuffer_first_page_bytes": 2097152,
+              "framebuffer_last_page_bytes": 2097152,
+              "framebuffer_preserved": true,
+              "leaf_fingerprint": "066F6E68217211A5",
+              "mapped_fnv1a64": "085F08EF4F73B645",
+              "mapped_page_count": 64,
+              "mapping_count": 4,
+              "original_cr3_restored": true,
+              "page_directory_index": 0,
+              "pdpt_index": 510,
+              "physical_address_bits": 40,
+              "pml4_index": 511,
+              "read_execute_page_count": 32,
+              "read_only_page_count": 12,
+              "read_write_page_count": 20,
+              "retained": {
+                "guard_page_count": 2,
+                "handoff_first_page_table_index": 80,
+                "handoff_page_count": 256,
+                "handoff_physical_base": 498188288,
+                "handoff_virtual_base": 18446744071562395648,
+                "kernel_physical_base": 500948992,
+                "page_table_root_physical": 501542912,
+                "retained_leaf_fingerprint": "F6AABD8C612439ED",
+                "stack_first_page_table_index": 65,
+                "stack_page_count": 8,
+                "stack_physical_base": 501559296,
+                "stack_top_virtual": 18446744071562366976,
+                "table_page_count": 4,
+                "total_mapped_page_count": 328
+              },
+              "table_page_count": 4,
+              "tables_retained": true,
+              "writable_executable_page_count": 0
+            },
+            "manifest": {
+              "artifact_count": 7,
+              "byte_count": 2615,
+              "kernel_file_byte_count": 180224,
+              "kernel_image_byte_count": 262144,
+              "kernel_sha256_prefix": "5D06ABFC9BD52593",
+              "kernel_version": 1,
+              "manifest_id_hash": "4A2625333244591C",
+              "manifest_version": 1,
+              "minimum_secure_version": 1,
+              "slot": 1
+            },
+            "marker_count": 25,
+            "memory_map": {
+              "byte_count": 4608,
+              "descriptor_bytes": 48,
+              "descriptor_count": 96
+            },
+            "ordered_contract_match": true,
+            "pbp1": {
+              "artifact_count": 10,
+              "boot_services_exited": true,
+              "byte_count": 5008,
+              "bytes_unchanged": true,
+              "descriptor_bytes": 48,
+              "development_mode_only": true,
+              "exit_attempts": 1,
+              "fnv1a64": "3A3F67DA57A8DA0C",
+              "framebuffer_present": 1,
+              "memory_entry_count": 96,
+              "message_crc32": "86EFFD63",
+              "pre_exit": false,
+              "record_count": 4,
+              "temporary_pools_released": false
+            },
+            "trust_state": {
+              "authority_grants": 0,
+              "binding_count": 14,
+              "contract_id": "PBTRUST1",
+              "denial": "pbtrust_policy_unsigned",
+              "denial_count": 1,
+              "policy_bytes": 320,
+              "policy_sha256": "DED2480B00B488A0B65F176B977130052914ABA6CEE5E6770EFAF4A972B88973",
+              "signature_verifications": 0,
+              "state_authenticated": false,
+              "state_bytes": 256,
+              "state_monotonic": false,
+              "state_sha256": "D92025006EC9C7D522A4FBC0DEE6176B333CFCF9AAA3FF9D571C76214099719C",
+              "state_source": "esp_candidate_not_persistent_authority",
+              "state_writes": 0
+            },
+            "uefi_revision": 131142
+          },
+          "kernel_entry": {
+            "build_id": "PKBUILD1-CYCLE118-N5-TRANSFER-001",
+            "entry_contract": "PKENTRY1",
+            "entry_count": 1,
+            "serial": "present",
+            "transfer_contract": "PKXFER1"
+          },
+          "kernel_pbp1": {
+            "artifact_count": 10,
+            "production_profile_valid": 0,
+            "profile": "development",
+            "record_count": 4
+          },
+          "kernel_revalidation": {
+            "actions_authorized": 0,
+            "artifact_count": 6,
+            "authority_grants": 0,
+            "contract_id": "PKREVAL1",
+            "denial": "pbtrust_policy_unsigned",
+            "manifest_bytes": 2615,
+            "parser_count": 9,
+            "policy_sha256": "DED2480B00B488A0B65F176B977130052914ABA6CEE5E6770EFAF4A972B88973",
+            "retained_file_bytes": 11952,
+            "retained_file_count": 9,
+            "retained_set_sha256": "652F3743DC6C033D41C8F634F359BF3A8A4B4AFF8D21F7EA329A0E349619A069",
+            "state_sha256": "D92025006EC9C7D522A4FBC0DEE6176B333CFCF9AAA3FF9D571C76214099719C",
+            "state_writes": 0
+          },
+          "kernel_state": {
+            "cr3": 501542912,
+            "entry": 18446744071562100736,
+            "handoff": 18446744071562395648,
+            "handoff_bytes": 5008,
+            "rflags_df": 0,
+            "rflags_if": 0,
+            "root": 501542912,
+            "stack_top": 18446744071562366976
+          },
+          "kernel_terminal": {
+            "actions_authorized": 0,
+            "authority_grants": 0,
+            "contract_id": "PKXFER1",
+            "entry_count": 1,
+            "firmware_calls_after_exit": 0,
+            "signature_verifications": 0,
+            "state_writes": 0,
+            "terminal": "halt"
+          },
+          "marker_count": 30,
+          "ordered_contract_match": true,
+          "transfer_arm": {
+            "actions_authorized": 0,
+            "authority_grants": 0,
+            "contract_id": "PKXFER1",
+            "cr3": 501542912,
+            "emulator_only": 1,
+            "entry": 18446744071562100736,
+            "firmware_calls_after_exit": 0,
+            "handoff": 18446744071562395648,
+            "handoff_bytes": 5008,
+            "mode": "development",
+            "root": 501542912,
+            "signature_verifications": 0,
+            "stack_top": 18446744071562366976,
+            "state_writes": 0
+          }
+        },
+        "markers": [
+          "POOLEBOOT/0.1 ENTRY",
+          "POOLEBOOT/0.1 SYSTEM_TABLE PASS revision=0x00020046",
+          "POOLEBOOT/0.1 BOOT_SERVICES PASS",
+          "POOLEBOOT/0.1 WATCHDOG status=0x0000000000000000",
+          "POOLEBOOT/0.1 CONSOLE PASS",
+          "POOLEBOOT/0.1 CONFIG PASS count=10 acpi20=1 smbios3=0 smbios2=1",
+          "POOLEBOOT/0.1 FILESYSTEM PASS loaded_image=1 simple_fs=1 root=1",
+          "POOLEBOOT/0.1 BOOTCFG PASS bytes=229 entries=1 default_hash=61053F0E3EBBD272 timeout_ms=0 attempts=3 slot=1 manifest_max_bytes=65536",
+          "POOLEBOOT/0.1 MANIFEST PASS bytes=2615 artifacts=7 id_hash=4A2625333244591C slot=1 version=1 minimum_secure_version=1",
+          "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=180224 image_bytes=262144 sha256_prefix=5D06ABFC9BD52593 path=manifest",
+          "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=180224 path=manifest_development",
+          "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=262144 pages=64 entry_offset=32768 relocations=302 files_closed=12 pools_freed=11 fnv1a64=085F08EF4F73B645",
+          "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=4083EDBC7C9D8759 retained=1 signatures=0 measured=0",
+          "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=652F3743DC6C033D41C8F634F359BF3A8A4B4AFF8D21F7EA329A0E349619A069 retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
+          "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=DED2480B00B488A0B65F176B977130052914ABA6CEE5E6770EFAF4A972B88973 state_sha256=D92025006EC9C7D522A4FBC0DEE6176B333CFCF9AAA3FF9D571C76214099719C source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
+          "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
+          "POOLEBOOT/0.1 FRAME READY",
+          "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=64 ro=12 rx=32 rw=20 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=066F6E68217211A5",
+          "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=64 physical_bits=40 mapped_fnv1a64=085F08EF4F73B645 framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
+          "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=8 handoff_pages=256 guards=2 total_pages=328 stack_pt=65 handoff_pt=80 kernel_phys=000000001DDBE000 root=000000001DE4F000 stack_phys=000000001DE53000 stack_top=FFFFFFFF80049000 handoff_phys=000000001DB1C000 handoff_virt=FFFFFFFF80050000 retained_fnv1a64=F6AABD8C612439ED original_cr3=restored firmware_calls_while_active=0",
+          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5008 records=4 memory_entries=96 framebuffer=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=86EFFD63 fnv1a64=3A3F67DA57A8DA0C state=boot_services_exited bytes_unchanged=1",
+          "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4608 descriptor_bytes=48 descriptors=96",
+          "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=64 artifact_pages=9 table_pages=4 stack_pages=8 handoff_pages=256",
+          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF80008000 handoff=FFFFFFFF80050000 bytes=5008 stack_top=FFFFFFFF80049000 root=000000001DE4F000 cr3=000000001DE4F000 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
+          "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
+          "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE118-N5-TRANSFER-001 entry_count=1 serial=present",
+          "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF80050000 bytes=5008 entry=0xFFFFFFFF80008000 stack_top=0xFFFFFFFF80049000 root=0x000000001DE4F000 cr3=0x000000001DE4F000 rflags_if=0 rflags_df=0",
+          "POOLEOS:KERNEL:PBP1 PASS profile=development records=4 artifacts=10 production_profile_valid=0",
+          "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=652F3743DC6C033D41C8F634F359BF3A8A4B4AFF8D21F7EA329A0E349619A069 policy_sha256=DED2480B00B488A0B65F176B977130052914ABA6CEE5E6770EFAF4A972B88973 state_sha256=D92025006EC9C7D522A4FBC0DEE6176B333CFCF9AAA3FF9D571C76214099719C denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
+          "POOLEOS:KERNEL:TRANSFER-DENIED PASS contract=PKXFER1 terminal=halt entry_count=1 post_exit_firmware_calls=0 signatures=0 authority=0 actions=0 writes=0"
+        ],
+        "media_read_only": true,
+        "pbp1_serial_debugcon_exact_match": true,
+        "pbp1_transcript": {
+          "artifact_count": 10,
+          "artifacts": [
+            {
+              "entry_virtual": "FFFFFFFF80008000",
+              "flags": 9,
+              "physical_base": "000000001DDBE000",
+              "physical_size": 262144,
+              "role": 1,
+              "sha256": "5D06ABFC9BD525931C63CC8A48FACD66A478640CE793E20E6D66EAEEB2BCEEEA",
+              "virtual_base": "FFFFFFFF80000000",
+              "virtual_size": 262144
+            },
+            {
+              "entry_virtual": "0000000000000000",
+              "flags": 1,
+              "physical_base": "000000001E5D8000",
+              "physical_size": 1860,
+              "role": 2,
+              "sha256": "00C28AB2DE744281CEC0459598A29E8C608E95BC2AF5207D78B67F494EF1E2F8",
+              "virtual_base": "0000000000000000",
+              "virtual_size": 0
+            },
+            {
+              "entry_virtual": "0000000000000000",
+              "flags": 1,
+              "physical_base": "000000001DE61000",
+              "physical_size": 1088,
+              "role": 3,
+              "sha256": "FFAC48737878D6D4986CBF1936F4A8BE7898D544D4C4043F4D51144AEC728B59",
+              "virtual_base": "0000000000000000",
+              "virtual_size": 0
+            },
+            {
+              "entry_virtual": "0000000000000000",
+              "flags": 1,
+              "physical_base": "000000001DE60000",
+              "physical_size": 821,
+              "role": 4,
+              "sha256": "C7990B0DCEB3925A6AAC270013E7C48FE9D36F661A43CE4F1A29ACA205E06993",
+              "virtual_base": "0000000000000000",
+              "virtual_size": 0
+            },
+            {
+              "entry_virtual": "0000000000000000",
+              "flags": 1,
+              "physical_base": "000000001DE5F000",
+              "physical_size": 1504,
+              "role": 5,
+              "sha256": "04D5F70F88FE15BF747992390467BC8AE9E3BD0E28F6D131C427B73764641397",
+              "virtual_base": "0000000000000000",
+              "virtual_size": 0
+            },
+            {
+              "entry_virtual": "0000000000000000",
+              "flags": 1,
+              "physical_base": "000000001DE5E000",
+              "physical_size": 1408,
+              "role": 6,
+              "sha256": "BD162F099BB0145738BA3FAD57B0B903FDB12B0080BBC85812528DC9C1A7A728",
+              "virtual_base": "0000000000000000",
+              "virtual_size": 0
+            },
+            {
+              "entry_virtual": "0000000000000000",
+              "flags": 1,
+              "physical_base": "000000001DE5D000",
+              "physical_size": 2080,
+              "role": 7,
+              "sha256": "BBEE4B8578ABF9B557A9C9766CC966A1064AF1E4AB45C7451266319E97A7EDE2",
+              "virtual_base": "0000000000000000",
+              "virtual_size": 0
+            },
+            {
+              "entry_virtual": "0000000000000000",
+              "flags": 1,
+              "physical_base": "000000001E5E1000",
+              "physical_size": 2615,
+              "role": 9,
+              "sha256": "BA23945EEB7507B02F3CBD08A133CECAFFBB7ABB5593B5BA7BD71034FCB1DF3D",
+              "virtual_base": "0000000000000000",
+              "virtual_size": 0
+            },
+            {
+              "entry_virtual": "0000000000000000",
+              "flags": 1,
+              "physical_base": "000000001DE5C000",
+              "physical_size": 320,
+              "role": 10,
+              "sha256": "DED2480B00B488A0B65F176B977130052914ABA6CEE5E6770EFAF4A972B88973",
+              "virtual_base": "0000000000000000",
+              "virtual_size": 0
+            },
+            {
+              "entry_virtual": "0000000000000000",
+              "flags": 1,
+              "physical_base": "000000001DE5B000",
+              "physical_size": 256,
+              "role": 11,
+              "sha256": "D92025006EC9C7D522A4FBC0DEE6176B333CFCF9AAA3FF9D571C76214099719C",
+              "virtual_base": "0000000000000000",
+              "virtual_size": 0
+            }
+          ],
+          "boot_services_exited": true,
+          "byte_count": 5008,
+          "contract_id": "PBLIVE3",
+          "core": {
+            "boot_attempt": 0,
+            "boot_attempt_limit": 3,
+            "boot_flags": "0000000000000011",
+            "boot_slot": 1,
+            "handoff_byte_count": 5008,
+            "handoff_physical_base": "000000001DB1C000",
+            "handoff_virtual_base": "FFFFFFFF80050000",
+            "initial_stack_top_virtual": "FFFFFFFF80049000",
+            "kernel_entry_virtual": "FFFFFFFF80008000",
+            "kernel_physical_base": "000000001DDBE000",
+            "kernel_physical_size": 262144,
+            "kernel_virtual_base": "FFFFFFFF80000000",
+            "kernel_virtual_size": 262144,
+            "page_table_root_physical": "000000001DE4F000",
+            "selected_entry": 1,
+            "uefi_revision": "00020046"
+          },
+          "development_mode_only": true,
+          "exit_development_profile_validated": true,
+          "features": "0000000000000017",
+          "fnv1a64": "3A3F67DA57A8DA0C",
+          "framebuffer": {
+            "blue_mask": "000000FF",
+            "byte_count": 4096000,
+            "green_mask": "0000FF00",
+            "height": 800,
+            "physical_base": "0000000080000000",
+            "pixel_format": 2,
+            "red_mask": "00FF0000",
+            "reserved_mask": "FF000000",
+            "stride": 1280,
+            "width": 1280
+          },
+          "kernel_artifact": {
+            "entry_virtual": "FFFFFFFF80008000",
+            "flags": 9,
+            "physical_base": "000000001DDBE000",
+            "physical_size": 262144,
+            "role": 1,
+            "sha256": "5D06ABFC9BD525931C63CC8A48FACD66A478640CE793E20E6D66EAEEB2BCEEEA",
+            "virtual_base": "FFFFFFFF80000000",
+            "virtual_size": 262144
+          },
+          "kernel_entry_profile_rejected": true,
+          "memory_entries": [
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 160,
+              "physical_start": "0000000000000000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 1798,
+              "physical_start": "0000000000100000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "0000000000806000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 4,
+              "physical_start": "0000000000807000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000000080B000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 20,
+              "physical_start": "000000000080C000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3936,
+              "physical_start": "0000000000820000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 107636,
+              "physical_start": "0000000001780000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 32,
+              "physical_start": "000000001BBF4000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 7944,
+              "physical_start": "000000001BC14000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 10,
+              "page_count": 738,
+              "physical_start": "000000001DB1C000",
+              "source_type": 2
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 10,
+              "page_count": 54,
+              "physical_start": "000000001DDFE000",
+              "source_type": 1
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 27,
+              "physical_start": "000000001DE34000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 10,
+              "page_count": 19,
+              "physical_start": "000000001DE4F000",
+              "source_type": 2
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1684,
+              "physical_start": "000000001DE62000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 224,
+              "physical_start": "000000001E4F6000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 2,
+              "physical_start": "000000001E5D6000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 10,
+              "page_count": 1,
+              "physical_start": "000000001E5D8000",
+              "source_type": 2
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 1,
+              "physical_start": "000000001E5D9000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 7,
+              "physical_start": "000000001E5DA000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 10,
+              "page_count": 1,
+              "physical_start": "000000001E5E1000",
+              "source_type": 2
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 85,
+              "physical_start": "000000001E5E2000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 34,
+              "physical_start": "000000001E637000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001E659000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 22,
+              "physical_start": "000000001E65A000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 2,
+              "physical_start": "000000001E670000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 14,
+              "physical_start": "000000001E672000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 7,
+              "physical_start": "000000001E680000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 6,
+              "physical_start": "000000001E687000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 41,
+              "physical_start": "000000001E68D000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 28,
+              "physical_start": "000000001E6B6000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001E6D2000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001E6D3000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001E6D8000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 36,
+              "physical_start": "000000001E6DD000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 2,
+              "physical_start": "000000001E701000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 23,
+              "physical_start": "000000001E703000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001E71A000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 41,
+              "physical_start": "000000001E71D000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001E746000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001E747000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 2,
+              "physical_start": "000000001E74C000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 25,
+              "physical_start": "000000001E74E000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001E767000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 41,
+              "physical_start": "000000001E76C000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001E795000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 42,
+              "physical_start": "000000001E796000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 2,
+              "physical_start": "000000001E7C0000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001E7C2000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001E7C6000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 11,
+              "physical_start": "000000001E7CA000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001E7D5000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001E7D8000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001E7DC000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 23,
+              "physical_start": "000000001E7E0000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 521,
+              "physical_start": "000000001E7F7000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 25,
+              "physical_start": "000000001EA00000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001EA19000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 33,
+              "physical_start": "000000001EA1C000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 6,
+              "physical_start": "000000001EA3D000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001EA43000",
+              "source_type": 3
+            },
+            {
+              "attributes": "800000000000000F",
+              "kind": 4,
+              "page_count": 193,
+              "physical_start": "000000001EA48000",
+              "source_type": 6
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 36,
+              "physical_start": "000000001EB09000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001EB2D000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001EB32000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001EB36000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 8,
+              "physical_start": "000000001EB3A000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001EB42000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 42,
+              "physical_start": "000000001EB43000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001EB6D000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 6,
+              "physical_start": "000000001EB72000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1042,
+              "physical_start": "000000001EB78000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 7,
+              "physical_start": "000000001EF8A000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001EF91000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 11,
+              "physical_start": "000000001EF95000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 6,
+              "physical_start": "000000001EFA0000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 23,
+              "physical_start": "000000001EFA6000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1328,
+              "physical_start": "000000001EFBD000",
+              "source_type": 4
+            },
+            {
+              "attributes": "800000000000000F",
+              "kind": 4,
+              "page_count": 256,
+              "physical_start": "000000001F4ED000",
+              "source_type": 6
+            },
+            {
+              "attributes": "800000000000000F",
+              "kind": 3,
+              "page_count": 256,
+              "physical_start": "000000001F5ED000",
+              "source_type": 5
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 135,
+              "physical_start": "000000001F6ED000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 5,
+              "page_count": 11,
+              "physical_start": "000000001F774000",
+              "source_type": 9
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 6,
+              "page_count": 128,
+              "physical_start": "000000001F77F000",
+              "source_type": 10
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1537,
+              "physical_start": "000000001F7FF000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 206,
+              "physical_start": "000000001FE00000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 32,
+              "physical_start": "000000001FECE000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 74,
+              "physical_start": "000000001FEEE000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 0,
+              "page_count": 4,
+              "physical_start": "000000001FF38000",
+              "source_type": 0
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 6,
+              "page_count": 2,
+              "physical_start": "000000001FF3C000",
+              "source_type": 10
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001FF3E000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 17,
+              "physical_start": "000000001FF3F000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 44,
+              "physical_start": "000000001FF50000",
+              "source_type": 3
+            },
+            {
+              "attributes": "800000000000000F",
+              "kind": 4,
+              "page_count": 132,
+              "physical_start": "000000001FF7C000",
+              "source_type": 6
+            },
+            {
+              "attributes": "0000000000000001",
+              "kind": 0,
+              "page_count": 65536,
+              "physical_start": "00000000E0000000",
+              "source_type": 0
+            },
+            {
+              "attributes": "8000000000000001",
+              "kind": 7,
+              "page_count": 1024,
+              "physical_start": "00000000FFC00000",
+              "source_type": 11
+            },
+            {
+              "attributes": "0000000000000000",
+              "kind": 0,
+              "page_count": 3145728,
+              "physical_start": "000000FD00000000",
+              "source_type": 0
+            }
+          ],
+          "memory_entry_count": 96,
+          "message_crc32": "86EFFD63",
+          "pre_exit_profile_validated": false,
+          "record_count": 4,
+          "required_features": "0000000000000013",
+          "secret_bearing_records_present": false,
+          "sha256": "0AAACFA1E98D2604900E2B70869C5D301163CE1D1E2327CCC40556C9CA406A42",
+          "transferable": false
+        },
+        "qemu_exit_code": 0,
+        "qmp_greeting": {
+          "capabilities": [
+            "oob"
+          ],
+          "version": {
+            "package": "v11.0.0-12122-ga4bb4b10c9",
+            "qemu": {
+              "major": 11,
+              "micro": 0,
+              "minor": 0
+            }
+          }
+        },
+        "qmp_loopback_only": true,
+        "qmp_quit_requested": true,
+        "run_id": "run-1",
+        "screenshot": {
+          "bright_cyan_pixel_count": 44970,
+          "byte_count": 3072016,
+          "dark_pixel_count": 979030,
+          "height": 800,
+          "nonblank": true,
+          "pixel_count": 1024000,
+          "poole_identity_palette_observed": true,
+          "sampled_unique_color_count": 6,
+          "sha256": "E9D4CFD48C23DBA760AED5B2049B39DCA49A0D172F680D570082EB0680FDFDBD",
+          "width": 1280
+        },
+        "serial_debugcon_exact_match": true,
+        "stderr_byte_count": 0,
+        "stderr_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "timestamped_qmp_events_excluded_from_equality": true,
+        "transcript_binding": {
+          "development_revalidation_profile_accepted": true,
+          "exact_transfer_fields_bound": true,
+          "production_kernel_entry_profile_rejected": true
+        }
+      },
+      {
+        "fresh_vars_copy": true,
+        "guest_network": false,
+        "host_acceleration": false,
+        "independent_kernel_revalidation": {
+          "actions_authorized": 0,
+          "artifact_count": 6,
+          "authority_grants": 0,
+          "contract_id": "PKREVAL1",
+          "denial": "pbtrust_policy_unsigned",
+          "guest_host_exact_match": true,
+          "manifest_bytes": 2615,
+          "parser_count": 9,
+          "policy_sha256": "DED2480B00B488A0B65F176B977130052914ABA6CEE5E6770EFAF4A972B88973",
+          "retained_file_bytes": 11952,
+          "retained_file_count": 9,
+          "retained_set_sha256": "652F3743DC6C033D41C8F634F359BF3A8A4B4AFF8D21F7EA329A0E349619A069",
+          "state_sha256": "D92025006EC9C7D522A4FBC0DEE6176B333CFCF9AAA3FF9D571C76214099719C",
+          "state_writes": 0
+        },
+        "local_paths_recorded": false,
+        "marker_sha256": "40F4B309291E47DC90A3B1FD6D5F86ECFF3B5650BFCEA4ED0E0CD5F9BDD34CBD",
+        "marker_summary": {
+          "boot_prefix": {
+            "artifact_set": {
+              "artifact_count": 6,
+              "contract_id": "PBART1",
+              "file_bytes": 8761,
+              "fnv1a64": "4083EDBC7C9D8759",
+              "measured": false,
+              "page_count": 6,
+              "pages_retained": true,
+              "retained_input_count": 9,
+              "retained_input_page_count": 9,
+              "semantics_applied": false,
+              "signatures_verified": false
+            },
+            "boot_config": {
+              "boot_attempt_limit": 3,
+              "byte_count": 229,
+              "default_entry_hash": "61053F0E3EBBD272",
+              "entry_count": 1,
+              "manifest_max_bytes": 65536,
+              "selected_slot": 1,
+              "timeout_ms": 0
+            },
+            "boot_exit": {
+              "artifact_page_count": 9,
+              "attempt_count": 1,
+              "contract_id": "PBEXIT1",
+              "descriptor_count": 96,
+              "descriptor_size": 48,
+              "firmware_calls_after_exit": 0,
+              "handoff_page_count": 256,
+              "kernel_page_count": 64,
+              "map_byte_count": 4608,
+              "stack_page_count": 8,
+              "successful_exit_prefix_validated": true,
+              "synthetic_stop_used_for_prefix_parser_only": true,
+              "table_page_count": 4
+            },
+            "config_table_count": 10,
+            "gop": {
+              "format": "BGR",
+              "height": 800,
+              "mode": 0,
+              "stride": 1280,
+              "width": 1280
+            },
+            "inner_set": {
+              "actions_authorized": 0,
+              "artifact_count": 6,
+              "authority_grants": 0,
+              "cross_binding_count": 6,
+              "development_denial_count": 6,
+              "exact_retained_bytes": true,
+              "file_bytes": 8761,
+              "hardware_observations": 0,
+              "parser_count": 6,
+              "payload_bytes": 8185,
+              "proof_id": "N5-INNER-LIVE-PARSE-001",
+              "retained_set_sha256": "652F3743DC6C033D41C8F634F359BF3A8A4B4AFF8D21F7EA329A0E349619A069",
+              "state_writes": 0
+            },
+            "kernel": {
+              "entry_offset": 32768,
+              "file_byte_count": 180224,
+              "file_handles_closed": 12,
+              "file_pools_freed": 11,
+              "image_byte_count": 262144,
+              "loaded_fnv1a64": "085F08EF4F73B645",
+              "page_count": 64,
+              "pages_retained": true,
+              "relocation_count": 302,
+              "resources_released": false
+            },
+            "kernel_map": {
+              "contract_id": "PKMAP2",
+              "firmware_calls_while_active": 0,
+              "first_page_table_index": 0,
+              "framebuffer_cache_signature": "00",
+              "framebuffer_first_page_bytes": 2097152,
+              "framebuffer_last_page_bytes": 2097152,
+              "framebuffer_preserved": true,
+              "leaf_fingerprint": "066F6E68217211A5",
+              "mapped_fnv1a64": "085F08EF4F73B645",
+              "mapped_page_count": 64,
+              "mapping_count": 4,
+              "original_cr3_restored": true,
+              "page_directory_index": 0,
+              "pdpt_index": 510,
+              "physical_address_bits": 40,
+              "pml4_index": 511,
+              "read_execute_page_count": 32,
+              "read_only_page_count": 12,
+              "read_write_page_count": 20,
+              "retained": {
+                "guard_page_count": 2,
+                "handoff_first_page_table_index": 80,
+                "handoff_page_count": 256,
+                "handoff_physical_base": 498188288,
+                "handoff_virtual_base": 18446744071562395648,
+                "kernel_physical_base": 500948992,
+                "page_table_root_physical": 501542912,
+                "retained_leaf_fingerprint": "F6AABD8C612439ED",
+                "stack_first_page_table_index": 65,
+                "stack_page_count": 8,
+                "stack_physical_base": 501559296,
+                "stack_top_virtual": 18446744071562366976,
+                "table_page_count": 4,
+                "total_mapped_page_count": 328
+              },
+              "table_page_count": 4,
+              "tables_retained": true,
+              "writable_executable_page_count": 0
+            },
+            "manifest": {
+              "artifact_count": 7,
+              "byte_count": 2615,
+              "kernel_file_byte_count": 180224,
+              "kernel_image_byte_count": 262144,
+              "kernel_sha256_prefix": "5D06ABFC9BD52593",
+              "kernel_version": 1,
+              "manifest_id_hash": "4A2625333244591C",
+              "manifest_version": 1,
+              "minimum_secure_version": 1,
+              "slot": 1
+            },
+            "marker_count": 25,
+            "memory_map": {
+              "byte_count": 4608,
+              "descriptor_bytes": 48,
+              "descriptor_count": 96
+            },
+            "ordered_contract_match": true,
+            "pbp1": {
+              "artifact_count": 10,
+              "boot_services_exited": true,
+              "byte_count": 5008,
+              "bytes_unchanged": true,
+              "descriptor_bytes": 48,
+              "development_mode_only": true,
+              "exit_attempts": 1,
+              "fnv1a64": "3A3F67DA57A8DA0C",
+              "framebuffer_present": 1,
+              "memory_entry_count": 96,
+              "message_crc32": "86EFFD63",
+              "pre_exit": false,
+              "record_count": 4,
+              "temporary_pools_released": false
+            },
+            "trust_state": {
+              "authority_grants": 0,
+              "binding_count": 14,
+              "contract_id": "PBTRUST1",
+              "denial": "pbtrust_policy_unsigned",
+              "denial_count": 1,
+              "policy_bytes": 320,
+              "policy_sha256": "DED2480B00B488A0B65F176B977130052914ABA6CEE5E6770EFAF4A972B88973",
+              "signature_verifications": 0,
+              "state_authenticated": false,
+              "state_bytes": 256,
+              "state_monotonic": false,
+              "state_sha256": "D92025006EC9C7D522A4FBC0DEE6176B333CFCF9AAA3FF9D571C76214099719C",
+              "state_source": "esp_candidate_not_persistent_authority",
+              "state_writes": 0
+            },
+            "uefi_revision": 131142
+          },
+          "kernel_entry": {
+            "build_id": "PKBUILD1-CYCLE118-N5-TRANSFER-001",
+            "entry_contract": "PKENTRY1",
+            "entry_count": 1,
+            "serial": "present",
+            "transfer_contract": "PKXFER1"
+          },
+          "kernel_pbp1": {
+            "artifact_count": 10,
+            "production_profile_valid": 0,
+            "profile": "development",
+            "record_count": 4
+          },
+          "kernel_revalidation": {
+            "actions_authorized": 0,
+            "artifact_count": 6,
+            "authority_grants": 0,
+            "contract_id": "PKREVAL1",
+            "denial": "pbtrust_policy_unsigned",
+            "manifest_bytes": 2615,
+            "parser_count": 9,
+            "policy_sha256": "DED2480B00B488A0B65F176B977130052914ABA6CEE5E6770EFAF4A972B88973",
+            "retained_file_bytes": 11952,
+            "retained_file_count": 9,
+            "retained_set_sha256": "652F3743DC6C033D41C8F634F359BF3A8A4B4AFF8D21F7EA329A0E349619A069",
+            "state_sha256": "D92025006EC9C7D522A4FBC0DEE6176B333CFCF9AAA3FF9D571C76214099719C",
+            "state_writes": 0
+          },
+          "kernel_state": {
+            "cr3": 501542912,
+            "entry": 18446744071562100736,
+            "handoff": 18446744071562395648,
+            "handoff_bytes": 5008,
+            "rflags_df": 0,
+            "rflags_if": 0,
+            "root": 501542912,
+            "stack_top": 18446744071562366976
+          },
+          "kernel_terminal": {
+            "actions_authorized": 0,
+            "authority_grants": 0,
+            "contract_id": "PKXFER1",
+            "entry_count": 1,
+            "firmware_calls_after_exit": 0,
+            "signature_verifications": 0,
+            "state_writes": 0,
+            "terminal": "halt"
+          },
+          "marker_count": 30,
+          "ordered_contract_match": true,
+          "transfer_arm": {
+            "actions_authorized": 0,
+            "authority_grants": 0,
+            "contract_id": "PKXFER1",
+            "cr3": 501542912,
+            "emulator_only": 1,
+            "entry": 18446744071562100736,
+            "firmware_calls_after_exit": 0,
+            "handoff": 18446744071562395648,
+            "handoff_bytes": 5008,
+            "mode": "development",
+            "root": 501542912,
+            "signature_verifications": 0,
+            "stack_top": 18446744071562366976,
+            "state_writes": 0
+          }
+        },
+        "markers": [
+          "POOLEBOOT/0.1 ENTRY",
+          "POOLEBOOT/0.1 SYSTEM_TABLE PASS revision=0x00020046",
+          "POOLEBOOT/0.1 BOOT_SERVICES PASS",
+          "POOLEBOOT/0.1 WATCHDOG status=0x0000000000000000",
+          "POOLEBOOT/0.1 CONSOLE PASS",
+          "POOLEBOOT/0.1 CONFIG PASS count=10 acpi20=1 smbios3=0 smbios2=1",
+          "POOLEBOOT/0.1 FILESYSTEM PASS loaded_image=1 simple_fs=1 root=1",
+          "POOLEBOOT/0.1 BOOTCFG PASS bytes=229 entries=1 default_hash=61053F0E3EBBD272 timeout_ms=0 attempts=3 slot=1 manifest_max_bytes=65536",
+          "POOLEBOOT/0.1 MANIFEST PASS bytes=2615 artifacts=7 id_hash=4A2625333244591C slot=1 version=1 minimum_secure_version=1",
+          "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=180224 image_bytes=262144 sha256_prefix=5D06ABFC9BD52593 path=manifest",
+          "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=180224 path=manifest_development",
+          "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=262144 pages=64 entry_offset=32768 relocations=302 files_closed=12 pools_freed=11 fnv1a64=085F08EF4F73B645",
+          "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=4083EDBC7C9D8759 retained=1 signatures=0 measured=0",
+          "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=652F3743DC6C033D41C8F634F359BF3A8A4B4AFF8D21F7EA329A0E349619A069 retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
+          "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=DED2480B00B488A0B65F176B977130052914ABA6CEE5E6770EFAF4A972B88973 state_sha256=D92025006EC9C7D522A4FBC0DEE6176B333CFCF9AAA3FF9D571C76214099719C source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
+          "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
+          "POOLEBOOT/0.1 FRAME READY",
+          "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=64 ro=12 rx=32 rw=20 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=066F6E68217211A5",
+          "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=64 physical_bits=40 mapped_fnv1a64=085F08EF4F73B645 framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
+          "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=8 handoff_pages=256 guards=2 total_pages=328 stack_pt=65 handoff_pt=80 kernel_phys=000000001DDBE000 root=000000001DE4F000 stack_phys=000000001DE53000 stack_top=FFFFFFFF80049000 handoff_phys=000000001DB1C000 handoff_virt=FFFFFFFF80050000 retained_fnv1a64=F6AABD8C612439ED original_cr3=restored firmware_calls_while_active=0",
+          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5008 records=4 memory_entries=96 framebuffer=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=86EFFD63 fnv1a64=3A3F67DA57A8DA0C state=boot_services_exited bytes_unchanged=1",
+          "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4608 descriptor_bytes=48 descriptors=96",
+          "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=64 artifact_pages=9 table_pages=4 stack_pages=8 handoff_pages=256",
+          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF80008000 handoff=FFFFFFFF80050000 bytes=5008 stack_top=FFFFFFFF80049000 root=000000001DE4F000 cr3=000000001DE4F000 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
+          "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
+          "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE118-N5-TRANSFER-001 entry_count=1 serial=present",
+          "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF80050000 bytes=5008 entry=0xFFFFFFFF80008000 stack_top=0xFFFFFFFF80049000 root=0x000000001DE4F000 cr3=0x000000001DE4F000 rflags_if=0 rflags_df=0",
+          "POOLEOS:KERNEL:PBP1 PASS profile=development records=4 artifacts=10 production_profile_valid=0",
+          "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=652F3743DC6C033D41C8F634F359BF3A8A4B4AFF8D21F7EA329A0E349619A069 policy_sha256=DED2480B00B488A0B65F176B977130052914ABA6CEE5E6770EFAF4A972B88973 state_sha256=D92025006EC9C7D522A4FBC0DEE6176B333CFCF9AAA3FF9D571C76214099719C denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
+          "POOLEOS:KERNEL:TRANSFER-DENIED PASS contract=PKXFER1 terminal=halt entry_count=1 post_exit_firmware_calls=0 signatures=0 authority=0 actions=0 writes=0"
+        ],
+        "media_read_only": true,
+        "pbp1_serial_debugcon_exact_match": true,
+        "pbp1_transcript": {
+          "artifact_count": 10,
+          "artifacts": [
+            {
+              "entry_virtual": "FFFFFFFF80008000",
+              "flags": 9,
+              "physical_base": "000000001DDBE000",
+              "physical_size": 262144,
+              "role": 1,
+              "sha256": "5D06ABFC9BD525931C63CC8A48FACD66A478640CE793E20E6D66EAEEB2BCEEEA",
+              "virtual_base": "FFFFFFFF80000000",
+              "virtual_size": 262144
+            },
+            {
+              "entry_virtual": "0000000000000000",
+              "flags": 1,
+              "physical_base": "000000001E5D8000",
+              "physical_size": 1860,
+              "role": 2,
+              "sha256": "00C28AB2DE744281CEC0459598A29E8C608E95BC2AF5207D78B67F494EF1E2F8",
+              "virtual_base": "0000000000000000",
+              "virtual_size": 0
+            },
+            {
+              "entry_virtual": "0000000000000000",
+              "flags": 1,
+              "physical_base": "000000001DE61000",
+              "physical_size": 1088,
+              "role": 3,
+              "sha256": "FFAC48737878D6D4986CBF1936F4A8BE7898D544D4C4043F4D51144AEC728B59",
+              "virtual_base": "0000000000000000",
+              "virtual_size": 0
+            },
+            {
+              "entry_virtual": "0000000000000000",
+              "flags": 1,
+              "physical_base": "000000001DE60000",
+              "physical_size": 821,
+              "role": 4,
+              "sha256": "C7990B0DCEB3925A6AAC270013E7C48FE9D36F661A43CE4F1A29ACA205E06993",
+              "virtual_base": "0000000000000000",
+              "virtual_size": 0
+            },
+            {
+              "entry_virtual": "0000000000000000",
+              "flags": 1,
+              "physical_base": "000000001DE5F000",
+              "physical_size": 1504,
+              "role": 5,
+              "sha256": "04D5F70F88FE15BF747992390467BC8AE9E3BD0E28F6D131C427B73764641397",
+              "virtual_base": "0000000000000000",
+              "virtual_size": 0
+            },
+            {
+              "entry_virtual": "0000000000000000",
+              "flags": 1,
+              "physical_base": "000000001DE5E000",
+              "physical_size": 1408,
+              "role": 6,
+              "sha256": "BD162F099BB0145738BA3FAD57B0B903FDB12B0080BBC85812528DC9C1A7A728",
+              "virtual_base": "0000000000000000",
+              "virtual_size": 0
+            },
+            {
+              "entry_virtual": "0000000000000000",
+              "flags": 1,
+              "physical_base": "000000001DE5D000",
+              "physical_size": 2080,
+              "role": 7,
+              "sha256": "BBEE4B8578ABF9B557A9C9766CC966A1064AF1E4AB45C7451266319E97A7EDE2",
+              "virtual_base": "0000000000000000",
+              "virtual_size": 0
+            },
+            {
+              "entry_virtual": "0000000000000000",
+              "flags": 1,
+              "physical_base": "000000001E5E1000",
+              "physical_size": 2615,
+              "role": 9,
+              "sha256": "BA23945EEB7507B02F3CBD08A133CECAFFBB7ABB5593B5BA7BD71034FCB1DF3D",
+              "virtual_base": "0000000000000000",
+              "virtual_size": 0
+            },
+            {
+              "entry_virtual": "0000000000000000",
+              "flags": 1,
+              "physical_base": "000000001DE5C000",
+              "physical_size": 320,
+              "role": 10,
+              "sha256": "DED2480B00B488A0B65F176B977130052914ABA6CEE5E6770EFAF4A972B88973",
+              "virtual_base": "0000000000000000",
+              "virtual_size": 0
+            },
+            {
+              "entry_virtual": "0000000000000000",
+              "flags": 1,
+              "physical_base": "000000001DE5B000",
+              "physical_size": 256,
+              "role": 11,
+              "sha256": "D92025006EC9C7D522A4FBC0DEE6176B333CFCF9AAA3FF9D571C76214099719C",
+              "virtual_base": "0000000000000000",
+              "virtual_size": 0
+            }
+          ],
+          "boot_services_exited": true,
+          "byte_count": 5008,
+          "contract_id": "PBLIVE3",
+          "core": {
+            "boot_attempt": 0,
+            "boot_attempt_limit": 3,
+            "boot_flags": "0000000000000011",
+            "boot_slot": 1,
+            "handoff_byte_count": 5008,
+            "handoff_physical_base": "000000001DB1C000",
+            "handoff_virtual_base": "FFFFFFFF80050000",
+            "initial_stack_top_virtual": "FFFFFFFF80049000",
+            "kernel_entry_virtual": "FFFFFFFF80008000",
+            "kernel_physical_base": "000000001DDBE000",
+            "kernel_physical_size": 262144,
+            "kernel_virtual_base": "FFFFFFFF80000000",
+            "kernel_virtual_size": 262144,
+            "page_table_root_physical": "000000001DE4F000",
+            "selected_entry": 1,
+            "uefi_revision": "00020046"
+          },
+          "development_mode_only": true,
+          "exit_development_profile_validated": true,
+          "features": "0000000000000017",
+          "fnv1a64": "3A3F67DA57A8DA0C",
+          "framebuffer": {
+            "blue_mask": "000000FF",
+            "byte_count": 4096000,
+            "green_mask": "0000FF00",
+            "height": 800,
+            "physical_base": "0000000080000000",
+            "pixel_format": 2,
+            "red_mask": "00FF0000",
+            "reserved_mask": "FF000000",
+            "stride": 1280,
+            "width": 1280
+          },
+          "kernel_artifact": {
+            "entry_virtual": "FFFFFFFF80008000",
+            "flags": 9,
+            "physical_base": "000000001DDBE000",
+            "physical_size": 262144,
+            "role": 1,
+            "sha256": "5D06ABFC9BD525931C63CC8A48FACD66A478640CE793E20E6D66EAEEB2BCEEEA",
+            "virtual_base": "FFFFFFFF80000000",
+            "virtual_size": 262144
+          },
+          "kernel_entry_profile_rejected": true,
+          "memory_entries": [
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 160,
+              "physical_start": "0000000000000000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 1798,
+              "physical_start": "0000000000100000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "0000000000806000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 4,
+              "physical_start": "0000000000807000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000000080B000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 20,
+              "physical_start": "000000000080C000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3936,
+              "physical_start": "0000000000820000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 107636,
+              "physical_start": "0000000001780000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 32,
+              "physical_start": "000000001BBF4000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 7944,
+              "physical_start": "000000001BC14000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 10,
+              "page_count": 738,
+              "physical_start": "000000001DB1C000",
+              "source_type": 2
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 10,
+              "page_count": 54,
+              "physical_start": "000000001DDFE000",
+              "source_type": 1
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 27,
+              "physical_start": "000000001DE34000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 10,
+              "page_count": 19,
+              "physical_start": "000000001DE4F000",
+              "source_type": 2
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1684,
+              "physical_start": "000000001DE62000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 224,
+              "physical_start": "000000001E4F6000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 2,
+              "physical_start": "000000001E5D6000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 10,
+              "page_count": 1,
+              "physical_start": "000000001E5D8000",
+              "source_type": 2
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 1,
+              "physical_start": "000000001E5D9000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 7,
+              "physical_start": "000000001E5DA000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 10,
+              "page_count": 1,
+              "physical_start": "000000001E5E1000",
+              "source_type": 2
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 85,
+              "physical_start": "000000001E5E2000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 34,
+              "physical_start": "000000001E637000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001E659000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 22,
+              "physical_start": "000000001E65A000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 2,
+              "physical_start": "000000001E670000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 14,
+              "physical_start": "000000001E672000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 7,
+              "physical_start": "000000001E680000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 6,
+              "physical_start": "000000001E687000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 41,
+              "physical_start": "000000001E68D000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 28,
+              "physical_start": "000000001E6B6000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001E6D2000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001E6D3000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001E6D8000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 36,
+              "physical_start": "000000001E6DD000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 2,
+              "physical_start": "000000001E701000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 23,
+              "physical_start": "000000001E703000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001E71A000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 41,
+              "physical_start": "000000001E71D000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001E746000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001E747000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 2,
+              "physical_start": "000000001E74C000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 25,
+              "physical_start": "000000001E74E000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001E767000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 41,
+              "physical_start": "000000001E76C000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001E795000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 42,
+              "physical_start": "000000001E796000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 2,
+              "physical_start": "000000001E7C0000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001E7C2000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001E7C6000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 11,
+              "physical_start": "000000001E7CA000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001E7D5000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001E7D8000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001E7DC000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 23,
+              "physical_start": "000000001E7E0000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 521,
+              "physical_start": "000000001E7F7000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 25,
+              "physical_start": "000000001EA00000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001EA19000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 33,
+              "physical_start": "000000001EA1C000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 6,
+              "physical_start": "000000001EA3D000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001EA43000",
+              "source_type": 3
+            },
+            {
+              "attributes": "800000000000000F",
+              "kind": 4,
+              "page_count": 193,
+              "physical_start": "000000001EA48000",
+              "source_type": 6
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 36,
+              "physical_start": "000000001EB09000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001EB2D000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001EB32000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001EB36000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 8,
+              "physical_start": "000000001EB3A000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001EB42000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 42,
+              "physical_start": "000000001EB43000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001EB6D000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 6,
+              "physical_start": "000000001EB72000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1042,
+              "physical_start": "000000001EB78000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 7,
+              "physical_start": "000000001EF8A000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001EF91000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 11,
+              "physical_start": "000000001EF95000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 6,
+              "physical_start": "000000001EFA0000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 23,
+              "physical_start": "000000001EFA6000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1328,
+              "physical_start": "000000001EFBD000",
+              "source_type": 4
+            },
+            {
+              "attributes": "800000000000000F",
+              "kind": 4,
+              "page_count": 256,
+              "physical_start": "000000001F4ED000",
+              "source_type": 6
+            },
+            {
+              "attributes": "800000000000000F",
+              "kind": 3,
+              "page_count": 256,
+              "physical_start": "000000001F5ED000",
+              "source_type": 5
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 135,
+              "physical_start": "000000001F6ED000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 5,
+              "page_count": 11,
+              "physical_start": "000000001F774000",
+              "source_type": 9
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 6,
+              "page_count": 128,
+              "physical_start": "000000001F77F000",
+              "source_type": 10
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1537,
+              "physical_start": "000000001F7FF000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 206,
+              "physical_start": "000000001FE00000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 32,
+              "physical_start": "000000001FECE000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 74,
+              "physical_start": "000000001FEEE000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 0,
+              "page_count": 4,
+              "physical_start": "000000001FF38000",
+              "source_type": 0
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 6,
+              "page_count": 2,
+              "physical_start": "000000001FF3C000",
+              "source_type": 10
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001FF3E000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 17,
+              "physical_start": "000000001FF3F000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 44,
+              "physical_start": "000000001FF50000",
+              "source_type": 3
+            },
+            {
+              "attributes": "800000000000000F",
+              "kind": 4,
+              "page_count": 132,
+              "physical_start": "000000001FF7C000",
+              "source_type": 6
+            },
+            {
+              "attributes": "0000000000000001",
+              "kind": 0,
+              "page_count": 65536,
+              "physical_start": "00000000E0000000",
+              "source_type": 0
+            },
+            {
+              "attributes": "8000000000000001",
+              "kind": 7,
+              "page_count": 1024,
+              "physical_start": "00000000FFC00000",
+              "source_type": 11
+            },
+            {
+              "attributes": "0000000000000000",
+              "kind": 0,
+              "page_count": 3145728,
+              "physical_start": "000000FD00000000",
+              "source_type": 0
+            }
+          ],
+          "memory_entry_count": 96,
+          "message_crc32": "86EFFD63",
+          "pre_exit_profile_validated": false,
+          "record_count": 4,
+          "required_features": "0000000000000013",
+          "secret_bearing_records_present": false,
+          "sha256": "0AAACFA1E98D2604900E2B70869C5D301163CE1D1E2327CCC40556C9CA406A42",
+          "transferable": false
+        },
+        "qemu_exit_code": 0,
+        "qmp_greeting": {
+          "capabilities": [
+            "oob"
+          ],
+          "version": {
+            "package": "v11.0.0-12122-ga4bb4b10c9",
+            "qemu": {
+              "major": 11,
+              "micro": 0,
+              "minor": 0
+            }
+          }
+        },
+        "qmp_loopback_only": true,
+        "qmp_quit_requested": true,
+        "run_id": "run-2",
+        "screenshot": {
+          "bright_cyan_pixel_count": 44970,
+          "byte_count": 3072016,
+          "dark_pixel_count": 979030,
+          "height": 800,
+          "nonblank": true,
+          "pixel_count": 1024000,
+          "poole_identity_palette_observed": true,
+          "sampled_unique_color_count": 6,
+          "sha256": "E9D4CFD48C23DBA760AED5B2049B39DCA49A0D172F680D570082EB0680FDFDBD",
+          "width": 1280
+        },
+        "serial_debugcon_exact_match": true,
+        "stderr_byte_count": 0,
+        "stderr_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "timestamped_qmp_events_excluded_from_equality": true,
+        "transcript_binding": {
+          "development_revalidation_profile_accepted": true,
+          "exact_transfer_fields_bound": true,
+          "production_kernel_entry_profile_rejected": true
+        }
+      }
+    ],
+    "vars_template_sha256": "5D2AC383371B408398ACCEE7EC27C8C09EA5B74A0DE0CEEA6513388B15BE5D1E"
+  },
+  "inputs": {
+    "contract": {
+      "byte_count": 7728,
+      "path": "specs/native-kernel-transfer-contract.json",
+      "sha256": "93A4EFEE61A26DCA9FEF6119A0BCE9D479A1EB39457C71E82048F314C0AAC272"
+    },
+    "implementation_inputs": [
+      {
+        "byte_count": 662,
+        "path": "native/boot/Cargo.toml",
+        "sha256": "9D36A396EED7B182B1E22169C92EC2A64E148C5250A2B66EAD4727457553CB34"
+      },
+      {
+        "byte_count": 27713,
+        "path": "native/boot/src/exit.rs",
+        "sha256": "A0A59546B7559A2451895087720650BB465DFF2C573F58261958697878D602ED"
+      },
+      {
+        "byte_count": 24579,
+        "path": "native/boot/src/kmap.rs",
+        "sha256": "1B7EDF6DA5296A963B56A0D7F223976F68271949930B69CB452AAC902FE8F339"
+      },
+      {
+        "byte_count": 17911,
+        "path": "native/bootexit/src/lib.rs",
+        "sha256": "76F9B4086C03333D73A9C7E4EB085CDDB069BB35D03B58EBE2D7BAA2AE2A920B"
+      },
+      {
+        "byte_count": 3066,
+        "path": "native/kernel/src/arch/x86_64.rs",
+        "sha256": "8A21103B07FFD12220A5B7B4BBF7E1E51829C6B3EF3BF9E21F706AB9D8345266"
+      },
+      {
+        "byte_count": 27340,
+        "path": "native/kernel/src/lib.rs",
+        "sha256": "C41F5DED37AB2BDA8026164E1BB78F632062A7EAA5C488090E8809DFB3C57017"
+      },
+      {
+        "byte_count": 10845,
+        "path": "native/kernel/src/main.rs",
+        "sha256": "F61A7B6471FF08D312AFAD74A4043EAE65279EF6A91743FFC6B18DB88C30D6F0"
+      },
+      {
+        "byte_count": 14333,
+        "path": "native/kernel/src/revalidation.rs",
+        "sha256": "127F1FCCCE98398D05424CCA49C3DA399FD00A311A9EFAB298CA026B77215A50"
+      },
+      {
+        "byte_count": 23703,
+        "path": "runtime/native_kernel_transfer.py",
+        "sha256": "C690F349556E68881CB67CE06493FC7EC0DB5F0FA89B831A0EF30B23405D7401"
+      },
+      {
+        "byte_count": 18161,
+        "path": "tools/qualify_native_kernel_transfer.py",
+        "sha256": "C67DFD78C9FDE1B435BAFE4DC481B93CD71F75AB1F34664705F94E70170383DE"
+      },
+      {
+        "byte_count": 10811,
+        "path": "tests/test_native_kernel_transfer.py",
+        "sha256": "F10C8D5B1373CDAA21C8E2380F935BAACA8C51ED4EDB2654BB846FBC2D853EE2"
+      },
+      {
+        "byte_count": 5832,
+        "path": "docs/native-kernel-transfer.md",
+        "sha256": "41D9EE202FEE0993556E333C4E51561762310F36821BD5723ADDCFC7FB641E36"
+      },
+      {
+        "byte_count": 21064,
+        "path": "runs/native_kernel_entry_readiness.json",
+        "sha256": "B216855DA578BCB2EF6DEB9DB6219EB415C9F47E7A0D2EA8172516FE2888E0A5"
+      },
+      {
+        "byte_count": 16443,
+        "path": "runs/native-kernel-revalidation-readiness.json",
+        "sha256": "CE20B945B661AD497C50DD8498FDF6926A700A5CF4C8D8F49E8603C451A44B78"
+      },
+      {
+        "byte_count": 188045,
+        "path": "runs/native_kernel_load_readiness.json",
+        "sha256": "8E97A3C0B136BAE4B29B6785C2AF521E1BA07FCA5E866A9972A67A44E08B87EB"
+      }
+    ],
+    "tier0_lock": {
+      "byte_count": 5641,
+      "path": "specs/native-tier0-lock.json",
+      "sha256": "E6E126A5EC683FC1A73B82B8C889F4212BE507BAA52EA43548B23C938093499F"
+    },
+    "tier0_profile": {
+      "byte_count": 6439,
+      "path": "specs/native-tier0-profile.json",
+      "sha256": "EE5139B1B71DC20684BFEBD862D2CD00A31A9BB1C8EADDC349CE659D252717DF"
+    },
+    "toolchain_lock": {
+      "byte_count": 4017,
+      "path": "specs/native-toolchain-lock.json",
+      "sha256": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E"
+    }
+  },
+  "media": {
+    "byte_count": 67108864,
+    "clean_generation_count": 2,
+    "exact_clean_generation_match": true,
+    "inspection": {
+      "artifact_set": {
+        "artifact_count": 6,
+        "artifacts": [
+          {
+            "contract_id": "PBART1",
+            "file_bytes": 1860,
+            "file_sha256": "00C28AB2DE744281CEC0459598A29E8C608E95BC2AF5207D78B67F494EF1E2F8",
+            "loaded_fnv1a64": "B2F412E3785B5814",
+            "manifest_id": "b_initial_system",
+            "page_count": 1,
+            "path": "EFI/POOLEOS/INITIAL.PBA",
+            "payload_bytes": 1764,
+            "payload_sha256": "FFE7243CEE75963D84905E6C9BF9F0D04310EEDBF097757C32E0EBE30FA0C3ED",
+            "role": 2,
+            "role_name": "initial_system",
+            "version": 1
+          },
+          {
+            "contract_id": "PBART1",
+            "file_bytes": 1088,
+            "file_sha256": "FFAC48737878D6D4986CBF1936F4A8BE7898D544D4C4043F4D51144AEC728B59",
+            "loaded_fnv1a64": "EF876C0D571C2F33",
+            "manifest_id": "c_recovery",
+            "page_count": 1,
+            "path": "EFI/POOLEOS/RECOVERY.PBA",
+            "payload_bytes": 992,
+            "payload_sha256": "BA63DF2A44AD51EBEEDBE3F05D2D4D13FAF68CF6A2024A7DE355A86A4D0D666C",
+            "role": 3,
+            "role_name": "recovery",
+            "version": 1
+          },
+          {
+            "contract_id": "PBART1",
+            "file_bytes": 821,
+            "file_sha256": "C7990B0DCEB3925A6AAC270013E7C48FE9D36F661A43CE4F1A29ACA205E06993",
+            "loaded_fnv1a64": "333201141A1DF493",
+            "manifest_id": "d_symbols",
+            "page_count": 1,
+            "path": "EFI/POOLEOS/SYMBOLS.PBA",
+            "payload_bytes": 725,
+            "payload_sha256": "8E46974E2787F36B72611255992051380578E132704987000AF54EE20CBA809D",
+            "role": 4,
+            "role_name": "symbols",
+            "version": 1
+          },
+          {
+            "contract_id": "PBART1",
+            "file_bytes": 1504,
+            "file_sha256": "04D5F70F88FE15BF747992390467BC8AE9E3BD0E28F6D131C427B73764641397",
+            "loaded_fnv1a64": "D2A550039110F6CF",
+            "manifest_id": "e_microcode",
+            "page_count": 1,
+            "path": "EFI/POOLEOS/MICROCOD.PBA",
+            "payload_bytes": 1408,
+            "payload_sha256": "D1EF85112EC9834E972C7CC49892B3CE81FE3464F1D143A94DBE37D59843ACE6",
+            "role": 5,
+            "role_name": "microcode",
+            "version": 1
+          },
+          {
+            "contract_id": "PBART1",
+            "file_bytes": 1408,
+            "file_sha256": "BD162F099BB0145738BA3FAD57B0B903FDB12B0080BBC85812528DC9C1A7A728",
+            "loaded_fnv1a64": "8B430EE6073095CB",
+            "manifest_id": "f_firmware",
+            "page_count": 1,
+            "path": "EFI/POOLEOS/FIRMWARE.PBA",
+            "payload_bytes": 1312,
+            "payload_sha256": "0057FAC6ACBEE3E1BE3A71BB20CF26155DA343010380D07631328D640F4090A5",
+            "role": 6,
+            "role_name": "firmware",
+            "version": 1
+          },
+          {
+            "contract_id": "PBART1",
+            "file_bytes": 2080,
+            "file_sha256": "BBEE4B8578ABF9B557A9C9766CC966A1064AF1E4AB45C7451266319E97A7EDE2",
+            "loaded_fnv1a64": "02CFE415D7FB3883",
+            "manifest_id": "g_policy",
+            "page_count": 1,
+            "path": "EFI/POOLEOS/POLICY.PBA",
+            "payload_bytes": 1984,
+            "payload_sha256": "96832C515CD6EEEC0D855E83EC33A043D9A6376CC082359F51793486FCC18C7D",
+            "role": 7,
+            "role_name": "policy",
+            "version": 1
+          }
+        ],
+        "contract_id": "PBART1",
+        "file_bytes": 8761,
+        "fnv1a64": "4083EDBC7C9D8759",
+        "measured": false,
+        "page_count": 6,
+        "semantics_applied": false,
+        "signatures_verified": false
+      },
+      "config": {
+        "boot_attempt_limit": 3,
+        "default_entry": "normal",
+        "default_entry_hash": "61053F0E3EBBD272",
+        "entry_count": 1,
+        "manifest_max_bytes": 65536,
+        "selected_manifest_path": "\\EFI\\POOLEOS\\SYSTEM_A.PBM",
+        "selected_slot": 1,
+        "timeout_ms": 0
+      },
+      "embedded_efi": {
+        "byte_count": 207360,
+        "characteristics": 34,
+        "debug_directory": {
+          "rva": 0,
+          "size": 0
+        },
+        "debug_directory_present": false,
+        "dll_characteristics": 33120,
+        "entry_nonzero": true,
+        "entry_point": 36457,
+        "file_alignment": 512,
+        "format": "PE32+",
+        "header_size": 1024,
+        "image_base": 5368709120,
+        "image_size": 221184,
+        "import_directory": {
+          "rva": 0,
+          "size": 0
+        },
+        "imports_present": false,
+        "machine": 34404,
+        "section_alignment": 4096,
+        "section_count": 4,
+        "sections": [
+          {
+            "characteristics": 1610612768,
+            "name": ".text",
+            "raw_offset": 1024,
+            "raw_size": 152576,
+            "virtual_address": 4096,
+            "virtual_size": 152339
+          },
+          {
+            "characteristics": 1073741888,
+            "name": ".rdata",
+            "raw_offset": 153600,
+            "raw_size": 52224,
+            "virtual_address": 159744,
+            "virtual_size": 51772
+          },
+          {
+            "characteristics": 1073741888,
+            "name": ".eh_fram",
+            "raw_offset": 205824,
+            "raw_size": 512,
+            "virtual_address": 212992,
+            "virtual_size": 64
+          },
+          {
+            "characteristics": 1107296320,
+            "name": ".reloc",
+            "raw_offset": 206336,
+            "raw_size": 1024,
+            "virtual_address": 217088,
+            "virtual_size": 748
+          }
+        ],
+        "sha256": "59EB676796210C76E0E4351384D9B05490D32547EBE9839B36000B6E46FCBF68",
+        "subsystem": 10,
+        "timestamp": 0
+      },
+      "esp": {
+        "end_lba": 131038,
+        "label": "POOLEOS ESP",
+        "sector_count": 128991,
+        "start_lba": 2048,
+        "type_guid": "C12A7328-F81F-11D2-BA4B-00A0C93EC93B",
+        "unique_guid": "504F4F4C-4553-5000-8000-000000000001"
+      },
+      "fat32": {
+        "boot_sector_backup_exact_match": true,
+        "cluster_count": 126973,
+        "fat_copies_exact_match": true,
+        "fat_count": 2,
+        "fat_sector_count": 993,
+        "fsinfo_backup_exact_match": true,
+        "volume_id": "97970001",
+        "volume_label": "POOLEOS ESP"
+      },
+      "files": [
+        {
+          "byte_count": 207360,
+          "cluster_count": 405,
+          "path": "EFI/BOOT/BOOTX64.EFI",
+          "sha256": "59EB676796210C76E0E4351384D9B05490D32547EBE9839B36000B6E46FCBF68"
+        },
+        {
+          "byte_count": 229,
+          "cluster_count": 1,
+          "path": "EFI/POOLEOS/BOOT.CFG",
+          "sha256": "E429F8BFD210649F09B0CB2CE4C8F2B18DB22827842DE04841DC832B38472A11"
+        },
+        {
+          "byte_count": 2615,
+          "cluster_count": 6,
+          "path": "EFI/POOLEOS/SYSTEM_A.PBM",
+          "sha256": "BA23945EEB7507B02F3CBD08A133CECAFFBB7ABB5593B5BA7BD71034FCB1DF3D"
+        },
+        {
+          "byte_count": 180224,
+          "cluster_count": 352,
+          "path": "EFI/POOLEOS/KERNEL.ELF",
+          "sha256": "5D06ABFC9BD525931C63CC8A48FACD66A478640CE793E20E6D66EAEEB2BCEEEA"
+        },
+        {
+          "byte_count": 1860,
+          "cluster_count": 4,
+          "path": "EFI/POOLEOS/INITIAL.PBA",
+          "sha256": "00C28AB2DE744281CEC0459598A29E8C608E95BC2AF5207D78B67F494EF1E2F8"
+        },
+        {
+          "byte_count": 1088,
+          "cluster_count": 3,
+          "path": "EFI/POOLEOS/RECOVERY.PBA",
+          "sha256": "FFAC48737878D6D4986CBF1936F4A8BE7898D544D4C4043F4D51144AEC728B59"
+        },
+        {
+          "byte_count": 821,
+          "cluster_count": 2,
+          "path": "EFI/POOLEOS/SYMBOLS.PBA",
+          "sha256": "C7990B0DCEB3925A6AAC270013E7C48FE9D36F661A43CE4F1A29ACA205E06993"
+        },
+        {
+          "byte_count": 1504,
+          "cluster_count": 3,
+          "path": "EFI/POOLEOS/MICROCOD.PBA",
+          "sha256": "04D5F70F88FE15BF747992390467BC8AE9E3BD0E28F6D131C427B73764641397"
+        },
+        {
+          "byte_count": 1408,
+          "cluster_count": 3,
+          "path": "EFI/POOLEOS/FIRMWARE.PBA",
+          "sha256": "BD162F099BB0145738BA3FAD57B0B903FDB12B0080BBC85812528DC9C1A7A728"
+        },
+        {
+          "byte_count": 2080,
+          "cluster_count": 5,
+          "path": "EFI/POOLEOS/POLICY.PBA",
+          "sha256": "BBEE4B8578ABF9B557A9C9766CC966A1064AF1E4AB45C7451266319E97A7EDE2"
+        },
+        {
+          "byte_count": 320,
+          "cluster_count": 1,
+          "path": "EFI/POOLEOS/TRUST.PBT",
+          "sha256": "DED2480B00B488A0B65F176B977130052914ABA6CEE5E6770EFAF4A972B88973"
+        },
+        {
+          "byte_count": 256,
+          "cluster_count": 1,
+          "path": "EFI/POOLEOS/TRUSTST.PBS",
+          "sha256": "D92025006EC9C7D522A4FBC0DEE6176B333CFCF9AAA3FF9D571C76214099719C"
+        }
+      ],
+      "firmware": {
+        "activation_allowed": false,
+        "activation_errors": [
+          "pfwm_activation_outer_signature",
+          "pfwm_activation_manifest_signature",
+          "pfwm_activation_package_signature",
+          "pfwm_activation_vendor_signature",
+          "pfwm_activation_target_profile",
+          "pfwm_activation_hardware_inventory",
+          "pfwm_activation_device_identity",
+          "pfwm_activation_current_versions",
+          "pfwm_activation_transport_support",
+          "pfwm_activation_firmware_services",
+          "pfwm_activation_updater_plugins",
+          "pfwm_activation_plugin_authority",
+          "pfwm_activation_external_payloads",
+          "pfwm_activation_payload_digests",
+          "pfwm_activation_license_policy",
+          "pfwm_activation_redistribution",
+          "pfwm_activation_revocation_state",
+          "pfwm_activation_component_revoked",
+          "pfwm_activation_anti_rollback",
+          "pfwm_activation_recovery",
+          "pfwm_activation_recovery_backup",
+          "pfwm_activation_staging",
+          "pfwm_activation_power",
+          "pfwm_activation_ac_power",
+          "pfwm_activation_transaction_journal",
+          "pfwm_activation_quiescence",
+          "pfwm_activation_storage_guard",
+          "pfwm_activation_suspend_shutdown_guard",
+          "pfwm_activation_reset_authority",
+          "pfwm_activation_reboot_authority",
+          "pfwm_activation_user_confirmation",
+          "pfwm_activation_physical_presence",
+          "pfwm_activation_post_reset_verifier",
+          "pfwm_activation_receipt_storage",
+          "pfwm_activation_firmware_change_authority"
+        ],
+        "authority_created": false,
+        "bundle_sha256": "0057FAC6ACBEE3E1BE3A71BB20CF26155DA343010380D07631328D640F4090A5",
+        "bundle_version": 1,
+        "capsule_submitted": false,
+        "component_count": 3,
+        "contract_id": "PFWM1",
+        "declared_external_payload_bytes": 12888,
+        "dependency_count": 2,
+        "external_payload_bytes_embedded": false,
+        "firmware_mutated": false,
+        "live_firmware_inventory_observed": false,
+        "maximum_transaction_components": 1,
+        "outer_payload_sha256": "0057FAC6ACBEE3E1BE3A71BB20CF26155DA343010380D07631328D640F4090A5",
+        "physical_media_written": false,
+        "pooleboot_enforced": false,
+        "poolekernel_enforced": false,
+        "production_vendor_payload_included": false,
+        "summary": {
+          "body_sha256": "F6C9F418ED22E7FCFC20FDB9ED71CE52462D087123F402C6E2D9A4A66347D451",
+          "component_count": 3,
+          "contract_id": "PFWM1",
+          "dependency_count": 2,
+          "external_payload_bytes": 12888,
+          "file_bytes": 1312,
+          "file_sha256": "0057FAC6ACBEE3E1BE3A71BB20CF26155DA343010380D07631328D640F4090A5",
+          "manifest_id": "PFWM1-CYCLE112-SYNTHETIC",
+          "manifest_version": 1,
+          "maximum_transaction_components": 1,
+          "profile": "synthetic_qualification",
+          "version": "1.0"
+        },
+        "synthetic_manifest_only": true,
+        "updater_driver_loaded": false,
+        "validated_by": "independent_host_media_oracle",
+        "vendor_payload_validated": false
+      },
+      "gpt": {
+        "backup_header_crc32": "A1498926",
+        "disk_guid": "504F4F4C-454F-534E-8000-000000000097",
+        "partition_entries_crc32": "36995F84",
+        "primary_backup_entries_exact_match": true,
+        "primary_header_crc32": "2F4545E3"
+      },
+      "image": {
+        "byte_count": 67108864,
+        "protective_mbr_valid": true,
+        "sector_bytes": 512,
+        "sector_count": 131072,
+        "sha256": "1AD6F1C5E5A8052FE7BFA4215B45A67BFB851333EEA842504A9B07ED4EE3FEBD"
+      },
+      "initial_system": {
+        "activation_allowed": false,
+        "activation_errors": [
+          "pinit_activation_outer_signature_verified",
+          "pinit_activation_manifest_signature_verified",
+          "pinit_activation_rollback_state_authenticated",
+          "pinit_activation_capability_allocator_ready",
+          "pinit_activation_resource_broker_ready",
+          "pinit_activation_component_contracts_verified",
+          "pinit_activation_transaction_capacity_verified"
+        ],
+        "bundle_sha256": "FFE7243CEE75963D84905E6C9BF9F0D04310EEDBF097757C32E0EBE30FA0C3ED",
+        "bundle_version": 1,
+        "capability_count": 11,
+        "component_count": 3,
+        "contract_id": "PINIT1",
+        "dependency_count": 3,
+        "outer_payload_sha256": "FFE7243CEE75963D84905E6C9BF9F0D04310EEDBF097757C32E0EBE30FA0C3ED",
+        "pooleboot_enforced": false,
+        "poolekernel_enforced": false,
+        "resource_count": 4,
+        "service_count": 3,
+        "start_order": [
+          1,
+          2,
+          3
+        ],
+        "summary": "OK;version=1;minimum_secure_version=1;components=3;services=3;dependencies=3;resources=4;capabilities=11;root=1;start_order=1,2,3;body_sha256=8AFA5770DBAC77ACB2D38A9B72C8AC663843A342759678B8DB3A667CD4AD7EA9",
+        "validated_by": "independent_host_media_oracle"
+      },
+      "inner_set": {
+        "actions_authorized": 0,
+        "artifact_count": 6,
+        "authority_grants": 0,
+        "cross_binding_count": 6,
+        "development_denial_count": 6,
+        "development_denials": [
+          "pinit_activation_outer_signature_verified",
+          "prec_activation_outer_signature",
+          "psym_activation_outer_signature",
+          "pmcu_activation_outer_signature",
+          "pfwm_activation_outer_signature",
+          "ppol_activation_outer_signature"
+        ],
+        "exact_retained_bytes": true,
+        "file_bytes": 8761,
+        "hardware_observations": 0,
+        "initial_routes_cross_bound": true,
+        "parser_count": 6,
+        "payload_bytes": 8185,
+        "policy_payload_digests_bound": true,
+        "proof_id": "N5-INNER-LIVE-PARSE-001",
+        "retained_set_sha256": "652F3743DC6C033D41C8F634F359BF3A8A4B4AFF8D21F7EA329A0E349619A069",
+        "state_writes": 0
+      },
+      "kernel": {
+        "loaded_fnv1a64": "085F08EF4F73B645",
+        "loaded_sha256": "00BDAF54F9CCD98AE6752B9F610886AFF571320640D44103A5FC65A83D89367E",
+        "plan": {
+          "entry_offset": 32768,
+          "entry_physical": 33587200,
+          "entry_virtual": 18446744071562100736,
+          "file_size": 180224,
+          "image_size": 262144,
+          "mappings": [
+            {
+              "memory_size": 32768,
+              "permissions": "r",
+              "virtual_offset": 0
+            },
+            {
+              "memory_size": 131072,
+              "permissions": "rx",
+              "virtual_offset": 32768
+            },
+            {
+              "memory_size": 16384,
+              "permissions": "r",
+              "virtual_offset": 163840
+            },
+            {
+              "memory_size": 81920,
+              "permissions": "rw",
+              "virtual_offset": 180224
+            }
+          ],
+          "physical_base": 33554432,
+          "relocation_address": 163904,
+          "relocation_count": 302,
+          "relro_offset": 163840,
+          "relro_size": 16384,
+          "segments": [
+            {
+              "file_offset": 0,
+              "file_size": 32768,
+              "memory_size": 32768,
+              "permissions": "r",
+              "virtual_offset": 0
+            },
+            {
+              "file_offset": 32768,
+              "file_size": 131072,
+              "memory_size": 131072,
+              "permissions": "rx",
+              "virtual_offset": 32768
+            },
+            {
+              "file_offset": 163840,
+              "file_size": 16384,
+              "memory_size": 98304,
+              "permissions": "rw",
+              "virtual_offset": 163840
+            }
+          ],
+          "virtual_base": 18446744071562067968
+        }
+      },
+      "manifest": {
+        "artifact_count": 7,
+        "artifacts": [
+          {
+            "entry_contract": "PKENTRY1",
+            "file_bytes": 180224,
+            "format": "PKELF1",
+            "id": "a_kernel",
+            "image_bytes": 262144,
+            "path": "\\EFI\\POOLEOS\\KERNEL.ELF",
+            "sha256": "5D06ABFC9BD525931C63CC8A48FACD66A478640CE793E20E6D66EAEEB2BCEEEA",
+            "type": "kernel",
+            "version": 1
+          },
+          {
+            "entry_contract": "none",
+            "file_bytes": 1860,
+            "format": "PBART1",
+            "id": "b_initial_system",
+            "image_bytes": 0,
+            "path": "\\EFI\\POOLEOS\\INITIAL.PBA",
+            "sha256": "00C28AB2DE744281CEC0459598A29E8C608E95BC2AF5207D78B67F494EF1E2F8",
+            "type": "initial_system",
+            "version": 1
+          },
+          {
+            "entry_contract": "none",
+            "file_bytes": 1088,
+            "format": "PBART1",
+            "id": "c_recovery",
+            "image_bytes": 0,
+            "path": "\\EFI\\POOLEOS\\RECOVERY.PBA",
+            "sha256": "FFAC48737878D6D4986CBF1936F4A8BE7898D544D4C4043F4D51144AEC728B59",
+            "type": "recovery",
+            "version": 1
+          },
+          {
+            "entry_contract": "none",
+            "file_bytes": 821,
+            "format": "PBART1",
+            "id": "d_symbols",
+            "image_bytes": 0,
+            "path": "\\EFI\\POOLEOS\\SYMBOLS.PBA",
+            "sha256": "C7990B0DCEB3925A6AAC270013E7C48FE9D36F661A43CE4F1A29ACA205E06993",
+            "type": "symbols",
+            "version": 1
+          },
+          {
+            "entry_contract": "none",
+            "file_bytes": 1504,
+            "format": "PBART1",
+            "id": "e_microcode",
+            "image_bytes": 0,
+            "path": "\\EFI\\POOLEOS\\MICROCOD.PBA",
+            "sha256": "04D5F70F88FE15BF747992390467BC8AE9E3BD0E28F6D131C427B73764641397",
+            "type": "microcode",
+            "version": 1
+          },
+          {
+            "entry_contract": "none",
+            "file_bytes": 1408,
+            "format": "PBART1",
+            "id": "f_firmware",
+            "image_bytes": 0,
+            "path": "\\EFI\\POOLEOS\\FIRMWARE.PBA",
+            "sha256": "BD162F099BB0145738BA3FAD57B0B903FDB12B0080BBC85812528DC9C1A7A728",
+            "type": "firmware",
+            "version": 1
+          },
+          {
+            "entry_contract": "none",
+            "file_bytes": 2080,
+            "format": "PBART1",
+            "id": "g_policy",
+            "image_bytes": 0,
+            "path": "\\EFI\\POOLEOS\\POLICY.PBA",
+            "sha256": "BBEE4B8578ABF9B557A9C9766CC966A1064AF1E4AB45C7451266319E97A7EDE2",
+            "type": "policy",
+            "version": 1
+          }
+        ],
+        "byte_count": 2615,
+        "kernel_sha256_prefix": "5D06ABFC9BD52593",
+        "manifest_id": "PSM-CYCLE107-SLOT1",
+        "manifest_id_hash": "4A2625333244591C",
+        "manifest_version": 1,
+        "minimum_secure_version": 1,
+        "sha256": "BA23945EEB7507B02F3CBD08A133CECAFFBB7ABB5593B5BA7BD71034FCB1DF3D",
+        "slot": 1
+      },
+      "microcode": {
+        "activation_allowed": false,
+        "activation_errors": [
+          "pmcu_activation_outer_signature",
+          "pmcu_activation_inner_signature",
+          "pmcu_activation_manifest_signature",
+          "pmcu_activation_vendor_signature",
+          "pmcu_activation_vendor_container",
+          "pmcu_activation_vendor_source",
+          "pmcu_activation_redistribution",
+          "pmcu_activation_revocation_state",
+          "pmcu_activation_hardware_evidence",
+          "pmcu_activation_cpuid_observation",
+          "pmcu_activation_revision_observation",
+          "pmcu_activation_apply_authority"
+        ],
+        "authority_created": false,
+        "bundle_sha256": "D1EF85112EC9834E972C7CC49892B3CE81FE3464F1D143A94DBE37D59843ACE6",
+        "bundle_version": 1,
+        "contract_id": "PMCU1",
+        "firmware_mutated": false,
+        "known_good_revision": 4054073376,
+        "microcode_applied": false,
+        "outer_payload_sha256": "D1EF85112EC9834E972C7CC49892B3CE81FE3464F1D143A94DBE37D59843ACE6",
+        "patch_count": 2,
+        "physical_media_written": false,
+        "pooleboot_enforced": false,
+        "poolekernel_enforced": false,
+        "preferred_revision": 4054073408,
+        "privileged_revision_observed": false,
+        "production_vendor_payload_included": false,
+        "security_revision_floor": 4054073376,
+        "summary": {
+          "body_sha256": "F5F8E04B2DC45424FB2E1E27F9030697A29553E95AB3E16A2398C2F4655BE85B",
+          "bundle_bytes": 1408,
+          "contract_id": "PMCU1",
+          "known_good_revision": 4054073376,
+          "patch_count": 2,
+          "preferred_revision": 4054073408,
+          "security_revision_floor": 4054073376,
+          "target_cpuid_signature": "0x00B40F40",
+          "vendor_id": "AuthenticAMD",
+          "version": "1.0"
+        },
+        "synthetic_payloads_only": true,
+        "validated_by": "independent_host_media_oracle",
+        "vendor_container_validated": false
+      },
+      "policy": {
+        "activation_allowed": false,
+        "activation_errors": [
+          "ppol_activation_outer_signature",
+          "ppol_activation_policy_signature",
+          "ppol_activation_manifest_signature",
+          "ppol_activation_artifact_signatures",
+          "ppol_activation_target_profile",
+          "ppol_activation_trust_policy",
+          "ppol_activation_revocation_state",
+          "ppol_activation_rollback_state",
+          "ppol_activation_audit_schema",
+          "ppol_activation_inner_contracts",
+          "ppol_activation_initial_system_cross_binding",
+          "ppol_activation_mode_authority",
+          "ppol_activation_transition_authority",
+          "ppol_activation_capability_allocator",
+          "ppol_activation_resource_broker",
+          "ppol_activation_audit_sink",
+          "ppol_activation_receipt_store"
+        ],
+        "authority_created": false,
+        "bundle_sha256": "96832C515CD6EEEC0D855E83EC33A043D9A6376CC082359F51793486FCC18C7D",
+        "bundle_version": 1,
+        "capability_rule_count": 11,
+        "contract_id": "PPOL1",
+        "firmware_physical_presence_modeled": true,
+        "firmware_separate_authority_modeled": true,
+        "initial_system_cross_bound": true,
+        "initial_system_sha256": "FFE7243CEE75963D84905E6C9BF9F0D04310EEDBF097757C32E0EBE30FA0C3ED",
+        "mode_count": 6,
+        "outer_payload_sha256": "96832C515CD6EEEC0D855E83EC33A043D9A6376CC082359F51793486FCC18C7D",
+        "physical_media_written": false,
+        "policy_decision_applied": false,
+        "pooleboot_enforced": false,
+        "pooleglyph_executable_authority": false,
+        "poolekernel_enforced": false,
+        "recovery_floor_validated": true,
+        "safe_floor_validated": true,
+        "signature_verified": false,
+        "state_mutated": false,
+        "summary": {
+          "body_sha256": "A7ED76DED0DAAC7C182FD036111CD73E27B029F7D545FA1FC5E136D409DE8B93",
+          "bytes": 1984,
+          "capability_rule_count": 11,
+          "contract_id": "PPOL1",
+          "initial_system_sha256": "FFE7243CEE75963D84905E6C9BF9F0D04310EEDBF097757C32E0EBE30FA0C3ED",
+          "mode_count": 6,
+          "policy_id": "POOLEOS-POLICY-CYCLE113",
+          "policy_version": 1,
+          "qualification_only": true,
+          "version": "1.0"
+        },
+        "synthetic_policy_only": true,
+        "validated_by": "independent_host_media_oracle"
+      },
+      "recovery": {
+        "activation_allowed": false,
+        "activation_errors": [
+          "prec_activation_outer_signature",
+          "prec_activation_inner_signature",
+          "prec_activation_manifest_signature",
+          "prec_activation_state_auth",
+          "prec_activation_state_generation",
+          "prec_activation_version_floor",
+          "prec_activation_components",
+          "prec_activation_transaction_capacity",
+          "prec_activation_evidence",
+          "prec_activation_rollback",
+          "prec_activation_state_writable"
+        ],
+        "authority_rule_count": 7,
+        "bundle_sha256": "BA63DF2A44AD51EBEEDBE3F05D2D4D13FAF68CF6A2024A7DE355A86A4D0D666C",
+        "bundle_version": 1,
+        "contract_id": "PREC1",
+        "failure_rule_count": 10,
+        "max_attempts": 3,
+        "mutable_state_bytes": 128,
+        "outer_payload_sha256": "BA63DF2A44AD51EBEEDBE3F05D2D4D13FAF68CF6A2024A7DE355A86A4D0D666C",
+        "pooleboot_enforced": false,
+        "poolekernel_enforced": false,
+        "recovery_executed": false,
+        "slot_count": 2,
+        "summary": "OK;version=1;minimum_secure_version=1;slots=2;failures=10;authorities=7;max_attempts=3;state_floor=11;body_sha256=5C7D28E71DD70E559798E71D72137749FE7A6D4D8A0CFC42EB6A611876C38A12",
+        "validated_by": "independent_host_media_oracle"
+      },
+      "symbols": {
+        "activation_allowed": false,
+        "activation_errors": [
+          "psym_activation_outer_signature",
+          "psym_activation_inner_signature",
+          "psym_activation_manifest_signature",
+          "psym_activation_kernel_signature",
+          "psym_activation_outer_file_digest",
+          "psym_activation_identity_evidence",
+          "psym_activation_stripped_correspondence",
+          "psym_activation_dwarf5",
+          "psym_activation_public_policy",
+          "psym_activation_source_paths",
+          "psym_activation_diagnostics_authority"
+        ],
+        "authority_created": false,
+        "bundle_sha256": "8E46974E2787F36B72611255992051380578E132704987000AF54EE20CBA809D",
+        "bundle_version": 1,
+        "contract_id": "PSYM1",
+        "full_debug_file_on_media": false,
+        "maximum_lookup_steps": 13,
+        "outer_payload_sha256": "8E46974E2787F36B72611255992051380578E132704987000AF54EE20CBA809D",
+        "pooleboot_enforced": false,
+        "poolekernel_enforced": false,
+        "runtime_addresses_disclosed": false,
+        "segment_count": 4,
+        "string_bytes": 69,
+        "summary": {
+          "body_sha256": "BFD76B74E0C62327C8670B42CF31496B3848686B3B40CF0551A06D9A223C828A",
+          "build_id_sha256": "6D3E21CBA8495B89D04247EA85835B06F7A0B790C4757F4135789C807CB05E19",
+          "bundle_bytes": 725,
+          "canonical_file_sha256": "5D06ABFC9BD525931C63CC8A48FACD66A478640CE793E20E6D66EAEEB2BCEEEA",
+          "contract_id": "PSYM1",
+          "debug_file_sha256": "6AAA1CC5DF0192DE9FEB545CB269185246D7BC3161E953B19B897D12397E2B68",
+          "entry_offset": 32768,
+          "image_bytes": 262144,
+          "preferred_loaded_sha256": "00BDAF54F9CCD98AE6752B9F610886AFF571320640D44103A5FC65A83D89367E",
+          "preferred_virtual_base": 18446744071562067968,
+          "segment_count": 4,
+          "slide_alignment": 2097152,
+          "source_manifest_sha256": "618BEE498804DB09A0CB18281379B5045FBAD3F5D123767E7F8E6A7ED6C02FD0",
+          "string_bytes": 69,
+          "symbol_count": 3,
+          "version": "1.0",
+          "virtual_window_end_exclusive": 18446744072635809792
+        },
+        "symbol_count": 3,
+        "symbols_consumed": false,
+        "validated_by": "independent_host_media_oracle"
+      },
+      "trust_state": {
+        "authority_grants": 0,
+        "binding_count": 14,
+        "contract_id": "PBTRUST1",
+        "denial": "pbtrust_policy_unsigned",
+        "denial_count": 1,
+        "development_unsigned": true,
+        "monotonic_backend_observations": 0,
+        "policy_bytes": 320,
+        "policy_sha256": "DED2480B00B488A0B65F176B977130052914ABA6CEE5E6770EFAF4A972B88973",
+        "signature_verifications": 0,
+        "state_authenticated": false,
+        "state_backend_writable": false,
+        "state_bytes": 256,
+        "state_monotonic": false,
+        "state_sha256": "D92025006EC9C7D522A4FBC0DEE6176B333CFCF9AAA3FF9D571C76214099719C",
+        "state_source": "esp_candidate_not_persistent_authority",
+        "state_writes": 0
+      }
+    },
+    "ordinary_workspace_file_only": true,
+    "physical_media_write_performed": false,
+    "sha256": "1AD6F1C5E5A8052FE7BFA4215B45A67BFB851333EEA842504A9B07ED4EE3FEBD"
+  },
+  "n5_exit_gate_satisfied": false,
+  "negative_controls": [
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-MARKER-OMISSION",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-MARKER-ORDER",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-MARKER-DUPLICATE",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-ARM-CONTRACT",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-ARM-MODE",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-ARM-EMULATOR",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-ARM-ENTRY",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-ARM-HANDOFF",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-ARM-BYTE-COUNT",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-ARM-STACK",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-ARM-ROOT",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-ARM-CR3",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-ARM-SIGNATURE",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-ARM-AUTHORITY",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-ARM-ACTION",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-ARM-STATE-WRITE",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-ARM-FIRMWARE",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-BOUNDARY",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-ENTRY-CONTRACT",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-ENTRY-TRANSFER-CONTRACT",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-ENTRY-BUILD",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-ENTRY-COUNT",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-ENTRY-SERIAL",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-STATE-HANDOFF",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-STATE-BYTE-COUNT",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-STATE-ENTRY",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-STATE-STACK",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-STATE-ROOT",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-STATE-CR3",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-STATE-IF",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-STATE-DF",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-PBP1-PROFILE",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-PBP1-RECORD-COUNT",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-PBP1-ARTIFACT-COUNT",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-PBP1-PRODUCTION",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-REVALIDATION-CONTRACT",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-REVALIDATION-FILE-COUNT",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-REVALIDATION-ARTIFACT-COUNT",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-REVALIDATION-PARSER-COUNT",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-REVALIDATION-MANIFEST-BYTES",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-REVALIDATION-RETAINED-BYTES",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-REVALIDATION-RETAINED-DIGEST",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-REVALIDATION-POLICY-DIGEST",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-REVALIDATION-STATE-DIGEST",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-REVALIDATION-DENIAL",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-REVALIDATION-AUTHORITY",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-REVALIDATION-ACTION",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-REVALIDATION-STATE-WRITE",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-TERMINAL-CONTRACT",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-TERMINAL-MODE",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-TERMINAL-ENTRY-COUNT",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-TERMINAL-FIRMWARE",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-TERMINAL-SIGNATURE",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-TERMINAL-AUTHORITY",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-TERMINAL-ACTION",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-TERMINAL-STATE-WRITE",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    },
+    {
+      "expected": "reject",
+      "id": "NEG-N5-PKXFER-UNEXPECTED-RETURN",
+      "layer": "live_transfer_marker_oracle",
+      "observed": "rejected",
+      "status": "pass"
+    }
+  ],
+  "non_claims": [
+    "The ordinary PooleBoot build still stops before transfer; live dispatch requires the explicit development-transfer feature.",
+    "The exited-development PBP1 intentionally fails the authenticated production PKENTRY1 profile.",
+    "The live kernel path grants no capability, lifecycle, recovery, symbol, microcode, firmware, policy, or state-write authority.",
+    "The framebuffer still uses inherited firmware translation and cache attributes pending final remap and revocation work.",
+    "No target firmware, physical hardware, second independent host, physical-media write, signed release, ISO, installer, or production promotion is claimed.",
+    "Owner authorization for signing or privileged operations does not substitute for the missing qualification evidence or safety gates."
+  ],
+  "open_items": [
+    "Define and qualify the authenticated production PKENTRY1 profile with trusted signatures and measured-boot evidence.",
+    "Replace inherited framebuffer translation with an explicit final cache policy and revoke the temporary identity mapping.",
+    "Qualify target firmware and physical hardware under a separately defined safe procedure despite the owner's broad authorization.",
+    "Reproduce exact product, media, markers, PBP1 bytes, and frame on a second independent host.",
+    "Implement GDT, IDT, TSS, exception containment, physical and virtual memory initialization, capabilities, scheduling, IPC, and initial user space.",
+    "Complete all remaining N5-N39 gates before ISO publication or production promotion."
+  ],
+  "phase_status": {
+    "N5": "partial",
+    "N5.1": "partial",
+    "N5.4": "partial",
+    "N5.5": "partial",
+    "N5.8": "partial",
+    "N5.9": "partial"
+  },
+  "production_promotion_allowed": false,
+  "production_ready": false,
+  "schema_version": "1.0",
+  "selected_move_id": "N5-KERNEL-TRANSFER-001",
+  "status": "pass_single_host_two_run_qemu_only_unsigned_terminal_non_promoting",
+  "status_date": "2026-07-18",
+  "summary": {
+    "actions_authorized": 0,
+    "authority_grants": 0,
+    "firmware_calls_after_exit": 0,
+    "kernel_marker_count": 5,
+    "marker_count": 30,
+    "negative_controls_passed": 57,
+    "production_claim_count": 0,
+    "retained_file_count": 9,
+    "signature_verifications": 0,
+    "state_writes": 0
+  }
+}

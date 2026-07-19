@@ -153,9 +153,9 @@ halts permanently at `STOP BEFORE TRANSFER`.
 
 ## Qualified Evidence
 
-The Cycle 117 receipt records:
+The Cycle 118-refreshed default-path receipt records:
 
-- 93/93 Rust host tests across PooleBoot, PBART1, the six-format retained-set
+- 99/99 Rust host tests across PooleBoot, PBART1, the six-format retained-set
   validator, PBTRUST1, PBC1/PSM1/PKELF1/PBP1, PKMAP2, PBEXIT1, and PKENTRY1;
 - two byte-identical PooleBoot builds, PooleKernel builds, and GPT/FAT32 media
   generations;
@@ -191,8 +191,8 @@ The Cycle 117 receipt records:
   default-deny authority intersection, safe/recovery floors, firmware
   physical-presence separation, durable receipt rules, and mandatory
   development activation denial;
-- an exact 11,950-byte nine-file retained set with SHA-256
-  `FEE092995AF574AABDC329154E27E9464252923B87D58171DD4455B89FCBBA49`, nine
+- an exact 11,952-byte nine-file retained set with SHA-256
+  `652F3743DC6C033D41C8F634F359BF3A8A4B4AFF8D21F7EA329A0E349619A069`, nine
   target parsers, manifest/inner/trust cross-bindings, exact unsigned-policy
   denial, and zero authority/action/state/hardware effects;
 - 155/155 integrated negative controls, including exact retained PSM1/PBTP1/
@@ -228,14 +228,14 @@ executable authority, enforce Secure
 Boot, perform measured boot, test a second host, test target firmware, touch
 physical media, satisfy N5, or establish production readiness.
 
-The next chronological owner-independent move is `N5-KERNEL-TRANSFER-001`:
-validate the exact ten-descriptor kernel-entry profile, install retained CR3
-and guarded RSP after `ExitBootServices`, preserve required framebuffer and ABI
-state, enter PooleKernel exactly once, and prove live PKREVAL1 terminal denial
-with zero authority, actions, writes, or firmware calls. Capability creation,
-lifecycle execution, signature trust, authenticated persistent state, and
-production transfer remain separately gated by N5/N6 and owner-controlled N0
-work.
+Cycle 118 separately closes the opt-in QEMU-only
+`N5-KERNEL-TRANSFER-001` development boundary without changing this default
+PKLOAD6 stop. The next chronological owner-independent move is `N7-TRAP-001`:
+install bounded GDT/TSS/IDT state after PKXFER1 and prove deliberate breakpoint,
+page-fault, invalid-opcode, double-fault, and malformed-frame containment.
+Capability creation, lifecycle execution, signature trust, authenticated
+persistent state, production transfer, and physical-target qualification remain
+separately gated by N5/N6 and owner-controlled N0 work.
 
 ## Primary Reference
 

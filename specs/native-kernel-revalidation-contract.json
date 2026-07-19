@@ -67,7 +67,7 @@
     "state_writes": 0
   },
   "qualification": {
-    "rust_host_test_count": 13,
+    "rust_host_test_count": 14,
     "python_unit_test_count": 8,
     "golden_cross_language_cases": 1,
     "negative_control_count": 36,
@@ -92,7 +92,7 @@
   "non_claims": [
     "No private key was generated or used and no signature was created or verified by PKREVAL1.",
     "The retained PBTS1 file remains an ESP development candidate, not selected PBSTATE1 persistent authority.",
-    "PooleBoot still stops before transfer, so QEMU evidence proves the producer and handoff bytes but not PooleKernel execution.",
+    "This standalone PKREVAL1 receipt does not execute PooleKernel; the separate PKXFER1 receipt owns the QEMU live-entry and guest-revalidation claim.",
     "No capability, lifecycle, recovery, symbol, microcode, firmware, policy, or state-write authority is granted.",
     "No target firmware, physical hardware, second builder, signed release, ISO, installer, or production promotion is claimed."
   ]

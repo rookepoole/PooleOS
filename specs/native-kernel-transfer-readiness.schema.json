@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-kernel-transfer-readiness.schema.json",
+  "title": "PooleOS PKXFER1 live kernel-transfer readiness",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "status",
+    "contract_id",
+    "selected_move_id",
+    "production_ready",
+    "production_promotion_allowed",
+    "n5_exit_gate_satisfied",
+    "inputs",
+    "build",
+    "media",
+    "execution",
+    "negative_controls",
+    "claims",
+    "non_claims",
+    "summary",
+    "open_items"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_transfer_readiness"},
+    "status": {"const": "pass_single_host_two_run_qemu_only_unsigned_terminal_non_promoting"},
+    "contract_id": {"const": "PKXFER1"},
+    "selected_move_id": {"const": "N5-KERNEL-TRANSFER-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "n5_exit_gate_satisfied": {"const": false},
+    "negative_controls": {"type": "array", "minItems": 57, "maxItems": 57},
+    "execution": {
+      "type": "object",
+      "required": [
+        "run_count",
+        "exact_marker_match",
+        "exact_screenshot_match",
+        "exact_pbp1_match",
+        "runs"
+      ],
+      "properties": {
+        "run_count": {"const": 2},
+        "exact_marker_match": {"const": true},
+        "exact_screenshot_match": {"const": true},
+        "exact_pbp1_match": {"const": true},
+        "runs": {"type": "array", "minItems": 2, "maxItems": 2}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "marker_count",
+        "kernel_marker_count",
+        "retained_file_count",
+        "signature_verifications",
+        "authority_grants",
+        "actions_authorized",
+        "state_writes",
+        "firmware_calls_after_exit"
+      ],
+      "properties": {
+        "marker_count": {"const": 30},
+        "kernel_marker_count": {"const": 5},
+        "retained_file_count": {"const": 9},
+        "signature_verifications": {"const": 0},
+        "authority_grants": {"const": 0},
+        "actions_authorized": {"const": 0},
+        "state_writes": {"const": 0},
+        "firmware_calls_after_exit": {"const": 0}
+      }
+    }
+  }
+}

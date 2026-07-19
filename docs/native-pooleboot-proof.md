@@ -60,6 +60,11 @@ PooleKernel code independently reparses all nine non-kernel files, reconstructs
 their manifest, inner, policy, and state bindings, rejects substitution and
 mutation, and requires exact unsigned-policy denial. The verifier is
 host-executed and target-built only; PooleBoot still stops before transfer.
+Cycle 118 adds a separate opt-in QEMU-only PKXFER1 path while preserving that
+default stop. It installs retained CR3/RSP, clears IF/DF, transfers once,
+executes PKREVAL1 over the exact retained bytes, emits an independently bound
+terminal unsigned denial over serial and debugcon, and halts with zero authority
+or effects.
 
 The normative aggregate contract is `specs/native-pooleboot-proof.json`.
 `tools/qualify_native_pooleboot.py` validates the current PKLOAD6 receipt,
@@ -181,7 +186,7 @@ The receipt proves, on the pinned profile:
   unsigned development context;
 - live reparse of all six exact retained PBART1 files, PPOL1 payload-digest and
   PINIT1 route cross-binding, six first-failure denials, and exact nine-file
-  retained-set SHA-256 `FEE092995AF574AABDC329154E27E9464252923B87D58171DD4455B89FCBBA49`;
+  retained-set SHA-256 `652F3743DC6C033D41C8F634F359BF3A8A4B4AFF8D21F7EA329A0E349619A069`;
 - live parse of the exact 320-byte PBTP1 policy and 256-byte PBTS1 acceptance
   state, fourteen cross-bindings, rejection of the ESP candidate as persistent
   authority, and exact unsigned-policy denial with zero effects;
@@ -203,16 +208,16 @@ unauthenticated and untrusted. The proof does not establish policy-signature or
 threshold verification, authenticated revocation, Secure Boot-state evidence,
 a live redundant authenticated monotonic writable state backend, performed
 state selection, repair, migration, or power-loss durability, artifact authentication,
-authorized semantic activation, live PooleKernel retained-byte parsing,
+authorized semantic activation or production-profile PooleKernel parsing,
 initial-system or recovery
 execution, symbol consumption, policy application, capability
 creation, PooleGlyph executable authority, microcode or firmware application,
 live firmware inventory, updater loading, kernel exports, diagnostic authority,
 authenticated rollback persistence or state I/O,
 real vendor-container validation, redistribution approval, privileged
-per-processor revision observation, final active kernel CR3/RSP,
-final framebuffer cache policy, a transferable kernel-entry handoff, initial
-system loading, PooleKernel execution, descriptor tables, interrupts, SMP,
+per-processor revision observation, final production kernel CR3/RSP,
+final framebuffer cache policy, an authenticated transferable handoff, initial
+system activation, a continuing PooleKernel runtime, descriptor tables, interrupts, SMP,
 capabilities, userspace, native drivers, PooleFS, PooleGlass, Secure Boot,
 measured boot, TPM policy, target-firmware behavior, physical hardware, physical
 media, an installer, an ISO, N5 exit, release acceptance, or production
@@ -241,14 +246,16 @@ PooleBoot parsing, cross-binding, development denial, and zero-effect evidence.
 `FLAG-N5-INNER-TRUST-CONTRACT-001` is closed only for PBTRUST1 format,
 precedence, bounded-model, and live unsigned-denial evidence.
 `FLAG-N5-INNER-TRUST-BACKEND-MODEL-001` is closed only for the pure PBSTATE1
-model. `FLAG-N5-INNER-KERNEL-REVALIDATE-001` is closed only for host-executed
+model. `FLAG-N5-INNER-KERNEL-REVALIDATE-001` is closed for standalone
 PooleKernel parsing, binding reconstruction, mutation rejection, and exact
-zero-authority denial. N5.6 and N5.9 remain partial because artifact
-authentication, monotonic durable state, live PooleKernel execution,
+zero-authority denial. `FLAG-N5-KERNEL-TRANSFER-001` is closed only for the
+opt-in QEMU transfer and terminal denial. N5.6 and N5.9 remain partial because
+artifact authentication, monotonic durable state, production-profile execution,
 capability creation and activation, recovery execution, symbol consumption,
 policy application, and microcode or firmware application are open. The next
-owner-independent move is `N5-KERNEL-TRANSFER-001`. Hardware-key acquisition
-and governance signing remain separate owner-controlled lanes.
+owner-independent move is `N7-TRAP-001`. Hardware-key possession and the
+governance signing ceremony remain a separate external lane despite current
+authorization.
 
 ## Primary References
 

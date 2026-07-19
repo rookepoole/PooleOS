@@ -56,6 +56,8 @@ pub(super) struct Summary {
 pub(super) struct Retained {
     pub summary: Summary,
     pub table_physical_base: u64,
+    #[cfg(feature = "development-transfer")]
+    pub transfer_cr3: u64,
     lifecycle: Lifecycle,
 }
 
@@ -694,6 +696,8 @@ pub(super) fn prepare_and_retain(
     Ok(Retained {
         summary,
         table_physical_base: allocation_base,
+        #[cfg(feature = "development-transfer")]
+        transfer_cr3: allocation_base | (original_cr3 & CR3_NON_PCID_FLAGS),
         lifecycle,
     })
 }

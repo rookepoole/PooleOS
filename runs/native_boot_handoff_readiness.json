@@ -91,8 +91,8 @@
       },
       {
         "path": "docs/native-boot-handoff.md",
-        "sha256": "602454646CCBDCB6B36BBFD6779D3FBC54C0BBBA1F1FFA2A7618F208CB4C087B",
-        "byte_count": 8778
+        "sha256": "EEB9CACDD9FDDEB2A9539B3432D56DE8D836EC0012319EC6939813082DE37C7E",
+        "byte_count": 8533
       }
     ]
   },

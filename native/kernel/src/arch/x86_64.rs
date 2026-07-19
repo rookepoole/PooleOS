@@ -1,6 +1,7 @@
 use poolekernel::ByteSink;
 
 const COM1_BASE: u16 = 0x03f8;
+const DEBUGCON_PORT: u16 = 0x0402;
 const TRANSMIT_READY: u8 = 1 << 5;
 const MAX_READY_POLLS: usize = 4096;
 
@@ -55,6 +56,21 @@ impl ByteSink for Com1 {
             core::hint::spin_loop();
         }
         self.available = false;
+    }
+}
+
+pub struct DebugCon;
+
+impl DebugCon {
+    pub const fn new() -> Self {
+        Self
+    }
+}
+
+impl ByteSink for DebugCon {
+    fn write_byte(&mut self, byte: u8) {
+        // SAFETY: PKXFER1's QEMU-only profile reserves this fixed debugcon port.
+        unsafe { outb(DEBUGCON_PORT, byte) };
     }
 }
 
