@@ -13,10 +13,12 @@
     "formats",
     "profiles",
     "object_separation",
+    "backend_contract",
     "authority_equation",
     "policy_error_order",
     "state_error_order",
     "authorization_error_order",
+    "backend_error_order",
     "qualification",
     "claims",
     "non_claims",
@@ -37,7 +39,7 @@
       }
     },
     "status": {"const": "development_fail_closed"},
-    "selected_move": {"const": "N5-INNER-TRUST-STATE-001"},
+    "selected_move": {"const": "N5-INNER-TRUST-BACKEND-001"},
     "phase_mapping": {
       "const": ["N5.1", "N5.4", "N5.5", "N5.8", "N5.9"]
     },
@@ -61,25 +63,42 @@
     },
     "profiles": {"type": "object"},
     "object_separation": {"type": "object"},
+    "backend_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_id", "logical_digest_domain", "anchor_fields", "selection_rule", "transition_steps", "power_loss_case_count", "model_only"],
+      "properties": {
+        "contract_id": {"const": "PBSTATE1"},
+        "logical_digest_domain": {"const": "POOLEOS/PBTS1/LOGICAL/V1"},
+        "anchor_fields": {"const": ["authenticated", "monotonic", "state_generation", "store_epoch", "auth_profile", "logical_state_sha256", "previous_state_sha256"]},
+        "selection_rule": {"type": "string", "minLength": 40},
+        "transition_steps": {"const": ["write_target_uncommitted", "flush_target_data", "write_target_commit_and_authentication", "flush_target_commit", "advance_monotonic_anchor", "verify_monotonic_anchor", "repair_other_copy", "flush_repaired_copy", "verify_redundant_copies"]},
+        "power_loss_case_count": {"const": 9},
+        "model_only": {"const": true}
+      }
+    },
     "authority_equation": {"type": "string", "minLength": 20},
     "policy_error_order": {"type": "array", "minItems": 11, "uniqueItems": true, "items": {"type": "string", "pattern": "^pbtrust_policy_"}},
     "state_error_order": {"type": "array", "minItems": 12, "uniqueItems": true, "items": {"type": "string", "pattern": "^pbtrust_state_"}},
     "authorization_error_order": {"type": "array", "minItems": 24, "uniqueItems": true, "items": {"type": "string", "pattern": "^pbtrust_"}},
+    "backend_error_order": {"type": "array", "minItems": 14, "uniqueItems": true, "items": {"type": "string", "pattern": "^pbtrust_backend_"}},
     "qualification": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["policy_parser_cases", "state_parser_cases", "authorization_cases", "negative_control_count"],
+      "required": ["policy_parser_cases", "state_parser_cases", "authorization_cases", "backend_selection_cases", "power_loss_cases", "negative_control_count"],
       "properties": {
         "policy_parser_cases": {"const": 8192},
         "state_parser_cases": {"const": 8192},
         "authorization_cases": {"const": 8192},
-        "negative_control_count": {"type": "integer", "minimum": 70}
+        "backend_selection_cases": {"const": 8192},
+        "power_loss_cases": {"const": 9},
+        "negative_control_count": {"const": 105}
       }
     },
     "claims": {"type": "object"},
     "non_claims": {"type": "array", "minItems": 7, "items": {"type": "string"}},
     "primary_references": {"type": "array", "minItems": 4, "items": {"type": "string", "format": "uri"}},
-    "implementation_bindings": {"type": "array", "minItems": 15, "maxItems": 15, "items": {"$ref": "#/$defs/binding"}}
+    "implementation_bindings": {"type": "array", "minItems": 16, "maxItems": 16, "items": {"$ref": "#/$defs/binding"}}
   },
   "$defs": {
     "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},

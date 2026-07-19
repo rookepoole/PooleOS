@@ -13,6 +13,8 @@ from runtime.schema_validation import validate_json
 
 
 CONTRACT_ID: Final = "PBTRUST1"
+BACKEND_CONTRACT_ID: Final = "PBSTATE1"
+LOGICAL_DIGEST_DOMAIN: Final = b"POOLEOS/PBTS1/LOGICAL/V1\0"
 POLICY_MAGIC: Final = b"PBTP1\0\0\0"
 STATE_MAGIC: Final = b"PBTS1\0\0\0"
 MAJOR_VERSION: Final = 1
@@ -41,6 +43,19 @@ STATE_KNOWN_FLAGS: Final = (
 )
 COPY_COUNT: Final = 2
 COMMIT_COMPLETE: Final = 1
+REDUNDANT_COPY_MASK: Final = 0b11
+TRANSITION_STEP_COUNT: Final = 9
+BACKEND_TRANSITION_STEPS: Final = (
+    "write_target_uncommitted",
+    "flush_target_data",
+    "write_target_commit_and_authentication",
+    "flush_target_commit",
+    "advance_monotonic_anchor",
+    "verify_monotonic_anchor",
+    "repair_other_copy",
+    "flush_repaired_copy",
+    "verify_redundant_copies",
+)
 
 POLICY_PATH: Final = "EFI/POOLEOS/TRUST.PBT"
 STATE_PATH: Final = "EFI/POOLEOS/TRUSTST.PBS"
@@ -54,6 +69,7 @@ IMPLEMENTATION_INPUTS: Final = (
     "native/Cargo.lock",
     "native/trust/Cargo.toml",
     "native/trust/src/lib.rs",
+    "native/trust/src/backend.rs",
     "native/trust/src/bin/pbtrust1_probe.rs",
     "native/boot/Cargo.toml",
     "native/boot/src/kload.rs",
@@ -120,6 +136,22 @@ AUTHORIZATION_ERROR_ORDER: Final = (
     "pbtrust_secure_boot_state",
     "pbtrust_unexpected_authority",
 )
+BACKEND_ERROR_ORDER: Final = (
+    "pbtrust_backend_anchor_authentication",
+    "pbtrust_backend_anchor_monotonicity",
+    "pbtrust_backend_anchor_numbers",
+    "pbtrust_backend_requirements",
+    "pbtrust_backend_anchor_rollback",
+    "pbtrust_backend_no_authenticated_copy",
+    "pbtrust_backend_previous_state",
+    "pbtrust_backend_anchor_digest",
+    "pbtrust_backend_future_state",
+    "pbtrust_backend_state_rollback",
+    "pbtrust_backend_writable",
+    "pbtrust_backend_repair_capacity",
+    "pbtrust_backend_generation_overflow",
+    "pbtrust_backend_migration_rollback",
+)
 
 TRUE_CLAIMS: Final = (
     "allocation_free_no_std_parser",
@@ -132,6 +164,13 @@ TRUE_CLAIMS: Final = (
     "external_evidence_required",
     "unsigned_development_policy_denied",
     "esp_candidate_rejected_as_persistent_authority",
+    "authenticated_anchor_required",
+    "redundant_backend_selection_modeled",
+    "logical_copy_identity_bound",
+    "rollback_and_future_state_rejected",
+    "deterministic_repair_plan_modeled",
+    "migration_plan_modeled",
+    "power_loss_recovery_corpus_passed",
 )
 FALSE_CLAIMS: Final = (
     "policy_signature_verified",
@@ -146,6 +185,10 @@ FALSE_CLAIMS: Final = (
     "private_key_used",
     "poolekernel_revalidated",
     "physical_media_written",
+    "backend_crypto_verified",
+    "monotonic_provider_implemented",
+    "persistent_backend_io_implemented",
+    "repair_or_migration_executed",
     "production_ready",
 )
 
@@ -217,6 +260,73 @@ class State:
     previous_state_sha256: str
     body_sha256: str
     raw: bytes
+
+
+@dataclasses.dataclass(frozen=True)
+class MonotonicAnchor:
+    authenticated: bool
+    monotonic: bool
+    state_generation: int
+    store_epoch: int
+    auth_profile: int
+    logical_state_sha256: str
+    previous_state_sha256: str
+
+
+@dataclasses.dataclass(frozen=True)
+class BackendRequirements:
+    minimum_state_generation: int
+    minimum_store_epoch: int
+    target_store_epoch: int
+    target_auth_profile: int
+
+
+@dataclasses.dataclass(frozen=True)
+class BackendAccess:
+    writable: bool
+    repair_capacity: bool
+
+
+@dataclasses.dataclass(frozen=True)
+class BackendCopy:
+    data: bytes | None
+    authentication_verified: bool
+
+
+@dataclasses.dataclass(frozen=True)
+class BackendSelection:
+    selected_copy: int
+    present_copy_mask: int
+    parsed_copy_mask: int
+    authenticated_copy_mask: int
+    anchored_copy_mask: int
+    repair_copy_mask: int
+    stale_copy_mask: int
+    future_copy_mask: int
+    state_generation: int
+    store_epoch: int
+    auth_profile: int
+    logical_state_sha256: str
+    previous_state_sha256: str
+    target_store_epoch: int
+    target_auth_profile: int
+    migration_required: bool
+    authority_grants: int = 0
+    state_writes: int = 0
+
+
+@dataclasses.dataclass(frozen=True)
+class BackendTransitionPlan:
+    source_copy: int
+    target_copy: int
+    next_generation: int
+    target_store_epoch: int
+    target_auth_profile: int
+    previous_state_sha256: str
+    ordered_step_count: int = TRANSITION_STEP_COUNT
+    state_writes_performed: int = 0
+    anchor_writes_performed: int = 0
+    authority_grants: int = 0
 
 
 @dataclasses.dataclass(frozen=True)
@@ -453,6 +563,233 @@ def parse_state(data: bytes) -> State:
     )
 
 
+def logical_state_sha256(state: State) -> str:
+    hasher = hashlib.sha256()
+    hasher.update(LOGICAL_DIGEST_DOMAIN)
+    hasher.update(struct.pack("<HH", MAJOR_VERSION, MINOR_VERSION))
+    hasher.update(
+        struct.pack(
+            "<HHQQQQQ",
+            STATE_FLAG_COMMITTED | STATE_FLAG_AUTHENTICATED_BACKEND,
+            state.auth_profile,
+            state.state_generation,
+            state.store_epoch,
+            state.minimum_secure_version,
+            state.accepted_manifest_version,
+            state.accepted_policy_version,
+        )
+    )
+    for digest in (
+        state.policy_sha256,
+        state.manifest_sha256,
+        state.kernel_sha256,
+        state.retained_set_sha256,
+        state.previous_state_sha256,
+    ):
+        hasher.update(bytes.fromhex(digest))
+    return hasher.hexdigest().upper()
+
+
+def _anchor_digest(value: str, *, allow_zero: bool) -> bytes | None:
+    if len(value) != 64 or value != value.upper():
+        return None
+    try:
+        decoded = bytes.fromhex(value)
+    except ValueError:
+        return None
+    if not allow_zero and decoded == bytes(32):
+        return None
+    return decoded
+
+
+def _validate_anchor(
+    anchor: MonotonicAnchor, requirements: BackendRequirements
+) -> None:
+    if not anchor.authenticated:
+        _fail("pbtrust_backend_anchor_authentication")
+    if not anchor.monotonic:
+        _fail("pbtrust_backend_anchor_monotonicity")
+    current = _anchor_digest(anchor.logical_state_sha256, allow_zero=False)
+    previous = _anchor_digest(anchor.previous_state_sha256, allow_zero=True)
+    if (
+        anchor.state_generation <= 0
+        or anchor.store_epoch <= 0
+        or anchor.auth_profile <= 0
+        or current is None
+        or previous is None
+        or ((anchor.state_generation == 1) != (previous == bytes(32)))
+    ):
+        _fail("pbtrust_backend_anchor_numbers")
+    if (
+        requirements.minimum_state_generation <= 0
+        or requirements.minimum_store_epoch <= 0
+        or requirements.target_store_epoch <= 0
+        or requirements.target_auth_profile <= 0
+        or requirements.target_store_epoch < requirements.minimum_store_epoch
+        or requirements.target_store_epoch < anchor.store_epoch
+    ):
+        _fail("pbtrust_backend_requirements")
+    if (
+        anchor.state_generation < requirements.minimum_state_generation
+        or anchor.store_epoch < requirements.minimum_store_epoch
+    ):
+        _fail("pbtrust_backend_anchor_rollback")
+
+
+def select_backend_state(
+    copies: tuple[BackendCopy, BackendCopy],
+    anchor: MonotonicAnchor,
+    requirements: BackendRequirements,
+    access: BackendAccess,
+) -> BackendSelection:
+    _validate_anchor(anchor, requirements)
+    candidates: list[tuple[State, str] | None] = [None, None]
+    present_mask = 0
+    parsed_mask = 0
+    authenticated_mask = 0
+    anchored_mask = 0
+    stale_mask = 0
+    future_mask = 0
+    previous_mismatch_mask = 0
+    digest_mismatch_mask = 0
+
+    for index, copy in enumerate(copies):
+        bit = 1 << index
+        if copy.data is None:
+            continue
+        present_mask |= bit
+        try:
+            state = parse_state(copy.data)
+        except BootTrustError:
+            continue
+        if state.copy_index != index:
+            continue
+        parsed_mask |= bit
+        if (
+            not copy.authentication_verified
+            or not state.flags & STATE_FLAG_AUTHENTICATED_BACKEND
+        ):
+            continue
+        authenticated_mask |= bit
+        logical = logical_state_sha256(state)
+        candidates[index] = (state, logical)
+        if (
+            state.state_generation < anchor.state_generation
+            or state.store_epoch < anchor.store_epoch
+        ):
+            stale_mask |= bit
+            continue
+        if (
+            state.state_generation > anchor.state_generation
+            or state.store_epoch > anchor.store_epoch
+        ):
+            future_mask |= bit
+            continue
+        if state.previous_state_sha256 != anchor.previous_state_sha256:
+            previous_mismatch_mask |= bit
+            continue
+        if (
+            state.auth_profile != anchor.auth_profile
+            or logical != anchor.logical_state_sha256
+        ):
+            digest_mismatch_mask |= bit
+            continue
+        anchored_mask |= bit
+
+    if not anchored_mask:
+        if previous_mismatch_mask:
+            _fail("pbtrust_backend_previous_state")
+        if digest_mismatch_mask:
+            _fail("pbtrust_backend_anchor_digest")
+        if future_mask:
+            _fail("pbtrust_backend_future_state")
+        if stale_mask:
+            _fail("pbtrust_backend_state_rollback")
+        _fail("pbtrust_backend_no_authenticated_copy")
+    if not access.writable:
+        _fail("pbtrust_backend_writable")
+    repair_mask = REDUNDANT_COPY_MASK & ~anchored_mask
+    if repair_mask and not access.repair_capacity:
+        _fail("pbtrust_backend_repair_capacity")
+
+    selected_copy = 0 if anchored_mask & 1 else 1
+    selected = candidates[selected_copy]
+    if selected is None:
+        _fail("pbtrust_backend_anchor_digest")
+    state, logical = selected
+    return BackendSelection(
+        selected_copy=selected_copy,
+        present_copy_mask=present_mask,
+        parsed_copy_mask=parsed_mask,
+        authenticated_copy_mask=authenticated_mask,
+        anchored_copy_mask=anchored_mask,
+        repair_copy_mask=repair_mask,
+        stale_copy_mask=stale_mask,
+        future_copy_mask=future_mask,
+        state_generation=state.state_generation,
+        store_epoch=state.store_epoch,
+        auth_profile=state.auth_profile,
+        logical_state_sha256=logical,
+        previous_state_sha256=state.previous_state_sha256,
+        target_store_epoch=requirements.target_store_epoch,
+        target_auth_profile=requirements.target_auth_profile,
+        migration_required=(
+            state.store_epoch < requirements.target_store_epoch
+            or state.auth_profile != requirements.target_auth_profile
+        ),
+    )
+
+
+def plan_backend_transition(selection: BackendSelection) -> BackendTransitionPlan:
+    anchored_mask = selection.anchored_copy_mask
+    expected_repair_mask = REDUNDANT_COPY_MASK & ~anchored_mask
+    expected_migration = (
+        selection.store_epoch < selection.target_store_epoch
+        or selection.auth_profile != selection.target_auth_profile
+    )
+    if (
+        selection.selected_copy not in (0, 1)
+        or anchored_mask <= 0
+        or anchored_mask & ~REDUNDANT_COPY_MASK
+        or not anchored_mask & (1 << selection.selected_copy)
+        or selection.repair_copy_mask != expected_repair_mask
+        or selection.state_generation <= 0
+        or selection.store_epoch <= 0
+        or selection.auth_profile <= 0
+        or _anchor_digest(selection.logical_state_sha256, allow_zero=False) is None
+        or _anchor_digest(selection.previous_state_sha256, allow_zero=True) is None
+        or (
+            (selection.state_generation == 1)
+            != (selection.previous_state_sha256 == "00" * 32)
+        )
+        or selection.migration_required != expected_migration
+        or selection.authority_grants != 0
+        or selection.state_writes != 0
+    ):
+        _fail("pbtrust_backend_requirements")
+    if (
+        selection.target_store_epoch < selection.store_epoch
+        or selection.target_auth_profile <= 0
+    ):
+        _fail("pbtrust_backend_migration_rollback")
+    if selection.state_generation >= (1 << 64) - 1:
+        _fail("pbtrust_backend_generation_overflow")
+    if selection.anchored_copy_mask == 0b01:
+        target_copy = 1
+    elif selection.anchored_copy_mask == 0b10:
+        target_copy = 0
+    else:
+        target_copy = 1 - selection.selected_copy
+    return BackendTransitionPlan(
+        source_copy=selection.selected_copy,
+        target_copy=target_copy,
+        next_generation=selection.state_generation + 1,
+        target_store_epoch=selection.target_store_epoch,
+        target_auth_profile=selection.target_auth_profile,
+        previous_state_sha256=selection.logical_state_sha256,
+    )
+
+
 def authorize(
     policy: Policy,
     state: State,
@@ -619,6 +956,30 @@ def expected_claims() -> dict[str, bool]:
     }
 
 
+def expected_backend_contract() -> dict[str, Any]:
+    return {
+        "contract_id": BACKEND_CONTRACT_ID,
+        "logical_digest_domain": LOGICAL_DIGEST_DOMAIN.rstrip(b"\0").decode("ascii"),
+        "anchor_fields": [
+            "authenticated",
+            "monotonic",
+            "state_generation",
+            "store_epoch",
+            "auth_profile",
+            "logical_state_sha256",
+            "previous_state_sha256",
+        ],
+        "selection_rule": (
+            "select the lowest-index externally authenticated committed copy "
+            "whose generation, epoch, profile, previous-state link, and logical "
+            "digest exactly match the authenticated monotonic anchor"
+        ),
+        "transition_steps": list(BACKEND_TRANSITION_STEPS),
+        "power_loss_case_count": 9,
+        "model_only": True,
+    }
+
+
 def _schema_errors(
     value: dict[str, Any], root: Path, schema_relative: str
 ) -> list[str]:
@@ -639,6 +1000,10 @@ def contract_errors(contract: dict[str, Any], root: Path) -> list[str]:
         errors.append("PBTRUST1 state error order changed")
     if contract.get("authorization_error_order") != list(AUTHORIZATION_ERROR_ORDER):
         errors.append("PBTRUST1 authorization error order changed")
+    if contract.get("backend_error_order") != list(BACKEND_ERROR_ORDER):
+        errors.append("PBSTATE1 backend error order changed")
+    if contract.get("backend_contract") != expected_backend_contract():
+        errors.append("PBSTATE1 backend contract changed")
     formats = contract.get("formats", {})
     if (
         formats.get("policy_bytes") != POLICY_BYTES
@@ -696,8 +1061,8 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
                 )
     build = readiness.get("build", {})
     if (
-        build.get("rust_host_tests_passed") != 4
-        or build.get("rust_host_tests_total") != 4
+        build.get("rust_host_tests_passed") != 12
+        or build.get("rust_host_tests_total") != 12
         or build.get("rustfmt_packages") != 1
         or build.get("clippy_targets") != 1
         or build.get("no_std_targets")
@@ -708,7 +1073,12 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
         errors.append("PBTRUST1 build evidence changed")
     qualification = contract.get("qualification", {})
     differential = readiness.get("differential", {})
-    for name in ("policy_parser", "state_parser", "authorization"):
+    for name in (
+        "policy_parser",
+        "state_parser",
+        "authorization",
+        "backend_selection",
+    ):
         item = differential.get(name, {})
         expected_cases = qualification.get(f"{name}_cases")
         if (
@@ -737,8 +1107,68 @@ def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
         or development.get("state_writes") != 0
     ):
         errors.append("PBTRUST1 development-denial boundary changed")
+    backend = readiness.get("backend_model", {})
+    if (
+        backend.get("contract_id") != BACKEND_CONTRACT_ID
+        or backend.get("logical_digest_domain")
+        != LOGICAL_DIGEST_DOMAIN.rstrip(b"\0").decode("ascii")
+        or backend.get("selected_copy") != 0
+        or backend.get("anchored_copy_mask") != REDUNDANT_COPY_MASK
+        or backend.get("repair_copy_mask") != 0
+        or backend.get("migration_required") is not True
+        or backend.get("next_generation") != 2
+        or backend.get("target_copy") != 1
+        or backend.get("ordered_transition_steps")
+        != list(BACKEND_TRANSITION_STEPS)
+        or backend.get("authority_grants") != 0
+        or backend.get("state_writes_performed") != 0
+        or backend.get("anchor_writes_performed") != 0
+    ):
+        errors.append("PBSTATE1 backend-model boundary changed")
+    power_loss = backend.get("power_loss", {})
+    expected_power_cases = (
+        ("before_target_write", 1, 0, 0),
+        ("after_target_body_write", 1, 0, 0b10),
+        ("after_target_data_flush", 1, 0, 0b10),
+        ("after_target_commit_auth", 1, 0, 0b10),
+        ("after_target_commit_flush", 1, 0, 0b10),
+        ("after_anchor_advance", 2, 1, 0b01),
+        ("after_anchor_verify", 2, 1, 0b01),
+        ("after_repair_write", 2, 1, 0b01),
+        ("after_final_verify", 2, 0, 0),
+    )
+    observed_power_cases = power_loss.get("cases", [])
+    normalized_power_cases = [
+        (
+            item.get("id"),
+            item.get("selected_generation"),
+            item.get("selected_copy"),
+            item.get("repair_copy_mask"),
+        )
+        for item in observed_power_cases
+        if isinstance(item, dict)
+    ]
+    if (
+        power_loss.get("case_count") != len(expected_power_cases)
+        or power_loss.get("all_cases_passed") is not True
+        or power_loss.get("storage_io_performed") is not False
+        or power_loss.get("anchor_writes_performed") != 0
+        or power_loss.get("state_writes_performed") != 0
+        or normalized_power_cases != list(expected_power_cases)
+        or len(normalized_power_cases) != len(observed_power_cases)
+        or any(
+            item.get("authority_grants") != 0
+            or item.get("state_writes") != 0
+            or item.get("status") != "pass"
+            for item in observed_power_cases
+            if isinstance(item, dict)
+        )
+    ):
+        errors.append("PBSTATE1 power-loss recovery evidence changed")
     if readiness.get("claims") != expected_claims():
         errors.append("PBTRUST1 readiness claim boundary changed")
+    if readiness.get("non_claims") != contract.get("non_claims"):
+        errors.append("PBTRUST1 readiness non-claim boundary changed")
     if readiness.get("production_ready") is not False:
         errors.append("PBTRUST1 overclaims production readiness")
     return errors

@@ -7,7 +7,7 @@
     "minor": 0
   },
   "status": "development_fail_closed",
-  "selected_move": "N5-INNER-TRUST-STATE-001",
+  "selected_move": "N5-INNER-TRUST-BACKEND-001",
   "phase_mapping": [
     "N5.1",
     "N5.4",
@@ -56,6 +56,33 @@
     "production_backend_requires_redundant_transactional_authenticated_storage": true,
     "production_backend_requires_previous_state_chain_and_power_loss_recovery": true,
     "poolekernel_independent_revalidation_required": true
+  },
+  "backend_contract": {
+    "contract_id": "PBSTATE1",
+    "logical_digest_domain": "POOLEOS/PBTS1/LOGICAL/V1",
+    "anchor_fields": [
+      "authenticated",
+      "monotonic",
+      "state_generation",
+      "store_epoch",
+      "auth_profile",
+      "logical_state_sha256",
+      "previous_state_sha256"
+    ],
+    "selection_rule": "select the lowest-index externally authenticated committed copy whose generation, epoch, profile, previous-state link, and logical digest exactly match the authenticated monotonic anchor",
+    "transition_steps": [
+      "write_target_uncommitted",
+      "flush_target_data",
+      "write_target_commit_and_authentication",
+      "flush_target_commit",
+      "advance_monotonic_anchor",
+      "verify_monotonic_anchor",
+      "repair_other_copy",
+      "flush_repaired_copy",
+      "verify_redundant_copies"
+    ],
+    "power_loss_case_count": 9,
+    "model_only": true
   },
   "authority_equation": "parsed_shape & exact_artifact_bindings & rollback_floors & external_policy_authentication & authenticated_revocation & authenticated_monotonic_state & verified_secure_boot_state",
   "policy_error_order": [
@@ -111,11 +138,29 @@
     "pbtrust_secure_boot_state",
     "pbtrust_unexpected_authority"
   ],
+  "backend_error_order": [
+    "pbtrust_backend_anchor_authentication",
+    "pbtrust_backend_anchor_monotonicity",
+    "pbtrust_backend_anchor_numbers",
+    "pbtrust_backend_requirements",
+    "pbtrust_backend_anchor_rollback",
+    "pbtrust_backend_no_authenticated_copy",
+    "pbtrust_backend_previous_state",
+    "pbtrust_backend_anchor_digest",
+    "pbtrust_backend_future_state",
+    "pbtrust_backend_state_rollback",
+    "pbtrust_backend_writable",
+    "pbtrust_backend_repair_capacity",
+    "pbtrust_backend_generation_overflow",
+    "pbtrust_backend_migration_rollback"
+  ],
   "qualification": {
     "policy_parser_cases": 8192,
     "state_parser_cases": 8192,
     "authorization_cases": 8192,
-    "negative_control_count": 88
+    "backend_selection_cases": 8192,
+    "power_loss_cases": 9,
+    "negative_control_count": 105
   },
   "claims": {
     "allocation_free_no_std_parser": true,
@@ -128,6 +173,13 @@
     "external_evidence_required": true,
     "unsigned_development_policy_denied": true,
     "esp_candidate_rejected_as_persistent_authority": true,
+    "authenticated_anchor_required": true,
+    "redundant_backend_selection_modeled": true,
+    "logical_copy_identity_bound": true,
+    "rollback_and_future_state_rejected": true,
+    "deterministic_repair_plan_modeled": true,
+    "migration_plan_modeled": true,
+    "power_loss_recovery_corpus_passed": true,
     "policy_signature_verified": false,
     "policy_threshold_verified": false,
     "revocation_state_authenticated": false,
@@ -140,6 +192,10 @@
     "private_key_used": false,
     "poolekernel_revalidated": false,
     "physical_media_written": false,
+    "backend_crypto_verified": false,
+    "monotonic_provider_implemented": false,
+    "persistent_backend_io_implemented": false,
+    "repair_or_migration_executed": false,
     "production_ready": false
   },
   "non_claims": [
@@ -147,7 +203,7 @@
     "No private key is generated, loaded, used, or requested.",
     "No authenticated revocation store, threshold root, or signer registry is implemented.",
     "The ESP state candidate is not authenticated, monotonic, rollback-resistant, or accepted as authority.",
-    "No trust state is selected, repaired, migrated, committed, or written.",
+    "PBSTATE1 selects only synthetic externally authenticated backend inputs and produces repair and migration plans; it performs no backend cryptography, persistence, anchor update, state write, or recovery action.",
     "No Secure Boot variable, TPM state, firmware inventory, or privileged hardware fact is observed.",
     "PooleKernel does not independently revalidate or consume PBTRUST1 and no capability or executable authority is created.",
     "No firmware, disk, driver, physical media, signing, tag, merge, release, or publication action occurs.",
@@ -178,13 +234,18 @@
     },
     {
       "path": "native/trust/src/lib.rs",
-      "byte_count": 27876,
-      "sha256": "90CE5080AB4242B22B82738F2B700D70201238E29B6B4980CE010D656A735F27"
+      "byte_count": 27894,
+      "sha256": "E075E10153BC4987000F9C99931568165A3E8726786E6F5D69C164BCD833EE81"
+    },
+    {
+      "path": "native/trust/src/backend.rs",
+      "byte_count": 24056,
+      "sha256": "0C5DBF62CE26DEAD2241385578FDF76DBF9A235751FE2345DE53DBF29AC6C2BF"
     },
     {
       "path": "native/trust/src/bin/pbtrust1_probe.rs",
-      "byte_count": 5714,
-      "sha256": "798600F8D1C622FB501FA09763009465079E930A38B739A7154DE10B31206FCE"
+      "byte_count": 8631,
+      "sha256": "35B0CE8EC004E0F878F2E90969CA2317FC5335C765D8B5205E06E1D34608FCD8"
     },
     {
       "path": "native/boot/Cargo.toml",
@@ -208,33 +269,33 @@
     },
     {
       "path": "runtime/native_boot_trust.py",
-      "byte_count": 28060,
-      "sha256": "ACCF4F5C8A4E069A668E56C2384D59E389FB4162AB4326D6EEF33920BFADB59F"
+      "byte_count": 43001,
+      "sha256": "6E6202A0AE17146F120C98A70FFA99036DE0B1B9651F552305B42FD0FC367B1D"
     },
     {
       "path": "tests/test_native_boot_trust.py",
-      "byte_count": 7977,
-      "sha256": "FF563340A4243C8602FAEE806D9BEB51B8CC8E724069D04A796463F80602CBBA"
+      "byte_count": 15996,
+      "sha256": "FC9F4464DE0CD2CA79050C604E5C52F1CC710592EF57219C824147E8986BC966"
     },
     {
       "path": "tools/qualify_native_boot_trust.py",
-      "byte_count": 38000,
-      "sha256": "C62F512C70475AF68F8930EAEE8EAC1EFF550264C2C8BA36AE7E73C2705E8F57"
+      "byte_count": 58421,
+      "sha256": "AB2E152EA8A747D4C2C88FF8E36BDFB6F19A1F6EC9602D3940912CC9D218CC3A"
     },
     {
       "path": "docs/native-boot-trust.md",
-      "byte_count": 6879,
-      "sha256": "BA3C68D859562FB64246A5E1DBAC137239FF8E44560A383D01ABE4090E09ED3F"
+      "byte_count": 9787,
+      "sha256": "02D98E02AA855EDAE830437AE74BB7A438A9D1B8F123BCDA73AC66482866CBDC"
     },
     {
       "path": "specs/native-boot-trust-contract.schema.json",
-      "byte_count": 3666,
-      "sha256": "344E85E8AD90EE831F881C30557CDB975D6A83571A921FAAB1BA6B9EF8AC3F5A"
+      "byte_count": 4977,
+      "sha256": "617B8189F8DF28B5E2372DC7AF3E91DDDF1F2A4D08BC343A8C389A63E4F89ECE"
     },
     {
       "path": "specs/native-boot-trust-readiness.schema.json",
-      "byte_count": 5403,
-      "sha256": "20635C4261E4EE5E280BDA9463D8FED1AE0171F358AB2EABD9B253E092857376"
+      "byte_count": 8508,
+      "sha256": "2630B1C7D0E4FA556A12AAF4661A7F8A42650F030502E679A6BFA3CB19B71278"
     }
   ]
 }

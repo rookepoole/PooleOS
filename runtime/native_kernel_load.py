@@ -133,6 +133,7 @@ IMPLEMENTATION_INPUTS = (
     "native/bootcfg/src/lib.rs",
     "native/trust/Cargo.toml",
     "native/trust/src/lib.rs",
+    "native/trust/src/backend.rs",
     "native/trust/src/bin/pbtrust1_probe.rs",
     "native/manifest/Cargo.toml",
     "native/manifest/src/lib.rs",

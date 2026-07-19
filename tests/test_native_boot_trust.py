@@ -36,6 +36,55 @@ def records(*, signed: bool = False, authenticated: bool = False):
     return policy, state, observed
 
 
+def backend_state(
+    copy_index: int,
+    generation: int = 1,
+    *,
+    epoch: int = 1,
+    auth_profile: int = 1,
+    previous: str | None = None,
+) -> bytes:
+    return trust.encode_state(
+        policy_sha256="55" * 32,
+        manifest_sha256=MANIFEST,
+        kernel_sha256=KERNEL,
+        retained_set_sha256=RETAINED,
+        state_generation=generation,
+        store_epoch=epoch,
+        authenticated_backend=True,
+        copy_index=copy_index,
+        auth_profile=auth_profile,
+        previous_state_sha256=previous,
+    )
+
+
+def backend_anchor(data: bytes) -> trust.MonotonicAnchor:
+    state = trust.parse_state(data)
+    return trust.MonotonicAnchor(
+        authenticated=True,
+        monotonic=True,
+        state_generation=state.state_generation,
+        store_epoch=state.store_epoch,
+        auth_profile=state.auth_profile,
+        logical_state_sha256=trust.logical_state_sha256(state),
+        previous_state_sha256=state.previous_state_sha256,
+    )
+
+
+def backend_requirements(**changes: int) -> trust.BackendRequirements:
+    values = {
+        "minimum_state_generation": 1,
+        "minimum_store_epoch": 1,
+        "target_store_epoch": 1,
+        "target_auth_profile": 1,
+        **changes,
+    }
+    return trust.BackendRequirements(**values)
+
+
+BACKEND_ACCESS = trust.BackendAccess(writable=True, repair_capacity=True)
+
+
 def rehash_policy(data: bytearray) -> bytes:
     data[224:256] = hashlib.sha256(data[:224]).digest()
     return bytes(data)
@@ -184,6 +233,175 @@ class NativeBootTrustTests(unittest.TestCase):
         )
         self.assertEqual(1, result["policy_version"])
         self.assertEqual(1, result["state_generation"])
+
+    def test_backend_logical_digest_ignores_only_copy_identity(self) -> None:
+        copy0 = backend_state(0)
+        copy1 = backend_state(1)
+        self.assertNotEqual(trust.sha256_bytes(copy0), trust.sha256_bytes(copy1))
+        self.assertEqual(
+            trust.logical_state_sha256(trust.parse_state(copy0)),
+            trust.logical_state_sha256(trust.parse_state(copy1)),
+        )
+
+    def test_backend_healthy_pair_selects_copy_zero_without_effects(self) -> None:
+        copy0 = backend_state(0)
+        copy1 = backend_state(1)
+        selected = trust.select_backend_state(
+            (
+                trust.BackendCopy(copy0, True),
+                trust.BackendCopy(copy1, True),
+            ),
+            backend_anchor(copy0),
+            backend_requirements(),
+            BACKEND_ACCESS,
+        )
+        self.assertEqual(0, selected.selected_copy)
+        self.assertEqual(0b11, selected.anchored_copy_mask)
+        self.assertEqual(0, selected.repair_copy_mask)
+        self.assertEqual(0, selected.authority_grants)
+        self.assertEqual(0, selected.state_writes)
+
+    def test_backend_future_copy_waits_for_anchor_commit(self) -> None:
+        old0 = backend_state(0)
+        old_digest = trust.logical_state_sha256(trust.parse_state(old0))
+        new1 = backend_state(1, 2, previous=old_digest)
+        selected_old = trust.select_backend_state(
+            (
+                trust.BackendCopy(old0, True),
+                trust.BackendCopy(new1, True),
+            ),
+            backend_anchor(old0),
+            backend_requirements(),
+            BACKEND_ACCESS,
+        )
+        self.assertEqual(0, selected_old.selected_copy)
+        self.assertEqual(0b10, selected_old.future_copy_mask)
+        self.assertEqual(0b10, selected_old.repair_copy_mask)
+
+        selected_new = trust.select_backend_state(
+            (
+                trust.BackendCopy(old0, True),
+                trust.BackendCopy(new1, True),
+            ),
+            backend_anchor(new1),
+            backend_requirements(),
+            BACKEND_ACCESS,
+        )
+        self.assertEqual(1, selected_new.selected_copy)
+        self.assertEqual(0b01, selected_new.stale_copy_mask)
+        self.assertEqual(0b01, selected_new.repair_copy_mask)
+
+    def test_backend_anchor_and_copy_authentication_fail_closed(self) -> None:
+        copy0 = backend_state(0)
+        copy1 = backend_state(1)
+        anchor = dataclasses.replace(backend_anchor(copy0), authenticated=False)
+        with self.assertRaises(trust.BootTrustError) as caught:
+            trust.select_backend_state(
+                (
+                    trust.BackendCopy(copy0, True),
+                    trust.BackendCopy(copy1, True),
+                ),
+                anchor,
+                backend_requirements(),
+                BACKEND_ACCESS,
+            )
+        self.assertEqual(
+            "pbtrust_backend_anchor_authentication", caught.exception.code
+        )
+
+        with self.assertRaises(trust.BootTrustError) as caught:
+            trust.select_backend_state(
+                (
+                    trust.BackendCopy(copy0, False),
+                    trust.BackendCopy(copy1, False),
+                ),
+                backend_anchor(copy0),
+                backend_requirements(),
+                BACKEND_ACCESS,
+            )
+        self.assertEqual(
+            "pbtrust_backend_no_authenticated_copy", caught.exception.code
+        )
+
+    def test_backend_repair_requires_writable_capacity(self) -> None:
+        copy0 = backend_state(0)
+        copies = (
+            trust.BackendCopy(copy0, True),
+            trust.BackendCopy(None, False),
+        )
+        for access, expected in (
+            (
+                trust.BackendAccess(writable=False, repair_capacity=True),
+                "pbtrust_backend_writable",
+            ),
+            (
+                trust.BackendAccess(writable=True, repair_capacity=False),
+                "pbtrust_backend_repair_capacity",
+            ),
+        ):
+            with self.subTest(expected=expected):
+                with self.assertRaises(trust.BootTrustError) as caught:
+                    trust.select_backend_state(
+                        copies,
+                        backend_anchor(copy0),
+                        backend_requirements(),
+                        access,
+                    )
+                self.assertEqual(expected, caught.exception.code)
+
+    def test_backend_transition_models_migration_without_writes(self) -> None:
+        copy0 = backend_state(0)
+        copy1 = backend_state(1)
+        selected = trust.select_backend_state(
+            (
+                trust.BackendCopy(copy0, True),
+                trust.BackendCopy(copy1, True),
+            ),
+            backend_anchor(copy0),
+            backend_requirements(target_store_epoch=2, target_auth_profile=2),
+            BACKEND_ACCESS,
+        )
+        self.assertTrue(selected.migration_required)
+        plan = trust.plan_backend_transition(selected)
+        self.assertEqual(2, plan.next_generation)
+        self.assertEqual(9, plan.ordered_step_count)
+        self.assertEqual(selected.logical_state_sha256, plan.previous_state_sha256)
+        self.assertEqual(0, plan.state_writes_performed)
+        self.assertEqual(0, plan.anchor_writes_performed)
+        self.assertEqual(0, plan.authority_grants)
+
+        with self.assertRaises(trust.BootTrustError) as caught:
+            trust.plan_backend_transition(
+                dataclasses.replace(selected, selected_copy=2)
+            )
+        self.assertEqual("pbtrust_backend_requirements", caught.exception.code)
+
+        with self.assertRaises(trust.BootTrustError) as caught:
+            trust.plan_backend_transition(
+                dataclasses.replace(selected, target_store_epoch=0)
+            )
+        self.assertEqual(
+            "pbtrust_backend_migration_rollback", caught.exception.code
+        )
+
+    def test_backend_transition_rejects_generation_overflow(self) -> None:
+        previous = "66" * 32
+        copy0 = backend_state(0, (1 << 64) - 1, previous=previous)
+        copy1 = backend_state(1, (1 << 64) - 1, previous=previous)
+        selected = trust.select_backend_state(
+            (
+                trust.BackendCopy(copy0, True),
+                trust.BackendCopy(copy1, True),
+            ),
+            backend_anchor(copy0),
+            backend_requirements(),
+            BACKEND_ACCESS,
+        )
+        with self.assertRaises(trust.BootTrustError) as caught:
+            trust.plan_backend_transition(selected)
+        self.assertEqual(
+            "pbtrust_backend_generation_overflow", caught.exception.code
+        )
 
 
 if __name__ == "__main__":

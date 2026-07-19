@@ -73,7 +73,7 @@ DEFAULT_GAPS = [
     "The completed owner response records both ADR dispositions and all 38 objective definitions while accepting zero measurements, but the selected FIDO2 hardware key is unavailable; trusted public-key custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
     "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
     "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, six bounded TLC models cover all seven required domains and detect twenty-one required counterexamples, and a bounded PooleBoot proof executes under the pinned profile; current source rebuilds, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open.",
-    "A reproducible unsigned PooleBoot proof application boots twice under pinned non-promoting OVMF with deterministic twelve-file GPT/FAT32 media and twenty-five ordered serial/debugcon markers; PBP1, PBC1, PSM1, PKELF1, PBART1, PINIT1, PREC1, PSYM1, synthetic-only PMCU1, synthetic-only PFWM1, qualification-only PPOL1, PBTRUST1, PKMAP2, PBEXIT1, and a separately qualified real PooleKernel image pass their bounded gates. PKLOAD6 proves retained kernel/six-artifact/table/guarded-stack/handoff storage, reparses all six exact retained inner files, cross-binds PPOL1 payloads and PINIT1 routes, parses and cross-binds separate immutable trust-policy and mutable acceptance-state candidates, requires exact unsigned-policy denial, reports zero authority/action/state/hardware effects, produces exact final-map PBP1, exits boot services, makes zero later firmware calls, and stops permanently before transfer. Policy signatures, authenticated revocation, a redundant authenticated monotonic writable state backend, Secure Boot-state verification, independent PooleKernel retained-byte revalidation, activation, recovery execution, symbol consumption, policy application, capability creation, live firmware inventory, privileged microcode-revision observation, real vendor-container or payload validation, digest-provider promotion, initial-system execution, microcode or firmware application, final framebuffer cache policy, kernel-entry transfer state, second host, target firmware, and physical-media qualification remain open.",
+    "A reproducible unsigned PooleBoot proof application boots twice under pinned non-promoting OVMF with deterministic twelve-file GPT/FAT32 media and twenty-five ordered serial/debugcon markers; PBP1, PBC1, PSM1, PKELF1, PBART1, PINIT1, PREC1, PSYM1, synthetic-only PMCU1, synthetic-only PFWM1, qualification-only PPOL1, PBTRUST1/PBSTATE1, PKMAP2, PBEXIT1, and a separately qualified real PooleKernel image pass their bounded gates. PKLOAD6 proves retained kernel/six-artifact/table/guarded-stack/handoff storage, reparses all six exact retained inner files, cross-binds PPOL1 payloads and PINIT1 routes, parses and cross-binds separate immutable trust-policy and mutable acceptance-state candidates, requires exact unsigned-policy denial, reports zero authority/action/state/hardware effects, produces exact final-map PBP1, exits boot services, makes zero later firmware calls, and stops permanently before transfer. PBSTATE1 separately models externally authenticated monotonic-anchor validation, deterministic two-copy selection, repair/migration planning, and nine interrupted-transition cases with no performed effects. Policy signatures, authenticated revocation, a real cryptographic monotonic writable provider, persistent backend I/O and executed repair/migration, Secure Boot-state verification, independent PooleKernel retained-byte revalidation, activation, recovery execution, symbol consumption, policy application, capability creation, live firmware inventory, privileged microcode-revision observation, real vendor-container or payload validation, digest-provider promotion, initial-system execution, microcode or firmware application, final framebuffer cache policy, kernel-entry transfer state, second host, target firmware, and physical-media qualification remain open.",
     "A real reproducible PooleKernel image, PKENTRY1 intake, bounded early ring/COM1/framebuffer paths, and panic classes exist, but boot trust, measured boot, live mappings and transfer, descriptor/exception setup, retained crash evidence, kernel runtime, target execution, and N6 exit remain open.",
     "No native CPU, interrupt, time, SMP, physical-memory, virtual-memory, or reclaim implementation.",
     "The sanitized Tier 1 identity and bounded user-mode CPUID transcript match, but MSR, PCI configuration-space, Secure Boot, TPM, SPD, sensor/power, standards-hash, lab-safety, native enumeration, and physical qualification evidence remain open.",
@@ -827,8 +827,8 @@ def check_native_boot_trust_readiness(path: Path = NATIVE_BOOT_TRUST_READINESS) 
     development = artifact.get("development_integration", {})
     controls = artifact.get("negative_controls", [])
     if (
-        build.get("rust_host_tests_passed") != 4
-        or build.get("rust_host_tests_total") != 4
+        build.get("rust_host_tests_passed") != 12
+        or build.get("rust_host_tests_total") != 12
         or build.get("pooleboot_uefi_integration_builds_passed") != 1
         or build.get("pooleboot_uefi_integration_builds_total") != 1
     ):
@@ -836,10 +836,15 @@ def check_native_boot_trust_readiness(path: Path = NATIVE_BOOT_TRUST_READINESS) 
     if any(
         differential.get(name, {}).get("cases") != 8192
         or differential.get(name, {}).get("mismatches") != 0
-        for name in ("policy_parser", "state_parser", "authorization")
+        for name in (
+            "policy_parser",
+            "state_parser",
+            "authorization",
+            "backend_selection",
+        )
     ):
         errors.append("PBTRUST1 differential evidence is incomplete")
-    if len(controls) != 88 or any(item.get("status") != "pass" for item in controls):
+    if len(controls) != 105 or any(item.get("status") != "pass" for item in controls):
         errors.append("PBTRUST1 hostile-control evidence is incomplete")
     expected_development = {
         "policy_bytes": 320,
@@ -857,13 +862,34 @@ def check_native_boot_trust_readiness(path: Path = NATIVE_BOOT_TRUST_READINESS) 
     }
     if development != expected_development:
         errors.append("PBTRUST1 development-denial boundary changed")
+    backend = artifact.get("backend_model", {})
+    power_loss = backend.get("power_loss", {})
+    if (
+        backend.get("contract_id") != "PBSTATE1"
+        or backend.get("selected_copy") != 0
+        or backend.get("anchored_copy_mask") != 3
+        or backend.get("repair_copy_mask") != 0
+        or backend.get("migration_required") is not True
+        or backend.get("next_generation") != 2
+        or backend.get("target_copy") != 1
+        or backend.get("authority_grants") != 0
+        or backend.get("state_writes_performed") != 0
+        or backend.get("anchor_writes_performed") != 0
+        or power_loss.get("case_count") != 9
+        or power_loss.get("all_cases_passed") is not True
+        or power_loss.get("storage_io_performed") is not False
+        or power_loss.get("anchor_writes_performed") != 0
+        or power_loss.get("state_writes_performed") != 0
+    ):
+        errors.append("PBSTATE1 backend-model evidence is incomplete")
     if artifact.get("claims") != native_boot_trust.expected_claims():
         errors.append("PBTRUST1 claim boundary changed")
     if artifact.get("production_ready") is not False:
         errors.append("PBTRUST1 overclaims production readiness")
     detail = (
-        "contract=PBTRUST1; rust_tests=4/4; uefi_integration=1/1; controls=88/88; "
-        "differential=24576; bindings=14; denial=pbtrust_policy_unsigned; "
+        "contract=PBTRUST1/PBSTATE1; rust_tests=12/12; uefi_integration=1/1; "
+        "controls=105/105; differential=32768; power_loss=9/9; bindings=14; "
+        "denial=pbtrust_policy_unsigned; backend_crypto=false; backend_io=false; "
         "policy_signature=false; state_authenticated=false; state_monotonic=false; "
         "state_backend_writable=false; authority=0; state_writes=0; production_ready=false"
     )
@@ -959,7 +985,7 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     summary = artifact.get("summary", {})
     if summary.get("guest_runs_passed") != 2 or summary.get("guest_runs_total") != 2:
         errors.append("PKLOAD6 guest-run evidence is incomplete")
-    if summary.get("rust_host_tests_passed") != 85 or summary.get("rust_host_tests_total") != 85:
+    if summary.get("rust_host_tests_passed") != 93 or summary.get("rust_host_tests_total") != 93:
         errors.append("PKLOAD6 Rust host-test evidence is incomplete")
     if summary.get("ordered_marker_count") != 25:
         errors.append("PKLOAD6 marker evidence is incomplete")
@@ -982,7 +1008,7 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     ) is not False:
         errors.append("PKLOAD6 overclaims N5 exit or production readiness")
     detail = (
-        "contract=PKLOAD6; rust_tests=85/85; boot_builds=2/2; kernel_builds=2/2; "
+        "contract=PKLOAD6; rust_tests=93/93; boot_builds=2/2; kernel_builds=2/2; "
         "media=2/2; guest_runs=2/2; markers=25; inner=6/6; inner_sha256=F3154B354C77D056; "
         "trust=unsigned-deny; trust_bindings=14; trust_authority=0; trust_writes=0; "
         "oracle=2/2; pbp1=2/2; kmap=2/2; exit=2/2; firmware_after_exit=0; "

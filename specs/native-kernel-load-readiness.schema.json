@@ -83,7 +83,7 @@
         "policy_readiness": {"$ref": "#/$defs/binding"},
         "boot_trust_contract": {"$ref": "#/$defs/binding"},
         "boot_trust_readiness": {"$ref": "#/$defs/binding"},
-        "implementation_inputs": {"type": "array", "minItems": 165, "maxItems": 165, "items": {"$ref": "#/$defs/binding"}}
+        "implementation_inputs": {"type": "array", "minItems": 166, "maxItems": 166, "items": {"$ref": "#/$defs/binding"}}
       }
     },
     "host_tests": {
@@ -98,8 +98,8 @@
         "inner_tests_passed": {"minimum": 5},
         "inner_tests_total": {"minimum": 5},
         "inner_differential_cases": {"const": 5},
-        "trust_tests_passed": {"const": 4},
-        "trust_tests_total": {"const": 4},
+        "trust_tests_passed": {"const": 12},
+        "trust_tests_total": {"const": 12},
         "handoff_tests_passed": {"minimum": 8},
         "handoff_tests_total": {"minimum": 8},
         "live_handoff_tests_passed": {"minimum": 8},

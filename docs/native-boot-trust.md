@@ -4,8 +4,11 @@
 
 PBTRUST1 is a bounded N5 development contract. It defines and independently
 validates the shape and ordering of boot trust policy and boot acceptance state.
-It does not authenticate either object, establish monotonic persistence, use a
-private key, grant authority, write state, or make PooleOS production ready.
+Its PBSTATE1 sub-contract now models redundant authenticated-state selection,
+repair/migration planning, and interrupted-transition recovery. It does not
+implement backend cryptography or persistence, establish a real monotonic
+anchor, use a private key, grant authority, write state, or make PooleOS
+production ready.
 
 The current PooleBoot integration reads `\EFI\POOLEOS\TRUST.PBT` and
 `\EFI\POOLEOS\TRUSTST.PBS`, validates every fixed-format and cross-binding gate,
@@ -65,11 +68,58 @@ Exactly one state profile is legal:
   requires independently supplied evidence that the record came from an
   authenticated, monotonic, writable backend.
 
-Two-copy metadata and a complete commit marker are mandatory. The current code
-does not implement selection, repair, or writing. A production backend must add
-transactional copy update, authenticated copy selection, previous-state chain
-verification, interrupted-write recovery, wear/error handling, and power-loss
-fault evidence. An ordinary ESP file cannot meet that requirement.
+Two-copy metadata and a complete commit marker are mandatory. PBSTATE1 models
+selection and produces repair/migration plans, but does not perform writes. A
+production backend must still add cryptographic authentication, a monotonic
+anchor provider, transactional storage I/O, durability barriers, media-specific
+wear/error handling, and hardware-backed fault evidence. An ordinary ESP file
+cannot meet that requirement.
+
+## PBSTATE1 Backend Model
+
+PBSTATE1 accepts exactly two physical copy slots plus an externally supplied
+anchor and backend-capability record. The anchor must itself be authenticated
+and monotonic. It binds the accepted generation, store epoch, authentication
+profile, domain-separated logical-state SHA-256, and previous logical-state
+SHA-256. Generation and epoch floors are checked before any copy is eligible.
+
+Each present copy is parsed independently. Its physical `copy_index` must match
+the slot, its PBTS1 profile must be `authenticated_backend`, and the caller must
+provide per-copy authentication evidence. The selector classifies authenticated
+copies as stale, future, mismatched, or exactly anchored. It chooses the
+lowest-index exact match, requires a writable backend and enough capacity to
+repair every non-anchored slot, and returns only metadata. A future copy written
+before anchor advancement is never selected; an old copy after anchor
+advancement is never selected.
+
+The logical digest normalizes only redundant physical-copy representation and
+other already-validated fixed or derived fields. It binds every mutable trust
+semantic field, including generation, epoch, authentication profile, rollback
+floors, accepted versions, artifact digests, and the previous-state link. This
+allows byte-distinct copy zero and copy one records to match one authenticated
+anchor without weakening their semantic identity.
+
+The transition planner first revalidates selector-origin copy masks, selected
+slot, chain shape, logical identity, migration intent, and zero-effect fields.
+It then targets the alternate slot, increments generation with overflow
+rejection, and freezes this order:
+
+1. Write the target record as uncommitted.
+2. Flush target data.
+3. Write the target commit marker and authentication material.
+4. Flush the target commit.
+5. Advance the monotonic anchor.
+6. Verify the advanced anchor.
+7. Repair the other copy.
+8. Flush the repaired copy.
+9. Verify both redundant copies.
+
+The anchor is the commit point. Before it advances, recovery selects the old
+anchored generation and treats any new copy as future. After it advances,
+recovery selects the new generation and treats the old or torn copy as needing
+repair. The nine-case corpus interrupts every meaningful boundary, including a
+torn repair before its flush. Every case is checked against independent Rust and
+Python selectors and records zero authority grants and zero performed writes.
 
 ## Ordered Decision
 
@@ -113,10 +163,13 @@ PBTRUST1, consume it, create capabilities from it, or enter the kernel.
 
 - Rust host tests, rustfmt, clippy, no-std builds for bare-metal and UEFI, and a
   PooleBoot UEFI integration build;
-- fixed development, signed-shape, and generation-chain cases;
-- independent Python/Rust parser and authorization differential campaigns;
-- malformed, substitution, rollback, incomplete-copy, chain, missing-evidence,
-  and transport hostile controls;
+- fixed development, signed-shape, generation-chain, redundant-copy, and
+  migration-plan cases;
+- four independent 8,192-case Python/Rust differential campaigns covering the
+  policy parser, state parser, authorization order, and backend selector;
+- malformed, substitution, rollback, future-state, incomplete-copy, chain,
+  anchor, repair-capacity, missing-evidence, and transport hostile controls;
+- nine deterministic interrupted-transition recovery cases;
 - exact implementation, toolchain, and target-profile bindings.
 
 The generated readiness receipt remains `production_ready=false`.
@@ -125,11 +178,12 @@ The generated readiness receipt remains `production_ready=false`.
 
 Production acceptance requires a reviewed signature suite and key hierarchy,
 real threshold verification, authenticated revocation state, a monotonic
-transactional backend, Secure Boot and TPM policy integration, state migration
-and recovery rules, PooleKernel independent revalidation, fault injection,
-target-firmware and physical-hardware qualification, and signed release evidence.
-Key generation, signing, firmware mutation, driver loading, and physical-media
-writes are outside this slice and require separate owner authorization.
+transactional backend implementation, Secure Boot and TPM policy integration,
+executed state migration and repair, PooleKernel independent revalidation,
+storage fault injection, target-firmware and physical-hardware qualification,
+and signed release evidence. Key generation, signing, firmware mutation, driver
+loading, and physical-media writes are outside this slice and require separate
+owner authorization.
 
 ## Primary References
 
@@ -138,6 +192,6 @@ writes are outside this slice and require separate owner authorization.
 - The Update Framework Specification:
   <https://theupdateframework.github.io/specification/latest/>
 - NIST SP 800-193, Platform Firmware Resiliency Guidelines:
-  <https://csrc.nist.gov/pubs/sp/800/193/final>
+  <https://csrc.nist.gov/pubs/sp/800-193/final>
 - TCG TPM 2.0 Library Specification:
   <https://trustedcomputinggroup.org/resource/tpm-library-specification/>

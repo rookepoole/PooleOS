@@ -28,6 +28,14 @@ fn digest(value: &str) -> Result<[u8; 32], &'static str> {
     bytes.try_into().map_err(|_| "transport")
 }
 
+fn boolean(value: &str) -> Result<bool, &'static str> {
+    match value {
+        "0" => Ok(false),
+        "1" => Ok(true),
+        _ => Err("transport"),
+    }
+}
+
 fn policy_summary(value: &str) -> Result<String, &'static str> {
     let bytes = decode_hex(value)?;
     let policy = poole_boot_trust::parse_policy(&bytes).map_err(|error| error.code())?;
@@ -127,6 +135,73 @@ fn authorization_summary(value: &str) -> Result<String, &'static str> {
     ))
 }
 
+fn backend_summary(value: &str) -> Result<String, &'static str> {
+    let fields: Vec<&str> = value.split(':').collect();
+    if fields.len() != 17 {
+        return Err("transport");
+    }
+    let copy0 = if fields[13] == "-" {
+        None
+    } else {
+        Some(decode_hex(fields[13])?)
+    };
+    let copy1 = if fields[15] == "-" {
+        None
+    } else {
+        Some(decode_hex(fields[15])?)
+    };
+    let copies = [
+        poole_boot_trust::backend::BackendCopy {
+            bytes: copy0.as_deref(),
+            authentication_verified: boolean(fields[14])?,
+        },
+        poole_boot_trust::backend::BackendCopy {
+            bytes: copy1.as_deref(),
+            authentication_verified: boolean(fields[16])?,
+        },
+    ];
+    let anchor = poole_boot_trust::backend::MonotonicAnchor {
+        state_generation: fields[0].parse().map_err(|_| "transport")?,
+        store_epoch: fields[1].parse().map_err(|_| "transport")?,
+        auth_profile: fields[2].parse().map_err(|_| "transport")?,
+        logical_state_sha256: digest(fields[3])?,
+        previous_state_sha256: digest(fields[4])?,
+        authenticated: boolean(fields[5])?,
+        monotonic: boolean(fields[6])?,
+    };
+    let requirements = poole_boot_trust::backend::BackendRequirements {
+        minimum_state_generation: fields[7].parse().map_err(|_| "transport")?,
+        minimum_store_epoch: fields[8].parse().map_err(|_| "transport")?,
+        target_store_epoch: fields[9].parse().map_err(|_| "transport")?,
+        target_auth_profile: fields[10].parse().map_err(|_| "transport")?,
+    };
+    let access = poole_boot_trust::backend::BackendAccess {
+        writable: boolean(fields[11])?,
+        repair_capacity: boolean(fields[12])?,
+    };
+    let selected =
+        poole_boot_trust::backend::select_backend_state(&copies, &anchor, &requirements, &access)
+            .map_err(|error| error.code())?;
+    Ok(format!(
+        "OK;copy={};present={};parsed={};authenticated={};anchored={};repair={};stale={};future={};generation={};epoch={};profile={};logical={};migration={};authority={};writes={}",
+        selected.selected_copy,
+        selected.present_copy_mask,
+        selected.parsed_copy_mask,
+        selected.authenticated_copy_mask,
+        selected.anchored_copy_mask,
+        selected.repair_copy_mask,
+        selected.stale_copy_mask,
+        selected.future_copy_mask,
+        selected.state_generation,
+        selected.store_epoch,
+        selected.auth_profile,
+        encode_hex(&selected.logical_state_sha256),
+        u8::from(selected.migration_required),
+        selected.authority_grants,
+        selected.state_writes,
+    ))
+}
+
 fn evaluate(line: &str) -> Result<String, &'static str> {
     if let Some(value) = line.strip_prefix("P:") {
         return policy_summary(value);
@@ -139,6 +214,9 @@ fn evaluate(line: &str) -> Result<String, &'static str> {
     }
     if let Some(value) = line.strip_prefix("A:") {
         return authorization_summary(value);
+    }
+    if let Some(value) = line.strip_prefix("B:") {
+        return backend_summary(value);
     }
     Err("transport")
 }

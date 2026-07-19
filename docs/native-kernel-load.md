@@ -145,9 +145,9 @@ halts permanently at `STOP BEFORE TRANSFER`.
 
 ## Qualified Evidence
 
-The Cycle 115 receipt records:
+The Cycle 116 receipt records:
 
-- 85/85 Rust host tests across PooleBoot, PBART1, the six-format retained-set
+- 93/93 Rust host tests across PooleBoot, PBART1, the six-format retained-set
   validator, PBTRUST1, PBC1/PSM1/PKELF1/PBP1, PKMAP2, PBEXIT1, and PKENTRY1;
 - two byte-identical PooleBoot builds, PooleKernel builds, and GPT/FAT32 media
   generations;
