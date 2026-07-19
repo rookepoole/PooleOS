@@ -53,6 +53,13 @@ now contains an allocation-free PBSTATE1 two-copy selection, repair, migration,
 and interrupted-transition planner rooted in externally authenticated monotonic
 evidence. Its source is included in both aggregate implementation-input ledgers,
 but PooleBoot does not invoke it; the live path and denial boundary are unchanged.
+Cycle 117 adds `N5-INNER-KERNEL-REVALIDATE-001`: PooleBoot now retains exact
+PSM1, PBTP1, and PBTS1 file bytes beside the six PBART1 files and represents all
+ten present artifacts in final PBP1. Allocation-free `no_std` PKREVAL1
+PooleKernel code independently reparses all nine non-kernel files, reconstructs
+their manifest, inner, policy, and state bindings, rejects substitution and
+mutation, and requires exact unsigned-policy denial. The verifier is
+host-executed and target-built only; PooleBoot still stops before transfer.
 
 The normative aggregate contract is `specs/native-pooleboot-proof.json`.
 `tools/qualify_native_pooleboot.py` validates the current PKLOAD6 receipt,
@@ -66,7 +73,7 @@ The qualified application:
 1. validates UEFI system and boot-service tables;
 2. disables the watchdog and initializes independent COM1/debugcon diagnostics;
 3. opens the EFI system partition and parses bounded PBC1;
-4. parses unsigned PSM1 and requires the exact seven-artifact profile;
+4. parses unsigned PSM1 and requires the exact seven-entry manifest profile;
 5. reads, SHA-256 checks, allocates, relocates, and verifies PooleKernel;
 6. validates six PBART1 role/version/payload envelopes and copies each exact file
    into a distinct zero-padded loader range;
@@ -76,13 +83,15 @@ The qualified application:
    kernel, retained set, revocation identity, roles, and rollback floors, then
    denies at `pbtrust_policy_unsigned` with zero effects;
 9. renders the static high-contrast PooleOS GOP identity;
-10. builds and actively audits PKMAP2, then restores the firmware CR3 while
-   retaining the kernel, six profile ranges, private root, guarded stack, and
-   handoff pages;
-11. obtains the final UEFI memory map and serializes PBLIVE3 into retained memory;
-12. calls `ExitBootServices`, retrying only stale-map-key failure within a bound;
-13. verifies immutable PBP1 state and zero post-exit firmware calls;
-14. emits the 25-marker dual-channel receipt and halts at
+10. copies exact PSM1, PBTP1, and PBTS1 files into final ranges, reparses them,
+    and frees their source pools;
+11. builds and actively audits PKMAP2, then restores the firmware CR3 while
+   retaining the kernel, nine non-kernel file ranges, private root, guarded
+   stack, and handoff pages;
+12. obtains the final UEFI memory map and serializes ten-descriptor PBLIVE3 into retained memory;
+13. calls `ExitBootServices`, retrying only stale-map-key failure within a bound;
+14. verifies immutable PBP1 state and zero post-exit firmware calls;
+15. emits the 25-marker dual-channel receipt and halts at
     `STOP BEFORE TRANSFER`.
 
 ## Evidence Method
@@ -116,8 +125,9 @@ acceleration, loopback-only QMP, and no shared folders. It requires:
   authority, or write effects;
 - provenance binding of the pure PBSTATE1 backend model while requiring that
   the live proof perform no backend selection, repair, migration, or I/O;
-- exact seven-artifact, root, stack, handoff, map, and digest cross-bindings;
-- 148/148 integrated hostile controls;
+- exact kernel/six-PBART1/PSM1/PBTP1/PBTS1, root, stack, handoff, map, and
+  digest cross-bindings;
+- 155/155 integrated hostile controls;
 - no absolute user path in public readiness artifacts;
 - a clean QMP shutdown of the intentionally halted guest.
 
@@ -133,7 +143,7 @@ Unexpected failures after the first attempt halt instead of returning into an
 ambiguous firmware state.
 
 The retained PBP1 says boot services have exited and includes real CR3, stack,
-handoff, seven-artifact, GOP, and final-map state. It remains a development
+handoff, ten-descriptor artifact, GOP, and final-map state. It remains a development
 profile: signature fields are absent and the kernel-entry profile rejects it. Therefore
 the proof deliberately does not load the retained CR3, switch RSP, or call the
 entry point.
@@ -170,15 +180,16 @@ The receipt proves, on the pinned profile:
   separation, durable decision receipts, and fail-closed activation for the
   unsigned development context;
 - live reparse of all six exact retained PBART1 files, PPOL1 payload-digest and
-  PINIT1 route cross-binding, six first-failure denials, and exact retained-set
-  SHA-256 `F3154B354C77D0567207994EFDDA4FE2D203611CA21D60B63872BC9FFC73C675`;
+  PINIT1 route cross-binding, six first-failure denials, and exact nine-file
+  retained-set SHA-256 `FEE092995AF574AABDC329154E27E9464252923B87D58171DD4455B89FCBBA49`;
 - live parse of the exact 320-byte PBTP1 policy and 256-byte PBTS1 acceptance
   state, fourteen cross-bindings, rejection of the ESP candidate as persistent
   authority, and exact unsigned-policy denial with zero effects;
 - complete higher-half kernel alias verification with W^X, CR0.WP, and NX;
 - framebuffer translation and cache-bit preservation during the active audit;
-- retention of kernel and six profile artifact ranges, four table pages, an
-  eight-page guarded stack, and a one-MiB read-only/NX handoff range;
+- retention of kernel, six profile artifacts, PSM1, PBTP1, and PBTS1 ranges,
+  four table pages, an eight-page guarded stack, and a one-MiB read-only/NX
+  handoff range;
 - a final-map-bound post-exit development PBP1 reconstructed identically from
   both diagnostics transports;
 - successful `ExitBootServices`, zero later firmware calls, and a permanent
@@ -187,13 +198,13 @@ The receipt proves, on the pinned profile:
 
 ## Explicit Nonclaims
 
-The manifest, all seven artifacts, and both PBTRUST1 candidates are unsigned or
+The manifest, kernel, all six PBART1 files, and both PBTRUST1 candidates are unsigned or
 unauthenticated and untrusted. The proof does not establish policy-signature or
 threshold verification, authenticated revocation, Secure Boot-state evidence,
 a live redundant authenticated monotonic writable state backend, performed
 state selection, repair, migration, or power-loss durability, artifact authentication,
-authorized semantic activation,
-independent PooleKernel retained-byte parsing, initial-system or recovery
+authorized semantic activation, live PooleKernel retained-byte parsing,
+initial-system or recovery
 execution, symbol consumption, policy application, capability
 creation, PooleGlyph executable authority, microcode or firmware application,
 live firmware inventory, updater loading, kernel exports, diagnostic authority,
@@ -228,13 +239,16 @@ mode/precedence/attenuation/cross-binding/receipt/activation-denial slice.
 formats. `FLAG-N5-INNER-PARSE-001` is closed only for exact retained-page
 PooleBoot parsing, cross-binding, development denial, and zero-effect evidence.
 `FLAG-N5-INNER-TRUST-CONTRACT-001` is closed only for PBTRUST1 format,
-precedence, bounded-model, and live unsigned-denial evidence. N5.6 and N5.9
-remain partial because artifact authentication, monotonic durable state,
-independent PooleKernel revalidation, capability creation and activation,
-recovery execution, symbol consumption, policy application, and microcode or
-firmware application are open. The next owner-independent move is
-`N5-INNER-TRUST-BACKEND-001`. Hardware-key acquisition and governance signing
-remain separate owner-controlled lanes.
+precedence, bounded-model, and live unsigned-denial evidence.
+`FLAG-N5-INNER-TRUST-BACKEND-MODEL-001` is closed only for the pure PBSTATE1
+model. `FLAG-N5-INNER-KERNEL-REVALIDATE-001` is closed only for host-executed
+PooleKernel parsing, binding reconstruction, mutation rejection, and exact
+zero-authority denial. N5.6 and N5.9 remain partial because artifact
+authentication, monotonic durable state, live PooleKernel execution,
+capability creation and activation, recovery execution, symbol consumption,
+policy application, and microcode or firmware application are open. The next
+owner-independent move is `N5-KERNEL-TRANSFER-001`. Hardware-key acquisition
+and governance signing remain separate owner-controlled lanes.
 
 ## Primary References
 

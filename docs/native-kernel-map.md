@@ -24,14 +24,15 @@ ranges must be aligned, nonoverlapping, complete, and W^X-safe.
 Retained physical ranges must also be aligned, nonzero, representable, and
 pairwise disjoint:
 
-- the 48-page PooleKernel allocation;
+- the 64-page PooleKernel allocation;
 - four private page-table pages;
 - eight writable, non-executable stack pages;
 - 256 handoff pages, covering one MiB.
 
-The virtual layout reserves low and high guard pages around the stack. Both
-guards remain non-present. The handoff range begins after a fixed alignment gap
-and is supervisor read-only and NX.
+The virtual layout reserves page-table index 64 as the low guard, indices
+65-72 for the stack, index 73 as the high guard, and index 80 onward for the
+handoff. Both guards remain non-present. The handoff range begins after the
+fixed alignment gap and is supervisor read-only and NX.
 
 ## Table Construction
 
@@ -48,8 +49,11 @@ private hierarchy at PML4[511], PDPT[510], and PD[0]. Exact 4 KiB leaves encode:
 - any writable-executable request: rejected.
 
 The Rust verifier and independent Python oracle reconstruct every parent and
-leaf. `pkmap2_probe` emits an address-independent retained-layout fingerprint;
-the qualified value is `DCA9DC32D914438D`.
+leaf. The qualified production map contains 64 kernel leaves: 12 read-only,
+32 read-execute, and 20 read-write, with zero writable-executable leaves. Its
+address-independent kernel-leaf fingerprint is `066F6E68217211A5`;
+`pkmap2_probe` emits retained-layout fingerprint `29BFB7F6B4B835C5` for the
+current stack/handoff geometry.
 
 ## Active Audit
 
@@ -71,12 +75,12 @@ slice.
 
 ## Retention And Final Map
 
-PKLOAD5 binds the live PKMAP2 marker to the final PBP1 core record and to an
+PKLOAD6 binds the live PKMAP2 marker to the final PBP1 core record and to an
 independently normalized UEFI memory map. Kernel, root, stack, and handoff
-physical ranges must all remain covered by loader-reserved descriptors in the
-map used for the successful `ExitBootServices` call. Overlap, omission, wrong
-memory kind, guard drift, marker drift, or guest/oracle disagreement rejects
-the receipt.
+physical ranges plus exact PSM1, six PBART1, PBTP1, and PBTS1 allocations must
+all remain covered by loader-reserved descriptors in the map used for the
+successful `ExitBootServices` call. Overlap, omission, wrong memory kind,
+guard drift, marker drift, or guest/oracle disagreement rejects the receipt.
 
 ## Qualification Boundary
 

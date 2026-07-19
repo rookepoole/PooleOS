@@ -36,9 +36,9 @@
         "sha256": "1741AC8F565F5849F8C86D77BD16E06ED195E76D32FFA62492E1928B8FAA8C1E"
       },
       {
-        "byte_count": 4060,
+        "byte_count": 4121,
         "path": "native/Cargo.lock",
-        "sha256": "88017EDF93CD2DBF5F298E612E9A50601FDCC657FF97CC841E08FBD8355090C6"
+        "sha256": "0E88ED49107E751E33C56A9992F36AA16BAA7EDD3E4A1CC296CC1BB814A3B5B5"
       },
       {
         "byte_count": 358,
@@ -81,9 +81,9 @@
         "sha256": "EB5354B0D2A60226F8EA4466D998CCB0FF8AC5C7F9A0BD24F87623808BB2DD0B"
       },
       {
-        "byte_count": 9366,
+        "byte_count": 9444,
         "path": "docs/native-initial-system-bundle.md",
-        "sha256": "B9B6BC31D79A19E6CF0B1B2B632AD1D6188170C077D2DB3C17E035839582AAE8"
+        "sha256": "7EB4B50779BC43A7FEED77A4A84E8359E987D771287AA0CD49C11E852C0B6096"
       }
     ],
     "readiness_schema": {

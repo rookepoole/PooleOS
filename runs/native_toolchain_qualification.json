@@ -33,8 +33,8 @@
       },
       {
         "path": "native/Cargo.lock",
-        "sha256": "88017EDF93CD2DBF5F298E612E9A50601FDCC657FF97CC841E08FBD8355090C6",
-        "byte_count": 4060
+        "sha256": "0E88ED49107E751E33C56A9992F36AA16BAA7EDD3E4A1CC296CC1BB814A3B5B5",
+        "byte_count": 4121
       },
       {
         "path": "native/rust-toolchain.toml",

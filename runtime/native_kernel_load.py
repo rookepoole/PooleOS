@@ -495,6 +495,12 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-PBP1-ARTIFACT-OMISSION",
     "NEG-N5-PBP1-ARTIFACT-OVERLAP",
     "NEG-N5-PBP1-ARTIFACT-SIGNATURE",
+    "NEG-N5-PBP1-MANIFEST-EXACT-SIZE",
+    "NEG-N5-PBP1-MANIFEST-DIGEST",
+    "NEG-N5-PBP1-TRUST-POLICY-EXACT-SIZE",
+    "NEG-N5-PBP1-TRUST-POLICY-DIGEST",
+    "NEG-N5-PBP1-TRUST-STATE-EXACT-SIZE",
+    "NEG-N5-PBP1-TRUST-STATE-DIGEST",
     "NEG-N5-PBP1-ARTIFACT-RANGE-COVERAGE",
     "NEG-N5-PBP1-MARKER-BYTE-DIVERGENCE",
     "NEG-N5-PBP1-MARKER-MEMORY-DIVERGENCE",
@@ -540,6 +546,7 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-PBEXIT-POST-EXIT-FIRMWARE",
     "NEG-N5-PBEXIT-MARKER-ATTEMPTS",
     "NEG-N5-PBEXIT-MARKER-DESCRIPTOR",
+    "NEG-N5-PBP1-RETAINED-INPUT-PAGES",
     "NEG-N5-PBEXIT-FIRMWARE-BOUNDARY",
     "NEG-N5-PBEXIT-TRANSFER",
 )
@@ -1815,12 +1822,18 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
     pbp1_descriptor_bytes = int(matches[20].group(6))
     pbp1_exit_attempts = int(matches[20].group(7))
     pbp1_unchanged = int(matches[20].group(10))
+    retained_input_pages = artifact_pages + sum(
+        (byte_count + native_elf_loader.PAGE_SIZE - 1)
+        // native_elf_loader.PAGE_SIZE
+        for byte_count in (manifest_bytes, trust_policy_bytes, trust_state_bytes)
+    )
     if (
         not 1 <= pbp1_bytes <= 1024 * 1024
         or pbp1_records not in {3, 4}
         or not 1 <= pbp1_memory_entries <= 16_384
         or pbp1_framebuffer != 1
-        or pbp1_artifacts != 1 + loaded_artifact_count
+        or pbp1_artifacts
+        != len(native_live_boot_handoff.PROFILE_ARTIFACT_ROLES)
         or not 40 <= pbp1_descriptor_bytes <= 256
         or pbp1_descriptor_bytes % 8
         or not 1 <= pbp1_exit_attempts <= native_boot_exit.MAX_EXIT_ATTEMPTS
@@ -1838,7 +1851,7 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         boot_exit["attempt_count"] != pbp1_exit_attempts
         or boot_exit["descriptor_size"] != pbp1_descriptor_bytes
         or boot_exit["kernel_page_count"] != pages
-        or boot_exit["artifact_page_count"] != artifact_pages
+        or boot_exit["artifact_page_count"] != retained_input_pages
     ):
         raise KernelLoadError("PKLOAD6 PBP1 and PBEXIT1 markers diverge")
     return {
@@ -1884,6 +1897,8 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
             "artifact_count": loaded_artifact_count,
             "file_bytes": artifact_file_bytes,
             "page_count": artifact_pages,
+            "retained_input_count": pbp1_artifacts - 1,
+            "retained_input_page_count": retained_input_pages,
             "fnv1a64": artifact_fingerprint,
             "pages_retained": bool(artifact_retained),
             "signatures_verified": bool(artifact_signatures),

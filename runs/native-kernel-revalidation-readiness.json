@@ -1,0 +1,432 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_kernel_revalidation_readiness",
+  "status_date": "2026-07-18",
+  "status": "pass_single_host_fail_closed_non_promoting",
+  "contract_id": "PKREVAL1",
+  "selected_move_id": "N5-INNER-KERNEL-REVALIDATE-001",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "inputs": {
+    "contract": {
+      "path": "specs/native-kernel-revalidation-contract.json",
+      "sha256": "CDD94643060C2ABB84966C7A1E7BD0D3A129821B24B02B667C8852BEB99EC70F",
+      "byte_count": 4834
+    },
+    "toolchain_lock": {
+      "path": "specs/native-toolchain-lock.json",
+      "sha256": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E",
+      "byte_count": 4017
+    },
+    "implementation_inputs": [
+      {
+        "path": "native/handoff/src/lib.rs",
+        "sha256": "58421DA4B25DB172947DAF2A6AE5A08D2CAD57D51E8987BD9503E140878C3EA7",
+        "byte_count": 48608
+      },
+      {
+        "path": "native/livehandoff/src/lib.rs",
+        "sha256": "581297CA43F5EB5424E7F3F7B1946C00C70CA9DAE3AED8EFC9AB7CAC55215C56",
+        "byte_count": 39358
+      },
+      {
+        "path": "native/boot/src/kload.rs",
+        "sha256": "9DDADC0BF6E741148BD08C30C6DC099F3B57E63CC972A57346C6D538737E3212",
+        "byte_count": 44327
+      },
+      {
+        "path": "native/boot/src/livehandoff.rs",
+        "sha256": "1408932CC50BF357D95D29E74C46FBAC621A1ECDFEF916A2BCBAADCA59A8C939",
+        "byte_count": 13198
+      },
+      {
+        "path": "native/boot/src/kmap.rs",
+        "sha256": "161D734F06AF349AFF04DC63618A9419B4889AD139F2FA56FBA4CBEA227BCA59",
+        "byte_count": 24381
+      },
+      {
+        "path": "native/kernel/Cargo.toml",
+        "sha256": "62102EE51CA34DCB59F0BFC48508AE5BECA79448F977478F1F09EF34B1BC947C",
+        "byte_count": 517
+      },
+      {
+        "path": "native/kernel/src/lib.rs",
+        "sha256": "F0FE4BC50CAF9E7255BE2E7A203994D3BD169FC4392DDFAC2CD03A706687E140",
+        "byte_count": 21657
+      },
+      {
+        "path": "native/kernel/src/main.rs",
+        "sha256": "0A59E472EF02A4DED2515F4AB5BB93FA53796EAB5F36C4740B713AE5E7B98D0D",
+        "byte_count": 6824
+      },
+      {
+        "path": "native/kernel/src/revalidation.rs",
+        "sha256": "127F1FCCCE98398D05424CCA49C3DA399FD00A311A9EFAB298CA026B77215A50",
+        "byte_count": 14333
+      },
+      {
+        "path": "native/kernel/src/bin/pkreval1_probe.rs",
+        "sha256": "8CED78F6C767FF41977C3B4C1D876B28B51BB1742C7B1F2DFFBCD320ADAECE52",
+        "byte_count": 7491
+      },
+      {
+        "path": "runtime/native_kernel_revalidation.py",
+        "sha256": "92E1AD7747EA17D5B066D1EA0987C45398A2421E0494BC8D00CF5FCF0E64EC44",
+        "byte_count": 24603
+      },
+      {
+        "path": "tools/qualify_native_kernel_revalidation.py",
+        "sha256": "CF7565C9A0F4E1822DE7F6CEAF8F60ECFA0125ED0DCC1140E7932A6150EE69D0",
+        "byte_count": 18171
+      },
+      {
+        "path": "tests/test_native_kernel_revalidation.py",
+        "sha256": "52B1BA81BB95BC3652B0D1EE3DB21B9EB824856700D6AB21E61693A603563C16",
+        "byte_count": 5561
+      },
+      {
+        "path": "docs/native-kernel-revalidation.md",
+        "sha256": "25D4D1635F71DDA4C097E8723B0F710E00108585A718124621B0006EF7995AEA",
+        "byte_count": 4922
+      }
+    ]
+  },
+  "build": {
+    "rustc": "rustc.exe",
+    "host_test_count": 13,
+    "format_check": "pass",
+    "host_probe_sha256": "0FAB7B6EAAB01F5F85E2C456C8B497BF61CCD278F61C3C70AB66D603AC8B0403",
+    "targets": {
+      "x86_64-unknown-none": {
+        "package": "poolekernel",
+        "binary": "PooleKernelLinked",
+        "byte_count": 1376,
+        "sha256": "D921132827FB903CA720DD86B151FA0F94A54EFB8B2538080556615A5D2BB92A"
+      },
+      "x86_64-unknown-uefi": {
+        "package": "pooleboot",
+        "binary": "PooleBoot",
+        "byte_count": 205824,
+        "sha256": "A359983A2A3D4C3746BA164FDD0C70E629F355232732985B90C8BAC976F32214"
+      }
+    }
+  },
+  "golden": {
+    "contract_id": "PKREVAL1",
+    "retained_file_count": 9,
+    "artifact_count": 6,
+    "parser_count": 9,
+    "manifest_bytes": 2613,
+    "retained_file_bytes": 11950,
+    "retained_set_sha256": "FEE092995AF574AABDC329154E27E9464252923B87D58171DD4455B89FCBBA49",
+    "policy_sha256": "DD017C3BE0264E7A5ECEFFAF2F59FBD4C58CF04C3E0E01959C03BF94604E1594",
+    "state_sha256": "44B51126A3902CCA64EEC498738D4789561E0EB64F3EF6A95AD906E05706FD74",
+    "denial": "pbtrust_policy_unsigned",
+    "authority_grants": 0,
+    "actions_authorized": 0,
+    "state_writes": 0,
+    "handoff_sha256": "93AA769C3BA9B307B04AE57D74D70D4412AB93E7042A82CC2AFAE804A36C0944",
+    "retained_file_sha256": [
+      "00C28AB2DE744281CEC0459598A29E8C608E95BC2AF5207D78B67F494EF1E2F8",
+      "FFAC48737878D6D4986CBF1936F4A8BE7898D544D4C4043F4D51144AEC728B59",
+      "2B29E4B948523DE21268DCCC1D016E7B7D4E3E305D65BE52BF128A81BC0C166F",
+      "04D5F70F88FE15BF747992390467BC8AE9E3BD0E28F6D131C427B73764641397",
+      "BD162F099BB0145738BA3FAD57B0B903FDB12B0080BBC85812528DC9C1A7A728",
+      "7CFC7CC01D8DF4936E80FCE9AAD0C26FA91E254FB98C9D6285097311DFA80369",
+      "4BB527FEB6D366EFA7549558EED775E4D1AE4C9D6879BD13CF45CBB556C1B729",
+      "DD017C3BE0264E7A5ECEFFAF2F59FBD4C58CF04C3E0E01959C03BF94604E1594",
+      "44B51126A3902CCA64EEC498738D4789561E0EB64F3EF6A95AD906E05706FD74"
+    ],
+    "rust_marker": "PKREVAL1 PASS retained_files=9 artifacts=6 parsers=9 manifest_bytes=2613 file_bytes=11950 retained_sha256=FEE092995AF574AABDC329154E27E9464252923B87D58171DD4455B89FCBBA49 policy_sha256=DD017C3BE0264E7A5ECEFFAF2F59FBD4C58CF04C3E0E01959C03BF94604E1594 state_sha256=44B51126A3902CCA64EEC498738D4789561E0EB64F3EF6A95AD906E05706FD74 denial=pbtrust_policy_unsigned authority_grants=0 actions=0 state_writes=0",
+    "rust_python_match": true
+  },
+  "negative_controls": [
+    {
+      "id": "NEG-N5-PKREVAL-POST-LOAD-MUTATION-01",
+      "expected": "pkreval_file_digest",
+      "observed": "pkreval_file_digest",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-POST-LOAD-MUTATION-02",
+      "expected": "pkreval_file_digest",
+      "observed": "pkreval_file_digest",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-POST-LOAD-MUTATION-03",
+      "expected": "pkreval_file_digest",
+      "observed": "pkreval_file_digest",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-POST-LOAD-MUTATION-04",
+      "expected": "pkreval_file_digest",
+      "observed": "pkreval_file_digest",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-POST-LOAD-MUTATION-05",
+      "expected": "pkreval_file_digest",
+      "observed": "pkreval_file_digest",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-POST-LOAD-MUTATION-06",
+      "expected": "pkreval_file_digest",
+      "observed": "pkreval_file_digest",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-POST-LOAD-MUTATION-07",
+      "expected": "pkreval_file_digest",
+      "observed": "pkreval_file_digest",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-POST-LOAD-MUTATION-08",
+      "expected": "pkreval_file_digest",
+      "observed": "pkreval_file_digest",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-POST-LOAD-MUTATION-09",
+      "expected": "pkreval_file_digest",
+      "observed": "pkreval_file_digest",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-TRUNCATION-01",
+      "expected": "pkreval_file_size",
+      "observed": "pkreval_file_size",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-TRUNCATION-02",
+      "expected": "pkreval_file_size",
+      "observed": "pkreval_file_size",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-TRUNCATION-03",
+      "expected": "pkreval_file_size",
+      "observed": "pkreval_file_size",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-TRUNCATION-04",
+      "expected": "pkreval_file_size",
+      "observed": "pkreval_file_size",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-TRUNCATION-05",
+      "expected": "pkreval_file_size",
+      "observed": "pkreval_file_size",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-TRUNCATION-06",
+      "expected": "pkreval_file_size",
+      "observed": "pkreval_file_size",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-TRUNCATION-07",
+      "expected": "pkreval_file_size",
+      "observed": "pkreval_file_size",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-TRUNCATION-08",
+      "expected": "pkreval_file_size",
+      "observed": "pkreval_file_size",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-TRUNCATION-09",
+      "expected": "pkreval_file_size",
+      "observed": "pkreval_file_size",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-DIGEST-REPAIR-01",
+      "expected": "pkreval_manifest_binding",
+      "observed": "pkreval_manifest_binding",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-DIGEST-REPAIR-02",
+      "expected": "pkreval_manifest_binding",
+      "observed": "pkreval_manifest_binding",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-DIGEST-REPAIR-03",
+      "expected": "pkreval_manifest_binding",
+      "observed": "pkreval_manifest_binding",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-DIGEST-REPAIR-04",
+      "expected": "pkreval_manifest_binding",
+      "observed": "pkreval_manifest_binding",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-DIGEST-REPAIR-05",
+      "expected": "pkreval_manifest_binding",
+      "observed": "pkreval_manifest_binding",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-DIGEST-REPAIR-06",
+      "expected": "pkreval_manifest_binding",
+      "observed": "pkreval_manifest_binding",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-DIGEST-REPAIR-07",
+      "expected": "manifest_missing_final_lf",
+      "observed": "manifest_missing_final_lf",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-DIGEST-REPAIR-08",
+      "expected": "pbtrust_policy_signer_shape",
+      "observed": "pbtrust_policy_signer_shape",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-DIGEST-REPAIR-09",
+      "expected": "pbtrust_state_body_digest",
+      "observed": "pbtrust_state_body_digest",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-ORDER",
+      "expected": "pkreval_file_size",
+      "observed": "pkreval_file_size",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-LOCATOR",
+      "expected": "pkreval_file_locator",
+      "observed": "pkreval_file_locator",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-WRITABLE",
+      "expected": "pkreval_artifact_flags",
+      "observed": "pkreval_artifact_flags",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-MISSING-HASH",
+      "expected": "pkreval_artifact_flags",
+      "observed": "pkreval_artifact_flags",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-NONKERNEL-EXECUTABLE",
+      "expected": "pkreval_handoff",
+      "observed": "pkreval_handoff",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-OVERLAP",
+      "expected": "pkreval_artifact_overlap",
+      "observed": "pkreval_artifact_overlap",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-EBS-CLEAR",
+      "expected": "pkreval_handoff",
+      "observed": "pkreval_handoff",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-SIZE-SUMMARY",
+      "expected": "pkreval_file_size",
+      "observed": "pkreval_file_size",
+      "rust_python_match": true,
+      "status": "pass"
+    },
+    {
+      "id": "NEG-N5-PKREVAL-DIGEST-SUMMARY",
+      "expected": "pkreval_file_digest",
+      "observed": "pkreval_file_digest",
+      "rust_python_match": true,
+      "status": "pass"
+    }
+  ],
+  "differential": {
+    "case_count": 32768,
+    "reject_count": 32768,
+    "expected_file_digest_count": 32768,
+    "role_coverage": 9,
+    "outcome_fnv1a64": "0778E0624E99D308"
+  },
+  "claims": {
+    "allocation_free_no_std_kernel_verifier": true,
+    "exact_final_page_bytes_reparsed": true,
+    "psm1_reparsed_in_kernel": true,
+    "six_pbart1_files_reparsed_in_kernel": true,
+    "six_inner_contracts_reparsed_in_kernel": true,
+    "pbtp1_and_pbts1_reparsed_in_kernel": true,
+    "loader_summary_substitution_rejected": true,
+    "post_loader_byte_mutation_rejected": true,
+    "development_authority_denied": true,
+    "live_kernel_entry_executed": false,
+    "authenticated_persistent_state_selected": false,
+    "production_ready": false
+  },
+  "non_claims": [
+    "No private key was generated or used and no signature was created or verified by PKREVAL1.",
+    "The retained PBTS1 file remains an ESP development candidate, not selected PBSTATE1 persistent authority.",
+    "PooleBoot still stops before transfer, so QEMU evidence proves the producer and handoff bytes but not PooleKernel execution.",
+    "No capability, lifecycle, recovery, symbol, microcode, firmware, policy, or state-write authority is granted.",
+    "No target firmware, physical hardware, second builder, signed release, ISO, installer, or production promotion is claimed."
+  ],
+  "open_items": [
+    "Replace the ESP PBTS1 development candidate with a selected authenticated PBSTATE1 backend snapshot.",
+    "Implement cryptographic policy, revocation, Secure Boot, and monotonic-state evidence under separate key authority.",
+    "Execute the PKREVAL1 path after a qualified PooleBoot-to-PooleKernel transfer.",
+    "Revoke temporary identity mappings after retained-byte consumption and before capability delegation.",
+    "Qualify target firmware, physical hardware, a second builder, signed ISO, installer, and recovery flows."
+  ]
+}

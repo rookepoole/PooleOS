@@ -5,9 +5,21 @@ edition.workspace = true
 license-file.workspace = true
 publish.workspace = true
 
+[features]
+default = []
+host-probe = []
+
 [[bin]]
 name = "PooleKernelLinked"
 path = "src/main.rs"
 
+[[bin]]
+name = "pkreval1-probe"
+path = "src/bin/pkreval1_probe.rs"
+required-features = ["host-probe"]
+
 [dependencies]
+poole-boot-trust = { path = "../trust" }
+poole-bootload = { path = "../bootload" }
 poole-handoff = { path = "../handoff" }
+poole-inner-live = { path = "../inner" }

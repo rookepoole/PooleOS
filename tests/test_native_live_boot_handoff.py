@@ -22,7 +22,7 @@ HANDOFF_VIRTUAL = KERNEL_VIRTUAL + 64 * 4096
 def exited_handoff() -> bytes:
     memory_entries = (
         (KERNEL_PHYSICAL, 48, 0, pbp1.MEMORY_LOADER_RESERVED, 2, 0),
-        (ARTIFACT_PHYSICAL, 6, 0, pbp1.MEMORY_LOADER_RESERVED, 2, 0),
+        (ARTIFACT_PHYSICAL, 9, 0, pbp1.MEMORY_LOADER_RESERVED, 2, 0),
         (ROOT_PHYSICAL, 4, 0, pbp1.MEMORY_LOADER_RESERVED, 2, 0),
         (STACK_PHYSICAL, 8, 0, pbp1.MEMORY_LOADER_RESERVED, 2, 0),
         (HANDOFF_PHYSICAL, 256, 0, pbp1.MEMORY_LOADER_RESERVED, 2, 0),
@@ -63,7 +63,7 @@ def exited_handoff() -> bytes:
                 role,
                 pbp1.ARTIFACT_HASH_VERIFIED,
                 ARTIFACT_PHYSICAL + index * pbp1.PAGE_BYTES,
-                pbp1.PAGE_BYTES,
+                257 + index * 31,
                 0,
                 0,
                 0,
@@ -132,7 +132,7 @@ class NativeLiveBootHandoffTests(unittest.TestCase):
         self.assertTrue(transcript.summary["exit_development_profile_validated"])
         self.assertFalse(transcript.summary["transferable"])
         self.assertEqual(6, transcript.summary["memory_entry_count"])
-        self.assertEqual(7, transcript.summary["artifact_count"])
+        self.assertEqual(10, transcript.summary["artifact_count"])
 
     def test_exited_profile_rejects_transfer_overclaim(self) -> None:
         handoff = pbp1.decode(exited_handoff())

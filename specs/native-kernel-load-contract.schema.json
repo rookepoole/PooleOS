@@ -187,7 +187,7 @@
     },
     "required_marker_count": {"const": 25},
     "required_markers": {"type": "array", "minItems": 25, "maxItems": 25, "items": {"type": "string"}},
-    "required_negative_controls": {"type": "array", "minItems": 148, "maxItems": 148, "uniqueItems": true, "items": {"type": "string"}},
+    "required_negative_controls": {"type": "array", "minItems": 155, "maxItems": 155, "uniqueItems": true, "items": {"type": "string"}},
     "claims": {"type": "object", "additionalProperties": {"type": "boolean"}, "minProperties": 104, "maxProperties": 104},
     "claim_boundary": {"type": "array", "minItems": 11, "items": {"type": "string"}},
     "official_references": {"type": "array", "minItems": 3, "items": {"type": "string", "format": "uri"}}

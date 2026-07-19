@@ -6,8 +6,8 @@
   "inputs": {
     "contract": {
       "path": "specs/native-boot-trust-contract.json",
-      "byte_count": 11117,
-      "sha256": "60830794EB41D44463C5F0BCB16BA05FAD1DAB6575B051B2556B13AEAE933BF8"
+      "byte_count": 10828,
+      "sha256": "DF1067BD299ED2804D3D302DEAB2B9EDA0E7935573C906C1155C96435FCE5FF6"
     },
     "toolchain_lock": {
       "path": "specs/native-toolchain-lock.json",
@@ -17,7 +17,7 @@
     "toolchain_qualification": {
       "path": "runs/native_toolchain_qualification.json",
       "byte_count": 14423,
-      "sha256": "4B0D7DE498891FB4A26C2002935948E46E8E87EA208305A0BA76A333380A3745"
+      "sha256": "C4CD60FCBC1586D6C87BEA1CC2783E108A84469E84D46519F9ADA96BAE1FD9FE"
     },
     "tier1_profile": {
       "path": "runs/hardware_target_readiness.json",
@@ -32,8 +32,8 @@
       },
       {
         "path": "native/Cargo.lock",
-        "byte_count": 4060,
-        "sha256": "88017EDF93CD2DBF5F298E612E9A50601FDCC657FF97CC841E08FBD8355090C6"
+        "byte_count": 4121,
+        "sha256": "0E88ED49107E751E33C56A9992F36AA16BAA7EDD3E4A1CC296CC1BB814A3B5B5"
       },
       {
         "path": "native/trust/Cargo.toml",
@@ -62,13 +62,13 @@
       },
       {
         "path": "native/boot/src/kload.rs",
-        "byte_count": 39757,
-        "sha256": "984A5A7C69727FC2F7677A8BC56AC56C348DF1505573F551CFA68D099BAA1C21"
+        "byte_count": 44327,
+        "sha256": "9DDADC0BF6E741148BD08C30C6DC099F3B57E63CC972A57346C6D538737E3212"
       },
       {
         "path": "native/boot/src/main.rs",
-        "byte_count": 20638,
-        "sha256": "6658C478FC24A797C26F70551291595D0BAE32D153F96AC414F886A20A4EED4E"
+        "byte_count": 20661,
+        "sha256": "02DDDB3178BC2A7EAC674A3B7EB2AA4E0A6611DE888A72196868E97D66DD5379"
       },
       {
         "path": "native/bootload/src/lib.rs",
@@ -92,8 +92,8 @@
       },
       {
         "path": "docs/native-boot-trust.md",
-        "byte_count": 9787,
-        "sha256": "02D98E02AA855EDAE830437AE74BB7A438A9D1B8F123BCDA73AC66482866CBDC"
+        "byte_count": 9930,
+        "sha256": "889CD35311ADF9790CFD92D8DF89BDF8494C6BBA2742CF78C77CEEA117A63102"
       },
       {
         "path": "specs/native-boot-trust-contract.schema.json",

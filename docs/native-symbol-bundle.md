@@ -45,8 +45,8 @@ Every segment and symbol address is an offset from the loaded image base. The bu
 - Preferred base: `0xFFFFFFFF80000000`
 - Window end, exclusive: `0xFFFFFFFFC0000000`
 - Slide alignment: 2 MiB
-- Current image bytes: `0x30000`
-- Current entry offset: `0x4000`
+- Current image bytes: `0x40000`
+- Current entry offset: `0x8000`
 
 Lookup rejects noncanonical x86-64 addresses, unaligned bases, bases outside the window, and addresses outside the image. A hit returns symbol ID, name, intra-symbol offset, and search-step count. A valid gap returns `unknown`; it never falls back to the preceding symbol.
 
@@ -56,11 +56,11 @@ The canonical development bundle binds these exact SHA-256 identities:
 
 | Identity | SHA-256 |
 | --- | --- |
-| Canonical stripped PKELF1 | `BF1176019E9E4AF1C588898F565A6B1F66737517C2D3CA804510C4B0AC1B2E9D` |
-| Preferred loaded image | `AE10F03BA413BB6D31EE562757EF16E898109F587D40A3AB42E90CF813FCB0D1` |
-| Build ID text | `CFE45F8D2BDECBE3DFF3584ADBFCFE4C69ABB96D8167BE896E98886AEF1D482B` |
-| Full split-debug ELF | `939CD1C036064DB0510A3108EC71BCF9210AF5CFFDDF9C44D148F4CC01B82CD7` |
-| `native/kernel/manifest.pkm` | `69F3CFAF14D49560212E7E825E275A36D80F739F0EDFC636AD81F2CDF2AB08B6` |
+| Canonical stripped PKELF1 | `5CBB39B4BFF9A23E8D65E3115FE536D4CDB13EAA372E8DAA5071F1530210132E` |
+| Preferred loaded image | `2E031002E303B22C9836F73636A6B6DF4061462293B62DA383A62060A386AA96` |
+| Build ID text | `4F29BB22D36F289A892E84DAB4C5C0C90093A61D91844E47CAE35F0A23EFCE48` |
+| Full split-debug ELF | `BBCCFB73249138C431F1262D0533297CC8B66614D560E2A1D531DD7EB15E2F1F` |
+| `native/kernel/manifest.pkm` | `AA05393FA6A1C33FFAD7AC143FF1E6F16391159E8B10222ECA9E0B1660ED34ED` |
 
 The qualification builds the full debug product twice and requires identical bytes. Both debug builds canonicalize to the exact stripped PKELF1 bytes. A separate release build must have no `.symtab` and no `.debug*` sections and must canonicalize to those same bytes.
 
@@ -72,9 +72,9 @@ Only these real global default-visible functions are selected today:
 
 | Symbol | Offset | Bytes | Policy |
 | --- | ---: | ---: | --- |
-| `poole_kernel_entry` | `0x4000` | 56 | entry, executable, public diagnostic |
-| `poole_kernel_emergency_panic` | `0x422A` | 190 | panic-safe, executable, public diagnostic |
-| `poole_kernel_rust_entry` | `0x42E8` | 850 | executable, public diagnostic |
+| `poole_kernel_entry` | `0x8000` | 56 | entry, executable, public diagnostic |
+| `poole_kernel_emergency_panic` | `0x822A` | 190 | panic-safe, executable, public diagnostic |
+| `poole_kernel_rust_entry` | `0x82E8` | 1,085 | executable, public diagnostic |
 
 ## Name And Privacy Policy
 
@@ -111,6 +111,7 @@ The synthetic all-true context exists only to test that every gate can be reache
 Passing this qualification closes `N5-SYMBOLS-SEMANTICS-001` only. N5 remains partial, PSYM1 remains pre-ABI and unsigned, and `production_ready` remains false.
 
 Cycle 114 PooleBoot reparses the exact retained PSYM1 bytes and requires this
-development gate to fail at `psym_activation_outer_signature`. It performs no
-lookup, discloses no address, and creates no diagnostic authority. PooleKernel
-revalidation and consumption remain open.
+development gate to fail at `psym_activation_outer_signature`. Cycle 117
+independently repeats the exact parse and denial in host-executed PooleKernel
+code. Neither path performs a lookup, discloses an address, or creates
+diagnostic authority; live PooleKernel execution and consumption remain open.

@@ -162,7 +162,7 @@
       "maximum_count": 64,
       "flags": ["array"],
       "fields": ["artifact role", "verification/measurement/permission flags", "physical range", "virtual range", "entry point", "SHA-256"],
-      "roles": ["kernel", "initial system", "recovery", "symbols", "microcode", "firmware manifest", "policy bundle", "crash kernel"]
+      "roles": ["kernel", "initial system", "recovery", "symbols", "microcode", "firmware manifest", "policy bundle", "crash kernel", "system manifest snapshot", "trust policy snapshot", "trust state snapshot"]
     },
     {
       "type": 6,

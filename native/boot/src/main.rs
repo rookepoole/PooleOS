@@ -582,7 +582,7 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
     diagnostic(format_args!(
         "POOLEBOOT/0.1 ARTIFACT_SET PASS contract={} count={} file_bytes={} pages={} roles=2-7 fnv1a64={:016X} retained=1 signatures=0 measured=0\n",
         pooleboot::bootload::artifact::CONTRACT_ID,
-        kernel.artifacts.len(),
+        pooleboot::bootload::AUXILIARY_ARTIFACT_COUNT,
         kernel.artifact_file_bytes,
         kernel.artifact_page_count,
         kernel.artifact_set_fnv1a64,

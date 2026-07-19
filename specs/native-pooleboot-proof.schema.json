@@ -124,7 +124,7 @@
       }
     },
     "required_markers": {"type": "array", "minItems": 25, "maxItems": 25, "items": {"type": "string"}},
-    "required_negative_controls": {"type": "array", "minItems": 148, "maxItems": 148, "items": {"type": "string"}},
+    "required_negative_controls": {"type": "array", "minItems": 155, "maxItems": 155, "items": {"type": "string"}},
     "claim_boundary": {"type": "array", "minItems": 11, "items": {"type": "string"}},
     "official_references": {"type": "array", "minItems": 8, "maxItems": 8, "items": {"type": "string"}}
   }

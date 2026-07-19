@@ -7,7 +7,7 @@
     "contract": {
       "path": "specs/native-firmware-contract.json",
       "bytes": 7613,
-      "sha256": "4C7BB23D3ED166CD3FDB77BF35241B8B89F75CA29D3FC43809046A3807D55D48"
+      "sha256": "D79BCAA8FCABC4B13CEE49DA1890B0730F0DF8ADB45DBCEBB645B46AD8D5D5D8"
     },
     "golden_vectors": {
       "path": "specs/native-firmware-golden-vectors.json",
@@ -22,7 +22,7 @@
     "toolchain_qualification": {
       "path": "runs/native_toolchain_qualification.json",
       "bytes": 14423,
-      "sha256": "4B0D7DE498891FB4A26C2002935948E46E8E87EA208305A0BA76A333380A3745"
+      "sha256": "C4CD60FCBC1586D6C87BEA1CC2783E108A84469E84D46519F9ADA96BAE1FD9FE"
     },
     "tier1_profile": {
       "path": "specs/tier1-hardware-target.json",
@@ -37,8 +37,8 @@
       },
       {
         "path": "native/Cargo.lock",
-        "bytes": 4060,
-        "sha256": "88017EDF93CD2DBF5F298E612E9A50601FDCC657FF97CC841E08FBD8355090C6"
+        "bytes": 4121,
+        "sha256": "0E88ED49107E751E33C56A9992F36AA16BAA7EDD3E4A1CC296CC1BB814A3B5B5"
       },
       {
         "path": "native/firmware/Cargo.toml",

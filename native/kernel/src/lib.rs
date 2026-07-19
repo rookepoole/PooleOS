@@ -8,8 +8,10 @@ use core::sync::atomic::{AtomicU8, AtomicU32, AtomicUsize, Ordering};
 
 use poole_handoff::{self, CoreRecord, Handoff, RECORD_FRAMEBUFFER, validate_kernel_entry_profile};
 
+pub mod revalidation;
+
 pub const ENTRY_CONTRACT_ID: &str = "PKENTRY1";
-pub const BUILD_ID: &[u8] = b"PKBUILD1-CYCLE101-N6-KENTRY-001";
+pub const BUILD_ID: &[u8] = b"PKBUILD1-CYCLE117-N5-REVALIDATE-001";
 pub const ENTRY_OFFSET: u64 = 0x4000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
 pub const HANDOFF_MAGIC_U64: u64 = u64::from_le_bytes(poole_handoff::MAGIC);
@@ -23,6 +25,7 @@ pub enum PanicCode {
     HandoffDecode = 0x1004,
     HandoffProfile = 0x1005,
     RuntimeContinuity = 0x1006,
+    TrustRevalidation = 0x1007,
     UnexpectedReturn = 0x10ff,
 }
 

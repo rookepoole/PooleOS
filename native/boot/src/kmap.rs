@@ -354,6 +354,42 @@ fn prepare_and_activate(
         profile.physical_address_bits,
         "kmap.kernel_identity_last",
     )?;
+    for artifact in &kernel.artifacts {
+        let allocation_bytes = (artifact.page_count as u64)
+            .checked_mul(poole_kmap::PAGE_SIZE)
+            .ok_or_else(|| contract_failure("kmap.retained_input_range", Error::RetainedRange))?;
+        let last = artifact
+            .physical_base
+            .checked_add(allocation_bytes)
+            .and_then(|end| end.checked_sub(1))
+            .ok_or_else(|| contract_failure("kmap.retained_input_range", Error::RetainedRange))?;
+        if artifact.role == 0
+            || artifact.physical_base == 0
+            || !artifact.physical_base.is_multiple_of(poole_kmap::PAGE_SIZE)
+            || artifact.page_count == 0
+            || artifact.file_bytes == 0
+            || artifact.file_bytes as u64 > allocation_bytes
+        {
+            return Err(contract_failure(
+                "kmap.retained_input_shape",
+                Error::RetainedRange,
+            ));
+        }
+        require_identity(
+            &reader,
+            original_root,
+            artifact.physical_base,
+            profile.physical_address_bits,
+            "kmap.retained_input_identity_first",
+        )?;
+        require_identity(
+            &reader,
+            original_root,
+            last,
+            profile.physical_address_bits,
+            "kmap.retained_input_identity_last",
+        )?;
+    }
     if let Some(retained) = retained {
         let stack_last = retained
             .stack_physical_base

@@ -19,7 +19,11 @@ PROFILE_ARTIFACT_ROLES = (
     pbp1.ARTIFACT_MICROCODE,
     pbp1.ARTIFACT_FIRMWARE_MANIFEST,
     pbp1.ARTIFACT_POLICY_BUNDLE,
+    pbp1.ARTIFACT_SYSTEM_MANIFEST,
+    pbp1.ARTIFACT_TRUST_POLICY,
+    pbp1.ARTIFACT_TRUST_STATE,
 )
+PROFILE_PBART1_COUNT = 6
 TRANSCRIPT_PREFIX = "PBP1HEX/0.1 "
 MAX_CHUNK_BYTES = 64
 BEGIN = re.compile(r"^PBP1HEX/0\.1 BEGIN bytes=([0-9]+)$")
@@ -88,7 +92,7 @@ def _memory_entries(record: pbp1.Record) -> list[dict[str, Any]]:
 
 def _artifact_entries(record: pbp1.Record) -> list[dict[str, Any]]:
     if record.element_count != len(PROFILE_ARTIFACT_ROLES):
-        raise LiveHandoffError("live PBP1 must bind exactly seven profile artifacts")
+        raise LiveHandoffError("live PBP1 must bind exactly ten profile artifacts")
     values = []
     ranges = []
     for index, expected_role in enumerate(PROFILE_ARTIFACT_ROLES):
@@ -109,7 +113,7 @@ def _artifact_entries(record: pbp1.Record) -> list[dict[str, Any]]:
             or physical_base == 0
             or physical_base % pbp1.PAGE_BYTES
             or physical_size == 0
-            or physical_size % pbp1.PAGE_BYTES
+            or (index == 0 and physical_size % pbp1.PAGE_BYTES)
             or not any(digest)
             or (
                 index != 0
@@ -117,7 +121,10 @@ def _artifact_entries(record: pbp1.Record) -> list[dict[str, Any]]:
             )
         ):
             raise LiveHandoffError("live PBP1 artifact role, flags, or range changed")
-        ranges.append((physical_base, physical_size))
+        allocation_size = (
+            (physical_size + pbp1.PAGE_BYTES - 1) // pbp1.PAGE_BYTES
+        ) * pbp1.PAGE_BYTES
+        ranges.append((physical_base, allocation_size))
         values.append(
             {
                 "role": role,
@@ -412,27 +419,73 @@ def validate_oracle_binding(
     ):
         raise LiveHandoffError("PBP1 kernel/config/manifest/entry cross-binding differs")
     media_artifacts = media_inspection["artifact_set"]["artifacts"]
-    if len(media_artifacts) != len(artifacts) - 1:
-        raise LiveHandoffError("PBP1 and media artifact counts diverge")
-    for index, (entry, media_artifact) in enumerate(
-        zip(artifacts[1:], media_artifacts, strict=True), start=1
-    ):
+    if len(media_artifacts) != PROFILE_PBART1_COUNT:
+        raise LiveHandoffError("PBP1 PBART1 media profile count diverges")
+    manifest_file = media_inspection["files"][2]
+    trust_policy_file = media_inspection["files"][-2]
+    trust_state_file = media_inspection["files"][-1]
+    expected_inputs = [
+        {
+            "role": PROFILE_ARTIFACT_ROLES[index],
+            "file_bytes": media_artifact["file_bytes"],
+            "sha256": media_artifact["file_sha256"],
+        }
+        for index, media_artifact in enumerate(media_artifacts, start=1)
+    ]
+    expected_inputs.extend(
+        (
+            {
+                "role": pbp1.ARTIFACT_SYSTEM_MANIFEST,
+                "file_bytes": manifest_file["byte_count"],
+                "sha256": manifest_file["sha256"],
+            },
+            {
+                "role": pbp1.ARTIFACT_TRUST_POLICY,
+                "file_bytes": trust_policy_file["byte_count"],
+                "sha256": trust_policy_file["sha256"],
+            },
+            {
+                "role": pbp1.ARTIFACT_TRUST_STATE,
+                "file_bytes": trust_state_file["byte_count"],
+                "sha256": trust_state_file["sha256"],
+            },
+        )
+    )
+    if len(expected_inputs) != len(artifacts) - 1:
+        raise LiveHandoffError("PBP1 and retained-input counts diverge")
+    for entry, expected in zip(artifacts[1:], expected_inputs, strict=True):
         if (
-            entry["role"] != PROFILE_ARTIFACT_ROLES[index]
+            entry["role"] != expected["role"]
             or entry["flags"] != pbp1.ARTIFACT_HASH_VERIFIED
-            or entry["physical_size"]
-            != media_artifact["page_count"] * pbp1.PAGE_BYTES
-            or entry["physical_size"] < media_artifact["file_bytes"]
+            or entry["physical_size"] != expected["file_bytes"]
             or entry["virtual_base"] != "0000000000000000"
             or entry["virtual_size"] != 0
             or entry["entry_virtual"] != "0000000000000000"
-            or entry["sha256"] != media_artifact["file_sha256"]
+            or entry["sha256"] != expected["sha256"]
         ):
-            raise LiveHandoffError("PBP1 PBART1 role, digest, or retained range diverges")
-    if sum(item["physical_size"] for item in artifacts[1:]) != (
-        marker_summary["artifact_set"]["page_count"] * pbp1.PAGE_BYTES
+            raise LiveHandoffError("PBP1 retained-input role, digest, or exact size diverges")
+    retained_input_pages = sum(
+        (item["physical_size"] + pbp1.PAGE_BYTES - 1) // pbp1.PAGE_BYTES
+        for item in artifacts[1:]
+    )
+    expected_input_pages = marker_summary["artifact_set"]["page_count"] + sum(
+        (item["byte_count"] + pbp1.PAGE_BYTES - 1) // pbp1.PAGE_BYTES
+        for item in (manifest_file, trust_policy_file, trust_state_file)
+    )
+    if (
+        retained_input_pages != expected_input_pages
+        or marker_summary["boot_exit"]["artifact_page_count"] != expected_input_pages
+        or manifest_file["byte_count"] != marker_summary["manifest"]["byte_count"]
+        or trust_policy_file["byte_count"]
+        != marker_summary["trust_state"]["policy_bytes"]
+        or trust_state_file["byte_count"]
+        != marker_summary["trust_state"]["state_bytes"]
+        or trust_policy_file["sha256"]
+        != marker_summary["trust_state"]["policy_sha256"]
+        or trust_state_file["sha256"]
+        != marker_summary["trust_state"]["state_sha256"]
     ):
-        raise LiveHandoffError("PBP1 PBART1 retained page accounting diverges")
+        raise LiveHandoffError("PBP1 retained-input page or trust accounting diverges")
     retained_ranges = (
         *((int(item["physical_base"], 16), item["physical_size"]) for item in artifacts),
         (

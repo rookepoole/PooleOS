@@ -173,8 +173,9 @@ dependencies and do not imply API or implementation compatibility.
 
 ## Nonclaims
 
-PINIT1 is not signed or ratified. PooleBoot reparses the development bytes, but
-PooleKernel does not independently reparse or activate them. No PXABI1
+PINIT1 is not signed or ratified. PooleBoot reparses the development bytes, and
+Cycle 117 independently reparses and denies them in host-executed PooleKernel
+code, but the kernel does not live-execute or activate them. No PXABI1
 executable ABI is frozen, no embedded component is authenticated, no
 service runs, and no capability or resource is created. No persistent rollback
 state, kernel transfer, target-firmware result, physical-media result, N5 exit,

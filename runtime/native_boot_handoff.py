@@ -92,6 +92,9 @@ ARTIFACT_MICROCODE = 5
 ARTIFACT_FIRMWARE_MANIFEST = 6
 ARTIFACT_POLICY_BUNDLE = 7
 ARTIFACT_CRASH_KERNEL = 8
+ARTIFACT_SYSTEM_MANIFEST = 9
+ARTIFACT_TRUST_POLICY = 10
+ARTIFACT_TRUST_STATE = 11
 ARTIFACT_HASH_VERIFIED = 1 << 0
 ARTIFACT_SIGNATURE_VERIFIED = 1 << 1
 ARTIFACT_MEASURED = 1 << 2
@@ -447,7 +450,7 @@ def _validate_artifacts(payload: bytes, count: int) -> None:
         physical, size, virtual_start, virtual_size, entry = struct.unpack_from("<QQQQQ", payload, base + 8)
         digest = payload[base + 48 : base + 80]
         if (
-            not 1 <= role <= ARTIFACT_CRASH_KERNEL
+            not 1 <= role <= ARTIFACT_TRUST_STATE
             or role <= previous_role
             or flags & ~KNOWN_ARTIFACT_FLAGS
             or not physical

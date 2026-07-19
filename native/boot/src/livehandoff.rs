@@ -170,17 +170,20 @@ pub(super) fn artifacts(
         sha256: kernel.kernel_sha256,
     }; PROFILE_ARTIFACT_COUNT];
     for (index, artifact) in kernel.artifacts.iter().enumerate() {
-        let physical_size = (artifact.page_count as u64)
+        let allocation_size = (artifact.page_count as u64)
             .checked_mul(poole_handoff::PAGE_BYTES)
             .ok_or(live::Error::ArtifactSet)?;
-        if artifact.file_bytes == 0 || artifact.file_bytes as u64 > physical_size {
+        if artifact.role == 0
+            || artifact.file_bytes == 0
+            || artifact.file_bytes as u64 > allocation_size
+        {
             return Err(live::Error::ArtifactSet);
         }
         values[index + 1] = ArtifactInput {
-            role: artifact.role.code(),
+            role: artifact.role,
             flags: poole_handoff::ARTIFACT_HASH_VERIFIED,
             physical_base: artifact.physical_base,
-            physical_size,
+            physical_size: artifact.file_bytes as u64,
             virtual_base: 0,
             virtual_size: 0,
             entry_virtual: 0,

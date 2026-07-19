@@ -311,7 +311,7 @@
         "runs": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/run"}}
       }
     },
-    "negative_controls": {"type": "array", "minItems": 148, "maxItems": 148, "items": {"$ref": "#/$defs/control"}},
+    "negative_controls": {"type": "array", "minItems": 155, "maxItems": 155, "items": {"$ref": "#/$defs/control"}},
     "claims": {
       "type": "object",
       "additionalProperties": {"type": "boolean"},
@@ -429,8 +429,8 @@
         "ordered_marker_count": {"const": 25},
         "serial_debugcon_match_count": {"const": 2},
         "gop_frame_match_count": {"const": 2},
-        "negative_controls_passed": {"const": 148},
-        "negative_controls_total": {"const": 148},
+        "negative_controls_passed": {"const": 155},
+        "negative_controls_total": {"const": 155},
         "inner_set_artifact_count": {"const": 6},
         "inner_set_parser_count": {"const": 6},
         "inner_set_cross_binding_count": {"const": 6},

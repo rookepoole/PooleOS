@@ -198,7 +198,10 @@ version = "0.0.0"
 name = "poolekernel"
 version = "0.0.0"
 dependencies = [
+ "poole-boot-trust",
+ "poole-bootload",
  "poole-handoff",
+ "poole-inner-live",
 ]
 
 [[package]]
