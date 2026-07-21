@@ -68,7 +68,7 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 143)
+        self.assertEqual(len(self.artifact["bound_sources"]), 150)
         bound_paths = {binding["path"] for binding in self.artifact["bound_sources"]}
         self.assertIn(
             "runs/adr_ratification_readiness.json",
@@ -113,6 +113,13 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertIn("runs/native-kernel-transfer-readiness.json", bound_paths)
         self.assertIn("specs/native-kernel-transfer-contract.json", bound_paths)
         self.assertIn("docs/native-kernel-transfer.md", bound_paths)
+        self.assertIn("runs/native-kernel-cpu-policy-readiness.json", bound_paths)
+        self.assertIn("specs/native-kernel-cpu-policy-contract.json", bound_paths)
+        self.assertIn("specs/native-kernel-cpu-policy-readiness.schema.json", bound_paths)
+        self.assertIn("docs/native-kernel-cpu-policy.md", bound_paths)
+        self.assertIn("runtime/native_kernel_cpu_policy.py", bound_paths)
+        self.assertIn("tools/qualify_native_kernel_cpu_policy.py", bound_paths)
+        self.assertIn("tests/test_native_kernel_cpu_policy.py", bound_paths)
         self.assertIn("runs/native_system_manifest_readiness.json", bound_paths)
         self.assertIn("specs/native-boot-config-contract.json", bound_paths)
         self.assertIn("specs/native-boot-config-golden-vectors.json", bound_paths)

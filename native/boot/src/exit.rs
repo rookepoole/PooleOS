@@ -30,8 +30,20 @@ const EFI_ALLOCATE_ANY_PAGES: u32 = 0;
         feature = "development-trap-double-fault",
         feature = "development-trap-malformed-frame"
     ),
+    all(
+        feature = "development-cpu-policy",
+        feature = "development-trap-returning"
+    ),
+    all(
+        feature = "development-cpu-policy",
+        feature = "development-trap-double-fault"
+    ),
+    all(
+        feature = "development-cpu-policy",
+        feature = "development-trap-malformed-frame"
+    ),
 ))]
-compile_error!("only one PKTRAP1 development scenario may be selected");
+compile_error!("only one post-PKXFER1 development scenario may be selected");
 
 #[cfg(feature = "development-transfer")]
 const DEVELOPMENT_TRAP_SCENARIO: u8 = if cfg!(feature = "development-trap-returning") {
@@ -40,6 +52,8 @@ const DEVELOPMENT_TRAP_SCENARIO: u8 = if cfg!(feature = "development-trap-return
     2
 } else if cfg!(feature = "development-trap-malformed-frame") {
     3
+} else if cfg!(feature = "development-cpu-policy") {
+    4
 } else {
     0
 };

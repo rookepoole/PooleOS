@@ -150,7 +150,7 @@ def contract_errors(contract: dict[str, object]) -> list[str]:
         qualification.get("negative_control_count"),
         qualification.get("differential_mutation_cases"),
         qualification.get("retained_role_coverage"),
-    ) != (19, 8, 36, 32_768, RETAINED_FILE_COUNT):
+    ) != (24, 8, 36, 32_768, RETAINED_FILE_COUNT):
         errors.append("PKREVAL1 qualification profile changed")
     authority = contract.get("authority_gate", {})
     if not isinstance(authority, dict) or (
@@ -181,7 +181,7 @@ def readiness_errors(readiness: dict[str, object], root: Path = ROOT) -> list[st
     if readiness.get("inputs") != expected_inputs:
         errors.append("PKREVAL1 readiness input bindings are stale")
     build = readiness.get("build", {})
-    if not isinstance(build, dict) or build.get("host_test_count") != 19 or set(
+    if not isinstance(build, dict) or build.get("host_test_count") != 24 or set(
         build.get("targets", {}) if isinstance(build.get("targets"), dict) else {}
     ) != {"x86_64-unknown-none", "x86_64-unknown-uefi"}:
         errors.append("PKREVAL1 build evidence changed")

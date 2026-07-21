@@ -8,7 +8,7 @@ This milestone is deliberately smaller than N7. It proves one BSP GDT, one long-
 
 ## Transfer selector
 
-PooleBoot validates a `DevelopmentTransfer.trap_scenario` value in `0..=3`, places it in `R10`, records it in the `PKXFER1` transfer-arm marker, and jumps once after successful `ExitBootServices`. The PooleKernel assembly wrapper preserves the original stack-top argument and places the seventh System V integer argument on the stack before its Rust call.
+PooleBoot validates a shared `DevelopmentTransfer.trap_scenario` value in `0..=4`, places it in `R10`, records it in the `PKXFER1` transfer-arm marker, and jumps once after successful `ExitBootServices`. PKTRAP1 owns only selectors `1..=3`; selector `4` belongs exclusively to PKCPU1. The PooleKernel assembly wrapper preserves the original stack-top argument and places the seventh System V integer argument on the stack before its Rust call.
 
 | Selector | Cargo feature | Terminal result |
 | --- | --- | --- |
@@ -16,6 +16,7 @@ PooleBoot validates a `DevelopmentTransfer.trap_scenario` value in `0..=3`, plac
 | `1` | `development-trap-returning` | Return from deliberate `#BP`, `#UD`, and guard-page `#PF`; then halt |
 | `2` | `development-trap-double-fault` | Contain processor-delivered `#DF` on IST2; then halt |
 | `3` | `development-trap-malformed-frame` | Reject a synthetic semantic selector corruption; then halt |
+| `4` | `development-cpu-policy` | Separate PKCPU1 read-only CPU-policy observation; outside PKTRAP1 |
 
 The three trap features imply `development-transfer` and are compile-time mutually exclusive. None is a default feature.
 
@@ -51,7 +52,10 @@ The public outputs are `runs/native-kernel-trap-readiness.json` and `runs/native
 
 ## Remaining N7 work
 
-- N7.1-N7.4: CPUID inventory, exact target CPU/errata policy, CR0/CR4/EFER/MSR policy, and complete SIMD/FPU/extended-state ownership.
+- N7.1: PKCPU1 closes only a bounded qemu64 BSP CPUID/feature/topology/address-width observation; exact Tier 1 inventory and AP-local policy remain open.
+- N7.2: exact target CPU-family, microcode-revision, errata, mitigation, and rejection policy remains unstarted.
+- N7.3: PKCPU1 closes only a bounded read-only qemu64 CR0/CR4/EFER/XCR0/APIC/PAT/MTRR observation; target state plus syscall/GS/TSC_AUX/MCE/performance MSRs remain open.
+- N7.4: complete SIMD/FPU/XSAVE ownership, initialization, context switching, lazy/eager policy, and hostile-state evidence remains unstarted.
 - N7.5: per-CPU GDT/TSS/IDT, guarded RSP0/IST mappings, AP bring-up integration, generated assembly/Rust offsets, and user-transition frames.
 - N7.6: all exceptions, NMI and machine check, external interrupt entry, recursion and stack-exhaustion policy, persistent crash records, recovery routing, and broad adversarial tests.
 - Qualification: second independent host, target firmware, physical hardware, and measured production profiles.

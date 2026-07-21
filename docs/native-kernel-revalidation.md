@@ -98,7 +98,8 @@ firmware, physical hardware, a second builder, authenticated persistent state,
 capability creation, a signed ISO, installation, recovery, N5 exit, N6 exit, or
 production readiness.
 
-PKTRAP1 now separately proves the bounded BSP-only descriptor and deliberate
-fault slice. The next owner-independent move is `N7-CPU-POLICY-001`: freeze
-bounded CPUID, required-feature, CR0/CR4/EFER, and read-only MSR policy
-contracts before expanding trap coverage.
+PKTRAP1 separately proves the bounded BSP-only descriptor and deliberate-fault
+slice, while PKCPU1 separately proves the bounded qemu64 read-only CPU-policy
+slice. The next owner-independent move is `N7-ERRATA-POLICY-001`: freeze the
+exact Tier 1 CPU-family, microcode-revision, errata, mitigation, and rejection
+policy without treating emulator observations as target evidence.

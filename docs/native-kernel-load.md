@@ -153,9 +153,9 @@ halts permanently at `STOP BEFORE TRANSFER`.
 
 ## Qualified Evidence
 
-The Cycle 119-refreshed default-path receipt records:
+The Cycle 120-refreshed default-path receipt records:
 
-- 104/104 Rust host tests across PooleBoot, PBART1, the six-format retained-set
+- 109/109 Rust host tests across PooleBoot, PBART1, the six-format retained-set
   validator, PBTRUST1, PBC1/PSM1/PKELF1/PBP1, PKMAP2, PBEXIT1, and PKENTRY1;
 - two byte-identical PooleBoot builds, PooleKernel builds, and GPT/FAT32 media
   generations;
@@ -192,7 +192,7 @@ The Cycle 119-refreshed default-path receipt records:
   physical-presence separation, durable receipt rules, and mandatory
   development activation denial;
 - an exact 11,952-byte nine-file retained set with SHA-256
-  `68B51E2BF83867CCB18535FC345888B7F56FA65E477FEFA43E7B5257BAB6F456`, nine
+  `C46B9030922FB095F5321CD62CD4930B812B2D8D8EA58B93B7C51956B6EEC8B8`, nine
   target parsers, manifest/inner/trust cross-bindings, exact unsigned-policy
   denial, and zero authority/action/state/hardware effects;
 - 155/155 integrated negative controls, including exact retained PSM1/PBTP1/
@@ -230,10 +230,11 @@ physical media, satisfy N5, or establish production readiness.
 
 Cycle 118 separately closes the opt-in QEMU-only
 `N5-KERNEL-TRANSFER-001` development boundary without changing this default
-PKLOAD6 stop. Cycle 119 separately closes the bounded BSP-only PKTRAP1 slice.
-The next chronological owner-independent move is `N7-CPU-POLICY-001`: freeze
-bounded CPUID, required-feature, CR0/CR4/EFER, and read-only MSR policy
-contracts before expanding trap coverage.
+PKLOAD6 stop. Cycle 119 separately closes the bounded BSP-only PKTRAP1 slice,
+and Cycle 120 closes the bounded qemu64 read-only PKCPU1 slice. The next
+chronological owner-independent move is `N7-ERRATA-POLICY-001`: freeze the exact
+Tier 1 CPU-family, microcode-revision, errata, mitigation, and rejection policy
+without promoting the qemu64 observation into target evidence.
 Capability creation, lifecycle execution, signature trust, authenticated
 persistent state, production transfer, and physical-target qualification remain
 separately gated by N5/N6 and owner-controlled N0 work.

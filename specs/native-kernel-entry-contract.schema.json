@@ -56,7 +56,7 @@
         "canonical_file_bytes": {"const": 180224},
         "maximum_linked_file_bytes": {"const": 8388608},
         "maximum_relocations": {"const": 4096},
-        "build_id": {"const": "PKBUILD1-CYCLE119-N7-TRAP-001"},
+        "build_id": {"const": "PKBUILD1-CYCLE120-N7-CPU-POLICY-001"},
         "manifest_path": {"const": "native/kernel/manifest.pkm"},
         "manifest_contract_bindings": {"type": "array", "minItems": 3, "maxItems": 3, "uniqueItems": true, "items": {"enum": ["PKENTRY1", "PKELF1", "PBP1"]}},
         "manifest_exactly_once_in_read_only_load": {"const": true}

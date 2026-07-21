@@ -186,7 +186,7 @@ The receipt proves, on the pinned profile:
   unsigned development context;
 - live reparse of all six exact retained PBART1 files, PPOL1 payload-digest and
   PINIT1 route cross-binding, six first-failure denials, and exact nine-file
-  retained-set SHA-256 `68B51E2BF83867CCB18535FC345888B7F56FA65E477FEFA43E7B5257BAB6F456`;
+  retained-set SHA-256 `C46B9030922FB095F5321CD62CD4930B812B2D8D8EA58B93B7C51956B6EEC8B8`;
 - live parse of the exact 320-byte PBTP1 policy and 256-byte PBTS1 acceptance
   state, fourteen cross-bindings, rejection of the ESP candidate as persistent
   authority, and exact unsigned-policy denial with zero effects;
@@ -253,8 +253,9 @@ opt-in QEMU transfer and terminal denial. N5.6 and N5.9 remain partial because
 artifact authentication, monotonic durable state, production-profile execution,
 capability creation and activation, recovery execution, symbol consumption,
 policy application, and microcode or firmware application are open. PKTRAP1
-now closes only the bounded BSP trap slice. The next owner-independent move is
-`N7-CPU-POLICY-001`. Hardware-key possession and the
+closes only the bounded BSP trap slice, and PKCPU1 closes only the bounded
+qemu64 read-only CPU-policy slice. The next owner-independent move is
+`N7-ERRATA-POLICY-001`. Hardware-key possession and the
 governance signing ceremony remain a separate external lane despite current
 authorization.
 
