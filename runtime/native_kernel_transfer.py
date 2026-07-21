@@ -27,7 +27,7 @@ MARKER_COUNT = 30
 BOOT_PREFIX_MARKER_COUNT = 23
 KERNEL_MARKER_COUNT = 5
 COMPLETION_MARKER = b"POOLEOS:KERNEL:TRANSFER-DENIED PASS"
-KERNEL_BUILD_ID = "PKBUILD1-CYCLE118-N5-TRANSFER-001"
+KERNEL_BUILD_ID = "PKBUILD1-CYCLE119-N7-TRAP-001"
 TRANSFER_BOUNDARY = (
     "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested "
     "selection=manifest_digest_untrusted artifacts=digest_verified_untrusted "
@@ -65,6 +65,7 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N5-PKXFER-ARM-STACK",
     "NEG-N5-PKXFER-ARM-ROOT",
     "NEG-N5-PKXFER-ARM-CR3",
+    "NEG-N5-PKXFER-ARM-TRAP-SCENARIO",
     "NEG-N5-PKXFER-ARM-SIGNATURE",
     "NEG-N5-PKXFER-ARM-AUTHORITY",
     "NEG-N5-PKXFER-ARM-ACTION",
@@ -116,7 +117,7 @@ TRANSFER_ARM = re.compile(
     r"^POOLEBOOT/0\.1 TRANSFER_ARM PASS contract=(PKXFER1) mode=(development) "
     r"emulator_only=([01]) entry=([0-9A-F]{16}) handoff=([0-9A-F]{16}) "
     r"bytes=([0-9]+) stack_top=([0-9A-F]{16}) root=([0-9A-F]{16}) "
-    r"cr3=([0-9A-F]{16}) signatures=([0-9]+) authority=([0-9]+) "
+    r"cr3=([0-9A-F]{16}) trap_scenario=([0-3]) signatures=([0-9]+) authority=([0-9]+) "
     r"actions=([0-9]+) writes=([0-9]+) firmware_calls_after_exit=([0-9]+)$"
 )
 KERNEL_ENTRY = re.compile(
@@ -213,7 +214,15 @@ def contract_errors(contract: dict[str, Any]) -> list[str]:
         profile.get("marker_count"),
         profile.get("kernel_marker_count"),
         profile.get("terminal_result"),
-    ) != ("development-transfer", True, MARKER_COUNT, KERNEL_MARKER_COUNT, "halt_unsigned_denial"):
+        profile.get("trap_scenario"),
+    ) != (
+        "development-transfer",
+        True,
+        MARKER_COUNT,
+        KERNEL_MARKER_COUNT,
+        "halt_unsigned_denial",
+        0,
+    ):
         errors.append("PKXFER1 transfer profile changed")
     authority = contract.get("authority_gate", {})
     if not isinstance(authority, dict) or tuple(
@@ -353,11 +362,12 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         "stack_top": int(arm.group(7), 16),
         "root": int(arm.group(8), 16),
         "cr3": int(arm.group(9), 16),
-        "signature_verifications": int(arm.group(10)),
-        "authority_grants": int(arm.group(11)),
-        "actions_authorized": int(arm.group(12)),
-        "state_writes": int(arm.group(13)),
-        "firmware_calls_after_exit": int(arm.group(14)),
+        "trap_scenario": int(arm.group(10)),
+        "signature_verifications": int(arm.group(11)),
+        "authority_grants": int(arm.group(12)),
+        "actions_authorized": int(arm.group(13)),
+        "state_writes": int(arm.group(14)),
+        "firmware_calls_after_exit": int(arm.group(15)),
     }
     retained = boot["kernel_map"]["retained"]
     expected_entry = native_elf_loader.MIN_VIRTUAL_BASE + boot["kernel"]["entry_offset"]
@@ -370,6 +380,7 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         or arm_values["root"] != retained["page_table_root_physical"]
         or arm_values["cr3"] & ~0x18 & 0xFFF
         or arm_values["cr3"] & ~0xFFF != arm_values["root"]
+        or arm_values["trap_scenario"] != 0
         or any(
             arm_values[key]
             for key in (

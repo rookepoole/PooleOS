@@ -58,13 +58,19 @@ class NativeSymbolTests(unittest.TestCase):
     def test_lookup_handles_hits_gaps_slides_and_bounds(self) -> None:
         bundle = psym1.parse(psym1.canonical_bundle())
         base = bundle.preferred_virtual_base + 5 * bundle.slide_alignment
-        result = psym1.lookup(bundle, base, base + 0x83BB + 37)
+        rust_entry = next(
+            symbol for symbol in bundle.symbols if symbol.name == "poole_kernel_rust_entry"
+        )
+        result = psym1.lookup(bundle, base, base + rust_entry.start_offset + 37)
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result.symbol.name, "poole_kernel_rust_entry")
         self.assertEqual(result.symbol_offset, 37)
         self.assertLessEqual(result.steps, psym1.MAX_LOOKUP_STEPS)
-        self.assertIsNone(psym1.lookup(bundle, base, base + 0x803F))
+        entry = bundle.symbols[0]
+        self.assertIsNone(
+            psym1.lookup(bundle, base, base + entry.start_offset + entry.byte_count)
+        )
         with self.assertRaisesRegex(psym1.SymbolError, "psym_lookup_base"):
             psym1.lookup(bundle, base + 1, base + 0x8000)
         with self.assertRaisesRegex(psym1.SymbolError, "psym_lookup_address"):

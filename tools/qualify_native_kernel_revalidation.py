@@ -149,8 +149,8 @@ def _build(toolchain_root: Path, temporary: Path) -> tuple[Path, dict[str, Any],
         env=env,
     )
     match = re.search(r"test result: ok\. ([0-9]+) passed; 0 failed", test_output)
-    if match is None or int(match.group(1)) != 14:
-        raise QualificationError("expected exactly fourteen PooleKernel Rust host tests")
+    if match is None or int(match.group(1)) != 19:
+        raise QualificationError("expected exactly nineteen PooleKernel Rust host tests")
     _run(
         _cargo(
             cargo,
@@ -211,7 +211,7 @@ def _build(toolchain_root: Path, temporary: Path) -> tuple[Path, dict[str, Any],
         raise QualificationError("PKREVAL1 host probe is missing")
     return probe, {
         "rustc": rustc.name,
-        "host_test_count": 14,
+        "host_test_count": 19,
         "format_check": "pass" if not fmt_output.strip() else "pass_with_output",
         "host_probe_sha256": hashlib.sha256(probe.read_bytes()).hexdigest().upper(),
         "targets": target_results,

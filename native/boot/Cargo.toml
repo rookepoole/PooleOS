@@ -8,6 +8,9 @@ publish.workspace = true
 [features]
 default = []
 development-transfer = []
+development-trap-returning = ["development-transfer"]
+development-trap-double-fault = ["development-transfer"]
+development-trap-malformed-frame = ["development-transfer"]
 
 [lib]
 name = "pooleboot"

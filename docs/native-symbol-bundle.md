@@ -56,11 +56,11 @@ The canonical development bundle binds these exact SHA-256 identities:
 
 | Identity | SHA-256 |
 | --- | --- |
-| Canonical stripped PKELF1 | `5D06ABFC9BD525931C63CC8A48FACD66A478640CE793E20E6D66EAEEB2BCEEEA` |
-| Preferred loaded image | `00BDAF54F9CCD98AE6752B9F610886AFF571320640D44103A5FC65A83D89367E` |
-| Build ID text | `6D3E21CBA8495B89D04247EA85835B06F7A0B790C4757F4135789C807CB05E19` |
-| Full split-debug ELF | `6AAA1CC5DF0192DE9FEB545CB269185246D7BC3161E953B19B897D12397E2B68` |
-| `native/kernel/manifest.pkm` | `618BEE498804DB09A0CB18281379B5045FBAD3F5D123767E7F8E6A7ED6C02FD0` |
+| Canonical stripped PKELF1 | `8D1C219B4B6D8FEFE3B325F3A59DF904F1D971686A4A6537D73825A1B6F56FD2` |
+| Preferred loaded image | `A13BAA5BED17F451861DA700662D5CEC1DB39F9344873A02DA8562A1DAF24D20` |
+| Build ID text | `AD783383CD6DB949335ABCA2EA3F9EBAC6DE9DB5690C81C086C7454C192A1A32` |
+| Full split-debug ELF | `7A2946F86B3A135C2BAC080842FE3CFBF84981ED412BF4DE460EF8EB093CAF4B` |
+| `native/kernel/manifest.pkm` | `1A68F2E8E3414A4B97A57853D9178F5A545BA75318ED9E9C87F64682AFC06DBF` |
 
 The qualification builds the full debug product twice and requires identical bytes. Both debug builds canonicalize to the exact stripped PKELF1 bytes. A separate release build must have no `.symtab` and no `.debug*` sections and must canonicalize to those same bytes.
 
@@ -72,9 +72,9 @@ Only these real global default-visible functions are selected today:
 
 | Symbol | Offset | Bytes | Policy |
 | --- | ---: | ---: | --- |
-| `poole_kernel_entry` | `0x8000` | 63 | entry, executable, public diagnostic |
-| `poole_kernel_emergency_panic` | `0x82F5` | 198 | panic-safe, executable, public diagnostic |
-| `poole_kernel_rust_entry` | `0x83BB` | 2,718 | executable, public diagnostic |
+| `poole_kernel_entry` | `0x8000` | 71 | entry, executable, public diagnostic |
+| `poole_kernel_emergency_panic` | `0x87AF` | 198 | panic-safe, executable, public diagnostic |
+| `poole_kernel_rust_entry` | `0x8875` | 3,714 | executable, public diagnostic |
 
 ## Name And Privacy Policy
 

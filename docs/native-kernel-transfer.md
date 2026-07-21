@@ -28,12 +28,15 @@ The transfer uses the integer-register subset of the [System V AMD64 ABI](https:
 | `RDI` | canonical virtual address of exact immutable PBP1 bytes |
 | `RSI` | exact PBP1 byte count |
 | `RDX` | little-endian `PBP1` magic as `u64` |
+| `R10` | validated trap scenario selector; exactly zero for this receipt |
 | `RSP` | 16-byte-aligned exclusive bootstrap-stack top |
 | `CR3` | retained PKMAP2 root plus only permitted PWT/PCD bits |
 | `IF` | clear |
 | `DF` | clear |
 
 PooleBoot executes `cli`, `cld`, installs CR3 and RSP, and jumps to the PBP1-bound entry. The PooleKernel assembly wrapper repeats `cli` and `cld`, validates the incoming stack without a language call, captures CR3 and RFLAGS in `R8` and `R9`, then calls the Rust entry using a correctly aligned stack. Intel instruction and control-register semantics are anchored to the [Intel 64 and IA-32 Software Developer Manuals](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html).
+
+Selectors `1..3` are qualified separately by PKTRAP1. They cannot satisfy this receipt's selector-zero unsigned terminal-denial oracle.
 
 ## Kernel Intake
 
@@ -66,7 +69,7 @@ Run the focused qualification with:
 python tools\qualify_native_kernel_transfer.py
 ```
 
-The generated public receipt is `runs/native-kernel-transfer-readiness.json`. The qualifier performs two clean PooleKernel builds, two clean feature-enabled PooleBoot builds, a separate feature-disabled isolation build, two byte-identical media generations, two fresh-vars QEMU/OVMF runs, exact marker/frame/PBP1 comparisons, and 57 hostile marker controls.
+The generated public receipt is `runs/native-kernel-transfer-readiness.json`. The qualifier performs two clean PooleKernel builds, two clean feature-enabled PooleBoot builds, a separate feature-disabled isolation build, two byte-identical media generations, two fresh-vars QEMU/OVMF runs, exact marker/frame/PBP1 comparisons, and 58 hostile marker controls.
 
 The receipt also binds the current standalone PKENTRY1, PKREVAL1, and default
 PKLOAD6 receipts. Any upstream kernel, retained semantic artifact, trust record,

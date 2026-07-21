@@ -151,7 +151,21 @@ def _build_and_test(
     temporary_root: Path,
     *,
     development_transfer: bool = False,
+    development_feature: str | None = None,
 ) -> tuple[bytes, dict[str, Any]]:
+    allowed_features = {
+        "development-transfer",
+        "development-trap-returning",
+        "development-trap-double-fault",
+        "development-trap-malformed-frame",
+    }
+    if development_feature is not None and development_feature not in allowed_features:
+        raise QualificationError("unknown PooleBoot development feature")
+    if development_transfer and development_feature is not None:
+        raise QualificationError("development transfer feature was selected twice")
+    selected_feature = development_feature or (
+        "development-transfer" if development_transfer else None
+    )
     cargo, _, env = _toolchain(toolchain_root)
     test_target = temporary_root / "host-contract-tests"
     test_command = [
@@ -169,8 +183,8 @@ def _build_and_test(
         "--target-dir",
         str(test_target),
     ]
-    if development_transfer:
-        test_command.extend(("--features", "development-transfer"))
+    if selected_feature is not None:
+        test_command.extend(("--features", selected_feature))
     test_command.extend(("--", "--test-threads=1"))
     test_output = _run_checked(
         test_command,
@@ -202,8 +216,8 @@ def _build_and_test(
             "--target-dir",
             str(target_dir),
         ]
-        if development_transfer:
-            build_command.extend(("--features", "development-transfer"))
+        if selected_feature is not None:
+            build_command.extend(("--features", selected_feature))
         _run_checked(
             build_command,
             cwd=NATIVE_ROOT,
@@ -235,7 +249,8 @@ def _build_and_test(
     return builds[0], {
         "host_contract_test_count": test_count,
         "host_contract_test_pass_count": test_count,
-        "development_transfer_feature": development_transfer,
+        "development_transfer_feature": selected_feature is not None,
+        "selected_development_feature": selected_feature,
         "clean_build_count": 2,
         "exact_clean_build_match": True,
         "sha256": native_pooleboot.sha256_bytes(builds[0]),
