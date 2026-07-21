@@ -1,8 +1,81 @@
 {
-  "artifact_kind": "pooleos_native_kernel_transfer_readiness",
+  "artifact_kind": "pooleos_native_kernel_cpu_policy_readiness",
   "build": {
-    "default_and_transfer_binaries_differ": true,
-    "default_feature_enabled": false,
+    "all_profile_binaries_distinct": true,
+    "cpu_policy_pooleboot": {
+      "byte_count": 207360,
+      "clean_build_count": 2,
+      "development_transfer_feature": true,
+      "exact_clean_build_match": true,
+      "host_contract_test_count": 8,
+      "host_contract_test_pass_count": 8,
+      "host_leakage_hit_count": 0,
+      "host_leakage_marker_count": 7,
+      "inspection": {
+        "byte_count": 207360,
+        "characteristics": 34,
+        "debug_directory": {
+          "rva": 0,
+          "size": 0
+        },
+        "debug_directory_present": false,
+        "dll_characteristics": 33120,
+        "entry_nonzero": true,
+        "entry_point": 36499,
+        "file_alignment": 512,
+        "format": "PE32+",
+        "header_size": 1024,
+        "image_base": 5368709120,
+        "image_size": 221184,
+        "import_directory": {
+          "rva": 0,
+          "size": 0
+        },
+        "imports_present": false,
+        "machine": 34404,
+        "section_alignment": 4096,
+        "section_count": 4,
+        "sections": [
+          {
+            "characteristics": 1610612768,
+            "name": ".text",
+            "raw_offset": 1024,
+            "raw_size": 152576,
+            "virtual_address": 4096,
+            "virtual_size": 152387
+          },
+          {
+            "characteristics": 1073741888,
+            "name": ".rdata",
+            "raw_offset": 153600,
+            "raw_size": 52224,
+            "virtual_address": 159744,
+            "virtual_size": 51796
+          },
+          {
+            "characteristics": 1073741888,
+            "name": ".eh_fram",
+            "raw_offset": 205824,
+            "raw_size": 512,
+            "virtual_address": 212992,
+            "virtual_size": 64
+          },
+          {
+            "characteristics": 1107296320,
+            "name": ".reloc",
+            "raw_offset": 206336,
+            "raw_size": 1024,
+            "virtual_address": 217088,
+            "virtual_size": 748
+          }
+        ],
+        "sha256": "3B95D85425ACA0D02C5E434736CE9F0EDF79FF8B82EF6CEED8A83A6B4662789A",
+        "subsystem": 10,
+        "timestamp": 0
+      },
+      "selected_development_feature": "development-cpu-policy",
+      "sha256": "3B95D85425ACA0D02C5E434736CE9F0EDF79FF8B82EF6CEED8A83A6B4662789A"
+    },
     "default_pooleboot": {
       "byte_count": 205824,
       "clean_build_count": 2,
@@ -79,7 +152,6 @@
     },
     "default_stop_marker_present": true,
     "default_transfer_marker_absent": true,
-    "development_transfer_feature": true,
     "kernel_entry": {
       "artifact_kind": "pooleos_native_kernel_entry_readiness",
       "bindings": {
@@ -701,101 +773,39 @@
         "target": "x86_64-unknown-none"
       }
     },
-    "transfer_pooleboot": {
-      "byte_count": 207360,
-      "clean_build_count": 2,
-      "development_transfer_feature": true,
-      "exact_clean_build_match": true,
-      "host_contract_test_count": 8,
-      "host_contract_test_pass_count": 8,
-      "host_leakage_hit_count": 0,
-      "host_leakage_marker_count": 7,
-      "inspection": {
-        "byte_count": 207360,
-        "characteristics": 34,
-        "debug_directory": {
-          "rva": 0,
-          "size": 0
-        },
-        "debug_directory_present": false,
-        "dll_characteristics": 33120,
-        "entry_nonzero": true,
-        "entry_point": 36499,
-        "file_alignment": 512,
-        "format": "PE32+",
-        "header_size": 1024,
-        "image_base": 5368709120,
-        "image_size": 221184,
-        "import_directory": {
-          "rva": 0,
-          "size": 0
-        },
-        "imports_present": false,
-        "machine": 34404,
-        "section_alignment": 4096,
-        "section_count": 4,
-        "sections": [
-          {
-            "characteristics": 1610612768,
-            "name": ".text",
-            "raw_offset": 1024,
-            "raw_size": 152576,
-            "virtual_address": 4096,
-            "virtual_size": 152387
-          },
-          {
-            "characteristics": 1073741888,
-            "name": ".rdata",
-            "raw_offset": 153600,
-            "raw_size": 52224,
-            "virtual_address": 159744,
-            "virtual_size": 51788
-          },
-          {
-            "characteristics": 1073741888,
-            "name": ".eh_fram",
-            "raw_offset": 205824,
-            "raw_size": 512,
-            "virtual_address": 212992,
-            "virtual_size": 64
-          },
-          {
-            "characteristics": 1107296320,
-            "name": ".reloc",
-            "raw_offset": 206336,
-            "raw_size": 1024,
-            "virtual_address": 217088,
-            "virtual_size": 748
-          }
-        ],
-        "sha256": "CFB6B5B47AE706433C81F9F4A0A24A2376848D5EEFDC1810779A2AFA4F1A301B",
-        "subsystem": 10,
-        "timestamp": 0
-      },
-      "selected_development_feature": "development-transfer",
-      "sha256": "CFB6B5B47AE706433C81F9F4A0A24A2376848D5EEFDC1810779A2AFA4F1A301B"
+    "profile_count": 2,
+    "source_audit": {
+      "forbidden_instruction_hits": [],
+      "forbidden_instructions": [
+        "wrmsr",
+        "xsetbv",
+        "mov cr0,",
+        "mov cr4,"
+      ],
+      "result": "pass_no_cpu_state_write_instruction",
+      "scope": "PKCPU1 observer and typed register helpers"
     }
   },
   "claims": {
-    "authenticated_kernel_entry_profile_valid": false,
-    "bootstrap_stack_installed": true,
-    "default_pooleboot_transfer_enabled": false,
-    "exact_pbp1_revalidated_in_kernel": true,
-    "exit_boot_services_succeeded_before_transfer": true,
-    "interrupts_and_direction_flag_cleared": true,
-    "live_poolekernel_entry_executed": true,
-    "nine_retained_files_revalidated_in_kernel": true,
-    "physical_media_written": false,
+    "allowlisted_apic_pat_mtrr_msrs_observed": true,
+    "cpu_state_writes_performed": false,
+    "cpuid_feature_and_width_policy_observed": true,
+    "cpuid_vendor_brand_identity_observed": true,
+    "cr0_cr4_efer_read_only_policy_observed": true,
+    "microcode_or_errata_policy_complete": false,
+    "n7_exit_gate_satisfied": false,
     "production_ready": false,
-    "retained_cr3_installed": true,
-    "serial_debugcon_exact_match": true,
-    "sysv_register_contract_observed": true,
-    "target_firmware_qualified": false,
-    "terminal_unsigned_denial": true,
-    "two_qemu_runs_exact_match": true
+    "rust_python_policy_agreement": true,
+    "support_gated_xcr0_observed": true,
+    "target_cpu_qualified": false,
+    "topology_cache_and_optional_facilities_observed": true,
+    "two_qemu_runs_exact_match": true,
+    "xsave_context_ownership_complete": false
   },
-  "contract_id": "PKXFER1",
+  "contract_id": "PKCPU1",
   "execution": {
+    "acceleration": "tcg_single_thread",
+    "cpu_model": "qemu64",
     "exact_marker_match": true,
     "exact_pbp1_match": true,
     "exact_screenshot_match": true,
@@ -863,6 +873,75 @@
       "tcp:127.0.0.1:$QMP_PORT,server=on,wait=off"
     ],
     "normalized_command_sha256": "BF26B10D53C21F195065BE2F2261FCDEED04E2013068AC329F1BB1D0A3766C32",
+    "observation": {
+      "discovery": {
+        "apic_id": 0,
+        "brand_hex": "51454D55205669727475616C204350552076657273696F6E20322E352B00000000000000000000000000000000000000",
+        "family": 15,
+        "linear_width": 48,
+        "logical_processors": 1,
+        "max_basic_leaf": 13,
+        "max_extended_leaf": 2147483658,
+        "model": 107,
+        "physical_width": 40,
+        "signature": 397233,
+        "stepping": 1,
+        "vendor": "AuthenticAMD"
+      },
+      "features": {
+        "ext1_ecx": 5,
+        "ext1_edx": 563346429,
+        "ext1f_eax": 0,
+        "ext7_edx": 0,
+        "leaf1_ecx": 2147491841,
+        "leaf1_edx": 126614525,
+        "leaf6_eax": 0,
+        "leaf7_ebx": 0,
+        "leaf7_ecx": 0,
+        "leaf7_edx": 0,
+        "leafa_eax": 0
+      },
+      "result": {
+        "actions_authorized": 0,
+        "authority_grants": 0,
+        "bsp": 1,
+        "interrupts": 0,
+        "policy": "required_and_support_gated",
+        "profile": "qemu64_tier0",
+        "reads": "cpuid_cr_msr",
+        "signature_verifications": 0,
+        "terminal": "halt",
+        "writes": 0
+      },
+      "state": {
+        "apic_base": 4276095232,
+        "cr0": 2147549235,
+        "cr4": 1640,
+        "efer": 3328,
+        "msr_read_mask": 31,
+        "mtrr_cap": 1288,
+        "mtrr_def": 3078,
+        "pat": 1974748653749254
+      },
+      "topology": {
+        "ext6_ecx": 33587520,
+        "leaf4_eax": 0,
+        "leaf4_ebx": 0,
+        "leaf4_ecx": 0,
+        "leaf4_edx": 0,
+        "leafb0_eax": 0,
+        "leafb0_ebx": 1,
+        "leafb0_ecx": 256,
+        "leafb0_edx": 0
+      },
+      "xsave": {
+        "leafd0_eax": 0,
+        "leafd0_ebx": 0,
+        "leafd0_ecx": 0,
+        "leafd0_edx": 0,
+        "xcr0": 0
+      }
+    },
     "profile_id": "bootstrap-debug",
     "qemu_sha256": "A930E028F93D0FA47E4D58BDAD2432F7466DC2B6AF0AE376F77EF7A298FFDD02",
     "run_count": 2,
@@ -888,240 +967,303 @@
           "state_writes": 0
         },
         "local_paths_recorded": false,
-        "marker_sha256": "AEF1D38808188AD37233901B2DC2C6F5E1F89BAD1F3580BD5B2E3A54224FE476",
+        "marker_sha256": "7EB85F80E196FB23EA1B022EA0C870B53D771B110B68AEA6F69B09508226B9BA",
         "marker_summary": {
-          "boot_prefix": {
-            "artifact_set": {
-              "artifact_count": 6,
-              "contract_id": "PBART1",
-              "file_bytes": 8761,
-              "fnv1a64": "3A45300F5CBD8DCF",
-              "measured": false,
-              "page_count": 6,
-              "pages_retained": true,
-              "retained_input_count": 9,
-              "retained_input_page_count": 9,
-              "semantics_applied": false,
-              "signatures_verified": false
+          "contract_id": "PKCPU1",
+          "discovery": {
+            "apic_id": 0,
+            "brand_hex": "51454D55205669727475616C204350552076657273696F6E20322E352B00000000000000000000000000000000000000",
+            "family": 15,
+            "linear_width": 48,
+            "logical_processors": 1,
+            "max_basic_leaf": 13,
+            "max_extended_leaf": 2147483658,
+            "model": 107,
+            "physical_width": 40,
+            "signature": 397233,
+            "stepping": 1,
+            "vendor": "AuthenticAMD"
+          },
+          "features": {
+            "ext1_ecx": 5,
+            "ext1_edx": 563346429,
+            "ext1f_eax": 0,
+            "ext7_edx": 0,
+            "leaf1_ecx": 2147491841,
+            "leaf1_edx": 126614525,
+            "leaf6_eax": 0,
+            "leaf7_ebx": 0,
+            "leaf7_ecx": 0,
+            "leaf7_edx": 0,
+            "leafa_eax": 0
+          },
+          "marker_count": 35,
+          "ordered_contract_match": true,
+          "result": {
+            "actions_authorized": 0,
+            "authority_grants": 0,
+            "bsp": 1,
+            "interrupts": 0,
+            "policy": "required_and_support_gated",
+            "profile": "qemu64_tier0",
+            "reads": "cpuid_cr_msr",
+            "signature_verifications": 0,
+            "terminal": "halt",
+            "writes": 0
+          },
+          "state": {
+            "apic_base": 4276095232,
+            "cr0": 2147549235,
+            "cr4": 1640,
+            "efer": 3328,
+            "msr_read_mask": 31,
+            "mtrr_cap": 1288,
+            "mtrr_def": 3078,
+            "pat": 1974748653749254
+          },
+          "topology": {
+            "ext6_ecx": 33587520,
+            "leaf4_eax": 0,
+            "leaf4_ebx": 0,
+            "leaf4_ecx": 0,
+            "leaf4_edx": 0,
+            "leafb0_eax": 0,
+            "leafb0_ebx": 1,
+            "leafb0_ecx": 256,
+            "leafb0_edx": 0
+          },
+          "transfer_prefix": {
+            "boot_prefix": {
+              "artifact_set": {
+                "artifact_count": 6,
+                "contract_id": "PBART1",
+                "file_bytes": 8761,
+                "fnv1a64": "3A45300F5CBD8DCF",
+                "measured": false,
+                "page_count": 6,
+                "pages_retained": true,
+                "retained_input_count": 9,
+                "retained_input_page_count": 9,
+                "semantics_applied": false,
+                "signatures_verified": false
+              },
+              "boot_config": {
+                "boot_attempt_limit": 3,
+                "byte_count": 229,
+                "default_entry_hash": "61053F0E3EBBD272",
+                "entry_count": 1,
+                "manifest_max_bytes": 65536,
+                "selected_slot": 1,
+                "timeout_ms": 0
+              },
+              "boot_exit": {
+                "artifact_page_count": 9,
+                "attempt_count": 1,
+                "contract_id": "PBEXIT1",
+                "descriptor_count": 96,
+                "descriptor_size": 48,
+                "firmware_calls_after_exit": 0,
+                "handoff_page_count": 256,
+                "kernel_page_count": 64,
+                "map_byte_count": 4608,
+                "stack_page_count": 8,
+                "successful_exit_prefix_validated": true,
+                "synthetic_stop_used_for_prefix_parser_only": true,
+                "table_page_count": 4
+              },
+              "config_table_count": 10,
+              "gop": {
+                "format": "BGR",
+                "height": 800,
+                "mode": 0,
+                "stride": 1280,
+                "width": 1280
+              },
+              "inner_set": {
+                "actions_authorized": 0,
+                "artifact_count": 6,
+                "authority_grants": 0,
+                "cross_binding_count": 6,
+                "development_denial_count": 6,
+                "exact_retained_bytes": true,
+                "file_bytes": 8761,
+                "hardware_observations": 0,
+                "parser_count": 6,
+                "payload_bytes": 8185,
+                "proof_id": "N5-INNER-LIVE-PARSE-001",
+                "retained_set_sha256": "C46B9030922FB095F5321CD62CD4930B812B2D8D8EA58B93B7C51956B6EEC8B8",
+                "state_writes": 0
+              },
+              "kernel": {
+                "entry_offset": 32768,
+                "file_byte_count": 180224,
+                "file_handles_closed": 12,
+                "file_pools_freed": 11,
+                "image_byte_count": 262144,
+                "loaded_fnv1a64": "B710F74ADE954C20",
+                "page_count": 64,
+                "pages_retained": true,
+                "relocation_count": 333,
+                "resources_released": false
+              },
+              "kernel_map": {
+                "contract_id": "PKMAP2",
+                "firmware_calls_while_active": 0,
+                "first_page_table_index": 0,
+                "framebuffer_cache_signature": "00",
+                "framebuffer_first_page_bytes": 2097152,
+                "framebuffer_last_page_bytes": 2097152,
+                "framebuffer_preserved": true,
+                "leaf_fingerprint": "066F6E68217211A5",
+                "mapped_fnv1a64": "B710F74ADE954C20",
+                "mapped_page_count": 64,
+                "mapping_count": 4,
+                "original_cr3_restored": true,
+                "page_directory_index": 0,
+                "pdpt_index": 510,
+                "physical_address_bits": 40,
+                "pml4_index": 511,
+                "read_execute_page_count": 32,
+                "read_only_page_count": 12,
+                "read_write_page_count": 20,
+                "retained": {
+                  "guard_page_count": 2,
+                  "handoff_first_page_table_index": 80,
+                  "handoff_page_count": 256,
+                  "handoff_physical_base": 498188288,
+                  "handoff_virtual_base": 18446744071562395648,
+                  "kernel_physical_base": 500948992,
+                  "page_table_root_physical": 501542912,
+                  "retained_leaf_fingerprint": "F6AABD8C612439ED",
+                  "stack_first_page_table_index": 65,
+                  "stack_page_count": 8,
+                  "stack_physical_base": 501559296,
+                  "stack_top_virtual": 18446744071562366976,
+                  "table_page_count": 4,
+                  "total_mapped_page_count": 328
+                },
+                "table_page_count": 4,
+                "tables_retained": true,
+                "writable_executable_page_count": 0
+              },
+              "manifest": {
+                "artifact_count": 7,
+                "byte_count": 2615,
+                "kernel_file_byte_count": 180224,
+                "kernel_image_byte_count": 262144,
+                "kernel_sha256_prefix": "21DCC577077DEC8C",
+                "kernel_version": 1,
+                "manifest_id_hash": "4A2625333244591C",
+                "manifest_version": 1,
+                "minimum_secure_version": 1,
+                "slot": 1
+              },
+              "marker_count": 25,
+              "memory_map": {
+                "byte_count": 4608,
+                "descriptor_bytes": 48,
+                "descriptor_count": 96
+              },
+              "ordered_contract_match": true,
+              "pbp1": {
+                "artifact_count": 10,
+                "boot_services_exited": true,
+                "byte_count": 5008,
+                "bytes_unchanged": true,
+                "descriptor_bytes": 48,
+                "development_mode_only": true,
+                "exit_attempts": 1,
+                "fnv1a64": "9987AE3EC3ABA2BB",
+                "framebuffer_present": 1,
+                "memory_entry_count": 96,
+                "message_crc32": "FAD8B899",
+                "pre_exit": false,
+                "record_count": 4,
+                "temporary_pools_released": false
+              },
+              "trust_state": {
+                "authority_grants": 0,
+                "binding_count": 14,
+                "contract_id": "PBTRUST1",
+                "denial": "pbtrust_policy_unsigned",
+                "denial_count": 1,
+                "policy_bytes": 320,
+                "policy_sha256": "0A464E3019C064D04062EAB179C903BCE5DF7C2321E75ABAA6C3A8F3A8DA1884",
+                "signature_verifications": 0,
+                "state_authenticated": false,
+                "state_bytes": 256,
+                "state_monotonic": false,
+                "state_sha256": "924D5DA41A5743FB68A42164839031FF9927732E4D2690B3DE092813B84608D8",
+                "state_source": "esp_candidate_not_persistent_authority",
+                "state_writes": 0
+              },
+              "uefi_revision": 131142
             },
-            "boot_config": {
-              "boot_attempt_limit": 3,
-              "byte_count": 229,
-              "default_entry_hash": "61053F0E3EBBD272",
+            "kernel_entry": {
+              "build_id": "PKBUILD1-CYCLE120-N7-CPU-POLICY-001",
+              "entry_contract": "PKENTRY1",
               "entry_count": 1,
-              "manifest_max_bytes": 65536,
-              "selected_slot": 1,
-              "timeout_ms": 0
+              "serial": "present",
+              "transfer_contract": "PKXFER1"
             },
-            "boot_exit": {
-              "artifact_page_count": 9,
-              "attempt_count": 1,
-              "contract_id": "PBEXIT1",
-              "descriptor_count": 96,
-              "descriptor_size": 48,
-              "firmware_calls_after_exit": 0,
-              "handoff_page_count": 256,
-              "kernel_page_count": 64,
-              "map_byte_count": 4608,
-              "stack_page_count": 8,
-              "successful_exit_prefix_validated": true,
-              "synthetic_stop_used_for_prefix_parser_only": true,
-              "table_page_count": 4
+            "kernel_pbp1": {
+              "artifact_count": 10,
+              "production_profile_valid": 0,
+              "profile": "development",
+              "record_count": 4
             },
-            "config_table_count": 10,
-            "gop": {
-              "format": "BGR",
-              "height": 800,
-              "mode": 0,
-              "stride": 1280,
-              "width": 1280
-            },
-            "inner_set": {
+            "kernel_revalidation": {
               "actions_authorized": 0,
               "artifact_count": 6,
               "authority_grants": 0,
-              "cross_binding_count": 6,
-              "development_denial_count": 6,
-              "exact_retained_bytes": true,
-              "file_bytes": 8761,
-              "hardware_observations": 0,
-              "parser_count": 6,
-              "payload_bytes": 8185,
-              "proof_id": "N5-INNER-LIVE-PARSE-001",
-              "retained_set_sha256": "C46B9030922FB095F5321CD62CD4930B812B2D8D8EA58B93B7C51956B6EEC8B8",
-              "state_writes": 0
-            },
-            "kernel": {
-              "entry_offset": 32768,
-              "file_byte_count": 180224,
-              "file_handles_closed": 12,
-              "file_pools_freed": 11,
-              "image_byte_count": 262144,
-              "loaded_fnv1a64": "B710F74ADE954C20",
-              "page_count": 64,
-              "pages_retained": true,
-              "relocation_count": 333,
-              "resources_released": false
-            },
-            "kernel_map": {
-              "contract_id": "PKMAP2",
-              "firmware_calls_while_active": 0,
-              "first_page_table_index": 0,
-              "framebuffer_cache_signature": "00",
-              "framebuffer_first_page_bytes": 2097152,
-              "framebuffer_last_page_bytes": 2097152,
-              "framebuffer_preserved": true,
-              "leaf_fingerprint": "066F6E68217211A5",
-              "mapped_fnv1a64": "B710F74ADE954C20",
-              "mapped_page_count": 64,
-              "mapping_count": 4,
-              "original_cr3_restored": true,
-              "page_directory_index": 0,
-              "pdpt_index": 510,
-              "physical_address_bits": 40,
-              "pml4_index": 511,
-              "read_execute_page_count": 32,
-              "read_only_page_count": 12,
-              "read_write_page_count": 20,
-              "retained": {
-                "guard_page_count": 2,
-                "handoff_first_page_table_index": 80,
-                "handoff_page_count": 256,
-                "handoff_physical_base": 498188288,
-                "handoff_virtual_base": 18446744071562395648,
-                "kernel_physical_base": 500948992,
-                "page_table_root_physical": 501542912,
-                "retained_leaf_fingerprint": "F6AABD8C612439ED",
-                "stack_first_page_table_index": 65,
-                "stack_page_count": 8,
-                "stack_physical_base": 501559296,
-                "stack_top_virtual": 18446744071562366976,
-                "table_page_count": 4,
-                "total_mapped_page_count": 328
-              },
-              "table_page_count": 4,
-              "tables_retained": true,
-              "writable_executable_page_count": 0
-            },
-            "manifest": {
-              "artifact_count": 7,
-              "byte_count": 2615,
-              "kernel_file_byte_count": 180224,
-              "kernel_image_byte_count": 262144,
-              "kernel_sha256_prefix": "21DCC577077DEC8C",
-              "kernel_version": 1,
-              "manifest_id_hash": "4A2625333244591C",
-              "manifest_version": 1,
-              "minimum_secure_version": 1,
-              "slot": 1
-            },
-            "marker_count": 25,
-            "memory_map": {
-              "byte_count": 4608,
-              "descriptor_bytes": 48,
-              "descriptor_count": 96
-            },
-            "ordered_contract_match": true,
-            "pbp1": {
-              "artifact_count": 10,
-              "boot_services_exited": true,
-              "byte_count": 5008,
-              "bytes_unchanged": true,
-              "descriptor_bytes": 48,
-              "development_mode_only": true,
-              "exit_attempts": 1,
-              "fnv1a64": "9987AE3EC3ABA2BB",
-              "framebuffer_present": 1,
-              "memory_entry_count": 96,
-              "message_crc32": "FAD8B899",
-              "pre_exit": false,
-              "record_count": 4,
-              "temporary_pools_released": false
-            },
-            "trust_state": {
-              "authority_grants": 0,
-              "binding_count": 14,
-              "contract_id": "PBTRUST1",
+              "contract_id": "PKREVAL1",
               "denial": "pbtrust_policy_unsigned",
-              "denial_count": 1,
-              "policy_bytes": 320,
+              "manifest_bytes": 2615,
+              "parser_count": 9,
               "policy_sha256": "0A464E3019C064D04062EAB179C903BCE5DF7C2321E75ABAA6C3A8F3A8DA1884",
-              "signature_verifications": 0,
-              "state_authenticated": false,
-              "state_bytes": 256,
-              "state_monotonic": false,
+              "retained_file_bytes": 11952,
+              "retained_file_count": 9,
+              "retained_set_sha256": "C46B9030922FB095F5321CD62CD4930B812B2D8D8EA58B93B7C51956B6EEC8B8",
               "state_sha256": "924D5DA41A5743FB68A42164839031FF9927732E4D2690B3DE092813B84608D8",
-              "state_source": "esp_candidate_not_persistent_authority",
               "state_writes": 0
             },
-            "uefi_revision": 131142
+            "kernel_state": {
+              "cr3": 501542912,
+              "entry": 18446744071562100736,
+              "handoff": 18446744071562395648,
+              "handoff_bytes": 5008,
+              "rflags_df": 0,
+              "rflags_if": 0,
+              "root": 501542912,
+              "stack_top": 18446744071562366976
+            },
+            "marker_count": 30,
+            "ordered_contract_match": true,
+            "synthetic_unsigned_terminal_used_for_prefix_parser_only": true,
+            "transfer_arm": {
+              "actions_authorized": 0,
+              "authority_grants": 0,
+              "contract_id": "PKXFER1",
+              "cr3": 501542912,
+              "emulator_only": 1,
+              "entry": 18446744071562100736,
+              "firmware_calls_after_exit": 0,
+              "handoff": 18446744071562395648,
+              "handoff_bytes": 5008,
+              "mode": "development",
+              "root": 501542912,
+              "signature_verifications": 0,
+              "stack_top": 18446744071562366976,
+              "state_writes": 0,
+              "trap_scenario": 4
+            }
           },
-          "kernel_entry": {
-            "build_id": "PKBUILD1-CYCLE120-N7-CPU-POLICY-001",
-            "entry_contract": "PKENTRY1",
-            "entry_count": 1,
-            "serial": "present",
-            "transfer_contract": "PKXFER1"
-          },
-          "kernel_pbp1": {
-            "artifact_count": 10,
-            "production_profile_valid": 0,
-            "profile": "development",
-            "record_count": 4
-          },
-          "kernel_revalidation": {
-            "actions_authorized": 0,
-            "artifact_count": 6,
-            "authority_grants": 0,
-            "contract_id": "PKREVAL1",
-            "denial": "pbtrust_policy_unsigned",
-            "manifest_bytes": 2615,
-            "parser_count": 9,
-            "policy_sha256": "0A464E3019C064D04062EAB179C903BCE5DF7C2321E75ABAA6C3A8F3A8DA1884",
-            "retained_file_bytes": 11952,
-            "retained_file_count": 9,
-            "retained_set_sha256": "C46B9030922FB095F5321CD62CD4930B812B2D8D8EA58B93B7C51956B6EEC8B8",
-            "state_sha256": "924D5DA41A5743FB68A42164839031FF9927732E4D2690B3DE092813B84608D8",
-            "state_writes": 0
-          },
-          "kernel_state": {
-            "cr3": 501542912,
-            "entry": 18446744071562100736,
-            "handoff": 18446744071562395648,
-            "handoff_bytes": 5008,
-            "rflags_df": 0,
-            "rflags_if": 0,
-            "root": 501542912,
-            "stack_top": 18446744071562366976
-          },
-          "kernel_terminal": {
-            "actions_authorized": 0,
-            "authority_grants": 0,
-            "contract_id": "PKXFER1",
-            "entry_count": 1,
-            "firmware_calls_after_exit": 0,
-            "signature_verifications": 0,
-            "state_writes": 0,
-            "terminal": "halt"
-          },
-          "marker_count": 30,
-          "ordered_contract_match": true,
-          "transfer_arm": {
-            "actions_authorized": 0,
-            "authority_grants": 0,
-            "contract_id": "PKXFER1",
-            "cr3": 501542912,
-            "emulator_only": 1,
-            "entry": 18446744071562100736,
-            "firmware_calls_after_exit": 0,
-            "handoff": 18446744071562395648,
-            "handoff_bytes": 5008,
-            "mode": "development",
-            "root": 501542912,
-            "signature_verifications": 0,
-            "stack_top": 18446744071562366976,
-            "state_writes": 0,
-            "trap_scenario": 0
+          "xsave": {
+            "leafd0_eax": 0,
+            "leafd0_ebx": 0,
+            "leafd0_ecx": 0,
+            "leafd0_edx": 0,
+            "xcr0": 0
           }
         },
         "markers": [
@@ -1148,13 +1290,18 @@
           "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5008 records=4 memory_entries=96 framebuffer=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=FAD8B899 fnv1a64=9987AE3EC3ABA2BB state=boot_services_exited bytes_unchanged=1",
           "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4608 descriptor_bytes=48 descriptors=96",
           "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=64 artifact_pages=9 table_pages=4 stack_pages=8 handoff_pages=256",
-          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF80008000 handoff=FFFFFFFF80050000 bytes=5008 stack_top=FFFFFFFF80049000 root=000000001DE4F000 cr3=000000001DE4F000 trap_scenario=0 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
+          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF80008000 handoff=FFFFFFFF80050000 bytes=5008 stack_top=FFFFFFFF80049000 root=000000001DE4F000 cr3=000000001DE4F000 trap_scenario=4 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
           "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
           "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE120-N7-CPU-POLICY-001 entry_count=1 serial=present",
           "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF80050000 bytes=5008 entry=0xFFFFFFFF80008000 stack_top=0xFFFFFFFF80049000 root=0x000000001DE4F000 cr3=0x000000001DE4F000 rflags_if=0 rflags_df=0",
           "POOLEOS:KERNEL:PBP1 PASS profile=development records=4 artifacts=10 production_profile_valid=0",
           "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=C46B9030922FB095F5321CD62CD4930B812B2D8D8EA58B93B7C51956B6EEC8B8 policy_sha256=0A464E3019C064D04062EAB179C903BCE5DF7C2321E75ABAA6C3A8F3A8DA1884 state_sha256=924D5DA41A5743FB68A42164839031FF9927732E4D2690B3DE092813B84608D8 denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
-          "POOLEOS:KERNEL:TRANSFER-DENIED PASS contract=PKXFER1 terminal=halt entry_count=1 post_exit_firmware_calls=0 signatures=0 authority=0 actions=0 writes=0"
+          "POOLEOS:KERNEL:CPU-DISCOVERY OBSERVE contract=PKCPU1 vendor_hex=41757468656E746963414D44 brand_hex=51454D55205669727475616C204350552076657273696F6E20322E352B00000000000000000000000000000000000000 max_basic=0x000000000000000D max_extended=0x000000008000000A signature=0x0000000000060FB1 family=15 model=107 stepping=1 logical=1 apic_id=0 physical_width=40 linear_width=48",
+          "POOLEOS:KERNEL:CPU-TOPOLOGY OBSERVE contract=PKCPU1 leaf4_eax=0x0000000000000000 leaf4_ebx=0x0000000000000000 leaf4_ecx=0x0000000000000000 leaf4_edx=0x0000000000000000 leafb0_eax=0x0000000000000000 leafb0_ebx=0x0000000000000001 leafb0_ecx=0x0000000000000100 leafb0_edx=0x0000000000000000 ext6_ecx=0x0000000002008140",
+          "POOLEOS:KERNEL:CPU-FEATURES OBSERVE contract=PKCPU1 leaf1_ecx=0x0000000080002001 leaf1_edx=0x00000000078BFBFD leaf6_eax=0x0000000000000000 leaf7_ebx=0x0000000000000000 leaf7_ecx=0x0000000000000000 leaf7_edx=0x0000000000000000 leafa_eax=0x0000000000000000 ext1_ecx=0x0000000000000005 ext1_edx=0x000000002193FBFD ext7_edx=0x0000000000000000 ext1f_eax=0x0000000000000000",
+          "POOLEOS:KERNEL:CPU-XSAVE OBSERVE contract=PKCPU1 leafd0_eax=0x0000000000000000 leafd0_ebx=0x0000000000000000 leafd0_ecx=0x0000000000000000 leafd0_edx=0x0000000000000000 xcr0=0x0000000000000000 ownership=observation_only",
+          "POOLEOS:KERNEL:CPU-STATE OBSERVE contract=PKCPU1 cr0=0x0000000080010033 cr4=0x0000000000000668 efer=0x0000000000000D00 apic_base=0x00000000FEE00900 pat=0x0007040600070406 mtrr_cap=0x0000000000000508 mtrr_def=0x0000000000000C06 msr_read_mask=0x000000000000001F",
+          "POOLEOS:KERNEL:CPU-RESULT PASS contract=PKCPU1 profile=qemu64_tier0 bsp=1 policy=required_and_support_gated reads=cpuid_cr_msr writes=0 signatures=0 authority=0 actions=0 interrupts=0 terminal=halt"
         ],
         "media_read_only": true,
         "pbp1_serial_debugcon_exact_match": true,
@@ -2009,7 +2156,7 @@
         },
         "qmp_loopback_only": true,
         "qmp_quit_requested": true,
-        "run_id": "run-1",
+        "run_id": "cpu-policy-run-1",
         "screenshot": {
           "bright_cyan_pixel_count": 44970,
           "byte_count": 3072016,
@@ -2053,240 +2200,303 @@
           "state_writes": 0
         },
         "local_paths_recorded": false,
-        "marker_sha256": "AEF1D38808188AD37233901B2DC2C6F5E1F89BAD1F3580BD5B2E3A54224FE476",
+        "marker_sha256": "7EB85F80E196FB23EA1B022EA0C870B53D771B110B68AEA6F69B09508226B9BA",
         "marker_summary": {
-          "boot_prefix": {
-            "artifact_set": {
-              "artifact_count": 6,
-              "contract_id": "PBART1",
-              "file_bytes": 8761,
-              "fnv1a64": "3A45300F5CBD8DCF",
-              "measured": false,
-              "page_count": 6,
-              "pages_retained": true,
-              "retained_input_count": 9,
-              "retained_input_page_count": 9,
-              "semantics_applied": false,
-              "signatures_verified": false
+          "contract_id": "PKCPU1",
+          "discovery": {
+            "apic_id": 0,
+            "brand_hex": "51454D55205669727475616C204350552076657273696F6E20322E352B00000000000000000000000000000000000000",
+            "family": 15,
+            "linear_width": 48,
+            "logical_processors": 1,
+            "max_basic_leaf": 13,
+            "max_extended_leaf": 2147483658,
+            "model": 107,
+            "physical_width": 40,
+            "signature": 397233,
+            "stepping": 1,
+            "vendor": "AuthenticAMD"
+          },
+          "features": {
+            "ext1_ecx": 5,
+            "ext1_edx": 563346429,
+            "ext1f_eax": 0,
+            "ext7_edx": 0,
+            "leaf1_ecx": 2147491841,
+            "leaf1_edx": 126614525,
+            "leaf6_eax": 0,
+            "leaf7_ebx": 0,
+            "leaf7_ecx": 0,
+            "leaf7_edx": 0,
+            "leafa_eax": 0
+          },
+          "marker_count": 35,
+          "ordered_contract_match": true,
+          "result": {
+            "actions_authorized": 0,
+            "authority_grants": 0,
+            "bsp": 1,
+            "interrupts": 0,
+            "policy": "required_and_support_gated",
+            "profile": "qemu64_tier0",
+            "reads": "cpuid_cr_msr",
+            "signature_verifications": 0,
+            "terminal": "halt",
+            "writes": 0
+          },
+          "state": {
+            "apic_base": 4276095232,
+            "cr0": 2147549235,
+            "cr4": 1640,
+            "efer": 3328,
+            "msr_read_mask": 31,
+            "mtrr_cap": 1288,
+            "mtrr_def": 3078,
+            "pat": 1974748653749254
+          },
+          "topology": {
+            "ext6_ecx": 33587520,
+            "leaf4_eax": 0,
+            "leaf4_ebx": 0,
+            "leaf4_ecx": 0,
+            "leaf4_edx": 0,
+            "leafb0_eax": 0,
+            "leafb0_ebx": 1,
+            "leafb0_ecx": 256,
+            "leafb0_edx": 0
+          },
+          "transfer_prefix": {
+            "boot_prefix": {
+              "artifact_set": {
+                "artifact_count": 6,
+                "contract_id": "PBART1",
+                "file_bytes": 8761,
+                "fnv1a64": "3A45300F5CBD8DCF",
+                "measured": false,
+                "page_count": 6,
+                "pages_retained": true,
+                "retained_input_count": 9,
+                "retained_input_page_count": 9,
+                "semantics_applied": false,
+                "signatures_verified": false
+              },
+              "boot_config": {
+                "boot_attempt_limit": 3,
+                "byte_count": 229,
+                "default_entry_hash": "61053F0E3EBBD272",
+                "entry_count": 1,
+                "manifest_max_bytes": 65536,
+                "selected_slot": 1,
+                "timeout_ms": 0
+              },
+              "boot_exit": {
+                "artifact_page_count": 9,
+                "attempt_count": 1,
+                "contract_id": "PBEXIT1",
+                "descriptor_count": 96,
+                "descriptor_size": 48,
+                "firmware_calls_after_exit": 0,
+                "handoff_page_count": 256,
+                "kernel_page_count": 64,
+                "map_byte_count": 4608,
+                "stack_page_count": 8,
+                "successful_exit_prefix_validated": true,
+                "synthetic_stop_used_for_prefix_parser_only": true,
+                "table_page_count": 4
+              },
+              "config_table_count": 10,
+              "gop": {
+                "format": "BGR",
+                "height": 800,
+                "mode": 0,
+                "stride": 1280,
+                "width": 1280
+              },
+              "inner_set": {
+                "actions_authorized": 0,
+                "artifact_count": 6,
+                "authority_grants": 0,
+                "cross_binding_count": 6,
+                "development_denial_count": 6,
+                "exact_retained_bytes": true,
+                "file_bytes": 8761,
+                "hardware_observations": 0,
+                "parser_count": 6,
+                "payload_bytes": 8185,
+                "proof_id": "N5-INNER-LIVE-PARSE-001",
+                "retained_set_sha256": "C46B9030922FB095F5321CD62CD4930B812B2D8D8EA58B93B7C51956B6EEC8B8",
+                "state_writes": 0
+              },
+              "kernel": {
+                "entry_offset": 32768,
+                "file_byte_count": 180224,
+                "file_handles_closed": 12,
+                "file_pools_freed": 11,
+                "image_byte_count": 262144,
+                "loaded_fnv1a64": "B710F74ADE954C20",
+                "page_count": 64,
+                "pages_retained": true,
+                "relocation_count": 333,
+                "resources_released": false
+              },
+              "kernel_map": {
+                "contract_id": "PKMAP2",
+                "firmware_calls_while_active": 0,
+                "first_page_table_index": 0,
+                "framebuffer_cache_signature": "00",
+                "framebuffer_first_page_bytes": 2097152,
+                "framebuffer_last_page_bytes": 2097152,
+                "framebuffer_preserved": true,
+                "leaf_fingerprint": "066F6E68217211A5",
+                "mapped_fnv1a64": "B710F74ADE954C20",
+                "mapped_page_count": 64,
+                "mapping_count": 4,
+                "original_cr3_restored": true,
+                "page_directory_index": 0,
+                "pdpt_index": 510,
+                "physical_address_bits": 40,
+                "pml4_index": 511,
+                "read_execute_page_count": 32,
+                "read_only_page_count": 12,
+                "read_write_page_count": 20,
+                "retained": {
+                  "guard_page_count": 2,
+                  "handoff_first_page_table_index": 80,
+                  "handoff_page_count": 256,
+                  "handoff_physical_base": 498188288,
+                  "handoff_virtual_base": 18446744071562395648,
+                  "kernel_physical_base": 500948992,
+                  "page_table_root_physical": 501542912,
+                  "retained_leaf_fingerprint": "F6AABD8C612439ED",
+                  "stack_first_page_table_index": 65,
+                  "stack_page_count": 8,
+                  "stack_physical_base": 501559296,
+                  "stack_top_virtual": 18446744071562366976,
+                  "table_page_count": 4,
+                  "total_mapped_page_count": 328
+                },
+                "table_page_count": 4,
+                "tables_retained": true,
+                "writable_executable_page_count": 0
+              },
+              "manifest": {
+                "artifact_count": 7,
+                "byte_count": 2615,
+                "kernel_file_byte_count": 180224,
+                "kernel_image_byte_count": 262144,
+                "kernel_sha256_prefix": "21DCC577077DEC8C",
+                "kernel_version": 1,
+                "manifest_id_hash": "4A2625333244591C",
+                "manifest_version": 1,
+                "minimum_secure_version": 1,
+                "slot": 1
+              },
+              "marker_count": 25,
+              "memory_map": {
+                "byte_count": 4608,
+                "descriptor_bytes": 48,
+                "descriptor_count": 96
+              },
+              "ordered_contract_match": true,
+              "pbp1": {
+                "artifact_count": 10,
+                "boot_services_exited": true,
+                "byte_count": 5008,
+                "bytes_unchanged": true,
+                "descriptor_bytes": 48,
+                "development_mode_only": true,
+                "exit_attempts": 1,
+                "fnv1a64": "9987AE3EC3ABA2BB",
+                "framebuffer_present": 1,
+                "memory_entry_count": 96,
+                "message_crc32": "FAD8B899",
+                "pre_exit": false,
+                "record_count": 4,
+                "temporary_pools_released": false
+              },
+              "trust_state": {
+                "authority_grants": 0,
+                "binding_count": 14,
+                "contract_id": "PBTRUST1",
+                "denial": "pbtrust_policy_unsigned",
+                "denial_count": 1,
+                "policy_bytes": 320,
+                "policy_sha256": "0A464E3019C064D04062EAB179C903BCE5DF7C2321E75ABAA6C3A8F3A8DA1884",
+                "signature_verifications": 0,
+                "state_authenticated": false,
+                "state_bytes": 256,
+                "state_monotonic": false,
+                "state_sha256": "924D5DA41A5743FB68A42164839031FF9927732E4D2690B3DE092813B84608D8",
+                "state_source": "esp_candidate_not_persistent_authority",
+                "state_writes": 0
+              },
+              "uefi_revision": 131142
             },
-            "boot_config": {
-              "boot_attempt_limit": 3,
-              "byte_count": 229,
-              "default_entry_hash": "61053F0E3EBBD272",
+            "kernel_entry": {
+              "build_id": "PKBUILD1-CYCLE120-N7-CPU-POLICY-001",
+              "entry_contract": "PKENTRY1",
               "entry_count": 1,
-              "manifest_max_bytes": 65536,
-              "selected_slot": 1,
-              "timeout_ms": 0
+              "serial": "present",
+              "transfer_contract": "PKXFER1"
             },
-            "boot_exit": {
-              "artifact_page_count": 9,
-              "attempt_count": 1,
-              "contract_id": "PBEXIT1",
-              "descriptor_count": 96,
-              "descriptor_size": 48,
-              "firmware_calls_after_exit": 0,
-              "handoff_page_count": 256,
-              "kernel_page_count": 64,
-              "map_byte_count": 4608,
-              "stack_page_count": 8,
-              "successful_exit_prefix_validated": true,
-              "synthetic_stop_used_for_prefix_parser_only": true,
-              "table_page_count": 4
+            "kernel_pbp1": {
+              "artifact_count": 10,
+              "production_profile_valid": 0,
+              "profile": "development",
+              "record_count": 4
             },
-            "config_table_count": 10,
-            "gop": {
-              "format": "BGR",
-              "height": 800,
-              "mode": 0,
-              "stride": 1280,
-              "width": 1280
-            },
-            "inner_set": {
+            "kernel_revalidation": {
               "actions_authorized": 0,
               "artifact_count": 6,
               "authority_grants": 0,
-              "cross_binding_count": 6,
-              "development_denial_count": 6,
-              "exact_retained_bytes": true,
-              "file_bytes": 8761,
-              "hardware_observations": 0,
-              "parser_count": 6,
-              "payload_bytes": 8185,
-              "proof_id": "N5-INNER-LIVE-PARSE-001",
-              "retained_set_sha256": "C46B9030922FB095F5321CD62CD4930B812B2D8D8EA58B93B7C51956B6EEC8B8",
-              "state_writes": 0
-            },
-            "kernel": {
-              "entry_offset": 32768,
-              "file_byte_count": 180224,
-              "file_handles_closed": 12,
-              "file_pools_freed": 11,
-              "image_byte_count": 262144,
-              "loaded_fnv1a64": "B710F74ADE954C20",
-              "page_count": 64,
-              "pages_retained": true,
-              "relocation_count": 333,
-              "resources_released": false
-            },
-            "kernel_map": {
-              "contract_id": "PKMAP2",
-              "firmware_calls_while_active": 0,
-              "first_page_table_index": 0,
-              "framebuffer_cache_signature": "00",
-              "framebuffer_first_page_bytes": 2097152,
-              "framebuffer_last_page_bytes": 2097152,
-              "framebuffer_preserved": true,
-              "leaf_fingerprint": "066F6E68217211A5",
-              "mapped_fnv1a64": "B710F74ADE954C20",
-              "mapped_page_count": 64,
-              "mapping_count": 4,
-              "original_cr3_restored": true,
-              "page_directory_index": 0,
-              "pdpt_index": 510,
-              "physical_address_bits": 40,
-              "pml4_index": 511,
-              "read_execute_page_count": 32,
-              "read_only_page_count": 12,
-              "read_write_page_count": 20,
-              "retained": {
-                "guard_page_count": 2,
-                "handoff_first_page_table_index": 80,
-                "handoff_page_count": 256,
-                "handoff_physical_base": 498188288,
-                "handoff_virtual_base": 18446744071562395648,
-                "kernel_physical_base": 500948992,
-                "page_table_root_physical": 501542912,
-                "retained_leaf_fingerprint": "F6AABD8C612439ED",
-                "stack_first_page_table_index": 65,
-                "stack_page_count": 8,
-                "stack_physical_base": 501559296,
-                "stack_top_virtual": 18446744071562366976,
-                "table_page_count": 4,
-                "total_mapped_page_count": 328
-              },
-              "table_page_count": 4,
-              "tables_retained": true,
-              "writable_executable_page_count": 0
-            },
-            "manifest": {
-              "artifact_count": 7,
-              "byte_count": 2615,
-              "kernel_file_byte_count": 180224,
-              "kernel_image_byte_count": 262144,
-              "kernel_sha256_prefix": "21DCC577077DEC8C",
-              "kernel_version": 1,
-              "manifest_id_hash": "4A2625333244591C",
-              "manifest_version": 1,
-              "minimum_secure_version": 1,
-              "slot": 1
-            },
-            "marker_count": 25,
-            "memory_map": {
-              "byte_count": 4608,
-              "descriptor_bytes": 48,
-              "descriptor_count": 96
-            },
-            "ordered_contract_match": true,
-            "pbp1": {
-              "artifact_count": 10,
-              "boot_services_exited": true,
-              "byte_count": 5008,
-              "bytes_unchanged": true,
-              "descriptor_bytes": 48,
-              "development_mode_only": true,
-              "exit_attempts": 1,
-              "fnv1a64": "9987AE3EC3ABA2BB",
-              "framebuffer_present": 1,
-              "memory_entry_count": 96,
-              "message_crc32": "FAD8B899",
-              "pre_exit": false,
-              "record_count": 4,
-              "temporary_pools_released": false
-            },
-            "trust_state": {
-              "authority_grants": 0,
-              "binding_count": 14,
-              "contract_id": "PBTRUST1",
+              "contract_id": "PKREVAL1",
               "denial": "pbtrust_policy_unsigned",
-              "denial_count": 1,
-              "policy_bytes": 320,
+              "manifest_bytes": 2615,
+              "parser_count": 9,
               "policy_sha256": "0A464E3019C064D04062EAB179C903BCE5DF7C2321E75ABAA6C3A8F3A8DA1884",
-              "signature_verifications": 0,
-              "state_authenticated": false,
-              "state_bytes": 256,
-              "state_monotonic": false,
+              "retained_file_bytes": 11952,
+              "retained_file_count": 9,
+              "retained_set_sha256": "C46B9030922FB095F5321CD62CD4930B812B2D8D8EA58B93B7C51956B6EEC8B8",
               "state_sha256": "924D5DA41A5743FB68A42164839031FF9927732E4D2690B3DE092813B84608D8",
-              "state_source": "esp_candidate_not_persistent_authority",
               "state_writes": 0
             },
-            "uefi_revision": 131142
+            "kernel_state": {
+              "cr3": 501542912,
+              "entry": 18446744071562100736,
+              "handoff": 18446744071562395648,
+              "handoff_bytes": 5008,
+              "rflags_df": 0,
+              "rflags_if": 0,
+              "root": 501542912,
+              "stack_top": 18446744071562366976
+            },
+            "marker_count": 30,
+            "ordered_contract_match": true,
+            "synthetic_unsigned_terminal_used_for_prefix_parser_only": true,
+            "transfer_arm": {
+              "actions_authorized": 0,
+              "authority_grants": 0,
+              "contract_id": "PKXFER1",
+              "cr3": 501542912,
+              "emulator_only": 1,
+              "entry": 18446744071562100736,
+              "firmware_calls_after_exit": 0,
+              "handoff": 18446744071562395648,
+              "handoff_bytes": 5008,
+              "mode": "development",
+              "root": 501542912,
+              "signature_verifications": 0,
+              "stack_top": 18446744071562366976,
+              "state_writes": 0,
+              "trap_scenario": 4
+            }
           },
-          "kernel_entry": {
-            "build_id": "PKBUILD1-CYCLE120-N7-CPU-POLICY-001",
-            "entry_contract": "PKENTRY1",
-            "entry_count": 1,
-            "serial": "present",
-            "transfer_contract": "PKXFER1"
-          },
-          "kernel_pbp1": {
-            "artifact_count": 10,
-            "production_profile_valid": 0,
-            "profile": "development",
-            "record_count": 4
-          },
-          "kernel_revalidation": {
-            "actions_authorized": 0,
-            "artifact_count": 6,
-            "authority_grants": 0,
-            "contract_id": "PKREVAL1",
-            "denial": "pbtrust_policy_unsigned",
-            "manifest_bytes": 2615,
-            "parser_count": 9,
-            "policy_sha256": "0A464E3019C064D04062EAB179C903BCE5DF7C2321E75ABAA6C3A8F3A8DA1884",
-            "retained_file_bytes": 11952,
-            "retained_file_count": 9,
-            "retained_set_sha256": "C46B9030922FB095F5321CD62CD4930B812B2D8D8EA58B93B7C51956B6EEC8B8",
-            "state_sha256": "924D5DA41A5743FB68A42164839031FF9927732E4D2690B3DE092813B84608D8",
-            "state_writes": 0
-          },
-          "kernel_state": {
-            "cr3": 501542912,
-            "entry": 18446744071562100736,
-            "handoff": 18446744071562395648,
-            "handoff_bytes": 5008,
-            "rflags_df": 0,
-            "rflags_if": 0,
-            "root": 501542912,
-            "stack_top": 18446744071562366976
-          },
-          "kernel_terminal": {
-            "actions_authorized": 0,
-            "authority_grants": 0,
-            "contract_id": "PKXFER1",
-            "entry_count": 1,
-            "firmware_calls_after_exit": 0,
-            "signature_verifications": 0,
-            "state_writes": 0,
-            "terminal": "halt"
-          },
-          "marker_count": 30,
-          "ordered_contract_match": true,
-          "transfer_arm": {
-            "actions_authorized": 0,
-            "authority_grants": 0,
-            "contract_id": "PKXFER1",
-            "cr3": 501542912,
-            "emulator_only": 1,
-            "entry": 18446744071562100736,
-            "firmware_calls_after_exit": 0,
-            "handoff": 18446744071562395648,
-            "handoff_bytes": 5008,
-            "mode": "development",
-            "root": 501542912,
-            "signature_verifications": 0,
-            "stack_top": 18446744071562366976,
-            "state_writes": 0,
-            "trap_scenario": 0
+          "xsave": {
+            "leafd0_eax": 0,
+            "leafd0_ebx": 0,
+            "leafd0_ecx": 0,
+            "leafd0_edx": 0,
+            "xcr0": 0
           }
         },
         "markers": [
@@ -2313,13 +2523,18 @@
           "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5008 records=4 memory_entries=96 framebuffer=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=FAD8B899 fnv1a64=9987AE3EC3ABA2BB state=boot_services_exited bytes_unchanged=1",
           "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4608 descriptor_bytes=48 descriptors=96",
           "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=64 artifact_pages=9 table_pages=4 stack_pages=8 handoff_pages=256",
-          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF80008000 handoff=FFFFFFFF80050000 bytes=5008 stack_top=FFFFFFFF80049000 root=000000001DE4F000 cr3=000000001DE4F000 trap_scenario=0 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
+          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF80008000 handoff=FFFFFFFF80050000 bytes=5008 stack_top=FFFFFFFF80049000 root=000000001DE4F000 cr3=000000001DE4F000 trap_scenario=4 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
           "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
           "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE120-N7-CPU-POLICY-001 entry_count=1 serial=present",
           "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF80050000 bytes=5008 entry=0xFFFFFFFF80008000 stack_top=0xFFFFFFFF80049000 root=0x000000001DE4F000 cr3=0x000000001DE4F000 rflags_if=0 rflags_df=0",
           "POOLEOS:KERNEL:PBP1 PASS profile=development records=4 artifacts=10 production_profile_valid=0",
           "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=C46B9030922FB095F5321CD62CD4930B812B2D8D8EA58B93B7C51956B6EEC8B8 policy_sha256=0A464E3019C064D04062EAB179C903BCE5DF7C2321E75ABAA6C3A8F3A8DA1884 state_sha256=924D5DA41A5743FB68A42164839031FF9927732E4D2690B3DE092813B84608D8 denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
-          "POOLEOS:KERNEL:TRANSFER-DENIED PASS contract=PKXFER1 terminal=halt entry_count=1 post_exit_firmware_calls=0 signatures=0 authority=0 actions=0 writes=0"
+          "POOLEOS:KERNEL:CPU-DISCOVERY OBSERVE contract=PKCPU1 vendor_hex=41757468656E746963414D44 brand_hex=51454D55205669727475616C204350552076657273696F6E20322E352B00000000000000000000000000000000000000 max_basic=0x000000000000000D max_extended=0x000000008000000A signature=0x0000000000060FB1 family=15 model=107 stepping=1 logical=1 apic_id=0 physical_width=40 linear_width=48",
+          "POOLEOS:KERNEL:CPU-TOPOLOGY OBSERVE contract=PKCPU1 leaf4_eax=0x0000000000000000 leaf4_ebx=0x0000000000000000 leaf4_ecx=0x0000000000000000 leaf4_edx=0x0000000000000000 leafb0_eax=0x0000000000000000 leafb0_ebx=0x0000000000000001 leafb0_ecx=0x0000000000000100 leafb0_edx=0x0000000000000000 ext6_ecx=0x0000000002008140",
+          "POOLEOS:KERNEL:CPU-FEATURES OBSERVE contract=PKCPU1 leaf1_ecx=0x0000000080002001 leaf1_edx=0x00000000078BFBFD leaf6_eax=0x0000000000000000 leaf7_ebx=0x0000000000000000 leaf7_ecx=0x0000000000000000 leaf7_edx=0x0000000000000000 leafa_eax=0x0000000000000000 ext1_ecx=0x0000000000000005 ext1_edx=0x000000002193FBFD ext7_edx=0x0000000000000000 ext1f_eax=0x0000000000000000",
+          "POOLEOS:KERNEL:CPU-XSAVE OBSERVE contract=PKCPU1 leafd0_eax=0x0000000000000000 leafd0_ebx=0x0000000000000000 leafd0_ecx=0x0000000000000000 leafd0_edx=0x0000000000000000 xcr0=0x0000000000000000 ownership=observation_only",
+          "POOLEOS:KERNEL:CPU-STATE OBSERVE contract=PKCPU1 cr0=0x0000000080010033 cr4=0x0000000000000668 efer=0x0000000000000D00 apic_base=0x00000000FEE00900 pat=0x0007040600070406 mtrr_cap=0x0000000000000508 mtrr_def=0x0000000000000C06 msr_read_mask=0x000000000000001F",
+          "POOLEOS:KERNEL:CPU-RESULT PASS contract=PKCPU1 profile=qemu64_tier0 bsp=1 policy=required_and_support_gated reads=cpuid_cr_msr writes=0 signatures=0 authority=0 actions=0 interrupts=0 terminal=halt"
         ],
         "media_read_only": true,
         "pbp1_serial_debugcon_exact_match": true,
@@ -3174,7 +3389,7 @@
         },
         "qmp_loopback_only": true,
         "qmp_quit_requested": true,
-        "run_id": "run-2",
+        "run_id": "cpu-policy-run-2",
         "screenshot": {
           "bright_cyan_pixel_count": 44970,
           "byte_count": 3072016,
@@ -3202,9 +3417,9 @@
   },
   "inputs": {
     "contract": {
-      "byte_count": 8096,
-      "path": "specs/native-kernel-transfer-contract.json",
-      "sha256": "B75BFF1212E48B8C2722DC7753723355AC0744A74AFE82D6A7C0F854BB00D95E"
+      "byte_count": 7406,
+      "path": "specs/native-kernel-cpu-policy-contract.json",
+      "sha256": "D527135D2F116936890160BDD0B7446F803F58D099DB329F65B427EAA4440A00"
     },
     "implementation_inputs": [
       {
@@ -3218,14 +3433,14 @@
         "sha256": "6ECF6741639D6CD81D6F79382300ABECC898F64FCC13E42604F5953E13F89BFC"
       },
       {
-        "byte_count": 24579,
-        "path": "native/boot/src/kmap.rs",
-        "sha256": "1B7EDF6DA5296A963B56A0D7F223976F68271949930B69CB452AAC902FE8F339"
-      },
-      {
         "byte_count": 18161,
         "path": "native/bootexit/src/lib.rs",
         "sha256": "186C0FD27333C6DEE63B375E49A4F35926AD121C4EE2513F6884BE521B7D3D5D"
+      },
+      {
+        "byte_count": 438,
+        "path": "native/kernel/manifest.pkm",
+        "sha256": "07D395013D94A941BCA3E7FE4957459EFA0FB3687E39ACCDC628624A1F83B1CA"
       },
       {
         "byte_count": 25834,
@@ -3243,9 +3458,9 @@
         "sha256": "EB4FC71DCC8F80D8BDDCB5F13E96D0F57AC7C19F6427EE9000668B0B1478C1ED"
       },
       {
-        "byte_count": 14333,
-        "path": "native/kernel/src/revalidation.rs",
-        "sha256": "127F1FCCCE98398D05424CCA49C3DA399FD00A311A9EFAB298CA026B77215A50"
+        "byte_count": 21187,
+        "path": "runtime/native_kernel_cpu_policy.py",
+        "sha256": "C264A098BA18E8F4BE487E28A54D6E677F8337C2DE3CEF271E77419BA3E87019"
       },
       {
         "byte_count": 23951,
@@ -3253,19 +3468,19 @@
         "sha256": "7F8FA5CE4F33048B78234D570D45E05ECDE0E927260C6F6C71154795CAA73124"
       },
       {
-        "byte_count": 18197,
-        "path": "tools/qualify_native_kernel_transfer.py",
-        "sha256": "558F326D24C8D60C5C55D50CDBB1692EC67365170D39691C8CE2C5C208BB8553"
+        "byte_count": 20375,
+        "path": "tools/qualify_native_kernel_cpu_policy.py",
+        "sha256": "82D04E108E1BB966A19542905BEA8052B35E9A112E4F9E8422DF50AD25DA7979"
       },
       {
-        "byte_count": 10829,
-        "path": "tests/test_native_kernel_transfer.py",
-        "sha256": "470E27F2B6470CC85D165CFA0D8D9F49D1BD92B4D507226DDDC8E280E3E927DA"
+        "byte_count": 4200,
+        "path": "tests/test_native_kernel_cpu_policy.py",
+        "sha256": "1EB42558B3161D9ED65FE89A3E629DFF3E0E1183179FB211A984AA13768B37ED"
       },
       {
-        "byte_count": 6238,
-        "path": "docs/native-kernel-transfer.md",
-        "sha256": "0916DF0159766B2C068C400D33EA700AACCE3D0A5D62526822E257E4BEBDD042"
+        "byte_count": 5846,
+        "path": "docs/native-kernel-cpu-policy.md",
+        "sha256": "4FFDDB67C999BD1EFD35EEC08668C08B1CA22B2612797EA8637E992C84B0BA23"
       },
       {
         "byte_count": 21067,
@@ -3449,7 +3664,7 @@
             "raw_offset": 153600,
             "raw_size": 52224,
             "virtual_address": 159744,
-            "virtual_size": 51788
+            "virtual_size": 51796
           },
           {
             "characteristics": 1073741888,
@@ -3468,7 +3683,7 @@
             "virtual_size": 748
           }
         ],
-        "sha256": "CFB6B5B47AE706433C81F9F4A0A24A2376848D5EEFDC1810779A2AFA4F1A301B",
+        "sha256": "3B95D85425ACA0D02C5E434736CE9F0EDF79FF8B82EF6CEED8A83A6B4662789A",
         "subsystem": 10,
         "timestamp": 0
       },
@@ -3495,7 +3710,7 @@
           "byte_count": 207360,
           "cluster_count": 405,
           "path": "EFI/BOOT/BOOTX64.EFI",
-          "sha256": "CFB6B5B47AE706433C81F9F4A0A24A2376848D5EEFDC1810779A2AFA4F1A301B"
+          "sha256": "3B95D85425ACA0D02C5E434736CE9F0EDF79FF8B82EF6CEED8A83A6B4662789A"
         },
         {
           "byte_count": 229,
@@ -3651,7 +3866,7 @@
         "protective_mbr_valid": true,
         "sector_bytes": 512,
         "sector_count": 131072,
-        "sha256": "658EF266C07EB12D0D642485E8C77C6FEE7CC10E4219857261E87250E707DD48"
+        "sha256": "36A7EF2D680B878F01CACAB4666E0719B142B8530565D40D1EC575B2D9360DD6"
       },
       "initial_system": {
         "activation_allowed": false,
@@ -4066,457 +4281,259 @@
     },
     "ordinary_workspace_file_only": true,
     "physical_media_write_performed": false,
-    "sha256": "658EF266C07EB12D0D642485E8C77C6FEE7CC10E4219857261E87250E707DD48"
+    "sha256": "36A7EF2D680B878F01CACAB4666E0719B142B8530565D40D1EC575B2D9360DD6"
   },
-  "n5_exit_gate_satisfied": false,
+  "n7_exit_gate_satisfied": false,
   "negative_controls": [
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-MARKER-OMISSION",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-MARKER-OMISSION",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-MARKER-ORDER",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-MARKER-ORDER",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-MARKER-DUPLICATE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-MARKER-DUPLICATE",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-CONTRACT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-SELECTOR",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-MODE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-CONTRACT",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-EMULATOR",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-VENDOR",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-ENTRY",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-BRAND",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-HANDOFF",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-MAX-BASIC",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-BYTE-COUNT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-MAX-EXTENDED",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-STACK",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-IDENTITY-FAMILY",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-ROOT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-IDENTITY-MODEL",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-CR3",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-IDENTITY-STEPPING",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-TRAP-SCENARIO",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-LOGICAL-COUNT",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-SIGNATURE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-PHYSICAL-WIDTH",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-AUTHORITY",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-LINEAR-WIDTH",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-ACTION",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-TOPOLOGY-ID",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-STATE-WRITE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-LEAF1-REQUIRED",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-FIRMWARE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-EXT1-REQUIRED",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-BOUNDARY",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-CR0-REQUIRED",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ENTRY-CONTRACT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-CR0-FORBIDDEN",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ENTRY-TRANSFER-CONTRACT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-CR4-REQUIRED",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ENTRY-BUILD",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-CR4-FORBIDDEN",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ENTRY-COUNT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-FEATURE-GATE",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ENTRY-SERIAL",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-OSXSAVE-CONSISTENCY",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-STATE-HANDOFF",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-XCR0-BASELINE",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-STATE-BYTE-COUNT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-EFER-REQUIRED",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-STATE-ENTRY",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-EFER-RESERVED",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-STATE-STACK",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-MSR-READ-ALLOWLIST",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-STATE-ROOT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-APIC-ENABLE",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-STATE-CR3",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-APIC-RESERVED",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-STATE-IF",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-PAT-TYPE",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-STATE-DF",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-MTRR-CAP",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-PBP1-PROFILE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-MTRR-DEFAULT",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-PBP1-RECORD-COUNT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-RESULT-PROFILE",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-PBP1-ARTIFACT-COUNT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-RESULT-READS",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-PBP1-PRODUCTION",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-RESULT-WRITES",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-CONTRACT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-RESULT-SIGNATURES",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-FILE-COUNT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-RESULT-AUTHORITY",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-ARTIFACT-COUNT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-RESULT-ACTIONS",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-PARSER-COUNT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-RESULT-INTERRUPTS",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-MANIFEST-BYTES",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-RETAINED-BYTES",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-RETAINED-DIGEST",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-POLICY-DIGEST",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-STATE-DIGEST",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-DENIAL",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-AUTHORITY",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-ACTION",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-STATE-WRITE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-TERMINAL-CONTRACT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-TERMINAL-MODE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-TERMINAL-ENTRY-COUNT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-TERMINAL-FIRMWARE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-TERMINAL-SIGNATURE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-TERMINAL-AUTHORITY",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-TERMINAL-ACTION",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-TERMINAL-STATE-WRITE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-UNEXPECTED-RETURN",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKCPU-RESULT-TERMINAL",
       "status": "pass"
     }
   ],
   "non_claims": [
-    "The ordinary PooleBoot build still stops before transfer; live dispatch requires the explicit development-transfer feature.",
-    "The PKXFER1 unsigned terminal-denial receipt accepts trap selector zero only; nonzero QEMU scenarios are qualified separately by PKTRAP1.",
-    "The exited-development PBP1 intentionally fails the authenticated production PKENTRY1 profile.",
-    "The live kernel path grants no capability, lifecycle, recovery, symbol, microcode, firmware, policy, or state-write authority.",
-    "The framebuffer still uses inherited firmware translation and cache attributes pending final remap and revocation work.",
-    "No target firmware, physical hardware, second independent host, physical-media write, signed release, ISO, installer, or production promotion is claimed.",
-    "Owner authorization for signing or privileged operations does not substitute for the missing qualification evidence or safety gates."
+    "PKCPU1 is a single-BSP qemu64 Tier 0 development observation and does not qualify the AMD Ryzen 7 9800X3D target.",
+    "The qemu64 model is intentionally limited and non-promoting; its observed vendor, family, model, features, cache, topology, and MSR values are not physical-machine evidence.",
+    "PKCPU1 reads CR0, CR4, EFER, XCR0, APIC base, PAT, and MTRR state but performs no control-register, XCR0, MSR, microcode, firmware, or device write.",
+    "The snapshot does not complete target-family errata, microcode revision acceptance, AP-local policy, dynamic feature revocation, or cross-generation support matrices.",
+    "XSAVE support and XCR0 consistency are observed only; x87/SSE/AVX save areas, ownership, context switching, lazy/eager policy, and hostile restore tests remain N7.4 work.",
+    "MCE, MCA, performance, thermal, virtualization, encryption, and random-instruction bits are inventory inputs only and are not activated or qualified subsystems.",
+    "No key, signature, capability, authority, user mode, scheduler, driver, firmware mutation, physical-media write, signed release, ISO publication, or production promotion is claimed."
   ],
   "open_items": [
-    "Define and qualify the authenticated production PKENTRY1 profile with trusted signatures and measured-boot evidence.",
-    "Replace inherited framebuffer translation with an explicit final cache policy and revoke the temporary identity mapping.",
-    "Qualify target firmware and physical hardware under a separately defined safe procedure despite the owner's broad authorization.",
-    "Reproduce exact product, media, markers, PBP1 bytes, and frame on a second independent host.",
-    "Implement GDT, IDT, TSS, exception containment, physical and virtual memory initialization, capabilities, scheduling, IPC, and initial user space.",
-    "Complete all remaining N5-N39 gates before ISO publication or production promotion."
+    "Freeze AMD Ryzen 7 9800X3D family/model/stepping and native CPUID acceptance from qualified physical evidence.",
+    "Acquire an applicable Granite Ridge revision guide or retain a documented vendor-source gap and build the target errata matrix.",
+    "Add privileged microcode revision observation and fail-closed minimum revision policy after mechanism qualification.",
+    "Implement x87/SSE/AVX/XSAVE ownership, context switching, restore validation, and hostile state tests in N7.4.",
+    "Extend discovery and policy to AP-local state, target firmware, physical hardware, and second-host reproduction.",
+    "Complete the remaining N7 descriptor, vector, NMI, machine-check, crash-retention, and exit-gate work."
   ],
   "phase_status": {
-    "N5": "partial",
-    "N5.1": "partial",
-    "N5.4": "partial",
-    "N5.5": "partial",
-    "N5.8": "partial",
-    "N5.9": "partial"
+    "N7": "partial",
+    "N7.1": "partial",
+    "N7.3": "partial"
   },
   "production_promotion_allowed": false,
   "production_ready": false,
   "schema_version": "1.0",
-  "selected_move_id": "N5-KERNEL-TRANSFER-001",
-  "status": "pass_single_host_two_run_qemu_only_unsigned_terminal_non_promoting",
-  "status_date": "2026-07-18",
+  "selected_move_id": "N7-CPU-POLICY-001",
+  "status": "pass_single_host_two_run_qemu64_read_only_non_promoting",
+  "status_date": "2026-07-21",
   "summary": {
     "actions_authorized": 0,
     "authority_grants": 0,
+    "cpuid_family": 15,
+    "cpuid_model": 107,
+    "cpuid_stepping": 1,
+    "cpuid_vendor": "AuthenticAMD",
     "firmware_calls_after_exit": 0,
-    "kernel_marker_count": 5,
-    "marker_count": 30,
-    "negative_controls_passed": 58,
+    "linear_width": 48,
+    "marker_count": 35,
+    "msr_read_count": 5,
+    "negative_controls_passed": 41,
+    "physical_width": 40,
     "production_claim_count": 0,
-    "retained_file_count": 9,
+    "qemu_run_count": 2,
     "signature_verifications": 0,
     "state_writes": 0
   }

@@ -4,8 +4,10 @@ use core::ptr::{addr_of, addr_of_mut, read_unaligned, write_bytes, write_volatil
 use core::sync::atomic::{Ordering, compiler_fence};
 
 use poolekernel::{
-    ByteSink, DescriptorState, GDT_LIMIT, IDT_LIMIT, INSTALLED_EXCEPTION_GATE_COUNT,
-    IST_STACK_BYTES, KERNEL_CODE_SELECTOR, KERNEL_DATA_SELECTOR, KERNEL_TSS_SELECTOR,
+    ByteSink, CPU_MSR_APIC_BASE, CPU_MSR_EFER, CPU_MSR_MTRR_CAP, CPU_MSR_MTRR_DEF_TYPE,
+    CPU_MSR_PAT, CpuControlState, CpuDiscovery, CpuPolicySnapshot, DescriptorState, GDT_LIMIT,
+    IDT_LIMIT, INSTALLED_EXCEPTION_GATE_COUNT, IST_STACK_BYTES, KERNEL_CODE_SELECTOR,
+    KERNEL_DATA_SELECTOR, KERNEL_TSS_SELECTOR,
 };
 
 const COM1_BASE: u16 = 0x03f8;
@@ -124,6 +126,258 @@ static mut TSS: AlignedTss = AlignedTss(TaskStateSegment {
 });
 static mut FAULT_STACK: TrapStack = TrapStack([0; IST_STACK_BYTES as usize]);
 static mut DOUBLE_FAULT_STACK: TrapStack = TrapStack([0; IST_STACK_BYTES as usize]);
+
+const IA32_APIC_BASE: u32 = 0x0000_001b;
+const IA32_MTRR_CAP: u32 = 0x0000_00fe;
+const IA32_PAT: u32 = 0x0000_0277;
+const IA32_MTRR_DEF_TYPE: u32 = 0x0000_02ff;
+const IA32_EFER: u32 = 0xc000_0080;
+const LEAF1_EDX_APIC: u32 = 1 << 9;
+const LEAF1_EDX_MTRR: u32 = 1 << 12;
+const LEAF1_EDX_PAT: u32 = 1 << 16;
+const LEAF1_ECX_OSXSAVE: u32 = 1 << 27;
+
+#[derive(Clone, Copy)]
+struct CpuidRegisters {
+    eax: u32,
+    ebx: u32,
+    ecx: u32,
+    edx: u32,
+}
+
+fn cpuid(leaf: u32, subleaf: u32) -> CpuidRegisters {
+    let value = core::arch::x86_64::__cpuid_count(leaf, subleaf);
+    CpuidRegisters {
+        eax: value.eax,
+        ebx: value.ebx,
+        ecx: value.ecx,
+        edx: value.edx,
+    }
+}
+
+unsafe fn read_cr0() -> u64 {
+    let value: u64;
+    // SAFETY: PKCPU1 calls this only at CPL0 after PKXFER1; the instruction is read-only.
+    unsafe { asm!("mov {}, cr0", out(reg) value, options(nomem, nostack, preserves_flags)) };
+    value
+}
+
+unsafe fn read_cr4() -> u64 {
+    let value: u64;
+    // SAFETY: PKCPU1 calls this only at CPL0 after PKXFER1; the instruction is read-only.
+    unsafe { asm!("mov {}, cr4", out(reg) value, options(nomem, nostack, preserves_flags)) };
+    value
+}
+
+unsafe fn read_msr(msr: u32) -> u64 {
+    let low: u32;
+    let high: u32;
+    // SAFETY: each caller gates this privileged read through the corresponding CPUID feature.
+    unsafe {
+        asm!(
+            "rdmsr",
+            in("ecx") msr,
+            out("eax") low,
+            out("edx") high,
+            options(nomem, nostack, preserves_flags)
+        )
+    };
+    u64::from(low) | (u64::from(high) << 32)
+}
+
+unsafe fn read_efer() -> u64 {
+    // SAFETY: long mode and the PKCPU1 baseline require IA32_EFER to exist.
+    unsafe { read_msr(IA32_EFER) }
+}
+
+unsafe fn read_apic_base() -> u64 {
+    // SAFETY: the caller requires CPUID.01H:EDX.APIC before this typed read.
+    unsafe { read_msr(IA32_APIC_BASE) }
+}
+
+unsafe fn read_pat() -> u64 {
+    // SAFETY: the caller requires CPUID.01H:EDX.PAT before this typed read.
+    unsafe { read_msr(IA32_PAT) }
+}
+
+unsafe fn read_mtrr_cap() -> u64 {
+    // SAFETY: the caller requires CPUID.01H:EDX.MTRR before this typed read.
+    unsafe { read_msr(IA32_MTRR_CAP) }
+}
+
+unsafe fn read_mtrr_default_type() -> u64 {
+    // SAFETY: the caller requires CPUID.01H:EDX.MTRR before this typed read.
+    unsafe { read_msr(IA32_MTRR_DEF_TYPE) }
+}
+
+unsafe fn read_xcr0() -> u64 {
+    let low: u32;
+    let high: u32;
+    // SAFETY: the caller requires CPUID.01H:ECX.OSXSAVE, which reflects CR4.OSXSAVE.
+    unsafe {
+        asm!(
+            "xgetbv",
+            in("ecx") 0_u32,
+            out("eax") low,
+            out("edx") high,
+            options(nomem, nostack, preserves_flags)
+        )
+    };
+    u64::from(low) | (u64::from(high) << 32)
+}
+
+pub unsafe fn observe_cpu_policy() -> CpuPolicySnapshot {
+    let basic = cpuid(0, 0);
+    let extended = cpuid(0x8000_0000, 0);
+    let leaf1 = cpuid(1, 0);
+    let leaf4 = cpuid(4, 0);
+    let leaf6 = if basic.eax >= 6 {
+        cpuid(6, 0)
+    } else {
+        cpuid(0, 0)
+    };
+    let leaf7 = cpuid(7, 0);
+    let leaf_a = if basic.eax >= 0x0a {
+        cpuid(0x0a, 0)
+    } else {
+        cpuid(0, 0)
+    };
+    let leaf_b0 = if basic.eax >= 0x0b {
+        cpuid(0x0b, 0)
+    } else {
+        CpuidRegisters {
+            eax: 0,
+            ebx: 0,
+            ecx: 0,
+            edx: 0,
+        }
+    };
+    let leaf_d0 = if basic.eax >= 0x0d && leaf1.ecx & (1 << 26) != 0 {
+        cpuid(0x0d, 0)
+    } else {
+        CpuidRegisters {
+            eax: 0,
+            ebx: 0,
+            ecx: 0,
+            edx: 0,
+        }
+    };
+    let ext1 = cpuid(0x8000_0001, 0);
+    let ext6 = cpuid(0x8000_0006, 0);
+    let ext7 = cpuid(0x8000_0007, 0);
+    let ext8 = cpuid(0x8000_0008, 0);
+    let ext1f = if extended.eax >= 0x8000_001f {
+        cpuid(0x8000_001f, 0)
+    } else {
+        CpuidRegisters {
+            eax: 0,
+            ebx: 0,
+            ecx: 0,
+            edx: 0,
+        }
+    };
+    let mut brand = [0_u8; 48];
+    let mut brand_offset = 0;
+    for leaf in 0x8000_0002..=0x8000_0004 {
+        let value = cpuid(leaf, 0);
+        for register in [value.eax, value.ebx, value.ecx, value.edx] {
+            brand[brand_offset..brand_offset + 4].copy_from_slice(&register.to_le_bytes());
+            brand_offset += 4;
+        }
+    }
+    let mut vendor = [0_u8; 12];
+    vendor[0..4].copy_from_slice(&basic.ebx.to_le_bytes());
+    vendor[4..8].copy_from_slice(&basic.edx.to_le_bytes());
+    vendor[8..12].copy_from_slice(&basic.ecx.to_le_bytes());
+
+    let mut msr_read_mask = CPU_MSR_EFER;
+    // SAFETY: the running x86-64 environment necessarily implements IA32_EFER.
+    let efer = unsafe { read_efer() };
+    let (apic_base, pat, mtrr_cap, mtrr_def_type) = (
+        if leaf1.edx & LEAF1_EDX_APIC != 0 {
+            msr_read_mask |= CPU_MSR_APIC_BASE;
+            // SAFETY: CPUID reports the APIC MSR facility.
+            unsafe { read_apic_base() }
+        } else {
+            0
+        },
+        if leaf1.edx & LEAF1_EDX_PAT != 0 {
+            msr_read_mask |= CPU_MSR_PAT;
+            // SAFETY: CPUID reports the PAT MSR facility.
+            unsafe { read_pat() }
+        } else {
+            0
+        },
+        if leaf1.edx & LEAF1_EDX_MTRR != 0 {
+            msr_read_mask |= CPU_MSR_MTRR_CAP;
+            // SAFETY: CPUID reports the MTRR MSR facility.
+            unsafe { read_mtrr_cap() }
+        } else {
+            0
+        },
+        if leaf1.edx & LEAF1_EDX_MTRR != 0 {
+            msr_read_mask |= CPU_MSR_MTRR_DEF_TYPE;
+            // SAFETY: CPUID reports the MTRR MSR facility.
+            unsafe { read_mtrr_default_type() }
+        } else {
+            0
+        },
+    );
+    let xcr0 = if leaf1.ecx & LEAF1_ECX_OSXSAVE != 0 {
+        // SAFETY: OSXSAVE reports that XGETBV is enabled by CR4.OSXSAVE.
+        unsafe { read_xcr0() }
+    } else {
+        0
+    };
+    CpuPolicySnapshot {
+        discovery: CpuDiscovery {
+            vendor,
+            brand,
+            max_basic_leaf: basic.eax,
+            max_extended_leaf: extended.eax,
+            leaf1_eax: leaf1.eax,
+            leaf1_ebx: leaf1.ebx,
+            leaf1_ecx: leaf1.ecx,
+            leaf1_edx: leaf1.edx,
+            leaf4_eax: leaf4.eax,
+            leaf4_ebx: leaf4.ebx,
+            leaf4_ecx: leaf4.ecx,
+            leaf4_edx: leaf4.edx,
+            leaf6_eax: leaf6.eax,
+            leaf7_ebx: leaf7.ebx,
+            leaf7_ecx: leaf7.ecx,
+            leaf7_edx: leaf7.edx,
+            leaf_a_eax: leaf_a.eax,
+            leaf_b0_eax: leaf_b0.eax,
+            leaf_b0_ebx: leaf_b0.ebx,
+            leaf_b0_ecx: leaf_b0.ecx,
+            leaf_b0_edx: leaf_b0.edx,
+            leaf_d0_eax: leaf_d0.eax,
+            leaf_d0_ebx: leaf_d0.ebx,
+            leaf_d0_ecx: leaf_d0.ecx,
+            leaf_d0_edx: leaf_d0.edx,
+            ext1_ecx: ext1.ecx,
+            ext1_edx: ext1.edx,
+            ext6_ecx: ext6.ecx,
+            ext7_edx: ext7.edx,
+            ext8_eax: ext8.eax,
+            ext1f_eax: ext1f.eax,
+        },
+        control: CpuControlState {
+            // SAFETY: PKCPU1 runs at CPL0; these reads do not modify control state.
+            cr0: unsafe { read_cr0() },
+            // SAFETY: PKCPU1 runs at CPL0; these reads do not modify control state.
+            cr4: unsafe { read_cr4() },
+            efer,
+            xcr0,
+            apic_base,
+            pat,
+            mtrr_cap,
+            mtrr_def_type,
+            msr_read_mask,
+        },
+    }
+}
 
 #[derive(Clone, Copy, Debug)]
 #[repr(C)]

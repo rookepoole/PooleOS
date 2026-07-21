@@ -11,6 +11,7 @@ development-transfer = []
 development-trap-returning = ["development-transfer"]
 development-trap-double-fault = ["development-transfer"]
 development-trap-malformed-frame = ["development-transfer"]
+development-cpu-policy = ["development-transfer"]
 
 [lib]
 name = "pooleboot"

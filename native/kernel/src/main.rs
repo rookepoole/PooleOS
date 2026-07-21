@@ -12,9 +12,10 @@ use core::sync::atomic::{AtomicU32, AtomicU64, Ordering};
 
 use arch::x86_64::{Com1, DebugCon, TrapFrame, halt_forever};
 use poolekernel::{
-    BUILD_ID, ByteSink, DevelopmentTrapScenario, EARLY_LOG_CAPACITY, EarlyLogger, EarlyRing,
-    Framebuffer, PanicCode, PanicDisposition, PanicState, TRANSFER_CONTRACT_ID, TRAP_CONTRACT_ID,
-    TrapDisposition, TrapError, TrapExpectation, TrapObservation, revalidation,
+    BUILD_ID, ByteSink, CPU_POLICY_CONTRACT_ID, DevelopmentTrapScenario, EARLY_LOG_CAPACITY,
+    EarlyLogger, EarlyRing, Framebuffer, PanicCode, PanicDisposition, PanicState,
+    TRANSFER_CONTRACT_ID, TRAP_CONTRACT_ID, TrapDisposition, TrapError, TrapExpectation,
+    TrapObservation, decode_cpu_identity, revalidation, validate_cpu_policy_snapshot,
     validate_descriptor_state, validate_development_handoff, validate_entry_envelope,
     validate_handoff, validate_runtime_state, validate_trap_observation,
 };
@@ -111,6 +112,7 @@ extern "C" fn poole_kernel_emergency_panic(code: u32) -> ! {
         0x1009 => PanicCode::Reentry,
         0x100a => PanicCode::DescriptorState,
         0x100b => PanicCode::TrapContract,
+        0x100c => PanicCode::CpuPolicy,
         _ => PanicCode::UnexpectedReturn,
     };
     let disposition = PANIC_STATE.begin(code);
@@ -302,6 +304,141 @@ extern "C" fn poole_kernel_rust_entry(
         halt_forever()
     }
 
+    if trap_scenario == DevelopmentTrapScenario::CpuPolicy {
+        // SAFETY: PKXFER1 has transferred once at CPL0 with IF/DF clear. PKCPU1 performs
+        // only support-gated CPUID, control-register, XCR0, and MSR reads.
+        let snapshot = unsafe { arch::x86_64::observe_cpu_policy() };
+        let discovery = &snapshot.discovery;
+        let control = &snapshot.control;
+        let identity = decode_cpu_identity(discovery.leaf1_eax);
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        logger.write_str("POOLEOS:KERNEL:CPU-DISCOVERY OBSERVE contract=");
+        logger.write_str(CPU_POLICY_CONTRACT_ID);
+        logger.write_str(" vendor_hex=");
+        logger.write_hex_bytes(&discovery.vendor);
+        logger.write_str(" brand_hex=");
+        logger.write_hex_bytes(&discovery.brand);
+        logger.write_str(" max_basic=");
+        logger.write_hex_u64(u64::from(discovery.max_basic_leaf));
+        logger.write_str(" max_extended=");
+        logger.write_hex_u64(u64::from(discovery.max_extended_leaf));
+        logger.write_str(" signature=");
+        logger.write_hex_u64(u64::from(discovery.leaf1_eax));
+        logger.write_str(" family=");
+        logger.write_decimal_u64(u64::from(identity.family));
+        logger.write_str(" model=");
+        logger.write_decimal_u64(u64::from(identity.model));
+        logger.write_str(" stepping=");
+        logger.write_decimal_u64(u64::from(identity.stepping));
+        logger.write_str(" logical=");
+        let leaf_b_logical = discovery.leaf_b0_ebx & 0xffff;
+        let leaf1_logical = (discovery.leaf1_ebx >> 16) & 0xff;
+        logger.write_decimal_u64(u64::from(if leaf_b_logical != 0 {
+            leaf_b_logical
+        } else if leaf1_logical != 0 {
+            leaf1_logical
+        } else {
+            1
+        }));
+        logger.write_str(" apic_id=");
+        logger.write_decimal_u64(u64::from(discovery.leaf1_ebx >> 24));
+        logger.write_str(" physical_width=");
+        logger.write_decimal_u64(u64::from(discovery.ext8_eax & 0xff));
+        logger.write_str(" linear_width=");
+        logger.write_decimal_u64(u64::from((discovery.ext8_eax >> 8) & 0xff));
+        logger.write_str("\nPOOLEOS:KERNEL:CPU-TOPOLOGY OBSERVE contract=");
+        logger.write_str(CPU_POLICY_CONTRACT_ID);
+        logger.write_str(" leaf4_eax=");
+        logger.write_hex_u64(u64::from(discovery.leaf4_eax));
+        logger.write_str(" leaf4_ebx=");
+        logger.write_hex_u64(u64::from(discovery.leaf4_ebx));
+        logger.write_str(" leaf4_ecx=");
+        logger.write_hex_u64(u64::from(discovery.leaf4_ecx));
+        logger.write_str(" leaf4_edx=");
+        logger.write_hex_u64(u64::from(discovery.leaf4_edx));
+        logger.write_str(" leafb0_eax=");
+        logger.write_hex_u64(u64::from(discovery.leaf_b0_eax));
+        logger.write_str(" leafb0_ebx=");
+        logger.write_hex_u64(u64::from(discovery.leaf_b0_ebx));
+        logger.write_str(" leafb0_ecx=");
+        logger.write_hex_u64(u64::from(discovery.leaf_b0_ecx));
+        logger.write_str(" leafb0_edx=");
+        logger.write_hex_u64(u64::from(discovery.leaf_b0_edx));
+        logger.write_str(" ext6_ecx=");
+        logger.write_hex_u64(u64::from(discovery.ext6_ecx));
+        logger.write_str("\nPOOLEOS:KERNEL:CPU-FEATURES OBSERVE contract=");
+        logger.write_str(CPU_POLICY_CONTRACT_ID);
+        logger.write_str(" leaf1_ecx=");
+        logger.write_hex_u64(u64::from(discovery.leaf1_ecx));
+        logger.write_str(" leaf1_edx=");
+        logger.write_hex_u64(u64::from(discovery.leaf1_edx));
+        logger.write_str(" leaf6_eax=");
+        logger.write_hex_u64(u64::from(discovery.leaf6_eax));
+        logger.write_str(" leaf7_ebx=");
+        logger.write_hex_u64(u64::from(discovery.leaf7_ebx));
+        logger.write_str(" leaf7_ecx=");
+        logger.write_hex_u64(u64::from(discovery.leaf7_ecx));
+        logger.write_str(" leaf7_edx=");
+        logger.write_hex_u64(u64::from(discovery.leaf7_edx));
+        logger.write_str(" leafa_eax=");
+        logger.write_hex_u64(u64::from(discovery.leaf_a_eax));
+        logger.write_str(" ext1_ecx=");
+        logger.write_hex_u64(u64::from(discovery.ext1_ecx));
+        logger.write_str(" ext1_edx=");
+        logger.write_hex_u64(u64::from(discovery.ext1_edx));
+        logger.write_str(" ext7_edx=");
+        logger.write_hex_u64(u64::from(discovery.ext7_edx));
+        logger.write_str(" ext1f_eax=");
+        logger.write_hex_u64(u64::from(discovery.ext1f_eax));
+        logger.write_str("\nPOOLEOS:KERNEL:CPU-XSAVE OBSERVE contract=");
+        logger.write_str(CPU_POLICY_CONTRACT_ID);
+        logger.write_str(" leafd0_eax=");
+        logger.write_hex_u64(u64::from(discovery.leaf_d0_eax));
+        logger.write_str(" leafd0_ebx=");
+        logger.write_hex_u64(u64::from(discovery.leaf_d0_ebx));
+        logger.write_str(" leafd0_ecx=");
+        logger.write_hex_u64(u64::from(discovery.leaf_d0_ecx));
+        logger.write_str(" leafd0_edx=");
+        logger.write_hex_u64(u64::from(discovery.leaf_d0_edx));
+        logger.write_str(" xcr0=");
+        logger.write_hex_u64(control.xcr0);
+        logger.write_str(" ownership=observation_only\nPOOLEOS:KERNEL:CPU-STATE OBSERVE contract=");
+        logger.write_str(CPU_POLICY_CONTRACT_ID);
+        logger.write_str(" cr0=");
+        logger.write_hex_u64(control.cr0);
+        logger.write_str(" cr4=");
+        logger.write_hex_u64(control.cr4);
+        logger.write_str(" efer=");
+        logger.write_hex_u64(control.efer);
+        logger.write_str(" apic_base=");
+        logger.write_hex_u64(control.apic_base);
+        logger.write_str(" pat=");
+        logger.write_hex_u64(control.pat);
+        logger.write_str(" mtrr_cap=");
+        logger.write_hex_u64(control.mtrr_cap);
+        logger.write_str(" mtrr_def=");
+        logger.write_hex_u64(control.mtrr_def_type);
+        logger.write_str(" msr_read_mask=");
+        logger.write_hex_u64(u64::from(control.msr_read_mask));
+        logger.write_str("\n");
+        if let Err(error) = validate_cpu_policy_snapshot(&snapshot) {
+            logger.write_str("POOLEOS:KERNEL:CPU-DENIED contract=PKCPU1 reason=");
+            logger.write_str(error.label());
+            logger.write_str(" writes=0 authority=0 actions=0 terminal=panic\n");
+            poole_kernel_emergency_panic(PanicCode::CpuPolicy as u32);
+        }
+        logger.write_str("POOLEOS:KERNEL:CPU-RESULT PASS contract=");
+        logger.write_str(CPU_POLICY_CONTRACT_ID);
+        logger.write_str(
+            " profile=qemu64_tier0 bsp=1 policy=required_and_support_gated reads=cpuid_cr_msr writes=0 signatures=0 authority=0 actions=0 interrupts=0 terminal=halt\n",
+        );
+        halt_forever()
+    }
+
     // SAFETY: PKXFER1 has installed the retained bootstrap stack, disabled IF/DF,
     // and transferred once on the BSP. PKTRAP1 owns these private descriptor statics.
     let descriptor_state = unsafe { arch::x86_64::install_descriptor_tables(stack_top as u64) };
@@ -403,6 +540,9 @@ extern "C" fn poole_kernel_rust_entry(
             // SAFETY: the valid #BP frame is then subjected to a synthetic semantic corruption.
             unsafe { arch::x86_64::trigger_breakpoint() };
             poole_kernel_emergency_panic(PanicCode::UnexpectedReturn as u32)
+        }
+        DevelopmentTrapScenario::CpuPolicy => {
+            poole_kernel_emergency_panic(PanicCode::TransferState as u32)
         }
     }
 }

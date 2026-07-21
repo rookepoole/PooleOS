@@ -28,7 +28,7 @@ The transfer uses the integer-register subset of the [System V AMD64 ABI](https:
 | `RDI` | canonical virtual address of exact immutable PBP1 bytes |
 | `RSI` | exact PBP1 byte count |
 | `RDX` | little-endian `PBP1` magic as `u64` |
-| `R10` | validated trap scenario selector; exactly zero for this receipt |
+| `R10` | validated development-profile selector; exactly zero for this receipt |
 | `RSP` | 16-byte-aligned exclusive bootstrap-stack top |
 | `CR3` | retained PKMAP2 root plus only permitted PWT/PCD bits |
 | `IF` | clear |
@@ -36,7 +36,7 @@ The transfer uses the integer-register subset of the [System V AMD64 ABI](https:
 
 PooleBoot executes `cli`, `cld`, installs CR3 and RSP, and jumps to the PBP1-bound entry. The PooleKernel assembly wrapper repeats `cli` and `cld`, validates the incoming stack without a language call, captures CR3 and RFLAGS in `R8` and `R9`, then calls the Rust entry using a correctly aligned stack. Intel instruction and control-register semantics are anchored to the [Intel 64 and IA-32 Software Developer Manuals](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html).
 
-Selectors `1..3` are qualified separately by PKTRAP1. They cannot satisfy this receipt's selector-zero unsigned terminal-denial oracle.
+Selectors `1..3` are qualified separately by PKTRAP1, and selector `4` is qualified separately by PKCPU1. None can satisfy this receipt's selector-zero unsigned terminal-denial oracle.
 
 ## Kernel Intake
 
@@ -78,6 +78,6 @@ live proof is rerun.
 
 ## Remaining Work
 
-`PKXFER1` does not validate an authenticated production PBP1 profile, target firmware, physical hardware, persistent state, a second independent builder, an ISO, or production promotion. The framebuffer still relies on the inherited firmware translation and cache attributes; final remapping and revocation remain mandatory. Descriptor tables, exception containment, memory management, capabilities, scheduling, IPC, initial user space, PooleGlyph, PDC, drivers, and PooleGlass remain downstream work.
+`PKXFER1` does not validate an authenticated production PBP1 profile, target firmware, physical hardware, persistent state, a second independent builder, an ISO, or production promotion. The framebuffer still relies on the inherited firmware translation and cache attributes; final remapping and revocation remain mandatory. PKTRAP1 and PKCPU1 separately cover bounded opt-in descriptor/fault and read-only qemu64 CPU-policy slices, but target-family/errata/xstate policy, complete exception containment, memory management, capabilities, scheduling, IPC, initial user space, PooleGlyph, PDC, drivers, and PooleGlass remain downstream work.
 
 The owner's broader authorization for signing and privileged operations is recorded separately. It removes an approval category but does not supply a FIDO2 key, safe target identity, backups, qualification evidence, or permission to bypass any charter gate.

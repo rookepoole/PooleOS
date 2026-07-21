@@ -74,6 +74,7 @@ class PublicationBoundaryTests(unittest.TestCase):
             "runs/native-kernel-revalidation-readiness.json",
             "runs/native-kernel-transfer-readiness.json",
             "runs/native-kernel-trap-readiness.json",
+            "runs/native-kernel-cpu-policy-readiness.json",
             "runs/native_microcode_readiness.json",
             "runs/native_recovery_readiness.json",
             "runs/native_system_manifest_readiness.json",

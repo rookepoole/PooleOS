@@ -17,7 +17,8 @@ pub mod revalidation;
 pub const ENTRY_CONTRACT_ID: &str = "PKENTRY1";
 pub const TRANSFER_CONTRACT_ID: &str = "PKXFER1";
 pub const TRAP_CONTRACT_ID: &str = "PKTRAP1";
-pub const BUILD_ID: &[u8] = b"PKBUILD1-CYCLE119-N7-TRAP-001";
+pub const CPU_POLICY_CONTRACT_ID: &str = "PKCPU1";
+pub const BUILD_ID: &[u8] = b"PKBUILD1-CYCLE120-N7-CPU-POLICY-001";
 pub const ENTRY_OFFSET: u64 = 0x8000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
 pub const HANDOFF_MAGIC_U64: u64 = u64::from_le_bytes(poole_handoff::MAGIC);
@@ -47,6 +48,7 @@ pub enum PanicCode {
     Reentry = 0x1009,
     DescriptorState = 0x100a,
     TrapContract = 0x100b,
+    CpuPolicy = 0x100c,
     UnexpectedReturn = 0x10ff,
 }
 
@@ -57,6 +59,7 @@ pub enum DevelopmentTrapScenario {
     Returning = 1,
     DoubleFault = 2,
     MalformedFrame = 3,
+    CpuPolicy = 4,
 }
 
 impl DevelopmentTrapScenario {
@@ -66,6 +69,7 @@ impl DevelopmentTrapScenario {
             1 => Some(Self::Returning),
             2 => Some(Self::DoubleFault),
             3 => Some(Self::MalformedFrame),
+            4 => Some(Self::CpuPolicy),
             _ => None,
         }
     }
@@ -76,8 +80,377 @@ impl DevelopmentTrapScenario {
             Self::Returning => "returning",
             Self::DoubleFault => "double_fault",
             Self::MalformedFrame => "malformed_frame",
+            Self::CpuPolicy => "cpu_policy",
         }
     }
+}
+
+const LEAF1_EDX_FPU: u32 = 1 << 0;
+const LEAF1_EDX_TSC: u32 = 1 << 4;
+const LEAF1_EDX_MSR: u32 = 1 << 5;
+const LEAF1_EDX_PAE: u32 = 1 << 6;
+const LEAF1_EDX_CX8: u32 = 1 << 8;
+const LEAF1_EDX_APIC: u32 = 1 << 9;
+const LEAF1_EDX_MTRR: u32 = 1 << 12;
+const LEAF1_EDX_PGE: u32 = 1 << 13;
+const LEAF1_EDX_CMOV: u32 = 1 << 15;
+const LEAF1_EDX_PAT: u32 = 1 << 16;
+const LEAF1_EDX_FXSR: u32 = 1 << 24;
+const LEAF1_EDX_SSE: u32 = 1 << 25;
+const LEAF1_EDX_SSE2: u32 = 1 << 26;
+const LEAF1_EDX_HTT: u32 = 1 << 28;
+pub const CPU_REQUIRED_LEAF1_EDX: u32 = LEAF1_EDX_FPU
+    | LEAF1_EDX_TSC
+    | LEAF1_EDX_MSR
+    | LEAF1_EDX_PAE
+    | LEAF1_EDX_CX8
+    | LEAF1_EDX_APIC
+    | LEAF1_EDX_MTRR
+    | LEAF1_EDX_PGE
+    | LEAF1_EDX_CMOV
+    | LEAF1_EDX_PAT
+    | LEAF1_EDX_FXSR
+    | LEAF1_EDX_SSE
+    | LEAF1_EDX_SSE2;
+
+const LEAF1_ECX_PCID: u32 = 1 << 17;
+const LEAF1_ECX_X2APIC: u32 = 1 << 21;
+const LEAF1_ECX_XSAVE: u32 = 1 << 26;
+const LEAF1_ECX_OSXSAVE: u32 = 1 << 27;
+const LEAF7_EBX_FSGSBASE: u32 = 1 << 0;
+const LEAF7_EBX_SMEP: u32 = 1 << 7;
+const LEAF7_EBX_SMAP: u32 = 1 << 20;
+const LEAF7_ECX_UMIP: u32 = 1 << 2;
+const EXT1_EDX_SYSCALL: u32 = 1 << 11;
+const EXT1_EDX_NX: u32 = 1 << 20;
+const EXT1_EDX_LONG_MODE: u32 = 1 << 29;
+pub const CPU_REQUIRED_EXT1_EDX: u32 = EXT1_EDX_SYSCALL | EXT1_EDX_NX | EXT1_EDX_LONG_MODE;
+
+const CR0_PE: u64 = 1 << 0;
+const CR0_MP: u64 = 1 << 1;
+const CR0_EM: u64 = 1 << 2;
+const CR0_TS: u64 = 1 << 3;
+const CR0_ET: u64 = 1 << 4;
+const CR0_NE: u64 = 1 << 5;
+const CR0_WP: u64 = 1 << 16;
+const CR0_NW: u64 = 1 << 29;
+const CR0_CD: u64 = 1 << 30;
+const CR0_PG: u64 = 1 << 31;
+pub const CPU_REQUIRED_CR0: u64 = CR0_PE | CR0_MP | CR0_ET | CR0_NE | CR0_WP | CR0_PG;
+pub const CPU_FORBIDDEN_CR0: u64 = CR0_EM | CR0_TS | CR0_NW | CR0_CD;
+
+const CR4_PAE: u64 = 1 << 5;
+const CR4_OSFXSR: u64 = 1 << 9;
+const CR4_OSXMMEXCPT: u64 = 1 << 10;
+const CR4_UMIP: u64 = 1 << 11;
+const CR4_VMXE: u64 = 1 << 13;
+const CR4_SMXE: u64 = 1 << 14;
+const CR4_FSGSBASE: u64 = 1 << 16;
+const CR4_PCIDE: u64 = 1 << 17;
+const CR4_OSXSAVE: u64 = 1 << 18;
+const CR4_SMEP: u64 = 1 << 20;
+const CR4_SMAP: u64 = 1 << 21;
+const CR4_PKE: u64 = 1 << 22;
+const CR4_CET: u64 = 1 << 23;
+const CR4_PKS: u64 = 1 << 24;
+const CR4_LA57: u64 = 1 << 12;
+pub const CPU_REQUIRED_CR4: u64 = CR4_PAE | CR4_OSFXSR | CR4_OSXMMEXCPT;
+pub const CPU_FORBIDDEN_CR4: u64 = CR4_LA57 | CR4_VMXE | CR4_SMXE | CR4_PKE | CR4_CET | CR4_PKS;
+
+const EFER_SCE: u64 = 1 << 0;
+const EFER_LME: u64 = 1 << 8;
+const EFER_LMA: u64 = 1 << 10;
+const EFER_NXE: u64 = 1 << 11;
+const EFER_SVME: u64 = 1 << 12;
+const EFER_LMSLE: u64 = 1 << 13;
+const EFER_FFXSR: u64 = 1 << 14;
+const EFER_TCE: u64 = 1 << 15;
+const EFER_ALLOWED: u64 =
+    EFER_SCE | EFER_LME | EFER_LMA | EFER_NXE | EFER_SVME | EFER_LMSLE | EFER_FFXSR | EFER_TCE;
+pub const CPU_REQUIRED_EFER: u64 = EFER_LME | EFER_LMA | EFER_NXE;
+
+pub const CPU_MSR_EFER: u32 = 1 << 0;
+pub const CPU_MSR_APIC_BASE: u32 = 1 << 1;
+pub const CPU_MSR_PAT: u32 = 1 << 2;
+pub const CPU_MSR_MTRR_CAP: u32 = 1 << 3;
+pub const CPU_MSR_MTRR_DEF_TYPE: u32 = 1 << 4;
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct CpuIdentity {
+    pub family: u16,
+    pub model: u16,
+    pub stepping: u8,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct CpuDiscovery {
+    pub vendor: [u8; 12],
+    pub brand: [u8; 48],
+    pub max_basic_leaf: u32,
+    pub max_extended_leaf: u32,
+    pub leaf1_eax: u32,
+    pub leaf1_ebx: u32,
+    pub leaf1_ecx: u32,
+    pub leaf1_edx: u32,
+    pub leaf4_eax: u32,
+    pub leaf4_ebx: u32,
+    pub leaf4_ecx: u32,
+    pub leaf4_edx: u32,
+    pub leaf6_eax: u32,
+    pub leaf7_ebx: u32,
+    pub leaf7_ecx: u32,
+    pub leaf7_edx: u32,
+    pub leaf_a_eax: u32,
+    pub leaf_b0_eax: u32,
+    pub leaf_b0_ebx: u32,
+    pub leaf_b0_ecx: u32,
+    pub leaf_b0_edx: u32,
+    pub leaf_d0_eax: u32,
+    pub leaf_d0_ebx: u32,
+    pub leaf_d0_ecx: u32,
+    pub leaf_d0_edx: u32,
+    pub ext1_ecx: u32,
+    pub ext1_edx: u32,
+    pub ext6_ecx: u32,
+    pub ext7_edx: u32,
+    pub ext8_eax: u32,
+    pub ext1f_eax: u32,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct CpuControlState {
+    pub cr0: u64,
+    pub cr4: u64,
+    pub efer: u64,
+    pub xcr0: u64,
+    pub apic_base: u64,
+    pub pat: u64,
+    pub mtrr_cap: u64,
+    pub mtrr_def_type: u64,
+    pub msr_read_mask: u32,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct CpuPolicySnapshot {
+    pub discovery: CpuDiscovery,
+    pub control: CpuControlState,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum CpuPolicyError {
+    Vendor,
+    LeafRange,
+    Identity,
+    Brand,
+    Feature,
+    AddressWidth,
+    Topology,
+    ControlRegister,
+    FeatureState,
+    Xsave,
+    Efer,
+    MsrReadSet,
+    ApicBase,
+    Pat,
+    Mtrr,
+}
+
+impl CpuPolicyError {
+    pub const fn label(self) -> &'static str {
+        match self {
+            Self::Vendor => "vendor",
+            Self::LeafRange => "leaf_range",
+            Self::Identity => "identity",
+            Self::Brand => "brand",
+            Self::Feature => "feature",
+            Self::AddressWidth => "address_width",
+            Self::Topology => "topology",
+            Self::ControlRegister => "control_register",
+            Self::FeatureState => "feature_state",
+            Self::Xsave => "xsave",
+            Self::Efer => "efer",
+            Self::MsrReadSet => "msr_read_set",
+            Self::ApicBase => "apic_base",
+            Self::Pat => "pat",
+            Self::Mtrr => "mtrr",
+        }
+    }
+}
+
+pub const fn decode_cpu_identity(signature: u32) -> CpuIdentity {
+    let stepping = (signature & 0x0f) as u8;
+    let base_model = ((signature >> 4) & 0x0f) as u16;
+    let base_family = ((signature >> 8) & 0x0f) as u16;
+    let extended_model = ((signature >> 16) & 0x0f) as u16;
+    let extended_family = ((signature >> 20) & 0xff) as u16;
+    let family = if base_family == 0x0f {
+        base_family + extended_family
+    } else {
+        base_family
+    };
+    let model = if base_family == 0x06 || base_family == 0x0f {
+        base_model | (extended_model << 4)
+    } else {
+        base_model
+    };
+    CpuIdentity {
+        family,
+        model,
+        stepping,
+    }
+}
+
+fn valid_brand(brand: &[u8; 48]) -> bool {
+    let mut saw_printable = false;
+    let mut saw_nul = false;
+    for byte in brand {
+        if *byte == 0 {
+            saw_nul = true;
+        } else if saw_nul || !(b' '..=b'~').contains(byte) {
+            return false;
+        } else if *byte != b' ' {
+            saw_printable = true;
+        }
+    }
+    saw_printable
+}
+
+fn valid_pat(pat: u64) -> bool {
+    let mut index = 0;
+    while index < 8 {
+        let value = ((pat >> (index * 8)) & 0xff) as u8;
+        if !matches!(value, 0 | 1 | 4 | 5 | 6 | 7) {
+            return false;
+        }
+        index += 1;
+    }
+    true
+}
+
+pub fn validate_cpu_policy_snapshot(
+    snapshot: &CpuPolicySnapshot,
+) -> Result<CpuIdentity, CpuPolicyError> {
+    let discovery = &snapshot.discovery;
+    let control = &snapshot.control;
+    if discovery.vendor != *b"AuthenticAMD" && discovery.vendor != *b"GenuineIntel" {
+        return Err(CpuPolicyError::Vendor);
+    }
+    if discovery.max_basic_leaf < 7 || discovery.max_extended_leaf < 0x8000_0008 {
+        return Err(CpuPolicyError::LeafRange);
+    }
+    let identity = decode_cpu_identity(discovery.leaf1_eax);
+    if identity.family == 0 || identity.family > 0x10e || identity.model > 0xff {
+        return Err(CpuPolicyError::Identity);
+    }
+    if !valid_brand(&discovery.brand) {
+        return Err(CpuPolicyError::Brand);
+    }
+    if discovery.leaf1_edx & CPU_REQUIRED_LEAF1_EDX != CPU_REQUIRED_LEAF1_EDX
+        || discovery.ext1_edx & CPU_REQUIRED_EXT1_EDX != CPU_REQUIRED_EXT1_EDX
+    {
+        return Err(CpuPolicyError::Feature);
+    }
+    let physical_width = discovery.ext8_eax & 0xff;
+    let linear_width = (discovery.ext8_eax >> 8) & 0xff;
+    if !(36..=52).contains(&physical_width) || linear_width != 48 {
+        return Err(CpuPolicyError::AddressWidth);
+    }
+    let logical_processors = (discovery.leaf1_ebx >> 16) & 0xff;
+    let leaf_b_logical = discovery.leaf_b0_ebx & 0xffff;
+    if leaf_b_logical != 0 && discovery.leaf_b0_edx != discovery.leaf1_ebx >> 24
+        || leaf_b_logical == 0
+            && discovery.leaf1_edx & LEAF1_EDX_HTT != 0
+            && logical_processors == 0
+    {
+        return Err(CpuPolicyError::Topology);
+    }
+    if control.cr0 & CPU_REQUIRED_CR0 != CPU_REQUIRED_CR0
+        || control.cr0 & CPU_FORBIDDEN_CR0 != 0
+        || control.cr4 & CPU_REQUIRED_CR4 != CPU_REQUIRED_CR4
+        || control.cr4 & CPU_FORBIDDEN_CR4 != 0
+    {
+        return Err(CpuPolicyError::ControlRegister);
+    }
+    let support_gated = [
+        (CR4_UMIP, discovery.leaf7_ecx & LEAF7_ECX_UMIP != 0),
+        (CR4_FSGSBASE, discovery.leaf7_ebx & LEAF7_EBX_FSGSBASE != 0),
+        (CR4_PCIDE, discovery.leaf1_ecx & LEAF1_ECX_PCID != 0),
+        (CR4_SMEP, discovery.leaf7_ebx & LEAF7_EBX_SMEP != 0),
+        (CR4_SMAP, discovery.leaf7_ebx & LEAF7_EBX_SMAP != 0),
+    ];
+    for (mask, supported) in support_gated {
+        if control.cr4 & mask != 0 && !supported {
+            return Err(CpuPolicyError::FeatureState);
+        }
+    }
+    let xsave = discovery.leaf1_ecx & LEAF1_ECX_XSAVE != 0;
+    let osxsave = discovery.leaf1_ecx & LEAF1_ECX_OSXSAVE != 0;
+    let cr4_osxsave = control.cr4 & CR4_OSXSAVE != 0;
+    if osxsave != cr4_osxsave || osxsave && !xsave {
+        return Err(CpuPolicyError::FeatureState);
+    }
+    if xsave {
+        let supported_xcr0 =
+            u64::from(discovery.leaf_d0_eax) | (u64::from(discovery.leaf_d0_edx) << 32);
+        if supported_xcr0 & 0b11 != 0b11
+            || osxsave && (control.xcr0 & 0b11 != 0b11 || control.xcr0 & !supported_xcr0 != 0)
+            || !osxsave && control.xcr0 != 0
+        {
+            return Err(CpuPolicyError::Xsave);
+        }
+    } else if discovery.leaf_d0_eax != 0
+        || discovery.leaf_d0_ebx != 0
+        || discovery.leaf_d0_ecx != 0
+        || discovery.leaf_d0_edx != 0
+        || control.xcr0 != 0
+        || cr4_osxsave
+    {
+        return Err(CpuPolicyError::Xsave);
+    }
+    if control.efer & CPU_REQUIRED_EFER != CPU_REQUIRED_EFER
+        || control.efer & !EFER_ALLOWED != 0
+        || control.efer & EFER_SVME != 0
+    {
+        return Err(CpuPolicyError::Efer);
+    }
+    let expected_msr_mask =
+        CPU_MSR_EFER | CPU_MSR_APIC_BASE | CPU_MSR_PAT | CPU_MSR_MTRR_CAP | CPU_MSR_MTRR_DEF_TYPE;
+    if control.msr_read_mask != expected_msr_mask {
+        return Err(CpuPolicyError::MsrReadSet);
+    }
+    let physical_mask = if physical_width == 64 {
+        u64::MAX
+    } else {
+        (1_u64 << physical_width) - 1
+    };
+    let apic_address = control.apic_base & 0x000f_ffff_ffff_f000;
+    if control.apic_base & !(0x000f_ffff_ffff_f000 | 0x0d00) != 0
+        || control.apic_base & 0x02ff != 0
+        || control.apic_base & (1 << 11) == 0
+        || control.apic_base & (1 << 10) != 0 && discovery.leaf1_ecx & LEAF1_ECX_X2APIC == 0
+        || apic_address == 0
+        || apic_address & !physical_mask != 0
+    {
+        return Err(CpuPolicyError::ApicBase);
+    }
+    if !valid_pat(control.pat) {
+        return Err(CpuPolicyError::Pat);
+    }
+    const MTRR_CAP_ALLOWED: u64 = 0xff | (1 << 8) | (1 << 10) | (1 << 11);
+    const MTRR_DEF_ALLOWED: u64 = 0xff | (1 << 10) | (1 << 11);
+    let variable_ranges = control.mtrr_cap & 0xff;
+    let default_type = control.mtrr_def_type & 0xff;
+    if control.mtrr_cap & !MTRR_CAP_ALLOWED != 0
+        || variable_ranges == 0
+        || variable_ranges > 32
+        || control.mtrr_def_type & !MTRR_DEF_ALLOWED != 0
+        || !matches!(default_type, 0 | 1 | 4 | 5 | 6 | 7)
+        || control.mtrr_def_type & (1 << 11) == 0
+        || control.mtrr_def_type & (1 << 10) != 0 && control.mtrr_cap & (1 << 8) == 0
+    {
+        return Err(CpuPolicyError::Mtrr);
+    }
+    Ok(identity)
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -952,6 +1325,156 @@ mod tests {
         }
     }
 
+    fn cpu_policy_snapshot() -> CpuPolicySnapshot {
+        let mut brand = [b' '; 48];
+        brand[..29].copy_from_slice(b"QEMU Virtual CPU version 2.5+");
+        CpuPolicySnapshot {
+            discovery: CpuDiscovery {
+                vendor: *b"AuthenticAMD",
+                brand,
+                max_basic_leaf: 0x0d,
+                max_extended_leaf: 0x8000_0008,
+                leaf1_eax: 0x0000_0f61,
+                leaf1_ebx: 1 << 16,
+                leaf1_ecx: 0,
+                leaf1_edx: CPU_REQUIRED_LEAF1_EDX,
+                leaf4_eax: 0,
+                leaf4_ebx: 0,
+                leaf4_ecx: 0,
+                leaf4_edx: 0,
+                leaf6_eax: 0,
+                leaf7_ebx: 0,
+                leaf7_ecx: 0,
+                leaf7_edx: 0,
+                leaf_a_eax: 0,
+                leaf_b0_eax: 0,
+                leaf_b0_ebx: 0,
+                leaf_b0_ecx: 0,
+                leaf_b0_edx: 0,
+                leaf_d0_eax: 0,
+                leaf_d0_ebx: 0,
+                leaf_d0_ecx: 0,
+                leaf_d0_edx: 0,
+                ext1_ecx: 0,
+                ext1_edx: CPU_REQUIRED_EXT1_EDX,
+                ext6_ecx: 0,
+                ext7_edx: 0,
+                ext8_eax: 0x0000_3030,
+                ext1f_eax: 0,
+            },
+            control: CpuControlState {
+                cr0: CPU_REQUIRED_CR0,
+                cr4: CPU_REQUIRED_CR4,
+                efer: CPU_REQUIRED_EFER,
+                xcr0: 0,
+                apic_base: 0xfee0_0900,
+                pat: 0x0007_0406_0007_0406,
+                mtrr_cap: 0x508,
+                mtrr_def_type: 0xc06,
+                msr_read_mask: CPU_MSR_EFER
+                    | CPU_MSR_APIC_BASE
+                    | CPU_MSR_PAT
+                    | CPU_MSR_MTRR_CAP
+                    | CPU_MSR_MTRR_DEF_TYPE,
+            },
+        }
+    }
+
+    #[test]
+    fn decodes_base_and_extended_cpu_identity_fields() {
+        assert_eq!(
+            decode_cpu_identity(0x00b4_0f40),
+            CpuIdentity {
+                family: 0x1a,
+                model: 0x44,
+                stepping: 0,
+            }
+        );
+        assert_eq!(
+            decode_cpu_identity(0x0003_06a9),
+            CpuIdentity {
+                family: 6,
+                model: 0x3a,
+                stepping: 9,
+            }
+        );
+    }
+
+    #[test]
+    fn accepts_bounded_read_only_cpu_policy_snapshot() {
+        assert_eq!(
+            validate_cpu_policy_snapshot(&cpu_policy_snapshot()),
+            Ok(CpuIdentity {
+                family: 0x0f,
+                model: 6,
+                stepping: 1,
+            })
+        );
+    }
+
+    #[test]
+    fn cpu_policy_rejects_missing_baseline_and_bad_widths() {
+        let mut snapshot = cpu_policy_snapshot();
+        snapshot.discovery.leaf1_edx &= !LEAF1_EDX_SSE2;
+        assert_eq!(
+            validate_cpu_policy_snapshot(&snapshot),
+            Err(CpuPolicyError::Feature)
+        );
+        snapshot = cpu_policy_snapshot();
+        snapshot.discovery.ext8_eax = 0x0000_3930;
+        assert_eq!(
+            validate_cpu_policy_snapshot(&snapshot),
+            Err(CpuPolicyError::AddressWidth)
+        );
+    }
+
+    #[test]
+    fn cpu_policy_rejects_unsupported_control_features_and_xsave_conflicts() {
+        let mut snapshot = cpu_policy_snapshot();
+        snapshot.control.cr4 |= CR4_SMEP;
+        assert_eq!(
+            validate_cpu_policy_snapshot(&snapshot),
+            Err(CpuPolicyError::FeatureState)
+        );
+        snapshot = cpu_policy_snapshot();
+        snapshot.discovery.leaf1_ecx = LEAF1_ECX_XSAVE | LEAF1_ECX_OSXSAVE;
+        snapshot.discovery.leaf_d0_eax = 0b111;
+        snapshot.control.cr4 |= CR4_OSXSAVE;
+        snapshot.control.xcr0 = 0b101;
+        assert_eq!(
+            validate_cpu_policy_snapshot(&snapshot),
+            Err(CpuPolicyError::Xsave)
+        );
+    }
+
+    #[test]
+    fn cpu_policy_rejects_msr_read_set_and_register_payload_faults() {
+        let mut snapshot = cpu_policy_snapshot();
+        snapshot.control.msr_read_mask &= !CPU_MSR_PAT;
+        assert_eq!(
+            validate_cpu_policy_snapshot(&snapshot),
+            Err(CpuPolicyError::MsrReadSet)
+        );
+        snapshot = cpu_policy_snapshot();
+        snapshot.control.apic_base &= !(1 << 11);
+        assert_eq!(
+            validate_cpu_policy_snapshot(&snapshot),
+            Err(CpuPolicyError::ApicBase)
+        );
+        snapshot = cpu_policy_snapshot();
+        snapshot.control.pat = 0x0007_0406_0007_0306;
+        assert_eq!(
+            validate_cpu_policy_snapshot(&snapshot),
+            Err(CpuPolicyError::Pat)
+        );
+        snapshot = cpu_policy_snapshot();
+        snapshot.control.mtrr_def_type &= !(1 << 11);
+        assert_eq!(
+            validate_cpu_policy_snapshot(&snapshot),
+            Err(CpuPolicyError::Mtrr)
+        );
+    }
+
     #[test]
     fn accepts_bounded_bsp_descriptor_state() {
         assert_eq!(validate_descriptor_state(&descriptor_state()), Ok(()));
@@ -1051,12 +1574,16 @@ mod tests {
     }
 
     #[test]
-    fn parses_only_frozen_development_trap_selectors() {
+    fn parses_only_frozen_development_scenario_selectors() {
         assert_eq!(
             DevelopmentTrapScenario::from_selector(1),
             Some(DevelopmentTrapScenario::Returning)
         );
-        assert_eq!(DevelopmentTrapScenario::from_selector(4), None);
+        assert_eq!(
+            DevelopmentTrapScenario::from_selector(4),
+            Some(DevelopmentTrapScenario::CpuPolicy)
+        );
+        assert_eq!(DevelopmentTrapScenario::from_selector(5), None);
     }
 
     #[test]
