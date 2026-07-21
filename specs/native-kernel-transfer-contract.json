@@ -19,6 +19,7 @@
     "handoff_contract": "PBP1",
     "page_table_contract": "PKMAP2",
     "revalidation_contract": "PKREVAL1",
+    "trap_scenario": 0,
     "marker_count": 30,
     "kernel_marker_count": 5,
     "terminal_result": "halt_unsigned_denial"
@@ -33,6 +34,7 @@
     "install the retained PKMAP2 CR3 while preserving only permitted PWT/PCD bits",
     "install the aligned bootstrap stack",
     "place PBP1 virtual address, exact byte count, and PBP1 magic in RDI, RSI, and RDX",
+    "place the validated ordinary-transfer trap selector zero in R10",
     "jump once to the PBP1-bound PooleKernel entry virtual address",
     "capture CR3 and RFLAGS in the assembly entry wrapper",
     "revalidate transfer continuity and reject the authenticated production profile",
@@ -45,6 +47,7 @@
     "rdi": "PBP1 handoff virtual address",
     "rsi": "exact PBP1 byte count",
     "rdx": "little-endian PBP1 magic",
+    "r10": "validated development trap selector; exactly zero for this PKXFER1 receipt",
     "rsp": "16-byte-aligned initial stack top before the kernel wrapper call",
     "interrupt_flag": 0,
     "direction_flag": 0,
@@ -68,7 +71,7 @@
     "exact_marker_match_required": true,
     "exact_screenshot_match_required": true,
     "exact_pbp1_match_required": true,
-    "negative_control_count": 57,
+    "negative_control_count": 58,
     "target_builds": ["x86_64-unknown-none", "x86_64-unknown-uefi"]
   },
   "normative_sources": [
@@ -113,6 +116,7 @@
   },
   "non_claims": [
     "The ordinary PooleBoot build still stops before transfer; live dispatch requires the explicit development-transfer feature.",
+    "The PKXFER1 unsigned terminal-denial receipt accepts trap selector zero only; nonzero QEMU scenarios are qualified separately by PKTRAP1.",
     "The exited-development PBP1 intentionally fails the authenticated production PKENTRY1 profile.",
     "The live kernel path grants no capability, lifecycle, recovery, symbol, microcode, firmware, policy, or state-write authority.",
     "The framebuffer still uses inherited firmware translation and cache attributes pending final remap and revocation work.",
@@ -132,6 +136,7 @@
     "NEG-N5-PKXFER-ARM-STACK",
     "NEG-N5-PKXFER-ARM-ROOT",
     "NEG-N5-PKXFER-ARM-CR3",
+    "NEG-N5-PKXFER-ARM-TRAP-SCENARIO",
     "NEG-N5-PKXFER-ARM-SIGNATURE",
     "NEG-N5-PKXFER-ARM-AUTHORITY",
     "NEG-N5-PKXFER-ARM-ACTION",

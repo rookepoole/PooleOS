@@ -84,6 +84,7 @@ def _negative_controls(markers: list[str]) -> list[dict[str, str]]:
         (23, "stack_top", "FFFFFFFF80049008"),
         (23, "root", "000000001DE50000"),
         (23, "cr3", "000000001DE4F001"),
+        (23, "trap_scenario", "1"),
         (23, "signatures", "1"),
         (23, "authority", "1"),
         (23, "actions", "1"),
@@ -91,16 +92,16 @@ def _negative_controls(markers: list[str]) -> list[dict[str, str]]:
         (23, "firmware_calls_after_exit", "1"),
     )
     for control_id, mutation in zip(
-        native_kernel_transfer.NEGATIVE_CONTROL_IDS[3:17], mutations, strict=True
+        native_kernel_transfer.NEGATIVE_CONTROL_IDS[3:18], mutations, strict=True
     ):
         controls.append(_require_rejection(control_id, _mutated_field(markers, *mutation)))
     boundary = markers.copy()
     boundary[24] = boundary[24].replace("transfer=one_way_development", "transfer=returned")
-    controls.append(_require_rejection(native_kernel_transfer.NEGATIVE_CONTROL_IDS[17], boundary))
+    controls.append(_require_rejection(native_kernel_transfer.NEGATIVE_CONTROL_IDS[18], boundary))
 
     mutation_groups = (
         (
-            native_kernel_transfer.NEGATIVE_CONTROL_IDS[18:23],
+            native_kernel_transfer.NEGATIVE_CONTROL_IDS[19:24],
             (
                 (25, "contract", "PKENTRY2"),
                 (25, "transfer_contract", "PKXFER2"),
@@ -110,7 +111,7 @@ def _negative_controls(markers: list[str]) -> list[dict[str, str]]:
             ),
         ),
         (
-            native_kernel_transfer.NEGATIVE_CONTROL_IDS[23:31],
+            native_kernel_transfer.NEGATIVE_CONTROL_IDS[24:32],
             (
                 (26, "handoff", "0xFFFFFFFF80051000"),
                 (26, "bytes", "5009"),
@@ -123,7 +124,7 @@ def _negative_controls(markers: list[str]) -> list[dict[str, str]]:
             ),
         ),
         (
-            native_kernel_transfer.NEGATIVE_CONTROL_IDS[31:35],
+            native_kernel_transfer.NEGATIVE_CONTROL_IDS[32:36],
             (
                 (27, "profile", "production"),
                 (27, "records", "3"),
@@ -132,7 +133,7 @@ def _negative_controls(markers: list[str]) -> list[dict[str, str]]:
             ),
         ),
         (
-            native_kernel_transfer.NEGATIVE_CONTROL_IDS[35:48],
+            native_kernel_transfer.NEGATIVE_CONTROL_IDS[36:49],
             (
                 (28, "contract", "PKREVAL2"),
                 (28, "files", "8"),
@@ -150,7 +151,7 @@ def _negative_controls(markers: list[str]) -> list[dict[str, str]]:
             ),
         ),
         (
-            native_kernel_transfer.NEGATIVE_CONTROL_IDS[48:56],
+            native_kernel_transfer.NEGATIVE_CONTROL_IDS[49:57],
             (
                 (29, "contract", "PKXFER2"),
                 (29, "terminal", "return"),
@@ -168,7 +169,7 @@ def _negative_controls(markers: list[str]) -> list[dict[str, str]]:
             controls.append(_require_rejection(control_id, _mutated_field(markers, *mutation)))
     controls.append(
         _require_rejection(
-            native_kernel_transfer.NEGATIVE_CONTROL_IDS[56],
+            native_kernel_transfer.NEGATIVE_CONTROL_IDS[57],
             [*markers, "POOLEOS:KERNEL:RETURN FAIL contract=PKXFER1"],
         )
     )

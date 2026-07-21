@@ -17,6 +17,33 @@ use super::{
 
 const EFI_ALLOCATE_ANY_PAGES: u32 = 0;
 
+#[cfg(any(
+    all(
+        feature = "development-trap-returning",
+        feature = "development-trap-double-fault"
+    ),
+    all(
+        feature = "development-trap-returning",
+        feature = "development-trap-malformed-frame"
+    ),
+    all(
+        feature = "development-trap-double-fault",
+        feature = "development-trap-malformed-frame"
+    ),
+))]
+compile_error!("only one PKTRAP1 development scenario may be selected");
+
+#[cfg(feature = "development-transfer")]
+const DEVELOPMENT_TRAP_SCENARIO: u8 = if cfg!(feature = "development-trap-returning") {
+    1
+} else if cfg!(feature = "development-trap-double-fault") {
+    2
+} else if cfg!(feature = "development-trap-malformed-frame") {
+    3
+} else {
+    0
+};
+
 type AllocatePages = extern "efiapi" fn(u32, u32, usize, *mut u64) -> EfiStatus;
 type FreePages = extern "efiapi" fn(u64, usize) -> EfiStatus;
 type ExitBootServices = extern "efiapi" fn(EfiHandle, usize) -> EfiStatus;
@@ -272,6 +299,7 @@ unsafe fn transfer_to_kernel(transfer: DevelopmentTransfer) -> ! {
             in("rdi") transfer.handoff_virtual,
             in("rsi") transfer.handoff_byte_count,
             in("rdx") u64::from_le_bytes(poole_handoff::MAGIC),
+            in("r10") u64::from(transfer.trap_scenario),
             in("r11") transfer.kernel_entry_virtual,
             options(noreturn),
         );
@@ -704,6 +732,7 @@ pub(super) fn exit_and_stop(
                 stack_top_virtual: retained_plan.stack_top_virtual,
                 page_table_root_physical: retained.table_physical_base,
                 transfer_cr3: retained.transfer_cr3,
+                trap_scenario: DEVELOPMENT_TRAP_SCENARIO,
                 boot_services_exited: true,
                 development_mode: true,
                 emulator_only: true,
@@ -725,7 +754,7 @@ pub(super) fn exit_and_stop(
                     fatal_after_attempt(transfer_failure("transfer.dispatch", error))
                 });
             diagnostic(format_args!(
-                "POOLEBOOT/0.1 TRANSFER_ARM PASS contract={} mode=development emulator_only=1 entry={:016X} handoff={:016X} bytes={} stack_top={:016X} root={:016X} cr3={:016X} signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit={}\n",
+                "POOLEBOOT/0.1 TRANSFER_ARM PASS contract={} mode=development emulator_only=1 entry={:016X} handoff={:016X} bytes={} stack_top={:016X} root={:016X} cr3={:016X} trap_scenario={} signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit={}\n",
                 contract::TRANSFER_CONTRACT_ID,
                 transfer.kernel_entry_virtual,
                 transfer.handoff_virtual,
@@ -733,6 +762,7 @@ pub(super) fn exit_and_stop(
                 transfer.stack_top_virtual,
                 transfer.page_table_root_physical,
                 transfer.transfer_cr3,
+                transfer.trap_scenario,
                 transfer.firmware_calls_after_exit,
             ));
             diagnostic(format_args!(

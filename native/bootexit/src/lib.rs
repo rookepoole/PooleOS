@@ -267,6 +267,7 @@ pub struct DevelopmentTransfer {
     pub stack_top_virtual: u64,
     pub page_table_root_physical: u64,
     pub transfer_cr3: u64,
+    pub trap_scenario: u8,
     pub boot_services_exited: bool,
     pub development_mode: bool,
     pub emulator_only: bool,
@@ -309,6 +310,7 @@ impl DevelopmentTransfer {
             || !self.emulator_only
             || !self.terminal_after_revalidation
             || self.production_kernel_entry_profile_valid
+            || self.trap_scenario > 3
         {
             return Err(TransferError::TransferState);
         }
@@ -483,6 +485,7 @@ mod tests {
             stack_top_virtual: 0xffff_ffff_8004_9000,
             page_table_root_physical: 0x0300_0000,
             transfer_cr3: 0x0300_0000,
+            trap_scenario: 0,
             boot_services_exited: true,
             development_mode: true,
             emulator_only: true,
@@ -542,6 +545,9 @@ mod tests {
         assert_eq!(transfer.validate(), Err(TransferError::TransferState));
         transfer = development_transfer();
         transfer.terminal_after_revalidation = false;
+        assert_eq!(transfer.validate(), Err(TransferError::TransferState));
+        transfer = development_transfer();
+        transfer.trap_scenario = 4;
         assert_eq!(transfer.validate(), Err(TransferError::TransferState));
     }
 

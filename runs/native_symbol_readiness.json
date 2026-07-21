@@ -26,7 +26,7 @@
     "golden_vectors": {
       "byte_count": 9611,
       "path": "specs/native-symbol-golden-vectors.json",
-      "sha256": "C004BAF55824B26090CF8134F455F2C2AD86D39CBA2466DD456434A579BA97FB"
+      "sha256": "0896AFE38726B14C10F3DAB5EFAF4058B143DB6CDD65B2800DD4F18BB332BC6B"
     },
     "implementation_inputs": [
       {
@@ -47,7 +47,7 @@
       {
         "byte_count": 36081,
         "path": "native/symbols/src/lib.rs",
-        "sha256": "A21FEC7438DF2A004BA7AE67732AF8F3CA40AB4B4ED89BB230FA9EB7356DAE5E"
+        "sha256": "E2B0E866061D8B902C9B5CBC13C04A12FD31294D73021A8ED832279876CF0089"
       },
       {
         "byte_count": 5305,
@@ -65,14 +65,14 @@
         "sha256": "D74C10E7E9010D91B1A5C4378D8B9CFCE8669FEE28706C75734D81A822D62A90"
       },
       {
-        "byte_count": 436,
+        "byte_count": 432,
         "path": "native/kernel/manifest.pkm",
-        "sha256": "618BEE498804DB09A0CB18281379B5045FBAD3F5D123767E7F8E6A7ED6C02FD0"
+        "sha256": "1A68F2E8E3414A4B97A57853D9178F5A545BA75318ED9E9C87F64682AFC06DBF"
       },
       {
-        "byte_count": 53864,
+        "byte_count": 53860,
         "path": "runtime/native_symbols.py",
-        "sha256": "1E4E3915A2836B6913159974708B88489845607B290DB7898FA0FD7754233E8F"
+        "sha256": "4AE4B9C9232A5B81E0FD3AF652F61F37E7C6429F6ABD7C1316583753237D0112"
       },
       {
         "byte_count": 8217,
@@ -90,14 +90,14 @@
         "sha256": "177C3883276CAAD4545932F3113750553BC2E344FAFC0E1FE886BC68F27CAE5E"
       },
       {
-        "byte_count": 7080,
+        "byte_count": 7313,
         "path": "tests/test_native_symbols.py",
-        "sha256": "14D6FD87176552B0119050A281E26E2ACB917DA1792E582E856829C47B0F9178"
+        "sha256": "EE0C25B56C75A41D6A06D7BAF0BFB1CA79028A11FB85B5AA77A9D22C31C3091E"
       },
       {
         "byte_count": 7698,
         "path": "docs/native-symbol-bundle.md",
-        "sha256": "03EF49CF125A341D699285788AA20EE2D009EBE5E9CEA69F5E340D4FD5F0C738"
+        "sha256": "25EB3EAD660E387D2C0B15E7D07D69EF75D608AF8CF3023CA66706BBCD107B2C"
       }
     ],
     "readiness_schema": {
@@ -137,13 +137,13 @@
   "debug_correspondence": {
     "canonical_entry_offset": 32768,
     "canonical_file_byte_count": 180224,
-    "canonical_file_sha256": "5D06ABFC9BD525931C63CC8A48FACD66A478640CE793E20E6D66EAEEB2BCEEEA",
+    "canonical_file_sha256": "8D1C219B4B6D8FEFE3B325F3A59DF904F1D971686A4A6537D73825A1B6F56FD2",
     "canonical_image_byte_count": 262144,
     "debug_build_count": 2,
     "debug_builds_byte_identical": true,
-    "debug_derived_bundle_sha256": "8E46974E2787F36B72611255992051380578E132704987000AF54EE20CBA809D",
-    "debug_file_byte_count": 3449288,
-    "debug_file_sha256": "6AAA1CC5DF0192DE9FEB545CB269185246D7BC3161E953B19B897D12397E2B68",
+    "debug_derived_bundle_sha256": "2DEC6AB0CC75193B8F21784AF276C7CA5108EF459E9A35B9F2544024E743A44B",
+    "debug_file_byte_count": 3492624,
+    "debug_file_sha256": "7A2946F86B3A135C2BAC080842FE3CFBF84981ED412BF4DE460EF8EB093CAF4B",
     "debug_file_staged_on_boot_media": false,
     "dwarf_compilation_unit_count": 60,
     "observed_dwarf_versions": [
@@ -161,7 +161,7 @@
   },
   "golden_vectors": [
     {
-      "bundle_sha256": "8E46974E2787F36B72611255992051380578E132704987000AF54EE20CBA809D",
+      "bundle_sha256": "2DEC6AB0CC75193B8F21784AF276C7CA5108EF459E9A35B9F2544024E743A44B",
       "id": "PSYM1-CANONICAL",
       "lookup_sample_count": 7,
       "python_result": "pass",
@@ -189,11 +189,11 @@
     "campaign_id": "PSYM1-LOOKUP-DIFF-1",
     "case_count": 16384,
     "corpus_published": false,
-    "hit_count": 4255,
+    "hit_count": 4219,
     "maximum_observed_steps": 2,
     "mismatch_count": 0,
-    "miss_count": 6018,
-    "rejected_count": 6111,
+    "miss_count": 6006,
+    "rejected_count": 6159,
     "seed": "0x5053594D3102",
     "status": "pass"
   },

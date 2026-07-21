@@ -65,7 +65,7 @@ owned byte slices.
 The pinned single-host qualifier builds PooleKernel for
 `x86_64-unknown-none`, PooleBoot for `x86_64-unknown-uefi`, and a host probe from
 the same `no_std` verifier. Rust and an independent Python oracle must agree on
-the canonical nine-file result through 14 Rust tests, 8 Python tests, 36
+the canonical nine-file result through 19 Rust tests, 8 Python tests, 36
 targeted hostile controls, and 32,768
 deterministic post-loader mutations spanning every retained role. All mutation
 cases must reject at the exact-file digest boundary; controls also cover source
@@ -98,6 +98,7 @@ firmware, physical hardware, a second builder, authenticated persistent state,
 capability creation, a signed ISO, installation, recovery, N5 exit, N6 exit, or
 production readiness.
 
-The next owner-independent move is `N7-TRAP-001`: install bounded GDT/TSS/IDT
-state and prove deliberate breakpoint and page-fault containment after the
-PKXFER1 handoff.
+PKTRAP1 now separately proves the bounded BSP-only descriptor and deliberate
+fault slice. The next owner-independent move is `N7-CPU-POLICY-001`: freeze
+bounded CPUID, required-feature, CR0/CR4/EFER, and read-only MSR policy
+contracts before expanding trap coverage.

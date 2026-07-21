@@ -16,13 +16,22 @@ pub mod revalidation;
 
 pub const ENTRY_CONTRACT_ID: &str = "PKENTRY1";
 pub const TRANSFER_CONTRACT_ID: &str = "PKXFER1";
-pub const BUILD_ID: &[u8] = b"PKBUILD1-CYCLE118-N5-TRANSFER-001";
+pub const TRAP_CONTRACT_ID: &str = "PKTRAP1";
+pub const BUILD_ID: &[u8] = b"PKBUILD1-CYCLE119-N7-TRAP-001";
 pub const ENTRY_OFFSET: u64 = 0x8000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
 pub const HANDOFF_MAGIC_U64: u64 = u64::from_le_bytes(poole_handoff::MAGIC);
+pub const KERNEL_CODE_SELECTOR: u16 = 0x08;
+pub const KERNEL_DATA_SELECTOR: u16 = 0x10;
+pub const KERNEL_TSS_SELECTOR: u16 = 0x18;
+pub const GDT_LIMIT: u16 = 39;
+pub const IDT_LIMIT: u16 = 4095;
+pub const IST_STACK_BYTES: u64 = 8192;
+pub const INSTALLED_EXCEPTION_GATE_COUNT: u16 = 5;
 const CR3_ALLOWED_LOW_BITS: u64 = (1 << 3) | (1 << 4);
 const RFLAGS_INTERRUPT_ENABLE: u64 = 1 << 9;
 const RFLAGS_DIRECTION: u64 = 1 << 10;
+const RFLAGS_RESERVED_ONE: u64 = 1 << 1;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(u32)]
@@ -36,7 +45,215 @@ pub enum PanicCode {
     TrustRevalidation = 0x1007,
     TransferState = 0x1008,
     Reentry = 0x1009,
+    DescriptorState = 0x100a,
+    TrapContract = 0x100b,
     UnexpectedReturn = 0x10ff,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(u64)]
+pub enum DevelopmentTrapScenario {
+    None = 0,
+    Returning = 1,
+    DoubleFault = 2,
+    MalformedFrame = 3,
+}
+
+impl DevelopmentTrapScenario {
+    pub const fn from_selector(selector: u64) -> Option<Self> {
+        match selector {
+            0 => Some(Self::None),
+            1 => Some(Self::Returning),
+            2 => Some(Self::DoubleFault),
+            3 => Some(Self::MalformedFrame),
+            _ => None,
+        }
+    }
+
+    pub const fn label(self) -> &'static str {
+        match self {
+            Self::None => "none",
+            Self::Returning => "returning",
+            Self::DoubleFault => "double_fault",
+            Self::MalformedFrame => "malformed_frame",
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct DescriptorState {
+    pub gdt_base: u64,
+    pub gdt_limit: u16,
+    pub idt_base: u64,
+    pub idt_limit: u16,
+    pub tss_base: u64,
+    pub rsp0: u64,
+    pub ist1_bottom: u64,
+    pub ist1_top: u64,
+    pub ist2_bottom: u64,
+    pub ist2_top: u64,
+    pub code_selector: u16,
+    pub data_selector: u16,
+    pub task_selector: u16,
+    pub installed_gate_count: u16,
+    pub interrupts_enabled: bool,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum DescriptorError {
+    Table,
+    Selector,
+    Stack,
+    InterruptState,
+}
+
+pub fn validate_descriptor_state(state: &DescriptorState) -> Result<(), DescriptorError> {
+    if state.gdt_base == 0
+        || state.idt_base == 0
+        || state.tss_base == 0
+        || !is_canonical_x86_64(state.gdt_base)
+        || !is_canonical_x86_64(state.idt_base)
+        || !is_canonical_x86_64(state.tss_base)
+        || state.gdt_limit != GDT_LIMIT
+        || state.idt_limit != IDT_LIMIT
+        || state.installed_gate_count != INSTALLED_EXCEPTION_GATE_COUNT
+    {
+        return Err(DescriptorError::Table);
+    }
+    if state.code_selector != KERNEL_CODE_SELECTOR
+        || state.data_selector != KERNEL_DATA_SELECTOR
+        || state.task_selector != KERNEL_TSS_SELECTOR
+    {
+        return Err(DescriptorError::Selector);
+    }
+    let valid_stack = |bottom: u64, top: u64| {
+        bottom != 0
+            && top.checked_sub(bottom) == Some(IST_STACK_BYTES)
+            && bottom.is_multiple_of(16)
+            && top.is_multiple_of(16)
+            && is_canonical_x86_64(bottom)
+            && is_canonical_x86_64(top - 1)
+    };
+    if state.rsp0 == 0
+        || !state.rsp0.is_multiple_of(16)
+        || !is_canonical_x86_64(state.rsp0)
+        || !valid_stack(state.ist1_bottom, state.ist1_top)
+        || !valid_stack(state.ist2_bottom, state.ist2_top)
+        || state.ist1_top > state.ist2_bottom && state.ist2_top > state.ist1_bottom
+        || state.rsp0 == state.ist1_top
+        || state.rsp0 == state.ist2_top
+    {
+        return Err(DescriptorError::Stack);
+    }
+    if state.interrupts_enabled {
+        return Err(DescriptorError::InterruptState);
+    }
+    Ok(())
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct TrapObservation {
+    pub vector: u64,
+    pub error_code: u64,
+    pub rip: u64,
+    pub code_selector: u64,
+    pub rflags: u64,
+    pub saved_rsp: u64,
+    pub data_selector: u64,
+    pub cr2: u64,
+    pub handler_rsp: u64,
+    pub depth: u32,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct TrapExpectation {
+    pub vector: u64,
+    pub error_code: u64,
+    pub fault_rip: u64,
+    pub resume_rip: u64,
+    pub expected_cr2: Option<u64>,
+    pub ist_bottom: u64,
+    pub ist_top: u64,
+    pub terminal: bool,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TrapDisposition {
+    ResumeAt(u64),
+    Halt,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TrapError {
+    Vector,
+    ErrorCode,
+    InstructionPointer,
+    CodeSelector,
+    DataSelector,
+    Flags,
+    SavedStack,
+    HandlerStack,
+    FaultAddress,
+    Depth,
+    Expectation,
+}
+
+pub fn validate_trap_observation(
+    observation: &TrapObservation,
+    expectation: &TrapExpectation,
+) -> Result<TrapDisposition, TrapError> {
+    if !matches!(expectation.vector, 3 | 6 | 8 | 14)
+        || !is_canonical_x86_64(expectation.fault_rip)
+        || !is_canonical_x86_64(expectation.resume_rip)
+        || expectation.ist_top <= expectation.ist_bottom
+        || expectation.ist_top - expectation.ist_bottom != IST_STACK_BYTES
+        || expectation.terminal != (expectation.vector == 8)
+    {
+        return Err(TrapError::Expectation);
+    }
+    if observation.vector != expectation.vector {
+        return Err(TrapError::Vector);
+    }
+    if observation.error_code != expectation.error_code {
+        return Err(TrapError::ErrorCode);
+    }
+    if observation.rip != expectation.fault_rip || !is_canonical_x86_64(observation.rip) {
+        return Err(TrapError::InstructionPointer);
+    }
+    if observation.code_selector != u64::from(KERNEL_CODE_SELECTOR) {
+        return Err(TrapError::CodeSelector);
+    }
+    if observation.data_selector != u64::from(KERNEL_DATA_SELECTOR) {
+        return Err(TrapError::DataSelector);
+    }
+    if observation.rflags & RFLAGS_RESERVED_ONE == 0
+        || observation.rflags & (RFLAGS_INTERRUPT_ENABLE | RFLAGS_DIRECTION) != 0
+    {
+        return Err(TrapError::Flags);
+    }
+    if observation.saved_rsp == 0 || !is_canonical_x86_64(observation.saved_rsp) {
+        return Err(TrapError::SavedStack);
+    }
+    if observation.handler_rsp < expectation.ist_bottom
+        || observation.handler_rsp >= expectation.ist_top
+        || !is_canonical_x86_64(observation.handler_rsp)
+    {
+        return Err(TrapError::HandlerStack);
+    }
+    if expectation
+        .expected_cr2
+        .is_some_and(|value| observation.cr2 != value)
+    {
+        return Err(TrapError::FaultAddress);
+    }
+    if observation.depth != 1 {
+        return Err(TrapError::Depth);
+    }
+    if expectation.terminal {
+        Ok(TrapDisposition::Halt)
+    } else {
+        Ok(TrapDisposition::ResumeAt(expectation.resume_rip))
+    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -140,8 +357,9 @@ pub struct ValidatedEntry {
 }
 
 pub const fn is_canonical_x86_64(address: u64) -> bool {
+    let sign = (address >> 47) & 1;
     let upper = address >> 48;
-    upper == 0 || upper == 0xffff
+    (sign == 0 && upper == 0) || (sign == 1 && upper == 0xffff)
 }
 
 pub fn validate_entry_envelope(
@@ -709,7 +927,136 @@ mod tests {
     fn canonical_address_rules_cover_both_halves() {
         assert!(is_canonical_x86_64(0x0000_7fff_ffff_ffff));
         assert!(is_canonical_x86_64(0xffff_8000_0000_0000));
+        assert!(!is_canonical_x86_64(0x0000_8000_0000_0000));
+        assert!(!is_canonical_x86_64(0xffff_7fff_ffff_ffff));
         assert!(!is_canonical_x86_64(0x0001_0000_0000_0000));
+    }
+
+    fn descriptor_state() -> DescriptorState {
+        DescriptorState {
+            gdt_base: 0xffff_ffff_8003_0000,
+            gdt_limit: GDT_LIMIT,
+            idt_base: 0xffff_ffff_8003_1000,
+            idt_limit: IDT_LIMIT,
+            tss_base: 0xffff_ffff_8003_2000,
+            rsp0: 0xffff_ffff_8004_9000,
+            ist1_bottom: 0xffff_ffff_8003_4000,
+            ist1_top: 0xffff_ffff_8003_6000,
+            ist2_bottom: 0xffff_ffff_8003_6000,
+            ist2_top: 0xffff_ffff_8003_8000,
+            code_selector: KERNEL_CODE_SELECTOR,
+            data_selector: KERNEL_DATA_SELECTOR,
+            task_selector: KERNEL_TSS_SELECTOR,
+            installed_gate_count: INSTALLED_EXCEPTION_GATE_COUNT,
+            interrupts_enabled: false,
+        }
+    }
+
+    #[test]
+    fn accepts_bounded_bsp_descriptor_state() {
+        assert_eq!(validate_descriptor_state(&descriptor_state()), Ok(()));
+    }
+
+    #[test]
+    fn descriptor_state_rejects_selector_stack_and_interrupt_faults() {
+        let mut state = descriptor_state();
+        state.task_selector = 0x20;
+        assert_eq!(
+            validate_descriptor_state(&state),
+            Err(DescriptorError::Selector)
+        );
+        state = descriptor_state();
+        state.ist2_bottom = state.ist1_bottom;
+        assert_eq!(
+            validate_descriptor_state(&state),
+            Err(DescriptorError::Stack)
+        );
+        state = descriptor_state();
+        state.interrupts_enabled = true;
+        assert_eq!(
+            validate_descriptor_state(&state),
+            Err(DescriptorError::InterruptState)
+        );
+    }
+
+    fn trap_observation() -> TrapObservation {
+        TrapObservation {
+            vector: 6,
+            error_code: 0,
+            rip: 0xffff_ffff_8000_a000,
+            code_selector: u64::from(KERNEL_CODE_SELECTOR),
+            rflags: RFLAGS_RESERVED_ONE,
+            saved_rsp: 0xffff_ffff_8004_8ff8,
+            data_selector: u64::from(KERNEL_DATA_SELECTOR),
+            cr2: 0,
+            handler_rsp: 0xffff_ffff_8003_5f00,
+            depth: 1,
+        }
+    }
+
+    fn trap_expectation() -> TrapExpectation {
+        TrapExpectation {
+            vector: 6,
+            error_code: 0,
+            fault_rip: 0xffff_ffff_8000_a000,
+            resume_rip: 0xffff_ffff_8000_a002,
+            expected_cr2: None,
+            ist_bottom: 0xffff_ffff_8003_4000,
+            ist_top: 0xffff_ffff_8003_6000,
+            terminal: false,
+        }
+    }
+
+    #[test]
+    fn accepts_uniform_returning_trap_frame() {
+        assert_eq!(
+            validate_trap_observation(&trap_observation(), &trap_expectation()),
+            Ok(TrapDisposition::ResumeAt(0xffff_ffff_8000_a002))
+        );
+    }
+
+    #[test]
+    fn trap_frame_rejects_corrupt_selectors_flags_stack_and_cr2() {
+        let expectation = trap_expectation();
+        let mut observation = trap_observation();
+        observation.code_selector = 0x10;
+        assert_eq!(
+            validate_trap_observation(&observation, &expectation),
+            Err(TrapError::CodeSelector)
+        );
+        observation = trap_observation();
+        observation.rflags |= RFLAGS_INTERRUPT_ENABLE;
+        assert_eq!(
+            validate_trap_observation(&observation, &expectation),
+            Err(TrapError::Flags)
+        );
+        observation = trap_observation();
+        observation.handler_rsp = expectation.ist_top;
+        assert_eq!(
+            validate_trap_observation(&observation, &expectation),
+            Err(TrapError::HandlerStack)
+        );
+        observation = trap_observation();
+        observation.vector = 14;
+        observation.cr2 = 0xffff_ffff_8004_0000;
+        let page_fault = TrapExpectation {
+            vector: 14,
+            expected_cr2: Some(0xffff_ffff_8004_1000),
+            ..expectation
+        };
+        assert_eq!(
+            validate_trap_observation(&observation, &page_fault),
+            Err(TrapError::FaultAddress)
+        );
+    }
+
+    #[test]
+    fn parses_only_frozen_development_trap_selectors() {
+        assert_eq!(
+            DevelopmentTrapScenario::from_selector(1),
+            Some(DevelopmentTrapScenario::Returning)
+        );
+        assert_eq!(DevelopmentTrapScenario::from_selector(4), None);
     }
 
     #[test]
