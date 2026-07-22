@@ -49,10 +49,10 @@
         "inspect_live_pooleglyph_each_turn": {"const": true},
         "verify_master_checklist_coverage_each_turn": {"const": true},
         "new_work_must_be_flagged": {"const": true},
-        "last_updated_cycle": {"const": 121},
-        "selected_move_id": {"const": "N7-ERRATA-POLICY-001"},
+        "last_updated_cycle": {"const": 122},
+        "selected_move_id": {"const": "N7-XSTATE-POLICY-001"},
         "immediate_next_move_id": {"const": "N0-HW-KEY-ACQUIRE-001"},
-        "owner_independent_next_move_id": {"const": "N7-XSTATE-POLICY-001"},
+        "owner_independent_next_move_id": {"const": "N7-XSTATE-EXCEPTION-001"},
         "required_records": {"type": "array", "minItems": 7, "items": {"type": "string"}, "uniqueItems": true},
         "flag_classes": {"type": "array", "minItems": 8, "items": {"type": "string"}, "uniqueItems": true}
       }
@@ -72,7 +72,7 @@
         "coverage_path": {"const": "runs/pooleos_native_checklist_coverage.json"},
         "coverage_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
         "coverage_status": {"const": "pass"},
-        "added_requirement_count": {"const": 44}
+        "added_requirement_count": {"const": 45}
       }
     },
     "baseline": {"type": "object", "required": ["pooleos_cycle", "entry_cycle", "pooleos_test_count", "historical_consistency_release_gate", "native_consistency_release_gate", "native", "pooleglyph", "pdc"]},
@@ -136,8 +136,8 @@
     },
     "implementation_flags": {
       "type": "array",
-      "minItems": 65,
-      "maxItems": 65,
+      "minItems": 66,
+      "maxItems": 66,
       "items": {
         "type": "object",
         "additionalProperties": false,

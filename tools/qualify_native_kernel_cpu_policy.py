@@ -141,21 +141,53 @@ def _negative_controls(markers: list[str]) -> list[dict[str, str]]:
     return controls
 
 
-def _source_audit() -> dict[str, Any]:
-    source = (ROOT / "native/kernel/src/arch/x86_64.rs").read_text(encoding="utf-8")
-    start = source.index("const IA32_APIC_BASE")
-    end = source.index("#[derive(Clone, Copy, Debug)]", start)
-    observer = source[start:end].lower()
+def _audit_source_text(source: str) -> dict[str, Any]:
+    def function_source(name: str) -> str:
+        matches = list(re.finditer(rf"(?m)^(?:unsafe )?fn {re.escape(name)}\(", source))
+        if len(matches) != 1:
+            raise QualificationError(f"PKCPU1 source-audit function changed: {name}")
+        start = matches[0].start()
+        opening = source.find("{", matches[0].end())
+        if opening < 0:
+            raise QualificationError(f"PKCPU1 source-audit function is malformed: {name}")
+        depth = 0
+        for index in range(opening, len(source)):
+            if source[index] == "{":
+                depth += 1
+            elif source[index] == "}":
+                depth -= 1
+                if depth == 0:
+                    return source[start : index + 1]
+        raise QualificationError(f"PKCPU1 source-audit function is unterminated: {name}")
+
+    function_names = (
+        "cpuid",
+        "read_cr0",
+        "read_cr4",
+        "read_msr",
+        "read_efer",
+        "read_apic_base",
+        "read_pat",
+        "read_mtrr_cap",
+        "read_mtrr_default_type",
+        "read_xcr0",
+    )
+    observer = "\n".join(function_source(name) for name in function_names).lower()
     forbidden = ("wrmsr", "xsetbv", 'mov cr0,', 'mov cr4,')
     hits = [instruction for instruction in forbidden if instruction in observer]
     if hits:
         raise QualificationError(f"PKCPU1 observer contains a forbidden write instruction: {hits}")
     return {
-        "scope": "PKCPU1 observer and typed register helpers",
+        "scope": "PKCPU1 cpuid and typed read-only register helper functions",
         "forbidden_instructions": list(forbidden),
         "forbidden_instruction_hits": [],
         "result": "pass_no_cpu_state_write_instruction",
     }
+
+
+def _source_audit() -> dict[str, Any]:
+    source = (ROOT / "native/kernel/src/arch/x86_64.rs").read_text(encoding="utf-8")
+    return _audit_source_text(source)
 
 
 def make_readiness(

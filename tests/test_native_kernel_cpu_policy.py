@@ -86,6 +86,14 @@ class NativeKernelCpuPolicyTests(unittest.TestCase):
         self.assertEqual(
             "pass_no_cpu_state_write_instruction", audit["result"]
         )
+        source = (ROOT / "native/kernel/src/arch/x86_64.rs").read_text(encoding="utf-8")
+        hostile = source.replace(
+            "// SAFETY: PKCPU1 calls this only at CPL0 after PKXFER1; the instruction is read-only.",
+            '// SAFETY: hostile source-audit fixture.\n    unsafe { asm!("mov cr4, rax") };',
+            1,
+        )
+        with self.assertRaises(qualify_native_kernel_cpu_policy.QualificationError):
+            qualify_native_kernel_cpu_policy._audit_source_text(hostile)
 
     def test_target_errata_and_xsave_ownership_remain_open(self) -> None:
         claims = self.readiness["claims"]

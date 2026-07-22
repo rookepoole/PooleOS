@@ -310,7 +310,7 @@ impl DevelopmentTransfer {
             || !self.emulator_only
             || !self.terminal_after_revalidation
             || self.production_kernel_entry_profile_valid
-            || self.trap_scenario > 4
+            || self.trap_scenario > 5
         {
             return Err(TransferError::TransferState);
         }
@@ -547,7 +547,7 @@ mod tests {
         transfer.terminal_after_revalidation = false;
         assert_eq!(transfer.validate(), Err(TransferError::TransferState));
         transfer = development_transfer();
-        transfer.trap_scenario = 5;
+        transfer.trap_scenario = 6;
         assert_eq!(transfer.validate(), Err(TransferError::TransferState));
     }
 

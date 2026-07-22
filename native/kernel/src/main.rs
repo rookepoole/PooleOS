@@ -18,6 +18,10 @@ use poolekernel::{
     TrapObservation, decode_cpu_identity, revalidation, validate_cpu_policy_snapshot,
     validate_descriptor_state, validate_development_handoff, validate_entry_envelope,
     validate_handoff, validate_runtime_state, validate_trap_observation,
+    xstate::{
+        AREA_BYTES as XSTATE_AREA_BYTES, CONTRACT_ID as XSTATE_CONTRACT_ID, ContextSwitch,
+        effective_mxcsr_mask, validate_context_switch, validate_proof as validate_xstate_proof,
+    },
 };
 
 #[used]
@@ -439,6 +443,138 @@ extern "C" fn poole_kernel_rust_entry(
         halt_forever()
     }
 
+    if trap_scenario == DevelopmentTrapScenario::XstatePolicy {
+        // SAFETY: PKXFER1 transferred exactly once at CPL0 with IF/DF clear. The opt-in
+        // PKXSTATE1 profile owns the BSP's x87/SSE state and its private aligned images.
+        let proof = match unsafe { arch::x86_64::run_xstate_policy() } {
+            Ok(value) => value,
+            Err(error) => {
+                let mut logger = EarlyLogger::new(BootSink {
+                    serial: &mut serial,
+                    debugcon: &mut debugcon,
+                    ring: &EARLY_RING,
+                });
+                logger.write_str("POOLEOS:KERNEL:XSTATE-DENIED contract=PKXSTATE1 reason=");
+                logger.write_str(error.label());
+                logger.write_str(" terminal=panic\n");
+                poole_kernel_emergency_panic(PanicCode::XstatePolicy as u32);
+            }
+        };
+        let context_switch = ContextSwitch {
+            outgoing_owner: 0xa,
+            incoming_owner: 0xb,
+            outgoing_address: proof.policy.area_address,
+            incoming_address: proof.policy.area_address + u64::from(XSTATE_AREA_BYTES),
+            image_bytes: XSTATE_AREA_BYTES,
+            selected_xcr0: proof.policy.selected_xcr0,
+            incoming_initialized: true,
+            scheduler_lock_held: true,
+            interrupts_disabled: true,
+            kernel_simd_active: false,
+            same_cpu: true,
+        };
+        if let Err(error) = validate_xstate_proof(&proof) {
+            let mut logger = EarlyLogger::new(BootSink {
+                serial: &mut serial,
+                debugcon: &mut debugcon,
+                ring: &EARLY_RING,
+            });
+            logger.write_str("POOLEOS:KERNEL:XSTATE-DENIED contract=PKXSTATE1 reason=");
+            logger.write_str(error.label());
+            logger.write_str(" cr0=");
+            logger.write_hex_u64(proof.policy.cr0);
+            logger.write_str(" cr4=");
+            logger.write_hex_u64(proof.policy.cr4);
+            logger.write_str(" fcw=");
+            logger.write_hex_u64(u64::from(proof.initial_fcw));
+            logger.write_str(" mxcsr=");
+            logger.write_hex_u64(u64::from(proof.initial_mxcsr));
+            logger.write_str(" terminal=panic\n");
+            poole_kernel_emergency_panic(PanicCode::XstatePolicy as u32);
+        }
+        if validate_context_switch(&context_switch).is_err() {
+            poole_kernel_emergency_panic(PanicCode::XstatePolicy as u32);
+        }
+
+        let policy = &proof.policy;
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        logger.write_str("POOLEOS:KERNEL:XSTATE-CAPABILITY PASS contract=");
+        logger.write_str(XSTATE_CONTRACT_ID);
+        logger.write_str(" leaf1_ecx=");
+        logger.write_hex_u64(u64::from(policy.leaf1_ecx));
+        logger.write_str(" leaf1_edx=");
+        logger.write_hex_u64(u64::from(policy.leaf1_edx));
+        logger.write_str(" supported_xcr0=");
+        logger.write_hex_u64(policy.supported_xcr0);
+        logger.write_str(" leafd1_eax=");
+        logger.write_hex_u64(u64::from(policy.leaf_d1_eax));
+        logger.write_str(" enabled_bytes=");
+        logger.write_decimal_u64(u64::from(policy.enabled_area_bytes));
+        logger.write_str(" maximum_bytes=");
+        logger.write_decimal_u64(u64::from(policy.maximum_area_bytes));
+        logger.write_str("\nPOOLEOS:KERNEL:XSTATE-CONFIG PASS contract=");
+        logger.write_str(XSTATE_CONTRACT_ID);
+        logger.write_str(" cr0_before=");
+        logger.write_hex_u64(proof.cr0_before);
+        logger.write_str(" cr0_after=");
+        logger.write_hex_u64(policy.cr0);
+        logger.write_str(" cr4_before=");
+        logger.write_hex_u64(proof.cr4_before);
+        logger.write_str(" cr4_after=");
+        logger.write_hex_u64(policy.cr4);
+        logger.write_str(" xcr0_before=");
+        logger.write_hex_u64(proof.xcr0_before);
+        logger.write_str(" xcr0_after=");
+        logger.write_hex_u64(policy.selected_xcr0);
+        logger.write_str(" xss=0x0000000000000000 strategy=eager format=standard area_bytes=");
+        logger.write_decimal_u64(u64::from(policy.area_bytes));
+        logger.write_str(" alignment=64\nPOOLEOS:KERNEL:XSTATE-INIT PASS contract=");
+        logger.write_str(XSTATE_CONTRACT_ID);
+        logger.write_str(" fcw=");
+        logger.write_hex_u64(u64::from(proof.initial_fcw));
+        logger.write_str(" mxcsr=");
+        logger.write_hex_u64(u64::from(proof.initial_mxcsr));
+        logger.write_str(" mxcsr_mask_raw=");
+        logger.write_hex_u64(u64::from(policy.mxcsr_mask));
+        logger.write_str(" mxcsr_mask_effective=");
+        logger.write_hex_u64(u64::from(effective_mxcsr_mask(policy.mxcsr_mask)));
+        logger.write_str(" exceptions=masked nm_policy=unexpected_fail_closed\n");
+        logger.write_str("POOLEOS:KERNEL:XSTATE-SWITCH PASS contract=");
+        logger.write_str(XSTATE_CONTRACT_ID);
+        logger.write_str(" owners=10,11 saves=");
+        logger.write_decimal_u64(u64::from(proof.save_count));
+        logger.write_str(" restores=");
+        logger.write_decimal_u64(u64::from(proof.restore_count));
+        logger.write_str(" xstate_bv_a=");
+        logger.write_hex_u64(proof.context_a_xstate_bv);
+        logger.write_str(" xstate_bv_b=");
+        logger.write_hex_u64(proof.context_b_xstate_bv);
+        logger.write_str(" match_a=");
+        logger.write_decimal_u64(u64::from(proof.context_a_match));
+        logger.write_str(" match_b=");
+        logger.write_decimal_u64(u64::from(proof.context_b_match));
+        logger.write_str(" scheduler_lock=1 interrupts=0 same_cpu=1 kernel_simd=0\n");
+        logger.write_str("POOLEOS:KERNEL:XSTATE-CLEAR PASS contract=");
+        logger.write_str(XSTATE_CONTRACT_ID);
+        logger.write_str(" canonical_xmm0_zero=");
+        logger.write_decimal_u64(u64::from(proof.canonical_xmm0_zero));
+        logger.write_str(" image_zero_bytes=");
+        logger.write_decimal_u64(u64::from(proof.context_image_zero_bytes));
+        logger.write_str(" unexpected_nm=");
+        logger.write_decimal_u64(u64::from(proof.unexpected_nm_count));
+        logger.write_str(" all_selected_components=canonical_image kernel_simd_policy=forbidden\n");
+        logger.write_str("POOLEOS:KERNEL:XSTATE-RESULT PASS contract=");
+        logger.write_str(XSTATE_CONTRACT_ID);
+        logger.write_str(
+            " profile=epyc_rome_v4_x87_sse bsp=1 writes=3 signatures=0 authority=0 actions=0 scheduler=0 smp=0 target=0 terminal=halt\n",
+        );
+        halt_forever()
+    }
+
     // SAFETY: PKXFER1 has installed the retained bootstrap stack, disabled IF/DF,
     // and transferred once on the BSP. PKTRAP1 owns these private descriptor statics.
     let descriptor_state = unsafe { arch::x86_64::install_descriptor_tables(stack_top as u64) };
@@ -543,6 +679,9 @@ extern "C" fn poole_kernel_rust_entry(
         }
         DevelopmentTrapScenario::CpuPolicy => {
             poole_kernel_emergency_panic(PanicCode::TransferState as u32)
+        }
+        DevelopmentTrapScenario::XstatePolicy => {
+            poole_kernel_emergency_panic(PanicCode::XstatePolicy as u32)
         }
     }
 }

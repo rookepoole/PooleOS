@@ -13,12 +13,13 @@ use poole_handoff::{
 };
 
 pub mod revalidation;
+pub mod xstate;
 
 pub const ENTRY_CONTRACT_ID: &str = "PKENTRY1";
 pub const TRANSFER_CONTRACT_ID: &str = "PKXFER1";
 pub const TRAP_CONTRACT_ID: &str = "PKTRAP1";
 pub const CPU_POLICY_CONTRACT_ID: &str = "PKCPU1";
-pub const BUILD_ID: &[u8] = b"PKBUILD1-CYCLE120-N7-CPU-POLICY-001";
+pub const BUILD_ID: &[u8] = b"PKBUILD1-CYCLE122-N7-XSTATE-POLICY-001";
 pub const ENTRY_OFFSET: u64 = 0x8000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
 pub const HANDOFF_MAGIC_U64: u64 = u64::from_le_bytes(poole_handoff::MAGIC);
@@ -49,6 +50,7 @@ pub enum PanicCode {
     DescriptorState = 0x100a,
     TrapContract = 0x100b,
     CpuPolicy = 0x100c,
+    XstatePolicy = 0x100d,
     UnexpectedReturn = 0x10ff,
 }
 
@@ -60,6 +62,7 @@ pub enum DevelopmentTrapScenario {
     DoubleFault = 2,
     MalformedFrame = 3,
     CpuPolicy = 4,
+    XstatePolicy = 5,
 }
 
 impl DevelopmentTrapScenario {
@@ -70,6 +73,7 @@ impl DevelopmentTrapScenario {
             2 => Some(Self::DoubleFault),
             3 => Some(Self::MalformedFrame),
             4 => Some(Self::CpuPolicy),
+            5 => Some(Self::XstatePolicy),
             _ => None,
         }
     }
@@ -81,6 +85,7 @@ impl DevelopmentTrapScenario {
             Self::DoubleFault => "double_fault",
             Self::MalformedFrame => "malformed_frame",
             Self::CpuPolicy => "cpu_policy",
+            Self::XstatePolicy => "xstate_policy",
         }
     }
 }
@@ -1583,7 +1588,11 @@ mod tests {
             DevelopmentTrapScenario::from_selector(4),
             Some(DevelopmentTrapScenario::CpuPolicy)
         );
-        assert_eq!(DevelopmentTrapScenario::from_selector(5), None);
+        assert_eq!(
+            DevelopmentTrapScenario::from_selector(5),
+            Some(DevelopmentTrapScenario::XstatePolicy)
+        );
+        assert_eq!(DevelopmentTrapScenario::from_selector(6), None);
     }
 
     #[test]

@@ -320,6 +320,16 @@ ADDED_REQUIREMENTS = [
         ],
     },
     {
+        "id": "ADD-N7-XSTATE-001",
+        "phase_id": "N7",
+        "requirement": "Bind every enabled XCR0 and XSS component to an exact standard or compacted save-area ABI; require dependency-valid component selection, canonical initialization before first exposure, per-owner aligned bounded images, eager or fully qualified lazy ownership, exception and migration policy, sensitive register and image clearing, and a final linked-machine-code audit that rejects unintended kernel vector instructions outside reviewed bracketed regions.",
+        "basis": [
+            "master checklist sections 020.3 and 021.1",
+            "https://docs.amd.com/v/u/en-US/24593_3.44_APM_Vol2",
+            "Cycle 122 PKXSTATE1 xstate ownership and compiler-boundary audit",
+        ],
+    },
+    {
         "id": "ADD-DRIVER-001",
         "phase_id": "N16",
         "requirement": "Run nonessential drivers outside the kernel in capability-confined address spaces; bind MMIO, ports, IRQs, DMA domains, and device reset to revocable leases and prove supervisor restart without stale completion or cross-domain memory access.",

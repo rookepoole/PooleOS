@@ -186,7 +186,7 @@ The receipt proves, on the pinned profile:
   unsigned development context;
 - live reparse of all six exact retained PBART1 files, PPOL1 payload-digest and
   PINIT1 route cross-binding, six first-failure denials, and exact nine-file
-  retained-set SHA-256 `C46B9030922FB095F5321CD62CD4930B812B2D8D8EA58B93B7C51956B6EEC8B8`;
+  retained-set SHA-256 `872978D7FB5E1108D04736796A247E5E59D9EEC0C97AE991CFBAC83D819A15DC`;
 - live parse of the exact 320-byte PBTP1 policy and 256-byte PBTS1 acceptance
   state, fourteen cross-bindings, rejection of the ESP candidate as persistent
   authority, and exact unsigned-policy denial with zero effects;

@@ -324,7 +324,7 @@ def _validate_prefix(markers: list[str], scenario: str) -> dict[str, Any]:
     if arm is None or int(arm.group(10)) != profile["selector"]:
         raise KernelTrapError("PKTRAP1 transfer selector diverges from its scenario")
     baseline = markers[:PREFIX_MARKER_COUNT]
-    baseline[23] = re.sub(r"trap_scenario=[0-4]", "trap_scenario=0", baseline[23], count=1)
+    baseline[23] = re.sub(r"trap_scenario=[0-5]", "trap_scenario=0", baseline[23], count=1)
     synthetic_terminal = (
         "POOLEOS:KERNEL:TRANSFER-DENIED PASS contract=PKXFER1 terminal=halt "
         "entry_count=1 post_exit_firmware_calls=0 signatures=0 authority=0 actions=0 writes=0"

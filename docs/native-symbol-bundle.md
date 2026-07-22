@@ -56,11 +56,11 @@ The canonical development bundle binds these exact SHA-256 identities:
 
 | Identity | SHA-256 |
 | --- | --- |
-| Canonical stripped PKELF1 | `21DCC577077DEC8CF26764CE83BAAB89DFD43B750DA75F19E12E8F3A58E13B40` |
-| Preferred loaded image | `5FC4B8BD942A35842B353F448CAD26E0DE874BD0F0CBE7911816FF4175133F66` |
-| Build ID text | `D75974AD6EA8586ADFF7AEE7B48EC4C173023843AE820C801366C3B3308BA014` |
-| Full split-debug ELF | `94CC929D60DD704DA165B62B71DD9E357C9CA11691987A7D6E8B187445ADDF9C` |
-| `native/kernel/manifest.pkm` | `07D395013D94A941BCA3E7FE4957459EFA0FB3687E39ACCDC628624A1F83B1CA` |
+| Canonical stripped PKELF1 | `7BFD0BFF2ED6F3F391AE09E57ED1559E3B53B14B4F5D4D969B2938FE8D30BAD6` |
+| Preferred loaded image | `83172368B09592BED4894ECB5B283604665D463E9C087CEEB373F63479C38CC7` |
+| Build ID text | `481ACCBE00E9D48BEFD36D73ED518B250A209871AFE110D27DCB5606CD82A63D` |
+| Full split-debug ELF | `D3BA3C1F8227779E31A689EBA4EC40E7F269632F01D44A5389FB62E854D16AFB` |
+| `native/kernel/manifest.pkm` | `0A50628C922DD147B6B6F3806AEC37D47CB5343EE31C44C1F1A4DDB19EBFFB6D` |
 
 The qualification builds the full debug product twice and requires identical bytes. Both debug builds canonicalize to the exact stripped PKELF1 bytes. A separate release build must have no `.symtab` and no `.debug*` sections and must canonicalize to those same bytes.
 
@@ -73,8 +73,8 @@ Only these real global default-visible functions are selected today:
 | Symbol | Offset | Bytes | Policy |
 | --- | ---: | ---: | --- |
 | `poole_kernel_entry` | `0x8000` | 71 | entry, executable, public diagnostic |
-| `poole_kernel_emergency_panic` | `0x87AF` | 198 | panic-safe, executable, public diagnostic |
-| `poole_kernel_rust_entry` | `0x8875` | 3,714 | executable, public diagnostic |
+| `poole_kernel_emergency_panic` | `0x934B` | 198 | panic-safe, executable, public diagnostic |
+| `poole_kernel_rust_entry` | `0x9411` | 9,023 | executable, public diagnostic |
 
 ## Name And Privacy Policy
 

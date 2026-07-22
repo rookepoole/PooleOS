@@ -162,7 +162,8 @@
       "source_line_count": 220,
       "source_checkbox_count": 192,
       "added_requirement_ids": [
-        "ADD-N7-ERRATA-SOURCE-001"
+        "ADD-N7-ERRATA-SOURCE-001",
+        "ADD-N7-XSTATE-001"
       ]
     },
     {
@@ -2983,6 +2984,16 @@
         "https://www.amd.com/en/resources/product-security/bulletin/amd-sb-7033.html",
         "https://www.amd.com/en/resources/product-security/bulletin/amd-sb-7055.html",
         "Cycle 121 PKERR1 direct-product source-applicability audit"
+      ]
+    },
+    {
+      "id": "ADD-N7-XSTATE-001",
+      "phase_id": "N7",
+      "requirement": "Bind every enabled XCR0 and XSS component to an exact standard or compacted save-area ABI; require dependency-valid component selection, canonical initialization before first exposure, per-owner aligned bounded images, eager or fully qualified lazy ownership, exception and migration policy, sensitive register and image clearing, and a final linked-machine-code audit that rejects unintended kernel vector instructions outside reviewed bracketed regions.",
+      "basis": [
+        "master checklist sections 020.3 and 021.1",
+        "https://docs.amd.com/v/u/en-US/24593_3.44_APM_Vol2",
+        "Cycle 122 PKXSTATE1 xstate ownership and compiler-boundary audit"
       ]
     },
     {
