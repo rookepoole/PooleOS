@@ -3,7 +3,7 @@ use poole_handoff::{
     MEMORY_USABLE, PAGE_BYTES, RECORD_MEMORY_MAP,
 };
 
-pub const CONTRACT_ID: &str = "PKPMM1";
+pub const CONTRACT_ID: &str = "PKPMM2";
 pub const MAX_MEMORY_ENTRIES: usize = 256;
 pub const MAX_FREE_EXTENTS: usize = 256;
 pub const MAX_ALLOCATIONS: usize = 32;
@@ -11,6 +11,9 @@ pub const MEMORY_KIND_COUNT: usize = 12;
 pub const DEFAULT_QUOTA_PAGES: u64 = 64;
 pub const DMA_END_PAGE: u64 = 16 * 1024 * 1024 / PAGE_BYTES;
 pub const DMA32_END_PAGE: u64 = 4 * 1024 * 1024 * 1024 / PAGE_BYTES;
+pub const SCRUB_WORD_BYTES: u64 = 8;
+pub const SCRUB_WORDS_PER_PAGE: usize = (PAGE_BYTES / SCRUB_WORD_BYTES) as usize;
+pub const STALE_PATTERN: u64 = 0xA5A5_5A5A_C3C3_3C3C;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(u8)]
@@ -45,6 +48,45 @@ pub struct AllocationHandle {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(u8)]
+pub enum ScrubKind {
+    Allocation = 1,
+    Release = 2,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ScrubReceipt {
+    pub sequence: u64,
+    pub kind: ScrubKind,
+    pub generation: u64,
+    pub start_page: u64,
+    pub page_count: u64,
+    pub owner: u16,
+    pub zeroed_bytes: u64,
+    pub verified_bytes: u64,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum PageAccessError {
+    Access,
+}
+
+pub trait PhysicalPageAccess {
+    fn write_word(
+        &mut self,
+        physical_address: u64,
+        word_index: usize,
+        value: u64,
+    ) -> Result<(), PageAccessError>;
+
+    fn read_word(
+        &mut self,
+        physical_address: u64,
+        word_index: usize,
+    ) -> Result<u64, PageAccessError>;
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PhysicalMemoryError {
     MissingMap,
     EntryCount,
@@ -61,6 +103,8 @@ pub enum PhysicalMemoryError {
     InvalidOwner,
     StaleHandle,
     CoreOwnership,
+    ScrubAccess,
+    ScrubVerification,
     ExerciseInvariant,
 }
 
@@ -87,6 +131,8 @@ pmm_label!(PMM_LABEL_ZERO_ALLOCATION, b"zero_allocation");
 pmm_label!(PMM_LABEL_INVALID_OWNER, b"invalid_owner");
 pmm_label!(PMM_LABEL_STALE_HANDLE, b"stale_handle");
 pmm_label!(PMM_LABEL_CORE_OWNERSHIP, b"core_ownership");
+pmm_label!(PMM_LABEL_SCRUB_ACCESS, b"scrub_access");
+pmm_label!(PMM_LABEL_SCRUB_VERIFICATION, b"scrub_verification");
 pmm_label!(PMM_LABEL_EXERCISE_INVARIANT, b"exercise_invariant");
 
 const fn pmm_label_text(bytes: &'static [u8]) -> &'static str {
@@ -112,6 +158,8 @@ impl PhysicalMemoryError {
             Self::InvalidOwner => pmm_label_text(&PMM_LABEL_INVALID_OWNER),
             Self::StaleHandle => pmm_label_text(&PMM_LABEL_STALE_HANDLE),
             Self::CoreOwnership => pmm_label_text(&PMM_LABEL_CORE_OWNERSHIP),
+            Self::ScrubAccess => pmm_label_text(&PMM_LABEL_SCRUB_ACCESS),
+            Self::ScrubVerification => pmm_label_text(&PMM_LABEL_SCRUB_VERIFICATION),
             Self::ExerciseInvariant => pmm_label_text(&PMM_LABEL_EXERCISE_INVARIANT),
         }
     }
@@ -152,6 +200,17 @@ const EMPTY_ALLOCATION: Allocation = Allocation {
 };
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct AllocationPlan {
+    slot: usize,
+    extent_index: usize,
+    generation: u64,
+    start_page: u64,
+    page_count: u64,
+    zone: Zone,
+    owner: u16,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct PhysicalMemorySummary {
     pub memory_entry_count: usize,
     pub source_pages: [u64; MEMORY_KIND_COUNT],
@@ -168,6 +227,12 @@ pub struct PhysicalMemorySummary {
     pub rejected_unavailable_requests: u64,
     pub metadata_poison_events: u64,
     pub coalesce_events: u64,
+    pub allocation_scrub_pages: u64,
+    pub release_scrub_pages: u64,
+    pub scrub_zeroed_bytes: u64,
+    pub scrub_verified_bytes: u64,
+    pub scrub_receipt_count: u64,
+    pub scrub_failures: u64,
 }
 
 pub struct PhysicalMemoryManager {
@@ -189,48 +254,143 @@ pub struct PhysicalMemoryManager {
     rejected_unavailable_requests: u64,
     metadata_poison_events: u64,
     coalesce_events: u64,
+    next_scrub_sequence: u64,
+    allocation_scrub_pages: u64,
+    release_scrub_pages: u64,
+    scrub_zeroed_bytes: u64,
+    scrub_verified_bytes: u64,
+    scrub_receipt_count: u64,
+    scrub_failures: u64,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct PhysicalMemoryProof {
     pub initial: PhysicalMemorySummary,
     pub final_state: PhysicalMemorySummary,
-    pub dma_start_page: u64,
-    pub dma32_start_page: u64,
+    pub start_page: u64,
+    pub first_generation: u64,
+    pub reuse_generation: u64,
+    pub stale_pattern: u64,
+    pub stale_pattern_absent: bool,
+    pub receipts: [ScrubReceipt; 4],
 }
 
 #[inline(never)]
-pub fn run_profile(
+pub fn run_profile<A: PhysicalPageAccess>(
     handoff: &Handoff<'_>,
     core: CoreRecord,
+    access: &mut A,
 ) -> Result<PhysicalMemoryProof, PhysicalMemoryError> {
     let mut manager = PhysicalMemoryManager::from_handoff(handoff, core, DEFAULT_QUOTA_PAGES)?;
     let initial = manager.summary();
-    let dma = manager.allocate(Zone::Dma, 3, 1)?;
-    let dma32 = manager.allocate(Zone::Dma32, 8, 2)?;
+    let (first, allocation_receipt) = manager.allocate_scrubbed(Zone::Dma32, 2, 1, access)?;
     let quota_rejected = manager
-        .allocate(Zone::Dma32, DEFAULT_QUOTA_PAGES, 3)
+        .allocate_scrubbed(Zone::Dma32, DEFAULT_QUOTA_PAGES, 3, access)
         .is_err();
-    let unavailable_rejected = manager.allocate(Zone::Normal, 1, 3).is_err();
-    manager.free(dma)?;
-    let double_free_rejected = manager.free(dma).is_err();
-    manager.free(dma32)?;
+    let unavailable_rejected = manager
+        .allocate_scrubbed(Zone::Normal, 1, 3, access)
+        .is_err();
+    fill_and_verify(access, first, STALE_PATTERN)?;
+    let release_receipt = manager.free_scrubbed(first, access)?;
+    let double_free_rejected = manager.free_scrubbed(first, access).is_err();
+    let (reused, reuse_allocation_receipt) =
+        manager.allocate_scrubbed(Zone::Dma32, 2, 2, access)?;
+    let stale_pattern_absent = verify_words(access, reused, 0)?;
+    let reuse_release_receipt = manager.free_scrubbed(reused, access)?;
     let final_state = manager.summary();
     if !quota_rejected
         || !unavailable_rejected
         || !double_free_rejected
+        || reused.start_page != first.start_page
+        || reused.generation <= first.generation
+        || !stale_pattern_absent
+        || [
+            allocation_receipt,
+            release_receipt,
+            reuse_allocation_receipt,
+            reuse_release_receipt,
+        ]
+        .iter()
+        .enumerate()
+        .any(|(index, receipt)| receipt.sequence != index as u64 + 1)
         || final_state.allocated_pages != 0
         || final_state.free_extent_count != initial.free_extent_count
         || final_state.largest_free_pages != initial.largest_free_pages
+        || final_state.allocation_scrub_pages != 4
+        || final_state.release_scrub_pages != 4
+        || final_state.scrub_zeroed_bytes != 8 * PAGE_BYTES
+        || final_state.scrub_verified_bytes != 8 * PAGE_BYTES
+        || final_state.scrub_receipt_count != 4
+        || final_state.scrub_failures != 0
     {
         return Err(PhysicalMemoryError::ExerciseInvariant);
     }
     Ok(PhysicalMemoryProof {
         initial,
         final_state,
-        dma_start_page: dma.start_page,
-        dma32_start_page: dma32.start_page,
+        start_page: first.start_page,
+        first_generation: first.generation,
+        reuse_generation: reused.generation,
+        stale_pattern: STALE_PATTERN,
+        stale_pattern_absent,
+        receipts: [
+            allocation_receipt,
+            release_receipt,
+            reuse_allocation_receipt,
+            reuse_release_receipt,
+        ],
     })
+}
+
+fn fill_and_verify<A: PhysicalPageAccess>(
+    access: &mut A,
+    handle: AllocationHandle,
+    pattern: u64,
+) -> Result<(), PhysicalMemoryError> {
+    for page_offset in 0..handle.page_count {
+        let page = handle
+            .start_page
+            .checked_add(page_offset)
+            .ok_or(PhysicalMemoryError::AddressRange)?;
+        let physical = page
+            .checked_mul(PAGE_BYTES)
+            .ok_or(PhysicalMemoryError::AddressRange)?;
+        for word_index in 0..SCRUB_WORDS_PER_PAGE {
+            access
+                .write_word(physical, word_index, pattern)
+                .map_err(|_| PhysicalMemoryError::ScrubAccess)?;
+        }
+    }
+    if !verify_words(access, handle, pattern)? {
+        return Err(PhysicalMemoryError::ScrubVerification);
+    }
+    Ok(())
+}
+
+fn verify_words<A: PhysicalPageAccess>(
+    access: &mut A,
+    handle: AllocationHandle,
+    expected: u64,
+) -> Result<bool, PhysicalMemoryError> {
+    for page_offset in 0..handle.page_count {
+        let page = handle
+            .start_page
+            .checked_add(page_offset)
+            .ok_or(PhysicalMemoryError::AddressRange)?;
+        let physical = page
+            .checked_mul(PAGE_BYTES)
+            .ok_or(PhysicalMemoryError::AddressRange)?;
+        for word_index in 0..SCRUB_WORDS_PER_PAGE {
+            if access
+                .read_word(physical, word_index)
+                .map_err(|_| PhysicalMemoryError::ScrubAccess)?
+                != expected
+            {
+                return Ok(false);
+            }
+        }
+    }
+    Ok(true)
 }
 
 fn read_u32(bytes: &[u8], offset: usize) -> Result<u32, PhysicalMemoryError> {
@@ -305,6 +465,13 @@ impl PhysicalMemoryManager {
             rejected_unavailable_requests: 0,
             metadata_poison_events: 0,
             coalesce_events: 0,
+            next_scrub_sequence: 1,
+            allocation_scrub_pages: 0,
+            release_scrub_pages: 0,
+            scrub_zeroed_bytes: 0,
+            scrub_verified_bytes: 0,
+            scrub_receipt_count: 0,
+            scrub_failures: 0,
         }
     }
 
@@ -451,12 +618,12 @@ impl PhysicalMemoryManager {
         Ok(())
     }
 
-    pub fn allocate(
+    fn plan_allocation(
         &mut self,
         zone: Zone,
         pages: u64,
         owner: u16,
-    ) -> Result<AllocationHandle, PhysicalMemoryError> {
+    ) -> Result<AllocationPlan, PhysicalMemoryError> {
         if pages == 0 {
             return Err(PhysicalMemoryError::ZeroAllocation);
         }
@@ -485,35 +652,81 @@ impl PhysicalMemoryManager {
             }
         };
         let start_page = self.free[extent_index].start_page;
-        self.free[extent_index].start_page += pages;
-        self.free[extent_index].page_count -= pages;
-        if self.free[extent_index].page_count == 0 {
-            self.remove_free_extent(extent_index);
-        }
-        let generation = self.next_generation;
-        self.next_generation = self
-            .next_generation
+        self.next_generation
             .checked_add(1)
             .ok_or(PhysicalMemoryError::AddressRange)?;
-        self.allocations[slot] = Allocation {
-            active: true,
-            generation,
-            start_page,
-            page_count: pages,
-            zone,
-            owner,
-            metadata_poisoned: false,
-        };
-        self.allocated_pages += pages;
-        self.allocation_count += 1;
-        Ok(AllocationHandle {
-            slot: slot as u8,
-            generation,
+        self.allocation_count
+            .checked_add(1)
+            .ok_or(PhysicalMemoryError::AddressRange)?;
+        Ok(AllocationPlan {
+            slot,
+            extent_index,
+            generation: self.next_generation,
             start_page,
             page_count: pages,
             zone,
             owner,
         })
+    }
+
+    fn commit_allocation(&mut self, plan: AllocationPlan) -> AllocationHandle {
+        let extent_index = plan.extent_index;
+        let pages = plan.page_count;
+        self.free[extent_index].start_page += pages;
+        self.free[extent_index].page_count -= pages;
+        if self.free[extent_index].page_count == 0 {
+            self.remove_free_extent(extent_index);
+        }
+        self.next_generation += 1;
+        self.allocations[plan.slot] = Allocation {
+            active: true,
+            generation: plan.generation,
+            start_page: plan.start_page,
+            page_count: pages,
+            zone: plan.zone,
+            owner: plan.owner,
+            metadata_poisoned: false,
+        };
+        self.allocated_pages += pages;
+        self.allocation_count += 1;
+        AllocationHandle {
+            slot: plan.slot as u8,
+            generation: plan.generation,
+            start_page: plan.start_page,
+            page_count: pages,
+            zone: plan.zone,
+            owner: plan.owner,
+        }
+    }
+
+    pub fn allocate(
+        &mut self,
+        zone: Zone,
+        pages: u64,
+        owner: u16,
+    ) -> Result<AllocationHandle, PhysicalMemoryError> {
+        let plan = self.plan_allocation(zone, pages, owner)?;
+        Ok(self.commit_allocation(plan))
+    }
+
+    pub fn allocate_scrubbed<A: PhysicalPageAccess>(
+        &mut self,
+        zone: Zone,
+        pages: u64,
+        owner: u16,
+        access: &mut A,
+    ) -> Result<(AllocationHandle, ScrubReceipt), PhysicalMemoryError> {
+        let plan = self.plan_allocation(zone, pages, owner)?;
+        let receipt = self.scrub_range(
+            access,
+            ScrubKind::Allocation,
+            plan.generation,
+            plan.start_page,
+            plan.page_count,
+            plan.owner,
+        )?;
+        let handle = self.commit_allocation(plan);
+        Ok((handle, receipt))
     }
 
     pub fn validate_allocation(&self, handle: AllocationHandle) -> Result<(), PhysicalMemoryError> {
@@ -542,17 +755,133 @@ impl PhysicalMemoryManager {
         }
         let slot = usize::from(handle.slot);
         let allocation = self.allocations[slot];
-        self.insert_and_coalesce(Extent {
+        let extent = Extent {
             start_page: allocation.start_page,
             page_count: allocation.page_count,
             zone: allocation.zone,
-        })?;
+        };
+        self.insert_and_coalesce(extent)?;
+        self.commit_free(slot, allocation);
+        Ok(())
+    }
+
+    pub fn free_scrubbed<A: PhysicalPageAccess>(
+        &mut self,
+        handle: AllocationHandle,
+        access: &mut A,
+    ) -> Result<ScrubReceipt, PhysicalMemoryError> {
+        if self.validate_allocation(handle).is_err() {
+            self.rejected_double_frees += 1;
+            return Err(PhysicalMemoryError::StaleHandle);
+        }
+        let slot = usize::from(handle.slot);
+        let allocation = self.allocations[slot];
+        let extent = Extent {
+            start_page: allocation.start_page,
+            page_count: allocation.page_count,
+            zone: allocation.zone,
+        };
+        self.preflight_insert(extent)?;
+        let receipt = self.scrub_range(
+            access,
+            ScrubKind::Release,
+            allocation.generation,
+            allocation.start_page,
+            allocation.page_count,
+            allocation.owner,
+        )?;
+        self.insert_and_coalesce(extent)?;
+        self.commit_free(slot, allocation);
+        Ok(receipt)
+    }
+
+    fn commit_free(&mut self, slot: usize, allocation: Allocation) {
         self.allocations[slot].active = false;
         self.allocations[slot].metadata_poisoned = true;
         self.allocated_pages -= allocation.page_count;
         self.free_operation_count += 1;
         self.metadata_poison_events += 1;
-        Ok(())
+    }
+
+    fn scrub_range<A: PhysicalPageAccess>(
+        &mut self,
+        access: &mut A,
+        kind: ScrubKind,
+        generation: u64,
+        start_page: u64,
+        page_count: u64,
+        owner: u16,
+    ) -> Result<ScrubReceipt, PhysicalMemoryError> {
+        let byte_count = page_count
+            .checked_mul(PAGE_BYTES)
+            .ok_or(PhysicalMemoryError::AddressRange)?;
+        let next_sequence = self
+            .next_scrub_sequence
+            .checked_add(1)
+            .ok_or(PhysicalMemoryError::AddressRange)?;
+        let next_receipt_count = self
+            .scrub_receipt_count
+            .checked_add(1)
+            .ok_or(PhysicalMemoryError::AddressRange)?;
+        let next_zeroed = self
+            .scrub_zeroed_bytes
+            .checked_add(byte_count)
+            .ok_or(PhysicalMemoryError::AddressRange)?;
+        let next_verified = self
+            .scrub_verified_bytes
+            .checked_add(byte_count)
+            .ok_or(PhysicalMemoryError::AddressRange)?;
+        let next_kind_pages = match kind {
+            ScrubKind::Allocation => self.allocation_scrub_pages.checked_add(page_count),
+            ScrubKind::Release => self.release_scrub_pages.checked_add(page_count),
+        }
+        .ok_or(PhysicalMemoryError::AddressRange)?;
+        for page_offset in 0..page_count {
+            let page = start_page
+                .checked_add(page_offset)
+                .ok_or(PhysicalMemoryError::AddressRange)?;
+            let physical = page
+                .checked_mul(PAGE_BYTES)
+                .ok_or(PhysicalMemoryError::AddressRange)?;
+            for word_index in 0..SCRUB_WORDS_PER_PAGE {
+                if access.write_word(physical, word_index, 0).is_err() {
+                    self.scrub_failures = self.scrub_failures.saturating_add(1);
+                    return Err(PhysicalMemoryError::ScrubAccess);
+                }
+            }
+            for word_index in 0..SCRUB_WORDS_PER_PAGE {
+                let value = match access.read_word(physical, word_index) {
+                    Ok(value) => value,
+                    Err(_) => {
+                        self.scrub_failures = self.scrub_failures.saturating_add(1);
+                        return Err(PhysicalMemoryError::ScrubAccess);
+                    }
+                };
+                if value != 0 {
+                    self.scrub_failures = self.scrub_failures.saturating_add(1);
+                    return Err(PhysicalMemoryError::ScrubVerification);
+                }
+            }
+        }
+        let receipt = ScrubReceipt {
+            sequence: self.next_scrub_sequence,
+            kind,
+            generation,
+            start_page,
+            page_count,
+            owner,
+            zeroed_bytes: byte_count,
+            verified_bytes: byte_count,
+        };
+        self.next_scrub_sequence = next_sequence;
+        self.scrub_receipt_count = next_receipt_count;
+        self.scrub_zeroed_bytes = next_zeroed;
+        self.scrub_verified_bytes = next_verified;
+        match kind {
+            ScrubKind::Allocation => self.allocation_scrub_pages = next_kind_pages,
+            ScrubKind::Release => self.release_scrub_pages = next_kind_pages,
+        }
+        Ok(receipt)
     }
 
     fn remove_free_extent(&mut self, index: usize) {
@@ -609,6 +938,36 @@ impl PhysicalMemoryManager {
         Ok(())
     }
 
+    fn preflight_insert(&self, extent: Extent) -> Result<(), PhysicalMemoryError> {
+        let mut index = 0;
+        while index < self.free_count && self.free[index].start_page < extent.start_page {
+            index += 1;
+        }
+        let merge_previous = index > 0 && can_coalesce(self.free[index - 1], extent);
+        let merge_next = index < self.free_count && can_coalesce(extent, self.free[index]);
+        if merge_previous {
+            self.free[index - 1]
+                .page_count
+                .checked_add(extent.page_count)
+                .and_then(|value| {
+                    if merge_next {
+                        value.checked_add(self.free[index].page_count)
+                    } else {
+                        Some(value)
+                    }
+                })
+                .ok_or(PhysicalMemoryError::AddressRange)?;
+        } else if merge_next {
+            extent
+                .page_count
+                .checked_add(self.free[index].page_count)
+                .ok_or(PhysicalMemoryError::AddressRange)?;
+        } else if self.free_count == MAX_FREE_EXTENTS {
+            return Err(PhysicalMemoryError::ExtentCapacity);
+        }
+        Ok(())
+    }
+
     pub fn summary(&self) -> PhysicalMemorySummary {
         let mut largest = [0u64; 3];
         for extent in &self.free[..self.free_count] {
@@ -630,6 +989,12 @@ impl PhysicalMemoryManager {
             rejected_unavailable_requests: self.rejected_unavailable_requests,
             metadata_poison_events: self.metadata_poison_events,
             coalesce_events: self.coalesce_events,
+            allocation_scrub_pages: self.allocation_scrub_pages,
+            release_scrub_pages: self.release_scrub_pages,
+            scrub_zeroed_bytes: self.scrub_zeroed_bytes,
+            scrub_verified_bytes: self.scrub_verified_bytes,
+            scrub_receipt_count: self.scrub_receipt_count,
+            scrub_failures: self.scrub_failures,
         }
     }
 
@@ -697,6 +1062,80 @@ mod tests {
     };
     use std::vec;
     use std::vec::Vec;
+
+    struct FakePageAccess {
+        start_page: u64,
+        words: Vec<u64>,
+        fail_write: Option<(u64, usize)>,
+        fail_read: Option<(u64, usize)>,
+        drop_write: Option<(u64, usize)>,
+        write_count: u64,
+    }
+
+    impl FakePageAccess {
+        fn new(start_page: u64, page_count: u64, fill: u64) -> Self {
+            Self {
+                start_page,
+                words: vec![fill; page_count as usize * SCRUB_WORDS_PER_PAGE],
+                fail_write: None,
+                fail_read: None,
+                drop_write: None,
+                write_count: 0,
+            }
+        }
+
+        fn index(
+            &self,
+            physical_address: u64,
+            word_index: usize,
+        ) -> Result<usize, PageAccessError> {
+            if !physical_address.is_multiple_of(PAGE_BYTES) || word_index >= SCRUB_WORDS_PER_PAGE {
+                return Err(PageAccessError::Access);
+            }
+            let page = physical_address / PAGE_BYTES;
+            let offset = page
+                .checked_sub(self.start_page)
+                .ok_or(PageAccessError::Access)?;
+            let index = offset as usize * SCRUB_WORDS_PER_PAGE + word_index;
+            if index >= self.words.len() {
+                return Err(PageAccessError::Access);
+            }
+            Ok(index)
+        }
+    }
+
+    impl PhysicalPageAccess for FakePageAccess {
+        fn write_word(
+            &mut self,
+            physical_address: u64,
+            word_index: usize,
+            value: u64,
+        ) -> Result<(), PageAccessError> {
+            let page = physical_address / PAGE_BYTES;
+            if self.fail_write == Some((page, word_index)) {
+                return Err(PageAccessError::Access);
+            }
+            let index = self.index(physical_address, word_index)?;
+            self.write_count += 1;
+            if self.drop_write != Some((page, word_index)) {
+                self.words[index] = value;
+            }
+            Ok(())
+        }
+
+        fn read_word(
+            &mut self,
+            physical_address: u64,
+            word_index: usize,
+        ) -> Result<u64, PageAccessError> {
+            let page = physical_address / PAGE_BYTES;
+            if self.fail_read == Some((page, word_index)) {
+                return Err(PageAccessError::Access);
+            }
+            let index = self.index(physical_address, word_index)?;
+            Ok(self.words[index])
+        }
+    }
 
     fn put_u32(value: &mut [u8], offset: usize, item: u32) {
         value[offset..offset + 4].copy_from_slice(&item.to_le_bytes());
@@ -905,5 +1344,136 @@ mod tests {
         assert_eq!(manager.allocated_pages, 1);
         assert_eq!(manager.free_operation_count, 0);
         assert_eq!(manager.metadata_poison_events, 0);
+    }
+
+    #[test]
+    fn scrubbed_lifecycle_removes_stale_pattern_before_generation_reuse() {
+        let start = DMA_END_PAGE;
+        let mut manager = PhysicalMemoryManager::test_manager(start, 4, 64);
+        let mut access = FakePageAccess::new(start, 4, STALE_PATTERN);
+        let (first, first_receipt) = manager
+            .allocate_scrubbed(Zone::Dma32, 2, 1, &mut access)
+            .unwrap();
+        assert_eq!(ScrubKind::Allocation, first_receipt.kind);
+        assert_eq!(1, first_receipt.sequence);
+        assert!(
+            access.words[..2 * SCRUB_WORDS_PER_PAGE]
+                .iter()
+                .all(|word| *word == 0)
+        );
+        for word in &mut access.words[..2 * SCRUB_WORDS_PER_PAGE] {
+            *word = STALE_PATTERN;
+        }
+        let release = manager.free_scrubbed(first, &mut access).unwrap();
+        assert_eq!(ScrubKind::Release, release.kind);
+        assert_eq!(2, release.sequence);
+        let (reused, reuse_receipt) = manager
+            .allocate_scrubbed(Zone::Dma32, 2, 2, &mut access)
+            .unwrap();
+        assert_eq!(first.start_page, reused.start_page);
+        assert!(reused.generation > first.generation);
+        assert_eq!(3, reuse_receipt.sequence);
+        assert!(
+            access.words[..2 * SCRUB_WORDS_PER_PAGE]
+                .iter()
+                .all(|word| *word == 0)
+        );
+        let final_release = manager.free_scrubbed(reused, &mut access).unwrap();
+        assert_eq!(4, final_release.sequence);
+        let summary = manager.summary();
+        assert_eq!(4, summary.allocation_scrub_pages);
+        assert_eq!(4, summary.release_scrub_pages);
+        assert_eq!(8 * PAGE_BYTES, summary.scrub_zeroed_bytes);
+        assert_eq!(summary.scrub_zeroed_bytes, summary.scrub_verified_bytes);
+        assert_eq!(4, summary.scrub_receipt_count);
+        assert_eq!(0, summary.scrub_failures);
+    }
+
+    #[test]
+    fn partial_allocation_scrub_failure_preserves_allocator_ownership_state() {
+        let start = DMA_END_PAGE;
+        let mut manager = PhysicalMemoryManager::test_manager(start, 4, 64);
+        let before = manager.summary();
+        let mut access = FakePageAccess::new(start, 4, STALE_PATTERN);
+        access.fail_write = Some((start + 1, 0));
+        assert_eq!(
+            manager.allocate_scrubbed(Zone::Dma32, 2, 1, &mut access),
+            Err(PhysicalMemoryError::ScrubAccess)
+        );
+        let failed = manager.summary();
+        assert_eq!(before.allocated_pages, failed.allocated_pages);
+        assert_eq!(before.free_extent_count, failed.free_extent_count);
+        assert_eq!(before.largest_free_pages, failed.largest_free_pages);
+        assert_eq!(0, failed.allocation_count);
+        assert_eq!(0, failed.scrub_receipt_count);
+        assert_eq!(1, failed.scrub_failures);
+        access.fail_write = None;
+        let (handle, receipt) = manager
+            .allocate_scrubbed(Zone::Dma32, 2, 1, &mut access)
+            .unwrap();
+        assert_eq!(start, handle.start_page);
+        assert_eq!(1, handle.generation);
+        assert_eq!(1, receipt.sequence);
+    }
+
+    #[test]
+    fn release_verification_failure_keeps_the_handle_live() {
+        let start = DMA_END_PAGE;
+        let mut manager = PhysicalMemoryManager::test_manager(start, 2, 64);
+        let mut access = FakePageAccess::new(start, 2, STALE_PATTERN);
+        let (handle, _) = manager
+            .allocate_scrubbed(Zone::Dma32, 1, 1, &mut access)
+            .unwrap();
+        access.words[0] = STALE_PATTERN;
+        access.drop_write = Some((start, 0));
+        assert_eq!(
+            manager.free_scrubbed(handle, &mut access),
+            Err(PhysicalMemoryError::ScrubVerification)
+        );
+        assert_eq!(Ok(()), manager.validate_allocation(handle));
+        let summary = manager.summary();
+        assert_eq!(1, summary.allocated_pages);
+        assert_eq!(0, summary.free_count);
+        assert_eq!(1, summary.scrub_receipt_count);
+        assert_eq!(1, summary.scrub_failures);
+    }
+
+    #[test]
+    fn scrubbed_free_preflights_extent_capacity_before_content_writes() {
+        let mut manager = PhysicalMemoryManager::empty(64);
+        for index in 0..MAX_FREE_EXTENTS {
+            manager.free[index] = Extent {
+                start_page: 1 + (index as u64 * 2),
+                page_count: 1,
+                zone: Zone::Dma,
+            };
+        }
+        manager.free_count = MAX_FREE_EXTENTS;
+        manager.allocations[0] = Allocation {
+            active: true,
+            generation: 1,
+            start_page: 700,
+            page_count: 1,
+            zone: Zone::Dma,
+            owner: 7,
+            metadata_poisoned: false,
+        };
+        manager.allocated_pages = 1;
+        let handle = AllocationHandle {
+            slot: 0,
+            generation: 1,
+            start_page: 700,
+            page_count: 1,
+            zone: Zone::Dma,
+            owner: 7,
+        };
+        let mut access = FakePageAccess::new(700, 1, STALE_PATTERN);
+        assert_eq!(
+            manager.free_scrubbed(handle, &mut access),
+            Err(PhysicalMemoryError::ExtentCapacity)
+        );
+        assert_eq!(0, access.write_count);
+        assert_eq!(Ok(()), manager.validate_allocation(handle));
+        assert_eq!(0, manager.summary().scrub_receipt_count);
     }
 }

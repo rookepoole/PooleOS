@@ -123,9 +123,9 @@
         "sha256": "2B3873C5FC61F2DDCE1B789C29BFB526FCAEB59B8F2B832F5D2CED0FB58C8F56"
       },
       {
-        "byte_count": 15145,
+        "byte_count": 15247,
         "path": "specs/pooleos-kernel-charter.md",
-        "sha256": "F3E834E6D0697FD898AA917693E9008FC6DB79D05DA2B7C217139F487957ED98"
+        "sha256": "A4E5BB952919EF183349506B141BE10A693AAFA7EF3400763CA8DDC3A2301388"
       },
       {
         "byte_count": 1765,

@@ -29,8 +29,8 @@ PAGE_BYTES = 4096
 TABLE_PAGES = 8
 OWNED_PAGES = 9
 PHYSICAL_WRITES = 8720
-TEMPORARY_PTE_WRITES = 5336
-BOOTSTRAP_INVALIDATIONS = 5336
+TEMPORARY_PTE_WRITES = 5368
+BOOTSTRAP_INVALIDATIONS = 5368
 ACTIVE_CR3_WRITES = 2
 ACTIVE_INVALIDATIONS = 3
 DIRECT_MAP_START = 0xFFFF_9000_0000_0000
@@ -437,7 +437,12 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         "terminal": "halt",
     }
     if result != expected_result:
-        raise KernelVirtualMemoryError("PKVM2 result boundary changed")
+        changed = {
+            key: {"expected": expected_result[key], "observed": result.get(key)}
+            for key in expected_result
+            if result.get(key) != expected_result[key]
+        }
+        raise KernelVirtualMemoryError(f"PKVM2 result boundary changed: {changed}")
     return {
         "transfer_prefix": prefix,
         "early": {

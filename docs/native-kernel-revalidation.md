@@ -108,6 +108,8 @@ MSR policy observation. Cycle 125 separately closes the bounded PKPMM1
 physical-page foundation, Cycle 126 closes the bounded PKVM1 inactive
 virtual-memory foundation, and Cycle 127 closes the bounded one-BSP PKVM2
 candidate-root activation, direct-map, exact CR3 restoration, and local
-invalidation-receipt move. The next owner-independent move is
-`N9-PMM-SCRUB-001` without target, scheduler, SMP, userspace, heap, pager, or
-production promotion.
+invalidation-receipt move. Cycle 128 upgrades selector 8 to PKPMM2 with
+scrub-before-allocation and scrub-before-reuse, full readback, receipts,
+exact-reuse residue rejection, fault rollback, and alias revocation. The next
+owner-independent move is `N9-PMM-METADATA-001` without target, scheduler, SMP,
+userspace, heap, pager, reclaim, or production promotion.

@@ -155,7 +155,7 @@ class NativeKernelMapTests(unittest.TestCase):
                 handoff_capacity_bytes=1024 * 1024,
             ),
         )
-        self.assertEqual([64, 79], model["guard_page_indices"])
+        self.assertEqual([66, 81], model["guard_page_indices"])
         self.assertEqual(334, model["total_mapped_page_count"])
         self.assertEqual("rw", model["retained_leaves"][0]["permissions"])
         self.assertEqual("r", model["retained_leaves"][-1]["permissions"])
@@ -170,7 +170,7 @@ class NativeKernelMapTests(unittest.TestCase):
             with self.assertRaises(native_kernel_map.KernelMapError):
                 native_kernel_map.build_retained_model(request, retained)
         hostile = copy.deepcopy(plan())
-        hostile["image_size"] = 65 * native_kernel_map.PAGE_SIZE
+        hostile["image_size"] = 67 * native_kernel_map.PAGE_SIZE
         hostile["mappings"][-1]["memory_size"] += native_kernel_map.PAGE_SIZE
         with self.assertRaises(native_kernel_map.KernelMapError):
             native_kernel_map.build_retained_model(
@@ -185,7 +185,7 @@ class NativeKernelMapTests(unittest.TestCase):
         )
         line = (
             "PKMAP2 PASS kernel_pages=64 stack_pages=14 handoff_pages=256 guards=2 "
-            f"total_pages=334 stack_pt=65 handoff_pt=80 retained_fnv1a64={expected['retained_leaf_fingerprint']}"
+            f"total_pages=334 stack_pt=67 handoff_pt=82 retained_fnv1a64={expected['retained_leaf_fingerprint']}"
         )
         self.assertEqual(
             expected["retained_leaf_fingerprint"],

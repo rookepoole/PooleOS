@@ -43,8 +43,8 @@
     "candidate_root_inheritance": "all other PML4 entries exactly equal the retained PKMAP2 root"
   },
   "table_policy": {
-    "table_frames": "one eight-page contiguous DMA32 generation-owned PKPMM1 allocation",
-    "data_frames": "one contiguous following DMA32 generation-owned PKPMM1 page",
+    "table_frames": "one eight-page contiguous DMA32 generation-owned PKPMM2 allocation",
+    "data_frames": "one contiguous following DMA32 generation-owned PKPMM2 page",
     "table_order": ["PML4", "user PDPT", "user PD", "user PT", "direct PDPT", "direct PD", "direct PT 0", "direct PT 1"],
     "physical_address_width": "live BSP CPUID leaf 0x80000008 constrained to 36..52 bits",
     "materialization": "volatile writes through one PKMAP2 bootstrap temporary leaf with translation readback and per-transition INVLPG",
@@ -71,8 +71,8 @@
     "restore": "write exact original CR3 and require readback before table scrubbing",
     "release": "scrub all eight inactive candidate table pages through the restored bootstrap mapping, revoke that mapping, then free tables",
     "inactive_table_physical_write_count": 8720,
-    "temporary_pte_write_count": 5336,
-    "bootstrap_invlpg_count": 5336,
+    "temporary_pte_write_count": 5368,
+    "bootstrap_invlpg_count": 5368,
     "active_cr3_write_count": 2,
     "active_local_invlpg_count": 3,
     "smp_shootdown_executed": false

@@ -41,7 +41,7 @@
     "authorities": {"type": "array", "minItems": 4, "items": {"type": "object"}},
     "product": {
       "type": "object",
-      "required": ["package", "binary_name", "published_file_name", "target", "architecture", "format_contract", "handoff_contract", "entry_symbol", "entry_offset", "image_memory_bytes", "canonical_file_bytes", "maximum_linked_file_bytes", "maximum_relocations", "build_id", "manifest_path", "manifest_contract_bindings", "manifest_exactly_once_in_read_only_load"],
+      "required": ["package", "binary_name", "published_file_name", "target", "architecture", "format_contract", "handoff_contract", "entry_symbol", "entry_offset", "image_memory_bytes", "canonical_file_bytes", "maximum_linked_file_bytes", "maximum_relocations", "build_id", "segment_boundaries", "manifest_path", "manifest_contract_bindings", "manifest_exactly_once_in_read_only_load"],
       "properties": {
         "package": {"const": "poolekernel"},
         "binary_name": {"const": "PooleKernelLinked"},
@@ -52,11 +52,23 @@
         "handoff_contract": {"const": "PBP1"},
         "entry_symbol": {"const": "poole_kernel_entry"},
         "entry_offset": {"const": 32768},
-        "image_memory_bytes": {"const": 262144},
-        "canonical_file_bytes": {"const": 221184},
+        "image_memory_bytes": {"const": 270336},
+        "canonical_file_bytes": {"const": 229376},
         "maximum_linked_file_bytes": {"const": 8388608},
         "maximum_relocations": {"const": 4096},
-        "build_id": {"const": "PKBUILD1-CYCLE127-N9-VM-ACTIVE-001"},
+        "build_id": {"const": "PKBUILD1-CYCLE128-N9-PMM-SCRUB-001"},
+        "segment_boundaries": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["read_only_end", "text_start", "text_end", "relro_end", "image_end"],
+          "properties": {
+            "read_only_end": {"const": 32768},
+            "text_start": {"const": 32768},
+            "text_end": {"const": 204800},
+            "relro_end": {"const": 229376},
+            "image_end": {"const": 270336}
+          }
+        },
         "manifest_path": {"const": "native/kernel/manifest.pkm"},
         "manifest_contract_bindings": {"type": "array", "minItems": 3, "maxItems": 3, "uniqueItems": true, "items": {"enum": ["PKENTRY1", "PKELF1", "PBP1"]}},
         "manifest_exactly_once_in_read_only_load": {"const": true}

@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["schema_version", "artifact_kind", "contract_id", "selected_move_id", "status", "production_ready", "production_promotion_allowed", "development_profile", "limits", "ownership_precedence", "zones", "allocation_policy", "qualification", "required_negative_controls", "claims", "non_claims"],
+  "required": ["schema_version", "artifact_kind", "contract_id", "selected_move_id", "status", "production_ready", "production_promotion_allowed", "development_profile", "limits", "ownership_precedence", "zones", "allocation_policy", "scrub_policy", "receipt_contract", "failure_atomicity", "qualification", "required_negative_controls", "claims", "non_claims"],
   "properties": {
     "schema_version": {"const": "1.0"},
     "artifact_kind": {"const": "pooleos_native_kernel_physical_memory_contract"},
-    "contract_id": {"const": "PKPMM1"},
-    "selected_move_id": {"const": "N9-PMM-001"},
+    "contract_id": {"const": "PKPMM2"},
+    "selected_move_id": {"const": "N9-PMM-SCRUB-001"},
     "status": {"type": "string", "minLength": 1},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
@@ -15,8 +15,11 @@
     "ownership_precedence": {"type": "array", "minItems": 5, "items": {"type": "string"}},
     "zones": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "object"}},
     "allocation_policy": {"type": "object"},
+    "scrub_policy": {"type": "object"},
+    "receipt_contract": {"type": "object"},
+    "failure_atomicity": {"type": "object"},
     "qualification": {"type": "object"},
-    "required_negative_controls": {"type": "array", "minItems": 48, "maxItems": 48, "items": {"type": "string", "pattern": "^NEG-N9-PKPMM-"}},
+    "required_negative_controls": {"type": "array", "minItems": 63, "maxItems": 63, "items": {"type": "string", "pattern": "^NEG-N9-PKPMM-"}},
     "claims": {"type": "object"},
     "non_claims": {"type": "array", "minItems": 4, "items": {"type": "string"}}
   },

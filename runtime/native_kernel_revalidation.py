@@ -181,7 +181,7 @@ def readiness_errors(readiness: dict[str, object], root: Path = ROOT) -> list[st
     if readiness.get("inputs") != expected_inputs:
         errors.append("PKREVAL1 readiness input bindings are stale")
     build = readiness.get("build", {})
-    if not isinstance(build, dict) or build.get("host_test_count") != 66 or set(
+    if not isinstance(build, dict) or build.get("host_test_count") != 70 or set(
         build.get("targets", {}) if isinstance(build.get("targets"), dict) else {}
     ) != {"x86_64-unknown-none", "x86_64-unknown-uefi"}:
         errors.append("PKREVAL1 build evidence changed")

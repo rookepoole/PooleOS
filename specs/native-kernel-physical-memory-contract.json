@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
   "artifact_kind": "pooleos_native_kernel_physical_memory_contract",
-  "contract_id": "PKPMM1",
-  "selected_move_id": "N9-PMM-001",
-  "status": "bounded_live_foundation_contract",
+  "contract_id": "PKPMM2",
+  "selected_move_id": "N9-PMM-SCRUB-001",
+  "status": "bounded_page_scrubbing_contract",
   "production_ready": false,
   "production_promotion_allowed": false,
   "development_profile": {
@@ -35,20 +35,59 @@
   "allocation_policy": {
     "algorithm": "deterministic_first_fit_by_zone",
     "heap_used": false,
-    "physical_page_contents_accessed": false,
+    "physical_page_contents_accessed": true,
+    "allocation_handle_commit": "after_zero_and_full_readback_only",
+    "release_ownership_commit": "after_zero_full_readback_and_extent_preflight_only",
     "free_handle": "slot_generation_range_zone_owner_exact_match",
     "free_metadata_poisoned": true,
-    "adjacent_same_zone_extents_coalesced": true
+    "adjacent_same_zone_extents_coalesced": true,
+    "raw_predecessor_apis": "retained_for_pkvm1_pkvm2_bounded_nonproduction_profiles_only"
+  },
+  "scrub_policy": {
+    "scrub_value": 0,
+    "word_bytes": 8,
+    "words_per_page": 512,
+    "full_page_readback_required": true,
+    "live_profile_allocation_pages": 4,
+    "live_profile_release_pages": 4,
+    "live_profile_total_scrub_pages": 8,
+    "live_profile_scrubbed_bytes": 32768,
+    "live_profile_verified_bytes": 32768,
+    "stale_pattern": "0xA5A55A5AC3C33C3C",
+    "exact_first_fit_reuse_required": true,
+    "generation_advance_required": true,
+    "final_temporary_alias_revocation_required": true
+  },
+  "receipt_contract": {
+    "receipt_count": 4,
+    "ordered_kinds": ["allocation", "release", "allocation", "release"],
+    "required_fields": ["sequence", "kind", "start_page", "page_count", "generation", "owner_id", "zeroed_bytes", "verified_bytes"],
+    "sequence_starts_at": 1,
+    "sequence_strictly_increases": true,
+    "receipt_emission": "after_full_scrub_and_readback_success_only"
+  },
+  "failure_atomicity": {
+    "allocation_scrub_failure": "no_handle_committed_and_planned_extent_restored",
+    "release_scrub_failure": "handle_remains_live_and_extent_remains_owned",
+    "free_extent_preflight": "must_succeed_before_any_release_scrub_write",
+    "host_fault_tests": [
+      "partial_allocation_scrub_failure_preserves_allocator_ownership_state",
+      "release_verification_failure_keeps_the_handle_live",
+      "scrubbed_free_preflights_extent_capacity_before_content_writes",
+      "scrubbed_lifecycle_removes_stale_pattern_before_generation_reuse"
+    ]
   },
   "qualification": {
     "qemu_run_count": 2,
     "fresh_ovmf_vars_each_run": true,
     "exact_markers_frame_and_pbp1_required": true,
     "independent_pbp1_oracle_required": true,
-    "negative_control_count": 48
+    "exact_scrub_counters_required": true,
+    "host_fault_tests_required": true,
+    "negative_control_count": 63
   },
   "required_negative_controls": [
-    "NEG-N9-PKPMM-MARKER-OMISSION", "NEG-N9-PKPMM-MARKER-ORDER", "NEG-N9-PKPMM-MARKER-DUPLICATE", "NEG-N9-PKPMM-SELECTOR", "NEG-N9-PKPMM-CONTRACT", "NEG-N9-PKPMM-ENTRY-COUNT", "NEG-N9-PKPMM-USABLE-PAGES", "NEG-N9-PKPMM-BOOT-RECLAIMABLE", "NEG-N9-PKPMM-LOADER-RESERVED", "NEG-N9-PKPMM-NULL-GUARD", "NEG-N9-PKPMM-DMA-SOURCE", "NEG-N9-PKPMM-DMA-MANAGED", "NEG-N9-PKPMM-DMA32-SOURCE", "NEG-N9-PKPMM-DMA32-MANAGED", "NEG-N9-PKPMM-NORMAL-SOURCE", "NEG-N9-PKPMM-NORMAL-MANAGED", "NEG-N9-PKPMM-EXTENT-COUNT", "NEG-N9-PKPMM-LARGEST-DMA", "NEG-N9-PKPMM-LARGEST-DMA32", "NEG-N9-PKPMM-LARGEST-NORMAL", "NEG-N9-PKPMM-KERNEL-BASE", "NEG-N9-PKPMM-KERNEL-PAGES", "NEG-N9-PKPMM-HANDOFF-BASE", "NEG-N9-PKPMM-HANDOFF-PAGES", "NEG-N9-PKPMM-ROOT", "NEG-N9-PKPMM-PROTECTED", "NEG-N9-PKPMM-ALLOCATION-COUNT", "NEG-N9-PKPMM-FREE-COUNT", "NEG-N9-PKPMM-DMA-START", "NEG-N9-PKPMM-DMA32-START", "NEG-N9-PKPMM-DOUBLE-FREE", "NEG-N9-PKPMM-QUOTA", "NEG-N9-PKPMM-UNAVAILABLE", "NEG-N9-PKPMM-METADATA-POISON", "NEG-N9-PKPMM-COALESCE", "NEG-N9-PKPMM-MANAGED-TOTAL", "NEG-N9-PKPMM-ALLOCATED-RESIDUE", "NEG-N9-PKPMM-PHYSICAL-WRITE", "NEG-N9-PKPMM-MAPPING", "NEG-N9-PKPMM-RECLAIM", "NEG-N9-PKPMM-CONCURRENCY", "NEG-N9-PKPMM-SIGNATURE", "NEG-N9-PKPMM-AUTHORITY", "NEG-N9-PKPMM-ACTION", "NEG-N9-PKPMM-TERMINAL", "NEG-N9-PKPMM-PBP1-OVERLAP", "NEG-N9-PKPMM-PBP1-SOURCE-KIND", "NEG-N9-PKPMM-PBP1-CORE-OWNERSHIP"
+    "NEG-N9-PKPMM-MARKER-OMISSION", "NEG-N9-PKPMM-MARKER-ORDER", "NEG-N9-PKPMM-MARKER-DUPLICATE", "NEG-N9-PKPMM-SELECTOR", "NEG-N9-PKPMM-CONTRACT", "NEG-N9-PKPMM-ENTRY-COUNT", "NEG-N9-PKPMM-USABLE-PAGES", "NEG-N9-PKPMM-BOOT-RECLAIMABLE", "NEG-N9-PKPMM-LOADER-RESERVED", "NEG-N9-PKPMM-NULL-GUARD", "NEG-N9-PKPMM-DMA-SOURCE", "NEG-N9-PKPMM-DMA-MANAGED", "NEG-N9-PKPMM-DMA32-SOURCE", "NEG-N9-PKPMM-DMA32-MANAGED", "NEG-N9-PKPMM-NORMAL-SOURCE", "NEG-N9-PKPMM-NORMAL-MANAGED", "NEG-N9-PKPMM-EXTENT-COUNT", "NEG-N9-PKPMM-LARGEST-DMA", "NEG-N9-PKPMM-LARGEST-DMA32", "NEG-N9-PKPMM-LARGEST-NORMAL", "NEG-N9-PKPMM-KERNEL-BASE", "NEG-N9-PKPMM-KERNEL-PAGES", "NEG-N9-PKPMM-HANDOFF-BASE", "NEG-N9-PKPMM-HANDOFF-PAGES", "NEG-N9-PKPMM-ROOT", "NEG-N9-PKPMM-PROTECTED", "NEG-N9-PKPMM-ALLOCATION-COUNT", "NEG-N9-PKPMM-FREE-COUNT", "NEG-N9-PKPMM-START", "NEG-N9-PKPMM-FIRST-GENERATION", "NEG-N9-PKPMM-REUSE-GENERATION", "NEG-N9-PKPMM-ALLOCATION-RECEIPTS", "NEG-N9-PKPMM-RELEASE-RECEIPTS", "NEG-N9-PKPMM-SCRUB-PAGES", "NEG-N9-PKPMM-SCRUB-BYTES", "NEG-N9-PKPMM-VERIFIED-BYTES", "NEG-N9-PKPMM-STALE-PATTERN", "NEG-N9-PKPMM-STALE-ABSENT", "NEG-N9-PKPMM-DOUBLE-FREE", "NEG-N9-PKPMM-QUOTA", "NEG-N9-PKPMM-UNAVAILABLE", "NEG-N9-PKPMM-METADATA-POISON", "NEG-N9-PKPMM-COALESCE", "NEG-N9-PKPMM-ROLLBACK", "NEG-N9-PKPMM-MANAGED-TOTAL", "NEG-N9-PKPMM-ALLOCATED-RESIDUE", "NEG-N9-PKPMM-PHYSICAL-WRITE", "NEG-N9-PKPMM-PHYSICAL-READ", "NEG-N9-PKPMM-TEMPORARY-PTE-WRITE", "NEG-N9-PKPMM-BOOTSTRAP-INVLPG", "NEG-N9-PKPMM-ALIAS-REVOCATION", "NEG-N9-PKPMM-MAPPING", "NEG-N9-PKPMM-RECLAIM", "NEG-N9-PKPMM-CONCURRENCY", "NEG-N9-PKPMM-SMP", "NEG-N9-PKPMM-SIGNATURE", "NEG-N9-PKPMM-AUTHORITY", "NEG-N9-PKPMM-ACTION", "NEG-N9-PKPMM-PRODUCTION", "NEG-N9-PKPMM-TERMINAL", "NEG-N9-PKPMM-PBP1-OVERLAP", "NEG-N9-PKPMM-PBP1-SOURCE-KIND", "NEG-N9-PKPMM-PBP1-CORE-OWNERSHIP"
   ],
   "claims": {
     "live_pbp1_memory_map_consumed_by_poolekernel": true,
@@ -59,17 +98,26 @@
     "bounded_allocate_free_and_coalesce_exercised": true,
     "quota_and_double_free_rejection_exercised": true,
     "metadata_poison_state_exercised": true,
-    "physical_page_contents_scrubbed": false,
+    "physical_page_contents_scrubbed": true,
+    "allocation_scrub_before_handle_commit": true,
+    "release_scrub_before_reuse": true,
+    "full_page_readback_verified": true,
+    "generation_and_sequence_bound_scrub_receipts": true,
+    "stale_pattern_absent_after_exact_reuse": true,
+    "scrub_failure_ownership_rollback_host_tested": true,
+    "bootstrap_temporary_alias_revoked": true,
     "boot_or_acpi_reclaim_activated": false,
-    "page_table_or_virtual_mapping_modified": false,
+    "complete_direct_map_or_address_space_claimed": false,
     "concurrent_or_smp_allocator_qualified": false,
     "n9_exit_gate_satisfied": false,
     "production_ready": false
   },
   "non_claims": [
-    "No physical page byte is read, zeroed, poisoned, or scrubbed by PKPMM1.",
+    "PKPMM2 qualifies only the bounded selector-8 two-page DMA32 allocation, release, exact-reuse, and final-release lifecycle.",
+    "Raw allocate and free APIs retained for predecessor PKVM1 and PKVM2 profiles are non-production and are not covered by the PKPMM2 scrub claim.",
+    "The bootstrap mapping is one temporary supervisor RW/NX page alias; no complete direct map or address-space policy is claimed.",
     "No boot-services or ACPI reclaimable range is activated.",
-    "No page table, virtual address space, cache policy, heap, object cache, stack, or reclaim path is implemented.",
-    "No SMP, interrupt-context, randomized stress, target hardware, second host, signature, release, or production claim is made."
+    "No concurrent, interrupt-context, or SMP allocator is qualified.",
+    "No target hardware, second host, signature, release, or production claim is made."
   ]
 }
