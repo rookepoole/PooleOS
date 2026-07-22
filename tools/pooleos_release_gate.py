@@ -32,6 +32,7 @@ from runtime import native_kernel_cpu_policy  # noqa: E402
 from runtime import native_kernel_errata_policy  # noqa: E402
 from runtime import native_kernel_xstate_policy  # noqa: E402
 from runtime import native_kernel_xstate_exception  # noqa: E402
+from runtime import native_kernel_privilege_msr_policy  # noqa: E402
 from runtime import native_initial_system  # noqa: E402
 from runtime import native_microcode  # noqa: E402
 from runtime import native_models  # noqa: E402
@@ -73,6 +74,9 @@ NATIVE_KERNEL_ERRATA_POLICY_READINESS = ROOT / "runs" / "native-kernel-errata-po
 NATIVE_KERNEL_XSTATE_POLICY_READINESS = ROOT / "runs" / "native-kernel-xstate-policy-readiness.json"
 NATIVE_KERNEL_XSTATE_EXCEPTION_READINESS = (
     ROOT / "runs" / "native-kernel-xstate-exception-readiness.json"
+)
+NATIVE_KERNEL_PRIVILEGE_MSR_POLICY_READINESS = (
+    ROOT / "runs" / "native-kernel-privilege-msr-policy-readiness.json"
 )
 NATIVE_INITIAL_SYSTEM_READINESS = ROOT / "runs" / "native_initial_system_readiness.json"
 NATIVE_FIRMWARE_READINESS = ROOT / "runs" / "native_firmware_readiness.json"
@@ -942,7 +946,7 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
         "inner_set_parser_count": 6,
         "inner_set_cross_binding_count": 6,
         "inner_set_development_denial_count": 6,
-        "inner_set_retained_set_sha256": "331E38A7C071FFC3491DB13132726CCA12B26901059AA08690C9963D8652435D",
+        "inner_set_retained_set_sha256": "1F2BE74362DEE662AE5E7E9B711EA2060DD659E74548421528637D1904DE9D05",
         "inner_set_authority_grants": 0,
         "inner_set_actions_authorized": 0,
         "inner_set_state_writes": 0,
@@ -957,8 +961,8 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
         "policy_profile": "synthetic_qualification_only",
         "trust_binding_count": 14,
         "trust_denial": "pbtrust_policy_unsigned",
-        "trust_policy_sha256": "05BDB631329F34276EF085B662282B017E5A93B58193FED87FE5FB522774F82E",
-        "trust_state_sha256": "E3E4B64CA853F863173E2B9606CBF66E1E3B00231EDC4A36B92A13166E70F4C9",
+        "trust_policy_sha256": "432A9C4B643FF116385E4292C762196C6FE039310A9EB89D6B42FC06C7D2DCF3",
+        "trust_state_sha256": "4404745B7CA579E8D559FDF5E727A46837689DA0D0841FCCCB4D1758B4E02A09",
         "trust_authority_grants": 0,
         "trust_state_writes": 0,
         "production_claim_count": 0,
@@ -972,7 +976,7 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
     detail = (
         "contract=POOLEOS-N5-POOLEBOOT-7; host_tests=8/8; builds=2/2; media=2/2; "
         "guest_runs=2/2; markers=25; serial_debugcon=2/2; gop_frames=2/2; "
-        "retained_files=9; inner=6/6; inner_sha256=331E38A7C071FFC3; authority=0; actions=0; state=0; hardware=0; "
+        "retained_files=9; inner=6/6; inner_sha256=1F2BE74362DEE662; authority=0; actions=0; state=0; hardware=0; "
         "trust=unsigned-deny; trust_bindings=14; trust_authority=0; trust_writes=0; "
         "pbp1=2/2; kmap=2/2; exit=2/2; negatives=155/155; pmcu1=synthetic-never-apply; pfwm1=synthetic-never-apply; ppol1=qualification-only; production_claims=0; n5_exit=false; production_ready=false"
     )
@@ -1001,7 +1005,7 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     summary = artifact.get("summary", {})
     if summary.get("guest_runs_passed") != 2 or summary.get("guest_runs_total") != 2:
         errors.append("PKLOAD6 guest-run evidence is incomplete")
-    if summary.get("rust_host_tests_passed") != 123 or summary.get("rust_host_tests_total") != 123:
+    if summary.get("rust_host_tests_passed") != 134 or summary.get("rust_host_tests_total") != 134:
         errors.append("PKLOAD6 Rust host-test evidence is incomplete")
     if summary.get("ordered_marker_count") != 25:
         errors.append("PKLOAD6 marker evidence is incomplete")
@@ -1014,7 +1018,7 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     ) != 155:
         errors.append("PKLOAD6 negative controls are incomplete")
     if summary.get("inner_retained_set_sha256") != (
-        "331E38A7C071FFC3491DB13132726CCA12B26901059AA08690C9963D8652435D"
+        "1F2BE74362DEE662AE5E7E9B711EA2060DD659E74548421528637D1904DE9D05"
     ):
         errors.append("PKLOAD6 retained inner-set identity changed")
     if artifact.get("claims") != native_kernel_load.expected_claims():
@@ -1024,9 +1028,9 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     ) is not False:
         errors.append("PKLOAD6 overclaims N5 exit or production readiness")
     detail = (
-        "contract=PKLOAD6; rust_tests=123/123; boot_builds=2/2; kernel_builds=2/2; "
+        "contract=PKLOAD6; rust_tests=134/134; boot_builds=2/2; kernel_builds=2/2; "
         "media=2/2; guest_runs=2/2; markers=25; retained_files=9; inner=6/6; "
-        "inner_sha256=331E38A7C071FFC3; "
+        "inner_sha256=1F2BE74362DEE662; "
         "trust=unsigned-deny; trust_bindings=14; trust_authority=0; trust_writes=0; "
         "oracle=2/2; pbp1=2/2; kmap=2/2; exit=2/2; firmware_after_exit=0; "
         "negatives=155/155; pmcu1=synthetic-never-apply; pfwm1=synthetic-never-apply; "
@@ -1057,7 +1061,7 @@ def check_native_kernel_revalidation_readiness(
         )
     errors.extend(native_kernel_revalidation.readiness_errors(artifact, ROOT))
     build = artifact.get("build", {})
-    if not isinstance(build, dict) or build.get("host_test_count") != 38:
+    if not isinstance(build, dict) or build.get("host_test_count") != 49:
         errors.append("PKREVAL1 host-test evidence is incomplete")
     controls = artifact.get("negative_controls", [])
     if (
@@ -1086,7 +1090,7 @@ def check_native_kernel_revalidation_readiness(
     ) != (
         9,
         9,
-        "331E38A7C071FFC3491DB13132726CCA12B26901059AA08690C9963D8652435D",
+        "1F2BE74362DEE662AE5E7E9B711EA2060DD659E74548421528637D1904DE9D05",
         "pbtrust_policy_unsigned",
         0,
         0,
@@ -1101,7 +1105,7 @@ def check_native_kernel_revalidation_readiness(
     ) is not False:
         errors.append("PKREVAL1 overclaims production readiness")
     detail = (
-        "contract=PKREVAL1; kernel_tests=38/38; python_tests=8/8; targets=2/2; "
+        "contract=PKREVAL1; kernel_tests=49/49; python_tests=8/8; targets=2/2; "
         "retained_files=9; parsers=9; controls=36/36; differential=32768/32768; "
         "denial=pbtrust_policy_unsigned; authority=0; actions=0; state_writes=0; "
         "live_kernel_entry=false; production_ready=false"
@@ -1243,8 +1247,8 @@ def check_native_kernel_trap_readiness(
         or build.get("default_stop_marker_present") is not True
         or build.get("default_transfer_marker_absent") is not True
         or kernel_product.get("canonical_sha256")
-        != "36582C1CBEB4CCCB9E872C432CA095EC0896FB8E5507FA10305AA406C13D37F7"
-        or kernel_product.get("relocation_count") != 352
+        != "062D4EE10BA27F4D0A943D97206ADB5B3761770B6DD9EEC2C281605B2693B883"
+        or kernel_product.get("relocation_count") != 361
     ):
         errors.append("PKTRAP1 build or feature isolation changed")
     if artifact.get("claims") != native_kernel_trap.expected_claims():
@@ -1496,6 +1500,61 @@ def check_native_kernel_xstate_exception_readiness(
     )
     return readiness.make_check(
         "native_kernel_xstate_exception_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_kernel_privilege_msr_policy_readiness(
+    path: Path = NATIVE_KERNEL_PRIVILEGE_MSR_POLICY_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-kernel-privilege-msr-policy-readiness.schema.json"
+    )
+    errors = [
+        f"native kernel privilege MSR policy readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_kernel_privilege_msr_policy_readiness",
+            False,
+            "; ".join(errors)
+            or "native kernel privilege MSR policy readiness is not an object",
+        )
+    errors.extend(native_kernel_privilege_msr_policy.readiness_errors(artifact, ROOT))
+    expected_summary = {
+        "actions_authorized": 0,
+        "authority_grants": 0,
+        "control_writes": 0,
+        "firmware_calls_after_exit": 0,
+        "machine_check_bank_count": 10,
+        "machine_check_bank_reads": 0,
+        "marker_count": 35,
+        "msr_read_count": 11,
+        "msr_writes": 0,
+        "negative_controls_passed": 47,
+        "pmu_msr_reads": 0,
+        "production_claim_count": 0,
+        "qemu_run_count": 2,
+        "signature_verifications": 0,
+    }
+    if artifact.get("summary") != expected_summary:
+        errors.append("PKMSR1 readiness summary changed")
+    if artifact.get("claims") != native_kernel_privilege_msr_policy.expected_claims():
+        errors.append("PKMSR1 claim boundary changed")
+    if (
+        artifact.get("n7_exit_gate_satisfied") is not False
+        or artifact.get("production_ready") is not False
+    ):
+        errors.append("PKMSR1 overclaims N7 exit or production readiness")
+    detail = (
+        "contract=PKMSR1; acceleration=tcg; bsp=1; runs=2/2; markers=35/35; "
+        "controls=47/47; msr_reads=11; msr_writes=0; mca_banks=10; bank_reads=0; "
+        "pmu_reads=0; authority=0; target=false; n7_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_kernel_privilege_msr_policy_readiness",
         not errors,
         detail if not errors else "; ".join(errors[:8]),
     )
@@ -2005,8 +2064,8 @@ def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINE
         )
     errors.extend(native_kernel_entry.readiness_errors(artifact))
     expected_summary = {
-        "rust_host_tests_passed": 38,
-        "rust_host_tests_total": 38,
+        "rust_host_tests_passed": 49,
+        "rust_host_tests_total": 49,
         "rustfmt_packages_passed": 2,
         "clippy_runs_passed": 2,
         "clippy_runs_total": 2,
@@ -2025,17 +2084,17 @@ def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINE
         product.get("canonical_byte_count") != 180_224
         or product.get("image_byte_count") != 262_144
         or product.get("entry_offset") != 0x8000
-        or product.get("relocation_count") != 352
+        or product.get("relocation_count") != 361
         or product.get("canonical_sha256")
-        != "36582C1CBEB4CCCB9E872C432CA095EC0896FB8E5507FA10305AA406C13D37F7"
+        != "062D4EE10BA27F4D0A943D97206ADB5B3761770B6DD9EEC2C281605B2693B883"
     ):
         errors.append("PKENTRY1 product identity changed")
     if artifact.get("claims") != native_kernel_entry.expected_claims():
         errors.append("PKENTRY1 claim boundary changed")
     detail = (
-        "contract=PKENTRY1; kernel_tests=38/38; clean_builds=2/2; negative=43/43; "
+        "contract=PKENTRY1; kernel_tests=49/49; clean_builds=2/2; negative=43/43; "
         "exact_loaded=2/2; bytes=180224; image_bytes=262144; entry=0x8000; "
-        "relocations=352; live_transfer=false; "
+        "relocations=361; live_transfer=false; "
         "target_execution=false; n6_exit=false; production_ready=false"
     )
     return readiness.make_check(
@@ -4879,6 +4938,11 @@ def main(argv: list[str] | None = None) -> int:
         default=NATIVE_KERNEL_XSTATE_EXCEPTION_READINESS,
     )
     parser.add_argument(
+        "--native-kernel-privilege-msr-policy-readiness",
+        type=Path,
+        default=NATIVE_KERNEL_PRIVILEGE_MSR_POLICY_READINESS,
+    )
+    parser.add_argument(
         "--native-initial-system-readiness",
         type=Path,
         default=NATIVE_INITIAL_SYSTEM_READINESS,
@@ -4944,6 +5008,9 @@ def main(argv: list[str] | None = None) -> int:
         check_native_kernel_xstate_policy_readiness(args.native_kernel_xstate_policy_readiness),
         check_native_kernel_xstate_exception_readiness(
             args.native_kernel_xstate_exception_readiness
+        ),
+        check_native_kernel_privilege_msr_policy_readiness(
+            args.native_kernel_privilege_msr_policy_readiness
         ),
         check_native_initial_system_readiness(args.native_initial_system_readiness),
         check_native_recovery_readiness(args.native_recovery_readiness),
@@ -5152,6 +5219,7 @@ def main(argv: list[str] | None = None) -> int:
             args.native_kernel_errata_policy_readiness,
             args.native_kernel_xstate_policy_readiness,
             args.native_kernel_xstate_exception_readiness,
+            args.native_kernel_privilege_msr_policy_readiness,
             args.native_initial_system_readiness,
             args.native_recovery_readiness,
             args.native_symbol_readiness,

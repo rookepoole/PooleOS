@@ -404,7 +404,7 @@ def _validate_prefix(markers: list[str]) -> dict[str, Any]:
         raise KernelXstateExceptionError("PKXEXC1 selector changed")
     baseline = markers[:PREFIX_MARKER_COUNT]
     baseline[23] = re.sub(
-        r"trap_scenario=[0-6]", "trap_scenario=0", baseline[23], count=1
+        r"trap_scenario=[0-7]", "trap_scenario=0", baseline[23], count=1
     )
     terminal = (
         "POOLEOS:KERNEL:TRANSFER-DENIED PASS contract=PKXFER1 terminal=halt "

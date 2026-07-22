@@ -153,9 +153,9 @@ halts permanently at `STOP BEFORE TRANSFER`.
 
 ## Qualified Evidence
 
-The Cycle 123-refreshed default-path receipt records:
+The Cycle 124-refreshed default-path receipt records:
 
-- 123/123 Rust host tests across PooleBoot, PBART1, the six-format retained-set
+- 134/134 Rust host tests across PooleBoot, PBART1, the six-format retained-set
   validator, PBTRUST1, PBC1/PSM1/PKELF1/PBP1, PKMAP2, PBEXIT1, and PKENTRY1;
 - two byte-identical PooleBoot builds, PooleKernel builds, and GPT/FAT32 media
   generations;
@@ -192,7 +192,7 @@ The Cycle 123-refreshed default-path receipt records:
   physical-presence separation, durable receipt rules, and mandatory
   development activation denial;
 - an exact 11,952-byte nine-file retained set with SHA-256
-  `331E38A7C071FFC3491DB13132726CCA12B26901059AA08690C9963D8652435D`, nine
+  `1F2BE74362DEE662AE5E7E9B711EA2060DD659E74548421528637D1904DE9D05`, nine
   target parsers, manifest/inner/trust cross-bindings, exact unsigned-policy
   denial, and zero authority/action/state/hardware effects;
 - 155/155 integrated negative controls, including exact retained PSM1/PBTP1/
@@ -234,9 +234,10 @@ PKLOAD6 stop. Cycle 119 separately closes the bounded BSP-only PKTRAP1 slice,
 Cycle 120 closes the bounded qemu64 read-only PKCPU1 slice, and Cycle 121
 closes only the pure PKERR1 exact-target policy boundary while retaining direct
 errata and numeric microcode-floor stop-ship gaps. Cycles 122 and 123 separately
-close the bounded PKXSTATE1 ownership and PKXEXC1 exception-delivery slices.
-The next chronological owner-independent move is
-`N7-PRIVILEGE-MSR-POLICY-001` without target, scheduler, or SMP promotion.
+close the bounded PKXSTATE1 ownership and PKXEXC1 exception-delivery slices,
+and Cycle 124 closes only the read-only PKMSR1 privileged-MSR policy slice.
+The next chronological owner-independent move is `N9-PMM-001` without
+target, scheduler, SMP, or production promotion.
 Capability creation, lifecycle execution, signature trust, authenticated
 persistent state, production transfer, and physical-target qualification remain
 separately gated by N5/N6 and owner-controlled N0 work.

@@ -990,7 +990,7 @@ mod tests {
     fn lookup_is_image_relative_and_bounded() {
         let bundle = parse(CANONICAL).expect("canonical PSYM1");
         let base = bundle.preferred_virtual_base;
-        let result = lookup(&bundle, base, base + 0x95D5)
+        let result = lookup(&bundle, base, base + 0x9930)
             .expect("lookup")
             .expect("known symbol");
         assert_eq!(result.symbol.name, b"poole_kernel_rust_entry");

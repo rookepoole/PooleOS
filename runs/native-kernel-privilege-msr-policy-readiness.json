@@ -1,5 +1,5 @@
 {
-  "artifact_kind": "pooleos_native_kernel_xstate_exception_readiness",
+  "artifact_kind": "pooleos_native_kernel_privilege_msr_policy_readiness",
   "build": {
     "all_profile_binaries_distinct": true,
     "default_pooleboot": {
@@ -76,80 +76,8 @@
       "selected_development_feature": null,
       "sha256": "73C10DF088158A8B2F66CD157C424787E0DCDF14F1DCB2E564C70040857C916F"
     },
-    "exception_pooleboot": {
-      "byte_count": 207360,
-      "clean_build_count": 2,
-      "development_transfer_feature": true,
-      "exact_clean_build_match": true,
-      "host_contract_test_count": 8,
-      "host_contract_test_pass_count": 8,
-      "host_leakage_hit_count": 0,
-      "host_leakage_marker_count": 7,
-      "inspection": {
-        "byte_count": 207360,
-        "characteristics": 34,
-        "debug_directory": {
-          "rva": 0,
-          "size": 0
-        },
-        "debug_directory_present": false,
-        "dll_characteristics": 33120,
-        "entry_nonzero": true,
-        "entry_point": 36499,
-        "file_alignment": 512,
-        "format": "PE32+",
-        "header_size": 1024,
-        "image_base": 5368709120,
-        "image_size": 221184,
-        "import_directory": {
-          "rva": 0,
-          "size": 0
-        },
-        "imports_present": false,
-        "machine": 34404,
-        "section_alignment": 4096,
-        "section_count": 4,
-        "sections": [
-          {
-            "characteristics": 1610612768,
-            "name": ".text",
-            "raw_offset": 1024,
-            "raw_size": 152576,
-            "virtual_address": 4096,
-            "virtual_size": 152387
-          },
-          {
-            "characteristics": 1073741888,
-            "name": ".rdata",
-            "raw_offset": 153600,
-            "raw_size": 52224,
-            "virtual_address": 159744,
-            "virtual_size": 51788
-          },
-          {
-            "characteristics": 1073741888,
-            "name": ".eh_fram",
-            "raw_offset": 205824,
-            "raw_size": 512,
-            "virtual_address": 212992,
-            "virtual_size": 64
-          },
-          {
-            "characteristics": 1107296320,
-            "name": ".reloc",
-            "raw_offset": 206336,
-            "raw_size": 1024,
-            "virtual_address": 217088,
-            "virtual_size": 748
-          }
-        ],
-        "sha256": "F187A2B6BC093E0008657456977A2EBA89C4D10635D865B17302F91592BCF0E7",
-        "subsystem": 10,
-        "timestamp": 0
-      },
-      "selected_development_feature": "development-xstate-exception",
-      "sha256": "F187A2B6BC093E0008657456977A2EBA89C4D10635D865B17302F91592BCF0E7"
-    },
+    "default_stop_marker_present": true,
+    "default_transfer_marker_absent": true,
     "kernel_entry": {
       "artifact_kind": "pooleos_native_kernel_entry_readiness",
       "bindings": {
@@ -772,101 +700,23 @@
       }
     },
     "linked_machine_code_audit": {
-      "allowlisted_vector_symbols": [
-        "PooleKernelLinked::arch::x86_64::run_xstate_policy",
-        "poole_simd_exception_fault",
-        "poole_trigger_simd_exception"
-      ],
       "canonical_byte_count": 180224,
       "canonical_sha256": "062D4EE10BA27F4D0A943D97206ADB5B3761770B6DD9EEC2C281605B2693B883",
-      "disassembler": "LLVM version 22.1.6-rust-1.97.0-stable",
-      "disassembly_byte_count": 1365022,
-      "disassembly_sha256": "7B055F9FFCB162C493EDABDF75FA759B3B64609CA6BEFADC543ECA33A0198A5F",
-      "extended_vector_instruction_count": 0,
-      "handler_recovery_instruction_counts": {
-        "fninit": 1,
-        "ldmxcsr": 1
+      "disassembly_byte_count": 1365020,
+      "disassembly_sha256": "31A683A6E7148C51AFD92096FBCBBD95289B488F6354055D0464A0BDDD3CF1F9",
+      "instruction_counts": {
+        "rdmsr": 17,
+        "rdpmc": 0,
+        "swapgs": 0,
+        "syscall": 0,
+        "sysret": 0,
+        "wrmsr": 0
       },
+      "instruction_record_count": 31169,
       "linked_byte_count": 3633704,
       "linked_sha256": "E532BAD45EC2A3A7BD614E23209E632AEA55107F163C5BFB08C8B9D24D822456",
       "relocation_count": 361,
-      "required_symbol_sequences": {
-        "poole_device_not_available_fault": [
-          "fnop",
-          "ud2"
-        ],
-        "poole_simd_exception_fault": [
-          "divss"
-        ],
-        "poole_trigger_device_not_available_rejection": [
-          "movq",
-          "orq",
-          "movq"
-        ],
-        "poole_trigger_simd_exception": [
-          "subq",
-          "movl",
-          "ldmxcsr",
-          "pxor",
-          "pxor"
-        ],
-        "poole_trigger_x87_exception": [
-          "subq",
-          "movw",
-          "fninit",
-          "fldcw",
-          "fldz",
-          "fldz",
-          "fdivrp"
-        ],
-        "poole_x87_exception_fault": [
-          "wait"
-        ]
-      },
-      "result": "pass_exact_linked_machine_code_scope_audit",
-      "vector_instruction_count": 8,
-      "vector_instructions": [
-        {
-          "mnemonic": "pxor",
-          "operands": "%xmm0, %xmm0",
-          "symbol": "poole_trigger_simd_exception"
-        },
-        {
-          "mnemonic": "pxor",
-          "operands": "%xmm1, %xmm1",
-          "symbol": "poole_trigger_simd_exception"
-        },
-        {
-          "mnemonic": "divss",
-          "operands": "%xmm1, %xmm0",
-          "symbol": "poole_simd_exception_fault"
-        },
-        {
-          "mnemonic": "movdqu",
-          "operands": "(%rsi), %xmm0",
-          "symbol": "PooleKernelLinked::arch::x86_64::run_xstate_policy"
-        },
-        {
-          "mnemonic": "movdqu",
-          "operands": "(%r10), %xmm0",
-          "symbol": "PooleKernelLinked::arch::x86_64::run_xstate_policy"
-        },
-        {
-          "mnemonic": "movdqu",
-          "operands": "%xmm0, (%r11)",
-          "symbol": "PooleKernelLinked::arch::x86_64::run_xstate_policy"
-        },
-        {
-          "mnemonic": "movdqu",
-          "operands": "%xmm0, (%r8)",
-          "symbol": "PooleKernelLinked::arch::x86_64::run_xstate_policy"
-        },
-        {
-          "mnemonic": "movdqu",
-          "operands": "%xmm0, (%rax)",
-          "symbol": "PooleKernelLinked::arch::x86_64::run_xstate_policy"
-        }
-      ]
+      "result": "pass_linked_rdmsr_present_no_activation_or_write_instruction"
     },
     "machine_code_audit_tool": {
       "archive_sha256": "671B509EC2C9220916D25D8FD546E71EFB552439F8E7AE75CE53208D9395DFB4",
@@ -881,71 +731,123 @@
       "sha256": "84DE1EDCEFED12FEB797F8B1C41DEBA99B6116A6BB3B80A1832FFF2CC06F2F94",
       "version": "LLVM version 22.1.6-rust-1.97.0-stable"
     },
+    "privilege_msr_policy_pooleboot": {
+      "byte_count": 207360,
+      "clean_build_count": 2,
+      "development_transfer_feature": true,
+      "exact_clean_build_match": true,
+      "host_contract_test_count": 8,
+      "host_contract_test_pass_count": 8,
+      "host_leakage_hit_count": 0,
+      "host_leakage_marker_count": 7,
+      "inspection": {
+        "byte_count": 207360,
+        "characteristics": 34,
+        "debug_directory": {
+          "rva": 0,
+          "size": 0
+        },
+        "debug_directory_present": false,
+        "dll_characteristics": 33120,
+        "entry_nonzero": true,
+        "entry_point": 36499,
+        "file_alignment": 512,
+        "format": "PE32+",
+        "header_size": 1024,
+        "image_base": 5368709120,
+        "image_size": 221184,
+        "import_directory": {
+          "rva": 0,
+          "size": 0
+        },
+        "imports_present": false,
+        "machine": 34404,
+        "section_alignment": 4096,
+        "section_count": 4,
+        "sections": [
+          {
+            "characteristics": 1610612768,
+            "name": ".text",
+            "raw_offset": 1024,
+            "raw_size": 152576,
+            "virtual_address": 4096,
+            "virtual_size": 152387
+          },
+          {
+            "characteristics": 1073741888,
+            "name": ".rdata",
+            "raw_offset": 153600,
+            "raw_size": 52224,
+            "virtual_address": 159744,
+            "virtual_size": 51796
+          },
+          {
+            "characteristics": 1073741888,
+            "name": ".eh_fram",
+            "raw_offset": 205824,
+            "raw_size": 512,
+            "virtual_address": 212992,
+            "virtual_size": 64
+          },
+          {
+            "characteristics": 1107296320,
+            "name": ".reloc",
+            "raw_offset": 206336,
+            "raw_size": 1024,
+            "virtual_address": 217088,
+            "virtual_size": 748
+          }
+        ],
+        "sha256": "3DC67B1DA07B98473817D83D5EE3F92C763F9E3992CC6E59DC16E1E857183983",
+        "subsystem": 10,
+        "timestamp": 0
+      },
+      "selected_development_feature": "development-privilege-msr-policy",
+      "sha256": "3DC67B1DA07B98473817D83D5EE3F92C763F9E3992CC6E59DC16E1E857183983"
+    },
     "profile_count": 2,
     "source_audit": {
-      "exception_required_instruction_counts": {
-        "nm_fault": 1,
-        "simd_fault": 1,
-        "test_only_ts_write": 1,
-        "x87_fault": 1
-      },
-      "exception_vector_token_counts": {
-        "xmm0": 3,
-        "xmm1": 3
-      },
-      "forbidden_token_hits": [],
-      "forbidden_tokens": [
+      "forbidden_instruction_hits": [],
+      "forbidden_instructions": [
         "wrmsr",
-        "xsaves64",
-        "xrstors64",
-        "ymm",
-        "zmm",
-        "clts"
+        "rdpmc",
+        "syscall",
+        "sysret",
+        "swapgs",
+        "xsetbv",
+        "mov cr0,",
+        "mov cr4,"
       ],
-      "parent_required_instruction_counts": {
-        "cr0_write": 1,
-        "cr4_write": 1,
-        "standard_restore": 1,
-        "standard_save": 1,
-        "xcr0_write": 1
-      },
-      "recovery_required_instruction_counts": {
-        "simd_recovery": 1,
-        "x87_recovery": 1
-      },
-      "result": "pass_bounded_source_instruction_audit",
-      "scope": "PKXSTATE1 parent plus dedicated PKXEXC1 helpers and assembly",
-      "vector_occurrences_outside_allowlisted_source_scopes": 0
+      "required_msr_constant_count": 12,
+      "result": "pass_read_only_support_gated_source_audit",
+      "scope": "observe_privilege_msr_policy support gates and allowlisted reads"
     }
   },
   "claims": {
-    "eager_nm_policy_rejection_delivered": true,
-    "exact_resume_sites_observed": true,
-    "lazy_nm_recovery_qualified": false,
-    "linked_machine_code_scope_audited": true,
+    "early_fs_gs_kernel_gs_and_tsc_aux_observed": false,
+    "global_machine_check_capability_and_status_observed": true,
+    "inactive_syscall_baseline_observed": true,
+    "linked_machine_code_no_wrmsr_audited": true,
+    "machine_check_handler_activated": false,
     "n7_exit_gate_satisfied": false,
-    "parent_x87_sse_xsave_policy_revalidated": true,
+    "performance_monitor_owner_activated": false,
     "production_ready": false,
-    "qemu_tcg_xm_non_delivery_limitation_observed": true,
+    "reserved_bit_and_canonical_address_policy_enforced": true,
     "rust_python_policy_agreement": true,
-    "scheduler_context_switch_integrated": false,
-    "simd_invalid_exception_delivered_and_recovered": true,
-    "smp_or_cpu_migration_qualified": false,
+    "support_gated_system_linkage_msrs_observed": true,
+    "syscall_entry_activated": false,
     "target_cpu_qualified": false,
     "two_qemu_runs_exact_match": true,
-    "x87_invalid_exception_delivered_and_recovered": true
+    "unsupported_pmu_path_failed_closed": true
   },
-  "contract_id": "PKXEXC1",
+  "contract_id": "PKMSR1",
   "execution": {
-    "acceleration": "whpx_hardware_accelerated",
-    "base_tier0_cpu_model": "qemu64",
-    "base_tier0_profile_modified": false,
-    "cpu_model": "EPYC-Rome-v4,-avx,-avx2,-fma,-f16c,-pku",
+    "acceleration": "tcg_single_thread",
+    "cpu_model": "qemu64",
     "exact_marker_match": true,
     "exact_pbp1_match": true,
     "exact_screenshot_match": true,
     "firmware_code_sha256": "33090CC07675BAA5190D9F1E84BF5176B33BCBFA9BACAC522961150CDB6DBB2A",
-    "host_cpu": "AMD Ryzen 7 9800X3D 8-Core Processor",
     "host_environment_count": 1,
     "machine": "pc-q35-11.0",
     "normalized_command": [
@@ -957,15 +859,17 @@
       "-machine",
       "pc-q35-11.0,smm=off,usb=off,vmport=off",
       "-accel",
-      "whpx",
+      "tcg,thread=single",
       "-cpu",
-      "EPYC-Rome-v4,-avx,-avx2,-fma,-f16c,-pku",
+      "qemu64",
       "-smp",
       "1,sockets=1,dies=1,clusters=1,cores=1,threads=1,maxcpus=1",
       "-m",
       "512M",
       "-rtc",
       "base=utc,clock=vm,driftfix=none",
+      "-icount",
+      "shift=0,align=off,sleep=off",
       "-global",
       "ICH9-LPC.disable_s3=1",
       "-global",
@@ -1006,110 +910,71 @@
       "-qmp",
       "tcp:127.0.0.1:$QMP_PORT,server=on,wait=off"
     ],
-    "normalized_command_sha256": "6E29077C2878A16E63EC8410B97BC93EC4C3272F388A9DA916E49245FF9D0E12",
+    "normalized_command_sha256": "BF26B10D53C21F195065BE2F2261FCDEED04E2013068AC329F1BB1D0A3766C32",
     "observation": {
-      "arm": {
-        "fcw": 894,
-        "mxcsr": 7936,
-        "nm_strategy": "eager_reject",
-        "sequence": "16,19,7",
-        "simd": "invalid",
-        "x87": "invalid"
+      "bases": {
+        "fs_base": 0,
+        "gs_base": 0,
+        "kernel_gs_base": 0,
+        "reads": 3,
+        "tsc_aux": 0,
+        "tsc_aux_read": 0
       },
-      "nm": {
-        "injection": "test_only",
-        "reason": "ts_set",
-        "recovery": "forbidden",
-        "state_sampled": 0,
-        "strategy": "eager",
-        "terminal": "halt",
-        "vector": 7
+      "features": {
+        "amd_perfmon_v2": 0,
+        "architectural_pmu_version": 0,
+        "cr4": 1640,
+        "ext1_edx": 563346429,
+        "ext22_eax": 0,
+        "leaf1_edx": 126614525,
+        "leaf_a_eax": 0,
+        "max_basic_leaf": 13,
+        "max_extended_leaf": 2147483658,
+        "mca": 1,
+        "mce": 1,
+        "rdtscp": 0,
+        "syscall": 1,
+        "vendor": "AuthenticAMD"
       },
-      "nm_arm": {
-        "cr0_ts": 1,
-        "injection": "test_only",
-        "recovery": "forbidden",
-        "terminal": "reject",
-        "vector": 7
+      "linkage": {
+        "active": 0,
+        "cstar": 0,
+        "efer": 3328,
+        "lstar": 0,
+        "reads": 5,
+        "sfmask": 0,
+        "star": 0
+      },
+      "machine_check": {
+        "bank_count": 10,
+        "bank_reads": 0,
+        "ctl_present": 1,
+        "mcg_cap": 16777482,
+        "mcg_ctl": 18446744073709551615,
+        "mcg_status": 0,
+        "reads": 3
+      },
+      "performance_monitoring": {
+        "amd_v2": 0,
+        "architectural": 0,
+        "cr4_pce": 0,
+        "msr_reads": 0,
+        "rdpmc": 0
       },
       "result": {
         "actions": 0,
         "authority": 0,
-        "deliveries": 3,
-        "nm_rejected": 1,
-        "privileged_writes": 4,
-        "recovered": 2,
-        "recovery_writes": 2,
-        "scheduler": 0,
-        "signatures": 0,
-        "smp": 0,
-        "target": 0,
-        "terminal": "halt",
-        "unexpected": 0
-      },
-      "setup": {
         "bsp": 1,
-        "cr0": 2147549235,
-        "cr4": 263784,
-        "exceptions_masked_default": 1,
-        "gates": 8,
+        "control_writes": 0,
         "interrupts": 0,
-        "ist": 1,
-        "parent": "PKXSTATE1",
-        "parent_control_writes": 3,
-        "selector": 6,
-        "vectors": "7,16,19",
-        "xcr0": 3
-      },
-      "simd": {
-        "enter": {
-          "depth": 1,
-          "error": 0,
-          "ist": 1,
-          "kind": "simd_invalid",
-          "vector": 19
-        },
-        "return": {
-          "recovery_write": 1,
-          "resume": "exact",
-          "returned": 2,
-          "vector": 19
-        },
-        "state": {
-          "fcw_after": 895,
-          "fcw_before": 895,
-          "fsw_after": 0,
-          "fsw_before": 0,
-          "kind": "simd_invalid",
-          "mxcsr_after": 8064,
-          "mxcsr_before": 7937,
-          "state_sampled": 1
-        }
-      },
-      "x87": {
-        "enter": {
-          "depth": 1,
-          "error": 0,
-          "ist": 1,
-          "kind": "x87_invalid",
-          "vector": 16
-        },
-        "return": {
-          "recovery_write": 1,
-          "resume": "exact",
-          "returned": 1,
-          "vector": 16
-        },
-        "state": {
-          "fcw_after": 895,
-          "fcw_before": 894,
-          "fsw_after": 0,
-          "fsw_before": 45185,
-          "kind": "x87_invalid",
-          "mxcsr_after": 8064,
-          "mxcsr_before": 8064,
-          "state_sampled": 1
-        }
+        "mce_handler": 0,
+        "msr_read_mask": 3839,
+        "msr_reads": 11,
+        "msr_writes": 0,
+        "pmu_owner": 0,
+        "signatures": 0,
+        "syscall_active": 0,
+        "terminal": "halt"
       }
     },
     "profile_id": "bootstrap-debug",
@@ -1137,92 +1002,72 @@
           "state_writes": 0
         },
         "local_paths_recorded": false,
-        "marker_sha256": "A63EB676DD46D693E9E9021F385A51F308FD228DB881051CA8F4CBD02DC75100",
+        "marker_sha256": "D8B0D5544B8B387DBC67A7EAEC79ED28DECA57260130314A6B972E9242E809FC",
         "marker_summary": {
-          "arm": {
-            "fcw": 894,
-            "mxcsr": 7936,
-            "nm_strategy": "eager_reject",
-            "sequence": "16,19,7",
-            "simd": "invalid",
-            "x87": "invalid"
+          "bases": {
+            "fs_base": 0,
+            "gs_base": 0,
+            "kernel_gs_base": 0,
+            "reads": 3,
+            "tsc_aux": 0,
+            "tsc_aux_read": 0
           },
-          "nm": {
-            "injection": "test_only",
-            "reason": "ts_set",
-            "recovery": "forbidden",
-            "state_sampled": 0,
-            "strategy": "eager",
-            "terminal": "halt",
-            "vector": 7
+          "features": {
+            "amd_perfmon_v2": 0,
+            "architectural_pmu_version": 0,
+            "cr4": 1640,
+            "ext1_edx": 563346429,
+            "ext22_eax": 0,
+            "leaf1_edx": 126614525,
+            "leaf_a_eax": 0,
+            "max_basic_leaf": 13,
+            "max_extended_leaf": 2147483658,
+            "mca": 1,
+            "mce": 1,
+            "rdtscp": 0,
+            "syscall": 1,
+            "vendor": "AuthenticAMD"
           },
-          "nm_arm": {
-            "cr0_ts": 1,
-            "injection": "test_only",
-            "recovery": "forbidden",
-            "terminal": "reject",
-            "vector": 7
+          "linkage": {
+            "active": 0,
+            "cstar": 0,
+            "efer": 3328,
+            "lstar": 0,
+            "reads": 5,
+            "sfmask": 0,
+            "star": 0
           },
-          "nm_enter": {
-            "depth": 1,
-            "error": 0,
-            "ist": 1,
-            "kind": "device_not_available",
-            "vector": 7
+          "machine_check": {
+            "bank_count": 10,
+            "bank_reads": 0,
+            "ctl_present": 1,
+            "mcg_cap": 16777482,
+            "mcg_ctl": 18446744073709551615,
+            "mcg_status": 0,
+            "reads": 3
+          },
+          "marker_count": 35,
+          "performance_monitoring": {
+            "amd_v2": 0,
+            "architectural": 0,
+            "cr4_pce": 0,
+            "msr_reads": 0,
+            "rdpmc": 0
           },
           "result": {
             "actions": 0,
             "authority": 0,
-            "deliveries": 3,
-            "nm_rejected": 1,
-            "privileged_writes": 4,
-            "recovered": 2,
-            "recovery_writes": 2,
-            "scheduler": 0,
-            "signatures": 0,
-            "smp": 0,
-            "target": 0,
-            "terminal": "halt",
-            "unexpected": 0
-          },
-          "setup": {
             "bsp": 1,
-            "cr0": 2147549235,
-            "cr4": 263784,
-            "exceptions_masked_default": 1,
-            "gates": 8,
+            "control_writes": 0,
             "interrupts": 0,
-            "ist": 1,
-            "parent": "PKXSTATE1",
-            "parent_control_writes": 3,
-            "selector": 6,
-            "vectors": "7,16,19",
-            "xcr0": 3
-          },
-          "simd": {
-            "enter": {
-              "depth": 1,
-              "error": 0,
-              "ist": 1,
-              "kind": "simd_invalid",
-              "vector": 19
-            },
-            "return": {
-              "recovery_write": 1,
-              "resume": "exact",
-              "returned": 2,
-              "vector": 19
-            },
-            "state": {
-              "fcw_after": 895,
-              "fcw_before": 895,
-              "fsw_after": 0,
-              "fsw_before": 0,
-              "kind": "simd_invalid",
-              "mxcsr_after": 8064,
-              "mxcsr_before": 7937,
-              "state_sampled": 1
-            }
+            "mce_handler": 0,
+            "msr_read_mask": 3839,
+            "msr_reads": 11,
+            "msr_writes": 0,
+            "pmu_owner": 0,
+            "signatures": 0,
+            "syscall_active": 0,
+            "terminal": "halt"
           },
           "transfer_prefix": {
             "boot_prefix": {
@@ -1252,12 +1097,12 @@
                 "artifact_page_count": 9,
                 "attempt_count": 1,
                 "contract_id": "PBEXIT1",
-                "descriptor_count": 111,
+                "descriptor_count": 96,
                 "descriptor_size": 48,
                 "firmware_calls_after_exit": 0,
                 "handoff_page_count": 256,
                 "kernel_page_count": 64,
-                "map_byte_count": 5328,
+                "map_byte_count": 4608,
                 "stack_page_count": 8,
                 "successful_exit_prefix_validated": true,
                 "synthetic_stop_used_for_prefix_parser_only": true,
@@ -1303,8 +1148,8 @@
                 "firmware_calls_while_active": 0,
                 "first_page_table_index": 0,
                 "framebuffer_cache_signature": "00",
-                "framebuffer_first_page_bytes": 1073741824,
-                "framebuffer_last_page_bytes": 1073741824,
+                "framebuffer_first_page_bytes": 2097152,
+                "framebuffer_last_page_bytes": 2097152,
                 "framebuffer_preserved": true,
                 "leaf_fingerprint": "066F6E68217211A5",
                 "mapped_fnv1a64": "8709C783DEA6E7E7",
@@ -1313,7 +1158,7 @@
                 "original_cr3_restored": true,
                 "page_directory_index": 0,
                 "pdpt_index": 510,
-                "physical_address_bits": 48,
+                "physical_address_bits": 40,
                 "pml4_index": 511,
                 "read_execute_page_count": 32,
                 "read_only_page_count": 12,
@@ -1322,14 +1167,14 @@
                   "guard_page_count": 2,
                   "handoff_first_page_table_index": 80,
                   "handoff_page_count": 256,
-                  "handoff_physical_base": 501088256,
+                  "handoff_physical_base": 498188288,
                   "handoff_virtual_base": 18446744071562395648,
-                  "kernel_physical_base": 503848960,
-                  "page_table_root_physical": 504442880,
-                  "retained_leaf_fingerprint": "79B73AFB48B79C75",
+                  "kernel_physical_base": 500948992,
+                  "page_table_root_physical": 501542912,
+                  "retained_leaf_fingerprint": "F6AABD8C612439ED",
                   "stack_first_page_table_index": 65,
                   "stack_page_count": 8,
-                  "stack_physical_base": 504459264,
+                  "stack_physical_base": 501559296,
                   "stack_top_virtual": 18446744071562366976,
                   "table_page_count": 4,
                   "total_mapped_page_count": 328
@@ -1352,23 +1197,23 @@
               },
               "marker_count": 25,
               "memory_map": {
-                "byte_count": 5328,
+                "byte_count": 4608,
                 "descriptor_bytes": 48,
-                "descriptor_count": 111
+                "descriptor_count": 96
               },
               "ordered_contract_match": true,
               "pbp1": {
                 "artifact_count": 10,
                 "boot_services_exited": true,
-                "byte_count": 5608,
+                "byte_count": 5008,
                 "bytes_unchanged": true,
                 "descriptor_bytes": 48,
                 "development_mode_only": true,
                 "exit_attempts": 1,
-                "fnv1a64": "92B10F1FC4F089D1",
+                "fnv1a64": "ECFDF08EB569A41C",
                 "framebuffer_present": 1,
-                "memory_entry_count": 111,
-                "message_crc32": "6FFAA234",
+                "memory_entry_count": 96,
+                "message_crc32": "0EE8CAB6",
                 "pre_exit": false,
                 "record_count": 4,
                 "temporary_pools_released": false
@@ -1420,13 +1265,13 @@
               "state_writes": 0
             },
             "kernel_state": {
-              "cr3": 504442880,
+              "cr3": 501542912,
               "entry": 18446744071562100736,
               "handoff": 18446744071562395648,
-              "handoff_bytes": 5608,
+              "handoff_bytes": 5008,
               "rflags_df": 0,
               "rflags_if": 0,
-              "root": 504442880,
+              "root": 501542912,
               "stack_top": 18446744071562366976
             },
             "marker_count": 30,
@@ -1436,43 +1281,18 @@
               "actions_authorized": 0,
               "authority_grants": 0,
               "contract_id": "PKXFER1",
-              "cr3": 504442880,
+              "cr3": 501542912,
               "emulator_only": 1,
               "entry": 18446744071562100736,
               "firmware_calls_after_exit": 0,
               "handoff": 18446744071562395648,
-              "handoff_bytes": 5608,
+              "handoff_bytes": 5008,
               "mode": "development",
-              "root": 504442880,
+              "root": 501542912,
               "signature_verifications": 0,
               "stack_top": 18446744071562366976,
               "state_writes": 0,
-              "trap_scenario": 6
-            }
-          },
-          "x87": {
-            "enter": {
-              "depth": 1,
-              "error": 0,
-              "ist": 1,
-              "kind": "x87_invalid",
-              "vector": 16
-            },
-            "return": {
-              "recovery_write": 1,
-              "resume": "exact",
-              "returned": 1,
-              "vector": 16
-            },
-            "state": {
-              "fcw_after": 895,
-              "fcw_before": 894,
-              "fsw_after": 0,
-              "fsw_before": 45185,
-              "kind": "x87_invalid",
-              "mxcsr_after": 8064,
-              "mxcsr_before": 8064,
-              "state_sampled": 1
+              "trap_scenario": 7
             }
           }
         },
@@ -1495,29 +1315,23 @@
           "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
           "POOLEBOOT/0.1 FRAME READY",
           "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=64 ro=12 rx=32 rw=20 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=066F6E68217211A5",
-          "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=64 physical_bits=48 mapped_fnv1a64=8709C783DEA6E7E7 framebuffer=preserved cache_signature=00 first_page_bytes=1073741824 last_page_bytes=1073741824",
-          "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=8 handoff_pages=256 guards=2 total_pages=328 stack_pt=65 handoff_pt=80 kernel_phys=000000001E082000 root=000000001E113000 stack_phys=000000001E117000 stack_top=FFFFFFFF80049000 handoff_phys=000000001DDE0000 handoff_virt=FFFFFFFF80050000 retained_fnv1a64=79B73AFB48B79C75 original_cr3=restored firmware_calls_while_active=0",
-          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5608 records=4 memory_entries=111 framebuffer=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=6FFAA234 fnv1a64=92B10F1FC4F089D1 state=boot_services_exited bytes_unchanged=1",
-          "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=5328 descriptor_bytes=48 descriptors=111",
+          "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=64 physical_bits=40 mapped_fnv1a64=8709C783DEA6E7E7 framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
+          "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=8 handoff_pages=256 guards=2 total_pages=328 stack_pt=65 handoff_pt=80 kernel_phys=000000001DDBE000 root=000000001DE4F000 stack_phys=000000001DE53000 stack_top=FFFFFFFF80049000 handoff_phys=000000001DB1C000 handoff_virt=FFFFFFFF80050000 retained_fnv1a64=F6AABD8C612439ED original_cr3=restored firmware_calls_while_active=0",
+          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5008 records=4 memory_entries=96 framebuffer=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=0EE8CAB6 fnv1a64=ECFDF08EB569A41C state=boot_services_exited bytes_unchanged=1",
+          "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4608 descriptor_bytes=48 descriptors=96",
           "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=64 artifact_pages=9 table_pages=4 stack_pages=8 handoff_pages=256",
-          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF80008000 handoff=FFFFFFFF80050000 bytes=5608 stack_top=FFFFFFFF80049000 root=000000001E113000 cr3=000000001E113000 trap_scenario=6 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
+          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF80008000 handoff=FFFFFFFF80050000 bytes=5008 stack_top=FFFFFFFF80049000 root=000000001DE4F000 cr3=000000001DE4F000 trap_scenario=7 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
           "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
           "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE124-N7-PRIVILEGE-MSR-POLICY-001 entry_count=1 serial=present",
-          "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF80050000 bytes=5608 entry=0xFFFFFFFF80008000 stack_top=0xFFFFFFFF80049000 root=0x000000001E113000 cr3=0x000000001E113000 rflags_if=0 rflags_df=0",
+          "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF80050000 bytes=5008 entry=0xFFFFFFFF80008000 stack_top=0xFFFFFFFF80049000 root=0x000000001DE4F000 cr3=0x000000001DE4F000 rflags_if=0 rflags_df=0",
           "POOLEOS:KERNEL:PBP1 PASS profile=development records=4 artifacts=10 production_profile_valid=0",
           "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=1F2BE74362DEE662AE5E7E9B711EA2060DD659E74548421528637D1904DE9D05 policy_sha256=432A9C4B643FF116385E4292C762196C6FE039310A9EB89D6B42FC06C7D2DCF3 state_sha256=4404745B7CA579E8D559FDF5E727A46837689DA0D0841FCCCB4D1758B4E02A09 denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-SETUP PASS contract=PKXEXC1 parent=PKXSTATE1 selector=6 bsp=1 gates=8 vectors=7,16,19 ist=1 xcr0=0x0000000000000003 cr0=0x0000000080010033 cr4=0x0000000000040668 parent_control_writes=3 exceptions_masked_default=1 if=0",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-ARM PASS contract=PKXEXC1 sequence=16,19,7 x87=invalid fcw=0x000000000000037E simd=invalid mxcsr=0x0000000000001F00 nm_strategy=eager_reject",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-ENTER PASS contract=PKXEXC1 kind=x87_invalid vector=16 error=0x0000000000000000 depth=1 ist=1",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-STATE PASS contract=PKXEXC1 kind=x87_invalid fcw_before=0x000000000000037E fsw_before=0x000000000000B081 mxcsr_before=0x0000000000001F80 fcw_after=0x000000000000037F fsw_after=0x0000000000000000 mxcsr_after=0x0000000000001F80 state_sampled=1",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-RETURN PASS contract=PKXEXC1 vector=16 resume=exact returned=1 recovery_write=1",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-ENTER PASS contract=PKXEXC1 kind=simd_invalid vector=19 error=0x0000000000000000 depth=1 ist=1",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-STATE PASS contract=PKXEXC1 kind=simd_invalid fcw_before=0x000000000000037F fsw_before=0x0000000000000000 mxcsr_before=0x0000000000001F01 fcw_after=0x000000000000037F fsw_after=0x0000000000000000 mxcsr_after=0x0000000000001F80 state_sampled=1",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-RETURN PASS contract=PKXEXC1 vector=19 resume=exact returned=2 recovery_write=1",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-NM-ARM PASS contract=PKXEXC1 vector=7 injection=test_only cr0_ts=1 recovery=forbidden terminal=reject",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-ENTER PASS contract=PKXEXC1 kind=device_not_available vector=7 error=0x0000000000000000 depth=1 ist=1",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-NM-REJECT PASS contract=PKXEXC1 vector=7 strategy=eager reason=ts_set injection=test_only state_sampled=0 recovery=forbidden terminal=halt",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-RESULT PASS contract=PKXEXC1 deliveries=3 recovered=2 nm_rejected=1 privileged_writes=4 recovery_writes=2 unexpected=0 signatures=0 authority=0 actions=0 scheduler=0 smp=0 target=0 terminal=halt"
+          "POOLEOS:KERNEL:PRIV-MSR-FEATURES OBSERVE contract=PKMSR1 vendor_hex=41757468656E746963414D44 max_basic=0x000000000000000D max_extended=0x000000008000000A leaf1_edx=0x00000000078BFBFD ext1_edx=0x000000002193FBFD leafa_eax=0x0000000000000000 ext22_eax=0x0000000000000000 cr4=0x0000000000000668 syscall=1 rdtscp=0 mce=1 mca=1 arch_pmu_version=0 amd_perfmon_v2=0",
+          "POOLEOS:KERNEL:PRIV-MSR-LINKAGE OBSERVE contract=PKMSR1 efer=0x0000000000000D00 star=0x0000000000000000 lstar=0x0000000000000000 cstar=0x0000000000000000 sfmask=0x0000000000000000 active=0 reads=5",
+          "POOLEOS:KERNEL:PRIV-MSR-BASES OBSERVE contract=PKMSR1 fs_base=0x0000000000000000 gs_base=0x0000000000000000 kernel_gs_base=0x0000000000000000 tsc_aux=0x0000000000000000 tsc_aux_read=0 reads=3",
+          "POOLEOS:KERNEL:PRIV-MSR-MCE OBSERVE contract=PKMSR1 mcg_cap=0x000000000100010A mcg_status=0x0000000000000000 mcg_ctl=0xFFFFFFFFFFFFFFFF bank_count=10 ctl_present=1 bank_reads=0 reads=3",
+          "POOLEOS:KERNEL:PRIV-MSR-PMU OBSERVE contract=PKMSR1 architectural=0 amd_v2=0 msr_reads=0 rdpmc=0 cr4_pce=0 policy=disabled",
+          "POOLEOS:KERNEL:PRIV-MSR-RESULT PASS contract=PKMSR1 profile=qemu64_tier0 bsp=1 policy=read_only_support_gated msr_reads=11 msr_writes=0 control_writes=0 signatures=0 authority=0 actions=0 interrupts=0 syscall_active=0 mce_handler=0 pmu_owner=0 terminal=halt"
         ],
         "media_read_only": true,
         "pbp1_serial_debugcon_exact_match": true,
@@ -1527,7 +1341,7 @@
             {
               "entry_virtual": "FFFFFFFF80008000",
               "flags": 9,
-              "physical_base": "000000001E082000",
+              "physical_base": "000000001DDBE000",
               "physical_size": 262144,
               "role": 1,
               "sha256": "062D4EE10BA27F4D0A943D97206ADB5B3761770B6DD9EEC2C281605B2693B883",
@@ -1537,7 +1351,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E7B7000",
+              "physical_base": "000000001E5D8000",
               "physical_size": 1860,
               "role": 2,
               "sha256": "00C28AB2DE744281CEC0459598A29E8C608E95BC2AF5207D78B67F494EF1E2F8",
@@ -1547,7 +1361,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E125000",
+              "physical_base": "000000001DE61000",
               "physical_size": 1088,
               "role": 3,
               "sha256": "FFAC48737878D6D4986CBF1936F4A8BE7898D544D4C4043F4D51144AEC728B59",
@@ -1557,7 +1371,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E124000",
+              "physical_base": "000000001DE60000",
               "physical_size": 821,
               "role": 4,
               "sha256": "7F4104BA88F42FD4F23B1413E93DFE8FDEF33D190BE934BB5611984690932072",
@@ -1567,7 +1381,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E123000",
+              "physical_base": "000000001DE5F000",
               "physical_size": 1504,
               "role": 5,
               "sha256": "04D5F70F88FE15BF747992390467BC8AE9E3BD0E28F6D131C427B73764641397",
@@ -1577,7 +1391,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E122000",
+              "physical_base": "000000001DE5E000",
               "physical_size": 1408,
               "role": 6,
               "sha256": "BD162F099BB0145738BA3FAD57B0B903FDB12B0080BBC85812528DC9C1A7A728",
@@ -1587,7 +1401,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E121000",
+              "physical_base": "000000001DE5D000",
               "physical_size": 2080,
               "role": 7,
               "sha256": "5A5DD881511E90FC8C2C96296BCE22B86F12D105A1B8497E2FBD7F244E6E39D0",
@@ -1597,7 +1411,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E7C0000",
+              "physical_base": "000000001E5E1000",
               "physical_size": 2615,
               "role": 9,
               "sha256": "714377C19323B2012011F98D6CCA657402B91FB37BCF425C892C6F166C5DD5BD",
@@ -1607,7 +1421,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E120000",
+              "physical_base": "000000001DE5C000",
               "physical_size": 320,
               "role": 10,
               "sha256": "432A9C4B643FF116385E4292C762196C6FE039310A9EB89D6B42FC06C7D2DCF3",
@@ -1617,7 +1431,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E11F000",
+              "physical_base": "000000001DE5B000",
               "physical_size": 256,
               "role": 11,
               "sha256": "4404745B7CA579E8D559FDF5E727A46837689DA0D0841FCCCB4D1758B4E02A09",
@@ -1626,30 +1440,30 @@
             }
           ],
           "boot_services_exited": true,
-          "byte_count": 5608,
+          "byte_count": 5008,
           "contract_id": "PBLIVE3",
           "core": {
             "boot_attempt": 0,
             "boot_attempt_limit": 3,
             "boot_flags": "0000000000000011",
             "boot_slot": 1,
-            "handoff_byte_count": 5608,
-            "handoff_physical_base": "000000001DDE0000",
+            "handoff_byte_count": 5008,
+            "handoff_physical_base": "000000001DB1C000",
             "handoff_virtual_base": "FFFFFFFF80050000",
             "initial_stack_top_virtual": "FFFFFFFF80049000",
             "kernel_entry_virtual": "FFFFFFFF80008000",
-            "kernel_physical_base": "000000001E082000",
+            "kernel_physical_base": "000000001DDBE000",
             "kernel_physical_size": 262144,
             "kernel_virtual_base": "FFFFFFFF80000000",
             "kernel_virtual_size": 262144,
-            "page_table_root_physical": "000000001E113000",
+            "page_table_root_physical": "000000001DE4F000",
             "selected_entry": 1,
             "uefi_revision": "00020046"
           },
           "development_mode_only": true,
           "exit_development_profile_validated": true,
           "features": "0000000000000017",
-          "fnv1a64": "92B10F1FC4F089D1",
+          "fnv1a64": "ECFDF08EB569A41C",
           "framebuffer": {
             "blue_mask": "000000FF",
             "byte_count": 4096000,
@@ -1665,7 +1479,7 @@
           "kernel_artifact": {
             "entry_virtual": "FFFFFFFF80008000",
             "flags": 9,
-            "physical_base": "000000001E082000",
+            "physical_base": "000000001DDBE000",
             "physical_size": 262144,
             "role": 1,
             "sha256": "062D4EE10BA27F4D0A943D97206ADB5B3761770B6DD9EEC2C281605B2693B883",
@@ -1726,7 +1540,7 @@
             {
               "attributes": "000000000000000F",
               "kind": 1,
-              "page_count": 108534,
+              "page_count": 107636,
               "physical_start": "0000000001780000",
               "source_type": 7
             },
@@ -1734,315 +1548,385 @@
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 32,
-              "physical_start": "000000001BF76000",
+              "physical_start": "000000001BBF4000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 1,
-              "page_count": 7754,
-              "physical_start": "000000001BF96000",
+              "page_count": 7944,
+              "physical_start": "000000001BC14000",
               "source_type": 7
             },
             {
               "attributes": "000000000000000F",
               "kind": 10,
               "page_count": 738,
-              "physical_start": "000000001DDE0000",
+              "physical_start": "000000001DB1C000",
               "source_type": 2
             },
             {
               "attributes": "000000000000000F",
               "kind": 10,
               "page_count": 54,
-              "physical_start": "000000001E0C2000",
+              "physical_start": "000000001DDFE000",
               "source_type": 1
             },
             {
               "attributes": "000000000000000F",
               "kind": 1,
               "page_count": 27,
-              "physical_start": "000000001E0F8000",
+              "physical_start": "000000001DE34000",
               "source_type": 7
             },
             {
               "attributes": "000000000000000F",
               "kind": 10,
               "page_count": 19,
-              "physical_start": "000000001E113000",
+              "physical_start": "000000001DE4F000",
               "source_type": 2
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 1681,
-              "physical_start": "000000001E126000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 10,
-              "page_count": 1,
-              "physical_start": "000000001E7B7000",
-              "source_type": 2
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 1,
-              "page_count": 1,
-              "physical_start": "000000001E7B8000",
-              "source_type": 7
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 7,
-              "physical_start": "000000001E7B9000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 10,
-              "page_count": 1,
-              "physical_start": "000000001E7C0000",
-              "source_type": 2
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 64,
-              "physical_start": "000000001E7C1000",
+              "page_count": 1684,
+              "physical_start": "000000001DE62000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 224,
-              "physical_start": "000000001E801000",
+              "physical_start": "000000001E4F6000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 13,
-              "physical_start": "000000001E8E1000",
+              "page_count": 2,
+              "physical_start": "000000001E5D6000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 10,
+              "page_count": 1,
+              "physical_start": "000000001E5D8000",
+              "source_type": 2
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 1,
+              "physical_start": "000000001E5D9000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 7,
+              "physical_start": "000000001E5DA000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 10,
+              "page_count": 1,
+              "physical_start": "000000001E5E1000",
+              "source_type": 2
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 85,
+              "physical_start": "000000001E5E2000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 19,
-              "physical_start": "000000001E8EE000",
+              "page_count": 34,
+              "physical_start": "000000001E637000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 19,
-              "physical_start": "000000001E901000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 133,
-              "physical_start": "000000001E914000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 4,
-              "physical_start": "000000001E999000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 6,
-              "physical_start": "000000001E99D000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 4,
-              "physical_start": "000000001E9A3000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 13,
-              "physical_start": "000000001E9A7000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 13,
-              "physical_start": "000000001E9B4000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 48,
-              "physical_start": "000000001E9C1000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 20,
-              "physical_start": "000000001E9F1000",
+              "page_count": 1,
+              "physical_start": "000000001E659000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 22,
-              "physical_start": "000000001EA05000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 3,
-              "physical_start": "000000001EA1B000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 30,
-              "physical_start": "000000001EA1E000",
+              "physical_start": "000000001E65A000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 2,
-              "physical_start": "000000001EA3C000",
+              "physical_start": "000000001E670000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 14,
+              "physical_start": "000000001E672000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 7,
+              "physical_start": "000000001E680000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 6,
+              "physical_start": "000000001E687000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 41,
+              "physical_start": "000000001E68D000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 28,
+              "physical_start": "000000001E6B6000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001E6D2000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001E6D3000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001E6D8000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 36,
+              "physical_start": "000000001E6DD000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 2,
+              "physical_start": "000000001E701000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 23,
+              "physical_start": "000000001E703000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001E71A000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 41,
-              "physical_start": "000000001EA3E000",
+              "physical_start": "000000001E71D000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 11,
-              "physical_start": "000000001EA67000",
+              "page_count": 1,
+              "physical_start": "000000001E746000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 15,
-              "physical_start": "000000001EA72000",
+              "page_count": 5,
+              "physical_start": "000000001E747000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 2,
-              "physical_start": "000000001EA81000",
+              "physical_start": "000000001E74C000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 34,
-              "physical_start": "000000001EA83000",
+              "page_count": 25,
+              "physical_start": "000000001E74E000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001E767000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 41,
+              "physical_start": "000000001E76C000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001E795000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 42,
+              "physical_start": "000000001E796000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 2,
+              "physical_start": "000000001E7C0000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001E7C2000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001E7C6000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 11,
+              "physical_start": "000000001E7CA000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001E7D5000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001E7D8000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001E7DC000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 23,
+              "physical_start": "000000001E7E0000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 521,
+              "physical_start": "000000001E7F7000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 25,
+              "physical_start": "000000001EA00000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001EA19000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 33,
+              "physical_start": "000000001EA1C000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 6,
-              "physical_start": "000000001EAA5000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 47,
-              "physical_start": "000000001EAAB000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 3,
-              "physical_start": "000000001EADA000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 13,
-              "physical_start": "000000001EADD000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 2,
-              "physical_start": "000000001EAEA000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 13,
-              "physical_start": "000000001EAEC000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 5,
-              "physical_start": "000000001EAF9000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 34,
-              "physical_start": "000000001EAFE000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 2,
-              "physical_start": "000000001EB20000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 3,
-              "physical_start": "000000001EB22000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 3,
-              "physical_start": "000000001EB25000",
+              "physical_start": "000000001EA3D000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 5,
-              "physical_start": "000000001EB28000",
+              "physical_start": "000000001EA43000",
+              "source_type": 3
+            },
+            {
+              "attributes": "800000000000000F",
+              "kind": 4,
+              "page_count": 193,
+              "physical_start": "000000001EA48000",
+              "source_type": 6
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 36,
+              "physical_start": "000000001EB09000",
               "source_type": 3
             },
             {
@@ -2055,316 +1939,141 @@
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 47,
+              "page_count": 4,
               "physical_start": "000000001EB32000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 2,
-              "physical_start": "000000001EB61000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 71,
-              "physical_start": "000000001EB63000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 7,
-              "physical_start": "000000001EBAA000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 10,
-              "physical_start": "000000001EBB1000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 7,
-              "physical_start": "000000001EBBB000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 21,
-              "physical_start": "000000001EBC2000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
               "page_count": 4,
-              "physical_start": "000000001EBD7000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 20,
-              "physical_start": "000000001EBDB000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 5,
-              "physical_start": "000000001EBEF000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 3,
-              "physical_start": "000000001EBF4000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 3,
-              "physical_start": "000000001EBF7000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 6,
-              "physical_start": "000000001EBFA000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 512,
-              "physical_start": "000000001EC00000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 25,
-              "physical_start": "000000001EE00000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 6,
-              "physical_start": "000000001EE19000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 3,
-              "physical_start": "000000001EE1F000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 3,
-              "physical_start": "000000001EE22000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 24,
-              "physical_start": "000000001EE25000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 1,
-              "physical_start": "000000001EE3D000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 5,
-              "physical_start": "000000001EE3E000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 5,
-              "physical_start": "000000001EE43000",
-              "source_type": 4
-            },
-            {
-              "attributes": "800000000000000F",
-              "kind": 4,
-              "page_count": 193,
-              "physical_start": "000000001EE48000",
-              "source_type": 6
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 36,
-              "physical_start": "000000001EF09000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 1,
-              "physical_start": "000000001EF2D000",
+              "physical_start": "000000001EB36000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 8,
-              "physical_start": "000000001EF2E000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 4,
-              "physical_start": "000000001EF36000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 8,
-              "physical_start": "000000001EF3A000",
+              "physical_start": "000000001EB3A000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 1,
-              "physical_start": "000000001EF42000",
+              "physical_start": "000000001EB42000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 42,
-              "physical_start": "000000001EF43000",
+              "physical_start": "000000001EB43000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 5,
-              "physical_start": "000000001EF6D000",
+              "physical_start": "000000001EB6D000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 6,
-              "physical_start": "000000001EF72000",
+              "physical_start": "000000001EB72000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 1042,
-              "physical_start": "000000001EF78000",
+              "physical_start": "000000001EB78000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 7,
-              "physical_start": "000000001F38A000",
+              "physical_start": "000000001EF8A000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 4,
-              "physical_start": "000000001F391000",
+              "physical_start": "000000001EF91000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 11,
-              "physical_start": "000000001F395000",
+              "physical_start": "000000001EF95000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 6,
-              "physical_start": "000000001F3A0000",
+              "physical_start": "000000001EFA0000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 23,
-              "physical_start": "000000001F3A6000",
+              "physical_start": "000000001EFA6000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 1328,
-              "physical_start": "000000001F3BD000",
+              "physical_start": "000000001EFBD000",
               "source_type": 4
             },
             {
               "attributes": "800000000000000F",
               "kind": 4,
               "page_count": 256,
-              "physical_start": "000000001F8ED000",
+              "physical_start": "000000001F4ED000",
               "source_type": 6
             },
             {
               "attributes": "800000000000000F",
               "kind": 3,
               "page_count": 256,
-              "physical_start": "000000001F9ED000",
+              "physical_start": "000000001F5ED000",
               "source_type": 5
             },
             {
               "attributes": "000000000000000F",
               "kind": 1,
               "page_count": 135,
-              "physical_start": "000000001FAED000",
+              "physical_start": "000000001F6ED000",
               "source_type": 7
             },
             {
               "attributes": "000000000000000F",
               "kind": 5,
               "page_count": 11,
-              "physical_start": "000000001FB74000",
+              "physical_start": "000000001F774000",
               "source_type": 9
             },
             {
               "attributes": "000000000000000F",
               "kind": 6,
               "page_count": 128,
-              "physical_start": "000000001FB7F000",
+              "physical_start": "000000001F77F000",
               "source_type": 10
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 513,
-              "physical_start": "000000001FBFF000",
+              "page_count": 1537,
+              "physical_start": "000000001F7FF000",
               "source_type": 4
             },
             {
@@ -2452,13 +2161,13 @@
               "source_type": 0
             }
           ],
-          "memory_entry_count": 111,
-          "message_crc32": "6FFAA234",
+          "memory_entry_count": 96,
+          "message_crc32": "0EE8CAB6",
           "pre_exit_profile_validated": false,
           "record_count": 4,
           "required_features": "0000000000000013",
           "secret_bearing_records_present": false,
-          "sha256": "4FFF1BD29DE87476763FEC2CD7CF7DC9B2E4CBF706E82414016DE3A9E734CC08",
+          "sha256": "CD23E7CB23580889DF2A5FE7B69FDF00CF8183E0B5CDFE712AC1A82C75336CCB",
           "transferable": false
         },
         "qemu_exit_code": 0,
@@ -2477,7 +2186,7 @@
         },
         "qmp_loopback_only": true,
         "qmp_quit_requested": true,
-        "run_id": "xstate-exception-run-1",
+        "run_id": "privilege-msr-policy-run-1",
         "screenshot": {
           "bright_cyan_pixel_count": 44970,
           "byte_count": 3072016,
@@ -2491,8 +2200,8 @@
           "width": 1280
         },
         "serial_debugcon_exact_match": true,
-        "stderr_byte_count": 171,
-        "stderr_sha256": "77B388371031B1EA3DF403F6C7D62E13A015663C8E0B9036EEF1A4A393E8FD11",
+        "stderr_byte_count": 0,
+        "stderr_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
         "timestamped_qmp_events_excluded_from_equality": true,
         "transcript_binding": {
           "development_revalidation_profile_accepted": true,
@@ -2521,92 +2230,72 @@
           "state_writes": 0
         },
         "local_paths_recorded": false,
-        "marker_sha256": "A63EB676DD46D693E9E9021F385A51F308FD228DB881051CA8F4CBD02DC75100",
+        "marker_sha256": "D8B0D5544B8B387DBC67A7EAEC79ED28DECA57260130314A6B972E9242E809FC",
         "marker_summary": {
-          "arm": {
-            "fcw": 894,
-            "mxcsr": 7936,
-            "nm_strategy": "eager_reject",
-            "sequence": "16,19,7",
-            "simd": "invalid",
-            "x87": "invalid"
+          "bases": {
+            "fs_base": 0,
+            "gs_base": 0,
+            "kernel_gs_base": 0,
+            "reads": 3,
+            "tsc_aux": 0,
+            "tsc_aux_read": 0
           },
-          "nm": {
-            "injection": "test_only",
-            "reason": "ts_set",
-            "recovery": "forbidden",
-            "state_sampled": 0,
-            "strategy": "eager",
-            "terminal": "halt",
-            "vector": 7
+          "features": {
+            "amd_perfmon_v2": 0,
+            "architectural_pmu_version": 0,
+            "cr4": 1640,
+            "ext1_edx": 563346429,
+            "ext22_eax": 0,
+            "leaf1_edx": 126614525,
+            "leaf_a_eax": 0,
+            "max_basic_leaf": 13,
+            "max_extended_leaf": 2147483658,
+            "mca": 1,
+            "mce": 1,
+            "rdtscp": 0,
+            "syscall": 1,
+            "vendor": "AuthenticAMD"
           },
-          "nm_arm": {
-            "cr0_ts": 1,
-            "injection": "test_only",
-            "recovery": "forbidden",
-            "terminal": "reject",
-            "vector": 7
+          "linkage": {
+            "active": 0,
+            "cstar": 0,
+            "efer": 3328,
+            "lstar": 0,
+            "reads": 5,
+            "sfmask": 0,
+            "star": 0
           },
-          "nm_enter": {
-            "depth": 1,
-            "error": 0,
-            "ist": 1,
-            "kind": "device_not_available",
-            "vector": 7
+          "machine_check": {
+            "bank_count": 10,
+            "bank_reads": 0,
+            "ctl_present": 1,
+            "mcg_cap": 16777482,
+            "mcg_ctl": 18446744073709551615,
+            "mcg_status": 0,
+            "reads": 3
+          },
+          "marker_count": 35,
+          "performance_monitoring": {
+            "amd_v2": 0,
+            "architectural": 0,
+            "cr4_pce": 0,
+            "msr_reads": 0,
+            "rdpmc": 0
           },
           "result": {
             "actions": 0,
             "authority": 0,
-            "deliveries": 3,
-            "nm_rejected": 1,
-            "privileged_writes": 4,
-            "recovered": 2,
-            "recovery_writes": 2,
-            "scheduler": 0,
-            "signatures": 0,
-            "smp": 0,
-            "target": 0,
-            "terminal": "halt",
-            "unexpected": 0
-          },
-          "setup": {
             "bsp": 1,
-            "cr0": 2147549235,
-            "cr4": 263784,
-            "exceptions_masked_default": 1,
-            "gates": 8,
+            "control_writes": 0,
             "interrupts": 0,
-            "ist": 1,
-            "parent": "PKXSTATE1",
-            "parent_control_writes": 3,
-            "selector": 6,
-            "vectors": "7,16,19",
-            "xcr0": 3
-          },
-          "simd": {
-            "enter": {
-              "depth": 1,
-              "error": 0,
-              "ist": 1,
-              "kind": "simd_invalid",
-              "vector": 19
-            },
-            "return": {
-              "recovery_write": 1,
-              "resume": "exact",
-              "returned": 2,
-              "vector": 19
-            },
-            "state": {
-              "fcw_after": 895,
-              "fcw_before": 895,
-              "fsw_after": 0,
-              "fsw_before": 0,
-              "kind": "simd_invalid",
-              "mxcsr_after": 8064,
-              "mxcsr_before": 7937,
-              "state_sampled": 1
-            }
+            "mce_handler": 0,
+            "msr_read_mask": 3839,
+            "msr_reads": 11,
+            "msr_writes": 0,
+            "pmu_owner": 0,
+            "signatures": 0,
+            "syscall_active": 0,
+            "terminal": "halt"
           },
           "transfer_prefix": {
             "boot_prefix": {
@@ -2636,12 +2325,12 @@
                 "artifact_page_count": 9,
                 "attempt_count": 1,
                 "contract_id": "PBEXIT1",
-                "descriptor_count": 111,
+                "descriptor_count": 96,
                 "descriptor_size": 48,
                 "firmware_calls_after_exit": 0,
                 "handoff_page_count": 256,
                 "kernel_page_count": 64,
-                "map_byte_count": 5328,
+                "map_byte_count": 4608,
                 "stack_page_count": 8,
                 "successful_exit_prefix_validated": true,
                 "synthetic_stop_used_for_prefix_parser_only": true,
@@ -2687,8 +2376,8 @@
                 "firmware_calls_while_active": 0,
                 "first_page_table_index": 0,
                 "framebuffer_cache_signature": "00",
-                "framebuffer_first_page_bytes": 1073741824,
-                "framebuffer_last_page_bytes": 1073741824,
+                "framebuffer_first_page_bytes": 2097152,
+                "framebuffer_last_page_bytes": 2097152,
                 "framebuffer_preserved": true,
                 "leaf_fingerprint": "066F6E68217211A5",
                 "mapped_fnv1a64": "8709C783DEA6E7E7",
@@ -2697,7 +2386,7 @@
                 "original_cr3_restored": true,
                 "page_directory_index": 0,
                 "pdpt_index": 510,
-                "physical_address_bits": 48,
+                "physical_address_bits": 40,
                 "pml4_index": 511,
                 "read_execute_page_count": 32,
                 "read_only_page_count": 12,
@@ -2706,14 +2395,14 @@
                   "guard_page_count": 2,
                   "handoff_first_page_table_index": 80,
                   "handoff_page_count": 256,
-                  "handoff_physical_base": 501088256,
+                  "handoff_physical_base": 498188288,
                   "handoff_virtual_base": 18446744071562395648,
-                  "kernel_physical_base": 503848960,
-                  "page_table_root_physical": 504442880,
-                  "retained_leaf_fingerprint": "79B73AFB48B79C75",
+                  "kernel_physical_base": 500948992,
+                  "page_table_root_physical": 501542912,
+                  "retained_leaf_fingerprint": "F6AABD8C612439ED",
                   "stack_first_page_table_index": 65,
                   "stack_page_count": 8,
-                  "stack_physical_base": 504459264,
+                  "stack_physical_base": 501559296,
                   "stack_top_virtual": 18446744071562366976,
                   "table_page_count": 4,
                   "total_mapped_page_count": 328
@@ -2736,23 +2425,23 @@
               },
               "marker_count": 25,
               "memory_map": {
-                "byte_count": 5328,
+                "byte_count": 4608,
                 "descriptor_bytes": 48,
-                "descriptor_count": 111
+                "descriptor_count": 96
               },
               "ordered_contract_match": true,
               "pbp1": {
                 "artifact_count": 10,
                 "boot_services_exited": true,
-                "byte_count": 5608,
+                "byte_count": 5008,
                 "bytes_unchanged": true,
                 "descriptor_bytes": 48,
                 "development_mode_only": true,
                 "exit_attempts": 1,
-                "fnv1a64": "92B10F1FC4F089D1",
+                "fnv1a64": "ECFDF08EB569A41C",
                 "framebuffer_present": 1,
-                "memory_entry_count": 111,
-                "message_crc32": "6FFAA234",
+                "memory_entry_count": 96,
+                "message_crc32": "0EE8CAB6",
                 "pre_exit": false,
                 "record_count": 4,
                 "temporary_pools_released": false
@@ -2804,13 +2493,13 @@
               "state_writes": 0
             },
             "kernel_state": {
-              "cr3": 504442880,
+              "cr3": 501542912,
               "entry": 18446744071562100736,
               "handoff": 18446744071562395648,
-              "handoff_bytes": 5608,
+              "handoff_bytes": 5008,
               "rflags_df": 0,
               "rflags_if": 0,
-              "root": 504442880,
+              "root": 501542912,
               "stack_top": 18446744071562366976
             },
             "marker_count": 30,
@@ -2820,43 +2509,18 @@
               "actions_authorized": 0,
               "authority_grants": 0,
               "contract_id": "PKXFER1",
-              "cr3": 504442880,
+              "cr3": 501542912,
               "emulator_only": 1,
               "entry": 18446744071562100736,
               "firmware_calls_after_exit": 0,
               "handoff": 18446744071562395648,
-              "handoff_bytes": 5608,
+              "handoff_bytes": 5008,
               "mode": "development",
-              "root": 504442880,
+              "root": 501542912,
               "signature_verifications": 0,
               "stack_top": 18446744071562366976,
               "state_writes": 0,
-              "trap_scenario": 6
-            }
-          },
-          "x87": {
-            "enter": {
-              "depth": 1,
-              "error": 0,
-              "ist": 1,
-              "kind": "x87_invalid",
-              "vector": 16
-            },
-            "return": {
-              "recovery_write": 1,
-              "resume": "exact",
-              "returned": 1,
-              "vector": 16
-            },
-            "state": {
-              "fcw_after": 895,
-              "fcw_before": 894,
-              "fsw_after": 0,
-              "fsw_before": 45185,
-              "kind": "x87_invalid",
-              "mxcsr_after": 8064,
-              "mxcsr_before": 8064,
-              "state_sampled": 1
+              "trap_scenario": 7
             }
           }
         },
@@ -2879,29 +2543,23 @@
           "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
           "POOLEBOOT/0.1 FRAME READY",
           "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=64 ro=12 rx=32 rw=20 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=066F6E68217211A5",
-          "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=64 physical_bits=48 mapped_fnv1a64=8709C783DEA6E7E7 framebuffer=preserved cache_signature=00 first_page_bytes=1073741824 last_page_bytes=1073741824",
-          "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=8 handoff_pages=256 guards=2 total_pages=328 stack_pt=65 handoff_pt=80 kernel_phys=000000001E082000 root=000000001E113000 stack_phys=000000001E117000 stack_top=FFFFFFFF80049000 handoff_phys=000000001DDE0000 handoff_virt=FFFFFFFF80050000 retained_fnv1a64=79B73AFB48B79C75 original_cr3=restored firmware_calls_while_active=0",
-          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5608 records=4 memory_entries=111 framebuffer=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=6FFAA234 fnv1a64=92B10F1FC4F089D1 state=boot_services_exited bytes_unchanged=1",
-          "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=5328 descriptor_bytes=48 descriptors=111",
+          "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=64 physical_bits=40 mapped_fnv1a64=8709C783DEA6E7E7 framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
+          "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=8 handoff_pages=256 guards=2 total_pages=328 stack_pt=65 handoff_pt=80 kernel_phys=000000001DDBE000 root=000000001DE4F000 stack_phys=000000001DE53000 stack_top=FFFFFFFF80049000 handoff_phys=000000001DB1C000 handoff_virt=FFFFFFFF80050000 retained_fnv1a64=F6AABD8C612439ED original_cr3=restored firmware_calls_while_active=0",
+          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5008 records=4 memory_entries=96 framebuffer=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=0EE8CAB6 fnv1a64=ECFDF08EB569A41C state=boot_services_exited bytes_unchanged=1",
+          "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4608 descriptor_bytes=48 descriptors=96",
           "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=64 artifact_pages=9 table_pages=4 stack_pages=8 handoff_pages=256",
-          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF80008000 handoff=FFFFFFFF80050000 bytes=5608 stack_top=FFFFFFFF80049000 root=000000001E113000 cr3=000000001E113000 trap_scenario=6 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
+          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF80008000 handoff=FFFFFFFF80050000 bytes=5008 stack_top=FFFFFFFF80049000 root=000000001DE4F000 cr3=000000001DE4F000 trap_scenario=7 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
           "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
           "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE124-N7-PRIVILEGE-MSR-POLICY-001 entry_count=1 serial=present",
-          "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF80050000 bytes=5608 entry=0xFFFFFFFF80008000 stack_top=0xFFFFFFFF80049000 root=0x000000001E113000 cr3=0x000000001E113000 rflags_if=0 rflags_df=0",
+          "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF80050000 bytes=5008 entry=0xFFFFFFFF80008000 stack_top=0xFFFFFFFF80049000 root=0x000000001DE4F000 cr3=0x000000001DE4F000 rflags_if=0 rflags_df=0",
           "POOLEOS:KERNEL:PBP1 PASS profile=development records=4 artifacts=10 production_profile_valid=0",
           "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=1F2BE74362DEE662AE5E7E9B711EA2060DD659E74548421528637D1904DE9D05 policy_sha256=432A9C4B643FF116385E4292C762196C6FE039310A9EB89D6B42FC06C7D2DCF3 state_sha256=4404745B7CA579E8D559FDF5E727A46837689DA0D0841FCCCB4D1758B4E02A09 denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-SETUP PASS contract=PKXEXC1 parent=PKXSTATE1 selector=6 bsp=1 gates=8 vectors=7,16,19 ist=1 xcr0=0x0000000000000003 cr0=0x0000000080010033 cr4=0x0000000000040668 parent_control_writes=3 exceptions_masked_default=1 if=0",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-ARM PASS contract=PKXEXC1 sequence=16,19,7 x87=invalid fcw=0x000000000000037E simd=invalid mxcsr=0x0000000000001F00 nm_strategy=eager_reject",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-ENTER PASS contract=PKXEXC1 kind=x87_invalid vector=16 error=0x0000000000000000 depth=1 ist=1",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-STATE PASS contract=PKXEXC1 kind=x87_invalid fcw_before=0x000000000000037E fsw_before=0x000000000000B081 mxcsr_before=0x0000000000001F80 fcw_after=0x000000000000037F fsw_after=0x0000000000000000 mxcsr_after=0x0000000000001F80 state_sampled=1",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-RETURN PASS contract=PKXEXC1 vector=16 resume=exact returned=1 recovery_write=1",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-ENTER PASS contract=PKXEXC1 kind=simd_invalid vector=19 error=0x0000000000000000 depth=1 ist=1",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-STATE PASS contract=PKXEXC1 kind=simd_invalid fcw_before=0x000000000000037F fsw_before=0x0000000000000000 mxcsr_before=0x0000000000001F01 fcw_after=0x000000000000037F fsw_after=0x0000000000000000 mxcsr_after=0x0000000000001F80 state_sampled=1",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-RETURN PASS contract=PKXEXC1 vector=19 resume=exact returned=2 recovery_write=1",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-NM-ARM PASS contract=PKXEXC1 vector=7 injection=test_only cr0_ts=1 recovery=forbidden terminal=reject",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-ENTER PASS contract=PKXEXC1 kind=device_not_available vector=7 error=0x0000000000000000 depth=1 ist=1",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-NM-REJECT PASS contract=PKXEXC1 vector=7 strategy=eager reason=ts_set injection=test_only state_sampled=0 recovery=forbidden terminal=halt",
-          "POOLEOS:KERNEL:XSTATE-EXCEPTION-RESULT PASS contract=PKXEXC1 deliveries=3 recovered=2 nm_rejected=1 privileged_writes=4 recovery_writes=2 unexpected=0 signatures=0 authority=0 actions=0 scheduler=0 smp=0 target=0 terminal=halt"
+          "POOLEOS:KERNEL:PRIV-MSR-FEATURES OBSERVE contract=PKMSR1 vendor_hex=41757468656E746963414D44 max_basic=0x000000000000000D max_extended=0x000000008000000A leaf1_edx=0x00000000078BFBFD ext1_edx=0x000000002193FBFD leafa_eax=0x0000000000000000 ext22_eax=0x0000000000000000 cr4=0x0000000000000668 syscall=1 rdtscp=0 mce=1 mca=1 arch_pmu_version=0 amd_perfmon_v2=0",
+          "POOLEOS:KERNEL:PRIV-MSR-LINKAGE OBSERVE contract=PKMSR1 efer=0x0000000000000D00 star=0x0000000000000000 lstar=0x0000000000000000 cstar=0x0000000000000000 sfmask=0x0000000000000000 active=0 reads=5",
+          "POOLEOS:KERNEL:PRIV-MSR-BASES OBSERVE contract=PKMSR1 fs_base=0x0000000000000000 gs_base=0x0000000000000000 kernel_gs_base=0x0000000000000000 tsc_aux=0x0000000000000000 tsc_aux_read=0 reads=3",
+          "POOLEOS:KERNEL:PRIV-MSR-MCE OBSERVE contract=PKMSR1 mcg_cap=0x000000000100010A mcg_status=0x0000000000000000 mcg_ctl=0xFFFFFFFFFFFFFFFF bank_count=10 ctl_present=1 bank_reads=0 reads=3",
+          "POOLEOS:KERNEL:PRIV-MSR-PMU OBSERVE contract=PKMSR1 architectural=0 amd_v2=0 msr_reads=0 rdpmc=0 cr4_pce=0 policy=disabled",
+          "POOLEOS:KERNEL:PRIV-MSR-RESULT PASS contract=PKMSR1 profile=qemu64_tier0 bsp=1 policy=read_only_support_gated msr_reads=11 msr_writes=0 control_writes=0 signatures=0 authority=0 actions=0 interrupts=0 syscall_active=0 mce_handler=0 pmu_owner=0 terminal=halt"
         ],
         "media_read_only": true,
         "pbp1_serial_debugcon_exact_match": true,
@@ -2911,7 +2569,7 @@
             {
               "entry_virtual": "FFFFFFFF80008000",
               "flags": 9,
-              "physical_base": "000000001E082000",
+              "physical_base": "000000001DDBE000",
               "physical_size": 262144,
               "role": 1,
               "sha256": "062D4EE10BA27F4D0A943D97206ADB5B3761770B6DD9EEC2C281605B2693B883",
@@ -2921,7 +2579,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E7B7000",
+              "physical_base": "000000001E5D8000",
               "physical_size": 1860,
               "role": 2,
               "sha256": "00C28AB2DE744281CEC0459598A29E8C608E95BC2AF5207D78B67F494EF1E2F8",
@@ -2931,7 +2589,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E125000",
+              "physical_base": "000000001DE61000",
               "physical_size": 1088,
               "role": 3,
               "sha256": "FFAC48737878D6D4986CBF1936F4A8BE7898D544D4C4043F4D51144AEC728B59",
@@ -2941,7 +2599,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E124000",
+              "physical_base": "000000001DE60000",
               "physical_size": 821,
               "role": 4,
               "sha256": "7F4104BA88F42FD4F23B1413E93DFE8FDEF33D190BE934BB5611984690932072",
@@ -2951,7 +2609,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E123000",
+              "physical_base": "000000001DE5F000",
               "physical_size": 1504,
               "role": 5,
               "sha256": "04D5F70F88FE15BF747992390467BC8AE9E3BD0E28F6D131C427B73764641397",
@@ -2961,7 +2619,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E122000",
+              "physical_base": "000000001DE5E000",
               "physical_size": 1408,
               "role": 6,
               "sha256": "BD162F099BB0145738BA3FAD57B0B903FDB12B0080BBC85812528DC9C1A7A728",
@@ -2971,7 +2629,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E121000",
+              "physical_base": "000000001DE5D000",
               "physical_size": 2080,
               "role": 7,
               "sha256": "5A5DD881511E90FC8C2C96296BCE22B86F12D105A1B8497E2FBD7F244E6E39D0",
@@ -2981,7 +2639,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E7C0000",
+              "physical_base": "000000001E5E1000",
               "physical_size": 2615,
               "role": 9,
               "sha256": "714377C19323B2012011F98D6CCA657402B91FB37BCF425C892C6F166C5DD5BD",
@@ -2991,7 +2649,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E120000",
+              "physical_base": "000000001DE5C000",
               "physical_size": 320,
               "role": 10,
               "sha256": "432A9C4B643FF116385E4292C762196C6FE039310A9EB89D6B42FC06C7D2DCF3",
@@ -3001,7 +2659,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E11F000",
+              "physical_base": "000000001DE5B000",
               "physical_size": 256,
               "role": 11,
               "sha256": "4404745B7CA579E8D559FDF5E727A46837689DA0D0841FCCCB4D1758B4E02A09",
@@ -3010,30 +2668,30 @@
             }
           ],
           "boot_services_exited": true,
-          "byte_count": 5608,
+          "byte_count": 5008,
           "contract_id": "PBLIVE3",
           "core": {
             "boot_attempt": 0,
             "boot_attempt_limit": 3,
             "boot_flags": "0000000000000011",
             "boot_slot": 1,
-            "handoff_byte_count": 5608,
-            "handoff_physical_base": "000000001DDE0000",
+            "handoff_byte_count": 5008,
+            "handoff_physical_base": "000000001DB1C000",
             "handoff_virtual_base": "FFFFFFFF80050000",
             "initial_stack_top_virtual": "FFFFFFFF80049000",
             "kernel_entry_virtual": "FFFFFFFF80008000",
-            "kernel_physical_base": "000000001E082000",
+            "kernel_physical_base": "000000001DDBE000",
             "kernel_physical_size": 262144,
             "kernel_virtual_base": "FFFFFFFF80000000",
             "kernel_virtual_size": 262144,
-            "page_table_root_physical": "000000001E113000",
+            "page_table_root_physical": "000000001DE4F000",
             "selected_entry": 1,
             "uefi_revision": "00020046"
           },
           "development_mode_only": true,
           "exit_development_profile_validated": true,
           "features": "0000000000000017",
-          "fnv1a64": "92B10F1FC4F089D1",
+          "fnv1a64": "ECFDF08EB569A41C",
           "framebuffer": {
             "blue_mask": "000000FF",
             "byte_count": 4096000,
@@ -3049,7 +2707,7 @@
           "kernel_artifact": {
             "entry_virtual": "FFFFFFFF80008000",
             "flags": 9,
-            "physical_base": "000000001E082000",
+            "physical_base": "000000001DDBE000",
             "physical_size": 262144,
             "role": 1,
             "sha256": "062D4EE10BA27F4D0A943D97206ADB5B3761770B6DD9EEC2C281605B2693B883",
@@ -3110,7 +2768,7 @@
             {
               "attributes": "000000000000000F",
               "kind": 1,
-              "page_count": 108534,
+              "page_count": 107636,
               "physical_start": "0000000001780000",
               "source_type": 7
             },
@@ -3118,315 +2776,385 @@
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 32,
-              "physical_start": "000000001BF76000",
+              "physical_start": "000000001BBF4000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 1,
-              "page_count": 7754,
-              "physical_start": "000000001BF96000",
+              "page_count": 7944,
+              "physical_start": "000000001BC14000",
               "source_type": 7
             },
             {
               "attributes": "000000000000000F",
               "kind": 10,
               "page_count": 738,
-              "physical_start": "000000001DDE0000",
+              "physical_start": "000000001DB1C000",
               "source_type": 2
             },
             {
               "attributes": "000000000000000F",
               "kind": 10,
               "page_count": 54,
-              "physical_start": "000000001E0C2000",
+              "physical_start": "000000001DDFE000",
               "source_type": 1
             },
             {
               "attributes": "000000000000000F",
               "kind": 1,
               "page_count": 27,
-              "physical_start": "000000001E0F8000",
+              "physical_start": "000000001DE34000",
               "source_type": 7
             },
             {
               "attributes": "000000000000000F",
               "kind": 10,
               "page_count": 19,
-              "physical_start": "000000001E113000",
+              "physical_start": "000000001DE4F000",
               "source_type": 2
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 1681,
-              "physical_start": "000000001E126000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 10,
-              "page_count": 1,
-              "physical_start": "000000001E7B7000",
-              "source_type": 2
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 1,
-              "page_count": 1,
-              "physical_start": "000000001E7B8000",
-              "source_type": 7
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 7,
-              "physical_start": "000000001E7B9000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 10,
-              "page_count": 1,
-              "physical_start": "000000001E7C0000",
-              "source_type": 2
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 64,
-              "physical_start": "000000001E7C1000",
+              "page_count": 1684,
+              "physical_start": "000000001DE62000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 224,
-              "physical_start": "000000001E801000",
+              "physical_start": "000000001E4F6000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 13,
-              "physical_start": "000000001E8E1000",
+              "page_count": 2,
+              "physical_start": "000000001E5D6000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 10,
+              "page_count": 1,
+              "physical_start": "000000001E5D8000",
+              "source_type": 2
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 1,
+              "page_count": 1,
+              "physical_start": "000000001E5D9000",
+              "source_type": 7
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 7,
+              "physical_start": "000000001E5DA000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 10,
+              "page_count": 1,
+              "physical_start": "000000001E5E1000",
+              "source_type": 2
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 85,
+              "physical_start": "000000001E5E2000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 19,
-              "physical_start": "000000001E8EE000",
+              "page_count": 34,
+              "physical_start": "000000001E637000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 19,
-              "physical_start": "000000001E901000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 133,
-              "physical_start": "000000001E914000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 4,
-              "physical_start": "000000001E999000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 6,
-              "physical_start": "000000001E99D000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 4,
-              "physical_start": "000000001E9A3000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 13,
-              "physical_start": "000000001E9A7000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 13,
-              "physical_start": "000000001E9B4000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 48,
-              "physical_start": "000000001E9C1000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 20,
-              "physical_start": "000000001E9F1000",
+              "page_count": 1,
+              "physical_start": "000000001E659000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 22,
-              "physical_start": "000000001EA05000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 3,
-              "physical_start": "000000001EA1B000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 30,
-              "physical_start": "000000001EA1E000",
+              "physical_start": "000000001E65A000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 2,
-              "physical_start": "000000001EA3C000",
+              "physical_start": "000000001E670000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 14,
+              "physical_start": "000000001E672000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 7,
+              "physical_start": "000000001E680000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 6,
+              "physical_start": "000000001E687000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 41,
+              "physical_start": "000000001E68D000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 28,
+              "physical_start": "000000001E6B6000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001E6D2000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001E6D3000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001E6D8000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 36,
+              "physical_start": "000000001E6DD000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 2,
+              "physical_start": "000000001E701000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 23,
+              "physical_start": "000000001E703000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001E71A000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 41,
-              "physical_start": "000000001EA3E000",
+              "physical_start": "000000001E71D000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 11,
-              "physical_start": "000000001EA67000",
+              "page_count": 1,
+              "physical_start": "000000001E746000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 15,
-              "physical_start": "000000001EA72000",
+              "page_count": 5,
+              "physical_start": "000000001E747000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 2,
-              "physical_start": "000000001EA81000",
+              "physical_start": "000000001E74C000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 34,
-              "physical_start": "000000001EA83000",
+              "page_count": 25,
+              "physical_start": "000000001E74E000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001E767000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 41,
+              "physical_start": "000000001E76C000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001E795000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 42,
+              "physical_start": "000000001E796000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 2,
+              "physical_start": "000000001E7C0000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001E7C2000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001E7C6000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 11,
+              "physical_start": "000000001E7CA000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001E7D5000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001E7D8000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001E7DC000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 23,
+              "physical_start": "000000001E7E0000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 521,
+              "physical_start": "000000001E7F7000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 25,
+              "physical_start": "000000001EA00000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001EA19000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 33,
+              "physical_start": "000000001EA1C000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 6,
-              "physical_start": "000000001EAA5000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 47,
-              "physical_start": "000000001EAAB000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 3,
-              "physical_start": "000000001EADA000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 13,
-              "physical_start": "000000001EADD000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 2,
-              "physical_start": "000000001EAEA000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 13,
-              "physical_start": "000000001EAEC000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 5,
-              "physical_start": "000000001EAF9000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 34,
-              "physical_start": "000000001EAFE000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 2,
-              "physical_start": "000000001EB20000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 3,
-              "physical_start": "000000001EB22000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 3,
-              "physical_start": "000000001EB25000",
+              "physical_start": "000000001EA3D000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 5,
-              "physical_start": "000000001EB28000",
+              "physical_start": "000000001EA43000",
+              "source_type": 3
+            },
+            {
+              "attributes": "800000000000000F",
+              "kind": 4,
+              "page_count": 193,
+              "physical_start": "000000001EA48000",
+              "source_type": 6
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 36,
+              "physical_start": "000000001EB09000",
               "source_type": 3
             },
             {
@@ -3439,316 +3167,141 @@
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 47,
+              "page_count": 4,
               "physical_start": "000000001EB32000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 2,
-              "physical_start": "000000001EB61000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 71,
-              "physical_start": "000000001EB63000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 7,
-              "physical_start": "000000001EBAA000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 10,
-              "physical_start": "000000001EBB1000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 7,
-              "physical_start": "000000001EBBB000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 21,
-              "physical_start": "000000001EBC2000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
               "page_count": 4,
-              "physical_start": "000000001EBD7000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 20,
-              "physical_start": "000000001EBDB000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 5,
-              "physical_start": "000000001EBEF000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 3,
-              "physical_start": "000000001EBF4000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 3,
-              "physical_start": "000000001EBF7000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 6,
-              "physical_start": "000000001EBFA000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 512,
-              "physical_start": "000000001EC00000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 25,
-              "physical_start": "000000001EE00000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 6,
-              "physical_start": "000000001EE19000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 3,
-              "physical_start": "000000001EE1F000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 3,
-              "physical_start": "000000001EE22000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 24,
-              "physical_start": "000000001EE25000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 1,
-              "physical_start": "000000001EE3D000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 5,
-              "physical_start": "000000001EE3E000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 5,
-              "physical_start": "000000001EE43000",
-              "source_type": 4
-            },
-            {
-              "attributes": "800000000000000F",
-              "kind": 4,
-              "page_count": 193,
-              "physical_start": "000000001EE48000",
-              "source_type": 6
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 36,
-              "physical_start": "000000001EF09000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 1,
-              "physical_start": "000000001EF2D000",
+              "physical_start": "000000001EB36000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 8,
-              "physical_start": "000000001EF2E000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 4,
-              "physical_start": "000000001EF36000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 8,
-              "physical_start": "000000001EF3A000",
+              "physical_start": "000000001EB3A000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 1,
-              "physical_start": "000000001EF42000",
+              "physical_start": "000000001EB42000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 42,
-              "physical_start": "000000001EF43000",
+              "physical_start": "000000001EB43000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 5,
-              "physical_start": "000000001EF6D000",
+              "physical_start": "000000001EB6D000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 6,
-              "physical_start": "000000001EF72000",
+              "physical_start": "000000001EB72000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 1042,
-              "physical_start": "000000001EF78000",
+              "physical_start": "000000001EB78000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 7,
-              "physical_start": "000000001F38A000",
+              "physical_start": "000000001EF8A000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 4,
-              "physical_start": "000000001F391000",
+              "physical_start": "000000001EF91000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 11,
-              "physical_start": "000000001F395000",
+              "physical_start": "000000001EF95000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 6,
-              "physical_start": "000000001F3A0000",
+              "physical_start": "000000001EFA0000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 23,
-              "physical_start": "000000001F3A6000",
+              "physical_start": "000000001EFA6000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 1328,
-              "physical_start": "000000001F3BD000",
+              "physical_start": "000000001EFBD000",
               "source_type": 4
             },
             {
               "attributes": "800000000000000F",
               "kind": 4,
               "page_count": 256,
-              "physical_start": "000000001F8ED000",
+              "physical_start": "000000001F4ED000",
               "source_type": 6
             },
             {
               "attributes": "800000000000000F",
               "kind": 3,
               "page_count": 256,
-              "physical_start": "000000001F9ED000",
+              "physical_start": "000000001F5ED000",
               "source_type": 5
             },
             {
               "attributes": "000000000000000F",
               "kind": 1,
               "page_count": 135,
-              "physical_start": "000000001FAED000",
+              "physical_start": "000000001F6ED000",
               "source_type": 7
             },
             {
               "attributes": "000000000000000F",
               "kind": 5,
               "page_count": 11,
-              "physical_start": "000000001FB74000",
+              "physical_start": "000000001F774000",
               "source_type": 9
             },
             {
               "attributes": "000000000000000F",
               "kind": 6,
               "page_count": 128,
-              "physical_start": "000000001FB7F000",
+              "physical_start": "000000001F77F000",
               "source_type": 10
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 513,
-              "physical_start": "000000001FBFF000",
+              "page_count": 1537,
+              "physical_start": "000000001F7FF000",
               "source_type": 4
             },
             {
@@ -3836,13 +3389,13 @@
               "source_type": 0
             }
           ],
-          "memory_entry_count": 111,
-          "message_crc32": "6FFAA234",
+          "memory_entry_count": 96,
+          "message_crc32": "0EE8CAB6",
           "pre_exit_profile_validated": false,
           "record_count": 4,
           "required_features": "0000000000000013",
           "secret_bearing_records_present": false,
-          "sha256": "4FFF1BD29DE87476763FEC2CD7CF7DC9B2E4CBF706E82414016DE3A9E734CC08",
+          "sha256": "CD23E7CB23580889DF2A5FE7B69FDF00CF8183E0B5CDFE712AC1A82C75336CCB",
           "transferable": false
         },
         "qemu_exit_code": 0,
@@ -3861,7 +3414,7 @@
         },
         "qmp_loopback_only": true,
         "qmp_quit_requested": true,
-        "run_id": "xstate-exception-run-2",
+        "run_id": "privilege-msr-policy-run-2",
         "screenshot": {
           "bright_cyan_pixel_count": 44970,
           "byte_count": 3072016,
@@ -3875,8 +3428,8 @@
           "width": 1280
         },
         "serial_debugcon_exact_match": true,
-        "stderr_byte_count": 171,
-        "stderr_sha256": "77B388371031B1EA3DF403F6C7D62E13A015663C8E0B9036EEF1A4A393E8FD11",
+        "stderr_byte_count": 0,
+        "stderr_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
         "timestamped_qmp_events_excluded_from_equality": true,
         "transcript_binding": {
           "development_revalidation_profile_accepted": true,
@@ -3885,96 +3438,18 @@
         }
       }
     ],
-    "tcg_limitation_probe": {
-      "acceleration": "tcg_single_thread",
-      "cpu_model": "EPYC-Rome-v4,-avx,-avx2,-fma,-f16c,-pku",
-      "cr4_osxmmexcpt_set": true,
-      "debugcon_byte_count": 144955,
-      "debugcon_sha256": "83A68AEF5A19C4D4078463F6983A93969B47E722CEA1013EC8AB1D0DB6FC34A0",
-      "mxcsr_after_undelivered_divss": 7937,
-      "mxcsr_invalid_mask_clear": true,
-      "mxcsr_invalid_status_set": true,
-      "normalized_command": [
-        "$QEMU",
-        "-L",
-        "$QEMU_ROOT/share",
-        "-nodefaults",
-        "-no-user-config",
-        "-machine",
-        "pc-q35-11.0,smm=off,usb=off,vmport=off",
-        "-accel",
-        "tcg,thread=single",
-        "-cpu",
-        "EPYC-Rome-v4,-avx,-avx2,-fma,-f16c,-pku",
-        "-smp",
-        "1,sockets=1,dies=1,clusters=1,cores=1,threads=1,maxcpus=1",
-        "-m",
-        "512M",
-        "-rtc",
-        "base=utc,clock=vm,driftfix=none",
-        "-icount",
-        "shift=0,align=off,sleep=off",
-        "-global",
-        "ICH9-LPC.disable_s3=1",
-        "-global",
-        "ICH9-LPC.disable_s4=1",
-        "-drive",
-        "if=pflash,format=raw,unit=0,readonly=on,file=$QEMU_ROOT/share/edk2-x86_64-code.fd",
-        "-drive",
-        "if=pflash,format=raw,unit=1,file=$RUN_DIR/OVMF_VARS.fd",
-        "-drive",
-        "if=none,id=pooleos_media,format=raw,readonly=on,file=$MEDIA_READ_ONLY",
-        "-device",
-        "virtio-blk-pci-non-transitional,drive=pooleos_media",
-        "-chardev",
-        "file,id=poole_serial,path=$RUN_DIR/pooleos.serial.log,append=off",
-        "-serial",
-        "chardev:poole_serial",
-        "-debugcon",
-        "file:$RUN_DIR/pooleos.debugcon.log",
-        "-global",
-        "isa-debugcon.iobase=0x402",
-        "-device",
-        "isa-debug-exit,iobase=0xf4,iosize=0x04",
-        "-display",
-        "none",
-        "-monitor",
-        "none",
-        "-nic",
-        "none",
-        "-no-reboot",
-        "-boot",
-        "strict=on,menu=off",
-        "-d",
-        "guest_errors,unimp",
-        "-D",
-        "$RUN_DIR/qemu.trace.log",
-        "-device",
-        "VGA,id=poole_gop",
-        "-qmp",
-        "tcp:127.0.0.1:$QMP_PORT,server=on,wait=off"
-      ],
-      "normalized_command_sha256": "ACF6E3BD56B15D8D2D6C144E486B7FACB3DBFEAAA562B2E0213EE9FBE8BC9A75",
-      "panic_code": "0x100E",
-      "production_promotion_allowed": false,
-      "returned_recovery_count": 1,
-      "run_count": 1,
-      "source": "https://gitlab.com/qemu-project/qemu/-/issues/215",
-      "status": "pass_expected_tcg_non_delivery_fail_closed",
-      "vector_19_delivered": false
-    },
     "vars_template_sha256": "5D2AC383371B408398ACCEE7EC27C8C09EA5B74A0DE0CEEA6513388B15BE5D1E"
   },
   "inputs": {
     "contract": {
-      "byte_count": 7953,
-      "path": "specs/native-kernel-xstate-exception-contract.json",
-      "sha256": "224566BFEFF0710A14932C11835D9D8ABE0E0BDAC56D92AEDC054B4CFA6EB38F"
+      "byte_count": 9402,
+      "path": "specs/native-kernel-privilege-msr-policy-contract.json",
+      "sha256": "BA49ABFF059EB6A78AA97107B64AA7F812F75F5E33358DD50BA3EFC8B020E50A"
     },
     "contract_schema": {
-      "byte_count": 1756,
-      "path": "specs/native-kernel-xstate-exception-contract.schema.json",
-      "sha256": "B2A7BD916F9B98B720B0AB32C35154E3DDA740933F13FB4FE038EB12BA0DF3DF"
+      "byte_count": 1897,
+      "path": "specs/native-kernel-privilege-msr-policy-contract.schema.json",
+      "sha256": "11AF86F41E1195C783CF136EC2F31D9AC92A9706EE33E96E0057B3441E7FEAC1"
     },
     "implementation_inputs": [
       {
@@ -4013,14 +3488,14 @@
         "sha256": "23B2165489A63B0233AC26B206752D062EA9AB44CF885B70DD8711BA6C790982"
       },
       {
-        "byte_count": 12375,
-        "path": "native/kernel/src/xstate.rs",
-        "sha256": "B5BAD6DFFDFEB99FEB769DB6F227BA5F7B2C5131BE3AC3CB5B31EC377401DB78"
+        "byte_count": 10891,
+        "path": "native/kernel/src/privilege_msr.rs",
+        "sha256": "E968325A755937F504779F656DAF7B70B4D5B276DB6450BCB9AD51F026029C54"
       },
       {
-        "byte_count": 12933,
-        "path": "native/kernel/src/xstate_exception.rs",
-        "sha256": "AA11CF24DE84DE38C5303598DE450B103B36906ACFD51FD254730F8052B45813"
+        "byte_count": 20696,
+        "path": "runtime/native_kernel_privilege_msr_policy.py",
+        "sha256": "B4E05B65214D5C2844F0F12E83C027319E766B5D5509ED702650B0BBADCD9E10"
       },
       {
         "byte_count": 23961,
@@ -4028,51 +3503,36 @@
         "sha256": "7EC869AEFA9AA837E595FCD99B3D0D36C088165B4D2C31A5DDED8A7FCC124960"
       },
       {
-        "byte_count": 18592,
-        "path": "runtime/native_kernel_xstate_policy.py",
-        "sha256": "59A4A60E8810DCDB3BF04C51CC356611FC8F0BF4FB32651C3DF3156DA073823E"
+        "byte_count": 23300,
+        "path": "tools/qualify_native_kernel_privilege_msr_policy.py",
+        "sha256": "D9ACA01EBAC8CAB7B84688FE34771359A98E14BDB80C94ECC2210C0185D7AE90"
       },
       {
-        "byte_count": 22621,
-        "path": "runtime/native_kernel_xstate_exception.py",
-        "sha256": "7017E2BB740CCCF2E3F17C85C2B18CBB59C378A1A488C941E9747728CDE391FB"
+        "byte_count": 4705,
+        "path": "tests/test_native_kernel_privilege_msr_policy.py",
+        "sha256": "54630FE13FBEC77D2EA2D00B1AC7ECC33166285624709AA786197EA6636330CB"
       },
       {
-        "byte_count": 42138,
-        "path": "tools/qualify_native_pooleboot.py",
-        "sha256": "9CD90B19BCFBEF1BFB647193B4F82E287B4A321C624ABD6A313E263031F1E081"
+        "byte_count": 3190,
+        "path": "docs/native-kernel-privilege-msr-policy.md",
+        "sha256": "187A1D81CFA366DFDAC9A6BFD5055F3A7792E82E311F06D36CC2E507DD2DDF9B"
       },
       {
-        "byte_count": 20126,
-        "path": "tools/qualify_native_kernel_xstate_policy.py",
-        "sha256": "580E8ED590E2F802DC01515D8EECDA9C62EEB232E5D564FC10D7624F4046D8AB"
+        "byte_count": 21077,
+        "path": "runs/native_kernel_entry_readiness.json",
+        "sha256": "DC80FB186F0399E27893F997A84E036404F9C749D37C93E7DC27B3FED18D5483"
       },
       {
-        "byte_count": 38367,
-        "path": "tools/qualify_native_kernel_xstate_exception.py",
-        "sha256": "634C851786A696B87274D470CBAD492264EE6D473670618D71C3018ACD0A61C2"
+        "byte_count": 16443,
+        "path": "runs/native-kernel-revalidation-readiness.json",
+        "sha256": "852059CBEF2E8D50899A75A040D479685F1BECF23D1E7BE2DF587237E6ADDD08"
       },
       {
-        "byte_count": 7477,
-        "path": "tests/test_native_kernel_xstate_exception.py",
-        "sha256": "C7DD24055EDE3B13C3CCF918A844C247A35EC3FDC915EDB240B054AD20901071"
-      },
-      {
-        "byte_count": 4926,
-        "path": "docs/native-kernel-xstate-exception.md",
-        "sha256": "5E00FE85CCD6DA6227260B11014FBD015E9FED4C3A305430A1A2B84C625B5CC8"
+        "byte_count": 188102,
+        "path": "runs/native_kernel_load_readiness.json",
+        "sha256": "F66DD44B6EE42C7B4B85882069744F92D9A5BB1871E93B5F7B7AE2AD2A5EAF36"
       }
     ],
-    "parent_contract": {
-      "byte_count": 6350,
-      "path": "specs/native-kernel-xstate-policy-contract.json",
-      "sha256": "E0E4A2BE77F07632A4ACC01843177AB52C1C545E41DB3C6A415D1C34FE4CDA7F"
-    },
-    "readiness_schema": {
-      "byte_count": 1611,
-      "path": "specs/native-kernel-xstate-exception-readiness.schema.json",
-      "sha256": "21619D8D739BEF78D9944C727C0043DC278334344C5B16980AC2754DACE0F532"
-    },
     "tier0_lock": {
       "byte_count": 5641,
       "path": "specs/native-tier0-lock.json",
@@ -4239,7 +3699,7 @@
             "raw_offset": 153600,
             "raw_size": 52224,
             "virtual_address": 159744,
-            "virtual_size": 51788
+            "virtual_size": 51796
           },
           {
             "characteristics": 1073741888,
@@ -4258,7 +3718,7 @@
             "virtual_size": 748
           }
         ],
-        "sha256": "F187A2B6BC093E0008657456977A2EBA89C4D10635D865B17302F91592BCF0E7",
+        "sha256": "3DC67B1DA07B98473817D83D5EE3F92C763F9E3992CC6E59DC16E1E857183983",
         "subsystem": 10,
         "timestamp": 0
       },
@@ -4285,7 +3745,7 @@
           "byte_count": 207360,
           "cluster_count": 405,
           "path": "EFI/BOOT/BOOTX64.EFI",
-          "sha256": "F187A2B6BC093E0008657456977A2EBA89C4D10635D865B17302F91592BCF0E7"
+          "sha256": "3DC67B1DA07B98473817D83D5EE3F92C763F9E3992CC6E59DC16E1E857183983"
         },
         {
           "byte_count": 229,
@@ -4441,7 +3901,7 @@
         "protective_mbr_valid": true,
         "sector_bytes": 512,
         "sector_count": 131072,
-        "sha256": "6F8DFDB1B1674393B355D7701EC39F07F276F0AA02CDA1F6099ED24E54D68D5E"
+        "sha256": "8D3AA87F7221892652EAED477AA63D18F14C60233EB7EA7CFD90D67647F4BE6A"
       },
       "initial_system": {
         "activation_allowed": false,
@@ -4856,267 +4316,287 @@
     },
     "ordinary_workspace_file_only": true,
     "physical_media_write_performed": false,
-    "sha256": "6F8DFDB1B1674393B355D7701EC39F07F276F0AA02CDA1F6099ED24E54D68D5E"
+    "sha256": "8D3AA87F7221892652EAED477AA63D18F14C60233EB7EA7CFD90D67647F4BE6A"
   },
   "n7_exit_gate_satisfied": false,
   "negative_controls": [
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-MARKER-OMISSION",
+      "id": "NEG-N7-PKMSR-MARKER-OMISSION",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-MARKER-ORDER",
+      "id": "NEG-N7-PKMSR-MARKER-ORDER",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-MARKER-DUPLICATE",
+      "id": "NEG-N7-PKMSR-MARKER-DUPLICATE",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-SELECTOR",
+      "id": "NEG-N7-PKMSR-SELECTOR",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-CONTRACT",
+      "id": "NEG-N7-PKMSR-CONTRACT",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-PARENT",
+      "id": "NEG-N7-PKMSR-VENDOR",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-GATES",
+      "id": "NEG-N7-PKMSR-MAX-BASIC",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-VECTORS",
+      "id": "NEG-N7-PKMSR-MAX-EXTENDED",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-IST",
+      "id": "NEG-N7-PKMSR-MCE-FEATURE",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-XCR0",
+      "id": "NEG-N7-PKMSR-MCA-FEATURE",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-CR0",
+      "id": "NEG-N7-PKMSR-SYSCALL-FEATURE",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-CR4",
+      "id": "NEG-N7-PKMSR-RDTSCP-FEATURE",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-PARENT-WRITES",
+      "id": "NEG-N7-PKMSR-LONG-MODE-FEATURE",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-DEFAULT-MASKS",
+      "id": "NEG-N7-PKMSR-FEATURE-MARKER",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-SEQUENCE",
+      "id": "NEG-N7-PKMSR-ARCH-PMU",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-X87-FCW-ARM",
+      "id": "NEG-N7-PKMSR-AMD-PERFMON-V2",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-SIMD-MXCSR-ARM",
+      "id": "NEG-N7-PKMSR-CR4-PCE",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-NM-STRATEGY",
+      "id": "NEG-N7-PKMSR-EFER-REQUIRED",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-X87-VECTOR",
+      "id": "NEG-N7-PKMSR-EFER-SCE",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-X87-ERROR",
+      "id": "NEG-N7-PKMSR-EFER-RESERVED",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-X87-STATUS",
+      "id": "NEG-N7-PKMSR-STAR-ACTIVE",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-X87-RECOVERY",
+      "id": "NEG-N7-PKMSR-LSTAR-CANONICAL",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-X87-RETURN",
+      "id": "NEG-N7-PKMSR-SFMASK-ACTIVE",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-SIMD-VECTOR",
+      "id": "NEG-N7-PKMSR-FS-BASE-ACTIVE",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-SIMD-STATUS",
+      "id": "NEG-N7-PKMSR-GS-BASE-CANONICAL",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-SIMD-RECOVERY",
+      "id": "NEG-N7-PKMSR-TSC-AUX-ACTIVE",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-SIMD-RETURN",
+      "id": "NEG-N7-PKMSR-TSC-AUX-READ",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-NM-ARM",
+      "id": "NEG-N7-PKMSR-MCG-CAP-RESERVED",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-NM-VECTOR",
+      "id": "NEG-N7-PKMSR-MCG-BANK-COUNT",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-NM-INJECTION",
+      "id": "NEG-N7-PKMSR-MCG-STATUS-ACTIVE",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-NM-SAMPLING",
+      "id": "NEG-N7-PKMSR-MCG-STATUS-RESERVED",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-NM-RECOVERY",
+      "id": "NEG-N7-PKMSR-MCG-CTL-BANK",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-DELIVERY-COUNT",
+      "id": "NEG-N7-PKMSR-MCG-READ-COUNT",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-RECOVERY-COUNT",
+      "id": "NEG-N7-PKMSR-MCG-BANK-READ",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-WRITE-COUNT",
+      "id": "NEG-N7-PKMSR-PMU-MSR-READ",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-UNEXPECTED",
+      "id": "NEG-N7-PKMSR-RDPMC",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-AUTHORITY",
+      "id": "NEG-N7-PKMSR-RESULT-READ-COUNT",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-SCHEDULER-CLAIM",
+      "id": "NEG-N7-PKMSR-MSR-WRITE",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-SMP-CLAIM",
+      "id": "NEG-N7-PKMSR-CONTROL-WRITE",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-TARGET-CLAIM",
+      "id": "NEG-N7-PKMSR-SIGNATURE",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-SOURCE-AUDIT",
+      "id": "NEG-N7-PKMSR-AUTHORITY",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-MACHINE-CODE-AUDIT",
+      "id": "NEG-N7-PKMSR-ACTION",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N7-PKXEXC-LLVM-BINDING",
+      "id": "NEG-N7-PKMSR-INTERRUPT",
+      "status": "pass"
+    },
+    {
+      "expected": "rejected",
+      "id": "NEG-N7-PKMSR-SYSCALL-ACTIVE",
+      "status": "pass"
+    },
+    {
+      "expected": "rejected",
+      "id": "NEG-N7-PKMSR-MCE-HANDLER",
+      "status": "pass"
+    },
+    {
+      "expected": "rejected",
+      "id": "NEG-N7-PKMSR-PMU-OWNER",
+      "status": "pass"
+    },
+    {
+      "expected": "rejected",
+      "id": "NEG-N7-PKMSR-TERMINAL",
       "status": "pass"
     }
   ],
   "non_claims": [
-    "PKXEXC1 is a single-BSP QEMU development profile and does not qualify the Ryzen 7 9800X3D target.",
-    "The deliberate CR0.TS write and #NM are test-only proof injections; PooleKernel retains the eager strategy and does not implement lazy restore or #NM recovery.",
-    "The #MF and #XM handlers recover only the deliberately generated invalid-operation cases and do not yet establish a complete floating-point exception policy for user tasks.",
-    "The linked audit is bounded to the exact Cycle 123 linked image and its allowlisted xstate assembly scopes; it is not a general proof about future compiler versions or binaries.",
-    "No scheduler, thread lifecycle, user-mode fault delivery, SMP, AP initialization, CPU migration, AVX state, or target-hardware behavior is integrated or claimed.",
-    "No key, signature, capability grant, firmware mutation, physical-media write, release, production promotion, or public key publication is performed or claimed."
+    "PKMSR1 is a single-BSP qemu64 development observation and does not qualify the AMD Ryzen 7 9800X3D target or any physical machine.",
+    "Observed zero system-linkage values are not architectural reset guarantees; AMD documents several reset values as undefined.",
+    "No STAR, LSTAR, CSTAR, SFMASK, EFER.SCE, FS/GS base, TSC_AUX, MCA, PMU, control-register, or other privileged write occurs; TSC_AUX is also not read because RDTSCP is absent.",
+    "No SYSCALL, SYSRET, SWAPGS, RDTSCP, RDPMC, machine-check delivery, MCA bank walk, error clear, PMU event programming, interrupt enable, or ring transition is executed.",
+    "The qemu64-only MCG_CAP bit 24 and all-ones MCG_CTL observations are compatibility-profile facts, not AMD architectural semantics or target-hardware policy.",
+    "Global MCA inventory does not qualify product-specific bank meanings, retained crash recovery, recursive fault containment, or a machine-check handler.",
+    "The absent qemu64 PMU path proves only fail-closed unsupported behavior; it does not qualify Intel architectural PMU or AMD PerfMonV2 behavior.",
+    "No AP-local ownership, scheduler integration, user ABI, target firmware, second host, key, signature, capability, authority, physical-media effect, release, or production promotion is claimed."
   ],
   "open_items": [
-    "Define and qualify user-task floating-point exception delivery semantics.",
-    "Integrate bounded xstate image ownership with real thread lifecycle and scheduling.",
-    "Qualify AP initialization, SMP homogeneity, and CPU migration behavior.",
-    "Qualify AVX and every subsequently selected extended component.",
-    "Qualify the exact Ryzen 7 9800X3D target and complete the remaining N7 exit gate."
+    "Implement and qualify transactional syscall entry/return only after ring-3 ABI, per-CPU stack, selector, and fault-containment contracts freeze.",
+    "Bind exact target CPU product-specific MCA bank semantics and retained machine-check crash handling before any bank clear or handler activation.",
+    "Define and qualify Intel architectural PMU and AMD PerfMonV2 ownership on profiles that actually enumerate those facilities.",
+    "Extend privileged-MSR initialization and validation to every AP, CPU migration, suspend/resume, hotplug, and target hardware.",
+    "Close applicable target errata and numeric microcode-floor stop-ship gaps before N7 exit."
   ],
   "phase_status": {
-    "ADD-N7-XSTATE-001": "partial",
     "N7": "partial",
-    "N7.4": "partial"
+    "N7.3": "partial"
   },
   "production_promotion_allowed": false,
   "production_ready": false,
   "schema_version": "1.0",
-  "selected_move_id": "N7-XSTATE-EXCEPTION-001",
-  "status": "pass_single_host_two_run_bsp_x87_simd_exception_non_promoting",
-  "status_date": "2026-07-21",
+  "selected_move_id": "N7-PRIVILEGE-MSR-POLICY-001",
+  "status": "pass_single_host_two_run_qemu64_read_only_non_promoting",
+  "status_date": "2026-07-22",
   "summary": {
     "actions_authorized": 0,
     "authority_grants": 0,
-    "exception_deliveries": 3,
+    "control_writes": 0,
     "firmware_calls_after_exit": 0,
-    "machine_code_audit_passed": true,
-    "marker_count": 41,
-    "negative_controls_passed": 43,
-    "nm_rejections": 1,
-    "privileged_configuration_writes": 4,
+    "machine_check_bank_count": 10,
+    "machine_check_bank_reads": 0,
+    "marker_count": 35,
+    "msr_read_count": 11,
+    "msr_writes": 0,
+    "negative_controls_passed": 47,
+    "pmu_msr_reads": 0,
     "production_claim_count": 0,
     "qemu_run_count": 2,
-    "recovered_returns": 2,
-    "recovery_state_writes": 2,
-    "signature_verifications": 0,
-    "tcg_limitation_probe_count": 1
+    "signature_verifications": 0
   }
 }

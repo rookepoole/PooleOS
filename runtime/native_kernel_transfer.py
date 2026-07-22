@@ -27,7 +27,7 @@ MARKER_COUNT = 30
 BOOT_PREFIX_MARKER_COUNT = 23
 KERNEL_MARKER_COUNT = 5
 COMPLETION_MARKER = b"POOLEOS:KERNEL:TRANSFER-DENIED PASS"
-KERNEL_BUILD_ID = "PKBUILD1-CYCLE123-N7-XSTATE-EXCEPTION-001"
+KERNEL_BUILD_ID = "PKBUILD1-CYCLE124-N7-PRIVILEGE-MSR-POLICY-001"
 TRANSFER_BOUNDARY = (
     "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested "
     "selection=manifest_digest_untrusted artifacts=digest_verified_untrusted "
@@ -117,7 +117,7 @@ TRANSFER_ARM = re.compile(
     r"^POOLEBOOT/0\.1 TRANSFER_ARM PASS contract=(PKXFER1) mode=(development) "
     r"emulator_only=([01]) entry=([0-9A-F]{16}) handoff=([0-9A-F]{16}) "
     r"bytes=([0-9]+) stack_top=([0-9A-F]{16}) root=([0-9A-F]{16}) "
-    r"cr3=([0-9A-F]{16}) trap_scenario=([0-6]) signatures=([0-9]+) authority=([0-9]+) "
+    r"cr3=([0-9A-F]{16}) trap_scenario=([0-7]) signatures=([0-9]+) authority=([0-9]+) "
     r"actions=([0-9]+) writes=([0-9]+) firmware_calls_after_exit=([0-9]+)$"
 )
 KERNEL_ENTRY = re.compile(

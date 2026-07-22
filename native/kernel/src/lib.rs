@@ -12,6 +12,7 @@ use poole_handoff::{
     RECORD_LOADED_ARTIFACTS, validate_kernel_entry_profile,
 };
 
+pub mod privilege_msr;
 pub mod revalidation;
 pub mod xstate;
 pub mod xstate_exception;
@@ -20,8 +21,9 @@ pub const ENTRY_CONTRACT_ID: &str = "PKENTRY1";
 pub const TRANSFER_CONTRACT_ID: &str = "PKXFER1";
 pub const TRAP_CONTRACT_ID: &str = "PKTRAP1";
 pub const CPU_POLICY_CONTRACT_ID: &str = "PKCPU1";
+pub const PRIVILEGE_MSR_CONTRACT_ID: &str = privilege_msr::CONTRACT_ID;
 pub const XSTATE_EXCEPTION_CONTRACT_ID: &str = "PKXEXC1";
-pub const BUILD_ID: &[u8] = b"PKBUILD1-CYCLE123-N7-XSTATE-EXCEPTION-001";
+pub const BUILD_ID: &[u8] = b"PKBUILD1-CYCLE124-N7-PRIVILEGE-MSR-POLICY-001";
 pub const ENTRY_OFFSET: u64 = 0x8000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
 pub const HANDOFF_MAGIC_U64: u64 = u64::from_le_bytes(poole_handoff::MAGIC);
@@ -55,6 +57,7 @@ pub enum PanicCode {
     CpuPolicy = 0x100c,
     XstatePolicy = 0x100d,
     XstateException = 0x100e,
+    PrivilegeMsrPolicy = 0x100f,
     UnexpectedReturn = 0x10ff,
 }
 
@@ -68,6 +71,7 @@ pub enum DevelopmentTrapScenario {
     CpuPolicy = 4,
     XstatePolicy = 5,
     XstateException = 6,
+    PrivilegeMsrPolicy = 7,
 }
 
 impl DevelopmentTrapScenario {
@@ -80,6 +84,7 @@ impl DevelopmentTrapScenario {
             4 => Some(Self::CpuPolicy),
             5 => Some(Self::XstatePolicy),
             6 => Some(Self::XstateException),
+            7 => Some(Self::PrivilegeMsrPolicy),
             _ => None,
         }
     }
@@ -93,6 +98,7 @@ impl DevelopmentTrapScenario {
             Self::CpuPolicy => "cpu_policy",
             Self::XstatePolicy => "xstate_policy",
             Self::XstateException => "xstate_exception",
+            Self::PrivilegeMsrPolicy => "privilege_msr_policy",
         }
     }
 }
@@ -1616,7 +1622,11 @@ mod tests {
             DevelopmentTrapScenario::from_selector(6),
             Some(DevelopmentTrapScenario::XstateException)
         );
-        assert_eq!(DevelopmentTrapScenario::from_selector(7), None);
+        assert_eq!(
+            DevelopmentTrapScenario::from_selector(7),
+            Some(DevelopmentTrapScenario::PrivilegeMsrPolicy)
+        );
+        assert_eq!(DevelopmentTrapScenario::from_selector(8), None);
     }
 
     #[test]

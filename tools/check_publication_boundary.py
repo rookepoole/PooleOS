@@ -44,6 +44,7 @@ ALLOWED_RUNS = {
     "runs/native-kernel-errata-policy-readiness.json",
     "runs/native-kernel-xstate-policy-readiness.json",
     "runs/native-kernel-xstate-exception-readiness.json",
+    "runs/native-kernel-privilege-msr-policy-readiness.json",
     "runs/native_model_readiness.json",
     "runs/native_microcode_readiness.json",
     "runs/native_pooleboot_readiness.json",

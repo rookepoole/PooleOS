@@ -68,7 +68,7 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 174)
+        self.assertEqual(len(self.artifact["bound_sources"]), 183)
         bound_paths = {binding["path"] for binding in self.artifact["bound_sources"]}
         self.assertIn(
             "runs/adr_ratification_readiness.json",
@@ -125,6 +125,12 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertIn("runtime/native_kernel_xstate_exception.py", bound_paths)
         self.assertIn("tools/qualify_native_kernel_xstate_exception.py", bound_paths)
         self.assertIn("tests/test_native_kernel_xstate_exception.py", bound_paths)
+        self.assertIn("runs/native-kernel-privilege-msr-policy-readiness.json", bound_paths)
+        self.assertIn("specs/native-kernel-privilege-msr-policy-contract.json", bound_paths)
+        self.assertIn("native/kernel/src/privilege_msr.rs", bound_paths)
+        self.assertIn("runtime/native_kernel_privilege_msr_policy.py", bound_paths)
+        self.assertIn("tools/qualify_native_kernel_privilege_msr_policy.py", bound_paths)
+        self.assertIn("tests/test_native_kernel_privilege_msr_policy.py", bound_paths)
         self.assertIn("runs/native_system_manifest_readiness.json", bound_paths)
         self.assertIn("specs/native-boot-config-contract.json", bound_paths)
         self.assertIn("specs/native-boot-config-golden-vectors.json", bound_paths)

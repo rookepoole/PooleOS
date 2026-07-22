@@ -103,5 +103,6 @@ slice, while PKCPU1 separately proves the bounded qemu64 read-only CPU-policy
 slice. PKERR1 separately freezes a pure exact-target rejection policy while
 leaving direct errata and numeric microcode-floor authority open. PKXSTATE1 and
 PKXEXC1 separately prove bounded one-BSP x87/SSE ownership and exception
-delivery/recovery. The next owner-independent move is
-`N7-PRIVILEGE-MSR-POLICY-001` without target, scheduler, or SMP promotion.
+delivery/recovery, while PKMSR1 separately proves bounded read-only privileged-
+MSR policy observation. The next owner-independent move is `N9-PMM-001`
+without target, scheduler, SMP, or production promotion.

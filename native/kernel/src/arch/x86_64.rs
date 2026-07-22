@@ -10,6 +10,11 @@ use poolekernel::{
     CPU_MSR_PAT, CpuControlState, CpuDiscovery, CpuPolicySnapshot, DescriptorState, GDT_LIMIT,
     IDT_LIMIT, INSTALLED_EXCEPTION_GATE_COUNT, INSTALLED_XSTATE_EXCEPTION_GATE_COUNT,
     IST_STACK_BYTES, KERNEL_CODE_SELECTOR, KERNEL_DATA_SELECTOR, KERNEL_TSS_SELECTOR,
+    privilege_msr::{
+        PrivilegeMsrSnapshot, READ_CSTAR, READ_EFER, READ_FS_BASE, READ_GS_BASE,
+        READ_KERNEL_GS_BASE, READ_LSTAR, READ_MCG_CAP, READ_MCG_CTL, READ_MCG_STATUS, READ_SFMASK,
+        READ_STAR, READ_TSC_AUX,
+    },
     xstate::{
         AREA_BYTES, INITIAL_FCW, INITIAL_MXCSR, KernelSimdPolicy, SELECTED_XCR0, SaveFormat,
         SwitchStrategy, XstatePolicy, XstateProof, effective_mxcsr_mask,
@@ -141,6 +146,21 @@ const IA32_MTRR_CAP: u32 = 0x0000_00fe;
 const IA32_PAT: u32 = 0x0000_0277;
 const IA32_MTRR_DEF_TYPE: u32 = 0x0000_02ff;
 const IA32_EFER: u32 = 0xc000_0080;
+const IA32_MCG_CAP: u32 = 0x0000_0179;
+const IA32_MCG_STATUS: u32 = 0x0000_017a;
+const IA32_MCG_CTL: u32 = 0x0000_017b;
+const IA32_STAR: u32 = 0xc000_0081;
+const IA32_LSTAR: u32 = 0xc000_0082;
+const IA32_CSTAR: u32 = 0xc000_0083;
+const IA32_SFMASK: u32 = 0xc000_0084;
+const IA32_FS_BASE: u32 = 0xc000_0100;
+const IA32_GS_BASE: u32 = 0xc000_0101;
+const IA32_KERNEL_GS_BASE: u32 = 0xc000_0102;
+const IA32_TSC_AUX: u32 = 0xc000_0103;
+const LEAF1_EDX_MCE: u32 = 1 << 7;
+const LEAF1_EDX_MCA: u32 = 1 << 14;
+const EXT1_EDX_SYSCALL: u32 = 1 << 11;
+const EXT1_EDX_RDTSCP: u32 = 1 << 27;
 const LEAF1_EDX_APIC: u32 = 1 << 9;
 const LEAF1_EDX_MTRR: u32 = 1 << 12;
 const LEAF1_EDX_PAT: u32 = 1 << 16;
@@ -697,6 +717,117 @@ pub unsafe fn observe_cpu_policy() -> CpuPolicySnapshot {
             mtrr_def_type,
             msr_read_mask,
         },
+    }
+}
+
+pub unsafe fn observe_privilege_msr_policy() -> PrivilegeMsrSnapshot {
+    let basic = cpuid(0, 0);
+    let extended = cpuid(0x8000_0000, 0);
+    let leaf1 = cpuid(1, 0);
+    let ext1 = cpuid(0x8000_0001, 0);
+    let leaf_a = if basic.eax >= 0x0a {
+        cpuid(0x0a, 0)
+    } else {
+        CpuidRegisters {
+            eax: 0,
+            ebx: 0,
+            ecx: 0,
+            edx: 0,
+        }
+    };
+    let ext22 = if extended.eax >= 0x8000_0022 {
+        cpuid(0x8000_0022, 0)
+    } else {
+        CpuidRegisters {
+            eax: 0,
+            ebx: 0,
+            ecx: 0,
+            edx: 0,
+        }
+    };
+    let mut vendor = [0_u8; 12];
+    vendor[0..4].copy_from_slice(&basic.ebx.to_le_bytes());
+    vendor[4..8].copy_from_slice(&basic.edx.to_le_bytes());
+    vendor[8..12].copy_from_slice(&basic.ecx.to_le_bytes());
+
+    let syscall = ext1.edx & EXT1_EDX_SYSCALL != 0;
+    let rdtscp = ext1.edx & EXT1_EDX_RDTSCP != 0;
+    let machine_check =
+        leaf1.edx & (LEAF1_EDX_MCE | LEAF1_EDX_MCA) == LEAF1_EDX_MCE | LEAF1_EDX_MCA;
+    let mut msr_read_mask = READ_EFER;
+    // SAFETY: long mode requires EFER and this is a read-only observation.
+    let efer = unsafe { read_msr(IA32_EFER) };
+    let (star, lstar, cstar, sfmask) = if syscall {
+        msr_read_mask |= READ_STAR | READ_LSTAR | READ_CSTAR | READ_SFMASK;
+        // SAFETY: CPUID reports SYSCALL/SYSRET and therefore these linkage MSRs.
+        unsafe {
+            (
+                read_msr(IA32_STAR),
+                read_msr(IA32_LSTAR),
+                read_msr(IA32_CSTAR),
+                read_msr(IA32_SFMASK),
+            )
+        }
+    } else {
+        (0, 0, 0, 0)
+    };
+    msr_read_mask |= READ_FS_BASE | READ_GS_BASE | READ_KERNEL_GS_BASE;
+    // SAFETY: these system-software MSRs are defined in 64-bit mode.
+    let (fs_base, gs_base, kernel_gs_base) = unsafe {
+        (
+            read_msr(IA32_FS_BASE),
+            read_msr(IA32_GS_BASE),
+            read_msr(IA32_KERNEL_GS_BASE),
+        )
+    };
+    let tsc_aux = if rdtscp {
+        msr_read_mask |= READ_TSC_AUX;
+        // SAFETY: CPUID reports RDTSCP and therefore TSC_AUX.
+        unsafe { read_msr(IA32_TSC_AUX) }
+    } else {
+        0
+    };
+    let (mcg_cap, mcg_status, mcg_ctl) = if machine_check {
+        msr_read_mask |= READ_MCG_CAP | READ_MCG_STATUS;
+        // SAFETY: CPUID reports MCE and MCA; MCG_CAP and MCG_STATUS are present.
+        let cap = unsafe { read_msr(IA32_MCG_CAP) };
+        // SAFETY: CPUID reports the global MCA MSR set.
+        let status = unsafe { read_msr(IA32_MCG_STATUS) };
+        let control = if cap & (1 << 8) != 0 {
+            msr_read_mask |= READ_MCG_CTL;
+            // SAFETY: MCG_CAP.CTLP reports MCG_CTL as present.
+            unsafe { read_msr(IA32_MCG_CTL) }
+        } else {
+            0
+        };
+        (cap, status, control)
+    } else {
+        (0, 0, 0)
+    };
+
+    PrivilegeMsrSnapshot {
+        vendor,
+        max_basic_leaf: basic.eax,
+        max_extended_leaf: extended.eax,
+        leaf1_edx: leaf1.edx,
+        ext1_edx: ext1.edx,
+        leaf_a_eax: leaf_a.eax,
+        ext22_eax: ext22.eax,
+        // SAFETY: the profile runs at CPL0 and this read does not modify CR4.
+        cr4: unsafe { read_cr4() },
+        efer,
+        star,
+        lstar,
+        cstar,
+        sfmask,
+        fs_base,
+        gs_base,
+        kernel_gs_base,
+        tsc_aux,
+        mcg_cap,
+        mcg_status,
+        mcg_ctl,
+        msr_read_mask,
     }
 }
 
