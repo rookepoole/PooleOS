@@ -1,0 +1,499 @@
+{
+  "artifact_kind": "pooleos_native_kernel_errata_policy_readiness",
+  "build_qualification": {
+    "clippy_targets": 1,
+    "host_tests_passed": 6,
+    "host_tests_total": 6,
+    "no_std_targets": [
+      "x86_64-unknown-none",
+      "x86_64-unknown-uefi"
+    ],
+    "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+    "rustfmt_packages": 1,
+    "status": "pass"
+  },
+  "claims": {
+    "current_target_policy_denied": true,
+    "direct_product_firmware_floors_frozen": true,
+    "exact_target_identity_frozen": true,
+    "firmware_update_performed": false,
+    "mandatory_feature_rejection_implemented": true,
+    "microcode_update_performed": false,
+    "model44_errata_matrix_complete": false,
+    "n7_exit_gate_satisfied": false,
+    "native_privileged_revision_qualified": false,
+    "numeric_microcode_floor_complete": false,
+    "production_ready": false,
+    "rust_python_policy_agreement": true,
+    "target_cpu_qualified": false,
+    "windows_registry_microcode_observed": true,
+    "wrong_model_revision_guide_rejected": true
+  },
+  "contract_id": "PKERR1",
+  "cross_language_vectors": {
+    "case_count": 128,
+    "failure_bit_coverage": 10,
+    "mismatch_count": 0,
+    "outcome_sha256": "320104A55086C590855EDFB59C8661D2FB57BCB415CE87C28405F70BB9AF7DB6",
+    "satisfied_case_count": 14,
+    "status": "pass"
+  },
+  "current_policy_decision": {
+    "actions_authorized": 0,
+    "authority_grants": 0,
+    "decision": "deny",
+    "failure_codes": [
+      "board_lineage",
+      "bios_floor",
+      "agesa_floor",
+      "microcode_evidence",
+      "microcode_floor_source",
+      "errata_guide"
+    ],
+    "failure_mask": "0x000000FC",
+    "policy_satisfied": false,
+    "state_writes": 0
+  },
+  "inputs": {
+    "contract": {
+      "byte_count": 9989,
+      "path": "specs/native-kernel-errata-policy-contract.json",
+      "sha256": "643769C309BF713838E8DB9FD6ACC43C195D6D2F063046BD0CC0B902BC95DF0B"
+    },
+    "contract_schema": {
+      "byte_count": 2174,
+      "path": "specs/native-kernel-errata-policy-contract.schema.json",
+      "sha256": "EA762BC1329B0C420459DED7859EE0BA029C6D358AE75C90CF33DEF284DAB882"
+    },
+    "implementation_inputs": [
+      {
+        "byte_count": 601,
+        "path": "native/Cargo.toml",
+        "sha256": "210BCDAF2778606B42C688E7BACD950FC0EEF3045081E884CF7846B9A7D78DF4"
+      },
+      {
+        "byte_count": 4178,
+        "path": "native/Cargo.lock",
+        "sha256": "272CD0157659F8C2F2F7491DDB493A47E99FB8FFD1F431E2615D35B072FF50AF"
+      },
+      {
+        "byte_count": 297,
+        "path": "native/cpupolicy/Cargo.toml",
+        "sha256": "5D3FB9D6652B35A83F535373687F5DD10E6148F9B518F4243294735D1D67677B"
+      },
+      {
+        "byte_count": 9712,
+        "path": "native/cpupolicy/src/lib.rs",
+        "sha256": "7CE2B59A074626E17943C8C03C1E24C0EB377FE9692A328635DE9D34178099E9"
+      },
+      {
+        "byte_count": 3759,
+        "path": "native/cpupolicy/src/bin/pkerr1_probe.rs",
+        "sha256": "8F39F780EA72FEFC8F507B7A10AA639CBC5A279E6F0D4C5F47A1FB1D87603252"
+      },
+      {
+        "byte_count": 22422,
+        "path": "runtime/native_kernel_errata_policy.py",
+        "sha256": "30C8B88E420AAA2F7B96E52E238631D6EEDF27C9D6DBD4F1852FD0839929EADA"
+      },
+      {
+        "byte_count": 23766,
+        "path": "tools/qualify_native_kernel_errata_policy.py",
+        "sha256": "E4812161CC33769F215658201C492E85315CD2EF9C8E531BB18E8AD40B8064AB"
+      },
+      {
+        "byte_count": 5011,
+        "path": "tests/test_native_kernel_errata_policy.py",
+        "sha256": "BE45FE684235FA64DAEF4B06EA216B49BDEEC6520A21BC3C2C43EEE59D6F551C"
+      },
+      {
+        "byte_count": 3533,
+        "path": "docs/native-kernel-errata-policy.md",
+        "sha256": "42FE277C5285409BF3905618A2FA76AB897EA294BAC478FF8145F3A991B8AB96"
+      }
+    ],
+    "readiness_schema": {
+      "byte_count": 2013,
+      "path": "specs/native-kernel-errata-policy-readiness.schema.json",
+      "sha256": "2D70FF4F0C581408F4EA7029453D695AB43550362F1D0EB013B8089ECF715BE8"
+    }
+  },
+  "n7_exit_gate_satisfied": false,
+  "negative_controls": [
+    {
+      "expected": "deny",
+      "failure_codes": [
+        "identity"
+      ],
+      "failure_mask": "0x00000001",
+      "id": "NEG-N7-PKERR-IDENTITY",
+      "status": "pass"
+    },
+    {
+      "expected": "deny",
+      "failure_codes": [
+        "features"
+      ],
+      "failure_mask": "0x00000002",
+      "id": "NEG-N7-PKERR-FEATURE",
+      "status": "pass"
+    },
+    {
+      "expected": "deny",
+      "failure_codes": [
+        "board_lineage",
+        "bios_floor"
+      ],
+      "failure_mask": "0x0000000C",
+      "id": "NEG-N7-PKERR-BOARD-UNKNOWN",
+      "status": "pass"
+    },
+    {
+      "expected": "deny",
+      "failure_codes": [
+        "bios_floor"
+      ],
+      "failure_mask": "0x00000008",
+      "id": "NEG-N7-PKERR-BIOS-BELOW-FLOOR",
+      "status": "pass"
+    },
+    {
+      "expected": "deny",
+      "failure_codes": [
+        "bios_floor"
+      ],
+      "failure_mask": "0x00000008",
+      "id": "NEG-N7-PKERR-BIOS-PRERELEASE",
+      "status": "pass"
+    },
+    {
+      "expected": "deny",
+      "failure_codes": [
+        "agesa_floor"
+      ],
+      "failure_mask": "0x00000010",
+      "id": "NEG-N7-PKERR-AGESA-BELOW-SB7033",
+      "status": "pass"
+    },
+    {
+      "expected": "deny",
+      "failure_codes": [
+        "agesa_floor",
+        "rdseed_policy"
+      ],
+      "failure_mask": "0x00000110",
+      "id": "NEG-N7-PKERR-AGESA-BELOW-SB7055",
+      "status": "pass"
+    },
+    {
+      "expected": "deny",
+      "failure_codes": [
+        "microcode_evidence"
+      ],
+      "failure_mask": "0x00000020",
+      "id": "NEG-N7-PKERR-MICROCODE-ZERO",
+      "status": "pass"
+    },
+    {
+      "expected": "deny",
+      "failure_codes": [
+        "microcode_evidence"
+      ],
+      "failure_mask": "0x00000020",
+      "id": "NEG-N7-PKERR-MICROCODE-MIXED",
+      "status": "pass"
+    },
+    {
+      "expected": "deny",
+      "failure_codes": [
+        "microcode_evidence"
+      ],
+      "failure_mask": "0x00000020",
+      "id": "NEG-N7-PKERR-MICROCODE-UNTRUSTED",
+      "status": "pass"
+    },
+    {
+      "expected": "deny",
+      "failure_codes": [
+        "microcode_floor_source"
+      ],
+      "failure_mask": "0x00000040",
+      "id": "NEG-N7-PKERR-MICROCODE-FLOOR-MISSING",
+      "status": "pass"
+    },
+    {
+      "expected": "deny",
+      "failure_codes": [
+        "errata_guide"
+      ],
+      "failure_mask": "0x00000080",
+      "id": "NEG-N7-PKERR-ERRATA-GUIDE-MISSING",
+      "status": "pass"
+    },
+    {
+      "expected": "deny",
+      "failure_codes": [
+        "errata_guide"
+      ],
+      "failure_mask": "0x00000080",
+      "id": "NEG-N7-PKERR-ERRATA-GUIDE-WRONG-RANGE",
+      "status": "pass"
+    },
+    {
+      "expected": "deny",
+      "failure_codes": [
+        "rdseed_policy"
+      ],
+      "failure_mask": "0x00000100",
+      "id": "NEG-N7-PKERR-RDSEED-UNKNOWN",
+      "status": "pass"
+    },
+    {
+      "expected": "deny",
+      "failure_codes": [
+        "agesa_floor",
+        "rdseed_policy"
+      ],
+      "failure_mask": "0x00000110",
+      "id": "NEG-N7-PKERR-RDSEED-PATCH-STALE",
+      "status": "pass"
+    },
+    {
+      "expected": "deny",
+      "failure_codes": [
+        "source_applicability"
+      ],
+      "failure_mask": "0x00000200",
+      "id": "NEG-N7-PKERR-CROSS-SEGMENT-SOURCE",
+      "status": "pass"
+    },
+    {
+      "expected": "contract_rejected",
+      "id": "NEG-N7-PKERR-SOURCE-HASH",
+      "status": "pass"
+    },
+    {
+      "expected": "contract_rejected",
+      "id": "NEG-N7-PKERR-58251-APPLICABILITY",
+      "status": "pass"
+    },
+    {
+      "expected": "contract_rejected",
+      "id": "NEG-N7-PKERR-CURRENT-OVERCLAIM",
+      "status": "pass"
+    },
+    {
+      "expected": "contract_rejected",
+      "id": "NEG-N7-PKERR-NUMERIC-FLOOR-INVENTED",
+      "status": "pass"
+    },
+    {
+      "expected": "contract_rejected",
+      "id": "NEG-N7-PKERR-FIRMWARE-FLOOR-LOWERED",
+      "status": "pass"
+    },
+    {
+      "expected": "contract_rejected",
+      "id": "NEG-N7-PKERR-AUTHORITY-OVERCLAIM",
+      "status": "pass"
+    },
+    {
+      "expected": "contract_rejected",
+      "id": "NEG-N7-PKERR-ACTION-OVERCLAIM",
+      "status": "pass"
+    },
+    {
+      "expected": "contract_rejected",
+      "id": "NEG-N7-PKERR-PRODUCTION-OVERCLAIM",
+      "status": "pass"
+    }
+  ],
+  "non_claims": [
+    "PKERR1 freezes a policy and rejects the current evidence; it does not qualify the physical target.",
+    "The Windows registry revision is an unprivileged OS report, not direct per-processor MSR evidence and not an AMD-published security floor.",
+    "AMD document 58251 covers Family 1Ah Models 00h-0Fh and is prohibited as target errata evidence for Model 44h.",
+    "The public-source audit did not locate an applicable Family 1Ah Models 40h-4Fh revision guide or a client numeric microcode floor.",
+    "F32 and AGESA 1.2.0.2b are recorded observations only; no firmware download, flash, setting change, or reboot was performed.",
+    "Synthetic all-true vectors demonstrate evaluator reachability only and create no trust, authority, or hardware evidence.",
+    "No microcode payload is acquired, parsed, staged, authenticated, applied, or redistributed.",
+    "No key, signature, capability, privileged probe, driver, firmware mutation, physical-media write, release, or production promotion is claimed."
+  ],
+  "open_items": [
+    "Physically confirm the exact B650M GAMING PLUS WIFI board revision before selecting the F or FA firmware lineage.",
+    "Acquire and hash an applicable AMD Family 1Ah Models 40h-4Fh revision guide or retain a reviewed vendor-response gap.",
+    "Obtain a direct AMD numeric client microcode floor or ratify a replacement rule that does not invent one.",
+    "Hash the exact stable board firmware image selected after board-revision confirmation and complete supersession review.",
+    "Perform reviewed native per-processor read-only CPUID and MSR_PATCH_LEVEL observation on a separately safe target path.",
+    "Prove all processors are homogeneous and bind the result to the exact firmware, reset state, and target identity.",
+    "Integrate PKERR1 into PooleKernel before feature activation and application-processor online transitions.",
+    "Implement and test RDSEED masking or the reviewed 64-bit-only fallback until remediated firmware is qualified.",
+    "Complete the broader transient-execution, branch, return-stack, store-bypass, SMT, and control-flow matrix.",
+    "Obtain a cryptographically retained GIGABYTE support-page or exact firmware metadata snapshot.",
+    "Reproduce the policy and target evidence on a second clean builder and target-firmware boot.",
+    "Complete N7 and every signed-media, physical-hardware, release, and production gate."
+  ],
+  "phase_status": {
+    "N15.1": "partial",
+    "N7": "partial",
+    "N7.2": "partial"
+  },
+  "production_promotion_allowed": false,
+  "production_ready": false,
+  "schema_version": "1.0",
+  "selected_move_id": "N7-ERRATA-POLICY-001",
+  "source_audit": {
+    "cpu_or_firmware_writes": 0,
+    "forbidden_hits": [],
+    "forbidden_tokens": [
+      "unsafe",
+      "asm!",
+      "wrmsr",
+      "xsetbv",
+      "write_volatile",
+      "std::"
+    ],
+    "privileged_reads": 0,
+    "status": "pass_pure_policy_no_cpu_or_firmware_io"
+  },
+  "status": "pass_policy_denies_current_target",
+  "status_date": "2026-07-21",
+  "summary": {
+    "actions_authorized_count": 0,
+    "applicable_source_count": 5,
+    "authority_grant_count": 0,
+    "cpu_or_firmware_write_count": 0,
+    "cross_language_mismatch_count": 0,
+    "cross_language_vector_count": 128,
+    "current_failure_count": 6,
+    "negative_controls_passed": 24,
+    "negative_controls_total": 24,
+    "no_std_target_builds_passed": 2,
+    "no_std_target_builds_total": 2,
+    "privileged_read_count": 0,
+    "production_claim_count": 0,
+    "rust_host_tests_passed": 6,
+    "rust_host_tests_total": 6,
+    "source_register_count": 7
+  },
+  "synthetic_policy_decision": {
+    "actions_authorized": 0,
+    "authority_grants": 0,
+    "decision": "policy_satisfied_without_authority",
+    "failure_codes": [],
+    "failure_mask": "0x00000000",
+    "is_hardware_or_trust_evidence": false,
+    "policy_satisfied": true,
+    "state_writes": 0
+  },
+  "windows_registry_observation": {
+    "driver_loaded": false,
+    "identifier": "AMD64 Family 26 Model 68 Stepping 0",
+    "msr_reads": 0,
+    "normalized_revision": "0x0B404023",
+    "privileged_reads": 0,
+    "raw_registers_read": false,
+    "read_only": true,
+    "record_count": 16,
+    "records": [
+      {
+        "identifier": "AMD64 Family 26 Model 68 Stepping 0",
+        "normalized_revision": "0x0B404023",
+        "processor": 0,
+        "revision_bytes_little_endian": "2340400B"
+      },
+      {
+        "identifier": "AMD64 Family 26 Model 68 Stepping 0",
+        "normalized_revision": "0x0B404023",
+        "processor": 1,
+        "revision_bytes_little_endian": "2340400B"
+      },
+      {
+        "identifier": "AMD64 Family 26 Model 68 Stepping 0",
+        "normalized_revision": "0x0B404023",
+        "processor": 2,
+        "revision_bytes_little_endian": "2340400B"
+      },
+      {
+        "identifier": "AMD64 Family 26 Model 68 Stepping 0",
+        "normalized_revision": "0x0B404023",
+        "processor": 3,
+        "revision_bytes_little_endian": "2340400B"
+      },
+      {
+        "identifier": "AMD64 Family 26 Model 68 Stepping 0",
+        "normalized_revision": "0x0B404023",
+        "processor": 4,
+        "revision_bytes_little_endian": "2340400B"
+      },
+      {
+        "identifier": "AMD64 Family 26 Model 68 Stepping 0",
+        "normalized_revision": "0x0B404023",
+        "processor": 5,
+        "revision_bytes_little_endian": "2340400B"
+      },
+      {
+        "identifier": "AMD64 Family 26 Model 68 Stepping 0",
+        "normalized_revision": "0x0B404023",
+        "processor": 6,
+        "revision_bytes_little_endian": "2340400B"
+      },
+      {
+        "identifier": "AMD64 Family 26 Model 68 Stepping 0",
+        "normalized_revision": "0x0B404023",
+        "processor": 7,
+        "revision_bytes_little_endian": "2340400B"
+      },
+      {
+        "identifier": "AMD64 Family 26 Model 68 Stepping 0",
+        "normalized_revision": "0x0B404023",
+        "processor": 8,
+        "revision_bytes_little_endian": "2340400B"
+      },
+      {
+        "identifier": "AMD64 Family 26 Model 68 Stepping 0",
+        "normalized_revision": "0x0B404023",
+        "processor": 9,
+        "revision_bytes_little_endian": "2340400B"
+      },
+      {
+        "identifier": "AMD64 Family 26 Model 68 Stepping 0",
+        "normalized_revision": "0x0B404023",
+        "processor": 10,
+        "revision_bytes_little_endian": "2340400B"
+      },
+      {
+        "identifier": "AMD64 Family 26 Model 68 Stepping 0",
+        "normalized_revision": "0x0B404023",
+        "processor": 11,
+        "revision_bytes_little_endian": "2340400B"
+      },
+      {
+        "identifier": "AMD64 Family 26 Model 68 Stepping 0",
+        "normalized_revision": "0x0B404023",
+        "processor": 12,
+        "revision_bytes_little_endian": "2340400B"
+      },
+      {
+        "identifier": "AMD64 Family 26 Model 68 Stepping 0",
+        "normalized_revision": "0x0B404023",
+        "processor": 13,
+        "revision_bytes_little_endian": "2340400B"
+      },
+      {
+        "identifier": "AMD64 Family 26 Model 68 Stepping 0",
+        "normalized_revision": "0x0B404023",
+        "processor": 14,
+        "revision_bytes_little_endian": "2340400B"
+      },
+      {
+        "identifier": "AMD64 Family 26 Model 68 Stepping 0",
+        "normalized_revision": "0x0B404023",
+        "processor": 15,
+        "revision_bytes_little_endian": "2340400B"
+      }
+    ],
+    "status": "pass_read_only_unprivileged_os_report",
+    "unique_revision_count": 1,
+    "writes": 0
+  }
+}

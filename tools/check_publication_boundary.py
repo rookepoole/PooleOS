@@ -41,6 +41,7 @@ ALLOWED_RUNS = {
     "runs/native-kernel-transfer-readiness.json",
     "runs/native-kernel-trap-readiness.json",
     "runs/native-kernel-cpu-policy-readiness.json",
+    "runs/native-kernel-errata-policy-readiness.json",
     "runs/native_model_readiness.json",
     "runs/native_microcode_readiness.json",
     "runs/native_pooleboot_readiness.json",

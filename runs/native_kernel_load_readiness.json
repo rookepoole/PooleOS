@@ -40,7 +40,7 @@
     },
     "toolchain_qualification": {
       "path": "runs/native_toolchain_qualification.json",
-      "sha256": "C4CD60FCBC1586D6C87BEA1CC2783E108A84469E84D46519F9ADA96BAE1FD9FE",
+      "sha256": "19D3A8B62999EFC8F22074D24B7490411BBFB96392BD7627656EFAD76D74F3F8",
       "byte_count": 14423
     },
     "tier0_lock": {
@@ -65,7 +65,7 @@
     },
     "kernel_entry_readiness": {
       "path": "runs/native_kernel_entry_readiness.json",
-      "sha256": "9B71C574609E937B140EE1ADEBE9FE32D465BEF2D90F27720FBF61D408975832",
+      "sha256": "2E3C84BAEB47DCE0F218291D5095FE914A5D6CF39D7E237AED764D37B4EC9158",
       "byte_count": 21067
     },
     "system_manifest_contract": {
@@ -75,7 +75,7 @@
     },
     "system_manifest_readiness": {
       "path": "runs/native_system_manifest_readiness.json",
-      "sha256": "A3815AA0D692D7971DDD60EA6D532882E32BEA236711637525C72C4B592227AF",
+      "sha256": "DF407E1F36C42885818566A8A3814931F02B0F020463CF6762C2FAA72F7886A1",
       "byte_count": 24495
     },
     "digest_provider": {
@@ -90,7 +90,7 @@
     },
     "initial_system_readiness": {
       "path": "runs/native_initial_system_readiness.json",
-      "sha256": "D2B9103181158FB088ACF07BBADC817BED6953D4BB3492149D5F6668BC544A3B",
+      "sha256": "DA4EB9E1259833E4FCF9CE2795FD5A5056DB1938640B129248BF0C4DFE3E7BD5",
       "byte_count": 29828
     },
     "recovery_contract": {
@@ -100,7 +100,7 @@
     },
     "recovery_readiness": {
       "path": "runs/native_recovery_readiness.json",
-      "sha256": "3FC4CAE788435A81ADC429D7AC931DF6E36F11D6DB6CE41297FC88157AC7ACE0",
+      "sha256": "D019E5C8DC431718FD1D038588415A52839B2034173CE816CBA26900A0899550",
       "byte_count": 37731
     },
     "symbols_contract": {
@@ -110,59 +110,59 @@
     },
     "symbols_readiness": {
       "path": "runs/native_symbol_readiness.json",
-      "sha256": "D4ED2908399ED1D7735B7C83CD5976A81649E80EA37D8FC350FE6B8E753AC4ED",
+      "sha256": "F4B335E7F443706FC362DCD99BC778509CAB0BE9FD0BEF11CC3EFF2CABD2F4C9",
       "byte_count": 39630
     },
     "microcode_contract": {
       "path": "specs/native-microcode-contract.json",
-      "sha256": "6CAA7167E84C72CC5ABCDD3D329843B8AF5156C8C3EE1E7E5D201B6540A75BDE",
-      "byte_count": 5229
+      "sha256": "BAD7EB360EFFEC55B3E6DAAC65A7CA5093FEC175CE7424AD7136830B43C5A038",
+      "byte_count": 5083
     },
     "microcode_readiness": {
       "path": "runs/native_microcode_readiness.json",
-      "sha256": "78108753ACF9D3C4CE7222B4C3F026055DD28F8D4651D210FAA16EA663AA45AD",
+      "sha256": "DF0E6D9D82AC88E0DD18AD66AEEA1C067B8C0006C12916F8260C875AFAF7E954",
       "byte_count": 42514
     },
     "firmware_contract": {
       "path": "specs/native-firmware-contract.json",
-      "sha256": "D79BCAA8FCABC4B13CEE49DA1890B0730F0DF8ADB45DBCEBB645B46AD8D5D5D8",
+      "sha256": "764A68E81BD018F33D8C8A272684F43CCB4446E1811A30C4DBBBEE406826EFB2",
       "byte_count": 7613
     },
     "firmware_readiness": {
       "path": "runs/native_firmware_readiness.json",
-      "sha256": "58A9056402D75ACAC3C7D621686A934F864C4554671FF03D72C1C566A6B0EE73",
+      "sha256": "3FA806E52E9AFC9497541409016A7E88B9B477858C4BC871E6D0C092348C9DBE",
       "byte_count": 18880
     },
     "policy_contract": {
       "path": "specs/native-policy-contract.json",
-      "sha256": "D24B8513FA5121D8E0BE399E4E18B551D51C3508E440694C52CA6942A841F51A",
+      "sha256": "499D7B04FA8D15E31A6949A6017DF1A264B156A041BAD71B75F4C037F7194106",
       "byte_count": 7406
     },
     "policy_readiness": {
       "path": "runs/native_policy_readiness.json",
-      "sha256": "77287F98E57A240828B1C9DF4538712214600CE35B4BACCE5085C2E9B844EABC",
+      "sha256": "08F5863E098E1EC806FDFF510469AA600D7596B6CBE126425EAC3E984843AE20",
       "byte_count": 22539
     },
     "boot_trust_contract": {
       "path": "specs/native-boot-trust-contract.json",
-      "sha256": "ED28CF0DED14E650C5D0EFEA9B842EF3E9ADB5F6BA3760585C572F84C6E008AB",
+      "sha256": "0A59CE540E39902A76F2E839D105795F09B573D999E6953D91708D52DA88494C",
       "byte_count": 10828
     },
     "boot_trust_readiness": {
       "path": "runs/native_boot_trust_readiness.json",
-      "sha256": "01CA5133CD80D01019053A503B6E951A128139D4190667836BFA24E301D7A725",
+      "sha256": "3BF5F3F9A633EC1EAAE0A4CFC1EA7D565785A1F47E652104DB401EF492D1CC8D",
       "byte_count": 37688
     },
     "implementation_inputs": [
       {
         "path": "native/Cargo.toml",
-        "sha256": "1741AC8F565F5849F8C86D77BD16E06ED195E76D32FFA62492E1928B8FAA8C1E",
-        "byte_count": 586
+        "sha256": "210BCDAF2778606B42C688E7BACD950FC0EEF3045081E884CF7846B9A7D78DF4",
+        "byte_count": 601
       },
       {
         "path": "native/Cargo.lock",
-        "sha256": "0E88ED49107E751E33C56A9992F36AA16BAA7EDD3E4A1CC296CC1BB814A3B5B5",
-        "byte_count": 4121
+        "sha256": "272CD0157659F8C2F2F7491DDB493A47E99FB8FFD1F431E2615D35B072FF50AF",
+        "byte_count": 4178
       },
       {
         "path": "native/artifact/Cargo.toml",
@@ -486,8 +486,8 @@
       },
       {
         "path": "runtime/native_microcode.py",
-        "sha256": "8311DF70FB9CFC5D3832C0B1662CA258E91F14638333771A25F7194BC558EEA8",
-        "byte_count": 52599
+        "sha256": "089AE566AA73BD23C9A9E648AE6F221406EB49EB9D44EF672BAE119F5D887772",
+        "byte_count": 52453
       },
       {
         "path": "runtime/native_policy.py",
@@ -546,7 +546,7 @@
       },
       {
         "path": "specs/native-boot-trust-contract.json",
-        "sha256": "ED28CF0DED14E650C5D0EFEA9B842EF3E9ADB5F6BA3760585C572F84C6E008AB",
+        "sha256": "0A59CE540E39902A76F2E839D105795F09B573D999E6953D91708D52DA88494C",
         "byte_count": 10828
       },
       {
@@ -561,7 +561,7 @@
       },
       {
         "path": "runs/native_boot_trust_readiness.json",
-        "sha256": "01CA5133CD80D01019053A503B6E951A128139D4190667836BFA24E301D7A725",
+        "sha256": "3BF5F3F9A633EC1EAAE0A4CFC1EA7D565785A1F47E652104DB401EF492D1CC8D",
         "byte_count": 37688
       },
       {
@@ -601,7 +601,7 @@
       },
       {
         "path": "runs/native_initial_system_readiness.json",
-        "sha256": "D2B9103181158FB088ACF07BBADC817BED6953D4BB3492149D5F6668BC544A3B",
+        "sha256": "DA4EB9E1259833E4FCF9CE2795FD5A5056DB1938640B129248BF0C4DFE3E7BD5",
         "byte_count": 29828
       },
       {
@@ -646,7 +646,7 @@
       },
       {
         "path": "runs/native_recovery_readiness.json",
-        "sha256": "3FC4CAE788435A81ADC429D7AC931DF6E36F11D6DB6CE41297FC88157AC7ACE0",
+        "sha256": "D019E5C8DC431718FD1D038588415A52839B2034173CE816CBA26900A0899550",
         "byte_count": 37731
       },
       {
@@ -696,18 +696,18 @@
       },
       {
         "path": "runs/native_symbol_readiness.json",
-        "sha256": "D4ED2908399ED1D7735B7C83CD5976A81649E80EA37D8FC350FE6B8E753AC4ED",
+        "sha256": "F4B335E7F443706FC362DCD99BC778509CAB0BE9FD0BEF11CC3EFF2CABD2F4C9",
         "byte_count": 39630
       },
       {
         "path": "docs/native-microcode-bundle.md",
-        "sha256": "220A5D173386E093BB4E808090C739F9C6EE91E0017CA92B1F24BE47AF8EA0B4",
-        "byte_count": 7979
+        "sha256": "8E4041B28BF59AED5B7785E43189A680825021464BAA8F922068A289FF9B7030",
+        "byte_count": 8178
       },
       {
         "path": "specs/native-microcode-contract.json",
-        "sha256": "6CAA7167E84C72CC5ABCDD3D329843B8AF5156C8C3EE1E7E5D201B6540A75BDE",
-        "byte_count": 5229
+        "sha256": "BAD7EB360EFFEC55B3E6DAAC65A7CA5093FEC175CE7424AD7136830B43C5A038",
+        "byte_count": 5083
       },
       {
         "path": "specs/native-microcode-contract.schema.json",
@@ -746,7 +746,7 @@
       },
       {
         "path": "runs/native_microcode_readiness.json",
-        "sha256": "78108753ACF9D3C4CE7222B4C3F026055DD28F8D4651D210FAA16EA663AA45AD",
+        "sha256": "DF0E6D9D82AC88E0DD18AD66AEEA1C067B8C0006C12916F8260C875AFAF7E954",
         "byte_count": 42514
       },
       {
@@ -756,7 +756,7 @@
       },
       {
         "path": "specs/native-firmware-contract.json",
-        "sha256": "D79BCAA8FCABC4B13CEE49DA1890B0730F0DF8ADB45DBCEBB645B46AD8D5D5D8",
+        "sha256": "764A68E81BD018F33D8C8A272684F43CCB4446E1811A30C4DBBBEE406826EFB2",
         "byte_count": 7613
       },
       {
@@ -786,7 +786,7 @@
       },
       {
         "path": "runs/native_firmware_readiness.json",
-        "sha256": "58A9056402D75ACAC3C7D621686A934F864C4554671FF03D72C1C566A6B0EE73",
+        "sha256": "3FA806E52E9AFC9497541409016A7E88B9B477858C4BC871E6D0C092348C9DBE",
         "byte_count": 18880
       },
       {
@@ -796,7 +796,7 @@
       },
       {
         "path": "specs/native-policy-contract.json",
-        "sha256": "D24B8513FA5121D8E0BE399E4E18B551D51C3508E440694C52CA6942A841F51A",
+        "sha256": "499D7B04FA8D15E31A6949A6017DF1A264B156A041BAD71B75F4C037F7194106",
         "byte_count": 7406
       },
       {
@@ -841,7 +841,7 @@
       },
       {
         "path": "runs/native_policy_readiness.json",
-        "sha256": "77287F98E57A240828B1C9DF4538712214600CE35B4BACCE5085C2E9B844EABC",
+        "sha256": "08F5863E098E1EC806FDFF510469AA600D7596B6CBE126425EAC3E984843AE20",
         "byte_count": 22539
       },
       {

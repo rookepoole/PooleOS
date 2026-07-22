@@ -10,9 +10,9 @@
   "artifact_kind": "pooleos_native_microcode_readiness",
   "bindings": {
     "contract": {
-      "byte_count": 5229,
+      "byte_count": 5083,
       "path": "specs/native-microcode-contract.json",
-      "sha256": "6CAA7167E84C72CC5ABCDD3D329843B8AF5156C8C3EE1E7E5D201B6540A75BDE"
+      "sha256": "BAD7EB360EFFEC55B3E6DAAC65A7CA5093FEC175CE7424AD7136830B43C5A038"
     },
     "contract_schema": {
       "byte_count": 1937,
@@ -31,14 +31,14 @@
     },
     "implementation_inputs": [
       {
-        "byte_count": 586,
+        "byte_count": 601,
         "path": "native/Cargo.toml",
-        "sha256": "1741AC8F565F5849F8C86D77BD16E06ED195E76D32FFA62492E1928B8FAA8C1E"
+        "sha256": "210BCDAF2778606B42C688E7BACD950FC0EEF3045081E884CF7846B9A7D78DF4"
       },
       {
-        "byte_count": 4121,
+        "byte_count": 4178,
         "path": "native/Cargo.lock",
-        "sha256": "0E88ED49107E751E33C56A9992F36AA16BAA7EDD3E4A1CC296CC1BB814A3B5B5"
+        "sha256": "272CD0157659F8C2F2F7491DDB493A47E99FB8FFD1F431E2615D35B072FF50AF"
       },
       {
         "byte_count": 351,
@@ -56,9 +56,9 @@
         "sha256": "D4849E5849A09141C5E64921F66DED6083ADAEA5EBF77CA439C407C7DAC53C64"
       },
       {
-        "byte_count": 52599,
+        "byte_count": 52453,
         "path": "runtime/native_microcode.py",
-        "sha256": "8311DF70FB9CFC5D3832C0B1662CA258E91F14638333771A25F7194BC558EEA8"
+        "sha256": "089AE566AA73BD23C9A9E648AE6F221406EB49EB9D44EF672BAE119F5D887772"
       },
       {
         "byte_count": 8217,
@@ -81,9 +81,9 @@
         "sha256": "CF6EE8FAFE154D51AC54525CFDAD37BA72EEC789245487DC7FFE4C2C12DE2CAC"
       },
       {
-        "byte_count": 7979,
+        "byte_count": 8178,
         "path": "docs/native-microcode-bundle.md",
-        "sha256": "220A5D173386E093BB4E808090C739F9C6EE91E0017CA92B1F24BE47AF8EA0B4"
+        "sha256": "8E4041B28BF59AED5B7785E43189A680825021464BAA8F922068A289FF9B7030"
       }
     ],
     "readiness_schema": {

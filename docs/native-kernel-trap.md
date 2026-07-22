@@ -53,7 +53,7 @@ The public outputs are `runs/native-kernel-trap-readiness.json` and `runs/native
 ## Remaining N7 work
 
 - N7.1: PKCPU1 closes only a bounded qemu64 BSP CPUID/feature/topology/address-width observation; exact Tier 1 inventory and AP-local policy remain open.
-- N7.2: exact target CPU-family, microcode-revision, errata, mitigation, and rejection policy remains unstarted.
+- N7.2: PKERR1 freezes a pure exact-target policy and exact current denial; applicable Model 40h-4Fh errata authority, a direct numeric microcode floor or ratified replacement, native per-processor evidence, kernel integration, and target qualification remain open.
 - N7.3: PKCPU1 closes only a bounded read-only qemu64 CR0/CR4/EFER/XCR0/APIC/PAT/MTRR observation; target state plus syscall/GS/TSC_AUX/MCE/performance MSRs remain open.
 - N7.4: complete SIMD/FPU/XSAVE ownership, initialization, context switching, lazy/eager policy, and hostile-state evidence remains unstarted.
 - N7.5: per-CPU GDT/TSS/IDT, guarded RSP0/IST mappings, AP bring-up integration, generated assembly/Rust offsets, and user-transition frames.

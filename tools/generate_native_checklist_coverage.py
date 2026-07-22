@@ -71,6 +71,7 @@ PHASE_STATUS = {
     "N4": "partial",
     "N5": "partial",
     "N6": "partial",
+    "N7": "partial",
     "N15": "partial",
     "N31": "partial",
     "N32": "partial",
@@ -308,6 +309,17 @@ ADDED_REQUIREMENTS = [
         "basis": ["https://docs.amd.com/", "https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html"],
     },
     {
+        "id": "ADD-N7-ERRATA-SOURCE-001",
+        "phase_id": "N7",
+        "requirement": "Bind every target CPU erratum, mitigation, firmware floor, and microcode rule to an exact directly applicable vendor source range; reject cross-model revision guides, inferred numeric floors, unknown board lineages, stale supersession state, and OS-reported metadata as substitutes for qualified native evidence.",
+        "basis": [
+            "master checklist sections 020.1 and 020.2",
+            "https://www.amd.com/en/resources/product-security/bulletin/amd-sb-7033.html",
+            "https://www.amd.com/en/resources/product-security/bulletin/amd-sb-7055.html",
+            "Cycle 121 PKERR1 direct-product source-applicability audit",
+        ],
+    },
+    {
         "id": "ADD-DRIVER-001",
         "phase_id": "N16",
         "requirement": "Run nonessential drivers outside the kernel in capability-confined address spaces; bind MMIO, ports, IRQs, DMA domains, and device reset to revocable leases and prove supervisor restart without stale completion or cross-domain memory access.",
@@ -528,7 +540,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path, default=ROOT / SOURCE_RELATIVE)
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pooleos_native_checklist_coverage.json")
-    parser.add_argument("--status-date", default="2026-07-18")
+    parser.add_argument("--status-date", default="2026-07-21")
     args = parser.parse_args()
     artifact = build_coverage(args.source, args.status_date)
     args.out.parent.mkdir(parents=True, exist_ok=True)

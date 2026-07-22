@@ -105,6 +105,7 @@ SUBPHASE_OVERRIDES = {
     "N6.5": "partial",
     "N6.6": "partial",
     "N7.1": "partial",
+    "N7.2": "partial",
     "N7.3": "partial",
     "N7.5": "partial",
     "N7.6": "partial",
@@ -247,6 +248,9 @@ PHASE_EVIDENCE = {
         "specs/native-kernel-cpu-policy-contract.json and docs/native-kernel-cpu-policy.md: PKCPU1 freezes a bounded BSP-only, read-only QEMU policy for required CPUID leaves and features, CR0/CR4/EFER state, XCR0, APIC/PAT/MTRR MSRs, topology, address widths, and explicit no-write/no-authority boundaries",
         "native/kernel/src/arch/x86_64.rs, native/kernel/src/lib.rs, and native/kernel/src/main.rs: support-gated CPUID, control-register, XGETBV, and RDMSR observation plus allocation-free policy validation and an opt-in selector-4 terminal development profile",
         "runs/native-kernel-cpu-policy-readiness.json: 24/24 kernel host tests, 2 exact fresh-vars qemu64 QEMU/OVMF runs, 35 ordered markers, 41/41 hostile controls, exact Rust/Python agreement, AuthenticAMD family 15 model 107 stepping 1 observation, 5 MSR reads, zero MSR writes, and zero authority or actions",
+        "specs/native-kernel-errata-policy-contract.json and docs/native-kernel-errata-policy.md: PKERR1 freezes exact Ryzen 7 9800X3D identity, mandatory features, board-lineage-specific BIOS floors, AMD-SB-7033 and AMD-SB-7055 AGESA floors, RDSEED policy, source applicability, and explicit no-authority boundaries",
+        "native/cpupolicy and runtime/native_kernel_errata_policy.py: independent allocation-free no_std Rust and Python pure-policy evaluators with ten fail-closed reason bits and no privileged or mutating path",
+        "runs/native-kernel-errata-policy-readiness.json: 6/6 Rust tests, both no_std targets, 128 cross-language vectors, 24/24 hostile controls, seven exact source records, homogeneous 16-record read-only Windows metadata, and exact six-reason current denial with zero privileged reads, writes, authority, or actions",
     ],
     "N15": ["runs/microkernel_isolation.json", "runs/capability_trap_proof.json", "runs/capability_trap_fuzz.json"],
     "N31": ["existing signed receipt and benchmark methodology artifacts"],
@@ -260,8 +264,8 @@ PHASE_EVIDENCE = {
         "Cycle 92 N34 machine-language co-development plan with six ADD-PGL requirements and explicit drift, Core IR, and IP flags",
     ],
     "N35": ["bounded static capability and trap simulations; no native containment"],
-    "N36": ["Cycle 120 host baseline: 747 tests with one Windows symlink-permission skip", "native binary parser, reproduction, leakage, malformed, substitution, governance, hardware, Tier 0, bounded-model, deterministic boot-media, PBP1/PBC1/PSM1/PBART1, six inner-format, PBTRUST1/PBSTATE1, PKELF1, PKENTRY1, PKLOAD6/PBLIVE3/PKMAP2/PBEXIT1, PKREVAL1, PKXFER1, PKTRAP1, and PKCPU1 policy/marker/zero-write controls, PooleGlyph roadmap bindings, Doctor external-report nonmutation, and collector-smoke negatives"],
-    "N37": ["Cycle 120 consistency release gate: 87/87 checks over 82 artifacts", "content-addressed source, objectives and governance receipts, native toolchain, bounded hardware/Tier 0/model evidence, PBTRUST1/PBSTATE1, bounded PooleBoot, PBP1/PBC1/PSM1/PBART1 and six inner formats, PKELF1, PKENTRY1, PKLOAD6/PKMAP2/PBEXIT1, PKREVAL1, PKXFER1, PKTRAP1, PKCPU1, PooleGlyph planning artifacts, and retained historical consistency artifacts"],
+    "N36": ["Cycle 121 host baseline: 755 tests with one Windows symlink-permission skip", "native binary parser, reproduction, leakage, malformed, substitution, governance, hardware, Tier 0, bounded-model, deterministic boot-media, PBP1/PBC1/PSM1/PBART1, six inner-format, PBTRUST1/PBSTATE1, PKELF1, PKENTRY1, PKLOAD6/PBLIVE3/PKMAP2/PBEXIT1, PKREVAL1, PKXFER1, PKTRAP1, PKCPU1, and PKERR1 policy/source/zero-effect controls, PooleGlyph roadmap bindings, Doctor external-report nonmutation, and collector-smoke negatives"],
+    "N37": ["Cycle 121 consistency release gate: 88/88 checks over 83 artifacts", "content-addressed source, objectives and governance receipts, native toolchain, bounded hardware/Tier 0/model evidence, PBTRUST1/PBSTATE1, bounded PooleBoot, PBP1/PBC1/PSM1/PBART1 and six inner formats, PKELF1, PKENTRY1, PKLOAD6/PKMAP2/PBEXIT1, PKREVAL1, PKXFER1, PKTRAP1, PKCPU1, PKERR1, PooleGlyph planning artifacts, and retained historical consistency artifacts"],
 }
 
 
@@ -280,7 +284,7 @@ PHASE_GAPS = {
     "N4": ["A pinned one-host q35/QEMU/OVMF/VIRTIO profile, paused-instantiation evidence, bounded checks for all seven required boot-slot/capability/virtual-memory/IPC/scheduler/update/PooleFS domains, and two bounded PooleBoot guest runs exist, but current upstream source rebuilds, debug-exit/GDB/reset/fault evidence, remaining VIRTIO profiles, malformed-device campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open"],
     "N5": ["A reproducible unsigned PooleBoot, PBP1, PBC1, PSM1, PKELF1, PBART1, PINIT1, PREC1, PSYM1, PMCU1, PFWM1, PPOL1, PBTRUST1/PBSTATE1, PKMAP2, PBEXIT1, PKREVAL1, PKXFER1, and real PooleKernel path now loads and retains the exact six-artifact development profile plus exact PSM1/PBTP1/PBTS1 files and table/guarded-stack/handoff storage; reparses all six exact retained inner files in PooleBoot; cross-binds policy, routes, and trust candidates; binds final post-exit PBP1 bytes to the successful memory map; calls ExitBootServices; and proves zero later firmware calls. The ordinary build stops before transfer. A separate opt-in QEMU-only build installs retained CR3 and guarded RSP, clears IF/DF, transfers once into PooleKernel, independently reparses all nine retained files, reconstructs exact unsigned-policy denial, and halts with zero signatures, authority, actions, state writes, or firmware calls. Artifact authentication and authenticated rollback state, a real cryptographic monotonic writable provider, capability creation or activation, recovery execution, symbol consumption, policy application, real vendor-container validation and licensed payload intake, live FMP/ESRT/PLDM inventory, privileged per-processor revision observation, signature-backed trusted selection, initial-system execution, final framebuffer remap/revocation, live menu/rollback policy, a production transfer profile, second host, target firmware, physical media, and N5 exit remain open"],
     "N6": ["A reproducible real 64-page PooleKernel PKELF1 image, PKENTRY1 intake, allocation-free PKREVAL1 verifier, bounded diagnostics, an opt-in QEMU-only live transfer, and a BSP-only descriptor/exception development profile now exist on one host; authenticated boot trust, measured boot, production transfer, final framebuffer remap/revocation, complete per-CPU GDT/IDT/TSS state, retained crash paths, kernel runtime, target execution, and N6 exit remain open"],
-    "N7": ["PKTRAP1 proves only one BSP GDT/TSS/IDT instance, five present exception gates, two bounded but unguarded IST arrays, a uniform integer frame, three exact returning synchronous faults, terminal double-fault containment, and one semantic malformed-frame rejection in QEMU. PKCPU1 additionally proves a bounded qemu64 BSP read-only CPUID, required-feature, CR0/CR4/EFER, XCR0, APIC/PAT/MTRR, topology, and address-width policy with zero writes or authority. Target-family and errata policy, target-hardware evidence, microcode revision policy, x87/SSE/XSAVE ownership, AP-local CPU state, syscall/GS/TSC_AUX/MCE/performance MSRs, generated offset checks, AP-local descriptor state, guarded RSP0/IST mappings, all-vector coverage, user transitions, asynchronous context preservation, NMI/machine-check handling, recursion recovery, persistent crash evidence, and the N7 exit gate remain open"],
+    "N7": ["PKTRAP1 proves only one BSP descriptor/fault slice, and PKCPU1 proves only a bounded qemu64 BSP read-only CPU snapshot. PKERR1 now freezes the exact Ryzen 7 9800X3D identity, mandatory-feature, firmware-floor, RDSEED, microcode-evidence, source-applicability, and rejection policy, but correctly denies the current evidence for six reasons. Exact board revision, stable firmware-image hash, an applicable AMD Family 1Ah Models 40h-4Fh errata guide or reviewed vendor-response disposition, a direct numeric client microcode floor or ratified replacement rule, native per-processor privileged revision evidence, kernel integration, x87/SSE/XSAVE ownership, AP-local CPU state, syscall/GS/TSC_AUX/MCE/performance MSRs, complete descriptor/fault handling, target qualification, and the N7 exit gate remain open"],
     "N8": ["No native APIC/timer/SMP implementation exists"],
     "N9": ["No native allocator, paging, address-space, or reclaim implementation exists"],
     "N10": ["No native ACPI/AML/SMBIOS/PCIe resource graph exists"],
@@ -356,6 +360,9 @@ FLAGS = [
     ("FLAG-N6-FRAMEBUFFER-MAP-001", "REQUIRED", "N6", "Install and record the exact temporary framebuffer identity mapping, preserve effective cache policy, and replace and revoke that mapping before graphics capability delegation"),
     ("FLAG-N7-TRAP-001", "REQUIRED", "N7", "Qualify a bounded BSP-only GDT/TSS/IDT and uniform integer trap-entry slice with exact deliberate breakpoint, invalid-opcode, guard-page-fault, double-fault, and malformed-frame evidence while preserving all per-CPU, all-vector, asynchronous, guarded-stack, target-hardware, and production nonclaims"),
     ("FLAG-N7-CPU-POLICY-001", "REQUIRED", "N7", "Qualify a bounded BSP-only qemu64 read-only CPUID, required-feature, control-register, XCR0, and support-gated MSR observation policy with independent Rust/Python agreement, exact dual-channel QEMU evidence, zero writes, zero authority, and explicit target-family, errata, xstate-ownership, AP-local, target-hardware, and production nonclaims"),
+    ("FLAG-N7-ERRATA-POLICY-001", "REQUIRED", "N7", "Freeze and independently qualify a fail-closed exact-target CPU identity, mandatory-feature, board-lineage, BIOS, AGESA, microcode-evidence, errata-source-applicability, and RDSEED mitigation policy with zero privileged reads, writes, authority, or current-target promotion"),
+    ("FLAG-N7-ERRATA-SOURCE-001", "STOP_SHIP", "N7", "Acquire and cryptographically bind an AMD source directly applicable to Family 1Ah Models 40h-4Fh, or retain an explicit reviewed vendor-response disposition; never substitute revision guide 58251 or another model range"),
+    ("FLAG-N7-MICROCODE-FLOOR-001", "STOP_SHIP", "N7", "Obtain a direct AMD numeric client microcode security floor for the exact target or owner-ratify a reviewed replacement rule that does not infer a floor from OS metadata, unrelated products, firmware labels, or synthetic PMCU1 revisions"),
     ("FLAG-NATIVE-KERNEL-001", "STOP_SHIP", "N13", "Boot PooleKernel and enforce memory, capabilities, IPC, and ring-3 execution"),
     ("FLAG-NATIVE-IOMMU-001", "STOP_SHIP", "N11", "Confine all bus-mastering drivers with DMA and interrupt remapping"),
     ("FLAG-NATIVE-DRIVER-001", "STOP_SHIP", "N16", "Prove driver crash/reset/revocation without stale authority"),
@@ -392,7 +399,7 @@ PROGRAM_GAPS = [
     "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, bounded checks for all seven required boot-slot/capability/virtual-memory/IPC/scheduler/update/PooleFS domains detect their required hostile violations, and a bounded PooleBoot proof executes under pinned OVMF, but source-rebuilt current QEMU/EDK II, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open",
     "A reproducible unsigned PooleBoot proof application boots twice with deterministic twelve-file GPT/FAT32 media, exact GOP frames, retained PKMAP2 kernel/PSM1/six-artifact/PBTP1/PBTS1/table/guarded-stack/handoff storage, independently reconstructed ten-descriptor final PBLIVE3 bytes, bounded PBEXIT1 retry, successful ExitBootServices, and zero later firmware calls. The ordinary build stops before transfer; a separate opt-in QEMU-only PKXFER1 build installs retained CR3/RSP, transfers once, and live-executes PKREVAL1 over all nine retained files before an exact terminal unsigned-policy denial with zero signatures, authority, actions, writes, or firmware calls. PBSTATE1 still only models authenticated monotonic-anchor validation, deterministic redundant-copy selection, rollback/future rejection, repair/migration planning, and nine interrupted-transition recovery boundaries with no performed effects. Policy signature verification, authenticated revocation, a real cryptographic monotonic writable state provider, persistent backend I/O and executed repair/migration, Secure Boot-state verification, capability creation, activation or update application, policy application, recovery execution or symbol consumption, licensed real vendor payload intake and validation, live FMP/ESRT/PLDM inventory, privileged per-processor revision observation, initial-system execution, final framebuffer remap/revocation, production transfer, target-firmware and physical-media qualification, and N5 exit remain open",
     "A real reproducible 64-page PooleKernel image, PKENTRY1 intake, allocation-free PKREVAL1 verifier, bounded early diagnostics, opt-in QEMU-only live entry, and BSP-only PKTRAP1 descriptor/exception containment exist, but authenticated boot trust, measured boot, production transfer, complete per-CPU descriptor/exception state, retained crash evidence, kernel runtime, target execution, and N6/N7 exit remain open",
-    "No target-qualified complete native CPU policy, errata/microcode policy, xstate ownership, AP-local CPU state, interrupts, time, SMP, physical memory, virtual memory, or reclaim implementation; PKCPU1 is a bounded read-only qemu64 BSP observation slice only",
+    "PKERR1 freezes a pure exact-target CPU/errata rejection policy, but no target-qualified complete native CPU policy, applicable Model 40h-4Fh errata authority, direct numeric client microcode floor or ratified replacement, xstate ownership, AP-local CPU state, interrupts, time, SMP, physical memory, virtual memory, or reclaim implementation exists; PKCPU1 remains a bounded qemu64 observation and PKERR1 performs no privileged reads or effects",
     "The exact Tier 1 identity passes 24/24 required checks and 16 allowlisted user-mode CPUID records are captured with zero public raw registers, but seven required channels remain non-complete in total, including partial CPU/MSR and SPD/topology; 15 standards hashes, ten lab-safety prerequisites, native parsing, and physical qualification also remain open",
     "No native DMA/IOMMU/interrupt-remapping confinement",
     "No native scheduler, task, syscall, capability, IPC, isolation, async I/O, or quota implementation",
@@ -933,6 +940,25 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                     "runs/native-kernel-cpu-policy-readiness.json",
                 ]
             )
+        if flag_id in {
+            "FLAG-N7-ERRATA-POLICY-001",
+            "FLAG-N7-ERRATA-SOURCE-001",
+            "FLAG-N7-MICROCODE-FLOOR-001",
+        }:
+            evidence.extend(
+                [
+                    "specs/native-kernel-errata-policy-contract.json",
+                    "specs/native-kernel-errata-policy-contract.schema.json",
+                    "specs/native-kernel-errata-policy-readiness.schema.json",
+                    "native/cpupolicy/src/lib.rs",
+                    "native/cpupolicy/src/bin/pkerr1_probe.rs",
+                    "runtime/native_kernel_errata_policy.py",
+                    "tools/qualify_native_kernel_errata_policy.py",
+                    "tests/test_native_kernel_errata_policy.py",
+                    "docs/native-kernel-errata-policy.md",
+                    "runs/native-kernel-errata-policy-readiness.json",
+                ]
+            )
         if flag_id == "FLAG-N6-BOOT-DIGEST-001":
             evidence.extend(
                 [
@@ -949,7 +975,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 "class": flag_class,
                 "status": "closed"
                 if flag_class == "SUPERSEDED"
-                or flag_id in {"FLAG-N0-RATIFICATION-SCOPE-001", "FLAG-N2-CPUID-001", "FLAG-N4-PROFILE-001", "FLAG-N4-IPC-MODEL-001", "FLAG-N4-SCHEDULER-MODEL-001", "FLAG-N4-POOLEFS-MODEL-001", "FLAG-N5-POOLEBOOT-PROOF-001", "FLAG-N5-BOOTPROTO-001", "FLAG-N5-BOOTCFG-001", "FLAG-N5-ELF-001", "FLAG-N5-KLOAD-001", "FLAG-N5-MANIFEST-001", "FLAG-N5-PBP1-LIVE-001", "FLAG-N5-KMAP-001", "FLAG-N5-HANDOFF-EXIT-001", "FLAG-N5-INIT-SYSTEM-001", "FLAG-N5-INIT-BUNDLE-001", "FLAG-N5-RECOVERY-BUNDLE-001", "FLAG-N5-SYMBOL-BUNDLE-001", "FLAG-N5-MICROCODE-BUNDLE-001", "FLAG-N5-FIRMWARE-BUNDLE-001", "FLAG-N5-POLICY-BUNDLE-001", "FLAG-N5-INIT-SEMANTICS-001", "FLAG-N5-INNER-PARSE-001", "FLAG-N5-INNER-TRUST-CONTRACT-001", "FLAG-N5-INNER-TRUST-BACKEND-MODEL-001", "FLAG-N5-INNER-KERNEL-REVALIDATE-001", "FLAG-N5-KERNEL-TRANSFER-001", "FLAG-N6-KENTRY-001", "FLAG-N7-TRAP-001", "FLAG-N7-CPU-POLICY-001"}
+                or flag_id in {"FLAG-N0-RATIFICATION-SCOPE-001", "FLAG-N2-CPUID-001", "FLAG-N4-PROFILE-001", "FLAG-N4-IPC-MODEL-001", "FLAG-N4-SCHEDULER-MODEL-001", "FLAG-N4-POOLEFS-MODEL-001", "FLAG-N5-POOLEBOOT-PROOF-001", "FLAG-N5-BOOTPROTO-001", "FLAG-N5-BOOTCFG-001", "FLAG-N5-ELF-001", "FLAG-N5-KLOAD-001", "FLAG-N5-MANIFEST-001", "FLAG-N5-PBP1-LIVE-001", "FLAG-N5-KMAP-001", "FLAG-N5-HANDOFF-EXIT-001", "FLAG-N5-INIT-SYSTEM-001", "FLAG-N5-INIT-BUNDLE-001", "FLAG-N5-RECOVERY-BUNDLE-001", "FLAG-N5-SYMBOL-BUNDLE-001", "FLAG-N5-MICROCODE-BUNDLE-001", "FLAG-N5-FIRMWARE-BUNDLE-001", "FLAG-N5-POLICY-BUNDLE-001", "FLAG-N5-INIT-SEMANTICS-001", "FLAG-N5-INNER-PARSE-001", "FLAG-N5-INNER-TRUST-CONTRACT-001", "FLAG-N5-INNER-TRUST-BACKEND-MODEL-001", "FLAG-N5-INNER-KERNEL-REVALIDATE-001", "FLAG-N5-KERNEL-TRANSFER-001", "FLAG-N6-KENTRY-001", "FLAG-N7-TRAP-001", "FLAG-N7-CPU-POLICY-001", "FLAG-N7-ERRATA-POLICY-001"}
                 else "open",
                 "phase_id": phase_id,
                 "closure_condition": closure,
@@ -987,10 +1013,10 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "inspect_live_pooleglyph_each_turn": True,
             "verify_master_checklist_coverage_each_turn": True,
             "new_work_must_be_flagged": True,
-            "last_updated_cycle": 120,
-            "selected_move_id": "N7-CPU-POLICY-001",
+            "last_updated_cycle": 121,
+            "selected_move_id": "N7-ERRATA-POLICY-001",
             "immediate_next_move_id": "N0-HW-KEY-ACQUIRE-001",
-            "owner_independent_next_move_id": "N7-ERRATA-POLICY-001",
+            "owner_independent_next_move_id": "N7-XSTATE-POLICY-001",
             "required_records": [
                 "docs/production-goal-charter.md",
                 "docs/pdc-production-build-plan.md",
@@ -1014,6 +1040,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 "runs/native-kernel-transfer-readiness.json",
                 "runs/native-kernel-trap-readiness.json",
                 "runs/native-kernel-cpu-policy-readiness.json",
+                "runs/native-kernel-errata-policy-readiness.json",
                 "runs/native_initial_system_readiness.json",
                 "runs/native_recovery_readiness.json",
                 "runs/native_symbol_readiness.json",
@@ -1042,7 +1069,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "added_requirement_count": len(coverage["added_requirements"]),
         },
         "baseline": {
-            "pooleos_cycle": 120,
+            "pooleos_cycle": 121,
             "entry_cycle": 79,
             "pooleos_test_count": test_count,
             "historical_consistency_release_gate": {
@@ -1054,9 +1081,9 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 "native_promotion_role": "historical_non_promoting",
             },
             "native_consistency_release_gate": {
-                "passed_checks": 87,
-                "total_checks": 87,
-                "artifact_count": 82,
+                "passed_checks": 88,
+                "total_checks": 88,
+                "artifact_count": 83,
                 "explicit_gap_count": len(PROGRAM_GAPS),
                 "production_ready": False,
                 "native_promotion_role": "planning_and_evidence_consistency_non_promoting",
@@ -1132,6 +1159,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "The Cycle 118 N5-KERNEL-TRANSFER-001 receipt preserves the ordinary PooleBoot stop-before-transfer path and adds only an opt-in QEMU-only development-transfer feature. Two exact PooleKernel builds, two exact feature-enabled PooleBoot builds, one default isolation build, two exact media generations, and two fresh-vars QEMU/OVMF runs agree on 30 ordered markers and exact serial/debugcon/PBP1 bytes. PooleBoot installs retained CR3 and guarded RSP, clears IF/DF, and transfers once; PooleKernel validates runtime state and independently executes PKREVAL1 over all nine retained files before an exact terminal unsigned denial. Fifty-eight hostile controls pass, and signatures, authority grants, actions, state writes, and post-exit firmware calls remain zero. This does not prove an authenticated production entry, persistent trust state, capabilities, target firmware, physical media, N5/N6 exit, or production readiness.",
             "The Cycle 119 N7-TRAP-001 receipt adds three mutually exclusive opt-in QEMU-only PKTRAP1 profiles after PKXFER1. Six fresh-vars runs prove one BSP GDT/TSS/IDT setup with five present gates, distinct bounded IST1/IST2 arrays, a normalized 176-byte integer frame, returning #BP/#UD/guard-page #PF handling, terminal processor-delivered #DF containment, and explicit semantic malformed-frame rejection across 51 hostile controls. It does not prove per-CPU tables, guarded IST mappings, all-vector or asynchronous context coverage, NMI, machine check, user transitions, persistent crash recovery, target firmware, physical hardware, N7 exit, or production readiness.",
             "The Cycle 120 N7-CPU-POLICY-001 receipt adds one mutually exclusive opt-in QEMU-only PKCPU1 profile after PKXFER1. Two fresh-vars qemu64 runs prove a support-gated BSP read-only snapshot and validation of CPUID identity/features/topology/address widths, CR0/CR4/EFER, XCR0, and APIC/PAT/MTRR MSRs across 35 markers and 41 hostile controls with exact Rust/Python agreement, five MSR reads, zero MSR writes, zero authority, and zero actions. It does not prove the Tier 1 target family, errata or microcode-revision policy, x87/SSE/XSAVE ownership, AP-local policy, syscall/GS/TSC_AUX/MCE/performance MSRs, target firmware, physical hardware, N7 exit, or production readiness.",
+            "The Cycle 121 N7-ERRATA-POLICY-001 receipt freezes PKERR1 as a pure exact-target policy for CPUID signature 0x00B40F40, nine mandatory features, board-lineage-specific stable BIOS floors, AMD-SB-7033 and AMD-SB-7055 AGESA floors, RDSEED handling, homogeneous microcode evidence, and direct-source applicability. Independent no_std Rust and Python evaluators agree across 128 vectors and 24 hostile controls. The current evidence is denied for six exact reasons with zero privileged reads, writes, authority, or actions. AMD revision guide 58251 is explicitly rejected because it covers Models 00h-0Fh, while the required Model 40h-4Fh guide and a direct numeric client microcode floor remain stop-ship gaps. Windows registry revision 0x0B404023 is OS-reported metadata only. No firmware was downloaded or changed, no microcode was applied, and no target, N7-exit, release, or production claim follows.",
             "Sixteen allowlisted user-mode CPUID records prove only a bounded host observation; they do not prove MSR access, privileged probes, native parsing, driver safety, or Tier 1 qualification.",
             "Owner-directed acceptance of thirty-eight objective definitions while binding zero measurements is not a cryptographic signature or implementation evidence.",
             "PooleGlyph Phase 65 proves a metadata, parser, AST, and diagnostic foundation only; no source form, Core IR, PGASM, PGB2, PGVM2, host call, policy, optimization, or version label is promoted without its own frozen contract and evidence gate.",
@@ -1145,7 +1173,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=747)
+    parser.add_argument("--test-count", type=int, default=755)
     parser.add_argument("--status-date", default="2026-07-21")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)
