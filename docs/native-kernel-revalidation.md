@@ -104,5 +104,6 @@ slice. PKERR1 separately freezes a pure exact-target rejection policy while
 leaving direct errata and numeric microcode-floor authority open. PKXSTATE1 and
 PKXEXC1 separately prove bounded one-BSP x87/SSE ownership and exception
 delivery/recovery, while PKMSR1 separately proves bounded read-only privileged-
-MSR policy observation. The next owner-independent move is `N9-PMM-001`
+MSR policy observation. Cycle 125 separately closes the bounded PKPMM1
+physical-page foundation. The next owner-independent move is `N9-VM-001`
 without target, scheduler, SMP, or production promotion.

@@ -153,16 +153,16 @@ halts permanently at `STOP BEFORE TRANSFER`.
 
 ## Qualified Evidence
 
-The Cycle 124-refreshed default-path receipt records:
+The Cycle 125-refreshed default-path receipt records:
 
-- 134/134 Rust host tests across PooleBoot, PBART1, the six-format retained-set
+- 139/139 Rust host tests across PooleBoot, PBART1, the six-format retained-set
   validator, PBTRUST1, PBC1/PSM1/PKELF1/PBP1, PKMAP2, PBEXIT1, and PKENTRY1;
 - two byte-identical PooleBoot builds, PooleKernel builds, and GPT/FAT32 media
   generations;
 - two fresh-vars, read-only-media, network-disabled QEMU/OVMF boots;
 - 25 identical ordered serial/debugcon markers;
 - exact static GOP frames;
-- exact 5,008-byte post-exit PBP1 reconstruction with 96 memory entries and
+- exact 5,048-byte post-exit PBP1 reconstruction with 97 memory entries and
   ten artifact descriptors;
 - six PBART1 files totaling 8,761 bytes and six retained pages, independently
   cross-bound to PSM1, guest markers, and final PBP1;
@@ -191,10 +191,11 @@ The Cycle 124-refreshed default-path receipt records:
   default-deny authority intersection, safe/recovery floors, firmware
   physical-presence separation, durable receipt rules, and mandatory
   development activation denial;
-- an exact 11,952-byte nine-file retained set with SHA-256
-  `1F2BE74362DEE662AE5E7E9B711EA2060DD659E74548421528637D1904DE9D05`, nine
-  target parsers, manifest/inner/trust cross-bindings, exact unsigned-policy
-  denial, and zero authority/action/state/hardware effects;
+- an exact six-file PBART1 retained set totaling 8,761 bytes with SHA-256
+  `2A80BA31090B247D7CE28FFCCCB1BBD936B4544E8052888EA8D992C51F4F91AE`,
+  plus exact retained PSM1, PBTP1, and PBTS1 files, nine target parsers,
+  manifest/inner/trust cross-bindings, exact unsigned-policy denial, and zero
+  authority/action/state/hardware effects;
 - 155/155 integrated negative controls, including exact retained PSM1/PBTP1/
   PBTS1 descriptor size and digest substitution plus PINIT1, PREC1, PSYM1, PMCU1,
   PFWM1, and PPOL1 inner
@@ -235,9 +236,12 @@ Cycle 120 closes the bounded qemu64 read-only PKCPU1 slice, and Cycle 121
 closes only the pure PKERR1 exact-target policy boundary while retaining direct
 errata and numeric microcode-floor stop-ship gaps. Cycles 122 and 123 separately
 close the bounded PKXSTATE1 ownership and PKXEXC1 exception-delivery slices,
-and Cycle 124 closes only the read-only PKMSR1 privileged-MSR policy slice.
-The next chronological owner-independent move is `N9-PMM-001` without
-target, scheduler, SMP, or production promotion.
+Cycle 124 closes only the read-only PKMSR1 privileged-MSR policy slice. Cycle
+125 separately closes the bounded selector-8 PKPMM1 physical-page ownership and
+allocator foundation after expanding the shared guarded stack to fourteen
+pages. The next chronological owner-independent move is `N9-VM-001` for the
+virtual-layout and page-table mutation boundary, without target, scheduler,
+SMP, reclaim, or production promotion.
 Capability creation, lifecycle execution, signature trust, authenticated
 persistent state, production transfer, and physical-target qualification remain
 separately gated by N5/N6 and owner-controlled N0 work.

@@ -164,7 +164,7 @@
       "properties": {
         "contract": {"const": "PKMAP2"},
         "private_table_page_count": {"const": 4},
-        "guarded_stack_page_count": {"const": 8},
+        "guarded_stack_page_count": {"const": 14},
         "guard_page_count": {"const": 2},
         "read_only_handoff_page_count": {"const": 256},
         "candidate_tables_retained_through_exit": {"const": true},

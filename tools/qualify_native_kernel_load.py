@@ -1231,7 +1231,7 @@ def _negative_controls(
         ("NEG-N5-KLOAD-TRUST-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, trust_oracle, pbp1_transcript))),
         ("NEG-N5-KLOAD-MARKER-MAPPING-COUNT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 17, "mappings=4", "mappings=3")))),
         ("NEG-N5-KLOAD-MARKER-WX", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 17, "wx=0", "wx=1")))),
-        ("NEG-N5-KLOAD-MARKER-RETAIN-COUNT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 19, "stack_pages=8", "stack_pages=7")))),
+        ("NEG-N5-KLOAD-MARKER-RETAIN-COUNT", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 19, "stack_pages=14", "stack_pages=13")))),
         ("NEG-N5-KLOAD-MARKER-BOUNDARY", _rejected(lambda: native_kernel_load.validate_markers(_replace_marker(markers, 23, "selection=manifest_digest_untrusted", "selection=trusted")))),
         ("NEG-N5-KLOAD-CONFIG-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, config_oracle, pbp1_transcript))),
         ("NEG-N5-KLOAD-MANIFEST-ORACLE-DIVERGENCE", _rejected(lambda: native_kernel_load.validate_oracle_binding(marker_summary, manifest_oracle, pbp1_transcript))),

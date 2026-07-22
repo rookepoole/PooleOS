@@ -193,7 +193,7 @@ The receipt proves, on the pinned profile:
 - complete higher-half kernel alias verification with W^X, CR0.WP, and NX;
 - framebuffer translation and cache-bit preservation during the active audit;
 - retention of kernel, six profile artifacts, PSM1, PBTP1, and PBTS1 ranges,
-  four table pages, an eight-page guarded stack, and a one-MiB read-only/NX
+  four table pages, a fourteen-page guarded stack, and a one-MiB read-only/NX
   handoff range;
 - a final-map-bound post-exit development PBP1 reconstructed identically from
   both diagnostics transports;

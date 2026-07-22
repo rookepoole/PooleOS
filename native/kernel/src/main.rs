@@ -16,6 +16,7 @@ use poolekernel::{
     EarlyLogger, EarlyRing, Framebuffer, PanicCode, PanicDisposition, PanicState,
     TRANSFER_CONTRACT_ID, TRAP_CONTRACT_ID, TrapDisposition, TrapError, TrapExpectation,
     TrapObservation, XSTATE_EXCEPTION_CONTRACT_ID, decode_cpu_identity,
+    physical_memory::{Zone, run_profile as run_physical_memory_profile},
     privilege_msr::{machine_check_bank_count, machine_check_ctl_present, validate_snapshot},
     revalidation, validate_cpu_policy_snapshot, validate_descriptor_state,
     validate_development_handoff, validate_entry_envelope, validate_handoff,
@@ -145,6 +146,127 @@ pkmsr_fragment!(
     b" msr_writes=0 control_writes=0 signatures=0 authority=0 actions=0 interrupts=0 syscall_active=0 mce_handler=0 pmu_owner=0 terminal=halt\n"
 );
 
+macro_rules! pkpmm_fragment {
+    ($name:ident, $value:literal) => {
+        #[used]
+        #[unsafe(link_section = ".text.pkpmm_literals")]
+        static $name: [u8; $value.len()] = *$value;
+    };
+}
+
+pkpmm_fragment!(
+    PKPMM_DENIED,
+    b"POOLEOS:KERNEL:PMM-DENIED contract=PKPMM1 reason="
+);
+pkpmm_fragment!(
+    PKPMM_DENIED_TAIL,
+    b" physical_writes=0 mappings=0 reclaim=0 authority=0 actions=0 terminal=panic\n"
+);
+pkpmm_fragment!(
+    PKPMM_EARLY,
+    b"POOLEOS:KERNEL:PMM-EARLY PASS contract=PKPMM1 selector=8 stack=validated_by_wrapper serial=initialized\n"
+);
+pkpmm_fragment!(
+    PKPMM_STAGE,
+    b"POOLEOS:KERNEL:PMM-STAGE PASS contract=PKPMM1 stage="
+);
+pkpmm_fragment!(
+    PKPMM_MAP,
+    b"POOLEOS:KERNEL:PMM-MAP PASS contract=PKPMM1 entries="
+);
+pkpmm_fragment!(PKPMM_USABLE, b" usable_pages=");
+pkpmm_fragment!(PKPMM_BOOT_RECLAIMABLE, b" boot_reclaimable_pages=");
+pkpmm_fragment!(PKPMM_LOADER_RESERVED, b" loader_reserved_pages=");
+pkpmm_fragment!(PKPMM_NULL_GUARD, b" null_guard_pages=");
+pkpmm_fragment!(
+    PKPMM_ZONES,
+    b"\nPOOLEOS:KERNEL:PMM-ZONES PASS contract=PKPMM1 dma_source="
+);
+pkpmm_fragment!(PKPMM_DMA_MANAGED, b" dma_managed=");
+pkpmm_fragment!(PKPMM_DMA32_SOURCE, b" dma32_source=");
+pkpmm_fragment!(PKPMM_DMA32_MANAGED, b" dma32_managed=");
+pkpmm_fragment!(PKPMM_NORMAL_SOURCE, b" normal_source=");
+pkpmm_fragment!(PKPMM_NORMAL_MANAGED, b" normal_managed=");
+pkpmm_fragment!(PKPMM_EXTENTS, b" extents=");
+pkpmm_fragment!(PKPMM_LARGEST_DMA, b" largest_dma=");
+pkpmm_fragment!(PKPMM_LARGEST_DMA32, b" largest_dma32=");
+pkpmm_fragment!(PKPMM_LARGEST_NORMAL, b" largest_normal=");
+pkpmm_fragment!(
+    PKPMM_OWNERSHIP,
+    b"\nPOOLEOS:KERNEL:PMM-OWNERSHIP PASS contract=PKPMM1 kernel_base="
+);
+pkpmm_fragment!(PKPMM_KERNEL_PAGES, b" kernel_pages=");
+pkpmm_fragment!(PKPMM_HANDOFF_BASE, b" handoff_base=");
+pkpmm_fragment!(PKPMM_HANDOFF_PAGES, b" handoff_pages=");
+pkpmm_fragment!(PKPMM_ROOT, b" root=");
+pkpmm_fragment!(PKPMM_PROTECTED, b" protected=1\n");
+pkpmm_fragment!(PKPMM_EXERCISE_DENIED, b"POOLEOS:KERNEL:PMM-DENIED contract=PKPMM1 reason=exercise_invariant physical_writes=0 mappings=0 reclaim=0 authority=0 actions=0 terminal=panic\n");
+pkpmm_fragment!(
+    PKPMM_EXERCISE,
+    b"POOLEOS:KERNEL:PMM-EXERCISE PASS contract=PKPMM1 allocations="
+);
+pkpmm_fragment!(PKPMM_FREES, b" frees=");
+pkpmm_fragment!(PKPMM_DMA_START, b" dma_start=");
+pkpmm_fragment!(PKPMM_DMA32_START, b" dma32_start=");
+pkpmm_fragment!(PKPMM_DOUBLE_FREE, b" double_free_rejected=");
+pkpmm_fragment!(PKPMM_QUOTA, b" quota_rejected=");
+pkpmm_fragment!(PKPMM_UNAVAILABLE, b" unavailable_rejected=");
+pkpmm_fragment!(PKPMM_METADATA_POISON, b" metadata_poison=");
+pkpmm_fragment!(PKPMM_COALESCES, b" coalesces=");
+pkpmm_fragment!(
+    PKPMM_RESULT,
+    b"\nPOOLEOS:KERNEL:PMM-RESULT PASS contract=PKPMM1 profile=qemu64_tier0 managed_pages="
+);
+pkpmm_fragment!(PKPMM_RESULT_TAIL, b" allocated_pages=0 physical_writes=0 mappings=0 reclaim=0 concurrency=0 signatures=0 authority=0 actions=0 terminal=halt\n");
+
+macro_rules! pkentry_fragment {
+    ($name:ident, $value:literal) => {
+        #[used]
+        #[unsafe(link_section = ".text.pkentry_literals")]
+        static $name: [u8; $value.len()] = *$value;
+    };
+}
+
+pkentry_fragment!(PKENTRY_ENTRY, b"POOLEOS:KERNEL:ENTRY PASS contract=");
+pkentry_fragment!(PKENTRY_TRANSFER, b" transfer_contract=");
+pkentry_fragment!(PKENTRY_BUILD, b" build=");
+pkentry_fragment!(PKENTRY_COUNT, b" entry_count=");
+pkentry_fragment!(PKENTRY_SERIAL, b" serial=");
+pkentry_fragment!(PKENTRY_PRESENT, b"present");
+pkentry_fragment!(PKENTRY_ABSENT, b"absent");
+pkentry_fragment!(PKENTRY_STATE, b"\nPOOLEOS:KERNEL:STATE PASS handoff=");
+pkentry_fragment!(PKENTRY_BYTES, b" bytes=");
+pkentry_fragment!(PKENTRY_RUNTIME, b" entry=");
+pkentry_fragment!(PKENTRY_STACK, b" stack_top=");
+pkentry_fragment!(PKENTRY_ROOT, b" root=");
+pkentry_fragment!(PKENTRY_CR3, b" cr3=");
+pkentry_fragment!(PKENTRY_RFLAGS, b" rflags_if=0 rflags_df=0\n");
+pkentry_fragment!(
+    PKENTRY_PBP1,
+    b"POOLEOS:KERNEL:PBP1 PASS profile=development records="
+);
+pkentry_fragment!(PKENTRY_ARTIFACTS, b" artifacts=");
+pkentry_fragment!(PKENTRY_PROFILE, b" production_profile_valid=0\n");
+pkentry_fragment!(
+    PKENTRY_REVALIDATION,
+    b"POOLEOS:KERNEL:PKREVAL PASS contract="
+);
+pkentry_fragment!(PKENTRY_FILES, b" files=");
+pkentry_fragment!(PKENTRY_PARSERS, b" parsers=");
+pkentry_fragment!(PKENTRY_MANIFEST_BYTES, b" manifest_bytes=");
+pkentry_fragment!(PKENTRY_RETAINED_BYTES, b" retained_bytes=");
+pkentry_fragment!(PKENTRY_RETAINED_SHA, b" retained_set_sha256=");
+pkentry_fragment!(PKENTRY_POLICY_SHA, b" policy_sha256=");
+pkentry_fragment!(PKENTRY_STATE_SHA, b" state_sha256=");
+pkentry_fragment!(PKENTRY_DENIAL, b" denial=");
+pkentry_fragment!(PKENTRY_AUTHORITY, b" authority=");
+pkentry_fragment!(PKENTRY_ACTIONS, b" actions=");
+pkentry_fragment!(PKENTRY_WRITES, b" writes=");
+pkentry_fragment!(PKENTRY_NEWLINE, b"\n");
+pkentry_fragment!(PKENTRY_FRAMEBUFFER, b"POOLEOS KERNEL ENTRY\nBUILD ");
+pkentry_fragment!(PKENTRY_FRAMEBUFFER_TAIL, b"\nPBP1 VALID\n");
+pkentry_fragment!(PKENTRY_TRANSFER_DENIED, b"POOLEOS:KERNEL:TRANSFER-DENIED PASS contract=PKXFER1 terminal=halt entry_count=1 post_exit_firmware_calls=0 signatures=0 authority=0 actions=0 writes=0\n");
+
 #[used]
 #[unsafe(link_section = ".text.pkcpu_literals")]
 static CPU_STATE_JOIN: [u8;
@@ -240,6 +362,18 @@ impl ByteSink for BootSink<'_> {
     }
 }
 
+#[inline(never)]
+fn log_physical_memory_stage(serial: &mut Com1, debugcon: &mut DebugCon, stage: u64) {
+    let mut logger = EarlyLogger::new(BootSink {
+        serial,
+        debugcon,
+        ring: &EARLY_RING,
+    });
+    logger.write_bytes(&PKPMM_STAGE);
+    logger.write_decimal_u64(stage);
+    logger.write_bytes(&PKENTRY_NEWLINE);
+}
+
 #[panic_handler]
 fn panic(_info: &PanicInfo<'_>) -> ! {
     poole_kernel_emergency_panic(PanicCode::RustPanic as u32)
@@ -263,6 +397,7 @@ extern "C" fn poole_kernel_emergency_panic(code: u32) -> ! {
         0x100d => PanicCode::XstatePolicy,
         0x100e => PanicCode::XstateException,
         0x100f => PanicCode::PrivilegeMsrPolicy,
+        0x1010 => PanicCode::PhysicalMemory,
         _ => PanicCode::UnexpectedReturn,
     };
     let disposition = PANIC_STATE.begin(code);
@@ -307,8 +442,20 @@ extern "C" fn poole_kernel_rust_entry(
     let serial_available = serial.available();
     let mut debugcon = DebugCon::new();
 
+    if trap_scenario == DevelopmentTrapScenario::PhysicalMemory {
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        logger.write_bytes(&PKPMM_EARLY);
+    }
+
     if let Err(error) = validate_entry_envelope(handoff_address, handoff_length, magic, stack_top) {
         poole_kernel_emergency_panic(error.panic_code() as u32);
+    }
+    if trap_scenario == DevelopmentTrapScenario::PhysicalMemory {
+        log_physical_memory_stage(&mut serial, &mut debugcon, 1);
     }
 
     // SAFETY: the envelope passed canonical range, overflow, alignment, and size checks;
@@ -326,6 +473,9 @@ extern "C" fn poole_kernel_rust_entry(
         }
         Err(error) => poole_kernel_emergency_panic(error.panic_code() as u32),
     };
+    if trap_scenario == DevelopmentTrapScenario::PhysicalMemory {
+        log_physical_memory_stage(&mut serial, &mut debugcon, 2);
+    }
     if let Err(error) = validate_runtime_state(
         &validated,
         handoff_address as u64,
@@ -336,6 +486,9 @@ extern "C" fn poole_kernel_rust_entry(
     ) {
         poole_kernel_emergency_panic(error.panic_code() as u32);
     }
+    if trap_scenario == DevelopmentTrapScenario::PhysicalMemory {
+        log_physical_memory_stage(&mut serial, &mut debugcon, 3);
+    }
     let decoded = match poole_handoff::decode(handoff) {
         Ok(value) => value,
         Err(_) => poole_kernel_emergency_panic(PanicCode::HandoffDecode as u32),
@@ -344,12 +497,18 @@ extern "C" fn poole_kernel_rust_entry(
         Some(value) => value,
         None => poole_kernel_emergency_panic(PanicCode::HandoffProfile as u32),
     };
+    if trap_scenario == DevelopmentTrapScenario::PhysicalMemory {
+        log_physical_memory_stage(&mut serial, &mut debugcon, 4);
+    }
     // SAFETY: PKENTRY1 requires every PBP1 retained-input range to remain
     // immutable and identity-mapped until this independent revalidation ends.
     let revalidated = match unsafe { revalidation::revalidate_development_from_handoff(handoff) } {
         Ok(value) => value,
         Err(_) => poole_kernel_emergency_panic(PanicCode::TrustRevalidation as u32),
     };
+    if trap_scenario == DevelopmentTrapScenario::PhysicalMemory {
+        log_physical_memory_stage(&mut serial, &mut debugcon, 5);
+    }
 
     {
         let mut logger = EarlyLogger::new(BootSink {
@@ -357,65 +516,65 @@ extern "C" fn poole_kernel_rust_entry(
             debugcon: &mut debugcon,
             ring: &EARLY_RING,
         });
-        logger.write_str("POOLEOS:KERNEL:ENTRY PASS contract=");
+        logger.write_bytes(&PKENTRY_ENTRY);
         logger.write_str(poolekernel::ENTRY_CONTRACT_ID);
-        logger.write_str(" transfer_contract=");
+        logger.write_bytes(&PKENTRY_TRANSFER);
         logger.write_str(TRANSFER_CONTRACT_ID);
-        logger.write_str(" build=");
+        logger.write_bytes(&PKENTRY_BUILD);
         logger.write_bytes(BUILD_ID);
-        logger.write_str(" entry_count=");
+        logger.write_bytes(&PKENTRY_COUNT);
         logger.write_decimal_u64(u64::from(entry_count));
-        logger.write_str(" serial=");
-        logger.write_str(if serial_available {
-            "present"
+        logger.write_bytes(&PKENTRY_SERIAL);
+        logger.write_bytes(if serial_available {
+            &PKENTRY_PRESENT
         } else {
-            "absent"
+            &PKENTRY_ABSENT
         });
-        logger.write_str("\nPOOLEOS:KERNEL:STATE PASS handoff=");
+        logger.write_bytes(&PKENTRY_STATE);
         logger.write_hex_u64(handoff_address as u64);
-        logger.write_str(" bytes=");
+        logger.write_bytes(&PKENTRY_BYTES);
         logger.write_decimal_u64(handoff_length as u64);
-        logger.write_str(" entry=");
+        logger.write_bytes(&PKENTRY_RUNTIME);
         logger.write_hex_u64(runtime_entry);
-        logger.write_str(" stack_top=");
+        logger.write_bytes(&PKENTRY_STACK);
         logger.write_hex_u64(stack_top as u64);
-        logger.write_str(" root=");
+        logger.write_bytes(&PKENTRY_ROOT);
         logger.write_hex_u64(validated.core.page_table_root_physical);
-        logger.write_str(" cr3=");
+        logger.write_bytes(&PKENTRY_CR3);
         logger.write_hex_u64(observed_cr3);
-        logger.write_str(" rflags_if=0 rflags_df=0\n");
-        logger.write_str("POOLEOS:KERNEL:PBP1 PASS profile=development records=");
+        logger.write_bytes(&PKENTRY_RFLAGS);
+        logger.write_bytes(&PKENTRY_PBP1);
         logger.write_decimal_u64(decoded.header().record_count as u64);
-        logger.write_str(" artifacts=");
+        logger.write_bytes(&PKENTRY_ARTIFACTS);
         logger.write_decimal_u64(loaded_artifacts.descriptor.element_count as u64);
-        logger.write_str(" production_profile_valid=0\n");
-        logger.write_str("POOLEOS:KERNEL:PKREVAL PASS contract=");
+        logger.write_bytes(&PKENTRY_PROFILE);
+        logger.write_bytes(&PKENTRY_REVALIDATION);
         logger.write_str(revalidation::CONTRACT_ID);
-        logger.write_str(" files=");
+        logger.write_bytes(&PKENTRY_FILES);
         logger.write_decimal_u64(u64::from(revalidated.retained_file_count));
-        logger.write_str(" artifacts=");
+        logger.write_bytes(&PKENTRY_ARTIFACTS);
         logger.write_decimal_u64(u64::from(revalidated.artifact_count));
-        logger.write_str(" parsers=");
+        logger.write_bytes(&PKENTRY_PARSERS);
         logger.write_decimal_u64(u64::from(revalidated.parser_count));
-        logger.write_str(" manifest_bytes=");
+        logger.write_bytes(&PKENTRY_MANIFEST_BYTES);
         logger.write_decimal_u64(u64::from(revalidated.manifest_bytes));
-        logger.write_str(" retained_bytes=");
+        logger.write_bytes(&PKENTRY_RETAINED_BYTES);
         logger.write_decimal_u64(u64::from(revalidated.retained_file_bytes));
-        logger.write_str(" retained_set_sha256=");
+        logger.write_bytes(&PKENTRY_RETAINED_SHA);
         logger.write_hex_bytes(&revalidated.retained_set_sha256);
-        logger.write_str(" policy_sha256=");
+        logger.write_bytes(&PKENTRY_POLICY_SHA);
         logger.write_hex_bytes(&revalidated.policy_sha256);
-        logger.write_str(" state_sha256=");
+        logger.write_bytes(&PKENTRY_STATE_SHA);
         logger.write_hex_bytes(&revalidated.state_sha256);
-        logger.write_str(" denial=");
+        logger.write_bytes(&PKENTRY_DENIAL);
         logger.write_str(revalidated.denial);
-        logger.write_str(" authority=");
+        logger.write_bytes(&PKENTRY_AUTHORITY);
         logger.write_decimal_u64(u64::from(revalidated.authority_grants));
-        logger.write_str(" actions=");
+        logger.write_bytes(&PKENTRY_ACTIONS);
         logger.write_decimal_u64(u64::from(revalidated.actions_authorized));
-        logger.write_str(" writes=");
+        logger.write_bytes(&PKENTRY_WRITES);
         logger.write_decimal_u64(u64::from(revalidated.state_writes));
-        logger.write_str("\n");
+        logger.write_bytes(&PKENTRY_NEWLINE);
     }
 
     if let Some(spec) = validated.framebuffer {
@@ -436,9 +595,9 @@ extern "C" fn poole_kernel_rust_entry(
         };
         if let Some(framebuffer) = framebuffer {
             let mut logger = EarlyLogger::new(framebuffer);
-            logger.write_str("POOLEOS KERNEL ENTRY\nBUILD ");
+            logger.write_bytes(&PKENTRY_FRAMEBUFFER);
             logger.write_bytes(BUILD_ID);
-            logger.write_str("\nPBP1 VALID\n");
+            logger.write_bytes(&PKENTRY_FRAMEBUFFER_TAIL);
         }
     }
 
@@ -448,9 +607,7 @@ extern "C" fn poole_kernel_rust_entry(
             debugcon: &mut debugcon,
             ring: &EARLY_RING,
         });
-        logger.write_str(
-            "POOLEOS:KERNEL:TRANSFER-DENIED PASS contract=PKXFER1 terminal=halt entry_count=1 post_exit_firmware_calls=0 signatures=0 authority=0 actions=0 writes=0\n",
-        );
+        logger.write_bytes(&PKENTRY_TRANSFER_DENIED);
         halt_forever()
     }
 
@@ -682,6 +839,112 @@ extern "C" fn poole_kernel_rust_entry(
         logger.write_bytes(&PKMSR_RESULT);
         logger.write_decimal_u64(u64::from(snapshot.msr_read_mask.count_ones()));
         logger.write_bytes(&PKMSR_RESULT_TAIL);
+        halt_forever()
+    }
+
+    if trap_scenario == DevelopmentTrapScenario::PhysicalMemory {
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        macro_rules! pmm_try {
+            ($operation:expr) => {
+                match $operation {
+                    Ok(value) => value,
+                    Err(error) => {
+                        logger.write_bytes(&PKPMM_DENIED);
+                        logger.write_str(error.label());
+                        logger.write_bytes(&PKPMM_DENIED_TAIL);
+                        poole_kernel_emergency_panic(PanicCode::PhysicalMemory as u32)
+                    }
+                }
+            };
+        }
+        let proof = pmm_try!(run_physical_memory_profile(&decoded, validated.core));
+        let initial = proof.initial;
+        logger.write_bytes(&PKPMM_MAP);
+        logger.write_decimal_u64(initial.memory_entry_count as u64);
+        logger.write_bytes(&PKPMM_USABLE);
+        logger.write_decimal_u64(initial.source_pages[poole_handoff::MEMORY_USABLE as usize]);
+        logger.write_bytes(&PKPMM_BOOT_RECLAIMABLE);
+        logger.write_decimal_u64(
+            initial.source_pages[poole_handoff::MEMORY_BOOT_RECLAIMABLE as usize],
+        );
+        logger.write_bytes(&PKPMM_LOADER_RESERVED);
+        logger.write_decimal_u64(
+            initial.source_pages[poole_handoff::MEMORY_LOADER_RESERVED as usize],
+        );
+        logger.write_bytes(&PKPMM_NULL_GUARD);
+        logger.write_decimal_u64(initial.null_guard_pages);
+        logger.write_bytes(&PKPMM_ZONES);
+        logger.write_decimal_u64(initial.source_usable_pages[Zone::Dma as usize]);
+        logger.write_bytes(&PKPMM_DMA_MANAGED);
+        logger.write_decimal_u64(initial.managed_pages[Zone::Dma as usize]);
+        logger.write_bytes(&PKPMM_DMA32_SOURCE);
+        logger.write_decimal_u64(initial.source_usable_pages[Zone::Dma32 as usize]);
+        logger.write_bytes(&PKPMM_DMA32_MANAGED);
+        logger.write_decimal_u64(initial.managed_pages[Zone::Dma32 as usize]);
+        logger.write_bytes(&PKPMM_NORMAL_SOURCE);
+        logger.write_decimal_u64(initial.source_usable_pages[Zone::Normal as usize]);
+        logger.write_bytes(&PKPMM_NORMAL_MANAGED);
+        logger.write_decimal_u64(initial.managed_pages[Zone::Normal as usize]);
+        logger.write_bytes(&PKPMM_EXTENTS);
+        logger.write_decimal_u64(initial.free_extent_count as u64);
+        logger.write_bytes(&PKPMM_LARGEST_DMA);
+        logger.write_decimal_u64(initial.largest_free_pages[Zone::Dma as usize]);
+        logger.write_bytes(&PKPMM_LARGEST_DMA32);
+        logger.write_decimal_u64(initial.largest_free_pages[Zone::Dma32 as usize]);
+        logger.write_bytes(&PKPMM_LARGEST_NORMAL);
+        logger.write_decimal_u64(initial.largest_free_pages[Zone::Normal as usize]);
+        logger.write_bytes(&PKPMM_OWNERSHIP);
+        logger.write_hex_u64(validated.core.kernel_physical_base);
+        logger.write_bytes(&PKPMM_KERNEL_PAGES);
+        logger.write_decimal_u64(
+            validated
+                .core
+                .kernel_physical_size
+                .div_ceil(poole_handoff::PAGE_BYTES),
+        );
+        logger.write_bytes(&PKPMM_HANDOFF_BASE);
+        logger.write_hex_u64(validated.core.handoff_physical_base);
+        logger.write_bytes(&PKPMM_HANDOFF_PAGES);
+        logger.write_decimal_u64(
+            validated
+                .core
+                .handoff_byte_count
+                .div_ceil(poole_handoff::PAGE_BYTES),
+        );
+        logger.write_bytes(&PKPMM_ROOT);
+        logger.write_hex_u64(validated.core.page_table_root_physical);
+        logger.write_bytes(&PKPMM_PROTECTED);
+
+        let final_state = proof.final_state;
+        logger.write_bytes(&PKPMM_EXERCISE);
+        logger.write_decimal_u64(final_state.allocation_count);
+        logger.write_bytes(&PKPMM_FREES);
+        logger.write_decimal_u64(final_state.free_count);
+        logger.write_bytes(&PKPMM_DMA_START);
+        logger.write_hex_u64(proof.dma_start_page * poole_handoff::PAGE_BYTES);
+        logger.write_bytes(&PKPMM_DMA32_START);
+        logger.write_hex_u64(proof.dma32_start_page * poole_handoff::PAGE_BYTES);
+        logger.write_bytes(&PKPMM_DOUBLE_FREE);
+        logger.write_decimal_u64(final_state.rejected_double_frees);
+        logger.write_bytes(&PKPMM_QUOTA);
+        logger.write_decimal_u64(final_state.rejected_quota_requests);
+        logger.write_bytes(&PKPMM_UNAVAILABLE);
+        logger.write_decimal_u64(final_state.rejected_unavailable_requests);
+        logger.write_bytes(&PKPMM_METADATA_POISON);
+        logger.write_decimal_u64(final_state.metadata_poison_events);
+        logger.write_bytes(&PKPMM_COALESCES);
+        logger.write_decimal_u64(final_state.coalesce_events);
+        logger.write_bytes(&PKPMM_RESULT);
+        logger.write_decimal_u64(
+            final_state.managed_pages[0]
+                + final_state.managed_pages[1]
+                + final_state.managed_pages[2],
+        );
+        logger.write_bytes(&PKPMM_RESULT_TAIL);
         halt_forever()
     }
 
@@ -952,7 +1215,9 @@ extern "C" fn poole_kernel_rust_entry(
             // SAFETY: #UD resumes only after the exact UD2 origin is validated.
             unsafe { arch::x86_64::trigger_invalid_opcode() };
             let guard_address = (stack_top as u64)
-                .checked_sub(9 * poole_handoff::PAGE_BYTES)
+                .checked_sub(
+                    (poolekernel::BOOTSTRAP_STACK_PAGE_COUNT + 1) * poole_handoff::PAGE_BYTES,
+                )
                 .unwrap_or_else(|| poole_kernel_emergency_panic(PanicCode::TrapContract as u32));
             EXPECTED_PAGE_FAULT_ADDRESS.store(guard_address, Ordering::Release);
             // SAFETY: the address is the retained stack's verified non-present low guard page.
@@ -1014,6 +1279,9 @@ extern "C" fn poole_kernel_rust_entry(
         }
         DevelopmentTrapScenario::PrivilegeMsrPolicy => {
             poole_kernel_emergency_panic(PanicCode::PrivilegeMsrPolicy as u32)
+        }
+        DevelopmentTrapScenario::PhysicalMemory => {
+            poole_kernel_emergency_panic(PanicCode::PhysicalMemory as u32)
         }
     }
 }

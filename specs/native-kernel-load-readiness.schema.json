@@ -378,7 +378,7 @@
         "file_handles_closed": {"const": 12},
         "file_pools_freed": {"const": 11},
         "kmap_table_pages_retained": {"const": 4},
-        "stack_pages_retained": {"const": 8},
+        "stack_pages_retained": {"const": 14},
         "handoff_pages_retained": {"const": 256},
         "artifact_pages_retained": {"type": "integer", "minimum": 6},
         "firmware_calls_after_exit": {"const": 0},

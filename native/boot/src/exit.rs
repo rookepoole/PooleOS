@@ -102,6 +102,18 @@ const EFI_ALLOCATE_ANY_PAGES: u32 = 0;
         feature = "development-privilege-msr-policy",
         feature = "development-xstate-exception"
     ),
+    all(
+        feature = "development-physical-memory",
+        any(
+            feature = "development-trap-returning",
+            feature = "development-trap-double-fault",
+            feature = "development-trap-malformed-frame",
+            feature = "development-cpu-policy",
+            feature = "development-xstate-policy",
+            feature = "development-xstate-exception",
+            feature = "development-privilege-msr-policy"
+        )
+    ),
 ))]
 compile_error!("only one post-PKXFER1 development scenario may be selected");
 
@@ -120,6 +132,8 @@ const DEVELOPMENT_TRAP_SCENARIO: u8 = if cfg!(feature = "development-trap-return
     6
 } else if cfg!(feature = "development-privilege-msr-policy") {
     7
+} else if cfg!(feature = "development-physical-memory") {
+    8
 } else {
     0
 };

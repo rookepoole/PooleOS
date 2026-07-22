@@ -2,14 +2,14 @@
   "artifact_kind": "pooleos_native_kernel_entry_readiness",
   "bindings": {
     "contract": {
-      "byte_count": 10702,
+      "byte_count": 10685,
       "path": "specs/native-kernel-entry-contract.json",
-      "sha256": "79F324C98F3B0A9995C2AB908CF833984BAA3423970D019FB2E867C651E081AB"
+      "sha256": "28659BB986EFC635E6C62CED5C6FBD84F167372D9FC0DA296A0FD28A39E715A2"
     },
     "contract_schema": {
-      "byte_count": 3467,
+      "byte_count": 3450,
       "path": "specs/native-kernel-entry-contract.schema.json",
-      "sha256": "69A109B1A39E8BC3C00CCCC9FC6FAE8A1C7EC593C5D8CFF1D2AF36151B7C0A43"
+      "sha256": "257F1229CE363BD07EC3FA618A60D6EF390216E11B264614D7F19B1BB1C5B57A"
     },
     "implementation_inputs": [
       {
@@ -28,9 +28,9 @@
         "sha256": "62102EE51CA34DCB59F0BFC48508AE5BECA79448F977478F1F09EF34B1BC947C"
       },
       {
-        "byte_count": 1740,
+        "byte_count": 2002,
         "path": "native/kernel/README.md",
-        "sha256": "05F37DD0A6CA47129FB0FDFBD2993C8AC0EF4657A64F6699D0D02B5CC1A3DD09"
+        "sha256": "16D64FEB24D4E090726870CF404C74DFFCCB3200D67296FD4D20B86356ABBACE"
       },
       {
         "byte_count": 895,
@@ -40,22 +40,22 @@
       {
         "byte_count": 2048,
         "path": "native/kernel/linker.ld",
-        "sha256": "D74C10E7E9010D91B1A5C4378D8B9CFCE8669FEE28706C75734D81A822D62A90"
+        "sha256": "5E801D19417A4405ADD7A27605E230BF3789871AD64D16FEB3FB5679B636E215"
       },
       {
-        "byte_count": 448,
+        "byte_count": 431,
         "path": "native/kernel/manifest.pkm",
-        "sha256": "0AA1E7E5F7C946A6A1798DBCF4B19D91F9C1D771742AF72B7B96E941B5ACCF70"
+        "sha256": "2EDD5B0AD9EAB7B2BC87625AA1FAEB91FA710944EAA553CDD8F507FD56E333DA"
       },
       {
-        "byte_count": 56853,
+        "byte_count": 57282,
         "path": "native/kernel/src/lib.rs",
-        "sha256": "9C70EB0851E33D6B107501C230E7402A6554853E7804039D48BBB0ACF9A01DE5"
+        "sha256": "EB72DF4399332855A28C779BC8BA4D81FE837547BBDFCA663AE579E1A9958347"
       },
       {
-        "byte_count": 58831,
+        "byte_count": 70769,
         "path": "native/kernel/src/main.rs",
-        "sha256": "23B2165489A63B0233AC26B206752D062EA9AB44CF885B70DD8711BA6C790982"
+        "sha256": "0E48D83DDE70FC46B94A3EA551BFF662ABDE3CF7E3617225E8DEF9EA407300C5"
       },
       {
         "byte_count": 49957,
@@ -85,22 +85,22 @@
       {
         "byte_count": 7214,
         "path": "runtime/native_kernel_entry.py",
-        "sha256": "EA7B0474C555D91878C3E5194DED450FC1F7C791255F918C398C81BFCFA9AE69"
+        "sha256": "6A73776ED5C0DF6B9103C97D020B4BAF7A2DA95E812A414E1671FDC2F06044C9"
       },
       {
         "byte_count": 24769,
         "path": "tools/qualify_native_kernel_entry.py",
-        "sha256": "1808291B1E8C2AD718612F7E5B413D4E06E619A10F7407B5C27688A9D160BF7F"
+        "sha256": "CC88305458C0EF1D5681A72DCB7D52FBED5B92FF4F87D23D1B0B46F851A54400"
       },
       {
         "byte_count": 6042,
         "path": "tests/test_native_kernel_entry.py",
-        "sha256": "97024B23079DE57F98EEECEB994B1B177C05B60A9774DD71888CC32163E3F804"
+        "sha256": "7247C5F4000700FE5AD080279BA8D80F48189E9EA81230097D18E759436BBEE8"
       },
       {
         "byte_count": 4278,
         "path": "docs/native-kernel-entry.md",
-        "sha256": "4EBB7B7369FBFEFA36454F27FF6D347A26A3C5FC4B0A10AADC1BCB189118A09A"
+        "sha256": "9D7FDB6EF16BC5F563926B8A3D3DC4B7AF8D00F79221E21A83216CEE85136B25"
       }
     ],
     "pbp1_contract": {
@@ -177,8 +177,8 @@
       "poolekernel-fixture"
     ],
     "status": "pass",
-    "test_count": 49,
-    "test_pass_count": 49
+    "test_count": 54,
+    "test_pass_count": 54
   },
   "n6_exit_gate_satisfied": false,
   "negative_controls": [
@@ -499,31 +499,31 @@
     "N6.6": "partial"
   },
   "product": {
-    "canonical_byte_count": 180224,
-    "canonical_sha256": "062D4EE10BA27F4D0A943D97206ADB5B3761770B6DD9EEC2C281605B2693B883",
+    "canonical_byte_count": 192512,
+    "canonical_sha256": "F449D0E037571345A40162DC9A943A2FA01F1195F21C239C8D8F1A85D39CA06E",
     "entry_offset": 32768,
     "entry_prefix_hex": "FAFC4889E14885C9743B48F7C10F00000075324889C848C1E01048C1F8104839C87522410F20D89C",
     "host_leakage_hits": [],
     "image_byte_count": 262144,
-    "linked_byte_count": 3633704,
-    "linked_sha256": "E532BAD45EC2A3A7BD614E23209E632AEA55107F163C5BFB08C8B9D24D822456",
-    "loaded_sha256": "1EE2CF2D508F7982782D54124B977BE75F40A58706EDA20F175D08C643A54501",
+    "linked_byte_count": 3719976,
+    "linked_sha256": "AA30A8ABA90A4A77FF4A2FC4DFD998EE4B8240C5FAF809977B3474A0DD151E60",
+    "loaded_sha256": "4B740D1FCDFE87EB10F20AA55B639555E2EBD01FBC46E418E680EE076CF1F221",
     "manifest_fields": {
-      "build_id": "PKBUILD1-CYCLE124-N7-PRIVILEGE-MSR-POLICY-001",
+      "build_id": "PKBUILD1-CYCLE125-N9-PMM-001",
       "entry_contract": "PKENTRY1",
       "entry_offset": "0x00008000",
       "handoff_contract": "PBP1",
       "image_contract": "PKELF1",
       "pbp1_contract_sha256": "89EA7517EF7D2E30C7EBEC4C28D092E3F01D95519EC6768E7B4D5C0F586B58E7",
       "pkelf1_contract_sha256": "A0CE48E9EF992B97333D84ECB2850E221D482E2ACF11BB312B5F769DAFF992AA",
-      "pkentry1_contract_sha256": "79F324C98F3B0A9995C2AB908CF833984BAA3423970D019FB2E867C651E081AB"
+      "pkentry1_contract_sha256": "28659BB986EFC635E6C62CED5C6FBD84F167372D9FC0DA296A0FD28A39E715A2"
     },
     "manifest_offset": 536,
-    "relocation_canonical_offset": 163904,
-    "relocation_count": 361,
-    "relocation_source_offset": 164064,
-    "relro_byte_count": 16384,
-    "relro_offset": 163840
+    "relocation_canonical_offset": 172096,
+    "relocation_count": 401,
+    "relocation_source_offset": 172256,
+    "relro_byte_count": 20480,
+    "relro_offset": 172032
   },
   "production_promotion_allowed": false,
   "production_ready": false,
@@ -541,8 +541,8 @@
     "negative_controls_passed": 43,
     "negative_controls_total": 43,
     "production_claim_count": 0,
-    "rust_host_tests_passed": 49,
-    "rust_host_tests_total": 49,
+    "rust_host_tests_passed": 54,
+    "rust_host_tests_total": 54,
     "rustfmt_packages_passed": 2
   },
   "toolchain": {

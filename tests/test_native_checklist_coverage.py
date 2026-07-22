@@ -80,8 +80,10 @@ class NativeChecklistCoverageTests(unittest.TestCase):
         self.assertEqual(sum(phase["source_line_count"] for phase in phases) + 16, 10512)
         self.assertEqual(sum(phase["source_checkbox_count"] for phase in phases) + 10, 8996)
         additions = self.artifact["added_requirements"]
-        self.assertEqual(len(additions), 45)
-        self.assertEqual(len({item["id"] for item in additions}), 45)
+        self.assertEqual(len(additions), 46)
+        self.assertEqual(len({item["id"] for item in additions}), 46)
+        memory = next(item for item in additions if item["id"] == "ADD-MEM-001")
+        self.assertEqual(memory["phase_id"], "N9")
         digest_provider = next(item for item in additions if item["id"] == "ADD-BOOT-003")
         self.assertEqual(digest_provider["phase_id"], "N6")
         artifact_profile = next(item for item in additions if item["id"] == "ADD-BOOT-004")

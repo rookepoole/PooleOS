@@ -223,7 +223,7 @@
     "firmware_calls_while_candidate_active_allowed": false,
     "original_cr3_restored_before_firmware_call": true,
     "candidate_tables_retained_through_exit": true,
-    "guarded_stack_page_count": 8,
+    "guarded_stack_page_count": 14,
     "guard_page_count": 2,
     "read_only_handoff_page_count": 256,
     "kernel_entry_called": false
