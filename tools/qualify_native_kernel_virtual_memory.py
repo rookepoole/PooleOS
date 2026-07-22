@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build and qualify the bounded PKVM1 inactive page-table foundation."""
+"""Build and qualify the bounded PKVM2 one-BSP active-root profile."""
 
 from __future__ import annotations
 
@@ -31,13 +31,13 @@ DEFAULT_OUT = ROOT / virtual_memory.READINESS_RELATIVE
 
 
 class QualificationError(RuntimeError):
-    """Raised when live PKVM1 qualification fails closed."""
+    """Raised when live PKVM2 qualification fails closed."""
 
 
 def _set_field(marker: str, name: str, value: str) -> str:
     pattern = re.compile(rf"(\b{re.escape(name)}=)([^ ]+)")
     if len(pattern.findall(marker)) != 1:
-        raise QualificationError(f"PKVM1 mutation field is not unique: {name}")
+        raise QualificationError(f"PKVM2 mutation field is not unique: {name}")
     return pattern.sub(rf"\g<1>{value}", marker, count=1)
 
 
@@ -49,7 +49,7 @@ def _require_marker_rejection(
         virtual_memory.validate_observation_binding(observation, transcript)
     except virtual_memory.KernelVirtualMemoryError:
         return {"id": control_id, "status": "pass", "expected": "rejected"}
-    raise QualificationError(f"PKVM1 hostile marker control did not reject: {control_id}")
+    raise QualificationError(f"PKVM2 hostile marker control did not reject: {control_id}")
 
 
 def _negative_controls(
@@ -69,43 +69,50 @@ def _negative_controls(
         candidate[index] = _set_field(candidate[index], field, value)
         return candidate
 
-    tables = observation["tables"]
+    candidate_observation = observation["candidate"]
     mutations = (
         (3, 23, "trap_scenario", "0"),
-        (4, 35, "contract", "PKVM2"),
+        (4, 35, "contract", "PKVM1"),
         (5, 35, "canonical_bits", "49"),
-        (6, 36, "root", f"0x{tables['root'] + 1:016X}"),
-        (7, 36, "table_generation", "0"),
-        (8, 36, "data", f"0x{tables['root']:016X}"),
-        (9, 36, "data_generation", "3"),
-        (10, 36, "table_pages", "3"),
-        (11, 36, "materialized", "3"),
-        (12, 36, "temporary_verified", "3"),
-        (13, 36, "root_active", "1"),
-        (14, 37, "mapped_physical", f"0x{tables['data'] + PAGE:016X}"),
-        (15, 37, "mapped_permissions", "rx_user"),
-        (16, 37, "protected_permissions", "rw_nx_user"),
-        (17, 37, "cache", "uncacheable"),
-        (18, 37, "page_bytes", "8192"),
-        (19, 38, "maps", "1"),
-        (20, 38, "protects", "0"),
-        (21, 38, "unmaps", "1"),
-        (22, 38, "inactive_receipts", "1"),
-        (23, 38, "cache_alias_rejected", "0"),
-        (24, 38, "wx_rejected", "0"),
-        (25, 38, "premature_reuse_rejected", "0"),
-        (26, 38, "rollback_controls", "skipped"),
-        (27, 39, "root_released", "0"),
-        (28, 39, "data_released", "0"),
-        (29, 39, "allocated_pages", "1"),
-        (30, 39, "physical_writes", str(virtual_memory.PHYSICAL_WRITES - 1)),
-        (31, 39, "temporary_pte_writes", str(virtual_memory.TEMPORARY_PTE_WRITES - 1)),
-        (32, 39, "allocations", "1"),
-        (33, 39, "frees", "1"),
-        (34, 39, "active_cr3_writes", "1"),
-        (35, 39, "invlpg", str(virtual_memory.HARDWARE_INVALIDATIONS - 1)),
-        (36, 39, "shootdown", "1"),
-        (37, 39, "huge_pages", "1"),
+        (6, 36, "original_root", f"0x{candidate_observation['original_root'] + PAGE:016X}"),
+        (7, 36, "candidate_root", f"0x{candidate_observation['candidate_root'] + 1:016X}"),
+        (8, 36, "table_generation", "0"),
+        (9, 36, "data", f"0x{candidate_observation['candidate_root']:016X}"),
+        (10, 36, "data_generation", "3"),
+        (11, 36, "direct_first", f"0x{candidate_observation['direct_first'] + PAGE:016X}"),
+        (12, 36, "direct_last", f"0x{candidate_observation['direct_last'] - 1:016X}"),
+        (13, 36, "inherited_kernel", "drifted"),
+        (14, 36, "guarded_stack", "drifted"),
+        (15, 36, "handoff", "drifted"),
+        (16, 36, "bootstrap_alias_revoked", "0"),
+        (17, 36, "root_active", "1"),
+        (18, 37, "cr3_writes", "1"),
+        (19, 37, "candidate_readback", "mismatch"),
+        (20, 37, "original_restore", "mismatch"),
+        (21, 37, "rollback_control", "skipped"),
+        (22, 37, "bsp", "0"),
+        (23, 37, "smp", "1"),
+        (24, 38, "local_invlpg", "2"),
+        (25, 38, "active_receipts", "2"),
+        (26, 38, "probe", "0x0000000000000000"),
+        (27, 38, "protect", "0"),
+        (28, 38, "user_unmap", "0"),
+        (29, 38, "direct_unmap", "0"),
+        (30, 38, "stale_root_rejected", "skipped"),
+        (31, 38, "premature_reuse_rejected", "0"),
+        (32, 38, "shootdown", "1"),
+        (33, 39, "root_released", "0"),
+        (34, 39, "data_released", "0"),
+        (35, 39, "allocated_pages", "1"),
+        (36, 39, "physical_writes", str(virtual_memory.PHYSICAL_WRITES - 1)),
+        (37, 39, "temporary_pte_writes", str(virtual_memory.TEMPORARY_PTE_WRITES - 1)),
+        (38, 39, "bootstrap_invlpg", str(virtual_memory.BOOTSTRAP_INVALIDATIONS - 1)),
+        (39, 39, "allocations", "1"),
+        (40, 39, "frees", "1"),
+        (41, 39, "active_cr3_writes", "1"),
+        (42, 39, "active_invlpg", "2"),
+        (43, 39, "shootdown", "1"),
+        (44, 39, "ring3", "1"),
     )
     for control_index, marker_index, field, value in mutations:
         candidates.append(
@@ -116,17 +123,17 @@ def _negative_controls(
         for control_id, candidate in candidates
     ]
     hostile_observation = copy.deepcopy(observation)
-    hostile_observation["tables"]["root"] += PAGE
+    hostile_observation["candidate"]["candidate_root"] += PAGE
     try:
         virtual_memory.validate_observation_binding(hostile_observation, transcript)
     except virtual_memory.KernelVirtualMemoryError:
         controls.append(
-            {"id": virtual_memory.NEGATIVE_CONTROL_IDS[38], "status": "pass", "expected": "rejected"}
+            {"id": virtual_memory.NEGATIVE_CONTROL_IDS[45], "status": "pass", "expected": "rejected"}
         )
     else:
-        raise QualificationError("PKVM1 hostile PBP1 first-fit control did not reject")
+        raise QualificationError("PKVM2 hostile PBP1 first-fit control did not reject")
     if [item["id"] for item in controls] != list(virtual_memory.NEGATIVE_CONTROL_IDS):
-        raise QualificationError("PKVM1 hostile-control order changed")
+        raise QualificationError("PKVM2 hostile-control order changed")
     return controls
 
 
@@ -134,7 +141,7 @@ PAGE = virtual_memory.PAGE_BYTES
 
 
 def _source_audit() -> dict[str, Any]:
-    core_path = ROOT / "native/kernel/src/virtual_memory.rs"
+    core_path = ROOT / "native/kernel/src/active_virtual_memory.rs"
     main_path = ROOT / "native/kernel/src/main.rs"
     arch_path = ROOT / "native/kernel/src/arch/x86_64.rs"
     core = core_path.read_text(encoding="utf-8").split("#[cfg(test)]", 1)[0]
@@ -143,35 +150,42 @@ def _source_audit() -> dict[str, Any]:
         "impl ByteSink for BootSink", 1
     )[0]
     arch = arch_path.read_text(encoding="utf-8")
-    forbidden = tuple(
-        token for token in ("alloc::", "Vec<", "Box<", "write_cr3", "invlpg", "asm!(") if token in core
-    )
+    forbidden = tuple(token for token in ("alloc::", "Vec<", "Box<", "asm!(") if token in core)
     required = (
-        "[Option<MappingRecord>; MAX_MAPPINGS]",
-        "[Option<FrameRecord>; MAX_FRAMES]",
-        "[Option<PendingInvalidation>; MAX_PENDING_INVALIDATIONS]",
-        "replace_entry",
-        "acknowledge_inactive",
-        "complete_unmap",
+        "pub trait ActiveHardware",
+        "HARDWARE_LEAF_BITS",
+        "fn observed_active_leaf",
+        "pub fn activate",
+        "pub fn protect_user",
+        "pub fn begin_user_unmap",
+        "pub fn revoke_data_direct_map",
+        "pub fn complete_data_release",
+        "pub fn restore",
+        "pub fn release_tables",
     )
     missing = tuple(token for token in required if token not in core)
     adapter_required = (
         "poole_kmap::translate",
         "read_volatile",
         "write_volatile",
-        '"invlpg [{}]"',
+        "impl ActiveHardware for LiveActiveHardware",
+        "arch::x86_64::write_cr3",
+        "arch::x86_64::invalidate_page",
         "TEMPORARY_LEAF_INDEX",
     )
     adapter_missing = tuple(token for token in adapter_required if token not in adapter)
     arch_required = (
         "pub fn physical_address_bits() -> Option<u8>",
+        "pub unsafe fn read_cr3() -> u64",
+        "pub unsafe fn write_cr3(value: u64)",
+        "pub unsafe fn invalidate_page(address: u64)",
         "0x8000_0008",
         "(36..=52).contains(&bits)",
     )
     arch_missing = tuple(token for token in arch_required if token not in arch)
     if forbidden or missing or adapter_missing or arch_missing:
         raise QualificationError(
-            "PKVM1 source scope changed: "
+            "PKVM2 source scope changed: "
             f"forbidden={forbidden}; missing={missing}; adapter={adapter_missing}; "
             f"arch={arch_missing}"
         )
@@ -183,12 +197,13 @@ def _source_audit() -> dict[str, Any]:
         "architecture_path": arch_path.relative_to(ROOT).as_posix(),
         "architecture_sha256": virtual_memory.sha256_bytes(arch_path.read_bytes()),
         "heap_api_token_count": 0,
-        "active_cr3_or_invlpg_token_count": 0,
+        "active_cr3_write_count": 2,
+        "active_local_invalidation_count": 3,
         "bootstrap_temporary_mapping_uses_invlpg": True,
         "live_cpuid_physical_width_validated": True,
-        "fixed_capacity_ledger_count": 3,
+        "fixed_capacity_table_page_count": 8,
         "volatile_physical_adapter": True,
-        "result": "pass_fixed_capacity_transaction_core_and_revoked_bootstrap_temporary_adapter",
+        "result": "pass_bounded_active_root_direct_map_cr3_rollback_and_local_receipt_adapter",
     }
 
 
@@ -211,7 +226,7 @@ def make_readiness(
     temporary_parent.mkdir(parents=True, exist_ok=True)
     run_parent = ROOT / "runs" / "native-tier0"
     run_parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="pkvm1-qualification-", dir=temporary_parent) as temporary:
+    with tempfile.TemporaryDirectory(prefix="pkvm2-qualification-", dir=temporary_parent) as temporary:
         temporary_root = Path(temporary)
         default_boot, default_build = qualify_native_pooleboot._build_and_test(
             toolchain_root, temporary_root / "default-boot"
@@ -224,28 +239,28 @@ def make_readiness(
         if b"POOLEBOOT/0.1 TRANSFER_ARM PASS" in default_boot or b"POOLEBOOT/0.1 STOP BEFORE TRANSFER" not in default_boot:
             raise QualificationError("default PooleBoot development-transfer isolation failed")
         if virtual_memory.sha256_bytes(default_boot) == virtual_memory.sha256_bytes(vm_boot):
-            raise QualificationError("default and PKVM1 PooleBoot profiles are not distinct")
+            raise QualificationError("default and PKVM2 PooleBoot profiles are not distinct")
         source_audit = _source_audit()
         media_one = native_kernel_load.build_media_bytes(vm_boot, config, manifest, kernel, artifact_files)
         media_two = native_kernel_load.build_media_bytes(vm_boot, config, manifest, kernel, artifact_files)
         if media_one != media_two:
-            raise QualificationError("two PKVM1 media generations differ")
+            raise QualificationError("two PKVM2 media generations differ")
         media_inspection = native_kernel_load.inspect_media_bytes(media_one)
         if media_inspection["files"][3]["sha256"] != kernel_readiness["product"]["canonical_sha256"]:
-            raise QualificationError("PKVM1 media kernel differs from PKENTRY1")
-        media_path = temporary_root / "pkvm1.img"
+            raise QualificationError("PKVM2 media kernel differs from PKENTRY1")
+        media_path = temporary_root / "pkvm2.img"
         media_path.write_bytes(media_one)
         runs: list[dict[str, Any]] = []
         screenshots: list[bytes] = []
         handoffs: list[bytes] = []
         for run_index in (1, 2):
             with tempfile.TemporaryDirectory(
-                prefix=f"pkvm1-run-{run_index}-", dir=run_parent
+                prefix=f"pkvm2-run-{run_index}-", dir=run_parent
             ) as run_temporary:
                 run_directory = Path(run_temporary)
                 try:
                     run, screenshot, handoff = qualify_native_pooleboot._execute_once(
-                        f"virtual-memory-run-{run_index}",
+                        f"active-virtual-memory-run-{run_index}",
                         lock,
                         profile,
                         qemu_root,
@@ -296,11 +311,11 @@ def make_readiness(
                 screenshots.append(screenshot)
                 handoffs.append(handoff)
         if runs[0]["markers"] != runs[1]["markers"]:
-            raise QualificationError("two PKVM1 runs emitted different markers")
+            raise QualificationError("two PKVM2 runs emitted different markers")
         if screenshots[0] != screenshots[1]:
-            raise QualificationError("two PKVM1 runs produced different frames")
+            raise QualificationError("two PKVM2 runs produced different frames")
         if handoffs[0] != handoffs[1]:
-            raise QualificationError("two PKVM1 runs produced different PBP1 bytes")
+            raise QualificationError("two PKVM2 runs produced different PBP1 bytes")
     controls = _negative_controls(runs[0]["markers"], runs[0]["pbp1_transcript"])
     observation = virtual_memory.validate_markers(runs[0]["markers"])
     derived = virtual_memory.validate_observation_binding(
@@ -312,7 +327,7 @@ def make_readiness(
         "schema_version": "1.0",
         "artifact_kind": "pooleos_native_kernel_virtual_memory_readiness",
         "status_date": status_date,
-        "status": "pass_single_host_two_run_qemu64_bounded_inactive_tables_bootstrap_temporary_map_non_promoting",
+        "status": "pass_single_host_two_run_qemu64_bounded_one_bsp_active_root_exact_restore_non_promoting",
         "contract_id": virtual_memory.CONTRACT_ID,
         "selected_move_id": virtual_memory.SELECTED_MOVE_ID,
         "production_ready": False,
@@ -359,7 +374,7 @@ def make_readiness(
             "runs": runs,
             "observation": {
                 key: observation[key]
-                for key in ("layout", "tables", "translation", "transaction", "result")
+                for key in ("layout", "candidate", "activation", "invalidation", "result")
             },
             "independent_memory_summary": derived,
         },
@@ -370,21 +385,23 @@ def make_readiness(
             "qemu_run_count": 2,
             "marker_count": virtual_memory.MARKER_COUNT,
             "negative_controls_passed": len(controls),
-            "table_pages_materialized": observation["tables"]["materialized"],
+            "table_pages_materialized": virtual_memory.TABLE_PAGES,
+            "mapped_owned_pages": virtual_memory.OWNED_PAGES,
             "physical_table_writes": observation["result"]["physical_writes"],
             "temporary_pte_writes": observation["result"]["temporary_pte_writes"],
-            "map_protect_unmap_operations": 5,
-            "inactive_invalidation_receipts": observation["transaction"]["inactive_receipts"],
-            "active_cr3_writes": 0,
-            "hardware_tlb_invalidations": observation["result"]["invlpg"],
+            "active_leaf_mutations": 3,
+            "active_invalidation_receipts": observation["invalidation"]["active_receipts"],
+            "active_cr3_writes": observation["result"]["active_cr3_writes"],
+            "active_hardware_tlb_invalidations": observation["result"]["active_invlpg"],
+            "bootstrap_hardware_tlb_invalidations": observation["result"]["bootstrap_invlpg"],
             "signature_verifications": 0,
             "authority_grants": 0,
             "actions_authorized": 0,
             "production_claim_count": 0,
         },
         "open_items": [
-            "Install a kernel-complete root with direct-map, kernel-image, guarded-stack, metadata, and managed temporary-map bands.",
-            "Implement active-root TLB invalidation receipts, SMP shootdown acknowledgements, and generation-safe deferred reclaim.",
+            "Expand the bounded nine-page direct map into a complete generation-owned physical-memory policy with metadata and managed temporary mappings.",
+            "Implement AP startup plus inter-processor TLB shootdown requests, acknowledgements, timeout/failure handling, and generation-safe deferred reclaim.",
             "Implement huge-page promotion and demotion, PCID policy, KASLR, copy-on-write, user faults, stack growth, and pager IPC.",
             "Qualify MMIO cache policy and alias auditing against PAT/MTRR policy on target hardware.",
             "Complete randomized concurrent memory stress, pressure/OOM policy, target hardware, second-host, and N9 exit gates.",
@@ -421,10 +438,10 @@ def main(argv: list[str] | None = None) -> int:
         virtual_memory.KernelVirtualMemoryError,
         native_tier0.Tier0Error,
     ) as error:
-        print(f"PKVM1 qualification failed: {error}", file=sys.stderr)
+        print(f"PKVM2 qualification failed: {error}", file=sys.stderr)
         return 1
     print(
-        "PKVM1 qualification passed: "
+        "PKVM2 qualification passed: "
         f"runs={report['summary']['qemu_run_count']}; "
         f"markers={report['summary']['marker_count']}; "
         f"controls={report['summary']['negative_controls_passed']}; "

@@ -68,7 +68,7 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 201)
+        self.assertEqual(len(self.artifact["bound_sources"]), 202)
         bound_paths = {binding["path"] for binding in self.artifact["bound_sources"]}
         self.assertIn(
             "runs/adr_ratification_readiness.json",
@@ -78,6 +78,7 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertIn("docs/n0-owner-decision-packet.md", bound_paths)
         self.assertIn("runs/n0_owner_response_receipt.json", bound_paths)
         self.assertIn("docs/n0-owner-response-receipt.md", bound_paths)
+        self.assertIn("native/kernel/src/active_virtual_memory.rs", bound_paths)
         self.assertIn("specs/n0-owner-response.json", bound_paths)
         self.assertIn(
             "runs/hardware_target_readiness.json",

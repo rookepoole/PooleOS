@@ -153,9 +153,9 @@ halts permanently at `STOP BEFORE TRANSFER`.
 
 ## Qualified Evidence
 
-The Cycle 126-refreshed default-path receipt records:
+The Cycle 127-refreshed default-path receipt records:
 
-- 145/145 Rust host tests across PooleBoot, PBART1, the six-format retained-set
+- 151/151 Rust host tests across PooleBoot, PBART1, the six-format retained-set
   validator, PBTRUST1, PBC1/PSM1/PKELF1/PBP1, PKMAP2, PBEXIT1, and PKENTRY1;
 - two byte-identical PooleBoot builds, PooleKernel builds, and GPT/FAT32 media
   generations;
@@ -240,11 +240,13 @@ Cycle 124 closes only the read-only PKMSR1 privileged-MSR policy slice. Cycle
 125 separately closes the bounded selector-8 PKPMM1 physical-page ownership and
 allocator foundation after expanding the shared guarded stack to fourteen
 pages. Cycle 126 separately closes the bounded selector-9 PKVM1 inactive
-virtual-memory foundation with one exactly revoked PKMAP2 bootstrap alias and
-zero PKVM1 CR3 writes or shootdowns. The next chronological owner-independent
-move is `N9-VM-ACTIVE-001` for a kernel-complete activation-eligible root and
-active-address-space invalidation contract, without target, scheduler, SMP,
-reclaim, userspace, heap, pager, or production promotion.
+virtual-memory foundation. Cycle 127 closes the bounded selector-10 PKVM2
+active-root move: eight candidate table pages and one data page are directly
+mapped, the candidate is installed and the exact original CR3 restored, and
+three local invalidation receipts cover protect and both unmaps. This remains
+one-BSP evidence with no shootdown, ring 3, reclaim policy, heap, pager, target,
+or production claim. The next chronological owner-independent move is
+`N9-PMM-SCRUB-001` for scrub-before-allocation and scrub-before-reuse policy.
 Capability creation, lifecycle execution, signature trust, authenticated
 persistent state, production transfer, and physical-target qualification remain
 separately gated by N5/N6 and owner-controlled N0 work.

@@ -1528,6 +1528,47 @@ pub fn halt_forever() -> ! {
     }
 }
 
+/// Reads the complete current CR3 value.
+///
+/// # Safety
+///
+/// The caller must execute at CPL0 on x86-64.
+pub unsafe fn read_cr3() -> u64 {
+    let value: u64;
+    // SAFETY: the caller owns this privileged control-register observation.
+    unsafe { asm!("mov {}, cr3", out(reg) value, options(nomem, nostack, preserves_flags)) };
+    value
+}
+
+/// Installs one prevalidated page-table root and performs the architectural CR3 flush.
+///
+/// # Safety
+///
+/// The caller must execute at CPL0 and prove that `value` preserves the executing code,
+/// current stack, and every operand needed until a later CR3 transition.
+pub unsafe fn write_cr3(value: u64) {
+    // SAFETY: the caller proves that this exact root is activation eligible.
+    unsafe { asm!("mov cr3, {}", in(reg) value, options(nostack, preserves_flags)) };
+}
+
+/// Invalidates one canonical virtual address in the current address space.
+///
+/// # Safety
+///
+/// The caller must execute at CPL0 and own the page-table transition for `address`.
+pub unsafe fn invalidate_page(address: u64) {
+    // SAFETY: the caller owns the local invalidation protocol for this address.
+    unsafe { asm!("invlpg [{}]", in(reg) address, options(nostack, preserves_flags)) };
+}
+
+/// Reads RFLAGS without changing interrupt state.
+pub fn read_rflags() -> u64 {
+    let value: u64;
+    // SAFETY: PUSHFQ/POP to a general register is unprivileged and preserves the flags.
+    unsafe { asm!("pushfq", "pop {}", out(reg) value, options(nomem, preserves_flags)) };
+    value
+}
+
 unsafe fn outb(port: u16, value: u8) {
     // SAFETY: the caller supplies a port for which it owns the privileged I/O operation.
     unsafe {

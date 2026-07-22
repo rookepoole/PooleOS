@@ -2,6 +2,9 @@
 #![deny(warnings)]
 #![forbid(unsafe_op_in_unsafe_fn)]
 
+#[cfg(test)]
+extern crate std;
+
 use core::marker::PhantomData;
 use core::ptr;
 use core::sync::atomic::{AtomicU8, AtomicU32, AtomicUsize, Ordering};
@@ -12,6 +15,7 @@ use poole_handoff::{
     RECORD_LOADED_ARTIFACTS, validate_kernel_entry_profile,
 };
 
+pub mod active_virtual_memory;
 pub mod physical_memory;
 pub mod privilege_msr;
 pub mod revalidation;
@@ -25,9 +29,13 @@ pub const TRAP_CONTRACT_ID: &str = "PKTRAP1";
 pub const CPU_POLICY_CONTRACT_ID: &str = "PKCPU1";
 pub const PRIVILEGE_MSR_CONTRACT_ID: &str = privilege_msr::CONTRACT_ID;
 pub const PHYSICAL_MEMORY_CONTRACT_ID: &str = physical_memory::CONTRACT_ID;
+pub const ACTIVE_VIRTUAL_MEMORY_CONTRACT_ID: &str = active_virtual_memory::CONTRACT_ID;
 pub const VIRTUAL_MEMORY_CONTRACT_ID: &str = virtual_memory::CONTRACT_ID;
 pub const XSTATE_EXCEPTION_CONTRACT_ID: &str = "PKXEXC1";
-pub const BUILD_ID: &[u8] = b"PKBUILD1-CYCLE126-N9-VM-001";
+#[used]
+#[unsafe(link_section = ".text.pkbuild_literal")]
+static BUILD_ID_BYTES: [u8; 34] = *b"PKBUILD1-CYCLE127-N9-VM-ACTIVE-001";
+pub const BUILD_ID: &[u8] = &BUILD_ID_BYTES;
 pub const ENTRY_OFFSET: u64 = 0x8000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
 pub const HANDOFF_MAGIC_U64: u64 = u64::from_le_bytes(poole_handoff::MAGIC);
@@ -65,6 +73,7 @@ pub enum PanicCode {
     PrivilegeMsrPolicy = 0x100f,
     PhysicalMemory = 0x1010,
     VirtualMemory = 0x1011,
+    ActiveVirtualMemory = 0x1012,
     UnexpectedReturn = 0x10ff,
 }
 
@@ -81,6 +90,32 @@ pub enum DevelopmentTrapScenario {
     PrivilegeMsrPolicy = 7,
     PhysicalMemory = 8,
     VirtualMemory = 9,
+    ActiveVirtualMemory = 10,
+}
+
+macro_rules! scenario_label {
+    ($name:ident, $value:literal) => {
+        #[used]
+        #[unsafe(link_section = ".text.pkscenario_labels")]
+        static $name: [u8; $value.len()] = *$value;
+    };
+}
+
+scenario_label!(SCENARIO_NONE, b"none");
+scenario_label!(SCENARIO_RETURNING, b"returning");
+scenario_label!(SCENARIO_DOUBLE_FAULT, b"double_fault");
+scenario_label!(SCENARIO_MALFORMED_FRAME, b"malformed_frame");
+scenario_label!(SCENARIO_CPU_POLICY, b"cpu_policy");
+scenario_label!(SCENARIO_XSTATE_POLICY, b"xstate_policy");
+scenario_label!(SCENARIO_XSTATE_EXCEPTION, b"xstate_exception");
+scenario_label!(SCENARIO_PRIVILEGE_MSR_POLICY, b"privilege_msr_policy");
+scenario_label!(SCENARIO_PHYSICAL_MEMORY, b"physical_memory");
+scenario_label!(SCENARIO_VIRTUAL_MEMORY, b"virtual_memory");
+scenario_label!(SCENARIO_ACTIVE_VIRTUAL_MEMORY, b"active_virtual_memory");
+
+const fn scenario_label_text(bytes: &'static [u8]) -> &'static str {
+    // SAFETY: every caller supplies an ASCII byte string declared immediately above.
+    unsafe { core::str::from_utf8_unchecked(bytes) }
 }
 
 impl DevelopmentTrapScenario {
@@ -96,22 +131,24 @@ impl DevelopmentTrapScenario {
             7 => Some(Self::PrivilegeMsrPolicy),
             8 => Some(Self::PhysicalMemory),
             9 => Some(Self::VirtualMemory),
+            10 => Some(Self::ActiveVirtualMemory),
             _ => None,
         }
     }
 
     pub const fn label(self) -> &'static str {
         match self {
-            Self::None => "none",
-            Self::Returning => "returning",
-            Self::DoubleFault => "double_fault",
-            Self::MalformedFrame => "malformed_frame",
-            Self::CpuPolicy => "cpu_policy",
-            Self::XstatePolicy => "xstate_policy",
-            Self::XstateException => "xstate_exception",
-            Self::PrivilegeMsrPolicy => "privilege_msr_policy",
-            Self::PhysicalMemory => "physical_memory",
-            Self::VirtualMemory => "virtual_memory",
+            Self::None => scenario_label_text(&SCENARIO_NONE),
+            Self::Returning => scenario_label_text(&SCENARIO_RETURNING),
+            Self::DoubleFault => scenario_label_text(&SCENARIO_DOUBLE_FAULT),
+            Self::MalformedFrame => scenario_label_text(&SCENARIO_MALFORMED_FRAME),
+            Self::CpuPolicy => scenario_label_text(&SCENARIO_CPU_POLICY),
+            Self::XstatePolicy => scenario_label_text(&SCENARIO_XSTATE_POLICY),
+            Self::XstateException => scenario_label_text(&SCENARIO_XSTATE_EXCEPTION),
+            Self::PrivilegeMsrPolicy => scenario_label_text(&SCENARIO_PRIVILEGE_MSR_POLICY),
+            Self::PhysicalMemory => scenario_label_text(&SCENARIO_PHYSICAL_MEMORY),
+            Self::VirtualMemory => scenario_label_text(&SCENARIO_VIRTUAL_MEMORY),
+            Self::ActiveVirtualMemory => scenario_label_text(&SCENARIO_ACTIVE_VIRTUAL_MEMORY),
         }
     }
 }
@@ -1647,7 +1684,11 @@ mod tests {
             DevelopmentTrapScenario::from_selector(9),
             Some(DevelopmentTrapScenario::VirtualMemory)
         );
-        assert_eq!(DevelopmentTrapScenario::from_selector(10), None);
+        assert_eq!(
+            DevelopmentTrapScenario::from_selector(10),
+            Some(DevelopmentTrapScenario::ActiveVirtualMemory)
+        );
+        assert_eq!(DevelopmentTrapScenario::from_selector(11), None);
     }
 
     #[test]
