@@ -1,6 +1,8 @@
 use core::arch::asm;
 use core::mem::size_of;
-use core::ptr::{addr_of, addr_of_mut, read_unaligned, write_bytes, write_volatile};
+use core::ptr::{
+    addr_of, addr_of_mut, read_unaligned, write_bytes, write_unaligned, write_volatile,
+};
 use core::sync::atomic::{Ordering, compiler_fence};
 
 use poolekernel::{
@@ -8,6 +10,10 @@ use poolekernel::{
     CPU_MSR_PAT, CpuControlState, CpuDiscovery, CpuPolicySnapshot, DescriptorState, GDT_LIMIT,
     IDT_LIMIT, INSTALLED_EXCEPTION_GATE_COUNT, IST_STACK_BYTES, KERNEL_CODE_SELECTOR,
     KERNEL_DATA_SELECTOR, KERNEL_TSS_SELECTOR,
+    xstate::{
+        AREA_BYTES, INITIAL_FCW, INITIAL_MXCSR, KernelSimdPolicy, SELECTED_XCR0, SaveFormat,
+        SwitchStrategy, XstatePolicy, XstateProof, effective_mxcsr_mask,
+    },
 };
 
 const COM1_BASE: u16 = 0x03f8;
@@ -136,6 +142,49 @@ const LEAF1_EDX_APIC: u32 = 1 << 9;
 const LEAF1_EDX_MTRR: u32 = 1 << 12;
 const LEAF1_EDX_PAT: u32 = 1 << 16;
 const LEAF1_ECX_OSXSAVE: u32 = 1 << 27;
+const LEAF1_ECX_XSAVE: u32 = 1 << 26;
+const CR0_MP: u64 = 1 << 1;
+const CR0_EM: u64 = 1 << 2;
+const CR0_TS: u64 = 1 << 3;
+const CR0_NE: u64 = 1 << 5;
+const CR4_OSFXSR: u64 = 1 << 9;
+const CR4_OSXMMEXCPT: u64 = 1 << 10;
+const CR4_OSXSAVE: u64 = 1 << 18;
+const LEAF_D1_XSAVES: u32 = 1 << 3;
+
+#[repr(C, align(64))]
+struct XstateArea([u8; AREA_BYTES as usize]);
+
+#[repr(C, align(16))]
+struct FxsaveArea([u8; 512]);
+
+static mut XSTATE_CANONICAL: XstateArea = XstateArea([0; AREA_BYTES as usize]);
+static mut XSTATE_CONTEXT_A: XstateArea = XstateArea([0; AREA_BYTES as usize]);
+static mut XSTATE_CONTEXT_B: XstateArea = XstateArea([0; AREA_BYTES as usize]);
+static mut XSTATE_FXSAVE: FxsaveArea = FxsaveArea([0; 512]);
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum XstateHardwareError {
+    Unsupported,
+    SupervisorState,
+    AreaSize,
+    Configuration,
+    RoundTrip,
+    Clear,
+}
+
+impl XstateHardwareError {
+    pub const fn label(self) -> &'static str {
+        match self {
+            Self::Unsupported => "unsupported",
+            Self::SupervisorState => "supervisor_state",
+            Self::AreaSize => "area_size",
+            Self::Configuration => "configuration",
+            Self::RoundTrip => "round_trip",
+            Self::Clear => "clear",
+        }
+    }
+}
 
 #[derive(Clone, Copy)]
 struct CpuidRegisters {
@@ -167,6 +216,16 @@ unsafe fn read_cr4() -> u64 {
     // SAFETY: PKCPU1 calls this only at CPL0 after PKXFER1; the instruction is read-only.
     unsafe { asm!("mov {}, cr4", out(reg) value, options(nomem, nostack, preserves_flags)) };
     value
+}
+
+unsafe fn write_cr0(value: u64) {
+    // SAFETY: PKXSTATE1 runs at CPL0 and writes only its frozen MP/EM/TS/NE policy.
+    unsafe { asm!("mov cr0, {}", in(reg) value, options(nostack, preserves_flags)) };
+}
+
+unsafe fn write_cr4(value: u64) {
+    // SAFETY: PKXSTATE1 runs at CPL0 after CPUID reports XSAVE and enables only OS-owned state.
+    unsafe { asm!("mov cr4, {}", in(reg) value, options(nostack, preserves_flags)) };
 }
 
 unsafe fn read_msr(msr: u32) -> u64 {
@@ -224,6 +283,272 @@ unsafe fn read_xcr0() -> u64 {
         )
     };
     u64::from(low) | (u64::from(high) << 32)
+}
+
+unsafe fn write_xcr0(value: u64) {
+    // SAFETY: the caller validates XCR0 against CPUID.0DH and the architectural dependencies.
+    unsafe {
+        asm!(
+            "xsetbv",
+            in("ecx") 0_u32,
+            in("eax") value as u32,
+            in("edx") (value >> 32) as u32,
+            options(nomem, nostack, preserves_flags)
+        )
+    };
+}
+
+unsafe fn xsave_area(pointer: *mut u8, mask: u64) {
+    // SAFETY: callers provide a writable 64-byte-aligned area sized for the selected mask.
+    unsafe {
+        asm!(
+            "xsave64 [{}]",
+            in(reg) pointer,
+            in("eax") mask as u32,
+            in("edx") (mask >> 32) as u32,
+            options(nostack)
+        )
+    };
+}
+
+unsafe fn xrstor_area(pointer: *const u8, mask: u64) {
+    // SAFETY: callers provide a validated standard-format area and a CPUID-supported mask.
+    unsafe {
+        asm!(
+            "xrstor64 [{}]",
+            in(reg) pointer,
+            in("eax") mask as u32,
+            in("edx") (mask >> 32) as u32,
+            options(readonly, nostack)
+        )
+    };
+}
+
+unsafe fn fxsave_area(pointer: *mut u8) {
+    // SAFETY: callers provide a writable 16-byte-aligned 512-byte area.
+    unsafe { asm!("fxsave64 [{}]", in(reg) pointer, options(nostack)) };
+}
+
+unsafe fn load_xmm0(pointer: *const u8) {
+    // SAFETY: the pointer names a readable 16-byte pattern and PKXSTATE1 owns XMM0 here.
+    unsafe { asm!("movdqu xmm0, [{}]", in(reg) pointer, options(readonly, nostack)) };
+}
+
+unsafe fn store_xmm0(pointer: *mut u8) {
+    // SAFETY: the pointer names a writable 16-byte observation buffer.
+    unsafe { asm!("movdqu [{}], xmm0", in(reg) pointer, options(nostack)) };
+}
+
+unsafe fn read_fcw() -> u16 {
+    let mut value = 0_u16;
+    // SAFETY: `value` is a writable two-byte stack object.
+    unsafe { asm!("fnstcw [{}]", in(reg) addr_of_mut!(value), options(nostack)) };
+    value
+}
+
+unsafe fn read_mxcsr() -> u32 {
+    let mut value = 0_u32;
+    // SAFETY: `value` is a writable four-byte stack object.
+    unsafe { asm!("stmxcsr [{}]", in(reg) addr_of_mut!(value), options(nostack)) };
+    value
+}
+
+unsafe fn write_mxcsr(value: &u32) {
+    // SAFETY: the caller masks unsupported bits and supplies a readable four-byte object.
+    unsafe { asm!("ldmxcsr [{}]", in(reg) value, options(readonly, nostack)) };
+}
+
+fn all_zero(pointer: *const u8, length: usize) -> bool {
+    let mut index = 0;
+    while index < length {
+        // SAFETY: callers pass one of the static areas with its exact declared length.
+        if unsafe { pointer.add(index).read_volatile() } != 0 {
+            return false;
+        }
+        index += 1;
+    }
+    true
+}
+
+pub unsafe fn run_xstate_policy() -> Result<XstateProof, XstateHardwareError> {
+    let leaf1 = cpuid(1, 0);
+    if leaf1.ecx & LEAF1_ECX_XSAVE == 0 {
+        return Err(XstateHardwareError::Unsupported);
+    }
+    let leaf_d0_before = cpuid(0x0d, 0);
+    let leaf_d1 = cpuid(0x0d, 1);
+    let supported_xcr0 = u64::from(leaf_d0_before.eax) | (u64::from(leaf_d0_before.edx) << 32);
+    if supported_xcr0 & SELECTED_XCR0 != SELECTED_XCR0 {
+        return Err(XstateHardwareError::Unsupported);
+    }
+    if leaf_d1.eax & LEAF_D1_XSAVES != 0 {
+        return Err(XstateHardwareError::SupervisorState);
+    }
+
+    // SAFETY: support checks above establish the only architectural writes in PKXSTATE1.
+    let initial_cr0 = unsafe { read_cr0() };
+    // SAFETY: PKXSTATE1 executes at CPL0 after PKXFER1.
+    let initial_cr4 = unsafe { read_cr4() };
+    let initial_xcr0 = if leaf1.ecx & LEAF1_ECX_OSXSAVE != 0 {
+        // SAFETY: CPUID reports that CR4.OSXSAVE already permits XGETBV.
+        unsafe { read_xcr0() }
+    } else {
+        0
+    };
+    let configured_cr0 = (initial_cr0 | CR0_MP | CR0_NE) & !(CR0_EM | CR0_TS);
+    let configured_cr4 = initial_cr4 | CR4_OSFXSR | CR4_OSXMMEXCPT | CR4_OSXSAVE;
+    // SAFETY: each value is restricted to the frozen policy above.
+    unsafe { write_cr0(configured_cr0) };
+    // SAFETY: CPUID reports XSAVE and the selected mask has valid dependencies.
+    unsafe { write_cr4(configured_cr4) };
+    // SAFETY: CPUID.0DH reports x87 and SSE support.
+    unsafe { write_xcr0(SELECTED_XCR0) };
+
+    let configured_leaf1 = cpuid(1, 0);
+    let leaf_d0 = cpuid(0x0d, 0);
+    // SAFETY: CR4.OSXSAVE is now enabled.
+    let configured_xcr0 = unsafe { read_xcr0() };
+    if configured_leaf1.ecx & LEAF1_ECX_OSXSAVE == 0
+        || configured_xcr0 != SELECTED_XCR0
+        || !(576..=AREA_BYTES).contains(&leaf_d0.ebx)
+        || leaf_d0.ecx < leaf_d0.ebx
+    {
+        return Err(XstateHardwareError::Configuration);
+    }
+
+    // SAFETY: selector 5 is single-BSP and owns these private statics until terminal halt.
+    let canonical = unsafe { addr_of_mut!(XSTATE_CANONICAL.0).cast::<u8>() };
+    // SAFETY: selector 5 is single-BSP and owns these private statics until terminal halt.
+    let context_a = unsafe { addr_of_mut!(XSTATE_CONTEXT_A.0).cast::<u8>() };
+    // SAFETY: selector 5 is single-BSP and owns these private statics until terminal halt.
+    let context_b = unsafe { addr_of_mut!(XSTATE_CONTEXT_B.0).cast::<u8>() };
+    // SAFETY: selector 5 is single-BSP and owns these private statics until terminal halt.
+    let fxsave = unsafe { addr_of_mut!(XSTATE_FXSAVE.0).cast::<u8>() };
+    if !(canonical as u64).is_multiple_of(64)
+        || !(context_a as u64).is_multiple_of(64)
+        || !(context_b as u64).is_multiple_of(64)
+    {
+        return Err(XstateHardwareError::AreaSize);
+    }
+    // SAFETY: all four pointers name private, correctly sized PKXSTATE1 statics.
+    unsafe {
+        write_bytes(canonical, 0, AREA_BYTES as usize);
+        write_bytes(context_a, 0, AREA_BYTES as usize);
+        write_bytes(context_b, 0, AREA_BYTES as usize);
+        write_bytes(fxsave, 0, 512);
+    }
+    compiler_fence(Ordering::SeqCst);
+
+    // SAFETY: CR0/CR4/XCR0 now satisfy the x87/SSE ownership preconditions.
+    unsafe { asm!("fninit", options(nomem, nostack)) };
+    let requested_mxcsr = INITIAL_MXCSR;
+    // SAFETY: INITIAL_MXCSR contains no reserved bit.
+    unsafe { write_mxcsr(&requested_mxcsr) };
+    // SAFETY: `fxsave` is a private 16-byte-aligned 512-byte area.
+    unsafe { fxsave_area(fxsave) };
+    // SAFETY: offset 28 is the architectural MXCSR_MASK u32 inside the FXSAVE area.
+    let raw_mxcsr_mask = unsafe { read_unaligned(fxsave.add(28).cast::<u32>()) };
+    if INITIAL_MXCSR & !effective_mxcsr_mask(raw_mxcsr_mask) != 0 {
+        return Err(XstateHardwareError::Configuration);
+    }
+
+    // Encode a complete standard-format initial image rather than inheriting firmware state.
+    // SAFETY: each field is inside the private 4,096-byte canonical area.
+    unsafe {
+        write_unaligned(canonical.cast::<u16>(), INITIAL_FCW);
+        write_unaligned(canonical.add(24).cast::<u32>(), INITIAL_MXCSR);
+        write_unaligned(
+            canonical.add(28).cast::<u32>(),
+            effective_mxcsr_mask(raw_mxcsr_mask),
+        );
+        write_unaligned(canonical.add(512).cast::<u64>(), SELECTED_XCR0);
+    }
+    compiler_fence(Ordering::SeqCst);
+    // SAFETY: canonical is an initialized standard-format area and the mask is supported.
+    unsafe { xrstor_area(canonical, SELECTED_XCR0) };
+    // SAFETY: the x87 and SSE state is live after the canonical restore.
+    let initial_fcw = unsafe { read_fcw() };
+    // SAFETY: the x87 and SSE state is live after the canonical restore.
+    let initial_mxcsr = unsafe { read_mxcsr() };
+
+    let pattern_a = [0x11_u8; 16];
+    let pattern_b = [0xa5_u8; 16];
+    let mut observed_a = [0_u8; 16];
+    let mut observed_b = [0_u8; 16];
+    let mut observed_zero = [0xff_u8; 16];
+    // SAFETY: the patterns and state areas meet the helper contracts.
+    unsafe {
+        load_xmm0(pattern_a.as_ptr());
+        xsave_area(context_a, SELECTED_XCR0);
+        load_xmm0(pattern_b.as_ptr());
+        xsave_area(context_b, SELECTED_XCR0);
+        xrstor_area(context_a, SELECTED_XCR0);
+        store_xmm0(observed_a.as_mut_ptr());
+        xrstor_area(context_b, SELECTED_XCR0);
+        store_xmm0(observed_b.as_mut_ptr());
+        xrstor_area(canonical, SELECTED_XCR0);
+        store_xmm0(observed_zero.as_mut_ptr());
+    }
+    // SAFETY: the XSTATE_BV fields are within initialized, aligned XSAVE areas.
+    let context_a_xstate_bv = unsafe { read_unaligned(context_a.add(512).cast::<u64>()) };
+    // SAFETY: the XSTATE_BV fields are within initialized, aligned XSAVE areas.
+    let context_b_xstate_bv = unsafe { read_unaligned(context_b.add(512).cast::<u64>()) };
+    let context_a_match = observed_a == pattern_a;
+    let context_b_match = observed_b == pattern_b;
+    let canonical_xmm0_zero = observed_zero == [0; 16];
+    if !context_a_match || !context_b_match {
+        return Err(XstateHardwareError::RoundTrip);
+    }
+    if !canonical_xmm0_zero {
+        return Err(XstateHardwareError::Clear);
+    }
+
+    // SAFETY: erase both per-context images and the capability scratch before reporting.
+    unsafe {
+        write_bytes(context_a, 0, AREA_BYTES as usize);
+        write_bytes(context_b, 0, AREA_BYTES as usize);
+        write_bytes(fxsave, 0, 512);
+    }
+    compiler_fence(Ordering::SeqCst);
+    if !all_zero(context_a, AREA_BYTES as usize) || !all_zero(context_b, AREA_BYTES as usize) {
+        return Err(XstateHardwareError::Clear);
+    }
+
+    Ok(XstateProof {
+        policy: XstatePolicy {
+            leaf1_ecx: configured_leaf1.ecx,
+            leaf1_edx: configured_leaf1.edx,
+            supported_xcr0,
+            selected_xcr0: configured_xcr0,
+            enabled_area_bytes: leaf_d0.ebx,
+            maximum_area_bytes: leaf_d0.ecx,
+            leaf_d1_eax: leaf_d1.eax,
+            cr0: configured_cr0,
+            cr4: configured_cr4,
+            xss: 0,
+            mxcsr_mask: raw_mxcsr_mask,
+            area_address: context_a as u64,
+            area_bytes: AREA_BYTES,
+            save_format: SaveFormat::StandardXsave,
+            switch_strategy: SwitchStrategy::Eager,
+            kernel_simd: KernelSimdPolicy::Forbidden,
+        },
+        cr0_before: initial_cr0,
+        cr4_before: initial_cr4,
+        xcr0_before: initial_xcr0,
+        initial_fcw,
+        initial_mxcsr,
+        context_a_xstate_bv,
+        context_b_xstate_bv,
+        context_a_match,
+        context_b_match,
+        canonical_xmm0_zero,
+        context_image_zero_bytes: AREA_BYTES * 2,
+        save_count: 2,
+        restore_count: 4,
+        state_write_count: 3,
+        unexpected_nm_count: 0,
+    })
 }
 
 pub unsafe fn observe_cpu_policy() -> CpuPolicySnapshot {

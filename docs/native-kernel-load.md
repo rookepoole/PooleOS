@@ -153,9 +153,9 @@ halts permanently at `STOP BEFORE TRANSFER`.
 
 ## Qualified Evidence
 
-The Cycle 120-refreshed default-path receipt records:
+The Cycle 122-refreshed default-path receipt records:
 
-- 109/109 Rust host tests across PooleBoot, PBART1, the six-format retained-set
+- 116/116 Rust host tests across PooleBoot, PBART1, the six-format retained-set
   validator, PBTRUST1, PBC1/PSM1/PKELF1/PBP1, PKMAP2, PBEXIT1, and PKENTRY1;
 - two byte-identical PooleBoot builds, PooleKernel builds, and GPT/FAT32 media
   generations;
@@ -192,7 +192,7 @@ The Cycle 120-refreshed default-path receipt records:
   physical-presence separation, durable receipt rules, and mandatory
   development activation denial;
 - an exact 11,952-byte nine-file retained set with SHA-256
-  `C46B9030922FB095F5321CD62CD4930B812B2D8D8EA58B93B7C51956B6EEC8B8`, nine
+  `872978D7FB5E1108D04736796A247E5E59D9EEC0C97AE991CFBAC83D819A15DC`, nine
   target parsers, manifest/inner/trust cross-bindings, exact unsigned-policy
   denial, and zero authority/action/state/hardware effects;
 - 155/155 integrated negative controls, including exact retained PSM1/PBTP1/

@@ -1,8 +1,7 @@
 {
-  "artifact_kind": "pooleos_native_kernel_transfer_readiness",
+  "artifact_kind": "pooleos_native_kernel_xstate_policy_readiness",
   "build": {
-    "default_and_transfer_binaries_differ": true,
-    "default_feature_enabled": false,
+    "all_profile_binaries_distinct": true,
     "default_pooleboot": {
       "byte_count": 205824,
       "clean_build_count": 2,
@@ -77,9 +76,6 @@
       "selected_development_feature": null,
       "sha256": "73C10DF088158A8B2F66CD157C424787E0DCDF14F1DCB2E564C70040857C916F"
     },
-    "default_stop_marker_present": true,
-    "default_transfer_marker_absent": true,
-    "development_transfer_feature": true,
     "kernel_entry": {
       "artifact_kind": "pooleos_native_kernel_entry_readiness",
       "bindings": {
@@ -701,7 +697,29 @@
         "target": "x86_64-unknown-none"
       }
     },
-    "transfer_pooleboot": {
+    "profile_count": 2,
+    "source_audit": {
+      "forbidden_token_hits": [],
+      "forbidden_tokens": [
+        "wrmsr",
+        "xsaves64",
+        "xrstors64",
+        "ymm",
+        "zmm"
+      ],
+      "required_instruction_counts": {
+        "cr0_write": 1,
+        "cr4_write": 1,
+        "standard_restore": 1,
+        "standard_save": 1,
+        "xcr0_write": 1
+      },
+      "result": "pass_bounded_source_instruction_audit",
+      "scope": "dedicated PKXSTATE1 architectural helpers and proof path",
+      "state_write_instruction_count": 3,
+      "xmm0_occurrences_outside_scope": 0
+    },
+    "xstate_pooleboot": {
       "byte_count": 207360,
       "clean_build_count": 2,
       "development_transfer_feature": true,
@@ -768,34 +786,38 @@
             "virtual_size": 748
           }
         ],
-        "sha256": "A9C88FBC4A3381A69867C558E20E6036E0C2D117011D6A2A57AE29E00035C828",
+        "sha256": "12860C65D127CA7BB70149C5493B107593CCA75187EB17E1D2A3DE9B7192EB7D",
         "subsystem": 10,
         "timestamp": 0
       },
-      "selected_development_feature": "development-transfer",
-      "sha256": "A9C88FBC4A3381A69867C558E20E6036E0C2D117011D6A2A57AE29E00035C828"
+      "selected_development_feature": "development-xstate-policy",
+      "sha256": "12860C65D127CA7BB70149C5493B107593CCA75187EB17E1D2A3DE9B7192EB7D"
     }
   },
   "claims": {
-    "authenticated_kernel_entry_profile_valid": false,
-    "bootstrap_stack_installed": true,
-    "default_pooleboot_transfer_enabled": false,
-    "exact_pbp1_revalidated_in_kernel": true,
-    "exit_boot_services_succeeded_before_transfer": true,
-    "interrupts_and_direction_flag_cleared": true,
-    "live_poolekernel_entry_executed": true,
-    "nine_retained_files_revalidated_in_kernel": true,
-    "physical_media_written": false,
+    "avx_or_extended_xstate_qualified": false,
+    "canonical_initial_state_observed": true,
+    "eager_standard_xsave_selected": true,
+    "kernel_simd_forbidden": true,
+    "lazy_nm_strategy_qualified": false,
+    "n7_exit_gate_satisfied": false,
+    "per_context_images_cleared": true,
     "production_ready": false,
-    "retained_cr3_installed": true,
-    "serial_debugcon_exact_match": true,
-    "sysv_register_contract_observed": true,
-    "target_firmware_qualified": false,
-    "terminal_unsigned_denial": true,
-    "two_qemu_runs_exact_match": true
+    "rust_python_policy_agreement": true,
+    "scheduler_context_switch_integrated": false,
+    "smp_or_cpu_migration_qualified": false,
+    "target_cpu_qualified": false,
+    "two_context_round_trip_observed": true,
+    "two_qemu_runs_exact_match": true,
+    "unmasked_x87_sse_exception_handlers_qualified": false,
+    "x87_sse_xsave_policy_frozen": true
   },
-  "contract_id": "PKXFER1",
+  "contract_id": "PKXSTATE1",
   "execution": {
+    "acceleration": "tcg_single_thread",
+    "base_tier0_cpu_model": "qemu64",
+    "base_tier0_profile_modified": false,
+    "cpu_model": "EPYC-Rome-v4,-avx,-avx2,-fma,-f16c,-pku",
     "exact_marker_match": true,
     "exact_pbp1_match": true,
     "exact_screenshot_match": true,
@@ -813,7 +835,7 @@
       "-accel",
       "tcg,thread=single",
       "-cpu",
-      "qemu64",
+      "EPYC-Rome-v4,-avx,-avx2,-fma,-f16c,-pku",
       "-smp",
       "1,sockets=1,dies=1,clusters=1,cores=1,threads=1,maxcpus=1",
       "-m",
@@ -862,7 +884,70 @@
       "-qmp",
       "tcp:127.0.0.1:$QMP_PORT,server=on,wait=off"
     ],
-    "normalized_command_sha256": "BF26B10D53C21F195065BE2F2261FCDEED04E2013068AC329F1BB1D0A3766C32",
+    "normalized_command_sha256": "ACF6E3BD56B15D8D2D6C144E486B7FACB3DBFEAAA562B2E0213EE9FBE8BC9A75",
+    "observation": {
+      "capability": {
+        "enabled_area_bytes": 576,
+        "leaf1_ecx": 3470270987,
+        "leaf1_edx": 126614525,
+        "leaf_d1_eax": 5,
+        "maximum_area_bytes": 576,
+        "supported_xcr0": 3
+      },
+      "clear": {
+        "all_selected_components": "canonical_image",
+        "canonical_xmm0_zero": 1,
+        "image_zero_bytes": 8192,
+        "kernel_simd_policy": "forbidden",
+        "unexpected_nm": 0
+      },
+      "config": {
+        "alignment": 64,
+        "area_bytes": 4096,
+        "cr0_after": 2147549235,
+        "cr0_before": 2147549235,
+        "cr4_after": 263784,
+        "cr4_before": 1640,
+        "format": "standard",
+        "strategy": "eager",
+        "xcr0_after": 3,
+        "xcr0_before": 0,
+        "xss": 0
+      },
+      "initialization": {
+        "exceptions": "masked",
+        "fcw": 895,
+        "mxcsr": 8064,
+        "mxcsr_mask_effective": 65535,
+        "mxcsr_mask_raw": 65535,
+        "nm_policy": "unexpected_fail_closed"
+      },
+      "result": {
+        "actions": 0,
+        "authority": 0,
+        "bsp": 1,
+        "profile": "epyc_rome_v4_x87_sse",
+        "scheduler": 0,
+        "signatures": 0,
+        "smp": 0,
+        "target": 0,
+        "terminal": "halt",
+        "writes": 3
+      },
+      "switch": {
+        "interrupts": 0,
+        "kernel_simd": 0,
+        "match_a": 1,
+        "match_b": 1,
+        "owners": "10,11",
+        "restores": 4,
+        "same_cpu": 1,
+        "saves": 2,
+        "scheduler_lock": 1,
+        "xstate_bv_a": 3,
+        "xstate_bv_b": 3
+      }
+    },
     "profile_id": "bootstrap-debug",
     "qemu_sha256": "A930E028F93D0FA47E4D58BDAD2432F7466DC2B6AF0AE376F77EF7A298FFDD02",
     "run_count": 2,
@@ -888,240 +973,294 @@
           "state_writes": 0
         },
         "local_paths_recorded": false,
-        "marker_sha256": "2A3EC71F59DFD6E68E53A7959307AA2A74DC54E2A5082555B32210C18C96CF40",
+        "marker_sha256": "E1EC9A93459767D8989DBB6F21A81EBC09A8DA191319EF10CF0857A76CD360B5",
         "marker_summary": {
-          "boot_prefix": {
-            "artifact_set": {
-              "artifact_count": 6,
-              "contract_id": "PBART1",
-              "file_bytes": 8761,
-              "fnv1a64": "33FEDE689382C5B9",
-              "measured": false,
-              "page_count": 6,
-              "pages_retained": true,
-              "retained_input_count": 9,
-              "retained_input_page_count": 9,
-              "semantics_applied": false,
-              "signatures_verified": false
+          "capability": {
+            "enabled_area_bytes": 576,
+            "leaf1_ecx": 3470270987,
+            "leaf1_edx": 126614525,
+            "leaf_d1_eax": 5,
+            "maximum_area_bytes": 576,
+            "supported_xcr0": 3
+          },
+          "clear": {
+            "all_selected_components": "canonical_image",
+            "canonical_xmm0_zero": 1,
+            "image_zero_bytes": 8192,
+            "kernel_simd_policy": "forbidden",
+            "unexpected_nm": 0
+          },
+          "config": {
+            "alignment": 64,
+            "area_bytes": 4096,
+            "cr0_after": 2147549235,
+            "cr0_before": 2147549235,
+            "cr4_after": 263784,
+            "cr4_before": 1640,
+            "format": "standard",
+            "strategy": "eager",
+            "xcr0_after": 3,
+            "xcr0_before": 0,
+            "xss": 0
+          },
+          "initialization": {
+            "exceptions": "masked",
+            "fcw": 895,
+            "mxcsr": 8064,
+            "mxcsr_mask_effective": 65535,
+            "mxcsr_mask_raw": 65535,
+            "nm_policy": "unexpected_fail_closed"
+          },
+          "result": {
+            "actions": 0,
+            "authority": 0,
+            "bsp": 1,
+            "profile": "epyc_rome_v4_x87_sse",
+            "scheduler": 0,
+            "signatures": 0,
+            "smp": 0,
+            "target": 0,
+            "terminal": "halt",
+            "writes": 3
+          },
+          "switch": {
+            "interrupts": 0,
+            "kernel_simd": 0,
+            "match_a": 1,
+            "match_b": 1,
+            "owners": "10,11",
+            "restores": 4,
+            "same_cpu": 1,
+            "saves": 2,
+            "scheduler_lock": 1,
+            "xstate_bv_a": 3,
+            "xstate_bv_b": 3
+          },
+          "transfer_prefix": {
+            "boot_prefix": {
+              "artifact_set": {
+                "artifact_count": 6,
+                "contract_id": "PBART1",
+                "file_bytes": 8761,
+                "fnv1a64": "33FEDE689382C5B9",
+                "measured": false,
+                "page_count": 6,
+                "pages_retained": true,
+                "retained_input_count": 9,
+                "retained_input_page_count": 9,
+                "semantics_applied": false,
+                "signatures_verified": false
+              },
+              "boot_config": {
+                "boot_attempt_limit": 3,
+                "byte_count": 229,
+                "default_entry_hash": "61053F0E3EBBD272",
+                "entry_count": 1,
+                "manifest_max_bytes": 65536,
+                "selected_slot": 1,
+                "timeout_ms": 0
+              },
+              "boot_exit": {
+                "artifact_page_count": 9,
+                "attempt_count": 1,
+                "contract_id": "PBEXIT1",
+                "descriptor_count": 111,
+                "descriptor_size": 48,
+                "firmware_calls_after_exit": 0,
+                "handoff_page_count": 256,
+                "kernel_page_count": 64,
+                "map_byte_count": 5328,
+                "stack_page_count": 8,
+                "successful_exit_prefix_validated": true,
+                "synthetic_stop_used_for_prefix_parser_only": true,
+                "table_page_count": 4
+              },
+              "config_table_count": 10,
+              "gop": {
+                "format": "BGR",
+                "height": 800,
+                "mode": 0,
+                "stride": 1280,
+                "width": 1280
+              },
+              "inner_set": {
+                "actions_authorized": 0,
+                "artifact_count": 6,
+                "authority_grants": 0,
+                "cross_binding_count": 6,
+                "development_denial_count": 6,
+                "exact_retained_bytes": true,
+                "file_bytes": 8761,
+                "hardware_observations": 0,
+                "parser_count": 6,
+                "payload_bytes": 8185,
+                "proof_id": "N5-INNER-LIVE-PARSE-001",
+                "retained_set_sha256": "872978D7FB5E1108D04736796A247E5E59D9EEC0C97AE991CFBAC83D819A15DC",
+                "state_writes": 0
+              },
+              "kernel": {
+                "entry_offset": 32768,
+                "file_byte_count": 180224,
+                "file_handles_closed": 12,
+                "file_pools_freed": 11,
+                "image_byte_count": 262144,
+                "loaded_fnv1a64": "D68370803C7BFA68",
+                "page_count": 64,
+                "pages_retained": true,
+                "relocation_count": 335,
+                "resources_released": false
+              },
+              "kernel_map": {
+                "contract_id": "PKMAP2",
+                "firmware_calls_while_active": 0,
+                "first_page_table_index": 0,
+                "framebuffer_cache_signature": "00",
+                "framebuffer_first_page_bytes": 1073741824,
+                "framebuffer_last_page_bytes": 1073741824,
+                "framebuffer_preserved": true,
+                "leaf_fingerprint": "066F6E68217211A5",
+                "mapped_fnv1a64": "D68370803C7BFA68",
+                "mapped_page_count": 64,
+                "mapping_count": 4,
+                "original_cr3_restored": true,
+                "page_directory_index": 0,
+                "pdpt_index": 510,
+                "physical_address_bits": 40,
+                "pml4_index": 511,
+                "read_execute_page_count": 32,
+                "read_only_page_count": 12,
+                "read_write_page_count": 20,
+                "retained": {
+                  "guard_page_count": 2,
+                  "handoff_first_page_table_index": 80,
+                  "handoff_page_count": 256,
+                  "handoff_physical_base": 501088256,
+                  "handoff_virtual_base": 18446744071562395648,
+                  "kernel_physical_base": 503848960,
+                  "page_table_root_physical": 504442880,
+                  "retained_leaf_fingerprint": "79B73AFB48B79C75",
+                  "stack_first_page_table_index": 65,
+                  "stack_page_count": 8,
+                  "stack_physical_base": 504459264,
+                  "stack_top_virtual": 18446744071562366976,
+                  "table_page_count": 4,
+                  "total_mapped_page_count": 328
+                },
+                "table_page_count": 4,
+                "tables_retained": true,
+                "writable_executable_page_count": 0
+              },
+              "manifest": {
+                "artifact_count": 7,
+                "byte_count": 2615,
+                "kernel_file_byte_count": 180224,
+                "kernel_image_byte_count": 262144,
+                "kernel_sha256_prefix": "7BFD0BFF2ED6F3F3",
+                "kernel_version": 1,
+                "manifest_id_hash": "4A2625333244591C",
+                "manifest_version": 1,
+                "minimum_secure_version": 1,
+                "slot": 1
+              },
+              "marker_count": 25,
+              "memory_map": {
+                "byte_count": 5328,
+                "descriptor_bytes": 48,
+                "descriptor_count": 111
+              },
+              "ordered_contract_match": true,
+              "pbp1": {
+                "artifact_count": 10,
+                "boot_services_exited": true,
+                "byte_count": 5608,
+                "bytes_unchanged": true,
+                "descriptor_bytes": 48,
+                "development_mode_only": true,
+                "exit_attempts": 1,
+                "fnv1a64": "F6ECD49707826EB3",
+                "framebuffer_present": 1,
+                "memory_entry_count": 111,
+                "message_crc32": "E9FB1487",
+                "pre_exit": false,
+                "record_count": 4,
+                "temporary_pools_released": false
+              },
+              "trust_state": {
+                "authority_grants": 0,
+                "binding_count": 14,
+                "contract_id": "PBTRUST1",
+                "denial": "pbtrust_policy_unsigned",
+                "denial_count": 1,
+                "policy_bytes": 320,
+                "policy_sha256": "714128872087FB09A8553E3D0B21713DADF58FD0929269A6F2DF5FFE8F28811B",
+                "signature_verifications": 0,
+                "state_authenticated": false,
+                "state_bytes": 256,
+                "state_monotonic": false,
+                "state_sha256": "86672AD1384509D2053CB191C17210351BE77C7C939227152DE26668932EA4AC",
+                "state_source": "esp_candidate_not_persistent_authority",
+                "state_writes": 0
+              },
+              "uefi_revision": 131142
             },
-            "boot_config": {
-              "boot_attempt_limit": 3,
-              "byte_count": 229,
-              "default_entry_hash": "61053F0E3EBBD272",
+            "kernel_entry": {
+              "build_id": "PKBUILD1-CYCLE122-N7-XSTATE-POLICY-001",
+              "entry_contract": "PKENTRY1",
               "entry_count": 1,
-              "manifest_max_bytes": 65536,
-              "selected_slot": 1,
-              "timeout_ms": 0
+              "serial": "present",
+              "transfer_contract": "PKXFER1"
             },
-            "boot_exit": {
-              "artifact_page_count": 9,
-              "attempt_count": 1,
-              "contract_id": "PBEXIT1",
-              "descriptor_count": 96,
-              "descriptor_size": 48,
-              "firmware_calls_after_exit": 0,
-              "handoff_page_count": 256,
-              "kernel_page_count": 64,
-              "map_byte_count": 4608,
-              "stack_page_count": 8,
-              "successful_exit_prefix_validated": true,
-              "synthetic_stop_used_for_prefix_parser_only": true,
-              "table_page_count": 4
+            "kernel_pbp1": {
+              "artifact_count": 10,
+              "production_profile_valid": 0,
+              "profile": "development",
+              "record_count": 4
             },
-            "config_table_count": 10,
-            "gop": {
-              "format": "BGR",
-              "height": 800,
-              "mode": 0,
-              "stride": 1280,
-              "width": 1280
-            },
-            "inner_set": {
+            "kernel_revalidation": {
               "actions_authorized": 0,
               "artifact_count": 6,
               "authority_grants": 0,
-              "cross_binding_count": 6,
-              "development_denial_count": 6,
-              "exact_retained_bytes": true,
-              "file_bytes": 8761,
-              "hardware_observations": 0,
-              "parser_count": 6,
-              "payload_bytes": 8185,
-              "proof_id": "N5-INNER-LIVE-PARSE-001",
-              "retained_set_sha256": "872978D7FB5E1108D04736796A247E5E59D9EEC0C97AE991CFBAC83D819A15DC",
-              "state_writes": 0
-            },
-            "kernel": {
-              "entry_offset": 32768,
-              "file_byte_count": 180224,
-              "file_handles_closed": 12,
-              "file_pools_freed": 11,
-              "image_byte_count": 262144,
-              "loaded_fnv1a64": "D68370803C7BFA68",
-              "page_count": 64,
-              "pages_retained": true,
-              "relocation_count": 335,
-              "resources_released": false
-            },
-            "kernel_map": {
-              "contract_id": "PKMAP2",
-              "firmware_calls_while_active": 0,
-              "first_page_table_index": 0,
-              "framebuffer_cache_signature": "00",
-              "framebuffer_first_page_bytes": 2097152,
-              "framebuffer_last_page_bytes": 2097152,
-              "framebuffer_preserved": true,
-              "leaf_fingerprint": "066F6E68217211A5",
-              "mapped_fnv1a64": "D68370803C7BFA68",
-              "mapped_page_count": 64,
-              "mapping_count": 4,
-              "original_cr3_restored": true,
-              "page_directory_index": 0,
-              "pdpt_index": 510,
-              "physical_address_bits": 40,
-              "pml4_index": 511,
-              "read_execute_page_count": 32,
-              "read_only_page_count": 12,
-              "read_write_page_count": 20,
-              "retained": {
-                "guard_page_count": 2,
-                "handoff_first_page_table_index": 80,
-                "handoff_page_count": 256,
-                "handoff_physical_base": 498188288,
-                "handoff_virtual_base": 18446744071562395648,
-                "kernel_physical_base": 500948992,
-                "page_table_root_physical": 501542912,
-                "retained_leaf_fingerprint": "F6AABD8C612439ED",
-                "stack_first_page_table_index": 65,
-                "stack_page_count": 8,
-                "stack_physical_base": 501559296,
-                "stack_top_virtual": 18446744071562366976,
-                "table_page_count": 4,
-                "total_mapped_page_count": 328
-              },
-              "table_page_count": 4,
-              "tables_retained": true,
-              "writable_executable_page_count": 0
-            },
-            "manifest": {
-              "artifact_count": 7,
-              "byte_count": 2615,
-              "kernel_file_byte_count": 180224,
-              "kernel_image_byte_count": 262144,
-              "kernel_sha256_prefix": "7BFD0BFF2ED6F3F3",
-              "kernel_version": 1,
-              "manifest_id_hash": "4A2625333244591C",
-              "manifest_version": 1,
-              "minimum_secure_version": 1,
-              "slot": 1
-            },
-            "marker_count": 25,
-            "memory_map": {
-              "byte_count": 4608,
-              "descriptor_bytes": 48,
-              "descriptor_count": 96
-            },
-            "ordered_contract_match": true,
-            "pbp1": {
-              "artifact_count": 10,
-              "boot_services_exited": true,
-              "byte_count": 5008,
-              "bytes_unchanged": true,
-              "descriptor_bytes": 48,
-              "development_mode_only": true,
-              "exit_attempts": 1,
-              "fnv1a64": "DA2B2CC1558FD8E2",
-              "framebuffer_present": 1,
-              "memory_entry_count": 96,
-              "message_crc32": "573C9ADE",
-              "pre_exit": false,
-              "record_count": 4,
-              "temporary_pools_released": false
-            },
-            "trust_state": {
-              "authority_grants": 0,
-              "binding_count": 14,
-              "contract_id": "PBTRUST1",
+              "contract_id": "PKREVAL1",
               "denial": "pbtrust_policy_unsigned",
-              "denial_count": 1,
-              "policy_bytes": 320,
+              "manifest_bytes": 2615,
+              "parser_count": 9,
               "policy_sha256": "714128872087FB09A8553E3D0B21713DADF58FD0929269A6F2DF5FFE8F28811B",
-              "signature_verifications": 0,
-              "state_authenticated": false,
-              "state_bytes": 256,
-              "state_monotonic": false,
+              "retained_file_bytes": 11952,
+              "retained_file_count": 9,
+              "retained_set_sha256": "872978D7FB5E1108D04736796A247E5E59D9EEC0C97AE991CFBAC83D819A15DC",
               "state_sha256": "86672AD1384509D2053CB191C17210351BE77C7C939227152DE26668932EA4AC",
-              "state_source": "esp_candidate_not_persistent_authority",
               "state_writes": 0
             },
-            "uefi_revision": 131142
-          },
-          "kernel_entry": {
-            "build_id": "PKBUILD1-CYCLE122-N7-XSTATE-POLICY-001",
-            "entry_contract": "PKENTRY1",
-            "entry_count": 1,
-            "serial": "present",
-            "transfer_contract": "PKXFER1"
-          },
-          "kernel_pbp1": {
-            "artifact_count": 10,
-            "production_profile_valid": 0,
-            "profile": "development",
-            "record_count": 4
-          },
-          "kernel_revalidation": {
-            "actions_authorized": 0,
-            "artifact_count": 6,
-            "authority_grants": 0,
-            "contract_id": "PKREVAL1",
-            "denial": "pbtrust_policy_unsigned",
-            "manifest_bytes": 2615,
-            "parser_count": 9,
-            "policy_sha256": "714128872087FB09A8553E3D0B21713DADF58FD0929269A6F2DF5FFE8F28811B",
-            "retained_file_bytes": 11952,
-            "retained_file_count": 9,
-            "retained_set_sha256": "872978D7FB5E1108D04736796A247E5E59D9EEC0C97AE991CFBAC83D819A15DC",
-            "state_sha256": "86672AD1384509D2053CB191C17210351BE77C7C939227152DE26668932EA4AC",
-            "state_writes": 0
-          },
-          "kernel_state": {
-            "cr3": 501542912,
-            "entry": 18446744071562100736,
-            "handoff": 18446744071562395648,
-            "handoff_bytes": 5008,
-            "rflags_df": 0,
-            "rflags_if": 0,
-            "root": 501542912,
-            "stack_top": 18446744071562366976
-          },
-          "kernel_terminal": {
-            "actions_authorized": 0,
-            "authority_grants": 0,
-            "contract_id": "PKXFER1",
-            "entry_count": 1,
-            "firmware_calls_after_exit": 0,
-            "signature_verifications": 0,
-            "state_writes": 0,
-            "terminal": "halt"
-          },
-          "marker_count": 30,
-          "ordered_contract_match": true,
-          "transfer_arm": {
-            "actions_authorized": 0,
-            "authority_grants": 0,
-            "contract_id": "PKXFER1",
-            "cr3": 501542912,
-            "emulator_only": 1,
-            "entry": 18446744071562100736,
-            "firmware_calls_after_exit": 0,
-            "handoff": 18446744071562395648,
-            "handoff_bytes": 5008,
-            "mode": "development",
-            "root": 501542912,
-            "signature_verifications": 0,
-            "stack_top": 18446744071562366976,
-            "state_writes": 0,
-            "trap_scenario": 0
+            "kernel_state": {
+              "cr3": 504442880,
+              "entry": 18446744071562100736,
+              "handoff": 18446744071562395648,
+              "handoff_bytes": 5608,
+              "rflags_df": 0,
+              "rflags_if": 0,
+              "root": 504442880,
+              "stack_top": 18446744071562366976
+            },
+            "marker_count": 30,
+            "ordered_contract_match": true,
+            "synthetic_unsigned_terminal_used_for_prefix_parser_only": true,
+            "transfer_arm": {
+              "actions_authorized": 0,
+              "authority_grants": 0,
+              "contract_id": "PKXFER1",
+              "cr3": 504442880,
+              "emulator_only": 1,
+              "entry": 18446744071562100736,
+              "firmware_calls_after_exit": 0,
+              "handoff": 18446744071562395648,
+              "handoff_bytes": 5608,
+              "mode": "development",
+              "root": 504442880,
+              "signature_verifications": 0,
+              "stack_top": 18446744071562366976,
+              "state_writes": 0,
+              "trap_scenario": 5
+            }
           }
         },
         "markers": [
@@ -1143,18 +1282,23 @@
           "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
           "POOLEBOOT/0.1 FRAME READY",
           "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=64 ro=12 rx=32 rw=20 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=066F6E68217211A5",
-          "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=64 physical_bits=40 mapped_fnv1a64=D68370803C7BFA68 framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
-          "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=8 handoff_pages=256 guards=2 total_pages=328 stack_pt=65 handoff_pt=80 kernel_phys=000000001DDBE000 root=000000001DE4F000 stack_phys=000000001DE53000 stack_top=FFFFFFFF80049000 handoff_phys=000000001DB1C000 handoff_virt=FFFFFFFF80050000 retained_fnv1a64=F6AABD8C612439ED original_cr3=restored firmware_calls_while_active=0",
-          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5008 records=4 memory_entries=96 framebuffer=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=573C9ADE fnv1a64=DA2B2CC1558FD8E2 state=boot_services_exited bytes_unchanged=1",
-          "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4608 descriptor_bytes=48 descriptors=96",
+          "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=64 physical_bits=40 mapped_fnv1a64=D68370803C7BFA68 framebuffer=preserved cache_signature=00 first_page_bytes=1073741824 last_page_bytes=1073741824",
+          "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=8 handoff_pages=256 guards=2 total_pages=328 stack_pt=65 handoff_pt=80 kernel_phys=000000001E082000 root=000000001E113000 stack_phys=000000001E117000 stack_top=FFFFFFFF80049000 handoff_phys=000000001DDE0000 handoff_virt=FFFFFFFF80050000 retained_fnv1a64=79B73AFB48B79C75 original_cr3=restored firmware_calls_while_active=0",
+          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5608 records=4 memory_entries=111 framebuffer=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=E9FB1487 fnv1a64=F6ECD49707826EB3 state=boot_services_exited bytes_unchanged=1",
+          "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=5328 descriptor_bytes=48 descriptors=111",
           "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=64 artifact_pages=9 table_pages=4 stack_pages=8 handoff_pages=256",
-          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF80008000 handoff=FFFFFFFF80050000 bytes=5008 stack_top=FFFFFFFF80049000 root=000000001DE4F000 cr3=000000001DE4F000 trap_scenario=0 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
+          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF80008000 handoff=FFFFFFFF80050000 bytes=5608 stack_top=FFFFFFFF80049000 root=000000001E113000 cr3=000000001E113000 trap_scenario=5 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
           "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
           "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE122-N7-XSTATE-POLICY-001 entry_count=1 serial=present",
-          "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF80050000 bytes=5008 entry=0xFFFFFFFF80008000 stack_top=0xFFFFFFFF80049000 root=0x000000001DE4F000 cr3=0x000000001DE4F000 rflags_if=0 rflags_df=0",
+          "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF80050000 bytes=5608 entry=0xFFFFFFFF80008000 stack_top=0xFFFFFFFF80049000 root=0x000000001E113000 cr3=0x000000001E113000 rflags_if=0 rflags_df=0",
           "POOLEOS:KERNEL:PBP1 PASS profile=development records=4 artifacts=10 production_profile_valid=0",
           "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=872978D7FB5E1108D04736796A247E5E59D9EEC0C97AE991CFBAC83D819A15DC policy_sha256=714128872087FB09A8553E3D0B21713DADF58FD0929269A6F2DF5FFE8F28811B state_sha256=86672AD1384509D2053CB191C17210351BE77C7C939227152DE26668932EA4AC denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
-          "POOLEOS:KERNEL:TRANSFER-DENIED PASS contract=PKXFER1 terminal=halt entry_count=1 post_exit_firmware_calls=0 signatures=0 authority=0 actions=0 writes=0"
+          "POOLEOS:KERNEL:XSTATE-CAPABILITY PASS contract=PKXSTATE1 leaf1_ecx=0x00000000CED8220B leaf1_edx=0x00000000078BFBFD supported_xcr0=0x0000000000000003 leafd1_eax=0x0000000000000005 enabled_bytes=576 maximum_bytes=576",
+          "POOLEOS:KERNEL:XSTATE-CONFIG PASS contract=PKXSTATE1 cr0_before=0x0000000080010033 cr0_after=0x0000000080010033 cr4_before=0x0000000000000668 cr4_after=0x0000000000040668 xcr0_before=0x0000000000000000 xcr0_after=0x0000000000000003 xss=0x0000000000000000 strategy=eager format=standard area_bytes=4096 alignment=64",
+          "POOLEOS:KERNEL:XSTATE-INIT PASS contract=PKXSTATE1 fcw=0x000000000000037F mxcsr=0x0000000000001F80 mxcsr_mask_raw=0x000000000000FFFF mxcsr_mask_effective=0x000000000000FFFF exceptions=masked nm_policy=unexpected_fail_closed",
+          "POOLEOS:KERNEL:XSTATE-SWITCH PASS contract=PKXSTATE1 owners=10,11 saves=2 restores=4 xstate_bv_a=0x0000000000000003 xstate_bv_b=0x0000000000000003 match_a=1 match_b=1 scheduler_lock=1 interrupts=0 same_cpu=1 kernel_simd=0",
+          "POOLEOS:KERNEL:XSTATE-CLEAR PASS contract=PKXSTATE1 canonical_xmm0_zero=1 image_zero_bytes=8192 unexpected_nm=0 all_selected_components=canonical_image kernel_simd_policy=forbidden",
+          "POOLEOS:KERNEL:XSTATE-RESULT PASS contract=PKXSTATE1 profile=epyc_rome_v4_x87_sse bsp=1 writes=3 signatures=0 authority=0 actions=0 scheduler=0 smp=0 target=0 terminal=halt"
         ],
         "media_read_only": true,
         "pbp1_serial_debugcon_exact_match": true,
@@ -1164,7 +1308,7 @@
             {
               "entry_virtual": "FFFFFFFF80008000",
               "flags": 9,
-              "physical_base": "000000001DDBE000",
+              "physical_base": "000000001E082000",
               "physical_size": 262144,
               "role": 1,
               "sha256": "7BFD0BFF2ED6F3F391AE09E57ED1559E3B53B14B4F5D4D969B2938FE8D30BAD6",
@@ -1174,7 +1318,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E5D8000",
+              "physical_base": "000000001E7B7000",
               "physical_size": 1860,
               "role": 2,
               "sha256": "00C28AB2DE744281CEC0459598A29E8C608E95BC2AF5207D78B67F494EF1E2F8",
@@ -1184,7 +1328,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001DE61000",
+              "physical_base": "000000001E125000",
               "physical_size": 1088,
               "role": 3,
               "sha256": "FFAC48737878D6D4986CBF1936F4A8BE7898D544D4C4043F4D51144AEC728B59",
@@ -1194,7 +1338,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001DE60000",
+              "physical_base": "000000001E124000",
               "physical_size": 821,
               "role": 4,
               "sha256": "5BA1A62EF2D3A4D96DF85A485DBF126550A3884EE51CE18B9125E62284B22896",
@@ -1204,7 +1348,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001DE5F000",
+              "physical_base": "000000001E123000",
               "physical_size": 1504,
               "role": 5,
               "sha256": "04D5F70F88FE15BF747992390467BC8AE9E3BD0E28F6D131C427B73764641397",
@@ -1214,7 +1358,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001DE5E000",
+              "physical_base": "000000001E122000",
               "physical_size": 1408,
               "role": 6,
               "sha256": "BD162F099BB0145738BA3FAD57B0B903FDB12B0080BBC85812528DC9C1A7A728",
@@ -1224,7 +1368,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001DE5D000",
+              "physical_base": "000000001E121000",
               "physical_size": 2080,
               "role": 7,
               "sha256": "5272D26C19D3EB24480AE49F231FFA2FC4FD34BCFC1E2F794197AA1724F1E121",
@@ -1234,7 +1378,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E5E1000",
+              "physical_base": "000000001E7C0000",
               "physical_size": 2615,
               "role": 9,
               "sha256": "E16F17A179CADFDB78D3CB6745FE1ABC429E7396E3ECB5AE19C15671EB4ED3D6",
@@ -1244,7 +1388,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001DE5C000",
+              "physical_base": "000000001E120000",
               "physical_size": 320,
               "role": 10,
               "sha256": "714128872087FB09A8553E3D0B21713DADF58FD0929269A6F2DF5FFE8F28811B",
@@ -1254,7 +1398,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001DE5B000",
+              "physical_base": "000000001E11F000",
               "physical_size": 256,
               "role": 11,
               "sha256": "86672AD1384509D2053CB191C17210351BE77C7C939227152DE26668932EA4AC",
@@ -1263,30 +1407,30 @@
             }
           ],
           "boot_services_exited": true,
-          "byte_count": 5008,
+          "byte_count": 5608,
           "contract_id": "PBLIVE3",
           "core": {
             "boot_attempt": 0,
             "boot_attempt_limit": 3,
             "boot_flags": "0000000000000011",
             "boot_slot": 1,
-            "handoff_byte_count": 5008,
-            "handoff_physical_base": "000000001DB1C000",
+            "handoff_byte_count": 5608,
+            "handoff_physical_base": "000000001DDE0000",
             "handoff_virtual_base": "FFFFFFFF80050000",
             "initial_stack_top_virtual": "FFFFFFFF80049000",
             "kernel_entry_virtual": "FFFFFFFF80008000",
-            "kernel_physical_base": "000000001DDBE000",
+            "kernel_physical_base": "000000001E082000",
             "kernel_physical_size": 262144,
             "kernel_virtual_base": "FFFFFFFF80000000",
             "kernel_virtual_size": 262144,
-            "page_table_root_physical": "000000001DE4F000",
+            "page_table_root_physical": "000000001E113000",
             "selected_entry": 1,
             "uefi_revision": "00020046"
           },
           "development_mode_only": true,
           "exit_development_profile_validated": true,
           "features": "0000000000000017",
-          "fnv1a64": "DA2B2CC1558FD8E2",
+          "fnv1a64": "F6ECD49707826EB3",
           "framebuffer": {
             "blue_mask": "000000FF",
             "byte_count": 4096000,
@@ -1302,7 +1446,7 @@
           "kernel_artifact": {
             "entry_virtual": "FFFFFFFF80008000",
             "flags": 9,
-            "physical_base": "000000001DDBE000",
+            "physical_base": "000000001E082000",
             "physical_size": 262144,
             "role": 1,
             "sha256": "7BFD0BFF2ED6F3F391AE09E57ED1559E3B53B14B4F5D4D969B2938FE8D30BAD6",
@@ -1363,7 +1507,7 @@
             {
               "attributes": "000000000000000F",
               "kind": 1,
-              "page_count": 107636,
+              "page_count": 108660,
               "physical_start": "0000000001780000",
               "source_type": 7
             },
@@ -1371,385 +1515,315 @@
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 32,
-              "physical_start": "000000001BBF4000",
+              "physical_start": "000000001BFF4000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 1,
-              "page_count": 7944,
-              "physical_start": "000000001BC14000",
+              "page_count": 7628,
+              "physical_start": "000000001C014000",
               "source_type": 7
             },
             {
               "attributes": "000000000000000F",
               "kind": 10,
               "page_count": 738,
-              "physical_start": "000000001DB1C000",
+              "physical_start": "000000001DDE0000",
               "source_type": 2
             },
             {
               "attributes": "000000000000000F",
               "kind": 10,
               "page_count": 54,
-              "physical_start": "000000001DDFE000",
+              "physical_start": "000000001E0C2000",
               "source_type": 1
             },
             {
               "attributes": "000000000000000F",
               "kind": 1,
               "page_count": 27,
-              "physical_start": "000000001DE34000",
+              "physical_start": "000000001E0F8000",
               "source_type": 7
             },
             {
               "attributes": "000000000000000F",
               "kind": 10,
               "page_count": 19,
-              "physical_start": "000000001DE4F000",
+              "physical_start": "000000001E113000",
               "source_type": 2
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 1684,
-              "physical_start": "000000001DE62000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 224,
-              "physical_start": "000000001E4F6000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 2,
-              "physical_start": "000000001E5D6000",
+              "page_count": 1681,
+              "physical_start": "000000001E126000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 10,
               "page_count": 1,
-              "physical_start": "000000001E5D8000",
+              "physical_start": "000000001E7B7000",
               "source_type": 2
             },
             {
               "attributes": "000000000000000F",
               "kind": 1,
               "page_count": 1,
-              "physical_start": "000000001E5D9000",
+              "physical_start": "000000001E7B8000",
               "source_type": 7
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 7,
-              "physical_start": "000000001E5DA000",
+              "physical_start": "000000001E7B9000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 10,
               "page_count": 1,
-              "physical_start": "000000001E5E1000",
+              "physical_start": "000000001E7C0000",
               "source_type": 2
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 85,
-              "physical_start": "000000001E5E2000",
+              "page_count": 64,
+              "physical_start": "000000001E7C1000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 34,
-              "physical_start": "000000001E637000",
+              "page_count": 224,
+              "physical_start": "000000001E801000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 1,
-              "physical_start": "000000001E659000",
+              "page_count": 13,
+              "physical_start": "000000001E8E1000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 19,
+              "physical_start": "000000001E8EE000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 19,
+              "physical_start": "000000001E901000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 133,
+              "physical_start": "000000001E914000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001E999000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 6,
+              "physical_start": "000000001E99D000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001E9A3000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 13,
+              "physical_start": "000000001E9A7000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 13,
+              "physical_start": "000000001E9B4000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 48,
+              "physical_start": "000000001E9C1000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 20,
+              "physical_start": "000000001E9F1000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 22,
-              "physical_start": "000000001E65A000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 2,
-              "physical_start": "000000001E670000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 14,
-              "physical_start": "000000001E672000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 7,
-              "physical_start": "000000001E680000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 6,
-              "physical_start": "000000001E687000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 41,
-              "physical_start": "000000001E68D000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 28,
-              "physical_start": "000000001E6B6000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 1,
-              "physical_start": "000000001E6D2000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 5,
-              "physical_start": "000000001E6D3000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 5,
-              "physical_start": "000000001E6D8000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 36,
-              "physical_start": "000000001E6DD000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 2,
-              "physical_start": "000000001E701000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 23,
-              "physical_start": "000000001E703000",
+              "physical_start": "000000001EA05000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 3,
-              "physical_start": "000000001E71A000",
+              "physical_start": "000000001EA1B000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 41,
-              "physical_start": "000000001E71D000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 1,
-              "physical_start": "000000001E746000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 5,
-              "physical_start": "000000001E747000",
+              "page_count": 30,
+              "physical_start": "000000001EA1E000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 2,
-              "physical_start": "000000001E74C000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 25,
-              "physical_start": "000000001E74E000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 5,
-              "physical_start": "000000001E767000",
+              "physical_start": "000000001EA3C000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 41,
-              "physical_start": "000000001E76C000",
+              "physical_start": "000000001EA3E000",
               "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 1,
-              "physical_start": "000000001E795000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 42,
-              "physical_start": "000000001E796000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 2,
-              "physical_start": "000000001E7C0000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 4,
-              "physical_start": "000000001E7C2000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 4,
-              "physical_start": "000000001E7C6000",
-              "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 11,
-              "physical_start": "000000001E7CA000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 3,
-              "physical_start": "000000001E7D5000",
+              "physical_start": "000000001EA67000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 4,
-              "physical_start": "000000001E7D8000",
+              "page_count": 15,
+              "physical_start": "000000001EA72000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 4,
-              "physical_start": "000000001E7DC000",
+              "page_count": 2,
+              "physical_start": "000000001EA81000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 23,
-              "physical_start": "000000001E7E0000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 521,
-              "physical_start": "000000001E7F7000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 25,
-              "physical_start": "000000001EA00000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 3,
-              "physical_start": "000000001EA19000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 33,
-              "physical_start": "000000001EA1C000",
+              "page_count": 34,
+              "physical_start": "000000001EA83000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 6,
-              "physical_start": "000000001EA3D000",
+              "physical_start": "000000001EAA5000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 47,
+              "physical_start": "000000001EAAB000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001EADA000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 13,
+              "physical_start": "000000001EADD000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 2,
+              "physical_start": "000000001EAEA000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 13,
+              "physical_start": "000000001EAEC000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001EAF9000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 34,
+              "physical_start": "000000001EAFE000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 2,
+              "physical_start": "000000001EB20000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001EB22000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001EB25000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 5,
-              "physical_start": "000000001EA43000",
-              "source_type": 3
-            },
-            {
-              "attributes": "800000000000000F",
-              "kind": 4,
-              "page_count": 193,
-              "physical_start": "000000001EA48000",
-              "source_type": 6
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 36,
-              "physical_start": "000000001EB09000",
+              "physical_start": "000000001EB28000",
               "source_type": 3
             },
             {
@@ -1762,141 +1836,316 @@
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 4,
+              "page_count": 47,
               "physical_start": "000000001EB32000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 4,
-              "physical_start": "000000001EB36000",
+              "page_count": 2,
+              "physical_start": "000000001EB61000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 8,
-              "physical_start": "000000001EB3A000",
+              "page_count": 71,
+              "physical_start": "000000001EB63000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 1,
-              "physical_start": "000000001EB42000",
+              "page_count": 7,
+              "physical_start": "000000001EBAA000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 42,
-              "physical_start": "000000001EB43000",
+              "page_count": 10,
+              "physical_start": "000000001EBB1000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 7,
+              "physical_start": "000000001EBBB000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 21,
+              "physical_start": "000000001EBC2000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001EBD7000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 20,
+              "physical_start": "000000001EBDB000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 5,
-              "physical_start": "000000001EB6D000",
+              "physical_start": "000000001EBEF000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001EBF4000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001EBF7000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 6,
-              "physical_start": "000000001EB72000",
+              "physical_start": "000000001EBFA000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 1042,
-              "physical_start": "000000001EB78000",
+              "page_count": 512,
+              "physical_start": "000000001EC00000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 7,
-              "physical_start": "000000001EF8A000",
+              "page_count": 25,
+              "physical_start": "000000001EE00000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 6,
+              "physical_start": "000000001EE19000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001EE1F000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001EE22000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 24,
+              "physical_start": "000000001EE25000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001EE3D000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001EE3E000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001EE43000",
+              "source_type": 4
+            },
+            {
+              "attributes": "800000000000000F",
+              "kind": 4,
+              "page_count": 193,
+              "physical_start": "000000001EE48000",
+              "source_type": 6
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 36,
+              "physical_start": "000000001EF09000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001EF2D000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 8,
+              "physical_start": "000000001EF2E000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 4,
-              "physical_start": "000000001EF91000",
+              "physical_start": "000000001EF36000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 8,
+              "physical_start": "000000001EF3A000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001EF42000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 42,
+              "physical_start": "000000001EF43000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001EF6D000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 6,
+              "physical_start": "000000001EF72000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1042,
+              "physical_start": "000000001EF78000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 7,
+              "physical_start": "000000001F38A000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001F391000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 11,
-              "physical_start": "000000001EF95000",
+              "physical_start": "000000001F395000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 6,
-              "physical_start": "000000001EFA0000",
+              "physical_start": "000000001F3A0000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 23,
-              "physical_start": "000000001EFA6000",
+              "physical_start": "000000001F3A6000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 1328,
-              "physical_start": "000000001EFBD000",
+              "physical_start": "000000001F3BD000",
               "source_type": 4
             },
             {
               "attributes": "800000000000000F",
               "kind": 4,
               "page_count": 256,
-              "physical_start": "000000001F4ED000",
+              "physical_start": "000000001F8ED000",
               "source_type": 6
             },
             {
               "attributes": "800000000000000F",
               "kind": 3,
               "page_count": 256,
-              "physical_start": "000000001F5ED000",
+              "physical_start": "000000001F9ED000",
               "source_type": 5
             },
             {
               "attributes": "000000000000000F",
               "kind": 1,
               "page_count": 135,
-              "physical_start": "000000001F6ED000",
+              "physical_start": "000000001FAED000",
               "source_type": 7
             },
             {
               "attributes": "000000000000000F",
               "kind": 5,
               "page_count": 11,
-              "physical_start": "000000001F774000",
+              "physical_start": "000000001FB74000",
               "source_type": 9
             },
             {
               "attributes": "000000000000000F",
               "kind": 6,
               "page_count": 128,
-              "physical_start": "000000001F77F000",
+              "physical_start": "000000001FB7F000",
               "source_type": 10
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 1537,
-              "physical_start": "000000001F7FF000",
+              "page_count": 513,
+              "physical_start": "000000001FBFF000",
               "source_type": 4
             },
             {
@@ -1984,13 +2233,13 @@
               "source_type": 0
             }
           ],
-          "memory_entry_count": 96,
-          "message_crc32": "573C9ADE",
+          "memory_entry_count": 111,
+          "message_crc32": "E9FB1487",
           "pre_exit_profile_validated": false,
           "record_count": 4,
           "required_features": "0000000000000013",
           "secret_bearing_records_present": false,
-          "sha256": "005292278DAE421B9FEB680393E7356C5770D07B291D0A108E2247579FEFD9A4",
+          "sha256": "9A07E180DD4B293BEACF71E745910BCFA58477F4A683AB37D265F04985617068",
           "transferable": false
         },
         "qemu_exit_code": 0,
@@ -2009,7 +2258,7 @@
         },
         "qmp_loopback_only": true,
         "qmp_quit_requested": true,
-        "run_id": "run-1",
+        "run_id": "xstate-policy-run-1",
         "screenshot": {
           "bright_cyan_pixel_count": 44970,
           "byte_count": 3072016,
@@ -2023,8 +2272,8 @@
           "width": 1280
         },
         "serial_debugcon_exact_match": true,
-        "stderr_byte_count": 0,
-        "stderr_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "stderr_byte_count": 2545,
+        "stderr_sha256": "B8B1E85EFF924068565D389E09B534400CBAF90444CD57594B43F0BF996CB584",
         "timestamped_qmp_events_excluded_from_equality": true,
         "transcript_binding": {
           "development_revalidation_profile_accepted": true,
@@ -2053,240 +2302,294 @@
           "state_writes": 0
         },
         "local_paths_recorded": false,
-        "marker_sha256": "2A3EC71F59DFD6E68E53A7959307AA2A74DC54E2A5082555B32210C18C96CF40",
+        "marker_sha256": "E1EC9A93459767D8989DBB6F21A81EBC09A8DA191319EF10CF0857A76CD360B5",
         "marker_summary": {
-          "boot_prefix": {
-            "artifact_set": {
-              "artifact_count": 6,
-              "contract_id": "PBART1",
-              "file_bytes": 8761,
-              "fnv1a64": "33FEDE689382C5B9",
-              "measured": false,
-              "page_count": 6,
-              "pages_retained": true,
-              "retained_input_count": 9,
-              "retained_input_page_count": 9,
-              "semantics_applied": false,
-              "signatures_verified": false
+          "capability": {
+            "enabled_area_bytes": 576,
+            "leaf1_ecx": 3470270987,
+            "leaf1_edx": 126614525,
+            "leaf_d1_eax": 5,
+            "maximum_area_bytes": 576,
+            "supported_xcr0": 3
+          },
+          "clear": {
+            "all_selected_components": "canonical_image",
+            "canonical_xmm0_zero": 1,
+            "image_zero_bytes": 8192,
+            "kernel_simd_policy": "forbidden",
+            "unexpected_nm": 0
+          },
+          "config": {
+            "alignment": 64,
+            "area_bytes": 4096,
+            "cr0_after": 2147549235,
+            "cr0_before": 2147549235,
+            "cr4_after": 263784,
+            "cr4_before": 1640,
+            "format": "standard",
+            "strategy": "eager",
+            "xcr0_after": 3,
+            "xcr0_before": 0,
+            "xss": 0
+          },
+          "initialization": {
+            "exceptions": "masked",
+            "fcw": 895,
+            "mxcsr": 8064,
+            "mxcsr_mask_effective": 65535,
+            "mxcsr_mask_raw": 65535,
+            "nm_policy": "unexpected_fail_closed"
+          },
+          "result": {
+            "actions": 0,
+            "authority": 0,
+            "bsp": 1,
+            "profile": "epyc_rome_v4_x87_sse",
+            "scheduler": 0,
+            "signatures": 0,
+            "smp": 0,
+            "target": 0,
+            "terminal": "halt",
+            "writes": 3
+          },
+          "switch": {
+            "interrupts": 0,
+            "kernel_simd": 0,
+            "match_a": 1,
+            "match_b": 1,
+            "owners": "10,11",
+            "restores": 4,
+            "same_cpu": 1,
+            "saves": 2,
+            "scheduler_lock": 1,
+            "xstate_bv_a": 3,
+            "xstate_bv_b": 3
+          },
+          "transfer_prefix": {
+            "boot_prefix": {
+              "artifact_set": {
+                "artifact_count": 6,
+                "contract_id": "PBART1",
+                "file_bytes": 8761,
+                "fnv1a64": "33FEDE689382C5B9",
+                "measured": false,
+                "page_count": 6,
+                "pages_retained": true,
+                "retained_input_count": 9,
+                "retained_input_page_count": 9,
+                "semantics_applied": false,
+                "signatures_verified": false
+              },
+              "boot_config": {
+                "boot_attempt_limit": 3,
+                "byte_count": 229,
+                "default_entry_hash": "61053F0E3EBBD272",
+                "entry_count": 1,
+                "manifest_max_bytes": 65536,
+                "selected_slot": 1,
+                "timeout_ms": 0
+              },
+              "boot_exit": {
+                "artifact_page_count": 9,
+                "attempt_count": 1,
+                "contract_id": "PBEXIT1",
+                "descriptor_count": 111,
+                "descriptor_size": 48,
+                "firmware_calls_after_exit": 0,
+                "handoff_page_count": 256,
+                "kernel_page_count": 64,
+                "map_byte_count": 5328,
+                "stack_page_count": 8,
+                "successful_exit_prefix_validated": true,
+                "synthetic_stop_used_for_prefix_parser_only": true,
+                "table_page_count": 4
+              },
+              "config_table_count": 10,
+              "gop": {
+                "format": "BGR",
+                "height": 800,
+                "mode": 0,
+                "stride": 1280,
+                "width": 1280
+              },
+              "inner_set": {
+                "actions_authorized": 0,
+                "artifact_count": 6,
+                "authority_grants": 0,
+                "cross_binding_count": 6,
+                "development_denial_count": 6,
+                "exact_retained_bytes": true,
+                "file_bytes": 8761,
+                "hardware_observations": 0,
+                "parser_count": 6,
+                "payload_bytes": 8185,
+                "proof_id": "N5-INNER-LIVE-PARSE-001",
+                "retained_set_sha256": "872978D7FB5E1108D04736796A247E5E59D9EEC0C97AE991CFBAC83D819A15DC",
+                "state_writes": 0
+              },
+              "kernel": {
+                "entry_offset": 32768,
+                "file_byte_count": 180224,
+                "file_handles_closed": 12,
+                "file_pools_freed": 11,
+                "image_byte_count": 262144,
+                "loaded_fnv1a64": "D68370803C7BFA68",
+                "page_count": 64,
+                "pages_retained": true,
+                "relocation_count": 335,
+                "resources_released": false
+              },
+              "kernel_map": {
+                "contract_id": "PKMAP2",
+                "firmware_calls_while_active": 0,
+                "first_page_table_index": 0,
+                "framebuffer_cache_signature": "00",
+                "framebuffer_first_page_bytes": 1073741824,
+                "framebuffer_last_page_bytes": 1073741824,
+                "framebuffer_preserved": true,
+                "leaf_fingerprint": "066F6E68217211A5",
+                "mapped_fnv1a64": "D68370803C7BFA68",
+                "mapped_page_count": 64,
+                "mapping_count": 4,
+                "original_cr3_restored": true,
+                "page_directory_index": 0,
+                "pdpt_index": 510,
+                "physical_address_bits": 40,
+                "pml4_index": 511,
+                "read_execute_page_count": 32,
+                "read_only_page_count": 12,
+                "read_write_page_count": 20,
+                "retained": {
+                  "guard_page_count": 2,
+                  "handoff_first_page_table_index": 80,
+                  "handoff_page_count": 256,
+                  "handoff_physical_base": 501088256,
+                  "handoff_virtual_base": 18446744071562395648,
+                  "kernel_physical_base": 503848960,
+                  "page_table_root_physical": 504442880,
+                  "retained_leaf_fingerprint": "79B73AFB48B79C75",
+                  "stack_first_page_table_index": 65,
+                  "stack_page_count": 8,
+                  "stack_physical_base": 504459264,
+                  "stack_top_virtual": 18446744071562366976,
+                  "table_page_count": 4,
+                  "total_mapped_page_count": 328
+                },
+                "table_page_count": 4,
+                "tables_retained": true,
+                "writable_executable_page_count": 0
+              },
+              "manifest": {
+                "artifact_count": 7,
+                "byte_count": 2615,
+                "kernel_file_byte_count": 180224,
+                "kernel_image_byte_count": 262144,
+                "kernel_sha256_prefix": "7BFD0BFF2ED6F3F3",
+                "kernel_version": 1,
+                "manifest_id_hash": "4A2625333244591C",
+                "manifest_version": 1,
+                "minimum_secure_version": 1,
+                "slot": 1
+              },
+              "marker_count": 25,
+              "memory_map": {
+                "byte_count": 5328,
+                "descriptor_bytes": 48,
+                "descriptor_count": 111
+              },
+              "ordered_contract_match": true,
+              "pbp1": {
+                "artifact_count": 10,
+                "boot_services_exited": true,
+                "byte_count": 5608,
+                "bytes_unchanged": true,
+                "descriptor_bytes": 48,
+                "development_mode_only": true,
+                "exit_attempts": 1,
+                "fnv1a64": "F6ECD49707826EB3",
+                "framebuffer_present": 1,
+                "memory_entry_count": 111,
+                "message_crc32": "E9FB1487",
+                "pre_exit": false,
+                "record_count": 4,
+                "temporary_pools_released": false
+              },
+              "trust_state": {
+                "authority_grants": 0,
+                "binding_count": 14,
+                "contract_id": "PBTRUST1",
+                "denial": "pbtrust_policy_unsigned",
+                "denial_count": 1,
+                "policy_bytes": 320,
+                "policy_sha256": "714128872087FB09A8553E3D0B21713DADF58FD0929269A6F2DF5FFE8F28811B",
+                "signature_verifications": 0,
+                "state_authenticated": false,
+                "state_bytes": 256,
+                "state_monotonic": false,
+                "state_sha256": "86672AD1384509D2053CB191C17210351BE77C7C939227152DE26668932EA4AC",
+                "state_source": "esp_candidate_not_persistent_authority",
+                "state_writes": 0
+              },
+              "uefi_revision": 131142
             },
-            "boot_config": {
-              "boot_attempt_limit": 3,
-              "byte_count": 229,
-              "default_entry_hash": "61053F0E3EBBD272",
+            "kernel_entry": {
+              "build_id": "PKBUILD1-CYCLE122-N7-XSTATE-POLICY-001",
+              "entry_contract": "PKENTRY1",
               "entry_count": 1,
-              "manifest_max_bytes": 65536,
-              "selected_slot": 1,
-              "timeout_ms": 0
+              "serial": "present",
+              "transfer_contract": "PKXFER1"
             },
-            "boot_exit": {
-              "artifact_page_count": 9,
-              "attempt_count": 1,
-              "contract_id": "PBEXIT1",
-              "descriptor_count": 96,
-              "descriptor_size": 48,
-              "firmware_calls_after_exit": 0,
-              "handoff_page_count": 256,
-              "kernel_page_count": 64,
-              "map_byte_count": 4608,
-              "stack_page_count": 8,
-              "successful_exit_prefix_validated": true,
-              "synthetic_stop_used_for_prefix_parser_only": true,
-              "table_page_count": 4
+            "kernel_pbp1": {
+              "artifact_count": 10,
+              "production_profile_valid": 0,
+              "profile": "development",
+              "record_count": 4
             },
-            "config_table_count": 10,
-            "gop": {
-              "format": "BGR",
-              "height": 800,
-              "mode": 0,
-              "stride": 1280,
-              "width": 1280
-            },
-            "inner_set": {
+            "kernel_revalidation": {
               "actions_authorized": 0,
               "artifact_count": 6,
               "authority_grants": 0,
-              "cross_binding_count": 6,
-              "development_denial_count": 6,
-              "exact_retained_bytes": true,
-              "file_bytes": 8761,
-              "hardware_observations": 0,
-              "parser_count": 6,
-              "payload_bytes": 8185,
-              "proof_id": "N5-INNER-LIVE-PARSE-001",
-              "retained_set_sha256": "872978D7FB5E1108D04736796A247E5E59D9EEC0C97AE991CFBAC83D819A15DC",
-              "state_writes": 0
-            },
-            "kernel": {
-              "entry_offset": 32768,
-              "file_byte_count": 180224,
-              "file_handles_closed": 12,
-              "file_pools_freed": 11,
-              "image_byte_count": 262144,
-              "loaded_fnv1a64": "D68370803C7BFA68",
-              "page_count": 64,
-              "pages_retained": true,
-              "relocation_count": 335,
-              "resources_released": false
-            },
-            "kernel_map": {
-              "contract_id": "PKMAP2",
-              "firmware_calls_while_active": 0,
-              "first_page_table_index": 0,
-              "framebuffer_cache_signature": "00",
-              "framebuffer_first_page_bytes": 2097152,
-              "framebuffer_last_page_bytes": 2097152,
-              "framebuffer_preserved": true,
-              "leaf_fingerprint": "066F6E68217211A5",
-              "mapped_fnv1a64": "D68370803C7BFA68",
-              "mapped_page_count": 64,
-              "mapping_count": 4,
-              "original_cr3_restored": true,
-              "page_directory_index": 0,
-              "pdpt_index": 510,
-              "physical_address_bits": 40,
-              "pml4_index": 511,
-              "read_execute_page_count": 32,
-              "read_only_page_count": 12,
-              "read_write_page_count": 20,
-              "retained": {
-                "guard_page_count": 2,
-                "handoff_first_page_table_index": 80,
-                "handoff_page_count": 256,
-                "handoff_physical_base": 498188288,
-                "handoff_virtual_base": 18446744071562395648,
-                "kernel_physical_base": 500948992,
-                "page_table_root_physical": 501542912,
-                "retained_leaf_fingerprint": "F6AABD8C612439ED",
-                "stack_first_page_table_index": 65,
-                "stack_page_count": 8,
-                "stack_physical_base": 501559296,
-                "stack_top_virtual": 18446744071562366976,
-                "table_page_count": 4,
-                "total_mapped_page_count": 328
-              },
-              "table_page_count": 4,
-              "tables_retained": true,
-              "writable_executable_page_count": 0
-            },
-            "manifest": {
-              "artifact_count": 7,
-              "byte_count": 2615,
-              "kernel_file_byte_count": 180224,
-              "kernel_image_byte_count": 262144,
-              "kernel_sha256_prefix": "7BFD0BFF2ED6F3F3",
-              "kernel_version": 1,
-              "manifest_id_hash": "4A2625333244591C",
-              "manifest_version": 1,
-              "minimum_secure_version": 1,
-              "slot": 1
-            },
-            "marker_count": 25,
-            "memory_map": {
-              "byte_count": 4608,
-              "descriptor_bytes": 48,
-              "descriptor_count": 96
-            },
-            "ordered_contract_match": true,
-            "pbp1": {
-              "artifact_count": 10,
-              "boot_services_exited": true,
-              "byte_count": 5008,
-              "bytes_unchanged": true,
-              "descriptor_bytes": 48,
-              "development_mode_only": true,
-              "exit_attempts": 1,
-              "fnv1a64": "DA2B2CC1558FD8E2",
-              "framebuffer_present": 1,
-              "memory_entry_count": 96,
-              "message_crc32": "573C9ADE",
-              "pre_exit": false,
-              "record_count": 4,
-              "temporary_pools_released": false
-            },
-            "trust_state": {
-              "authority_grants": 0,
-              "binding_count": 14,
-              "contract_id": "PBTRUST1",
+              "contract_id": "PKREVAL1",
               "denial": "pbtrust_policy_unsigned",
-              "denial_count": 1,
-              "policy_bytes": 320,
+              "manifest_bytes": 2615,
+              "parser_count": 9,
               "policy_sha256": "714128872087FB09A8553E3D0B21713DADF58FD0929269A6F2DF5FFE8F28811B",
-              "signature_verifications": 0,
-              "state_authenticated": false,
-              "state_bytes": 256,
-              "state_monotonic": false,
+              "retained_file_bytes": 11952,
+              "retained_file_count": 9,
+              "retained_set_sha256": "872978D7FB5E1108D04736796A247E5E59D9EEC0C97AE991CFBAC83D819A15DC",
               "state_sha256": "86672AD1384509D2053CB191C17210351BE77C7C939227152DE26668932EA4AC",
-              "state_source": "esp_candidate_not_persistent_authority",
               "state_writes": 0
             },
-            "uefi_revision": 131142
-          },
-          "kernel_entry": {
-            "build_id": "PKBUILD1-CYCLE122-N7-XSTATE-POLICY-001",
-            "entry_contract": "PKENTRY1",
-            "entry_count": 1,
-            "serial": "present",
-            "transfer_contract": "PKXFER1"
-          },
-          "kernel_pbp1": {
-            "artifact_count": 10,
-            "production_profile_valid": 0,
-            "profile": "development",
-            "record_count": 4
-          },
-          "kernel_revalidation": {
-            "actions_authorized": 0,
-            "artifact_count": 6,
-            "authority_grants": 0,
-            "contract_id": "PKREVAL1",
-            "denial": "pbtrust_policy_unsigned",
-            "manifest_bytes": 2615,
-            "parser_count": 9,
-            "policy_sha256": "714128872087FB09A8553E3D0B21713DADF58FD0929269A6F2DF5FFE8F28811B",
-            "retained_file_bytes": 11952,
-            "retained_file_count": 9,
-            "retained_set_sha256": "872978D7FB5E1108D04736796A247E5E59D9EEC0C97AE991CFBAC83D819A15DC",
-            "state_sha256": "86672AD1384509D2053CB191C17210351BE77C7C939227152DE26668932EA4AC",
-            "state_writes": 0
-          },
-          "kernel_state": {
-            "cr3": 501542912,
-            "entry": 18446744071562100736,
-            "handoff": 18446744071562395648,
-            "handoff_bytes": 5008,
-            "rflags_df": 0,
-            "rflags_if": 0,
-            "root": 501542912,
-            "stack_top": 18446744071562366976
-          },
-          "kernel_terminal": {
-            "actions_authorized": 0,
-            "authority_grants": 0,
-            "contract_id": "PKXFER1",
-            "entry_count": 1,
-            "firmware_calls_after_exit": 0,
-            "signature_verifications": 0,
-            "state_writes": 0,
-            "terminal": "halt"
-          },
-          "marker_count": 30,
-          "ordered_contract_match": true,
-          "transfer_arm": {
-            "actions_authorized": 0,
-            "authority_grants": 0,
-            "contract_id": "PKXFER1",
-            "cr3": 501542912,
-            "emulator_only": 1,
-            "entry": 18446744071562100736,
-            "firmware_calls_after_exit": 0,
-            "handoff": 18446744071562395648,
-            "handoff_bytes": 5008,
-            "mode": "development",
-            "root": 501542912,
-            "signature_verifications": 0,
-            "stack_top": 18446744071562366976,
-            "state_writes": 0,
-            "trap_scenario": 0
+            "kernel_state": {
+              "cr3": 504442880,
+              "entry": 18446744071562100736,
+              "handoff": 18446744071562395648,
+              "handoff_bytes": 5608,
+              "rflags_df": 0,
+              "rflags_if": 0,
+              "root": 504442880,
+              "stack_top": 18446744071562366976
+            },
+            "marker_count": 30,
+            "ordered_contract_match": true,
+            "synthetic_unsigned_terminal_used_for_prefix_parser_only": true,
+            "transfer_arm": {
+              "actions_authorized": 0,
+              "authority_grants": 0,
+              "contract_id": "PKXFER1",
+              "cr3": 504442880,
+              "emulator_only": 1,
+              "entry": 18446744071562100736,
+              "firmware_calls_after_exit": 0,
+              "handoff": 18446744071562395648,
+              "handoff_bytes": 5608,
+              "mode": "development",
+              "root": 504442880,
+              "signature_verifications": 0,
+              "stack_top": 18446744071562366976,
+              "state_writes": 0,
+              "trap_scenario": 5
+            }
           }
         },
         "markers": [
@@ -2308,18 +2611,23 @@
           "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
           "POOLEBOOT/0.1 FRAME READY",
           "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=64 ro=12 rx=32 rw=20 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=066F6E68217211A5",
-          "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=64 physical_bits=40 mapped_fnv1a64=D68370803C7BFA68 framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
-          "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=8 handoff_pages=256 guards=2 total_pages=328 stack_pt=65 handoff_pt=80 kernel_phys=000000001DDBE000 root=000000001DE4F000 stack_phys=000000001DE53000 stack_top=FFFFFFFF80049000 handoff_phys=000000001DB1C000 handoff_virt=FFFFFFFF80050000 retained_fnv1a64=F6AABD8C612439ED original_cr3=restored firmware_calls_while_active=0",
-          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5008 records=4 memory_entries=96 framebuffer=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=573C9ADE fnv1a64=DA2B2CC1558FD8E2 state=boot_services_exited bytes_unchanged=1",
-          "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4608 descriptor_bytes=48 descriptors=96",
+          "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=64 physical_bits=40 mapped_fnv1a64=D68370803C7BFA68 framebuffer=preserved cache_signature=00 first_page_bytes=1073741824 last_page_bytes=1073741824",
+          "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=8 handoff_pages=256 guards=2 total_pages=328 stack_pt=65 handoff_pt=80 kernel_phys=000000001E082000 root=000000001E113000 stack_phys=000000001E117000 stack_top=FFFFFFFF80049000 handoff_phys=000000001DDE0000 handoff_virt=FFFFFFFF80050000 retained_fnv1a64=79B73AFB48B79C75 original_cr3=restored firmware_calls_while_active=0",
+          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5608 records=4 memory_entries=111 framebuffer=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=E9FB1487 fnv1a64=F6ECD49707826EB3 state=boot_services_exited bytes_unchanged=1",
+          "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=5328 descriptor_bytes=48 descriptors=111",
           "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=64 artifact_pages=9 table_pages=4 stack_pages=8 handoff_pages=256",
-          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF80008000 handoff=FFFFFFFF80050000 bytes=5008 stack_top=FFFFFFFF80049000 root=000000001DE4F000 cr3=000000001DE4F000 trap_scenario=0 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
+          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF80008000 handoff=FFFFFFFF80050000 bytes=5608 stack_top=FFFFFFFF80049000 root=000000001E113000 cr3=000000001E113000 trap_scenario=5 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
           "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
           "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE122-N7-XSTATE-POLICY-001 entry_count=1 serial=present",
-          "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF80050000 bytes=5008 entry=0xFFFFFFFF80008000 stack_top=0xFFFFFFFF80049000 root=0x000000001DE4F000 cr3=0x000000001DE4F000 rflags_if=0 rflags_df=0",
+          "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF80050000 bytes=5608 entry=0xFFFFFFFF80008000 stack_top=0xFFFFFFFF80049000 root=0x000000001E113000 cr3=0x000000001E113000 rflags_if=0 rflags_df=0",
           "POOLEOS:KERNEL:PBP1 PASS profile=development records=4 artifacts=10 production_profile_valid=0",
           "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=872978D7FB5E1108D04736796A247E5E59D9EEC0C97AE991CFBAC83D819A15DC policy_sha256=714128872087FB09A8553E3D0B21713DADF58FD0929269A6F2DF5FFE8F28811B state_sha256=86672AD1384509D2053CB191C17210351BE77C7C939227152DE26668932EA4AC denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
-          "POOLEOS:KERNEL:TRANSFER-DENIED PASS contract=PKXFER1 terminal=halt entry_count=1 post_exit_firmware_calls=0 signatures=0 authority=0 actions=0 writes=0"
+          "POOLEOS:KERNEL:XSTATE-CAPABILITY PASS contract=PKXSTATE1 leaf1_ecx=0x00000000CED8220B leaf1_edx=0x00000000078BFBFD supported_xcr0=0x0000000000000003 leafd1_eax=0x0000000000000005 enabled_bytes=576 maximum_bytes=576",
+          "POOLEOS:KERNEL:XSTATE-CONFIG PASS contract=PKXSTATE1 cr0_before=0x0000000080010033 cr0_after=0x0000000080010033 cr4_before=0x0000000000000668 cr4_after=0x0000000000040668 xcr0_before=0x0000000000000000 xcr0_after=0x0000000000000003 xss=0x0000000000000000 strategy=eager format=standard area_bytes=4096 alignment=64",
+          "POOLEOS:KERNEL:XSTATE-INIT PASS contract=PKXSTATE1 fcw=0x000000000000037F mxcsr=0x0000000000001F80 mxcsr_mask_raw=0x000000000000FFFF mxcsr_mask_effective=0x000000000000FFFF exceptions=masked nm_policy=unexpected_fail_closed",
+          "POOLEOS:KERNEL:XSTATE-SWITCH PASS contract=PKXSTATE1 owners=10,11 saves=2 restores=4 xstate_bv_a=0x0000000000000003 xstate_bv_b=0x0000000000000003 match_a=1 match_b=1 scheduler_lock=1 interrupts=0 same_cpu=1 kernel_simd=0",
+          "POOLEOS:KERNEL:XSTATE-CLEAR PASS contract=PKXSTATE1 canonical_xmm0_zero=1 image_zero_bytes=8192 unexpected_nm=0 all_selected_components=canonical_image kernel_simd_policy=forbidden",
+          "POOLEOS:KERNEL:XSTATE-RESULT PASS contract=PKXSTATE1 profile=epyc_rome_v4_x87_sse bsp=1 writes=3 signatures=0 authority=0 actions=0 scheduler=0 smp=0 target=0 terminal=halt"
         ],
         "media_read_only": true,
         "pbp1_serial_debugcon_exact_match": true,
@@ -2329,7 +2637,7 @@
             {
               "entry_virtual": "FFFFFFFF80008000",
               "flags": 9,
-              "physical_base": "000000001DDBE000",
+              "physical_base": "000000001E082000",
               "physical_size": 262144,
               "role": 1,
               "sha256": "7BFD0BFF2ED6F3F391AE09E57ED1559E3B53B14B4F5D4D969B2938FE8D30BAD6",
@@ -2339,7 +2647,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E5D8000",
+              "physical_base": "000000001E7B7000",
               "physical_size": 1860,
               "role": 2,
               "sha256": "00C28AB2DE744281CEC0459598A29E8C608E95BC2AF5207D78B67F494EF1E2F8",
@@ -2349,7 +2657,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001DE61000",
+              "physical_base": "000000001E125000",
               "physical_size": 1088,
               "role": 3,
               "sha256": "FFAC48737878D6D4986CBF1936F4A8BE7898D544D4C4043F4D51144AEC728B59",
@@ -2359,7 +2667,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001DE60000",
+              "physical_base": "000000001E124000",
               "physical_size": 821,
               "role": 4,
               "sha256": "5BA1A62EF2D3A4D96DF85A485DBF126550A3884EE51CE18B9125E62284B22896",
@@ -2369,7 +2677,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001DE5F000",
+              "physical_base": "000000001E123000",
               "physical_size": 1504,
               "role": 5,
               "sha256": "04D5F70F88FE15BF747992390467BC8AE9E3BD0E28F6D131C427B73764641397",
@@ -2379,7 +2687,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001DE5E000",
+              "physical_base": "000000001E122000",
               "physical_size": 1408,
               "role": 6,
               "sha256": "BD162F099BB0145738BA3FAD57B0B903FDB12B0080BBC85812528DC9C1A7A728",
@@ -2389,7 +2697,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001DE5D000",
+              "physical_base": "000000001E121000",
               "physical_size": 2080,
               "role": 7,
               "sha256": "5272D26C19D3EB24480AE49F231FFA2FC4FD34BCFC1E2F794197AA1724F1E121",
@@ -2399,7 +2707,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001E5E1000",
+              "physical_base": "000000001E7C0000",
               "physical_size": 2615,
               "role": 9,
               "sha256": "E16F17A179CADFDB78D3CB6745FE1ABC429E7396E3ECB5AE19C15671EB4ED3D6",
@@ -2409,7 +2717,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001DE5C000",
+              "physical_base": "000000001E120000",
               "physical_size": 320,
               "role": 10,
               "sha256": "714128872087FB09A8553E3D0B21713DADF58FD0929269A6F2DF5FFE8F28811B",
@@ -2419,7 +2727,7 @@
             {
               "entry_virtual": "0000000000000000",
               "flags": 1,
-              "physical_base": "000000001DE5B000",
+              "physical_base": "000000001E11F000",
               "physical_size": 256,
               "role": 11,
               "sha256": "86672AD1384509D2053CB191C17210351BE77C7C939227152DE26668932EA4AC",
@@ -2428,30 +2736,30 @@
             }
           ],
           "boot_services_exited": true,
-          "byte_count": 5008,
+          "byte_count": 5608,
           "contract_id": "PBLIVE3",
           "core": {
             "boot_attempt": 0,
             "boot_attempt_limit": 3,
             "boot_flags": "0000000000000011",
             "boot_slot": 1,
-            "handoff_byte_count": 5008,
-            "handoff_physical_base": "000000001DB1C000",
+            "handoff_byte_count": 5608,
+            "handoff_physical_base": "000000001DDE0000",
             "handoff_virtual_base": "FFFFFFFF80050000",
             "initial_stack_top_virtual": "FFFFFFFF80049000",
             "kernel_entry_virtual": "FFFFFFFF80008000",
-            "kernel_physical_base": "000000001DDBE000",
+            "kernel_physical_base": "000000001E082000",
             "kernel_physical_size": 262144,
             "kernel_virtual_base": "FFFFFFFF80000000",
             "kernel_virtual_size": 262144,
-            "page_table_root_physical": "000000001DE4F000",
+            "page_table_root_physical": "000000001E113000",
             "selected_entry": 1,
             "uefi_revision": "00020046"
           },
           "development_mode_only": true,
           "exit_development_profile_validated": true,
           "features": "0000000000000017",
-          "fnv1a64": "DA2B2CC1558FD8E2",
+          "fnv1a64": "F6ECD49707826EB3",
           "framebuffer": {
             "blue_mask": "000000FF",
             "byte_count": 4096000,
@@ -2467,7 +2775,7 @@
           "kernel_artifact": {
             "entry_virtual": "FFFFFFFF80008000",
             "flags": 9,
-            "physical_base": "000000001DDBE000",
+            "physical_base": "000000001E082000",
             "physical_size": 262144,
             "role": 1,
             "sha256": "7BFD0BFF2ED6F3F391AE09E57ED1559E3B53B14B4F5D4D969B2938FE8D30BAD6",
@@ -2528,7 +2836,7 @@
             {
               "attributes": "000000000000000F",
               "kind": 1,
-              "page_count": 107636,
+              "page_count": 108660,
               "physical_start": "0000000001780000",
               "source_type": 7
             },
@@ -2536,385 +2844,315 @@
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 32,
-              "physical_start": "000000001BBF4000",
+              "physical_start": "000000001BFF4000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 1,
-              "page_count": 7944,
-              "physical_start": "000000001BC14000",
+              "page_count": 7628,
+              "physical_start": "000000001C014000",
               "source_type": 7
             },
             {
               "attributes": "000000000000000F",
               "kind": 10,
               "page_count": 738,
-              "physical_start": "000000001DB1C000",
+              "physical_start": "000000001DDE0000",
               "source_type": 2
             },
             {
               "attributes": "000000000000000F",
               "kind": 10,
               "page_count": 54,
-              "physical_start": "000000001DDFE000",
+              "physical_start": "000000001E0C2000",
               "source_type": 1
             },
             {
               "attributes": "000000000000000F",
               "kind": 1,
               "page_count": 27,
-              "physical_start": "000000001DE34000",
+              "physical_start": "000000001E0F8000",
               "source_type": 7
             },
             {
               "attributes": "000000000000000F",
               "kind": 10,
               "page_count": 19,
-              "physical_start": "000000001DE4F000",
+              "physical_start": "000000001E113000",
               "source_type": 2
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 1684,
-              "physical_start": "000000001DE62000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 224,
-              "physical_start": "000000001E4F6000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 2,
-              "physical_start": "000000001E5D6000",
+              "page_count": 1681,
+              "physical_start": "000000001E126000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 10,
               "page_count": 1,
-              "physical_start": "000000001E5D8000",
+              "physical_start": "000000001E7B7000",
               "source_type": 2
             },
             {
               "attributes": "000000000000000F",
               "kind": 1,
               "page_count": 1,
-              "physical_start": "000000001E5D9000",
+              "physical_start": "000000001E7B8000",
               "source_type": 7
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 7,
-              "physical_start": "000000001E5DA000",
+              "physical_start": "000000001E7B9000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 10,
               "page_count": 1,
-              "physical_start": "000000001E5E1000",
+              "physical_start": "000000001E7C0000",
               "source_type": 2
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 85,
-              "physical_start": "000000001E5E2000",
+              "page_count": 64,
+              "physical_start": "000000001E7C1000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 34,
-              "physical_start": "000000001E637000",
+              "page_count": 224,
+              "physical_start": "000000001E801000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 1,
-              "physical_start": "000000001E659000",
+              "page_count": 13,
+              "physical_start": "000000001E8E1000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 19,
+              "physical_start": "000000001E8EE000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 19,
+              "physical_start": "000000001E901000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 133,
+              "physical_start": "000000001E914000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001E999000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 6,
+              "physical_start": "000000001E99D000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001E9A3000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 13,
+              "physical_start": "000000001E9A7000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 13,
+              "physical_start": "000000001E9B4000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 48,
+              "physical_start": "000000001E9C1000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 20,
+              "physical_start": "000000001E9F1000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 22,
-              "physical_start": "000000001E65A000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 2,
-              "physical_start": "000000001E670000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 14,
-              "physical_start": "000000001E672000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 7,
-              "physical_start": "000000001E680000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 6,
-              "physical_start": "000000001E687000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 41,
-              "physical_start": "000000001E68D000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 28,
-              "physical_start": "000000001E6B6000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 1,
-              "physical_start": "000000001E6D2000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 5,
-              "physical_start": "000000001E6D3000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 5,
-              "physical_start": "000000001E6D8000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 36,
-              "physical_start": "000000001E6DD000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 2,
-              "physical_start": "000000001E701000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 23,
-              "physical_start": "000000001E703000",
+              "physical_start": "000000001EA05000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 3,
-              "physical_start": "000000001E71A000",
+              "physical_start": "000000001EA1B000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 41,
-              "physical_start": "000000001E71D000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 1,
-              "physical_start": "000000001E746000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 5,
-              "physical_start": "000000001E747000",
+              "page_count": 30,
+              "physical_start": "000000001EA1E000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 2,
-              "physical_start": "000000001E74C000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 25,
-              "physical_start": "000000001E74E000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 5,
-              "physical_start": "000000001E767000",
+              "physical_start": "000000001EA3C000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 41,
-              "physical_start": "000000001E76C000",
+              "physical_start": "000000001EA3E000",
               "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 1,
-              "physical_start": "000000001E795000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 42,
-              "physical_start": "000000001E796000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 2,
-              "physical_start": "000000001E7C0000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 4,
-              "physical_start": "000000001E7C2000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 4,
-              "physical_start": "000000001E7C6000",
-              "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 11,
-              "physical_start": "000000001E7CA000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 3,
-              "physical_start": "000000001E7D5000",
+              "physical_start": "000000001EA67000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 4,
-              "physical_start": "000000001E7D8000",
+              "page_count": 15,
+              "physical_start": "000000001EA72000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 4,
-              "physical_start": "000000001E7DC000",
+              "page_count": 2,
+              "physical_start": "000000001EA81000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 23,
-              "physical_start": "000000001E7E0000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 521,
-              "physical_start": "000000001E7F7000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 25,
-              "physical_start": "000000001EA00000",
-              "source_type": 3
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 3,
-              "physical_start": "000000001EA19000",
-              "source_type": 4
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 33,
-              "physical_start": "000000001EA1C000",
+              "page_count": 34,
+              "physical_start": "000000001EA83000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 6,
-              "physical_start": "000000001EA3D000",
+              "physical_start": "000000001EAA5000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 47,
+              "physical_start": "000000001EAAB000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001EADA000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 13,
+              "physical_start": "000000001EADD000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 2,
+              "physical_start": "000000001EAEA000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 13,
+              "physical_start": "000000001EAEC000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001EAF9000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 34,
+              "physical_start": "000000001EAFE000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 2,
+              "physical_start": "000000001EB20000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001EB22000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001EB25000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 5,
-              "physical_start": "000000001EA43000",
-              "source_type": 3
-            },
-            {
-              "attributes": "800000000000000F",
-              "kind": 4,
-              "page_count": 193,
-              "physical_start": "000000001EA48000",
-              "source_type": 6
-            },
-            {
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "page_count": 36,
-              "physical_start": "000000001EB09000",
+              "physical_start": "000000001EB28000",
               "source_type": 3
             },
             {
@@ -2927,141 +3165,316 @@
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 4,
+              "page_count": 47,
               "physical_start": "000000001EB32000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 4,
-              "physical_start": "000000001EB36000",
+              "page_count": 2,
+              "physical_start": "000000001EB61000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 8,
-              "physical_start": "000000001EB3A000",
+              "page_count": 71,
+              "physical_start": "000000001EB63000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 1,
-              "physical_start": "000000001EB42000",
+              "page_count": 7,
+              "physical_start": "000000001EBAA000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 42,
-              "physical_start": "000000001EB43000",
+              "page_count": 10,
+              "physical_start": "000000001EBB1000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 7,
+              "physical_start": "000000001EBBB000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 21,
+              "physical_start": "000000001EBC2000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001EBD7000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 20,
+              "physical_start": "000000001EBDB000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 5,
-              "physical_start": "000000001EB6D000",
+              "physical_start": "000000001EBEF000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001EBF4000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001EBF7000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 6,
-              "physical_start": "000000001EB72000",
+              "physical_start": "000000001EBFA000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 1042,
-              "physical_start": "000000001EB78000",
+              "page_count": 512,
+              "physical_start": "000000001EC00000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 7,
-              "physical_start": "000000001EF8A000",
+              "page_count": 25,
+              "physical_start": "000000001EE00000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 6,
+              "physical_start": "000000001EE19000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001EE1F000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 3,
+              "physical_start": "000000001EE22000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 24,
+              "physical_start": "000000001EE25000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001EE3D000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001EE3E000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001EE43000",
+              "source_type": 4
+            },
+            {
+              "attributes": "800000000000000F",
+              "kind": 4,
+              "page_count": 193,
+              "physical_start": "000000001EE48000",
+              "source_type": 6
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 36,
+              "physical_start": "000000001EF09000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001EF2D000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 8,
+              "physical_start": "000000001EF2E000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 4,
-              "physical_start": "000000001EF91000",
+              "physical_start": "000000001EF36000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 8,
+              "physical_start": "000000001EF3A000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1,
+              "physical_start": "000000001EF42000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 42,
+              "physical_start": "000000001EF43000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 5,
+              "physical_start": "000000001EF6D000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 6,
+              "physical_start": "000000001EF72000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 1042,
+              "physical_start": "000000001EF78000",
+              "source_type": 4
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 7,
+              "physical_start": "000000001F38A000",
+              "source_type": 3
+            },
+            {
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "page_count": 4,
+              "physical_start": "000000001F391000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 11,
-              "physical_start": "000000001EF95000",
+              "physical_start": "000000001F395000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 6,
-              "physical_start": "000000001EFA0000",
+              "physical_start": "000000001F3A0000",
               "source_type": 4
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 23,
-              "physical_start": "000000001EFA6000",
+              "physical_start": "000000001F3A6000",
               "source_type": 3
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
               "page_count": 1328,
-              "physical_start": "000000001EFBD000",
+              "physical_start": "000000001F3BD000",
               "source_type": 4
             },
             {
               "attributes": "800000000000000F",
               "kind": 4,
               "page_count": 256,
-              "physical_start": "000000001F4ED000",
+              "physical_start": "000000001F8ED000",
               "source_type": 6
             },
             {
               "attributes": "800000000000000F",
               "kind": 3,
               "page_count": 256,
-              "physical_start": "000000001F5ED000",
+              "physical_start": "000000001F9ED000",
               "source_type": 5
             },
             {
               "attributes": "000000000000000F",
               "kind": 1,
               "page_count": 135,
-              "physical_start": "000000001F6ED000",
+              "physical_start": "000000001FAED000",
               "source_type": 7
             },
             {
               "attributes": "000000000000000F",
               "kind": 5,
               "page_count": 11,
-              "physical_start": "000000001F774000",
+              "physical_start": "000000001FB74000",
               "source_type": 9
             },
             {
               "attributes": "000000000000000F",
               "kind": 6,
               "page_count": 128,
-              "physical_start": "000000001F77F000",
+              "physical_start": "000000001FB7F000",
               "source_type": 10
             },
             {
               "attributes": "000000000000000F",
               "kind": 2,
-              "page_count": 1537,
-              "physical_start": "000000001F7FF000",
+              "page_count": 513,
+              "physical_start": "000000001FBFF000",
               "source_type": 4
             },
             {
@@ -3149,13 +3562,13 @@
               "source_type": 0
             }
           ],
-          "memory_entry_count": 96,
-          "message_crc32": "573C9ADE",
+          "memory_entry_count": 111,
+          "message_crc32": "E9FB1487",
           "pre_exit_profile_validated": false,
           "record_count": 4,
           "required_features": "0000000000000013",
           "secret_bearing_records_present": false,
-          "sha256": "005292278DAE421B9FEB680393E7356C5770D07B291D0A108E2247579FEFD9A4",
+          "sha256": "9A07E180DD4B293BEACF71E745910BCFA58477F4A683AB37D265F04985617068",
           "transferable": false
         },
         "qemu_exit_code": 0,
@@ -3174,7 +3587,7 @@
         },
         "qmp_loopback_only": true,
         "qmp_quit_requested": true,
-        "run_id": "run-2",
+        "run_id": "xstate-policy-run-2",
         "screenshot": {
           "bright_cyan_pixel_count": 44970,
           "byte_count": 3072016,
@@ -3188,8 +3601,8 @@
           "width": 1280
         },
         "serial_debugcon_exact_match": true,
-        "stderr_byte_count": 0,
-        "stderr_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "stderr_byte_count": 2545,
+        "stderr_sha256": "B8B1E85EFF924068565D389E09B534400CBAF90444CD57594B43F0BF996CB584",
         "timestamped_qmp_events_excluded_from_equality": true,
         "transcript_binding": {
           "development_revalidation_profile_accepted": true,
@@ -3202,9 +3615,14 @@
   },
   "inputs": {
     "contract": {
-      "byte_count": 8096,
-      "path": "specs/native-kernel-transfer-contract.json",
-      "sha256": "B75BFF1212E48B8C2722DC7753723355AC0744A74AFE82D6A7C0F854BB00D95E"
+      "byte_count": 6284,
+      "path": "specs/native-kernel-xstate-policy-contract.json",
+      "sha256": "74DA00D6AF27958444F5A03F08E54D07CCFB14ED105B4A8951F1948EC9C54F41"
+    },
+    "contract_schema": {
+      "byte_count": 1652,
+      "path": "specs/native-kernel-xstate-policy-contract.schema.json",
+      "sha256": "8C013C6E0C96634B1EE406863E0F6E99C0F4C2401CC734A1BF3DBB337B41DF22"
     },
     "implementation_inputs": [
       {
@@ -3216,11 +3634,6 @@
         "byte_count": 29515,
         "path": "native/boot/src/exit.rs",
         "sha256": "17D85BA339D52EF1E717A208C12A8E15B4FEEFBF2AFA7CF8585761ED029BA24A"
-      },
-      {
-        "byte_count": 24579,
-        "path": "native/boot/src/kmap.rs",
-        "sha256": "1B7EDF6DA5296A963B56A0D7F223976F68271949930B69CB452AAC902FE8F339"
       },
       {
         "byte_count": 18161,
@@ -3243,9 +3656,9 @@
         "sha256": "DD48F912A48599F6037CD906DA75728FF0D528BFAF8C89F654016EB713D244F7"
       },
       {
-        "byte_count": 14333,
-        "path": "native/kernel/src/revalidation.rs",
-        "sha256": "127F1FCCCE98398D05424CCA49C3DA399FD00A311A9EFAB298CA026B77215A50"
+        "byte_count": 12083,
+        "path": "native/kernel/src/xstate.rs",
+        "sha256": "22F3DE80F9304A526C608FA0C2A8A451941D368F579D291B6D21CAECBBAC8E46"
       },
       {
         "byte_count": 23954,
@@ -3253,36 +3666,31 @@
         "sha256": "A4E987B6B7EB6B994229A7607F46C0EBCDD8F996ACC6B13787DF27E5D9C23183"
       },
       {
-        "byte_count": 18197,
-        "path": "tools/qualify_native_kernel_transfer.py",
-        "sha256": "558F326D24C8D60C5C55D50CDBB1692EC67365170D39691C8CE2C5C208BB8553"
+        "byte_count": 18514,
+        "path": "runtime/native_kernel_xstate_policy.py",
+        "sha256": "2E4CFF837339787BAFF9CFDB4B0BCB08FF8B46765040485BB61D0C976AC81BE5"
       },
       {
-        "byte_count": 10832,
-        "path": "tests/test_native_kernel_transfer.py",
-        "sha256": "DD4F1EBF55BDAE265C38C3B0FAFF3303B1398738F3E42C2B31650A41AF2C00E5"
+        "byte_count": 19563,
+        "path": "tools/qualify_native_kernel_xstate_policy.py",
+        "sha256": "4E6598B5BEF5786C94C6192C63C2405E94A311E3280889E64BE6D9870F142D9A"
       },
       {
-        "byte_count": 6238,
-        "path": "docs/native-kernel-transfer.md",
-        "sha256": "0916DF0159766B2C068C400D33EA700AACCE3D0A5D62526822E257E4BEBDD042"
+        "byte_count": 6148,
+        "path": "tests/test_native_kernel_xstate_policy.py",
+        "sha256": "CB4F47CCC332A1BCA59DCE72E45058FF5F0798427218ABDF0DF79A1D50E836F3"
       },
       {
-        "byte_count": 21070,
-        "path": "runs/native_kernel_entry_readiness.json",
-        "sha256": "1DC0F4761EDE6EC7C20FAF1D234F44E94AA71FA73C186692A6810D8915D0B819"
-      },
-      {
-        "byte_count": 16443,
-        "path": "runs/native-kernel-revalidation-readiness.json",
-        "sha256": "2D3B089F79B1AF0DFB556FCC8746D2CD692940AAA2E6250E710C12BECC9C0F88"
-      },
-      {
-        "byte_count": 188094,
-        "path": "runs/native_kernel_load_readiness.json",
-        "sha256": "E3C58F9442D38FB83AF3CEFAA87E7900B00D630626CEE794D29ECA8994E7B592"
+        "byte_count": 4727,
+        "path": "docs/native-kernel-xstate-policy.md",
+        "sha256": "A399A7645DE2F10FAEEBA3EE2B35246C2E502FFAD09EE974065AAB7340F2DCCD"
       }
     ],
+    "readiness_schema": {
+      "byte_count": 1592,
+      "path": "specs/native-kernel-xstate-policy-readiness.schema.json",
+      "sha256": "B0B53C5145D1A34039DFA5F28C1ED1A00E6D70A34A3AAC6F30FD474C7B0DB080"
+    },
     "tier0_lock": {
       "byte_count": 5641,
       "path": "specs/native-tier0-lock.json",
@@ -3468,7 +3876,7 @@
             "virtual_size": 748
           }
         ],
-        "sha256": "A9C88FBC4A3381A69867C558E20E6036E0C2D117011D6A2A57AE29E00035C828",
+        "sha256": "12860C65D127CA7BB70149C5493B107593CCA75187EB17E1D2A3DE9B7192EB7D",
         "subsystem": 10,
         "timestamp": 0
       },
@@ -3495,7 +3903,7 @@
           "byte_count": 207360,
           "cluster_count": 405,
           "path": "EFI/BOOT/BOOTX64.EFI",
-          "sha256": "A9C88FBC4A3381A69867C558E20E6036E0C2D117011D6A2A57AE29E00035C828"
+          "sha256": "12860C65D127CA7BB70149C5493B107593CCA75187EB17E1D2A3DE9B7192EB7D"
         },
         {
           "byte_count": 229,
@@ -3651,7 +4059,7 @@
         "protective_mbr_valid": true,
         "sector_bytes": 512,
         "sector_count": 131072,
-        "sha256": "B0CC5C41DB7DB6DF5136BB14C91C11D774C5EDF00D059716EB9191D9F6FFF9AD"
+        "sha256": "6782AAC6FD2C67A14514866789786B0C12D44C2248E737D76050C30ED6473D65"
       },
       "initial_system": {
         "activation_allowed": false,
@@ -4066,458 +4474,269 @@
     },
     "ordinary_workspace_file_only": true,
     "physical_media_write_performed": false,
-    "sha256": "B0CC5C41DB7DB6DF5136BB14C91C11D774C5EDF00D059716EB9191D9F6FFF9AD"
+    "sha256": "6782AAC6FD2C67A14514866789786B0C12D44C2248E737D76050C30ED6473D65"
   },
-  "n5_exit_gate_satisfied": false,
+  "n7_exit_gate_satisfied": false,
   "negative_controls": [
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-MARKER-OMISSION",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-MARKER-OMISSION",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-MARKER-ORDER",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-MARKER-ORDER",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-MARKER-DUPLICATE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-MARKER-DUPLICATE",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-CONTRACT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-SELECTOR",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-MODE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-CONTRACT",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-EMULATOR",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-XSAVE-FEATURE",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-ENTRY",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-OSXSAVE-FEATURE",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-HANDOFF",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-SSE2-FEATURE",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-BYTE-COUNT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-XCR0-SUPPORT",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-STACK",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-XSAVES",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-ROOT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-ENABLED-SIZE-LOW",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-CR3",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-ENABLED-SIZE-HIGH",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-TRAP-SCENARIO",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-MAXIMUM-SIZE",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-SIGNATURE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-CR0-TS",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-AUTHORITY",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-CR0-EM",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-ACTION",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-CR4-OSXSAVE",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-STATE-WRITE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-XCR0-SELECTED",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ARM-FIRMWARE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-XSS",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-BOUNDARY",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-STRATEGY",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ENTRY-CONTRACT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-FORMAT",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ENTRY-TRANSFER-CONTRACT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-AREA-SIZE",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ENTRY-BUILD",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-ALIGNMENT",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ENTRY-COUNT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-FCW",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-ENTRY-SERIAL",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-MXCSR",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-STATE-HANDOFF",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-MXCSR-MASK",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-STATE-BYTE-COUNT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-SAVE-COUNT",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-STATE-ENTRY",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-RESTORE-COUNT",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-STATE-STACK",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-XSTATE-BV",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-STATE-ROOT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-CONTEXT-MATCH",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-STATE-CR3",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-SCHEDULER-LOCK",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-STATE-IF",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-INTERRUPTS",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-STATE-DF",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-CPU-MIGRATION",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-PBP1-PROFILE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-KERNEL-SIMD",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-PBP1-RECORD-COUNT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-CANONICAL-CLEAR",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-PBP1-ARTIFACT-COUNT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-IMAGE-CLEAR",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-PBP1-PRODUCTION",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-NM",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-CONTRACT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-WRITES",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-FILE-COUNT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-SIGNATURES",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-ARTIFACT-COUNT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-AUTHORITY",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-PARSER-COUNT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-ACTIONS",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-MANIFEST-BYTES",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-SCHEDULER-CLAIM",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-RETAINED-BYTES",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-SMP-CLAIM",
       "status": "pass"
     },
     {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-RETAINED-DIGEST",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-POLICY-DIGEST",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-STATE-DIGEST",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-DENIAL",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-AUTHORITY",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-ACTION",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-REVALIDATION-STATE-WRITE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-TERMINAL-CONTRACT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-TERMINAL-MODE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-TERMINAL-ENTRY-COUNT",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-TERMINAL-FIRMWARE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-TERMINAL-SIGNATURE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-TERMINAL-AUTHORITY",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-TERMINAL-ACTION",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-TERMINAL-STATE-WRITE",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
-      "status": "pass"
-    },
-    {
-      "expected": "reject",
-      "id": "NEG-N5-PKXFER-UNEXPECTED-RETURN",
-      "layer": "live_transfer_marker_oracle",
-      "observed": "rejected",
+      "expected": "rejected",
+      "id": "NEG-N7-PKXSTATE-TARGET-CLAIM",
       "status": "pass"
     }
   ],
   "non_claims": [
-    "The ordinary PooleBoot build still stops before transfer; live dispatch requires the explicit development-transfer feature.",
-    "The PKXFER1 unsigned terminal-denial receipt accepts trap selector zero only; nonzero QEMU scenarios are qualified separately by PKTRAP1.",
-    "The exited-development PBP1 intentionally fails the authenticated production PKENTRY1 profile.",
-    "The live kernel path grants no capability, lifecycle, recovery, symbol, microcode, firmware, policy, or state-write authority.",
-    "The framebuffer still uses inherited firmware translation and cache attributes pending final remap and revocation work.",
-    "No target firmware, physical hardware, second independent host, physical-media write, signed release, ISO, installer, or production promotion is claimed.",
-    "Owner authorization for signing or privileged operations does not substitute for the missing qualification evidence or safety gates."
+    "PKXSTATE1 is a single-BSP QEMU development proof and does not qualify the Ryzen 7 9800X3D target.",
+    "The profile selects only x87 and SSE; AVX, AVX2, AVX-512, PKRU, AMX, CET state, and every other extended component remain unqualified.",
+    "The two context images exercise ownership semantics without integrating the scheduler, thread lifecycle, SMP, CPU migration, or AP initialization.",
+    "x87 and SSE exceptions remain masked; deliberate #MF, #XM, and #NM delivery and recovery are not qualified.",
+    "XSAVEOPT, XSAVEC, XSAVES, XRSTORS, compacted format, and supervisor state are not selected or qualified.",
+    "Kernel SIMD is prohibited in this slice; no bracketed kernel SIMD API is implemented or claimed.",
+    "The source audit is not a complete final-machine-code proof that the compiler emitted no incidental vector instruction outside the dedicated assembly path.",
+    "No key, signature, capability grant, firmware mutation, physical-media write, scheduler promotion, release, or production promotion is performed or claimed."
   ],
   "open_items": [
-    "Define and qualify the authenticated production PKENTRY1 profile with trusted signatures and measured-boot evidence.",
-    "Replace inherited framebuffer translation with an explicit final cache policy and revoke the temporary identity mapping.",
-    "Qualify target firmware and physical hardware under a separately defined safe procedure despite the owner's broad authorization.",
-    "Reproduce exact product, media, markers, PBP1 bytes, and frame on a second independent host.",
-    "Implement GDT, IDT, TSS, exception containment, physical and virtual memory initialization, capabilities, scheduling, IPC, and initial user space.",
-    "Complete all remaining N5-N39 gates before ISO publication or production promotion."
+    "Qualify AVX and other selected extended components with exact XCR0/XSS dependencies.",
+    "Qualify deliberate #MF, #XM, and any selected #NM delivery and recovery path.",
+    "Integrate bounded image allocation and ownership with real thread lifecycle and scheduling.",
+    "Qualify AP initialization, SMP homogeneity, and CPU migration behavior.",
+    "Add final linked-machine-code auditing for unintended compiler vector instructions.",
+    "Qualify the exact Ryzen 7 9800X3D target and complete the remaining N7 exit gate."
   ],
   "phase_status": {
-    "N5": "partial",
-    "N5.1": "partial",
-    "N5.4": "partial",
-    "N5.5": "partial",
-    "N5.8": "partial",
-    "N5.9": "partial"
+    "ADD-N7-XSTATE-001": "partial",
+    "N7": "partial",
+    "N7.4": "partial"
   },
   "production_promotion_allowed": false,
   "production_ready": false,
   "schema_version": "1.0",
-  "selected_move_id": "N5-KERNEL-TRANSFER-001",
-  "status": "pass_single_host_two_run_qemu_only_unsigned_terminal_non_promoting",
-  "status_date": "2026-07-18",
+  "selected_move_id": "N7-XSTATE-POLICY-001",
+  "status": "pass_single_host_two_run_bsp_x87_sse_non_promoting",
+  "status_date": "2026-07-21",
   "summary": {
     "actions_authorized": 0,
     "authority_grants": 0,
+    "context_image_zero_bytes": 8192,
+    "context_restore_count": 4,
+    "context_save_count": 2,
+    "enabled_area_bytes": 576,
     "firmware_calls_after_exit": 0,
-    "kernel_marker_count": 5,
-    "marker_count": 30,
-    "negative_controls_passed": 58,
+    "marker_count": 35,
+    "negative_controls_passed": 43,
+    "privileged_configuration_writes": 3,
     "production_claim_count": 0,
-    "retained_file_count": 9,
-    "signature_verifications": 0,
-    "state_writes": 0
+    "qemu_run_count": 2,
+    "selected_xcr0": 3,
+    "signature_verifications": 0
   }
 }
