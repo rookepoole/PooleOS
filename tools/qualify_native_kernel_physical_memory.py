@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build and qualify the bounded PKPMM2 physical-page scrubbing foundation."""
+"""Build and qualify the bounded PKPMM3 PMM metadata arena."""
 
 from __future__ import annotations
 
@@ -31,13 +31,13 @@ DEFAULT_OUT = ROOT / physical_memory.READINESS_RELATIVE
 
 
 class QualificationError(RuntimeError):
-    """Raised when live PKPMM2 qualification fails closed."""
+    """Raised when live PKPMM3 qualification fails closed."""
 
 
 def _set_field(marker: str, name: str, value: str) -> str:
     pattern = re.compile(rf"(\b{re.escape(name)}=)([^ ]+)")
     if len(pattern.findall(marker)) != 1:
-        raise QualificationError(f"PKPMM2 mutation field is not unique: {name}")
+        raise QualificationError(f"PKPMM3 mutation field is not unique: {name}")
     return pattern.sub(rf"\g<1>{value}", marker, count=1)
 
 
@@ -49,7 +49,7 @@ def _require_marker_rejection(
         physical_memory.validate_observation_binding(observation, transcript)
     except physical_memory.KernelPhysicalMemoryError:
         return {"id": control_id, "status": "pass", "expected": "rejected"}
-    raise QualificationError(f"PKPMM2 hostile marker control did not reject: {control_id}")
+    raise QualificationError(f"PKPMM3 hostile marker control did not reject: {control_id}")
 
 
 def _require_pbp1_rejection(
@@ -59,7 +59,7 @@ def _require_pbp1_rejection(
         physical_memory.validate_observation_binding(observation, transcript)
     except physical_memory.KernelPhysicalMemoryError:
         return {"id": control_id, "status": "pass", "expected": "rejected"}
-    raise QualificationError(f"PKPMM2 hostile PBP1 control did not reject: {control_id}")
+    raise QualificationError(f"PKPMM3 hostile PBP1 control did not reject: {control_id}")
 
 
 def _negative_controls(
@@ -79,68 +79,93 @@ def _negative_controls(
         return candidate
 
     mutations = (
-        (3, 23, "trap_scenario", "0"),
-        (4, 35, "contract", "PKPMM1"),
-        (5, 35, "entries", str(observation["map"]["entries"] + 1)),
-        (6, 35, "usable_pages", str(observation["map"]["usable_pages"] + 1)),
-        (7, 35, "boot_reclaimable_pages", str(observation["map"]["boot_reclaimable_pages"] + 1)),
-        (8, 35, "loader_reserved_pages", str(observation["map"]["loader_reserved_pages"] + 1)),
-        (9, 35, "null_guard_pages", "0"),
-        (10, 36, "dma_source", str(observation["zones"]["dma_source"] + 1)),
-        (11, 36, "dma_managed", str(observation["zones"]["dma_managed"] + 1)),
-        (12, 36, "dma32_source", str(observation["zones"]["dma32_source"] + 1)),
-        (13, 36, "dma32_managed", str(observation["zones"]["dma32_managed"] + 1)),
-        (14, 36, "normal_source", str(observation["zones"]["normal_source"] + 1)),
-        (15, 36, "normal_managed", str(observation["zones"]["normal_managed"] + 1)),
-        (16, 36, "extents", str(observation["zones"]["extents"] + 1)),
-        (17, 36, "largest_dma", str(observation["zones"]["largest_dma"] + 1)),
-        (18, 36, "largest_dma32", str(observation["zones"]["largest_dma32"] + 1)),
-        (19, 36, "largest_normal", str(observation["zones"]["largest_normal"] + 1)),
-        (20, 37, "kernel_base", "0x0000000000001000"),
-        (21, 37, "kernel_pages", str(observation["ownership"]["kernel_pages"] + 1)),
-        (22, 37, "handoff_base", "0x0000000000001000"),
-        (23, 37, "handoff_pages", str(observation["ownership"]["handoff_pages"] + 1)),
-        (24, 37, "root", "0x0000000000001000"),
-        (25, 37, "protected", "0"),
-        (26, 38, "allocations", "3"),
-        (27, 38, "frees", "1"),
-        (28, 38, "start", "0x0000000000001000"),
-        (29, 38, "first_generation", "0"),
-        (30, 38, "reuse_generation", "1"),
-        (31, 38, "allocation_receipts", "1"),
-        (32, 38, "release_receipts", "1"),
-        (33, 38, "scrub_pages", "7"),
-        (34, 38, "scrub_bytes", "28672"),
-        (35, 38, "verified_bytes", "28672"),
-        (36, 38, "stale_pattern", "0x0000000000000000"),
-        (37, 38, "stale_absent", "0"),
-        (38, 38, "double_free_rejected", "0"),
-        (39, 38, "quota_rejected", "0"),
-        (40, 38, "unavailable_rejected", "0"),
-        (41, 38, "metadata_poison", "0"),
-        (42, 38, "coalesces", "0"),
-        (43, 38, "rollback", "unverified"),
-        (44, 39, "managed_pages", str(observation["result"]["managed_pages"] + 1)),
-        (45, 39, "allocated_pages", "1"),
-        (46, 39, "physical_writes", "1"),
-        (47, 39, "physical_reads", "1"),
-        (48, 39, "temporary_pte_writes", "1"),
-        (49, 39, "bootstrap_invlpg", "1"),
-        (50, 39, "alias_revoked", "0"),
-        (51, 39, "mappings", "complete_direct_map"),
-        (52, 39, "reclaim", "1"),
-        (53, 39, "concurrency", "1"),
-        (54, 39, "smp", "1"),
-        (55, 39, "signatures", "1"),
-        (56, 39, "authority", "1"),
-        (57, 39, "actions", "1"),
-        (58, 39, "production", "1"),
-        (59, 39, "terminal", "return"),
+        (23, "trap_scenario", "0"),
+        (35, "contract", "PKPMM2"),
+        (35, "entries", str(observation["map"]["entries"] + 1)),
+        (35, "usable_pages", str(observation["map"]["usable_pages"] + 1)),
+        (35, "boot_reclaimable_pages", str(observation["map"]["boot_reclaimable_pages"] + 1)),
+        (35, "loader_reserved_pages", str(observation["map"]["loader_reserved_pages"] + 1)),
+        (35, "null_guard_pages", "0"),
+        (36, "dma_source", str(observation["zones"]["dma_source"] + 1)),
+        (36, "dma_managed", str(observation["zones"]["dma_managed"] + 1)),
+        (36, "dma32_source", str(observation["zones"]["dma32_source"] + 1)),
+        (36, "dma32_managed", str(observation["zones"]["dma32_managed"] + 1)),
+        (36, "normal_source", str(observation["zones"]["normal_source"] + 1)),
+        (36, "normal_managed", str(observation["zones"]["normal_managed"] + 1)),
+        (36, "extents", str(observation["zones"]["extents"] + 1)),
+        (36, "largest_dma", str(observation["zones"]["largest_dma"] + 1)),
+        (36, "largest_dma32", str(observation["zones"]["largest_dma32"] + 1)),
+        (36, "largest_normal", str(observation["zones"]["largest_normal"] + 1)),
+        (37, "kernel_base", "0x0000000000001000"),
+        (37, "kernel_pages", str(observation["ownership"]["kernel_pages"] + 1)),
+        (37, "handoff_base", "0x0000000000001000"),
+        (37, "handoff_pages", str(observation["ownership"]["handoff_pages"] + 1)),
+        (37, "root", "0x0000000000001000"),
+        (37, "protected", "0"),
+        (38, "pages", "4"),
+        (38, "physical_start", "0x0000000000001000"),
+        (38, "virtual_start", "0x0000000000001000"),
+        (38, "generation", "0"),
+        (38, "owner", "0"),
+        (38, "manager_bytes", "0"),
+        (38, "source_records", str(observation["metadata"]["source_records"] + 1)),
+        (38, "free_extents", str(observation["metadata"]["free_extents"] + 1)),
+        (38, "allocation_records", "2"),
+        (38, "receipt_records", "2"),
+        (38, "handoff_checksum", "0x0000000000000000"),
+        (38, "final_checksum", "0x0000000000000000"),
+        (38, "guard_pages", "1"),
+        (38, "mappings", "4"),
+        (38, "pte_writes", "4"),
+        (38, "release_excluded", "0"),
+        (38, "release_rejected", "0"),
+        (38, "integrity", "0"),
+        (38, "reservation_rollbacks", "1"),
+        (38, "mapping_rollbacks", "1"),
+        (38, "handoff", "unvalidated"),
+        (38, "corruption", "unverified"),
+        (38, "rollback", "unverified"),
+        (39, "allocations", "2"),
+        (39, "frees", "1"),
+        (39, "start", "0x0000000000001000"),
+        (39, "first_generation", "0"),
+        (39, "reuse_generation", "1"),
+        (39, "allocation_receipts", "1"),
+        (39, "release_receipts", "1"),
+        (39, "scrub_pages", "12"),
+        (39, "scrub_bytes", "49152"),
+        (39, "verified_bytes", "49152"),
+        (39, "stale_pattern", "0x0000000000000000"),
+        (39, "stale_absent", "0"),
+        (39, "double_free_rejected", "0"),
+        (39, "quota_rejected", "0"),
+        (39, "unavailable_rejected", "0"),
+        (39, "metadata_poison", "0"),
+        (39, "coalesces", "0"),
+        (39, "rollback", "unverified"),
+        (40, "managed_pages", str(observation["result"]["managed_pages"] + 1)),
+        (40, "allocated_pages", "0"),
+        (40, "physical_writes", "1"),
+        (40, "physical_reads", "1"),
+        (40, "temporary_pte_writes", "1"),
+        (40, "bootstrap_invlpg", "1"),
+        (40, "alias_revoked", "0"),
+        (40, "metadata_retained", "0"),
+        (40, "mappings", "complete_direct_map"),
+        (40, "reclaim", "1"),
+        (40, "concurrency", "1"),
+        (40, "smp", "1"),
+        (40, "signatures", "1"),
+        (40, "authority", "1"),
+        (40, "actions", "1"),
+        (40, "production", "1"),
+        (40, "terminal", "return"),
     )
-    for control_index, marker_index, field, value in mutations:
-        candidates.append(
-            (physical_memory.NEGATIVE_CONTROL_IDS[control_index], changed(marker_index, field, value))
-        )
+    marker_control_ids = physical_memory.NEGATIVE_CONTROL_IDS[3:-3]
+    if len(mutations) != len(marker_control_ids):
+        raise QualificationError("PKPMM3 hostile-control inventory and mutations disagree")
+    for control_id, (marker_index, field, value) in zip(marker_control_ids, mutations):
+        candidates.append((control_id, changed(marker_index, field, value)))
     controls = [
         _require_marker_rejection(control_id, candidate, transcript)
         for control_id, candidate in candidates
@@ -148,15 +173,15 @@ def _negative_controls(
 
     overlap = copy.deepcopy(transcript)
     overlap["memory_entries"][1]["physical_start"] = overlap["memory_entries"][0]["physical_start"]
-    controls.append(_require_pbp1_rejection(physical_memory.NEGATIVE_CONTROL_IDS[60], observation, overlap))
+    controls.append(_require_pbp1_rejection(physical_memory.NEGATIVE_CONTROL_IDS[-3], observation, overlap))
     source_kind = copy.deepcopy(transcript)
     source_kind["memory_entries"][0]["source_type"] = 1
-    controls.append(_require_pbp1_rejection(physical_memory.NEGATIVE_CONTROL_IDS[61], observation, source_kind))
+    controls.append(_require_pbp1_rejection(physical_memory.NEGATIVE_CONTROL_IDS[-2], observation, source_kind))
     ownership = copy.deepcopy(transcript)
     ownership["core"]["kernel_physical_base"] = ownership["memory_entries"][0]["physical_start"]
-    controls.append(_require_pbp1_rejection(physical_memory.NEGATIVE_CONTROL_IDS[62], observation, ownership))
+    controls.append(_require_pbp1_rejection(physical_memory.NEGATIVE_CONTROL_IDS[-1], observation, ownership))
     if [item["id"] for item in controls] != list(physical_memory.NEGATIVE_CONTROL_IDS):
-        raise QualificationError("PKPMM2 hostile-control order changed")
+        raise QualificationError("PKPMM3 hostile-control order changed")
     return controls
 
 
@@ -167,13 +192,16 @@ def _source_audit() -> dict[str, Any]:
     adapter_source = adapter_path.read_text(encoding="utf-8")
     implementation = source.split("#[cfg(test)]", 1)[0]
     authorized = (
-        '#[unsafe(link_section = ".text.pkpmm_labels")]',
-        "unsafe { core::str::from_utf8_unchecked(bytes) }",
+        ('#[unsafe(link_section = ".text.pkpmm_labels")]', 1),
+        ("unsafe { core::str::from_utf8_unchecked(bytes) }", 1),
+        ("unsafe { &mut *(migration.manager_address as usize as *mut PhysicalMemoryManager) }", 1),
+        ("unsafe { core::ptr::copy_nonoverlapping(self as *const Self, mapped_pointer, 1) }", 1),
+        ("unsafe { &mut *mapped_pointer }", 2),
     )
     audited = implementation
-    for token in authorized:
-        if implementation.count(token) != 1:
-            raise QualificationError(f"PKPMM2 authorized source token changed: {token}")
+    for token, expected_count in authorized:
+        if implementation.count(token) != expected_count:
+            raise QualificationError(f"PKPMM3 authorized source token changed: {token}")
         audited = audited.replace(token, "")
     forbidden = tuple(
         token
@@ -183,28 +211,40 @@ def _source_audit() -> dict[str, Any]:
     required = (
         "[Extent; MAX_FREE_EXTENTS]",
         "[Allocation; MAX_ALLOCATIONS]",
+        "[SourceRecord; MAX_MEMORY_ENTRIES]",
+        "[Option<ScrubReceipt>; MAX_SCRUB_RECEIPTS]",
         "MEMORY_USABLE",
         "MEMORY_LOADER_RESERVED",
         "pub trait PhysicalPageAccess",
+        "pub trait MetadataArenaAccess",
         "pub fn allocate_scrubbed",
         "pub fn free_scrubbed",
         "fn scrub_range",
         "fn preflight_insert",
+        "fn migrate_to_metadata",
+        "fn logical_checksum",
+        "release_excluded",
         "SCRUB_WORDS_PER_PAGE",
     )
     missing = tuple(token for token in required if token not in implementation)
     if forbidden or missing:
-        raise QualificationError(f"PKPMM2 source scope changed: forbidden={forbidden}; missing={missing}")
+        raise QualificationError(f"PKPMM3 source scope changed: forbidden={forbidden}; missing={missing}")
     adapter_required = (
         "impl PhysicalPageAccess for BootstrapTableMemory",
+        "impl MetadataArenaAccess for BootstrapTableMemory",
         "self.ensure_mapped(physical_address)",
         "write_volatile(pointer, value)",
         "read_volatile(pointer)",
         "page_access\n                .finish()",
+        "self.metadata_guards_absent()?",
+        "metadata_retained=1",
     )
     adapter_missing = tuple(token for token in adapter_required if token not in adapter_source)
     if adapter_missing:
-        raise QualificationError(f"PKPMM2 live adapter scope changed: missing={adapter_missing}")
+        raise QualificationError(f"PKPMM3 live adapter scope changed: missing={adapter_missing}")
+    adapter_implementation = adapter_source.split("struct BootstrapTableMemory", 1)[1].split(
+        "struct LiveActiveHardware", 1
+    )[0]
     return {
         "core_path": core_path.relative_to(ROOT).as_posix(),
         "core_sha256": physical_memory.sha256_bytes(source.encode("utf-8")),
@@ -212,12 +252,14 @@ def _source_audit() -> dict[str, Any]:
         "adapter_sha256": physical_memory.sha256_bytes(adapter_source.encode("utf-8")),
         "implementation_unsafe_token_count": 0,
         "authorized_nonmutating_unsafe_site_count": 2,
-        "live_adapter_volatile_read_site_count": 1,
-        "live_adapter_volatile_write_site_count": 1,
+        "authorized_metadata_migration_unsafe_site_count": 4,
+        "live_adapter_volatile_read_site_count": adapter_implementation.count("read_volatile"),
+        "live_adapter_volatile_write_site_count": adapter_implementation.count("write_volatile"),
         "final_temporary_alias_revocation_required": True,
+        "final_guarded_metadata_mapping_retention_required": True,
         "heap_api_token_count": 0,
-        "fixed_capacity_ledger_count": 2,
-        "result": "pass_safe_scrub_state_machine_with_audited_live_page_adapter",
+        "fixed_capacity_ledger_count": 4,
+        "result": "pass_guarded_metadata_migration_with_audited_live_page_adapter",
     }
 
 
@@ -241,7 +283,7 @@ def make_readiness(
     temporary_parent.mkdir(parents=True, exist_ok=True)
     run_parent = ROOT / "runs" / "native-tier0"
     run_parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="pkpmm2-qualification-", dir=temporary_parent) as temporary:
+    with tempfile.TemporaryDirectory(prefix="pkpmm3-qualification-", dir=temporary_parent) as temporary:
         temporary_root = Path(temporary)
         default_boot, default_build = qualify_native_pooleboot._build_and_test(
             toolchain_root, temporary_root / "default-boot"
@@ -254,23 +296,23 @@ def make_readiness(
         if b"POOLEBOOT/0.1 TRANSFER_ARM PASS" in default_boot or b"POOLEBOOT/0.1 STOP BEFORE TRANSFER" not in default_boot:
             raise QualificationError("default PooleBoot development-transfer isolation failed")
         if physical_memory.sha256_bytes(default_boot) == physical_memory.sha256_bytes(pmm_boot):
-            raise QualificationError("default and PKPMM2 PooleBoot profiles are not distinct")
+            raise QualificationError("default and PKPMM3 PooleBoot profiles are not distinct")
         source_audit = _source_audit()
         media_one = native_kernel_load.build_media_bytes(pmm_boot, config, manifest, kernel, artifact_files)
         media_two = native_kernel_load.build_media_bytes(pmm_boot, config, manifest, kernel, artifact_files)
         if media_one != media_two:
-            raise QualificationError("two PKPMM2 media generations differ")
+            raise QualificationError("two PKPMM3 media generations differ")
         media_inspection = native_kernel_load.inspect_media_bytes(media_one)
         if media_inspection["files"][3]["sha256"] != kernel_readiness["product"]["canonical_sha256"]:
-            raise QualificationError("PKPMM2 media kernel differs from PKENTRY1")
-        media_path = temporary_root / "pkpmm2.img"
+            raise QualificationError("PKPMM3 media kernel differs from PKENTRY1")
+        media_path = temporary_root / "pkpmm3.img"
         media_path.write_bytes(media_one)
 
         runs: list[dict[str, Any]] = []
         screenshots: list[bytes] = []
         handoffs: list[bytes] = []
         for run_index in (1, 2):
-            with tempfile.TemporaryDirectory(prefix=f"pkpmm2-run-{run_index}-", dir=run_parent) as run_temporary:
+            with tempfile.TemporaryDirectory(prefix=f"pkpmm3-run-{run_index}-", dir=run_parent) as run_temporary:
                 run_directory = Path(run_temporary)
                 try:
                     run, screenshot, handoff = qualify_native_pooleboot._execute_once(
@@ -327,11 +369,11 @@ def make_readiness(
                 screenshots.append(screenshot)
                 handoffs.append(handoff)
         if runs[0]["markers"] != runs[1]["markers"]:
-            raise QualificationError("two PKPMM2 runs emitted different markers")
+            raise QualificationError("two PKPMM3 runs emitted different markers")
         if screenshots[0] != screenshots[1]:
-            raise QualificationError("two PKPMM2 runs produced different frames")
+            raise QualificationError("two PKPMM3 runs produced different frames")
         if handoffs[0] != handoffs[1]:
-            raise QualificationError("two PKPMM2 runs produced different PBP1 bytes")
+            raise QualificationError("two PKPMM3 runs produced different PBP1 bytes")
 
     controls = _negative_controls(runs[0]["markers"], runs[0]["pbp1_transcript"])
     observation = physical_memory.validate_markers(runs[0]["markers"])
@@ -342,7 +384,7 @@ def make_readiness(
         "schema_version": "1.0",
         "artifact_kind": "pooleos_native_kernel_physical_memory_readiness",
         "status_date": status_date,
-        "status": "pass_single_host_two_run_qemu64_bounded_page_scrubbing_non_promoting",
+        "status": "pass_single_host_two_run_qemu64_guarded_metadata_arena_non_promoting",
         "contract_id": physical_memory.CONTRACT_ID,
         "selected_move_id": physical_memory.SELECTED_MOVE_ID,
         "production_ready": False,
@@ -388,7 +430,8 @@ def make_readiness(
             "exact_pbp1_match": True,
             "runs": runs,
             "observation": {
-                key: observation[key] for key in ("map", "zones", "ownership", "scrub", "result")
+                key: observation[key]
+                for key in ("map", "zones", "ownership", "metadata", "scrub", "result")
             },
             "independent_memory_summary": derived,
         },
@@ -406,6 +449,7 @@ def make_readiness(
             "loader_reserved_pages_protected": derived["kind_pages"][10],
             "allocator_operations": observation["scrub"]["allocations"] + observation["scrub"]["frees"],
             "scrub_receipts": observation["scrub"]["allocation_receipts"] + observation["scrub"]["release_receipts"],
+            "metadata_scrub_receipts": 1,
             "scrub_page_count": observation["scrub"]["scrub_pages"],
             "scrubbed_bytes": observation["scrub"]["scrub_bytes"],
             "verified_bytes": observation["scrub"]["verified_bytes"],
@@ -414,6 +458,17 @@ def make_readiness(
             "bootstrap_temporary_pte_writes": observation["result"]["temporary_pte_writes"],
             "bootstrap_invalidations": observation["result"]["bootstrap_invlpg"],
             "final_temporary_alias_revoked": observation["result"]["alias_revoked"] == 1,
+            "metadata_arena_pages": observation["metadata"]["pages"],
+            "metadata_guard_pages": observation["metadata"]["guard_pages"],
+            "metadata_manager_bytes": observation["metadata"]["manager_bytes"],
+            "metadata_source_records": observation["metadata"]["source_records"],
+            "metadata_free_extents": observation["metadata"]["free_extents"],
+            "metadata_allocation_records_at_handoff": observation["metadata"]["allocation_records"],
+            "metadata_receipt_records_at_handoff": observation["metadata"]["receipt_records"],
+            "metadata_pte_writes": observation["metadata"]["pte_writes"],
+            "metadata_mapping_retained": observation["result"]["metadata_retained"] == 1,
+            "metadata_release_excluded": observation["metadata"]["release_excluded"] == 1,
+            "metadata_integrity_verified": observation["metadata"]["integrity"] == 1,
             "complete_address_space_mapping_operations": 0,
             "reclaim_operations": 0,
             "signature_verifications": 0,
@@ -422,11 +477,11 @@ def make_readiness(
             "production_claim_count": 0,
         },
         "open_items": [
-            "Move PMM metadata out of the bounded bootstrap stack ledger while preserving fail-closed ownership and scrub receipts.",
             "Freeze and qualify boot-services and ACPI reclaim transitions with explicit subsystem ownership handoff.",
             "Implement N9.3/N9.4 virtual layout, page-table ownership, map/unmap, TLB, PCID, guard, and huge-page contracts.",
             "Implement randomized, concurrent, interrupt-context, SMP, fragmentation, quota, and OOM allocator stress.",
             "Implement heap, object caches, kernel stacks, cacheability policy, reclaim, target hardware, and second-host qualification.",
+            "Replace the bounded five-page arena with scalable metadata growth after reclaim, VM ownership, and allocator concurrency contracts exist.",
         ],
     }
     errors = physical_memory.readiness_errors(report, ROOT)
@@ -460,10 +515,10 @@ def main(argv: list[str] | None = None) -> int:
         physical_memory.KernelPhysicalMemoryError,
         native_tier0.Tier0Error,
     ) as error:
-        print(f"PKPMM2 qualification failed: {error}", file=sys.stderr)
+        print(f"PKPMM3 qualification failed: {error}", file=sys.stderr)
         return 1
     print(
-        "PKPMM2 qualification passed: "
+        "PKPMM3 qualification passed: "
         f"runs={report['summary']['qemu_run_count']}; "
         f"markers={report['summary']['marker_count']}; "
         f"controls={report['summary']['negative_controls_passed']}; "

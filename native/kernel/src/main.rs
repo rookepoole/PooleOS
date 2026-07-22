@@ -22,8 +22,8 @@ use poolekernel::{
     },
     decode_cpu_identity,
     physical_memory::{
-        PageAccessError, PhysicalPageAccess, ScrubKind, Zone,
-        run_profile as run_physical_memory_profile,
+        METADATA_ARENA_PAGE_COUNT, MetadataArenaAccess, PageAccessError, PhysicalPageAccess,
+        ScrubKind, Zone, run_profile as run_physical_memory_profile,
     },
     privilege_msr::{machine_check_bank_count, machine_check_ctl_present, validate_snapshot},
     revalidation, validate_cpu_policy_snapshot, validate_descriptor_state,
@@ -165,7 +165,7 @@ macro_rules! pkpmm_fragment {
 
 pkpmm_fragment!(
     PKPMM_DENIED,
-    b"POOLEOS:KERNEL:PMM-DENIED contract=PKPMM2 reason="
+    b"POOLEOS:KERNEL:PMM-DENIED contract=PKPMM3 reason="
 );
 pkpmm_fragment!(
     PKPMM_DENIED_TAIL,
@@ -173,15 +173,15 @@ pkpmm_fragment!(
 );
 pkpmm_fragment!(
     PKPMM_EARLY,
-    b"POOLEOS:KERNEL:PMM-EARLY PASS contract=PKPMM2 selector=8 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n"
+    b"POOLEOS:KERNEL:PMM-EARLY PASS contract=PKPMM3 selector=8 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n"
 );
 pkpmm_fragment!(
     PKPMM_STAGE,
-    b"POOLEOS:KERNEL:PMM-STAGE PASS contract=PKPMM2 stage="
+    b"POOLEOS:KERNEL:PMM-STAGE PASS contract=PKPMM3 stage="
 );
 pkpmm_fragment!(
     PKPMM_MAP,
-    b"POOLEOS:KERNEL:PMM-MAP PASS contract=PKPMM2 entries="
+    b"POOLEOS:KERNEL:PMM-MAP PASS contract=PKPMM3 entries="
 );
 pkpmm_fragment!(PKPMM_USABLE, b" usable_pages=");
 pkpmm_fragment!(PKPMM_BOOT_RECLAIMABLE, b" boot_reclaimable_pages=");
@@ -189,7 +189,7 @@ pkpmm_fragment!(PKPMM_LOADER_RESERVED, b" loader_reserved_pages=");
 pkpmm_fragment!(PKPMM_NULL_GUARD, b" null_guard_pages=");
 pkpmm_fragment!(
     PKPMM_ZONES,
-    b"\nPOOLEOS:KERNEL:PMM-ZONES PASS contract=PKPMM2 dma_source="
+    b"\nPOOLEOS:KERNEL:PMM-ZONES PASS contract=PKPMM3 dma_source="
 );
 pkpmm_fragment!(PKPMM_DMA_MANAGED, b" dma_managed=");
 pkpmm_fragment!(PKPMM_DMA32_SOURCE, b" dma32_source=");
@@ -202,17 +202,47 @@ pkpmm_fragment!(PKPMM_LARGEST_DMA32, b" largest_dma32=");
 pkpmm_fragment!(PKPMM_LARGEST_NORMAL, b" largest_normal=");
 pkpmm_fragment!(
     PKPMM_OWNERSHIP,
-    b"\nPOOLEOS:KERNEL:PMM-OWNERSHIP PASS contract=PKPMM2 kernel_base="
+    b"\nPOOLEOS:KERNEL:PMM-OWNERSHIP PASS contract=PKPMM3 kernel_base="
 );
 pkpmm_fragment!(PKPMM_KERNEL_PAGES, b" kernel_pages=");
 pkpmm_fragment!(PKPMM_HANDOFF_BASE, b" handoff_base=");
 pkpmm_fragment!(PKPMM_HANDOFF_PAGES, b" handoff_pages=");
 pkpmm_fragment!(PKPMM_ROOT, b" root=");
 pkpmm_fragment!(PKPMM_PROTECTED, b" protected=1\n");
-pkpmm_fragment!(PKPMM_EXERCISE_DENIED, b"POOLEOS:KERNEL:PMM-DENIED contract=PKPMM2 reason=exercise_invariant physical_effects=fail_closed ownership_release=0 reclaim=0 authority=0 actions=0 terminal=panic\n");
+pkpmm_fragment!(PKPMM_EXERCISE_DENIED, b"POOLEOS:KERNEL:PMM-DENIED contract=PKPMM3 reason=exercise_invariant physical_effects=fail_closed ownership_release=0 reclaim=0 authority=0 actions=0 terminal=panic\n");
+pkpmm_fragment!(
+    PKPMM_METADATA,
+    b"POOLEOS:KERNEL:PMM-METADATA PASS contract=PKPMM3 pages="
+);
+pkpmm_fragment!(PKPMM_METADATA_PHYSICAL, b" physical_start=");
+pkpmm_fragment!(PKPMM_METADATA_VIRTUAL, b" virtual_start=");
+pkpmm_fragment!(PKPMM_METADATA_GENERATION, b" generation=");
+pkpmm_fragment!(PKPMM_METADATA_OWNER, b" owner=");
+pkpmm_fragment!(PKPMM_METADATA_BYTES, b" manager_bytes=");
+pkpmm_fragment!(PKPMM_METADATA_SOURCE, b" source_records=");
+pkpmm_fragment!(PKPMM_METADATA_EXTENTS, b" free_extents=");
+pkpmm_fragment!(PKPMM_METADATA_ALLOCATIONS, b" allocation_records=");
+pkpmm_fragment!(PKPMM_METADATA_RECEIPTS, b" receipt_records=");
+pkpmm_fragment!(PKPMM_METADATA_HANDOFF_CHECKSUM, b" handoff_checksum=");
+pkpmm_fragment!(PKPMM_METADATA_FINAL_CHECKSUM, b" final_checksum=");
+pkpmm_fragment!(PKPMM_METADATA_GUARDS, b" guard_pages=");
+pkpmm_fragment!(PKPMM_METADATA_MAPPINGS, b" mappings=");
+pkpmm_fragment!(PKPMM_METADATA_PTE_WRITES, b" pte_writes=");
+pkpmm_fragment!(PKPMM_METADATA_RELEASE_EXCLUDED, b" release_excluded=");
+pkpmm_fragment!(PKPMM_METADATA_RELEASE_REJECTED, b" release_rejected=");
+pkpmm_fragment!(PKPMM_METADATA_INTEGRITY, b" integrity=");
+pkpmm_fragment!(
+    PKPMM_METADATA_RESERVATION_ROLLBACKS,
+    b" reservation_rollbacks="
+);
+pkpmm_fragment!(PKPMM_METADATA_MAPPING_ROLLBACKS, b" mapping_rollbacks=");
+pkpmm_fragment!(
+    PKPMM_METADATA_TAIL,
+    b" handoff=validated corruption=host_verified rollback=host_verified\n"
+);
 pkpmm_fragment!(
     PKPMM_SCRUB,
-    b"POOLEOS:KERNEL:PMM-SCRUB PASS contract=PKPMM2 allocations="
+    b"POOLEOS:KERNEL:PMM-SCRUB PASS contract=PKPMM3 allocations="
 );
 pkpmm_fragment!(PKPMM_FREES, b" frees=");
 pkpmm_fragment!(PKPMM_START, b" start=");
@@ -233,14 +263,14 @@ pkpmm_fragment!(PKPMM_COALESCES, b" coalesces=");
 pkpmm_fragment!(PKPMM_ROLLBACK, b" rollback=host_verified\n");
 pkpmm_fragment!(
     PKPMM_RESULT,
-    b"POOLEOS:KERNEL:PMM-RESULT PASS contract=PKPMM2 profile=qemu64_tier0 managed_pages="
+    b"POOLEOS:KERNEL:PMM-RESULT PASS contract=PKPMM3 profile=qemu64_tier0 managed_pages="
 );
 pkpmm_fragment!(PKPMM_ALLOCATED_PAGES, b" allocated_pages=");
 pkpmm_fragment!(PKPMM_PHYSICAL_WRITES, b" physical_writes=");
 pkpmm_fragment!(PKPMM_PHYSICAL_READS, b" physical_reads=");
 pkpmm_fragment!(PKPMM_TEMPORARY_WRITES, b" temporary_pte_writes=");
 pkpmm_fragment!(PKPMM_BOOTSTRAP_INVLPG, b" bootstrap_invlpg=");
-pkpmm_fragment!(PKPMM_RESULT_TAIL, b" alias_revoked=1 mappings=temporary_single_page reclaim=0 concurrency=0 smp=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n");
+pkpmm_fragment!(PKPMM_RESULT_TAIL, b" alias_revoked=1 metadata_retained=1 mappings=temporary_single_page_plus_guarded_metadata reclaim=0 concurrency=0 smp=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n");
 
 macro_rules! pkvm_fragment {
     ($name:ident, $value:literal) => {
@@ -538,11 +568,15 @@ struct BootstrapTableMemory {
     reads: u64,
     temporary_pte_writes: u64,
     invalidations: u64,
+    metadata_physical_start: Option<u64>,
+    metadata_mapped_pages: u64,
+    metadata_pte_writes: u64,
+    metadata_guard_pages_verified: u64,
+    metadata_mapping_rollbacks: u64,
 }
 
 impl BootstrapTableMemory {
-    const TEMPORARY_LEAF_INDEX: usize =
-        poole_kmap::HANDOFF_FIRST_PAGE + poole_kmap::HANDOFF_PAGE_COUNT;
+    const TEMPORARY_LEAF_INDEX: usize = poole_kmap::TEMPORARY_PAGE_INDEX;
     const TEMPORARY_ENTRY_FLAGS: u64 = (1 << 0) | (1 << 1) | (1 << 63);
     const PHYSICAL_MASK_52: u64 = 0x000f_ffff_ffff_f000;
 
@@ -565,13 +599,14 @@ impl BootstrapTableMemory {
         }
         // SAFETY: the loop above proves that the retained PKMAP2 leaf table is
         // identity-mapped and writable through its physical address.
-        let value = unsafe {
-            read_volatile(
-                (active_leaf_table as usize as *const u64).wrapping_add(Self::TEMPORARY_LEAF_INDEX),
-            )
-        };
-        if value != 0 {
-            return Err(virtual_memory::Error::BootstrapLeafOccupied);
+        for index in Self::TEMPORARY_LEAF_INDEX..=poole_kmap::METADATA_GUARD_HIGH_PAGE {
+            // SAFETY: the loop above proves that the retained leaf table is writable.
+            let value = unsafe {
+                read_volatile((active_leaf_table as usize as *const u64).wrapping_add(index))
+            };
+            if value != 0 {
+                return Err(virtual_memory::Error::BootstrapLeafOccupied);
+            }
         }
         Ok(Self {
             active_root,
@@ -582,6 +617,11 @@ impl BootstrapTableMemory {
             reads: 0,
             temporary_pte_writes: 0,
             invalidations: 0,
+            metadata_physical_start: None,
+            metadata_mapped_pages: 0,
+            metadata_pte_writes: 0,
+            metadata_guard_pages_verified: 0,
+            metadata_mapping_rollbacks: 0,
         })
     }
 
@@ -596,11 +636,18 @@ impl BootstrapTableMemory {
         (self.active_leaf_table as usize as *mut u64).wrapping_add(Self::TEMPORARY_LEAF_INDEX)
     }
 
-    fn invalidate(&mut self) {
-        // SAFETY: selectors 8 through 10 run at CPL0 on the BSP with interrupts disabled;
-        // the operand is the single PKMAP2 bootstrap temporary leaf.
-        unsafe { arch::x86_64::invalidate_page(virtual_memory::TEMPORARY_MAP_START) };
+    fn indexed_leaf_pointer(&self, index: usize) -> *mut u64 {
+        (self.active_leaf_table as usize as *mut u64).wrapping_add(index)
+    }
+
+    fn invalidate_address(&mut self, virtual_address: u64) {
+        // SAFETY: selectors 8 through 10 run at CPL0 on the BSP with interrupts disabled.
+        unsafe { arch::x86_64::invalidate_page(virtual_address) };
         self.invalidations += 1;
+    }
+
+    fn invalidate(&mut self) {
+        self.invalidate_address(virtual_memory::TEMPORARY_MAP_START);
     }
 
     fn ensure_mapped(&mut self, physical_address: u64) -> Result<(), virtual_memory::Error> {
@@ -651,6 +698,61 @@ impl BootstrapTableMemory {
         }
         Ok(())
     }
+
+    fn metadata_guards_absent(&self) -> Result<(), virtual_memory::Error> {
+        for (index, virtual_address) in [
+            (
+                poole_kmap::METADATA_GUARD_LOW_PAGE,
+                virtual_memory::METADATA_GUARD_LOW_START,
+            ),
+            (
+                poole_kmap::METADATA_GUARD_HIGH_PAGE,
+                virtual_memory::METADATA_GUARD_HIGH_START,
+            ),
+        ] {
+            // SAFETY: new() proves the retained leaf table is identity-mapped.
+            if unsafe { read_volatile(self.indexed_leaf_pointer(index)) } != 0
+                || poole_kmap::translate(
+                    &ActivePhysicalReader,
+                    self.active_root,
+                    virtual_address,
+                    self.physical_address_bits,
+                ) != Err(poole_kmap::Error::TranslationMissing)
+            {
+                return Err(virtual_memory::Error::BootstrapLeafState);
+            }
+        }
+        Ok(())
+    }
+
+    fn rollback_metadata_prefix(
+        &mut self,
+        physical_address: u64,
+        installed_pages: usize,
+    ) -> Result<(), virtual_memory::Error> {
+        for offset in (0..installed_pages).rev() {
+            let expected = physical_address
+                .checked_add(offset as u64 * poole_kmap::PAGE_SIZE)
+                .ok_or(virtual_memory::Error::BootstrapTargetAddress)?;
+            let leaf = self.indexed_leaf_pointer(poole_kmap::METADATA_FIRST_PAGE + offset);
+            // SAFETY: new() proves the retained leaf table is identity-mapped.
+            let observed = unsafe { read_volatile(leaf) };
+            if observed & Self::PHYSICAL_MASK_52 != expected
+                || observed & Self::TEMPORARY_ENTRY_FLAGS != Self::TEMPORARY_ENTRY_FLAGS
+            {
+                return Err(virtual_memory::Error::BootstrapLeafState);
+            }
+            // SAFETY: this transaction installed and exclusively owns the leaf.
+            unsafe { write_volatile(leaf, 0) };
+            self.temporary_pte_writes += 1;
+            self.metadata_pte_writes += 1;
+            self.invalidate_address(
+                virtual_memory::METADATA_MAP_START + offset as u64 * poole_kmap::PAGE_SIZE,
+            );
+        }
+        self.metadata_mapping_rollbacks += 1;
+        self.metadata_guards_absent()
+    }
 }
 
 impl PhysicalPageAccess for BootstrapTableMemory {
@@ -663,7 +765,7 @@ impl PhysicalPageAccess for BootstrapTableMemory {
         self.ensure_mapped(physical_address)
             .map_err(|_| PageAccessError::Access)?;
         let pointer = Self::target_pointer(word_index).map_err(|_| PageAccessError::Access)?;
-        // SAFETY: PKPMM2 owns the planned or still-live PMM extent and ensure_mapped
+        // SAFETY: PKPMM3 owns the planned or still-live PMM extent and ensure_mapped
         // proves that its exact physical page occupies the supervisor RW/NX alias.
         unsafe { write_volatile(pointer, value) };
         self.writes = self.writes.checked_add(1).ok_or(PageAccessError::Access)?;
@@ -678,11 +780,133 @@ impl PhysicalPageAccess for BootstrapTableMemory {
         self.ensure_mapped(physical_address)
             .map_err(|_| PageAccessError::Access)?;
         let pointer = Self::target_pointer(word_index).map_err(|_| PageAccessError::Access)?;
-        // SAFETY: the same PKPMM2 ownership and temporary-alias proof as write_word
+        // SAFETY: the same PKPMM3 ownership and temporary-alias proof as write_word
         // applies; volatile readback is required before the scrub receipt is minted.
         let value = unsafe { read_volatile(pointer) };
         self.reads = self.reads.checked_add(1).ok_or(PageAccessError::Access)?;
         Ok(value)
+    }
+}
+
+impl MetadataArenaAccess for BootstrapTableMemory {
+    fn install_metadata_arena(
+        &mut self,
+        physical_address: u64,
+        page_count: u64,
+    ) -> Result<u64, PageAccessError> {
+        if self.metadata_physical_start.is_some()
+            || page_count != METADATA_ARENA_PAGE_COUNT
+            || page_count as usize != poole_kmap::METADATA_PAGE_COUNT
+            || physical_address == 0
+            || !physical_address.is_multiple_of(poole_kmap::PAGE_SIZE)
+            || physical_address & !Self::PHYSICAL_MASK_52 != 0
+        {
+            return Err(PageAccessError::Access);
+        }
+        self.metadata_guards_absent()
+            .map_err(|_| PageAccessError::Access)?;
+        for offset in 0..poole_kmap::METADATA_PAGE_COUNT {
+            let leaf = self.indexed_leaf_pointer(poole_kmap::METADATA_FIRST_PAGE + offset);
+            // SAFETY: new() proves the retained leaf table is identity-mapped.
+            if unsafe { read_volatile(leaf) } != 0 {
+                if offset != 0 {
+                    self.rollback_metadata_prefix(physical_address, offset)
+                        .map_err(|_| PageAccessError::Access)?;
+                }
+                return Err(PageAccessError::Access);
+            }
+            let physical = physical_address
+                .checked_add(offset as u64 * poole_kmap::PAGE_SIZE)
+                .ok_or(PageAccessError::Access)?;
+            // SAFETY: the metadata transaction owns this absent leaf exclusively.
+            unsafe { write_volatile(leaf, physical | Self::TEMPORARY_ENTRY_FLAGS) };
+            self.temporary_pte_writes += 1;
+            self.metadata_pte_writes += 1;
+            let virtual_address =
+                virtual_memory::METADATA_MAP_START + offset as u64 * poole_kmap::PAGE_SIZE;
+            self.invalidate_address(virtual_address);
+            let translation = poole_kmap::translate(
+                &ActivePhysicalReader,
+                self.active_root,
+                virtual_address,
+                self.physical_address_bits,
+            );
+            if !matches!(
+                translation,
+                Ok(value)
+                    if value.physical_address == physical
+                        && value.writable
+                        && !value.executable
+                        && !value.user
+            ) {
+                self.rollback_metadata_prefix(physical_address, offset + 1)
+                    .map_err(|_| PageAccessError::Access)?;
+                return Err(PageAccessError::Access);
+            }
+        }
+        self.metadata_physical_start = Some(physical_address);
+        self.metadata_mapped_pages = page_count;
+        Ok(virtual_memory::METADATA_MAP_START)
+    }
+
+    fn finalize_metadata_handoff(
+        &mut self,
+        virtual_address: u64,
+        manager_byte_count: u64,
+    ) -> Result<(), PageAccessError> {
+        let physical_address = self
+            .metadata_physical_start
+            .ok_or(PageAccessError::Access)?;
+        if virtual_address != virtual_memory::METADATA_MAP_START
+            || manager_byte_count == 0
+            || manager_byte_count > METADATA_ARENA_PAGE_COUNT * poole_kmap::PAGE_SIZE
+            || self.metadata_mapped_pages != METADATA_ARENA_PAGE_COUNT
+        {
+            return Err(PageAccessError::Access);
+        }
+        self.metadata_guards_absent()
+            .map_err(|_| PageAccessError::Access)?;
+        for offset in 0..poole_kmap::METADATA_PAGE_COUNT {
+            let translation = poole_kmap::translate(
+                &ActivePhysicalReader,
+                self.active_root,
+                virtual_address + offset as u64 * poole_kmap::PAGE_SIZE,
+                self.physical_address_bits,
+            )
+            .map_err(|_| PageAccessError::Access)?;
+            if translation.physical_address
+                != physical_address + offset as u64 * poole_kmap::PAGE_SIZE
+                || !translation.writable
+                || translation.executable
+                || translation.user
+            {
+                return Err(PageAccessError::Access);
+            }
+        }
+        self.metadata_guard_pages_verified = 2;
+        Ok(())
+    }
+
+    fn uninstall_metadata_arena(
+        &mut self,
+        virtual_address: u64,
+        page_count: u64,
+    ) -> Result<(), PageAccessError> {
+        let physical_address = self
+            .metadata_physical_start
+            .ok_or(PageAccessError::Access)?;
+        if virtual_address != virtual_memory::METADATA_MAP_START
+            || page_count != METADATA_ARENA_PAGE_COUNT
+            || self.metadata_mapped_pages != page_count
+        {
+            return Err(PageAccessError::Access);
+        }
+        self.rollback_metadata_prefix(physical_address, page_count as usize)
+            .map_err(|_| PageAccessError::Access)?;
+        self.metadata_physical_start = None;
+        self.metadata_mapped_pages = 0;
+        self.metadata_guard_pages_verified = 0;
+        Ok(())
     }
 }
 
@@ -744,6 +968,38 @@ impl TableMemory for BootstrapTableMemory {
         ) != Err(poole_kmap::Error::TranslationMissing)
         {
             return Err(virtual_memory::Error::BootstrapRevocation);
+        }
+        self.metadata_guards_absent()?;
+        match self.metadata_physical_start {
+            Some(physical_address) => {
+                if self.metadata_mapped_pages != METADATA_ARENA_PAGE_COUNT
+                    || self.metadata_guard_pages_verified != 2
+                {
+                    return Err(virtual_memory::Error::BootstrapLeafState);
+                }
+                for offset in 0..poole_kmap::METADATA_PAGE_COUNT {
+                    let translation = poole_kmap::translate(
+                        &ActivePhysicalReader,
+                        self.active_root,
+                        virtual_memory::METADATA_MAP_START + offset as u64 * poole_kmap::PAGE_SIZE,
+                        self.physical_address_bits,
+                    )
+                    .map_err(|_| virtual_memory::Error::BootstrapTranslation)?;
+                    if translation.physical_address
+                        != physical_address + offset as u64 * poole_kmap::PAGE_SIZE
+                        || !translation.writable
+                        || translation.executable
+                        || translation.user
+                    {
+                        return Err(virtual_memory::Error::BootstrapTranslation);
+                    }
+                }
+            }
+            None => {
+                if self.metadata_mapped_pages != 0 || self.metadata_guard_pages_verified != 0 {
+                    return Err(virtual_memory::Error::BootstrapLeafState);
+                }
+            }
         }
         Ok(())
     }
@@ -1510,6 +1766,51 @@ extern "C" fn poole_kernel_rust_entry(
         logger.write_bytes(&PKPMM_PROTECTED);
 
         let final_state = proof.final_state;
+        let metadata = proof.metadata;
+        logger.write_bytes(&PKPMM_METADATA);
+        logger.write_decimal_u64(metadata.page_count);
+        logger.write_bytes(&PKPMM_METADATA_PHYSICAL);
+        logger.write_hex_u64(metadata.physical_start_page * poole_handoff::PAGE_BYTES);
+        logger.write_bytes(&PKPMM_METADATA_VIRTUAL);
+        logger.write_hex_u64(metadata.virtual_start);
+        logger.write_bytes(&PKPMM_METADATA_GENERATION);
+        logger.write_decimal_u64(metadata.generation);
+        logger.write_bytes(&PKPMM_METADATA_OWNER);
+        logger.write_decimal_u64(u64::from(metadata.owner));
+        logger.write_bytes(&PKPMM_METADATA_BYTES);
+        logger.write_decimal_u64(metadata.manager_byte_count);
+        logger.write_bytes(&PKPMM_METADATA_SOURCE);
+        logger.write_decimal_u64(metadata.source_record_count);
+        logger.write_bytes(&PKPMM_METADATA_EXTENTS);
+        logger.write_decimal_u64(metadata.free_extent_count);
+        logger.write_bytes(&PKPMM_METADATA_ALLOCATIONS);
+        logger.write_decimal_u64(metadata.allocation_record_count);
+        logger.write_bytes(&PKPMM_METADATA_RECEIPTS);
+        logger.write_decimal_u64(metadata.receipt_ledger_count);
+        logger.write_bytes(&PKPMM_METADATA_HANDOFF_CHECKSUM);
+        logger.write_hex_u64(metadata.logical_checksum);
+        logger.write_bytes(&PKPMM_METADATA_FINAL_CHECKSUM);
+        logger.write_hex_u64(proof.final_metadata_checksum);
+        logger.write_bytes(&PKPMM_METADATA_GUARDS);
+        logger.write_decimal_u64(metadata.guard_page_count);
+        logger.write_bytes(&PKPMM_METADATA_MAPPINGS);
+        logger.write_decimal_u64(metadata.mapping_count);
+        logger.write_bytes(&PKPMM_METADATA_PTE_WRITES);
+        logger.write_decimal_u64(page_access.metadata_pte_writes);
+        logger.write_bytes(&PKPMM_METADATA_RELEASE_EXCLUDED);
+        logger.write_decimal_u64(u64::from(metadata.release_excluded));
+        logger.write_bytes(&PKPMM_METADATA_RELEASE_REJECTED);
+        logger.write_decimal_u64(u64::from(proof.metadata_release_rejected));
+        logger.write_bytes(&PKPMM_METADATA_INTEGRITY);
+        logger.write_decimal_u64(u64::from(
+            metadata.integrity_verified && proof.metadata_integrity_verified,
+        ));
+        logger.write_bytes(&PKPMM_METADATA_RESERVATION_ROLLBACKS);
+        logger.write_decimal_u64(final_state.metadata_migration_rollbacks);
+        logger.write_bytes(&PKPMM_METADATA_MAPPING_ROLLBACKS);
+        logger.write_decimal_u64(page_access.metadata_mapping_rollbacks);
+        logger.write_bytes(&PKPMM_METADATA_TAIL);
+
         logger.write_bytes(&PKPMM_SCRUB);
         logger.write_decimal_u64(final_state.allocation_count);
         logger.write_bytes(&PKPMM_FREES);

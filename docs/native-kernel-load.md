@@ -52,8 +52,8 @@ equality is real but not security trust: the manifest and artifacts are
 unsigned and attacker-controllable in this development profile.
 
 PKELF1 accepts the frozen x86-64 `ET_DYN` profile, computes the four mapping
-ranges, allocates 66 loader pages, copies segments, applies 542 relative
-relocations, verifies the 270,336-byte loaded image, and binds the entry at
+ranges, allocates 70 loader pages, copies segments, applies 569 relative
+relocations, verifies the 286,720-byte loaded image, and binds the entry at
 offset `0x8000`.
 Every file and temporary intake pool is closed or freed before the final map.
 
@@ -243,11 +243,13 @@ pages. Cycle 126 separately closes the bounded selector-9 PKVM1 inactive
 virtual-memory foundation. Cycle 127 closes the bounded selector-10 PKVM2
 active-root move. Cycle 128 upgrades selector 8 to PKPMM2 with full-page
 scrub-before-allocation and scrub-before-reuse, readback, receipts, exact-reuse
-residue rejection, fault rollback, and temporary-alias revocation. These remain
-one-BSP development profiles with no complete direct map, shootdown, ring 3,
-reclaim policy, heap, pager, target, or production claim. The next chronological
-owner-independent move is `N9-PMM-METADATA-001` for a reserved mapped allocator
-metadata arena and transactional bootstrap-to-main handoff.
+residue rejection, fault rollback, and temporary-alias revocation. Cycle 129
+upgrades it to PKPMM3 with a retained five-page guarded metadata arena,
+complete-manager transactional handoff, integrity seal, corruption rejection,
+rollback, and release exclusion. These remain one-BSP development profiles with
+no complete direct map, shootdown, ring 3, held-class reclaim, scalable metadata,
+heap, pager, target, or production claim. The next chronological owner-independent
+move is `N9-PMM-RECLAIM-001` for exact lifecycle-gated held-class admission.
 Capability creation, lifecycle execution, signature trust, authenticated
 persistent state, production transfer, and physical-target qualification remain
 separately gated by N5/N6 and owner-controlled N0 work.

@@ -24,19 +24,23 @@ ranges must be aligned, nonoverlapping, complete, and W^X-safe.
 Retained physical ranges must also be aligned, nonzero, representable, and
 pairwise disjoint:
 
-- the current 66-page PooleKernel allocation;
+- the current 70-page PooleKernel allocation;
 - four private page-table pages;
 - fourteen writable, non-executable stack pages;
 - 256 handoff pages, covering one MiB.
 
-The virtual layout reserves page-table index 66 as the low guard, indices
-67-80 for the stack, index 81 as the high guard, and index 82 onward for the
+The virtual layout reserves page-table index 70 as the low guard, indices
+71-84 for the stack, index 85 as the high guard, and index 86 onward for the
 handoff. Both guards remain non-present. The handoff range begins after the
 fixed boundary and is supervisor read-only and NX. `ADD-MEM-001` requires boot,
 entry, trap, and PMM consumers to derive these bounds from one contract.
 The bootstrap temporary alias is derived as the first leaf after the complete
-handoff range, currently index 338, so retained-layout growth cannot silently
+handoff range, currently index 342, so retained-layout growth cannot silently
 occupy the scrub and page-table transaction slot.
+PKPMM3 reserves index 343 as a metadata low guard, indices 344-348 for its
+five-page supervisor RW/NX arena, and index 349 as its high guard. These leaves
+are absent in the PKMAP2 construction receipt and are installed only after
+PooleKernel takes ownership in selector 8.
 
 ## Table Construction
 

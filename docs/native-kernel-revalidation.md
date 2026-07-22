@@ -110,6 +110,9 @@ virtual-memory foundation, and Cycle 127 closes the bounded one-BSP PKVM2
 candidate-root activation, direct-map, exact CR3 restoration, and local
 invalidation-receipt move. Cycle 128 upgrades selector 8 to PKPMM2 with
 scrub-before-allocation and scrub-before-reuse, full readback, receipts,
-exact-reuse residue rejection, fault rollback, and alias revocation. The next
-owner-independent move is `N9-PMM-METADATA-001` without target, scheduler, SMP,
-userspace, heap, pager, reclaim, or production promotion.
+exact-reuse residue rejection, fault rollback, and alias revocation. Cycle 129
+upgrades it to PKPMM3 with a retained five-page guarded metadata arena,
+complete-manager handoff, integrity seal, mapped-corruption rejection, rollback,
+and release exclusion. The next owner-independent move is
+`N9-PMM-RECLAIM-001` without target, scheduler, SMP, userspace, heap, pager,
+concurrent reclaim, or production promotion.

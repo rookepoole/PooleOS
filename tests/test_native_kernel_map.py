@@ -155,8 +155,15 @@ class NativeKernelMapTests(unittest.TestCase):
                 handoff_capacity_bytes=1024 * 1024,
             ),
         )
-        self.assertEqual([66, 81], model["guard_page_indices"])
+        self.assertEqual([70, 85], model["guard_page_indices"])
         self.assertEqual(334, model["total_mapped_page_count"])
+        self.assertEqual(342, native_kernel_map.TEMPORARY_PAGE_INDEX)
+        self.assertEqual((343, 344, 5, 349), (
+            native_kernel_map.METADATA_GUARD_LOW_PAGE,
+            native_kernel_map.METADATA_FIRST_PAGE,
+            native_kernel_map.METADATA_PAGE_COUNT,
+            native_kernel_map.METADATA_GUARD_HIGH_PAGE,
+        ))
         self.assertEqual("rw", model["retained_leaves"][0]["permissions"])
         self.assertEqual("r", model["retained_leaves"][-1]["permissions"])
 
@@ -185,7 +192,7 @@ class NativeKernelMapTests(unittest.TestCase):
         )
         line = (
             "PKMAP2 PASS kernel_pages=64 stack_pages=14 handoff_pages=256 guards=2 "
-            f"total_pages=334 stack_pt=67 handoff_pt=82 retained_fnv1a64={expected['retained_leaf_fingerprint']}"
+            f"total_pages=334 stack_pt=71 handoff_pt=86 retained_fnv1a64={expected['retained_leaf_fingerprint']}"
         )
         self.assertEqual(
             expected["retained_leaf_fingerprint"],

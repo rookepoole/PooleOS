@@ -36,7 +36,13 @@ class NativeKernelPhysicalMemoryTests(unittest.TestCase):
         self.assertEqual(physical_memory.SCRUB_BYTES, observation["scrub"]["verified_bytes"])
         self.assertEqual(physical_memory.PHYSICAL_WRITES, observation["result"]["physical_writes"])
         self.assertEqual(physical_memory.PHYSICAL_READS, observation["result"]["physical_reads"])
-        self.assertEqual("temporary_single_page", observation["result"]["mappings"])
+        self.assertEqual(
+            "temporary_single_page_plus_guarded_metadata", observation["result"]["mappings"]
+        )
+        self.assertEqual(5, observation["metadata"]["pages"])
+        self.assertEqual(2, observation["metadata"]["guard_pages"])
+        self.assertEqual(14616, observation["metadata"]["manager_bytes"])
+        self.assertEqual(1, observation["result"]["metadata_retained"])
         self.assertEqual(1, observation["result"]["alias_revoked"])
         self.assertEqual(0, observation["result"]["reclaim"])
 
@@ -69,15 +75,17 @@ class NativeKernelPhysicalMemoryTests(unittest.TestCase):
         audit = qualify_native_kernel_physical_memory._source_audit()
         self.assertEqual(0, audit["implementation_unsafe_token_count"])
         self.assertEqual(0, audit["heap_api_token_count"])
-        self.assertEqual(2, audit["fixed_capacity_ledger_count"])
-        self.assertEqual(1, audit["live_adapter_volatile_read_site_count"])
-        self.assertEqual(1, audit["live_adapter_volatile_write_site_count"])
+        self.assertEqual(4, audit["fixed_capacity_ledger_count"])
+        self.assertEqual(8, audit["live_adapter_volatile_read_site_count"])
+        self.assertEqual(7, audit["live_adapter_volatile_write_site_count"])
         self.assertTrue(audit["final_temporary_alias_revocation_required"])
+        self.assertTrue(audit["final_guarded_metadata_mapping_retention_required"])
 
     def test_release_gate_accepts_only_the_bound_non_promoting_receipt(self) -> None:
         check = pooleos_release_gate.check_native_kernel_physical_memory_readiness()
         self.assertTrue(check["ok"], check["detail"])
-        self.assertIn("scrub=32768/32768", check["detail"])
+        self.assertIn("scrub=53248/53248", check["detail"])
+        self.assertIn("metadata=5+2_guards", check["detail"])
         self.assertIn("alias_revoked=1", check["detail"])
         self.assertIn("n9_exit=false", check["detail"])
 
