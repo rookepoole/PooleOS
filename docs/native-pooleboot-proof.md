@@ -254,8 +254,9 @@ artifact authentication, monotonic durable state, production-profile execution,
 capability creation and activation, recovery execution, symbol consumption,
 policy application, and microcode or firmware application are open. PKTRAP1
 closes only the bounded BSP trap slice, and PKCPU1 closes only the bounded
-qemu64 read-only CPU-policy slice. The next owner-independent move is
-`N7-ERRATA-POLICY-001`. Hardware-key possession and the
+qemu64 read-only CPU-policy slice. PKERR1 separately closes only the pure
+exact-target rejection-policy boundary. The next owner-independent move is
+`N7-XSTATE-POLICY-001`. Hardware-key possession and the
 governance signing ceremony remain a separate external lane despite current
 authorization.
 

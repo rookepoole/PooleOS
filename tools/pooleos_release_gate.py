@@ -29,6 +29,7 @@ from runtime import native_kernel_revalidation  # noqa: E402
 from runtime import native_kernel_transfer  # noqa: E402
 from runtime import native_kernel_trap  # noqa: E402
 from runtime import native_kernel_cpu_policy  # noqa: E402
+from runtime import native_kernel_errata_policy  # noqa: E402
 from runtime import native_initial_system  # noqa: E402
 from runtime import native_microcode  # noqa: E402
 from runtime import native_models  # noqa: E402
@@ -66,6 +67,7 @@ NATIVE_KERNEL_REVALIDATION_READINESS = ROOT / "runs" / "native-kernel-revalidati
 NATIVE_KERNEL_TRANSFER_READINESS = ROOT / "runs" / "native-kernel-transfer-readiness.json"
 NATIVE_KERNEL_TRAP_READINESS = ROOT / "runs" / "native-kernel-trap-readiness.json"
 NATIVE_KERNEL_CPU_POLICY_READINESS = ROOT / "runs" / "native-kernel-cpu-policy-readiness.json"
+NATIVE_KERNEL_ERRATA_POLICY_READINESS = ROOT / "runs" / "native-kernel-errata-policy-readiness.json"
 NATIVE_INITIAL_SYSTEM_READINESS = ROOT / "runs" / "native_initial_system_readiness.json"
 NATIVE_FIRMWARE_READINESS = ROOT / "runs" / "native_firmware_readiness.json"
 NATIVE_MICROCODE_READINESS = ROOT / "runs" / "native_microcode_readiness.json"
@@ -81,9 +83,9 @@ DEFAULT_GAPS = [
     "The completed owner response records both ADR dispositions and all 38 objective definitions while accepting zero measurements, but the selected FIDO2 hardware key is unavailable; trusted public-key custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
     "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
     "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, six bounded TLC models cover all seven required domains and detect twenty-one required counterexamples, and a bounded PooleBoot proof executes under the pinned profile; current source rebuilds, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open.",
-    "A reproducible unsigned PooleBoot proof application boots twice under pinned non-promoting OVMF with deterministic twelve-file GPT/FAT32 media and twenty-five ordered serial/debugcon markers; PBP1, PBC1, PSM1, PKELF1, PBART1, PINIT1, PREC1, PSYM1, synthetic-only PMCU1, synthetic-only PFWM1, qualification-only PPOL1, PBTRUST1/PBSTATE1, PKMAP2, PBEXIT1, PKREVAL1, PKXFER1, PKTRAP1, PKCPU1, and a separately qualified real PooleKernel image pass their bounded gates. PKLOAD6 proves exact retained storage and successful ExitBootServices with zero later firmware calls while the default path stops permanently. PKXFER1 separately proves one opt-in QEMU-only transfer and live nine-file PKREVAL1 denial. PKTRAP1 adds only three opt-in BSP scenarios with five present IDT gates, distinct unguarded IST arrays, three returning deliberate faults, terminal double-fault containment, and semantic malformed-frame rejection. PKCPU1 adds only one opt-in BSP qemu64 read-only CPUID/control/XCR0/APIC/PAT/MTRR profile with five MSR reads and zero writes or authority. Policy signatures, authenticated revocation, a real cryptographic monotonic writable provider, persistent backend I/O and executed repair/migration, Secure Boot-state verification, activation, recovery execution, symbol consumption, capability creation and enforcement, live firmware inventory, privileged microcode-revision observation, real vendor-container or payload validation, digest-provider promotion, initial-system execution, microcode or firmware application, final framebuffer cache policy, production transfer, second host, target firmware, and physical-media qualification remain open.",
-    "A real reproducible PooleKernel image, PKENTRY1 intake, bounded early diagnostics, panic classes, PKXFER1 live entry, BSP-only PKTRAP1 descriptor/exception entry, and BSP-only qemu64 PKCPU1 read-only CPU-policy observation exist, but boot trust, measured boot, production transfer, exact target-family/errata/xstate and AP-local CPU policy, per-CPU descriptor state, guarded IST stacks, complete exception/NMI/machine-check handling, asynchronous context preservation, retained crash evidence, kernel runtime, target execution, and N6/N7 exit remain open.",
-    "No target-qualified complete native CPU policy, errata/microcode policy, xstate ownership, AP-local CPU state, interrupt, time, SMP, physical-memory, virtual-memory, or reclaim implementation; PKCPU1 is a bounded read-only qemu64 BSP observation only.",
+    "A reproducible unsigned PooleBoot proof application boots twice under pinned non-promoting OVMF with deterministic twelve-file GPT/FAT32 media and twenty-five ordered serial/debugcon markers; PBP1, PBC1, PSM1, PKELF1, PBART1, PINIT1, PREC1, PSYM1, synthetic-only PMCU1, synthetic-only PFWM1, qualification-only PPOL1, PBTRUST1/PBSTATE1, PKMAP2, PBEXIT1, PKREVAL1, PKXFER1, PKTRAP1, PKCPU1, PKERR1, and a separately qualified real PooleKernel image pass their bounded gates. PKLOAD6 proves exact retained storage and successful ExitBootServices with zero later firmware calls while the default path stops permanently. PKXFER1 separately proves one opt-in QEMU-only transfer and live nine-file PKREVAL1 denial. PKTRAP1 adds only three opt-in BSP scenarios, PKCPU1 adds only one opt-in BSP qemu64 read-only profile, and PKERR1 adds only a pure exact-target policy that denies the current evidence with zero privileged reads or effects. Policy signatures, authenticated revocation, a real cryptographic monotonic writable provider, Secure Boot-state verification, activation, capability enforcement, applicable target errata and numeric microcode-floor authority, live firmware inventory, privileged per-processor revision observation, real vendor-container or payload validation, xstate/AP-local policy, initial-system execution, final framebuffer policy, production transfer, second host, target firmware, and physical-media qualification remain open.",
+    "A real reproducible PooleKernel image, PKENTRY1 intake, bounded early diagnostics, panic classes, PKXFER1 live entry, BSP-only PKTRAP1 descriptor/exception entry, and BSP-only qemu64 PKCPU1 read-only CPU-policy observation exist. PKERR1 freezes an exact Ryzen 7 9800X3D policy and correctly denies the current evidence, but boot trust, measured boot, production transfer, direct target errata and numeric microcode-floor sources, xstate and AP-local CPU policy, per-CPU descriptor state, guarded IST stacks, complete exception/NMI/machine-check handling, retained crash evidence, kernel runtime, target execution, and N6/N7 exit remain open.",
+    "No target-qualified complete native CPU policy, applicable Model 40h-4Fh errata guide, direct numeric client microcode floor or ratified replacement, xstate ownership, AP-local CPU state, interrupt, time, SMP, physical-memory, virtual-memory, or reclaim implementation; PKCPU1 is a bounded qemu64 observation and PKERR1 is a pure fail-closed policy with zero privileged reads or effects.",
     "The sanitized Tier 1 identity and bounded user-mode CPUID transcript match, but MSR, PCI configuration-space, Secure Boot, TPM, SPD, sensor/power, standards-hash, lab-safety, native enumeration, and physical qualification evidence remain open.",
     "No native DMA/IOMMU/interrupt-remapping confinement.",
     "No native scheduler, task, syscall, capability, IPC, isolation, asynchronous-I/O, or quota implementation.",
@@ -1323,6 +1325,61 @@ def check_native_kernel_cpu_policy_readiness(
     )
     return readiness.make_check(
         "native_kernel_cpu_policy_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_kernel_errata_policy_readiness(
+    path: Path = NATIVE_KERNEL_ERRATA_POLICY_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-kernel-errata-policy-readiness.schema.json"
+    )
+    errors = [
+        f"native kernel errata policy readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_kernel_errata_policy_readiness",
+            False,
+            "; ".join(errors) or "native kernel errata policy readiness is not an object",
+        )
+    errors.extend(native_kernel_errata_policy.readiness_errors(artifact, ROOT))
+    summary = artifact.get("summary", {})
+    expected_summary = {
+        "actions_authorized_count": 0,
+        "applicable_source_count": 5,
+        "authority_grant_count": 0,
+        "cpu_or_firmware_write_count": 0,
+        "cross_language_mismatch_count": 0,
+        "cross_language_vector_count": 128,
+        "current_failure_count": 6,
+        "negative_controls_passed": 24,
+        "negative_controls_total": 24,
+        "no_std_target_builds_passed": 2,
+        "no_std_target_builds_total": 2,
+        "privileged_read_count": 0,
+        "production_claim_count": 0,
+        "rust_host_tests_passed": 6,
+        "rust_host_tests_total": 6,
+        "source_register_count": 7,
+    }
+    if summary != expected_summary:
+        errors.append("PKERR1 readiness summary changed")
+    if artifact.get("claims") != native_kernel_errata_policy.expected_claims():
+        errors.append("PKERR1 claim boundary changed")
+    if artifact.get("n7_exit_gate_satisfied") is not False or artifact.get("production_ready") is not False:
+        errors.append("PKERR1 overclaims N7 exit or production readiness")
+    detail = (
+        "contract=PKERR1; rust_tests=6/6; no_std_targets=2/2; vectors=128; "
+        "controls=24/24; current=deny_6; sources=7; applicable=5; "
+        "privileged_reads=0; writes=0; authority=0; model44_guide=false; "
+        "numeric_microcode_floor=false; n7_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_kernel_errata_policy_readiness",
         not errors,
         detail if not errors else "; ".join(errors[:8]),
     )
@@ -4691,6 +4748,11 @@ def main(argv: list[str] | None = None) -> int:
         default=NATIVE_KERNEL_CPU_POLICY_READINESS,
     )
     parser.add_argument(
+        "--native-kernel-errata-policy-readiness",
+        type=Path,
+        default=NATIVE_KERNEL_ERRATA_POLICY_READINESS,
+    )
+    parser.add_argument(
         "--native-initial-system-readiness",
         type=Path,
         default=NATIVE_INITIAL_SYSTEM_READINESS,
@@ -4752,6 +4814,7 @@ def main(argv: list[str] | None = None) -> int:
         check_native_kernel_transfer_readiness(args.native_kernel_transfer_readiness),
         check_native_kernel_trap_readiness(args.native_kernel_trap_readiness),
         check_native_kernel_cpu_policy_readiness(args.native_kernel_cpu_policy_readiness),
+        check_native_kernel_errata_policy_readiness(args.native_kernel_errata_policy_readiness),
         check_native_initial_system_readiness(args.native_initial_system_readiness),
         check_native_recovery_readiness(args.native_recovery_readiness),
         check_native_symbol_readiness(args.native_symbol_readiness),
@@ -4956,6 +5019,7 @@ def main(argv: list[str] | None = None) -> int:
             args.native_kernel_transfer_readiness,
             args.native_kernel_trap_readiness,
             args.native_kernel_cpu_policy_readiness,
+            args.native_kernel_errata_policy_readiness,
             args.native_initial_system_readiness,
             args.native_recovery_readiness,
             args.native_symbol_readiness,

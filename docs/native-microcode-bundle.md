@@ -30,10 +30,14 @@ behavior, and privileged native observation remain open.
 Primary research inputs are:
 
 - AMD Ryzen 7 9800X3D product specification;
-- AMD Family 1Ah revision guidance and AMD64 system-programming reference;
-- Intel's public microcode update and minimum-runtime-revision guidance as a
-  comparative x86 source, not as an AMD format claim;
+- AMD CPUID and AMD64 system-programming references;
+- AMD-SB-7033 and AMD-SB-7055 direct-product firmware mitigations;
 - the UEFI PI multiprocessor-services boundary as firmware lifecycle context.
+
+AMD revision guide 58251 covers Family 1Ah Models 00h-0Fh and is not
+applicable to target Model 44h. PKERR1 therefore rejects it as target errata
+evidence and keeps the missing applicable Model 40h-4Fh guide and numeric
+client microcode floor open rather than inventing either value.
 
 PMCU1 does not import Linux, Debian, Buildroot, or their userspace. Public OS
 implementations may inform later clean-room review only under ADR-0002; they

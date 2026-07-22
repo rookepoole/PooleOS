@@ -86,47 +86,47 @@
       },
       {
         "path": "docs/native-kernel-revalidation.md",
-        "sha256": "F4AB6E04A341809F4C15E862AB5A9C0BFA849D1DBF49F03169CFA68627915E74",
-        "byte_count": 5501
+        "sha256": "2301E5EE7C8AF73D66A47AAAF3908DDB6D22865A899F696588D6B8E425367E1C",
+        "byte_count": 5573
       },
       {
         "path": "runs/native_initial_system_readiness.json",
-        "sha256": "D2B9103181158FB088ACF07BBADC817BED6953D4BB3492149D5F6668BC544A3B",
+        "sha256": "DA4EB9E1259833E4FCF9CE2795FD5A5056DB1938640B129248BF0C4DFE3E7BD5",
         "byte_count": 29828
       },
       {
         "path": "runs/native_recovery_readiness.json",
-        "sha256": "3FC4CAE788435A81ADC429D7AC931DF6E36F11D6DB6CE41297FC88157AC7ACE0",
+        "sha256": "D019E5C8DC431718FD1D038588415A52839B2034173CE816CBA26900A0899550",
         "byte_count": 37731
       },
       {
         "path": "runs/native_symbol_readiness.json",
-        "sha256": "D4ED2908399ED1D7735B7C83CD5976A81649E80EA37D8FC350FE6B8E753AC4ED",
+        "sha256": "F4B335E7F443706FC362DCD99BC778509CAB0BE9FD0BEF11CC3EFF2CABD2F4C9",
         "byte_count": 39630
       },
       {
         "path": "runs/native_microcode_readiness.json",
-        "sha256": "78108753ACF9D3C4CE7222B4C3F026055DD28F8D4651D210FAA16EA663AA45AD",
+        "sha256": "DF0E6D9D82AC88E0DD18AD66AEEA1C067B8C0006C12916F8260C875AFAF7E954",
         "byte_count": 42514
       },
       {
         "path": "runs/native_firmware_readiness.json",
-        "sha256": "58A9056402D75ACAC3C7D621686A934F864C4554671FF03D72C1C566A6B0EE73",
+        "sha256": "3FA806E52E9AFC9497541409016A7E88B9B477858C4BC871E6D0C092348C9DBE",
         "byte_count": 18880
       },
       {
         "path": "runs/native_policy_readiness.json",
-        "sha256": "77287F98E57A240828B1C9DF4538712214600CE35B4BACCE5085C2E9B844EABC",
+        "sha256": "08F5863E098E1EC806FDFF510469AA600D7596B6CBE126425EAC3E984843AE20",
         "byte_count": 22539
       },
       {
         "path": "runs/native_boot_trust_readiness.json",
-        "sha256": "01CA5133CD80D01019053A503B6E951A128139D4190667836BFA24E301D7A725",
+        "sha256": "3BF5F3F9A633EC1EAAE0A4CFC1EA7D565785A1F47E652104DB401EF492D1CC8D",
         "byte_count": 37688
       },
       {
         "path": "runs/native_system_manifest_readiness.json",
-        "sha256": "A3815AA0D692D7971DDD60EA6D532882E32BEA236711637525C72C4B592227AF",
+        "sha256": "DF407E1F36C42885818566A8A3814931F02B0F020463CF6762C2FAA72F7886A1",
         "byte_count": 24495
       }
     ]
@@ -135,7 +135,7 @@
     "rustc": "rustc.exe",
     "host_test_count": 24,
     "format_check": "pass",
-    "host_probe_sha256": "04165221F822E67D8D430E5696AC1A7170CEEF9E50549FF79216F08D2360B7A4",
+    "host_probe_sha256": "11787195CA1D3E5B128853E156303202CF14D97B192A87A337D983508B7EEF46",
     "targets": {
       "x86_64-unknown-none": {
         "package": "poolekernel",

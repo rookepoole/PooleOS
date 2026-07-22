@@ -65,10 +65,10 @@
   "production_ready": false,
   "research_basis": [
     "https://www.amd.com/en/products/processors/desktops/ryzen/9000-series/amd-ryzen-7-9800x3d.html",
-    "https://www.amd.com/content/dam/amd/en/documents/processor-tech-docs/revision-guides/58251.pdf",
+    "https://www.amd.com/content/dam/amd/en/documents/archived-tech-docs/design-guides/25481.pdf",
     "https://www.amd.com/content/dam/amd/en/documents/processor-tech-docs/programmer-references/24593.pdf",
-    "https://www.intel.com/content/www/us/en/developer/articles/technical/software-security-guidance/best-practices/microcode-update-guidance.html",
-    "https://www.intel.com/content/www/us/en/developer/articles/technical/software-security-guidance/secure-coding/minimum-runtime-ucode-update-revision.html",
+    "https://www.amd.com/en/resources/product-security/bulletin/amd-sb-7033.html",
+    "https://www.amd.com/en/resources/product-security/bulletin/amd-sb-7055.html",
     "https://uefi.org/specs/PI/1.8/V2_DXE_Boot_Services_Protocols.html"
   ],
   "schema_version": "1.0",

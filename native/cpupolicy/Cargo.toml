@@ -1,0 +1,17 @@
+[package]
+name = "poole-cpu-policy"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+publish.workspace = true
+
+[features]
+default = []
+host-probe = []
+
+[[bin]]
+name = "pkerr1-probe"
+path = "src/bin/pkerr1_probe.rs"
+required-features = ["host-probe"]
+
+[dependencies]

@@ -231,10 +231,11 @@ physical media, satisfy N5, or establish production readiness.
 Cycle 118 separately closes the opt-in QEMU-only
 `N5-KERNEL-TRANSFER-001` development boundary without changing this default
 PKLOAD6 stop. Cycle 119 separately closes the bounded BSP-only PKTRAP1 slice,
-and Cycle 120 closes the bounded qemu64 read-only PKCPU1 slice. The next
-chronological owner-independent move is `N7-ERRATA-POLICY-001`: freeze the exact
-Tier 1 CPU-family, microcode-revision, errata, mitigation, and rejection policy
-without promoting the qemu64 observation into target evidence.
+Cycle 120 closes the bounded qemu64 read-only PKCPU1 slice, and Cycle 121
+closes only the pure PKERR1 exact-target policy boundary while retaining direct
+errata and numeric microcode-floor stop-ship gaps. The next chronological
+owner-independent move is `N7-XSTATE-POLICY-001` for x87/SSE/XSAVE ownership
+and sensitive-state rules without scheduler or SMP promotion.
 Capability creation, lifecycle execution, signature trust, authenticated
 persistent state, production transfer, and physical-target qualification remain
 separately gated by N5/N6 and owner-controlled N0 work.

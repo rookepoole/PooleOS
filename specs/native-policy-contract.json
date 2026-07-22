@@ -169,13 +169,13 @@
   "implementation_bindings": [
     {
       "path": "native/Cargo.toml",
-      "bytes": 586,
-      "sha256": "1741AC8F565F5849F8C86D77BD16E06ED195E76D32FFA62492E1928B8FAA8C1E"
+      "bytes": 601,
+      "sha256": "210BCDAF2778606B42C688E7BACD950FC0EEF3045081E884CF7846B9A7D78DF4"
     },
     {
       "path": "native/Cargo.lock",
-      "bytes": 4121,
-      "sha256": "0E88ED49107E751E33C56A9992F36AA16BAA7EDD3E4A1CC296CC1BB814A3B5B5"
+      "bytes": 4178,
+      "sha256": "272CD0157659F8C2F2F7491DDB493A47E99FB8FFD1F431E2615D35B072FF50AF"
     },
     {
       "path": "native/policy/Cargo.toml",

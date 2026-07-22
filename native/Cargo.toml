@@ -5,6 +5,7 @@ members = [
   "bootexit",
   "bootload",
   "bootcfg",
+  "cpupolicy",
   "elf",
   "firmware",
   "fixtures/pooleboot",
