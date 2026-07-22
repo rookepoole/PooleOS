@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_kernel_physical_memory_contract",
+  "contract_id": "PKPMM1",
+  "selected_move_id": "N9-PMM-001",
+  "status": "bounded_live_foundation_contract",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "development_profile": {
+    "feature": "development-physical-memory",
+    "selector": 8,
+    "cpu_model": "qemu64",
+    "bsp_only": true,
+    "terminal": "halt"
+  },
+  "limits": {
+    "memory_entries": 256,
+    "free_extents": 256,
+    "allocations": 32,
+    "quota_pages": 64,
+    "page_bytes": 4096
+  },
+  "ownership_precedence": [
+    "explicit PooleKernel null-page guard",
+    "PBP1 loader-reserved kernel, retained handoff, page tables, stack, and artifacts",
+    "UEFI runtime, ACPI NVS, MMIO, reserved, unusable, and persistent classes",
+    "boot-services and ACPI reclaimable classes held pending explicit subsystem handoff",
+    "UEFI conventional memory admitted as initially usable"
+  ],
+  "zones": [
+    {"name": "dma", "physical_start": 0, "physical_end_exclusive": 16777216},
+    {"name": "dma32", "physical_start": 16777216, "physical_end_exclusive": 4294967296},
+    {"name": "normal", "physical_start": 4294967296, "physical_end_exclusive": 18446744073709551615}
+  ],
+  "allocation_policy": {
+    "algorithm": "deterministic_first_fit_by_zone",
+    "heap_used": false,
+    "physical_page_contents_accessed": false,
+    "free_handle": "slot_generation_range_zone_owner_exact_match",
+    "free_metadata_poisoned": true,
+    "adjacent_same_zone_extents_coalesced": true
+  },
+  "qualification": {
+    "qemu_run_count": 2,
+    "fresh_ovmf_vars_each_run": true,
+    "exact_markers_frame_and_pbp1_required": true,
+    "independent_pbp1_oracle_required": true,
+    "negative_control_count": 48
+  },
+  "required_negative_controls": [
+    "NEG-N9-PKPMM-MARKER-OMISSION", "NEG-N9-PKPMM-MARKER-ORDER", "NEG-N9-PKPMM-MARKER-DUPLICATE", "NEG-N9-PKPMM-SELECTOR", "NEG-N9-PKPMM-CONTRACT", "NEG-N9-PKPMM-ENTRY-COUNT", "NEG-N9-PKPMM-USABLE-PAGES", "NEG-N9-PKPMM-BOOT-RECLAIMABLE", "NEG-N9-PKPMM-LOADER-RESERVED", "NEG-N9-PKPMM-NULL-GUARD", "NEG-N9-PKPMM-DMA-SOURCE", "NEG-N9-PKPMM-DMA-MANAGED", "NEG-N9-PKPMM-DMA32-SOURCE", "NEG-N9-PKPMM-DMA32-MANAGED", "NEG-N9-PKPMM-NORMAL-SOURCE", "NEG-N9-PKPMM-NORMAL-MANAGED", "NEG-N9-PKPMM-EXTENT-COUNT", "NEG-N9-PKPMM-LARGEST-DMA", "NEG-N9-PKPMM-LARGEST-DMA32", "NEG-N9-PKPMM-LARGEST-NORMAL", "NEG-N9-PKPMM-KERNEL-BASE", "NEG-N9-PKPMM-KERNEL-PAGES", "NEG-N9-PKPMM-HANDOFF-BASE", "NEG-N9-PKPMM-HANDOFF-PAGES", "NEG-N9-PKPMM-ROOT", "NEG-N9-PKPMM-PROTECTED", "NEG-N9-PKPMM-ALLOCATION-COUNT", "NEG-N9-PKPMM-FREE-COUNT", "NEG-N9-PKPMM-DMA-START", "NEG-N9-PKPMM-DMA32-START", "NEG-N9-PKPMM-DOUBLE-FREE", "NEG-N9-PKPMM-QUOTA", "NEG-N9-PKPMM-UNAVAILABLE", "NEG-N9-PKPMM-METADATA-POISON", "NEG-N9-PKPMM-COALESCE", "NEG-N9-PKPMM-MANAGED-TOTAL", "NEG-N9-PKPMM-ALLOCATED-RESIDUE", "NEG-N9-PKPMM-PHYSICAL-WRITE", "NEG-N9-PKPMM-MAPPING", "NEG-N9-PKPMM-RECLAIM", "NEG-N9-PKPMM-CONCURRENCY", "NEG-N9-PKPMM-SIGNATURE", "NEG-N9-PKPMM-AUTHORITY", "NEG-N9-PKPMM-ACTION", "NEG-N9-PKPMM-TERMINAL", "NEG-N9-PKPMM-PBP1-OVERLAP", "NEG-N9-PKPMM-PBP1-SOURCE-KIND", "NEG-N9-PKPMM-PBP1-CORE-OWNERSHIP"
+  ],
+  "claims": {
+    "live_pbp1_memory_map_consumed_by_poolekernel": true,
+    "firmware_source_kind_pairs_revalidated": true,
+    "usable_only_initial_ownership_enforced": true,
+    "kernel_handoff_and_root_loader_ownership_audited": true,
+    "dma_dma32_normal_zone_accounting_enforced": true,
+    "bounded_allocate_free_and_coalesce_exercised": true,
+    "quota_and_double_free_rejection_exercised": true,
+    "metadata_poison_state_exercised": true,
+    "physical_page_contents_scrubbed": false,
+    "boot_or_acpi_reclaim_activated": false,
+    "page_table_or_virtual_mapping_modified": false,
+    "concurrent_or_smp_allocator_qualified": false,
+    "n9_exit_gate_satisfied": false,
+    "production_ready": false
+  },
+  "non_claims": [
+    "No physical page byte is read, zeroed, poisoned, or scrubbed by PKPMM1.",
+    "No boot-services or ACPI reclaimable range is activated.",
+    "No page table, virtual address space, cache policy, heap, object cache, stack, or reclaim path is implemented.",
+    "No SMP, interrupt-context, randomized stress, target hardware, second host, signature, release, or production claim is made."
+  ]
+}

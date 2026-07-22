@@ -243,6 +243,7 @@ fn profile_descriptors(
     Ok(descriptors)
 }
 
+#[inline(never)]
 pub fn revalidate_development(
     handoff_bytes: &[u8],
     files: [RetainedFile<'_>; RETAINED_FILE_COUNT],
@@ -343,6 +344,7 @@ pub fn revalidate_development(
     })
 }
 
+#[inline(never)]
 pub fn revalidate_development_files(
     handoff_bytes: &[u8],
     files: [&[u8]; RETAINED_FILE_COUNT],
@@ -369,6 +371,7 @@ pub fn retained_locators(handoff_bytes: &[u8]) -> Result<[u64; RETAINED_FILE_COU
 ///
 /// Every retained physical range named by the validated PBP1 profile must be
 /// identity-mapped, immutable, and readable for its exact declared byte count.
+#[inline(never)]
 pub unsafe fn revalidate_development_from_handoff(handoff_bytes: &[u8]) -> Result<Summary, Error> {
     let handoff = pbp1::decode(handoff_bytes).map_err(|_| Error::Handoff)?;
     let descriptors = profile_descriptors(&handoff)?;

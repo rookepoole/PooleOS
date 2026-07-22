@@ -72,6 +72,7 @@ PHASE_STATUS = {
     "N5": "partial",
     "N6": "partial",
     "N7": "partial",
+    "N9": "partial",
     "N15": "partial",
     "N31": "partial",
     "N32": "partial",
@@ -282,6 +283,16 @@ ADDED_REQUIREMENTS = [
             "PBP1 framebuffer physical-address contract",
             "master checklist section 018 early framebuffer requirements",
             "Cycle101 N6-KENTRY-001 mapping-gap analysis",
+        ],
+    },
+    {
+        "id": "ADD-MEM-001",
+        "phase_id": "N9",
+        "requirement": "Define bootstrap stack, low/high guard, retained page-table root, handoff, kernel-image, and allocator metadata bounds once across PooleBoot, PBP1, PKMAP2, PooleKernel entry, trap handling, and physical-memory ownership; require every consumer and hostile test to derive those boundaries from the same contract so layout growth cannot silently turn a guard probe into a mapped-stack access or expose retained loader pages to allocation.",
+        "basis": [
+            "Cycle 125 bootstrap-stack growth and PKTRAP1 guard-boundary correction",
+            "Cycle 125 PKPMM1 retained-range ownership audit",
+            "master checklist sections 026-029 and 151",
         ],
     },
     {

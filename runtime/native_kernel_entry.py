@@ -107,7 +107,7 @@ def contract_errors(contract: Any) -> list[str]:
         "handoff_contract": "PBP1",
         "entry_offset": 0x8000,
         "image_memory_bytes": 0x40000,
-        "canonical_file_bytes": 0x2C000,
+        "canonical_file_bytes": 0x2F000,
         "maximum_relocations": 4096,
     }
     for key, value in expected_product.items():
@@ -155,7 +155,7 @@ def readiness_errors(readiness: Any, root: Path = ROOT) -> list[str]:
     ):
         if not isinstance(summary.get(total), int) or summary.get(passed) != summary.get(total):
             errors.append(f"readiness summary mismatch: {passed}")
-    if summary.get("rust_host_tests_total") != 49:
+    if summary.get("rust_host_tests_total") != 54:
         errors.append("readiness host-test count mismatch")
     if summary.get("clean_builds_total") != 2:
         errors.append("readiness clean-build count mismatch")

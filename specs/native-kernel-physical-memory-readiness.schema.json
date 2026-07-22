@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "artifact_kind", "status_date", "status", "contract_id", "selected_move_id", "production_ready", "production_promotion_allowed", "n9_exit_gate_satisfied", "phase_status", "inputs", "build", "media", "execution", "negative_controls", "claims", "non_claims", "summary", "open_items"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_physical_memory_readiness"},
+    "status_date": {"type": "string", "format": "date"},
+    "status": {"type": "string", "minLength": 1},
+    "contract_id": {"const": "PKPMM1"},
+    "selected_move_id": {"const": "N9-PMM-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "n9_exit_gate_satisfied": {"const": false},
+    "phase_status": {"type": "object"},
+    "inputs": {"type": "object"},
+    "build": {"type": "object"},
+    "media": {"type": "object"},
+    "execution": {"type": "object"},
+    "negative_controls": {"type": "array", "minItems": 48, "maxItems": 48, "items": {"type": "object"}},
+    "claims": {"type": "object"},
+    "non_claims": {"type": "array", "items": {"type": "string"}},
+    "summary": {"type": "object"},
+    "open_items": {"type": "array", "minItems": 5, "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

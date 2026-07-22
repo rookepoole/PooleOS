@@ -184,7 +184,7 @@
     {
       "phase_id": "N9",
       "title": "Physical and Virtual Memory, MMIO, Allocation, and Reclaim",
-      "status": "not_started",
+      "status": "partial",
       "source_section_ids": [
         "026",
         "027",
@@ -194,7 +194,9 @@
       ],
       "source_line_count": 484,
       "source_checkbox_count": 410,
-      "added_requirement_ids": []
+      "added_requirement_ids": [
+        "ADD-MEM-001"
+      ]
     },
     {
       "phase_id": "N10",
@@ -987,7 +989,7 @@
       "subheading_count": 4,
       "checkbox_count": 78,
       "phase_id": "N9",
-      "phase_status": "not_started",
+      "phase_status": "partial",
       "completion_inferred": false
     },
     {
@@ -999,7 +1001,7 @@
       "subheading_count": 5,
       "checkbox_count": 109,
       "phase_id": "N9",
-      "phase_status": "not_started",
+      "phase_status": "partial",
       "completion_inferred": false
     },
     {
@@ -1011,7 +1013,7 @@
       "subheading_count": 3,
       "checkbox_count": 44,
       "phase_id": "N9",
-      "phase_status": "not_started",
+      "phase_status": "partial",
       "completion_inferred": false
     },
     {
@@ -1023,7 +1025,7 @@
       "subheading_count": 0,
       "checkbox_count": 20,
       "phase_id": "N9",
-      "phase_status": "not_started",
+      "phase_status": "partial",
       "completion_inferred": false
     },
     {
@@ -2487,7 +2489,7 @@
       "subheading_count": 9,
       "checkbox_count": 159,
       "phase_id": "N9",
-      "phase_status": "not_started",
+      "phase_status": "partial",
       "completion_inferred": false
     },
     {
@@ -2938,6 +2940,16 @@
         "PBP1 framebuffer physical-address contract",
         "master checklist section 018 early framebuffer requirements",
         "Cycle101 N6-KENTRY-001 mapping-gap analysis"
+      ]
+    },
+    {
+      "id": "ADD-MEM-001",
+      "phase_id": "N9",
+      "requirement": "Define bootstrap stack, low/high guard, retained page-table root, handoff, kernel-image, and allocator metadata bounds once across PooleBoot, PBP1, PKMAP2, PooleKernel entry, trap handling, and physical-memory ownership; require every consumer and hostile test to derive those boundaries from the same contract so layout growth cannot silently turn a guard probe into a mapped-stack access or expose retained loader pages to allocation.",
+      "basis": [
+        "Cycle 125 bootstrap-stack growth and PKTRAP1 guard-boundary correction",
+        "Cycle 125 PKPMM1 retained-range ownership audit",
+        "master checklist sections 026-029 and 151"
       ]
     },
     {

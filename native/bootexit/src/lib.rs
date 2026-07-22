@@ -7,7 +7,7 @@ pub const MAX_EXIT_ATTEMPTS: usize = 4;
 pub const RAW_MEMORY_MAP_CAPACITY: usize = 1024 * 1024;
 pub const NORMALIZED_MEMORY_CAPACITY: usize = 16_384 * 40;
 pub const HANDOFF_CAPACITY_BYTES: usize = 1024 * 1024;
-pub const STACK_PAGE_COUNT: usize = 8;
+pub const STACK_PAGE_COUNT: usize = 14;
 pub const PAGE_SIZE: u64 = 4096;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -310,7 +310,7 @@ impl DevelopmentTransfer {
             || !self.emulator_only
             || !self.terminal_after_revalidation
             || self.production_kernel_entry_profile_valid
-            || self.trap_scenario > 7
+            || self.trap_scenario > 8
         {
             return Err(TransferError::TransferState);
         }
@@ -482,7 +482,7 @@ mod tests {
             kernel_entry_virtual: 0xffff_ffff_8000_8000,
             handoff_virtual: 0xffff_ffff_8005_0000,
             handoff_byte_count: 5008,
-            stack_top_virtual: 0xffff_ffff_8004_9000,
+            stack_top_virtual: 0xffff_ffff_8004_f000,
             page_table_root_physical: 0x0300_0000,
             transfer_cr3: 0x0300_0000,
             trap_scenario: 0,
@@ -547,7 +547,7 @@ mod tests {
         transfer.terminal_after_revalidation = false;
         assert_eq!(transfer.validate(), Err(TransferError::TransferState));
         transfer = development_transfer();
-        transfer.trap_scenario = 8;
+        transfer.trap_scenario = 9;
         assert_eq!(transfer.validate(), Err(TransferError::TransferState));
     }
 

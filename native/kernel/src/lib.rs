@@ -12,6 +12,7 @@ use poole_handoff::{
     RECORD_LOADED_ARTIFACTS, validate_kernel_entry_profile,
 };
 
+pub mod physical_memory;
 pub mod privilege_msr;
 pub mod revalidation;
 pub mod xstate;
@@ -22,8 +23,9 @@ pub const TRANSFER_CONTRACT_ID: &str = "PKXFER1";
 pub const TRAP_CONTRACT_ID: &str = "PKTRAP1";
 pub const CPU_POLICY_CONTRACT_ID: &str = "PKCPU1";
 pub const PRIVILEGE_MSR_CONTRACT_ID: &str = privilege_msr::CONTRACT_ID;
+pub const PHYSICAL_MEMORY_CONTRACT_ID: &str = physical_memory::CONTRACT_ID;
 pub const XSTATE_EXCEPTION_CONTRACT_ID: &str = "PKXEXC1";
-pub const BUILD_ID: &[u8] = b"PKBUILD1-CYCLE124-N7-PRIVILEGE-MSR-POLICY-001";
+pub const BUILD_ID: &[u8] = b"PKBUILD1-CYCLE125-N9-PMM-001";
 pub const ENTRY_OFFSET: u64 = 0x8000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
 pub const HANDOFF_MAGIC_U64: u64 = u64::from_le_bytes(poole_handoff::MAGIC);
@@ -33,6 +35,7 @@ pub const KERNEL_TSS_SELECTOR: u16 = 0x18;
 pub const GDT_LIMIT: u16 = 39;
 pub const IDT_LIMIT: u16 = 4095;
 pub const IST_STACK_BYTES: u64 = 8192;
+pub const BOOTSTRAP_STACK_PAGE_COUNT: u64 = 14;
 pub const INSTALLED_EXCEPTION_GATE_COUNT: u16 = 5;
 pub const INSTALLED_XSTATE_EXCEPTION_GATE_COUNT: u16 = 8;
 const CR3_ALLOWED_LOW_BITS: u64 = (1 << 3) | (1 << 4);
@@ -58,6 +61,7 @@ pub enum PanicCode {
     XstatePolicy = 0x100d,
     XstateException = 0x100e,
     PrivilegeMsrPolicy = 0x100f,
+    PhysicalMemory = 0x1010,
     UnexpectedReturn = 0x10ff,
 }
 
@@ -72,6 +76,7 @@ pub enum DevelopmentTrapScenario {
     XstatePolicy = 5,
     XstateException = 6,
     PrivilegeMsrPolicy = 7,
+    PhysicalMemory = 8,
 }
 
 impl DevelopmentTrapScenario {
@@ -85,6 +90,7 @@ impl DevelopmentTrapScenario {
             5 => Some(Self::XstatePolicy),
             6 => Some(Self::XstateException),
             7 => Some(Self::PrivilegeMsrPolicy),
+            8 => Some(Self::PhysicalMemory),
             _ => None,
         }
     }
@@ -99,6 +105,7 @@ impl DevelopmentTrapScenario {
             Self::XstatePolicy => "xstate_policy",
             Self::XstateException => "xstate_exception",
             Self::PrivilegeMsrPolicy => "privilege_msr_policy",
+            Self::PhysicalMemory => "physical_memory",
         }
     }
 }
@@ -1626,7 +1633,11 @@ mod tests {
             DevelopmentTrapScenario::from_selector(7),
             Some(DevelopmentTrapScenario::PrivilegeMsrPolicy)
         );
-        assert_eq!(DevelopmentTrapScenario::from_selector(8), None);
+        assert_eq!(
+            DevelopmentTrapScenario::from_selector(8),
+            Some(DevelopmentTrapScenario::PhysicalMemory)
+        );
+        assert_eq!(DevelopmentTrapScenario::from_selector(9), None);
     }
 
     #[test]

@@ -15,6 +15,7 @@ development-cpu-policy = ["development-transfer"]
 development-xstate-policy = ["development-transfer"]
 development-xstate-exception = ["development-transfer"]
 development-privilege-msr-policy = ["development-transfer"]
+development-physical-memory = ["development-transfer"]
 
 [lib]
 name = "pooleboot"

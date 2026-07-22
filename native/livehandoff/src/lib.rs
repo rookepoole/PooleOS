@@ -22,7 +22,7 @@ pub const MAX_DESCRIPTOR_BYTES: usize = 256;
 pub const MAX_MEMORY_ENTRIES: usize = 16_384;
 pub const MAX_TRANSCRIPT_CHUNK_BYTES: usize = 64;
 pub const RETAINED_TABLE_PAGE_COUNT: u32 = 4;
-pub const RETAINED_STACK_PAGE_COUNT: u32 = 8;
+pub const RETAINED_STACK_PAGE_COUNT: u32 = 14;
 pub const PROFILE_ARTIFACT_COUNT: usize = 10;
 pub const PROFILE_ARTIFACT_ROLES: [u32; PROFILE_ARTIFACT_COUNT] = [
     ARTIFACT_KERNEL,
@@ -821,7 +821,7 @@ mod tests {
     fn exit_raw_map(stride: usize) -> std::vec::Vec<u8> {
         let mut value = descriptor(2, 0x0020_0000, 48, 4, stride);
         value.extend(descriptor(2, 0x0030_0000, 4, 4, stride));
-        value.extend(descriptor(2, 0x0040_0000, 8, 4, stride));
+        value.extend(descriptor(2, 0x0040_0000, 14, 4, stride));
         value.extend(descriptor(2, 0x0050_0000, 256, 4, stride));
         value.extend(descriptor(11, 0x8000_0000, 1024, 1, stride));
         value
@@ -891,8 +891,8 @@ mod tests {
             table_page_count: RETAINED_TABLE_PAGE_COUNT,
             stack_physical_base: 0x0040_0000,
             stack_page_count: RETAINED_STACK_PAGE_COUNT,
-            stack_top_virtual: 0xffff_ffff_8003_9000,
-            handoff_virtual_base: 0xffff_ffff_8004_0000,
+            stack_top_virtual: 0xffff_ffff_8004_f000,
+            handoff_virtual_base: 0xffff_ffff_8005_0000,
             handoff_capacity_bytes: pbp1::MAX_TOTAL_BYTES as u32,
         }
     }

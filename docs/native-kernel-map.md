@@ -4,7 +4,7 @@
 
 PKMAP2 extends the validated PKMAP1 kernel alias into retained boot-transfer
 storage. PooleBoot builds and audits an exact supervisor higher-half mapping,
-adds a guarded eight-page kernel stack and a one-MiB read-only handoff window,
+adds a guarded fourteen-page kernel stack and a one-MiB read-only handoff window,
 then preserves the kernel and all private page tables across
 `ExitBootServices`. The current slice stops before installing the retained CR3,
 changing RSP, or calling PooleKernel.
@@ -26,13 +26,14 @@ pairwise disjoint:
 
 - the 64-page PooleKernel allocation;
 - four private page-table pages;
-- eight writable, non-executable stack pages;
+- fourteen writable, non-executable stack pages;
 - 256 handoff pages, covering one MiB.
 
 The virtual layout reserves page-table index 64 as the low guard, indices
-65-72 for the stack, index 73 as the high guard, and index 80 onward for the
+65-78 for the stack, index 79 as the high guard, and index 80 onward for the
 handoff. Both guards remain non-present. The handoff range begins after the
-fixed alignment gap and is supervisor read-only and NX.
+fixed boundary and is supervisor read-only and NX. `ADD-MEM-001` requires boot,
+entry, trap, and PMM consumers to derive these bounds from one contract.
 
 ## Table Construction
 
