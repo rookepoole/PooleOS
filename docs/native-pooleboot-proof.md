@@ -186,7 +186,7 @@ The receipt proves, on the pinned profile:
   unsigned development context;
 - live reparse of all six exact retained PBART1 files, PPOL1 payload-digest and
   PINIT1 route cross-binding, six first-failure denials, and exact nine-file
-  retained-set SHA-256 `331E38A7C071FFC3491DB13132726CCA12B26901059AA08690C9963D8652435D`;
+  retained-set SHA-256 `1F2BE74362DEE662AE5E7E9B711EA2060DD659E74548421528637D1904DE9D05`;
 - live parse of the exact 320-byte PBTP1 policy and 256-byte PBTS1 acceptance
   state, fourteen cross-bindings, rejection of the ESP candidate as persistent
   authority, and exact unsigned-policy denial with zero effects;
@@ -256,8 +256,9 @@ policy application, and microcode or firmware application are open. PKTRAP1
 closes only the bounded BSP trap slice, and PKCPU1 closes only the bounded
 qemu64 read-only CPU-policy slice. PKERR1 separately closes only the pure
 exact-target rejection-policy boundary. PKXSTATE1 and PKXEXC1 separately close
-bounded one-BSP x87/SSE ownership and exception-delivery boundaries. The next
-owner-independent move is `N7-PRIVILEGE-MSR-POLICY-001`. Hardware-key possession and the
+bounded one-BSP x87/SSE ownership and exception-delivery boundaries, while
+PKMSR1 closes only the bounded read-only privileged-MSR policy boundary. The
+next owner-independent move is `N9-PMM-001`. Hardware-key possession and the
 governance signing ceremony remain a separate external lane despite current
 authorization.
 

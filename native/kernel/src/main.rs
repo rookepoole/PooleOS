@@ -15,10 +15,11 @@ use poolekernel::{
     BUILD_ID, ByteSink, CPU_POLICY_CONTRACT_ID, DevelopmentTrapScenario, EARLY_LOG_CAPACITY,
     EarlyLogger, EarlyRing, Framebuffer, PanicCode, PanicDisposition, PanicState,
     TRANSFER_CONTRACT_ID, TRAP_CONTRACT_ID, TrapDisposition, TrapError, TrapExpectation,
-    TrapObservation, XSTATE_EXCEPTION_CONTRACT_ID, decode_cpu_identity, revalidation,
-    validate_cpu_policy_snapshot, validate_descriptor_state, validate_development_handoff,
-    validate_entry_envelope, validate_handoff, validate_runtime_state, validate_trap_observation,
-    validate_xstate_exception_descriptor_state,
+    TrapObservation, XSTATE_EXCEPTION_CONTRACT_ID, decode_cpu_identity,
+    privilege_msr::{machine_check_bank_count, machine_check_ctl_present, validate_snapshot},
+    revalidation, validate_cpu_policy_snapshot, validate_descriptor_state,
+    validate_development_handoff, validate_entry_envelope, validate_handoff,
+    validate_runtime_state, validate_trap_observation, validate_xstate_exception_descriptor_state,
     xstate::{
         AREA_BYTES as XSTATE_AREA_BYTES, CONTRACT_ID as XSTATE_CONTRACT_ID, ContextSwitch,
         effective_mxcsr_mask, validate_context_switch, validate_proof as validate_xstate_proof,
@@ -68,6 +69,107 @@ static XSTATE_EXCEPTION_SIMD_DELIVERY_ERROR_PREFIX: [u8;
 static XSTATE_EXCEPTION_PARENT_ERROR_PREFIX: [u8;
     b"POOLEOS:KERNEL:XSTATE-EXCEPTION-PARENT-ERROR reason=".len()] =
     *b"POOLEOS:KERNEL:XSTATE-EXCEPTION-PARENT-ERROR reason=";
+
+macro_rules! pkmsr_fragment {
+    ($name:ident, $value:literal) => {
+        #[used]
+        #[unsafe(link_section = ".text.pkmsr_literals")]
+        static $name: [u8; $value.len()] = *$value;
+    };
+}
+
+pkmsr_fragment!(
+    PKMSR_FEATURES,
+    b"POOLEOS:KERNEL:PRIV-MSR-FEATURES OBSERVE contract=PKMSR1 vendor_hex="
+);
+pkmsr_fragment!(PKMSR_MAX_BASIC, b" max_basic=");
+pkmsr_fragment!(PKMSR_MAX_EXTENDED, b" max_extended=");
+pkmsr_fragment!(PKMSR_LEAF1_EDX, b" leaf1_edx=");
+pkmsr_fragment!(PKMSR_EXT1_EDX, b" ext1_edx=");
+pkmsr_fragment!(PKMSR_LEAFA_EAX, b" leafa_eax=");
+pkmsr_fragment!(PKMSR_EXT22_EAX, b" ext22_eax=");
+pkmsr_fragment!(PKMSR_CR4, b" cr4=");
+pkmsr_fragment!(PKMSR_SYSCALL, b" syscall=");
+pkmsr_fragment!(PKMSR_RDTSCP, b" rdtscp=");
+pkmsr_fragment!(PKMSR_MCE, b" mce=");
+pkmsr_fragment!(PKMSR_MCA, b" mca=");
+pkmsr_fragment!(PKMSR_ARCH_PMU, b" arch_pmu_version=");
+pkmsr_fragment!(PKMSR_AMD_PMU, b" amd_perfmon_v2=");
+pkmsr_fragment!(
+    PKMSR_LINKAGE,
+    b"\nPOOLEOS:KERNEL:PRIV-MSR-LINKAGE OBSERVE contract=PKMSR1 efer="
+);
+pkmsr_fragment!(PKMSR_STAR, b" star=");
+pkmsr_fragment!(PKMSR_LSTAR, b" lstar=");
+pkmsr_fragment!(PKMSR_CSTAR, b" cstar=");
+pkmsr_fragment!(PKMSR_SFMASK, b" sfmask=");
+pkmsr_fragment!(
+    PKMSR_BASES,
+    b" active=0 reads=5\nPOOLEOS:KERNEL:PRIV-MSR-BASES OBSERVE contract=PKMSR1 fs_base="
+);
+pkmsr_fragment!(PKMSR_GS_BASE, b" gs_base=");
+pkmsr_fragment!(PKMSR_KERNEL_GS_BASE, b" kernel_gs_base=");
+pkmsr_fragment!(PKMSR_TSC_AUX, b" tsc_aux=");
+pkmsr_fragment!(PKMSR_TSC_AUX_READ, b" tsc_aux_read=");
+pkmsr_fragment!(PKMSR_READS, b" reads=");
+pkmsr_fragment!(
+    PKMSR_MCG,
+    b"\nPOOLEOS:KERNEL:PRIV-MSR-MCE OBSERVE contract=PKMSR1 mcg_cap="
+);
+pkmsr_fragment!(PKMSR_MCG_STATUS, b" mcg_status=");
+pkmsr_fragment!(PKMSR_MCG_CTL, b" mcg_ctl=");
+pkmsr_fragment!(PKMSR_BANK_COUNT, b" bank_count=");
+pkmsr_fragment!(PKMSR_CTL_PRESENT, b" ctl_present=");
+pkmsr_fragment!(PKMSR_BANK_READS, b" bank_reads=0 reads=");
+pkmsr_fragment!(
+    PKMSR_PMU,
+    b"\nPOOLEOS:KERNEL:PRIV-MSR-PMU OBSERVE contract=PKMSR1 architectural="
+);
+pkmsr_fragment!(PKMSR_AMD_V2, b" amd_v2=");
+pkmsr_fragment!(PKMSR_PMU_SCOPE, b" msr_reads=0 rdpmc=0 cr4_pce=");
+pkmsr_fragment!(PKMSR_DISABLED, b" policy=disabled\n");
+pkmsr_fragment!(
+    PKMSR_DENIED,
+    b"POOLEOS:KERNEL:PRIV-MSR-DENIED contract=PKMSR1 reason="
+);
+pkmsr_fragment!(
+    PKMSR_DENIED_TAIL,
+    b" msr_writes=0 authority=0 actions=0 terminal=panic\n"
+);
+pkmsr_fragment!(
+    PKMSR_RESULT,
+    b"POOLEOS:KERNEL:PRIV-MSR-RESULT PASS contract=PKMSR1 profile=qemu64_tier0 bsp=1 policy=read_only_support_gated msr_reads="
+);
+pkmsr_fragment!(
+    PKMSR_RESULT_TAIL,
+    b" msr_writes=0 control_writes=0 signatures=0 authority=0 actions=0 interrupts=0 syscall_active=0 mce_handler=0 pmu_owner=0 terminal=halt\n"
+);
+
+#[used]
+#[unsafe(link_section = ".text.pkcpu_literals")]
+static CPU_STATE_JOIN: [u8;
+    b" ownership=observation_only\nPOOLEOS:KERNEL:CPU-STATE OBSERVE contract=".len()] =
+    *b" ownership=observation_only\nPOOLEOS:KERNEL:CPU-STATE OBSERVE contract=";
+
+#[used]
+#[unsafe(link_section = ".text.pkcpu_literals")]
+static CPU_DENIED_PREFIX: [u8; b"POOLEOS:KERNEL:CPU-DENIED contract=PKCPU1 reason=".len()] =
+    *b"POOLEOS:KERNEL:CPU-DENIED contract=PKCPU1 reason=";
+
+#[used]
+#[unsafe(link_section = ".text.pkcpu_literals")]
+static CPU_DENIED_TAIL: [u8; b" writes=0 authority=0 actions=0 terminal=panic\n".len()] =
+    *b" writes=0 authority=0 actions=0 terminal=panic\n";
+
+#[used]
+#[unsafe(link_section = ".text.pkcpu_literals")]
+static CPU_RESULT_PREFIX: [u8; b"POOLEOS:KERNEL:CPU-RESULT PASS contract=".len()] =
+    *b"POOLEOS:KERNEL:CPU-RESULT PASS contract=";
+
+#[used]
+#[unsafe(link_section = ".text.pkcpu_literals")]
+static CPU_RESULT_TAIL: [u8; b" profile=qemu64_tier0 bsp=1 policy=required_and_support_gated reads=cpuid_cr_msr writes=0 signatures=0 authority=0 actions=0 interrupts=0 terminal=halt\n".len()] =
+    *b" profile=qemu64_tier0 bsp=1 policy=required_and_support_gated reads=cpuid_cr_msr writes=0 signatures=0 authority=0 actions=0 interrupts=0 terminal=halt\n";
 
 static EARLY_RING: EarlyRing = EarlyRing::new();
 static PANIC_STATE: PanicState = PanicState::new();
@@ -160,6 +262,7 @@ extern "C" fn poole_kernel_emergency_panic(code: u32) -> ! {
         0x100c => PanicCode::CpuPolicy,
         0x100d => PanicCode::XstatePolicy,
         0x100e => PanicCode::XstateException,
+        0x100f => PanicCode::PrivilegeMsrPolicy,
         _ => PanicCode::UnexpectedReturn,
     };
     let disposition = PANIC_STATE.begin(code);
@@ -453,7 +556,7 @@ extern "C" fn poole_kernel_rust_entry(
         logger.write_hex_u64(u64::from(discovery.leaf_d0_edx));
         logger.write_str(" xcr0=");
         logger.write_hex_u64(control.xcr0);
-        logger.write_str(" ownership=observation_only\nPOOLEOS:KERNEL:CPU-STATE OBSERVE contract=");
+        logger.write_bytes(&CPU_STATE_JOIN);
         logger.write_str(CPU_POLICY_CONTRACT_ID);
         logger.write_str(" cr0=");
         logger.write_hex_u64(control.cr0);
@@ -473,16 +576,112 @@ extern "C" fn poole_kernel_rust_entry(
         logger.write_hex_u64(u64::from(control.msr_read_mask));
         logger.write_str("\n");
         if let Err(error) = validate_cpu_policy_snapshot(&snapshot) {
-            logger.write_str("POOLEOS:KERNEL:CPU-DENIED contract=PKCPU1 reason=");
+            logger.write_bytes(&CPU_DENIED_PREFIX);
             logger.write_str(error.label());
-            logger.write_str(" writes=0 authority=0 actions=0 terminal=panic\n");
+            logger.write_bytes(&CPU_DENIED_TAIL);
             poole_kernel_emergency_panic(PanicCode::CpuPolicy as u32);
         }
-        logger.write_str("POOLEOS:KERNEL:CPU-RESULT PASS contract=");
+        logger.write_bytes(&CPU_RESULT_PREFIX);
         logger.write_str(CPU_POLICY_CONTRACT_ID);
-        logger.write_str(
-            " profile=qemu64_tier0 bsp=1 policy=required_and_support_gated reads=cpuid_cr_msr writes=0 signatures=0 authority=0 actions=0 interrupts=0 terminal=halt\n",
-        );
+        logger.write_bytes(&CPU_RESULT_TAIL);
+        halt_forever()
+    }
+
+    if trap_scenario == DevelopmentTrapScenario::PrivilegeMsrPolicy {
+        // SAFETY: PKXFER1 transferred once at CPL0 with IF/DF clear. PKMSR1 performs
+        // only support-gated CPUID, CR4, and allowlisted RDMSR observations.
+        let snapshot = unsafe { arch::x86_64::observe_privilege_msr_policy() };
+        let bank_count = machine_check_bank_count(&snapshot);
+        let ctl_present = machine_check_ctl_present(&snapshot);
+        let syscall = snapshot.ext1_edx & (1 << 11) != 0;
+        let rdtscp = snapshot.ext1_edx & (1 << 27) != 0;
+        let mce = snapshot.leaf1_edx & (1 << 7) != 0;
+        let mca = snapshot.leaf1_edx & (1 << 14) != 0;
+        let arch_pmu_version = snapshot.leaf_a_eax & 0xff;
+        let amd_perfmon_v2 = snapshot.ext22_eax & 0xff;
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        logger.write_bytes(&PKMSR_FEATURES);
+        logger.write_hex_bytes(&snapshot.vendor);
+        logger.write_bytes(&PKMSR_MAX_BASIC);
+        logger.write_hex_u64(u64::from(snapshot.max_basic_leaf));
+        logger.write_bytes(&PKMSR_MAX_EXTENDED);
+        logger.write_hex_u64(u64::from(snapshot.max_extended_leaf));
+        logger.write_bytes(&PKMSR_LEAF1_EDX);
+        logger.write_hex_u64(u64::from(snapshot.leaf1_edx));
+        logger.write_bytes(&PKMSR_EXT1_EDX);
+        logger.write_hex_u64(u64::from(snapshot.ext1_edx));
+        logger.write_bytes(&PKMSR_LEAFA_EAX);
+        logger.write_hex_u64(u64::from(snapshot.leaf_a_eax));
+        logger.write_bytes(&PKMSR_EXT22_EAX);
+        logger.write_hex_u64(u64::from(snapshot.ext22_eax));
+        logger.write_bytes(&PKMSR_CR4);
+        logger.write_hex_u64(snapshot.cr4);
+        logger.write_bytes(&PKMSR_SYSCALL);
+        logger.write_decimal_u64(u64::from(syscall));
+        logger.write_bytes(&PKMSR_RDTSCP);
+        logger.write_decimal_u64(u64::from(rdtscp));
+        logger.write_bytes(&PKMSR_MCE);
+        logger.write_decimal_u64(u64::from(mce));
+        logger.write_bytes(&PKMSR_MCA);
+        logger.write_decimal_u64(u64::from(mca));
+        logger.write_bytes(&PKMSR_ARCH_PMU);
+        logger.write_decimal_u64(u64::from(arch_pmu_version));
+        logger.write_bytes(&PKMSR_AMD_PMU);
+        logger.write_decimal_u64(u64::from(amd_perfmon_v2));
+        logger.write_bytes(&PKMSR_LINKAGE);
+        logger.write_hex_u64(snapshot.efer);
+        logger.write_bytes(&PKMSR_STAR);
+        logger.write_hex_u64(snapshot.star);
+        logger.write_bytes(&PKMSR_LSTAR);
+        logger.write_hex_u64(snapshot.lstar);
+        logger.write_bytes(&PKMSR_CSTAR);
+        logger.write_hex_u64(snapshot.cstar);
+        logger.write_bytes(&PKMSR_SFMASK);
+        logger.write_hex_u64(snapshot.sfmask);
+        logger.write_bytes(&PKMSR_BASES);
+        logger.write_hex_u64(snapshot.fs_base);
+        logger.write_bytes(&PKMSR_GS_BASE);
+        logger.write_hex_u64(snapshot.gs_base);
+        logger.write_bytes(&PKMSR_KERNEL_GS_BASE);
+        logger.write_hex_u64(snapshot.kernel_gs_base);
+        logger.write_bytes(&PKMSR_TSC_AUX);
+        logger.write_hex_u64(snapshot.tsc_aux);
+        logger.write_bytes(&PKMSR_TSC_AUX_READ);
+        logger.write_decimal_u64(u64::from(rdtscp));
+        logger.write_bytes(&PKMSR_READS);
+        logger.write_decimal_u64(3 + u64::from(rdtscp));
+        logger.write_bytes(&PKMSR_MCG);
+        logger.write_hex_u64(snapshot.mcg_cap);
+        logger.write_bytes(&PKMSR_MCG_STATUS);
+        logger.write_hex_u64(snapshot.mcg_status);
+        logger.write_bytes(&PKMSR_MCG_CTL);
+        logger.write_hex_u64(snapshot.mcg_ctl);
+        logger.write_bytes(&PKMSR_BANK_COUNT);
+        logger.write_decimal_u64(u64::from(bank_count));
+        logger.write_bytes(&PKMSR_CTL_PRESENT);
+        logger.write_decimal_u64(u64::from(ctl_present));
+        logger.write_bytes(&PKMSR_BANK_READS);
+        logger.write_decimal_u64(2 + u64::from(ctl_present));
+        logger.write_bytes(&PKMSR_PMU);
+        logger.write_decimal_u64(u64::from(arch_pmu_version != 0));
+        logger.write_bytes(&PKMSR_AMD_V2);
+        logger.write_decimal_u64(u64::from(amd_perfmon_v2 != 0));
+        logger.write_bytes(&PKMSR_PMU_SCOPE);
+        logger.write_decimal_u64(u64::from(snapshot.cr4 & (1 << 8) != 0));
+        logger.write_bytes(&PKMSR_DISABLED);
+        if let Err(error) = validate_snapshot(&snapshot) {
+            logger.write_bytes(&PKMSR_DENIED);
+            logger.write_str(error.label());
+            logger.write_bytes(&PKMSR_DENIED_TAIL);
+            poole_kernel_emergency_panic(PanicCode::PrivilegeMsrPolicy as u32);
+        }
+        logger.write_bytes(&PKMSR_RESULT);
+        logger.write_decimal_u64(u64::from(snapshot.msr_read_mask.count_ones()));
+        logger.write_bytes(&PKMSR_RESULT_TAIL);
         halt_forever()
     }
 
@@ -812,6 +1011,9 @@ extern "C" fn poole_kernel_rust_entry(
         }
         DevelopmentTrapScenario::XstateException => {
             poole_kernel_emergency_panic(PanicCode::XstateException as u32)
+        }
+        DevelopmentTrapScenario::PrivilegeMsrPolicy => {
+            poole_kernel_emergency_panic(PanicCode::PrivilegeMsrPolicy as u32)
         }
     }
 }
