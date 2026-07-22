@@ -86,7 +86,7 @@ the pre-activation entry would be incorrect after hardware traversal.
 The live oracle requires two byte-identical QEMU/OVMF runs, 40 exact markers,
 46 hostile controls, deterministic binding to the PBP1 DMA32 first-fit
 transcript, and source audits for the no-heap core and volatile privileged
-adapter. The canonical run performs 8,720 physical table writes, 5,368
+adapter. The canonical run performs 8,720 physical table writes, 5,432
 bootstrap temporary-PTE writes and invalidations, two CR3 writes, and three
 active local invalidations. Signature, authority, action, and production counts
 remain zero.

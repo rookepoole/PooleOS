@@ -3,10 +3,11 @@ use poole_handoff::{
     MEMORY_USABLE, PAGE_BYTES, RECORD_MEMORY_MAP,
 };
 
-pub const CONTRACT_ID: &str = "PKPMM2";
+pub const CONTRACT_ID: &str = "PKPMM3";
 pub const MAX_MEMORY_ENTRIES: usize = 256;
 pub const MAX_FREE_EXTENTS: usize = 256;
 pub const MAX_ALLOCATIONS: usize = 32;
+pub const MAX_SCRUB_RECEIPTS: usize = 16;
 pub const MEMORY_KIND_COUNT: usize = 12;
 pub const DEFAULT_QUOTA_PAGES: u64 = 64;
 pub const DMA_END_PAGE: u64 = 16 * 1024 * 1024 / PAGE_BYTES;
@@ -14,6 +15,14 @@ pub const DMA32_END_PAGE: u64 = 4 * 1024 * 1024 * 1024 / PAGE_BYTES;
 pub const SCRUB_WORD_BYTES: u64 = 8;
 pub const SCRUB_WORDS_PER_PAGE: usize = (PAGE_BYTES / SCRUB_WORD_BYTES) as usize;
 pub const STALE_PATTERN: u64 = 0xA5A5_5A5A_C3C3_3C3C;
+pub const METADATA_ARENA_PAGE_COUNT: u64 = 5;
+pub const METADATA_GUARD_PAGE_COUNT: u64 = 2;
+pub const METADATA_OWNER: u16 = 0x4D45;
+pub const METADATA_MAGIC: u64 = u64::from_le_bytes(*b"PKPMMETA");
+pub const METADATA_VERSION: u64 = 1;
+
+const FNV_OFFSET: u64 = 0xCBF2_9CE4_8422_2325;
+const FNV_PRIME: u64 = 0x0000_0100_0000_01B3;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(u8)]
@@ -86,6 +95,26 @@ pub trait PhysicalPageAccess {
     ) -> Result<u64, PageAccessError>;
 }
 
+pub trait MetadataArenaAccess: PhysicalPageAccess {
+    fn install_metadata_arena(
+        &mut self,
+        physical_address: u64,
+        page_count: u64,
+    ) -> Result<u64, PageAccessError>;
+
+    fn finalize_metadata_handoff(
+        &mut self,
+        virtual_address: u64,
+        manager_byte_count: u64,
+    ) -> Result<(), PageAccessError>;
+
+    fn uninstall_metadata_arena(
+        &mut self,
+        virtual_address: u64,
+        page_count: u64,
+    ) -> Result<(), PageAccessError>;
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PhysicalMemoryError {
     MissingMap,
@@ -105,6 +134,13 @@ pub enum PhysicalMemoryError {
     CoreOwnership,
     ScrubAccess,
     ScrubVerification,
+    ReceiptCapacity,
+    MetadataCapacity,
+    MetadataState,
+    MetadataMapping,
+    MetadataCorruption,
+    MetadataOwnership,
+    MetadataHandoff,
     ExerciseInvariant,
 }
 
@@ -133,6 +169,13 @@ pmm_label!(PMM_LABEL_STALE_HANDLE, b"stale_handle");
 pmm_label!(PMM_LABEL_CORE_OWNERSHIP, b"core_ownership");
 pmm_label!(PMM_LABEL_SCRUB_ACCESS, b"scrub_access");
 pmm_label!(PMM_LABEL_SCRUB_VERIFICATION, b"scrub_verification");
+pmm_label!(PMM_LABEL_RECEIPT_CAPACITY, b"receipt_capacity");
+pmm_label!(PMM_LABEL_METADATA_CAPACITY, b"metadata_capacity");
+pmm_label!(PMM_LABEL_METADATA_STATE, b"metadata_state");
+pmm_label!(PMM_LABEL_METADATA_MAPPING, b"metadata_mapping");
+pmm_label!(PMM_LABEL_METADATA_CORRUPTION, b"metadata_corruption");
+pmm_label!(PMM_LABEL_METADATA_OWNERSHIP, b"metadata_ownership");
+pmm_label!(PMM_LABEL_METADATA_HANDOFF, b"metadata_handoff");
 pmm_label!(PMM_LABEL_EXERCISE_INVARIANT, b"exercise_invariant");
 
 const fn pmm_label_text(bytes: &'static [u8]) -> &'static str {
@@ -160,6 +203,13 @@ impl PhysicalMemoryError {
             Self::CoreOwnership => pmm_label_text(&PMM_LABEL_CORE_OWNERSHIP),
             Self::ScrubAccess => pmm_label_text(&PMM_LABEL_SCRUB_ACCESS),
             Self::ScrubVerification => pmm_label_text(&PMM_LABEL_SCRUB_VERIFICATION),
+            Self::ReceiptCapacity => pmm_label_text(&PMM_LABEL_RECEIPT_CAPACITY),
+            Self::MetadataCapacity => pmm_label_text(&PMM_LABEL_METADATA_CAPACITY),
+            Self::MetadataState => pmm_label_text(&PMM_LABEL_METADATA_STATE),
+            Self::MetadataMapping => pmm_label_text(&PMM_LABEL_METADATA_MAPPING),
+            Self::MetadataCorruption => pmm_label_text(&PMM_LABEL_METADATA_CORRUPTION),
+            Self::MetadataOwnership => pmm_label_text(&PMM_LABEL_METADATA_OWNERSHIP),
+            Self::MetadataHandoff => pmm_label_text(&PMM_LABEL_METADATA_HANDOFF),
             Self::ExerciseInvariant => pmm_label_text(&PMM_LABEL_EXERCISE_INVARIANT),
         }
     }
@@ -179,6 +229,21 @@ const EMPTY_EXTENT: Extent = Extent {
 };
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct SourceRecord {
+    start_page: u64,
+    page_count: u64,
+    kind: u32,
+    source: u32,
+}
+
+const EMPTY_SOURCE_RECORD: SourceRecord = SourceRecord {
+    start_page: 0,
+    page_count: 0,
+    kind: 0,
+    source: 0,
+};
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 struct Allocation {
     active: bool,
     generation: u64,
@@ -187,6 +252,7 @@ struct Allocation {
     zone: Zone,
     owner: u16,
     metadata_poisoned: bool,
+    release_excluded: bool,
 }
 
 const EMPTY_ALLOCATION: Allocation = Allocation {
@@ -197,6 +263,41 @@ const EMPTY_ALLOCATION: Allocation = Allocation {
     zone: Zone::Dma,
     owner: 0,
     metadata_poisoned: false,
+    release_excluded: false,
+};
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(u64)]
+enum MetadataLifecycle {
+    Bootstrap = 0,
+    Prepared = 1,
+    Mapped = 2,
+    Retired = 3,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct MetadataHeader {
+    magic: u64,
+    version: u64,
+    manager_byte_count: u64,
+    arena_page_count: u64,
+    physical_start_page: u64,
+    virtual_start: u64,
+    generation: u64,
+    owner: u16,
+    logical_checksum: u64,
+}
+
+const EMPTY_METADATA_HEADER: MetadataHeader = MetadataHeader {
+    magic: 0,
+    version: 0,
+    manager_byte_count: 0,
+    arena_page_count: 0,
+    physical_start_page: 0,
+    virtual_start: 0,
+    generation: 0,
+    owner: 0,
+    logical_checksum: 0,
 };
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -233,12 +334,21 @@ pub struct PhysicalMemorySummary {
     pub scrub_verified_bytes: u64,
     pub scrub_receipt_count: u64,
     pub scrub_failures: u64,
+    pub source_record_count: usize,
+    pub receipt_ledger_count: usize,
+    pub metadata_arena_pages: u64,
+    pub metadata_release_rejections: u64,
+    pub metadata_migration_rollbacks: u64,
+    pub metadata_mapped: bool,
 }
 
 pub struct PhysicalMemoryManager {
     free: [Extent; MAX_FREE_EXTENTS],
     free_count: usize,
     allocations: [Allocation; MAX_ALLOCATIONS],
+    source_records: [SourceRecord; MAX_MEMORY_ENTRIES],
+    scrub_receipts: [Option<ScrubReceipt>; MAX_SCRUB_RECEIPTS],
+    receipt_ledger_count: usize,
     memory_entry_count: usize,
     source_pages: [u64; MEMORY_KIND_COUNT],
     source_usable_pages: [u64; 3],
@@ -261,6 +371,39 @@ pub struct PhysicalMemoryManager {
     scrub_verified_bytes: u64,
     scrub_receipt_count: u64,
     scrub_failures: u64,
+    metadata_header: MetadataHeader,
+    metadata_lifecycle: MetadataLifecycle,
+    metadata_release_rejections: u64,
+    metadata_migration_rollbacks: u64,
+}
+
+const METADATA_ARENA_BYTE_CAPACITY: usize =
+    METADATA_ARENA_PAGE_COUNT as usize * PAGE_BYTES as usize;
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct MetadataArenaReceipt {
+    pub physical_start_page: u64,
+    pub virtual_start: u64,
+    pub page_count: u64,
+    pub guard_page_count: u64,
+    pub generation: u64,
+    pub owner: u16,
+    pub manager_byte_count: u64,
+    pub source_record_count: u64,
+    pub free_extent_count: u64,
+    pub allocation_record_count: u64,
+    pub receipt_ledger_count: u64,
+    pub logical_checksum: u64,
+    pub mapping_count: u64,
+    pub release_excluded: bool,
+    pub integrity_verified: bool,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct MetadataMigration {
+    manager_address: u64,
+    allocation: AllocationHandle,
+    receipt: MetadataArenaReceipt,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -273,16 +416,27 @@ pub struct PhysicalMemoryProof {
     pub stale_pattern: u64,
     pub stale_pattern_absent: bool,
     pub receipts: [ScrubReceipt; 4],
+    pub metadata: MetadataArenaReceipt,
+    pub metadata_release_rejected: bool,
+    pub metadata_integrity_verified: bool,
+    pub final_metadata_checksum: u64,
 }
 
 #[inline(never)]
-pub fn run_profile<A: PhysicalPageAccess>(
+pub fn run_profile<A: MetadataArenaAccess>(
     handoff: &Handoff<'_>,
     core: CoreRecord,
     access: &mut A,
 ) -> Result<PhysicalMemoryProof, PhysicalMemoryError> {
-    let mut manager = PhysicalMemoryManager::from_handoff(handoff, core, DEFAULT_QUOTA_PAGES)?;
+    let mut bootstrap = PhysicalMemoryManager::from_handoff(handoff, core, DEFAULT_QUOTA_PAGES)?;
+    let migration = bootstrap.migrate_to_metadata(access)?;
+    // SAFETY: migrate_to_metadata copied, sealed, and validated a complete manager
+    // object in an installed mapping that remains live for this profile.
+    let manager =
+        unsafe { &mut *(migration.manager_address as usize as *mut PhysicalMemoryManager) };
     let initial = manager.summary();
+    let metadata_release_rejected = manager.free_scrubbed(migration.allocation, access)
+        == Err(PhysicalMemoryError::MetadataOwnership);
     let (first, allocation_receipt) = manager.allocate_scrubbed(Zone::Dma32, 2, 1, access)?;
     let quota_rejected = manager
         .allocate_scrubbed(Zone::Dma32, DEFAULT_QUOTA_PAGES, 3, access)
@@ -297,8 +451,11 @@ pub fn run_profile<A: PhysicalPageAccess>(
         manager.allocate_scrubbed(Zone::Dma32, 2, 2, access)?;
     let stale_pattern_absent = verify_words(access, reused, 0)?;
     let reuse_release_receipt = manager.free_scrubbed(reused, access)?;
+    let metadata_integrity_verified = manager.verify_metadata_integrity().is_ok();
     let final_state = manager.summary();
-    if !quota_rejected
+    if !metadata_release_rejected
+        || !metadata_integrity_verified
+        || !quota_rejected
         || !unavailable_rejected
         || !double_free_rejected
         || reused.start_page != first.start_page
@@ -312,16 +469,21 @@ pub fn run_profile<A: PhysicalPageAccess>(
         ]
         .iter()
         .enumerate()
-        .any(|(index, receipt)| receipt.sequence != index as u64 + 1)
-        || final_state.allocated_pages != 0
+        .any(|(index, receipt)| receipt.sequence != index as u64 + 2)
+        || final_state.allocated_pages != METADATA_ARENA_PAGE_COUNT
         || final_state.free_extent_count != initial.free_extent_count
         || final_state.largest_free_pages != initial.largest_free_pages
-        || final_state.allocation_scrub_pages != 4
+        || final_state.allocation_scrub_pages != METADATA_ARENA_PAGE_COUNT + 4
         || final_state.release_scrub_pages != 4
-        || final_state.scrub_zeroed_bytes != 8 * PAGE_BYTES
-        || final_state.scrub_verified_bytes != 8 * PAGE_BYTES
-        || final_state.scrub_receipt_count != 4
+        || final_state.scrub_zeroed_bytes != (METADATA_ARENA_PAGE_COUNT + 8) * PAGE_BYTES
+        || final_state.scrub_verified_bytes != (METADATA_ARENA_PAGE_COUNT + 8) * PAGE_BYTES
+        || final_state.scrub_receipt_count != 5
+        || final_state.receipt_ledger_count != 5
         || final_state.scrub_failures != 0
+        || final_state.source_record_count != initial.memory_entry_count
+        || final_state.metadata_arena_pages != METADATA_ARENA_PAGE_COUNT
+        || final_state.metadata_release_rejections != 1
+        || !final_state.metadata_mapped
     {
         return Err(PhysicalMemoryError::ExerciseInvariant);
     }
@@ -339,6 +501,10 @@ pub fn run_profile<A: PhysicalPageAccess>(
             reuse_allocation_receipt,
             reuse_release_receipt,
         ],
+        metadata: migration.receipt,
+        metadata_release_rejected,
+        metadata_integrity_verified,
+        final_metadata_checksum: manager.metadata_header.logical_checksum,
     })
 }
 
@@ -409,6 +575,18 @@ fn read_u64(bytes: &[u8], offset: usize) -> Result<u64, PhysicalMemoryError> {
     ]))
 }
 
+fn fnv_u64(mut state: u64, value: u64) -> u64 {
+    for byte in value.to_le_bytes() {
+        state ^= u64::from(byte);
+        state = state.wrapping_mul(FNV_PRIME);
+    }
+    state
+}
+
+const fn zone_code(zone: Zone) -> u64 {
+    zone as u8 as u64
+}
+
 const fn source_matches_kind(source: u32, kind: u32) -> bool {
     matches!(
         (source, kind),
@@ -450,6 +628,9 @@ impl PhysicalMemoryManager {
             free: [EMPTY_EXTENT; MAX_FREE_EXTENTS],
             free_count: 0,
             allocations: [EMPTY_ALLOCATION; MAX_ALLOCATIONS],
+            source_records: [EMPTY_SOURCE_RECORD; MAX_MEMORY_ENTRIES],
+            scrub_receipts: [None; MAX_SCRUB_RECEIPTS],
+            receipt_ledger_count: 0,
             memory_entry_count: 0,
             source_pages: [0; MEMORY_KIND_COUNT],
             source_usable_pages: [0; 3],
@@ -472,6 +653,10 @@ impl PhysicalMemoryManager {
             scrub_verified_bytes: 0,
             scrub_receipt_count: 0,
             scrub_failures: 0,
+            metadata_header: EMPTY_METADATA_HEADER,
+            metadata_lifecycle: MetadataLifecycle::Bootstrap,
+            metadata_release_rejections: 0,
+            metadata_migration_rollbacks: 0,
         }
     }
 
@@ -519,6 +704,12 @@ impl PhysicalMemoryManager {
                 return Err(PhysicalMemoryError::EntryOrder);
             }
             previous_end = end;
+            manager.source_records[index] = SourceRecord {
+                start_page: start / PAGE_BYTES,
+                page_count: pages,
+                kind,
+                source,
+            };
             manager.source_pages[kind as usize] = manager.source_pages[kind as usize]
                 .checked_add(pages)
                 .ok_or(PhysicalMemoryError::AddressRange)?;
@@ -528,6 +719,266 @@ impl PhysicalMemoryManager {
         }
         manager.audit_core_ownership(record.payload, core)?;
         Ok(manager)
+    }
+
+    fn logical_checksum(&self) -> u64 {
+        let mut state = FNV_OFFSET;
+        for value in [
+            self.metadata_header.magic,
+            self.metadata_header.version,
+            self.metadata_header.manager_byte_count,
+            self.metadata_header.arena_page_count,
+            self.metadata_header.physical_start_page,
+            self.metadata_header.virtual_start,
+            self.metadata_header.generation,
+            u64::from(self.metadata_header.owner),
+            self.metadata_lifecycle as u64,
+            self.free_count as u64,
+            self.receipt_ledger_count as u64,
+            self.memory_entry_count as u64,
+            self.null_guard_pages,
+            self.quota_pages,
+            self.allocated_pages,
+            self.next_generation,
+            self.allocation_count,
+            self.free_operation_count,
+            self.rejected_double_frees,
+            self.rejected_quota_requests,
+            self.rejected_unavailable_requests,
+            self.metadata_poison_events,
+            self.coalesce_events,
+            self.next_scrub_sequence,
+            self.allocation_scrub_pages,
+            self.release_scrub_pages,
+            self.scrub_zeroed_bytes,
+            self.scrub_verified_bytes,
+            self.scrub_receipt_count,
+            self.scrub_failures,
+            self.metadata_release_rejections,
+            self.metadata_migration_rollbacks,
+        ] {
+            state = fnv_u64(state, value);
+        }
+        for extent in self.free {
+            for value in [extent.start_page, extent.page_count, zone_code(extent.zone)] {
+                state = fnv_u64(state, value);
+            }
+        }
+        for allocation in self.allocations {
+            for value in [
+                u64::from(allocation.active),
+                allocation.generation,
+                allocation.start_page,
+                allocation.page_count,
+                zone_code(allocation.zone),
+                u64::from(allocation.owner),
+                u64::from(allocation.metadata_poisoned),
+                u64::from(allocation.release_excluded),
+            ] {
+                state = fnv_u64(state, value);
+            }
+        }
+        for record in self.source_records {
+            for value in [
+                record.start_page,
+                record.page_count,
+                u64::from(record.kind),
+                u64::from(record.source),
+            ] {
+                state = fnv_u64(state, value);
+            }
+        }
+        for receipt in self.scrub_receipts {
+            state = fnv_u64(state, u64::from(receipt.is_some()));
+            if let Some(receipt) = receipt {
+                for value in [
+                    receipt.sequence,
+                    receipt.kind as u8 as u64,
+                    receipt.generation,
+                    receipt.start_page,
+                    receipt.page_count,
+                    u64::from(receipt.owner),
+                    receipt.zeroed_bytes,
+                    receipt.verified_bytes,
+                ] {
+                    state = fnv_u64(state, value);
+                }
+            }
+        }
+        for value in self.source_pages {
+            state = fnv_u64(state, value);
+        }
+        for value in self.source_usable_pages {
+            state = fnv_u64(state, value);
+        }
+        for value in self.managed_pages {
+            state = fnv_u64(state, value);
+        }
+        state
+    }
+
+    fn seal_metadata_integrity(&mut self) {
+        if self.metadata_lifecycle == MetadataLifecycle::Mapped {
+            self.metadata_header.logical_checksum = self.logical_checksum();
+        }
+    }
+
+    pub fn verify_metadata_integrity(&self) -> Result<(), PhysicalMemoryError> {
+        if self.metadata_lifecycle != MetadataLifecycle::Mapped
+            || self.metadata_header.magic != METADATA_MAGIC
+            || self.metadata_header.version != METADATA_VERSION
+            || self.metadata_header.manager_byte_count != core::mem::size_of::<Self>() as u64
+            || self.metadata_header.arena_page_count != METADATA_ARENA_PAGE_COUNT
+            || self.metadata_header.owner != METADATA_OWNER
+            || self.metadata_header.virtual_start == 0
+            || !self
+                .metadata_header
+                .virtual_start
+                .is_multiple_of(PAGE_BYTES)
+            || self.metadata_header.logical_checksum != self.logical_checksum()
+        {
+            return Err(PhysicalMemoryError::MetadataCorruption);
+        }
+        Ok(())
+    }
+
+    fn require_operational(&self) -> Result<(), PhysicalMemoryError> {
+        match self.metadata_lifecycle {
+            MetadataLifecycle::Bootstrap => Ok(()),
+            MetadataLifecycle::Mapped => self.verify_metadata_integrity(),
+            MetadataLifecycle::Prepared | MetadataLifecycle::Retired => {
+                Err(PhysicalMemoryError::MetadataState)
+            }
+        }
+    }
+
+    fn rollback_metadata_reservation<A: PhysicalPageAccess>(
+        &mut self,
+        handle: AllocationHandle,
+        access: &mut A,
+    ) -> Result<(), PhysicalMemoryError> {
+        let slot = usize::from(handle.slot);
+        if self.allocations.get(slot).map(|item| item.release_excluded) != Some(true) {
+            return Err(PhysicalMemoryError::MetadataState);
+        }
+        self.allocations[slot].release_excluded = false;
+        self.metadata_lifecycle = MetadataLifecycle::Bootstrap;
+        self.metadata_header = EMPTY_METADATA_HEADER;
+        self.metadata_migration_rollbacks = self.metadata_migration_rollbacks.saturating_add(1);
+        self.free_scrubbed(handle, access)?;
+        Ok(())
+    }
+
+    fn migrate_to_metadata<A: MetadataArenaAccess>(
+        &mut self,
+        access: &mut A,
+    ) -> Result<MetadataMigration, PhysicalMemoryError> {
+        let manager_byte_count = core::mem::size_of::<Self>();
+        if manager_byte_count == 0 || manager_byte_count > METADATA_ARENA_BYTE_CAPACITY {
+            return Err(PhysicalMemoryError::MetadataCapacity);
+        }
+        self.require_operational()?;
+        let (allocation, _) = self.allocate_scrubbed(
+            Zone::Dma32,
+            METADATA_ARENA_PAGE_COUNT,
+            METADATA_OWNER,
+            access,
+        )?;
+        let slot = usize::from(allocation.slot);
+        self.allocations[slot].release_excluded = true;
+        self.metadata_lifecycle = MetadataLifecycle::Prepared;
+        self.metadata_header = MetadataHeader {
+            magic: METADATA_MAGIC,
+            version: METADATA_VERSION,
+            manager_byte_count: manager_byte_count as u64,
+            arena_page_count: METADATA_ARENA_PAGE_COUNT,
+            physical_start_page: allocation.start_page,
+            virtual_start: 0,
+            generation: allocation.generation,
+            owner: allocation.owner,
+            logical_checksum: 0,
+        };
+        let physical_address = allocation
+            .start_page
+            .checked_mul(PAGE_BYTES)
+            .ok_or(PhysicalMemoryError::AddressRange)?;
+        let virtual_address =
+            match access.install_metadata_arena(physical_address, METADATA_ARENA_PAGE_COUNT) {
+                Ok(value) => value,
+                Err(_) => {
+                    self.rollback_metadata_reservation(allocation, access)?;
+                    return Err(PhysicalMemoryError::MetadataMapping);
+                }
+            };
+        let destination_end = virtual_address
+            .checked_add(manager_byte_count as u64)
+            .ok_or(PhysicalMemoryError::AddressRange)?;
+        let arena_end = virtual_address
+            .checked_add(METADATA_ARENA_PAGE_COUNT * PAGE_BYTES)
+            .ok_or(PhysicalMemoryError::AddressRange)?;
+        let source_start = self as *const Self as usize as u64;
+        let source_end = source_start
+            .checked_add(manager_byte_count as u64)
+            .ok_or(PhysicalMemoryError::AddressRange)?;
+        if virtual_address == 0
+            || !virtual_address.is_multiple_of(PAGE_BYTES)
+            || destination_end > arena_end
+            || (virtual_address < source_end && source_start < destination_end)
+        {
+            access
+                .uninstall_metadata_arena(virtual_address, METADATA_ARENA_PAGE_COUNT)
+                .map_err(|_| PhysicalMemoryError::MetadataMapping)?;
+            self.rollback_metadata_reservation(allocation, access)?;
+            return Err(PhysicalMemoryError::MetadataHandoff);
+        }
+        self.metadata_header.virtual_start = virtual_address;
+        let mapped_pointer = virtual_address as usize as *mut Self;
+        // SAFETY: the architecture adapter returns a page-aligned, non-overlapping,
+        // writable mapping whose capacity is checked above. Self has no Drop fields.
+        unsafe { core::ptr::copy_nonoverlapping(self as *const Self, mapped_pointer, 1) };
+        let validation = {
+            // SAFETY: the complete manager object was copied into the validated mapping.
+            let mapped = unsafe { &mut *mapped_pointer };
+            mapped.metadata_lifecycle = MetadataLifecycle::Mapped;
+            mapped.seal_metadata_integrity();
+            access
+                .finalize_metadata_handoff(virtual_address, manager_byte_count as u64)
+                .map_err(|_| PhysicalMemoryError::MetadataHandoff)
+                .and_then(|()| mapped.verify_metadata_integrity())
+        };
+        if let Err(error) = validation {
+            access
+                .uninstall_metadata_arena(virtual_address, METADATA_ARENA_PAGE_COUNT)
+                .map_err(|_| PhysicalMemoryError::MetadataMapping)?;
+            self.rollback_metadata_reservation(allocation, access)?;
+            return Err(error);
+        }
+        // SAFETY: validation above proves the mapped manager header and logical seal.
+        let mapped = unsafe { &mut *mapped_pointer };
+        let active_allocations = mapped.allocations.iter().filter(|item| item.active).count();
+        let receipt = MetadataArenaReceipt {
+            physical_start_page: allocation.start_page,
+            virtual_start: virtual_address,
+            page_count: METADATA_ARENA_PAGE_COUNT,
+            guard_page_count: METADATA_GUARD_PAGE_COUNT,
+            generation: allocation.generation,
+            owner: allocation.owner,
+            manager_byte_count: manager_byte_count as u64,
+            source_record_count: mapped.memory_entry_count as u64,
+            free_extent_count: mapped.free_count as u64,
+            allocation_record_count: active_allocations as u64,
+            receipt_ledger_count: mapped.receipt_ledger_count as u64,
+            logical_checksum: mapped.metadata_header.logical_checksum,
+            mapping_count: METADATA_ARENA_PAGE_COUNT,
+            release_excluded: mapped.allocations[slot].release_excluded,
+            integrity_verified: true,
+        };
+        self.metadata_lifecycle = MetadataLifecycle::Retired;
+        Ok(MetadataMigration {
+            manager_address: virtual_address,
+            allocation,
+            receipt,
+        })
     }
 
     fn append_usable(
@@ -686,6 +1137,7 @@ impl PhysicalMemoryManager {
             zone: plan.zone,
             owner: plan.owner,
             metadata_poisoned: false,
+            release_excluded: false,
         };
         self.allocated_pages += pages;
         self.allocation_count += 1;
@@ -705,8 +1157,12 @@ impl PhysicalMemoryManager {
         pages: u64,
         owner: u16,
     ) -> Result<AllocationHandle, PhysicalMemoryError> {
-        let plan = self.plan_allocation(zone, pages, owner)?;
-        Ok(self.commit_allocation(plan))
+        self.require_operational()?;
+        let result = self
+            .plan_allocation(zone, pages, owner)
+            .map(|plan| self.commit_allocation(plan));
+        self.seal_metadata_integrity();
+        result
     }
 
     pub fn allocate_scrubbed<A: PhysicalPageAccess>(
@@ -716,20 +1172,28 @@ impl PhysicalMemoryManager {
         owner: u16,
         access: &mut A,
     ) -> Result<(AllocationHandle, ScrubReceipt), PhysicalMemoryError> {
-        let plan = self.plan_allocation(zone, pages, owner)?;
-        let receipt = self.scrub_range(
-            access,
-            ScrubKind::Allocation,
-            plan.generation,
-            plan.start_page,
-            plan.page_count,
-            plan.owner,
-        )?;
-        let handle = self.commit_allocation(plan);
-        Ok((handle, receipt))
+        self.require_operational()?;
+        let result = (|| {
+            let plan = self.plan_allocation(zone, pages, owner)?;
+            let receipt = self.scrub_range(
+                access,
+                ScrubKind::Allocation,
+                plan.generation,
+                plan.start_page,
+                plan.page_count,
+                plan.owner,
+            )?;
+            let handle = self.commit_allocation(plan);
+            Ok((handle, receipt))
+        })();
+        self.seal_metadata_integrity();
+        result
     }
 
-    pub fn validate_allocation(&self, handle: AllocationHandle) -> Result<(), PhysicalMemoryError> {
+    fn validate_allocation_inner(
+        &self,
+        handle: AllocationHandle,
+    ) -> Result<(), PhysicalMemoryError> {
         let slot = usize::from(handle.slot);
         let allocation = self
             .allocations
@@ -748,21 +1212,35 @@ impl PhysicalMemoryManager {
         Ok(())
     }
 
+    pub fn validate_allocation(&self, handle: AllocationHandle) -> Result<(), PhysicalMemoryError> {
+        self.require_operational()?;
+        self.validate_allocation_inner(handle)
+    }
+
     pub fn free(&mut self, handle: AllocationHandle) -> Result<(), PhysicalMemoryError> {
-        if self.validate_allocation(handle).is_err() {
-            self.rejected_double_frees += 1;
-            return Err(PhysicalMemoryError::StaleHandle);
-        }
-        let slot = usize::from(handle.slot);
-        let allocation = self.allocations[slot];
-        let extent = Extent {
-            start_page: allocation.start_page,
-            page_count: allocation.page_count,
-            zone: allocation.zone,
-        };
-        self.insert_and_coalesce(extent)?;
-        self.commit_free(slot, allocation);
-        Ok(())
+        self.require_operational()?;
+        let result = (|| {
+            if self.validate_allocation_inner(handle).is_err() {
+                self.rejected_double_frees += 1;
+                return Err(PhysicalMemoryError::StaleHandle);
+            }
+            let slot = usize::from(handle.slot);
+            let allocation = self.allocations[slot];
+            if allocation.release_excluded {
+                self.metadata_release_rejections += 1;
+                return Err(PhysicalMemoryError::MetadataOwnership);
+            }
+            let extent = Extent {
+                start_page: allocation.start_page,
+                page_count: allocation.page_count,
+                zone: allocation.zone,
+            };
+            self.insert_and_coalesce(extent)?;
+            self.commit_free(slot, allocation);
+            Ok(())
+        })();
+        self.seal_metadata_integrity();
+        result
     }
 
     pub fn free_scrubbed<A: PhysicalPageAccess>(
@@ -770,29 +1248,38 @@ impl PhysicalMemoryManager {
         handle: AllocationHandle,
         access: &mut A,
     ) -> Result<ScrubReceipt, PhysicalMemoryError> {
-        if self.validate_allocation(handle).is_err() {
-            self.rejected_double_frees += 1;
-            return Err(PhysicalMemoryError::StaleHandle);
-        }
-        let slot = usize::from(handle.slot);
-        let allocation = self.allocations[slot];
-        let extent = Extent {
-            start_page: allocation.start_page,
-            page_count: allocation.page_count,
-            zone: allocation.zone,
-        };
-        self.preflight_insert(extent)?;
-        let receipt = self.scrub_range(
-            access,
-            ScrubKind::Release,
-            allocation.generation,
-            allocation.start_page,
-            allocation.page_count,
-            allocation.owner,
-        )?;
-        self.insert_and_coalesce(extent)?;
-        self.commit_free(slot, allocation);
-        Ok(receipt)
+        self.require_operational()?;
+        let result = (|| {
+            if self.validate_allocation_inner(handle).is_err() {
+                self.rejected_double_frees += 1;
+                return Err(PhysicalMemoryError::StaleHandle);
+            }
+            let slot = usize::from(handle.slot);
+            let allocation = self.allocations[slot];
+            if allocation.release_excluded {
+                self.metadata_release_rejections += 1;
+                return Err(PhysicalMemoryError::MetadataOwnership);
+            }
+            let extent = Extent {
+                start_page: allocation.start_page,
+                page_count: allocation.page_count,
+                zone: allocation.zone,
+            };
+            self.preflight_insert(extent)?;
+            let receipt = self.scrub_range(
+                access,
+                ScrubKind::Release,
+                allocation.generation,
+                allocation.start_page,
+                allocation.page_count,
+                allocation.owner,
+            )?;
+            self.insert_and_coalesce(extent)?;
+            self.commit_free(slot, allocation);
+            Ok(receipt)
+        })();
+        self.seal_metadata_integrity();
+        result
     }
 
     fn commit_free(&mut self, slot: usize, allocation: Allocation) {
@@ -823,6 +1310,9 @@ impl PhysicalMemoryManager {
             .scrub_receipt_count
             .checked_add(1)
             .ok_or(PhysicalMemoryError::AddressRange)?;
+        if self.receipt_ledger_count == MAX_SCRUB_RECEIPTS {
+            return Err(PhysicalMemoryError::ReceiptCapacity);
+        }
         let next_zeroed = self
             .scrub_zeroed_bytes
             .checked_add(byte_count)
@@ -875,6 +1365,8 @@ impl PhysicalMemoryManager {
         };
         self.next_scrub_sequence = next_sequence;
         self.scrub_receipt_count = next_receipt_count;
+        self.scrub_receipts[self.receipt_ledger_count] = Some(receipt);
+        self.receipt_ledger_count += 1;
         self.scrub_zeroed_bytes = next_zeroed;
         self.scrub_verified_bytes = next_verified;
         match kind {
@@ -995,6 +1487,16 @@ impl PhysicalMemoryManager {
             scrub_verified_bytes: self.scrub_verified_bytes,
             scrub_receipt_count: self.scrub_receipt_count,
             scrub_failures: self.scrub_failures,
+            source_record_count: self.memory_entry_count,
+            receipt_ledger_count: self.receipt_ledger_count,
+            metadata_arena_pages: if self.metadata_lifecycle == MetadataLifecycle::Mapped {
+                self.metadata_header.arena_page_count
+            } else {
+                0
+            },
+            metadata_release_rejections: self.metadata_release_rejections,
+            metadata_migration_rollbacks: self.metadata_migration_rollbacks,
+            metadata_mapped: self.metadata_lifecycle == MetadataLifecycle::Mapped,
         }
     }
 
@@ -1060,6 +1562,8 @@ mod tests {
         BOOT_SERVICES_EXITED, DEVELOPMENT_MODE, Encoder, RECORD_ARRAY, RECORD_CORE,
         RECORD_REQUIRED, encoded_size,
     };
+    use std::alloc::{Layout, alloc_zeroed, dealloc};
+    use std::ptr::null_mut;
     use std::vec;
     use std::vec::Vec;
 
@@ -1070,6 +1574,11 @@ mod tests {
         fail_read: Option<(u64, usize)>,
         drop_write: Option<(u64, usize)>,
         write_count: u64,
+        arena_pointer: *mut u8,
+        fail_install: bool,
+        corrupt_handoff: bool,
+        arena_installed: bool,
+        uninstall_count: u64,
     }
 
     impl FakePageAccess {
@@ -1081,6 +1590,11 @@ mod tests {
                 fail_read: None,
                 drop_write: None,
                 write_count: 0,
+                arena_pointer: null_mut(),
+                fail_install: false,
+                corrupt_handoff: false,
+                arena_installed: false,
+                uninstall_count: 0,
             }
         }
 
@@ -1101,6 +1615,18 @@ mod tests {
                 return Err(PageAccessError::Access);
             }
             Ok(index)
+        }
+    }
+
+    impl Drop for FakePageAccess {
+        fn drop(&mut self) {
+            if !self.arena_pointer.is_null() {
+                let layout =
+                    Layout::from_size_align(METADATA_ARENA_BYTE_CAPACITY, PAGE_BYTES as usize)
+                        .unwrap();
+                // SAFETY: arena_pointer was allocated once with this exact layout.
+                unsafe { dealloc(self.arena_pointer, layout) };
+            }
         }
     }
 
@@ -1134,6 +1660,68 @@ mod tests {
             }
             let index = self.index(physical_address, word_index)?;
             Ok(self.words[index])
+        }
+    }
+
+    impl MetadataArenaAccess for FakePageAccess {
+        fn install_metadata_arena(
+            &mut self,
+            _physical_address: u64,
+            page_count: u64,
+        ) -> Result<u64, PageAccessError> {
+            if self.fail_install || self.arena_installed || page_count != METADATA_ARENA_PAGE_COUNT
+            {
+                return Err(PageAccessError::Access);
+            }
+            if self.arena_pointer.is_null() {
+                let layout =
+                    Layout::from_size_align(METADATA_ARENA_BYTE_CAPACITY, PAGE_BYTES as usize)
+                        .map_err(|_| PageAccessError::Access)?;
+                // SAFETY: the validated layout is nonzero and page aligned.
+                self.arena_pointer = unsafe { alloc_zeroed(layout) };
+                if self.arena_pointer.is_null() {
+                    return Err(PageAccessError::Access);
+                }
+            }
+            self.arena_installed = true;
+            Ok(self.arena_pointer as usize as u64)
+        }
+
+        fn finalize_metadata_handoff(
+            &mut self,
+            virtual_address: u64,
+            manager_byte_count: u64,
+        ) -> Result<(), PageAccessError> {
+            if !self.arena_installed
+                || virtual_address != self.arena_pointer as usize as u64
+                || manager_byte_count != core::mem::size_of::<PhysicalMemoryManager>() as u64
+            {
+                return Err(PageAccessError::Access);
+            }
+            if self.corrupt_handoff {
+                // SAFETY: install_metadata_arena returned storage for a complete manager,
+                // and migrate_to_metadata copied that manager before this callback.
+                let manager =
+                    unsafe { &mut *(virtual_address as usize as *mut PhysicalMemoryManager) };
+                manager.free[0].page_count ^= 1;
+            }
+            Ok(())
+        }
+
+        fn uninstall_metadata_arena(
+            &mut self,
+            virtual_address: u64,
+            page_count: u64,
+        ) -> Result<(), PageAccessError> {
+            if !self.arena_installed
+                || virtual_address != self.arena_pointer as usize as u64
+                || page_count != METADATA_ARENA_PAGE_COUNT
+            {
+                return Err(PageAccessError::Access);
+            }
+            self.arena_installed = false;
+            self.uninstall_count += 1;
+            Ok(())
         }
     }
 
@@ -1286,6 +1874,7 @@ mod tests {
             zone: Zone::Dma,
             owner: 7,
             metadata_poisoned: false,
+            release_excluded: false,
         };
         manager.allocated_pages = 1;
         let handle = AllocationHandle {
@@ -1324,6 +1913,7 @@ mod tests {
             zone: Zone::Dma,
             owner: 7,
             metadata_poisoned: false,
+            release_excluded: false,
         };
         manager.allocated_pages = 1;
         let handle = AllocationHandle {
@@ -1344,6 +1934,114 @@ mod tests {
         assert_eq!(manager.allocated_pages, 1);
         assert_eq!(manager.free_operation_count, 0);
         assert_eq!(manager.metadata_poison_events, 0);
+    }
+
+    #[test]
+    fn metadata_arena_migrates_full_ledgers_and_excludes_release() {
+        let (bytes, core) = fixture();
+        let handoff = poole_handoff::decode(&bytes).unwrap();
+        let mut bootstrap = PhysicalMemoryManager::from_handoff(&handoff, core, 64).unwrap();
+        let mut access = FakePageAccess::new(DMA_END_PAGE, 64, STALE_PATTERN);
+        let migration = bootstrap.migrate_to_metadata(&mut access).unwrap();
+        assert_eq!(
+            bootstrap.allocate(Zone::Dma32, 1, 1),
+            Err(PhysicalMemoryError::MetadataState)
+        );
+        // SAFETY: migration returned a sealed manager in the fake page-aligned arena.
+        let manager =
+            unsafe { &mut *(migration.manager_address as usize as *mut PhysicalMemoryManager) };
+        assert_eq!(Ok(()), manager.verify_metadata_integrity());
+        assert_eq!(5, manager.memory_entry_count);
+        assert_eq!(
+            5,
+            manager
+                .source_records
+                .iter()
+                .filter(|item| item.page_count != 0)
+                .count()
+        );
+        assert_eq!(1, manager.receipt_ledger_count);
+        assert_eq!(
+            Some(ScrubKind::Allocation),
+            manager.scrub_receipts[0].map(|item| item.kind)
+        );
+        assert_eq!(METADATA_ARENA_PAGE_COUNT, manager.summary().allocated_pages);
+        assert_eq!(METADATA_ARENA_PAGE_COUNT, migration.receipt.page_count);
+        assert_eq!(
+            METADATA_GUARD_PAGE_COUNT,
+            migration.receipt.guard_page_count
+        );
+        assert_eq!(METADATA_OWNER, migration.receipt.owner);
+        assert!(migration.receipt.release_excluded);
+        assert!(migration.receipt.integrity_verified);
+        assert_eq!(
+            manager.free_scrubbed(migration.allocation, &mut access),
+            Err(PhysicalMemoryError::MetadataOwnership)
+        );
+        assert_eq!(1, manager.summary().metadata_release_rejections);
+        assert_eq!(Ok(()), manager.verify_metadata_integrity());
+    }
+
+    #[test]
+    fn metadata_mapping_failure_rolls_back_reserved_pages() {
+        let (bytes, core) = fixture();
+        let handoff = poole_handoff::decode(&bytes).unwrap();
+        let mut manager = PhysicalMemoryManager::from_handoff(&handoff, core, 64).unwrap();
+        let before = manager.summary();
+        let mut access = FakePageAccess::new(DMA_END_PAGE, 64, STALE_PATTERN);
+        access.fail_install = true;
+        assert_eq!(
+            manager.migrate_to_metadata(&mut access),
+            Err(PhysicalMemoryError::MetadataMapping)
+        );
+        let after = manager.summary();
+        assert_eq!(0, after.allocated_pages);
+        assert_eq!(before.free_extent_count, after.free_extent_count);
+        assert_eq!(before.largest_free_pages, after.largest_free_pages);
+        assert_eq!(1, after.metadata_migration_rollbacks);
+        assert_eq!(2, after.receipt_ledger_count);
+        assert!(!access.arena_installed);
+    }
+
+    #[test]
+    fn metadata_handoff_corruption_unmaps_and_rolls_back() {
+        let (bytes, core) = fixture();
+        let handoff = poole_handoff::decode(&bytes).unwrap();
+        let mut manager = PhysicalMemoryManager::from_handoff(&handoff, core, 64).unwrap();
+        let before = manager.summary();
+        let mut access = FakePageAccess::new(DMA_END_PAGE, 64, STALE_PATTERN);
+        access.corrupt_handoff = true;
+        assert_eq!(
+            manager.migrate_to_metadata(&mut access),
+            Err(PhysicalMemoryError::MetadataCorruption)
+        );
+        let after = manager.summary();
+        assert_eq!(0, after.allocated_pages);
+        assert_eq!(before.largest_free_pages, after.largest_free_pages);
+        assert_eq!(1, after.metadata_migration_rollbacks);
+        assert_eq!(1, access.uninstall_count);
+        assert!(!access.arena_installed);
+    }
+
+    #[test]
+    fn mapped_metadata_corruption_rejects_the_next_operation() {
+        let (bytes, core) = fixture();
+        let handoff = poole_handoff::decode(&bytes).unwrap();
+        let mut bootstrap = PhysicalMemoryManager::from_handoff(&handoff, core, 64).unwrap();
+        let mut access = FakePageAccess::new(DMA_END_PAGE, 64, STALE_PATTERN);
+        let migration = bootstrap.migrate_to_metadata(&mut access).unwrap();
+        // SAFETY: migration returned a sealed manager in the fake page-aligned arena.
+        let manager =
+            unsafe { &mut *(migration.manager_address as usize as *mut PhysicalMemoryManager) };
+        manager.free[0].page_count ^= 1;
+        assert_eq!(
+            manager.allocate(Zone::Dma32, 1, 1),
+            Err(PhysicalMemoryError::MetadataCorruption)
+        );
+        assert_eq!(
+            manager.verify_metadata_integrity(),
+            Err(PhysicalMemoryError::MetadataCorruption)
+        );
     }
 
     #[test]
@@ -1457,6 +2155,7 @@ mod tests {
             zone: Zone::Dma,
             owner: 7,
             metadata_poisoned: false,
+            release_excluded: false,
         };
         manager.allocated_pages = 1;
         let handle = AllocationHandle {
