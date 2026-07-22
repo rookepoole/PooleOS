@@ -20,7 +20,7 @@ Run:
 python tools/qualify_native_kernel_entry.py --artifact-out outputs/PooleKernel.pkelf
 ```
 
-The qualifier uses the workspace-local pinned Rust toolchain, executes 54 host tests, checks formatting and Clippy, performs two clean offline builds in separate target directories, compares linked and canonical bytes, runs hostile linked-ELF and canonical-PKELF controls, scans for host leakage, and compares exact loaded bytes from the independent Python and Rust PKELF1 implementations. Its deterministic public receipt is `runs/native_kernel_entry_readiness.json`; the current product has a 3,719,976-byte private linked input, a 192,512-byte canonical file, a 262,144-byte loaded image, entry offset `0x8000`, 401 relative relocations, and canonical SHA-256 `F449D0E037571345A40162DC9A943A2FA01F1195F21C239C8D8F1A85D39CA06E`. The product file under `outputs/` remains local generated state.
+The qualifier uses the workspace-local pinned Rust toolchain, executes 60 host tests, checks formatting and Clippy, performs two clean offline builds in separate target directories, compares linked and canonical bytes, runs hostile linked-ELF and canonical-PKELF controls, scans for host leakage, and compares exact loaded bytes from the independent Python and Rust PKELF1 implementations. Its deterministic public receipt is `runs/native_kernel_entry_readiness.json`; the current product has a 3,986,944-byte private linked input, a 204,800-byte canonical file, a 262,144-byte loaded image, entry offset `0x8000`, 472 relative relocations, and canonical SHA-256 `8DE68D5A5F9D71DBA57843B0AA55C9A42207C4026D69B6383B3C751DC5E434FA`. The product file under `outputs/` remains local generated state.
 
 ## Nonclaims
 

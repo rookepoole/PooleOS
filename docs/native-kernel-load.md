@@ -153,9 +153,9 @@ halts permanently at `STOP BEFORE TRANSFER`.
 
 ## Qualified Evidence
 
-The Cycle 125-refreshed default-path receipt records:
+The Cycle 126-refreshed default-path receipt records:
 
-- 139/139 Rust host tests across PooleBoot, PBART1, the six-format retained-set
+- 145/145 Rust host tests across PooleBoot, PBART1, the six-format retained-set
   validator, PBTRUST1, PBC1/PSM1/PKELF1/PBP1, PKMAP2, PBEXIT1, and PKENTRY1;
 - two byte-identical PooleBoot builds, PooleKernel builds, and GPT/FAT32 media
   generations;
@@ -192,7 +192,7 @@ The Cycle 125-refreshed default-path receipt records:
   physical-presence separation, durable receipt rules, and mandatory
   development activation denial;
 - an exact six-file PBART1 retained set totaling 8,761 bytes with SHA-256
-  `2A80BA31090B247D7CE28FFCCCB1BBD936B4544E8052888EA8D992C51F4F91AE`,
+  `E80E88314DD131BF5D3DE61C01CD0DF91A4087555BEBE60003053F4A9A64DCFB`,
   plus exact retained PSM1, PBTP1, and PBTS1 files, nine target parsers,
   manifest/inner/trust cross-bindings, exact unsigned-policy denial, and zero
   authority/action/state/hardware effects;
@@ -239,9 +239,12 @@ close the bounded PKXSTATE1 ownership and PKXEXC1 exception-delivery slices,
 Cycle 124 closes only the read-only PKMSR1 privileged-MSR policy slice. Cycle
 125 separately closes the bounded selector-8 PKPMM1 physical-page ownership and
 allocator foundation after expanding the shared guarded stack to fourteen
-pages. The next chronological owner-independent move is `N9-VM-001` for the
-virtual-layout and page-table mutation boundary, without target, scheduler,
-SMP, reclaim, or production promotion.
+pages. Cycle 126 separately closes the bounded selector-9 PKVM1 inactive
+virtual-memory foundation with one exactly revoked PKMAP2 bootstrap alias and
+zero PKVM1 CR3 writes or shootdowns. The next chronological owner-independent
+move is `N9-VM-ACTIVE-001` for a kernel-complete activation-eligible root and
+active-address-space invalidation contract, without target, scheduler, SMP,
+reclaim, userspace, heap, pager, or production promotion.
 Capability creation, lifecycle execution, signature trust, authenticated
 persistent state, production transfer, and physical-target qualification remain
 separately gated by N5/N6 and owner-controlled N0 work.

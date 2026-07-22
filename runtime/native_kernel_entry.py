@@ -29,6 +29,8 @@ IMPLEMENTATION_INPUTS = (
     Path("native/kernel/src/lib.rs"),
     Path("native/kernel/src/main.rs"),
     Path("native/kernel/src/arch/x86_64.rs"),
+    Path("native/kernel/src/physical_memory.rs"),
+    Path("native/kernel/src/virtual_memory.rs"),
     Path("native/fixtures/poolekernel/Cargo.toml"),
     Path("native/fixtures/poolekernel/README.md"),
     Path("native/fixtures/poolekernel/src/main.rs"),
@@ -107,7 +109,7 @@ def contract_errors(contract: Any) -> list[str]:
         "handoff_contract": "PBP1",
         "entry_offset": 0x8000,
         "image_memory_bytes": 0x40000,
-        "canonical_file_bytes": 0x2F000,
+        "canonical_file_bytes": 0x32000,
         "maximum_relocations": 4096,
     }
     for key, value in expected_product.items():
@@ -155,7 +157,7 @@ def readiness_errors(readiness: Any, root: Path = ROOT) -> list[str]:
     ):
         if not isinstance(summary.get(total), int) or summary.get(passed) != summary.get(total):
             errors.append(f"readiness summary mismatch: {passed}")
-    if summary.get("rust_host_tests_total") != 54:
+    if summary.get("rust_host_tests_total") != 60:
         errors.append("readiness host-test count mismatch")
     if summary.get("clean_builds_total") != 2:
         errors.append("readiness clean-build count mismatch")

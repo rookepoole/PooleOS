@@ -274,7 +274,7 @@ def _validate_prefix(markers: list[str]) -> dict[str, Any]:
             + COMMON_KERNEL_MARKER_COUNT
         ],
     ]
-    baseline[23] = re.sub(r"trap_scenario=[0-8]", "trap_scenario=0", baseline[23], count=1)
+    baseline[23] = re.sub(r"trap_scenario=[0-9]", "trap_scenario=0", baseline[23], count=1)
     terminal = (
         "POOLEOS:KERNEL:TRANSFER-DENIED PASS contract=PKXFER1 terminal=halt "
         "entry_count=1 post_exit_firmware_calls=0 signatures=0 authority=0 actions=0 writes=0"

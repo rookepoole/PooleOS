@@ -224,6 +224,17 @@ fn cpuid(leaf: u32, subleaf: u32) -> CpuidRegisters {
     }
 }
 
+pub fn physical_address_bits() -> Option<u8> {
+    const EXTENDED_MAXIMUM: u32 = 0x8000_0000;
+    const ADDRESS_WIDTHS: u32 = 0x8000_0008;
+
+    if cpuid(EXTENDED_MAXIMUM, 0).eax < ADDRESS_WIDTHS {
+        return None;
+    }
+    let bits = (cpuid(ADDRESS_WIDTHS, 0).eax & 0xff) as u8;
+    (36..=52).contains(&bits).then_some(bits)
+}
+
 unsafe fn read_cr0() -> u64 {
     let value: u64;
     // SAFETY: PKCPU1 calls this only at CPL0 after PKXFER1; the instruction is read-only.

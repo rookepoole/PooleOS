@@ -174,8 +174,8 @@
     },
     {
       "path": "native/Cargo.lock",
-      "bytes": 4178,
-      "sha256": "272CD0157659F8C2F2F7491DDB493A47E99FB8FFD1F431E2615D35B072FF50AF"
+      "bytes": 4193,
+      "sha256": "29CE9938C5C60DEA5AEA244A6961BB1924D88AEC601D1E02EAAA510B0B36E390"
     },
     {
       "path": "native/policy/Cargo.toml",

@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_kernel_virtual_memory_contract",
+  "contract_id": "PKVM1",
+  "selected_move_id": "N9-VM-001",
+  "status": "bounded_live_inactive_page_table_foundation_with_bootstrap_temporary_mapping",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "development_profile": {
+    "feature": "development-virtual-memory",
+    "selector": 9,
+    "cpu_model": "qemu64",
+    "bsp_only": true,
+    "terminal": "halt"
+  },
+  "limits": {
+    "paging_levels": 4,
+    "table_pages": 4,
+    "mappings": 8,
+    "frames": 4,
+    "pending_invalidations": 8,
+    "page_bytes": 4096,
+    "implemented_window_pages": 512
+  },
+  "layout": {
+    "canonical_address_bits": 48,
+    "null_guard_end": "0x0000000000010000",
+    "user_end_exclusive": "0x0000800000000000",
+    "kernel_start": "0xFFFF800000000000",
+    "direct_map_start": "0xFFFF900000000000",
+    "direct_map_end_exclusive": "0xFFFFD00000000000",
+    "temporary_map_start": "0xFFFFFFFF80150000",
+    "temporary_map_end_exclusive": "0xFFFFFFFF80151000",
+    "kernel_image_start": "0xFFFFFFFF80000000",
+    "kernel_image_end_exclusive": "0xFFFFFFFFC0000000",
+    "implemented_user_window_start": "0x0000000040000000",
+    "implemented_user_window_end_exclusive": "0x0000000040200000"
+  },
+  "table_policy": {
+    "table_frames": "one four-page contiguous DMA32 PKPMM1 allocation",
+    "data_frames": "one-page generation-bound PKPMM1 allocations",
+    "physical_address_width": "live BSP CPUID leaf 0x80000008 constrained to 36..52 bits",
+    "materialization": "volatile writes through one PKMAP2 bootstrap temporary leaf with translation readback and per-transition INVLPG",
+    "root_state": "inactive and not activation-eligible because kernel mappings are absent",
+    "leaf_size_bytes": 4096,
+    "parent_permissions": "present writable user",
+    "supported_cache_policies": ["write_back", "uncacheable"],
+    "mixed_cache_alias_allowed": false,
+    "writable_executable_allowed": false
+  },
+  "transaction_policy": {
+    "operations": ["map", "protect", "begin_unmap", "acknowledge_inactive", "complete_unmap"],
+    "write_readback_required": true,
+    "rollback_on_write_or_readback_failure": true,
+    "mapping_ledger_updated_after_commit_only": true,
+    "unmapped_frame_quarantined_until_receipt": true,
+    "all_aliases_and_pending_receipts_required_before_free": true,
+    "active_root_receipt_supported": false,
+    "bootstrap_temporary_leaf_activated": true,
+    "bootstrap_temporary_leaf_revoked_before_table_free": true,
+    "inactive_table_physical_write_count": 4104,
+    "temporary_pte_write_count": 40,
+    "hardware_invlpg_executed": true,
+    "hardware_invlpg_count": 40,
+    "smp_shootdown_executed": false
+  },
+  "qualification": {
+    "qemu_run_count": 2,
+    "fresh_ovmf_vars_each_run": true,
+    "exact_markers_frame_and_pbp1_required": true,
+    "independent_pbp1_first_fit_oracle_required": true,
+    "rust_transaction_rollback_tests_required": true,
+    "negative_control_count": 39
+  },
+  "required_negative_controls": [
+    "NEG-N9-PKVM-MARKER-OMISSION", "NEG-N9-PKVM-MARKER-ORDER", "NEG-N9-PKVM-MARKER-DUPLICATE", "NEG-N9-PKVM-SELECTOR", "NEG-N9-PKVM-CONTRACT", "NEG-N9-PKVM-LAYOUT", "NEG-N9-PKVM-ROOT-ALIGNMENT", "NEG-N9-PKVM-TABLE-GENERATION", "NEG-N9-PKVM-DATA-CONTIGUITY", "NEG-N9-PKVM-DATA-GENERATION", "NEG-N9-PKVM-TABLE-PAGES", "NEG-N9-PKVM-MATERIALIZED", "NEG-N9-PKVM-TEMPORARY-VERIFY", "NEG-N9-PKVM-ROOT-ACTIVE", "NEG-N9-PKVM-TRANSLATION", "NEG-N9-PKVM-MAPPED-PERMISSIONS", "NEG-N9-PKVM-PROTECTED-PERMISSIONS", "NEG-N9-PKVM-CACHE", "NEG-N9-PKVM-PAGE-BYTES", "NEG-N9-PKVM-MAPS", "NEG-N9-PKVM-PROTECTS", "NEG-N9-PKVM-UNMAPS", "NEG-N9-PKVM-RECEIPTS", "NEG-N9-PKVM-CACHE-ALIAS", "NEG-N9-PKVM-WX", "NEG-N9-PKVM-PREMATURE-REUSE", "NEG-N9-PKVM-ROLLBACK", "NEG-N9-PKVM-ROOT-RELEASE", "NEG-N9-PKVM-DATA-RELEASE", "NEG-N9-PKVM-ALLOCATED-RESIDUE", "NEG-N9-PKVM-PHYSICAL-WRITES", "NEG-N9-PKVM-TEMPORARY-PTE-WRITES", "NEG-N9-PKVM-ALLOCATION-COUNT", "NEG-N9-PKVM-FREE-COUNT", "NEG-N9-PKVM-ACTIVE-CR3", "NEG-N9-PKVM-INVLPG", "NEG-N9-PKVM-SHOOTDOWN", "NEG-N9-PKVM-OVERCLAIM", "NEG-N9-PKVM-PBP1-FIRST-FIT"
+  ],
+  "claims": {
+    "canonical_48_bit_layout_frozen": true,
+    "live_pmm_generation_bound_table_and_data_frames": true,
+    "four_level_4k_page_tables_materialized_in_physical_ram": true,
+    "bounded_map_protect_unmap_implemented": true,
+    "writable_executable_and_cache_alias_rejection_exercised": true,
+    "transactional_leaf_rollback_host_tested": true,
+    "inactive_root_invalidation_receipts_exercised": true,
+    "frame_reuse_before_all_alias_receipts_rejected": true,
+    "active_root_installed": false,
+    "hardware_tlb_invalidation_executed": true,
+    "smp_shootdown_implemented": false,
+    "huge_pages_cow_user_faults_or_pager_implemented": false,
+    "bootstrap_temporary_mapping_activated_and_revoked": true,
+    "kernel_direct_map_activated": false,
+    "n9_exit_gate_satisfied": false,
+    "production_ready": false
+  },
+  "non_claims": [
+    "PKVM1 never loads its root into CR3; INVLPG is executed only for the PKMAP2 bootstrap temporary leaf, and no inter-processor shootdown occurs.",
+    "The direct-map band remains inactive; selector 9 activates and revokes exactly one reserved PKMAP2 bootstrap temporary leaf.",
+    "No huge page, PCID, KASLR, copy-on-write, user-fault delivery, stack growth, pager, heap, SMP, or reclaim path is implemented.",
+    "The inactive receipt proves no CPU can cache the never-active PKVM1 root; bootstrap-leaf INVLPG evidence is not an active-address-space TLB receipt.",
+    "No target hardware, second host, signature, release, N9 exit, or production claim is made."
+  ]
+}
