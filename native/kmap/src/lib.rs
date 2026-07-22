@@ -10,11 +10,11 @@ pub const MAX_MAPPINGS: usize = 8;
 pub const WINDOW_BYTES: u64 = 2 * 1024 * 1024;
 pub const MIN_VIRTUAL_BASE: u64 = 0xffff_ffff_8000_0000;
 pub const MAX_VIRTUAL_EXCLUSIVE: u64 = 0xffff_ffff_c000_0000;
-pub const STACK_GUARD_LOW_PAGE: usize = 64;
-pub const STACK_FIRST_PAGE: usize = 65;
+pub const STACK_GUARD_LOW_PAGE: usize = 66;
+pub const STACK_FIRST_PAGE: usize = 67;
 pub const STACK_PAGE_COUNT: usize = 14;
-pub const STACK_GUARD_HIGH_PAGE: usize = 79;
-pub const HANDOFF_FIRST_PAGE: usize = 80;
+pub const STACK_GUARD_HIGH_PAGE: usize = 81;
+pub const HANDOFF_FIRST_PAGE: usize = 82;
 pub const HANDOFF_PAGE_COUNT: usize = 256;
 pub const HANDOFF_CAPACITY_BYTES: u64 = HANDOFF_PAGE_COUNT as u64 * PAGE_SIZE;
 

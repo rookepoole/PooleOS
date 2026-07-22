@@ -1,12 +1,12 @@
 # Native physical-memory foundation
 
-`PKPMM1` is the first live N9 physical-memory increment. It is an opt-in, BSP-only, qemu64 Tier-0 development profile selected by PooleBoot selector `8`; the default image still stops before kernel transfer.
+`PKPMM2` is the bounded N9 physical-page scrubbing increment. It is an opt-in, BSP-only, qemu64 Tier-0 development profile selected by PooleBoot selector `8`; the default image still stops before kernel transfer. It supersedes the selector-8 `PKPMM1` evidence without promoting N9 or PooleOS to production.
 
 ## Ownership boundary
 
 PooleKernel consumes the exact post-`ExitBootServices()` PBP1 map, independently revalidates every normalized UEFI source-type/kind pair, and initially admits only `MEMORY_USABLE` (`EfiConventionalMemory`) pages. Page zero becomes an explicit null guard. Boot-services code/data, ACPI reclaimable memory, runtime memory, ACPI NVS, MMIO, persistent, unusable, and reserved memory remain unavailable. The kernel image, retained handoff, and current page-table root must all be covered by PBP1 loader-reserved ranges.
 
-This follows the UEFI 2.11 ownership boundary: firmware owns the map before `ExitBootServices()`; after a successful exit the loader/OS owns unused loader, boot-services, and conventional memory but must preserve runtime ranges. PKPMM1 deliberately holds the broader reclaimable set until PooleOS has explicit subsystem handoff and mapping contracts.
+This follows the UEFI 2.11 ownership boundary: firmware owns the map before `ExitBootServices()`; after a successful exit the loader/OS owns unused loader, boot-services, and conventional memory but must preserve runtime ranges. `PKPMM2` deliberately holds the broader reclaimable set until PooleOS has explicit subsystem handoff and mapping contracts.
 
 Official references:
 
@@ -15,14 +15,41 @@ Official references:
 
 ## Bounded manager
 
-The Rust manager uses fixed arrays for at most 256 PBP1 records, 256 free extents, and 32 active allocation slots. It has no heap and no unsafe block. Usable ranges are split into DMA (below 16 MiB), DMA32 (16 MiB through 4 GiB), and Normal (above 4 GiB) zones. Allocation is deterministic first-fit within one requested zone and is capped by a 64-page profile quota.
+The safe Rust manager uses fixed arrays for at most 256 PBP1 records, 256 free extents, and 32 active allocation slots. It has no heap. Usable ranges are split into DMA (below 16 MiB), DMA32 (16 MiB through 4 GiB), and Normal (above 4 GiB) zones. Allocation is deterministic first-fit within one requested zone and is capped by a 64-page profile quota.
 
-An allocation handle binds slot, generation, physical page range, zone, and owner. Free requires an exact match, first proves that the returned extent can be represented, and only then releases accounting and marks the inactive slot as metadata-poisoned. Adjacent same-zone extents can coalesce even when the fixed extent ledger is otherwise full; an unrepresentable non-adjacent free fails transactionally and leaves the allocation live. The live exercise allocates three DMA and eight DMA32 pages, rejects quota overflow, rejects an unavailable Normal request on the qemu64 fixture, frees both allocations, rejects a repeated free, and proves the initial free-extent topology is restored.
+An allocation handle binds slot, generation, physical page range, zone, and owner. Free requires an exact match and rejects stale or repeated handles. Adjacent same-zone extents coalesce. The free path proves that the returned extent can be represented before it performs any physical write, so fixed-ledger exhaustion cannot scrub a page that remains owned by a live handle.
 
-## Evidence and limits
+The earlier raw `allocate` and `free` methods remain only for the bounded `PKVM1` and `PKVM2` predecessor profiles. They are not production APIs and are not covered by the `PKPMM2` page-content claim.
 
-Two fresh-OVMF-vars TCG runs must produce identical 40-marker streams, framebuffer captures, and PBP1 bytes. The stream includes an immediate selector receipt and five ordered gates for the entry envelope, development handoff profile, runtime continuity, record/artifact decode, and retained-set revalidation. An independent Python oracle reconstructs all kind totals, zone splits, largest extents, deterministic first-fit addresses, and core ownership directly from PBP1. Forty-eight hostile controls cover marker mutation, map overlap, invalid source/kind pairing, and escaped core ownership.
+## Scrub transaction
 
-Cycle 125 also expands the bootstrap stack from eight to fourteen pages (56 KiB) while keeping the low guard at page-table index 64, stack leaves at 65-78, the high guard at 79, and the handoff at 80. The first selector-8 live run exposed the earlier stack ceiling; the expanded stack reached the allocator receipt. The PKTRAP1 rerun then exposed a hard-coded eight-page guard offset that now landed inside the mapped stack. PooleKernel now exports the fourteen-page count and derives the guard address from it, and all three trap scenarios pass again. `ADD-MEM-001` prevents these boot, entry, trap, and allocator boundaries from drifting independently.
+`allocate_scrubbed` plans a first-fit allocation without changing the free or ownership ledgers. Through the `PhysicalPageAccess` boundary it writes zero to every 64-bit word of every planned page and then reads every word back. Only a complete zero-and-readback pass commits the allocation slot and returns its handle. A failed access or comparison restores the pre-call ownership state and emits no receipt.
 
-`metadata_poison=2` describes stale allocation-ledger state only. PKPMM1 performs zero reads or writes to allocated physical page contents, zero mapping changes, and zero reclaim operations. N9 remains partial until mapped metadata, physical scrubbing, lifecycle reclaim, virtual address spaces, page-table operations, TLB policy, cacheability, heap/caches/stacks, concurrency, randomized stress, reclaim/OOM, target hardware, and second-host evidence are complete.
+`free_scrubbed` first validates the exact live handle and preflights extent reinsertion. It then zeroes and reads back every word while the handle remains owned. Only success releases the slot, reinserts and coalesces the extent, poisons inactive metadata, and emits a release receipt. A failed release scrub leaves the handle live and the pages unavailable for reuse.
+
+Each successful transaction emits an immutable value receipt binding sequence, operation kind, start page, page count, generation, owner, zeroed byte count, and verified byte count. Sequences start at one and advance only after success.
+
+## Live adapter
+
+The selector-8 adapter maps exactly one physical page at a pre-existing supervisor RW/NX temporary virtual address. Changing the physical page writes one leaf PTE and invalidates that virtual address. Volatile writes and reads operate only through that alias. After the profile, `finish()` clears the leaf, invalidates it, and proves translation is absent. This is a temporary bootstrap mechanism, not a direct-map or complete address-space claim.
+
+The live profile performs this exact lifecycle:
+
+1. Allocate two DMA32 pages, zero and read them back, and emit allocation receipt 1.
+2. Fill both pages with `0xA5A55A5AC3C33C3C` and verify the pattern.
+3. Zero and read back both pages before release, then emit release receipt 2.
+4. Reject the stale handle, quota overflow, and an unavailable Normal request.
+5. Reallocate the exact first-fit range with a greater generation, prove every word is zero, and emit allocation receipt 3.
+6. Zero and read back the range before final release, emit receipt 4, and revoke the temporary alias.
+
+The resulting live counters are 8 scrubbed and verified pages, 32,768 scrubbed bytes, 32,768 verified bytes, 5,120 64-bit physical writes, 6,144 64-bit physical reads, 28 temporary leaf writes, and 28 local invalidations. Final allocated pages are zero.
+
+## Failure and hostile evidence
+
+Host tests inject a partial allocation write failure, a release readback mismatch, and an extent-ledger preflight failure. They prove that failed allocation does not create a handle, failed release retains its handle, and preflight rejection performs no physical writes. The lifecycle test also proves exact first-fit reuse advances generation and contains no stale pattern.
+
+Two fresh-OVMF-vars TCG runs must produce identical 40-marker streams, framebuffer captures, and PBP1 bytes. An independent Python oracle reconstructs source-kind totals, zone splits, largest extents, deterministic DMA32 first fit, and core ownership directly from PBP1. Sixty-three hostile controls mutate every contract-bearing marker field plus map overlap, source-kind pairing, and core ownership.
+
+Cycle 125 expanded the bootstrap stack from eight to fourteen pages (56 KiB) and bound the guard derivation through `ADD-MEM-001`. `PKPMM2` preserves that geometry.
+
+N9 remains partial. The evidence does not activate reclaimable ranges, move metadata to a durable mapped arena, implement complete kernel/user address spaces, qualify concurrent or SMP allocation and TLB policy, provide heap/object caches/kernel stacks, cover pressure/OOM behavior, or establish target-hardware and second-host results.

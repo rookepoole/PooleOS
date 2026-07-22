@@ -40,13 +40,13 @@ class NativeKernelEntryTests(unittest.TestCase):
 
     def test_product_identity_and_entry_prefix_are_frozen(self) -> None:
         product = self.readiness["product"]
-        self.assertEqual(product["canonical_byte_count"], 221184)
-        self.assertEqual(product["image_byte_count"], 262144)
+        self.assertEqual(product["canonical_byte_count"], 229376)
+        self.assertEqual(product["image_byte_count"], 270336)
         self.assertEqual(product["entry_offset"], 0x8000)
-        self.assertEqual(product["relocation_count"], 525)
+        self.assertEqual(product["relocation_count"], 542)
         self.assertEqual(
             product["canonical_sha256"],
-            "5533347F0DA41B0F08B4E0ADF643379706BE548B5486D49C57960FEFE799FE93",
+            "06D36FAF5531509097CD03819390AC744DCFD2BD9FB64D1E6F6710DD7796776E",
         )
         self.assertTrue(product["entry_prefix_hex"].startswith("FAFC4889E14885C9"))
 

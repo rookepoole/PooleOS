@@ -24,16 +24,19 @@ ranges must be aligned, nonoverlapping, complete, and W^X-safe.
 Retained physical ranges must also be aligned, nonzero, representable, and
 pairwise disjoint:
 
-- the 64-page PooleKernel allocation;
+- the current 66-page PooleKernel allocation;
 - four private page-table pages;
 - fourteen writable, non-executable stack pages;
 - 256 handoff pages, covering one MiB.
 
-The virtual layout reserves page-table index 64 as the low guard, indices
-65-78 for the stack, index 79 as the high guard, and index 80 onward for the
+The virtual layout reserves page-table index 66 as the low guard, indices
+67-80 for the stack, index 81 as the high guard, and index 82 onward for the
 handoff. Both guards remain non-present. The handoff range begins after the
 fixed boundary and is supervisor read-only and NX. `ADD-MEM-001` requires boot,
 entry, trap, and PMM consumers to derive these bounds from one contract.
+The bootstrap temporary alias is derived as the first leaf after the complete
+handoff range, currently index 338, so retained-layout growth cannot silently
+occupy the scrub and page-table transaction slot.
 
 ## Table Construction
 
@@ -50,11 +53,8 @@ private hierarchy at PML4[511], PDPT[510], and PD[0]. Exact 4 KiB leaves encode:
 - any writable-executable request: rejected.
 
 The Rust verifier and independent Python oracle reconstruct every parent and
-leaf. The qualified production map contains 64 kernel leaves: 12 read-only,
-32 read-execute, and 20 read-write, with zero writable-executable leaves. Its
-address-independent kernel-leaf fingerprint is `066F6E68217211A5`;
-`pkmap2_probe` emits retained-layout fingerprint `29BFB7F6B4B835C5` for the
-current stack/handoff geometry.
+leaf. Exact leaf counts and fingerprints are rebound from each canonical
+kernel image, while zero writable-executable leaves remains mandatory.
 
 ## Active Audit
 

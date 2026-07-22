@@ -52,8 +52,8 @@ equality is real but not security trust: the manifest and artifacts are
 unsigned and attacker-controllable in this development profile.
 
 PKELF1 accepts the frozen x86-64 `ET_DYN` profile, computes the four mapping
-ranges, allocates 64 loader pages, copies segments, applies 325 relative
-relocations, verifies the 262,144-byte loaded image, and binds the entry at
+ranges, allocates 66 loader pages, copies segments, applies 542 relative
+relocations, verifies the 270,336-byte loaded image, and binds the entry at
 offset `0x8000`.
 Every file and temporary intake pool is closed or freed before the final map.
 
@@ -91,13 +91,13 @@ as persistent authority. PBTRUST1 is separate from PREC1 boot-attempt state.
 Before the first exit attempt, PooleBoot allocates and zeroes all storage needed
 after boot services become unavailable:
 
-- 64 kernel pages;
+- 66 kernel pages;
 - six distinct PBART1 page ranges, one page each in the canonical fixture;
 - one exact-file PSM1 range;
 - one exact-file PBTP1 range;
 - one exact-file PBTS1 range;
 - four PKMAP2 page-table pages;
-- eight kernel-stack pages with one absent guard page on each side;
+- fourteen kernel-stack pages with one absent guard page on each side;
 - a 256-page, one-MiB handoff allocation;
 - fixed one-MiB raw-map and 640-KiB normalized-map work pools.
 
@@ -153,9 +153,9 @@ halts permanently at `STOP BEFORE TRANSFER`.
 
 ## Qualified Evidence
 
-The Cycle 127-refreshed default-path receipt records:
+The Cycle 128-refreshed default-path receipt records:
 
-- 151/151 Rust host tests across PooleBoot, PBART1, the six-format retained-set
+- 155/155 Rust host tests across PooleBoot, PBART1, the six-format retained-set
   validator, PBTRUST1, PBC1/PSM1/PKELF1/PBP1, PKMAP2, PBEXIT1, and PKENTRY1;
 - two byte-identical PooleBoot builds, PooleKernel builds, and GPT/FAT32 media
   generations;
@@ -241,12 +241,13 @@ Cycle 124 closes only the read-only PKMSR1 privileged-MSR policy slice. Cycle
 allocator foundation after expanding the shared guarded stack to fourteen
 pages. Cycle 126 separately closes the bounded selector-9 PKVM1 inactive
 virtual-memory foundation. Cycle 127 closes the bounded selector-10 PKVM2
-active-root move: eight candidate table pages and one data page are directly
-mapped, the candidate is installed and the exact original CR3 restored, and
-three local invalidation receipts cover protect and both unmaps. This remains
-one-BSP evidence with no shootdown, ring 3, reclaim policy, heap, pager, target,
-or production claim. The next chronological owner-independent move is
-`N9-PMM-SCRUB-001` for scrub-before-allocation and scrub-before-reuse policy.
+active-root move. Cycle 128 upgrades selector 8 to PKPMM2 with full-page
+scrub-before-allocation and scrub-before-reuse, readback, receipts, exact-reuse
+residue rejection, fault rollback, and temporary-alias revocation. These remain
+one-BSP development profiles with no complete direct map, shootdown, ring 3,
+reclaim policy, heap, pager, target, or production claim. The next chronological
+owner-independent move is `N9-PMM-METADATA-001` for a reserved mapped allocator
+metadata arena and transactional bootstrap-to-main handoff.
 Capability creation, lifecycle execution, signature trust, authenticated
 persistent state, production transfer, and physical-target qualification remain
 separately gated by N5/N6 and owner-controlled N0 work.

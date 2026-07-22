@@ -34,7 +34,7 @@ pub const VIRTUAL_MEMORY_CONTRACT_ID: &str = virtual_memory::CONTRACT_ID;
 pub const XSTATE_EXCEPTION_CONTRACT_ID: &str = "PKXEXC1";
 #[used]
 #[unsafe(link_section = ".text.pkbuild_literal")]
-static BUILD_ID_BYTES: [u8; 34] = *b"PKBUILD1-CYCLE127-N9-VM-ACTIVE-001";
+static BUILD_ID_BYTES: [u8; 34] = *b"PKBUILD1-CYCLE128-N9-PMM-SCRUB-001";
 pub const BUILD_ID: &[u8] = &BUILD_ID_BYTES;
 pub const ENTRY_OFFSET: u64 = 0x8000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
