@@ -16,7 +16,11 @@ use poolekernel::{
     BUILD_ID, ByteSink, CPU_POLICY_CONTRACT_ID, DevelopmentTrapScenario, EARLY_LOG_CAPACITY,
     EarlyLogger, EarlyRing, Framebuffer, PanicCode, PanicDisposition, PanicState,
     TRANSFER_CONTRACT_ID, TRAP_CONTRACT_ID, TrapDisposition, TrapError, TrapExpectation,
-    TrapObservation, XSTATE_EXCEPTION_CONTRACT_ID, decode_cpu_identity,
+    TrapObservation, XSTATE_EXCEPTION_CONTRACT_ID,
+    active_virtual_memory::{
+        self, ActiveHardware, run_profile as run_active_virtual_memory_profile,
+    },
+    decode_cpu_identity,
     physical_memory::{Zone, run_profile as run_physical_memory_profile},
     privilege_msr::{machine_check_bank_count, machine_check_ctl_present, validate_snapshot},
     revalidation, validate_cpu_policy_snapshot, validate_descriptor_state,
@@ -286,6 +290,80 @@ pkvm_fragment!(
     b" shootdown=0 huge_pages=0 cow=0 user_faults=0 pager=0 heap=0 smp=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n"
 );
 
+macro_rules! pkavm_fragment {
+    ($name:ident, $value:literal) => {
+        #[used]
+        #[unsafe(link_section = ".text.pkavm_literals")]
+        static $name: [u8; $value.len()] = *$value;
+    };
+}
+
+pkavm_fragment!(
+    PKAVM_DENIED,
+    b"POOLEOS:KERNEL:ACTIVE-VM-DENIED contract=PKVM2 reason="
+);
+pkavm_fragment!(
+    PKAVM_DENIED_TAIL,
+    b" effects=fail_closed authority=0 actions=0 terminal=panic\n"
+);
+pkavm_fragment!(
+    PKAVM_EARLY,
+    b"POOLEOS:KERNEL:ACTIVE-VM-EARLY PASS contract=PKVM2 selector=10 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n"
+);
+pkavm_fragment!(
+    PKAVM_STAGE,
+    b"POOLEOS:KERNEL:ACTIVE-VM-STAGE PASS contract=PKVM2 stage="
+);
+pkavm_fragment!(
+    PKAVM_LAYOUT,
+    b"POOLEOS:KERNEL:ACTIVE-VM-LAYOUT PASS contract=PKVM2 canonical_bits=48 direct_start=0xFFFF900000000000 direct_end=0xFFFFD00000000000 user_start=0x0000000040000000 page_bytes=4096 table_pages=8 owned_pages=9\n"
+);
+pkavm_fragment!(
+    PKAVM_CANDIDATE,
+    b"POOLEOS:KERNEL:ACTIVE-VM-CANDIDATE PASS contract=PKVM2 original_root="
+);
+pkavm_fragment!(PKAVM_ROOT, b" candidate_root=");
+pkavm_fragment!(PKAVM_TABLE_GENERATION, b" table_generation=");
+pkavm_fragment!(PKAVM_DATA, b" data=");
+pkavm_fragment!(PKAVM_DATA_GENERATION, b" data_generation=");
+pkavm_fragment!(PKAVM_DIRECT_FIRST, b" direct_first=");
+pkavm_fragment!(PKAVM_DIRECT_LAST, b" direct_last=");
+pkavm_fragment!(
+    PKAVM_CANDIDATE_TAIL,
+    b" inherited_kernel=exact guarded_stack=exact handoff=exact bootstrap_alias_revoked=1 root_active=0\n"
+);
+pkavm_fragment!(
+    PKAVM_ACTIVATION,
+    b"POOLEOS:KERNEL:ACTIVE-VM-ACTIVATION PASS contract=PKVM2 cr3_writes="
+);
+pkavm_fragment!(
+    PKAVM_ACTIVATION_TAIL,
+    b" candidate_readback=exact original_restore=exact rollback_control=host_verified bsp=1 smp=0\n"
+);
+pkavm_fragment!(
+    PKAVM_INVALIDATION,
+    b"POOLEOS:KERNEL:ACTIVE-VM-INVALIDATION PASS contract=PKVM2 local_invlpg="
+);
+pkavm_fragment!(PKAVM_RECEIPTS, b" active_receipts=");
+pkavm_fragment!(PKAVM_PROBE, b" probe=");
+pkavm_fragment!(
+    PKAVM_INVALIDATION_TAIL,
+    b" protect=1 user_unmap=1 direct_unmap=1 stale_root_rejected=host premature_reuse_rejected=1 shootdown=0\n"
+);
+pkavm_fragment!(
+    PKAVM_RESULT,
+    b"POOLEOS:KERNEL:ACTIVE-VM-RESULT PASS contract=PKVM2 profile=qemu64_tier0 root_released=1 data_released=1 allocated_pages="
+);
+pkavm_fragment!(PKAVM_PHYSICAL_WRITES, b" physical_writes=");
+pkavm_fragment!(PKAVM_TEMPORARY_WRITES, b" temporary_pte_writes=");
+pkavm_fragment!(PKAVM_BOOTSTRAP_INVLPG, b" bootstrap_invlpg=");
+pkavm_fragment!(PKAVM_ALLOCATIONS, b" allocations=");
+pkavm_fragment!(PKAVM_FREES, b" frees=");
+pkavm_fragment!(
+    PKAVM_RESULT_TAIL,
+    b" active_cr3_writes=2 active_invlpg=3 shootdown=0 ring3=0 huge_pages=0 pcid=0 cow=0 user_faults=0 pager=0 heap=0 smp=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n"
+);
+
 macro_rules! pkentry_fragment {
     ($name:ident, $value:literal) => {
         #[used]
@@ -499,15 +577,9 @@ impl BootstrapTableMemory {
     }
 
     fn invalidate(&mut self) {
-        // SAFETY: selector 9 runs at CPL0 on the BSP with interrupts disabled;
+        // SAFETY: selectors 9 and 10 run at CPL0 on the BSP with interrupts disabled;
         // the operand is the single PKMAP2 bootstrap temporary leaf.
-        unsafe {
-            core::arch::asm!(
-                "invlpg [{}]",
-                in(reg) virtual_memory::TEMPORARY_MAP_START,
-                options(nostack, preserves_flags)
-            )
-        };
+        unsafe { arch::x86_64::invalidate_page(virtual_memory::TEMPORARY_MAP_START) };
         self.invalidations += 1;
     }
 
@@ -529,7 +601,7 @@ impl BootstrapTableMemory {
                 if observed & Self::PHYSICAL_MASK_52 == current
                     && observed & Self::TEMPORARY_ENTRY_FLAGS == Self::TEMPORARY_ENTRY_FLAGS =>
             {
-                // SAFETY: selector 9 exclusively owns the previously installed leaf.
+                // SAFETY: the selected VM profile exclusively owns the installed leaf.
                 unsafe { write_volatile(leaf, 0) };
                 self.temporary_pte_writes += 1;
                 self.invalidate();
@@ -599,7 +671,7 @@ impl TableMemory for BootstrapTableMemory {
             .mapped_physical
             .ok_or(virtual_memory::Error::BootstrapLeafState)?;
         let leaf = self.leaf_pointer();
-        // SAFETY: selector 9 exclusively owns the installed temporary leaf.
+        // SAFETY: the selected VM profile exclusively owns the installed temporary leaf.
         let observed = unsafe { read_volatile(leaf) };
         if observed & Self::PHYSICAL_MASK_52 != current
             || observed & Self::TEMPORARY_ENTRY_FLAGS != Self::TEMPORARY_ENTRY_FLAGS
@@ -633,6 +705,95 @@ impl TableMemory for BootstrapTableMemory {
 
     fn hardware_invalidation_count(&self) -> u64 {
         self.invalidations
+    }
+}
+
+struct LiveActiveHardware;
+
+impl ActiveHardware for LiveActiveHardware {
+    fn interrupts_disabled(&mut self) -> bool {
+        arch::x86_64::read_rflags() & (1 << 9) == 0
+    }
+
+    fn cpu_id(&mut self) -> u32 {
+        active_virtual_memory::BSP_CPU_ID
+    }
+
+    fn read_cr3(&mut self) -> u64 {
+        // SAFETY: PKVM2 runs at CPL0 after PKENTRY1 validates the transfer state.
+        unsafe { arch::x86_64::read_cr3() }
+    }
+
+    fn write_cr3(&mut self, value: u64) -> Result<(), active_virtual_memory::Error> {
+        if value == 0 || !value.is_multiple_of(poole_handoff::PAGE_BYTES) {
+            return Err(active_virtual_memory::Error::PhysicalAddress);
+        }
+        // SAFETY: PKVM2 audits the candidate root or supplies the exact retained root;
+        // both preserve the executing high-half image and current guarded stack.
+        unsafe { arch::x86_64::write_cr3(value) };
+        Ok(())
+    }
+
+    fn invalidate_page(
+        &mut self,
+        virtual_address: u64,
+    ) -> Result<(), active_virtual_memory::Error> {
+        if !virtual_memory::is_canonical_48(virtual_address) {
+            return Err(active_virtual_memory::Error::MemoryAccess);
+        }
+        // SAFETY: PKVM2 owns the current BSP root and the exact leaf transition.
+        unsafe { arch::x86_64::invalidate_page(virtual_address) };
+        Ok(())
+    }
+
+    fn read_u64(&mut self, virtual_address: u64) -> Result<u64, active_virtual_memory::Error> {
+        if !virtual_memory::is_canonical_48(virtual_address)
+            || !virtual_address.is_multiple_of(core::mem::align_of::<u64>() as u64)
+            || virtual_address > usize::MAX as u64
+        {
+            return Err(active_virtual_memory::Error::MemoryAccess);
+        }
+        // SAFETY: PKVM2 supplies an audited, supervisor RW/NX direct-map address.
+        Ok(unsafe { read_volatile(virtual_address as usize as *const u64) })
+    }
+
+    fn write_u64(
+        &mut self,
+        virtual_address: u64,
+        value: u64,
+    ) -> Result<(), active_virtual_memory::Error> {
+        if !virtual_memory::is_canonical_48(virtual_address)
+            || !virtual_address.is_multiple_of(core::mem::align_of::<u64>() as u64)
+            || virtual_address > usize::MAX as u64
+        {
+            return Err(active_virtual_memory::Error::MemoryAccess);
+        }
+        // SAFETY: PKVM2 supplies an audited, supervisor RW/NX direct-map address.
+        unsafe { write_volatile(virtual_address as usize as *mut u64, value) };
+        Ok(())
+    }
+
+    fn read_u8(&mut self, virtual_address: u64) -> Result<u8, active_virtual_memory::Error> {
+        if !virtual_memory::is_canonical_48(virtual_address) || virtual_address > usize::MAX as u64
+        {
+            return Err(active_virtual_memory::Error::MemoryAccess);
+        }
+        // SAFETY: PKVM2 supplies its one audited user-window probe address.
+        Ok(unsafe { read_volatile(virtual_address as usize as *const u8) })
+    }
+
+    fn write_u8(
+        &mut self,
+        virtual_address: u64,
+        value: u8,
+    ) -> Result<(), active_virtual_memory::Error> {
+        if !virtual_memory::is_canonical_48(virtual_address) || virtual_address > usize::MAX as u64
+        {
+            return Err(active_virtual_memory::Error::MemoryAccess);
+        }
+        // SAFETY: PKVM2 writes only while the audited user-window leaf is writable.
+        unsafe { write_volatile(virtual_address as usize as *mut u8, value) };
+        Ok(())
     }
 }
 
@@ -673,6 +834,18 @@ fn log_virtual_memory_stage(serial: &mut Com1, debugcon: &mut DebugCon, stage: u
     logger.write_bytes(&PKENTRY_NEWLINE);
 }
 
+#[inline(never)]
+fn log_active_virtual_memory_stage(serial: &mut Com1, debugcon: &mut DebugCon, stage: u64) {
+    let mut logger = EarlyLogger::new(BootSink {
+        serial,
+        debugcon,
+        ring: &EARLY_RING,
+    });
+    logger.write_bytes(&PKAVM_STAGE);
+    logger.write_decimal_u64(stage);
+    logger.write_bytes(&PKENTRY_NEWLINE);
+}
+
 #[panic_handler]
 fn panic(_info: &PanicInfo<'_>) -> ! {
     poole_kernel_emergency_panic(PanicCode::RustPanic as u32)
@@ -698,6 +871,7 @@ extern "C" fn poole_kernel_emergency_panic(code: u32) -> ! {
         0x100f => PanicCode::PrivilegeMsrPolicy,
         0x1010 => PanicCode::PhysicalMemory,
         0x1011 => PanicCode::VirtualMemory,
+        0x1012 => PanicCode::ActiveVirtualMemory,
         _ => PanicCode::UnexpectedReturn,
     };
     let disposition = PANIC_STATE.begin(code);
@@ -758,6 +932,14 @@ extern "C" fn poole_kernel_rust_entry(
         });
         logger.write_bytes(&PKVM_EARLY);
     }
+    if trap_scenario == DevelopmentTrapScenario::ActiveVirtualMemory {
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        logger.write_bytes(&PKAVM_EARLY);
+    }
 
     if let Err(error) = validate_entry_envelope(handoff_address, handoff_length, magic, stack_top) {
         poole_kernel_emergency_panic(error.panic_code() as u32);
@@ -767,6 +949,9 @@ extern "C" fn poole_kernel_rust_entry(
     }
     if trap_scenario == DevelopmentTrapScenario::VirtualMemory {
         log_virtual_memory_stage(&mut serial, &mut debugcon, 1);
+    }
+    if trap_scenario == DevelopmentTrapScenario::ActiveVirtualMemory {
+        log_active_virtual_memory_stage(&mut serial, &mut debugcon, 1);
     }
 
     // SAFETY: the envelope passed canonical range, overflow, alignment, and size checks;
@@ -790,6 +975,9 @@ extern "C" fn poole_kernel_rust_entry(
     if trap_scenario == DevelopmentTrapScenario::VirtualMemory {
         log_virtual_memory_stage(&mut serial, &mut debugcon, 2);
     }
+    if trap_scenario == DevelopmentTrapScenario::ActiveVirtualMemory {
+        log_active_virtual_memory_stage(&mut serial, &mut debugcon, 2);
+    }
     if let Err(error) = validate_runtime_state(
         &validated,
         handoff_address as u64,
@@ -806,6 +994,9 @@ extern "C" fn poole_kernel_rust_entry(
     if trap_scenario == DevelopmentTrapScenario::VirtualMemory {
         log_virtual_memory_stage(&mut serial, &mut debugcon, 3);
     }
+    if trap_scenario == DevelopmentTrapScenario::ActiveVirtualMemory {
+        log_active_virtual_memory_stage(&mut serial, &mut debugcon, 3);
+    }
     let decoded = match poole_handoff::decode(handoff) {
         Ok(value) => value,
         Err(_) => poole_kernel_emergency_panic(PanicCode::HandoffDecode as u32),
@@ -820,6 +1011,9 @@ extern "C" fn poole_kernel_rust_entry(
     if trap_scenario == DevelopmentTrapScenario::VirtualMemory {
         log_virtual_memory_stage(&mut serial, &mut debugcon, 4);
     }
+    if trap_scenario == DevelopmentTrapScenario::ActiveVirtualMemory {
+        log_active_virtual_memory_stage(&mut serial, &mut debugcon, 4);
+    }
     // SAFETY: PKENTRY1 requires every PBP1 retained-input range to remain
     // immutable and identity-mapped until this independent revalidation ends.
     let revalidated = match unsafe { revalidation::revalidate_development_from_handoff(handoff) } {
@@ -831,6 +1025,9 @@ extern "C" fn poole_kernel_rust_entry(
     }
     if trap_scenario == DevelopmentTrapScenario::VirtualMemory {
         log_virtual_memory_stage(&mut serial, &mut debugcon, 5);
+    }
+    if trap_scenario == DevelopmentTrapScenario::ActiveVirtualMemory {
+        log_active_virtual_memory_stage(&mut serial, &mut debugcon, 5);
     }
 
     {
@@ -1329,6 +1526,89 @@ extern "C" fn poole_kernel_rust_entry(
         halt_forever()
     }
 
+    if trap_scenario == DevelopmentTrapScenario::ActiveVirtualMemory {
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        macro_rules! active_vm_try {
+            ($operation:expr) => {
+                match $operation {
+                    Ok(value) => value,
+                    Err(error) => {
+                        logger.write_bytes(&PKAVM_DENIED);
+                        logger.write_str(error.label());
+                        logger.write_bytes(&PKAVM_DENIED_TAIL);
+                        poole_kernel_emergency_panic(PanicCode::ActiveVirtualMemory as u32)
+                    }
+                }
+            };
+        }
+        let physical_bits = active_vm_try!(
+            arch::x86_64::physical_address_bits().ok_or(active_virtual_memory::Error::AddressWidth)
+        );
+        let mut table_memory = match BootstrapTableMemory::new(observed_cr3, physical_bits) {
+            Ok(value) => value,
+            Err(error) => {
+                logger.write_bytes(&PKAVM_DENIED);
+                logger.write_str(error.label());
+                logger.write_bytes(&PKAVM_DENIED_TAIL);
+                poole_kernel_emergency_panic(PanicCode::ActiveVirtualMemory as u32)
+            }
+        };
+        let mut hardware = LiveActiveHardware;
+        let proof = active_vm_try!(run_active_virtual_memory_profile(
+            &decoded,
+            validated.core,
+            observed_cr3,
+            physical_bits,
+            &mut table_memory,
+            &mut hardware,
+        ));
+        let summary = proof.summary;
+        logger.write_bytes(&PKAVM_LAYOUT);
+        logger.write_bytes(&PKAVM_CANDIDATE);
+        logger.write_hex_u64(summary.original_root);
+        logger.write_bytes(&PKAVM_ROOT);
+        logger.write_hex_u64(summary.candidate_root);
+        logger.write_bytes(&PKAVM_TABLE_GENERATION);
+        logger.write_decimal_u64(summary.table_generation);
+        logger.write_bytes(&PKAVM_DATA);
+        logger.write_hex_u64(summary.data_physical);
+        logger.write_bytes(&PKAVM_DATA_GENERATION);
+        logger.write_decimal_u64(summary.data_generation);
+        logger.write_bytes(&PKAVM_DIRECT_FIRST);
+        logger.write_hex_u64(summary.direct_map_first);
+        logger.write_bytes(&PKAVM_DIRECT_LAST);
+        logger.write_hex_u64(summary.direct_map_last);
+        logger.write_bytes(&PKAVM_CANDIDATE_TAIL);
+        logger.write_bytes(&PKAVM_ACTIVATION);
+        logger.write_decimal_u64(summary.cr3_writes);
+        logger.write_bytes(&PKAVM_ACTIVATION_TAIL);
+        logger.write_bytes(&PKAVM_INVALIDATION);
+        logger.write_decimal_u64(summary.local_invalidations);
+        logger.write_bytes(&PKAVM_RECEIPTS);
+        logger.write_decimal_u64(summary.active_receipts);
+        logger.write_bytes(&PKAVM_PROBE);
+        logger.write_hex_u64(u64::from(proof.probe_value));
+        logger.write_bytes(&PKAVM_INVALIDATION_TAIL);
+        logger.write_bytes(&PKAVM_RESULT);
+        logger.write_decimal_u64(proof.final_allocated_pages);
+        logger.write_bytes(&PKAVM_PHYSICAL_WRITES);
+        logger.write_decimal_u64(proof.physical_write_count);
+        logger.write_bytes(&PKAVM_TEMPORARY_WRITES);
+        logger.write_decimal_u64(proof.temporary_pte_write_count);
+        logger.write_bytes(&PKAVM_BOOTSTRAP_INVLPG);
+        logger.write_decimal_u64(proof.bootstrap_invalidation_count);
+        logger.write_bytes(&PKAVM_ALLOCATIONS);
+        logger.write_decimal_u64(proof.final_allocation_count);
+        logger.write_bytes(&PKAVM_FREES);
+        logger.write_decimal_u64(proof.final_free_count);
+        logger.write_bytes(&PKAVM_RESULT_TAIL);
+        halt_forever()
+    }
+
     if trap_scenario == DevelopmentTrapScenario::XstatePolicy {
         // SAFETY: PKXFER1 transferred exactly once at CPL0 with IF/DF clear. The opt-in
         // PKXSTATE1 profile owns the BSP's x87/SSE state and its private aligned images.
@@ -1666,6 +1946,9 @@ extern "C" fn poole_kernel_rust_entry(
         }
         DevelopmentTrapScenario::VirtualMemory => {
             poole_kernel_emergency_panic(PanicCode::VirtualMemory as u32)
+        }
+        DevelopmentTrapScenario::ActiveVirtualMemory => {
+            poole_kernel_emergency_panic(PanicCode::ActiveVirtualMemory as u32)
         }
     }
 }

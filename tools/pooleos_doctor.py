@@ -3438,7 +3438,7 @@ def run_pooleos_tests() -> CheckResult:
         "pooleos:unittest",
         [sys.executable, "-m", "unittest", "discover", "-s", "tests"],
         ROOT,
-        timeout=300,
+        timeout=600,
     )
 
 

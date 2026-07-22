@@ -182,6 +182,7 @@ BOUND_SOURCE_PATHS = (
     "specs/native-kernel-virtual-memory-contract.schema.json",
     "specs/native-kernel-virtual-memory-readiness.schema.json",
     "native/kernel/src/virtual_memory.rs",
+    "native/kernel/src/active_virtual_memory.rs",
     "runtime/native_kernel_virtual_memory.py",
     "tools/qualify_native_kernel_virtual_memory.py",
     "tests/test_native_kernel_virtual_memory.py",

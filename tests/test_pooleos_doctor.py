@@ -14,6 +14,23 @@ class PooleOSDoctorTests(unittest.TestCase):
             calls.append((name, cmd, cwd, timeout))
             return pooleos_doctor.CheckResult(name, True, "pass")
 
+        with mock.patch.object(pooleos_doctor, "run_command", side_effect=fake_run_command):
+            result = pooleos_doctor.run_pooleos_tests()
+
+        self.assertTrue(result.ok)
+        self.assertEqual(
+            calls,
+            [
+                (
+                    "pooleos:unittest",
+                    [pooleos_doctor.sys.executable, "-m", "unittest", "discover", "-s", "tests"],
+                    pooleos_doctor.ROOT,
+                    600,
+                )
+            ],
+        )
+        calls.clear()
+
         with tempfile.TemporaryDirectory() as temp_dir:
             pooleglyph = Path(temp_dir) / "PooleGlyph"
             pooleglyph.mkdir()

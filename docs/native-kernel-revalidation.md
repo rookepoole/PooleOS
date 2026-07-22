@@ -105,7 +105,9 @@ leaving direct errata and numeric microcode-floor authority open. PKXSTATE1 and
 PKXEXC1 separately prove bounded one-BSP x87/SSE ownership and exception
 delivery/recovery, while PKMSR1 separately proves bounded read-only privileged-
 MSR policy observation. Cycle 125 separately closes the bounded PKPMM1
-physical-page foundation, and Cycle 126 separately closes the bounded PKVM1
-inactive virtual-memory foundation. The next owner-independent move is
-`N9-VM-ACTIVE-001` without target, scheduler, SMP, userspace, heap, pager, or
+physical-page foundation, Cycle 126 closes the bounded PKVM1 inactive
+virtual-memory foundation, and Cycle 127 closes the bounded one-BSP PKVM2
+candidate-root activation, direct-map, exact CR3 restoration, and local
+invalidation-receipt move. The next owner-independent move is
+`N9-PMM-SCRUB-001` without target, scheduler, SMP, userspace, heap, pager, or
 production promotion.
