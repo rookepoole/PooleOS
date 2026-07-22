@@ -25,7 +25,7 @@ PKXSTATE1 selects only XCR0 bits 0 and 1: x87 and SSE. CPUID must report x87, FX
 
 - eager save/restore; CR0.TS is clear and any `#NM` is unexpected;
 - standard-format `XSAVE64` and `XRSTOR64`;
-- XSS zero and no XSAVES/XRSTORS or compacted supervisor format;
+- XSS zero and no XSAVES/XRSTORS or compacted supervisor format; advertised XSAVES capability is allowed without selecting it;
 - 4,096-byte, 64-byte-aligned per-context areas, with CPUID-reported enabled size bounded to 576-4,096 bytes;
 - x87 control word `0x037F`;
 - MXCSR `0x1F80`, accepted only after masking against MXCSR_MASK, with architectural fallback `0x0000FFBF` when the reported mask is zero;
@@ -44,7 +44,7 @@ After the final canonical restore, both 4,096-byte context images are volatile-z
 
 ## Failure boundary
 
-The oracle rejects marker omission, order and duplication faults; selector or contract drift; missing x87/SSE/XSAVE features; invalid XCR0 or XSS; XSAVES exposure; malformed size or alignment; CR0/CR4 policy faults; noncanonical FCW/MXCSR state; wrong save/restore counts; unsupported XSTATE_BV bits; cross-context contamination; missing scheduler preconditions; kernel SIMD use; incomplete clearing; unexpected `#NM`; unauthorized writes, signatures, grants, actions; and scheduler, SMP, or target overclaims.
+The oracle rejects marker omission, order and duplication faults; selector or contract drift; missing x87/SSE/XSAVE features; invalid XCR0 or XSS; unknown CPUID leaf-D1 capability bits; malformed size or alignment; CR0/CR4 policy faults; noncanonical FCW/MXCSR state; wrong save/restore counts; unsupported XSTATE_BV bits; cross-context contamination; missing scheduler preconditions; kernel SIMD use; incomplete clearing; unexpected `#NM`; unauthorized writes, signatures, grants, actions; and scheduler, SMP, or target overclaims.
 
 ## Source binding
 

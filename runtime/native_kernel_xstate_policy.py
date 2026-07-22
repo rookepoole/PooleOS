@@ -56,7 +56,7 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N7-PKXSTATE-OSXSAVE-FEATURE",
     "NEG-N7-PKXSTATE-SSE2-FEATURE",
     "NEG-N7-PKXSTATE-XCR0-SUPPORT",
-    "NEG-N7-PKXSTATE-XSAVES",
+    "NEG-N7-PKXSTATE-LEAFD1-RESERVED",
     "NEG-N7-PKXSTATE-ENABLED-SIZE-LOW",
     "NEG-N7-PKXSTATE-ENABLED-SIZE-HIGH",
     "NEG-N7-PKXSTATE-MAXIMUM-SIZE",
@@ -212,8 +212,9 @@ def contract_errors(contract: dict[str, Any]) -> list[str]:
             "strategy",
             "format",
             "kernel_simd",
+            "xsaves_capability_allowed_without_selection",
         )
-    ) != (3, 0, 4096, 64, 0x037F, 0x1F80, 0xFFBF, "eager", "standard_xsave", "forbidden"):
+    ) != (3, 0, 4096, 64, 0x037F, 0x1F80, 0xFFBF, "eager", "standard_xsave", "forbidden", True):
         errors.append("PKXSTATE1 frozen policy changed")
     qualification = contract.get("qualification", {})
     if (
@@ -297,7 +298,7 @@ def _validate_prefix(markers: list[str]) -> dict[str, Any]:
     if arm is None or int(arm.group(10)) != SELECTOR:
         raise KernelXstatePolicyError("PKXSTATE1 selector changed")
     baseline = markers[:PREFIX_MARKER_COUNT]
-    baseline[23] = re.sub(r"trap_scenario=[0-5]", "trap_scenario=0", baseline[23], count=1)
+    baseline[23] = re.sub(r"trap_scenario=[0-6]", "trap_scenario=0", baseline[23], count=1)
     terminal = (
         "POOLEOS:KERNEL:TRANSFER-DENIED PASS contract=PKXFER1 terminal=halt "
         "entry_count=1 post_exit_firmware_calls=0 signatures=0 authority=0 actions=0 writes=0"
@@ -338,8 +339,8 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         raise KernelXstatePolicyError("PKXSTATE1 x87/SSE features missing")
     if capability["supported_xcr0"] & SELECTED_XCR0 != SELECTED_XCR0:
         raise KernelXstatePolicyError("PKXSTATE1 component support missing")
-    if capability["leaf_d1_eax"] & (1 << 3):
-        raise KernelXstatePolicyError("PKXSTATE1 XSAVES supervisor state is prohibited")
+    if capability["leaf_d1_eax"] & ~0x0F:
+        raise KernelXstatePolicyError("PKXSTATE1 CPUID leaf D1 contains an unknown capability")
     if not 576 <= capability["enabled_area_bytes"] <= AREA_BYTES or capability["maximum_area_bytes"] < capability["enabled_area_bytes"]:
         raise KernelXstatePolicyError("PKXSTATE1 area size is invalid")
 

@@ -43,6 +43,7 @@
     "xsaveopt_selected": false,
     "xsavec_selected": false,
     "xsaves_selected": false,
+    "xsaves_capability_allowed_without_selection": true,
     "lazy_nm_selected": false,
     "context_owner_ids": [
       10,
@@ -107,7 +108,7 @@
     "NEG-N7-PKXSTATE-OSXSAVE-FEATURE",
     "NEG-N7-PKXSTATE-SSE2-FEATURE",
     "NEG-N7-PKXSTATE-XCR0-SUPPORT",
-    "NEG-N7-PKXSTATE-XSAVES",
+    "NEG-N7-PKXSTATE-LEAFD1-RESERVED",
     "NEG-N7-PKXSTATE-ENABLED-SIZE-LOW",
     "NEG-N7-PKXSTATE-ENABLED-SIZE-HIGH",
     "NEG-N7-PKXSTATE-MAXIMUM-SIZE",

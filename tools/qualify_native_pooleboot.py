@@ -160,6 +160,7 @@ def _build_and_test(
         "development-trap-malformed-frame",
         "development-cpu-policy",
         "development-xstate-policy",
+        "development-xstate-exception",
     }
     if development_feature is not None and development_feature not in allowed_features:
         raise QualificationError("unknown PooleBoot development feature")

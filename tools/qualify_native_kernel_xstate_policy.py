@@ -82,8 +82,8 @@ def _negative_controls(markers: list[str]) -> list[dict[str, str]]:
         29, "leaf1_edx", _hex(cap["leaf1_edx"] & ~(1 << 26))
     )
     candidates["NEG-N7-PKXSTATE-XCR0-SUPPORT"] = changed(29, "supported_xcr0", _hex(1))
-    candidates["NEG-N7-PKXSTATE-XSAVES"] = changed(
-        29, "leafd1_eax", _hex(cap["leaf_d1_eax"] | (1 << 3))
+    candidates["NEG-N7-PKXSTATE-LEAFD1-RESERVED"] = changed(
+        29, "leafd1_eax", _hex(cap["leaf_d1_eax"] | (1 << 4))
     )
     candidates["NEG-N7-PKXSTATE-ENABLED-SIZE-LOW"] = changed(29, "enabled_bytes", "575")
     candidates["NEG-N7-PKXSTATE-ENABLED-SIZE-HIGH"] = changed(29, "enabled_bytes", "4097")
@@ -140,7 +140,9 @@ def _source_audit() -> dict[str, Any]:
     start = source.index("unsafe fn write_cr0")
     end = source.index("pub unsafe fn observe_cpu_policy", start)
     segment = source[start:end].lower()
-    outside = (source[:start] + source[end:]).lower()
+    exception_start = source.index(".global poole_trigger_x87_exception", end)
+    exception_scope = source[exception_start:].lower()
+    outside = (source[:start] + source[end:exception_start]).lower()
     required = {
         "cr0_write": '"mov cr0, {}"',
         "cr4_write": '"mov cr4, {}"',
@@ -153,7 +155,15 @@ def _source_audit() -> dict[str, Any]:
         raise QualificationError(f"PKXSTATE1 required instruction audit failed: {counts}")
     forbidden = ("wrmsr", "xsaves64", "xrstors64", "ymm", "zmm")
     hits = [token for token in forbidden if token in segment]
-    if hits or "xmm0" in outside:
+    exception_vector_tokens = {
+        "xmm0": exception_scope.count("xmm0"),
+        "xmm1": exception_scope.count("xmm1"),
+    }
+    if exception_vector_tokens != {"xmm0": 3, "xmm1": 3}:
+        raise QualificationError(
+            f"PKXSTATE1 child PKXEXC1 scope changed: {exception_vector_tokens}"
+        )
+    if hits or "xmm0" in outside or "xmm1" in outside:
         raise QualificationError(f"PKXSTATE1 source restriction audit failed: {hits}")
     return {
         "scope": "dedicated PKXSTATE1 architectural helpers and proof path",
@@ -162,6 +172,7 @@ def _source_audit() -> dict[str, Any]:
         "forbidden_tokens": list(forbidden),
         "forbidden_token_hits": [],
         "xmm0_occurrences_outside_scope": 0,
+        "child_pkxexc1_vector_token_counts": exception_vector_tokens,
         "result": "pass_bounded_source_instruction_audit",
     }
 

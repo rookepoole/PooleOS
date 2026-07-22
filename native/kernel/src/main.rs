@@ -15,13 +15,15 @@ use poolekernel::{
     BUILD_ID, ByteSink, CPU_POLICY_CONTRACT_ID, DevelopmentTrapScenario, EARLY_LOG_CAPACITY,
     EarlyLogger, EarlyRing, Framebuffer, PanicCode, PanicDisposition, PanicState,
     TRANSFER_CONTRACT_ID, TRAP_CONTRACT_ID, TrapDisposition, TrapError, TrapExpectation,
-    TrapObservation, decode_cpu_identity, revalidation, validate_cpu_policy_snapshot,
-    validate_descriptor_state, validate_development_handoff, validate_entry_envelope,
-    validate_handoff, validate_runtime_state, validate_trap_observation,
+    TrapObservation, XSTATE_EXCEPTION_CONTRACT_ID, decode_cpu_identity, revalidation,
+    validate_cpu_policy_snapshot, validate_descriptor_state, validate_development_handoff,
+    validate_entry_envelope, validate_handoff, validate_runtime_state, validate_trap_observation,
+    validate_xstate_exception_descriptor_state,
     xstate::{
         AREA_BYTES as XSTATE_AREA_BYTES, CONTRACT_ID as XSTATE_CONTRACT_ID, ContextSwitch,
         effective_mxcsr_mask, validate_context_switch, validate_proof as validate_xstate_proof,
     },
+    xstate_exception::{XstateExceptionKind, XstateExceptionState, validate_exception_state},
 };
 
 #[used]
@@ -29,12 +31,51 @@ use poolekernel::{
 static KERNEL_MANIFEST: [u8; include_bytes!("../manifest.pkm").len()] =
     *include_bytes!("../manifest.pkm");
 
+#[used]
+#[unsafe(link_section = ".text.pkxexc_literals")]
+static XSTATE_EXCEPTION_ARM_MARKER: [u8; b"POOLEOS:KERNEL:XSTATE-EXCEPTION-ARM PASS contract=PKXEXC1 sequence=16,19,7 x87=invalid fcw=0x000000000000037E simd=invalid mxcsr=0x0000000000001F00 nm_strategy=eager_reject\n".len()] =
+    *b"POOLEOS:KERNEL:XSTATE-EXCEPTION-ARM PASS contract=PKXEXC1 sequence=16,19,7 x87=invalid fcw=0x000000000000037E simd=invalid mxcsr=0x0000000000001F00 nm_strategy=eager_reject\n";
+
+#[used]
+#[unsafe(link_section = ".text.pkxexc_literals")]
+static XSTATE_EXCEPTION_NM_ARM_MARKER: [u8; b"POOLEOS:KERNEL:XSTATE-EXCEPTION-NM-ARM PASS contract=PKXEXC1 vector=7 injection=test_only cr0_ts=1 recovery=forbidden terminal=reject\n".len()] =
+    *b"POOLEOS:KERNEL:XSTATE-EXCEPTION-NM-ARM PASS contract=PKXEXC1 vector=7 injection=test_only cr0_ts=1 recovery=forbidden terminal=reject\n";
+
+#[used]
+#[unsafe(link_section = ".text.pkxexc_literals")]
+static XSTATE_EXCEPTION_NM_REJECT_MARKER: [u8; b"POOLEOS:KERNEL:XSTATE-EXCEPTION-NM-REJECT PASS contract=PKXEXC1 vector=7 strategy=eager reason=ts_set injection=test_only state_sampled=0 recovery=forbidden terminal=halt\n".len()] =
+    *b"POOLEOS:KERNEL:XSTATE-EXCEPTION-NM-REJECT PASS contract=PKXEXC1 vector=7 strategy=eager reason=ts_set injection=test_only state_sampled=0 recovery=forbidden terminal=halt\n";
+
+#[used]
+#[unsafe(link_section = ".text.pkxexc_literals")]
+static XSTATE_EXCEPTION_RESULT_MARKER: [u8; b"POOLEOS:KERNEL:XSTATE-EXCEPTION-RESULT PASS contract=PKXEXC1 deliveries=3 recovered=2 nm_rejected=1 privileged_writes=4 recovery_writes=2 unexpected=0 signatures=0 authority=0 actions=0 scheduler=0 smp=0 target=0 terminal=halt\n".len()] =
+    *b"POOLEOS:KERNEL:XSTATE-EXCEPTION-RESULT PASS contract=PKXEXC1 deliveries=3 recovered=2 nm_rejected=1 privileged_writes=4 recovery_writes=2 unexpected=0 signatures=0 authority=0 actions=0 scheduler=0 smp=0 target=0 terminal=halt\n";
+
+#[used]
+#[unsafe(link_section = ".text.pkxexc_literals")]
+static XSTATE_EXCEPTION_SETUP_PREFIX: [u8;
+    b"POOLEOS:KERNEL:XSTATE-EXCEPTION-SETUP PASS contract=".len()] =
+    *b"POOLEOS:KERNEL:XSTATE-EXCEPTION-SETUP PASS contract=";
+
+#[used]
+#[unsafe(link_section = ".text.pkxexc_literals")]
+static XSTATE_EXCEPTION_SIMD_DELIVERY_ERROR_PREFIX: [u8;
+    b"POOLEOS:KERNEL:XSTATE-EXCEPTION-SIMD-DELIVERY-ERROR returned=".len()] =
+    *b"POOLEOS:KERNEL:XSTATE-EXCEPTION-SIMD-DELIVERY-ERROR returned=";
+
+#[used]
+#[unsafe(link_section = ".text.pkxexc_literals")]
+static XSTATE_EXCEPTION_PARENT_ERROR_PREFIX: [u8;
+    b"POOLEOS:KERNEL:XSTATE-EXCEPTION-PARENT-ERROR reason=".len()] =
+    *b"POOLEOS:KERNEL:XSTATE-EXCEPTION-PARENT-ERROR reason=";
+
 static EARLY_RING: EarlyRing = EarlyRing::new();
 static PANIC_STATE: PanicState = PanicState::new();
 static ENTRY_COUNT: AtomicU32 = AtomicU32::new(0);
 static TRAP_SCENARIO: AtomicU64 = AtomicU64::new(0);
 static TRAP_DEPTH: AtomicU32 = AtomicU32::new(0);
 static TRAP_RETURN_COUNT: AtomicU32 = AtomicU32::new(0);
+static XSTATE_EXCEPTION_RETURN_COUNT: AtomicU32 = AtomicU32::new(0);
 static EXPECTED_PAGE_FAULT_ADDRESS: AtomicU64 = AtomicU64::new(0);
 static IST1_BOTTOM: AtomicU64 = AtomicU64::new(0);
 static IST1_TOP: AtomicU64 = AtomicU64::new(0);
@@ -117,6 +158,8 @@ extern "C" fn poole_kernel_emergency_panic(code: u32) -> ! {
         0x100a => PanicCode::DescriptorState,
         0x100b => PanicCode::TrapContract,
         0x100c => PanicCode::CpuPolicy,
+        0x100d => PanicCode::XstatePolicy,
+        0x100e => PanicCode::XstateException,
         _ => PanicCode::UnexpectedReturn,
     };
     let disposition = PANIC_STATE.begin(code);
@@ -575,6 +618,90 @@ extern "C" fn poole_kernel_rust_entry(
         halt_forever()
     }
 
+    if trap_scenario == DevelopmentTrapScenario::XstateException {
+        // SAFETY: PKXFER1 transferred once at CPL0 with IF/DF clear. PKXEXC1 first
+        // reproduces the complete parent PKXSTATE1 configuration and ownership proof.
+        let proof = match unsafe { arch::x86_64::run_xstate_policy() } {
+            Ok(value) => value,
+            Err(error) => {
+                let mut logger = EarlyLogger::new(BootSink {
+                    serial: &mut serial,
+                    debugcon: &mut debugcon,
+                    ring: &EARLY_RING,
+                });
+                logger.write_bytes(&XSTATE_EXCEPTION_PARENT_ERROR_PREFIX);
+                logger.write_str(error.label());
+                logger.write_str("\n");
+                poole_kernel_emergency_panic(PanicCode::XstateException as u32)
+            }
+        };
+        if validate_xstate_proof(&proof).is_err() {
+            poole_kernel_emergency_panic(PanicCode::XstateException as u32);
+        }
+        // SAFETY: the opt-in selector owns the BSP descriptor statics until terminal halt.
+        let descriptor_state =
+            unsafe { arch::x86_64::install_xstate_exception_descriptor_tables(stack_top as u64) };
+        if validate_xstate_exception_descriptor_state(&descriptor_state).is_err() {
+            poole_kernel_emergency_panic(PanicCode::XstateException as u32);
+        }
+        IST1_BOTTOM.store(descriptor_state.ist1_bottom, Ordering::Release);
+        IST1_TOP.store(descriptor_state.ist1_top, Ordering::Release);
+        IST2_BOTTOM.store(descriptor_state.ist2_bottom, Ordering::Release);
+        IST2_TOP.store(descriptor_state.ist2_top, Ordering::Release);
+        {
+            let mut logger = EarlyLogger::new(BootSink {
+                serial: &mut serial,
+                debugcon: &mut debugcon,
+                ring: &EARLY_RING,
+            });
+            logger.write_bytes(&XSTATE_EXCEPTION_SETUP_PREFIX);
+            logger.write_str(XSTATE_EXCEPTION_CONTRACT_ID);
+            logger.write_str(" parent=PKXSTATE1 selector=6 bsp=1 gates=");
+            logger.write_decimal_u64(u64::from(descriptor_state.installed_gate_count));
+            logger.write_str(" vectors=7,16,19 ist=1 xcr0=");
+            logger.write_hex_u64(proof.policy.selected_xcr0);
+            logger.write_str(" cr0=");
+            logger.write_hex_u64(proof.policy.cr0);
+            logger.write_str(" cr4=");
+            logger.write_hex_u64(proof.policy.cr4);
+            logger.write_str(" parent_control_writes=3 exceptions_masked_default=1 if=0\n");
+            logger.write_bytes(&XSTATE_EXCEPTION_ARM_MARKER);
+        }
+        // SAFETY: vector 16 is installed; the helper unmask is confined to the owned x87 state.
+        unsafe { arch::x86_64::trigger_x87_exception() };
+        // SAFETY: vector 19 is installed; the helper unmask is confined to the owned SSE state.
+        unsafe { arch::x86_64::trigger_simd_exception() };
+        if XSTATE_EXCEPTION_RETURN_COUNT.load(Ordering::Acquire) != 2 {
+            let (mxcsr, cr4) = arch::x86_64::observe_simd_exception_diagnostic();
+            let mut logger = EarlyLogger::new(BootSink {
+                serial: &mut serial,
+                debugcon: &mut debugcon,
+                ring: &EARLY_RING,
+            });
+            logger.write_bytes(&XSTATE_EXCEPTION_SIMD_DELIVERY_ERROR_PREFIX);
+            logger.write_decimal_u64(u64::from(
+                XSTATE_EXCEPTION_RETURN_COUNT.load(Ordering::Acquire),
+            ));
+            logger.write_str(" mxcsr=");
+            logger.write_hex_u64(u64::from(mxcsr));
+            logger.write_str(" cr4=");
+            logger.write_hex_u64(cr4);
+            logger.write_str("\n");
+            poole_kernel_emergency_panic(PanicCode::XstateException as u32);
+        }
+        {
+            let mut logger = EarlyLogger::new(BootSink {
+                serial: &mut serial,
+                debugcon: &mut debugcon,
+                ring: &EARLY_RING,
+            });
+            logger.write_bytes(&XSTATE_EXCEPTION_NM_ARM_MARKER);
+        }
+        // SAFETY: this terminal helper performs the fourth privileged configuration write,
+        // then executes FNOP at the exact exported #NM origin and cannot return.
+        unsafe { arch::x86_64::trigger_device_not_available_rejection() }
+    }
+
     // SAFETY: PKXFER1 has installed the retained bootstrap stack, disabled IF/DF,
     // and transferred once on the BSP. PKTRAP1 owns these private descriptor statics.
     let descriptor_state = unsafe { arch::x86_64::install_descriptor_tables(stack_top as u64) };
@@ -683,6 +810,9 @@ extern "C" fn poole_kernel_rust_entry(
         DevelopmentTrapScenario::XstatePolicy => {
             poole_kernel_emergency_panic(PanicCode::XstatePolicy as u32)
         }
+        DevelopmentTrapScenario::XstateException => {
+            poole_kernel_emergency_panic(PanicCode::XstateException as u32)
+        }
     }
 }
 
@@ -699,6 +829,10 @@ extern "C" fn poole_kernel_trap_dispatch(frame_pointer: *mut TrapFrame) {
     let frame = unsafe { &mut *frame_pointer };
     let scenario = DevelopmentTrapScenario::from_selector(TRAP_SCENARIO.load(Ordering::Acquire))
         .unwrap_or_else(|| poole_kernel_emergency_panic(PanicCode::TrapContract as u32));
+    if scenario == DevelopmentTrapScenario::XstateException {
+        dispatch_xstate_exception(frame, depth);
+        return;
+    }
     let (fault_rip, resume_rip, expected_cr2, ist_bottom, ist_top, terminal) =
         match (scenario, frame.vector) {
             (DevelopmentTrapScenario::Returning | DevelopmentTrapScenario::MalformedFrame, 3) => (
@@ -816,6 +950,145 @@ extern "C" fn poole_kernel_trap_dispatch(frame_pointer: *mut TrapFrame) {
             logger.write_str(
                 "POOLEOS:KERNEL:TRAP-RESULT PASS contract=PKTRAP1 scenario=double_fault vector=8 ist=2 terminal=halt\n",
             );
+            halt_forever()
+        }
+    }
+}
+
+fn dispatch_xstate_exception(frame: &mut TrapFrame, depth: u32) {
+    let (kind, fault_rip, resume_rip, transition, sampled, injected) = match frame.vector {
+        16 => {
+            // SAFETY: vector 16 runs with TS clear and the PKXEXC1 handler owns x87 state.
+            let value = unsafe { arch::x86_64::recover_x87_exception() };
+            (
+                XstateExceptionKind::X87Invalid,
+                arch::x86_64::x87_exception_fault_address(),
+                arch::x86_64::x87_exception_resume_address(),
+                value,
+                true,
+                false,
+            )
+        }
+        19 => {
+            // SAFETY: vector 19 runs with TS clear and the PKXEXC1 handler owns SSE state.
+            let value = unsafe { arch::x86_64::recover_simd_exception() };
+            (
+                XstateExceptionKind::SimdInvalid,
+                arch::x86_64::simd_exception_fault_address(),
+                arch::x86_64::simd_exception_resume_address(),
+                value,
+                true,
+                false,
+            )
+        }
+        7 => {
+            let (cr0, cr4) = arch::x86_64::observe_xstate_control_state();
+            (
+                XstateExceptionKind::DeviceNotAvailable,
+                arch::x86_64::device_not_available_fault_address(),
+                arch::x86_64::device_not_available_fault_address(),
+                arch::x86_64::XstateExceptionTransition {
+                    cr0,
+                    cr4,
+                    fcw_before: 0,
+                    fsw_before: 0,
+                    mxcsr_before: 0,
+                    fcw_after: 0,
+                    fsw_after: 0,
+                    mxcsr_after: 0,
+                },
+                false,
+                true,
+            )
+        }
+        _ => poole_kernel_emergency_panic(PanicCode::XstateException as u32),
+    };
+    let observation = TrapObservation {
+        vector: frame.vector,
+        error_code: frame.error_code,
+        rip: frame.rip,
+        code_selector: frame.code_selector,
+        rflags: frame.rflags,
+        saved_rsp: frame.rsp,
+        data_selector: frame.data_selector,
+        cr2: 0,
+        handler_rsp: frame as *mut TrapFrame as u64,
+        depth,
+    };
+    let state = XstateExceptionState {
+        kind,
+        trap: observation,
+        expected_fault_rip: fault_rip,
+        expected_resume_rip: resume_rip,
+        ist_bottom: IST1_BOTTOM.load(Ordering::Acquire),
+        ist_top: IST1_TOP.load(Ordering::Acquire),
+        cr0: transition.cr0,
+        cr4: transition.cr4,
+        fcw_before: transition.fcw_before,
+        fsw_before: transition.fsw_before,
+        mxcsr_before: transition.mxcsr_before,
+        fcw_after: transition.fcw_after,
+        fsw_after: transition.fsw_after,
+        mxcsr_after: transition.mxcsr_after,
+        state_sampled: sampled,
+        test_only_ts_injected: injected,
+    };
+    let disposition = validate_exception_state(&state)
+        .unwrap_or_else(|_| poole_kernel_emergency_panic(PanicCode::XstateException as u32));
+
+    // SAFETY: the bounded ring-0 diagnostic path uses only the fixed COM1 probe with IF clear.
+    let mut serial = unsafe { Com1::initialize() };
+    let mut debugcon = DebugCon::new();
+    let mut logger = EarlyLogger::new(BootSink {
+        serial: &mut serial,
+        debugcon: &mut debugcon,
+        ring: &EARLY_RING,
+    });
+    logger.write_str("POOLEOS:KERNEL:XSTATE-EXCEPTION-ENTER PASS contract=");
+    logger.write_str(XSTATE_EXCEPTION_CONTRACT_ID);
+    logger.write_str(" kind=");
+    logger.write_str(kind.label());
+    logger.write_str(" vector=");
+    logger.write_decimal_u64(frame.vector);
+    logger.write_str(" error=");
+    logger.write_hex_u64(frame.error_code);
+    logger.write_str(" depth=");
+    logger.write_decimal_u64(u64::from(depth));
+    logger.write_str(" ist=1\n");
+
+    match disposition {
+        TrapDisposition::ResumeAt(address) => {
+            logger.write_str("POOLEOS:KERNEL:XSTATE-EXCEPTION-STATE PASS contract=");
+            logger.write_str(XSTATE_EXCEPTION_CONTRACT_ID);
+            logger.write_str(" kind=");
+            logger.write_str(kind.label());
+            logger.write_str(" fcw_before=");
+            logger.write_hex_u64(u64::from(transition.fcw_before));
+            logger.write_str(" fsw_before=");
+            logger.write_hex_u64(u64::from(transition.fsw_before));
+            logger.write_str(" mxcsr_before=");
+            logger.write_hex_u64(u64::from(transition.mxcsr_before));
+            logger.write_str(" fcw_after=");
+            logger.write_hex_u64(u64::from(transition.fcw_after));
+            logger.write_str(" fsw_after=");
+            logger.write_hex_u64(u64::from(transition.fsw_after));
+            logger.write_str(" mxcsr_after=");
+            logger.write_hex_u64(u64::from(transition.mxcsr_after));
+            logger.write_str(" state_sampled=1\n");
+            frame.rip = address;
+            let returned = XSTATE_EXCEPTION_RETURN_COUNT.fetch_add(1, Ordering::AcqRel) + 1;
+            logger.write_str("POOLEOS:KERNEL:XSTATE-EXCEPTION-RETURN PASS contract=");
+            logger.write_str(XSTATE_EXCEPTION_CONTRACT_ID);
+            logger.write_str(" vector=");
+            logger.write_decimal_u64(frame.vector);
+            logger.write_str(" resume=exact returned=");
+            logger.write_decimal_u64(u64::from(returned));
+            logger.write_str(" recovery_write=1\n");
+            TRAP_DEPTH.store(0, Ordering::Release);
+        }
+        TrapDisposition::Halt => {
+            logger.write_bytes(&XSTATE_EXCEPTION_NM_REJECT_MARKER);
+            logger.write_bytes(&XSTATE_EXCEPTION_RESULT_MARKER);
             halt_forever()
         }
     }

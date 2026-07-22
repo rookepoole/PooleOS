@@ -7,7 +7,7 @@
     "contract": {
       "path": "specs/native-boot-trust-contract.json",
       "byte_count": 10828,
-      "sha256": "2C3C8F71BE5C86E333D7013D5783FA1F6174EAD22BB056152306D0D0F605C4C3"
+      "sha256": "9EAED1CD7009E895E5B68FDD53B667770D68F9380E4109A2872434BA73D90C59"
     },
     "toolchain_lock": {
       "path": "specs/native-toolchain-lock.json",
@@ -57,8 +57,8 @@
       },
       {
         "path": "native/boot/Cargo.toml",
-        "byte_count": 936,
-        "sha256": "1A85A36B29C089A76A00B0F3F985808C71D2DDAE43E58082FF5FAC98E1DBF569"
+        "byte_count": 992,
+        "sha256": "BDA968ABC95B2E143D811437E82489619F74EF1A4DDB60D4D1C4723CEF0D01F7"
       },
       {
         "path": "native/boot/src/kload.rs",

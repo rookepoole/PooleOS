@@ -2993,7 +2993,7 @@
       "basis": [
         "master checklist sections 020.3 and 021.1",
         "https://docs.amd.com/v/u/en-US/24593_3.44_APM_Vol2",
-        "Cycle 122 PKXSTATE1 xstate ownership and compiler-boundary audit"
+        "Cycles 122-123 PKXSTATE1 ownership and PKXEXC1 exception/machine-code audits"
       ]
     },
     {

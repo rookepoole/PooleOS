@@ -18,8 +18,8 @@ class NativeKernelXstatePolicyTests(unittest.TestCase):
         markers = list(readiness["execution"]["runs"][0]["markers"][:29])
         markers[23] = markers[23].replace("trap_scenario=4", "trap_scenario=5")
         markers[25] = markers[25].replace(
-            "PKBUILD1-CYCLE120-N7-CPU-POLICY-001",
             "PKBUILD1-CYCLE122-N7-XSTATE-POLICY-001",
+            "PKBUILD1-CYCLE123-N7-XSTATE-EXCEPTION-001",
         )
         markers.extend(
             [
@@ -83,7 +83,7 @@ class NativeKernelXstatePolicyTests(unittest.TestCase):
     def test_rejects_feature_control_and_supervisor_faults(self) -> None:
         mutations = (
             (29, "leaf1_ecx=0x000000000C000000", "leaf1_ecx=0x0000000008000000"),
-            (29, "leafd1_eax=0x0000000000000001", "leafd1_eax=0x0000000000000009"),
+            (29, "leafd1_eax=0x0000000000000001", "leafd1_eax=0x0000000000000011"),
             (30, "cr0_after=0x0000000080010033", "cr0_after=0x000000008001003B"),
             (30, "xcr0_after=0x0000000000000003", "xcr0_after=0x0000000000000001"),
             (30, "xss=0x0000000000000000", "xss=0x0000000000000001"),

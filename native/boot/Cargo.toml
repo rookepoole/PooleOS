@@ -13,6 +13,7 @@ development-trap-double-fault = ["development-transfer"]
 development-trap-malformed-frame = ["development-transfer"]
 development-cpu-policy = ["development-transfer"]
 development-xstate-policy = ["development-transfer"]
+development-xstate-exception = ["development-transfer"]
 
 [lib]
 name = "pooleboot"
