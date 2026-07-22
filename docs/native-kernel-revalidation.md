@@ -101,6 +101,7 @@ production readiness.
 PKTRAP1 separately proves the bounded BSP-only descriptor and deliberate-fault
 slice, while PKCPU1 separately proves the bounded qemu64 read-only CPU-policy
 slice. PKERR1 separately freezes a pure exact-target rejection policy while
-leaving direct errata and numeric microcode-floor authority open. The next
-owner-independent move is `N7-XSTATE-POLICY-001`: freeze x87/SSE/XSAVE
-ownership and sensitive-state rules without scheduler or SMP promotion.
+leaving direct errata and numeric microcode-floor authority open. PKXSTATE1 and
+PKXEXC1 separately prove bounded one-BSP x87/SSE ownership and exception
+delivery/recovery. The next owner-independent move is
+`N7-PRIVILEGE-MSR-POLICY-001` without target, scheduler, or SMP promotion.

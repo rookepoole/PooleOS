@@ -55,7 +55,7 @@ The public outputs are `runs/native-kernel-trap-readiness.json` and `runs/native
 - N7.1: PKCPU1 closes only a bounded qemu64 BSP CPUID/feature/topology/address-width observation; exact Tier 1 inventory and AP-local policy remain open.
 - N7.2: PKERR1 freezes a pure exact-target policy and exact current denial; applicable Model 40h-4Fh errata authority, a direct numeric microcode floor or ratified replacement, native per-processor evidence, kernel integration, and target qualification remain open.
 - N7.3: PKCPU1 closes only a bounded read-only qemu64 CR0/CR4/EFER/XCR0/APIC/PAT/MTRR observation; target state plus syscall/GS/TSC_AUX/MCE/performance MSRs remain open.
-- N7.4: PKXSTATE1 proves only bounded eager x87/SSE standard-XSAVE ownership on one QEMU BSP; AVX/extended state, deliberate xstate exceptions, real scheduler/thread integration, AP state, migration, final machine-code SIMD audit, and target evidence remain open.
+- N7.4: PKXSTATE1 proves bounded eager x87/SSE standard-XSAVE ownership and PKXEXC1 separately proves deliberate `#MF`/`#XM` delivery, exact bounded recovery, terminal test-only `#NM` rejection, and the linked-image machine-code scope on one WHPX BSP; AVX/extended state, scheduler and user-task delivery, AP state, migration, and target evidence remain open.
 - N7.5: per-CPU GDT/TSS/IDT, guarded RSP0/IST mappings, AP bring-up integration, generated assembly/Rust offsets, and user-transition frames.
 - N7.6: all exceptions, NMI and machine check, external interrupt entry, recursion and stack-exhaustion policy, persistent crash records, recovery routing, and broad adversarial tests.
 - Qualification: second independent host, target firmware, physical hardware, and measured production profiles.

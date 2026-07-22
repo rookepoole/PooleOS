@@ -18,7 +18,7 @@ const LEAF1_EDX_FXSR: u32 = 1 << 24;
 const LEAF1_EDX_SSE: u32 = 1 << 25;
 const LEAF1_EDX_SSE2: u32 = 1 << 26;
 const REQUIRED_LEAF1_EDX: u32 = LEAF1_EDX_FPU | LEAF1_EDX_FXSR | LEAF1_EDX_SSE | LEAF1_EDX_SSE2;
-const LEAF_D1_XSAVES: u32 = 1 << 3;
+const LEAF_D1_KNOWN_CAPABILITIES: u32 = 0x0f;
 const CR0_MP: u64 = 1 << 1;
 const CR0_EM: u64 = 1 << 2;
 const CR0_TS: u64 = 1 << 3;
@@ -122,8 +122,11 @@ pub fn validate_policy(policy: &XstatePolicy) -> Result<(), XstatePolicyError> {
     {
         return Err(XstatePolicyError::ControlState);
     }
-    if policy.xss != 0 || policy.leaf_d1_eax & LEAF_D1_XSAVES != 0 {
+    if policy.xss != 0 {
         return Err(XstatePolicyError::SupervisorState);
+    }
+    if policy.leaf_d1_eax & !LEAF_D1_KNOWN_CAPABILITIES != 0 {
+        return Err(XstatePolicyError::Feature);
     }
     let mxcsr_mask = effective_mxcsr_mask(policy.mxcsr_mask);
     if INITIAL_MXCSR & !mxcsr_mask != 0 {
@@ -301,11 +304,16 @@ mod tests {
             Err(XstatePolicyError::ControlState)
         );
         value = policy();
-        value.leaf_d1_eax |= LEAF_D1_XSAVES;
+        value.xss = 1;
         assert_eq!(
             validate_policy(&value),
             Err(XstatePolicyError::SupervisorState)
         );
+        value = policy();
+        value.leaf_d1_eax |= 1 << 3;
+        assert_eq!(validate_policy(&value), Ok(()));
+        value.leaf_d1_eax |= 1 << 4;
+        assert_eq!(validate_policy(&value), Err(XstatePolicyError::Feature));
     }
 
     #[test]

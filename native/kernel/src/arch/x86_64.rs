@@ -8,8 +8,8 @@ use core::sync::atomic::{Ordering, compiler_fence};
 use poolekernel::{
     ByteSink, CPU_MSR_APIC_BASE, CPU_MSR_EFER, CPU_MSR_MTRR_CAP, CPU_MSR_MTRR_DEF_TYPE,
     CPU_MSR_PAT, CpuControlState, CpuDiscovery, CpuPolicySnapshot, DescriptorState, GDT_LIMIT,
-    IDT_LIMIT, INSTALLED_EXCEPTION_GATE_COUNT, IST_STACK_BYTES, KERNEL_CODE_SELECTOR,
-    KERNEL_DATA_SELECTOR, KERNEL_TSS_SELECTOR,
+    IDT_LIMIT, INSTALLED_EXCEPTION_GATE_COUNT, INSTALLED_XSTATE_EXCEPTION_GATE_COUNT,
+    IST_STACK_BYTES, KERNEL_CODE_SELECTOR, KERNEL_DATA_SELECTOR, KERNEL_TSS_SELECTOR,
     xstate::{
         AREA_BYTES, INITIAL_FCW, INITIAL_MXCSR, KernelSimdPolicy, SELECTED_XCR0, SaveFormat,
         SwitchStrategy, XstatePolicy, XstateProof, effective_mxcsr_mask,
@@ -23,9 +23,12 @@ const MAX_READY_POLLS: usize = 4096;
 const IDT_ENTRY_COUNT: usize = 256;
 const BREAKPOINT_VECTOR: usize = 3;
 const INVALID_OPCODE_VECTOR: usize = 6;
+const DEVICE_NOT_AVAILABLE_VECTOR: usize = 7;
 const DOUBLE_FAULT_VECTOR: usize = 8;
 const GENERAL_PROTECTION_VECTOR: usize = 13;
 const PAGE_FAULT_VECTOR: usize = 14;
+const X87_FLOATING_POINT_VECTOR: usize = 16;
+const SIMD_FLOATING_POINT_VECTOR: usize = 19;
 const FAULT_IST_INDEX: u8 = 1;
 const DOUBLE_FAULT_IST_INDEX: u8 = 2;
 const INTERRUPT_GATE_PRESENT_RING0: u8 = 0x8e;
@@ -150,7 +153,6 @@ const CR0_NE: u64 = 1 << 5;
 const CR4_OSFXSR: u64 = 1 << 9;
 const CR4_OSXMMEXCPT: u64 = 1 << 10;
 const CR4_OSXSAVE: u64 = 1 << 18;
-const LEAF_D1_XSAVES: u32 = 1 << 3;
 
 #[repr(C, align(64))]
 struct XstateArea([u8; AREA_BYTES as usize]);
@@ -166,7 +168,6 @@ static mut XSTATE_FXSAVE: FxsaveArea = FxsaveArea([0; 512]);
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum XstateHardwareError {
     Unsupported,
-    SupervisorState,
     AreaSize,
     Configuration,
     RoundTrip,
@@ -177,7 +178,6 @@ impl XstateHardwareError {
     pub const fn label(self) -> &'static str {
         match self {
             Self::Unsupported => "unsupported",
-            Self::SupervisorState => "supervisor_state",
             Self::AreaSize => "area_size",
             Self::Configuration => "configuration",
             Self::RoundTrip => "round_trip",
@@ -381,10 +381,6 @@ pub unsafe fn run_xstate_policy() -> Result<XstateProof, XstateHardwareError> {
     if supported_xcr0 & SELECTED_XCR0 != SELECTED_XCR0 {
         return Err(XstateHardwareError::Unsupported);
     }
-    if leaf_d1.eax & LEAF_D1_XSAVES != 0 {
-        return Err(XstateHardwareError::SupervisorState);
-    }
-
     // SAFETY: support checks above establish the only architectural writes in PKXSTATE1.
     let initial_cr0 = unsafe { read_cr0() };
     // SAFETY: PKXSTATE1 executes at CPL0 after PKXFER1.
@@ -731,7 +727,32 @@ pub struct TrapFrame {
     pub data_selector: u64,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct XstateExceptionTransition {
+    pub cr0: u64,
+    pub cr4: u64,
+    pub fcw_before: u16,
+    pub fsw_before: u16,
+    pub mxcsr_before: u32,
+    pub fcw_after: u16,
+    pub fsw_after: u16,
+    pub mxcsr_after: u32,
+}
+
 pub unsafe fn install_descriptor_tables(rsp0: u64) -> DescriptorState {
+    // SAFETY: the caller owns the single-BSP PKTRAP1 descriptor installation.
+    unsafe { install_descriptor_tables_for_profile(rsp0, false) }
+}
+
+pub unsafe fn install_xstate_exception_descriptor_tables(rsp0: u64) -> DescriptorState {
+    // SAFETY: the caller owns the single-BSP PKXEXC1 descriptor installation.
+    unsafe { install_descriptor_tables_for_profile(rsp0, true) }
+}
+
+unsafe fn install_descriptor_tables_for_profile(
+    rsp0: u64,
+    include_xstate_exceptions: bool,
+) -> DescriptorState {
     // SAFETY: single-entry BSP initialization is the sole accessor to these statics.
     let (gdt_base, idt_base, tss_base, ist1_bottom, ist2_bottom) = unsafe {
         (
@@ -798,6 +819,30 @@ pub unsafe fn install_descriptor_tables(rsp0: u64) -> DescriptorState {
                 IdtGate::interrupt(handler, ist),
             )
         };
+    }
+    if include_xstate_exceptions {
+        for (vector, handler) in [
+            (
+                DEVICE_NOT_AVAILABLE_VECTOR,
+                poole_trap_device_not_available as *const () as usize as u64,
+            ),
+            (
+                X87_FLOATING_POINT_VECTOR,
+                poole_trap_x87_floating_point as *const () as usize as u64,
+            ),
+            (
+                SIMD_FLOATING_POINT_VECTOR,
+                poole_trap_simd_floating_point as *const () as usize as u64,
+            ),
+        ] {
+            // SAFETY: each extra PKXEXC1 vector is unique and within the live IDT.
+            unsafe {
+                write_volatile(
+                    addr_of_mut!(IDT.0).cast::<IdtGate>().add(vector),
+                    IdtGate::interrupt(handler, FAULT_IST_INDEX),
+                )
+            };
+        }
     }
 
     let gdtr = DescriptorPointer {
@@ -867,7 +912,11 @@ pub unsafe fn install_descriptor_tables(rsp0: u64) -> DescriptorState {
         code_selector,
         data_selector,
         task_selector,
-        installed_gate_count: INSTALLED_EXCEPTION_GATE_COUNT,
+        installed_gate_count: if include_xstate_exceptions {
+            INSTALLED_XSTATE_EXCEPTION_GATE_COUNT
+        } else {
+            INSTALLED_EXCEPTION_GATE_COUNT
+        },
         interrupts_enabled: rflags & (1 << 9) != 0,
     }
 }
@@ -945,6 +994,90 @@ pub fn double_fault_origin_address() -> u64 {
     poole_double_fault_origin as *const () as usize as u64
 }
 
+pub fn x87_exception_fault_address() -> u64 {
+    poole_x87_exception_fault as *const () as usize as u64
+}
+
+pub fn x87_exception_resume_address() -> u64 {
+    poole_x87_exception_resume as *const () as usize as u64
+}
+
+pub fn simd_exception_fault_address() -> u64 {
+    poole_simd_exception_fault as *const () as usize as u64
+}
+
+pub fn simd_exception_resume_address() -> u64 {
+    poole_simd_exception_resume as *const () as usize as u64
+}
+
+pub fn device_not_available_fault_address() -> u64 {
+    poole_device_not_available_fault as *const () as usize as u64
+}
+
+unsafe fn read_fsw() -> u16 {
+    let value: u16;
+    // SAFETY: FNSTSW is the non-waiting status observation required in a #MF handler.
+    unsafe { asm!("fnstsw ax", out("ax") value, options(nomem, nostack)) };
+    value
+}
+
+pub fn observe_xstate_control_state() -> (u64, u64) {
+    // SAFETY: PKXEXC1 invokes this only at CPL0 inside its installed handlers.
+    unsafe { (read_cr0(), read_cr4()) }
+}
+
+pub fn observe_simd_exception_diagnostic() -> (u32, u64) {
+    // SAFETY: the panic-only diagnostic runs at CPL0 with the parent eager policy live.
+    unsafe { (read_mxcsr(), read_cr4()) }
+}
+
+pub unsafe fn recover_x87_exception() -> XstateExceptionTransition {
+    // SAFETY: #MF dispatch runs at CPL0 with TS clear and owns the x87 state.
+    let cr0 = unsafe { read_cr0() };
+    // SAFETY: #MF dispatch runs at CPL0 after PKXSTATE1 configuration.
+    let cr4 = unsafe { read_cr4() };
+    // SAFETY: all three observations are non-mutating and valid with TS clear.
+    let (fcw_before, fsw_before, mxcsr_before) = unsafe { (read_fcw(), read_fsw(), read_mxcsr()) };
+    // SAFETY: FNINIT is the bounded non-waiting recovery action for the owned x87 state.
+    unsafe { asm!("fninit", options(nomem, nostack)) };
+    // SAFETY: the recovered state is live and readable after FNINIT.
+    let (fcw_after, fsw_after, mxcsr_after) = unsafe { (read_fcw(), read_fsw(), read_mxcsr()) };
+    XstateExceptionTransition {
+        cr0,
+        cr4,
+        fcw_before,
+        fsw_before,
+        mxcsr_before,
+        fcw_after,
+        fsw_after,
+        mxcsr_after,
+    }
+}
+
+pub unsafe fn recover_simd_exception() -> XstateExceptionTransition {
+    // SAFETY: #XM dispatch runs at CPL0 with TS clear and owns the SSE state.
+    let cr0 = unsafe { read_cr0() };
+    // SAFETY: #XM dispatch runs at CPL0 after PKXSTATE1 configuration.
+    let cr4 = unsafe { read_cr4() };
+    // SAFETY: all three observations are non-mutating and valid with TS clear.
+    let (fcw_before, fsw_before, mxcsr_before) = unsafe { (read_fcw(), read_fsw(), read_mxcsr()) };
+    let canonical = INITIAL_MXCSR;
+    // SAFETY: the canonical MXCSR contains no reserved bits and masks every exception.
+    unsafe { write_mxcsr(&canonical) };
+    // SAFETY: the recovered state is live and readable after LDMXCSR.
+    let (fcw_after, fsw_after, mxcsr_after) = unsafe { (read_fcw(), read_fsw(), read_mxcsr()) };
+    XstateExceptionTransition {
+        cr0,
+        cr4,
+        fcw_before,
+        fsw_before,
+        mxcsr_before,
+        fcw_after,
+        fsw_after,
+        mxcsr_after,
+    }
+}
+
 pub unsafe fn trigger_breakpoint() {
     // SAFETY: PKTRAP1 installs and validates the corresponding IDT gate before this call.
     unsafe { poole_trigger_breakpoint() };
@@ -965,12 +1098,30 @@ pub unsafe fn trigger_double_fault() -> ! {
     unsafe { poole_trigger_double_fault() }
 }
 
+pub unsafe fn trigger_x87_exception() {
+    // SAFETY: PKXEXC1 installed vector 16 and owns the live x87 state.
+    unsafe { poole_trigger_x87_exception() };
+}
+
+pub unsafe fn trigger_simd_exception() {
+    // SAFETY: PKXEXC1 installed vector 19 and owns the live SSE state.
+    unsafe { poole_trigger_simd_exception() };
+}
+
+pub unsafe fn trigger_device_not_available_rejection() -> ! {
+    // SAFETY: this terminal test-only path arms TS and immediately executes FNOP.
+    unsafe { poole_trigger_device_not_available_rejection() }
+}
+
 unsafe extern "C" {
     fn poole_trap_breakpoint();
     fn poole_trap_invalid_opcode();
+    fn poole_trap_device_not_available();
     fn poole_trap_double_fault();
     fn poole_trap_general_protection();
     fn poole_trap_page_fault();
+    fn poole_trap_x87_floating_point();
+    fn poole_trap_simd_floating_point();
     fn poole_trigger_breakpoint();
     fn poole_breakpoint_resume();
     fn poole_trigger_invalid_opcode();
@@ -981,6 +1132,14 @@ unsafe extern "C" {
     fn poole_page_fault_resume();
     fn poole_trigger_double_fault() -> !;
     fn poole_double_fault_origin();
+    fn poole_trigger_x87_exception();
+    fn poole_x87_exception_fault();
+    fn poole_x87_exception_resume();
+    fn poole_trigger_simd_exception();
+    fn poole_simd_exception_fault();
+    fn poole_simd_exception_resume();
+    fn poole_trigger_device_not_available_rejection() -> !;
+    fn poole_device_not_available_fault();
 }
 
 core::arch::global_asm!(
@@ -1008,9 +1167,12 @@ core::arch::global_asm!(
 
     POOLE_TRAP_NO_ERROR poole_trap_breakpoint, 3
     POOLE_TRAP_NO_ERROR poole_trap_invalid_opcode, 6
+    POOLE_TRAP_NO_ERROR poole_trap_device_not_available, 7
     POOLE_TRAP_ERROR poole_trap_double_fault, 8
     POOLE_TRAP_ERROR poole_trap_general_protection, 13
     POOLE_TRAP_ERROR poole_trap_page_fault, 14
+    POOLE_TRAP_NO_ERROR poole_trap_x87_floating_point, 16
+    POOLE_TRAP_NO_ERROR poole_trap_simd_floating_point, 19
 
     .global poole_trap_common
     .type poole_trap_common,@function
@@ -1092,6 +1254,54 @@ poole_double_fault_origin:
     mov ds, ax
     ud2
     .size poole_trigger_double_fault, .-poole_trigger_double_fault
+
+    .global poole_trigger_x87_exception
+    .type poole_trigger_x87_exception,@function
+poole_trigger_x87_exception:
+    sub rsp, 16
+    mov word ptr [rsp], 0x037e
+    fninit
+    fldcw word ptr [rsp]
+    fldz
+    fldz
+    fdivp st(1), st(0)
+    .global poole_x87_exception_fault
+poole_x87_exception_fault:
+    fwait
+    .global poole_x87_exception_resume
+poole_x87_exception_resume:
+    add rsp, 16
+    ret
+    .size poole_trigger_x87_exception, .-poole_trigger_x87_exception
+
+    .global poole_trigger_simd_exception
+    .type poole_trigger_simd_exception,@function
+poole_trigger_simd_exception:
+    sub rsp, 16
+    mov dword ptr [rsp], 0x00001f00
+    ldmxcsr dword ptr [rsp]
+    pxor xmm0, xmm0
+    pxor xmm1, xmm1
+    .global poole_simd_exception_fault
+poole_simd_exception_fault:
+    divss xmm0, xmm1
+    .global poole_simd_exception_resume
+poole_simd_exception_resume:
+    add rsp, 16
+    ret
+    .size poole_trigger_simd_exception, .-poole_trigger_simd_exception
+
+    .global poole_trigger_device_not_available_rejection
+    .type poole_trigger_device_not_available_rejection,@function
+poole_trigger_device_not_available_rejection:
+    mov rax, cr0
+    or rax, 8
+    mov cr0, rax
+    .global poole_device_not_available_fault
+poole_device_not_available_fault:
+    fnop
+    ud2
+    .size poole_trigger_device_not_available_rejection, .-poole_trigger_device_not_available_rejection
 "#
 );
 

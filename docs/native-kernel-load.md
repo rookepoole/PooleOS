@@ -153,9 +153,9 @@ halts permanently at `STOP BEFORE TRANSFER`.
 
 ## Qualified Evidence
 
-The Cycle 122-refreshed default-path receipt records:
+The Cycle 123-refreshed default-path receipt records:
 
-- 116/116 Rust host tests across PooleBoot, PBART1, the six-format retained-set
+- 123/123 Rust host tests across PooleBoot, PBART1, the six-format retained-set
   validator, PBTRUST1, PBC1/PSM1/PKELF1/PBP1, PKMAP2, PBEXIT1, and PKENTRY1;
 - two byte-identical PooleBoot builds, PooleKernel builds, and GPT/FAT32 media
   generations;
@@ -192,7 +192,7 @@ The Cycle 122-refreshed default-path receipt records:
   physical-presence separation, durable receipt rules, and mandatory
   development activation denial;
 - an exact 11,952-byte nine-file retained set with SHA-256
-  `872978D7FB5E1108D04736796A247E5E59D9EEC0C97AE991CFBAC83D819A15DC`, nine
+  `331E38A7C071FFC3491DB13132726CCA12B26901059AA08690C9963D8652435D`, nine
   target parsers, manifest/inner/trust cross-bindings, exact unsigned-policy
   denial, and zero authority/action/state/hardware effects;
 - 155/155 integrated negative controls, including exact retained PSM1/PBTP1/
@@ -233,9 +233,10 @@ Cycle 118 separately closes the opt-in QEMU-only
 PKLOAD6 stop. Cycle 119 separately closes the bounded BSP-only PKTRAP1 slice,
 Cycle 120 closes the bounded qemu64 read-only PKCPU1 slice, and Cycle 121
 closes only the pure PKERR1 exact-target policy boundary while retaining direct
-errata and numeric microcode-floor stop-ship gaps. The next chronological
-owner-independent move is `N7-XSTATE-POLICY-001` for x87/SSE/XSAVE ownership
-and sensitive-state rules without scheduler or SMP promotion.
+errata and numeric microcode-floor stop-ship gaps. Cycles 122 and 123 separately
+close the bounded PKXSTATE1 ownership and PKXEXC1 exception-delivery slices.
+The next chronological owner-independent move is
+`N7-PRIVILEGE-MSR-POLICY-001` without target, scheduler, or SMP promotion.
 Capability creation, lifecycle execution, signature trust, authenticated
 persistent state, production transfer, and physical-target qualification remain
 separately gated by N5/N6 and owner-controlled N0 work.

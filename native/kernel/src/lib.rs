@@ -14,12 +14,14 @@ use poole_handoff::{
 
 pub mod revalidation;
 pub mod xstate;
+pub mod xstate_exception;
 
 pub const ENTRY_CONTRACT_ID: &str = "PKENTRY1";
 pub const TRANSFER_CONTRACT_ID: &str = "PKXFER1";
 pub const TRAP_CONTRACT_ID: &str = "PKTRAP1";
 pub const CPU_POLICY_CONTRACT_ID: &str = "PKCPU1";
-pub const BUILD_ID: &[u8] = b"PKBUILD1-CYCLE122-N7-XSTATE-POLICY-001";
+pub const XSTATE_EXCEPTION_CONTRACT_ID: &str = "PKXEXC1";
+pub const BUILD_ID: &[u8] = b"PKBUILD1-CYCLE123-N7-XSTATE-EXCEPTION-001";
 pub const ENTRY_OFFSET: u64 = 0x8000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
 pub const HANDOFF_MAGIC_U64: u64 = u64::from_le_bytes(poole_handoff::MAGIC);
@@ -30,6 +32,7 @@ pub const GDT_LIMIT: u16 = 39;
 pub const IDT_LIMIT: u16 = 4095;
 pub const IST_STACK_BYTES: u64 = 8192;
 pub const INSTALLED_EXCEPTION_GATE_COUNT: u16 = 5;
+pub const INSTALLED_XSTATE_EXCEPTION_GATE_COUNT: u16 = 8;
 const CR3_ALLOWED_LOW_BITS: u64 = (1 << 3) | (1 << 4);
 const RFLAGS_INTERRUPT_ENABLE: u64 = 1 << 9;
 const RFLAGS_DIRECTION: u64 = 1 << 10;
@@ -51,6 +54,7 @@ pub enum PanicCode {
     TrapContract = 0x100b,
     CpuPolicy = 0x100c,
     XstatePolicy = 0x100d,
+    XstateException = 0x100e,
     UnexpectedReturn = 0x10ff,
 }
 
@@ -63,6 +67,7 @@ pub enum DevelopmentTrapScenario {
     MalformedFrame = 3,
     CpuPolicy = 4,
     XstatePolicy = 5,
+    XstateException = 6,
 }
 
 impl DevelopmentTrapScenario {
@@ -74,6 +79,7 @@ impl DevelopmentTrapScenario {
             3 => Some(Self::MalformedFrame),
             4 => Some(Self::CpuPolicy),
             5 => Some(Self::XstatePolicy),
+            6 => Some(Self::XstateException),
             _ => None,
         }
     }
@@ -86,6 +92,7 @@ impl DevelopmentTrapScenario {
             Self::MalformedFrame => "malformed_frame",
             Self::CpuPolicy => "cpu_policy",
             Self::XstatePolicy => "xstate_policy",
+            Self::XstateException => "xstate_exception",
         }
     }
 }
@@ -485,7 +492,10 @@ pub enum DescriptorError {
     InterruptState,
 }
 
-pub fn validate_descriptor_state(state: &DescriptorState) -> Result<(), DescriptorError> {
+fn validate_descriptor_state_with_gate_count(
+    state: &DescriptorState,
+    expected_gate_count: u16,
+) -> Result<(), DescriptorError> {
     if state.gdt_base == 0
         || state.idt_base == 0
         || state.tss_base == 0
@@ -494,7 +504,7 @@ pub fn validate_descriptor_state(state: &DescriptorState) -> Result<(), Descript
         || !is_canonical_x86_64(state.tss_base)
         || state.gdt_limit != GDT_LIMIT
         || state.idt_limit != IDT_LIMIT
-        || state.installed_gate_count != INSTALLED_EXCEPTION_GATE_COUNT
+        || state.installed_gate_count != expected_gate_count
     {
         return Err(DescriptorError::Table);
     }
@@ -527,6 +537,16 @@ pub fn validate_descriptor_state(state: &DescriptorState) -> Result<(), Descript
         return Err(DescriptorError::InterruptState);
     }
     Ok(())
+}
+
+pub fn validate_descriptor_state(state: &DescriptorState) -> Result<(), DescriptorError> {
+    validate_descriptor_state_with_gate_count(state, INSTALLED_EXCEPTION_GATE_COUNT)
+}
+
+pub fn validate_xstate_exception_descriptor_state(
+    state: &DescriptorState,
+) -> Result<(), DescriptorError> {
+    validate_descriptor_state_with_gate_count(state, INSTALLED_XSTATE_EXCEPTION_GATE_COUNT)
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -580,12 +600,12 @@ pub fn validate_trap_observation(
     observation: &TrapObservation,
     expectation: &TrapExpectation,
 ) -> Result<TrapDisposition, TrapError> {
-    if !matches!(expectation.vector, 3 | 6 | 8 | 14)
+    if !matches!(expectation.vector, 3 | 6 | 7 | 8 | 14 | 16 | 19)
         || !is_canonical_x86_64(expectation.fault_rip)
         || !is_canonical_x86_64(expectation.resume_rip)
         || expectation.ist_top <= expectation.ist_bottom
         || expectation.ist_top - expectation.ist_bottom != IST_STACK_BYTES
-        || expectation.terminal != (expectation.vector == 8)
+        || expectation.terminal != matches!(expectation.vector, 7 | 8)
     {
         return Err(TrapError::Expectation);
     }
@@ -1592,7 +1612,11 @@ mod tests {
             DevelopmentTrapScenario::from_selector(5),
             Some(DevelopmentTrapScenario::XstatePolicy)
         );
-        assert_eq!(DevelopmentTrapScenario::from_selector(6), None);
+        assert_eq!(
+            DevelopmentTrapScenario::from_selector(6),
+            Some(DevelopmentTrapScenario::XstateException)
+        );
+        assert_eq!(DevelopmentTrapScenario::from_selector(7), None);
     }
 
     #[test]
