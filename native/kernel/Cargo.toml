@@ -23,3 +23,4 @@ poole-boot-trust = { path = "../trust" }
 poole-bootload = { path = "../bootload" }
 poole-handoff = { path = "../handoff" }
 poole-inner-live = { path = "../inner" }
+poole-kmap = { path = "../kmap" }

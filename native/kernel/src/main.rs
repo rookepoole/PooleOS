@@ -8,6 +8,7 @@ mod arch {
 }
 
 use core::panic::PanicInfo;
+use core::ptr::{read_volatile, write_volatile};
 use core::sync::atomic::{AtomicU32, AtomicU64, Ordering};
 
 use arch::x86_64::{Com1, DebugCon, TrapFrame, halt_forever};
@@ -21,6 +22,7 @@ use poolekernel::{
     revalidation, validate_cpu_policy_snapshot, validate_descriptor_state,
     validate_development_handoff, validate_entry_envelope, validate_handoff,
     validate_runtime_state, validate_trap_observation, validate_xstate_exception_descriptor_state,
+    virtual_memory::{self, TableMemory, run_profile as run_virtual_memory_profile},
     xstate::{
         AREA_BYTES as XSTATE_AREA_BYTES, CONTRACT_ID as XSTATE_CONTRACT_ID, ContextSwitch,
         effective_mxcsr_mask, validate_context_switch, validate_proof as validate_xstate_proof,
@@ -219,6 +221,71 @@ pkpmm_fragment!(
 );
 pkpmm_fragment!(PKPMM_RESULT_TAIL, b" allocated_pages=0 physical_writes=0 mappings=0 reclaim=0 concurrency=0 signatures=0 authority=0 actions=0 terminal=halt\n");
 
+macro_rules! pkvm_fragment {
+    ($name:ident, $value:literal) => {
+        #[used]
+        #[unsafe(link_section = ".text.pkvm_literals")]
+        static $name: [u8; $value.len()] = *$value;
+    };
+}
+
+pkvm_fragment!(
+    PKVM_DENIED,
+    b"POOLEOS:KERNEL:VM-DENIED contract=PKVM1 reason="
+);
+pkvm_fragment!(
+    PKVM_DENIED_TAIL,
+    b" effects=unqualified authority=0 actions=0 terminal=panic\n"
+);
+pkvm_fragment!(
+    PKVM_EARLY,
+    b"POOLEOS:KERNEL:VM-EARLY PASS contract=PKVM1 selector=9 stack=validated_by_wrapper serial=initialized\n"
+);
+pkvm_fragment!(
+    PKVM_STAGE,
+    b"POOLEOS:KERNEL:VM-STAGE PASS contract=PKVM1 stage="
+);
+pkvm_fragment!(
+    PKVM_LAYOUT,
+    b"POOLEOS:KERNEL:VM-LAYOUT PASS contract=PKVM1 canonical_bits=48 null_guard_end=0x0000000000010000 user_end=0x0000800000000000 kernel_start=0xFFFF800000000000 direct_start=0xFFFF900000000000 direct_end=0xFFFFD00000000000 temp_start=0xFFFFFFFF80150000 temp_end=0xFFFFFFFF80151000 kernel_image_start=0xFFFFFFFF80000000 kernel_image_end=0xFFFFFFFFC0000000 window_start=0x0000000040000000 window_pages=512\n"
+);
+pkvm_fragment!(
+    PKVM_TABLES,
+    b"POOLEOS:KERNEL:VM-TABLES PASS contract=PKVM1 root="
+);
+pkvm_fragment!(PKVM_TABLE_GENERATION, b" table_generation=");
+pkvm_fragment!(PKVM_DATA, b" data=");
+pkvm_fragment!(PKVM_DATA_GENERATION, b" data_generation=");
+pkvm_fragment!(
+    PKVM_TABLES_TAIL,
+    b" table_pages=4 materialized=4 temporary_verified=4 root_active=0\n"
+);
+pkvm_fragment!(
+    PKVM_TRANSLATION,
+    b"POOLEOS:KERNEL:VM-TRANSLATION PASS contract=PKVM1 mapped_physical="
+);
+pkvm_fragment!(
+    PKVM_TRANSLATION_TAIL,
+    b" mapped_permissions=rw_nx_user protected_permissions=rx_user cache=write_back page_bytes=4096\n"
+);
+pkvm_fragment!(
+    PKVM_TRANSACTION,
+    b"POOLEOS:KERNEL:VM-TRANSACTION PASS contract=PKVM1 maps=2 protects=1 unmaps=2 inactive_receipts=2 cache_alias_rejected=1 wx_rejected=1 premature_reuse_rejected=1 rollback_controls=host_verified\n"
+);
+pkvm_fragment!(
+    PKVM_RESULT,
+    b"POOLEOS:KERNEL:VM-RESULT PASS contract=PKVM1 profile=qemu64_tier0 root_released=1 data_released=1 allocated_pages="
+);
+pkvm_fragment!(PKVM_PHYSICAL_WRITES, b" physical_writes=");
+pkvm_fragment!(PKVM_TEMPORARY_PTE_WRITES, b" temporary_pte_writes=");
+pkvm_fragment!(PKVM_ALLOCATIONS, b" allocations=");
+pkvm_fragment!(PKVM_FREES, b" frees=");
+pkvm_fragment!(PKVM_INVLPG, b" active_cr3_writes=0 invlpg=");
+pkvm_fragment!(
+    PKVM_RESULT_TAIL,
+    b" shootdown=0 huge_pages=0 cow=0 user_faults=0 pager=0 heap=0 smp=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n"
+);
+
 macro_rules! pkentry_fragment {
     ($name:ident, $value:literal) => {
         #[used]
@@ -349,6 +416,226 @@ struct BootSink<'a> {
     ring: &'a EarlyRing,
 }
 
+struct ActivePhysicalReader;
+
+impl poole_kmap::TableReader for ActivePhysicalReader {
+    fn read_entry(&self, table_address: u64, index: usize) -> Result<u64, poole_kmap::Error> {
+        if table_address == 0
+            || !table_address.is_multiple_of(poole_kmap::PAGE_SIZE)
+            || table_address > usize::MAX as u64
+            || index >= poole_kmap::TABLE_ENTRIES
+        {
+            return Err(poole_kmap::Error::TranslationAddress);
+        }
+        let pointer = (table_address as usize as *const u64).wrapping_add(index);
+        // SAFETY: PKVM1 uses this reader only after PKENTRY1 validates the active
+        // retained root; PKMAP2 keeps its four retained page-table frames identity-mapped.
+        Ok(unsafe { read_volatile(pointer) })
+    }
+}
+
+struct BootstrapTableMemory {
+    active_root: u64,
+    active_leaf_table: u64,
+    physical_address_bits: u8,
+    mapped_physical: Option<u64>,
+    writes: u64,
+    temporary_pte_writes: u64,
+    invalidations: u64,
+}
+
+impl BootstrapTableMemory {
+    const TEMPORARY_LEAF_INDEX: usize = 336;
+    const TEMPORARY_ENTRY_FLAGS: u64 = (1 << 0) | (1 << 1) | (1 << 63);
+    const PHYSICAL_MASK_52: u64 = 0x000f_ffff_ffff_f000;
+
+    fn new(active_root: u64, physical_address_bits: u8) -> Result<Self, virtual_memory::Error> {
+        if active_root == 0 || !active_root.is_multiple_of(poole_kmap::PAGE_SIZE) {
+            return Err(virtual_memory::Error::BootstrapRoot);
+        }
+        let active_leaf_table = active_root + 3 * poole_kmap::PAGE_SIZE;
+        let reader = ActivePhysicalReader;
+        for address in [
+            active_leaf_table,
+            active_leaf_table + poole_kmap::PAGE_SIZE - 1,
+        ] {
+            let translation =
+                poole_kmap::translate(&reader, active_root, address, physical_address_bits)
+                    .map_err(|_| virtual_memory::Error::BootstrapRetainedIdentity)?;
+            if translation.physical_address != address || !translation.writable {
+                return Err(virtual_memory::Error::BootstrapRetainedIdentity);
+            }
+        }
+        // SAFETY: the loop above proves that the retained PKMAP2 leaf table is
+        // identity-mapped and writable through its physical address.
+        let value = unsafe {
+            read_volatile(
+                (active_leaf_table as usize as *const u64).wrapping_add(Self::TEMPORARY_LEAF_INDEX),
+            )
+        };
+        if value != 0 {
+            return Err(virtual_memory::Error::BootstrapLeafOccupied);
+        }
+        Ok(Self {
+            active_root,
+            active_leaf_table,
+            physical_address_bits,
+            mapped_physical: None,
+            writes: 0,
+            temporary_pte_writes: 0,
+            invalidations: 0,
+        })
+    }
+
+    fn target_pointer(index: usize) -> Result<*mut u64, virtual_memory::Error> {
+        if index >= poole_kmap::TABLE_ENTRIES {
+            return Err(virtual_memory::Error::MemoryAccess);
+        }
+        Ok((virtual_memory::TEMPORARY_MAP_START as usize as *mut u64).wrapping_add(index))
+    }
+
+    fn leaf_pointer(&self) -> *mut u64 {
+        (self.active_leaf_table as usize as *mut u64).wrapping_add(Self::TEMPORARY_LEAF_INDEX)
+    }
+
+    fn invalidate(&mut self) {
+        // SAFETY: selector 9 runs at CPL0 on the BSP with interrupts disabled;
+        // the operand is the single PKMAP2 bootstrap temporary leaf.
+        unsafe {
+            core::arch::asm!(
+                "invlpg [{}]",
+                in(reg) virtual_memory::TEMPORARY_MAP_START,
+                options(nostack, preserves_flags)
+            )
+        };
+        self.invalidations += 1;
+    }
+
+    fn ensure_mapped(&mut self, physical_address: u64) -> Result<(), virtual_memory::Error> {
+        if physical_address == 0
+            || !physical_address.is_multiple_of(poole_kmap::PAGE_SIZE)
+            || physical_address & !Self::PHYSICAL_MASK_52 != 0
+        {
+            return Err(virtual_memory::Error::BootstrapTargetAddress);
+        }
+        if self.mapped_physical == Some(physical_address) {
+            return Ok(());
+        }
+        let leaf = self.leaf_pointer();
+        // SAFETY: new() proves the private PKMAP2 leaf table is identity-mapped.
+        let observed = unsafe { read_volatile(leaf) };
+        match self.mapped_physical {
+            Some(current)
+                if observed & Self::PHYSICAL_MASK_52 == current
+                    && observed & Self::TEMPORARY_ENTRY_FLAGS == Self::TEMPORARY_ENTRY_FLAGS =>
+            {
+                // SAFETY: selector 9 exclusively owns the previously installed leaf.
+                unsafe { write_volatile(leaf, 0) };
+                self.temporary_pte_writes += 1;
+                self.invalidate();
+            }
+            None if observed == 0 => {}
+            _ => return Err(virtual_memory::Error::BootstrapLeafState),
+        }
+        // SAFETY: the target frame is generation-owned by PKVM1 and this leaf is
+        // outside kernel, stack, guard, and handoff mappings.
+        unsafe { write_volatile(leaf, physical_address | Self::TEMPORARY_ENTRY_FLAGS) };
+        self.temporary_pte_writes += 1;
+        self.invalidate();
+        self.mapped_physical = Some(physical_address);
+        let translation = poole_kmap::translate(
+            &ActivePhysicalReader,
+            self.active_root,
+            virtual_memory::TEMPORARY_MAP_START,
+            self.physical_address_bits,
+        )
+        .map_err(|_| virtual_memory::Error::BootstrapTranslation)?;
+        if translation.physical_address != physical_address
+            || !translation.writable
+            || translation.executable
+            || translation.user
+        {
+            return Err(virtual_memory::Error::BootstrapTranslation);
+        }
+        Ok(())
+    }
+}
+
+impl TableMemory for BootstrapTableMemory {
+    fn prepare_page(&mut self, physical_address: u64) -> Result<(), virtual_memory::Error> {
+        self.ensure_mapped(physical_address)
+    }
+
+    fn read_entry(
+        &mut self,
+        table_address: u64,
+        index: usize,
+    ) -> Result<u64, virtual_memory::Error> {
+        self.ensure_mapped(table_address)?;
+        let pointer = Self::target_pointer(index)?;
+        // SAFETY: ensure_mapped proves the target table occupies the temporary leaf.
+        Ok(unsafe { read_volatile(pointer) })
+    }
+
+    fn write_entry(
+        &mut self,
+        table_address: u64,
+        index: usize,
+        value: u64,
+    ) -> Result<(), virtual_memory::Error> {
+        self.ensure_mapped(table_address)?;
+        let pointer = Self::target_pointer(index)?;
+        // SAFETY: PKVM1 owns the PMM generation for the currently mapped table page.
+        unsafe { write_volatile(pointer, value) };
+        self.writes = self
+            .writes
+            .checked_add(1)
+            .ok_or(virtual_memory::Error::MemoryAccess)?;
+        Ok(())
+    }
+
+    fn finish(&mut self) -> Result<(), virtual_memory::Error> {
+        let current = self
+            .mapped_physical
+            .ok_or(virtual_memory::Error::BootstrapLeafState)?;
+        let leaf = self.leaf_pointer();
+        // SAFETY: selector 9 exclusively owns the installed temporary leaf.
+        let observed = unsafe { read_volatile(leaf) };
+        if observed & Self::PHYSICAL_MASK_52 != current
+            || observed & Self::TEMPORARY_ENTRY_FLAGS != Self::TEMPORARY_ENTRY_FLAGS
+        {
+            return Err(virtual_memory::Error::BootstrapLeafState);
+        }
+        // SAFETY: clearing the owned leaf revokes the final temporary alias.
+        unsafe { write_volatile(leaf, 0) };
+        self.temporary_pte_writes += 1;
+        self.invalidate();
+        self.mapped_physical = None;
+        if poole_kmap::translate(
+            &ActivePhysicalReader,
+            self.active_root,
+            virtual_memory::TEMPORARY_MAP_START,
+            self.physical_address_bits,
+        ) != Err(poole_kmap::Error::TranslationMissing)
+        {
+            return Err(virtual_memory::Error::BootstrapRevocation);
+        }
+        Ok(())
+    }
+
+    fn physical_write_count(&self) -> u64 {
+        self.writes
+    }
+
+    fn temporary_pte_write_count(&self) -> u64 {
+        self.temporary_pte_writes
+    }
+
+    fn hardware_invalidation_count(&self) -> u64 {
+        self.invalidations
+    }
+}
+
 impl ByteSink for BootSink<'_> {
     fn write_byte(&mut self, byte: u8) {
         if byte == b'\n' {
@@ -370,6 +657,18 @@ fn log_physical_memory_stage(serial: &mut Com1, debugcon: &mut DebugCon, stage: 
         ring: &EARLY_RING,
     });
     logger.write_bytes(&PKPMM_STAGE);
+    logger.write_decimal_u64(stage);
+    logger.write_bytes(&PKENTRY_NEWLINE);
+}
+
+#[inline(never)]
+fn log_virtual_memory_stage(serial: &mut Com1, debugcon: &mut DebugCon, stage: u64) {
+    let mut logger = EarlyLogger::new(BootSink {
+        serial,
+        debugcon,
+        ring: &EARLY_RING,
+    });
+    logger.write_bytes(&PKVM_STAGE);
     logger.write_decimal_u64(stage);
     logger.write_bytes(&PKENTRY_NEWLINE);
 }
@@ -398,6 +697,7 @@ extern "C" fn poole_kernel_emergency_panic(code: u32) -> ! {
         0x100e => PanicCode::XstateException,
         0x100f => PanicCode::PrivilegeMsrPolicy,
         0x1010 => PanicCode::PhysicalMemory,
+        0x1011 => PanicCode::VirtualMemory,
         _ => PanicCode::UnexpectedReturn,
     };
     let disposition = PANIC_STATE.begin(code);
@@ -450,12 +750,23 @@ extern "C" fn poole_kernel_rust_entry(
         });
         logger.write_bytes(&PKPMM_EARLY);
     }
+    if trap_scenario == DevelopmentTrapScenario::VirtualMemory {
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        logger.write_bytes(&PKVM_EARLY);
+    }
 
     if let Err(error) = validate_entry_envelope(handoff_address, handoff_length, magic, stack_top) {
         poole_kernel_emergency_panic(error.panic_code() as u32);
     }
     if trap_scenario == DevelopmentTrapScenario::PhysicalMemory {
         log_physical_memory_stage(&mut serial, &mut debugcon, 1);
+    }
+    if trap_scenario == DevelopmentTrapScenario::VirtualMemory {
+        log_virtual_memory_stage(&mut serial, &mut debugcon, 1);
     }
 
     // SAFETY: the envelope passed canonical range, overflow, alignment, and size checks;
@@ -476,6 +787,9 @@ extern "C" fn poole_kernel_rust_entry(
     if trap_scenario == DevelopmentTrapScenario::PhysicalMemory {
         log_physical_memory_stage(&mut serial, &mut debugcon, 2);
     }
+    if trap_scenario == DevelopmentTrapScenario::VirtualMemory {
+        log_virtual_memory_stage(&mut serial, &mut debugcon, 2);
+    }
     if let Err(error) = validate_runtime_state(
         &validated,
         handoff_address as u64,
@@ -489,6 +803,9 @@ extern "C" fn poole_kernel_rust_entry(
     if trap_scenario == DevelopmentTrapScenario::PhysicalMemory {
         log_physical_memory_stage(&mut serial, &mut debugcon, 3);
     }
+    if trap_scenario == DevelopmentTrapScenario::VirtualMemory {
+        log_virtual_memory_stage(&mut serial, &mut debugcon, 3);
+    }
     let decoded = match poole_handoff::decode(handoff) {
         Ok(value) => value,
         Err(_) => poole_kernel_emergency_panic(PanicCode::HandoffDecode as u32),
@@ -500,6 +817,9 @@ extern "C" fn poole_kernel_rust_entry(
     if trap_scenario == DevelopmentTrapScenario::PhysicalMemory {
         log_physical_memory_stage(&mut serial, &mut debugcon, 4);
     }
+    if trap_scenario == DevelopmentTrapScenario::VirtualMemory {
+        log_virtual_memory_stage(&mut serial, &mut debugcon, 4);
+    }
     // SAFETY: PKENTRY1 requires every PBP1 retained-input range to remain
     // immutable and identity-mapped until this independent revalidation ends.
     let revalidated = match unsafe { revalidation::revalidate_development_from_handoff(handoff) } {
@@ -508,6 +828,9 @@ extern "C" fn poole_kernel_rust_entry(
     };
     if trap_scenario == DevelopmentTrapScenario::PhysicalMemory {
         log_physical_memory_stage(&mut serial, &mut debugcon, 5);
+    }
+    if trap_scenario == DevelopmentTrapScenario::VirtualMemory {
+        log_virtual_memory_stage(&mut serial, &mut debugcon, 5);
     }
 
     {
@@ -948,6 +1271,64 @@ extern "C" fn poole_kernel_rust_entry(
         halt_forever()
     }
 
+    if trap_scenario == DevelopmentTrapScenario::VirtualMemory {
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        macro_rules! vm_try {
+            ($operation:expr) => {
+                match $operation {
+                    Ok(value) => value,
+                    Err(error) => {
+                        logger.write_bytes(&PKVM_DENIED);
+                        logger.write_str(error.label());
+                        logger.write_bytes(&PKVM_DENIED_TAIL);
+                        poole_kernel_emergency_panic(PanicCode::VirtualMemory as u32)
+                    }
+                }
+            };
+        }
+        let physical_bits = vm_try!(
+            arch::x86_64::physical_address_bits().ok_or(virtual_memory::Error::BootstrapRoot)
+        );
+        let mut table_memory = vm_try!(BootstrapTableMemory::new(observed_cr3, physical_bits));
+        let proof = vm_try!(run_virtual_memory_profile(
+            &decoded,
+            validated.core,
+            &mut table_memory,
+        ));
+        logger.write_bytes(&PKVM_LAYOUT);
+        logger.write_bytes(&PKVM_TABLES);
+        logger.write_hex_u64(proof.root_physical);
+        logger.write_bytes(&PKVM_TABLE_GENERATION);
+        logger.write_decimal_u64(proof.table_generation);
+        logger.write_bytes(&PKVM_DATA);
+        logger.write_hex_u64(proof.data_physical);
+        logger.write_bytes(&PKVM_DATA_GENERATION);
+        logger.write_decimal_u64(proof.data_generation);
+        logger.write_bytes(&PKVM_TABLES_TAIL);
+        logger.write_bytes(&PKVM_TRANSLATION);
+        logger.write_hex_u64(proof.mapped_translation.physical_address);
+        logger.write_bytes(&PKVM_TRANSLATION_TAIL);
+        logger.write_bytes(&PKVM_TRANSACTION);
+        logger.write_bytes(&PKVM_RESULT);
+        logger.write_decimal_u64(proof.final_allocated_pages);
+        logger.write_bytes(&PKVM_PHYSICAL_WRITES);
+        logger.write_decimal_u64(proof.physical_write_count);
+        logger.write_bytes(&PKVM_TEMPORARY_PTE_WRITES);
+        logger.write_decimal_u64(proof.temporary_pte_write_count);
+        logger.write_bytes(&PKVM_ALLOCATIONS);
+        logger.write_decimal_u64(proof.final_allocation_count);
+        logger.write_bytes(&PKVM_FREES);
+        logger.write_decimal_u64(proof.final_free_count);
+        logger.write_bytes(&PKVM_INVLPG);
+        logger.write_decimal_u64(proof.hardware_invalidation_count);
+        logger.write_bytes(&PKVM_RESULT_TAIL);
+        halt_forever()
+    }
+
     if trap_scenario == DevelopmentTrapScenario::XstatePolicy {
         // SAFETY: PKXFER1 transferred exactly once at CPL0 with IF/DF clear. The opt-in
         // PKXSTATE1 profile owns the BSP's x87/SSE state and its private aligned images.
@@ -1282,6 +1663,9 @@ extern "C" fn poole_kernel_rust_entry(
         }
         DevelopmentTrapScenario::PhysicalMemory => {
             poole_kernel_emergency_panic(PanicCode::PhysicalMemory as u32)
+        }
+        DevelopmentTrapScenario::VirtualMemory => {
+            poole_kernel_emergency_panic(PanicCode::VirtualMemory as u32)
         }
     }
 }

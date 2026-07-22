@@ -163,6 +163,7 @@ def _build_and_test(
         "development-xstate-exception",
         "development-privilege-msr-policy",
         "development-physical-memory",
+        "development-virtual-memory",
     }
     if development_feature is not None and development_feature not in allowed_features:
         raise QualificationError("unknown PooleBoot development feature")

@@ -15,6 +15,7 @@ use poole_handoff::{
 pub mod physical_memory;
 pub mod privilege_msr;
 pub mod revalidation;
+pub mod virtual_memory;
 pub mod xstate;
 pub mod xstate_exception;
 
@@ -24,8 +25,9 @@ pub const TRAP_CONTRACT_ID: &str = "PKTRAP1";
 pub const CPU_POLICY_CONTRACT_ID: &str = "PKCPU1";
 pub const PRIVILEGE_MSR_CONTRACT_ID: &str = privilege_msr::CONTRACT_ID;
 pub const PHYSICAL_MEMORY_CONTRACT_ID: &str = physical_memory::CONTRACT_ID;
+pub const VIRTUAL_MEMORY_CONTRACT_ID: &str = virtual_memory::CONTRACT_ID;
 pub const XSTATE_EXCEPTION_CONTRACT_ID: &str = "PKXEXC1";
-pub const BUILD_ID: &[u8] = b"PKBUILD1-CYCLE125-N9-PMM-001";
+pub const BUILD_ID: &[u8] = b"PKBUILD1-CYCLE126-N9-VM-001";
 pub const ENTRY_OFFSET: u64 = 0x8000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
 pub const HANDOFF_MAGIC_U64: u64 = u64::from_le_bytes(poole_handoff::MAGIC);
@@ -62,6 +64,7 @@ pub enum PanicCode {
     XstateException = 0x100e,
     PrivilegeMsrPolicy = 0x100f,
     PhysicalMemory = 0x1010,
+    VirtualMemory = 0x1011,
     UnexpectedReturn = 0x10ff,
 }
 
@@ -77,6 +80,7 @@ pub enum DevelopmentTrapScenario {
     XstateException = 6,
     PrivilegeMsrPolicy = 7,
     PhysicalMemory = 8,
+    VirtualMemory = 9,
 }
 
 impl DevelopmentTrapScenario {
@@ -91,6 +95,7 @@ impl DevelopmentTrapScenario {
             6 => Some(Self::XstateException),
             7 => Some(Self::PrivilegeMsrPolicy),
             8 => Some(Self::PhysicalMemory),
+            9 => Some(Self::VirtualMemory),
             _ => None,
         }
     }
@@ -106,6 +111,7 @@ impl DevelopmentTrapScenario {
             Self::XstateException => "xstate_exception",
             Self::PrivilegeMsrPolicy => "privilege_msr_policy",
             Self::PhysicalMemory => "physical_memory",
+            Self::VirtualMemory => "virtual_memory",
         }
     }
 }
@@ -1637,7 +1643,11 @@ mod tests {
             DevelopmentTrapScenario::from_selector(8),
             Some(DevelopmentTrapScenario::PhysicalMemory)
         );
-        assert_eq!(DevelopmentTrapScenario::from_selector(9), None);
+        assert_eq!(
+            DevelopmentTrapScenario::from_selector(9),
+            Some(DevelopmentTrapScenario::VirtualMemory)
+        );
+        assert_eq!(DevelopmentTrapScenario::from_selector(10), None);
     }
 
     #[test]

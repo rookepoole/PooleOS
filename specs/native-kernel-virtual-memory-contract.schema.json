@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "artifact_kind", "contract_id", "selected_move_id", "status", "production_ready", "production_promotion_allowed", "development_profile", "limits", "layout", "table_policy", "transaction_policy", "qualification", "required_negative_controls", "claims", "non_claims"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_virtual_memory_contract"},
+    "contract_id": {"const": "PKVM1"},
+    "selected_move_id": {"const": "N9-VM-001"},
+    "status": {"type": "string", "minLength": 1},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "development_profile": {"type": "object"},
+    "limits": {"type": "object"},
+    "layout": {"type": "object"},
+    "table_policy": {"type": "object"},
+    "transaction_policy": {"type": "object"},
+    "qualification": {"type": "object"},
+    "required_negative_controls": {"type": "array", "minItems": 39, "maxItems": 39, "items": {"type": "string", "pattern": "^NEG-N9-PKVM-"}},
+    "claims": {"type": "object"},
+    "non_claims": {"type": "array", "minItems": 5, "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

@@ -67,7 +67,7 @@
     "state_writes": 0
   },
   "qualification": {
-    "rust_host_test_count": 54,
+    "rust_host_test_count": 60,
     "python_unit_test_count": 8,
     "golden_cross_language_cases": 1,
     "negative_control_count": 36,

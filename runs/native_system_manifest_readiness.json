@@ -43,9 +43,9 @@
         "sha256": "210BCDAF2778606B42C688E7BACD950FC0EEF3045081E884CF7846B9A7D78DF4"
       },
       {
-        "byte_count": 4178,
+        "byte_count": 4193,
         "path": "native/Cargo.lock",
-        "sha256": "272CD0157659F8C2F2F7491DDB493A47E99FB8FFD1F431E2615D35B072FF50AF"
+        "sha256": "29CE9938C5C60DEA5AEA244A6961BB1924D88AEC601D1E02EAAA510B0B36E390"
       },
       {
         "byte_count": 348,
@@ -705,7 +705,7 @@
     ],
     "pooleboot_uefi_integration": {
       "byte_count": 205824,
-      "sha256": "73C10DF088158A8B2F66CD157C424787E0DCDF14F1DCB2E564C70040857C916F",
+      "sha256": "6C378B0CDA2AEA191106EE60E4EC7CD6D3CA2122EB88799B258D3C2462789107",
       "status": "pass"
     },
     "rust_host_target": "x86_64-pc-windows-msvc",

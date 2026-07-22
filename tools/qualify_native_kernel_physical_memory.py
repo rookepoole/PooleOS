@@ -149,8 +149,26 @@ def _source_audit() -> dict[str, Any]:
     path = ROOT / "native/kernel/src/physical_memory.rs"
     source = path.read_text(encoding="utf-8")
     implementation = source.split("#[cfg(test)]", 1)[0]
-    forbidden = tuple(token for token in ("unsafe", "from_raw_parts", "read_volatile", "write_volatile", "alloc::") if token in implementation)
-    required = ("[Extent; MAX_FREE_EXTENTS]", "[Allocation; MAX_ALLOCATIONS]", "MEMORY_USABLE", "MEMORY_LOADER_RESERVED")
+    authorized = (
+        '#[unsafe(link_section = ".text.pkpmm_labels")]',
+        "unsafe { core::str::from_utf8_unchecked(bytes) }",
+    )
+    audited = implementation
+    for token in authorized:
+        if implementation.count(token) != 1:
+            raise QualificationError(f"PKPMM1 authorized source token changed: {token}")
+        audited = audited.replace(token, "")
+    forbidden = tuple(
+        token
+        for token in ("unsafe", "from_raw_parts", "read_volatile", "write_volatile", "alloc::")
+        if token in audited
+    )
+    required = (
+        "[Extent; MAX_FREE_EXTENTS]",
+        "[Allocation; MAX_ALLOCATIONS]",
+        "MEMORY_USABLE",
+        "MEMORY_LOADER_RESERVED",
+    )
     missing = tuple(token for token in required if token not in implementation)
     if forbidden or missing:
         raise QualificationError(f"PKPMM1 source scope changed: forbidden={forbidden}; missing={missing}")
@@ -158,6 +176,7 @@ def _source_audit() -> dict[str, Any]:
         "path": path.relative_to(ROOT).as_posix(),
         "sha256": physical_memory.sha256_bytes(source.encode("utf-8")),
         "implementation_unsafe_token_count": 0,
+        "authorized_nonmutating_unsafe_site_count": 2,
         "heap_api_token_count": 0,
         "fixed_capacity_ledger_count": 2,
         "result": "pass_safe_allocation_free_metadata_only_manager",

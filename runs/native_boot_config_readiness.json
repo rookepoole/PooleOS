@@ -46,13 +46,13 @@
       },
       {
         "path": "native/Cargo.lock",
-        "sha256": "272CD0157659F8C2F2F7491DDB493A47E99FB8FFD1F431E2615D35B072FF50AF",
-        "byte_count": 4178
+        "sha256": "29CE9938C5C60DEA5AEA244A6961BB1924D88AEC601D1E02EAAA510B0B36E390",
+        "byte_count": 4193
       },
       {
         "path": "native/boot/Cargo.toml",
-        "sha256": "EF378BA03AA1DE47CD04704E4D5E7A58A055B1877A99B657461E3DCD149E6E64",
-        "byte_count": 1107
+        "sha256": "A75CC5C76A28F3F6FB1FF9D72F8BE1580EFCF28F3EE1F5A6EFA5C65F5FA8F3D9",
+        "byte_count": 1161
       },
       {
         "path": "native/boot/src/lib.rs",

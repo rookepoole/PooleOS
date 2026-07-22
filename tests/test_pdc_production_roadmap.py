@@ -118,8 +118,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 125)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 779)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 126)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 785)
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
         self.assertTrue(native["pooleboot_exists"])
@@ -135,9 +135,9 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertFalse(historical["production_ready"])
         self.assertEqual(historical["native_promotion_role"], "historical_non_promoting")
         current = self.roadmap["baseline"]["native_consistency_release_gate"]
-        self.assertEqual(current["passed_checks"], 92)
-        self.assertEqual(current["total_checks"], 92)
-        self.assertEqual(current["artifact_count"], 87)
+        self.assertEqual(current["passed_checks"], 93)
+        self.assertEqual(current["total_checks"], 93)
+        self.assertEqual(current["artifact_count"], 50)
         self.assertEqual(current["explicit_gap_count"], 20)
         self.assertFalse(current["production_ready"])
         self.assertEqual(self.roadmap["immediate_next_move"]["id"], "N0-HW-KEY-ACQUIRE-001")
@@ -159,10 +159,10 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N9-PMM-001")
+        self.assertEqual(protocol["selected_move_id"], "N9-VM-001")
         self.assertEqual(
             protocol["owner_independent_next_move_id"],
-            "N9-VM-001",
+            "N9-VM-ACTIVE-001",
         )
         self.assertIn("runs/hardware_target_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_tier0_readiness.json", protocol["required_records"])
@@ -199,8 +199,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
     def test_flags_and_gaps_are_native_and_traceable(self) -> None:
         phase_ids = {phase["id"] for phase in self.roadmap["phases"]}
         flags = self.roadmap["implementation_flags"]
-        self.assertEqual(len(flags), 69)
-        self.assertEqual(len({flag["id"] for flag in flags}), 69)
+        self.assertEqual(len(flags), 70)
+        self.assertEqual(len({flag["id"] for flag in flags}), 70)
         self.assertTrue(any(flag["class"] == "STOP_SHIP" and flag["status"] == "open" for flag in flags))
         self.assertEqual(next(flag for flag in flags if flag["id"] == "FLAG-BUILDROOT-LEGACY-001")["status"], "closed")
         objectives_flag = next(flag for flag in flags if flag["id"] == "FLAG-N0-OBJECTIVES-001")
@@ -581,12 +581,20 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         n9_statuses = {subphase["id"]: subphase["status"] for subphase in n9["subphases"]}
         self.assertEqual(n9_statuses["N9.1"], "partial")
         self.assertEqual(n9_statuses["N9.2"], "partial")
-        for subphase_id in ("N9.3", "N9.4", "N9.5", "N9.6", "N9.7"):
+        self.assertEqual(n9_statuses["N9.3"], "partial")
+        self.assertEqual(n9_statuses["N9.4"], "partial")
+        for subphase_id in ("N9.5", "N9.6", "N9.7"):
             self.assertEqual(n9_statuses[subphase_id], "not_started")
         self.assertIn("ADD-MEM-001", n9["added_requirement_ids"])
         self.assertTrue(
             any(
                 item.startswith("runs/native-kernel-physical-memory-readiness.json:")
+                for item in n9["current_evidence"]
+            )
+        )
+        self.assertTrue(
+            any(
+                item.startswith("runs/native-kernel-virtual-memory-readiness.json:")
                 for item in n9["current_evidence"]
             )
         )

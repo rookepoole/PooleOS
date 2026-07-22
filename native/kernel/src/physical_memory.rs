@@ -64,25 +64,55 @@ pub enum PhysicalMemoryError {
     ExerciseInvariant,
 }
 
+macro_rules! pmm_label {
+    ($name:ident, $value:literal) => {
+        #[used]
+        #[unsafe(link_section = ".text.pkpmm_labels")]
+        static $name: [u8; $value.len()] = *$value;
+    };
+}
+
+pmm_label!(PMM_LABEL_MISSING_MAP, b"missing_map");
+pmm_label!(PMM_LABEL_ENTRY_COUNT, b"entry_count");
+pmm_label!(PMM_LABEL_ENTRY_SHAPE, b"entry_shape");
+pmm_label!(PMM_LABEL_ENTRY_VALUE, b"entry_value");
+pmm_label!(PMM_LABEL_ENTRY_ORDER, b"entry_order");
+pmm_label!(PMM_LABEL_ADDRESS_RANGE, b"address_range");
+pmm_label!(PMM_LABEL_SOURCE_KIND, b"source_kind");
+pmm_label!(PMM_LABEL_EXTENT_CAPACITY, b"extent_capacity");
+pmm_label!(PMM_LABEL_ALLOCATION_CAPACITY, b"allocation_capacity");
+pmm_label!(PMM_LABEL_QUOTA, b"quota");
+pmm_label!(PMM_LABEL_UNAVAILABLE, b"unavailable");
+pmm_label!(PMM_LABEL_ZERO_ALLOCATION, b"zero_allocation");
+pmm_label!(PMM_LABEL_INVALID_OWNER, b"invalid_owner");
+pmm_label!(PMM_LABEL_STALE_HANDLE, b"stale_handle");
+pmm_label!(PMM_LABEL_CORE_OWNERSHIP, b"core_ownership");
+pmm_label!(PMM_LABEL_EXERCISE_INVARIANT, b"exercise_invariant");
+
+const fn pmm_label_text(bytes: &'static [u8]) -> &'static str {
+    // SAFETY: every caller passes an ASCII byte string declared immediately above.
+    unsafe { core::str::from_utf8_unchecked(bytes) }
+}
+
 impl PhysicalMemoryError {
     pub const fn label(self) -> &'static str {
         match self {
-            Self::MissingMap => "missing_map",
-            Self::EntryCount => "entry_count",
-            Self::EntryShape => "entry_shape",
-            Self::EntryValue => "entry_value",
-            Self::EntryOrder => "entry_order",
-            Self::AddressRange => "address_range",
-            Self::SourceKind => "source_kind",
-            Self::ExtentCapacity => "extent_capacity",
-            Self::AllocationCapacity => "allocation_capacity",
-            Self::Quota => "quota",
-            Self::Unavailable => "unavailable",
-            Self::ZeroAllocation => "zero_allocation",
-            Self::InvalidOwner => "invalid_owner",
-            Self::StaleHandle => "stale_handle",
-            Self::CoreOwnership => "core_ownership",
-            Self::ExerciseInvariant => "exercise_invariant",
+            Self::MissingMap => pmm_label_text(&PMM_LABEL_MISSING_MAP),
+            Self::EntryCount => pmm_label_text(&PMM_LABEL_ENTRY_COUNT),
+            Self::EntryShape => pmm_label_text(&PMM_LABEL_ENTRY_SHAPE),
+            Self::EntryValue => pmm_label_text(&PMM_LABEL_ENTRY_VALUE),
+            Self::EntryOrder => pmm_label_text(&PMM_LABEL_ENTRY_ORDER),
+            Self::AddressRange => pmm_label_text(&PMM_LABEL_ADDRESS_RANGE),
+            Self::SourceKind => pmm_label_text(&PMM_LABEL_SOURCE_KIND),
+            Self::ExtentCapacity => pmm_label_text(&PMM_LABEL_EXTENT_CAPACITY),
+            Self::AllocationCapacity => pmm_label_text(&PMM_LABEL_ALLOCATION_CAPACITY),
+            Self::Quota => pmm_label_text(&PMM_LABEL_QUOTA),
+            Self::Unavailable => pmm_label_text(&PMM_LABEL_UNAVAILABLE),
+            Self::ZeroAllocation => pmm_label_text(&PMM_LABEL_ZERO_ALLOCATION),
+            Self::InvalidOwner => pmm_label_text(&PMM_LABEL_INVALID_OWNER),
+            Self::StaleHandle => pmm_label_text(&PMM_LABEL_STALE_HANDLE),
+            Self::CoreOwnership => pmm_label_text(&PMM_LABEL_CORE_OWNERSHIP),
+            Self::ExerciseInvariant => pmm_label_text(&PMM_LABEL_EXERCISE_INVARIANT),
         }
     }
 }
@@ -486,7 +516,7 @@ impl PhysicalMemoryManager {
         })
     }
 
-    pub fn free(&mut self, handle: AllocationHandle) -> Result<(), PhysicalMemoryError> {
+    pub fn validate_allocation(&self, handle: AllocationHandle) -> Result<(), PhysicalMemoryError> {
         let slot = usize::from(handle.slot);
         let allocation = self
             .allocations
@@ -500,9 +530,18 @@ impl PhysicalMemoryManager {
             || allocation.zone != handle.zone
             || allocation.owner != handle.owner
         {
+            return Err(PhysicalMemoryError::StaleHandle);
+        }
+        Ok(())
+    }
+
+    pub fn free(&mut self, handle: AllocationHandle) -> Result<(), PhysicalMemoryError> {
+        if self.validate_allocation(handle).is_err() {
             self.rejected_double_frees += 1;
             return Err(PhysicalMemoryError::StaleHandle);
         }
+        let slot = usize::from(handle.slot);
+        let allocation = self.allocations[slot];
         self.insert_and_coalesce(Extent {
             start_page: allocation.start_page,
             page_count: allocation.page_count,
@@ -592,6 +631,15 @@ impl PhysicalMemoryManager {
             metadata_poison_events: self.metadata_poison_events,
             coalesce_events: self.coalesce_events,
         }
+    }
+
+    #[cfg(test)]
+    pub(crate) fn test_manager(start_page: u64, page_count: u64, quota_pages: u64) -> Self {
+        let mut manager = Self::empty(quota_pages);
+        manager
+            .append_usable(start_page, page_count)
+            .expect("test extent must be valid");
+        manager
     }
 }
 
