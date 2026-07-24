@@ -113,6 +113,9 @@ scrub-before-allocation and scrub-before-reuse, full readback, receipts,
 exact-reuse residue rejection, fault rollback, and alias revocation. Cycle 129
 upgrades it to PKPMM3 with a retained five-page guarded metadata arena,
 complete-manager handoff, integrity seal, mapped-corruption rejection, rollback,
-and release exclusion. The next owner-independent move is
-`N9-PMM-RECLAIM-001` without target, scheduler, SMP, userspace, heap, pager,
+and release exclusion. Cycle 130 upgrades it to PKPMM4 with streamed complete
+preflight, scrub-before-admission, exact lifecycle gates, retained-range
+exclusion, atomic metadata commit, idempotence, and immutable Boot Services
+reclaim receipts while ACPI remains held. The next owner-independent move is
+`N9-PMM-GROWTH-001` without target, scheduler, SMP, userspace, heap, pager,
 concurrent reclaim, or production promotion.

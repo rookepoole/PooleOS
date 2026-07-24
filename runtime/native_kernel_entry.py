@@ -165,7 +165,7 @@ def readiness_errors(readiness: Any, root: Path = ROOT) -> list[str]:
     ):
         if not isinstance(summary.get(total), int) or summary.get(passed) != summary.get(total):
             errors.append(f"readiness summary mismatch: {passed}")
-    if summary.get("rust_host_tests_total") != 74:
+    if summary.get("rust_host_tests_total") != 79:
         errors.append("readiness host-test count mismatch")
     if summary.get("clean_builds_total") != 2:
         errors.append("readiness clean-build count mismatch")

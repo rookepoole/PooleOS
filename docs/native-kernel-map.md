@@ -37,7 +37,7 @@ entry, trap, and PMM consumers to derive these bounds from one contract.
 The bootstrap temporary alias is derived as the first leaf after the complete
 handoff range, currently index 342, so retained-layout growth cannot silently
 occupy the scrub and page-table transaction slot.
-PKPMM3 reserves index 343 as a metadata low guard, indices 344-348 for its
+PKPMM4 retains index 343 as a metadata low guard, indices 344-348 for its
 five-page supervisor RW/NX arena, and index 349 as its high guard. These leaves
 are absent in the PKMAP2 construction receipt and are installed only after
 PooleKernel takes ownership in selector 8.

@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
   "artifact_kind": "pooleos_native_kernel_physical_memory_contract",
-  "contract_id": "PKPMM3",
-  "selected_move_id": "N9-PMM-METADATA-001",
-  "status": "bounded_guarded_metadata_arena_contract",
+  "contract_id": "PKPMM4",
+  "selected_move_id": "N9-PMM-RECLAIM-001",
+  "status": "bounded_held_class_reclaim_contract",
   "production_ready": false,
   "production_promotion_allowed": false,
   "development_profile": {
@@ -18,6 +18,7 @@
     "free_extents": 256,
     "allocations": 32,
     "scrub_receipts": 16,
+    "reclaim_receipts": 2,
     "quota_pages": 64,
     "page_bytes": 4096,
     "metadata_arena_pages": 5,
@@ -27,7 +28,8 @@
     "explicit PooleKernel null-page guard",
     "PBP1 loader-reserved kernel, retained handoff, page tables, stack, and artifacts",
     "UEFI runtime, ACPI NVS, MMIO, reserved, unusable, and persistent classes",
-    "boot-services and ACPI reclaimable classes held pending explicit subsystem handoff",
+    "boot-services memory admitted only after the monotonic post-ExitBootServices stage and a successful reclaim transaction",
+    "ACPI reclaimable memory held until the monotonic ACPI-tables-released stage and a successful reclaim transaction",
     "UEFI conventional memory admitted as initially usable"
   ],
   "zones": [
@@ -54,9 +56,10 @@
     "full_page_readback_required": true,
     "live_profile_allocation_pages": 9,
     "live_profile_release_pages": 4,
-    "live_profile_total_scrub_pages": 13,
-    "live_profile_scrubbed_bytes": 53248,
-    "live_profile_verified_bytes": 53248,
+    "live_profile_reclaim_pages": 11250,
+    "live_profile_total_scrub_pages": 11263,
+    "live_profile_scrubbed_bytes": 46133248,
+    "live_profile_verified_bytes": 46133248,
     "stale_pattern": "0xA5A55A5AC3C33C3C",
     "exact_first_fit_reuse_required": true,
     "generation_advance_required": true,
@@ -65,14 +68,14 @@
   },
   "metadata_arena": {
     "owner_id": 19781,
-    "manager_byte_count": 14616,
+    "manager_byte_count": 14928,
     "page_count": 5,
     "guard_page_count": 2,
     "mapping_permissions": "supervisor_rw_nx_wb",
     "mapping_layout": "after_retained_handoff_and_single_temporary_leaf",
     "integrity_algorithm": "fnv1a64_logical_fields",
     "migration_order": ["reserve", "zero_and_verify", "mark_release_excluded", "map_with_absent_guards", "copy_complete_manager", "seal", "validate_mapping_and_seal", "retire_stack_bootstrap_copy"],
-    "migrated_ledgers": ["source_records_256", "free_extents_256", "allocations_32", "scrub_receipts_16", "ownership_and_counters"],
+    "migrated_ledgers": ["source_records_256", "free_extents_256", "allocations_32", "scrub_receipts_16", "reclaim_receipts_2", "reclaim_lifecycle", "ownership_and_counters"],
     "failure_policy": "unmap_installed_prefix_and_scrub_release_reserved_pages_before_returning_failure",
     "release_policy": "fail_closed_with_metadata_ownership_error"
   },
@@ -84,10 +87,44 @@
     "sequence_strictly_increases": true,
     "receipt_emission": "after_full_scrub_and_readback_success_only"
   },
+  "reclaim_policy": {
+    "classes": ["boot_services", "acpi"],
+    "boot_services_source_kind": 2,
+    "acpi_source_kind": 5,
+    "boot_services_required_stage": "post_exit_boot_services",
+    "acpi_required_stage": "acpi_tables_released",
+    "stage_progression": ["pre_exit_boot_services", "post_exit_boot_services", "acpi_tables_released"],
+    "stage_skip_or_regression": "rejected_before_content_or_ownership_mutation",
+    "target_selection": "all_source_records_of_the_requested_held_class_split_at_zone_boundaries",
+    "retained_overlap_policy": "reject_if_any_target_overlaps_an_active_allocation_or_non_target_source_record",
+    "free_ledger_policy": "stream_and_capacity_check_the_complete_merged_ledger_before_content_writes_then_repeat_the_immutable_stream_for_scrub_and_commit",
+    "stack_policy": "scalar_bounded_cursor_and_plan_only_no_extent_array_transaction_snapshot",
+    "content_policy": "zero_each_target_page_and_require_full_readback_before_ownership_admission",
+    "ownership_commit": "single_manager_state_commit_after_all_content_operations_succeed",
+    "idempotence": "repeat_call_returns_the_exact_immutable_receipt_without_physical_access",
+    "live_boot_reclaim_pages": 11250,
+    "live_boot_source_records": 70,
+    "live_boot_ranges": 12,
+    "live_boot_pages_by_zone": [2018, 9232, 0],
+    "live_acpi_pages_held": 11,
+    "live_acpi_positive_activation": false
+  },
+  "reclaim_receipt_contract": {
+    "receipt_count": 1,
+    "maximum_receipts": 2,
+    "required_fields": ["sequence", "class", "required_stage", "observed_stage", "source_record_count", "range_count", "page_count", "pages_by_zone", "pre_free_extent_count", "post_free_extent_count", "zeroed_bytes", "verified_bytes", "range_checksum", "receipt_checksum"],
+    "sequence_starts_at": 1,
+    "sequence_strictly_increases": true,
+    "checksum_algorithm": "fnv1a64_over_ordered_receipt_fields",
+    "receipt_emission": "after_all_target_ranges_are_zeroed_verified_and_atomically_admitted"
+  },
   "failure_atomicity": {
     "allocation_scrub_failure": "no_handle_committed_and_planned_extent_restored",
     "release_scrub_failure": "handle_remains_live_and_extent_remains_owned",
     "free_extent_preflight": "must_succeed_before_any_release_scrub_write",
+    "reclaim_preflight_failure": "no_content_write_no_ownership_change_no_receipt",
+    "reclaim_scrub_failure": "content_may_be_partially_zeroed_but_ownership_free_ledgers_managed_counts_and_receipts_remain_unchanged",
+    "reclaim_retry": "allowed_after_a_scrub_failure_and_must_emit_the_first_sequence_only_after_success",
     "host_fault_tests": [
       "partial_allocation_scrub_failure_preserves_allocator_ownership_state",
       "release_verification_failure_keeps_the_handle_live",
@@ -96,7 +133,12 @@
       "metadata_arena_migrates_full_ledgers_and_excludes_release",
       "metadata_mapping_failure_rolls_back_reserved_pages",
       "metadata_handoff_corruption_unmaps_and_rolls_back",
-      "mapped_metadata_corruption_rejects_the_next_operation"
+      "mapped_metadata_corruption_rejects_the_next_operation",
+      "held_class_lifecycle_rejects_early_skip_and_regression_transitions",
+      "boot_and_acpi_reclaim_emit_exact_idempotent_receipts_after_required_stages",
+      "mapped_manager_boot_reclaim_preserves_the_integrity_seal",
+      "reclaim_scrub_failure_rolls_back_manager_ownership_and_retry_succeeds",
+      "reclaim_capacity_and_retained_overlap_reject_before_physical_write"
     ]
   },
   "qualification": {
@@ -106,10 +148,10 @@
     "independent_pbp1_oracle_required": true,
     "exact_scrub_counters_required": true,
     "host_fault_tests_required": true,
-    "negative_control_count": 87
+    "negative_control_count": 109
   },
   "required_negative_controls": [
-    "NEG-N9-PKPMM-MARKER-OMISSION", "NEG-N9-PKPMM-MARKER-ORDER", "NEG-N9-PKPMM-MARKER-DUPLICATE", "NEG-N9-PKPMM-SELECTOR", "NEG-N9-PKPMM-CONTRACT", "NEG-N9-PKPMM-ENTRY-COUNT", "NEG-N9-PKPMM-USABLE-PAGES", "NEG-N9-PKPMM-BOOT-RECLAIMABLE", "NEG-N9-PKPMM-LOADER-RESERVED", "NEG-N9-PKPMM-NULL-GUARD", "NEG-N9-PKPMM-DMA-SOURCE", "NEG-N9-PKPMM-DMA-MANAGED", "NEG-N9-PKPMM-DMA32-SOURCE", "NEG-N9-PKPMM-DMA32-MANAGED", "NEG-N9-PKPMM-NORMAL-SOURCE", "NEG-N9-PKPMM-NORMAL-MANAGED", "NEG-N9-PKPMM-EXTENT-COUNT", "NEG-N9-PKPMM-LARGEST-DMA", "NEG-N9-PKPMM-LARGEST-DMA32", "NEG-N9-PKPMM-LARGEST-NORMAL", "NEG-N9-PKPMM-KERNEL-BASE", "NEG-N9-PKPMM-KERNEL-PAGES", "NEG-N9-PKPMM-HANDOFF-BASE", "NEG-N9-PKPMM-HANDOFF-PAGES", "NEG-N9-PKPMM-ROOT", "NEG-N9-PKPMM-PROTECTED", "NEG-N9-PKPMM-METADATA-PAGES", "NEG-N9-PKPMM-METADATA-PHYSICAL", "NEG-N9-PKPMM-METADATA-VIRTUAL", "NEG-N9-PKPMM-METADATA-GENERATION", "NEG-N9-PKPMM-METADATA-OWNER", "NEG-N9-PKPMM-METADATA-MANAGER-BYTES", "NEG-N9-PKPMM-METADATA-SOURCE-RECORDS", "NEG-N9-PKPMM-METADATA-FREE-EXTENTS", "NEG-N9-PKPMM-METADATA-ALLOCATION-RECORDS", "NEG-N9-PKPMM-METADATA-RECEIPT-RECORDS", "NEG-N9-PKPMM-METADATA-HANDOFF-CHECKSUM", "NEG-N9-PKPMM-METADATA-FINAL-CHECKSUM", "NEG-N9-PKPMM-METADATA-GUARD-PAGES", "NEG-N9-PKPMM-METADATA-MAPPING-COUNT", "NEG-N9-PKPMM-METADATA-PTE-WRITES", "NEG-N9-PKPMM-METADATA-RELEASE-EXCLUDED", "NEG-N9-PKPMM-METADATA-RELEASE-REJECTED", "NEG-N9-PKPMM-METADATA-INTEGRITY", "NEG-N9-PKPMM-METADATA-RESERVATION-ROLLBACK", "NEG-N9-PKPMM-METADATA-MAPPING-ROLLBACK", "NEG-N9-PKPMM-METADATA-HANDOFF", "NEG-N9-PKPMM-METADATA-CORRUPTION", "NEG-N9-PKPMM-METADATA-ROLLBACK", "NEG-N9-PKPMM-ALLOCATION-COUNT", "NEG-N9-PKPMM-FREE-COUNT", "NEG-N9-PKPMM-START", "NEG-N9-PKPMM-FIRST-GENERATION", "NEG-N9-PKPMM-REUSE-GENERATION", "NEG-N9-PKPMM-ALLOCATION-RECEIPTS", "NEG-N9-PKPMM-RELEASE-RECEIPTS", "NEG-N9-PKPMM-SCRUB-PAGES", "NEG-N9-PKPMM-SCRUB-BYTES", "NEG-N9-PKPMM-VERIFIED-BYTES", "NEG-N9-PKPMM-STALE-PATTERN", "NEG-N9-PKPMM-STALE-ABSENT", "NEG-N9-PKPMM-DOUBLE-FREE", "NEG-N9-PKPMM-QUOTA", "NEG-N9-PKPMM-UNAVAILABLE", "NEG-N9-PKPMM-METADATA-POISON", "NEG-N9-PKPMM-COALESCE", "NEG-N9-PKPMM-ROLLBACK", "NEG-N9-PKPMM-MANAGED-TOTAL", "NEG-N9-PKPMM-ALLOCATED-RESIDUE", "NEG-N9-PKPMM-PHYSICAL-WRITE", "NEG-N9-PKPMM-PHYSICAL-READ", "NEG-N9-PKPMM-TEMPORARY-PTE-WRITE", "NEG-N9-PKPMM-BOOTSTRAP-INVLPG", "NEG-N9-PKPMM-ALIAS-REVOCATION", "NEG-N9-PKPMM-METADATA-RETAINED", "NEG-N9-PKPMM-MAPPING", "NEG-N9-PKPMM-RECLAIM", "NEG-N9-PKPMM-CONCURRENCY", "NEG-N9-PKPMM-SMP", "NEG-N9-PKPMM-SIGNATURE", "NEG-N9-PKPMM-AUTHORITY", "NEG-N9-PKPMM-ACTION", "NEG-N9-PKPMM-PRODUCTION", "NEG-N9-PKPMM-TERMINAL", "NEG-N9-PKPMM-PBP1-OVERLAP", "NEG-N9-PKPMM-PBP1-SOURCE-KIND", "NEG-N9-PKPMM-PBP1-CORE-OWNERSHIP"
+    "NEG-N9-PKPMM-MARKER-OMISSION", "NEG-N9-PKPMM-MARKER-ORDER", "NEG-N9-PKPMM-MARKER-DUPLICATE", "NEG-N9-PKPMM-SELECTOR", "NEG-N9-PKPMM-CONTRACT", "NEG-N9-PKPMM-ENTRY-COUNT", "NEG-N9-PKPMM-USABLE-PAGES", "NEG-N9-PKPMM-BOOT-RECLAIMABLE", "NEG-N9-PKPMM-LOADER-RESERVED", "NEG-N9-PKPMM-NULL-GUARD", "NEG-N9-PKPMM-DMA-SOURCE", "NEG-N9-PKPMM-DMA-MANAGED", "NEG-N9-PKPMM-DMA32-SOURCE", "NEG-N9-PKPMM-DMA32-MANAGED", "NEG-N9-PKPMM-NORMAL-SOURCE", "NEG-N9-PKPMM-NORMAL-MANAGED", "NEG-N9-PKPMM-EXTENT-COUNT", "NEG-N9-PKPMM-LARGEST-DMA", "NEG-N9-PKPMM-LARGEST-DMA32", "NEG-N9-PKPMM-LARGEST-NORMAL", "NEG-N9-PKPMM-KERNEL-BASE", "NEG-N9-PKPMM-KERNEL-PAGES", "NEG-N9-PKPMM-HANDOFF-BASE", "NEG-N9-PKPMM-HANDOFF-PAGES", "NEG-N9-PKPMM-ROOT", "NEG-N9-PKPMM-PROTECTED", "NEG-N9-PKPMM-METADATA-PAGES", "NEG-N9-PKPMM-METADATA-PHYSICAL", "NEG-N9-PKPMM-METADATA-VIRTUAL", "NEG-N9-PKPMM-METADATA-GENERATION", "NEG-N9-PKPMM-METADATA-OWNER", "NEG-N9-PKPMM-METADATA-MANAGER-BYTES", "NEG-N9-PKPMM-METADATA-SOURCE-RECORDS", "NEG-N9-PKPMM-METADATA-FREE-EXTENTS", "NEG-N9-PKPMM-METADATA-ALLOCATION-RECORDS", "NEG-N9-PKPMM-METADATA-RECEIPT-RECORDS", "NEG-N9-PKPMM-METADATA-HANDOFF-CHECKSUM", "NEG-N9-PKPMM-METADATA-FINAL-CHECKSUM", "NEG-N9-PKPMM-METADATA-GUARD-PAGES", "NEG-N9-PKPMM-METADATA-MAPPING-COUNT", "NEG-N9-PKPMM-METADATA-PTE-WRITES", "NEG-N9-PKPMM-METADATA-RELEASE-EXCLUDED", "NEG-N9-PKPMM-METADATA-RELEASE-REJECTED", "NEG-N9-PKPMM-METADATA-INTEGRITY", "NEG-N9-PKPMM-METADATA-RESERVATION-ROLLBACK", "NEG-N9-PKPMM-METADATA-MAPPING-ROLLBACK", "NEG-N9-PKPMM-METADATA-HANDOFF", "NEG-N9-PKPMM-METADATA-CORRUPTION", "NEG-N9-PKPMM-METADATA-ROLLBACK", "NEG-N9-PKPMM-RECLAIM-STAGE", "NEG-N9-PKPMM-RECLAIM-CLASS", "NEG-N9-PKPMM-RECLAIM-SEQUENCE", "NEG-N9-PKPMM-RECLAIM-SOURCE-RECORDS", "NEG-N9-PKPMM-RECLAIM-RANGES", "NEG-N9-PKPMM-RECLAIM-PAGES", "NEG-N9-PKPMM-RECLAIM-DMA-PAGES", "NEG-N9-PKPMM-RECLAIM-DMA32-PAGES", "NEG-N9-PKPMM-RECLAIM-NORMAL-PAGES", "NEG-N9-PKPMM-RECLAIM-PRE-EXTENTS", "NEG-N9-PKPMM-RECLAIM-POST-EXTENTS", "NEG-N9-PKPMM-RECLAIM-SCRUB-BYTES", "NEG-N9-PKPMM-RECLAIM-VERIFIED-BYTES", "NEG-N9-PKPMM-RECLAIM-RANGE-CHECKSUM", "NEG-N9-PKPMM-RECLAIM-RECEIPT-CHECKSUM", "NEG-N9-PKPMM-RECLAIM-IDEMPOTENT", "NEG-N9-PKPMM-RECLAIM-ACPI-HELD", "NEG-N9-PKPMM-RECLAIM-ACPI-EARLY", "NEG-N9-PKPMM-RECLAIM-RETAINED", "NEG-N9-PKPMM-RECLAIM-ATOMIC", "NEG-N9-PKPMM-RECLAIM-ROLLBACK", "NEG-N9-PKPMM-ALLOCATION-COUNT", "NEG-N9-PKPMM-FREE-COUNT", "NEG-N9-PKPMM-START", "NEG-N9-PKPMM-FIRST-GENERATION", "NEG-N9-PKPMM-REUSE-GENERATION", "NEG-N9-PKPMM-ALLOCATION-RECEIPTS", "NEG-N9-PKPMM-RELEASE-RECEIPTS", "NEG-N9-PKPMM-SCRUB-PAGES", "NEG-N9-PKPMM-SCRUB-BYTES", "NEG-N9-PKPMM-VERIFIED-BYTES", "NEG-N9-PKPMM-STALE-PATTERN", "NEG-N9-PKPMM-STALE-ABSENT", "NEG-N9-PKPMM-DOUBLE-FREE", "NEG-N9-PKPMM-QUOTA", "NEG-N9-PKPMM-UNAVAILABLE", "NEG-N9-PKPMM-METADATA-POISON", "NEG-N9-PKPMM-COALESCE", "NEG-N9-PKPMM-ROLLBACK", "NEG-N9-PKPMM-MANAGED-TOTAL", "NEG-N9-PKPMM-ALLOCATED-RESIDUE", "NEG-N9-PKPMM-PHYSICAL-WRITE", "NEG-N9-PKPMM-PHYSICAL-READ", "NEG-N9-PKPMM-TEMPORARY-PTE-WRITE", "NEG-N9-PKPMM-BOOTSTRAP-INVLPG", "NEG-N9-PKPMM-ALIAS-REVOCATION", "NEG-N9-PKPMM-METADATA-RETAINED", "NEG-N9-PKPMM-MAPPING", "NEG-N9-PKPMM-RECLAIM", "NEG-N9-PKPMM-ACPI-RECLAIM", "NEG-N9-PKPMM-CONCURRENCY", "NEG-N9-PKPMM-SMP", "NEG-N9-PKPMM-SIGNATURE", "NEG-N9-PKPMM-AUTHORITY", "NEG-N9-PKPMM-ACTION", "NEG-N9-PKPMM-PRODUCTION", "NEG-N9-PKPMM-TERMINAL", "NEG-N9-PKPMM-PBP1-OVERLAP", "NEG-N9-PKPMM-PBP1-SOURCE-KIND", "NEG-N9-PKPMM-PBP1-CORE-OWNERSHIP"
   ],
   "claims": {
     "live_pbp1_memory_map_consumed_by_poolekernel": true,
@@ -133,17 +175,23 @@
     "metadata_logical_integrity_seal_enforced": true,
     "metadata_handoff_and_mapping_rollback_host_tested": true,
     "metadata_release_exclusion_enforced": true,
-    "boot_or_acpi_reclaim_activated": false,
+    "boot_services_reclaim_lifecycle_enforced": true,
+    "boot_services_reclaim_scrubbed_and_activated": true,
+    "reclaim_capacity_and_retained_range_preflight_enforced": true,
+    "reclaim_atomicity_rollback_and_idempotence_host_tested": true,
+    "generation_bound_reclaim_receipt_enforced": true,
+    "acpi_reclaim_timing_enforced": true,
+    "acpi_reclaim_activated": false,
     "complete_direct_map_or_address_space_claimed": false,
     "concurrent_or_smp_allocator_qualified": false,
     "n9_exit_gate_satisfied": false,
     "production_ready": false
   },
   "non_claims": [
-    "PKPMM3 qualifies only a bounded five-page guarded metadata arena plus the selector-8 two-page DMA32 allocation, release, exact-reuse, and final-release lifecycle.",
-    "Raw allocate and free APIs retained for predecessor PKVM1 and PKVM2 profiles are non-production and are not covered by the PKPMM3 scrub or metadata claim.",
+    "PKPMM4 qualifies only a bounded one-BSP Boot Services reclaim transaction plus the prior guarded metadata and selector-8 allocation lifecycle.",
+    "Raw allocate and free APIs retained for predecessor PKVM1 and PKVM2 profiles are non-production and are not covered by the PKPMM4 scrub, metadata, or reclaim claim.",
     "The retained mappings are one guarded five-page supervisor RW/NX metadata arena plus one revoked temporary supervisor RW/NX page alias; no complete direct map or address-space policy is claimed.",
-    "No boot-services or ACPI reclaimable range is activated.",
+    "Boot Services reclaim is activated only in the bounded qemu64 profile; ACPI reclaim remains held and no positive ACPI activation is claimed.",
     "No concurrent, interrupt-context, or SMP allocator is qualified.",
     "No target hardware, second host, signature, release, or production claim is made."
   ]
