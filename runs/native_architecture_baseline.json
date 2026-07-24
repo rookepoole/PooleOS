@@ -437,9 +437,9 @@
     },
     {
       "path": "docs/native-kernel-load.md",
-      "sha256": "169BBE6100DC614A5BB06B21441CEC153CF31F4A70080273B991835575DB0424",
-      "byte_count": 15010,
-      "line_count": 264
+      "sha256": "575CCCA1C803823D563DAD4F394EDF7031B7CB4E3E2DF3CF6FF31642218CDA82",
+      "byte_count": 15229,
+      "line_count": 267
     },
     {
       "path": "docs/native-kernel-revalidation.md",
