@@ -52,7 +52,7 @@ class NativeSymbolTests(unittest.TestCase):
         self.assertEqual(bundle.identity, psym1.canonical_identity())
         self.assertEqual(bundle.segments, psym1.canonical_segments())
         self.assertEqual(bundle.symbols, psym1.canonical_symbols())
-        self.assertEqual(bundle.image_bytes, 0x4C000)
+        self.assertEqual(bundle.image_bytes, 0x4E000)
         self.assertEqual(bundle.entry_offset, 0x9000)
 
     def test_lookup_handles_hits_gaps_slides_and_bounds(self) -> None:

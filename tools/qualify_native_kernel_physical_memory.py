@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build and qualify the bounded PKPMM5 held-class reclaim transaction."""
+"""Build and qualify the bounded PKPMM6 automatic-growth transaction."""
 
 from __future__ import annotations
 
@@ -31,13 +31,13 @@ DEFAULT_OUT = ROOT / physical_memory.READINESS_RELATIVE
 
 
 class QualificationError(RuntimeError):
-    """Raised when live PKPMM5 qualification fails closed."""
+    """Raised when live PKPMM6 qualification fails closed."""
 
 
 def _set_field(marker: str, name: str, value: str) -> str:
     pattern = re.compile(rf"(\b{re.escape(name)}=)([^ ]+)")
     if len(pattern.findall(marker)) != 1:
-        raise QualificationError(f"PKPMM5 mutation field is not unique: {name}")
+        raise QualificationError(f"PKPMM6 mutation field is not unique: {name}")
     return pattern.sub(rf"\g<1>{value}", marker, count=1)
 
 
@@ -49,7 +49,7 @@ def _require_marker_rejection(
         physical_memory.validate_observation_binding(observation, transcript)
     except physical_memory.KernelPhysicalMemoryError:
         return {"id": control_id, "status": "pass", "expected": "rejected"}
-    raise QualificationError(f"PKPMM5 hostile marker control did not reject: {control_id}")
+    raise QualificationError(f"PKPMM6 hostile marker control did not reject: {control_id}")
 
 
 def _require_pbp1_rejection(
@@ -59,7 +59,7 @@ def _require_pbp1_rejection(
         physical_memory.validate_observation_binding(observation, transcript)
     except physical_memory.KernelPhysicalMemoryError:
         return {"id": control_id, "status": "pass", "expected": "rejected"}
-    raise QualificationError(f"PKPMM5 hostile PBP1 control did not reject: {control_id}")
+    raise QualificationError(f"PKPMM6 hostile PBP1 control did not reject: {control_id}")
 
 
 def _negative_controls(
@@ -147,6 +147,16 @@ def _negative_controls(
         (39, "rollbacks", "1"),
         (39, "retirement_failures", "1"),
         (39, "retirement_retry", "1"),
+        (39, "pressure_checks", "0"),
+        (39, "pressure_triggers", "0"),
+        (39, "automatic_growths", "0"),
+        (39, "pressure_cycles", "0"),
+        (39, "soft_fallbacks", "0"),
+        (39, "hard_rejections", "0"),
+        (39, "growth_headroom_scrub", "0"),
+        (39, "window_capacity", "31"),
+        (39, "next_pages", "57"),
+        (39, "pre_effect", "unverified"),
         (39, "concurrency", "1"),
         (39, "smp", "1"),
         (39, "authority", "1"),
@@ -213,7 +223,7 @@ def _negative_controls(
     )
     marker_control_ids = physical_memory.NEGATIVE_CONTROL_IDS[3:-3]
     if len(mutations) != len(marker_control_ids):
-        raise QualificationError("PKPMM5 hostile-control inventory and mutations disagree")
+        raise QualificationError("PKPMM6 hostile-control inventory and mutations disagree")
     for control_id, (marker_index, field, value) in zip(marker_control_ids, mutations):
         candidates.append((control_id, changed(marker_index, field, value)))
     controls = [
@@ -231,7 +241,7 @@ def _negative_controls(
     ownership["core"]["kernel_physical_base"] = ownership["memory_entries"][0]["physical_start"]
     controls.append(_require_pbp1_rejection(physical_memory.NEGATIVE_CONTROL_IDS[-1], observation, ownership))
     if [item["id"] for item in controls] != list(physical_memory.NEGATIVE_CONTROL_IDS):
-        raise QualificationError("PKPMM5 hostile-control order changed")
+        raise QualificationError("PKPMM6 hostile-control order changed")
     return controls
 
 
@@ -258,7 +268,7 @@ def _source_audit() -> dict[str, Any]:
     audited = implementation
     for token, expected_count in authorized:
         if implementation.count(token) != expected_count:
-            raise QualificationError(f"PKPMM5 authorized source token changed: {token}")
+            raise QualificationError(f"PKPMM6 authorized source token changed: {token}")
         audited = audited.replace(token, "")
     forbidden = tuple(
         token
@@ -284,6 +294,13 @@ def _source_audit() -> dict[str, Any]:
         "pub trait MetadataArenaAccess",
         "pub fn allocate_scrubbed",
         "pub fn free_scrubbed",
+        "pub fn allocate_scrubbed_automatic",
+        "pub fn free_scrubbed_automatic",
+        "pub fn ensure_ledger_capacity",
+        "struct LedgerDemand",
+        "pub struct LedgerPressureOutcome",
+        "LEDGER_GROWTH_ALLOCATION_HEADROOM",
+        "LEDGER_GROWTH_SCRUB_HEADROOM",
         "fn scrub_range",
         "pub fn advance_reclaim_stage",
         "pub fn reclaim_held",
@@ -304,7 +321,7 @@ def _source_audit() -> dict[str, Any]:
     )
     missing = tuple(token for token in required if token not in implementation)
     if forbidden or missing:
-        raise QualificationError(f"PKPMM5 source scope changed: forbidden={forbidden}; missing={missing}")
+        raise QualificationError(f"PKPMM6 source scope changed: forbidden={forbidden}; missing={missing}")
     adapter_required = (
         "impl PhysicalPageAccess for BootstrapTableMemory",
         "impl MetadataArenaAccess for BootstrapTableMemory",
@@ -321,7 +338,7 @@ def _source_audit() -> dict[str, Any]:
     )
     adapter_missing = tuple(token for token in adapter_required if token not in adapter_source)
     if adapter_missing:
-        raise QualificationError(f"PKPMM5 live adapter scope changed: missing={adapter_missing}")
+        raise QualificationError(f"PKPMM6 live adapter scope changed: missing={adapter_missing}")
     adapter_implementation = adapter_source.split("struct BootstrapTableMemory", 1)[1].split(
         "struct LiveActiveHardware", 1
     )[0]
@@ -341,7 +358,7 @@ def _source_audit() -> dict[str, Any]:
         "heap_api_token_count": 0,
         "bootstrap_fixed_capacity_ledger_count": 5,
         "active_fixed_capacity_ledger_count": 0,
-        "result": "pass_guarded_generation_growth_and_reclaim_with_audited_live_page_adapter",
+        "result": "pass_checked_pressure_triggered_repeated_growth_with_audited_live_page_adapter",
     }
 
 
@@ -365,7 +382,7 @@ def make_readiness(
     temporary_parent.mkdir(parents=True, exist_ok=True)
     run_parent = ROOT / "runs" / "native-tier0"
     run_parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="pkpmm5-qualification-", dir=temporary_parent) as temporary:
+    with tempfile.TemporaryDirectory(prefix="pkpmm6-qualification-", dir=temporary_parent) as temporary:
         temporary_root = Path(temporary)
         default_boot, default_build = qualify_native_pooleboot._build_and_test(
             toolchain_root, temporary_root / "default-boot"
@@ -378,23 +395,23 @@ def make_readiness(
         if b"POOLEBOOT/0.1 TRANSFER_ARM PASS" in default_boot or b"POOLEBOOT/0.1 STOP BEFORE TRANSFER" not in default_boot:
             raise QualificationError("default PooleBoot development-transfer isolation failed")
         if physical_memory.sha256_bytes(default_boot) == physical_memory.sha256_bytes(pmm_boot):
-            raise QualificationError("default and PKPMM5 PooleBoot profiles are not distinct")
+            raise QualificationError("default and PKPMM6 PooleBoot profiles are not distinct")
         source_audit = _source_audit()
         media_one = native_kernel_load.build_media_bytes(pmm_boot, config, manifest, kernel, artifact_files)
         media_two = native_kernel_load.build_media_bytes(pmm_boot, config, manifest, kernel, artifact_files)
         if media_one != media_two:
-            raise QualificationError("two PKPMM5 media generations differ")
+            raise QualificationError("two PKPMM6 media generations differ")
         media_inspection = native_kernel_load.inspect_media_bytes(media_one)
         if media_inspection["files"][3]["sha256"] != kernel_readiness["product"]["canonical_sha256"]:
-            raise QualificationError("PKPMM5 media kernel differs from PKENTRY1")
-        media_path = temporary_root / "pkpmm5.img"
+            raise QualificationError("PKPMM6 media kernel differs from PKENTRY1")
+        media_path = temporary_root / "pkpmm6.img"
         media_path.write_bytes(media_one)
 
         runs: list[dict[str, Any]] = []
         screenshots: list[bytes] = []
         handoffs: list[bytes] = []
         for run_index in (1, 2):
-            with tempfile.TemporaryDirectory(prefix=f"pkpmm5-run-{run_index}-", dir=run_parent) as run_temporary:
+            with tempfile.TemporaryDirectory(prefix=f"pkpmm6-run-{run_index}-", dir=run_parent) as run_temporary:
                 run_directory = Path(run_temporary)
                 try:
                     run, screenshot, handoff = qualify_native_pooleboot._execute_once(
@@ -451,11 +468,11 @@ def make_readiness(
                 screenshots.append(screenshot)
                 handoffs.append(handoff)
         if runs[0]["markers"] != runs[1]["markers"]:
-            raise QualificationError("two PKPMM5 runs emitted different markers")
+            raise QualificationError("two PKPMM6 runs emitted different markers")
         if screenshots[0] != screenshots[1]:
-            raise QualificationError("two PKPMM5 runs produced different frames")
+            raise QualificationError("two PKPMM6 runs produced different frames")
         if handoffs[0] != handoffs[1]:
-            raise QualificationError("two PKPMM5 runs produced different PBP1 bytes")
+            raise QualificationError("two PKPMM6 runs produced different PBP1 bytes")
 
     controls = _negative_controls(runs[0]["markers"], runs[0]["pbp1_transcript"])
     observation = physical_memory.validate_markers(runs[0]["markers"])
@@ -466,7 +483,7 @@ def make_readiness(
         "schema_version": "1.0",
         "artifact_kind": "pooleos_native_kernel_physical_memory_readiness",
         "status_date": status_date,
-        "status": "pass_single_host_two_run_qemu64_guarded_ledger_growth_non_promoting",
+        "status": "pass_single_host_two_run_qemu64_checked_automatic_repeated_ledger_growth_non_promoting",
         "contract_id": physical_memory.CONTRACT_ID,
         "selected_move_id": physical_memory.SELECTED_MOVE_ID,
         "production_ready": False,
@@ -543,7 +560,8 @@ def make_readiness(
             "acpi_early_reclaim_rejected": observation["reclaim"]["acpi_early_rejected"] == 1,
             "loader_reserved_pages_protected": derived["kind_pages"][10],
             "allocator_operations": observation["scrub"]["allocations"] + observation["scrub"]["frees"],
-            "scrub_receipts": observation["scrub"]["allocation_receipts"] + observation["scrub"]["release_receipts"],
+            "scrub_receipts": observation["growth"]["scrub_capacity"],
+            "sample_scrub_receipts": observation["scrub"]["allocation_receipts"] + observation["scrub"]["release_receipts"],
             "metadata_scrub_receipts": 1,
             "scrub_page_count": observation["scrub"]["scrub_pages"],
             "scrubbed_bytes": observation["scrub"]["scrub_bytes"],
@@ -588,6 +606,17 @@ def make_readiness(
                     "rollbacks",
                     "retirement_failures",
                     "retirement_retry",
+                    "pressure_checks",
+                    "pressure_triggers",
+                    "automatic_growths",
+                    "pressure_cycles",
+                    "soft_fallbacks",
+                    "hard_rejections",
+                    "growth_headroom_allocation",
+                    "growth_headroom_scrub",
+                    "window_capacity",
+                    "next_pages",
+                    "pre_effect",
                 )
             },
             "complete_address_space_mapping_operations": 0,
@@ -602,7 +631,7 @@ def make_readiness(
             "Implement N9.3/N9.4 virtual layout, page-table ownership, map/unmap, TLB, PCID, guard, and huge-page contracts.",
             "Implement randomized, concurrent, interrupt-context, SMP, fragmentation, quota, and OOM allocator stress.",
             "Implement heap, object caches, kernel stacks, cacheability policy, target hardware, and second-host qualification.",
-            "Integrate checked ledger growth with allocator pressure triggers and define behavior when both bounded generation windows are exhausted.",
+            "Replace the bounded retained-leaf growth windows with the later N9.3 generation-owned virtual mapping policy before production scale is claimed.",
         ],
     }
     errors = physical_memory.readiness_errors(report, ROOT)
@@ -636,10 +665,10 @@ def main(argv: list[str] | None = None) -> int:
         physical_memory.KernelPhysicalMemoryError,
         native_tier0.Tier0Error,
     ) as error:
-        print(f"PKPMM5 qualification failed: {error}", file=sys.stderr)
+        print(f"PKPMM6 qualification failed: {error}", file=sys.stderr)
         return 1
     print(
-        "PKPMM5 qualification passed: "
+        "PKPMM6 qualification passed: "
         f"runs={report['summary']['qemu_run_count']}; "
         f"markers={report['summary']['marker_count']}; "
         f"controls={report['summary']['negative_controls_passed']}; "

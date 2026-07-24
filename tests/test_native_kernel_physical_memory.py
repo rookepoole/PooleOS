@@ -40,22 +40,28 @@ class NativeKernelPhysicalMemoryTests(unittest.TestCase):
         self.assertEqual(physical_memory.PHYSICAL_WRITES, observation["result"]["physical_writes"])
         self.assertEqual(physical_memory.PHYSICAL_READS, observation["result"]["physical_reads"])
         self.assertEqual(
-            "temporary_single_page_plus_guarded_metadata_and_ledger_generation",
+            "temporary_single_page_plus_guarded_metadata_and_repeated_ledger_generations",
             observation["result"]["mappings"],
         )
         self.assertEqual(5, observation["metadata"]["pages"])
         self.assertEqual(2, observation["metadata"]["guard_pages"])
-        self.assertEqual(15336, observation["metadata"]["manager_bytes"])
-        self.assertEqual(3, observation["growth"]["final_generation"])
-        self.assertEqual(8, observation["growth"]["final_pages"])
-        self.assertEqual([512, 64, 512, 32, 4], [
+        self.assertEqual(15376, observation["metadata"]["manager_bytes"])
+        self.assertEqual(32, observation["growth"]["final_generation"])
+        self.assertEqual(29, observation["growth"]["final_pages"])
+        self.assertEqual([2048, 256, 2048, 128, 16], [
             observation["growth"]["free_capacity"],
             observation["growth"]["allocation_capacity"],
             observation["growth"]["source_capacity"],
             observation["growth"]["scrub_capacity"],
             observation["growth"]["reclaim_capacity"],
         ])
-        self.assertEqual(1, observation["growth"]["revoked"])
+        self.assertEqual(3, observation["growth"]["revoked"])
+        self.assertEqual(121, observation["growth"]["pressure_checks"])
+        self.assertEqual(8, observation["growth"]["pressure_triggers"])
+        self.assertEqual(3, observation["growth"]["automatic_growths"])
+        self.assertEqual(4, observation["growth"]["soft_fallbacks"])
+        self.assertEqual(1, observation["growth"]["hard_rejections"])
+        self.assertEqual("host_verified", observation["growth"]["pre_effect"])
         self.assertEqual(1, observation["result"]["metadata_retained"])
         self.assertEqual(1, observation["result"]["ledger_generation_retained"])
         self.assertEqual(1, observation["result"]["alias_revoked"])

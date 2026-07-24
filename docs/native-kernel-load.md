@@ -250,12 +250,15 @@ rollback, and release exclusion. Cycle 130 upgrades it to PKPMM4 with monotonic
 reclaim stages, complete streamed preflight, scrub-before-admission, retained-
 range exclusion, atomic metadata commit, idempotence, and immutable Boot Services
 reclaim receipts while ACPI remains held. Cycle 131 upgrades it to PKPMM5 with
-guarded generation-owned ledgers and one explicit atomic 4-to-8-page growth,
-including rollback, retryable retirement, integrity, and independent-oracle
-evidence. These remain one-BSP development profiles with no automatic repeated
-growth, complete direct map, shootdown, ring 3, complete ACPI consumer
+guarded generation-owned ledgers and one explicit atomic 4-to-8-page growth.
+Cycle 132 upgrades it to PKPMM6 with exact-demand pressure checks, automatic
+4/8/15/29-page generation growth, rollback/retry headroom, three scrubbed
+predecessor retirements, bounded-window soft fallback, and hard rejection before
+physical or ownership effects when the 58-page next layout cannot fit. These
+remain one-BSP development profiles with no interrupt-context/concurrent/SMP
+allocation, complete direct map, shootdown, ring 3, complete ACPI consumer
 integration, heap, pager, target, or production claim. The next chronological
-owner-independent move is `N9-PMM-GROWTH-AUTOMATION-001`.
+owner-independent move is `N9-PMM-ACPI-CONSUMER-001`.
 Capability creation, lifecycle execution, signature trust, authenticated
 persistent state, production transfer, and physical-target qualification remain
 separately gated by N5/N6 and owner-controlled N0 work.

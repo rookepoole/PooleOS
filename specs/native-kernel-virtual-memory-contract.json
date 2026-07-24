@@ -71,8 +71,8 @@
     "restore": "write exact original CR3 and require readback before table scrubbing",
     "release": "scrub all eight inactive candidate table pages through the restored bootstrap mapping, revoke that mapping, then free tables",
     "inactive_table_physical_write_count": 8720,
-    "temporary_pte_write_count": 5528,
-    "bootstrap_invlpg_count": 5528,
+    "temporary_pte_write_count": 5560,
+    "bootstrap_invlpg_count": 5560,
     "active_cr3_write_count": 2,
     "active_local_invlpg_count": 3,
     "smp_shootdown_executed": false

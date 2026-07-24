@@ -123,8 +123,8 @@ def _host_checks(cargo: Path, env: dict[str, str], temporary_root: Path) -> dict
         env=env,
     )
     match = re.search(r"test result: ok\. ([0-9]+) passed; 0 failed", output)
-    if match is None or int(match.group(1)) != 82:
-        raise QualificationError("expected exactly eighty-two PooleKernel host tests")
+    if match is None or int(match.group(1)) != 84:
+        raise QualificationError("expected exactly eighty-four PooleKernel host tests")
     for package in ("poolekernel", "poolekernel-fixture"):
         _run(
             [
@@ -426,6 +426,12 @@ def make_readiness(toolchain_root: Path) -> tuple[dict[str, Any], bytes]:
             raise QualificationError("PooleKernel memory image size mismatch")
         if plan_one.entry_offset != contract["product"]["entry_offset"]:
             raise QualificationError("PooleKernel entry offset mismatch")
+        build_id_bytes = contract["product"]["build_id"].encode("ascii")
+        if canonical_one.count(build_id_bytes) != 2:
+            raise QualificationError(
+                "canonical PooleKernel must contain the contract build ID exactly "
+                "once in PKMID1 and once in the live diagnostic literal"
+            )
         manifest = (NATIVE_ROOT / "kernel" / "manifest.pkm").read_bytes()
         controls = _linked_negative_controls(linked_one, plan_one, manifest)
         controls.extend(_canonical_negative_controls(canonical_one, plan_one))
@@ -502,8 +508,8 @@ def make_readiness(toolchain_root: Path) -> tuple[dict[str, Any], bytes]:
         "negative_controls": controls,
         "claims": entry.expected_claims(),
         "summary": {
-            "rust_host_tests_passed": 82,
-            "rust_host_tests_total": 82,
+            "rust_host_tests_passed": 84,
+            "rust_host_tests_total": 84,
             "rustfmt_packages_passed": 2,
             "clippy_runs_passed": 2,
             "clippy_runs_total": 2,
