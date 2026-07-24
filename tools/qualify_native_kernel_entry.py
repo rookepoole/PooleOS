@@ -123,8 +123,8 @@ def _host_checks(cargo: Path, env: dict[str, str], temporary_root: Path) -> dict
         env=env,
     )
     match = re.search(r"test result: ok\. ([0-9]+) passed; 0 failed", output)
-    if match is None or int(match.group(1)) != 79:
-        raise QualificationError("expected exactly seventy-nine PooleKernel host tests")
+    if match is None or int(match.group(1)) != 82:
+        raise QualificationError("expected exactly eighty-two PooleKernel host tests")
     for package in ("poolekernel", "poolekernel-fixture"):
         _run(
             [
@@ -188,8 +188,8 @@ def _host_checks(cargo: Path, env: dict[str, str], temporary_root: Path) -> dict
         env=_product_environment(env),
     )
     return {
-        "test_count": 79,
-        "test_pass_count": 79,
+        "test_count": 82,
+        "test_pass_count": 82,
         "rustfmt_packages": ["poolekernel", "poolekernel-fixture"],
         "clippy_targets": [HOST_TARGET, PRODUCT_TARGET],
         "status": "pass",
@@ -278,7 +278,7 @@ def _linked_negative_controls(
             ("NEG-N6-KENTRY-LINKED-RO-PADDR", _set(linked, _phdr(1, 24), "<Q", 1), "load_geometry"),
             ("NEG-N6-KENTRY-LINKED-TEXT-OFFSET", _set(linked, _phdr(2, 8), "<Q", 0x8001), "load_geometry"),
             ("NEG-N6-KENTRY-LINKED-DATA-FILESZ", _set(linked, _phdr(3, 32), "<Q", 0), "load_geometry"),
-            ("NEG-N6-KENTRY-LINKED-LOAD-LAYOUT", _set(linked, _phdr(1, 40), "<Q", 0x9000), "load_layout"),
+            ("NEG-N6-KENTRY-LINKED-LOAD-LAYOUT", _set(linked, _phdr(1, 40), "<Q", 0xA000), "load_layout"),
             ("NEG-N6-KENTRY-LINKED-ENTRY-RANGE", _set(linked, 24, "<Q", 0), "entry_range"),
             ("NEG-N6-KENTRY-LINKED-ENTRY-PREFIX", _set_byte(linked, plan.entry_offset, 0x90), "entry_prefix"),
             ("NEG-N6-KENTRY-LINKED-DYNAMIC-FLAGS", _set(linked, _phdr(4, 4), "<I", 4), "source_dynamic_segment"),
@@ -360,7 +360,7 @@ def _manifest_lines() -> list[str]:
 def _validate_manifest(contract: dict[str, Any]) -> dict[str, str]:
     expected = {
         "entry_contract": entry.CONTRACT_ID,
-        "entry_offset": "0x00008000",
+        "entry_offset": f"0x{contract['product']['entry_offset']:08X}",
         "image_contract": elf.CONTRACT_ID,
         "handoff_contract": "PBP1",
         "build_id": contract["product"]["build_id"],
@@ -502,8 +502,8 @@ def make_readiness(toolchain_root: Path) -> tuple[dict[str, Any], bytes]:
         "negative_controls": controls,
         "claims": entry.expected_claims(),
         "summary": {
-            "rust_host_tests_passed": 79,
-            "rust_host_tests_total": 79,
+            "rust_host_tests_passed": 82,
+            "rust_host_tests_total": 82,
             "rustfmt_packages_passed": 2,
             "clippy_runs_passed": 2,
             "clippy_runs_total": 2,

@@ -45,8 +45,8 @@ Every segment and symbol address is an offset from the loaded image base. The bu
 - Preferred base: `0xFFFFFFFF80000000`
 - Window end, exclusive: `0xFFFFFFFFC0000000`
 - Slide alignment: 2 MiB
-- Current image bytes: `0x46000`
-- Current entry offset: `0x8000`
+- Current image bytes: `0x4C000`
+- Current entry offset: `0x9000`
 
 Lookup rejects noncanonical x86-64 addresses, unaligned bases, bases outside the window, and addresses outside the image. A hit returns symbol ID, name, intra-symbol offset, and search-step count. A valid gap returns `unknown`; it never falls back to the preceding symbol.
 
@@ -56,11 +56,11 @@ The canonical development bundle binds these exact SHA-256 identities:
 
 | Identity | SHA-256 |
 | --- | --- |
-| Canonical stripped PKELF1 | `20BCE1C7501BC2344A6D7505BCDA749D9B2738A8435255D0EC2EF5A3E177CC4C` |
-| Preferred loaded image | `BCBE6AEB56B5DC5ADD0B8A40A131DE73B80E6C0996FB5232673D089533366EDC` |
-| Build ID text | `2F67CF7F9A1F4DB3218D43F50F099F30151DECDDE0D0D0E9D03EEA446105EBD6` |
-| Full split-debug ELF | `4FB716646D93E9447D2F67C08E0908B0F045EBEAFE8F16AB1E1037AC03B65BE2` |
-| `native/kernel/manifest.pkm` | `20F2C57DA4F5505DBE2752C73126633E5F77931A9BB8137A541B1A02E22D458F` |
+| Canonical stripped PKELF1 | `30E414826D7DF588C07A66032423DCD6AA8C47B0E6CCFC3D6686BC9224AFB947` |
+| Preferred loaded image | `B366FACA80AF826BE3969EA251B059AC40EC6266917D4E0BC97BEBB725F4EB65` |
+| Build ID text | `CFF0410E640559D08F7D8449BAB52175BB4CBD076B2A1DD50C8E23DA3FBA5C4A` |
+| Full split-debug ELF | `1F4857685D8BD18293448FAC63A297D7378504A38B17F266471AB70D66DB05FC` |
+| `native/kernel/manifest.pkm` | `530C2946B6B6527406DD8537F5B3C7B84BD6FC78E096570F797C11C0418464D2` |
 
 The qualification builds the full debug product twice and requires identical bytes. Both debug builds canonicalize to the exact stripped PKELF1 bytes. A separate release build must have no `.symtab` and no `.debug*` sections and must canonicalize to those same bytes.
 
@@ -72,9 +72,9 @@ Only these real global default-visible functions are selected today:
 
 | Symbol | Offset | Bytes | Policy |
 | --- | ---: | ---: | --- |
-| `poole_kernel_entry` | `0x8000` | 71 | entry, executable, public diagnostic |
-| `poole_kernel_emergency_panic` | `0x1002B` | 198 | panic-safe, executable, public diagnostic |
-| `poole_kernel_rust_entry` | `0x100F1` | 23,308 | executable, public diagnostic |
+| `poole_kernel_entry` | `0x9000` | 71 | entry, executable, public diagnostic |
+| `poole_kernel_emergency_panic` | `0x129A7` | 198 | panic-safe, executable, public diagnostic |
+| `poole_kernel_rust_entry` | `0x12A6D` | 26,019 | executable, public diagnostic |
 
 ## Name And Privacy Policy
 

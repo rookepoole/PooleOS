@@ -3,7 +3,7 @@ use poole_handoff::{
     MEMORY_LOADER_RESERVED, MEMORY_USABLE, PAGE_BYTES, RECORD_MEMORY_MAP,
 };
 
-pub const CONTRACT_ID: &str = "PKPMM4";
+pub const CONTRACT_ID: &str = "PKPMM5";
 pub const MAX_MEMORY_ENTRIES: usize = 256;
 pub const MAX_FREE_EXTENTS: usize = 256;
 pub const MAX_ALLOCATIONS: usize = 32;
@@ -22,6 +22,10 @@ pub const METADATA_GUARD_PAGE_COUNT: u64 = 2;
 pub const METADATA_OWNER: u16 = 0x4D45;
 pub const METADATA_MAGIC: u64 = u64::from_le_bytes(*b"PKPMMETA");
 pub const METADATA_VERSION: u64 = 1;
+pub const LEDGER_ARENA_PAGE_CAPACITY: u64 = 32;
+pub const LEDGER_GUARD_PAGE_COUNT: u64 = 2;
+pub const LEDGER_MAGIC: u64 = u64::from_le_bytes(*b"PKLEDGER");
+pub const LEDGER_VERSION: u64 = 1;
 
 const FNV_OFFSET: u64 = 0xCBF2_9CE4_8422_2325;
 const FNV_PRIME: u64 = 0x0000_0100_0000_01B3;
@@ -50,7 +54,7 @@ impl Zone {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct AllocationHandle {
-    slot: u8,
+    slot: u16,
     pub generation: u64,
     pub start_page: u64,
     pub page_count: u64,
@@ -174,6 +178,27 @@ pub trait MetadataArenaAccess: PhysicalPageAccess {
         virtual_address: u64,
         page_count: u64,
     ) -> Result<(), PageAccessError>;
+
+    fn install_ledger_arena(
+        &mut self,
+        slot: u8,
+        physical_address: u64,
+        page_count: u64,
+    ) -> Result<u64, PageAccessError>;
+
+    fn finalize_ledger_arena(
+        &mut self,
+        slot: u8,
+        virtual_address: u64,
+        page_count: u64,
+    ) -> Result<(), PageAccessError>;
+
+    fn uninstall_ledger_arena(
+        &mut self,
+        slot: u8,
+        virtual_address: u64,
+        page_count: u64,
+    ) -> Result<(), PageAccessError>;
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -202,6 +227,10 @@ pub enum PhysicalMemoryError {
     MetadataCorruption,
     MetadataOwnership,
     MetadataHandoff,
+    LedgerCapacity,
+    LedgerMapping,
+    LedgerCorruption,
+    LedgerRetirement,
     ReclaimTiming,
     ReclaimCapacity,
     ReclaimOwnership,
@@ -241,6 +270,10 @@ pmm_label!(PMM_LABEL_METADATA_MAPPING, b"metadata_mapping");
 pmm_label!(PMM_LABEL_METADATA_CORRUPTION, b"metadata_corruption");
 pmm_label!(PMM_LABEL_METADATA_OWNERSHIP, b"metadata_ownership");
 pmm_label!(PMM_LABEL_METADATA_HANDOFF, b"metadata_handoff");
+pmm_label!(PMM_LABEL_LEDGER_CAPACITY, b"ledger_capacity");
+pmm_label!(PMM_LABEL_LEDGER_MAPPING, b"ledger_mapping");
+pmm_label!(PMM_LABEL_LEDGER_CORRUPTION, b"ledger_corruption");
+pmm_label!(PMM_LABEL_LEDGER_RETIREMENT, b"ledger_retirement");
 pmm_label!(PMM_LABEL_RECLAIM_TIMING, b"reclaim_timing");
 pmm_label!(PMM_LABEL_RECLAIM_CAPACITY, b"reclaim_capacity");
 pmm_label!(PMM_LABEL_RECLAIM_OWNERSHIP, b"reclaim_ownership");
@@ -279,6 +312,10 @@ impl PhysicalMemoryError {
             Self::MetadataCorruption => pmm_label_text(&PMM_LABEL_METADATA_CORRUPTION),
             Self::MetadataOwnership => pmm_label_text(&PMM_LABEL_METADATA_OWNERSHIP),
             Self::MetadataHandoff => pmm_label_text(&PMM_LABEL_METADATA_HANDOFF),
+            Self::LedgerCapacity => pmm_label_text(&PMM_LABEL_LEDGER_CAPACITY),
+            Self::LedgerMapping => pmm_label_text(&PMM_LABEL_LEDGER_MAPPING),
+            Self::LedgerCorruption => pmm_label_text(&PMM_LABEL_LEDGER_CORRUPTION),
+            Self::LedgerRetirement => pmm_label_text(&PMM_LABEL_LEDGER_RETIREMENT),
             Self::ReclaimTiming => pmm_label_text(&PMM_LABEL_RECLAIM_TIMING),
             Self::ReclaimCapacity => pmm_label_text(&PMM_LABEL_RECLAIM_CAPACITY),
             Self::ReclaimOwnership => pmm_label_text(&PMM_LABEL_RECLAIM_OWNERSHIP),
@@ -374,6 +411,94 @@ const EMPTY_METADATA_HEADER: MetadataHeader = MetadataHeader {
 };
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(C)]
+struct LedgerArenaHeader {
+    magic: u64,
+    version: u64,
+    generation: u64,
+    previous_generation: u64,
+    physical_start_page: u64,
+    virtual_start: u64,
+    page_count: u64,
+    byte_count: u64,
+    free_offset: u64,
+    free_capacity: u64,
+    allocation_offset: u64,
+    allocation_capacity: u64,
+    source_offset: u64,
+    source_capacity: u64,
+    scrub_offset: u64,
+    scrub_capacity: u64,
+    reclaim_offset: u64,
+    reclaim_capacity: u64,
+    logical_checksum: u64,
+}
+
+const EMPTY_LEDGER_HEADER: LedgerArenaHeader = LedgerArenaHeader {
+    magic: 0,
+    version: 0,
+    generation: 0,
+    previous_generation: 0,
+    physical_start_page: 0,
+    virtual_start: 0,
+    page_count: 0,
+    byte_count: 0,
+    free_offset: 0,
+    free_capacity: 0,
+    allocation_offset: 0,
+    allocation_capacity: 0,
+    source_offset: 0,
+    source_capacity: 0,
+    scrub_offset: 0,
+    scrub_capacity: 0,
+    reclaim_offset: 0,
+    reclaim_capacity: 0,
+    logical_checksum: 0,
+};
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct LedgerCapacities {
+    free: usize,
+    allocations: usize,
+    source: usize,
+    scrub: usize,
+    reclaim: usize,
+}
+
+const BOOTSTRAP_LEDGER_CAPACITIES: LedgerCapacities = LedgerCapacities {
+    free: MAX_FREE_EXTENTS,
+    allocations: MAX_ALLOCATIONS,
+    source: MAX_MEMORY_ENTRIES,
+    scrub: MAX_SCRUB_RECEIPTS,
+    reclaim: MAX_RECLAIM_RECEIPTS,
+};
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct LedgerLayout {
+    header: LedgerArenaHeader,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct MetadataGrowthReceipt {
+    pub generation: u64,
+    pub previous_generation: u64,
+    pub physical_start_page: u64,
+    pub virtual_start: u64,
+    pub page_count: u64,
+    pub guard_page_count: u64,
+    pub free_capacity: u64,
+    pub allocation_capacity: u64,
+    pub source_capacity: u64,
+    pub scrub_capacity: u64,
+    pub reclaim_capacity: u64,
+    pub logical_checksum: u64,
+    pub retired_generation: u64,
+    pub retired_page_count: u64,
+    pub rollback_count: u64,
+    pub integrity_verified: bool,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 struct AllocationPlan {
     slot: usize,
     extent_index: usize,
@@ -450,6 +575,14 @@ pub struct PhysicalMemorySummary {
     pub metadata_release_rejections: u64,
     pub metadata_migration_rollbacks: u64,
     pub metadata_mapped: bool,
+    pub ledger_generation: u64,
+    pub ledger_pages: u64,
+    pub ledger_capacities: [u64; 5],
+    pub ledger_growth_operations: u64,
+    pub ledger_growth_rollbacks: u64,
+    pub ledger_retired_generations: u64,
+    pub ledger_retired_pages: u64,
+    pub ledger_retirement_failures: u64,
     pub reclaim_stage: ReclaimStage,
     pub reclaim_operations: u64,
     pub reclaim_receipt_count: u64,
@@ -494,6 +627,18 @@ pub struct PhysicalMemoryManager {
     metadata_lifecycle: MetadataLifecycle,
     metadata_release_rejections: u64,
     metadata_migration_rollbacks: u64,
+    ledger_header: LedgerArenaHeader,
+    ledger_slot: u8,
+    ledger_allocation: Option<AllocationHandle>,
+    ledger_retirement_pending: Option<AllocationHandle>,
+    ledger_retirement_header: LedgerArenaHeader,
+    ledger_retirement_slot: u8,
+    ledger_retirement_mapped: bool,
+    ledger_growth_operations: u64,
+    ledger_growth_rollbacks: u64,
+    ledger_retired_generations: u64,
+    ledger_retired_pages: u64,
+    ledger_retirement_failures: u64,
     reclaim_stage: ReclaimStage,
     reclaim_receipts: [Option<ReclaimReceipt>; MAX_RECLAIM_RECEIPTS],
     reclaim_receipt_count: usize,
@@ -547,6 +692,8 @@ pub struct PhysicalMemoryProof {
     pub stale_pattern_absent: bool,
     pub receipts: [ScrubReceipt; 4],
     pub metadata: MetadataArenaReceipt,
+    pub ledger_initial: MetadataGrowthReceipt,
+    pub ledger_growth: MetadataGrowthReceipt,
     pub metadata_release_rejected: bool,
     pub metadata_integrity_verified: bool,
     pub final_metadata_checksum: u64,
@@ -568,6 +715,8 @@ pub fn run_profile<A: MetadataArenaAccess>(
     let manager =
         unsafe { &mut *(migration.manager_address as usize as *mut PhysicalMemoryManager) };
     let initial = manager.summary();
+    let ledger_initial = manager.grow_metadata_ledgers(access)?;
+    let ledger_growth = manager.grow_metadata_ledgers(access)?;
     let metadata_release_rejected = manager.free_scrubbed(migration.allocation, access)
         == Err(PhysicalMemoryError::MetadataOwnership);
     manager.advance_reclaim_stage(ReclaimStage::PostExitBootServices)?;
@@ -620,22 +769,36 @@ pub fn run_profile<A: MetadataArenaAccess>(
         ]
         .iter()
         .enumerate()
-        .any(|(index, receipt)| receipt.sequence != index as u64 + 2)
-        || final_state.allocated_pages != METADATA_ARENA_PAGE_COUNT
+        .any(|(index, receipt)| receipt.sequence != index as u64 + 5)
+        || final_state.allocated_pages != METADATA_ARENA_PAGE_COUNT + ledger_growth.page_count
         || final_state.free_extent_count != boot_reclaim.receipt.post_free_extent_count as usize
-        || final_state.allocation_scrub_pages != METADATA_ARENA_PAGE_COUNT + 4
-        || final_state.release_scrub_pages != 4
+        || final_state.allocation_scrub_pages
+            != METADATA_ARENA_PAGE_COUNT + ledger_initial.page_count + ledger_growth.page_count + 4
+        || final_state.release_scrub_pages != ledger_initial.page_count + 4
         || final_state.reclaim_scrub_pages != boot_reclaim.receipt.page_count
         || final_state.scrub_zeroed_bytes
-            != (METADATA_ARENA_PAGE_COUNT + 8 + boot_reclaim.receipt.page_count) * PAGE_BYTES
+            != (METADATA_ARENA_PAGE_COUNT
+                + (2 * ledger_initial.page_count)
+                + ledger_growth.page_count
+                + 8
+                + boot_reclaim.receipt.page_count)
+                * PAGE_BYTES
         || final_state.scrub_verified_bytes != final_state.scrub_zeroed_bytes
-        || final_state.scrub_receipt_count != 5
-        || final_state.receipt_ledger_count != 5
+        || final_state.scrub_receipt_count != 8
+        || final_state.receipt_ledger_count != 8
         || final_state.scrub_failures != 0
         || final_state.source_record_count != initial.memory_entry_count
         || final_state.metadata_arena_pages != METADATA_ARENA_PAGE_COUNT
         || final_state.metadata_release_rejections != 1
         || !final_state.metadata_mapped
+        || final_state.ledger_generation != ledger_growth.generation
+        || final_state.ledger_pages != ledger_growth.page_count
+        || final_state.ledger_capacities != [512, 64, 512, 32, 4]
+        || final_state.ledger_growth_operations != 2
+        || final_state.ledger_growth_rollbacks != 0
+        || final_state.ledger_retired_generations != 1
+        || final_state.ledger_retired_pages != ledger_initial.page_count
+        || final_state.ledger_retirement_failures != 0
         || final_state.reclaim_stage != ReclaimStage::PostExitBootServices
         || final_state.reclaim_operations != 1
         || final_state.reclaim_receipt_count != 1
@@ -663,6 +826,8 @@ pub fn run_profile<A: MetadataArenaAccess>(
             reuse_release_receipt,
         ],
         metadata: migration.receipt,
+        ledger_initial,
+        ledger_growth,
         metadata_release_rejected,
         metadata_integrity_verified,
         final_metadata_checksum: manager.metadata_header.logical_checksum,
@@ -786,7 +951,225 @@ const fn zone_end_page(zone: Zone) -> u64 {
     }
 }
 
+fn align_up(value: usize, alignment: usize) -> Result<usize, PhysicalMemoryError> {
+    let mask = alignment
+        .checked_sub(1)
+        .ok_or(PhysicalMemoryError::LedgerCapacity)?;
+    value
+        .checked_add(mask)
+        .map(|item| item & !mask)
+        .ok_or(PhysicalMemoryError::LedgerCapacity)
+}
+
+fn ledger_field<T>(cursor: &mut usize, capacity: usize) -> Result<u64, PhysicalMemoryError> {
+    *cursor = align_up(*cursor, core::mem::align_of::<T>())?;
+    let offset = *cursor;
+    *cursor = cursor
+        .checked_add(
+            core::mem::size_of::<T>()
+                .checked_mul(capacity)
+                .ok_or(PhysicalMemoryError::LedgerCapacity)?,
+        )
+        .ok_or(PhysicalMemoryError::LedgerCapacity)?;
+    u64::try_from(offset).map_err(|_| PhysicalMemoryError::LedgerCapacity)
+}
+
+fn ledger_layout(
+    capacities: LedgerCapacities,
+    generation: u64,
+    previous_generation: u64,
+    physical_start_page: u64,
+    virtual_start: u64,
+) -> Result<LedgerLayout, PhysicalMemoryError> {
+    if capacities.free == 0
+        || capacities.allocations == 0
+        || capacities.source == 0
+        || capacities.scrub == 0
+        || capacities.reclaim == 0
+    {
+        return Err(PhysicalMemoryError::LedgerCapacity);
+    }
+    let mut cursor = core::mem::size_of::<LedgerArenaHeader>();
+    let free_offset = ledger_field::<Extent>(&mut cursor, capacities.free)?;
+    let allocation_offset = ledger_field::<Allocation>(&mut cursor, capacities.allocations)?;
+    let source_offset = ledger_field::<SourceRecord>(&mut cursor, capacities.source)?;
+    let scrub_offset = ledger_field::<Option<ScrubReceipt>>(&mut cursor, capacities.scrub)?;
+    let reclaim_offset = ledger_field::<Option<ReclaimReceipt>>(&mut cursor, capacities.reclaim)?;
+    let byte_count = align_up(cursor, PAGE_BYTES as usize)?;
+    let page_count = byte_count / PAGE_BYTES as usize;
+    if page_count == 0 || page_count as u64 > LEDGER_ARENA_PAGE_CAPACITY {
+        return Err(PhysicalMemoryError::LedgerCapacity);
+    }
+    Ok(LedgerLayout {
+        header: LedgerArenaHeader {
+            magic: LEDGER_MAGIC,
+            version: LEDGER_VERSION,
+            generation,
+            previous_generation,
+            physical_start_page,
+            virtual_start,
+            page_count: page_count as u64,
+            byte_count: byte_count as u64,
+            free_offset,
+            free_capacity: capacities.free as u64,
+            allocation_offset,
+            allocation_capacity: capacities.allocations as u64,
+            source_offset,
+            source_capacity: capacities.source as u64,
+            scrub_offset,
+            scrub_capacity: capacities.scrub as u64,
+            reclaim_offset,
+            reclaim_capacity: capacities.reclaim as u64,
+            logical_checksum: 0,
+        },
+    })
+}
+
+fn populate_ledger_field<T: Copy>(
+    virtual_start: u64,
+    offset: u64,
+    capacity: usize,
+    empty: T,
+    source: &[T],
+) -> Result<(), PhysicalMemoryError> {
+    if source.len() > capacity {
+        return Err(PhysicalMemoryError::LedgerCapacity);
+    }
+    let pointer = virtual_start
+        .checked_add(offset)
+        .ok_or(PhysicalMemoryError::LedgerCapacity)? as usize as *mut T;
+    for index in 0..capacity {
+        // SAFETY: ledger_layout validated this complete aligned field inside the mapping.
+        unsafe { core::ptr::write(pointer.add(index), empty) };
+    }
+    // SAFETY: source and the newly installed alternate ledger arena do not overlap.
+    unsafe { core::ptr::copy_nonoverlapping(source.as_ptr(), pointer, source.len()) };
+    Ok(())
+}
+
 impl PhysicalMemoryManager {
+    fn has_external_ledgers(&self) -> bool {
+        self.ledger_header.magic == LEDGER_MAGIC
+    }
+
+    fn ledger_capacities(&self) -> LedgerCapacities {
+        if self.has_external_ledgers() {
+            LedgerCapacities {
+                free: self.ledger_header.free_capacity as usize,
+                allocations: self.ledger_header.allocation_capacity as usize,
+                source: self.ledger_header.source_capacity as usize,
+                scrub: self.ledger_header.scrub_capacity as usize,
+                reclaim: self.ledger_header.reclaim_capacity as usize,
+            }
+        } else {
+            BOOTSTRAP_LEDGER_CAPACITIES
+        }
+    }
+
+    fn external_slice<T>(&self, offset: u64, capacity: u64) -> &[T] {
+        let pointer = self.ledger_header.virtual_start.wrapping_add(offset) as usize as *const T;
+        // SAFETY: a nonempty ledger header is installed only after layout bounds,
+        // alignment, mapping, and integrity validation complete.
+        unsafe { core::slice::from_raw_parts(pointer, capacity as usize) }
+    }
+
+    fn external_slice_mut<T>(&mut self, offset: u64, capacity: u64) -> &mut [T] {
+        let pointer = self.ledger_header.virtual_start.wrapping_add(offset) as usize as *mut T;
+        // SAFETY: the active manager exclusively mutates its current generation.
+        unsafe { core::slice::from_raw_parts_mut(pointer, capacity as usize) }
+    }
+
+    fn free_entries(&self) -> &[Extent] {
+        if self.has_external_ledgers() {
+            self.external_slice(
+                self.ledger_header.free_offset,
+                self.ledger_header.free_capacity,
+            )
+        } else {
+            &self.free
+        }
+    }
+
+    fn free_entries_mut(&mut self) -> &mut [Extent] {
+        if self.has_external_ledgers() {
+            let header = self.ledger_header;
+            self.external_slice_mut(header.free_offset, header.free_capacity)
+        } else {
+            &mut self.free
+        }
+    }
+
+    fn allocation_entries(&self) -> &[Allocation] {
+        if self.has_external_ledgers() {
+            self.external_slice(
+                self.ledger_header.allocation_offset,
+                self.ledger_header.allocation_capacity,
+            )
+        } else {
+            &self.allocations
+        }
+    }
+
+    fn allocation_entries_mut(&mut self) -> &mut [Allocation] {
+        if self.has_external_ledgers() {
+            let header = self.ledger_header;
+            self.external_slice_mut(header.allocation_offset, header.allocation_capacity)
+        } else {
+            &mut self.allocations
+        }
+    }
+
+    fn source_entries(&self) -> &[SourceRecord] {
+        if self.has_external_ledgers() {
+            self.external_slice(
+                self.ledger_header.source_offset,
+                self.ledger_header.source_capacity,
+            )
+        } else {
+            &self.source_records
+        }
+    }
+
+    fn scrub_entries(&self) -> &[Option<ScrubReceipt>] {
+        if self.has_external_ledgers() {
+            self.external_slice(
+                self.ledger_header.scrub_offset,
+                self.ledger_header.scrub_capacity,
+            )
+        } else {
+            &self.scrub_receipts
+        }
+    }
+
+    fn scrub_entries_mut(&mut self) -> &mut [Option<ScrubReceipt>] {
+        if self.has_external_ledgers() {
+            let header = self.ledger_header;
+            self.external_slice_mut(header.scrub_offset, header.scrub_capacity)
+        } else {
+            &mut self.scrub_receipts
+        }
+    }
+
+    fn reclaim_entries(&self) -> &[Option<ReclaimReceipt>] {
+        if self.has_external_ledgers() {
+            self.external_slice(
+                self.ledger_header.reclaim_offset,
+                self.ledger_header.reclaim_capacity,
+            )
+        } else {
+            &self.reclaim_receipts
+        }
+    }
+
+    fn reclaim_entries_mut(&mut self) -> &mut [Option<ReclaimReceipt>] {
+        if self.has_external_ledgers() {
+            let header = self.ledger_header;
+            self.external_slice_mut(header.reclaim_offset, header.reclaim_capacity)
+        } else {
+            &mut self.reclaim_receipts
+        }
+    }
+
     fn empty(quota_pages: u64) -> Self {
         Self {
             free: [EMPTY_EXTENT; MAX_FREE_EXTENTS],
@@ -821,6 +1204,18 @@ impl PhysicalMemoryManager {
             metadata_lifecycle: MetadataLifecycle::Bootstrap,
             metadata_release_rejections: 0,
             metadata_migration_rollbacks: 0,
+            ledger_header: EMPTY_LEDGER_HEADER,
+            ledger_slot: 0,
+            ledger_allocation: None,
+            ledger_retirement_pending: None,
+            ledger_retirement_header: EMPTY_LEDGER_HEADER,
+            ledger_retirement_slot: 0,
+            ledger_retirement_mapped: false,
+            ledger_growth_operations: 0,
+            ledger_growth_rollbacks: 0,
+            ledger_retired_generations: 0,
+            ledger_retired_pages: 0,
+            ledger_retirement_failures: 0,
             reclaim_stage: ReclaimStage::PreExitBootServices,
             reclaim_receipts: [None; MAX_RECLAIM_RECEIPTS],
             reclaim_receipt_count: 0,
@@ -931,6 +1326,12 @@ impl PhysicalMemoryManager {
             self.scrub_failures,
             self.metadata_release_rejections,
             self.metadata_migration_rollbacks,
+            self.ledger_slot as u64,
+            self.ledger_growth_operations,
+            self.ledger_growth_rollbacks,
+            self.ledger_retired_generations,
+            self.ledger_retired_pages,
+            self.ledger_retirement_failures,
             self.reclaim_stage as u64,
             self.reclaim_receipt_count as u64,
             self.next_reclaim_sequence,
@@ -943,12 +1344,74 @@ impl PhysicalMemoryManager {
         ] {
             state = fnv_u64(state, value);
         }
-        for extent in self.free {
+        for value in [
+            self.ledger_header.magic,
+            self.ledger_header.version,
+            self.ledger_header.generation,
+            self.ledger_header.previous_generation,
+            self.ledger_header.physical_start_page,
+            self.ledger_header.virtual_start,
+            self.ledger_header.page_count,
+            self.ledger_header.byte_count,
+            self.ledger_header.free_offset,
+            self.ledger_header.free_capacity,
+            self.ledger_header.allocation_offset,
+            self.ledger_header.allocation_capacity,
+            self.ledger_header.source_offset,
+            self.ledger_header.source_capacity,
+            self.ledger_header.scrub_offset,
+            self.ledger_header.scrub_capacity,
+            self.ledger_header.reclaim_offset,
+            self.ledger_header.reclaim_capacity,
+            self.ledger_header.logical_checksum,
+            self.ledger_retirement_header.magic,
+            self.ledger_retirement_header.version,
+            self.ledger_retirement_header.generation,
+            self.ledger_retirement_header.previous_generation,
+            self.ledger_retirement_header.physical_start_page,
+            self.ledger_retirement_header.virtual_start,
+            self.ledger_retirement_header.page_count,
+            self.ledger_retirement_header.byte_count,
+            self.ledger_retirement_header.logical_checksum,
+            u64::from(self.ledger_retirement_slot),
+            u64::from(self.ledger_retirement_mapped),
+        ] {
+            state = fnv_u64(state, value);
+        }
+        if let Some(handle) = self.ledger_allocation {
+            for value in [
+                u64::from(handle.slot),
+                handle.generation,
+                handle.start_page,
+                handle.page_count,
+                zone_code(handle.zone),
+                u64::from(handle.owner),
+            ] {
+                state = fnv_u64(state, value);
+            }
+        } else {
+            state = fnv_u64(state, 0);
+        }
+        if let Some(handle) = self.ledger_retirement_pending {
+            for value in [
+                u64::from(handle.slot),
+                handle.generation,
+                handle.start_page,
+                handle.page_count,
+                zone_code(handle.zone),
+                u64::from(handle.owner),
+            ] {
+                state = fnv_u64(state, value);
+            }
+        } else {
+            state = fnv_u64(state, 0);
+        }
+        for extent in self.free_entries() {
             for value in [extent.start_page, extent.page_count, zone_code(extent.zone)] {
                 state = fnv_u64(state, value);
             }
         }
-        for allocation in self.allocations {
+        for allocation in self.allocation_entries() {
             for value in [
                 u64::from(allocation.active),
                 allocation.generation,
@@ -962,7 +1425,7 @@ impl PhysicalMemoryManager {
                 state = fnv_u64(state, value);
             }
         }
-        for record in self.source_records {
+        for record in self.source_entries() {
             for value in [
                 record.start_page,
                 record.page_count,
@@ -972,9 +1435,9 @@ impl PhysicalMemoryManager {
                 state = fnv_u64(state, value);
             }
         }
-        for receipt in self.scrub_receipts {
+        for receipt in self.scrub_entries() {
             state = fnv_u64(state, u64::from(receipt.is_some()));
-            if let Some(receipt) = receipt {
+            if let Some(receipt) = *receipt {
                 for value in [
                     receipt.sequence,
                     receipt.kind as u8 as u64,
@@ -989,9 +1452,9 @@ impl PhysicalMemoryManager {
                 }
             }
         }
-        for receipt in self.reclaim_receipts {
+        for receipt in self.reclaim_entries() {
             state = fnv_u64(state, u64::from(receipt.is_some()));
-            if let Some(receipt) = receipt {
+            if let Some(receipt) = *receipt {
                 for value in [
                     receipt.sequence,
                     receipt.class as u8 as u64,
@@ -1029,8 +1492,115 @@ impl PhysicalMemoryManager {
         state
     }
 
+    fn ledger_checksum(&self) -> u64 {
+        if !self.has_external_ledgers() {
+            return 0;
+        }
+        let mut state = FNV_OFFSET;
+        for value in [
+            self.ledger_header.magic,
+            self.ledger_header.version,
+            self.ledger_header.generation,
+            self.ledger_header.previous_generation,
+            self.ledger_header.physical_start_page,
+            self.ledger_header.virtual_start,
+            self.ledger_header.page_count,
+            self.ledger_header.byte_count,
+            self.ledger_header.free_offset,
+            self.ledger_header.free_capacity,
+            self.ledger_header.allocation_offset,
+            self.ledger_header.allocation_capacity,
+            self.ledger_header.source_offset,
+            self.ledger_header.source_capacity,
+            self.ledger_header.scrub_offset,
+            self.ledger_header.scrub_capacity,
+            self.ledger_header.reclaim_offset,
+            self.ledger_header.reclaim_capacity,
+        ] {
+            state = fnv_u64(state, value);
+        }
+        for extent in self.free_entries() {
+            for value in [extent.start_page, extent.page_count, zone_code(extent.zone)] {
+                state = fnv_u64(state, value);
+            }
+        }
+        for allocation in self.allocation_entries() {
+            for value in [
+                u64::from(allocation.active),
+                allocation.generation,
+                allocation.start_page,
+                allocation.page_count,
+                zone_code(allocation.zone),
+                u64::from(allocation.owner),
+                u64::from(allocation.metadata_poisoned),
+                u64::from(allocation.release_excluded),
+            ] {
+                state = fnv_u64(state, value);
+            }
+        }
+        for record in self.source_entries() {
+            for value in [
+                record.start_page,
+                record.page_count,
+                u64::from(record.kind),
+                u64::from(record.source),
+            ] {
+                state = fnv_u64(state, value);
+            }
+        }
+        for receipt in self.scrub_entries() {
+            state = fnv_u64(state, u64::from(receipt.is_some()));
+            if let Some(receipt) = *receipt {
+                for value in [
+                    receipt.sequence,
+                    receipt.kind as u8 as u64,
+                    receipt.generation,
+                    receipt.start_page,
+                    receipt.page_count,
+                    u64::from(receipt.owner),
+                    receipt.zeroed_bytes,
+                    receipt.verified_bytes,
+                ] {
+                    state = fnv_u64(state, value);
+                }
+            }
+        }
+        for receipt in self.reclaim_entries() {
+            state = fnv_u64(state, u64::from(receipt.is_some()));
+            if let Some(receipt) = *receipt {
+                for value in [
+                    receipt.sequence,
+                    receipt.class as u8 as u64,
+                    receipt.required_stage as u8 as u64,
+                    receipt.observed_stage as u8 as u64,
+                    receipt.source_record_count,
+                    receipt.range_count,
+                    receipt.page_count,
+                    receipt.pre_free_extent_count,
+                    receipt.post_free_extent_count,
+                    receipt.zeroed_bytes,
+                    receipt.verified_bytes,
+                    receipt.range_checksum,
+                    receipt.receipt_checksum,
+                ] {
+                    state = fnv_u64(state, value);
+                }
+                for value in receipt.pages_by_zone {
+                    state = fnv_u64(state, value);
+                }
+            }
+        }
+        state
+    }
+
     fn seal_metadata_integrity(&mut self) {
         if self.metadata_lifecycle == MetadataLifecycle::Mapped {
+            if self.has_external_ledgers() {
+                self.ledger_header.logical_checksum = self.ledger_checksum();
+                let pointer = self.ledger_header.virtual_start as usize as *mut LedgerArenaHeader;
+                // SAFETY: the active ledger mapping owns a complete aligned header.
+                unsafe { core::ptr::write(pointer, self.ledger_header) };
+            }
             self.metadata_header.logical_checksum = self.logical_checksum();
         }
     }
@@ -1051,6 +1621,22 @@ impl PhysicalMemoryManager {
         {
             return Err(PhysicalMemoryError::MetadataCorruption);
         }
+        if self.has_external_ledgers() {
+            let pointer = self.ledger_header.virtual_start as usize as *const LedgerArenaHeader;
+            // SAFETY: the manager's sealed descriptor names the active mapped header.
+            let mapped_header = unsafe { core::ptr::read(pointer) };
+            if mapped_header != self.ledger_header
+                || self.ledger_header.magic != LEDGER_MAGIC
+                || self.ledger_header.version != LEDGER_VERSION
+                || self.ledger_header.virtual_start == 0
+                || !self.ledger_header.virtual_start.is_multiple_of(PAGE_BYTES)
+                || self.ledger_header.page_count == 0
+                || self.ledger_header.page_count > LEDGER_ARENA_PAGE_CAPACITY
+                || self.ledger_header.logical_checksum != self.ledger_checksum()
+            {
+                return Err(PhysicalMemoryError::LedgerCorruption);
+            }
+        }
         Ok(())
     }
 
@@ -1070,10 +1656,15 @@ impl PhysicalMemoryManager {
         access: &mut A,
     ) -> Result<(), PhysicalMemoryError> {
         let slot = usize::from(handle.slot);
-        if self.allocations.get(slot).map(|item| item.release_excluded) != Some(true) {
+        if self
+            .allocation_entries()
+            .get(slot)
+            .map(|item| item.release_excluded)
+            != Some(true)
+        {
             return Err(PhysicalMemoryError::MetadataState);
         }
-        self.allocations[slot].release_excluded = false;
+        self.allocation_entries_mut()[slot].release_excluded = false;
         self.metadata_lifecycle = MetadataLifecycle::Bootstrap;
         self.metadata_header = EMPTY_METADATA_HEADER;
         self.metadata_migration_rollbacks = self.metadata_migration_rollbacks.saturating_add(1);
@@ -1097,7 +1688,7 @@ impl PhysicalMemoryManager {
             access,
         )?;
         let slot = usize::from(allocation.slot);
-        self.allocations[slot].release_excluded = true;
+        self.allocation_entries_mut()[slot].release_excluded = true;
         self.metadata_lifecycle = MetadataLifecycle::Prepared;
         self.metadata_header = MetadataHeader {
             magic: METADATA_MAGIC,
@@ -1167,7 +1758,11 @@ impl PhysicalMemoryManager {
         }
         // SAFETY: validation above proves the mapped manager header and logical seal.
         let mapped = unsafe { &mut *mapped_pointer };
-        let active_allocations = mapped.allocations.iter().filter(|item| item.active).count();
+        let active_allocations = mapped
+            .allocation_entries()
+            .iter()
+            .filter(|item| item.active)
+            .count();
         let receipt = MetadataArenaReceipt {
             physical_start_page: allocation.start_page,
             virtual_start: virtual_address,
@@ -1182,7 +1777,7 @@ impl PhysicalMemoryManager {
             receipt_ledger_count: mapped.receipt_ledger_count as u64,
             logical_checksum: mapped.metadata_header.logical_checksum,
             mapping_count: METADATA_ARENA_PAGE_COUNT,
-            release_excluded: mapped.allocations[slot].release_excluded,
+            release_excluded: mapped.allocation_entries()[slot].release_excluded,
             integrity_verified: true,
         };
         self.metadata_lifecycle = MetadataLifecycle::Retired;
@@ -1191,6 +1786,300 @@ impl PhysicalMemoryManager {
             allocation,
             receipt,
         })
+    }
+
+    fn populate_ledger_generation(
+        &self,
+        header: LedgerArenaHeader,
+    ) -> Result<(), PhysicalMemoryError> {
+        let header_pointer = header.virtual_start as usize as *mut LedgerArenaHeader;
+        // SAFETY: install_ledger_arena returned a writable, page-aligned mapping.
+        unsafe { core::ptr::write(header_pointer, header) };
+        populate_ledger_field(
+            header.virtual_start,
+            header.free_offset,
+            header.free_capacity as usize,
+            EMPTY_EXTENT,
+            self.free_entries(),
+        )?;
+        populate_ledger_field(
+            header.virtual_start,
+            header.allocation_offset,
+            header.allocation_capacity as usize,
+            EMPTY_ALLOCATION,
+            self.allocation_entries(),
+        )?;
+        populate_ledger_field(
+            header.virtual_start,
+            header.source_offset,
+            header.source_capacity as usize,
+            EMPTY_SOURCE_RECORD,
+            self.source_entries(),
+        )?;
+        populate_ledger_field(
+            header.virtual_start,
+            header.scrub_offset,
+            header.scrub_capacity as usize,
+            None,
+            self.scrub_entries(),
+        )?;
+        populate_ledger_field(
+            header.virtual_start,
+            header.reclaim_offset,
+            header.reclaim_capacity as usize,
+            None,
+            self.reclaim_entries(),
+        )?;
+        Ok(())
+    }
+
+    fn abandon_ledger_reservation<A: MetadataArenaAccess>(
+        &mut self,
+        allocation: AllocationHandle,
+        access: &mut A,
+    ) -> Result<(), PhysicalMemoryError> {
+        let slot = usize::from(allocation.slot);
+        if self
+            .allocation_entries()
+            .get(slot)
+            .map(|item| item.active && item.release_excluded)
+            != Some(true)
+        {
+            return Err(PhysicalMemoryError::LedgerRetirement);
+        }
+        self.allocation_entries_mut()[slot].release_excluded = false;
+        self.ledger_growth_rollbacks = self.ledger_growth_rollbacks.saturating_add(1);
+        self.seal_metadata_integrity();
+        if let Err(error) = self.free_scrubbed(allocation, access) {
+            if self.allocation_entries().get(slot).map(|item| item.active) == Some(true) {
+                self.allocation_entries_mut()[slot].release_excluded = true;
+            }
+            self.ledger_retirement_failures = self.ledger_retirement_failures.saturating_add(1);
+            self.seal_metadata_integrity();
+            return Err(error);
+        }
+        Ok(())
+    }
+
+    pub fn grow_metadata_ledgers<A: MetadataArenaAccess>(
+        &mut self,
+        access: &mut A,
+    ) -> Result<MetadataGrowthReceipt, PhysicalMemoryError> {
+        self.require_operational()?;
+        if self.ledger_retirement_pending.is_some() {
+            return Err(PhysicalMemoryError::LedgerRetirement);
+        }
+        let current = self.ledger_capacities();
+        let target = if self.has_external_ledgers() {
+            LedgerCapacities {
+                free: current
+                    .free
+                    .checked_mul(2)
+                    .ok_or(PhysicalMemoryError::LedgerCapacity)?,
+                allocations: current
+                    .allocations
+                    .checked_mul(2)
+                    .ok_or(PhysicalMemoryError::LedgerCapacity)?,
+                source: current
+                    .source
+                    .checked_mul(2)
+                    .ok_or(PhysicalMemoryError::LedgerCapacity)?,
+                scrub: current
+                    .scrub
+                    .checked_mul(2)
+                    .ok_or(PhysicalMemoryError::LedgerCapacity)?,
+                reclaim: current
+                    .reclaim
+                    .checked_mul(2)
+                    .ok_or(PhysicalMemoryError::LedgerCapacity)?,
+            }
+        } else {
+            current
+        };
+        let required_receipts = 2;
+        if self
+            .receipt_ledger_count
+            .checked_add(required_receipts)
+            .filter(|count| *count <= current.scrub)
+            .is_none()
+            || self
+                .allocation_entries()
+                .iter()
+                .filter(|item| item.active)
+                .count()
+                .checked_add(1)
+                .filter(|count| *count <= current.allocations)
+                .is_none()
+        {
+            return Err(PhysicalMemoryError::LedgerCapacity);
+        }
+        let previous_generation = self.ledger_header.generation;
+        let preliminary = ledger_layout(target, self.next_generation, previous_generation, 0, 0)?;
+        let page_count = preliminary.header.page_count;
+        let (allocation, _) =
+            self.allocate_scrubbed(Zone::Dma32, page_count, METADATA_OWNER, access)?;
+        let allocation_slot = usize::from(allocation.slot);
+        self.allocation_entries_mut()[allocation_slot].release_excluded = true;
+        self.seal_metadata_integrity();
+        let target_slot = if self.has_external_ledgers() {
+            1 - self.ledger_slot
+        } else {
+            0
+        };
+        let physical_address = allocation
+            .start_page
+            .checked_mul(PAGE_BYTES)
+            .ok_or(PhysicalMemoryError::AddressRange)?;
+        let virtual_address =
+            match access.install_ledger_arena(target_slot, physical_address, page_count) {
+                Ok(value) => value,
+                Err(_) => {
+                    self.abandon_ledger_reservation(allocation, access)?;
+                    return Err(PhysicalMemoryError::LedgerMapping);
+                }
+            };
+        let layout = ledger_layout(
+            target,
+            allocation.generation,
+            previous_generation,
+            allocation.start_page,
+            virtual_address,
+        )?;
+        if let Err(error) = self.populate_ledger_generation(layout.header) {
+            access
+                .uninstall_ledger_arena(target_slot, virtual_address, page_count)
+                .map_err(|_| PhysicalMemoryError::LedgerMapping)?;
+            self.abandon_ledger_reservation(allocation, access)?;
+            return Err(error);
+        }
+        let old_header = self.ledger_header;
+        let old_slot = self.ledger_slot;
+        let old_allocation = self.ledger_allocation;
+        self.ledger_header = layout.header;
+        self.ledger_slot = target_slot;
+        self.ledger_allocation = Some(allocation);
+        self.seal_metadata_integrity();
+        let validation = access
+            .finalize_ledger_arena(target_slot, virtual_address, page_count)
+            .map_err(|_| PhysicalMemoryError::LedgerMapping)
+            .and_then(|()| self.verify_metadata_integrity());
+        if let Err(error) = validation {
+            self.ledger_header = old_header;
+            self.ledger_slot = old_slot;
+            self.ledger_allocation = old_allocation;
+            self.seal_metadata_integrity();
+            access
+                .uninstall_ledger_arena(target_slot, virtual_address, page_count)
+                .map_err(|_| PhysicalMemoryError::LedgerMapping)?;
+            self.abandon_ledger_reservation(allocation, access)?;
+            return Err(error);
+        }
+        self.ledger_growth_operations = self.ledger_growth_operations.saturating_add(1);
+        self.seal_metadata_integrity();
+
+        let mut retired_generation = 0;
+        let mut retired_page_count = 0;
+        if let Some(retired_allocation) = old_allocation {
+            retired_generation = old_header.generation;
+            retired_page_count = old_header.page_count;
+            if access
+                .uninstall_ledger_arena(old_slot, old_header.virtual_start, old_header.page_count)
+                .is_err()
+            {
+                self.ledger_retirement_pending = Some(retired_allocation);
+                self.ledger_retirement_header = old_header;
+                self.ledger_retirement_slot = old_slot;
+                self.ledger_retirement_mapped = true;
+                self.ledger_retirement_failures = self.ledger_retirement_failures.saturating_add(1);
+                self.seal_metadata_integrity();
+                return Err(PhysicalMemoryError::LedgerRetirement);
+            }
+            let retired_slot = usize::from(retired_allocation.slot);
+            self.allocation_entries_mut()[retired_slot].release_excluded = false;
+            self.seal_metadata_integrity();
+            if let Err(error) = self.free_scrubbed(retired_allocation, access) {
+                if self
+                    .allocation_entries()
+                    .get(retired_slot)
+                    .map(|item| item.active)
+                    == Some(true)
+                {
+                    self.allocation_entries_mut()[retired_slot].release_excluded = true;
+                }
+                self.ledger_retirement_pending = Some(retired_allocation);
+                self.ledger_retirement_header = old_header;
+                self.ledger_retirement_slot = old_slot;
+                self.ledger_retirement_mapped = false;
+                self.ledger_retirement_failures = self.ledger_retirement_failures.saturating_add(1);
+                self.seal_metadata_integrity();
+                return Err(error);
+            }
+            self.ledger_retired_generations = self.ledger_retired_generations.saturating_add(1);
+            self.ledger_retired_pages = self
+                .ledger_retired_pages
+                .saturating_add(old_header.page_count);
+        }
+        self.seal_metadata_integrity();
+        Ok(MetadataGrowthReceipt {
+            generation: self.ledger_header.generation,
+            previous_generation,
+            physical_start_page: self.ledger_header.physical_start_page,
+            virtual_start: self.ledger_header.virtual_start,
+            page_count: self.ledger_header.page_count,
+            guard_page_count: LEDGER_GUARD_PAGE_COUNT,
+            free_capacity: self.ledger_header.free_capacity,
+            allocation_capacity: self.ledger_header.allocation_capacity,
+            source_capacity: self.ledger_header.source_capacity,
+            scrub_capacity: self.ledger_header.scrub_capacity,
+            reclaim_capacity: self.ledger_header.reclaim_capacity,
+            logical_checksum: self.ledger_header.logical_checksum,
+            retired_generation,
+            retired_page_count,
+            rollback_count: self.ledger_growth_rollbacks,
+            integrity_verified: self.verify_metadata_integrity().is_ok(),
+        })
+    }
+
+    pub fn retry_metadata_retirement<A: MetadataArenaAccess>(
+        &mut self,
+        access: &mut A,
+    ) -> Result<bool, PhysicalMemoryError> {
+        self.require_operational()?;
+        let allocation = match self.ledger_retirement_pending {
+            Some(value) => value,
+            None => return Ok(false),
+        };
+        if self.ledger_retirement_mapped {
+            access
+                .uninstall_ledger_arena(
+                    self.ledger_retirement_slot,
+                    self.ledger_retirement_header.virtual_start,
+                    self.ledger_retirement_header.page_count,
+                )
+                .map_err(|_| PhysicalMemoryError::LedgerRetirement)?;
+            self.ledger_retirement_mapped = false;
+        }
+        let slot = usize::from(allocation.slot);
+        self.allocation_entries_mut()[slot].release_excluded = false;
+        self.seal_metadata_integrity();
+        if let Err(error) = self.free_scrubbed(allocation, access) {
+            if self.allocation_entries().get(slot).map(|item| item.active) == Some(true) {
+                self.allocation_entries_mut()[slot].release_excluded = true;
+            }
+            self.ledger_retirement_failures = self.ledger_retirement_failures.saturating_add(1);
+            self.seal_metadata_integrity();
+            return Err(error);
+        }
+        self.ledger_retirement_pending = None;
+        self.ledger_retired_generations = self.ledger_retired_generations.saturating_add(1);
+        self.ledger_retired_pages = self
+            .ledger_retired_pages
+            .saturating_add(self.ledger_retirement_header.page_count);
+        self.ledger_retirement_header = EMPTY_LEDGER_HEADER;
+        self.ledger_retirement_slot = 0;
+        self.ledger_retirement_mapped = false;
+        self.seal_metadata_integrity();
+        Ok(true)
     }
 
     pub fn advance_reclaim_stage(
@@ -1227,7 +2116,7 @@ impl PhysicalMemoryManager {
     ) -> Result<ReclaimOutcome, PhysicalMemoryError> {
         self.require_operational()?;
         let class_index = class.index();
-        if let Some(receipt) = self.reclaim_receipts[class_index] {
+        if let Some(receipt) = self.reclaim_entries()[class_index] {
             return Ok(ReclaimOutcome {
                 receipt,
                 newly_reclaimed: false,
@@ -1288,7 +2177,7 @@ impl PhysicalMemoryManager {
         self.reclaim_operations = plan.reclaim_operations_after;
         self.next_reclaim_sequence = plan.next_reclaim_sequence_after;
         self.reclaimed_pages[class_index] = plan.page_count;
-        self.reclaim_receipts[class_index] = Some(receipt);
+        self.reclaim_entries_mut()[class_index] = Some(receipt);
         self.reclaim_receipt_count += 1;
         self.seal_metadata_integrity();
         Ok(ReclaimOutcome {
@@ -1298,7 +2187,7 @@ impl PhysicalMemoryManager {
     }
 
     fn plan_reclaim(&mut self, class: ReclaimClass) -> Result<ReclaimPlan, PhysicalMemoryError> {
-        if self.reclaim_receipt_count == MAX_RECLAIM_RECEIPTS {
+        if self.reclaim_receipt_count == self.ledger_capacities().reclaim {
             self.reclaim_capacity_rejections = self.reclaim_capacity_rejections.saturating_add(1);
             return Err(PhysicalMemoryError::ReclaimCapacity);
         }
@@ -1307,7 +2196,7 @@ impl PhysicalMemoryManager {
         range_checksum = fnv_u64(range_checksum, self.reclaim_stage as u8 as u64);
         let target_kind = class.source_kind();
         for record_index in 0..self.memory_entry_count {
-            let record = self.source_records[record_index];
+            let record = self.source_entries()[record_index];
             if record.kind != target_kind {
                 continue;
             }
@@ -1356,7 +2245,7 @@ impl PhysicalMemoryManager {
                 .ok_or(PhysicalMemoryError::AddressRange)?;
             let mut merge_previous = false;
             let mut merge_next = false;
-            for free in &self.free[..self.free_count] {
+            for free in &self.free_entries()[..self.free_count] {
                 let free_end = free
                     .start_page
                     .checked_add(free.page_count)
@@ -1388,7 +2277,7 @@ impl PhysicalMemoryManager {
                 free_count_after = free_count_after
                     .checked_add(1)
                     .ok_or(PhysicalMemoryError::AddressRange)?;
-                if free_count_after > MAX_FREE_EXTENTS {
+                if free_count_after > self.ledger_capacities().free {
                     self.reclaim_capacity_rejections =
                         self.reclaim_capacity_rejections.saturating_add(1);
                     return Err(PhysicalMemoryError::ReclaimCapacity);
@@ -1471,7 +2360,7 @@ impl PhysicalMemoryManager {
             } else {
                 let mut record = None;
                 while cursor.next_record < self.memory_entry_count {
-                    let candidate = self.source_records[cursor.next_record];
+                    let candidate = self.source_entries()[cursor.next_record];
                     cursor.next_record += 1;
                     if candidate.kind == target_kind {
                         record = Some(candidate);
@@ -1509,33 +2398,39 @@ impl PhysicalMemoryManager {
 
     fn commit_preflighted_extent(&mut self, extent: Extent) {
         let mut index = 0;
-        while index < self.free_count && self.free[index].start_page < extent.start_page {
+        while index < self.free_count && self.free_entries()[index].start_page < extent.start_page {
             index += 1;
         }
-        let merge_previous = index > 0 && can_coalesce(self.free[index - 1], extent);
-        let merge_next = index < self.free_count && can_coalesce(extent, self.free[index]);
+        let merge_previous = index > 0 && can_coalesce(self.free_entries()[index - 1], extent);
+        let merge_next =
+            index < self.free_count && can_coalesce(extent, self.free_entries()[index]);
         if merge_previous && merge_next {
-            self.free[index - 1].page_count = self.free[index - 1]
+            let page_count = self.free_entries()[index - 1]
                 .page_count
                 .wrapping_add(extent.page_count)
-                .wrapping_add(self.free[index].page_count);
+                .wrapping_add(self.free_entries()[index].page_count);
+            self.free_entries_mut()[index - 1].page_count = page_count;
             self.remove_free_extent(index);
             self.coalesce_events = self.coalesce_events.wrapping_add(2);
         } else if merge_previous {
-            self.free[index - 1].page_count = self.free[index - 1]
+            let page_count = self.free_entries()[index - 1]
                 .page_count
                 .wrapping_add(extent.page_count);
+            self.free_entries_mut()[index - 1].page_count = page_count;
             self.coalesce_events = self.coalesce_events.wrapping_add(1);
         } else if merge_next {
-            self.free[index].start_page = extent.start_page;
-            self.free[index].page_count =
-                extent.page_count.wrapping_add(self.free[index].page_count);
+            let page_count = extent
+                .page_count
+                .wrapping_add(self.free_entries()[index].page_count);
+            self.free_entries_mut()[index].start_page = extent.start_page;
+            self.free_entries_mut()[index].page_count = page_count;
             self.coalesce_events = self.coalesce_events.wrapping_add(1);
         } else {
             for item in (index..self.free_count).rev() {
-                self.free[item + 1] = self.free[item];
+                let value = self.free_entries()[item];
+                self.free_entries_mut()[item + 1] = value;
             }
-            self.free[index] = extent;
+            self.free_entries_mut()[index] = extent;
             self.free_count += 1;
         }
     }
@@ -1545,7 +2440,7 @@ impl PhysicalMemoryManager {
         extent: Extent,
         target_kind: u32,
     ) -> Result<bool, PhysicalMemoryError> {
-        for allocation in self.allocations.iter().filter(|item| item.active) {
+        for allocation in self.allocation_entries().iter().filter(|item| item.active) {
             if ranges_overlap(
                 extent.start_page,
                 extent.page_count,
@@ -1555,7 +2450,7 @@ impl PhysicalMemoryManager {
                 return Ok(true);
             }
         }
-        for record in self.source_records[..self.memory_entry_count]
+        for record in self.source_entries()[..self.memory_entry_count]
             .iter()
             .filter(|item| item.kind != target_kind)
         {
@@ -1650,7 +2545,8 @@ impl PhysicalMemoryManager {
 
     fn append_free_extent(&mut self, extent: Extent) -> Result<(), PhysicalMemoryError> {
         if self.free_count != 0 {
-            let previous = &mut self.free[self.free_count - 1];
+            let previous_index = self.free_count - 1;
+            let previous = &mut self.free_entries_mut()[previous_index];
             if previous.zone == extent.zone
                 && previous.start_page.checked_add(previous.page_count) == Some(extent.start_page)
             {
@@ -1661,10 +2557,11 @@ impl PhysicalMemoryManager {
                 return Ok(());
             }
         }
-        if self.free_count == MAX_FREE_EXTENTS {
+        if self.free_count == self.ledger_capacities().free {
             return Err(PhysicalMemoryError::ExtentCapacity);
         }
-        self.free[self.free_count] = extent;
+        let free_count = self.free_count;
+        self.free_entries_mut()[free_count] = extent;
         self.free_count += 1;
         Ok(())
     }
@@ -1714,11 +2611,11 @@ impl PhysicalMemoryManager {
             return Err(PhysicalMemoryError::Quota);
         }
         let slot = self
-            .allocations
+            .allocation_entries()
             .iter()
             .position(|item| !item.active)
             .ok_or(PhysicalMemoryError::AllocationCapacity)?;
-        let extent_index = match self.free[..self.free_count]
+        let extent_index = match self.free_entries()[..self.free_count]
             .iter()
             .position(|item| item.zone == zone && item.page_count >= pages)
         {
@@ -1728,7 +2625,7 @@ impl PhysicalMemoryManager {
                 return Err(PhysicalMemoryError::Unavailable);
             }
         };
-        let start_page = self.free[extent_index].start_page;
+        let start_page = self.free_entries()[extent_index].start_page;
         self.next_generation
             .checked_add(1)
             .ok_or(PhysicalMemoryError::AddressRange)?;
@@ -1749,13 +2646,13 @@ impl PhysicalMemoryManager {
     fn commit_allocation(&mut self, plan: AllocationPlan) -> AllocationHandle {
         let extent_index = plan.extent_index;
         let pages = plan.page_count;
-        self.free[extent_index].start_page += pages;
-        self.free[extent_index].page_count -= pages;
-        if self.free[extent_index].page_count == 0 {
+        self.free_entries_mut()[extent_index].start_page += pages;
+        self.free_entries_mut()[extent_index].page_count -= pages;
+        if self.free_entries()[extent_index].page_count == 0 {
             self.remove_free_extent(extent_index);
         }
         self.next_generation += 1;
-        self.allocations[plan.slot] = Allocation {
+        self.allocation_entries_mut()[plan.slot] = Allocation {
             active: true,
             generation: plan.generation,
             start_page: plan.start_page,
@@ -1768,7 +2665,7 @@ impl PhysicalMemoryManager {
         self.allocated_pages += pages;
         self.allocation_count += 1;
         AllocationHandle {
-            slot: plan.slot as u8,
+            slot: plan.slot as u16,
             generation: plan.generation,
             start_page: plan.start_page,
             page_count: pages,
@@ -1822,7 +2719,7 @@ impl PhysicalMemoryManager {
     ) -> Result<(), PhysicalMemoryError> {
         let slot = usize::from(handle.slot);
         let allocation = self
-            .allocations
+            .allocation_entries()
             .get(slot)
             .copied()
             .ok_or(PhysicalMemoryError::StaleHandle)?;
@@ -1851,7 +2748,7 @@ impl PhysicalMemoryManager {
                 return Err(PhysicalMemoryError::StaleHandle);
             }
             let slot = usize::from(handle.slot);
-            let allocation = self.allocations[slot];
+            let allocation = self.allocation_entries()[slot];
             if allocation.release_excluded {
                 self.metadata_release_rejections += 1;
                 return Err(PhysicalMemoryError::MetadataOwnership);
@@ -1881,7 +2778,7 @@ impl PhysicalMemoryManager {
                 return Err(PhysicalMemoryError::StaleHandle);
             }
             let slot = usize::from(handle.slot);
-            let allocation = self.allocations[slot];
+            let allocation = self.allocation_entries()[slot];
             if allocation.release_excluded {
                 self.metadata_release_rejections += 1;
                 return Err(PhysicalMemoryError::MetadataOwnership);
@@ -1909,8 +2806,8 @@ impl PhysicalMemoryManager {
     }
 
     fn commit_free(&mut self, slot: usize, allocation: Allocation) {
-        self.allocations[slot].active = false;
-        self.allocations[slot].metadata_poisoned = true;
+        self.allocation_entries_mut()[slot].active = false;
+        self.allocation_entries_mut()[slot].metadata_poisoned = true;
         self.allocated_pages -= allocation.page_count;
         self.free_operation_count += 1;
         self.metadata_poison_events += 1;
@@ -1936,7 +2833,7 @@ impl PhysicalMemoryManager {
             .scrub_receipt_count
             .checked_add(1)
             .ok_or(PhysicalMemoryError::AddressRange)?;
-        if self.receipt_ledger_count == MAX_SCRUB_RECEIPTS {
+        if self.receipt_ledger_count == self.ledger_capacities().scrub {
             return Err(PhysicalMemoryError::ReceiptCapacity);
         }
         let next_zeroed = self
@@ -1991,7 +2888,8 @@ impl PhysicalMemoryManager {
         };
         self.next_scrub_sequence = next_sequence;
         self.scrub_receipt_count = next_receipt_count;
-        self.scrub_receipts[self.receipt_ledger_count] = Some(receipt);
+        let receipt_index = self.receipt_ledger_count;
+        self.scrub_entries_mut()[receipt_index] = Some(receipt);
         self.receipt_ledger_count += 1;
         self.scrub_zeroed_bytes = next_zeroed;
         self.scrub_verified_bytes = next_verified;
@@ -2004,72 +2902,79 @@ impl PhysicalMemoryManager {
 
     fn remove_free_extent(&mut self, index: usize) {
         for item in index..self.free_count - 1 {
-            self.free[item] = self.free[item + 1];
+            let value = self.free_entries()[item + 1];
+            self.free_entries_mut()[item] = value;
         }
         self.free_count -= 1;
-        self.free[self.free_count] = EMPTY_EXTENT;
+        let free_count = self.free_count;
+        self.free_entries_mut()[free_count] = EMPTY_EXTENT;
     }
 
     fn insert_and_coalesce(&mut self, extent: Extent) -> Result<(), PhysicalMemoryError> {
         let mut index = 0;
-        while index < self.free_count && self.free[index].start_page < extent.start_page {
+        while index < self.free_count && self.free_entries()[index].start_page < extent.start_page {
             index += 1;
         }
-        let merge_previous = index > 0 && can_coalesce(self.free[index - 1], extent);
-        let merge_next = index < self.free_count && can_coalesce(extent, self.free[index]);
+        let merge_previous = index > 0 && can_coalesce(self.free_entries()[index - 1], extent);
+        let merge_next =
+            index < self.free_count && can_coalesce(extent, self.free_entries()[index]);
         if merge_previous && merge_next {
-            let page_count = self.free[index - 1]
+            let page_count = self.free_entries()[index - 1]
                 .page_count
                 .checked_add(extent.page_count)
-                .and_then(|value| value.checked_add(self.free[index].page_count))
+                .and_then(|value| value.checked_add(self.free_entries()[index].page_count))
                 .ok_or(PhysicalMemoryError::AddressRange)?;
-            self.free[index - 1].page_count = page_count;
+            self.free_entries_mut()[index - 1].page_count = page_count;
             self.remove_free_extent(index);
             self.coalesce_events += 2;
             return Ok(());
         }
         if merge_previous {
-            self.free[index - 1].page_count = self.free[index - 1]
+            let page_count = self.free_entries()[index - 1]
                 .page_count
                 .checked_add(extent.page_count)
                 .ok_or(PhysicalMemoryError::AddressRange)?;
+            self.free_entries_mut()[index - 1].page_count = page_count;
             self.coalesce_events += 1;
             return Ok(());
         }
         if merge_next {
-            self.free[index].start_page = extent.start_page;
-            self.free[index].page_count = extent
+            let page_count = extent
                 .page_count
-                .checked_add(self.free[index].page_count)
+                .checked_add(self.free_entries()[index].page_count)
                 .ok_or(PhysicalMemoryError::AddressRange)?;
+            self.free_entries_mut()[index].start_page = extent.start_page;
+            self.free_entries_mut()[index].page_count = page_count;
             self.coalesce_events += 1;
             return Ok(());
         }
-        if self.free_count == MAX_FREE_EXTENTS {
+        if self.free_count == self.ledger_capacities().free {
             return Err(PhysicalMemoryError::ExtentCapacity);
         }
         for item in (index..self.free_count).rev() {
-            self.free[item + 1] = self.free[item];
+            let value = self.free_entries()[item];
+            self.free_entries_mut()[item + 1] = value;
         }
-        self.free[index] = extent;
+        self.free_entries_mut()[index] = extent;
         self.free_count += 1;
         Ok(())
     }
 
     fn preflight_insert(&self, extent: Extent) -> Result<(), PhysicalMemoryError> {
         let mut index = 0;
-        while index < self.free_count && self.free[index].start_page < extent.start_page {
+        while index < self.free_count && self.free_entries()[index].start_page < extent.start_page {
             index += 1;
         }
-        let merge_previous = index > 0 && can_coalesce(self.free[index - 1], extent);
-        let merge_next = index < self.free_count && can_coalesce(extent, self.free[index]);
+        let merge_previous = index > 0 && can_coalesce(self.free_entries()[index - 1], extent);
+        let merge_next =
+            index < self.free_count && can_coalesce(extent, self.free_entries()[index]);
         if merge_previous {
-            self.free[index - 1]
+            self.free_entries()[index - 1]
                 .page_count
                 .checked_add(extent.page_count)
                 .and_then(|value| {
                     if merge_next {
-                        value.checked_add(self.free[index].page_count)
+                        value.checked_add(self.free_entries()[index].page_count)
                     } else {
                         Some(value)
                     }
@@ -2078,9 +2983,9 @@ impl PhysicalMemoryManager {
         } else if merge_next {
             extent
                 .page_count
-                .checked_add(self.free[index].page_count)
+                .checked_add(self.free_entries()[index].page_count)
                 .ok_or(PhysicalMemoryError::AddressRange)?;
-        } else if self.free_count == MAX_FREE_EXTENTS {
+        } else if self.free_count == self.ledger_capacities().free {
             return Err(PhysicalMemoryError::ExtentCapacity);
         }
         Ok(())
@@ -2088,7 +2993,8 @@ impl PhysicalMemoryManager {
 
     pub fn summary(&self) -> PhysicalMemorySummary {
         let mut largest = [0u64; 3];
-        for extent in &self.free[..self.free_count] {
+        let capacities = self.ledger_capacities();
+        for extent in &self.free_entries()[..self.free_count] {
             largest[extent.zone.index()] = largest[extent.zone.index()].max(extent.page_count);
         }
         PhysicalMemorySummary {
@@ -2123,6 +3029,20 @@ impl PhysicalMemoryManager {
             metadata_release_rejections: self.metadata_release_rejections,
             metadata_migration_rollbacks: self.metadata_migration_rollbacks,
             metadata_mapped: self.metadata_lifecycle == MetadataLifecycle::Mapped,
+            ledger_generation: self.ledger_header.generation,
+            ledger_pages: self.ledger_header.page_count,
+            ledger_capacities: [
+                capacities.free as u64,
+                capacities.allocations as u64,
+                capacities.source as u64,
+                capacities.scrub as u64,
+                capacities.reclaim as u64,
+            ],
+            ledger_growth_operations: self.ledger_growth_operations,
+            ledger_growth_rollbacks: self.ledger_growth_rollbacks,
+            ledger_retired_generations: self.ledger_retired_generations,
+            ledger_retired_pages: self.ledger_retired_pages,
+            ledger_retirement_failures: self.ledger_retirement_failures,
             reclaim_stage: self.reclaim_stage,
             reclaim_operations: self.reclaim_operations,
             reclaim_receipt_count: self.reclaim_receipt_count as u64,
@@ -2253,6 +3173,14 @@ mod tests {
         corrupt_handoff: bool,
         arena_installed: bool,
         uninstall_count: u64,
+        ledger_pointers: [*mut u8; 2],
+        ledger_installed: [bool; 2],
+        ledger_pages: [u64; 2],
+        fail_ledger_install: bool,
+        fail_ledger_finalize: bool,
+        fail_ledger_uninstall: bool,
+        corrupt_ledger: bool,
+        ledger_uninstall_count: u64,
     }
 
     impl FakePageAccess {
@@ -2269,6 +3197,14 @@ mod tests {
                 corrupt_handoff: false,
                 arena_installed: false,
                 uninstall_count: 0,
+                ledger_pointers: [null_mut(); 2],
+                ledger_installed: [false; 2],
+                ledger_pages: [0; 2],
+                fail_ledger_install: false,
+                fail_ledger_finalize: false,
+                fail_ledger_uninstall: false,
+                corrupt_ledger: false,
+                ledger_uninstall_count: 0,
             }
         }
 
@@ -2300,6 +3236,17 @@ mod tests {
                         .unwrap();
                 // SAFETY: arena_pointer was allocated once with this exact layout.
                 unsafe { dealloc(self.arena_pointer, layout) };
+            }
+            let layout = Layout::from_size_align(
+                LEDGER_ARENA_PAGE_CAPACITY as usize * PAGE_BYTES as usize,
+                PAGE_BYTES as usize,
+            )
+            .unwrap();
+            for pointer in self.ledger_pointers {
+                if !pointer.is_null() {
+                    // SAFETY: each ledger pointer was allocated once with this layout.
+                    unsafe { dealloc(pointer, layout) };
+                }
             }
         }
     }
@@ -2395,6 +3342,82 @@ mod tests {
             }
             self.arena_installed = false;
             self.uninstall_count += 1;
+            Ok(())
+        }
+
+        fn install_ledger_arena(
+            &mut self,
+            slot: u8,
+            _physical_address: u64,
+            page_count: u64,
+        ) -> Result<u64, PageAccessError> {
+            let index = usize::from(slot);
+            if self.fail_ledger_install
+                || index >= self.ledger_pointers.len()
+                || self.ledger_installed[index]
+                || page_count == 0
+                || page_count > LEDGER_ARENA_PAGE_CAPACITY
+            {
+                return Err(PageAccessError::Access);
+            }
+            if self.ledger_pointers[index].is_null() {
+                let layout = Layout::from_size_align(
+                    LEDGER_ARENA_PAGE_CAPACITY as usize * PAGE_BYTES as usize,
+                    PAGE_BYTES as usize,
+                )
+                .map_err(|_| PageAccessError::Access)?;
+                // SAFETY: the validated layout is nonzero and page aligned.
+                self.ledger_pointers[index] = unsafe { alloc_zeroed(layout) };
+                if self.ledger_pointers[index].is_null() {
+                    return Err(PageAccessError::Access);
+                }
+            }
+            self.ledger_installed[index] = true;
+            self.ledger_pages[index] = page_count;
+            Ok(self.ledger_pointers[index] as usize as u64)
+        }
+
+        fn finalize_ledger_arena(
+            &mut self,
+            slot: u8,
+            virtual_address: u64,
+            page_count: u64,
+        ) -> Result<(), PageAccessError> {
+            let index = usize::from(slot);
+            if self.fail_ledger_finalize
+                || index >= self.ledger_pointers.len()
+                || !self.ledger_installed[index]
+                || virtual_address != self.ledger_pointers[index] as usize as u64
+                || page_count != self.ledger_pages[index]
+            {
+                return Err(PageAccessError::Access);
+            }
+            if self.corrupt_ledger {
+                // SAFETY: the installed arena begins with a complete ledger header.
+                let header = unsafe { &mut *(virtual_address as usize as *mut LedgerArenaHeader) };
+                header.logical_checksum ^= 1;
+            }
+            Ok(())
+        }
+
+        fn uninstall_ledger_arena(
+            &mut self,
+            slot: u8,
+            virtual_address: u64,
+            page_count: u64,
+        ) -> Result<(), PageAccessError> {
+            let index = usize::from(slot);
+            if self.fail_ledger_uninstall
+                || index >= self.ledger_pointers.len()
+                || !self.ledger_installed[index]
+                || virtual_address != self.ledger_pointers[index] as usize as u64
+                || page_count != self.ledger_pages[index]
+            {
+                return Err(PageAccessError::Access);
+            }
+            self.ledger_installed[index] = false;
+            self.ledger_pages[index] = 0;
+            self.ledger_uninstall_count += 1;
             Ok(())
         }
     }
@@ -2535,8 +3558,8 @@ mod tests {
 
     #[test]
     fn manager_fits_the_guarded_metadata_arena() {
-        assert_eq!(14928, core::mem::size_of::<PhysicalMemoryManager>());
-        assert!(14928 <= METADATA_ARENA_BYTE_CAPACITY);
+        assert_eq!(15336, core::mem::size_of::<PhysicalMemoryManager>());
+        assert!(15336 <= METADATA_ARENA_BYTE_CAPACITY);
         assert!(core::mem::size_of::<ReclaimPlan>() <= 160);
         assert!(core::mem::size_of::<ReclaimCursor>() <= 64);
     }
@@ -2899,6 +3922,115 @@ mod tests {
             Err(PhysicalMemoryError::MetadataOwnership)
         );
         assert_eq!(1, manager.summary().metadata_release_rejections);
+        assert_eq!(Ok(()), manager.verify_metadata_integrity());
+    }
+
+    #[test]
+    fn generation_owned_ledgers_expand_all_capacities_and_retire_the_old_arena() {
+        let (bytes, core) = fixture();
+        let handoff = poole_handoff::decode(&bytes).unwrap();
+        let mut bootstrap = PhysicalMemoryManager::from_handoff(&handoff, core, 64).unwrap();
+        let mut access = FakePageAccess::new(DMA_END_PAGE, 64, STALE_PATTERN);
+        let migration = bootstrap.migrate_to_metadata(&mut access).unwrap();
+        // SAFETY: migration returned a sealed manager in the fake page-aligned arena.
+        let manager =
+            unsafe { &mut *(migration.manager_address as usize as *mut PhysicalMemoryManager) };
+
+        let initial = manager.grow_metadata_ledgers(&mut access).unwrap();
+        assert_eq!(0, initial.previous_generation);
+        assert_eq!([256, 32, 256, 16, 2], manager.summary().ledger_capacities);
+        assert!(access.ledger_installed[0]);
+        let grown = manager.grow_metadata_ledgers(&mut access).unwrap();
+        let summary = manager.summary();
+        assert_eq!(initial.generation, grown.previous_generation);
+        assert!(grown.generation > initial.generation);
+        assert!(grown.page_count > initial.page_count);
+        assert_eq!([512, 64, 512, 32, 4], summary.ledger_capacities);
+        assert_eq!(2, summary.ledger_growth_operations);
+        assert_eq!(1, summary.ledger_retired_generations);
+        assert_eq!(initial.page_count, summary.ledger_retired_pages);
+        assert_eq!(0, summary.ledger_growth_rollbacks);
+        assert_eq!(0, summary.ledger_retirement_failures);
+        assert!(!access.ledger_installed[0]);
+        assert!(access.ledger_installed[1]);
+        assert_eq!(Ok(()), manager.verify_metadata_integrity());
+    }
+
+    #[test]
+    fn ledger_mapping_and_integrity_failures_restore_the_previous_generation() {
+        let (bytes, core) = fixture();
+        let handoff = poole_handoff::decode(&bytes).unwrap();
+        let mut bootstrap = PhysicalMemoryManager::from_handoff(&handoff, core, 64).unwrap();
+        let mut access = FakePageAccess::new(DMA_END_PAGE, 64, STALE_PATTERN);
+        let migration = bootstrap.migrate_to_metadata(&mut access).unwrap();
+        // SAFETY: migration returned a sealed manager in the fake page-aligned arena.
+        let manager =
+            unsafe { &mut *(migration.manager_address as usize as *mut PhysicalMemoryManager) };
+        let before = manager.summary();
+        access.fail_ledger_install = true;
+        assert_eq!(
+            manager.grow_metadata_ledgers(&mut access),
+            Err(PhysicalMemoryError::LedgerMapping)
+        );
+        access.fail_ledger_install = false;
+        let after_mapping = manager.summary();
+        assert_eq!(before.allocated_pages, after_mapping.allocated_pages);
+        assert_eq!(before.free_extent_count, after_mapping.free_extent_count);
+        assert_eq!(0, after_mapping.ledger_generation);
+        assert_eq!(1, after_mapping.ledger_growth_rollbacks);
+        assert_eq!(Ok(()), manager.verify_metadata_integrity());
+
+        access.corrupt_ledger = true;
+        assert_eq!(
+            manager.grow_metadata_ledgers(&mut access),
+            Err(PhysicalMemoryError::LedgerCorruption)
+        );
+        access.corrupt_ledger = false;
+        let after_corruption = manager.summary();
+        assert_eq!(before.allocated_pages, after_corruption.allocated_pages);
+        assert_eq!(0, after_corruption.ledger_generation);
+        assert_eq!(2, after_corruption.ledger_growth_rollbacks);
+        assert_eq!(Ok(()), manager.verify_metadata_integrity());
+    }
+
+    #[test]
+    fn retirement_failure_keeps_both_generations_owned_until_retry() {
+        let (bytes, core) = fixture();
+        let handoff = poole_handoff::decode(&bytes).unwrap();
+        let mut bootstrap = PhysicalMemoryManager::from_handoff(&handoff, core, 64).unwrap();
+        let mut access = FakePageAccess::new(DMA_END_PAGE, 64, STALE_PATTERN);
+        let migration = bootstrap.migrate_to_metadata(&mut access).unwrap();
+        // SAFETY: migration returned a sealed manager in the fake page-aligned arena.
+        let manager =
+            unsafe { &mut *(migration.manager_address as usize as *mut PhysicalMemoryManager) };
+        let initial = manager.grow_metadata_ledgers(&mut access).unwrap();
+        access.fail_ledger_uninstall = true;
+        assert_eq!(
+            manager.grow_metadata_ledgers(&mut access),
+            Err(PhysicalMemoryError::LedgerRetirement)
+        );
+        let retained = manager.summary();
+        assert_eq!(2, retained.ledger_growth_operations);
+        assert_eq!(1, retained.ledger_retirement_failures);
+        assert_eq!(
+            METADATA_ARENA_PAGE_COUNT + initial.page_count * 3,
+            retained.allocated_pages
+        );
+        assert!(access.ledger_installed[0]);
+        assert!(access.ledger_installed[1]);
+        assert_eq!(Ok(()), manager.verify_metadata_integrity());
+
+        access.fail_ledger_uninstall = false;
+        assert_eq!(Ok(true), manager.retry_metadata_retirement(&mut access));
+        let recovered = manager.summary();
+        assert_eq!(1, recovered.ledger_retired_generations);
+        assert_eq!(initial.page_count, recovered.ledger_retired_pages);
+        assert_eq!(
+            METADATA_ARENA_PAGE_COUNT + initial.page_count * 2,
+            recovered.allocated_pages
+        );
+        assert!(!access.ledger_installed[0]);
+        assert!(access.ledger_installed[1]);
         assert_eq!(Ok(()), manager.verify_metadata_integrity());
     }
 

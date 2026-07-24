@@ -22,8 +22,9 @@ use poolekernel::{
     },
     decode_cpu_identity,
     physical_memory::{
-        METADATA_ARENA_PAGE_COUNT, MetadataArenaAccess, PageAccessError, PhysicalPageAccess,
-        ScrubKind, Zone, run_profile as run_physical_memory_profile,
+        LEDGER_ARENA_PAGE_CAPACITY, LEDGER_GUARD_PAGE_COUNT, METADATA_ARENA_PAGE_COUNT,
+        MetadataArenaAccess, PageAccessError, PhysicalPageAccess, ScrubKind, Zone,
+        run_profile as run_physical_memory_profile,
     },
     privilege_msr::{machine_check_bank_count, machine_check_ctl_present, validate_snapshot},
     revalidation, validate_cpu_policy_snapshot, validate_descriptor_state,
@@ -165,7 +166,7 @@ macro_rules! pkpmm_fragment {
 
 pkpmm_fragment!(
     PKPMM_DENIED,
-    b"POOLEOS:KERNEL:PMM-DENIED contract=PKPMM4 reason="
+    b"POOLEOS:KERNEL:PMM-DENIED contract=PKPMM5 reason="
 );
 pkpmm_fragment!(
     PKPMM_DENIED_TAIL,
@@ -173,15 +174,15 @@ pkpmm_fragment!(
 );
 pkpmm_fragment!(
     PKPMM_EARLY,
-    b"POOLEOS:KERNEL:PMM-EARLY PASS contract=PKPMM4 selector=8 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n"
+    b"POOLEOS:KERNEL:PMM-EARLY PASS contract=PKPMM5 selector=8 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n"
 );
 pkpmm_fragment!(
     PKPMM_STAGE,
-    b"POOLEOS:KERNEL:PMM-STAGE PASS contract=PKPMM4 stage="
+    b"POOLEOS:KERNEL:PMM-STAGE PASS contract=PKPMM5 stage="
 );
 pkpmm_fragment!(
     PKPMM_MAP,
-    b"POOLEOS:KERNEL:PMM-MAP PASS contract=PKPMM4 entries="
+    b"POOLEOS:KERNEL:PMM-MAP PASS contract=PKPMM5 entries="
 );
 pkpmm_fragment!(PKPMM_USABLE, b" usable_pages=");
 pkpmm_fragment!(PKPMM_BOOT_RECLAIMABLE, b" boot_reclaimable_pages=");
@@ -189,7 +190,7 @@ pkpmm_fragment!(PKPMM_LOADER_RESERVED, b" loader_reserved_pages=");
 pkpmm_fragment!(PKPMM_NULL_GUARD, b" null_guard_pages=");
 pkpmm_fragment!(
     PKPMM_ZONES,
-    b"\nPOOLEOS:KERNEL:PMM-ZONES PASS contract=PKPMM4 dma_source="
+    b"\nPOOLEOS:KERNEL:PMM-ZONES PASS contract=PKPMM5 dma_source="
 );
 pkpmm_fragment!(PKPMM_DMA_MANAGED, b" dma_managed=");
 pkpmm_fragment!(PKPMM_DMA32_SOURCE, b" dma32_source=");
@@ -202,17 +203,17 @@ pkpmm_fragment!(PKPMM_LARGEST_DMA32, b" largest_dma32=");
 pkpmm_fragment!(PKPMM_LARGEST_NORMAL, b" largest_normal=");
 pkpmm_fragment!(
     PKPMM_OWNERSHIP,
-    b"\nPOOLEOS:KERNEL:PMM-OWNERSHIP PASS contract=PKPMM4 kernel_base="
+    b"\nPOOLEOS:KERNEL:PMM-OWNERSHIP PASS contract=PKPMM5 kernel_base="
 );
 pkpmm_fragment!(PKPMM_KERNEL_PAGES, b" kernel_pages=");
 pkpmm_fragment!(PKPMM_HANDOFF_BASE, b" handoff_base=");
 pkpmm_fragment!(PKPMM_HANDOFF_PAGES, b" handoff_pages=");
 pkpmm_fragment!(PKPMM_ROOT, b" root=");
 pkpmm_fragment!(PKPMM_PROTECTED, b" protected=1\n");
-pkpmm_fragment!(PKPMM_EXERCISE_DENIED, b"POOLEOS:KERNEL:PMM-DENIED contract=PKPMM4 reason=exercise_invariant physical_effects=fail_closed ownership_release=0 reclaim=0 authority=0 actions=0 terminal=panic\n");
+pkpmm_fragment!(PKPMM_EXERCISE_DENIED, b"POOLEOS:KERNEL:PMM-DENIED contract=PKPMM5 reason=exercise_invariant physical_effects=fail_closed ownership_release=0 reclaim=0 authority=0 actions=0 terminal=panic\n");
 pkpmm_fragment!(
     PKPMM_METADATA,
-    b"POOLEOS:KERNEL:PMM-METADATA PASS contract=PKPMM4 pages="
+    b"POOLEOS:KERNEL:PMM-METADATA PASS contract=PKPMM5 pages="
 );
 pkpmm_fragment!(PKPMM_METADATA_PHYSICAL, b" physical_start=");
 pkpmm_fragment!(PKPMM_METADATA_VIRTUAL, b" virtual_start=");
@@ -241,8 +242,26 @@ pkpmm_fragment!(
     b" handoff=validated corruption=host_verified rollback=host_verified\n"
 );
 pkpmm_fragment!(
+    PKPMM_GROWTH,
+    b"POOLEOS:KERNEL:PMM-GROWTH PASS contract=PKPMM5 initial_generation="
+);
+pkpmm_fragment!(PKPMM_GROWTH_FINAL_GENERATION, b" final_generation=");
+pkpmm_fragment!(PKPMM_GROWTH_INITIAL_PAGES, b" initial_pages=");
+pkpmm_fragment!(PKPMM_GROWTH_FINAL_PAGES, b" final_pages=");
+pkpmm_fragment!(PKPMM_GROWTH_FREE_CAPACITY, b" free_capacity=");
+pkpmm_fragment!(PKPMM_GROWTH_ALLOCATION_CAPACITY, b" allocation_capacity=");
+pkpmm_fragment!(PKPMM_GROWTH_SOURCE_CAPACITY, b" source_capacity=");
+pkpmm_fragment!(PKPMM_GROWTH_SCRUB_CAPACITY, b" scrub_capacity=");
+pkpmm_fragment!(PKPMM_GROWTH_RECLAIM_CAPACITY, b" reclaim_capacity=");
+pkpmm_fragment!(PKPMM_GROWTH_RETIRED_GENERATION, b" retired_generation=");
+pkpmm_fragment!(PKPMM_GROWTH_RETIRED_PAGES, b" retired_pages=");
+pkpmm_fragment!(PKPMM_GROWTH_MAPPED_PAGES, b" mapped_pages=");
+pkpmm_fragment!(PKPMM_GROWTH_PTE_WRITES, b" pte_writes=");
+pkpmm_fragment!(PKPMM_GROWTH_CHECKSUM, b" checksum=");
+pkpmm_fragment!(PKPMM_GROWTH_TAIL, b" guard_pages=4 mapping_events=2 revoked=1 integrity=1 atomic=1 rollbacks=0 retirement_failures=0 retirement_retry=0 concurrency=0 smp=0 authority=0 actions=0 production=0\n");
+pkpmm_fragment!(
     PKPMM_RECLAIM,
-    b"POOLEOS:KERNEL:PMM-RECLAIM PASS contract=PKPMM4 stage=post_exit_boot_services class=boot_services sequence="
+    b"POOLEOS:KERNEL:PMM-RECLAIM PASS contract=PKPMM5 stage=post_exit_boot_services class=boot_services sequence="
 );
 pkpmm_fragment!(PKPMM_RECLAIM_SOURCE_RECORDS, b" source_records=");
 pkpmm_fragment!(PKPMM_RECLAIM_RANGES, b" ranges=");
@@ -265,7 +284,7 @@ pkpmm_fragment!(
 );
 pkpmm_fragment!(
     PKPMM_SCRUB,
-    b"POOLEOS:KERNEL:PMM-SCRUB PASS contract=PKPMM4 allocations="
+    b"POOLEOS:KERNEL:PMM-SCRUB PASS contract=PKPMM5 allocations="
 );
 pkpmm_fragment!(PKPMM_FREES, b" frees=");
 pkpmm_fragment!(PKPMM_START, b" start=");
@@ -286,14 +305,14 @@ pkpmm_fragment!(PKPMM_COALESCES, b" coalesces=");
 pkpmm_fragment!(PKPMM_ROLLBACK, b" rollback=host_verified\n");
 pkpmm_fragment!(
     PKPMM_RESULT,
-    b"POOLEOS:KERNEL:PMM-RESULT PASS contract=PKPMM4 profile=qemu64_tier0 managed_pages="
+    b"POOLEOS:KERNEL:PMM-RESULT PASS contract=PKPMM5 profile=qemu64_tier0 managed_pages="
 );
 pkpmm_fragment!(PKPMM_ALLOCATED_PAGES, b" allocated_pages=");
 pkpmm_fragment!(PKPMM_PHYSICAL_WRITES, b" physical_writes=");
 pkpmm_fragment!(PKPMM_PHYSICAL_READS, b" physical_reads=");
 pkpmm_fragment!(PKPMM_TEMPORARY_WRITES, b" temporary_pte_writes=");
 pkpmm_fragment!(PKPMM_BOOTSTRAP_INVLPG, b" bootstrap_invlpg=");
-pkpmm_fragment!(PKPMM_RESULT_TAIL, b" alias_revoked=1 metadata_retained=1 mappings=temporary_single_page_plus_guarded_metadata reclaim=1 acpi_reclaim=0 concurrency=0 smp=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n");
+pkpmm_fragment!(PKPMM_RESULT_TAIL, b" alias_revoked=1 metadata_retained=1 ledger_generation_retained=1 mappings=temporary_single_page_plus_guarded_metadata_and_ledger_generation reclaim=1 acpi_reclaim=0 concurrency=0 smp=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n");
 
 macro_rules! pkvm_fragment {
     ($name:ident, $value:literal) => {
@@ -596,6 +615,11 @@ struct BootstrapTableMemory {
     metadata_pte_writes: u64,
     metadata_guard_pages_verified: u64,
     metadata_mapping_rollbacks: u64,
+    ledger_physical_start: [Option<u64>; 2],
+    ledger_mapped_pages: [u64; 2],
+    ledger_guard_pages_verified: [u64; 2],
+    ledger_pte_writes: u64,
+    ledger_mapping_rollbacks: u64,
 }
 
 impl BootstrapTableMemory {
@@ -622,7 +646,7 @@ impl BootstrapTableMemory {
         }
         // SAFETY: the loop above proves that the retained PKMAP2 leaf table is
         // identity-mapped and writable through its physical address.
-        for index in Self::TEMPORARY_LEAF_INDEX..=poole_kmap::METADATA_GUARD_HIGH_PAGE {
+        for index in Self::TEMPORARY_LEAF_INDEX..=poole_kmap::LEDGER_B_GUARD_HIGH_PAGE {
             // SAFETY: the loop above proves that the retained leaf table is writable.
             let value = unsafe {
                 read_volatile((active_leaf_table as usize as *const u64).wrapping_add(index))
@@ -645,6 +669,11 @@ impl BootstrapTableMemory {
             metadata_pte_writes: 0,
             metadata_guard_pages_verified: 0,
             metadata_mapping_rollbacks: 0,
+            ledger_physical_start: [None; 2],
+            ledger_mapped_pages: [0; 2],
+            ledger_guard_pages_verified: [0; 2],
+            ledger_pte_writes: 0,
+            ledger_mapping_rollbacks: 0,
         })
     }
 
@@ -748,6 +777,76 @@ impl BootstrapTableMemory {
         Ok(())
     }
 
+    fn ledger_geometry(
+        slot: u8,
+    ) -> Result<(usize, u64, usize, u64, usize, u64), virtual_memory::Error> {
+        match slot {
+            0 => Ok((
+                poole_kmap::LEDGER_A_GUARD_LOW_PAGE,
+                virtual_memory::LEDGER_A_GUARD_LOW_START,
+                poole_kmap::LEDGER_A_FIRST_PAGE,
+                virtual_memory::LEDGER_A_MAP_START,
+                poole_kmap::LEDGER_A_GUARD_HIGH_PAGE,
+                virtual_memory::LEDGER_A_GUARD_HIGH_START,
+            )),
+            1 => Ok((
+                poole_kmap::LEDGER_B_GUARD_LOW_PAGE,
+                virtual_memory::LEDGER_B_GUARD_LOW_START,
+                poole_kmap::LEDGER_B_FIRST_PAGE,
+                virtual_memory::LEDGER_B_MAP_START,
+                poole_kmap::LEDGER_B_GUARD_HIGH_PAGE,
+                virtual_memory::LEDGER_B_GUARD_HIGH_START,
+            )),
+            _ => Err(virtual_memory::Error::BootstrapTargetAddress),
+        }
+    }
+
+    fn ledger_guards_absent(&self, slot: u8) -> Result<(), virtual_memory::Error> {
+        let (low_index, low_virtual, _, _, high_index, high_virtual) = Self::ledger_geometry(slot)?;
+        for (index, virtual_address) in [(low_index, low_virtual), (high_index, high_virtual)] {
+            // SAFETY: new() proves the retained leaf table is identity-mapped.
+            if unsafe { read_volatile(self.indexed_leaf_pointer(index)) } != 0
+                || poole_kmap::translate(
+                    &ActivePhysicalReader,
+                    self.active_root,
+                    virtual_address,
+                    self.physical_address_bits,
+                ) != Err(poole_kmap::Error::TranslationMissing)
+            {
+                return Err(virtual_memory::Error::BootstrapLeafState);
+            }
+        }
+        Ok(())
+    }
+
+    fn rollback_ledger_prefix(
+        &mut self,
+        slot: u8,
+        physical_address: u64,
+        installed_pages: usize,
+    ) -> Result<(), virtual_memory::Error> {
+        let (_, _, first_page, virtual_start, _, _) = Self::ledger_geometry(slot)?;
+        for offset in (0..installed_pages).rev() {
+            let expected = physical_address
+                .checked_add(offset as u64 * poole_kmap::PAGE_SIZE)
+                .ok_or(virtual_memory::Error::BootstrapTargetAddress)?;
+            let leaf = self.indexed_leaf_pointer(first_page + offset);
+            // SAFETY: new() proves the retained leaf table is identity-mapped.
+            let observed = unsafe { read_volatile(leaf) };
+            if observed & Self::PHYSICAL_MASK_52 != expected
+                || observed & Self::TEMPORARY_ENTRY_FLAGS != Self::TEMPORARY_ENTRY_FLAGS
+            {
+                return Err(virtual_memory::Error::BootstrapLeafState);
+            }
+            // SAFETY: this transaction installed and exclusively owns the leaf.
+            unsafe { write_volatile(leaf, 0) };
+            self.temporary_pte_writes += 1;
+            self.ledger_pte_writes += 1;
+            self.invalidate_address(virtual_start + offset as u64 * poole_kmap::PAGE_SIZE);
+        }
+        self.ledger_guards_absent(slot)
+    }
+
     fn rollback_metadata_prefix(
         &mut self,
         physical_address: u64,
@@ -788,7 +887,7 @@ impl PhysicalPageAccess for BootstrapTableMemory {
         self.ensure_mapped(physical_address)
             .map_err(|_| PageAccessError::Access)?;
         let pointer = Self::target_pointer(word_index).map_err(|_| PageAccessError::Access)?;
-        // SAFETY: PKPMM4 owns the planned, held, or still-live PMM extent and ensure_mapped
+        // SAFETY: PKPMM5 owns the planned, held, or still-live PMM extent and ensure_mapped
         // proves that its exact physical page occupies the supervisor RW/NX alias.
         unsafe { write_volatile(pointer, value) };
         self.writes = self.writes.checked_add(1).ok_or(PageAccessError::Access)?;
@@ -803,7 +902,7 @@ impl PhysicalPageAccess for BootstrapTableMemory {
         self.ensure_mapped(physical_address)
             .map_err(|_| PageAccessError::Access)?;
         let pointer = Self::target_pointer(word_index).map_err(|_| PageAccessError::Access)?;
-        // SAFETY: the same PKPMM4 ownership and temporary-alias proof as write_word
+        // SAFETY: the same PKPMM5 ownership and temporary-alias proof as write_word
         // applies; volatile readback is required before the scrub receipt is minted.
         let value = unsafe { read_volatile(pointer) };
         self.reads = self.reads.checked_add(1).ok_or(PageAccessError::Access)?;
@@ -931,6 +1030,146 @@ impl MetadataArenaAccess for BootstrapTableMemory {
         self.metadata_guard_pages_verified = 0;
         Ok(())
     }
+
+    fn install_ledger_arena(
+        &mut self,
+        slot: u8,
+        physical_address: u64,
+        page_count: u64,
+    ) -> Result<u64, PageAccessError> {
+        let slot_index = usize::from(slot);
+        let (_, _, first_page, virtual_start, _, _) =
+            Self::ledger_geometry(slot).map_err(|_| PageAccessError::Access)?;
+        if slot_index >= self.ledger_physical_start.len()
+            || self.ledger_physical_start[slot_index].is_some()
+            || page_count == 0
+            || page_count > LEDGER_ARENA_PAGE_CAPACITY
+            || physical_address == 0
+            || !physical_address.is_multiple_of(poole_kmap::PAGE_SIZE)
+            || physical_address & !Self::PHYSICAL_MASK_52 != 0
+        {
+            return Err(PageAccessError::Access);
+        }
+        self.ledger_guards_absent(slot)
+            .map_err(|_| PageAccessError::Access)?;
+        for offset in 0..page_count as usize {
+            let leaf = self.indexed_leaf_pointer(first_page + offset);
+            // SAFETY: new() proves the retained leaf table is identity-mapped.
+            if unsafe { read_volatile(leaf) } != 0 {
+                if offset != 0 {
+                    self.rollback_ledger_prefix(slot, physical_address, offset)
+                        .map_err(|_| PageAccessError::Access)?;
+                    self.ledger_mapping_rollbacks += 1;
+                }
+                return Err(PageAccessError::Access);
+            }
+            let physical = physical_address
+                .checked_add(offset as u64 * poole_kmap::PAGE_SIZE)
+                .ok_or(PageAccessError::Access)?;
+            // SAFETY: this ledger generation owns the absent leaf exclusively.
+            unsafe { write_volatile(leaf, physical | Self::TEMPORARY_ENTRY_FLAGS) };
+            self.temporary_pte_writes += 1;
+            self.ledger_pte_writes += 1;
+            let virtual_address = virtual_start + offset as u64 * poole_kmap::PAGE_SIZE;
+            self.invalidate_address(virtual_address);
+            let translation = poole_kmap::translate(
+                &ActivePhysicalReader,
+                self.active_root,
+                virtual_address,
+                self.physical_address_bits,
+            );
+            if !matches!(
+                translation,
+                Ok(value)
+                    if value.physical_address == physical
+                        && value.writable
+                        && !value.executable
+                        && !value.user
+            ) {
+                self.rollback_ledger_prefix(slot, physical_address, offset + 1)
+                    .map_err(|_| PageAccessError::Access)?;
+                self.ledger_mapping_rollbacks += 1;
+                return Err(PageAccessError::Access);
+            }
+        }
+        self.ledger_physical_start[slot_index] = Some(physical_address);
+        self.ledger_mapped_pages[slot_index] = page_count;
+        Ok(virtual_start)
+    }
+
+    fn finalize_ledger_arena(
+        &mut self,
+        slot: u8,
+        virtual_address: u64,
+        page_count: u64,
+    ) -> Result<(), PageAccessError> {
+        let slot_index = usize::from(slot);
+        let (_, _, _, expected_virtual, _, _) =
+            Self::ledger_geometry(slot).map_err(|_| PageAccessError::Access)?;
+        let physical_address = self
+            .ledger_physical_start
+            .get(slot_index)
+            .copied()
+            .flatten()
+            .ok_or(PageAccessError::Access)?;
+        if virtual_address != expected_virtual
+            || page_count == 0
+            || page_count > LEDGER_ARENA_PAGE_CAPACITY
+            || self.ledger_mapped_pages[slot_index] != page_count
+        {
+            return Err(PageAccessError::Access);
+        }
+        self.ledger_guards_absent(slot)
+            .map_err(|_| PageAccessError::Access)?;
+        for offset in 0..page_count as usize {
+            let translation = poole_kmap::translate(
+                &ActivePhysicalReader,
+                self.active_root,
+                virtual_address + offset as u64 * poole_kmap::PAGE_SIZE,
+                self.physical_address_bits,
+            )
+            .map_err(|_| PageAccessError::Access)?;
+            if translation.physical_address
+                != physical_address + offset as u64 * poole_kmap::PAGE_SIZE
+                || !translation.writable
+                || translation.executable
+                || translation.user
+            {
+                return Err(PageAccessError::Access);
+            }
+        }
+        self.ledger_guard_pages_verified[slot_index] = LEDGER_GUARD_PAGE_COUNT;
+        Ok(())
+    }
+
+    fn uninstall_ledger_arena(
+        &mut self,
+        slot: u8,
+        virtual_address: u64,
+        page_count: u64,
+    ) -> Result<(), PageAccessError> {
+        let slot_index = usize::from(slot);
+        let (_, _, _, expected_virtual, _, _) =
+            Self::ledger_geometry(slot).map_err(|_| PageAccessError::Access)?;
+        let physical_address = self
+            .ledger_physical_start
+            .get(slot_index)
+            .copied()
+            .flatten()
+            .ok_or(PageAccessError::Access)?;
+        if virtual_address != expected_virtual
+            || page_count == 0
+            || self.ledger_mapped_pages[slot_index] != page_count
+        {
+            return Err(PageAccessError::Access);
+        }
+        self.rollback_ledger_prefix(slot, physical_address, page_count as usize)
+            .map_err(|_| PageAccessError::Access)?;
+        self.ledger_physical_start[slot_index] = None;
+        self.ledger_mapped_pages[slot_index] = 0;
+        self.ledger_guard_pages_verified[slot_index] = 0;
+        Ok(())
+    }
 }
 
 impl TableMemory for BootstrapTableMemory {
@@ -1023,6 +1262,52 @@ impl TableMemory for BootstrapTableMemory {
                     return Err(virtual_memory::Error::BootstrapLeafState);
                 }
             }
+        }
+        let mut active_ledgers = 0u64;
+        for slot in 0..2u8 {
+            self.ledger_guards_absent(slot)?;
+            let index = usize::from(slot);
+            match self.ledger_physical_start[index] {
+                Some(physical_address) => {
+                    active_ledgers += 1;
+                    let page_count = self.ledger_mapped_pages[index];
+                    if page_count == 0
+                        || page_count > LEDGER_ARENA_PAGE_CAPACITY
+                        || self.ledger_guard_pages_verified[index] != LEDGER_GUARD_PAGE_COUNT
+                    {
+                        return Err(virtual_memory::Error::BootstrapLeafState);
+                    }
+                    let (_, _, _, virtual_start, _, _) = Self::ledger_geometry(slot)?;
+                    for offset in 0..page_count {
+                        let translation = poole_kmap::translate(
+                            &ActivePhysicalReader,
+                            self.active_root,
+                            virtual_start + offset * poole_kmap::PAGE_SIZE,
+                            self.physical_address_bits,
+                        )
+                        .map_err(|_| virtual_memory::Error::BootstrapTranslation)?;
+                        if translation.physical_address
+                            != physical_address + offset * poole_kmap::PAGE_SIZE
+                            || !translation.writable
+                            || translation.executable
+                            || translation.user
+                        {
+                            return Err(virtual_memory::Error::BootstrapTranslation);
+                        }
+                    }
+                }
+                None => {
+                    if self.ledger_mapped_pages[index] != 0
+                        || self.ledger_guard_pages_verified[index] != 0
+                    {
+                        return Err(virtual_memory::Error::BootstrapLeafState);
+                    }
+                }
+            }
+        }
+        let expected_active_ledgers = u64::from(self.metadata_physical_start.is_some());
+        if active_ledgers != expected_active_ledgers {
+            return Err(virtual_memory::Error::BootstrapLeafState);
         }
         Ok(())
     }
@@ -1833,6 +2118,38 @@ extern "C" fn poole_kernel_rust_entry(
         logger.write_bytes(&PKPMM_METADATA_MAPPING_ROLLBACKS);
         logger.write_decimal_u64(page_access.metadata_mapping_rollbacks);
         logger.write_bytes(&PKPMM_METADATA_TAIL);
+
+        let ledger_initial = proof.ledger_initial;
+        let ledger_growth = proof.ledger_growth;
+        logger.write_bytes(&PKPMM_GROWTH);
+        logger.write_decimal_u64(ledger_initial.generation);
+        logger.write_bytes(&PKPMM_GROWTH_FINAL_GENERATION);
+        logger.write_decimal_u64(ledger_growth.generation);
+        logger.write_bytes(&PKPMM_GROWTH_INITIAL_PAGES);
+        logger.write_decimal_u64(ledger_initial.page_count);
+        logger.write_bytes(&PKPMM_GROWTH_FINAL_PAGES);
+        logger.write_decimal_u64(ledger_growth.page_count);
+        logger.write_bytes(&PKPMM_GROWTH_FREE_CAPACITY);
+        logger.write_decimal_u64(ledger_growth.free_capacity);
+        logger.write_bytes(&PKPMM_GROWTH_ALLOCATION_CAPACITY);
+        logger.write_decimal_u64(ledger_growth.allocation_capacity);
+        logger.write_bytes(&PKPMM_GROWTH_SOURCE_CAPACITY);
+        logger.write_decimal_u64(ledger_growth.source_capacity);
+        logger.write_bytes(&PKPMM_GROWTH_SCRUB_CAPACITY);
+        logger.write_decimal_u64(ledger_growth.scrub_capacity);
+        logger.write_bytes(&PKPMM_GROWTH_RECLAIM_CAPACITY);
+        logger.write_decimal_u64(ledger_growth.reclaim_capacity);
+        logger.write_bytes(&PKPMM_GROWTH_RETIRED_GENERATION);
+        logger.write_decimal_u64(ledger_growth.retired_generation);
+        logger.write_bytes(&PKPMM_GROWTH_RETIRED_PAGES);
+        logger.write_decimal_u64(ledger_growth.retired_page_count);
+        logger.write_bytes(&PKPMM_GROWTH_MAPPED_PAGES);
+        logger.write_decimal_u64(final_state.ledger_pages);
+        logger.write_bytes(&PKPMM_GROWTH_PTE_WRITES);
+        logger.write_decimal_u64(page_access.ledger_pte_writes);
+        logger.write_bytes(&PKPMM_GROWTH_CHECKSUM);
+        logger.write_hex_u64(ledger_growth.logical_checksum);
+        logger.write_bytes(&PKPMM_GROWTH_TAIL);
 
         let reclaim = proof.boot_reclaim;
         logger.write_bytes(&PKPMM_RECLAIM);

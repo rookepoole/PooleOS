@@ -52,8 +52,8 @@ class NativeSymbolTests(unittest.TestCase):
         self.assertEqual(bundle.identity, psym1.canonical_identity())
         self.assertEqual(bundle.segments, psym1.canonical_segments())
         self.assertEqual(bundle.symbols, psym1.canonical_symbols())
-        self.assertEqual(bundle.image_bytes, 0x46000)
-        self.assertEqual(bundle.entry_offset, 0x8000)
+        self.assertEqual(bundle.image_bytes, 0x4C000)
+        self.assertEqual(bundle.entry_offset, 0x9000)
 
     def test_lookup_handles_hits_gaps_slides_and_bounds(self) -> None:
         bundle = psym1.parse(psym1.canonical_bundle())
@@ -72,7 +72,7 @@ class NativeSymbolTests(unittest.TestCase):
             psym1.lookup(bundle, base, base + entry.start_offset + entry.byte_count)
         )
         with self.assertRaisesRegex(psym1.SymbolError, "psym_lookup_base"):
-            psym1.lookup(bundle, base + 1, base + 0x8000)
+            psym1.lookup(bundle, base + 1, base + 0x9000)
         with self.assertRaisesRegex(psym1.SymbolError, "psym_lookup_address"):
             psym1.lookup(bundle, base, base + bundle.image_bytes)
 
