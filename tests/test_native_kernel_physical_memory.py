@@ -40,12 +40,24 @@ class NativeKernelPhysicalMemoryTests(unittest.TestCase):
         self.assertEqual(physical_memory.PHYSICAL_WRITES, observation["result"]["physical_writes"])
         self.assertEqual(physical_memory.PHYSICAL_READS, observation["result"]["physical_reads"])
         self.assertEqual(
-            "temporary_single_page_plus_guarded_metadata", observation["result"]["mappings"]
+            "temporary_single_page_plus_guarded_metadata_and_ledger_generation",
+            observation["result"]["mappings"],
         )
         self.assertEqual(5, observation["metadata"]["pages"])
         self.assertEqual(2, observation["metadata"]["guard_pages"])
-        self.assertEqual(14928, observation["metadata"]["manager_bytes"])
+        self.assertEqual(15336, observation["metadata"]["manager_bytes"])
+        self.assertEqual(3, observation["growth"]["final_generation"])
+        self.assertEqual(8, observation["growth"]["final_pages"])
+        self.assertEqual([512, 64, 512, 32, 4], [
+            observation["growth"]["free_capacity"],
+            observation["growth"]["allocation_capacity"],
+            observation["growth"]["source_capacity"],
+            observation["growth"]["scrub_capacity"],
+            observation["growth"]["reclaim_capacity"],
+        ])
+        self.assertEqual(1, observation["growth"]["revoked"])
         self.assertEqual(1, observation["result"]["metadata_retained"])
+        self.assertEqual(1, observation["result"]["ledger_generation_retained"])
         self.assertEqual(1, observation["result"]["alias_revoked"])
         self.assertEqual(1, observation["result"]["reclaim"])
         self.assertEqual(0, observation["result"]["acpi_reclaim"])
@@ -59,7 +71,7 @@ class NativeKernelPhysicalMemoryTests(unittest.TestCase):
         self.assertEqual(11250, reclaim["page_count"])
         self.assertEqual([2018, 9232, 0], reclaim["pages_by_zone"])
         self.assertEqual(0x5A485D4A5725EED8, reclaim["range_checksum"])
-        self.assertEqual(0x4D3EBF743B7F2CCC, reclaim["receipt_checksum"])
+        self.assertEqual(0xE1F4C87AE4009940, reclaim["receipt_checksum"])
         self.assertEqual(reclaim["receipt_checksum"], observation["reclaim"]["receipt_checksum"])
         self.assertEqual(11, observation["reclaim"]["acpi_held_pages"])
         self.assertEqual(1, observation["reclaim"]["acpi_early_rejected"])
@@ -91,11 +103,12 @@ class NativeKernelPhysicalMemoryTests(unittest.TestCase):
 
     def test_source_audit_proves_safe_core_and_live_adapter(self) -> None:
         audit = qualify_native_kernel_physical_memory._source_audit()
-        self.assertEqual(0, audit["implementation_unsafe_token_count"])
+        self.assertEqual(0, audit["implementation_unauthorized_unsafe_token_count"])
         self.assertEqual(0, audit["heap_api_token_count"])
-        self.assertEqual(5, audit["fixed_capacity_ledger_count"])
-        self.assertEqual(8, audit["live_adapter_volatile_read_site_count"])
-        self.assertEqual(7, audit["live_adapter_volatile_write_site_count"])
+        self.assertEqual(5, audit["bootstrap_fixed_capacity_ledger_count"])
+        self.assertEqual(0, audit["active_fixed_capacity_ledger_count"])
+        self.assertEqual(11, audit["live_adapter_volatile_read_site_count"])
+        self.assertEqual(9, audit["live_adapter_volatile_write_site_count"])
         self.assertTrue(audit["final_temporary_alias_revocation_required"])
         self.assertTrue(audit["final_guarded_metadata_mapping_retention_required"])
 

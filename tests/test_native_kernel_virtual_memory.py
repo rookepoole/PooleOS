@@ -40,7 +40,7 @@ class NativeKernelVirtualMemoryTests(unittest.TestCase):
             candidate["direct_first"],
         )
         self.assertEqual(8720, observation["result"]["physical_writes"])
-        self.assertEqual(5432, observation["result"]["temporary_pte_writes"])
+        self.assertEqual(5528, observation["result"]["temporary_pte_writes"])
 
     def test_active_root_restores_cr3_and_binds_leaf_receipts(self) -> None:
         observation = virtual_memory.validate_markers(self.markers)
@@ -51,7 +51,7 @@ class NativeKernelVirtualMemoryTests(unittest.TestCase):
         self.assertEqual(0xA5, observation["invalidation"]["probe"])
         self.assertEqual(1, observation["invalidation"]["premature_reuse_rejected"])
         self.assertEqual(3, observation["result"]["active_invlpg"])
-        self.assertEqual(5432, observation["result"]["bootstrap_invlpg"])
+        self.assertEqual(5528, observation["result"]["bootstrap_invlpg"])
         for key in ("shootdown", "smp", "ring3", "production"):
             self.assertEqual(0, observation["result"][key])
 

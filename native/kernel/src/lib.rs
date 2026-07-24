@@ -34,9 +34,9 @@ pub const VIRTUAL_MEMORY_CONTRACT_ID: &str = virtual_memory::CONTRACT_ID;
 pub const XSTATE_EXCEPTION_CONTRACT_ID: &str = "PKXEXC1";
 #[used]
 #[unsafe(link_section = ".text.pkbuild_literal")]
-static BUILD_ID_BYTES: [u8; 36] = *b"PKBUILD1-CYCLE130-N9-PMM-RECLAIM-001";
+static BUILD_ID_BYTES: [u8; 35] = *b"PKBUILD1-CYCLE131-N9-PMM-GROWTH-001";
 pub const BUILD_ID: &[u8] = &BUILD_ID_BYTES;
-pub const ENTRY_OFFSET: u64 = 0x8000;
+pub const ENTRY_OFFSET: u64 = 0x9000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
 pub const HANDOFF_MAGIC_U64: u64 = u64::from_le_bytes(poole_handoff::MAGIC);
 pub const KERNEL_CODE_SELECTOR: u16 = 0x08;

@@ -78,7 +78,7 @@ def _negative_controls(markers: list[str]) -> list[dict[str, str]]:
         (23, "contract", "PKXFER2"),
         (23, "mode", "production"),
         (23, "emulator_only", "0"),
-        (23, "entry", "FFFFFFFF80009000"),
+        (23, "entry", "FFFFFFFF8000A000"),
         (23, "handoff", "FFFFFFFF80051000"),
         (23, "bytes", "5009"),
         (23, "stack_top", "FFFFFFFF80049008"),
@@ -115,7 +115,7 @@ def _negative_controls(markers: list[str]) -> list[dict[str, str]]:
             (
                 (26, "handoff", "0xFFFFFFFF80051000"),
                 (26, "bytes", "5009"),
-                (26, "entry", "0xFFFFFFFF80009000"),
+                (26, "entry", "0xFFFFFFFF8000A000"),
                 (26, "stack_top", "0xFFFFFFFF80049008"),
                 (26, "root", "0x000000001DE50000"),
                 (26, "cr3", "0x000000001DE4F001"),

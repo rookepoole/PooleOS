@@ -10,30 +10,30 @@ fn main() {
     let mut mappings = [Mapping::EMPTY; poole_kmap::MAX_MAPPINGS];
     mappings[0] = Mapping {
         virtual_offset: 0,
-        byte_count: 0x8000,
+        byte_count: 0x9000,
         permissions: Permissions::READ,
     };
     mappings[1] = Mapping {
-        virtual_offset: 0x8000,
-        byte_count: 0x2e000,
+        virtual_offset: 0x9000,
+        byte_count: 0x32000,
         permissions: Permissions::READ_EXECUTE,
     };
     mappings[2] = Mapping {
-        virtual_offset: 0x36000,
-        byte_count: 0x6000,
+        virtual_offset: 0x3b000,
+        byte_count: 0x7000,
         permissions: Permissions::READ,
     };
     mappings[3] = Mapping {
-        virtual_offset: 0x3c000,
+        virtual_offset: 0x42000,
         byte_count: 0xa000,
         permissions: Permissions::READ_WRITE,
     };
     let request = Request {
         physical_base: PHYSICAL,
         virtual_base: VIRTUAL,
-        image_bytes: 0x46000,
-        page_count: 70,
-        entry_virtual: VIRTUAL + 0x8000,
+        image_bytes: 0x4c000,
+        page_count: 76,
+        entry_virtual: VIRTUAL + 0x9000,
         mapping_count: 4,
         mappings,
         physical_address_bits: 48,
