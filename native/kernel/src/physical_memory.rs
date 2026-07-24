@@ -3,7 +3,7 @@ use poole_handoff::{
     MEMORY_LOADER_RESERVED, MEMORY_USABLE, PAGE_BYTES, RECORD_MEMORY_MAP,
 };
 
-pub const CONTRACT_ID: &str = "PKPMM5";
+pub const CONTRACT_ID: &str = "PKPMM6";
 pub const MAX_MEMORY_ENTRIES: usize = 256;
 pub const MAX_FREE_EXTENTS: usize = 256;
 pub const MAX_ALLOCATIONS: usize = 32;
@@ -26,6 +26,8 @@ pub const LEDGER_ARENA_PAGE_CAPACITY: u64 = 32;
 pub const LEDGER_GUARD_PAGE_COUNT: u64 = 2;
 pub const LEDGER_MAGIC: u64 = u64::from_le_bytes(*b"PKLEDGER");
 pub const LEDGER_VERSION: u64 = 1;
+pub const LEDGER_GROWTH_ALLOCATION_HEADROOM: usize = 1;
+pub const LEDGER_GROWTH_SCRUB_HEADROOM: usize = 4;
 
 const FNV_OFFSET: u64 = 0xCBF2_9CE4_8422_2325;
 const FNV_PRIME: u64 = 0x0000_0100_0000_01B3;
@@ -465,6 +467,46 @@ struct LedgerCapacities {
     reclaim: usize,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct LedgerDemand {
+    pub free_extents: usize,
+    pub allocations: usize,
+    pub source_records: usize,
+    pub scrub_receipts: usize,
+    pub reclaim_receipts: usize,
+}
+
+impl LedgerDemand {
+    const fn scrubbed_allocation() -> Self {
+        Self {
+            free_extents: 0,
+            allocations: 1,
+            source_records: 0,
+            scrub_receipts: 1,
+            reclaim_receipts: 0,
+        }
+    }
+
+    const fn scrubbed_release(free_extents: usize) -> Self {
+        Self {
+            free_extents,
+            allocations: 0,
+            source_records: 0,
+            scrub_receipts: 1,
+            reclaim_receipts: 0,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct LedgerPressureOutcome {
+    pub before_generation: u64,
+    pub after_generation: u64,
+    pub automatic_growths: u64,
+    pub soft_window_fallback: bool,
+    pub last_growth: Option<MetadataGrowthReceipt>,
+}
+
 const BOOTSTRAP_LEDGER_CAPACITIES: LedgerCapacities = LedgerCapacities {
     free: MAX_FREE_EXTENTS,
     allocations: MAX_ALLOCATIONS,
@@ -583,6 +625,11 @@ pub struct PhysicalMemorySummary {
     pub ledger_retired_generations: u64,
     pub ledger_retired_pages: u64,
     pub ledger_retirement_failures: u64,
+    pub ledger_pressure_checks: u64,
+    pub ledger_pressure_triggers: u64,
+    pub ledger_automatic_growths: u64,
+    pub ledger_soft_window_fallbacks: u64,
+    pub ledger_hard_window_rejections: u64,
     pub reclaim_stage: ReclaimStage,
     pub reclaim_operations: u64,
     pub reclaim_receipt_count: u64,
@@ -639,6 +686,11 @@ pub struct PhysicalMemoryManager {
     ledger_retired_generations: u64,
     ledger_retired_pages: u64,
     ledger_retirement_failures: u64,
+    ledger_pressure_checks: u64,
+    ledger_pressure_triggers: u64,
+    ledger_automatic_growths: u64,
+    ledger_soft_window_fallbacks: u64,
+    ledger_hard_window_rejections: u64,
     reclaim_stage: ReclaimStage,
     reclaim_receipts: [Option<ReclaimReceipt>; MAX_RECLAIM_RECEIPTS],
     reclaim_receipt_count: usize,
@@ -694,6 +746,8 @@ pub struct PhysicalMemoryProof {
     pub metadata: MetadataArenaReceipt,
     pub ledger_initial: MetadataGrowthReceipt,
     pub ledger_growth: MetadataGrowthReceipt,
+    pub pressure_cycle_count: u64,
+    pub hard_window_rejected: bool,
     pub metadata_release_rejected: bool,
     pub metadata_integrity_verified: bool,
     pub final_metadata_checksum: u64,
@@ -716,17 +770,14 @@ pub fn run_profile<A: MetadataArenaAccess>(
         unsafe { &mut *(migration.manager_address as usize as *mut PhysicalMemoryManager) };
     let initial = manager.summary();
     let ledger_initial = manager.grow_metadata_ledgers(access)?;
-    let ledger_growth = manager.grow_metadata_ledgers(access)?;
+    let mut ledger_growth = ledger_initial;
     let metadata_release_rejected = manager.free_scrubbed(migration.allocation, access)
         == Err(PhysicalMemoryError::MetadataOwnership);
-    manager.advance_reclaim_stage(ReclaimStage::PostExitBootServices)?;
-    let boot_reclaim = manager.reclaim_held(ReclaimClass::BootServices, access)?;
-    let boot_reclaim_repeat = manager.reclaim_held(ReclaimClass::BootServices, access)?;
-    let boot_reclaim_idempotent =
-        !boot_reclaim_repeat.newly_reclaimed && boot_reclaim_repeat.receipt == boot_reclaim.receipt;
-    let acpi_early_rejected =
-        manager.reclaim_held(ReclaimClass::Acpi, access) == Err(PhysicalMemoryError::ReclaimTiming);
-    let (first, allocation_receipt) = manager.allocate_scrubbed(Zone::Dma32, 2, 1, access)?;
+    let (first, allocation_receipt, first_pressure) =
+        manager.allocate_scrubbed_automatic(Zone::Dma32, 2, 1, access)?;
+    if let Some(receipt) = first_pressure.last_growth {
+        ledger_growth = receipt;
+    }
     let quota_rejected = manager
         .allocate_scrubbed(Zone::Dma32, DEFAULT_QUOTA_PAGES, 3, access)
         .is_err();
@@ -734,12 +785,48 @@ pub fn run_profile<A: MetadataArenaAccess>(
         .allocate_scrubbed(Zone::Normal, 1, 3, access)
         .is_err();
     fill_and_verify(access, first, STALE_PATTERN)?;
-    let release_receipt = manager.free_scrubbed(first, access)?;
+    let (release_receipt, release_pressure) = manager.free_scrubbed_automatic(first, access)?;
+    if let Some(receipt) = release_pressure.last_growth {
+        ledger_growth = receipt;
+    }
     let double_free_rejected = manager.free_scrubbed(first, access).is_err();
-    let (reused, reuse_allocation_receipt) =
-        manager.allocate_scrubbed(Zone::Dma32, 2, 2, access)?;
+    let (reused, reuse_allocation_receipt, reuse_pressure) =
+        manager.allocate_scrubbed_automatic(Zone::Dma32, 2, 2, access)?;
+    if let Some(receipt) = reuse_pressure.last_growth {
+        ledger_growth = receipt;
+    }
     let stale_pattern_absent = verify_words(access, reused, 0)?;
-    let reuse_release_receipt = manager.free_scrubbed(reused, access)?;
+    let (reuse_release_receipt, reuse_release_pressure) =
+        manager.free_scrubbed_automatic(reused, access)?;
+    if let Some(receipt) = reuse_release_pressure.last_growth {
+        ledger_growth = receipt;
+    }
+
+    let mut pressure_cycle_count = 2u64;
+    while manager.receipt_ledger_count < 128 {
+        let (handle, _, allocation_pressure) =
+            manager.allocate_scrubbed_automatic(Zone::Dma32, 1, 3, access)?;
+        if let Some(receipt) = allocation_pressure.last_growth {
+            ledger_growth = receipt;
+        }
+        let (_, release_pressure) = manager.free_scrubbed_automatic(handle, access)?;
+        if let Some(receipt) = release_pressure.last_growth {
+            ledger_growth = receipt;
+        }
+        pressure_cycle_count = pressure_cycle_count
+            .checked_add(1)
+            .ok_or(PhysicalMemoryError::ExerciseInvariant)?;
+    }
+    let hard_window_rejected = manager.allocate_scrubbed_automatic(Zone::Dma32, 1, 3, access)
+        == Err(PhysicalMemoryError::LedgerCapacity);
+
+    manager.advance_reclaim_stage(ReclaimStage::PostExitBootServices)?;
+    let boot_reclaim = manager.reclaim_held(ReclaimClass::BootServices, access)?;
+    let boot_reclaim_repeat = manager.reclaim_held(ReclaimClass::BootServices, access)?;
+    let boot_reclaim_idempotent =
+        !boot_reclaim_repeat.newly_reclaimed && boot_reclaim_repeat.receipt == boot_reclaim.receipt;
+    let acpi_early_rejected =
+        manager.reclaim_held(ReclaimClass::Acpi, access) == Err(PhysicalMemoryError::ReclaimTiming);
     let metadata_integrity_verified = manager.verify_metadata_integrity().is_ok();
     let final_state = manager.summary();
     if !metadata_release_rejected
@@ -747,6 +834,7 @@ pub fn run_profile<A: MetadataArenaAccess>(
         || !boot_reclaim.newly_reclaimed
         || !boot_reclaim_idempotent
         || !acpi_early_rejected
+        || !hard_window_rejected
         || boot_reclaim.receipt.class != ReclaimClass::BootServices
         || boot_reclaim.receipt.required_stage != ReclaimStage::PostExitBootServices
         || boot_reclaim.receipt.observed_stage != ReclaimStage::PostExitBootServices
@@ -769,23 +857,17 @@ pub fn run_profile<A: MetadataArenaAccess>(
         ]
         .iter()
         .enumerate()
-        .any(|(index, receipt)| receipt.sequence != index as u64 + 5)
+        .any(|(index, receipt)| receipt.sequence != index as u64 + 3)
         || final_state.allocated_pages != METADATA_ARENA_PAGE_COUNT + ledger_growth.page_count
         || final_state.free_extent_count != boot_reclaim.receipt.post_free_extent_count as usize
-        || final_state.allocation_scrub_pages
-            != METADATA_ARENA_PAGE_COUNT + ledger_initial.page_count + ledger_growth.page_count + 4
-        || final_state.release_scrub_pages != ledger_initial.page_count + 4
+        || final_state.allocation_scrub_pages != 123
+        || final_state.release_scrub_pages != 89
         || final_state.reclaim_scrub_pages != boot_reclaim.receipt.page_count
         || final_state.scrub_zeroed_bytes
-            != (METADATA_ARENA_PAGE_COUNT
-                + (2 * ledger_initial.page_count)
-                + ledger_growth.page_count
-                + 8
-                + boot_reclaim.receipt.page_count)
-                * PAGE_BYTES
+            != (123 + 89 + boot_reclaim.receipt.page_count) * PAGE_BYTES
         || final_state.scrub_verified_bytes != final_state.scrub_zeroed_bytes
-        || final_state.scrub_receipt_count != 8
-        || final_state.receipt_ledger_count != 8
+        || final_state.scrub_receipt_count != 128
+        || final_state.receipt_ledger_count != 128
         || final_state.scrub_failures != 0
         || final_state.source_record_count != initial.memory_entry_count
         || final_state.metadata_arena_pages != METADATA_ARENA_PAGE_COUNT
@@ -793,12 +875,18 @@ pub fn run_profile<A: MetadataArenaAccess>(
         || !final_state.metadata_mapped
         || final_state.ledger_generation != ledger_growth.generation
         || final_state.ledger_pages != ledger_growth.page_count
-        || final_state.ledger_capacities != [512, 64, 512, 32, 4]
-        || final_state.ledger_growth_operations != 2
+        || final_state.ledger_capacities != [2048, 256, 2048, 128, 16]
+        || final_state.ledger_growth_operations != 4
         || final_state.ledger_growth_rollbacks != 0
-        || final_state.ledger_retired_generations != 1
-        || final_state.ledger_retired_pages != ledger_initial.page_count
+        || final_state.ledger_retired_generations != 3
+        || final_state.ledger_retired_pages != 27
         || final_state.ledger_retirement_failures != 0
+        || final_state.ledger_pressure_checks != 121
+        || final_state.ledger_pressure_triggers != 8
+        || final_state.ledger_automatic_growths != 3
+        || final_state.ledger_soft_window_fallbacks != 4
+        || final_state.ledger_hard_window_rejections != 1
+        || pressure_cycle_count != 60
         || final_state.reclaim_stage != ReclaimStage::PostExitBootServices
         || final_state.reclaim_operations != 1
         || final_state.reclaim_receipt_count != 1
@@ -828,6 +916,8 @@ pub fn run_profile<A: MetadataArenaAccess>(
         metadata: migration.receipt,
         ledger_initial,
         ledger_growth,
+        pressure_cycle_count,
+        hard_window_rejected,
         metadata_release_rejected,
         metadata_integrity_verified,
         final_metadata_checksum: manager.metadata_header.logical_checksum,
@@ -1216,6 +1306,11 @@ impl PhysicalMemoryManager {
             ledger_retired_generations: 0,
             ledger_retired_pages: 0,
             ledger_retirement_failures: 0,
+            ledger_pressure_checks: 0,
+            ledger_pressure_triggers: 0,
+            ledger_automatic_growths: 0,
+            ledger_soft_window_fallbacks: 0,
+            ledger_hard_window_rejections: 0,
             reclaim_stage: ReclaimStage::PreExitBootServices,
             reclaim_receipts: [None; MAX_RECLAIM_RECEIPTS],
             reclaim_receipt_count: 0,
@@ -1332,6 +1427,11 @@ impl PhysicalMemoryManager {
             self.ledger_retired_generations,
             self.ledger_retired_pages,
             self.ledger_retirement_failures,
+            self.ledger_pressure_checks,
+            self.ledger_pressure_triggers,
+            self.ledger_automatic_growths,
+            self.ledger_soft_window_fallbacks,
+            self.ledger_hard_window_rejections,
             self.reclaim_stage as u64,
             self.reclaim_receipt_count as u64,
             self.next_reclaim_sequence,
@@ -1859,6 +1959,115 @@ impl PhysicalMemoryManager {
             return Err(error);
         }
         Ok(())
+    }
+
+    fn required_ledger_capacities(
+        &self,
+        demand: LedgerDemand,
+    ) -> Result<LedgerCapacities, PhysicalMemoryError> {
+        Ok(LedgerCapacities {
+            free: self
+                .free_count
+                .checked_add(demand.free_extents)
+                .ok_or(PhysicalMemoryError::LedgerCapacity)?,
+            allocations: self
+                .allocation_entries()
+                .iter()
+                .filter(|item| item.active)
+                .count()
+                .checked_add(demand.allocations)
+                .ok_or(PhysicalMemoryError::LedgerCapacity)?,
+            source: self
+                .memory_entry_count
+                .checked_add(demand.source_records)
+                .ok_or(PhysicalMemoryError::LedgerCapacity)?,
+            scrub: self
+                .receipt_ledger_count
+                .checked_add(demand.scrub_receipts)
+                .ok_or(PhysicalMemoryError::LedgerCapacity)?,
+            reclaim: self
+                .reclaim_receipt_count
+                .checked_add(demand.reclaim_receipts)
+                .ok_or(PhysicalMemoryError::LedgerCapacity)?,
+        })
+    }
+
+    pub fn ensure_ledger_capacity<A: MetadataArenaAccess>(
+        &mut self,
+        demand: LedgerDemand,
+        access: &mut A,
+    ) -> Result<LedgerPressureOutcome, PhysicalMemoryError> {
+        self.require_operational()?;
+        if self.ledger_retirement_pending.is_some() {
+            return Err(PhysicalMemoryError::LedgerRetirement);
+        }
+        self.ledger_pressure_checks = self.ledger_pressure_checks.saturating_add(1);
+        let before_generation = self.ledger_header.generation;
+        let mut automatic_growths = 0u64;
+        let mut last_growth = None;
+        let mut trigger_recorded = false;
+        self.seal_metadata_integrity();
+
+        loop {
+            let current = self.ledger_capacities();
+            let required = self.required_ledger_capacities(demand)?;
+            let fits = required.free <= current.free
+                && required.allocations <= current.allocations
+                && required.source <= current.source
+                && required.scrub <= current.scrub
+                && required.reclaim <= current.reclaim;
+            let growth_headroom_fits = required
+                .allocations
+                .checked_add(LEDGER_GROWTH_ALLOCATION_HEADROOM)
+                .filter(|count| *count <= current.allocations)
+                .is_some()
+                && required
+                    .scrub
+                    .checked_add(LEDGER_GROWTH_SCRUB_HEADROOM)
+                    .filter(|count| *count <= current.scrub)
+                    .is_some();
+            if fits && growth_headroom_fits {
+                return Ok(LedgerPressureOutcome {
+                    before_generation,
+                    after_generation: self.ledger_header.generation,
+                    automatic_growths,
+                    soft_window_fallback: false,
+                    last_growth,
+                });
+            }
+            if !trigger_recorded {
+                self.ledger_pressure_triggers = self.ledger_pressure_triggers.saturating_add(1);
+                trigger_recorded = true;
+                self.seal_metadata_integrity();
+            }
+            match self.grow_metadata_ledgers(access) {
+                Ok(receipt) => {
+                    automatic_growths = automatic_growths.saturating_add(1);
+                    self.ledger_automatic_growths = self.ledger_automatic_growths.saturating_add(1);
+                    last_growth = Some(receipt);
+                    self.seal_metadata_integrity();
+                }
+                Err(PhysicalMemoryError::LedgerCapacity) if fits => {
+                    self.ledger_soft_window_fallbacks =
+                        self.ledger_soft_window_fallbacks.saturating_add(1);
+                    self.seal_metadata_integrity();
+                    return Ok(LedgerPressureOutcome {
+                        before_generation,
+                        after_generation: self.ledger_header.generation,
+                        automatic_growths,
+                        soft_window_fallback: true,
+                        last_growth,
+                    });
+                }
+                Err(PhysicalMemoryError::LedgerCapacity) => {
+                    self.ledger_hard_window_rejections =
+                        self.ledger_hard_window_rejections.saturating_add(1);
+                    self.seal_metadata_integrity();
+                    return Err(PhysicalMemoryError::LedgerCapacity);
+                }
+                Err(error) => return Err(error),
+            }
+        }
     }
 
     pub fn grow_metadata_ledgers<A: MetadataArenaAccess>(
@@ -2713,6 +2922,43 @@ impl PhysicalMemoryManager {
         result
     }
 
+    pub fn allocate_scrubbed_automatic<A: MetadataArenaAccess>(
+        &mut self,
+        zone: Zone,
+        pages: u64,
+        owner: u16,
+        access: &mut A,
+    ) -> Result<(AllocationHandle, ScrubReceipt, LedgerPressureOutcome), PhysicalMemoryError> {
+        self.require_operational()?;
+        if pages == 0 {
+            return Err(PhysicalMemoryError::ZeroAllocation);
+        }
+        if owner == 0 {
+            return Err(PhysicalMemoryError::InvalidOwner);
+        }
+        if self.allocated_pages.checked_add(pages).is_none()
+            || self.allocated_pages + pages > self.quota_pages
+        {
+            self.rejected_quota_requests = self.rejected_quota_requests.saturating_add(1);
+            self.seal_metadata_integrity();
+            return Err(PhysicalMemoryError::Quota);
+        }
+        if !self
+            .free_entries()
+            .iter()
+            .take(self.free_count)
+            .any(|extent| extent.zone == zone && extent.page_count >= pages)
+        {
+            self.rejected_unavailable_requests =
+                self.rejected_unavailable_requests.saturating_add(1);
+            self.seal_metadata_integrity();
+            return Err(PhysicalMemoryError::Unavailable);
+        }
+        let pressure = self.ensure_ledger_capacity(LedgerDemand::scrubbed_allocation(), access)?;
+        let (handle, receipt) = self.allocate_scrubbed(zone, pages, owner, access)?;
+        Ok((handle, receipt, pressure))
+    }
+
     fn validate_allocation_inner(
         &self,
         handle: AllocationHandle,
@@ -2803,6 +3049,42 @@ impl PhysicalMemoryManager {
         })();
         self.seal_metadata_integrity();
         result
+    }
+
+    pub fn free_scrubbed_automatic<A: MetadataArenaAccess>(
+        &mut self,
+        handle: AllocationHandle,
+        access: &mut A,
+    ) -> Result<(ScrubReceipt, LedgerPressureOutcome), PhysicalMemoryError> {
+        self.require_operational()?;
+        if self.validate_allocation_inner(handle).is_err() {
+            self.rejected_double_frees = self.rejected_double_frees.saturating_add(1);
+            self.seal_metadata_integrity();
+            return Err(PhysicalMemoryError::StaleHandle);
+        }
+        let allocation = self.allocation_entries()[usize::from(handle.slot)];
+        if allocation.release_excluded {
+            self.metadata_release_rejections = self.metadata_release_rejections.saturating_add(1);
+            self.seal_metadata_integrity();
+            return Err(PhysicalMemoryError::MetadataOwnership);
+        }
+        let extent = Extent {
+            start_page: allocation.start_page,
+            page_count: allocation.page_count,
+            zone: allocation.zone,
+        };
+        let mut index = 0;
+        while index < self.free_count && self.free_entries()[index].start_page < extent.start_page {
+            index += 1;
+        }
+        let merge_previous = index > 0 && can_coalesce(self.free_entries()[index - 1], extent);
+        let merge_next =
+            index < self.free_count && can_coalesce(extent, self.free_entries()[index]);
+        let free_extent_demand = usize::from(!merge_previous && !merge_next);
+        let pressure = self
+            .ensure_ledger_capacity(LedgerDemand::scrubbed_release(free_extent_demand), access)?;
+        let receipt = self.free_scrubbed(handle, access)?;
+        Ok((receipt, pressure))
     }
 
     fn commit_free(&mut self, slot: usize, allocation: Allocation) {
@@ -3043,6 +3325,11 @@ impl PhysicalMemoryManager {
             ledger_retired_generations: self.ledger_retired_generations,
             ledger_retired_pages: self.ledger_retired_pages,
             ledger_retirement_failures: self.ledger_retirement_failures,
+            ledger_pressure_checks: self.ledger_pressure_checks,
+            ledger_pressure_triggers: self.ledger_pressure_triggers,
+            ledger_automatic_growths: self.ledger_automatic_growths,
+            ledger_soft_window_fallbacks: self.ledger_soft_window_fallbacks,
+            ledger_hard_window_rejections: self.ledger_hard_window_rejections,
             reclaim_stage: self.reclaim_stage,
             reclaim_operations: self.reclaim_operations,
             reclaim_receipt_count: self.reclaim_receipt_count as u64,
@@ -3168,6 +3455,7 @@ mod tests {
         fail_read: Option<(u64, usize)>,
         drop_write: Option<(u64, usize)>,
         write_count: u64,
+        read_count: u64,
         arena_pointer: *mut u8,
         fail_install: bool,
         corrupt_handoff: bool,
@@ -3192,6 +3480,7 @@ mod tests {
                 fail_read: None,
                 drop_write: None,
                 write_count: 0,
+                read_count: 0,
                 arena_pointer: null_mut(),
                 fail_install: false,
                 corrupt_handoff: false,
@@ -3280,6 +3569,7 @@ mod tests {
                 return Err(PageAccessError::Access);
             }
             let index = self.index(physical_address, word_index)?;
+            self.read_count += 1;
             Ok(self.words[index])
         }
     }
@@ -3558,8 +3848,8 @@ mod tests {
 
     #[test]
     fn manager_fits_the_guarded_metadata_arena() {
-        assert_eq!(15336, core::mem::size_of::<PhysicalMemoryManager>());
-        assert!(15336 <= METADATA_ARENA_BYTE_CAPACITY);
+        assert_eq!(15376, core::mem::size_of::<PhysicalMemoryManager>());
+        assert!(15376 <= METADATA_ARENA_BYTE_CAPACITY);
         assert!(core::mem::size_of::<ReclaimPlan>() <= 160);
         assert!(core::mem::size_of::<ReclaimCursor>() <= 64);
     }
@@ -3953,6 +4243,110 @@ mod tests {
         assert_eq!(0, summary.ledger_retirement_failures);
         assert!(!access.ledger_installed[0]);
         assert!(access.ledger_installed[1]);
+        assert_eq!(Ok(()), manager.verify_metadata_integrity());
+    }
+
+    #[test]
+    fn automatic_pressure_repeats_growth_then_falls_back_and_rejects_without_effects() {
+        let (bytes, core) = fixture();
+        let handoff = poole_handoff::decode(&bytes).unwrap();
+        let mut bootstrap = PhysicalMemoryManager::from_handoff(&handoff, core, 64).unwrap();
+        let mut access = FakePageAccess::new(DMA_END_PAGE, 256, STALE_PATTERN);
+        let migration = bootstrap.migrate_to_metadata(&mut access).unwrap();
+        // SAFETY: migration returned a sealed manager in the fake page-aligned arena.
+        let manager =
+            unsafe { &mut *(migration.manager_address as usize as *mut PhysicalMemoryManager) };
+        manager.grow_metadata_ledgers(&mut access).unwrap();
+
+        let mut cycles = 0u64;
+        while manager.receipt_ledger_count < 128 {
+            let (handle, _, _) = manager
+                .allocate_scrubbed_automatic(Zone::Dma32, 1, 7, &mut access)
+                .unwrap();
+            manager
+                .free_scrubbed_automatic(handle, &mut access)
+                .unwrap();
+            cycles += 1;
+        }
+        assert_eq!(60, cycles);
+        let before = manager.summary();
+        let writes = access.write_count;
+        let reads = access.read_count;
+        assert_eq!(
+            Err(PhysicalMemoryError::LedgerCapacity),
+            manager.allocate_scrubbed_automatic(Zone::Dma32, 1, 7, &mut access)
+        );
+        let after = manager.summary();
+        assert_eq!(before.allocated_pages, after.allocated_pages);
+        assert_eq!(before.free_extent_count, after.free_extent_count);
+        assert_eq!(before.receipt_ledger_count, after.receipt_ledger_count);
+        assert_eq!(writes, access.write_count);
+        assert_eq!(reads, access.read_count);
+        assert_eq!(29, after.ledger_pages);
+        assert_eq!([2048, 256, 2048, 128, 16], after.ledger_capacities);
+        assert_eq!(4, after.ledger_growth_operations);
+        assert_eq!(3, after.ledger_automatic_growths);
+        assert_eq!(3, after.ledger_retired_generations);
+        assert_eq!(27, after.ledger_retired_pages);
+        assert_eq!(121, after.ledger_pressure_checks);
+        assert_eq!(8, after.ledger_pressure_triggers);
+        assert_eq!(4, after.ledger_soft_window_fallbacks);
+        assert_eq!(1, after.ledger_hard_window_rejections);
+        assert_eq!(Ok(()), manager.verify_metadata_integrity());
+    }
+
+    #[test]
+    fn pressure_growth_rollback_preserves_retry_headroom_and_requested_ownership() {
+        let (bytes, core) = fixture();
+        let handoff = poole_handoff::decode(&bytes).unwrap();
+        let mut bootstrap = PhysicalMemoryManager::from_handoff(&handoff, core, 64).unwrap();
+        let mut access = FakePageAccess::new(DMA_END_PAGE, 128, STALE_PATTERN);
+        let migration = bootstrap.migrate_to_metadata(&mut access).unwrap();
+        // SAFETY: migration returned a sealed manager in the fake page-aligned arena.
+        let manager =
+            unsafe { &mut *(migration.manager_address as usize as *mut PhysicalMemoryManager) };
+        manager.grow_metadata_ledgers(&mut access).unwrap();
+        while manager.receipt_ledger_count < 12 {
+            let (handle, _, _) = manager
+                .allocate_scrubbed_automatic(Zone::Dma32, 1, 9, &mut access)
+                .unwrap();
+            manager
+                .free_scrubbed_automatic(handle, &mut access)
+                .unwrap();
+        }
+        let before = manager.summary();
+        access.fail_ledger_install = true;
+        assert_eq!(
+            Err(PhysicalMemoryError::LedgerMapping),
+            manager.allocate_scrubbed_automatic(Zone::Dma32, 1, 9, &mut access)
+        );
+        let rolled_back = manager.summary();
+        assert_eq!(before.allocated_pages, rolled_back.allocated_pages);
+        assert_eq!(before.free_extent_count, rolled_back.free_extent_count);
+        assert_eq!(before.ledger_generation, rolled_back.ledger_generation);
+        assert_eq!(
+            before.ledger_growth_operations,
+            rolled_back.ledger_growth_operations
+        );
+        assert_eq!(
+            before.ledger_growth_rollbacks + 1,
+            rolled_back.ledger_growth_rollbacks
+        );
+        assert_eq!(
+            before.receipt_ledger_count + 2,
+            rolled_back.receipt_ledger_count
+        );
+
+        access.fail_ledger_install = false;
+        let (handle, _, pressure) = manager
+            .allocate_scrubbed_automatic(Zone::Dma32, 1, 9, &mut access)
+            .unwrap();
+        assert_eq!(1, pressure.automatic_growths);
+        assert!(pressure.last_growth.is_some());
+        assert_eq!(8, manager.summary().ledger_pages);
+        manager
+            .free_scrubbed_automatic(handle, &mut access)
+            .unwrap();
         assert_eq!(Ok(()), manager.verify_metadata_integrity());
     }
 

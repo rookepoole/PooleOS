@@ -1,4 +1,4 @@
-"""Independent PKPMM5 oracle for generation-owned PMM growth and reclaim."""
+"""Independent PKPMM6 oracle for checked automatic PMM ledger growth."""
 
 from __future__ import annotations
 
@@ -12,8 +12,8 @@ from runtime import native_kernel_map, native_kernel_transfer
 from runtime.schema_validation import validate_json
 
 
-CONTRACT_ID = "PKPMM5"
-SELECTED_MOVE_ID = "N9-PMM-GROWTH-001"
+CONTRACT_ID = "PKPMM6"
+SELECTED_MOVE_ID = "N9-PMM-GROWTH-AUTOMATION-001"
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_RELATIVE = "specs/native-kernel-physical-memory-contract.json"
 CONTRACT_SCHEMA_RELATIVE = "specs/native-kernel-physical-memory-contract.schema.json"
@@ -29,15 +29,21 @@ PAGE_BYTES = 4096
 DMA_END = 16 * 1024 * 1024
 DMA32_END = 4 * 1024 * 1024 * 1024
 MAX_MEMORY_ENTRIES = 256
-COMPLETION_MARKER = b"POOLEOS:KERNEL:PMM-RESULT PASS contract=PKPMM5"
+COMPLETION_MARKER = b"POOLEOS:KERNEL:PMM-RESULT PASS contract=PKPMM6"
 METADATA_ARENA_PAGE_COUNT = 5
 METADATA_GUARD_PAGE_COUNT = 2
 METADATA_OWNER = 0x4D45
-METADATA_MANAGER_BYTES = 15336
+METADATA_MANAGER_BYTES = 15376
 LEDGER_INITIAL_PAGE_COUNT = 4
-LEDGER_FINAL_PAGE_COUNT = 8
-LEDGER_FINAL_CAPACITIES = (512, 64, 512, 32, 4)
-LEDGER_PTE_WRITES = 16
+LEDGER_PAGE_COUNTS = (4, 8, 15, 29)
+LEDGER_FINAL_PAGE_COUNT = 29
+LEDGER_FINAL_CAPACITIES = (2048, 256, 2048, 128, 16)
+LEDGER_RETIRED_PAGE_COUNT = 27
+LEDGER_PTE_WRITES = 83
+LEDGER_PRESSURE_COUNTS = (121, 8, 3, 60, 4, 1)
+LEDGER_GROWTH_HEADROOM = (1, 4)
+LEDGER_WINDOW_PAGE_CAPACITY = 32
+LEDGER_NEXT_PAGE_COUNT = 58
 MAX_SCRUB_RECEIPTS = 16
 MAX_RECLAIM_RECEIPTS = 2
 METADATA_MAP_START = (
@@ -51,12 +57,12 @@ ACPI_HELD_PAGE_COUNT = 11
 BOOT_RECLAIM_RANGE_CHECKSUM = 0x5A485D4A5725EED8
 BOOT_RECLAIM_RECEIPT_CHECKSUM = 0xE1F4C87AE4009940
 RECLAIM_SCRUB_BYTES = BOOT_RECLAIM_PAGE_COUNT * PAGE_BYTES
-SCRUB_PAGE_COUNT = 29 + BOOT_RECLAIM_PAGE_COUNT
+SCRUB_PAGE_COUNT = 212 + BOOT_RECLAIM_PAGE_COUNT
 SCRUB_BYTES = SCRUB_PAGE_COUNT * PAGE_BYTES
 PHYSICAL_WRITES = (SCRUB_PAGE_COUNT + 2) * (PAGE_BYTES // 8)
 PHYSICAL_READS = (SCRUB_PAGE_COUNT + 4) * (PAGE_BYTES // 8)
-TEMPORARY_PTE_WRITES = 22591
-BOOTSTRAP_INVALIDATIONS = 22591
+TEMPORARY_PTE_WRITES = 22798
+BOOTSTRAP_INVALIDATIONS = 22798
 METADATA_PTE_WRITES = 5
 STALE_PATTERN = 0xA5A55A5AC3C33C3C
 
@@ -158,6 +164,16 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N9-PKPMM-GROWTH-ROLLBACKS",
     "NEG-N9-PKPMM-GROWTH-RETIREMENT-FAILURES",
     "NEG-N9-PKPMM-GROWTH-RETIREMENT-RETRY",
+    "NEG-N9-PKPMM-PRESSURE-CHECKS",
+    "NEG-N9-PKPMM-PRESSURE-TRIGGERS",
+    "NEG-N9-PKPMM-PRESSURE-AUTO-GROWTHS",
+    "NEG-N9-PKPMM-PRESSURE-CYCLES",
+    "NEG-N9-PKPMM-PRESSURE-SOFT-FALLBACKS",
+    "NEG-N9-PKPMM-PRESSURE-HARD-REJECTIONS",
+    "NEG-N9-PKPMM-PRESSURE-HEADROOM",
+    "NEG-N9-PKPMM-GROWTH-WINDOW-BOUND",
+    "NEG-N9-PKPMM-GROWTH-NEXT-LAYOUT",
+    "NEG-N9-PKPMM-PRESSURE-PRE-EFFECT",
     "NEG-N9-PKPMM-GROWTH-CONCURRENCY",
     "NEG-N9-PKPMM-GROWTH-SMP",
     "NEG-N9-PKPMM-GROWTH-AUTHORITY",
@@ -229,25 +245,25 @@ NEGATIVE_CONTROL_IDS = (
 DEC = r"([0-9]+)"
 HEX = r"(0x[0-9A-F]{16})"
 EARLY = re.compile(
-    r"^POOLEOS:KERNEL:PMM-EARLY PASS contract=(PKPMM5) selector=(8) bsp=(1) if=(0) "
+    r"^POOLEOS:KERNEL:PMM-EARLY PASS contract=(PKPMM6) selector=(8) bsp=(1) if=(0) "
     r"stack=(validated_by_wrapper) serial=(initialized)$"
 )
-STAGE = re.compile(r"^POOLEOS:KERNEL:PMM-STAGE PASS contract=(PKPMM5) stage=([1-5])$")
+STAGE = re.compile(r"^POOLEOS:KERNEL:PMM-STAGE PASS contract=(PKPMM6) stage=([1-5])$")
 MAP = re.compile(
-    rf"^POOLEOS:KERNEL:PMM-MAP PASS contract=(PKPMM5) entries={DEC} usable_pages={DEC} "
+    rf"^POOLEOS:KERNEL:PMM-MAP PASS contract=(PKPMM6) entries={DEC} usable_pages={DEC} "
     rf"boot_reclaimable_pages={DEC} loader_reserved_pages={DEC} null_guard_pages={DEC}$"
 )
 ZONES = re.compile(
-    rf"^POOLEOS:KERNEL:PMM-ZONES PASS contract=(PKPMM5) dma_source={DEC} dma_managed={DEC} "
+    rf"^POOLEOS:KERNEL:PMM-ZONES PASS contract=(PKPMM6) dma_source={DEC} dma_managed={DEC} "
     rf"dma32_source={DEC} dma32_managed={DEC} normal_source={DEC} normal_managed={DEC} "
     rf"extents={DEC} largest_dma={DEC} largest_dma32={DEC} largest_normal={DEC}$"
 )
 OWNERSHIP = re.compile(
-    rf"^POOLEOS:KERNEL:PMM-OWNERSHIP PASS contract=(PKPMM5) kernel_base={HEX} kernel_pages={DEC} "
+    rf"^POOLEOS:KERNEL:PMM-OWNERSHIP PASS contract=(PKPMM6) kernel_base={HEX} kernel_pages={DEC} "
     rf"handoff_base={HEX} handoff_pages={DEC} root={HEX} protected=([01])$"
 )
 METADATA = re.compile(
-    rf"^POOLEOS:KERNEL:PMM-METADATA PASS contract=(PKPMM5) pages={DEC} physical_start={HEX} "
+    rf"^POOLEOS:KERNEL:PMM-METADATA PASS contract=(PKPMM6) pages={DEC} physical_start={HEX} "
     rf"virtual_start={HEX} generation={DEC} owner={DEC} manager_bytes={DEC} source_records={DEC} "
     rf"free_extents={DEC} allocation_records={DEC} receipt_records={DEC} handoff_checksum={HEX} "
     rf"final_checksum={HEX} guard_pages={DEC} mappings={DEC} pte_writes={DEC} release_excluded={DEC} "
@@ -255,16 +271,18 @@ METADATA = re.compile(
     rf"handoff=(validated) corruption=(host_verified) rollback=(host_verified)$"
 )
 GROWTH = re.compile(
-    rf"^POOLEOS:KERNEL:PMM-GROWTH PASS contract=(PKPMM5) initial_generation={DEC} "
+    rf"^POOLEOS:KERNEL:PMM-GROWTH PASS contract=(PKPMM6) initial_generation={DEC} "
     rf"final_generation={DEC} initial_pages={DEC} final_pages={DEC} free_capacity={DEC} "
     rf"allocation_capacity={DEC} source_capacity={DEC} scrub_capacity={DEC} reclaim_capacity={DEC} "
     rf"retired_generation={DEC} retired_pages={DEC} mapped_pages={DEC} pte_writes={DEC} checksum={HEX} "
     rf"guard_pages={DEC} mapping_events={DEC} revoked={DEC} integrity={DEC} atomic={DEC} rollbacks={DEC} "
-    rf"retirement_failures={DEC} retirement_retry={DEC} concurrency={DEC} smp={DEC} authority={DEC} "
-    rf"actions={DEC} production={DEC}$"
+    rf"retirement_failures={DEC} retirement_retry={DEC} pressure_checks={DEC} pressure_triggers={DEC} "
+    rf"automatic_growths={DEC} pressure_cycles={DEC} soft_fallbacks={DEC} hard_rejections={DEC} "
+    rf"growth_headroom_allocation={DEC} growth_headroom_scrub={DEC} window_capacity={DEC} next_pages={DEC} "
+    rf"pre_effect=(host_verified) concurrency={DEC} smp={DEC} authority={DEC} actions={DEC} production={DEC}$"
 )
 RECLAIM = re.compile(
-    rf"^POOLEOS:KERNEL:PMM-RECLAIM PASS contract=(PKPMM5) stage=(post_exit_boot_services) "
+    rf"^POOLEOS:KERNEL:PMM-RECLAIM PASS contract=(PKPMM6) stage=(post_exit_boot_services) "
     rf"class=(boot_services) sequence={DEC} source_records={DEC} ranges={DEC} pages={DEC} "
     rf"dma_pages={DEC} dma32_pages={DEC} normal_pages={DEC} pre_extents={DEC} post_extents={DEC} "
     rf"scrub_bytes={DEC} verified_bytes={DEC} range_checksum={HEX} receipt_checksum={HEX} "
@@ -272,24 +290,24 @@ RECLAIM = re.compile(
     rf"atomic={DEC} rollback=(host_verified)$"
 )
 SCRUB = re.compile(
-    rf"^POOLEOS:KERNEL:PMM-SCRUB PASS contract=(PKPMM5) allocations={DEC} frees={DEC} "
+    rf"^POOLEOS:KERNEL:PMM-SCRUB PASS contract=(PKPMM6) allocations={DEC} frees={DEC} "
     rf"start={HEX} first_generation={DEC} reuse_generation={DEC} allocation_receipts={DEC} "
     rf"release_receipts={DEC} scrub_pages={DEC} scrub_bytes={DEC} verified_bytes={DEC} "
     rf"stale_pattern={HEX} stale_absent={DEC} double_free_rejected={DEC} quota_rejected={DEC} "
     rf"unavailable_rejected={DEC} metadata_poison={DEC} coalesces={DEC} rollback=(host_verified)$"
 )
 RESULT = re.compile(
-    rf"^POOLEOS:KERNEL:PMM-RESULT PASS contract=(PKPMM5) profile=(qemu64_tier0) managed_pages={DEC} "
+    rf"^POOLEOS:KERNEL:PMM-RESULT PASS contract=(PKPMM6) profile=(qemu64_tier0) managed_pages={DEC} "
     rf"allocated_pages={DEC} physical_writes={DEC} physical_reads={DEC} temporary_pte_writes={DEC} "
     rf"bootstrap_invlpg={DEC} alias_revoked={DEC} metadata_retained={DEC} ledger_generation_retained={DEC} "
-    rf"mappings=(temporary_single_page_plus_guarded_metadata_and_ledger_generation) reclaim={DEC} acpi_reclaim={DEC} "
+    rf"mappings=(temporary_single_page_plus_guarded_metadata_and_repeated_ledger_generations) reclaim={DEC} acpi_reclaim={DEC} "
     rf"concurrency={DEC} smp={DEC} signatures={DEC} authority={DEC} actions={DEC} production={DEC} "
     rf"terminal=(halt)$"
 )
 
 
 class KernelPhysicalMemoryError(ValueError):
-    """Raised when PKPMM5 evidence violates the frozen reclaim contract."""
+    """Raised when PKPMM6 evidence violates the frozen growth contract."""
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -350,6 +368,11 @@ def expected_claims() -> dict[str, bool]:
         "metadata_old_generation_revoked_scrubbed_retired": True,
         "metadata_growth_precommit_rollback_host_tested": True,
         "metadata_retirement_failure_recovery_host_tested": True,
+        "metadata_pressure_capacity_checked_before_automatic_operations": True,
+        "metadata_pressure_repeated_multi_generation_growth_exercised": True,
+        "metadata_pressure_retry_headroom_enforced": True,
+        "metadata_bounded_window_soft_fallback_exercised": True,
+        "metadata_bounded_window_hard_rejection_pre_effect_host_tested": True,
         "metadata_logical_integrity_seal_enforced": True,
         "metadata_handoff_and_mapping_rollback_host_tested": True,
         "metadata_release_exclusion_enforced": True,
@@ -371,12 +394,12 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
     schema = read_json(root / CONTRACT_SCHEMA_RELATIVE)
     errors = [f"schema {item.path}: {item.message}" for item in validate_json(contract, schema)]
     if (contract.get("contract_id"), contract.get("selected_move_id")) != (CONTRACT_ID, SELECTED_MOVE_ID):
-        errors.append("PKPMM5 contract identity changed")
+        errors.append("PKPMM6 contract identity changed")
     profile = contract.get("development_profile", {})
     if not isinstance(profile, dict) or tuple(
         profile.get(key) for key in ("feature", "selector", "cpu_model", "bsp_only")
     ) != (FEATURE, SELECTOR, "qemu64", True):
-        errors.append("PKPMM5 development profile changed")
+        errors.append("PKPMM6 development profile changed")
     limits = contract.get("limits", {})
     if not isinstance(limits, dict) or tuple(
         limits.get(key)
@@ -391,29 +414,51 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
             "metadata_guard_pages",
         )
     ) != (256, 256, 32, 16, 2, 64, 5, 2):
-        errors.append("PKPMM5 bounded capacities changed")
+        errors.append("PKPMM6 bounded capacities changed")
     if contract.get("required_negative_controls") != list(NEGATIVE_CONTROL_IDS):
-        errors.append("PKPMM5 hostile-control inventory changed")
+        errors.append("PKPMM6 hostile-control inventory changed")
     metadata_arena = contract.get("metadata_arena", {})
     if not isinstance(metadata_arena, dict) or tuple(
         metadata_arena.get(key)
         for key in ("owner_id", "manager_byte_count", "page_count", "guard_page_count")
     ) != (METADATA_OWNER, METADATA_MANAGER_BYTES, METADATA_ARENA_PAGE_COUNT, METADATA_GUARD_PAGE_COUNT):
-        errors.append("PKPMM5 metadata arena shape changed")
+        errors.append("PKPMM6 metadata arena shape changed")
     ledger_generations = contract.get("ledger_generations", {})
     if (
         not isinstance(ledger_generations, dict)
         or ledger_generations.get("initial_capacities")
         != {"free_extents": 256, "allocations": 32, "source_records": 256, "scrub_receipts": 16, "reclaim_receipts": 2}
-        or ledger_generations.get("grown_capacities")
-        != {"free_extents": 512, "allocations": 64, "source_records": 512, "scrub_receipts": 32, "reclaim_receipts": 4}
+        or ledger_generations.get("final_capacities")
+        != {"free_extents": 2048, "allocations": 256, "source_records": 2048, "scrub_receipts": 128, "reclaim_receipts": 16}
+        or ledger_generations.get("generation_capacities")
+        != [
+            {"pages": 4, "free_extents": 256, "allocations": 32, "source_records": 256, "scrub_receipts": 16, "reclaim_receipts": 2},
+            {"pages": 8, "free_extents": 512, "allocations": 64, "source_records": 512, "scrub_receipts": 32, "reclaim_receipts": 4},
+            {"pages": 15, "free_extents": 1024, "allocations": 128, "source_records": 1024, "scrub_receipts": 64, "reclaim_receipts": 8},
+            {"pages": 29, "free_extents": 2048, "allocations": 256, "source_records": 2048, "scrub_receipts": 128, "reclaim_receipts": 16},
+        ]
         or tuple(
             ledger_generations.get(key)
-            for key in ("live_generation_events", "live_retired_generations", "live_mapping_pte_writes", "concurrency_qualified")
+            for key in (
+                "live_generation_events", "live_retired_generations", "live_retired_pages",
+                "live_mapping_pte_writes", "concurrency_qualified"
+            )
         )
-        != (2, 1, LEDGER_PTE_WRITES, False)
+        != (4, 3, LEDGER_RETIRED_PAGE_COUNT, LEDGER_PTE_WRITES, False)
+        or ledger_generations.get("pressure_policy", {}).get("check_count")
+        != LEDGER_PRESSURE_COUNTS[0]
+        or ledger_generations.get("pressure_policy", {}).get("trigger_count")
+        != LEDGER_PRESSURE_COUNTS[1]
+        or ledger_generations.get("pressure_policy", {}).get("automatic_growth_count")
+        != LEDGER_PRESSURE_COUNTS[2]
+        or ledger_generations.get("pressure_policy", {}).get("successful_pressure_cycles")
+        != LEDGER_PRESSURE_COUNTS[3]
+        or ledger_generations.get("pressure_policy", {}).get("soft_window_fallback_count")
+        != LEDGER_PRESSURE_COUNTS[4]
+        or ledger_generations.get("pressure_policy", {}).get("hard_window_rejection_count")
+        != LEDGER_PRESSURE_COUNTS[5]
     ):
-        errors.append("PKPMM5 ledger-generation contract changed")
+        errors.append("PKPMM6 ledger-generation contract changed")
     reclaim = contract.get("reclaim_policy", {})
     if not isinstance(reclaim, dict) or tuple(
         reclaim.get(key)
@@ -426,11 +471,11 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
             "live_acpi_pages_held",
         )
     ) != (2, 5, "post_exit_boot_services", "acpi_tables_released", 11250, 11):
-        errors.append("PKPMM5 reclaim policy changed")
+        errors.append("PKPMM6 reclaim policy changed")
     if contract.get("claims") != expected_claims():
-        errors.append("PKPMM5 claim boundary changed")
+        errors.append("PKPMM6 claim boundary changed")
     if contract.get("production_ready") is not False or contract.get("production_promotion_allowed") is not False:
-        errors.append("PKPMM5 contract overclaims production")
+        errors.append("PKPMM6 contract overclaims production")
     return errors
 
 
@@ -439,23 +484,23 @@ def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     errors = [f"schema {item.path}: {item.message}" for item in validate_json(readiness, schema)]
     errors.extend(contract_errors(read_json(root / CONTRACT_RELATIVE), root))
     if readiness.get("inputs") != expected_inputs(root):
-        errors.append("PKPMM5 readiness input bindings are stale")
+        errors.append("PKPMM6 readiness input bindings are stale")
     execution = readiness.get("execution", {})
     if not isinstance(execution, dict) or tuple(
         execution.get(key) for key in ("run_count", "exact_marker_match", "exact_screenshot_match", "exact_pbp1_match")
     ) != (2, True, True, True):
-        errors.append("PKPMM5 exact two-run evidence changed")
+        errors.append("PKPMM6 exact two-run evidence changed")
     controls = readiness.get("negative_controls", [])
     if (
         not isinstance(controls, list)
         or [item.get("id") for item in controls if isinstance(item, dict)] != list(NEGATIVE_CONTROL_IDS)
         or any(not isinstance(item, dict) or item.get("status") != "pass" for item in controls)
     ):
-        errors.append("PKPMM5 hostile-control evidence changed")
+        errors.append("PKPMM6 hostile-control evidence changed")
     if readiness.get("claims") != expected_claims():
-        errors.append("PKPMM5 readiness claims changed")
+        errors.append("PKPMM6 readiness claims changed")
     if readiness.get("production_ready") is not False or readiness.get("production_promotion_allowed") is not False:
-        errors.append("PKPMM5 readiness overclaims production")
+        errors.append("PKPMM6 readiness overclaims production")
     return errors
 
 
@@ -466,7 +511,7 @@ def extract_markers(raw: bytes) -> list[str]:
 def _match(pattern: re.Pattern[str], marker: str, name: str) -> re.Match[str]:
     match = pattern.fullmatch(marker)
     if match is None:
-        raise KernelPhysicalMemoryError(f"PKPMM5 {name} marker violates its contract: {marker!r}")
+        raise KernelPhysicalMemoryError(f"PKPMM6 {name} marker violates its contract: {marker!r}")
     return match
 
 
@@ -481,7 +526,7 @@ def _hex(match: re.Match[str], group: int) -> int:
 def _validate_prefix(markers: list[str]) -> dict[str, Any]:
     arm = native_kernel_transfer.TRANSFER_ARM.fullmatch(markers[23])
     if arm is None or int(arm.group(10)) != SELECTOR:
-        raise KernelPhysicalMemoryError("PKPMM5 transfer selector changed")
+        raise KernelPhysicalMemoryError("PKPMM6 transfer selector changed")
     baseline = [
         *markers[:BOOT_TRANSFER_MARKER_COUNT],
         *markers[
@@ -506,12 +551,12 @@ def _validate_prefix(markers: list[str]) -> dict[str, Any]:
 
 def validate_markers(markers: list[str]) -> dict[str, Any]:
     if len(markers) != MARKER_COUNT:
-        raise KernelPhysicalMemoryError(f"expected {MARKER_COUNT} PKPMM5 markers, observed {len(markers)}")
+        raise KernelPhysicalMemoryError(f"expected {MARKER_COUNT} PKPMM6 markers, observed {len(markers)}")
     prefix = _validate_prefix(markers)
     early_match = _match(EARLY, markers[25], "early-entry")
     stages = [_match(STAGE, markers[26 + index], "stage") for index in range(5)]
     if [int(item.group(2)) for item in stages] != [1, 2, 3, 4, 5]:
-        raise KernelPhysicalMemoryError("PKPMM5 stage order changed")
+        raise KernelPhysicalMemoryError("PKPMM6 stage order changed")
     map_match = _match(MAP, markers[35], "map")
     zone_match = _match(ZONES, markers[36], "zones")
     owner_match = _match(OWNERSHIP, markers[37], "ownership")
@@ -595,11 +640,22 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         "rollbacks": _dec(growth_match, 21),
         "retirement_failures": _dec(growth_match, 22),
         "retirement_retry": _dec(growth_match, 23),
-        "concurrency": _dec(growth_match, 24),
-        "smp": _dec(growth_match, 25),
-        "authority": _dec(growth_match, 26),
-        "actions": _dec(growth_match, 27),
-        "production": _dec(growth_match, 28),
+        "pressure_checks": _dec(growth_match, 24),
+        "pressure_triggers": _dec(growth_match, 25),
+        "automatic_growths": _dec(growth_match, 26),
+        "pressure_cycles": _dec(growth_match, 27),
+        "soft_fallbacks": _dec(growth_match, 28),
+        "hard_rejections": _dec(growth_match, 29),
+        "growth_headroom_allocation": _dec(growth_match, 30),
+        "growth_headroom_scrub": _dec(growth_match, 31),
+        "window_capacity": _dec(growth_match, 32),
+        "next_pages": _dec(growth_match, 33),
+        "pre_effect": growth_match.group(34),
+        "concurrency": _dec(growth_match, 35),
+        "smp": _dec(growth_match, 36),
+        "authority": _dec(growth_match, 37),
+        "actions": _dec(growth_match, 38),
+        "production": _dec(growth_match, 39),
     }
     reclaim = {
         "stage": reclaim_match.group(2),
@@ -671,19 +727,19 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         or map_summary["entries"]
         != prefix["boot_prefix"]["pbp1"]["memory_entry_count"]
     ):
-        raise KernelPhysicalMemoryError("PKPMM5 memory-entry bound changed")
+        raise KernelPhysicalMemoryError("PKPMM6 memory-entry bound changed")
     if map_summary["null_guard_pages"] != 1 or map_summary["usable_pages"] != sum(
         zones[key] for key in ("dma_source", "dma32_source", "normal_source")
     ):
-        raise KernelPhysicalMemoryError("PKPMM5 source accounting changed")
+        raise KernelPhysicalMemoryError("PKPMM6 source accounting changed")
     if map_summary["usable_pages"] - 1 != sum(
         zones[key] for key in ("dma_managed", "dma32_managed", "normal_managed")
     ):
-        raise KernelPhysicalMemoryError("PKPMM5 managed accounting changed")
+        raise KernelPhysicalMemoryError("PKPMM6 managed accounting changed")
     if ownership["protected"] != 1 or any(value % PAGE_BYTES for value in (
         ownership["kernel_base"], ownership["handoff_base"], ownership["root"]
     )):
-        raise KernelPhysicalMemoryError("PKPMM5 protected ownership marker changed")
+        raise KernelPhysicalMemoryError("PKPMM6 protected ownership marker changed")
     exact_metadata = (
         metadata["pages"],
         metadata["virtual_start"],
@@ -728,7 +784,7 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         "host_verified",
         "host_verified",
     ):
-        raise KernelPhysicalMemoryError("PKPMM5 metadata arena boundary changed")
+        raise KernelPhysicalMemoryError("PKPMM6 metadata arena boundary changed")
     if (
         metadata["physical_start"] % PAGE_BYTES
         or not DMA_END <= metadata["physical_start"] < DMA32_END
@@ -736,7 +792,7 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         or metadata["final_checksum"] == 0
         or metadata["handoff_checksum"] == metadata["final_checksum"]
     ):
-        raise KernelPhysicalMemoryError("PKPMM5 metadata handoff evidence changed")
+        raise KernelPhysicalMemoryError("PKPMM6 metadata handoff evidence changed")
     exact_growth = (
         growth["initial_generation"],
         growth["final_generation"],
@@ -759,6 +815,17 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         growth["rollbacks"],
         growth["retirement_failures"],
         growth["retirement_retry"],
+        growth["pressure_checks"],
+        growth["pressure_triggers"],
+        growth["automatic_growths"],
+        growth["pressure_cycles"],
+        growth["soft_fallbacks"],
+        growth["hard_rejections"],
+        growth["growth_headroom_allocation"],
+        growth["growth_headroom_scrub"],
+        growth["window_capacity"],
+        growth["next_pages"],
+        growth["pre_effect"],
         growth["concurrency"],
         growth["smp"],
         growth["authority"],
@@ -766,14 +833,16 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         growth["production"],
     )
     expected_growth = (
-        2, 3, LEDGER_INITIAL_PAGE_COUNT, LEDGER_FINAL_PAGE_COUNT,
-        *LEDGER_FINAL_CAPACITIES, 2, LEDGER_INITIAL_PAGE_COUNT,
-        LEDGER_FINAL_PAGE_COUNT, LEDGER_PTE_WRITES, 4, 2, 1, 1, 1,
-        0, 0, 0, 0, 0, 0, 0, 0,
+        2, 32, LEDGER_INITIAL_PAGE_COUNT, LEDGER_FINAL_PAGE_COUNT,
+        *LEDGER_FINAL_CAPACITIES, 16, 15,
+        LEDGER_FINAL_PAGE_COUNT, LEDGER_PTE_WRITES, 4, 4, 3, 1, 1,
+        0, 0, 0, *LEDGER_PRESSURE_COUNTS, *LEDGER_GROWTH_HEADROOM,
+        LEDGER_WINDOW_PAGE_CAPACITY, LEDGER_NEXT_PAGE_COUNT, "host_verified",
+        0, 0, 0, 0, 0,
     )
     if exact_growth != expected_growth or growth["checksum"] == 0:
         raise KernelPhysicalMemoryError(
-            "PKPMM5 ledger growth boundary changed: "
+            "PKPMM6 ledger growth boundary changed: "
             f"observed={exact_growth!r}; expected={expected_growth!r}; "
             f"checksum={growth['checksum']}"
         )
@@ -821,7 +890,7 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         1,
         "host_verified",
     ):
-        raise KernelPhysicalMemoryError("PKPMM5 held-class reclaim boundary changed")
+        raise KernelPhysicalMemoryError("PKPMM6 held-class reclaim boundary changed")
     exact_scrub = (
         scrub["allocations"],
         scrub["frees"],
@@ -842,12 +911,10 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         scrub["rollback"],
     )
     if exact_scrub != (
-        5, 3, 4, 5, 2, 2, SCRUB_PAGE_COUNT, SCRUB_BYTES, SCRUB_BYTES,
-        STALE_PATTERN, 1, 1, 1, 1, 3, 12, "host_verified",
+        65, 63, 3, 4, 2, 2, SCRUB_PAGE_COUNT, SCRUB_BYTES, SCRUB_BYTES,
+        STALE_PATTERN, 1, 1, 1, 1, 63, 72, "host_verified",
     ):
-        raise KernelPhysicalMemoryError("PKPMM5 bounded scrub exercise changed")
-    if scrub["start"] != DMA_END:
-        raise KernelPhysicalMemoryError("PKPMM5 scrub allocation did not follow reclaimed first fit")
+        raise KernelPhysicalMemoryError("PKPMM6 bounded scrub exercise changed")
     exact_result = (
         result["managed_pages"],
         result["allocated_pages"],
@@ -869,15 +936,19 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         result["production"],
         result["terminal"],
     )
-    if exact_result != (
+    expected_result = (
         map_summary["usable_pages"] - 1 + BOOT_RECLAIM_PAGE_COUNT,
         METADATA_ARENA_PAGE_COUNT + LEDGER_FINAL_PAGE_COUNT,
         PHYSICAL_WRITES, PHYSICAL_READS,
         TEMPORARY_PTE_WRITES, BOOTSTRAP_INVALIDATIONS, 1, 1, 1,
-        "temporary_single_page_plus_guarded_metadata_and_ledger_generation",
+        "temporary_single_page_plus_guarded_metadata_and_repeated_ledger_generations",
         1, 0, 0, 0, 0, 0, 0, 0, "halt",
-    ):
-        raise KernelPhysicalMemoryError("PKPMM5 result boundary changed")
+    )
+    if exact_result != expected_result:
+        raise KernelPhysicalMemoryError(
+            "PKPMM6 result boundary changed: "
+            f"observed={exact_result!r}; expected={expected_result!r}"
+        )
     return {
         "transfer_prefix": prefix,
         "early": {
@@ -927,7 +998,7 @@ def derive_memory_summary(transcript: dict[str, Any]) -> dict[str, Any]:
     entries = transcript.get("memory_entries")
     core = transcript.get("core")
     if not isinstance(entries, list) or not isinstance(core, dict) or not 1 <= len(entries) <= MAX_MEMORY_ENTRIES:
-        raise KernelPhysicalMemoryError("PKPMM5 PBP1 memory map is missing or out of bounds")
+        raise KernelPhysicalMemoryError("PKPMM6 PBP1 memory map is missing or out of bounds")
     kind_pages = [0] * 12
     source = [0, 0, 0]
     managed = [0, 0, 0]
@@ -935,18 +1006,18 @@ def derive_memory_summary(transcript: dict[str, Any]) -> dict[str, Any]:
     previous_end = 0
     for index, entry in enumerate(entries):
         if not isinstance(entry, dict):
-            raise KernelPhysicalMemoryError("PKPMM5 PBP1 memory entry is not an object")
+            raise KernelPhysicalMemoryError("PKPMM6 PBP1 memory entry is not an object")
         start = int(str(entry["physical_start"]), 16)
         pages = int(entry["page_count"])
         kind = int(entry["kind"])
         source_type = int(entry["source_type"])
         end = start + pages * PAGE_BYTES
         if start % PAGE_BYTES or pages <= 0 or not 0 <= kind < 12 or end <= start:
-            raise KernelPhysicalMemoryError("PKPMM5 PBP1 memory entry shape changed")
+            raise KernelPhysicalMemoryError("PKPMM6 PBP1 memory entry shape changed")
         if index and start < previous_end:
-            raise KernelPhysicalMemoryError("PKPMM5 PBP1 memory map overlaps or is unsorted")
+            raise KernelPhysicalMemoryError("PKPMM6 PBP1 memory map overlaps or is unsorted")
         if not _source_matches(source_type, kind):
-            raise KernelPhysicalMemoryError("PKPMM5 PBP1 source-kind mapping changed")
+            raise KernelPhysicalMemoryError("PKPMM6 PBP1 source-kind mapping changed")
         previous_end = end
         kind_pages[kind] += pages
         if kind != 1:
@@ -979,7 +1050,7 @@ def derive_memory_summary(transcript: dict[str, Any]) -> dict[str, Any]:
         if zone != 1:
             continue
         if pages < METADATA_ARENA_PAGE_COUNT:
-            raise KernelPhysicalMemoryError("PKPMM5 first DMA32 extent cannot hold metadata arena")
+            raise KernelPhysicalMemoryError("PKPMM6 first DMA32 extent cannot hold metadata arena")
         if pages == METADATA_ARENA_PAGE_COUNT:
             post_metadata_extents.pop(index)
         else:
@@ -990,32 +1061,56 @@ def derive_memory_summary(transcript: dict[str, Any]) -> dict[str, Any]:
             )
         break
     else:
-        raise KernelPhysicalMemoryError("PKPMM5 PBP1 map has no DMA32 metadata extent")
+        raise KernelPhysicalMemoryError("PKPMM6 PBP1 map has no DMA32 metadata extent")
     post_metadata_largest = [0, 0, 0]
     for _, pages, zone in post_metadata_extents:
         post_metadata_largest[zone] = max(post_metadata_largest[zone], pages)
 
-    # PKPMM5 allocates the initial ledger immediately after the stable manager,
-    # then allocates its replacement after that generation. Retirement returns
-    # only the initial ledger pages, leaving the grown generation owned.
+    # PKPMM6 follows the allocator itself: each replacement is DMA32 first-fit,
+    # then the complete predecessor generation is returned and coalesced. This
+    # independently derives the final retained generation and its free holes.
     post_generation_extents = list(post_metadata_extents)
-    for index, (start_page, pages, zone) in enumerate(post_generation_extents):
-        required_pages = LEDGER_INITIAL_PAGE_COUNT + LEDGER_FINAL_PAGE_COUNT
-        if zone != 1:
-            continue
-        if pages < required_pages:
-            raise KernelPhysicalMemoryError(
-                "PKPMM5 first post-metadata DMA32 extent cannot hold ledger generations"
+    active_generation: tuple[int, int, int] | None = None
+    ordinary_first_address = 0
+
+    def allocate_dma32_first_fit(page_count: int) -> tuple[int, int, int]:
+        for index, (start_page, pages, zone) in enumerate(post_generation_extents):
+            if zone != 1 or pages < page_count:
+                continue
+            allocated = (start_page, page_count, zone)
+            if pages == page_count:
+                post_generation_extents.pop(index)
+            else:
+                post_generation_extents[index] = (
+                    start_page + page_count, pages - page_count, zone
+                )
+            return allocated
+        raise KernelPhysicalMemoryError(
+            "PKPMM6 first post-metadata DMA32 extent cannot hold ledger generation"
+        )
+
+    def release_extent(extent: tuple[int, int, int]) -> None:
+        post_generation_extents.append(extent)
+        merged: list[tuple[int, int, int]] = []
+        for candidate in sorted(post_generation_extents):
+            if merged and merged[-1][2] == candidate[2] and merged[-1][0] + merged[-1][1] == candidate[0]:
+                previous = merged[-1]
+                merged[-1] = (previous[0], previous[1] + candidate[1], previous[2])
+            else:
+                merged.append(candidate)
+        post_generation_extents[:] = merged
+
+    for generation_index, page_count in enumerate(LEDGER_PAGE_COUNTS):
+        candidate = allocate_dma32_first_fit(page_count)
+        if generation_index == 0:
+            ordinary_first_address = next(
+                start * PAGE_BYTES
+                for start, pages, zone in post_generation_extents
+                if zone == 1 and pages
             )
-        replacement = [(start_page, LEDGER_INITIAL_PAGE_COUNT, zone)]
-        if pages > required_pages:
-            replacement.append(
-                (start_page + required_pages, pages - required_pages, zone)
-            )
-        post_generation_extents[index : index + 1] = replacement
-        break
-    else:
-        raise KernelPhysicalMemoryError("PKPMM5 PBP1 map has no DMA32 ledger extent")
+        if active_generation is not None:
+            release_extent(active_generation)
+        active_generation = candidate
 
     boot_ranges: list[tuple[int, int, int]] = []
     boot_source_records = 0
@@ -1034,7 +1129,7 @@ def derive_memory_summary(transcript: dict[str, Any]) -> dict[str, Any]:
             boundary_page = (DMA_END // PAGE_BYTES, DMA32_END // PAGE_BYTES, 1 << 52)[zone]
             take = min(remaining, boundary_page - start_page)
             if take <= 0:
-                raise KernelPhysicalMemoryError("PKPMM5 reclaim range cannot advance")
+                raise KernelPhysicalMemoryError("PKPMM6 reclaim range cannot advance")
             boot_pages_by_zone[zone] += take
             if (
                 boot_ranges
@@ -1054,7 +1149,7 @@ def derive_memory_summary(transcript: dict[str, Any]) -> dict[str, Any]:
             previous = post_reclaim_extents[-1]
             previous_end = previous[0] + previous[1]
             if extent[0] < previous_end:
-                raise KernelPhysicalMemoryError("PKPMM5 reclaim overlaps retained ownership")
+                raise KernelPhysicalMemoryError("PKPMM6 reclaim overlaps retained ownership")
             if previous[2] == extent[2] and extent[0] == previous_end:
                 post_reclaim_extents[-1] = (
                     previous[0], previous[1] + extent[1], previous[2]
@@ -1104,7 +1199,7 @@ def derive_memory_summary(transcript: dict[str, Any]) -> dict[str, Any]:
         range_has_loader(handoff_base, handoff_size),
         range_has_loader(root, PAGE_BYTES),
     )):
-        raise KernelPhysicalMemoryError("PKPMM5 PBP1 core range escaped loader-reserved ownership")
+        raise KernelPhysicalMemoryError("PKPMM6 PBP1 core range escaped loader-reserved ownership")
     first = [next((start * PAGE_BYTES for start, pages, item_zone in extents if item_zone == zone and pages), 0) for zone in range(3)]
     return {
         "entry_count": len(entries),
@@ -1130,6 +1225,7 @@ def derive_memory_summary(transcript: dict[str, Any]) -> dict[str, Any]:
             "first_free_address": post_reclaim_first,
         },
         "first_free_address": first,
+        "ordinary_first_address": ordinary_first_address,
         "kernel_base": kernel_base,
         "kernel_pages": (kernel_size + PAGE_BYTES - 1) // PAGE_BYTES,
         "handoff_base": handoff_base,
@@ -1193,13 +1289,13 @@ def validate_observation_binding(observation: dict[str, Any], transcript: dict[s
         "rollback": "host_verified",
     }
     if observation["map"] != expected_map or observation["zones"] != expected_zones:
-        raise KernelPhysicalMemoryError("PKPMM5 markers disagree with independent PBP1 accounting")
+        raise KernelPhysicalMemoryError("PKPMM6 markers disagree with independent PBP1 accounting")
     if observation["ownership"] != expected_ownership:
-        raise KernelPhysicalMemoryError("PKPMM5 ownership marker disagrees with PBP1 core ranges")
+        raise KernelPhysicalMemoryError("PKPMM6 ownership marker disagrees with PBP1 core ranges")
     if observation["reclaim"] != expected_reclaim:
-        raise KernelPhysicalMemoryError("PKPMM5 reclaim receipt disagrees with independent PBP1 accounting")
+        raise KernelPhysicalMemoryError("PKPMM6 reclaim receipt disagrees with independent PBP1 accounting")
     if observation["metadata"]["physical_start"] != derived["first_free_address"][1]:
-        raise KernelPhysicalMemoryError("PKPMM5 metadata arena is not deterministic DMA32 first-fit")
-    if observation["scrub"]["start"] != reclaim["first_free_address"][1]:
-        raise KernelPhysicalMemoryError("PKPMM5 ordinary allocation did not follow reclaimed first fit")
+        raise KernelPhysicalMemoryError("PKPMM6 metadata arena is not deterministic DMA32 first-fit")
+    if observation["scrub"]["start"] != derived["ordinary_first_address"]:
+        raise KernelPhysicalMemoryError("PKPMM6 ordinary allocation did not follow pre-reclaim first fit")
     return derived

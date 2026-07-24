@@ -24,22 +24,22 @@ ranges must be aligned, nonoverlapping, complete, and W^X-safe.
 Retained physical ranges must also be aligned, nonzero, representable, and
 pairwise disjoint:
 
-- the current 76-page PooleKernel allocation;
+- the current 78-page PooleKernel allocation;
 - four private page-table pages;
 - fourteen writable, non-executable stack pages;
 - 256 handoff pages, covering one MiB.
 
-The virtual layout reserves page-table index 76 as the low guard, indices
-77-90 for the stack, index 91 as the high guard, and index 92 onward for the
+The virtual layout reserves page-table index 78 as the low guard, indices
+79-92 for the stack, index 93 as the high guard, and index 94 onward for the
 handoff. Both guards remain non-present. The handoff range begins after the
 fixed boundary and is supervisor read-only and NX. `ADD-MEM-001` requires boot,
 entry, trap, and PMM consumers to derive these bounds from one contract.
 The bootstrap temporary alias is derived as the first leaf after the complete
-handoff range, currently index 348, so retained-layout growth cannot silently
+handoff range, currently index 350, so retained-layout growth cannot silently
 occupy the scrub and page-table transaction slot.
-PKPMM5 retains index 349 as the stable-manager low guard, indices 350-354 for
-its five-page supervisor RW/NX manager, and index 355 as its high guard. It
-also reserves guarded 32-page ledger windows at indices 356-389 and 390-423.
+PKPMM6 retains index 351 as the stable-manager low guard, indices 352-356 for
+its five-page supervisor RW/NX manager, and index 357 as its high guard. It
+also reserves guarded 32-page ledger windows at indices 358-391 and 392-425.
 All of these leaves are absent in the PKMAP2 construction receipt. Selector 8
 installs only the manager plus the pages owned by one active ledger generation.
 

@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
   "artifact_kind": "pooleos_native_kernel_physical_memory_contract",
-  "contract_id": "PKPMM5",
-  "selected_move_id": "N9-PMM-GROWTH-001",
-  "status": "generation_owned_scalable_metadata_growth_contract",
+  "contract_id": "PKPMM6",
+  "selected_move_id": "N9-PMM-GROWTH-AUTOMATION-001",
+  "status": "checked_pressure_triggered_repeated_generation_growth_contract",
   "production_ready": false,
   "production_promotion_allowed": false,
   "development_profile": {
@@ -27,7 +27,11 @@
     "ledger_window_count": 2,
     "ledger_guard_pages_per_window": 2,
     "initial_ledger_pages": 4,
-    "grown_ledger_pages": 8
+    "grown_ledger_pages": 29,
+    "ledger_generation_page_sequence": [4, 8, 15, 29],
+    "ledger_next_rejected_page_count": 58,
+    "ledger_growth_allocation_headroom": 1,
+    "ledger_growth_scrub_headroom": 4
   },
   "ownership_precedence": [
     "explicit PooleKernel null-page guard",
@@ -71,12 +75,12 @@
     "word_bytes": 8,
     "words_per_page": 512,
     "full_page_readback_required": true,
-    "live_profile_allocation_pages": 21,
-    "live_profile_release_pages": 8,
+    "live_profile_allocation_pages": 123,
+    "live_profile_release_pages": 89,
     "live_profile_reclaim_pages": 11250,
-    "live_profile_total_scrub_pages": 11279,
-    "live_profile_scrubbed_bytes": 46198784,
-    "live_profile_verified_bytes": 46198784,
+    "live_profile_total_scrub_pages": 11462,
+    "live_profile_scrubbed_bytes": 46948352,
+    "live_profile_verified_bytes": 46948352,
     "stale_pattern": "0xA5A55A5AC3C33C3C",
     "exact_first_fit_reuse_required": true,
     "generation_advance_required": true,
@@ -85,7 +89,7 @@
   },
   "metadata_arena": {
     "owner_id": 19781,
-    "manager_byte_count": 15336,
+    "manager_byte_count": 15376,
     "page_count": 5,
     "guard_page_count": 2,
     "mapping_permissions": "supervisor_rw_nx_wb",
@@ -123,14 +127,30 @@
       "scrub_receipts": 16,
       "reclaim_receipts": 2
     },
-    "grown_capacities": {
-      "free_extents": 512,
-      "allocations": 64,
-      "source_records": 512,
-      "scrub_receipts": 32,
-      "reclaim_receipts": 4
+    "generation_capacities": [
+      {"pages": 4, "free_extents": 256, "allocations": 32, "source_records": 256, "scrub_receipts": 16, "reclaim_receipts": 2},
+      {"pages": 8, "free_extents": 512, "allocations": 64, "source_records": 512, "scrub_receipts": 32, "reclaim_receipts": 4},
+      {"pages": 15, "free_extents": 1024, "allocations": 128, "source_records": 1024, "scrub_receipts": 64, "reclaim_receipts": 8},
+      {"pages": 29, "free_extents": 2048, "allocations": 256, "source_records": 2048, "scrub_receipts": 128, "reclaim_receipts": 16}
+    ],
+    "final_capacities": {
+      "free_extents": 2048,
+      "allocations": 256,
+      "source_records": 2048,
+      "scrub_receipts": 128,
+      "reclaim_receipts": 16
     },
-    "growth_policy": "checked doubling of every ledger capacity while the complete aligned layout remains within one 32-page generation window",
+    "growth_policy": "before each automatic scrubbed allocate or free, compute exact post-operation ledger demand and repeatedly double every capacity while reserving one allocation slot and four scrub receipts for a complete failed-growth rollback and retry",
+    "pressure_policy": {
+      "check_count": 121,
+      "trigger_count": 8,
+      "automatic_growth_count": 3,
+      "successful_pressure_cycles": 60,
+      "soft_window_fallback_count": 4,
+      "hard_window_rejection_count": 1,
+      "soft_window_fallback": "when the next aligned doubled generation exceeds 32 pages but exact requested demand fits the active generation, continue without growth and record the fallback",
+      "hard_window_rejection": "when exact requested demand does not fit and the next aligned doubled generation exceeds 32 pages, reject before page reads, page writes, allocation ownership changes, or receipt commitment"
+    },
     "transaction_order": [
       "complete_capacity_and_layout_preflight",
       "reserve_and_zero_new_generation",
@@ -146,23 +166,23 @@
     "precommit_failure_policy": "restore exact previous descriptor, revoke the candidate mapping, and scrub-release the candidate reservation with an auditable rollback count",
     "postcommit_retirement_failure_policy": "retain both allocations under PMM ownership, record pending retirement and failure count, and require explicit retry before another growth",
     "integrity_algorithm": "fnv1a64 over generation header, complete capacity-sized ledgers, and stable-manager ownership state",
-    "live_generation_events": 2,
-    "live_retired_generations": 1,
-    "live_mapping_pte_writes": 16,
+    "live_generation_events": 4,
+    "live_retired_generations": 3,
+    "live_retired_pages": 27,
+    "live_mapping_pte_writes": 83,
     "concurrency_qualified": false
   },
   "receipt_contract": {
-    "receipt_count": 8,
-    "ordered_kinds": [
+    "receipt_count": 128,
+    "ordered_prefix_kinds": [
       "allocation_manager_metadata",
       "allocation_initial_ledger",
-      "allocation_grown_ledger",
-      "release_retired_ledger",
       "allocation",
       "release",
       "allocation",
       "release"
     ],
+    "remaining_sequence": "ordinary allocation/release pairs with automatic generation allocation/retired-generation release pairs inserted only at checked pressure thresholds",
     "required_fields": [
       "sequence",
       "kind",
@@ -257,7 +277,9 @@
       "boot_and_acpi_reclaim_emit_exact_idempotent_receipts_after_required_stages",
       "mapped_manager_boot_reclaim_preserves_the_integrity_seal",
       "reclaim_scrub_failure_rolls_back_manager_ownership_and_retry_succeeds",
-      "reclaim_capacity_and_retained_overlap_reject_before_physical_write"
+      "reclaim_capacity_and_retained_overlap_reject_before_physical_write",
+      "automatic_pressure_repeats_growth_then_falls_back_and_rejects_without_effects",
+      "pressure_growth_rollback_preserves_retry_headroom_and_requested_ownership"
     ]
   },
   "qualification": {
@@ -267,7 +289,7 @@
     "independent_pbp1_oracle_required": true,
     "exact_scrub_counters_required": true,
     "host_fault_tests_required": true,
-    "negative_control_count": 137
+    "negative_control_count": 147
   },
   "required_negative_controls": [
     "NEG-N9-PKPMM-MARKER-OMISSION",
@@ -341,6 +363,16 @@
     "NEG-N9-PKPMM-GROWTH-ROLLBACKS",
     "NEG-N9-PKPMM-GROWTH-RETIREMENT-FAILURES",
     "NEG-N9-PKPMM-GROWTH-RETIREMENT-RETRY",
+    "NEG-N9-PKPMM-PRESSURE-CHECKS",
+    "NEG-N9-PKPMM-PRESSURE-TRIGGERS",
+    "NEG-N9-PKPMM-PRESSURE-AUTO-GROWTHS",
+    "NEG-N9-PKPMM-PRESSURE-CYCLES",
+    "NEG-N9-PKPMM-PRESSURE-SOFT-FALLBACKS",
+    "NEG-N9-PKPMM-PRESSURE-HARD-REJECTIONS",
+    "NEG-N9-PKPMM-PRESSURE-HEADROOM",
+    "NEG-N9-PKPMM-GROWTH-WINDOW-BOUND",
+    "NEG-N9-PKPMM-GROWTH-NEXT-LAYOUT",
+    "NEG-N9-PKPMM-PRESSURE-PRE-EFFECT",
     "NEG-N9-PKPMM-GROWTH-CONCURRENCY",
     "NEG-N9-PKPMM-GROWTH-SMP",
     "NEG-N9-PKPMM-GROWTH-AUTHORITY",
@@ -433,6 +465,11 @@
     "metadata_old_generation_revoked_scrubbed_retired": true,
     "metadata_growth_precommit_rollback_host_tested": true,
     "metadata_retirement_failure_recovery_host_tested": true,
+    "metadata_pressure_capacity_checked_before_automatic_operations": true,
+    "metadata_pressure_repeated_multi_generation_growth_exercised": true,
+    "metadata_pressure_retry_headroom_enforced": true,
+    "metadata_bounded_window_soft_fallback_exercised": true,
+    "metadata_bounded_window_hard_rejection_pre_effect_host_tested": true,
     "metadata_logical_integrity_seal_enforced": true,
     "metadata_handoff_and_mapping_rollback_host_tested": true,
     "metadata_release_exclusion_enforced": true,
@@ -449,11 +486,11 @@
     "production_ready": false
   },
   "non_claims": [
-    "PKPMM5 qualifies generation-owned PMM ledger growth and the predecessor one-BSP Boot Services reclaim transaction only inside the bounded qemu64 selector-8 profile.",
-    "Raw allocate and free APIs retained for predecessor PKVM1 and PKVM2 profiles are non-production and are not covered by the PKPMM5 scrub, metadata-growth, or reclaim claim.",
-    "The retained mappings are one guarded five-page stable manager arena, one active guarded ledger-generation window, and one revoked temporary supervisor RW/NX page alias; no complete direct map or address-space policy is claimed.",
+    "PKPMM6 qualifies checked pressure-triggered repeated PMM ledger growth and the predecessor one-BSP Boot Services reclaim transaction only inside the bounded qemu64 selector-8 profile.",
+    "Raw allocate and free APIs retained for predecessor PKVM1 and PKVM2 profiles are non-production and are not covered by the PKPMM6 scrub, metadata-growth, pressure, or reclaim claim.",
+    "The retained mappings are one guarded five-page stable manager arena, one active guarded ledger-generation window after three predecessor-generation revocations, and one revoked temporary supervisor RW/NX page alias; no complete direct map or address-space policy is claimed.",
     "Boot Services reclaim is activated only in the bounded qemu64 profile; ACPI reclaim remains held and no positive ACPI activation is claimed.",
-    "Capacity growth is bounded by the current 32-page retained leaf-table windows; automatic concurrency-safe growth, interrupt-context allocation, and SMP allocation are not qualified.",
+    "Automatic growth is serial one-BSP behavior bounded by the current 32-page retained leaf-table windows; the 58-page next layout is rejected, and concurrency-safe growth, interrupt-context allocation, and SMP allocation are not qualified.",
     "No target hardware, second host, signature, release, or production claim is made."
   ]
 }

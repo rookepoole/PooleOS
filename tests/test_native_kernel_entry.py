@@ -40,13 +40,13 @@ class NativeKernelEntryTests(unittest.TestCase):
 
     def test_product_identity_and_entry_prefix_are_frozen(self) -> None:
         product = self.readiness["product"]
-        self.assertEqual(product["canonical_byte_count"], 270336)
-        self.assertEqual(product["image_byte_count"], 311296)
+        self.assertEqual(product["canonical_byte_count"], 278528)
+        self.assertEqual(product["image_byte_count"], 319488)
         self.assertEqual(product["entry_offset"], 0x9000)
-        self.assertEqual(product["relocation_count"], 662)
+        self.assertEqual(product["relocation_count"], 667)
         self.assertEqual(
             product["canonical_sha256"],
-            "30E414826D7DF588C07A66032423DCD6AA8C47B0E6CCFC3D6686BC9224AFB947",
+            "CDF33067B2421550BB03A4796FF9A92AE54D40B2575188632BF2C208449B882E",
         )
         self.assertTrue(product["entry_prefix_hex"].startswith("FAFC4889E14885C9"))
 
@@ -62,6 +62,12 @@ class NativeKernelEntryTests(unittest.TestCase):
         ):
             digest = hashlib.sha256((ROOT / path).read_bytes()).hexdigest().upper()
             self.assertEqual(fields[field], digest)
+
+    def test_live_build_id_matches_the_entry_contract(self) -> None:
+        build_id = self.contract["product"]["build_id"]
+        kernel_source = (ROOT / "native/kernel/src/lib.rs").read_text(encoding="utf-8")
+        self.assertIn(f'*b"{build_id}"', kernel_source)
+        self.assertEqual(self.readiness["product"]["manifest_fields"]["build_id"], build_id)
 
     def test_framebuffer_mapping_gap_is_explicit(self) -> None:
         coverage = json.loads(

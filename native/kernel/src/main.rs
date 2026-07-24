@@ -166,7 +166,7 @@ macro_rules! pkpmm_fragment {
 
 pkpmm_fragment!(
     PKPMM_DENIED,
-    b"POOLEOS:KERNEL:PMM-DENIED contract=PKPMM5 reason="
+    b"POOLEOS:KERNEL:PMM-DENIED contract=PKPMM6 reason="
 );
 pkpmm_fragment!(
     PKPMM_DENIED_TAIL,
@@ -174,15 +174,15 @@ pkpmm_fragment!(
 );
 pkpmm_fragment!(
     PKPMM_EARLY,
-    b"POOLEOS:KERNEL:PMM-EARLY PASS contract=PKPMM5 selector=8 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n"
+    b"POOLEOS:KERNEL:PMM-EARLY PASS contract=PKPMM6 selector=8 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n"
 );
 pkpmm_fragment!(
     PKPMM_STAGE,
-    b"POOLEOS:KERNEL:PMM-STAGE PASS contract=PKPMM5 stage="
+    b"POOLEOS:KERNEL:PMM-STAGE PASS contract=PKPMM6 stage="
 );
 pkpmm_fragment!(
     PKPMM_MAP,
-    b"POOLEOS:KERNEL:PMM-MAP PASS contract=PKPMM5 entries="
+    b"POOLEOS:KERNEL:PMM-MAP PASS contract=PKPMM6 entries="
 );
 pkpmm_fragment!(PKPMM_USABLE, b" usable_pages=");
 pkpmm_fragment!(PKPMM_BOOT_RECLAIMABLE, b" boot_reclaimable_pages=");
@@ -190,7 +190,7 @@ pkpmm_fragment!(PKPMM_LOADER_RESERVED, b" loader_reserved_pages=");
 pkpmm_fragment!(PKPMM_NULL_GUARD, b" null_guard_pages=");
 pkpmm_fragment!(
     PKPMM_ZONES,
-    b"\nPOOLEOS:KERNEL:PMM-ZONES PASS contract=PKPMM5 dma_source="
+    b"\nPOOLEOS:KERNEL:PMM-ZONES PASS contract=PKPMM6 dma_source="
 );
 pkpmm_fragment!(PKPMM_DMA_MANAGED, b" dma_managed=");
 pkpmm_fragment!(PKPMM_DMA32_SOURCE, b" dma32_source=");
@@ -203,17 +203,17 @@ pkpmm_fragment!(PKPMM_LARGEST_DMA32, b" largest_dma32=");
 pkpmm_fragment!(PKPMM_LARGEST_NORMAL, b" largest_normal=");
 pkpmm_fragment!(
     PKPMM_OWNERSHIP,
-    b"\nPOOLEOS:KERNEL:PMM-OWNERSHIP PASS contract=PKPMM5 kernel_base="
+    b"\nPOOLEOS:KERNEL:PMM-OWNERSHIP PASS contract=PKPMM6 kernel_base="
 );
 pkpmm_fragment!(PKPMM_KERNEL_PAGES, b" kernel_pages=");
 pkpmm_fragment!(PKPMM_HANDOFF_BASE, b" handoff_base=");
 pkpmm_fragment!(PKPMM_HANDOFF_PAGES, b" handoff_pages=");
 pkpmm_fragment!(PKPMM_ROOT, b" root=");
 pkpmm_fragment!(PKPMM_PROTECTED, b" protected=1\n");
-pkpmm_fragment!(PKPMM_EXERCISE_DENIED, b"POOLEOS:KERNEL:PMM-DENIED contract=PKPMM5 reason=exercise_invariant physical_effects=fail_closed ownership_release=0 reclaim=0 authority=0 actions=0 terminal=panic\n");
+pkpmm_fragment!(PKPMM_EXERCISE_DENIED, b"POOLEOS:KERNEL:PMM-DENIED contract=PKPMM6 reason=exercise_invariant physical_effects=fail_closed ownership_release=0 reclaim=0 authority=0 actions=0 terminal=panic\n");
 pkpmm_fragment!(
     PKPMM_METADATA,
-    b"POOLEOS:KERNEL:PMM-METADATA PASS contract=PKPMM5 pages="
+    b"POOLEOS:KERNEL:PMM-METADATA PASS contract=PKPMM6 pages="
 );
 pkpmm_fragment!(PKPMM_METADATA_PHYSICAL, b" physical_start=");
 pkpmm_fragment!(PKPMM_METADATA_VIRTUAL, b" virtual_start=");
@@ -243,7 +243,7 @@ pkpmm_fragment!(
 );
 pkpmm_fragment!(
     PKPMM_GROWTH,
-    b"POOLEOS:KERNEL:PMM-GROWTH PASS contract=PKPMM5 initial_generation="
+    b"POOLEOS:KERNEL:PMM-GROWTH PASS contract=PKPMM6 initial_generation="
 );
 pkpmm_fragment!(PKPMM_GROWTH_FINAL_GENERATION, b" final_generation=");
 pkpmm_fragment!(PKPMM_GROWTH_INITIAL_PAGES, b" initial_pages=");
@@ -258,10 +258,16 @@ pkpmm_fragment!(PKPMM_GROWTH_RETIRED_PAGES, b" retired_pages=");
 pkpmm_fragment!(PKPMM_GROWTH_MAPPED_PAGES, b" mapped_pages=");
 pkpmm_fragment!(PKPMM_GROWTH_PTE_WRITES, b" pte_writes=");
 pkpmm_fragment!(PKPMM_GROWTH_CHECKSUM, b" checksum=");
-pkpmm_fragment!(PKPMM_GROWTH_TAIL, b" guard_pages=4 mapping_events=2 revoked=1 integrity=1 atomic=1 rollbacks=0 retirement_failures=0 retirement_retry=0 concurrency=0 smp=0 authority=0 actions=0 production=0\n");
+pkpmm_fragment!(PKPMM_GROWTH_PRESSURE_CHECKS, b" guard_pages=4 mapping_events=4 revoked=3 integrity=1 atomic=1 rollbacks=0 retirement_failures=0 retirement_retry=0 pressure_checks=");
+pkpmm_fragment!(PKPMM_GROWTH_PRESSURE_TRIGGERS, b" pressure_triggers=");
+pkpmm_fragment!(PKPMM_GROWTH_AUTOMATIC_GROWTHS, b" automatic_growths=");
+pkpmm_fragment!(PKPMM_GROWTH_PRESSURE_CYCLES, b" pressure_cycles=");
+pkpmm_fragment!(PKPMM_GROWTH_SOFT_FALLBACKS, b" soft_fallbacks=");
+pkpmm_fragment!(PKPMM_GROWTH_HARD_REJECTIONS, b" hard_rejections=");
+pkpmm_fragment!(PKPMM_GROWTH_TAIL, b" growth_headroom_allocation=1 growth_headroom_scrub=4 window_capacity=32 next_pages=58 pre_effect=host_verified concurrency=0 smp=0 authority=0 actions=0 production=0\n");
 pkpmm_fragment!(
     PKPMM_RECLAIM,
-    b"POOLEOS:KERNEL:PMM-RECLAIM PASS contract=PKPMM5 stage=post_exit_boot_services class=boot_services sequence="
+    b"POOLEOS:KERNEL:PMM-RECLAIM PASS contract=PKPMM6 stage=post_exit_boot_services class=boot_services sequence="
 );
 pkpmm_fragment!(PKPMM_RECLAIM_SOURCE_RECORDS, b" source_records=");
 pkpmm_fragment!(PKPMM_RECLAIM_RANGES, b" ranges=");
@@ -284,7 +290,7 @@ pkpmm_fragment!(
 );
 pkpmm_fragment!(
     PKPMM_SCRUB,
-    b"POOLEOS:KERNEL:PMM-SCRUB PASS contract=PKPMM5 allocations="
+    b"POOLEOS:KERNEL:PMM-SCRUB PASS contract=PKPMM6 allocations="
 );
 pkpmm_fragment!(PKPMM_FREES, b" frees=");
 pkpmm_fragment!(PKPMM_START, b" start=");
@@ -305,14 +311,14 @@ pkpmm_fragment!(PKPMM_COALESCES, b" coalesces=");
 pkpmm_fragment!(PKPMM_ROLLBACK, b" rollback=host_verified\n");
 pkpmm_fragment!(
     PKPMM_RESULT,
-    b"POOLEOS:KERNEL:PMM-RESULT PASS contract=PKPMM5 profile=qemu64_tier0 managed_pages="
+    b"POOLEOS:KERNEL:PMM-RESULT PASS contract=PKPMM6 profile=qemu64_tier0 managed_pages="
 );
 pkpmm_fragment!(PKPMM_ALLOCATED_PAGES, b" allocated_pages=");
 pkpmm_fragment!(PKPMM_PHYSICAL_WRITES, b" physical_writes=");
 pkpmm_fragment!(PKPMM_PHYSICAL_READS, b" physical_reads=");
 pkpmm_fragment!(PKPMM_TEMPORARY_WRITES, b" temporary_pte_writes=");
 pkpmm_fragment!(PKPMM_BOOTSTRAP_INVLPG, b" bootstrap_invlpg=");
-pkpmm_fragment!(PKPMM_RESULT_TAIL, b" alias_revoked=1 metadata_retained=1 ledger_generation_retained=1 mappings=temporary_single_page_plus_guarded_metadata_and_ledger_generation reclaim=1 acpi_reclaim=0 concurrency=0 smp=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n");
+pkpmm_fragment!(PKPMM_RESULT_TAIL, b" alias_revoked=1 metadata_retained=1 ledger_generation_retained=1 mappings=temporary_single_page_plus_guarded_metadata_and_repeated_ledger_generations reclaim=1 acpi_reclaim=0 concurrency=0 smp=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n");
 
 macro_rules! pkvm_fragment {
     ($name:ident, $value:literal) => {
@@ -887,7 +893,7 @@ impl PhysicalPageAccess for BootstrapTableMemory {
         self.ensure_mapped(physical_address)
             .map_err(|_| PageAccessError::Access)?;
         let pointer = Self::target_pointer(word_index).map_err(|_| PageAccessError::Access)?;
-        // SAFETY: PKPMM5 owns the planned, held, or still-live PMM extent and ensure_mapped
+        // SAFETY: PKPMM6 owns the planned, held, or still-live PMM extent and ensure_mapped
         // proves that its exact physical page occupies the supervisor RW/NX alias.
         unsafe { write_volatile(pointer, value) };
         self.writes = self.writes.checked_add(1).ok_or(PageAccessError::Access)?;
@@ -902,7 +908,7 @@ impl PhysicalPageAccess for BootstrapTableMemory {
         self.ensure_mapped(physical_address)
             .map_err(|_| PageAccessError::Access)?;
         let pointer = Self::target_pointer(word_index).map_err(|_| PageAccessError::Access)?;
-        // SAFETY: the same PKPMM5 ownership and temporary-alias proof as write_word
+        // SAFETY: the same PKPMM6 ownership and temporary-alias proof as write_word
         // applies; volatile readback is required before the scrub receipt is minted.
         let value = unsafe { read_volatile(pointer) };
         self.reads = self.reads.checked_add(1).ok_or(PageAccessError::Access)?;
@@ -2149,6 +2155,18 @@ extern "C" fn poole_kernel_rust_entry(
         logger.write_decimal_u64(page_access.ledger_pte_writes);
         logger.write_bytes(&PKPMM_GROWTH_CHECKSUM);
         logger.write_hex_u64(ledger_growth.logical_checksum);
+        logger.write_bytes(&PKPMM_GROWTH_PRESSURE_CHECKS);
+        logger.write_decimal_u64(final_state.ledger_pressure_checks);
+        logger.write_bytes(&PKPMM_GROWTH_PRESSURE_TRIGGERS);
+        logger.write_decimal_u64(final_state.ledger_pressure_triggers);
+        logger.write_bytes(&PKPMM_GROWTH_AUTOMATIC_GROWTHS);
+        logger.write_decimal_u64(final_state.ledger_automatic_growths);
+        logger.write_bytes(&PKPMM_GROWTH_PRESSURE_CYCLES);
+        logger.write_decimal_u64(proof.pressure_cycle_count);
+        logger.write_bytes(&PKPMM_GROWTH_SOFT_FALLBACKS);
+        logger.write_decimal_u64(final_state.ledger_soft_window_fallbacks);
+        logger.write_bytes(&PKPMM_GROWTH_HARD_REJECTIONS);
+        logger.write_decimal_u64(final_state.ledger_hard_window_rejections);
         logger.write_bytes(&PKPMM_GROWTH_TAIL);
 
         let reclaim = proof.boot_reclaim;
