@@ -52,7 +52,7 @@ equality is real but not security trust: the manifest and artifacts are
 unsigned and attacker-controllable in this development profile.
 
 PKELF1 accepts the frozen x86-64 `ET_DYN` profile, computes the four mapping
-ranges, allocates 70 loader pages, copies segments, applies 569 relative
+ranges, allocates 70 loader pages, copies segments, applies 593 relative
 relocations, verifies the 286,720-byte loaded image, and binds the entry at
 offset `0x8000`.
 Every file and temporary intake pool is closed or freed before the final map.
@@ -246,10 +246,13 @@ scrub-before-allocation and scrub-before-reuse, readback, receipts, exact-reuse
 residue rejection, fault rollback, and temporary-alias revocation. Cycle 129
 upgrades it to PKPMM3 with a retained five-page guarded metadata arena,
 complete-manager transactional handoff, integrity seal, corruption rejection,
-rollback, and release exclusion. These remain one-BSP development profiles with
-no complete direct map, shootdown, ring 3, held-class reclaim, scalable metadata,
-heap, pager, target, or production claim. The next chronological owner-independent
-move is `N9-PMM-RECLAIM-001` for exact lifecycle-gated held-class admission.
+rollback, and release exclusion. Cycle 130 upgrades it to PKPMM4 with monotonic
+reclaim stages, complete streamed preflight, scrub-before-admission, retained-
+range exclusion, atomic metadata commit, idempotence, and immutable Boot Services
+reclaim receipts while ACPI remains held. These remain one-BSP development
+profiles with no complete direct map, shootdown, ring 3, scalable metadata,
+complete ACPI consumer integration, heap, pager, target, or production claim.
+The next chronological owner-independent move is `N9-PMM-GROWTH-001`.
 Capability creation, lifecycle execution, signature trust, authenticated
 persistent state, production transfer, and physical-target qualification remain
 separately gated by N5/N6 and owner-controlled N0 work.

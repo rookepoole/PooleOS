@@ -1,13 +1,15 @@
 use poole_handoff::{
-    CoreRecord, Handoff, MEMORY_BOOT_RECLAIMABLE, MEMORY_ENTRY_BYTES, MEMORY_LOADER_RESERVED,
-    MEMORY_USABLE, PAGE_BYTES, RECORD_MEMORY_MAP,
+    CoreRecord, Handoff, MEMORY_ACPI_RECLAIMABLE, MEMORY_BOOT_RECLAIMABLE, MEMORY_ENTRY_BYTES,
+    MEMORY_LOADER_RESERVED, MEMORY_USABLE, PAGE_BYTES, RECORD_MEMORY_MAP,
 };
 
-pub const CONTRACT_ID: &str = "PKPMM3";
+pub const CONTRACT_ID: &str = "PKPMM4";
 pub const MAX_MEMORY_ENTRIES: usize = 256;
 pub const MAX_FREE_EXTENTS: usize = 256;
 pub const MAX_ALLOCATIONS: usize = 32;
 pub const MAX_SCRUB_RECEIPTS: usize = 16;
+pub const MAX_RECLAIM_RECEIPTS: usize = 2;
+pub const MAX_RECLAIM_EXTENTS: usize = MAX_MEMORY_ENTRIES + 2;
 pub const MEMORY_KIND_COUNT: usize = 12;
 pub const DEFAULT_QUOTA_PAGES: u64 = 64;
 pub const DMA_END_PAGE: u64 = 16 * 1024 * 1024 / PAGE_BYTES;
@@ -76,6 +78,65 @@ pub struct ScrubReceipt {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(u8)]
+pub enum ReclaimClass {
+    BootServices = 1,
+    Acpi = 2,
+}
+
+impl ReclaimClass {
+    const fn index(self) -> usize {
+        self as usize - 1
+    }
+
+    const fn source_kind(self) -> u32 {
+        match self {
+            Self::BootServices => MEMORY_BOOT_RECLAIMABLE,
+            Self::Acpi => MEMORY_ACPI_RECLAIMABLE,
+        }
+    }
+
+    const fn required_stage(self) -> ReclaimStage {
+        match self {
+            Self::BootServices => ReclaimStage::PostExitBootServices,
+            Self::Acpi => ReclaimStage::AcpiTablesReleased,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[repr(u8)]
+pub enum ReclaimStage {
+    PreExitBootServices = 0,
+    PostExitBootServices = 1,
+    AcpiTablesReleased = 2,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ReclaimReceipt {
+    pub sequence: u64,
+    pub class: ReclaimClass,
+    pub required_stage: ReclaimStage,
+    pub observed_stage: ReclaimStage,
+    pub source_record_count: u64,
+    pub range_count: u64,
+    pub page_count: u64,
+    pub pages_by_zone: [u64; 3],
+    pub pre_free_extent_count: u64,
+    pub post_free_extent_count: u64,
+    pub zeroed_bytes: u64,
+    pub verified_bytes: u64,
+    pub range_checksum: u64,
+    pub receipt_checksum: u64,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ReclaimOutcome {
+    pub receipt: ReclaimReceipt,
+    pub newly_reclaimed: bool,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PageAccessError {
     Access,
 }
@@ -141,6 +202,10 @@ pub enum PhysicalMemoryError {
     MetadataCorruption,
     MetadataOwnership,
     MetadataHandoff,
+    ReclaimTiming,
+    ReclaimCapacity,
+    ReclaimOwnership,
+    ReclaimUnavailable,
     ExerciseInvariant,
 }
 
@@ -176,6 +241,10 @@ pmm_label!(PMM_LABEL_METADATA_MAPPING, b"metadata_mapping");
 pmm_label!(PMM_LABEL_METADATA_CORRUPTION, b"metadata_corruption");
 pmm_label!(PMM_LABEL_METADATA_OWNERSHIP, b"metadata_ownership");
 pmm_label!(PMM_LABEL_METADATA_HANDOFF, b"metadata_handoff");
+pmm_label!(PMM_LABEL_RECLAIM_TIMING, b"reclaim_timing");
+pmm_label!(PMM_LABEL_RECLAIM_CAPACITY, b"reclaim_capacity");
+pmm_label!(PMM_LABEL_RECLAIM_OWNERSHIP, b"reclaim_ownership");
+pmm_label!(PMM_LABEL_RECLAIM_UNAVAILABLE, b"reclaim_unavailable");
 pmm_label!(PMM_LABEL_EXERCISE_INVARIANT, b"exercise_invariant");
 
 const fn pmm_label_text(bytes: &'static [u8]) -> &'static str {
@@ -210,6 +279,10 @@ impl PhysicalMemoryError {
             Self::MetadataCorruption => pmm_label_text(&PMM_LABEL_METADATA_CORRUPTION),
             Self::MetadataOwnership => pmm_label_text(&PMM_LABEL_METADATA_OWNERSHIP),
             Self::MetadataHandoff => pmm_label_text(&PMM_LABEL_METADATA_HANDOFF),
+            Self::ReclaimTiming => pmm_label_text(&PMM_LABEL_RECLAIM_TIMING),
+            Self::ReclaimCapacity => pmm_label_text(&PMM_LABEL_RECLAIM_CAPACITY),
+            Self::ReclaimOwnership => pmm_label_text(&PMM_LABEL_RECLAIM_OWNERSHIP),
+            Self::ReclaimUnavailable => pmm_label_text(&PMM_LABEL_RECLAIM_UNAVAILABLE),
             Self::ExerciseInvariant => pmm_label_text(&PMM_LABEL_EXERCISE_INVARIANT),
         }
     }
@@ -311,6 +384,43 @@ struct AllocationPlan {
     owner: u16,
 }
 
+#[derive(Clone, Copy)]
+struct ReclaimPlan {
+    stage: ReclaimStage,
+    range_count: usize,
+    free_count_after: usize,
+    source_record_count: u64,
+    pages_by_zone: [u64; 3],
+    page_count: u64,
+    managed_after: [u64; 3],
+    coalesce_events_after: u64,
+    scrub_zeroed_bytes_after: u64,
+    scrub_verified_bytes_after: u64,
+    reclaim_scrub_pages_after: u64,
+    reclaim_operations_after: u64,
+    next_reclaim_sequence_after: u64,
+    range_checksum: u64,
+}
+
+#[derive(Clone, Copy)]
+struct ReclaimCursor {
+    next_record: usize,
+    split_start_page: u64,
+    split_remaining: u64,
+    pending: Option<Extent>,
+}
+
+impl ReclaimCursor {
+    const fn empty() -> Self {
+        Self {
+            next_record: 0,
+            split_start_page: 0,
+            split_remaining: 0,
+            pending: None,
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct PhysicalMemorySummary {
     pub memory_entry_count: usize,
@@ -340,6 +450,15 @@ pub struct PhysicalMemorySummary {
     pub metadata_release_rejections: u64,
     pub metadata_migration_rollbacks: u64,
     pub metadata_mapped: bool,
+    pub reclaim_stage: ReclaimStage,
+    pub reclaim_operations: u64,
+    pub reclaim_receipt_count: u64,
+    pub reclaim_scrub_pages: u64,
+    pub reclaimed_pages: [u64; 2],
+    pub reclaim_timing_rejections: u64,
+    pub reclaim_capacity_rejections: u64,
+    pub reclaim_ownership_rejections: u64,
+    pub reclaim_rollbacks: u64,
 }
 
 pub struct PhysicalMemoryManager {
@@ -375,6 +494,17 @@ pub struct PhysicalMemoryManager {
     metadata_lifecycle: MetadataLifecycle,
     metadata_release_rejections: u64,
     metadata_migration_rollbacks: u64,
+    reclaim_stage: ReclaimStage,
+    reclaim_receipts: [Option<ReclaimReceipt>; MAX_RECLAIM_RECEIPTS],
+    reclaim_receipt_count: usize,
+    next_reclaim_sequence: u64,
+    reclaim_operations: u64,
+    reclaim_scrub_pages: u64,
+    reclaimed_pages: [u64; MAX_RECLAIM_RECEIPTS],
+    reclaim_timing_rejections: u64,
+    reclaim_capacity_rejections: u64,
+    reclaim_ownership_rejections: u64,
+    reclaim_rollbacks: u64,
 }
 
 const METADATA_ARENA_BYTE_CAPACITY: usize =
@@ -420,6 +550,9 @@ pub struct PhysicalMemoryProof {
     pub metadata_release_rejected: bool,
     pub metadata_integrity_verified: bool,
     pub final_metadata_checksum: u64,
+    pub boot_reclaim: ReclaimReceipt,
+    pub boot_reclaim_idempotent: bool,
+    pub acpi_early_rejected: bool,
 }
 
 #[inline(never)]
@@ -437,6 +570,13 @@ pub fn run_profile<A: MetadataArenaAccess>(
     let initial = manager.summary();
     let metadata_release_rejected = manager.free_scrubbed(migration.allocation, access)
         == Err(PhysicalMemoryError::MetadataOwnership);
+    manager.advance_reclaim_stage(ReclaimStage::PostExitBootServices)?;
+    let boot_reclaim = manager.reclaim_held(ReclaimClass::BootServices, access)?;
+    let boot_reclaim_repeat = manager.reclaim_held(ReclaimClass::BootServices, access)?;
+    let boot_reclaim_idempotent =
+        !boot_reclaim_repeat.newly_reclaimed && boot_reclaim_repeat.receipt == boot_reclaim.receipt;
+    let acpi_early_rejected =
+        manager.reclaim_held(ReclaimClass::Acpi, access) == Err(PhysicalMemoryError::ReclaimTiming);
     let (first, allocation_receipt) = manager.allocate_scrubbed(Zone::Dma32, 2, 1, access)?;
     let quota_rejected = manager
         .allocate_scrubbed(Zone::Dma32, DEFAULT_QUOTA_PAGES, 3, access)
@@ -455,6 +595,17 @@ pub fn run_profile<A: MetadataArenaAccess>(
     let final_state = manager.summary();
     if !metadata_release_rejected
         || !metadata_integrity_verified
+        || !boot_reclaim.newly_reclaimed
+        || !boot_reclaim_idempotent
+        || !acpi_early_rejected
+        || boot_reclaim.receipt.class != ReclaimClass::BootServices
+        || boot_reclaim.receipt.required_stage != ReclaimStage::PostExitBootServices
+        || boot_reclaim.receipt.observed_stage != ReclaimStage::PostExitBootServices
+        || boot_reclaim.receipt.page_count != initial.source_pages[MEMORY_BOOT_RECLAIMABLE as usize]
+        || boot_reclaim.receipt.zeroed_bytes != boot_reclaim.receipt.page_count * PAGE_BYTES
+        || boot_reclaim.receipt.verified_bytes != boot_reclaim.receipt.zeroed_bytes
+        || boot_reclaim.receipt.range_checksum == 0
+        || boot_reclaim.receipt.receipt_checksum == 0
         || !quota_rejected
         || !unavailable_rejected
         || !double_free_rejected
@@ -471,12 +622,13 @@ pub fn run_profile<A: MetadataArenaAccess>(
         .enumerate()
         .any(|(index, receipt)| receipt.sequence != index as u64 + 2)
         || final_state.allocated_pages != METADATA_ARENA_PAGE_COUNT
-        || final_state.free_extent_count != initial.free_extent_count
-        || final_state.largest_free_pages != initial.largest_free_pages
+        || final_state.free_extent_count != boot_reclaim.receipt.post_free_extent_count as usize
         || final_state.allocation_scrub_pages != METADATA_ARENA_PAGE_COUNT + 4
         || final_state.release_scrub_pages != 4
-        || final_state.scrub_zeroed_bytes != (METADATA_ARENA_PAGE_COUNT + 8) * PAGE_BYTES
-        || final_state.scrub_verified_bytes != (METADATA_ARENA_PAGE_COUNT + 8) * PAGE_BYTES
+        || final_state.reclaim_scrub_pages != boot_reclaim.receipt.page_count
+        || final_state.scrub_zeroed_bytes
+            != (METADATA_ARENA_PAGE_COUNT + 8 + boot_reclaim.receipt.page_count) * PAGE_BYTES
+        || final_state.scrub_verified_bytes != final_state.scrub_zeroed_bytes
         || final_state.scrub_receipt_count != 5
         || final_state.receipt_ledger_count != 5
         || final_state.scrub_failures != 0
@@ -484,6 +636,15 @@ pub fn run_profile<A: MetadataArenaAccess>(
         || final_state.metadata_arena_pages != METADATA_ARENA_PAGE_COUNT
         || final_state.metadata_release_rejections != 1
         || !final_state.metadata_mapped
+        || final_state.reclaim_stage != ReclaimStage::PostExitBootServices
+        || final_state.reclaim_operations != 1
+        || final_state.reclaim_receipt_count != 1
+        || final_state.reclaimed_pages
+            != [initial.source_pages[MEMORY_BOOT_RECLAIMABLE as usize], 0]
+        || final_state.reclaim_timing_rejections != 1
+        || final_state.reclaim_capacity_rejections != 0
+        || final_state.reclaim_ownership_rejections != 0
+        || final_state.reclaim_rollbacks != 0
     {
         return Err(PhysicalMemoryError::ExerciseInvariant);
     }
@@ -505,6 +666,9 @@ pub fn run_profile<A: MetadataArenaAccess>(
         metadata_release_rejected,
         metadata_integrity_verified,
         final_metadata_checksum: manager.metadata_header.logical_checksum,
+        boot_reclaim: boot_reclaim.receipt,
+        boot_reclaim_idempotent,
+        acpi_early_rejected,
     })
 }
 
@@ -657,6 +821,17 @@ impl PhysicalMemoryManager {
             metadata_lifecycle: MetadataLifecycle::Bootstrap,
             metadata_release_rejections: 0,
             metadata_migration_rollbacks: 0,
+            reclaim_stage: ReclaimStage::PreExitBootServices,
+            reclaim_receipts: [None; MAX_RECLAIM_RECEIPTS],
+            reclaim_receipt_count: 0,
+            next_reclaim_sequence: 1,
+            reclaim_operations: 0,
+            reclaim_scrub_pages: 0,
+            reclaimed_pages: [0; MAX_RECLAIM_RECEIPTS],
+            reclaim_timing_rejections: 0,
+            reclaim_capacity_rejections: 0,
+            reclaim_ownership_rejections: 0,
+            reclaim_rollbacks: 0,
         }
     }
 
@@ -756,6 +931,15 @@ impl PhysicalMemoryManager {
             self.scrub_failures,
             self.metadata_release_rejections,
             self.metadata_migration_rollbacks,
+            self.reclaim_stage as u64,
+            self.reclaim_receipt_count as u64,
+            self.next_reclaim_sequence,
+            self.reclaim_operations,
+            self.reclaim_scrub_pages,
+            self.reclaim_timing_rejections,
+            self.reclaim_capacity_rejections,
+            self.reclaim_ownership_rejections,
+            self.reclaim_rollbacks,
         ] {
             state = fnv_u64(state, value);
         }
@@ -805,6 +989,31 @@ impl PhysicalMemoryManager {
                 }
             }
         }
+        for receipt in self.reclaim_receipts {
+            state = fnv_u64(state, u64::from(receipt.is_some()));
+            if let Some(receipt) = receipt {
+                for value in [
+                    receipt.sequence,
+                    receipt.class as u8 as u64,
+                    receipt.required_stage as u8 as u64,
+                    receipt.observed_stage as u8 as u64,
+                    receipt.source_record_count,
+                    receipt.range_count,
+                    receipt.page_count,
+                    receipt.pre_free_extent_count,
+                    receipt.post_free_extent_count,
+                    receipt.zeroed_bytes,
+                    receipt.verified_bytes,
+                    receipt.range_checksum,
+                    receipt.receipt_checksum,
+                ] {
+                    state = fnv_u64(state, value);
+                }
+                for value in receipt.pages_by_zone {
+                    state = fnv_u64(state, value);
+                }
+            }
+        }
         for value in self.source_pages {
             state = fnv_u64(state, value);
         }
@@ -812,6 +1021,9 @@ impl PhysicalMemoryManager {
             state = fnv_u64(state, value);
         }
         for value in self.managed_pages {
+            state = fnv_u64(state, value);
+        }
+        for value in self.reclaimed_pages {
             state = fnv_u64(state, value);
         }
         state
@@ -979,6 +1191,420 @@ impl PhysicalMemoryManager {
             allocation,
             receipt,
         })
+    }
+
+    pub fn advance_reclaim_stage(
+        &mut self,
+        stage: ReclaimStage,
+    ) -> Result<(), PhysicalMemoryError> {
+        self.require_operational()?;
+        let result = if stage == self.reclaim_stage {
+            Ok(())
+        } else if matches!(
+            (self.reclaim_stage, stage),
+            (
+                ReclaimStage::PreExitBootServices,
+                ReclaimStage::PostExitBootServices
+            ) | (
+                ReclaimStage::PostExitBootServices,
+                ReclaimStage::AcpiTablesReleased
+            )
+        ) {
+            self.reclaim_stage = stage;
+            Ok(())
+        } else {
+            self.reclaim_timing_rejections = self.reclaim_timing_rejections.saturating_add(1);
+            Err(PhysicalMemoryError::ReclaimTiming)
+        };
+        self.seal_metadata_integrity();
+        result
+    }
+
+    pub fn reclaim_held<A: PhysicalPageAccess>(
+        &mut self,
+        class: ReclaimClass,
+        access: &mut A,
+    ) -> Result<ReclaimOutcome, PhysicalMemoryError> {
+        self.require_operational()?;
+        let class_index = class.index();
+        if let Some(receipt) = self.reclaim_receipts[class_index] {
+            return Ok(ReclaimOutcome {
+                receipt,
+                newly_reclaimed: false,
+            });
+        }
+        if self.reclaim_stage < class.required_stage() {
+            self.reclaim_timing_rejections = self.reclaim_timing_rejections.saturating_add(1);
+            self.seal_metadata_integrity();
+            return Err(PhysicalMemoryError::ReclaimTiming);
+        }
+        let plan = match self.plan_reclaim(class) {
+            Ok(value) => value,
+            Err(error) => {
+                self.seal_metadata_integrity();
+                return Err(error);
+            }
+        };
+        let target_kind = class.source_kind();
+        let mut scrub_cursor = ReclaimCursor::empty();
+        while let Some(extent) = self.next_reclaim_extent(target_kind, &mut scrub_cursor)? {
+            if let Err(error) = self.scrub_extent(access, extent) {
+                self.reclaim_rollbacks = self.reclaim_rollbacks.saturating_add(1);
+                self.seal_metadata_integrity();
+                return Err(error);
+            }
+        }
+        let byte_count = plan
+            .page_count
+            .checked_mul(PAGE_BYTES)
+            .ok_or(PhysicalMemoryError::AddressRange)?;
+        let mut receipt = ReclaimReceipt {
+            sequence: self.next_reclaim_sequence,
+            class,
+            required_stage: class.required_stage(),
+            observed_stage: plan.stage,
+            source_record_count: plan.source_record_count,
+            range_count: plan.range_count as u64,
+            page_count: plan.page_count,
+            pages_by_zone: plan.pages_by_zone,
+            pre_free_extent_count: self.free_count as u64,
+            post_free_extent_count: plan.free_count_after as u64,
+            zeroed_bytes: byte_count,
+            verified_bytes: byte_count,
+            range_checksum: plan.range_checksum,
+            receipt_checksum: 0,
+        };
+        receipt.receipt_checksum = reclaim_receipt_checksum(receipt);
+        let mut commit_cursor = ReclaimCursor::empty();
+        while let Some(extent) = self.next_reclaim_extent(target_kind, &mut commit_cursor)? {
+            self.commit_preflighted_extent(extent);
+        }
+        self.free_count = plan.free_count_after;
+        self.coalesce_events = plan.coalesce_events_after;
+        self.managed_pages = plan.managed_after;
+        self.scrub_zeroed_bytes = plan.scrub_zeroed_bytes_after;
+        self.scrub_verified_bytes = plan.scrub_verified_bytes_after;
+        self.reclaim_scrub_pages = plan.reclaim_scrub_pages_after;
+        self.reclaim_operations = plan.reclaim_operations_after;
+        self.next_reclaim_sequence = plan.next_reclaim_sequence_after;
+        self.reclaimed_pages[class_index] = plan.page_count;
+        self.reclaim_receipts[class_index] = Some(receipt);
+        self.reclaim_receipt_count += 1;
+        self.seal_metadata_integrity();
+        Ok(ReclaimOutcome {
+            receipt,
+            newly_reclaimed: true,
+        })
+    }
+
+    fn plan_reclaim(&mut self, class: ReclaimClass) -> Result<ReclaimPlan, PhysicalMemoryError> {
+        if self.reclaim_receipt_count == MAX_RECLAIM_RECEIPTS {
+            self.reclaim_capacity_rejections = self.reclaim_capacity_rejections.saturating_add(1);
+            return Err(PhysicalMemoryError::ReclaimCapacity);
+        }
+        let mut source_record_count = 0u64;
+        let mut range_checksum = fnv_u64(FNV_OFFSET, class as u8 as u64);
+        range_checksum = fnv_u64(range_checksum, self.reclaim_stage as u8 as u64);
+        let target_kind = class.source_kind();
+        for record_index in 0..self.memory_entry_count {
+            let record = self.source_records[record_index];
+            if record.kind != target_kind {
+                continue;
+            }
+            source_record_count = source_record_count
+                .checked_add(1)
+                .ok_or(PhysicalMemoryError::AddressRange)?;
+            for value in [
+                record.start_page,
+                record.page_count,
+                u64::from(record.kind),
+                u64::from(record.source),
+            ] {
+                range_checksum = fnv_u64(range_checksum, value);
+            }
+        }
+        let mut range_count = 0usize;
+        let mut pages_by_zone = [0u64; 3];
+        let mut page_count = 0u64;
+        let mut free_count_after = self.free_count;
+        let mut coalesce_delta = 0u64;
+        let mut cursor = ReclaimCursor::empty();
+        while let Some(extent) = self.next_reclaim_extent(target_kind, &mut cursor)? {
+            range_count = range_count
+                .checked_add(1)
+                .ok_or(PhysicalMemoryError::AddressRange)?;
+            if range_count > MAX_RECLAIM_EXTENTS {
+                self.reclaim_capacity_rejections =
+                    self.reclaim_capacity_rejections.saturating_add(1);
+                return Err(PhysicalMemoryError::ReclaimCapacity);
+            }
+            if self.reclaim_extent_overlaps_retained(extent, target_kind)? {
+                self.reclaim_ownership_rejections =
+                    self.reclaim_ownership_rejections.saturating_add(1);
+                return Err(PhysicalMemoryError::ReclaimOwnership);
+            }
+            let zone_index = extent.zone.index();
+            pages_by_zone[zone_index] = pages_by_zone[zone_index]
+                .checked_add(extent.page_count)
+                .ok_or(PhysicalMemoryError::AddressRange)?;
+            page_count = page_count
+                .checked_add(extent.page_count)
+                .ok_or(PhysicalMemoryError::AddressRange)?;
+            let extent_end = extent
+                .start_page
+                .checked_add(extent.page_count)
+                .ok_or(PhysicalMemoryError::AddressRange)?;
+            let mut merge_previous = false;
+            let mut merge_next = false;
+            for free in &self.free[..self.free_count] {
+                let free_end = free
+                    .start_page
+                    .checked_add(free.page_count)
+                    .ok_or(PhysicalMemoryError::AddressRange)?;
+                if extent.start_page < free_end && free.start_page < extent_end {
+                    self.reclaim_ownership_rejections =
+                        self.reclaim_ownership_rejections.saturating_add(1);
+                    return Err(PhysicalMemoryError::ReclaimOwnership);
+                }
+                if free.zone == extent.zone && free_end == extent.start_page {
+                    merge_previous = true;
+                }
+                if free.zone == extent.zone && extent_end == free.start_page {
+                    merge_next = true;
+                }
+            }
+            if merge_previous && merge_next {
+                free_count_after = free_count_after
+                    .checked_sub(1)
+                    .ok_or(PhysicalMemoryError::AddressRange)?;
+                coalesce_delta = coalesce_delta
+                    .checked_add(2)
+                    .ok_or(PhysicalMemoryError::AddressRange)?;
+            } else if merge_previous || merge_next {
+                coalesce_delta = coalesce_delta
+                    .checked_add(1)
+                    .ok_or(PhysicalMemoryError::AddressRange)?;
+            } else {
+                free_count_after = free_count_after
+                    .checked_add(1)
+                    .ok_or(PhysicalMemoryError::AddressRange)?;
+                if free_count_after > MAX_FREE_EXTENTS {
+                    self.reclaim_capacity_rejections =
+                        self.reclaim_capacity_rejections.saturating_add(1);
+                    return Err(PhysicalMemoryError::ReclaimCapacity);
+                }
+            }
+        }
+        if page_count == 0 {
+            return Err(PhysicalMemoryError::ReclaimUnavailable);
+        }
+        let mut managed_after = self.managed_pages;
+        for zone in 0..managed_after.len() {
+            managed_after[zone] = managed_after[zone]
+                .checked_add(pages_by_zone[zone])
+                .ok_or(PhysicalMemoryError::AddressRange)?;
+        }
+        let byte_count = page_count
+            .checked_mul(PAGE_BYTES)
+            .ok_or(PhysicalMemoryError::AddressRange)?;
+        Ok(ReclaimPlan {
+            stage: self.reclaim_stage,
+            range_count,
+            free_count_after,
+            source_record_count,
+            pages_by_zone,
+            page_count,
+            managed_after,
+            coalesce_events_after: self
+                .coalesce_events
+                .checked_add(coalesce_delta)
+                .ok_or(PhysicalMemoryError::AddressRange)?,
+            scrub_zeroed_bytes_after: self
+                .scrub_zeroed_bytes
+                .checked_add(byte_count)
+                .ok_or(PhysicalMemoryError::AddressRange)?,
+            scrub_verified_bytes_after: self
+                .scrub_verified_bytes
+                .checked_add(byte_count)
+                .ok_or(PhysicalMemoryError::AddressRange)?,
+            reclaim_scrub_pages_after: self
+                .reclaim_scrub_pages
+                .checked_add(page_count)
+                .ok_or(PhysicalMemoryError::AddressRange)?,
+            reclaim_operations_after: self
+                .reclaim_operations
+                .checked_add(1)
+                .ok_or(PhysicalMemoryError::AddressRange)?,
+            next_reclaim_sequence_after: self
+                .next_reclaim_sequence
+                .checked_add(1)
+                .ok_or(PhysicalMemoryError::AddressRange)?,
+            range_checksum,
+        })
+    }
+
+    fn next_reclaim_extent(
+        &self,
+        target_kind: u32,
+        cursor: &mut ReclaimCursor,
+    ) -> Result<Option<Extent>, PhysicalMemoryError> {
+        loop {
+            let next = if cursor.split_remaining != 0 {
+                let zone = zone_for_page(cursor.split_start_page);
+                let take = cursor
+                    .split_remaining
+                    .min(zone_end_page(zone).saturating_sub(cursor.split_start_page));
+                if take == 0 {
+                    return Err(PhysicalMemoryError::AddressRange);
+                }
+                let extent = Extent {
+                    start_page: cursor.split_start_page,
+                    page_count: take,
+                    zone,
+                };
+                cursor.split_start_page = cursor
+                    .split_start_page
+                    .checked_add(take)
+                    .ok_or(PhysicalMemoryError::AddressRange)?;
+                cursor.split_remaining -= take;
+                Some(extent)
+            } else {
+                let mut record = None;
+                while cursor.next_record < self.memory_entry_count {
+                    let candidate = self.source_records[cursor.next_record];
+                    cursor.next_record += 1;
+                    if candidate.kind == target_kind {
+                        record = Some(candidate);
+                        break;
+                    }
+                }
+                if let Some(record) = record {
+                    cursor.split_start_page = record.start_page;
+                    cursor.split_remaining = record.page_count;
+                    continue;
+                }
+                None
+            };
+            match (cursor.pending, next) {
+                (None, None) => return Ok(None),
+                (Some(pending), None) => {
+                    cursor.pending = None;
+                    return Ok(Some(pending));
+                }
+                (None, Some(extent)) => cursor.pending = Some(extent),
+                (Some(mut pending), Some(extent)) if can_coalesce(pending, extent) => {
+                    pending.page_count = pending
+                        .page_count
+                        .checked_add(extent.page_count)
+                        .ok_or(PhysicalMemoryError::AddressRange)?;
+                    cursor.pending = Some(pending);
+                }
+                (Some(pending), Some(extent)) => {
+                    cursor.pending = Some(extent);
+                    return Ok(Some(pending));
+                }
+            }
+        }
+    }
+
+    fn commit_preflighted_extent(&mut self, extent: Extent) {
+        let mut index = 0;
+        while index < self.free_count && self.free[index].start_page < extent.start_page {
+            index += 1;
+        }
+        let merge_previous = index > 0 && can_coalesce(self.free[index - 1], extent);
+        let merge_next = index < self.free_count && can_coalesce(extent, self.free[index]);
+        if merge_previous && merge_next {
+            self.free[index - 1].page_count = self.free[index - 1]
+                .page_count
+                .wrapping_add(extent.page_count)
+                .wrapping_add(self.free[index].page_count);
+            self.remove_free_extent(index);
+            self.coalesce_events = self.coalesce_events.wrapping_add(2);
+        } else if merge_previous {
+            self.free[index - 1].page_count = self.free[index - 1]
+                .page_count
+                .wrapping_add(extent.page_count);
+            self.coalesce_events = self.coalesce_events.wrapping_add(1);
+        } else if merge_next {
+            self.free[index].start_page = extent.start_page;
+            self.free[index].page_count =
+                extent.page_count.wrapping_add(self.free[index].page_count);
+            self.coalesce_events = self.coalesce_events.wrapping_add(1);
+        } else {
+            for item in (index..self.free_count).rev() {
+                self.free[item + 1] = self.free[item];
+            }
+            self.free[index] = extent;
+            self.free_count += 1;
+        }
+    }
+
+    fn reclaim_extent_overlaps_retained(
+        &self,
+        extent: Extent,
+        target_kind: u32,
+    ) -> Result<bool, PhysicalMemoryError> {
+        for allocation in self.allocations.iter().filter(|item| item.active) {
+            if ranges_overlap(
+                extent.start_page,
+                extent.page_count,
+                allocation.start_page,
+                allocation.page_count,
+            )? {
+                return Ok(true);
+            }
+        }
+        for record in self.source_records[..self.memory_entry_count]
+            .iter()
+            .filter(|item| item.kind != target_kind)
+        {
+            if ranges_overlap(
+                extent.start_page,
+                extent.page_count,
+                record.start_page,
+                record.page_count,
+            )? {
+                return Ok(true);
+            }
+        }
+        Ok(false)
+    }
+
+    fn scrub_extent<A: PhysicalPageAccess>(
+        &mut self,
+        access: &mut A,
+        extent: Extent,
+    ) -> Result<(), PhysicalMemoryError> {
+        for page_offset in 0..extent.page_count {
+            let page = extent
+                .start_page
+                .checked_add(page_offset)
+                .ok_or(PhysicalMemoryError::AddressRange)?;
+            let physical = page
+                .checked_mul(PAGE_BYTES)
+                .ok_or(PhysicalMemoryError::AddressRange)?;
+            for word_index in 0..SCRUB_WORDS_PER_PAGE {
+                if access.write_word(physical, word_index, 0).is_err() {
+                    self.scrub_failures = self.scrub_failures.saturating_add(1);
+                    return Err(PhysicalMemoryError::ScrubAccess);
+                }
+            }
+            for word_index in 0..SCRUB_WORDS_PER_PAGE {
+                let value = match access.read_word(physical, word_index) {
+                    Ok(value) => value,
+                    Err(_) => {
+                        self.scrub_failures = self.scrub_failures.saturating_add(1);
+                        return Err(PhysicalMemoryError::ScrubAccess);
+                    }
+                };
+                if value != 0 {
+                    self.scrub_failures = self.scrub_failures.saturating_add(1);
+                    return Err(PhysicalMemoryError::ScrubVerification);
+                }
+            }
+        }
+        Ok(())
     }
 
     fn append_usable(
@@ -1497,6 +2123,15 @@ impl PhysicalMemoryManager {
             metadata_release_rejections: self.metadata_release_rejections,
             metadata_migration_rollbacks: self.metadata_migration_rollbacks,
             metadata_mapped: self.metadata_lifecycle == MetadataLifecycle::Mapped,
+            reclaim_stage: self.reclaim_stage,
+            reclaim_operations: self.reclaim_operations,
+            reclaim_receipt_count: self.reclaim_receipt_count as u64,
+            reclaim_scrub_pages: self.reclaim_scrub_pages,
+            reclaimed_pages: self.reclaimed_pages,
+            reclaim_timing_rejections: self.reclaim_timing_rejections,
+            reclaim_capacity_rejections: self.reclaim_capacity_rejections,
+            reclaim_ownership_rejections: self.reclaim_ownership_rejections,
+            reclaim_rollbacks: self.reclaim_rollbacks,
         }
     }
 
@@ -1513,6 +2148,45 @@ impl PhysicalMemoryManager {
 fn can_coalesce(first: Extent, second: Extent) -> bool {
     first.zone as u8 == second.zone as u8
         && first.start_page.checked_add(first.page_count) == Some(second.start_page)
+}
+
+fn ranges_overlap(
+    first_start: u64,
+    first_pages: u64,
+    second_start: u64,
+    second_pages: u64,
+) -> Result<bool, PhysicalMemoryError> {
+    let first_end = first_start
+        .checked_add(first_pages)
+        .ok_or(PhysicalMemoryError::AddressRange)?;
+    let second_end = second_start
+        .checked_add(second_pages)
+        .ok_or(PhysicalMemoryError::AddressRange)?;
+    Ok(first_start < second_end && second_start < first_end)
+}
+
+fn reclaim_receipt_checksum(receipt: ReclaimReceipt) -> u64 {
+    let mut state = FNV_OFFSET;
+    for value in [
+        receipt.sequence,
+        receipt.class as u8 as u64,
+        receipt.required_stage as u8 as u64,
+        receipt.observed_stage as u8 as u64,
+        receipt.source_record_count,
+        receipt.range_count,
+        receipt.page_count,
+        receipt.pre_free_extent_count,
+        receipt.post_free_extent_count,
+        receipt.zeroed_bytes,
+        receipt.verified_bytes,
+        receipt.range_checksum,
+    ] {
+        state = fnv_u64(state, value);
+    }
+    for value in receipt.pages_by_zone {
+        state = fnv_u64(state, value);
+    }
+    state
 }
 
 fn range_has_kind(
@@ -1794,6 +2468,58 @@ mod tests {
         (bytes, parsed_core)
     }
 
+    fn reclaim_fixture() -> (Vec<u8>, CoreRecord) {
+        let mut core = [0u8; 128];
+        put_u64(&mut core, 0, DEVELOPMENT_MODE | BOOT_SERVICES_EXITED);
+        put_u64(&mut core, 8, 0x0200_0000);
+        put_u64(&mut core, 16, 0x0004_0000);
+        put_u64(&mut core, 24, 0xffff_ffff_8000_0000);
+        put_u64(&mut core, 32, 0x0004_0000);
+        put_u64(&mut core, 40, 0xffff_ffff_8000_8000);
+        put_u64(&mut core, 48, 0xffff_ffff_8004_9000);
+        put_u64(&mut core, 56, 0x0204_0000);
+        put_u64(&mut core, 64, 0x0205_0000);
+        put_u64(&mut core, 72, 0xffff_ffff_8005_0000);
+        put_u64(&mut core, 80, 4096);
+        put_u32(&mut core, 104, 0);
+        put_u32(&mut core, 108, 3);
+        put_u32(&mut core, 112, 1);
+        put_u32(&mut core, 116, 1);
+        put_u32(&mut core, 120, 0x0002_0046);
+        let entries = [
+            entry(0, 4096, MEMORY_USABLE, 7),
+            entry(0x0100_0000, 4096, MEMORY_USABLE, 7),
+            entry(0x0200_0000, 96, MEMORY_LOADER_RESERVED, 2),
+            entry(0x0206_0000, 32, MEMORY_BOOT_RECLAIMABLE, 4),
+            entry(0x0208_0000, 4, MEMORY_ACPI_RECLAIMABLE, 9),
+            entry(0x1_0000_0000, 128, MEMORY_USABLE, 7),
+        ];
+        let mut memory = Vec::new();
+        for value in entries {
+            memory.extend_from_slice(&value);
+        }
+        let total = encoded_size(2, &[128, memory.len()]).unwrap();
+        put_u64(&mut core, 80, total as u64);
+        let mut output = vec![0u8; total];
+        let mut encoder = Encoder::new(&mut output, 2, 0, 0).unwrap();
+        encoder
+            .push(RECORD_CORE, 1, RECORD_REQUIRED, 128, 1, &core)
+            .unwrap();
+        encoder
+            .push(
+                RECORD_MEMORY_MAP,
+                1,
+                RECORD_REQUIRED | RECORD_ARRAY,
+                MEMORY_ENTRY_BYTES,
+                entries.len(),
+                &memory,
+            )
+            .unwrap();
+        let bytes = encoder.finish().unwrap().to_vec();
+        let parsed_core = poole_handoff::decode(&bytes).unwrap().core().unwrap();
+        (bytes, parsed_core)
+    }
+
     #[test]
     fn classifies_zones_and_preserves_nonusable_ranges() {
         let (bytes, core) = fixture();
@@ -1805,6 +2531,14 @@ mod tests {
         assert_eq!(summary.source_pages[MEMORY_BOOT_RECLAIMABLE as usize], 32);
         assert_eq!(summary.source_pages[MEMORY_LOADER_RESERVED as usize], 96);
         assert_eq!(summary.null_guard_pages, 1);
+    }
+
+    #[test]
+    fn manager_fits_the_guarded_metadata_arena() {
+        assert_eq!(14928, core::mem::size_of::<PhysicalMemoryManager>());
+        assert!(14928 <= METADATA_ARENA_BYTE_CAPACITY);
+        assert!(core::mem::size_of::<ReclaimPlan>() <= 160);
+        assert!(core::mem::size_of::<ReclaimCursor>() <= 64);
     }
 
     #[test]
@@ -1853,6 +2587,192 @@ mod tests {
         manager.free(normal).unwrap();
         assert_eq!(manager.summary().rejected_quota_requests, 1);
         assert_eq!(manager.summary().rejected_unavailable_requests, 1);
+    }
+
+    #[test]
+    fn held_classes_require_monotonic_lifecycle_and_reclaim_idempotently() {
+        let (bytes, core) = reclaim_fixture();
+        let handoff = poole_handoff::decode(&bytes).unwrap();
+        let mut manager = PhysicalMemoryManager::from_handoff(&handoff, core, 64).unwrap();
+        let boot_page = 0x0206_0000 / PAGE_BYTES;
+        let mut access = FakePageAccess::new(boot_page, 36, STALE_PATTERN);
+        assert_eq!(
+            manager.reclaim_held(ReclaimClass::BootServices, &mut access),
+            Err(PhysicalMemoryError::ReclaimTiming)
+        );
+        assert_eq!(
+            manager.advance_reclaim_stage(ReclaimStage::AcpiTablesReleased),
+            Err(PhysicalMemoryError::ReclaimTiming)
+        );
+        assert_eq!(0, access.write_count);
+        manager
+            .advance_reclaim_stage(ReclaimStage::PostExitBootServices)
+            .unwrap();
+        let boot = manager
+            .reclaim_held(ReclaimClass::BootServices, &mut access)
+            .unwrap();
+        assert!(boot.newly_reclaimed);
+        assert_eq!(32, boot.receipt.page_count);
+        assert_eq!([0, 32, 0], boot.receipt.pages_by_zone);
+        assert_eq!(1, boot.receipt.source_record_count);
+        assert_eq!(1, boot.receipt.range_count);
+        assert_ne!(0, boot.receipt.range_checksum);
+        assert_eq!(
+            boot.receipt.receipt_checksum,
+            reclaim_receipt_checksum(boot.receipt)
+        );
+        assert!(
+            access.words[..32 * SCRUB_WORDS_PER_PAGE]
+                .iter()
+                .all(|word| *word == 0)
+        );
+        assert!(
+            access.words[32 * SCRUB_WORDS_PER_PAGE..]
+                .iter()
+                .all(|word| *word == STALE_PATTERN)
+        );
+        let writes_after_boot = access.write_count;
+        let repeated = manager
+            .reclaim_held(ReclaimClass::BootServices, &mut access)
+            .unwrap();
+        assert!(!repeated.newly_reclaimed);
+        assert_eq!(boot.receipt, repeated.receipt);
+        assert_eq!(writes_after_boot, access.write_count);
+        assert_eq!(
+            manager.reclaim_held(ReclaimClass::Acpi, &mut access),
+            Err(PhysicalMemoryError::ReclaimTiming)
+        );
+        manager
+            .advance_reclaim_stage(ReclaimStage::AcpiTablesReleased)
+            .unwrap();
+        let acpi = manager
+            .reclaim_held(ReclaimClass::Acpi, &mut access)
+            .unwrap();
+        assert!(acpi.newly_reclaimed);
+        assert_eq!(4, acpi.receipt.page_count);
+        assert_eq!([0, 4, 0], acpi.receipt.pages_by_zone);
+        assert!(access.words.iter().all(|word| *word == 0));
+        let summary = manager.summary();
+        assert_eq!(ReclaimStage::AcpiTablesReleased, summary.reclaim_stage);
+        assert_eq!(2, summary.reclaim_operations);
+        assert_eq!(2, summary.reclaim_receipt_count);
+        assert_eq!(36, summary.reclaim_scrub_pages);
+        assert_eq!([32, 4], summary.reclaimed_pages);
+        assert_eq!(3, summary.reclaim_timing_rejections);
+        assert_eq!([4095, 4132, 128], summary.managed_pages);
+    }
+
+    #[test]
+    fn mapped_manager_reclaims_boot_services_and_preserves_its_seal() {
+        let (bytes, core) = reclaim_fixture();
+        let handoff = poole_handoff::decode(&bytes).unwrap();
+        let mut bootstrap = PhysicalMemoryManager::from_handoff(&handoff, core, 64).unwrap();
+        let acpi_end_page = 0x0208_4000 / PAGE_BYTES;
+        let mut access =
+            FakePageAccess::new(DMA_END_PAGE, acpi_end_page - DMA_END_PAGE, STALE_PATTERN);
+        let migration = bootstrap.migrate_to_metadata(&mut access).unwrap();
+        // SAFETY: migration returned a sealed manager in the fake page-aligned arena.
+        let manager =
+            unsafe { &mut *(migration.manager_address as usize as *mut PhysicalMemoryManager) };
+        manager
+            .advance_reclaim_stage(ReclaimStage::PostExitBootServices)
+            .unwrap();
+        let outcome = manager
+            .reclaim_held(ReclaimClass::BootServices, &mut access)
+            .unwrap();
+        assert!(outcome.newly_reclaimed);
+        assert_eq!(32, outcome.receipt.page_count);
+        assert_eq!(Ok(()), manager.verify_metadata_integrity());
+        assert_eq!(1, manager.summary().reclaim_operations);
+        assert_eq!(METADATA_ARENA_PAGE_COUNT, manager.summary().allocated_pages);
+    }
+
+    #[test]
+    fn reclaim_scrub_fault_preserves_held_ownership_and_receipt_sequence() {
+        let (bytes, core) = reclaim_fixture();
+        let handoff = poole_handoff::decode(&bytes).unwrap();
+        let mut manager = PhysicalMemoryManager::from_handoff(&handoff, core, 64).unwrap();
+        manager
+            .advance_reclaim_stage(ReclaimStage::PostExitBootServices)
+            .unwrap();
+        let boot_page = 0x0206_0000 / PAGE_BYTES;
+        let mut access = FakePageAccess::new(boot_page, 32, STALE_PATTERN);
+        access.fail_write = Some((boot_page + 1, 0));
+        let before = manager.summary();
+        assert_eq!(
+            manager.reclaim_held(ReclaimClass::BootServices, &mut access),
+            Err(PhysicalMemoryError::ScrubAccess)
+        );
+        let failed = manager.summary();
+        assert_eq!(before.free_extent_count, failed.free_extent_count);
+        assert_eq!(before.managed_pages, failed.managed_pages);
+        assert_eq!(0, failed.reclaim_operations);
+        assert_eq!(0, failed.reclaim_receipt_count);
+        assert_eq!([0, 0], failed.reclaimed_pages);
+        assert_eq!(1, failed.reclaim_rollbacks);
+        assert_eq!(1, failed.scrub_failures);
+        access.fail_write = None;
+        let recovered = manager
+            .reclaim_held(ReclaimClass::BootServices, &mut access)
+            .unwrap();
+        assert_eq!(1, recovered.receipt.sequence);
+        assert_eq!(32, recovered.receipt.page_count);
+    }
+
+    #[test]
+    fn reclaim_capacity_and_retained_overlap_fail_before_physical_writes() {
+        let mut capacity = PhysicalMemoryManager::empty(64);
+        for index in 0..MAX_FREE_EXTENTS {
+            capacity.free[index] = Extent {
+                start_page: 1 + index as u64 * 2,
+                page_count: 1,
+                zone: Zone::Dma,
+            };
+        }
+        capacity.free_count = MAX_FREE_EXTENTS;
+        capacity.memory_entry_count = 1;
+        capacity.source_records[0] = SourceRecord {
+            start_page: 700,
+            page_count: 1,
+            kind: MEMORY_BOOT_RECLAIMABLE,
+            source: 4,
+        };
+        capacity.source_pages[MEMORY_BOOT_RECLAIMABLE as usize] = 1;
+        capacity
+            .advance_reclaim_stage(ReclaimStage::PostExitBootServices)
+            .unwrap();
+        let mut capacity_access = FakePageAccess::new(700, 1, STALE_PATTERN);
+        assert_eq!(
+            capacity.reclaim_held(ReclaimClass::BootServices, &mut capacity_access),
+            Err(PhysicalMemoryError::ReclaimCapacity)
+        );
+        assert_eq!(0, capacity_access.write_count);
+        assert_eq!(1, capacity.summary().reclaim_capacity_rejections);
+
+        let mut overlap = PhysicalMemoryManager::empty(64);
+        overlap.memory_entry_count = 2;
+        overlap.source_records[0] = SourceRecord {
+            start_page: 700,
+            page_count: 1,
+            kind: MEMORY_BOOT_RECLAIMABLE,
+            source: 4,
+        };
+        overlap.source_records[1] = SourceRecord {
+            start_page: 700,
+            page_count: 1,
+            kind: MEMORY_LOADER_RESERVED,
+            source: 2,
+        };
+        overlap
+            .advance_reclaim_stage(ReclaimStage::PostExitBootServices)
+            .unwrap();
+        let mut overlap_access = FakePageAccess::new(700, 1, STALE_PATTERN);
+        assert_eq!(
+            overlap.reclaim_held(ReclaimClass::BootServices, &mut overlap_access),
+            Err(PhysicalMemoryError::ReclaimOwnership)
+        );
+        assert_eq!(0, overlap_access.write_count);
+        assert_eq!(1, overlap.summary().reclaim_ownership_rejections);
     }
 
     #[test]
