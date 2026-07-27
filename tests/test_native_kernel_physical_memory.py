@@ -146,8 +146,8 @@ class NativeKernelPhysicalMemoryTests(unittest.TestCase):
         self.assertEqual(0, audit["heap_api_token_count"])
         self.assertEqual(5, audit["bootstrap_fixed_capacity_ledger_count"])
         self.assertEqual(0, audit["active_fixed_capacity_ledger_count"])
-        self.assertEqual(11, audit["live_adapter_volatile_read_site_count"])
-        self.assertEqual(9, audit["live_adapter_volatile_write_site_count"])
+        self.assertEqual(15, audit["live_adapter_volatile_read_site_count"])
+        self.assertEqual(13, audit["live_adapter_volatile_write_site_count"])
         self.assertTrue(audit["final_temporary_alias_revocation_required"])
         self.assertTrue(audit["final_guarded_metadata_mapping_retention_required"])
 

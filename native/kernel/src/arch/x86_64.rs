@@ -8,8 +8,10 @@ use core::sync::atomic::{Ordering, compiler_fence};
 use poolekernel::{
     ByteSink, CPU_MSR_APIC_BASE, CPU_MSR_EFER, CPU_MSR_MTRR_CAP, CPU_MSR_MTRR_DEF_TYPE,
     CPU_MSR_PAT, CpuControlState, CpuDiscovery, CpuPolicySnapshot, DescriptorState, GDT_LIMIT,
-    IDT_LIMIT, INSTALLED_EXCEPTION_GATE_COUNT, INSTALLED_XSTATE_EXCEPTION_GATE_COUNT,
-    IST_STACK_BYTES, KERNEL_CODE_SELECTOR, KERNEL_DATA_SELECTOR, KERNEL_TSS_SELECTOR,
+    IDT_LIMIT, INSTALLED_EXCEPTION_GATE_COUNT, INSTALLED_INTERRUPT_GATE_COUNT,
+    INSTALLED_XSTATE_EXCEPTION_GATE_COUNT, IST_STACK_BYTES, KERNEL_CODE_SELECTOR,
+    KERNEL_DATA_SELECTOR, KERNEL_TSS_SELECTOR,
+    interrupt_time::{APIC_ERROR_VECTOR, CpuApicObservation, SPURIOUS_VECTOR, TIMER_VECTOR},
     privilege_msr::{
         PrivilegeMsrSnapshot, READ_CSTAR, READ_EFER, READ_FS_BASE, READ_GS_BASE,
         READ_KERNEL_GS_BASE, READ_LSTAR, READ_MCG_CAP, READ_MCG_CTL, READ_MCG_STATUS, READ_SFMASK,
@@ -34,6 +36,9 @@ const GENERAL_PROTECTION_VECTOR: usize = 13;
 const PAGE_FAULT_VECTOR: usize = 14;
 const X87_FLOATING_POINT_VECTOR: usize = 16;
 const SIMD_FLOATING_POINT_VECTOR: usize = 19;
+const TIMER_INTERRUPT_VECTOR: usize = TIMER_VECTOR as usize;
+const APIC_ERROR_INTERRUPT_VECTOR: usize = APIC_ERROR_VECTOR as usize;
+const SPURIOUS_INTERRUPT_VECTOR: usize = SPURIOUS_VECTOR as usize;
 const FAULT_IST_INDEX: u8 = 1;
 const DOUBLE_FAULT_IST_INDEX: u8 = 2;
 const INTERRUPT_GATE_PRESENT_RING0: u8 = 0x8e;
@@ -275,6 +280,19 @@ unsafe fn read_msr(msr: u32) -> u64 {
     u64::from(low) | (u64::from(high) << 32)
 }
 
+unsafe fn write_msr(msr: u32, value: u64) {
+    // SAFETY: each caller supplies a typed, support-gated MSR and a constrained value.
+    unsafe {
+        asm!(
+            "wrmsr",
+            in("ecx") msr,
+            in("eax") value as u32,
+            in("edx") (value >> 32) as u32,
+            options(nomem, nostack, preserves_flags)
+        )
+    };
+}
+
 unsafe fn read_efer() -> u64 {
     // SAFETY: long mode and the PKCPU1 baseline require IA32_EFER to exist.
     unsafe { read_msr(IA32_EFER) }
@@ -283,6 +301,26 @@ unsafe fn read_efer() -> u64 {
 unsafe fn read_apic_base() -> u64 {
     // SAFETY: the caller requires CPUID.01H:EDX.APIC before this typed read.
     unsafe { read_msr(IA32_APIC_BASE) }
+}
+
+pub fn observe_apic_cpu() -> CpuApicObservation {
+    let leaf1 = cpuid(1, 0);
+    CpuApicObservation {
+        apic_supported: leaf1.edx & (1 << 9) != 0,
+        x2apic_supported: leaf1.ecx & (1 << 21) != 0,
+        initial_apic_id: leaf1.ebx >> 24,
+        physical_address_bits: physical_address_bits().unwrap_or(0),
+    }
+}
+
+pub unsafe fn read_local_apic_base() -> u64 {
+    // SAFETY: the PKIRQ1 caller first requires CPUID.01H:EDX.APIC.
+    unsafe { read_apic_base() }
+}
+
+pub unsafe fn write_local_apic_base(value: u64) {
+    // SAFETY: PKIRQ1 permits only an exact read-modify-write of IA32_APIC_BASE.EN.
+    unsafe { write_msr(IA32_APIC_BASE, value) }
 }
 
 unsafe fn read_pat() -> u64 {
@@ -883,18 +921,25 @@ pub struct XstateExceptionTransition {
 
 pub unsafe fn install_descriptor_tables(rsp0: u64) -> DescriptorState {
     // SAFETY: the caller owns the single-BSP PKTRAP1 descriptor installation.
-    unsafe { install_descriptor_tables_for_profile(rsp0, false) }
+    unsafe { install_descriptor_tables_for_profile(rsp0, false, false) }
 }
 
 pub unsafe fn install_xstate_exception_descriptor_tables(rsp0: u64) -> DescriptorState {
     // SAFETY: the caller owns the single-BSP PKXEXC1 descriptor installation.
-    unsafe { install_descriptor_tables_for_profile(rsp0, true) }
+    unsafe { install_descriptor_tables_for_profile(rsp0, true, false) }
+}
+
+pub unsafe fn install_interrupt_descriptor_tables(rsp0: u64) -> DescriptorState {
+    // SAFETY: the caller owns the one-BSP PKIRQ1 descriptor installation with IF clear.
+    unsafe { install_descriptor_tables_for_profile(rsp0, false, true) }
 }
 
 unsafe fn install_descriptor_tables_for_profile(
     rsp0: u64,
     include_xstate_exceptions: bool,
+    include_interrupts: bool,
 ) -> DescriptorState {
+    assert!(!(include_xstate_exceptions && include_interrupts));
     // SAFETY: single-entry BSP initialization is the sole accessor to these statics.
     let (gdt_base, idt_base, tss_base, ist1_bottom, ist2_bottom) = unsafe {
         (
@@ -986,6 +1031,30 @@ unsafe fn install_descriptor_tables_for_profile(
             };
         }
     }
+    if include_interrupts {
+        for (vector, handler) in [
+            (
+                TIMER_INTERRUPT_VECTOR,
+                poole_interrupt_timer as *const () as usize as u64,
+            ),
+            (
+                APIC_ERROR_INTERRUPT_VECTOR,
+                poole_interrupt_apic_error as *const () as usize as u64,
+            ),
+            (
+                SPURIOUS_INTERRUPT_VECTOR,
+                poole_interrupt_spurious as *const () as usize as u64,
+            ),
+        ] {
+            // SAFETY: each PKIRQ1 vector is uniquely owned and uses the bounded IST1 stack.
+            unsafe {
+                write_volatile(
+                    addr_of_mut!(IDT.0).cast::<IdtGate>().add(vector),
+                    IdtGate::interrupt(handler, FAULT_IST_INDEX),
+                )
+            };
+        }
+    }
 
     let gdtr = DescriptorPointer {
         limit: GDT_LIMIT,
@@ -1056,6 +1125,8 @@ unsafe fn install_descriptor_tables_for_profile(
         task_selector,
         installed_gate_count: if include_xstate_exceptions {
             INSTALLED_XSTATE_EXCEPTION_GATE_COUNT
+        } else if include_interrupts {
+            INSTALLED_INTERRUPT_GATE_COUNT
         } else {
             INSTALLED_EXCEPTION_GATE_COUNT
         },
@@ -1282,6 +1353,9 @@ unsafe extern "C" {
     fn poole_simd_exception_resume();
     fn poole_trigger_device_not_available_rejection() -> !;
     fn poole_device_not_available_fault();
+    fn poole_interrupt_timer();
+    fn poole_interrupt_apic_error();
+    fn poole_interrupt_spurious();
 }
 
 core::arch::global_asm!(
@@ -1315,6 +1389,9 @@ core::arch::global_asm!(
     POOLE_TRAP_ERROR poole_trap_page_fault, 14
     POOLE_TRAP_NO_ERROR poole_trap_x87_floating_point, 16
     POOLE_TRAP_NO_ERROR poole_trap_simd_floating_point, 19
+    POOLE_TRAP_NO_ERROR poole_interrupt_timer, 64
+    POOLE_TRAP_NO_ERROR poole_interrupt_apic_error, 240
+    POOLE_TRAP_NO_ERROR poole_interrupt_spurious, 255
 
     .global poole_trap_common
     .type poole_trap_common,@function
@@ -1519,6 +1596,56 @@ impl ByteSink for DebugCon {
         // SAFETY: PKXFER1's QEMU-only profile reserves this fixed debugcon port.
         unsafe { outb(DEBUGCON_PORT, byte) };
     }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct PicMasks {
+    pub master: u8,
+    pub slave: u8,
+}
+
+pub unsafe fn mask_legacy_pic() -> Result<PicMasks, ()> {
+    // SAFETY: PKIRQ1 owns the fixed dual-8259 data ports while IF is clear.
+    let original = unsafe {
+        PicMasks {
+            master: inb(0x21),
+            slave: inb(0xa1),
+        }
+    };
+    // SAFETY: writing all ones masks every legacy PIC input without remapping vectors.
+    unsafe {
+        outb(0x21, 0xff);
+        outb(0xa1, 0xff);
+    }
+    // SAFETY: readback is limited to the two mask registers just written.
+    if unsafe { inb(0x21) } != 0xff || unsafe { inb(0xa1) } != 0xff {
+        // SAFETY: restore the exact observed masks after failed readback.
+        unsafe {
+            outb(0x21, original.master);
+            outb(0xa1, original.slave);
+        }
+        return Err(());
+    }
+    Ok(original)
+}
+
+pub unsafe fn restore_legacy_pic(masks: PicMasks) -> Result<(), ()> {
+    // SAFETY: PKIRQ1 still owns the fixed dual-8259 data ports with IF clear.
+    unsafe {
+        outb(0x21, masks.master);
+        outb(0xa1, masks.slave);
+    }
+    // SAFETY: readback verifies the exact rollback state.
+    if unsafe { inb(0x21) } != masks.master || unsafe { inb(0xa1) } != masks.slave {
+        return Err(());
+    }
+    Ok(())
+}
+
+pub unsafe fn enable_interrupts_halt_disable() {
+    // SAFETY: PKIRQ1 calls this only after a complete IDT/APIC/timer transaction;
+    // STI's interrupt shadow keeps HLT adjacent and CLI closes the delivery window.
+    unsafe { asm!("sti", "hlt", "cli", options(nomem, nostack)) };
 }
 
 pub fn halt_forever() -> ! {

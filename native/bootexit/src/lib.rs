@@ -9,6 +9,7 @@ pub const NORMALIZED_MEMORY_CAPACITY: usize = 16_384 * 40;
 pub const HANDOFF_CAPACITY_BYTES: usize = 1024 * 1024;
 pub const STACK_PAGE_COUNT: usize = 32;
 pub const PAGE_SIZE: u64 = 4096;
+pub const MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = 11;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Error {
@@ -310,7 +311,7 @@ impl DevelopmentTransfer {
             || !self.emulator_only
             || !self.terminal_after_revalidation
             || self.production_kernel_entry_profile_valid
-            || self.trap_scenario > 10
+            || self.trap_scenario > MAX_DEVELOPMENT_TRAP_SCENARIO
         {
             return Err(TransferError::TransferState);
         }
@@ -547,7 +548,7 @@ mod tests {
         transfer.terminal_after_revalidation = false;
         assert_eq!(transfer.validate(), Err(TransferError::TransferState));
         transfer = development_transfer();
-        transfer.trap_scenario = 11;
+        transfer.trap_scenario = MAX_DEVELOPMENT_TRAP_SCENARIO + 1;
         assert_eq!(transfer.validate(), Err(TransferError::TransferState));
     }
 

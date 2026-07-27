@@ -71,10 +71,17 @@ class NativeKernelPrivilegeMsrPolicyTests(unittest.TestCase):
         with self.assertRaises(qualify_native_kernel_privilege_msr_policy.QualificationError):
             qualify_native_kernel_privilege_msr_policy._audit_source_text(hostile)
 
-    def test_linked_audit_records_no_activation_or_write_instruction(self) -> None:
+    def test_linked_audit_scopes_pkirq1_writes_outside_pkmsr1(self) -> None:
         audit = self.readiness["build"]["linked_machine_code_audit"]
         self.assertGreaterEqual(audit["instruction_counts"]["rdmsr"], 1)
-        self.assertEqual(0, audit["instruction_counts"]["wrmsr"])
+        self.assertEqual(2, audit["instruction_counts"]["wrmsr"])
+        self.assertEqual(0, audit["pkmsr1_runtime_msr_write_count"])
+        self.assertEqual(
+            {"rdmsr": 12, "wrmsr": 0},
+            audit["privileged_function_instruction_counts"][
+                "PooleKernelLinked::arch::x86_64::observe_privilege_msr_policy"
+            ],
+        )
         self.assertEqual(0, audit["instruction_counts"]["syscall"])
         self.assertEqual(0, audit["instruction_counts"]["swapgs"])
 

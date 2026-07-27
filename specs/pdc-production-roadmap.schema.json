@@ -49,10 +49,10 @@
         "inspect_live_pooleglyph_each_turn": {"const": true},
         "verify_master_checklist_coverage_each_turn": {"const": true},
         "new_work_must_be_flagged": {"const": true},
-        "last_updated_cycle": {"const": 134},
-        "selected_move_id": {"const": "N9-VM-DIRECT-MAP-001"},
+        "last_updated_cycle": {"const": 135},
+        "selected_move_id": {"const": "N8-IRQ-001"},
         "immediate_next_move_id": {"const": "N0-HW-KEY-ACQUIRE-001"},
-        "owner_independent_next_move_id": {"const": "N8-IRQ-001"},
+        "owner_independent_next_move_id": {"const": "N8-SMP-FIRST-AP-001"},
         "required_records": {"type": "array", "minItems": 7, "items": {"type": "string"}, "uniqueItems": true},
         "flag_classes": {"type": "array", "minItems": 8, "items": {"type": "string"}, "uniqueItems": true}
       }
@@ -92,9 +92,9 @@
       "properties": {
         "total": {"const": 40},
         "complete": {"const": 0},
-        "partial": {"const": 16},
+        "partial": {"const": 17},
         "blocked": {"const": 1},
-        "not_started": {"const": 23},
+        "not_started": {"const": 22},
         "subphase_total": {"const": 301}
       }
     },

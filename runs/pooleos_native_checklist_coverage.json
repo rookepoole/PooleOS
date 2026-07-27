@@ -169,7 +169,7 @@
     {
       "phase_id": "N8",
       "title": "Interrupts, Time, SMP, and CPU Lifecycle",
-      "status": "not_started",
+      "status": "partial",
       "source_section_ids": [
         "023",
         "024",
@@ -954,7 +954,7 @@
       "subheading_count": 4,
       "checkbox_count": 76,
       "phase_id": "N8",
-      "phase_status": "not_started",
+      "phase_status": "partial",
       "completion_inferred": false
     },
     {
@@ -966,7 +966,7 @@
       "subheading_count": 3,
       "checkbox_count": 60,
       "phase_id": "N8",
-      "phase_status": "not_started",
+      "phase_status": "partial",
       "completion_inferred": false
     },
     {
@@ -978,7 +978,7 @@
       "subheading_count": 4,
       "checkbox_count": 68,
       "phase_id": "N8",
-      "phase_status": "not_started",
+      "phase_status": "partial",
       "completion_inferred": false
     },
     {

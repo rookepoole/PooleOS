@@ -107,23 +107,25 @@ allocations, block further growth, and require explicit retry.
 
 ## Retained Layout
 
-The final 83-page kernel and 32-page bootstrap stack use this shared PKMAP2
+The final 89-page kernel and 32-page bootstrap stack use this shared PKMAP2
 leaf geometry:
 
 | Indices | Role |
 | --- | --- |
-| `0-82` | PooleKernel image |
-| `83` | absent low stack guard |
-| `84-115` | bootstrap stack |
-| `116` | absent high stack guard |
-| `117-372` | read-only PBP1 handoff |
-| `373` | temporary physical alias |
-| `374 / 380` | stable-manager guards |
-| `375-379` | stable manager |
-| `381 / 414` | ledger-window A guards |
-| `382-413` | ledger-window A |
-| `415 / 448` | ledger-window B guards |
-| `416-447` | ledger-window B |
+| `0-88` | PooleKernel image |
+| `89` | absent low stack guard |
+| `90-121` | bootstrap stack |
+| `122` | absent high stack guard |
+| `123-378` | read-only PBP1 handoff |
+| `379` | temporary physical alias |
+| `380 / 386` | stable-manager guards |
+| `381-385` | stable manager |
+| `387 / 420` | ledger-window A guards |
+| `388-419` | ledger-window A |
+| `421 / 454` | ledger-window B guards |
+| `422-453` | ledger-window B |
+| `455 / 457 / 459` | PKIRQ1 MMIO guards |
+| `456 / 458` | transient local-APIC / HPET leaves |
 
 Closeout found and fixed two consumers that still used the former 14-page
 stack size. PKTRAP1 had calculated its deliberate low-guard page from the old
@@ -134,7 +136,7 @@ consume the 32-page contract, and their live profiles pass.
 ## Canonical Evidence
 
 Two fresh-OVMF-vars TCG runs reproduce 45 ordered markers, exact framebuffer
-bytes, and exact PBP1 bytes. Eighty-eight PooleKernel host tests and 191 hostile
+bytes, and exact PBP1 bytes. Ninety-nine PooleKernel host tests and 191 hostile
 controls pass. The independent Python oracle derives every source class,
 first-fit allocation, generation, retired hole, reclaim range, receipt,
 checksum, physical access, and final ownership total from PBP1.
@@ -142,9 +144,9 @@ checksum, physical access, and final ownership total from PBP1.
 | Measure | Result |
 | --- | ---: |
 | PBP1 memory entries | 97 |
-| Conventional usable source pages | 117,888 |
-| Final managed pages | 129,148 |
-| Protected loader pages | 856 |
+| Conventional usable source pages | 117,882 |
+| Final managed pages | 129,142 |
+| Protected loader pages | 862 |
 | Stable manager / final ledger / ACPI snapshot pages | `5 / 29 / 1` |
 | Boot reclaim source records / ranges / pages | `70 / 12 / 11,250` |
 | Boot reclaim DMA / DMA32 / Normal pages | `2,018 / 9,232 / 0` |
@@ -161,10 +163,12 @@ checksum, physical access, and final ownership total from PBP1.
 | ACPI source / snapshot checksums | `0x078583AEEFDD6581 / 0x4089A5CFEC81CB41` |
 | ACPI range / receipt checksums | `0xC718FB26B45257F2 / 0x60DAA52A8A05ABD6` |
 
-The Cycle 134 requalification keeps the kernel at 299,008 canonical bytes in a
-339,968-byte, 83-page image, now with 729 relocations and SHA-256
-`5B581CC1D1ABEB163D0984D12144CA5016C44B46A28B190A6DFCBDCDA689A255`.
-PKPMM7 also supplies PKVM3's exact generation-bound sparse ownership manifest.
+The Cycle 135 requalification binds the kernel at 323,584 canonical bytes in a
+364,544-byte, 89-page image with 812 relocations and SHA-256
+`2ACD4A5EF30CA1A4A22711FD31E2A259A5C87D97BCE7FB1BF49A3488B3FC02B2`.
+PKPMM7 also supplies PKVM3's exact generation-bound sparse ownership manifest;
+the six-page retained-layout increase is fully reflected in source, managed,
+loader-protected, and dependent direct-map counts.
 
 ## Nonclaims
 

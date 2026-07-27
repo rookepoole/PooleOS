@@ -268,7 +268,8 @@ from the complete PMM ownership manifest and proving transactional activation,
 rollback, local invalidation receipts, and one-BSP generation retirement.
 Interrupt-context, concurrent, and SMP allocation, AP startup, remote shootdown
 and deferred reclaim, ring 3, heap, pager, target, and production claims remain
-open. The next chronological owner-independent move is `N8-IRQ-001`.
+open. Cycle 135 adds the separately qualified PKIRQ1 selector-11 path; the next
+chronological owner-independent move is `N8-SMP-FIRST-AP-001`.
 Capability creation, lifecycle execution, signature trust, authenticated
 persistent state, production transfer, and physical-target qualification remain
 separately gated by N5/N6 and owner-controlled N0 work.

@@ -17,6 +17,7 @@ use poole_handoff::{
 
 pub mod acpi;
 pub mod active_virtual_memory;
+pub mod interrupt_time;
 pub mod physical_memory;
 pub mod privilege_msr;
 pub mod revalidation;
@@ -35,7 +36,7 @@ pub const VIRTUAL_MEMORY_CONTRACT_ID: &str = virtual_memory::CONTRACT_ID;
 pub const XSTATE_EXCEPTION_CONTRACT_ID: &str = "PKXEXC1";
 #[used]
 #[unsafe(link_section = ".text.pkbuild_literal")]
-static BUILD_ID_BYTES: [u8; 42] = *b"PKBUILD1-CYCLE134-N9-VM-DIRECT-MAP-V01-001";
+static BUILD_ID_BYTES: [u8; 42] = *b"PKBUILD1-CYCLE135-N8-IRQ-TIMER-V01-0010000";
 pub const BUILD_ID: &[u8] = &BUILD_ID_BYTES;
 pub const ENTRY_OFFSET: u64 = 0x9000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
@@ -49,6 +50,7 @@ pub const IST_STACK_BYTES: u64 = 8192;
 pub const BOOTSTRAP_STACK_PAGE_COUNT: u64 = 32;
 pub const INSTALLED_EXCEPTION_GATE_COUNT: u16 = 5;
 pub const INSTALLED_XSTATE_EXCEPTION_GATE_COUNT: u16 = 8;
+pub const INSTALLED_INTERRUPT_GATE_COUNT: u16 = 8;
 const CR3_ALLOWED_LOW_BITS: u64 = (1 << 3) | (1 << 4);
 const RFLAGS_INTERRUPT_ENABLE: u64 = 1 << 9;
 const RFLAGS_DIRECTION: u64 = 1 << 10;
@@ -75,6 +77,7 @@ pub enum PanicCode {
     PhysicalMemory = 0x1010,
     VirtualMemory = 0x1011,
     ActiveVirtualMemory = 0x1012,
+    InterruptTime = 0x1013,
     UnexpectedReturn = 0x10ff,
 }
 
@@ -92,6 +95,7 @@ pub enum DevelopmentTrapScenario {
     PhysicalMemory = 8,
     VirtualMemory = 9,
     ActiveVirtualMemory = 10,
+    InterruptTime = 11,
 }
 
 macro_rules! scenario_label {
@@ -113,6 +117,7 @@ scenario_label!(SCENARIO_PRIVILEGE_MSR_POLICY, b"privilege_msr_policy");
 scenario_label!(SCENARIO_PHYSICAL_MEMORY, b"physical_memory");
 scenario_label!(SCENARIO_VIRTUAL_MEMORY, b"virtual_memory");
 scenario_label!(SCENARIO_ACTIVE_VIRTUAL_MEMORY, b"active_virtual_memory");
+scenario_label!(SCENARIO_INTERRUPT_TIME, b"interrupt_time");
 
 const fn scenario_label_text(bytes: &'static [u8]) -> &'static str {
     // SAFETY: every caller supplies an ASCII byte string declared immediately above.
@@ -133,6 +138,7 @@ impl DevelopmentTrapScenario {
             8 => Some(Self::PhysicalMemory),
             9 => Some(Self::VirtualMemory),
             10 => Some(Self::ActiveVirtualMemory),
+            11 => Some(Self::InterruptTime),
             _ => None,
         }
     }
@@ -150,6 +156,7 @@ impl DevelopmentTrapScenario {
             Self::PhysicalMemory => scenario_label_text(&SCENARIO_PHYSICAL_MEMORY),
             Self::VirtualMemory => scenario_label_text(&SCENARIO_VIRTUAL_MEMORY),
             Self::ActiveVirtualMemory => scenario_label_text(&SCENARIO_ACTIVE_VIRTUAL_MEMORY),
+            Self::InterruptTime => scenario_label_text(&SCENARIO_INTERRUPT_TIME),
         }
     }
 }
@@ -604,6 +611,10 @@ pub fn validate_xstate_exception_descriptor_state(
     state: &DescriptorState,
 ) -> Result<(), DescriptorError> {
     validate_descriptor_state_with_gate_count(state, INSTALLED_XSTATE_EXCEPTION_GATE_COUNT)
+}
+
+pub fn validate_interrupt_descriptor_state(state: &DescriptorState) -> Result<(), DescriptorError> {
+    validate_descriptor_state_with_gate_count(state, INSTALLED_INTERRUPT_GATE_COUNT)
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -1691,7 +1702,11 @@ mod tests {
             DevelopmentTrapScenario::from_selector(10),
             Some(DevelopmentTrapScenario::ActiveVirtualMemory)
         );
-        assert_eq!(DevelopmentTrapScenario::from_selector(11), None);
+        assert_eq!(
+            DevelopmentTrapScenario::from_selector(11),
+            Some(DevelopmentTrapScenario::InterruptTime)
+        );
+        assert_eq!(DevelopmentTrapScenario::from_selector(12), None);
     }
 
     #[test]

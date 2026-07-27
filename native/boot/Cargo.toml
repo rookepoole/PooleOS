@@ -18,6 +18,7 @@ development-privilege-msr-policy = ["development-transfer"]
 development-physical-memory = ["development-transfer"]
 development-virtual-memory = ["development-transfer"]
 development-active-virtual-memory = ["development-transfer"]
+development-interrupt-time = ["development-transfer"]
 
 [lib]
 name = "pooleboot"

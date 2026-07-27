@@ -155,26 +155,33 @@ class NativeKernelMapTests(unittest.TestCase):
                 handoff_capacity_bytes=1024 * 1024,
             ),
         )
-        self.assertEqual([83, 116], model["guard_page_indices"])
+        self.assertEqual([89, 122], model["guard_page_indices"])
         self.assertEqual(352, model["total_mapped_page_count"])
-        self.assertEqual(373, native_kernel_map.TEMPORARY_PAGE_INDEX)
-        self.assertEqual((374, 375, 5, 380), (
+        self.assertEqual(379, native_kernel_map.TEMPORARY_PAGE_INDEX)
+        self.assertEqual((380, 381, 5, 386), (
             native_kernel_map.METADATA_GUARD_LOW_PAGE,
             native_kernel_map.METADATA_FIRST_PAGE,
             native_kernel_map.METADATA_PAGE_COUNT,
             native_kernel_map.METADATA_GUARD_HIGH_PAGE,
         ))
-        self.assertEqual((381, 382, 32, 414), (
+        self.assertEqual((387, 388, 32, 420), (
             native_kernel_map.LEDGER_A_GUARD_LOW_PAGE,
             native_kernel_map.LEDGER_A_FIRST_PAGE,
             native_kernel_map.LEDGER_A_PAGE_CAPACITY,
             native_kernel_map.LEDGER_A_GUARD_HIGH_PAGE,
         ))
-        self.assertEqual((415, 416, 32, 448), (
+        self.assertEqual((421, 422, 32, 454), (
             native_kernel_map.LEDGER_B_GUARD_LOW_PAGE,
             native_kernel_map.LEDGER_B_FIRST_PAGE,
             native_kernel_map.LEDGER_B_PAGE_CAPACITY,
             native_kernel_map.LEDGER_B_GUARD_HIGH_PAGE,
+        ))
+        self.assertEqual((455, 456, 457, 458, 459), (
+            native_kernel_map.MMIO_GUARD_LOW_PAGE,
+            native_kernel_map.LOCAL_APIC_PAGE,
+            native_kernel_map.MMIO_GUARD_MIDDLE_PAGE,
+            native_kernel_map.HPET_PAGE,
+            native_kernel_map.MMIO_GUARD_HIGH_PAGE,
         ))
         self.assertEqual("rw", model["retained_leaves"][0]["permissions"])
         self.assertEqual("r", model["retained_leaves"][-1]["permissions"])
@@ -204,7 +211,7 @@ class NativeKernelMapTests(unittest.TestCase):
         )
         line = (
             "PKMAP2 PASS kernel_pages=64 stack_pages=32 handoff_pages=256 guards=2 "
-            f"total_pages=352 stack_pt=84 handoff_pt=117 retained_fnv1a64={expected['retained_leaf_fingerprint']}"
+            f"total_pages=352 stack_pt=90 handoff_pt=123 retained_fnv1a64={expected['retained_leaf_fingerprint']}"
         )
         self.assertEqual(
             expected["retained_leaf_fingerprint"],

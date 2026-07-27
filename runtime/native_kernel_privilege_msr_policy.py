@@ -191,7 +191,7 @@ def expected_claims() -> dict[str, bool]:
         "unsupported_pmu_path_failed_closed": True,
         "reserved_bit_and_canonical_address_policy_enforced": True,
         "rust_python_policy_agreement": True,
-        "linked_machine_code_no_wrmsr_audited": True,
+        "linked_machine_code_privileged_instruction_scope_audited": True,
         "two_qemu_runs_exact_match": True,
         "syscall_entry_activated": False,
         "machine_check_handler_activated": False,

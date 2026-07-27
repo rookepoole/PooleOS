@@ -190,7 +190,23 @@ def _audit_source_text(source: str) -> dict[str, Any]:
 
 
 def _source_audit() -> dict[str, Any]:
-    return _audit_source_text((ROOT / "native/kernel/src/arch/x86_64.rs").read_text(encoding="utf-8"))
+    audit = _audit_source_text(
+        (ROOT / "native/kernel/src/arch/x86_64.rs").read_text(encoding="utf-8")
+    )
+    main_source = (ROOT / "native/kernel/src/main.rs").read_text(encoding="utf-8")
+    irq_start = main_source.index(
+        "if trap_scenario == DevelopmentTrapScenario::InterruptTime {"
+    )
+    irq_end = main_source.index(
+        "if trap_scenario == DevelopmentTrapScenario::XstatePolicy {", irq_start
+    )
+    irq_scope = main_source[irq_start:irq_end]
+    write_calls = "arch::x86_64::write_local_apic_base("
+    if irq_scope.count(write_calls) != 2 or main_source.count(write_calls) != 2:
+        raise QualificationError("PKMSR1 PKIRQ1 write-call isolation changed")
+    audit["pkirq1_main_write_call_count"] = 2
+    audit["pkirq1_main_writes_outside_interrupt_time_scope"] = 0
+    return audit
 
 
 def _run(command: list[str], cwd: Path) -> str:
@@ -222,13 +238,11 @@ def _linked_machine_audit(toolchain_root: Path, temporary_root: Path) -> tuple[d
         for instructions in functions.values()
         for mnemonic, _ in instructions
     ]
-    counts = {
-        mnemonic: mnemonics.count(mnemonic)
-        for mnemonic in ("rdmsr", "wrmsr", "rdpmc", "syscall", "sysret", "swapgs")
-    }
+    audited_mnemonics = ("rdmsr", "wrmsr", "rdpmc", "syscall", "sysret", "swapgs")
+    counts = {mnemonic: mnemonics.count(mnemonic) for mnemonic in audited_mnemonics}
     expected_counts = {
-        "rdmsr": 17,
-        "wrmsr": 0,
+        "rdmsr": 20,
+        "wrmsr": 2,
         "rdpmc": 0,
         "syscall": 0,
         "sysret": 0,
@@ -236,6 +250,26 @@ def _linked_machine_audit(toolchain_root: Path, temporary_root: Path) -> tuple[d
     }
     if counts != expected_counts:
         raise QualificationError(f"PKMSR1 linked privileged instruction scope changed: {counts}")
+    function_counts = {
+        name: {
+            mnemonic: sum(1 for observed, _ in functions.get(name, []) if observed.lower() == mnemonic)
+            for mnemonic in ("rdmsr", "wrmsr")
+        }
+        for name in (
+            "PooleKernelLinked::arch::x86_64::observe_cpu_policy",
+            "PooleKernelLinked::arch::x86_64::observe_privilege_msr_policy",
+            "poole_kernel_rust_entry",
+        )
+    }
+    expected_function_counts = {
+        "PooleKernelLinked::arch::x86_64::observe_cpu_policy": {"rdmsr": 5, "wrmsr": 0},
+        "PooleKernelLinked::arch::x86_64::observe_privilege_msr_policy": {"rdmsr": 12, "wrmsr": 0},
+        "poole_kernel_rust_entry": {"rdmsr": 3, "wrmsr": 2},
+    }
+    if function_counts != expected_function_counts:
+        raise QualificationError(
+            f"PKMSR1 linked privileged per-function scope changed: {function_counts}"
+        )
     audit = {
         "linked_byte_count": len(linked),
         "linked_sha256": privilege_msr.sha256_bytes(linked),
@@ -246,7 +280,10 @@ def _linked_machine_audit(toolchain_root: Path, temporary_root: Path) -> tuple[d
         "disassembly_sha256": privilege_msr.sha256_bytes(disassembly.encode("utf-8")),
         "instruction_record_count": len(mnemonics),
         "instruction_counts": counts,
-        "result": "pass_linked_rdmsr_present_no_activation_or_write_instruction",
+        "privileged_function_instruction_counts": function_counts,
+        "pkmsr1_runtime_msr_write_count": 0,
+        "pkirq1_linked_wrmsr_count": 2,
+        "result": "pass_linked_privileged_instruction_scope_with_pkirq1_isolation",
     }
     return audit, tool
 
