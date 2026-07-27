@@ -429,7 +429,7 @@ def _validate_firmware(payload: bytes, count: int) -> None:
         if (
             not any(guid)
             or not address
-            or address % 8
+            or address % 4
             or not 0 < size <= 16 * 1024 * 1024
             or flags & ~0x7
             or reserved

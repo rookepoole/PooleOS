@@ -22,7 +22,7 @@ PKVM2 fails closed against these bounded threats:
   maskable interrupts are enabled;
 - losing or weakening inherited kernel, entry, guarded-stack, or PBP1 handoff
   mappings while constructing the candidate;
-- mapping a frame outside the two generation-owned PKPMM1 allocations;
+- mapping a frame outside the two generation-owned PKPMM7 allocations;
 - accepting an occupied direct-map root slot or leaving the bootstrap alias
   active before CR3 installation;
 - treating x86-64 hardware Accessed or Dirty updates as unauthorized drift;
@@ -43,7 +43,7 @@ The contract freezes canonical 48-bit addresses for this profile:
 - inherited kernel half: PML4 indices 256 through 511 except index 288;
 - bounded direct-map base: `0xFFFF900000000000`, PML4 index 288;
 - inherited kernel entry: exact RX mapping at `0xFFFFFFFF80000000`;
-- inherited kernel stack: exact 14 mapped pages with both guard pages absent;
+- inherited kernel stack: exact 32 mapped pages with both guard pages absent;
 - inherited PBP1 handoff: exact first and last pages, read-only and NX.
 
 PKVM2 allocates eight contiguous DMA32 table pages in this order: candidate
@@ -86,7 +86,7 @@ the pre-activation entry would be incorrect after hardware traversal.
 The live oracle requires two byte-identical QEMU/OVMF runs, 40 exact markers,
 46 hostile controls, deterministic binding to the PBP1 DMA32 first-fit
 transcript, and source audits for the no-heap core and volatile privileged
-adapter. The canonical run performs 8,720 physical table writes, 5,560
+adapter. The canonical run performs 8,720 physical table writes, 5,640
 bootstrap temporary-PTE writes and invalidations, two CR3 writes, and three
 active local invalidations. Signature, authority, action, and production counts
 remain zero.

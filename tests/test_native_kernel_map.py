@@ -150,27 +150,27 @@ class NativeKernelMapTests(unittest.TestCase):
             native_kernel_map.request_from_elf_plan(plan(), 48),
             native_kernel_map.RetainedRequest(
                 stack_physical_base=0x0400_0000,
-                stack_page_count=14,
+                stack_page_count=32,
                 handoff_physical_base=0x0500_0000,
                 handoff_capacity_bytes=1024 * 1024,
             ),
         )
-        self.assertEqual([78, 93], model["guard_page_indices"])
-        self.assertEqual(334, model["total_mapped_page_count"])
-        self.assertEqual(350, native_kernel_map.TEMPORARY_PAGE_INDEX)
-        self.assertEqual((351, 352, 5, 357), (
+        self.assertEqual([83, 116], model["guard_page_indices"])
+        self.assertEqual(352, model["total_mapped_page_count"])
+        self.assertEqual(373, native_kernel_map.TEMPORARY_PAGE_INDEX)
+        self.assertEqual((374, 375, 5, 380), (
             native_kernel_map.METADATA_GUARD_LOW_PAGE,
             native_kernel_map.METADATA_FIRST_PAGE,
             native_kernel_map.METADATA_PAGE_COUNT,
             native_kernel_map.METADATA_GUARD_HIGH_PAGE,
         ))
-        self.assertEqual((358, 359, 32, 391), (
+        self.assertEqual((381, 382, 32, 414), (
             native_kernel_map.LEDGER_A_GUARD_LOW_PAGE,
             native_kernel_map.LEDGER_A_FIRST_PAGE,
             native_kernel_map.LEDGER_A_PAGE_CAPACITY,
             native_kernel_map.LEDGER_A_GUARD_HIGH_PAGE,
         ))
-        self.assertEqual((392, 393, 32, 425), (
+        self.assertEqual((415, 416, 32, 448), (
             native_kernel_map.LEDGER_B_GUARD_LOW_PAGE,
             native_kernel_map.LEDGER_B_FIRST_PAGE,
             native_kernel_map.LEDGER_B_PAGE_CAPACITY,
@@ -182,9 +182,9 @@ class NativeKernelMapTests(unittest.TestCase):
     def test_retained_model_rejects_overlap_range_and_kernel_guard_collision(self) -> None:
         request = native_kernel_map.request_from_elf_plan(plan(), 48)
         for retained in (
-            native_kernel_map.RetainedRequest(request.physical_base, 14, 0x0500_0000, 1024 * 1024),
-            native_kernel_map.RetainedRequest(0x0400_0001, 14, 0x0500_0000, 1024 * 1024),
-            native_kernel_map.RetainedRequest(0x0400_0000, 13, 0x0500_0000, 1024 * 1024),
+            native_kernel_map.RetainedRequest(request.physical_base, 32, 0x0500_0000, 1024 * 1024),
+            native_kernel_map.RetainedRequest(0x0400_0001, 32, 0x0500_0000, 1024 * 1024),
+            native_kernel_map.RetainedRequest(0x0400_0000, 31, 0x0500_0000, 1024 * 1024),
         ):
             with self.assertRaises(native_kernel_map.KernelMapError):
                 native_kernel_map.build_retained_model(request, retained)
@@ -194,17 +194,17 @@ class NativeKernelMapTests(unittest.TestCase):
         with self.assertRaises(native_kernel_map.KernelMapError):
             native_kernel_map.build_retained_model(
                 native_kernel_map.request_from_elf_plan(hostile, 48),
-                native_kernel_map.RetainedRequest(0x0400_0000, 14, 0x0500_0000, 1024 * 1024),
+                native_kernel_map.RetainedRequest(0x0400_0000, 32, 0x0500_0000, 1024 * 1024),
             )
 
     def test_retained_probe_and_lifecycle_are_exact(self) -> None:
         expected = native_kernel_map.build_retained_model(
             native_kernel_map.request_from_elf_plan(plan(), 48),
-            native_kernel_map.RetainedRequest(0x0400_0000, 14, 0x0500_0000, 1024 * 1024),
+            native_kernel_map.RetainedRequest(0x0400_0000, 32, 0x0500_0000, 1024 * 1024),
         )
         line = (
-            "PKMAP2 PASS kernel_pages=64 stack_pages=14 handoff_pages=256 guards=2 "
-            f"total_pages=334 stack_pt=79 handoff_pt=94 retained_fnv1a64={expected['retained_leaf_fingerprint']}"
+            "PKMAP2 PASS kernel_pages=64 stack_pages=32 handoff_pages=256 guards=2 "
+            f"total_pages=352 stack_pt=84 handoff_pt=117 retained_fnv1a64={expected['retained_leaf_fingerprint']}"
         )
         self.assertEqual(
             expected["retained_leaf_fingerprint"],

@@ -8,22 +8,29 @@ use poole_handoff::{
     ARTIFACT_HASH_VERIFIED, ARTIFACT_INITIAL_SYSTEM, ARTIFACT_KERNEL, ARTIFACT_MICROCODE,
     ARTIFACT_POLICY_BUNDLE, ARTIFACT_RECOVERY, ARTIFACT_SYMBOLS, ARTIFACT_SYSTEM_MANIFEST,
     ARTIFACT_TRUST_POLICY, ARTIFACT_TRUST_STATE, BOOT_SERVICES_EXITED, CORE_BYTES,
-    DEVELOPMENT_MODE, Encoder, FRAMEBUFFER_BYTES, MEMORY_ACPI_NVS, MEMORY_ACPI_RECLAIMABLE,
-    MEMORY_BOOT_RECLAIMABLE, MEMORY_ENTRY_BYTES, MEMORY_LOADER_RESERVED, MEMORY_MMIO,
-    MEMORY_PERSISTENT, MEMORY_RESERVED, MEMORY_RUNTIME_CODE, MEMORY_RUNTIME_DATA, MEMORY_UNUSABLE,
-    MEMORY_USABLE, RECORD_ARRAY, RECORD_CORE, RECORD_FRAMEBUFFER, RECORD_LOADED_ARTIFACTS,
-    RECORD_MEMORY_MAP, RECORD_REQUIRED,
+    DEVELOPMENT_MODE, Encoder, FIRMWARE_TABLE_ENTRY_BYTES, FRAMEBUFFER_BYTES, MEMORY_ACPI_NVS,
+    MEMORY_ACPI_RECLAIMABLE, MEMORY_BOOT_RECLAIMABLE, MEMORY_ENTRY_BYTES, MEMORY_LOADER_RESERVED,
+    MEMORY_MMIO, MEMORY_PERSISTENT, MEMORY_RESERVED, MEMORY_RUNTIME_CODE, MEMORY_RUNTIME_DATA,
+    MEMORY_UNUSABLE, MEMORY_USABLE, RECORD_ARRAY, RECORD_CORE, RECORD_FIRMWARE_TABLES,
+    RECORD_FRAMEBUFFER, RECORD_LOADED_ARTIFACTS, RECORD_MEMORY_MAP, RECORD_REQUIRED,
 };
 
-pub const CONTRACT_ID: &str = "PBLIVE3";
+pub const CONTRACT_ID: &str = "PBLIVE4";
 pub const UEFI_DESCRIPTOR_VERSION: u32 = 1;
 pub const MIN_DESCRIPTOR_BYTES: usize = 40;
 pub const MAX_DESCRIPTOR_BYTES: usize = 256;
 pub const MAX_MEMORY_ENTRIES: usize = 16_384;
 pub const MAX_TRANSCRIPT_CHUNK_BYTES: usize = 64;
 pub const RETAINED_TABLE_PAGE_COUNT: u32 = 4;
-pub const RETAINED_STACK_PAGE_COUNT: u32 = 14;
+pub const RETAINED_STACK_PAGE_COUNT: u32 = 32;
 pub const PROFILE_ARTIFACT_COUNT: usize = 10;
+pub const PROFILE_FIRMWARE_TABLE_COUNT: usize = 1;
+pub const FIRMWARE_TABLE_COPIED: u32 = 1 << 0;
+pub const FIRMWARE_TABLE_PHYSICAL: u32 = 1 << 1;
+pub const FIRMWARE_TABLE_CHECKSUM_VALIDATED: u32 = 1 << 2;
+pub const ACPI_20_TABLE_GUID: [u8; 16] = [
+    0x88, 0x68, 0xe8, 0x71, 0xe4, 0xf1, 0x11, 0xd3, 0xbc, 0x22, 0x00, 0x80, 0xc7, 0x3c, 0x88, 0x81,
+];
 pub const PROFILE_ARTIFACT_ROLES: [u32; PROFILE_ARTIFACT_COUNT] = [
     ARTIFACT_KERNEL,
     ARTIFACT_INITIAL_SYSTEM,
@@ -51,6 +58,9 @@ pub enum Error {
     PreExitProfile,
     ExitProfile,
     RetainedRange,
+    RetainedShape,
+    RetainedOverlap,
+    RetainedCoverage,
     ArtifactSet,
 }
 
@@ -101,6 +111,14 @@ pub struct ArtifactInput {
     pub sha256: [u8; 32],
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct FirmwareTableInput {
+    pub guid: [u8; 16],
+    pub physical_address: u64,
+    pub byte_count: u64,
+    pub flags: u32,
+}
+
 #[derive(Clone, Copy)]
 pub struct BuildInput<'a> {
     pub raw_memory_map: &'a [u8],
@@ -110,6 +128,7 @@ pub struct BuildInput<'a> {
     pub kernel: KernelInput,
     pub artifacts: [ArtifactInput; PROFILE_ARTIFACT_COUNT],
     pub framebuffer: Option<FramebufferInput>,
+    pub firmware_tables: [FirmwareTableInput; PROFILE_FIRMWARE_TABLE_COUNT],
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -132,6 +151,7 @@ pub struct ExitBuildInput<'a> {
     pub kernel: KernelInput,
     pub artifacts: [ArtifactInput; PROFILE_ARTIFACT_COUNT],
     pub framebuffer: Option<FramebufferInput>,
+    pub firmware_tables: [FirmwareTableInput; PROFILE_FIRMWARE_TABLE_COUNT],
     pub retained: RetainedInput,
 }
 
@@ -141,6 +161,7 @@ pub struct Summary {
     pub record_count: usize,
     pub memory_entry_count: usize,
     pub framebuffer_present: bool,
+    pub firmware_table_count: usize,
     pub artifact_count: usize,
     pub message_crc32: u32,
     pub fnv1a64: u64,
@@ -405,7 +426,7 @@ fn validate_retained_shape(input: &ExitBuildInput<'_>) -> Result<(), Error> {
         || input.handoff_physical_base == 0
         || !input.handoff_physical_base.is_multiple_of(pbp1::PAGE_BYTES)
     {
-        return Err(Error::RetainedRange);
+        return Err(Error::RetainedShape);
     }
     let mut ranges = [(0u64, 0u64); PROFILE_ARTIFACT_COUNT + 3];
     for (index, artifact) in input.artifacts.iter().enumerate() {
@@ -425,7 +446,7 @@ fn validate_retained_shape(input: &ExitBuildInput<'_>) -> Result<(), Error> {
     );
     for (start, byte_count) in ranges {
         if start == 0 || byte_count == 0 || start.checked_add(byte_count).is_none() {
-            return Err(Error::RetainedRange);
+            return Err(Error::RetainedShape);
         }
     }
     for first in 0..ranges.len() {
@@ -436,7 +457,7 @@ fn validate_retained_shape(input: &ExitBuildInput<'_>) -> Result<(), Error> {
                 ranges[second].0,
                 ranges[second].1,
             ) {
-                return Err(Error::RetainedRange);
+                return Err(Error::RetainedOverlap);
             }
         }
     }
@@ -449,7 +470,9 @@ fn loader_range_covered(
     start: u64,
     byte_count: u64,
 ) -> Result<bool, Error> {
-    let end = start.checked_add(byte_count).ok_or(Error::RetainedRange)?;
+    let end = start
+        .checked_add(byte_count)
+        .ok_or(Error::RetainedCoverage)?;
     let mut cursor = start;
     for index in 0..count {
         let base = index * MEMORY_ENTRY_BYTES;
@@ -459,9 +482,9 @@ fn loader_range_covered(
             .checked_add(
                 pages
                     .checked_mul(pbp1::PAGE_BYTES)
-                    .ok_or(Error::RetainedRange)?,
+                    .ok_or(Error::RetainedCoverage)?,
             )
-            .ok_or(Error::RetainedRange)?;
+            .ok_or(Error::RetainedCoverage)?;
         if cursor < entry_start {
             return Ok(false);
         }
@@ -503,7 +526,7 @@ fn validate_retained_coverage(
     );
     for (start, byte_count) in ranges {
         if !loader_range_covered(normalized, count, start, byte_count)? {
-            return Err(Error::RetainedRange);
+            return Err(Error::RetainedCoverage);
         }
     }
     Ok(())
@@ -522,6 +545,35 @@ fn framebuffer_payload(input: FramebufferInput) -> [u8; FRAMEBUFFER_BYTES] {
     write_u32(&mut value, 40, input.blue_mask);
     write_u32(&mut value, 44, input.reserved_mask);
     value
+}
+
+fn firmware_table_payload(
+    input: &[FirmwareTableInput; PROFILE_FIRMWARE_TABLE_COUNT],
+) -> [u8; FIRMWARE_TABLE_ENTRY_BYTES * PROFILE_FIRMWARE_TABLE_COUNT] {
+    let mut value = [0u8; FIRMWARE_TABLE_ENTRY_BYTES * PROFILE_FIRMWARE_TABLE_COUNT];
+    for (index, table) in input.iter().enumerate() {
+        let base = index * FIRMWARE_TABLE_ENTRY_BYTES;
+        value[base..base + 16].copy_from_slice(&table.guid);
+        write_u64(&mut value, base + 16, table.physical_address);
+        write_u64(&mut value, base + 24, table.byte_count);
+        write_u32(&mut value, base + 32, table.flags);
+    }
+    value
+}
+
+fn validate_profile_firmware_record(
+    firmware: &pbp1::Record<'_>,
+    profile_error: Error,
+) -> Result<(), Error> {
+    if firmware.descriptor.element_count != PROFILE_FIRMWARE_TABLE_COUNT
+        || firmware.payload[..16] != ACPI_20_TABLE_GUID
+        || read_u64(firmware.payload, 24)? != 36
+        || read_u32(firmware.payload, 32)?
+            != FIRMWARE_TABLE_PHYSICAL | FIRMWARE_TABLE_CHECKSUM_VALIDATED
+    {
+        return Err(profile_error);
+    }
+    Ok(())
 }
 
 fn artifact_payload(
@@ -572,19 +624,22 @@ fn validate_profile_artifact_record(
 pub fn validate_pre_exit_profile(handoff: &pbp1::Handoff<'_>) -> Result<(), Error> {
     let expected_features = pbp1::FEATURE_CORE
         | pbp1::FEATURE_MEMORY_MAP
+        | pbp1::FEATURE_FIRMWARE_TABLES
         | pbp1::FEATURE_LOADED_ARTIFACTS
         | if handoff.record(RECORD_FRAMEBUFFER).is_some() {
             pbp1::FEATURE_FRAMEBUFFER
         } else {
             0
         };
-    let expected_required =
-        pbp1::FEATURE_CORE | pbp1::FEATURE_MEMORY_MAP | pbp1::FEATURE_LOADED_ARTIFACTS;
+    let expected_required = pbp1::FEATURE_CORE
+        | pbp1::FEATURE_MEMORY_MAP
+        | pbp1::FEATURE_FIRMWARE_TABLES
+        | pbp1::FEATURE_LOADED_ARTIFACTS;
     let header = handoff.header();
     let core = handoff.core()?;
     if header.features != expected_features
         || header.required_features != expected_required
-        || !matches!(header.record_count, 3 | 4)
+        || !matches!(header.record_count, 4 | 5)
         || core.boot_flags != DEVELOPMENT_MODE
         || core.initial_stack_top_virtual != 0
         || core.page_table_root_physical != 0
@@ -597,6 +652,10 @@ pub fn validate_pre_exit_profile(handoff: &pbp1::Handoff<'_>) -> Result<(), Erro
         .record(RECORD_LOADED_ARTIFACTS)
         .ok_or(Error::PreExitProfile)?;
     validate_profile_artifact_record(&artifacts, Error::PreExitProfile)?;
+    let firmware = handoff
+        .record(RECORD_FIRMWARE_TABLES)
+        .ok_or(Error::PreExitProfile)?;
+    validate_profile_firmware_record(&firmware, Error::PreExitProfile)?;
     if pbp1::validate_kernel_entry_profile(handoff).is_ok() {
         return Err(Error::PreExitProfile);
     }
@@ -606,19 +665,22 @@ pub fn validate_pre_exit_profile(handoff: &pbp1::Handoff<'_>) -> Result<(), Erro
 pub fn validate_exit_development_profile(handoff: &pbp1::Handoff<'_>) -> Result<(), Error> {
     let expected_features = pbp1::FEATURE_CORE
         | pbp1::FEATURE_MEMORY_MAP
+        | pbp1::FEATURE_FIRMWARE_TABLES
         | pbp1::FEATURE_LOADED_ARTIFACTS
         | if handoff.record(RECORD_FRAMEBUFFER).is_some() {
             pbp1::FEATURE_FRAMEBUFFER
         } else {
             0
         };
-    let expected_required =
-        pbp1::FEATURE_CORE | pbp1::FEATURE_MEMORY_MAP | pbp1::FEATURE_LOADED_ARTIFACTS;
+    let expected_required = pbp1::FEATURE_CORE
+        | pbp1::FEATURE_MEMORY_MAP
+        | pbp1::FEATURE_FIRMWARE_TABLES
+        | pbp1::FEATURE_LOADED_ARTIFACTS;
     let header = handoff.header();
     let core = handoff.core()?;
     if header.features != expected_features
         || header.required_features != expected_required
-        || !matches!(header.record_count, 3 | 4)
+        || !matches!(header.record_count, 4 | 5)
         || core.boot_flags != DEVELOPMENT_MODE | BOOT_SERVICES_EXITED
         || core.initial_stack_top_virtual == 0
         || !core.initial_stack_top_virtual.is_multiple_of(16)
@@ -635,6 +697,10 @@ pub fn validate_exit_development_profile(handoff: &pbp1::Handoff<'_>) -> Result<
         .record(RECORD_LOADED_ARTIFACTS)
         .ok_or(Error::ExitProfile)?;
     validate_profile_artifact_record(&artifacts, Error::ExitProfile)?;
+    let firmware = handoff
+        .record(RECORD_FIRMWARE_TABLES)
+        .ok_or(Error::ExitProfile)?;
+    validate_profile_firmware_record(&firmware, Error::ExitProfile)?;
     if pbp1::validate_kernel_entry_profile(handoff).is_ok() {
         return Err(Error::ExitProfile);
     }
@@ -661,12 +727,14 @@ pub fn build_pre_exit<'a>(
         normalized_memory,
     )?;
     let memory_bytes = memory_count * MEMORY_ENTRY_BYTES;
-    let record_count = if input.framebuffer.is_some() { 4 } else { 3 };
+    let record_count = if input.framebuffer.is_some() { 5 } else { 4 };
     let artifact_bytes = ARTIFACT_ENTRY_BYTES * PROFILE_ARTIFACT_COUNT;
-    let mut lengths = [CORE_BYTES, memory_bytes, artifact_bytes, 0];
+    let firmware_bytes = FIRMWARE_TABLE_ENTRY_BYTES * PROFILE_FIRMWARE_TABLE_COUNT;
+    let mut lengths = [CORE_BYTES, memory_bytes, firmware_bytes, artifact_bytes, 0];
     if input.framebuffer.is_some() {
         lengths[2] = FRAMEBUFFER_BYTES;
-        lengths[3] = artifact_bytes;
+        lengths[3] = firmware_bytes;
+        lengths[4] = artifact_bytes;
     }
     let total_bytes = pbp1::encoded_size(record_count, &lengths[..record_count])?;
     if output.len() < total_bytes {
@@ -688,6 +756,15 @@ pub fn build_pre_exit<'a>(
         let framebuffer = framebuffer_payload(framebuffer);
         encoder.push(RECORD_FRAMEBUFFER, 1, 0, FRAMEBUFFER_BYTES, 1, &framebuffer)?;
     }
+    let firmware_tables = firmware_table_payload(&input.firmware_tables);
+    encoder.push(
+        RECORD_FIRMWARE_TABLES,
+        1,
+        RECORD_REQUIRED | RECORD_ARRAY,
+        FIRMWARE_TABLE_ENTRY_BYTES,
+        PROFILE_FIRMWARE_TABLE_COUNT,
+        &firmware_tables,
+    )?;
     encoder.push(
         RECORD_LOADED_ARTIFACTS,
         1,
@@ -704,6 +781,7 @@ pub fn build_pre_exit<'a>(
         record_count,
         memory_entry_count: memory_count,
         framebuffer_present: input.framebuffer.is_some(),
+        firmware_table_count: PROFILE_FIRMWARE_TABLE_COUNT,
         artifact_count: PROFILE_ARTIFACT_COUNT,
         message_crc32: read_u32(bytes, 48)?,
         fnv1a64: fnv1a64(bytes),
@@ -725,12 +803,14 @@ pub fn build_exit_candidate<'a>(
     )?;
     let memory_bytes = memory_count * MEMORY_ENTRY_BYTES;
     validate_retained_coverage(&input, &normalized_memory[..memory_bytes], memory_count)?;
-    let record_count = if input.framebuffer.is_some() { 4 } else { 3 };
+    let record_count = if input.framebuffer.is_some() { 5 } else { 4 };
     let artifact_bytes = ARTIFACT_ENTRY_BYTES * PROFILE_ARTIFACT_COUNT;
-    let mut lengths = [CORE_BYTES, memory_bytes, artifact_bytes, 0];
+    let firmware_bytes = FIRMWARE_TABLE_ENTRY_BYTES * PROFILE_FIRMWARE_TABLE_COUNT;
+    let mut lengths = [CORE_BYTES, memory_bytes, firmware_bytes, artifact_bytes, 0];
     if input.framebuffer.is_some() {
         lengths[2] = FRAMEBUFFER_BYTES;
-        lengths[3] = artifact_bytes;
+        lengths[3] = firmware_bytes;
+        lengths[4] = artifact_bytes;
     }
     let total_bytes = pbp1::encoded_size(record_count, &lengths[..record_count])?;
     if output.len() < total_bytes
@@ -756,6 +836,15 @@ pub fn build_exit_candidate<'a>(
         let framebuffer = framebuffer_payload(framebuffer);
         encoder.push(RECORD_FRAMEBUFFER, 1, 0, FRAMEBUFFER_BYTES, 1, &framebuffer)?;
     }
+    let firmware_tables = firmware_table_payload(&input.firmware_tables);
+    encoder.push(
+        RECORD_FIRMWARE_TABLES,
+        1,
+        RECORD_REQUIRED | RECORD_ARRAY,
+        FIRMWARE_TABLE_ENTRY_BYTES,
+        PROFILE_FIRMWARE_TABLE_COUNT,
+        &firmware_tables,
+    )?;
     encoder.push(
         RECORD_LOADED_ARTIFACTS,
         1,
@@ -772,6 +861,7 @@ pub fn build_exit_candidate<'a>(
         record_count,
         memory_entry_count: memory_count,
         framebuffer_present: input.framebuffer.is_some(),
+        firmware_table_count: PROFILE_FIRMWARE_TABLE_COUNT,
         artifact_count: PROFILE_ARTIFACT_COUNT,
         message_crc32: read_u32(bytes, 48)?,
         fnv1a64: fnv1a64(bytes),
@@ -821,7 +911,7 @@ mod tests {
     fn exit_raw_map(stride: usize) -> std::vec::Vec<u8> {
         let mut value = descriptor(2, 0x0020_0000, 48, 4, stride);
         value.extend(descriptor(2, 0x0030_0000, 4, 4, stride));
-        value.extend(descriptor(2, 0x0040_0000, 14, 4, stride));
+        value.extend(descriptor(2, 0x0040_0000, 32, 4, stride));
         value.extend(descriptor(2, 0x0050_0000, 256, 4, stride));
         value.extend(descriptor(11, 0x8000_0000, 1024, 1, stride));
         value
@@ -883,6 +973,15 @@ mod tests {
             blue_mask: 0x00ff_0000,
             reserved_mask: 0xff00_0000,
         }
+    }
+
+    fn firmware_tables() -> [FirmwareTableInput; PROFILE_FIRMWARE_TABLE_COUNT] {
+        [FirmwareTableInput {
+            guid: ACPI_20_TABLE_GUID,
+            physical_address: 0x007f_0000,
+            byte_count: 36,
+            flags: FIRMWARE_TABLE_PHYSICAL | FIRMWARE_TABLE_CHECKSUM_VALIDATED,
+        }]
     }
 
     fn retained() -> RetainedInput {
@@ -994,9 +1093,11 @@ mod tests {
             kernel: kernel(),
             artifacts: artifacts(),
             framebuffer: Some(framebuffer()),
+            firmware_tables: firmware_tables(),
         };
         let (bytes, summary) = build_pre_exit(input, &mut scratch, &mut output).unwrap();
-        assert_eq!(summary.record_count, 4);
+        assert_eq!(summary.record_count, 5);
+        assert_eq!(summary.firmware_table_count, 1);
         assert_eq!(summary.memory_entry_count, 3);
         assert!(summary.framebuffer_present);
         assert_eq!(summary.artifact_count, PROFILE_ARTIFACT_COUNT);
@@ -1022,9 +1123,10 @@ mod tests {
             kernel: kernel(),
             artifacts: artifacts(),
             framebuffer: None,
+            firmware_tables: firmware_tables(),
         };
         let (_, summary) = build_pre_exit(input, &mut scratch, &mut output).unwrap();
-        assert_eq!(summary.record_count, 3);
+        assert_eq!(summary.record_count, 4);
         let mut tiny = [0u8; 128];
         assert_eq!(
             build_pre_exit(input, &mut scratch, &mut tiny).map(|_| ()),
@@ -1045,10 +1147,12 @@ mod tests {
             kernel: kernel(),
             artifacts: artifacts(),
             framebuffer: Some(framebuffer()),
+            firmware_tables: firmware_tables(),
             retained: retained(),
         };
         let (bytes, summary) = build_exit_candidate(input, &mut scratch, &mut output).unwrap();
-        assert_eq!(summary.record_count, 4);
+        assert_eq!(summary.record_count, 5);
+        assert_eq!(summary.firmware_table_count, 1);
         assert_eq!(summary.memory_entry_count, 5);
         assert_eq!(summary.artifact_count, PROFILE_ARTIFACT_COUNT);
         let decoded = pbp1::decode(bytes).unwrap();
@@ -1081,11 +1185,12 @@ mod tests {
             kernel: kernel(),
             artifacts: artifacts(),
             framebuffer: Some(framebuffer()),
+            firmware_tables: firmware_tables(),
             retained: retained(),
         };
         assert_eq!(
             build_exit_candidate(input, &mut scratch, &mut output).map(|_| ()),
-            Err(Error::RetainedRange)
+            Err(Error::RetainedCoverage)
         );
         let mut overlap = retained();
         overlap.stack_physical_base = kernel().physical_base;
@@ -1095,7 +1200,7 @@ mod tests {
         };
         assert_eq!(
             build_exit_candidate(input, &mut scratch, &mut output).map(|_| ()),
-            Err(Error::RetainedRange)
+            Err(Error::RetainedOverlap)
         );
         let mut overlapping_artifacts = artifacts();
         overlapping_artifacts[2].physical_base = overlapping_artifacts[1].physical_base;

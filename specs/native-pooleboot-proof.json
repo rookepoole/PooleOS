@@ -306,7 +306,7 @@
     "NEG-N5-PBEXIT-TRANSFER"
   ],
   "claim_boundary": [
-    "This contract covers one unsigned UEFI proof application with bounded live PBC1, PSM1, PKELF1, PBART1, PINIT1, PREC1, PSYM1, PMCU1, PFWM1, PPOL1, PBLIVE3, PKMAP2, and PBEXIT1 parsing and integration, not the complete PooleBoot loader.",
+    "This contract covers one unsigned UEFI proof application with bounded live PBC1, PSM1, PKELF1, PBART1, PINIT1, PREC1, PSYM1, PMCU1, PFWM1, PPOL1, PBLIVE4, PKMAP2, and PBEXIT1 parsing and integration, not the complete PooleBoot loader.",
     "The proof loads and relocates PooleKernel, loads six exact-profile PBART1 envelopes into distinct zero-padded firmware page ranges, validates the kernel's supervisor W^X mapping plan, and retains every loaded range plus four private table pages, an eight-page guarded stack, and a one-MiB read-only handoff allocation.",
     "PSM1 selects and digest-binds the kernel and six profile artifacts; PBART1 additionally binds each non-kernel role, version, payload length, and payload digest, but all artifacts remain unsigned and untrusted.",
     "PooleBoot reparses the exact retained PINIT1 bytes and requires the development activation gate to fail first at the missing outer signature; it creates no authority, starts no component, and PooleKernel does not reparse or activate the bundle.",

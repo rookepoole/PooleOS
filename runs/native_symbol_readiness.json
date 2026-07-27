@@ -26,7 +26,7 @@
     "golden_vectors": {
       "byte_count": 9878,
       "path": "specs/native-symbol-golden-vectors.json",
-      "sha256": "6E7CC483662839A94B87D4470749186EDC3433631976DB6AE9BFE6731015EAB4"
+      "sha256": "BFC44C4F604163877462FA4DAE4EA2B4490209FC09C9BE2B9F74E2C8776E761A"
     },
     "implementation_inputs": [
       {
@@ -47,7 +47,7 @@
       {
         "byte_count": 36082,
         "path": "native/symbols/src/lib.rs",
-        "sha256": "14C92ECC0DC10FA602F3199B0F7F5F55B2F868040FE0CE611611E9023DD45FC2"
+        "sha256": "281768168259F4BE26D87056F2ECBD1A8B16CF11826AEB0BB20437A394CAFA6E"
       },
       {
         "byte_count": 5305,
@@ -62,17 +62,17 @@
       {
         "byte_count": 2048,
         "path": "native/kernel/linker.ld",
-        "sha256": "98B2A27014CF82BF372915B549929820406B0F498797AA866028E8D097E3C520"
+        "sha256": "1E3529A954572C438BD8DAE48CC8CD9C5483474BD48CA1F292B73B1C38CFDACA"
       },
       {
-        "byte_count": 449,
+        "byte_count": 445,
         "path": "native/kernel/manifest.pkm",
-        "sha256": "5EE0684A31EB5BF95EC4138AF76CA91852F730E907047EB0F8984160254E2E73"
+        "sha256": "3E5D4E98E08539F2487CB35ADE8974C2486C77531151CE94DAC633EC20F0CAF8"
       },
       {
-        "byte_count": 54085,
+        "byte_count": 54081,
         "path": "runtime/native_symbols.py",
-        "sha256": "0EDD22672EAF3951F7E1B7043DF12A44515C8F765BF7BC9198C782E37D0C452F"
+        "sha256": "50581F9F590F252331809D791FB3E3D3626F9EB80B87835AEB63133A20B74238"
       },
       {
         "byte_count": 8217,
@@ -92,7 +92,7 @@
       {
         "byte_count": 7313,
         "path": "tests/test_native_symbols.py",
-        "sha256": "FBC3813CFA2DDA9E4ED022D60482E423AF56A708D8E93C00362BA15DCCB29505"
+        "sha256": "D143757B2F0B2BA4DA37D363297E0BD83EC527E162FCF4A334DD04B8FB6DE153"
       },
       {
         "byte_count": 7701,
@@ -136,14 +136,14 @@
   "contract_id": "PSYM1",
   "debug_correspondence": {
     "canonical_entry_offset": 36864,
-    "canonical_file_byte_count": 278528,
-    "canonical_file_sha256": "CDF33067B2421550BB03A4796FF9A92AE54D40B2575188632BF2C208449B882E",
-    "canonical_image_byte_count": 319488,
+    "canonical_file_byte_count": 299008,
+    "canonical_file_sha256": "D9EF9B10B56BF779B155BD18DE55853874CCC032D2A3E5E7841B918F08CDE1F2",
+    "canonical_image_byte_count": 339968,
     "debug_build_count": 2,
     "debug_builds_byte_identical": true,
-    "debug_derived_bundle_sha256": "49345991566697F954F3BFE6DCB4ACC4CC67FE849A5964ADF5738F57A7539B1C",
-    "debug_file_byte_count": 4570744,
-    "debug_file_sha256": "AD1D40AEEFC3AF4B210F6E288E5F2092478C09F23E7C12BB2AFB94D536FC49E8",
+    "debug_derived_bundle_sha256": "FB183471A412FE90FC244C5AF837366400327861F0C64A1354878FFB648CD74A",
+    "debug_file_byte_count": 4673408,
+    "debug_file_sha256": "8781F1FAEBBAFAB68D1DA918822D2DE24F42F52EF2F2E954A6B461194132D200",
     "debug_file_staged_on_boot_media": false,
     "dwarf_compilation_unit_count": 61,
     "observed_dwarf_versions": [
@@ -161,7 +161,7 @@
   },
   "golden_vectors": [
     {
-      "bundle_sha256": "49345991566697F954F3BFE6DCB4ACC4CC67FE849A5964ADF5738F57A7539B1C",
+      "bundle_sha256": "FB183471A412FE90FC244C5AF837366400327861F0C64A1354878FFB648CD74A",
       "id": "PSYM1-CANONICAL",
       "lookup_sample_count": 10,
       "python_result": "pass",
@@ -189,11 +189,11 @@
     "campaign_id": "PSYM1-LOOKUP-DIFF-1",
     "case_count": 16384,
     "corpus_published": false,
-    "hit_count": 4392,
+    "hit_count": 4419,
     "maximum_observed_steps": 2,
     "mismatch_count": 0,
-    "miss_count": 5824,
-    "rejected_count": 6168,
+    "miss_count": 5827,
+    "rejected_count": 6138,
     "seed": "0x5053594D3102",
     "status": "pass"
   },
@@ -1320,13 +1320,13 @@
     "Complete signed physical-media, production ISO, and N5-N39 exit gates."
   ],
   "parser_differential": {
-    "accepted_count": 856,
+    "accepted_count": 857,
     "campaign_id": "PSYM1-PARSER-DIFF-1",
     "case_count": 16384,
     "corpus_published": false,
     "digest_repaired_deep_mutations": true,
     "mismatch_count": 0,
-    "rejected_count": 15528,
+    "rejected_count": 15527,
     "seed": "0x5053594D3101",
     "status": "pass"
   },

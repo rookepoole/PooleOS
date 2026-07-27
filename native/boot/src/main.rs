@@ -219,7 +219,7 @@ impl Write for DiagnosticWriter {
 #[derive(Clone, Copy)]
 struct ConfigSummary {
     count: usize,
-    acpi20: bool,
+    acpi20_rsdp: u64,
     smbios3: bool,
     smbios2: bool,
 }
@@ -380,7 +380,7 @@ fn summarize_configuration_tables(system: &EfiSystemTable) -> Result<ConfigSumma
     .map_err(|_| EFI_COMPROMISED_DATA)?;
     let mut summary = ConfigSummary {
         count,
-        acpi20: false,
+        acpi20_rsdp: 0,
         smbios3: false,
         smbios2: false,
     };
@@ -389,11 +389,45 @@ fn summarize_configuration_tables(system: &EfiSystemTable) -> Result<ConfigSumma
     }
     let tables = unsafe { from_raw_parts(system.configuration_tables, count) };
     for table in tables {
-        summary.acpi20 |= table.vendor_guid == ACPI_20_GUID;
+        if table.vendor_guid == ACPI_20_GUID {
+            if summary.acpi20_rsdp != 0 || table.vendor_table.is_null() {
+                return Err(EFI_COMPROMISED_DATA);
+            }
+            summary.acpi20_rsdp = validate_acpi20_rsdp(table.vendor_table)?;
+        }
         summary.smbios3 |= table.vendor_guid == SMBIOS3_GUID;
         summary.smbios2 |= table.vendor_guid == SMBIOS_GUID;
     }
+    if summary.acpi20_rsdp == 0 {
+        return Err(EFI_COMPROMISED_DATA);
+    }
     Ok(summary)
+}
+
+fn validate_acpi20_rsdp(table: *const c_void) -> Result<u64, EfiStatus> {
+    let address = table as usize as u64;
+    if address == 0 {
+        return Err(EFI_COMPROMISED_DATA);
+    }
+    let bytes = unsafe { from_raw_parts(table.cast::<u8>(), 36) };
+    let length = u32::from_le_bytes([bytes[20], bytes[21], bytes[22], bytes[23]]);
+    let xsdt = u64::from_le_bytes([
+        bytes[24], bytes[25], bytes[26], bytes[27], bytes[28], bytes[29], bytes[30], bytes[31],
+    ]);
+    if &bytes[..8] != b"RSD PTR "
+        || bytes[..20]
+            .iter()
+            .fold(0u8, |sum, byte| sum.wrapping_add(*byte))
+            != 0
+        || bytes[15] < 2
+        || length != 36
+        || xsdt == 0
+        || bytes.iter().fold(0u8, |sum, byte| sum.wrapping_add(*byte)) != 0
+        || bytes[33..36] != [0, 0, 0]
+    {
+        return Err(EFI_COMPROMISED_DATA);
+    }
+    Ok(address)
 }
 
 fn discover_gop(boot_services: &EfiBootServices) -> Result<GopSummary, EfiStatus> {
@@ -525,7 +559,7 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
     diagnostic(format_args!(
         "POOLEBOOT/0.1 CONFIG PASS count={} acpi20={} smbios3={} smbios2={}\n",
         config.count,
-        u8::from(config.acpi20),
+        u8::from(config.acpi20_rsdp != 0),
         u8::from(config.smbios3),
         u8::from(config.smbios2)
     ));
@@ -647,6 +681,7 @@ fn run(image_handle: EfiHandle, system_table: *mut EfiSystemTable) -> EfiStatus 
         &kernel,
         gop,
         system.header.revision,
+        config.acpi20_rsdp,
     ) {
         Ok(()) => unreachable!(),
         Err(failure) => {

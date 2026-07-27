@@ -483,7 +483,7 @@ fn validate_firmware_tables(payload: &[u8], count: usize) -> Result<(), Error> {
         let flags = read_u32(payload, base + 32)?;
         if all_zero(guid)
             || address == 0
-            || address % 8 != 0
+            || address % 4 != 0
             || size == 0
             || size > 16 * 1024 * 1024
             || flags & !0x7 != 0

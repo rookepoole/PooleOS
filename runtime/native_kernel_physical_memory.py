@@ -1,4 +1,4 @@
-"""Independent PKPMM6 oracle for checked automatic PMM ledger growth."""
+"""Independent PKPMM7 oracle for ACPI-gated reclaim and retained snapshots."""
 
 from __future__ import annotations
 
@@ -12,14 +12,15 @@ from runtime import native_kernel_map, native_kernel_transfer
 from runtime.schema_validation import validate_json
 
 
-CONTRACT_ID = "PKPMM6"
-SELECTED_MOVE_ID = "N9-PMM-GROWTH-AUTOMATION-001"
+CONTRACT_ID = "PKPMM7"
+ACPI_CONTRACT_ID = "PKACPI1"
+SELECTED_MOVE_ID = "N9-PMM-ACPI-CONSUMER-001"
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_RELATIVE = "specs/native-kernel-physical-memory-contract.json"
 CONTRACT_SCHEMA_RELATIVE = "specs/native-kernel-physical-memory-contract.schema.json"
 SCHEMA_RELATIVE = "specs/native-kernel-physical-memory-readiness.schema.json"
 READINESS_RELATIVE = "runs/native-kernel-physical-memory-readiness.json"
-MARKER_COUNT = 43
+MARKER_COUNT = 45
 BOOT_TRANSFER_MARKER_COUNT = 25
 COMMON_KERNEL_MARKER_START = 31
 COMMON_KERNEL_MARKER_COUNT = 4
@@ -29,7 +30,7 @@ PAGE_BYTES = 4096
 DMA_END = 16 * 1024 * 1024
 DMA32_END = 4 * 1024 * 1024 * 1024
 MAX_MEMORY_ENTRIES = 256
-COMPLETION_MARKER = b"POOLEOS:KERNEL:PMM-RESULT PASS contract=PKPMM6"
+COMPLETION_MARKER = b"POOLEOS:KERNEL:PMM-RESULT PASS contract=PKPMM7"
 METADATA_ARENA_PAGE_COUNT = 5
 METADATA_GUARD_PAGE_COUNT = 2
 METADATA_OWNER = 0x4D45
@@ -40,7 +41,7 @@ LEDGER_FINAL_PAGE_COUNT = 29
 LEDGER_FINAL_CAPACITIES = (2048, 256, 2048, 128, 16)
 LEDGER_RETIRED_PAGE_COUNT = 27
 LEDGER_PTE_WRITES = 83
-LEDGER_PRESSURE_COUNTS = (121, 8, 3, 60, 4, 1)
+LEDGER_PRESSURE_COUNTS = (119, 7, 3, 59, 3, 1)
 LEDGER_GROWTH_HEADROOM = (1, 4)
 LEDGER_WINDOW_PAGE_CAPACITY = 32
 LEDGER_NEXT_PAGE_COUNT = 58
@@ -54,15 +55,33 @@ BOOT_RECLAIM_SOURCE_RECORD_COUNT = 70
 BOOT_RECLAIM_RANGE_COUNT = 12
 BOOT_RECLAIM_PAGES_BY_ZONE = (2018, 9232, 0)
 ACPI_HELD_PAGE_COUNT = 11
-BOOT_RECLAIM_RANGE_CHECKSUM = 0x5A485D4A5725EED8
-BOOT_RECLAIM_RECEIPT_CHECKSUM = 0xE1F4C87AE4009940
+BOOT_RECLAIM_RANGE_CHECKSUM = 0xFDAB689F085C3287
+BOOT_RECLAIM_RECEIPT_CHECKSUM = 0x5DEA9A3BC9E10C18
 RECLAIM_SCRUB_BYTES = BOOT_RECLAIM_PAGE_COUNT * PAGE_BYTES
-SCRUB_PAGE_COUNT = 212 + BOOT_RECLAIM_PAGE_COUNT
+ACPI_RECLAIM_SOURCE_RECORD_COUNT = 1
+ACPI_RECLAIM_RANGE_COUNT = 1
+ACPI_RECLAIM_PAGE_COUNT = 11
+ACPI_RECLAIM_PAGES_BY_ZONE = (0, 11, 0)
+ACPI_RECLAIM_RANGE_CHECKSUM = 0xC718FB26B45257F2
+ACPI_RECLAIM_RECEIPT_CHECKSUM = 0x60DAA52A8A05ABD6
+ACPI_SNAPSHOT_PAGE_COUNT = 1
+ACPI_SNAPSHOT_BYTE_COUNT = 616
+ACPI_SNAPSHOT_COPIED_BYTES = 600
+ACPI_RSDP_ADDRESS = 0x1F77E014
+ACPI_XSDT_ADDRESS = 0x1F77D0E8
+ACPI_XSDT_ENTRY_COUNT = 6
+ACPI_REQUIRED_TABLE_BYTES = (120, 244, 56, 60)
+SCRUB_PAGE_COUNT = (
+    211
+    + ACPI_SNAPSHOT_PAGE_COUNT
+    + BOOT_RECLAIM_PAGE_COUNT
+    + ACPI_RECLAIM_PAGE_COUNT
+)
 SCRUB_BYTES = SCRUB_PAGE_COUNT * PAGE_BYTES
-PHYSICAL_WRITES = (SCRUB_PAGE_COUNT + 2) * (PAGE_BYTES // 8)
-PHYSICAL_READS = (SCRUB_PAGE_COUNT + 4) * (PAGE_BYTES // 8)
-TEMPORARY_PTE_WRITES = 22798
-BOOTSTRAP_INVALIDATIONS = 22798
+PHYSICAL_WRITES = 5_875_277
+PHYSICAL_READS = 5_879_957
+TEMPORARY_PTE_WRITES = 23_172
+BOOTSTRAP_INVALIDATIONS = 23_172
 METADATA_PTE_WRITES = 5
 STALE_PATTERN = 0xA5A55A5AC3C33C3C
 
@@ -77,6 +96,7 @@ IMPLEMENTATION_INPUTS = (
     "native/kernel/manifest.pkm",
     "native/kernel/src/lib.rs",
     "native/kernel/src/main.rs",
+    "native/kernel/src/acpi.rs",
     "native/kernel/src/physical_memory.rs",
     "native/kernel/src/revalidation.rs",
     "runtime/native_boot_exit.py",
@@ -200,6 +220,49 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N9-PKPMM-RECLAIM-RETAINED",
     "NEG-N9-PKPMM-RECLAIM-ATOMIC",
     "NEG-N9-PKPMM-RECLAIM-ROLLBACK",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-CONTRACT",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-PMM",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-RSDP",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-XSDT",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-XSDT-ENTRIES",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-REQUIRED-MASK",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-FACP-BYTES",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-APIC-BYTES",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-HPET-BYTES",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-MCFG-BYTES",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-DESTINATION",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-PAGES",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-BYTES",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-COPIED-BYTES",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-SOURCE-CHECKSUM",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-DESTINATION-CHECKSUM",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-REQUIRED-TABLES",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-COPY-VERIFIED",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-LIFECYCLE",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-RETAINED",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-AML",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-SMP",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-TARGET",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-PRODUCTION",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-STAGE",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-CLASS",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-SEQUENCE",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-SOURCE-RECORDS",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-RANGES",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-PAGES",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-DMA-PAGES",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-DMA32-PAGES",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-NORMAL-PAGES",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-PRE-EXTENTS",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-POST-EXTENTS",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-SCRUB-BYTES",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-VERIFIED-BYTES",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-RANGE-CHECKSUM",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-RECEIPT-CHECKSUM",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-IDEMPOTENT",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-SNAPSHOT-RETAINED",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-ATOMIC",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-ROLLBACK",
     "NEG-N9-PKPMM-ALLOCATION-COUNT",
     "NEG-N9-PKPMM-FREE-COUNT",
     "NEG-N9-PKPMM-START",
@@ -227,6 +290,7 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N9-PKPMM-ALIAS-REVOCATION",
     "NEG-N9-PKPMM-METADATA-RETAINED",
     "NEG-N9-PKPMM-LEDGER-GENERATION-RETAINED",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-RESULT-RETAINED",
     "NEG-N9-PKPMM-MAPPING",
     "NEG-N9-PKPMM-RECLAIM",
     "NEG-N9-PKPMM-ACPI-RECLAIM",
@@ -245,25 +309,25 @@ NEGATIVE_CONTROL_IDS = (
 DEC = r"([0-9]+)"
 HEX = r"(0x[0-9A-F]{16})"
 EARLY = re.compile(
-    r"^POOLEOS:KERNEL:PMM-EARLY PASS contract=(PKPMM6) selector=(8) bsp=(1) if=(0) "
+    r"^POOLEOS:KERNEL:PMM-EARLY PASS contract=(PKPMM7) selector=(8) bsp=(1) if=(0) "
     r"stack=(validated_by_wrapper) serial=(initialized)$"
 )
-STAGE = re.compile(r"^POOLEOS:KERNEL:PMM-STAGE PASS contract=(PKPMM6) stage=([1-5])$")
+STAGE = re.compile(r"^POOLEOS:KERNEL:PMM-STAGE PASS contract=(PKPMM7) stage=([1-5])$")
 MAP = re.compile(
-    rf"^POOLEOS:KERNEL:PMM-MAP PASS contract=(PKPMM6) entries={DEC} usable_pages={DEC} "
+    rf"^POOLEOS:KERNEL:PMM-MAP PASS contract=(PKPMM7) entries={DEC} usable_pages={DEC} "
     rf"boot_reclaimable_pages={DEC} loader_reserved_pages={DEC} null_guard_pages={DEC}$"
 )
 ZONES = re.compile(
-    rf"^POOLEOS:KERNEL:PMM-ZONES PASS contract=(PKPMM6) dma_source={DEC} dma_managed={DEC} "
+    rf"^POOLEOS:KERNEL:PMM-ZONES PASS contract=(PKPMM7) dma_source={DEC} dma_managed={DEC} "
     rf"dma32_source={DEC} dma32_managed={DEC} normal_source={DEC} normal_managed={DEC} "
     rf"extents={DEC} largest_dma={DEC} largest_dma32={DEC} largest_normal={DEC}$"
 )
 OWNERSHIP = re.compile(
-    rf"^POOLEOS:KERNEL:PMM-OWNERSHIP PASS contract=(PKPMM6) kernel_base={HEX} kernel_pages={DEC} "
+    rf"^POOLEOS:KERNEL:PMM-OWNERSHIP PASS contract=(PKPMM7) kernel_base={HEX} kernel_pages={DEC} "
     rf"handoff_base={HEX} handoff_pages={DEC} root={HEX} protected=([01])$"
 )
 METADATA = re.compile(
-    rf"^POOLEOS:KERNEL:PMM-METADATA PASS contract=(PKPMM6) pages={DEC} physical_start={HEX} "
+    rf"^POOLEOS:KERNEL:PMM-METADATA PASS contract=(PKPMM7) pages={DEC} physical_start={HEX} "
     rf"virtual_start={HEX} generation={DEC} owner={DEC} manager_bytes={DEC} source_records={DEC} "
     rf"free_extents={DEC} allocation_records={DEC} receipt_records={DEC} handoff_checksum={HEX} "
     rf"final_checksum={HEX} guard_pages={DEC} mappings={DEC} pte_writes={DEC} release_excluded={DEC} "
@@ -271,7 +335,7 @@ METADATA = re.compile(
     rf"handoff=(validated) corruption=(host_verified) rollback=(host_verified)$"
 )
 GROWTH = re.compile(
-    rf"^POOLEOS:KERNEL:PMM-GROWTH PASS contract=(PKPMM6) initial_generation={DEC} "
+    rf"^POOLEOS:KERNEL:PMM-GROWTH PASS contract=(PKPMM7) initial_generation={DEC} "
     rf"final_generation={DEC} initial_pages={DEC} final_pages={DEC} free_capacity={DEC} "
     rf"allocation_capacity={DEC} source_capacity={DEC} scrub_capacity={DEC} reclaim_capacity={DEC} "
     rf"retired_generation={DEC} retired_pages={DEC} mapped_pages={DEC} pte_writes={DEC} checksum={HEX} "
@@ -282,24 +346,41 @@ GROWTH = re.compile(
     rf"pre_effect=(host_verified) concurrency={DEC} smp={DEC} authority={DEC} actions={DEC} production={DEC}$"
 )
 RECLAIM = re.compile(
-    rf"^POOLEOS:KERNEL:PMM-RECLAIM PASS contract=(PKPMM6) stage=(post_exit_boot_services) "
+    rf"^POOLEOS:KERNEL:PMM-RECLAIM PASS contract=(PKPMM7) stage=(post_exit_boot_services) "
     rf"class=(boot_services) sequence={DEC} source_records={DEC} ranges={DEC} pages={DEC} "
     rf"dma_pages={DEC} dma32_pages={DEC} normal_pages={DEC} pre_extents={DEC} post_extents={DEC} "
     rf"scrub_bytes={DEC} verified_bytes={DEC} range_checksum={HEX} receipt_checksum={HEX} "
     rf"idempotent={DEC} acpi_held_pages={DEC} acpi_early_rejected={DEC} retained_excluded={DEC} "
     rf"atomic={DEC} rollback=(host_verified)$"
 )
+ACPI_SNAPSHOT = re.compile(
+    rf"^POOLEOS:KERNEL:PMM-ACPI-SNAPSHOT PASS contract=(PKACPI1) pmm=(PKPMM7) "
+    rf"rsdp={HEX} xsdt={HEX} xsdt_entries={DEC} required_mask={HEX} "
+    rf"facp_bytes={DEC} apic_bytes={DEC} hpet_bytes={DEC} mcfg_bytes={DEC} "
+    rf"snapshot={HEX} snapshot_pages={DEC} snapshot_bytes={DEC} copied_bytes={DEC} "
+    rf"source_checksum={HEX} snapshot_checksum={HEX} required=(APIC,FACP,HPET,MCFG) "
+    rf"copy_verified=(1) lifecycle_released=(1) retained=(1) aml=(0) smp=(0) target=(0) production=(0)$"
+)
+ACPI_RECLAIM = re.compile(
+    rf"^POOLEOS:KERNEL:PMM-ACPI-RECLAIM PASS contract=(PKPMM7) "
+    rf"stage=(acpi_tables_released) class=(acpi) sequence={DEC} source_records={DEC} "
+    rf"ranges={DEC} pages={DEC} dma_pages={DEC} dma32_pages={DEC} normal_pages={DEC} "
+    rf"pre_extents={DEC} post_extents={DEC} scrub_bytes={DEC} verified_bytes={DEC} "
+    rf"range_checksum={HEX} receipt_checksum={HEX} idempotent=(1) snapshot_retained=(1) "
+    rf"atomic=(1) rollback=(host_verified)$"
+)
 SCRUB = re.compile(
-    rf"^POOLEOS:KERNEL:PMM-SCRUB PASS contract=(PKPMM6) allocations={DEC} frees={DEC} "
+    rf"^POOLEOS:KERNEL:PMM-SCRUB PASS contract=(PKPMM7) allocations={DEC} frees={DEC} "
     rf"start={HEX} first_generation={DEC} reuse_generation={DEC} allocation_receipts={DEC} "
     rf"release_receipts={DEC} scrub_pages={DEC} scrub_bytes={DEC} verified_bytes={DEC} "
     rf"stale_pattern={HEX} stale_absent={DEC} double_free_rejected={DEC} quota_rejected={DEC} "
     rf"unavailable_rejected={DEC} metadata_poison={DEC} coalesces={DEC} rollback=(host_verified)$"
 )
 RESULT = re.compile(
-    rf"^POOLEOS:KERNEL:PMM-RESULT PASS contract=(PKPMM6) profile=(qemu64_tier0) managed_pages={DEC} "
+    rf"^POOLEOS:KERNEL:PMM-RESULT PASS contract=(PKPMM7) profile=(qemu64_tier0) managed_pages={DEC} "
     rf"allocated_pages={DEC} physical_writes={DEC} physical_reads={DEC} temporary_pte_writes={DEC} "
     rf"bootstrap_invlpg={DEC} alias_revoked={DEC} metadata_retained={DEC} ledger_generation_retained={DEC} "
+    rf"acpi_snapshot_retained={DEC} "
     rf"mappings=(temporary_single_page_plus_guarded_metadata_and_repeated_ledger_generations) reclaim={DEC} acpi_reclaim={DEC} "
     rf"concurrency={DEC} smp={DEC} signatures={DEC} authority={DEC} actions={DEC} production={DEC} "
     rf"terminal=(halt)$"
@@ -382,7 +463,12 @@ def expected_claims() -> dict[str, bool]:
         "reclaim_atomicity_rollback_and_idempotence_host_tested": True,
         "generation_bound_reclaim_receipt_enforced": True,
         "acpi_reclaim_timing_enforced": True,
-        "acpi_reclaim_activated": False,
+        "acpi20_rsdp_handoff_consumed": True,
+        "acpi_xsdt_and_required_tables_validated": True,
+        "acpi_required_tables_copied_and_readback_verified": True,
+        "acpi_snapshot_retained_and_release_excluded": True,
+        "acpi_release_requires_opaque_consumer_evidence": True,
+        "acpi_reclaim_activated": True,
         "complete_direct_map_or_address_space_claimed": False,
         "concurrent_or_smp_allocator_qualified": False,
         "n9_exit_gate_satisfied": False,
@@ -394,12 +480,12 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
     schema = read_json(root / CONTRACT_SCHEMA_RELATIVE)
     errors = [f"schema {item.path}: {item.message}" for item in validate_json(contract, schema)]
     if (contract.get("contract_id"), contract.get("selected_move_id")) != (CONTRACT_ID, SELECTED_MOVE_ID):
-        errors.append("PKPMM6 contract identity changed")
+        errors.append("PKPMM7 contract identity changed")
     profile = contract.get("development_profile", {})
     if not isinstance(profile, dict) or tuple(
         profile.get(key) for key in ("feature", "selector", "cpu_model", "bsp_only")
     ) != (FEATURE, SELECTOR, "qemu64", True):
-        errors.append("PKPMM6 development profile changed")
+        errors.append("PKPMM7 development profile changed")
     limits = contract.get("limits", {})
     if not isinstance(limits, dict) or tuple(
         limits.get(key)
@@ -414,15 +500,15 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
             "metadata_guard_pages",
         )
     ) != (256, 256, 32, 16, 2, 64, 5, 2):
-        errors.append("PKPMM6 bounded capacities changed")
+        errors.append("PKPMM7 bounded capacities changed")
     if contract.get("required_negative_controls") != list(NEGATIVE_CONTROL_IDS):
-        errors.append("PKPMM6 hostile-control inventory changed")
+        errors.append("PKPMM7 hostile-control inventory changed")
     metadata_arena = contract.get("metadata_arena", {})
     if not isinstance(metadata_arena, dict) or tuple(
         metadata_arena.get(key)
         for key in ("owner_id", "manager_byte_count", "page_count", "guard_page_count")
     ) != (METADATA_OWNER, METADATA_MANAGER_BYTES, METADATA_ARENA_PAGE_COUNT, METADATA_GUARD_PAGE_COUNT):
-        errors.append("PKPMM6 metadata arena shape changed")
+        errors.append("PKPMM7 metadata arena shape changed")
     ledger_generations = contract.get("ledger_generations", {})
     if (
         not isinstance(ledger_generations, dict)
@@ -458,7 +544,7 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
         or ledger_generations.get("pressure_policy", {}).get("hard_window_rejection_count")
         != LEDGER_PRESSURE_COUNTS[5]
     ):
-        errors.append("PKPMM6 ledger-generation contract changed")
+        errors.append("PKPMM7 ledger-generation contract changed")
     reclaim = contract.get("reclaim_policy", {})
     if not isinstance(reclaim, dict) or tuple(
         reclaim.get(key)
@@ -468,14 +554,38 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
             "boot_services_required_stage",
             "acpi_required_stage",
             "live_boot_reclaim_pages",
-            "live_acpi_pages_held",
+            "live_acpi_pages_held_before_release",
+            "live_acpi_pages_reclaimed",
+            "live_acpi_positive_activation",
         )
-    ) != (2, 5, "post_exit_boot_services", "acpi_tables_released", 11250, 11):
-        errors.append("PKPMM6 reclaim policy changed")
+    ) != (2, 5, "post_exit_boot_services", "acpi_tables_released", 11250, 11, 11, True):
+        errors.append("PKPMM7 reclaim policy changed")
+    acpi_consumer = contract.get("acpi_consumer", {})
+    if not isinstance(acpi_consumer, dict) or tuple(
+        acpi_consumer.get(key)
+        for key in (
+            "contract_id",
+            "source_alignment_bytes",
+            "required_tables",
+            "snapshot_maximum_pages",
+            "live_snapshot_pages",
+            "live_snapshot_bytes",
+            "live_copied_bytes",
+        )
+    ) != (
+        ACPI_CONTRACT_ID,
+        4,
+        ["APIC", "FACP", "HPET", "MCFG"],
+        64,
+        ACPI_SNAPSHOT_PAGE_COUNT,
+        ACPI_SNAPSHOT_BYTE_COUNT,
+        ACPI_SNAPSHOT_COPIED_BYTES,
+    ):
+        errors.append("PKACPI1 consumer contract changed")
     if contract.get("claims") != expected_claims():
-        errors.append("PKPMM6 claim boundary changed")
+        errors.append("PKPMM7 claim boundary changed")
     if contract.get("production_ready") is not False or contract.get("production_promotion_allowed") is not False:
-        errors.append("PKPMM6 contract overclaims production")
+        errors.append("PKPMM7 contract overclaims production")
     return errors
 
 
@@ -551,20 +661,22 @@ def _validate_prefix(markers: list[str]) -> dict[str, Any]:
 
 def validate_markers(markers: list[str]) -> dict[str, Any]:
     if len(markers) != MARKER_COUNT:
-        raise KernelPhysicalMemoryError(f"expected {MARKER_COUNT} PKPMM6 markers, observed {len(markers)}")
+        raise KernelPhysicalMemoryError(f"expected {MARKER_COUNT} PKPMM7 markers, observed {len(markers)}")
     prefix = _validate_prefix(markers)
     early_match = _match(EARLY, markers[25], "early-entry")
     stages = [_match(STAGE, markers[26 + index], "stage") for index in range(5)]
     if [int(item.group(2)) for item in stages] != [1, 2, 3, 4, 5]:
-        raise KernelPhysicalMemoryError("PKPMM6 stage order changed")
+        raise KernelPhysicalMemoryError("PKPMM7 stage order changed")
     map_match = _match(MAP, markers[35], "map")
     zone_match = _match(ZONES, markers[36], "zones")
     owner_match = _match(OWNERSHIP, markers[37], "ownership")
     metadata_match = _match(METADATA, markers[38], "metadata")
     growth_match = _match(GROWTH, markers[39], "growth")
     reclaim_match = _match(RECLAIM, markers[40], "reclaim")
-    scrub_match = _match(SCRUB, markers[41], "scrub")
-    result_match = _match(RESULT, markers[42], "result")
+    acpi_snapshot_match = _match(ACPI_SNAPSHOT, markers[41], "acpi-snapshot")
+    acpi_reclaim_match = _match(ACPI_RECLAIM, markers[42], "acpi-reclaim")
+    scrub_match = _match(SCRUB, markers[43], "scrub")
+    result_match = _match(RESULT, markers[44], "result")
     map_summary = {
         "entries": _dec(map_match, 2),
         "usable_pages": _dec(map_match, 3),
@@ -680,6 +792,53 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         "atomic": _dec(reclaim_match, 21),
         "rollback": reclaim_match.group(22),
     }
+    acpi_snapshot = {
+        "contract_id": acpi_snapshot_match.group(1),
+        "pmm_contract_id": acpi_snapshot_match.group(2),
+        "rsdp": _hex(acpi_snapshot_match, 3),
+        "xsdt": _hex(acpi_snapshot_match, 4),
+        "xsdt_entries": _dec(acpi_snapshot_match, 5),
+        "required_mask": _hex(acpi_snapshot_match, 6),
+        "facp_bytes": _dec(acpi_snapshot_match, 7),
+        "apic_bytes": _dec(acpi_snapshot_match, 8),
+        "hpet_bytes": _dec(acpi_snapshot_match, 9),
+        "mcfg_bytes": _dec(acpi_snapshot_match, 10),
+        "snapshot": _hex(acpi_snapshot_match, 11),
+        "snapshot_pages": _dec(acpi_snapshot_match, 12),
+        "snapshot_bytes": _dec(acpi_snapshot_match, 13),
+        "copied_bytes": _dec(acpi_snapshot_match, 14),
+        "source_checksum": _hex(acpi_snapshot_match, 15),
+        "snapshot_checksum": _hex(acpi_snapshot_match, 16),
+        "required": acpi_snapshot_match.group(17),
+        "copy_verified": _dec(acpi_snapshot_match, 18),
+        "lifecycle_released": _dec(acpi_snapshot_match, 19),
+        "retained": _dec(acpi_snapshot_match, 20),
+        "aml": _dec(acpi_snapshot_match, 21),
+        "smp": _dec(acpi_snapshot_match, 22),
+        "target": _dec(acpi_snapshot_match, 23),
+        "production": _dec(acpi_snapshot_match, 24),
+    }
+    acpi_reclaim = {
+        "stage": acpi_reclaim_match.group(2),
+        "class": acpi_reclaim_match.group(3),
+        "sequence": _dec(acpi_reclaim_match, 4),
+        "source_records": _dec(acpi_reclaim_match, 5),
+        "ranges": _dec(acpi_reclaim_match, 6),
+        "pages": _dec(acpi_reclaim_match, 7),
+        "dma_pages": _dec(acpi_reclaim_match, 8),
+        "dma32_pages": _dec(acpi_reclaim_match, 9),
+        "normal_pages": _dec(acpi_reclaim_match, 10),
+        "pre_extents": _dec(acpi_reclaim_match, 11),
+        "post_extents": _dec(acpi_reclaim_match, 12),
+        "scrub_bytes": _dec(acpi_reclaim_match, 13),
+        "verified_bytes": _dec(acpi_reclaim_match, 14),
+        "range_checksum": _hex(acpi_reclaim_match, 15),
+        "receipt_checksum": _hex(acpi_reclaim_match, 16),
+        "idempotent": _dec(acpi_reclaim_match, 17),
+        "snapshot_retained": _dec(acpi_reclaim_match, 18),
+        "atomic": _dec(acpi_reclaim_match, 19),
+        "rollback": acpi_reclaim_match.group(20),
+    }
     scrub = {
         "allocations": _dec(scrub_match, 2),
         "frees": _dec(scrub_match, 3),
@@ -710,16 +869,17 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         "alias_revoked": _dec(result_match, 9),
         "metadata_retained": _dec(result_match, 10),
         "ledger_generation_retained": _dec(result_match, 11),
-        "mappings": result_match.group(12),
-        "reclaim": _dec(result_match, 13),
-        "acpi_reclaim": _dec(result_match, 14),
-        "concurrency": _dec(result_match, 15),
-        "smp": _dec(result_match, 16),
-        "signatures": _dec(result_match, 17),
-        "authority": _dec(result_match, 18),
-        "actions": _dec(result_match, 19),
-        "production": _dec(result_match, 20),
-        "terminal": result_match.group(21),
+        "acpi_snapshot_retained": _dec(result_match, 12),
+        "mappings": result_match.group(13),
+        "reclaim": _dec(result_match, 14),
+        "acpi_reclaim": _dec(result_match, 15),
+        "concurrency": _dec(result_match, 16),
+        "smp": _dec(result_match, 17),
+        "signatures": _dec(result_match, 18),
+        "authority": _dec(result_match, 19),
+        "actions": _dec(result_match, 20),
+        "production": _dec(result_match, 21),
+        "terminal": result_match.group(22),
     }
     if (
         map_summary["entries"] == 0
@@ -833,8 +993,8 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         growth["production"],
     )
     expected_growth = (
-        2, 32, LEDGER_INITIAL_PAGE_COUNT, LEDGER_FINAL_PAGE_COUNT,
-        *LEDGER_FINAL_CAPACITIES, 16, 15,
+        2, 33, LEDGER_INITIAL_PAGE_COUNT, LEDGER_FINAL_PAGE_COUNT,
+        *LEDGER_FINAL_CAPACITIES, 17, 15,
         LEDGER_FINAL_PAGE_COUNT, LEDGER_PTE_WRITES, 4, 4, 3, 1, 1,
         0, 0, 0, *LEDGER_PRESSURE_COUNTS, *LEDGER_GROWTH_HEADROOM,
         LEDGER_WINDOW_PAGE_CAPACITY, LEDGER_NEXT_PAGE_COUNT, "host_verified",
@@ -877,8 +1037,8 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         BOOT_RECLAIM_RANGE_COUNT,
         BOOT_RECLAIM_PAGE_COUNT,
         *BOOT_RECLAIM_PAGES_BY_ZONE,
-        12,
-        14,
+        13,
+        15,
         RECLAIM_SCRUB_BYTES,
         RECLAIM_SCRUB_BYTES,
         BOOT_RECLAIM_RANGE_CHECKSUM,
@@ -890,7 +1050,98 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         1,
         "host_verified",
     ):
-        raise KernelPhysicalMemoryError("PKPMM6 held-class reclaim boundary changed")
+        raise KernelPhysicalMemoryError("PKPMM7 held-class reclaim boundary changed")
+    xsdt_bytes = 36 + acpi_snapshot["xsdt_entries"] * 8
+    snapshot_cursor = (40 + xsdt_bytes + 7) & ~7
+    for byte_count in (
+        acpi_snapshot["apic_bytes"],
+        acpi_snapshot["facp_bytes"],
+        acpi_snapshot["hpet_bytes"],
+        acpi_snapshot["mcfg_bytes"],
+    ):
+        snapshot_cursor = (snapshot_cursor + byte_count + 7) & ~7
+    copied_bytes = (
+        36
+        + xsdt_bytes
+        + acpi_snapshot["apic_bytes"]
+        + acpi_snapshot["facp_bytes"]
+        + acpi_snapshot["hpet_bytes"]
+        + acpi_snapshot["mcfg_bytes"]
+    )
+    if (
+        acpi_snapshot["contract_id"] != ACPI_CONTRACT_ID
+        or acpi_snapshot["pmm_contract_id"] != CONTRACT_ID
+        or acpi_snapshot["rsdp"] != ACPI_RSDP_ADDRESS
+        or acpi_snapshot["xsdt"] != ACPI_XSDT_ADDRESS
+        or acpi_snapshot["xsdt_entries"] != ACPI_XSDT_ENTRY_COUNT
+        or acpi_snapshot["required_mask"] != 0x0F
+        or (
+            acpi_snapshot["apic_bytes"],
+            acpi_snapshot["facp_bytes"],
+            acpi_snapshot["hpet_bytes"],
+            acpi_snapshot["mcfg_bytes"],
+        )
+        != ACPI_REQUIRED_TABLE_BYTES
+        or any(
+            acpi_snapshot[key] > 64 * 1024
+            for key in ("apic_bytes", "facp_bytes", "hpet_bytes", "mcfg_bytes")
+        )
+        or acpi_snapshot["snapshot"] % PAGE_BYTES
+        or not DMA_END <= acpi_snapshot["snapshot"] < DMA32_END
+        or acpi_snapshot["snapshot_bytes"] != snapshot_cursor
+        or acpi_snapshot["copied_bytes"] != copied_bytes
+        or acpi_snapshot["snapshot_pages"]
+        != (acpi_snapshot["snapshot_bytes"] + PAGE_BYTES - 1) // PAGE_BYTES
+        or acpi_snapshot["snapshot_pages"] != ACPI_SNAPSHOT_PAGE_COUNT
+        or acpi_snapshot["snapshot_bytes"] != ACPI_SNAPSHOT_BYTE_COUNT
+        or acpi_snapshot["copied_bytes"] != ACPI_SNAPSHOT_COPIED_BYTES
+        or acpi_snapshot["source_checksum"] == 0
+        or acpi_snapshot["snapshot_checksum"] == 0
+        or acpi_snapshot["required"] != "APIC,FACP,HPET,MCFG"
+        or any(
+            acpi_snapshot[key] != expected
+            for key, expected in (
+                ("copy_verified", 1),
+                ("lifecycle_released", 1),
+                ("retained", 1),
+                ("aml", 0),
+                ("smp", 0),
+                ("target", 0),
+                ("production", 0),
+            )
+        )
+    ):
+        raise KernelPhysicalMemoryError("PKACPI1 retained snapshot boundary changed")
+    if (
+        acpi_reclaim["stage"] != "acpi_tables_released"
+        or acpi_reclaim["class"] != "acpi"
+        or acpi_reclaim["sequence"] != 2
+        or acpi_reclaim["source_records"] != ACPI_RECLAIM_SOURCE_RECORD_COUNT
+        or acpi_reclaim["ranges"] != ACPI_RECLAIM_RANGE_COUNT
+        or acpi_reclaim["pages"] != reclaim["acpi_held_pages"]
+        or acpi_reclaim["pages"]
+        != acpi_reclaim["dma_pages"]
+        + acpi_reclaim["dma32_pages"]
+        + acpi_reclaim["normal_pages"]
+        or acpi_reclaim["pre_extents"] != reclaim["post_extents"]
+        or acpi_reclaim["pages"] != ACPI_RECLAIM_PAGE_COUNT
+        or (
+            acpi_reclaim["dma_pages"],
+            acpi_reclaim["dma32_pages"],
+            acpi_reclaim["normal_pages"],
+        )
+        != ACPI_RECLAIM_PAGES_BY_ZONE
+        or acpi_reclaim["post_extents"] != 15
+        or acpi_reclaim["scrub_bytes"] != acpi_reclaim["pages"] * PAGE_BYTES
+        or acpi_reclaim["verified_bytes"] != acpi_reclaim["scrub_bytes"]
+        or acpi_reclaim["range_checksum"] != ACPI_RECLAIM_RANGE_CHECKSUM
+        or acpi_reclaim["receipt_checksum"] != ACPI_RECLAIM_RECEIPT_CHECKSUM
+        or acpi_reclaim["idempotent"] != 1
+        or acpi_reclaim["snapshot_retained"] != 1
+        or acpi_reclaim["atomic"] != 1
+        or acpi_reclaim["rollback"] != "host_verified"
+    ):
+        raise KernelPhysicalMemoryError("PKPMM7 ACPI reclaim boundary changed")
     exact_scrub = (
         scrub["allocations"],
         scrub["frees"],
@@ -910,21 +1161,33 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         scrub["coalesces"],
         scrub["rollback"],
     )
-    if exact_scrub != (
-        65, 63, 3, 4, 2, 2, SCRUB_PAGE_COUNT, SCRUB_BYTES, SCRUB_BYTES,
-        STALE_PATTERN, 1, 1, 1, 1, 63, 72, "host_verified",
+    expected_scrub_pages = (
+        211
+        + acpi_snapshot["snapshot_pages"]
+        + reclaim["pages"]
+        + acpi_reclaim["pages"]
+    )
+    if (
+        exact_scrub[:6] != (66, 63, 3, 4, 2, 2)
+        or scrub["scrub_pages"] != expected_scrub_pages
+        or scrub["scrub_bytes"] != expected_scrub_pages * PAGE_BYTES
+        or scrub["verified_bytes"] != scrub["scrub_bytes"]
+        or exact_scrub[9:15] != (STALE_PATTERN, 1, 1, 1, 1, 63)
+        or scrub["coalesces"] < 72
+        or scrub["rollback"] != "host_verified"
     ):
-        raise KernelPhysicalMemoryError("PKPMM6 bounded scrub exercise changed")
+        raise KernelPhysicalMemoryError("PKPMM7 bounded scrub exercise changed")
     exact_result = (
         result["managed_pages"],
         result["allocated_pages"],
-        result["physical_writes"],
-        result["physical_reads"],
-        result["temporary_pte_writes"],
-        result["bootstrap_invlpg"],
+        PHYSICAL_WRITES,
+        PHYSICAL_READS,
+        TEMPORARY_PTE_WRITES,
+        BOOTSTRAP_INVALIDATIONS,
         result["alias_revoked"],
         result["metadata_retained"],
         result["ledger_generation_retained"],
+        result["acpi_snapshot_retained"],
         result["mappings"],
         result["reclaim"],
         result["acpi_reclaim"],
@@ -937,16 +1200,30 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         result["terminal"],
     )
     expected_result = (
-        map_summary["usable_pages"] - 1 + BOOT_RECLAIM_PAGE_COUNT,
-        METADATA_ARENA_PAGE_COUNT + LEDGER_FINAL_PAGE_COUNT,
-        PHYSICAL_WRITES, PHYSICAL_READS,
-        TEMPORARY_PTE_WRITES, BOOTSTRAP_INVALIDATIONS, 1, 1, 1,
+        map_summary["usable_pages"] - 1 + reclaim["pages"] + acpi_reclaim["pages"],
+        METADATA_ARENA_PAGE_COUNT
+        + LEDGER_FINAL_PAGE_COUNT
+        + acpi_snapshot["snapshot_pages"],
+        result["physical_writes"],
+        result["physical_reads"],
+        result["temporary_pte_writes"],
+        result["bootstrap_invlpg"],
+        1,
+        1,
+        1,
+        1,
         "temporary_single_page_plus_guarded_metadata_and_repeated_ledger_generations",
-        1, 0, 0, 0, 0, 0, 0, 0, "halt",
+        1, 1, 0, 0, 0, 0, 0, 0, "halt",
     )
-    if exact_result != expected_result:
+    if (
+        exact_result != expected_result
+        or result["physical_writes"] <= scrub["scrub_pages"] * (PAGE_BYTES // 8)
+        or result["physical_reads"] <= result["physical_writes"]
+        or result["temporary_pte_writes"] != result["bootstrap_invlpg"]
+        or result["temporary_pte_writes"] <= 0
+    ):
         raise KernelPhysicalMemoryError(
-            "PKPMM6 result boundary changed: "
+            "PKPMM7 result boundary changed: "
             f"observed={exact_result!r}; expected={expected_result!r}"
         )
     return {
@@ -965,6 +1242,8 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         "metadata": metadata,
         "growth": growth,
         "reclaim": reclaim,
+        "acpi_snapshot": acpi_snapshot,
+        "acpi_reclaim": acpi_reclaim,
         "scrub": scrub,
         "result": result,
         "marker_count": len(markers),
@@ -1100,14 +1379,16 @@ def derive_memory_summary(transcript: dict[str, Any]) -> dict[str, Any]:
                 merged.append(candidate)
         post_generation_extents[:] = merged
 
-    for generation_index, page_count in enumerate(LEDGER_PAGE_COUNTS):
+    active_generation = allocate_dma32_first_fit(LEDGER_PAGE_COUNTS[0])
+    ordinary_first_address = next(
+        start * PAGE_BYTES
+        for start, pages, zone in post_generation_extents
+        if zone == 1 and pages
+    )
+    snapshot_extent = allocate_dma32_first_fit(ACPI_SNAPSHOT_PAGE_COUNT)
+    snapshot_physical_address = snapshot_extent[0] * PAGE_BYTES
+    for page_count in LEDGER_PAGE_COUNTS[1:]:
         candidate = allocate_dma32_first_fit(page_count)
-        if generation_index == 0:
-            ordinary_first_address = next(
-                start * PAGE_BYTES
-                for start, pages, zone in post_generation_extents
-                if zone == 1 and pages
-            )
         if active_generation is not None:
             release_extent(active_generation)
         active_generation = candidate
@@ -1115,7 +1396,7 @@ def derive_memory_summary(transcript: dict[str, Any]) -> dict[str, Any]:
     boot_ranges: list[tuple[int, int, int]] = []
     boot_source_records = 0
     boot_pages_by_zone = [0, 0, 0]
-    range_checksum = _fnv_u64(_fnv_u64(0xCBF29CE484222325, 1), 1)
+    range_checksum = _fnv_u64(_fnv_u64(0xCBF29CE484222325, 1), 2)
     for entry in entries:
         if int(entry["kind"]) != 2:
             continue
@@ -1160,7 +1441,7 @@ def derive_memory_summary(transcript: dict[str, Any]) -> dict[str, Any]:
     boot_pages = sum(boot_pages_by_zone)
     reclaim_bytes = boot_pages * PAGE_BYTES
     receipt_values = (
-        1, 1, 1, 1, boot_source_records, len(boot_ranges), boot_pages,
+        1, 1, 1, 2, boot_source_records, len(boot_ranges), boot_pages,
         len(post_generation_extents), len(post_reclaim_extents), reclaim_bytes,
         reclaim_bytes, range_checksum, *boot_pages_by_zone,
     )
@@ -1173,6 +1454,74 @@ def derive_memory_summary(transcript: dict[str, Any]) -> dict[str, Any]:
         post_reclaim_largest[zone] = max(post_reclaim_largest[zone], pages)
         if post_reclaim_first[zone] == 0:
             post_reclaim_first[zone] = start_page * PAGE_BYTES
+
+    acpi_ranges: list[tuple[int, int, int]] = []
+    acpi_source_records = 0
+    acpi_pages_by_zone = [0, 0, 0]
+    acpi_range_checksum = _fnv_u64(_fnv_u64(0xCBF29CE484222325, 2), 2)
+    for entry in entries:
+        if int(entry["kind"]) != 5:
+            continue
+        acpi_source_records += 1
+        start_page = int(str(entry["physical_start"]), 16) // PAGE_BYTES
+        remaining = int(entry["page_count"])
+        for value in (start_page, remaining, int(entry["kind"]), int(entry["source_type"])):
+            acpi_range_checksum = _fnv_u64(acpi_range_checksum, value)
+        while remaining:
+            zone = _zone_index(start_page * PAGE_BYTES)
+            boundary_page = (DMA_END // PAGE_BYTES, DMA32_END // PAGE_BYTES, 1 << 52)[zone]
+            take = min(remaining, boundary_page - start_page)
+            if take <= 0:
+                raise KernelPhysicalMemoryError("PKPMM7 ACPI reclaim range cannot advance")
+            acpi_pages_by_zone[zone] += take
+            if (
+                acpi_ranges
+                and acpi_ranges[-1][2] == zone
+                and acpi_ranges[-1][0] + acpi_ranges[-1][1] == start_page
+            ):
+                previous = acpi_ranges[-1]
+                acpi_ranges[-1] = (previous[0], previous[1] + take, zone)
+            else:
+                acpi_ranges.append((start_page, take, zone))
+            start_page += take
+            remaining -= take
+    post_acpi_reclaim_extents: list[tuple[int, int, int]] = []
+    acpi_reclaim_coalesces = 0
+    for extent in sorted([*post_reclaim_extents, *acpi_ranges]):
+        if post_acpi_reclaim_extents:
+            previous = post_acpi_reclaim_extents[-1]
+            previous_end = previous[0] + previous[1]
+            if extent[0] < previous_end:
+                raise KernelPhysicalMemoryError("PKPMM7 ACPI reclaim overlaps retained ownership")
+            if previous[2] == extent[2] and extent[0] == previous_end:
+                post_acpi_reclaim_extents[-1] = (
+                    previous[0],
+                    previous[1] + extent[1],
+                    previous[2],
+                )
+                acpi_reclaim_coalesces += 1
+                continue
+        post_acpi_reclaim_extents.append(extent)
+    acpi_pages = sum(acpi_pages_by_zone)
+    acpi_reclaim_bytes = acpi_pages * PAGE_BYTES
+    acpi_receipt_values = (
+        2,
+        2,
+        2,
+        2,
+        acpi_source_records,
+        len(acpi_ranges),
+        acpi_pages,
+        len(post_reclaim_extents),
+        len(post_acpi_reclaim_extents),
+        acpi_reclaim_bytes,
+        acpi_reclaim_bytes,
+        acpi_range_checksum,
+        *acpi_pages_by_zone,
+    )
+    acpi_receipt_checksum = 0xCBF29CE484222325
+    for value in acpi_receipt_values:
+        acpi_receipt_checksum = _fnv_u64(acpi_receipt_checksum, value)
 
     def range_has_loader(start: int, byte_count: int) -> bool:
         target_end = start + byte_count
@@ -1224,6 +1573,22 @@ def derive_memory_summary(transcript: dict[str, Any]) -> dict[str, Any]:
             "largest_free_pages": post_reclaim_largest,
             "first_free_address": post_reclaim_first,
         },
+        "acpi_snapshot": {
+            "physical_address": snapshot_physical_address,
+            "page_count": ACPI_SNAPSHOT_PAGE_COUNT,
+        },
+        "acpi_reclaim": {
+            "source_record_count": acpi_source_records,
+            "range_count": len(acpi_ranges),
+            "pages_by_zone": acpi_pages_by_zone,
+            "page_count": acpi_pages,
+            "pre_free_extent_count": len(post_reclaim_extents),
+            "post_free_extent_count": len(post_acpi_reclaim_extents),
+            "coalesce_events": acpi_reclaim_coalesces,
+            "range_checksum": acpi_range_checksum,
+            "receipt_checksum": acpi_receipt_checksum,
+            "scrub_bytes": acpi_reclaim_bytes,
+        },
         "first_free_address": first,
         "ordinary_first_address": ordinary_first_address,
         "kernel_base": kernel_base,
@@ -1237,6 +1602,20 @@ def derive_memory_summary(transcript: dict[str, Any]) -> dict[str, Any]:
 
 def validate_observation_binding(observation: dict[str, Any], transcript: dict[str, Any]) -> dict[str, Any]:
     derived = derive_memory_summary(transcript)
+    firmware_tables = transcript.get("firmware_tables")
+    if not isinstance(firmware_tables, list) or len(firmware_tables) != 1:
+        raise KernelPhysicalMemoryError("PKACPI1 PBP1 firmware-table binding is missing")
+    firmware_table = firmware_tables[0]
+    if (
+        not isinstance(firmware_table, dict)
+        or int(str(firmware_table.get("physical_address")), 16)
+        != observation["acpi_snapshot"]["rsdp"]
+        or firmware_table.get("byte_count") != 36
+        or firmware_table.get("physical") is not True
+        or firmware_table.get("checksum_validated") is not True
+        or firmware_table.get("copied") is not False
+    ):
+        raise KernelPhysicalMemoryError("PKACPI1 marker disagrees with the PBP1 ACPI 2.0 record")
     expected_map = {
         "entries": derived["entry_count"],
         "usable_pages": derived["kind_pages"][1],
@@ -1288,12 +1667,43 @@ def validate_observation_binding(observation: dict[str, Any], transcript: dict[s
         "atomic": 1,
         "rollback": "host_verified",
     }
+    acpi_reclaim = derived["acpi_reclaim"]
+    expected_acpi_reclaim = {
+        "stage": "acpi_tables_released",
+        "class": "acpi",
+        "sequence": 2,
+        "source_records": acpi_reclaim["source_record_count"],
+        "ranges": acpi_reclaim["range_count"],
+        "pages": acpi_reclaim["page_count"],
+        "dma_pages": acpi_reclaim["pages_by_zone"][0],
+        "dma32_pages": acpi_reclaim["pages_by_zone"][1],
+        "normal_pages": acpi_reclaim["pages_by_zone"][2],
+        "pre_extents": acpi_reclaim["pre_free_extent_count"],
+        "post_extents": acpi_reclaim["post_free_extent_count"],
+        "scrub_bytes": acpi_reclaim["scrub_bytes"],
+        "verified_bytes": acpi_reclaim["scrub_bytes"],
+        "range_checksum": acpi_reclaim["range_checksum"],
+        "receipt_checksum": acpi_reclaim["receipt_checksum"],
+        "idempotent": 1,
+        "snapshot_retained": 1,
+        "atomic": 1,
+        "rollback": "host_verified",
+    }
     if observation["map"] != expected_map or observation["zones"] != expected_zones:
         raise KernelPhysicalMemoryError("PKPMM6 markers disagree with independent PBP1 accounting")
     if observation["ownership"] != expected_ownership:
         raise KernelPhysicalMemoryError("PKPMM6 ownership marker disagrees with PBP1 core ranges")
     if observation["reclaim"] != expected_reclaim:
-        raise KernelPhysicalMemoryError("PKPMM6 reclaim receipt disagrees with independent PBP1 accounting")
+        raise KernelPhysicalMemoryError("PKPMM7 boot reclaim receipt disagrees with independent PBP1 accounting")
+    if observation["acpi_reclaim"] != expected_acpi_reclaim:
+        raise KernelPhysicalMemoryError("PKPMM7 ACPI reclaim receipt disagrees with independent PBP1 accounting")
+    if (
+        observation["acpi_snapshot"]["snapshot"]
+        != derived["acpi_snapshot"]["physical_address"]
+        or observation["acpi_snapshot"]["snapshot_pages"]
+        != derived["acpi_snapshot"]["page_count"]
+    ):
+        raise KernelPhysicalMemoryError("PKACPI1 snapshot is not deterministic DMA32 first-fit")
     if observation["metadata"]["physical_start"] != derived["first_free_address"][1]:
         raise KernelPhysicalMemoryError("PKPMM6 metadata arena is not deterministic DMA32 first-fit")
     if observation["scrub"]["start"] != derived["ordinary_first_address"]:

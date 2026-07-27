@@ -259,8 +259,8 @@
     },
     {
       "path": "native/boot/src/main.rs",
-      "byte_count": 20661,
-      "sha256": "02DDDB3178BC2A7EAC674A3B7EB2AA4E0A6611DE888A72196868E97D66DD5379"
+      "byte_count": 21883,
+      "sha256": "A5D9BA6D0F1EDE8F67A04DD6FD49D13A7FD2F2EAFE66FFABE455AA0C7321A18B"
     },
     {
       "path": "native/bootload/src/lib.rs",

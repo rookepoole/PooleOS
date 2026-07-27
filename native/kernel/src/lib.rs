@@ -10,11 +10,12 @@ use core::ptr;
 use core::sync::atomic::{AtomicU8, AtomicU32, AtomicUsize, Ordering};
 
 use poole_handoff::{
-    self, BOOT_SERVICES_EXITED, CoreRecord, DEVELOPMENT_MODE, FEATURE_CORE, FEATURE_FRAMEBUFFER,
-    FEATURE_LOADED_ARTIFACTS, FEATURE_MEMORY_MAP, Handoff, RECORD_FRAMEBUFFER,
-    RECORD_LOADED_ARTIFACTS, validate_kernel_entry_profile,
+    self, BOOT_SERVICES_EXITED, CoreRecord, DEVELOPMENT_MODE, FEATURE_CORE,
+    FEATURE_FIRMWARE_TABLES, FEATURE_FRAMEBUFFER, FEATURE_LOADED_ARTIFACTS, FEATURE_MEMORY_MAP,
+    Handoff, RECORD_FRAMEBUFFER, RECORD_LOADED_ARTIFACTS, validate_kernel_entry_profile,
 };
 
+pub mod acpi;
 pub mod active_virtual_memory;
 pub mod physical_memory;
 pub mod privilege_msr;
@@ -34,7 +35,7 @@ pub const VIRTUAL_MEMORY_CONTRACT_ID: &str = virtual_memory::CONTRACT_ID;
 pub const XSTATE_EXCEPTION_CONTRACT_ID: &str = "PKXEXC1";
 #[used]
 #[unsafe(link_section = ".text.pkbuild_literal")]
-static BUILD_ID_BYTES: [u8; 46] = *b"PKBUILD1-CYCLE132-N9-PMM-GROWTH-AUTOMATION-001";
+static BUILD_ID_BYTES: [u8; 42] = *b"PKBUILD1-CYCLE133-N9-PMM-ACPI-CONSUMER-001";
 pub const BUILD_ID: &[u8] = &BUILD_ID_BYTES;
 pub const ENTRY_OFFSET: u64 = 0x9000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
@@ -45,7 +46,7 @@ pub const KERNEL_TSS_SELECTOR: u16 = 0x18;
 pub const GDT_LIMIT: u16 = 39;
 pub const IDT_LIMIT: u16 = 4095;
 pub const IST_STACK_BYTES: u64 = 8192;
-pub const BOOTSTRAP_STACK_PAGE_COUNT: u64 = 14;
+pub const BOOTSTRAP_STACK_PAGE_COUNT: u64 = 32;
 pub const INSTALLED_EXCEPTION_GATE_COUNT: u16 = 5;
 pub const INSTALLED_XSTATE_EXCEPTION_GATE_COUNT: u16 = 8;
 const CR3_ALLOWED_LOW_BITS: u64 = (1 << 3) | (1 << 4);
@@ -898,13 +899,15 @@ fn validate_development_transfer_profile(handoff: &Handoff<'_>) -> Result<(), En
     let expected_features = FEATURE_CORE
         | FEATURE_MEMORY_MAP
         | FEATURE_LOADED_ARTIFACTS
+        | FEATURE_FIRMWARE_TABLES
         | if has_framebuffer {
             FEATURE_FRAMEBUFFER
         } else {
             0
         };
-    let expected_required = FEATURE_CORE | FEATURE_MEMORY_MAP | FEATURE_LOADED_ARTIFACTS;
-    let expected_record_count = if has_framebuffer { 4 } else { 3 };
+    let expected_required =
+        FEATURE_CORE | FEATURE_MEMORY_MAP | FEATURE_LOADED_ARTIFACTS | FEATURE_FIRMWARE_TABLES;
+    let expected_record_count = if has_framebuffer { 5 } else { 4 };
     let header = handoff.header();
     let core = handoff.core().map_err(|_| EntryError::Decode)?;
     let artifacts = handoff

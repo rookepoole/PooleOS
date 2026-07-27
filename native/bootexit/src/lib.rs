@@ -7,7 +7,7 @@ pub const MAX_EXIT_ATTEMPTS: usize = 4;
 pub const RAW_MEMORY_MAP_CAPACITY: usize = 1024 * 1024;
 pub const NORMALIZED_MEMORY_CAPACITY: usize = 16_384 * 40;
 pub const HANDOFF_CAPACITY_BYTES: usize = 1024 * 1024;
-pub const STACK_PAGE_COUNT: usize = 14;
+pub const STACK_PAGE_COUNT: usize = 32;
 pub const PAGE_SIZE: u64 = 4096;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

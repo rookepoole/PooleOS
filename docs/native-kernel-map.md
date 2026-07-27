@@ -4,7 +4,7 @@
 
 PKMAP2 extends the validated PKMAP1 kernel alias into retained boot-transfer
 storage. PooleBoot builds and audits an exact supervisor higher-half mapping,
-adds a guarded fourteen-page kernel stack and a one-MiB read-only handoff window,
+adds a guarded 32-page kernel stack and a one-MiB read-only handoff window,
 then preserves the kernel and all private page tables across
 `ExitBootServices`. The current slice stops before installing the retained CR3,
 changing RSP, or calling PooleKernel.
@@ -24,22 +24,22 @@ ranges must be aligned, nonoverlapping, complete, and W^X-safe.
 Retained physical ranges must also be aligned, nonzero, representable, and
 pairwise disjoint:
 
-- the current 78-page PooleKernel allocation;
+- the current 83-page PooleKernel allocation;
 - four private page-table pages;
-- fourteen writable, non-executable stack pages;
+- 32 writable, non-executable stack pages;
 - 256 handoff pages, covering one MiB.
 
-The virtual layout reserves page-table index 78 as the low guard, indices
-79-92 for the stack, index 93 as the high guard, and index 94 onward for the
+The virtual layout reserves page-table index 83 as the low guard, indices
+84-115 for the stack, index 116 as the high guard, and index 117 onward for the
 handoff. Both guards remain non-present. The handoff range begins after the
 fixed boundary and is supervisor read-only and NX. `ADD-MEM-001` requires boot,
 entry, trap, and PMM consumers to derive these bounds from one contract.
 The bootstrap temporary alias is derived as the first leaf after the complete
-handoff range, currently index 350, so retained-layout growth cannot silently
+handoff range, currently index 373, so retained-layout growth cannot silently
 occupy the scrub and page-table transaction slot.
-PKPMM6 retains index 351 as the stable-manager low guard, indices 352-356 for
-its five-page supervisor RW/NX manager, and index 357 as its high guard. It
-also reserves guarded 32-page ledger windows at indices 358-391 and 392-425.
+PKPMM7 retains index 374 as the stable-manager low guard, indices 375-379 for
+its five-page supervisor RW/NX manager, and index 380 as its high guard. It
+also reserves guarded 32-page ledger windows at indices 381-414 and 415-448.
 All of these leaves are absent in the PKMAP2 construction receipt. Selector 8
 installs only the manager plus the pages owned by one active ledger generation.
 

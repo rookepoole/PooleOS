@@ -61,7 +61,7 @@
       },
       {
         "path": "native/handoff/src/lib.rs",
-        "sha256": "58421DA4B25DB172947DAF2A6AE5A08D2CAD57D51E8987BD9503E140878C3EA7",
+        "sha256": "983DAFD71E0B892F6F98C614D43600CBEBDDBD7C0AA1E2D81CDAA545E165B110",
         "byte_count": 48608
       },
       {
@@ -71,7 +71,7 @@
       },
       {
         "path": "runtime/native_boot_handoff.py",
-        "sha256": "A670B9569840D6149040978AE1C8B1192F14FE1562F6496A007AD93EE023F419",
+        "sha256": "89071EAC531B6DD0E47930A3295B92570201C2EA60277C4CCF87A5E4E684CFE1",
         "byte_count": 47432
       },
       {
@@ -91,8 +91,8 @@
       },
       {
         "path": "docs/native-boot-handoff.md",
-        "sha256": "EEB9CACDD9FDDEB2A9539B3432D56DE8D836EC0012319EC6939813082DE37C7E",
-        "byte_count": 8533
+        "sha256": "203884DE011202531BFFBE3B06BEFB2CB8C2F6C3FF36CD63CF7B356FD8E9CE55",
+        "byte_count": 8867
       }
     ]
   },
@@ -106,13 +106,13 @@
         "target": "x86_64-unknown-uefi",
         "status": "pass",
         "byte_count": 101068,
-        "sha256": "4A24A2FCA410781B0A87297ACF284D8F028080A71D3D7CFFA76A8EFC7DD02336"
+        "sha256": "DCF41FA2D36DE89406838FAA436F1C3FB3DDD6DBD5AC132F97AA9722F24A0D78"
       },
       {
         "target": "x86_64-unknown-none",
         "status": "pass",
         "byte_count": 106070,
-        "sha256": "971C448241CA9DA79EF41C84BFFB35BE766257FECF0406D864B23CA8BA41E5FB"
+        "sha256": "60A12736A314427635A16204C1A6D939F10683CFF555B2FD7823785136590D12"
       }
     ],
     "layout_assertion_count": 12,

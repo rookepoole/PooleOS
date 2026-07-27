@@ -1,178 +1,179 @@
-# Native physical-memory foundation
+# Native Physical-Memory Foundation
 
-`PKPMM6` is the N9 automatic allocator-metadata growth increment. It is
-an opt-in, BSP-only, qemu64 Tier-0 development profile selected by PooleBoot
-selector `8`; the default image still stops before kernel transfer. It preserves
-the PKPMM5 generation transaction and PKPMM4 lifecycle-gated reclaim proofs
-while checking exact post-operation pressure before each scrubbed allocate or
-free. It does not promote N9 or PooleOS to production.
+`PKPMM7` is the Cycle 133 `N9-PMM-ACPI-CONSUMER-001` increment. It is an
+opt-in, BSP-only qemu64 Tier-0 development profile selected by PooleBoot
+selector `8`; the ordinary image still stops before kernel transfer. PKPMM7
+preserves the PKPMM6 scrubbed allocator, guarded generation-owned ledgers,
+automatic growth, and Boot Services reclaim while adding a bounded native ACPI
+table snapshot whose opaque success evidence is required before ACPI
+reclaimable pages can be admitted. It does not satisfy N9 or promote PooleOS.
 
-## Ownership boundary
+## Firmware Handoff
 
-PooleKernel consumes the exact post-`ExitBootServices()` PBP1 map,
-independently revalidates every normalized UEFI source-type/kind pair, and
-initially admits only `MEMORY_USABLE` (`EfiConventionalMemory`) pages. Page zero
-is an explicit null guard. The kernel image, retained handoff, active root,
-guarded bootstrap stack, stable manager, active ledger generation, and all
-other allocations remain protected by immutable source-ledger and active-
-allocation exclusions.
+PooleBoot now emits `PBLIVE4`, a five-record PBP1 profile containing core,
+normalized memory-map, framebuffer, firmware-table, and loaded-artifact
+records. The firmware-table profile contains exactly one ACPI 2.0 RSDP record
+copied from the UEFI configuration table. The handoff preserves the physical
+address only; it does not assert that the RSDP or any referenced table is
+valid.
 
-This follows the UEFI 2.11 boundary: firmware owns the map before
-`ExitBootServices()`; after successful exit the OS may reclaim unused Boot
-Services memory but must preserve runtime ranges. ACPI reclaimable memory stays
-held until every required table consumer has copied or released it. Runtime
-memory, ACPI NVS, MMIO, persistent, unusable, and reserved memory are never
-PKPMM6 candidates.
+PooleKernel rejects a missing, duplicate, misaligned, zero, or unsupported
+firmware-table record before allocator effects. PKACPI1 then:
 
-Official references:
+1. reads and validates the RSDP signature, revision, lengths, v1 checksum, and
+   extended checksum;
+2. reads and validates the XSDT header, length, alignment, checksum, and bounded
+   entry count;
+3. requires exactly one valid `APIC`, `FACP`, `HPET`, and `MCFG` table;
+4. rejects missing, duplicate, malformed, out-of-range, overflowing, or
+   checksum-invalid tables;
+5. computes the exact retained snapshot size;
+6. allocates one scrubbed, release-excluded PMM page;
+7. copies a canonical 16-byte snapshot header plus the complete RSDP, XSDT, and
+   required table bytes;
+8. reads every copied byte back and seals source and snapshot checksums; and
+9. returns opaque `AcpiReleaseEvidence` that is the only input accepted by the
+   lifecycle transition to `AcpiTablesReleased`.
 
-- <https://uefi.org/specs/UEFI/2.11/07_Services_Boot_Services.html#efi-boot-services-getmemorymap>
-- <https://uefi.org/specs/UEFI/2.11/07_Services_Boot_Services.html#efi-boot-services-exitbootservices>
+The consumer parses table containers only. It does not execute AML, enumerate
+processors, route interrupts, configure PCI, activate timers, or apply FADT
+policy.
 
-## Stable manager
+Official boundaries:
 
-The allocation-free Rust bootstrap manager contains bounded arrays for 256
-PBP1 source records, 256 free extents, 32 allocations, 16 scrub receipts, and
-two reclaim receipts. It divides ranges into DMA (below 16 MiB), DMA32 (16 MiB
-through 4 GiB), and Normal (above 4 GiB) zones. Allocation is deterministic
-first-fit within one requested zone and has a 64-page development-profile
-quota.
+- UEFI configuration tables and ACPI GUIDs:
+  <https://uefi.org/specs/UEFI/2.11/04_EFI_System_Table.html>
+- `GetMemoryMap()` and `ExitBootServices()`:
+  <https://uefi.org/specs/UEFI/2.11/07_Services_Boot_Services.html>
+- ACPI 6.6 table formats:
+  <https://uefi.org/specs/ACPI/6.6/>
 
-Selector 8 reserves and scrubs five DMA32 pages under owner `0x4D45`, marks the
-allocation release-excluded, and maps the complete 15,376-byte manager
-supervisor RW/NX at `0xFFFFFFFF80160000` between absent guards. Its versioned
-header and FNV-1a-64 logical checksum bind every ownership field. Mapping or
-handoff failure revokes every installed leaf, scrub-releases the reservation,
-and leaves the bootstrap manager usable. This is corruption detection, not
-cryptographic authentication.
+## Ownership and Reclaim
 
-The bootstrap arrays remain available for construction and rollback. Once a
-ledger generation is active, every ordinary allocator, scrub, reclaim, and
-integrity operation addresses the active mapped generation; no shadow fixed
-array is authoritative.
+PooleKernel consumes the exact post-`ExitBootServices()` PBP1 map and
+independently revalidates every UEFI source-type/kind pair. Initially it admits
+only `MEMORY_USABLE` (`EfiConventionalMemory`) pages. Page zero is a null guard.
+The kernel, retained PBP1, active root, guarded bootstrap stack, stable manager,
+active ledger generation, ACPI snapshot, and every live allocation remain
+protected by immutable source-ledger and active-allocation exclusions.
 
-## Ledger generations
+The reclaim stages are monotonic and non-skippable:
 
-PKPMM6 reserves two alternate virtual windows in the retained PKMAP2 leaf
-table. Each window has 32 data-page slots and independent absent low/high
-guards. Window A data begins at `0xFFFFFFFF80167000`; window B begins at
-`0xFFFFFFFF80189000`. Only the pages owned by the current generation are
-present.
+1. `PreExitBootServices`
+2. `PostExitBootServices`
+3. `AcpiTablesReleased`
 
-The live profile materializes four generations:
+Boot Services admission requires stage 2. ACPI admission requires stage 3 and
+the PKACPI1 evidence generated by the same manager instance. A forged,
+replayed, mismatched, or absent evidence object is rejected. The retained
+snapshot remains owned and release-excluded after source ACPI pages are
+reclaimed.
 
-1. Generation 2 maps four pages with capacities `256/32/256/16/2` for free
-   extents, allocations, source records, scrub receipts, and reclaim receipts.
-2. Checked pressure automatically maps generation 4 in eight pages with
-   capacities `512/64/512/32/4`.
-3. The next pressure threshold maps generation 8 in fifteen pages with
-   capacities `1024/128/1024/64/8`.
-4. The final successful threshold maps generation 16 in twenty-nine pages with
-   capacities `2048/256/2048/128/16`; its successful retirement advances the
-   stable descriptor to generation 32.
+Each reclaim performs complete arithmetic, capacity, retained-overlap,
+active-overlap, free-ledger, receipt, and checksum preflight; full zero and
+readback while ownership remains held; then one infallible metadata commit.
+Faults preserve ownership, accounting, sequence, and receipt state. Exact
+repeats return the immutable receipt without physical access.
 
-Before every automatic scrubbed allocate or free, the manager computes exact
-post-operation demand. Growth reserves one allocation slot and four scrub
-receipts so a failed candidate can be scrub-released and the requested
-operation retried. The measured run performs 121 checks, sees eight pressure
-triggers, completes three automatic growths across sixty allocation/free
-cycles, and records four soft fallbacks. A doubled next layout would require 58
-pages, so the bounded 32-page window rejects it. Operations that still fit the
-active generation continue through the soft fallback; a request that does not
-fit is rejected before physical reads, physical writes, ownership changes, or
-receipt commitment.
+## Stable Manager and Ledgers
 
-Each transaction completes capacity and aligned-layout preflight, reserves and
-zero-verifies candidate pages, marks them release-excluded, maps the alternate
-guarded window, copies every complete ledger, seals and verifies both manager
-and generation, commits one descriptor switch, revokes the old mapping, then
-zero-verifies and releases the retired pages. The generation checksum covers
-the header, complete capacity-sized ledgers, and stable-manager ownership
-state.
+The stable 15,376-byte manager occupies five scrubbed DMA32 pages owned by
+`0x4D45` and mapped supervisor RW/NX at `0xFFFFFFFF80177000` between absent
+guards. It stores bounded bootstrap arrays, the active generation descriptor,
+integrity state, and rollback state. Once a ledger generation is active, all
+ordinary source, extent, allocation, scrub-receipt, and reclaim-receipt
+operations use that mapped generation.
 
-A precommit mapping or integrity fault restores the exact previous descriptor,
-revokes the candidate window, and scrub-releases the candidate allocation. A
-postcommit retirement fault keeps both allocations owned, records pending
-retirement, blocks another growth, and requires explicit retry. Host fault
-tests cover mapping failure, corruption, retirement failure, successful
-retirement retry, pressure rollback with retry headroom, repeated growth, soft
-fallback, and hard pre-effect rejection. The live run records four mapping
-events, 83 ledger PTE writes, four guards, three revoked generations totaling
-27 pages, and one retained 29-page generation.
+Two alternate guarded 32-page windows begin at `0xFFFFFFFF8017E000` and
+`0xFFFFFFFF801A0000`. PKPMM7 materializes four active generations:
 
-## Scrub and reclaim
+1. generation 2: 4 pages, capacities `256/32/256/16/2`;
+2. generation 5: 8 pages, capacities `512/64/512/32/4`;
+3. generation 9: 15 pages, capacities `1024/128/1024/64/8`;
+4. generation 17: 29 pages, capacities `2048/256/2048/128/16`.
 
-`allocate_scrubbed` plans without changing ownership, writes zero to every
-64-bit word, reads every word back, and commits only after full verification.
-`free_scrubbed` validates the slot, generation, range, zone, and owner; it
-preflights reinsertion before content writes and leaves ownership live on any
-fault. Adjacent same-zone extents coalesce. Successful operations emit immutable
-sequence, range, generation, owner, zeroed-byte, and verified-byte receipts.
+Successful predecessor retirement advances the final active generation to 33.
+The run performs 119 pressure checks, sees seven triggers, completes three
+automatic growths across 59 pressure cycles, records three soft fallbacks, and
+host-proves one hard pre-effect rejection because a 58-page next generation
+cannot fit either bounded window. One allocation slot and four scrub receipts
+remain reserved for complete failed-growth rollback and retry.
 
-The monotonic reclaim stages remain `PreExitBootServices`,
-`PostExitBootServices`, and `AcpiTablesReleased`. Stages cannot skip or regress.
-The live profile admits Boot Services only at the second stage and rejects ACPI
-admission before the third. The host suite separately proves positive ACPI
-admission after explicit release; PKPMM6 does not claim a real ACPI consumer has
-issued that release.
+The transaction order remains preflight, scrubbed reserve, guarded mapping,
+complete copy, seal, descriptor switch, predecessor revocation, full
+zero/readback, and physical retirement. Precommit faults restore the previous
+descriptor and release the candidate. Postcommit retirement faults retain both
+allocations, block further growth, and require explicit retry.
 
-Reclaim streams the immutable PBP1 ledger through complete arithmetic,
-capacity, retained-overlap, active-overlap, free-ledger, receipt, and checksum
-preflight; full zero/readback while ownership remains held; then an infallible
-metadata commit. A content fault may leave held bytes zeroed but preserves
-ownership, ledgers, totals, receipts, and sequence. Exact repeats return the
-prior immutable receipt without physical access.
+## Retained Layout
 
-## Live evidence
+The final 83-page kernel and 32-page bootstrap stack use this shared PKMAP2
+leaf geometry:
 
-The privileged adapter uses one supervisor RW/NX temporary alias for physical
-scrub/readback, invalidates every remap, and revokes it before terminal success.
-It independently validates stable-manager guards plus both ledger-window guards
-and proves exactly one final ledger mapping retained.
+| Indices | Role |
+| --- | --- |
+| `0-82` | PooleKernel image |
+| `83` | absent low stack guard |
+| `84-115` | bootstrap stack |
+| `116` | absent high stack guard |
+| `117-372` | read-only PBP1 handoff |
+| `373` | temporary physical alias |
+| `374 / 380` | stable-manager guards |
+| `375-379` | stable manager |
+| `381 / 414` | ledger-window A guards |
+| `382-413` | ledger-window A |
+| `415 / 448` | ledger-window B guards |
+| `416-447` | ledger-window B |
 
-Two fresh-OVMF-vars TCG runs reproduce the same 43 markers, framebuffer bytes,
-and PBP1 bytes. An independent Python oracle derives source classes, manager and
-generation first-fit ownership, retired-generation free space, zone splits,
-coalescing, reclaim checksums, and final accounting directly from PBP1. The
-focused gate passes 84 PooleKernel host tests and 147 hostile controls.
+Closeout found and fixed two consumers that still used the former 14-page
+stack size. PKTRAP1 had calculated its deliberate low-guard page from the old
+constant, turning the intended #PF into a mapped access. PKVM2 independently
+validated the old stack span and rejected the correct retained root. Both now
+consume the 32-page contract, and their live profiles pass.
+
+## Canonical Evidence
+
+Two fresh-OVMF-vars TCG runs reproduce 45 ordered markers, exact framebuffer
+bytes, and exact PBP1 bytes. Eighty-eight PooleKernel host tests and 191 hostile
+controls pass. The independent Python oracle derives every source class,
+first-fit allocation, generation, retired hole, reclaim range, receipt,
+checksum, physical access, and final ownership total from PBP1.
 
 | Measure | Result |
 | --- | ---: |
-| PBP1 entries | 97 |
-| Conventional usable source pages | 117,911 |
-| Initial / final managed pages | 117,910 / 129,160 |
-| Stable manager / final active ledger pages | 5 / 29 |
-| Ledger page sequence | `4 / 8 / 15 / 29` |
-| Final ledger capacities | `2048/256/2048/128/16` |
-| Retired generations / pages | 3 / 27 |
-| Pressure checks / triggers / automatic growths | 121 / 8 / 3 |
-| Soft fallbacks / hard pre-effect rejections | 4 / 1 |
-| Boot Services source records / ranges / pages | 70 / 12 / 11,250 |
-| Admitted DMA / DMA32 / Normal pages | 2,018 / 9,232 / 0 |
-| ACPI pages held / loader pages protected | 11 / 833 |
-| Reclaim pre/post free extents | 12 / 14 |
-| Reclaim / total coalesces | 10 / 72 |
-| Scrubbed and verified pages / bytes | 11,462 / 46,948,352 |
-| Physical word writes / reads | 5,869,568 / 5,870,592 |
-| Temporary PTE writes / invalidations | 22,798 / 22,798 |
-| Ledger checksum | `0xF7AD111CA266071D` |
-| Reclaim range / receipt checksums | `0x5A485D4A5725EED8` / `0xE1F4C87AE4009940` |
+| PBP1 memory entries | 97 |
+| Conventional usable source pages | 117,888 |
+| Final managed pages | 129,148 |
+| Protected loader pages | 856 |
+| Stable manager / final ledger / ACPI snapshot pages | `5 / 29 / 1` |
+| Boot reclaim source records / ranges / pages | `70 / 12 / 11,250` |
+| Boot reclaim DMA / DMA32 / Normal pages | `2,018 / 9,232 / 0` |
+| ACPI reclaim source records / ranges / pages | `1 / 1 / 11` |
+| ACPI snapshot bytes / copied bytes | `616 / 600` |
+| Required ACPI table bytes | `APIC 120 / FACP 244 / HPET 56 / MCFG 60` |
+| XSDT entries / required mask | `6 / 0x0F` |
+| Allocator operations / reclaim operations | `129 / 2` |
+| Scrubbed and verified pages / bytes | `11,473 / 46,993,408` |
+| Physical word writes / reads | `5,875,277 / 5,879,957` |
+| Temporary PTE writes / invalidations | `23,172 / 23,172` |
+| Growth checksum | `0xCC30B722527718AE` |
+| Boot range / receipt checksums | `0xFDAB689F085C3287 / 0x5DEA9A3BC9E10C18` |
+| ACPI source / snapshot checksums | `0x078583AEEFDD6581 / 0x4089A5CFEC81CB41` |
+| ACPI range / receipt checksums | `0xC718FB26B45257F2 / 0x60DAA52A8A05ABD6` |
 
-The Cycle 132 image occupies 78 pages. The retained layout uses indices 78 and
-93 as stack guards, 79-92 for the stack, 94-349 for PBP1, 350 for the temporary
-alias, 351/357 for stable-manager guards, 352-356 for the manager, 358/391 for
-window A guards and 359-390 for its data, and 392/425 for window B guards and
-393-424 for its data.
+The exact Cycle 133 kernel is 299,008 canonical bytes in a 339,968-byte,
+83-page image with 693 relocations and SHA-256
+`D9EF9B10B56BF779B155BD18DE55853874CCC032D2A3E5E7841B918F08CDE1F2`.
+PKVM2 is rebound to 5,640 bootstrap temporary-PTE writes and invalidations.
 
 ## Nonclaims
 
-N9 remains partial. PKPMM6 proves serial checked automatic growth only inside
-two bounded 32-page windows. It deliberately fails closed when exact demand no
-longer fits and a 58-page next generation cannot be represented. There is no
-concurrent, interrupt-context, or SMP allocator protocol, complete ACPI
-consumer integration, complete
-generation-owned address space, SMP TLB shootdown, heap/object cache, general
-kernel stack allocator, pressure/OOM policy, target-hardware qualification, or
-second-host result. The profile performs no signature verification, authority
-grant, authorized action, firmware mutation, physical-media write, release, or
-production promotion.
+N9 remains partial. PKPMM7 is a serial one-BSP allocator and bounded ACPI table
+container consumer. It does not implement AML, AP enumeration, interrupt
+routing, full platform discovery, interrupt-context allocation, concurrent or
+SMP allocation, a complete generation-owned physical direct map, SMP TLB
+shootdown or deferred reclaim, huge pages, PCID, COW, user faults, pager IPC,
+heap/object caches, general pressure/OOM policy, MMIO/PAT/MTRR qualification,
+target hardware, or second-host reproduction. The profile performs no
+signature verification, authority grant, authorized action, firmware mutation,
+physical-media write, release, or production promotion.

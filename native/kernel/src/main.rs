@@ -166,7 +166,7 @@ macro_rules! pkpmm_fragment {
 
 pkpmm_fragment!(
     PKPMM_DENIED,
-    b"POOLEOS:KERNEL:PMM-DENIED contract=PKPMM6 reason="
+    b"POOLEOS:KERNEL:PMM-DENIED contract=PKPMM7 reason="
 );
 pkpmm_fragment!(
     PKPMM_DENIED_TAIL,
@@ -174,15 +174,15 @@ pkpmm_fragment!(
 );
 pkpmm_fragment!(
     PKPMM_EARLY,
-    b"POOLEOS:KERNEL:PMM-EARLY PASS contract=PKPMM6 selector=8 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n"
+    b"POOLEOS:KERNEL:PMM-EARLY PASS contract=PKPMM7 selector=8 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n"
 );
 pkpmm_fragment!(
     PKPMM_STAGE,
-    b"POOLEOS:KERNEL:PMM-STAGE PASS contract=PKPMM6 stage="
+    b"POOLEOS:KERNEL:PMM-STAGE PASS contract=PKPMM7 stage="
 );
 pkpmm_fragment!(
     PKPMM_MAP,
-    b"POOLEOS:KERNEL:PMM-MAP PASS contract=PKPMM6 entries="
+    b"POOLEOS:KERNEL:PMM-MAP PASS contract=PKPMM7 entries="
 );
 pkpmm_fragment!(PKPMM_USABLE, b" usable_pages=");
 pkpmm_fragment!(PKPMM_BOOT_RECLAIMABLE, b" boot_reclaimable_pages=");
@@ -190,7 +190,7 @@ pkpmm_fragment!(PKPMM_LOADER_RESERVED, b" loader_reserved_pages=");
 pkpmm_fragment!(PKPMM_NULL_GUARD, b" null_guard_pages=");
 pkpmm_fragment!(
     PKPMM_ZONES,
-    b"\nPOOLEOS:KERNEL:PMM-ZONES PASS contract=PKPMM6 dma_source="
+    b"\nPOOLEOS:KERNEL:PMM-ZONES PASS contract=PKPMM7 dma_source="
 );
 pkpmm_fragment!(PKPMM_DMA_MANAGED, b" dma_managed=");
 pkpmm_fragment!(PKPMM_DMA32_SOURCE, b" dma32_source=");
@@ -203,17 +203,17 @@ pkpmm_fragment!(PKPMM_LARGEST_DMA32, b" largest_dma32=");
 pkpmm_fragment!(PKPMM_LARGEST_NORMAL, b" largest_normal=");
 pkpmm_fragment!(
     PKPMM_OWNERSHIP,
-    b"\nPOOLEOS:KERNEL:PMM-OWNERSHIP PASS contract=PKPMM6 kernel_base="
+    b"\nPOOLEOS:KERNEL:PMM-OWNERSHIP PASS contract=PKPMM7 kernel_base="
 );
 pkpmm_fragment!(PKPMM_KERNEL_PAGES, b" kernel_pages=");
 pkpmm_fragment!(PKPMM_HANDOFF_BASE, b" handoff_base=");
 pkpmm_fragment!(PKPMM_HANDOFF_PAGES, b" handoff_pages=");
 pkpmm_fragment!(PKPMM_ROOT, b" root=");
 pkpmm_fragment!(PKPMM_PROTECTED, b" protected=1\n");
-pkpmm_fragment!(PKPMM_EXERCISE_DENIED, b"POOLEOS:KERNEL:PMM-DENIED contract=PKPMM6 reason=exercise_invariant physical_effects=fail_closed ownership_release=0 reclaim=0 authority=0 actions=0 terminal=panic\n");
+pkpmm_fragment!(PKPMM_EXERCISE_DENIED, b"POOLEOS:KERNEL:PMM-DENIED contract=PKPMM7 reason=exercise_invariant physical_effects=fail_closed ownership_release=0 reclaim=0 authority=0 actions=0 terminal=panic\n");
 pkpmm_fragment!(
     PKPMM_METADATA,
-    b"POOLEOS:KERNEL:PMM-METADATA PASS contract=PKPMM6 pages="
+    b"POOLEOS:KERNEL:PMM-METADATA PASS contract=PKPMM7 pages="
 );
 pkpmm_fragment!(PKPMM_METADATA_PHYSICAL, b" physical_start=");
 pkpmm_fragment!(PKPMM_METADATA_VIRTUAL, b" virtual_start=");
@@ -243,7 +243,7 @@ pkpmm_fragment!(
 );
 pkpmm_fragment!(
     PKPMM_GROWTH,
-    b"POOLEOS:KERNEL:PMM-GROWTH PASS contract=PKPMM6 initial_generation="
+    b"POOLEOS:KERNEL:PMM-GROWTH PASS contract=PKPMM7 initial_generation="
 );
 pkpmm_fragment!(PKPMM_GROWTH_FINAL_GENERATION, b" final_generation=");
 pkpmm_fragment!(PKPMM_GROWTH_INITIAL_PAGES, b" initial_pages=");
@@ -267,7 +267,7 @@ pkpmm_fragment!(PKPMM_GROWTH_HARD_REJECTIONS, b" hard_rejections=");
 pkpmm_fragment!(PKPMM_GROWTH_TAIL, b" growth_headroom_allocation=1 growth_headroom_scrub=4 window_capacity=32 next_pages=58 pre_effect=host_verified concurrency=0 smp=0 authority=0 actions=0 production=0\n");
 pkpmm_fragment!(
     PKPMM_RECLAIM,
-    b"POOLEOS:KERNEL:PMM-RECLAIM PASS contract=PKPMM6 stage=post_exit_boot_services class=boot_services sequence="
+    b"POOLEOS:KERNEL:PMM-RECLAIM PASS contract=PKPMM7 stage=post_exit_boot_services class=boot_services sequence="
 );
 pkpmm_fragment!(PKPMM_RECLAIM_SOURCE_RECORDS, b" source_records=");
 pkpmm_fragment!(PKPMM_RECLAIM_RANGES, b" ranges=");
@@ -289,8 +289,46 @@ pkpmm_fragment!(
     b" retained_excluded=1 atomic=1 rollback=host_verified\n"
 );
 pkpmm_fragment!(
+    PKPMM_ACPI_SNAPSHOT,
+    b"POOLEOS:KERNEL:PMM-ACPI-SNAPSHOT PASS contract=PKACPI1 pmm=PKPMM7 rsdp="
+);
+pkpmm_fragment!(PKPMM_ACPI_XSDT, b" xsdt=");
+pkpmm_fragment!(PKPMM_ACPI_ENTRIES, b" xsdt_entries=");
+pkpmm_fragment!(PKPMM_ACPI_MASK, b" required_mask=");
+pkpmm_fragment!(PKPMM_ACPI_FACP, b" facp_bytes=");
+pkpmm_fragment!(PKPMM_ACPI_APIC, b" apic_bytes=");
+pkpmm_fragment!(PKPMM_ACPI_HPET, b" hpet_bytes=");
+pkpmm_fragment!(PKPMM_ACPI_MCFG, b" mcfg_bytes=");
+pkpmm_fragment!(PKPMM_ACPI_DESTINATION, b" snapshot=");
+pkpmm_fragment!(PKPMM_ACPI_PAGES, b" snapshot_pages=");
+pkpmm_fragment!(PKPMM_ACPI_BYTES, b" snapshot_bytes=");
+pkpmm_fragment!(PKPMM_ACPI_COPIED, b" copied_bytes=");
+pkpmm_fragment!(PKPMM_ACPI_SOURCE_CHECKSUM, b" source_checksum=");
+pkpmm_fragment!(PKPMM_ACPI_SNAPSHOT_CHECKSUM, b" snapshot_checksum=");
+pkpmm_fragment!(PKPMM_ACPI_TAIL, b" required=APIC,FACP,HPET,MCFG copy_verified=1 lifecycle_released=1 retained=1 aml=0 smp=0 target=0 production=0\n");
+pkpmm_fragment!(
+    PKPMM_ACPI_RECLAIM,
+    b"POOLEOS:KERNEL:PMM-ACPI-RECLAIM PASS contract=PKPMM7 stage=acpi_tables_released class=acpi sequence="
+);
+pkpmm_fragment!(PKPMM_ACPI_RECLAIM_SOURCE, b" source_records=");
+pkpmm_fragment!(PKPMM_ACPI_RECLAIM_RANGES, b" ranges=");
+pkpmm_fragment!(PKPMM_ACPI_RECLAIM_PAGES, b" pages=");
+pkpmm_fragment!(PKPMM_ACPI_RECLAIM_DMA, b" dma_pages=");
+pkpmm_fragment!(PKPMM_ACPI_RECLAIM_DMA32, b" dma32_pages=");
+pkpmm_fragment!(PKPMM_ACPI_RECLAIM_NORMAL, b" normal_pages=");
+pkpmm_fragment!(PKPMM_ACPI_RECLAIM_PRE, b" pre_extents=");
+pkpmm_fragment!(PKPMM_ACPI_RECLAIM_POST, b" post_extents=");
+pkpmm_fragment!(PKPMM_ACPI_RECLAIM_ZEROED, b" scrub_bytes=");
+pkpmm_fragment!(PKPMM_ACPI_RECLAIM_VERIFIED, b" verified_bytes=");
+pkpmm_fragment!(PKPMM_ACPI_RECLAIM_RANGE_CHECKSUM, b" range_checksum=");
+pkpmm_fragment!(PKPMM_ACPI_RECLAIM_RECEIPT_CHECKSUM, b" receipt_checksum=");
+pkpmm_fragment!(
+    PKPMM_ACPI_RECLAIM_TAIL,
+    b" idempotent=1 snapshot_retained=1 atomic=1 rollback=host_verified\n"
+);
+pkpmm_fragment!(
     PKPMM_SCRUB,
-    b"POOLEOS:KERNEL:PMM-SCRUB PASS contract=PKPMM6 allocations="
+    b"POOLEOS:KERNEL:PMM-SCRUB PASS contract=PKPMM7 allocations="
 );
 pkpmm_fragment!(PKPMM_FREES, b" frees=");
 pkpmm_fragment!(PKPMM_START, b" start=");
@@ -311,14 +349,14 @@ pkpmm_fragment!(PKPMM_COALESCES, b" coalesces=");
 pkpmm_fragment!(PKPMM_ROLLBACK, b" rollback=host_verified\n");
 pkpmm_fragment!(
     PKPMM_RESULT,
-    b"POOLEOS:KERNEL:PMM-RESULT PASS contract=PKPMM6 profile=qemu64_tier0 managed_pages="
+    b"POOLEOS:KERNEL:PMM-RESULT PASS contract=PKPMM7 profile=qemu64_tier0 managed_pages="
 );
 pkpmm_fragment!(PKPMM_ALLOCATED_PAGES, b" allocated_pages=");
 pkpmm_fragment!(PKPMM_PHYSICAL_WRITES, b" physical_writes=");
 pkpmm_fragment!(PKPMM_PHYSICAL_READS, b" physical_reads=");
 pkpmm_fragment!(PKPMM_TEMPORARY_WRITES, b" temporary_pte_writes=");
 pkpmm_fragment!(PKPMM_BOOTSTRAP_INVLPG, b" bootstrap_invlpg=");
-pkpmm_fragment!(PKPMM_RESULT_TAIL, b" alias_revoked=1 metadata_retained=1 ledger_generation_retained=1 mappings=temporary_single_page_plus_guarded_metadata_and_repeated_ledger_generations reclaim=1 acpi_reclaim=0 concurrency=0 smp=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n");
+pkpmm_fragment!(PKPMM_RESULT_TAIL, b" alias_revoked=1 metadata_retained=1 ledger_generation_retained=1 acpi_snapshot_retained=1 mappings=temporary_single_page_plus_guarded_metadata_and_repeated_ledger_generations reclaim=1 acpi_reclaim=1 concurrency=0 smp=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n");
 
 macro_rules! pkvm_fragment {
     ($name:ident, $value:literal) => {
@@ -893,7 +931,7 @@ impl PhysicalPageAccess for BootstrapTableMemory {
         self.ensure_mapped(physical_address)
             .map_err(|_| PageAccessError::Access)?;
         let pointer = Self::target_pointer(word_index).map_err(|_| PageAccessError::Access)?;
-        // SAFETY: PKPMM6 owns the planned, held, or still-live PMM extent and ensure_mapped
+        // SAFETY: PKPMM7 owns the planned, held, or still-live PMM extent and ensure_mapped
         // proves that its exact physical page occupies the supervisor RW/NX alias.
         unsafe { write_volatile(pointer, value) };
         self.writes = self.writes.checked_add(1).ok_or(PageAccessError::Access)?;
@@ -908,7 +946,7 @@ impl PhysicalPageAccess for BootstrapTableMemory {
         self.ensure_mapped(physical_address)
             .map_err(|_| PageAccessError::Access)?;
         let pointer = Self::target_pointer(word_index).map_err(|_| PageAccessError::Access)?;
-        // SAFETY: the same PKPMM6 ownership and temporary-alias proof as write_word
+        // SAFETY: the same PKPMM7 ownership and temporary-alias proof as write_word
         // applies; volatile readback is required before the scrub receipt is minted.
         let value = unsafe { read_volatile(pointer) };
         self.reads = self.reads.checked_add(1).ok_or(PageAccessError::Access)?;
@@ -2205,6 +2243,66 @@ extern "C" fn poole_kernel_rust_entry(
         logger.write_bytes(&PKPMM_RECLAIM_ACPI_EARLY_REJECTED);
         logger.write_decimal_u64(u64::from(proof.acpi_early_rejected));
         logger.write_bytes(&PKPMM_RECLAIM_TAIL);
+
+        let acpi = proof.acpi_snapshot;
+        logger.write_bytes(&PKPMM_ACPI_SNAPSHOT);
+        logger.write_hex_u64(acpi.rsdp_source_address);
+        logger.write_bytes(&PKPMM_ACPI_XSDT);
+        logger.write_hex_u64(acpi.xsdt_source_address);
+        logger.write_bytes(&PKPMM_ACPI_ENTRIES);
+        logger.write_decimal_u64(acpi.xsdt_entry_count);
+        logger.write_bytes(&PKPMM_ACPI_MASK);
+        logger.write_hex_u64(u64::from(acpi.required_table_mask));
+        logger.write_bytes(&PKPMM_ACPI_FACP);
+        logger.write_decimal_u64(acpi.required_tables[1].byte_count);
+        logger.write_bytes(&PKPMM_ACPI_APIC);
+        logger.write_decimal_u64(acpi.required_tables[0].byte_count);
+        logger.write_bytes(&PKPMM_ACPI_HPET);
+        logger.write_decimal_u64(acpi.required_tables[2].byte_count);
+        logger.write_bytes(&PKPMM_ACPI_MCFG);
+        logger.write_decimal_u64(acpi.required_tables[3].byte_count);
+        logger.write_bytes(&PKPMM_ACPI_DESTINATION);
+        logger.write_hex_u64(acpi.snapshot_physical_address);
+        logger.write_bytes(&PKPMM_ACPI_PAGES);
+        logger.write_decimal_u64(acpi.snapshot_page_count);
+        logger.write_bytes(&PKPMM_ACPI_BYTES);
+        logger.write_decimal_u64(acpi.snapshot_byte_count);
+        logger.write_bytes(&PKPMM_ACPI_COPIED);
+        logger.write_decimal_u64(acpi.copied_byte_count);
+        logger.write_bytes(&PKPMM_ACPI_SOURCE_CHECKSUM);
+        logger.write_hex_u64(acpi.source_checksum);
+        logger.write_bytes(&PKPMM_ACPI_SNAPSHOT_CHECKSUM);
+        logger.write_hex_u64(acpi.snapshot_checksum);
+        logger.write_bytes(&PKPMM_ACPI_TAIL);
+
+        let acpi_reclaim = proof.acpi_reclaim;
+        logger.write_bytes(&PKPMM_ACPI_RECLAIM);
+        logger.write_decimal_u64(acpi_reclaim.sequence);
+        logger.write_bytes(&PKPMM_ACPI_RECLAIM_SOURCE);
+        logger.write_decimal_u64(acpi_reclaim.source_record_count);
+        logger.write_bytes(&PKPMM_ACPI_RECLAIM_RANGES);
+        logger.write_decimal_u64(acpi_reclaim.range_count);
+        logger.write_bytes(&PKPMM_ACPI_RECLAIM_PAGES);
+        logger.write_decimal_u64(acpi_reclaim.page_count);
+        logger.write_bytes(&PKPMM_ACPI_RECLAIM_DMA);
+        logger.write_decimal_u64(acpi_reclaim.pages_by_zone[Zone::Dma as usize]);
+        logger.write_bytes(&PKPMM_ACPI_RECLAIM_DMA32);
+        logger.write_decimal_u64(acpi_reclaim.pages_by_zone[Zone::Dma32 as usize]);
+        logger.write_bytes(&PKPMM_ACPI_RECLAIM_NORMAL);
+        logger.write_decimal_u64(acpi_reclaim.pages_by_zone[Zone::Normal as usize]);
+        logger.write_bytes(&PKPMM_ACPI_RECLAIM_PRE);
+        logger.write_decimal_u64(acpi_reclaim.pre_free_extent_count);
+        logger.write_bytes(&PKPMM_ACPI_RECLAIM_POST);
+        logger.write_decimal_u64(acpi_reclaim.post_free_extent_count);
+        logger.write_bytes(&PKPMM_ACPI_RECLAIM_ZEROED);
+        logger.write_decimal_u64(acpi_reclaim.zeroed_bytes);
+        logger.write_bytes(&PKPMM_ACPI_RECLAIM_VERIFIED);
+        logger.write_decimal_u64(acpi_reclaim.verified_bytes);
+        logger.write_bytes(&PKPMM_ACPI_RECLAIM_RANGE_CHECKSUM);
+        logger.write_hex_u64(acpi_reclaim.range_checksum);
+        logger.write_bytes(&PKPMM_ACPI_RECLAIM_RECEIPT_CHECKSUM);
+        logger.write_hex_u64(acpi_reclaim.receipt_checksum);
+        logger.write_bytes(&PKPMM_ACPI_RECLAIM_TAIL);
 
         logger.write_bytes(&PKPMM_SCRUB);
         logger.write_decimal_u64(final_state.allocation_count);

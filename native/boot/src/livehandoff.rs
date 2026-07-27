@@ -4,8 +4,9 @@ use core::ptr::null_mut;
 use core::slice::{from_raw_parts, from_raw_parts_mut};
 
 use poole_live_handoff::{
-    self as live, ArtifactInput, BuildInput, FramebufferInput, KernelInput, MAX_MEMORY_ENTRIES,
-    PROFILE_ARTIFACT_COUNT,
+    self as live, ACPI_20_TABLE_GUID, ArtifactInput, BuildInput, FIRMWARE_TABLE_CHECKSUM_VALIDATED,
+    FIRMWARE_TABLE_PHYSICAL, FirmwareTableInput, FramebufferInput, KernelInput, MAX_MEMORY_ENTRIES,
+    PROFILE_ARTIFACT_COUNT, PROFILE_FIRMWARE_TABLE_COUNT,
 };
 
 use super::{
@@ -72,6 +73,9 @@ fn contract_failure(stage: &'static str, error: live::Error) -> Failure {
         live::Error::PreExitProfile => "pre_exit_profile",
         live::Error::ExitProfile => "exit_profile",
         live::Error::RetainedRange => "retained_range",
+        live::Error::RetainedShape => "retained_shape",
+        live::Error::RetainedOverlap => "retained_overlap",
+        live::Error::RetainedCoverage => "retained_coverage",
         live::Error::ArtifactSet => "artifact_set",
     };
     Failure {
@@ -215,6 +219,7 @@ pub(super) fn produce(
     kernel: &super::kload::Summary,
     gop: Option<GopSummary>,
     uefi_revision: u32,
+    acpi20_rsdp: u64,
 ) -> Result<Summary, Failure> {
     let calls = Calls {
         get_memory_map: unsafe { function(boot_services.get_memory_map) }
@@ -323,6 +328,7 @@ pub(super) fn produce(
             artifacts: artifacts(kernel)
                 .map_err(|error| contract_failure("pbp1.artifact_set", error))?,
             framebuffer: framebuffer(gop),
+            firmware_tables: firmware_tables(acpi20_rsdp),
         };
         let (bytes, handoff) = match live::build_pre_exit(input, normalized, output) {
             Ok(value) => value,
@@ -359,4 +365,15 @@ pub(super) fn produce(
         "pbp1.memory_map_retry_exhausted",
         EFI_BUFFER_TOO_SMALL,
     ))
+}
+
+pub(super) fn firmware_tables(
+    acpi20_rsdp: u64,
+) -> [FirmwareTableInput; PROFILE_FIRMWARE_TABLE_COUNT] {
+    [FirmwareTableInput {
+        guid: ACPI_20_TABLE_GUID,
+        physical_address: acpi20_rsdp,
+        byte_count: 36,
+        flags: FIRMWARE_TABLE_PHYSICAL | FIRMWARE_TABLE_CHECKSUM_VALIDATED,
+    }]
 }

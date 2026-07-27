@@ -103,7 +103,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(checklist["section_count"], 171)
         self.assertEqual(checklist["coverage_status"], "pass")
         self.assertEqual(checklist["coverage_sha256"], hashlib.sha256(self.coverage_path.read_bytes()).hexdigest().upper())
-        self.assertEqual(checklist["added_requirement_count"], 46)
+        self.assertEqual(checklist["added_requirement_count"], 47)
 
     def test_phase_checklist_mapping_matches_coverage(self) -> None:
         coverage_by_phase = {item["phase_id"]: item for item in self.coverage["phase_coverage"]}
@@ -118,8 +118,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 132)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 787)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 133)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 788)
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
         self.assertTrue(native["pooleboot_exists"])
@@ -159,10 +159,10 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N9-PMM-GROWTH-AUTOMATION-001")
+        self.assertEqual(protocol["selected_move_id"], "N9-PMM-ACPI-CONSUMER-001")
         self.assertEqual(
             protocol["owner_independent_next_move_id"],
-            "N9-PMM-ACPI-CONSUMER-001",
+            "N9-VM-DIRECT-MAP-001",
         )
         self.assertIn("runs/hardware_target_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_tier0_readiness.json", protocol["required_records"])
@@ -199,8 +199,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
     def test_flags_and_gaps_are_native_and_traceable(self) -> None:
         phase_ids = {phase["id"] for phase in self.roadmap["phases"]}
         flags = self.roadmap["implementation_flags"]
-        self.assertEqual(len(flags), 77)
-        self.assertEqual(len({flag["id"] for flag in flags}), 77)
+        self.assertEqual(len(flags), 78)
+        self.assertEqual(len({flag["id"] for flag in flags}), 78)
         self.assertTrue(any(flag["class"] == "STOP_SHIP" and flag["status"] == "open" for flag in flags))
         self.assertEqual(next(flag for flag in flags if flag["id"] == "FLAG-BUILDROOT-LEGACY-001")["status"], "closed")
         objectives_flag = next(flag for flag in flags if flag["id"] == "FLAG-N0-OBJECTIVES-001")
@@ -277,10 +277,20 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             flag for flag in flags if flag["id"] == "FLAG-N9-PMM-ACPI-CONSUMER-001"
         )
         self.assertEqual(acpi_consumer_flag["class"], "REQUIRED")
-        self.assertEqual(acpi_consumer_flag["status"], "open")
+        self.assertEqual(acpi_consumer_flag["status"], "closed")
         self.assertIn(
             "runs/native-kernel-physical-memory-readiness.json",
             acpi_consumer_flag["evidence"],
+        )
+        self.assertIn("native/kernel/src/acpi.rs", acpi_consumer_flag["evidence"])
+        direct_map_flag = next(
+            flag for flag in flags if flag["id"] == "FLAG-N9-VM-DIRECT-MAP-001"
+        )
+        self.assertEqual(direct_map_flag["class"], "REQUIRED")
+        self.assertEqual(direct_map_flag["status"], "open")
+        self.assertIn(
+            "runs/native-kernel-virtual-memory-readiness.json",
+            direct_map_flag["evidence"],
         )
         pooleboot_proof_flag = next(flag for flag in flags if flag["id"] == "FLAG-N5-POOLEBOOT-PROOF-001")
         self.assertEqual(pooleboot_proof_flag["class"], "REQUIRED")

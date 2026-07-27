@@ -10,11 +10,11 @@ pub const MAX_MAPPINGS: usize = 8;
 pub const WINDOW_BYTES: u64 = 2 * 1024 * 1024;
 pub const MIN_VIRTUAL_BASE: u64 = 0xffff_ffff_8000_0000;
 pub const MAX_VIRTUAL_EXCLUSIVE: u64 = 0xffff_ffff_c000_0000;
-pub const STACK_GUARD_LOW_PAGE: usize = 78;
-pub const STACK_FIRST_PAGE: usize = 79;
-pub const STACK_PAGE_COUNT: usize = 14;
-pub const STACK_GUARD_HIGH_PAGE: usize = 93;
-pub const HANDOFF_FIRST_PAGE: usize = 94;
+pub const STACK_GUARD_LOW_PAGE: usize = 83;
+pub const STACK_FIRST_PAGE: usize = 84;
+pub const STACK_PAGE_COUNT: usize = 32;
+pub const STACK_GUARD_HIGH_PAGE: usize = 116;
+pub const HANDOFF_FIRST_PAGE: usize = 117;
 pub const HANDOFF_PAGE_COUNT: usize = 256;
 pub const HANDOFF_CAPACITY_BYTES: u64 = HANDOFF_PAGE_COUNT as u64 * PAGE_SIZE;
 pub const TEMPORARY_PAGE_INDEX: usize = HANDOFF_FIRST_PAGE + HANDOFF_PAGE_COUNT;
@@ -1441,7 +1441,7 @@ mod tests {
         assert_eq!(summary.stack_page_count, STACK_PAGE_COUNT as u32);
         assert_eq!(summary.handoff_page_count, HANDOFF_PAGE_COUNT as u32);
         assert_eq!(summary.guard_page_count, 2);
-        assert_eq!(summary.total_mapped_page_count, 334);
+        assert_eq!(summary.total_mapped_page_count, 352);
         assert_eq!(table[STACK_GUARD_LOW_PAGE], 0);
         assert_eq!(table[STACK_GUARD_HIGH_PAGE], 0);
         assert_eq!(

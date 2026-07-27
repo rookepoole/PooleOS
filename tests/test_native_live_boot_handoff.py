@@ -17,16 +17,27 @@ STACK_PHYSICAL = 0x0400_0000
 STACK_TOP = KERNEL_VIRTUAL + 57 * 4096
 HANDOFF_PHYSICAL = 0x0500_0000
 HANDOFF_VIRTUAL = KERNEL_VIRTUAL + 64 * 4096
+RSDP_PHYSICAL = 0x000F_0010
 
 
 def exited_handoff() -> bytes:
     memory_entries = (
+        (0x000F_0000, 1, 0, pbp1.MEMORY_ACPI_RECLAIMABLE, 9, 0),
         (KERNEL_PHYSICAL, 48, 0, pbp1.MEMORY_LOADER_RESERVED, 2, 0),
         (ARTIFACT_PHYSICAL, 9, 0, pbp1.MEMORY_LOADER_RESERVED, 2, 0),
         (ROOT_PHYSICAL, 4, 0, pbp1.MEMORY_LOADER_RESERVED, 2, 0),
         (STACK_PHYSICAL, 8, 0, pbp1.MEMORY_LOADER_RESERVED, 2, 0),
         (HANDOFF_PHYSICAL, 256, 0, pbp1.MEMORY_LOADER_RESERVED, 2, 0),
         (0x8000_0000, 1000, 0, pbp1.MEMORY_FRAMEBUFFER, 11, 0),
+    )
+    firmware = struct.pack(
+        "<16sQQII",
+        native_live_boot_handoff.ACPI_20_TABLE_GUID,
+        RSDP_PHYSICAL,
+        36,
+        native_live_boot_handoff.FIRMWARE_TABLE_PHYSICAL
+        | native_live_boot_handoff.FIRMWARE_TABLE_CHECKSUM_VALIDATED,
+        0,
     )
     memory = b"".join(struct.pack("<QQQIIQ", *entry) for entry in memory_entries)
     framebuffer = struct.pack(
@@ -71,7 +82,9 @@ def exited_handoff() -> bytes:
             )
         )
     artifact = b"".join(artifacts)
-    total = pbp1.encoded_size((pbp1.CORE_BYTES, len(memory), len(framebuffer), len(artifact)))
+    total = pbp1.encoded_size(
+        (pbp1.CORE_BYTES, len(memory), len(framebuffer), len(firmware), len(artifact))
+    )
     core_values = (
         pbp1.DEVELOPMENT_MODE | pbp1.BOOT_SERVICES_EXITED,
         KERNEL_PHYSICAL,
@@ -111,6 +124,13 @@ def exited_handoff() -> bytes:
                 "payload": framebuffer,
             },
             {
+                "record_type": pbp1.RECORD_FIRMWARE_TABLES,
+                "flags": pbp1.RECORD_REQUIRED | pbp1.RECORD_ARRAY,
+                "element_size": pbp1.FIRMWARE_TABLE_ENTRY_BYTES,
+                "element_count": 1,
+                "payload": firmware,
+            },
+            {
                 "record_type": pbp1.RECORD_LOADED_ARTIFACTS,
                 "flags": pbp1.RECORD_REQUIRED | pbp1.RECORD_ARRAY,
                 "element_size": pbp1.ARTIFACT_ENTRY_BYTES,
@@ -127,11 +147,16 @@ class NativeLiveBootHandoffTests(unittest.TestCase):
         transcript = native_live_boot_handoff.extract_transcript(
             native_live_boot_handoff.format_transcript(data)
         )
-        self.assertEqual("PBLIVE3", transcript.summary["contract_id"])
+        self.assertEqual("PBLIVE4", transcript.summary["contract_id"])
         self.assertTrue(transcript.summary["boot_services_exited"])
         self.assertTrue(transcript.summary["exit_development_profile_validated"])
         self.assertFalse(transcript.summary["transferable"])
-        self.assertEqual(6, transcript.summary["memory_entry_count"])
+        self.assertEqual(7, transcript.summary["memory_entry_count"])
+        self.assertEqual(1, transcript.summary["firmware_table_count"])
+        self.assertEqual(
+            f"{RSDP_PHYSICAL:016X}",
+            transcript.summary["firmware_tables"][0]["physical_address"],
+        )
         self.assertEqual(10, transcript.summary["artifact_count"])
 
     def test_exited_profile_rejects_transfer_overclaim(self) -> None:
@@ -170,7 +195,7 @@ class NativeLiveBootHandoffTests(unittest.TestCase):
         entries = summary["memory_entries"]
         self.assertTrue(native_live_boot_handoff._loader_range_covered(entries, STACK_PHYSICAL, 8 * 4096))
         hostile = [dict(item) for item in entries]
-        hostile[3]["kind"] = pbp1.MEMORY_USABLE
+        hostile[4]["kind"] = pbp1.MEMORY_USABLE
         self.assertFalse(native_live_boot_handoff._loader_range_covered(hostile, STACK_PHYSICAL, 8 * 4096))
         self.assertFalse(native_live_boot_handoff._loader_range_covered(entries, 0x0600_0000, 4096))
 
