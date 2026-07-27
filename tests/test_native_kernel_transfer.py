@@ -43,7 +43,7 @@ def valid_markers() -> list[str]:
         "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=83 artifact_pages=9 table_pages=4 stack_pages=32 handoff_pages=256",
         "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF80009000 handoff=FFFFFFFF80075000 bytes=5120 stack_top=FFFFFFFF80074000 root=000000001DE37000 cr3=000000001DE37000 trap_scenario=0 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
         native_kernel_transfer.TRANSFER_BOUNDARY,
-        "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE133-N9-PMM-ACPI-CONSUMER-001 entry_count=1 serial=present",
+        "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE134-N9-VM-DIRECT-MAP-V01-001 entry_count=1 serial=present",
         "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF80075000 bytes=5120 entry=0xFFFFFFFF80009000 stack_top=0xFFFFFFFF80074000 root=0x000000001DE37000 cr3=0x000000001DE37000 rflags_if=0 rflags_df=0",
         "POOLEOS:KERNEL:PBP1 PASS profile=development records=5 artifacts=10 production_profile_valid=0",
         "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=717CC278184DEFE839176D5A3859A530D2132D72CD45324E5B7FA434EF98D31D policy_sha256=4F623114181E46163D57E53BD43D0DF569F63736B5CDD83BCD644F0A01C14E5D state_sha256=97CF93166164CCF91329D357DFB75E41EB71C7A2D45B163448F2915566DAB964 denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",

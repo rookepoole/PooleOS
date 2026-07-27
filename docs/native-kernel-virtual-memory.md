@@ -1,98 +1,119 @@
-# PKVM2 Bounded Active Virtual-Memory Root
+# PKVM3 PMM-Owned Sparse Direct Map
 
 ## Scope
 
-PKVM2 is PooleKernel's first bounded, kernel-complete page-table root that is
-actually installed in CR3. It advances the inactive PKVM1 foundation without
-claiming a complete virtual-memory subsystem or satisfying the N9 exit gate.
-The qualified selector-10 profile runs on one bootstrap processor with
-interrupts disabled, maps one user page, directly maps its eight table pages
-and one data page, performs three live leaf mutations, restores the exact
-original root, scrubs every owned page, and releases both allocations.
+PKVM3 is the Cycle 134 `N9-VM-DIRECT-MAP-001` increment. It replaces the
+fixed nine-page PKVM2 mapping with a dynamically sized, generation-bound,
+sparse physical direct map derived from PKPMM7 ownership. The selector-10
+profile installs the candidate in CR3 on one bootstrap processor with
+interrupts disabled, exercises one user frame and three live leaf mutations,
+restores the exact retained root, and releases data and table generations only
+after exact invalidation and retirement receipts.
 
-The canonical contract is
-`specs/native-kernel-virtual-memory-contract.json`; this note explains the
-design and its deliberately narrow evidence boundary.
+This is real native kernel work, but it is not a complete VM subsystem. The
+canonical contract is `specs/native-kernel-virtual-memory-contract.json` and
+the deterministic live receipt is
+`runs/native-kernel-virtual-memory-readiness.json`.
 
-## Threat Model
+## Ownership Authority
 
-PKVM2 fails closed against these bounded threats:
+`PhysicalMemoryManager::direct_map_manifest` is the only admission authority.
+It merges every current free extent with every active allocation that is not
+marked `release_excluded`, sorts and coalesces the resulting physical ranges,
+and rejects overlap, arithmetic overflow, capacity overflow, or accounting
+drift. Retained allocations are counted but omitted. The manifest binds its
+PMM generation, exact ranges, mapped-page count, gap-page count, retained
+exclusion count, first and ending page, write-back cache policy, and a 64-bit
+FNV coverage checksum.
 
-- activating a candidate built from a stale root, on a non-BSP CPU, or while
-  maskable interrupts are enabled;
-- losing or weakening inherited kernel, entry, guarded-stack, or PBP1 handoff
-  mappings while constructing the candidate;
-- mapping a frame outside the two generation-owned PKPMM7 allocations;
-- accepting an occupied direct-map root slot or leaving the bootstrap alias
-  active before CR3 installation;
-- treating x86-64 hardware Accessed or Dirty updates as unauthorized drift;
-- mutating an active leaf without a root-, generation-, address-, CPU-, and
-  sequence-bound local invalidation receipt;
-- freeing the data frame before both user and direct-map aliases are revoked;
-- freeing table pages while their root is active, or failing to restore the
-  exact original CR3 after activation or readback failure.
+The VM path previews the manifest to size its tables, allocates one contiguous
+DMA32 table generation and the following data frame, then asks PKPMM7 to
+reconstruct and compare the complete manifest before materialization. This
+works because allocation changes ownership category without changing admitted
+coverage. A stale or forged range set, generation, count, boundary, cache
+policy, or checksum fails closed.
 
-This profile does not defend an SMP system, execute ring 3, or validate MMIO,
-PAT/MTRR, speculative-execution, side-channel, or physical fault behavior.
+The live qemu64 profile covers 117,887 owned pages in eleven ranges. It leaves
+12,878 pages of physical holes unmapped. Its selector does not run the separate
+PKACPI1 retained-snapshot lifecycle, so the live retained-exclusion count is
+zero; a host test inserts a retained allocation and proves the resulting hole
+is excluded and untranslated.
 
-## Address Layout
+## Sparse Topology
 
-The contract freezes canonical 48-bit addresses for this profile:
+The direct map begins at `0xFFFF900000000000`, using PML4 slot 288 and the
+formula `DIRECT_MAP_START + physical_address`. PKVM3 derives one leaf table for
+each occupied 2 MiB physical region and one directory table for each occupied
+1 GiB region. The bounded development profile permits at most 512 leaf tables,
+four directory tables, and 288 ownership ranges.
 
-- user probe page: `0x0000000040000000`;
-- inherited kernel half: PML4 indices 256 through 511 except index 288;
-- bounded direct-map base: `0xFFFF900000000000`, PML4 index 288;
-- inherited kernel entry: exact RX mapping at `0xFFFFFFFF80000000`;
-- inherited kernel stack: exact 32 mapped pages with both guard pages absent;
-- inherited PBP1 handoff: exact first and last pages, read-only and NX.
+Table order is deterministic: candidate PML4, user PDPT, user PD, user PT,
+direct-map PDPT, sorted direct directories, then sorted direct leaf tables.
+Every admitted physical page receives one supervisor RW/NX, 4 KiB, write-back
+leaf. Holes, held firmware pages, loader-retained pages, metadata-retained
+pages, and other release-excluded ownership receive no direct leaf. PWT or PCD
+on an audited leaf is rejected as an incompatible cache alias. Large pages are
+not admitted.
 
-PKVM2 allocates eight contiguous DMA32 table pages in this order: candidate
-PML4, user PDPT, user PD, user PT, direct-map PDPT, direct-map PD, direct-map
-PT0, and direct-map PT1. A second one-page allocation immediately follows for
-the probe data. The direct map covers exactly those nine owned pages with
-supervisor RW/NX 4 KiB leaves. It is not a general physical-memory map.
+The current live topology contains 237 direct leaf tables, one direct
+directory, and five fixed tables, for 243 generation-owned table pages. It
+retains the exact PKMAP2 kernel image, RX entry, 32-page guarded stack, and
+read-only/NX PBP1 handoff mappings. The bootstrap temporary alias is revoked
+and translation-checked immediately before activation.
 
-## Lifecycle
+## Transaction Lifecycle
 
-1. Copy the current PKMAP2 PML4, construct fresh user and direct-map branches,
-   and audit every inherited and owned mapping through the temporary bootstrap
-   mapper.
-2. Revoke the bootstrap alias, require BSP 0 with IF clear, verify the expected
-   original root, install the candidate, and require exact CR3 readback.
-3. Write and read the data probe through its live direct-map alias.
-4. Change the user leaf from RW/NX to RX and issue local `INVLPG` receipt 1.
-5. Remove the user leaf and issue local `INVLPG` receipt 2.
-6. Remove the data direct-map leaf and issue local `INVLPG` receipt 3.
-7. Reject premature data reuse until both unmap receipts are present, then
-   scrub and free the data frame.
-8. Restore and read back the exact original CR3, scrub all eight inactive table
-   pages through the bootstrap mapper, revoke that alias, and free the tables.
+1. Build the sparse candidate through the volatile PKMAP2 temporary mapper and
+   read back every table transition.
+2. Audit every admitted leaf, each range edge, every sparse gap, inherited
+   kernel permissions, stack guards, handoff boundaries, cache attributes, and
+   physical-address-width constraints.
+3. Require BSP 0, IF clear, and exact retained CR3; install the candidate and
+   require exact readback. A failed activation restores and verifies the old
+   root.
+4. Write/read probe byte `0xA5`, protect the user leaf from RW/NX to RX, revoke
+   the user leaf, and revoke the data direct alias. Each commit creates a
+   root-, generation-, CPU-, address-, kind-, and sequence-bound local INVLPG
+   receipt. Hardware Accessed/Dirty bits are preserved; all other drift fails.
+5. Reject data-frame reuse until both unmap receipts are exact, then scrub and
+   release that allocation.
+6. Reject root retirement for any active-processor count other than one with
+   `ShootdownRequired`. For the one-BSP profile, restore and read back the
+   retained root, perform the local context flush implicit in CR3 replacement,
+   and mint one exact generation-retirement receipt.
+7. Keep old-generation reclamation deferred until that receipt is supplied,
+   zero and verify all 243 inactive table pages, revoke the temporary alias,
+   then release the table generation. Missing, stale, reordered, or
+   remote-pending receipts are rejected.
 
-If candidate CR3 readback fails, PKVM2 immediately writes the exact original
-CR3 and returns an activation failure. Host fault injection proves that path.
-Table-leaf rollback is likewise host-tested when an active hardware write
-fails; no invalidation receipt is minted for a mutation that did not commit.
+Host fault injection covers manifest forgery, retained sparse holes, cache
+attribute drift, candidate-write rollback, CR3 rollback, premature reuse,
+missing and stale retirement receipts, and the future multi-processor
+shootdown dependency.
 
-## Architectural Bits
+## Qualification
 
-x86-64 may set Accessed on traversed entries and Dirty on the written data
-leaf. PKVM2 permits only those architectural changes while an entry is active,
-preserves them across permission changes, and rejects every other observed-bit
-drift. This distinction is required for a live root; byte-for-byte equality to
-the pre-activation entry would be incorrect after hardware traversal.
+Two fresh-vars QEMU/OVMF executions reproduce the same 40 markers, framebuffer,
+and exact PBP1 transcript. Ninety-one PooleKernel host tests, 43 PKENTRY1
+controls, and 46 PKVM3 hostile controls pass. An independent Python oracle
+reconstructs PMM ranges, page-zero exclusion, DMA32 first fit, topology,
+addresses, gap counts, and the coverage checksum from the PBP1 transcript.
 
-## Qualification Boundary
+The Cycle 134 run records 117,887 mapped pages, eleven ranges, 12,878 gap pages,
+237 direct leaf tables, one direct directory, 243 total table pages, checksum
+`0x341CF729ADB26B52`, 367,474 physical table writes, 950,234 temporary-PTE
+writes and matching bootstrap invalidations, two CR3 writes, three local leaf
+invalidations, and one generation-retirement receipt. The 299,008-byte
+canonical kernel occupies an 83-page, 339,968-byte image, has 729 relocations,
+and SHA-256 `5B581CC1D1ABEB163D0984D12144CA5016C44B46A28B190A6DFCBDCDA689A255`.
 
-The live oracle requires two byte-identical QEMU/OVMF runs, 40 exact markers,
-46 hostile controls, deterministic binding to the PBP1 DMA32 first-fit
-transcript, and source audits for the no-heap core and volatile privileged
-adapter. The canonical run performs 8,720 physical table writes, 5,640
-bootstrap temporary-PTE writes and invalidations, two CR3 writes, and three
-active local invalidations. Signature, authority, action, and production counts
-remain zero.
+## Remaining Boundary
 
-PKVM2 does not implement AP startup or TLB shootdown, deferred SMP reclaim,
-huge pages, PCID, KASLR, copy-on-write, user faults, stack growth, pager IPC,
-heap policy, pressure/OOM handling, or a complete generation-owned direct map.
-It has no target-hardware or second-host evidence. Those remain explicit N9
-work; PKVM2 is pre-production evidence only.
+PKVM3 executes no inter-processor shootdown. AP startup, request/acknowledgement
+transport, timeout and failure policy, remote-context proof, and generation-safe
+SMP deferred reclaim remain mandatory. Concurrent allocation and incremental
+map replacement, huge-page promotion/demotion, PCID and global-page policy,
+KASLR, COW, ring 3, user faults, stack growth, pager IPC, heaps, MMIO and
+PAT/MTRR qualification, pressure/OOM behavior, target hardware, second-host
+reproduction, and the N9 exit gate also remain open. Signatures, authority
+grants, authorized actions, and production claims are all zero.

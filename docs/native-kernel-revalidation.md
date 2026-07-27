@@ -104,18 +104,14 @@ slice. PKERR1 separately freezes a pure exact-target rejection policy while
 leaving direct errata and numeric microcode-floor authority open. PKXSTATE1 and
 PKXEXC1 separately prove bounded one-BSP x87/SSE ownership and exception
 delivery/recovery, while PKMSR1 separately proves bounded read-only privileged-
-MSR policy observation. Cycle 125 separately closes the bounded PKPMM1
-physical-page foundation, Cycle 126 closes the bounded PKVM1 inactive
-virtual-memory foundation, and Cycle 127 closes the bounded one-BSP PKVM2
-candidate-root activation, direct-map, exact CR3 restoration, and local
-invalidation-receipt move. Cycle 128 upgrades selector 8 to PKPMM2 with
-scrub-before-allocation and scrub-before-reuse, full readback, receipts,
-exact-reuse residue rejection, fault rollback, and alias revocation. Cycle 129
-upgrades it to PKPMM3 with a retained five-page guarded metadata arena,
-complete-manager handoff, integrity seal, mapped-corruption rejection, rollback,
-and release exclusion. Cycle 130 upgrades it to PKPMM4 with streamed complete
-preflight, scrub-before-admission, exact lifecycle gates, retained-range
-exclusion, atomic metadata commit, idempotence, and immutable Boot Services
-reclaim receipts while ACPI remains held. The next owner-independent move is
-`N9-PMM-GROWTH-001` without target, scheduler, SMP, userspace, heap, pager,
-concurrent reclaim, or production promotion.
+MSR policy observation. Cycles 125-127 separately close the bounded PKPMM1
+physical-page foundation, PKVM1 inactive virtual-memory foundation, and one-BSP
+PKVM2 candidate-root activation. Cycles 128-133 add scrub-before-allocation and
+reuse, the guarded manager, lifecycle-gated Boot Services and ACPI reclaim,
+generation-owned growing ledgers, and a retained validated required-table
+snapshot. Cycle 134 upgrades selector 10 to PKVM3, deriving an exact sparse
+direct map from the PMM ownership manifest and proving transactional activation,
+rollback, local invalidation receipts, and one-BSP generation retirement. The
+next owner-independent move is `N8-IRQ-001`; target, scheduler, remote SMP
+shootdown, userspace, heap, pager, concurrent reclaim, and production promotion
+remain open.

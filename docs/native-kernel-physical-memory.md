@@ -161,18 +161,19 @@ checksum, physical access, and final ownership total from PBP1.
 | ACPI source / snapshot checksums | `0x078583AEEFDD6581 / 0x4089A5CFEC81CB41` |
 | ACPI range / receipt checksums | `0xC718FB26B45257F2 / 0x60DAA52A8A05ABD6` |
 
-The exact Cycle 133 kernel is 299,008 canonical bytes in a 339,968-byte,
-83-page image with 693 relocations and SHA-256
-`D9EF9B10B56BF779B155BD18DE55853874CCC032D2A3E5E7841B918F08CDE1F2`.
-PKVM2 is rebound to 5,640 bootstrap temporary-PTE writes and invalidations.
+The Cycle 134 requalification keeps the kernel at 299,008 canonical bytes in a
+339,968-byte, 83-page image, now with 729 relocations and SHA-256
+`5B581CC1D1ABEB163D0984D12144CA5016C44B46A28B190A6DFCBDCDA689A255`.
+PKPMM7 also supplies PKVM3's exact generation-bound sparse ownership manifest.
 
 ## Nonclaims
 
 N9 remains partial. PKPMM7 is a serial one-BSP allocator and bounded ACPI table
 container consumer. It does not implement AML, AP enumeration, interrupt
 routing, full platform discovery, interrupt-context allocation, concurrent or
-SMP allocation, a complete generation-owned physical direct map, SMP TLB
-shootdown or deferred reclaim, huge pages, PCID, COW, user faults, pager IPC,
+SMP allocation, or SMP TLB shootdown and remote deferred reclaim. PKVM3
+separately proves a complete generation-owned sparse direct map only for one
+BSP; huge pages, PCID, COW, user faults, pager IPC,
 heap/object caches, general pressure/OOM policy, MMIO/PAT/MTRR qualification,
 target hardware, or second-host reproduction. The profile performs no
 signature verification, authority grant, authorized action, firmware mutation,
