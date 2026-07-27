@@ -21,6 +21,11 @@ use poolekernel::{
         self, ActiveHardware, run_profile as run_active_virtual_memory_profile,
     },
     decode_cpu_identity,
+    interrupt_time::{
+        self, APIC_BASE_ENABLE, APIC_BASE_X2APIC, APIC_ERROR_VECTOR, HpetClock, SPURIOUS_VECTOR,
+        TIMER_VECTOR, VectorLedger, calibrate_apic_timer, parse_hpet, parse_madt,
+        timer_initial_count, validate_apic_discovery,
+    },
     physical_memory::{
         LEDGER_ARENA_PAGE_CAPACITY, LEDGER_GUARD_PAGE_COUNT, METADATA_ARENA_PAGE_COUNT,
         MetadataArenaAccess, PageAccessError, PhysicalPageAccess, ScrubKind, Zone,
@@ -29,7 +34,8 @@ use poolekernel::{
     privilege_msr::{machine_check_bank_count, machine_check_ctl_present, validate_snapshot},
     revalidation, validate_cpu_policy_snapshot, validate_descriptor_state,
     validate_development_handoff, validate_entry_envelope, validate_handoff,
-    validate_runtime_state, validate_trap_observation, validate_xstate_exception_descriptor_state,
+    validate_interrupt_descriptor_state, validate_runtime_state, validate_trap_observation,
+    validate_xstate_exception_descriptor_state,
     virtual_memory::{self, TableMemory, run_profile as run_virtual_memory_profile},
     xstate::{
         AREA_BYTES as XSTATE_AREA_BYTES, CONTRACT_ID as XSTATE_CONTRACT_ID, ContextSwitch,
@@ -583,6 +589,80 @@ static CPU_RESULT_PREFIX: [u8; b"POOLEOS:KERNEL:CPU-RESULT PASS contract=".len()
 static CPU_RESULT_TAIL: [u8; b" profile=qemu64_tier0 bsp=1 policy=required_and_support_gated reads=cpuid_cr_msr writes=0 signatures=0 authority=0 actions=0 interrupts=0 terminal=halt\n".len()] =
     *b" profile=qemu64_tier0 bsp=1 policy=required_and_support_gated reads=cpuid_cr_msr writes=0 signatures=0 authority=0 actions=0 interrupts=0 terminal=halt\n";
 
+macro_rules! pkirq_fragment {
+    ($name:ident, $value:literal) => {
+        #[used]
+        #[unsafe(link_section = ".text.pkirq_literals")]
+        static $name: [u8; $value.len()] = *$value;
+    };
+}
+
+pkirq_fragment!(PKIRQ_EARLY, b"POOLEOS:KERNEL:IRQ-EARLY PASS contract=PKIRQ1 selector=11 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n");
+pkirq_fragment!(
+    PKIRQ_DENIED,
+    b"POOLEOS:KERNEL:IRQ-DENIED contract=PKIRQ1 reason="
+);
+pkirq_fragment!(
+    PKIRQ_DENIED_TAIL,
+    b" rollback=terminal_fail_closed authority=0 actions=0 production=0 terminal=panic\n"
+);
+pkirq_fragment!(
+    PKIRQ_ACPI,
+    b"POOLEOS:KERNEL:IRQ-ACPI PASS contract=PKIRQ1 madt_bytes="
+);
+pkirq_fragment!(PKIRQ_PROCESSORS, b" processors=");
+pkirq_fragment!(PKIRQ_ENABLED, b" enabled=");
+pkirq_fragment!(PKIRQ_IOAPICS, b" ioapics=");
+pkirq_fragment!(PKIRQ_OVERRIDES, b" overrides=");
+pkirq_fragment!(PKIRQ_NMI_SOURCES, b" nmi_sources=");
+pkirq_fragment!(PKIRQ_LOCAL_NMIS, b" local_nmis=");
+pkirq_fragment!(PKIRQ_UNKNOWN, b" unknown=");
+pkirq_fragment!(PKIRQ_PCAT, b" pcat=");
+pkirq_fragment!(PKIRQ_APIC_PHYSICAL, b" apic_physical=");
+pkirq_fragment!(PKIRQ_HPET_PHYSICAL, b" hpet_physical=");
+pkirq_fragment!(PKIRQ_ACPI_TAIL, b" retained_snapshot=1 complete_walk=1\n");
+pkirq_fragment!(
+    PKIRQ_APIC,
+    b"POOLEOS:KERNEL:IRQ-APIC PASS contract=PKIRQ1 apic_id="
+);
+pkirq_fragment!(PKIRQ_VERSION, b" version=");
+pkirq_fragment!(PKIRQ_MAX_LVT, b" max_lvt=");
+pkirq_fragment!(PKIRQ_GLOBAL, b" global_enable=");
+pkirq_fragment!(PKIRQ_MSR_WRITES, b" msr_writes=");
+pkirq_fragment!(PKIRQ_SVR, b" svr_vector=255 software_enable=1 pic_masked=");
+pkirq_fragment!(PKIRQ_MMIO, b" mmio=uncacheable guarded=3\n");
+pkirq_fragment!(
+    PKIRQ_VECTOR,
+    b"POOLEOS:KERNEL:IRQ-VECTORS PASS contract=PKIRQ1 owned="
+);
+pkirq_fragment!(
+    PKIRQ_TIMER_VECTOR,
+    b" timer=64 ipi_first=224 ipi_last=239 error=240 spurious=255 collisions=host_verified\n"
+);
+pkirq_fragment!(
+    PKIRQ_CLOCK,
+    b"POOLEOS:KERNEL:IRQ-CLOCK PASS contract=PKIRQ1 source=hpet counter_bits="
+);
+pkirq_fragment!(PKIRQ_PERIOD, b" period_fs=");
+pkirq_fragment!(PKIRQ_HPET_TICKS, b" sample_ticks=");
+pkirq_fragment!(PKIRQ_SAMPLE_NS, b" sample_ns=");
+pkirq_fragment!(PKIRQ_APIC_TICKS, b" apic_ticks=");
+pkirq_fragment!(PKIRQ_FREQUENCY, b" apic_hz=");
+pkirq_fragment!(PKIRQ_INITIAL, b" one_shot_initial=");
+pkirq_fragment!(PKIRQ_MONOTONIC_NS, b" monotonic_ns=");
+pkirq_fragment!(PKIRQ_CLOCK_TAIL, b" overflow=checked wrap=bounded\n");
+pkirq_fragment!(
+    PKIRQ_DELIVERY,
+    b"POOLEOS:KERNEL:IRQ-DELIVERY PASS contract=PKIRQ1 timer_deliveries="
+);
+pkirq_fragment!(PKIRQ_EOIS, b" eois=");
+pkirq_fragment!(PKIRQ_ERRORS, b" apic_errors=");
+pkirq_fragment!(PKIRQ_SPURIOUS, b" spurious=");
+pkirq_fragment!(PKIRQ_ISR, b" in_service_after=");
+pkirq_fragment!(PKIRQ_DELIVERY_TAIL, b" exact_one_shot=1 unacknowledged=0\n");
+pkirq_fragment!(PKIRQ_RESULT, b"POOLEOS:KERNEL:IRQ-RESULT PASS contract=PKIRQ1 profile=qemu64_tier0 bsp=1 madt=1 local_apic=1 hpet=1 vectors=1 timer=1 deliveries=");
+pkirq_fragment!(PKIRQ_RESULT_TAIL, b" rollback=1 mmio_revoked=1 pic_restored=1 interrupts=disabled smp=0 ap_start=0 shootdown=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n");
+
 static EARLY_RING: EarlyRing = EarlyRing::new();
 static PANIC_STATE: PanicState = PanicState::new();
 static ENTRY_COUNT: AtomicU32 = AtomicU32::new(0);
@@ -595,6 +675,11 @@ static IST1_BOTTOM: AtomicU64 = AtomicU64::new(0);
 static IST1_TOP: AtomicU64 = AtomicU64::new(0);
 static IST2_BOTTOM: AtomicU64 = AtomicU64::new(0);
 static IST2_TOP: AtomicU64 = AtomicU64::new(0);
+static IRQ_APIC_VIRTUAL: AtomicU64 = AtomicU64::new(0);
+static IRQ_TIMER_DELIVERIES: AtomicU32 = AtomicU32::new(0);
+static IRQ_EOI_COUNT: AtomicU32 = AtomicU32::new(0);
+static IRQ_ERROR_COUNT: AtomicU32 = AtomicU32::new(0);
+static IRQ_SPURIOUS_COUNT: AtomicU32 = AtomicU32::new(0);
 
 core::arch::global_asm!(
     r#"
@@ -676,11 +761,16 @@ struct BootstrapTableMemory {
     ledger_guard_pages_verified: [u64; 2],
     ledger_pte_writes: u64,
     ledger_mapping_rollbacks: u64,
+    mmio_physical: [Option<u64>; 2],
+    mmio_pte_writes: u64,
+    mmio_guard_pages_verified: u64,
 }
 
 impl BootstrapTableMemory {
     const TEMPORARY_LEAF_INDEX: usize = poole_kmap::TEMPORARY_PAGE_INDEX;
     const TEMPORARY_ENTRY_FLAGS: u64 = (1 << 0) | (1 << 1) | (1 << 63);
+    const UNCACHED_MMIO_ENTRY_FLAGS: u64 =
+        Self::TEMPORARY_ENTRY_FLAGS | poole_kmap::ENTRY_PWT | poole_kmap::ENTRY_PCD;
     const PHYSICAL_MASK_52: u64 = 0x000f_ffff_ffff_f000;
 
     fn new(active_root: u64, physical_address_bits: u8) -> Result<Self, virtual_memory::Error> {
@@ -702,7 +792,7 @@ impl BootstrapTableMemory {
         }
         // SAFETY: the loop above proves that the retained PKMAP2 leaf table is
         // identity-mapped and writable through its physical address.
-        for index in Self::TEMPORARY_LEAF_INDEX..=poole_kmap::LEDGER_B_GUARD_HIGH_PAGE {
+        for index in Self::TEMPORARY_LEAF_INDEX..=poole_kmap::MMIO_GUARD_HIGH_PAGE {
             // SAFETY: the loop above proves that the retained leaf table is writable.
             let value = unsafe {
                 read_volatile((active_leaf_table as usize as *const u64).wrapping_add(index))
@@ -730,6 +820,9 @@ impl BootstrapTableMemory {
             ledger_guard_pages_verified: [0; 2],
             ledger_pte_writes: 0,
             ledger_mapping_rollbacks: 0,
+            mmio_physical: [None; 2],
+            mmio_pte_writes: 0,
+            mmio_guard_pages_verified: 0,
         })
     }
 
@@ -756,6 +849,140 @@ impl BootstrapTableMemory {
 
     fn invalidate(&mut self) {
         self.invalidate_address(virtual_memory::TEMPORARY_MAP_START);
+    }
+
+    fn mmio_guards_absent(&self) -> Result<(), virtual_memory::Error> {
+        for (index, virtual_address) in [
+            (
+                poole_kmap::MMIO_GUARD_LOW_PAGE,
+                virtual_memory::MMIO_GUARD_LOW_START,
+            ),
+            (
+                poole_kmap::MMIO_GUARD_MIDDLE_PAGE,
+                virtual_memory::MMIO_GUARD_MIDDLE_START,
+            ),
+            (
+                poole_kmap::MMIO_GUARD_HIGH_PAGE,
+                virtual_memory::MMIO_GUARD_HIGH_START,
+            ),
+        ] {
+            // SAFETY: new() proves the retained leaf table is identity-mapped.
+            if unsafe { read_volatile(self.indexed_leaf_pointer(index)) } != 0
+                || poole_kmap::translate(
+                    &ActivePhysicalReader,
+                    self.active_root,
+                    virtual_address,
+                    self.physical_address_bits,
+                ) != Err(poole_kmap::Error::TranslationMissing)
+            {
+                return Err(virtual_memory::Error::BootstrapLeafState);
+            }
+        }
+        Ok(())
+    }
+
+    fn install_uncached_mmio(
+        &mut self,
+        local_apic_physical: u64,
+        hpet_physical: u64,
+    ) -> Result<(u64, u64), virtual_memory::Error> {
+        if self.mmio_physical != [None; 2]
+            || local_apic_physical == 0
+            || hpet_physical == 0
+            || !local_apic_physical.is_multiple_of(poole_kmap::PAGE_SIZE)
+            || !hpet_physical.is_multiple_of(poole_kmap::PAGE_SIZE)
+            || local_apic_physical == hpet_physical
+            || local_apic_physical & !Self::PHYSICAL_MASK_52 != 0
+            || hpet_physical & !Self::PHYSICAL_MASK_52 != 0
+        {
+            return Err(virtual_memory::Error::BootstrapTargetAddress);
+        }
+        self.mmio_guards_absent()?;
+        let mappings = [
+            (
+                poole_kmap::LOCAL_APIC_PAGE,
+                virtual_memory::LOCAL_APIC_MAP_START,
+                local_apic_physical,
+            ),
+            (
+                poole_kmap::HPET_PAGE,
+                virtual_memory::HPET_MAP_START,
+                hpet_physical,
+            ),
+        ];
+        for (slot, (index, virtual_address, physical_address)) in
+            mappings.iter().copied().enumerate()
+        {
+            let leaf = self.indexed_leaf_pointer(index);
+            // SAFETY: new() proves the retained leaf table is identity-mapped.
+            if unsafe { read_volatile(leaf) } != 0 {
+                if slot != 0 {
+                    self.uninstall_uncached_mmio_prefix(slot)?;
+                }
+                return Err(virtual_memory::Error::BootstrapLeafOccupied);
+            }
+            // SAFETY: PKIRQ1 exclusively owns these absent guarded leaf slots.
+            unsafe { write_volatile(leaf, physical_address | Self::UNCACHED_MMIO_ENTRY_FLAGS) };
+            self.temporary_pte_writes += 1;
+            self.mmio_pte_writes += 1;
+            self.invalidate_address(virtual_address);
+            let translation = poole_kmap::translate(
+                &ActivePhysicalReader,
+                self.active_root,
+                virtual_address,
+                self.physical_address_bits,
+            )
+            .map_err(|_| virtual_memory::Error::BootstrapTranslation)?;
+            if translation.physical_address != physical_address
+                || !translation.writable
+                || translation.executable
+                || translation.user
+                || !translation.cache.pwt
+                || !translation.cache.pcd
+                || translation.cache.pat
+            {
+                self.uninstall_uncached_mmio_prefix(slot + 1)?;
+                return Err(virtual_memory::Error::BootstrapTranslation);
+            }
+            self.mmio_physical[slot] = Some(physical_address);
+        }
+        self.mmio_guard_pages_verified = 3;
+        Ok((
+            virtual_memory::LOCAL_APIC_MAP_START,
+            virtual_memory::HPET_MAP_START,
+        ))
+    }
+
+    fn uninstall_uncached_mmio_prefix(
+        &mut self,
+        installed: usize,
+    ) -> Result<(), virtual_memory::Error> {
+        let mappings = [
+            (
+                poole_kmap::LOCAL_APIC_PAGE,
+                virtual_memory::LOCAL_APIC_MAP_START,
+            ),
+            (poole_kmap::HPET_PAGE, virtual_memory::HPET_MAP_START),
+        ];
+        for slot in (0..installed).rev() {
+            let (index, virtual_address) = mappings[slot];
+            let leaf = self.indexed_leaf_pointer(index);
+            // SAFETY: this transaction installed and exclusively owns the leaf.
+            unsafe { write_volatile(leaf, 0) };
+            self.temporary_pte_writes += 1;
+            self.mmio_pte_writes += 1;
+            self.invalidate_address(virtual_address);
+            self.mmio_physical[slot] = None;
+        }
+        self.mmio_guard_pages_verified = 0;
+        self.mmio_guards_absent()
+    }
+
+    fn uninstall_uncached_mmio(&mut self) -> Result<(), virtual_memory::Error> {
+        if self.mmio_physical.iter().any(Option::is_none) || self.mmio_guard_pages_verified != 3 {
+            return Err(virtual_memory::Error::BootstrapLeafState);
+        }
+        self.uninstall_uncached_mmio_prefix(2)
     }
 
     fn ensure_mapped(&mut self, physical_address: u64) -> Result<(), virtual_memory::Error> {
@@ -963,6 +1190,17 @@ impl PhysicalPageAccess for BootstrapTableMemory {
         let value = unsafe { read_volatile(pointer) };
         self.reads = self.reads.checked_add(1).ok_or(PageAccessError::Access)?;
         Ok(value)
+    }
+}
+
+impl interrupt_time::PhysicalRead for BootstrapTableMemory {
+    fn read_word(
+        &mut self,
+        page_address: u64,
+        word_index: usize,
+    ) -> Result<u64, interrupt_time::Error> {
+        PhysicalPageAccess::read_word(self, page_address, word_index)
+            .map_err(|_| interrupt_time::Error::PhysicalAccess)
     }
 }
 
@@ -1365,6 +1603,10 @@ impl TableMemory for BootstrapTableMemory {
         if active_ledgers != expected_active_ledgers {
             return Err(virtual_memory::Error::BootstrapLeafState);
         }
+        if self.mmio_physical != [None; 2] || self.mmio_guard_pages_verified != 0 {
+            return Err(virtual_memory::Error::BootstrapLeafState);
+        }
+        self.mmio_guards_absent()?;
         Ok(())
     }
 
@@ -1378,6 +1620,76 @@ impl TableMemory for BootstrapTableMemory {
 
     fn hardware_invalidation_count(&self) -> u64 {
         self.invalidations
+    }
+}
+
+struct LiveInterruptHardware {
+    local_apic_virtual: u64,
+    hpet_virtual: u64,
+}
+
+impl LiveInterruptHardware {
+    const APIC_REGISTER_LIMIT: u64 = 0x400;
+    const HPET_REGISTER_LIMIT: u64 = 0x1000;
+
+    fn apic_read(&self, offset: u64) -> Result<u32, interrupt_time::Error> {
+        if offset >= Self::APIC_REGISTER_LIMIT || !offset.is_multiple_of(16) {
+            return Err(interrupt_time::Error::TableAddress);
+        }
+        let address = self
+            .local_apic_virtual
+            .checked_add(offset)
+            .ok_or(interrupt_time::Error::TableAddress)?;
+        // SAFETY: PKIRQ1 maps exactly one guarded local-APIC page UC and validates offset.
+        Ok(unsafe { read_volatile(address as usize as *const u32) })
+    }
+
+    fn apic_write(&mut self, offset: u64, value: u32) -> Result<(), interrupt_time::Error> {
+        if offset >= Self::APIC_REGISTER_LIMIT || !offset.is_multiple_of(16) {
+            return Err(interrupt_time::Error::TableAddress);
+        }
+        let address = self
+            .local_apic_virtual
+            .checked_add(offset)
+            .ok_or(interrupt_time::Error::TableAddress)?;
+        // SAFETY: PKIRQ1 maps exactly one guarded local-APIC page UC and owns the register.
+        unsafe { write_volatile(address as usize as *mut u32, value) };
+        Ok(())
+    }
+
+    fn hpet_read(&self, offset: u64) -> Result<u64, interrupt_time::Error> {
+        if offset >= Self::HPET_REGISTER_LIMIT || !offset.is_multiple_of(8) {
+            return Err(interrupt_time::Error::TableAddress);
+        }
+        let address = self
+            .hpet_virtual
+            .checked_add(offset)
+            .ok_or(interrupt_time::Error::TableAddress)?;
+        // SAFETY: PKIRQ1 maps exactly one guarded HPET page UC and validates offset.
+        Ok(unsafe { read_volatile(address as usize as *const u64) })
+    }
+
+    fn hpet_write(&mut self, offset: u64, value: u64) -> Result<(), interrupt_time::Error> {
+        if offset >= Self::HPET_REGISTER_LIMIT || !offset.is_multiple_of(8) {
+            return Err(interrupt_time::Error::TableAddress);
+        }
+        let address = self
+            .hpet_virtual
+            .checked_add(offset)
+            .ok_or(interrupt_time::Error::TableAddress)?;
+        // SAFETY: PKIRQ1 maps exactly one guarded HPET page UC and owns configuration only.
+        unsafe { write_volatile(address as usize as *mut u64, value) };
+        Ok(())
+    }
+
+    fn in_service_count(&self) -> Result<u32, interrupt_time::Error> {
+        let mut count = 0u32;
+        for bank in 0..8u64 {
+            count = count
+                .checked_add(self.apic_read(0x100 + bank * 0x10)?.count_ones())
+                .ok_or(interrupt_time::Error::TableShape)?;
+        }
+        Ok(count)
     }
 }
 
@@ -1545,6 +1857,7 @@ extern "C" fn poole_kernel_emergency_panic(code: u32) -> ! {
         0x1010 => PanicCode::PhysicalMemory,
         0x1011 => PanicCode::VirtualMemory,
         0x1012 => PanicCode::ActiveVirtualMemory,
+        0x1013 => PanicCode::InterruptTime,
         _ => PanicCode::UnexpectedReturn,
     };
     let disposition = PANIC_STATE.begin(code);
@@ -1612,6 +1925,14 @@ extern "C" fn poole_kernel_rust_entry(
             ring: &EARLY_RING,
         });
         logger.write_bytes(&PKAVM_EARLY);
+    }
+    if trap_scenario == DevelopmentTrapScenario::InterruptTime {
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        logger.write_bytes(&PKIRQ_EARLY);
     }
 
     if let Err(error) = validate_entry_envelope(handoff_address, handoff_length, magic, stack_top) {
@@ -2546,6 +2867,425 @@ extern "C" fn poole_kernel_rust_entry(
         halt_forever()
     }
 
+    if trap_scenario == DevelopmentTrapScenario::InterruptTime {
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        macro_rules! irq_try {
+            ($operation:expr) => {
+                match $operation {
+                    Ok(value) => value,
+                    Err(error) => {
+                        logger.write_bytes(&PKIRQ_DENIED);
+                        logger.write_str(error.label());
+                        logger.write_bytes(&PKIRQ_DENIED_TAIL);
+                        poole_kernel_emergency_panic(PanicCode::InterruptTime as u32)
+                    }
+                }
+            };
+        }
+        macro_rules! irq_require {
+            ($condition:expr, $error:expr) => {
+                if !$condition {
+                    logger.write_bytes(&PKIRQ_DENIED);
+                    logger.write_str($error.label());
+                    logger.write_bytes(&PKIRQ_DENIED_TAIL);
+                    poole_kernel_emergency_panic(PanicCode::InterruptTime as u32)
+                }
+            };
+        }
+
+        let physical_bits =
+            irq_try!(arch::x86_64::physical_address_bits().ok_or(interrupt_time::Error::ApicBase));
+        let mut page_access = match BootstrapTableMemory::new(observed_cr3, physical_bits) {
+            Ok(value) => value,
+            Err(_) => {
+                logger.write_bytes(&PKIRQ_DENIED);
+                logger.write_str(interrupt_time::Error::PhysicalAccess.label());
+                logger.write_bytes(&PKIRQ_DENIED_TAIL);
+                poole_kernel_emergency_panic(PanicCode::InterruptTime as u32)
+            }
+        };
+        let memory_proof =
+            match run_physical_memory_profile(&decoded, validated.core, &mut page_access) {
+                Ok(value) => value,
+                Err(_) => {
+                    logger.write_bytes(&PKIRQ_DENIED);
+                    logger.write_str(interrupt_time::Error::PhysicalAccess.label());
+                    logger.write_bytes(&PKIRQ_DENIED_TAIL);
+                    poole_kernel_emergency_panic(PanicCode::InterruptTime as u32)
+                }
+            };
+        let acpi = memory_proof.acpi_snapshot;
+        let madt_receipt = acpi.required_tables[0];
+        let hpet_receipt = acpi.required_tables[2];
+        let madt_snapshot = irq_try!(
+            acpi.snapshot_physical_address
+                .checked_add(madt_receipt.snapshot_offset)
+                .ok_or(interrupt_time::Error::TableAddress)
+        );
+        let hpet_snapshot = irq_try!(
+            acpi.snapshot_physical_address
+                .checked_add(hpet_receipt.snapshot_offset)
+                .ok_or(interrupt_time::Error::TableAddress)
+        );
+        let topology = irq_try!(parse_madt(
+            &mut page_access,
+            madt_snapshot,
+            madt_receipt.byte_count,
+        ));
+        let hpet = irq_try!(parse_hpet(
+            &mut page_access,
+            hpet_snapshot,
+            hpet_receipt.byte_count,
+        ));
+        let vectors = irq_try!(VectorLedger::new());
+        irq_require!(
+            vectors.owner(TIMER_VECTOR) == interrupt_time::VectorOwner::Timer
+                && vectors.owner(APIC_ERROR_VECTOR) == interrupt_time::VectorOwner::ApicError
+                && vectors.owner(SPURIOUS_VECTOR) == interrupt_time::VectorOwner::Spurious,
+            interrupt_time::Error::VectorOwned
+        );
+
+        let cpu = arch::x86_64::observe_apic_cpu();
+        irq_require!(cpu.apic_supported, interrupt_time::Error::ApicUnsupported);
+        // SAFETY: CPUID reports APIC and PKIRQ1 is executing at CPL0 with IF clear.
+        let original_apic_base = unsafe { arch::x86_64::read_local_apic_base() };
+        irq_require!(
+            original_apic_base & APIC_BASE_X2APIC == 0,
+            interrupt_time::Error::X2ApicActive
+        );
+        let apic_physical = original_apic_base & interrupt_time::APIC_BASE_ADDRESS_MASK;
+        irq_require!(
+            apic_physical == topology.local_apic_address,
+            interrupt_time::Error::ApicBase
+        );
+        let mut apic_msr_writes = 0u64;
+        let enabled_apic_base = if original_apic_base & APIC_BASE_ENABLE == 0 {
+            let enabled = original_apic_base | APIC_BASE_ENABLE;
+            // SAFETY: this exact write changes only IA32_APIC_BASE.EN on the BSP.
+            unsafe { arch::x86_64::write_local_apic_base(enabled) };
+            apic_msr_writes = 1;
+            // SAFETY: typed readback verifies the exact enable transition.
+            irq_require!(
+                unsafe { arch::x86_64::read_local_apic_base() } == enabled,
+                interrupt_time::Error::ApicBase
+            );
+            enabled
+        } else {
+            original_apic_base
+        };
+
+        let hpet_page = hpet.physical_address & !0xfff;
+        let (apic_virtual, hpet_page_virtual) =
+            match page_access.install_uncached_mmio(apic_physical, hpet_page) {
+                Ok(value) => value,
+                Err(_) => {
+                    logger.write_bytes(&PKIRQ_DENIED);
+                    logger.write_str(interrupt_time::Error::PhysicalAccess.label());
+                    logger.write_bytes(&PKIRQ_DENIED_TAIL);
+                    poole_kernel_emergency_panic(PanicCode::InterruptTime as u32)
+                }
+            };
+        let hpet_virtual = irq_try!(
+            hpet_page_virtual
+                .checked_add(hpet.physical_address & 0xfff)
+                .ok_or(interrupt_time::Error::TableAddress)
+        );
+        let mut hardware = LiveInterruptHardware {
+            local_apic_virtual: apic_virtual,
+            hpet_virtual,
+        };
+
+        let apic_id_register = irq_try!(hardware.apic_read(0x20));
+        let apic_version_register = irq_try!(hardware.apic_read(0x30));
+        let discovery = irq_try!(validate_apic_discovery(
+            &topology,
+            cpu,
+            enabled_apic_base,
+            apic_id_register,
+            apic_version_register,
+        ));
+        irq_require!(discovery.bsp, interrupt_time::Error::ProcessorMissing);
+
+        let original_tpr = irq_try!(hardware.apic_read(0x80));
+        let original_svr = irq_try!(hardware.apic_read(0xf0));
+        let original_lvt_timer = irq_try!(hardware.apic_read(0x320));
+        let original_lvt_thermal = irq_try!(hardware.apic_read(0x330));
+        let original_lvt_performance = irq_try!(hardware.apic_read(0x340));
+        let original_lvt_lint0 = irq_try!(hardware.apic_read(0x350));
+        let original_lvt_lint1 = irq_try!(hardware.apic_read(0x360));
+        let original_lvt_error = irq_try!(hardware.apic_read(0x370));
+        let original_divide = irq_try!(hardware.apic_read(0x3e0));
+        let original_hpet_config = irq_try!(hardware.hpet_read(0x10));
+        irq_require!(
+            hardware.in_service_count() == Ok(0),
+            interrupt_time::Error::TableShape
+        );
+
+        let pic_masks = if topology.pcat_compatible {
+            // SAFETY: ACPI PCAT_COMPAT requires the dual 8259 to be masked before APIC use.
+            match unsafe { arch::x86_64::mask_legacy_pic() } {
+                Ok(value) => Some(value),
+                Err(()) => {
+                    logger.write_bytes(&PKIRQ_DENIED);
+                    logger.write_str(interrupt_time::Error::PhysicalAccess.label());
+                    logger.write_bytes(&PKIRQ_DENIED_TAIL);
+                    poole_kernel_emergency_panic(PanicCode::InterruptTime as u32)
+                }
+            }
+        } else {
+            None
+        };
+
+        irq_try!(hardware.apic_write(0x80, 0));
+        irq_try!(hardware.apic_write(0x320, u32::from(TIMER_VECTOR) | (1 << 16)));
+        irq_try!(hardware.apic_write(0x330, original_lvt_thermal | (1 << 16)));
+        irq_try!(hardware.apic_write(0x340, original_lvt_performance | (1 << 16)));
+        irq_try!(hardware.apic_write(0x350, original_lvt_lint0 | (1 << 16)));
+        irq_try!(hardware.apic_write(0x360, original_lvt_lint1 | (1 << 16)));
+        irq_try!(hardware.apic_write(0x370, u32::from(APIC_ERROR_VECTOR) | (1 << 16)));
+        irq_try!(hardware.apic_write(0x280, 0));
+        let _cleared_esr = irq_try!(hardware.apic_read(0x280));
+        irq_try!(hardware.apic_write(
+            0xf0,
+            (original_svr & !0xff) | u32::from(SPURIOUS_VECTOR) | (1 << 8),
+        ));
+        irq_try!(hardware.apic_write(0x3e0, 0x3));
+
+        let hpet_capabilities = irq_try!(hardware.hpet_read(0));
+        let hpet_period = hpet_capabilities >> 32;
+        irq_require!(
+            (100_000..=100_000_000).contains(&hpet_period),
+            interrupt_time::Error::HpetPeriod
+        );
+        let counter_bits = if hpet_capabilities & (1 << 13) != 0 {
+            64
+        } else {
+            32
+        };
+        irq_require!(
+            hpet.counter_64_bit_capable == (counter_bits == 64),
+            interrupt_time::Error::CounterWidth
+        );
+        if original_hpet_config & 1 == 0 {
+            irq_try!(hardware.hpet_write(0x10, original_hpet_config | 1));
+            irq_require!(
+                irq_try!(hardware.hpet_read(0x10)) & 1 != 0,
+                interrupt_time::Error::HpetRegisterShape
+            );
+        }
+        let counter_mask = if counter_bits == 64 {
+            u64::MAX
+        } else {
+            u64::from(u32::MAX)
+        };
+        let calibration_start = irq_try!(hardware.hpet_read(0xf0)) & counter_mask;
+        irq_try!(hardware.apic_write(0x380, u32::MAX));
+        let target_hpet_ticks = 10_000_000_000_000u64.div_ceil(hpet_period);
+        let mut calibration_end = calibration_start;
+        let mut poll_count = 0u64;
+        while calibration_end.wrapping_sub(calibration_start) & counter_mask < target_hpet_ticks {
+            calibration_end = irq_try!(hardware.hpet_read(0xf0)) & counter_mask;
+            poll_count = irq_try!(
+                poll_count
+                    .checked_add(1)
+                    .ok_or(interrupt_time::Error::CalibrationSample)
+            );
+            irq_require!(
+                poll_count <= 100_000_000,
+                interrupt_time::Error::CalibrationSample
+            );
+            core::hint::spin_loop();
+        }
+        let calibration_current = irq_try!(hardware.apic_read(0x390));
+        irq_try!(hardware.apic_write(0x320, u32::from(TIMER_VECTOR) | (1 << 16)));
+        let elapsed_hpet_ticks = calibration_end.wrapping_sub(calibration_start) & counter_mask;
+        let calibration = irq_try!(calibrate_apic_timer(
+            u32::MAX,
+            calibration_current,
+            elapsed_hpet_ticks,
+            hpet_period,
+        ));
+        let one_shot_count = irq_try!(timer_initial_count(
+            calibration.apic_ticks_per_second,
+            10_000_000,
+        ));
+
+        let descriptor_state = unsafe {
+            // SAFETY: PKIRQ1 owns the one-BSP descriptor installation while IF is clear.
+            arch::x86_64::install_interrupt_descriptor_tables(stack_top as u64)
+        };
+        irq_require!(
+            validate_interrupt_descriptor_state(&descriptor_state).is_ok(),
+            interrupt_time::Error::TableShape
+        );
+        IST1_BOTTOM.store(descriptor_state.ist1_bottom, Ordering::Release);
+        IST1_TOP.store(descriptor_state.ist1_top, Ordering::Release);
+        IST2_BOTTOM.store(descriptor_state.ist2_bottom, Ordering::Release);
+        IST2_TOP.store(descriptor_state.ist2_top, Ordering::Release);
+        IRQ_TIMER_DELIVERIES.store(0, Ordering::Release);
+        IRQ_EOI_COUNT.store(0, Ordering::Release);
+        IRQ_ERROR_COUNT.store(0, Ordering::Release);
+        IRQ_SPURIOUS_COUNT.store(0, Ordering::Release);
+        IRQ_APIC_VIRTUAL.store(apic_virtual, Ordering::Release);
+
+        irq_try!(hardware.apic_write(0x370, u32::from(APIC_ERROR_VECTOR)));
+        let monotonic_start = irq_try!(hardware.hpet_read(0xf0)) & counter_mask;
+        let max_sample_delta = core::cmp::min(
+            counter_mask / 2,
+            5_000_000_000_000_000u64.div_ceil(hpet_period),
+        );
+        let mut clock = irq_try!(HpetClock::new(
+            counter_bits,
+            hpet_period,
+            monotonic_start,
+            max_sample_delta,
+        ));
+        for expected in 1..=8u32 {
+            irq_try!(hardware.apic_write(0x320, u32::from(TIMER_VECTOR)));
+            irq_try!(hardware.apic_write(0x380, one_shot_count));
+            // SAFETY: IDT, UC APIC mapping, vector ownership, and one-shot timer are live.
+            unsafe { arch::x86_64::enable_interrupts_halt_disable() };
+            irq_try!(hardware.apic_write(0x320, u32::from(TIMER_VECTOR) | (1 << 16)));
+            irq_require!(
+                IRQ_TIMER_DELIVERIES.load(Ordering::Acquire) == expected,
+                interrupt_time::Error::TimerCount
+            );
+        }
+        let monotonic_end = irq_try!(hardware.hpet_read(0xf0)) & counter_mask;
+        let monotonic_nanoseconds = irq_try!(clock.sample(monotonic_end));
+        let timer_deliveries = IRQ_TIMER_DELIVERIES.load(Ordering::Acquire);
+        let eoi_count = IRQ_EOI_COUNT.load(Ordering::Acquire);
+        let error_count = IRQ_ERROR_COUNT.load(Ordering::Acquire);
+        let spurious_count = IRQ_SPURIOUS_COUNT.load(Ordering::Acquire);
+        let in_service_after = irq_try!(hardware.in_service_count());
+        irq_require!(
+            timer_deliveries == 8
+                && eoi_count == timer_deliveries
+                && error_count == 0
+                && spurious_count == 0
+                && in_service_after == 0
+                && TRAP_DEPTH.load(Ordering::Acquire) == 0,
+            interrupt_time::Error::TimerCount
+        );
+
+        irq_try!(hardware.apic_write(0x320, original_lvt_timer));
+        irq_try!(hardware.apic_write(0x370, original_lvt_error));
+        irq_try!(hardware.apic_write(0x330, original_lvt_thermal));
+        irq_try!(hardware.apic_write(0x340, original_lvt_performance));
+        irq_try!(hardware.apic_write(0x350, original_lvt_lint0));
+        irq_try!(hardware.apic_write(0x360, original_lvt_lint1));
+        irq_try!(hardware.apic_write(0x3e0, original_divide));
+        irq_try!(hardware.apic_write(0x80, original_tpr));
+        irq_try!(hardware.apic_write(0xf0, original_svr));
+        if irq_try!(hardware.hpet_read(0x10)) != original_hpet_config {
+            irq_try!(hardware.hpet_write(0x10, original_hpet_config));
+        }
+        IRQ_APIC_VIRTUAL.store(0, Ordering::Release);
+        if let Some(masks) = pic_masks {
+            // SAFETY: IF remains clear and PKIRQ1 restores the exact observed masks.
+            if unsafe { arch::x86_64::restore_legacy_pic(masks) }.is_err() {
+                logger.write_bytes(&PKIRQ_DENIED);
+                logger.write_str(interrupt_time::Error::PhysicalAccess.label());
+                logger.write_bytes(&PKIRQ_DENIED_TAIL);
+                poole_kernel_emergency_panic(PanicCode::InterruptTime as u32)
+            }
+        }
+        if apic_msr_writes != 0 {
+            // SAFETY: all APIC interrupt sources are masked and IF is clear before rollback.
+            unsafe { arch::x86_64::write_local_apic_base(original_apic_base) };
+            // SAFETY: typed readback verifies exact IA32_APIC_BASE restoration.
+            irq_require!(
+                unsafe { arch::x86_64::read_local_apic_base() } == original_apic_base,
+                interrupt_time::Error::ApicBase
+            );
+            apic_msr_writes += 1;
+        }
+        if page_access.uninstall_uncached_mmio().is_err()
+            || TableMemory::finish(&mut page_access).is_err()
+        {
+            logger.write_bytes(&PKIRQ_DENIED);
+            logger.write_str(interrupt_time::Error::PhysicalAccess.label());
+            logger.write_bytes(&PKIRQ_DENIED_TAIL);
+            poole_kernel_emergency_panic(PanicCode::InterruptTime as u32)
+        }
+
+        logger.write_bytes(&PKIRQ_ACPI);
+        logger.write_decimal_u64(madt_receipt.byte_count);
+        logger.write_bytes(&PKIRQ_PROCESSORS);
+        logger.write_decimal_u64(topology.processor_count as u64);
+        logger.write_bytes(&PKIRQ_ENABLED);
+        logger.write_decimal_u64(topology.enabled_processor_count as u64);
+        logger.write_bytes(&PKIRQ_IOAPICS);
+        logger.write_decimal_u64(topology.io_apic_count as u64);
+        logger.write_bytes(&PKIRQ_OVERRIDES);
+        logger.write_decimal_u64(topology.override_count as u64);
+        logger.write_bytes(&PKIRQ_NMI_SOURCES);
+        logger.write_decimal_u64(topology.nmi_source_count as u64);
+        logger.write_bytes(&PKIRQ_LOCAL_NMIS);
+        logger.write_decimal_u64(topology.local_nmi_count as u64);
+        logger.write_bytes(&PKIRQ_UNKNOWN);
+        logger.write_decimal_u64(topology.unknown_structure_count as u64);
+        logger.write_bytes(&PKIRQ_PCAT);
+        logger.write_decimal_u64(u64::from(topology.pcat_compatible));
+        logger.write_bytes(&PKIRQ_APIC_PHYSICAL);
+        logger.write_hex_u64(apic_physical);
+        logger.write_bytes(&PKIRQ_HPET_PHYSICAL);
+        logger.write_hex_u64(hpet.physical_address);
+        logger.write_bytes(&PKIRQ_ACPI_TAIL);
+        logger.write_bytes(&PKIRQ_APIC);
+        logger.write_decimal_u64(u64::from(discovery.apic_id));
+        logger.write_bytes(&PKIRQ_VERSION);
+        logger.write_decimal_u64(u64::from(discovery.version));
+        logger.write_bytes(&PKIRQ_MAX_LVT);
+        logger.write_decimal_u64(u64::from(discovery.max_lvt_entry));
+        logger.write_bytes(&PKIRQ_GLOBAL);
+        logger.write_decimal_u64(u64::from(discovery.globally_enabled));
+        logger.write_bytes(&PKIRQ_MSR_WRITES);
+        logger.write_decimal_u64(apic_msr_writes);
+        logger.write_bytes(&PKIRQ_SVR);
+        logger.write_decimal_u64(u64::from(topology.pcat_compatible));
+        logger.write_bytes(&PKIRQ_MMIO);
+        logger.write_bytes(&PKIRQ_VECTOR);
+        logger.write_decimal_u64(u64::from(vectors.owned_count()));
+        logger.write_bytes(&PKIRQ_TIMER_VECTOR);
+        logger.write_bytes(&PKIRQ_CLOCK);
+        logger.write_decimal_u64(u64::from(counter_bits));
+        logger.write_bytes(&PKIRQ_PERIOD);
+        logger.write_decimal_u64(hpet_period);
+        logger.write_bytes(&PKIRQ_HPET_TICKS);
+        logger.write_decimal_u64(calibration.hpet_ticks);
+        logger.write_bytes(&PKIRQ_SAMPLE_NS);
+        logger.write_decimal_u64(calibration.sample_nanoseconds);
+        logger.write_bytes(&PKIRQ_APIC_TICKS);
+        logger.write_decimal_u64(calibration.elapsed_apic_ticks);
+        logger.write_bytes(&PKIRQ_FREQUENCY);
+        logger.write_decimal_u64(calibration.apic_ticks_per_second);
+        logger.write_bytes(&PKIRQ_INITIAL);
+        logger.write_decimal_u64(u64::from(one_shot_count));
+        logger.write_bytes(&PKIRQ_MONOTONIC_NS);
+        logger.write_decimal_u64(monotonic_nanoseconds);
+        logger.write_bytes(&PKIRQ_CLOCK_TAIL);
+        logger.write_bytes(&PKIRQ_DELIVERY);
+        logger.write_decimal_u64(u64::from(timer_deliveries));
+        logger.write_bytes(&PKIRQ_EOIS);
+        logger.write_decimal_u64(u64::from(eoi_count));
+        logger.write_bytes(&PKIRQ_ERRORS);
+        logger.write_decimal_u64(u64::from(error_count));
+        logger.write_bytes(&PKIRQ_SPURIOUS);
+        logger.write_decimal_u64(u64::from(spurious_count));
+        logger.write_bytes(&PKIRQ_ISR);
+        logger.write_decimal_u64(u64::from(in_service_after));
+        logger.write_bytes(&PKIRQ_DELIVERY_TAIL);
+        logger.write_bytes(&PKIRQ_RESULT);
+        logger.write_decimal_u64(u64::from(timer_deliveries));
+        logger.write_bytes(&PKIRQ_RESULT_TAIL);
+        halt_forever()
+    }
+
     if trap_scenario == DevelopmentTrapScenario::XstatePolicy {
         // SAFETY: PKXFER1 transferred exactly once at CPL0 with IF/DF clear. The opt-in
         // PKXSTATE1 profile owns the BSP's x87/SSE state and its private aligned images.
@@ -2887,7 +3627,59 @@ extern "C" fn poole_kernel_rust_entry(
         DevelopmentTrapScenario::ActiveVirtualMemory => {
             poole_kernel_emergency_panic(PanicCode::ActiveVirtualMemory as u32)
         }
+        DevelopmentTrapScenario::InterruptTime => {
+            poole_kernel_emergency_panic(PanicCode::InterruptTime as u32)
+        }
     }
+}
+
+fn dispatch_interrupt_time(frame: &TrapFrame, depth: u32) {
+    let ist_bottom = IST1_BOTTOM.load(Ordering::Acquire);
+    let ist_top = IST1_TOP.load(Ordering::Acquire);
+    let handler_rsp = frame as *const TrapFrame as u64;
+    if depth != 1
+        || frame.error_code != 0
+        || frame.code_selector != u64::from(poolekernel::KERNEL_CODE_SELECTOR)
+        || frame.data_selector != u64::from(poolekernel::KERNEL_DATA_SELECTOR)
+        || frame.rflags & (1 << 1) == 0
+        || frame.rflags & (1 << 9) == 0
+        || frame.rflags & ((1 << 14) | (1 << 17)) != 0
+        || handler_rsp < ist_bottom
+        || handler_rsp
+            .checked_add(core::mem::size_of::<TrapFrame>() as u64)
+            .is_none_or(|end| end > ist_top)
+    {
+        poole_kernel_emergency_panic(PanicCode::InterruptTime as u32);
+    }
+    let apic = IRQ_APIC_VIRTUAL.load(Ordering::Acquire);
+    if apic == 0 {
+        poole_kernel_emergency_panic(PanicCode::InterruptTime as u32);
+    }
+    let increment = |counter: &AtomicU32| {
+        let previous = counter.fetch_add(1, Ordering::AcqRel);
+        if previous == u32::MAX {
+            poole_kernel_emergency_panic(PanicCode::InterruptTime as u32);
+        }
+    };
+    match frame.vector {
+        vector if vector == u64::from(TIMER_VECTOR) => {
+            increment(&IRQ_TIMER_DELIVERIES);
+            // SAFETY: PKIRQ1 keeps the guarded UC local-APIC mapping live until IF closes.
+            unsafe { write_volatile((apic + 0xb0) as usize as *mut u32, 0) };
+            increment(&IRQ_EOI_COUNT);
+        }
+        vector if vector == u64::from(APIC_ERROR_VECTOR) => {
+            increment(&IRQ_ERROR_COUNT);
+            // SAFETY: local APIC errors enter the in-service state and require EOI.
+            unsafe { write_volatile((apic + 0xb0) as usize as *mut u32, 0) };
+            increment(&IRQ_EOI_COUNT);
+        }
+        vector if vector == u64::from(SPURIOUS_VECTOR) => {
+            increment(&IRQ_SPURIOUS_COUNT);
+        }
+        _ => poole_kernel_emergency_panic(PanicCode::InterruptTime as u32),
+    }
+    TRAP_DEPTH.store(0, Ordering::Release);
 }
 
 #[unsafe(no_mangle)]
@@ -2905,6 +3697,10 @@ extern "C" fn poole_kernel_trap_dispatch(frame_pointer: *mut TrapFrame) {
         .unwrap_or_else(|| poole_kernel_emergency_panic(PanicCode::TrapContract as u32));
     if scenario == DevelopmentTrapScenario::XstateException {
         dispatch_xstate_exception(frame, depth);
+        return;
+    }
+    if scenario == DevelopmentTrapScenario::InterruptTime {
+        dispatch_interrupt_time(frame, depth);
         return;
     }
     let (fault_rip, resume_rip, expected_cr2, ist_bottom, ist_top, terminal) =

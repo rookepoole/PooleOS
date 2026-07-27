@@ -110,15 +110,15 @@ def contract_errors(contract: Any) -> list[str]:
         "format_contract": "PKELF1",
         "handoff_contract": "PBP1",
         "entry_offset": 0x9000,
-        "image_memory_bytes": 0x53000,
-        "canonical_file_bytes": 0x49000,
+        "image_memory_bytes": 0x59000,
+        "canonical_file_bytes": 0x4F000,
         "maximum_relocations": 4096,
         "segment_boundaries": {
             "read_only_end": 0x9000,
             "text_start": 0x9000,
-            "text_end": 0x41000,
-            "relro_end": 0x49000,
-            "image_end": 0x53000,
+            "text_end": 0x46000,
+            "relro_end": 0x4F000,
+            "image_end": 0x59000,
         },
     }
     for key, value in expected_product.items():
@@ -166,7 +166,7 @@ def readiness_errors(readiness: Any, root: Path = ROOT) -> list[str]:
     ):
         if not isinstance(summary.get(total), int) or summary.get(passed) != summary.get(total):
             errors.append(f"readiness summary mismatch: {passed}")
-    if summary.get("rust_host_tests_total") != 91:
+    if summary.get("rust_host_tests_total") != 99:
         errors.append("readiness host-test count mismatch")
     if summary.get("clean_builds_total") != 2:
         errors.append("readiness clean-build count mismatch")

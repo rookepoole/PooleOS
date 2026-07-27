@@ -45,7 +45,7 @@ Every segment and symbol address is an offset from the loaded image base. The bu
 - Preferred base: `0xFFFFFFFF80000000`
 - Window end, exclusive: `0xFFFFFFFFC0000000`
 - Slide alignment: 2 MiB
-- Current image bytes: `0x53000`
+- Current image bytes: `0x59000`
 - Current entry offset: `0x9000`
 
 Lookup rejects noncanonical x86-64 addresses, unaligned bases, bases outside the window, and addresses outside the image. A hit returns symbol ID, name, intra-symbol offset, and search-step count. A valid gap returns `unknown`; it never falls back to the preceding symbol.
@@ -56,11 +56,11 @@ The canonical development bundle binds these exact SHA-256 identities:
 
 | Identity | SHA-256 |
 | --- | --- |
-| Canonical stripped PKELF1 | `5B581CC1D1ABEB163D0984D12144CA5016C44B46A28B190A6DFCBDCDA689A255` |
-| Preferred loaded image | `4ABA7EEDEE0A5AE32F5DD4B566B4604CBA220BEE6B1B4CB5951F86CB79F54154` |
-| Build ID text | `69EB1D532BBF450B45684DA78172F9DD8C8D004196FE5C1D43C9214123F2DE7A` |
-| Full split-debug ELF | `A61D6EFAF926F56C48338E1B4C2529845E7372773E80F26A76BEA996A4B9BD00` |
-| `native/kernel/manifest.pkm` | `4588E4AB013E4B37D4832B582B429DB8DDB2428A4615275C77E487B4E3FB1B05` |
+| Canonical stripped PKELF1 | `2ACD4A5EF30CA1A4A22711FD31E2A259A5C87D97BCE7FB1BF49A3488B3FC02B2` |
+| Preferred loaded image | `0E36F523BE29337E5CA607D94E8DB58313194032B4FCAA8C30235FA58C3C7F7F` |
+| Build ID text | `56C91D31FC283E35218E5A4BA3C6BB29A68497E7A72A36036A20CF4699810689` |
+| Full split-debug ELF | `58F2AC2FC538D3AFFA2C83CA3ADA2E8D58B3ADD4F08771F6A6522C58ACE35C49` |
+| `native/kernel/manifest.pkm` | `A3454D62C453F6D27CD0CCDC8493139C6387575CA033220A4F69A09DAB024E9B` |
 
 The qualification builds the full debug product twice and requires identical bytes. Both debug builds canonicalize to the exact stripped PKELF1 bytes. A separate release build must have no `.symtab` and no `.debug*` sections and must canonicalize to those same bytes.
 
@@ -73,8 +73,8 @@ Only these real global default-visible functions are selected today:
 | Symbol | Offset | Bytes | Policy |
 | --- | ---: | ---: | --- |
 | `poole_kernel_entry` | `0x9000` | 71 | entry, executable, public diagnostic |
-| `poole_kernel_emergency_panic` | `0x15B42` | 198 | panic-safe, executable, public diagnostic |
-| `poole_kernel_rust_entry` | `0x15C08` | 30,635 | executable, public diagnostic |
+| `poole_kernel_emergency_panic` | `0x17AEB` | 198 | panic-safe, executable, public diagnostic |
+| `poole_kernel_rust_entry` | `0x17BB1` | 35,754 | executable, public diagnostic |
 
 ## Name And Privacy Policy
 

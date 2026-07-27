@@ -165,6 +165,7 @@ def _build_and_test(
         "development-physical-memory",
         "development-virtual-memory",
         "development-active-virtual-memory",
+        "development-interrupt-time",
     }
     if development_feature is not None and development_feature not in allowed_features:
         raise QualificationError("unknown PooleBoot development feature")

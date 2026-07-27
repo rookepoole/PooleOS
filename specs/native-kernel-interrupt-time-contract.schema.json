@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-kernel-interrupt-time-contract.schema.json",
+  "title": "PooleOS PKIRQ1 contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "artifact_kind", "contract_id", "selected_move_id", "status_date",
+    "status", "production_ready", "production_promotion_allowed", "phase_mapping",
+    "development_profile", "firmware_discovery", "interrupt_controller", "vector_ownership",
+    "mmio_policy", "timekeeping", "transaction_and_restore", "qualification",
+    "source_register", "required_negative_controls", "claims", "non_claims"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_interrupt_time_contract"},
+    "contract_id": {"const": "PKIRQ1"},
+    "selected_move_id": {"const": "N8-IRQ-001"},
+    "status_date": {"const": "2026-07-26"},
+    "status": {"const": "frozen_bounded_one_bsp_local_apic_hpet_interrupt_substrate_non_promoting"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "phase_mapping": {"const": ["N8.1", "N8.3"]},
+    "development_profile": {
+      "type": "object",
+      "required": ["feature", "selector", "machine", "cpu_model", "acceleration", "bsp_count", "application_processors_started", "emulator_only"],
+      "properties": {
+        "feature": {"const": "development-interrupt-time"},
+        "selector": {"const": 11},
+        "machine": {"const": "pc-q35-11.0"},
+        "cpu_model": {"const": "qemu64"},
+        "acceleration": {"const": "tcg_single_thread"},
+        "bsp_count": {"const": 1},
+        "application_processors_started": {"const": 0},
+        "emulator_only": {"const": true}
+      }
+    },
+    "firmware_discovery": {"type": "object"},
+    "interrupt_controller": {"type": "object"},
+    "vector_ownership": {"type": "object"},
+    "mmio_policy": {"type": "object"},
+    "timekeeping": {"type": "object"},
+    "transaction_and_restore": {"type": "object"},
+    "qualification": {
+      "type": "object",
+      "required": ["qemu_run_count", "negative_control_count"],
+      "properties": {
+        "qemu_run_count": {"const": 2},
+        "negative_control_count": {"const": 58}
+      }
+    },
+    "source_register": {"type": "array", "minItems": 3, "items": {"type": "object"}},
+    "required_negative_controls": {"type": "array", "minItems": 58, "maxItems": 58, "uniqueItems": true, "items": {"type": "string"}},
+    "claims": {"type": "object", "minProperties": 19, "additionalProperties": {"type": "boolean"}},
+    "non_claims": {"type": "array", "minItems": 8, "items": {"type": "string"}}
+  }
+}

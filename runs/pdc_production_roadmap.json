@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_kind": "pdc_production_roadmap",
-  "status_date": "2026-07-26",
+  "status_date": "2026-07-24",
   "objective": "Deliver production-ready native PooleOS as an original PooleBoot plus PooleKernel microkernel system and reproducible signed UEFI bootable ISO while developing PooleGlyph machine language in tandem through independently verified source, Core IR, PGB2, PGVM2, host-ABI, policy, compatibility, and IP-boundary gates, alongside canonical PDC, isolated drivers, guarded backends, and accessible PooleGlass Liquid Glass UI.",
   "production_ready": false,
   "architecture": {
@@ -43,10 +43,10 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 134,
-    "selected_move_id": "N9-VM-DIRECT-MAP-001",
+    "last_updated_cycle": 135,
+    "selected_move_id": "N8-IRQ-001",
     "immediate_next_move_id": "N0-HW-KEY-ACQUIRE-001",
-    "owner_independent_next_move_id": "N8-IRQ-001",
+    "owner_independent_next_move_id": "N8-SMP-FIRST-AP-001",
     "required_records": [
       "docs/production-goal-charter.md",
       "docs/pdc-production-build-plan.md",
@@ -108,14 +108,14 @@
     "implementation_item_count": 8996,
     "section_count": 171,
     "coverage_path": "runs/pooleos_native_checklist_coverage.json",
-    "coverage_sha256": "A1594265A178A9A5F00D4843AC7788CCE7649B53E64DBF0351A44585FFF15454",
+    "coverage_sha256": "DAB76A153B9B0BC86CB556D7966E5713295435B79F12846525BF5C68D82FADB5",
     "coverage_status": "pass",
     "added_requirement_count": 47
   },
   "baseline": {
-    "pooleos_cycle": 134,
+    "pooleos_cycle": 135,
     "entry_cycle": 79,
-    "pooleos_test_count": 788,
+    "pooleos_test_count": 796,
     "historical_consistency_release_gate": {
       "passed_checks": 58,
       "total_checks": 58,
@@ -125,9 +125,9 @@
       "native_promotion_role": "historical_non_promoting"
     },
     "native_consistency_release_gate": {
-      "passed_checks": 93,
-      "total_checks": 93,
-      "artifact_count": 88,
+      "passed_checks": 94,
+      "total_checks": 94,
+      "artifact_count": 89,
       "explicit_gap_count": 20,
       "production_ready": false,
       "native_promotion_role": "planning_and_evidence_consistency_non_promoting"
@@ -308,9 +308,9 @@
   "phase_summary": {
     "total": 40,
     "complete": 0,
-    "partial": 16,
+    "partial": 17,
     "blocked": 1,
-    "not_started": 23,
+    "not_started": 22,
     "subphase_total": 301
   },
   "phases": [
@@ -781,7 +781,7 @@
         "native/bootload, native/inner, native/trust, native/boot/src/kload.rs, native/boot/src/kmap.rs, native/boot/src/exit.rs, native/bootexit, runtime/native_inner_live.py, runtime/native_boot_trust.py, and runtime/native_kernel_load.py: dependency-free contracts, reviewed raw UEFI adapters, and independent retained-set/trust/media/map/exit oracle implementation",
         "specs/native-kernel-map-contract.json, native/kmap, runtime/native_kernel_map.py, and docs/native-kernel-map.md: PKMAP2 exact 64-page 4 KiB supervisor kernel mapping, guarded stack, read-only handoff, W^X/WP/NX, active-root audit, framebuffer preservation, ten-role retained allocation coverage, and nonclaim contract",
         "specs/native-boot-exit-contract.json, native/bootexit, runtime/native_boot_exit.py, and docs/native-boot-exit.md: PBEXIT1 final-map, current-key, bounded stale-key retry, no-post-attempt-service, no-post-exit-firmware, and permanent pre-transfer-stop contract",
-        "runs/native_kernel_load_readiness.json: 151/151 Rust host tests, 2/2 exact PooleBoot builds, 2/2 exact PooleKernel builds, 2/2 exact twelve-file media generations, 2/2 QEMU/OVMF runs, 25 ordered markers, 155/155 integrated hostile controls, exact retained PINIT1, PREC1, PSYM1, PMCU1, PFWM1, and PPOL1 parsing with payload/route cross-binding and mandatory development denial, exact retained PSM1/PBTP1/PBTS1 parsing with fourteen trust cross-bindings and unsigned-policy denial, two exact post-exit PBLIVE4 PBP1 reconstructions, exact 83-page kernel plus nine retained files/table/32-page guarded-stack/handoff/firmware-record agreement, successful ExitBootServices, zero later firmware calls, and exact guest/oracle agreement",
+        "runs/native_kernel_load_readiness.json: 184/184 aggregate Rust host tests, 2/2 exact PooleBoot builds, 2/2 exact PooleKernel builds, 2/2 exact twelve-file media generations, 2/2 QEMU/OVMF runs, 25 ordered markers, 155/155 integrated hostile controls, exact retained PINIT1, PREC1, PSYM1, PMCU1, PFWM1, and PPOL1 parsing with payload/route cross-binding and mandatory development denial, exact retained PSM1/PBTP1/PBTS1 parsing with fourteen trust cross-bindings and unsigned-policy denial, two exact post-exit PBLIVE4 PBP1 reconstructions, exact 89-page kernel plus nine retained files/table/32-page guarded-stack/handoff/firmware-record agreement, successful ExitBootServices, zero later firmware calls, and exact guest/oracle agreement",
         "specs/native-kernel-revalidation-contract.json and docs/native-kernel-revalidation.md: PKREVAL1 freezes independent allocation-free no_std PooleKernel reparsing of exact retained PSM1, six PBART1 inner files, PBTP1, and PBTS1 bytes before authority, with exact role/order/range/digest/binding/denial requirements and standalone-execution nonclaims",
         "native/kernel/src/revalidation.rs, native/kernel/src/bin/pkreval1_probe.rs, runtime/native_kernel_revalidation.py, and tests/test_native_kernel_revalidation.py: independent kernel-side verifier, host probe, Python oracle, loader-summary substitution controls, post-load mutation controls, and deterministic role-complete differential campaign",
         "runs/native-kernel-revalidation-readiness.json: 70/70 Rust tests, 8/8 Python tests, both no_std target builds, nine exact retained files and parsers, 36/36 hostile controls, 32,768/32,768 deterministic mutation rejects, exact unsigned-policy denial, zero authority grants/actions/state writes, and no standalone live-entry claim",
@@ -855,13 +855,13 @@
         "specs/native-kernel-entry-contract.json and docs/native-kernel-entry.md: PKENTRY1 transfer, mapping, diagnostic, panic, build, and explicit nonclaim boundary",
         "native/kernel: real freestanding PooleKernel product with fixed entry assembly, allocation-free PBP1 intake and PKREVAL1 retained-byte verifier, static early ring, bounded COM1 candidate, optional volatile framebuffer sink, and terminal panic path",
         "runtime/native_kernel_image.py: fail-closed pinned-LLD input validation and deterministic PKELF1 canonicalization",
-        "runs/native_kernel_entry_readiness.json: 91/91 host tests, 2/2 exact clean linked and canonical builds, 43/43 hostile controls, 729 relative relocations, exact independent Rust/Python loaded bytes, and a current bound canonical SHA-256",
+        "runs/native_kernel_entry_readiness.json: 99/99 host tests, 2/2 exact clean linked and canonical builds, 43/43 hostile controls, 812 relative relocations, exact independent Rust/Python loaded bytes, and canonical SHA-256 2ACD4A5EF30CA1A4A22711FD31E2A259A5C87D97BCE7FB1BF49A3488B3FC02B2",
         "specs/native-boot-digest-provider.json: PBDIGEST1 pins vendored RustCrypto sha2 0.11.0, the soft-compact UEFI backend, locked transitive packages, and reproducible /pooleos/native source-path remapping while retaining independent security review and provider promotion as open",
         "ADD-BOOT-003: boot-time digest-provider pinning, reproducible path remapping, qualification, independent review, and target-backend promotion boundary",
         "ADD-KERNEL-001: explicit temporary framebuffer identity mapping, cache-policy preservation, lifetime, replacement, and revocation dependency"
       ],
       "current_gaps": [
-        "A reproducible real 83-page PooleKernel PKELF1 image, PKENTRY1 intake, allocation-free PKREVAL1 verifier, bounded diagnostics, an opt-in QEMU-only live transfer, and BSP-only descriptor/exception, CPU, xstate, MSR, physical-memory, ACPI-container, and virtual-memory development profiles now exist on one host; authenticated boot trust, measured boot, production transfer, final framebuffer remap/revocation, complete per-CPU runtime state, retained crash paths, target execution, and N6 exit remain open"
+        "A reproducible real 89-page PooleKernel PKELF1 image, PKENTRY1 intake, allocation-free PKREVAL1 verifier, bounded diagnostics, an opt-in QEMU-only live transfer, and BSP-only descriptor/exception, CPU, xstate, MSR, physical-memory, ACPI-container, virtual-memory, and interrupt/time development profiles now exist on one host; authenticated boot trust, measured boot, production transfer, final framebuffer remap/revocation, complete per-CPU runtime state, retained crash paths, target execution, and N6 exit remain open"
       ],
       "exit_gate": "every accepted boot is signature/digest/version bound; revocation and malformed signatures fail closed into recovery; deliberate failures at every early stage yield retained serial evidence without silent reset loops."
     },
@@ -929,7 +929,7 @@
         "specs/native-kernel-xstate-exception-contract.json and docs/native-kernel-xstate-exception.md: PKXEXC1 freezes deliberate #MF/#XM delivery and exact recovery plus terminal test-only #NM eager-policy rejection under a hardware-accelerated one-BSP development boundary",
         "runs/native-kernel-xstate-exception-readiness.json: two exact fresh-vars WHPX QEMU/OVMF runs, one expected TCG limitation probe, 41 markers, 43/43 hostile controls, three processor-delivered exceptions, two exact recoveries, one terminal #NM rejection, linked machine-code scope audit, four bounded configuration writes, two recovery writes, zero authority, and explicit scheduler/SMP/target nonclaims",
         "specs/native-kernel-privilege-msr-policy-contract.json and docs/native-kernel-privilege-msr-policy.md: PKMSR1 freezes a read-only qemu64 BSP policy for system-linkage, FS/GS, support-gated TSC_AUX, global machine-check, and unsupported-PMU state without activation",
-        "runs/native-kernel-privilege-msr-policy-readiness.json: two exact fresh-vars TCG QEMU/OVMF runs, 35 markers, 47/47 hostile controls, 11 support-gated MSR reads, ten observed MCA banks, zero bank reads, zero writes, linked no-WRMSR audit, zero authority, and explicit emulator/target/production nonclaims"
+        "runs/native-kernel-privilege-msr-policy-readiness.json: two exact fresh-vars TCG QEMU/OVMF runs, 35 markers, 47/47 hostile controls, 11 support-gated MSR reads, ten observed MCA banks, zero bank reads, zero runtime writes, and a linked-image scope audit isolating both WRMSR sites to the separately selected PKIRQ1 branch with zero authority and explicit emulator/target/production nonclaims"
       ],
       "current_gaps": [
         "PKTRAP1 proves only one BSP descriptor/fault slice, PKCPU1 proves only a bounded qemu64 BSP read-only CPU snapshot, and PKERR1 freezes an exact-target rejection policy that correctly denies six current gaps. PKXSTATE1 proves bounded eager x87/SSE standard-XSAVE ownership and clearing; PKXEXC1 adds deliberate #MF/#XM delivery and exact bounded recovery, terminal test-only #NM eager-policy rejection, and a linked machine-code scope audit under WHPX on one BSP. PKMSR1 adds a read-only qemu64 BSP system-linkage/FS-GS/global-MCA/unsupported-PMU policy with eleven support-gated reads and zero activation. Exact board revision, stable firmware-image hash, an applicable AMD Family 1Ah Models 40h-4Fh errata guide or reviewed vendor-response disposition, a direct numeric client microcode floor or ratified replacement rule, native per-processor privileged revision evidence, target-specific privileged-MSR semantics, syscall and per-CPU activation transactions, machine-check delivery and recovery, supported PMU ownership, AVX and extended xstate, user-task exception delivery, scheduler integration, AP-local CPU state, CPU migration, complete descriptor/fault handling, target qualification, and the N7 exit gate remain open"
@@ -939,11 +939,11 @@
     {
       "id": "N8",
       "title": "Interrupts, Time, SMP, and CPU Lifecycle",
-      "status": "not_started",
+      "status": "partial",
       "subphases": [
         {
           "id": "N8.1",
-          "status": "not_started",
+          "status": "partial",
           "description": "Mask legacy PIC; initialize local APIC/x2APIC; parse MADT and overrides; configure I/O APIC; allocate vectors; handle spurious/error interrupts."
         },
         {
@@ -953,7 +953,7 @@
         },
         {
           "id": "N8.3",
-          "status": "not_started",
+          "status": "partial",
           "description": "Calibrate invariant TSC against HPET/PM timer as applicable; implement clocksource watchdog, timer queues, TSC deadline, and monotonic nanosecond APIs."
         },
         {
@@ -989,9 +989,13 @@
       "added_requirement_ids": [
         "ADD-TIME-001"
       ],
-      "current_evidence": [],
+      "current_evidence": [
+        "specs/native-kernel-interrupt-time-contract.json and docs/native-kernel-interrupt-time.md: PKIRQ1 freezes a bounded one-BSP qemu64 xAPIC/HPET transaction, complete retained MADT/HPET parsing, vector ownership, guarded uncacheable MMIO, exact local timer delivery and EOI accounting, normal-path rollback, and explicit no-AP/no-IPI/no-target/nonproduction boundaries",
+        "native/kernel/src/interrupt_time.rs, native/kernel/src/arch/x86_64.rs, and native/kernel/src/main.rs: allocation-free MADT/HPET parsing and checked clock arithmetic, typed APIC/PIC/IDT/MSR operations, selector-11 controller transaction, eight interrupt windows, and exact controller/clock/PIC/MSR/MMIO restoration",
+        "runs/native-kernel-interrupt-time-readiness.json: 99/99 kernel host tests, two exact fresh-vars qemu64 QEMU/OVMF runs, 36 ordered markers, 58/58 hostile controls, eight timer deliveries, eight EOIs, zero APIC-error or spurious deliveries, three absent MMIO guards, exact LAPIC/HPET mapping revocation, zero AP starts, and zero signatures, authority, actions, or production claims"
+      ],
       "current_gaps": [
-        "No native APIC/timer/SMP implementation exists"
+        "PKIRQ1 proves a bounded one-BSP qemu64 local xAPIC and HPET substrate with retained-table discovery, guarded uncacheable mappings, vector ownership, calibrated one-shot timer delivery, exact EOI accounting, legacy-PIC masking, and normal-path rollback. I/O APIC routing, MSI/MSI-X, invariant-TSC calibration, watchdog and timer queues, public time domains, first-AP startup and per-CPU state, IPIs, SMP shootdown, panic-path transactional recovery, target hardware, and the N8 exit gate remain open"
       ],
       "exit_gate": "all 16 logical processors repeatedly start under Tier 0 and Tier 1 profiles; timer monotonicity, interrupt routing, IPI, and SMP stress tests pass with bounded skew and no lost/duplicate work."
     },
@@ -1054,10 +1058,10 @@
       "current_evidence": [
         "specs/native-kernel-physical-memory-contract.json, specs/native-kernel-physical-memory-contract.schema.json, and docs/native-kernel-physical-memory.md: PKPMM7 freezes exact PBLIVE4/PBP1 intake, UEFI source-kind validation, usable-only initial ownership, page-zero exclusion, DMA/DMA32/Normal zones, generation-safe scrubbed transactions, a stable five-page guarded manager, external generation-owned guarded active ledgers, checked pressure-triggered repeated growth, bounded-window fallback/rejection, PKACPI1 required-table validation and retained snapshot copying, and two separately lifecycle-gated reclaim receipts without AML, concurrency, interrupt-context, SMP, target, or production claims",
         "native/kernel/src/acpi.rs, native/kernel/src/physical_memory.rs, native/kernel/src/main.rs, native/boot/src/livehandoff.rs, runtime/native_kernel_physical_memory.py, tools/qualify_native_kernel_physical_memory.py, and tests/test_native_kernel_physical_memory.py: allocation-free no_std ACPI/PMM path; canonical firmware RSDP handoff; RSDP/XSDT checksum, range, signature, uniqueness, length, copy, readback, and rollback validation; retained scrubbed snapshot; opaque evidence-gated AcpiTablesReleased transition; dual streamed reclaim; generation growth/retirement; independent transcript/oracle validation; and host malformed, duplicate, allocation, copy, readback, rollback, early-reclaim, and idempotence controls",
-        "runs/native-kernel-physical-memory-readiness.json: 2/2 exact qemu64 QEMU/OVMF runs, 45 ordered markers, 191/191 hostile controls, 91/91 kernel host tests, 97 PBP1 entries, 117,888 usable source pages, and 129,148 final managed pages. PKACPI1 validates one RSDP/XSDT and exactly one APIC, FACP, HPET, and MCFG table, copies 600 table bytes into a retained one-page 616-byte snapshot, and binds source checksum 078583AEEFDD6581 plus snapshot checksum 4089A5CFEC81CB41. Boot reclaim admits 11,250 pages under receipt 5DEA9A3BC9E10C18; only after opaque validation/copy/readback evidence does ACPI reclaim admit 11 pages under receipt 60DAA52A8A05ABD6. The stable manager remains five guarded pages; checked pressure reaches a 29-page generation, retires three predecessors totaling 15 pages, records 119 checks, seven triggers, 59 successful cycles, three soft fallbacks, and one hard pre-effect rejection, and binds growth checksum 0xCC30B722527718AE. The runs protect 856 loader pages, scrub and verify 11,473 pages and 46,993,408 bytes, perform 5,875,277 physical writes, 5,879,957 reads, and 23,172 temporary PTE writes and invalidations with zero signatures, authority, actions, AML execution, SMP, target, or production claims",
+        "runs/native-kernel-physical-memory-readiness.json: 2/2 exact qemu64 QEMU/OVMF runs, 45 ordered markers, 191/191 hostile controls, 99/99 kernel host tests, 97 PBP1 entries, 117,882 usable source pages, and 129,142 final managed pages. PKACPI1 validates one RSDP/XSDT and exactly one APIC, FACP, HPET, and MCFG table, copies 600 table bytes into a retained one-page 616-byte snapshot, and binds source checksum 078583AEEFDD6581 plus snapshot checksum 4089A5CFEC81CB41. Boot reclaim admits 11,250 pages under receipt 5DEA9A3BC9E10C18; only after opaque validation/copy/readback evidence does ACPI reclaim admit 11 pages under receipt 60DAA52A8A05ABD6. The stable manager remains five guarded pages; checked pressure reaches a 29-page generation, retires three predecessors totaling 15 pages, records 119 checks, seven triggers, 59 successful cycles, three soft fallbacks, and one hard pre-effect rejection, and binds growth checksum 0xCC30B722527718AE. The runs protect 862 loader pages, scrub and verify 11,473 pages and 46,993,408 bytes, perform 5,875,277 physical writes, 5,879,957 reads, and 23,172 temporary PTE writes and invalidations with zero signatures, authority, actions, AML execution, SMP, target, or production claims",
         "specs/native-kernel-virtual-memory-contract.json and docs/native-kernel-virtual-memory.md: PKVM3 freezes the 48-bit candidate-root layout, exact inherited kernel/entry/guarded-stack/handoff mappings, PMM-derived sparse direct-map ownership and write-back cache policy, dynamic topology, CR3 activation/rollback, architectural Accessed/Dirty handling, local invalidation receipts, exact one-BSP generation-retirement receipts, and future SMP-shootdown rejection",
         "native/kernel/src/active_virtual_memory.rs, native/kernel/src/main.rs, runtime/native_kernel_virtual_memory.py, tools/qualify_native_kernel_virtual_memory.py, and tests/test_native_kernel_virtual_memory.py: fixed-capacity no_std active-root core, privileged volatile CR3/INVLPG adapter, independent PBP1 first-fit oracle, source audit, host rollback/fault tests, and bounded selector-10 evidence; the selector-9 PKVM1 inactive foundation remains its predecessor",
-        "runs/native-kernel-virtual-memory-readiness.json: 2/2 exact qemu64 QEMU/OVMF runs, 40 ordered markers, 46/46 hostile controls, 117,887 admitted pages in eleven sparse ranges with 12,878 hole pages, 237 direct leaf tables, one direct directory and 243 total table pages, coverage checksum 0x341CF729ADB26B52, 367,474 physical table writes, 950,234 temporary-PTE writes and invalidations, two CR3 writes, three active local invalidation receipts, one exact generation-retirement receipt, zero remote shootdowns, and zero signatures, authority, or actions",
+        "runs/native-kernel-virtual-memory-readiness.json: 2/2 exact qemu64 QEMU/OVMF runs, 40 ordered markers, 46/46 hostile controls, 117,881 admitted pages in eleven sparse ranges with 12,884 hole pages, 237 direct leaf tables, one direct directory and 243 total table pages, coverage checksum 0x23C9E575300AC1CE, 367,468 physical table writes, 950,282 temporary-PTE writes and invalidations, two CR3 writes, three active local invalidation receipts, one exact generation-retirement receipt, zero remote shootdowns, and zero signatures, authority, or actions",
         "ADD-MEM-001: one cross-stage bootstrap stack, guard, root-table, handoff, kernel-image, and allocator-metadata boundary shared by PooleBoot, PBP1, PKMAP2, PooleKernel entry, trap handling, and PMM ownership",
         "ADD-MEM-002: replace the bounded nine-page PKVM2 mapping with one complete generation-owned sparse physical direct map that excludes holes and forbidden ranges, prevents incompatible cache aliases, preserves retained bootstrap and ACPI snapshot exclusions, switches transactionally, records local invalidation and future SMP-shootdown dependencies, and defers reclamation until exact generation receipts permit it"
       ],
@@ -2817,8 +2821,8 @@
         "ADD-TEST-001"
       ],
       "current_evidence": [
-        "Cycle 134 host baseline: 788 tests with one Windows symlink-permission skip",
-        "native binary parser, reproduction, leakage, malformed, substitution, governance, hardware, Tier 0, bounded-model, deterministic boot-media, PBP1/PBC1/PSM1/PBART1, six inner-format, PBTRUST1/PBSTATE1, PKELF1, PKENTRY1, PKLOAD6/PBLIVE4/PKMAP2/PBEXIT1, PKREVAL1, PKXFER1, PKTRAP1, PKCPU1, PKERR1, PKXSTATE1, PKXEXC1, PKMSR1, PKPMM7/PKACPI1, PKVM1, and PKVM3 policy/source/machine-code/zero-authority controls, PooleGlyph roadmap bindings, Doctor external-report nonmutation, and collector-smoke negatives"
+        "Cycle 135 host baseline: 796 tests with one Windows symlink-permission skip",
+        "native binary parser, reproduction, leakage, malformed, substitution, governance, hardware, Tier 0, bounded-model, deterministic boot-media, PBP1/PBC1/PSM1/PBART1, six inner-format, PBTRUST1/PBSTATE1, PKELF1, PKENTRY1, PKLOAD6/PBLIVE4/PKMAP2/PBEXIT1, PKREVAL1, PKXFER1, PKTRAP1, PKCPU1, PKERR1, PKXSTATE1, PKXEXC1, PKMSR1, PKPMM7/PKACPI1, PKVM1, PKVM3, and PKIRQ1 policy/source/machine-code/zero-authority controls, PooleGlyph roadmap bindings, Doctor external-report nonmutation, and collector-smoke negatives"
       ],
       "current_gaps": [
         "No native system, power-loss, hardware, accessibility, soak, or external security suite exists"
@@ -2885,8 +2889,8 @@
         "ADD-SUPPLY-001"
       ],
       "current_evidence": [
-        "Cycle 134 consistency release gate: 93/93 checks over 88 artifacts",
-        "content-addressed source, objectives and governance receipts, native toolchain, bounded hardware/Tier 0/model evidence, PBTRUST1/PBSTATE1, bounded PooleBoot, PBP1/PBC1/PSM1/PBART1 and six inner formats, PKELF1, PKENTRY1, PKLOAD6/PKMAP2/PBEXIT1, PKREVAL1, PKXFER1, PKTRAP1, PKCPU1, PKERR1, PKXSTATE1, PKXEXC1, PKMSR1, PKPMM7/PKACPI1, PKVM1, PKVM3, PooleGlyph planning artifacts, and retained historical consistency artifacts"
+        "Cycle 135 consistency release gate: 94/94 checks over 89 artifacts",
+        "content-addressed source, objectives and governance receipts, native toolchain, bounded hardware/Tier 0/model evidence, PBTRUST1/PBSTATE1, bounded PooleBoot, PBP1/PBC1/PSM1/PBART1 and six inner formats, PKELF1, PKENTRY1, PKLOAD6/PKMAP2/PBEXIT1, PKREVAL1, PKXFER1, PKTRAP1, PKCPU1, PKERR1, PKXSTATE1, PKXEXC1, PKMSR1, PKPMM7/PKACPI1, PKVM1, PKVM3, PKIRQ1, PooleGlyph planning artifacts, and retained historical consistency artifacts"
       ],
       "current_gaps": [
         "No native SBOM/provenance/signing ceremony/release manifest or source-controlled release exists"
@@ -6082,7 +6086,18 @@
       "closure_condition": "Implement and qualify local APIC discovery and enablement, a bounded interrupt-vector ownership model, one monotonic timer source with calibration and overflow policy, and first-AP startup with per-CPU state, failure rollback, and zero unacknowledged interrupts before SMP TLB shootdown work is promoted",
       "evidence": [
         "docs/pdc-production-build-plan.md",
-        "runs/pooleos_native_checklist_coverage.json"
+        "runs/pooleos_native_checklist_coverage.json",
+        "specs/native-kernel-interrupt-time-contract.json",
+        "specs/native-kernel-interrupt-time-contract.schema.json",
+        "specs/native-kernel-interrupt-time-readiness.schema.json",
+        "native/kernel/src/interrupt_time.rs",
+        "native/kernel/src/arch/x86_64.rs",
+        "native/kernel/src/main.rs",
+        "runtime/native_kernel_interrupt_time.py",
+        "tools/qualify_native_kernel_interrupt_time.py",
+        "tests/test_native_kernel_interrupt_time.py",
+        "docs/native-kernel-interrupt-time.md",
+        "runs/native-kernel-interrupt-time-readiness.json"
       ]
     },
     {
@@ -6593,6 +6608,7 @@
     "The Cycle 132 N9-PMM-GROWTH-AUTOMATION-001 receipt upgrades selector-8 to PKPMM6. Every automatic scrubbed allocate/free computes exact post-operation demand and reserves one allocation plus four scrub-receipt slots for complete failed-growth rollback and retry. The profile grows through 4/8/15/29-page generations with capacities ending at 2048/256/2048/128/16, revokes and scrub-retires three predecessors totaling 27 pages, records 121 pressure checks, eight triggers, three automatic growths, sixty successful cycles, and four soft fallbacks, then host-proves one hard pre-effect rejection because the 58-page next layout exceeds each bounded 32-page window. Two exact fresh-vars qemu64 runs retain 43 markers while 147 hostile controls and 84 kernel host tests pass. They manage 117,911 source-usable and 129,160 final pages, protect 833 loader pages, admit 11,250 Boot Services pages while holding eleven ACPI pages, scrub and verify 11,462 pages and 46,948,352 bytes, and perform 5,869,568 physical writes, 5,870,592 reads, and 22,798 temporary-PTE writes and invalidations. Growth checksum 0xF7AD111CA266071D binds the sequence. The retained-layout shift rebinds PKVM2 to 5,560 temporary writes and invalidations. A build-ID split discovered during closeout is fixed and guarded: PKMID1 and the live kernel diagnostic now both carry PKBUILD1-CYCLE132-N9-PMM-GROWTH-AUTOMATION-001. The kernel is 278,528 canonical bytes in a 319,488-byte, 78-page image with 667 relocations and SHA-256 CDF33067B2421550BB03A4796FF9A92AE54D40B2575188632BF2C208449B882E. This does not prove complete ACPI consumer integration, interrupt-context or concurrent allocation, SMP, general pressure/OOM policy, target hardware, N9 exit, release, or production readiness.",
     "The Cycle 133 N9-PMM-ACPI-CONSUMER-001 receipt upgrades selector-8 to PKPMM7 and the live handoff to PBLIVE4. PooleBoot records the UEFI ACPI 2.0 RSDP address; PKACPI1 validates RSDP and XSDT checksums, range and length bounds, then requires exactly one APIC, FACP, HPET, and MCFG table. It allocates and scrubs one retained page, copies 600 table bytes into a 616-byte snapshot, verifies readback, and advances to AcpiTablesReleased only with an opaque evidence token. Boot reclaim admits 11,250 pages under receipt 5DEA9A3BC9E10C18; the later ACPI transaction admits eleven pages under independent receipt 60DAA52A8A05ABD6. Missing, duplicate, malformed, checksum, range, allocation, copy, readback, rollback, early-reclaim, and repeat-call controls fail closed. Two exact qemu64 runs emit 45 markers and pass 191 hostile controls plus 88 kernel host tests. They manage 117,888 source-usable and 129,148 final pages, protect 856 loader pages, retain the ACPI snapshot, scrub and verify 11,473 pages and 46,993,408 bytes, and perform 5,875,277 physical writes, 5,879,957 reads, and 23,172 temporary-PTE writes and invalidations. The dependent PKVM2 count is 5,640. The kernel is 299,008 canonical bytes in a 339,968-byte, 83-page image with 693 relocations and SHA-256 D9EF9B10B56BF779B155BD18DE55853874CCC032D2A3E5E7841B918F08CDE1F2. This proves no AML execution, complete ACPI namespace/resource graph, SMP, target hardware, N9 exit, release, or production readiness.",
     "The Cycle 134 N9-VM-DIRECT-MAP-001 receipt upgrades selector-10 to PKVM3. PKPMM7 reconstructs an exact generation-bound direct-map manifest from free extents plus active non-release-excluded allocations, omits retained ownership, coalesces sparse ranges, and binds counts, gaps, write-back cache policy, and checksum before and after allocation. PKVM3 derives 237 occupied 2 MiB leaf regions and one 1 GiB directory, allocates 243 contiguous DMA32 table pages, maps all 117,887 admitted pages across eleven ranges, leaves 12,878 gap pages unmapped, rejects cache drift and forged manifests, and audits inherited kernel, guarded-stack, handoff, range-edge, and sparse-hole translations before activation. Three local leaf receipts protect and revoke the data aliases; any active-processor count other than one returns ShootdownRequired; exact CR3 restoration mints one root/generation/BSP/local-context-flush retirement receipt; and table reclamation rejects absent or stale receipts. Ninety-one kernel host tests and two exact 40-marker qemu64 runs pass 46 hostile controls with coverage checksum 0x341CF729ADB26B52, 367,474 physical table writes, and 950,234 temporary-PTE writes and invalidations. The exact Cycle 134 kernel remains 299,008 canonical bytes in a 339,968-byte, 83-page image with 729 relocations and SHA-256 5B581CC1D1ABEB163D0984D12144CA5016C44B46A28B190A6DFCBDCDA689A255. AP startup, inter-processor shootdown execution, generation-safe remote deferred reclaim, incremental concurrent map replacement, target hardware, N9 exit, release, and production readiness remain open.",
+    "The Cycle 135 N8-IRQ-001 receipt adds selector-11 PKIRQ1 as a bounded one-BSP xAPIC/HPET substrate. It walks the retained validated MADT and HPET descriptions, validates BSP/APIC identity, reserves 51 vectors, installs guarded uncacheable LAPIC and HPET mappings, masks and restores the legacy PIC, calibrates a one-shot local APIC timer over a checked ten-millisecond HPET interval, and opens exactly eight interrupt windows. Two exact 36-marker qemu64 runs deliver and acknowledge eight timer interrupts with zero APIC-error, spurious, or remaining ISR bits; revoke both MMIO leaves; restore controller, clock, PIC, and IA32_APIC_BASE state; and pass 58 hostile controls plus 99 kernel host tests. The exact kernel is 323,584 canonical bytes in a 364,544-byte, 89-page image with 812 relocations and SHA-256 2ACD4A5EF30CA1A4A22711FD31E2A259A5C87D97BCE7FB1BF49A3488B3FC02B2. PKIRQ1 starts zero APs and implements no I/O APIC route, MSI/MSI-X, public time API, IPI, shootdown, target-hardware path, N8 exit, release, or production readiness. FLAG-N8-IRQ-001 remains open; N8-SMP-FIRST-AP-001 is next.",
     "Sixteen allowlisted user-mode CPUID records prove only a bounded host observation; they do not prove MSR access, privileged probes, native parsing, driver safety, or Tier 1 qualification.",
     "Owner-directed acceptance of thirty-eight objective definitions while binding zero measurements is not a cryptographic signature or implementation evidence.",
     "PooleGlyph Phase 65 proves a metadata, parser, AST, and diagnostic foundation only; no source form, Core IR, PGASM, PGB2, PGVM2, host call, policy, optimization, or version label is promoted without its own frozen contract and evidence gate.",

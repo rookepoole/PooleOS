@@ -94,18 +94,18 @@ shootdown dependency.
 ## Qualification
 
 Two fresh-vars QEMU/OVMF executions reproduce the same 40 markers, framebuffer,
-and exact PBP1 transcript. Ninety-one PooleKernel host tests, 43 PKENTRY1
+and exact PBP1 transcript. Ninety-nine PooleKernel host tests, 43 PKENTRY1
 controls, and 46 PKVM3 hostile controls pass. An independent Python oracle
 reconstructs PMM ranges, page-zero exclusion, DMA32 first fit, topology,
 addresses, gap counts, and the coverage checksum from the PBP1 transcript.
 
-The Cycle 134 run records 117,887 mapped pages, eleven ranges, 12,878 gap pages,
+The Cycle 135 requalification records 117,881 mapped pages, eleven ranges, 12,884 gap pages,
 237 direct leaf tables, one direct directory, 243 total table pages, checksum
-`0x341CF729ADB26B52`, 367,474 physical table writes, 950,234 temporary-PTE
+`0x23C9E575300AC1CE`, 367,468 physical table writes, 950,282 temporary-PTE
 writes and matching bootstrap invalidations, two CR3 writes, three local leaf
-invalidations, and one generation-retirement receipt. The 299,008-byte
-canonical kernel occupies an 83-page, 339,968-byte image, has 729 relocations,
-and SHA-256 `5B581CC1D1ABEB163D0984D12144CA5016C44B46A28B190A6DFCBDCDA689A255`.
+invalidations, and one generation-retirement receipt. The 323,584-byte
+canonical kernel occupies an 89-page, 364,544-byte image, has 812 relocations,
+and SHA-256 `2ACD4A5EF30CA1A4A22711FD31E2A259A5C87D97BCE7FB1BF49A3488B3FC02B2`.
 
 ## Remaining Boundary
 

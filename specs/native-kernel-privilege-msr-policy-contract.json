@@ -101,7 +101,9 @@
     "negative_control_count": 47,
     "source_instruction_audit_required": true,
     "linked_machine_code_audit_required": true,
-    "forbidden_linked_instructions": ["WRMSR", "RDPMC", "SYSCALL", "SYSRET", "SWAPGS"]
+    "forbidden_linked_instructions": ["RDPMC", "SYSCALL", "SYSRET", "SWAPGS"],
+    "exact_linked_instruction_counts": {"RDMSR": 20, "WRMSR": 2},
+    "wrmsr_scope": "exactly two typed IA32_APIC_BASE writes in the separately selected PKIRQ1 InterruptTime branch; PKMSR1 executes zero writes"
   },
   "source_register": [
     {
@@ -184,7 +186,7 @@
     "unsupported_pmu_path_failed_closed": true,
     "reserved_bit_and_canonical_address_policy_enforced": true,
     "rust_python_policy_agreement": true,
-    "linked_machine_code_no_wrmsr_audited": true,
+    "linked_machine_code_privileged_instruction_scope_audited": true,
     "two_qemu_runs_exact_match": true,
     "syscall_entry_activated": false,
     "machine_check_handler_activated": false,
@@ -196,7 +198,7 @@
   "non_claims": [
     "PKMSR1 is a single-BSP qemu64 development observation and does not qualify the AMD Ryzen 7 9800X3D target or any physical machine.",
     "Observed zero system-linkage values are not architectural reset guarantees; AMD documents several reset values as undefined.",
-    "No STAR, LSTAR, CSTAR, SFMASK, EFER.SCE, FS/GS base, TSC_AUX, MCA, PMU, control-register, or other privileged write occurs; TSC_AUX is also not read because RDTSCP is absent.",
+    "PKMSR1 executes no STAR, LSTAR, CSTAR, SFMASK, EFER.SCE, FS/GS base, TSC_AUX, MCA, PMU, control-register, or other privileged write; the shared linked image contains exactly two typed IA32_APIC_BASE WRMSR sites isolated to the separately selected PKIRQ1 InterruptTime branch. TSC_AUX is also not read because RDTSCP is absent.",
     "No SYSCALL, SYSRET, SWAPGS, RDTSCP, RDPMC, machine-check delivery, MCA bank walk, error clear, PMU event programming, interrupt enable, or ring transition is executed.",
     "The qemu64-only MCG_CAP bit 24 and all-ones MCG_CTL observations are compatibility-profile facts, not AMD architectural semantics or target-hardware policy.",
     "Global MCA inventory does not qualify product-specific bank meanings, retained crash recovery, recursive fault containment, or a machine-check handler.",

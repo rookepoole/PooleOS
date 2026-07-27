@@ -61,6 +61,8 @@ the compatibility-model boundary; live CPUID remains the executable gate.
 This is not syscall entry, `SWAPGS`, per-thread FS/GS ownership, per-CPU
 `TSC_AUX`, a machine-check handler, MCA recovery, PMU ownership, AP state,
 target-hardware qualification, user mode, release, or production evidence.
-There are zero `WRMSR` instructions, control writes, signatures, authority
-grants, authorized actions, firmware calls, and physical-media writes in this
-profile.
+PKMSR1 executes zero MSR or control writes. The shared linked kernel contains
+exactly two typed `IA32_APIC_BASE` `WRMSR` sites in the separately selected
+PKIRQ1 `InterruptTime` branch; source and per-function linked audits bind that
+isolation. There are zero signatures, authority grants, authorized actions,
+firmware calls, and physical-media writes in this profile.

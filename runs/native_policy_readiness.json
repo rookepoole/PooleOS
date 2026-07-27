@@ -12,7 +12,7 @@
     "golden_vectors": {
       "path": "specs/native-policy-golden-vectors.json",
       "bytes": 43996,
-      "sha256": "4113079DB57B7C75A13C346DCFFF208A56A2CB0D54757BCA6480DF7FEE987FB6"
+      "sha256": "0F0A9128739854154733AA65364F90123E91BDCEC6ED52708032A44FF5198DE8"
     },
     "toolchain_lock": {
       "path": "specs/native-toolchain-lock.json",
