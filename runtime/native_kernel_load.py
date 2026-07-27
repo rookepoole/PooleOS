@@ -603,7 +603,7 @@ MARKER_PATTERNS = (
         r"^POOLEBOOT/0\.1 KERNEL_MAP_RETAIN PASS table_pages=([0-9]+) stack_pages=([0-9]+) handoff_pages=([0-9]+) guards=([0-9]+) total_pages=([0-9]+) stack_pt=([0-9]+) handoff_pt=([0-9]+) kernel_phys=([0-9A-F]{16}) root=([0-9A-F]{16}) stack_phys=([0-9A-F]{16}) stack_top=([0-9A-F]{16}) handoff_phys=([0-9A-F]{16}) handoff_virt=([0-9A-F]{16}) retained_fnv1a64=([0-9A-F]{16}) original_cr3=restored firmware_calls_while_active=([0-9]+)$"
     ),
     re.compile(
-        r"^POOLEBOOT/0\.1 PBP1_FINAL PASS bytes=([0-9]+) records=([0-9]+) memory_entries=([0-9]+) framebuffer=([01]) artifacts=([0-9]+) descriptor_bytes=([0-9]+) exit_attempts=([0-9]+) message_crc32=([0-9A-F]{8}) fnv1a64=([0-9A-F]{16}) state=boot_services_exited bytes_unchanged=([01])$"
+        r"^POOLEBOOT/0\.1 PBP1_FINAL PASS bytes=([0-9]+) records=([0-9]+) memory_entries=([0-9]+) framebuffer=([01]) firmware_tables=([0-9]+) artifacts=([0-9]+) descriptor_bytes=([0-9]+) exit_attempts=([0-9]+) message_crc32=([0-9A-F]{8}) fnv1a64=([0-9A-F]{16}) state=boot_services_exited bytes_unchanged=([01])$"
     ),
     re.compile(
         r"^POOLEBOOT/0\.1 EXIT_BOOT_SERVICES PASS contract=(PBEXIT1) attempts=([0-9]+) map_bytes=([0-9]+) descriptor_bytes=([0-9]+) descriptors=([0-9]+)$"
@@ -1818,10 +1818,11 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
     pbp1_records = int(matches[20].group(2))
     pbp1_memory_entries = int(matches[20].group(3))
     pbp1_framebuffer = int(matches[20].group(4))
-    pbp1_artifacts = int(matches[20].group(5))
-    pbp1_descriptor_bytes = int(matches[20].group(6))
-    pbp1_exit_attempts = int(matches[20].group(7))
-    pbp1_unchanged = int(matches[20].group(10))
+    pbp1_firmware_tables = int(matches[20].group(5))
+    pbp1_artifacts = int(matches[20].group(6))
+    pbp1_descriptor_bytes = int(matches[20].group(7))
+    pbp1_exit_attempts = int(matches[20].group(8))
+    pbp1_unchanged = int(matches[20].group(11))
     retained_input_pages = artifact_pages + sum(
         (byte_count + native_elf_loader.PAGE_SIZE - 1)
         // native_elf_loader.PAGE_SIZE
@@ -1829,9 +1830,10 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
     )
     if (
         not 1 <= pbp1_bytes <= 1024 * 1024
-        or pbp1_records not in {3, 4}
+        or pbp1_records != 5
         or not 1 <= pbp1_memory_entries <= 16_384
         or pbp1_framebuffer != 1
+        or pbp1_firmware_tables != 1
         or pbp1_artifacts
         != len(native_live_boot_handoff.PROFILE_ARTIFACT_ROLES)
         or not 40 <= pbp1_descriptor_bytes <= 256
@@ -1941,11 +1943,12 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
             "record_count": pbp1_records,
             "memory_entry_count": pbp1_memory_entries,
             "framebuffer_present": pbp1_framebuffer,
+            "firmware_table_count": pbp1_firmware_tables,
             "artifact_count": pbp1_artifacts,
             "descriptor_bytes": pbp1_descriptor_bytes,
             "exit_attempts": pbp1_exit_attempts,
-            "message_crc32": matches[20].group(8),
-            "fnv1a64": matches[20].group(9),
+            "message_crc32": matches[20].group(9),
+            "fnv1a64": matches[20].group(10),
             "pre_exit": False,
             "boot_services_exited": True,
             "development_mode_only": True,

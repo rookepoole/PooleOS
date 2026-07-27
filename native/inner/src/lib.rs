@@ -313,6 +313,8 @@ mod tests {
     #[test]
     fn canonical_retained_set_parses_cross_binds_and_denies() {
         let files = canonical_files();
+        let policy = poole_policy::parse(POLICY).unwrap();
+        assert_eq!(poole_boot_artifact::sha256(SYMBOLS), policy.symbols_sha256);
         let summary = validate_development_set(slices(&files)).unwrap();
         assert_eq!(summary.artifact_count, 6);
         assert_eq!(summary.parser_count, 6);

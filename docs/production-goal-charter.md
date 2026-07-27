@@ -1,13 +1,41 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-07-24
+Status date: 2026-07-26
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 132
+Last roadmap reconciliation: PooleOS Cycle 133
+
+Cycle 133 reconciliation (superseding the historical Cycle 132 paragraph
+below): the governance and external-key state is unchanged. The selected
+`hardware_fido2_ed25519_sk` device is still physically unavailable, no key or
+signature exists, and `N0-HW-KEY-ACQUIRE-001` remains the blocked external
+move. No cryptographic, privileged-hardware, firmware, physical-media,
+publication, release, or production-promotion action occurred. The
+owner-independent `N9-PMM-ACPI-CONSUMER-001` move is complete within its
+bounded one-BSP scope. PBLIVE4 adds one canonical ACPI2 RSDP record; PKACPI1
+validates RSDP/XSDT and exactly one APIC/FACP/HPET/MCFG table, copies and
+read-verifies 600 source bytes into a 616-byte release-excluded scrubbed
+snapshot, and supplies opaque evidence for the lifecycle transition.
+PKPMM7 then admits eleven ACPI reclaimable pages under a second immutable
+receipt while retaining the snapshot. Eighty-eight kernel host tests, two
+exact 45-marker qemu64 runs, and 191 hostile controls pass. Closeout found and
+fixed two real cross-stage contract defects: PKTRAP1 and PKVM2 still used a
+retired 14-page stack constant after PooleBoot had moved to 32 pages. Both now
+consume the shared 32-page geometry and their live profiles pass. The exact
+kernel is 299,008 canonical bytes in a 339,968-byte, 83-page image with 693
+relocations and SHA-256
+`D9EF9B10B56BF779B155BD18DE55853874CCC032D2A3E5E7841B918F08CDE1F2`.
+PKVM2 records 5,640 bootstrap writes and invalidations after the ACPI consumer
+is included. N9 remains partial: AML, full platform discovery, a complete
+generation-owned physical direct map, SMP shootdown/deferred reclaim,
+interrupt-context and concurrent allocation, heaps, pager, pressure/OOM,
+target hardware, and N9 exit remain open. The next owner-independent move is
+`N9-VM-DIRECT-MAP-001`; PooleGlyph Phase 66 may proceed in parallel without
+outranking N0-N9.
 
 Current reconciliation: the seven-record native constitution, public/private boundary, architecture baseline, and conformance policy remain partial evidence. The historical completed owner response directs ADR-0003, ADR-0004, and all 38 Workstation v1 definitions while accepting zero measurements. Rooke Poole selected `hardware_fido2_ed25519_sk`, reported no available key, accepted no software-key substitution, and deferred public-key publication at that time; that receipt remains immutable. The selected physical key is still unavailable, the trust store remains empty, and no key was generated or used. Standing Authority Amendment V2 permits ordinary repository and fully gated clean-merge work. Later owner authorization approves compatible-key acquisition, key generation/use, public-key publication, signing, secrets use, privileged probes, driver loading, firmware changes, physical-media writes, tags/releases, and production promotion as operation categories, but it does not supply the key, owner presence, custody/recovery procedure, backups, recovery media, a separately identified safe target, qualified mechanisms, passing release evidence, or permission to bypass this charter. None of those operation categories were exercised in Cycle 132. `N0-HW-KEY-ACQUIRE-001` remains the blocked external move. PooleGlyph remains at the Phase 65/66 boundary with its existing generated-report change preserved and no policy authority inferred from metadata. Cycles 97-131 qualify bounded unsigned boot through PKPMM5 explicit ledger growth and one PKVM2 active-root transaction without production promotion. Cycle 132 closes only the bounded serial scope of `FLAG-N9-PMM-GROWTH-AUTOMATION-001`: selector-8 PKPMM6 checks exact post-operation demand before every automatic scrubbed allocate/free, reserves one allocation and four scrub-receipt slots for complete failed-growth rollback and retry, and grows all active ledgers through 4/8/15/29-page generations with final capacities 2048/256/2048/128/16. Three predecessors totaling 27 pages are revoked, zeroed, read-verified, and retired. The measured sequence records 121 pressure checks, eight triggers, three automatic growths, sixty successful cycles, and four soft fallbacks; a host test proves one hard rejection before physical reads/writes, ownership changes, or receipt commitment because the required 58-page next layout exceeds a bounded 32-page window. An independent Python oracle reconstructs all first-fit generations, alternating windows, retired holes, ownership, pressure counters, reclaim coalescing, and physical access counts. Two exact fresh-vars qemu64 runs emit 43 markers and pass 147 hostile controls plus 84 kernel host tests. They manage 117,911 source-usable and 129,160 final pages, keep eleven ACPI pages held, protect 833 loader pages, scrub and verify 11,462 pages and 46,948,352 bytes, and perform 5,869,568 physical writes, 5,870,592 reads, and 22,798 temporary-PTE writes and invalidations. Growth checksum `0xF7AD111CA266071D` binds the sequence. The retained-layout shift rebinds PKVM2 to 5,560 temporary writes and invalidations. Closeout also fixes and directly guards an identity split so PKMID1 and the live diagnostic both carry `PKBUILD1-CYCLE132-N9-PMM-GROWTH-AUTOMATION-001`. The dependent kernel identity is 278,528 canonical bytes, 319,488 image bytes, and 78 pages with 667 relocations and SHA-256 `CDF33067B2421550BB03A4796FF9A92AE54D40B2575188632BF2C208449B882E`. N9.1-N9.4 remain partial. Complete ACPI consumer integration, complete direct-map and SMP TLB policy, deferred reclaim, huge pages, PCID, COW, user faults, pager IPC, heaps/object caches, MMIO/cache qualification, interrupt-context/concurrent allocation, general pressure/OOM policy, target hardware, N9 exit, trust, persistent state, framebuffer, N4-N8, userspace, drivers, filesystems, PooleGlass, installer, signed ISO, and production gates remain open. `N9-PMM-ACPI-CONSUMER-001` is the next owner-independent move, while PooleGlyph Phase 66 may advance in parallel without outranking N0-N9.
 
@@ -191,7 +219,7 @@ Standing Authority Amendment V2 authorizes Codex to:
 - mark a Codex-authored draft PR ready and merge it, including into `main`, only when the exact candidate passes the canonical qualification suite, publication-boundary scan, release gate, all configured required GitHub checks, clean-merge check, and review gates, with no blocking review request or unresolved thread;
 - merge into non-default `agent/*` integration branches and delete only Codex-created remote `agent/*` branches after merge.
 
-Codex may not force-push, bypass protections, rewrite shared history, delete `main` or a user-created branch, weaken governance, alter repository visibility/ownership/billing, expose secrets, or treat an ordinary permitted merge as production promotion. A later Cycle 118 owner statement, reaffirmed before Cycle 124 closeout, supplies explicit categorical authorization to acquire a compatible FIDO2 key; generate/use the selected key; publish its public key; sign; use secrets without exposing them; run privileged probes; load drivers; change firmware; write physical media; publish tags/releases; and promote production. These are permissions, not evidence or instructions to act immediately. Key work still requires the selected physical device, owner presence, reviewed custody and recovery, exact fingerprint review, and no private-material disclosure. Privileged, driver, firmware, disk, media, boot, TPM, device, and installation work still requires a bounded reviewed mechanism, verified backups and recovery media where applicable, a separately identified safe target, stop conditions, and retained evidence. Tag/release publication or production promotion still requires every charter release gate to pass for the exact bytes. No newly authorized cryptographic, privileged-hardware, mutating, publication, release, or promotion action occurred through Cycle 132; Cycle 132 used only host builds and non-promoting virtual-machine execution. Historical owner packets and receipts remain immutable records of the authority that existed when they were created.
+Codex may not force-push, bypass protections, rewrite shared history, delete `main` or a user-created branch, weaken governance, alter repository visibility/ownership/billing, expose secrets, or treat an ordinary permitted merge as production promotion. A later Cycle 118 owner statement, reaffirmed before Cycle 124 closeout, supplies explicit categorical authorization to acquire a compatible FIDO2 key; generate/use the selected key; publish its public key; sign; use secrets without exposing them; run privileged probes; load drivers; change firmware; write physical media; publish tags/releases; and promote production. These are permissions, not evidence or instructions to act immediately. Key work still requires the selected physical device, owner presence, reviewed custody and recovery, exact fingerprint review, and no private-material disclosure. Privileged, driver, firmware, disk, media, boot, TPM, device, and installation work still requires a bounded reviewed mechanism, verified backups and recovery media where applicable, a separately identified safe target, stop conditions, and retained evidence. Tag/release publication or production promotion still requires every charter release gate to pass for the exact bytes. No newly authorized cryptographic, privileged-hardware, mutating, publication, release, or promotion action occurred through Cycle 133; Cycles 132-133 used only host builds and non-promoting virtual-machine execution. Historical owner packets and receipts remain immutable records of the authority that existed when they were created.
 
 ## 12. Per-Turn Next-Best-Move Loop
 

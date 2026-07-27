@@ -10,7 +10,10 @@ from typing import Any
 from runtime import native_boot_handoff as pbp1
 
 
-CONTRACT_ID = "PBLIVE3"
+CONTRACT_ID = "PBLIVE4"
+ACPI_20_TABLE_GUID = bytes.fromhex("8868E871E4F111D3BC220080C73C8881")
+FIRMWARE_TABLE_PHYSICAL = 1 << 1
+FIRMWARE_TABLE_CHECKSUM_VALIDATED = 1 << 2
 PROFILE_ARTIFACT_ROLES = (
     pbp1.ARTIFACT_KERNEL,
     pbp1.ARTIFACT_INITIAL_SYSTEM,
@@ -162,21 +165,59 @@ def _framebuffer_summary(record: pbp1.Record | None) -> dict[str, Any] | None:
     }
 
 
+def _firmware_summary(record: pbp1.Record) -> dict[str, Any]:
+    if record.element_count != 1 or len(record.payload) != pbp1.FIRMWARE_TABLE_ENTRY_BYTES:
+        raise LiveHandoffError("live PBP1 must bind exactly one firmware table")
+    guid = record.payload[:16]
+    address, byte_count, flags, reserved = struct.unpack_from("<QQII", record.payload, 16)
+    if (
+        guid != ACPI_20_TABLE_GUID
+        or address == 0
+        or address % 4
+        or byte_count != 36
+        or flags != FIRMWARE_TABLE_PHYSICAL | FIRMWARE_TABLE_CHECKSUM_VALIDATED
+        or reserved
+    ):
+        raise LiveHandoffError("live PBP1 ACPI 2.0 RSDP binding changed")
+    return {
+        "guid": guid.hex().upper(),
+        "physical_address": _hex64(address),
+        "byte_count": byte_count,
+        "flags": flags,
+        "physical": True,
+        "checksum_validated": True,
+        "copied": False,
+    }
+
+
 def _profile_records(
     handoff: pbp1.Handoff,
-) -> tuple[dict[str, Any], pbp1.Record, list[dict[str, Any]], dict[str, Any] | None]:
+) -> tuple[
+    dict[str, Any],
+    pbp1.Record,
+    list[dict[str, Any]],
+    dict[str, Any] | None,
+    dict[str, Any],
+]:
     framebuffer = handoff.record(pbp1.RECORD_FRAMEBUFFER)
     expected_types = [pbp1.RECORD_CORE, pbp1.RECORD_MEMORY_MAP]
     if framebuffer is not None:
         expected_types.append(pbp1.RECORD_FRAMEBUFFER)
+    expected_types.append(pbp1.RECORD_FIRMWARE_TABLES)
     expected_types.append(pbp1.RECORD_LOADED_ARTIFACTS)
     expected_features = (
         pbp1.FEATURE_CORE
         | pbp1.FEATURE_MEMORY_MAP
+        | pbp1.FEATURE_FIRMWARE_TABLES
         | pbp1.FEATURE_LOADED_ARTIFACTS
         | (pbp1.FEATURE_FRAMEBUFFER if framebuffer is not None else 0)
     )
-    expected_required = pbp1.FEATURE_CORE | pbp1.FEATURE_MEMORY_MAP | pbp1.FEATURE_LOADED_ARTIFACTS
+    expected_required = (
+        pbp1.FEATURE_CORE
+        | pbp1.FEATURE_MEMORY_MAP
+        | pbp1.FEATURE_FIRMWARE_TABLES
+        | pbp1.FEATURE_LOADED_ARTIFACTS
+    )
     if (
         _record_types(handoff) != expected_types
         or handoff.features != expected_features
@@ -185,11 +226,18 @@ def _profile_records(
         raise LiveHandoffError("live PBP1 record or feature profile changed")
     core_record = handoff.record(pbp1.RECORD_CORE)
     memory = handoff.record(pbp1.RECORD_MEMORY_MAP)
+    firmware = handoff.record(pbp1.RECORD_FIRMWARE_TABLES)
     artifacts = handoff.record(pbp1.RECORD_LOADED_ARTIFACTS)
-    if core_record is None or memory is None or artifacts is None:
+    if core_record is None or memory is None or firmware is None or artifacts is None:
         raise LiveHandoffError("live PBP1 required record missing")
     core = pbp1._validate_core(core_record.payload, handoff.total_size)
-    return core, memory, _artifact_entries(artifacts), _framebuffer_summary(framebuffer)
+    return (
+        core,
+        memory,
+        _artifact_entries(artifacts),
+        _framebuffer_summary(framebuffer),
+        _firmware_summary(firmware),
+    )
 
 
 def _profile_summary(
@@ -198,6 +246,7 @@ def _profile_summary(
     memory: pbp1.Record,
     artifacts: list[dict[str, Any]],
     framebuffer: dict[str, Any] | None,
+    firmware_table: dict[str, Any],
     *,
     exited: bool,
 ) -> dict[str, Any]:
@@ -229,6 +278,8 @@ def _profile_summary(
         "artifacts": artifacts,
         "kernel_artifact": artifacts[0],
         "framebuffer": framebuffer,
+        "firmware_table_count": 1,
+        "firmware_tables": [firmware_table],
         "development_mode_only": True,
         "boot_services_exited": exited,
         "transferable": False,
@@ -240,7 +291,7 @@ def _profile_summary(
 
 
 def validate_pre_exit_profile(handoff: pbp1.Handoff) -> dict[str, Any]:
-    core, memory, artifacts, framebuffer = _profile_records(handoff)
+    core, memory, artifacts, framebuffer, firmware_table = _profile_records(handoff)
     if (
         core["boot_flags"] != pbp1.DEVELOPMENT_MODE
         or core["initial_stack_top_virtual"] != 0
@@ -256,12 +307,12 @@ def validate_pre_exit_profile(handoff: pbp1.Handoff) -> dict[str, Any]:
     else:
         raise LiveHandoffError("pre-exit PBP1 unexpectedly satisfies the transfer profile")
     return _profile_summary(
-        handoff, core, memory, artifacts, framebuffer, exited=False
+        handoff, core, memory, artifacts, framebuffer, firmware_table, exited=False
     )
 
 
 def validate_exit_development_profile(handoff: pbp1.Handoff) -> dict[str, Any]:
-    core, memory, artifacts, framebuffer = _profile_records(handoff)
+    core, memory, artifacts, framebuffer, firmware_table = _profile_records(handoff)
     if (
         core["boot_flags"] != pbp1.DEVELOPMENT_MODE | pbp1.BOOT_SERVICES_EXITED
         or core["initial_stack_top_virtual"] == 0
@@ -279,7 +330,7 @@ def validate_exit_development_profile(handoff: pbp1.Handoff) -> dict[str, Any]:
     else:
         raise LiveHandoffError("exited-development PBP1 unexpectedly satisfies kernel entry")
     return _profile_summary(
-        handoff, core, memory, artifacts, framebuffer, exited=True
+        handoff, core, memory, artifacts, framebuffer, firmware_table, exited=True
     )
 
 

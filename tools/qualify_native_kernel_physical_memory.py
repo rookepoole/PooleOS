@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build and qualify the bounded PKPMM6 automatic-growth transaction."""
+"""Build and qualify bounded PKPMM7 ACPI consumption and held-memory reclaim."""
 
 from __future__ import annotations
 
@@ -31,7 +31,7 @@ DEFAULT_OUT = ROOT / physical_memory.READINESS_RELATIVE
 
 
 class QualificationError(RuntimeError):
-    """Raised when live PKPMM6 qualification fails closed."""
+    """Raised when live PKPMM7 qualification fails closed."""
 
 
 def _set_field(marker: str, name: str, value: str) -> str:
@@ -183,43 +183,87 @@ def _negative_controls(
         (40, "retained_excluded", "0"),
         (40, "atomic", "0"),
         (40, "rollback", "unverified"),
-        (41, "allocations", "2"),
-        (41, "frees", "1"),
-        (41, "start", "0x0000000000001000"),
-        (41, "first_generation", "0"),
-        (41, "reuse_generation", "1"),
-        (41, "allocation_receipts", "1"),
-        (41, "release_receipts", "1"),
-        (41, "scrub_pages", "12"),
-        (41, "scrub_bytes", "49152"),
-        (41, "verified_bytes", "49152"),
-        (41, "stale_pattern", "0x0000000000000000"),
-        (41, "stale_absent", "0"),
-        (41, "double_free_rejected", "0"),
-        (41, "quota_rejected", "0"),
-        (41, "unavailable_rejected", "0"),
-        (41, "metadata_poison", "0"),
-        (41, "coalesces", "0"),
-        (41, "rollback", "unverified"),
-        (42, "managed_pages", str(observation["result"]["managed_pages"] + 1)),
-        (42, "allocated_pages", "0"),
-        (42, "physical_writes", "1"),
-        (42, "physical_reads", "1"),
-        (42, "temporary_pte_writes", "1"),
-        (42, "bootstrap_invlpg", "1"),
-        (42, "alias_revoked", "0"),
-        (42, "metadata_retained", "0"),
-        (42, "ledger_generation_retained", "0"),
-        (42, "mappings", "complete_direct_map"),
-        (42, "reclaim", "0"),
-        (42, "acpi_reclaim", "1"),
-        (42, "concurrency", "1"),
-        (42, "smp", "1"),
-        (42, "signatures", "1"),
-        (42, "authority", "1"),
-        (42, "actions", "1"),
-        (42, "production", "1"),
-        (42, "terminal", "return"),
+        (41, "contract", "PKACPI0"),
+        (41, "pmm", "PKPMM6"),
+        (41, "rsdp", "0x0000000000001000"),
+        (41, "xsdt", "0x0000000000001000"),
+        (41, "xsdt_entries", "0"),
+        (41, "required_mask", "0x0000000000000000"),
+        (41, "facp_bytes", "0"),
+        (41, "apic_bytes", "0"),
+        (41, "hpet_bytes", "0"),
+        (41, "mcfg_bytes", "0"),
+        (41, "snapshot", "0x0000000000001000"),
+        (41, "snapshot_pages", "0"),
+        (41, "snapshot_bytes", "0"),
+        (41, "copied_bytes", "0"),
+        (41, "source_checksum", "0x0000000000000000"),
+        (41, "snapshot_checksum", "0x0000000000000000"),
+        (41, "required", "APIC,FACP,HPET"),
+        (41, "copy_verified", "0"),
+        (41, "lifecycle_released", "0"),
+        (41, "retained", "0"),
+        (41, "aml", "1"),
+        (41, "smp", "1"),
+        (41, "target", "1"),
+        (41, "production", "1"),
+        (42, "stage", "post_exit_boot_services"),
+        (42, "class", "boot_services"),
+        (42, "sequence", "1"),
+        (42, "source_records", str(observation["acpi_reclaim"]["source_records"] + 1)),
+        (42, "ranges", str(observation["acpi_reclaim"]["ranges"] + 1)),
+        (42, "pages", str(observation["acpi_reclaim"]["pages"] + 1)),
+        (42, "dma_pages", "1"),
+        (42, "dma32_pages", str(observation["acpi_reclaim"]["dma32_pages"] + 1)),
+        (42, "normal_pages", "1"),
+        (42, "pre_extents", str(observation["acpi_reclaim"]["pre_extents"] + 1)),
+        (42, "post_extents", str(observation["acpi_reclaim"]["post_extents"] + 1)),
+        (42, "scrub_bytes", str(observation["acpi_reclaim"]["scrub_bytes"] + 4096)),
+        (42, "verified_bytes", str(observation["acpi_reclaim"]["verified_bytes"] + 4096)),
+        (42, "range_checksum", "0x0000000000000000"),
+        (42, "receipt_checksum", "0x0000000000000000"),
+        (42, "idempotent", "0"),
+        (42, "snapshot_retained", "0"),
+        (42, "atomic", "0"),
+        (42, "rollback", "unverified"),
+        (43, "allocations", "2"),
+        (43, "frees", "1"),
+        (43, "start", "0x0000000000001000"),
+        (43, "first_generation", "0"),
+        (43, "reuse_generation", "1"),
+        (43, "allocation_receipts", "1"),
+        (43, "release_receipts", "1"),
+        (43, "scrub_pages", "12"),
+        (43, "scrub_bytes", "49152"),
+        (43, "verified_bytes", "49152"),
+        (43, "stale_pattern", "0x0000000000000000"),
+        (43, "stale_absent", "0"),
+        (43, "double_free_rejected", "0"),
+        (43, "quota_rejected", "0"),
+        (43, "unavailable_rejected", "0"),
+        (43, "metadata_poison", "0"),
+        (43, "coalesces", "0"),
+        (43, "rollback", "unverified"),
+        (44, "managed_pages", str(observation["result"]["managed_pages"] + 1)),
+        (44, "allocated_pages", "0"),
+        (44, "physical_writes", "1"),
+        (44, "physical_reads", "1"),
+        (44, "temporary_pte_writes", "1"),
+        (44, "bootstrap_invlpg", "1"),
+        (44, "alias_revoked", "0"),
+        (44, "metadata_retained", "0"),
+        (44, "ledger_generation_retained", "0"),
+        (44, "acpi_snapshot_retained", "0"),
+        (44, "mappings", "complete_direct_map"),
+        (44, "reclaim", "0"),
+        (44, "acpi_reclaim", "0"),
+        (44, "concurrency", "1"),
+        (44, "smp", "1"),
+        (44, "signatures", "1"),
+        (44, "authority", "1"),
+        (44, "actions", "1"),
+        (44, "production", "1"),
+        (44, "terminal", "return"),
     )
     marker_control_ids = physical_memory.NEGATIVE_CONTROL_IDS[3:-3]
     if len(mutations) != len(marker_control_ids):
@@ -334,7 +378,8 @@ def _source_audit() -> dict[str, Any]:
         "metadata_retained=1",
         "ledger_generation_retained=1",
         "reclaim=1",
-        "acpi_reclaim=0",
+        "acpi_snapshot_retained=1",
+        "acpi_reclaim=1",
     )
     adapter_missing = tuple(token for token in adapter_required if token not in adapter_source)
     if adapter_missing:
@@ -358,7 +403,7 @@ def _source_audit() -> dict[str, Any]:
         "heap_api_token_count": 0,
         "bootstrap_fixed_capacity_ledger_count": 5,
         "active_fixed_capacity_ledger_count": 0,
-        "result": "pass_checked_pressure_triggered_repeated_growth_with_audited_live_page_adapter",
+        "result": "pass_acpi_snapshot_gated_dual_reclaim_with_audited_live_page_adapter",
     }
 
 
@@ -382,7 +427,7 @@ def make_readiness(
     temporary_parent.mkdir(parents=True, exist_ok=True)
     run_parent = ROOT / "runs" / "native-tier0"
     run_parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="pkpmm6-qualification-", dir=temporary_parent) as temporary:
+    with tempfile.TemporaryDirectory(prefix="pkpmm7-qualification-", dir=temporary_parent) as temporary:
         temporary_root = Path(temporary)
         default_boot, default_build = qualify_native_pooleboot._build_and_test(
             toolchain_root, temporary_root / "default-boot"
@@ -395,23 +440,23 @@ def make_readiness(
         if b"POOLEBOOT/0.1 TRANSFER_ARM PASS" in default_boot or b"POOLEBOOT/0.1 STOP BEFORE TRANSFER" not in default_boot:
             raise QualificationError("default PooleBoot development-transfer isolation failed")
         if physical_memory.sha256_bytes(default_boot) == physical_memory.sha256_bytes(pmm_boot):
-            raise QualificationError("default and PKPMM6 PooleBoot profiles are not distinct")
+            raise QualificationError("default and PKPMM7 PooleBoot profiles are not distinct")
         source_audit = _source_audit()
         media_one = native_kernel_load.build_media_bytes(pmm_boot, config, manifest, kernel, artifact_files)
         media_two = native_kernel_load.build_media_bytes(pmm_boot, config, manifest, kernel, artifact_files)
         if media_one != media_two:
-            raise QualificationError("two PKPMM6 media generations differ")
+            raise QualificationError("two PKPMM7 media generations differ")
         media_inspection = native_kernel_load.inspect_media_bytes(media_one)
         if media_inspection["files"][3]["sha256"] != kernel_readiness["product"]["canonical_sha256"]:
-            raise QualificationError("PKPMM6 media kernel differs from PKENTRY1")
-        media_path = temporary_root / "pkpmm6.img"
+            raise QualificationError("PKPMM7 media kernel differs from PKENTRY1")
+        media_path = temporary_root / "pkpmm7.img"
         media_path.write_bytes(media_one)
 
         runs: list[dict[str, Any]] = []
         screenshots: list[bytes] = []
         handoffs: list[bytes] = []
         for run_index in (1, 2):
-            with tempfile.TemporaryDirectory(prefix=f"pkpmm6-run-{run_index}-", dir=run_parent) as run_temporary:
+            with tempfile.TemporaryDirectory(prefix=f"pkpmm7-run-{run_index}-", dir=run_parent) as run_temporary:
                 run_directory = Path(run_temporary)
                 try:
                     run, screenshot, handoff = qualify_native_pooleboot._execute_once(
@@ -468,11 +513,11 @@ def make_readiness(
                 screenshots.append(screenshot)
                 handoffs.append(handoff)
         if runs[0]["markers"] != runs[1]["markers"]:
-            raise QualificationError("two PKPMM6 runs emitted different markers")
+            raise QualificationError("two PKPMM7 runs emitted different markers")
         if screenshots[0] != screenshots[1]:
-            raise QualificationError("two PKPMM6 runs produced different frames")
+            raise QualificationError("two PKPMM7 runs produced different frames")
         if handoffs[0] != handoffs[1]:
-            raise QualificationError("two PKPMM6 runs produced different PBP1 bytes")
+            raise QualificationError("two PKPMM7 runs produced different PBP1 bytes")
 
     controls = _negative_controls(runs[0]["markers"], runs[0]["pbp1_transcript"])
     observation = physical_memory.validate_markers(runs[0]["markers"])
@@ -483,7 +528,7 @@ def make_readiness(
         "schema_version": "1.0",
         "artifact_kind": "pooleos_native_kernel_physical_memory_readiness",
         "status_date": status_date,
-        "status": "pass_single_host_two_run_qemu64_checked_automatic_repeated_ledger_growth_non_promoting",
+        "status": "pass_single_host_two_run_qemu64_acpi_snapshot_gated_dual_reclaim_non_promoting",
         "contract_id": physical_memory.CONTRACT_ID,
         "selected_move_id": physical_memory.SELECTED_MOVE_ID,
         "production_ready": False,
@@ -531,7 +576,8 @@ def make_readiness(
             "observation": {
                 key: observation[key]
                 for key in (
-                    "map", "zones", "ownership", "metadata", "growth", "reclaim", "scrub", "result"
+                    "map", "zones", "ownership", "metadata", "growth", "reclaim",
+                    "acpi_snapshot", "acpi_reclaim", "scrub", "result"
                 )
             },
             "independent_memory_summary": derived,
@@ -545,7 +591,11 @@ def make_readiness(
             "negative_controls_passed": len(controls),
             "memory_entry_count": derived["entry_count"],
             "source_usable_pages": derived["kind_pages"][1],
-            "managed_pages": sum(derived["managed_pages"]) + derived["boot_reclaim"]["page_count"],
+            "managed_pages": (
+                sum(derived["managed_pages"])
+                + derived["boot_reclaim"]["page_count"]
+                + derived["acpi_reclaim"]["page_count"]
+            ),
             "boot_reclaimable_pages_reclaimed": derived["boot_reclaim"]["page_count"],
             "boot_reclaim_source_records": observation["reclaim"]["source_records"],
             "boot_reclaim_ranges": observation["reclaim"]["ranges"],
@@ -556,8 +606,14 @@ def make_readiness(
             ],
             "boot_reclaim_receipts": 1,
             "boot_reclaim_idempotent": observation["reclaim"]["idempotent"] == 1,
-            "acpi_reclaimable_pages_held": observation["reclaim"]["acpi_held_pages"],
+            "acpi_reclaimable_pages_held_before_release": observation["reclaim"]["acpi_held_pages"],
             "acpi_early_reclaim_rejected": observation["reclaim"]["acpi_early_rejected"] == 1,
+            "acpi_snapshot_pages_retained": observation["acpi_snapshot"]["snapshot_pages"],
+            "acpi_snapshot_bytes": observation["acpi_snapshot"]["snapshot_bytes"],
+            "acpi_snapshot_copied_bytes": observation["acpi_snapshot"]["copied_bytes"],
+            "acpi_reclaimable_pages_reclaimed": observation["acpi_reclaim"]["pages"],
+            "acpi_reclaim_receipts": 1,
+            "acpi_reclaim_idempotent": observation["acpi_reclaim"]["idempotent"] == 1,
             "loader_reserved_pages_protected": derived["kind_pages"][10],
             "allocator_operations": observation["scrub"]["allocations"] + observation["scrub"]["frees"],
             "scrub_receipts": observation["growth"]["scrub_capacity"],
@@ -620,14 +676,14 @@ def make_readiness(
                 )
             },
             "complete_address_space_mapping_operations": 0,
-            "reclaim_operations": 1,
+            "reclaim_operations": 2,
             "signature_verifications": 0,
             "authority_grants": 0,
             "actions_authorized": 0,
             "production_claim_count": 0,
         },
         "open_items": [
-            "Integrate the positive ACPI reclaim transition only after N10 owns ACPI table parsing and explicit table-release evidence.",
+            "Extend PKACPI1 beyond required-table structural capture into AML namespace ownership under N10; this receipt makes no AML claim.",
             "Implement N9.3/N9.4 virtual layout, page-table ownership, map/unmap, TLB, PCID, guard, and huge-page contracts.",
             "Implement randomized, concurrent, interrupt-context, SMP, fragmentation, quota, and OOM allocator stress.",
             "Implement heap, object caches, kernel stacks, cacheability policy, target hardware, and second-host qualification.",
@@ -665,10 +721,10 @@ def main(argv: list[str] | None = None) -> int:
         physical_memory.KernelPhysicalMemoryError,
         native_tier0.Tier0Error,
     ) as error:
-        print(f"PKPMM6 qualification failed: {error}", file=sys.stderr)
+        print(f"PKPMM7 qualification failed: {error}", file=sys.stderr)
         return 1
     print(
-        "PKPMM6 qualification passed: "
+        "PKPMM7 qualification passed: "
         f"runs={report['summary']['qemu_run_count']}; "
         f"markers={report['summary']['marker_count']}; "
         f"controls={report['summary']['negative_controls_passed']}; "

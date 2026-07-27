@@ -27,7 +27,7 @@ const DIRECT_PARENT_FLAGS: u64 = ENTRY_PRESENT | ENTRY_WRITABLE | ENTRY_NO_EXECU
 const USER_RW_NX_FLAGS: u64 = ENTRY_PRESENT | ENTRY_WRITABLE | ENTRY_USER | ENTRY_NO_EXECUTE;
 const SUPERVISOR_RW_NX_FLAGS: u64 = ENTRY_PRESENT | ENTRY_WRITABLE | ENTRY_NO_EXECUTE;
 const HARDWARE_LEAF_BITS: u64 = ENTRY_ACCESSED | ENTRY_DIRTY;
-const STACK_PAGE_COUNT: u64 = 14;
+const STACK_PAGE_COUNT: u64 = 32;
 const PROBE_VALUE: u8 = 0xa5;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -1112,8 +1112,8 @@ mod tests {
                 pages.get_mut(&leaf).unwrap()[page] =
                     KERNEL_PHYSICAL + page as u64 * PAGE_BYTES | ENTRY_PRESENT;
             }
-            let stack_top = KERNEL_VIRTUAL + 79 * PAGE_BYTES;
-            for page in 65..79usize {
+            let stack_top = KERNEL_VIRTUAL + 97 * PAGE_BYTES;
+            for page in 65..97usize {
                 pages.get_mut(&leaf).unwrap()[page] =
                     0x0040_0000 + (page - 65) as u64 * PAGE_BYTES | SUPERVISOR_RW_NX_FLAGS;
             }

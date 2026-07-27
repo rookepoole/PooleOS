@@ -11,7 +11,7 @@ The machine-readable contract is
 
 ## Retained input profile
 
-PBLIVE3 keeps the PBP1 1.0 loaded-artifact entry layout and extends its
+PBLIVE4 keeps the PBP1 1.0 loaded-artifact entry layout and extends its
 canonical profile from seven to ten roles:
 
 | Role | Input | PBP1 size meaning |

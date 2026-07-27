@@ -123,8 +123,8 @@ def _host_checks(cargo: Path, env: dict[str, str], temporary_root: Path) -> dict
         env=env,
     )
     match = re.search(r"test result: ok\. ([0-9]+) passed; 0 failed", output)
-    if match is None or int(match.group(1)) != 84:
-        raise QualificationError("expected exactly eighty-four PooleKernel host tests")
+    if match is None or int(match.group(1)) != 88:
+        raise QualificationError("expected exactly eighty-eight PooleKernel host tests")
     for package in ("poolekernel", "poolekernel-fixture"):
         _run(
             [
@@ -188,7 +188,7 @@ def _host_checks(cargo: Path, env: dict[str, str], temporary_root: Path) -> dict
         env=_product_environment(env),
     )
     return {
-        "test_count": 82,
+        "test_count": 88,
         "test_pass_count": 82,
         "rustfmt_packages": ["poolekernel", "poolekernel-fixture"],
         "clippy_targets": [HOST_TARGET, PRODUCT_TARGET],
@@ -508,8 +508,8 @@ def make_readiness(toolchain_root: Path) -> tuple[dict[str, Any], bytes]:
         "negative_controls": controls,
         "claims": entry.expected_claims(),
         "summary": {
-            "rust_host_tests_passed": 84,
-            "rust_host_tests_total": 84,
+            "rust_host_tests_passed": 88,
+            "rust_host_tests_total": 88,
             "rustfmt_packages_passed": 2,
             "clippy_runs_passed": 2,
             "clippy_runs_total": 2,

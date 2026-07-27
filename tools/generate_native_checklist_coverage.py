@@ -296,6 +296,16 @@ ADDED_REQUIREMENTS = [
         ],
     },
     {
+        "id": "ADD-MEM-002",
+        "phase_id": "N9",
+        "requirement": "Replace the bounded nine-page PKVM2 demonstration map with a generation-owned sparse physical direct map whose coverage is derived from validated PMM ownership, excludes holes and forbidden firmware/device ranges, enforces one cache policy per frame, installs and retires table generations transactionally, preserves bootstrap and ACPI snapshot exclusions, and produces local invalidation plus future SMP-shootdown/deferred-reclaim receipts before temporary aliases or concurrent allocation can be promoted.",
+        "basis": [
+            "Cycle 133 PKPMM7 ACPI snapshot and reclaim closeout",
+            "Cycle 133 shared 32-page retained-stack defect corrections",
+            "master checklist sections 026-029, 031, and 151",
+        ],
+    },
+    {
         "id": "ADD-TIME-001",
         "phase_id": "N8",
         "requirement": "Keep monotonic, boot, UTC, and civil time domains separate; specify leap-second, time-step, suspend, RTC-invalid, and pre-network trust behavior without allowing wall-clock changes to break deadlines or signature rollback state.",
@@ -561,7 +571,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path, default=ROOT / SOURCE_RELATIVE)
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pooleos_native_checklist_coverage.json")
-    parser.add_argument("--status-date", default="2026-07-21")
+    parser.add_argument("--status-date", default="2026-07-26")
     args = parser.parse_args()
     artifact = build_coverage(args.source, args.status_date)
     args.out.parent.mkdir(parents=True, exist_ok=True)

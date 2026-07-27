@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_kind": "pooleos_native_checklist_coverage",
-  "status_date": "2026-07-21",
+  "status_date": "2026-07-26",
   "status": "pass",
   "source": {
     "path": "sources/requirements/sha256/a8c94719faf9428c1f133010ba2603c0270c4e1efd7327af8eab9c8c362abb3d/PooleOS_From_Scratch_Master_Checklist.md",
@@ -195,7 +195,8 @@
       "source_line_count": 484,
       "source_checkbox_count": 410,
       "added_requirement_ids": [
-        "ADD-MEM-001"
+        "ADD-MEM-001",
+        "ADD-MEM-002"
       ]
     },
     {
@@ -2950,6 +2951,16 @@
         "Cycle 125 bootstrap-stack growth and PKTRAP1 guard-boundary correction",
         "Cycle 125 PKPMM1 retained-range ownership audit",
         "master checklist sections 026-029 and 151"
+      ]
+    },
+    {
+      "id": "ADD-MEM-002",
+      "phase_id": "N9",
+      "requirement": "Replace the bounded nine-page PKVM2 demonstration map with a generation-owned sparse physical direct map whose coverage is derived from validated PMM ownership, excludes holes and forbidden firmware/device ranges, enforces one cache policy per frame, installs and retires table generations transactionally, preserves bootstrap and ACPI snapshot exclusions, and produces local invalidation plus future SMP-shootdown/deferred-reclaim receipts before temporary aliases or concurrent allocation can be promoted.",
+      "basis": [
+        "Cycle 133 PKPMM7 ACPI snapshot and reclaim closeout",
+        "Cycle 133 shared 32-page retained-stack defect corrections",
+        "master checklist sections 026-029, 031, and 151"
       ]
     },
     {

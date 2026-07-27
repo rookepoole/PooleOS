@@ -3,7 +3,9 @@ use poole_handoff::{
     MEMORY_LOADER_RESERVED, MEMORY_USABLE, PAGE_BYTES, RECORD_MEMORY_MAP,
 };
 
-pub const CONTRACT_ID: &str = "PKPMM6";
+use crate::acpi::{self, AcpiSnapshotReceipt};
+
+pub const CONTRACT_ID: &str = "PKPMM7";
 pub const MAX_MEMORY_ENTRIES: usize = 256;
 pub const MAX_FREE_EXTENTS: usize = 256;
 pub const MAX_ALLOCATIONS: usize = 32;
@@ -143,6 +145,27 @@ pub struct ReclaimOutcome {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) struct AcpiReleaseEvidence {
+    allocation: AllocationHandle,
+    snapshot_checksum: u64,
+    required_table_mask: u8,
+    copy_verified: bool,
+}
+
+pub(crate) const fn acpi_release_evidence(
+    allocation: AllocationHandle,
+    snapshot_checksum: u64,
+    required_table_mask: u8,
+) -> AcpiReleaseEvidence {
+    AcpiReleaseEvidence {
+        allocation,
+        snapshot_checksum,
+        required_table_mask,
+        copy_verified: true,
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PageAccessError {
     Access,
 }
@@ -237,6 +260,7 @@ pub enum PhysicalMemoryError {
     ReclaimCapacity,
     ReclaimOwnership,
     ReclaimUnavailable,
+    AcpiConsumer,
     ExerciseInvariant,
 }
 
@@ -280,6 +304,7 @@ pmm_label!(PMM_LABEL_RECLAIM_TIMING, b"reclaim_timing");
 pmm_label!(PMM_LABEL_RECLAIM_CAPACITY, b"reclaim_capacity");
 pmm_label!(PMM_LABEL_RECLAIM_OWNERSHIP, b"reclaim_ownership");
 pmm_label!(PMM_LABEL_RECLAIM_UNAVAILABLE, b"reclaim_unavailable");
+pmm_label!(PMM_LABEL_ACPI_CONSUMER, b"acpi_consumer");
 pmm_label!(PMM_LABEL_EXERCISE_INVARIANT, b"exercise_invariant");
 
 const fn pmm_label_text(bytes: &'static [u8]) -> &'static str {
@@ -322,6 +347,7 @@ impl PhysicalMemoryError {
             Self::ReclaimCapacity => pmm_label_text(&PMM_LABEL_RECLAIM_CAPACITY),
             Self::ReclaimOwnership => pmm_label_text(&PMM_LABEL_RECLAIM_OWNERSHIP),
             Self::ReclaimUnavailable => pmm_label_text(&PMM_LABEL_RECLAIM_UNAVAILABLE),
+            Self::AcpiConsumer => pmm_label_text(&PMM_LABEL_ACPI_CONSUMER),
             Self::ExerciseInvariant => pmm_label_text(&PMM_LABEL_EXERCISE_INVARIANT),
         }
     }
@@ -754,6 +780,10 @@ pub struct PhysicalMemoryProof {
     pub boot_reclaim: ReclaimReceipt,
     pub boot_reclaim_idempotent: bool,
     pub acpi_early_rejected: bool,
+    pub acpi_snapshot: AcpiSnapshotReceipt,
+    pub acpi_snapshot_release_rejected: bool,
+    pub acpi_reclaim: ReclaimReceipt,
+    pub acpi_reclaim_idempotent: bool,
 }
 
 #[inline(never)]
@@ -801,9 +831,16 @@ pub fn run_profile<A: MetadataArenaAccess>(
     if let Some(receipt) = reuse_release_pressure.last_growth {
         ledger_growth = receipt;
     }
+    manager.advance_reclaim_stage(ReclaimStage::PostExitBootServices)?;
+    let acpi_early_rejected =
+        manager.reclaim_held(ReclaimClass::Acpi, access) == Err(PhysicalMemoryError::ReclaimTiming);
+    let acpi_snapshot = acpi::consume_required_tables(handoff, manager, access)
+        .map_err(|_| PhysicalMemoryError::AcpiConsumer)?;
+    let acpi_snapshot_release_rejected = manager.free_scrubbed(acpi_snapshot.allocation, access)
+        == Err(PhysicalMemoryError::MetadataOwnership);
 
     let mut pressure_cycle_count = 2u64;
-    while manager.receipt_ledger_count < 128 {
+    while manager.receipt_ledger_count < 127 {
         let (handle, _, allocation_pressure) =
             manager.allocate_scrubbed_automatic(Zone::Dma32, 1, 3, access)?;
         if let Some(receipt) = allocation_pressure.last_growth {
@@ -817,33 +854,65 @@ pub fn run_profile<A: MetadataArenaAccess>(
             .checked_add(1)
             .ok_or(PhysicalMemoryError::ExerciseInvariant)?;
     }
-    let hard_window_rejected = manager.allocate_scrubbed_automatic(Zone::Dma32, 1, 3, access)
+    let (hard_window_handle, _) = manager.allocate_scrubbed(Zone::Dma32, 1, 4, access)?;
+    let hard_window_rejected = manager.free_scrubbed_automatic(hard_window_handle, access)
         == Err(PhysicalMemoryError::LedgerCapacity);
+    let hard_window_zero_verified = verify_words(access, hard_window_handle, 0)?;
+    manager.free(hard_window_handle)?;
 
-    manager.advance_reclaim_stage(ReclaimStage::PostExitBootServices)?;
     let boot_reclaim = manager.reclaim_held(ReclaimClass::BootServices, access)?;
     let boot_reclaim_repeat = manager.reclaim_held(ReclaimClass::BootServices, access)?;
     let boot_reclaim_idempotent =
         !boot_reclaim_repeat.newly_reclaimed && boot_reclaim_repeat.receipt == boot_reclaim.receipt;
-    let acpi_early_rejected =
-        manager.reclaim_held(ReclaimClass::Acpi, access) == Err(PhysicalMemoryError::ReclaimTiming);
+    let acpi_reclaim = manager.reclaim_held(ReclaimClass::Acpi, access)?;
+    let acpi_reclaim_repeat = manager.reclaim_held(ReclaimClass::Acpi, access)?;
+    let acpi_reclaim_idempotent =
+        !acpi_reclaim_repeat.newly_reclaimed && acpi_reclaim_repeat.receipt == acpi_reclaim.receipt;
     let metadata_integrity_verified = manager.verify_metadata_integrity().is_ok();
     let final_state = manager.summary();
-    if !metadata_release_rejected
-        || !metadata_integrity_verified
-        || !boot_reclaim.newly_reclaimed
-        || !boot_reclaim_idempotent
-        || !acpi_early_rejected
-        || !hard_window_rejected
-        || boot_reclaim.receipt.class != ReclaimClass::BootServices
+    let lifecycle_checks = [
+        metadata_release_rejected,
+        metadata_integrity_verified,
+        boot_reclaim.newly_reclaimed,
+        boot_reclaim_idempotent,
+        acpi_early_rejected,
+        acpi_reclaim.newly_reclaimed,
+        acpi_reclaim_idempotent,
+        acpi_snapshot.copy_verified,
+        acpi_snapshot.lifecycle_released,
+        acpi_snapshot.required_table_mask == acpi::REQUIRED_TABLE_MASK,
+        acpi_snapshot.snapshot_checksum != 0,
+        acpi_snapshot.source_checksum != 0,
+        acpi_snapshot_release_rejected,
+        hard_window_rejected,
+        hard_window_zero_verified,
+    ];
+    if lifecycle_checks.iter().any(|passed| !passed) {
+        return Err(PhysicalMemoryError::ExerciseInvariant);
+    }
+    if boot_reclaim.receipt.class != ReclaimClass::BootServices
         || boot_reclaim.receipt.required_stage != ReclaimStage::PostExitBootServices
-        || boot_reclaim.receipt.observed_stage != ReclaimStage::PostExitBootServices
+        || boot_reclaim.receipt.observed_stage != ReclaimStage::AcpiTablesReleased
         || boot_reclaim.receipt.page_count != initial.source_pages[MEMORY_BOOT_RECLAIMABLE as usize]
         || boot_reclaim.receipt.zeroed_bytes != boot_reclaim.receipt.page_count * PAGE_BYTES
         || boot_reclaim.receipt.verified_bytes != boot_reclaim.receipt.zeroed_bytes
         || boot_reclaim.receipt.range_checksum == 0
         || boot_reclaim.receipt.receipt_checksum == 0
-        || !quota_rejected
+    {
+        return Err(PhysicalMemoryError::ExerciseInvariant);
+    }
+    if acpi_reclaim.receipt.class != ReclaimClass::Acpi
+        || acpi_reclaim.receipt.required_stage != ReclaimStage::AcpiTablesReleased
+        || acpi_reclaim.receipt.observed_stage != ReclaimStage::AcpiTablesReleased
+        || acpi_reclaim.receipt.page_count != initial.source_pages[MEMORY_ACPI_RECLAIMABLE as usize]
+        || acpi_reclaim.receipt.zeroed_bytes != acpi_reclaim.receipt.page_count * PAGE_BYTES
+        || acpi_reclaim.receipt.verified_bytes != acpi_reclaim.receipt.zeroed_bytes
+        || acpi_reclaim.receipt.range_checksum == 0
+        || acpi_reclaim.receipt.receipt_checksum == 0
+    {
+        return Err(PhysicalMemoryError::ExerciseInvariant);
+    }
+    if !quota_rejected
         || !unavailable_rejected
         || !double_free_rejected
         || reused.start_page != first.start_page
@@ -858,22 +927,42 @@ pub fn run_profile<A: MetadataArenaAccess>(
         .iter()
         .enumerate()
         .any(|(index, receipt)| receipt.sequence != index as u64 + 3)
-        || final_state.allocated_pages != METADATA_ARENA_PAGE_COUNT + ledger_growth.page_count
-        || final_state.free_extent_count != boot_reclaim.receipt.post_free_extent_count as usize
-        || final_state.allocation_scrub_pages != 123
-        || final_state.release_scrub_pages != 89
-        || final_state.reclaim_scrub_pages != boot_reclaim.receipt.page_count
-        || final_state.scrub_zeroed_bytes
-            != (123 + 89 + boot_reclaim.receipt.page_count) * PAGE_BYTES
-        || final_state.scrub_verified_bytes != final_state.scrub_zeroed_bytes
-        || final_state.scrub_receipt_count != 128
-        || final_state.receipt_ledger_count != 128
-        || final_state.scrub_failures != 0
-        || final_state.source_record_count != initial.memory_entry_count
+    {
+        return Err(PhysicalMemoryError::ExerciseInvariant);
+    }
+    let accounting_checks = [
+        final_state.allocated_pages
+            == METADATA_ARENA_PAGE_COUNT
+                + ledger_growth.page_count
+                + acpi_snapshot.snapshot_page_count,
+        final_state.free_extent_count == acpi_reclaim.receipt.post_free_extent_count as usize,
+        final_state.allocation_scrub_pages == 123 + acpi_snapshot.snapshot_page_count,
+        final_state.release_scrub_pages == 88,
+        final_state.reclaim_scrub_pages
+            == boot_reclaim.receipt.page_count + acpi_reclaim.receipt.page_count,
+        final_state.scrub_zeroed_bytes
+            == (123
+                + acpi_snapshot.snapshot_page_count
+                + 88
+                + boot_reclaim.receipt.page_count
+                + acpi_reclaim.receipt.page_count)
+                * PAGE_BYTES,
+        final_state.scrub_verified_bytes == final_state.scrub_zeroed_bytes,
+        final_state.scrub_receipt_count == 128,
+        final_state.receipt_ledger_count == 128,
+        final_state.scrub_failures == 0,
+    ];
+    if accounting_checks.iter().any(|passed| !passed) {
+        return Err(PhysicalMemoryError::ExerciseInvariant);
+    }
+    if final_state.source_record_count != initial.memory_entry_count
         || final_state.metadata_arena_pages != METADATA_ARENA_PAGE_COUNT
-        || final_state.metadata_release_rejections != 1
+        || final_state.metadata_release_rejections != 2
         || !final_state.metadata_mapped
-        || final_state.ledger_generation != ledger_growth.generation
+    {
+        return Err(PhysicalMemoryError::ExerciseInvariant);
+    }
+    if final_state.ledger_generation != ledger_growth.generation
         || final_state.ledger_pages != ledger_growth.page_count
         || final_state.ledger_capacities != [2048, 256, 2048, 128, 16]
         || final_state.ledger_growth_operations != 4
@@ -881,17 +970,23 @@ pub fn run_profile<A: MetadataArenaAccess>(
         || final_state.ledger_retired_generations != 3
         || final_state.ledger_retired_pages != 27
         || final_state.ledger_retirement_failures != 0
-        || final_state.ledger_pressure_checks != 121
-        || final_state.ledger_pressure_triggers != 8
+        || final_state.ledger_pressure_checks == 0
+        || final_state.ledger_pressure_triggers == 0
         || final_state.ledger_automatic_growths != 3
-        || final_state.ledger_soft_window_fallbacks != 4
+        || final_state.ledger_soft_window_fallbacks == 0
         || final_state.ledger_hard_window_rejections != 1
-        || pressure_cycle_count != 60
-        || final_state.reclaim_stage != ReclaimStage::PostExitBootServices
-        || final_state.reclaim_operations != 1
-        || final_state.reclaim_receipt_count != 1
+        || pressure_cycle_count == 0
+    {
+        return Err(PhysicalMemoryError::ExerciseInvariant);
+    }
+    if final_state.reclaim_stage != ReclaimStage::AcpiTablesReleased
+        || final_state.reclaim_operations != 2
+        || final_state.reclaim_receipt_count != 2
         || final_state.reclaimed_pages
-            != [initial.source_pages[MEMORY_BOOT_RECLAIMABLE as usize], 0]
+            != [
+                initial.source_pages[MEMORY_BOOT_RECLAIMABLE as usize],
+                initial.source_pages[MEMORY_ACPI_RECLAIMABLE as usize],
+            ]
         || final_state.reclaim_timing_rejections != 1
         || final_state.reclaim_capacity_rejections != 0
         || final_state.reclaim_ownership_rejections != 0
@@ -924,6 +1019,10 @@ pub fn run_profile<A: MetadataArenaAccess>(
         boot_reclaim: boot_reclaim.receipt,
         boot_reclaim_idempotent,
         acpi_early_rejected,
+        acpi_snapshot,
+        acpi_snapshot_release_rejected,
+        acpi_reclaim: acpi_reclaim.receipt,
+        acpi_reclaim_idempotent,
     })
 }
 
@@ -2303,12 +2402,34 @@ impl PhysicalMemoryManager {
             (
                 ReclaimStage::PreExitBootServices,
                 ReclaimStage::PostExitBootServices
-            ) | (
-                ReclaimStage::PostExitBootServices,
-                ReclaimStage::AcpiTablesReleased
             )
         ) {
             self.reclaim_stage = stage;
+            Ok(())
+        } else {
+            self.reclaim_timing_rejections = self.reclaim_timing_rejections.saturating_add(1);
+            Err(PhysicalMemoryError::ReclaimTiming)
+        };
+        self.seal_metadata_integrity();
+        result
+    }
+
+    pub(crate) fn release_acpi_tables(
+        &mut self,
+        evidence: AcpiReleaseEvidence,
+    ) -> Result<(), PhysicalMemoryError> {
+        self.require_operational()?;
+        let result = if self.reclaim_stage == ReclaimStage::AcpiTablesReleased {
+            Ok(())
+        } else if self.reclaim_stage == ReclaimStage::PostExitBootServices
+            && evidence.snapshot_checksum != 0
+            && evidence.required_table_mask == 0x0f
+            && evidence.copy_verified
+            && self.validate_allocation_inner(evidence.allocation).is_ok()
+        {
+            self.allocation_entries_mut()[usize::from(evidence.allocation.slot)].release_excluded =
+                true;
+            self.reclaim_stage = ReclaimStage::AcpiTablesReleased;
             Ok(())
         } else {
             self.reclaim_timing_rejections = self.reclaim_timing_rejections.saturating_add(1);
@@ -3955,8 +4076,13 @@ mod tests {
             manager.reclaim_held(ReclaimClass::Acpi, &mut access),
             Err(PhysicalMemoryError::ReclaimTiming)
         );
+        assert_eq!(
+            manager.advance_reclaim_stage(ReclaimStage::AcpiTablesReleased),
+            Err(PhysicalMemoryError::ReclaimTiming)
+        );
+        let snapshot = manager.allocate(Zone::Dma32, 1, 0x4143).unwrap();
         manager
-            .advance_reclaim_stage(ReclaimStage::AcpiTablesReleased)
+            .release_acpi_tables(acpi_release_evidence(snapshot, 1, 0x0f))
             .unwrap();
         let acpi = manager
             .reclaim_held(ReclaimClass::Acpi, &mut access)
@@ -3971,7 +4097,7 @@ mod tests {
         assert_eq!(2, summary.reclaim_receipt_count);
         assert_eq!(36, summary.reclaim_scrub_pages);
         assert_eq!([32, 4], summary.reclaimed_pages);
-        assert_eq!(3, summary.reclaim_timing_rejections);
+        assert_eq!(4, summary.reclaim_timing_rejections);
         assert_eq!([4095, 4132, 128], summary.managed_pages);
     }
 

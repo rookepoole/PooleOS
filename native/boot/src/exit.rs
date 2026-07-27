@@ -237,6 +237,9 @@ fn live_failure(stage: &'static str, error: live::Error) -> Failure {
         live::Error::PreExitProfile => "pre_exit_profile",
         live::Error::ExitProfile => "exit_profile",
         live::Error::RetainedRange => "retained_range",
+        live::Error::RetainedShape => "retained_shape",
+        live::Error::RetainedOverlap => "retained_overlap",
+        live::Error::RetainedCoverage => "retained_coverage",
         live::Error::ArtifactSet => "artifact_set",
     };
     Failure {
@@ -437,6 +440,7 @@ pub(super) fn exit_and_stop(
     kernel: &kload::Summary,
     gop: Option<GopSummary>,
     uefi_revision: u32,
+    acpi20_rsdp: u64,
 ) -> Result<(), Failure> {
     let calls = calls(boot_services)?;
     let raw = allocate_pool(
@@ -711,6 +715,7 @@ pub(super) fn exit_and_stop(
             kernel: kernel_input,
             artifacts: artifact_inputs,
             framebuffer: livehandoff::framebuffer(gop),
+            firmware_tables: livehandoff::firmware_tables(acpi20_rsdp),
             retained: RetainedInput {
                 page_table_root_physical: retained.table_physical_base,
                 table_page_count: retained.summary.table_page_count as u32,
@@ -807,11 +812,12 @@ pub(super) fn exit_and_stop(
             ));
         }
         diagnostic(format_args!(
-            "POOLEBOOT/0.1 PBP1_FINAL PASS bytes={} records={} memory_entries={} framebuffer={} artifacts={} descriptor_bytes={} exit_attempts={} message_crc32={:08X} fnv1a64={:016X} state=boot_services_exited bytes_unchanged=1\n",
+            "POOLEBOOT/0.1 PBP1_FINAL PASS bytes={} records={} memory_entries={} framebuffer={} firmware_tables={} artifacts={} descriptor_bytes={} exit_attempts={} message_crc32={:08X} fnv1a64={:016X} state=boot_services_exited bytes_unchanged=1\n",
             handoff_summary.total_bytes,
             handoff_summary.record_count,
             handoff_summary.memory_entry_count,
             u8::from(handoff_summary.framebuffer_present),
+            handoff_summary.firmware_table_count,
             handoff_summary.artifact_count,
             descriptor_size,
             lifecycle.attempts(),

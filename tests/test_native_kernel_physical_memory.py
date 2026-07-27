@@ -32,7 +32,12 @@ class NativeKernelPhysicalMemoryTests(unittest.TestCase):
         )
         self.assertEqual(8, observation["transfer_prefix"]["transfer_arm"]["trap_scenario"])
         self.assertEqual(
-            derived["kind_pages"][1] - 1 + derived["boot_reclaim"]["page_count"],
+            (
+                derived["kind_pages"][1]
+                - 1
+                + derived["boot_reclaim"]["page_count"]
+                + derived["acpi_reclaim"]["page_count"]
+            ),
             observation["result"]["managed_pages"],
         )
         self.assertEqual(physical_memory.SCRUB_BYTES, observation["scrub"]["scrub_bytes"])
@@ -46,7 +51,7 @@ class NativeKernelPhysicalMemoryTests(unittest.TestCase):
         self.assertEqual(5, observation["metadata"]["pages"])
         self.assertEqual(2, observation["metadata"]["guard_pages"])
         self.assertEqual(15376, observation["metadata"]["manager_bytes"])
-        self.assertEqual(32, observation["growth"]["final_generation"])
+        self.assertEqual(33, observation["growth"]["final_generation"])
         self.assertEqual(29, observation["growth"]["final_pages"])
         self.assertEqual([2048, 256, 2048, 128, 16], [
             observation["growth"]["free_capacity"],
@@ -56,17 +61,18 @@ class NativeKernelPhysicalMemoryTests(unittest.TestCase):
             observation["growth"]["reclaim_capacity"],
         ])
         self.assertEqual(3, observation["growth"]["revoked"])
-        self.assertEqual(121, observation["growth"]["pressure_checks"])
-        self.assertEqual(8, observation["growth"]["pressure_triggers"])
+        self.assertEqual(119, observation["growth"]["pressure_checks"])
+        self.assertEqual(7, observation["growth"]["pressure_triggers"])
         self.assertEqual(3, observation["growth"]["automatic_growths"])
-        self.assertEqual(4, observation["growth"]["soft_fallbacks"])
+        self.assertEqual(3, observation["growth"]["soft_fallbacks"])
         self.assertEqual(1, observation["growth"]["hard_rejections"])
         self.assertEqual("host_verified", observation["growth"]["pre_effect"])
         self.assertEqual(1, observation["result"]["metadata_retained"])
         self.assertEqual(1, observation["result"]["ledger_generation_retained"])
         self.assertEqual(1, observation["result"]["alias_revoked"])
         self.assertEqual(1, observation["result"]["reclaim"])
-        self.assertEqual(0, observation["result"]["acpi_reclaim"])
+        self.assertEqual(1, observation["result"]["acpi_snapshot_retained"])
+        self.assertEqual(1, observation["result"]["acpi_reclaim"])
 
     def test_boot_reclaim_receipt_is_independently_derived(self) -> None:
         observation = physical_memory.validate_markers(self.markers)
@@ -76,11 +82,38 @@ class NativeKernelPhysicalMemoryTests(unittest.TestCase):
         self.assertEqual(12, reclaim["range_count"])
         self.assertEqual(11250, reclaim["page_count"])
         self.assertEqual([2018, 9232, 0], reclaim["pages_by_zone"])
-        self.assertEqual(0x5A485D4A5725EED8, reclaim["range_checksum"])
-        self.assertEqual(0xE1F4C87AE4009940, reclaim["receipt_checksum"])
+        self.assertEqual(0xFDAB689F085C3287, reclaim["range_checksum"])
+        self.assertEqual(0x5DEA9A3BC9E10C18, reclaim["receipt_checksum"])
         self.assertEqual(reclaim["receipt_checksum"], observation["reclaim"]["receipt_checksum"])
         self.assertEqual(11, observation["reclaim"]["acpi_held_pages"])
         self.assertEqual(1, observation["reclaim"]["acpi_early_rejected"])
+
+    def test_acpi_snapshot_and_reclaim_are_independently_bound(self) -> None:
+        observation = physical_memory.validate_markers(self.markers)
+        derived = physical_memory.derive_memory_summary(self.run_evidence["pbp1_transcript"])
+        snapshot = observation["acpi_snapshot"]
+        reclaim = derived["acpi_reclaim"]
+        self.assertEqual("PKACPI1", snapshot["contract_id"])
+        self.assertEqual(["APIC", "FACP", "HPET", "MCFG"], snapshot["required"].split(","))
+        self.assertEqual([120, 244, 56, 60], [
+            snapshot["apic_bytes"],
+            snapshot["facp_bytes"],
+            snapshot["hpet_bytes"],
+            snapshot["mcfg_bytes"],
+        ])
+        self.assertEqual(1, snapshot["snapshot_pages"])
+        self.assertEqual(616, snapshot["snapshot_bytes"])
+        self.assertEqual(600, snapshot["copied_bytes"])
+        self.assertEqual(derived["acpi_snapshot"]["physical_address"], snapshot["snapshot"])
+        self.assertEqual(1, reclaim["source_record_count"])
+        self.assertEqual(1, reclaim["range_count"])
+        self.assertEqual(11, reclaim["page_count"])
+        self.assertEqual([0, 11, 0], reclaim["pages_by_zone"])
+        self.assertEqual(0xC718FB26B45257F2, reclaim["range_checksum"])
+        self.assertEqual(0x60DAA52A8A05ABD6, reclaim["receipt_checksum"])
+        self.assertEqual(
+            reclaim["receipt_checksum"], observation["acpi_reclaim"]["receipt_checksum"]
+        )
 
     def test_oracle_rejects_overlap_source_kind_and_core_escape(self) -> None:
         observation = physical_memory.validate_markers(self.markers)

@@ -164,7 +164,7 @@
       "properties": {
         "contract": {"const": "PKMAP2"},
         "private_table_page_count": {"const": 4},
-        "guarded_stack_page_count": {"const": 14},
+        "guarded_stack_page_count": {"const": 32},
         "guard_page_count": {"const": 2},
         "read_only_handoff_page_count": {"const": 256},
         "candidate_tables_retained_through_exit": {"const": true},
@@ -175,7 +175,7 @@
       "type": "object",
       "required": ["producer_contract", "wire_contract", "raw_uefi_descriptor_stride_honored", "boot_services_exited", "kernel_entry_profile_must_reject", "retained_range_loader_coverage_required", "container_retained_after_exit", "transferable"],
       "properties": {
-        "producer_contract": {"const": "PBLIVE3"},
+        "producer_contract": {"const": "PBLIVE4"},
         "wire_contract": {"const": "PBP1"},
         "raw_uefi_descriptor_stride_honored": {"const": true},
         "boot_services_exited": {"const": true},

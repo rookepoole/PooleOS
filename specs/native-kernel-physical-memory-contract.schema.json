@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["schema_version", "artifact_kind", "contract_id", "selected_move_id", "status", "production_ready", "production_promotion_allowed", "development_profile", "limits", "ownership_precedence", "zones", "allocation_policy", "scrub_policy", "metadata_arena", "ledger_generations", "receipt_contract", "reclaim_policy", "reclaim_receipt_contract", "failure_atomicity", "qualification", "required_negative_controls", "claims", "non_claims"],
+  "required": ["schema_version", "artifact_kind", "contract_id", "selected_move_id", "status", "production_ready", "production_promotion_allowed", "development_profile", "limits", "ownership_precedence", "zones", "allocation_policy", "scrub_policy", "metadata_arena", "ledger_generations", "receipt_contract", "reclaim_policy", "acpi_consumer", "reclaim_receipt_contract", "failure_atomicity", "qualification", "required_negative_controls", "claims", "non_claims"],
   "properties": {
     "schema_version": {"const": "1.0"},
     "artifact_kind": {"const": "pooleos_native_kernel_physical_memory_contract"},
-    "contract_id": {"const": "PKPMM6"},
-    "selected_move_id": {"const": "N9-PMM-GROWTH-AUTOMATION-001"},
+    "contract_id": {"const": "PKPMM7"},
+    "selected_move_id": {"const": "N9-PMM-ACPI-CONSUMER-001"},
     "status": {"type": "string", "minLength": 1},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
@@ -20,10 +20,11 @@
     "ledger_generations": {"type": "object"},
     "receipt_contract": {"type": "object"},
     "reclaim_policy": {"type": "object"},
+    "acpi_consumer": {"type": "object"},
     "reclaim_receipt_contract": {"type": "object"},
     "failure_atomicity": {"type": "object"},
     "qualification": {"type": "object"},
-    "required_negative_controls": {"type": "array", "minItems": 147, "maxItems": 147, "items": {"type": "string", "pattern": "^NEG-N9-PKPMM-"}},
+    "required_negative_controls": {"type": "array", "minItems": 191, "maxItems": 191, "items": {"type": "string", "pattern": "^NEG-N9-PKPMM-"}},
     "claims": {"type": "object"},
     "non_claims": {"type": "array", "minItems": 4, "items": {"type": "string"}}
   },

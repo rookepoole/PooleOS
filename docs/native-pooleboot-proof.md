@@ -66,6 +66,12 @@ executes PKREVAL1 over the exact retained bytes, emits an independently bound
 terminal unsigned denial over serial and debugcon, and halts with zero authority
 or effects.
 
+Cycle 133 advances the current retained handoff to PBLIVE4, adds one canonical
+firmware record carrying the UEFI ACPI 2.0 RSDP address, expands the shared
+guarded stack to 32 pages, and rebinds the current 83-page PooleKernel. The
+record is only a locator; PKACPI1 separately validates and copies its bounded
+required-table set inside PooleKernel before ACPI reclaim.
+
 The normative aggregate contract is `specs/native-pooleboot-proof.json`.
 `tools/qualify_native_pooleboot.py` validates the current PKLOAD6 receipt,
 rebuilds and executes the live proof twice, and emits
@@ -93,7 +99,8 @@ The qualified application:
 11. builds and actively audits PKMAP2, then restores the firmware CR3 while
    retaining the kernel, nine non-kernel file ranges, private root, guarded
    stack, and handoff pages;
-12. obtains the final UEFI memory map and serializes ten-descriptor PBLIVE3 into retained memory;
+12. obtains the final UEFI memory map and serializes ten-descriptor PBLIVE4,
+    including the ACPI 2.0 RSDP firmware record, into retained memory;
 13. calls `ExitBootServices`, retrying only stale-map-key failure within a bound;
 14. verifies immutable PBP1 state and zero post-exit firmware calls;
 15. emits the 25-marker dual-channel receipt and halts at
@@ -193,7 +200,7 @@ The receipt proves, on the pinned profile:
 - complete higher-half kernel alias verification with W^X, CR0.WP, and NX;
 - framebuffer translation and cache-bit preservation during the active audit;
 - retention of kernel, six profile artifacts, PSM1, PBTP1, and PBTS1 ranges,
-  four table pages, a fourteen-page guarded stack, and a one-MiB read-only/NX
+  four table pages, a 32-page guarded stack, and a one-MiB read-only/NX
   handoff range;
 - a final-map-bound post-exit development PBP1 reconstructed identically from
   both diagnostics transports;

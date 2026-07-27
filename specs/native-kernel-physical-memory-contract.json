@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
   "artifact_kind": "pooleos_native_kernel_physical_memory_contract",
-  "contract_id": "PKPMM6",
-  "selected_move_id": "N9-PMM-GROWTH-AUTOMATION-001",
-  "status": "checked_pressure_triggered_repeated_generation_growth_contract",
+  "contract_id": "PKPMM7",
+  "selected_move_id": "N9-PMM-ACPI-CONSUMER-001",
+  "status": "acpi_required_table_snapshot_and_evidence_gated_dual_reclaim_contract",
   "production_ready": false,
   "production_promotion_allowed": false,
   "development_profile": {
@@ -68,19 +68,19 @@
     "free_metadata_poisoned": true,
     "adjacent_same_zone_extents_coalesced": true,
     "raw_predecessor_apis": "retained_for_pkvm1_pkvm2_bounded_nonproduction_profiles_only",
-    "metadata_release": "stable_manager_and_current_ledger_generation_are release_excluded; replaced ledger generations are revoked, scrubbed, and released"
+    "metadata_release": "stable manager, current ledger generation, and retained ACPI snapshot are release_excluded; replaced ledger generations are revoked, scrubbed, and released"
   },
   "scrub_policy": {
     "scrub_value": 0,
     "word_bytes": 8,
     "words_per_page": 512,
     "full_page_readback_required": true,
-    "live_profile_allocation_pages": 123,
-    "live_profile_release_pages": 89,
-    "live_profile_reclaim_pages": 11250,
-    "live_profile_total_scrub_pages": 11462,
-    "live_profile_scrubbed_bytes": 46948352,
-    "live_profile_verified_bytes": 46948352,
+    "live_profile_allocation_pages": 124,
+    "live_profile_release_pages": 88,
+    "live_profile_reclaim_pages": 11261,
+    "live_profile_total_scrub_pages": 11473,
+    "live_profile_scrubbed_bytes": 46993408,
+    "live_profile_verified_bytes": 46993408,
     "stale_pattern": "0xA5A55A5AC3C33C3C",
     "exact_first_fit_reuse_required": true,
     "generation_advance_required": true,
@@ -142,11 +142,11 @@
     },
     "growth_policy": "before each automatic scrubbed allocate or free, compute exact post-operation ledger demand and repeatedly double every capacity while reserving one allocation slot and four scrub receipts for a complete failed-growth rollback and retry",
     "pressure_policy": {
-      "check_count": 121,
-      "trigger_count": 8,
+      "check_count": 119,
+      "trigger_count": 7,
       "automatic_growth_count": 3,
-      "successful_pressure_cycles": 60,
-      "soft_window_fallback_count": 4,
+      "successful_pressure_cycles": 59,
+      "soft_window_fallback_count": 3,
       "hard_window_rejection_count": 1,
       "soft_window_fallback": "when the next aligned doubled generation exceeds 32 pages but exact requested demand fits the active generation, continue without growth and record the fallback",
       "hard_window_rejection": "when exact requested demand does not fit and the next aligned doubled generation exceeds 32 pages, reject before page reads, page writes, allocation ownership changes, or receipt commitment"
@@ -227,11 +227,58 @@
       9232,
       0
     ],
-    "live_acpi_pages_held": 11,
-    "live_acpi_positive_activation": false
+    "live_acpi_pages_held_before_release": 11,
+    "live_acpi_pages_reclaimed": 11,
+    "live_acpi_source_records": 1,
+    "live_acpi_ranges": 1,
+    "live_acpi_pages_by_zone": [
+      0,
+      11,
+      0
+    ],
+    "live_acpi_positive_activation": true
+  },
+  "acpi_consumer": {
+    "contract_id": "PKACPI1",
+    "handoff_source": "exactly one PBP1 ACPI 2.0 RSDP firmware-table entry captured before ExitBootServices",
+    "source_alignment_bytes": 4,
+    "source_memory_classes": [
+      "acpi_reclaimable",
+      "acpi_nvs"
+    ],
+    "rsdp_requirements": [
+      "RSD PTR signature",
+      "revision at least 2",
+      "20-byte checksum zero",
+      "36-byte extended checksum zero",
+      "reserved bytes zero",
+      "nonzero XSDT address"
+    ],
+    "xsdt_requirements": [
+      "XSDT signature",
+      "bounded 36-to-65536-byte length",
+      "checksum zero",
+      "one to 64 table pointers",
+      "no duplicate table address"
+    ],
+    "required_tables": [
+      "APIC",
+      "FACP",
+      "HPET",
+      "MCFG"
+    ],
+    "required_table_policy": "each required signature appears exactly once, has its signature-specific minimum length, remains within ACPI source classes, and has a zero checksum",
+    "snapshot_policy": "allocate scrubbed DMA32 pages, copy RSDP then XSDT then APIC/FACP/HPET/MCFG into an aligned bounded layout, read back every copied word, and retain the allocation as release_excluded",
+    "snapshot_maximum_pages": 64,
+    "live_snapshot_pages": 1,
+    "live_snapshot_bytes": 616,
+    "live_copied_bytes": 600,
+    "release_evidence": "opaque PMM evidence binds the live allocation handle, nonzero snapshot checksum, complete required-table mask 0x0F, and successful copy verification",
+    "release_order": "ACPI reclaim remains denied until the snapshot is complete and release_acpi_tables accepts the evidence",
+    "failure_policy": "missing, duplicate, malformed, checksum, source-range, allocation, copy, readback, release, and rollback failures deny ACPI release and preserve PMM ownership"
   },
   "reclaim_receipt_contract": {
-    "receipt_count": 1,
+    "receipt_count": 2,
     "maximum_receipts": 2,
     "required_fields": [
       "sequence",
@@ -280,6 +327,10 @@
       "reclaim_capacity_and_retained_overlap_reject_before_physical_write",
       "automatic_pressure_repeats_growth_then_falls_back_and_rejects_without_effects",
       "pressure_growth_rollback_preserves_retry_headroom_and_requested_ownership"
+      ,"acpi_required_tables_are_copied_before_reclaim_and_snapshot_is_retained"
+      ,"acpi_rejects_missing_duplicate_and_out_of_class_required_tables"
+      ,"acpi_rejects_rsdp_xsdt_and_required_table_corruption"
+      ,"acpi_copy_and_readback_faults_roll_back_without_releasing_tables"
     ]
   },
   "qualification": {
@@ -289,7 +340,7 @@
     "independent_pbp1_oracle_required": true,
     "exact_scrub_counters_required": true,
     "host_fault_tests_required": true,
-    "negative_control_count": 147
+    "negative_control_count": 191
   },
   "required_negative_controls": [
     "NEG-N9-PKPMM-MARKER-OMISSION",
@@ -399,6 +450,49 @@
     "NEG-N9-PKPMM-RECLAIM-RETAINED",
     "NEG-N9-PKPMM-RECLAIM-ATOMIC",
     "NEG-N9-PKPMM-RECLAIM-ROLLBACK",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-CONTRACT",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-PMM",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-RSDP",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-XSDT",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-XSDT-ENTRIES",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-REQUIRED-MASK",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-FACP-BYTES",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-APIC-BYTES",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-HPET-BYTES",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-MCFG-BYTES",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-DESTINATION",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-PAGES",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-BYTES",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-COPIED-BYTES",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-SOURCE-CHECKSUM",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-DESTINATION-CHECKSUM",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-REQUIRED-TABLES",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-COPY-VERIFIED",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-LIFECYCLE",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-RETAINED",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-AML",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-SMP",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-TARGET",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-PRODUCTION",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-STAGE",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-CLASS",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-SEQUENCE",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-SOURCE-RECORDS",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-RANGES",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-PAGES",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-DMA-PAGES",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-DMA32-PAGES",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-NORMAL-PAGES",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-PRE-EXTENTS",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-POST-EXTENTS",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-SCRUB-BYTES",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-VERIFIED-BYTES",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-RANGE-CHECKSUM",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-RECEIPT-CHECKSUM",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-IDEMPOTENT",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-SNAPSHOT-RETAINED",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-ATOMIC",
+    "NEG-N9-PKPMM-ACPI-RECLAIM-ROLLBACK",
     "NEG-N9-PKPMM-ALLOCATION-COUNT",
     "NEG-N9-PKPMM-FREE-COUNT",
     "NEG-N9-PKPMM-START",
@@ -426,6 +520,7 @@
     "NEG-N9-PKPMM-ALIAS-REVOCATION",
     "NEG-N9-PKPMM-METADATA-RETAINED",
     "NEG-N9-PKPMM-LEDGER-GENERATION-RETAINED",
+    "NEG-N9-PKPMM-ACPI-SNAPSHOT-RESULT-RETAINED",
     "NEG-N9-PKPMM-MAPPING",
     "NEG-N9-PKPMM-RECLAIM",
     "NEG-N9-PKPMM-ACPI-RECLAIM",
@@ -479,17 +574,22 @@
     "reclaim_atomicity_rollback_and_idempotence_host_tested": true,
     "generation_bound_reclaim_receipt_enforced": true,
     "acpi_reclaim_timing_enforced": true,
-    "acpi_reclaim_activated": false,
+    "acpi20_rsdp_handoff_consumed": true,
+    "acpi_xsdt_and_required_tables_validated": true,
+    "acpi_required_tables_copied_and_readback_verified": true,
+    "acpi_snapshot_retained_and_release_excluded": true,
+    "acpi_release_requires_opaque_consumer_evidence": true,
+    "acpi_reclaim_activated": true,
     "complete_direct_map_or_address_space_claimed": false,
     "concurrent_or_smp_allocator_qualified": false,
     "n9_exit_gate_satisfied": false,
     "production_ready": false
   },
   "non_claims": [
-    "PKPMM6 qualifies checked pressure-triggered repeated PMM ledger growth and the predecessor one-BSP Boot Services reclaim transaction only inside the bounded qemu64 selector-8 profile.",
-    "Raw allocate and free APIs retained for predecessor PKVM1 and PKVM2 profiles are non-production and are not covered by the PKPMM6 scrub, metadata-growth, pressure, or reclaim claim.",
+    "PKPMM7 qualifies checked pressure-triggered PMM ledger growth, PKACPI1 required-table capture, and one-BSP Boot Services plus ACPI reclaim transactions only inside the bounded qemu64 selector-8 profile.",
+    "Raw allocate and free APIs retained for predecessor PKVM1 and PKVM2 profiles are non-production and are not covered by the PKPMM7 scrub, metadata-growth, pressure, or reclaim claim.",
     "The retained mappings are one guarded five-page stable manager arena, one active guarded ledger-generation window after three predecessor-generation revocations, and one revoked temporary supervisor RW/NX page alias; no complete direct map or address-space policy is claimed.",
-    "Boot Services reclaim is activated only in the bounded qemu64 profile; ACPI reclaim remains held and no positive ACPI activation is claimed.",
+    "PKACPI1 validates and retains only RSDP, XSDT, APIC, FACP, HPET, and MCFG bytes; it does not interpret AML, activate SMP, configure timers, enumerate PCI, or authorize drivers.",
     "Automatic growth is serial one-BSP behavior bounded by the current 32-page retained leaf-table windows; the 58-page next layout is rejected, and concurrency-safe growth, interrupt-context allocation, and SMP allocation are not qualified.",
     "No target hardware, second host, signature, release, or production claim is made."
   ]

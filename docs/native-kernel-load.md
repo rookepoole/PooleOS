@@ -109,7 +109,7 @@ root. No firmware call occurs while the candidate root is active.
 
 ## Final PBP1
 
-For each exit attempt, PBLIVE3 normalizes the newly captured UEFI map into the
+For each exit attempt, PBLIVE4 normalizes the newly captured UEFI map into the
 fixed retained work buffer and serializes PBP1 directly into the retained
 handoff allocation. The final development profile requires:
 
@@ -123,6 +123,8 @@ handoff allocation. The final development profile requires:
 - nonzero retained root, stack top, and handoff addresses;
 - the PSM1 kernel digest and boot-selection state;
 - optional GOP state;
+- one canonical ACPI 2.0 RSDP firmware record copied from the UEFI
+  configuration table; this is a locator, not table-validation evidence;
 - loader-reserved final-map coverage for kernel, six auxiliary artifacts,
   PSM1, PBTP1, PBTS1, table, stack, and handoff physical ranges.
 
@@ -255,10 +257,15 @@ Cycle 132 upgrades it to PKPMM6 with exact-demand pressure checks, automatic
 4/8/15/29-page generation growth, rollback/retry headroom, three scrubbed
 predecessor retirements, bounded-window soft fallback, and hard rejection before
 physical or ownership effects when the 58-page next layout cannot fit. These
-remain one-BSP development profiles with no interrupt-context/concurrent/SMP
-allocation, complete direct map, shootdown, ring 3, complete ACPI consumer
-integration, heap, pager, target, or production claim. The next chronological
-owner-independent move is `N9-PMM-ACPI-CONSUMER-001`.
+remain historical one-BSP development records. Cycle 133 upgrades the handoff
+to PBLIVE4 and selector 8 to PKPMM7/PKACPI1: the kernel validates RSDP/XSDT and
+exactly one APIC, FACP, HPET, and MCFG table, copies the required bytes into a
+retained scrubbed snapshot, verifies readback, and admits the eleven ACPI pages
+only through a separate opaque-evidence-gated reclaim receipt. No AML is
+executed and no complete ACPI resource graph is built. Interrupt-context,
+concurrent, and SMP allocation, a complete generation-owned sparse direct map,
+shootdown, ring 3, heap, pager, target, and production claims remain open. The
+next chronological owner-independent move is `N9-VM-DIRECT-MAP-001`.
 Capability creation, lifecycle execution, signature trust, authenticated
 persistent state, production transfer, and physical-target qualification remain
 separately gated by N5/N6 and owner-controlled N0 work.
