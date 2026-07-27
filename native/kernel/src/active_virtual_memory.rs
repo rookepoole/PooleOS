@@ -1,13 +1,18 @@
 use poole_handoff::{CoreRecord, Handoff, PAGE_BYTES};
 
-use crate::physical_memory::{AllocationHandle, PhysicalMemoryManager, Zone};
+use crate::physical_memory::{
+    AllocationHandle, DirectMapCachePolicy, DirectMapManifest, PhysicalMemoryManager, Zone,
+};
 use crate::virtual_memory::{
     DIRECT_MAP_END_EXCLUSIVE, DIRECT_MAP_START, TableMemory, USER_WINDOW_START,
 };
 
-pub const CONTRACT_ID: &str = "PKVM2";
-pub const TABLE_PAGE_COUNT: u64 = 8;
-pub const MAPPED_OWNED_PAGE_COUNT: u64 = TABLE_PAGE_COUNT + 1;
+pub const CONTRACT_ID: &str = "PKVM3";
+pub const MAX_DIRECT_PAGE_TABLES: usize = 512;
+pub const MAX_DIRECT_DIRECTORY_TABLES: usize = 4;
+pub const FIXED_TABLE_PAGE_COUNT: usize = 5;
+pub const MAX_TABLE_PAGE_COUNT: usize =
+    FIXED_TABLE_PAGE_COUNT + MAX_DIRECT_DIRECTORY_TABLES + MAX_DIRECT_PAGE_TABLES;
 pub const TABLE_OWNER: u16 = 0x0911;
 pub const DATA_OWNER: u16 = 0x0912;
 pub const BSP_CPU_ID: u32 = 0;
@@ -16,6 +21,8 @@ const TABLE_ENTRIES: usize = 512;
 const ENTRY_PRESENT: u64 = 1 << 0;
 const ENTRY_WRITABLE: u64 = 1 << 1;
 const ENTRY_USER: u64 = 1 << 2;
+const ENTRY_PWT: u64 = 1 << 3;
+const ENTRY_PCD: u64 = 1 << 4;
 const ENTRY_ACCESSED: u64 = 1 << 5;
 const ENTRY_DIRTY: u64 = 1 << 6;
 const ENTRY_PAGE_SIZE_OR_PAT: u64 = 1 << 7;
@@ -29,6 +36,7 @@ const SUPERVISOR_RW_NX_FLAGS: u64 = ENTRY_PRESENT | ENTRY_WRITABLE | ENTRY_NO_EX
 const HARDWARE_LEAF_BITS: u64 = ENTRY_ACCESSED | ENTRY_DIRTY;
 const STACK_PAGE_COUNT: u64 = 32;
 const PROBE_VALUE: u8 = 0xa5;
+const PAGES_PER_PAGE_TABLE: u64 = TABLE_ENTRIES as u64;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Error {
@@ -42,6 +50,9 @@ pub enum Error {
     OriginalRoot,
     RootSlotOccupied,
     DirectMapRange,
+    DirectMapCapacity,
+    DirectMapOwnership,
+    CacheAlias,
     LargePage,
     TranslationMissing,
     RetainedKernel,
@@ -69,6 +80,7 @@ pub enum Error {
     Lifecycle,
     InvalidationRequired,
     StaleReceipt,
+    ShootdownRequired,
     ProbeMismatch,
     ExerciseInvariant,
 }
@@ -87,6 +99,9 @@ error_label!(LABEL_TABLE_ACCESS, b"table_access");
 error_label!(LABEL_ORIGINAL_ROOT, b"original_root");
 error_label!(LABEL_ROOT_SLOT_OCCUPIED, b"root_slot_occupied");
 error_label!(LABEL_DIRECT_MAP, b"direct_map");
+error_label!(LABEL_DIRECT_MAP_CAPACITY, b"direct_map_capacity");
+error_label!(LABEL_DIRECT_MAP_OWNERSHIP, b"direct_map_ownership");
+error_label!(LABEL_CACHE_ALIAS, b"cache_alias");
 error_label!(LABEL_TRANSLATION, b"translation");
 error_label!(LABEL_RETAINED_KERNEL, b"retained_kernel");
 error_label!(LABEL_RETAINED_STACK, b"retained_stack");
@@ -114,6 +129,7 @@ error_label!(LABEL_CPU_MISMATCH, b"cpu_mismatch");
 error_label!(LABEL_CR3, b"cr3");
 error_label!(LABEL_LIFECYCLE, b"lifecycle");
 error_label!(LABEL_INVALIDATION, b"invalidation");
+error_label!(LABEL_SHOOTDOWN, b"shootdown_required");
 error_label!(LABEL_PROBE, b"probe");
 error_label!(LABEL_EXERCISE, b"exercise_invariant");
 
@@ -135,6 +151,9 @@ impl Error {
             Self::OriginalRoot => label_text(&LABEL_ORIGINAL_ROOT),
             Self::RootSlotOccupied => label_text(&LABEL_ROOT_SLOT_OCCUPIED),
             Self::DirectMapRange | Self::DirectMap => label_text(&LABEL_DIRECT_MAP),
+            Self::DirectMapCapacity => label_text(&LABEL_DIRECT_MAP_CAPACITY),
+            Self::DirectMapOwnership => label_text(&LABEL_DIRECT_MAP_OWNERSHIP),
+            Self::CacheAlias => label_text(&LABEL_CACHE_ALIAS),
             Self::LargePage | Self::TranslationMissing => label_text(&LABEL_TRANSLATION),
             Self::RetainedKernel => label_text(&LABEL_RETAINED_KERNEL),
             Self::RetainedStack => label_text(&LABEL_RETAINED_STACK),
@@ -156,6 +175,7 @@ impl Error {
             Self::Cr3Mismatch | Self::ActivationMismatch => label_text(&LABEL_CR3),
             Self::Lifecycle => label_text(&LABEL_LIFECYCLE),
             Self::InvalidationRequired | Self::StaleReceipt => label_text(&LABEL_INVALIDATION),
+            Self::ShootdownRequired => label_text(&LABEL_SHOOTDOWN),
             Self::ProbeMismatch => label_text(&LABEL_PROBE),
             Self::ExerciseInvariant => label_text(&LABEL_EXERCISE),
         }
@@ -168,6 +188,7 @@ pub struct Translation {
     pub writable: bool,
     pub executable: bool,
     pub user: bool,
+    pub cache_policy: DirectMapCachePolicy,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -196,6 +217,18 @@ pub struct InvalidationReceipt {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct GenerationRetirementReceipt {
+    sequence: u64,
+    retired_root_physical: u64,
+    retired_root_generation: u64,
+    replacement_root_physical: u64,
+    cpu_id: u32,
+    active_processor_count: u32,
+    local_context_flushes: u64,
+    remote_shootdowns_pending: u32,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Summary {
     pub original_root: u64,
     pub candidate_root: u64,
@@ -204,11 +237,23 @@ pub struct Summary {
     pub data_generation: u64,
     pub direct_map_first: u64,
     pub direct_map_last: u64,
+    pub direct_map_generation: u64,
+    pub direct_map_range_count: u64,
+    pub direct_map_page_count: u64,
+    pub direct_map_gap_pages: u64,
+    pub retained_excluded_pages: u64,
+    pub direct_map_checksum: u64,
+    pub direct_page_tables: u64,
+    pub direct_directory_tables: u64,
+    pub table_pages: u64,
     pub mapped_owned_pages: u64,
     pub cr3_writes: u64,
     pub local_invalidations: u64,
     pub active_receipts: u64,
     pub activation_rollbacks: u64,
+    pub generation_retirement_receipts: u64,
+    pub remote_shootdowns_pending: u64,
+    pub old_generation_reclaim_deferred: bool,
     pub data_released: bool,
     pub tables_released: bool,
     pub root_active: bool,
@@ -221,6 +266,9 @@ pub struct ActiveVirtualMemoryProof {
     pub probe_value: u8,
     pub premature_reuse_rejected: bool,
     pub release_while_active_rejected: bool,
+    pub release_without_retirement_rejected: bool,
+    pub smp_reclaim_rejected: bool,
+    pub cache_alias_rejected: bool,
     pub physical_write_count: u64,
     pub temporary_pte_write_count: u64,
     pub bootstrap_invalidation_count: u64,
@@ -263,6 +311,25 @@ fn direct_address(physical: u64) -> Result<u64, Error> {
         .checked_add(physical)
         .filter(|address| *address < DIRECT_MAP_END_EXCLUSIVE)
         .ok_or(Error::DirectMapRange)
+}
+
+fn manifest_contains_page(manifest: &DirectMapManifest, page: u64) -> bool {
+    manifest.admitted_ranges().iter().any(|range| {
+        page >= range.start_page
+            && page
+                < range
+                    .start_page
+                    .checked_add(range.page_count)
+                    .unwrap_or(range.start_page)
+    })
+}
+
+fn cache_policy_from_entry(entry: u64) -> Result<DirectMapCachePolicy, Error> {
+    if entry & (ENTRY_PWT | ENTRY_PCD) == 0 {
+        Ok(DirectMapCachePolicy::WriteBack)
+    } else {
+        Err(Error::CacheAlias)
+    }
 }
 
 fn read_entry<M: TableMemory>(memory: &mut M, table: u64, index: usize) -> Result<u64, Error> {
@@ -336,6 +403,7 @@ fn translate<M: TableMemory>(
                 writable,
                 executable,
                 user,
+                cache_policy: cache_policy_from_entry(entry)?,
             });
         }
         table = entry & mask;
@@ -359,10 +427,108 @@ fn require_missing<M: TableMemory>(
     }
 }
 
+#[derive(Clone, Copy)]
+struct DirectMapTopology {
+    regions: [u64; MAX_DIRECT_PAGE_TABLES],
+    region_count: usize,
+    directories: [u64; MAX_DIRECT_DIRECTORY_TABLES],
+    directory_count: usize,
+    table_page_count: usize,
+}
+
+impl DirectMapTopology {
+    fn from_manifest(manifest: &DirectMapManifest) -> Result<Self, Error> {
+        if manifest.generation == 0
+            || manifest.range_count == 0
+            || manifest.mapped_pages == 0
+            || manifest.coverage_checksum == 0
+        {
+            return Err(Error::DirectMapOwnership);
+        }
+        let mut topology = Self {
+            regions: [0; MAX_DIRECT_PAGE_TABLES],
+            region_count: 0,
+            directories: [0; MAX_DIRECT_DIRECTORY_TABLES],
+            directory_count: 0,
+            table_page_count: 0,
+        };
+        let mut previous_end = 0u64;
+        for range in manifest.admitted_ranges() {
+            if range.cache_policy != DirectMapCachePolicy::WriteBack || range.page_count == 0 {
+                return Err(Error::CacheAlias);
+            }
+            let end_page = range
+                .start_page
+                .checked_add(range.page_count)
+                .ok_or(Error::DirectMapRange)?;
+            if range.start_page == 0 || range.start_page < previous_end {
+                return Err(Error::DirectMapOwnership);
+            }
+            let last_physical = end_page
+                .checked_mul(PAGE_BYTES)
+                .and_then(|value| value.checked_sub(1))
+                .ok_or(Error::DirectMapRange)?;
+            let first_physical = range
+                .start_page
+                .checked_mul(PAGE_BYTES)
+                .ok_or(Error::DirectMapRange)?;
+            direct_address(first_physical)?;
+            direct_address(last_physical)?;
+            let first_region = range.start_page / PAGES_PER_PAGE_TABLE;
+            let last_region = (end_page - 1) / PAGES_PER_PAGE_TABLE;
+            for region in first_region..=last_region {
+                if topology.region_count == 0
+                    || topology.regions[topology.region_count - 1] != region
+                {
+                    if topology.region_count == topology.regions.len() {
+                        return Err(Error::DirectMapCapacity);
+                    }
+                    topology.regions[topology.region_count] = region;
+                    topology.region_count += 1;
+                }
+                let directory = region / TABLE_ENTRIES as u64;
+                if directory >= TABLE_ENTRIES as u64 {
+                    return Err(Error::DirectMapRange);
+                }
+                if topology.directory_count == 0
+                    || topology.directories[topology.directory_count - 1] != directory
+                {
+                    if topology.directory_count == topology.directories.len() {
+                        return Err(Error::DirectMapCapacity);
+                    }
+                    topology.directories[topology.directory_count] = directory;
+                    topology.directory_count += 1;
+                }
+            }
+            previous_end = end_page;
+        }
+        topology.table_page_count = FIXED_TABLE_PAGE_COUNT
+            .checked_add(topology.directory_count)
+            .and_then(|count| count.checked_add(topology.region_count))
+            .filter(|count| *count <= MAX_TABLE_PAGE_COUNT)
+            .ok_or(Error::DirectMapCapacity)?;
+        Ok(topology)
+    }
+
+    fn region_index(&self, region: u64) -> Result<usize, Error> {
+        self.regions[..self.region_count]
+            .binary_search(&region)
+            .map_err(|_| Error::DirectMapOwnership)
+    }
+
+    fn directory_index(&self, directory: u64) -> Result<usize, Error> {
+        self.directories[..self.directory_count]
+            .binary_search(&directory)
+            .map_err(|_| Error::DirectMapOwnership)
+    }
+}
+
 pub struct ActiveAddressSpace {
     table_allocation: AllocationHandle,
     data_allocation: AllocationHandle,
-    tables: [u64; TABLE_PAGE_COUNT as usize],
+    tables: [u64; MAX_TABLE_PAGE_COUNT],
+    topology: DirectMapTopology,
+    manifest: DirectMapManifest,
     original_cr3: u64,
     lifecycle: Lifecycle,
     next_receipt: u64,
@@ -370,8 +536,19 @@ pub struct ActiveAddressSpace {
     local_invalidations: u64,
     active_receipts: u64,
     activation_rollbacks: u64,
+    generation_retirement_receipts: u64,
+    retirement_receipt: Option<GenerationRetirementReceipt>,
+    old_generation_reclaim_deferred: bool,
     data_released: bool,
     tables_released: bool,
+}
+
+#[derive(Clone, Copy)]
+pub struct ActiveAddressSpaceInput {
+    pub manifest: DirectMapManifest,
+    pub original_cr3: u64,
+    pub core: CoreRecord,
+    pub physical_address_bits: u8,
 }
 
 impl ActiveAddressSpace {
@@ -380,19 +557,28 @@ impl ActiveAddressSpace {
         table_allocation: AllocationHandle,
         data_allocation: AllocationHandle,
         memory: &mut M,
-        original_cr3: u64,
-        core: CoreRecord,
-        physical_address_bits: u8,
+        input: ActiveAddressSpaceInput,
     ) -> Result<Self, Error> {
+        let ActiveAddressSpaceInput {
+            manifest,
+            original_cr3,
+            core,
+            physical_address_bits,
+        } = input;
         manager
             .validate_allocation(table_allocation)
             .map_err(|_| Error::Pmm)?;
         manager
             .validate_allocation(data_allocation)
             .map_err(|_| Error::Pmm)?;
-        if table_allocation.page_count != TABLE_PAGE_COUNT
+        manager
+            .validate_direct_map_manifest(manifest, table_allocation)
+            .map_err(|_| Error::DirectMapOwnership)?;
+        let topology = DirectMapTopology::from_manifest(&manifest)?;
+        if table_allocation.page_count != topology.table_page_count as u64
             || table_allocation.owner != TABLE_OWNER
             || table_allocation.zone != Zone::Dma32
+            || table_allocation.generation != manifest.generation
         {
             return Err(Error::TableAllocation);
         }
@@ -407,7 +593,7 @@ impl ActiveAddressSpace {
         }
         let root = physical_address(table_allocation)?;
         let data = physical_address(data_allocation)?;
-        if data != root + TABLE_PAGE_COUNT * PAGE_BYTES {
+        if data != root + table_allocation.page_count * PAGE_BYTES {
             return Err(Error::AllocationContiguity);
         }
         if original_cr3 & ROOT_ADDRESS_MASK != core.page_table_root_physical
@@ -415,20 +601,42 @@ impl ActiveAddressSpace {
         {
             return Err(Error::OriginalRoot);
         }
-        let tables = core::array::from_fn(|index| root + index as u64 * PAGE_BYTES);
-        let first_direct = direct_address(root)?;
-        let last_direct = direct_address(data + PAGE_BYTES - 1)?;
+        let mut tables = [0u64; MAX_TABLE_PAGE_COUNT];
+        for (index, table) in tables
+            .iter_mut()
+            .enumerate()
+            .take(topology.table_page_count)
+        {
+            *table = root + index as u64 * PAGE_BYTES;
+        }
+        for page in
+            table_allocation.start_page..table_allocation.start_page + table_allocation.page_count
+        {
+            if !manifest_contains_page(&manifest, page) {
+                return Err(Error::DirectMapOwnership);
+            }
+        }
+        if !manifest_contains_page(&manifest, data_allocation.start_page) {
+            return Err(Error::DirectMapOwnership);
+        }
+        let first_physical = manifest
+            .first_page
+            .checked_mul(PAGE_BYTES)
+            .ok_or(Error::DirectMapRange)?;
+        let last_physical = manifest
+            .end_page
+            .checked_mul(PAGE_BYTES)
+            .and_then(|value| value.checked_sub(1))
+            .ok_or(Error::DirectMapRange)?;
+        let first_direct = direct_address(first_physical)?;
+        let last_direct = direct_address(last_physical)?;
         let first_indices = indices(first_direct);
         let last_indices = indices(last_direct);
-        if first_indices[0] != last_indices[0]
-            || first_indices[1] != last_indices[1]
-            || last_indices[2] < first_indices[2]
-            || last_indices[2] - first_indices[2] > 1
-        {
+        if first_indices[0] != last_indices[0] || first_indices[1] != last_indices[1] {
             return Err(Error::DirectMapRange);
         }
 
-        for table in tables {
+        for table in tables.iter().take(topology.table_page_count).copied() {
             memory
                 .prepare_page(table)
                 .map_err(|_| Error::MemoryAccess)?;
@@ -491,43 +699,61 @@ impl ActiveAddressSpace {
         )
         .map_err(|_| Error::UserHierarchyTransaction)?;
 
-        replace_entry(
-            memory,
-            tables[4],
-            first_indices[1],
-            0,
-            tables[5] | DIRECT_PARENT_FLAGS,
-        )
-        .map_err(|_| Error::DirectHierarchyTransaction)?;
-        for directory_offset in 0..=(last_indices[2] - first_indices[2]) {
+        for (directory_offset, directory) in topology.directories[..topology.directory_count]
+            .iter()
+            .copied()
+            .enumerate()
+        {
             replace_entry(
                 memory,
-                tables[5],
-                first_indices[2] + directory_offset,
+                tables[4],
+                directory as usize,
                 0,
-                tables[6 + directory_offset] | DIRECT_PARENT_FLAGS,
+                tables[FIXED_TABLE_PAGE_COUNT + directory_offset] | DIRECT_PARENT_FLAGS,
             )
             .map_err(|_| Error::DirectHierarchyTransaction)?;
         }
-        for page in 0..MAPPED_OWNED_PAGE_COUNT {
-            let physical = root + page * PAGE_BYTES;
-            let direct = direct_address(physical)?;
-            let direct_indices = indices(direct);
-            let directory_offset = direct_indices[2] - first_indices[2];
+        let direct_pt_start = FIXED_TABLE_PAGE_COUNT + topology.directory_count;
+        for (region_offset, region) in topology.regions[..topology.region_count]
+            .iter()
+            .copied()
+            .enumerate()
+        {
+            let directory = region / TABLE_ENTRIES as u64;
+            let directory_offset = topology.directory_index(directory)?;
             replace_entry(
                 memory,
-                tables[6 + directory_offset],
-                direct_indices[3],
+                tables[FIXED_TABLE_PAGE_COUNT + directory_offset],
+                (region % TABLE_ENTRIES as u64) as usize,
                 0,
-                physical | SUPERVISOR_RW_NX_FLAGS,
+                tables[direct_pt_start + region_offset] | DIRECT_PARENT_FLAGS,
             )
-            .map_err(|_| Error::DirectLeafTransaction)?;
+            .map_err(|_| Error::DirectHierarchyTransaction)?;
+        }
+        for range in manifest.admitted_ranges() {
+            let end_page = range
+                .start_page
+                .checked_add(range.page_count)
+                .ok_or(Error::DirectMapRange)?;
+            for page in range.start_page..end_page {
+                let region_offset = topology.region_index(page / PAGES_PER_PAGE_TABLE)?;
+                replace_entry(
+                    memory,
+                    tables[direct_pt_start + region_offset],
+                    (page % PAGES_PER_PAGE_TABLE) as usize,
+                    0,
+                    (page * PAGE_BYTES) | SUPERVISOR_RW_NX_FLAGS,
+                )
+                .map_err(|_| Error::DirectLeafTransaction)?;
+            }
         }
 
         let space = Self {
             table_allocation,
             data_allocation,
             tables,
+            topology,
+            manifest,
             original_cr3,
             lifecycle: Lifecycle::Prepared,
             next_receipt: 1,
@@ -535,6 +761,9 @@ impl ActiveAddressSpace {
             local_invalidations: 0,
             active_receipts: 0,
             activation_rollbacks: 0,
+            generation_retirement_receipts: 0,
+            retirement_receipt: None,
+            old_generation_reclaim_deferred: false,
             data_released: false,
             tables_released: false,
         };
@@ -669,23 +898,49 @@ impl ActiveAddressSpace {
                 return Err(Error::RetainedHandoff);
             }
         }
-        let root = self.tables[0];
-        for page in 0..MAPPED_OWNED_PAGE_COUNT {
-            let physical = root + page * PAGE_BYTES;
-            let translation = translate(
-                memory,
-                candidate_root,
-                direct_address(physical)?,
-                physical_address_bits,
-            )
-            .map_err(|_| Error::DirectMap)?;
-            if translation.physical_address != physical
-                || !translation.writable
-                || translation.executable
-                || translation.user
+        let mut previous_end = None;
+        let mut audited_pages = 0u64;
+        for range in self.manifest.admitted_ranges() {
+            let end_page = range
+                .start_page
+                .checked_add(range.page_count)
+                .ok_or(Error::DirectMapRange)?;
+            if let Some(gap_start) = previous_end
+                && gap_start < range.start_page
             {
-                return Err(Error::DirectMap);
+                for page in [gap_start, range.start_page - 1] {
+                    require_missing(
+                        memory,
+                        candidate_root,
+                        direct_address(page * PAGE_BYTES)?,
+                        physical_address_bits,
+                        Error::DirectMap,
+                    )?;
+                }
             }
+            for page in range.start_page..end_page {
+                let physical = page * PAGE_BYTES;
+                let translation = translate(
+                    memory,
+                    candidate_root,
+                    direct_address(physical)?,
+                    physical_address_bits,
+                )
+                .map_err(|_| Error::DirectMap)?;
+                if translation.physical_address != physical
+                    || !translation.writable
+                    || translation.executable
+                    || translation.user
+                    || translation.cache_policy != range.cache_policy
+                {
+                    return Err(Error::DirectMap);
+                }
+                audited_pages = audited_pages.checked_add(1).ok_or(Error::DirectMapRange)?;
+            }
+            previous_end = Some(end_page);
+        }
+        if audited_pages != self.manifest.mapped_pages {
+            return Err(Error::DirectMapOwnership);
         }
         let user = translate(
             memory,
@@ -859,6 +1114,7 @@ impl ActiveAddressSpace {
             writable: value & ENTRY_WRITABLE != 0,
             executable: value & ENTRY_NO_EXECUTE == 0,
             user: value & ENTRY_USER != 0,
+            cache_policy: DirectMapCachePolicy::WriteBack,
         };
         if translation.physical_address != data
             || translation.writable
@@ -898,21 +1154,19 @@ impl ActiveAddressSpace {
         let cpu_id = self.require_active(hardware)?;
         let data = physical_address(self.data_allocation)?;
         let direct = direct_address(data)?;
-        let direct_indices = indices(direct);
-        let first_directory = indices(direct_address(self.tables[0])?)[2];
-        let directory_offset = direct_indices[2]
-            .checked_sub(first_directory)
-            .filter(|offset| *offset <= 1)
-            .ok_or(Error::DirectMapRange)?;
-        let table_virtual = direct_address(self.tables[6 + directory_offset])?;
+        let page = data / PAGE_BYTES;
+        let region_offset = self.topology.region_index(page / PAGES_PER_PAGE_TABLE)?;
+        let direct_pt_start = FIXED_TABLE_PAGE_COUNT + self.topology.directory_count;
+        let table_virtual = direct_address(self.tables[direct_pt_start + region_offset])?;
+        let leaf_index = (page % PAGES_PER_PAGE_TABLE) as usize;
         let observed = Self::observed_active_leaf(
             hardware,
             table_virtual,
-            direct_indices[3],
+            leaf_index,
             data | SUPERVISOR_RW_NX_FLAGS,
         )
         .map_err(|_| Error::DirectUnmapTransaction)?;
-        Self::active_replace(hardware, table_virtual, direct_indices[3], observed, 0)
+        Self::active_replace(hardware, table_virtual, leaf_index, observed, 0)
             .map_err(|_| Error::DirectUnmapTransaction)?;
         self.invalidate(hardware, direct, cpu_id, ReceiptKind::DirectUnmap)
     }
@@ -948,10 +1202,17 @@ impl ActiveAddressSpace {
         Ok(())
     }
 
-    pub fn restore<H: ActiveHardware>(&mut self, hardware: &mut H) -> Result<(), Error> {
-        self.require_active(hardware)?;
+    pub fn restore<H: ActiveHardware>(
+        &mut self,
+        hardware: &mut H,
+        active_processor_count: u32,
+    ) -> Result<GenerationRetirementReceipt, Error> {
+        let cpu_id = self.require_active(hardware)?;
         if !self.data_released {
             return Err(Error::Lifecycle);
+        }
+        if active_processor_count != 1 {
+            return Err(Error::ShootdownRequired);
         }
         hardware.write_cr3(self.original_cr3)?;
         if hardware.read_cr3() != self.original_cr3 {
@@ -959,18 +1220,53 @@ impl ActiveAddressSpace {
         }
         self.cr3_writes += 1;
         self.lifecycle = Lifecycle::Restored;
-        Ok(())
+        let receipt = GenerationRetirementReceipt {
+            sequence: self.next_receipt,
+            retired_root_physical: self.tables[0],
+            retired_root_generation: self.table_allocation.generation,
+            replacement_root_physical: self.original_cr3 & ROOT_ADDRESS_MASK,
+            cpu_id,
+            active_processor_count,
+            local_context_flushes: 1,
+            remote_shootdowns_pending: 0,
+        };
+        self.next_receipt = self
+            .next_receipt
+            .checked_add(1)
+            .ok_or(Error::StaleReceipt)?;
+        self.generation_retirement_receipts += 1;
+        self.retirement_receipt = Some(receipt);
+        self.old_generation_reclaim_deferred = true;
+        Ok(receipt)
     }
 
     pub fn release_tables<M: TableMemory>(
         &mut self,
         manager: &mut PhysicalMemoryManager,
         memory: &mut M,
+        retirement: Option<GenerationRetirementReceipt>,
     ) -> Result<(), Error> {
         if self.lifecycle != Lifecycle::Restored || !self.data_released || self.tables_released {
             return Err(Error::Lifecycle);
         }
-        for table in self.tables {
+        let receipt = retirement.ok_or(Error::InvalidationRequired)?;
+        if self.retirement_receipt != Some(receipt)
+            || receipt.retired_root_physical != self.tables[0]
+            || receipt.retired_root_generation != self.table_allocation.generation
+            || receipt.replacement_root_physical != self.original_cr3 & ROOT_ADDRESS_MASK
+            || receipt.cpu_id != BSP_CPU_ID
+            || receipt.active_processor_count != 1
+            || receipt.local_context_flushes != 1
+            || receipt.remote_shootdowns_pending != 0
+        {
+            return Err(Error::StaleReceipt);
+        }
+        for table in self
+            .tables
+            .iter()
+            .take(self.topology.table_page_count)
+            .copied()
+        {
             for index in 0..TABLE_ENTRIES {
                 write_entry(memory, table, index, 0)?;
             }
@@ -992,13 +1288,38 @@ impl ActiveAddressSpace {
             table_generation: self.table_allocation.generation,
             data_physical: data,
             data_generation: self.data_allocation.generation,
-            direct_map_first: direct_address(self.tables[0]).unwrap_or(0),
-            direct_map_last: direct_address(data + PAGE_BYTES - 1).unwrap_or(0),
-            mapped_owned_pages: MAPPED_OWNED_PAGE_COUNT,
+            direct_map_first: self
+                .manifest
+                .first_page
+                .checked_mul(PAGE_BYTES)
+                .and_then(|physical| direct_address(physical).ok())
+                .unwrap_or(0),
+            direct_map_last: self
+                .manifest
+                .end_page
+                .checked_mul(PAGE_BYTES)
+                .and_then(|value| value.checked_sub(1))
+                .and_then(|physical| direct_address(physical).ok())
+                .unwrap_or(0),
+            direct_map_generation: self.manifest.generation,
+            direct_map_range_count: self.manifest.range_count as u64,
+            direct_map_page_count: self.manifest.mapped_pages,
+            direct_map_gap_pages: self.manifest.gap_pages,
+            retained_excluded_pages: self.manifest.retained_excluded_pages,
+            direct_map_checksum: self.manifest.coverage_checksum,
+            direct_page_tables: self.topology.region_count as u64,
+            direct_directory_tables: self.topology.directory_count as u64,
+            table_pages: self.topology.table_page_count as u64,
+            mapped_owned_pages: self.manifest.mapped_pages,
             cr3_writes: self.cr3_writes,
             local_invalidations: self.local_invalidations,
             active_receipts: self.active_receipts,
             activation_rollbacks: self.activation_rollbacks,
+            generation_retirement_receipts: self.generation_retirement_receipts,
+            remote_shootdowns_pending: self
+                .retirement_receipt
+                .map_or(0, |receipt| u64::from(receipt.remote_shootdowns_pending)),
+            old_generation_reclaim_deferred: self.old_generation_reclaim_deferred,
             data_released: self.data_released,
             tables_released: self.tables_released,
             root_active: self.lifecycle == Lifecycle::Active,
@@ -1016,9 +1337,14 @@ pub fn run_profile<M: TableMemory, H: ActiveHardware>(
     hardware: &mut H,
 ) -> Result<ActiveVirtualMemoryProof, Error> {
     let mut manager =
-        PhysicalMemoryManager::from_handoff(handoff, core, 24).map_err(|_| Error::Pmm)?;
+        PhysicalMemoryManager::from_handoff(handoff, core, MAX_TABLE_PAGE_COUNT as u64 + 1)
+            .map_err(|_| Error::Pmm)?;
+    let manifest = manager
+        .preview_direct_map_manifest()
+        .map_err(|_| Error::DirectMapOwnership)?;
+    let topology = DirectMapTopology::from_manifest(&manifest)?;
     let tables = manager
-        .allocate(Zone::Dma32, TABLE_PAGE_COUNT, TABLE_OWNER)
+        .allocate(Zone::Dma32, topology.table_page_count as u64, TABLE_OWNER)
         .map_err(|_| Error::TableAllocation)?;
     let data = manager
         .allocate(Zone::Dma32, 1, DATA_OWNER)
@@ -1028,9 +1354,12 @@ pub fn run_profile<M: TableMemory, H: ActiveHardware>(
         tables,
         data,
         memory,
-        original_cr3,
-        core,
-        physical_address_bits,
+        ActiveAddressSpaceInput {
+            manifest,
+            original_cr3,
+            core,
+            physical_address_bits,
+        },
     )?;
     memory.finish().map_err(|_| Error::MemoryAccess)?;
     space.activate(hardware)?;
@@ -1043,20 +1372,30 @@ pub fn run_profile<M: TableMemory, H: ActiveHardware>(
     let direct_receipt = space.revoke_data_direct_map(hardware)?;
     space.complete_data_release(&mut manager, hardware, user_receipt, Some(direct_receipt))?;
     let release_while_active_rejected =
-        space.release_tables(&mut manager, memory) == Err(Error::Lifecycle);
-    space.restore(hardware)?;
-    space.release_tables(&mut manager, memory)?;
+        space.release_tables(&mut manager, memory, None) == Err(Error::Lifecycle);
+    let smp_reclaim_rejected = space.restore(hardware, 2) == Err(Error::ShootdownRequired);
+    let retirement = space.restore(hardware, 1)?;
+    let release_without_retirement_rejected =
+        space.release_tables(&mut manager, memory, None) == Err(Error::InvalidationRequired);
+    space.release_tables(&mut manager, memory, Some(retirement))?;
+    let cache_alias_rejected = cache_policy_from_entry(ENTRY_PCD) == Err(Error::CacheAlias);
     let summary = space.summary();
     let final_pmm = manager.summary();
     if probe_value != PROBE_VALUE
         || !premature_reuse_rejected
         || !release_while_active_rejected
+        || !release_without_retirement_rejected
+        || !smp_reclaim_rejected
+        || !cache_alias_rejected
         || protected_translation.writable
         || !protected_translation.executable
         || !protected_translation.user
         || summary.cr3_writes != 2
         || summary.local_invalidations != 3
         || summary.active_receipts != 3
+        || summary.generation_retirement_receipts != 1
+        || summary.remote_shootdowns_pending != 0
+        || !summary.old_generation_reclaim_deferred
         || !summary.data_released
         || !summary.tables_released
         || summary.root_active
@@ -1070,6 +1409,9 @@ pub fn run_profile<M: TableMemory, H: ActiveHardware>(
         probe_value,
         premature_reuse_rejected,
         release_while_active_rejected,
+        release_without_retirement_rejected,
+        smp_reclaim_rejected,
+        cache_alias_rejected,
         physical_write_count: memory.physical_write_count(),
         temporary_pte_write_count: memory.temporary_pte_write_count(),
         bootstrap_invalidation_count: memory.hardware_invalidation_count(),
@@ -1110,12 +1452,12 @@ mod tests {
             pages.get_mut(&directory).unwrap()[0] = leaf | ENTRY_PRESENT | ENTRY_WRITABLE;
             for page in 0..4usize {
                 pages.get_mut(&leaf).unwrap()[page] =
-                    KERNEL_PHYSICAL + page as u64 * PAGE_BYTES | ENTRY_PRESENT;
+                    (KERNEL_PHYSICAL + page as u64 * PAGE_BYTES) | ENTRY_PRESENT;
             }
             let stack_top = KERNEL_VIRTUAL + 97 * PAGE_BYTES;
             for page in 65..97usize {
                 pages.get_mut(&leaf).unwrap()[page] =
-                    0x0040_0000 + (page - 65) as u64 * PAGE_BYTES | SUPERVISOR_RW_NX_FLAGS;
+                    (0x0040_0000 + (page - 65) as u64 * PAGE_BYTES) | SUPERVISOR_RW_NX_FLAGS;
             }
             pages.get_mut(&leaf).unwrap()[80] = 0x0050_0000 | ENTRY_PRESENT | ENTRY_NO_EXECUTE;
             let core = CoreRecord {
@@ -1297,8 +1639,10 @@ mod tests {
     ) {
         let (mut memory, core) = Memory::fixture();
         let mut manager = PhysicalMemoryManager::test_manager(4096, 128, 24);
+        let manifest = manager.preview_direct_map_manifest().unwrap();
+        let topology = DirectMapTopology::from_manifest(&manifest).unwrap();
         let tables = manager
-            .allocate(Zone::Dma32, TABLE_PAGE_COUNT, TABLE_OWNER)
+            .allocate(Zone::Dma32, topology.table_page_count as u64, TABLE_OWNER)
             .unwrap();
         let data = manager.allocate(Zone::Dma32, 1, DATA_OWNER).unwrap();
         let space = ActiveAddressSpace::initialize(
@@ -1306,23 +1650,29 @@ mod tests {
             tables,
             data,
             &mut memory,
-            ORIGINAL_ROOT,
-            core,
-            48,
+            ActiveAddressSpaceInput {
+                manifest,
+                original_cr3: ORIGINAL_ROOT,
+                core,
+                physical_address_bits: 48,
+            },
         )
         .unwrap();
         (manager, space, memory, core)
     }
 
     #[test]
-    fn candidate_preserves_retained_mappings_and_owns_bounded_direct_map() {
+    fn candidate_preserves_retained_mappings_and_maps_complete_managed_ownership() {
         let (_manager, space, mut memory, core) = prepared();
         space.audit(&mut memory, core, 48).unwrap();
         let summary = space.summary();
-        assert_eq!(MAPPED_OWNED_PAGE_COUNT, summary.mapped_owned_pages);
+        assert_eq!(128, summary.mapped_owned_pages);
+        assert_eq!(1, summary.direct_map_range_count);
+        assert_eq!(1, summary.direct_page_tables);
+        assert_eq!(7, summary.table_pages);
         assert_eq!(
             summary.candidate_root,
-            summary.data_physical - 8 * PAGE_BYTES
+            summary.data_physical - summary.table_pages * PAGE_BYTES
         );
     }
 
@@ -1406,9 +1756,25 @@ mod tests {
             .complete_data_release(&mut manager, &mut hardware, user, Some(direct))
             .unwrap();
         assert_eq!(hardware.invalidations.len(), 3);
-        space.restore(&mut hardware).unwrap();
+        assert_eq!(
+            space.restore(&mut hardware, 2),
+            Err(Error::ShootdownRequired)
+        );
+        let retirement = space.restore(&mut hardware, 1).unwrap();
         drop(hardware);
-        space.release_tables(&mut manager, &mut memory).unwrap();
+        assert_eq!(
+            space.release_tables(&mut manager, &mut memory, None),
+            Err(Error::InvalidationRequired)
+        );
+        let mut stale = retirement;
+        stale.sequence += 1;
+        assert_eq!(
+            space.release_tables(&mut manager, &mut memory, Some(stale)),
+            Err(Error::StaleReceipt)
+        );
+        space
+            .release_tables(&mut manager, &mut memory, Some(retirement))
+            .unwrap();
         assert_eq!(manager.summary().allocated_pages, 0);
     }
 
@@ -1438,13 +1804,105 @@ mod tests {
     }
 
     #[test]
+    fn sparse_manifest_leaves_retained_hole_unmapped() {
+        let (mut memory, core) = Memory::fixture();
+        let mut manager = PhysicalMemoryManager::test_manager(4096, 128, 64);
+        let _prefix = manager.allocate(Zone::Dma32, 8, 0x0900).unwrap();
+        let retained = manager.allocate(Zone::Dma32, 4, 0x4143).unwrap();
+        manager.test_retain_allocation(retained).unwrap();
+        let manifest = manager.preview_direct_map_manifest().unwrap();
+        let topology = DirectMapTopology::from_manifest(&manifest).unwrap();
+        let tables = manager
+            .allocate(Zone::Dma32, topology.table_page_count as u64, TABLE_OWNER)
+            .unwrap();
+        let data = manager.allocate(Zone::Dma32, 1, DATA_OWNER).unwrap();
+        let space = ActiveAddressSpace::initialize(
+            &manager,
+            tables,
+            data,
+            &mut memory,
+            ActiveAddressSpaceInput {
+                manifest,
+                original_cr3: ORIGINAL_ROOT,
+                core,
+                physical_address_bits: 48,
+            },
+        )
+        .unwrap();
+        assert_eq!(2, space.summary().direct_map_range_count);
+        assert_eq!(4, space.summary().direct_map_gap_pages);
+        assert_eq!(4, space.summary().retained_excluded_pages);
+        assert_eq!(
+            translate(
+                &mut memory,
+                space.tables[0],
+                direct_address(retained.start_page * PAGE_BYTES).unwrap(),
+                48,
+            ),
+            Err(Error::TranslationMissing)
+        );
+    }
+
+    #[test]
+    fn cache_attribute_drift_and_forged_manifest_fail_closed() {
+        let (_manager, space, mut memory, core) = prepared();
+        let page = space.manifest.first_page;
+        let region_offset = space
+            .topology
+            .region_index(page / PAGES_PER_PAGE_TABLE)
+            .unwrap();
+        let direct_pt_start = FIXED_TABLE_PAGE_COUNT + space.topology.directory_count;
+        memory
+            .pages
+            .get_mut(&space.tables[direct_pt_start + region_offset])
+            .unwrap()[(page % PAGES_PER_PAGE_TABLE) as usize] |= ENTRY_PCD;
+        assert_eq!(
+            translate(
+                &mut memory,
+                space.tables[0],
+                direct_address(page * PAGE_BYTES).unwrap(),
+                48,
+            ),
+            Err(Error::CacheAlias)
+        );
+        assert_eq!(space.audit(&mut memory, core, 48), Err(Error::DirectMap));
+
+        let (mut memory, core) = Memory::fixture();
+        let mut manager = PhysicalMemoryManager::test_manager(4096, 128, 24);
+        let mut manifest = manager.preview_direct_map_manifest().unwrap();
+        let topology = DirectMapTopology::from_manifest(&manifest).unwrap();
+        let tables = manager
+            .allocate(Zone::Dma32, topology.table_page_count as u64, TABLE_OWNER)
+            .unwrap();
+        let data = manager.allocate(Zone::Dma32, 1, DATA_OWNER).unwrap();
+        manifest.coverage_checksum ^= 1;
+        assert!(matches!(
+            ActiveAddressSpace::initialize(
+                &manager,
+                tables,
+                data,
+                &mut memory,
+                ActiveAddressSpaceInput {
+                    manifest,
+                    original_cr3: ORIGINAL_ROOT,
+                    core,
+                    physical_address_bits: 48,
+                },
+            ),
+            Err(Error::DirectMapOwnership)
+        ));
+    }
+
+    #[test]
     fn occupied_direct_root_slot_fails_closed() {
         let (mut memory, core) = Memory::fixture();
         memory.pages.get_mut(&ORIGINAL_ROOT).unwrap()[indices(DIRECT_MAP_START)[0]] =
             0x0400_0000 | ENTRY_PRESENT;
         let mut manager = PhysicalMemoryManager::test_manager(4096, 128, 24);
+        let manifest = manager.preview_direct_map_manifest().unwrap();
+        let topology = DirectMapTopology::from_manifest(&manifest).unwrap();
         let tables = manager
-            .allocate(Zone::Dma32, TABLE_PAGE_COUNT, TABLE_OWNER)
+            .allocate(Zone::Dma32, topology.table_page_count as u64, TABLE_OWNER)
             .unwrap();
         let data = manager.allocate(Zone::Dma32, 1, DATA_OWNER).unwrap();
         assert!(matches!(
@@ -1453,9 +1911,12 @@ mod tests {
                 tables,
                 data,
                 &mut memory,
-                ORIGINAL_ROOT,
-                core,
-                48,
+                ActiveAddressSpaceInput {
+                    manifest,
+                    original_cr3: ORIGINAL_ROOT,
+                    core,
+                    physical_address_bits: 48,
+                },
             ),
             Err(Error::RootSlotOccupied)
         ));

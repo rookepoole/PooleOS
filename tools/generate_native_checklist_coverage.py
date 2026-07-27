@@ -301,7 +301,7 @@ ADDED_REQUIREMENTS = [
         "requirement": "Replace the bounded nine-page PKVM2 demonstration map with a generation-owned sparse physical direct map whose coverage is derived from validated PMM ownership, excludes holes and forbidden firmware/device ranges, enforces one cache policy per frame, installs and retires table generations transactionally, preserves bootstrap and ACPI snapshot exclusions, and produces local invalidation plus future SMP-shootdown/deferred-reclaim receipts before temporary aliases or concurrent allocation can be promoted.",
         "basis": [
             "Cycle 133 PKPMM7 ACPI snapshot and reclaim closeout",
-            "Cycle 133 shared 32-page retained-stack defect corrections",
+            "Cycle 134 PKVM3 PMM-owned sparse direct-map and generation-retirement closeout",
             "master checklist sections 026-029, 031, and 151",
         ],
     },

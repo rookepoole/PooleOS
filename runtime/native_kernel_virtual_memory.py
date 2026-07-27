@@ -1,4 +1,4 @@
-"""Independent PKVM2 oracle for bounded active-root virtual memory."""
+"""Independent PKVM3 oracle for the sparse generation-owned direct map."""
 
 from __future__ import annotations
 
@@ -12,8 +12,8 @@ from runtime import native_kernel_physical_memory, native_kernel_transfer
 from runtime.schema_validation import validate_json
 
 
-CONTRACT_ID = "PKVM2"
-SELECTED_MOVE_ID = "N9-VM-ACTIVE-001"
+CONTRACT_ID = "PKVM3"
+SELECTED_MOVE_ID = "N9-VM-DIRECT-MAP-001"
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_RELATIVE = "specs/native-kernel-virtual-memory-contract.json"
 CONTRACT_SCHEMA_RELATIVE = "specs/native-kernel-virtual-memory-contract.schema.json"
@@ -26,15 +26,10 @@ BOOT_TRANSFER_MARKER_COUNT = 25
 COMMON_KERNEL_MARKER_START = 31
 COMMON_KERNEL_MARKER_COUNT = 4
 PAGE_BYTES = 4096
-TABLE_PAGES = 8
-OWNED_PAGES = 9
-PHYSICAL_WRITES = 8720
-TEMPORARY_PTE_WRITES = 5640
-BOOTSTRAP_INVALIDATIONS = 5640
 ACTIVE_CR3_WRITES = 2
 ACTIVE_INVALIDATIONS = 3
 DIRECT_MAP_START = 0xFFFF_9000_0000_0000
-COMPLETION_MARKER = b"POOLEOS:KERNEL:ACTIVE-VM-RESULT PASS contract=PKVM2"
+COMPLETION_MARKER = b"POOLEOS:KERNEL:ACTIVE-VM-RESULT PASS contract=PKVM3"
 
 IMPLEMENTATION_INPUTS = (
     "native/Cargo.lock",
@@ -63,86 +58,91 @@ IMPLEMENTATION_INPUTS = (
 )
 
 NEGATIVE_CONTROL_IDS = (
-    "NEG-N9-PKVM2-MARKER-OMISSION",
-    "NEG-N9-PKVM2-MARKER-ORDER",
-    "NEG-N9-PKVM2-MARKER-DUPLICATE",
-    "NEG-N9-PKVM2-SELECTOR",
-    "NEG-N9-PKVM2-CONTRACT",
-    "NEG-N9-PKVM2-LAYOUT",
-    "NEG-N9-PKVM2-ORIGINAL-ROOT",
-    "NEG-N9-PKVM2-CANDIDATE-ALIGNMENT",
-    "NEG-N9-PKVM2-TABLE-GENERATION",
-    "NEG-N9-PKVM2-DATA-CONTIGUITY",
-    "NEG-N9-PKVM2-DATA-GENERATION",
-    "NEG-N9-PKVM2-DIRECT-FIRST",
-    "NEG-N9-PKVM2-DIRECT-LAST",
-    "NEG-N9-PKVM2-INHERITED-KERNEL",
-    "NEG-N9-PKVM2-GUARDED-STACK",
-    "NEG-N9-PKVM2-HANDOFF",
-    "NEG-N9-PKVM2-BOOTSTRAP-REVOCATION",
-    "NEG-N9-PKVM2-PRE-ACTIVE-STATE",
-    "NEG-N9-PKVM2-CR3-WRITES",
-    "NEG-N9-PKVM2-CANDIDATE-READBACK",
-    "NEG-N9-PKVM2-ORIGINAL-RESTORE",
-    "NEG-N9-PKVM2-ROLLBACK-CONTROL",
-    "NEG-N9-PKVM2-BSP",
-    "NEG-N9-PKVM2-ACTIVATION-SMP",
-    "NEG-N9-PKVM2-LOCAL-INVLPG",
-    "NEG-N9-PKVM2-ACTIVE-RECEIPTS",
-    "NEG-N9-PKVM2-PROBE",
-    "NEG-N9-PKVM2-PROTECT",
-    "NEG-N9-PKVM2-USER-UNMAP",
-    "NEG-N9-PKVM2-DIRECT-UNMAP",
-    "NEG-N9-PKVM2-STALE-ROOT",
-    "NEG-N9-PKVM2-PREMATURE-REUSE",
-    "NEG-N9-PKVM2-INVALIDATION-SHOOTDOWN",
-    "NEG-N9-PKVM2-ROOT-RELEASE",
-    "NEG-N9-PKVM2-DATA-RELEASE",
-    "NEG-N9-PKVM2-ALLOCATED-RESIDUE",
-    "NEG-N9-PKVM2-PHYSICAL-WRITES",
-    "NEG-N9-PKVM2-TEMPORARY-PTE-WRITES",
-    "NEG-N9-PKVM2-BOOTSTRAP-INVLPG",
-    "NEG-N9-PKVM2-ALLOCATION-COUNT",
-    "NEG-N9-PKVM2-FREE-COUNT",
-    "NEG-N9-PKVM2-RESULT-CR3",
-    "NEG-N9-PKVM2-RESULT-INVLPG",
-    "NEG-N9-PKVM2-SHOOTDOWN",
-    "NEG-N9-PKVM2-OVERCLAIM",
-    "NEG-N9-PKVM2-PBP1-FIRST-FIT",
+    "NEG-N9-PKVM3-MARKER-OMISSION",
+    "NEG-N9-PKVM3-MARKER-ORDER",
+    "NEG-N9-PKVM3-MARKER-DUPLICATE",
+    "NEG-N9-PKVM3-SELECTOR",
+    "NEG-N9-PKVM3-CONTRACT",
+    "NEG-N9-PKVM3-TOPOLOGY",
+    "NEG-N9-PKVM3-ORIGINAL-ROOT",
+    "NEG-N9-PKVM3-CANDIDATE-ALIGNMENT",
+    "NEG-N9-PKVM3-TABLE-GENERATION",
+    "NEG-N9-PKVM3-DATA-CONTIGUITY",
+    "NEG-N9-PKVM3-DATA-GENERATION",
+    "NEG-N9-PKVM3-DIRECT-FIRST",
+    "NEG-N9-PKVM3-DIRECT-LAST",
+    "NEG-N9-PKVM3-DIRECT-GENERATION",
+    "NEG-N9-PKVM3-DIRECT-RANGES",
+    "NEG-N9-PKVM3-MAPPED-PAGES",
+    "NEG-N9-PKVM3-GAP-PAGES",
+    "NEG-N9-PKVM3-RETAINED-EXCLUSION",
+    "NEG-N9-PKVM3-COVERAGE-CHECKSUM",
+    "NEG-N9-PKVM3-CACHE-POLICY",
+    "NEG-N9-PKVM3-CACHE-ALIAS",
+    "NEG-N9-PKVM3-INHERITED-KERNEL",
+    "NEG-N9-PKVM3-GUARDED-STACK",
+    "NEG-N9-PKVM3-HANDOFF",
+    "NEG-N9-PKVM3-BOOTSTRAP-REVOCATION",
+    "NEG-N9-PKVM3-PRE-ACTIVE-STATE",
+    "NEG-N9-PKVM3-CR3-WRITES",
+    "NEG-N9-PKVM3-CANDIDATE-READBACK",
+    "NEG-N9-PKVM3-ORIGINAL-RESTORE",
+    "NEG-N9-PKVM3-ROLLBACK-CONTROL",
+    "NEG-N9-PKVM3-BSP",
+    "NEG-N9-PKVM3-ACTIVATION-SMP",
+    "NEG-N9-PKVM3-LOCAL-INVLPG",
+    "NEG-N9-PKVM3-ACTIVE-RECEIPTS",
+    "NEG-N9-PKVM3-PROBE",
+    "NEG-N9-PKVM3-LEAF-MUTATIONS",
+    "NEG-N9-PKVM3-RETIREMENT-RECEIPT",
+    "NEG-N9-PKVM3-CONTEXT-FLUSH",
+    "NEG-N9-PKVM3-REMOTE-PENDING",
+    "NEG-N9-PKVM3-FUTURE-SMP",
+    "NEG-N9-PKVM3-DEFERRED-RECLAIM",
+    "NEG-N9-PKVM3-EXACT-RELEASE",
+    "NEG-N9-PKVM3-PHYSICAL-WRITES",
+    "NEG-N9-PKVM3-TEMPORARY-MAPPING",
+    "NEG-N9-PKVM3-OVERCLAIM",
+    "NEG-N9-PKVM3-PBP1-BINDING",
 )
 
-LAYOUT_MARKER = (
-    "POOLEOS:KERNEL:ACTIVE-VM-LAYOUT PASS contract=PKVM2 canonical_bits=48 "
-    "direct_start=0xFFFF900000000000 direct_end=0xFFFFD00000000000 "
-    "user_start=0x0000000040000000 page_bytes=4096 table_pages=8 owned_pages=9"
+HEX = r"(0x[0-9A-F]{16})"
+DEC = r"([0-9]+)"
+LAYOUT = re.compile(
+    rf"^POOLEOS:KERNEL:ACTIVE-VM-LAYOUT PASS contract=(PKVM3) canonical_bits=(48) "
+    rf"direct_start=(0xFFFF900000000000) direct_end=(0xFFFFD00000000000) "
+    rf"user_start=(0x0000000040000000) page_bytes=(4096) table_pages={DEC} "
+    rf"direct_directory_tables={DEC} direct_page_tables={DEC} mapped_pages={DEC}$"
 )
 EARLY = re.compile(
-    r"^POOLEOS:KERNEL:ACTIVE-VM-EARLY PASS contract=(PKVM2) selector=(10) "
+    r"^POOLEOS:KERNEL:ACTIVE-VM-EARLY PASS contract=(PKVM3) selector=(10) "
     r"bsp=(1) if=(0) stack=(validated_by_wrapper) serial=(initialized)$"
 )
 STAGE = re.compile(
-    r"^POOLEOS:KERNEL:ACTIVE-VM-STAGE PASS contract=(PKVM2) stage=([1-5])$"
+    r"^POOLEOS:KERNEL:ACTIVE-VM-STAGE PASS contract=(PKVM3) stage=([1-5])$"
 )
-HEX = r"(0x[0-9A-F]{16})"
-DEC = r"([0-9]+)"
 CANDIDATE = re.compile(
-    rf"^POOLEOS:KERNEL:ACTIVE-VM-CANDIDATE PASS contract=(PKVM2) original_root={HEX} "
+    rf"^POOLEOS:KERNEL:ACTIVE-VM-CANDIDATE PASS contract=(PKVM3) original_root={HEX} "
     rf"candidate_root={HEX} table_generation={DEC} data={HEX} data_generation={DEC} "
-    rf"direct_first={HEX} direct_last={HEX} inherited_kernel=(exact) guarded_stack=(exact) "
+    rf"direct_first={HEX} direct_last={HEX} direct_generation={DEC} direct_ranges={DEC} "
+    rf"gap_pages={DEC} retained_excluded_pages={DEC} coverage_checksum={HEX} "
+    rf"cache=(write_back) cache_alias_rejected={DEC} inherited_kernel=(exact) guarded_stack=(exact) "
     rf"handoff=(exact) bootstrap_alias_revoked={DEC} root_active={DEC}$"
 )
 ACTIVATION = re.compile(
-    rf"^POOLEOS:KERNEL:ACTIVE-VM-ACTIVATION PASS contract=(PKVM2) cr3_writes={DEC} "
+    rf"^POOLEOS:KERNEL:ACTIVE-VM-ACTIVATION PASS contract=(PKVM3) cr3_writes={DEC} "
     r"candidate_readback=(exact) original_restore=(exact) rollback_control=(host_verified) "
     rf"bsp={DEC} smp={DEC}$"
 )
 INVALIDATION = re.compile(
-    rf"^POOLEOS:KERNEL:ACTIVE-VM-INVALIDATION PASS contract=(PKVM2) local_invlpg={DEC} "
+    rf"^POOLEOS:KERNEL:ACTIVE-VM-INVALIDATION PASS contract=(PKVM3) local_invlpg={DEC} "
     rf"active_receipts={DEC} probe={HEX} protect={DEC} user_unmap={DEC} direct_unmap={DEC} "
-    rf"stale_root_rejected=(host) premature_reuse_rejected={DEC} shootdown={DEC}$"
+    rf"stale_root_rejected=(host) premature_reuse_rejected={DEC} generation_retirement_receipts={DEC} "
+    rf"local_context_flushes={DEC} remote_shootdowns_pending={DEC} future_smp_shootdown_required={DEC} "
+    rf"old_generation_reclaim_deferred={DEC} exact_release_receipt={DEC} shootdown={DEC}$"
 )
 RESULT = re.compile(
-    rf"^POOLEOS:KERNEL:ACTIVE-VM-RESULT PASS contract=(PKVM2) profile=(qemu64_tier0) "
+    rf"^POOLEOS:KERNEL:ACTIVE-VM-RESULT PASS contract=(PKVM3) profile=(qemu64_tier0) "
     rf"root_released={DEC} data_released={DEC} allocated_pages={DEC} physical_writes={DEC} "
     rf"temporary_pte_writes={DEC} bootstrap_invlpg={DEC} allocations={DEC} frees={DEC} "
     rf"active_cr3_writes={DEC} active_invlpg={DEC} shootdown={DEC} ring3={DEC} "
@@ -152,7 +152,7 @@ RESULT = re.compile(
 
 
 class KernelVirtualMemoryError(ValueError):
-    """Raised when PKVM2 evidence violates the frozen contract."""
+    """Raised when PKVM3 evidence violates the frozen contract."""
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -193,9 +193,13 @@ def expected_claims() -> dict[str, bool]:
         "kernel_stack_and_handoff_mappings_inherited_exactly": True,
         "live_pmm_generation_bound_table_and_data_frames": True,
         "kernel_complete_candidate_root_materialized": True,
-        "bounded_owned_page_direct_map_activated": True,
+        "complete_profile_pmm_ownership_direct_map_activated": True,
+        "sparse_holes_and_retained_ranges_unmapped": True,
+        "single_write_back_cache_policy_enforced": True,
         "one_bsp_candidate_root_installed_and_restored": True,
         "active_address_space_local_invalidation_receipts_exercised": True,
+        "generation_retirement_receipt_enforced": True,
+        "future_smp_shootdown_dependency_enforced": True,
         "architectural_accessed_dirty_bits_handled": True,
         "transactional_leaf_and_cr3_rollback_host_tested": True,
         "frame_reuse_before_user_and_direct_receipts_rejected": True,
@@ -214,32 +218,32 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
         CONTRACT_ID,
         SELECTED_MOVE_ID,
     ):
-        errors.append("PKVM2 contract identity changed")
+        errors.append("PKVM3 contract identity changed")
     profile = contract.get("development_profile", {})
     if not isinstance(profile, dict) or tuple(
         profile.get(key) for key in ("feature", "selector", "cpu_model", "bsp_only")
     ) != (FEATURE, SELECTOR, "qemu64", True):
-        errors.append("PKVM2 development profile changed")
+        errors.append("PKVM3 development profile changed")
     limits = contract.get("limits", {})
     if not isinstance(limits, dict) or tuple(
         limits.get(key)
         for key in (
-            "table_pages",
-            "mapped_owned_pages",
+            "max_direct_page_tables",
+            "max_direct_directory_tables",
             "page_bytes",
             "cr3_writes",
             "active_local_invalidations",
         )
-    ) != (TABLE_PAGES, OWNED_PAGES, PAGE_BYTES, ACTIVE_CR3_WRITES, ACTIVE_INVALIDATIONS):
-        errors.append("PKVM2 bounded capacities changed")
+    ) != (512, 4, PAGE_BYTES, ACTIVE_CR3_WRITES, ACTIVE_INVALIDATIONS):
+        errors.append("PKVM3 bounded capacities changed")
     if contract.get("required_negative_controls") != list(NEGATIVE_CONTROL_IDS):
-        errors.append("PKVM2 hostile-control inventory changed")
+        errors.append("PKVM3 hostile-control inventory changed")
     if contract.get("claims") != expected_claims():
-        errors.append("PKVM2 claim boundary changed")
+        errors.append("PKVM3 claim boundary changed")
     if contract.get("production_ready") is not False or contract.get(
         "production_promotion_allowed"
     ) is not False:
-        errors.append("PKVM2 contract overclaims production")
+        errors.append("PKVM3 contract overclaims production")
     return errors
 
 
@@ -248,13 +252,13 @@ def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     errors = [f"schema {item.path}: {item.message}" for item in validate_json(readiness, schema)]
     errors.extend(contract_errors(read_json(root / CONTRACT_RELATIVE), root))
     if readiness.get("inputs") != expected_inputs(root):
-        errors.append("PKVM2 readiness input bindings are stale")
+        errors.append("PKVM3 readiness input bindings are stale")
     execution = readiness.get("execution", {})
     if not isinstance(execution, dict) or tuple(
         execution.get(key)
         for key in ("run_count", "exact_marker_match", "exact_screenshot_match", "exact_pbp1_match")
     ) != (2, True, True, True):
-        errors.append("PKVM2 exact two-run evidence changed")
+        errors.append("PKVM3 exact two-run evidence changed")
     controls = readiness.get("negative_controls", [])
     if (
         not isinstance(controls, list)
@@ -262,13 +266,13 @@ def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
         != list(NEGATIVE_CONTROL_IDS)
         or any(not isinstance(item, dict) or item.get("status") != "pass" for item in controls)
     ):
-        errors.append("PKVM2 hostile-control evidence changed")
+        errors.append("PKVM3 hostile-control evidence changed")
     if readiness.get("claims") != expected_claims():
-        errors.append("PKVM2 readiness claims changed")
+        errors.append("PKVM3 readiness claims changed")
     if readiness.get("production_ready") is not False or readiness.get(
         "production_promotion_allowed"
     ) is not False:
-        errors.append("PKVM2 readiness overclaims production")
+        errors.append("PKVM3 readiness overclaims production")
     return errors
 
 
@@ -279,14 +283,14 @@ def extract_markers(raw: bytes) -> list[str]:
 def _match(pattern: re.Pattern[str], marker: str, name: str) -> re.Match[str]:
     match = pattern.fullmatch(marker)
     if match is None:
-        raise KernelVirtualMemoryError(f"PKVM2 {name} marker violates its contract: {marker!r}")
+        raise KernelVirtualMemoryError(f"PKVM3 {name} marker violates its contract: {marker!r}")
     return match
 
 
 def _prefix(markers: list[str]) -> dict[str, Any]:
     arm = native_kernel_transfer.TRANSFER_ARM.fullmatch(markers[23])
     if arm is None or int(arm.group(10)) != SELECTOR:
-        raise KernelVirtualMemoryError("PKVM2 transfer selector changed")
+        raise KernelVirtualMemoryError("PKVM3 transfer selector changed")
     baseline = [
         *markers[:BOOT_TRANSFER_MARKER_COUNT],
         *markers[COMMON_KERNEL_MARKER_START : COMMON_KERNEL_MARKER_START + COMMON_KERNEL_MARKER_COUNT],
@@ -308,19 +312,24 @@ def _prefix(markers: list[str]) -> dict[str, Any]:
 
 def validate_markers(markers: list[str]) -> dict[str, Any]:
     if len(markers) != MARKER_COUNT:
-        raise KernelVirtualMemoryError(f"expected {MARKER_COUNT} PKVM2 markers, observed {len(markers)}")
+        raise KernelVirtualMemoryError(f"expected {MARKER_COUNT} PKVM3 markers, observed {len(markers)}")
     prefix = _prefix(markers)
     early = _match(EARLY, markers[25], "early")
     stages = [_match(STAGE, markers[26 + index], "stage") for index in range(5)]
     if [int(item.group(2)) for item in stages] != [1, 2, 3, 4, 5]:
-        raise KernelVirtualMemoryError("PKVM2 stage order changed")
-    if markers[35] != LAYOUT_MARKER:
-        raise KernelVirtualMemoryError("PKVM2 layout marker changed")
+        raise KernelVirtualMemoryError("PKVM3 stage order changed")
+    layout_match = _match(LAYOUT, markers[35], "layout")
     candidate_match = _match(CANDIDATE, markers[36], "candidate")
     activation_match = _match(ACTIVATION, markers[37], "activation")
     invalidation_match = _match(INVALIDATION, markers[38], "invalidation")
     result_match = _match(RESULT, markers[39], "result")
 
+    layout = {
+        "table_pages": int(layout_match.group(7)),
+        "direct_directory_tables": int(layout_match.group(8)),
+        "direct_page_tables": int(layout_match.group(9)),
+        "mapped_pages": int(layout_match.group(10)),
+    }
     candidate = {
         "original_root": int(candidate_match.group(2), 16),
         "candidate_root": int(candidate_match.group(3), 16),
@@ -329,11 +338,18 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         "data_generation": int(candidate_match.group(6)),
         "direct_first": int(candidate_match.group(7), 16),
         "direct_last": int(candidate_match.group(8), 16),
-        "inherited_kernel": candidate_match.group(9),
-        "guarded_stack": candidate_match.group(10),
-        "handoff": candidate_match.group(11),
-        "bootstrap_alias_revoked": int(candidate_match.group(12)),
-        "root_active": int(candidate_match.group(13)),
+        "direct_generation": int(candidate_match.group(9)),
+        "direct_ranges": int(candidate_match.group(10)),
+        "gap_pages": int(candidate_match.group(11)),
+        "retained_excluded_pages": int(candidate_match.group(12)),
+        "coverage_checksum": int(candidate_match.group(13), 16),
+        "cache": candidate_match.group(14),
+        "cache_alias_rejected": int(candidate_match.group(15)),
+        "inherited_kernel": candidate_match.group(16),
+        "guarded_stack": candidate_match.group(17),
+        "handoff": candidate_match.group(18),
+        "bootstrap_alias_revoked": int(candidate_match.group(19)),
+        "root_active": int(candidate_match.group(20)),
     }
     activation = {
         "cr3_writes": int(activation_match.group(2)),
@@ -352,7 +368,13 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         "direct_unmap": int(invalidation_match.group(7)),
         "stale_root_rejected": invalidation_match.group(8),
         "premature_reuse_rejected": int(invalidation_match.group(9)),
-        "shootdown": int(invalidation_match.group(10)),
+        "generation_retirement_receipts": int(invalidation_match.group(10)),
+        "local_context_flushes": int(invalidation_match.group(11)),
+        "remote_shootdowns_pending": int(invalidation_match.group(12)),
+        "future_smp_shootdown_required": int(invalidation_match.group(13)),
+        "old_generation_reclaim_deferred": int(invalidation_match.group(14)),
+        "exact_release_receipt": int(invalidation_match.group(15)),
+        "shootdown": int(invalidation_match.group(16)),
     }
     names = (
         "root_released",
@@ -384,15 +406,24 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
 
     original_from_transfer = prefix["transfer_arm"]["root"]
     if candidate["original_root"] != original_from_transfer:
-        raise KernelVirtualMemoryError("PKVM2 original root differs from PKXFER1")
+        raise KernelVirtualMemoryError("PKVM3 original root differs from PKXFER1")
     if (
         candidate["candidate_root"] % PAGE_BYTES
         or candidate["candidate_root"] == candidate["original_root"]
-        or candidate["data"] != candidate["candidate_root"] + TABLE_PAGES * PAGE_BYTES
+        or layout["table_pages"] != (
+            5 + layout["direct_directory_tables"] + layout["direct_page_tables"]
+        )
+        or layout["mapped_pages"] == 0
+        or candidate["data"] != candidate["candidate_root"] + layout["table_pages"] * PAGE_BYTES
         or candidate["table_generation"] != 1
         or candidate["data_generation"] != 2
-        or candidate["direct_first"] != DIRECT_MAP_START + candidate["candidate_root"]
-        or candidate["direct_last"] != DIRECT_MAP_START + candidate["data"] + PAGE_BYTES - 1
+        or candidate["direct_generation"] != candidate["table_generation"]
+        or candidate["direct_ranges"] == 0
+        or candidate["direct_first"] < DIRECT_MAP_START + PAGE_BYTES
+        or candidate["direct_last"] <= candidate["direct_first"]
+        or candidate["coverage_checksum"] == 0
+        or candidate["cache"] != "write_back"
+        or candidate["cache_alias_rejected"] != 1
         or tuple(
             candidate[key]
             for key in (
@@ -405,18 +436,28 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         )
         != ("exact", "exact", "exact", 1, 0)
     ):
-        raise KernelVirtualMemoryError("PKVM2 candidate ownership or inheritance changed")
+        raise KernelVirtualMemoryError("PKVM3 candidate ownership or inheritance changed")
     if tuple(activation.values()) != (2, "exact", "exact", "host_verified", 1, 0):
-        raise KernelVirtualMemoryError("PKVM2 activation proof changed")
-    if tuple(invalidation.values()) != (3, 3, 0xA5, 1, 1, 1, "host", 1, 0):
-        raise KernelVirtualMemoryError("PKVM2 invalidation proof changed")
+        raise KernelVirtualMemoryError("PKVM3 activation proof changed")
+    if tuple(invalidation.values()) != (
+        3, 3, 0xA5, 1, 1, 1, "host", 1, 1, 1, 0, 1, 1, 1, 0
+    ):
+        raise KernelVirtualMemoryError("PKVM3 invalidation proof changed")
+    expected_physical_writes = (
+        2 * layout["table_pages"] * 512
+        + 512
+        + 5
+        + layout["direct_directory_tables"]
+        + layout["direct_page_tables"]
+        + layout["mapped_pages"]
+    )
     expected_result = {
         "root_released": 1,
         "data_released": 1,
         "allocated_pages": 0,
-        "physical_writes": PHYSICAL_WRITES,
-        "temporary_pte_writes": TEMPORARY_PTE_WRITES,
-        "bootstrap_invlpg": BOOTSTRAP_INVALIDATIONS,
+        "physical_writes": expected_physical_writes,
+        "temporary_pte_writes": result["temporary_pte_writes"],
+        "bootstrap_invlpg": result["temporary_pte_writes"],
         "allocations": 2,
         "frees": 2,
         "active_cr3_writes": ACTIVE_CR3_WRITES,
@@ -442,7 +483,9 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
             for key in expected_result
             if result.get(key) != expected_result[key]
         }
-        raise KernelVirtualMemoryError(f"PKVM2 result boundary changed: {changed}")
+        raise KernelVirtualMemoryError(f"PKVM3 result boundary changed: {changed}")
+    if result["temporary_pte_writes"] == 0:
+        raise KernelVirtualMemoryError("PKVM3 temporary mapping evidence is empty")
     return {
         "transfer_prefix": prefix,
         "early": {
@@ -453,7 +496,7 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
             "serial": early.group(6),
         },
         "stages": [1, 2, 3, 4, 5],
-        "layout": LAYOUT_MARKER,
+        "layout": layout,
         "candidate": candidate,
         "activation": activation,
         "invalidation": invalidation,
@@ -469,10 +512,101 @@ def validate_observation_binding(
         derived = native_kernel_physical_memory.derive_memory_summary(transcript)
     except native_kernel_physical_memory.KernelPhysicalMemoryError as error:
         raise KernelVirtualMemoryError(str(error)) from error
+    entries = transcript.get("memory_entries")
+    if not isinstance(entries, list):
+        raise KernelVirtualMemoryError("PKVM3 PBP1 memory map is missing")
+    ranges: list[list[int]] = []
+    for entry in entries:
+        if not isinstance(entry, dict) or int(entry.get("kind", -1)) != 1:
+            continue
+        start_page = int(str(entry["physical_start"]), 16) // PAGE_BYTES
+        page_count = int(entry["page_count"])
+        if start_page == 0:
+            start_page = 1
+            page_count -= 1
+        if page_count <= 0:
+            continue
+        if ranges and ranges[-1][0] + ranges[-1][1] == start_page:
+            ranges[-1][1] += page_count
+        else:
+            ranges.append([start_page, page_count])
+    if not ranges:
+        raise KernelVirtualMemoryError("PKVM3 has no PMM-admitted direct-map ranges")
+    mapped_pages = sum(item[1] for item in ranges)
+    gap_pages = sum(
+        ranges[index][0] - (ranges[index - 1][0] + ranges[index - 1][1])
+        for index in range(1, len(ranges))
+    )
+    first_page = ranges[0][0]
+    end_page = ranges[-1][0] + ranges[-1][1]
+    regions = sorted(
+        {
+            region
+            for start_page, page_count in ranges
+            for region in range(start_page // 512, (start_page + page_count - 1) // 512 + 1)
+        }
+    )
+    directories = sorted({region // 512 for region in regions})
+    table_pages = 5 + len(directories) + len(regions)
+    coverage_checksum = 0xCBF29CE484222325
+    for value in (
+        1,
+        len(ranges),
+        mapped_pages,
+        0,
+        gap_pages,
+        first_page,
+        end_page,
+    ):
+        coverage_checksum = native_kernel_physical_memory._fnv_u64(coverage_checksum, value)
+    for start_page, page_count in ranges:
+        for value in (start_page, page_count, 0):
+            coverage_checksum = native_kernel_physical_memory._fnv_u64(coverage_checksum, value)
+
     first_dma32 = derived["first_free_address"][1]
+    layout = observation["layout"]
     candidate = observation["candidate"]
     if first_dma32 == 0 or candidate["candidate_root"] != first_dma32:
-        raise KernelVirtualMemoryError("PKVM2 candidate root is not deterministic DMA32 first-fit")
-    if candidate["data"] != first_dma32 + TABLE_PAGES * PAGE_BYTES:
-        raise KernelVirtualMemoryError("PKVM2 data frame is not contiguous second allocation")
+        raise KernelVirtualMemoryError("PKVM3 candidate root is not deterministic DMA32 first-fit")
+    expected_layout = {
+        "table_pages": table_pages,
+        "direct_directory_tables": len(directories),
+        "direct_page_tables": len(regions),
+        "mapped_pages": mapped_pages,
+    }
+    if layout != expected_layout:
+        raise KernelVirtualMemoryError(
+            f"PKVM3 sparse topology differs from PMM ownership: expected={expected_layout}, observed={layout}"
+        )
+    expected_candidate = {
+        "data": first_dma32 + table_pages * PAGE_BYTES,
+        "direct_first": DIRECT_MAP_START + first_page * PAGE_BYTES,
+        "direct_last": DIRECT_MAP_START + end_page * PAGE_BYTES - 1,
+        "direct_generation": 1,
+        "direct_ranges": len(ranges),
+        "gap_pages": gap_pages,
+        "retained_excluded_pages": 0,
+        "coverage_checksum": coverage_checksum,
+    }
+    changed = {
+        key: {"expected": value, "observed": candidate.get(key)}
+        for key, value in expected_candidate.items()
+        if candidate.get(key) != value
+    }
+    if changed:
+        raise KernelVirtualMemoryError(f"PKVM3 PMM coverage binding changed: {changed}")
+    derived["direct_map"] = {
+        "ranges": [
+            {"start_page": start_page, "page_count": page_count, "cache": "write_back"}
+            for start_page, page_count in ranges
+        ],
+        "mapped_pages": mapped_pages,
+        "gap_pages": gap_pages,
+        "first_page": first_page,
+        "end_page": end_page,
+        "direct_page_tables": len(regions),
+        "direct_directory_tables": len(directories),
+        "table_pages": table_pages,
+        "coverage_checksum": coverage_checksum,
+    }
     return derived

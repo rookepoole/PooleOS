@@ -433,7 +433,7 @@ macro_rules! pkavm_fragment {
 
 pkavm_fragment!(
     PKAVM_DENIED,
-    b"POOLEOS:KERNEL:ACTIVE-VM-DENIED contract=PKVM2 reason="
+    b"POOLEOS:KERNEL:ACTIVE-VM-DENIED contract=PKVM3 reason="
 );
 pkavm_fragment!(
     PKAVM_DENIED_TAIL,
@@ -441,19 +441,26 @@ pkavm_fragment!(
 );
 pkavm_fragment!(
     PKAVM_EARLY,
-    b"POOLEOS:KERNEL:ACTIVE-VM-EARLY PASS contract=PKVM2 selector=10 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n"
+    b"POOLEOS:KERNEL:ACTIVE-VM-EARLY PASS contract=PKVM3 selector=10 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n"
 );
 pkavm_fragment!(
     PKAVM_STAGE,
-    b"POOLEOS:KERNEL:ACTIVE-VM-STAGE PASS contract=PKVM2 stage="
+    b"POOLEOS:KERNEL:ACTIVE-VM-STAGE PASS contract=PKVM3 stage="
 );
 pkavm_fragment!(
     PKAVM_LAYOUT,
-    b"POOLEOS:KERNEL:ACTIVE-VM-LAYOUT PASS contract=PKVM2 canonical_bits=48 direct_start=0xFFFF900000000000 direct_end=0xFFFFD00000000000 user_start=0x0000000040000000 page_bytes=4096 table_pages=8 owned_pages=9\n"
+    b"POOLEOS:KERNEL:ACTIVE-VM-LAYOUT PASS contract=PKVM3 canonical_bits=48 direct_start=0xFFFF900000000000 direct_end=0xFFFFD00000000000 user_start=0x0000000040000000 page_bytes=4096 table_pages="
 );
 pkavm_fragment!(
+    PKAVM_LAYOUT_DIRECT_DIRECTORIES,
+    b" direct_directory_tables="
+);
+pkavm_fragment!(PKAVM_LAYOUT_DIRECT_TABLES, b" direct_page_tables=");
+pkavm_fragment!(PKAVM_LAYOUT_MAPPED_PAGES, b" mapped_pages=");
+pkavm_fragment!(PKAVM_LINE_END, b"\n");
+pkavm_fragment!(
     PKAVM_CANDIDATE,
-    b"POOLEOS:KERNEL:ACTIVE-VM-CANDIDATE PASS contract=PKVM2 original_root="
+    b"POOLEOS:KERNEL:ACTIVE-VM-CANDIDATE PASS contract=PKVM3 original_root="
 );
 pkavm_fragment!(PKAVM_ROOT, b" candidate_root=");
 pkavm_fragment!(PKAVM_TABLE_GENERATION, b" table_generation=");
@@ -461,13 +468,18 @@ pkavm_fragment!(PKAVM_DATA, b" data=");
 pkavm_fragment!(PKAVM_DATA_GENERATION, b" data_generation=");
 pkavm_fragment!(PKAVM_DIRECT_FIRST, b" direct_first=");
 pkavm_fragment!(PKAVM_DIRECT_LAST, b" direct_last=");
+pkavm_fragment!(PKAVM_DIRECT_GENERATION, b" direct_generation=");
+pkavm_fragment!(PKAVM_DIRECT_RANGES, b" direct_ranges=");
+pkavm_fragment!(PKAVM_DIRECT_GAPS, b" gap_pages=");
+pkavm_fragment!(PKAVM_DIRECT_EXCLUDED, b" retained_excluded_pages=");
+pkavm_fragment!(PKAVM_DIRECT_CHECKSUM, b" coverage_checksum=");
 pkavm_fragment!(
     PKAVM_CANDIDATE_TAIL,
-    b" inherited_kernel=exact guarded_stack=exact handoff=exact bootstrap_alias_revoked=1 root_active=0\n"
+    b" cache=write_back cache_alias_rejected=1 inherited_kernel=exact guarded_stack=exact handoff=exact bootstrap_alias_revoked=1 root_active=0\n"
 );
 pkavm_fragment!(
     PKAVM_ACTIVATION,
-    b"POOLEOS:KERNEL:ACTIVE-VM-ACTIVATION PASS contract=PKVM2 cr3_writes="
+    b"POOLEOS:KERNEL:ACTIVE-VM-ACTIVATION PASS contract=PKVM3 cr3_writes="
 );
 pkavm_fragment!(
     PKAVM_ACTIVATION_TAIL,
@@ -475,17 +487,17 @@ pkavm_fragment!(
 );
 pkavm_fragment!(
     PKAVM_INVALIDATION,
-    b"POOLEOS:KERNEL:ACTIVE-VM-INVALIDATION PASS contract=PKVM2 local_invlpg="
+    b"POOLEOS:KERNEL:ACTIVE-VM-INVALIDATION PASS contract=PKVM3 local_invlpg="
 );
 pkavm_fragment!(PKAVM_RECEIPTS, b" active_receipts=");
 pkavm_fragment!(PKAVM_PROBE, b" probe=");
 pkavm_fragment!(
     PKAVM_INVALIDATION_TAIL,
-    b" protect=1 user_unmap=1 direct_unmap=1 stale_root_rejected=host premature_reuse_rejected=1 shootdown=0\n"
+    b" protect=1 user_unmap=1 direct_unmap=1 stale_root_rejected=host premature_reuse_rejected=1 generation_retirement_receipts=1 local_context_flushes=1 remote_shootdowns_pending=0 future_smp_shootdown_required=1 old_generation_reclaim_deferred=1 exact_release_receipt=1 shootdown=0\n"
 );
 pkavm_fragment!(
     PKAVM_RESULT,
-    b"POOLEOS:KERNEL:ACTIVE-VM-RESULT PASS contract=PKVM2 profile=qemu64_tier0 root_released=1 data_released=1 allocated_pages="
+    b"POOLEOS:KERNEL:ACTIVE-VM-RESULT PASS contract=PKVM3 profile=qemu64_tier0 root_released=1 data_released=1 allocated_pages="
 );
 pkavm_fragment!(PKAVM_PHYSICAL_WRITES, b" physical_writes=");
 pkavm_fragment!(PKAVM_TEMPORARY_WRITES, b" temporary_pte_writes=");
@@ -1381,7 +1393,7 @@ impl ActiveHardware for LiveActiveHardware {
     }
 
     fn read_cr3(&mut self) -> u64 {
-        // SAFETY: PKVM2 runs at CPL0 after PKENTRY1 validates the transfer state.
+        // SAFETY: PKVM3 runs at CPL0 after PKENTRY1 validates the transfer state.
         unsafe { arch::x86_64::read_cr3() }
     }
 
@@ -1389,7 +1401,7 @@ impl ActiveHardware for LiveActiveHardware {
         if value == 0 || !value.is_multiple_of(poole_handoff::PAGE_BYTES) {
             return Err(active_virtual_memory::Error::PhysicalAddress);
         }
-        // SAFETY: PKVM2 audits the candidate root or supplies the exact retained root;
+        // SAFETY: PKVM3 audits the candidate root or supplies the exact retained root;
         // both preserve the executing high-half image and current guarded stack.
         unsafe { arch::x86_64::write_cr3(value) };
         Ok(())
@@ -1402,7 +1414,7 @@ impl ActiveHardware for LiveActiveHardware {
         if !virtual_memory::is_canonical_48(virtual_address) {
             return Err(active_virtual_memory::Error::MemoryAccess);
         }
-        // SAFETY: PKVM2 owns the current BSP root and the exact leaf transition.
+        // SAFETY: PKVM3 owns the current BSP root and the exact leaf transition.
         unsafe { arch::x86_64::invalidate_page(virtual_address) };
         Ok(())
     }
@@ -1414,7 +1426,7 @@ impl ActiveHardware for LiveActiveHardware {
         {
             return Err(active_virtual_memory::Error::MemoryAccess);
         }
-        // SAFETY: PKVM2 supplies an audited, supervisor RW/NX direct-map address.
+        // SAFETY: PKVM3 supplies an audited, supervisor RW/NX direct-map address.
         Ok(unsafe { read_volatile(virtual_address as usize as *const u64) })
     }
 
@@ -1429,7 +1441,7 @@ impl ActiveHardware for LiveActiveHardware {
         {
             return Err(active_virtual_memory::Error::MemoryAccess);
         }
-        // SAFETY: PKVM2 supplies an audited, supervisor RW/NX direct-map address.
+        // SAFETY: PKVM3 supplies an audited, supervisor RW/NX direct-map address.
         unsafe { write_volatile(virtual_address as usize as *mut u64, value) };
         Ok(())
     }
@@ -1439,7 +1451,7 @@ impl ActiveHardware for LiveActiveHardware {
         {
             return Err(active_virtual_memory::Error::MemoryAccess);
         }
-        // SAFETY: PKVM2 supplies its one audited user-window probe address.
+        // SAFETY: PKVM3 supplies its one audited user-window probe address.
         Ok(unsafe { read_volatile(virtual_address as usize as *const u8) })
     }
 
@@ -1452,7 +1464,7 @@ impl ActiveHardware for LiveActiveHardware {
         {
             return Err(active_virtual_memory::Error::MemoryAccess);
         }
-        // SAFETY: PKVM2 writes only while the audited user-window leaf is writable.
+        // SAFETY: PKVM3 writes only while the audited user-window leaf is writable.
         unsafe { write_volatile(virtual_address as usize as *mut u8, value) };
         Ok(())
     }
@@ -2475,6 +2487,14 @@ extern "C" fn poole_kernel_rust_entry(
         ));
         let summary = proof.summary;
         logger.write_bytes(&PKAVM_LAYOUT);
+        logger.write_decimal_u64(summary.table_pages);
+        logger.write_bytes(&PKAVM_LAYOUT_DIRECT_DIRECTORIES);
+        logger.write_decimal_u64(summary.direct_directory_tables);
+        logger.write_bytes(&PKAVM_LAYOUT_DIRECT_TABLES);
+        logger.write_decimal_u64(summary.direct_page_tables);
+        logger.write_bytes(&PKAVM_LAYOUT_MAPPED_PAGES);
+        logger.write_decimal_u64(summary.direct_map_page_count);
+        logger.write_bytes(&PKAVM_LINE_END);
         logger.write_bytes(&PKAVM_CANDIDATE);
         logger.write_hex_u64(summary.original_root);
         logger.write_bytes(&PKAVM_ROOT);
@@ -2489,6 +2509,16 @@ extern "C" fn poole_kernel_rust_entry(
         logger.write_hex_u64(summary.direct_map_first);
         logger.write_bytes(&PKAVM_DIRECT_LAST);
         logger.write_hex_u64(summary.direct_map_last);
+        logger.write_bytes(&PKAVM_DIRECT_GENERATION);
+        logger.write_decimal_u64(summary.direct_map_generation);
+        logger.write_bytes(&PKAVM_DIRECT_RANGES);
+        logger.write_decimal_u64(summary.direct_map_range_count);
+        logger.write_bytes(&PKAVM_DIRECT_GAPS);
+        logger.write_decimal_u64(summary.direct_map_gap_pages);
+        logger.write_bytes(&PKAVM_DIRECT_EXCLUDED);
+        logger.write_decimal_u64(summary.retained_excluded_pages);
+        logger.write_bytes(&PKAVM_DIRECT_CHECKSUM);
+        logger.write_hex_u64(summary.direct_map_checksum);
         logger.write_bytes(&PKAVM_CANDIDATE_TAIL);
         logger.write_bytes(&PKAVM_ACTIVATION);
         logger.write_decimal_u64(summary.cr3_writes);

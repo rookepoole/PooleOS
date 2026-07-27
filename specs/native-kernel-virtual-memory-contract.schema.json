@@ -5,8 +5,8 @@
   "properties": {
     "schema_version": {"const": "1.0"},
     "artifact_kind": {"const": "pooleos_native_kernel_virtual_memory_contract"},
-    "contract_id": {"const": "PKVM2"},
-    "selected_move_id": {"const": "N9-VM-ACTIVE-001"},
+    "contract_id": {"const": "PKVM3"},
+    "selected_move_id": {"const": "N9-VM-DIRECT-MAP-001"},
     "status": {"type": "string", "minLength": 1},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
@@ -17,7 +17,7 @@
     "transaction_policy": {"type": "object"},
     "threat_model": {"type": "object"},
     "qualification": {"type": "object"},
-    "required_negative_controls": {"type": "array", "minItems": 46, "maxItems": 46, "items": {"type": "string", "pattern": "^NEG-N9-PKVM2-"}},
+    "required_negative_controls": {"type": "array", "minItems": 46, "maxItems": 46, "items": {"type": "string", "pattern": "^NEG-N9-PKVM3-"}},
     "claims": {"type": "object"},
     "non_claims": {"type": "array", "minItems": 5, "items": {"type": "string"}}
   },

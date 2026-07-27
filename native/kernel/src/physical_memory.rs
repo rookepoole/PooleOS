@@ -30,6 +30,7 @@ pub const LEDGER_MAGIC: u64 = u64::from_le_bytes(*b"PKLEDGER");
 pub const LEDGER_VERSION: u64 = 1;
 pub const LEDGER_GROWTH_ALLOCATION_HEADROOM: usize = 1;
 pub const LEDGER_GROWTH_SCRUB_HEADROOM: usize = 4;
+pub const MAX_DIRECT_MAP_RANGES: usize = MAX_FREE_EXTENTS + MAX_ALLOCATIONS;
 
 const FNV_OFFSET: u64 = 0xCBF2_9CE4_8422_2325;
 const FNV_PRIME: u64 = 0x0000_0100_0000_01B3;
@@ -261,6 +262,8 @@ pub enum PhysicalMemoryError {
     ReclaimOwnership,
     ReclaimUnavailable,
     AcpiConsumer,
+    DirectMapCapacity,
+    DirectMapOwnership,
     ExerciseInvariant,
 }
 
@@ -305,6 +308,8 @@ pmm_label!(PMM_LABEL_RECLAIM_CAPACITY, b"reclaim_capacity");
 pmm_label!(PMM_LABEL_RECLAIM_OWNERSHIP, b"reclaim_ownership");
 pmm_label!(PMM_LABEL_RECLAIM_UNAVAILABLE, b"reclaim_unavailable");
 pmm_label!(PMM_LABEL_ACPI_CONSUMER, b"acpi_consumer");
+pmm_label!(PMM_LABEL_DIRECT_MAP_CAPACITY, b"direct_map_capacity");
+pmm_label!(PMM_LABEL_DIRECT_MAP_OWNERSHIP, b"direct_map_ownership");
 pmm_label!(PMM_LABEL_EXERCISE_INVARIANT, b"exercise_invariant");
 
 const fn pmm_label_text(bytes: &'static [u8]) -> &'static str {
@@ -348,6 +353,8 @@ impl PhysicalMemoryError {
             Self::ReclaimOwnership => pmm_label_text(&PMM_LABEL_RECLAIM_OWNERSHIP),
             Self::ReclaimUnavailable => pmm_label_text(&PMM_LABEL_RECLAIM_UNAVAILABLE),
             Self::AcpiConsumer => pmm_label_text(&PMM_LABEL_ACPI_CONSUMER),
+            Self::DirectMapCapacity => pmm_label_text(&PMM_LABEL_DIRECT_MAP_CAPACITY),
+            Self::DirectMapOwnership => pmm_label_text(&PMM_LABEL_DIRECT_MAP_OWNERSHIP),
             Self::ExerciseInvariant => pmm_label_text(&PMM_LABEL_EXERCISE_INVARIANT),
         }
     }
@@ -365,6 +372,44 @@ const EMPTY_EXTENT: Extent = Extent {
     page_count: 0,
     zone: Zone::Dma,
 };
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(u8)]
+pub enum DirectMapCachePolicy {
+    WriteBack = 0,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct DirectMapRange {
+    pub start_page: u64,
+    pub page_count: u64,
+    pub cache_policy: DirectMapCachePolicy,
+}
+
+const EMPTY_DIRECT_MAP_RANGE: DirectMapRange = DirectMapRange {
+    start_page: 0,
+    page_count: 0,
+    cache_policy: DirectMapCachePolicy::WriteBack,
+};
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct DirectMapManifest {
+    pub generation: u64,
+    pub ranges: [DirectMapRange; MAX_DIRECT_MAP_RANGES],
+    pub range_count: usize,
+    pub mapped_pages: u64,
+    pub retained_excluded_pages: u64,
+    pub gap_pages: u64,
+    pub first_page: u64,
+    pub end_page: u64,
+    pub coverage_checksum: u64,
+}
+
+impl DirectMapManifest {
+    pub fn admitted_ranges(&self) -> &[DirectMapRange] {
+        &self.ranges[..self.range_count]
+    }
+}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 struct SourceRecord {
@@ -3394,6 +3439,187 @@ impl PhysicalMemoryManager {
         Ok(())
     }
 
+    fn direct_map_manifest(
+        &self,
+        generation: u64,
+    ) -> Result<DirectMapManifest, PhysicalMemoryError> {
+        self.require_operational()?;
+        if generation == 0 {
+            return Err(PhysicalMemoryError::DirectMapOwnership);
+        }
+        let mut candidates = [EMPTY_DIRECT_MAP_RANGE; MAX_DIRECT_MAP_RANGES];
+        let mut candidate_count = 0usize;
+        let mut retained_excluded_pages = 0u64;
+
+        for extent in self.free_entries().iter().take(self.free_count) {
+            if candidate_count == candidates.len() {
+                return Err(PhysicalMemoryError::DirectMapCapacity);
+            }
+            candidates[candidate_count] = DirectMapRange {
+                start_page: extent.start_page,
+                page_count: extent.page_count,
+                cache_policy: DirectMapCachePolicy::WriteBack,
+            };
+            candidate_count += 1;
+        }
+        for allocation in self
+            .allocation_entries()
+            .iter()
+            .filter(|entry| entry.active)
+        {
+            if allocation.release_excluded {
+                retained_excluded_pages = retained_excluded_pages
+                    .checked_add(allocation.page_count)
+                    .ok_or(PhysicalMemoryError::AddressRange)?;
+                continue;
+            }
+            if candidate_count == candidates.len() {
+                return Err(PhysicalMemoryError::DirectMapCapacity);
+            }
+            candidates[candidate_count] = DirectMapRange {
+                start_page: allocation.start_page,
+                page_count: allocation.page_count,
+                cache_policy: DirectMapCachePolicy::WriteBack,
+            };
+            candidate_count += 1;
+        }
+
+        for index in 1..candidate_count {
+            let value = candidates[index];
+            let mut destination = index;
+            while destination != 0 && candidates[destination - 1].start_page > value.start_page {
+                candidates[destination] = candidates[destination - 1];
+                destination -= 1;
+            }
+            candidates[destination] = value;
+        }
+
+        let mut ranges = [EMPTY_DIRECT_MAP_RANGE; MAX_DIRECT_MAP_RANGES];
+        let mut range_count = 0usize;
+        for candidate in candidates.iter().take(candidate_count).copied() {
+            if candidate.page_count == 0 || candidate.start_page == 0 {
+                return Err(PhysicalMemoryError::DirectMapOwnership);
+            }
+            let candidate_end = candidate
+                .start_page
+                .checked_add(candidate.page_count)
+                .ok_or(PhysicalMemoryError::AddressRange)?;
+            if range_count != 0 {
+                let previous = &mut ranges[range_count - 1];
+                let previous_end = previous
+                    .start_page
+                    .checked_add(previous.page_count)
+                    .ok_or(PhysicalMemoryError::AddressRange)?;
+                if candidate.start_page < previous_end {
+                    return Err(PhysicalMemoryError::DirectMapOwnership);
+                }
+                if candidate.start_page == previous_end
+                    && candidate.cache_policy == previous.cache_policy
+                {
+                    previous.page_count = candidate_end
+                        .checked_sub(previous.start_page)
+                        .ok_or(PhysicalMemoryError::AddressRange)?;
+                    continue;
+                }
+            }
+            if range_count == ranges.len() {
+                return Err(PhysicalMemoryError::DirectMapCapacity);
+            }
+            ranges[range_count] = candidate;
+            range_count += 1;
+        }
+        if range_count == 0 {
+            return Err(PhysicalMemoryError::DirectMapOwnership);
+        }
+
+        let mut mapped_pages = 0u64;
+        let mut gap_pages = 0u64;
+        for (index, range) in ranges.iter().take(range_count).enumerate() {
+            mapped_pages = mapped_pages
+                .checked_add(range.page_count)
+                .ok_or(PhysicalMemoryError::AddressRange)?;
+            if index != 0 {
+                let previous = ranges[index - 1];
+                let previous_end = previous
+                    .start_page
+                    .checked_add(previous.page_count)
+                    .ok_or(PhysicalMemoryError::AddressRange)?;
+                gap_pages = gap_pages
+                    .checked_add(
+                        range
+                            .start_page
+                            .checked_sub(previous_end)
+                            .ok_or(PhysicalMemoryError::DirectMapOwnership)?,
+                    )
+                    .ok_or(PhysicalMemoryError::AddressRange)?;
+            }
+        }
+        let expected_pages = self
+            .managed_pages
+            .iter()
+            .try_fold(0u64, |total, pages| total.checked_add(*pages))
+            .and_then(|pages| pages.checked_sub(retained_excluded_pages))
+            .ok_or(PhysicalMemoryError::DirectMapOwnership)?;
+        if mapped_pages != expected_pages {
+            return Err(PhysicalMemoryError::DirectMapOwnership);
+        }
+        let first_page = ranges[0].start_page;
+        let last = ranges[range_count - 1];
+        let end_page = last
+            .start_page
+            .checked_add(last.page_count)
+            .ok_or(PhysicalMemoryError::AddressRange)?;
+        let mut coverage_checksum = FNV_OFFSET;
+        for value in [
+            generation,
+            range_count as u64,
+            mapped_pages,
+            retained_excluded_pages,
+            gap_pages,
+            first_page,
+            end_page,
+        ] {
+            coverage_checksum = fnv_u64(coverage_checksum, value);
+        }
+        for range in ranges.iter().take(range_count) {
+            for value in [
+                range.start_page,
+                range.page_count,
+                range.cache_policy as u8 as u64,
+            ] {
+                coverage_checksum = fnv_u64(coverage_checksum, value);
+            }
+        }
+        Ok(DirectMapManifest {
+            generation,
+            ranges,
+            range_count,
+            mapped_pages,
+            retained_excluded_pages,
+            gap_pages,
+            first_page,
+            end_page,
+            coverage_checksum,
+        })
+    }
+
+    pub fn preview_direct_map_manifest(&self) -> Result<DirectMapManifest, PhysicalMemoryError> {
+        self.direct_map_manifest(self.next_generation)
+    }
+
+    pub fn validate_direct_map_manifest(
+        &self,
+        manifest: DirectMapManifest,
+        generation_owner: AllocationHandle,
+    ) -> Result<(), PhysicalMemoryError> {
+        self.validate_allocation(generation_owner)?;
+        let expected = self.direct_map_manifest(generation_owner.generation)?;
+        if manifest != expected {
+            return Err(PhysicalMemoryError::DirectMapOwnership);
+        }
+        Ok(())
+    }
+
     pub fn summary(&self) -> PhysicalMemorySummary {
         let mut largest = [0u64; 3];
         let capacities = self.ledger_capacities();
@@ -3470,6 +3696,17 @@ impl PhysicalMemoryManager {
             .append_usable(start_page, page_count)
             .expect("test extent must be valid");
         manager
+    }
+
+    #[cfg(test)]
+    pub(crate) fn test_retain_allocation(
+        &mut self,
+        handle: AllocationHandle,
+    ) -> Result<(), PhysicalMemoryError> {
+        self.validate_allocation(handle)?;
+        self.allocation_entries_mut()[usize::from(handle.slot)].release_excluded = true;
+        self.seal_metadata_integrity();
+        Ok(())
     }
 }
 
@@ -4746,5 +4983,29 @@ mod tests {
         assert_eq!(0, access.write_count);
         assert_eq!(Ok(()), manager.validate_allocation(handle));
         assert_eq!(0, manager.summary().scrub_receipt_count);
+    }
+
+    #[test]
+    fn direct_map_manifest_covers_managed_ownership_and_excludes_retained_allocations() {
+        let mut manager = PhysicalMemoryManager::test_manager(4096, 128, 64);
+        let retained = manager.allocate(Zone::Dma32, 8, 0x4143).unwrap();
+        let mapped = manager.allocate(Zone::Dma32, 4, 0x0912).unwrap();
+        manager.allocation_entries_mut()[usize::from(retained.slot)].release_excluded = true;
+        manager.seal_metadata_integrity();
+
+        let manifest = manager.preview_direct_map_manifest().unwrap();
+        assert_eq!(3, manifest.generation);
+        assert_eq!(1, manifest.range_count);
+        assert_eq!(120, manifest.mapped_pages);
+        assert_eq!(8, manifest.retained_excluded_pages);
+        assert_eq!(0, manifest.gap_pages);
+        assert_eq!(mapped.start_page, manifest.first_page);
+        assert_eq!(4096 + 128, manifest.end_page);
+        assert_eq!(
+            DirectMapCachePolicy::WriteBack,
+            manifest.ranges[0].cache_policy
+        );
+        assert_ne!(0, manifest.coverage_checksum);
+        assert_eq!(manifest, manager.preview_direct_map_manifest().unwrap());
     }
 }

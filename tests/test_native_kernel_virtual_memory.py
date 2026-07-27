@@ -25,7 +25,7 @@ class NativeKernelVirtualMemoryTests(unittest.TestCase):
         self.assertFalse(self.readiness["production_ready"])
         self.assertFalse(self.readiness["n9_exit_gate_satisfied"])
 
-    def test_live_tables_bind_to_pbp1_first_fit(self) -> None:
+    def test_live_sparse_tables_bind_to_complete_pmm_ownership(self) -> None:
         observation = virtual_memory.validate_markers(self.markers)
         derived = virtual_memory.validate_observation_binding(
             observation, self.live_run["pbp1_transcript"]
@@ -33,14 +33,21 @@ class NativeKernelVirtualMemoryTests(unittest.TestCase):
         candidate = observation["candidate"]
         self.assertEqual(10, observation["transfer_prefix"]["transfer_arm"]["trap_scenario"])
         self.assertEqual(derived["first_free_address"][1], candidate["candidate_root"])
-        self.assertEqual(8, virtual_memory.TABLE_PAGES)
-        self.assertEqual(candidate["candidate_root"] + 8 * virtual_memory.PAGE_BYTES, candidate["data"])
+        direct_map = derived["direct_map"]
+        self.assertEqual(direct_map["table_pages"], observation["layout"]["table_pages"])
         self.assertEqual(
-            virtual_memory.DIRECT_MAP_START + candidate["candidate_root"],
+            candidate["candidate_root"] + direct_map["table_pages"] * virtual_memory.PAGE_BYTES,
+            candidate["data"],
+        )
+        self.assertEqual(
+            virtual_memory.DIRECT_MAP_START
+            + direct_map["first_page"] * virtual_memory.PAGE_BYTES,
             candidate["direct_first"],
         )
-        self.assertEqual(8720, observation["result"]["physical_writes"])
-        self.assertEqual(5640, observation["result"]["temporary_pte_writes"])
+        self.assertEqual(direct_map["mapped_pages"], observation["layout"]["mapped_pages"])
+        self.assertEqual(direct_map["coverage_checksum"], candidate["coverage_checksum"])
+        self.assertGreater(observation["result"]["physical_writes"], direct_map["mapped_pages"])
+        self.assertGreater(observation["result"]["temporary_pte_writes"], direct_map["mapped_pages"])
 
     def test_active_root_restores_cr3_and_binds_leaf_receipts(self) -> None:
         observation = virtual_memory.validate_markers(self.markers)
@@ -50,8 +57,17 @@ class NativeKernelVirtualMemoryTests(unittest.TestCase):
         self.assertEqual(3, observation["invalidation"]["active_receipts"])
         self.assertEqual(0xA5, observation["invalidation"]["probe"])
         self.assertEqual(1, observation["invalidation"]["premature_reuse_rejected"])
+        self.assertEqual(1, observation["invalidation"]["generation_retirement_receipts"])
+        self.assertEqual(1, observation["invalidation"]["local_context_flushes"])
+        self.assertEqual(0, observation["invalidation"]["remote_shootdowns_pending"])
+        self.assertEqual(1, observation["invalidation"]["future_smp_shootdown_required"])
+        self.assertEqual(1, observation["invalidation"]["old_generation_reclaim_deferred"])
+        self.assertEqual(1, observation["invalidation"]["exact_release_receipt"])
         self.assertEqual(3, observation["result"]["active_invlpg"])
-        self.assertEqual(5640, observation["result"]["bootstrap_invlpg"])
+        self.assertEqual(
+            observation["result"]["temporary_pte_writes"],
+            observation["result"]["bootstrap_invlpg"],
+        )
         for key in ("shootdown", "smp", "ring3", "production"):
             self.assertEqual(0, observation["result"][key])
 
@@ -78,7 +94,9 @@ class NativeKernelVirtualMemoryTests(unittest.TestCase):
         self.assertEqual(0, audit["heap_api_token_count"])
         self.assertEqual(2, audit["active_cr3_write_count"])
         self.assertEqual(3, audit["active_local_invalidation_count"])
-        self.assertEqual(8, audit["fixed_capacity_table_page_count"])
+        self.assertEqual(512, audit["max_direct_page_table_count"])
+        self.assertEqual(4, audit["max_direct_directory_table_count"])
+        self.assertTrue(audit["table_page_count_derived_from_manifest"])
         self.assertTrue(audit["volatile_physical_adapter"])
         self.assertTrue(audit["bootstrap_temporary_mapping_uses_invlpg"])
         self.assertTrue(audit["live_cpuid_physical_width_validated"])

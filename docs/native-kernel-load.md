@@ -262,10 +262,13 @@ to PBLIVE4 and selector 8 to PKPMM7/PKACPI1: the kernel validates RSDP/XSDT and
 exactly one APIC, FACP, HPET, and MCFG table, copies the required bytes into a
 retained scrubbed snapshot, verifies readback, and admits the eleven ACPI pages
 only through a separate opaque-evidence-gated reclaim receipt. No AML is
-executed and no complete ACPI resource graph is built. Interrupt-context,
-concurrent, and SMP allocation, a complete generation-owned sparse direct map,
-shootdown, ring 3, heap, pager, target, and production claims remain open. The
-next chronological owner-independent move is `N9-VM-DIRECT-MAP-001`.
+executed and no complete ACPI resource graph is built. Cycle 134 upgrades
+selector 10 to PKVM3, deriving an audited generation-owned sparse direct map
+from the complete PMM ownership manifest and proving transactional activation,
+rollback, local invalidation receipts, and one-BSP generation retirement.
+Interrupt-context, concurrent, and SMP allocation, AP startup, remote shootdown
+and deferred reclaim, ring 3, heap, pager, target, and production claims remain
+open. The next chronological owner-independent move is `N8-IRQ-001`.
 Capability creation, lifecycle execution, signature trust, authenticated
 persistent state, production transfer, and physical-target qualification remain
 separately gated by N5/N6 and owner-controlled N0 work.
