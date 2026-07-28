@@ -3,7 +3,7 @@
   "artifact_kind": "pooleos_native_kernel_privilege_msr_policy_contract",
   "contract_id": "PKMSR1",
   "selected_move_id": "N7-PRIVILEGE-MSR-POLICY-001",
-  "status_date": "2026-07-22",
+  "status_date": "2026-07-28",
   "status": "frozen_bounded_bsp_read_only_privileged_msr_policy_non_promoting",
   "production_ready": false,
   "production_promotion_allowed": false,
@@ -102,7 +102,8 @@
     "source_instruction_audit_required": true,
     "linked_machine_code_audit_required": true,
     "forbidden_linked_instructions": ["RDPMC", "SYSCALL", "SYSRET", "SWAPGS"],
-    "exact_linked_instruction_counts": {"RDMSR": 20, "WRMSR": 2},
+    "exact_linked_instruction_counts": {"RDMSR": 21, "WRMSR": 2},
+    "rdmsr_scope": "twenty PKMSR1/CPU-entry observations plus exactly one IA32_EFER read in the separately selected PKSMP1 first-AP lifecycle; PKMSR1 executes eleven support-gated reads",
     "wrmsr_scope": "exactly two typed IA32_APIC_BASE writes in the separately selected PKIRQ1 InterruptTime branch; PKMSR1 executes zero writes"
   },
   "source_register": [
@@ -198,7 +199,7 @@
   "non_claims": [
     "PKMSR1 is a single-BSP qemu64 development observation and does not qualify the AMD Ryzen 7 9800X3D target or any physical machine.",
     "Observed zero system-linkage values are not architectural reset guarantees; AMD documents several reset values as undefined.",
-    "PKMSR1 executes no STAR, LSTAR, CSTAR, SFMASK, EFER.SCE, FS/GS base, TSC_AUX, MCA, PMU, control-register, or other privileged write; the shared linked image contains exactly two typed IA32_APIC_BASE WRMSR sites isolated to the separately selected PKIRQ1 InterruptTime branch. TSC_AUX is also not read because RDTSCP is absent.",
+    "PKMSR1 executes no STAR, LSTAR, CSTAR, SFMASK, EFER.SCE, FS/GS base, TSC_AUX, MCA, PMU, control-register, or other privileged write; the shared linked image contains exactly one additional IA32_EFER RDMSR site isolated to the separately selected PKSMP1 first-AP lifecycle and exactly two typed IA32_APIC_BASE WRMSR sites isolated to the separately selected PKIRQ1 InterruptTime branch. TSC_AUX is also not read because RDTSCP is absent.",
     "No SYSCALL, SYSRET, SWAPGS, RDTSCP, RDPMC, machine-check delivery, MCA bank walk, error clear, PMU event programming, interrupt enable, or ring transition is executed.",
     "The qemu64-only MCG_CAP bit 24 and all-ones MCG_CTL observations are compatibility-profile facts, not AMD architectural semantics or target-hardware policy.",
     "Global MCA inventory does not qualify product-specific bank meanings, retained crash recovery, recursive fault containment, or a machine-check handler.",

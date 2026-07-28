@@ -24,9 +24,9 @@
       "sha256": "C8A8D41611E02622C49CC386C003C9A72F89A302AA07726AD22DB2C51542C38A"
     },
     "golden_vectors": {
-      "byte_count": 9878,
+      "byte_count": 9832,
       "path": "specs/native-symbol-golden-vectors.json",
-      "sha256": "A025968095F9EBBB1AC3A56F0C9874484217DAFC40B8C2EACFD4DCE3C9B0D2DB"
+      "sha256": "E4E79706DEDB13DF29CCA200F1A13009739EFE81783B4CAEB1728F272C458DD2"
     },
     "implementation_inputs": [
       {
@@ -47,7 +47,7 @@
       {
         "byte_count": 36082,
         "path": "native/symbols/src/lib.rs",
-        "sha256": "A73EA1D2ABAF48B18B408F1A04FFF17BB5AD2378BE2C3B6AE6E1763C5F58196A"
+        "sha256": "7987CFF2C1BD7CB385E4A2423109CDEFE69C7A4526A06369529377068631CCC9"
       },
       {
         "byte_count": 5305,
@@ -62,17 +62,17 @@
       {
         "byte_count": 2048,
         "path": "native/kernel/linker.ld",
-        "sha256": "CAE85AD1F42F5A579CA0F329F31B2C403F97ECB10DF3EBE29CA4C65DFEBCF95B"
+        "sha256": "005229E6BF1945D357E5A7CB2377C60B69FF7A7C4BB7D2F64D76AEAC44F68DDE"
       },
       {
-        "byte_count": 445,
+        "byte_count": 448,
         "path": "native/kernel/manifest.pkm",
-        "sha256": "A3454D62C453F6D27CD0CCDC8493139C6387575CA033220A4F69A09DAB024E9B"
+        "sha256": "617CA27F81772C0DA9D138B8FB4B19322283EC59D6E9D18AFD4C5C6AC69FBE1E"
       },
       {
-        "byte_count": 54081,
+        "byte_count": 54084,
         "path": "runtime/native_symbols.py",
-        "sha256": "AEA32A9C555C6696CEBD80B5D120832C8E952ADEBC93362DBAC828F3DB061C16"
+        "sha256": "3FE5089B9B404A8CE44D7FF0D51F0D3917E42C82ED00D726B3618F8AAD1F6637"
       },
       {
         "byte_count": 8217,
@@ -92,7 +92,7 @@
       {
         "byte_count": 7313,
         "path": "tests/test_native_symbols.py",
-        "sha256": "6D50C2670E145E1CD52C6E330EFC9C80F1CAAD4D6E4A7323E311D4904C8C25AA"
+        "sha256": "22CF36488ABCC844F47F9F0AD2CC1F94F1003CD174B4D8B6BB38DB6D4767FFDB"
       },
       {
         "byte_count": 7701,
@@ -136,14 +136,14 @@
   "contract_id": "PSYM1",
   "debug_correspondence": {
     "canonical_entry_offset": 36864,
-    "canonical_file_byte_count": 323584,
-    "canonical_file_sha256": "2ACD4A5EF30CA1A4A22711FD31E2A259A5C87D97BCE7FB1BF49A3488B3FC02B2",
-    "canonical_image_byte_count": 364544,
+    "canonical_file_byte_count": 335872,
+    "canonical_file_sha256": "6596CB332EB24813089F95A00AC979C892C47235943CB0E73E3979ED9901B725",
+    "canonical_image_byte_count": 376832,
     "debug_build_count": 2,
     "debug_builds_byte_identical": true,
-    "debug_derived_bundle_sha256": "B083717D41DCEEC6BAD5AD8E58CA8B5A22BE2FEA495A822AAD9DB83C1784927C",
-    "debug_file_byte_count": 4908504,
-    "debug_file_sha256": "58F2AC2FC538D3AFFA2C83CA3ADA2E8D58B3ADD4F08771F6A6522C58ACE35C49",
+    "debug_derived_bundle_sha256": "0D38D0659A440E7E968BABF7D101C3F59E959D4F1F3E610E8532FA3F39B16F5F",
+    "debug_file_byte_count": 5075616,
+    "debug_file_sha256": "E0D818B5C03345AA855E450EB8D2E1CFBBDC928E172834BCC11E1D88E3D646D0",
     "debug_file_staged_on_boot_media": false,
     "dwarf_compilation_unit_count": 61,
     "observed_dwarf_versions": [
@@ -161,7 +161,7 @@
   },
   "golden_vectors": [
     {
-      "bundle_sha256": "B083717D41DCEEC6BAD5AD8E58CA8B5A22BE2FEA495A822AAD9DB83C1784927C",
+      "bundle_sha256": "0D38D0659A440E7E968BABF7D101C3F59E959D4F1F3E610E8532FA3F39B16F5F",
       "id": "PSYM1-CANONICAL",
       "lookup_sample_count": 10,
       "python_result": "pass",
@@ -189,11 +189,11 @@
     "campaign_id": "PSYM1-LOOKUP-DIFF-1",
     "case_count": 16384,
     "corpus_published": false,
-    "hit_count": 4428,
+    "hit_count": 4431,
     "maximum_observed_steps": 2,
     "mismatch_count": 0,
-    "miss_count": 5815,
-    "rejected_count": 6141,
+    "miss_count": 5810,
+    "rejected_count": 6143,
     "seed": "0x5053594D3102",
     "status": "pass"
   },
@@ -389,37 +389,37 @@
       "surface": "parser"
     },
     {
-      "expected": "ERR:psym_slide_alignment",
+      "expected": "ERR:psym_symbol_order",
       "id": "NEG-PSYM1-PARSER-028",
+      "observed": "ERR:psym_symbol_order",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:psym_slide_alignment",
+      "id": "NEG-PSYM1-PARSER-029",
       "observed": "ERR:psym_slide_alignment",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_symbol_name_ascii",
-      "id": "NEG-PSYM1-PARSER-029",
+      "id": "NEG-PSYM1-PARSER-030",
       "observed": "ERR:psym_symbol_name_ascii",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_body_digest",
-      "id": "NEG-PSYM1-PARSER-030",
+      "id": "NEG-PSYM1-PARSER-031",
       "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_segment_id",
-      "id": "NEG-PSYM1-PARSER-031",
-      "observed": "ERR:psym_segment_id",
-      "status": "pass",
-      "surface": "parser"
-    },
-    {
-      "expected": "ERR:psym_body_digest",
       "id": "NEG-PSYM1-PARSER-032",
-      "observed": "ERR:psym_body_digest",
+      "observed": "ERR:psym_segment_id",
       "status": "pass",
       "surface": "parser"
     },
@@ -431,268 +431,268 @@
       "surface": "parser"
     },
     {
-      "expected": "ERR:psym_symbol_range",
+      "expected": "ERR:psym_body_digest",
       "id": "NEG-PSYM1-PARSER-034",
+      "observed": "ERR:psym_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:psym_symbol_range",
+      "id": "NEG-PSYM1-PARSER-035",
       "observed": "ERR:psym_symbol_range",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_reserved",
-      "id": "NEG-PSYM1-PARSER-035",
+      "id": "NEG-PSYM1-PARSER-036",
       "observed": "ERR:psym_reserved",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_bounds",
-      "id": "NEG-PSYM1-PARSER-036",
+      "id": "NEG-PSYM1-PARSER-037",
       "observed": "ERR:psym_bounds",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_reserved",
-      "id": "NEG-PSYM1-PARSER-037",
+      "id": "NEG-PSYM1-PARSER-038",
       "observed": "ERR:psym_reserved",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_magic",
-      "id": "NEG-PSYM1-PARSER-038",
+      "id": "NEG-PSYM1-PARSER-039",
       "observed": "ERR:psym_magic",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_reserved",
-      "id": "NEG-PSYM1-PARSER-039",
+      "id": "NEG-PSYM1-PARSER-040",
       "observed": "ERR:psym_reserved",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_body_digest",
-      "id": "NEG-PSYM1-PARSER-040",
+      "id": "NEG-PSYM1-PARSER-041",
       "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_reserved",
-      "id": "NEG-PSYM1-PARSER-041",
+      "id": "NEG-PSYM1-PARSER-042",
       "observed": "ERR:psym_reserved",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_total_size",
-      "id": "NEG-PSYM1-PARSER-042",
+      "id": "NEG-PSYM1-PARSER-043",
       "observed": "ERR:psym_total_size",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_symbol_range",
-      "id": "NEG-PSYM1-PARSER-043",
+      "id": "NEG-PSYM1-PARSER-044",
       "observed": "ERR:psym_symbol_range",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_symbol_id",
-      "id": "NEG-PSYM1-PARSER-044",
+      "id": "NEG-PSYM1-PARSER-045",
       "observed": "ERR:psym_symbol_id",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_body_digest",
-      "id": "NEG-PSYM1-PARSER-045",
+      "id": "NEG-PSYM1-PARSER-046",
       "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_bounds",
-      "id": "NEG-PSYM1-PARSER-046",
+      "id": "NEG-PSYM1-PARSER-047",
       "observed": "ERR:psym_bounds",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_body_digest",
-      "id": "NEG-PSYM1-PARSER-047",
+      "id": "NEG-PSYM1-PARSER-048",
       "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_table_layout",
-      "id": "NEG-PSYM1-PARSER-048",
+      "id": "NEG-PSYM1-PARSER-049",
       "observed": "ERR:psym_table_layout",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_body_digest",
-      "id": "NEG-PSYM1-PARSER-049",
+      "id": "NEG-PSYM1-PARSER-050",
       "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_segment_order",
-      "id": "NEG-PSYM1-PARSER-050",
+      "id": "NEG-PSYM1-PARSER-051",
       "observed": "ERR:psym_segment_order",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_body_digest",
-      "id": "NEG-PSYM1-PARSER-051",
-      "observed": "ERR:psym_body_digest",
-      "status": "pass",
-      "surface": "parser"
-    },
-    {
-      "expected": "ERR:psym_symbol_name_fingerprint",
       "id": "NEG-PSYM1-PARSER-052",
-      "observed": "ERR:psym_symbol_name_fingerprint",
-      "status": "pass",
-      "surface": "parser"
-    },
-    {
-      "expected": "ERR:psym_body_digest",
-      "id": "NEG-PSYM1-PARSER-053",
       "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_symbol_name_fingerprint",
-      "id": "NEG-PSYM1-PARSER-054",
+      "id": "NEG-PSYM1-PARSER-053",
       "observed": "ERR:psym_symbol_name_fingerprint",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_body_digest",
+      "id": "NEG-PSYM1-PARSER-054",
+      "observed": "ERR:psym_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:psym_symbol_name_fingerprint",
       "id": "NEG-PSYM1-PARSER-055",
+      "observed": "ERR:psym_symbol_name_fingerprint",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:psym_body_digest",
+      "id": "NEG-PSYM1-PARSER-056",
       "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_entry_symbol",
-      "id": "NEG-PSYM1-PARSER-056",
+      "id": "NEG-PSYM1-PARSER-057",
       "observed": "ERR:psym_entry_symbol",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_segment_flags",
-      "id": "NEG-PSYM1-PARSER-057",
+      "id": "NEG-PSYM1-PARSER-058",
       "observed": "ERR:psym_segment_flags",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_body_digest",
-      "id": "NEG-PSYM1-PARSER-058",
+      "id": "NEG-PSYM1-PARSER-059",
       "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_flags",
-      "id": "NEG-PSYM1-PARSER-059",
+      "id": "NEG-PSYM1-PARSER-060",
       "observed": "ERR:psym_flags",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_bounds",
-      "id": "NEG-PSYM1-PARSER-060",
+      "id": "NEG-PSYM1-PARSER-061",
       "observed": "ERR:psym_bounds",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_body_digest",
-      "id": "NEG-PSYM1-PARSER-061",
+      "id": "NEG-PSYM1-PARSER-062",
       "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_segment_flags",
-      "id": "NEG-PSYM1-PARSER-062",
+      "id": "NEG-PSYM1-PARSER-063",
       "observed": "ERR:psym_segment_flags",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_symbol_name_layout",
-      "id": "NEG-PSYM1-PARSER-063",
+      "id": "NEG-PSYM1-PARSER-064",
       "observed": "ERR:psym_symbol_name_layout",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_body_digest",
-      "id": "NEG-PSYM1-PARSER-064",
+      "id": "NEG-PSYM1-PARSER-065",
       "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_reserved",
-      "id": "NEG-PSYM1-PARSER-065",
+      "id": "NEG-PSYM1-PARSER-066",
       "observed": "ERR:psym_reserved",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_total_size",
-      "id": "NEG-PSYM1-PARSER-066",
+      "id": "NEG-PSYM1-PARSER-067",
       "observed": "ERR:psym_total_size",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_segment_range",
-      "id": "NEG-PSYM1-PARSER-067",
+      "id": "NEG-PSYM1-PARSER-068",
       "observed": "ERR:psym_segment_range",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_table_layout",
-      "id": "NEG-PSYM1-PARSER-068",
+      "id": "NEG-PSYM1-PARSER-069",
       "observed": "ERR:psym_table_layout",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_body_digest",
-      "id": "NEG-PSYM1-PARSER-069",
+      "id": "NEG-PSYM1-PARSER-070",
       "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_symbol_id",
-      "id": "NEG-PSYM1-PARSER-070",
-      "observed": "ERR:psym_symbol_id",
-      "status": "pass",
-      "surface": "parser"
-    },
-    {
-      "expected": "ERR:psym_body_digest",
       "id": "NEG-PSYM1-PARSER-071",
-      "observed": "ERR:psym_body_digest",
+      "observed": "ERR:psym_symbol_id",
       "status": "pass",
       "surface": "parser"
     },
@@ -711,37 +711,37 @@
       "surface": "parser"
     },
     {
-      "expected": "ERR:psym_table_layout",
+      "expected": "ERR:psym_body_digest",
       "id": "NEG-PSYM1-PARSER-074",
+      "observed": "ERR:psym_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:psym_table_layout",
+      "id": "NEG-PSYM1-PARSER-075",
       "observed": "ERR:psym_table_layout",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_body_digest",
-      "id": "NEG-PSYM1-PARSER-075",
+      "id": "NEG-PSYM1-PARSER-076",
       "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_segment_range",
-      "id": "NEG-PSYM1-PARSER-076",
+      "id": "NEG-PSYM1-PARSER-077",
       "observed": "ERR:psym_segment_range",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_segment_flags",
-      "id": "NEG-PSYM1-PARSER-077",
-      "observed": "ERR:psym_segment_flags",
-      "status": "pass",
-      "surface": "parser"
-    },
-    {
-      "expected": "ERR:psym_body_digest",
       "id": "NEG-PSYM1-PARSER-078",
-      "observed": "ERR:psym_body_digest",
+      "observed": "ERR:psym_segment_flags",
       "status": "pass",
       "surface": "parser"
     },
@@ -753,9 +753,9 @@
       "surface": "parser"
     },
     {
-      "expected": "ERR:psym_reserved",
+      "expected": "ERR:psym_body_digest",
       "id": "NEG-PSYM1-PARSER-080",
-      "observed": "ERR:psym_reserved",
+      "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
@@ -767,65 +767,65 @@
       "surface": "parser"
     },
     {
-      "expected": "ERR:psym_version",
+      "expected": "ERR:psym_reserved",
       "id": "NEG-PSYM1-PARSER-082",
+      "observed": "ERR:psym_reserved",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:psym_version",
+      "id": "NEG-PSYM1-PARSER-083",
       "observed": "ERR:psym_version",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_body_digest",
-      "id": "NEG-PSYM1-PARSER-083",
+      "id": "NEG-PSYM1-PARSER-084",
       "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_segment_kind",
-      "id": "NEG-PSYM1-PARSER-084",
+      "id": "NEG-PSYM1-PARSER-085",
       "observed": "ERR:psym_segment_kind",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_bounds",
-      "id": "NEG-PSYM1-PARSER-085",
+      "id": "NEG-PSYM1-PARSER-086",
       "observed": "ERR:psym_bounds",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_table_layout",
-      "id": "NEG-PSYM1-PARSER-086",
+      "id": "NEG-PSYM1-PARSER-087",
       "observed": "ERR:psym_table_layout",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_segment_kind",
-      "id": "NEG-PSYM1-PARSER-087",
+      "id": "NEG-PSYM1-PARSER-088",
       "observed": "ERR:psym_segment_kind",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_table_layout",
-      "id": "NEG-PSYM1-PARSER-088",
+      "id": "NEG-PSYM1-PARSER-089",
       "observed": "ERR:psym_table_layout",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_segment_range",
-      "id": "NEG-PSYM1-PARSER-089",
-      "observed": "ERR:psym_segment_range",
-      "status": "pass",
-      "surface": "parser"
-    },
-    {
-      "expected": "ERR:psym_reserved",
       "id": "NEG-PSYM1-PARSER-090",
-      "observed": "ERR:psym_reserved",
+      "observed": "ERR:psym_segment_range",
       "status": "pass",
       "surface": "parser"
     },
@@ -837,58 +837,58 @@
       "surface": "parser"
     },
     {
-      "expected": "ERR:psym_slide_alignment",
+      "expected": "ERR:psym_reserved",
       "id": "NEG-PSYM1-PARSER-092",
+      "observed": "ERR:psym_reserved",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:psym_slide_alignment",
+      "id": "NEG-PSYM1-PARSER-093",
       "observed": "ERR:psym_slide_alignment",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_reserved",
-      "id": "NEG-PSYM1-PARSER-093",
+      "id": "NEG-PSYM1-PARSER-094",
       "observed": "ERR:psym_reserved",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_entry_symbol",
-      "id": "NEG-PSYM1-PARSER-094",
+      "id": "NEG-PSYM1-PARSER-095",
       "observed": "ERR:psym_entry_symbol",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_body_digest",
-      "id": "NEG-PSYM1-PARSER-095",
+      "id": "NEG-PSYM1-PARSER-096",
       "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_symbol_name_ascii",
-      "id": "NEG-PSYM1-PARSER-096",
+      "id": "NEG-PSYM1-PARSER-097",
       "observed": "ERR:psym_symbol_name_ascii",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_body_digest",
-      "id": "NEG-PSYM1-PARSER-097",
+      "id": "NEG-PSYM1-PARSER-098",
       "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_segment_order",
-      "id": "NEG-PSYM1-PARSER-098",
-      "observed": "ERR:psym_segment_order",
-      "status": "pass",
-      "surface": "parser"
-    },
-    {
-      "expected": "ERR:psym_body_digest",
       "id": "NEG-PSYM1-PARSER-099",
-      "observed": "ERR:psym_body_digest",
+      "observed": "ERR:psym_segment_order",
       "status": "pass",
       "surface": "parser"
     },
@@ -900,23 +900,23 @@
       "surface": "parser"
     },
     {
-      "expected": "ERR:psym_virtual_window",
+      "expected": "ERR:psym_body_digest",
       "id": "NEG-PSYM1-PARSER-101",
+      "observed": "ERR:psym_body_digest",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:psym_virtual_window",
+      "id": "NEG-PSYM1-PARSER-102",
       "observed": "ERR:psym_virtual_window",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_total_size",
-      "id": "NEG-PSYM1-PARSER-102",
-      "observed": "ERR:psym_total_size",
-      "status": "pass",
-      "surface": "parser"
-    },
-    {
-      "expected": "ERR:psym_reserved",
       "id": "NEG-PSYM1-PARSER-103",
-      "observed": "ERR:psym_reserved",
+      "observed": "ERR:psym_total_size",
       "status": "pass",
       "surface": "parser"
     },
@@ -928,93 +928,93 @@
       "surface": "parser"
     },
     {
-      "expected": "ERR:psym_body_digest",
+      "expected": "ERR:psym_reserved",
       "id": "NEG-PSYM1-PARSER-105",
+      "observed": "ERR:psym_reserved",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:psym_body_digest",
+      "id": "NEG-PSYM1-PARSER-106",
       "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_segment_range",
-      "id": "NEG-PSYM1-PARSER-106",
+      "id": "NEG-PSYM1-PARSER-107",
       "observed": "ERR:psym_segment_range",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_body_digest",
-      "id": "NEG-PSYM1-PARSER-107",
+      "id": "NEG-PSYM1-PARSER-108",
       "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_reserved",
-      "id": "NEG-PSYM1-PARSER-108",
+      "id": "NEG-PSYM1-PARSER-109",
       "observed": "ERR:psym_reserved",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_table_layout",
-      "id": "NEG-PSYM1-PARSER-109",
+      "id": "NEG-PSYM1-PARSER-110",
       "observed": "ERR:psym_table_layout",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_body_digest",
-      "id": "NEG-PSYM1-PARSER-110",
+      "id": "NEG-PSYM1-PARSER-111",
       "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_reserved",
-      "id": "NEG-PSYM1-PARSER-111",
+      "id": "NEG-PSYM1-PARSER-112",
       "observed": "ERR:psym_reserved",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_virtual_window",
-      "id": "NEG-PSYM1-PARSER-112",
+      "id": "NEG-PSYM1-PARSER-113",
       "observed": "ERR:psym_virtual_window",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_symbol_id",
-      "id": "NEG-PSYM1-PARSER-113",
+      "id": "NEG-PSYM1-PARSER-114",
       "observed": "ERR:psym_symbol_id",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_body_digest",
-      "id": "NEG-PSYM1-PARSER-114",
+      "id": "NEG-PSYM1-PARSER-115",
       "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_segment_range",
-      "id": "NEG-PSYM1-PARSER-115",
+      "id": "NEG-PSYM1-PARSER-116",
       "observed": "ERR:psym_segment_range",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_segment_flags",
-      "id": "NEG-PSYM1-PARSER-116",
-      "observed": "ERR:psym_segment_flags",
-      "status": "pass",
-      "surface": "parser"
-    },
-    {
-      "expected": "ERR:psym_body_digest",
       "id": "NEG-PSYM1-PARSER-117",
-      "observed": "ERR:psym_body_digest",
+      "observed": "ERR:psym_segment_flags",
       "status": "pass",
       "surface": "parser"
     },
@@ -1033,16 +1033,16 @@
       "surface": "parser"
     },
     {
-      "expected": "ERR:psym_reserved",
+      "expected": "ERR:psym_body_digest",
       "id": "NEG-PSYM1-PARSER-120",
-      "observed": "ERR:psym_reserved",
+      "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
     {
-      "expected": "ERR:psym_body_digest",
+      "expected": "ERR:psym_reserved",
       "id": "NEG-PSYM1-PARSER-121",
-      "observed": "ERR:psym_body_digest",
+      "observed": "ERR:psym_reserved",
       "status": "pass",
       "surface": "parser"
     },
@@ -1054,23 +1054,23 @@
       "surface": "parser"
     },
     {
-      "expected": "ERR:psym_reserved",
-      "id": "NEG-PSYM1-PARSER-123",
-      "observed": "ERR:psym_reserved",
-      "status": "pass",
-      "surface": "parser"
-    },
-    {
       "expected": "ERR:psym_body_digest",
-      "id": "NEG-PSYM1-PARSER-124",
+      "id": "NEG-PSYM1-PARSER-123",
       "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
     {
       "expected": "ERR:psym_reserved",
-      "id": "NEG-PSYM1-PARSER-125",
+      "id": "NEG-PSYM1-PARSER-124",
       "observed": "ERR:psym_reserved",
+      "status": "pass",
+      "surface": "parser"
+    },
+    {
+      "expected": "ERR:psym_body_digest",
+      "id": "NEG-PSYM1-PARSER-125",
+      "observed": "ERR:psym_body_digest",
       "status": "pass",
       "surface": "parser"
     },
@@ -1082,16 +1082,16 @@
       "surface": "parser"
     },
     {
-      "expected": "ERR:psym_table_layout",
+      "expected": "ERR:psym_reserved",
       "id": "NEG-PSYM1-PARSER-127",
-      "observed": "ERR:psym_table_layout",
+      "observed": "ERR:psym_reserved",
       "status": "pass",
       "surface": "parser"
     },
     {
-      "expected": "ERR:psym_reserved",
+      "expected": "ERR:psym_table_layout",
       "id": "NEG-PSYM1-PARSER-128",
-      "observed": "ERR:psym_reserved",
+      "observed": "ERR:psym_table_layout",
       "status": "pass",
       "surface": "parser"
     },
@@ -1320,13 +1320,13 @@
     "Complete signed physical-media, production ISO, and N5-N39 exit gates."
   ],
   "parser_differential": {
-    "accepted_count": 860,
+    "accepted_count": 859,
     "campaign_id": "PSYM1-PARSER-DIFF-1",
     "case_count": 16384,
     "corpus_published": false,
     "digest_repaired_deep_mutations": true,
     "mismatch_count": 0,
-    "rejected_count": 15524,
+    "rejected_count": 15525,
     "seed": "0x5053594D3101",
     "status": "pass"
   },

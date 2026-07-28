@@ -241,7 +241,7 @@ def _linked_machine_audit(toolchain_root: Path, temporary_root: Path) -> tuple[d
     audited_mnemonics = ("rdmsr", "wrmsr", "rdpmc", "syscall", "sysret", "swapgs")
     counts = {mnemonic: mnemonics.count(mnemonic) for mnemonic in audited_mnemonics}
     expected_counts = {
-        "rdmsr": 20,
+        "rdmsr": 21,
         "wrmsr": 2,
         "rdpmc": 0,
         "syscall": 0,
@@ -256,12 +256,14 @@ def _linked_machine_audit(toolchain_root: Path, temporary_root: Path) -> tuple[d
             for mnemonic in ("rdmsr", "wrmsr")
         }
         for name in (
+            "PooleKernelLinked::run_smp_first_ap",
             "PooleKernelLinked::arch::x86_64::observe_cpu_policy",
             "PooleKernelLinked::arch::x86_64::observe_privilege_msr_policy",
             "poole_kernel_rust_entry",
         )
     }
     expected_function_counts = {
+        "PooleKernelLinked::run_smp_first_ap": {"rdmsr": 1, "wrmsr": 0},
         "PooleKernelLinked::arch::x86_64::observe_cpu_policy": {"rdmsr": 5, "wrmsr": 0},
         "PooleKernelLinked::arch::x86_64::observe_privilege_msr_policy": {"rdmsr": 12, "wrmsr": 0},
         "poole_kernel_rust_entry": {"rdmsr": 3, "wrmsr": 2},
@@ -283,7 +285,8 @@ def _linked_machine_audit(toolchain_root: Path, temporary_root: Path) -> tuple[d
         "privileged_function_instruction_counts": function_counts,
         "pkmsr1_runtime_msr_write_count": 0,
         "pkirq1_linked_wrmsr_count": 2,
-        "result": "pass_linked_privileged_instruction_scope_with_pkirq1_isolation",
+        "pksmp1_linked_rdmsr_count": 1,
+        "result": "pass_linked_privileged_instruction_scope_with_pkirq1_and_pksmp1_isolation",
     }
     return audit, tool
 

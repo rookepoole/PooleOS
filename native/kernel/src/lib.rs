@@ -21,6 +21,7 @@ pub mod interrupt_time;
 pub mod physical_memory;
 pub mod privilege_msr;
 pub mod revalidation;
+pub mod smp;
 pub mod virtual_memory;
 pub mod xstate;
 pub mod xstate_exception;
@@ -36,7 +37,7 @@ pub const VIRTUAL_MEMORY_CONTRACT_ID: &str = virtual_memory::CONTRACT_ID;
 pub const XSTATE_EXCEPTION_CONTRACT_ID: &str = "PKXEXC1";
 #[used]
 #[unsafe(link_section = ".text.pkbuild_literal")]
-static BUILD_ID_BYTES: [u8; 42] = *b"PKBUILD1-CYCLE135-N8-IRQ-TIMER-V01-0010000";
+static BUILD_ID_BYTES: [u8; 45] = *b"PKBUILD1-CYCLE136-N8-SMP-FIRST-AP-V01-0010000";
 pub const BUILD_ID: &[u8] = &BUILD_ID_BYTES;
 pub const ENTRY_OFFSET: u64 = 0x9000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
@@ -78,6 +79,7 @@ pub enum PanicCode {
     VirtualMemory = 0x1011,
     ActiveVirtualMemory = 0x1012,
     InterruptTime = 0x1013,
+    SmpFirstAp = 0x1014,
     UnexpectedReturn = 0x10ff,
 }
 
@@ -96,6 +98,7 @@ pub enum DevelopmentTrapScenario {
     VirtualMemory = 9,
     ActiveVirtualMemory = 10,
     InterruptTime = 11,
+    SmpFirstAp = 12,
 }
 
 macro_rules! scenario_label {
@@ -118,6 +121,7 @@ scenario_label!(SCENARIO_PHYSICAL_MEMORY, b"physical_memory");
 scenario_label!(SCENARIO_VIRTUAL_MEMORY, b"virtual_memory");
 scenario_label!(SCENARIO_ACTIVE_VIRTUAL_MEMORY, b"active_virtual_memory");
 scenario_label!(SCENARIO_INTERRUPT_TIME, b"interrupt_time");
+scenario_label!(SCENARIO_SMP_FIRST_AP, b"smp_first_ap");
 
 const fn scenario_label_text(bytes: &'static [u8]) -> &'static str {
     // SAFETY: every caller supplies an ASCII byte string declared immediately above.
@@ -139,6 +143,7 @@ impl DevelopmentTrapScenario {
             9 => Some(Self::VirtualMemory),
             10 => Some(Self::ActiveVirtualMemory),
             11 => Some(Self::InterruptTime),
+            12 => Some(Self::SmpFirstAp),
             _ => None,
         }
     }
@@ -157,6 +162,7 @@ impl DevelopmentTrapScenario {
             Self::VirtualMemory => scenario_label_text(&SCENARIO_VIRTUAL_MEMORY),
             Self::ActiveVirtualMemory => scenario_label_text(&SCENARIO_ACTIVE_VIRTUAL_MEMORY),
             Self::InterruptTime => scenario_label_text(&SCENARIO_INTERRUPT_TIME),
+            Self::SmpFirstAp => scenario_label_text(&SCENARIO_SMP_FIRST_AP),
         }
     }
 }
@@ -1706,7 +1712,11 @@ mod tests {
             DevelopmentTrapScenario::from_selector(11),
             Some(DevelopmentTrapScenario::InterruptTime)
         );
-        assert_eq!(DevelopmentTrapScenario::from_selector(12), None);
+        assert_eq!(
+            DevelopmentTrapScenario::from_selector(12),
+            Some(DevelopmentTrapScenario::SmpFirstAp)
+        );
+        assert_eq!(DevelopmentTrapScenario::from_selector(13), None);
     }
 
     #[test]

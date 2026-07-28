@@ -3,7 +3,7 @@
   "artifact_kind": "pooleos_native_kernel_entry_contract",
   "contract_id": "PKENTRY1",
   "selected_move_id": "N6-KENTRY-001",
-  "status_date": "2026-07-18",
+  "status_date": "2026-07-28",
   "status": "candidate_product_image_single_host_non_promoting",
   "production_ready": false,
   "production_promotion_allowed": false,
@@ -51,17 +51,17 @@
     "handoff_contract": "PBP1",
     "entry_symbol": "poole_kernel_entry",
     "entry_offset": 36864,
-    "image_memory_bytes": 364544,
-    "canonical_file_bytes": 323584,
+    "image_memory_bytes": 376832,
+    "canonical_file_bytes": 335872,
     "maximum_linked_file_bytes": 8388608,
     "maximum_relocations": 4096,
-    "build_id": "PKBUILD1-CYCLE135-N8-IRQ-TIMER-V01-0010000",
+    "build_id": "PKBUILD1-CYCLE136-N8-SMP-FIRST-AP-V01-0010000",
     "segment_boundaries": {
       "read_only_end": 36864,
       "text_start": 36864,
-      "text_end": 286720,
-      "relro_end": 323584,
-      "image_end": 364544
+      "text_end": 299008,
+      "relro_end": 335872,
+      "image_end": 376832
     },
     "manifest_path": "native/kernel/manifest.pkm",
     "manifest_contract_bindings": [
