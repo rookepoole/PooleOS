@@ -31,6 +31,17 @@ def plan() -> dict[str, object]:
 
 
 class NativeKernelMapTests(unittest.TestCase):
+    def test_retained_probe_tracks_cycle136_linker_geometry(self) -> None:
+        source = (ROOT / "native/kmap/src/bin/pkmap2_probe.rs").read_text(encoding="utf-8")
+        for exact in (
+            "byte_count: 0x40000",
+            "virtual_offset: 0x49000",
+            "virtual_offset: 0x52000",
+            "image_bytes: 0x5c000",
+            "page_count: 92",
+        ):
+            self.assertIn(exact, source)
+
     def test_contract_matches_schema_and_control_register(self) -> None:
         contract = json.loads(
             (ROOT / "specs" / "native-kernel-map-contract.json").read_text(encoding="utf-8")
@@ -155,28 +166,28 @@ class NativeKernelMapTests(unittest.TestCase):
                 handoff_capacity_bytes=1024 * 1024,
             ),
         )
-        self.assertEqual([89, 122], model["guard_page_indices"])
+        self.assertEqual([92, 125], model["guard_page_indices"])
         self.assertEqual(352, model["total_mapped_page_count"])
-        self.assertEqual(379, native_kernel_map.TEMPORARY_PAGE_INDEX)
-        self.assertEqual((380, 381, 5, 386), (
+        self.assertEqual(382, native_kernel_map.TEMPORARY_PAGE_INDEX)
+        self.assertEqual((383, 384, 5, 389), (
             native_kernel_map.METADATA_GUARD_LOW_PAGE,
             native_kernel_map.METADATA_FIRST_PAGE,
             native_kernel_map.METADATA_PAGE_COUNT,
             native_kernel_map.METADATA_GUARD_HIGH_PAGE,
         ))
-        self.assertEqual((387, 388, 32, 420), (
+        self.assertEqual((390, 391, 32, 423), (
             native_kernel_map.LEDGER_A_GUARD_LOW_PAGE,
             native_kernel_map.LEDGER_A_FIRST_PAGE,
             native_kernel_map.LEDGER_A_PAGE_CAPACITY,
             native_kernel_map.LEDGER_A_GUARD_HIGH_PAGE,
         ))
-        self.assertEqual((421, 422, 32, 454), (
+        self.assertEqual((424, 425, 32, 457), (
             native_kernel_map.LEDGER_B_GUARD_LOW_PAGE,
             native_kernel_map.LEDGER_B_FIRST_PAGE,
             native_kernel_map.LEDGER_B_PAGE_CAPACITY,
             native_kernel_map.LEDGER_B_GUARD_HIGH_PAGE,
         ))
-        self.assertEqual((455, 456, 457, 458, 459), (
+        self.assertEqual((458, 459, 460, 461, 462), (
             native_kernel_map.MMIO_GUARD_LOW_PAGE,
             native_kernel_map.LOCAL_APIC_PAGE,
             native_kernel_map.MMIO_GUARD_MIDDLE_PAGE,
@@ -211,7 +222,7 @@ class NativeKernelMapTests(unittest.TestCase):
         )
         line = (
             "PKMAP2 PASS kernel_pages=64 stack_pages=32 handoff_pages=256 guards=2 "
-            f"total_pages=352 stack_pt=90 handoff_pt=123 retained_fnv1a64={expected['retained_leaf_fingerprint']}"
+            f"total_pages=352 stack_pt=93 handoff_pt=126 retained_fnv1a64={expected['retained_leaf_fingerprint']}"
         )
         self.assertEqual(
             expected["retained_leaf_fingerprint"],

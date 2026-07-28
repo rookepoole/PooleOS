@@ -34,7 +34,7 @@ Pure QEMU TCG does not reliably deliver unmasked x86 floating-point exceptions. 
 
 The qualifier builds a fresh linked PooleKernel and audits its disassembly with workspace-local `llvm-objdump` from Rust 1.97.0 `llvm-tools-preview`. The executable is 35,279,360 bytes, SHA-256 `84DE1EDCEFED12FEB797F8B1C41DEBA99B6116A6BB3B80A1832FFF2CC06F2F94`, and reports LLVM `22.1.6-rust-1.97.0-stable`. Its official archive SHA-256 is `671B509EC2C9220916D25D8FD546E71EFB552439F8E7AE75CE53208D9395DFB4`; the license is Apache-2.0 WITH LLVM-exception.
 
-The audit requires the exact `FWAIT`, `DIVSS`, CR0.TS write, `FNOP`, `FNINIT`, and `LDMXCSR` forms in named scopes and rejects vector-register instructions outside the established PKXSTATE1/PKXEXC1 allowlist. A synthetic disassembly mutation must be rejected. This is evidence for the exact linked image, not a proof about future binaries.
+The audit requires the exact `FWAIT`, `DIVSS`, CR0.TS write, `FNOP`, `FNINIT`, and `LDMXCSR` forms in named scopes and rejects vector-register instructions outside the established PKXSTATE1/PKXEXC1 allowlist. Its source boundary ends at the next `global_asm!` block, records zero `WRMSR` sites inside PKXEXC1 and exactly two shared-image sites outside it, and rejects an injected in-scope write. A synthetic disassembly mutation must also be rejected. This is evidence for the exact linked image, not a proof about future binaries.
 
 ## Source Binding
 

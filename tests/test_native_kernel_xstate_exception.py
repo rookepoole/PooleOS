@@ -5,6 +5,7 @@ import json
 import unittest
 
 from runtime import native_kernel_xstate_exception as xstate_exception
+from tools import qualify_native_kernel_xstate_exception as qualify_xstate_exception
 
 
 class NativeKernelXstateExceptionTests(unittest.TestCase):
@@ -20,7 +21,7 @@ class NativeKernelXstateExceptionTests(unittest.TestCase):
         markers[23] = markers[23].replace("trap_scenario=4", "trap_scenario=6")
         markers[25] = markers[25].replace(
             "PKBUILD1-CYCLE122-N7-XSTATE-POLICY-001",
-            "PKBUILD1-CYCLE135-N8-IRQ-TIMER-V01-0010000",
+            "PKBUILD1-CYCLE136-N8-SMP-FIRST-AP-V01-0010000",
         )
         markers.extend(
             [
@@ -140,6 +141,21 @@ class NativeKernelXstateExceptionTests(unittest.TestCase):
             "PKXEXC1 claim boundary changed",
             xstate_exception.contract_errors(promoted),
         )
+
+    def test_source_audit_isolates_later_global_assembly(self) -> None:
+        source = (
+            xstate_exception.ROOT / "native/kernel/src/arch/x86_64.rs"
+        ).read_text(encoding="utf-8")
+        audit = qualify_xstate_exception._source_audit(source)
+        self.assertEqual(0, audit["profile_source_wrmsr_site_count"])
+        self.assertEqual(2, audit["shared_source_wrmsr_sites_outside_profile"])
+        hostile = source.replace(
+            "poole_trigger_x87_exception:\n",
+            "poole_trigger_x87_exception:\n    wrmsr\n",
+            1,
+        )
+        with self.assertRaises(qualify_xstate_exception.QualificationError):
+            qualify_xstate_exception._source_audit(hostile)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-kernel-smp-first-ap-contract.schema.json",
+  "title": "PooleOS PKSMP1 contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "contract_id", "selected_move_id", "status_date", "status", "production_ready", "production_promotion_allowed", "phase_mapping", "source_requirement_ids", "profile", "topology", "resource_geometry", "startup", "mailbox", "shutdown_and_cleanup", "qualification", "required_negative_controls", "claims", "non_claims", "official_references"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_smp_first_ap_contract"},
+    "contract_id": {"const": "PKSMP1"},
+    "selected_move_id": {"const": "N8-SMP-FIRST-AP-001"},
+    "status_date": {"const": "2026-07-28"},
+    "status": {"const": "bounded_first_application_processor_lifecycle_qemu64_two_vcpu_non_promoting"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "phase_mapping": {"const": ["N8.1", "N8.3", "N8.5"]},
+    "source_requirement_ids": {"type": "array", "minItems": 4},
+    "profile": {"type": "object", "required": ["feature", "selector", "virtual_cpu_count", "bsp_count", "application_processor_count", "emulator_only"], "properties": {"feature": {"const": "development-smp-first-ap"}, "selector": {"const": 12}, "virtual_cpu_count": {"const": 2}, "bsp_count": {"const": 1}, "application_processor_count": {"const": 1}, "emulator_only": {"const": true}}},
+    "topology": {"type": "object"},
+    "resource_geometry": {"type": "object"},
+    "startup": {"type": "object"},
+    "mailbox": {"type": "object"},
+    "shutdown_and_cleanup": {"type": "object"},
+    "qualification": {"type": "object", "required": ["qemu_run_count", "negative_control_count"], "properties": {"qemu_run_count": {"const": 2}, "negative_control_count": {"const": 72}}},
+    "required_negative_controls": {"type": "array", "minItems": 72, "maxItems": 72, "uniqueItems": true, "items": {"type": "string"}},
+    "claims": {"type": "object", "required": ["flag_n8_smp_first_ap_001_closed", "one_application_processor_started", "general_smp_implemented", "n8_exit_gate_satisfied", "production_ready"], "properties": {"flag_n8_smp_first_ap_001_closed": {"const": true}, "one_application_processor_started": {"const": true}, "general_smp_implemented": {"const": false}, "n8_exit_gate_satisfied": {"const": false}, "production_ready": {"const": false}}},
+    "non_claims": {"type": "array", "minItems": 6, "items": {"type": "string"}},
+    "official_references": {"type": "array", "minItems": 3, "items": {"type": "string", "format": "uri"}}
+  }
+}

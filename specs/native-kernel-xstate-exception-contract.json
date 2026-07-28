@@ -3,7 +3,7 @@
   "artifact_kind": "pooleos_native_kernel_xstate_exception_contract",
   "contract_id": "PKXEXC1",
   "selected_move_id": "N7-XSTATE-EXCEPTION-001",
-  "status_date": "2026-07-21",
+  "status_date": "2026-07-28",
   "status": "frozen_bounded_bsp_x87_simd_exception_non_promoting",
   "production_ready": false,
   "production_promotion_allowed": false,
@@ -67,6 +67,8 @@
     "rust_python_agreement_required": true,
     "negative_control_count": 43,
     "source_instruction_audit_required": true,
+    "profile_source_wrmsr_site_count": 0,
+    "shared_source_wrmsr_sites_outside_profile": 2,
     "linked_machine_code_audit_required": true,
     "synthetic_disassembly_negative_required": true
   },
@@ -183,7 +185,7 @@
     "PKXEXC1 is a single-BSP QEMU development profile and does not qualify the Ryzen 7 9800X3D target.",
     "The deliberate CR0.TS write and #NM are test-only proof injections; PooleKernel retains the eager strategy and does not implement lazy restore or #NM recovery.",
     "The #MF and #XM handlers recover only the deliberately generated invalid-operation cases and do not yet establish a complete floating-point exception policy for user tasks.",
-    "The linked audit is bounded to the exact Cycle 123 linked image and its allowlisted xstate assembly scopes; it is not a general proof about future compiler versions or binaries.",
+    "The linked audit is bounded to the exact Cycle 136 integrated linked image and its allowlisted xstate assembly scopes; its source audit records zero WRMSR sites in the PKXEXC1 profile and two separately qualified shared-image sites outside that profile, and it is not a general proof about future compiler versions or binaries.",
     "No scheduler, thread lifecycle, user-mode fault delivery, SMP, AP initialization, CPU migration, AVX state, or target-hardware behavior is integrated or claimed.",
     "No key, signature, capability grant, firmware mutation, physical-media write, release, production promotion, or public key publication is performed or claimed."
   ]

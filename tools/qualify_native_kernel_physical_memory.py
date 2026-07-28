@@ -387,6 +387,19 @@ def _source_audit() -> dict[str, Any]:
     adapter_implementation = adapter_source.split("struct BootstrapTableMemory", 1)[1].split(
         "struct LiveActiveHardware", 1
     )[0]
+    smp_adapter = adapter_source.split("struct SmpOperationProof", 1)[1].split(
+        "struct LiveActiveHardware", 1
+    )[0]
+    pmm_read_sites = adapter_implementation.count("read_volatile") - smp_adapter.count(
+        "read_volatile"
+    )
+    pmm_write_sites = adapter_implementation.count("write_volatile") - smp_adapter.count(
+        "write_volatile"
+    )
+    smp_read_sites = smp_adapter.count("read_volatile")
+    smp_write_sites = smp_adapter.count("write_volatile")
+    if (pmm_read_sites, pmm_write_sites, smp_read_sites, smp_write_sites) != (15, 13, 2, 2):
+        raise QualificationError("PKPMM7/PKSMP1 volatile adapter scope changed")
     return {
         "core_path": core_path.relative_to(ROOT).as_posix(),
         "core_sha256": physical_memory.sha256_bytes(source.encode("utf-8")),
@@ -396,8 +409,10 @@ def _source_audit() -> dict[str, Any]:
         "authorized_utf8_and_mapped_read_unsafe_site_count": 3,
         "authorized_metadata_migration_unsafe_site_count": 4,
         "authorized_generation_storage_unsafe_site_count": 5,
-        "live_adapter_volatile_read_site_count": adapter_implementation.count("read_volatile"),
-        "live_adapter_volatile_write_site_count": adapter_implementation.count("write_volatile"),
+        "live_adapter_volatile_read_site_count": pmm_read_sites,
+        "live_adapter_volatile_write_site_count": pmm_write_sites,
+        "pksmp1_mailbox_volatile_read_site_count": smp_read_sites,
+        "pksmp1_mailbox_volatile_write_site_count": smp_write_sites,
         "final_temporary_alias_revocation_required": True,
         "final_guarded_metadata_mapping_retention_required": True,
         "heap_api_token_count": 0,

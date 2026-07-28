@@ -87,11 +87,13 @@ def _source_audit(source: str | None = None) -> dict[str, Any]:
     exception_end = lower.index("core::arch::global_asm!", exception_start)
     helpers = lower[exception_start:exception_end]
     assembly_start = lower.index(".global poole_trigger_x87_exception", exception_end)
-    assembly = lower[assembly_start:]
+    assembly_end = lower.index("core::arch::global_asm!", assembly_start)
+    assembly = lower[assembly_start:assembly_end]
     outside = (
         lower[:parent_start]
         + lower[parent_end:exception_start]
         + lower[exception_end:assembly_start]
+        + lower[assembly_end:]
     )
 
     parent_required = {
@@ -153,6 +155,11 @@ def _source_audit(source: str | None = None) -> dict[str, Any]:
         raise QualificationError(
             f"PKXEXC1 source restriction audit failed: {hits + vector_outside_hits}"
         )
+    shared_wrmsr_count = parent.count("wrmsr") + outside.count("wrmsr")
+    if shared_wrmsr_count != 2:
+        raise QualificationError(
+            f"PKXEXC1 shared-source WRMSR scope changed: {shared_wrmsr_count}"
+        )
     return {
         "scope": "PKXSTATE1 parent plus dedicated PKXEXC1 helpers and assembly",
         "parent_required_instruction_counts": parent_counts,
@@ -160,6 +167,8 @@ def _source_audit(source: str | None = None) -> dict[str, Any]:
         "recovery_required_instruction_counts": helper_counts,
         "forbidden_tokens": list(forbidden),
         "forbidden_token_hits": [],
+        "profile_source_wrmsr_site_count": 0,
+        "shared_source_wrmsr_sites_outside_profile": 2,
         "vector_occurrences_outside_allowlisted_source_scopes": 0,
         "exception_vector_token_counts": exception_vector_tokens,
         "result": "pass_bounded_source_instruction_audit",

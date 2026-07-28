@@ -82,9 +82,9 @@
     "future_ipi_vectors_reserved_but_not_delivered": true
   },
   "mmio_policy": {
-    "local_apic_virtual_page_index": 456,
-    "hpet_virtual_page_index": 458,
-    "guard_page_indices": [455, 457, 459],
+    "local_apic_virtual_page_index": 459,
+    "hpet_virtual_page_index": 461,
+    "guard_page_indices": [458, 460, 462],
     "page_bytes": 4096,
     "leaf_permissions": "supervisor RW NX PWT PCD PAT0",
     "effective_cache_policy": "uncacheable",

@@ -155,3 +155,19 @@ N8.1 and N8.3 are partial, but no AP, IPI, I/O APIC route, MSI/MSI-X, complete
 time service, target-hardware result, or production promotion exists.
 `FLAG-N8-IRQ-001` remains open; the next owner-independent engineering move is
 `N8-SMP-FIRST-AP-001`.
+
+Cycle 136 supersedes the current-image and next-move values above. PKSMP1 adds
+one bounded first-AP lifecycle on a two-vCPU qemu64 profile: retained MADT
+selection, fourteen contiguous pages below 1 MiB, four absent guards, an RX
+16-to-32-to-64-bit trampoline with pre-accessed GDT descriptors, guarded RW/NX
+stack and mailbox, INIT-SIPI-SIPI startup, exact long-mode observation,
+stop/quiesce, final-INIT park, alias revocation, and 57,344-byte scrub,
+verification, and release. One hundred eleven kernel host tests, two exact
+38-marker runs, and 72 hostile controls pass. The current kernel is 335,872
+canonical bytes in a 376,832-byte, 92-page image with 855 relocations and
+SHA-256
+`6596CB332EB24813089F95A00AC979C892C47235943CB0E73E3979ED9901B725`.
+This closes only `FLAG-N8-SMP-FIRST-AP-001`; `FLAG-N8-IRQ-001` remains open.
+AP-local descriptor, stack, xstate, and interrupt ownership, multi-AP startup,
+IPIs, shootdown, target hardware, N8 exit, release, and production remain
+open. The next owner-independent move is `N8-SMP-PERCPU-RUNTIME-001`.
