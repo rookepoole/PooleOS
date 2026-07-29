@@ -169,6 +169,23 @@ const EFI_ALLOCATE_ANY_PAGES: u32 = 0;
             feature = "development-physical-memory",
             feature = "development-virtual-memory",
             feature = "development-active-virtual-memory",
+            feature = "development-interrupt-time",
+            feature = "development-smp-percpu-runtime"
+        )
+    ),
+    all(
+        feature = "development-smp-percpu-runtime",
+        any(
+            feature = "development-trap-returning",
+            feature = "development-trap-double-fault",
+            feature = "development-trap-malformed-frame",
+            feature = "development-cpu-policy",
+            feature = "development-xstate-policy",
+            feature = "development-xstate-exception",
+            feature = "development-privilege-msr-policy",
+            feature = "development-physical-memory",
+            feature = "development-virtual-memory",
+            feature = "development-active-virtual-memory",
             feature = "development-interrupt-time"
         )
     ),
@@ -200,6 +217,8 @@ const DEVELOPMENT_TRAP_SCENARIO: u8 = if cfg!(feature = "development-trap-return
     11
 } else if cfg!(feature = "development-smp-first-ap") {
     12
+} else if cfg!(feature = "development-smp-percpu-runtime") {
+    13
 } else {
     0
 };

@@ -18,6 +18,7 @@ use poolekernel::{
         READ_STAR, READ_TSC_AUX,
     },
     smp::{self, ResourceLayout},
+    smp_runtime::{self, ResourceLayout as RuntimeResourceLayout},
     xstate::{
         AREA_BYTES, INITIAL_FCW, INITIAL_MXCSR, KernelSimdPolicy, SELECTED_XCR0, SaveFormat,
         SwitchStrategy, XstatePolicy, XstateProof, effective_mxcsr_mask,
@@ -1553,6 +1554,336 @@ poole_device_not_available_fault:
 
 core::arch::global_asm!(
     r#"
+    .section .rodata.poole_ap_runtime_trampoline,"a",@progbits
+    .balign 16
+    .global poole_ap_runtime_trampoline_start
+    .global poole_ap_runtime_trampoline_end
+    .global poole_ap_runtime_trampoline_protected_entry
+    .global poole_ap_runtime_trampoline_long_entry
+    .global poole_ap_runtime_trampoline_fault
+    .global poole_ap_runtime_trampoline_gdt
+    .global poole_ap_runtime_patch_protected_offset
+    .global poole_ap_runtime_patch_long_offset
+    .global poole_ap_runtime_patch_gdt_base
+    .global poole_ap_runtime_patch_cr3
+    .global poole_ap_runtime_patch_stack_top
+    .global poole_ap_runtime_patch_mailbox
+    .global poole_ap_runtime_patch_gdtr_base
+    .global poole_ap_runtime_patch_idtr_base
+    .global poole_ap_runtime_patch_xstate
+
+    .set poole_ap_runtime_gdt_pointer_offset, .Lpoole_ap_runtime_gdt_pointer - poole_ap_runtime_trampoline_start
+    .set poole_ap_runtime_config_cr3_offset, .Lpoole_ap_runtime_config_cr3 - poole_ap_runtime_trampoline_start
+    .set poole_ap_runtime_config_stack_top_offset, .Lpoole_ap_runtime_config_stack_top - poole_ap_runtime_trampoline_start
+    .set poole_ap_runtime_config_mailbox_offset, .Lpoole_ap_runtime_config_mailbox - poole_ap_runtime_trampoline_start
+    .set poole_ap_runtime_config_gdtr_offset, .Lpoole_ap_runtime_config_gdtr - poole_ap_runtime_trampoline_start
+    .set poole_ap_runtime_config_idtr_offset, .Lpoole_ap_runtime_config_idtr - poole_ap_runtime_trampoline_start
+    .set poole_ap_runtime_config_xstate_offset, .Lpoole_ap_runtime_config_xstate - poole_ap_runtime_trampoline_start
+
+poole_ap_runtime_trampoline_start:
+    .code16
+    cli
+    cld
+    xor eax, eax
+    mov ax, cs
+    shl eax, 4
+    mov esi, eax
+    .byte 0xbb
+    .word poole_ap_runtime_gdt_pointer_offset
+    lgdt cs:[bx]
+    mov eax, cr0
+    or eax, 1
+    mov cr0, eax
+    .byte 0x66, 0xea
+poole_ap_runtime_patch_protected_offset:
+    .long 0
+    .word 0x0008
+
+    .code32
+poole_ap_runtime_trampoline_protected_entry:
+    mov ax, 0x0010
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    mov eax, cr4
+    or eax, 0x20
+    mov cr4, eax
+    mov eax, dword ptr [esi + poole_ap_runtime_config_cr3_offset]
+    mov cr3, eax
+    mov ecx, 0xc0000080
+    rdmsr
+    or eax, 0x00000900
+    wrmsr
+    mov eax, cr0
+    or eax, 0x80010001
+    mov cr0, eax
+    .byte 0xea
+poole_ap_runtime_patch_long_offset:
+    .long 0
+    .word 0x0018
+
+    .code64
+poole_ap_runtime_trampoline_long_entry:
+    mov ax, 0x0020
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    mov esi, esi
+    mov rsp, qword ptr [rsi + poole_ap_runtime_config_stack_top_offset]
+    xor rbp, rbp
+    mov rdi, qword ptr [rsi + poole_ap_runtime_config_mailbox_offset]
+    lgdt [rsi + poole_ap_runtime_config_gdtr_offset]
+    push 0x0008
+    lea rax, [rip + .Lpoole_ap_runtime_gdt_live]
+    push rax
+    retfq
+.Lpoole_ap_runtime_gdt_live:
+    mov ax, 0x0010
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    xor eax, eax
+    mov fs, ax
+    mov gs, ax
+    mov ax, 0x0018
+    ltr ax
+    lidt [rsi + poole_ap_runtime_config_idtr_offset]
+    mov dword ptr [rdi + 108], 2
+
+    mov rax, cr0
+    or rax, 0x22
+    and rax, -13
+    mov cr0, rax
+    mov rax, cr4
+    or rax, 0x00040620
+    mov cr4, rax
+    xor ecx, ecx
+    mov eax, 3
+    xor edx, edx
+    xsetbv
+    fninit
+    fldcw word ptr [rip + .Lpoole_ap_runtime_initial_fcw]
+    ldmxcsr dword ptr [rip + .Lpoole_ap_runtime_initial_mxcsr]
+    mov rbx, qword ptr [rsi + poole_ap_runtime_config_xstate_offset]
+    mov eax, 3
+    xor edx, edx
+    xsave64 [rbx]
+    mov dword ptr [rdi + 108], 3
+
+    mov eax, 1
+    cpuid
+    mov r8d, ebx
+    shr r8d, 24
+    mov dword ptr [rdi + 28], r8d
+    mov dword ptr [rdi + 32], ecx
+    mov dword ptr [rdi + 36], edx
+    mov eax, 0x0d
+    xor ecx, ecx
+    cpuid
+    mov dword ptr [rdi + 296], eax
+    mov dword ptr [rdi + 300], 0
+    mov dword ptr [rdi + 304], ebx
+    mov dword ptr [rdi + 308], ecx
+
+    mov rax, cr0
+    mov qword ptr [rdi + 40], rax
+    mov rax, cr3
+    mov qword ptr [rdi + 48], rax
+    mov rax, cr4
+    mov qword ptr [rdi + 56], rax
+    mov ecx, 0xc0000080
+    rdmsr
+    shl rdx, 32
+    or rax, rdx
+    mov qword ptr [rdi + 64], rax
+    xor ecx, ecx
+    xgetbv
+    shl rdx, 32
+    or rax, rdx
+    mov qword ptr [rdi + 216], rax
+
+    sgdt [rdi + 320]
+    movzx eax, word ptr [rdi + 320]
+    mov dword ptr [rdi + 240], eax
+    mov rax, qword ptr [rdi + 322]
+    mov qword ptr [rdi + 192], rax
+    sidt [rdi + 336]
+    movzx eax, word ptr [rdi + 336]
+    mov dword ptr [rdi + 244], eax
+    mov rax, qword ptr [rdi + 338]
+    mov qword ptr [rdi + 200], rax
+    str ax
+    movzx eax, ax
+    mov dword ptr [rdi + 248], eax
+    mov ax, cs
+    movzx eax, ax
+    mov dword ptr [rdi + 252], eax
+    mov ax, ss
+    movzx eax, ax
+    mov dword ptr [rdi + 256], eax
+    mov qword ptr [rdi + 208], rsp
+    pushfq
+    pop rax
+    mov qword ptr [rdi + 232], rax
+    shr rax, 9
+    and eax, 1
+    mov dword ptr [rdi + 268], eax
+    fnstcw word ptr [rdi + 272]
+    stmxcsr dword ptr [rdi + 276]
+    mov rbx, qword ptr [rsi + poole_ap_runtime_config_xstate_offset]
+    mov rax, qword ptr [rbx + 512]
+    mov qword ptr [rdi + 224], rax
+
+    lfence
+    rdtsc
+    shl rdx, 32
+    or rax, rdx
+    mov qword ptr [rdi + 72], rax
+    mov dword ptr [rdi + 108], 4
+    mfence
+    mov dword ptr [rdi + 12], 2
+.Lpoole_ap_runtime_wait_stop:
+    pause
+    cmp dword ptr [rdi + 16], 1
+    jne .Lpoole_ap_runtime_wait_stop
+    lfence
+    rdtsc
+    shl rdx, 32
+    or rax, rdx
+    mov qword ptr [rdi + 80], rax
+    mov rbx, qword ptr [rsi + poole_ap_runtime_config_xstate_offset]
+    mov eax, 3
+    xor edx, edx
+    xrstor64 [rbx]
+    mov dword ptr [rdi + 280], 0
+    mov dword ptr [rdi + 284], 1
+    mov dword ptr [rdi + 288], 1
+    mov dword ptr [rdi + 108], 5
+    mfence
+    mov dword ptr [rdi + 12], 3
+.Lpoole_ap_runtime_parked:
+    cli
+    hlt
+    jmp .Lpoole_ap_runtime_parked
+
+poole_ap_runtime_trampoline_fault:
+    cli
+    mov rax, qword ptr [rip + .Lpoole_ap_runtime_config_mailbox]
+    mov dword ptr [rax + 292], 1
+    mov dword ptr [rax + 108], 0xffffffff
+    mfence
+    mov dword ptr [rax + 12], 0xffffffff
+.Lpoole_ap_runtime_fault_halt:
+    hlt
+    jmp .Lpoole_ap_runtime_fault_halt
+
+    .balign 8
+.Lpoole_ap_runtime_initial_fcw:
+    .word 0x037f
+    .balign 4
+.Lpoole_ap_runtime_initial_mxcsr:
+    .long 0x00001f80
+    .balign 8
+.Lpoole_ap_runtime_gdt_pointer:
+    .word .Lpoole_ap_runtime_gdt_end - poole_ap_runtime_trampoline_gdt - 1
+poole_ap_runtime_patch_gdt_base:
+    .long 0
+    .balign 8
+poole_ap_runtime_trampoline_gdt:
+    .quad 0x0000000000000000
+    .quad 0x00cf9b000000ffff
+    .quad 0x00cf93000000ffff
+    .quad 0x00af9b000000ffff
+    .quad 0x00cf93000000ffff
+.Lpoole_ap_runtime_gdt_end:
+    .balign 8
+.Lpoole_ap_runtime_config_cr3:
+poole_ap_runtime_patch_cr3:
+    .long 0
+    .long 0
+.Lpoole_ap_runtime_config_stack_top:
+poole_ap_runtime_patch_stack_top:
+    .quad 0
+.Lpoole_ap_runtime_config_mailbox:
+poole_ap_runtime_patch_mailbox:
+    .quad 0
+.Lpoole_ap_runtime_config_gdtr:
+    .word 39
+poole_ap_runtime_patch_gdtr_base:
+    .quad 0
+.Lpoole_ap_runtime_config_idtr:
+    .word 4095
+poole_ap_runtime_patch_idtr_base:
+    .quad 0
+.Lpoole_ap_runtime_config_xstate:
+poole_ap_runtime_patch_xstate:
+    .quad 0
+poole_ap_runtime_trampoline_end:
+    .code64
+"#
+);
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct ApRuntimeTrampolineOffsets {
+    protected_patch: usize,
+    long_patch: usize,
+    gdt_base_patch: usize,
+    cr3_patch: usize,
+    stack_top_patch: usize,
+    mailbox_patch: usize,
+    gdtr_base_patch: usize,
+    idtr_base_patch: usize,
+    xstate_patch: usize,
+    protected_entry: usize,
+    long_entry: usize,
+    fault_entry: usize,
+    gdt: usize,
+}
+
+unsafe extern "C" {
+    static poole_ap_runtime_trampoline_start: u8;
+    static poole_ap_runtime_trampoline_end: u8;
+    static poole_ap_runtime_trampoline_protected_entry: u8;
+    static poole_ap_runtime_trampoline_long_entry: u8;
+    static poole_ap_runtime_trampoline_fault: u8;
+    static poole_ap_runtime_trampoline_gdt: u8;
+    static poole_ap_runtime_patch_protected_offset: u8;
+    static poole_ap_runtime_patch_long_offset: u8;
+    static poole_ap_runtime_patch_gdt_base: u8;
+    static poole_ap_runtime_patch_cr3: u8;
+    static poole_ap_runtime_patch_stack_top: u8;
+    static poole_ap_runtime_patch_mailbox: u8;
+    static poole_ap_runtime_patch_gdtr_base: u8;
+    static poole_ap_runtime_patch_idtr_base: u8;
+    static poole_ap_runtime_patch_xstate: u8;
+}
+
+fn ap_runtime_trampoline_offsets(start: *const u8) -> Option<ApRuntimeTrampolineOffsets> {
+    Some(ApRuntimeTrampolineOffsets {
+        protected_patch: ap_symbol_offset(
+            &raw const poole_ap_runtime_patch_protected_offset,
+            start,
+        )?,
+        long_patch: ap_symbol_offset(&raw const poole_ap_runtime_patch_long_offset, start)?,
+        gdt_base_patch: ap_symbol_offset(&raw const poole_ap_runtime_patch_gdt_base, start)?,
+        cr3_patch: ap_symbol_offset(&raw const poole_ap_runtime_patch_cr3, start)?,
+        stack_top_patch: ap_symbol_offset(&raw const poole_ap_runtime_patch_stack_top, start)?,
+        mailbox_patch: ap_symbol_offset(&raw const poole_ap_runtime_patch_mailbox, start)?,
+        gdtr_base_patch: ap_symbol_offset(&raw const poole_ap_runtime_patch_gdtr_base, start)?,
+        idtr_base_patch: ap_symbol_offset(&raw const poole_ap_runtime_patch_idtr_base, start)?,
+        xstate_patch: ap_symbol_offset(&raw const poole_ap_runtime_patch_xstate, start)?,
+        protected_entry: ap_symbol_offset(
+            &raw const poole_ap_runtime_trampoline_protected_entry,
+            start,
+        )?,
+        long_entry: ap_symbol_offset(&raw const poole_ap_runtime_trampoline_long_entry, start)?,
+        fault_entry: ap_symbol_offset(&raw const poole_ap_runtime_trampoline_fault, start)?,
+        gdt: ap_symbol_offset(&raw const poole_ap_runtime_trampoline_gdt, start)?,
+    })
+}
+
+core::arch::global_asm!(
+    r#"
     .section .rodata.poole_ap_trampoline,"a",@progbits
     .balign 16
     .global poole_ap_trampoline_start
@@ -1800,6 +2131,76 @@ pub fn build_ap_trampoline_page(
         layout.per_cpu().to_le_bytes(),
     )?;
     Ok((page, length))
+}
+
+pub fn build_ap_runtime_trampoline_page(
+    layout: RuntimeResourceLayout,
+) -> Result<([u8; smp_runtime::PAGE_BYTES as usize], usize, u64), ()> {
+    let start = &raw const poole_ap_runtime_trampoline_start;
+    let end = &raw const poole_ap_runtime_trampoline_end;
+    let length = (end as usize).checked_sub(start as usize).ok_or(())?;
+    if length == 0 || length > smp_runtime::PAGE_BYTES as usize {
+        return Err(());
+    }
+    let offsets = ap_runtime_trampoline_offsets(start).ok_or(())?;
+    let mut page = [0u8; smp_runtime::PAGE_BYTES as usize];
+    // SAFETY: the linker symbols bound one immutable template wholly inside this image.
+    let template = unsafe { core::slice::from_raw_parts(start, length) };
+    page[..length].copy_from_slice(template);
+
+    let protected = layout
+        .trampoline()
+        .checked_add(offsets.protected_entry as u64)
+        .and_then(|value| u32::try_from(value).ok())
+        .ok_or(())?;
+    let long = layout
+        .trampoline()
+        .checked_add(offsets.long_entry as u64)
+        .and_then(|value| u32::try_from(value).ok())
+        .ok_or(())?;
+    let gdt = layout
+        .trampoline()
+        .checked_add(offsets.gdt as u64)
+        .and_then(|value| u32::try_from(value).ok())
+        .ok_or(())?;
+    let fault = layout
+        .trampoline()
+        .checked_add(offsets.fault_entry as u64)
+        .ok_or(())?;
+    patch_bytes(&mut page, offsets.protected_patch, protected.to_le_bytes())?;
+    patch_bytes(&mut page, offsets.long_patch, long.to_le_bytes())?;
+    patch_bytes(&mut page, offsets.gdt_base_patch, gdt.to_le_bytes())?;
+    patch_bytes(
+        &mut page,
+        offsets.cr3_patch,
+        u32::try_from(layout.pml4()).map_err(|_| ())?.to_le_bytes(),
+    )?;
+    patch_bytes(
+        &mut page,
+        offsets.stack_top_patch,
+        layout.rsp0_top().to_le_bytes(),
+    )?;
+    patch_bytes(
+        &mut page,
+        offsets.mailbox_patch,
+        layout.local().to_le_bytes(),
+    )?;
+    patch_bytes(
+        &mut page,
+        offsets.gdtr_base_patch,
+        layout.gdt().to_le_bytes(),
+    )?;
+    patch_bytes(
+        &mut page,
+        offsets.idtr_base_patch,
+        layout.idt().to_le_bytes(),
+    )?;
+    patch_bytes(
+        &mut page,
+        offsets.xstate_patch,
+        layout.xstate().to_le_bytes(),
+    )?;
+    Ok((page, length, fault))
 }
 
 const _: () = assert!(size_of::<DescriptorPointer>() == 10);

@@ -19,26 +19,26 @@ def plan() -> dict[str, object]:
     return {
         "physical_base": 0x0200_0000,
         "virtual_base": native_kernel_map.MIN_VIRTUAL_BASE,
-        "image_size": 0x40000,
-        "entry_virtual": native_kernel_map.MIN_VIRTUAL_BASE + 0x8000,
+        "image_size": 0x70000,
+        "entry_virtual": native_kernel_map.MIN_VIRTUAL_BASE + 0x9000,
         "mappings": [
-            {"virtual_offset": 0, "memory_size": 0x8000, "permissions": "r"},
-            {"virtual_offset": 0x8000, "memory_size": 0x22000, "permissions": "rx"},
-            {"virtual_offset": 0x2A000, "memory_size": 0x5000, "permissions": "r"},
-            {"virtual_offset": 0x2F000, "memory_size": 0x11000, "permissions": "rw"},
+            {"virtual_offset": 0, "memory_size": 0x9000, "permissions": "r"},
+            {"virtual_offset": 0x9000, "memory_size": 0x4F000, "permissions": "rx"},
+            {"virtual_offset": 0x58000, "memory_size": 0xC000, "permissions": "r"},
+            {"virtual_offset": 0x64000, "memory_size": 0xC000, "permissions": "rw"},
         ],
     }
 
 
 class NativeKernelMapTests(unittest.TestCase):
-    def test_retained_probe_tracks_cycle136_linker_geometry(self) -> None:
+    def test_retained_probe_tracks_cycle137_linker_geometry(self) -> None:
         source = (ROOT / "native/kmap/src/bin/pkmap2_probe.rs").read_text(encoding="utf-8")
         for exact in (
-            "byte_count: 0x40000",
-            "virtual_offset: 0x49000",
-            "virtual_offset: 0x52000",
-            "image_bytes: 0x5c000",
-            "page_count: 92",
+            "byte_count: 0x4f000",
+            "virtual_offset: 0x58000",
+            "virtual_offset: 0x64000",
+            "image_bytes: 0x70000",
+            "page_count: 112",
         ):
             self.assertIn(exact, source)
 
@@ -57,16 +57,16 @@ class NativeKernelMapTests(unittest.TestCase):
 
     def test_exact_product_model_matches_frozen_summary(self) -> None:
         model = native_kernel_map.build_model(native_kernel_map.request_from_elf_plan(plan(), 48))
-        self.assertEqual(64, model["mapped_page_count"])
-        self.assertEqual(13, model["read_only_page_count"])
-        self.assertEqual(34, model["read_execute_page_count"])
-        self.assertEqual(17, model["read_write_page_count"])
+        self.assertEqual(112, model["mapped_page_count"])
+        self.assertEqual(21, model["read_only_page_count"])
+        self.assertEqual(79, model["read_execute_page_count"])
+        self.assertEqual(12, model["read_write_page_count"])
         self.assertEqual(0, model["writable_executable_page_count"])
         self.assertEqual(
             {"pml4": 511, "pdpt": 510, "page_directory": 0, "first_page_table": 0},
             model["indices"],
         )
-        self.assertEqual("ECB08F4FB12FEC67", model["leaf_fingerprint"])
+        self.assertEqual("F43490703F3DCA21", model["leaf_fingerprint"])
         native_kernel_map.validate_model(model)
 
     def test_cpu_profile_requires_wp_nx_and_four_level_non_pcid_mode(self) -> None:
@@ -147,8 +147,8 @@ class NativeKernelMapTests(unittest.TestCase):
 
     def test_probe_parser_requires_exact_order_and_fingerprint(self) -> None:
         line = (
-            "PKMAP1 PASS mappings=4 pages=64 ro=13 rx=34 rw=17 wx=0 "
-            "pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=ECB08F4FB12FEC67"
+            "PKMAP1 PASS mappings=4 pages=112 ro=21 rx=79 rw=12 wx=0 "
+            "pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=F43490703F3DCA21"
         )
         observed = native_kernel_map.parse_probe_output(line)
         expected = native_kernel_map.marker_expectation(plan(), 48)
@@ -166,28 +166,28 @@ class NativeKernelMapTests(unittest.TestCase):
                 handoff_capacity_bytes=1024 * 1024,
             ),
         )
-        self.assertEqual([92, 125], model["guard_page_indices"])
-        self.assertEqual(352, model["total_mapped_page_count"])
-        self.assertEqual(382, native_kernel_map.TEMPORARY_PAGE_INDEX)
-        self.assertEqual((383, 384, 5, 389), (
+        self.assertEqual([112, 145], model["guard_page_indices"])
+        self.assertEqual(400, model["total_mapped_page_count"])
+        self.assertEqual(402, native_kernel_map.TEMPORARY_PAGE_INDEX)
+        self.assertEqual((403, 404, 5, 409), (
             native_kernel_map.METADATA_GUARD_LOW_PAGE,
             native_kernel_map.METADATA_FIRST_PAGE,
             native_kernel_map.METADATA_PAGE_COUNT,
             native_kernel_map.METADATA_GUARD_HIGH_PAGE,
         ))
-        self.assertEqual((390, 391, 32, 423), (
+        self.assertEqual((410, 411, 32, 443), (
             native_kernel_map.LEDGER_A_GUARD_LOW_PAGE,
             native_kernel_map.LEDGER_A_FIRST_PAGE,
             native_kernel_map.LEDGER_A_PAGE_CAPACITY,
             native_kernel_map.LEDGER_A_GUARD_HIGH_PAGE,
         ))
-        self.assertEqual((424, 425, 32, 457), (
+        self.assertEqual((444, 445, 32, 477), (
             native_kernel_map.LEDGER_B_GUARD_LOW_PAGE,
             native_kernel_map.LEDGER_B_FIRST_PAGE,
             native_kernel_map.LEDGER_B_PAGE_CAPACITY,
             native_kernel_map.LEDGER_B_GUARD_HIGH_PAGE,
         ))
-        self.assertEqual((458, 459, 460, 461, 462), (
+        self.assertEqual((478, 479, 480, 481, 482), (
             native_kernel_map.MMIO_GUARD_LOW_PAGE,
             native_kernel_map.LOCAL_APIC_PAGE,
             native_kernel_map.MMIO_GUARD_MIDDLE_PAGE,
@@ -207,8 +207,8 @@ class NativeKernelMapTests(unittest.TestCase):
             with self.assertRaises(native_kernel_map.KernelMapError):
                 native_kernel_map.build_retained_model(request, retained)
         hostile = copy.deepcopy(plan())
-        hostile["image_size"] = 67 * native_kernel_map.PAGE_SIZE
-        hostile["mappings"][-1]["memory_size"] += native_kernel_map.PAGE_SIZE
+        hostile["image_size"] = 115 * native_kernel_map.PAGE_SIZE
+        hostile["mappings"][-1]["memory_size"] += 3 * native_kernel_map.PAGE_SIZE
         with self.assertRaises(native_kernel_map.KernelMapError):
             native_kernel_map.build_retained_model(
                 native_kernel_map.request_from_elf_plan(hostile, 48),
@@ -221,8 +221,8 @@ class NativeKernelMapTests(unittest.TestCase):
             native_kernel_map.RetainedRequest(0x0400_0000, 32, 0x0500_0000, 1024 * 1024),
         )
         line = (
-            "PKMAP2 PASS kernel_pages=64 stack_pages=32 handoff_pages=256 guards=2 "
-            f"total_pages=352 stack_pt=93 handoff_pt=126 retained_fnv1a64={expected['retained_leaf_fingerprint']}"
+            "PKMAP2 PASS kernel_pages=112 stack_pages=32 handoff_pages=256 guards=2 "
+            f"total_pages=400 stack_pt=113 handoff_pt=146 retained_fnv1a64={expected['retained_leaf_fingerprint']}"
         )
         self.assertEqual(
             expected["retained_leaf_fingerprint"],

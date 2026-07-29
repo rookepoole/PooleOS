@@ -102,8 +102,8 @@
     "source_instruction_audit_required": true,
     "linked_machine_code_audit_required": true,
     "forbidden_linked_instructions": ["RDPMC", "SYSCALL", "SYSRET", "SWAPGS"],
-    "exact_linked_instruction_counts": {"RDMSR": 21, "WRMSR": 2},
-    "rdmsr_scope": "twenty PKMSR1/CPU-entry observations plus exactly one IA32_EFER read in the separately selected PKSMP1 first-AP lifecycle; PKMSR1 executes eleven support-gated reads",
+    "exact_linked_instruction_counts": {"RDMSR": 22, "WRMSR": 2},
+    "rdmsr_scope": "twenty PKMSR1/CPU-entry observations plus one IA32_EFER read in each separately selected PKSMP1 and PKSMP2 AP lifecycle; PKMSR1 executes eleven support-gated reads",
     "wrmsr_scope": "exactly two typed IA32_APIC_BASE writes in the separately selected PKIRQ1 InterruptTime branch; PKMSR1 executes zero writes"
   },
   "source_register": [
