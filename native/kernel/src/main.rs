@@ -35,6 +35,7 @@ use poolekernel::{
     privilege_msr::{machine_check_bank_count, machine_check_ctl_present, validate_snapshot},
     revalidation,
     smp::{self, MailboxSnapshot, ResourceLayout},
+    smp_ipi::{self, IpiSnapshot, Operation as IpiOperation, Request as IpiRequest},
     smp_runtime::{self, MailboxSnapshot as RuntimeMailboxSnapshot},
     validate_cpu_policy_snapshot, validate_descriptor_state, validate_development_handoff,
     validate_entry_envelope, validate_handoff, validate_interrupt_descriptor_state,
@@ -902,6 +903,83 @@ pksmp2_fragment!(PKSMP2_ZEROED_BYTES, b" zeroed_bytes=");
 pksmp2_fragment!(PKSMP2_VERIFIED_BYTES, b" verified_bytes=");
 pksmp2_fragment!(PKSMP2_RELEASE_TAIL, b" resources_released=32 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged\n");
 pksmp2_fragment!(PKSMP2_RESULT, b"POOLEOS:KERNEL:SMP-RUNTIME-RESULT PASS contract=PKSMP2 profile=sandybridge_x87_sse_two_vcpu bsp=1 ap_started=1 ap_online=1 descriptors=1 stacks=3 xstate=1 vectors=27 ap_quiesced=1 ap_parked=1 resources_released=32 rollback=host_verified ipi_service=0 shootdown=0 scheduler=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n");
+
+macro_rules! pksmp3_fragment {
+    ($name:ident, $value:literal) => {
+        #[used]
+        #[unsafe(link_section = ".text.pksmp3_literals")]
+        static $name: [u8; $value.len()] = *$value;
+    };
+}
+
+pksmp3_fragment!(PKSMP3_EARLY, b"POOLEOS:KERNEL:SMP-IPI-EARLY PASS contract=PKSMP3 selector=14 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n");
+pksmp3_fragment!(
+    PKSMP3_DENIED,
+    b"POOLEOS:KERNEL:SMP-IPI-DENIED contract=PKSMP3 reason="
+);
+pksmp3_fragment!(PKSMP3_DENIED_TAIL, b" cleanup=fail_closed capability_revoked=1 authority=0 actions=0 production=0 terminal=panic\n");
+pksmp3_fragment!(
+    PKSMP3_TOPOLOGY,
+    b"POOLEOS:KERNEL:SMP-IPI-TOPOLOGY PASS contract=PKSMP3 processors="
+);
+pksmp3_fragment!(
+    PKSMP3_RESOURCES,
+    b"POOLEOS:KERNEL:SMP-IPI-RESOURCES PASS contract=PKSMP3 physical_start="
+);
+pksmp3_fragment!(PKSMP3_ONLINE, b"POOLEOS:KERNEL:SMP-IPI-ONLINE PASS contract=PKSMP3 service_state=2 if=1 vectors=224,225,226,227,228,229 apic_mmio=0x00000000FEE00000 apic_table=1\n");
+pksmp3_fragment!(PKSMP3_ACCEPTED, b"POOLEOS:KERNEL:SMP-IPI-ACCEPTED PASS contract=PKSMP3 operations=reschedule,shootdown_transport,call_allowlist_noop,diagnostic,panic_notice,stop sequences=1,2,3,4,5,6 accepted=");
+pksmp3_fragment!(PKSMP3_CONTROLS, b"POOLEOS:KERNEL:SMP-IPI-CONTROLS PASS contract=PKSMP3 invalid_capability=1 vector_mismatch=1 stale_sequence=1 duplicate_sequence=1 denied=");
+pksmp3_fragment!(PKSMP3_TIMEOUT, b"POOLEOS:KERNEL:SMP-IPI-TIMEOUT PASS contract=PKSMP3 target_apic_id=2 attempt=10 bounded=1 offline_cpu=1 timeout_count=");
+pksmp3_fragment!(
+    PKSMP3_STOP,
+    b"POOLEOS:KERNEL:SMP-IPI-STOP PASS contract=PKSMP3 ack_attempt="
+);
+pksmp3_fragment!(
+    PKSMP3_RELEASE,
+    b"POOLEOS:KERNEL:SMP-IPI-RELEASE PASS contract=PKSMP3 release_sequence="
+);
+pksmp3_fragment!(PKSMP3_RESULT, b"POOLEOS:KERNEL:SMP-IPI-RESULT PASS contract=PKSMP3 profile=sandybridge_x87_sse_two_vcpu capability_gate=development_fixed_token operation_classes=6 valid_deliveries=6 denied_deliveries=4 offline_timeouts=1 eois=10 panic_latched=1 stop_quiesced=1 ap_parked=1 resources_released=32 rollback=host_verified shootdown_transport_only=1 tlb_invalidations=0 call_allowlist_noop=1 arbitrary_callback=0 scheduler=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n");
+pksmp3_fragment!(PKSMP3_ENABLED, b" enabled=");
+pksmp3_fragment!(PKSMP3_BSP_APIC, b" bsp_apic_id=");
+pksmp3_fragment!(PKSMP3_TARGET_APIC, b" target_apic_id=");
+pksmp3_fragment!(PKSMP3_APIC_PHYSICAL, b" apic_physical=");
+pksmp3_fragment!(PKSMP3_TOPOLOGY_TAIL, b" selection=lowest_enabled_non_bsp\n");
+pksmp3_fragment!(PKSMP3_PAGES, b" pages=");
+pksmp3_fragment!(PKSMP3_SIPI_VECTOR, b" sipi_vector=");
+pksmp3_fragment!(PKSMP3_TRAMPOLINE_BYTES, b" trampoline_bytes=");
+pksmp3_fragment!(PKSMP3_ALLOCATION_SEQUENCE, b" allocation_sequence=");
+pksmp3_fragment!(PKSMP3_RESOURCES_TAIL, b" tables=5 mapped_pages=13 guard_pages=14 apic_pt_offset=31 apic_leaf=pwt_pcd_rw_nx below_1mib=1\n");
+pksmp3_fragment!(PKSMP3_RESCHEDULE, b" reschedule=");
+pksmp3_fragment!(PKSMP3_SHOOTDOWN, b" shootdown=");
+pksmp3_fragment!(PKSMP3_CALL_FUNCTION, b" call_function=");
+pksmp3_fragment!(PKSMP3_DIAGNOSTIC, b" diagnostic=");
+pksmp3_fragment!(PKSMP3_PANIC, b" panic=");
+pksmp3_fragment!(PKSMP3_STOP_COUNT, b" stop=");
+pksmp3_fragment!(PKSMP3_DELIVERY_COUNT, b" delivery_count=");
+pksmp3_fragment!(PKSMP3_EOI_COUNT, b" eoi_count=");
+pksmp3_fragment!(PKSMP3_SPURIOUS, b" spurious=");
+pksmp3_fragment!(PKSMP3_APIC_ERROR, b" apic_error=");
+pksmp3_fragment!(PKSMP3_NEWLINE, b"\n");
+pksmp3_fragment!(PKSMP3_ACK_SEQUENCE, b" ack_sequence=");
+pksmp3_fragment!(PKSMP3_LAST_SEQUENCE, b" last_accepted_sequence=");
+pksmp3_fragment!(PKSMP3_SERVICE_STATE, b" service_state=");
+pksmp3_fragment!(PKSMP3_MAILBOX_STATE, b" mailbox_state=");
+pksmp3_fragment!(PKSMP3_RUNTIME_STATE, b" runtime_state=");
+pksmp3_fragment!(PKSMP3_PANIC_LATCHED, b" panic_latched=");
+pksmp3_fragment!(PKSMP3_RESPONSE_CHECKSUM, b" response_checksum=");
+pksmp3_fragment!(PKSMP3_BASELINE_CHECKSUM, b" baseline_checksum=");
+pksmp3_fragment!(PKSMP3_RUNTIME_CHECKSUM, b" runtime_checksum=");
+pksmp3_fragment!(PKSMP3_INIT_ASSERTS, b" init_asserts=");
+pksmp3_fragment!(PKSMP3_INIT_DEASSERTS, b" init_deasserts=");
+pksmp3_fragment!(PKSMP3_SIPIS, b" sipis=");
+pksmp3_fragment!(PKSMP3_TSS_BUSY, b" tss_busy=");
+pksmp3_fragment!(PKSMP3_IDT_VERIFIED, b" idt_verified=");
+pksmp3_fragment!(PKSMP3_XSTATE_VERIFIED, b" xstate_verified=");
+pksmp3_fragment!(PKSMP3_APIC_TABLE_VERIFIED, b" apic_table_verified=");
+pksmp3_fragment!(PKSMP3_STOP_TAIL, b" final_init=1 parked=1\n");
+pksmp3_fragment!(PKSMP3_ZEROED_BYTES, b" zeroed_bytes=");
+pksmp3_fragment!(PKSMP3_VERIFIED_BYTES, b" verified_bytes=");
+pksmp3_fragment!(PKSMP3_RELEASE_TAIL, b" resources_released=32 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged\n");
 
 static EARLY_RING: EarlyRing = EarlyRing::new();
 static PANIC_STATE: PanicState = PanicState::new();
@@ -3240,6 +3318,786 @@ fn run_smp_percpu_runtime(
     }
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum SmpIpiLiveError {
+    Base(smp::Error),
+    Runtime(smp_runtime::Error),
+    Ipi(smp_ipi::Error),
+}
+
+impl SmpIpiLiveError {
+    #[inline(always)]
+    const fn code(self) -> u32 {
+        match self {
+            Self::Base(_) => 0x1000,
+            Self::Runtime(_) => 0x2000,
+            Self::Ipi(_) => 0x3000,
+        }
+    }
+}
+
+impl From<smp::Error> for SmpIpiLiveError {
+    fn from(value: smp::Error) -> Self {
+        Self::Base(value)
+    }
+}
+
+impl From<smp_runtime::Error> for SmpIpiLiveError {
+    fn from(value: smp_runtime::Error) -> Self {
+        Self::Runtime(value)
+    }
+}
+
+impl From<smp_ipi::Error> for SmpIpiLiveError {
+    fn from(value: smp_ipi::Error) -> Self {
+        Self::Ipi(value)
+    }
+}
+
+impl From<SmpRuntimeLiveError> for SmpIpiLiveError {
+    fn from(value: SmpRuntimeLiveError) -> Self {
+        match value {
+            SmpRuntimeLiveError::Base(error) => Self::Base(error),
+            SmpRuntimeLiveError::Runtime(error) => Self::Runtime(error),
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+struct SmpIpiOperationProof {
+    mailbox: RuntimeMailboxSnapshot,
+    ipi: IpiSnapshot,
+    handlers: smp_ipi::HandlerLayout,
+    init_asserts: u64,
+    init_deasserts: u64,
+    sipis: u64,
+    timeout_count: u32,
+    tss_busy_verified: bool,
+    idt_verified: bool,
+    xstate_verified: bool,
+    apic_table_verified: bool,
+}
+
+#[derive(Clone, Copy)]
+struct SmpIpiLiveProof {
+    processor_count: u64,
+    enabled_processor_count: u64,
+    bsp_apic_id: u32,
+    target_apic_id: u32,
+    apic_physical: u64,
+    layout: smp_runtime::ResourceLayout,
+    trampoline_bytes: u64,
+    allocation_receipt: ScrubReceipt,
+    release_receipt: ScrubReceipt,
+    operation: SmpIpiOperationProof,
+}
+
+const SMP_IPI_ENTRY_WRITE_THROUGH: u64 = 1 << 3;
+const SMP_IPI_ENTRY_CACHE_DISABLE: u64 = 1 << 4;
+const SMP_IPI_ENTRY_ACCESSED: u64 = 1 << 5;
+const SMP_IPI_ENTRY_DIRTY: u64 = 1 << 6;
+const SMP_IPI_APIC_LEAF_FLAGS: u64 = smp::ENTRY_PRESENT
+    | smp::ENTRY_WRITABLE
+    | SMP_IPI_ENTRY_WRITE_THROUGH
+    | SMP_IPI_ENTRY_CACHE_DISABLE
+    | smp::ENTRY_NO_EXECUTE;
+
+fn smp_ipi_mailbox_read_u32(offset: usize) -> u32 {
+    debug_assert!(offset + core::mem::size_of::<u32>() <= smp_ipi::MAILBOX_BYTES);
+    // SAFETY: PKSMP3 retains one private supervisor alias for the AP-local page.
+    unsafe { read_volatile(smp_mailbox_address(offset) as *const u32) }
+}
+
+fn smp_ipi_mailbox_read_u64(offset: usize) -> u64 {
+    debug_assert!(offset + core::mem::size_of::<u64>() <= smp_ipi::MAILBOX_BYTES);
+    // SAFETY: every extension u64 is aligned and bounded by the frozen PKSMP3 ABI.
+    unsafe { read_volatile(smp_mailbox_address(offset) as *const u64) }
+}
+
+fn smp_ipi_mailbox_write_u32(offset: usize, value: u32) {
+    debug_assert!(offset + core::mem::size_of::<u32>() <= smp_ipi::MAILBOX_BYTES);
+    // SAFETY: the BSP owns request publication and initial extension state.
+    unsafe { write_volatile(smp_mailbox_address(offset) as *mut u32, value) };
+    arch::x86_64::memory_fence();
+}
+
+fn smp_ipi_mailbox_write_u64(offset: usize, value: u64) {
+    debug_assert!(offset + core::mem::size_of::<u64>() <= smp_ipi::MAILBOX_BYTES);
+    // SAFETY: the BSP owns request publication and initial extension state.
+    unsafe { write_volatile(smp_mailbox_address(offset) as *mut u64, value) };
+    arch::x86_64::memory_fence();
+}
+
+fn smp_ipi_mailbox_snapshot() -> IpiSnapshot {
+    arch::x86_64::memory_fence();
+    IpiSnapshot {
+        magic: smp_ipi_mailbox_read_u64(smp_ipi::MAGIC_OFFSET),
+        version: smp_ipi_mailbox_read_u32(smp_ipi::VERSION_OFFSET),
+        service_state: smp_ipi_mailbox_read_u32(smp_ipi::SERVICE_STATE_OFFSET),
+        capability_high: smp_ipi_mailbox_read_u64(smp_ipi::CAPABILITY_HIGH_OFFSET),
+        capability_low: smp_ipi_mailbox_read_u64(smp_ipi::CAPABILITY_LOW_OFFSET),
+        request_capability_high: smp_ipi_mailbox_read_u64(smp_ipi::REQUEST_CAPABILITY_HIGH_OFFSET),
+        request_capability_low: smp_ipi_mailbox_read_u64(smp_ipi::REQUEST_CAPABILITY_LOW_OFFSET),
+        request_attempt: smp_ipi_mailbox_read_u64(smp_ipi::REQUEST_ATTEMPT_OFFSET),
+        request_sequence: smp_ipi_mailbox_read_u64(smp_ipi::REQUEST_SEQUENCE_OFFSET),
+        payload: smp_ipi_mailbox_read_u64(smp_ipi::PAYLOAD_OFFSET),
+        request_checksum: smp_ipi_mailbox_read_u64(smp_ipi::REQUEST_CHECKSUM_OFFSET),
+        ack_attempt: smp_ipi_mailbox_read_u64(smp_ipi::ACK_ATTEMPT_OFFSET),
+        ack_sequence: smp_ipi_mailbox_read_u64(smp_ipi::ACK_SEQUENCE_OFFSET),
+        result: smp_ipi_mailbox_read_u64(smp_ipi::RESULT_OFFSET),
+        response_checksum: smp_ipi_mailbox_read_u64(smp_ipi::RESPONSE_CHECKSUM_OFFSET),
+        last_accepted_sequence: smp_ipi_mailbox_read_u64(smp_ipi::LAST_ACCEPTED_SEQUENCE_OFFSET),
+        request_operation: smp_ipi_mailbox_read_u32(smp_ipi::REQUEST_OPERATION_OFFSET),
+        request_vector: smp_ipi_mailbox_read_u32(smp_ipi::REQUEST_VECTOR_OFFSET),
+        request_target_apic_id: smp_ipi_mailbox_read_u32(smp_ipi::REQUEST_TARGET_APIC_ID_OFFSET),
+        request_status: smp_ipi_mailbox_read_u32(smp_ipi::REQUEST_STATUS_OFFSET),
+        ack_operation: smp_ipi_mailbox_read_u32(smp_ipi::ACK_OPERATION_OFFSET),
+        ack_status: smp_ipi_mailbox_read_u32(smp_ipi::ACK_STATUS_OFFSET),
+        ack_error: smp_ipi_mailbox_read_u32(smp_ipi::ACK_ERROR_OFFSET),
+        delivery_count: smp_ipi_mailbox_read_u32(smp_ipi::DELIVERY_COUNT_OFFSET),
+        eoi_count: smp_ipi_mailbox_read_u32(smp_ipi::EOI_COUNT_OFFSET),
+        accepted_count: smp_ipi_mailbox_read_u32(smp_ipi::ACCEPTED_COUNT_OFFSET),
+        denied_count: smp_ipi_mailbox_read_u32(smp_ipi::DENIED_COUNT_OFFSET),
+        reschedule_count: smp_ipi_mailbox_read_u32(smp_ipi::RESCHEDULE_COUNT_OFFSET),
+        shootdown_count: smp_ipi_mailbox_read_u32(smp_ipi::SHOOTDOWN_COUNT_OFFSET),
+        call_function_count: smp_ipi_mailbox_read_u32(smp_ipi::CALL_FUNCTION_COUNT_OFFSET),
+        diagnostic_count: smp_ipi_mailbox_read_u32(smp_ipi::DIAGNOSTIC_COUNT_OFFSET),
+        stop_count: smp_ipi_mailbox_read_u32(smp_ipi::STOP_COUNT_OFFSET),
+        panic_count: smp_ipi_mailbox_read_u32(smp_ipi::PANIC_COUNT_OFFSET),
+        panic_latched: smp_ipi_mailbox_read_u32(smp_ipi::PANIC_LATCHED_OFFSET),
+        spurious_count: smp_ipi_mailbox_read_u32(smp_ipi::SPURIOUS_COUNT_OFFSET),
+        apic_error_count: smp_ipi_mailbox_read_u32(smp_ipi::APIC_ERROR_COUNT_OFFSET),
+    }
+}
+
+fn smp_ipi_prepare_resources(
+    access: &mut BootstrapTableMemory,
+    layout: smp_runtime::ResourceLayout,
+    bsp_apic_id: u32,
+    target_apic_id: u32,
+    apic_physical: u64,
+) -> Result<(usize, smp_ipi::HandlerLayout), SmpIpiLiveError> {
+    if apic_physical != smp_ipi::APIC_PHYSICAL_ADDRESS {
+        return Err(smp_ipi::Error::ResourceAddress.into());
+    }
+    let _ = smp_runtime_prepare_resources(access, layout, bsp_apic_id, target_apic_id)?;
+    let (trampoline, trampoline_bytes, handlers) =
+        arch::x86_64::build_ap_ipi_trampoline_page(layout).map_err(|_| smp::Error::Trampoline)?;
+    smp_write_page_bytes(access, layout.trampoline(), &trampoline)?;
+    let idt = smp_ipi::build_idt_page(layout, handlers)?;
+    smp_write_page_bytes(access, layout.idt(), &idt)?;
+
+    let apic_table = layout.page_address(smp_ipi::APIC_PAGE_TABLE_OFFSET);
+    TableMemory::write_entry(
+        access,
+        layout.pdpt(),
+        smp_ipi::APIC_PDPT_INDEX,
+        layout.page_directory() | smp::ENTRY_PRESENT | smp::ENTRY_WRITABLE,
+    )
+    .map_err(|_| smp::Error::Memory)?;
+    TableMemory::write_entry(
+        access,
+        layout.page_directory(),
+        smp_ipi::APIC_PAGE_DIRECTORY_INDEX,
+        apic_table | smp::ENTRY_PRESENT | smp::ENTRY_WRITABLE,
+    )
+    .map_err(|_| smp::Error::Memory)?;
+    TableMemory::write_entry(
+        access,
+        apic_table,
+        smp_ipi::APIC_PAGE_TABLE_INDEX,
+        apic_physical | SMP_IPI_APIC_LEAF_FLAGS,
+    )
+    .map_err(|_| smp::Error::Memory)?;
+
+    if TableMemory::read_entry(access, layout.pdpt(), smp_ipi::APIC_PDPT_INDEX)
+        .map_err(|_| smp::Error::Memory)?
+        != layout.page_directory() | smp::ENTRY_PRESENT | smp::ENTRY_WRITABLE
+        || TableMemory::read_entry(
+            access,
+            layout.page_directory(),
+            smp_ipi::APIC_PAGE_DIRECTORY_INDEX,
+        )
+        .map_err(|_| smp::Error::Memory)?
+            != apic_table | smp::ENTRY_PRESENT | smp::ENTRY_WRITABLE
+        || TableMemory::read_entry(access, apic_table, smp_ipi::APIC_PAGE_TABLE_INDEX)
+            .map_err(|_| smp::Error::Memory)?
+            != apic_physical | SMP_IPI_APIC_LEAF_FLAGS
+    {
+        return Err(smp_ipi::Error::PageRole.into());
+    }
+    access
+        .ensure_mapped(layout.local())
+        .map_err(|_| smp::Error::PhysicalAccess)?;
+    smp_ipi_mailbox_write_u64(smp_ipi::MAGIC_OFFSET, smp_ipi::EXTENSION_MAGIC);
+    smp_ipi_mailbox_write_u32(smp_ipi::VERSION_OFFSET, smp_ipi::EXTENSION_VERSION);
+    smp_ipi_mailbox_write_u32(
+        smp_ipi::SERVICE_STATE_OFFSET,
+        smp_ipi::SERVICE_STATE_PREPARED,
+    );
+    smp_ipi_mailbox_write_u64(smp_ipi::CAPABILITY_HIGH_OFFSET, smp_ipi::CAPABILITY_HIGH);
+    smp_ipi_mailbox_write_u64(smp_ipi::CAPABILITY_LOW_OFFSET, smp_ipi::CAPABILITY_LOW);
+    if smp_ipi_mailbox_read_u64(smp_ipi::MAGIC_OFFSET) != smp_ipi::EXTENSION_MAGIC
+        || smp_ipi_mailbox_read_u32(smp_ipi::VERSION_OFFSET) != smp_ipi::EXTENSION_VERSION
+        || smp_ipi_mailbox_read_u32(smp_ipi::SERVICE_STATE_OFFSET)
+            != smp_ipi::SERVICE_STATE_PREPARED
+    {
+        return Err(smp_ipi::Error::MailboxShape.into());
+    }
+    Ok((trampoline_bytes, handlers))
+}
+
+fn smp_ipi_publish_request(request: &IpiRequest) {
+    smp_ipi_mailbox_write_u32(smp_ipi::REQUEST_STATUS_OFFSET, smp_ipi::REQUEST_IDLE);
+    smp_ipi_mailbox_write_u64(
+        smp_ipi::REQUEST_CAPABILITY_HIGH_OFFSET,
+        request.capability_high,
+    );
+    smp_ipi_mailbox_write_u64(
+        smp_ipi::REQUEST_CAPABILITY_LOW_OFFSET,
+        request.capability_low,
+    );
+    smp_ipi_mailbox_write_u64(smp_ipi::REQUEST_ATTEMPT_OFFSET, request.attempt);
+    smp_ipi_mailbox_write_u64(smp_ipi::REQUEST_SEQUENCE_OFFSET, request.sequence);
+    smp_ipi_mailbox_write_u64(smp_ipi::PAYLOAD_OFFSET, request.payload);
+    smp_ipi_mailbox_write_u32(smp_ipi::REQUEST_OPERATION_OFFSET, request.operation);
+    smp_ipi_mailbox_write_u32(smp_ipi::REQUEST_VECTOR_OFFSET, request.vector);
+    smp_ipi_mailbox_write_u32(
+        smp_ipi::REQUEST_TARGET_APIC_ID_OFFSET,
+        request.target_apic_id,
+    );
+    smp_ipi_mailbox_write_u64(smp_ipi::REQUEST_CHECKSUM_OFFSET, request.checksum);
+    arch::x86_64::memory_fence();
+    smp_ipi_mailbox_write_u32(smp_ipi::REQUEST_STATUS_OFFSET, request.status);
+}
+
+fn smp_ipi_wait_ack(
+    hardware: &LiveInterruptHardware,
+    period_femtoseconds: u64,
+    attempt: u64,
+) -> Result<IpiSnapshot, SmpIpiLiveError> {
+    let target = smp_hpet_ticks(SMP_MAILBOX_TIMEOUT_NANOSECONDS, period_femtoseconds)?;
+    let start = hardware.hpet_read(0xf0).map_err(|_| smp::Error::Hpet)?;
+    for _ in 0..SMP_HPET_POLL_LIMIT {
+        if smp_ipi_mailbox_read_u32(smp_ipi::SERVICE_STATE_OFFSET) == smp_ipi::SERVICE_STATE_FAULTED
+        {
+            return Err(smp_ipi::Error::MailboxShape.into());
+        }
+        if smp_ipi_mailbox_read_u64(smp_ipi::ACK_ATTEMPT_OFFSET) == attempt {
+            let snapshot = smp_ipi_mailbox_snapshot();
+            if snapshot.response_checksum != smp_ipi::response_checksum(&snapshot) {
+                return Err(smp_ipi::Error::Checksum.into());
+            }
+            return Ok(snapshot);
+        }
+        let current = hardware.hpet_read(0xf0).map_err(|_| smp::Error::Hpet)?;
+        if current.wrapping_sub(start) >= target {
+            return Err(smp::Error::Timeout.into());
+        }
+        core::hint::spin_loop();
+    }
+    Err(smp::Error::Timeout.into())
+}
+
+fn smp_ipi_deliver(
+    hardware: &mut LiveInterruptHardware,
+    period_femtoseconds: u64,
+    handler_operation: IpiOperation,
+    request: &IpiRequest,
+    expected_status: u32,
+    expected_error: u32,
+    expected_result: u64,
+) -> Result<IpiSnapshot, SmpIpiLiveError> {
+    smp_ipi_publish_request(request);
+    smp_apic_command(
+        hardware,
+        request.target_apic_id,
+        u32::from(handler_operation.vector()),
+    )?;
+    let snapshot = smp_ipi_wait_ack(hardware, period_femtoseconds, request.attempt)?;
+    if snapshot.ack_sequence != request.sequence
+        || snapshot.ack_operation != handler_operation as u32
+        || snapshot.ack_status != expected_status
+        || snapshot.ack_error != expected_error
+        || snapshot.request_status != smp_ipi::REQUEST_IDLE
+    {
+        return Err(smp_ipi::Error::Result.into());
+    }
+    if snapshot.result != expected_result {
+        return Err(smp_ipi::Error::Result.into());
+    }
+    Ok(snapshot)
+}
+
+fn smp_ipi_validate_post_ap_resources(
+    access: &mut BootstrapTableMemory,
+    layout: smp_runtime::ResourceLayout,
+    handlers: smp_ipi::HandlerLayout,
+    mailbox: &RuntimeMailboxSnapshot,
+    apic_physical: u64,
+) -> Result<(), SmpIpiLiveError> {
+    let descriptor = smp_runtime_read_page_bytes(
+        access,
+        layout.page_address(smp_runtime::DESCRIPTOR_PAGE_OFFSET),
+    )?;
+    let idt = smp_runtime_read_page_bytes(access, layout.idt())?;
+    let xstate = smp_runtime_read_page_bytes(access, layout.xstate())?;
+    let compatibility_idt = smp_runtime::build_idt_page(layout, handlers.fault)?;
+    smp_runtime::validate_post_ap_resources(
+        layout,
+        &descriptor,
+        &compatibility_idt,
+        &xstate,
+        handlers.fault,
+        mailbox,
+    )?;
+    if idt != smp_ipi::build_idt_page(layout, handlers)? {
+        return Err(smp_ipi::Error::Idt.into());
+    }
+    let apic_table = layout.page_address(smp_ipi::APIC_PAGE_TABLE_OFFSET);
+    if TableMemory::read_entry(access, layout.pdpt(), smp_ipi::APIC_PDPT_INDEX)
+        .map_err(|_| smp::Error::Memory)?
+        != layout.page_directory()
+            | smp::ENTRY_PRESENT
+            | smp::ENTRY_WRITABLE
+            | SMP_IPI_ENTRY_ACCESSED
+        || TableMemory::read_entry(
+            access,
+            layout.page_directory(),
+            smp_ipi::APIC_PAGE_DIRECTORY_INDEX,
+        )
+        .map_err(|_| smp::Error::Memory)?
+            != apic_table | smp::ENTRY_PRESENT | smp::ENTRY_WRITABLE | SMP_IPI_ENTRY_ACCESSED
+        || TableMemory::read_entry(access, apic_table, smp_ipi::APIC_PAGE_TABLE_INDEX)
+            .map_err(|_| smp::Error::Memory)?
+            != apic_physical
+                | SMP_IPI_APIC_LEAF_FLAGS
+                | SMP_IPI_ENTRY_ACCESSED
+                | SMP_IPI_ENTRY_DIRTY
+    {
+        return Err(smp_ipi::Error::PageRole.into());
+    }
+    for index in 1..512 {
+        if TableMemory::read_entry(access, apic_table, index).map_err(|_| smp::Error::Memory)? != 0
+        {
+            return Err(smp_ipi::Error::PageRole.into());
+        }
+    }
+    Ok(())
+}
+
+fn run_smp_ipi(
+    handoff: &poole_handoff::Handoff<'_>,
+    core: poole_handoff::CoreRecord,
+    observed_cr3: u64,
+) -> Result<SmpIpiLiveProof, SmpIpiLiveError> {
+    let physical_bits = arch::x86_64::physical_address_bits().ok_or(smp::Error::Memory)?;
+    let mut page_access =
+        BootstrapTableMemory::new(observed_cr3, physical_bits).map_err(|_| smp::Error::Memory)?;
+    let mut manager = PhysicalMemoryManager::from_handoff(handoff, core, DEFAULT_QUOTA_PAGES)
+        .map_err(|_| smp::Error::Memory)?;
+    manager
+        .advance_reclaim_stage(ReclaimStage::PostExitBootServices)
+        .map_err(|_| smp::Error::Memory)?;
+    let acpi_snapshot = acpi::consume_required_tables(handoff, &mut manager, &mut page_access)
+        .map_err(smp::Error::Acpi)?;
+    let madt_receipt = acpi_snapshot.required_tables[0];
+    let hpet_receipt = acpi_snapshot.required_tables[2];
+    let madt_snapshot = acpi_snapshot
+        .snapshot_physical_address
+        .checked_add(madt_receipt.snapshot_offset)
+        .ok_or(smp::Error::AcpiAddress)?;
+    let hpet_snapshot = acpi_snapshot
+        .snapshot_physical_address
+        .checked_add(hpet_receipt.snapshot_offset)
+        .ok_or(smp::Error::AcpiAddress)?;
+    let topology = parse_madt(&mut page_access, madt_snapshot, madt_receipt.byte_count)
+        .map_err(|_| smp::Error::Madt)?;
+    let hpet = parse_hpet(&mut page_access, hpet_snapshot, hpet_receipt.byte_count)
+        .map_err(|_| smp::Error::Hpet)?;
+    if !hpet.counter_64_bit_capable {
+        return Err(smp::Error::Hpet.into());
+    }
+    let cpu = arch::x86_64::observe_apic_cpu();
+    if !cpu.apic_supported {
+        return Err(smp::Error::Apic.into());
+    }
+    // SAFETY: CPUID reports APIC and selector 14 runs at CPL0 with IF clear.
+    let original_apic_base = unsafe { arch::x86_64::read_local_apic_base() };
+    if original_apic_base & (APIC_BASE_ENABLE | APIC_BASE_X2APIC) != APIC_BASE_ENABLE {
+        return Err(smp::Error::Apic.into());
+    }
+    let apic_physical = original_apic_base & interrupt_time::APIC_BASE_ADDRESS_MASK;
+    if apic_physical != topology.local_apic_address
+        || apic_physical != smp_ipi::APIC_PHYSICAL_ADDRESS
+    {
+        return Err(smp::Error::Apic.into());
+    }
+    let target = smp::select_first_ap(&topology, cpu.initial_apic_id)?;
+    let (allocation, allocation_receipt) = manager
+        .allocate_scrubbed(
+            Zone::Dma,
+            smp_runtime::RESOURCE_PAGE_COUNT,
+            SMP_RESOURCE_OWNER,
+            &mut page_access,
+        )
+        .map_err(|_| smp::Error::Memory)?;
+    let layout = smp_runtime::ResourceLayout::new(allocation.start_page, allocation.page_count)?;
+    let mut transaction = smp_ipi::IpiTransaction::new();
+    transaction.reserve()?;
+    let (trampoline_bytes, handlers) = match smp_ipi_prepare_resources(
+        &mut page_access,
+        layout,
+        cpu.initial_apic_id,
+        target.apic_id,
+        apic_physical,
+    ) {
+        Ok(value) => value,
+        Err(error) => {
+            smp_runtime_release_resources(&mut manager, &mut page_access, allocation)?;
+            let _ = transaction.rollback(false)?;
+            return Err(error);
+        }
+    };
+    transaction.prepare()?;
+    let hpet_page = hpet.physical_address & !0xfff;
+    let (apic_virtual, hpet_page_virtual) =
+        match page_access.install_uncached_mmio(apic_physical, hpet_page) {
+            Ok(value) => value,
+            Err(_) => {
+                smp_runtime_release_resources(&mut manager, &mut page_access, allocation)?;
+                let _ = transaction.rollback(false)?;
+                return Err(smp::Error::PhysicalAccess.into());
+            }
+        };
+    let hpet_virtual = hpet_page_virtual
+        .checked_add(hpet.physical_address & 0xfff)
+        .ok_or(smp::Error::Hpet)?;
+    let mut hardware = LiveInterruptHardware {
+        local_apic_virtual: apic_virtual,
+        hpet_virtual,
+    };
+    let mut original_hpet_config = None;
+    let mut pic_masks = None;
+    let mut hpet_changed = false;
+    let mut ap_started = false;
+    let mut period_femtoseconds = None;
+    let mut operation_result = (|| -> Result<SmpIpiOperationProof, SmpIpiLiveError> {
+        let discovery = validate_apic_discovery(
+            &topology,
+            cpu,
+            original_apic_base,
+            hardware.apic_read(0x20).map_err(|_| smp::Error::Apic)?,
+            hardware.apic_read(0x30).map_err(|_| smp::Error::Apic)?,
+        )
+        .map_err(|_| smp::Error::Apic)?;
+        if !discovery.bsp || !discovery.globally_enabled || discovery.apic_id != cpu.initial_apic_id
+        {
+            return Err(smp::Error::Apic.into());
+        }
+        let period = smp_hpet_period(&hardware)?;
+        period_femtoseconds = Some(period);
+        let hpet_config = hardware.hpet_read(0x10).map_err(|_| smp::Error::Hpet)?;
+        original_hpet_config = Some(hpet_config);
+        if topology.pcat_compatible {
+            // SAFETY: IF is clear and PKSMP3 restores the exact masks after final INIT.
+            pic_masks = Some(
+                unsafe { arch::x86_64::mask_legacy_pic() }
+                    .map_err(|_| smp::Error::PhysicalAccess)?,
+            );
+        }
+        if hpet_config & 1 == 0 {
+            hardware
+                .hpet_write(0x10, hpet_config | 1)
+                .map_err(|_| smp::Error::Hpet)?;
+            hpet_changed = true;
+            if hardware.hpet_read(0x10).map_err(|_| smp::Error::Hpet)? != hpet_config | 1 {
+                return Err(smp::Error::Hpet.into());
+            }
+        }
+        let (bsp_leaf1_ecx, bsp_leaf1_edx) = arch::x86_64::observe_leaf1_features();
+        if bsp_leaf1_ecx & smp_runtime::REQUIRED_HARDWARE_LEAF1_ECX
+            != smp_runtime::REQUIRED_HARDWARE_LEAF1_ECX
+            || bsp_leaf1_edx & smp::REQUIRED_LEAF1_EDX != smp::REQUIRED_LEAF1_EDX
+        {
+            return Err(smp_runtime::Error::FeatureMismatch.into());
+        }
+        let bsp_tsc_before = arch::x86_64::read_tsc_ordered();
+        smp_init_sequence(&mut hardware, target.apic_id, period)?;
+        ap_started = true;
+        transaction.startup_sent()?;
+        smp_apic_command(
+            &mut hardware,
+            target.apic_id,
+            SMP_APIC_STARTUP | u32::from(layout.sipi_vector()),
+        )?;
+        smp_hpet_wait(&hardware, period, SMP_INTER_IPI_NANOSECONDS)?;
+        smp_apic_command(
+            &mut hardware,
+            target.apic_id,
+            SMP_APIC_STARTUP | u32::from(layout.sipi_vector()),
+        )?;
+        smp_hpet_wait(&hardware, period, SMP_INTER_IPI_NANOSECONDS)?;
+        smp_wait_mailbox_state(
+            &hardware,
+            period,
+            smp_runtime::MAILBOX_STATE_PREPARED,
+            smp_runtime::MAILBOX_STATE_ONLINE,
+        )?;
+        let bsp_tsc_after = arch::x86_64::read_tsc_ordered();
+        transaction.online()?;
+
+        let mut request = IpiRequest::canonical(1, 1, IpiOperation::Reschedule, target.apic_id);
+        let _ = smp_ipi_deliver(
+            &mut hardware,
+            period,
+            IpiOperation::Reschedule,
+            &request,
+            smp_ipi::ACK_ACCEPTED,
+            smp_ipi::ERROR_NONE,
+            smp_ipi::RESULT_RESCHEDULE_OBSERVED,
+        )?;
+        request = IpiRequest::canonical(2, 2, IpiOperation::Shootdown, target.apic_id);
+        request.capability_high ^= 1;
+        request.checksum = smp_ipi::request_checksum(&request);
+        let _ = smp_ipi_deliver(
+            &mut hardware,
+            period,
+            IpiOperation::Shootdown,
+            &request,
+            smp_ipi::ACK_DENIED,
+            smp_ipi::ERROR_CAPABILITY,
+            0,
+        )?;
+        request = IpiRequest::canonical(3, 2, IpiOperation::Shootdown, target.apic_id);
+        request.vector = u32::from(IpiOperation::Diagnostic.vector());
+        request.checksum = smp_ipi::request_checksum(&request);
+        let _ = smp_ipi_deliver(
+            &mut hardware,
+            period,
+            IpiOperation::Shootdown,
+            &request,
+            smp_ipi::ACK_DENIED,
+            smp_ipi::ERROR_VECTOR,
+            0,
+        )?;
+        request = IpiRequest::canonical(4, 0, IpiOperation::Shootdown, target.apic_id);
+        let _ = smp_ipi_deliver(
+            &mut hardware,
+            period,
+            IpiOperation::Shootdown,
+            &request,
+            smp_ipi::ACK_DENIED,
+            smp_ipi::ERROR_STALE_SEQUENCE,
+            0,
+        )?;
+        request = IpiRequest::canonical(5, 1, IpiOperation::Shootdown, target.apic_id);
+        let _ = smp_ipi_deliver(
+            &mut hardware,
+            period,
+            IpiOperation::Shootdown,
+            &request,
+            smp_ipi::ACK_DENIED,
+            smp_ipi::ERROR_DUPLICATE_SEQUENCE,
+            0,
+        )?;
+        request = IpiRequest::canonical(6, 2, IpiOperation::Shootdown, target.apic_id);
+        let _ = smp_ipi_deliver(
+            &mut hardware,
+            period,
+            IpiOperation::Shootdown,
+            &request,
+            smp_ipi::ACK_ACCEPTED,
+            smp_ipi::ERROR_NONE,
+            smp_ipi::RESULT_SHOOTDOWN_TRANSPORT_ONLY,
+        )?;
+        request = IpiRequest::canonical(7, 3, IpiOperation::CallFunction, target.apic_id);
+        let _ = smp_ipi_deliver(
+            &mut hardware,
+            period,
+            IpiOperation::CallFunction,
+            &request,
+            smp_ipi::ACK_ACCEPTED,
+            smp_ipi::ERROR_NONE,
+            smp_ipi::RESULT_CALL_ALLOWLIST_NOOP,
+        )?;
+        request = IpiRequest::canonical(8, 4, IpiOperation::Diagnostic, target.apic_id);
+        let _ = smp_ipi_deliver(
+            &mut hardware,
+            period,
+            IpiOperation::Diagnostic,
+            &request,
+            smp_ipi::ACK_ACCEPTED,
+            smp_ipi::ERROR_NONE,
+            smp_ipi::RESULT_DIAGNOSTIC_OBSERVED,
+        )?;
+        request = IpiRequest::canonical(9, 5, IpiOperation::Panic, target.apic_id);
+        let _ = smp_ipi_deliver(
+            &mut hardware,
+            period,
+            IpiOperation::Panic,
+            &request,
+            smp_ipi::ACK_ACCEPTED,
+            smp_ipi::ERROR_NONE,
+            smp_ipi::RESULT_PANIC_LATCHED,
+        )?;
+        request = IpiRequest::canonical(10, 6, IpiOperation::Stop, 2);
+        smp_ipi_publish_request(&request);
+        smp_apic_command(&mut hardware, 2, u32::from(IpiOperation::Stop.vector()))?;
+        match smp_ipi_wait_ack(&hardware, period, request.attempt) {
+            Err(SmpIpiLiveError::Base(smp::Error::Timeout)) => {}
+            Err(error) => return Err(error),
+            Ok(_) => return Err(smp_ipi::Error::Target.into()),
+        }
+        transaction.exercised()?;
+        request = IpiRequest::canonical(10, 6, IpiOperation::Stop, target.apic_id);
+        let _ = smp_ipi_deliver(
+            &mut hardware,
+            period,
+            IpiOperation::Stop,
+            &request,
+            smp_ipi::ACK_ACCEPTED,
+            smp_ipi::ERROR_NONE,
+            smp_ipi::RESULT_STOP_QUIESCED,
+        )?;
+        smp_wait_mailbox_state(
+            &hardware,
+            period,
+            smp_runtime::MAILBOX_STATE_ONLINE,
+            smp_runtime::MAILBOX_STATE_QUIESCED,
+        )?;
+        let ipi = smp_ipi_mailbox_snapshot();
+        transaction.quiesced()?;
+
+        let mut mailbox = smp_runtime_mailbox_snapshot();
+        mailbox.baseline_checksum = smp_runtime::baseline_checksum(&mailbox);
+        smp_runtime_mailbox_write_u64(
+            smp_runtime::MAILBOX_BASELINE_CHECKSUM_OFFSET,
+            mailbox.baseline_checksum,
+        );
+        mailbox.runtime_checksum = smp_runtime::runtime_checksum(&mailbox);
+        smp_runtime_mailbox_write_u64(
+            smp_runtime::MAILBOX_RUNTIME_CHECKSUM_OFFSET,
+            mailbox.runtime_checksum,
+        );
+        mailbox = smp_runtime_mailbox_snapshot();
+        smp_runtime::validate_mailbox(
+            &mailbox,
+            layout,
+            bsp_leaf1_ecx,
+            bsp_leaf1_edx,
+            bsp_tsc_before,
+            bsp_tsc_after,
+        )?;
+        smp_ipi::validate_final(&ipi, target.apic_id, smp_ipi::LIVE_TIMEOUT_COUNT)?;
+        Ok(SmpIpiOperationProof {
+            mailbox,
+            ipi,
+            handlers,
+            init_asserts: 1,
+            init_deasserts: 1,
+            sipis: 2,
+            timeout_count: smp_ipi::LIVE_TIMEOUT_COUNT,
+            tss_busy_verified: false,
+            idt_verified: false,
+            xstate_verified: false,
+            apic_table_verified: false,
+        })
+    })();
+
+    let park_result = if ap_started {
+        match period_femtoseconds {
+            Some(period) => smp_init_sequence(&mut hardware, target.apic_id, period),
+            None => Err(smp::Error::Rollback),
+        }
+    } else {
+        Ok(())
+    };
+    if park_result.is_err() {
+        if let (true, Some(config)) = (hpet_changed, original_hpet_config) {
+            let _ = hardware.hpet_write(0x10, config);
+        }
+        if let Some(masks) = pic_masks {
+            // SAFETY: IF remains clear; retaining all AP resources takes precedence.
+            let _ = unsafe { arch::x86_64::restore_legacy_pic(masks) };
+        }
+        return Err(smp_ipi::Error::Rollback.into());
+    }
+    if operation_result.is_ok() {
+        transaction.parked()?;
+    }
+
+    if let Ok(mut operation) = operation_result {
+        operation_result = match smp_ipi_validate_post_ap_resources(
+            &mut page_access,
+            layout,
+            operation.handlers,
+            &operation.mailbox,
+            apic_physical,
+        ) {
+            Ok(()) => {
+                transaction.validated()?;
+                operation.tss_busy_verified = true;
+                operation.idt_verified = true;
+                operation.xstate_verified = true;
+                operation.apic_table_verified = true;
+                Ok(operation)
+            }
+            Err(error) => Err(error),
+        };
+    }
+
+    let mut cleanup_error = None;
+    if let (true, Some(config)) = (hpet_changed, original_hpet_config) {
+        let restore_failed = hardware.hpet_write(0x10, config).is_err()
+            || hardware.hpet_read(0x10).ok() != Some(config);
+        if restore_failed {
+            cleanup_error = Some(SmpIpiLiveError::Base(smp::Error::Hpet));
+        }
+    }
+    if let Some(masks) = pic_masks {
+        // SAFETY: the AP is reset, IF is clear, and these are the observed masks.
+        if unsafe { arch::x86_64::restore_legacy_pic(masks) }.is_err() {
+            cleanup_error = Some(SmpIpiLiveError::Base(smp::Error::PhysicalAccess));
+        }
+    }
+    if page_access.uninstall_uncached_mmio().is_err() {
+        cleanup_error = Some(SmpIpiLiveError::Base(smp::Error::PhysicalAccess));
+    }
+    let release_receipt =
+        match smp_runtime_release_resources(&mut manager, &mut page_access, allocation) {
+            Ok(value) => value,
+            Err(error) => {
+                cleanup_error = Some(error.into());
+                allocation_receipt
+            }
+        };
+    match operation_result {
+        Err(error) => {
+            let _ = transaction.rollback(true)?;
+            Err(cleanup_error.unwrap_or(error))
+        }
+        Ok(operation) => {
+            if let Some(error) = cleanup_error {
+                return Err(error);
+            }
+            transaction.released()?;
+            Ok(SmpIpiLiveProof {
+                processor_count: topology.processor_count as u64,
+                enabled_processor_count: topology.enabled_processor_count as u64,
+                bsp_apic_id: cpu.initial_apic_id,
+                target_apic_id: target.apic_id,
+                apic_physical,
+                layout,
+                trampoline_bytes: trampoline_bytes as u64,
+                allocation_receipt,
+                release_receipt,
+                operation,
+            })
+        }
+    }
+}
+
 struct LiveActiveHardware;
 
 impl ActiveHardware for LiveActiveHardware {
@@ -3498,6 +4356,14 @@ extern "C" fn poole_kernel_rust_entry(
             ring: &EARLY_RING,
         });
         logger.write_bytes(&PKSMP2_EARLY);
+    }
+    if trap_scenario == DevelopmentTrapScenario::SmpIpi {
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        logger.write_bytes(&PKSMP3_EARLY);
     }
 
     if let Err(error) = validate_entry_envelope(handoff_address, handoff_length, magic, stack_top) {
@@ -5136,6 +6002,128 @@ extern "C" fn poole_kernel_rust_entry(
         halt_forever()
     }
 
+    if trap_scenario == DevelopmentTrapScenario::SmpIpi {
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        let proof = match run_smp_ipi(&decoded, validated.core, observed_cr3) {
+            Ok(value) => value,
+            Err(error) => {
+                logger.write_bytes(&PKSMP3_DENIED);
+                logger.write_hex_u64(u64::from(error.code()));
+                logger.write_bytes(&PKSMP3_DENIED_TAIL);
+                poole_kernel_emergency_panic(PanicCode::SmpIpi as u32)
+            }
+        };
+        let mailbox = proof.operation.mailbox;
+        let ipi = proof.operation.ipi;
+
+        logger.write_bytes(&PKSMP3_TOPOLOGY);
+        logger.write_decimal_u64(proof.processor_count);
+        logger.write_bytes(&PKSMP3_ENABLED);
+        logger.write_decimal_u64(proof.enabled_processor_count);
+        logger.write_bytes(&PKSMP3_BSP_APIC);
+        logger.write_decimal_u64(u64::from(proof.bsp_apic_id));
+        logger.write_bytes(&PKSMP3_TARGET_APIC);
+        logger.write_decimal_u64(u64::from(proof.target_apic_id));
+        logger.write_bytes(&PKSMP3_APIC_PHYSICAL);
+        logger.write_hex_u64(proof.apic_physical);
+        logger.write_bytes(&PKSMP3_TOPOLOGY_TAIL);
+
+        logger.write_bytes(&PKSMP3_RESOURCES);
+        logger.write_hex_u64(proof.layout.trampoline());
+        logger.write_bytes(&PKSMP3_PAGES);
+        logger.write_decimal_u64(proof.layout.page_count);
+        logger.write_bytes(&PKSMP3_SIPI_VECTOR);
+        logger.write_decimal_u64(u64::from(proof.layout.sipi_vector()));
+        logger.write_bytes(&PKSMP3_TRAMPOLINE_BYTES);
+        logger.write_decimal_u64(proof.trampoline_bytes);
+        logger.write_bytes(&PKSMP3_ALLOCATION_SEQUENCE);
+        logger.write_decimal_u64(proof.allocation_receipt.sequence);
+        logger.write_bytes(&PKSMP3_RESOURCES_TAIL);
+
+        logger.write_bytes(&PKSMP3_ONLINE);
+        logger.write_bytes(&PKSMP3_ACCEPTED);
+        logger.write_decimal_u64(u64::from(ipi.accepted_count));
+        logger.write_bytes(&PKSMP3_RESCHEDULE);
+        logger.write_decimal_u64(u64::from(ipi.reschedule_count));
+        logger.write_bytes(&PKSMP3_SHOOTDOWN);
+        logger.write_decimal_u64(u64::from(ipi.shootdown_count));
+        logger.write_bytes(&PKSMP3_CALL_FUNCTION);
+        logger.write_decimal_u64(u64::from(ipi.call_function_count));
+        logger.write_bytes(&PKSMP3_DIAGNOSTIC);
+        logger.write_decimal_u64(u64::from(ipi.diagnostic_count));
+        logger.write_bytes(&PKSMP3_PANIC);
+        logger.write_decimal_u64(u64::from(ipi.panic_count));
+        logger.write_bytes(&PKSMP3_STOP_COUNT);
+        logger.write_decimal_u64(u64::from(ipi.stop_count));
+        logger.write_bytes(&PKSMP3_NEWLINE);
+
+        logger.write_bytes(&PKSMP3_CONTROLS);
+        logger.write_decimal_u64(u64::from(ipi.denied_count));
+        logger.write_bytes(&PKSMP3_DELIVERY_COUNT);
+        logger.write_decimal_u64(u64::from(ipi.delivery_count));
+        logger.write_bytes(&PKSMP3_EOI_COUNT);
+        logger.write_decimal_u64(u64::from(ipi.eoi_count));
+        logger.write_bytes(&PKSMP3_SPURIOUS);
+        logger.write_decimal_u64(u64::from(ipi.spurious_count));
+        logger.write_bytes(&PKSMP3_APIC_ERROR);
+        logger.write_decimal_u64(u64::from(ipi.apic_error_count));
+        logger.write_bytes(&PKSMP3_NEWLINE);
+
+        logger.write_bytes(&PKSMP3_TIMEOUT);
+        logger.write_decimal_u64(u64::from(proof.operation.timeout_count));
+        logger.write_bytes(&PKSMP3_NEWLINE);
+
+        logger.write_bytes(&PKSMP3_STOP);
+        logger.write_decimal_u64(ipi.ack_attempt);
+        logger.write_bytes(&PKSMP3_ACK_SEQUENCE);
+        logger.write_decimal_u64(ipi.ack_sequence);
+        logger.write_bytes(&PKSMP3_LAST_SEQUENCE);
+        logger.write_decimal_u64(ipi.last_accepted_sequence);
+        logger.write_bytes(&PKSMP3_SERVICE_STATE);
+        logger.write_decimal_u64(u64::from(ipi.service_state));
+        logger.write_bytes(&PKSMP3_MAILBOX_STATE);
+        logger.write_decimal_u64(u64::from(mailbox.state));
+        logger.write_bytes(&PKSMP3_RUNTIME_STATE);
+        logger.write_decimal_u64(u64::from(mailbox.runtime_state));
+        logger.write_bytes(&PKSMP3_PANIC_LATCHED);
+        logger.write_decimal_u64(u64::from(ipi.panic_latched));
+        logger.write_bytes(&PKSMP3_RESPONSE_CHECKSUM);
+        logger.write_hex_u64(ipi.response_checksum);
+        logger.write_bytes(&PKSMP3_BASELINE_CHECKSUM);
+        logger.write_hex_u64(mailbox.baseline_checksum);
+        logger.write_bytes(&PKSMP3_RUNTIME_CHECKSUM);
+        logger.write_hex_u64(mailbox.runtime_checksum);
+        logger.write_bytes(&PKSMP3_INIT_ASSERTS);
+        logger.write_decimal_u64(proof.operation.init_asserts);
+        logger.write_bytes(&PKSMP3_INIT_DEASSERTS);
+        logger.write_decimal_u64(proof.operation.init_deasserts);
+        logger.write_bytes(&PKSMP3_SIPIS);
+        logger.write_decimal_u64(proof.operation.sipis);
+        logger.write_bytes(&PKSMP3_TSS_BUSY);
+        logger.write_decimal_u64(proof.operation.tss_busy_verified as u64);
+        logger.write_bytes(&PKSMP3_IDT_VERIFIED);
+        logger.write_decimal_u64(proof.operation.idt_verified as u64);
+        logger.write_bytes(&PKSMP3_XSTATE_VERIFIED);
+        logger.write_decimal_u64(proof.operation.xstate_verified as u64);
+        logger.write_bytes(&PKSMP3_APIC_TABLE_VERIFIED);
+        logger.write_decimal_u64(proof.operation.apic_table_verified as u64);
+        logger.write_bytes(&PKSMP3_STOP_TAIL);
+
+        logger.write_bytes(&PKSMP3_RELEASE);
+        logger.write_decimal_u64(proof.release_receipt.sequence);
+        logger.write_bytes(&PKSMP3_ZEROED_BYTES);
+        logger.write_decimal_u64(proof.release_receipt.zeroed_bytes);
+        logger.write_bytes(&PKSMP3_VERIFIED_BYTES);
+        logger.write_decimal_u64(proof.release_receipt.verified_bytes);
+        logger.write_bytes(&PKSMP3_RELEASE_TAIL);
+        logger.write_bytes(&PKSMP3_RESULT);
+        halt_forever()
+    }
+
     if trap_scenario == DevelopmentTrapScenario::XstatePolicy {
         // SAFETY: PKXFER1 transferred exactly once at CPL0 with IF/DF clear. The opt-in
         // PKXSTATE1 profile owns the BSP's x87/SSE state and its private aligned images.
@@ -5486,6 +6474,7 @@ extern "C" fn poole_kernel_rust_entry(
         DevelopmentTrapScenario::SmpPerCpuRuntime => {
             poole_kernel_emergency_panic(PanicCode::SmpPerCpuRuntime as u32)
         }
+        DevelopmentTrapScenario::SmpIpi => poole_kernel_emergency_panic(PanicCode::SmpIpi as u32),
     }
 }
 

@@ -393,16 +393,29 @@ def _source_audit() -> dict[str, Any]:
     smp_runtime_adapter = adapter_source.split("struct SmpRuntimeOperationProof", 1)[1].split(
         "struct LiveActiveHardware", 1
     )[0]
+    smp_ipi_adapter = adapter_source.split("struct SmpIpiOperationProof", 1)[1].split(
+        "struct LiveActiveHardware", 1
+    )[0]
     pmm_read_sites = adapter_implementation.count("read_volatile") - smp_adapter.count(
         "read_volatile"
     )
     pmm_write_sites = adapter_implementation.count("write_volatile") - smp_adapter.count(
         "write_volatile"
     )
-    smp_runtime_read_sites = smp_runtime_adapter.count("read_volatile")
-    smp_runtime_write_sites = smp_runtime_adapter.count("write_volatile")
-    smp_read_sites = smp_adapter.count("read_volatile") - smp_runtime_read_sites
-    smp_write_sites = smp_adapter.count("write_volatile") - smp_runtime_write_sites
+    smp_ipi_read_sites = smp_ipi_adapter.count("read_volatile")
+    smp_ipi_write_sites = smp_ipi_adapter.count("write_volatile")
+    smp_runtime_read_sites = (
+        smp_runtime_adapter.count("read_volatile") - smp_ipi_read_sites
+    )
+    smp_runtime_write_sites = (
+        smp_runtime_adapter.count("write_volatile") - smp_ipi_write_sites
+    )
+    smp_read_sites = smp_adapter.count("read_volatile") - smp_runtime_adapter.count(
+        "read_volatile"
+    )
+    smp_write_sites = smp_adapter.count("write_volatile") - smp_runtime_adapter.count(
+        "write_volatile"
+    )
     if (
         pmm_read_sites,
         pmm_write_sites,
@@ -410,8 +423,12 @@ def _source_audit() -> dict[str, Any]:
         smp_write_sites,
         smp_runtime_read_sites,
         smp_runtime_write_sites,
-    ) != (15, 13, 2, 2, 2, 2):
-        raise QualificationError("PKPMM7/PKSMP1/PKSMP2 volatile adapter scope changed")
+        smp_ipi_read_sites,
+        smp_ipi_write_sites,
+    ) != (15, 13, 2, 2, 2, 2, 2, 2):
+        raise QualificationError(
+            "PKPMM7/PKSMP1/PKSMP2/PKSMP3 volatile adapter scope changed"
+        )
     return {
         "core_path": core_path.relative_to(ROOT).as_posix(),
         "core_sha256": physical_memory.sha256_bytes(source.encode("utf-8")),
@@ -427,6 +444,8 @@ def _source_audit() -> dict[str, Any]:
         "pksmp1_mailbox_volatile_write_site_count": smp_write_sites,
         "pksmp2_mailbox_volatile_read_site_count": smp_runtime_read_sites,
         "pksmp2_mailbox_volatile_write_site_count": smp_runtime_write_sites,
+        "pksmp3_mailbox_volatile_read_site_count": smp_ipi_read_sites,
+        "pksmp3_mailbox_volatile_write_site_count": smp_ipi_write_sites,
         "final_temporary_alias_revocation_required": True,
         "final_guarded_metadata_mapping_retention_required": True,
         "heap_api_token_count": 0,

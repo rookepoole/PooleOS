@@ -19,7 +19,7 @@ class NativeKernelXstatePolicyTests(unittest.TestCase):
         markers[23] = markers[23].replace("trap_scenario=4", "trap_scenario=5")
         markers[25] = markers[25].replace(
             "PKBUILD1-CYCLE122-N7-XSTATE-POLICY-001",
-            "PKBUILD1-CYCLE137-N8-SMP-RUNTIME-V001-0010000",
+            "PKBUILD1-CYCLE138-N8-SMP-IPI-V001-00100000000",
         )
         markers.extend(
             [

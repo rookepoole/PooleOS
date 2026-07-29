@@ -190,3 +190,24 @@ open. Capability-gated IPI delivery and acknowledgement, TLB shootdown,
 scheduler CPU ownership, multi-AP startup, target hardware, N8 exit, release,
 and production remain open. The next owner-independent move is
 `N8-SMP-IPI-001`.
+
+Cycle 138 supersedes the current-image and next-move values above. PKSMP3 adds
+one bounded development-only IPI transport on the frozen two-vCPU
+`SandyBridge,-avx` TCG profile. APIC ID 1 installs six fixed vectors and
+acknowledges six allowlisted operation classes behind a checksum-bound
+development capability. Two exact 39-marker runs prove six accepted and four
+denied deliveries, ten EOIs, one bounded offline-APIC timeout, panic latching,
+stop quiescence, final-INIT parking, post-execution descriptor/xstate/APIC-table
+validation, capability and alias revocation, and exact zero/readback release of
+all 32 pages or 131,072 bytes. One hundred thirty kernel host tests and 18
+hostile-control categories covering 120 independently rejected cases pass. The
+current kernel is 409,600 canonical bytes in a 458,752-byte, 112-page image
+with 959 relocations and SHA-256
+`6B8A9C2C3EAC559E1D9CB5965800A1671DB8F487F149861300D4EDCB279B3A11`.
+This closes only `FLAG-N8-SMP-IPI-001`; `FLAG-N8-IRQ-001` remains open. The
+fixed capability is not production authority, the shootdown operation performs
+zero TLB invalidations, and call-function exposes no arbitrary callback. Real
+generation-bound remote invalidation and deferred reclaim, scheduler CPU
+ownership, multi-AP startup, target hardware, N8/N9 exit, release, and
+production remain open. The next owner-independent move is
+`N9-SMP-SHOOTDOWN-001`.

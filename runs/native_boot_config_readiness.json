@@ -51,8 +51,8 @@
       },
       {
         "path": "native/boot/Cargo.toml",
-        "sha256": "1848606DCAA439DC3DEB1D1AD6597BEC4E6A34EA57EA236AF450FF7113F8AC08",
-        "byte_count": 1386
+        "sha256": "09EC9098F1618A3CD7BE9C056C998F2E3AA681F038F1087DDACA57E0D8ACFF51",
+        "byte_count": 1433
       },
       {
         "path": "native/boot/src/lib.rs",

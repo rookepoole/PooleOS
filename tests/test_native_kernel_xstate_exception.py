@@ -21,7 +21,7 @@ class NativeKernelXstateExceptionTests(unittest.TestCase):
         markers[23] = markers[23].replace("trap_scenario=4", "trap_scenario=6")
         markers[25] = markers[25].replace(
             "PKBUILD1-CYCLE122-N7-XSTATE-POLICY-001",
-            "PKBUILD1-CYCLE137-N8-SMP-RUNTIME-V001-0010000",
+            "PKBUILD1-CYCLE138-N8-SMP-IPI-V001-00100000000",
         )
         markers.extend(
             [
@@ -148,7 +148,7 @@ class NativeKernelXstateExceptionTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         audit = qualify_xstate_exception._source_audit(source)
         self.assertEqual(0, audit["profile_source_wrmsr_site_count"])
-        self.assertEqual(3, audit["shared_source_wrmsr_sites_outside_profile"])
+        self.assertEqual(4, audit["shared_source_wrmsr_sites_outside_profile"])
         hostile = source.replace(
             "poole_trigger_x87_exception:\n",
             "poole_trigger_x87_exception:\n    wrmsr\n",

@@ -62,10 +62,11 @@ This is not syscall entry, `SWAPGS`, per-thread FS/GS ownership, per-CPU
 `TSC_AUX`, a machine-check handler, MCA recovery, PMU ownership, AP state,
 target-hardware qualification, user mode, release, or production evidence.
 PKMSR1 executes zero MSR or control writes. The shared linked kernel contains
-22 `RDMSR` sites: twenty in the established CPU/entry policy paths, one
-`IA32_EFER` read in the separately selected PKSMP1 first-AP lifecycle, and one
-AP-local read in the separately selected PKSMP2 runtime lifecycle. It also
-contains exactly two typed `IA32_APIC_BASE` `WRMSR` sites in the separately
-selected PKIRQ1 `InterruptTime` branch. Source and per-function linked audits
-bind all three isolations. There are zero signatures, authority grants, authorized
+25 `RDMSR` sites: twenty in the established CPU/entry policy paths, one each in
+the separately selected PKSMP1 and PKSMP2 lifecycles, and three isolated to the
+PKSMP3 protected-mode trampoline, long-mode trampoline, and BSP transaction.
+It contains two typed `IA32_APIC_BASE` `WRMSR` sites in the separately selected
+PKIRQ1 `InterruptTime` branch and one `IA32_EFER` long-mode-enablement write in
+the separately selected PKSMP3 trampoline. Source and per-function linked
+audits bind every isolation. There are zero signatures, authority grants, authorized
 actions, firmware calls, and physical-media writes in this profile.

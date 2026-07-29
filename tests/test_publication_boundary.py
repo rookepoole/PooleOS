@@ -77,6 +77,8 @@ class PublicationBoundaryTests(unittest.TestCase):
             "runs/native-kernel-cpu-policy-readiness.json",
             "runs/native-kernel-interrupt-time-readiness.json",
             "runs/native-kernel-smp-first-ap-readiness.json",
+            "runs/native-kernel-smp-percpu-runtime-readiness.json",
+            "runs/native-kernel-smp-ipi-readiness.json",
             "runs/native_microcode_readiness.json",
             "runs/native_recovery_readiness.json",
             "runs/native_system_manifest_readiness.json",

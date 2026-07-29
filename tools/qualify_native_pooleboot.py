@@ -168,6 +168,7 @@ def _build_and_test(
         "development-interrupt-time",
         "development-smp-first-ap",
         "development-smp-percpu-runtime",
+        "development-smp-ipi",
     }
     if development_feature is not None and development_feature not in allowed_features:
         raise QualificationError("unknown PooleBoot development feature")

@@ -48,6 +48,8 @@ ALLOWED_RUNS = {
     "runs/native-kernel-physical-memory-readiness.json",
     "runs/native-kernel-interrupt-time-readiness.json",
     "runs/native-kernel-smp-first-ap-readiness.json",
+    "runs/native-kernel-smp-percpu-runtime-readiness.json",
+    "runs/native-kernel-smp-ipi-readiness.json",
     "runs/native-kernel-virtual-memory-readiness.json",
     "runs/native_model_readiness.json",
     "runs/native_microcode_readiness.json",

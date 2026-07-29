@@ -79,8 +79,11 @@ def _field_matrix(control_id: str, markers: list[str], marker_index: int, fields
 
 
 def _audit_source_text(arch_text: str, main_text: str, runtime_text: str) -> dict[str, Any]:
+    runtime_arch = arch_text.split("poole_ap_runtime_trampoline_start:", 1)[1].split(
+        "poole_ap_runtime_trampoline_end:", 1
+    )[0]
     required_arch = (
-        "poole_ap_runtime_trampoline_start:", ".code16", ".code32", ".code64",
+        ".code16", ".code32", ".code64",
         "ltr ax", "lidt [rsi + poole_ap_runtime_config_idtr_offset]", "xsetbv",
         "xsave64 [rbx]", "xrstor64 [rbx]", "mov dword ptr [rdi + 280], 0",
     )
@@ -95,15 +98,15 @@ def _audit_source_text(arch_text: str, main_text: str, runtime_text: str) -> dic
         "pub fn runtime_checksum", "pub fn validate_mailbox", "pub fn build_descriptor_page",
         "pub fn build_idt_page", "pub fn validate_post_ap_resources",
     )
-    smp_runtime._require(all(token in arch_text for token in required_arch), "PKSMP2 trampoline source audit failed")
+    smp_runtime._require(all(token in runtime_arch for token in required_arch), "PKSMP2 trampoline source audit failed")
     smp_runtime._require(all(token in main_text for token in required_main), "PKSMP2 lifecycle source audit failed")
     smp_runtime._require(all(token in runtime_text for token in required_runtime), "PKSMP2 runtime model source audit failed")
     smp_runtime._require("PKSMP2DBG" not in arch_text + main_text + runtime_text, "PKSMP2 transient diagnostics remain")
     return {
         "trampoline_mode_count": 3,
         "hardware_descriptor_load_count": 2,
-        "xsave_instruction_count": arch_text.count("xsave64 [rbx]"),
-        "xrstor_instruction_count": arch_text.count("xrstor64 [rbx]"),
+        "xsave_instruction_count": runtime_arch.count("xsave64 [rbx]"),
+        "xrstor_instruction_count": runtime_arch.count("xrstor64 [rbx]"),
         "resource_page_count": 32,
         "guard_page_count": 14,
         "identity_mapped_page_count": 13,

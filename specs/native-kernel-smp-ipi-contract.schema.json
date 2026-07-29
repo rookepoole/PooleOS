@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-kernel-smp-ipi-contract.schema.json",
+  "title": "PooleOS PKSMP3 contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "contract_id",
+    "selected_move_id",
+    "status_date",
+    "status",
+    "production_ready",
+    "production_promotion_allowed",
+    "phase_mapping",
+    "source_requirement_ids",
+    "profile",
+    "topology",
+    "resource_geometry",
+    "transport",
+    "shutdown_and_cleanup",
+    "qualification",
+    "required_negative_controls",
+    "claims",
+    "non_claims",
+    "official_references"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_smp_ipi_contract"},
+    "contract_id": {"const": "PKSMP3"},
+    "selected_move_id": {"const": "N8-SMP-IPI-001"},
+    "status_date": {"const": "2026-07-29"},
+    "status": {"const": "bounded_capability_gated_ipi_transport_sandybridge_two_vcpu_non_promoting"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "phase_mapping": {"const": ["N8.1", "N8.2", "N8.3", "N8.5"]},
+    "source_requirement_ids": {"type": "array", "minItems": 5, "uniqueItems": true, "items": {"type": "string"}},
+    "profile": {
+      "type": "object",
+      "required": ["feature", "selector", "cpu_model", "acceleration", "virtual_cpu_count", "application_processor_count", "emulator_only"],
+      "properties": {
+        "feature": {"const": "development-smp-ipi"},
+        "selector": {"const": 14},
+        "cpu_model": {"const": "SandyBridge,-avx"},
+        "acceleration": {"const": "tcg_multi_thread"},
+        "virtual_cpu_count": {"const": 2},
+        "application_processor_count": {"const": 1},
+        "emulator_only": {"const": true}
+      }
+    },
+    "topology": {
+      "type": "object",
+      "required": ["processor_count", "enabled_processor_count", "bsp_apic_id", "target_apic_id", "x2apic_allowed"],
+      "properties": {
+        "processor_count": {"const": 2},
+        "enabled_processor_count": {"const": 2},
+        "bsp_apic_id": {"const": 0},
+        "target_apic_id": {"const": 1},
+        "x2apic_allowed": {"const": false}
+      }
+    },
+    "resource_geometry": {
+      "type": "object",
+      "required": ["page_count", "guard_page_count", "mapped_page_count", "apic_page_table"],
+      "properties": {
+        "page_count": {"const": 32},
+        "guard_page_count": {"const": 14},
+        "mapped_page_count": {"const": 13},
+        "apic_page_table": {
+          "type": "object",
+          "required": ["page_offset", "pdpt_index", "page_directory_index", "page_table_index", "post_execution_accessed_dirty_bits_required"],
+          "properties": {
+            "page_offset": {"const": 31},
+            "pdpt_index": {"const": 3},
+            "page_directory_index": {"const": 503},
+            "page_table_index": {"const": 0},
+            "post_execution_accessed_dirty_bits_required": {"const": true}
+          }
+        }
+      }
+    },
+    "transport": {
+      "type": "object",
+      "required": ["capability_profile", "operation_classes", "live_accepted_deliveries", "live_denied_deliveries", "live_delivery_count", "live_eoi_count", "offline_target_timeout_count"],
+      "properties": {
+        "capability_profile": {"const": "development-only fixed token"},
+        "operation_classes": {"type": "array", "minItems": 6, "maxItems": 6},
+        "live_accepted_deliveries": {"const": 6},
+        "live_denied_deliveries": {"const": 4},
+        "live_delivery_count": {"const": 10},
+        "live_eoi_count": {"const": 10},
+        "offline_target_timeout_count": {"const": 1}
+      }
+    },
+    "shutdown_and_cleanup": {
+      "type": "object",
+      "required": ["final_init_park_required_before_release", "capability_revoked", "resource_pages_released", "verified_bytes"],
+      "properties": {
+        "final_init_park_required_before_release": {"const": true},
+        "capability_revoked": {"const": true},
+        "resource_pages_released": {"const": 32},
+        "verified_bytes": {"const": 131072}
+      }
+    },
+    "qualification": {
+      "type": "object",
+      "required": ["qemu_run_count", "negative_control_count", "hostile_case_count"],
+      "properties": {
+        "qemu_run_count": {"const": 2},
+        "negative_control_count": {"const": 18},
+        "hostile_case_count": {"const": 120}
+      }
+    },
+    "required_negative_controls": {"type": "array", "minItems": 18, "maxItems": 18, "uniqueItems": true, "items": {"type": "string"}},
+    "claims": {
+      "type": "object",
+      "required": ["flag_n8_smp_ipi_001_closed", "six_allowlisted_operation_classes_acknowledged", "real_tlb_shootdown_implemented", "arbitrary_remote_callback_implemented", "scheduler_implemented", "n8_exit_gate_satisfied", "production_ready"],
+      "properties": {
+        "flag_n8_smp_ipi_001_closed": {"const": true},
+        "six_allowlisted_operation_classes_acknowledged": {"const": true},
+        "real_tlb_shootdown_implemented": {"const": false},
+        "arbitrary_remote_callback_implemented": {"const": false},
+        "scheduler_implemented": {"const": false},
+        "n8_exit_gate_satisfied": {"const": false},
+        "production_ready": {"const": false}
+      }
+    },
+    "non_claims": {"type": "array", "minItems": 9, "items": {"type": "string"}},
+    "official_references": {"type": "array", "minItems": 3, "items": {"type": "string", "format": "uri"}}
+  }
+}

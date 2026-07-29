@@ -241,8 +241,8 @@ def _linked_machine_audit(toolchain_root: Path, temporary_root: Path) -> tuple[d
     audited_mnemonics = ("rdmsr", "wrmsr", "rdpmc", "syscall", "sysret", "swapgs")
     counts = {mnemonic: mnemonics.count(mnemonic) for mnemonic in audited_mnemonics}
     expected_counts = {
-        "rdmsr": 22,
-        "wrmsr": 2,
+        "rdmsr": 25,
+        "wrmsr": 3,
         "rdpmc": 0,
         "syscall": 0,
         "sysret": 0,
@@ -256,14 +256,22 @@ def _linked_machine_audit(toolchain_root: Path, temporary_root: Path) -> tuple[d
             for mnemonic in ("rdmsr", "wrmsr")
         }
         for name in (
+            "poole_ap_ipi_trampoline_protected_entry",
+            "poole_ap_ipi_trampoline_long_entry",
+            "PooleKernelLinked::run_smp_ipi",
             "PooleKernelLinked::run_smp_first_ap",
+            "PooleKernelLinked::run_smp_percpu_runtime",
             "PooleKernelLinked::arch::x86_64::observe_cpu_policy",
             "PooleKernelLinked::arch::x86_64::observe_privilege_msr_policy",
             "poole_kernel_rust_entry",
         )
     }
     expected_function_counts = {
+        "poole_ap_ipi_trampoline_protected_entry": {"rdmsr": 1, "wrmsr": 1},
+        "poole_ap_ipi_trampoline_long_entry": {"rdmsr": 1, "wrmsr": 0},
+        "PooleKernelLinked::run_smp_ipi": {"rdmsr": 1, "wrmsr": 0},
         "PooleKernelLinked::run_smp_first_ap": {"rdmsr": 1, "wrmsr": 0},
+        "PooleKernelLinked::run_smp_percpu_runtime": {"rdmsr": 1, "wrmsr": 0},
         "PooleKernelLinked::arch::x86_64::observe_cpu_policy": {"rdmsr": 5, "wrmsr": 0},
         "PooleKernelLinked::arch::x86_64::observe_privilege_msr_policy": {"rdmsr": 12, "wrmsr": 0},
         "poole_kernel_rust_entry": {"rdmsr": 3, "wrmsr": 2},
@@ -287,7 +295,9 @@ def _linked_machine_audit(toolchain_root: Path, temporary_root: Path) -> tuple[d
         "pkirq1_linked_wrmsr_count": 2,
         "pksmp1_linked_rdmsr_count": 1,
         "pksmp2_linked_rdmsr_count": 1,
-        "result": "pass_linked_privileged_instruction_scope_with_pkirq1_pksmp1_and_pksmp2_isolation",
+        "pksmp3_linked_rdmsr_count": 3,
+        "pksmp3_linked_wrmsr_count": 1,
+        "result": "pass_linked_privileged_instruction_scope_with_pkirq1_pksmp1_pksmp2_and_pksmp3_isolation",
     }
     return audit, tool
 
