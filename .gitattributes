@@ -18,3 +18,5 @@ tools/bootstrap_native_models.ps1 text eol=lf
 *.woff2 binary
 *.zip binary
 
+# Preserve checksum-verified upstream Cargo sources byte-for-byte.
+native/vendor/** -whitespace

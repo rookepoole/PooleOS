@@ -1,12 +1,26 @@
 [package]
-name = "poolekernel-fixture"
+name = "poolekernel"
 version.workspace = true
 edition.workspace = true
 license-file.workspace = true
 publish.workspace = true
 
+[features]
+default = []
+host-probe = []
+
 [[bin]]
-name = "PooleKernelFixture"
+name = "PooleKernelLinked"
 path = "src/main.rs"
 
+[[bin]]
+name = "pkreval1-probe"
+path = "src/bin/pkreval1_probe.rs"
+required-features = ["host-probe"]
+
 [dependencies]
+poole-boot-trust = { path = "../trust" }
+poole-bootload = { path = "../bootload" }
+poole-handoff = { path = "../handoff" }
+poole-inner-live = { path = "../inner" }
+poole-kmap = { path = "../kmap" }

@@ -1,5 +1,28 @@
 [workspace]
-members = ["boot", "kernel"]
+members = [
+  "artifact",
+  "boot",
+  "bootexit",
+  "bootload",
+  "bootcfg",
+  "cpupolicy",
+  "elf",
+  "firmware",
+  "fixtures/pooleboot",
+  "fixtures/poolekernel",
+  "handoff",
+  "inner",
+  "initsys",
+  "kernel",
+  "kmap",
+  "livehandoff",
+  "manifest",
+  "microcode",
+  "policy",
+  "recovery",
+  "symbols",
+  "trust",
+]
 resolver = "3"
 
 [workspace.package]

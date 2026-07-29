@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-kernel-entry-readiness.schema.json",
+  "title": "PooleOS native PKENTRY1 qualification readiness",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "status",
+    "contract_id",
+    "selected_move_id",
+    "production_ready",
+    "production_promotion_allowed",
+    "n6_exit_gate_satisfied",
+    "phase_status",
+    "bindings",
+    "toolchain",
+    "host_tests",
+    "builds",
+    "product",
+    "negative_controls",
+    "claims",
+    "summary",
+    "open_items",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_entry_readiness"},
+    "status": {"const": "pass_single_host_product_image_non_promoting"},
+    "contract_id": {"const": "PKENTRY1"},
+    "selected_move_id": {"const": "N6-KENTRY-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "n6_exit_gate_satisfied": {"const": false},
+    "negative_controls": {"type": "array", "minItems": 32},
+    "claims": {"type": "object"},
+    "summary": {"type": "object"}
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-boot-handoff-readiness.schema.json",
+  "title": "PooleOS PBP1 qualification readiness",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "status_date", "status", "contract_id", "selected_move_id", "production_ready", "production_promotion_allowed", "n5_exit_gate_satisfied", "phase_status", "bindings", "codec_qualification", "golden_vectors", "negative_controls", "differential_fuzz", "claims", "summary", "open_items", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_boot_handoff_readiness"},
+    "status_date": {"const": "2026-07-16"},
+    "status": {"const": "pass_single_host_synthetic_non_promoting"},
+    "contract_id": {"const": "PBP1"},
+    "selected_move_id": {"const": "N5-BOOTPROTO-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "n5_exit_gate_satisfied": {"const": false},
+    "phase_status": {"type": "object", "additionalProperties": false, "required": ["N5", "N5.8"], "properties": {"N5": {"const": "partial"}, "N5.8": {"const": "partial"}}},
+    "bindings": {"type": "object", "additionalProperties": false, "required": ["contract", "contract_schema", "golden_vectors", "golden_schema", "readiness_schema", "implementation_inputs"], "properties": {"contract": {"type": "object"}, "contract_schema": {"type": "object"}, "golden_vectors": {"type": "object"}, "golden_schema": {"type": "object"}, "readiness_schema": {"type": "object"}, "implementation_inputs": {"type": "array", "minItems": 11, "maxItems": 11, "items": {"type": "object"}}}},
+    "codec_qualification": {"type": "object"},
+    "golden_vectors": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "object"}},
+    "negative_controls": {"type": "array", "minItems": 32, "maxItems": 32, "items": {"type": "object"}},
+    "differential_fuzz": {"type": "object"},
+    "claims": {"type": "object"},
+    "summary": {"type": "object"},
+    "open_items": {"type": "array", "minItems": 8, "items": {"type": "string"}},
+    "claim_boundary": {"type": "array", "minItems": 7, "items": {"type": "string"}}
+  }
+}

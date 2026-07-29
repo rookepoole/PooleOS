@@ -69,6 +69,10 @@ The executable capability model and its revocation state machine are N4/N13 prer
 
 The executable virtual-memory ownership model is an N4/N9 prerequisite. Cycle 90 checks page-table, TLB, and retired-translation ownership/generation agreement over two domains, two CPUs, two physical pages, one virtual address, and one generation-changing ownership reuse. The safe transfer path requires old page-table mappings, cached translations, and pending shootdown state to clear before ownership changes; independent stale-mapping and early-reuse mutants must violate `PageTableSafety` and `TlbSafety`. The model deliberately excludes page-table levels, PCID/ASID, weak-memory ordering, interrupt races, concurrent page-table writers, DMA/IOMMU, hardware page walks, huge pages, copy-on-write, swap, and NUMA. It is not a theorem, memory ABI freeze, kernel execution, or implementation-equivalence claim.
 
+The executable scheduler model is an N4/N12 prerequisite. Cycle 95 checks run-state and queue agreement, one current task, blocked wait ownership, cancel and timeout wake delivery, no duplicate runnable entry, one-level priority inheritance, audited effective-priority dispatch, a two-bypass accounting bound, lock handoff, and teardown over three fixed-priority tasks, one CPU context, and one lock. Seven independent mutants must violate their exact wake, queue, inheritance, dispatch, bypass, or quiescence invariant. The bypass bound is a state-transition accounting rule only: `Idle` remains enabled, and no temporal fairness, eventual-dispatch, response-time, starvation-freedom, SMP, weak-memory, register-context, ABI, or implementation-equivalence claim follows.
+
+The executable PooleFS transaction/recovery model is an N4/N19 prerequisite. Cycle 96 checks copy-on-write allocation roles, data/checksum agreement, ordered data/intent/commit persistence, commit-before-publication, old-or-new visibility, corruption rejection, crash and restart during mounted operation or recovery, replay idempotence, and mounted teardown over two abstract blocks and one update. Six independent mutants must violate their exact checksum, publication, allocation, replay, corruption-rejection, or quiescence invariant. Atomic flush/FUA edges do not model sector atomicity, device caches, controller ordering, concurrent transactions, VFS/page-cache behavior, on-disk ABI bytes, hardware durability, or implementation equivalence.
+
 ## Boot and Trust Boundary
 
 PooleBoot is a separate Poole-authored PE32+ UEFI application. It owns firmware-facing boot duties, image and manifest verification, memory-map capture, entropy/firmware-table handoff, and `ExitBootServices`. PooleKernel accepts only the frozen Poole boot protocol and does not call UEFI boot services after takeover.
@@ -136,4 +140,83 @@ PooleKernel is not production-ready until:
 7. the signed ISO is reproducible and free of prohibited production substitutes; and
 8. clean-media QEMU and physical-machine receipts bind the exact source, toolchain, binaries, configuration, keys, and hardware identity.
 
-Current state: chartered, not implemented, not production-ready. Cycle 87 closes only the bounded user-mode CPUID sub-capability of `N2-HW-002`; no privileged probe, native parser, driver, or kernel mechanism is implied. Cycle 88 adds a pinned host-side Tier 0 Q35/QEMU/OVMF profile and proves only deterministic command construction plus paused machine instantiation. Cycles 89-90 add bounded boot-slot rollback, capability derivation/revocation, and virtual-memory ownership/map/unmap/shootdown checks: all three safe finite spaces drain and all four deliberately unsafe configurations yield their required invariant violation. These results execute no guest or kernel instruction, contain zero implementation-trace comparisons, and grant no liveness, refinement, fingerprint-collision, ABI-freeze, or production claim. The immediate owner move remains `N0-RATIFY-001`; the next owner-independent engineering move is `N4-IPC-MODEL-001`.
+Current state: PooleKernel is implemented only as a bounded early freestanding product and is not production-ready. Cycles 97-118 establish unsigned PooleBoot intake, exact retained PKMAP2/PBLIVE4/PBEXIT1 state, a reproducible PKELF1 image, allocation-free nine-file PKREVAL1, and opt-in QEMU-only PKXFER1 with no authority. Cycles 119-124 add bounded BSP trap, qemu64 CPU observation, exact-target rejection policy, eager x87/SSE ownership/exceptions, and privileged-MSR observation. Cycles 125-133 add generation-safe physical ownership, inactive and bounded active virtual memory, full-page scrubbing, a guarded stable manager, lifecycle-gated Boot Services and ACPI reclaim, generation-owned ledgers, checked automatic 4/8/15/29-page growth, and a validated retained required-table snapshot. Cycle 134 upgrades selector 10 to PKVM3: PKPMM7 reconstructs a generation-bound sparse ownership manifest; the kernel allocates 243 contiguous DMA32 table pages; maps 117,887 admitted supervisor RW/NX write-back pages across eleven ranges; and leaves 12,878 gap and retained pages absent. Manifest forgery, retained-hole admission, cache-bit drift, partial writes, CR3 rollback, premature reuse, and absent or stale retirement receipts fail closed. Three local invalidation receipts gate the test data frame, and one exact root/generation/BSP/local-context-flush receipt gates old-table scrub and release. Ninety-one kernel host tests and two exact 40-marker qemu64 runs pass 46 hostile controls with checksum `0x341CF729ADB26B52`, 367,474 physical table writes, and 950,234 temporary-PTE writes and invalidations. The current kernel is 299,008 canonical bytes in a 339,968-byte, 83-page image with 729 relocations and SHA-256 `5B581CC1D1ABEB163D0984D12144CA5016C44B46A28B190A6DFCBDCDA689A255`. This is not authenticated boot, production transfer, target qualification, direct per-processor microcode evidence, syscall or GS/TSC_AUX activation, machine-check handling, PMU ownership, AVX/extended-state qualification, scheduler or user-task delivery, AP/migration integration, complete per-CPU descriptor state, AML, complete platform discovery, SMP shootdown or remote generation retirement, concurrent address-space replacement, huge pages, PCID, COW, user faults, pager IPC, heaps, broad MMIO/cache qualification, interrupt-context/concurrent/SMP allocation, general pressure/OOM policy, capabilities, ring 3, N5/N6/N7/N9 exit, or production readiness. The applicable Model 40h-4Fh errata source and a direct numeric client microcode floor or ratified replacement remain stop-ship gaps. The selected FIDO2 key remains physically unavailable despite authorization for acquisition and later key/signing operations. The immediate external move is `N0-HW-KEY-ACQUIRE-001`; the next owner-independent engineering move is `N8-IRQ-001`.
+
+Cycle 135 supersedes the current-image and next-move values in the preceding
+historical paragraph. PKIRQ1 adds retained MADT/HPET discovery, one-BSP local
+xAPIC validation, 51-vector ownership, guarded uncacheable LAPIC/HPET mapping,
+legacy-PIC masking, checked one-shot calibration, and eight exact timer
+deliveries and EOIs with normal-path restoration. Ninety-nine kernel host tests,
+two exact 36-marker qemu64 runs, and 58 hostile controls pass. The current
+kernel is 323,584 canonical bytes in a 364,544-byte, 89-page image with 812
+relocations and SHA-256
+`2ACD4A5EF30CA1A4A22711FD31E2A259A5C87D97BCE7FB1BF49A3488B3FC02B2`.
+N8.1 and N8.3 are partial, but no AP, IPI, I/O APIC route, MSI/MSI-X, complete
+time service, target-hardware result, or production promotion exists.
+`FLAG-N8-IRQ-001` remains open; the next owner-independent engineering move is
+`N8-SMP-FIRST-AP-001`.
+
+Cycle 136 supersedes the current-image and next-move values above. PKSMP1 adds
+one bounded first-AP lifecycle on a two-vCPU qemu64 profile: retained MADT
+selection, fourteen contiguous pages below 1 MiB, four absent guards, an RX
+16-to-32-to-64-bit trampoline with pre-accessed GDT descriptors, guarded RW/NX
+stack and mailbox, INIT-SIPI-SIPI startup, exact long-mode observation,
+stop/quiesce, final-INIT park, alias revocation, and 57,344-byte scrub,
+verification, and release. One hundred eleven kernel host tests, two exact
+38-marker runs, and 72 hostile controls pass. The current kernel is 335,872
+canonical bytes in a 376,832-byte, 92-page image with 855 relocations and
+SHA-256
+`6596CB332EB24813089F95A00AC979C892C47235943CB0E73E3979ED9901B725`.
+This closes only `FLAG-N8-SMP-FIRST-AP-001`; `FLAG-N8-IRQ-001` remains open.
+AP-local descriptor, stack, xstate, and interrupt ownership, multi-AP startup,
+IPIs, shootdown, target hardware, N8 exit, release, and production remain
+open. The next owner-independent move is `N8-SMP-PERCPU-RUNTIME-001`.
+
+Cycle 137 supersedes the current-image and next-move values above. PKSMP2 adds
+one bounded processor-local AP runtime on the frozen two-vCPU
+`SandyBridge,-avx` TCG profile: one AP-owned GDT/TSS/IDT, guarded RSP0/IST1/IST2
+stacks, x87/SSE owner state, eight exception gates, and nineteen owned
+interrupt gates. The 32-page below-1-MiB transaction leaves fourteen guards
+and one reserved page absent; the BSP verifies the hardware-busy TSS
+descriptor, all 27 gates, one XSAVE/XRSTOR round trip, quiescence, final-INIT
+parking, alias revocation, and exact zero/readback release of all 131,072
+bytes. One hundred twenty-two kernel host tests, two exact 42-marker runs, and
+19 hostile-control categories covering 159 independently rejected cases pass.
+The current kernel is 409,600 canonical bytes in a 458,752-byte, 112-page
+image with 919 relocations and SHA-256
+`214F32214494E632063238337551C355BFED150B9B49846DB8A927584B8E47F0`.
+This closes only `FLAG-N8-SMP-PERCPU-RUNTIME-001`; `FLAG-N8-IRQ-001` remains
+open. Capability-gated IPI delivery and acknowledgement, TLB shootdown,
+scheduler CPU ownership, multi-AP startup, target hardware, N8 exit, release,
+and production remain open. The next owner-independent move is
+`N8-SMP-IPI-001`.
+
+Cycle 138 supersedes the current-image and next-move values above. PKSMP3 adds
+one bounded development-only IPI transport on the frozen two-vCPU
+`SandyBridge,-avx` TCG profile. APIC ID 1 installs six fixed vectors and
+acknowledges six allowlisted operation classes behind a checksum-bound
+development capability. Two exact 39-marker runs prove six accepted and four
+denied deliveries, ten EOIs, one bounded offline-APIC timeout, panic latching,
+stop quiescence, final-INIT parking, post-execution descriptor/xstate/APIC-table
+validation, capability and alias revocation, and exact zero/readback release of
+all 32 pages or 131,072 bytes. One hundred thirty kernel host tests and 18
+hostile-control categories covering 120 independently rejected cases pass. The
+current kernel is 409,600 canonical bytes in a 458,752-byte, 112-page image
+with 959 relocations and SHA-256
+`6B8A9C2C3EAC559E1D9CB5965800A1671DB8F487F149861300D4EDCB279B3A11`.
+This closes only `FLAG-N8-SMP-IPI-001`; `FLAG-N8-IRQ-001` remains open. The
+fixed capability is not production authority, the shootdown operation performs
+zero TLB invalidations, and call-function exposes no arbitrary callback. Real
+generation-bound remote invalidation and deferred reclaim, scheduler CPU
+ownership, multi-AP startup, target hardware, N8/N9 exit, release, and
+production remain open. The next owner-independent move is
+`N9-SMP-SHOOTDOWN-001`.
+
+Cycle 139 changes no kernel mechanism or claim. Main-integration preflight
+found that PBTRUST1 and PKSMP3 readiness writers captured Windows CRLF working
+bytes before Git stored LF, making fresh-checkout bindings stale. Both writers
+now force LF and have byte-level regression tests; the complete affected
+trust-to-PooleBoot evidence chain was requalified in dependency order. The
+Cycle 138 kernel identity and bounded PKSMP3 results remain exact,
+`production_ready=false`, and `N9-SMP-SHOOTDOWN-001` remains the next
+owner-independent kernel move.

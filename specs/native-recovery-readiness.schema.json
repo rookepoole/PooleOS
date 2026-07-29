@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-recovery-readiness.schema.json",
+  "title": "PooleOS PREC1 recovery qualification readiness",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "status",
+    "contract_id",
+    "selected_move_id",
+    "production_ready",
+    "production_promotion_allowed",
+    "n5_exit_gate_satisfied",
+    "phase_status",
+    "bindings",
+    "validator_qualification",
+    "golden_vectors",
+    "negative_controls",
+    "differential_fuzz",
+    "transition_qualification",
+    "activation_qualification",
+    "claims",
+    "summary",
+    "open_items",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_recovery_readiness"},
+    "status_date": {"const": "2026-07-18"},
+    "status": {"const": "pass_single_host_synthetic_non_promoting"},
+    "contract_id": {"const": "PREC1"},
+    "selected_move_id": {"const": "N5-RECOVERY-SEMANTICS-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "n5_exit_gate_satisfied": {"const": false},
+    "phase_status": {"type": "object"},
+    "bindings": {"type": "object"},
+    "validator_qualification": {"type": "object"},
+    "golden_vectors": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"type": "object"}
+    },
+    "negative_controls": {
+      "type": "array",
+      "minItems": 144,
+      "maxItems": 144,
+      "items": {"type": "object"}
+    },
+    "differential_fuzz": {"type": "object"},
+    "transition_qualification": {"type": "object"},
+    "activation_qualification": {"type": "object"},
+    "claims": {"type": "object"},
+    "summary": {"type": "object"},
+    "open_items": {
+      "type": "array",
+      "minItems": 12,
+      "items": {"type": "string"}
+    },
+    "claim_boundary": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {"type": "string"}
+    }
+  }
+}

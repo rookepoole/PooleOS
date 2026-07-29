@@ -1,15 +1,191 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-07-16  
+Status date: 2026-07-29
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 93
+Last roadmap reconciliation: PooleOS Cycle 139
 
-Current reconciliation: the seven-record native constitution, public/private boundary, architecture baseline, and conformance policy remain partial evidence. Public `main` is at Cycle 92 commit `a106e6ffcee06c4a13c67f2b949fbc1ab8f24bc9`. Cycle 91's deterministic 16-source owner packet remains byte-frozen with every original response field `UNSELECTED`, preserving the exact reviewed input. Cycle 93 validates `POOLEOS-N0-OWNER-RESPONSE-V1`, records ADR-0003 and ADR-0004 plus all 38 Workstation v1 definitions as owner-directed but cryptographically unsigned, and passes 16/16 hostile response controls while accepting zero measurements. Rooke Poole selected `hardware_fido2_ed25519_sk`, reported that no FIDO2 hardware key is currently available, marked software-key risk `not_applicable`, and deferred public-key publication as `not_yet`. The trust store therefore remains empty. No key was generated or used; no signing, merge, tag, registration, or publication is authorized; and `production_promotion_allowed=false`. `N0-HW-KEY-ACQUIRE-001` is the blocked owner move, and key generation will still require separate explicit approval after compatible hardware is obtained. Cycle 92's 22-subphase PooleGlyph co-development track remains active. The bounded CPUID, Tier 0, and three finite TLC model results retain their prior evidence and non-claim limits. `FLAG-N4-MODELS-001` remains open because IPC, scheduler, PooleFS recovery, and all native implementation-trace comparisons are unfinished. Current QEMU and EDK II source rebuilds, provider patch-delta review, license/SBOM/vulnerability closure, real PooleBoot evidence, fault campaigns, and second-host reproduction remain open. `N4-IPC-MODEL-001` is the next owner-independent move, while PooleGlyph Phase 66 may advance as a parallel component lane. No functional PooleBoot, PooleKernel, userspace, driver, desktop, or ISO exists.
+Cycle 139 reconciliation (superseding only Cycle 138 closeout-integrity
+metadata): main-integration preflight reproduced all 819 Cycle 138 tests but
+found six stale bindings because the PBTRUST1 readiness writer had hashed CRLF
+working bytes before Git stored LF. The same platform-default newline defect
+was present in the new PKSMP3 writer and would have made its architecture
+binding stale after checkout. Both writers now force LF and have byte-level
+regression tests. PBTRUST1, PKLOAD6, PKREVAL1, PKXFER1, every affected
+CPU/xstate/MSR/memory/SMP receipt, PKSMP3, and PooleBoot were requalified in
+dependency order against committed-byte semantics. The exact kernel, bounded
+PKSMP3 behavior, phase/subphase status, flags, gaps, and production boundary
+do not advance. `production_ready=false`; no key, signature, firmware change,
+physical-media write, tag, release, or production promotion occurred. The
+blocked external move remains `N0-HW-KEY-ACQUIRE-001`; the next
+owner-independent engineering move remains `N9-SMP-SHOOTDOWN-001`.
+
+Cycle 138 reconciliation (superseding the historical Cycle 137 paragraph
+below): governance and external-key state are unchanged. The selected
+`hardware_fido2_ed25519_sk` device remains physically unavailable;
+`N0-HW-KEY-ACQUIRE-001` remains the blocked external move; and no key,
+signature, privileged-hardware, firmware, physical-media, publication,
+release, or production-promotion action occurred. The owner-independent
+`N8-SMP-IPI-001` move closes only its bounded PKSMP3 development transport.
+On the frozen two-vCPU `SandyBridge,-avx` TCG profile, APIC ID 1 installs six
+fixed vectors and acknowledges six allowlisted operation classes behind a
+checksum-bound development capability. Two exact 39-marker runs observe six
+accepted and four denied deliveries, ten EOIs, one bounded offline-APIC
+timeout, panic latching, stop quiescence, final-INIT parking, post-execution
+descriptor/xstate/APIC-table validation, capability and alias revocation, and
+exact scrub/release of all 32 pages or 131,072 bytes. Eighteen hostile-control
+categories cover 120 independently rejected cases and 130 kernel host tests
+pass. The exact kernel is 409,600 canonical bytes in a 458,752-byte, 112-page
+image with 959 relocations and SHA-256
+`6B8A9C2C3EAC559E1D9CB5965800A1671DB8F487F149861300D4EDCB279B3A11`.
+N8.6 is partial only. The capability is a fixed development token; the
+shootdown operation records transport but performs zero TLB invalidations,
+and call-function exposes no arbitrary callback. Real generation-bound remote
+invalidation and deferred reclaim, production capability authority, scheduler
+CPU ownership, multi-AP and live partial-start fault injection, target
+hardware, N8/N9 exit, release, and production remain open. The next
+owner-independent move is `N9-SMP-SHOOTDOWN-001`; PooleGlyph Phase 66 may
+proceed in parallel without outranking N0-N9.
+
+Cycle 137 reconciliation (superseding the historical Cycle 136 paragraph
+below): governance and external-key state are unchanged. The selected
+`hardware_fido2_ed25519_sk` device remains physically unavailable;
+`N0-HW-KEY-ACQUIRE-001` remains the blocked external move; and no key,
+signature, privileged-hardware, firmware, physical-media, publication,
+release, or production-promotion action occurred. The owner-independent
+`N8-SMP-PERCPU-RUNTIME-001` move closes only its bounded PKSMP2 lifecycle. On
+the frozen two-vCPU `SandyBridge,-avx` TCG profile, APIC ID 1 loads one
+processor-local GDT/TSS/IDT, guarded RSP0/IST1/IST2 stacks, x87/SSE owner
+state, eight exception gates, and nineteen owned interrupt gates. The
+32-page below-1-MiB transaction has thirteen mapped leaves, fourteen absent
+guards, and one absent reserved page. The BSP verifies the hardware-set busy
+TSS descriptor, all 27 gates, and one XSAVE/XRSTOR round trip before it
+commands quiescence, final-INIT parks the AP, revokes all aliases, zeroes and
+read-verifies 131,072 bytes, and releases all 32 pages. Two exact 42-marker
+runs, 19 hostile-control categories covering 159 independently rejected
+cases, and 122 kernel host tests pass. The exact kernel is 409,600 canonical
+bytes in a 458,752-byte, 112-page image with 919 relocations and SHA-256
+`214F32214494E632063238337551C355BFED150B9B49846DB8A927584B8E47F0`.
+N8.5 remains partial. General SMP, multi-AP startup, capability-gated IPI
+delivery and acknowledgement, TLB shootdown, scheduler CPU ownership, live
+partial-start fault injection, target hardware, N8 exit, release, and
+production remain open. The next owner-independent move is `N8-SMP-IPI-001`;
+PooleGlyph Phase 66 may proceed in parallel without outranking N0-N9.
+
+Cycle 136 reconciliation (superseding the historical Cycle 135 paragraph
+below): governance and external-key state are unchanged. The selected
+`hardware_fido2_ed25519_sk` device remains physically unavailable;
+`N0-HW-KEY-ACQUIRE-001` remains the blocked external move; and no key,
+signature, privileged-hardware, firmware, physical-media, publication,
+release, or production-promotion action occurred. The owner-independent
+`N8-SMP-FIRST-AP-001` move closes only its bounded PKSMP1 lifecycle. On a
+two-vCPU qemu64 profile, PooleKernel selects APIC ID 1 from the retained MADT,
+allocates fourteen pages below 1 MiB, installs four absent guards plus an RX
+16-to-32-to-64-bit trampoline and guarded RW/NX stack/mailbox, performs one
+INIT-SIPI-SIPI sequence, observes the AP online in long mode, commands stop,
+validates quiescence and the dynamic mailbox checksum, issues a final INIT
+park, revokes aliases, scrubs and verifies 57,344 bytes, and releases all
+fourteen pages. Two exact 38-marker runs, 72 hostile controls, and 111 kernel
+host tests pass. Live fault investigation found and fixed an RX-GDT accessed-
+bit write that had caused an AP page fault and triple fault; every trampoline
+descriptor is now pre-accessed. The exact kernel is 335,872 canonical bytes in
+a 376,832-byte, 92-page image with 855 relocations and SHA-256
+`6596CB332EB24813089F95A00AC979C892C47235943CB0E73E3979ED9901B725`.
+N8.5 is partial only. General SMP, AP-local GDT/TSS/IDT/RSP0/IST/xstate and
+interrupt state, multi-AP startup, IPIs, shootdown, live partial-start fault
+injection, target hardware, N8 exit, release, and production remain open. The
+next owner-independent move is `N8-SMP-PERCPU-RUNTIME-001`; PooleGlyph Phase 66
+may proceed in parallel without outranking N0-N9.
+
+Cycle 135 reconciliation (superseding the historical Cycle 134 paragraph
+below): governance and external-key state are unchanged. The selected
+`hardware_fido2_ed25519_sk` device remains physically unavailable;
+`N0-HW-KEY-ACQUIRE-001` remains the blocked external move; and no key,
+signature, privileged-hardware, firmware, physical-media, publication,
+release, or production-promotion action occurred. The owner-independent
+`N8-IRQ-001` move now has a bounded one-BSP implementation but remains open as
+an encompassing flag. PKIRQ1 walks the retained validated MADT and HPET
+descriptions, validates local-xAPIC identity, reserves 51 vectors, installs
+guarded uncacheable LAPIC/HPET mappings, masks and restores the legacy PIC,
+calibrates checked one-shot local-APIC time against HPET, and opens exactly
+eight interrupt windows. Two exact 36-marker qemu64 runs deliver eight timer
+interrupts and eight EOIs with zero APIC-error, spurious, or remaining ISR
+bits; normal completion restores APIC, HPET, PIC, IA32_APIC_BASE, and MMIO
+state. Ninety-nine kernel host tests and 58 hostile controls pass. The exact
+kernel is 323,584 canonical bytes in a 364,544-byte, 89-page image with 812
+relocations and SHA-256
+`2ACD4A5EF30CA1A4A22711FD31E2A259A5C87D97BCE7FB1BF49A3488B3FC02B2`.
+N8.1 and N8.3 are partial only. I/O APIC routing, MSI/MSI-X, complete time
+services, panic-path rollback, first-AP startup, per-CPU state, IPIs, SMP
+shootdown, target hardware, and N8 exit remain open. The next
+owner-independent move is `N8-SMP-FIRST-AP-001`; PooleGlyph Phase 66 may
+proceed in parallel without outranking N0-N9.
+
+Cycle 134 reconciliation (superseding the historical Cycle 133 paragraph
+below): governance and external-key state are unchanged. The selected
+`hardware_fido2_ed25519_sk` device is still physically unavailable; no key or
+signature exists; and `N0-HW-KEY-ACQUIRE-001` remains the blocked external
+move. No cryptographic, privileged-hardware, firmware, physical-media,
+publication, release, or production-promotion action occurred. The
+owner-independent `N9-VM-DIRECT-MAP-001` move is complete only within its
+bounded one-BSP scope. PKPMM7 reconstructs a generation-bound ownership
+manifest from every free extent and active non-release-excluded allocation,
+coalesces eleven exact write-back ranges, and excludes retained ownership.
+PKVM3 derives and audits a 243-table topology before activation, maps 117,887
+supervisor RW/NX pages, leaves 12,878 gap pages absent, and binds checksum
+`0x341CF729ADB26B52`. Forged manifests, retained-hole admission, PWT/PCD drift,
+partial writes, CR3 rollback, premature reuse, and absent or stale retirement
+receipts fail closed. Three local invalidation receipts gate the data frame;
+one exact root/generation/BSP/local-context-flush receipt gates table scrub and
+release. Ninety-one kernel host tests and two exact 40-marker qemu64 runs pass
+46 hostile controls with 367,474 physical table writes and 950,234 temporary-
+PTE writes and invalidations. The exact kernel is 299,008 canonical bytes in a
+339,968-byte, 83-page image with 729 relocations and SHA-256
+`5B581CC1D1ABEB163D0984D12144CA5016C44B46A28B190A6DFCBDCDA689A255`.
+N9 remains partial: PKVM3 deliberately rejects more than one active processor
+until AP startup, interrupt delivery, and real inter-processor shootdown exist;
+remote deferred reclaim, concurrent replacement, huge pages, PCID, COW, user
+faults, pager IPC, heaps, broad MMIO/cache policy, pressure/OOM, target
+hardware, and N9 exit remain open. `N8-IRQ-001` is the next owner-independent
+move; PooleGlyph Phase 66 may proceed in parallel without outranking N0-N9.
+
+Cycle 133 reconciliation (superseding the historical Cycle 132 paragraph
+below): the governance and external-key state is unchanged. The selected
+`hardware_fido2_ed25519_sk` device is still physically unavailable, no key or
+signature exists, and `N0-HW-KEY-ACQUIRE-001` remains the blocked external
+move. No cryptographic, privileged-hardware, firmware, physical-media,
+publication, release, or production-promotion action occurred. The
+owner-independent `N9-PMM-ACPI-CONSUMER-001` move is complete within its
+bounded one-BSP scope. PBLIVE4 adds one canonical ACPI2 RSDP record; PKACPI1
+validates RSDP/XSDT and exactly one APIC/FACP/HPET/MCFG table, copies and
+read-verifies 600 source bytes into a 616-byte release-excluded scrubbed
+snapshot, and supplies opaque evidence for the lifecycle transition.
+PKPMM7 then admits eleven ACPI reclaimable pages under a second immutable
+receipt while retaining the snapshot. Eighty-eight kernel host tests, two
+exact 45-marker qemu64 runs, and 191 hostile controls pass. Closeout found and
+fixed two real cross-stage contract defects: PKTRAP1 and PKVM2 still used a
+retired 14-page stack constant after PooleBoot had moved to 32 pages. Both now
+consume the shared 32-page geometry and their live profiles pass. The exact
+kernel is 299,008 canonical bytes in a 339,968-byte, 83-page image with 693
+relocations and SHA-256
+`D9EF9B10B56BF779B155BD18DE55853874CCC032D2A3E5E7841B918F08CDE1F2`.
+PKVM2 records 5,640 bootstrap writes and invalidations after the ACPI consumer
+is included. N9 remains partial: AML, full platform discovery, a complete
+generation-owned physical direct map, SMP shootdown/deferred reclaim,
+interrupt-context and concurrent allocation, heaps, pager, pressure/OOM,
+target hardware, and N9 exit remain open. The next owner-independent move is
+`N9-VM-DIRECT-MAP-001`; PooleGlyph Phase 66 may proceed in parallel without
+outranking N0-N9.
+
+Historical Cycle 132 reconciliation: the seven-record native constitution, public/private boundary, architecture baseline, and conformance policy remain partial evidence. The historical completed owner response directs ADR-0003, ADR-0004, and all 38 Workstation v1 definitions while accepting zero measurements. Rooke Poole selected `hardware_fido2_ed25519_sk`, reported no available key, accepted no software-key substitution, and deferred public-key publication at that time; that receipt remains immutable. The selected physical key is still unavailable, the trust store remains empty, and no key was generated or used. Standing Authority Amendment V2 permits ordinary repository and fully gated clean-merge work. Later owner authorization approves compatible-key acquisition, key generation/use, public-key publication, signing, secrets use, privileged probes, driver loading, firmware changes, physical-media writes, tags/releases, and production promotion as operation categories, but it does not supply the key, owner presence, custody/recovery procedure, backups, recovery media, a separately identified safe target, qualified mechanisms, passing release evidence, or permission to bypass this charter. None of those operation categories were exercised in Cycle 132. `N0-HW-KEY-ACQUIRE-001` remains the blocked external move. PooleGlyph remains at the Phase 65/66 boundary with its existing generated-report change preserved and no policy authority inferred from metadata. Cycles 97-131 qualify bounded unsigned boot through PKPMM5 explicit ledger growth and one PKVM2 active-root transaction without production promotion. Cycle 132 closes only the bounded serial scope of `FLAG-N9-PMM-GROWTH-AUTOMATION-001`: selector-8 PKPMM6 checks exact post-operation demand before every automatic scrubbed allocate/free, reserves one allocation and four scrub-receipt slots for complete failed-growth rollback and retry, and grows all active ledgers through 4/8/15/29-page generations with final capacities 2048/256/2048/128/16. Three predecessors totaling 27 pages are revoked, zeroed, read-verified, and retired. The measured sequence records 121 pressure checks, eight triggers, three automatic growths, sixty successful cycles, and four soft fallbacks; a host test proves one hard rejection before physical reads/writes, ownership changes, or receipt commitment because the required 58-page next layout exceeds a bounded 32-page window. An independent Python oracle reconstructs all first-fit generations, alternating windows, retired holes, ownership, pressure counters, reclaim coalescing, and physical access counts. Two exact fresh-vars qemu64 runs emit 43 markers and pass 147 hostile controls plus 84 kernel host tests. They manage 117,911 source-usable and 129,160 final pages, keep eleven ACPI pages held, protect 833 loader pages, scrub and verify 11,462 pages and 46,948,352 bytes, and perform 5,869,568 physical writes, 5,870,592 reads, and 22,798 temporary-PTE writes and invalidations. Growth checksum `0xF7AD111CA266071D` binds the sequence. The retained-layout shift rebinds PKVM2 to 5,560 temporary writes and invalidations. Closeout also fixes and directly guards an identity split so PKMID1 and the live diagnostic both carry `PKBUILD1-CYCLE132-N9-PMM-GROWTH-AUTOMATION-001`. The dependent kernel identity is 278,528 canonical bytes, 319,488 image bytes, and 78 pages with 667 relocations and SHA-256 `CDF33067B2421550BB03A4796FF9A92AE54D40B2575188632BF2C208449B882E`. N9.1-N9.4 remain partial. Complete ACPI consumer integration, complete direct-map and SMP TLB policy, deferred reclaim, huge pages, PCID, COW, user faults, pager IPC, heaps/object caches, MMIO/cache qualification, interrupt-context/concurrent allocation, general pressure/OOM policy, target hardware, N9 exit, trust, persistent state, framebuffer, N4-N8, userspace, drivers, filesystems, PooleGlass, installer, signed ISO, and production gates remain open. `N9-PMM-ACPI-CONSUMER-001` is the next owner-independent move, while PooleGlyph Phase 66 may advance in parallel without outranking N0-N9.
+
+The preceding Cycle 132-136 reconciliations are retained as historical
+evidence; the Cycle 137 reconciliation at the head of this charter is
+authoritative.
 
 ## 1. Objective
 
@@ -180,7 +356,20 @@ For every promoted requirement:
 - distinguish normative conformance, tested behavior, observed behavior, hypothesis, research, and unsupported behavior;
 - require independent reproduction where the Build Plan or release profile says so.
 
-## 11. Per-Turn Next-Best-Move Loop
+## 11. Standing Execution Authority
+
+Standing Authority Amendment V2 authorizes Codex to:
+
+- read, edit, build, test, document, commit, branch, push, and manage pull requests, issues, labels, milestones, project metadata, and draft release material needed by this charter;
+- install hash-pinned non-administrative tools under a dedicated PooleOS tools directory without changing global `PATH` or system-wide configuration, while recording source, version, hash, license, and provenance;
+- run read-only unprivileged hardware and operating-system inventory commands;
+- create or strengthen GitHub Actions, rulesets, required checks, branch protections, vulnerability reporting, and repository security controls;
+- mark a Codex-authored draft PR ready and merge it, including into `main`, only when the exact candidate passes the canonical qualification suite, publication-boundary scan, release gate, all configured required GitHub checks, clean-merge check, and review gates, with no blocking review request or unresolved thread;
+- merge into non-default `agent/*` integration branches and delete only Codex-created remote `agent/*` branches after merge.
+
+Codex may not force-push, bypass protections, rewrite shared history, delete `main` or a user-created branch, weaken governance, alter repository visibility/ownership/billing, expose secrets, or treat an ordinary permitted merge as production promotion. A later Cycle 118 owner statement, reaffirmed before Cycle 124 closeout, supplies explicit categorical authorization to acquire a compatible FIDO2 key; generate/use the selected key; publish its public key; sign; use secrets without exposing them; run privileged probes; load drivers; change firmware; write physical media; publish tags/releases; and promote production. These are permissions, not evidence or instructions to act immediately. Key work still requires the selected physical device, owner presence, reviewed custody and recovery, exact fingerprint review, and no private-material disclosure. Privileged, driver, firmware, disk, media, boot, TPM, device, and installation work still requires a bounded reviewed mechanism, verified backups and recovery media where applicable, a separately identified safe target, stop conditions, and retained evidence. Tag/release publication or production promotion still requires every charter release gate to pass for the exact bytes. No newly authorized cryptographic, privileged-hardware, mutating, publication, release, or promotion action occurred through Cycle 137; Cycles 132-137 used only host builds and non-promoting virtual-machine execution. Historical owner packets and receipts remain immutable records of the authority that existed when they were created.
+
+## 12. Per-Turn Next-Best-Move Loop
 
 Every active goal turn must:
 
@@ -199,7 +388,7 @@ Every active goal turn must:
 
 Architecture work N0-N5 outranks downstream optimization while those foundations remain unclosed. PDC signed dynamics and the PooleGlyph machine-language lane beginning with Phase 66 may proceed in parallel but cannot substitute for native boot progress.
 
-## 12. Phase Contract
+## 13. Phase Contract
 
 The authoritative completion range is `N0-N39`.
 
@@ -213,7 +402,7 @@ The authoritative completion range is `N0-N39`.
 
 A phase may be marked complete only when every mapped required item and applicable research addition passes its Build Plan exit gate with immutable evidence.
 
-## 13. Bootable ISO Contract
+## 14. Bootable ISO Contract
 
 The production `.iso` is UEFI-native and PooleOS-owned. It must define and verify:
 
@@ -227,7 +416,7 @@ The production `.iso` is UEFI-native and PooleOS-owned. It must define and verif
 - independent reproducibility, signatures, checksums, SBOM, provenance, source, support matrix, limitations, and release receipt;
 - proof that tested and signed ISO bytes are the distributed ISO bytes.
 
-## 14. Completion Gate
+## 15. Completion Gate
 
 Do not mark this goal complete until all of the following are true for the exact supported release profile:
 

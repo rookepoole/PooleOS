@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-boot-exit-contract.schema.json",
+  "title": "PooleOS PBEXIT1 contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "contract_id",
+    "selected_move_id",
+    "status_date",
+    "status",
+    "production_ready",
+    "production_promotion_allowed",
+    "phase_mapping",
+    "source_requirement_ids",
+    "preconditions",
+    "attempt_protocol",
+    "post_success_boundary",
+    "required_negative_controls",
+    "claims",
+    "claim_boundary",
+    "official_references"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_boot_exit_contract"},
+    "contract_id": {"const": "PBEXIT1"},
+    "selected_move_id": {"const": "N5-HANDOFF-001"},
+    "status_date": {"const": "2026-07-17"},
+    "status": {"const": "bounded_exit_boot_services_success_and_permanent_pre_transfer_stop_non_promoting"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "phase_mapping": {"const": ["N5.5", "N5.8"]},
+    "source_requirement_ids": {"const": ["013", "014", "015", "ADD-BOOT-001"]},
+    "preconditions": {"type": "object", "additionalProperties": true},
+    "attempt_protocol": {
+      "type": "object",
+      "required": ["maximum_attempts", "retryable_status", "fresh_get_memory_map_required_after_retry", "return_to_uefi_after_first_attempt_allowed", "allocation_between_final_map_and_exit_allowed"],
+      "properties": {
+        "maximum_attempts": {"const": 4},
+        "retryable_status": {"const": "EFI_INVALID_PARAMETER"},
+        "fresh_get_memory_map_required_after_retry": {"const": true},
+        "return_to_uefi_after_first_attempt_allowed": {"const": false},
+        "allocation_between_final_map_and_exit_allowed": {"const": false}
+      }
+    },
+    "post_success_boundary": {
+      "type": "object",
+      "required": ["boot_services_calls_allowed", "kernel_entry_called", "transfer_allowed", "terminal_state"],
+      "properties": {
+        "boot_services_calls_allowed": {"const": false},
+        "kernel_entry_called": {"const": false},
+        "transfer_allowed": {"const": false},
+        "terminal_state": {"const": "interrupts disabled and CPU halted before transfer"}
+      }
+    },
+    "required_negative_controls": {"type": "array", "minItems": 11, "maxItems": 11, "uniqueItems": true, "items": {"type": "string"}},
+    "claims": {"type": "object", "additionalProperties": {"type": "boolean"}, "minProperties": 11, "maxProperties": 11},
+    "claim_boundary": {"type": "array", "minItems": 6, "items": {"type": "string"}},
+    "official_references": {"type": "array", "minItems": 3, "items": {"type": "string", "format": "uri"}}
+  }
+}

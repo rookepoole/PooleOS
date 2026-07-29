@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_boot_digest_provider",
+  "contract_id": "PBDIGEST1",
+  "status": "candidate_pre_security_review_non_promoting",
+  "production_ready": false,
+  "algorithm": {
+    "name": "SHA-256",
+    "digest_bytes": 32,
+    "manifest_encoding": "64 uppercase hexadecimal characters",
+    "normative_reference": "NIST FIPS 180-4"
+  },
+  "provider": {
+    "project": "RustCrypto hashes",
+    "repository": "https://github.com/RustCrypto/hashes",
+    "crate": "sha2",
+    "version": "0.11.0",
+    "crate_sha256": "446BA717509524CB3F22F17ECC096F10F4822D76AB5C0B9822C5F9C284E825F4",
+    "license_expression": "MIT OR Apache-2.0",
+    "minimum_rust_version": "1.85",
+    "vendored_root": "native/vendor",
+    "uefi_backend": "soft_compact",
+    "reproducible_source_prefix": "/pooleos/native",
+    "default_features": false
+  },
+  "locked_packages": [
+    {"name": "block-buffer", "version": "0.12.1", "crate_sha256": "D2F6C7DBE95A6ED67AD9F18E57DAF93A2F034C524B99FD2B76D18FDFEB6660AA"},
+    {"name": "cfg-if", "version": "1.0.4", "crate_sha256": "9330F8B2FF13F34540B44E946EF35111825727B38D33286EF986142615121801"},
+    {"name": "cpufeatures", "version": "0.3.0", "crate_sha256": "8B2A41393F66F16B0823BB79094D54AC5FBD34AB292DDAFB9A0456AC9F87D201"},
+    {"name": "crypto-common", "version": "0.2.2", "crate_sha256": "CE6E4C961D6CD6C9A86DB418387425E8BDEAF05B3C8BC1411E6DCA4C252F1453"},
+    {"name": "digest", "version": "0.11.3", "crate_sha256": "F1DD6DBB5841937940781866FA1281A1FF7BD3BF827091440879F9994983D5C2"},
+    {"name": "hybrid-array", "version": "0.4.13", "crate_sha256": "818356C5132C1FEDE50F837CA96AFBE78FF42413047F4ABB886217845E1B6C8C"},
+    {"name": "libc", "version": "0.2.186", "crate_sha256": "68AB91017FE16C622486840E4C83C9A37AFEFF978BD239B5293D61ECE587DE66"},
+    {"name": "sha2", "version": "0.11.0", "crate_sha256": "446BA717509524CB3F22F17ECC096F10F4822D76AB5C0B9822C5F9C284E825F4"},
+    {"name": "typenum", "version": "1.20.1", "crate_sha256": "B6F5E870BE6C3B371B77FE0EE0BAFB859FA4964B4404C27DE1D380043C4DDA20"}
+  ],
+  "qualification": {
+    "offline_locked_build_required": true,
+    "vendored_checksum_files_required": true,
+    "standard_vectors_required": true,
+    "independent_python_hashlib_agreement_required": true,
+    "artifact_digest_mutation_rejection_required": true,
+    "absolute_source_path_remapping_required": true,
+    "security_review_complete": false,
+    "provider_promotion_allowed": false
+  },
+  "claim_boundary": [
+    "RustCrypto SHA-256 is used instead of a newly designed PooleOS hash algorithm.",
+    "Vendoring and vector agreement establish reproducible development inputs, not an independent cryptographic security review.",
+    "Digest agreement detects byte drift only after a trusted manifest exists; this cycle has no manifest signature or trust anchor.",
+    "Secure Boot, revocation, minimum-version state, measured boot, TPM policy, target firmware, and production acceptance remain open."
+  ]
+}

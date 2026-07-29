@@ -28,13 +28,13 @@
     "build_inputs": [
       {
         "path": "native/Cargo.toml",
-        "sha256": "8FAE196869B772D7CD4600412A134FB549B2677E2837DD115C862DB7485C6246",
-        "byte_count": 308
+        "sha256": "210BCDAF2778606B42C688E7BACD950FC0EEF3045081E884CF7846B9A7D78DF4",
+        "byte_count": 601
       },
       {
         "path": "native/Cargo.lock",
-        "sha256": "81B1D5B6368BEFCFB013B66C2E411E76ECF20CCADE8ABEEAD0528FD2AFB3AD4E",
-        "byte_count": 221
+        "sha256": "29CE9938C5C60DEA5AEA244A6961BB1924D88AEC601D1E02EAAA510B0B36E390",
+        "byte_count": 4193
       },
       {
         "path": "native/rust-toolchain.toml",
@@ -43,26 +43,26 @@
       },
       {
         "path": "native/.cargo/config.toml",
-        "sha256": "98D1AD53467848CFE31349BE720C58CC1432570F5564FA9B8F727482BBBD2A23",
-        "byte_count": 363
+        "sha256": "7983881C5CAD2B909CCA64BFA7F5895EC56377B0E52967444CB2818A69FA4FE1",
+        "byte_count": 539
       },
       {
-        "path": "native/boot/Cargo.toml",
+        "path": "native/fixtures/pooleboot/Cargo.toml",
         "sha256": "537AD7C57F0C8C26600162D2B3C94D2FDEC2989EF971C8A0445AFAA62CAF6D53",
         "byte_count": 214
       },
       {
-        "path": "native/boot/src/main.rs",
+        "path": "native/fixtures/pooleboot/src/main.rs",
         "sha256": "18C9762993BC10303596B944FAEEB113457288D263D62F36692367716AABA890",
         "byte_count": 404
       },
       {
-        "path": "native/kernel/Cargo.toml",
+        "path": "native/fixtures/poolekernel/Cargo.toml",
         "sha256": "6D0DDE25F74DEEEDA7794077273B85A4A8B099E73C68939C686173716D20FF46",
         "byte_count": 218
       },
       {
-        "path": "native/kernel/src/main.rs",
+        "path": "native/fixtures/poolekernel/src/main.rs",
         "sha256": "C211A93BF7EDF8CCFC1E1EBBF03063825D63AC52A330A71F41CD43D27664CFD7",
         "byte_count": 349
       },
@@ -78,8 +78,8 @@
       },
       {
         "path": "tools/qualify_native_toolchain.py",
-        "sha256": "BDDB5483C649AF1CC905684198CD9DCE3F67E1F30FDBE37DC727E85A945FC2CD",
-        "byte_count": 16610
+        "sha256": "8C9F975F483DF6CF3337475EAE9D777BF707B52C1E719C4BA5FFD7BFAEDF63F1",
+        "byte_count": 16666
       }
     ]
   },

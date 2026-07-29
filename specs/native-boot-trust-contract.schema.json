@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "contract_id",
+    "version",
+    "status",
+    "selected_move",
+    "phase_mapping",
+    "formats",
+    "profiles",
+    "object_separation",
+    "backend_contract",
+    "authority_equation",
+    "policy_error_order",
+    "state_error_order",
+    "authorization_error_order",
+    "backend_error_order",
+    "qualification",
+    "claims",
+    "non_claims",
+    "primary_references",
+    "implementation_bindings"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "artifact_kind": {"const": "pooleos_native_boot_trust_contract"},
+    "contract_id": {"const": "PBTRUST1"},
+    "version": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["major", "minor"],
+      "properties": {
+        "major": {"const": 1},
+        "minor": {"const": 0}
+      }
+    },
+    "status": {"const": "development_fail_closed"},
+    "selected_move": {"const": "N5-INNER-TRUST-BACKEND-001"},
+    "phase_mapping": {
+      "const": ["N5.1", "N5.4", "N5.5", "N5.8", "N5.9"]
+    },
+    "formats": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_magic", "state_magic", "policy_bytes", "state_bytes", "policy_body_bytes", "state_body_bytes", "signature_capacity", "artifact_role_mask", "maximum_signers", "copy_count", "commit_complete"],
+      "properties": {
+        "policy_magic": {"const": "PBTP1"},
+        "state_magic": {"const": "PBTS1"},
+        "policy_bytes": {"const": 320},
+        "state_bytes": {"const": 256},
+        "policy_body_bytes": {"const": 224},
+        "state_body_bytes": {"const": 224},
+        "signature_capacity": {"const": 64},
+        "artifact_role_mask": {"const": 127},
+        "maximum_signers": {"const": 8},
+        "copy_count": {"const": 2},
+        "commit_complete": {"const": 1}
+      }
+    },
+    "profiles": {"type": "object"},
+    "object_separation": {"type": "object"},
+    "backend_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_id", "logical_digest_domain", "anchor_fields", "selection_rule", "transition_steps", "power_loss_case_count", "model_only"],
+      "properties": {
+        "contract_id": {"const": "PBSTATE1"},
+        "logical_digest_domain": {"const": "POOLEOS/PBTS1/LOGICAL/V1"},
+        "anchor_fields": {"const": ["authenticated", "monotonic", "state_generation", "store_epoch", "auth_profile", "logical_state_sha256", "previous_state_sha256"]},
+        "selection_rule": {"type": "string", "minLength": 40},
+        "transition_steps": {"const": ["write_target_uncommitted", "flush_target_data", "write_target_commit_and_authentication", "flush_target_commit", "advance_monotonic_anchor", "verify_monotonic_anchor", "repair_other_copy", "flush_repaired_copy", "verify_redundant_copies"]},
+        "power_loss_case_count": {"const": 9},
+        "model_only": {"const": true}
+      }
+    },
+    "authority_equation": {"type": "string", "minLength": 20},
+    "policy_error_order": {"type": "array", "minItems": 11, "uniqueItems": true, "items": {"type": "string", "pattern": "^pbtrust_policy_"}},
+    "state_error_order": {"type": "array", "minItems": 12, "uniqueItems": true, "items": {"type": "string", "pattern": "^pbtrust_state_"}},
+    "authorization_error_order": {"type": "array", "minItems": 24, "uniqueItems": true, "items": {"type": "string", "pattern": "^pbtrust_"}},
+    "backend_error_order": {"type": "array", "minItems": 14, "uniqueItems": true, "items": {"type": "string", "pattern": "^pbtrust_backend_"}},
+    "qualification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_parser_cases", "state_parser_cases", "authorization_cases", "backend_selection_cases", "power_loss_cases", "negative_control_count"],
+      "properties": {
+        "policy_parser_cases": {"const": 8192},
+        "state_parser_cases": {"const": 8192},
+        "authorization_cases": {"const": 8192},
+        "backend_selection_cases": {"const": 8192},
+        "power_loss_cases": {"const": 9},
+        "negative_control_count": {"const": 105}
+      }
+    },
+    "claims": {"type": "object"},
+    "non_claims": {"type": "array", "minItems": 7, "items": {"type": "string"}},
+    "primary_references": {"type": "array", "minItems": 4, "items": {"type": "string", "format": "uri"}},
+    "implementation_bindings": {"type": "array", "minItems": 16, "maxItems": 16, "items": {"$ref": "#/$defs/binding"}}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "byte_count", "sha256"],
+      "properties": {
+        "path": {"type": "string"},
+        "byte_count": {"type": "integer", "minimum": 1},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

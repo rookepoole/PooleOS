@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-symbol-golden-vectors.schema.json",
+  "title": "PooleOS PSYM1 golden vectors",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "contract_id", "status", "production_ready", "vectors", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_symbol_golden_vectors"},
+    "contract_id": {"const": "PSYM1"},
+    "status": {"const": "synthetic_non_promoting_golden_bytes"},
+    "production_ready": {"const": false},
+    "vectors": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "purpose", "bundle_byte_count", "bundle_sha256", "summary", "lookup_samples", "bundle_hex"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^PSYM1-"},
+          "purpose": {"type": "string"},
+          "bundle_byte_count": {"type": "integer", "minimum": 385, "maximum": 524288},
+          "bundle_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+          "summary": {"type": "object"},
+          "lookup_samples": {
+            "type": "array",
+            "minItems": 4,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["runtime_base", "runtime_address", "result"],
+              "properties": {
+                "runtime_base": {"type": "integer", "minimum": 0},
+                "runtime_address": {"type": "integer", "minimum": 0},
+                "result": {"type": "string"}
+              }
+            }
+          },
+          "bundle_hex": {"type": "string", "pattern": "^[0-9A-F]+$"}
+        }
+      }
+    },
+    "claim_boundary": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "string"}}
+  }
+}

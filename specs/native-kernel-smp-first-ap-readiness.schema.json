@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-kernel-smp-first-ap-readiness.schema.json",
+  "title": "PooleOS PKSMP1 readiness",
+  "type": "object",
+  "required": ["schema_version", "artifact_kind", "status_date", "status", "contract_id", "selected_move_id", "production_ready", "production_promotion_allowed", "n8_exit_gate_satisfied", "flag_n8_smp_first_ap_001_closed", "phase_status", "inputs", "build", "media", "execution", "negative_controls", "claims", "non_claims", "summary", "open_items"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_smp_first_ap_readiness"},
+    "status_date": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+    "status": {"const": "pass_single_host_two_run_qemu64_two_vcpu_first_ap_non_promoting"},
+    "contract_id": {"const": "PKSMP1"},
+    "selected_move_id": {"const": "N8-SMP-FIRST-AP-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "n8_exit_gate_satisfied": {"const": false},
+    "flag_n8_smp_first_ap_001_closed": {"const": true},
+    "phase_status": {"type": "object"},
+    "inputs": {"type": "object"},
+    "build": {"type": "object"},
+    "media": {"type": "object", "required": ["clean_generation_count", "exact_clean_generation_match", "physical_media_write_performed"], "properties": {"clean_generation_count": {"const": 2}, "exact_clean_generation_match": {"const": true}, "physical_media_write_performed": {"const": false}}},
+    "execution": {
+      "type": "object",
+      "required": ["run_count", "virtual_cpu_count", "static_markers_exact_match", "dynamic_tsc_and_checksum_fields_revalidated", "exact_screenshot_match", "exact_pbp1_match", "runs", "observation"],
+      "properties": {
+        "run_count": {"const": 2},
+        "virtual_cpu_count": {"const": 2},
+        "static_markers_exact_match": {"const": true},
+        "dynamic_tsc_and_checksum_fields_revalidated": {"const": true},
+        "exact_screenshot_match": {"const": true},
+        "exact_pbp1_match": {"const": true},
+        "runs": {"type": "array", "minItems": 2, "maxItems": 2},
+        "observation": {"type": "object"}
+      }
+    },
+    "negative_controls": {"type": "array", "minItems": 72, "maxItems": 72, "items": {"type": "object", "required": ["id", "status", "expected"], "properties": {"id": {"type": "string"}, "status": {"const": "pass"}, "expected": {"const": "rejected"}}}},
+    "claims": {"type": "object"},
+    "non_claims": {"type": "array", "minItems": 6, "items": {"type": "string"}},
+    "summary": {"type": "object", "required": ["application_processors_started", "application_processors_online", "application_processors_quiesced", "application_processors_parked", "verified_bytes", "production_claim_count"], "properties": {"application_processors_started": {"const": 1}, "application_processors_online": {"const": 1}, "application_processors_quiesced": {"const": 1}, "application_processors_parked": {"const": 1}, "verified_bytes": {"const": 57344}, "production_claim_count": {"const": 0}}},
+    "open_items": {"type": "array", "minItems": 6, "items": {"type": "string"}}
+  }
+}

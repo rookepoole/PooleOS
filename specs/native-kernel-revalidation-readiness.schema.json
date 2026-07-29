@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-kernel-revalidation-readiness.schema.json",
+  "title": "PooleOS PKREVAL1 retained-byte qualification readiness",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "status",
+    "contract_id",
+    "selected_move_id",
+    "production_ready",
+    "production_promotion_allowed",
+    "inputs",
+    "build",
+    "golden",
+    "negative_controls",
+    "differential",
+    "claims",
+    "non_claims",
+    "open_items"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_revalidation_readiness"},
+    "status": {"const": "pass_single_host_fail_closed_non_promoting"},
+    "contract_id": {"const": "PKREVAL1"},
+    "selected_move_id": {"const": "N5-INNER-KERNEL-REVALIDATE-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "negative_controls": {"type": "array", "minItems": 36},
+    "differential": {
+      "type": "object",
+      "required": ["case_count", "reject_count", "expected_file_digest_count", "role_coverage", "outcome_fnv1a64"],
+      "properties": {
+        "case_count": {"const": 32768},
+        "reject_count": {"const": 32768},
+        "expected_file_digest_count": {"const": 32768},
+        "role_coverage": {"const": 9}
+      }
+    }
+  }
+}

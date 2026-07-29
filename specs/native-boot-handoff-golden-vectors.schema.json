@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-boot-handoff-golden-vectors.schema.json",
+  "title": "PooleOS PBP1 golden byte vectors",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "contract_id", "status", "production_ready", "vectors", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_boot_handoff_golden_vectors"},
+    "contract_id": {"const": "PBP1"},
+    "status": {"const": "synthetic_non_promoting_golden_bytes"},
+    "production_ready": {"const": false},
+    "vectors": {
+      "type": "array", "minItems": 3, "maxItems": 3,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "purpose", "writer_major", "writer_minor", "minimum_reader_minor", "record_count", "byte_count", "sha256", "kernel_entry_profile", "hex"],
+        "properties": {
+          "id": {"type": "string"}, "purpose": {"type": "string"}, "writer_major": {"const": 1}, "writer_minor": {"type": "integer"}, "minimum_reader_minor": {"type": "integer"}, "record_count": {"type": "integer"}, "byte_count": {"type": "integer"}, "sha256": {"type": "string"}, "kernel_entry_profile": {"type": "boolean"}, "hex": {"type": "string"}
+        }
+      }
+    },
+    "claim_boundary": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "string"}}
+  }
+}

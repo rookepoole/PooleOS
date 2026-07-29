@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "contract_id", "vectors"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "artifact_kind": {"const": "pooleos_native_firmware_golden_vectors"},
+    "contract_id": {"const": "PFWM1"},
+    "vectors": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "hex", "sha256", "summary"],
+        "properties": {
+          "id": {"enum": ["canonical", "minimal", "boundary"]},
+          "hex": {"type": "string", "pattern": "^[0-9A-F]+$"},
+          "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+          "summary": {"type": "object"}
+        }
+      }
+    }
+  }
+}

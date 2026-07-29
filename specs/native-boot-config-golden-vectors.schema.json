@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-boot-config-golden-vectors.schema.json",
+  "title": "PooleOS PBC1 golden vectors",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "contract_id", "status", "production_ready", "vectors", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_boot_config_golden_vectors"},
+    "contract_id": {"const": "PBC1"},
+    "status": {"const": "synthetic_non_promoting_golden_bytes"},
+    "production_ready": {"const": false},
+    "vectors": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "purpose", "entry_count", "byte_count", "sha256", "summary", "hex"],
+        "properties": {
+          "id": {"type": "string"},
+          "purpose": {"type": "string"},
+          "entry_count": {"type": "integer", "minimum": 1, "maximum": 8},
+          "byte_count": {"type": "integer", "minimum": 1, "maximum": 16384},
+          "sha256": {"type": "string", "pattern": "^[A-F0-9]{64}$"},
+          "summary": {"type": "string", "pattern": "^OK;"},
+          "hex": {"type": "string", "pattern": "^[A-F0-9]+$"}
+        }
+      }
+    },
+    "claim_boundary": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "string"}}
+  }
+}

@@ -1,0 +1,21 @@
+[package]
+name = "poole-handoff"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+publish.workspace = true
+
+[lib]
+name = "poole_handoff"
+path = "src/lib.rs"
+
+[features]
+default = []
+host-probe = []
+
+[[bin]]
+name = "pbp1-probe"
+path = "src/bin/pbp1_probe.rs"
+required-features = ["host-probe"]
+
+[dependencies]

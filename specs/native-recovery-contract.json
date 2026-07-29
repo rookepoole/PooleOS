@@ -1,0 +1,142 @@
+{
+  "activation_preconditions": [
+    "outer role, version, payload digest, and file digest match",
+    "outer, inner, and manifest signatures verify",
+    "state authentication and monotonic generation verify",
+    "version floor is durably persisted",
+    "manifest and recovery components verify",
+    "PBP1 and PooleKernel ABI versions match",
+    "offline path is available with PDC disabled",
+    "recovery is independent of PooleGlyph",
+    "serial or GOP/software display path is available",
+    "transaction capacity and evidence preservation are ready",
+    "rollback is available and authenticated state is writable"
+  ],
+  "artifact_kind": "pooleos_native_recovery_contract",
+  "authority_policy": {
+    "ambient_firmware_raw_disk_network_prohibited": true,
+    "declarative_only": true,
+    "ordered_authorities": [
+      "inspect",
+      "export_evidence",
+      "select_fallback",
+      "request_reboot",
+      "unlock_encrypted_volume",
+      "repair",
+      "reinstall"
+    ],
+    "repair_and_reinstall_require": [
+      "physical_presence",
+      "operator_authentication",
+      "verified_backup",
+      "verified_signature"
+    ]
+  },
+  "claim_boundary": [
+    "PREC1 is not owner-ratified or a stable ABI.",
+    "Policy and state parsers run on the host; PooleBoot and PooleKernel do not enforce PREC1.",
+    "The 16-byte state checksum is corruption detection, not authentication or anti-rollback storage.",
+    "Authority records are requirements and never capability grants.",
+    "No UEFI variable, firmware setting, driver, or physical disk is modified.",
+    "No recovery component is loaded or executed.",
+    "No key is generated or used and no artifact is signed.",
+    "Synthetic qualification cannot authorize production promotion.",
+    "Recovery UI and installer workflows remain unimplemented."
+  ],
+  "contract_id": "PREC1",
+  "encoding": {
+    "body_digest": "SHA-256",
+    "byte_order": "little_endian",
+    "header_bytes": 256,
+    "policy_bytes": 992,
+    "record_alignment": 8,
+    "state_bytes": 128,
+    "state_checksum": "truncated_SHA-256_first_16_bytes_not_authentication"
+  },
+  "failure_policy": {
+    "actions": [
+      "retry_candidate",
+      "safe",
+      "previous",
+      "recovery",
+      "firmware",
+      "halt"
+    ],
+    "evidence_preserved": true,
+    "ordered_failure_ids": [
+      "config_invalid",
+      "state_invalid",
+      "signature_invalid",
+      "version_rollback",
+      "artifact_integrity",
+      "kernel_entry",
+      "initial_health_timeout",
+      "attempt_exhausted",
+      "known_good_runtime",
+      "operator_request"
+    ],
+    "safe_attempts_per_slot": 1
+  },
+  "policy_tables": {
+    "authorities": {
+      "count": 7,
+      "offset": 768,
+      "record_bytes": 32
+    },
+    "failures": {
+      "count": 10,
+      "offset": 448,
+      "record_bytes": 32
+    },
+    "slots": {
+      "count": 2,
+      "offset": 256,
+      "record_bytes": 96
+    }
+  },
+  "production_claims": {
+    "attempt_decrement_before_handoff_modeled": true,
+    "destructive_authority_requires_physical_presence": true,
+    "development_activation_denied": true,
+    "known_good_fallback_modeled": true,
+    "mutable_state_format_frozen": true,
+    "parsing_confers_authority": false,
+    "physical_disk_write_performed": false,
+    "policy_format_frozen": true,
+    "pooleboot_enforces_prec1": false,
+    "poolekernel_executes_recovery": false,
+    "production_ready": false,
+    "recovery_authority_granted": false,
+    "safe_loop_bounded": true,
+    "state_checksum_is_authentication": false,
+    "uefi_variable_io_implemented": false
+  },
+  "production_ready": false,
+  "research_basis": [
+    "https://uefi.org/specs/UEFI/2.11/03_Boot_Manager.html",
+    "https://source.android.com/docs/core/ota/ab",
+    "https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/android16-qpr2-release/boot/1.0/IBootControl.hal",
+    "https://theupdateframework.github.io/specification/v1.0.26/",
+    "https://www.chromium.org/chromium-os/chromiumos-design-docs/filesystem-autoupdate/",
+    "https://www.chromium.org/chromium-os/developer-library/reference/device/disk-format/"
+  ],
+  "schema_version": "1.0",
+  "slot_policy": {
+    "attempts_decremented_before_handoff": true,
+    "candidate_never_overwrites_known_good": true,
+    "fallback_requires_eligible_known_good_at_or_above_floor": true,
+    "slot_ids": [
+      1,
+      2
+    ],
+    "success_requires_authenticated_matching_receipt": true
+  },
+  "state_policy": {
+    "external_authentication_required": true,
+    "file_fallback_may_never_carry_security_state": true,
+    "monotonic_generation_required": true,
+    "state_write_failure_action": "recovery",
+    "uefi_variable_transport_frozen": false
+  },
+  "status": "candidate_pre_abi_non_promoting"
+}

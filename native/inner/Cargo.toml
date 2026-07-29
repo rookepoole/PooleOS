@@ -1,0 +1,25 @@
+[package]
+name = "poole-inner-live"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+publish.workspace = true
+
+[features]
+default = []
+host-probe = []
+
+[[bin]]
+name = "pinner1-probe"
+path = "src/bin/pinner1_probe.rs"
+required-features = ["host-probe"]
+
+[dependencies]
+poole-boot-artifact = { path = "../artifact" }
+poole-firmware = { path = "../firmware" }
+poole-initial-system = { path = "../initsys" }
+poole-microcode = { path = "../microcode" }
+poole-policy = { path = "../policy" }
+poole-recovery = { path = "../recovery" }
+poole-symbols = { path = "../symbols" }
+sha2 = { version = "=0.11.0", default-features = false }

@@ -43,15 +43,16 @@
     "execution_protocol": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["updates_required_each_goal_turn", "inspect_live_pooleglyph_each_turn", "verify_master_checklist_coverage_each_turn", "new_work_must_be_flagged", "last_updated_cycle", "selected_move_id", "immediate_next_move_id", "required_records", "flag_classes"],
+      "required": ["updates_required_each_goal_turn", "inspect_live_pooleglyph_each_turn", "verify_master_checklist_coverage_each_turn", "new_work_must_be_flagged", "last_updated_cycle", "selected_move_id", "immediate_next_move_id", "owner_independent_next_move_id", "required_records", "flag_classes"],
       "properties": {
         "updates_required_each_goal_turn": {"const": true},
         "inspect_live_pooleglyph_each_turn": {"const": true},
         "verify_master_checklist_coverage_each_turn": {"const": true},
         "new_work_must_be_flagged": {"const": true},
-        "last_updated_cycle": {"const": 93},
-        "selected_move_id": {"const": "N0-OWNER-RESPONSE-001"},
+        "last_updated_cycle": {"const": 139},
+        "selected_move_id": {"const": "N8-SMP-IPI-001"},
         "immediate_next_move_id": {"const": "N0-HW-KEY-ACQUIRE-001"},
+        "owner_independent_next_move_id": {"const": "N9-SMP-SHOOTDOWN-001"},
         "required_records": {"type": "array", "minItems": 7, "items": {"type": "string"}, "uniqueItems": true},
         "flag_classes": {"type": "array", "minItems": 8, "items": {"type": "string"}, "uniqueItems": true}
       }
@@ -71,7 +72,7 @@
         "coverage_path": {"const": "runs/pooleos_native_checklist_coverage.json"},
         "coverage_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
         "coverage_status": {"const": "pass"},
-        "added_requirement_count": {"const": 32}
+        "added_requirement_count": {"const": 47}
       }
     },
     "baseline": {"type": "object", "required": ["pooleos_cycle", "entry_cycle", "pooleos_test_count", "historical_consistency_release_gate", "native_consistency_release_gate", "native", "pooleglyph", "pdc"]},
@@ -91,9 +92,9 @@
       "properties": {
         "total": {"const": 40},
         "complete": {"const": 0},
-        "partial": {"const": 12},
+        "partial": {"const": 17},
         "blocked": {"const": 1},
-        "not_started": {"const": 27},
+        "not_started": {"const": 22},
         "subphase_total": {"const": 301}
       }
     },
@@ -135,8 +136,8 @@
     },
     "implementation_flags": {
       "type": "array",
-      "minItems": 30,
-      "maxItems": 30,
+      "minItems": 83,
+      "maxItems": 83,
       "items": {
         "type": "object",
         "additionalProperties": false,

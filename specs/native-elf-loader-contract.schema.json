@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "address_profile": {
+      "type": "object"
+    },
+    "artifact_kind": {
+      "const": "pooleos_native_elf_loader_contract"
+    },
+    "authorities": {
+      "minItems": 3,
+      "type": "array"
+    },
+    "bounds": {
+      "additionalProperties": false,
+      "properties": {
+        "load_segment_count": {
+          "const": 3
+        },
+        "mapping_count": {
+          "const": 4
+        },
+        "max_file_bytes": {
+          "const": 1048576
+        },
+        "max_image_bytes": {
+          "const": 67108864
+        },
+        "max_relocations": {
+          "const": 4096
+        },
+        "program_header_count": {
+          "const": 7
+        }
+      },
+      "required": [
+        "load_segment_count",
+        "mapping_count",
+        "max_file_bytes",
+        "max_image_bytes",
+        "max_relocations",
+        "program_header_count"
+      ],
+      "type": "object"
+    },
+    "claim_boundary": {
+      "minItems": 5,
+      "type": "array"
+    },
+    "claims": {
+      "type": "object"
+    },
+    "contract_id": {
+      "const": "PKELF1"
+    },
+    "dynamic_profile": {
+      "type": "object"
+    },
+    "elf_header_profile": {
+      "type": "object"
+    },
+    "error_precedence": {
+      "minItems": 10,
+      "type": "array"
+    },
+    "load_profile": {
+      "type": "object"
+    },
+    "mapping_profile": {
+      "type": "object"
+    },
+    "program_header_profile": {
+      "type": "object"
+    },
+    "relocation_profile": {
+      "type": "object"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "status": {
+      "const": "candidate_preproduction_non_promoting"
+    },
+    "status_date": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "status",
+    "contract_id",
+    "authorities",
+    "bounds",
+    "elf_header_profile",
+    "program_header_profile",
+    "load_profile",
+    "dynamic_profile",
+    "relocation_profile",
+    "address_profile",
+    "mapping_profile",
+    "error_precedence",
+    "claims",
+    "claim_boundary"
+  ],
+  "type": "object"
+}

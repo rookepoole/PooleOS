@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "contract_id", "status", "inputs", "build", "golden", "negative_controls", "differential", "activation", "payloads", "claims", "non_claims", "production_ready"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "artifact_kind": {"const": "pooleos_native_firmware_readiness"},
+    "contract_id": {"const": "PFWM1"},
+    "status": {"const": "pass"},
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract", "golden_vectors", "toolchain_lock", "toolchain_qualification", "tier1_profile", "implementation_inputs"],
+      "properties": {
+        "contract": {"$ref": "#/$defs/binding"},
+        "golden_vectors": {"$ref": "#/$defs/binding"},
+        "toolchain_lock": {"$ref": "#/$defs/binding"},
+        "toolchain_qualification": {"$ref": "#/$defs/binding"},
+        "tier1_profile": {"$ref": "#/$defs/binding"},
+        "implementation_inputs": {"type": "array", "minItems": 10, "items": {"$ref": "#/$defs/binding"}}
+      }
+    },
+    "build": {"type": "object"},
+    "golden": {"type": "object"},
+    "negative_controls": {
+      "type": "array",
+      "minItems": 80,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "expected", "status"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^NEG-N5-PFWM-"},
+          "expected": {"type": "string"},
+          "status": {"const": "pass"}
+        }
+      }
+    },
+    "differential": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["parser", "activation", "post_reset"],
+      "properties": {
+        "parser": {"$ref": "#/$defs/differential"},
+        "activation": {"$ref": "#/$defs/differential"},
+        "post_reset": {"$ref": "#/$defs/differential"}
+      }
+    },
+    "activation": {"type": "object"},
+    "payloads": {"type": "object"},
+    "claims": {"type": "object"},
+    "non_claims": {"type": "array", "minItems": 5, "items": {"type": "string"}},
+    "production_ready": {"const": false}
+  },
+  "$defs": {
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "bytes", "sha256"],
+      "properties": {
+        "path": {"type": "string"},
+        "bytes": {"type": "integer", "minimum": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"}
+      }
+    },
+    "differential": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cases", "mismatches", "seed"],
+      "properties": {
+        "cases": {"type": "integer", "minimum": 1},
+        "mismatches": {"const": 0},
+        "seed": {"type": "integer", "minimum": 1}
+      }
+    }
+  }
+}

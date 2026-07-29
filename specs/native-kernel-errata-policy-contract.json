@@ -1,0 +1,270 @@
+{
+  "artifact_kind": "pooleos_native_kernel_errata_policy_contract",
+  "authority_gate": {
+    "actions_authorized": 0,
+    "authority_grants": 0,
+    "cpu_or_firmware_writes": 0,
+    "privileged_reads": 0,
+    "signature_verifications": 0,
+    "state_writes": 0
+  },
+  "claims": {
+    "current_target_policy_denied": true,
+    "direct_product_firmware_floors_frozen": true,
+    "exact_target_identity_frozen": true,
+    "firmware_update_performed": false,
+    "mandatory_feature_rejection_implemented": true,
+    "microcode_update_performed": false,
+    "model44_errata_matrix_complete": false,
+    "n7_exit_gate_satisfied": false,
+    "native_privileged_revision_qualified": false,
+    "numeric_microcode_floor_complete": false,
+    "production_ready": false,
+    "rust_python_policy_agreement": true,
+    "target_cpu_qualified": false,
+    "windows_registry_microcode_observed": true,
+    "wrong_model_revision_guide_rejected": true
+  },
+  "contract_id": "PKERR1",
+  "current_observation": {
+    "agesa": "1.2.0.2b",
+    "bios": "F32",
+    "board_lineage": "unknown",
+    "cpuid_signature": "0x00B40F40",
+    "decision": "deny",
+    "expected_failure_codes": [
+      "board_lineage",
+      "bios_floor",
+      "agesa_floor",
+      "microcode_evidence",
+      "microcode_floor_source",
+      "errata_guide"
+    ],
+    "expected_failure_mask": "0x000000FC",
+    "feature_mask": "0x00000000000001FF",
+    "rdseed_mode": "masked_until_qualified",
+    "windows_reported_microcode_revision": "0x0B404023"
+  },
+  "errata_policy": {
+    "cross_model_or_cross_segment_inference_allowed": false,
+    "document_58251_range": "AMD Family 1Ah Models 00h-0Fh",
+    "document_58251_target_applicable": false,
+    "production_rule": "deny target errata completion until an applicable AMD guide or reviewed vendor response is bound",
+    "public_target_revision_guide_status": "not_located",
+    "required_target_range": "AMD Family 1Ah Models 40h-4Fh"
+  },
+  "firmware_policy": {
+    "amd_sb_7033_minimum": "ComboAM5PI 1.2.0.3c",
+    "amd_sb_7055_remediated_versions": [
+      "ComboAM5PI 1.2.0.3i",
+      "ComboAM5PI 1.2.8.0"
+    ],
+    "combined_comparison_floor": "1.2.0.3i",
+    "current_observation": {
+      "agesa": "1.2.0.2b",
+      "bios": "F32",
+      "board_revision": "unknown",
+      "decision": "deny"
+    },
+    "lineages": [
+      {
+        "bios_prefix": "F",
+        "board_revisions": [
+          "1.0",
+          "1.1",
+          "1.2"
+        ],
+        "minimum_stable_agesa": "1.2.8.0",
+        "minimum_stable_bios": "F39",
+        "vendor_checksum_noncryptographic": "B86C"
+      },
+      {
+        "bios_prefix": "FA",
+        "board_revisions": [
+          "1.3"
+        ],
+        "minimum_stable_agesa": "1.2.8.0",
+        "minimum_stable_bios": "FA7",
+        "vendor_checksum_noncryptographic": "7349"
+      }
+    ],
+    "prerelease_bios_allowed": false,
+    "unknown_board_revision_policy": "deny"
+  },
+  "mandatory_features": {
+    "basis": "sanitized user-mode target CPUID evidence; native per-processor confirmation remains required",
+    "mask": "0x00000000000001FF",
+    "missing_feature_policy": "deny",
+    "names": [
+      "long_mode",
+      "nx",
+      "sse2",
+      "xsave",
+      "osxsave",
+      "fsgsbase",
+      "smep",
+      "smap",
+      "invariant_tsc"
+    ]
+  },
+  "microcode_policy": {
+    "all_windows_records_same_after_normalization": true,
+    "amd_published_client_numeric_floor": null,
+    "logical_processor_record_count": 16,
+    "native_rule": "read every processor revision through a separately qualified read-only mechanism and reject mixed state",
+    "numeric_floor_status": "not_published_in_applicable_direct_product_sources",
+    "observed_revision_is_security_floor": false,
+    "production_rule": "deny numeric-revision qualification until a direct AMD floor or reviewed replacement ADR is bound",
+    "windows_observation_is_native_msr_evidence": false,
+    "windows_registry_revision_bytes_little_endian": "2340400B",
+    "windows_reported_revision": "0x0B404023"
+  },
+  "non_claims": [
+    "PKERR1 freezes a policy and rejects the current evidence; it does not qualify the physical target.",
+    "The Windows registry revision is an unprivileged OS report, not direct per-processor MSR evidence and not an AMD-published security floor.",
+    "AMD document 58251 covers Family 1Ah Models 00h-0Fh and is prohibited as target errata evidence for Model 44h.",
+    "The public-source audit did not locate an applicable Family 1Ah Models 40h-4Fh revision guide or a client numeric microcode floor.",
+    "F32 and AGESA 1.2.0.2b are recorded observations only; no firmware download, flash, setting change, or reboot was performed.",
+    "Synthetic all-true vectors demonstrate evaluator reachability only and create no trust, authority, or hardware evidence.",
+    "No microcode payload is acquired, parsed, staged, authenticated, applied, or redistributed.",
+    "No key, signature, capability, privileged probe, driver, firmware mutation, physical-media write, release, or production promotion is claimed."
+  ],
+  "phase_mapping": [
+    "N7.2",
+    "N15.1"
+  ],
+  "production_promotion_allowed": false,
+  "production_ready": false,
+  "rdseed_policy": {
+    "affected_forms": [
+      16,
+      32
+    ],
+    "bulletin": "AMD-SB-7055",
+    "cve": "CVE-2025-62626",
+    "post_patch_policy": "require an applicable remediated AGESA version before ordinary exposure",
+    "pre_patch_allowed_modes": [
+      "mask_cpuid_rdseed",
+      "use_64_bit_only_with_zero_retry"
+    ],
+    "severity": "High",
+    "unaffected_form": 64,
+    "unknown_mode_policy": "deny"
+  },
+  "required_negative_controls": [
+    "NEG-N7-PKERR-IDENTITY",
+    "NEG-N7-PKERR-FEATURE",
+    "NEG-N7-PKERR-BOARD-UNKNOWN",
+    "NEG-N7-PKERR-BIOS-BELOW-FLOOR",
+    "NEG-N7-PKERR-BIOS-PRERELEASE",
+    "NEG-N7-PKERR-AGESA-BELOW-SB7033",
+    "NEG-N7-PKERR-AGESA-BELOW-SB7055",
+    "NEG-N7-PKERR-MICROCODE-ZERO",
+    "NEG-N7-PKERR-MICROCODE-MIXED",
+    "NEG-N7-PKERR-MICROCODE-UNTRUSTED",
+    "NEG-N7-PKERR-MICROCODE-FLOOR-MISSING",
+    "NEG-N7-PKERR-ERRATA-GUIDE-MISSING",
+    "NEG-N7-PKERR-ERRATA-GUIDE-WRONG-RANGE",
+    "NEG-N7-PKERR-RDSEED-UNKNOWN",
+    "NEG-N7-PKERR-RDSEED-PATCH-STALE",
+    "NEG-N7-PKERR-CROSS-SEGMENT-SOURCE",
+    "NEG-N7-PKERR-SOURCE-HASH",
+    "NEG-N7-PKERR-58251-APPLICABILITY",
+    "NEG-N7-PKERR-CURRENT-OVERCLAIM",
+    "NEG-N7-PKERR-NUMERIC-FLOOR-INVENTED",
+    "NEG-N7-PKERR-FIRMWARE-FLOOR-LOWERED",
+    "NEG-N7-PKERR-AUTHORITY-OVERCLAIM",
+    "NEG-N7-PKERR-ACTION-OVERCLAIM",
+    "NEG-N7-PKERR-PRODUCTION-OVERCLAIM"
+  ],
+  "schema_version": "1.0",
+  "selected_move_id": "N7-ERRATA-POLICY-001",
+  "source_register": [
+    {
+      "authority": "AMD",
+      "captured_byte_count": 184465,
+      "captured_sha256": "05A19B3619628EB050EB05383913BE9E55859755CC192E67F840591F3EE449C0",
+      "id": "AMD-CPUID-25481",
+      "source_class": "architecture_identity",
+      "target_applicable": true,
+      "url": "https://www.amd.com/content/dam/amd/en/documents/archived-tech-docs/design-guides/25481.pdf"
+    },
+    {
+      "authority": "AMD",
+      "captured_byte_count": 200021,
+      "captured_sha256": "3EEED6552FE7F56B4DB31B16EC33ADB856765A00866E4824B03147BB707D0077",
+      "id": "AMD-PRODUCT-9800X3D",
+      "source_class": "direct_product_identity",
+      "target_applicable": true,
+      "url": "https://www.amd.com/en/products/processors/desktops/ryzen/9000-series/amd-ryzen-7-9800x3d.html"
+    },
+    {
+      "authority": "AMD",
+      "captured_byte_count": 174264,
+      "captured_sha256": "540FF884CB2BC69FF495AD1272A85AA44105737153FD1CBD300FA206D6C1DD61",
+      "id": "AMD-SB-7033",
+      "source_class": "direct_product_security_bulletin",
+      "target_applicable": true,
+      "url": "https://www.amd.com/en/resources/product-security/bulletin/amd-sb-7033.html"
+    },
+    {
+      "authority": "AMD",
+      "captured_byte_count": 160179,
+      "captured_sha256": "2BE2FA4E39E2BDD2362AD49323EF1DCAA866DE8A298DC4BB851ACD44442CB7C7",
+      "id": "AMD-SB-7055",
+      "source_class": "direct_product_security_bulletin",
+      "target_applicable": true,
+      "url": "https://www.amd.com/en/resources/product-security/bulletin/amd-sb-7055.html"
+    },
+    {
+      "authority": "AMD",
+      "captured_byte_count": 1002117,
+      "captured_sha256": "541BE14A5B2A6A4E9A0B1383492D09A28C061EE57EB969D5CFD5C8ED75A5C231",
+      "id": "AMD-REV-58251",
+      "source_class": "nonapplicable_revision_guide_control",
+      "target_applicable": false,
+      "url": "https://www.amd.com/content/dam/amd/en/documents/processor-tech-docs/revision-guides/58251.pdf"
+    },
+    {
+      "authority": "GIGABYTE",
+      "capture_status": "primary_page_verified_raw_download_denied",
+      "captured_byte_count": null,
+      "captured_sha256": null,
+      "id": "GIGABYTE-B650M-GAMING-PLUS-WIFI-BIOS",
+      "source_class": "direct_board_firmware_metadata",
+      "target_applicable": true,
+      "url": "https://www.gigabyte.com/eu/Motherboard/B650M-GAMING-PLUS-WIFI-rev-10-11-12/support"
+    },
+    {
+      "authority": "AMD",
+      "capture_status": "not_located_in_public_amd_catalog",
+      "captured_byte_count": null,
+      "captured_sha256": null,
+      "id": "AMD-F1A-M40-4F-REVISION-GUIDE-GAP",
+      "source_class": "required_missing_target_errata_source",
+      "target_applicable": false,
+      "url": null
+    }
+  ],
+  "source_requirement_ids": [
+    "020.1",
+    "020.2",
+    "ADD-CPU-001",
+    "ADD-N7-ERRATA-SOURCE-001"
+  ],
+  "status": "candidate_fail_closed_target_errata_policy_non_promoting",
+  "status_date": "2026-07-21",
+  "target": {
+    "architecture": "Zen 5",
+    "cpuid_signature": "0x00B40F40",
+    "decoded_family": 26,
+    "decoded_model": 68,
+    "decoded_stepping": 0,
+    "former_codename": "Granite Ridge",
+    "hardware_profile": "TIER1-B650M-9800X3D-RTX5070-001",
+    "product": "AMD Ryzen 7 9800X3D",
+    "product_id_boxed": "100-100001084WOF",
+    "product_id_tray": "100-000001084",
+    "vendor_id": "AuthenticAMD"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-kernel-trap-readiness.schema.json",
+  "title": "PooleOS PKTRAP1 BSP exception-entry readiness",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "status",
+    "contract_id",
+    "selected_move_id",
+    "production_ready",
+    "production_promotion_allowed",
+    "n7_exit_gate_satisfied",
+    "inputs",
+    "build",
+    "media",
+    "execution",
+    "negative_controls",
+    "claims",
+    "non_claims",
+    "summary",
+    "open_items"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_trap_readiness"},
+    "status": {"const": "pass_single_host_six_run_qemu_only_bsp_non_promoting"},
+    "contract_id": {"const": "PKTRAP1"},
+    "selected_move_id": {"const": "N7-TRAP-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "n7_exit_gate_satisfied": {"const": false},
+    "negative_controls": {"type": "array", "minItems": 51, "maxItems": 51},
+    "execution": {
+      "type": "object",
+      "required": ["host_environment_count", "run_count", "scenarios"],
+      "properties": {
+        "host_environment_count": {"const": 1},
+        "run_count": {"const": 6},
+        "scenarios": {"type": "array", "minItems": 3, "maxItems": 3}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "scenario_count",
+        "qemu_run_count",
+        "returning_exception_count",
+        "terminal_double_fault_count",
+        "malformed_frame_rejection_count",
+        "negative_controls_passed",
+        "signature_verifications",
+        "authority_grants",
+        "actions_authorized",
+        "state_writes",
+        "firmware_calls_after_exit"
+      ]
+    }
+  }
+}

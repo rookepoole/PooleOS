@@ -69,6 +69,11 @@ PHASE_STATUS = {
     "N2": "partial",
     "N3": "partial",
     "N4": "partial",
+    "N5": "partial",
+    "N6": "partial",
+    "N7": "partial",
+    "N8": "partial",
+    "N9": "partial",
     "N15": "partial",
     "N31": "partial",
     "N32": "partial",
@@ -150,10 +155,156 @@ ADDED_REQUIREMENTS = [
         "basis": ["https://uefi.org/specs/UEFI/2.11/"],
     },
     {
+        "id": "ADD-BOOT-004",
+        "phase_id": "N5",
+        "requirement": "Define a bounded typed envelope and exact profile for every non-kernel boot artifact; independently validate role, version, size, payload and whole-file digests, transactional loading, zero padding, retained-range ownership, cleanup, and PBP1 cross-binding while keeping authentication and each payload's executable or device-changing semantics separately gated.",
+        "basis": [
+            "Cycle 107 PBART1 and PBASET1 integration",
+            "master checklist sections 013-015",
+            "N5.6 initial-system, recovery, symbol, microcode, firmware-manifest, and policy artifact requirements",
+        ],
+    },
+    {
+        "id": "ADD-BOOT-005",
+        "phase_id": "N5",
+        "requirement": "Define every executable initial-system bundle as a deterministic declaration contract whose parsing and graph validation cannot confer authority; gate activation separately on authenticated outer and manifest signatures, persistent rollback state, ABI compatibility, resource and capability allocator readiness, complete component verification, transactional capacity, and fail-closed rollback before any allocation, capability issuance, or instruction execution.",
+        "basis": [
+            "Cycle 108 PINIT1 declaration and activation-separation qualification",
+            "https://docs.sel4.systems/projects/capdl/lang-spec.html",
+            "https://fuchsia.dev/fuchsia-src/concepts/components/v2/capabilities",
+            "https://fuchsia.dev/fuchsia-src/concepts/components/v2/lifecycle",
+            "https://theupdateframework.github.io/specification/v1.0.26/",
+        ],
+    },
+    {
+        "id": "ADD-BOOT-006",
+        "phase_id": "N5",
+        "requirement": "Define recovery policy and mutable boot-attempt state as separate deterministic contracts; require authenticated monotonic state, exact attempt decrement before handoff, bounded safe-mode and recovery transitions, known-good fallback, authenticated success receipts, physical presence for firmware or destructive authority, and independently validated failure routing before any recovery payload executes or writes persistent state.",
+        "basis": [
+            "Cycle 109 PREC1 recovery-policy and transition qualification",
+            "https://uefi.org/specs/UEFI/2.11/03_Boot_Manager.html",
+            "https://source.android.com/docs/core/ota/ab",
+            "https://theupdateframework.github.io/specification/v1.0.26/",
+        ],
+    },
+    {
+        "id": "ADD-BOOT-007",
+        "phase_id": "N5",
+        "requirement": "Define the public boot symbol payload as a deterministic image-relative diagnostic index bound to one exact stripped PooleKernel, preferred loaded image, build ID, private split-debug product, and source manifest; require bounded parsing and lookup, explicit KASLR base input, public-only names, source-path exclusion, pointer redaction, independent Rust/Python differential evidence, and authenticated diagnostic authorization before any target consumes it.",
+        "basis": [
+            "Cycle 110 PSYM1 public symbol and split-debug qualification",
+            "https://gabi.xinuos.com/elf/05-symtab.html",
+            "https://dwarfstd.org/doc/DWARF5.pdf",
+            "https://sourceware.org/gdb/current/onlinedocs/gdb.html/Separate-Debug-Files.html",
+        ],
+    },
+    {
+        "id": "ADD-BOOT-008",
+        "phase_id": "N5",
+        "requirement": "Define the processor-microcode payload as a deterministic package around opaque vendor-authenticated bytes, bound to exact vendor and CPUID identity, platform selectors, per-patch digests, security and authenticated rollback floors, revocation state, redistribution policy, and target-hardware evidence; require highest-eligible normal selection, reset-based exact known-good recovery without in-session downgrade, early bootstrap-processor and application-processor sequencing before affected features or user scheduling, complete per-processor post-apply revision and CPUID verification, mixed-revision fail-closed handling, durable receipts, independent no_std Rust/Python differential evidence, and an explicit PooleKernel authority gate before any real payload is staged or applied.",
+        "basis": [
+            "Cycle 111 PMCU1 microcode-package and apply-policy qualification",
+            "https://www.amd.com/content/dam/amd/en/documents/processor-tech-docs/revision-guides/58251.pdf",
+            "https://www.amd.com/content/dam/amd/en/documents/processor-tech-docs/programmer-references/24593.pdf",
+            "https://www.intel.com/content/www/us/en/developer/articles/technical/software-security-guidance/best-practices/microcode-update-guidance.html",
+            "https://uefi.org/specs/PI/1.8/V2_DXE_Boot_Services_Protocols.html",
+        ],
+    },
+    {
+        "id": "ADD-BOOT-009",
+        "phase_id": "N5",
+        "requirement": "Define firmware update intent as a deterministic manifest separate from vendor payload bytes and execution authority, bound by signature to exact component, resource GUID, hardware instance, device identity, current and target versions, lowest-supported and rollback floors, payload digest, vendor signer, updater plugin, recovery route, license, revocation, and target-hardware evidence; normalize UEFI FMP/ESRT/capsule, exact device-plugin, and PLDM transports without generic flashing; require an acyclic topological order, one active component per durable transaction, protected staging, power/quiesce/storage/suspend/shutdown guards, recovery and physical confirmation, stop-on-failure and reboot-loop prevention, post-reset version/status/re-enumeration/self-test verification, driver rebinding only after validation, independent allocation-free Rust/Python hostile and differential evidence, and separately approved authority before any live inventory, driver load, reset, payload transfer, capsule submission, firmware mutation, or physical-media action.",
+        "basis": [
+            "Cycle 112 PFWM1 synthetic firmware-manifest and dry-run-policy qualification",
+            "https://uefi.org/specs/UEFI/2.11/23_Firmware_Update_and_Reporting.html",
+            "https://csrc.nist.gov/pubs/sp/800/193/final",
+            "https://www.dmtf.org/sites/default/files/standards/documents/DSP0267_1.3.0.pdf",
+            "https://trustedcomputinggroup.org/resource/tcg-pc-client-reference-integrity-manifest-specification/",
+        ],
+    },
+    {
+        "id": "ADD-BOOT-010",
+        "phase_id": "N5",
+        "requirement": "Define the role-7 system policy as a deterministic, bounded, default-deny contract whose effective authority is the intersection of the compiled-in ceiling, authenticated policy, selected boot mode, issued capability, and request; require exact PINIT1 route cross-binding, monotonic attenuation, immutable safe and recovery floors, separate physical-presence and firmware authority, authenticated version and rollback state, durable decision receipts, independent allocation-free Rust/Python hostile and differential evidence, and explicit separation from PooleGlyph metadata before any PooleBoot or PooleKernel enforcement, capability creation, state mutation, executable transfer, or physical-media action.",
+        "basis": [
+            "Cycle 113 PPOL1 policy-bundle and authority-intersection qualification",
+            "https://docs.sel4.systems/projects/capdl/lang-spec.html",
+            "https://fuchsia.dev/fuchsia-src/concepts/components/v2/capabilities",
+            "https://fuchsia.dev/fuchsia-src/concepts/components/v2/lifecycle",
+            "https://uefi.org/specs/UEFI/2.11/03_Boot_Manager.html",
+            "https://theupdateframework.github.io/specification/v1.0.35/",
+            "https://csrc.nist.gov/pubs/sp/800/193/final",
+            "https://csrc.nist.gov/pubs/sp/800/207/final",
+        ],
+    },
+    {
+        "id": "ADD-BOOT-011",
+        "phase_id": "N5",
+        "requirement": "PooleBoot and PooleKernel MUST independently reparse the exact retained PBART1 bytes before granting authority; parser summaries or pre-copy bytes are not substitutes, and digest, authentication, policy, and persistent-state bindings must close the loader-to-kernel time-of-check/time-of-use boundary before any capability creation, lifecycle activation, recovery transition, symbol consumption, microcode action, firmware action, policy decision, or state write.",
+        "basis": [
+            "Cycle 114 PooleBoot retained-page inner parsing qualification",
+            "https://uefi.org/specs/UEFI/2.11/07_Services_Boot_Services.html",
+            "https://docs.sel4.systems/projects/capdl/lang-spec.html",
+            "https://fuchsia.dev/docs/concepts/components/v2/lifecycle",
+        ],
+    },
+    {
+        "id": "ADD-BOOT-012",
+        "phase_id": "N5",
+        "requirement": "Keep immutable signed boot-trust policy, mutable monotonic boot-acceptance state, and PREC1 boot-attempt state as three separate contracts. An ESP file MUST NOT be accepted as persistent trust authority. Before authority, require an authenticated redundant transactional backend with deterministic copy selection, previous-state chaining, monotonic generation and rollback floors, revocation binding, torn-write and power-loss recovery, repair and migration rules, durable receipts, and independent PooleKernel revalidation of the exact selected state and retained artifacts.",
+        "basis": [
+            "Cycle 115 PBTRUST1 trust-policy and acceptance-state contract qualification",
+            "https://uefi.org/specs/UEFI/2.11/08_Services_Runtime_Services.html",
+            "https://uefi.org/specs/UEFI/2.11/32_Secure_Boot_and_Driver_Signing.html",
+            "https://theupdateframework.github.io/specification/v1.0.35/",
+            "https://csrc.nist.gov/pubs/sp/800/193/final",
+        ],
+    },
+    {
         "id": "ADD-BOOT-002",
         "phase_id": "N6",
         "requirement": "Model UEFI PK, KEK, db, dbx, image signer revocation, minimum secure version, authenticated boot state, recovery-key rotation, and development-key containment as one boot-trust state machine.",
         "basis": ["https://uefi.org/specs/UEFI/2.11/32_Secure_Boot_and_Driver_Signing.html"],
+    },
+    {
+        "id": "ADD-BOOT-003",
+        "phase_id": "N6",
+        "requirement": "Pin and vendor every boot-time digest provider, remove absolute build paths reproducibly, qualify standard, differential, and artifact-mutation vectors, and require independent cryptographic review plus target-backend qualification before trust promotion; digest equality against an unsigned manifest is not authentication.",
+        "basis": [
+            "Cycle 103 PBDIGEST1 boot-time SHA-256 provider integration",
+            "specs/native-boot-digest-provider.json",
+            "master checklist sections 016, 017, 099, and 170",
+        ],
+    },
+    {
+        "id": "ADD-KERNEL-001",
+        "phase_id": "N6",
+        "requirement": "Declare the exact temporary mapping, lifetime, cache policy, write permission, and revocation transition for every physical address passed to early PooleKernel diagnostics; in particular, no PBP1 framebuffer physical address may be dereferenced until the entry contract proves that mapping is present.",
+        "basis": [
+            "PBP1 framebuffer physical-address contract",
+            "master checklist section 018 early framebuffer requirements",
+            "Cycle101 N6-KENTRY-001 mapping-gap analysis",
+        ],
+    },
+    {
+        "id": "ADD-MEM-001",
+        "phase_id": "N9",
+        "requirement": "Define bootstrap stack, low/high guard, retained page-table root, handoff, kernel-image, and allocator metadata bounds once across PooleBoot, PBP1, PKMAP2, PooleKernel entry, trap handling, and physical-memory ownership; require every consumer and hostile test to derive those boundaries from the same contract so layout growth cannot silently turn a guard probe into a mapped-stack access or expose retained loader pages to allocation.",
+        "basis": [
+            "Cycle 125 bootstrap-stack growth and PKTRAP1 guard-boundary correction",
+            "Cycle 125 PKPMM1 retained-range ownership audit",
+            "master checklist sections 026-029 and 151",
+        ],
+    },
+    {
+        "id": "ADD-MEM-002",
+        "phase_id": "N9",
+        "requirement": "Replace the bounded nine-page PKVM2 demonstration map with a generation-owned sparse physical direct map whose coverage is derived from validated PMM ownership, excludes holes and forbidden firmware/device ranges, enforces one cache policy per frame, installs and retires table generations transactionally, preserves bootstrap and ACPI snapshot exclusions, and produces local invalidation plus future SMP-shootdown/deferred-reclaim receipts before temporary aliases or concurrent allocation can be promoted.",
+        "basis": [
+            "Cycle 133 PKPMM7 ACPI snapshot and reclaim closeout",
+            "Cycle 134 PKVM3 PMM-owned sparse direct-map and generation-retirement closeout",
+            "master checklist sections 026-029, 031, and 151",
+        ],
     },
     {
         "id": "ADD-TIME-001",
@@ -178,6 +329,27 @@ ADDED_REQUIREMENTS = [
         "phase_id": "N15",
         "requirement": "Maintain a target-CPU and microcode mitigation matrix for transient execution, branch prediction, return-stack, store-bypass, SMT, and control-flow protections; gate every mitigation by exact CPUID, firmware, threat, and benchmark evidence.",
         "basis": ["https://docs.amd.com/", "https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html"],
+    },
+    {
+        "id": "ADD-N7-ERRATA-SOURCE-001",
+        "phase_id": "N7",
+        "requirement": "Bind every target CPU erratum, mitigation, firmware floor, and microcode rule to an exact directly applicable vendor source range; reject cross-model revision guides, inferred numeric floors, unknown board lineages, stale supersession state, and OS-reported metadata as substitutes for qualified native evidence.",
+        "basis": [
+            "master checklist sections 020.1 and 020.2",
+            "https://www.amd.com/en/resources/product-security/bulletin/amd-sb-7033.html",
+            "https://www.amd.com/en/resources/product-security/bulletin/amd-sb-7055.html",
+            "Cycle 121 PKERR1 direct-product source-applicability audit",
+        ],
+    },
+    {
+        "id": "ADD-N7-XSTATE-001",
+        "phase_id": "N7",
+        "requirement": "Bind every enabled XCR0 and XSS component to an exact standard or compacted save-area ABI; require dependency-valid component selection, canonical initialization before first exposure, per-owner aligned bounded images, eager or fully qualified lazy ownership, exception and migration policy, sensitive register and image clearing, and a final linked-machine-code audit that rejects unintended kernel vector instructions outside reviewed bracketed regions.",
+        "basis": [
+            "master checklist sections 020.3 and 021.1",
+            "https://docs.amd.com/v/u/en-US/24593_3.44_APM_Vol2",
+            "Cycles 122-123 PKXSTATE1 ownership and PKXEXC1 exception/machine-code audits",
+        ],
     },
     {
         "id": "ADD-DRIVER-001",
@@ -400,7 +572,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path, default=ROOT / SOURCE_RELATIVE)
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pooleos_native_checklist_coverage.json")
-    parser.add_argument("--status-date", default="2026-07-15")
+    parser.add_argument("--status-date", default="2026-07-26")
     args = parser.parse_args()
     artifact = build_coverage(args.source, args.status_date)
     args.out.parent.mkdir(parents=True, exist_ok=True)

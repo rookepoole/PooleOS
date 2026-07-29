@@ -1,12 +1,43 @@
 [package]
-name = "pooleboot-fixture"
+name = "pooleboot"
 version.workspace = true
 edition.workspace = true
 license-file.workspace = true
 publish.workspace = true
 
+[features]
+default = []
+development-transfer = []
+development-trap-returning = ["development-transfer"]
+development-trap-double-fault = ["development-transfer"]
+development-trap-malformed-frame = ["development-transfer"]
+development-cpu-policy = ["development-transfer"]
+development-xstate-policy = ["development-transfer"]
+development-xstate-exception = ["development-transfer"]
+development-privilege-msr-policy = ["development-transfer"]
+development-physical-memory = ["development-transfer"]
+development-virtual-memory = ["development-transfer"]
+development-active-virtual-memory = ["development-transfer"]
+development-interrupt-time = ["development-transfer"]
+development-smp-first-ap = ["development-transfer"]
+development-smp-percpu-runtime = ["development-transfer"]
+development-smp-ipi = ["development-transfer"]
+
+[lib]
+name = "pooleboot"
+path = "src/lib.rs"
+
 [[bin]]
-name = "PooleBootFixture"
+name = "PooleBoot"
 path = "src/main.rs"
 
 [dependencies]
+poole-boot-exit = { path = "../bootexit" }
+poole-bootload = { path = "../bootload" }
+poole-boot-config = { path = "../bootcfg" }
+poole-boot-trust = { path = "../trust" }
+poole-elf = { path = "../elf" }
+poole-handoff = { path = "../handoff" }
+poole-inner-live = { path = "../inner" }
+poole-kmap = { path = "../kmap" }
+poole-live-handoff = { path = "../livehandoff" }

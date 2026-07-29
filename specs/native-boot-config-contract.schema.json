@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-boot-config-contract.schema.json",
+  "title": "PooleOS PBC1 boot configuration contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "contract_id",
+    "status",
+    "production_ready",
+    "encoding",
+    "grammar",
+    "limits",
+    "entry_modes",
+    "path_policy",
+    "version_policy",
+    "artifact_size_policy",
+    "production_claims",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_boot_config_contract"},
+    "contract_id": {"const": "PBC1"},
+    "status": {"const": "candidate_pre_abi_non_promoting"},
+    "production_ready": {"const": false},
+    "encoding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["character_set", "line_ending", "final_lf_required", "bom_allowed", "comments_allowed", "blank_lines_allowed", "whitespace_allowed"],
+      "properties": {
+        "character_set": {"type": "string"},
+        "line_ending": {"const": "LF"},
+        "final_lf_required": {"const": true},
+        "bom_allowed": {"const": false},
+        "comments_allowed": {"const": false},
+        "blank_lines_allowed": {"const": false},
+        "whitespace_allowed": {"const": false}
+      }
+    },
+    "grammar": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["magic", "fixed_keys", "entry_key_template", "entry_field_order", "terminal", "entry_order", "duplicate_policy", "unknown_key_policy", "number_policy"],
+      "properties": {
+        "magic": {"const": "POOLEOS-BOOTCFG/1.0"},
+        "fixed_keys": {"const": ["entry_count", "default_entry", "timeout_ms", "boot_attempt_limit"]},
+        "entry_key_template": {"type": "string"},
+        "entry_field_order": {"const": ["mode", "slot", "manifest", "manifest_max_bytes"]},
+        "terminal": {"const": "end=PBC1"},
+        "entry_order": {"type": "string"},
+        "duplicate_policy": {"type": "string"},
+        "unknown_key_policy": {"const": "reject"},
+        "number_policy": {"type": "string"}
+      }
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["config_bytes", "line_bytes", "lines", "entries", "identifier_bytes", "timeout_ms", "boot_attempts", "slot", "manifest_path_bytes", "manifest_bytes"],
+      "properties": {
+        "config_bytes": {"const": 16384},
+        "line_bytes": {"const": 320},
+        "lines": {"const": 64},
+        "entries": {"const": 8},
+        "identifier_bytes": {"const": 31},
+        "timeout_ms": {"const": 30000},
+        "boot_attempts": {"const": 8},
+        "slot": {"const": 4},
+        "manifest_path_bytes": {"const": 240},
+        "manifest_bytes": {"const": 1048576}
+      }
+    },
+    "entry_modes": {"const": ["normal", "safe", "previous", "recovery", "diagnostic"]},
+    "path_policy": {"type": "object"},
+    "version_policy": {"type": "object"},
+    "artifact_size_policy": {"type": "object"},
+    "production_claims": {"type": "object"},
+    "claim_boundary": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"type": "string"}}
+  }
+}

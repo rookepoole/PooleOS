@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-system-manifest-golden-vectors.schema.json",
+  "title": "PooleOS PSM1 golden vectors",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "contract_id", "status", "production_ready", "vectors", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_system_manifest_golden_vectors"},
+    "contract_id": {"const": "PSM1"},
+    "status": {"const": "synthetic_non_promoting_golden_bytes"},
+    "production_ready": {"const": false},
+    "vectors": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "purpose", "artifact_count", "byte_count", "sha256", "summary", "hex"],
+        "properties": {
+          "id": {"type": "string"},
+          "purpose": {"type": "string"},
+          "artifact_count": {"type": "integer", "minimum": 1, "maximum": 16},
+          "byte_count": {"type": "integer", "minimum": 1, "maximum": 65536},
+          "sha256": {"type": "string"},
+          "summary": {"type": "string"},
+          "hex": {"type": "string"}
+        }
+      }
+    },
+    "claim_boundary": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "string"}}
+  }
+}

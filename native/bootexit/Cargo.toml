@@ -1,0 +1,10 @@
+[package]
+name = "poole-boot-exit"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+publish.workspace = true
+
+[lib]
+name = "poole_boot_exit"
+path = "src/lib.rs"

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "contract_id", "vectors"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "artifact_kind": {"const": "pooleos_native_policy_golden_vectors"},
+    "contract_id": {"const": "PPOL1"},
+    "vectors": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "bytes", "sha256", "hex", "summary"],
+        "properties": {
+          "id": {"type": "string"},
+          "bytes": {"type": "integer", "minimum": 1},
+          "sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"},
+          "hex": {"type": "string", "pattern": "^[0-9A-F]+$"},
+          "summary": {"type": "object"}
+        }
+      }
+    }
+  }
+}

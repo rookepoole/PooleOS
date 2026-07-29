@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -187,6 +188,270 @@ def check_native_model_readiness() -> CheckResult:
     from tools import pooleos_release_gate
 
     check = pooleos_release_gate.check_native_model_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_pooleboot_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_pooleboot_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_boot_trust_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_boot_trust_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_kernel_load_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_kernel_load_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_kernel_revalidation_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_kernel_revalidation_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_kernel_transfer_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_kernel_transfer_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_kernel_trap_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_kernel_trap_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_kernel_cpu_policy_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_kernel_cpu_policy_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_kernel_errata_policy_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_kernel_errata_policy_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_kernel_xstate_policy_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_kernel_xstate_policy_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_kernel_xstate_exception_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_kernel_xstate_exception_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_kernel_privilege_msr_policy_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_kernel_privilege_msr_policy_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_kernel_physical_memory_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_kernel_physical_memory_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_kernel_virtual_memory_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_kernel_virtual_memory_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_initial_system_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_initial_system_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_recovery_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_recovery_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_symbol_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_symbol_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_microcode_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_microcode_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_firmware_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_firmware_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_policy_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_policy_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_system_manifest_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_system_manifest_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_boot_handoff_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_boot_handoff_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_boot_config_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_boot_config_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_elf_loader_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_elf_loader_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
+def check_native_kernel_entry_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_kernel_entry_readiness()
     return CheckResult(
         name=check["name"],
         ok=check["ok"],
@@ -3125,29 +3390,47 @@ def run_command(name: str, cmd: list[str], cwd: Path, timeout: int) -> CheckResu
 
 def run_pooleglyph_baseline(pooleglyph: Path, full: bool) -> list[CheckResult]:
     if full:
-        return [
-            run_command(
-                "pooleglyph:full_test",
-                [str(pooleglyph / "pooleglyph.bat"), "test"],
+        with tempfile.TemporaryDirectory(prefix="pooleos-pooleglyph-full-") as temp_dir:
+            staged = Path(temp_dir) / "PooleGlyph"
+            shutil.copytree(
                 pooleglyph,
-                timeout=180,
+                staged,
+                ignore=shutil.ignore_patterns(".git", ".venv", "venv", "__pycache__", "*.pyc", "runs"),
             )
-        ]
+            return [
+                run_command(
+                    "pooleglyph:full_test",
+                    [str(staged / "pooleglyph.bat"), "test"],
+                    staged,
+                    timeout=180,
+                )
+            ]
 
-    return [
+    results = [
         run_command(
             "pooleglyph:pgvm_selftest",
             [sys.executable, str(pooleglyph / "pooleglyph_pgvm.py"), "test"],
             pooleglyph,
             timeout=60,
-        ),
-        run_command(
-            "pooleglyph:conformance",
-            [sys.executable, str(pooleglyph / "pooleglyph_pgvm_conformance.py"), "run"],
-            pooleglyph,
-            timeout=60,
-        ),
+        )
     ]
+    with tempfile.TemporaryDirectory(prefix="pooleos-pooleglyph-conformance-") as temp_dir:
+        report_path = Path(temp_dir) / "conformance_report.json"
+        results.append(
+            run_command(
+                "pooleglyph:conformance",
+                [
+                    sys.executable,
+                    str(pooleglyph / "pooleglyph_pgvm_conformance.py"),
+                    "run",
+                    "--out",
+                    str(report_path),
+                ],
+                pooleglyph,
+                timeout=60,
+            )
+        )
+    return results
 
 
 def run_pooleos_tests() -> CheckResult:
@@ -3155,7 +3438,7 @@ def run_pooleos_tests() -> CheckResult:
         "pooleos:unittest",
         [sys.executable, "-m", "unittest", "discover", "-s", "tests"],
         ROOT,
-        timeout=120,
+        timeout=600,
     )
 
 
@@ -3240,6 +3523,29 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "models" / "tla" / "PooleVirtualMemory.safe.cfg",
                 ROOT / "models" / "tla" / "PooleVirtualMemory.stale_mapping.cfg",
                 ROOT / "models" / "tla" / "PooleVirtualMemory.early_reuse.cfg",
+                ROOT / "models" / "tla" / "PooleIPC.tla",
+                ROOT / "models" / "tla" / "PooleIPC.safe.cfg",
+                ROOT / "models" / "tla" / "PooleIPC.unauthorized_call.cfg",
+                ROOT / "models" / "tla" / "PooleIPC.token_reuse.cfg",
+                ROOT / "models" / "tla" / "PooleIPC.stale_reply.cfg",
+                ROOT / "models" / "tla" / "PooleIPC.leaky_teardown.cfg",
+                ROOT / "models" / "tla" / "PooleScheduler.tla",
+                ROOT / "models" / "tla" / "PooleScheduler.safe.cfg",
+                ROOT / "models" / "tla" / "PooleScheduler.lost_cancel.cfg",
+                ROOT / "models" / "tla" / "PooleScheduler.lost_timeout.cfg",
+                ROOT / "models" / "tla" / "PooleScheduler.duplicate_wakeup.cfg",
+                ROOT / "models" / "tla" / "PooleScheduler.no_inheritance.cfg",
+                ROOT / "models" / "tla" / "PooleScheduler.priority_bypass.cfg",
+                ROOT / "models" / "tla" / "PooleScheduler.fairness_bypass.cfg",
+                ROOT / "models" / "tla" / "PooleScheduler.leaky_teardown.cfg",
+                ROOT / "models" / "tla" / "PooleFS.tla",
+                ROOT / "models" / "tla" / "PooleFS.safe.cfg",
+                ROOT / "models" / "tla" / "PooleFS.torn_write.cfg",
+                ROOT / "models" / "tla" / "PooleFS.premature_publish.cfg",
+                ROOT / "models" / "tla" / "PooleFS.double_allocation.cfg",
+                ROOT / "models" / "tla" / "PooleFS.non_idempotent_replay.cfg",
+                ROOT / "models" / "tla" / "PooleFS.checksum_acceptance.cfg",
+                ROOT / "models" / "tla" / "PooleFS.recovery_leak.cfg",
                 ROOT / "specs" / "native-release-architecture-policy.json",
                 ROOT / "specs" / "native-release-architecture-policy.schema.json",
                 ROOT / "specs" / "native-release-architecture-report.schema.json",
@@ -3265,6 +3571,41 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "tools" / "run_native_tier0.py",
                 ROOT / "tools" / "bootstrap_native_models.ps1",
                 ROOT / "tools" / "qualify_native_models.py",
+                ROOT / "tools" / "build_native_pooleboot_media.py",
+                ROOT / "tools" / "qualify_native_pooleboot.py",
+                ROOT / "tools" / "qualify_native_kernel_load.py",
+                ROOT / "tools" / "qualify_native_kernel_revalidation.py",
+                ROOT / "tools" / "qualify_native_kernel_transfer.py",
+                ROOT / "tools" / "qualify_native_kernel_trap.py",
+                ROOT / "tools" / "qualify_native_kernel_cpu_policy.py",
+                ROOT / "tools" / "qualify_native_kernel_errata_policy.py",
+                ROOT / "tools" / "qualify_native_kernel_xstate_policy.py",
+                ROOT / "tools" / "qualify_native_kernel_xstate_exception.py",
+                ROOT / "tools" / "qualify_native_kernel_privilege_msr_policy.py",
+                ROOT / "tools" / "qualify_native_kernel_physical_memory.py",
+                ROOT / "tools" / "qualify_native_kernel_virtual_memory.py",
+                ROOT / "tools" / "qualify_native_kernel_smp_ipi.py",
+                ROOT / "tools" / "generate_native_initial_system_vectors.py",
+                ROOT / "tools" / "qualify_native_initial_system.py",
+                ROOT / "tools" / "generate_native_recovery_vectors.py",
+                ROOT / "tools" / "qualify_native_recovery.py",
+                ROOT / "tools" / "generate_native_symbol_vectors.py",
+                ROOT / "tools" / "qualify_native_symbols.py",
+                ROOT / "tools" / "generate_native_microcode_vectors.py",
+                ROOT / "tools" / "qualify_native_microcode.py",
+                ROOT / "tools" / "generate_native_firmware_vectors.py",
+                ROOT / "tools" / "qualify_native_firmware.py",
+                ROOT / "tools" / "generate_native_policy_vectors.py",
+                ROOT / "tools" / "qualify_native_policy.py",
+                ROOT / "tools" / "generate_native_system_manifest_vectors.py",
+                ROOT / "tools" / "qualify_native_system_manifest.py",
+                ROOT / "tools" / "generate_native_boot_handoff_vectors.py",
+                ROOT / "tools" / "qualify_native_boot_handoff.py",
+                ROOT / "tools" / "generate_native_boot_config_vectors.py",
+                ROOT / "tools" / "qualify_native_boot_config.py",
+                ROOT / "tools" / "generate_native_elf_loader_vectors.py",
+                ROOT / "tools" / "qualify_native_elf_loader.py",
+                ROOT / "tools" / "qualify_native_kernel_entry.py",
                 ROOT / "runtime" / "native_binary.py",
                 ROOT / "runtime" / "native_v1_objectives.py",
                 ROOT / "runtime" / "adr_ratification.py",
@@ -3273,6 +3614,61 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runtime" / "hardware_target.py",
                 ROOT / "runtime" / "native_tier0.py",
                 ROOT / "runtime" / "native_models.py",
+                ROOT / "runtime" / "native_pooleboot.py",
+                ROOT / "runtime" / "native_kernel_load.py",
+                ROOT / "runtime" / "native_kernel_revalidation.py",
+                ROOT / "runtime" / "native_kernel_transfer.py",
+                ROOT / "runtime" / "native_kernel_trap.py",
+                ROOT / "runtime" / "native_kernel_cpu_policy.py",
+                ROOT / "runtime" / "native_kernel_errata_policy.py",
+                ROOT / "runtime" / "native_kernel_xstate_policy.py",
+                ROOT / "runtime" / "native_kernel_xstate_exception.py",
+                ROOT / "runtime" / "native_kernel_privilege_msr_policy.py",
+                ROOT / "runtime" / "native_kernel_physical_memory.py",
+                ROOT / "runtime" / "native_kernel_virtual_memory.py",
+                ROOT / "runtime" / "native_kernel_smp_ipi.py",
+                ROOT / "runtime" / "native_initial_system.py",
+                ROOT / "runtime" / "native_recovery.py",
+                ROOT / "runtime" / "native_symbols.py",
+                ROOT / "runtime" / "native_microcode.py",
+                ROOT / "runtime" / "native_firmware.py",
+                ROOT / "runtime" / "native_policy.py",
+                ROOT / "runtime" / "native_system_manifest.py",
+                ROOT / "runtime" / "native_boot_handoff.py",
+                ROOT / "runtime" / "native_boot_config.py",
+                ROOT / "runtime" / "native_elf_loader.py",
+                ROOT / "runtime" / "native_kernel_image.py",
+                ROOT / "runtime" / "native_kernel_entry.py",
+                ROOT / "docs" / "native-pooleboot-proof.md",
+                ROOT / "docs" / "native-kernel-load.md",
+                ROOT / "docs" / "native-kernel-revalidation.md",
+                ROOT / "docs" / "native-kernel-transfer.md",
+                ROOT / "docs" / "native-kernel-trap.md",
+                ROOT / "docs" / "native-kernel-cpu-policy.md",
+                ROOT / "docs" / "native-kernel-errata-policy.md",
+                ROOT / "docs" / "native-kernel-xstate-policy.md",
+                ROOT / "docs" / "native-kernel-xstate-exception.md",
+                ROOT / "docs" / "native-kernel-privilege-msr-policy.md",
+                ROOT / "docs" / "native-kernel-physical-memory.md",
+                ROOT / "docs" / "native-kernel-virtual-memory.md",
+                ROOT / "docs" / "native-kernel-smp-ipi.md",
+                ROOT / "docs" / "native-initial-system-bundle.md",
+                ROOT / "docs" / "native-recovery-bundle.md",
+                ROOT / "docs" / "native-symbol-bundle.md",
+                ROOT / "docs" / "native-microcode-bundle.md",
+                ROOT / "docs" / "native-firmware-manifest.md",
+                ROOT / "docs" / "native-policy-bundle.md",
+                ROOT / "docs" / "native-system-manifest.md",
+                ROOT / "docs" / "native-boot-handoff.md",
+                ROOT / "docs" / "native-boot-config.md",
+                ROOT / "docs" / "native-elf-loader.md",
+                ROOT / "docs" / "native-kernel-entry.md",
+                ROOT / "native" / "firmware" / "Cargo.toml",
+                ROOT / "native" / "firmware" / "src" / "lib.rs",
+                ROOT / "native" / "firmware" / "src" / "bin" / "pfwm1_probe.rs",
+                ROOT / "native" / "policy" / "Cargo.toml",
+                ROOT / "native" / "policy" / "src" / "lib.rs",
+                ROOT / "native" / "policy" / "src" / "bin" / "ppol1_probe.rs",
                 ROOT / "security" / "README.md",
                 ROOT / "security" / "owner-adr-signers.allowed",
                 ROOT / "security" / "revoked-adr-signers",
@@ -3282,8 +3678,65 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "native" / ".cargo" / "config.toml",
                 ROOT / "native" / "boot" / "Cargo.toml",
                 ROOT / "native" / "boot" / "src" / "main.rs",
+                ROOT / "native" / "boot" / "src" / "lib.rs",
+                ROOT / "native" / "boot" / "src" / "kload.rs",
+                ROOT / "native" / "bootload" / "Cargo.toml",
+                ROOT / "native" / "bootload" / "README.md",
+                ROOT / "native" / "bootload" / "src" / "lib.rs",
+                ROOT / "native" / "initsys" / "Cargo.toml",
+                ROOT / "native" / "initsys" / "src" / "lib.rs",
+                ROOT / "native" / "initsys" / "src" / "bin" / "pinit1_probe.rs",
+                ROOT / "native" / "recovery" / "Cargo.toml",
+                ROOT / "native" / "recovery" / "README.md",
+                ROOT / "native" / "recovery" / "src" / "lib.rs",
+                ROOT / "native" / "recovery" / "src" / "bin" / "prec1_probe.rs",
+                ROOT / "native" / "symbols" / "Cargo.toml",
+                ROOT / "native" / "symbols" / "src" / "lib.rs",
+                ROOT / "native" / "symbols" / "src" / "bin" / "psym1_probe.rs",
+                ROOT / "native" / "microcode" / "Cargo.toml",
+                ROOT / "native" / "microcode" / "src" / "lib.rs",
+                ROOT / "native" / "microcode" / "src" / "bin" / "pmcu1_probe.rs",
+                ROOT / "native" / "manifest" / "Cargo.toml",
+                ROOT / "native" / "manifest" / "README.md",
+                ROOT / "native" / "manifest" / "src" / "lib.rs",
+                ROOT / "native" / "manifest" / "src" / "bin" / "psm1_probe.rs",
+                ROOT / "native" / "third_party" / "rustcrypto-sha2-0.11.0.md",
+                ROOT / "native" / "handoff" / "Cargo.toml",
+                ROOT / "native" / "handoff" / "README.md",
+                ROOT / "native" / "handoff" / "src" / "lib.rs",
+                ROOT / "native" / "elf" / "Cargo.toml",
+                ROOT / "native" / "elf" / "README.md",
+                ROOT / "native" / "elf" / "src" / "lib.rs",
+                ROOT / "native" / "elf" / "src" / "bin" / "poole_elf_probe.rs",
+                ROOT / "native" / "handoff" / "src" / "bin" / "pbp1_probe.rs",
+                ROOT / "native" / "bootcfg" / "Cargo.toml",
+                ROOT / "native" / "bootcfg" / "README.md",
+                ROOT / "native" / "bootcfg" / "src" / "lib.rs",
+                ROOT / "native" / "bootcfg" / "src" / "bin" / "pbc1_probe.rs",
+                ROOT / "native" / "fixtures" / "pooleboot" / "Cargo.toml",
+                ROOT / "native" / "fixtures" / "pooleboot" / "src" / "main.rs",
                 ROOT / "native" / "kernel" / "Cargo.toml",
+                ROOT / "native" / "kernel" / "README.md",
+                ROOT / "native" / "kernel" / "arch" / "x86_64" / "README.md",
+                ROOT / "native" / "kernel" / "linker.ld",
+                ROOT / "native" / "kernel" / "manifest.pkm",
+                ROOT / "native" / "kernel" / "src" / "lib.rs",
                 ROOT / "native" / "kernel" / "src" / "main.rs",
+                ROOT / "native" / "kernel" / "src" / "revalidation.rs",
+                ROOT / "native" / "kernel" / "src" / "xstate.rs",
+                ROOT / "native" / "kernel" / "src" / "xstate_exception.rs",
+                ROOT / "native" / "kernel" / "src" / "privilege_msr.rs",
+                ROOT / "native" / "kernel" / "src" / "physical_memory.rs",
+                ROOT / "native" / "kernel" / "src" / "virtual_memory.rs",
+                ROOT / "native" / "kernel" / "src" / "smp_ipi.rs",
+                ROOT / "native" / "kernel" / "src" / "bin" / "pkreval1_probe.rs",
+                ROOT / "native" / "kernel" / "src" / "arch" / "x86_64.rs",
+                ROOT / "native" / "cpupolicy" / "Cargo.toml",
+                ROOT / "native" / "cpupolicy" / "src" / "lib.rs",
+                ROOT / "native" / "cpupolicy" / "src" / "bin" / "pkerr1_probe.rs",
+                ROOT / "native" / "fixtures" / "poolekernel" / "Cargo.toml",
+                ROOT / "native" / "fixtures" / "poolekernel" / "README.md",
+                ROOT / "native" / "fixtures" / "poolekernel" / "src" / "main.rs",
                 ROOT / "runs" / "pooleos_native_checklist_coverage.json",
                 ROOT / "runs" / "pdc_production_roadmap.json",
                 ROOT / "runs" / "native_architecture_baseline.json",
@@ -3302,6 +3755,146 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runs" / "hardware_target_readiness.json",
                 ROOT / "runs" / "native_tier0_readiness.json",
                 ROOT / "runs" / "native_model_readiness.json",
+                ROOT / "runs" / "native_pooleboot_readiness.json",
+                ROOT / "runs" / "native_kernel_load_readiness.json",
+                ROOT / "runs" / "native-kernel-revalidation-readiness.json",
+                ROOT / "runs" / "native-kernel-transfer-readiness.json",
+                ROOT / "runs" / "native-kernel-trap-readiness.json",
+                ROOT / "runs" / "native-kernel-cpu-policy-readiness.json",
+                ROOT / "runs" / "native-kernel-errata-policy-readiness.json",
+                ROOT / "runs" / "native-kernel-xstate-policy-readiness.json",
+                ROOT / "runs" / "native-kernel-xstate-exception-readiness.json",
+                ROOT / "runs" / "native-kernel-privilege-msr-policy-readiness.json",
+                ROOT / "runs" / "native-kernel-physical-memory-readiness.json",
+                ROOT / "runs" / "native-kernel-virtual-memory-readiness.json",
+                ROOT / "runs" / "native-kernel-smp-ipi-readiness.json",
+                ROOT / "runs" / "native_initial_system_readiness.json",
+                ROOT / "runs" / "native_recovery_readiness.json",
+                ROOT / "runs" / "native_symbol_readiness.json",
+                ROOT / "runs" / "native_microcode_readiness.json",
+                ROOT / "runs" / "native_firmware_readiness.json",
+                ROOT / "runs" / "native_policy_readiness.json",
+                ROOT / "runs" / "native_system_manifest_readiness.json",
+                ROOT / "runs" / "native_boot_handoff_readiness.json",
+                ROOT / "runs" / "native_boot_config_readiness.json",
+                ROOT / "runs" / "native_elf_loader_readiness.json",
+                ROOT / "runs" / "native_kernel_entry_readiness.json",
+                ROOT / "specs" / "native-pooleboot-proof.json",
+                ROOT / "specs" / "native-pooleboot-proof.schema.json",
+                ROOT / "specs" / "native-pooleboot-readiness.schema.json",
+                ROOT / "specs" / "native-kernel-load-contract.json",
+                ROOT / "specs" / "native-kernel-load-contract.schema.json",
+                ROOT / "specs" / "native-kernel-load-readiness.schema.json",
+                ROOT / "specs" / "native-kernel-revalidation-contract.json",
+                ROOT / "specs" / "native-kernel-revalidation-readiness.schema.json",
+                ROOT / "specs" / "native-kernel-transfer-contract.json",
+                ROOT / "specs" / "native-kernel-transfer-readiness.schema.json",
+                ROOT / "specs" / "native-kernel-trap-contract.json",
+                ROOT / "specs" / "native-kernel-trap-readiness.schema.json",
+                ROOT / "specs" / "native-kernel-cpu-policy-contract.json",
+                ROOT / "specs" / "native-kernel-cpu-policy-readiness.schema.json",
+                ROOT / "specs" / "native-kernel-errata-policy-contract.json",
+                ROOT / "specs" / "native-kernel-errata-policy-contract.schema.json",
+                ROOT / "specs" / "native-kernel-errata-policy-readiness.schema.json",
+                ROOT / "specs" / "native-kernel-xstate-policy-contract.json",
+                ROOT / "specs" / "native-kernel-xstate-policy-contract.schema.json",
+                ROOT / "specs" / "native-kernel-xstate-policy-readiness.schema.json",
+                ROOT / "specs" / "native-kernel-xstate-exception-contract.json",
+                ROOT / "specs" / "native-kernel-xstate-exception-contract.schema.json",
+                ROOT / "specs" / "native-kernel-xstate-exception-readiness.schema.json",
+                ROOT / "specs" / "native-kernel-privilege-msr-policy-contract.json",
+                ROOT / "specs" / "native-kernel-privilege-msr-policy-contract.schema.json",
+                ROOT / "specs" / "native-kernel-privilege-msr-policy-readiness.schema.json",
+                ROOT / "specs" / "native-kernel-physical-memory-contract.json",
+                ROOT / "specs" / "native-kernel-physical-memory-contract.schema.json",
+                ROOT / "specs" / "native-kernel-physical-memory-readiness.schema.json",
+                ROOT / "specs" / "native-kernel-virtual-memory-contract.json",
+                ROOT / "specs" / "native-kernel-virtual-memory-contract.schema.json",
+                ROOT / "specs" / "native-kernel-virtual-memory-readiness.schema.json",
+                ROOT / "specs" / "native-kernel-smp-ipi-contract.json",
+                ROOT / "specs" / "native-kernel-smp-ipi-contract.schema.json",
+                ROOT / "specs" / "native-kernel-smp-ipi-readiness.schema.json",
+                ROOT / "specs" / "native-initial-system-contract.json",
+                ROOT / "specs" / "native-initial-system-contract.schema.json",
+                ROOT / "specs" / "native-initial-system-golden-vectors.json",
+                ROOT / "specs" / "native-initial-system-golden-vectors.schema.json",
+                ROOT / "specs" / "native-initial-system-readiness.schema.json",
+                ROOT / "specs" / "native-recovery-contract.json",
+                ROOT / "specs" / "native-recovery-contract.schema.json",
+                ROOT / "specs" / "native-recovery-golden-vectors.json",
+                ROOT / "specs" / "native-recovery-golden-vectors.schema.json",
+                ROOT / "specs" / "native-recovery-readiness.schema.json",
+                ROOT / "specs" / "fixtures" / "prec1-canonical.bin",
+                ROOT / "specs" / "fixtures" / "prec1-canonical-state.bin",
+                ROOT / "specs" / "native-symbol-contract.json",
+                ROOT / "specs" / "native-symbol-contract.schema.json",
+                ROOT / "specs" / "native-symbol-golden-vectors.json",
+                ROOT / "specs" / "native-symbol-golden-vectors.schema.json",
+                ROOT / "specs" / "native-symbol-readiness.schema.json",
+                ROOT / "specs" / "fixtures" / "psym1-canonical.bin",
+                ROOT / "specs" / "fixtures" / "psym1-minimal.bin",
+                ROOT / "specs" / "fixtures" / "psym1-boundary.bin",
+                ROOT / "tests" / "test_native_symbols.py",
+                ROOT / "specs" / "native-microcode-contract.json",
+                ROOT / "specs" / "native-microcode-contract.schema.json",
+                ROOT / "specs" / "native-microcode-golden-vectors.json",
+                ROOT / "specs" / "native-microcode-golden-vectors.schema.json",
+                ROOT / "specs" / "native-microcode-readiness.schema.json",
+                ROOT / "specs" / "fixtures" / "pmcu1-canonical.bin",
+                ROOT / "specs" / "fixtures" / "pmcu1-minimal.bin",
+                ROOT / "specs" / "fixtures" / "pmcu1-boundary.bin",
+                ROOT / "tests" / "test_native_microcode.py",
+                ROOT / "specs" / "native-firmware-contract.json",
+                ROOT / "specs" / "native-firmware-contract.schema.json",
+                ROOT / "specs" / "native-firmware-golden-vectors.json",
+                ROOT / "specs" / "native-firmware-golden-vectors.schema.json",
+                ROOT / "specs" / "native-firmware-readiness.schema.json",
+                ROOT / "tests" / "test_native_firmware.py",
+                ROOT / "specs" / "native-policy-contract.json",
+                ROOT / "specs" / "native-policy-contract.schema.json",
+                ROOT / "specs" / "native-policy-golden-vectors.json",
+                ROOT / "specs" / "native-policy-golden-vectors.schema.json",
+                ROOT / "specs" / "native-policy-readiness.schema.json",
+                ROOT / "specs" / "fixtures" / "ppol1-canonical.bin",
+                ROOT / "specs" / "fixtures" / "ppol1-minimal.bin",
+                ROOT / "specs" / "fixtures" / "ppol1-boundary.bin",
+                ROOT / "specs" / "fixtures" / "ppol1-canonical-pinit.bin",
+                ROOT / "tests" / "test_native_policy.py",
+                ROOT / "specs" / "native-boot-digest-provider.json",
+                ROOT / "specs" / "native-boot-digest-provider.schema.json",
+                ROOT / "specs" / "native-system-manifest-contract.json",
+                ROOT / "specs" / "native-system-manifest-contract.schema.json",
+                ROOT / "specs" / "native-system-manifest-golden-vectors.json",
+                ROOT / "specs" / "native-system-manifest-golden-vectors.schema.json",
+                ROOT / "specs" / "native-system-manifest-readiness.schema.json",
+                ROOT / "specs" / "native-boot-handoff-contract.json",
+                ROOT / "specs" / "native-boot-handoff-contract.schema.json",
+                ROOT / "specs" / "native-boot-handoff-golden-vectors.json",
+                ROOT / "specs" / "native-boot-handoff-golden-vectors.schema.json",
+                ROOT / "specs" / "native-boot-handoff-readiness.schema.json",
+                ROOT / "specs" / "native-boot-config-contract.json",
+                ROOT / "specs" / "native-boot-config-contract.schema.json",
+                ROOT / "specs" / "native-boot-config-golden-vectors.json",
+                ROOT / "specs" / "native-boot-config-golden-vectors.schema.json",
+                ROOT / "specs" / "native-boot-config-readiness.schema.json",
+                ROOT / "specs" / "native-elf-loader-contract.json",
+                ROOT / "specs" / "native-elf-loader-contract.schema.json",
+                ROOT / "specs" / "native-elf-loader-golden-vectors.json",
+                ROOT / "specs" / "native-elf-loader-golden-vectors.schema.json",
+                ROOT / "specs" / "native-elf-loader-readiness.schema.json",
+                ROOT / "specs" / "native-kernel-entry-contract.json",
+                ROOT / "specs" / "native-kernel-entry-contract.schema.json",
+                ROOT / "specs" / "native-kernel-entry-readiness.schema.json",
+                ROOT / "tests" / "test_native_kernel_transfer.py",
+                ROOT / "tests" / "test_native_kernel_trap.py",
+                ROOT / "tests" / "test_native_kernel_cpu_policy.py",
+                ROOT / "tests" / "test_native_kernel_errata_policy.py",
+                ROOT / "tests" / "test_native_kernel_xstate_policy.py",
+                ROOT / "tests" / "test_native_kernel_xstate_exception.py",
+                ROOT / "tests" / "test_native_kernel_privilege_msr_policy.py",
+                ROOT / "tests" / "test_native_kernel_physical_memory.py",
+                ROOT / "tests" / "test_native_kernel_virtual_memory.py",
+                ROOT / "tests" / "test_native_kernel_smp_ipi.py",
                 ROOT / "specs" / "pdc-source-intake.schema.json",
                 ROOT / "specs" / "pdc-math-contract.schema.json",
                 ROOT / "specs" / "pdc-golden-vectors.schema.json",
@@ -3379,6 +3972,30 @@ def main(argv: list[str] | None = None) -> int:
     checks.append(check_hardware_target_readiness())
     checks.append(check_native_tier0_readiness())
     checks.append(check_native_model_readiness())
+    checks.append(check_native_boot_trust_readiness())
+    checks.append(check_native_pooleboot_readiness())
+    checks.append(check_native_kernel_load_readiness())
+    checks.append(check_native_kernel_revalidation_readiness())
+    checks.append(check_native_kernel_transfer_readiness())
+    checks.append(check_native_kernel_trap_readiness())
+    checks.append(check_native_kernel_cpu_policy_readiness())
+    checks.append(check_native_kernel_errata_policy_readiness())
+    checks.append(check_native_kernel_xstate_policy_readiness())
+    checks.append(check_native_kernel_xstate_exception_readiness())
+    checks.append(check_native_kernel_privilege_msr_policy_readiness())
+    checks.append(check_native_kernel_physical_memory_readiness())
+    checks.append(check_native_kernel_virtual_memory_readiness())
+    checks.append(check_native_initial_system_readiness())
+    checks.append(check_native_recovery_readiness())
+    checks.append(check_native_symbol_readiness())
+    checks.append(check_native_microcode_readiness())
+    checks.append(check_native_firmware_readiness())
+    checks.append(check_native_policy_readiness())
+    checks.append(check_native_system_manifest_readiness())
+    checks.append(check_native_boot_handoff_readiness())
+    checks.append(check_native_boot_config_readiness())
+    checks.append(check_native_elf_loader_readiness())
+    checks.append(check_native_kernel_entry_readiness())
     checks.append(check_publication_boundary())
     checks.extend(check_claim_schema())
     checks.extend(check_claim_examples())

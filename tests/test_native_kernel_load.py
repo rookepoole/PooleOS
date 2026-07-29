@@ -1,0 +1,285 @@
+import copy
+import json
+import struct
+import sys
+import unittest
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from runtime import native_elf_loader, native_kernel_load, native_pooleboot  # noqa: E402
+from runtime.schema_validation import validate_json  # noqa: E402
+
+
+def synthetic_pooleboot() -> bytes:
+    data = bytearray(512)
+    data[0:2] = b"MZ"
+    struct.pack_into("<I", data, 0x3C, 0x80)
+    data[0x80:0x84] = b"PE\0\0"
+    struct.pack_into("<HHIIIHH", data, 0x84, 0x8664, 0, 0, 0, 0, 240, 0x22)
+    optional = 0x98
+    struct.pack_into("<H", data, optional, 0x20B)
+    struct.pack_into("<I", data, optional + 16, 0x1000)
+    struct.pack_into("<Q", data, optional + 24, 0x140000000)
+    struct.pack_into("<II", data, optional + 32, 0x1000, 0x200)
+    struct.pack_into("<II", data, optional + 56, 0x2000, 0x200)
+    struct.pack_into("<H", data, optional + 68, 10)
+    struct.pack_into("<I", data, optional + 108, 0)
+    return bytes(data)
+
+
+def valid_markers() -> list[str]:
+    return [
+        "POOLEBOOT/0.1 ENTRY",
+        "POOLEBOOT/0.1 SYSTEM_TABLE PASS revision=0x00020046",
+        "POOLEBOOT/0.1 BOOT_SERVICES PASS",
+        "POOLEBOOT/0.1 WATCHDOG status=0x0000000000000000",
+        "POOLEBOOT/0.1 CONSOLE PASS",
+        "POOLEBOOT/0.1 CONFIG PASS count=10 acpi20=1 smbios3=0 smbios2=1",
+        "POOLEBOOT/0.1 FILESYSTEM PASS loaded_image=1 simple_fs=1 root=1",
+        "POOLEBOOT/0.1 BOOTCFG PASS bytes=229 entries=1 default_hash=61053F0E3EBBD272 timeout_ms=0 attempts=3 slot=1 manifest_max_bytes=65536",
+        "POOLEBOOT/0.1 MANIFEST PASS bytes=2615 artifacts=7 id_hash=4A2625333244591C slot=1 version=1 minimum_secure_version=1",
+        "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=409600 image_bytes=458752 sha256_prefix=6B8A9C2C3EAC559E path=manifest",
+        "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=409600 path=manifest_development",
+        "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=458752 pages=112 entry_offset=36864 relocations=959 files_closed=12 pools_freed=11 fnv1a64=19B79DF51C3C95C9",
+        "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=1ACE21ED949FAC5D retained=1 signatures=0 measured=0",
+        "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=E15FF547B310FC526C5880D83FD88D6B0ED3A5B2E2849F8EEE0FE9D15A7EB463 retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
+        "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=22D34E581E42D05BE051B9418C39FA130051BECB6733F705D2F9586D4ADE2C0B state_sha256=A2E36E0C1D0AE3DF2CB23C5D5BE09C830948128013EFB076CBBD9C69D8959896 source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
+        "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
+        "POOLEBOOT/0.1 FRAME READY",
+        "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=112 ro=21 rx=79 rw=12 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=F43490703F3DCA21",
+        "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=112 physical_bits=40 mapped_fnv1a64=19B79DF51C3C95C9 framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
+        "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=32 handoff_pages=256 guards=2 total_pages=400 stack_pt=113 handoff_pt=146 kernel_phys=000000001DD29000 root=000000001DE37000 stack_phys=000000001DE3B000 stack_top=FFFFFFFF80091000 handoff_phys=000000001DA87000 handoff_virt=FFFFFFFF80092000 retained_fnv1a64=7E827DE1C8B94B7F original_cr3=restored firmware_calls_while_active=0",
+        "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5120 records=5 memory_entries=97 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=46080EB7 fnv1a64=C3AEE738606C61BE state=boot_services_exited bytes_unchanged=1",
+        "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4656 descriptor_bytes=48 descriptors=97",
+        "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=112 artifact_pages=9 table_pages=4 stack_pages=32 handoff_pages=256",
+        "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=not_called exit_boot_services=called transfer=stopped",
+        "POOLEBOOT/0.1 STOP BEFORE TRANSFER",
+    ]
+
+
+class NativeKernelLoadTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.contract = native_kernel_load.read_json(ROOT / native_kernel_load.CONTRACT_RELATIVE)
+        cls.readiness = native_kernel_load.read_json(ROOT / native_kernel_load.READINESS_RELATIVE)
+
+    def test_contract_and_readiness_match_schemas(self) -> None:
+        cases = (
+            (self.contract, native_kernel_load.CONTRACT_SCHEMA_RELATIVE),
+            (self.readiness, native_kernel_load.READINESS_SCHEMA_RELATIVE),
+        )
+        for value, schema_relative in cases:
+            with self.subTest(schema=schema_relative):
+                schema = native_kernel_load.read_json(ROOT / schema_relative)
+                self.assertEqual([], list(validate_json(value, schema)))
+
+    def test_contract_and_readiness_pass_semantic_validation(self) -> None:
+        self.assertEqual([], native_kernel_load.contract_errors(self.contract, ROOT))
+        self.assertEqual([], native_kernel_load.readiness_errors(self.readiness, ROOT))
+
+    def test_canonical_config_is_exact_pbc1(self) -> None:
+        data = native_kernel_load.canonical_config_bytes()
+        self.assertEqual(229, len(data))
+        self.assertTrue(data.endswith(b"end=PBC1\n"))
+        self.assertIn(b"default_entry=normal\n", data)
+
+    def test_extended_media_is_deterministic_and_exactly_inspected(self) -> None:
+        efi = synthetic_pooleboot()
+        config = native_kernel_load.canonical_config_bytes()
+        kernel = native_elf_loader.build_fixture("minimal_relative_v1")
+        manifest = native_kernel_load.canonical_manifest_bytes(kernel)
+        first = native_kernel_load.build_media_bytes(efi, config, manifest, kernel)
+        second = native_kernel_load.build_media_bytes(efi, config, manifest, kernel)
+        self.assertEqual(first, second)
+        inspection = native_kernel_load.inspect_media_bytes(first)
+        self.assertEqual(
+            [
+                native_pooleboot.FALLBACK_PATH,
+                native_kernel_load.CONFIG_PATH,
+                native_kernel_load.MANIFEST_PATH,
+                native_kernel_load.KERNEL_PATH,
+                native_kernel_load.INITIAL_SYSTEM_PATH,
+                native_kernel_load.RECOVERY_PATH,
+                native_kernel_load.SYMBOLS_PATH,
+                native_kernel_load.MICROCODE_PATH,
+                native_kernel_load.FIRMWARE_PATH,
+                native_kernel_load.POLICY_PATH,
+                native_kernel_load.TRUST_POLICY_PATH,
+                native_kernel_load.TRUST_STATE_PATH,
+            ],
+            [item["path"] for item in inspection["files"]],
+        )
+        self.assertEqual("normal", inspection["config"]["default_entry"])
+        self.assertEqual(4, len(inspection["kernel"]["plan"]["mappings"]))
+        self.assertEqual("PINIT1", inspection["initial_system"]["contract_id"])
+        self.assertEqual("PREC1", inspection["recovery"]["contract_id"])
+        self.assertFalse(inspection["recovery"]["activation_allowed"])
+        self.assertFalse(inspection["recovery"]["pooleboot_enforced"])
+        self.assertFalse(inspection["recovery"]["poolekernel_enforced"])
+        self.assertFalse(inspection["recovery"]["recovery_executed"])
+        self.assertEqual("PSYM1", inspection["symbols"]["contract_id"])
+        self.assertEqual(3, inspection["symbols"]["symbol_count"])
+        self.assertFalse(inspection["symbols"]["activation_allowed"])
+        self.assertFalse(inspection["symbols"]["pooleboot_enforced"])
+        self.assertFalse(inspection["symbols"]["poolekernel_enforced"])
+        self.assertFalse(inspection["symbols"]["symbols_consumed"])
+        self.assertFalse(inspection["symbols"]["runtime_addresses_disclosed"])
+        self.assertFalse(inspection["symbols"]["full_debug_file_on_media"])
+        self.assertFalse(inspection["symbols"]["authority_created"])
+        self.assertEqual("PFWM1", inspection["firmware"]["contract_id"])
+        self.assertEqual(3, inspection["firmware"]["component_count"])
+        self.assertEqual(2, inspection["firmware"]["dependency_count"])
+        self.assertFalse(inspection["firmware"]["activation_allowed"])
+        self.assertFalse(inspection["firmware"]["live_firmware_inventory_observed"])
+        self.assertFalse(inspection["firmware"]["external_payload_bytes_embedded"])
+        self.assertFalse(inspection["firmware"]["firmware_mutated"])
+        self.assertTrue(inspection["firmware"]["synthetic_manifest_only"])
+        self.assertFalse(inspection["firmware"]["authority_created"])
+        self.assertEqual("PPOL1", inspection["policy"]["contract_id"])
+        self.assertEqual(6, inspection["policy"]["mode_count"])
+        self.assertEqual(11, inspection["policy"]["capability_rule_count"])
+        self.assertTrue(inspection["policy"]["initial_system_cross_bound"])
+        self.assertTrue(inspection["policy"]["safe_floor_validated"])
+        self.assertTrue(inspection["policy"]["recovery_floor_validated"])
+        self.assertFalse(inspection["policy"]["activation_allowed"])
+        self.assertFalse(inspection["policy"]["pooleboot_enforced"])
+        self.assertFalse(inspection["policy"]["poolekernel_enforced"])
+        self.assertFalse(inspection["policy"]["policy_decision_applied"])
+        self.assertFalse(inspection["policy"]["pooleglyph_executable_authority"])
+        self.assertFalse(inspection["policy"]["authority_created"])
+        self.assertEqual(
+            native_kernel_load.native_inner_live.PROOF_ID,
+            inspection["inner_set"]["proof_id"],
+        )
+        self.assertEqual(6, inspection["inner_set"]["parser_count"])
+        self.assertEqual(6, inspection["inner_set"]["cross_binding_count"])
+        self.assertEqual(6, inspection["inner_set"]["development_denial_count"])
+        self.assertEqual(0, inspection["inner_set"]["actions_authorized"])
+        self.assertEqual("PBTRUST1", inspection["trust_state"]["contract_id"])
+        self.assertEqual("pbtrust_policy_unsigned", inspection["trust_state"]["denial"])
+        self.assertEqual(14, inspection["trust_state"]["binding_count"])
+        self.assertEqual(0, inspection["trust_state"]["authority_grants"])
+        self.assertEqual(0, inspection["trust_state"]["state_writes"])
+
+    def test_extended_media_rejects_fat_and_config_mutations(self) -> None:
+        media = bytearray(
+            native_kernel_load.build_media_bytes(
+                synthetic_pooleboot(),
+                native_kernel_load.canonical_config_bytes(),
+                native_kernel_load.canonical_manifest_bytes(
+                    native_elf_loader.build_fixture("minimal_relative_v1")
+                ),
+                native_elf_loader.build_fixture("minimal_relative_v1"),
+            )
+        )
+        inspection = native_kernel_load.inspect_media_bytes(bytes(media))
+        fat_sectors = inspection["fat32"]["fat_sector_count"]
+        second_fat = (
+            native_pooleboot.ESP_START_LBA
+            + native_pooleboot.FAT_RESERVED_SECTORS
+            + fat_sectors
+        ) * native_pooleboot.SECTOR_BYTES
+        changed_fat = media[:]
+        changed_fat[second_fat + 8] ^= 1
+        with self.assertRaises(native_kernel_load.KernelLoadError):
+            native_kernel_load.inspect_media_bytes(bytes(changed_fat))
+
+        config_cluster = 5 + inspection["files"][0]["cluster_count"] + 1
+        data_start_lba = (
+            native_pooleboot.ESP_START_LBA
+            + native_pooleboot.FAT_RESERVED_SECTORS
+            + native_pooleboot.FAT_COUNT * fat_sectors
+        )
+        config_offset = (data_start_lba + config_cluster - 2) * native_pooleboot.SECTOR_BYTES
+        changed_config = media[:]
+        changed_config[config_offset] = ord("X")
+        with self.assertRaises(native_kernel_load.KernelLoadError):
+            native_kernel_load.inspect_media_bytes(bytes(changed_config))
+
+    def test_marker_contract_captures_load_mapping_and_cleanup(self) -> None:
+        summary = native_kernel_load.validate_markers(valid_markers())
+        self.assertEqual(25, summary["marker_count"])
+        self.assertEqual(6, summary["artifact_set"]["artifact_count"])
+        self.assertEqual(6, summary["inner_set"]["parser_count"])
+        self.assertEqual(0, summary["inner_set"]["authority_grants"])
+        self.assertEqual("pbtrust_policy_unsigned", summary["trust_state"]["denial"])
+        self.assertEqual(0, summary["trust_state"]["authority_grants"])
+        self.assertEqual(112, summary["kernel"]["page_count"])
+        self.assertEqual(0, summary["kernel_map"]["writable_executable_page_count"])
+        self.assertEqual(112, summary["kernel_map"]["mapped_page_count"])
+        self.assertTrue(summary["kernel_map"]["original_cr3_restored"])
+        self.assertTrue(summary["kernel_map"]["tables_retained"])
+        self.assertTrue(summary["kernel"]["pages_retained"])
+        self.assertFalse(summary["pbp1"]["pre_exit"])
+        self.assertTrue(summary["pbp1"]["boot_services_exited"])
+        self.assertTrue(summary["boot_exit"]["stopped_before_transfer"])
+
+    def test_marker_contract_rejects_omission_wx_and_page_mismatch(self) -> None:
+        markers = valid_markers()
+        with self.assertRaises(native_kernel_load.KernelLoadError):
+            native_kernel_load.validate_markers(markers[:-1])
+        writable = markers[:]
+        writable[17] = writable[17].replace("wx=0", "wx=1")
+        with self.assertRaises(native_kernel_load.KernelLoadError):
+            native_kernel_load.validate_markers(writable)
+        page_mismatch = markers[:]
+        page_mismatch[11] = page_mismatch[11].replace("pages=112", "pages=113")
+        with self.assertRaises(native_kernel_load.KernelLoadError):
+            native_kernel_load.validate_markers(page_mismatch)
+        active_mismatch = markers[:]
+        active_mismatch[18] = active_mismatch[18].replace(
+            "mapped_fnv1a64=19B79DF51C3C95C9",
+            "mapped_fnv1a64=0000000000000000",
+        )
+        with self.assertRaises(native_kernel_load.KernelLoadError):
+            native_kernel_load.validate_markers(active_mismatch)
+        retained_mismatch = markers[:]
+        retained_mismatch[19] = retained_mismatch[19].replace(
+            "firmware_calls_while_active=0", "firmware_calls_while_active=1"
+        )
+        with self.assertRaises(native_kernel_load.KernelLoadError):
+            native_kernel_load.validate_markers(retained_mismatch)
+
+    def test_claim_overreach_is_rejected(self) -> None:
+        claims = native_kernel_load.expected_claims()
+        native_kernel_load.validate_claims(claims)
+        claims["kernel_entry_called"] = True
+        with self.assertRaises(native_kernel_load.KernelLoadError):
+            native_kernel_load.validate_claims(claims)
+
+    def test_readiness_detects_stale_input_and_oracle_divergence(self) -> None:
+        stale = copy.deepcopy(self.readiness)
+        stale["bindings"]["implementation_inputs"][0]["sha256"] = "0" * 64
+        self.assertTrue(
+            any(
+                "stale implementation input" in item
+                for item in native_kernel_load.readiness_errors(stale, ROOT)
+            )
+        )
+        divergent = copy.deepcopy(self.readiness)
+        divergent["media"]["inspection"]["kernel"]["loaded_fnv1a64"] = "0" * 16
+        self.assertTrue(
+            any(
+                "oracle" in item.lower()
+                for item in native_kernel_load.readiness_errors(divergent, ROOT)
+            )
+        )
+        command_drift = copy.deepcopy(self.readiness)
+        command_drift["execution"]["normalized_command"][0] = "$WRONG_QEMU"
+        self.assertTrue(
+            any(
+                "normalized command digest mismatch" in item
+                for item in native_kernel_load.readiness_errors(command_drift, ROOT)
+            )
+        )
+
+    def test_public_readiness_has_no_absolute_user_path(self) -> None:
+        encoded = json.dumps(self.readiness, ensure_ascii=True)
+        self.assertIsNone(native_pooleboot.ABSOLUTE_USER_PATH.search(encoded))
+
+
+if __name__ == "__main__":
+    unittest.main()

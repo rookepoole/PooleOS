@@ -18,7 +18,35 @@ from runtime import pgb2_bundle as pgb2  # noqa: E402
 from runtime import adr_ratification  # noqa: E402
 from runtime import hardware_target  # noqa: E402
 from runtime import lab_readiness  # noqa: E402
+from runtime import native_boot_config  # noqa: E402
+from runtime import native_boot_handoff  # noqa: E402
+from runtime import native_boot_trust  # noqa: E402
+from runtime import native_elf_loader  # noqa: E402
+from runtime import native_firmware  # noqa: E402
+from runtime import native_kernel_entry  # noqa: E402
+from runtime import native_kernel_load  # noqa: E402
+from runtime import native_kernel_revalidation  # noqa: E402
+from runtime import native_kernel_transfer  # noqa: E402
+from runtime import native_kernel_trap  # noqa: E402
+from runtime import native_kernel_cpu_policy  # noqa: E402
+from runtime import native_kernel_errata_policy  # noqa: E402
+from runtime import native_kernel_xstate_policy  # noqa: E402
+from runtime import native_kernel_xstate_exception  # noqa: E402
+from runtime import native_kernel_privilege_msr_policy  # noqa: E402
+from runtime import native_kernel_physical_memory  # noqa: E402
+from runtime import native_kernel_virtual_memory  # noqa: E402
+from runtime import native_kernel_interrupt_time  # noqa: E402
+from runtime import native_kernel_smp_first_ap  # noqa: E402
+from runtime import native_kernel_smp_percpu_runtime  # noqa: E402
+from runtime import native_kernel_smp_ipi  # noqa: E402
+from runtime import native_initial_system  # noqa: E402
+from runtime import native_microcode  # noqa: E402
 from runtime import native_models  # noqa: E402
+from runtime import native_policy  # noqa: E402
+from runtime import native_pooleboot  # noqa: E402
+from runtime import native_recovery  # noqa: E402
+from runtime import native_symbols  # noqa: E402
+from runtime import native_system_manifest  # noqa: E402
 from runtime import n0_owner_decision_packet  # noqa: E402
 from runtime import n0_owner_response  # noqa: E402
 from runtime import native_tier0  # noqa: E402
@@ -38,19 +66,61 @@ N0_OWNER_RESPONSE_RECEIPT = ROOT / "runs" / "n0_owner_response_receipt.json"
 NATIVE_TOOLCHAIN_QUALIFICATION = ROOT / "runs" / "native_toolchain_qualification.json"
 HARDWARE_TARGET_READINESS = ROOT / "runs" / "hardware_target_readiness.json"
 NATIVE_MODEL_READINESS = ROOT / "runs" / "native_model_readiness.json"
+NATIVE_BOOT_CONFIG_READINESS = ROOT / "runs" / "native_boot_config_readiness.json"
+NATIVE_BOOT_HANDOFF_READINESS = ROOT / "runs" / "native_boot_handoff_readiness.json"
+NATIVE_BOOT_TRUST_READINESS = ROOT / "runs" / "native_boot_trust_readiness.json"
+NATIVE_ELF_LOADER_READINESS = ROOT / "runs" / "native_elf_loader_readiness.json"
+NATIVE_KERNEL_ENTRY_READINESS = ROOT / "runs" / "native_kernel_entry_readiness.json"
+NATIVE_KERNEL_LOAD_READINESS = ROOT / "runs" / "native_kernel_load_readiness.json"
+NATIVE_KERNEL_REVALIDATION_READINESS = ROOT / "runs" / "native-kernel-revalidation-readiness.json"
+NATIVE_KERNEL_TRANSFER_READINESS = ROOT / "runs" / "native-kernel-transfer-readiness.json"
+NATIVE_KERNEL_TRAP_READINESS = ROOT / "runs" / "native-kernel-trap-readiness.json"
+NATIVE_KERNEL_CPU_POLICY_READINESS = ROOT / "runs" / "native-kernel-cpu-policy-readiness.json"
+NATIVE_KERNEL_ERRATA_POLICY_READINESS = ROOT / "runs" / "native-kernel-errata-policy-readiness.json"
+NATIVE_KERNEL_XSTATE_POLICY_READINESS = ROOT / "runs" / "native-kernel-xstate-policy-readiness.json"
+NATIVE_KERNEL_XSTATE_EXCEPTION_READINESS = (
+    ROOT / "runs" / "native-kernel-xstate-exception-readiness.json"
+)
+NATIVE_KERNEL_PRIVILEGE_MSR_POLICY_READINESS = (
+    ROOT / "runs" / "native-kernel-privilege-msr-policy-readiness.json"
+)
+NATIVE_KERNEL_PHYSICAL_MEMORY_READINESS = (
+    ROOT / "runs" / "native-kernel-physical-memory-readiness.json"
+)
+NATIVE_KERNEL_VIRTUAL_MEMORY_READINESS = (
+    ROOT / "runs" / "native-kernel-virtual-memory-readiness.json"
+)
+NATIVE_KERNEL_INTERRUPT_TIME_READINESS = (
+    ROOT / "runs" / "native-kernel-interrupt-time-readiness.json"
+)
+NATIVE_KERNEL_SMP_FIRST_AP_READINESS = (
+    ROOT / "runs" / "native-kernel-smp-first-ap-readiness.json"
+)
+NATIVE_KERNEL_SMP_PERCPU_RUNTIME_READINESS = (
+    ROOT / "runs" / "native-kernel-smp-percpu-runtime-readiness.json"
+)
+NATIVE_KERNEL_SMP_IPI_READINESS = ROOT / "runs" / "native-kernel-smp-ipi-readiness.json"
+NATIVE_INITIAL_SYSTEM_READINESS = ROOT / "runs" / "native_initial_system_readiness.json"
+NATIVE_FIRMWARE_READINESS = ROOT / "runs" / "native_firmware_readiness.json"
+NATIVE_MICROCODE_READINESS = ROOT / "runs" / "native_microcode_readiness.json"
+NATIVE_POLICY_READINESS = ROOT / "runs" / "native_policy_readiness.json"
+NATIVE_POOLEBOOT_READINESS = ROOT / "runs" / "native_pooleboot_readiness.json"
+NATIVE_RECOVERY_READINESS = ROOT / "runs" / "native_recovery_readiness.json"
+NATIVE_SYMBOL_READINESS = ROOT / "runs" / "native_symbol_readiness.json"
+NATIVE_SYSTEM_MANIFEST_READINESS = ROOT / "runs" / "native_system_manifest_readiness.json"
 NATIVE_TIER0_READINESS = ROOT / "runs" / "native_tier0_readiness.json"
 
 
 DEFAULT_GAPS = [
     "The completed owner response records both ADR dispositions and all 38 objective definitions while accepting zero measurements, but the selected FIDO2 hardware key is unavailable; trusted public-key custody, detached signatures, the signed baseline tag, immutable release refs, and retained CI review evidence remain open.",
     "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
-    "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, and three bounded TLC models detect required boot-slot, capability, stale-mapping, and early-reuse counterexamples; current source rebuilds, real PooleBoot launch evidence, complete reference devices/fault campaigns, IPC/scheduler/PooleFS models, all implementation-trace cross-checks, and second-host reproduction remain open.",
-    "No PooleBoot PE32+ UEFI loader or frozen native boot protocol.",
-    "No native boot trust, measured boot, kernel image, early runtime, serial panic, or crash path.",
-    "No native CPU, interrupt, time, SMP, physical-memory, virtual-memory, or reclaim implementation.",
+    "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, six bounded TLC models cover all seven required domains and detect twenty-one required counterexamples, and a bounded PooleBoot proof executes under the pinned profile; current source rebuilds, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open.",
+    "A reproducible unsigned PooleBoot proof application boots twice with deterministic twelve-file GPT/FAT32 media, exact GOP frames, retained PKMAP2 kernel/PSM1/six-artifact/PBTP1/PBTS1/table/guarded-stack/handoff storage, independently reconstructed PBLIVE4 bytes including a firmware RSDP record, bounded PBEXIT1 retry, successful ExitBootServices, and zero later firmware calls. The ordinary build stops before transfer; a separate opt-in QEMU-only PKXFER1 build installs retained CR3/RSP, transfers once, and live-executes PKREVAL1 over all nine retained files before an exact terminal unsigned-policy denial with zero signatures, authority, actions, writes, or firmware calls. PBSTATE1 still only models authenticated monotonic-anchor validation, deterministic redundant-copy selection, rollback/future rejection, repair/migration planning, and nine interrupted-transition recovery boundaries with no performed effects. Policy signature verification, authenticated revocation, a real cryptographic monotonic writable state provider, persistent backend I/O and executed repair/migration, Secure Boot-state verification, capability creation, activation or update application, policy application, recovery execution or symbol consumption, licensed real vendor payload intake and validation, live FMP/ESRT/PLDM inventory, privileged per-processor revision observation, initial-system execution, final framebuffer remap/revocation, production transfer, target-firmware and physical-media qualification, and N5 exit remain open.",
+    "A real reproducible 112-page PooleKernel image, PKENTRY1 intake, allocation-free PKREVAL1 verifier, bounded early diagnostics, opt-in QEMU-only live entry, BSP-only PKTRAP1 descriptor/exception containment, bounded BSP PKXSTATE1 x87/SSE ownership, PKPMM7 scrubbed lifecycle and checked repeated ledger growth, guarded stable-manager and generation-owned active-ledger transactions, PKACPI1 required-table snapshot/reclaim evidence, PKVM3 sparse PMM-owned direct-map evidence, PKIRQ1 one-BSP timer evidence, PKSMP1 one-AP lifecycle evidence, PKSMP2 one-AP processor-local runtime evidence, and PKSMP3 fixed development-only IPI transport evidence exist, but authenticated boot trust, measured boot, production transfer, production capability authority, real remote TLB shootdown, multi-AP and scheduler ownership, retained crash evidence, target execution, and N6/N7/N8/N9 exit remain open.",
+    "PKERR1 freezes a pure exact-target CPU/errata rejection policy, PKXSTATE1 proves bounded x87/SSE standard-XSAVE ownership, PKXEXC1 proves deliberate #MF/#XM recovery plus terminal test-only #NM rejection with a linked scope audit under WHPX, and PKMSR1 proves only a read-only qemu64 BSP system-linkage/global-MCA/unsupported-PMU observation. PKPMM7 supplies bounded physical ownership, scrubbed lifecycle transactions, a stable guarded five-page manager, external generation-owned active ledgers, checked automatic growth with retirement, bounded-window fallback and pre-effect rejection, streamed lifecycle-gated Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation and retained copy/readback; PKVM1 supplies inactive page-table transactions; PKVM3 proves one-BSP activation/restoration of a complete-profile PMM-owned sparse direct map; PKIRQ1 proves one bounded local timer transaction; PKSMP1 proves one first-AP start/quiesce/park lifecycle; PKSMP2 proves one processor-local GDT/TSS/IDT, guarded-stack, x87/SSE-owner, and interrupt-vector transaction; and PKSMP3 proves six fixed development-only IPI operation classes with checked acknowledgements, denials, timeout, EOI, and teardown. No target-qualified complete native CPU policy, applicable Model 40h-4Fh errata authority, direct numeric client microcode floor or ratified replacement, target-specific privileged-MSR semantics, syscall/MCE/PMU activation, AVX/extended state, user-task exception delivery, scheduler or migration integration, general interrupt routing/time services, production capability authority, multi-AP operation, real SMP shootdown, AML or complete ACPI resource-graph execution, complete kernel/user address spaces, heap, MMIO/PAT/MTRR qualification, interrupt-context or concurrent allocator, general pressure, or OOM implementation exists.",
     "The sanitized Tier 1 identity and bounded user-mode CPUID transcript match, but MSR, PCI configuration-space, Secure Boot, TPM, SPD, sensor/power, standards-hash, lab-safety, native enumeration, and physical qualification evidence remain open.",
     "No native DMA/IOMMU/interrupt-remapping confinement.",
-    "No native scheduler, task, syscall, capability, IPC, isolation, asynchronous-I/O, or quota implementation.",
+    "PKPMM7 supplies bounded one-BSP physical-page ownership, scrub-before-allocation and scrub-before-reuse with full readback and fault rollback, a stable guarded five-page manager, external generation-owned guarded ledgers, checked automatic repeated growth, verified retirement, bounded-window fallback and pre-effect rejection, exact post-ExitBootServices Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation plus retained snapshot copy/readback. PKVM1 supplies inactive four-level 4 KiB transactions, PKVM3 supplies a complete-profile PMM-owned sparse direct map, cache-alias rejection, exact CR3 restoration, three local invalidation receipts, and one-BSP generation-retirement gating, and PKSMP3 supplies a bounded development-only IPI transport whose shootdown operation performs zero TLB invalidations. Generation-bound remote TLB invalidation and generation-safe remote deferred reclaim, production capability authority, multi-AP operation, incremental concurrent map replacement, huge pages, PCID, COW, user faults, pager IPC, cache/MMIO qualification, heaps/object caches, interrupt-context allocation, concurrency/SMP, general pressure and OOM policy, scheduler, task, syscall, capability, IPC, isolation, and asynchronous I/O remain open.",
     "No native security, cryptography, TPM, secrets, MAC, privacy implementation, or external review.",
     "No isolated native driver domains or VIRTIO reference drivers.",
     "No native block, NVMe, USB, input, VFS, PooleFS, or persistent-data path.",
@@ -77,7 +147,12 @@ def run_doctor(*, include_runtime: bool) -> dict:
         stderr=subprocess.STDOUT,
         check=False,
     )
-    detail = "\n".join(completed.stdout.splitlines()[-8:])
+    output_lines = completed.stdout.splitlines()
+    if completed.returncode == 0:
+        detail = "\n".join(output_lines[-8:])
+    else:
+        failure_lines = [line for line in output_lines if line.startswith("FAIL ")]
+        detail = "\n".join([*failure_lines[-12:], "--- doctor tail ---", *output_lines[-8:]])
     return readiness.make_check("pooleos_doctor", completed.returncode == 0, detail)
 
 
@@ -752,23 +827,1884 @@ def check_native_model_readiness(path: Path = NATIVE_MODEL_READINESS) -> dict:
     runs = artifact.get("runs", [])
     if [item.get("id") for item in runs if isinstance(item, dict)] != list(native_models.RUN_IDS):
         errors.append("bounded model run set changed")
-    if summary.get("safe_run_pass_count") != 3 or summary.get("hostile_counterexample_count") != 4:
+    if summary.get("safe_run_pass_count") != 6 or summary.get("hostile_counterexample_count") != 21:
         errors.append("safe or hostile model evidence is incomplete")
-    if summary.get("repeat_match_count") != 7 or summary.get("negative_control_pass_count") != 14:
+    if summary.get("repeat_match_count") != 27 or summary.get("negative_control_pass_count") != 31:
         errors.append("model determinism or negative controls are incomplete")
-    if coverage.get("modeled_count") != 4 or coverage.get("open_count") != 3:
+    if coverage.get("modeled_count") != 7 or coverage.get("open_count") != 0:
         errors.append("bounded model domain coverage changed")
     if summary.get("implementation_trace_cross_check_count") != 0:
         errors.append("implementation trace cross-check is overclaimed")
     if artifact.get("n4_model_slice_satisfied") is not True or artifact.get("n4_exit_gate_satisfied") is not False:
         errors.append("N4 model-slice or exit boundary changed")
     detail = (
-        "contract=POOLEOS-N4-MODELS-2; models=3; safe=3/3; counterexamples=4/4; "
-        "repeats=7/7; negatives=14/14; domains=4/7; trace_cross_checks=0/3; "
+        "contract=POOLEOS-N4-MODELS-5; models=6; safe=6/6; counterexamples=21/21; "
+        "repeats=27/27; negatives=31/31; domains=7/7; trace_cross_checks=0/6; "
         "formal_proof=false; n4_exit=false; production_promotion_allowed=false"
     )
     return readiness.make_check(
         "native_model_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_boot_trust_readiness(path: Path = NATIVE_BOOT_TRUST_READINESS) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-boot-trust-readiness.schema.json"
+    )
+    errors = [
+        f"native boot trust readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_boot_trust_readiness",
+            False,
+            "; ".join(errors) or "native boot trust readiness is not an object",
+        )
+    errors.extend(native_boot_trust.readiness_errors(artifact, ROOT))
+    build = artifact.get("build", {})
+    differential = artifact.get("differential", {})
+    development = artifact.get("development_integration", {})
+    controls = artifact.get("negative_controls", [])
+    if (
+        build.get("rust_host_tests_passed") != 12
+        or build.get("rust_host_tests_total") != 12
+        or build.get("pooleboot_uefi_integration_builds_passed") != 1
+        or build.get("pooleboot_uefi_integration_builds_total") != 1
+    ):
+        errors.append("PBTRUST1 build evidence is incomplete")
+    if any(
+        differential.get(name, {}).get("cases") != 8192
+        or differential.get(name, {}).get("mismatches") != 0
+        for name in (
+            "policy_parser",
+            "state_parser",
+            "authorization",
+            "backend_selection",
+        )
+    ):
+        errors.append("PBTRUST1 differential evidence is incomplete")
+    if len(controls) != 105 or any(item.get("status") != "pass" for item in controls):
+        errors.append("PBTRUST1 hostile-control evidence is incomplete")
+    expected_development = {
+        "policy_bytes": 320,
+        "state_bytes": 256,
+        "binding_count": 14,
+        "denial_count": 1,
+        "denial": "pbtrust_policy_unsigned",
+        "state_source": "esp_candidate_not_persistent_authority",
+        "state_authenticated": False,
+        "state_monotonic": False,
+        "state_backend_writable": False,
+        "signature_verifications": 0,
+        "authority_grants": 0,
+        "state_writes": 0,
+    }
+    if development != expected_development:
+        errors.append("PBTRUST1 development-denial boundary changed")
+    backend = artifact.get("backend_model", {})
+    power_loss = backend.get("power_loss", {})
+    if (
+        backend.get("contract_id") != "PBSTATE1"
+        or backend.get("selected_copy") != 0
+        or backend.get("anchored_copy_mask") != 3
+        or backend.get("repair_copy_mask") != 0
+        or backend.get("migration_required") is not True
+        or backend.get("next_generation") != 2
+        or backend.get("target_copy") != 1
+        or backend.get("authority_grants") != 0
+        or backend.get("state_writes_performed") != 0
+        or backend.get("anchor_writes_performed") != 0
+        or power_loss.get("case_count") != 9
+        or power_loss.get("all_cases_passed") is not True
+        or power_loss.get("storage_io_performed") is not False
+        or power_loss.get("anchor_writes_performed") != 0
+        or power_loss.get("state_writes_performed") != 0
+    ):
+        errors.append("PBSTATE1 backend-model evidence is incomplete")
+    if artifact.get("claims") != native_boot_trust.expected_claims():
+        errors.append("PBTRUST1 claim boundary changed")
+    if artifact.get("production_ready") is not False:
+        errors.append("PBTRUST1 overclaims production readiness")
+    detail = (
+        "contract=PBTRUST1/PBSTATE1; rust_tests=12/12; uefi_integration=1/1; "
+        "controls=105/105; differential=32768; power_loss=9/9; bindings=14; "
+        "denial=pbtrust_policy_unsigned; backend_crypto=false; backend_io=false; "
+        "policy_signature=false; state_authenticated=false; state_monotonic=false; "
+        "state_backend_writable=false; authority=0; state_writes=0; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_boot_trust_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(path, "native-pooleboot-readiness.schema.json")
+    errors = [f"native PooleBoot readiness {error.path}: {error.message}" for error in artifact_schema_errors[:8]]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_pooleboot_readiness",
+            False,
+            "; ".join(errors) or "native PooleBoot readiness is not an object",
+        )
+    errors.extend(native_pooleboot.readiness_contract_errors(artifact, ROOT))
+    expected_summary = {
+        "host_contract_tests_total": 8,
+        "host_contract_tests_passed": 8,
+        "clean_builds_exact": 2,
+        "clean_media_generations_exact": 2,
+        "guest_runs_total": 2,
+        "guest_runs_passed": 2,
+        "ordered_marker_count": 25,
+        "serial_debugcon_match_count": 2,
+        "gop_frame_match_count": 2,
+        "negative_controls_total": 155,
+        "negative_controls_passed": 155,
+        "inner_set_artifact_count": 6,
+        "inner_set_parser_count": 6,
+        "inner_set_cross_binding_count": 6,
+        "inner_set_development_denial_count": 6,
+        "inner_set_retained_set_sha256": "E15FF547B310FC526C5880D83FD88D6B0ED3A5B2E2849F8EEE0FE9D15A7EB463",
+        "inner_set_authority_grants": 0,
+        "inner_set_actions_authorized": 0,
+        "inner_set_state_writes": 0,
+        "inner_set_hardware_observations": 0,
+        "microcode_patch_count": 2,
+        "microcode_payload_profile": "synthetic_test_only_never_apply",
+        "firmware_component_count": 3,
+        "firmware_dependency_count": 2,
+        "firmware_manifest_profile": "synthetic_qualification_never_apply",
+        "policy_capability_rule_count": 11,
+        "policy_mode_count": 6,
+        "policy_profile": "synthetic_qualification_only",
+        "trust_binding_count": 14,
+        "trust_denial": "pbtrust_policy_unsigned",
+        "trust_policy_sha256": "22D34E581E42D05BE051B9418C39FA130051BECB6733F705D2F9586D4ADE2C0B",
+        "trust_state_sha256": "A2E36E0C1D0AE3DF2CB23C5D5BE09C830948128013EFB076CBBD9C69D8959896",
+        "trust_authority_grants": 0,
+        "trust_state_writes": 0,
+        "production_claim_count": 0,
+    }
+    if artifact.get("summary") != expected_summary:
+        errors.append("PooleBoot proof summary changed")
+    if artifact.get("claims") != native_pooleboot.expected_claims():
+        errors.append("PooleBoot proof claim boundary changed")
+    if artifact.get("n5_exit_gate_satisfied") is not False or artifact.get("production_ready") is not False:
+        errors.append("PooleBoot proof overclaims N5 exit or production readiness")
+    detail = (
+        "contract=POOLEOS-N5-POOLEBOOT-7; host_tests=8/8; builds=2/2; media=2/2; "
+        "guest_runs=2/2; markers=25; serial_debugcon=2/2; gop_frames=2/2; "
+        "retained_files=9; inner=6/6; inner_sha256=E15FF547B310; authority=0; actions=0; state=0; hardware=0; "
+        "trust=unsigned-deny; trust_bindings=14; trust_authority=0; trust_writes=0; "
+        "pbp1=2/2; kmap=2/2; exit=2/2; negatives=155/155; pmcu1=synthetic-never-apply; pfwm1=synthetic-never-apply; ppol1=qualification-only; production_claims=0; n5_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_pooleboot_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-kernel-load-readiness.schema.json"
+    )
+    errors = [
+        f"native kernel load readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_kernel_load_readiness",
+            False,
+            "; ".join(errors) or "native kernel load readiness is not an object",
+        )
+    errors.extend(native_kernel_load.readiness_errors(artifact, ROOT))
+    summary = artifact.get("summary", {})
+    if summary.get("guest_runs_passed") != 2 or summary.get("guest_runs_total") != 2:
+        errors.append("PKLOAD6 guest-run evidence is incomplete")
+    if summary.get("rust_host_tests_passed") != 215 or summary.get("rust_host_tests_total") != 215:
+        errors.append("PKLOAD6 Rust host-test evidence is incomplete")
+    if summary.get("ordered_marker_count") != 25:
+        errors.append("PKLOAD6 marker evidence is incomplete")
+    if summary.get("exact_pbp1_match_count") != 2:
+        errors.append("PKLOAD6 PBP1 evidence is incomplete")
+    if summary.get("oracle_match_count") != 2:
+        errors.append("PKLOAD6 PKMAP2/PBEXIT1 oracle evidence is incomplete")
+    if summary.get("negative_controls_passed") != 155 or summary.get(
+        "negative_controls_total"
+    ) != 155:
+        errors.append("PKLOAD6 negative controls are incomplete")
+    if summary.get("inner_retained_set_sha256") != (
+        "E15FF547B310FC526C5880D83FD88D6B0ED3A5B2E2849F8EEE0FE9D15A7EB463"
+    ):
+        errors.append("PKLOAD6 retained inner-set identity changed")
+    if artifact.get("claims") != native_kernel_load.expected_claims():
+        errors.append("PKLOAD6 claim boundary changed")
+    if artifact.get("n5_exit_gate_satisfied") is not False or artifact.get(
+        "production_ready"
+    ) is not False:
+        errors.append("PKLOAD6 overclaims N5 exit or production readiness")
+    detail = (
+        "contract=PKLOAD6; rust_tests=215/215; boot_builds=2/2; kernel_builds=2/2; "
+        "media=2/2; guest_runs=2/2; markers=25; retained_files=9; inner=6/6; "
+        "inner_sha256=E15FF547B310; "
+        "trust=unsigned-deny; trust_bindings=14; trust_authority=0; trust_writes=0; "
+        "oracle=2/2; pbp1=2/2; kmap=2/2; exit=2/2; firmware_after_exit=0; "
+        "negatives=155/155; pmcu1=synthetic-never-apply; pfwm1=synthetic-never-apply; "
+        "ppol1=qualification-only; transfer=false; n5_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_kernel_load_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_kernel_revalidation_readiness(
+    path: Path = NATIVE_KERNEL_REVALIDATION_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-kernel-revalidation-readiness.schema.json"
+    )
+    errors = [
+        f"native kernel revalidation readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_kernel_revalidation_readiness",
+            False,
+            "; ".join(errors) or "native kernel revalidation readiness is not an object",
+        )
+    errors.extend(native_kernel_revalidation.readiness_errors(artifact, ROOT))
+    build = artifact.get("build", {})
+    if not isinstance(build, dict) or build.get("host_test_count") != 130:
+        errors.append("PKREVAL1 host-test evidence is incomplete")
+    controls = artifact.get("negative_controls", [])
+    if (
+        not isinstance(controls, list)
+        or len(controls) != 36
+        or any(not isinstance(item, dict) or item.get("status") != "pass" for item in controls)
+    ):
+        errors.append("PKREVAL1 hostile controls are incomplete")
+    differential = artifact.get("differential", {})
+    if not isinstance(differential, dict) or (
+        differential.get("case_count"),
+        differential.get("reject_count"),
+        differential.get("role_coverage"),
+    ) != (32_768, 32_768, 9):
+        errors.append("PKREVAL1 differential evidence is incomplete")
+    golden = artifact.get("golden", {})
+    if not isinstance(golden, dict) or (
+        golden.get("retained_file_count"),
+        golden.get("parser_count"),
+        golden.get("retained_set_sha256"),
+        golden.get("denial"),
+        golden.get("authority_grants"),
+        golden.get("actions_authorized"),
+        golden.get("state_writes"),
+        golden.get("rust_python_match"),
+    ) != (
+        9,
+        9,
+        "E15FF547B310FC526C5880D83FD88D6B0ED3A5B2E2849F8EEE0FE9D15A7EB463",
+        "pbtrust_policy_unsigned",
+        0,
+        0,
+        0,
+        True,
+    ):
+        errors.append("PKREVAL1 golden evidence changed")
+    if artifact.get("claims") != native_kernel_revalidation.expected_claims():
+        errors.append("PKREVAL1 claim boundary changed")
+    if artifact.get("production_ready") is not False or artifact.get(
+        "production_promotion_allowed"
+    ) is not False:
+        errors.append("PKREVAL1 overclaims production readiness")
+    detail = (
+        "contract=PKREVAL1; kernel_tests=130/130; python_tests=8/8; targets=2/2; "
+        "retained_files=9; parsers=9; controls=36/36; differential=32768/32768; "
+        "denial=pbtrust_policy_unsigned; authority=0; actions=0; state_writes=0; "
+        "live_kernel_entry=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_kernel_revalidation_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_kernel_transfer_readiness(
+    path: Path = NATIVE_KERNEL_TRANSFER_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-kernel-transfer-readiness.schema.json"
+    )
+    errors = [
+        f"native kernel transfer readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_kernel_transfer_readiness",
+            False,
+            "; ".join(errors) or "native kernel transfer readiness is not an object",
+        )
+    errors.extend(native_kernel_transfer.readiness_errors(artifact, ROOT))
+    summary = artifact.get("summary", {})
+    if not isinstance(summary, dict) or (
+        summary.get("marker_count"),
+        summary.get("kernel_marker_count"),
+        summary.get("retained_file_count"),
+        summary.get("negative_controls_passed"),
+        summary.get("signature_verifications"),
+        summary.get("authority_grants"),
+        summary.get("actions_authorized"),
+        summary.get("state_writes"),
+        summary.get("firmware_calls_after_exit"),
+    ) != (30, 5, 9, 58, 0, 0, 0, 0, 0):
+        errors.append("PKXFER1 summary changed")
+    execution = artifact.get("execution", {})
+    runs = execution.get("runs", []) if isinstance(execution, dict) else []
+    if (
+        len(runs) != 2
+        or any(
+            not isinstance(run, dict)
+            or run.get("serial_debugcon_exact_match") is not True
+            or run.get("pbp1_serial_debugcon_exact_match") is not True
+            or run.get("marker_summary", {}).get("kernel_terminal", {}).get("terminal") != "halt"
+            or run.get("independent_kernel_revalidation", {}).get("guest_host_exact_match") is not True
+            for run in runs
+        )
+    ):
+        errors.append("PKXFER1 live run evidence is incomplete")
+    build = artifact.get("build", {})
+    if (
+        not isinstance(build, dict)
+        or build.get("development_transfer_feature") is not True
+        or build.get("default_feature_enabled") is not False
+        or build.get("default_stop_marker_present") is not True
+        or build.get("default_transfer_marker_absent") is not True
+    ):
+        errors.append("PKXFER1 feature isolation changed")
+    if artifact.get("claims") != native_kernel_transfer.expected_claims():
+        errors.append("PKXFER1 claim boundary changed")
+    detail = (
+        "contract=PKXFER1; feature=development-transfer; default_transfer=false; "
+        "qemu_runs=2/2; markers=30/30; kernel_markers=5/5; channels=2/2; "
+        "pbp1=2/2; pkreval_files=9; controls=58/58; terminal=unsigned-denial-halt; "
+        "signatures=0; authority=0; actions=0; writes=0; firmware_after_exit=0; "
+        "target_firmware=false; physical_media=false; n5_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_kernel_transfer_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_kernel_trap_readiness(
+    path: Path = NATIVE_KERNEL_TRAP_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-kernel-trap-readiness.schema.json"
+    )
+    errors = [
+        f"native kernel trap readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_kernel_trap_readiness",
+            False,
+            "; ".join(errors) or "native kernel trap readiness is not an object",
+        )
+    errors.extend(native_kernel_trap.readiness_errors(artifact, ROOT))
+    summary = artifact.get("summary", {})
+    if not isinstance(summary, dict) or tuple(
+        summary.get(key)
+        for key in (
+            "scenario_count",
+            "qemu_run_count",
+            "returning_exception_count",
+            "terminal_double_fault_count",
+            "malformed_frame_rejection_count",
+            "negative_controls_passed",
+        )
+    ) != (3, 6, 3, 1, 1, 51):
+        errors.append("PKTRAP1 summary changed")
+    execution = artifact.get("execution", {})
+    scenarios = execution.get("scenarios", []) if isinstance(execution, dict) else []
+    if (
+        len(scenarios) != 3
+        or sum(item.get("run_count", 0) for item in scenarios if isinstance(item, dict)) != 6
+        or any(
+            not isinstance(item, dict)
+            or item.get("exact_marker_match") is not True
+            or item.get("exact_screenshot_match") is not True
+            or item.get("exact_pbp1_match") is not True
+            or any(
+                run.get("serial_debugcon_exact_match") is not True
+                or run.get("pbp1_serial_debugcon_exact_match") is not True
+                or run.get("independent_kernel_revalidation", {}).get("guest_host_exact_match")
+                is not True
+                for run in item.get("runs", [])
+                if isinstance(run, dict)
+            )
+            for item in scenarios
+        )
+    ):
+        errors.append("PKTRAP1 live scenario evidence is incomplete")
+    build = artifact.get("build", {})
+    kernel_product = build.get("kernel_entry", {}).get("product", {}) if isinstance(build, dict) else {}
+    if (
+        not isinstance(build, dict)
+        or build.get("profile_count") != 4
+        or build.get("all_profile_binaries_distinct") is not True
+        or build.get("default_stop_marker_present") is not True
+        or build.get("default_transfer_marker_absent") is not True
+        or kernel_product.get("canonical_sha256")
+        != "6B8A9C2C3EAC559E1D9CB5965800A1671DB8F487F149861300D4EDCB279B3A11"
+        or kernel_product.get("relocation_count") != 959
+    ):
+        errors.append("PKTRAP1 build or feature isolation changed")
+    if artifact.get("claims") != native_kernel_trap.expected_claims():
+        errors.append("PKTRAP1 claim boundary changed")
+    detail = (
+        "contract=PKTRAP1; bsp=1; profiles=4/4; qemu_scenarios=3/3; qemu_runs=6/6; "
+        "returning_vectors=3,6,14; double_fault=1/1; malformed_semantic=1/1; "
+        "gdt=loaded; tss=loaded; idt_gates=5; ist=2; controls=51/51; channels=2/2; "
+        "interrupts=false; authority=0; all_vectors=false; guarded_ist=false; "
+        "per_cpu=false; n7_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_kernel_trap_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_kernel_cpu_policy_readiness(
+    path: Path = NATIVE_KERNEL_CPU_POLICY_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-kernel-cpu-policy-readiness.schema.json"
+    )
+    errors = [
+        f"native kernel CPU policy readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_kernel_cpu_policy_readiness",
+            False,
+            "; ".join(errors) or "native kernel CPU policy readiness is not an object",
+        )
+    errors.extend(native_kernel_cpu_policy.readiness_errors(artifact, ROOT))
+    summary = artifact.get("summary", {})
+    if not isinstance(summary, dict) or tuple(
+        summary.get(key)
+        for key in (
+            "qemu_run_count",
+            "marker_count",
+            "negative_controls_passed",
+            "msr_read_count",
+            "state_writes",
+            "authority_grants",
+        )
+    ) != (2, 35, 41, 5, 0, 0):
+        errors.append("PKCPU1 summary changed")
+    execution = artifact.get("execution", {})
+    runs = execution.get("runs", []) if isinstance(execution, dict) else []
+    if (
+        len(runs) != 2
+        or execution.get("cpu_model") != "qemu64"
+        or execution.get("acceleration") != "tcg_single_thread"
+        or any(
+            not isinstance(run, dict)
+            or run.get("serial_debugcon_exact_match") is not True
+            or run.get("pbp1_serial_debugcon_exact_match") is not True
+            or run.get("independent_kernel_revalidation", {}).get("guest_host_exact_match")
+            is not True
+            for run in runs
+        )
+    ):
+        errors.append("PKCPU1 live observation evidence is incomplete")
+    build = artifact.get("build", {})
+    source_audit = build.get("source_audit", {}) if isinstance(build, dict) else {}
+    if (
+        not isinstance(build, dict)
+        or build.get("profile_count") != 2
+        or build.get("all_profile_binaries_distinct") is not True
+        or build.get("default_stop_marker_present") is not True
+        or build.get("default_transfer_marker_absent") is not True
+        or source_audit.get("forbidden_instruction_hits") != []
+        or source_audit.get("result") != "pass_no_cpu_state_write_instruction"
+    ):
+        errors.append("PKCPU1 build, isolation, or no-write audit changed")
+    if artifact.get("claims") != native_kernel_cpu_policy.expected_claims():
+        errors.append("PKCPU1 claim boundary changed")
+    detail = (
+        "contract=PKCPU1; profile=qemu64; bsp=1; runs=2/2; markers=35/35; "
+        "controls=41/41; cpuid=observed; cr0_cr4_efer=read_only; msrs=5/5; "
+        "writes=0; authority=0; target_cpu=false; errata=false; xsave_ownership=false; "
+        "n7_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_kernel_cpu_policy_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_kernel_errata_policy_readiness(
+    path: Path = NATIVE_KERNEL_ERRATA_POLICY_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-kernel-errata-policy-readiness.schema.json"
+    )
+    errors = [
+        f"native kernel errata policy readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_kernel_errata_policy_readiness",
+            False,
+            "; ".join(errors) or "native kernel errata policy readiness is not an object",
+        )
+    errors.extend(native_kernel_errata_policy.readiness_errors(artifact, ROOT))
+    summary = artifact.get("summary", {})
+    expected_summary = {
+        "actions_authorized_count": 0,
+        "applicable_source_count": 5,
+        "authority_grant_count": 0,
+        "cpu_or_firmware_write_count": 0,
+        "cross_language_mismatch_count": 0,
+        "cross_language_vector_count": 128,
+        "current_failure_count": 6,
+        "negative_controls_passed": 24,
+        "negative_controls_total": 24,
+        "no_std_target_builds_passed": 2,
+        "no_std_target_builds_total": 2,
+        "privileged_read_count": 0,
+        "production_claim_count": 0,
+        "rust_host_tests_passed": 6,
+        "rust_host_tests_total": 6,
+        "source_register_count": 7,
+    }
+    if summary != expected_summary:
+        errors.append("PKERR1 readiness summary changed")
+    if artifact.get("claims") != native_kernel_errata_policy.expected_claims():
+        errors.append("PKERR1 claim boundary changed")
+    if artifact.get("n7_exit_gate_satisfied") is not False or artifact.get("production_ready") is not False:
+        errors.append("PKERR1 overclaims N7 exit or production readiness")
+    detail = (
+        "contract=PKERR1; rust_tests=6/6; no_std_targets=2/2; vectors=128; "
+        "controls=24/24; current=deny_6; sources=7; applicable=5; "
+        "privileged_reads=0; writes=0; authority=0; model44_guide=false; "
+        "numeric_microcode_floor=false; n7_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_kernel_errata_policy_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_kernel_xstate_policy_readiness(
+    path: Path = NATIVE_KERNEL_XSTATE_POLICY_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-kernel-xstate-policy-readiness.schema.json"
+    )
+    errors = [
+        f"native kernel xstate policy readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_kernel_xstate_policy_readiness",
+            False,
+            "; ".join(errors) or "native kernel xstate policy readiness is not an object",
+        )
+    errors.extend(native_kernel_xstate_policy.readiness_errors(artifact, ROOT))
+    summary = artifact.get("summary", {})
+    expected_summary = {
+        "actions_authorized": 0,
+        "authority_grants": 0,
+        "context_image_zero_bytes": 8192,
+        "context_restore_count": 4,
+        "context_save_count": 2,
+        "enabled_area_bytes": 576,
+        "firmware_calls_after_exit": 0,
+        "marker_count": 35,
+        "negative_controls_passed": 43,
+        "production_claim_count": 0,
+        "qemu_run_count": 2,
+        "selected_xcr0": 3,
+        "signature_verifications": 0,
+        "privileged_configuration_writes": 3,
+    }
+    if summary != expected_summary:
+        errors.append("PKXSTATE1 readiness summary changed")
+    if artifact.get("claims") != native_kernel_xstate_policy.expected_claims():
+        errors.append("PKXSTATE1 claim boundary changed")
+    if artifact.get("n7_exit_gate_satisfied") is not False or artifact.get("production_ready") is not False:
+        errors.append("PKXSTATE1 overclaims N7 exit or production readiness")
+    detail = (
+        "contract=PKXSTATE1; profile=epyc_rome_v4_x87_sse; bsp=1; runs=2/2; "
+        "markers=35/35; controls=43/43; xcr0=0x3; enabled_bytes=576; "
+        "saves=2; restores=4; image_clear=8192; control_writes=3; scheduler=false; "
+        "smp=false; target=false; n7_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_kernel_xstate_policy_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_kernel_xstate_exception_readiness(
+    path: Path = NATIVE_KERNEL_XSTATE_EXCEPTION_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-kernel-xstate-exception-readiness.schema.json"
+    )
+    errors = [
+        f"native kernel xstate exception readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_kernel_xstate_exception_readiness",
+            False,
+            "; ".join(errors)
+            or "native kernel xstate exception readiness is not an object",
+        )
+    errors.extend(native_kernel_xstate_exception.readiness_errors(artifact, ROOT))
+    expected_summary = {
+        "actions_authorized": 0,
+        "authority_grants": 0,
+        "exception_deliveries": 3,
+        "firmware_calls_after_exit": 0,
+        "machine_code_audit_passed": True,
+        "marker_count": 41,
+        "negative_controls_passed": 43,
+        "nm_rejections": 1,
+        "privileged_configuration_writes": 4,
+        "production_claim_count": 0,
+        "qemu_run_count": 2,
+        "recovered_returns": 2,
+        "recovery_state_writes": 2,
+        "signature_verifications": 0,
+        "tcg_limitation_probe_count": 1,
+    }
+    if artifact.get("summary") != expected_summary:
+        errors.append("PKXEXC1 readiness summary changed")
+    if artifact.get("claims") != native_kernel_xstate_exception.expected_claims():
+        errors.append("PKXEXC1 claim boundary changed")
+    if (
+        artifact.get("n7_exit_gate_satisfied") is not False
+        or artifact.get("production_ready") is not False
+    ):
+        errors.append("PKXEXC1 overclaims N7 exit or production readiness")
+    detail = (
+        "contract=PKXEXC1; acceleration=whpx; bsp=1; runs=2/2; tcg_probe=1; "
+        "markers=41/41; controls=43/43; deliveries=3; recovered=2; nm_rejected=1; "
+        "control_writes=4; recovery_writes=2; machine_audit=true; scheduler=false; "
+        "smp=false; target=false; n7_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_kernel_xstate_exception_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_kernel_privilege_msr_policy_readiness(
+    path: Path = NATIVE_KERNEL_PRIVILEGE_MSR_POLICY_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-kernel-privilege-msr-policy-readiness.schema.json"
+    )
+    errors = [
+        f"native kernel privilege MSR policy readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_kernel_privilege_msr_policy_readiness",
+            False,
+            "; ".join(errors)
+            or "native kernel privilege MSR policy readiness is not an object",
+        )
+    errors.extend(native_kernel_privilege_msr_policy.readiness_errors(artifact, ROOT))
+    expected_summary = {
+        "actions_authorized": 0,
+        "authority_grants": 0,
+        "control_writes": 0,
+        "firmware_calls_after_exit": 0,
+        "machine_check_bank_count": 10,
+        "machine_check_bank_reads": 0,
+        "marker_count": 35,
+        "msr_read_count": 11,
+        "msr_writes": 0,
+        "negative_controls_passed": 47,
+        "pmu_msr_reads": 0,
+        "production_claim_count": 0,
+        "qemu_run_count": 2,
+        "signature_verifications": 0,
+    }
+    if artifact.get("summary") != expected_summary:
+        errors.append("PKMSR1 readiness summary changed")
+    if artifact.get("claims") != native_kernel_privilege_msr_policy.expected_claims():
+        errors.append("PKMSR1 claim boundary changed")
+    if (
+        artifact.get("n7_exit_gate_satisfied") is not False
+        or artifact.get("production_ready") is not False
+    ):
+        errors.append("PKMSR1 overclaims N7 exit or production readiness")
+    detail = (
+        "contract=PKMSR1; acceleration=tcg; bsp=1; runs=2/2; markers=35/35; "
+        "controls=47/47; msr_reads=11; msr_writes=0; mca_banks=10; bank_reads=0; "
+        "pmu_reads=0; authority=0; target=false; n7_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_kernel_privilege_msr_policy_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_kernel_physical_memory_readiness(
+    path: Path = NATIVE_KERNEL_PHYSICAL_MEMORY_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-kernel-physical-memory-readiness.schema.json"
+    )
+    errors = [
+        f"native kernel physical-memory readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_kernel_physical_memory_readiness",
+            False,
+            "; ".join(errors) or "native kernel physical-memory readiness is not an object",
+        )
+    errors.extend(native_kernel_physical_memory.readiness_errors(artifact, ROOT))
+    expected_summary = {
+        "acpi_early_reclaim_rejected": True,
+        "acpi_reclaim_idempotent": True,
+        "acpi_reclaim_receipts": 1,
+        "acpi_reclaimable_pages_held_before_release": 11,
+        "acpi_reclaimable_pages_reclaimed": 11,
+        "acpi_snapshot_bytes": 616,
+        "acpi_snapshot_copied_bytes": 600,
+        "acpi_snapshot_pages_retained": 1,
+        "actions_authorized": 0,
+        "allocator_operations": 129,
+        "authority_grants": 0,
+        "boot_reclaim_idempotent": True,
+        "boot_reclaim_pages_by_zone": [2018, 9232, 0],
+        "boot_reclaim_ranges": 12,
+        "boot_reclaim_receipts": 1,
+        "boot_reclaim_source_records": 70,
+        "boot_reclaimable_pages_reclaimed": 11250,
+        "bootstrap_invalidations": 23172,
+        "bootstrap_temporary_pte_writes": 23172,
+        "complete_address_space_mapping_operations": 0,
+        "final_temporary_alias_revoked": True,
+        "loader_reserved_pages_protected": 885,
+        "managed_pages": 129119,
+        "marker_count": 45,
+        "memory_entry_count": 97,
+        "metadata_allocation_records_at_handoff": 1,
+        "metadata_arena_pages": 5,
+        "metadata_free_extents": 11,
+        "metadata_guard_pages": 2,
+        "metadata_integrity_verified": True,
+        "metadata_manager_bytes": 15376,
+        "metadata_mapping_retained": True,
+        "metadata_pte_writes": 5,
+        "metadata_receipt_records_at_handoff": 1,
+        "metadata_release_excluded": True,
+        "metadata_scrub_receipts": 1,
+        "metadata_source_records": 97,
+        "ledger_generation_growth": {
+            "allocation_capacity": 256,
+            "atomic": 1,
+            "automatic_growths": 3,
+            "final_generation": 33,
+            "final_pages": 29,
+            "free_capacity": 2048,
+            "growth_headroom_allocation": 1,
+            "growth_headroom_scrub": 4,
+            "guard_pages": 4,
+            "hard_rejections": 1,
+            "initial_generation": 2,
+            "initial_pages": 4,
+            "integrity": 1,
+            "mapped_pages": 29,
+            "mapping_events": 4,
+            "next_pages": 58,
+            "pre_effect": "host_verified",
+            "pressure_checks": 119,
+            "pressure_cycles": 59,
+            "pressure_triggers": 7,
+            "pte_writes": 83,
+            "reclaim_capacity": 16,
+            "retired_generation": 17,
+            "retired_pages": 15,
+            "retirement_failures": 0,
+            "retirement_retry": 0,
+            "revoked": 3,
+            "rollbacks": 0,
+            "scrub_capacity": 128,
+            "soft_fallbacks": 3,
+            "source_capacity": 2048,
+            "window_capacity": 32,
+        },
+        "negative_controls_passed": 191,
+        "physical_word_reads": 5879957,
+        "physical_word_writes": 5875277,
+        "production_claim_count": 0,
+        "qemu_run_count": 2,
+        "reclaim_operations": 2,
+        "sample_scrub_receipts": 4,
+        "scrub_page_count": 11473,
+        "scrub_receipts": 128,
+        "scrubbed_bytes": 46993408,
+        "signature_verifications": 0,
+        "source_usable_pages": 117859,
+        "verified_bytes": 46993408,
+    }
+    if artifact.get("summary") != expected_summary:
+        errors.append("PKPMM7 readiness summary changed")
+    if artifact.get("claims") != native_kernel_physical_memory.expected_claims():
+        errors.append("PKPMM7 claim boundary changed")
+    if (
+        artifact.get("n9_exit_gate_satisfied") is not False
+        or artifact.get("production_ready") is not False
+    ):
+        errors.append("PKPMM7 overclaims N9 exit or production readiness")
+    detail = (
+        "contract=PKPMM7+PKACPI1; qemu64_bsp=1; runs=2/2; markers=45/45; controls=191/191; "
+        "map_entries=97; usable=117859; managed=129119; stack_pages=32; "
+        "metadata=5+2_guards; manager_bytes=15376; metadata_receipts=1; "
+        "ledger_growth=4_to_8_to_15_to_29_pages; capacities=2048/256/2048/128/16; "
+        "ledger_guards=4; ledger_pte_writes=83; ledger_retired=27; "
+        "pressure=119/7/3; fallback=3; hard_reject=1; pre_effect=host_verified; "
+        "boot_reclaim=11250; acpi_snapshot=1_page/616_bytes; acpi_reclaim=11; "
+        "reclaim_receipts=2; idempotent=1; alloc_free=66/63; receipts=128; "
+        "scrub=46993408/46993408; physical_words=5875277/5879957; "
+        "temporary_pte_writes=23172; bootstrap_invlpg=23172; alias_revoked=1; "
+        "metadata_retained=1; ledger_generation_retained=1; acpi_snapshot_retained=1; "
+        "complete_mappings=0; reclaim=1; acpi_reclaim=1; concurrency=0; "
+        "authority=0; target=false; n9_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_kernel_physical_memory_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_kernel_virtual_memory_readiness(
+    path: Path = NATIVE_KERNEL_VIRTUAL_MEMORY_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-kernel-virtual-memory-readiness.schema.json"
+    )
+    errors = [
+        f"native kernel virtual-memory readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_kernel_virtual_memory_readiness",
+            False,
+            "; ".join(errors) or "native kernel virtual-memory readiness is not an object",
+        )
+    errors.extend(native_kernel_virtual_memory.readiness_errors(artifact, ROOT))
+    expected_summary = {
+        "actions_authorized": 0,
+        "active_cr3_writes": 2,
+        "active_hardware_tlb_invalidations": 3,
+        "active_invalidation_receipts": 3,
+        "active_leaf_mutations": 3,
+        "authority_grants": 0,
+        "bootstrap_hardware_tlb_invalidations": 950466,
+        "coverage_checksum": "0x6E870613F130BA60",
+        "direct_directory_tables": 1,
+        "direct_map_gap_pages": 12907,
+        "direct_map_ranges": 11,
+        "direct_page_tables": 237,
+        "generation_retirement_receipts": 1,
+        "marker_count": 40,
+        "mapped_owned_pages": 117858,
+        "negative_controls_passed": 46,
+        "physical_table_writes": 367445,
+        "production_claim_count": 0,
+        "qemu_run_count": 2,
+        "remote_shootdowns_pending": 0,
+        "retained_excluded_pages": 0,
+        "signature_verifications": 0,
+        "table_pages_materialized": 243,
+        "temporary_pte_writes": 950466,
+    }
+    if artifact.get("summary") != expected_summary:
+        errors.append("PKVM3 readiness summary changed")
+    if artifact.get("claims") != native_kernel_virtual_memory.expected_claims():
+        errors.append("PKVM3 claim boundary changed")
+    if (
+        artifact.get("n9_exit_gate_satisfied") is not False
+        or artifact.get("production_ready") is not False
+    ):
+        errors.append("PKVM3 overclaims N9 exit or production readiness")
+    detail = (
+        "contract=PKVM3; qemu64_bsp=1; runs=2/2; markers=40/40; controls=46/46; "
+        "ranges=11; gaps=12907; tables=243; owned_pages=117858; "
+        "physical_writes=367445; temporary_pte_writes=950466; cr3_writes=2; "
+        "active_invlpg=3; retirement_receipts=1; remote_shootdowns=0; authority=0; "
+        "target=false; n9_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_kernel_virtual_memory_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_kernel_interrupt_time_readiness(
+    path: Path = NATIVE_KERNEL_INTERRUPT_TIME_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-kernel-interrupt-time-readiness.schema.json"
+    )
+    errors = [
+        f"native kernel interrupt/time readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_kernel_interrupt_time_readiness",
+            False,
+            "; ".join(errors) or "native kernel interrupt/time readiness is not an object",
+        )
+    errors.extend(native_kernel_interrupt_time.readiness_errors(artifact, ROOT))
+    expected_summary = {
+        "kernel_host_tests_passed": 130,
+        "kernel_host_tests_total": 130,
+        "qemu_runs_passed": 2,
+        "qemu_runs_total": 2,
+        "markers_per_run": 36,
+        "negative_controls_passed": 58,
+        "negative_controls_total": 58,
+        "timer_interrupts_delivered": 8,
+        "timer_eois": 8,
+        "application_processors_started": 0,
+        "production_claim_count": 0,
+    }
+    if artifact.get("summary") != expected_summary:
+        errors.append("PKIRQ1 readiness summary changed")
+    execution = artifact.get("execution", {})
+    runs = execution.get("runs", []) if isinstance(execution, dict) else []
+    if (
+        len(runs) != 2
+        or execution.get("exact_marker_match") is not True
+        or execution.get("exact_screenshot_match") is not True
+        or execution.get("exact_pbp1_match") is not True
+        or any(
+            not isinstance(run, dict)
+            or run.get("serial_debugcon_exact_match") is not True
+            or run.get("pbp1_serial_debugcon_exact_match") is not True
+            or run.get("independent_kernel_revalidation", {}).get("guest_host_exact_match")
+            is not True
+            for run in runs
+        )
+    ):
+        errors.append("PKIRQ1 live run evidence is incomplete")
+    observation = execution.get("observation", {}) if isinstance(execution, dict) else {}
+    if (
+        observation.get("delivery", {}).get("timer_deliveries") != 8
+        or observation.get("delivery", {}).get("eois") != 8
+        or observation.get("delivery", {}).get("unacknowledged") != 0
+        or observation.get("result", {}).get("rollback") != 1
+        or observation.get("result", {}).get("mmio_revoked") != 1
+        or observation.get("result", {}).get("ap_start") != 0
+        or observation.get("result", {}).get("smp") != 0
+    ):
+        errors.append("PKIRQ1 interrupt accounting, rollback, or nonclaim boundary changed")
+    if artifact.get("claims") != native_kernel_interrupt_time.expected_claims():
+        errors.append("PKIRQ1 claim boundary changed")
+    if (
+        artifact.get("flag_n8_irq_001_closed") is not False
+        or artifact.get("n8_exit_gate_satisfied") is not False
+        or artifact.get("production_ready") is not False
+    ):
+        errors.append("PKIRQ1 overclaims flag closure, N8 exit, or production readiness")
+    detail = (
+        "contract=PKIRQ1; qemu64_bsp=1; runs=2/2; markers=36/36; controls=58/58; "
+        "madt=complete; lapic=enabled; hpet=calibrated; timer=8/8; eoi=8/8; "
+        "errors=0; spurious=0; isr=0; rollback=1; mmio_revoked=1; pic_restored=1; "
+        "ap_start=0; ipi=0; shootdown=0; target=false; flag_closed=false; "
+        "n8_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_kernel_interrupt_time_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_kernel_smp_first_ap_readiness(
+    path: Path = NATIVE_KERNEL_SMP_FIRST_AP_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-kernel-smp-first-ap-readiness.schema.json"
+    )
+    errors = [
+        f"native kernel SMP first-AP readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_kernel_smp_first_ap_readiness",
+            False,
+            "; ".join(errors) or "native kernel SMP first-AP readiness is not an object",
+        )
+    errors.extend(native_kernel_smp_first_ap.readiness_errors(artifact, ROOT))
+    expected_summary = {
+        "application_processors_online": 1,
+        "application_processors_parked": 1,
+        "application_processors_quiesced": 1,
+        "application_processors_started": 1,
+        "kernel_host_tests_passed": 130,
+        "kernel_host_tests_total": 130,
+        "markers_per_run": 38,
+        "negative_controls_passed": 72,
+        "negative_controls_total": 72,
+        "production_claim_count": 0,
+        "qemu_runs_passed": 2,
+        "qemu_runs_total": 2,
+        "resource_pages_released": 14,
+        "verified_bytes": 57_344,
+        "zeroed_bytes": 57_344,
+    }
+    if artifact.get("summary") != expected_summary:
+        errors.append("PKSMP1 readiness summary changed")
+    execution = artifact.get("execution", {})
+    runs = execution.get("runs", []) if isinstance(execution, dict) else []
+    if (
+        len(runs) != 2
+        or execution.get("run_count") != 2
+        or execution.get("virtual_cpu_count") != 2
+        or execution.get("static_markers_exact_match") is not True
+        or execution.get("dynamic_tsc_and_checksum_fields_revalidated") is not True
+        or execution.get("exact_screenshot_match") is not True
+        or execution.get("exact_pbp1_match") is not True
+        or any(
+            not isinstance(run, dict)
+            or run.get("serial_debugcon_exact_match") is not True
+            or run.get("pbp1_serial_debugcon_exact_match") is not True
+            or run.get("independent_kernel_revalidation", {}).get("guest_host_exact_match")
+            is not True
+            for run in runs
+        )
+    ):
+        errors.append("PKSMP1 live run evidence is incomplete")
+    observation = execution.get("observation", {}) if isinstance(execution, dict) else {}
+    if (
+        observation.get("result", {}).get("ap_started") != 1
+        or observation.get("result", {}).get("ap_online") != 1
+        or observation.get("result", {}).get("ap_quiesced") != 1
+        or observation.get("result", {}).get("ap_parked") != 1
+        or observation.get("result", {}).get("production") != 0
+        or observation.get("stop", {}).get("parked") is not True
+        or observation.get("release", {}).get("resources_released") != 14
+        or observation.get("release", {}).get("zeroed_bytes") != 57_344
+        or observation.get("release", {}).get("verified_bytes") != 57_344
+    ):
+        errors.append("PKSMP1 AP lifecycle, release accounting, or nonclaim boundary changed")
+    contract = native_kernel_smp_first_ap.read_json(
+        ROOT / native_kernel_smp_first_ap.CONTRACT_RELATIVE
+    )
+    if artifact.get("claims") != contract.get("claims"):
+        errors.append("PKSMP1 claim boundary changed")
+    if (
+        artifact.get("flag_n8_smp_first_ap_001_closed") is not True
+        or artifact.get("n8_exit_gate_satisfied") is not False
+        or artifact.get("production_ready") is not False
+    ):
+        errors.append("PKSMP1 flag closure, N8 exit, or production boundary changed")
+    detail = (
+        "contract=PKSMP1; qemu64_vcpus=2; runs=2/2; markers=38/38; controls=72/72; "
+        "ap=1/1; parked=1/1; resources=14/14; scrub=57344/57344; "
+        "n8_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_kernel_smp_first_ap_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_kernel_smp_percpu_runtime_readiness(
+    path: Path = NATIVE_KERNEL_SMP_PERCPU_RUNTIME_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-kernel-smp-percpu-runtime-readiness.schema.json"
+    )
+    errors = [
+        f"native kernel SMP per-CPU runtime readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_kernel_smp_percpu_runtime_readiness",
+            False,
+            "; ".join(errors) or "native kernel SMP per-CPU runtime readiness is not an object",
+        )
+    errors.extend(native_kernel_smp_percpu_runtime.readiness_errors(artifact, ROOT))
+    expected_summary = {
+        "application_processors_online": 1,
+        "application_processors_parked": 1,
+        "application_processors_quiesced": 1,
+        "application_processors_started": 1,
+        "guarded_stack_classes": 3,
+        "hostile_cases_total": 159,
+        "installed_gates": 27,
+        "kernel_host_tests_passed": 130,
+        "kernel_host_tests_total": 130,
+        "markers_per_run": 42,
+        "negative_controls_passed": 19,
+        "negative_controls_total": 19,
+        "processor_local_descriptor_sets": 1,
+        "production_claim_count": 0,
+        "qemu_runs_passed": 2,
+        "qemu_runs_total": 2,
+        "resource_pages_released": 32,
+        "verified_bytes": 131_072,
+        "xstate_round_trips": 1,
+        "zeroed_bytes": 131_072,
+    }
+    if artifact.get("summary") != expected_summary:
+        errors.append("PKSMP2 readiness summary changed")
+    execution = artifact.get("execution", {})
+    runs = execution.get("runs", []) if isinstance(execution, dict) else []
+    if (
+        len(runs) != 2
+        or execution.get("run_count") != 2
+        or execution.get("virtual_cpu_count") != 2
+        or execution.get("cpu_model") != "SandyBridge,-avx"
+        or execution.get("acceleration") != "tcg_multi_thread"
+        or execution.get("deterministic_instruction_clock") is not False
+        or execution.get("static_markers_exact_match") is not True
+        or execution.get("dynamic_fields_revalidated") is not True
+        or execution.get("exact_screenshot_match") is not True
+        or execution.get("exact_pbp1_match") is not True
+        or any(
+            not isinstance(run, dict)
+            or run.get("serial_debugcon_exact_match") is not True
+            or run.get("pbp1_serial_debugcon_exact_match") is not True
+            or run.get("independent_kernel_revalidation", {}).get("guest_host_exact_match")
+            is not True
+            for run in runs
+        )
+    ):
+        errors.append("PKSMP2 live run evidence is incomplete")
+    controls = artifact.get("negative_controls", [])
+    if (
+        not isinstance(controls, list)
+        or len(controls) != 19
+        or sum(item.get("case_count", 0) for item in controls if isinstance(item, dict)) != 159
+    ):
+        errors.append("PKSMP2 hostile-control evidence is incomplete")
+    observation = execution.get("observation", {}) if isinstance(execution, dict) else {}
+    if (
+        observation.get("result", {}).get("ap_started") != 1
+        or observation.get("result", {}).get("ap_online") != 1
+        or observation.get("result", {}).get("descriptors") != 1
+        or observation.get("result", {}).get("stack_classes") != 3
+        or observation.get("result", {}).get("xstate") != 1
+        or observation.get("result", {}).get("vectors") != 27
+        or observation.get("result", {}).get("production") != 0
+        or observation.get("stop", {}).get("parked") is not True
+        or observation.get("xstate", {}).get("owner_cleared") is not True
+        or observation.get("release", {}).get("resources_released") != 32
+        or observation.get("release", {}).get("verified_bytes") != 131_072
+    ):
+        errors.append("PKSMP2 AP-local runtime, release accounting, or nonclaim boundary changed")
+    contract = native_kernel_smp_percpu_runtime.read_json(
+        ROOT / native_kernel_smp_percpu_runtime.CONTRACT_RELATIVE
+    )
+    if artifact.get("claims") != contract.get("claims"):
+        errors.append("PKSMP2 claim boundary changed")
+    if (
+        artifact.get("flag_n8_smp_percpu_runtime_001_closed") is not True
+        or artifact.get("n8_exit_gate_satisfied") is not False
+        or artifact.get("production_ready") is not False
+    ):
+        errors.append("PKSMP2 flag closure, N8 exit, or production boundary changed")
+    detail = (
+        "contract=PKSMP2; sandybridge_vcpus=2; runs=2/2; markers=42/42; "
+        "controls=19/19; cases=159; ap=1/1; stacks=3/3; gates=27/27; "
+        "resources=32/32; scrub=131072/131072; n8_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_kernel_smp_percpu_runtime_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_kernel_smp_ipi_readiness(
+    path: Path = NATIVE_KERNEL_SMP_IPI_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-kernel-smp-ipi-readiness.schema.json"
+    )
+    errors = [
+        f"native kernel SMP IPI readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_kernel_smp_ipi_readiness",
+            False,
+            "; ".join(errors) or "native kernel SMP IPI readiness is not an object",
+        )
+    errors.extend(native_kernel_smp_ipi.readiness_errors(artifact, ROOT))
+    expected_summary = {
+        "application_processors_online": 1,
+        "operation_classes": 6,
+        "accepted_deliveries": 6,
+        "denied_deliveries": 4,
+        "offline_timeouts": 1,
+        "eois": 10,
+        "resource_pages_released": 32,
+        "verified_bytes": 131_072,
+        "negative_controls_total": 18,
+        "hostile_cases_total": 120,
+        "production_claim_count": 0,
+    }
+    if artifact.get("summary") != expected_summary:
+        errors.append("PKSMP3 readiness summary changed")
+    execution = artifact.get("execution", {})
+    runs = execution.get("runs", []) if isinstance(execution, dict) else []
+    if (
+        len(runs) != 2
+        or execution.get("run_count") != 2
+        or execution.get("virtual_cpu_count") != 2
+        or execution.get("cpu_model") != "SandyBridge,-avx"
+        or execution.get("acceleration") != "tcg_multi_thread"
+        or execution.get("deterministic_instruction_clock") is not False
+        or execution.get("static_markers_exact_match") is not True
+        or execution.get("dynamic_fields_revalidated") is not True
+        or execution.get("exact_screenshot_match") is not True
+        or execution.get("exact_pbp1_match") is not True
+        or any(
+            not isinstance(run, dict)
+            or run.get("serial_debugcon_exact_match") is not True
+            or run.get("pbp1_serial_debugcon_exact_match") is not True
+            or run.get("independent_kernel_revalidation", {}).get("guest_host_exact_match")
+            is not True
+            for run in runs
+        )
+    ):
+        errors.append("PKSMP3 live run evidence is incomplete")
+    controls = artifact.get("negative_controls", [])
+    if (
+        not isinstance(controls, list)
+        or len(controls) != 18
+        or sum(item.get("case_count", 0) for item in controls if isinstance(item, dict))
+        != 120
+    ):
+        errors.append("PKSMP3 hostile-control evidence is incomplete")
+    observation = execution.get("observation", {}) if isinstance(execution, dict) else {}
+    if (
+        observation.get("operations", {}).get("accepted") != 6
+        or observation.get("operations", {}).get("denied") != 4
+        or observation.get("operations", {}).get("deliveries") != 10
+        or observation.get("operations", {}).get("eois") != 10
+        or observation.get("operations", {}).get("timeout_count") != 1
+        or observation.get("stop", {}).get("parked") != 1
+        or observation.get("result", {}).get("shootdown_transport_only") != 1
+        or observation.get("result", {}).get("tlb_invalidations") != 0
+        or observation.get("result", {}).get("arbitrary_callback") != 0
+        or observation.get("result", {}).get("scheduler") != 0
+        or observation.get("release", {}).get("resources_released") != 32
+        or observation.get("release", {}).get("verified_bytes") != 131_072
+    ):
+        errors.append("PKSMP3 transport, release accounting, or nonclaim boundary changed")
+    contract = native_kernel_smp_ipi.read_json(ROOT / native_kernel_smp_ipi.CONTRACT_RELATIVE)
+    if artifact.get("claims") != contract.get("claims"):
+        errors.append("PKSMP3 claim boundary changed")
+    if (
+        artifact.get("flag_n8_smp_ipi_001_closed") is not True
+        or artifact.get("n8_exit_gate_satisfied") is not False
+        or artifact.get("production_ready") is not False
+    ):
+        errors.append("PKSMP3 flag closure, N8 exit, or production boundary changed")
+    detail = (
+        "contract=PKSMP3; sandybridge_vcpus=2; runs=2/2; markers=39/39; "
+        "controls=18/18; cases=120; accepted=6/6; denied=4/4; eois=10/10; "
+        "timeouts=1/1; resources=32/32; scrub=131072/131072; "
+        "tlb_invalidations=0; n8_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_kernel_smp_ipi_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_initial_system_readiness(
+    path: Path = NATIVE_INITIAL_SYSTEM_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-initial-system-readiness.schema.json"
+    )
+    errors = [
+        f"native initial system readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_initial_system_readiness",
+            False,
+            "; ".join(errors) or "native initial system readiness is not an object",
+        )
+    errors.extend(native_initial_system.readiness_errors(artifact))
+    expected_summary = {
+        "development_activation_denied": True,
+        "differential_fuzz_cases": 16_384,
+        "differential_mismatches": 0,
+        "golden_vectors_matched": 3,
+        "golden_vectors_total": 3,
+        "negative_controls_passed": 120,
+        "negative_controls_total": 120,
+        "no_std_target_builds_passed": 2,
+        "no_std_target_builds_total": 2,
+        "production_claim_count": 0,
+        "rust_host_tests_passed": 3,
+        "rust_host_tests_total": 3,
+        "synthetic_activation_passed": True,
+    }
+    if artifact.get("summary") != expected_summary:
+        errors.append("PINIT1 readiness summary changed")
+    if artifact.get("claims") != native_initial_system.expected_claims():
+        errors.append("PINIT1 claim boundary changed")
+    if artifact.get("n5_exit_gate_satisfied") is not False or artifact.get(
+        "production_ready"
+    ) is not False:
+        errors.append("PINIT1 overclaims N5 exit or production readiness")
+    detail = (
+        "contract=PINIT1; rust_tests=3/3; no_std_targets=2/2; golden=3/3; "
+        "negatives=120/120; differential=16384; mismatches=0; development_activation=false; "
+        "pooleboot_enforcement=false; poolekernel_activation=false; n5_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_initial_system_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_recovery_readiness(
+    path: Path = NATIVE_RECOVERY_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-recovery-readiness.schema.json"
+    )
+    errors = [
+        f"native recovery readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_recovery_readiness",
+            False,
+            "; ".join(errors) or "native recovery readiness is not an object",
+        )
+    errors.extend(native_recovery.readiness_errors(artifact, ROOT))
+    expected_summary = {
+        "development_activation_denied": True,
+        "differential_mismatches": 0,
+        "golden_vectors_matched": 3,
+        "golden_vectors_total": 3,
+        "negative_controls_passed": 144,
+        "negative_controls_total": 144,
+        "no_std_target_builds_passed": 2,
+        "no_std_target_builds_total": 2,
+        "parser_differential_cases": 16_384,
+        "production_claim_count": 0,
+        "rust_host_tests_passed": 3,
+        "rust_host_tests_total": 3,
+        "transition_differential_cases": 8_192,
+    }
+    if artifact.get("summary") != expected_summary:
+        errors.append("PREC1 readiness summary changed")
+    if artifact.get("claims") != native_recovery.expected_claims():
+        errors.append("PREC1 claim boundary changed")
+    if artifact.get("n5_exit_gate_satisfied") is not False or artifact.get(
+        "production_ready"
+    ) is not False:
+        errors.append("PREC1 overclaims N5 exit or production readiness")
+    detail = (
+        "contract=PREC1; rust_tests=3/3; no_std_targets=2/2; golden=3/3; "
+        "negatives=144/144; parser_state_differential=16384; transition_differential=8192; "
+        "mismatches=0; development_activation=false; state_checksum_auth=false; "
+        "pooleboot_enforcement=false; poolekernel_execution=false; n5_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_recovery_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_symbol_readiness(
+    path: Path = NATIVE_SYMBOL_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-symbol-readiness.schema.json"
+    )
+    errors = [
+        f"native symbol readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_symbol_readiness",
+            False,
+            "; ".join(errors) or "native symbol readiness is not an object",
+        )
+    errors.extend(native_symbols.readiness_errors(artifact, ROOT))
+    expected_summary = {
+        "debug_reproducible_builds": 2,
+        "differential_mismatches": 0,
+        "golden_vectors_matched": 3,
+        "golden_vectors_total": 3,
+        "lookup_differential_cases": 16_384,
+        "negative_controls_passed": 158,
+        "negative_controls_total": 158,
+        "no_std_target_builds_passed": 2,
+        "no_std_target_builds_total": 2,
+        "parser_differential_cases": 16_384,
+        "production_claim_count": 0,
+        "public_symbols": 3,
+        "rust_host_tests_passed": 4,
+        "rust_host_tests_total": 4,
+    }
+    if artifact.get("summary") != expected_summary:
+        errors.append("PSYM1 readiness summary changed")
+    expected_claims = {
+        "format_frozen": True,
+        "python_oracle_implemented": True,
+        "no_std_parser_implemented": True,
+        "bounded_lookup_implemented": True,
+        "split_debug_correspondence_qualified": True,
+        "development_activation_denied": True,
+        "symbol_consumption_enabled": False,
+        "pooleboot_enforced": False,
+        "poolekernel_enforced": False,
+        "kernel_export_authority_created": False,
+        "full_debug_file_on_boot_media": False,
+        "runtime_addresses_disclosed_by_default": False,
+        "n5_exit_gate_satisfied": False,
+        "production_ready": False,
+    }
+    if artifact.get("claims") != expected_claims:
+        errors.append("PSYM1 claim boundary changed")
+    detail = (
+        "contract=PSYM1; rust_tests=4/4; no_std_targets=2/2; golden=3/3; "
+        "negatives=158/158; parser_differential=16384; lookup_differential=16384; "
+        "debug_builds=2; public_symbols=3; mismatches=0; consumption=false; "
+        "n5_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_symbol_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_microcode_readiness(
+    path: Path = NATIVE_MICROCODE_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-microcode-readiness.schema.json"
+    )
+    errors = [
+        f"native microcode readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_microcode_readiness",
+            False,
+            "; ".join(errors) or "native microcode readiness is not an object",
+        )
+    errors.extend(native_microcode.readiness_errors(artifact, ROOT))
+    expected_summary = {
+        "differential_mismatches": 0,
+        "golden_vectors_matched": 3,
+        "golden_vectors_total": 3,
+        "negative_controls_passed": 174,
+        "negative_controls_total": 174,
+        "no_std_target_builds_passed": 2,
+        "no_std_target_builds_total": 2,
+        "parser_differential_cases": 16_384,
+        "post_apply_differential_cases": 8_192,
+        "production_claim_count": 0,
+        "production_vendor_payload_count": 0,
+        "rust_host_tests_passed": 4,
+        "rust_host_tests_total": 4,
+        "selection_differential_cases": 16_384,
+        "synthetic_payload_count": 35,
+    }
+    if artifact.get("summary") != expected_summary:
+        errors.append("PMCU1 readiness summary changed")
+    expected_claims = {
+        "bounded_selection_implemented": True,
+        "development_activation_denied": True,
+        "format_frozen": True,
+        "microcode_applied": False,
+        "n5_exit_gate_satisfied": False,
+        "no_std_parser_implemented": True,
+        "pooleboot_enforced": False,
+        "poolekernel_enforced": False,
+        "post_apply_verification_model_implemented": True,
+        "privileged_revision_observed": False,
+        "production_ready": False,
+        "python_oracle_implemented": True,
+        "vendor_container_parser_implemented": False,
+        "vendor_payload_included": False,
+    }
+    if artifact.get("claims") != expected_claims:
+        errors.append("PMCU1 claim boundary changed")
+    detail = (
+        "contract=PMCU1; rust_tests=4/4; no_std_targets=2/2; golden=3/3; "
+        "negatives=174/174; parser_differential=16384; selection_differential=16384; "
+        "post_apply_differential=8192; mismatches=0; payloads=synthetic_only; "
+        "revision_probe=false; apply=false; n5_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_microcode_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_firmware_readiness(
+    path: Path = NATIVE_FIRMWARE_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-firmware-readiness.schema.json"
+    )
+    errors = [
+        f"native firmware readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_firmware_readiness",
+            False,
+            "; ".join(errors) or "native firmware readiness is not an object",
+        )
+    errors.extend(native_firmware.readiness_errors(artifact, ROOT))
+    if len(artifact.get("negative_controls", [])) != 101:
+        errors.append("PFWM1 negative-control count changed")
+    differential = artifact.get("differential", {})
+    if sum(item.get("cases", 0) for item in differential.values()) != 32_768:
+        errors.append("PFWM1 differential case count changed")
+    if artifact.get("payloads", {}).get("embedded_payload_count") != 0:
+        errors.append("PFWM1 unexpectedly embeds firmware payload bytes")
+    detail = (
+        "contract=PFWM1; rust_tests=5/5; no_std_targets=2/2; golden=3/3; "
+        "negatives=101/101; parser_differential=16384; activation_differential=8192; "
+        "post_reset_differential=8192; mismatches=0; embedded_payloads=0; "
+        "live_inventory=false; apply=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_firmware_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_policy_readiness(
+    path: Path = NATIVE_POLICY_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-policy-readiness.schema.json"
+    )
+    errors = [
+        f"native policy readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_policy_readiness",
+            False,
+            "; ".join(errors) or "native policy readiness is not an object",
+        )
+    errors.extend(native_policy.readiness_errors(artifact, ROOT))
+    if len(artifact.get("negative_controls", [])) != 116:
+        errors.append("PPOL1 negative-control count changed")
+    differential = artifact.get("differential", {})
+    if sum(item.get("cases", 0) for item in differential.values()) != 32_768:
+        errors.append("PPOL1 differential case count changed")
+    activation = artifact.get("activation", {})
+    if activation.get("development_allowed") is not False:
+        errors.append("PPOL1 development activation boundary changed")
+    detail = (
+        "contract=PPOL1; rust_tests=6/6; no_std_targets=2/2; golden=3/3; "
+        "negatives=116/116; parser_differential=8192; cross_binding=4096; "
+        "activation_differential=12288; receipt_differential=8192; mismatches=0; "
+        "live_enforcement=false; authority_created=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_policy_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_system_manifest_readiness(
+    path: Path = NATIVE_SYSTEM_MANIFEST_READINESS,
+) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(
+        path, "native-system-manifest-readiness.schema.json"
+    )
+    errors = [
+        f"native system manifest readiness {error.path}: {error.message}"
+        for error in artifact_schema_errors[:8]
+    ]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_system_manifest_readiness",
+            False,
+            "; ".join(errors) or "native system manifest readiness is not an object",
+        )
+    errors.extend(native_system_manifest.readiness_errors(artifact, ROOT))
+    expected_summary = {
+        "differential_cases": 16384,
+        "digest_cases": 1027,
+        "golden_vectors_passed": 3,
+        "golden_vectors_total": 3,
+        "mismatch_count": 0,
+        "negative_controls_passed": 64,
+        "negative_controls_total": 64,
+        "no_std_target_builds_passed": 2,
+        "no_std_target_builds_total": 2,
+        "pooleboot_uefi_integration_builds_passed": 1,
+        "pooleboot_uefi_integration_builds_total": 1,
+        "production_claim_count": 0,
+        "rust_host_tests_passed": 8,
+        "rust_host_tests_total": 8,
+    }
+    if artifact.get("summary") != expected_summary:
+        errors.append("PSM1 readiness summary changed")
+    digest = artifact.get("digest_qualification", {})
+    if digest.get("security_review_complete") is not False or digest.get(
+        "provider_promotion_allowed"
+    ) is not False:
+        errors.append("PBDIGEST1 security-review boundary changed")
+    if artifact.get("n5_exit_gate_satisfied") is not False or artifact.get(
+        "production_ready"
+    ) is not False:
+        errors.append("PSM1 overclaims N5 exit or production readiness")
+    detail = (
+        "contract=PSM1; rust_tests=8/8; targets=2/2; pooleboot_integration=1/1; "
+        "vectors=3/3; negatives=64/64; differential=16384; digest_cases=1027; "
+        "mismatches=0; security_review=false; n5_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_system_manifest_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_boot_handoff_readiness(path: Path = NATIVE_BOOT_HANDOFF_READINESS) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(path, "native-boot-handoff-readiness.schema.json")
+    errors = [f"native boot handoff readiness {error.path}: {error.message}" for error in artifact_schema_errors[:8]]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_boot_handoff_readiness",
+            False,
+            "; ".join(errors) or "native boot handoff readiness is not an object",
+        )
+    errors.extend(native_boot_handoff.readiness_errors(artifact, ROOT))
+    if artifact.get("summary") != {
+        "rust_host_tests_passed": 8,
+        "rust_host_tests_total": 8,
+        "no_std_target_builds_passed": 2,
+        "no_std_target_builds_total": 2,
+        "layout_assertions_passed": 12,
+        "golden_vectors_matched": 3,
+        "golden_vectors_total": 3,
+        "negative_controls_passed": 32,
+        "negative_controls_total": 32,
+        "differential_fuzz_cases": 16_384,
+        "differential_mismatches": 0,
+        "production_claim_count": 0,
+    }:
+        errors.append("PBP1 qualification summary changed")
+    if artifact.get("claims") != native_boot_handoff.expected_claims():
+        errors.append("PBP1 claim boundary changed")
+    detail = (
+        "contract=PBP1; rust_tests=8/8; no_std_targets=2/2; layouts=12; golden=3/3; "
+        "negatives=32/32; fuzz=16384; mismatches=0; producer=false; consumer=false; "
+        "n5_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_boot_handoff_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_boot_config_readiness(path: Path = NATIVE_BOOT_CONFIG_READINESS) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(path, "native-boot-config-readiness.schema.json")
+    errors = [f"native boot config readiness {error.path}: {error.message}" for error in artifact_schema_errors[:8]]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_boot_config_readiness",
+            False,
+            "; ".join(errors) or "native boot config readiness is not an object",
+        )
+    errors.extend(native_boot_config.readiness_errors(artifact, ROOT))
+    if artifact.get("summary") != {
+        "rust_host_tests_passed": 12,
+        "rust_host_tests_total": 12,
+        "no_std_target_builds_passed": 2,
+        "no_std_target_builds_total": 2,
+        "golden_vectors_matched": 3,
+        "golden_vectors_total": 3,
+        "negative_controls_passed": 64,
+        "negative_controls_total": 64,
+        "differential_fuzz_cases": 16_384,
+        "differential_mismatches": 0,
+        "production_claim_count": 0,
+    }:
+        errors.append("PBC1 qualification summary changed")
+    if artifact.get("claims") != native_boot_config.expected_claims():
+        errors.append("PBC1 claim boundary changed")
+    detail = (
+        "contract=PBC1; rust_tests=12/12; no_std_targets=2/2; golden=3/3; "
+        "negative=64/64; fuzz=16384; mismatches=0; live_file=false; live_parse=false; "
+        "n5_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_boot_config_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_elf_loader_readiness(path: Path = NATIVE_ELF_LOADER_READINESS) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(path, "native-elf-loader-readiness.schema.json")
+    errors = [f"native ELF loader readiness {error.path}: {error.message}" for error in artifact_schema_errors[:8]]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_elf_loader_readiness",
+            False,
+            "; ".join(errors) or "native ELF loader readiness is not an object",
+        )
+    errors.extend(native_elf_loader.readiness_errors(artifact))
+    expected = {
+        "rust_host_tests_passed": 12,
+        "rust_host_tests_total": 12,
+        "rustfmt_passed": 1,
+        "clippy_runs_passed": 3,
+        "clippy_runs_total": 3,
+        "no_std_target_builds_passed": 2,
+        "no_std_target_builds_total": 2,
+        "pooleboot_integration_builds_passed": 2,
+        "pooleboot_integration_builds_total": 2,
+        "golden_vectors_matched": 3,
+        "golden_vectors_total": 3,
+        "exact_loaded_byte_vectors_matched": 3,
+        "maximum_relocations_exercised": 4096,
+        "negative_controls_passed": 129,
+        "negative_controls_total": 129,
+        "differential_fuzz_cases": 16_384,
+        "differential_mismatches": 0,
+        "production_claim_count": 0,
+    }
+    if artifact.get("summary") != expected:
+        errors.append("PKELF1 qualification summary changed")
+    if artifact.get("claims") != native_elf_loader.expected_claims():
+        errors.append("PKELF1 claim boundary changed")
+    detail = (
+        "contract=PKELF1; rust_tests=12/12; no_std_targets=2/2; pooleboot_builds=2/2; "
+        "golden=3/3; exact_loaded=3/3; maximum_relocations=4096; negative=129/129; "
+        "fuzz=16384; mismatches=0; firmware_allocation=false; page_mapping=false; "
+        "kernel_transfer=false; n5_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_elf_loader_readiness",
+        not errors,
+        detail if not errors else "; ".join(errors[:8]),
+    )
+
+
+def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINESS) -> dict:
+    artifact, artifact_schema_errors = _load_schema_artifact(path, "native-kernel-entry-readiness.schema.json")
+    errors = [f"native kernel entry readiness {error.path}: {error.message}" for error in artifact_schema_errors[:8]]
+    if not isinstance(artifact, dict):
+        return readiness.make_check(
+            "native_kernel_entry_readiness",
+            False,
+            "; ".join(errors) or "native kernel entry readiness is not an object",
+        )
+    errors.extend(native_kernel_entry.readiness_errors(artifact))
+    expected_summary = {
+        "rust_host_tests_passed": 130,
+        "rust_host_tests_total": 130,
+        "rustfmt_packages_passed": 2,
+        "clippy_runs_passed": 2,
+        "clippy_runs_total": 2,
+        "clean_builds_matched": 2,
+        "clean_builds_total": 2,
+        "negative_controls_passed": 43,
+        "negative_controls_total": 43,
+        "exact_loaded_byte_implementations_matched": 2,
+        "exact_loaded_byte_implementations_total": 2,
+        "production_claim_count": 0,
+    }
+    if artifact.get("summary") != expected_summary:
+        errors.append("PKENTRY1 qualification summary changed")
+    product = artifact.get("product", {})
+    if (
+        product.get("canonical_byte_count") != 409_600
+        or product.get("image_byte_count") != 458_752
+        or product.get("entry_offset") != 0x9000
+        or product.get("relocation_count") != 959
+        or product.get("canonical_sha256")
+        != "6B8A9C2C3EAC559E1D9CB5965800A1671DB8F487F149861300D4EDCB279B3A11"
+    ):
+        errors.append("PKENTRY1 product identity changed")
+    if artifact.get("claims") != native_kernel_entry.expected_claims():
+        errors.append("PKENTRY1 claim boundary changed")
+    detail = (
+        "contract=PKENTRY1; kernel_tests=130/130; clean_builds=2/2; negative=43/43; "
+        "exact_loaded=2/2; bytes=409600; image_bytes=458752; entry=0x9000; "
+        "relocations=959; live_transfer=false; "
+        "target_execution=false; n6_exit=false; production_ready=false"
+    )
+    return readiness.make_check(
+        "native_kernel_entry_readiness",
         not errors,
         detail if not errors else "; ".join(errors[:8]),
     )
@@ -3569,6 +5505,118 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--hardware-target-readiness", type=Path, default=HARDWARE_TARGET_READINESS)
     parser.add_argument("--native-tier0-readiness", type=Path, default=NATIVE_TIER0_READINESS)
     parser.add_argument("--native-model-readiness", type=Path, default=NATIVE_MODEL_READINESS)
+    parser.add_argument("--native-boot-trust-readiness", type=Path, default=NATIVE_BOOT_TRUST_READINESS)
+    parser.add_argument("--native-pooleboot-readiness", type=Path, default=NATIVE_POOLEBOOT_READINESS)
+    parser.add_argument("--native-kernel-load-readiness", type=Path, default=NATIVE_KERNEL_LOAD_READINESS)
+    parser.add_argument(
+        "--native-kernel-revalidation-readiness",
+        type=Path,
+        default=NATIVE_KERNEL_REVALIDATION_READINESS,
+    )
+    parser.add_argument(
+        "--native-kernel-transfer-readiness",
+        type=Path,
+        default=NATIVE_KERNEL_TRANSFER_READINESS,
+    )
+    parser.add_argument(
+        "--native-kernel-trap-readiness",
+        type=Path,
+        default=NATIVE_KERNEL_TRAP_READINESS,
+    )
+    parser.add_argument(
+        "--native-kernel-cpu-policy-readiness",
+        type=Path,
+        default=NATIVE_KERNEL_CPU_POLICY_READINESS,
+    )
+    parser.add_argument(
+        "--native-kernel-errata-policy-readiness",
+        type=Path,
+        default=NATIVE_KERNEL_ERRATA_POLICY_READINESS,
+    )
+    parser.add_argument(
+        "--native-kernel-xstate-policy-readiness",
+        type=Path,
+        default=NATIVE_KERNEL_XSTATE_POLICY_READINESS,
+    )
+    parser.add_argument(
+        "--native-kernel-xstate-exception-readiness",
+        type=Path,
+        default=NATIVE_KERNEL_XSTATE_EXCEPTION_READINESS,
+    )
+    parser.add_argument(
+        "--native-kernel-privilege-msr-policy-readiness",
+        type=Path,
+        default=NATIVE_KERNEL_PRIVILEGE_MSR_POLICY_READINESS,
+    )
+    parser.add_argument(
+        "--native-kernel-physical-memory-readiness",
+        type=Path,
+        default=NATIVE_KERNEL_PHYSICAL_MEMORY_READINESS,
+    )
+    parser.add_argument(
+        "--native-kernel-virtual-memory-readiness",
+        type=Path,
+        default=NATIVE_KERNEL_VIRTUAL_MEMORY_READINESS,
+    )
+    parser.add_argument(
+        "--native-kernel-interrupt-time-readiness",
+        type=Path,
+        default=NATIVE_KERNEL_INTERRUPT_TIME_READINESS,
+    )
+    parser.add_argument(
+        "--native-kernel-smp-first-ap-readiness",
+        type=Path,
+        default=NATIVE_KERNEL_SMP_FIRST_AP_READINESS,
+    )
+    parser.add_argument(
+        "--native-kernel-smp-percpu-runtime-readiness",
+        type=Path,
+        default=NATIVE_KERNEL_SMP_PERCPU_RUNTIME_READINESS,
+    )
+    parser.add_argument(
+        "--native-kernel-smp-ipi-readiness",
+        type=Path,
+        default=NATIVE_KERNEL_SMP_IPI_READINESS,
+    )
+    parser.add_argument(
+        "--native-initial-system-readiness",
+        type=Path,
+        default=NATIVE_INITIAL_SYSTEM_READINESS,
+    )
+    parser.add_argument(
+        "--native-recovery-readiness",
+        type=Path,
+        default=NATIVE_RECOVERY_READINESS,
+    )
+    parser.add_argument(
+        "--native-symbol-readiness",
+        type=Path,
+        default=NATIVE_SYMBOL_READINESS,
+    )
+    parser.add_argument(
+        "--native-microcode-readiness",
+        type=Path,
+        default=NATIVE_MICROCODE_READINESS,
+    )
+    parser.add_argument(
+        "--native-firmware-readiness",
+        type=Path,
+        default=NATIVE_FIRMWARE_READINESS,
+    )
+    parser.add_argument(
+        "--native-policy-readiness",
+        type=Path,
+        default=NATIVE_POLICY_READINESS,
+    )
+    parser.add_argument(
+        "--native-system-manifest-readiness",
+        type=Path,
+        default=NATIVE_SYSTEM_MANIFEST_READINESS,
+    )
+    parser.add_argument("--native-boot-handoff-readiness", type=Path, default=NATIVE_BOOT_HANDOFF_READINESS)
+    parser.add_argument("--native-boot-config-readiness", type=Path, default=NATIVE_BOOT_CONFIG_READINESS)
+    parser.add_argument("--native-elf-loader-readiness", type=Path, default=NATIVE_ELF_LOADER_READINESS)
+    parser.add_argument("--native-kernel-entry-readiness", type=Path, default=NATIVE_KERNEL_ENTRY_READINESS)
     parser.add_argument("--out", type=Path, default=ROOT / "runs" / "release_gate.json")
     parser.add_argument("--include-runtime", action="store_true", help="Include PooleGlyph runtime checks in doctor.")
     args = parser.parse_args(argv)
@@ -3585,6 +5633,48 @@ def main(argv: list[str] | None = None) -> int:
         check_hardware_target_readiness(args.hardware_target_readiness),
         check_native_tier0_readiness(args.native_tier0_readiness),
         check_native_model_readiness(args.native_model_readiness),
+        check_native_boot_trust_readiness(args.native_boot_trust_readiness),
+        check_native_pooleboot_readiness(args.native_pooleboot_readiness),
+        check_native_kernel_load_readiness(args.native_kernel_load_readiness),
+        check_native_kernel_revalidation_readiness(args.native_kernel_revalidation_readiness),
+        check_native_kernel_transfer_readiness(args.native_kernel_transfer_readiness),
+        check_native_kernel_trap_readiness(args.native_kernel_trap_readiness),
+        check_native_kernel_cpu_policy_readiness(args.native_kernel_cpu_policy_readiness),
+        check_native_kernel_errata_policy_readiness(args.native_kernel_errata_policy_readiness),
+        check_native_kernel_xstate_policy_readiness(args.native_kernel_xstate_policy_readiness),
+        check_native_kernel_xstate_exception_readiness(
+            args.native_kernel_xstate_exception_readiness
+        ),
+        check_native_kernel_privilege_msr_policy_readiness(
+            args.native_kernel_privilege_msr_policy_readiness
+        ),
+        check_native_kernel_physical_memory_readiness(
+            args.native_kernel_physical_memory_readiness
+        ),
+        check_native_kernel_virtual_memory_readiness(
+            args.native_kernel_virtual_memory_readiness
+        ),
+        check_native_kernel_interrupt_time_readiness(
+            args.native_kernel_interrupt_time_readiness
+        ),
+        check_native_kernel_smp_first_ap_readiness(
+            args.native_kernel_smp_first_ap_readiness
+        ),
+        check_native_kernel_smp_percpu_runtime_readiness(
+            args.native_kernel_smp_percpu_runtime_readiness
+        ),
+        check_native_kernel_smp_ipi_readiness(args.native_kernel_smp_ipi_readiness),
+        check_native_initial_system_readiness(args.native_initial_system_readiness),
+        check_native_recovery_readiness(args.native_recovery_readiness),
+        check_native_symbol_readiness(args.native_symbol_readiness),
+        check_native_microcode_readiness(args.native_microcode_readiness),
+        check_native_firmware_readiness(args.native_firmware_readiness),
+        check_native_policy_readiness(args.native_policy_readiness),
+        check_native_system_manifest_readiness(args.native_system_manifest_readiness),
+        check_native_boot_handoff_readiness(args.native_boot_handoff_readiness),
+        check_native_boot_config_readiness(args.native_boot_config_readiness),
+        check_native_elf_loader_readiness(args.native_elf_loader_readiness),
+        check_native_kernel_entry_readiness(args.native_kernel_entry_readiness),
         check_publication_boundary(),
         check_bundle(args.bundle),
         check_replay_proof(args.replay_proof),
@@ -3771,6 +5861,34 @@ def main(argv: list[str] | None = None) -> int:
             args.hardware_target_readiness,
             args.native_tier0_readiness,
             args.native_model_readiness,
+            args.native_boot_trust_readiness,
+            args.native_pooleboot_readiness,
+            args.native_kernel_load_readiness,
+            args.native_kernel_revalidation_readiness,
+            args.native_kernel_transfer_readiness,
+            args.native_kernel_trap_readiness,
+            args.native_kernel_cpu_policy_readiness,
+            args.native_kernel_errata_policy_readiness,
+            args.native_kernel_xstate_policy_readiness,
+            args.native_kernel_xstate_exception_readiness,
+            args.native_kernel_privilege_msr_policy_readiness,
+            args.native_kernel_physical_memory_readiness,
+            args.native_kernel_virtual_memory_readiness,
+            args.native_kernel_interrupt_time_readiness,
+            args.native_kernel_smp_first_ap_readiness,
+            args.native_kernel_smp_percpu_runtime_readiness,
+            args.native_kernel_smp_ipi_readiness,
+            args.native_initial_system_readiness,
+            args.native_recovery_readiness,
+            args.native_symbol_readiness,
+            args.native_microcode_readiness,
+            args.native_firmware_readiness,
+            args.native_policy_readiness,
+            args.native_system_manifest_readiness,
+            args.native_boot_handoff_readiness,
+            args.native_boot_config_readiness,
+            args.native_elf_loader_readiness,
+            args.native_kernel_entry_readiness,
         )
         if path is not None
     ]
