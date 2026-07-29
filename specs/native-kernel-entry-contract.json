@@ -55,7 +55,7 @@
     "canonical_file_bytes": 409600,
     "maximum_linked_file_bytes": 8388608,
     "maximum_relocations": 4096,
-    "build_id": "PKBUILD1-CYCLE138-N8-SMP-IPI-V001-00100000000",
+    "build_id": "PKBUILD1-CYCLE140-N9-SMP-SHOOTDOWN-V001-00001",
     "segment_boundaries": {
       "read_only_end": 36864,
       "text_start": 36864,

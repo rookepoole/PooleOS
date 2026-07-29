@@ -35,7 +35,10 @@ use poolekernel::{
     privilege_msr::{machine_check_bank_count, machine_check_ctl_present, validate_snapshot},
     revalidation,
     smp::{self, MailboxSnapshot, ResourceLayout},
-    smp_ipi::{self, IpiSnapshot, Operation as IpiOperation, Request as IpiRequest},
+    smp_ipi::{
+        self, IpiSnapshot, Operation as IpiOperation, Request as IpiRequest, ShootdownRequest,
+        ShootdownSnapshot,
+    },
     smp_runtime::{self, MailboxSnapshot as RuntimeMailboxSnapshot},
     validate_cpu_policy_snapshot, validate_descriptor_state, validate_development_handoff,
     validate_entry_envelope, validate_handoff, validate_interrupt_descriptor_state,
@@ -912,33 +915,53 @@ macro_rules! pksmp3_fragment {
     };
 }
 
-pksmp3_fragment!(PKSMP3_EARLY, b"POOLEOS:KERNEL:SMP-IPI-EARLY PASS contract=PKSMP3 selector=14 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n");
+pksmp3_fragment!(PKSMP3_EARLY, b"POOLEOS:KERNEL:SMP-IPI-EARLY PASS contract=PKSMP4 selector=14 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n");
 pksmp3_fragment!(
     PKSMP3_DENIED,
-    b"POOLEOS:KERNEL:SMP-IPI-DENIED contract=PKSMP3 reason="
+    b"POOLEOS:KERNEL:SMP-IPI-DENIED contract=PKSMP4 reason="
 );
 pksmp3_fragment!(PKSMP3_DENIED_TAIL, b" cleanup=fail_closed capability_revoked=1 authority=0 actions=0 production=0 terminal=panic\n");
 pksmp3_fragment!(
     PKSMP3_TOPOLOGY,
-    b"POOLEOS:KERNEL:SMP-IPI-TOPOLOGY PASS contract=PKSMP3 processors="
+    b"POOLEOS:KERNEL:SMP-IPI-TOPOLOGY PASS contract=PKSMP4 processors="
 );
 pksmp3_fragment!(
     PKSMP3_RESOURCES,
-    b"POOLEOS:KERNEL:SMP-IPI-RESOURCES PASS contract=PKSMP3 physical_start="
+    b"POOLEOS:KERNEL:SMP-IPI-RESOURCES PASS contract=PKSMP4 physical_start="
 );
-pksmp3_fragment!(PKSMP3_ONLINE, b"POOLEOS:KERNEL:SMP-IPI-ONLINE PASS contract=PKSMP3 service_state=2 if=1 vectors=224,225,226,227,228,229 apic_mmio=0x00000000FEE00000 apic_table=1\n");
-pksmp3_fragment!(PKSMP3_ACCEPTED, b"POOLEOS:KERNEL:SMP-IPI-ACCEPTED PASS contract=PKSMP3 operations=reschedule,shootdown_transport,call_allowlist_noop,diagnostic,panic_notice,stop sequences=1,2,3,4,5,6 accepted=");
-pksmp3_fragment!(PKSMP3_CONTROLS, b"POOLEOS:KERNEL:SMP-IPI-CONTROLS PASS contract=PKSMP3 invalid_capability=1 vector_mismatch=1 stale_sequence=1 duplicate_sequence=1 denied=");
-pksmp3_fragment!(PKSMP3_TIMEOUT, b"POOLEOS:KERNEL:SMP-IPI-TIMEOUT PASS contract=PKSMP3 target_apic_id=2 attempt=10 bounded=1 offline_cpu=1 timeout_count=");
+pksmp3_fragment!(PKSMP3_ONLINE, b"POOLEOS:KERNEL:SMP-IPI-ONLINE PASS contract=PKSMP4 service_state=2 if=1 vectors=224,225,226,227,228,229 apic_mmio=0x00000000FEE00000 apic_table=1\n");
+pksmp3_fragment!(PKSMP3_ACCEPTED, b"POOLEOS:KERNEL:SMP-IPI-ACCEPTED PASS contract=PKSMP4 operations=reschedule,shootdown_remote_invlpg,call_allowlist_noop,diagnostic,panic_notice,stop sequences=1,2,3,4,5,6 accepted=");
+pksmp3_fragment!(PKSMP3_CONTROLS, b"POOLEOS:KERNEL:SMP-IPI-CONTROLS PASS contract=PKSMP4 invalid_capability=1 vector_mismatch=1 stale_sequence=1 duplicate_sequence=1 denied=");
+pksmp3_fragment!(PKSMP3_TIMEOUT, b"POOLEOS:KERNEL:SMP-IPI-TIMEOUT PASS contract=PKSMP4 operation=shootdown target_apic_id=2 target_mask=0x0000000000000004 attempt=6 bounded=1 offline_cpu=1 retry_same_attempt=1 timeout_count=");
+pksmp3_fragment!(
+    PKSMP3_SHOOTDOWN_RECEIPT,
+    b"POOLEOS:KERNEL:SMP-SHOOTDOWN PASS contract=PKSMP4 root="
+);
+pksmp3_fragment!(
+    PKSMP3_PROBE,
+    b" probe=0x00000000001FF000 retired_generation="
+);
+pksmp3_fragment!(PKSMP3_ACTIVE_GENERATION, b" active_generation=");
+pksmp3_fragment!(PKSMP3_TARGET_MASK, b" target_mask=");
+pksmp3_fragment!(PKSMP3_ACK_MASK, b" ack_mask=");
+pksmp3_fragment!(PKSMP3_OLD_FRAME, b" old_frame=");
+pksmp3_fragment!(PKSMP3_NEW_FRAME, b" new_frame=");
+pksmp3_fragment!(PKSMP3_OBSERVED_BEFORE, b" observed_before=");
+pksmp3_fragment!(PKSMP3_OBSERVED_AFTER, b" observed_after=");
+pksmp3_fragment!(PKSMP3_INVALIDATIONS, b" invalidations=");
+pksmp3_fragment!(PKSMP3_LAST_ACK_GENERATION, b" last_ack_generation=");
+pksmp3_fragment!(PKSMP3_PREMATURE_RECLAIM, b" premature_reclaim_rejected=");
+pksmp3_fragment!(PKSMP3_RECLAIM_STATE, b" reclaim_state=");
+pksmp3_fragment!(PKSMP3_SHOOTDOWN_CHECKSUM, b" shootdown_checksum=");
 pksmp3_fragment!(
     PKSMP3_STOP,
-    b"POOLEOS:KERNEL:SMP-IPI-STOP PASS contract=PKSMP3 ack_attempt="
+    b"POOLEOS:KERNEL:SMP-IPI-STOP PASS contract=PKSMP4 ack_attempt="
 );
 pksmp3_fragment!(
     PKSMP3_RELEASE,
-    b"POOLEOS:KERNEL:SMP-IPI-RELEASE PASS contract=PKSMP3 release_sequence="
+    b"POOLEOS:KERNEL:SMP-IPI-RELEASE PASS contract=PKSMP4 release_sequence="
 );
-pksmp3_fragment!(PKSMP3_RESULT, b"POOLEOS:KERNEL:SMP-IPI-RESULT PASS contract=PKSMP3 profile=sandybridge_x87_sse_two_vcpu capability_gate=development_fixed_token operation_classes=6 valid_deliveries=6 denied_deliveries=4 offline_timeouts=1 eois=10 panic_latched=1 stop_quiesced=1 ap_parked=1 resources_released=32 rollback=host_verified shootdown_transport_only=1 tlb_invalidations=0 call_allowlist_noop=1 arbitrary_callback=0 scheduler=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n");
+pksmp3_fragment!(PKSMP3_RESULT, b"POOLEOS:KERNEL:SMP-IPI-RESULT PASS contract=PKSMP4 profile=sandybridge_x87_sse_two_vcpu capability_gate=development_fixed_token operation_classes=6 valid_deliveries=6 denied_deliveries=4 offline_timeouts=1 eois=10 panic_latched=1 stop_quiesced=1 ap_parked=1 resources_released=34 rollback=host_verified shootdown_remote_invlpg=1 tlb_invalidations=1 generation_retirement=1 no_reuse_before_retirement=1 call_allowlist_noop=1 arbitrary_callback=0 scheduler=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n");
 pksmp3_fragment!(PKSMP3_ENABLED, b" enabled=");
 pksmp3_fragment!(PKSMP3_BSP_APIC, b" bsp_apic_id=");
 pksmp3_fragment!(PKSMP3_TARGET_APIC, b" target_apic_id=");
@@ -979,7 +1002,14 @@ pksmp3_fragment!(PKSMP3_APIC_TABLE_VERIFIED, b" apic_table_verified=");
 pksmp3_fragment!(PKSMP3_STOP_TAIL, b" final_init=1 parked=1\n");
 pksmp3_fragment!(PKSMP3_ZEROED_BYTES, b" zeroed_bytes=");
 pksmp3_fragment!(PKSMP3_VERIFIED_BYTES, b" verified_bytes=");
-pksmp3_fragment!(PKSMP3_RELEASE_TAIL, b" resources_released=32 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged\n");
+pksmp3_fragment!(
+    PKSMP3_FRAME_ALLOCATION_SEQUENCES,
+    b" frame_allocation_sequences="
+);
+pksmp3_fragment!(PKSMP3_FRAME_RELEASE_SEQUENCES, b" frame_release_sequences=");
+pksmp3_fragment!(PKSMP3_FRAME_ZEROED_BYTES, b" frame_zeroed_bytes=");
+pksmp3_fragment!(PKSMP3_FRAME_VERIFIED_BYTES, b" frame_verified_bytes=");
+pksmp3_fragment!(PKSMP3_RELEASE_TAIL, b" resources_released=34 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged\n");
 
 static EARLY_RING: EarlyRing = EarlyRing::new();
 static PANIC_STATE: PanicState = PanicState::new();
@@ -998,6 +1028,8 @@ static IRQ_TIMER_DELIVERIES: AtomicU32 = AtomicU32::new(0);
 static IRQ_EOI_COUNT: AtomicU32 = AtomicU32::new(0);
 static IRQ_ERROR_COUNT: AtomicU32 = AtomicU32::new(0);
 static IRQ_SPURIOUS_COUNT: AtomicU32 = AtomicU32::new(0);
+static SMP_IPI_FAILURE_STAGE: AtomicU32 = AtomicU32::new(0);
+static SMP_IPI_FAILURE_DETAIL: AtomicU64 = AtomicU64::new(0);
 
 core::arch::global_asm!(
     r#"
@@ -3327,12 +3359,13 @@ enum SmpIpiLiveError {
 
 impl SmpIpiLiveError {
     #[inline(always)]
-    const fn code(self) -> u32 {
-        match self {
-            Self::Base(_) => 0x1000,
+    fn code(self) -> u32 {
+        let class = match self {
+            Self::Base(error) => 0x1000 | error.code(),
             Self::Runtime(_) => 0x2000,
             Self::Ipi(_) => 0x3000,
-        }
+        };
+        class | (SMP_IPI_FAILURE_STAGE.load(Ordering::Relaxed) << 16)
     }
 }
 
@@ -3376,6 +3409,9 @@ struct SmpIpiOperationProof {
     idt_verified: bool,
     xstate_verified: bool,
     apic_table_verified: bool,
+    retirement_receipt: smp_ipi::GenerationRetirementReceipt,
+    old_frame_release_receipt: ScrubReceipt,
+    premature_reclaim_rejected: bool,
 }
 
 #[derive(Clone, Copy)]
@@ -3389,6 +3425,9 @@ struct SmpIpiLiveProof {
     trampoline_bytes: u64,
     allocation_receipt: ScrubReceipt,
     release_receipt: ScrubReceipt,
+    old_frame_allocation_receipt: ScrubReceipt,
+    new_frame_allocation_receipt: ScrubReceipt,
+    new_frame_release_receipt: ScrubReceipt,
     operation: SmpIpiOperationProof,
 }
 
@@ -3467,6 +3506,42 @@ fn smp_ipi_mailbox_snapshot() -> IpiSnapshot {
         panic_latched: smp_ipi_mailbox_read_u32(smp_ipi::PANIC_LATCHED_OFFSET),
         spurious_count: smp_ipi_mailbox_read_u32(smp_ipi::SPURIOUS_COUNT_OFFSET),
         apic_error_count: smp_ipi_mailbox_read_u32(smp_ipi::APIC_ERROR_COUNT_OFFSET),
+        shootdown: ShootdownSnapshot {
+            magic: smp_ipi_mailbox_read_u64(smp_ipi::SHOOTDOWN_MAGIC_OFFSET),
+            version: smp_ipi_mailbox_read_u32(smp_ipi::SHOOTDOWN_VERSION_OFFSET),
+            state: smp_ipi_mailbox_read_u32(smp_ipi::SHOOTDOWN_STATE_OFFSET),
+            error: smp_ipi_mailbox_read_u32(smp_ipi::SHOOTDOWN_ERROR_OFFSET),
+            root_physical: smp_ipi_mailbox_read_u64(smp_ipi::SHOOTDOWN_ROOT_PHYSICAL_OFFSET),
+            virtual_address: smp_ipi_mailbox_read_u64(smp_ipi::SHOOTDOWN_VIRTUAL_ADDRESS_OFFSET),
+            retired_generation: smp_ipi_mailbox_read_u64(
+                smp_ipi::SHOOTDOWN_RETIRED_GENERATION_OFFSET,
+            ),
+            active_generation: smp_ipi_mailbox_read_u64(
+                smp_ipi::SHOOTDOWN_ACTIVE_GENERATION_OFFSET,
+            ),
+            target_mask: smp_ipi_mailbox_read_u64(smp_ipi::SHOOTDOWN_TARGET_MASK_OFFSET),
+            ack_mask: smp_ipi_mailbox_read_u64(smp_ipi::SHOOTDOWN_ACK_MASK_OFFSET),
+            old_frame_physical: smp_ipi_mailbox_read_u64(
+                smp_ipi::SHOOTDOWN_OLD_FRAME_PHYSICAL_OFFSET,
+            ),
+            new_frame_physical: smp_ipi_mailbox_read_u64(
+                smp_ipi::SHOOTDOWN_NEW_FRAME_PHYSICAL_OFFSET,
+            ),
+            observed_before: smp_ipi_mailbox_read_u64(smp_ipi::SHOOTDOWN_OBSERVED_BEFORE_OFFSET),
+            observed_after: smp_ipi_mailbox_read_u64(smp_ipi::SHOOTDOWN_OBSERVED_AFTER_OFFSET),
+            invalidation_count: smp_ipi_mailbox_read_u64(
+                smp_ipi::SHOOTDOWN_INVALIDATION_COUNT_OFFSET,
+            ),
+            request_checksum: smp_ipi_mailbox_read_u64(smp_ipi::SHOOTDOWN_REQUEST_CHECKSUM_OFFSET),
+            response_checksum: smp_ipi_mailbox_read_u64(
+                smp_ipi::SHOOTDOWN_RESPONSE_CHECKSUM_OFFSET,
+            ),
+            last_ack_generation: smp_ipi_mailbox_read_u64(
+                smp_ipi::SHOOTDOWN_LAST_ACK_GENERATION_OFFSET,
+            ),
+            timeout_count: smp_ipi_mailbox_read_u32(smp_ipi::SHOOTDOWN_TIMEOUT_COUNT_OFFSET),
+            reclaim_state: smp_ipi_mailbox_read_u32(smp_ipi::SHOOTDOWN_RECLAIM_STATE_OFFSET),
+        },
     }
 }
 
@@ -3476,6 +3551,7 @@ fn smp_ipi_prepare_resources(
     bsp_apic_id: u32,
     target_apic_id: u32,
     apic_physical: u64,
+    shootdown: &ShootdownRequest,
 ) -> Result<(usize, smp_ipi::HandlerLayout), SmpIpiLiveError> {
     if apic_physical != smp_ipi::APIC_PHYSICAL_ADDRESS {
         return Err(smp_ipi::Error::ResourceAddress.into());
@@ -3486,6 +3562,16 @@ fn smp_ipi_prepare_resources(
     smp_write_page_bytes(access, layout.trampoline(), &trampoline)?;
     let idt = smp_ipi::build_idt_page(layout, handlers)?;
     smp_write_page_bytes(access, layout.idt(), &idt)?;
+    TableMemory::write_entry(
+        access,
+        layout.page_table(),
+        smp_ipi::PROBE_PAGE_TABLE_INDEX,
+        shootdown.old_frame_physical
+            | smp::ENTRY_PRESENT
+            | smp::ENTRY_WRITABLE
+            | smp::ENTRY_NO_EXECUTE,
+    )
+    .map_err(|_| smp::Error::Memory)?;
 
     let apic_table = layout.page_address(smp_ipi::APIC_PAGE_TABLE_OFFSET);
     TableMemory::write_entry(
@@ -3537,10 +3623,56 @@ fn smp_ipi_prepare_resources(
     );
     smp_ipi_mailbox_write_u64(smp_ipi::CAPABILITY_HIGH_OFFSET, smp_ipi::CAPABILITY_HIGH);
     smp_ipi_mailbox_write_u64(smp_ipi::CAPABILITY_LOW_OFFSET, smp_ipi::CAPABILITY_LOW);
+    smp_ipi_mailbox_write_u64(smp_ipi::SHOOTDOWN_MAGIC_OFFSET, smp_ipi::SHOOTDOWN_MAGIC);
+    smp_ipi_mailbox_write_u32(
+        smp_ipi::SHOOTDOWN_VERSION_OFFSET,
+        smp_ipi::SHOOTDOWN_VERSION,
+    );
+    smp_ipi_mailbox_write_u32(
+        smp_ipi::SHOOTDOWN_STATE_OFFSET,
+        smp_ipi::SHOOTDOWN_STATE_PREPARED,
+    );
+    smp_ipi_mailbox_write_u32(smp_ipi::SHOOTDOWN_ERROR_OFFSET, smp_ipi::ERROR_NONE);
+    smp_ipi_mailbox_write_u64(
+        smp_ipi::SHOOTDOWN_ROOT_PHYSICAL_OFFSET,
+        shootdown.root_physical,
+    );
+    smp_ipi_mailbox_write_u64(
+        smp_ipi::SHOOTDOWN_VIRTUAL_ADDRESS_OFFSET,
+        shootdown.virtual_address,
+    );
+    smp_ipi_mailbox_write_u64(
+        smp_ipi::SHOOTDOWN_RETIRED_GENERATION_OFFSET,
+        shootdown.retired_generation,
+    );
+    smp_ipi_mailbox_write_u64(
+        smp_ipi::SHOOTDOWN_ACTIVE_GENERATION_OFFSET,
+        shootdown.active_generation,
+    );
+    smp_ipi_mailbox_write_u64(smp_ipi::SHOOTDOWN_TARGET_MASK_OFFSET, shootdown.target_mask);
+    smp_ipi_mailbox_write_u64(
+        smp_ipi::SHOOTDOWN_OLD_FRAME_PHYSICAL_OFFSET,
+        shootdown.old_frame_physical,
+    );
+    smp_ipi_mailbox_write_u64(
+        smp_ipi::SHOOTDOWN_NEW_FRAME_PHYSICAL_OFFSET,
+        shootdown.new_frame_physical,
+    );
+    smp_ipi_mailbox_write_u64(
+        smp_ipi::SHOOTDOWN_REQUEST_CHECKSUM_OFFSET,
+        shootdown.checksum,
+    );
+    smp_ipi_mailbox_write_u32(
+        smp_ipi::SHOOTDOWN_RECLAIM_STATE_OFFSET,
+        smp_ipi::RECLAIM_BLOCKED,
+    );
     if smp_ipi_mailbox_read_u64(smp_ipi::MAGIC_OFFSET) != smp_ipi::EXTENSION_MAGIC
         || smp_ipi_mailbox_read_u32(smp_ipi::VERSION_OFFSET) != smp_ipi::EXTENSION_VERSION
         || smp_ipi_mailbox_read_u32(smp_ipi::SERVICE_STATE_OFFSET)
             != smp_ipi::SERVICE_STATE_PREPARED
+        || smp_ipi_mailbox_read_u64(smp_ipi::SHOOTDOWN_MAGIC_OFFSET) != smp_ipi::SHOOTDOWN_MAGIC
+        || smp_ipi_mailbox_read_u64(smp_ipi::SHOOTDOWN_REQUEST_CHECKSUM_OFFSET)
+            != shootdown.checksum
     {
         return Err(smp_ipi::Error::MailboxShape.into());
     }
@@ -3635,6 +3767,7 @@ fn smp_ipi_validate_post_ap_resources(
     handlers: smp_ipi::HandlerLayout,
     mailbox: &RuntimeMailboxSnapshot,
     apic_physical: u64,
+    new_frame_physical: u64,
 ) -> Result<(), SmpIpiLiveError> {
     let descriptor = smp_runtime_read_page_bytes(
         access,
@@ -3683,6 +3816,18 @@ fn smp_ipi_validate_post_ap_resources(
             return Err(smp_ipi::Error::PageRole.into());
         }
     }
+    let probe_leaf =
+        TableMemory::read_entry(access, layout.page_table(), smp_ipi::PROBE_PAGE_TABLE_INDEX)
+            .map_err(|_| smp::Error::Memory)?;
+    if probe_leaf
+        != (new_frame_physical
+            | smp::ENTRY_PRESENT
+            | smp::ENTRY_WRITABLE
+            | smp::ENTRY_NO_EXECUTE
+            | SMP_IPI_ENTRY_ACCESSED)
+    {
+        return Err(smp_ipi::Error::PageRole.into());
+    }
     Ok(())
 }
 
@@ -3691,6 +3836,7 @@ fn run_smp_ipi(
     core: poole_handoff::CoreRecord,
     observed_cr3: u64,
 ) -> Result<SmpIpiLiveProof, SmpIpiLiveError> {
+    SMP_IPI_FAILURE_STAGE.store(1, Ordering::Relaxed);
     let physical_bits = arch::x86_64::physical_address_bits().ok_or(smp::Error::Memory)?;
     let mut page_access =
         BootstrapTableMemory::new(observed_cr3, physical_bits).map_err(|_| smp::Error::Memory)?;
@@ -3743,6 +3889,68 @@ fn run_smp_ipi(
         )
         .map_err(|_| smp::Error::Memory)?;
     let layout = smp_runtime::ResourceLayout::new(allocation.start_page, allocation.page_count)?;
+    let (old_frame, old_frame_allocation_receipt) = match manager.allocate_scrubbed(
+        Zone::Dma,
+        1,
+        smp_ipi::SHOOTDOWN_FRAME_OWNER,
+        &mut page_access,
+    ) {
+        Ok(value) => value,
+        Err(_) => {
+            let _ = smp_runtime_release_resources(&mut manager, &mut page_access, allocation)?;
+            return Err(smp::Error::Memory.into());
+        }
+    };
+    let (new_frame, new_frame_allocation_receipt) = match manager.allocate_scrubbed(
+        Zone::Dma,
+        1,
+        smp_ipi::SHOOTDOWN_FRAME_OWNER,
+        &mut page_access,
+    ) {
+        Ok(value) => value,
+        Err(_) => {
+            let _ = manager.free_scrubbed(old_frame, &mut page_access);
+            let _ = smp_runtime_release_resources(&mut manager, &mut page_access, allocation)?;
+            return Err(smp::Error::Memory.into());
+        }
+    };
+    let old_frame_physical = old_frame
+        .start_page
+        .checked_mul(smp_ipi::PAGE_BYTES)
+        .ok_or(smp::Error::Memory)?;
+    let new_frame_physical = new_frame
+        .start_page
+        .checked_mul(smp_ipi::PAGE_BYTES)
+        .ok_or(smp::Error::Memory)?;
+    PhysicalPageAccess::write_word(
+        &mut page_access,
+        old_frame_physical,
+        0,
+        smp_ipi::OLD_FRAME_VALUE,
+    )
+    .map_err(|_| smp::Error::Memory)?;
+    PhysicalPageAccess::write_word(
+        &mut page_access,
+        new_frame_physical,
+        0,
+        smp_ipi::NEW_FRAME_VALUE,
+    )
+    .map_err(|_| smp::Error::Memory)?;
+    if PhysicalPageAccess::read_word(&mut page_access, old_frame_physical, 0)
+        .map_err(|_| smp::Error::Memory)?
+        != smp_ipi::OLD_FRAME_VALUE
+        || PhysicalPageAccess::read_word(&mut page_access, new_frame_physical, 0)
+            .map_err(|_| smp::Error::Memory)?
+            != smp_ipi::NEW_FRAME_VALUE
+    {
+        return Err(smp::Error::Memory.into());
+    }
+    let shootdown =
+        ShootdownRequest::canonical(layout.pml4(), old_frame_physical, new_frame_physical);
+    smp_ipi::validate_shootdown_request(&shootdown, layout.pml4(), 0)
+        .map_err(|_| smp_ipi::Error::Result)?;
+    let mut deferred_reclaim =
+        smp_ipi::DeferredReclaim::new(shootdown).map_err(|_| smp_ipi::Error::Transition)?;
     let mut transaction = smp_ipi::IpiTransaction::new();
     transaction.reserve()?;
     let (trampoline_bytes, handlers) = match smp_ipi_prepare_resources(
@@ -3751,9 +3959,12 @@ fn run_smp_ipi(
         cpu.initial_apic_id,
         target.apic_id,
         apic_physical,
+        &shootdown,
     ) {
         Ok(value) => value,
         Err(error) => {
+            let _ = manager.free_scrubbed(new_frame, &mut page_access);
+            let _ = manager.free_scrubbed(old_frame, &mut page_access);
             smp_runtime_release_resources(&mut manager, &mut page_access, allocation)?;
             let _ = transaction.rollback(false)?;
             return Err(error);
@@ -3781,8 +3992,11 @@ fn run_smp_ipi(
     let mut pic_masks = None;
     let mut hpet_changed = false;
     let mut ap_started = false;
+    let mut old_frame_release_receipt: Option<ScrubReceipt> = None;
+    let mut new_frame_release_receipt: Option<ScrubReceipt> = None;
     let mut period_femtoseconds = None;
     let mut operation_result = (|| -> Result<SmpIpiOperationProof, SmpIpiLiveError> {
+        SMP_IPI_FAILURE_STAGE.store(2, Ordering::Relaxed);
         let discovery = validate_apic_discovery(
             &topology,
             cpu,
@@ -3824,6 +4038,7 @@ fn run_smp_ipi(
         }
         let bsp_tsc_before = arch::x86_64::read_tsc_ordered();
         smp_init_sequence(&mut hardware, target.apic_id, period)?;
+        SMP_IPI_FAILURE_STAGE.store(3, Ordering::Relaxed);
         ap_started = true;
         transaction.startup_sent()?;
         smp_apic_command(
@@ -3844,8 +4059,14 @@ fn run_smp_ipi(
             smp_runtime::MAILBOX_STATE_PREPARED,
             smp_runtime::MAILBOX_STATE_ONLINE,
         )?;
+        SMP_IPI_FAILURE_STAGE.store(4, Ordering::Relaxed);
         let bsp_tsc_after = arch::x86_64::read_tsc_ordered();
         transaction.online()?;
+        if smp_ipi_mailbox_read_u64(smp_ipi::SHOOTDOWN_OBSERVED_BEFORE_OFFSET)
+            != smp_ipi::OLD_FRAME_VALUE
+        {
+            return Err(smp_ipi::Error::Result.into());
+        }
 
         let mut request = IpiRequest::canonical(1, 1, IpiOperation::Reschedule, target.apic_id);
         let _ = smp_ipi_deliver(
@@ -3901,16 +4122,124 @@ fn run_smp_ipi(
             smp_ipi::ERROR_DUPLICATE_SEQUENCE,
             0,
         )?;
+        deferred_reclaim
+            .arm()
+            .map_err(|_| smp_ipi::Error::Transition)?;
+        SMP_IPI_FAILURE_STAGE.store(5, Ordering::Relaxed);
+        let mut offline_shootdown = shootdown;
+        offline_shootdown.target_mask = smp_ipi::OFFLINE_CPU_MASK;
+        offline_shootdown.checksum = smp_ipi::shootdown_request_checksum(&offline_shootdown);
+        smp_ipi_mailbox_write_u64(
+            smp_ipi::SHOOTDOWN_TARGET_MASK_OFFSET,
+            offline_shootdown.target_mask,
+        );
+        smp_ipi_mailbox_write_u64(
+            smp_ipi::SHOOTDOWN_REQUEST_CHECKSUM_OFFSET,
+            offline_shootdown.checksum,
+        );
+        smp_ipi_mailbox_write_u32(
+            smp_ipi::SHOOTDOWN_STATE_OFFSET,
+            smp_ipi::SHOOTDOWN_STATE_ARMED,
+        );
+        request = IpiRequest::canonical(6, 2, IpiOperation::Shootdown, 2);
+        smp_ipi_publish_request(&request);
+        smp_apic_command(
+            &mut hardware,
+            2,
+            u32::from(IpiOperation::Shootdown.vector()),
+        )?;
+        SMP_IPI_FAILURE_STAGE.store(6, Ordering::Relaxed);
+        match smp_ipi_wait_ack(&hardware, period, request.attempt) {
+            Err(SmpIpiLiveError::Base(smp::Error::Timeout)) => {}
+            Err(error) => return Err(error),
+            Ok(_) => return Err(smp_ipi::Error::Target.into()),
+        }
+        deferred_reclaim
+            .timeout()
+            .map_err(|_| smp_ipi::Error::Transition)?;
+        SMP_IPI_FAILURE_STAGE.store(7, Ordering::Relaxed);
+        smp_ipi_mailbox_write_u32(
+            smp_ipi::SHOOTDOWN_TIMEOUT_COUNT_OFFSET,
+            smp_ipi::LIVE_TIMEOUT_COUNT,
+        );
+        smp_ipi_mailbox_write_u64(smp_ipi::SHOOTDOWN_TARGET_MASK_OFFSET, shootdown.target_mask);
+        smp_ipi_mailbox_write_u64(
+            smp_ipi::SHOOTDOWN_REQUEST_CHECKSUM_OFFSET,
+            shootdown.checksum,
+        );
+        smp_ipi_mailbox_write_u32(
+            smp_ipi::SHOOTDOWN_STATE_OFFSET,
+            smp_ipi::SHOOTDOWN_STATE_PREPARED,
+        );
+        deferred_reclaim
+            .arm()
+            .map_err(|_| smp_ipi::Error::Transition)?;
+        let premature_reclaim_rejected = deferred_reclaim.authorize().is_err();
+        if !premature_reclaim_rejected {
+            return Err(smp_ipi::Error::Transition.into());
+        }
+        let probe_leaf_before = TableMemory::read_entry(
+            &mut page_access,
+            layout.page_table(),
+            smp_ipi::PROBE_PAGE_TABLE_INDEX,
+        )
+        .map_err(|_| smp::Error::Memory)?;
+        if probe_leaf_before & 0x000f_ffff_ffff_f000 != old_frame_physical
+            || probe_leaf_before & SMP_IPI_ENTRY_ACCESSED == 0
+        {
+            return Err(smp_ipi::Error::PageRole.into());
+        }
+        TableMemory::write_entry(
+            &mut page_access,
+            layout.page_table(),
+            smp_ipi::PROBE_PAGE_TABLE_INDEX,
+            new_frame_physical | smp::ENTRY_PRESENT | smp::ENTRY_WRITABLE | smp::ENTRY_NO_EXECUTE,
+        )
+        .map_err(|_| smp::Error::Memory)?;
+        arch::x86_64::memory_fence();
+        page_access
+            .ensure_mapped(layout.local())
+            .map_err(|_| smp::Error::PhysicalAccess)?;
+        smp_ipi_mailbox_write_u32(
+            smp_ipi::SHOOTDOWN_STATE_OFFSET,
+            smp_ipi::SHOOTDOWN_STATE_ARMED,
+        );
         request = IpiRequest::canonical(6, 2, IpiOperation::Shootdown, target.apic_id);
-        let _ = smp_ipi_deliver(
+        let shootdown_ack = smp_ipi_deliver(
             &mut hardware,
             period,
             IpiOperation::Shootdown,
             &request,
             smp_ipi::ACK_ACCEPTED,
             smp_ipi::ERROR_NONE,
-            smp_ipi::RESULT_SHOOTDOWN_TRANSPORT_ONLY,
+            smp_ipi::RESULT_SHOOTDOWN_INVALIDATED,
         )?;
+        SMP_IPI_FAILURE_STAGE.store(8, Ordering::Relaxed);
+        smp_ipi::validate_shootdown_ack(&shootdown_ack.shootdown, &shootdown)?;
+        deferred_reclaim
+            .acknowledge(&shootdown_ack.shootdown)
+            .map_err(|_| smp_ipi::Error::Transition)?;
+        let retirement_receipt = deferred_reclaim
+            .authorize()
+            .map_err(|_| smp_ipi::Error::Transition)?;
+        smp_ipi_mailbox_write_u32(
+            smp_ipi::SHOOTDOWN_RECLAIM_STATE_OFFSET,
+            smp_ipi::RECLAIM_AUTHORIZED,
+        );
+        let retired_release = manager
+            .free_scrubbed(old_frame, &mut page_access)
+            .map_err(|_| smp::Error::Memory)?;
+        page_access
+            .ensure_mapped(layout.local())
+            .map_err(|_| smp::Error::PhysicalAccess)?;
+        deferred_reclaim
+            .released(retirement_receipt)
+            .map_err(|_| smp_ipi::Error::Transition)?;
+        old_frame_release_receipt = Some(retired_release);
+        smp_ipi_mailbox_write_u32(
+            smp_ipi::SHOOTDOWN_RECLAIM_STATE_OFFSET,
+            smp_ipi::RECLAIM_RELEASED,
+        );
         request = IpiRequest::canonical(7, 3, IpiOperation::CallFunction, target.apic_id);
         let _ = smp_ipi_deliver(
             &mut hardware,
@@ -3941,16 +4270,9 @@ fn run_smp_ipi(
             smp_ipi::ERROR_NONE,
             smp_ipi::RESULT_PANIC_LATCHED,
         )?;
-        request = IpiRequest::canonical(10, 6, IpiOperation::Stop, 2);
-        smp_ipi_publish_request(&request);
-        smp_apic_command(&mut hardware, 2, u32::from(IpiOperation::Stop.vector()))?;
-        match smp_ipi_wait_ack(&hardware, period, request.attempt) {
-            Err(SmpIpiLiveError::Base(smp::Error::Timeout)) => {}
-            Err(error) => return Err(error),
-            Ok(_) => return Err(smp_ipi::Error::Target.into()),
-        }
         transaction.exercised()?;
         request = IpiRequest::canonical(10, 6, IpiOperation::Stop, target.apic_id);
+        SMP_IPI_FAILURE_STAGE.store(9, Ordering::Relaxed);
         let _ = smp_ipi_deliver(
             &mut hardware,
             period,
@@ -4002,10 +4324,28 @@ fn run_smp_ipi(
             idt_verified: false,
             xstate_verified: false,
             apic_table_verified: false,
+            retirement_receipt,
+            old_frame_release_receipt: retired_release,
+            premature_reclaim_rejected,
         })
     })();
+    let operation_failure_stage = operation_result
+        .as_ref()
+        .err()
+        .map(|_| SMP_IPI_FAILURE_STAGE.load(Ordering::Relaxed));
+    if operation_result.is_err() {
+        let detail = (u64::from(smp_ipi_mailbox_read_u32(smp_ipi::SERVICE_STATE_OFFSET) & 0x0f)
+            << 32)
+            | ((smp_ipi_mailbox_read_u64(smp_ipi::ACK_ATTEMPT_OFFSET) & 0xff) << 36)
+            | (u64::from(smp_ipi_mailbox_read_u32(smp_ipi::ACK_STATUS_OFFSET) & 0x0f) << 44)
+            | (u64::from(smp_ipi_mailbox_read_u32(smp_ipi::ACK_ERROR_OFFSET) & 0xff) << 48)
+            | (u64::from(smp_ipi_mailbox_read_u32(smp_ipi::SHOOTDOWN_STATE_OFFSET) & 0x0f) << 56)
+            | (u64::from(smp_ipi_mailbox_read_u32(smp_ipi::SHOOTDOWN_ERROR_OFFSET) & 0x0f) << 60);
+        SMP_IPI_FAILURE_DETAIL.store(detail, Ordering::Relaxed);
+    }
 
     let park_result = if ap_started {
+        SMP_IPI_FAILURE_STAGE.store(10, Ordering::Relaxed);
         match period_femtoseconds {
             Some(period) => smp_init_sequence(&mut hardware, target.apic_id, period),
             None => Err(smp::Error::Rollback),
@@ -4028,12 +4368,14 @@ fn run_smp_ipi(
     }
 
     if let Ok(mut operation) = operation_result {
+        SMP_IPI_FAILURE_STAGE.store(11, Ordering::Relaxed);
         operation_result = match smp_ipi_validate_post_ap_resources(
             &mut page_access,
             layout,
             operation.handlers,
             &operation.mailbox,
             apic_physical,
+            new_frame_physical,
         ) {
             Ok(()) => {
                 transaction.validated()?;
@@ -4048,6 +4390,7 @@ fn run_smp_ipi(
     }
 
     let mut cleanup_error = None;
+    SMP_IPI_FAILURE_STAGE.store(12, Ordering::Relaxed);
     if let (true, Some(config)) = (hpet_changed, original_hpet_config) {
         let restore_failed = hardware.hpet_write(0x10, config).is_err()
             || hardware.hpet_read(0x10).ok() != Some(config);
@@ -4064,6 +4407,16 @@ fn run_smp_ipi(
     if page_access.uninstall_uncached_mmio().is_err() {
         cleanup_error = Some(SmpIpiLiveError::Base(smp::Error::PhysicalAccess));
     }
+    if old_frame_release_receipt.is_none() {
+        match manager.free_scrubbed(old_frame, &mut page_access) {
+            Ok(_) => {}
+            Err(_) => cleanup_error = Some(SmpIpiLiveError::Base(smp::Error::Memory)),
+        }
+    }
+    match manager.free_scrubbed(new_frame, &mut page_access) {
+        Ok(receipt) => new_frame_release_receipt = Some(receipt),
+        Err(_) => cleanup_error = Some(SmpIpiLiveError::Base(smp::Error::Memory)),
+    }
     let release_receipt =
         match smp_runtime_release_resources(&mut manager, &mut page_access, allocation) {
             Ok(value) => value,
@@ -4075,13 +4428,22 @@ fn run_smp_ipi(
     match operation_result {
         Err(error) => {
             let _ = transaction.rollback(true)?;
-            Err(cleanup_error.unwrap_or(error))
+            match cleanup_error {
+                Some(cleanup) => Err(cleanup),
+                None => {
+                    SMP_IPI_FAILURE_STAGE
+                        .store(operation_failure_stage.unwrap_or(0), Ordering::Relaxed);
+                    Err(error)
+                }
+            }
         }
         Ok(operation) => {
             if let Some(error) = cleanup_error {
                 return Err(error);
             }
+            let new_frame_release_receipt = new_frame_release_receipt.ok_or(smp::Error::Memory)?;
             transaction.released()?;
+            SMP_IPI_FAILURE_STAGE.store(0, Ordering::Relaxed);
             Ok(SmpIpiLiveProof {
                 processor_count: topology.processor_count as u64,
                 enabled_processor_count: topology.enabled_processor_count as u64,
@@ -4092,6 +4454,9 @@ fn run_smp_ipi(
                 trampoline_bytes: trampoline_bytes as u64,
                 allocation_receipt,
                 release_receipt,
+                old_frame_allocation_receipt,
+                new_frame_allocation_receipt,
+                new_frame_release_receipt,
                 operation,
             })
         }
@@ -6012,13 +6377,17 @@ extern "C" fn poole_kernel_rust_entry(
             Ok(value) => value,
             Err(error) => {
                 logger.write_bytes(&PKSMP3_DENIED);
-                logger.write_hex_u64(u64::from(error.code()));
+                let reason =
+                    u64::from(error.code()) | SMP_IPI_FAILURE_DETAIL.load(Ordering::Relaxed);
+                logger.write_hex_u64(reason);
                 logger.write_bytes(&PKSMP3_DENIED_TAIL);
                 poole_kernel_emergency_panic(PanicCode::SmpIpi as u32)
             }
         };
         let mailbox = proof.operation.mailbox;
         let ipi = proof.operation.ipi;
+        let shootdown = ipi.shootdown;
+        let retirement = proof.operation.retirement_receipt;
 
         logger.write_bytes(&PKSMP3_TOPOLOGY);
         logger.write_decimal_u64(proof.processor_count);
@@ -6077,6 +6446,36 @@ extern "C" fn poole_kernel_rust_entry(
         logger.write_decimal_u64(u64::from(proof.operation.timeout_count));
         logger.write_bytes(&PKSMP3_NEWLINE);
 
+        logger.write_bytes(&PKSMP3_SHOOTDOWN_RECEIPT);
+        logger.write_hex_u64(retirement.root_physical);
+        logger.write_bytes(&PKSMP3_PROBE);
+        logger.write_decimal_u64(retirement.retired_generation);
+        logger.write_bytes(&PKSMP3_ACTIVE_GENERATION);
+        logger.write_decimal_u64(retirement.active_generation);
+        logger.write_bytes(&PKSMP3_TARGET_MASK);
+        logger.write_hex_u64(retirement.target_mask);
+        logger.write_bytes(&PKSMP3_ACK_MASK);
+        logger.write_hex_u64(retirement.ack_mask);
+        logger.write_bytes(&PKSMP3_OLD_FRAME);
+        logger.write_hex_u64(shootdown.old_frame_physical);
+        logger.write_bytes(&PKSMP3_NEW_FRAME);
+        logger.write_hex_u64(shootdown.new_frame_physical);
+        logger.write_bytes(&PKSMP3_OBSERVED_BEFORE);
+        logger.write_hex_u64(shootdown.observed_before);
+        logger.write_bytes(&PKSMP3_OBSERVED_AFTER);
+        logger.write_hex_u64(shootdown.observed_after);
+        logger.write_bytes(&PKSMP3_INVALIDATIONS);
+        logger.write_decimal_u64(retirement.invalidation_count);
+        logger.write_bytes(&PKSMP3_LAST_ACK_GENERATION);
+        logger.write_decimal_u64(shootdown.last_ack_generation);
+        logger.write_bytes(&PKSMP3_PREMATURE_RECLAIM);
+        logger.write_decimal_u64(proof.operation.premature_reclaim_rejected as u64);
+        logger.write_bytes(&PKSMP3_RECLAIM_STATE);
+        logger.write_decimal_u64(u64::from(shootdown.reclaim_state));
+        logger.write_bytes(&PKSMP3_SHOOTDOWN_CHECKSUM);
+        logger.write_hex_u64(shootdown.response_checksum);
+        logger.write_bytes(&PKSMP3_NEWLINE);
+
         logger.write_bytes(&PKSMP3_STOP);
         logger.write_decimal_u64(ipi.ack_attempt);
         logger.write_bytes(&PKSMP3_ACK_SEQUENCE);
@@ -6119,6 +6518,24 @@ extern "C" fn poole_kernel_rust_entry(
         logger.write_decimal_u64(proof.release_receipt.zeroed_bytes);
         logger.write_bytes(&PKSMP3_VERIFIED_BYTES);
         logger.write_decimal_u64(proof.release_receipt.verified_bytes);
+        logger.write_bytes(&PKSMP3_FRAME_ALLOCATION_SEQUENCES);
+        logger.write_decimal_u64(proof.old_frame_allocation_receipt.sequence);
+        logger.write_bytes(b",");
+        logger.write_decimal_u64(proof.new_frame_allocation_receipt.sequence);
+        logger.write_bytes(&PKSMP3_FRAME_RELEASE_SEQUENCES);
+        logger.write_decimal_u64(proof.operation.old_frame_release_receipt.sequence);
+        logger.write_bytes(b",");
+        logger.write_decimal_u64(proof.new_frame_release_receipt.sequence);
+        logger.write_bytes(&PKSMP3_FRAME_ZEROED_BYTES);
+        logger.write_decimal_u64(
+            proof.operation.old_frame_release_receipt.zeroed_bytes
+                + proof.new_frame_release_receipt.zeroed_bytes,
+        );
+        logger.write_bytes(&PKSMP3_FRAME_VERIFIED_BYTES);
+        logger.write_decimal_u64(
+            proof.operation.old_frame_release_receipt.verified_bytes
+                + proof.new_frame_release_receipt.verified_bytes,
+        );
         logger.write_bytes(&PKSMP3_RELEASE_TAIL);
         logger.write_bytes(&PKSMP3_RESULT);
         halt_forever()

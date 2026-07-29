@@ -73,8 +73,8 @@
       },
       {
         "path": "tools/bootstrap_native_toolchain.ps1",
-        "sha256": "CAB72D7B198989E9450FE259BFABCBF96E5330330F0A23DB70F6102B69CA9779",
-        "byte_count": 4563
+        "sha256": "61FB11BDAC4A13609022218083EAC3595AFC393678CFC6C2BD925038851521F2",
+        "byte_count": 4649
       },
       {
         "path": "tools/qualify_native_toolchain.py",

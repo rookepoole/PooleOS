@@ -1,11 +1,11 @@
-//! Pure PKSMP3 capability-gated IPI transport contract and validation.
+//! Pure PKSMP4 generation-bound remote TLB shootdown contract and validation.
 
 use core::mem::{offset_of, size_of};
 
 use crate::smp_runtime;
 
-pub const CONTRACT_ID: &str = "PKSMP3";
-pub const SELECTED_MOVE_ID: &str = "N8-SMP-IPI-001";
+pub const CONTRACT_ID: &str = "PKSMP4";
+pub const SELECTED_MOVE_ID: &str = "N9-SMP-SHOOTDOWN-001";
 pub const SELECTOR: u64 = 14;
 
 pub const PAGE_BYTES: u64 = smp_runtime::PAGE_BYTES;
@@ -17,8 +17,8 @@ pub const APIC_PHYSICAL_ADDRESS: u64 = 0xfee0_0000;
 pub const APIC_EOI_OFFSET: u64 = 0x0b0;
 pub const APIC_SPURIOUS_OFFSET: u64 = 0x0f0;
 
-pub const EXTENSION_MAGIC: u64 = 0x504b_534d_5033_4950;
-pub const EXTENSION_VERSION: u32 = 1;
+pub const EXTENSION_MAGIC: u64 = 0x504b_534d_5034_4950;
+pub const EXTENSION_VERSION: u32 = 2;
 pub const SERVICE_STATE_PREPARED: u32 = 1;
 pub const SERVICE_STATE_ONLINE: u32 = 2;
 pub const SERVICE_STATE_PANIC: u32 = 3;
@@ -43,21 +43,27 @@ pub const ERROR_DUPLICATE_SEQUENCE: u32 = 8;
 pub const ERROR_ATTEMPT: u32 = 9;
 pub const ERROR_PAYLOAD: u32 = 10;
 pub const ERROR_PANIC_LATCHED: u32 = 11;
+pub const ERROR_SHOOTDOWN_STATE: u32 = 12;
+pub const ERROR_SHOOTDOWN_ROOT: u32 = 13;
+pub const ERROR_SHOOTDOWN_GENERATION: u32 = 14;
+pub const ERROR_SHOOTDOWN_TARGET: u32 = 15;
+pub const ERROR_SHOOTDOWN_ADDRESS: u32 = 16;
+pub const ERROR_SHOOTDOWN_CHECKSUM: u32 = 17;
 
 pub const CAPABILITY_HIGH: u64 = 0x504f_4f4c_454f_5349;
-pub const CAPABILITY_LOW: u64 = 0x504b_534d_5033_0001;
+pub const CAPABILITY_LOW: u64 = 0x504b_534d_5034_0001;
 pub const REQUEST_CHECKSUM_SEED: u64 = 0x4950_4952_4551_0001;
 pub const RESPONSE_CHECKSUM_SEED: u64 = 0x4950_4952_5350_0001;
 
 pub const RESCHEDULE_PAYLOAD: u64 = 0;
-pub const SHOOTDOWN_GENERATION: u64 = 1;
+pub const SHOOTDOWN_GENERATION: u64 = 2;
 pub const CALL_NOOP_TOKEN: u64 = 0x504b_4e4f_4f50_0001;
 pub const DIAGNOSTIC_TOKEN: u64 = 0x504b_4449_4147_0001;
 pub const PANIC_NOTICE_TOKEN: u64 = 0x504b_5041_4e49_0001;
 pub const STOP_TOKEN: u64 = 0x504b_5354_4f50_0001;
 
 pub const RESULT_RESCHEDULE_OBSERVED: u64 = 0x5253_4348_4544_0001;
-pub const RESULT_SHOOTDOWN_TRANSPORT_ONLY: u64 = 0x5348_4f4f_5400_0001;
+pub const RESULT_SHOOTDOWN_INVALIDATED: u64 = 0x5348_4f4f_5400_0002;
 pub const RESULT_CALL_ALLOWLIST_NOOP: u64 = 0x4341_4c4c_4e4f_4f50;
 pub const RESULT_DIAGNOSTIC_OBSERVED: u64 = 0x4449_4147_4e4f_0001;
 pub const RESULT_PANIC_LATCHED: u64 = 0x5041_4e49_4300_0001;
@@ -69,6 +75,29 @@ pub const LIVE_DELIVERY_COUNT: u32 = LIVE_ACCEPTED_COUNT + LIVE_DENIED_COUNT;
 pub const LIVE_TIMEOUT_COUNT: u32 = 1;
 pub const LIVE_FINAL_ATTEMPT: u64 = 10;
 pub const LIVE_FINAL_SEQUENCE: u64 = 6;
+
+pub const SHOOTDOWN_MAGIC: u64 = 0x504b_534d_5034_544c;
+pub const SHOOTDOWN_VERSION: u32 = 1;
+pub const SHOOTDOWN_STATE_PREPARED: u32 = 1;
+pub const SHOOTDOWN_STATE_ARMED: u32 = 2;
+pub const SHOOTDOWN_STATE_ACKED: u32 = 3;
+pub const SHOOTDOWN_STATE_TIMED_OUT: u32 = 4;
+pub const SHOOTDOWN_STATE_QUIESCED: u32 = 5;
+pub const SHOOTDOWN_STATE_FAULTED: u32 = u32::MAX;
+pub const RECLAIM_BLOCKED: u32 = 1;
+pub const RECLAIM_AUTHORIZED: u32 = 2;
+pub const RECLAIM_RELEASED: u32 = 3;
+pub const SHOOTDOWN_REQUEST_CHECKSUM_SEED: u64 = 0x5348_4f4f_5452_4551;
+pub const SHOOTDOWN_RESPONSE_CHECKSUM_SEED: u64 = 0x5348_4f4f_5452_5350;
+pub const RETIRED_GENERATION: u64 = 1;
+pub const ACTIVE_GENERATION: u64 = 2;
+pub const TARGET_CPU_MASK: u64 = 1 << 1;
+pub const OFFLINE_CPU_MASK: u64 = 1 << 2;
+pub const PROBE_VIRTUAL_ADDRESS: u64 = 0x001f_f000;
+pub const PROBE_PAGE_TABLE_INDEX: usize = 511;
+pub const OLD_FRAME_VALUE: u64 = 0x504b_534d_5034_4f4c;
+pub const NEW_FRAME_VALUE: u64 = 0x504b_534d_5034_4e57;
+pub const SHOOTDOWN_FRAME_OWNER: u16 = 0x0914;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(u32)]
@@ -124,7 +153,7 @@ impl Operation {
     pub const fn result(self) -> u64 {
         match self {
             Self::Reschedule => RESULT_RESCHEDULE_OBSERVED,
-            Self::Shootdown => RESULT_SHOOTDOWN_TRANSPORT_ONLY,
+            Self::Shootdown => RESULT_SHOOTDOWN_INVALIDATED,
             Self::CallFunction => RESULT_CALL_ALLOWLIST_NOOP,
             Self::Diagnostic => RESULT_DIAGNOSTIC_OBSERVED,
             Self::Panic => RESULT_PANIC_LATCHED,
@@ -174,6 +203,27 @@ pub struct IpiExtension {
     pub panic_latched: u32,
     pub spurious_count: u32,
     pub apic_error_count: u32,
+    pub shootdown_magic: u64,
+    pub shootdown_version: u32,
+    pub shootdown_state: u32,
+    pub shootdown_error: u32,
+    pub shootdown_reserved: u32,
+    pub shootdown_root_physical: u64,
+    pub shootdown_virtual_address: u64,
+    pub shootdown_retired_generation: u64,
+    pub shootdown_active_generation: u64,
+    pub shootdown_target_mask: u64,
+    pub shootdown_ack_mask: u64,
+    pub shootdown_old_frame_physical: u64,
+    pub shootdown_new_frame_physical: u64,
+    pub shootdown_observed_before: u64,
+    pub shootdown_observed_after: u64,
+    pub shootdown_invalidation_count: u64,
+    pub shootdown_request_checksum: u64,
+    pub shootdown_response_checksum: u64,
+    pub shootdown_last_ack_generation: u64,
+    pub shootdown_timeout_count: u32,
+    pub shootdown_reclaim_state: u32,
 }
 
 pub const EXTENSION_BASE_OFFSET: usize = smp_runtime::MAILBOX_BYTES;
@@ -222,15 +272,46 @@ pub const PANIC_COUNT_OFFSET: usize = extension_offset!(panic_count);
 pub const PANIC_LATCHED_OFFSET: usize = extension_offset!(panic_latched);
 pub const SPURIOUS_COUNT_OFFSET: usize = extension_offset!(spurious_count);
 pub const APIC_ERROR_COUNT_OFFSET: usize = extension_offset!(apic_error_count);
+pub const SHOOTDOWN_MAGIC_OFFSET: usize = extension_offset!(shootdown_magic);
+pub const SHOOTDOWN_VERSION_OFFSET: usize = extension_offset!(shootdown_version);
+pub const SHOOTDOWN_STATE_OFFSET: usize = extension_offset!(shootdown_state);
+pub const SHOOTDOWN_ERROR_OFFSET: usize = extension_offset!(shootdown_error);
+pub const SHOOTDOWN_ROOT_PHYSICAL_OFFSET: usize = extension_offset!(shootdown_root_physical);
+pub const SHOOTDOWN_VIRTUAL_ADDRESS_OFFSET: usize = extension_offset!(shootdown_virtual_address);
+pub const SHOOTDOWN_RETIRED_GENERATION_OFFSET: usize =
+    extension_offset!(shootdown_retired_generation);
+pub const SHOOTDOWN_ACTIVE_GENERATION_OFFSET: usize =
+    extension_offset!(shootdown_active_generation);
+pub const SHOOTDOWN_TARGET_MASK_OFFSET: usize = extension_offset!(shootdown_target_mask);
+pub const SHOOTDOWN_ACK_MASK_OFFSET: usize = extension_offset!(shootdown_ack_mask);
+pub const SHOOTDOWN_OLD_FRAME_PHYSICAL_OFFSET: usize =
+    extension_offset!(shootdown_old_frame_physical);
+pub const SHOOTDOWN_NEW_FRAME_PHYSICAL_OFFSET: usize =
+    extension_offset!(shootdown_new_frame_physical);
+pub const SHOOTDOWN_OBSERVED_BEFORE_OFFSET: usize = extension_offset!(shootdown_observed_before);
+pub const SHOOTDOWN_OBSERVED_AFTER_OFFSET: usize = extension_offset!(shootdown_observed_after);
+pub const SHOOTDOWN_INVALIDATION_COUNT_OFFSET: usize =
+    extension_offset!(shootdown_invalidation_count);
+pub const SHOOTDOWN_REQUEST_CHECKSUM_OFFSET: usize = extension_offset!(shootdown_request_checksum);
+pub const SHOOTDOWN_RESPONSE_CHECKSUM_OFFSET: usize =
+    extension_offset!(shootdown_response_checksum);
+pub const SHOOTDOWN_LAST_ACK_GENERATION_OFFSET: usize =
+    extension_offset!(shootdown_last_ack_generation);
+pub const SHOOTDOWN_TIMEOUT_COUNT_OFFSET: usize = extension_offset!(shootdown_timeout_count);
+pub const SHOOTDOWN_RECLAIM_STATE_OFFSET: usize = extension_offset!(shootdown_reclaim_state);
 
 const _: () = assert!(EXTENSION_BASE_OFFSET == 352);
-const _: () = assert!(EXTENSION_BYTES == 200);
+const _: () = assert!(EXTENSION_BYTES == 344);
 const _: () = assert!(MAGIC_OFFSET == 352);
 const _: () = assert!(REQUEST_ATTEMPT_OFFSET == 400);
 const _: () = assert!(ACK_ATTEMPT_OFFSET == 432);
 const _: () = assert!(REQUEST_OPERATION_OFFSET == 472);
 const _: () = assert!(APIC_ERROR_COUNT_OFFSET == 548);
-const _: () = assert!(MAILBOX_BYTES == 552);
+const _: () = assert!(SHOOTDOWN_MAGIC_OFFSET == 552);
+const _: () = assert!(SHOOTDOWN_ROOT_PHYSICAL_OFFSET == 576);
+const _: () = assert!(SHOOTDOWN_LAST_ACK_GENERATION_OFFSET == 680);
+const _: () = assert!(SHOOTDOWN_RECLAIM_STATE_OFFSET == 692);
+const _: () = assert!(MAILBOX_BYTES == 696);
 const _: () = assert!((APIC_PHYSICAL_ADDRESS >> 30) as usize & 0x1ff == APIC_PDPT_INDEX);
 const _: () = assert!((APIC_PHYSICAL_ADDRESS >> 21) as usize & 0x1ff == APIC_PAGE_DIRECTORY_INDEX);
 
@@ -272,6 +353,264 @@ pub struct IpiSnapshot {
     pub panic_latched: u32,
     pub spurious_count: u32,
     pub apic_error_count: u32,
+    pub shootdown: ShootdownSnapshot,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ShootdownSnapshot {
+    pub magic: u64,
+    pub version: u32,
+    pub state: u32,
+    pub error: u32,
+    pub root_physical: u64,
+    pub virtual_address: u64,
+    pub retired_generation: u64,
+    pub active_generation: u64,
+    pub target_mask: u64,
+    pub ack_mask: u64,
+    pub old_frame_physical: u64,
+    pub new_frame_physical: u64,
+    pub observed_before: u64,
+    pub observed_after: u64,
+    pub invalidation_count: u64,
+    pub request_checksum: u64,
+    pub response_checksum: u64,
+    pub last_ack_generation: u64,
+    pub timeout_count: u32,
+    pub reclaim_state: u32,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ShootdownRequest {
+    pub root_physical: u64,
+    pub virtual_address: u64,
+    pub retired_generation: u64,
+    pub active_generation: u64,
+    pub target_mask: u64,
+    pub old_frame_physical: u64,
+    pub new_frame_physical: u64,
+    pub checksum: u64,
+}
+
+impl ShootdownRequest {
+    pub const fn canonical(
+        root_physical: u64,
+        old_frame_physical: u64,
+        new_frame_physical: u64,
+    ) -> Self {
+        let mut value = Self {
+            root_physical,
+            virtual_address: PROBE_VIRTUAL_ADDRESS,
+            retired_generation: RETIRED_GENERATION,
+            active_generation: ACTIVE_GENERATION,
+            target_mask: TARGET_CPU_MASK,
+            old_frame_physical,
+            new_frame_physical,
+            checksum: 0,
+        };
+        value.checksum = shootdown_request_checksum(&value);
+        value
+    }
+}
+
+pub const fn shootdown_request_checksum(request: &ShootdownRequest) -> u64 {
+    SHOOTDOWN_REQUEST_CHECKSUM_SEED
+        ^ request.root_physical
+        ^ request.virtual_address
+        ^ request.retired_generation
+        ^ request.active_generation
+        ^ request.target_mask
+        ^ request.old_frame_physical
+        ^ request.new_frame_physical
+}
+
+pub const fn shootdown_response_checksum(snapshot: &ShootdownSnapshot) -> u64 {
+    SHOOTDOWN_RESPONSE_CHECKSUM_SEED
+        ^ snapshot.root_physical
+        ^ snapshot.virtual_address
+        ^ snapshot.active_generation
+        ^ snapshot.target_mask
+        ^ snapshot.ack_mask
+        ^ snapshot.observed_before
+        ^ snapshot.observed_after
+        ^ snapshot.invalidation_count
+        ^ snapshot.last_ack_generation
+        ^ snapshot.state as u64
+        ^ snapshot.error as u64
+}
+
+pub fn validate_shootdown_request(
+    request: &ShootdownRequest,
+    expected_root: u64,
+    last_ack_generation: u64,
+) -> Result<(), u32> {
+    if request.root_physical != expected_root || !request.root_physical.is_multiple_of(PAGE_BYTES) {
+        return Err(ERROR_SHOOTDOWN_ROOT);
+    }
+    if request.virtual_address != PROBE_VIRTUAL_ADDRESS
+        || !request.virtual_address.is_multiple_of(PAGE_BYTES)
+    {
+        return Err(ERROR_SHOOTDOWN_ADDRESS);
+    }
+    if request.retired_generation != RETIRED_GENERATION
+        || request.active_generation != request.retired_generation.wrapping_add(1)
+        || request.active_generation <= last_ack_generation
+    {
+        return Err(ERROR_SHOOTDOWN_GENERATION);
+    }
+    if request.target_mask != TARGET_CPU_MASK {
+        return Err(ERROR_SHOOTDOWN_TARGET);
+    }
+    if request.old_frame_physical == request.new_frame_physical
+        || request.old_frame_physical == 0
+        || request.new_frame_physical == 0
+        || !request.old_frame_physical.is_multiple_of(PAGE_BYTES)
+        || !request.new_frame_physical.is_multiple_of(PAGE_BYTES)
+    {
+        return Err(ERROR_SHOOTDOWN_ADDRESS);
+    }
+    if request.checksum != shootdown_request_checksum(request) {
+        return Err(ERROR_SHOOTDOWN_CHECKSUM);
+    }
+    Ok(())
+}
+
+pub fn validate_shootdown_ack(
+    snapshot: &ShootdownSnapshot,
+    request: &ShootdownRequest,
+) -> Result<(), Error> {
+    if snapshot.magic != SHOOTDOWN_MAGIC
+        || snapshot.version != SHOOTDOWN_VERSION
+        || snapshot.state != SHOOTDOWN_STATE_ACKED
+        || snapshot.error != ERROR_NONE
+    {
+        return Err(Error::MailboxShape);
+    }
+    if snapshot.root_physical != request.root_physical
+        || snapshot.virtual_address != request.virtual_address
+        || snapshot.retired_generation != request.retired_generation
+        || snapshot.active_generation != request.active_generation
+        || snapshot.old_frame_physical != request.old_frame_physical
+        || snapshot.new_frame_physical != request.new_frame_physical
+    {
+        return Err(Error::Result);
+    }
+    if snapshot.target_mask != request.target_mask || snapshot.ack_mask != request.target_mask {
+        return Err(Error::Target);
+    }
+    if snapshot.observed_before != OLD_FRAME_VALUE
+        || snapshot.observed_after != NEW_FRAME_VALUE
+        || snapshot.invalidation_count != 1
+        || snapshot.last_ack_generation != request.active_generation
+    {
+        return Err(Error::Result);
+    }
+    if snapshot.request_checksum != request.checksum
+        || snapshot.response_checksum != shootdown_response_checksum(snapshot)
+    {
+        return Err(Error::Checksum);
+    }
+    Ok(())
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct GenerationRetirementReceipt {
+    pub root_physical: u64,
+    pub retired_generation: u64,
+    pub active_generation: u64,
+    pub target_mask: u64,
+    pub ack_mask: u64,
+    pub invalidation_count: u64,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ReclaimError {
+    State,
+    Request,
+    Acknowledgement,
+    Duplicate,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum ReclaimStage {
+    Prepared,
+    Armed,
+    TimedOut,
+    Acknowledged,
+    Authorized,
+    Released,
+}
+
+pub struct DeferredReclaim {
+    request: ShootdownRequest,
+    stage: ReclaimStage,
+}
+
+impl DeferredReclaim {
+    pub fn new(request: ShootdownRequest) -> Result<Self, ReclaimError> {
+        validate_shootdown_request(&request, request.root_physical, 0)
+            .map_err(|_| ReclaimError::Request)?;
+        Ok(Self {
+            request,
+            stage: ReclaimStage::Prepared,
+        })
+    }
+
+    pub fn arm(&mut self) -> Result<(), ReclaimError> {
+        if !matches!(self.stage, ReclaimStage::Prepared | ReclaimStage::TimedOut) {
+            return Err(ReclaimError::State);
+        }
+        self.stage = ReclaimStage::Armed;
+        Ok(())
+    }
+
+    pub fn timeout(&mut self) -> Result<(), ReclaimError> {
+        if self.stage != ReclaimStage::Armed {
+            return Err(ReclaimError::State);
+        }
+        self.stage = ReclaimStage::TimedOut;
+        Ok(())
+    }
+
+    pub fn acknowledge(&mut self, snapshot: &ShootdownSnapshot) -> Result<(), ReclaimError> {
+        if self.stage != ReclaimStage::Armed {
+            return Err(ReclaimError::State);
+        }
+        validate_shootdown_ack(snapshot, &self.request)
+            .map_err(|_| ReclaimError::Acknowledgement)?;
+        self.stage = ReclaimStage::Acknowledged;
+        Ok(())
+    }
+
+    pub fn authorize(&mut self) -> Result<GenerationRetirementReceipt, ReclaimError> {
+        if self.stage != ReclaimStage::Acknowledged {
+            return Err(ReclaimError::State);
+        }
+        self.stage = ReclaimStage::Authorized;
+        Ok(GenerationRetirementReceipt {
+            root_physical: self.request.root_physical,
+            retired_generation: self.request.retired_generation,
+            active_generation: self.request.active_generation,
+            target_mask: self.request.target_mask,
+            ack_mask: self.request.target_mask,
+            invalidation_count: 1,
+        })
+    }
+
+    pub fn released(&mut self, receipt: GenerationRetirementReceipt) -> Result<(), ReclaimError> {
+        if self.stage != ReclaimStage::Authorized
+            || receipt.root_physical != self.request.root_physical
+            || receipt.retired_generation != self.request.retired_generation
+            || receipt.active_generation != self.request.active_generation
+            || receipt.target_mask != self.request.target_mask
+            || receipt.ack_mask != self.request.target_mask
+            || receipt.invalidation_count != 1
+        {
+            return Err(ReclaimError::Acknowledgement);
+        }
+        self.stage = ReclaimStage::Released;
+        Ok(())
+    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -595,6 +934,23 @@ pub fn validate_final(
     if snapshot.response_checksum != response_checksum(snapshot) {
         return Err(Error::Checksum);
     }
+    let request = ShootdownRequest {
+        root_physical: snapshot.shootdown.root_physical,
+        virtual_address: snapshot.shootdown.virtual_address,
+        retired_generation: snapshot.shootdown.retired_generation,
+        active_generation: snapshot.shootdown.active_generation,
+        target_mask: snapshot.shootdown.target_mask,
+        old_frame_physical: snapshot.shootdown.old_frame_physical,
+        new_frame_physical: snapshot.shootdown.new_frame_physical,
+        checksum: snapshot.shootdown.request_checksum,
+    };
+    validate_shootdown_request(&request, request.root_physical, 0).map_err(|_| Error::Result)?;
+    validate_shootdown_ack(&snapshot.shootdown, &request)?;
+    if snapshot.shootdown.timeout_count != LIVE_TIMEOUT_COUNT
+        || snapshot.shootdown.reclaim_state != RECLAIM_RELEASED
+    {
+        return Err(Error::Counter);
+    }
     Ok(())
 }
 
@@ -751,10 +1107,36 @@ mod tests {
             panic_latched: 1,
             spurious_count: 0,
             apic_error_count: 0,
+            shootdown: ShootdownSnapshot {
+                magic: SHOOTDOWN_MAGIC,
+                version: SHOOTDOWN_VERSION,
+                state: SHOOTDOWN_STATE_ACKED,
+                error: ERROR_NONE,
+                root_physical: PAGE_BYTES,
+                virtual_address: PROBE_VIRTUAL_ADDRESS,
+                retired_generation: RETIRED_GENERATION,
+                active_generation: ACTIVE_GENERATION,
+                target_mask: TARGET_CPU_MASK,
+                ack_mask: TARGET_CPU_MASK,
+                old_frame_physical: 2 * PAGE_BYTES,
+                new_frame_physical: 3 * PAGE_BYTES,
+                observed_before: OLD_FRAME_VALUE,
+                observed_after: NEW_FRAME_VALUE,
+                invalidation_count: 1,
+                request_checksum: 0,
+                response_checksum: 0,
+                last_ack_generation: ACTIVE_GENERATION,
+                timeout_count: LIVE_TIMEOUT_COUNT,
+                reclaim_state: RECLAIM_RELEASED,
+            },
         };
         let request =
             Request::canonical(LIVE_FINAL_ATTEMPT, LIVE_FINAL_SEQUENCE, Operation::Stop, 1);
         value.request_checksum = request.checksum;
+        let shootdown_request =
+            ShootdownRequest::canonical(PAGE_BYTES, 2 * PAGE_BYTES, 3 * PAGE_BYTES);
+        value.shootdown.request_checksum = shootdown_request.checksum;
+        value.shootdown.response_checksum = shootdown_response_checksum(&value.shootdown);
         value.response_checksum = response_checksum(&value);
         value
     }
@@ -762,10 +1144,12 @@ mod tests {
     #[test]
     fn mailbox_offsets_are_frozen() {
         assert_eq!(EXTENSION_BASE_OFFSET, 352);
-        assert_eq!(MAILBOX_BYTES, 552);
+        assert_eq!(MAILBOX_BYTES, 696);
         assert_eq!(REQUEST_ATTEMPT_OFFSET, 400);
         assert_eq!(RESPONSE_CHECKSUM_OFFSET, 456);
         assert_eq!(APIC_ERROR_COUNT_OFFSET, 548);
+        assert_eq!(SHOOTDOWN_MAGIC_OFFSET, 552);
+        assert_eq!(SHOOTDOWN_RECLAIM_STATE_OFFSET, 692);
     }
 
     #[test]
@@ -881,9 +1265,9 @@ mod tests {
             ),
             (
                 Request {
-                    payload: 2,
+                    payload: 3,
                     checksum: request_checksum(&Request {
-                        payload: 2,
+                        payload: 3,
                         ..valid
                     }),
                     ..valid
@@ -989,5 +1373,55 @@ mod tests {
         assert!(receipt.mmio_revoked);
         assert!(receipt.resources_zeroed);
         assert!(receipt.resources_released);
+    }
+
+    #[test]
+    fn shootdown_request_binds_root_generation_mask_address_and_frames() {
+        let request = ShootdownRequest::canonical(PAGE_BYTES, 2 * PAGE_BYTES, 3 * PAGE_BYTES);
+        assert_eq!(validate_shootdown_request(&request, PAGE_BYTES, 0), Ok(()));
+        for mutate in 0..8 {
+            let mut hostile = request;
+            match mutate {
+                0 => hostile.root_physical ^= PAGE_BYTES,
+                1 => hostile.virtual_address ^= PAGE_BYTES,
+                2 => hostile.retired_generation = 0,
+                3 => hostile.active_generation = 3,
+                4 => hostile.target_mask ^= 1,
+                5 => hostile.old_frame_physical = hostile.new_frame_physical,
+                6 => hostile.new_frame_physical += 1,
+                _ => hostile.checksum ^= 1,
+            }
+            assert!(validate_shootdown_request(&hostile, PAGE_BYTES, 0).is_err());
+        }
+        assert_eq!(
+            validate_shootdown_request(&request, PAGE_BYTES, ACTIVE_GENERATION),
+            Err(ERROR_SHOOTDOWN_GENERATION)
+        );
+    }
+
+    #[test]
+    fn deferred_reclaim_requires_exact_remote_ack_before_release() {
+        let request = ShootdownRequest::canonical(PAGE_BYTES, 2 * PAGE_BYTES, 3 * PAGE_BYTES);
+        let valid = response().shootdown;
+        let mut reclaim = DeferredReclaim::new(request).unwrap();
+        assert_eq!(reclaim.authorize(), Err(ReclaimError::State));
+        reclaim.arm().unwrap();
+        reclaim.timeout().unwrap();
+        assert_eq!(reclaim.authorize(), Err(ReclaimError::State));
+        reclaim.arm().unwrap();
+        let mut stale = valid;
+        stale.last_ack_generation = RETIRED_GENERATION;
+        stale.response_checksum = shootdown_response_checksum(&stale);
+        assert_eq!(
+            reclaim.acknowledge(&stale),
+            Err(ReclaimError::Acknowledgement)
+        );
+        reclaim.acknowledge(&valid).unwrap();
+        let receipt = reclaim.authorize().unwrap();
+        assert_eq!(reclaim.released(receipt), Ok(()));
+        assert_eq!(
+            reclaim.released(receipt),
+            Err(ReclaimError::Acknowledgement)
+        );
     }
 }

@@ -6,6 +6,7 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
+# This script is source-bound by native-toolchain readiness; keep canonical LF bytes.
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 if ([string]::IsNullOrWhiteSpace($ToolchainRoot)) {
     $ToolchainRoot = Join-Path $RepoRoot ".toolchains\rust-1.97.0"

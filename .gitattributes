@@ -4,6 +4,7 @@
 *.cmd text eol=crlf
 *.ps1 text eol=crlf
 tools/bootstrap_native_models.ps1 text eol=lf
+tools/bootstrap_native_toolchain.ps1 text eol=lf
 
 *.efi binary
 *.elf binary

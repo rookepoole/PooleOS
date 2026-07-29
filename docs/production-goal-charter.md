@@ -7,7 +7,31 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 139
+Last roadmap reconciliation: PooleOS Cycle 140
+
+Cycle 140 reconciliation (superseding current Cycle 139 implementation and
+next-move values): governance and external-key state are unchanged, and no
+key, signature, publication, privileged host probe, driver load, firmware
+change, physical-media write, tag, release, or production promotion occurred.
+The owner-independent `N9-SMP-SHOOTDOWN-001` move upgrades selector 14 to
+PKSMP4 and closes only its bounded flag. On the frozen two-vCPU
+`SandyBridge,-avx` TCG profile, one AP fills a translation for one page from
+one AP-owned root, validates a checksum-bound generation-2 request, executes
+exactly one linked-image-audited `INVLPG`, observes the replacement frame, and
+acknowledges the exact generation, root, page, target mask, sequence, and
+attempt. The BSP proves one offline-target timeout with same-attempt retry,
+rejects premature reclaim, and releases the retired frame only after exact
+acknowledgement. Two exact 40-marker runs, 25 hostile-control categories
+covering 169 rejected cases, and 132 kernel host tests pass; all 32 runtime
+pages plus both data frames, 139,264 bytes, are scrubbed, read-verified, and
+released. The exact kernel is 409,600 canonical bytes in a 458,752-byte,
+112-page image with 969 relocations and SHA-256
+`95DDA27784DA944A9C0F5B04029255EDE4DE1BB0684A8EA10DCFC07E686B59A2`.
+General multi-AP or address-space-wide shootdown, concurrent generations,
+scheduler ownership, production capability authority, target execution,
+N8/N9 exit, release, and production remain open. `production_ready=false`;
+the blocked external move remains `N0-HW-KEY-ACQUIRE-001`, and the next
+owner-independent move is `N8-SMP-MULTI-AP-001`.
 
 Cycle 139 reconciliation (superseding only Cycle 138 closeout-integrity
 metadata): main-integration preflight reproduced all 819 Cycle 138 tests but

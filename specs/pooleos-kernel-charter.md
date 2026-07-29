@@ -220,3 +220,23 @@ trust-to-PooleBoot evidence chain was requalified in dependency order. The
 Cycle 138 kernel identity and bounded PKSMP3 results remain exact,
 `production_ready=false`, and `N9-SMP-SHOOTDOWN-001` remains the next
 owner-independent kernel move.
+
+Cycle 140 supersedes the current-image and next-move values above. PKSMP4
+retains the six fixed development IPI operation classes and adds one bounded
+generation-bound remote invalidation. One AP fills virtual page `0x001FF000`
+from an AP-owned root, validates an exact generation-2/root/page/target-mask
+request, executes exactly one linked-image-audited `INVLPG`, observes the
+replacement frame, and returns the exact acknowledgement. The BSP proves an
+offline-target timeout with same-attempt retry, rejects pre-ack reclaim, and
+releases the retired frame only after the acknowledgement. Two exact
+40-marker two-vCPU `SandyBridge,-avx` TCG runs, 25 hostile-control categories
+covering 169 rejected cases, and 132 kernel host tests pass. All 32 runtime
+pages plus the old and replacement frames, 34 pages or 139,264 bytes, are
+scrubbed, read-verified, and released. The current kernel is 409,600 canonical
+bytes in a 458,752-byte, 112-page image with 969 relocations and SHA-256
+`95DDA27784DA944A9C0F5B04029255EDE4DE1BB0684A8EA10DCFC07E686B59A2`.
+This closes only `FLAG-N9-SMP-SHOOTDOWN-001`. General multi-AP or
+address-space-wide shootdown, concurrent generations, scheduler ownership,
+production capability authority, target hardware, N8/N9 exit, release, and
+production remain open. `N8-SMP-MULTI-AP-001` is the next owner-independent
+kernel move.
