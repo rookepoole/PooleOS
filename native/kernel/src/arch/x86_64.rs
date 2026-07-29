@@ -2078,6 +2078,18 @@ poole_ap_ipi_trampoline_long_entry:
     jne poole_ap_ipi_trampoline_fault
     cmp dword ptr [rdi + {ipi_version_offset}], {ipi_version}
     jne poole_ap_ipi_trampoline_fault
+    mov rax, qword ptr [rdi + {shootdown_magic_offset}]
+    mov rbx, {shootdown_magic}
+    cmp rax, rbx
+    jne poole_ap_ipi_trampoline_fault
+    cmp dword ptr [rdi + {shootdown_version_offset}], {shootdown_version}
+    jne poole_ap_ipi_trampoline_fault
+    mov rax, qword ptr [rdi + {shootdown_virtual_offset}]
+    mov rbx, {shootdown_probe_virtual}
+    cmp rax, rbx
+    jne poole_ap_ipi_trampoline_fault
+    mov rbx, qword ptr [rax]
+    mov qword ptr [rdi + {shootdown_observed_before_offset}], rbx
 
     lfence
     rdtsc
@@ -2204,7 +2216,7 @@ poole_ap_ipi_stop:
     xor ebx, ebx
     jmp .Lpoole_ap_ipi_payload_compare
 .Lpoole_ap_ipi_payload_shootdown:
-    mov ebx, 1
+    mov ebx, {shootdown_active_generation}
     jmp .Lpoole_ap_ipi_payload_compare
 .Lpoole_ap_ipi_payload_call:
     mov rbx, {call_token}
@@ -2217,6 +2229,56 @@ poole_ap_ipi_stop:
 .Lpoole_ap_ipi_payload_compare:
     cmp qword ptr [rdi + {payload_offset}], rbx
     jne .Lpoole_ap_ipi_deny_payload
+    cmp r15d, 2
+    jne .Lpoole_ap_ipi_payload_valid
+    cmp dword ptr [rdi + {shootdown_state_offset}], {shootdown_state_armed}
+    jne .Lpoole_ap_ipi_deny_shootdown_state
+    mov rax, cr3
+    mov rbx, {shootdown_root_mask}
+    and rax, rbx
+    cmp rax, qword ptr [rdi + {shootdown_root_offset}]
+    jne .Lpoole_ap_ipi_deny_shootdown_root
+    mov rax, qword ptr [rdi + {shootdown_virtual_offset}]
+    mov rbx, {shootdown_probe_virtual}
+    cmp rax, rbx
+    jne .Lpoole_ap_ipi_deny_shootdown_address
+    mov rax, qword ptr [rdi + {shootdown_retired_generation_offset}]
+    cmp rax, {shootdown_retired_generation}
+    jne .Lpoole_ap_ipi_deny_shootdown_generation
+    mov rbx, qword ptr [rdi + {shootdown_active_generation_offset}]
+    cmp rbx, {shootdown_active_generation}
+    jne .Lpoole_ap_ipi_deny_shootdown_generation
+    inc rax
+    cmp rax, rbx
+    jne .Lpoole_ap_ipi_deny_shootdown_generation
+    cmp rbx, qword ptr [rdi + {shootdown_last_ack_generation_offset}]
+    jbe .Lpoole_ap_ipi_deny_shootdown_generation
+    mov rax, qword ptr [rdi + {shootdown_target_mask_offset}]
+    cmp rax, {shootdown_target_mask}
+    jne .Lpoole_ap_ipi_deny_shootdown_target
+    mov rax, qword ptr [rdi + {shootdown_old_frame_offset}]
+    test rax, rax
+    jz .Lpoole_ap_ipi_deny_shootdown_address
+    test rax, 0xfff
+    jnz .Lpoole_ap_ipi_deny_shootdown_address
+    mov rbx, qword ptr [rdi + {shootdown_new_frame_offset}]
+    test rbx, rbx
+    jz .Lpoole_ap_ipi_deny_shootdown_address
+    test rbx, 0xfff
+    jnz .Lpoole_ap_ipi_deny_shootdown_address
+    cmp rax, rbx
+    je .Lpoole_ap_ipi_deny_shootdown_address
+    mov rax, {shootdown_request_checksum_seed}
+    xor rax, qword ptr [rdi + {shootdown_root_offset}]
+    xor rax, qword ptr [rdi + {shootdown_virtual_offset}]
+    xor rax, qword ptr [rdi + {shootdown_retired_generation_offset}]
+    xor rax, qword ptr [rdi + {shootdown_active_generation_offset}]
+    xor rax, qword ptr [rdi + {shootdown_target_mask_offset}]
+    xor rax, qword ptr [rdi + {shootdown_old_frame_offset}]
+    xor rax, qword ptr [rdi + {shootdown_new_frame_offset}]
+    cmp rax, qword ptr [rdi + {shootdown_request_checksum_offset}]
+    jne .Lpoole_ap_ipi_deny_shootdown_checksum
+.Lpoole_ap_ipi_payload_valid:
     cmp dword ptr [rdi + {panic_latched_offset}], 0
     je .Lpoole_ap_ipi_accept
     cmp r15d, 4
@@ -2247,6 +2309,33 @@ poole_ap_ipi_stop:
     mov r12, {result_reschedule}
     jmp .Lpoole_ap_ipi_respond
 .Lpoole_ap_ipi_result_shootdown:
+    mov rax, qword ptr [rdi + {shootdown_virtual_offset}]
+    invlpg [rax]
+    mfence
+    mov rbx, qword ptr [rax]
+    mov qword ptr [rdi + {shootdown_observed_after_offset}], rbx
+    inc qword ptr [rdi + {shootdown_invalidation_count_offset}]
+    mov rax, qword ptr [rdi + {shootdown_active_generation_offset}]
+    mov qword ptr [rdi + {shootdown_last_ack_generation_offset}], rax
+    mov rax, qword ptr [rdi + {shootdown_target_mask_offset}]
+    mov qword ptr [rdi + {shootdown_ack_mask_offset}], rax
+    mov dword ptr [rdi + {shootdown_error_offset}], 0
+    mov dword ptr [rdi + {shootdown_state_offset}], {shootdown_state_acked}
+    mov rax, {shootdown_response_checksum_seed}
+    xor rax, qword ptr [rdi + {shootdown_root_offset}]
+    xor rax, qword ptr [rdi + {shootdown_virtual_offset}]
+    xor rax, qword ptr [rdi + {shootdown_active_generation_offset}]
+    xor rax, qword ptr [rdi + {shootdown_target_mask_offset}]
+    xor rax, qword ptr [rdi + {shootdown_ack_mask_offset}]
+    xor rax, qword ptr [rdi + {shootdown_observed_before_offset}]
+    xor rax, qword ptr [rdi + {shootdown_observed_after_offset}]
+    xor rax, qword ptr [rdi + {shootdown_invalidation_count_offset}]
+    xor rax, qword ptr [rdi + {shootdown_last_ack_generation_offset}]
+    mov ebx, dword ptr [rdi + {shootdown_state_offset}]
+    xor rax, rbx
+    mov ebx, dword ptr [rdi + {shootdown_error_offset}]
+    xor rax, rbx
+    mov qword ptr [rdi + {shootdown_response_checksum_offset}], rax
     mov r12, {result_shootdown}
     jmp .Lpoole_ap_ipi_respond
 .Lpoole_ap_ipi_result_call:
@@ -2293,6 +2382,24 @@ poole_ap_ipi_stop:
     jmp .Lpoole_ap_ipi_deny
 .Lpoole_ap_ipi_deny_panic:
     mov r14d, {error_panic}
+    jmp .Lpoole_ap_ipi_deny
+.Lpoole_ap_ipi_deny_shootdown_state:
+    mov r14d, {error_shootdown_state}
+    jmp .Lpoole_ap_ipi_deny
+.Lpoole_ap_ipi_deny_shootdown_root:
+    mov r14d, {error_shootdown_root}
+    jmp .Lpoole_ap_ipi_deny
+.Lpoole_ap_ipi_deny_shootdown_generation:
+    mov r14d, {error_shootdown_generation}
+    jmp .Lpoole_ap_ipi_deny
+.Lpoole_ap_ipi_deny_shootdown_target:
+    mov r14d, {error_shootdown_target}
+    jmp .Lpoole_ap_ipi_deny
+.Lpoole_ap_ipi_deny_shootdown_address:
+    mov r14d, {error_shootdown_address}
+    jmp .Lpoole_ap_ipi_deny
+.Lpoole_ap_ipi_deny_shootdown_checksum:
+    mov r14d, {error_shootdown_checksum}
 .Lpoole_ap_ipi_deny:
     mov r13d, {ack_denied}
     xor r12d, r12d
@@ -2483,6 +2590,24 @@ poole_ap_ipi_trampoline_end:
     panic_latched_offset = const smp_ipi::PANIC_LATCHED_OFFSET,
     spurious_count_offset = const smp_ipi::SPURIOUS_COUNT_OFFSET,
     apic_error_count_offset = const smp_ipi::APIC_ERROR_COUNT_OFFSET,
+    shootdown_magic_offset = const smp_ipi::SHOOTDOWN_MAGIC_OFFSET,
+    shootdown_version_offset = const smp_ipi::SHOOTDOWN_VERSION_OFFSET,
+    shootdown_state_offset = const smp_ipi::SHOOTDOWN_STATE_OFFSET,
+    shootdown_error_offset = const smp_ipi::SHOOTDOWN_ERROR_OFFSET,
+    shootdown_root_offset = const smp_ipi::SHOOTDOWN_ROOT_PHYSICAL_OFFSET,
+    shootdown_virtual_offset = const smp_ipi::SHOOTDOWN_VIRTUAL_ADDRESS_OFFSET,
+    shootdown_retired_generation_offset = const smp_ipi::SHOOTDOWN_RETIRED_GENERATION_OFFSET,
+    shootdown_active_generation_offset = const smp_ipi::SHOOTDOWN_ACTIVE_GENERATION_OFFSET,
+    shootdown_target_mask_offset = const smp_ipi::SHOOTDOWN_TARGET_MASK_OFFSET,
+    shootdown_ack_mask_offset = const smp_ipi::SHOOTDOWN_ACK_MASK_OFFSET,
+    shootdown_old_frame_offset = const smp_ipi::SHOOTDOWN_OLD_FRAME_PHYSICAL_OFFSET,
+    shootdown_new_frame_offset = const smp_ipi::SHOOTDOWN_NEW_FRAME_PHYSICAL_OFFSET,
+    shootdown_observed_before_offset = const smp_ipi::SHOOTDOWN_OBSERVED_BEFORE_OFFSET,
+    shootdown_observed_after_offset = const smp_ipi::SHOOTDOWN_OBSERVED_AFTER_OFFSET,
+    shootdown_invalidation_count_offset = const smp_ipi::SHOOTDOWN_INVALIDATION_COUNT_OFFSET,
+    shootdown_request_checksum_offset = const smp_ipi::SHOOTDOWN_REQUEST_CHECKSUM_OFFSET,
+    shootdown_response_checksum_offset = const smp_ipi::SHOOTDOWN_RESPONSE_CHECKSUM_OFFSET,
+    shootdown_last_ack_generation_offset = const smp_ipi::SHOOTDOWN_LAST_ACK_GENERATION_OFFSET,
     ipi_magic = const smp_ipi::EXTENSION_MAGIC,
     ipi_version = const smp_ipi::EXTENSION_VERSION,
     service_online = const smp_ipi::SERVICE_STATE_ONLINE,
@@ -2502,6 +2627,12 @@ poole_ap_ipi_trampoline_end:
     error_duplicate = const smp_ipi::ERROR_DUPLICATE_SEQUENCE,
     error_payload = const smp_ipi::ERROR_PAYLOAD,
     error_panic = const smp_ipi::ERROR_PANIC_LATCHED,
+    error_shootdown_state = const smp_ipi::ERROR_SHOOTDOWN_STATE,
+    error_shootdown_root = const smp_ipi::ERROR_SHOOTDOWN_ROOT,
+    error_shootdown_generation = const smp_ipi::ERROR_SHOOTDOWN_GENERATION,
+    error_shootdown_target = const smp_ipi::ERROR_SHOOTDOWN_TARGET,
+    error_shootdown_address = const smp_ipi::ERROR_SHOOTDOWN_ADDRESS,
+    error_shootdown_checksum = const smp_ipi::ERROR_SHOOTDOWN_CHECKSUM,
     capability_high = const smp_ipi::CAPABILITY_HIGH,
     capability_low = const smp_ipi::CAPABILITY_LOW,
     request_checksum_seed = const smp_ipi::REQUEST_CHECKSUM_SEED,
@@ -2511,11 +2642,22 @@ poole_ap_ipi_trampoline_end:
     panic_token = const smp_ipi::PANIC_NOTICE_TOKEN,
     stop_token = const smp_ipi::STOP_TOKEN,
     result_reschedule = const smp_ipi::RESULT_RESCHEDULE_OBSERVED,
-    result_shootdown = const smp_ipi::RESULT_SHOOTDOWN_TRANSPORT_ONLY,
+    result_shootdown = const smp_ipi::RESULT_SHOOTDOWN_INVALIDATED,
     result_call = const smp_ipi::RESULT_CALL_ALLOWLIST_NOOP,
     result_diagnostic = const smp_ipi::RESULT_DIAGNOSTIC_OBSERVED,
     result_panic = const smp_ipi::RESULT_PANIC_LATCHED,
     result_stop = const smp_ipi::RESULT_STOP_QUIESCED,
+    shootdown_magic = const smp_ipi::SHOOTDOWN_MAGIC,
+    shootdown_version = const smp_ipi::SHOOTDOWN_VERSION,
+    shootdown_state_armed = const smp_ipi::SHOOTDOWN_STATE_ARMED,
+    shootdown_state_acked = const smp_ipi::SHOOTDOWN_STATE_ACKED,
+    shootdown_root_mask = const 0x000f_ffff_ffff_f000u64,
+    shootdown_probe_virtual = const smp_ipi::PROBE_VIRTUAL_ADDRESS,
+    shootdown_retired_generation = const smp_ipi::RETIRED_GENERATION,
+    shootdown_active_generation = const smp_ipi::ACTIVE_GENERATION,
+    shootdown_target_mask = const smp_ipi::TARGET_CPU_MASK,
+    shootdown_request_checksum_seed = const smp_ipi::SHOOTDOWN_REQUEST_CHECKSUM_SEED,
+    shootdown_response_checksum_seed = const smp_ipi::SHOOTDOWN_RESPONSE_CHECKSUM_SEED,
 );
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

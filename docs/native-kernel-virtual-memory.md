@@ -105,7 +105,7 @@ The Cycle 137 requalification records 117,858 mapped pages, eleven ranges, 12,90
 writes and matching bootstrap invalidations, two CR3 writes, three local leaf
 invalidations, and one generation-retirement receipt. The 409,600-byte
 canonical kernel occupies a 112-page, 458,752-byte image, has 919 relocations,
-and SHA-256 `6B8A9C2C3EAC559E1D9CB5965800A1671DB8F487F149861300D4EDCB279B3A11`.
+and SHA-256 `95DDA27784DA944A9C0F5B04029255EDE4DE1BB0684A8EA10DCFC07E686B59A2`.
 
 ## Remaining Boundary
 

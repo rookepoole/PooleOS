@@ -103,6 +103,38 @@ pub enum Error {
 }
 
 impl Error {
+    pub const fn code(self) -> u32 {
+        match self {
+            Self::PhysicalAccess => 1,
+            Self::Acpi(_) => 2,
+            Self::AcpiAddress => 3,
+            Self::Madt => 4,
+            Self::Apic => 5,
+            Self::Hpet => 6,
+            Self::Memory => 7,
+            Self::Timeout => 8,
+            Self::Trampoline => 9,
+            Self::ResourceAddress => 10,
+            Self::ResourceCount => 11,
+            Self::SipiVector => 12,
+            Self::ProcessorCount => 13,
+            Self::BspMissing => 14,
+            Self::TargetMissing => 15,
+            Self::TargetApicId => 16,
+            Self::X2ApicUnsupported => 17,
+            Self::PageRole => 18,
+            Self::MailboxShape => 19,
+            Self::MailboxState => 20,
+            Self::MailboxIdentity => 21,
+            Self::FeatureMismatch => 22,
+            Self::ControlState => 23,
+            Self::TimeOrder => 24,
+            Self::Checksum => 25,
+            Self::Transition => 26,
+            Self::Rollback => 27,
+        }
+    }
+
     pub const fn label(self) -> &'static str {
         match self {
             Self::PhysicalAccess => "physical_access",

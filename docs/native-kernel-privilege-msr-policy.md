@@ -64,9 +64,9 @@ target-hardware qualification, user mode, release, or production evidence.
 PKMSR1 executes zero MSR or control writes. The shared linked kernel contains
 25 `RDMSR` sites: twenty in the established CPU/entry policy paths, one each in
 the separately selected PKSMP1 and PKSMP2 lifecycles, and three isolated to the
-PKSMP3 protected-mode trampoline, long-mode trampoline, and BSP transaction.
+selector-14 PKSMP4 protected-mode trampoline, long-mode trampoline, and BSP transaction.
 It contains two typed `IA32_APIC_BASE` `WRMSR` sites in the separately selected
 PKIRQ1 `InterruptTime` branch and one `IA32_EFER` long-mode-enablement write in
-the separately selected PKSMP3 trampoline. Source and per-function linked
+the separately selected selector-14 PKSMP4 trampoline. Source and per-function linked
 audits bind every isolation. There are zero signatures, authority grants, authorized
 actions, firmware calls, and physical-media writes in this profile.

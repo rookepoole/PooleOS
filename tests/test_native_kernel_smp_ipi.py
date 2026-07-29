@@ -20,8 +20,8 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
     def test_contract_schema_and_negative_control_order(self) -> None:
         contract = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.CONTRACT_RELATIVE)
         self.assertEqual([], smp_ipi.contract_errors(contract))
-        self.assertEqual(18, len(smp_ipi.NEGATIVE_CONTROL_IDS))
-        self.assertEqual(120, contract["qualification"]["hostile_case_count"])
+        self.assertEqual(25, len(smp_ipi.NEGATIVE_CONTROL_IDS))
+        self.assertEqual(169, contract["qualification"]["hostile_case_count"])
 
     def test_resource_layout_repurposes_only_page_31_for_apic_table(self) -> None:
         layout = smp_ipi.resource_layout(1, 32)
@@ -71,6 +71,30 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
         )
         self.assertEqual(0x1A04_0602_5350_0005, checksum)
 
+    def test_shootdown_model_binds_generation_mask_frames_and_reclaim(self) -> None:
+        request = smp_ipi.canonical_shootdown_request(0x2000, 0x3000, 0x4000)
+        smp_ipi.validate_shootdown_request(request, 0x2000, 0)
+        snapshot = smp_ipi.canonical_shootdown_snapshot(request)
+        smp_ipi.validate_shootdown_ack(snapshot, request)
+        reclaim = smp_ipi.DeferredReclaimModel(request)
+        with self.assertRaises(smp_ipi.KernelSmpIpiError):
+            reclaim.authorize()
+        reclaim.arm()
+        reclaim.timeout()
+        with self.assertRaises(smp_ipi.KernelSmpIpiError):
+            reclaim.authorize()
+        reclaim.retry()
+        reclaim.acknowledge(snapshot)
+        reclaim.authorize()
+        reclaim.release()
+        self.assertEqual("released", reclaim.stage)
+
+        stale = request.copy()
+        stale["active_generation"] = stale["retired_generation"]
+        stale["checksum"] = smp_ipi.shootdown_request_checksum(stale)
+        with self.assertRaises(smp_ipi.KernelSmpIpiError):
+            smp_ipi.validate_shootdown_request(stale, 0x2000, 0)
+
     def test_sandybridge_profile_is_two_cpu_multi_tcg_without_icount(self) -> None:
         _, base = native_tier0.validate_contracts(smp_ipi.ROOT)
         profile = qualify._sandybridge_profile(base)
@@ -88,6 +112,7 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
         self.assertGreaterEqual(audit["xsave_instruction_count"], 2)
         self.assertGreaterEqual(audit["xrstor_instruction_count"], 2)
         self.assertEqual(6, audit["operation_handler_count"])
+        self.assertEqual(1, audit["remote_shootdown_invlpg_source_count"])
         arch = (smp_ipi.ROOT / "native/kernel/src/arch/x86_64.rs").read_text(encoding="utf-8")
         main = (smp_ipi.ROOT / "native/kernel/src/main.rs").read_text(encoding="utf-8")
         ipi = (smp_ipi.ROOT / "native/kernel/src/smp_ipi.rs").read_text(encoding="utf-8")
@@ -96,10 +121,20 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
                 arch.replace("xrstor64 [rbx]", "xrstor64 [rax]", 1), main, ipi
             )
 
+    def test_linked_invlpg_scope_requires_one_instruction_in_handler(self) -> None:
+        disassembly = (
+            "0000000000001000 <poole_ap_ipi_trampoline_start>:\n"
+            "    1000: 0f 01 38\tinvlpg\t(%rax)\n"
+            "0000000000001003 <poole_ap_ipi_trampoline_end>:\n"
+        )
+        self.assertEqual(1, qualify._linked_invlpg_scope(disassembly)["invlpg_instruction_count"])
+        with self.assertRaises(smp_ipi.KernelSmpIpiError):
+            qualify._linked_invlpg_scope(disassembly.replace("invlpg", "nop"))
+
     def test_live_readiness_and_hostile_cases_when_generated(self) -> None:
         path = smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE
         if not path.is_file():
-            self.skipTest("PKSMP3 readiness has not been generated yet")
+            self.skipTest("PKSMP4 readiness has not been generated yet")
         readiness = smp_ipi.read_json(path)
         self.assertEqual([], smp_ipi.readiness_errors(readiness))
         markers = readiness["execution"]["runs"][0]["markers"]
@@ -108,11 +143,11 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
         self.assertEqual(4, observation["operations"]["denied"])
         controls = qualify._negative_controls(markers)
         self.assertEqual(list(smp_ipi.NEGATIVE_CONTROL_IDS), [item["id"] for item in controls])
-        self.assertEqual(120, sum(item["case_count"] for item in controls))
+        self.assertEqual(169, sum(item["case_count"] for item in controls))
         check = pooleos_release_gate.check_native_kernel_smp_ipi_readiness()
         self.assertTrue(check["ok"], check["detail"])
         self.assertIn("accepted=6/6", check["detail"])
-        self.assertIn("tlb_invalidations=0", check["detail"])
+        self.assertIn("tlb_invalidations=1", check["detail"])
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://pooleos.local/specs/native-kernel-smp-ipi-readiness.schema.json",
-  "title": "PooleOS PKSMP3 readiness",
+  "title": "PooleOS PKSMP4 readiness",
   "type": "object",
   "required": [
     "schema_version",
@@ -12,8 +12,8 @@
     "selected_move_id",
     "production_ready",
     "production_promotion_allowed",
-    "n8_exit_gate_satisfied",
-    "flag_n8_smp_ipi_001_closed",
+    "n9_exit_gate_satisfied",
+    "flag_n9_smp_shootdown_001_closed",
     "phase_status",
     "inputs",
     "build",
@@ -29,16 +29,32 @@
     "schema_version": {"const": "1.0"},
     "artifact_kind": {"const": "pooleos_native_kernel_smp_ipi_readiness"},
     "status_date": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
-    "status": {"const": "pass_single_host_two_run_sandybridge_two_vcpu_capability_ipi_transport_non_promoting"},
-    "contract_id": {"const": "PKSMP3"},
-    "selected_move_id": {"const": "N8-SMP-IPI-001"},
+    "status": {"const": "pass_single_host_two_run_sandybridge_two_vcpu_remote_invlpg_generation_retirement_non_promoting"},
+    "contract_id": {"const": "PKSMP4"},
+    "selected_move_id": {"const": "N9-SMP-SHOOTDOWN-001"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
-    "n8_exit_gate_satisfied": {"const": false},
-    "flag_n8_smp_ipi_001_closed": {"const": true},
+    "n9_exit_gate_satisfied": {"const": false},
+    "flag_n9_smp_shootdown_001_closed": {"const": true},
     "phase_status": {"type": "object"},
     "inputs": {"type": "object"},
-    "build": {"type": "object"},
+    "build": {
+      "type": "object",
+      "required": ["linked_invlpg_audit"],
+      "properties": {
+        "linked_invlpg_audit": {
+          "type": "object",
+          "required": ["scope", "invlpg_instruction_count", "operand", "status", "canonical_sha256"],
+          "properties": {
+            "scope": {"const": "poole_ap_ipi_trampoline_start..poole_ap_ipi_trampoline_end"},
+            "invlpg_instruction_count": {"const": 1},
+            "operand": {"const": "(%rax)"},
+            "status": {"const": "pass"},
+            "canonical_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"}
+          }
+        }
+      }
+    },
     "media": {
       "type": "object",
       "required": ["clean_generation_count", "exact_clean_generation_match", "physical_media_write_performed"],
@@ -64,8 +80,8 @@
     },
     "negative_controls": {
       "type": "array",
-      "minItems": 18,
-      "maxItems": 18,
+      "minItems": 25,
+      "maxItems": 25,
       "items": {
         "type": "object",
         "required": ["id", "status", "expected", "case_count"],
@@ -81,7 +97,7 @@
     "non_claims": {"type": "array", "minItems": 9, "items": {"type": "string"}},
     "summary": {
       "type": "object",
-      "required": ["application_processors_online", "operation_classes", "accepted_deliveries", "denied_deliveries", "offline_timeouts", "eois", "resource_pages_released", "verified_bytes", "negative_controls_total", "hostile_cases_total", "production_claim_count"],
+      "required": ["application_processors_online", "operation_classes", "accepted_deliveries", "denied_deliveries", "offline_timeouts", "eois", "remote_tlb_invalidations", "retired_generations", "premature_reclaim_rejections", "resource_pages_released", "verified_bytes", "negative_controls_total", "hostile_cases_total", "production_claim_count"],
       "properties": {
         "application_processors_online": {"const": 1},
         "operation_classes": {"const": 6},
@@ -89,10 +105,13 @@
         "denied_deliveries": {"const": 4},
         "offline_timeouts": {"const": 1},
         "eois": {"const": 10},
-        "resource_pages_released": {"const": 32},
-        "verified_bytes": {"const": 131072},
-        "negative_controls_total": {"const": 18},
-        "hostile_cases_total": {"const": 120},
+        "remote_tlb_invalidations": {"const": 1},
+        "retired_generations": {"const": 1},
+        "premature_reclaim_rejections": {"const": 1},
+        "resource_pages_released": {"const": 34},
+        "verified_bytes": {"const": 139264},
+        "negative_controls_total": {"const": 25},
+        "hostile_cases_total": {"const": 169},
         "production_claim_count": {"const": 0}
       }
     },

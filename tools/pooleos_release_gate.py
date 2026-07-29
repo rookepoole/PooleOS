@@ -116,11 +116,11 @@ DEFAULT_GAPS = [
     "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
     "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, six bounded TLC models cover all seven required domains and detect twenty-one required counterexamples, and a bounded PooleBoot proof executes under the pinned profile; current source rebuilds, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open.",
     "A reproducible unsigned PooleBoot proof application boots twice with deterministic twelve-file GPT/FAT32 media, exact GOP frames, retained PKMAP2 kernel/PSM1/six-artifact/PBTP1/PBTS1/table/guarded-stack/handoff storage, independently reconstructed PBLIVE4 bytes including a firmware RSDP record, bounded PBEXIT1 retry, successful ExitBootServices, and zero later firmware calls. The ordinary build stops before transfer; a separate opt-in QEMU-only PKXFER1 build installs retained CR3/RSP, transfers once, and live-executes PKREVAL1 over all nine retained files before an exact terminal unsigned-policy denial with zero signatures, authority, actions, writes, or firmware calls. PBSTATE1 still only models authenticated monotonic-anchor validation, deterministic redundant-copy selection, rollback/future rejection, repair/migration planning, and nine interrupted-transition recovery boundaries with no performed effects. Policy signature verification, authenticated revocation, a real cryptographic monotonic writable state provider, persistent backend I/O and executed repair/migration, Secure Boot-state verification, capability creation, activation or update application, policy application, recovery execution or symbol consumption, licensed real vendor payload intake and validation, live FMP/ESRT/PLDM inventory, privileged per-processor revision observation, initial-system execution, final framebuffer remap/revocation, production transfer, target-firmware and physical-media qualification, and N5 exit remain open.",
-    "A real reproducible 112-page PooleKernel image, PKENTRY1 intake, allocation-free PKREVAL1 verifier, bounded early diagnostics, opt-in QEMU-only live entry, BSP-only PKTRAP1 descriptor/exception containment, bounded BSP PKXSTATE1 x87/SSE ownership, PKPMM7 scrubbed lifecycle and checked repeated ledger growth, guarded stable-manager and generation-owned active-ledger transactions, PKACPI1 required-table snapshot/reclaim evidence, PKVM3 sparse PMM-owned direct-map evidence, PKIRQ1 one-BSP timer evidence, PKSMP1 one-AP lifecycle evidence, PKSMP2 one-AP processor-local runtime evidence, and PKSMP3 fixed development-only IPI transport evidence exist, but authenticated boot trust, measured boot, production transfer, production capability authority, real remote TLB shootdown, multi-AP and scheduler ownership, retained crash evidence, target execution, and N6/N7/N8/N9 exit remain open.",
-    "PKERR1 freezes a pure exact-target CPU/errata rejection policy, PKXSTATE1 proves bounded x87/SSE standard-XSAVE ownership, PKXEXC1 proves deliberate #MF/#XM recovery plus terminal test-only #NM rejection with a linked scope audit under WHPX, and PKMSR1 proves only a read-only qemu64 BSP system-linkage/global-MCA/unsupported-PMU observation. PKPMM7 supplies bounded physical ownership, scrubbed lifecycle transactions, a stable guarded five-page manager, external generation-owned active ledgers, checked automatic growth with retirement, bounded-window fallback and pre-effect rejection, streamed lifecycle-gated Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation and retained copy/readback; PKVM1 supplies inactive page-table transactions; PKVM3 proves one-BSP activation/restoration of a complete-profile PMM-owned sparse direct map; PKIRQ1 proves one bounded local timer transaction; PKSMP1 proves one first-AP start/quiesce/park lifecycle; PKSMP2 proves one processor-local GDT/TSS/IDT, guarded-stack, x87/SSE-owner, and interrupt-vector transaction; and PKSMP3 proves six fixed development-only IPI operation classes with checked acknowledgements, denials, timeout, EOI, and teardown. No target-qualified complete native CPU policy, applicable Model 40h-4Fh errata authority, direct numeric client microcode floor or ratified replacement, target-specific privileged-MSR semantics, syscall/MCE/PMU activation, AVX/extended state, user-task exception delivery, scheduler or migration integration, general interrupt routing/time services, production capability authority, multi-AP operation, real SMP shootdown, AML or complete ACPI resource-graph execution, complete kernel/user address spaces, heap, MMIO/PAT/MTRR qualification, interrupt-context or concurrent allocator, general pressure, or OOM implementation exists.",
+    "A real reproducible 112-page PooleKernel image, PKENTRY1 intake, allocation-free PKREVAL1 verifier, bounded early diagnostics, opt-in QEMU-only live entry, BSP-only PKTRAP1 descriptor/exception containment, bounded BSP PKXSTATE1 x87/SSE ownership, PKPMM7 scrubbed lifecycle and checked repeated ledger growth, guarded stable-manager and generation-owned active-ledger transactions, PKACPI1 required-table snapshot/reclaim evidence, PKVM3 sparse PMM-owned direct-map evidence, PKIRQ1 one-BSP timer evidence, PKSMP1 one-AP lifecycle evidence, PKSMP2 one-AP processor-local runtime evidence, and PKSMP4 fixed IPI plus one-page remote-invalidation evidence exist, but authenticated boot trust, measured boot, production transfer, production capability authority, general multi-AP shootdown, scheduler ownership, retained crash evidence, target execution, and N6/N7/N8/N9 exit remain open.",
+    "PKERR1 freezes a pure exact-target CPU/errata rejection policy, PKXSTATE1 proves bounded x87/SSE standard-XSAVE ownership, PKXEXC1 proves deliberate #MF/#XM recovery plus terminal test-only #NM rejection with a linked scope audit under WHPX, and PKMSR1 proves only a read-only qemu64 BSP system-linkage/global-MCA/unsupported-PMU observation. PKPMM7 supplies bounded physical ownership, scrubbed lifecycle transactions, a stable guarded five-page manager, external generation-owned active ledgers, checked automatic growth with retirement, bounded-window fallback and pre-effect rejection, streamed lifecycle-gated Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation and retained copy/readback; PKVM1 supplies inactive page-table transactions; PKVM3 proves one-BSP activation/restoration of a complete-profile PMM-owned sparse direct map; PKIRQ1 proves one bounded local timer transaction; PKSMP1 proves one first-AP start/quiesce/park lifecycle; PKSMP2 proves one AP-local GDT/TSS/IDT, guarded-stack, x87/SSE-owner, and interrupt-vector runtime transaction; and PKSMP4 proves six fixed IPI classes plus one AP-side one-page INVLPG and one deferred generation retirement. No target-qualified complete native CPU policy, applicable Model 40h-4Fh errata authority, direct numeric client microcode floor or ratified replacement, target-specific privileged-MSR semantics, syscall/MCE/PMU activation, AVX/extended state, user-task exception delivery, scheduler or migration integration, general interrupt routing/time services, production capability authority, multi-AP operation, general SMP shootdown, AML or complete ACPI resource-graph execution, complete kernel/user address spaces, heap, MMIO/PAT/MTRR qualification, interrupt-context or concurrent allocator, general pressure, or OOM implementation exists.",
     "The sanitized Tier 1 identity and bounded user-mode CPUID transcript match, but MSR, PCI configuration-space, Secure Boot, TPM, SPD, sensor/power, standards-hash, lab-safety, native enumeration, and physical qualification evidence remain open.",
     "No native DMA/IOMMU/interrupt-remapping confinement.",
-    "PKPMM7 supplies bounded one-BSP physical-page ownership, scrub-before-allocation and scrub-before-reuse with full readback and fault rollback, a stable guarded five-page manager, external generation-owned guarded ledgers, checked automatic repeated growth, verified retirement, bounded-window fallback and pre-effect rejection, exact post-ExitBootServices Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation plus retained snapshot copy/readback. PKVM1 supplies inactive four-level 4 KiB transactions, PKVM3 supplies a complete-profile PMM-owned sparse direct map, cache-alias rejection, exact CR3 restoration, three local invalidation receipts, and one-BSP generation-retirement gating, and PKSMP3 supplies a bounded development-only IPI transport whose shootdown operation performs zero TLB invalidations. Generation-bound remote TLB invalidation and generation-safe remote deferred reclaim, production capability authority, multi-AP operation, incremental concurrent map replacement, huge pages, PCID, COW, user faults, pager IPC, cache/MMIO qualification, heaps/object caches, interrupt-context allocation, concurrency/SMP, general pressure and OOM policy, scheduler, task, syscall, capability, IPC, isolation, and asynchronous I/O remain open.",
+    "PKPMM7 supplies bounded one-BSP physical-page ownership, scrub-before-allocation and scrub-before-reuse with full readback and fault rollback, a stable guarded five-page manager, external generation-owned guarded ledgers, checked automatic repeated growth, verified retirement, bounded-window fallback and pre-effect rejection, exact post-ExitBootServices Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation plus retained snapshot copy/readback. PKVM1 supplies inactive four-level 4 KiB transactions, PKVM3 supplies a complete-profile PMM-owned sparse direct map, cache-alias rejection, exact CR3 restoration, three local invalidation receipts, and generation-retirement gating, and PKSMP4 proves exactly one AP-side INVLPG and deferred reclaim for one AP-owned root, one page, and one generation. General multi-AP and address-space-wide shootdown, multiple concurrent generations, production capability authority, incremental concurrent map replacement, huge pages, PCID, COW, user faults, pager IPC, cache/MMIO qualification, heaps/object caches, interrupt-context allocation, concurrency/SMP, general pressure and OOM policy, scheduler, task, syscall, capability, IPC, isolation, and asynchronous I/O remain open.",
     "No native security, cryptography, TPM, secrets, MAC, privacy implementation, or external review.",
     "No isolated native driver domains or VIRTIO reference drivers.",
     "No native block, NVMe, USB, input, VFS, PooleFS, or persistent-data path.",
@@ -968,7 +968,7 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
         "inner_set_parser_count": 6,
         "inner_set_cross_binding_count": 6,
         "inner_set_development_denial_count": 6,
-        "inner_set_retained_set_sha256": "E15FF547B310FC526C5880D83FD88D6B0ED3A5B2E2849F8EEE0FE9D15A7EB463",
+        "inner_set_retained_set_sha256": "E350B2276092199EAA5E6896C36C4E04521E610D1C9D4D0E3DA9B8E458A2A22A",
         "inner_set_authority_grants": 0,
         "inner_set_actions_authorized": 0,
         "inner_set_state_writes": 0,
@@ -983,8 +983,8 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
         "policy_profile": "synthetic_qualification_only",
         "trust_binding_count": 14,
         "trust_denial": "pbtrust_policy_unsigned",
-        "trust_policy_sha256": "22D34E581E42D05BE051B9418C39FA130051BECB6733F705D2F9586D4ADE2C0B",
-        "trust_state_sha256": "A2E36E0C1D0AE3DF2CB23C5D5BE09C830948128013EFB076CBBD9C69D8959896",
+        "trust_policy_sha256": "7DC7DD8ADBD881D421D0389C32D4E9AF2F967AAC1AAA07AD2685A3A6221C4101",
+        "trust_state_sha256": "B1BCF17D6D630E35BA940284FAB963C2941D9A668E30A0F9C89BC0ED18231A7F",
         "trust_authority_grants": 0,
         "trust_state_writes": 0,
         "production_claim_count": 0,
@@ -998,7 +998,7 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
     detail = (
         "contract=POOLEOS-N5-POOLEBOOT-7; host_tests=8/8; builds=2/2; media=2/2; "
         "guest_runs=2/2; markers=25; serial_debugcon=2/2; gop_frames=2/2; "
-        "retained_files=9; inner=6/6; inner_sha256=E15FF547B310; authority=0; actions=0; state=0; hardware=0; "
+        "retained_files=9; inner=6/6; inner_sha256=E350B2276092; authority=0; actions=0; state=0; hardware=0; "
         "trust=unsigned-deny; trust_bindings=14; trust_authority=0; trust_writes=0; "
         "pbp1=2/2; kmap=2/2; exit=2/2; negatives=155/155; pmcu1=synthetic-never-apply; pfwm1=synthetic-never-apply; ppol1=qualification-only; production_claims=0; n5_exit=false; production_ready=false"
     )
@@ -1027,7 +1027,7 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     summary = artifact.get("summary", {})
     if summary.get("guest_runs_passed") != 2 or summary.get("guest_runs_total") != 2:
         errors.append("PKLOAD6 guest-run evidence is incomplete")
-    if summary.get("rust_host_tests_passed") != 215 or summary.get("rust_host_tests_total") != 215:
+    if summary.get("rust_host_tests_passed") != 217 or summary.get("rust_host_tests_total") != 217:
         errors.append("PKLOAD6 Rust host-test evidence is incomplete")
     if summary.get("ordered_marker_count") != 25:
         errors.append("PKLOAD6 marker evidence is incomplete")
@@ -1040,7 +1040,7 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     ) != 155:
         errors.append("PKLOAD6 negative controls are incomplete")
     if summary.get("inner_retained_set_sha256") != (
-        "E15FF547B310FC526C5880D83FD88D6B0ED3A5B2E2849F8EEE0FE9D15A7EB463"
+        "E350B2276092199EAA5E6896C36C4E04521E610D1C9D4D0E3DA9B8E458A2A22A"
     ):
         errors.append("PKLOAD6 retained inner-set identity changed")
     if artifact.get("claims") != native_kernel_load.expected_claims():
@@ -1050,9 +1050,9 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     ) is not False:
         errors.append("PKLOAD6 overclaims N5 exit or production readiness")
     detail = (
-        "contract=PKLOAD6; rust_tests=215/215; boot_builds=2/2; kernel_builds=2/2; "
+        "contract=PKLOAD6; rust_tests=217/217; boot_builds=2/2; kernel_builds=2/2; "
         "media=2/2; guest_runs=2/2; markers=25; retained_files=9; inner=6/6; "
-        "inner_sha256=E15FF547B310; "
+        "inner_sha256=E350B2276092; "
         "trust=unsigned-deny; trust_bindings=14; trust_authority=0; trust_writes=0; "
         "oracle=2/2; pbp1=2/2; kmap=2/2; exit=2/2; firmware_after_exit=0; "
         "negatives=155/155; pmcu1=synthetic-never-apply; pfwm1=synthetic-never-apply; "
@@ -1083,7 +1083,7 @@ def check_native_kernel_revalidation_readiness(
         )
     errors.extend(native_kernel_revalidation.readiness_errors(artifact, ROOT))
     build = artifact.get("build", {})
-    if not isinstance(build, dict) or build.get("host_test_count") != 130:
+    if not isinstance(build, dict) or build.get("host_test_count") != 132:
         errors.append("PKREVAL1 host-test evidence is incomplete")
     controls = artifact.get("negative_controls", [])
     if (
@@ -1112,7 +1112,7 @@ def check_native_kernel_revalidation_readiness(
     ) != (
         9,
         9,
-        "E15FF547B310FC526C5880D83FD88D6B0ED3A5B2E2849F8EEE0FE9D15A7EB463",
+        "E350B2276092199EAA5E6896C36C4E04521E610D1C9D4D0E3DA9B8E458A2A22A",
         "pbtrust_policy_unsigned",
         0,
         0,
@@ -1127,7 +1127,7 @@ def check_native_kernel_revalidation_readiness(
     ) is not False:
         errors.append("PKREVAL1 overclaims production readiness")
     detail = (
-        "contract=PKREVAL1; kernel_tests=130/130; python_tests=8/8; targets=2/2; "
+        "contract=PKREVAL1; kernel_tests=132/132; python_tests=8/8; targets=2/2; "
         "retained_files=9; parsers=9; controls=36/36; differential=32768/32768; "
         "denial=pbtrust_policy_unsigned; authority=0; actions=0; state_writes=0; "
         "live_kernel_entry=false; production_ready=false"
@@ -1269,8 +1269,8 @@ def check_native_kernel_trap_readiness(
         or build.get("default_stop_marker_present") is not True
         or build.get("default_transfer_marker_absent") is not True
         or kernel_product.get("canonical_sha256")
-        != "6B8A9C2C3EAC559E1D9CB5965800A1671DB8F487F149861300D4EDCB279B3A11"
-        or kernel_product.get("relocation_count") != 959
+        != "95DDA27784DA944A9C0F5B04029255EDE4DE1BB0684A8EA10DCFC07E686B59A2"
+        or kernel_product.get("relocation_count") != 969
     ):
         errors.append("PKTRAP1 build or feature isolation changed")
     if artifact.get("claims") != native_kernel_trap.expected_claims():
@@ -1800,8 +1800,8 @@ def check_native_kernel_interrupt_time_readiness(
         )
     errors.extend(native_kernel_interrupt_time.readiness_errors(artifact, ROOT))
     expected_summary = {
-        "kernel_host_tests_passed": 130,
-        "kernel_host_tests_total": 130,
+        "kernel_host_tests_passed": 132,
+        "kernel_host_tests_total": 132,
         "qemu_runs_passed": 2,
         "qemu_runs_total": 2,
         "markers_per_run": 36,
@@ -1886,8 +1886,8 @@ def check_native_kernel_smp_first_ap_readiness(
         "application_processors_parked": 1,
         "application_processors_quiesced": 1,
         "application_processors_started": 1,
-        "kernel_host_tests_passed": 130,
-        "kernel_host_tests_total": 130,
+        "kernel_host_tests_passed": 132,
+        "kernel_host_tests_total": 132,
         "markers_per_run": 38,
         "negative_controls_passed": 72,
         "negative_controls_total": 72,
@@ -1981,8 +1981,8 @@ def check_native_kernel_smp_percpu_runtime_readiness(
         "guarded_stack_classes": 3,
         "hostile_cases_total": 159,
         "installed_gates": 27,
-        "kernel_host_tests_passed": 130,
-        "kernel_host_tests_total": 130,
+        "kernel_host_tests_passed": 132,
+        "kernel_host_tests_total": 132,
         "markers_per_run": 42,
         "negative_controls_passed": 19,
         "negative_controls_total": 19,
@@ -2089,14 +2089,17 @@ def check_native_kernel_smp_ipi_readiness(
         "denied_deliveries": 4,
         "offline_timeouts": 1,
         "eois": 10,
-        "resource_pages_released": 32,
-        "verified_bytes": 131_072,
-        "negative_controls_total": 18,
-        "hostile_cases_total": 120,
+        "remote_tlb_invalidations": 1,
+        "retired_generations": 1,
+        "premature_reclaim_rejections": 1,
+        "resource_pages_released": 34,
+        "verified_bytes": 139_264,
+        "negative_controls_total": 25,
+        "hostile_cases_total": 169,
         "production_claim_count": 0,
     }
     if artifact.get("summary") != expected_summary:
-        errors.append("PKSMP3 readiness summary changed")
+        errors.append("PKSMP4 readiness summary changed")
     execution = artifact.get("execution", {})
     runs = execution.get("runs", []) if isinstance(execution, dict) else []
     if (
@@ -2119,15 +2122,15 @@ def check_native_kernel_smp_ipi_readiness(
             for run in runs
         )
     ):
-        errors.append("PKSMP3 live run evidence is incomplete")
+        errors.append("PKSMP4 live run evidence is incomplete")
     controls = artifact.get("negative_controls", [])
     if (
         not isinstance(controls, list)
-        or len(controls) != 18
+        or len(controls) != 25
         or sum(item.get("case_count", 0) for item in controls if isinstance(item, dict))
-        != 120
+        != 169
     ):
-        errors.append("PKSMP3 hostile-control evidence is incomplete")
+        errors.append("PKSMP4 hostile-control evidence is incomplete")
     observation = execution.get("observation", {}) if isinstance(execution, dict) else {}
     if (
         observation.get("operations", {}).get("accepted") != 6
@@ -2136,28 +2139,40 @@ def check_native_kernel_smp_ipi_readiness(
         or observation.get("operations", {}).get("eois") != 10
         or observation.get("operations", {}).get("timeout_count") != 1
         or observation.get("stop", {}).get("parked") != 1
-        or observation.get("result", {}).get("shootdown_transport_only") != 1
-        or observation.get("result", {}).get("tlb_invalidations") != 0
+        or observation.get("operations", {}).get("timeout_attempt") != 6
+        or observation.get("operations", {}).get("retry_same_attempt") is not True
+        or observation.get("shootdown", {}).get("retired_generation") != 1
+        or observation.get("shootdown", {}).get("active_generation") != 2
+        or observation.get("shootdown", {}).get("target_mask") != 2
+        or observation.get("shootdown", {}).get("ack_mask") != 2
+        or observation.get("shootdown", {}).get("invalidation_count") != 1
+        or observation.get("shootdown", {}).get("premature_reclaim_rejected") is not True
+        or observation.get("shootdown", {}).get("reclaim_state") != 3
+        or observation.get("result", {}).get("shootdown_remote_invlpg") != 1
+        or observation.get("result", {}).get("tlb_invalidations") != 1
+        or observation.get("result", {}).get("generation_retirement") != 1
+        or observation.get("result", {}).get("no_reuse_before_retirement") != 1
         or observation.get("result", {}).get("arbitrary_callback") != 0
         or observation.get("result", {}).get("scheduler") != 0
-        or observation.get("release", {}).get("resources_released") != 32
+        or observation.get("release", {}).get("resources_released") != 34
         or observation.get("release", {}).get("verified_bytes") != 131_072
+        or observation.get("release", {}).get("frame_verified_bytes") != 8_192
     ):
-        errors.append("PKSMP3 transport, release accounting, or nonclaim boundary changed")
+        errors.append("PKSMP4 shootdown, release accounting, or nonclaim boundary changed")
     contract = native_kernel_smp_ipi.read_json(ROOT / native_kernel_smp_ipi.CONTRACT_RELATIVE)
     if artifact.get("claims") != contract.get("claims"):
-        errors.append("PKSMP3 claim boundary changed")
+        errors.append("PKSMP4 claim boundary changed")
     if (
-        artifact.get("flag_n8_smp_ipi_001_closed") is not True
-        or artifact.get("n8_exit_gate_satisfied") is not False
+        artifact.get("flag_n9_smp_shootdown_001_closed") is not True
+        or artifact.get("n9_exit_gate_satisfied") is not False
         or artifact.get("production_ready") is not False
     ):
-        errors.append("PKSMP3 flag closure, N8 exit, or production boundary changed")
+        errors.append("PKSMP4 flag closure, N9 exit, or production boundary changed")
     detail = (
-        "contract=PKSMP3; sandybridge_vcpus=2; runs=2/2; markers=39/39; "
-        "controls=18/18; cases=120; accepted=6/6; denied=4/4; eois=10/10; "
-        "timeouts=1/1; resources=32/32; scrub=131072/131072; "
-        "tlb_invalidations=0; n8_exit=false; production_ready=false"
+        "contract=PKSMP4; sandybridge_vcpus=2; runs=2/2; markers=40/40; "
+        "controls=25/25; cases=169; accepted=6/6; denied=4/4; eois=10/10; "
+        "timeouts=1/1; resources=34/34; scrub=139264/139264; "
+        "tlb_invalidations=1; retired_generations=1; n9_exit=false; production_ready=false"
     )
     return readiness.make_check(
         "native_kernel_smp_ipi_readiness",
@@ -2670,8 +2685,8 @@ def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINE
         )
     errors.extend(native_kernel_entry.readiness_errors(artifact))
     expected_summary = {
-        "rust_host_tests_passed": 130,
-        "rust_host_tests_total": 130,
+        "rust_host_tests_passed": 132,
+        "rust_host_tests_total": 132,
         "rustfmt_packages_passed": 2,
         "clippy_runs_passed": 2,
         "clippy_runs_total": 2,
@@ -2690,17 +2705,17 @@ def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINE
         product.get("canonical_byte_count") != 409_600
         or product.get("image_byte_count") != 458_752
         or product.get("entry_offset") != 0x9000
-        or product.get("relocation_count") != 959
+        or product.get("relocation_count") != 969
         or product.get("canonical_sha256")
-        != "6B8A9C2C3EAC559E1D9CB5965800A1671DB8F487F149861300D4EDCB279B3A11"
+        != "95DDA27784DA944A9C0F5B04029255EDE4DE1BB0684A8EA10DCFC07E686B59A2"
     ):
         errors.append("PKENTRY1 product identity changed")
     if artifact.get("claims") != native_kernel_entry.expected_claims():
         errors.append("PKENTRY1 claim boundary changed")
     detail = (
-        "contract=PKENTRY1; kernel_tests=130/130; clean_builds=2/2; negative=43/43; "
+        "contract=PKENTRY1; kernel_tests=132/132; clean_builds=2/2; negative=43/43; "
         "exact_loaded=2/2; bytes=409600; image_bytes=458752; entry=0x9000; "
-        "relocations=959; live_transfer=false; "
+        "relocations=969; live_transfer=false; "
         "target_execution=false; n6_exit=false; production_ready=false"
     )
     return readiness.make_check(
