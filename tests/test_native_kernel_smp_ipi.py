@@ -1,4 +1,6 @@
+import tempfile
 import unittest
+from pathlib import Path
 
 from runtime import native_kernel_smp_ipi as smp_ipi
 from runtime import native_tier0
@@ -7,6 +9,14 @@ from tools import pooleos_release_gate
 
 
 class NativeKernelSmpIpiTests(unittest.TestCase):
+    def test_readiness_writer_emits_canonical_lf_bytes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "readiness.json"
+            qualify._write_readiness(path, {"status": "pass", "values": [1, 2]})
+            data = path.read_bytes()
+        self.assertNotIn(b"\r\n", data)
+        self.assertTrue(data.endswith(b"\n"))
+
     def test_contract_schema_and_negative_control_order(self) -> None:
         contract = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.CONTRACT_RELATIVE)
         self.assertEqual([], smp_ipi.contract_errors(contract))

@@ -723,7 +723,7 @@
       "canonical_byte_count": 409600,
       "canonical_sha256": "6B8A9C2C3EAC559E1D9CB5965800A1671DB8F487F149861300D4EDCB279B3A11",
       "disassembly_byte_count": 3315408,
-      "disassembly_sha256": "BED0530F33FD37FC78B6767C93FA2412104EC0A5C8A8A2AABDB19663C0478B04",
+      "disassembly_sha256": "4451AB488414BE60C41A9A96B027B3D7DCBE64A765DBB5949774174951335EF8",
       "instruction_counts": {
         "rdmsr": 25,
         "rdpmc": 0,
@@ -3627,12 +3627,12 @@
       {
         "byte_count": 16446,
         "path": "runs/native-kernel-revalidation-readiness.json",
-        "sha256": "675A3D96D1FF65368AC18B48F354A5E1E6525901A88BAC15F822B44A9877D49A"
+        "sha256": "CF3B22CE5D72B7687F9F083AC0483F641260EFBFE7EA02B71288A2B54F6F4ADA"
       },
       {
         "byte_count": 189517,
         "path": "runs/native_kernel_load_readiness.json",
-        "sha256": "F2BD0B91309C4F1AB7DE98F09E97863D269636AF64277651D30359B3112D0BD2"
+        "sha256": "582677FC743E9C14C01441D7B84CDCCE8A7CC82F179BAB72E5651D864C866A51"
       }
     ],
     "tier0_lock": {

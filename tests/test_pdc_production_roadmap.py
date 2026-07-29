@@ -118,8 +118,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 138)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 819)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 139)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 821)
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
         self.assertTrue(native["pooleboot_exists"])

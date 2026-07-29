@@ -35,6 +35,14 @@ class QualificationError(RuntimeError):
     """Raised when PKSMP3 qualification fails closed."""
 
 
+def _write_readiness(path: Path, report: dict[str, Any]) -> None:
+    path.write_text(
+        json.dumps(report, indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+
+
 def _set_field(marker: str, name: str, value: str) -> str:
     pattern = re.compile(rf"(\b{re.escape(name)}=)([^ ]+)")
     if len(pattern.findall(marker)) != 1:
@@ -361,7 +369,7 @@ def main() -> int:
     args = parser.parse_args()
     report = make_readiness(args.toolchain_root, args.qemu_root, args.status_date, args.timeout)
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    _write_readiness(args.out, report)
     print(f"PKSMP3 qualification PASS: {args.out}")
     return 0
 

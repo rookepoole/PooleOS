@@ -7,7 +7,22 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 138
+Last roadmap reconciliation: PooleOS Cycle 139
+
+Cycle 139 reconciliation (superseding only Cycle 138 closeout-integrity
+metadata): main-integration preflight reproduced all 819 Cycle 138 tests but
+found six stale bindings because the PBTRUST1 readiness writer had hashed CRLF
+working bytes before Git stored LF. The same platform-default newline defect
+was present in the new PKSMP3 writer and would have made its architecture
+binding stale after checkout. Both writers now force LF and have byte-level
+regression tests. PBTRUST1, PKLOAD6, PKREVAL1, PKXFER1, every affected
+CPU/xstate/MSR/memory/SMP receipt, PKSMP3, and PooleBoot were requalified in
+dependency order against committed-byte semantics. The exact kernel, bounded
+PKSMP3 behavior, phase/subphase status, flags, gaps, and production boundary
+do not advance. `production_ready=false`; no key, signature, firmware change,
+physical-media write, tag, release, or production promotion occurred. The
+blocked external move remains `N0-HW-KEY-ACQUIRE-001`; the next
+owner-independent engineering move remains `N9-SMP-SHOOTDOWN-001`.
 
 Cycle 138 reconciliation (superseding the historical Cycle 137 paragraph
 below): governance and external-key state are unchanged. The selected

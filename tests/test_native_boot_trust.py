@@ -1,6 +1,7 @@
 import dataclasses
 import hashlib
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -9,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from runtime import native_boot_trust as trust  # noqa: E402
+from tools import qualify_native_boot_trust as qualify  # noqa: E402
 
 
 MANIFEST = "11" * 32
@@ -96,6 +98,14 @@ def rehash_state(data: bytearray) -> bytes:
 
 
 class NativeBootTrustTests(unittest.TestCase):
+    def test_readiness_writer_emits_canonical_lf_bytes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "readiness.json"
+            qualify._write_readiness(path, {"status": "pass", "values": [1, 2]})
+            data = path.read_bytes()
+        self.assertNotIn(b"\r\n", data)
+        self.assertTrue(data.endswith(b"\n"))
+
     def test_development_records_cross_bind_then_deny_without_effects(self) -> None:
         policy, state, observed = records()
         summary = trust.validate_development(policy, state, observed)

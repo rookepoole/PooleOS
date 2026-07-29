@@ -42,6 +42,14 @@ class QualificationError(RuntimeError):
     """Raised when PBTRUST1 qualification fails closed."""
 
 
+def _write_readiness(path: Path, readiness: dict[str, Any]) -> None:
+    path.write_text(
+        json.dumps(readiness, indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+
+
 @dataclasses.dataclass(frozen=True)
 class ProbeCase:
     identifier: str
@@ -1439,7 +1447,7 @@ def main() -> int:
     args = parser.parse_args()
     readiness = make_readiness(args.toolchain_root.resolve())
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(readiness, indent=2) + "\n", encoding="utf-8")
+    _write_readiness(args.out, readiness)
     print(
         "PBTRUST1 qualification PASS "
         f"controls={len(readiness['negative_controls'])} "

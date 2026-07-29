@@ -146,13 +146,13 @@
       },
       {
         "path": "tools/qualify_native_kernel_smp_ipi.py",
-        "byte_count": 20518,
-        "sha256": "09EFBA7F0DD002AB3F00F55E47D994CCD159BAA1622B1EBB230A5B40C4EA93A6"
+        "byte_count": 20666,
+        "sha256": "6D5E0CF4506132FD868808DF43DD8A0996CF1B2E2BF0F23EE27A9F1341534098"
       },
       {
         "path": "tests/test_native_kernel_smp_ipi.py",
-        "byte_count": 5360,
-        "sha256": "74473883613BFA333FD4C9743F9FD31B3990D6CDE9F7302EA5196B181F58E1DB"
+        "byte_count": 5787,
+        "sha256": "9FD5A38EDF59A1B3DAC00469D7C394271793DA355E9355EF712C6D585B975210"
       },
       {
         "path": "docs/native-kernel-smp-ipi.md",
@@ -1886,11 +1886,11 @@
           "POOLEOS:KERNEL:SMP-IPI-ACCEPTED PASS contract=PKSMP3 operations=reschedule,shootdown_transport,call_allowlist_noop,diagnostic,panic_notice,stop sequences=1,2,3,4,5,6 accepted=6 reschedule=1 shootdown=1 call_function=1 diagnostic=1 panic=1 stop=1",
           "POOLEOS:KERNEL:SMP-IPI-CONTROLS PASS contract=PKSMP3 invalid_capability=1 vector_mismatch=1 stale_sequence=1 duplicate_sequence=1 denied=4 delivery_count=10 eoi_count=10 spurious=0 apic_error=0",
           "POOLEOS:KERNEL:SMP-IPI-TIMEOUT PASS contract=PKSMP3 target_apic_id=2 attempt=10 bounded=1 offline_cpu=1 timeout_count=1",
-          "POOLEOS:KERNEL:SMP-IPI-STOP PASS contract=PKSMP3 ack_attempt=10 ack_sequence=6 last_accepted_sequence=6 service_state=4 mailbox_state=3 runtime_state=5 panic_latched=1 response_checksum=0x1A04060253500005 baseline_checksum=0xC24E7CF0C7D27298 runtime_checksum=0x30290E3AA8E4531D init_asserts=1 init_deasserts=1 sipis=2 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 final_init=1 parked=1",
+          "POOLEOS:KERNEL:SMP-IPI-STOP PASS contract=PKSMP3 ack_attempt=10 ack_sequence=6 last_accepted_sequence=6 service_state=4 mailbox_state=3 runtime_state=5 panic_latched=1 response_checksum=0x1A04060253500005 baseline_checksum=0x2D5A41DE8B0C95A9 runtime_checksum=0x30987AAF250AD507 init_asserts=1 init_deasserts=1 sipis=2 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 final_init=1 parked=1",
           "POOLEOS:KERNEL:SMP-IPI-RELEASE PASS contract=PKSMP3 release_sequence=3 zeroed_bytes=131072 verified_bytes=131072 resources_released=32 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged",
           "POOLEOS:KERNEL:SMP-IPI-RESULT PASS contract=PKSMP3 profile=sandybridge_x87_sse_two_vcpu capability_gate=development_fixed_token operation_classes=6 valid_deliveries=6 denied_deliveries=4 offline_timeouts=1 eois=10 panic_latched=1 stop_quiesced=1 ap_parked=1 resources_released=32 rollback=host_verified shootdown_transport_only=1 tlb_invalidations=0 call_allowlist_noop=1 arbitrary_callback=0 scheduler=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],
-        "marker_sha256": "66EEED715FF6325CAAB9E75DD48E7119496ED87BF15EA231475AE8693637D7C4",
+        "marker_sha256": "E6FBC62301C04CCA4E3A34D508F7210D4419C3DBC3F72F65F78F320A58A79321",
         "serial_debugcon_exact_match": true,
         "marker_summary": {
           "transfer_prefix": {
@@ -2171,8 +2171,8 @@
             "final_init": 1,
             "parked": 1,
             "response_checksum": 1874629951950422021,
-            "baseline_checksum": 14001265665127903896,
-            "runtime_checksum": 3470320632970105629
+            "baseline_checksum": 3267996903682119081,
+            "runtime_checksum": 3501683602939892999
           },
           "release": {
             "sequence": 3,
@@ -3232,11 +3232,11 @@
           "POOLEOS:KERNEL:SMP-IPI-ACCEPTED PASS contract=PKSMP3 operations=reschedule,shootdown_transport,call_allowlist_noop,diagnostic,panic_notice,stop sequences=1,2,3,4,5,6 accepted=6 reschedule=1 shootdown=1 call_function=1 diagnostic=1 panic=1 stop=1",
           "POOLEOS:KERNEL:SMP-IPI-CONTROLS PASS contract=PKSMP3 invalid_capability=1 vector_mismatch=1 stale_sequence=1 duplicate_sequence=1 denied=4 delivery_count=10 eoi_count=10 spurious=0 apic_error=0",
           "POOLEOS:KERNEL:SMP-IPI-TIMEOUT PASS contract=PKSMP3 target_apic_id=2 attempt=10 bounded=1 offline_cpu=1 timeout_count=1",
-          "POOLEOS:KERNEL:SMP-IPI-STOP PASS contract=PKSMP3 ack_attempt=10 ack_sequence=6 last_accepted_sequence=6 service_state=4 mailbox_state=3 runtime_state=5 panic_latched=1 response_checksum=0x1A04060253500005 baseline_checksum=0x116D42E667A8EFC2 runtime_checksum=0xE905E1EBE28A3DD4 init_asserts=1 init_deasserts=1 sipis=2 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 final_init=1 parked=1",
+          "POOLEOS:KERNEL:SMP-IPI-STOP PASS contract=PKSMP3 ack_attempt=10 ack_sequence=6 last_accepted_sequence=6 service_state=4 mailbox_state=3 runtime_state=5 panic_latched=1 response_checksum=0x1A04060253500005 baseline_checksum=0x0D10163A7B900393 runtime_checksum=0xDF6D6DFA0DC37040 init_asserts=1 init_deasserts=1 sipis=2 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 final_init=1 parked=1",
           "POOLEOS:KERNEL:SMP-IPI-RELEASE PASS contract=PKSMP3 release_sequence=3 zeroed_bytes=131072 verified_bytes=131072 resources_released=32 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged",
           "POOLEOS:KERNEL:SMP-IPI-RESULT PASS contract=PKSMP3 profile=sandybridge_x87_sse_two_vcpu capability_gate=development_fixed_token operation_classes=6 valid_deliveries=6 denied_deliveries=4 offline_timeouts=1 eois=10 panic_latched=1 stop_quiesced=1 ap_parked=1 resources_released=32 rollback=host_verified shootdown_transport_only=1 tlb_invalidations=0 call_allowlist_noop=1 arbitrary_callback=0 scheduler=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],
-        "marker_sha256": "4C0A8C51CB405532D90E2D5FDC0037039119A6411E06BA2E64C4C0A04876A3B4",
+        "marker_sha256": "3BE66C829E750E895CC8E284DE8EC079C4F74E8E164B663F611B0F3B3C9E1602",
         "serial_debugcon_exact_match": true,
         "marker_summary": {
           "transfer_prefix": {
@@ -3517,8 +3517,8 @@
             "final_init": 1,
             "parked": 1,
             "response_checksum": 1874629951950422021,
-            "baseline_checksum": 1255733428455272386,
-            "runtime_checksum": 16791075188955037140
+            "baseline_checksum": 941276762557383571,
+            "runtime_checksum": 16099645163659554880
           },
           "release": {
             "sequence": 3,
@@ -4798,8 +4798,8 @@
         "final_init": 1,
         "parked": 1,
         "response_checksum": 1874629951950422021,
-        "baseline_checksum": 14001265665127903896,
-        "runtime_checksum": 3470320632970105629
+        "baseline_checksum": 3267996903682119081,
+        "runtime_checksum": 3501683602939892999
       },
       "release": {
         "sequence": 3,

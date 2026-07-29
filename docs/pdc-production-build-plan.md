@@ -1,8 +1,8 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-07-29
-Plan version: 2.44.0-native-kernel-smp-ipi
-Roadmap cycle: PooleOS Cycle 138
+Plan version: 2.45.0-native-release-integrity
+Roadmap cycle: PooleOS Cycle 139
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
@@ -10,6 +10,13 @@ Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
 ## 1. Architecture Decision
+
+Cycle 139 is a non-promoting release-integrity repair discovered during
+`main` integration preflight. PBTRUST1 and PKSMP3 readiness writers now force
+LF before any downstream digest is captured, with byte-level regression tests.
+The trust-to-PooleBoot evidence chain was requalified in dependency order.
+Kernel bytes, bounded behavior, phase/subphase dispositions, flags, gaps, and
+the next implementation move are unchanged from Cycle 138.
 
 PooleOS v1 is an original x86-64 operating system. Its production artifact is not Linux-based, Debian-based, Buildroot-based, or a customized distribution. The production boot chain is:
 
@@ -1618,6 +1625,8 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 | `FLAG-BUILDROOT-LEGACY-001` | SUPERSEDED | Closed by architecture reset | Buildroot remains historical reference and cannot promote native status |
 
 ## 12. Near-Term Execution Sequence
+
+Cycle 139 repairs the canonical evidence pipeline without advancing an implementation flag. Main-integration preflight found that PBTRUST1 and PKSMP3 readiness writers emitted platform-default CRLF while Git stored LF, invalidating downstream and architecture hashes after checkout. Both writers now force LF and have focused byte-level tests. PBTRUST1 and the complete dependent trust/load/revalidation/transfer/CPU/xstate/MSR/memory/SMP/PooleBoot chain pass fresh qualification in dependency order. Cycle 138 kernel bytes and behavioral evidence remain exact; phase counts, flags, 20 gaps, and `production_ready=false` are unchanged. No key, signature, public-key publication, privileged host probe, driver load, firmware change, physical-media write, tag, release, or production promotion occurred. `N0-HW-KEY-ACQUIRE-001` remains the blocked external move and `N9-SMP-SHOOTDOWN-001` remains the next owner-independent engineering move.
 
 Cycle 138 closes only `FLAG-N8-SMP-IPI-001`. PKSMP3 extends the proven one-AP runtime with six fixed development-only IPI vectors and operation classes, checksum-bound request/response state, sequence and attempt replay controls, checked delivery/acknowledgement/EOI, bounded offline timeout, panic and stop behavior, final INIT parking, capability/alias revocation, and exact zero/readback release of all 32 pages or 131,072 bytes. One hundred thirty kernel host tests, two exact 39-marker two-vCPU SandyBridge-minus-AVX TCG runs, 18 hostile-control categories, and 120 independently rejected cases pass. The canonical kernel is 409,600 bytes in a 458,752-byte, 112-page image with 959 relocations and SHA-256 `6B8A9C2C3EAC559E1D9CB5965800A1671DB8F487F149861300D4EDCB279B3A11`. N8.6 remains partial and `FLAG-N8-IRQ-001` remains open. The capability is a fixed development token, the shootdown class performs zero TLB invalidations, and call-function exposes no arbitrary callback. Real generation-bound remote invalidation and deferred reclaim, scheduler ownership, multi-AP startup, I/O APIC/MSI, complete time services, live partial-start and panic rollback, target qualification, N8/N9 exit, release, and production remain open. `FLAG-N7-ERRATA-SOURCE-001` and `FLAG-N7-MICROCODE-FLOOR-001` remain stop-ship. The selected `hardware_fido2_ed25519_sk` device remains physically unavailable, so `N0-HW-KEY-ACQUIRE-001` is still the immediate blocked external move. No key, signature, public-key publication, secret use, privileged host probe, driver load, firmware change, physical-media write, tag/release publication, or production promotion occurred in Cycle 138. The next owner-independent engineering move is `N9-SMP-SHOOTDOWN-001`; PooleGlyph Phase 66 may advance in parallel without outranking N0-N9.
 

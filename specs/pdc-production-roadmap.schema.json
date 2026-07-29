@@ -49,7 +49,7 @@
         "inspect_live_pooleglyph_each_turn": {"const": true},
         "verify_master_checklist_coverage_each_turn": {"const": true},
         "new_work_must_be_flagged": {"const": true},
-        "last_updated_cycle": {"const": 138},
+        "last_updated_cycle": {"const": 139},
         "selected_move_id": {"const": "N8-SMP-IPI-001"},
         "immediate_next_move_id": {"const": "N0-HW-KEY-ACQUIRE-001"},
         "owner_independent_next_move_id": {"const": "N9-SMP-SHOOTDOWN-001"},

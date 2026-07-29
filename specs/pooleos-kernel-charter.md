@@ -211,3 +211,12 @@ generation-bound remote invalidation and deferred reclaim, scheduler CPU
 ownership, multi-AP startup, target hardware, N8/N9 exit, release, and
 production remain open. The next owner-independent move is
 `N9-SMP-SHOOTDOWN-001`.
+
+Cycle 139 changes no kernel mechanism or claim. Main-integration preflight
+found that PBTRUST1 and PKSMP3 readiness writers captured Windows CRLF working
+bytes before Git stored LF, making fresh-checkout bindings stale. Both writers
+now force LF and have byte-level regression tests; the complete affected
+trust-to-PooleBoot evidence chain was requalified in dependency order. The
+Cycle 138 kernel identity and bounded PKSMP3 results remain exact,
+`production_ready=false`, and `N9-SMP-SHOOTDOWN-001` remains the next
+owner-independent kernel move.

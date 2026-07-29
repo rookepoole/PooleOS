@@ -145,13 +145,13 @@
     },
     "boot_trust_contract": {
       "path": "specs/native-boot-trust-contract.json",
-      "sha256": "D2BF53D1704BEE7CDFCB7927A3B430E7D20942DF29BCC9786F1BD9AB095AF4DF",
+      "sha256": "F1D69594E22DBC9219D67A7DF5F1AD9BFCE64DABA032233ED75DC27DD6134EFC",
       "byte_count": 10829
     },
     "boot_trust_readiness": {
       "path": "runs/native_boot_trust_readiness.json",
-      "sha256": "06685C325A24A248D2F484726C36275F68284DCF334E55A7432EB20020D9D298",
-      "byte_count": 37689
+      "sha256": "0A4B53476DBE1A408FF1A4E787DFD4CC51F7F4F260948C19035943EC05DBEAF9",
+      "byte_count": 36618
     },
     "implementation_inputs": [
       {
@@ -546,7 +546,7 @@
       },
       {
         "path": "specs/native-boot-trust-contract.json",
-        "sha256": "D2BF53D1704BEE7CDFCB7927A3B430E7D20942DF29BCC9786F1BD9AB095AF4DF",
+        "sha256": "F1D69594E22DBC9219D67A7DF5F1AD9BFCE64DABA032233ED75DC27DD6134EFC",
         "byte_count": 10829
       },
       {
@@ -561,8 +561,8 @@
       },
       {
         "path": "runs/native_boot_trust_readiness.json",
-        "sha256": "06685C325A24A248D2F484726C36275F68284DCF334E55A7432EB20020D9D298",
-        "byte_count": 37689
+        "sha256": "0A4B53476DBE1A408FF1A4E787DFD4CC51F7F4F260948C19035943EC05DBEAF9",
+        "byte_count": 36618
       },
       {
         "path": "docs/native-initial-system-profile.md",
@@ -876,8 +876,8 @@
       },
       {
         "path": "tools/qualify_native_boot_trust.py",
-        "sha256": "AB2E152EA8A747D4C2C88FF8E36BDFB6F19A1F6EC9602D3940912CC9D218CC3A",
-        "byte_count": 58421
+        "sha256": "44C1B2E3B313FD2E21D042CAA8811AF2CA27088D51B1A0A7817F813B49AA05B5",
+        "byte_count": 58575
       },
       {
         "path": "tools/qualify_native_kernel_load.py",
@@ -941,8 +941,8 @@
       },
       {
         "path": "tests/test_native_boot_trust.py",
-        "sha256": "FC9F4464DE0CD2CA79050C604E5C52F1CC710592EF57219C824147E8986BC966",
-        "byte_count": 15996
+        "sha256": "F389F780CBA24EEFC3F9B78B77D7796910603B398764DD5F49046EAC2FB68C40",
+        "byte_count": 16467
       },
       {
         "path": "tests/test_native_initial_system.py",

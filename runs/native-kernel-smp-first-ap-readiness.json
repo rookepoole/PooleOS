@@ -943,10 +943,10 @@
         "production": 0
       },
       "stop": {
-        "checksum": 16343139455433951776,
+        "checksum": 3592680131024562616,
         "parked": true,
-        "tsc_online": 1967176080,
-        "tsc_stop": 1967376188
+        "tsc_online": 1967180133,
+        "tsc_stop": 1967380241
       },
       "topology": {
         "bsp_apic_id": 0,
@@ -1208,7 +1208,7 @@
           "state_writes": 0
         },
         "local_paths_recorded": false,
-        "marker_sha256": "3B9CF5E05FFB56EF51399D918BCFDC2A2B63A17F3FEDF8D61D01568E848F848E",
+        "marker_sha256": "B17D7AC1B078D0D2645F15FB26733EFBBF020499FF5D987C1A06ECCECD62D60B",
         "marker_summary": {
           "online": {
             "cr0": 3758161937,
@@ -1241,10 +1241,10 @@
             "production": 0
           },
           "stop": {
-            "checksum": 16343139455433951776,
+            "checksum": 3592680131024562616,
             "parked": true,
-            "tsc_online": 1967176080,
-            "tsc_stop": 1967376188
+            "tsc_online": 1967180133,
+            "tsc_stop": 1967380241
           },
           "topology": {
             "bsp_apic_id": 0,
@@ -1517,7 +1517,7 @@
           "POOLEOS:KERNEL:SMP-TABLES PASS contract=PKSMP1 pml4=0x0000000000002000 pdpt=0x0000000000003000 pd=0x0000000000004000 pt=0x0000000000005000 identity_pages=6 trampoline=rx stack=rw_nx per_cpu=rw_nx guards=absent high_alias=revocable",
           "POOLEOS:KERNEL:SMP-START PASS contract=PKSMP1 init_asserts=1 init_deasserts=1 sipis=2 delivery_timeouts=0 sequence=init_sipi_sipi",
           "POOLEOS:KERNEL:SMP-ONLINE PASS contract=PKSMP1 state=2 observed_apic_id=1 leaf1_ecx=0x0000000080002001 leaf1_edx=0x00000000178BFBFD cr0=0x00000000E0010011 cr3=0x0000000000002000 cr4=0x0000000000000020 efer=0x0000000000000D00 mode=x86_64 tsc_order=validated",
-          "POOLEOS:KERNEL:SMP-STOP PASS contract=PKSMP1 command=1 state=3 tsc_online=0x000000007540B990 tsc_stop=0x000000007543C73C checksum=0xE2CE7EBEBBCFCA20 final_init=1 parked=1 mailbox_validated=1",
+          "POOLEOS:KERNEL:SMP-STOP PASS contract=PKSMP1 command=1 state=3 tsc_online=0x000000007540C965 tsc_stop=0x000000007543D711 checksum=0x31DBC38B5952A9B8 final_init=1 parked=1 mailbox_validated=1",
           "POOLEOS:KERNEL:SMP-RELEASE PASS contract=PKSMP1 release_sequence=3 zeroed_bytes=57344 verified_bytes=57344 resources_released=14 mailbox_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged",
           "POOLEOS:KERNEL:SMP-RESULT PASS contract=PKSMP1 profile=qemu64_tier0_two_vcpu bsp=1 ap_started=1 ap_online=1 ap_quiesced=1 ap_parked=1 per_cpu=1 stack_pages=4 guards=4 rollback=host_verified ipi_service=0 shootdown=0 scheduler=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],
@@ -2507,7 +2507,7 @@
           "state_writes": 0
         },
         "local_paths_recorded": false,
-        "marker_sha256": "C8B86ECA57208A1226296729234DBE1853635105FCC8289940D8B49580FD5C30",
+        "marker_sha256": "5F8EB3BD9A01587EEC13B2300C7EB4BC879858B5F1C0F885CFB17A92C2663C9B",
         "marker_summary": {
           "online": {
             "cr0": 3758161937,
@@ -2540,10 +2540,10 @@
             "production": 0
           },
           "stop": {
-            "checksum": 16656502131332629316,
+            "checksum": 6113247177462057662,
             "parked": true,
-            "tsc_online": 1967175384,
-            "tsc_stop": 1967375492
+            "tsc_online": 1967180201,
+            "tsc_stop": 1967380299
           },
           "topology": {
             "bsp_apic_id": 0,
@@ -2816,7 +2816,7 @@
           "POOLEOS:KERNEL:SMP-TABLES PASS contract=PKSMP1 pml4=0x0000000000002000 pdpt=0x0000000000003000 pd=0x0000000000004000 pt=0x0000000000005000 identity_pages=6 trampoline=rx stack=rw_nx per_cpu=rw_nx guards=absent high_alias=revocable",
           "POOLEOS:KERNEL:SMP-START PASS contract=PKSMP1 init_asserts=1 init_deasserts=1 sipis=2 delivery_timeouts=0 sequence=init_sipi_sipi",
           "POOLEOS:KERNEL:SMP-ONLINE PASS contract=PKSMP1 state=2 observed_apic_id=1 leaf1_ecx=0x0000000080002001 leaf1_edx=0x00000000178BFBFD cr0=0x00000000E0010011 cr3=0x0000000000002000 cr4=0x0000000000000020 efer=0x0000000000000D00 mode=x86_64 tsc_order=validated",
-          "POOLEOS:KERNEL:SMP-STOP PASS contract=PKSMP1 command=1 state=3 tsc_online=0x000000007540B6D8 tsc_stop=0x000000007543C484 checksum=0xE727C870429E4344 final_init=1 parked=1 mailbox_validated=1",
+          "POOLEOS:KERNEL:SMP-STOP PASS contract=PKSMP1 command=1 state=3 tsc_online=0x000000007540C9A9 tsc_stop=0x000000007543D74B checksum=0x54D69DEB24C90ABE final_init=1 parked=1 mailbox_validated=1",
           "POOLEOS:KERNEL:SMP-RELEASE PASS contract=PKSMP1 release_sequence=3 zeroed_bytes=57344 verified_bytes=57344 resources_released=14 mailbox_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged",
           "POOLEOS:KERNEL:SMP-RESULT PASS contract=PKSMP1 profile=qemu64_tier0_two_vcpu bsp=1 ap_started=1 ap_online=1 ap_quiesced=1 ap_parked=1 per_cpu=1 stack_pages=4 guards=4 rollback=host_verified ipi_service=0 shootdown=0 scheduler=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],

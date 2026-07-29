@@ -7,7 +7,7 @@
     "contract": {
       "path": "specs/native-boot-trust-contract.json",
       "byte_count": 10829,
-      "sha256": "D2BF53D1704BEE7CDFCB7927A3B430E7D20942DF29BCC9786F1BD9AB095AF4DF"
+      "sha256": "F1D69594E22DBC9219D67A7DF5F1AD9BFCE64DABA032233ED75DC27DD6134EFC"
     },
     "toolchain_lock": {
       "path": "specs/native-toolchain-lock.json",
@@ -82,13 +82,13 @@
       },
       {
         "path": "tests/test_native_boot_trust.py",
-        "byte_count": 15996,
-        "sha256": "FC9F4464DE0CD2CA79050C604E5C52F1CC710592EF57219C824147E8986BC966"
+        "byte_count": 16467,
+        "sha256": "F389F780CBA24EEFC3F9B78B77D7796910603B398764DD5F49046EAC2FB68C40"
       },
       {
         "path": "tools/qualify_native_boot_trust.py",
-        "byte_count": 58421,
-        "sha256": "AB2E152EA8A747D4C2C88FF8E36BDFB6F19A1F6EC9602D3940912CC9D218CC3A"
+        "byte_count": 58575,
+        "sha256": "44C1B2E3B313FD2E21D042CAA8811AF2CA27088D51B1A0A7817F813B49AA05B5"
       },
       {
         "path": "docs/native-boot-trust.md",

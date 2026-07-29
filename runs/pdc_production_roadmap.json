@@ -43,7 +43,7 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 138,
+    "last_updated_cycle": 139,
     "selected_move_id": "N8-SMP-IPI-001",
     "immediate_next_move_id": "N0-HW-KEY-ACQUIRE-001",
     "owner_independent_next_move_id": "N9-SMP-SHOOTDOWN-001",
@@ -117,9 +117,9 @@
     "added_requirement_count": 47
   },
   "baseline": {
-    "pooleos_cycle": 138,
+    "pooleos_cycle": 139,
     "entry_cycle": 79,
-    "pooleos_test_count": 819,
+    "pooleos_test_count": 821,
     "historical_consistency_release_gate": {
       "passed_checks": 58,
       "total_checks": 58,
@@ -2832,8 +2832,8 @@
         "ADD-TEST-001"
       ],
       "current_evidence": [
-        "Cycle 138 host baseline: 819 tests with one Windows symlink-permission skip",
-        "native binary parser, reproduction, leakage, malformed, substitution, governance, hardware, Tier 0, bounded-model, deterministic boot-media, PBP1/PBC1/PSM1/PBART1, six inner-format, PBTRUST1/PBSTATE1, PKELF1, PKENTRY1, PKLOAD6/PBLIVE4/PKMAP2/PBEXIT1, PKREVAL1, PKXFER1, PKTRAP1, PKCPU1, PKERR1, PKXSTATE1, PKXEXC1, PKMSR1, PKPMM7/PKACPI1, PKVM1, PKVM3, PKIRQ1, PKSMP1, PKSMP2, and PKSMP3 policy/source/machine-code/zero-authority controls, PooleGlyph roadmap bindings, Doctor external-report nonmutation, and collector-smoke negatives"
+        "Cycle 139 host baseline: 821 tests with one Windows symlink-permission skip",
+        "native binary parser, reproduction, leakage, malformed, substitution, governance, hardware, Tier 0, bounded-model, deterministic boot-media, PBP1/PBC1/PSM1/PBART1, six inner-format, PBTRUST1/PBSTATE1, PKELF1, PKENTRY1, PKLOAD6/PBLIVE4/PKMAP2/PBEXIT1, PKREVAL1, PKXFER1, PKTRAP1, PKCPU1, PKERR1, PKXSTATE1, PKXEXC1, PKMSR1, PKPMM7/PKACPI1, PKVM1, PKVM3, PKIRQ1, PKSMP1, PKSMP2, and PKSMP3 policy/source/machine-code/zero-authority controls, canonical-LF readiness regression controls, PooleGlyph roadmap bindings, Doctor external-report nonmutation, and collector-smoke negatives"
       ],
       "current_gaps": [
         "No native system, power-loss, hardware, accessibility, soak, or external security suite exists"
@@ -2900,7 +2900,7 @@
         "ADD-SUPPLY-001"
       ],
       "current_evidence": [
-        "Cycle 138 consistency release gate: 97/97 checks over 92 artifacts",
+        "Cycle 139 consistency release gate: 97/97 checks over 92 artifacts",
         "content-addressed source, objectives and governance receipts, native toolchain, bounded hardware/Tier 0/model evidence, PBTRUST1/PBSTATE1, bounded PooleBoot, PBP1/PBC1/PSM1/PBART1 and six inner formats, PKELF1, PKENTRY1, PKLOAD6/PKMAP2/PBEXIT1, PKREVAL1, PKXFER1, PKTRAP1, PKCPU1, PKERR1, PKXSTATE1, PKXEXC1, PKMSR1, PKPMM7/PKACPI1, PKVM1, PKVM3, PKIRQ1, PKSMP1, PKSMP2, PKSMP3, PooleGlyph planning artifacts, and retained historical consistency artifacts"
       ],
       "current_gaps": [
@@ -6727,6 +6727,7 @@
     "The Cycle 136 N8-SMP-FIRST-AP-001 receipt adds selector-12 PKSMP1 after PKIRQ1. PooleKernel selects APIC ID 1 from the retained validated MADT, allocates fourteen contiguous pages below 1 MiB, builds a W^X identity hierarchy with four absent guard pages, and uses an RX 16-to-32-to-64-bit trampoline whose four GDT descriptors have their hardware-accessed bits pre-set. Two exact fresh-vars, two-vCPU qemu64 QEMU/OVMF runs each perform one INIT-SIPI-SIPI sequence, observe APIC ID 1 online in long mode with the required CR0/CR3/CR4/EFER and CPUID state, command stop, validate the dynamic mailbox checksum, observe quiescence, issue a final INIT park, revoke aliases, scrub and verify 57,344 bytes, and release all fourteen pages. Thirty-eight ordered markers, 72 hostile controls, and 111 kernel host tests pass. The exact kernel is 335,872 canonical bytes in a 376,832-byte, 92-page image with 855 relocations and SHA-256 6596CB332EB24813089F95A00AC979C892C47235943CB0E73E3979ED9901B725. A live triple-fault investigation found and fixed the RX-GDT accessed-bit write hazard. FLAG-N8-SMP-FIRST-AP-001 closes only this bounded lifecycle; general SMP, AP-local GDT/TSS/IDT/RSP0/IST/xstate/interrupt state, IPIs, shootdown, multi-AP and partial-start fault handling, target hardware, N8 exit, release, and production readiness remain open. N8-SMP-PERCPU-RUNTIME-001 is next.",
     "The Cycle 137 N8-SMP-PERCPU-RUNTIME-001 receipt adds selector-13 PKSMP2 after PKSMP1. In a frozen two-vCPU SandyBridge-minus-AVX TCG profile, one AP starts through the 16-to-32-to-64-bit trampoline, loads a processor-local GDT/TSS/IDT, guarded four-page RSP0 plus two-page IST1/IST2 stacks, x87/SSE owner state, and eight exception plus nineteen owned interrupt gates. The BSP verifies the hardware-busy TSS descriptor, all 27 gates, exact stack and xstate geometry, both FNV mailbox checksums, final INIT parking, and zero/readback release of all 32 pages or 131,072 bytes. Two exact 42-marker runs, 19 hostile-control categories covering 159 independently rejected cases, and 122 kernel host tests pass. The exact kernel is 409,600 canonical bytes in a 458,752-byte, 112-page image with 919 relocations and SHA-256 214F32214494E632063238337551C355BFED150B9B49846DB8A927584B8E47F0. FLAG-N8-SMP-PERCPU-RUNTIME-001 closes only this bounded one-AP runtime. General SMP, capability-gated IPI delivery, TLB shootdown, scheduler ownership, multi-AP and live partial-start fault injection, target hardware, N8 exit, release, and production readiness remain open. N8-SMP-IPI-001 is next.",
     "The Cycle 138 N8-SMP-IPI-001 receipt adds selector-14 PKSMP3 after PKSMP2. In the frozen two-vCPU SandyBridge-minus-AVX TCG profile, APIC ID 1 installs six fixed vectors and acknowledges six allowlisted operation classes behind a checksum-bound development capability. Two exact 39-marker runs observe six accepted and four denied deliveries, ten EOIs, one bounded offline-APIC timeout, panic latching, stop quiescence, final INIT parking, post-execution descriptor/xstate/APIC-table validation, capability and alias revocation, and exact scrub/release of all 32 pages or 131,072 bytes. Eighteen hostile-control categories cover 120 independently rejected cases and 130 kernel host tests pass. The exact kernel is 409,600 canonical bytes in a 458,752-byte, 112-page image with 959 relocations and SHA-256 6B8A9C2C3EAC559E1D9CB5965800A1671DB8F487F149861300D4EDCB279B3A11. FLAG-N8-SMP-IPI-001 closes only this bounded transport. The capability is a fixed development token; shootdown records transport only and performs zero TLB invalidations; call-function is one no-op token and exposes no arbitrary callback. Real generation-bound remote invalidation and deferred reclaim, scheduler ownership, multi-AP and live partial-start fault injection, I/O APIC/MSI, target hardware, N8/N9 exit, release, and production readiness remain open. N9-SMP-SHOOTDOWN-001 is next.",
+    "Cycle 139 repairs one cross-platform release-integrity defect without advancing a kernel claim: PBTRUST1 and PKSMP3 readiness writers now force canonical LF before dependent hashes are captured, focused byte-level tests reject CRLF, and the affected trust-to-PooleBoot chain is requalified in dependency order. Cycle 138 kernel identity and behavior remain exact; phase status, flags, gaps, and production_ready=false are unchanged. N9-SMP-SHOOTDOWN-001 remains next.",
     "Sixteen allowlisted user-mode CPUID records prove only a bounded host observation; they do not prove MSR access, privileged probes, native parsing, driver safety, or Tier 1 qualification.",
     "Owner-directed acceptance of thirty-eight objective definitions while binding zero measurements is not a cryptographic signature or implementation evidence.",
     "PooleGlyph Phase 65 proves a metadata, parser, AST, and diagnostic foundation only; no source form, Core IR, PGASM, PGB2, PGVM2, host call, policy, optimization, or version label is promoted without its own frozen contract and evidence gate.",

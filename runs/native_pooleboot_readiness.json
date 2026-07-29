@@ -4,12 +4,12 @@
     "boot_trust_contract": {
       "byte_count": 10829,
       "path": "specs/native-boot-trust-contract.json",
-      "sha256": "D2BF53D1704BEE7CDFCB7927A3B430E7D20942DF29BCC9786F1BD9AB095AF4DF"
+      "sha256": "F1D69594E22DBC9219D67A7DF5F1AD9BFCE64DABA032233ED75DC27DD6134EFC"
     },
     "boot_trust_readiness": {
-      "byte_count": 37689,
+      "byte_count": 36618,
       "path": "runs/native_boot_trust_readiness.json",
-      "sha256": "06685C325A24A248D2F484726C36275F68284DCF334E55A7432EB20020D9D298"
+      "sha256": "0A4B53476DBE1A408FF1A4E787DFD4CC51F7F4F260948C19035943EC05DBEAF9"
     },
     "contract": {
       "byte_count": 16908,
@@ -685,7 +685,7 @@
       {
         "byte_count": 10829,
         "path": "specs/native-boot-trust-contract.json",
-        "sha256": "D2BF53D1704BEE7CDFCB7927A3B430E7D20942DF29BCC9786F1BD9AB095AF4DF"
+        "sha256": "F1D69594E22DBC9219D67A7DF5F1AD9BFCE64DABA032233ED75DC27DD6134EFC"
       },
       {
         "byte_count": 4977,
@@ -698,9 +698,9 @@
         "sha256": "2630B1C7D0E4FA556A12AAF4661A7F8A42650F030502E679A6BFA3CB19B71278"
       },
       {
-        "byte_count": 37689,
+        "byte_count": 36618,
         "path": "runs/native_boot_trust_readiness.json",
-        "sha256": "06685C325A24A248D2F484726C36275F68284DCF334E55A7432EB20020D9D298"
+        "sha256": "0A4B53476DBE1A408FF1A4E787DFD4CC51F7F4F260948C19035943EC05DBEAF9"
       },
       {
         "byte_count": 16908,
@@ -868,9 +868,9 @@
         "sha256": "D6EFD20411001ADF59C6722784D579A94C2D725745B0C9DE7A7EFE8A25DB84CB"
       },
       {
-        "byte_count": 58421,
+        "byte_count": 58575,
         "path": "tools/qualify_native_boot_trust.py",
-        "sha256": "AB2E152EA8A747D4C2C88FF8E36BDFB6F19A1F6EC9602D3940912CC9D218CC3A"
+        "sha256": "44C1B2E3B313FD2E21D042CAA8811AF2CA27088D51B1A0A7817F813B49AA05B5"
       },
       {
         "byte_count": 26041,
@@ -908,9 +908,9 @@
         "sha256": "1C974EE8B1B116BDA4F201BD115F219B44EB170D3E2917BDA591AD0B1857EF68"
       },
       {
-        "byte_count": 15996,
+        "byte_count": 16467,
         "path": "tests/test_native_boot_trust.py",
-        "sha256": "FC9F4464DE0CD2CA79050C604E5C52F1CC710592EF57219C824147E8986BC966"
+        "sha256": "F389F780CBA24EEFC3F9B78B77D7796910603B398764DD5F49046EAC2FB68C40"
       }
     ],
     "initial_system_contract": {
@@ -936,7 +936,7 @@
     "kernel_load_readiness": {
       "byte_count": 189517,
       "path": "runs/native_kernel_load_readiness.json",
-      "sha256": "F2BD0B91309C4F1AB7DE98F09E97863D269636AF64277651D30359B3112D0BD2"
+      "sha256": "582677FC743E9C14C01441D7B84CDCCE8A7CC82F179BAB72E5651D864C866A51"
     },
     "microcode_contract": {
       "byte_count": 5083,
