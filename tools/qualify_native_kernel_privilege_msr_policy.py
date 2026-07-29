@@ -241,7 +241,7 @@ def _linked_machine_audit(toolchain_root: Path, temporary_root: Path) -> tuple[d
     audited_mnemonics = ("rdmsr", "wrmsr", "rdpmc", "syscall", "sysret", "swapgs")
     counts = {mnemonic: mnemonics.count(mnemonic) for mnemonic in audited_mnemonics}
     expected_counts = {
-        "rdmsr": 21,
+        "rdmsr": 22,
         "wrmsr": 2,
         "rdpmc": 0,
         "syscall": 0,
@@ -286,7 +286,8 @@ def _linked_machine_audit(toolchain_root: Path, temporary_root: Path) -> tuple[d
         "pkmsr1_runtime_msr_write_count": 0,
         "pkirq1_linked_wrmsr_count": 2,
         "pksmp1_linked_rdmsr_count": 1,
-        "result": "pass_linked_privileged_instruction_scope_with_pkirq1_and_pksmp1_isolation",
+        "pksmp2_linked_rdmsr_count": 1,
+        "result": "pass_linked_privileged_instruction_scope_with_pkirq1_pksmp1_and_pksmp2_isolation",
     }
     return audit, tool
 

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-kernel-smp-percpu-runtime-contract.schema.json",
+  "title": "PooleOS PKSMP2 contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "contract_id", "selected_move_id", "status_date", "status", "production_ready", "production_promotion_allowed", "phase_mapping", "source_requirement_ids", "profile", "topology", "resource_geometry", "processor_local_runtime", "mailbox", "shutdown_and_cleanup", "qualification", "required_negative_controls", "claims", "non_claims", "official_references"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_smp_percpu_runtime_contract"},
+    "contract_id": {"const": "PKSMP2"},
+    "selected_move_id": {"const": "N8-SMP-PERCPU-RUNTIME-001"},
+    "status_date": {"const": "2026-07-28"},
+    "status": {"const": "bounded_ap_local_runtime_sandybridge_two_vcpu_non_promoting"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "phase_mapping": {"const": ["N8.1", "N8.2", "N8.3", "N8.5"]},
+    "source_requirement_ids": {"type": "array", "minItems": 5, "uniqueItems": true},
+    "profile": {"type": "object", "required": ["feature", "selector", "cpu_model", "acceleration", "virtual_cpu_count", "application_processor_count", "emulator_only"], "properties": {"feature": {"const": "development-smp-percpu-runtime"}, "selector": {"const": 13}, "cpu_model": {"const": "SandyBridge,-avx"}, "acceleration": {"const": "tcg_multi_thread"}, "virtual_cpu_count": {"const": 2}, "application_processor_count": {"const": 1}, "emulator_only": {"const": true}}},
+    "topology": {"type": "object"},
+    "resource_geometry": {"type": "object", "required": ["page_count", "guard_page_count", "mapped_page_count", "reserved_absent_offset"], "properties": {"page_count": {"const": 32}, "guard_page_count": {"const": 14}, "mapped_page_count": {"const": 13}, "reserved_absent_offset": {"const": 31}}},
+    "processor_local_runtime": {"type": "object", "required": ["installed_gate_count", "tss_busy_bit_verified_after_ltr", "xstate_policy"], "properties": {"installed_gate_count": {"const": 27}, "tss_busy_bit_verified_after_ltr": {"const": true}, "xstate_policy": {"const": "eager x87/SSE XSAVE/XRSTOR"}}},
+    "mailbox": {"type": "object"},
+    "shutdown_and_cleanup": {"type": "object", "required": ["resource_pages_released", "verified_bytes"], "properties": {"resource_pages_released": {"const": 32}, "verified_bytes": {"const": 131072}}},
+    "qualification": {"type": "object", "required": ["qemu_run_count", "negative_control_count", "hostile_case_count"], "properties": {"qemu_run_count": {"const": 2}, "negative_control_count": {"const": 19}, "hostile_case_count": {"const": 159}}},
+    "required_negative_controls": {"type": "array", "minItems": 19, "maxItems": 19, "uniqueItems": true, "items": {"type": "string"}},
+    "claims": {"type": "object", "required": ["flag_n8_smp_percpu_runtime_001_closed", "ap_local_gdt_tss_idt_loaded", "general_smp_implemented", "n8_exit_gate_satisfied", "production_ready"], "properties": {"flag_n8_smp_percpu_runtime_001_closed": {"const": true}, "ap_local_gdt_tss_idt_loaded": {"const": true}, "general_smp_implemented": {"const": false}, "n8_exit_gate_satisfied": {"const": false}, "production_ready": {"const": false}}},
+    "non_claims": {"type": "array", "minItems": 7, "items": {"type": "string"}},
+    "official_references": {"type": "array", "minItems": 3, "items": {"type": "string", "format": "uri"}}
+  }
+}

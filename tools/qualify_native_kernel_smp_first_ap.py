@@ -114,6 +114,20 @@ def _source_audit() -> dict[str, Any]:
     return result
 
 
+def _mutate_pksmp1_gdt_descriptor(arch_text: str) -> str:
+    prefix, separator, remainder = arch_text.partition("poole_ap_trampoline_gdt:")
+    if not separator:
+        raise QualificationError("PKSMP1 AP GDT block is missing")
+    gdt_block, end_separator, suffix = remainder.partition(".Lpoole_ap_gdt_end:")
+    if not end_separator:
+        raise QualificationError("PKSMP1 AP GDT block end is missing")
+    original = "0x00cf9b000000ffff"
+    mutated = "0x00cf9a000000ffff"
+    if gdt_block.count(original) != 1:
+        raise QualificationError("PKSMP1 AP code descriptor is not unique in its GDT block")
+    return prefix + separator + gdt_block.replace(original, mutated, 1) + end_separator + suffix
+
+
 def _negative_controls(markers: list[str]) -> list[dict[str, str]]:
     observation = smp_first_ap.validate_markers(markers)
     controls: list[dict[str, str]] = []
@@ -205,7 +219,7 @@ def _negative_controls(markers: list[str]) -> list[dict[str, str]]:
     controls.append(
         _require_rejection(
             smp_first_ap.NEGATIVE_CONTROL_IDS[69],
-            lambda: _audit_source_text(arch.replace("0x00cf9b000000ffff", "0x00cf9a000000ffff", 1), main, smp),
+            lambda: _audit_source_text(_mutate_pksmp1_gdt_descriptor(arch), main, smp),
         )
     )
     processors = [

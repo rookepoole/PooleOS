@@ -112,7 +112,8 @@ generation-owned growing ledgers, and a retained validated required-table
 snapshot. Cycle 134 upgrades selector 10 to PKVM3, deriving an exact sparse
 direct map from the PMM ownership manifest and proving transactional activation,
 rollback, local invalidation receipts, and one-BSP generation retirement. The
-Cycle 135 adds PKIRQ1 without changing the nine-file verifier boundary. The
-next owner-independent move is `N8-SMP-FIRST-AP-001`; target, scheduler, remote SMP
+Cycle 135 adds PKIRQ1, Cycle 136 adds PKSMP1, and Cycle 137 adds PKSMP2 without
+changing the nine-file verifier boundary. The next owner-independent move is
+`N8-SMP-IPI-001`; target, scheduler, remote SMP
 shootdown, userspace, heap, pager, concurrent reclaim, and production promotion
 remain open.

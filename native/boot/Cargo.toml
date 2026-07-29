@@ -20,6 +20,7 @@ development-virtual-memory = ["development-transfer"]
 development-active-virtual-memory = ["development-transfer"]
 development-interrupt-time = ["development-transfer"]
 development-smp-first-ap = ["development-transfer"]
+development-smp-percpu-runtime = ["development-transfer"]
 
 [lib]
 name = "pooleboot"

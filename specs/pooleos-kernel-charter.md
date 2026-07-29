@@ -171,3 +171,22 @@ This closes only `FLAG-N8-SMP-FIRST-AP-001`; `FLAG-N8-IRQ-001` remains open.
 AP-local descriptor, stack, xstate, and interrupt ownership, multi-AP startup,
 IPIs, shootdown, target hardware, N8 exit, release, and production remain
 open. The next owner-independent move is `N8-SMP-PERCPU-RUNTIME-001`.
+
+Cycle 137 supersedes the current-image and next-move values above. PKSMP2 adds
+one bounded processor-local AP runtime on the frozen two-vCPU
+`SandyBridge,-avx` TCG profile: one AP-owned GDT/TSS/IDT, guarded RSP0/IST1/IST2
+stacks, x87/SSE owner state, eight exception gates, and nineteen owned
+interrupt gates. The 32-page below-1-MiB transaction leaves fourteen guards
+and one reserved page absent; the BSP verifies the hardware-busy TSS
+descriptor, all 27 gates, one XSAVE/XRSTOR round trip, quiescence, final-INIT
+parking, alias revocation, and exact zero/readback release of all 131,072
+bytes. One hundred twenty-two kernel host tests, two exact 42-marker runs, and
+19 hostile-control categories covering 159 independently rejected cases pass.
+The current kernel is 409,600 canonical bytes in a 458,752-byte, 112-page
+image with 919 relocations and SHA-256
+`214F32214494E632063238337551C355BFED150B9B49846DB8A927584B8E47F0`.
+This closes only `FLAG-N8-SMP-PERCPU-RUNTIME-001`; `FLAG-N8-IRQ-001` remains
+open. Capability-gated IPI delivery and acknowledgement, TLB shootdown,
+scheduler CPU ownership, multi-AP startup, target hardware, N8 exit, release,
+and production remain open. The next owner-independent move is
+`N8-SMP-IPI-001`.

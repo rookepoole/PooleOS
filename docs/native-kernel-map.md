@@ -24,25 +24,25 @@ ranges must be aligned, nonoverlapping, complete, and W^X-safe.
 Retained physical ranges must also be aligned, nonzero, representable, and
 pairwise disjoint:
 
-- the current 89-page PooleKernel allocation;
+- the current 112-page PooleKernel allocation;
 - four private page-table pages;
 - 32 writable, non-executable stack pages;
 - 256 handoff pages, covering one MiB.
 
-The virtual layout reserves page-table index 89 as the low guard, indices
-90-121 for the stack, index 122 as the high guard, and index 123 onward for the
+The virtual layout reserves page-table index 112 as the low guard, indices
+113-144 for the stack, index 145 as the high guard, and index 146 onward for the
 handoff. Both guards remain non-present. The handoff range begins after the
 fixed boundary and is supervisor read-only and NX. `ADD-MEM-001` requires boot,
 entry, trap, and PMM consumers to derive these bounds from one contract.
 The bootstrap temporary alias is derived as the first leaf after the complete
-handoff range, currently index 379, so retained-layout growth cannot silently
+handoff range, currently index 402, so retained-layout growth cannot silently
 occupy the scrub and page-table transaction slot.
-PKPMM7 retains index 380 as the stable-manager low guard, indices 381-385 for
-its five-page supervisor RW/NX manager, and index 386 as its high guard. It
-also reserves guarded 32-page ledger windows at indices 387-420 and 421-454.
+PKPMM7 retains index 403 as the stable-manager low guard, indices 404-408 for
+its five-page supervisor RW/NX manager, and index 409 as its high guard. It
+also reserves guarded 32-page ledger windows at indices 410-443 and 444-477.
 All of these leaves are absent in the PKMAP2 construction receipt. Selector 8
 installs only the manager plus the pages owned by one active ledger generation.
-PKIRQ1 reserves indices 455-459 as low guard, local APIC, middle guard, HPET,
+PKIRQ1 reserves indices 478-482 as low guard, local APIC, middle guard, HPET,
 and high guard. PKMAP2 leaves all five absent; selector 11 may install only the
 two supervisor RW/NX PWT/PCD device leaves and must revoke them before halt.
 
