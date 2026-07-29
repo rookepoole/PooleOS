@@ -22,6 +22,7 @@ pub mod physical_memory;
 pub mod privilege_msr;
 pub mod revalidation;
 pub mod smp;
+pub mod smp_ipi;
 pub mod smp_runtime;
 pub mod virtual_memory;
 pub mod xstate;
@@ -38,10 +39,18 @@ pub const VIRTUAL_MEMORY_CONTRACT_ID: &str = virtual_memory::CONTRACT_ID;
 pub const XSTATE_EXCEPTION_CONTRACT_ID: &str = "PKXEXC1";
 #[used]
 #[unsafe(link_section = ".text.pkbuild_literal")]
-static BUILD_ID_BYTES: [u8; 45] = *b"PKBUILD1-CYCLE137-N8-SMP-RUNTIME-V001-0010000";
+static BUILD_ID_BYTES: [u8; 45] = *b"PKBUILD1-CYCLE138-N8-SMP-IPI-V001-00100000000";
 pub const BUILD_ID: &[u8] = &BUILD_ID_BYTES;
 pub const ENTRY_OFFSET: u64 = 0x9000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
+
+#[used]
+#[unsafe(link_section = ".text.pklogger_literals")]
+static HEX_DIGITS: [u8; 16] = *b"0123456789ABCDEF";
+
+#[used]
+#[unsafe(link_section = ".text.pklogger_literals")]
+static HEX_PREFIX: [u8; 2] = *b"0x";
 pub const HANDOFF_MAGIC_U64: u64 = u64::from_le_bytes(poole_handoff::MAGIC);
 pub const KERNEL_CODE_SELECTOR: u16 = 0x08;
 pub const KERNEL_DATA_SELECTOR: u16 = 0x10;
@@ -82,6 +91,7 @@ pub enum PanicCode {
     InterruptTime = 0x1013,
     SmpFirstAp = 0x1014,
     SmpPerCpuRuntime = 0x1015,
+    SmpIpi = 0x1016,
     UnexpectedReturn = 0x10ff,
 }
 
@@ -102,6 +112,7 @@ pub enum DevelopmentTrapScenario {
     InterruptTime = 11,
     SmpFirstAp = 12,
     SmpPerCpuRuntime = 13,
+    SmpIpi = 14,
 }
 
 macro_rules! scenario_label {
@@ -126,6 +137,7 @@ scenario_label!(SCENARIO_ACTIVE_VIRTUAL_MEMORY, b"active_virtual_memory");
 scenario_label!(SCENARIO_INTERRUPT_TIME, b"interrupt_time");
 scenario_label!(SCENARIO_SMP_FIRST_AP, b"smp_first_ap");
 scenario_label!(SCENARIO_SMP_PERCPU_RUNTIME, b"smp_percpu_runtime");
+scenario_label!(SCENARIO_SMP_IPI, b"smp_ipi");
 
 const fn scenario_label_text(bytes: &'static [u8]) -> &'static str {
     // SAFETY: every caller supplies an ASCII byte string declared immediately above.
@@ -149,6 +161,7 @@ impl DevelopmentTrapScenario {
             11 => Some(Self::InterruptTime),
             12 => Some(Self::SmpFirstAp),
             13 => Some(Self::SmpPerCpuRuntime),
+            14 => Some(Self::SmpIpi),
             _ => None,
         }
     }
@@ -169,6 +182,7 @@ impl DevelopmentTrapScenario {
             Self::InterruptTime => scenario_label_text(&SCENARIO_INTERRUPT_TIME),
             Self::SmpFirstAp => scenario_label_text(&SCENARIO_SMP_FIRST_AP),
             Self::SmpPerCpuRuntime => scenario_label_text(&SCENARIO_SMP_PERCPU_RUNTIME),
+            Self::SmpIpi => scenario_label_text(&SCENARIO_SMP_IPI),
         }
     }
 }
@@ -1112,19 +1126,17 @@ impl<S: ByteSink> EarlyLogger<S> {
     }
 
     pub fn write_hex_u64(&mut self, value: u64) {
-        const HEX: &[u8; 16] = b"0123456789ABCDEF";
-        self.write_str("0x");
+        self.write_bytes(&HEX_PREFIX);
         for shift in (0..16).rev() {
             self.sink
-                .write_byte(HEX[((value >> (shift * 4)) & 0xf) as usize]);
+                .write_byte(HEX_DIGITS[((value >> (shift * 4)) & 0xf) as usize]);
         }
     }
 
     pub fn write_hex_bytes(&mut self, bytes: &[u8]) {
-        const HEX: &[u8; 16] = b"0123456789ABCDEF";
         for byte in bytes {
-            self.sink.write_byte(HEX[(byte >> 4) as usize]);
-            self.sink.write_byte(HEX[(byte & 0x0f) as usize]);
+            self.sink.write_byte(HEX_DIGITS[(byte >> 4) as usize]);
+            self.sink.write_byte(HEX_DIGITS[(byte & 0x0f) as usize]);
         }
     }
 
@@ -1726,7 +1738,11 @@ mod tests {
             DevelopmentTrapScenario::from_selector(13),
             Some(DevelopmentTrapScenario::SmpPerCpuRuntime)
         );
-        assert_eq!(DevelopmentTrapScenario::from_selector(14), None);
+        assert_eq!(
+            DevelopmentTrapScenario::from_selector(14),
+            Some(DevelopmentTrapScenario::SmpIpi)
+        );
+        assert_eq!(DevelopmentTrapScenario::from_selector(15), None);
     }
 
     #[test]

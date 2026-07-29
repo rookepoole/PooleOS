@@ -156,7 +156,7 @@ def _source_audit(source: str | None = None) -> dict[str, Any]:
             f"PKXEXC1 source restriction audit failed: {hits + vector_outside_hits}"
         )
     shared_wrmsr_count = parent.count("wrmsr") + outside.count("wrmsr")
-    if shared_wrmsr_count != 3:
+    if shared_wrmsr_count != 4:
         raise QualificationError(
             f"PKXEXC1 shared-source WRMSR scope changed: {shared_wrmsr_count}"
         )
@@ -168,7 +168,7 @@ def _source_audit(source: str | None = None) -> dict[str, Any]:
         "forbidden_tokens": list(forbidden),
         "forbidden_token_hits": [],
         "profile_source_wrmsr_site_count": 0,
-        "shared_source_wrmsr_sites_outside_profile": 3,
+        "shared_source_wrmsr_sites_outside_profile": 4,
         "vector_occurrences_outside_allowlisted_source_scopes": 0,
         "exception_vector_token_counts": exception_vector_tokens,
         "result": "pass_bounded_source_instruction_audit",

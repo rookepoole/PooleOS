@@ -1,13 +1,40 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-07-28
+Status date: 2026-07-29
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 137
+Last roadmap reconciliation: PooleOS Cycle 138
+
+Cycle 138 reconciliation (superseding the historical Cycle 137 paragraph
+below): governance and external-key state are unchanged. The selected
+`hardware_fido2_ed25519_sk` device remains physically unavailable;
+`N0-HW-KEY-ACQUIRE-001` remains the blocked external move; and no key,
+signature, privileged-hardware, firmware, physical-media, publication,
+release, or production-promotion action occurred. The owner-independent
+`N8-SMP-IPI-001` move closes only its bounded PKSMP3 development transport.
+On the frozen two-vCPU `SandyBridge,-avx` TCG profile, APIC ID 1 installs six
+fixed vectors and acknowledges six allowlisted operation classes behind a
+checksum-bound development capability. Two exact 39-marker runs observe six
+accepted and four denied deliveries, ten EOIs, one bounded offline-APIC
+timeout, panic latching, stop quiescence, final-INIT parking, post-execution
+descriptor/xstate/APIC-table validation, capability and alias revocation, and
+exact scrub/release of all 32 pages or 131,072 bytes. Eighteen hostile-control
+categories cover 120 independently rejected cases and 130 kernel host tests
+pass. The exact kernel is 409,600 canonical bytes in a 458,752-byte, 112-page
+image with 959 relocations and SHA-256
+`6B8A9C2C3EAC559E1D9CB5965800A1671DB8F487F149861300D4EDCB279B3A11`.
+N8.6 is partial only. The capability is a fixed development token; the
+shootdown operation records transport but performs zero TLB invalidations,
+and call-function exposes no arbitrary callback. Real generation-bound remote
+invalidation and deferred reclaim, production capability authority, scheduler
+CPU ownership, multi-AP and live partial-start fault injection, target
+hardware, N8/N9 exit, release, and production remain open. The next
+owner-independent move is `N9-SMP-SHOOTDOWN-001`; PooleGlyph Phase 66 may
+proceed in parallel without outranking N0-N9.
 
 Cycle 137 reconciliation (superseding the historical Cycle 136 paragraph
 below): governance and external-key state are unchanged. The selected

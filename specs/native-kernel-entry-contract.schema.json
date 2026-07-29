@@ -56,7 +56,7 @@
         "canonical_file_bytes": {"const": 409600},
         "maximum_linked_file_bytes": {"const": 8388608},
         "maximum_relocations": {"const": 4096},
-        "build_id": {"const": "PKBUILD1-CYCLE137-N8-SMP-RUNTIME-V001-0010000"},
+        "build_id": {"const": "PKBUILD1-CYCLE138-N8-SMP-IPI-V001-00100000000"},
         "segment_boundaries": {
           "type": "object",
           "additionalProperties": false,

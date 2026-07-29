@@ -18,6 +18,7 @@ use poolekernel::{
         READ_STAR, READ_TSC_AUX,
     },
     smp::{self, ResourceLayout},
+    smp_ipi::{self, HandlerLayout as IpiHandlerLayout},
     smp_runtime::{self, ResourceLayout as RuntimeResourceLayout},
     xstate::{
         AREA_BYTES, INITIAL_FCW, INITIAL_MXCSR, KernelSimdPolicy, SELECTED_XCR0, SaveFormat,
@@ -1884,6 +1885,715 @@ fn ap_runtime_trampoline_offsets(start: *const u8) -> Option<ApRuntimeTrampoline
 
 core::arch::global_asm!(
     r#"
+    .section .text.poole_ap_ipi_trampoline,"ax",@progbits
+    .balign 16
+    .global poole_ap_ipi_trampoline_start
+    .global poole_ap_ipi_trampoline_end
+    .global poole_ap_ipi_trampoline_protected_entry
+    .global poole_ap_ipi_trampoline_long_entry
+    .global poole_ap_ipi_trampoline_fault
+    .global poole_ap_ipi_reschedule
+    .global poole_ap_ipi_shootdown
+    .global poole_ap_ipi_call_function
+    .global poole_ap_ipi_diagnostic
+    .global poole_ap_ipi_panic
+    .global poole_ap_ipi_stop
+    .global poole_ap_ipi_apic_error
+    .global poole_ap_ipi_spurious
+    .global poole_ap_ipi_trampoline_gdt
+    .global poole_ap_ipi_patch_protected_offset
+    .global poole_ap_ipi_patch_long_offset
+    .global poole_ap_ipi_patch_gdt_base
+    .global poole_ap_ipi_patch_cr3
+    .global poole_ap_ipi_patch_stack_top
+    .global poole_ap_ipi_patch_mailbox
+    .global poole_ap_ipi_patch_gdtr_base
+    .global poole_ap_ipi_patch_idtr_base
+    .global poole_ap_ipi_patch_xstate
+
+    .set poole_ap_ipi_gdt_pointer_offset, .Lpoole_ap_ipi_gdt_pointer - poole_ap_ipi_trampoline_start
+    .set poole_ap_ipi_config_cr3_offset, .Lpoole_ap_ipi_config_cr3 - poole_ap_ipi_trampoline_start
+    .set poole_ap_ipi_config_stack_top_offset, .Lpoole_ap_ipi_config_stack_top - poole_ap_ipi_trampoline_start
+    .set poole_ap_ipi_config_mailbox_offset, .Lpoole_ap_ipi_config_mailbox - poole_ap_ipi_trampoline_start
+    .set poole_ap_ipi_config_gdtr_offset, .Lpoole_ap_ipi_config_gdtr - poole_ap_ipi_trampoline_start
+    .set poole_ap_ipi_config_idtr_offset, .Lpoole_ap_ipi_config_idtr - poole_ap_ipi_trampoline_start
+    .set poole_ap_ipi_config_xstate_offset, .Lpoole_ap_ipi_config_xstate - poole_ap_ipi_trampoline_start
+
+poole_ap_ipi_trampoline_start:
+    .code16
+    cli
+    cld
+    xor eax, eax
+    mov ax, cs
+    shl eax, 4
+    mov esi, eax
+    .byte 0xbb
+    .word poole_ap_ipi_gdt_pointer_offset
+    lgdt cs:[bx]
+    mov eax, cr0
+    or eax, 1
+    mov cr0, eax
+    .byte 0x66, 0xea
+poole_ap_ipi_patch_protected_offset:
+    .long 0
+    .word 0x0008
+
+    .code32
+poole_ap_ipi_trampoline_protected_entry:
+    mov ax, 0x0010
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    mov eax, cr4
+    or eax, 0x20
+    mov cr4, eax
+    mov eax, dword ptr [esi + poole_ap_ipi_config_cr3_offset]
+    mov cr3, eax
+    mov ecx, 0xc0000080
+    rdmsr
+    or eax, 0x00000900
+    wrmsr
+    mov eax, cr0
+    or eax, 0x80010001
+    mov cr0, eax
+    .byte 0xea
+poole_ap_ipi_patch_long_offset:
+    .long 0
+    .word 0x0018
+
+    .code64
+poole_ap_ipi_trampoline_long_entry:
+    mov ax, 0x0020
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    mov esi, esi
+    mov rsp, qword ptr [rsi + poole_ap_ipi_config_stack_top_offset]
+    xor rbp, rbp
+    mov rdi, qword ptr [rsi + poole_ap_ipi_config_mailbox_offset]
+    lgdt [rsi + poole_ap_ipi_config_gdtr_offset]
+    push 0x0008
+    lea rax, [rip + .Lpoole_ap_ipi_gdt_live]
+    push rax
+    retfq
+.Lpoole_ap_ipi_gdt_live:
+    mov ax, 0x0010
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    xor eax, eax
+    mov fs, ax
+    mov gs, ax
+    mov ax, 0x0018
+    ltr ax
+    lidt [rsi + poole_ap_ipi_config_idtr_offset]
+    mov dword ptr [rdi + 108], 2
+
+    mov rax, cr0
+    or rax, 0x22
+    and rax, -13
+    mov cr0, rax
+    mov rax, cr4
+    or rax, 0x00040620
+    mov cr4, rax
+    xor ecx, ecx
+    mov eax, 3
+    xor edx, edx
+    xsetbv
+    fninit
+    fldcw word ptr [rip + .Lpoole_ap_ipi_initial_fcw]
+    ldmxcsr dword ptr [rip + .Lpoole_ap_ipi_initial_mxcsr]
+    mov rbx, qword ptr [rsi + poole_ap_ipi_config_xstate_offset]
+    mov eax, 3
+    xor edx, edx
+    xsave64 [rbx]
+    mov dword ptr [rdi + 108], 3
+
+    mov eax, 1
+    cpuid
+    mov r8d, ebx
+    shr r8d, 24
+    mov dword ptr [rdi + 28], r8d
+    mov dword ptr [rdi + 32], ecx
+    mov dword ptr [rdi + 36], edx
+    mov eax, 0x0d
+    xor ecx, ecx
+    cpuid
+    mov dword ptr [rdi + 296], eax
+    mov dword ptr [rdi + 300], 0
+    mov dword ptr [rdi + 304], ebx
+    mov dword ptr [rdi + 308], ecx
+
+    mov rax, cr0
+    mov qword ptr [rdi + 40], rax
+    mov rax, cr3
+    mov qword ptr [rdi + 48], rax
+    mov rax, cr4
+    mov qword ptr [rdi + 56], rax
+    mov ecx, 0xc0000080
+    rdmsr
+    shl rdx, 32
+    or rax, rdx
+    mov qword ptr [rdi + 64], rax
+    xor ecx, ecx
+    xgetbv
+    shl rdx, 32
+    or rax, rdx
+    mov qword ptr [rdi + 216], rax
+
+    sgdt [rdi + 320]
+    movzx eax, word ptr [rdi + 320]
+    mov dword ptr [rdi + 240], eax
+    mov rax, qword ptr [rdi + 322]
+    mov qword ptr [rdi + 192], rax
+    sidt [rdi + 336]
+    movzx eax, word ptr [rdi + 336]
+    mov dword ptr [rdi + 244], eax
+    mov rax, qword ptr [rdi + 338]
+    mov qword ptr [rdi + 200], rax
+    str ax
+    movzx eax, ax
+    mov dword ptr [rdi + 248], eax
+    mov ax, cs
+    movzx eax, ax
+    mov dword ptr [rdi + 252], eax
+    mov ax, ss
+    movzx eax, ax
+    mov dword ptr [rdi + 256], eax
+    mov qword ptr [rdi + 208], rsp
+    fnstcw word ptr [rdi + 272]
+    stmxcsr dword ptr [rdi + 276]
+    mov rbx, qword ptr [rsi + poole_ap_ipi_config_xstate_offset]
+    mov rax, qword ptr [rbx + 512]
+    mov qword ptr [rdi + 224], rax
+
+    mov rbx, {apic_physical}
+    mov eax, dword ptr [rbx + {apic_spurious_offset}]
+    and eax, 0xffffff00
+    or eax, 0x000001ff
+    mov dword ptr [rbx + {apic_spurious_offset}], eax
+    mov rax, qword ptr [rdi + {ipi_magic_offset}]
+    mov rbx, {ipi_magic}
+    cmp rax, rbx
+    jne poole_ap_ipi_trampoline_fault
+    cmp dword ptr [rdi + {ipi_version_offset}], {ipi_version}
+    jne poole_ap_ipi_trampoline_fault
+
+    lfence
+    rdtsc
+    shl rdx, 32
+    or rax, rdx
+    mov qword ptr [rdi + 72], rax
+    mov dword ptr [rdi + 108], 4
+    mov dword ptr [rdi + {ipi_service_offset}], {service_online}
+    mfence
+    mov dword ptr [rdi + 12], 2
+    sti
+    pushfq
+    pop rax
+    mov qword ptr [rdi + 232], rax
+    mov dword ptr [rdi + 268], 1
+.Lpoole_ap_ipi_wait:
+    hlt
+    jmp .Lpoole_ap_ipi_wait
+
+poole_ap_ipi_reschedule:
+    push rax
+    mov eax, 1
+    jmp .Lpoole_ap_ipi_common
+poole_ap_ipi_shootdown:
+    push rax
+    mov eax, 2
+    jmp .Lpoole_ap_ipi_common
+poole_ap_ipi_call_function:
+    push rax
+    mov eax, 3
+    jmp .Lpoole_ap_ipi_common
+poole_ap_ipi_diagnostic:
+    push rax
+    mov eax, 4
+    jmp .Lpoole_ap_ipi_common
+poole_ap_ipi_panic:
+    push rax
+    mov eax, 5
+    jmp .Lpoole_ap_ipi_common
+poole_ap_ipi_stop:
+    push rax
+    mov eax, 6
+
+.Lpoole_ap_ipi_common:
+    push rbx
+    push rcx
+    push rdx
+    push rsi
+    push rdi
+    push r8
+    push r9
+    push r10
+    push r11
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r15d, eax
+    mov rdi, qword ptr [rip + .Lpoole_ap_ipi_config_mailbox]
+    inc dword ptr [rdi + {delivery_offset}]
+    xor r14d, r14d
+
+    cmp dword ptr [rdi + {request_status_offset}], {request_armed}
+    jne .Lpoole_ap_ipi_deny_state
+    mov rax, qword ptr [rdi + {request_cap_high_offset}]
+    mov rbx, {capability_high}
+    cmp rax, rbx
+    jne .Lpoole_ap_ipi_deny_capability
+    mov rax, qword ptr [rdi + {request_cap_low_offset}]
+    mov rbx, {capability_low}
+    cmp rax, rbx
+    jne .Lpoole_ap_ipi_deny_capability
+    mov rax, qword ptr [rdi + {request_attempt_offset}]
+    mov rbx, qword ptr [rdi + {ack_attempt_offset}]
+    inc rbx
+    cmp rax, rbx
+    jne .Lpoole_ap_ipi_deny_attempt
+    cmp dword ptr [rdi + {request_operation_offset}], r15d
+    jne .Lpoole_ap_ipi_deny_operation
+    lea ebx, [r15d + 0xdf]
+    cmp dword ptr [rdi + {request_vector_offset}], ebx
+    jne .Lpoole_ap_ipi_deny_vector
+    mov ebx, dword ptr [rdi + 28]
+    cmp dword ptr [rdi + {request_target_offset}], ebx
+    jne .Lpoole_ap_ipi_deny_target
+
+    mov rax, {request_checksum_seed}
+    xor rax, qword ptr [rdi + {request_cap_high_offset}]
+    xor rax, qword ptr [rdi + {request_cap_low_offset}]
+    xor rax, qword ptr [rdi + {request_attempt_offset}]
+    xor rax, qword ptr [rdi + {request_sequence_offset}]
+    xor rax, qword ptr [rdi + {payload_offset}]
+    mov ebx, dword ptr [rdi + {request_operation_offset}]
+    xor rax, rbx
+    mov ebx, dword ptr [rdi + {request_vector_offset}]
+    xor rax, rbx
+    mov ebx, dword ptr [rdi + {request_target_offset}]
+    xor rax, rbx
+    cmp rax, qword ptr [rdi + {request_checksum_offset}]
+    jne .Lpoole_ap_ipi_deny_checksum
+
+    mov rax, qword ptr [rdi + {request_sequence_offset}]
+    mov rbx, qword ptr [rdi + {last_sequence_offset}]
+    cmp rax, rbx
+    je .Lpoole_ap_ipi_deny_duplicate
+    jb .Lpoole_ap_ipi_deny_stale
+    inc rbx
+    cmp rax, rbx
+    jne .Lpoole_ap_ipi_deny_stale
+
+    cmp r15d, 1
+    je .Lpoole_ap_ipi_payload_reschedule
+    cmp r15d, 2
+    je .Lpoole_ap_ipi_payload_shootdown
+    cmp r15d, 3
+    je .Lpoole_ap_ipi_payload_call
+    cmp r15d, 4
+    je .Lpoole_ap_ipi_payload_diagnostic
+    cmp r15d, 5
+    je .Lpoole_ap_ipi_payload_panic
+    mov rbx, {stop_token}
+    jmp .Lpoole_ap_ipi_payload_compare
+.Lpoole_ap_ipi_payload_reschedule:
+    xor ebx, ebx
+    jmp .Lpoole_ap_ipi_payload_compare
+.Lpoole_ap_ipi_payload_shootdown:
+    mov ebx, 1
+    jmp .Lpoole_ap_ipi_payload_compare
+.Lpoole_ap_ipi_payload_call:
+    mov rbx, {call_token}
+    jmp .Lpoole_ap_ipi_payload_compare
+.Lpoole_ap_ipi_payload_diagnostic:
+    mov rbx, {diagnostic_token}
+    jmp .Lpoole_ap_ipi_payload_compare
+.Lpoole_ap_ipi_payload_panic:
+    mov rbx, {panic_token}
+.Lpoole_ap_ipi_payload_compare:
+    cmp qword ptr [rdi + {payload_offset}], rbx
+    jne .Lpoole_ap_ipi_deny_payload
+    cmp dword ptr [rdi + {panic_latched_offset}], 0
+    je .Lpoole_ap_ipi_accept
+    cmp r15d, 4
+    je .Lpoole_ap_ipi_accept
+    cmp r15d, 6
+    jne .Lpoole_ap_ipi_deny_panic
+
+.Lpoole_ap_ipi_accept:
+    mov r13d, {ack_accepted}
+    inc dword ptr [rdi + {accepted_offset}]
+    mov rax, qword ptr [rdi + {request_sequence_offset}]
+    mov qword ptr [rdi + {last_sequence_offset}], rax
+    lea rbx, [rdi + {operation_count_base}]
+    inc dword ptr [rbx + r15*4]
+    cmp r15d, 1
+    je .Lpoole_ap_ipi_result_reschedule
+    cmp r15d, 2
+    je .Lpoole_ap_ipi_result_shootdown
+    cmp r15d, 3
+    je .Lpoole_ap_ipi_result_call
+    cmp r15d, 4
+    je .Lpoole_ap_ipi_result_diagnostic
+    cmp r15d, 5
+    je .Lpoole_ap_ipi_result_panic
+    mov r12, {result_stop}
+    jmp .Lpoole_ap_ipi_respond
+.Lpoole_ap_ipi_result_reschedule:
+    mov r12, {result_reschedule}
+    jmp .Lpoole_ap_ipi_respond
+.Lpoole_ap_ipi_result_shootdown:
+    mov r12, {result_shootdown}
+    jmp .Lpoole_ap_ipi_respond
+.Lpoole_ap_ipi_result_call:
+    mov r12, {result_call}
+    jmp .Lpoole_ap_ipi_respond
+.Lpoole_ap_ipi_result_diagnostic:
+    mov r12, {result_diagnostic}
+    jmp .Lpoole_ap_ipi_respond
+.Lpoole_ap_ipi_result_panic:
+    mov r12, {result_panic}
+    mov dword ptr [rdi + {panic_latched_offset}], 1
+    mov dword ptr [rdi + {ipi_service_offset}], {service_panic}
+    jmp .Lpoole_ap_ipi_respond
+
+.Lpoole_ap_ipi_deny_state:
+    mov r14d, {error_state}
+    jmp .Lpoole_ap_ipi_deny
+.Lpoole_ap_ipi_deny_capability:
+    mov r14d, {error_capability}
+    jmp .Lpoole_ap_ipi_deny
+.Lpoole_ap_ipi_deny_attempt:
+    mov r14d, {error_attempt}
+    jmp .Lpoole_ap_ipi_deny
+.Lpoole_ap_ipi_deny_operation:
+    mov r14d, {error_operation}
+    jmp .Lpoole_ap_ipi_deny
+.Lpoole_ap_ipi_deny_vector:
+    mov r14d, {error_vector}
+    jmp .Lpoole_ap_ipi_deny
+.Lpoole_ap_ipi_deny_target:
+    mov r14d, {error_target}
+    jmp .Lpoole_ap_ipi_deny
+.Lpoole_ap_ipi_deny_checksum:
+    mov r14d, {error_checksum}
+    jmp .Lpoole_ap_ipi_deny
+.Lpoole_ap_ipi_deny_stale:
+    mov r14d, {error_stale}
+    jmp .Lpoole_ap_ipi_deny
+.Lpoole_ap_ipi_deny_duplicate:
+    mov r14d, {error_duplicate}
+    jmp .Lpoole_ap_ipi_deny
+.Lpoole_ap_ipi_deny_payload:
+    mov r14d, {error_payload}
+    jmp .Lpoole_ap_ipi_deny
+.Lpoole_ap_ipi_deny_panic:
+    mov r14d, {error_panic}
+.Lpoole_ap_ipi_deny:
+    mov r13d, {ack_denied}
+    xor r12d, r12d
+    inc dword ptr [rdi + {denied_offset}]
+
+.Lpoole_ap_ipi_respond:
+    mov dword ptr [rdi + {request_status_offset}], 0
+    mov dword ptr [rdi + {ack_operation_offset}], r15d
+    mov dword ptr [rdi + {ack_status_offset}], r13d
+    mov dword ptr [rdi + {ack_error_offset}], r14d
+    mov rax, qword ptr [rdi + {request_sequence_offset}]
+    mov qword ptr [rdi + {ack_sequence_offset}], rax
+    mov qword ptr [rdi + {result_offset}], r12
+    mov rax, {response_checksum_seed}
+    xor rax, qword ptr [rdi + {request_attempt_offset}]
+    xor rax, qword ptr [rdi + {request_sequence_offset}]
+    xor rax, r12
+    xor rax, qword ptr [rdi + {last_sequence_offset}]
+    xor rax, r15
+    xor rax, r13
+    xor rax, r14
+    mov ebx, dword ptr [rdi + {delivery_offset}]
+    xor rax, rbx
+    mov ebx, dword ptr [rdi + {accepted_offset}]
+    xor rax, rbx
+    mov ebx, dword ptr [rdi + {denied_offset}]
+    xor rax, rbx
+    mov qword ptr [rdi + {response_checksum_offset}], rax
+    inc dword ptr [rdi + {eoi_offset}]
+    mov ebx, {apic_physical}
+    mov dword ptr [rbx + {apic_eoi_offset}], 0
+    mfence
+    mov rax, qword ptr [rdi + {request_attempt_offset}]
+    mov qword ptr [rdi + {ack_attempt_offset}], rax
+    cmp r15d, 6
+    jne .Lpoole_ap_ipi_return
+    cmp r13d, {ack_accepted}
+    je .Lpoole_ap_ipi_terminal_stop
+
+.Lpoole_ap_ipi_return:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop r11
+    pop r10
+    pop r9
+    pop r8
+    pop rdi
+    pop rsi
+    pop rdx
+    pop rcx
+    pop rbx
+    pop rax
+    iretq
+
+.Lpoole_ap_ipi_terminal_stop:
+    cli
+    lfence
+    rdtsc
+    shl rdx, 32
+    or rax, rdx
+    mov qword ptr [rdi + 80], rax
+    mov rbx, qword ptr [rip + .Lpoole_ap_ipi_config_xstate]
+    mov eax, 3
+    xor edx, edx
+    xrstor64 [rbx]
+    mov dword ptr [rdi + 280], 0
+    mov dword ptr [rdi + 284], 1
+    mov dword ptr [rdi + 288], 1
+    pushfq
+    pop rax
+    mov qword ptr [rdi + 232], rax
+    mov dword ptr [rdi + 268], 0
+    mov dword ptr [rdi + 16], 1
+    mov dword ptr [rdi + 108], 5
+    mov dword ptr [rdi + {ipi_service_offset}], {service_quiesced}
+    mfence
+    mov dword ptr [rdi + 12], 3
+.Lpoole_ap_ipi_parked:
+    hlt
+    jmp .Lpoole_ap_ipi_parked
+
+poole_ap_ipi_apic_error:
+    push rax
+    push rbx
+    mov rax, qword ptr [rip + .Lpoole_ap_ipi_config_mailbox]
+    inc dword ptr [rax + {apic_error_count_offset}]
+    inc dword ptr [rax + {eoi_offset}]
+    mov ebx, {apic_physical}
+    mov dword ptr [rbx + {apic_eoi_offset}], 0
+    pop rbx
+    pop rax
+    iretq
+
+poole_ap_ipi_spurious:
+    push rax
+    mov rax, qword ptr [rip + .Lpoole_ap_ipi_config_mailbox]
+    inc dword ptr [rax + {spurious_count_offset}]
+    pop rax
+    iretq
+
+poole_ap_ipi_trampoline_fault:
+    cli
+    mov rax, qword ptr [rip + .Lpoole_ap_ipi_config_mailbox]
+    mov dword ptr [rax + 292], 1
+    mov dword ptr [rax + 108], 0xffffffff
+    mov dword ptr [rax + {ipi_service_offset}], 0xffffffff
+    mfence
+    mov dword ptr [rax + 12], 0xffffffff
+.Lpoole_ap_ipi_fault_halt:
+    hlt
+    jmp .Lpoole_ap_ipi_fault_halt
+
+    .balign 8
+.Lpoole_ap_ipi_initial_fcw:
+    .word 0x037f
+    .balign 4
+.Lpoole_ap_ipi_initial_mxcsr:
+    .long 0x00001f80
+    .balign 8
+.Lpoole_ap_ipi_gdt_pointer:
+    .word .Lpoole_ap_ipi_gdt_end - poole_ap_ipi_trampoline_gdt - 1
+poole_ap_ipi_patch_gdt_base:
+    .long 0
+    .balign 8
+poole_ap_ipi_trampoline_gdt:
+    .quad 0x0000000000000000
+    .quad 0x00cf9b000000ffff
+    .quad 0x00cf93000000ffff
+    .quad 0x00af9b000000ffff
+    .quad 0x00cf93000000ffff
+.Lpoole_ap_ipi_gdt_end:
+    .balign 8
+.Lpoole_ap_ipi_config_cr3:
+poole_ap_ipi_patch_cr3:
+    .long 0
+    .long 0
+.Lpoole_ap_ipi_config_stack_top:
+poole_ap_ipi_patch_stack_top:
+    .quad 0
+.Lpoole_ap_ipi_config_mailbox:
+poole_ap_ipi_patch_mailbox:
+    .quad 0
+.Lpoole_ap_ipi_config_gdtr:
+    .word 39
+poole_ap_ipi_patch_gdtr_base:
+    .quad 0
+.Lpoole_ap_ipi_config_idtr:
+    .word 4095
+poole_ap_ipi_patch_idtr_base:
+    .quad 0
+.Lpoole_ap_ipi_config_xstate:
+poole_ap_ipi_patch_xstate:
+    .quad 0
+poole_ap_ipi_trampoline_end:
+    .code64
+"#,
+    apic_physical = const smp_ipi::APIC_PHYSICAL_ADDRESS,
+    apic_eoi_offset = const smp_ipi::APIC_EOI_OFFSET,
+    apic_spurious_offset = const smp_ipi::APIC_SPURIOUS_OFFSET,
+    ipi_magic_offset = const smp_ipi::MAGIC_OFFSET,
+    ipi_version_offset = const smp_ipi::VERSION_OFFSET,
+    ipi_service_offset = const smp_ipi::SERVICE_STATE_OFFSET,
+    request_cap_high_offset = const smp_ipi::REQUEST_CAPABILITY_HIGH_OFFSET,
+    request_cap_low_offset = const smp_ipi::REQUEST_CAPABILITY_LOW_OFFSET,
+    request_attempt_offset = const smp_ipi::REQUEST_ATTEMPT_OFFSET,
+    request_sequence_offset = const smp_ipi::REQUEST_SEQUENCE_OFFSET,
+    payload_offset = const smp_ipi::PAYLOAD_OFFSET,
+    request_checksum_offset = const smp_ipi::REQUEST_CHECKSUM_OFFSET,
+    ack_attempt_offset = const smp_ipi::ACK_ATTEMPT_OFFSET,
+    ack_sequence_offset = const smp_ipi::ACK_SEQUENCE_OFFSET,
+    result_offset = const smp_ipi::RESULT_OFFSET,
+    response_checksum_offset = const smp_ipi::RESPONSE_CHECKSUM_OFFSET,
+    last_sequence_offset = const smp_ipi::LAST_ACCEPTED_SEQUENCE_OFFSET,
+    request_operation_offset = const smp_ipi::REQUEST_OPERATION_OFFSET,
+    request_vector_offset = const smp_ipi::REQUEST_VECTOR_OFFSET,
+    request_target_offset = const smp_ipi::REQUEST_TARGET_APIC_ID_OFFSET,
+    request_status_offset = const smp_ipi::REQUEST_STATUS_OFFSET,
+    ack_operation_offset = const smp_ipi::ACK_OPERATION_OFFSET,
+    ack_status_offset = const smp_ipi::ACK_STATUS_OFFSET,
+    ack_error_offset = const smp_ipi::ACK_ERROR_OFFSET,
+    delivery_offset = const smp_ipi::DELIVERY_COUNT_OFFSET,
+    eoi_offset = const smp_ipi::EOI_COUNT_OFFSET,
+    accepted_offset = const smp_ipi::ACCEPTED_COUNT_OFFSET,
+    denied_offset = const smp_ipi::DENIED_COUNT_OFFSET,
+    operation_count_base = const (smp_ipi::RESCHEDULE_COUNT_OFFSET - 4),
+    panic_latched_offset = const smp_ipi::PANIC_LATCHED_OFFSET,
+    spurious_count_offset = const smp_ipi::SPURIOUS_COUNT_OFFSET,
+    apic_error_count_offset = const smp_ipi::APIC_ERROR_COUNT_OFFSET,
+    ipi_magic = const smp_ipi::EXTENSION_MAGIC,
+    ipi_version = const smp_ipi::EXTENSION_VERSION,
+    service_online = const smp_ipi::SERVICE_STATE_ONLINE,
+    service_panic = const smp_ipi::SERVICE_STATE_PANIC,
+    service_quiesced = const smp_ipi::SERVICE_STATE_QUIESCED,
+    request_armed = const smp_ipi::REQUEST_ARMED,
+    ack_accepted = const smp_ipi::ACK_ACCEPTED,
+    ack_denied = const smp_ipi::ACK_DENIED,
+    error_state = const smp_ipi::ERROR_REQUEST_STATE,
+    error_capability = const smp_ipi::ERROR_CAPABILITY,
+    error_attempt = const smp_ipi::ERROR_ATTEMPT,
+    error_operation = const smp_ipi::ERROR_OPERATION,
+    error_vector = const smp_ipi::ERROR_VECTOR,
+    error_target = const smp_ipi::ERROR_TARGET,
+    error_checksum = const smp_ipi::ERROR_CHECKSUM,
+    error_stale = const smp_ipi::ERROR_STALE_SEQUENCE,
+    error_duplicate = const smp_ipi::ERROR_DUPLICATE_SEQUENCE,
+    error_payload = const smp_ipi::ERROR_PAYLOAD,
+    error_panic = const smp_ipi::ERROR_PANIC_LATCHED,
+    capability_high = const smp_ipi::CAPABILITY_HIGH,
+    capability_low = const smp_ipi::CAPABILITY_LOW,
+    request_checksum_seed = const smp_ipi::REQUEST_CHECKSUM_SEED,
+    response_checksum_seed = const smp_ipi::RESPONSE_CHECKSUM_SEED,
+    call_token = const smp_ipi::CALL_NOOP_TOKEN,
+    diagnostic_token = const smp_ipi::DIAGNOSTIC_TOKEN,
+    panic_token = const smp_ipi::PANIC_NOTICE_TOKEN,
+    stop_token = const smp_ipi::STOP_TOKEN,
+    result_reschedule = const smp_ipi::RESULT_RESCHEDULE_OBSERVED,
+    result_shootdown = const smp_ipi::RESULT_SHOOTDOWN_TRANSPORT_ONLY,
+    result_call = const smp_ipi::RESULT_CALL_ALLOWLIST_NOOP,
+    result_diagnostic = const smp_ipi::RESULT_DIAGNOSTIC_OBSERVED,
+    result_panic = const smp_ipi::RESULT_PANIC_LATCHED,
+    result_stop = const smp_ipi::RESULT_STOP_QUIESCED,
+);
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct ApIpiTrampolineOffsets {
+    protected_patch: usize,
+    long_patch: usize,
+    gdt_base_patch: usize,
+    cr3_patch: usize,
+    stack_top_patch: usize,
+    mailbox_patch: usize,
+    gdtr_base_patch: usize,
+    idtr_base_patch: usize,
+    xstate_patch: usize,
+    protected_entry: usize,
+    long_entry: usize,
+    handlers: IpiHandlerLayout,
+    gdt: usize,
+}
+
+unsafe extern "C" {
+    static poole_ap_ipi_trampoline_start: u8;
+    static poole_ap_ipi_trampoline_end: u8;
+    static poole_ap_ipi_trampoline_protected_entry: u8;
+    static poole_ap_ipi_trampoline_long_entry: u8;
+    static poole_ap_ipi_trampoline_fault: u8;
+    static poole_ap_ipi_reschedule: u8;
+    static poole_ap_ipi_shootdown: u8;
+    static poole_ap_ipi_call_function: u8;
+    static poole_ap_ipi_diagnostic: u8;
+    static poole_ap_ipi_panic: u8;
+    static poole_ap_ipi_stop: u8;
+    static poole_ap_ipi_apic_error: u8;
+    static poole_ap_ipi_spurious: u8;
+    static poole_ap_ipi_trampoline_gdt: u8;
+    static poole_ap_ipi_patch_protected_offset: u8;
+    static poole_ap_ipi_patch_long_offset: u8;
+    static poole_ap_ipi_patch_gdt_base: u8;
+    static poole_ap_ipi_patch_cr3: u8;
+    static poole_ap_ipi_patch_stack_top: u8;
+    static poole_ap_ipi_patch_mailbox: u8;
+    static poole_ap_ipi_patch_gdtr_base: u8;
+    static poole_ap_ipi_patch_idtr_base: u8;
+    static poole_ap_ipi_patch_xstate: u8;
+}
+
+fn ap_ipi_trampoline_offsets(start: *const u8) -> Option<ApIpiTrampolineOffsets> {
+    Some(ApIpiTrampolineOffsets {
+        protected_patch: ap_symbol_offset(&raw const poole_ap_ipi_patch_protected_offset, start)?,
+        long_patch: ap_symbol_offset(&raw const poole_ap_ipi_patch_long_offset, start)?,
+        gdt_base_patch: ap_symbol_offset(&raw const poole_ap_ipi_patch_gdt_base, start)?,
+        cr3_patch: ap_symbol_offset(&raw const poole_ap_ipi_patch_cr3, start)?,
+        stack_top_patch: ap_symbol_offset(&raw const poole_ap_ipi_patch_stack_top, start)?,
+        mailbox_patch: ap_symbol_offset(&raw const poole_ap_ipi_patch_mailbox, start)?,
+        gdtr_base_patch: ap_symbol_offset(&raw const poole_ap_ipi_patch_gdtr_base, start)?,
+        idtr_base_patch: ap_symbol_offset(&raw const poole_ap_ipi_patch_idtr_base, start)?,
+        xstate_patch: ap_symbol_offset(&raw const poole_ap_ipi_patch_xstate, start)?,
+        protected_entry: ap_symbol_offset(
+            &raw const poole_ap_ipi_trampoline_protected_entry,
+            start,
+        )?,
+        long_entry: ap_symbol_offset(&raw const poole_ap_ipi_trampoline_long_entry, start)?,
+        handlers: IpiHandlerLayout {
+            fault: ap_symbol_offset(&raw const poole_ap_ipi_trampoline_fault, start)? as u64,
+            reschedule: ap_symbol_offset(&raw const poole_ap_ipi_reschedule, start)? as u64,
+            shootdown: ap_symbol_offset(&raw const poole_ap_ipi_shootdown, start)? as u64,
+            call_function: ap_symbol_offset(&raw const poole_ap_ipi_call_function, start)? as u64,
+            diagnostic: ap_symbol_offset(&raw const poole_ap_ipi_diagnostic, start)? as u64,
+            panic: ap_symbol_offset(&raw const poole_ap_ipi_panic, start)? as u64,
+            stop: ap_symbol_offset(&raw const poole_ap_ipi_stop, start)? as u64,
+            apic_error: ap_symbol_offset(&raw const poole_ap_ipi_apic_error, start)? as u64,
+            spurious: ap_symbol_offset(&raw const poole_ap_ipi_spurious, start)? as u64,
+        },
+        gdt: ap_symbol_offset(&raw const poole_ap_ipi_trampoline_gdt, start)?,
+    })
+}
+
+core::arch::global_asm!(
+    r#"
     .section .rodata.poole_ap_trampoline,"a",@progbits
     .balign 16
     .global poole_ap_trampoline_start
@@ -2201,6 +2911,72 @@ pub fn build_ap_runtime_trampoline_page(
         layout.xstate().to_le_bytes(),
     )?;
     Ok((page, length, fault))
+}
+
+pub fn build_ap_ipi_trampoline_page(
+    layout: RuntimeResourceLayout,
+) -> Result<([u8; smp_ipi::PAGE_BYTES as usize], usize, IpiHandlerLayout), ()> {
+    let start = &raw const poole_ap_ipi_trampoline_start;
+    let end = &raw const poole_ap_ipi_trampoline_end;
+    let length = (end as usize).checked_sub(start as usize).ok_or(())?;
+    if length == 0 || length > smp_ipi::PAGE_BYTES as usize {
+        return Err(());
+    }
+    let offsets = ap_ipi_trampoline_offsets(start).ok_or(())?;
+    let mut page = [0u8; smp_ipi::PAGE_BYTES as usize];
+    // SAFETY: the linker symbols bound one immutable template wholly inside this image.
+    let template = unsafe { core::slice::from_raw_parts(start, length) };
+    page[..length].copy_from_slice(template);
+
+    let physical = |offset: usize| layout.trampoline().checked_add(offset as u64).ok_or(());
+    let protected = u32::try_from(physical(offsets.protected_entry)?).map_err(|_| ())?;
+    let long = u32::try_from(physical(offsets.long_entry)?).map_err(|_| ())?;
+    let gdt = u32::try_from(physical(offsets.gdt)?).map_err(|_| ())?;
+    let handlers = IpiHandlerLayout {
+        fault: physical(offsets.handlers.fault as usize)?,
+        reschedule: physical(offsets.handlers.reschedule as usize)?,
+        shootdown: physical(offsets.handlers.shootdown as usize)?,
+        call_function: physical(offsets.handlers.call_function as usize)?,
+        diagnostic: physical(offsets.handlers.diagnostic as usize)?,
+        panic: physical(offsets.handlers.panic as usize)?,
+        stop: physical(offsets.handlers.stop as usize)?,
+        apic_error: physical(offsets.handlers.apic_error as usize)?,
+        spurious: physical(offsets.handlers.spurious as usize)?,
+    };
+    patch_bytes(&mut page, offsets.protected_patch, protected.to_le_bytes())?;
+    patch_bytes(&mut page, offsets.long_patch, long.to_le_bytes())?;
+    patch_bytes(&mut page, offsets.gdt_base_patch, gdt.to_le_bytes())?;
+    patch_bytes(
+        &mut page,
+        offsets.cr3_patch,
+        u32::try_from(layout.pml4()).map_err(|_| ())?.to_le_bytes(),
+    )?;
+    patch_bytes(
+        &mut page,
+        offsets.stack_top_patch,
+        layout.rsp0_top().to_le_bytes(),
+    )?;
+    patch_bytes(
+        &mut page,
+        offsets.mailbox_patch,
+        layout.local().to_le_bytes(),
+    )?;
+    patch_bytes(
+        &mut page,
+        offsets.gdtr_base_patch,
+        layout.gdt().to_le_bytes(),
+    )?;
+    patch_bytes(
+        &mut page,
+        offsets.idtr_base_patch,
+        layout.idt().to_le_bytes(),
+    )?;
+    patch_bytes(
+        &mut page,
+        offsets.xstate_patch,
+        layout.xstate().to_le_bytes(),
+    )?;
+    Ok((page, length, handlers))
 }
 
 const _: () = assert!(size_of::<DescriptorPointer>() == 10);
