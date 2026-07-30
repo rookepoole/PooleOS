@@ -74,6 +74,7 @@ PHASE_STATUS = {
     "N7": "partial",
     "N8": "partial",
     "N9": "partial",
+    "N12": "partial",
     "N15": "partial",
     "N31": "partial",
     "N32": "partial",
@@ -311,6 +312,16 @@ ADDED_REQUIREMENTS = [
         "phase_id": "N8",
         "requirement": "Keep monotonic, boot, UTC, and civil time domains separate; specify leap-second, time-step, suspend, RTC-invalid, and pre-network trust behavior without allowing wall-clock changes to break deadlines or signature rollback state.",
         "basis": ["https://pubs.opengroup.org/onlinepubs/9799919799/", "https://www.iana.org/time-zones"],
+    },
+    {
+        "id": "ADD-N12-SCHED-FOUNDATION-001",
+        "phase_id": "N12",
+        "requirement": "Freeze and independently qualify a neutral allocation-free scheduler foundation with generation-safe task identities, explicit CPU ownership and affinity, bounded priority/fairness behavior, deterministic run queues, wake/block/cancel/timeout/teardown transitions, lock and reference-lifetime primitives, exact context-switch state, stack isolation and clearing, and strict separation between cooperative BSP evidence and later interrupt-preemptive, SMP, ring-3, address-space, and production claims.",
+        "basis": [
+            "Cycle 142 PKSCHED1 scheduler and context-switch foundation",
+            "master checklist sections 031-034",
+            "PooleOS neutral-policy and no-authority-amplification requirements",
+        ],
     },
     {
         "id": "ADD-CAP-001",
@@ -572,7 +583,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path, default=ROOT / SOURCE_RELATIVE)
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pooleos_native_checklist_coverage.json")
-    parser.add_argument("--status-date", default="2026-07-26")
+    parser.add_argument("--status-date", default="2026-07-30")
     args = parser.parse_args()
     artifact = build_coverage(args.source, args.status_date)
     args.out.parent.mkdir(parents=True, exist_ok=True)

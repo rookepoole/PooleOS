@@ -71,15 +71,16 @@ class NativeKernelPrivilegeMsrPolicyTests(unittest.TestCase):
         with self.assertRaises(qualify_native_kernel_privilege_msr_policy.QualificationError):
             qualify_native_kernel_privilege_msr_policy._audit_source_text(hostile)
 
-    def test_linked_audit_scopes_pkirq1_and_all_three_pksmp_profiles(self) -> None:
+    def test_linked_audit_scopes_pkirq1_pksmp_and_pksched_profiles(self) -> None:
         audit = self.readiness["build"]["linked_machine_code_audit"]
-        self.assertEqual(25, audit["instruction_counts"]["rdmsr"])
+        self.assertEqual(31, audit["instruction_counts"]["rdmsr"])
         self.assertEqual(3, audit["instruction_counts"]["wrmsr"])
         self.assertEqual(0, audit["pkmsr1_runtime_msr_write_count"])
         self.assertEqual(1, audit["pksmp1_linked_rdmsr_count"])
         self.assertEqual(1, audit["pksmp2_linked_rdmsr_count"])
         self.assertEqual(3, audit["pksmp3_linked_rdmsr_count"])
         self.assertEqual(1, audit["pksmp3_linked_wrmsr_count"])
+        self.assertEqual(6, audit["pksched1_linked_rdmsr_count"])
         self.assertEqual(
             {"rdmsr": 1, "wrmsr": 1},
             audit["privileged_function_instruction_counts"][
@@ -96,6 +97,12 @@ class NativeKernelPrivilegeMsrPolicyTests(unittest.TestCase):
             {"rdmsr": 12, "wrmsr": 0},
             audit["privileged_function_instruction_counts"][
                 "PooleKernelLinked::arch::x86_64::observe_privilege_msr_policy"
+            ],
+        )
+        self.assertEqual(
+            {"rdmsr": 6, "wrmsr": 0},
+            audit["privileged_function_instruction_counts"][
+                "PooleKernelLinked::arch::x86_64::run_scheduler_context_switch_probe"
             ],
         )
         self.assertEqual(0, audit["instruction_counts"]["syscall"])

@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-kernel-scheduler-readiness.schema.json",
+  "title": "PooleOS PKSCHED1 readiness",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "status_date", "status", "contract_id", "selected_move_id", "production_ready", "production_promotion_allowed", "n12_exit_gate_satisfied", "phase_status", "inputs", "build", "media", "execution", "negative_controls", "claims", "non_claims", "summary", "open_items"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_scheduler_readiness"},
+    "status_date": {"const": "2026-07-30"},
+    "status": {"const": "pass_single_host_two_run_qemu64_bsp_cooperative_scheduler_foundation_non_promoting"},
+    "contract_id": {"const": "PKSCHED1"},
+    "selected_move_id": {"const": "N12-SCHED-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "n12_exit_gate_satisfied": {"const": false},
+    "phase_status": {"type": "object"},
+    "inputs": {"type": "object"},
+    "build": {
+      "type": "object",
+      "required": ["kernel_entry", "default_pooleboot", "scheduler_pooleboot", "profile_count", "all_profile_binaries_distinct", "default_stop_marker_present", "default_transfer_marker_absent", "host_probe", "source_audit", "linked_switch_audit"],
+      "properties": {
+        "profile_count": {"const": 2},
+        "all_profile_binaries_distinct": {"const": true},
+        "default_stop_marker_present": {"const": true},
+        "default_transfer_marker_absent": {"const": true},
+        "host_probe": {"type": "object"},
+        "source_audit": {"type": "object"},
+        "linked_switch_audit": {
+          "type": "object",
+          "required": ["scope", "instruction_count", "forbidden_instruction_count", "status", "canonical_sha256"],
+          "properties": {
+            "scope": {"const": "poole_scheduler_context_switch..poole_scheduler_context_switch_end"},
+            "instruction_count": {"minimum": 17},
+            "forbidden_instruction_count": {"const": 0},
+            "status": {"const": "pass"},
+            "canonical_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"}
+          }
+        }
+      }
+    },
+    "media": {
+      "type": "object",
+      "required": ["clean_generation_count", "exact_clean_generation_match", "ordinary_workspace_file_only", "physical_media_write_performed"],
+      "properties": {
+        "clean_generation_count": {"const": 2},
+        "exact_clean_generation_match": {"const": true},
+        "ordinary_workspace_file_only": {"const": true},
+        "physical_media_write_performed": {"const": false}
+      }
+    },
+    "execution": {
+      "type": "object",
+      "required": ["host_environment_count", "run_count", "virtual_cpu_count", "bsp_only", "static_markers_exact_match", "dynamic_fields_revalidated", "exact_screenshot_match", "exact_pbp1_match", "runs", "observation"],
+      "properties": {
+        "host_environment_count": {"const": 1},
+        "run_count": {"const": 2},
+        "virtual_cpu_count": {"const": 1},
+        "bsp_only": {"const": true},
+        "static_markers_exact_match": {"const": true},
+        "dynamic_fields_revalidated": {"const": true},
+        "exact_screenshot_match": {"const": true},
+        "exact_pbp1_match": {"const": true},
+        "runs": {"type": "array", "minItems": 2, "maxItems": 2},
+        "observation": {"type": "object"}
+      }
+    },
+    "negative_controls": {
+      "type": "array",
+      "minItems": 28,
+      "maxItems": 28,
+      "items": {
+        "type": "object",
+        "required": ["id", "status", "expected", "case_count"],
+        "properties": {
+          "id": {"type": "string"},
+          "status": {"const": "pass"},
+          "expected": {"const": "rejected"},
+          "case_count": {"type": "integer", "minimum": 1}
+        }
+      }
+    },
+    "claims": {"type": "object", "minProperties": 20, "additionalProperties": {"type": "boolean"}},
+    "non_claims": {"type": "array", "minItems": 12, "items": {"type": "string"}},
+    "summary": {"type": "object"},
+    "open_items": {"type": "array", "minItems": 10, "uniqueItems": true, "items": {"type": "string"}}
+  }
+}

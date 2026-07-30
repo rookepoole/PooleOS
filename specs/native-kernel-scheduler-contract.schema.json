@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-kernel-scheduler-contract.schema.json",
+  "title": "PooleOS PKSCHED1 contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "contract_id", "selected_move_id", "status_date", "status", "production_ready", "production_promotion_allowed", "phase_mapping", "source_requirement_ids", "development_profile", "scheduler_core", "synchronization", "host_trace", "live_context_switch", "formal_model_boundary", "qualification", "required_negative_controls", "claims", "non_claims", "official_references"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_scheduler_contract"},
+    "contract_id": {"const": "PKSCHED1"},
+    "selected_move_id": {"const": "N12-SCHED-001"},
+    "status_date": {"const": "2026-07-30"},
+    "status": {"const": "bounded_fixed_capacity_neutral_scheduler_and_bsp_context_switch_non_promoting"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "phase_mapping": {"const": ["N12.1", "N12.2", "N12.5", "N12.6", "N12.7"]},
+    "source_requirement_ids": {"type": "array", "minItems": 5, "uniqueItems": true, "items": {"type": "string"}},
+    "development_profile": {
+      "type": "object",
+      "required": ["feature", "selector", "virtual_cpu_count", "bsp_only", "emulator_only"],
+      "properties": {
+        "feature": {"const": "development-scheduler"},
+        "selector": {"const": 15},
+        "virtual_cpu_count": {"const": 1},
+        "bsp_only": {"const": true},
+        "emulator_only": {"const": true}
+      }
+    },
+    "scheduler_core": {
+      "type": "object",
+      "required": ["cpu_capacity", "task_capacity", "run_queue_count", "run_queue_capacity", "minimum_priority", "maximum_priority", "maximum_equal_priority_bypass", "neutral_policy", "allocation", "task_identity", "affinity", "migration", "wake_delivery", "teardown"],
+      "properties": {
+        "cpu_capacity": {"const": 4},
+        "task_capacity": {"const": 8},
+        "run_queue_count": {"const": 4},
+        "run_queue_capacity": {"const": 8},
+        "minimum_priority": {"const": 1},
+        "maximum_priority": {"const": 31},
+        "maximum_equal_priority_bypass": {"const": 7},
+        "neutral_policy": {"const": "fixed_priority_round_robin"}
+      }
+    },
+    "synchronization": {
+      "type": "object",
+      "required": ["raw_spinlock", "reference_count", "sleeping_mutex_count", "priority_inheritance", "mutex_handoff", "scheduler_lock_required_during_hardware_switch"],
+      "properties": {
+        "sleeping_mutex_count": {"const": 1},
+        "priority_inheritance": {"const": "one_level_direct_highest_waiter"},
+        "scheduler_lock_required_during_hardware_switch": {"const": true}
+      }
+    },
+    "host_trace": {
+      "type": "object",
+      "required": ["cpu_count", "task_count", "step_count", "seed", "dispatch_count", "migration_count", "final_runnable_count", "final_running_count", "snapshot_checksum", "rust_python_exact_agreement_required"],
+      "properties": {
+        "cpu_count": {"const": 4},
+        "task_count": {"const": 8},
+        "step_count": {"const": 4096},
+        "dispatch_count": {"const": 1761},
+        "migration_count": {"const": 2334},
+        "snapshot_checksum": {"const": "0x23B76E2F80E2B747"},
+        "rust_python_exact_agreement_required": {"const": true}
+      }
+    },
+    "live_context_switch": {
+      "type": "object",
+      "required": ["active_task_count", "dispatch_count", "machine_transition_count", "expected_dispatch_trace", "task_run_counts", "private_stack_count", "stack_bytes_each", "stack_alignment_bytes", "cleared_stack_bytes", "saved_callee_registers", "saved_control_flow_state", "interrupts_disabled", "same_cr3_required", "fs_gs_unchanged_required", "xstate_unused", "debug_state_unused", "pmu_state_unused", "stack_canaries_required", "machine_code_scope_audit_required"],
+      "properties": {
+        "active_task_count": {"const": 2},
+        "dispatch_count": {"const": 8},
+        "machine_transition_count": {"const": 16},
+        "expected_dispatch_trace": {"const": [0, 1, 0, 1, 0, 1, 0, 1]},
+        "task_run_counts": {"const": [4, 4]},
+        "private_stack_count": {"const": 2},
+        "stack_bytes_each": {"const": 16384},
+        "stack_alignment_bytes": {"const": 16},
+        "cleared_stack_bytes": {"const": 32768},
+        "saved_callee_registers": {"const": ["RBX", "RBP", "R12", "R13", "R14", "R15"]},
+        "saved_control_flow_state": {"const": ["RSP", "RIP", "RFLAGS"]},
+        "interrupts_disabled": {"const": true},
+        "same_cr3_required": {"const": true},
+        "fs_gs_unchanged_required": {"const": true},
+        "xstate_unused": {"const": true},
+        "debug_state_unused": {"const": true},
+        "pmu_state_unused": {"const": true},
+        "stack_canaries_required": {"const": true},
+        "machine_code_scope_audit_required": {"const": true}
+      }
+    },
+    "formal_model_boundary": {
+      "type": "object",
+      "required": ["predecessor_model", "predecessor_task_count", "predecessor_cpu_context_count", "predecessor_maximum_bypass", "shared_safety_trace_cross_check", "full_refinement_proved", "temporal_liveness_proved", "implementation_capacity_covered_by_tla_model"],
+      "properties": {
+        "predecessor_task_count": {"const": 3},
+        "predecessor_cpu_context_count": {"const": 1},
+        "predecessor_maximum_bypass": {"const": 2},
+        "full_refinement_proved": {"const": false},
+        "temporal_liveness_proved": {"const": false},
+        "implementation_capacity_covered_by_tla_model": {"const": false}
+      }
+    },
+    "qualification": {
+      "type": "object",
+      "required": ["host_environment_count", "rust_scheduler_test_count", "rust_kernel_test_count_minimum", "host_probe_receipt_count", "clean_media_generation_count", "qemu_run_count", "static_markers_exact_match_required", "dynamic_fields_revalidated_each_run", "screenshot_exact_match_required", "pbp1_exact_match_required", "negative_control_count", "hostile_case_count"],
+      "properties": {
+        "rust_scheduler_test_count": {"const": 14},
+        "rust_kernel_test_count_minimum": {"minimum": 151},
+        "host_probe_receipt_count": {"const": 4},
+        "clean_media_generation_count": {"const": 2},
+        "qemu_run_count": {"const": 2},
+        "negative_control_count": {"const": 28},
+        "hostile_case_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "required_negative_controls": {"type": "array", "minItems": 28, "maxItems": 28, "uniqueItems": true, "items": {"type": "string"}},
+    "claims": {"type": "object", "minProperties": 20, "additionalProperties": {"type": "boolean"}},
+    "non_claims": {"type": "array", "minItems": 12, "uniqueItems": true, "items": {"type": "string"}},
+    "official_references": {"type": "array", "minItems": 4, "uniqueItems": true, "items": {"type": "string", "format": "uri"}}
+  }
+}
