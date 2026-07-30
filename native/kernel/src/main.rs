@@ -34,6 +34,11 @@ use poolekernel::{
     },
     privilege_msr::{machine_check_bank_count, machine_check_ctl_present, validate_snapshot},
     revalidation,
+    scheduler::{
+        ContextSwitchContract as SchedulerContextSwitchContract, CpuId as SchedulerCpuId,
+        RawSpinLock as SchedulerRawSpinLock, Scheduler, TaskId as SchedulerTaskId,
+        TaskState as SchedulerTaskState, validate_context_switch_contract,
+    },
     smp::{self, MailboxSnapshot, ResourceLayout},
     smp_ipi::{
         self, IpiSnapshot, Operation as IpiOperation, Request as IpiRequest, ShootdownRequest,
@@ -1140,6 +1145,20 @@ pksmp5_fragment!(PKSMP5_FRAME_VERIFIED_BYTES, b" frame_verified_bytes=");
 pksmp5_fragment!(PKSMP5_TOTAL_PAGES, b" total_pages=");
 pksmp5_fragment!(PKSMP5_RELEASE_TAIL, b" capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged\n");
 
+macro_rules! pksched1_fragment {
+    ($name:ident, $value:literal) => {
+        #[used]
+        #[unsafe(link_section = ".text.pksched1_literals")]
+        static $name: [u8; $value.len()] = *$value;
+    };
+}
+
+pksched1_fragment!(PKSCHED1_EARLY, b"POOLEOS:KERNEL:SCHED-EARLY PASS contract=PKSCHED1 selector=15 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n");
+pksched1_fragment!(PKSCHED1_CORE, b"POOLEOS:KERNEL:SCHED-CORE PASS contract=PKSCHED1 cpu_capacity=4 task_capacity=8 active_tasks=2 queue_count=4 policy=fixed_priority_round_robin priorities=1-31 dispatches=8 migrations=0 wakes=0 teardowns=2 max_bypass=7 trace=0,1,0,1,0,1,0,1\n");
+pksched1_fragment!(PKSCHED1_SWITCH, b"POOLEOS:KERNEL:SCHED-SWITCH PASS contract=PKSCHED1 tasks=2 dispatches=8 transitions=16 task0_runs=4 task1_runs=4 callee_saved=6 rflags=1 same_cr3=1 fs_gs_unchanged=1 xstate_unused=1 debug_unused=1 pmu_unused=1 stacks_distinct=1 stack_bytes=16384 alignment=16 errors=0\n");
+pksched1_fragment!(PKSCHED1_CLEANUP, b"POOLEOS:KERNEL:SCHED-CLEANUP PASS contract=PKSCHED1 scheduler_lock_released=1 stack_bytes_cleared=32768 task_contexts_retired=2 queue_entries=0 running=0 blocked=0 dead=2\n");
+pksched1_fragment!(PKSCHED1_RESULT, b"POOLEOS:KERNEL:SCHED-RESULT PASS contract=PKSCHED1 profile=qemu64_bsp_cooperative core=1 hardware_switch=1 bsp=1 smp_dispatch=0 preemption=0 ring3=0 address_spaces=1 xstate_switch=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n");
+
 static EARLY_RING: EarlyRing = EarlyRing::new();
 static PANIC_STATE: PanicState = PanicState::new();
 static ENTRY_COUNT: AtomicU32 = AtomicU32::new(0);
@@ -1159,6 +1178,7 @@ static IRQ_ERROR_COUNT: AtomicU32 = AtomicU32::new(0);
 static IRQ_SPURIOUS_COUNT: AtomicU32 = AtomicU32::new(0);
 static SMP_IPI_FAILURE_STAGE: AtomicU32 = AtomicU32::new(0);
 static SMP_IPI_FAILURE_DETAIL: AtomicU64 = AtomicU64::new(0);
+static SCHEDULER_SWITCH_LOCK: SchedulerRawSpinLock = SchedulerRawSpinLock::new();
 
 core::arch::global_asm!(
     r#"
@@ -5777,6 +5797,8 @@ extern "C" fn poole_kernel_emergency_panic(code: u32) -> ! {
         0x1013 => PanicCode::InterruptTime,
         0x1014 => PanicCode::SmpFirstAp,
         0x1015 => PanicCode::SmpPerCpuRuntime,
+        0x1016 => PanicCode::SmpIpi,
+        0x1017 => PanicCode::Scheduler,
         _ => PanicCode::UnexpectedReturn,
     };
     let disposition = PANIC_STATE.begin(code);
@@ -5887,6 +5909,14 @@ extern "C" fn poole_kernel_rust_entry(
             ring: &EARLY_RING,
         });
         logger.write_bytes(&PKSMP5_EARLY);
+    }
+    if trap_scenario == DevelopmentTrapScenario::Scheduler {
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        logger.write_bytes(&PKSCHED1_EARLY);
     }
 
     if let Err(error) = validate_entry_envelope(handoff_address, handoff_length, magic, stack_top) {
@@ -7918,6 +7948,123 @@ extern "C" fn poole_kernel_rust_entry(
         halt_forever()
     }
 
+    if trap_scenario == DevelopmentTrapScenario::Scheduler {
+        let cpu = SchedulerCpuId::new(0)
+            .unwrap_or_else(|_| poole_kernel_emergency_panic(PanicCode::Scheduler as u32));
+        let mut neutral = Scheduler::new(1)
+            .unwrap_or_else(|_| poole_kernel_emergency_panic(PanicCode::Scheduler as u32));
+        let task_a = neutral
+            .create_task(0, 1, 16, 1)
+            .unwrap_or_else(|_| poole_kernel_emergency_panic(PanicCode::Scheduler as u32));
+        let task_b = neutral
+            .create_task(1, 1, 16, 1)
+            .unwrap_or_else(|_| poole_kernel_emergency_panic(PanicCode::Scheduler as u32));
+        neutral
+            .activate(task_a, cpu)
+            .unwrap_or_else(|_| poole_kernel_emergency_panic(PanicCode::Scheduler as u32));
+        neutral
+            .activate(task_b, cpu)
+            .unwrap_or_else(|_| poole_kernel_emergency_panic(PanicCode::Scheduler as u32));
+
+        let mut trace = [0u8; 8];
+        for slot in &mut trace {
+            let selected = neutral
+                .dispatch(cpu)
+                .unwrap_or_else(|_| poole_kernel_emergency_panic(PanicCode::Scheduler as u32));
+            *slot = selected.slot;
+            neutral
+                .account_tick(cpu, 1)
+                .unwrap_or_else(|_| poole_kernel_emergency_panic(PanicCode::Scheduler as u32));
+            neutral
+                .yield_current(cpu)
+                .unwrap_or_else(|_| poole_kernel_emergency_panic(PanicCode::Scheduler as u32));
+        }
+        if trace != [0, 1, 0, 1, 0, 1, 0, 1] {
+            poole_kernel_emergency_panic(PanicCode::Scheduler as u32);
+        }
+
+        SCHEDULER_SWITCH_LOCK
+            .lock_bounded(1, 1)
+            .unwrap_or_else(|_| poole_kernel_emergency_panic(PanicCode::Scheduler as u32));
+        let switch_contract = SchedulerContextSwitchContract {
+            outgoing: SchedulerTaskId::new(0, 1)
+                .unwrap_or_else(|_| poole_kernel_emergency_panic(PanicCode::Scheduler as u32)),
+            incoming: SchedulerTaskId::new(1, 1)
+                .unwrap_or_else(|_| poole_kernel_emergency_panic(PanicCode::Scheduler as u32)),
+            cpu,
+            scheduler_lock_held: SCHEDULER_SWITCH_LOCK.owner() == 1,
+            interrupts_disabled: arch::x86_64::read_rflags() & (1 << 9) == 0,
+            same_address_space: true,
+            fs_gs_unchanged: true,
+            xstate_unused: true,
+            debug_state_unused: true,
+            pmu_state_unused: true,
+            kernel_stacks_distinct: true,
+            stack_alignment: 16,
+        };
+        validate_context_switch_contract(&switch_contract)
+            .unwrap_or_else(|_| poole_kernel_emergency_panic(PanicCode::Scheduler as u32));
+        let switch_proof = arch::x86_64::run_scheduler_context_switch_probe(&trace)
+            .unwrap_or_else(|_| poole_kernel_emergency_panic(PanicCode::Scheduler as u32));
+        if SCHEDULER_SWITCH_LOCK.owner() != 1 {
+            poole_kernel_emergency_panic(PanicCode::Scheduler as u32);
+        }
+        SCHEDULER_SWITCH_LOCK
+            .unlock(1)
+            .unwrap_or_else(|_| poole_kernel_emergency_panic(PanicCode::Scheduler as u32));
+
+        for task in [task_a, task_b] {
+            neutral
+                .teardown(task)
+                .unwrap_or_else(|_| poole_kernel_emergency_panic(PanicCode::Scheduler as u32));
+            match neutral.task_snapshot(task) {
+                Ok(snapshot) if snapshot.state == SchedulerTaskState::Dead => {}
+                _ => poole_kernel_emergency_panic(PanicCode::Scheduler as u32),
+            }
+        }
+        let summary = neutral.summary();
+        if summary.task_count != 2
+            || summary.runnable_count != 0
+            || summary.running_count != 0
+            || summary.blocked_count != 0
+            || summary.dead_count != 2
+            || summary.dispatch_count != 8
+            || summary.migration_count != 0
+            || summary.wake_count != 0
+            || summary.teardown_count != 2
+            || neutral.queue_len(cpu) != Ok(0)
+            || SCHEDULER_SWITCH_LOCK.owner() != 0
+            || switch_proof.dispatch_count != 8
+            || switch_proof.machine_transition_count != 16
+            || switch_proof.task_a_runs != 4
+            || switch_proof.task_b_runs != 4
+            || switch_proof.callee_saved_register_count != 6
+            || !switch_proof.rflags_preserved
+            || !switch_proof.same_cr3
+            || !switch_proof.fs_gs_unchanged
+            || !switch_proof.xstate_unused
+            || !switch_proof.debug_state_unused
+            || !switch_proof.pmu_state_unused
+            || !switch_proof.stacks_distinct
+            || switch_proof.stack_bytes_each != 16_384
+            || switch_proof.stack_alignment != 16
+            || switch_proof.stack_bytes_cleared != 32_768
+            || switch_proof.register_error_count != 0
+        {
+            poole_kernel_emergency_panic(PanicCode::Scheduler as u32);
+        }
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        logger.write_bytes(&PKSCHED1_CORE);
+        logger.write_bytes(&PKSCHED1_SWITCH);
+        logger.write_bytes(&PKSCHED1_CLEANUP);
+        logger.write_bytes(&PKSCHED1_RESULT);
+        halt_forever()
+    }
+
     if trap_scenario == DevelopmentTrapScenario::XstatePolicy {
         // SAFETY: PKXFER1 transferred exactly once at CPL0 with IF/DF clear. The opt-in
         // PKXSTATE1 profile owns the BSP's x87/SSE state and its private aligned images.
@@ -8269,6 +8416,9 @@ extern "C" fn poole_kernel_rust_entry(
             poole_kernel_emergency_panic(PanicCode::SmpPerCpuRuntime as u32)
         }
         DevelopmentTrapScenario::SmpIpi => poole_kernel_emergency_panic(PanicCode::SmpIpi as u32),
+        DevelopmentTrapScenario::Scheduler => {
+            poole_kernel_emergency_panic(PanicCode::Scheduler as u32)
+        }
     }
 }
 

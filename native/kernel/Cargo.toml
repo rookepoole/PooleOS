@@ -18,6 +18,11 @@ name = "pkreval1-probe"
 path = "src/bin/pkreval1_probe.rs"
 required-features = ["host-probe"]
 
+[[bin]]
+name = "pksched1-probe"
+path = "src/bin/pksched1_probe.rs"
+required-features = ["host-probe"]
+
 [dependencies]
 poole-boot-trust = { path = "../trust" }
 poole-bootload = { path = "../bootload" }

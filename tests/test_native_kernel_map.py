@@ -19,26 +19,26 @@ def plan() -> dict[str, object]:
     return {
         "physical_base": 0x0200_0000,
         "virtual_base": native_kernel_map.MIN_VIRTUAL_BASE,
-        "image_size": 0x70000,
-        "entry_virtual": native_kernel_map.MIN_VIRTUAL_BASE + 0x9000,
+        "image_size": 0x7C000,
+        "entry_virtual": native_kernel_map.MIN_VIRTUAL_BASE + 0xA000,
         "mappings": [
-            {"virtual_offset": 0, "memory_size": 0x9000, "permissions": "r"},
-            {"virtual_offset": 0x9000, "memory_size": 0x4F000, "permissions": "rx"},
-            {"virtual_offset": 0x58000, "memory_size": 0xC000, "permissions": "r"},
-            {"virtual_offset": 0x64000, "memory_size": 0xC000, "permissions": "rw"},
+            {"virtual_offset": 0, "memory_size": 0xA000, "permissions": "r"},
+            {"virtual_offset": 0xA000, "memory_size": 0x52000, "permissions": "rx"},
+            {"virtual_offset": 0x5C000, "memory_size": 0xC000, "permissions": "r"},
+            {"virtual_offset": 0x68000, "memory_size": 0x14000, "permissions": "rw"},
         ],
     }
 
 
 class NativeKernelMapTests(unittest.TestCase):
-    def test_retained_probe_tracks_cycle137_linker_geometry(self) -> None:
+    def test_retained_probe_tracks_cycle142_linker_geometry(self) -> None:
         source = (ROOT / "native/kmap/src/bin/pkmap2_probe.rs").read_text(encoding="utf-8")
         for exact in (
-            "byte_count: 0x4f000",
-            "virtual_offset: 0x58000",
-            "virtual_offset: 0x64000",
-            "image_bytes: 0x70000",
-            "page_count: 112",
+            "byte_count: 0x52000",
+            "virtual_offset: 0x5c000",
+            "virtual_offset: 0x68000",
+            "image_bytes: 0x7c000",
+            "page_count: 124",
         ):
             self.assertIn(exact, source)
 
@@ -57,16 +57,16 @@ class NativeKernelMapTests(unittest.TestCase):
 
     def test_exact_product_model_matches_frozen_summary(self) -> None:
         model = native_kernel_map.build_model(native_kernel_map.request_from_elf_plan(plan(), 48))
-        self.assertEqual(112, model["mapped_page_count"])
-        self.assertEqual(21, model["read_only_page_count"])
-        self.assertEqual(79, model["read_execute_page_count"])
-        self.assertEqual(12, model["read_write_page_count"])
+        self.assertEqual(124, model["mapped_page_count"])
+        self.assertEqual(22, model["read_only_page_count"])
+        self.assertEqual(82, model["read_execute_page_count"])
+        self.assertEqual(20, model["read_write_page_count"])
         self.assertEqual(0, model["writable_executable_page_count"])
         self.assertEqual(
             {"pml4": 511, "pdpt": 510, "page_directory": 0, "first_page_table": 0},
             model["indices"],
         )
-        self.assertEqual("F43490703F3DCA21", model["leaf_fingerprint"])
+        self.assertEqual("03E40F0B986CF725", model["leaf_fingerprint"])
         native_kernel_map.validate_model(model)
 
     def test_cpu_profile_requires_wp_nx_and_four_level_non_pcid_mode(self) -> None:
@@ -147,8 +147,8 @@ class NativeKernelMapTests(unittest.TestCase):
 
     def test_probe_parser_requires_exact_order_and_fingerprint(self) -> None:
         line = (
-            "PKMAP1 PASS mappings=4 pages=112 ro=21 rx=79 rw=12 wx=0 "
-            "pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=F43490703F3DCA21"
+            "PKMAP1 PASS mappings=4 pages=124 ro=22 rx=82 rw=20 wx=0 "
+            "pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=03E40F0B986CF725"
         )
         observed = native_kernel_map.parse_probe_output(line)
         expected = native_kernel_map.marker_expectation(plan(), 48)
@@ -166,28 +166,28 @@ class NativeKernelMapTests(unittest.TestCase):
                 handoff_capacity_bytes=1024 * 1024,
             ),
         )
-        self.assertEqual([112, 145], model["guard_page_indices"])
-        self.assertEqual(400, model["total_mapped_page_count"])
-        self.assertEqual(402, native_kernel_map.TEMPORARY_PAGE_INDEX)
-        self.assertEqual((403, 404, 5, 409), (
+        self.assertEqual([124, 157], model["guard_page_indices"])
+        self.assertEqual(412, model["total_mapped_page_count"])
+        self.assertEqual(414, native_kernel_map.TEMPORARY_PAGE_INDEX)
+        self.assertEqual((415, 416, 5, 421), (
             native_kernel_map.METADATA_GUARD_LOW_PAGE,
             native_kernel_map.METADATA_FIRST_PAGE,
             native_kernel_map.METADATA_PAGE_COUNT,
             native_kernel_map.METADATA_GUARD_HIGH_PAGE,
         ))
-        self.assertEqual((410, 411, 32, 443), (
+        self.assertEqual((422, 423, 32, 455), (
             native_kernel_map.LEDGER_A_GUARD_LOW_PAGE,
             native_kernel_map.LEDGER_A_FIRST_PAGE,
             native_kernel_map.LEDGER_A_PAGE_CAPACITY,
             native_kernel_map.LEDGER_A_GUARD_HIGH_PAGE,
         ))
-        self.assertEqual((444, 445, 32, 477), (
+        self.assertEqual((456, 457, 32, 489), (
             native_kernel_map.LEDGER_B_GUARD_LOW_PAGE,
             native_kernel_map.LEDGER_B_FIRST_PAGE,
             native_kernel_map.LEDGER_B_PAGE_CAPACITY,
             native_kernel_map.LEDGER_B_GUARD_HIGH_PAGE,
         ))
-        self.assertEqual((478, 479, 480, 481, 482), (
+        self.assertEqual((490, 491, 492, 493, 494), (
             native_kernel_map.MMIO_GUARD_LOW_PAGE,
             native_kernel_map.LOCAL_APIC_PAGE,
             native_kernel_map.MMIO_GUARD_MIDDLE_PAGE,
@@ -221,8 +221,8 @@ class NativeKernelMapTests(unittest.TestCase):
             native_kernel_map.RetainedRequest(0x0400_0000, 32, 0x0500_0000, 1024 * 1024),
         )
         line = (
-            "PKMAP2 PASS kernel_pages=112 stack_pages=32 handoff_pages=256 guards=2 "
-            f"total_pages=400 stack_pt=113 handoff_pt=146 retained_fnv1a64={expected['retained_leaf_fingerprint']}"
+            "PKMAP2 PASS kernel_pages=124 stack_pages=32 handoff_pages=256 guards=2 "
+            f"total_pages=412 stack_pt=125 handoff_pt=158 retained_fnv1a64={expected['retained_leaf_fingerprint']}"
         )
         self.assertEqual(
             expected["retained_leaf_fingerprint"],

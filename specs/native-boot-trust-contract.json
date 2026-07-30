@@ -249,8 +249,8 @@
     },
     {
       "path": "native/boot/Cargo.toml",
-      "byte_count": 1433,
-      "sha256": "09EC9098F1618A3CD7BE9C056C998F2E3AA681F038F1087DDACA57E0D8ACFF51"
+      "byte_count": 1482,
+      "sha256": "B12C0CE859D615D0DD1E844EFDC4FD06727A3F1843E3251436E5ADBD39A953D5"
     },
     {
       "path": "native/boot/src/kload.rs",

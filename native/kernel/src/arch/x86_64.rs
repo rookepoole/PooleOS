@@ -1,7 +1,8 @@
 use core::arch::asm;
 use core::mem::size_of;
 use core::ptr::{
-    addr_of, addr_of_mut, read_unaligned, write_bytes, write_unaligned, write_volatile,
+    addr_of, addr_of_mut, read_unaligned, read_volatile, write_bytes, write_unaligned,
+    write_volatile,
 };
 use core::sync::atomic::{Ordering, compiler_fence};
 
@@ -192,6 +193,206 @@ static mut XSTATE_CANONICAL: XstateArea = XstateArea([0; AREA_BYTES as usize]);
 static mut XSTATE_CONTEXT_A: XstateArea = XstateArea([0; AREA_BYTES as usize]);
 static mut XSTATE_CONTEXT_B: XstateArea = XstateArea([0; AREA_BYTES as usize]);
 static mut XSTATE_FXSAVE: FxsaveArea = FxsaveArea([0; 512]);
+
+pub const SCHEDULER_STACK_BYTES: usize = 16 * 1024;
+pub const SCHEDULER_STACK_ALIGNMENT: usize = 16;
+const SCHEDULER_CONTEXT_WORDS: usize = 8;
+const SCHEDULER_CONTEXT_BYTES: usize = SCHEDULER_CONTEXT_WORDS * size_of::<u64>();
+const SCHEDULER_HIGH_CANARY_OFFSET: usize =
+    SCHEDULER_STACK_BYTES - SCHEDULER_CONTEXT_BYTES - size_of::<u64>();
+const SCHEDULER_STACK_CANARY: u64 = 0x504b_5343_4845_4431;
+const SCHEDULER_STACK_FILL: u8 = 0xa5;
+const SCHEDULER_TASK_A_REGISTERS: [u64; 6] = [
+    0xa0a0_b0b0_c0c0_d0d0,
+    0xa1a1_b1b1_c1c1_d1d1,
+    0xa2a2_b2b2_c2c2_d2d2,
+    0xa3a3_b3b3_c3c3_d3d3,
+    0xa4a4_b4b4_c4c4_d4d4,
+    0xa5a5_b5b5_c5c5_d5d5,
+];
+const SCHEDULER_TASK_B_REGISTERS: [u64; 6] = [
+    0xb0b0_c0c0_d0d0_e0e0,
+    0xb1b1_c1c1_d1d1_e1e1,
+    0xb2b2_c2c2_d2d2_e2e2,
+    0xb3b3_c3c3_d3d3_e3e3,
+    0xb4b4_c4c4_d4d4_e4e4,
+    0xb5b5_c5c5_d5d5_e5e5,
+];
+
+#[repr(C, align(16))]
+struct SchedulerStack([u8; SCHEDULER_STACK_BYTES]);
+
+static mut SCHEDULER_STACK_A: SchedulerStack = SchedulerStack([0; SCHEDULER_STACK_BYTES]);
+static mut SCHEDULER_STACK_B: SchedulerStack = SchedulerStack([0; SCHEDULER_STACK_BYTES]);
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SchedulerSwitchHardwareError {
+    Trace,
+    InterruptState,
+    StackGeometry,
+    RegisterState,
+    TransitionCount,
+    ControlState,
+    Clear,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SchedulerSwitchProof {
+    pub dispatch_count: u32,
+    pub machine_transition_count: u32,
+    pub task_a_runs: u32,
+    pub task_b_runs: u32,
+    pub callee_saved_register_count: u8,
+    pub rflags_preserved: bool,
+    pub same_cr3: bool,
+    pub fs_gs_unchanged: bool,
+    pub xstate_unused: bool,
+    pub debug_state_unused: bool,
+    pub pmu_state_unused: bool,
+    pub stacks_distinct: bool,
+    pub stack_bytes_each: u32,
+    pub stack_alignment: u8,
+    pub stack_bytes_cleared: u32,
+    pub register_error_count: u32,
+}
+
+unsafe extern "C" {
+    fn poole_scheduler_context_switch(outgoing: *mut u64, incoming: *const u64);
+    fn poole_scheduler_task_a_entry();
+    fn poole_scheduler_task_b_entry();
+    static mut poole_scheduler_kernel_rsp: u64;
+    static mut poole_scheduler_task_a_rsp: u64;
+    static mut poole_scheduler_task_b_rsp: u64;
+    static mut poole_scheduler_task_a_runs: u64;
+    static mut poole_scheduler_task_b_runs: u64;
+    static mut poole_scheduler_last_task: u64;
+    static mut poole_scheduler_transition_count: u64;
+    static mut poole_scheduler_register_errors: u64;
+}
+
+core::arch::global_asm!(
+    r#"
+    .section .text.poole_scheduler_switch,"ax",@progbits
+    .balign 16
+    .global poole_scheduler_context_switch
+    .type poole_scheduler_context_switch,@function
+poole_scheduler_context_switch:
+    pushfq
+    push rbp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
+    mov qword ptr [rdi], rsp
+    inc qword ptr [rip + poole_scheduler_transition_count]
+    mov rsp, qword ptr [rsi]
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    pop rbp
+    popfq
+    ret
+    .global poole_scheduler_context_switch_end
+poole_scheduler_context_switch_end:
+    .size poole_scheduler_context_switch, .-poole_scheduler_context_switch
+
+    .global poole_scheduler_task_a_entry
+    .type poole_scheduler_task_a_entry,@function
+poole_scheduler_task_a_entry:
+    mov rax, 0xa0a0b0b0c0c0d0d0
+    cmp rbx, rax
+    jne .Lpoole_scheduler_task_a_error
+    mov rax, 0xa1a1b1b1c1c1d1d1
+    cmp rbp, rax
+    jne .Lpoole_scheduler_task_a_error
+    mov rax, 0xa2a2b2b2c2c2d2d2
+    cmp r12, rax
+    jne .Lpoole_scheduler_task_a_error
+    mov rax, 0xa3a3b3b3c3c3d3d3
+    cmp r13, rax
+    jne .Lpoole_scheduler_task_a_error
+    mov rax, 0xa4a4b4b4c4c4d4d4
+    cmp r14, rax
+    jne .Lpoole_scheduler_task_a_error
+    mov rax, 0xa5a5b5b5c5c5d5d5
+    cmp r15, rax
+    jne .Lpoole_scheduler_task_a_error
+    jmp .Lpoole_scheduler_task_a_run
+.Lpoole_scheduler_task_a_error:
+    inc qword ptr [rip + poole_scheduler_register_errors]
+.Lpoole_scheduler_task_a_run:
+    inc qword ptr [rip + poole_scheduler_task_a_runs]
+    mov qword ptr [rip + poole_scheduler_last_task], 1
+    lea rdi, [rip + poole_scheduler_task_a_rsp]
+    lea rsi, [rip + poole_scheduler_kernel_rsp]
+    call poole_scheduler_context_switch
+    jmp poole_scheduler_task_a_entry
+    .size poole_scheduler_task_a_entry, .-poole_scheduler_task_a_entry
+
+    .global poole_scheduler_task_b_entry
+    .type poole_scheduler_task_b_entry,@function
+poole_scheduler_task_b_entry:
+    mov rax, 0xb0b0c0c0d0d0e0e0
+    cmp rbx, rax
+    jne .Lpoole_scheduler_task_b_error
+    mov rax, 0xb1b1c1c1d1d1e1e1
+    cmp rbp, rax
+    jne .Lpoole_scheduler_task_b_error
+    mov rax, 0xb2b2c2c2d2d2e2e2
+    cmp r12, rax
+    jne .Lpoole_scheduler_task_b_error
+    mov rax, 0xb3b3c3c3d3d3e3e3
+    cmp r13, rax
+    jne .Lpoole_scheduler_task_b_error
+    mov rax, 0xb4b4c4c4d4d4e4e4
+    cmp r14, rax
+    jne .Lpoole_scheduler_task_b_error
+    mov rax, 0xb5b5c5c5d5d5e5e5
+    cmp r15, rax
+    jne .Lpoole_scheduler_task_b_error
+    jmp .Lpoole_scheduler_task_b_run
+.Lpoole_scheduler_task_b_error:
+    inc qword ptr [rip + poole_scheduler_register_errors]
+.Lpoole_scheduler_task_b_run:
+    inc qword ptr [rip + poole_scheduler_task_b_runs]
+    mov qword ptr [rip + poole_scheduler_last_task], 2
+    lea rdi, [rip + poole_scheduler_task_b_rsp]
+    lea rsi, [rip + poole_scheduler_kernel_rsp]
+    call poole_scheduler_context_switch
+    jmp poole_scheduler_task_b_entry
+    .size poole_scheduler_task_b_entry, .-poole_scheduler_task_b_entry
+
+    .section .bss.poole_scheduler_context,"aw",@nobits
+    .balign 8
+    .global poole_scheduler_kernel_rsp
+poole_scheduler_kernel_rsp:
+    .quad 0
+    .global poole_scheduler_task_a_rsp
+poole_scheduler_task_a_rsp:
+    .quad 0
+    .global poole_scheduler_task_b_rsp
+poole_scheduler_task_b_rsp:
+    .quad 0
+    .global poole_scheduler_task_a_runs
+poole_scheduler_task_a_runs:
+    .quad 0
+    .global poole_scheduler_task_b_runs
+poole_scheduler_task_b_runs:
+    .quad 0
+    .global poole_scheduler_last_task
+poole_scheduler_last_task:
+    .quad 0
+    .global poole_scheduler_transition_count
+poole_scheduler_transition_count:
+    .quad 0
+    .global poole_scheduler_register_errors
+poole_scheduler_register_errors:
+    .quad 0
+"#
+);
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum XstateHardwareError {
@@ -3308,6 +3509,256 @@ pub fn read_rflags() -> u64 {
     // SAFETY: PUSHFQ/POP to a general register is unprivileged and preserves the flags.
     unsafe { asm!("pushfq", "pop {}", out(reg) value, options(nomem, preserves_flags)) };
     value
+}
+
+fn scheduler_stack_pointer(task: u8) -> *mut u64 {
+    match task {
+        0 => addr_of_mut!(poole_scheduler_task_a_rsp),
+        _ => addr_of_mut!(poole_scheduler_task_b_rsp),
+    }
+}
+
+fn scheduler_stack_base(task: u8) -> *mut u8 {
+    // SAFETY: this creates raw addresses only; ownership is enforced by the one-BSP caller.
+    unsafe {
+        match task {
+            0 => addr_of_mut!(SCHEDULER_STACK_A.0).cast::<u8>(),
+            _ => addr_of_mut!(SCHEDULER_STACK_B.0).cast::<u8>(),
+        }
+    }
+}
+
+unsafe fn initialize_scheduler_stack(
+    stack: *mut u8,
+    saved_rsp: *mut u64,
+    entry: unsafe extern "C" fn(),
+    registers: [u64; 6],
+) {
+    // SAFETY: the caller exclusively owns the fixed static stack and context slot.
+    unsafe {
+        write_bytes(stack, SCHEDULER_STACK_FILL, SCHEDULER_STACK_BYTES);
+        write_volatile(stack.cast::<u64>(), SCHEDULER_STACK_CANARY);
+        write_volatile(
+            stack.add(SCHEDULER_HIGH_CANARY_OFFSET).cast::<u64>(),
+            SCHEDULER_STACK_CANARY,
+        );
+        let frame = stack
+            .add(SCHEDULER_STACK_BYTES - SCHEDULER_CONTEXT_BYTES)
+            .cast::<u64>();
+        write_volatile(frame, registers[5]);
+        write_volatile(frame.add(1), registers[4]);
+        write_volatile(frame.add(2), registers[3]);
+        write_volatile(frame.add(3), registers[2]);
+        write_volatile(frame.add(4), registers[0]);
+        write_volatile(frame.add(5), registers[1]);
+        write_volatile(frame.add(6), 1 << 1);
+        write_volatile(frame.add(7), entry as usize as u64);
+        write_volatile(saved_rsp, frame as u64);
+    }
+}
+
+fn scheduler_stack_valid(task: u8) -> bool {
+    let base = scheduler_stack_base(task);
+    let saved = unsafe { read_volatile(scheduler_stack_pointer(task)) };
+    let low = base as u64;
+    let high = low + SCHEDULER_STACK_BYTES as u64;
+    let canaries = unsafe {
+        read_volatile(base.cast::<u64>()) == SCHEDULER_STACK_CANARY
+            && read_volatile(base.add(SCHEDULER_HIGH_CANARY_OFFSET).cast::<u64>())
+                == SCHEDULER_STACK_CANARY
+    };
+    canaries
+        && saved >= low + size_of::<u64>() as u64
+        && saved
+            .checked_add(SCHEDULER_CONTEXT_BYTES as u64)
+            .is_some_and(|end| end <= high)
+        && saved.is_multiple_of(SCHEDULER_STACK_ALIGNMENT as u64)
+}
+
+fn clear_scheduler_stacks() -> bool {
+    for task in 0..2 {
+        let base = scheduler_stack_base(task);
+        // SAFETY: the task contexts are retired and no switch can resume either stack.
+        unsafe { write_bytes(base, 0, SCHEDULER_STACK_BYTES) };
+    }
+    let mut cleared = true;
+    for task in 0..2 {
+        let base = scheduler_stack_base(task);
+        for offset in 0..SCHEDULER_STACK_BYTES {
+            // SAFETY: the fixed stack range remains exclusively owned by this proof.
+            cleared &= unsafe { read_volatile(base.add(offset)) } == 0;
+        }
+        // SAFETY: the retired context slot cannot be consumed after this point.
+        unsafe { write_volatile(scheduler_stack_pointer(task), 0) };
+    }
+    cleared
+}
+
+fn run_scheduler_context_switch_inner(
+    trace: &[u8; 8],
+) -> Result<SchedulerSwitchProof, SchedulerSwitchHardwareError> {
+    if trace != &[0, 1, 0, 1, 0, 1, 0, 1] {
+        return Err(SchedulerSwitchHardwareError::Trace);
+    }
+    let rflags_before = read_rflags();
+    if rflags_before & (1 << 9) != 0 {
+        return Err(SchedulerSwitchHardwareError::InterruptState);
+    }
+    // SAFETY: selector 15 executes at CPL0 and reads only the current architectural state.
+    let cr3_before = unsafe { read_cr3() };
+    // SAFETY: long mode defines these three base MSRs; selector 15 does not write them.
+    let bases_before = unsafe {
+        (
+            read_msr(IA32_FS_BASE),
+            read_msr(IA32_GS_BASE),
+            read_msr(IA32_KERNEL_GS_BASE),
+        )
+    };
+
+    // SAFETY: this profile is single-entry, one-BSP, and exclusively owns both static stacks.
+    unsafe {
+        write_volatile(addr_of_mut!(poole_scheduler_kernel_rsp), 0);
+        write_volatile(addr_of_mut!(poole_scheduler_task_a_runs), 0);
+        write_volatile(addr_of_mut!(poole_scheduler_task_b_runs), 0);
+        write_volatile(addr_of_mut!(poole_scheduler_last_task), 0);
+        write_volatile(addr_of_mut!(poole_scheduler_transition_count), 0);
+        write_volatile(addr_of_mut!(poole_scheduler_register_errors), 0);
+        initialize_scheduler_stack(
+            scheduler_stack_base(0),
+            scheduler_stack_pointer(0),
+            poole_scheduler_task_a_entry,
+            SCHEDULER_TASK_A_REGISTERS,
+        );
+        initialize_scheduler_stack(
+            scheduler_stack_base(1),
+            scheduler_stack_pointer(1),
+            poole_scheduler_task_b_entry,
+            SCHEDULER_TASK_B_REGISTERS,
+        );
+    }
+
+    let stack_a = scheduler_stack_base(0) as u64;
+    let stack_b = scheduler_stack_base(1) as u64;
+    let stack_a_end = stack_a
+        .checked_add(SCHEDULER_STACK_BYTES as u64)
+        .ok_or(SchedulerSwitchHardwareError::StackGeometry)?;
+    let stack_b_end = stack_b
+        .checked_add(SCHEDULER_STACK_BYTES as u64)
+        .ok_or(SchedulerSwitchHardwareError::StackGeometry)?;
+    if !stack_a.is_multiple_of(SCHEDULER_STACK_ALIGNMENT as u64)
+        || !stack_b.is_multiple_of(SCHEDULER_STACK_ALIGNMENT as u64)
+        || !(stack_a_end <= stack_b || stack_b_end <= stack_a)
+    {
+        return Err(SchedulerSwitchHardwareError::StackGeometry);
+    }
+
+    for (index, task) in trace.iter().copied().enumerate() {
+        let runs_before = unsafe {
+            if task == 0 {
+                read_volatile(addr_of!(poole_scheduler_task_a_runs))
+            } else {
+                read_volatile(addr_of!(poole_scheduler_task_b_runs))
+            }
+        };
+        // SAFETY: each incoming RSP names a validated frame on a private live stack.
+        unsafe {
+            write_volatile(addr_of_mut!(poole_scheduler_last_task), 0);
+            poole_scheduler_context_switch(
+                addr_of_mut!(poole_scheduler_kernel_rsp),
+                scheduler_stack_pointer(task),
+            );
+        }
+        let (runs_after, observed_task, transitions, register_errors) = unsafe {
+            (
+                if task == 0 {
+                    read_volatile(addr_of!(poole_scheduler_task_a_runs))
+                } else {
+                    read_volatile(addr_of!(poole_scheduler_task_b_runs))
+                },
+                read_volatile(addr_of!(poole_scheduler_last_task)),
+                read_volatile(addr_of!(poole_scheduler_transition_count)),
+                read_volatile(addr_of!(poole_scheduler_register_errors)),
+            )
+        };
+        if runs_after != runs_before + 1 || observed_task != u64::from(task) + 1 {
+            return Err(SchedulerSwitchHardwareError::Trace);
+        }
+        if transitions != (index as u64 + 1) * 2 {
+            return Err(SchedulerSwitchHardwareError::TransitionCount);
+        }
+        if register_errors != 0 {
+            return Err(SchedulerSwitchHardwareError::RegisterState);
+        }
+        if !scheduler_stack_valid(task) {
+            return Err(SchedulerSwitchHardwareError::StackGeometry);
+        }
+    }
+
+    let rflags_after = read_rflags();
+    // SAFETY: these are the same read-only CPL0 observations sampled before the proof.
+    let (cr3_after, bases_after) = unsafe {
+        (
+            read_cr3(),
+            (
+                read_msr(IA32_FS_BASE),
+                read_msr(IA32_GS_BASE),
+                read_msr(IA32_KERNEL_GS_BASE),
+            ),
+        )
+    };
+    let (task_a_runs, task_b_runs, transitions, register_errors, kernel_rsp) = unsafe {
+        (
+            read_volatile(addr_of!(poole_scheduler_task_a_runs)),
+            read_volatile(addr_of!(poole_scheduler_task_b_runs)),
+            read_volatile(addr_of!(poole_scheduler_transition_count)),
+            read_volatile(addr_of!(poole_scheduler_register_errors)),
+            read_volatile(addr_of!(poole_scheduler_kernel_rsp)),
+        )
+    };
+    if task_a_runs != 4 || task_b_runs != 4 || transitions != 16 || register_errors != 0 {
+        return Err(SchedulerSwitchHardwareError::TransitionCount);
+    }
+    if kernel_rsp == 0 || !kernel_rsp.is_multiple_of(SCHEDULER_STACK_ALIGNMENT as u64) {
+        return Err(SchedulerSwitchHardwareError::StackGeometry);
+    }
+    if rflags_after != rflags_before || cr3_after != cr3_before || bases_after != bases_before {
+        return Err(SchedulerSwitchHardwareError::ControlState);
+    }
+    if !scheduler_stack_valid(0) || !scheduler_stack_valid(1) {
+        return Err(SchedulerSwitchHardwareError::StackGeometry);
+    }
+
+    Ok(SchedulerSwitchProof {
+        dispatch_count: trace.len() as u32,
+        machine_transition_count: transitions as u32,
+        task_a_runs: task_a_runs as u32,
+        task_b_runs: task_b_runs as u32,
+        callee_saved_register_count: 6,
+        rflags_preserved: true,
+        same_cr3: true,
+        fs_gs_unchanged: true,
+        xstate_unused: true,
+        debug_state_unused: true,
+        pmu_state_unused: true,
+        stacks_distinct: true,
+        stack_bytes_each: SCHEDULER_STACK_BYTES as u32,
+        stack_alignment: SCHEDULER_STACK_ALIGNMENT as u8,
+        stack_bytes_cleared: 0,
+        register_error_count: register_errors as u32,
+    })
+}
+
+pub fn run_scheduler_context_switch_probe(
+    trace: &[u8; 8],
+) -> Result<SchedulerSwitchProof, SchedulerSwitchHardwareError> {
+    let result = run_scheduler_context_switch_inner(trace);
+    if !clear_scheduler_stacks() {
+        return Err(SchedulerSwitchHardwareError::Clear);
+    }
+    result.map(|mut proof| {
+        proof.stack_bytes_cleared = (2 * SCHEDULER_STACK_BYTES) as u32;
+        proof
+    })
 }
 
 unsafe fn outb(port: u16, value: u8) {

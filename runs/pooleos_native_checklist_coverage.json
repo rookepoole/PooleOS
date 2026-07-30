@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_kind": "pooleos_native_checklist_coverage",
-  "status_date": "2026-07-26",
+  "status_date": "2026-07-30",
   "status": "pass",
   "source": {
     "path": "sources/requirements/sha256/a8c94719faf9428c1f133010ba2603c0270c4e1efd7327af8eab9c8c362abb3d/PooleOS_From_Scratch_Master_Checklist.md",
@@ -229,7 +229,7 @@
     {
       "phase_id": "N12",
       "title": "Concurrency, Scheduler, Deferred Work, and Context Switching",
-      "status": "not_started",
+      "status": "partial",
       "source_section_ids": [
         "031",
         "032",
@@ -238,7 +238,9 @@
       ],
       "source_line_count": 227,
       "source_checkbox_count": 193,
-      "added_requirement_ids": []
+      "added_requirement_ids": [
+        "ADD-N12-SCHED-FOUNDATION-001"
+      ]
     },
     {
       "phase_id": "N13",
@@ -1050,7 +1052,7 @@
       "subheading_count": 3,
       "checkbox_count": 44,
       "phase_id": "N12",
-      "phase_status": "not_started",
+      "phase_status": "partial",
       "completion_inferred": false
     },
     {
@@ -1062,7 +1064,7 @@
       "subheading_count": 0,
       "checkbox_count": 22,
       "phase_id": "N12",
-      "phase_status": "not_started",
+      "phase_status": "partial",
       "completion_inferred": false
     },
     {
@@ -1074,7 +1076,7 @@
       "subheading_count": 5,
       "checkbox_count": 103,
       "phase_id": "N12",
-      "phase_status": "not_started",
+      "phase_status": "partial",
       "completion_inferred": false
     },
     {
@@ -1086,7 +1088,7 @@
       "subheading_count": 0,
       "checkbox_count": 24,
       "phase_id": "N12",
-      "phase_status": "not_started",
+      "phase_status": "partial",
       "completion_inferred": false
     },
     {
@@ -2970,6 +2972,16 @@
       "basis": [
         "https://pubs.opengroup.org/onlinepubs/9799919799/",
         "https://www.iana.org/time-zones"
+      ]
+    },
+    {
+      "id": "ADD-N12-SCHED-FOUNDATION-001",
+      "phase_id": "N12",
+      "requirement": "Freeze and independently qualify a neutral allocation-free scheduler foundation with generation-safe task identities, explicit CPU ownership and affinity, bounded priority/fairness behavior, deterministic run queues, wake/block/cancel/timeout/teardown transitions, lock and reference-lifetime primitives, exact context-switch state, stack isolation and clearing, and strict separation between cooperative BSP evidence and later interrupt-preemptive, SMP, ring-3, address-space, and production claims.",
+      "basis": [
+        "Cycle 142 PKSCHED1 scheduler and context-switch foundation",
+        "master checklist sections 031-034",
+        "PooleOS neutral-policy and no-authority-amplification requirements"
       ]
     },
     {

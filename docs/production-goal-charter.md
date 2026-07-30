@@ -1,13 +1,41 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-07-29
+Status date: 2026-07-30
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 141
+Last roadmap reconciliation: PooleOS Cycle 142
+
+Cycle 142 reconciliation (superseding current Cycle 141 implementation and
+next-move values): governance and external-key state are unchanged, and no
+key, signature, publication, privileged host probe, driver load, firmware
+change, physical-media write, tag, release, or production promotion occurred.
+The owner-independent `N12-SCHED-001` move adds selector 15 PKSCHED1 and closes
+only `FLAG-N12-SCHED-FOUNDATION-001`. Its allocation-free four-CPU/eight-task
+core freezes generation-safe task identity, four deterministic queues,
+priorities 1-31, maximum bypass 7, affinity, modeled migration, accounting,
+yield/block/wake/cancel/timeout/teardown transitions, one-mutex direct priority
+inheritance, bounded references, and a raw spinlock. A deterministic Rust and
+Python campaign agrees over 4,096 steps, 1,761 dispatches, 2,334 migrations,
+and checksum `0x23B76E2F80E2B747`. Two exact 17-marker qemu64 BSP runs execute
+eight cooperative dispatches and sixteen context transitions across two
+distinct 16-KiB stacks through an exact linked-image-audited 18-instruction,
+36-byte switch. They preserve one CR3 and the declared excluded architectural
+state, retire both task contexts, and clear 32,768 stack bytes. Fourteen
+scheduler tests within 151 kernel host tests and 28 hostile-control categories
+covering 115 rejected cases pass. The exact kernel is 425,984 canonical bytes
+in a 507,904-byte, 124-page image with 1,042 relocations and SHA-256
+`AFED4AF858404D83CD77215C118F8478C88E91BDDC0F0B1ABAC3C9324B6ED602`.
+This is a cooperative BSP foundation, not the complete N12 scheduler.
+Interrupt timer/wakeup preemption, deferred work, live AP dispatch and
+cross-CPU migration, ring-3/address-space switching, per-task FS/GS and full
+xstate/debug/PMU ownership, general locks, target execution, N12 exit, release,
+and production remain open. `production_ready=false`; the blocked external
+move remains `N0-HW-KEY-ACQUIRE-001`, and the next owner-independent move is
+`N12-SCHED-PREEMPT-001`.
 
 Cycle 141 reconciliation (superseding current Cycle 140 implementation and
 next-move values): governance and external-key state are unchanged, and no

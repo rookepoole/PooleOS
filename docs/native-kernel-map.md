@@ -24,7 +24,7 @@ ranges must be aligned, nonoverlapping, complete, and W^X-safe.
 Retained physical ranges must also be aligned, nonzero, representable, and
 pairwise disjoint:
 
-- the current 112-page PooleKernel allocation;
+- the current 124-page PooleKernel allocation;
 - four private page-table pages;
 - 32 writable, non-executable stack pages;
 - 256 handoff pages, covering one MiB.

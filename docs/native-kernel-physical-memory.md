@@ -107,7 +107,7 @@ allocations, block further growth, and require explicit retry.
 
 ## Retained Layout
 
-The final 112-page kernel and 32-page bootstrap stack use this shared PKMAP2
+The final 124-page kernel and 32-page bootstrap stack use this shared PKMAP2
 leaf geometry:
 
 | Indices | Role |
@@ -136,7 +136,7 @@ consume the 32-page contract, and their live profiles pass.
 ## Canonical Evidence
 
 Two fresh-OVMF-vars TCG runs reproduce 45 ordered markers, exact framebuffer
-bytes, and exact PBP1 bytes. One hundred twenty-two PooleKernel host tests and 191 hostile
+bytes, and exact PBP1 bytes. One hundred fifty-one PooleKernel host tests and 191 hostile
 controls pass. The independent Python oracle derives every source class,
 first-fit allocation, generation, retired hole, reclaim range, receipt,
 checksum, physical access, and final ownership total from PBP1.
@@ -144,9 +144,9 @@ checksum, physical access, and final ownership total from PBP1.
 | Measure | Result |
 | --- | ---: |
 | PBP1 memory entries | 97 |
-| Conventional usable source pages | 117,859 |
-| Final managed pages | 129,119 |
-| Protected loader pages | 885 |
+| Conventional usable source pages | 117,847 |
+| Final managed pages | 129,107 |
+| Protected loader pages | 897 |
 | Stable manager / final ledger / ACPI snapshot pages | `5 / 29 / 1` |
 | Boot reclaim source records / ranges / pages | `70 / 12 / 11,250` |
 | Boot reclaim DMA / DMA32 / Normal pages | `2,018 / 9,232 / 0` |
@@ -158,16 +158,16 @@ checksum, physical access, and final ownership total from PBP1.
 | Scrubbed and verified pages / bytes | `11,473 / 46,993,408` |
 | Physical word writes / reads | `5,875,277 / 5,879,957` |
 | Temporary PTE writes / invalidations | `23,172 / 23,172` |
-| Growth checksum | `0xF6CB1CC42ACDAB03` |
+| Growth checksum | `0x17C9628B9F0CAAE8` |
 | Boot range / receipt checksums | `0xFDAB689F085C3287 / 0x5DEA9A3BC9E10C18` |
 | ACPI source / snapshot checksums | `0x078583AEEFDD6581 / 0x4089A5CFEC81CB41` |
 | ACPI range / receipt checksums | `0xC718FB26B45257F2 / 0x60DAA52A8A05ABD6` |
 
-The Cycle 141 requalification binds the kernel at 409,600 canonical bytes in a
-458,752-byte, 112-page image with 985 relocations and SHA-256
-`8118ED5F7761B9D36A4A65EFF1BC1856C5182D5733CE95A8BEEB24D1C2435F8D`.
+The Cycle 142 requalification binds the kernel at 425,984 canonical bytes in a
+507,904-byte, 124-page image with 1,042 relocations and SHA-256
+`AFED4AF858404D83CD77215C118F8478C88E91BDDC0F0B1ABAC3C9324B6ED602`.
 PKPMM7 also supplies PKVM3's exact generation-bound sparse ownership manifest;
-the 23-page retained-layout increase since Cycle 135 is fully reflected in source, managed,
+the 35-page retained-layout increase since Cycle 135 is fully reflected in source, managed,
 loader-protected, and dependent direct-map counts.
 
 ## Nonclaims

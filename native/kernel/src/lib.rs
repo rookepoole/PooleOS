@@ -21,6 +21,7 @@ pub mod interrupt_time;
 pub mod physical_memory;
 pub mod privilege_msr;
 pub mod revalidation;
+pub mod scheduler;
 pub mod smp;
 pub mod smp_ipi;
 pub mod smp_runtime;
@@ -37,11 +38,12 @@ pub const PHYSICAL_MEMORY_CONTRACT_ID: &str = physical_memory::CONTRACT_ID;
 pub const ACTIVE_VIRTUAL_MEMORY_CONTRACT_ID: &str = active_virtual_memory::CONTRACT_ID;
 pub const VIRTUAL_MEMORY_CONTRACT_ID: &str = virtual_memory::CONTRACT_ID;
 pub const XSTATE_EXCEPTION_CONTRACT_ID: &str = "PKXEXC1";
+pub const SCHEDULER_CONTRACT_ID: &str = scheduler::CONTRACT_ID;
 #[used]
 #[unsafe(link_section = ".text.pkbuild_literal")]
-static BUILD_ID_BYTES: [u8; 44] = *b"PKBUILD1-CYCLE141-N8-SMP-MULTI-AP-V001-00001";
+static BUILD_ID_BYTES: [u8; 44] = *b"PKBUILD1-CYCLE142-N12-SCHED-FOUND-V001-00001";
 pub const BUILD_ID: &[u8] = &BUILD_ID_BYTES;
-pub const ENTRY_OFFSET: u64 = 0x9000;
+pub const ENTRY_OFFSET: u64 = 0xa000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
 
 #[used]
@@ -92,6 +94,7 @@ pub enum PanicCode {
     SmpFirstAp = 0x1014,
     SmpPerCpuRuntime = 0x1015,
     SmpIpi = 0x1016,
+    Scheduler = 0x1017,
     UnexpectedReturn = 0x10ff,
 }
 
@@ -113,6 +116,7 @@ pub enum DevelopmentTrapScenario {
     SmpFirstAp = 12,
     SmpPerCpuRuntime = 13,
     SmpIpi = 14,
+    Scheduler = 15,
 }
 
 macro_rules! scenario_label {
@@ -138,6 +142,7 @@ scenario_label!(SCENARIO_INTERRUPT_TIME, b"interrupt_time");
 scenario_label!(SCENARIO_SMP_FIRST_AP, b"smp_first_ap");
 scenario_label!(SCENARIO_SMP_PERCPU_RUNTIME, b"smp_percpu_runtime");
 scenario_label!(SCENARIO_SMP_IPI, b"smp_ipi");
+scenario_label!(SCENARIO_SCHEDULER, b"scheduler");
 
 const fn scenario_label_text(bytes: &'static [u8]) -> &'static str {
     // SAFETY: every caller supplies an ASCII byte string declared immediately above.
@@ -162,6 +167,7 @@ impl DevelopmentTrapScenario {
             12 => Some(Self::SmpFirstAp),
             13 => Some(Self::SmpPerCpuRuntime),
             14 => Some(Self::SmpIpi),
+            15 => Some(Self::Scheduler),
             _ => None,
         }
     }
@@ -183,6 +189,7 @@ impl DevelopmentTrapScenario {
             Self::SmpFirstAp => scenario_label_text(&SCENARIO_SMP_FIRST_AP),
             Self::SmpPerCpuRuntime => scenario_label_text(&SCENARIO_SMP_PERCPU_RUNTIME),
             Self::SmpIpi => scenario_label_text(&SCENARIO_SMP_IPI),
+            Self::Scheduler => scenario_label_text(&SCENARIO_SCHEDULER),
         }
     }
 }
@@ -1742,7 +1749,11 @@ mod tests {
             DevelopmentTrapScenario::from_selector(14),
             Some(DevelopmentTrapScenario::SmpIpi)
         );
-        assert_eq!(DevelopmentTrapScenario::from_selector(15), None);
+        assert_eq!(
+            DevelopmentTrapScenario::from_selector(15),
+            Some(DevelopmentTrapScenario::Scheduler)
+        );
+        assert_eq!(DevelopmentTrapScenario::from_selector(16), None);
     }
 
     #[test]
