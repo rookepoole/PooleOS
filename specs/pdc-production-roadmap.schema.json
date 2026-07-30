@@ -49,10 +49,10 @@
         "inspect_live_pooleglyph_each_turn": {"const": true},
         "verify_master_checklist_coverage_each_turn": {"const": true},
         "new_work_must_be_flagged": {"const": true},
-        "last_updated_cycle": {"const": 140},
-        "selected_move_id": {"const": "N9-SMP-SHOOTDOWN-001"},
+        "last_updated_cycle": {"const": 141},
+        "selected_move_id": {"const": "N8-SMP-MULTI-AP-001"},
         "immediate_next_move_id": {"const": "N0-HW-KEY-ACQUIRE-001"},
-        "owner_independent_next_move_id": {"const": "N8-SMP-MULTI-AP-001"},
+        "owner_independent_next_move_id": {"const": "N12-SCHED-001"},
         "required_records": {"type": "array", "minItems": 7, "items": {"type": "string"}, "uniqueItems": true},
         "flag_classes": {"type": "array", "minItems": 8, "items": {"type": "string"}, "uniqueItems": true}
       }

@@ -798,10 +798,10 @@ pub struct MetadataArenaReceipt {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-struct MetadataMigration {
-    manager_address: u64,
-    allocation: AllocationHandle,
-    receipt: MetadataArenaReceipt,
+pub struct MetadataMigration {
+    pub manager_address: u64,
+    pub allocation: AllocationHandle,
+    pub receipt: MetadataArenaReceipt,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -1916,7 +1916,7 @@ impl PhysicalMemoryManager {
         Ok(())
     }
 
-    fn migrate_to_metadata<A: MetadataArenaAccess>(
+    pub fn migrate_to_metadata<A: MetadataArenaAccess>(
         &mut self,
         access: &mut A,
     ) -> Result<MetadataMigration, PhysicalMemoryError> {

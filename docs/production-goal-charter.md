@@ -7,7 +7,35 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 140
+Last roadmap reconciliation: PooleOS Cycle 141
+
+Cycle 141 reconciliation (superseding current Cycle 140 implementation and
+next-move values): governance and external-key state are unchanged, and no
+key, signature, publication, privileged host probe, driver load, firmware
+change, physical-media write, tag, release, or production promotion occurred.
+The owner-independent `N8-SMP-MULTI-AP-001` move upgrades selector 14 to
+PKSMP5 and closes only its bounded flag. On one exact four-vCPU
+`SandyBridge,-avx` TCG topology, BSP APIC ID 0 owns three private AP runtimes
+for APIC IDs 1, 2, and 3 with dynamic local masks `0x2`, `0x4`, and `0x8`.
+One injected APIC-4 timeout after APs 1 and 2 start proves final-INIT parking,
+alias revocation, complete scrub/release, and fresh allocation before retry.
+The successful retry brings all three APs online simultaneously, records nine
+accepted and three forged-capability-denied deliveries, twelve EOIs, three
+one-page remote invalidations, and aggregate target/ack mask `0xE`. Reclaim is
+rejected twice before all unique acknowledgements arrive; generation 1 then
+retires, every AP quiesces and final-INIT parks, and all 96 runtime plus six
+frame pages are scrubbed, read-verified, and released. Two exact 40-marker
+runs, 30 hostile-control categories covering 243 rejected cases, and 137
+kernel host tests pass; each resource lifecycle verifies 417,792 bytes. The
+exact kernel is 409,600 canonical bytes in a 458,752-byte, 112-page image with
+985 relocations and SHA-256
+`8118ED5F7761B9D36A4A65EFF1BC1856C5182D5733CE95A8BEEB24D1C2435F8D`.
+General topology/x2APIC, address-space-wide or concurrent-generation
+shootdown, scheduler ownership, production capability authority, target
+execution, N8/N9 exit, release, and production remain open.
+`production_ready=false`; the blocked external move remains
+`N0-HW-KEY-ACQUIRE-001`, and the next owner-independent move is
+`N12-SCHED-001`.
 
 Cycle 140 reconciliation (superseding current Cycle 139 implementation and
 next-move values): governance and external-key state are unchanged, and no

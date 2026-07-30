@@ -118,8 +118,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 140)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 823)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 141)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 828)
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
         self.assertTrue(native["pooleboot_exists"])
@@ -159,10 +159,10 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N9-SMP-SHOOTDOWN-001")
+        self.assertEqual(protocol["selected_move_id"], "N8-SMP-MULTI-AP-001")
         self.assertEqual(
             protocol["owner_independent_next_move_id"],
-            "N8-SMP-MULTI-AP-001",
+            "N12-SCHED-001",
         )
         self.assertIn("runs/hardware_target_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_tier0_readiness.json", protocol["required_records"])
@@ -333,8 +333,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             flag for flag in flags if flag["id"] == "FLAG-N8-SMP-MULTI-AP-001"
         )
         self.assertEqual(multi_ap_flag["class"], "REQUIRED")
-        self.assertEqual(multi_ap_flag["status"], "open")
-        self.assertIn("docs/pdc-production-build-plan.md", multi_ap_flag["evidence"])
+        self.assertEqual(multi_ap_flag["status"], "closed")
+        self.assertIn("runs/native-kernel-smp-ipi-readiness.json", multi_ap_flag["evidence"])
         pooleboot_proof_flag = next(flag for flag in flags if flag["id"] == "FLAG-N5-POOLEBOOT-PROOF-001")
         self.assertEqual(pooleboot_proof_flag["class"], "REQUIRED")
         self.assertEqual(pooleboot_proof_flag["status"], "closed")
