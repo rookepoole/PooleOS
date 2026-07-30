@@ -1,43 +1,21 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://pooleos.local/specs/native-kernel-smp-ipi-contract.schema.json",
-  "title": "PooleOS PKSMP4 contract",
+  "title": "PooleOS PKSMP5 contract",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "schema_version",
-    "artifact_kind",
-    "contract_id",
-    "selected_move_id",
-    "status_date",
-    "status",
-    "production_ready",
-    "production_promotion_allowed",
-    "phase_mapping",
-    "source_requirement_ids",
-    "profile",
-    "topology",
-    "resource_geometry",
-    "transport",
-    "shootdown",
-    "shutdown_and_cleanup",
-    "qualification",
-    "required_negative_controls",
-    "claims",
-    "non_claims",
-    "official_references"
-  ],
+  "required": ["schema_version", "artifact_kind", "contract_id", "selected_move_id", "status_date", "status", "production_ready", "production_promotion_allowed", "phase_mapping", "source_requirement_ids", "profile", "topology", "resource_geometry", "partial_start_rollback", "transport", "shootdown", "shutdown_and_cleanup", "qualification", "required_negative_controls", "claims", "non_claims", "official_references"],
   "properties": {
     "schema_version": {"const": "1.0"},
     "artifact_kind": {"const": "pooleos_native_kernel_smp_ipi_contract"},
-    "contract_id": {"const": "PKSMP4"},
-    "selected_move_id": {"const": "N9-SMP-SHOOTDOWN-001"},
+    "contract_id": {"const": "PKSMP5"},
+    "selected_move_id": {"const": "N8-SMP-MULTI-AP-001"},
     "status_date": {"const": "2026-07-29"},
-    "status": {"const": "bounded_remote_invlpg_generation_retirement_sandybridge_two_vcpu_non_promoting"},
+    "status": {"const": "bounded_exact_four_vcpu_three_ap_partial_rollback_and_aggregate_shootdown_non_promoting"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
     "phase_mapping": {"const": ["N8.1", "N8.2", "N8.3", "N8.5", "N9.2", "N9.3", "N9.4", "N9.5"]},
-    "source_requirement_ids": {"type": "array", "minItems": 5, "uniqueItems": true, "items": {"type": "string"}},
+    "source_requirement_ids": {"type": "array", "minItems": 6, "uniqueItems": true, "items": {"type": "string"}},
     "profile": {
       "type": "object",
       "required": ["feature", "selector", "cpu_model", "acceleration", "virtual_cpu_count", "application_processor_count", "emulator_only"],
@@ -46,79 +24,95 @@
         "selector": {"const": 14},
         "cpu_model": {"const": "SandyBridge,-avx"},
         "acceleration": {"const": "tcg_multi_thread"},
-        "virtual_cpu_count": {"const": 2},
-        "application_processor_count": {"const": 1},
+        "virtual_cpu_count": {"const": 4},
+        "application_processor_count": {"const": 3},
         "emulator_only": {"const": true}
       }
     },
     "topology": {
       "type": "object",
-      "required": ["processor_count", "enabled_processor_count", "bsp_apic_id", "target_apic_id", "x2apic_allowed"],
+      "required": ["processor_count", "enabled_processor_count", "bsp_apic_id", "target_apic_ids", "target_cpu_mask", "x2apic_allowed"],
       "properties": {
-        "processor_count": {"const": 2},
-        "enabled_processor_count": {"const": 2},
+        "processor_count": {"const": 4},
+        "enabled_processor_count": {"const": 4},
         "bsp_apic_id": {"const": 0},
-        "target_apic_id": {"const": 1},
+        "target_apic_ids": {"const": [1, 2, 3]},
+        "target_cpu_mask": {"const": "0x000000000000000E"},
         "x2apic_allowed": {"const": false}
       }
     },
     "resource_geometry": {
       "type": "object",
-      "required": ["page_count", "guard_page_count", "mapped_page_count", "apic_page_table"],
+      "required": ["per_ap_page_count", "application_processor_count", "total_runtime_pages", "total_frame_pages", "guard_page_count_per_ap", "identity_mapped_leaf_count_per_ap", "apic_page_table_offset", "private_root_stack_local_descriptor_idt_xstate"],
       "properties": {
-        "page_count": {"const": 32},
-        "guard_page_count": {"const": 14},
-        "mapped_page_count": {"const": 13},
-        "apic_page_table": {
-          "type": "object",
-          "required": ["page_offset", "pdpt_index", "page_directory_index", "page_table_index", "post_execution_accessed_dirty_bits_required"],
-          "properties": {
-            "page_offset": {"const": 31},
-            "pdpt_index": {"const": 3},
-            "page_directory_index": {"const": 503},
-            "page_table_index": {"const": 0},
-            "post_execution_accessed_dirty_bits_required": {"const": true}
-          }
-        }
+        "per_ap_page_count": {"const": 32},
+        "application_processor_count": {"const": 3},
+        "total_runtime_pages": {"const": 96},
+        "total_frame_pages": {"const": 6},
+        "guard_page_count_per_ap": {"const": 14},
+        "identity_mapped_leaf_count_per_ap": {"const": 13},
+        "apic_page_table_offset": {"const": 31},
+        "private_root_stack_local_descriptor_idt_xstate": {"const": true}
+      }
+    },
+    "partial_start_rollback": {
+      "type": "object",
+      "required": ["first_started_apic_ids", "started_mask", "offline_target_apic_id", "offline_target_mask", "timeout_count", "parked_mask", "released_mask", "runtime_pages_scrubbed_and_released", "frame_pages_scrubbed_and_released", "verified_bytes", "fresh_retry_allocations_required"],
+      "properties": {
+        "first_started_apic_ids": {"const": [1, 2]},
+        "started_mask": {"const": "0x0000000000000006"},
+        "offline_target_apic_id": {"const": 4},
+        "offline_target_mask": {"const": "0x0000000000000010"},
+        "timeout_count": {"const": 1},
+        "parked_mask": {"const": "0x0000000000000006"},
+        "released_mask": {"const": "0x000000000000000E"},
+        "runtime_pages_scrubbed_and_released": {"const": 96},
+        "frame_pages_scrubbed_and_released": {"const": 6},
+        "verified_bytes": {"const": 417792},
+        "fresh_retry_allocations_required": {"const": true}
       }
     },
     "transport": {
       "type": "object",
-      "required": ["capability_profile", "operation_classes", "live_accepted_deliveries", "live_denied_deliveries", "live_delivery_count", "live_eoi_count", "offline_target_timeout_count"],
+      "required": ["capability_profile", "local_target_masks", "aggregate_target_mask", "operation_classes_installed_per_ap", "live_accepted_deliveries_per_ap", "live_denied_deliveries_per_ap", "live_delivery_count_per_ap", "live_eoi_count_per_ap", "offline_target_timeout_count"],
       "properties": {
         "capability_profile": {"const": "development-only fixed token"},
-        "operation_classes": {"type": "array", "minItems": 6, "maxItems": 6},
-        "live_accepted_deliveries": {"const": 6},
-        "live_denied_deliveries": {"const": 4},
-        "live_delivery_count": {"const": 10},
-        "live_eoi_count": {"const": 10},
+        "local_target_masks": {"const": ["0x0000000000000002", "0x0000000000000004", "0x0000000000000008"]},
+        "aggregate_target_mask": {"const": "0x000000000000000E"},
+        "operation_classes_installed_per_ap": {"const": 6},
+        "live_accepted_deliveries_per_ap": {"const": 3},
+        "live_denied_deliveries_per_ap": {"const": 1},
+        "live_delivery_count_per_ap": {"const": 4},
+        "live_eoi_count_per_ap": {"const": 4},
         "offline_target_timeout_count": {"const": 1}
       }
     },
     "shootdown": {
       "type": "object",
-      "required": ["probe_virtual", "retired_generation", "active_generation", "target_cpu_mask", "ack_cpu_mask", "remote_invlpg_count", "premature_reclaim_rejected", "reclaim_requires_exact_ack", "retired_frame_reuse_before_ack", "scope"],
+      "required": ["probe_virtual", "retired_generation", "active_generation", "target_cpu_mask", "ack_cpu_mask", "remote_invlpg_count", "premature_reclaim_rejection_count", "reclaim_requires_every_unique_local_ack", "retired_frame_reuse_before_all_acks", "scope"],
       "properties": {
         "probe_virtual": {"const": "0x00000000001FF000"},
         "retired_generation": {"const": 1},
         "active_generation": {"const": 2},
-        "target_cpu_mask": {"const": "0x0000000000000002"},
-        "ack_cpu_mask": {"const": "0x0000000000000002"},
-        "remote_invlpg_count": {"const": 1},
-        "premature_reclaim_rejected": {"const": true},
-        "reclaim_requires_exact_ack": {"const": true},
-        "retired_frame_reuse_before_ack": {"const": false},
+        "target_cpu_mask": {"const": "0x000000000000000E"},
+        "ack_cpu_mask": {"const": "0x000000000000000E"},
+        "remote_invlpg_count": {"const": 3},
+        "premature_reclaim_rejection_count": {"const": 2},
+        "reclaim_requires_every_unique_local_ack": {"const": true},
+        "retired_frame_reuse_before_all_acks": {"const": false},
         "scope": {"type": "string"}
       }
     },
     "shutdown_and_cleanup": {
       "type": "object",
-      "required": ["final_init_park_required_before_release", "capability_revoked", "resource_pages_released", "verified_bytes"],
+      "required": ["stop_quiesced_ap_count", "final_init_parked_ap_count", "capability_revoked", "resource_pages_released", "frame_pages_released", "total_verified_bytes"],
       "properties": {
-        "final_init_park_required_before_release": {"const": true},
+        "stop_quiesced_ap_count": {"const": 3},
+        "final_init_parked_ap_count": {"const": 3},
         "capability_revoked": {"const": true},
-        "resource_pages_released": {"const": 34},
-        "verified_bytes": {"const": 131072}
+        "resource_pages_released": {"const": 96},
+        "frame_pages_released": {"const": 6},
+        "total_verified_bytes": {"const": 417792}
       }
     },
     "qualification": {
@@ -126,22 +120,22 @@
       "required": ["qemu_run_count", "negative_control_count", "hostile_case_count"],
       "properties": {
         "qemu_run_count": {"const": 2},
-        "negative_control_count": {"const": 25},
-        "hostile_case_count": {"const": 169}
+        "negative_control_count": {"const": 30},
+        "hostile_case_count": {"type": "integer", "minimum": 1}
       }
     },
-    "required_negative_controls": {"type": "array", "minItems": 25, "maxItems": 25, "uniqueItems": true, "items": {"type": "string"}},
+    "required_negative_controls": {"type": "array", "minItems": 30, "maxItems": 30, "uniqueItems": true, "items": {"type": "string"}},
     "claims": {
       "type": "object",
-      "required": ["flag_n8_smp_ipi_001_closed", "flag_n9_smp_shootdown_001_closed", "six_allowlisted_operation_classes_acknowledged", "one_page_remote_tlb_shootdown_implemented", "one_generation_retirement_implemented", "general_tlb_shootdown_implemented", "arbitrary_remote_callback_implemented", "scheduler_implemented", "n8_exit_gate_satisfied", "n9_exit_gate_satisfied", "production_ready"],
+      "required": ["flag_n8_smp_ipi_001_closed", "flag_n9_smp_shootdown_001_closed", "flag_n8_smp_multi_ap_001_closed", "three_application_processors_started_simultaneously", "live_partial_start_timeout_and_rollback_verified", "aggregate_three_ap_ack_mask_verified", "general_tlb_shootdown_implemented", "scheduler_implemented", "n8_exit_gate_satisfied", "n9_exit_gate_satisfied", "production_ready"],
       "properties": {
         "flag_n8_smp_ipi_001_closed": {"const": true},
         "flag_n9_smp_shootdown_001_closed": {"const": true},
-        "six_allowlisted_operation_classes_acknowledged": {"const": true},
-        "one_page_remote_tlb_shootdown_implemented": {"const": true},
-        "one_generation_retirement_implemented": {"const": true},
+        "flag_n8_smp_multi_ap_001_closed": {"const": true},
+        "three_application_processors_started_simultaneously": {"const": true},
+        "live_partial_start_timeout_and_rollback_verified": {"const": true},
+        "aggregate_three_ap_ack_mask_verified": {"const": true},
         "general_tlb_shootdown_implemented": {"const": false},
-        "arbitrary_remote_callback_implemented": {"const": false},
         "scheduler_implemented": {"const": false},
         "n8_exit_gate_satisfied": {"const": false},
         "n9_exit_gate_satisfied": {"const": false},

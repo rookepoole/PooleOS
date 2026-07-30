@@ -1,12 +1,14 @@
 # PooleGlyph Checkpoint Deep Inspection
 
-Status: refreshed 2026-07-01 from `<POOLEGYPH_REPO>`
+Status: re-audited 2026-07-29 from `<POOLEGYPH_REPO>`
 
 PooleOS should treat the live PooleGlyph tree as the current source anchor for tandem development. The latest verified local checkpoint observed during this inspection is:
 
 - checkpoint: `Phase 65 - diagnostic hardening across all declaration kinds`
 - zip: `<POOLEGYPH_REPO>/checkpoints/pooleglyph_v0_5_phase65_diagnostic_hardening_verified.zip`
 - zip SHA-256: `F3CCEB701CF76274D9464A0958BF6106888FB34F3C0BFBD55DE4ACE03C427ABC`
+- handoff SHA-256: `569546D0E1B0AA30EE52B61073B1E51D32CB474FEEE895518C0591F64808F276`
+- manifest SHA-256: `A2387DD5A9E51BA50493E1E39E5D9B0FCE304BAFDF57567552AB3CE30DAC7CE9`
 - checkpoint manifests: `53`
 - checkpoint handoff markdown files: `53`
 - latest zip entries: `1147`
@@ -15,6 +17,8 @@ PooleOS should treat the live PooleGlyph tree as the current source anchor for t
 - next PooleGlyph move: `Phase 66 - Core IR boundary audit for all metadata declarations`
 
 The live PooleGlyph git tree is usable for PooleOS evidence, but it is not clean: `tests/reports/conformance_report.json` is modified. The PooleOS source anchor and bridge manifest therefore report `warn` with zero failed checks.
+
+The July 29 re-audit found no Phase 66 checkpoint or manifest. The Phase 65 ZIP remains 1,460,003 bytes and its computed digest still exactly matches the manifest. The existing modified conformance report was treated as user-owned state and was not changed. This confirms the integration boundary has not advanced since the July 1 verification.
 
 ## Fresh Verification
 

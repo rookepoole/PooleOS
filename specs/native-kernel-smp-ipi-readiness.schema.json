@@ -1,41 +1,22 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://pooleos.local/specs/native-kernel-smp-ipi-readiness.schema.json",
-  "title": "PooleOS PKSMP4 readiness",
+  "title": "PooleOS PKSMP5 readiness",
   "type": "object",
-  "required": [
-    "schema_version",
-    "artifact_kind",
-    "status_date",
-    "status",
-    "contract_id",
-    "selected_move_id",
-    "production_ready",
-    "production_promotion_allowed",
-    "n9_exit_gate_satisfied",
-    "flag_n9_smp_shootdown_001_closed",
-    "phase_status",
-    "inputs",
-    "build",
-    "media",
-    "execution",
-    "negative_controls",
-    "claims",
-    "non_claims",
-    "summary",
-    "open_items"
-  ],
+  "required": ["schema_version", "artifact_kind", "status_date", "status", "contract_id", "selected_move_id", "production_ready", "production_promotion_allowed", "n8_exit_gate_satisfied", "n9_exit_gate_satisfied", "flag_n9_smp_shootdown_001_closed", "flag_n8_smp_multi_ap_001_closed", "phase_status", "inputs", "build", "media", "execution", "negative_controls", "claims", "non_claims", "summary", "open_items"],
   "properties": {
     "schema_version": {"const": "1.0"},
     "artifact_kind": {"const": "pooleos_native_kernel_smp_ipi_readiness"},
     "status_date": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
-    "status": {"const": "pass_single_host_two_run_sandybridge_two_vcpu_remote_invlpg_generation_retirement_non_promoting"},
-    "contract_id": {"const": "PKSMP4"},
-    "selected_move_id": {"const": "N9-SMP-SHOOTDOWN-001"},
+    "status": {"const": "pass_single_host_two_run_sandybridge_four_vcpu_three_ap_partial_rollback_and_aggregate_shootdown_non_promoting"},
+    "contract_id": {"const": "PKSMP5"},
+    "selected_move_id": {"const": "N8-SMP-MULTI-AP-001"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"const": false},
+    "n8_exit_gate_satisfied": {"const": false},
     "n9_exit_gate_satisfied": {"const": false},
     "flag_n9_smp_shootdown_001_closed": {"const": true},
+    "flag_n8_smp_multi_ap_001_closed": {"const": true},
     "phase_status": {"type": "object"},
     "inputs": {"type": "object"},
     "build": {
@@ -44,10 +25,11 @@
       "properties": {
         "linked_invlpg_audit": {
           "type": "object",
-          "required": ["scope", "invlpg_instruction_count", "operand", "status", "canonical_sha256"],
+          "required": ["scope", "invlpg_instruction_count", "runtime_execution_count", "operand", "status", "canonical_sha256"],
           "properties": {
             "scope": {"const": "poole_ap_ipi_trampoline_start..poole_ap_ipi_trampoline_end"},
             "invlpg_instruction_count": {"const": 1},
+            "runtime_execution_count": {"const": 3},
             "operand": {"const": "(%rax)"},
             "status": {"const": "pass"},
             "canonical_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"}
@@ -66,10 +48,11 @@
     },
     "execution": {
       "type": "object",
-      "required": ["run_count", "virtual_cpu_count", "static_markers_exact_match", "dynamic_fields_revalidated", "exact_screenshot_match", "exact_pbp1_match", "runs", "observation"],
+      "required": ["run_count", "virtual_cpu_count", "application_processor_count", "static_markers_exact_match", "dynamic_fields_revalidated", "exact_screenshot_match", "exact_pbp1_match", "runs", "observation"],
       "properties": {
         "run_count": {"const": 2},
-        "virtual_cpu_count": {"const": 2},
+        "virtual_cpu_count": {"const": 4},
+        "application_processor_count": {"const": 3},
         "static_markers_exact_match": {"const": true},
         "dynamic_fields_revalidated": {"const": true},
         "exact_screenshot_match": {"const": true},
@@ -80,8 +63,8 @@
     },
     "negative_controls": {
       "type": "array",
-      "minItems": 25,
-      "maxItems": 25,
+      "minItems": 30,
+      "maxItems": 30,
       "items": {
         "type": "object",
         "required": ["id", "status", "expected", "case_count"],
@@ -97,24 +80,27 @@
     "non_claims": {"type": "array", "minItems": 9, "items": {"type": "string"}},
     "summary": {
       "type": "object",
-      "required": ["application_processors_online", "operation_classes", "accepted_deliveries", "denied_deliveries", "offline_timeouts", "eois", "remote_tlb_invalidations", "retired_generations", "premature_reclaim_rejections", "resource_pages_released", "verified_bytes", "negative_controls_total", "hostile_cases_total", "production_claim_count"],
+      "required": ["application_processors_online", "operation_classes_installed_per_ap", "accepted_deliveries", "denied_deliveries", "offline_timeouts", "partial_start_rollbacks", "fresh_retries", "eois", "remote_tlb_invalidations", "retired_generations", "premature_reclaim_rejections", "resource_pages_released", "frame_pages_released", "verified_bytes", "negative_controls_total", "hostile_cases_total", "production_claim_count"],
       "properties": {
-        "application_processors_online": {"const": 1},
-        "operation_classes": {"const": 6},
-        "accepted_deliveries": {"const": 6},
-        "denied_deliveries": {"const": 4},
+        "application_processors_online": {"const": 3},
+        "operation_classes_installed_per_ap": {"const": 6},
+        "accepted_deliveries": {"const": 9},
+        "denied_deliveries": {"const": 3},
         "offline_timeouts": {"const": 1},
-        "eois": {"const": 10},
-        "remote_tlb_invalidations": {"const": 1},
+        "partial_start_rollbacks": {"const": 1},
+        "fresh_retries": {"const": 1},
+        "eois": {"const": 12},
+        "remote_tlb_invalidations": {"const": 3},
         "retired_generations": {"const": 1},
-        "premature_reclaim_rejections": {"const": 1},
-        "resource_pages_released": {"const": 34},
-        "verified_bytes": {"const": 139264},
-        "negative_controls_total": {"const": 25},
-        "hostile_cases_total": {"const": 169},
+        "premature_reclaim_rejections": {"const": 2},
+        "resource_pages_released": {"const": 96},
+        "frame_pages_released": {"const": 6},
+        "verified_bytes": {"const": 417792},
+        "negative_controls_total": {"const": 30},
+        "hostile_cases_total": {"const": 243},
         "production_claim_count": {"const": 0}
       }
     },
-    "open_items": {"type": "array", "minItems": 8, "items": {"type": "string"}}
+    "open_items": {"type": "array", "minItems": 9, "items": {"type": "string"}}
   }
 }

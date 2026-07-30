@@ -94,24 +94,25 @@ shootdown dependency.
 ## Qualification
 
 Two fresh-vars QEMU/OVMF executions reproduce the same 40 markers, framebuffer,
-and exact PBP1 transcript. One hundred twenty-two PooleKernel host tests, 43 PKENTRY1
+and exact PBP1 transcript. One hundred thirty-seven PooleKernel host tests, 43 PKENTRY1
 controls, and 46 PKVM3 hostile controls pass. An independent Python oracle
 reconstructs PMM ranges, page-zero exclusion, DMA32 first fit, topology,
 addresses, gap counts, and the coverage checksum from the PBP1 transcript.
 
-The Cycle 137 requalification records 117,858 mapped pages, eleven ranges, 12,907 gap pages,
+The Cycle 141 requalification records 117,858 mapped pages, eleven ranges, 12,907 gap pages,
 237 direct leaf tables, one direct directory, 243 total table pages, checksum
 `0x6E870613F130BA60`, 367,445 physical table writes, 950,466 temporary-PTE
 writes and matching bootstrap invalidations, two CR3 writes, three local leaf
 invalidations, and one generation-retirement receipt. The 409,600-byte
-canonical kernel occupies a 112-page, 458,752-byte image, has 919 relocations,
-and SHA-256 `95DDA27784DA944A9C0F5B04029255EDE4DE1BB0684A8EA10DCFC07E686B59A2`.
+canonical kernel occupies a 112-page, 458,752-byte image, has 985 relocations,
+and SHA-256 `8118ED5F7761B9D36A4A65EFF1BC1856C5182D5733CE95A8BEEB24D1C2435F8D`.
 
 ## Remaining Boundary
 
-PKVM3 executes no inter-processor shootdown. AP startup, request/acknowledgement
-transport, timeout and failure policy, remote-context proof, and generation-safe
-SMP deferred reclaim remain mandatory. Concurrent allocation and incremental
+PKVM3 itself executes no inter-processor shootdown. PKSMP5 separately proves
+three exact AP-side one-page invalidations and aggregate acknowledgement for
+three private roots and one generation, but general address-space-wide or
+concurrent-generation shootdown remains mandatory. Concurrent allocation and incremental
 map replacement, huge-page promotion/demotion, PCID and global-page policy,
 KASLR, COW, ring 3, user faults, stack growth, pager IPC, heaps, MMIO and
 PAT/MTRR qualification, pressure/OOM behavior, target hardware, second-host

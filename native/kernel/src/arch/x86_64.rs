@@ -2254,7 +2254,12 @@ poole_ap_ipi_stop:
     cmp rbx, qword ptr [rdi + {shootdown_last_ack_generation_offset}]
     jbe .Lpoole_ap_ipi_deny_shootdown_generation
     mov rax, qword ptr [rdi + {shootdown_target_mask_offset}]
-    cmp rax, {shootdown_target_mask}
+    mov ecx, dword ptr [rdi + 28]
+    cmp ecx, 64
+    jae .Lpoole_ap_ipi_deny_shootdown_target
+    mov rbx, 1
+    shl rbx, cl
+    cmp rax, rbx
     jne .Lpoole_ap_ipi_deny_shootdown_target
     mov rax, qword ptr [rdi + {shootdown_old_frame_offset}]
     test rax, rax
@@ -2291,8 +2296,19 @@ poole_ap_ipi_stop:
     inc dword ptr [rdi + {accepted_offset}]
     mov rax, qword ptr [rdi + {request_sequence_offset}]
     mov qword ptr [rdi + {last_sequence_offset}], rax
+    cmp r15d, 5
+    je .Lpoole_ap_ipi_count_panic
+    cmp r15d, 6
+    je .Lpoole_ap_ipi_count_stop
     lea rbx, [rdi + {operation_count_base}]
     inc dword ptr [rbx + r15*4]
+    jmp .Lpoole_ap_ipi_counted
+.Lpoole_ap_ipi_count_panic:
+    inc dword ptr [rdi + {panic_count_offset}]
+    jmp .Lpoole_ap_ipi_counted
+.Lpoole_ap_ipi_count_stop:
+    inc dword ptr [rdi + {stop_count_offset}]
+.Lpoole_ap_ipi_counted:
     cmp r15d, 1
     je .Lpoole_ap_ipi_result_reschedule
     cmp r15d, 2
@@ -2587,6 +2603,8 @@ poole_ap_ipi_trampoline_end:
     accepted_offset = const smp_ipi::ACCEPTED_COUNT_OFFSET,
     denied_offset = const smp_ipi::DENIED_COUNT_OFFSET,
     operation_count_base = const (smp_ipi::RESCHEDULE_COUNT_OFFSET - 4),
+    stop_count_offset = const smp_ipi::STOP_COUNT_OFFSET,
+    panic_count_offset = const smp_ipi::PANIC_COUNT_OFFSET,
     panic_latched_offset = const smp_ipi::PANIC_LATCHED_OFFSET,
     spurious_count_offset = const smp_ipi::SPURIOUS_COUNT_OFFSET,
     apic_error_count_offset = const smp_ipi::APIC_ERROR_COUNT_OFFSET,
@@ -2655,7 +2673,6 @@ poole_ap_ipi_trampoline_end:
     shootdown_probe_virtual = const smp_ipi::PROBE_VIRTUAL_ADDRESS,
     shootdown_retired_generation = const smp_ipi::RETIRED_GENERATION,
     shootdown_active_generation = const smp_ipi::ACTIVE_GENERATION,
-    shootdown_target_mask = const smp_ipi::TARGET_CPU_MASK,
     shootdown_request_checksum_seed = const smp_ipi::SHOOTDOWN_REQUEST_CHECKSUM_SEED,
     shootdown_response_checksum_seed = const smp_ipi::SHOOTDOWN_RESPONSE_CHECKSUM_SEED,
 );

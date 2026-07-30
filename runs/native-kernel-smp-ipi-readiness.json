@@ -2,13 +2,15 @@
   "schema_version": "1.0",
   "artifact_kind": "pooleos_native_kernel_smp_ipi_readiness",
   "status_date": "2026-07-29",
-  "status": "pass_single_host_two_run_sandybridge_two_vcpu_remote_invlpg_generation_retirement_non_promoting",
-  "contract_id": "PKSMP4",
-  "selected_move_id": "N9-SMP-SHOOTDOWN-001",
+  "status": "pass_single_host_two_run_sandybridge_four_vcpu_three_ap_partial_rollback_and_aggregate_shootdown_non_promoting",
+  "contract_id": "PKSMP5",
+  "selected_move_id": "N8-SMP-MULTI-AP-001",
   "production_ready": false,
   "production_promotion_allowed": false,
+  "n8_exit_gate_satisfied": false,
   "n9_exit_gate_satisfied": false,
   "flag_n9_smp_shootdown_001_closed": true,
+  "flag_n8_smp_multi_ap_001_closed": true,
   "phase_status": {
     "N8": "partial",
     "N8.1": "partial",
@@ -56,23 +58,23 @@
       },
       {
         "path": "native/kernel/manifest.pkm",
-        "byte_count": 448,
-        "sha256": "B3BB53DA89ADB16953B3EC95C7AEFB5E97C8203663E0A369A52DC076E943251E"
+        "byte_count": 447,
+        "sha256": "741FC52B981BCB20B0ABD92824297C0F2C2062EF2E458F8C4374D8EF76EECA1E"
       },
       {
         "path": "native/kernel/src/lib.rs",
-        "byte_count": 61725,
-        "sha256": "07EA3CAD02238AA645D211890CA5516EC6779EBF809D7EB241520A9F5F1BE69C"
+        "byte_count": 61724,
+        "sha256": "C6A6D9311BDC901AB60E56AC20B07ABE89EE7867BFABBD87F72044184C4B9F92"
       },
       {
         "path": "native/kernel/src/main.rs",
-        "byte_count": 314368,
-        "sha256": "9C640A9AA213DD26053895DBBD16C512CF6B1E8CC1350EA4D3A4A5189793E502"
+        "byte_count": 372469,
+        "sha256": "684A399618196276C86CCDD65040B4F46F156D8AB254F14F9817D8C2BA33B7C5"
       },
       {
         "path": "native/kernel/src/arch/x86_64.rs",
-        "byte_count": 110008,
-        "sha256": "6B2585232E4505D904F862932F48677543698CDFA5F233EC487C3300C9B854C4"
+        "byte_count": 110505,
+        "sha256": "50C02F8F525389DFCC6B7E3271EE3286A71C74A58CA386E85104F4DA3876456D"
       },
       {
         "path": "native/kernel/src/acpi.rs",
@@ -86,8 +88,8 @@
       },
       {
         "path": "native/kernel/src/physical_memory.rs",
-        "byte_count": 194086,
-        "sha256": "BC7D9B35163812A20E30DCE411E9E41279767BD522A8C8F2BA8C9105CAD26113"
+        "byte_count": 194106,
+        "sha256": "DC855A94C64333C7E5289962C5736E62318EA55D4D390B4EBF974C42A1F446CC"
       },
       {
         "path": "native/kernel/src/smp.rs",
@@ -101,8 +103,8 @@
       },
       {
         "path": "native/kernel/src/smp_ipi.rs",
-        "byte_count": 49838,
-        "sha256": "A28523E4D88355C3E42C01DEB313D486BFB49E033CDB8C3C0801BB7629C82D53"
+        "byte_count": 72510,
+        "sha256": "CDFBB3133D1FC8F7A7BD0E7269176E71767E2648468DB915A64F4043D213C224"
       },
       {
         "path": "native/kernel/src/virtual_memory.rs",
@@ -121,13 +123,13 @@
       },
       {
         "path": "runtime/native_kernel_smp_ipi.py",
-        "byte_count": 33121,
-        "sha256": "3398C8D21D49EE7BD01046083359E4F4FC696EF4808068FB8300E131D99BBBBA"
+        "byte_count": 36004,
+        "sha256": "66297C8BA3003B132320ABEEE5F2519E53299F2706346B6259CC9C4D61666186"
       },
       {
         "path": "specs/native-kernel-entry-contract.json",
-        "byte_count": 10873,
-        "sha256": "5F5DB2B7BF856B162E9DA9321145D915F20BA81298007FE7FB7DB1509DB89CA2"
+        "byte_count": 10872,
+        "sha256": "1BAD5F5F2777E5FB2D9C38A1086991499B387E19D568BD7CFF469D87DA059254"
       },
       {
         "path": "specs/native-kernel-map-contract.json",
@@ -136,33 +138,33 @@
       },
       {
         "path": "specs/native-kernel-smp-ipi-contract.json",
-        "byte_count": 10506,
-        "sha256": "B590B1AD00E864C15DF5D33C1CB38CEFA76F945B605B675EC092351EF28C2386"
+        "byte_count": 8578,
+        "sha256": "C3155ED76BD9003ECEB57FBD78B7223546103C5938E797EBFEA4D930BE6F207D"
       },
       {
         "path": "specs/native-kernel-smp-ipi-contract.schema.json",
-        "byte_count": 6862,
-        "sha256": "39C8CBC35F5B03839CD4EB83391EB99983342F48113A61DBD6C142A4849F54F5"
+        "byte_count": 8311,
+        "sha256": "252049DA5842D05CBC29382A49ED15E767FEBEF269B8F63ADD127252D1F9C246"
       },
       {
         "path": "specs/native-kernel-smp-ipi-readiness.schema.json",
-        "byte_count": 4708,
-        "sha256": "47AE110D73483806783686D6C37C13FC898CDC4DBFD66D7F2A06E95C3AC9B8AC"
+        "byte_count": 5203,
+        "sha256": "F01C50553060D3954841E7AEA9D54E91EC6857730A315BCF733D06542191F15A"
       },
       {
         "path": "tools/qualify_native_kernel_smp_ipi.py",
-        "byte_count": 28232,
-        "sha256": "A673E323EA55F826AB717140002DAE617D1496F0B7DA2505E2448012675B45B1"
+        "byte_count": 29960,
+        "sha256": "76C801479A37DE5D16CB06227E219B5AC006B48117D8CF66B3391DB7B798329E"
       },
       {
         "path": "tests/test_native_kernel_smp_ipi.py",
-        "byte_count": 7494,
-        "sha256": "BDC54DD5713F102B6F69350A987E8F98E8EDFAD4219E41BE3D8B1B9FC6A70FB1"
+        "byte_count": 9764,
+        "sha256": "E05C3047E24CCD8C3477BC27A32EDE89F3C4FB281E3D6A940071E68FD1134CB3"
       },
       {
         "path": "docs/native-kernel-smp-ipi.md",
-        "byte_count": 3235,
-        "sha256": "6D83EF53CD7C96422AE89CB4F9CDD8E2976EF056EA9A3F5535268C90F02FFC97"
+        "byte_count": 3533,
+        "sha256": "BA90221B0B51BA55415CC0D3B2E709FA8D1468689286B19CE15B06E3D8EE68C7"
       }
     ]
   },
@@ -186,13 +188,13 @@
       "bindings": {
         "contract": {
           "path": "specs/native-kernel-entry-contract.json",
-          "byte_count": 10873,
-          "sha256": "5F5DB2B7BF856B162E9DA9321145D915F20BA81298007FE7FB7DB1509DB89CA2"
+          "byte_count": 10872,
+          "sha256": "1BAD5F5F2777E5FB2D9C38A1086991499B387E19D568BD7CFF469D87DA059254"
         },
         "contract_schema": {
           "path": "specs/native-kernel-entry-contract.schema.json",
-          "byte_count": 3953,
-          "sha256": "A812A3CAE40B2C2880DD33FE04A95317DC2A9AA5072D8BCD4DED225B8A340514"
+          "byte_count": 3952,
+          "sha256": "46ACAB7B8313FB8833997DBAC54D58A8A104AB6E7BA3E79231AC86E3D0238244"
         },
         "readiness_schema": {
           "path": "specs/native-kernel-entry-readiness.schema.json",
@@ -232,13 +234,13 @@
           },
           {
             "path": "native/kernel/README.md",
-            "byte_count": 2711,
-            "sha256": "130834D2519DEDDCD107D3D8709C3D58C1FEA0F5E63B6408E1F17C36345E505E"
+            "byte_count": 2658,
+            "sha256": "9D304DF5A81702CD3398866094C80497619FD4E4011382C553835FA540F5B107"
           },
           {
             "path": "native/kernel/arch/x86_64/README.md",
-            "byte_count": 895,
-            "sha256": "20ED93949BD4B10B64E6D6269B5F9E0678CF7EE1B86C14575B5FA03AC19106DA"
+            "byte_count": 1417,
+            "sha256": "E7589BC85E7A56A67AFCFA335EB292D5262FBC37D78F4720AD4C3A76EBB205EB"
           },
           {
             "path": "native/kernel/linker.ld",
@@ -247,23 +249,23 @@
           },
           {
             "path": "native/kernel/manifest.pkm",
-            "byte_count": 448,
-            "sha256": "B3BB53DA89ADB16953B3EC95C7AEFB5E97C8203663E0A369A52DC076E943251E"
+            "byte_count": 447,
+            "sha256": "741FC52B981BCB20B0ABD92824297C0F2C2062EF2E458F8C4374D8EF76EECA1E"
           },
           {
             "path": "native/kernel/src/lib.rs",
-            "byte_count": 61725,
-            "sha256": "07EA3CAD02238AA645D211890CA5516EC6779EBF809D7EB241520A9F5F1BE69C"
+            "byte_count": 61724,
+            "sha256": "C6A6D9311BDC901AB60E56AC20B07ABE89EE7867BFABBD87F72044184C4B9F92"
           },
           {
             "path": "native/kernel/src/main.rs",
-            "byte_count": 314368,
-            "sha256": "9C640A9AA213DD26053895DBBD16C512CF6B1E8CC1350EA4D3A4A5189793E502"
+            "byte_count": 372469,
+            "sha256": "684A399618196276C86CCDD65040B4F46F156D8AB254F14F9817D8C2BA33B7C5"
           },
           {
             "path": "native/kernel/src/arch/x86_64.rs",
-            "byte_count": 110008,
-            "sha256": "6B2585232E4505D904F862932F48677543698CDFA5F233EC487C3300C9B854C4"
+            "byte_count": 110505,
+            "sha256": "50C02F8F525389DFCC6B7E3271EE3286A71C74A58CA386E85104F4DA3876456D"
           },
           {
             "path": "native/kernel/src/acpi.rs",
@@ -272,8 +274,8 @@
           },
           {
             "path": "native/kernel/src/physical_memory.rs",
-            "byte_count": 194086,
-            "sha256": "BC7D9B35163812A20E30DCE411E9E41279767BD522A8C8F2BA8C9105CAD26113"
+            "byte_count": 194106,
+            "sha256": "DC855A94C64333C7E5289962C5736E62318EA55D4D390B4EBF974C42A1F446CC"
           },
           {
             "path": "native/kernel/src/virtual_memory.rs",
@@ -308,22 +310,22 @@
           {
             "path": "runtime/native_kernel_entry.py",
             "byte_count": 7624,
-            "sha256": "4268736C5D9865E8062C8C282030760F12F41F0AE18B7BE76BF43053091E6F65"
+            "sha256": "E084AA1E4F729B088BFCA2CFA99A16A8FC100BA1FEABB6E86D54C07BF9FB2807"
           },
           {
             "path": "tools/qualify_native_kernel_entry.py",
             "byte_count": 25136,
-            "sha256": "F18F8A42E1E686821D5ADB2F71CC5A176DACA6CAB14D25C6A214B88EAA615F20"
+            "sha256": "C4CDFF5890791CA33E842413A119FDF77B97AA5FBECB15F1F8B09B3A0D1E6E11"
           },
           {
             "path": "tests/test_native_kernel_entry.py",
             "byte_count": 6405,
-            "sha256": "5230624FB69CD8340053278E5266EF9442A257341924C5CEE70AD7CBB39FB7F2"
+            "sha256": "E24723EA2EB40EC47AF5C4AC13480E3E3766AC4813CF5F823691507B35140EE3"
           },
           {
             "path": "docs/native-kernel-entry.md",
-            "byte_count": 4427,
-            "sha256": "9E8889866C220B160EA74BAFED9B8ED316C3FE6E3B5AD64B03A01ADB90DF0A72"
+            "byte_count": 4471,
+            "sha256": "C6457A939313032883FB486C5B617A08067822498601E7647DC82CC20EBF367D"
           }
         ]
       },
@@ -401,8 +403,8 @@
         }
       },
       "host_tests": {
-        "test_count": 132,
-        "test_pass_count": 132,
+        "test_count": 137,
+        "test_pass_count": 137,
         "rustfmt_packages": [
           "poolekernel",
           "poolekernel-fixture"
@@ -423,15 +425,15 @@
         "source_date_epoch": 0
       },
       "product": {
-        "linked_byte_count": 5467088,
-        "linked_sha256": "30576D45EC9FAFAB7A0A938C8C65D8E30CF5D64B1FAE7938189DD20AAFD93752",
+        "linked_byte_count": 5587448,
+        "linked_sha256": "52CCE0B38B983D82C1FC5E6976E7C08F0703DFD05427855BE1BAC4D400CE7D36",
         "canonical_byte_count": 409600,
-        "canonical_sha256": "95DDA27784DA944A9C0F5B04029255EDE4DE1BB0684A8EA10DCFC07E686B59A2",
+        "canonical_sha256": "8118ED5F7761B9D36A4A65EFF1BC1856C5182D5733CE95A8BEEB24D1C2435F8D",
         "image_byte_count": 458752,
-        "loaded_sha256": "872CD4ADCDE176F0CFA17259643639C5A3B01BA17C646FDC7DB560A348D68051",
+        "loaded_sha256": "AE542D6F02A8A5FC65CD480D896378BF582DCBEDA533B61DCC404BC3B113EA81",
         "entry_offset": 36864,
         "entry_prefix_hex": "FAFC4889E14885C9743B48F7C10F00000075324889C848C1E01048C1F8104839C87522410F20D89C",
-        "relocation_count": 969,
+        "relocation_count": 985,
         "relocation_source_offset": 360672,
         "relocation_canonical_offset": 360512,
         "relro_offset": 360448,
@@ -442,8 +444,8 @@
           "entry_offset": "0x00009000",
           "image_contract": "PKELF1",
           "handoff_contract": "PBP1",
-          "build_id": "PKBUILD1-CYCLE140-N9-SMP-SHOOTDOWN-V001-00001",
-          "pkentry1_contract_sha256": "5F5DB2B7BF856B162E9DA9321145D915F20BA81298007FE7FB7DB1509DB89CA2",
+          "build_id": "PKBUILD1-CYCLE141-N8-SMP-MULTI-AP-V001-00001",
+          "pkentry1_contract_sha256": "1BAD5F5F2777E5FB2D9C38A1086991499B387E19D568BD7CFF469D87DA059254",
           "pbp1_contract_sha256": "89EA7517EF7D2E30C7EBEC4C28D092E3F01D95519EC6768E7B4D5C0F586B58E7",
           "pkelf1_contract_sha256": "A0CE48E9EF992B97333D84ECB2850E221D482E2ACF11BB312B5F769DAFF992AA"
         },
@@ -777,8 +779,8 @@
         "production_ready": false
       },
       "summary": {
-        "rust_host_tests_passed": 132,
-        "rust_host_tests_total": 132,
+        "rust_host_tests_passed": 137,
+        "rust_host_tests_total": 137,
         "rustfmt_packages_passed": 2,
         "clippy_runs_passed": 2,
         "clippy_runs_total": 2,
@@ -967,36 +969,39 @@
       "xsave_instruction_count": 2,
       "xrstor_instruction_count": 2,
       "remote_shootdown_invlpg_source_count": 1,
-      "resource_page_count": 32,
-      "guard_page_count": 14,
-      "identity_mapped_page_count": 13,
-      "apic_page_table_offset": 31,
+      "application_processor_count": 3,
+      "resource_page_count_per_ap": 32,
+      "total_runtime_page_count": 96,
+      "guard_page_count_per_ap": 14,
+      "identity_mapped_page_count_per_ap": 13,
+      "dynamic_local_mask_binding_count": 1,
       "transient_diagnostic_token_count": 0,
       "files": {
         "arch": {
           "path": "native/kernel/src/arch/x86_64.rs",
-          "sha256": "6B2585232E4505D904F862932F48677543698CDFA5F233EC487C3300C9B854C4"
+          "sha256": "50C02F8F525389DFCC6B7E3271EE3286A71C74A58CA386E85104F4DA3876456D"
         },
         "main": {
           "path": "native/kernel/src/main.rs",
-          "sha256": "9C640A9AA213DD26053895DBBD16C512CF6B1E8CC1350EA4D3A4A5189793E502"
+          "sha256": "684A399618196276C86CCDD65040B4F46F156D8AB254F14F9817D8C2BA33B7C5"
         },
         "ipi": {
           "path": "native/kernel/src/smp_ipi.rs",
-          "sha256": "A28523E4D88355C3E42C01DEB313D486BFB49E033CDB8C3C0801BB7629C82D53"
+          "sha256": "CDFBB3133D1FC8F7A7BD0E7269176E71767E2648468DB915A64F4043D213C224"
         }
       }
     },
     "linked_invlpg_audit": {
       "scope": "poole_ap_ipi_trampoline_start..poole_ap_ipi_trampoline_end",
       "invlpg_instruction_count": 1,
+      "runtime_execution_count": 3,
       "operand": "(%rax)",
       "status": "pass",
-      "linked_sha256": "30576D45EC9FAFAB7A0A938C8C65D8E30CF5D64B1FAE7938189DD20AAFD93752",
-      "linked_byte_count": 5467088,
-      "canonical_sha256": "95DDA27784DA944A9C0F5B04029255EDE4DE1BB0684A8EA10DCFC07E686B59A2",
+      "linked_sha256": "52CCE0B38B983D82C1FC5E6976E7C08F0703DFD05427855BE1BAC4D400CE7D36",
+      "linked_byte_count": 5587448,
+      "canonical_sha256": "8118ED5F7761B9D36A4A65EFF1BC1856C5182D5733CE95A8BEEB24D1C2435F8D",
       "canonical_byte_count": 409600,
-      "relocation_count": 969,
+      "relocation_count": 985,
       "llvm_objdump_path": ".toolchains/rust-1.97.0/rustup/toolchains/1.97.0-x86_64-pc-windows-msvc/lib/rustlib/x86_64-pc-windows-msvc/bin/llvm-objdump.exe",
       "llvm_objdump_sha256": "84DE1EDCEFED12FEB797F8B1C41DEBA99B6116A6BB3B80A1832FFF2CC06F2F94"
     }
@@ -1004,11 +1009,11 @@
   "media": {
     "clean_generation_count": 2,
     "exact_clean_generation_match": true,
-    "sha256": "0B48372F7EA9A53B4069C9F3DEB6534FE967EFBE253682F34E4ECB7A23103FAF",
+    "sha256": "DF07FB6CD231E3568CAA3122224D1A30D063D483E754C9D14F8B4843261ECD2B",
     "byte_count": 67108864,
     "inspection": {
       "image": {
-        "sha256": "0B48372F7EA9A53B4069C9F3DEB6534FE967EFBE253682F34E4ECB7A23103FAF",
+        "sha256": "DF07FB6CD231E3568CAA3122224D1A30D063D483E754C9D14F8B4843261ECD2B",
         "byte_count": 67108864,
         "sector_bytes": 512,
         "sector_count": 131072,
@@ -1054,13 +1059,13 @@
         },
         {
           "path": "EFI/POOLEOS/SYSTEM_A.PBM",
-          "sha256": "0162389720F801278E87C222D28CBBB7B093C601420B45C0E6016D3942E00392",
+          "sha256": "98807FDC6BBD1FF04B8BB7938FD1497DC673B2A946B7FDF3E421F23103613EB4",
           "byte_count": 2615,
           "cluster_count": 6
         },
         {
           "path": "EFI/POOLEOS/KERNEL.ELF",
-          "sha256": "95DDA27784DA944A9C0F5B04029255EDE4DE1BB0684A8EA10DCFC07E686B59A2",
+          "sha256": "8118ED5F7761B9D36A4A65EFF1BC1856C5182D5733CE95A8BEEB24D1C2435F8D",
           "byte_count": 409600,
           "cluster_count": 800
         },
@@ -1078,7 +1083,7 @@
         },
         {
           "path": "EFI/POOLEOS/SYMBOLS.PBA",
-          "sha256": "63FEC3A5A9210024D1A7CEFEC848DEF5FD907D6F4F43CDC34412DC2B0728E709",
+          "sha256": "D64F63E68A7DF33C0CEAB89F2B230E13D1785EA24F02CBC0895C11F61CC9CE1B",
           "byte_count": 821,
           "cluster_count": 2
         },
@@ -1096,19 +1101,19 @@
         },
         {
           "path": "EFI/POOLEOS/POLICY.PBA",
-          "sha256": "3FF415B93596F40D9BD5FFA4572B671FE1B2133F06FC7E918EF26F83B7F03831",
+          "sha256": "0F8095B3608C742D8725D3C7AFC5E18AF6D031A87207DCE37B2F43B24F686A41",
           "byte_count": 2080,
           "cluster_count": 5
         },
         {
           "path": "EFI/POOLEOS/TRUST.PBT",
-          "sha256": "7DC7DD8ADBD881D421D0389C32D4E9AF2F967AAC1AAA07AD2685A3A6221C4101",
+          "sha256": "8CB43034BAF575CB1F8969EE52DFD3379685A3925E405A254C9301C7B1C46F09",
           "byte_count": 320,
           "cluster_count": 1
         },
         {
           "path": "EFI/POOLEOS/TRUSTST.PBS",
-          "sha256": "B1BCF17D6D630E35BA940284FAB963C2941D9A668E30A0F9C89BC0ED18231A7F",
+          "sha256": "1466610A3DD385CB2E0F546E5070CE327784317C1875CE170BDF67DDCF812987",
           "byte_count": 256,
           "cluster_count": 1
         }
@@ -1200,7 +1205,7 @@
             "path": "\\EFI\\POOLEOS\\KERNEL.ELF",
             "file_bytes": 409600,
             "image_bytes": 458752,
-            "sha256": "95DDA27784DA944A9C0F5B04029255EDE4DE1BB0684A8EA10DCFC07E686B59A2",
+            "sha256": "8118ED5F7761B9D36A4A65EFF1BC1856C5182D5733CE95A8BEEB24D1C2435F8D",
             "entry_contract": "PKENTRY1"
           },
           {
@@ -1233,7 +1238,7 @@
             "path": "\\EFI\\POOLEOS\\SYMBOLS.PBA",
             "file_bytes": 821,
             "image_bytes": 0,
-            "sha256": "63FEC3A5A9210024D1A7CEFEC848DEF5FD907D6F4F43CDC34412DC2B0728E709",
+            "sha256": "D64F63E68A7DF33C0CEAB89F2B230E13D1785EA24F02CBC0895C11F61CC9CE1B",
             "entry_contract": "none"
           },
           {
@@ -1266,14 +1271,14 @@
             "path": "\\EFI\\POOLEOS\\POLICY.PBA",
             "file_bytes": 2080,
             "image_bytes": 0,
-            "sha256": "3FF415B93596F40D9BD5FFA4572B671FE1B2133F06FC7E918EF26F83B7F03831",
+            "sha256": "0F8095B3608C742D8725D3C7AFC5E18AF6D031A87207DCE37B2F43B24F686A41",
             "entry_contract": "none"
           }
         ],
         "byte_count": 2615,
-        "sha256": "0162389720F801278E87C222D28CBBB7B093C601420B45C0E6016D3942E00392",
+        "sha256": "98807FDC6BBD1FF04B8BB7938FD1497DC673B2A946B7FDF3E421F23103613EB4",
         "manifest_id_hash": "4A2625333244591C",
-        "kernel_sha256_prefix": "95DDA27784DA944A"
+        "kernel_sha256_prefix": "8118ED5F7761B9D3"
       },
       "kernel": {
         "plan": {
@@ -1284,7 +1289,7 @@
           "entry_physical": 33591296,
           "physical_base": 33554432,
           "virtual_base": 18446744071562067968,
-          "relocation_count": 969,
+          "relocation_count": 985,
           "relro_offset": 360448,
           "relro_size": 49152,
           "segments": [
@@ -1334,15 +1339,15 @@
           ],
           "relocation_address": 360512
         },
-        "loaded_fnv1a64": "BE35280E2A566DED",
-        "loaded_sha256": "872CD4ADCDE176F0CFA17259643639C5A3B01BA17C646FDC7DB560A348D68051"
+        "loaded_fnv1a64": "422749EDD9087C0D",
+        "loaded_sha256": "AE542D6F02A8A5FC65CD480D896378BF582DCBEDA533B61DCC404BC3B113EA81"
       },
       "artifact_set": {
         "contract_id": "PBART1",
         "artifact_count": 6,
         "file_bytes": 8761,
         "page_count": 6,
-        "fnv1a64": "1DBB42EC63A7BB08",
+        "fnv1a64": "A71D3CB33E349AB5",
         "signatures_verified": false,
         "measured": false,
         "semantics_applied": false,
@@ -1382,12 +1387,12 @@
             "version": 1,
             "file_bytes": 821,
             "payload_bytes": 725,
-            "payload_sha256": "0CEB5E58B7876E2CBD97ECEAE8F234B4244B786A3D98F75C105E6115962EBB46",
-            "file_sha256": "63FEC3A5A9210024D1A7CEFEC848DEF5FD907D6F4F43CDC34412DC2B0728E709",
+            "payload_sha256": "51D54CCE2A0C41FB35471B6E3A04B030C3FBBA936D91A76749D23FA467F62C54",
+            "file_sha256": "D64F63E68A7DF33C0CEAB89F2B230E13D1785EA24F02CBC0895C11F61CC9CE1B",
             "path": "EFI/POOLEOS/SYMBOLS.PBA",
             "manifest_id": "d_symbols",
             "page_count": 1,
-            "loaded_fnv1a64": "2D7248315AD1F5F6"
+            "loaded_fnv1a64": "74DEAB8437B3C73B"
           },
           {
             "contract_id": "PBART1",
@@ -1424,12 +1429,12 @@
             "version": 1,
             "file_bytes": 2080,
             "payload_bytes": 1984,
-            "payload_sha256": "A453A002F3B7DBC17EC8C62B71769F02C16BA9BC2F23DE2D15565A26A25E90E7",
-            "file_sha256": "3FF415B93596F40D9BD5FFA4572B671FE1B2133F06FC7E918EF26F83B7F03831",
+            "payload_sha256": "B68C7C9159E182BADFEB391F8465B2FF9AF7BABFF164812C8D3BCC6A9A2CC36D",
+            "file_sha256": "0F8095B3608C742D8725D3C7AFC5E18AF6D031A87207DCE37B2F43B24F686A41",
             "path": "EFI/POOLEOS/POLICY.PBA",
             "manifest_id": "g_policy",
             "page_count": 1,
-            "loaded_fnv1a64": "8C105985AB73E1AA"
+            "loaded_fnv1a64": "5DCFD309A3FF8C57"
           }
         ]
       },
@@ -1507,20 +1512,20 @@
           "preferred_virtual_base": 18446744071562067968,
           "virtual_window_end_exclusive": 18446744072635809792,
           "slide_alignment": 2097152,
-          "canonical_file_sha256": "95DDA27784DA944A9C0F5B04029255EDE4DE1BB0684A8EA10DCFC07E686B59A2",
-          "preferred_loaded_sha256": "872CD4ADCDE176F0CFA17259643639C5A3B01BA17C646FDC7DB560A348D68051",
-          "build_id_sha256": "5E707CBD1DFEB9FF253A6C21B1102404924397831F00046BD90A9A6E8D06DB19",
-          "debug_file_sha256": "30576D45EC9FAFAB7A0A938C8C65D8E30CF5D64B1FAE7938189DD20AAFD93752",
-          "source_manifest_sha256": "B3BB53DA89ADB16953B3EC95C7AEFB5E97C8203663E0A369A52DC076E943251E",
-          "body_sha256": "A3946DA5F086E4BBDEAE8AA3C8B00B17401D2BEB81F04F64CD2A6547BEAF2DC4"
+          "canonical_file_sha256": "8118ED5F7761B9D36A4A65EFF1BC1856C5182D5733CE95A8BEEB24D1C2435F8D",
+          "preferred_loaded_sha256": "AE542D6F02A8A5FC65CD480D896378BF582DCBEDA533B61DCC404BC3B113EA81",
+          "build_id_sha256": "F6247267DB203406EF1E0A5E6EF399127972281A8753791D7AB90E9E69E85005",
+          "debug_file_sha256": "52CCE0B38B983D82C1FC5E6976E7C08F0703DFD05427855BE1BAC4D400CE7D36",
+          "source_manifest_sha256": "741FC52B981BCB20B0ABD92824297C0F2C2062EF2E458F8C4374D8EF76EECA1E",
+          "body_sha256": "18CA305E2950228140A6BD3B9397A4595A62655F2D9FAF40E2627BE0530601C1"
         },
-        "bundle_sha256": "0CEB5E58B7876E2CBD97ECEAE8F234B4244B786A3D98F75C105E6115962EBB46",
+        "bundle_sha256": "51D54CCE2A0C41FB35471B6E3A04B030C3FBBA936D91A76749D23FA467F62C54",
         "bundle_version": 1,
         "segment_count": 4,
         "symbol_count": 3,
         "string_bytes": 69,
         "maximum_lookup_steps": 13,
-        "outer_payload_sha256": "0CEB5E58B7876E2CBD97ECEAE8F234B4244B786A3D98F75C105E6115962EBB46",
+        "outer_payload_sha256": "51D54CCE2A0C41FB35471B6E3A04B030C3FBBA936D91A76749D23FA467F62C54",
         "activation_allowed": false,
         "activation_errors": [
           "psym_activation_outer_signature",
@@ -1680,12 +1685,12 @@
           "initial_system_sha256": "FFE7243CEE75963D84905E6C9BF9F0D04310EEDBF097757C32E0EBE30FA0C3ED",
           "qualification_only": true
         },
-        "bundle_sha256": "A453A002F3B7DBC17EC8C62B71769F02C16BA9BC2F23DE2D15565A26A25E90E7",
+        "bundle_sha256": "B68C7C9159E182BADFEB391F8465B2FF9AF7BABFF164812C8D3BCC6A9A2CC36D",
         "bundle_version": 1,
         "mode_count": 6,
         "capability_rule_count": 11,
         "initial_system_sha256": "FFE7243CEE75963D84905E6C9BF9F0D04310EEDBF097757C32E0EBE30FA0C3ED",
-        "outer_payload_sha256": "A453A002F3B7DBC17EC8C62B71769F02C16BA9BC2F23DE2D15565A26A25E90E7",
+        "outer_payload_sha256": "B68C7C9159E182BADFEB391F8465B2FF9AF7BABFF164812C8D3BCC6A9A2CC36D",
         "activation_allowed": false,
         "activation_errors": [
           "ppol_activation_outer_signature",
@@ -1730,7 +1735,7 @@
         "development_denial_count": 6,
         "file_bytes": 8761,
         "payload_bytes": 8185,
-        "retained_set_sha256": "E350B2276092199EAA5E6896C36C4E04521E610D1C9D4D0E3DA9B8E458A2A22A",
+        "retained_set_sha256": "FFDBBD79609651D507C3FF9701B530B9F5D66AC8F866FF3857F4AE1C2C07527B",
         "exact_retained_bytes": true,
         "policy_payload_digests_bound": true,
         "initial_routes_cross_bound": true,
@@ -1754,8 +1759,8 @@
         "binding_count": 14,
         "denial_count": 1,
         "denial": "pbtrust_policy_unsigned",
-        "policy_sha256": "7DC7DD8ADBD881D421D0389C32D4E9AF2F967AAC1AAA07AD2685A3A6221C4101",
-        "state_sha256": "B1BCF17D6D630E35BA940284FAB963C2941D9A668E30A0F9C89BC0ED18231A7F",
+        "policy_sha256": "8CB43034BAF575CB1F8969EE52DFD3379685A3925E405A254C9301C7B1C46F09",
+        "state_sha256": "1466610A3DD385CB2E0F546E5070CE327784317C1875CE170BDF67DDCF812987",
         "development_unsigned": true,
         "state_source": "esp_candidate_not_persistent_authority",
         "state_authenticated": false,
@@ -1773,10 +1778,11 @@
   "execution": {
     "host_environment_count": 1,
     "run_count": 2,
-    "profile_id": "sandybridge-x87-sse-two-vcpu",
+    "profile_id": "sandybridge-x87-sse-four-vcpu-three-ap",
     "machine": "pc-q35-11.0",
     "cpu_model": "SandyBridge,-avx",
-    "virtual_cpu_count": 2,
+    "virtual_cpu_count": 4,
+    "application_processor_count": 3,
     "acceleration": "tcg_multi_thread",
     "deterministic_instruction_clock": false,
     "qemu_sha256": "A930E028F93D0FA47E4D58BDAD2432F7466DC2B6AF0AE376F77EF7A298FFDD02",
@@ -1795,7 +1801,7 @@
       "-cpu",
       "SandyBridge,-avx",
       "-smp",
-      "2,sockets=1,dies=1,clusters=1,cores=2,threads=1,maxcpus=2",
+      "4,sockets=1,dies=1,clusters=1,cores=4,threads=1,maxcpus=4",
       "-m",
       "512M",
       "-rtc",
@@ -1846,7 +1852,7 @@
     "exact_pbp1_match": true,
     "runs": [
       {
-        "run_id": "smp-ipi-run-1",
+        "run_id": "smp-multi-run-1",
         "fresh_vars_copy": true,
         "media_read_only": true,
         "guest_network": false,
@@ -1878,39 +1884,39 @@
           "POOLEBOOT/0.1 FILESYSTEM PASS loaded_image=1 simple_fs=1 root=1",
           "POOLEBOOT/0.1 BOOTCFG PASS bytes=229 entries=1 default_hash=61053F0E3EBBD272 timeout_ms=0 attempts=3 slot=1 manifest_max_bytes=65536",
           "POOLEBOOT/0.1 MANIFEST PASS bytes=2615 artifacts=7 id_hash=4A2625333244591C slot=1 version=1 minimum_secure_version=1",
-          "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=409600 image_bytes=458752 sha256_prefix=95DDA27784DA944A path=manifest",
+          "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=409600 image_bytes=458752 sha256_prefix=8118ED5F7761B9D3 path=manifest",
           "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=409600 path=manifest_development",
-          "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=458752 pages=112 entry_offset=36864 relocations=969 files_closed=12 pools_freed=11 fnv1a64=BE35280E2A566DED",
-          "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=1DBB42EC63A7BB08 retained=1 signatures=0 measured=0",
-          "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=E350B2276092199EAA5E6896C36C4E04521E610D1C9D4D0E3DA9B8E458A2A22A retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
-          "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=7DC7DD8ADBD881D421D0389C32D4E9AF2F967AAC1AAA07AD2685A3A6221C4101 state_sha256=B1BCF17D6D630E35BA940284FAB963C2941D9A668E30A0F9C89BC0ED18231A7F source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
+          "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=458752 pages=112 entry_offset=36864 relocations=985 files_closed=12 pools_freed=11 fnv1a64=422749EDD9087C0D",
+          "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=A71D3CB33E349AB5 retained=1 signatures=0 measured=0",
+          "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=FFDBBD79609651D507C3FF9701B530B9F5D66AC8F866FF3857F4AE1C2C07527B retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
+          "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=8CB43034BAF575CB1F8969EE52DFD3379685A3925E405A254C9301C7B1C46F09 state_sha256=1466610A3DD385CB2E0F546E5070CE327784317C1875CE170BDF67DDCF812987 source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
           "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
           "POOLEBOOT/0.1 FRAME READY",
           "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=112 ro=21 rx=79 rw=12 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=F43490703F3DCA21",
-          "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=112 physical_bits=40 mapped_fnv1a64=BE35280E2A566DED framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
-          "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=32 handoff_pages=256 guards=2 total_pages=400 stack_pt=113 handoff_pt=146 kernel_phys=000000001E11D000 root=000000001E22F000 stack_phys=000000001E233000 stack_top=FFFFFFFF80091000 handoff_phys=000000001DE7B000 handoff_virt=FFFFFFFF80092000 retained_fnv1a64=52A6EE3DCB476C57 original_cr3=restored firmware_calls_while_active=0",
-          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5640 records=5 memory_entries=110 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=3272A049 fnv1a64=FF4D339714E7D77B state=boot_services_exited bytes_unchanged=1",
-          "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=5280 descriptor_bytes=48 descriptors=110",
+          "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=112 physical_bits=40 mapped_fnv1a64=422749EDD9087C0D framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
+          "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=32 handoff_pages=256 guards=2 total_pages=400 stack_pt=113 handoff_pt=146 kernel_phys=000000001E111000 root=000000001E21F000 stack_phys=000000001E223000 stack_top=FFFFFFFF80091000 handoff_phys=000000001DE6F000 handoff_virt=FFFFFFFF80092000 retained_fnv1a64=7775033C7989EB3B original_cr3=restored firmware_calls_while_active=0",
+          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5440 records=5 memory_entries=105 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=F1D8B362 fnv1a64=0D0B5D15CD332D86 state=boot_services_exited bytes_unchanged=1",
+          "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=5040 descriptor_bytes=48 descriptors=105",
           "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=112 artifact_pages=9 table_pages=4 stack_pages=32 handoff_pages=256",
-          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF80009000 handoff=FFFFFFFF80092000 bytes=5640 stack_top=FFFFFFFF80091000 root=000000001E22F000 cr3=000000001E22F000 trap_scenario=14 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
+          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF80009000 handoff=FFFFFFFF80092000 bytes=5440 stack_top=FFFFFFFF80091000 root=000000001E21F000 cr3=000000001E21F000 trap_scenario=14 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
           "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
-          "POOLEOS:KERNEL:SMP-IPI-EARLY PASS contract=PKSMP4 selector=14 bsp=1 if=0 stack=validated_by_wrapper serial=initialized",
-          "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE140-N9-SMP-SHOOTDOWN-V001-00001 entry_count=1 serial=present",
-          "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF80092000 bytes=5640 entry=0xFFFFFFFF80009000 stack_top=0xFFFFFFFF80091000 root=0x000000001E22F000 cr3=0x000000001E22F000 rflags_if=0 rflags_df=0",
+          "POOLEOS:KERNEL:SMP-MULTI-EARLY PASS contract=PKSMP5 selector=14 bsp=1 if=0 stack=validated_by_wrapper serial=initialized",
+          "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE141-N8-SMP-MULTI-AP-V001-00001 entry_count=1 serial=present",
+          "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF80092000 bytes=5440 entry=0xFFFFFFFF80009000 stack_top=0xFFFFFFFF80091000 root=0x000000001E21F000 cr3=0x000000001E21F000 rflags_if=0 rflags_df=0",
           "POOLEOS:KERNEL:PBP1 PASS profile=development records=5 artifacts=10 production_profile_valid=0",
-          "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=E350B2276092199EAA5E6896C36C4E04521E610D1C9D4D0E3DA9B8E458A2A22A policy_sha256=7DC7DD8ADBD881D421D0389C32D4E9AF2F967AAC1AAA07AD2685A3A6221C4101 state_sha256=B1BCF17D6D630E35BA940284FAB963C2941D9A668E30A0F9C89BC0ED18231A7F denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
-          "POOLEOS:KERNEL:SMP-IPI-TOPOLOGY PASS contract=PKSMP4 processors=2 enabled=2 bsp_apic_id=0 target_apic_id=1 apic_physical=0x00000000FEE00000 selection=lowest_enabled_non_bsp",
-          "POOLEOS:KERNEL:SMP-IPI-RESOURCES PASS contract=PKSMP4 physical_start=0x0000000000001000 pages=32 sipi_vector=1 trampoline_bytes=2564 allocation_sequence=2 tables=5 mapped_pages=13 guard_pages=14 apic_pt_offset=31 apic_leaf=pwt_pcd_rw_nx below_1mib=1",
-          "POOLEOS:KERNEL:SMP-IPI-ONLINE PASS contract=PKSMP4 service_state=2 if=1 vectors=224,225,226,227,228,229 apic_mmio=0x00000000FEE00000 apic_table=1",
-          "POOLEOS:KERNEL:SMP-IPI-ACCEPTED PASS contract=PKSMP4 operations=reschedule,shootdown_remote_invlpg,call_allowlist_noop,diagnostic,panic_notice,stop sequences=1,2,3,4,5,6 accepted=6 reschedule=1 shootdown=1 call_function=1 diagnostic=1 panic=1 stop=1",
-          "POOLEOS:KERNEL:SMP-IPI-CONTROLS PASS contract=PKSMP4 invalid_capability=1 vector_mismatch=1 stale_sequence=1 duplicate_sequence=1 denied=4 delivery_count=10 eoi_count=10 spurious=0 apic_error=0",
-          "POOLEOS:KERNEL:SMP-IPI-TIMEOUT PASS contract=PKSMP4 operation=shootdown target_apic_id=2 target_mask=0x0000000000000004 attempt=6 bounded=1 offline_cpu=1 retry_same_attempt=1 timeout_count=1",
-          "POOLEOS:KERNEL:SMP-SHOOTDOWN PASS contract=PKSMP4 root=0x0000000000002000 probe=0x00000000001FF000 retired_generation=1 active_generation=2 target_mask=0x0000000000000002 ack_mask=0x0000000000000002 old_frame=0x0000000000021000 new_frame=0x0000000000022000 observed_before=0x504B534D50344F4C observed_after=0x504B534D50344E57 invalidations=1 last_ack_generation=2 premature_reclaim_rejected=1 reclaim_state=3 shootdown_checksum=0x53484F4F544D8249",
-          "POOLEOS:KERNEL:SMP-IPI-STOP PASS contract=PKSMP4 ack_attempt=10 ack_sequence=6 last_accepted_sequence=6 service_state=4 mailbox_state=3 runtime_state=5 panic_latched=1 response_checksum=0x1A04060253500005 baseline_checksum=0x615028BEF7FFF23B runtime_checksum=0x10F17072B84EFE1E init_asserts=1 init_deasserts=1 sipis=2 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 final_init=1 parked=1",
-          "POOLEOS:KERNEL:SMP-IPI-RELEASE PASS contract=PKSMP4 release_sequence=7 zeroed_bytes=131072 verified_bytes=131072 frame_allocation_sequences=3,4 frame_release_sequences=5,6 frame_zeroed_bytes=8192 frame_verified_bytes=8192 resources_released=34 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged",
-          "POOLEOS:KERNEL:SMP-IPI-RESULT PASS contract=PKSMP4 profile=sandybridge_x87_sse_two_vcpu capability_gate=development_fixed_token operation_classes=6 valid_deliveries=6 denied_deliveries=4 offline_timeouts=1 eois=10 panic_latched=1 stop_quiesced=1 ap_parked=1 resources_released=34 rollback=host_verified shootdown_remote_invlpg=1 tlb_invalidations=1 generation_retirement=1 no_reuse_before_retirement=1 call_allowlist_noop=1 arbitrary_callback=0 scheduler=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
+          "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=FFDBBD79609651D507C3FF9701B530B9F5D66AC8F866FF3857F4AE1C2C07527B policy_sha256=8CB43034BAF575CB1F8969EE52DFD3379685A3925E405A254C9301C7B1C46F09 state_sha256=1466610A3DD385CB2E0F546E5070CE327784317C1875CE170BDF67DDCF812987 denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
+          "POOLEOS:KERNEL:SMP-MULTI-TOPOLOGY PASS contract=PKSMP5 processors=4 enabled=4 bsp_apic_id=0 target_apic_ids=1,2,3 target_mask=0x000000000000000E apic_physical=0x00000000FEE00000 selection=exact_enabled_legacy_apic_topology",
+          "POOLEOS:KERNEL:SMP-MULTI-PARTIAL-ROLLBACK PASS contract=PKSMP5 started_mask=0x0000000000000006 timeout_apic_id=4 timeout_mask=0x0000000000000010 timeout_count=1 parked_mask=0x0000000000000006 released_mask=0x000000000000000E resource_pages=96 frame_pages=6 zeroed_bytes=417792 verified_bytes=417792 fresh_allocation_required=1",
+          "POOLEOS:KERNEL:SMP-MULTI-RETRY PASS contract=PKSMP5 retry_count=1 partial_rollback_count=1 started_mask=0x000000000000000E online_mask=0x000000000000000E simultaneous_online=1",
+          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=0 apic_id=1 physical_start=0x0000000000001000 pages=32 sipi_vector=1 trampoline_bytes=2612 allocation_sequence=24 frame_allocation_sequences=25,26 frame_release_sequences=35,42 resource_release_sequence=43 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=1 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000002 ack_mask=0x0000000000000002 invalidations=1 baseline_checksum=0xFD39DD16C89B502D runtime_checksum=0x8EBE56C14E8E2951 response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
+          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=1 apic_id=2 physical_start=0x0000000000023000 pages=32 sipi_vector=35 trampoline_bytes=2612 allocation_sequence=27 frame_allocation_sequences=28,31 frame_release_sequences=36,40 resource_release_sequence=41 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=0 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000004 ack_mask=0x0000000000000004 invalidations=1 baseline_checksum=0xC23A643FCA4AE773 runtime_checksum=0x9BDFFF6D6D7249ED response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
+          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=2 apic_id=3 physical_start=0x0000000000045000 pages=32 sipi_vector=69 trampoline_bytes=2612 allocation_sequence=32 frame_allocation_sequences=33,34 frame_release_sequences=37,38 resource_release_sequence=39 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=0 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000008 ack_mask=0x0000000000000008 invalidations=1 baseline_checksum=0xB8CFFD9517333C7A runtime_checksum=0x5EA998A8DC0CBD27 response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
+          "POOLEOS:KERNEL:SMP-MULTI-SHOOTDOWN PASS contract=PKSMP5 target_mask=0x000000000000000E ack_mask=0x000000000000000E retired_generation=1 active_generation=2 invalidations=3 root_checksum=0x5A6D5E693D7F53DC old_frame_checksum=0xBE1E07C6144BC01A new_frame_checksum=0xE351D68DF0864FAA premature_reclaim_rejections=2 reclaim_state=released",
+          "POOLEOS:KERNEL:SMP-MULTI-LIFECYCLE PASS contract=PKSMP5 started_mask=0x000000000000000E online_mask=0x000000000000000E quiesced_mask=0x000000000000000E parked_mask=0x000000000000000E validated_mask=0x000000000000000E released_mask=0x000000000000000E timeout_count=1 retry_count=1 partial_rollback_count=1 exact_accounting=1",
+          "POOLEOS:KERNEL:SMP-MULTI-RELEASE PASS contract=PKSMP5 resource_pages=96 frame_pages=6 resource_zeroed_bytes=393216 resource_verified_bytes=393216 frame_zeroed_bytes=24576 frame_verified_bytes=24576 total_pages=102 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged",
+          "POOLEOS:KERNEL:SMP-MULTI-RESULT PASS contract=PKSMP5 profile=sandybridge_x87_sse_four_vcpu aps=3 simultaneous_online=1 partial_start_timeout=1 partial_rollback=1 fresh_retry=1 target_mask=0x000000000000000E ack_mask=0x000000000000000E tlb_invalidations=3 no_reuse_before_all_acks=1 stop_quiesced=3 ap_parked=3 resources_released=102 scheduler=0 general_broadcast=0 target_hardware=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],
-        "marker_sha256": "9E3732BA9F98DD8B89BBE2B054E7B8DC829FEE8F80CC5535F2481E4767DD45E0",
+        "marker_sha256": "7860FC5C248EC1EE02F353C3A2523F8AAA0D6EA7CC47315D055200CA01C3B677",
         "serial_debugcon_exact_match": true,
         "marker_summary": {
           "transfer_prefix": {
@@ -1940,15 +1946,15 @@
                 "kernel_version": 1,
                 "kernel_file_byte_count": 409600,
                 "kernel_image_byte_count": 458752,
-                "kernel_sha256_prefix": "95DDA27784DA944A"
+                "kernel_sha256_prefix": "8118ED5F7761B9D3"
               },
               "kernel": {
                 "file_byte_count": 409600,
                 "image_byte_count": 458752,
                 "page_count": 112,
                 "entry_offset": 36864,
-                "relocation_count": 969,
-                "loaded_fnv1a64": "BE35280E2A566DED",
+                "relocation_count": 985,
+                "loaded_fnv1a64": "422749EDD9087C0D",
                 "file_handles_closed": 12,
                 "file_pools_freed": 11,
                 "pages_retained": true,
@@ -1961,7 +1967,7 @@
                 "page_count": 6,
                 "retained_input_count": 9,
                 "retained_input_page_count": 9,
-                "fnv1a64": "1DBB42EC63A7BB08",
+                "fnv1a64": "A71D3CB33E349AB5",
                 "pages_retained": true,
                 "signatures_verified": false,
                 "measured": false,
@@ -1975,7 +1981,7 @@
                 "development_denial_count": 6,
                 "file_bytes": 8761,
                 "payload_bytes": 8185,
-                "retained_set_sha256": "E350B2276092199EAA5E6896C36C4E04521E610D1C9D4D0E3DA9B8E458A2A22A",
+                "retained_set_sha256": "FFDBBD79609651D507C3FF9701B530B9F5D66AC8F866FF3857F4AE1C2C07527B",
                 "exact_retained_bytes": true,
                 "authority_grants": 0,
                 "actions_authorized": 0,
@@ -1989,8 +1995,8 @@
                 "binding_count": 14,
                 "denial_count": 1,
                 "denial": "pbtrust_policy_unsigned",
-                "policy_sha256": "7DC7DD8ADBD881D421D0389C32D4E9AF2F967AAC1AAA07AD2685A3A6221C4101",
-                "state_sha256": "B1BCF17D6D630E35BA940284FAB963C2941D9A668E30A0F9C89BC0ED18231A7F",
+                "policy_sha256": "8CB43034BAF575CB1F8969EE52DFD3379685A3925E405A254C9301C7B1C46F09",
+                "state_sha256": "1466610A3DD385CB2E0F546E5070CE327784317C1875CE170BDF67DDCF812987",
                 "state_source": "esp_candidate_not_persistent_authority",
                 "signature_verifications": 0,
                 "authority_grants": 0,
@@ -1999,16 +2005,16 @@
                 "state_monotonic": false
               },
               "pbp1": {
-                "byte_count": 5640,
+                "byte_count": 5440,
                 "record_count": 5,
-                "memory_entry_count": 110,
+                "memory_entry_count": 105,
                 "framebuffer_present": 1,
                 "firmware_table_count": 1,
                 "artifact_count": 10,
                 "descriptor_bytes": 48,
                 "exit_attempts": 1,
-                "message_crc32": "3272A049",
-                "fnv1a64": "FF4D339714E7D77B",
+                "message_crc32": "F1D8B362",
+                "fnv1a64": "0D0B5D15CD332D86",
                 "pre_exit": false,
                 "boot_services_exited": true,
                 "development_mode_only": true,
@@ -2030,7 +2036,7 @@
                 "leaf_fingerprint": "F43490703F3DCA21",
                 "table_page_count": 4,
                 "physical_address_bits": 40,
-                "mapped_fnv1a64": "BE35280E2A566DED",
+                "mapped_fnv1a64": "422749EDD9087C0D",
                 "framebuffer_preserved": true,
                 "framebuffer_cache_signature": "00",
                 "framebuffer_first_page_bytes": 2097152,
@@ -2046,13 +2052,13 @@
                   "total_mapped_page_count": 400,
                   "stack_first_page_table_index": 113,
                   "handoff_first_page_table_index": 146,
-                  "kernel_physical_base": 504483840,
-                  "page_table_root_physical": 505606144,
-                  "stack_physical_base": 505622528,
+                  "kernel_physical_base": 504434688,
+                  "page_table_root_physical": 505540608,
+                  "stack_physical_base": 505556992,
                   "stack_top_virtual": 18446744071562661888,
-                  "handoff_physical_base": 501723136,
+                  "handoff_physical_base": 501673984,
                   "handoff_virtual_base": 18446744071562665984,
-                  "retained_leaf_fingerprint": "52A6EE3DCB476C57"
+                  "retained_leaf_fingerprint": "7775033C7989EB3B"
                 }
               },
               "gop": {
@@ -2063,16 +2069,16 @@
                 "format": "BGR"
               },
               "memory_map": {
-                "byte_count": 5280,
+                "byte_count": 5040,
                 "descriptor_bytes": 48,
-                "descriptor_count": 110
+                "descriptor_count": 105
               },
               "boot_exit": {
                 "contract_id": "PBEXIT1",
                 "attempt_count": 1,
-                "map_byte_count": 5280,
+                "map_byte_count": 5040,
                 "descriptor_size": 48,
-                "descriptor_count": 110,
+                "descriptor_count": 105,
                 "firmware_calls_after_exit": 0,
                 "kernel_page_count": 112,
                 "artifact_page_count": 9,
@@ -2089,10 +2095,10 @@
               "emulator_only": 1,
               "entry": 18446744071562104832,
               "handoff": 18446744071562665984,
-              "handoff_bytes": 5640,
+              "handoff_bytes": 5440,
               "stack_top": 18446744071562661888,
-              "root": 505606144,
-              "cr3": 505606144,
+              "root": 505540608,
+              "cr3": 505540608,
               "trap_scenario": 14,
               "signature_verifications": 0,
               "authority_grants": 0,
@@ -2103,17 +2109,17 @@
             "kernel_entry": {
               "entry_contract": "PKENTRY1",
               "transfer_contract": "PKXFER1",
-              "build_id": "PKBUILD1-CYCLE140-N9-SMP-SHOOTDOWN-V001-00001",
+              "build_id": "PKBUILD1-CYCLE141-N8-SMP-MULTI-AP-V001-00001",
               "entry_count": 1,
               "serial": "present"
             },
             "kernel_state": {
               "handoff": 18446744071562665984,
-              "handoff_bytes": 5640,
+              "handoff_bytes": 5440,
               "entry": 18446744071562104832,
               "stack_top": 18446744071562661888,
-              "root": 505606144,
-              "cr3": 505606144,
+              "root": 505540608,
+              "cr3": 505540608,
               "rflags_if": 0,
               "rflags_df": 0
             },
@@ -2130,9 +2136,9 @@
               "parser_count": 9,
               "manifest_bytes": 2615,
               "retained_file_bytes": 11952,
-              "retained_set_sha256": "E350B2276092199EAA5E6896C36C4E04521E610D1C9D4D0E3DA9B8E458A2A22A",
-              "policy_sha256": "7DC7DD8ADBD881D421D0389C32D4E9AF2F967AAC1AAA07AD2685A3A6221C4101",
-              "state_sha256": "B1BCF17D6D630E35BA940284FAB963C2941D9A668E30A0F9C89BC0ED18231A7F",
+              "retained_set_sha256": "FFDBBD79609651D507C3FF9701B530B9F5D66AC8F866FF3857F4AE1C2C07527B",
+              "policy_sha256": "8CB43034BAF575CB1F8969EE52DFD3379685A3925E405A254C9301C7B1C46F09",
+              "state_sha256": "1466610A3DD385CB2E0F546E5070CE327784317C1875CE170BDF67DDCF812987",
               "denial": "pbtrust_policy_unsigned",
               "authority_grants": 0,
               "actions_authorized": 0,
@@ -2141,106 +2147,302 @@
             "synthetic_unsigned_terminal_used_for_prefix_parser_only": true
           },
           "topology": {
-            "processors": 2,
-            "enabled": 2,
+            "processors": 4,
+            "enabled": 4,
             "bsp_apic_id": 0,
-            "target_apic_id": 1
-          },
-          "resources": {
-            "physical_start": 4096,
-            "page_count": 32,
-            "mapped_pages": 13,
-            "guard_pages": 14,
-            "apic_page_table": 131072,
-            "trampoline_bytes": 2564
-          },
-          "service": {
-            "vectors": [
-              224,
-              225,
-              226,
-              227,
-              228,
-              229
+            "target_apic_ids": [
+              1,
+              2,
+              3
             ],
-            "interrupts_enabled": true,
-            "capability_gate": "development_fixed_token"
+            "target_mask": 14
           },
-          "operations": {
-            "accepted": 6,
-            "denied": 4,
-            "deliveries": 10,
-            "eois": 10,
+          "partial_rollback": {
+            "started_mask": 6,
+            "offline_apic_id": 4,
             "timeout_count": 1,
-            "timeout_attempt": 6,
-            "retry_same_attempt": true
+            "parked_mask": 6,
+            "released_mask": 14,
+            "resource_pages": 96,
+            "frame_pages": 6
           },
+          "retry": {
+            "retry_count": 1,
+            "simultaneous_online": true
+          },
+          "aps": [
+            {
+              "index": 0,
+              "apic_id": 1,
+              "layout": {
+                "start": 4096,
+                "end": 135168,
+                "sipi_vector": 1,
+                "pml4": 8192,
+                "local": 53248,
+                "apic_page_table": 131072,
+                "roles": {
+                  "trampoline": [
+                    0
+                  ],
+                  "tables": [
+                    1,
+                    2,
+                    3,
+                    4
+                  ],
+                  "rsp0": [
+                    6,
+                    7,
+                    8,
+                    9
+                  ],
+                  "local": [
+                    12
+                  ],
+                  "descriptors": [
+                    15
+                  ],
+                  "idt": [
+                    18
+                  ],
+                  "ist1": [
+                    21,
+                    22
+                  ],
+                  "ist2": [
+                    25,
+                    26
+                  ],
+                  "xstate": [
+                    29
+                  ],
+                  "apic_page_table": [
+                    31
+                  ],
+                  "guards": [
+                    5,
+                    10,
+                    11,
+                    13,
+                    14,
+                    16,
+                    17,
+                    19,
+                    20,
+                    23,
+                    24,
+                    27,
+                    28,
+                    30
+                  ]
+                }
+              },
+              "allocation_sequence": 24,
+              "frame_allocation_sequences": [
+                25,
+                26
+              ],
+              "frame_release_sequences": [
+                35,
+                42
+              ],
+              "resource_release_sequence": 43,
+              "trampoline_bytes": 2612,
+              "response_checksum": 1874629951950422021
+            },
+            {
+              "index": 1,
+              "apic_id": 2,
+              "layout": {
+                "start": 143360,
+                "end": 274432,
+                "sipi_vector": 35,
+                "pml4": 147456,
+                "local": 192512,
+                "apic_page_table": 270336,
+                "roles": {
+                  "trampoline": [
+                    0
+                  ],
+                  "tables": [
+                    1,
+                    2,
+                    3,
+                    4
+                  ],
+                  "rsp0": [
+                    6,
+                    7,
+                    8,
+                    9
+                  ],
+                  "local": [
+                    12
+                  ],
+                  "descriptors": [
+                    15
+                  ],
+                  "idt": [
+                    18
+                  ],
+                  "ist1": [
+                    21,
+                    22
+                  ],
+                  "ist2": [
+                    25,
+                    26
+                  ],
+                  "xstate": [
+                    29
+                  ],
+                  "apic_page_table": [
+                    31
+                  ],
+                  "guards": [
+                    5,
+                    10,
+                    11,
+                    13,
+                    14,
+                    16,
+                    17,
+                    19,
+                    20,
+                    23,
+                    24,
+                    27,
+                    28,
+                    30
+                  ]
+                }
+              },
+              "allocation_sequence": 27,
+              "frame_allocation_sequences": [
+                28,
+                31
+              ],
+              "frame_release_sequences": [
+                36,
+                40
+              ],
+              "resource_release_sequence": 41,
+              "trampoline_bytes": 2612,
+              "response_checksum": 1874629951950422021
+            },
+            {
+              "index": 2,
+              "apic_id": 3,
+              "layout": {
+                "start": 282624,
+                "end": 413696,
+                "sipi_vector": 69,
+                "pml4": 286720,
+                "local": 331776,
+                "apic_page_table": 409600,
+                "roles": {
+                  "trampoline": [
+                    0
+                  ],
+                  "tables": [
+                    1,
+                    2,
+                    3,
+                    4
+                  ],
+                  "rsp0": [
+                    6,
+                    7,
+                    8,
+                    9
+                  ],
+                  "local": [
+                    12
+                  ],
+                  "descriptors": [
+                    15
+                  ],
+                  "idt": [
+                    18
+                  ],
+                  "ist1": [
+                    21,
+                    22
+                  ],
+                  "ist2": [
+                    25,
+                    26
+                  ],
+                  "xstate": [
+                    29
+                  ],
+                  "apic_page_table": [
+                    31
+                  ],
+                  "guards": [
+                    5,
+                    10,
+                    11,
+                    13,
+                    14,
+                    16,
+                    17,
+                    19,
+                    20,
+                    23,
+                    24,
+                    27,
+                    28,
+                    30
+                  ]
+                }
+              },
+              "allocation_sequence": 32,
+              "frame_allocation_sequences": [
+                33,
+                34
+              ],
+              "frame_release_sequences": [
+                37,
+                38
+              ],
+              "resource_release_sequence": 39,
+              "trampoline_bytes": 2612,
+              "response_checksum": 1874629951950422021
+            }
+          ],
           "shootdown": {
-            "root_physical": 8192,
-            "virtual_address": 2093056,
-            "retired_generation": 1,
-            "active_generation": 2,
-            "target_mask": 2,
-            "ack_mask": 2,
-            "old_frame_physical": 135168,
-            "new_frame_physical": 139264,
-            "observed_before": 5785809737810726732,
-            "observed_after": 5785809737810726487,
-            "invalidation_count": 1,
-            "premature_reclaim_rejected": true,
-            "reclaim_state": 3,
-            "response_checksum": 6001133705606562377
-          },
-          "stop": {
-            "attempt": 10,
-            "sequence": 6,
-            "last": 6,
-            "service": 4,
-            "mailbox": 3,
-            "runtime": 5,
-            "panic": 1,
-            "asserts": 1,
-            "deasserts": 1,
-            "sipis": 2,
-            "tss": 1,
-            "idt": 1,
-            "xstate": 1,
-            "apic_table": 1,
-            "final_init": 1,
-            "parked": 1,
-            "response_checksum": 1874629951950422021,
-            "baseline_checksum": 7012149420485505595,
-            "runtime_checksum": 1220880612014882334
+            "target_mask": 14,
+            "ack_mask": 14,
+            "invalidation_count": 3,
+            "premature_reclaim_rejections": 2,
+            "stage": "released"
           },
           "release": {
-            "sequence": 7,
-            "zeroed_bytes": 131072,
-            "verified_bytes": 131072,
-            "frame_zeroed_bytes": 8192,
-            "frame_verified_bytes": 8192,
-            "resources_released": 34
+            "resource_pages": 96,
+            "frame_pages": 6,
+            "total_pages": 102,
+            "verified_bytes": 417792
           },
           "result": {
-            "shootdown_remote_invlpg": 1,
-            "tlb_invalidations": 1,
-            "generation_retirement": 1,
-            "no_reuse_before_retirement": 1,
-            "call_allowlist_noop": 1,
-            "arbitrary_callback": 0,
+            "application_processors_online": 3,
             "scheduler": 0,
+            "general_broadcast": 0,
+            "target_hardware": 0,
             "production": 0
           }
         },
         "pbp1_transcript": {
           "contract_id": "PBLIVE4",
-          "byte_count": 5640,
-          "sha256": "7A14DEBE42A52DF7DEC226F6388B253DCDD436139052E41282D025F791D69C15",
-          "message_crc32": "3272A049",
-          "fnv1a64": "FF4D339714E7D77B",
+          "byte_count": 5440,
+          "sha256": "87E67C9F1BBCEC6AC4CD5A86834E2534A1098363C7BD6CC7A4F754A84828F854",
+          "message_crc32": "F1D8B362",
+          "fnv1a64": "0D0B5D15CD332D86",
           "record_count": 5,
           "features": "000000000000001F",
           "required_features": "000000000000001B",
-          "memory_entry_count": 110,
+          "memory_entry_count": 105,
           "memory_entries": [
             {
               "physical_start": "0000000000000000",
@@ -2307,518 +2509,441 @@
             },
             {
               "physical_start": "0000000001780000",
-              "page_count": 108589,
+              "page_count": 108573,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001BFAD000",
+              "physical_start": "000000001BF9D000",
               "page_count": 32,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001BFCD000",
-              "page_count": 7854,
+              "physical_start": "000000001BFBD000",
+              "page_count": 7858,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001DE7B000",
+              "physical_start": "000000001DE6F000",
               "page_count": 786,
               "attributes": "000000000000000F",
               "kind": 10,
               "source_type": 2
             },
             {
-              "physical_start": "000000001E18D000",
+              "physical_start": "000000001E181000",
               "page_count": 101,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001E1F2000",
+              "physical_start": "000000001E1E6000",
               "page_count": 54,
               "attributes": "000000000000000F",
               "kind": 10,
               "source_type": 1
             },
             {
-              "physical_start": "000000001E228000",
-              "page_count": 7,
+              "physical_start": "000000001E21C000",
+              "page_count": 3,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001E22F000",
-              "page_count": 39,
+              "physical_start": "000000001E21F000",
+              "page_count": 43,
               "attributes": "000000000000000F",
               "kind": 10,
               "source_type": 2
             },
             {
-              "physical_start": "000000001E256000",
-              "page_count": 1684,
+              "physical_start": "000000001E24A000",
+              "page_count": 1676,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001E8EA000",
+              "physical_start": "000000001E8D6000",
               "page_count": 224,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001E9CA000",
-              "page_count": 4,
-              "attributes": "000000000000000F",
-              "kind": 10,
-              "source_type": 2
-            },
-            {
-              "physical_start": "000000001E9CE000",
-              "page_count": 2,
+              "physical_start": "000000001E9B6000",
+              "page_count": 10,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001E9D0000",
+              "physical_start": "000000001E9C0000",
               "page_count": 2,
               "attributes": "000000000000000F",
               "kind": 10,
               "source_type": 2
             },
             {
-              "physical_start": "000000001E9D2000",
+              "physical_start": "000000001E9C2000",
               "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001E9D3000",
+              "physical_start": "000000001E9C3000",
               "page_count": 92,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EA2F000",
+              "physical_start": "000000001EA1F000",
               "page_count": 34,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EA51000",
+              "physical_start": "000000001EA41000",
               "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EA52000",
+              "physical_start": "000000001EA42000",
               "page_count": 22,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EA68000",
+              "physical_start": "000000001EA58000",
               "page_count": 2,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EA6A000",
+              "physical_start": "000000001EA5A000",
               "page_count": 14,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EA78000",
+              "physical_start": "000000001EA68000",
               "page_count": 7,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EA7F000",
+              "physical_start": "000000001EA6F000",
               "page_count": 6,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EA85000",
-              "page_count": 37,
+              "physical_start": "000000001EA75000",
+              "page_count": 33,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EAAA000",
+              "physical_start": "000000001EA96000",
               "page_count": 28,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EAC6000",
-              "page_count": 1,
+              "physical_start": "000000001EAB2000",
+              "page_count": 6,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EAC7000",
-              "page_count": 5,
+              "physical_start": "000000001EAB8000",
+              "page_count": 47,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EACC000",
-              "page_count": 5,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EAD1000",
-              "page_count": 42,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EAFB000",
+              "physical_start": "000000001EAE7000",
               "page_count": 3,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EAFE000",
+              "physical_start": "000000001EAEA000",
               "page_count": 13,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
+              "physical_start": "000000001EAF7000",
+              "page_count": 2,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001EAF9000",
+              "page_count": 13,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EB06000",
+              "page_count": 5,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
               "physical_start": "000000001EB0B000",
+              "page_count": 34,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EB2D000",
               "page_count": 2,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EB0D000",
-              "page_count": 28,
+              "physical_start": "000000001EB2F000",
+              "page_count": 3,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EB29000",
-              "page_count": 5,
+              "physical_start": "000000001EB32000",
+              "page_count": 3,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EB2E000",
-              "page_count": 17,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EB3F000",
-              "page_count": 1,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EB40000",
-              "page_count": 5,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EB45000",
-              "page_count": 2,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EB47000",
+              "physical_start": "000000001EB35000",
               "page_count": 25,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EB60000",
+              "physical_start": "000000001EB4E000",
               "page_count": 5,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EB65000",
+              "physical_start": "000000001EB53000",
               "page_count": 41,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EB8E000",
+              "physical_start": "000000001EB7C000",
               "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EB8F000",
+              "physical_start": "000000001EB7D000",
               "page_count": 42,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EBB9000",
+              "physical_start": "000000001EBA7000",
               "page_count": 2,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EBBB000",
+              "physical_start": "000000001EBA9000",
               "page_count": 4,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EBBF000",
+              "physical_start": "000000001EBAD000",
               "page_count": 4,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EBC3000",
+              "physical_start": "000000001EBB1000",
               "page_count": 11,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EBCE000",
+              "physical_start": "000000001EBBC000",
               "page_count": 3,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EBD1000",
+              "physical_start": "000000001EBBF000",
               "page_count": 4,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EBD5000",
+              "physical_start": "000000001EBC3000",
               "page_count": 4,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EBD9000",
-              "page_count": 39,
+              "physical_start": "000000001EBC7000",
+              "page_count": 23,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EBDE000",
+              "page_count": 9,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001EBE7000",
+              "page_count": 25,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
               "physical_start": "000000001EC00000",
-              "page_count": 513,
+              "page_count": 514,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EE01000",
+              "physical_start": "000000001EE02000",
               "page_count": 9,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EE0A000",
-              "page_count": 9,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EE13000",
-              "page_count": 9,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EE1C000",
+              "physical_start": "000000001EE0B000",
               "page_count": 3,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EE1F000",
+              "physical_start": "000000001EE0E000",
               "page_count": 24,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EE37000",
+              "physical_start": "000000001EE26000",
               "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EE38000",
+              "physical_start": "000000001EE27000",
               "page_count": 5,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EE3D000",
+              "physical_start": "000000001EE2C000",
               "page_count": 5,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EE42000",
+              "physical_start": "000000001EE31000",
               "page_count": 193,
               "attributes": "800000000000000F",
               "kind": 4,
               "source_type": 6
             },
             {
-              "physical_start": "000000001EF03000",
-              "page_count": 36,
+              "physical_start": "000000001EEF2000",
+              "page_count": 29,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EF27000",
-              "page_count": 1,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EF28000",
-              "page_count": 8,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EF30000",
-              "page_count": 4,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EF34000",
-              "page_count": 8,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EF3C000",
-              "page_count": 2,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EF3E000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EF41000",
+              "physical_start": "000000001EF0F000",
               "page_count": 3,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EF44000",
-              "page_count": 6,
+              "physical_start": "000000001EF12000",
+              "page_count": 11,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EF4A000",
-              "page_count": 2,
+              "physical_start": "000000001EF1D000",
+              "page_count": 3,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EF4C000",
-              "page_count": 3,
+              "physical_start": "000000001EF20000",
+              "page_count": 12,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EF4F000",
-              "page_count": 1,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EF50000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EF53000",
-              "page_count": 3,
+              "physical_start": "000000001EF2C000",
+              "page_count": 42,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
@@ -2832,21 +2957,63 @@
             },
             {
               "physical_start": "000000001EF73000",
-              "page_count": 2,
+              "page_count": 5,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EF75000",
+              "physical_start": "000000001EF78000",
+              "page_count": 3,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EF7B000",
+              "page_count": 1,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001EF7C000",
+              "page_count": 9,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EF85000",
+              "page_count": 3,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001EF88000",
+              "page_count": 3,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EF8B000",
+              "page_count": 4,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001EF8F000",
               "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EF76000",
-              "page_count": 1050,
+              "physical_start": "000000001EF90000",
+              "page_count": 1024,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
@@ -2937,49 +3104,49 @@
             },
             {
               "physical_start": "000000001FE00000",
-              "page_count": 198,
+              "page_count": 182,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001FEC6000",
+              "physical_start": "000000001FEB6000",
               "page_count": 32,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001FEE6000",
+              "physical_start": "000000001FED6000",
               "page_count": 74,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001FF30000",
+              "physical_start": "000000001FF20000",
               "page_count": 4,
               "attributes": "000000000000000F",
               "kind": 0,
               "source_type": 0
             },
             {
-              "physical_start": "000000001FF34000",
+              "physical_start": "000000001FF24000",
               "page_count": 2,
               "attributes": "000000000000000F",
               "kind": 6,
               "source_type": 10
             },
             {
-              "physical_start": "000000001FF36000",
+              "physical_start": "000000001FF26000",
               "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001FF37000",
-              "page_count": 25,
+              "physical_start": "000000001FF27000",
+              "page_count": 41,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
@@ -3015,16 +3182,16 @@
           ],
           "core": {
             "boot_flags": "0000000000000011",
-            "kernel_physical_base": "000000001E11D000",
+            "kernel_physical_base": "000000001E111000",
             "kernel_physical_size": 458752,
             "kernel_virtual_base": "FFFFFFFF80000000",
             "kernel_virtual_size": 458752,
             "kernel_entry_virtual": "FFFFFFFF80009000",
             "initial_stack_top_virtual": "FFFFFFFF80091000",
-            "page_table_root_physical": "000000001E22F000",
-            "handoff_physical_base": "000000001DE7B000",
+            "page_table_root_physical": "000000001E21F000",
+            "handoff_physical_base": "000000001DE6F000",
             "handoff_virtual_base": "FFFFFFFF80092000",
-            "handoff_byte_count": 5640,
+            "handoff_byte_count": 5440,
             "boot_attempt": 0,
             "boot_attempt_limit": 3,
             "boot_slot": 1,
@@ -3036,17 +3203,17 @@
             {
               "role": 1,
               "flags": 9,
-              "physical_base": "000000001E11D000",
+              "physical_base": "000000001E111000",
               "physical_size": 458752,
               "virtual_base": "FFFFFFFF80000000",
               "virtual_size": 458752,
               "entry_virtual": "FFFFFFFF80009000",
-              "sha256": "95DDA27784DA944A9C0F5B04029255EDE4DE1BB0684A8EA10DCFC07E686B59A2"
+              "sha256": "8118ED5F7761B9D36A4A65EFF1BC1856C5182D5733CE95A8BEEB24D1C2435F8D"
             },
             {
               "role": 2,
               "flags": 1,
-              "physical_base": "000000001E9D0000",
+              "physical_base": "000000001E9C0000",
               "physical_size": 1860,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -3056,7 +3223,7 @@
             {
               "role": 3,
               "flags": 1,
-              "physical_base": "000000001E9CD000",
+              "physical_base": "000000001E249000",
               "physical_size": 1088,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -3066,17 +3233,17 @@
             {
               "role": 4,
               "flags": 1,
-              "physical_base": "000000001E9CC000",
+              "physical_base": "000000001E248000",
               "physical_size": 821,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
               "entry_virtual": "0000000000000000",
-              "sha256": "63FEC3A5A9210024D1A7CEFEC848DEF5FD907D6F4F43CDC34412DC2B0728E709"
+              "sha256": "D64F63E68A7DF33C0CEAB89F2B230E13D1785EA24F02CBC0895C11F61CC9CE1B"
             },
             {
               "role": 5,
               "flags": 1,
-              "physical_base": "000000001E9CB000",
+              "physical_base": "000000001E247000",
               "physical_size": 1504,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -3086,7 +3253,7 @@
             {
               "role": 6,
               "flags": 1,
-              "physical_base": "000000001E9CA000",
+              "physical_base": "000000001E246000",
               "physical_size": 1408,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -3096,53 +3263,53 @@
             {
               "role": 7,
               "flags": 1,
-              "physical_base": "000000001E255000",
+              "physical_base": "000000001E245000",
               "physical_size": 2080,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
               "entry_virtual": "0000000000000000",
-              "sha256": "3FF415B93596F40D9BD5FFA4572B671FE1B2133F06FC7E918EF26F83B7F03831"
+              "sha256": "0F8095B3608C742D8725D3C7AFC5E18AF6D031A87207DCE37B2F43B24F686A41"
             },
             {
               "role": 9,
               "flags": 1,
-              "physical_base": "000000001E9D1000",
+              "physical_base": "000000001E9C1000",
               "physical_size": 2615,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
               "entry_virtual": "0000000000000000",
-              "sha256": "0162389720F801278E87C222D28CBBB7B093C601420B45C0E6016D3942E00392"
+              "sha256": "98807FDC6BBD1FF04B8BB7938FD1497DC673B2A946B7FDF3E421F23103613EB4"
             },
             {
               "role": 10,
               "flags": 1,
-              "physical_base": "000000001E254000",
+              "physical_base": "000000001E244000",
               "physical_size": 320,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
               "entry_virtual": "0000000000000000",
-              "sha256": "7DC7DD8ADBD881D421D0389C32D4E9AF2F967AAC1AAA07AD2685A3A6221C4101"
+              "sha256": "8CB43034BAF575CB1F8969EE52DFD3379685A3925E405A254C9301C7B1C46F09"
             },
             {
               "role": 11,
               "flags": 1,
-              "physical_base": "000000001E253000",
+              "physical_base": "000000001E243000",
               "physical_size": 256,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
               "entry_virtual": "0000000000000000",
-              "sha256": "B1BCF17D6D630E35BA940284FAB963C2941D9A668E30A0F9C89BC0ED18231A7F"
+              "sha256": "1466610A3DD385CB2E0F546E5070CE327784317C1875CE170BDF67DDCF812987"
             }
           ],
           "kernel_artifact": {
             "role": 1,
             "flags": 9,
-            "physical_base": "000000001E11D000",
+            "physical_base": "000000001E111000",
             "physical_size": 458752,
             "virtual_base": "FFFFFFFF80000000",
             "virtual_size": 458752,
             "entry_virtual": "FFFFFFFF80009000",
-            "sha256": "95DDA27784DA944A9C0F5B04029255EDE4DE1BB0684A8EA10DCFC07E686B59A2"
+            "sha256": "8118ED5F7761B9D36A4A65EFF1BC1856C5182D5733CE95A8BEEB24D1C2435F8D"
           },
           "framebuffer": {
             "physical_base": "0000000080000000",
@@ -3189,8 +3356,8 @@
           "nonblank": true,
           "poole_identity_palette_observed": true
         },
-        "stderr_sha256": "0849494825285D3C0E0BD35F999B5DA4B4FEFD06838AA549914D9D81A6361FDB",
-        "stderr_byte_count": 422,
+        "stderr_sha256": "DB03CEE1F1043EC1AAA78104E5CB12DF6D3F427D2F4BD996AE2EBA19D0C552EB",
+        "stderr_byte_count": 844,
         "local_paths_recorded": false,
         "transcript_binding": {
           "exact_transfer_fields_bound": true,
@@ -3204,9 +3371,9 @@
           "parser_count": 9,
           "manifest_bytes": 2615,
           "retained_file_bytes": 11952,
-          "retained_set_sha256": "E350B2276092199EAA5E6896C36C4E04521E610D1C9D4D0E3DA9B8E458A2A22A",
-          "policy_sha256": "7DC7DD8ADBD881D421D0389C32D4E9AF2F967AAC1AAA07AD2685A3A6221C4101",
-          "state_sha256": "B1BCF17D6D630E35BA940284FAB963C2941D9A668E30A0F9C89BC0ED18231A7F",
+          "retained_set_sha256": "FFDBBD79609651D507C3FF9701B530B9F5D66AC8F866FF3857F4AE1C2C07527B",
+          "policy_sha256": "8CB43034BAF575CB1F8969EE52DFD3379685A3925E405A254C9301C7B1C46F09",
+          "state_sha256": "1466610A3DD385CB2E0F546E5070CE327784317C1875CE170BDF67DDCF812987",
           "denial": "pbtrust_policy_unsigned",
           "authority_grants": 0,
           "actions_authorized": 0,
@@ -3215,7 +3382,7 @@
         }
       },
       {
-        "run_id": "smp-ipi-run-2",
+        "run_id": "smp-multi-run-2",
         "fresh_vars_copy": true,
         "media_read_only": true,
         "guest_network": false,
@@ -3247,39 +3414,39 @@
           "POOLEBOOT/0.1 FILESYSTEM PASS loaded_image=1 simple_fs=1 root=1",
           "POOLEBOOT/0.1 BOOTCFG PASS bytes=229 entries=1 default_hash=61053F0E3EBBD272 timeout_ms=0 attempts=3 slot=1 manifest_max_bytes=65536",
           "POOLEBOOT/0.1 MANIFEST PASS bytes=2615 artifacts=7 id_hash=4A2625333244591C slot=1 version=1 minimum_secure_version=1",
-          "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=409600 image_bytes=458752 sha256_prefix=95DDA27784DA944A path=manifest",
+          "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=409600 image_bytes=458752 sha256_prefix=8118ED5F7761B9D3 path=manifest",
           "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=409600 path=manifest_development",
-          "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=458752 pages=112 entry_offset=36864 relocations=969 files_closed=12 pools_freed=11 fnv1a64=BE35280E2A566DED",
-          "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=1DBB42EC63A7BB08 retained=1 signatures=0 measured=0",
-          "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=E350B2276092199EAA5E6896C36C4E04521E610D1C9D4D0E3DA9B8E458A2A22A retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
-          "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=7DC7DD8ADBD881D421D0389C32D4E9AF2F967AAC1AAA07AD2685A3A6221C4101 state_sha256=B1BCF17D6D630E35BA940284FAB963C2941D9A668E30A0F9C89BC0ED18231A7F source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
+          "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=458752 pages=112 entry_offset=36864 relocations=985 files_closed=12 pools_freed=11 fnv1a64=422749EDD9087C0D",
+          "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=A71D3CB33E349AB5 retained=1 signatures=0 measured=0",
+          "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=FFDBBD79609651D507C3FF9701B530B9F5D66AC8F866FF3857F4AE1C2C07527B retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
+          "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=8CB43034BAF575CB1F8969EE52DFD3379685A3925E405A254C9301C7B1C46F09 state_sha256=1466610A3DD385CB2E0F546E5070CE327784317C1875CE170BDF67DDCF812987 source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
           "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
           "POOLEBOOT/0.1 FRAME READY",
           "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=112 ro=21 rx=79 rw=12 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=F43490703F3DCA21",
-          "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=112 physical_bits=40 mapped_fnv1a64=BE35280E2A566DED framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
-          "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=32 handoff_pages=256 guards=2 total_pages=400 stack_pt=113 handoff_pt=146 kernel_phys=000000001E11D000 root=000000001E22F000 stack_phys=000000001E233000 stack_top=FFFFFFFF80091000 handoff_phys=000000001DE7B000 handoff_virt=FFFFFFFF80092000 retained_fnv1a64=52A6EE3DCB476C57 original_cr3=restored firmware_calls_while_active=0",
-          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5640 records=5 memory_entries=110 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=3272A049 fnv1a64=FF4D339714E7D77B state=boot_services_exited bytes_unchanged=1",
-          "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=5280 descriptor_bytes=48 descriptors=110",
+          "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=112 physical_bits=40 mapped_fnv1a64=422749EDD9087C0D framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
+          "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=32 handoff_pages=256 guards=2 total_pages=400 stack_pt=113 handoff_pt=146 kernel_phys=000000001E111000 root=000000001E21F000 stack_phys=000000001E223000 stack_top=FFFFFFFF80091000 handoff_phys=000000001DE6F000 handoff_virt=FFFFFFFF80092000 retained_fnv1a64=7775033C7989EB3B original_cr3=restored firmware_calls_while_active=0",
+          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5440 records=5 memory_entries=105 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=F1D8B362 fnv1a64=0D0B5D15CD332D86 state=boot_services_exited bytes_unchanged=1",
+          "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=5040 descriptor_bytes=48 descriptors=105",
           "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=112 artifact_pages=9 table_pages=4 stack_pages=32 handoff_pages=256",
-          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF80009000 handoff=FFFFFFFF80092000 bytes=5640 stack_top=FFFFFFFF80091000 root=000000001E22F000 cr3=000000001E22F000 trap_scenario=14 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
+          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF80009000 handoff=FFFFFFFF80092000 bytes=5440 stack_top=FFFFFFFF80091000 root=000000001E21F000 cr3=000000001E21F000 trap_scenario=14 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
           "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
-          "POOLEOS:KERNEL:SMP-IPI-EARLY PASS contract=PKSMP4 selector=14 bsp=1 if=0 stack=validated_by_wrapper serial=initialized",
-          "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE140-N9-SMP-SHOOTDOWN-V001-00001 entry_count=1 serial=present",
-          "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF80092000 bytes=5640 entry=0xFFFFFFFF80009000 stack_top=0xFFFFFFFF80091000 root=0x000000001E22F000 cr3=0x000000001E22F000 rflags_if=0 rflags_df=0",
+          "POOLEOS:KERNEL:SMP-MULTI-EARLY PASS contract=PKSMP5 selector=14 bsp=1 if=0 stack=validated_by_wrapper serial=initialized",
+          "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE141-N8-SMP-MULTI-AP-V001-00001 entry_count=1 serial=present",
+          "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF80092000 bytes=5440 entry=0xFFFFFFFF80009000 stack_top=0xFFFFFFFF80091000 root=0x000000001E21F000 cr3=0x000000001E21F000 rflags_if=0 rflags_df=0",
           "POOLEOS:KERNEL:PBP1 PASS profile=development records=5 artifacts=10 production_profile_valid=0",
-          "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=E350B2276092199EAA5E6896C36C4E04521E610D1C9D4D0E3DA9B8E458A2A22A policy_sha256=7DC7DD8ADBD881D421D0389C32D4E9AF2F967AAC1AAA07AD2685A3A6221C4101 state_sha256=B1BCF17D6D630E35BA940284FAB963C2941D9A668E30A0F9C89BC0ED18231A7F denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
-          "POOLEOS:KERNEL:SMP-IPI-TOPOLOGY PASS contract=PKSMP4 processors=2 enabled=2 bsp_apic_id=0 target_apic_id=1 apic_physical=0x00000000FEE00000 selection=lowest_enabled_non_bsp",
-          "POOLEOS:KERNEL:SMP-IPI-RESOURCES PASS contract=PKSMP4 physical_start=0x0000000000001000 pages=32 sipi_vector=1 trampoline_bytes=2564 allocation_sequence=2 tables=5 mapped_pages=13 guard_pages=14 apic_pt_offset=31 apic_leaf=pwt_pcd_rw_nx below_1mib=1",
-          "POOLEOS:KERNEL:SMP-IPI-ONLINE PASS contract=PKSMP4 service_state=2 if=1 vectors=224,225,226,227,228,229 apic_mmio=0x00000000FEE00000 apic_table=1",
-          "POOLEOS:KERNEL:SMP-IPI-ACCEPTED PASS contract=PKSMP4 operations=reschedule,shootdown_remote_invlpg,call_allowlist_noop,diagnostic,panic_notice,stop sequences=1,2,3,4,5,6 accepted=6 reschedule=1 shootdown=1 call_function=1 diagnostic=1 panic=1 stop=1",
-          "POOLEOS:KERNEL:SMP-IPI-CONTROLS PASS contract=PKSMP4 invalid_capability=1 vector_mismatch=1 stale_sequence=1 duplicate_sequence=1 denied=4 delivery_count=10 eoi_count=10 spurious=0 apic_error=0",
-          "POOLEOS:KERNEL:SMP-IPI-TIMEOUT PASS contract=PKSMP4 operation=shootdown target_apic_id=2 target_mask=0x0000000000000004 attempt=6 bounded=1 offline_cpu=1 retry_same_attempt=1 timeout_count=1",
-          "POOLEOS:KERNEL:SMP-SHOOTDOWN PASS contract=PKSMP4 root=0x0000000000002000 probe=0x00000000001FF000 retired_generation=1 active_generation=2 target_mask=0x0000000000000002 ack_mask=0x0000000000000002 old_frame=0x0000000000021000 new_frame=0x0000000000022000 observed_before=0x504B534D50344F4C observed_after=0x504B534D50344E57 invalidations=1 last_ack_generation=2 premature_reclaim_rejected=1 reclaim_state=3 shootdown_checksum=0x53484F4F544D8249",
-          "POOLEOS:KERNEL:SMP-IPI-STOP PASS contract=PKSMP4 ack_attempt=10 ack_sequence=6 last_accepted_sequence=6 service_state=4 mailbox_state=3 runtime_state=5 panic_latched=1 response_checksum=0x1A04060253500005 baseline_checksum=0xC854000020BC465B runtime_checksum=0xC67B2C55365B709D init_asserts=1 init_deasserts=1 sipis=2 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 final_init=1 parked=1",
-          "POOLEOS:KERNEL:SMP-IPI-RELEASE PASS contract=PKSMP4 release_sequence=7 zeroed_bytes=131072 verified_bytes=131072 frame_allocation_sequences=3,4 frame_release_sequences=5,6 frame_zeroed_bytes=8192 frame_verified_bytes=8192 resources_released=34 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged",
-          "POOLEOS:KERNEL:SMP-IPI-RESULT PASS contract=PKSMP4 profile=sandybridge_x87_sse_two_vcpu capability_gate=development_fixed_token operation_classes=6 valid_deliveries=6 denied_deliveries=4 offline_timeouts=1 eois=10 panic_latched=1 stop_quiesced=1 ap_parked=1 resources_released=34 rollback=host_verified shootdown_remote_invlpg=1 tlb_invalidations=1 generation_retirement=1 no_reuse_before_retirement=1 call_allowlist_noop=1 arbitrary_callback=0 scheduler=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
+          "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=FFDBBD79609651D507C3FF9701B530B9F5D66AC8F866FF3857F4AE1C2C07527B policy_sha256=8CB43034BAF575CB1F8969EE52DFD3379685A3925E405A254C9301C7B1C46F09 state_sha256=1466610A3DD385CB2E0F546E5070CE327784317C1875CE170BDF67DDCF812987 denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
+          "POOLEOS:KERNEL:SMP-MULTI-TOPOLOGY PASS contract=PKSMP5 processors=4 enabled=4 bsp_apic_id=0 target_apic_ids=1,2,3 target_mask=0x000000000000000E apic_physical=0x00000000FEE00000 selection=exact_enabled_legacy_apic_topology",
+          "POOLEOS:KERNEL:SMP-MULTI-PARTIAL-ROLLBACK PASS contract=PKSMP5 started_mask=0x0000000000000006 timeout_apic_id=4 timeout_mask=0x0000000000000010 timeout_count=1 parked_mask=0x0000000000000006 released_mask=0x000000000000000E resource_pages=96 frame_pages=6 zeroed_bytes=417792 verified_bytes=417792 fresh_allocation_required=1",
+          "POOLEOS:KERNEL:SMP-MULTI-RETRY PASS contract=PKSMP5 retry_count=1 partial_rollback_count=1 started_mask=0x000000000000000E online_mask=0x000000000000000E simultaneous_online=1",
+          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=0 apic_id=1 physical_start=0x0000000000001000 pages=32 sipi_vector=1 trampoline_bytes=2612 allocation_sequence=24 frame_allocation_sequences=25,26 frame_release_sequences=35,42 resource_release_sequence=43 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=1 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000002 ack_mask=0x0000000000000002 invalidations=1 baseline_checksum=0xBAE740074218CC91 runtime_checksum=0x004F2F7B8592E549 response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
+          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=1 apic_id=2 physical_start=0x0000000000023000 pages=32 sipi_vector=35 trampoline_bytes=2612 allocation_sequence=27 frame_allocation_sequences=28,31 frame_release_sequences=36,40 resource_release_sequence=41 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=0 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000004 ack_mask=0x0000000000000004 invalidations=1 baseline_checksum=0x0E0AD9C252092486 runtime_checksum=0xA679EF96ED6FA858 response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
+          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=2 apic_id=3 physical_start=0x0000000000045000 pages=32 sipi_vector=69 trampoline_bytes=2612 allocation_sequence=32 frame_allocation_sequences=33,34 frame_release_sequences=37,38 resource_release_sequence=39 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=0 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000008 ack_mask=0x0000000000000008 invalidations=1 baseline_checksum=0x840E34863C40C824 runtime_checksum=0x523C0E6BB1CE8426 response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
+          "POOLEOS:KERNEL:SMP-MULTI-SHOOTDOWN PASS contract=PKSMP5 target_mask=0x000000000000000E ack_mask=0x000000000000000E retired_generation=1 active_generation=2 invalidations=3 root_checksum=0x5A6D5E693D7F53DC old_frame_checksum=0xBE1E07C6144BC01A new_frame_checksum=0xE351D68DF0864FAA premature_reclaim_rejections=2 reclaim_state=released",
+          "POOLEOS:KERNEL:SMP-MULTI-LIFECYCLE PASS contract=PKSMP5 started_mask=0x000000000000000E online_mask=0x000000000000000E quiesced_mask=0x000000000000000E parked_mask=0x000000000000000E validated_mask=0x000000000000000E released_mask=0x000000000000000E timeout_count=1 retry_count=1 partial_rollback_count=1 exact_accounting=1",
+          "POOLEOS:KERNEL:SMP-MULTI-RELEASE PASS contract=PKSMP5 resource_pages=96 frame_pages=6 resource_zeroed_bytes=393216 resource_verified_bytes=393216 frame_zeroed_bytes=24576 frame_verified_bytes=24576 total_pages=102 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged",
+          "POOLEOS:KERNEL:SMP-MULTI-RESULT PASS contract=PKSMP5 profile=sandybridge_x87_sse_four_vcpu aps=3 simultaneous_online=1 partial_start_timeout=1 partial_rollback=1 fresh_retry=1 target_mask=0x000000000000000E ack_mask=0x000000000000000E tlb_invalidations=3 no_reuse_before_all_acks=1 stop_quiesced=3 ap_parked=3 resources_released=102 scheduler=0 general_broadcast=0 target_hardware=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],
-        "marker_sha256": "6081A5B286E0AE5FB5C554DB4EBC611D7B6DB801DA9270DAACDB01A3180939D5",
+        "marker_sha256": "EB9ACEDEE7F73FB99227671E5619865E502973549F371BBA76CFE0198AC4D775",
         "serial_debugcon_exact_match": true,
         "marker_summary": {
           "transfer_prefix": {
@@ -3309,15 +3476,15 @@
                 "kernel_version": 1,
                 "kernel_file_byte_count": 409600,
                 "kernel_image_byte_count": 458752,
-                "kernel_sha256_prefix": "95DDA27784DA944A"
+                "kernel_sha256_prefix": "8118ED5F7761B9D3"
               },
               "kernel": {
                 "file_byte_count": 409600,
                 "image_byte_count": 458752,
                 "page_count": 112,
                 "entry_offset": 36864,
-                "relocation_count": 969,
-                "loaded_fnv1a64": "BE35280E2A566DED",
+                "relocation_count": 985,
+                "loaded_fnv1a64": "422749EDD9087C0D",
                 "file_handles_closed": 12,
                 "file_pools_freed": 11,
                 "pages_retained": true,
@@ -3330,7 +3497,7 @@
                 "page_count": 6,
                 "retained_input_count": 9,
                 "retained_input_page_count": 9,
-                "fnv1a64": "1DBB42EC63A7BB08",
+                "fnv1a64": "A71D3CB33E349AB5",
                 "pages_retained": true,
                 "signatures_verified": false,
                 "measured": false,
@@ -3344,7 +3511,7 @@
                 "development_denial_count": 6,
                 "file_bytes": 8761,
                 "payload_bytes": 8185,
-                "retained_set_sha256": "E350B2276092199EAA5E6896C36C4E04521E610D1C9D4D0E3DA9B8E458A2A22A",
+                "retained_set_sha256": "FFDBBD79609651D507C3FF9701B530B9F5D66AC8F866FF3857F4AE1C2C07527B",
                 "exact_retained_bytes": true,
                 "authority_grants": 0,
                 "actions_authorized": 0,
@@ -3358,8 +3525,8 @@
                 "binding_count": 14,
                 "denial_count": 1,
                 "denial": "pbtrust_policy_unsigned",
-                "policy_sha256": "7DC7DD8ADBD881D421D0389C32D4E9AF2F967AAC1AAA07AD2685A3A6221C4101",
-                "state_sha256": "B1BCF17D6D630E35BA940284FAB963C2941D9A668E30A0F9C89BC0ED18231A7F",
+                "policy_sha256": "8CB43034BAF575CB1F8969EE52DFD3379685A3925E405A254C9301C7B1C46F09",
+                "state_sha256": "1466610A3DD385CB2E0F546E5070CE327784317C1875CE170BDF67DDCF812987",
                 "state_source": "esp_candidate_not_persistent_authority",
                 "signature_verifications": 0,
                 "authority_grants": 0,
@@ -3368,16 +3535,16 @@
                 "state_monotonic": false
               },
               "pbp1": {
-                "byte_count": 5640,
+                "byte_count": 5440,
                 "record_count": 5,
-                "memory_entry_count": 110,
+                "memory_entry_count": 105,
                 "framebuffer_present": 1,
                 "firmware_table_count": 1,
                 "artifact_count": 10,
                 "descriptor_bytes": 48,
                 "exit_attempts": 1,
-                "message_crc32": "3272A049",
-                "fnv1a64": "FF4D339714E7D77B",
+                "message_crc32": "F1D8B362",
+                "fnv1a64": "0D0B5D15CD332D86",
                 "pre_exit": false,
                 "boot_services_exited": true,
                 "development_mode_only": true,
@@ -3399,7 +3566,7 @@
                 "leaf_fingerprint": "F43490703F3DCA21",
                 "table_page_count": 4,
                 "physical_address_bits": 40,
-                "mapped_fnv1a64": "BE35280E2A566DED",
+                "mapped_fnv1a64": "422749EDD9087C0D",
                 "framebuffer_preserved": true,
                 "framebuffer_cache_signature": "00",
                 "framebuffer_first_page_bytes": 2097152,
@@ -3415,13 +3582,13 @@
                   "total_mapped_page_count": 400,
                   "stack_first_page_table_index": 113,
                   "handoff_first_page_table_index": 146,
-                  "kernel_physical_base": 504483840,
-                  "page_table_root_physical": 505606144,
-                  "stack_physical_base": 505622528,
+                  "kernel_physical_base": 504434688,
+                  "page_table_root_physical": 505540608,
+                  "stack_physical_base": 505556992,
                   "stack_top_virtual": 18446744071562661888,
-                  "handoff_physical_base": 501723136,
+                  "handoff_physical_base": 501673984,
                   "handoff_virtual_base": 18446744071562665984,
-                  "retained_leaf_fingerprint": "52A6EE3DCB476C57"
+                  "retained_leaf_fingerprint": "7775033C7989EB3B"
                 }
               },
               "gop": {
@@ -3432,16 +3599,16 @@
                 "format": "BGR"
               },
               "memory_map": {
-                "byte_count": 5280,
+                "byte_count": 5040,
                 "descriptor_bytes": 48,
-                "descriptor_count": 110
+                "descriptor_count": 105
               },
               "boot_exit": {
                 "contract_id": "PBEXIT1",
                 "attempt_count": 1,
-                "map_byte_count": 5280,
+                "map_byte_count": 5040,
                 "descriptor_size": 48,
-                "descriptor_count": 110,
+                "descriptor_count": 105,
                 "firmware_calls_after_exit": 0,
                 "kernel_page_count": 112,
                 "artifact_page_count": 9,
@@ -3458,10 +3625,10 @@
               "emulator_only": 1,
               "entry": 18446744071562104832,
               "handoff": 18446744071562665984,
-              "handoff_bytes": 5640,
+              "handoff_bytes": 5440,
               "stack_top": 18446744071562661888,
-              "root": 505606144,
-              "cr3": 505606144,
+              "root": 505540608,
+              "cr3": 505540608,
               "trap_scenario": 14,
               "signature_verifications": 0,
               "authority_grants": 0,
@@ -3472,17 +3639,17 @@
             "kernel_entry": {
               "entry_contract": "PKENTRY1",
               "transfer_contract": "PKXFER1",
-              "build_id": "PKBUILD1-CYCLE140-N9-SMP-SHOOTDOWN-V001-00001",
+              "build_id": "PKBUILD1-CYCLE141-N8-SMP-MULTI-AP-V001-00001",
               "entry_count": 1,
               "serial": "present"
             },
             "kernel_state": {
               "handoff": 18446744071562665984,
-              "handoff_bytes": 5640,
+              "handoff_bytes": 5440,
               "entry": 18446744071562104832,
               "stack_top": 18446744071562661888,
-              "root": 505606144,
-              "cr3": 505606144,
+              "root": 505540608,
+              "cr3": 505540608,
               "rflags_if": 0,
               "rflags_df": 0
             },
@@ -3499,9 +3666,9 @@
               "parser_count": 9,
               "manifest_bytes": 2615,
               "retained_file_bytes": 11952,
-              "retained_set_sha256": "E350B2276092199EAA5E6896C36C4E04521E610D1C9D4D0E3DA9B8E458A2A22A",
-              "policy_sha256": "7DC7DD8ADBD881D421D0389C32D4E9AF2F967AAC1AAA07AD2685A3A6221C4101",
-              "state_sha256": "B1BCF17D6D630E35BA940284FAB963C2941D9A668E30A0F9C89BC0ED18231A7F",
+              "retained_set_sha256": "FFDBBD79609651D507C3FF9701B530B9F5D66AC8F866FF3857F4AE1C2C07527B",
+              "policy_sha256": "8CB43034BAF575CB1F8969EE52DFD3379685A3925E405A254C9301C7B1C46F09",
+              "state_sha256": "1466610A3DD385CB2E0F546E5070CE327784317C1875CE170BDF67DDCF812987",
               "denial": "pbtrust_policy_unsigned",
               "authority_grants": 0,
               "actions_authorized": 0,
@@ -3510,106 +3677,302 @@
             "synthetic_unsigned_terminal_used_for_prefix_parser_only": true
           },
           "topology": {
-            "processors": 2,
-            "enabled": 2,
+            "processors": 4,
+            "enabled": 4,
             "bsp_apic_id": 0,
-            "target_apic_id": 1
-          },
-          "resources": {
-            "physical_start": 4096,
-            "page_count": 32,
-            "mapped_pages": 13,
-            "guard_pages": 14,
-            "apic_page_table": 131072,
-            "trampoline_bytes": 2564
-          },
-          "service": {
-            "vectors": [
-              224,
-              225,
-              226,
-              227,
-              228,
-              229
+            "target_apic_ids": [
+              1,
+              2,
+              3
             ],
-            "interrupts_enabled": true,
-            "capability_gate": "development_fixed_token"
+            "target_mask": 14
           },
-          "operations": {
-            "accepted": 6,
-            "denied": 4,
-            "deliveries": 10,
-            "eois": 10,
+          "partial_rollback": {
+            "started_mask": 6,
+            "offline_apic_id": 4,
             "timeout_count": 1,
-            "timeout_attempt": 6,
-            "retry_same_attempt": true
+            "parked_mask": 6,
+            "released_mask": 14,
+            "resource_pages": 96,
+            "frame_pages": 6
           },
+          "retry": {
+            "retry_count": 1,
+            "simultaneous_online": true
+          },
+          "aps": [
+            {
+              "index": 0,
+              "apic_id": 1,
+              "layout": {
+                "start": 4096,
+                "end": 135168,
+                "sipi_vector": 1,
+                "pml4": 8192,
+                "local": 53248,
+                "apic_page_table": 131072,
+                "roles": {
+                  "trampoline": [
+                    0
+                  ],
+                  "tables": [
+                    1,
+                    2,
+                    3,
+                    4
+                  ],
+                  "rsp0": [
+                    6,
+                    7,
+                    8,
+                    9
+                  ],
+                  "local": [
+                    12
+                  ],
+                  "descriptors": [
+                    15
+                  ],
+                  "idt": [
+                    18
+                  ],
+                  "ist1": [
+                    21,
+                    22
+                  ],
+                  "ist2": [
+                    25,
+                    26
+                  ],
+                  "xstate": [
+                    29
+                  ],
+                  "apic_page_table": [
+                    31
+                  ],
+                  "guards": [
+                    5,
+                    10,
+                    11,
+                    13,
+                    14,
+                    16,
+                    17,
+                    19,
+                    20,
+                    23,
+                    24,
+                    27,
+                    28,
+                    30
+                  ]
+                }
+              },
+              "allocation_sequence": 24,
+              "frame_allocation_sequences": [
+                25,
+                26
+              ],
+              "frame_release_sequences": [
+                35,
+                42
+              ],
+              "resource_release_sequence": 43,
+              "trampoline_bytes": 2612,
+              "response_checksum": 1874629951950422021
+            },
+            {
+              "index": 1,
+              "apic_id": 2,
+              "layout": {
+                "start": 143360,
+                "end": 274432,
+                "sipi_vector": 35,
+                "pml4": 147456,
+                "local": 192512,
+                "apic_page_table": 270336,
+                "roles": {
+                  "trampoline": [
+                    0
+                  ],
+                  "tables": [
+                    1,
+                    2,
+                    3,
+                    4
+                  ],
+                  "rsp0": [
+                    6,
+                    7,
+                    8,
+                    9
+                  ],
+                  "local": [
+                    12
+                  ],
+                  "descriptors": [
+                    15
+                  ],
+                  "idt": [
+                    18
+                  ],
+                  "ist1": [
+                    21,
+                    22
+                  ],
+                  "ist2": [
+                    25,
+                    26
+                  ],
+                  "xstate": [
+                    29
+                  ],
+                  "apic_page_table": [
+                    31
+                  ],
+                  "guards": [
+                    5,
+                    10,
+                    11,
+                    13,
+                    14,
+                    16,
+                    17,
+                    19,
+                    20,
+                    23,
+                    24,
+                    27,
+                    28,
+                    30
+                  ]
+                }
+              },
+              "allocation_sequence": 27,
+              "frame_allocation_sequences": [
+                28,
+                31
+              ],
+              "frame_release_sequences": [
+                36,
+                40
+              ],
+              "resource_release_sequence": 41,
+              "trampoline_bytes": 2612,
+              "response_checksum": 1874629951950422021
+            },
+            {
+              "index": 2,
+              "apic_id": 3,
+              "layout": {
+                "start": 282624,
+                "end": 413696,
+                "sipi_vector": 69,
+                "pml4": 286720,
+                "local": 331776,
+                "apic_page_table": 409600,
+                "roles": {
+                  "trampoline": [
+                    0
+                  ],
+                  "tables": [
+                    1,
+                    2,
+                    3,
+                    4
+                  ],
+                  "rsp0": [
+                    6,
+                    7,
+                    8,
+                    9
+                  ],
+                  "local": [
+                    12
+                  ],
+                  "descriptors": [
+                    15
+                  ],
+                  "idt": [
+                    18
+                  ],
+                  "ist1": [
+                    21,
+                    22
+                  ],
+                  "ist2": [
+                    25,
+                    26
+                  ],
+                  "xstate": [
+                    29
+                  ],
+                  "apic_page_table": [
+                    31
+                  ],
+                  "guards": [
+                    5,
+                    10,
+                    11,
+                    13,
+                    14,
+                    16,
+                    17,
+                    19,
+                    20,
+                    23,
+                    24,
+                    27,
+                    28,
+                    30
+                  ]
+                }
+              },
+              "allocation_sequence": 32,
+              "frame_allocation_sequences": [
+                33,
+                34
+              ],
+              "frame_release_sequences": [
+                37,
+                38
+              ],
+              "resource_release_sequence": 39,
+              "trampoline_bytes": 2612,
+              "response_checksum": 1874629951950422021
+            }
+          ],
           "shootdown": {
-            "root_physical": 8192,
-            "virtual_address": 2093056,
-            "retired_generation": 1,
-            "active_generation": 2,
-            "target_mask": 2,
-            "ack_mask": 2,
-            "old_frame_physical": 135168,
-            "new_frame_physical": 139264,
-            "observed_before": 5785809737810726732,
-            "observed_after": 5785809737810726487,
-            "invalidation_count": 1,
-            "premature_reclaim_rejected": true,
-            "reclaim_state": 3,
-            "response_checksum": 6001133705606562377
-          },
-          "stop": {
-            "attempt": 10,
-            "sequence": 6,
-            "last": 6,
-            "service": 4,
-            "mailbox": 3,
-            "runtime": 5,
-            "panic": 1,
-            "asserts": 1,
-            "deasserts": 1,
-            "sipis": 2,
-            "tss": 1,
-            "idt": 1,
-            "xstate": 1,
-            "apic_table": 1,
-            "final_init": 1,
-            "parked": 1,
-            "response_checksum": 1874629951950422021,
-            "baseline_checksum": 14435162706178491995,
-            "runtime_checksum": 14302073786140946589
+            "target_mask": 14,
+            "ack_mask": 14,
+            "invalidation_count": 3,
+            "premature_reclaim_rejections": 2,
+            "stage": "released"
           },
           "release": {
-            "sequence": 7,
-            "zeroed_bytes": 131072,
-            "verified_bytes": 131072,
-            "frame_zeroed_bytes": 8192,
-            "frame_verified_bytes": 8192,
-            "resources_released": 34
+            "resource_pages": 96,
+            "frame_pages": 6,
+            "total_pages": 102,
+            "verified_bytes": 417792
           },
           "result": {
-            "shootdown_remote_invlpg": 1,
-            "tlb_invalidations": 1,
-            "generation_retirement": 1,
-            "no_reuse_before_retirement": 1,
-            "call_allowlist_noop": 1,
-            "arbitrary_callback": 0,
+            "application_processors_online": 3,
             "scheduler": 0,
+            "general_broadcast": 0,
+            "target_hardware": 0,
             "production": 0
           }
         },
         "pbp1_transcript": {
           "contract_id": "PBLIVE4",
-          "byte_count": 5640,
-          "sha256": "7A14DEBE42A52DF7DEC226F6388B253DCDD436139052E41282D025F791D69C15",
-          "message_crc32": "3272A049",
-          "fnv1a64": "FF4D339714E7D77B",
+          "byte_count": 5440,
+          "sha256": "87E67C9F1BBCEC6AC4CD5A86834E2534A1098363C7BD6CC7A4F754A84828F854",
+          "message_crc32": "F1D8B362",
+          "fnv1a64": "0D0B5D15CD332D86",
           "record_count": 5,
           "features": "000000000000001F",
           "required_features": "000000000000001B",
-          "memory_entry_count": 110,
+          "memory_entry_count": 105,
           "memory_entries": [
             {
               "physical_start": "0000000000000000",
@@ -3676,518 +4039,441 @@
             },
             {
               "physical_start": "0000000001780000",
-              "page_count": 108589,
+              "page_count": 108573,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001BFAD000",
+              "physical_start": "000000001BF9D000",
               "page_count": 32,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001BFCD000",
-              "page_count": 7854,
+              "physical_start": "000000001BFBD000",
+              "page_count": 7858,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001DE7B000",
+              "physical_start": "000000001DE6F000",
               "page_count": 786,
               "attributes": "000000000000000F",
               "kind": 10,
               "source_type": 2
             },
             {
-              "physical_start": "000000001E18D000",
+              "physical_start": "000000001E181000",
               "page_count": 101,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001E1F2000",
+              "physical_start": "000000001E1E6000",
               "page_count": 54,
               "attributes": "000000000000000F",
               "kind": 10,
               "source_type": 1
             },
             {
-              "physical_start": "000000001E228000",
-              "page_count": 7,
+              "physical_start": "000000001E21C000",
+              "page_count": 3,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001E22F000",
-              "page_count": 39,
+              "physical_start": "000000001E21F000",
+              "page_count": 43,
               "attributes": "000000000000000F",
               "kind": 10,
               "source_type": 2
             },
             {
-              "physical_start": "000000001E256000",
-              "page_count": 1684,
+              "physical_start": "000000001E24A000",
+              "page_count": 1676,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001E8EA000",
+              "physical_start": "000000001E8D6000",
               "page_count": 224,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001E9CA000",
-              "page_count": 4,
-              "attributes": "000000000000000F",
-              "kind": 10,
-              "source_type": 2
-            },
-            {
-              "physical_start": "000000001E9CE000",
-              "page_count": 2,
+              "physical_start": "000000001E9B6000",
+              "page_count": 10,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001E9D0000",
+              "physical_start": "000000001E9C0000",
               "page_count": 2,
               "attributes": "000000000000000F",
               "kind": 10,
               "source_type": 2
             },
             {
-              "physical_start": "000000001E9D2000",
+              "physical_start": "000000001E9C2000",
               "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001E9D3000",
+              "physical_start": "000000001E9C3000",
               "page_count": 92,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EA2F000",
+              "physical_start": "000000001EA1F000",
               "page_count": 34,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EA51000",
+              "physical_start": "000000001EA41000",
               "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EA52000",
+              "physical_start": "000000001EA42000",
               "page_count": 22,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EA68000",
+              "physical_start": "000000001EA58000",
               "page_count": 2,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EA6A000",
+              "physical_start": "000000001EA5A000",
               "page_count": 14,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EA78000",
+              "physical_start": "000000001EA68000",
               "page_count": 7,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EA7F000",
+              "physical_start": "000000001EA6F000",
               "page_count": 6,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EA85000",
-              "page_count": 37,
+              "physical_start": "000000001EA75000",
+              "page_count": 33,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EAAA000",
+              "physical_start": "000000001EA96000",
               "page_count": 28,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EAC6000",
-              "page_count": 1,
+              "physical_start": "000000001EAB2000",
+              "page_count": 6,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EAC7000",
-              "page_count": 5,
+              "physical_start": "000000001EAB8000",
+              "page_count": 47,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EACC000",
-              "page_count": 5,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EAD1000",
-              "page_count": 42,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EAFB000",
+              "physical_start": "000000001EAE7000",
               "page_count": 3,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EAFE000",
+              "physical_start": "000000001EAEA000",
               "page_count": 13,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
+              "physical_start": "000000001EAF7000",
+              "page_count": 2,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001EAF9000",
+              "page_count": 13,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EB06000",
+              "page_count": 5,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
               "physical_start": "000000001EB0B000",
+              "page_count": 34,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EB2D000",
               "page_count": 2,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EB0D000",
-              "page_count": 28,
+              "physical_start": "000000001EB2F000",
+              "page_count": 3,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EB29000",
-              "page_count": 5,
+              "physical_start": "000000001EB32000",
+              "page_count": 3,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EB2E000",
-              "page_count": 17,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EB3F000",
-              "page_count": 1,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EB40000",
-              "page_count": 5,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EB45000",
-              "page_count": 2,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EB47000",
+              "physical_start": "000000001EB35000",
               "page_count": 25,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EB60000",
+              "physical_start": "000000001EB4E000",
               "page_count": 5,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EB65000",
+              "physical_start": "000000001EB53000",
               "page_count": 41,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EB8E000",
+              "physical_start": "000000001EB7C000",
               "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EB8F000",
+              "physical_start": "000000001EB7D000",
               "page_count": 42,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EBB9000",
+              "physical_start": "000000001EBA7000",
               "page_count": 2,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EBBB000",
+              "physical_start": "000000001EBA9000",
               "page_count": 4,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EBBF000",
+              "physical_start": "000000001EBAD000",
               "page_count": 4,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EBC3000",
+              "physical_start": "000000001EBB1000",
               "page_count": 11,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EBCE000",
+              "physical_start": "000000001EBBC000",
               "page_count": 3,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EBD1000",
+              "physical_start": "000000001EBBF000",
               "page_count": 4,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EBD5000",
+              "physical_start": "000000001EBC3000",
               "page_count": 4,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EBD9000",
-              "page_count": 39,
+              "physical_start": "000000001EBC7000",
+              "page_count": 23,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EBDE000",
+              "page_count": 9,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001EBE7000",
+              "page_count": 25,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
               "physical_start": "000000001EC00000",
-              "page_count": 513,
+              "page_count": 514,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EE01000",
+              "physical_start": "000000001EE02000",
               "page_count": 9,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EE0A000",
-              "page_count": 9,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EE13000",
-              "page_count": 9,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EE1C000",
+              "physical_start": "000000001EE0B000",
               "page_count": 3,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EE1F000",
+              "physical_start": "000000001EE0E000",
               "page_count": 24,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EE37000",
+              "physical_start": "000000001EE26000",
               "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EE38000",
+              "physical_start": "000000001EE27000",
               "page_count": 5,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EE3D000",
+              "physical_start": "000000001EE2C000",
               "page_count": 5,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EE42000",
+              "physical_start": "000000001EE31000",
               "page_count": 193,
               "attributes": "800000000000000F",
               "kind": 4,
               "source_type": 6
             },
             {
-              "physical_start": "000000001EF03000",
-              "page_count": 36,
+              "physical_start": "000000001EEF2000",
+              "page_count": 29,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EF27000",
-              "page_count": 1,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EF28000",
-              "page_count": 8,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EF30000",
-              "page_count": 4,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EF34000",
-              "page_count": 8,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EF3C000",
-              "page_count": 2,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EF3E000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EF41000",
+              "physical_start": "000000001EF0F000",
               "page_count": 3,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EF44000",
-              "page_count": 6,
+              "physical_start": "000000001EF12000",
+              "page_count": 11,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EF4A000",
-              "page_count": 2,
+              "physical_start": "000000001EF1D000",
+              "page_count": 3,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EF4C000",
-              "page_count": 3,
+              "physical_start": "000000001EF20000",
+              "page_count": 12,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EF4F000",
-              "page_count": 1,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EF50000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EF53000",
-              "page_count": 3,
+              "physical_start": "000000001EF2C000",
+              "page_count": 42,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
@@ -4201,21 +4487,63 @@
             },
             {
               "physical_start": "000000001EF73000",
-              "page_count": 2,
+              "page_count": 5,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EF75000",
+              "physical_start": "000000001EF78000",
+              "page_count": 3,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EF7B000",
+              "page_count": 1,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001EF7C000",
+              "page_count": 9,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EF85000",
+              "page_count": 3,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001EF88000",
+              "page_count": 3,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EF8B000",
+              "page_count": 4,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001EF8F000",
               "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EF76000",
-              "page_count": 1050,
+              "physical_start": "000000001EF90000",
+              "page_count": 1024,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
@@ -4306,49 +4634,49 @@
             },
             {
               "physical_start": "000000001FE00000",
-              "page_count": 198,
+              "page_count": 182,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001FEC6000",
+              "physical_start": "000000001FEB6000",
               "page_count": 32,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001FEE6000",
+              "physical_start": "000000001FED6000",
               "page_count": 74,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001FF30000",
+              "physical_start": "000000001FF20000",
               "page_count": 4,
               "attributes": "000000000000000F",
               "kind": 0,
               "source_type": 0
             },
             {
-              "physical_start": "000000001FF34000",
+              "physical_start": "000000001FF24000",
               "page_count": 2,
               "attributes": "000000000000000F",
               "kind": 6,
               "source_type": 10
             },
             {
-              "physical_start": "000000001FF36000",
+              "physical_start": "000000001FF26000",
               "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001FF37000",
-              "page_count": 25,
+              "physical_start": "000000001FF27000",
+              "page_count": 41,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
@@ -4384,16 +4712,16 @@
           ],
           "core": {
             "boot_flags": "0000000000000011",
-            "kernel_physical_base": "000000001E11D000",
+            "kernel_physical_base": "000000001E111000",
             "kernel_physical_size": 458752,
             "kernel_virtual_base": "FFFFFFFF80000000",
             "kernel_virtual_size": 458752,
             "kernel_entry_virtual": "FFFFFFFF80009000",
             "initial_stack_top_virtual": "FFFFFFFF80091000",
-            "page_table_root_physical": "000000001E22F000",
-            "handoff_physical_base": "000000001DE7B000",
+            "page_table_root_physical": "000000001E21F000",
+            "handoff_physical_base": "000000001DE6F000",
             "handoff_virtual_base": "FFFFFFFF80092000",
-            "handoff_byte_count": 5640,
+            "handoff_byte_count": 5440,
             "boot_attempt": 0,
             "boot_attempt_limit": 3,
             "boot_slot": 1,
@@ -4405,17 +4733,17 @@
             {
               "role": 1,
               "flags": 9,
-              "physical_base": "000000001E11D000",
+              "physical_base": "000000001E111000",
               "physical_size": 458752,
               "virtual_base": "FFFFFFFF80000000",
               "virtual_size": 458752,
               "entry_virtual": "FFFFFFFF80009000",
-              "sha256": "95DDA27784DA944A9C0F5B04029255EDE4DE1BB0684A8EA10DCFC07E686B59A2"
+              "sha256": "8118ED5F7761B9D36A4A65EFF1BC1856C5182D5733CE95A8BEEB24D1C2435F8D"
             },
             {
               "role": 2,
               "flags": 1,
-              "physical_base": "000000001E9D0000",
+              "physical_base": "000000001E9C0000",
               "physical_size": 1860,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -4425,7 +4753,7 @@
             {
               "role": 3,
               "flags": 1,
-              "physical_base": "000000001E9CD000",
+              "physical_base": "000000001E249000",
               "physical_size": 1088,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -4435,17 +4763,17 @@
             {
               "role": 4,
               "flags": 1,
-              "physical_base": "000000001E9CC000",
+              "physical_base": "000000001E248000",
               "physical_size": 821,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
               "entry_virtual": "0000000000000000",
-              "sha256": "63FEC3A5A9210024D1A7CEFEC848DEF5FD907D6F4F43CDC34412DC2B0728E709"
+              "sha256": "D64F63E68A7DF33C0CEAB89F2B230E13D1785EA24F02CBC0895C11F61CC9CE1B"
             },
             {
               "role": 5,
               "flags": 1,
-              "physical_base": "000000001E9CB000",
+              "physical_base": "000000001E247000",
               "physical_size": 1504,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -4455,7 +4783,7 @@
             {
               "role": 6,
               "flags": 1,
-              "physical_base": "000000001E9CA000",
+              "physical_base": "000000001E246000",
               "physical_size": 1408,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -4465,53 +4793,53 @@
             {
               "role": 7,
               "flags": 1,
-              "physical_base": "000000001E255000",
+              "physical_base": "000000001E245000",
               "physical_size": 2080,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
               "entry_virtual": "0000000000000000",
-              "sha256": "3FF415B93596F40D9BD5FFA4572B671FE1B2133F06FC7E918EF26F83B7F03831"
+              "sha256": "0F8095B3608C742D8725D3C7AFC5E18AF6D031A87207DCE37B2F43B24F686A41"
             },
             {
               "role": 9,
               "flags": 1,
-              "physical_base": "000000001E9D1000",
+              "physical_base": "000000001E9C1000",
               "physical_size": 2615,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
               "entry_virtual": "0000000000000000",
-              "sha256": "0162389720F801278E87C222D28CBBB7B093C601420B45C0E6016D3942E00392"
+              "sha256": "98807FDC6BBD1FF04B8BB7938FD1497DC673B2A946B7FDF3E421F23103613EB4"
             },
             {
               "role": 10,
               "flags": 1,
-              "physical_base": "000000001E254000",
+              "physical_base": "000000001E244000",
               "physical_size": 320,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
               "entry_virtual": "0000000000000000",
-              "sha256": "7DC7DD8ADBD881D421D0389C32D4E9AF2F967AAC1AAA07AD2685A3A6221C4101"
+              "sha256": "8CB43034BAF575CB1F8969EE52DFD3379685A3925E405A254C9301C7B1C46F09"
             },
             {
               "role": 11,
               "flags": 1,
-              "physical_base": "000000001E253000",
+              "physical_base": "000000001E243000",
               "physical_size": 256,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
               "entry_virtual": "0000000000000000",
-              "sha256": "B1BCF17D6D630E35BA940284FAB963C2941D9A668E30A0F9C89BC0ED18231A7F"
+              "sha256": "1466610A3DD385CB2E0F546E5070CE327784317C1875CE170BDF67DDCF812987"
             }
           ],
           "kernel_artifact": {
             "role": 1,
             "flags": 9,
-            "physical_base": "000000001E11D000",
+            "physical_base": "000000001E111000",
             "physical_size": 458752,
             "virtual_base": "FFFFFFFF80000000",
             "virtual_size": 458752,
             "entry_virtual": "FFFFFFFF80009000",
-            "sha256": "95DDA27784DA944A9C0F5B04029255EDE4DE1BB0684A8EA10DCFC07E686B59A2"
+            "sha256": "8118ED5F7761B9D36A4A65EFF1BC1856C5182D5733CE95A8BEEB24D1C2435F8D"
           },
           "framebuffer": {
             "physical_base": "0000000080000000",
@@ -4558,8 +4886,8 @@
           "nonblank": true,
           "poole_identity_palette_observed": true
         },
-        "stderr_sha256": "0849494825285D3C0E0BD35F999B5DA4B4FEFD06838AA549914D9D81A6361FDB",
-        "stderr_byte_count": 422,
+        "stderr_sha256": "DB03CEE1F1043EC1AAA78104E5CB12DF6D3F427D2F4BD996AE2EBA19D0C552EB",
+        "stderr_byte_count": 844,
         "local_paths_recorded": false,
         "transcript_binding": {
           "exact_transfer_fields_bound": true,
@@ -4573,9 +4901,9 @@
           "parser_count": 9,
           "manifest_bytes": 2615,
           "retained_file_bytes": 11952,
-          "retained_set_sha256": "E350B2276092199EAA5E6896C36C4E04521E610D1C9D4D0E3DA9B8E458A2A22A",
-          "policy_sha256": "7DC7DD8ADBD881D421D0389C32D4E9AF2F967AAC1AAA07AD2685A3A6221C4101",
-          "state_sha256": "B1BCF17D6D630E35BA940284FAB963C2941D9A668E30A0F9C89BC0ED18231A7F",
+          "retained_set_sha256": "FFDBBD79609651D507C3FF9701B530B9F5D66AC8F866FF3857F4AE1C2C07527B",
+          "policy_sha256": "8CB43034BAF575CB1F8969EE52DFD3379685A3925E405A254C9301C7B1C46F09",
+          "state_sha256": "1466610A3DD385CB2E0F546E5070CE327784317C1875CE170BDF67DDCF812987",
           "denial": "pbtrust_policy_unsigned",
           "authority_grants": 0,
           "actions_authorized": 0,
@@ -4612,15 +4940,15 @@
             "kernel_version": 1,
             "kernel_file_byte_count": 409600,
             "kernel_image_byte_count": 458752,
-            "kernel_sha256_prefix": "95DDA27784DA944A"
+            "kernel_sha256_prefix": "8118ED5F7761B9D3"
           },
           "kernel": {
             "file_byte_count": 409600,
             "image_byte_count": 458752,
             "page_count": 112,
             "entry_offset": 36864,
-            "relocation_count": 969,
-            "loaded_fnv1a64": "BE35280E2A566DED",
+            "relocation_count": 985,
+            "loaded_fnv1a64": "422749EDD9087C0D",
             "file_handles_closed": 12,
             "file_pools_freed": 11,
             "pages_retained": true,
@@ -4633,7 +4961,7 @@
             "page_count": 6,
             "retained_input_count": 9,
             "retained_input_page_count": 9,
-            "fnv1a64": "1DBB42EC63A7BB08",
+            "fnv1a64": "A71D3CB33E349AB5",
             "pages_retained": true,
             "signatures_verified": false,
             "measured": false,
@@ -4647,7 +4975,7 @@
             "development_denial_count": 6,
             "file_bytes": 8761,
             "payload_bytes": 8185,
-            "retained_set_sha256": "E350B2276092199EAA5E6896C36C4E04521E610D1C9D4D0E3DA9B8E458A2A22A",
+            "retained_set_sha256": "FFDBBD79609651D507C3FF9701B530B9F5D66AC8F866FF3857F4AE1C2C07527B",
             "exact_retained_bytes": true,
             "authority_grants": 0,
             "actions_authorized": 0,
@@ -4661,8 +4989,8 @@
             "binding_count": 14,
             "denial_count": 1,
             "denial": "pbtrust_policy_unsigned",
-            "policy_sha256": "7DC7DD8ADBD881D421D0389C32D4E9AF2F967AAC1AAA07AD2685A3A6221C4101",
-            "state_sha256": "B1BCF17D6D630E35BA940284FAB963C2941D9A668E30A0F9C89BC0ED18231A7F",
+            "policy_sha256": "8CB43034BAF575CB1F8969EE52DFD3379685A3925E405A254C9301C7B1C46F09",
+            "state_sha256": "1466610A3DD385CB2E0F546E5070CE327784317C1875CE170BDF67DDCF812987",
             "state_source": "esp_candidate_not_persistent_authority",
             "signature_verifications": 0,
             "authority_grants": 0,
@@ -4671,16 +4999,16 @@
             "state_monotonic": false
           },
           "pbp1": {
-            "byte_count": 5640,
+            "byte_count": 5440,
             "record_count": 5,
-            "memory_entry_count": 110,
+            "memory_entry_count": 105,
             "framebuffer_present": 1,
             "firmware_table_count": 1,
             "artifact_count": 10,
             "descriptor_bytes": 48,
             "exit_attempts": 1,
-            "message_crc32": "3272A049",
-            "fnv1a64": "FF4D339714E7D77B",
+            "message_crc32": "F1D8B362",
+            "fnv1a64": "0D0B5D15CD332D86",
             "pre_exit": false,
             "boot_services_exited": true,
             "development_mode_only": true,
@@ -4702,7 +5030,7 @@
             "leaf_fingerprint": "F43490703F3DCA21",
             "table_page_count": 4,
             "physical_address_bits": 40,
-            "mapped_fnv1a64": "BE35280E2A566DED",
+            "mapped_fnv1a64": "422749EDD9087C0D",
             "framebuffer_preserved": true,
             "framebuffer_cache_signature": "00",
             "framebuffer_first_page_bytes": 2097152,
@@ -4718,13 +5046,13 @@
               "total_mapped_page_count": 400,
               "stack_first_page_table_index": 113,
               "handoff_first_page_table_index": 146,
-              "kernel_physical_base": 504483840,
-              "page_table_root_physical": 505606144,
-              "stack_physical_base": 505622528,
+              "kernel_physical_base": 504434688,
+              "page_table_root_physical": 505540608,
+              "stack_physical_base": 505556992,
               "stack_top_virtual": 18446744071562661888,
-              "handoff_physical_base": 501723136,
+              "handoff_physical_base": 501673984,
               "handoff_virtual_base": 18446744071562665984,
-              "retained_leaf_fingerprint": "52A6EE3DCB476C57"
+              "retained_leaf_fingerprint": "7775033C7989EB3B"
             }
           },
           "gop": {
@@ -4735,16 +5063,16 @@
             "format": "BGR"
           },
           "memory_map": {
-            "byte_count": 5280,
+            "byte_count": 5040,
             "descriptor_bytes": 48,
-            "descriptor_count": 110
+            "descriptor_count": 105
           },
           "boot_exit": {
             "contract_id": "PBEXIT1",
             "attempt_count": 1,
-            "map_byte_count": 5280,
+            "map_byte_count": 5040,
             "descriptor_size": 48,
-            "descriptor_count": 110,
+            "descriptor_count": 105,
             "firmware_calls_after_exit": 0,
             "kernel_page_count": 112,
             "artifact_page_count": 9,
@@ -4761,10 +5089,10 @@
           "emulator_only": 1,
           "entry": 18446744071562104832,
           "handoff": 18446744071562665984,
-          "handoff_bytes": 5640,
+          "handoff_bytes": 5440,
           "stack_top": 18446744071562661888,
-          "root": 505606144,
-          "cr3": 505606144,
+          "root": 505540608,
+          "cr3": 505540608,
           "trap_scenario": 14,
           "signature_verifications": 0,
           "authority_grants": 0,
@@ -4775,17 +5103,17 @@
         "kernel_entry": {
           "entry_contract": "PKENTRY1",
           "transfer_contract": "PKXFER1",
-          "build_id": "PKBUILD1-CYCLE140-N9-SMP-SHOOTDOWN-V001-00001",
+          "build_id": "PKBUILD1-CYCLE141-N8-SMP-MULTI-AP-V001-00001",
           "entry_count": 1,
           "serial": "present"
         },
         "kernel_state": {
           "handoff": 18446744071562665984,
-          "handoff_bytes": 5640,
+          "handoff_bytes": 5440,
           "entry": 18446744071562104832,
           "stack_top": 18446744071562661888,
-          "root": 505606144,
-          "cr3": 505606144,
+          "root": 505540608,
+          "cr3": 505540608,
           "rflags_if": 0,
           "rflags_df": 0
         },
@@ -4802,9 +5130,9 @@
           "parser_count": 9,
           "manifest_bytes": 2615,
           "retained_file_bytes": 11952,
-          "retained_set_sha256": "E350B2276092199EAA5E6896C36C4E04521E610D1C9D4D0E3DA9B8E458A2A22A",
-          "policy_sha256": "7DC7DD8ADBD881D421D0389C32D4E9AF2F967AAC1AAA07AD2685A3A6221C4101",
-          "state_sha256": "B1BCF17D6D630E35BA940284FAB963C2941D9A668E30A0F9C89BC0ED18231A7F",
+          "retained_set_sha256": "FFDBBD79609651D507C3FF9701B530B9F5D66AC8F866FF3857F4AE1C2C07527B",
+          "policy_sha256": "8CB43034BAF575CB1F8969EE52DFD3379685A3925E405A254C9301C7B1C46F09",
+          "state_sha256": "1466610A3DD385CB2E0F546E5070CE327784317C1875CE170BDF67DDCF812987",
           "denial": "pbtrust_policy_unsigned",
           "authority_grants": 0,
           "actions_authorized": 0,
@@ -4813,266 +5141,487 @@
         "synthetic_unsigned_terminal_used_for_prefix_parser_only": true
       },
       "topology": {
-        "processors": 2,
-        "enabled": 2,
+        "processors": 4,
+        "enabled": 4,
         "bsp_apic_id": 0,
-        "target_apic_id": 1
-      },
-      "resources": {
-        "physical_start": 4096,
-        "page_count": 32,
-        "mapped_pages": 13,
-        "guard_pages": 14,
-        "apic_page_table": 131072,
-        "trampoline_bytes": 2564
-      },
-      "service": {
-        "vectors": [
-          224,
-          225,
-          226,
-          227,
-          228,
-          229
+        "target_apic_ids": [
+          1,
+          2,
+          3
         ],
-        "interrupts_enabled": true,
-        "capability_gate": "development_fixed_token"
+        "target_mask": 14
       },
-      "operations": {
-        "accepted": 6,
-        "denied": 4,
-        "deliveries": 10,
-        "eois": 10,
+      "partial_rollback": {
+        "started_mask": 6,
+        "offline_apic_id": 4,
         "timeout_count": 1,
-        "timeout_attempt": 6,
-        "retry_same_attempt": true
+        "parked_mask": 6,
+        "released_mask": 14,
+        "resource_pages": 96,
+        "frame_pages": 6
       },
+      "retry": {
+        "retry_count": 1,
+        "simultaneous_online": true
+      },
+      "aps": [
+        {
+          "index": 0,
+          "apic_id": 1,
+          "layout": {
+            "start": 4096,
+            "end": 135168,
+            "sipi_vector": 1,
+            "pml4": 8192,
+            "local": 53248,
+            "apic_page_table": 131072,
+            "roles": {
+              "trampoline": [
+                0
+              ],
+              "tables": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "rsp0": [
+                6,
+                7,
+                8,
+                9
+              ],
+              "local": [
+                12
+              ],
+              "descriptors": [
+                15
+              ],
+              "idt": [
+                18
+              ],
+              "ist1": [
+                21,
+                22
+              ],
+              "ist2": [
+                25,
+                26
+              ],
+              "xstate": [
+                29
+              ],
+              "apic_page_table": [
+                31
+              ],
+              "guards": [
+                5,
+                10,
+                11,
+                13,
+                14,
+                16,
+                17,
+                19,
+                20,
+                23,
+                24,
+                27,
+                28,
+                30
+              ]
+            }
+          },
+          "allocation_sequence": 24,
+          "frame_allocation_sequences": [
+            25,
+            26
+          ],
+          "frame_release_sequences": [
+            35,
+            42
+          ],
+          "resource_release_sequence": 43,
+          "trampoline_bytes": 2612,
+          "response_checksum": 1874629951950422021
+        },
+        {
+          "index": 1,
+          "apic_id": 2,
+          "layout": {
+            "start": 143360,
+            "end": 274432,
+            "sipi_vector": 35,
+            "pml4": 147456,
+            "local": 192512,
+            "apic_page_table": 270336,
+            "roles": {
+              "trampoline": [
+                0
+              ],
+              "tables": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "rsp0": [
+                6,
+                7,
+                8,
+                9
+              ],
+              "local": [
+                12
+              ],
+              "descriptors": [
+                15
+              ],
+              "idt": [
+                18
+              ],
+              "ist1": [
+                21,
+                22
+              ],
+              "ist2": [
+                25,
+                26
+              ],
+              "xstate": [
+                29
+              ],
+              "apic_page_table": [
+                31
+              ],
+              "guards": [
+                5,
+                10,
+                11,
+                13,
+                14,
+                16,
+                17,
+                19,
+                20,
+                23,
+                24,
+                27,
+                28,
+                30
+              ]
+            }
+          },
+          "allocation_sequence": 27,
+          "frame_allocation_sequences": [
+            28,
+            31
+          ],
+          "frame_release_sequences": [
+            36,
+            40
+          ],
+          "resource_release_sequence": 41,
+          "trampoline_bytes": 2612,
+          "response_checksum": 1874629951950422021
+        },
+        {
+          "index": 2,
+          "apic_id": 3,
+          "layout": {
+            "start": 282624,
+            "end": 413696,
+            "sipi_vector": 69,
+            "pml4": 286720,
+            "local": 331776,
+            "apic_page_table": 409600,
+            "roles": {
+              "trampoline": [
+                0
+              ],
+              "tables": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "rsp0": [
+                6,
+                7,
+                8,
+                9
+              ],
+              "local": [
+                12
+              ],
+              "descriptors": [
+                15
+              ],
+              "idt": [
+                18
+              ],
+              "ist1": [
+                21,
+                22
+              ],
+              "ist2": [
+                25,
+                26
+              ],
+              "xstate": [
+                29
+              ],
+              "apic_page_table": [
+                31
+              ],
+              "guards": [
+                5,
+                10,
+                11,
+                13,
+                14,
+                16,
+                17,
+                19,
+                20,
+                23,
+                24,
+                27,
+                28,
+                30
+              ]
+            }
+          },
+          "allocation_sequence": 32,
+          "frame_allocation_sequences": [
+            33,
+            34
+          ],
+          "frame_release_sequences": [
+            37,
+            38
+          ],
+          "resource_release_sequence": 39,
+          "trampoline_bytes": 2612,
+          "response_checksum": 1874629951950422021
+        }
+      ],
       "shootdown": {
-        "root_physical": 8192,
-        "virtual_address": 2093056,
-        "retired_generation": 1,
-        "active_generation": 2,
-        "target_mask": 2,
-        "ack_mask": 2,
-        "old_frame_physical": 135168,
-        "new_frame_physical": 139264,
-        "observed_before": 5785809737810726732,
-        "observed_after": 5785809737810726487,
-        "invalidation_count": 1,
-        "premature_reclaim_rejected": true,
-        "reclaim_state": 3,
-        "response_checksum": 6001133705606562377
-      },
-      "stop": {
-        "attempt": 10,
-        "sequence": 6,
-        "last": 6,
-        "service": 4,
-        "mailbox": 3,
-        "runtime": 5,
-        "panic": 1,
-        "asserts": 1,
-        "deasserts": 1,
-        "sipis": 2,
-        "tss": 1,
-        "idt": 1,
-        "xstate": 1,
-        "apic_table": 1,
-        "final_init": 1,
-        "parked": 1,
-        "response_checksum": 1874629951950422021,
-        "baseline_checksum": 7012149420485505595,
-        "runtime_checksum": 1220880612014882334
+        "target_mask": 14,
+        "ack_mask": 14,
+        "invalidation_count": 3,
+        "premature_reclaim_rejections": 2,
+        "stage": "released"
       },
       "release": {
-        "sequence": 7,
-        "zeroed_bytes": 131072,
-        "verified_bytes": 131072,
-        "frame_zeroed_bytes": 8192,
-        "frame_verified_bytes": 8192,
-        "resources_released": 34
+        "resource_pages": 96,
+        "frame_pages": 6,
+        "total_pages": 102,
+        "verified_bytes": 417792
       },
       "result": {
-        "shootdown_remote_invlpg": 1,
-        "tlb_invalidations": 1,
-        "generation_retirement": 1,
-        "no_reuse_before_retirement": 1,
-        "call_allowlist_noop": 1,
-        "arbitrary_callback": 0,
+        "application_processors_online": 3,
         "scheduler": 0,
+        "general_broadcast": 0,
+        "target_hardware": 0,
         "production": 0
       }
     }
   },
   "negative_controls": [
     {
-      "id": "NEG-N9-PKSMP4-MARKER-OMISSION",
+      "id": "NEG-N8-PKSMP5-MARKER-OMISSION",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N9-PKSMP4-MARKER-ORDER",
+      "id": "NEG-N8-PKSMP5-MARKER-ORDER",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N9-PKSMP4-MARKER-DUPLICATE",
+      "id": "NEG-N8-PKSMP5-MARKER-DUPLICATE",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N9-PKSMP4-TRANSFER-PREFIX-SELECTOR-MATRIX",
+      "id": "NEG-N8-PKSMP5-TRANSFER-PREFIX-SELECTOR-MATRIX",
       "status": "pass",
       "expected": "rejected",
       "case_count": 2
     },
     {
-      "id": "NEG-N9-PKSMP4-TOPOLOGY-FIELD-MATRIX",
+      "id": "NEG-N8-PKSMP5-TOPOLOGY-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
-      "case_count": 7
+      "case_count": 8
     },
     {
-      "id": "NEG-N9-PKSMP4-RESOURCE-GEOMETRY-FIELD-MATRIX",
+      "id": "NEG-N8-PKSMP5-PARTIAL-ROLLBACK-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
       "case_count": 12
     },
     {
-      "id": "NEG-N9-PKSMP4-ONLINE-FIELD-MATRIX",
+      "id": "NEG-N8-PKSMP5-RETRY-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
       "case_count": 6
     },
     {
-      "id": "NEG-N9-PKSMP4-ACCEPTED-FIELD-MATRIX",
+      "id": "NEG-N8-PKSMP5-AP0-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
-      "case_count": 10
+      "case_count": 36
     },
     {
-      "id": "NEG-N9-PKSMP4-DENIAL-FIELD-MATRIX",
+      "id": "NEG-N8-PKSMP5-AP1-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
-      "case_count": 10
+      "case_count": 36
     },
     {
-      "id": "NEG-N9-PKSMP4-TIMEOUT-FIELD-MATRIX",
+      "id": "NEG-N8-PKSMP5-AP2-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
-      "case_count": 9
+      "case_count": 36
     },
     {
-      "id": "NEG-N9-PKSMP4-SHOOTDOWN-FIELD-MATRIX",
+      "id": "NEG-N8-PKSMP5-SHOOTDOWN-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
-      "case_count": 16
+      "case_count": 11
     },
     {
-      "id": "NEG-N9-PKSMP4-STOP-CHECKSUM-FIELD-MATRIX",
+      "id": "NEG-N8-PKSMP5-LIFECYCLE-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
-      "case_count": 20
+      "case_count": 11
     },
     {
-      "id": "NEG-N9-PKSMP4-RELEASE-FIELD-MATRIX",
+      "id": "NEG-N8-PKSMP5-RELEASE-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
-      "case_count": 15
+      "case_count": 14
     },
     {
-      "id": "NEG-N9-PKSMP4-CLAIM-BOUNDARY-FIELD-MATRIX",
+      "id": "NEG-N8-PKSMP5-CLAIM-BOUNDARY-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
-      "case_count": 26
+      "case_count": 22
     },
     {
-      "id": "NEG-N9-PKSMP4-SOURCE-AUDIT",
+      "id": "NEG-N8-PKSMP5-SOURCE-AUDIT",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N9-PKSMP4-LINKED-INVLPG-SCOPE",
+      "id": "NEG-N8-PKSMP5-LINKED-INVLPG-SCOPE",
       "status": "pass",
       "expected": "rejected",
       "case_count": 2
     },
     {
-      "id": "NEG-N9-PKSMP4-RESOURCE-LAYOUT-MODEL",
+      "id": "NEG-N8-PKSMP5-RESOURCE-LAYOUT-MODEL",
       "status": "pass",
       "expected": "rejected",
       "case_count": 2
     },
     {
-      "id": "NEG-N9-PKSMP4-REQUEST-CAPABILITY-MODEL",
+      "id": "NEG-N8-PKSMP5-REQUEST-CAPABILITY-MODEL",
       "status": "pass",
       "expected": "rejected",
       "case_count": 2
     },
     {
-      "id": "NEG-N9-PKSMP4-REQUEST-VECTOR-MODEL",
+      "id": "NEG-N8-PKSMP5-REQUEST-VECTOR-MODEL",
       "status": "pass",
       "expected": "rejected",
       "case_count": 2
     },
     {
-      "id": "NEG-N9-PKSMP4-REQUEST-SEQUENCE-MODEL",
+      "id": "NEG-N8-PKSMP5-REQUEST-SEQUENCE-MODEL",
       "status": "pass",
       "expected": "rejected",
       "case_count": 2
     },
     {
-      "id": "NEG-N9-PKSMP4-SHOOTDOWN-REQUEST-BINDING-MODEL",
+      "id": "NEG-N8-PKSMP5-SHOOTDOWN-REQUEST-BINDING-MODEL",
       "status": "pass",
       "expected": "rejected",
       "case_count": 8
     },
     {
-      "id": "NEG-N9-PKSMP4-SHOOTDOWN-ACK-BINDING-MODEL",
+      "id": "NEG-N8-PKSMP5-SHOOTDOWN-ACK-BINDING-MODEL",
       "status": "pass",
       "expected": "rejected",
       "case_count": 8
     },
     {
-      "id": "NEG-N9-PKSMP4-STALE-GENERATION-MODEL",
+      "id": "NEG-N8-PKSMP5-STALE-GENERATION-MODEL",
       "status": "pass",
       "expected": "rejected",
       "case_count": 2
     },
     {
-      "id": "NEG-N9-PKSMP4-TARGET-MASK-MODEL",
+      "id": "NEG-N8-PKSMP5-TARGET-MASK-MODEL",
       "status": "pass",
       "expected": "rejected",
       "case_count": 2
     },
     {
-      "id": "NEG-N9-PKSMP4-PREACK-RECLAIM-MODEL",
+      "id": "NEG-N8-PKSMP5-PREACK-RECLAIM-MODEL",
       "status": "pass",
       "expected": "rejected",
       "case_count": 2
+    },
+    {
+      "id": "NEG-N8-PKSMP5-EXACT-TOPOLOGY-MODEL",
+      "status": "pass",
+      "expected": "rejected",
+      "case_count": 4
+    },
+    {
+      "id": "NEG-N8-PKSMP5-PARTIAL-ROLLBACK-MODEL",
+      "status": "pass",
+      "expected": "rejected",
+      "case_count": 3
+    },
+    {
+      "id": "NEG-N8-PKSMP5-DUPLICATE-ACK-MODEL",
+      "status": "pass",
+      "expected": "rejected",
+      "case_count": 1
+    },
+    {
+      "id": "NEG-N8-PKSMP5-AGGREGATE-ACK-MODEL",
+      "status": "pass",
+      "expected": "rejected",
+      "case_count": 2
+    },
+    {
+      "id": "NEG-N8-PKSMP5-RELEASE-ACCOUNTING-MODEL",
+      "status": "pass",
+      "expected": "rejected",
+      "case_count": 3
     }
   ],
   "claims": {
     "flag_n8_smp_ipi_001_closed": true,
     "flag_n9_smp_shootdown_001_closed": true,
-    "one_application_processor_started": true,
-    "six_fixed_ipi_vectors_installed": true,
-    "six_allowlisted_operation_classes_acknowledged": true,
-    "capability_vector_and_replay_denials_observed": true,
-    "bounded_offline_target_timeout_observed": true,
-    "live_eoi_accounting_verified": true,
-    "panic_latch_and_stop_quiescence_verified": true,
-    "application_processor_parked_before_release": true,
-    "all_runtime_resources_scrubbed_and_released": true,
-    "live_partial_start_fault_injection_verified": false,
-    "general_smp_implemented": false,
-    "one_page_remote_tlb_shootdown_implemented": true,
-    "one_generation_retirement_implemented": true,
-    "premature_reclaim_rejected": true,
+    "flag_n8_smp_multi_ap_001_closed": true,
+    "three_application_processors_started_simultaneously": true,
+    "live_partial_start_timeout_and_rollback_verified": true,
+    "fresh_retry_after_complete_scrub_verified": true,
+    "private_per_ap_runtime_resources_verified": true,
+    "aggregate_three_ap_ack_mask_verified": true,
+    "one_page_per_root_remote_tlb_shootdown_implemented": true,
+    "one_generation_three_ap_retirement_implemented": true,
+    "premature_reclaim_rejected_until_all_acks": true,
     "general_tlb_shootdown_implemented": false,
     "arbitrary_remote_callback_implemented": false,
     "scheduler_implemented": false,
@@ -5082,40 +5631,42 @@
     "production_ready": false
   },
   "non_claims": [
-    "PKSMP4 qualifies exactly one AP, one AP-owned root, one page, and one generation in one frozen two-vCPU Sandy Bridge TCG profile; it is not general SMP or a general shootdown subsystem.",
-    "The capability token is a fixed development value and is not a production capability minting, delegation, revocation, or secrecy mechanism.",
-    "The shootdown operation performs exactly one AP-side INVLPG for the frozen probe; it does not implement INVPCID, CR3 reload shootdowns, address-space-wide invalidation, multi-AP masks, or multiple concurrent generations.",
-    "The call-function operation accepts one fixed no-op token only and exposes no arbitrary function pointer, closure, or remote execution surface.",
-    "No scheduler, migration, CPU ownership, hotplug, NUMA, multi-socket, x2APIC, or multi-AP lifecycle is implemented.",
-    "Host-model rollback is verified, but live injected failures after INIT and each SIPI remain open.",
-    "QEMU evidence is not physical-target evidence and does not close N8, N9, or any production gate.",
-    "No service, driver, user task, PGVM2, PDC, or PooleGlyph workload is dispatched through this transport.",
+    "PKSMP5 qualifies exactly one frozen four-vCPU QEMU topology with BSP 0 and legacy-xAPIC APs 1, 2, and 3; it is not a general topology, hotplug, NUMA, multi-socket, or x2APIC implementation.",
+    "The capability token remains a fixed development value and is not a production minting, delegation, revocation, or secrecy mechanism.",
+    "Each AP invalidates exactly one frozen probe page in its private root for one generation; address-space-wide invalidation, concurrent generations, INVPCID, PCID, and broadcast shorthand remain open.",
+    "The aggregate mask is assembled from three separately validated private mailbox acknowledgements; no shared writable mailbox or arbitrary remote callback is introduced.",
+    "No scheduler, task migration, CPU affinity authority, user task, service, driver, PGVM2, PDC, or PooleGlyph workload is dispatched.",
+    "The injected APIC-4 timeout proves one partial-start rollback point, not every hardware or timing failure interleaving.",
+    "QEMU TCG evidence is not physical-target evidence and does not close N8, N9, or production qualification.",
+    "The retained Cycle 140 PKSMP4 receipt remains historical evidence for the predecessor one-AP slice; PKSMP5 does not rewrite that receipt.",
     "No signature, authority grant, authorized action, production promotion, firmware mutation, or physical-media write occurs."
   ],
   "summary": {
-    "application_processors_online": 1,
-    "operation_classes": 6,
-    "accepted_deliveries": 6,
-    "denied_deliveries": 4,
+    "application_processors_online": 3,
+    "operation_classes_installed_per_ap": 6,
+    "accepted_deliveries": 9,
+    "denied_deliveries": 3,
     "offline_timeouts": 1,
-    "eois": 10,
-    "remote_tlb_invalidations": 1,
+    "partial_start_rollbacks": 1,
+    "fresh_retries": 1,
+    "eois": 12,
+    "remote_tlb_invalidations": 3,
     "retired_generations": 1,
-    "premature_reclaim_rejections": 1,
-    "resource_pages_released": 34,
-    "verified_bytes": 139264,
-    "negative_controls_total": 25,
-    "hostile_cases_total": 169,
+    "premature_reclaim_rejections": 2,
+    "resource_pages_released": 96,
+    "frame_pages_released": 6,
+    "verified_bytes": 417792,
+    "negative_controls_total": 30,
+    "hostile_cases_total": 243,
     "production_claim_count": 0
   },
   "open_items": [
-    "general multi-AP SMP",
+    "scheduler ownership and CPU affinity",
+    "general topology and x2APIC",
     "concurrent address-space replacement",
-    "multi-generation deferred reclaim",
-    "scheduler CPU ownership",
-    "capability minting and revocation authority",
-    "live partial-start fault injection",
-    "x2APIC and topology matrix",
+    "address-space-wide and concurrent-generation shootdown",
+    "production capability minting and revocation",
+    "additional live failure interleavings",
     "physical-target evidence",
     "N8 and N9 exit gates",
     "production signing and promotion"

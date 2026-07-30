@@ -34,6 +34,17 @@ class QualificationError(RuntimeError):
     """Raised when live PKPMM7 qualification fails closed."""
 
 
+def _required_region(source: str, start: str, end: str, scope: str) -> str:
+    before, separator, remainder = source.partition(start)
+    del before
+    if not separator:
+        raise QualificationError(f"{scope} start boundary is missing: {start}")
+    region, separator, _ = remainder.partition(end)
+    if not separator:
+        raise QualificationError(f"{scope} end boundary is missing or reordered: {end}")
+    return region
+
+
 def _set_field(marker: str, name: str, value: str) -> str:
     pattern = re.compile(rf"(\b{re.escape(name)}=)([^ ]+)")
     if len(pattern.findall(marker)) != 1:
@@ -289,11 +300,15 @@ def _negative_controls(
     return controls
 
 
-def _source_audit() -> dict[str, Any]:
+def _source_audit(adapter_source_override: str | None = None) -> dict[str, Any]:
     core_path = ROOT / "native/kernel/src/physical_memory.rs"
     adapter_path = ROOT / "native/kernel/src/main.rs"
     source = core_path.read_text(encoding="utf-8")
-    adapter_source = adapter_path.read_text(encoding="utf-8")
+    adapter_source = (
+        adapter_path.read_text(encoding="utf-8")
+        if adapter_source_override is None
+        else adapter_source_override
+    )
     implementation = source.split("#[cfg(test)]", 1)[0]
     authorized = (
         ('#[unsafe(link_section = ".text.pkpmm_labels")]', 1),
@@ -384,18 +399,30 @@ def _source_audit() -> dict[str, Any]:
     adapter_missing = tuple(token for token in adapter_required if token not in adapter_source)
     if adapter_missing:
         raise QualificationError(f"PKPMM6 live adapter scope changed: missing={adapter_missing}")
-    adapter_implementation = adapter_source.split("struct BootstrapTableMemory", 1)[1].split(
-        "struct LiveActiveHardware", 1
-    )[0]
-    smp_adapter = adapter_source.split("struct SmpOperationProof", 1)[1].split(
-        "struct LiveActiveHardware", 1
-    )[0]
-    smp_runtime_adapter = adapter_source.split("struct SmpRuntimeOperationProof", 1)[1].split(
-        "struct LiveActiveHardware", 1
-    )[0]
-    smp_ipi_adapter = adapter_source.split("struct SmpIpiOperationProof", 1)[1].split(
-        "struct LiveActiveHardware", 1
-    )[0]
+    adapter_implementation = _required_region(
+        adapter_source,
+        "struct BootstrapTableMemory",
+        "struct LiveActiveHardware",
+        "PKPMM7 live adapter",
+    )
+    smp_adapter = _required_region(
+        adapter_source,
+        "struct SmpOperationProof",
+        "struct LiveActiveHardware",
+        "PKSMP1 live adapter",
+    )
+    smp_runtime_adapter = _required_region(
+        adapter_source,
+        "struct SmpRuntimeOperationProof",
+        "struct LiveActiveHardware",
+        "PKSMP2 live adapter",
+    )
+    smp_ipi_adapter = _required_region(
+        adapter_source,
+        "enum SmpIpiLiveError",
+        "struct LiveActiveHardware",
+        "PKSMP5 live adapter",
+    )
     pmm_read_sites = adapter_implementation.count("read_volatile") - smp_adapter.count(
         "read_volatile"
     )

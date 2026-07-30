@@ -163,9 +163,9 @@ checksum, physical access, and final ownership total from PBP1.
 | ACPI source / snapshot checksums | `0x078583AEEFDD6581 / 0x4089A5CFEC81CB41` |
 | ACPI range / receipt checksums | `0xC718FB26B45257F2 / 0x60DAA52A8A05ABD6` |
 
-The Cycle 137 requalification binds the kernel at 409,600 canonical bytes in a
-458,752-byte, 112-page image with 919 relocations and SHA-256
-`95DDA27784DA944A9C0F5B04029255EDE4DE1BB0684A8EA10DCFC07E686B59A2`.
+The Cycle 141 requalification binds the kernel at 409,600 canonical bytes in a
+458,752-byte, 112-page image with 985 relocations and SHA-256
+`8118ED5F7761B9D36A4A65EFF1BC1856C5182D5733CE95A8BEEB24D1C2435F8D`.
 PKPMM7 also supplies PKVM3's exact generation-bound sparse ownership manifest;
 the 23-page retained-layout increase since Cycle 135 is fully reflected in source, managed,
 loader-protected, and dependent direct-map counts.
@@ -173,9 +173,10 @@ loader-protected, and dependent direct-map counts.
 ## Nonclaims
 
 N9 remains partial. PKPMM7 is a serial one-BSP allocator and bounded ACPI table
-container consumer. It does not implement AML, AP enumeration, interrupt
-routing, full platform discovery, interrupt-context allocation, concurrent or
-SMP allocation, or SMP TLB shootdown and remote deferred reclaim. PKVM3
+container consumer. It does not implement AML, interrupt routing, full platform
+discovery, interrupt-context allocation, or concurrent allocation. PKSMP5
+separately consumes the manager for one bounded three-AP allocation/release and
+shootdown transaction; that does not make PKPMM7 a general SMP allocator. PKVM3
 separately proves a complete generation-owned sparse direct map only for one
 BSP; huge pages, PCID, COW, user faults, pager IPC,
 heap/object caches, general pressure/OOM policy, MMIO/PAT/MTRR qualification,

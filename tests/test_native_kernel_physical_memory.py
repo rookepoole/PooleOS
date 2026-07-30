@@ -157,6 +157,17 @@ class NativeKernelPhysicalMemoryTests(unittest.TestCase):
         self.assertTrue(audit["final_temporary_alias_revocation_required"])
         self.assertTrue(audit["final_guarded_metadata_mapping_retention_required"])
 
+    def test_source_audit_rejects_missing_multi_ap_boundary(self) -> None:
+        source = (physical_memory.ROOT / "native/kernel/src/main.rs").read_text(
+            encoding="utf-8"
+        )
+        hostile = source.replace("enum SmpIpiLiveError", "enum RemovedSmpIpiLiveError", 1)
+        with self.assertRaisesRegex(
+            qualify_native_kernel_physical_memory.QualificationError,
+            "PKSMP5 live adapter start boundary is missing",
+        ):
+            qualify_native_kernel_physical_memory._source_audit(hostile)
+
     def test_release_gate_accepts_only_the_bound_non_promoting_receipt(self) -> None:
         check = pooleos_release_gate.check_native_kernel_physical_memory_readiness()
         self.assertTrue(check["ok"], check["detail"])
