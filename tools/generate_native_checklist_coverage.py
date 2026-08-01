@@ -324,6 +324,26 @@ ADDED_REQUIREMENTS = [
         ],
     },
     {
+        "id": "ADD-N12-SCHED-PREEMPT-001",
+        "phase_id": "N12",
+        "requirement": "Integrate the bounded scheduler with an owned timer and wake/cancel interrupt path through a normalized interrupt frame, explicit deferred-reschedule state, exact task-stack ownership, deterministic quantum and higher-priority wakeup rules, balanced interrupt acknowledgements, transactional rollback, and complete cleanup while preserving strict no-live-AP, no-ring-3, no-address-space-switch, no-target, and no-production boundaries.",
+        "basis": [
+            "Cycle 143 PKSCHED2 BSP timer and wakeup preemption closeout",
+            "PKIRQ1 timer ownership and PKSCHED1 scheduler foundations",
+            "master checklist sections 031-034",
+        ],
+    },
+    {
+        "id": "ADD-N12-SCHED-DEFERRED-001",
+        "phase_id": "N12",
+        "requirement": "Implement bounded interrupt-deferred work and kernel-internal workers with queue ownership, duplicate suppression, cancellation, flush, recursion prevention, shutdown ordering, fault rollback, starvation limits, and reclamation-safe teardown before asynchronous kernel work can be used by drivers or services.",
+        "basis": [
+            "N12.3-N12.4 deferred reclamation and kernel-worker exit requirements",
+            "Cycle 143 PKSCHED2 intentionally leaves its bounded event queue drained synchronously",
+            "master checklist sections 031-034",
+        ],
+    },
+    {
         "id": "ADD-CAP-001",
         "phase_id": "N13",
         "requirement": "Specify unforgeable capabilities, rights attenuation, derivation provenance, transfer, revocation, generation-safe handles, quotas, object destruction, and zero ambient authority; prove no authority amplification across IPC.",

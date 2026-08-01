@@ -241,7 +241,7 @@ def _linked_machine_audit(toolchain_root: Path, temporary_root: Path) -> tuple[d
     audited_mnemonics = ("rdmsr", "wrmsr", "rdpmc", "syscall", "sysret", "swapgs")
     counts = {mnemonic: mnemonics.count(mnemonic) for mnemonic in audited_mnemonics}
     expected_counts = {
-        "rdmsr": 31,
+        "rdmsr": 37,
         "wrmsr": 3,
         "rdpmc": 0,
         "syscall": 0,
@@ -263,6 +263,7 @@ def _linked_machine_audit(toolchain_root: Path, temporary_root: Path) -> tuple[d
             "PooleKernelLinked::run_smp_percpu_runtime",
             "PooleKernelLinked::arch::x86_64::observe_cpu_policy",
             "PooleKernelLinked::arch::x86_64::observe_privilege_msr_policy",
+            "PooleKernelLinked::arch::x86_64::run_scheduler_preemption_launcher",
             "PooleKernelLinked::arch::x86_64::run_scheduler_context_switch_probe",
             "poole_kernel_rust_entry",
         )
@@ -275,6 +276,7 @@ def _linked_machine_audit(toolchain_root: Path, temporary_root: Path) -> tuple[d
         "PooleKernelLinked::run_smp_percpu_runtime": {"rdmsr": 1, "wrmsr": 0},
         "PooleKernelLinked::arch::x86_64::observe_cpu_policy": {"rdmsr": 5, "wrmsr": 0},
         "PooleKernelLinked::arch::x86_64::observe_privilege_msr_policy": {"rdmsr": 12, "wrmsr": 0},
+        "PooleKernelLinked::arch::x86_64::run_scheduler_preemption_launcher": {"rdmsr": 6, "wrmsr": 0},
         "PooleKernelLinked::arch::x86_64::run_scheduler_context_switch_probe": {"rdmsr": 6, "wrmsr": 0},
         "poole_kernel_rust_entry": {"rdmsr": 3, "wrmsr": 2},
     }
@@ -300,7 +302,8 @@ def _linked_machine_audit(toolchain_root: Path, temporary_root: Path) -> tuple[d
         "pksmp3_linked_rdmsr_count": 3,
         "pksmp3_linked_wrmsr_count": 1,
         "pksched1_linked_rdmsr_count": 6,
-        "result": "pass_linked_privileged_instruction_scope_with_pkirq1_pksmp1_pksmp2_pksmp3_and_pksched1_isolation",
+        "pksched2_linked_rdmsr_count": 6,
+        "result": "pass_linked_privileged_instruction_scope_with_pkirq1_pksmp1_pksmp2_pksmp3_pksched1_and_pksched2_isolation",
     }
     return audit, tool
 

@@ -239,7 +239,9 @@
       "source_line_count": 227,
       "source_checkbox_count": 193,
       "added_requirement_ids": [
-        "ADD-N12-SCHED-FOUNDATION-001"
+        "ADD-N12-SCHED-FOUNDATION-001",
+        "ADD-N12-SCHED-PREEMPT-001",
+        "ADD-N12-SCHED-DEFERRED-001"
       ]
     },
     {
@@ -2982,6 +2984,26 @@
         "Cycle 142 PKSCHED1 scheduler and context-switch foundation",
         "master checklist sections 031-034",
         "PooleOS neutral-policy and no-authority-amplification requirements"
+      ]
+    },
+    {
+      "id": "ADD-N12-SCHED-PREEMPT-001",
+      "phase_id": "N12",
+      "requirement": "Integrate the bounded scheduler with an owned timer and wake/cancel interrupt path through a normalized interrupt frame, explicit deferred-reschedule state, exact task-stack ownership, deterministic quantum and higher-priority wakeup rules, balanced interrupt acknowledgements, transactional rollback, and complete cleanup while preserving strict no-live-AP, no-ring-3, no-address-space-switch, no-target, and no-production boundaries.",
+      "basis": [
+        "Cycle 143 PKSCHED2 BSP timer and wakeup preemption closeout",
+        "PKIRQ1 timer ownership and PKSCHED1 scheduler foundations",
+        "master checklist sections 031-034"
+      ]
+    },
+    {
+      "id": "ADD-N12-SCHED-DEFERRED-001",
+      "phase_id": "N12",
+      "requirement": "Implement bounded interrupt-deferred work and kernel-internal workers with queue ownership, duplicate suppression, cancellation, flush, recursion prevention, shutdown ordering, fault rollback, starvation limits, and reclamation-safe teardown before asynchronous kernel work can be used by drivers or services.",
+      "basis": [
+        "N12.3-N12.4 deferred reclamation and kernel-worker exit requirements",
+        "Cycle 143 PKSCHED2 intentionally leaves its bounded event queue drained synchronously",
+        "master checklist sections 031-034"
       ]
     },
     {

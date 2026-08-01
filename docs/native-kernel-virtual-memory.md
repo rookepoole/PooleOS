@@ -103,9 +103,9 @@ The Cycle 142 requalification records 117,846 mapped pages, eleven ranges, 12,91
 237 direct leaf tables, one direct directory, 243 total table pages, checksum
 `0xB57226C8B33601C0`, 367,433 physical table writes, 950,562 temporary-PTE
 writes and matching bootstrap invalidations, two CR3 writes, three local leaf
-invalidations, and one generation-retirement receipt. The 425,984-byte
-canonical kernel occupies a 124-page, 507,904-byte image, has 1,042 relocations,
-and SHA-256 `AFED4AF858404D83CD77215C118F8478C88E91BDDC0F0B1ABAC3C9324B6ED602`.
+invalidations, and one generation-retirement receipt. The 443,504-byte
+canonical kernel occupies a 136-page, 557,056-byte image, has 1,086 relocations,
+and SHA-256 `A5DE1DBD2ECA9243D90C2EAA2BEDCAC4B0FCC5E4A4779073E398C6722F30B943`.
 
 ## Remaining Boundary
 

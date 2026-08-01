@@ -431,7 +431,7 @@
     },
     {
       "path": "docs/native-kernel-entry.md",
-      "sha256": "910E1F0C02480C439CD74059B25C5374213764FB96EBBA3F7E85D7D8A3AD0B02",
+      "sha256": "C1BF9CBB31302B68D19FF75A6159E65F24DEC2A9BF8CB2497F4854026BDB4CC9",
       "byte_count": 4473,
       "line_count": 27
     },
@@ -485,19 +485,19 @@
     },
     {
       "path": "docs/native-kernel-privilege-msr-policy.md",
-      "sha256": "9188E39CFFD0F48A898B33568E16E5F3C6D6BC9632D4B830522DE7F4EA5B5F77",
-      "byte_count": 3892,
-      "line_count": 74
+      "sha256": "99A7D8BEFEC0C6F59513FE3E69269CDB499D1449F97AA6E89E766B04A6EC19DC",
+      "byte_count": 4051,
+      "line_count": 76
     },
     {
       "path": "docs/native-kernel-physical-memory.md",
-      "sha256": "53CA01CC28189DB4FAC348FE2A2ADFC33DA959FD2A997C06D3BC2FA2F75759C2",
+      "sha256": "C76387F81916988551DD78C459AC6DC46D8DBE9207CF5D4BD9855D081AC78443",
       "byte_count": 9115,
       "line_count": 185
     },
     {
       "path": "docs/native-kernel-virtual-memory.md",
-      "sha256": "4E676C984DB2DBBAD455485D5DFE9EEF38E66D7B5351F68DFEA7C37DEA94AD00",
+      "sha256": "EF841FDFD7837D02F2082B757B555AD8A998050A40EB07C0469B931EE139B4E6",
       "byte_count": 6716,
       "line_count": 120
     },
@@ -521,7 +521,7 @@
     },
     {
       "path": "docs/native-kernel-smp-ipi.md",
-      "sha256": "83E30C50E9C815665C5CB538AAE1F67E664FC7566F372FC733090F902193A9BF",
+      "sha256": "62F71E5A3506B27097D70B830F90AFDC6619CE71F705231F99CC79177967AA2E",
       "byte_count": 3533,
       "line_count": 15
     },
@@ -551,7 +551,7 @@
     },
     {
       "path": "docs/native-symbol-bundle.md",
-      "sha256": "0934904BA363BF6119D9FDE333B54AF4D85BE63B896BB520CA56C83B35E0BD6C",
+      "sha256": "2266E3587DBE11788281E2AABFD0A7A5E9BDCFE20E18D76866BE210A386CBAE2",
       "byte_count": 7701,
       "line_count": 118
     },
@@ -593,15 +593,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "8BC94383093DDBC80350C4922D1614A736B2FD20E1056FFDBA3C05A68C92CA60",
-      "byte_count": 43638,
-      "line_count": 520
+      "sha256": "1A1DF6B8A7FE6F48C7725EF816DE93B53492C66F220892B483333259869617FA",
+      "byte_count": 45385,
+      "line_count": 546
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "E5C63AF1F639D7CE872BEC53BCBD5ADEA10E810D807291DEE590529E2BE88373",
-      "byte_count": 306725,
-      "line_count": 1754
+      "sha256": "7905A3BA5AAD8864B82E502437AFEBFD69387DB4A74CD15C5E14B26727CC56DD",
+      "byte_count": 310028,
+      "line_count": 1764
     },
     {
       "path": "docs/publication-boundary.md",
@@ -617,9 +617,9 @@
     },
     {
       "path": "runs/pooleos_native_checklist_coverage.json",
-      "sha256": "95193CBDC5D33D859012CCCD23243CEBEBB40C8D22CABF868206B014E4302A0B",
-      "byte_count": 101522,
-      "line_count": 3183
+      "sha256": "4ACDA40AE51F654E6859FC0DB234476CF4B4C82EB8404245EA1EEB0F434ADE6D",
+      "byte_count": 103005,
+      "line_count": 3205
     },
     {
       "path": "runs/adr_ratification_readiness.json",
@@ -641,7 +641,7 @@
     },
     {
       "path": "runs/native_boot_config_readiness.json",
-      "sha256": "F0470CF6FB487EE614FD4CE2E8D725C54CE47DC19CAA0F60028F553281395083",
+      "sha256": "152061A08A6AB85ED139146A82A98596A9C890A7633F0E72266AD5EE38273FCA",
       "byte_count": 18223,
       "line_count": 615
     },
@@ -653,13 +653,13 @@
     },
     {
       "path": "runs/native_boot_trust_readiness.json",
-      "sha256": "ECD6833347393A368270AC30C28060501789E76194C63A49D0BA5AD29CAA9BD3",
+      "sha256": "C6CF662EB6247C30F20634EFCBAF6C972BEC808321D37ADB792AF3F678965FB7",
       "byte_count": 36618,
       "line_count": 1071
     },
     {
       "path": "runs/native_elf_loader_readiness.json",
-      "sha256": "1853D88E4944DBD6378CA7B7BAF8BBBBC2ED4844205D80B34FAA14B89AEB4A39",
+      "sha256": "59720C01F96C1A140FF0DF841BDC61DBBD627E773AD80436C40CE93A59D05E56",
       "byte_count": 36302,
       "line_count": 1166
     },
@@ -677,39 +677,39 @@
     },
     {
       "path": "runs/native_kernel_entry_readiness.json",
-      "sha256": "5654EE7A236853E4B75C4D6C76F7D32FCDCB582A7930997CD2C0109EC69F40ED",
-      "byte_count": 21827,
-      "line_count": 641
+      "sha256": "B1222F4D35E402AF83F0A13B4CE39B1DFDFCEA0ECC060E2305280A36C5CC64DF",
+      "byte_count": 22197,
+      "line_count": 651
     },
     {
       "path": "runs/native_kernel_load_readiness.json",
-      "sha256": "F99F5692AE3E779AC19998D7521B066F9DFC8A13C2EB60ADE3BC83840CF59264",
-      "byte_count": 189523,
+      "sha256": "34A937D248B7D62DE4D3F71D32A330BF5BEBCAF560876FFD667EA6FAA03D3051",
+      "byte_count": 189524,
       "line_count": 5351
     },
     {
       "path": "runs/native-kernel-revalidation-readiness.json",
-      "sha256": "F9B71B36E8CEDEC931182DBE16F09BA15579503058A4E00A254C6B0FFC085DBE",
+      "sha256": "3653C495B59C88DA15B6515FC7EC516400ED88D92015621968711C870A4D6FD4",
       "byte_count": 16446,
       "line_count": 472
     },
     {
       "path": "runs/native-kernel-transfer-readiness.json",
-      "sha256": "2591247F34F66D35682709D80DF69DF9FCFA525A64BC190924709C478AE5B659",
-      "byte_count": 167061,
-      "line_count": 4583
+      "sha256": "B87825DD4D80DC74C196B8FC400E6C343C83F08ECFACE9CB96E000A9536A7196",
+      "byte_count": 167472,
+      "line_count": 4593
     },
     {
       "path": "runs/native-kernel-trap-readiness.json",
-      "sha256": "B495D75D9B64C081E771EB7595ED1F57D91255A3E84630E2E6E37DB34EB29F43",
-      "byte_count": 457747,
-      "line_count": 11211
+      "sha256": "96120D15B554D0AD950A8A6FA43D8B2B5E7A6CC40C8AF3037962AE2C344ADE78",
+      "byte_count": 458160,
+      "line_count": 11221
     },
     {
       "path": "runs/native-kernel-cpu-policy-readiness.json",
-      "sha256": "A1EFAC8377379D35061A39AAF69D2CC5689969231D958AFDA74F5EBB0A657CDD",
-      "byte_count": 171087,
-      "line_count": 4600
+      "sha256": "9A0D3517D475370F2E3A92628680CCF806C528850569AD324AA81B0A410877B8",
+      "byte_count": 171498,
+      "line_count": 4610
     },
     {
       "path": "runs/native-kernel-errata-policy-readiness.json",
@@ -719,57 +719,57 @@
     },
     {
       "path": "runs/native-kernel-xstate-policy-readiness.json",
-      "sha256": "9B64C57045B0CBD5C8FACFCAD3F2E7653FF8BFBAC239D36D20839E736BB925B7",
-      "byte_count": 176269,
-      "line_count": 4806
+      "sha256": "788ABBB6D6975C47C656F5DED27DBB5CA26B3D138E3C17A061643F8354629F29",
+      "byte_count": 176680,
+      "line_count": 4816
     },
     {
       "path": "runs/native-kernel-xstate-exception-readiness.json",
-      "sha256": "BC547F173BD2C9FD6697138F5CB8896C0F52A3AF2CFA8AC596B997C57A1A7205",
-      "byte_count": 189361,
-      "line_count": 5188
+      "sha256": "E17C1DA394DB4821293587AA904F907723561A8FEE346897B7173CA35B994EC5",
+      "byte_count": 189718,
+      "line_count": 5195
     },
     {
       "path": "runs/native-kernel-privilege-msr-policy-readiness.json",
-      "sha256": "67EFA4580440FFD2A2115874AFB8A38004A02E8827D1F47B8352D1C8E47C284A",
-      "byte_count": 173991,
-      "line_count": 4709
+      "sha256": "7B54B5BA52543188920BEB3301066BE90CCE06F417450B7C2C2799DCF8842AA1",
+      "byte_count": 174585,
+      "line_count": 4724
     },
     {
       "path": "runs/native-kernel-physical-memory-readiness.json",
-      "sha256": "3D36682659BBB3DF58EC97D3326887BD996408DC683107258017EB460E375D9C",
-      "byte_count": 222079,
-      "line_count": 6263
+      "sha256": "D43C4A84974E85C18E08A28E2A32E72AF630B6018F3A8DAD4026FDF1A02F929B",
+      "byte_count": 222493,
+      "line_count": 6273
     },
     {
       "path": "runs/native-kernel-virtual-memory-readiness.json",
-      "sha256": "97AD88E7947D5E09F311B90457358E18E13FA08DA8D16CB8A874378C3E846FB5",
-      "byte_count": 190131,
-      "line_count": 5248
+      "sha256": "525E2770274B0EDD54160C3BEDE0A8D0F9C76D24E817CAAFD97C09033459421C",
+      "byte_count": 190536,
+      "line_count": 5258
     },
     {
       "path": "runs/native-kernel-interrupt-time-readiness.json",
-      "sha256": "E7A0090F1AA7B5CCBF913B0C994B6AF44EAFB3B704A8A3332D669A210979ABA1",
-      "byte_count": 183329,
-      "line_count": 5004
+      "sha256": "8FFE058774A13F9BCB7CC7F65B9099CFD00C4C9CE6A77C1671DB8A6F15225F47",
+      "byte_count": 183740,
+      "line_count": 5014
     },
     {
       "path": "runs/native-kernel-smp-first-ap-readiness.json",
-      "sha256": "EE97ACC51EEA725193D98DC65CD211C8B06CC57110C039DB7E1514F2198A834A",
-      "byte_count": 186448,
-      "line_count": 5101
+      "sha256": "ADFC4ADD5B3C2BB20B88462DAF6DA697C49310DD074892F931F1FC28CB13745C",
+      "byte_count": 186861,
+      "line_count": 5111
     },
     {
       "path": "runs/native-kernel-smp-percpu-runtime-readiness.json",
-      "sha256": "CD85D0B55E73F2C613E0593743B6C51080BC028751F04725D0837EBEE7FF476B",
-      "byte_count": 188446,
-      "line_count": 4996
+      "sha256": "59CABD45B305E76B46EAD9385955E6D131A8FDEF525B6CFD1379D9113C78F14C",
+      "byte_count": 188859,
+      "line_count": 5006
     },
     {
       "path": "runs/native-kernel-smp-ipi-readiness.json",
-      "sha256": "E1AE8D10580DE04B5B04D4E56A531D52346E959917B6C98A41019E1A9410631D",
-      "byte_count": 207082,
-      "line_count": 5674
+      "sha256": "A7343D0AE0260878D71A59167CFE1FE2A20CA0076CF1D98DEE5E91BF8EFBC72D",
+      "byte_count": 207493,
+      "line_count": 5684
     },
     {
       "path": "runs/native_microcode_readiness.json",
@@ -779,13 +779,13 @@
     },
     {
       "path": "runs/native_pooleboot_readiness.json",
-      "sha256": "E14988AC88016C6364597D4A3684604708F1A3CA18F8C4EC8B5B51E48392EBA5",
-      "byte_count": 186468,
+      "sha256": "BE11145D60CFAD68B949D43EB3D858E57FC30164A807B8A34C34B7BAF28100C4",
+      "byte_count": 186469,
       "line_count": 5256
     },
     {
       "path": "runs/native_policy_readiness.json",
-      "sha256": "58D7E6746AB5FA024DF5288CD34FD0D88F6E97BAE01E7E1ED8389C7AAB550FFB",
+      "sha256": "E1F8832D7AB4859CD946015CAD8E56F9A0A2ABF8B8402C99DD24BD70F13200A9",
       "byte_count": 22539,
       "line_count": 809
     },
@@ -797,13 +797,13 @@
     },
     {
       "path": "runs/native_symbol_readiness.json",
-      "sha256": "0847DDCE2E6AEBD6D8F4185A618C608D2CE6380BC9B0D162B916DA089151091C",
+      "sha256": "FDE8D6F8012C2AD89BB5FFBAA0A516E8100DC42BA3914D5BAEF39F9381138E5D",
       "byte_count": 39623,
       "line_count": 1371
     },
     {
       "path": "runs/native_system_manifest_readiness.json",
-      "sha256": "35AEA77B56B52FC96F0888BC26EACB1D3E186983F508F308C5A477E58DFBD059",
+      "sha256": "E0A979B15D20261C3CB23A583EF7684F5F786ACD6D04606135D437F35E2D9DEF",
       "byte_count": 24495,
       "line_count": 744
     },
@@ -929,7 +929,7 @@
     },
     {
       "path": "specs/native-boot-trust-contract.json",
-      "sha256": "6ED984DA29B9B9B7C1EFC15AB8D2E5EEDE4E90FC45CE74953EF5E21B7A4F1B19",
+      "sha256": "149F0EC118F5E52F3EF2A57A57C3D1F6521FEA7071C3D7AE93E748BCBBA9D49F",
       "byte_count": 10829,
       "line_count": 301
     },
@@ -1037,13 +1037,13 @@
     },
     {
       "path": "specs/native-kernel-entry-contract.json",
-      "sha256": "0DD625F2EA5F8950CCD0DCDF645C29F2144708230E0EF2BFEDBF88C09414E2C5",
+      "sha256": "EC8F109B723F044217B2DC858E88E6BF346AE6AE011F6E8C664A605173ED5B74",
       "byte_count": 10872,
       "line_count": 236
     },
     {
       "path": "specs/native-kernel-entry-contract.schema.json",
-      "sha256": "C481F1263DB5F975E474DD6C17AAAF91109527534CDF8F1719BBEE862E2D6638",
+      "sha256": "7D2532D81CA0A672CC899B0365FEB4724168BBD17E7B7D20B94DACB50326D031",
       "byte_count": 3952,
       "line_count": 87
     },
@@ -1205,7 +1205,7 @@
     },
     {
       "path": "tests/test_native_kernel_xstate_policy.py",
-      "sha256": "E5AF9369FE855BB7146CFEFBBA60AA3AD04D644F0C6E80D4083844D0442C2D10",
+      "sha256": "D78B09E5AE3A7BDD0A53567A7E295C986D794F562D4CB4BE78453F64954DE112",
       "byte_count": 6157,
       "line_count": 121
     },
@@ -1241,14 +1241,14 @@
     },
     {
       "path": "tests/test_native_kernel_xstate_exception.py",
-      "sha256": "63877337C37E169B2D91EC4CBFAF291501D5BC1B0210B86459EBB56B207C82F6",
+      "sha256": "49D49D470151CA87A67509097F7199ED15705B0F9AB52F7C9027D20959805D7D",
       "byte_count": 8274,
       "line_count": 162
     },
     {
       "path": "specs/native-kernel-privilege-msr-policy-contract.json",
-      "sha256": "54D66D9BD6BED1F9D3AB1F4FE67904BBA5E70A52E7F79848AFE7C6A342871E3E",
-      "byte_count": 10293,
+      "sha256": "D4113FAFBCFD1E32AC225348851279BD9FBF2FBD5DD8BBAB2CDFF060F88BC0AA",
+      "byte_count": 10357,
       "line_count": 209
     },
     {
@@ -1277,15 +1277,15 @@
     },
     {
       "path": "tools/qualify_native_kernel_privilege_msr_policy.py",
-      "sha256": "BE6B32BDA2687B4678AEC91562570DBAEB01B4E5F05A607BD815E37947FDCF55",
-      "byte_count": 26141,
-      "line_count": 528
+      "sha256": "F66C86476386D2A15430185C3D06F0850B2B93743DE9578D4C92702B3FB3ADAB",
+      "byte_count": 26378,
+      "line_count": 531
     },
     {
       "path": "tests/test_native_kernel_privilege_msr_policy.py",
-      "sha256": "DA94E333D0E949E698B404E474D3105342CCEDBC76E6E446AC3EF704EF55144B",
-      "byte_count": 5967,
-      "line_count": 113
+      "sha256": "5B418006D2E6E750B022A3C51654736125853FA3BDC0B98F4DAB46063A289921",
+      "byte_count": 6268,
+      "line_count": 120
     },
     {
       "path": "specs/native-kernel-physical-memory-contract.json",
@@ -1439,7 +1439,7 @@
     },
     {
       "path": "specs/native-policy-golden-vectors.json",
-      "sha256": "7EF6B42D2DEA7780984033F9CBF3A8EF381FACB429FAED848FF0B3342ABA76D3",
+      "sha256": "495BC78621D6C93E3671008E0F0D2DE730680DD22F034FD34EF81DB09DF234F2",
       "byte_count": 43996,
       "line_count": 61
     },
@@ -1499,7 +1499,7 @@
     },
     {
       "path": "specs/native-symbol-golden-vectors.json",
-      "sha256": "1BB65BD6A61E8135A0CFCD4ACF1FBA44B7C1F6CB7923CCEEB731563EBFF4475E",
+      "sha256": "A261B7039D6515D78DE77BEAA74F85CD8FEA09D3F0A2C46BEA224678E8F9EEBC",
       "byte_count": 9801,
       "line_count": 1
     },

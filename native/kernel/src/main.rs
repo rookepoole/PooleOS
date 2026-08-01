@@ -7,6 +7,7 @@ mod arch {
     pub mod x86_64;
 }
 
+use core::cell::UnsafeCell;
 use core::panic::PanicInfo;
 use core::ptr::{read_volatile, write_volatile};
 use core::sync::atomic::{AtomicU32, AtomicU64, Ordering};
@@ -38,6 +39,11 @@ use poolekernel::{
         ContextSwitchContract as SchedulerContextSwitchContract, CpuId as SchedulerCpuId,
         RawSpinLock as SchedulerRawSpinLock, Scheduler, TaskId as SchedulerTaskId,
         TaskState as SchedulerTaskState, validate_context_switch_contract,
+    },
+    scheduler_preempt::{
+        BspPreemption, ContextOwnership as SchedulerContextOwnership, DeferredEvent,
+        DeferredEventKind, InterruptFrameContract as SchedulerInterruptFrameContract,
+        RescheduleCause, validate_context_ownership as validate_scheduler_context_ownership,
     },
     smp::{self, MailboxSnapshot, ResourceLayout},
     smp_ipi::{
@@ -1159,6 +1165,106 @@ pksched1_fragment!(PKSCHED1_SWITCH, b"POOLEOS:KERNEL:SCHED-SWITCH PASS contract=
 pksched1_fragment!(PKSCHED1_CLEANUP, b"POOLEOS:KERNEL:SCHED-CLEANUP PASS contract=PKSCHED1 scheduler_lock_released=1 stack_bytes_cleared=32768 task_contexts_retired=2 queue_entries=0 running=0 blocked=0 dead=2\n");
 pksched1_fragment!(PKSCHED1_RESULT, b"POOLEOS:KERNEL:SCHED-RESULT PASS contract=PKSCHED1 profile=qemu64_bsp_cooperative core=1 hardware_switch=1 bsp=1 smp_dispatch=0 preemption=0 ring3=0 address_spaces=1 xstate_switch=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n");
 
+macro_rules! pksched2_fragment {
+    ($name:ident, $value:literal) => {
+        #[used]
+        #[unsafe(link_section = ".text.pksched2_literals")]
+        static $name: [u8; $value.len()] = *$value;
+    };
+}
+
+pksched2_fragment!(PKSCHED2_EARLY, b"POOLEOS:KERNEL:SCHED-PREEMPT-EARLY PASS contract=PKSCHED2 selector=16 parent_scheduler=PKSCHED1 parent_timer=PKIRQ1 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n");
+pksched2_fragment!(
+    PKSCHED2_DENIED,
+    b"POOLEOS:KERNEL:SCHED-PREEMPT-DENIED contract=PKSCHED2 reason="
+);
+pksched2_fragment!(
+    PKSCHED2_DENIED_TAIL,
+    b" rollback=fail_closed authority=0 actions=0 production=0 terminal=panic\n"
+);
+pksched2_fragment!(
+    PKSCHED2_ARM,
+    b"POOLEOS:KERNEL:SCHED-PREEMPT-ARM PASS contract=PKSCHED2 timer_vector=64 one_shot_count="
+);
+pksched2_fragment!(PKSCHED2_FREQUENCY, b" apic_ticks_per_second=");
+pksched2_fragment!(PKSCHED2_ARM_TAIL, b" quantum_ticks=2 tasks=4 deferred_capacity=8 events=3 stacks=4 stack_bytes=16384 ist=1 handler_if=0 interrupted_if=1\n");
+pksched2_fragment!(PKSCHED2_TRACE, b"POOLEOS:KERNEL:SCHED-PREEMPT-TRACE PASS contract=PKSCHED2 ticks=6 next_trace=0,1,2,0,3,3 causes=none,quantum,wake,block,wake,none events=signal:2@3,block@4,cancel:3@5 runtime_ticks=3,1,1,1 quantum_reschedules=1 wake_reschedules=2 block_reschedules=1 frame_switches=4\n");
+pksched2_fragment!(PKSCHED2_FRAME, b"POOLEOS:KERNEL:SCHED-PREEMPT-FRAME PASS contract=PKSCHED2 frames_saved=6 frames_restored=4 eois=6 nested=0 lock_contention=0 task_entries=1,1,1,1 launcher_transitions=2 same_cr3=1 fs_gs_unchanged=1 stack_ownership=exact\n");
+pksched2_fragment!(PKSCHED2_CLEANUP, b"POOLEOS:KERNEL:SCHED-PREEMPT-CLEANUP PASS contract=PKSCHED2 timer_masked=1 controller_retired=1 contexts_cleared=4 stack_bytes_cleared=65536 tasks_dead=4 queue_entries=0 running=0 blocked=0 lock_released=1 apic_restored=1 pic_restored=1 hpet_restored=1 mmio_revoked=1\n");
+pksched2_fragment!(PKSCHED2_RESULT, b"POOLEOS:KERNEL:SCHED-PREEMPT-RESULT PASS contract=PKSCHED2 profile=qemu64_bsp_interrupt_return preemption=timer_and_wakeup bsp=1 ap_dispatch=0 ring3=0 address_spaces=1 xstate_switch=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n");
+
+struct SchedulerPreemptionRuntimeCell(UnsafeCell<Option<BspPreemption>>);
+
+// SAFETY: selector 16 is BSP-only; IF and the scheduler lock serialize every access.
+unsafe impl Sync for SchedulerPreemptionRuntimeCell {}
+
+impl SchedulerPreemptionRuntimeCell {
+    const fn new() -> Self {
+        Self(UnsafeCell::new(None))
+    }
+
+    unsafe fn install(&self, controller: BspPreemption) -> Result<(), ()> {
+        // SAFETY: the caller holds exclusive pre-launch ownership with IF clear.
+        let slot = unsafe { &mut *self.0.get() };
+        if slot.is_some() {
+            return Err(());
+        }
+        *slot = Some(controller);
+        Ok(())
+    }
+
+    unsafe fn with_mut<R>(&self, operation: impl FnOnce(&mut BspPreemption) -> R) -> Option<R> {
+        // SAFETY: the interrupt gate cleared IF and the caller holds the scheduler lock.
+        unsafe { (&mut *self.0.get()).as_mut().map(operation) }
+    }
+
+    unsafe fn take(&self) -> Option<BspPreemption> {
+        // SAFETY: the timer is masked and IF is clear after bounded launcher return.
+        unsafe { (&mut *self.0.get()).take() }
+    }
+}
+
+struct SchedulerPreemptionContexts(UnsafeCell<[Option<TrapFrame>; 4]>);
+
+// SAFETY: the same selector-16 BSP/IF/lock protocol serializes every frame access.
+unsafe impl Sync for SchedulerPreemptionContexts {}
+
+impl SchedulerPreemptionContexts {
+    const fn new() -> Self {
+        Self(UnsafeCell::new([None; 4]))
+    }
+
+    unsafe fn install(&self, contexts: [TrapFrame; 4]) {
+        // SAFETY: installation occurs once before timer delivery is armed.
+        unsafe { *self.0.get() = contexts.map(Some) };
+    }
+
+    unsafe fn save(&self, task: usize, frame: TrapFrame) -> Result<(), ()> {
+        if task >= 4 {
+            return Err(());
+        }
+        // SAFETY: the interrupt handler owns this task's stopped context.
+        unsafe { (*self.0.get())[task] = Some(frame) };
+        Ok(())
+    }
+
+    unsafe fn load(&self, task: usize) -> Option<TrapFrame> {
+        if task >= 4 {
+            return None;
+        }
+        // SAFETY: the scheduler selected this stopped context while holding the lock.
+        unsafe { (*self.0.get())[task] }
+    }
+
+    unsafe fn clear(&self) -> usize {
+        // SAFETY: no task context remains runnable after controller teardown.
+        let contexts = unsafe { &mut *self.0.get() };
+        let count = contexts.iter().filter(|value| value.is_some()).count();
+        *contexts = [None; 4];
+        count
+    }
+}
+
 static EARLY_RING: EarlyRing = EarlyRing::new();
 static PANIC_STATE: PanicState = PanicState::new();
 static ENTRY_COUNT: AtomicU32 = AtomicU32::new(0);
@@ -1179,6 +1285,13 @@ static IRQ_SPURIOUS_COUNT: AtomicU32 = AtomicU32::new(0);
 static SMP_IPI_FAILURE_STAGE: AtomicU32 = AtomicU32::new(0);
 static SMP_IPI_FAILURE_DETAIL: AtomicU64 = AtomicU64::new(0);
 static SCHEDULER_SWITCH_LOCK: SchedulerRawSpinLock = SchedulerRawSpinLock::new();
+static SCHEDULER_PREEMPT_RUNTIME: SchedulerPreemptionRuntimeCell =
+    SchedulerPreemptionRuntimeCell::new();
+static SCHEDULER_PREEMPT_CONTEXTS: SchedulerPreemptionContexts = SchedulerPreemptionContexts::new();
+static SCHEDULER_PREEMPT_TIMER_COUNT: AtomicU32 = AtomicU32::new(0);
+static SCHEDULER_PREEMPT_FRAME_SWITCHES: AtomicU32 = AtomicU32::new(0);
+#[unsafe(no_mangle)]
+static poole_scheduler_preempt_done: AtomicU32 = AtomicU32::new(0);
 
 core::arch::global_asm!(
     r#"
@@ -5799,6 +5912,7 @@ extern "C" fn poole_kernel_emergency_panic(code: u32) -> ! {
         0x1015 => PanicCode::SmpPerCpuRuntime,
         0x1016 => PanicCode::SmpIpi,
         0x1017 => PanicCode::Scheduler,
+        0x1018 => PanicCode::SchedulerPreempt,
         _ => PanicCode::UnexpectedReturn,
     };
     let disposition = PANIC_STATE.begin(code);
@@ -5917,6 +6031,14 @@ extern "C" fn poole_kernel_rust_entry(
             ring: &EARLY_RING,
         });
         logger.write_bytes(&PKSCHED1_EARLY);
+    }
+    if trap_scenario == DevelopmentTrapScenario::SchedulerPreempt {
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        logger.write_bytes(&PKSCHED2_EARLY);
     }
 
     if let Err(error) = validate_entry_envelope(handoff_address, handoff_length, magic, stack_top) {
@@ -6851,21 +6973,40 @@ extern "C" fn poole_kernel_rust_entry(
         halt_forever()
     }
 
-    if trap_scenario == DevelopmentTrapScenario::InterruptTime {
+    if matches!(
+        trap_scenario,
+        DevelopmentTrapScenario::InterruptTime | DevelopmentTrapScenario::SchedulerPreempt
+    ) {
         let mut logger = EarlyLogger::new(BootSink {
             serial: &mut serial,
             debugcon: &mut debugcon,
             ring: &EARLY_RING,
         });
+        let scheduler_preempt = trap_scenario == DevelopmentTrapScenario::SchedulerPreempt;
+        let failure_head: &[u8] = if scheduler_preempt {
+            &PKSCHED2_DENIED
+        } else {
+            &PKIRQ_DENIED
+        };
+        let failure_tail: &[u8] = if scheduler_preempt {
+            &PKSCHED2_DENIED_TAIL
+        } else {
+            &PKIRQ_DENIED_TAIL
+        };
+        let failure_panic = if scheduler_preempt {
+            PanicCode::SchedulerPreempt
+        } else {
+            PanicCode::InterruptTime
+        };
         macro_rules! irq_try {
             ($operation:expr) => {
                 match $operation {
                     Ok(value) => value,
                     Err(error) => {
-                        logger.write_bytes(&PKIRQ_DENIED);
+                        logger.write_bytes(failure_head);
                         logger.write_str(error.label());
-                        logger.write_bytes(&PKIRQ_DENIED_TAIL);
-                        poole_kernel_emergency_panic(PanicCode::InterruptTime as u32)
+                        logger.write_bytes(failure_tail);
+                        poole_kernel_emergency_panic(failure_panic as u32)
                     }
                 }
             };
@@ -6873,10 +7014,10 @@ extern "C" fn poole_kernel_rust_entry(
         macro_rules! irq_require {
             ($condition:expr, $error:expr) => {
                 if !$condition {
-                    logger.write_bytes(&PKIRQ_DENIED);
+                    logger.write_bytes(failure_head);
                     logger.write_str($error.label());
-                    logger.write_bytes(&PKIRQ_DENIED_TAIL);
-                    poole_kernel_emergency_panic(PanicCode::InterruptTime as u32)
+                    logger.write_bytes(failure_tail);
+                    poole_kernel_emergency_panic(failure_panic as u32)
                 }
             };
         }
@@ -6886,20 +7027,20 @@ extern "C" fn poole_kernel_rust_entry(
         let mut page_access = match BootstrapTableMemory::new(observed_cr3, physical_bits) {
             Ok(value) => value,
             Err(_) => {
-                logger.write_bytes(&PKIRQ_DENIED);
+                logger.write_bytes(failure_head);
                 logger.write_str(interrupt_time::Error::PhysicalAccess.label());
-                logger.write_bytes(&PKIRQ_DENIED_TAIL);
-                poole_kernel_emergency_panic(PanicCode::InterruptTime as u32)
+                logger.write_bytes(failure_tail);
+                poole_kernel_emergency_panic(failure_panic as u32)
             }
         };
         let memory_proof =
             match run_physical_memory_profile(&decoded, validated.core, &mut page_access) {
                 Ok(value) => value,
                 Err(_) => {
-                    logger.write_bytes(&PKIRQ_DENIED);
+                    logger.write_bytes(failure_head);
                     logger.write_str(interrupt_time::Error::PhysicalAccess.label());
-                    logger.write_bytes(&PKIRQ_DENIED_TAIL);
-                    poole_kernel_emergency_panic(PanicCode::InterruptTime as u32)
+                    logger.write_bytes(failure_tail);
+                    poole_kernel_emergency_panic(failure_panic as u32)
                 }
             };
         let acpi = memory_proof.acpi_snapshot;
@@ -6967,10 +7108,10 @@ extern "C" fn poole_kernel_rust_entry(
             match page_access.install_uncached_mmio(apic_physical, hpet_page) {
                 Ok(value) => value,
                 Err(_) => {
-                    logger.write_bytes(&PKIRQ_DENIED);
+                    logger.write_bytes(failure_head);
                     logger.write_str(interrupt_time::Error::PhysicalAccess.label());
-                    logger.write_bytes(&PKIRQ_DENIED_TAIL);
-                    poole_kernel_emergency_panic(PanicCode::InterruptTime as u32)
+                    logger.write_bytes(failure_tail);
+                    poole_kernel_emergency_panic(failure_panic as u32)
                 }
             };
         let hpet_virtual = irq_try!(
@@ -7014,10 +7155,10 @@ extern "C" fn poole_kernel_rust_entry(
             match unsafe { arch::x86_64::mask_legacy_pic() } {
                 Ok(value) => Some(value),
                 Err(()) => {
-                    logger.write_bytes(&PKIRQ_DENIED);
+                    logger.write_bytes(failure_head);
                     logger.write_str(interrupt_time::Error::PhysicalAccess.label());
-                    logger.write_bytes(&PKIRQ_DENIED_TAIL);
-                    poole_kernel_emergency_panic(PanicCode::InterruptTime as u32)
+                    logger.write_bytes(failure_tail);
+                    poole_kernel_emergency_panic(failure_panic as u32)
                 }
             }
         } else {
@@ -7128,17 +7269,202 @@ extern "C" fn poole_kernel_rust_entry(
             monotonic_start,
             max_sample_delta,
         ));
-        for expected in 1..=8u32 {
+        let preempt_evidence = if scheduler_preempt {
+            macro_rules! sched_try {
+                ($operation:expr, $reason:literal) => {
+                    match $operation {
+                        Ok(value) => value,
+                        Err(_) => {
+                            logger.write_bytes(&PKSCHED2_DENIED);
+                            logger.write_str($reason);
+                            logger.write_bytes(&PKSCHED2_DENIED_TAIL);
+                            poole_kernel_emergency_panic(PanicCode::SchedulerPreempt as u32)
+                        }
+                    }
+                };
+            }
+            macro_rules! sched_require {
+                ($condition:expr, $reason:literal) => {
+                    if !$condition {
+                        logger.write_bytes(&PKSCHED2_DENIED);
+                        logger.write_str($reason);
+                        logger.write_bytes(&PKSCHED2_DENIED_TAIL);
+                        poole_kernel_emergency_panic(PanicCode::SchedulerPreempt as u32)
+                    }
+                };
+            }
+
+            let scheduler_cpu = sched_try!(SchedulerCpuId::new(0), "cpu");
+            let mut scheduler = sched_try!(Scheduler::new(1), "scheduler_init");
+            let task_a = sched_try!(scheduler.create_task(0, 1, 10, 1), "task_a");
+            let task_b = sched_try!(scheduler.create_task(1, 1, 10, 1), "task_b");
+            let signal_task = sched_try!(scheduler.create_task(2, 1, 30, 1), "signal_task");
+            let cancel_task = sched_try!(scheduler.create_task(3, 1, 25, 1), "cancel_task");
+            sched_try!(
+                scheduler.activate(signal_task, scheduler_cpu),
+                "signal_activate"
+            );
+            sched_require!(
+                sched_try!(scheduler.dispatch(scheduler_cpu), "signal_dispatch") == signal_task,
+                "signal_dispatch_identity"
+            );
+            sched_try!(scheduler.block_current(scheduler_cpu), "signal_block");
+            sched_try!(
+                scheduler.activate(cancel_task, scheduler_cpu),
+                "cancel_activate"
+            );
+            sched_require!(
+                sched_try!(scheduler.dispatch(scheduler_cpu), "cancel_dispatch") == cancel_task,
+                "cancel_dispatch_identity"
+            );
+            sched_try!(scheduler.block_current(scheduler_cpu), "cancel_block");
+            sched_try!(scheduler.activate(task_a, scheduler_cpu), "task_a_activate");
+            sched_try!(scheduler.activate(task_b, scheduler_cpu), "task_b_activate");
+            sched_require!(
+                sched_try!(scheduler.dispatch(scheduler_cpu), "task_a_dispatch") == task_a,
+                "task_a_dispatch_identity"
+            );
+            let mut controller = sched_try!(
+                BspPreemption::new(scheduler, scheduler_cpu, 2),
+                "controller_init"
+            );
+            sched_try!(
+                controller.queue_event(DeferredEvent {
+                    due_tick: 3,
+                    kind: DeferredEventKind::Signal(signal_task),
+                }),
+                "signal_event"
+            );
+            sched_try!(
+                controller.queue_event(DeferredEvent {
+                    due_tick: 4,
+                    kind: DeferredEventKind::BlockCurrent,
+                }),
+                "block_event"
+            );
+            sched_try!(
+                controller.queue_event(DeferredEvent {
+                    due_tick: 5,
+                    kind: DeferredEventKind::Cancel(cancel_task),
+                }),
+                "cancel_event"
+            );
+            let contexts = sched_try!(
+                arch::x86_64::prepare_scheduler_preemption_contexts(stack_top as u64),
+                "context_prepare"
+            );
+            // SAFETY: selector 16 has exclusive BSP ownership before timer delivery starts.
+            sched_require!(
+                unsafe { SCHEDULER_PREEMPT_RUNTIME.install(controller) }.is_ok(),
+                "controller_install"
+            );
+            // SAFETY: every prepared frame is stack- and entry-bound by the arch helper.
+            unsafe { SCHEDULER_PREEMPT_CONTEXTS.install(contexts) };
+            SCHEDULER_PREEMPT_TIMER_COUNT.store(one_shot_count, Ordering::Release);
+            SCHEDULER_PREEMPT_FRAME_SWITCHES.store(0, Ordering::Release);
+            poole_scheduler_preempt_done.store(0, Ordering::Release);
+
+            logger.write_bytes(&PKSCHED2_ARM);
+            logger.write_decimal_u64(u64::from(one_shot_count));
+            logger.write_bytes(&PKSCHED2_FREQUENCY);
+            logger.write_decimal_u64(calibration.apic_ticks_per_second);
+            logger.write_bytes(&PKSCHED2_ARM_TAIL);
+
             irq_try!(hardware.apic_write(0x320, u32::from(TIMER_VECTOR)));
             irq_try!(hardware.apic_write(0x380, one_shot_count));
-            // SAFETY: IDT, UC APIC mapping, vector ownership, and one-shot timer are live.
-            unsafe { arch::x86_64::enable_interrupts_halt_disable() };
+            let hardware_proof = match arch::x86_64::run_scheduler_preemption_launcher() {
+                Ok(value) => value,
+                Err(error) => {
+                    logger.write_bytes(&PKSCHED2_DENIED);
+                    logger.write_str(error.label());
+                    logger.write_bytes(&PKSCHED2_DENIED_TAIL);
+                    poole_kernel_emergency_panic(PanicCode::SchedulerPreempt as u32)
+                }
+            };
             irq_try!(hardware.apic_write(0x320, u32::from(TIMER_VECTOR) | (1 << 16)));
-            irq_require!(
-                IRQ_TIMER_DELIVERIES.load(Ordering::Acquire) == expected,
-                interrupt_time::Error::TimerCount
+            sched_require!(
+                poole_scheduler_preempt_done.load(Ordering::Acquire) == 1,
+                "terminal_tick"
             );
-        }
+            // SAFETY: the launcher returned with IF clear and the timer is masked.
+            let mut controller = unsafe { SCHEDULER_PREEMPT_RUNTIME.take() }.unwrap_or_else(|| {
+                poole_kernel_emergency_panic(PanicCode::SchedulerPreempt as u32)
+            });
+            let summary = controller.summary();
+            sched_require!(
+                summary.timer_ticks == 6
+                    && summary.events_processed == 3
+                    && summary.signal_events == 1
+                    && summary.cancel_events == 1
+                    && summary.timeout_events == 0
+                    && summary.block_events == 1
+                    && summary.quantum_reschedules == 1
+                    && summary.wake_reschedules == 2
+                    && summary.block_reschedules == 1
+                    && summary.context_switches == 4
+                    && summary.rollback_count == 0
+                    && summary.pending_events == 0
+                    && summary.scheduler.dispatch_count == 7
+                    && summary.scheduler.runnable_count == 2
+                    && summary.scheduler.running_count == 1
+                    && summary.scheduler.blocked_count == 1,
+                "summary"
+            );
+            let expected_runtime = [3, 1, 1, 1];
+            for (task, ticks) in [task_a, task_b, signal_task, cancel_task]
+                .into_iter()
+                .zip(expected_runtime)
+            {
+                sched_require!(
+                    sched_try!(controller.scheduler().task_snapshot(task), "task_snapshot")
+                        .runtime_ticks
+                        == ticks,
+                    "runtime_accounting"
+                );
+            }
+            for task in [task_a, task_b, signal_task, cancel_task] {
+                sched_try!(controller.scheduler_mut().teardown(task), "task_teardown");
+            }
+            let cleanup = controller.scheduler().summary();
+            sched_require!(
+                cleanup.dead_count == 4
+                    && cleanup.runnable_count == 0
+                    && cleanup.running_count == 0
+                    && cleanup.blocked_count == 0
+                    && cleanup.teardown_count == 4,
+                "scheduler_cleanup"
+            );
+            // SAFETY: all scheduler task ownership is retired before dropping saved frames.
+            let contexts_cleared = unsafe { SCHEDULER_PREEMPT_CONTEXTS.clear() };
+            sched_require!(contexts_cleared == 4, "context_cleanup");
+            let hardware_proof = sched_try!(
+                arch::x86_64::clear_scheduler_preemption_stacks(hardware_proof),
+                "stack_cleanup"
+            );
+            sched_require!(
+                SCHEDULER_SWITCH_LOCK.owner() == 0
+                    && hardware_proof.task_entry_count == [1, 1, 1, 1]
+                    && hardware_proof.launcher_transition_count == 2
+                    && hardware_proof.stack_bytes_cleared == 65_536,
+                "hardware_cleanup"
+            );
+            SCHEDULER_PREEMPT_TIMER_COUNT.store(0, Ordering::Release);
+            poole_scheduler_preempt_done.store(0, Ordering::Release);
+            Some((summary, cleanup, hardware_proof, contexts_cleared))
+        } else {
+            for expected in 1..=8u32 {
+                irq_try!(hardware.apic_write(0x320, u32::from(TIMER_VECTOR)));
+                irq_try!(hardware.apic_write(0x380, one_shot_count));
+                // SAFETY: IDT, UC APIC mapping, vector ownership, and one-shot timer are live.
+                unsafe { arch::x86_64::enable_interrupts_halt_disable() };
+                irq_try!(hardware.apic_write(0x320, u32::from(TIMER_VECTOR) | (1 << 16)));
+                irq_require!(
+                    IRQ_TIMER_DELIVERIES.load(Ordering::Acquire) == expected,
+                    interrupt_time::Error::TimerCount
+                );
+            }
+            None
+        };
         let monotonic_end = irq_try!(hardware.hpet_read(0xf0)) & counter_mask;
         let monotonic_nanoseconds = irq_try!(clock.sample(monotonic_end));
         let timer_deliveries = IRQ_TIMER_DELIVERIES.load(Ordering::Acquire);
@@ -7147,7 +7473,7 @@ extern "C" fn poole_kernel_rust_entry(
         let spurious_count = IRQ_SPURIOUS_COUNT.load(Ordering::Acquire);
         let in_service_after = irq_try!(hardware.in_service_count());
         irq_require!(
-            timer_deliveries == 8
+            timer_deliveries == if scheduler_preempt { 6 } else { 8 }
                 && eoi_count == timer_deliveries
                 && error_count == 0
                 && spurious_count == 0
@@ -7172,10 +7498,10 @@ extern "C" fn poole_kernel_rust_entry(
         if let Some(masks) = pic_masks {
             // SAFETY: IF remains clear and PKIRQ1 restores the exact observed masks.
             if unsafe { arch::x86_64::restore_legacy_pic(masks) }.is_err() {
-                logger.write_bytes(&PKIRQ_DENIED);
+                logger.write_bytes(failure_head);
                 logger.write_str(interrupt_time::Error::PhysicalAccess.label());
-                logger.write_bytes(&PKIRQ_DENIED_TAIL);
-                poole_kernel_emergency_panic(PanicCode::InterruptTime as u32)
+                logger.write_bytes(failure_tail);
+                poole_kernel_emergency_panic(failure_panic as u32)
             }
         }
         if apic_msr_writes != 0 {
@@ -7191,10 +7517,37 @@ extern "C" fn poole_kernel_rust_entry(
         if page_access.uninstall_uncached_mmio().is_err()
             || TableMemory::finish(&mut page_access).is_err()
         {
-            logger.write_bytes(&PKIRQ_DENIED);
+            logger.write_bytes(failure_head);
             logger.write_str(interrupt_time::Error::PhysicalAccess.label());
-            logger.write_bytes(&PKIRQ_DENIED_TAIL);
-            poole_kernel_emergency_panic(PanicCode::InterruptTime as u32)
+            logger.write_bytes(failure_tail);
+            poole_kernel_emergency_panic(failure_panic as u32)
+        }
+
+        if let Some((summary, cleanup, hardware_proof, contexts_cleared)) = preempt_evidence {
+            if timer_deliveries != 6
+                || eoi_count != 6
+                || error_count != 0
+                || spurious_count != 0
+                || in_service_after != 0
+                || SCHEDULER_PREEMPT_FRAME_SWITCHES.load(Ordering::Acquire) != 4
+                || summary.timer_ticks != 6
+                || cleanup.dead_count != 4
+                || hardware_proof.task_entry_count != [1, 1, 1, 1]
+                || !hardware_proof.same_cr3
+                || !hardware_proof.fs_gs_unchanged
+                || !hardware_proof.returned_with_interrupts_disabled
+                || contexts_cleared != 4
+            {
+                logger.write_bytes(&PKSCHED2_DENIED);
+                logger.write_str("final_evidence");
+                logger.write_bytes(&PKSCHED2_DENIED_TAIL);
+                poole_kernel_emergency_panic(PanicCode::SchedulerPreempt as u32)
+            }
+            logger.write_bytes(&PKSCHED2_TRACE);
+            logger.write_bytes(&PKSCHED2_FRAME);
+            logger.write_bytes(&PKSCHED2_CLEANUP);
+            logger.write_bytes(&PKSCHED2_RESULT);
+            halt_forever()
         }
 
         logger.write_bytes(&PKIRQ_ACPI);
@@ -8419,7 +8772,147 @@ extern "C" fn poole_kernel_rust_entry(
         DevelopmentTrapScenario::Scheduler => {
             poole_kernel_emergency_panic(PanicCode::Scheduler as u32)
         }
+        DevelopmentTrapScenario::SchedulerPreempt => {
+            poole_kernel_emergency_panic(PanicCode::SchedulerPreempt as u32)
+        }
     }
+}
+
+fn dispatch_scheduler_preemption(frame: &mut TrapFrame, depth: u32) {
+    if SCHEDULER_SWITCH_LOCK.lock_bounded(2, 1).is_err() {
+        poole_kernel_emergency_panic(PanicCode::SchedulerPreempt as u32);
+    }
+    let ist_bottom = IST1_BOTTOM.load(Ordering::Acquire);
+    let ist_top = IST1_TOP.load(Ordering::Acquire);
+    let handler_rsp = frame as *const TrapFrame as u64;
+    let frame_contract = SchedulerInterruptFrameContract {
+        depth,
+        vector: frame.vector,
+        error_code: frame.error_code,
+        code_selector: frame.code_selector,
+        data_selector: frame.data_selector,
+        interrupted_rflags: frame.rflags,
+        handler_interrupts_disabled: arch::x86_64::read_rflags() & (1 << 9) == 0,
+        scheduler_lock_held: SCHEDULER_SWITCH_LOCK.owner() == 2,
+        handler_rsp,
+        frame_bytes: core::mem::size_of::<TrapFrame>() as u64,
+        ist_bottom,
+        ist_top,
+    };
+    let operation = unsafe {
+        // SAFETY: the interrupt gate cleared IF and owner token 2 serializes the runtime cell.
+        SCHEDULER_PREEMPT_RUNTIME.with_mut(|controller| {
+            let current = controller
+                .scheduler()
+                .current(SchedulerCpuId::new(0).map_err(|_| ())?)
+                .map_err(|_| ())?
+                .ok_or(())?;
+            let outgoing = current.index();
+            if !arch::x86_64::scheduler_preemption_context_valid(outgoing, frame) {
+                return Err(());
+            }
+            // SAFETY: the interrupted task is stopped on IST1 and owns this complete frame.
+            SCHEDULER_PREEMPT_CONTEXTS
+                .save(outgoing, *frame)
+                .map_err(|_| ())?;
+            let outcome = controller.handle_timer(&frame_contract).map_err(|_| ())?;
+            Ok((outcome, outgoing))
+        })
+    };
+    let (outcome, outgoing) = match operation {
+        Some(Ok(value)) => value,
+        _ => poole_kernel_emergency_panic(PanicCode::SchedulerPreempt as u32),
+    };
+    let expected_next = [0usize, 1, 2, 0, 3, 3];
+    let expected_cause = [
+        RescheduleCause::None,
+        RescheduleCause::QuantumExpired,
+        RescheduleCause::HigherPriorityWake,
+        RescheduleCause::CurrentBlocked,
+        RescheduleCause::HigherPriorityWake,
+        RescheduleCause::None,
+    ];
+    let expected_events = [0u8, 0, 1, 1, 1, 0];
+    let tick_index = outcome
+        .tick
+        .checked_sub(1)
+        .and_then(|value| usize::try_from(value).ok())
+        .filter(|value| *value < expected_next.len())
+        .unwrap_or_else(|| poole_kernel_emergency_panic(PanicCode::SchedulerPreempt as u32));
+    let incoming_task = outcome.next.index();
+    let expected_switch = outgoing != expected_next[tick_index];
+    if incoming_task != expected_next[tick_index]
+        || outcome.cause != expected_cause[tick_index]
+        || outcome.events_processed != expected_events[tick_index]
+        || outcome.context_switch_required != expected_switch
+        || outcome.previous.index() != outgoing
+    {
+        poole_kernel_emergency_panic(PanicCode::SchedulerPreempt as u32);
+    }
+
+    let incoming = if outcome.context_switch_required {
+        let value = unsafe {
+            // SAFETY: the scheduler selected this stopped or initialized task context.
+            SCHEDULER_PREEMPT_CONTEXTS.load(incoming_task)
+        }
+        .unwrap_or_else(|| poole_kernel_emergency_panic(PanicCode::SchedulerPreempt as u32));
+        if !arch::x86_64::scheduler_preemption_context_valid(incoming_task, &value) {
+            poole_kernel_emergency_panic(PanicCode::SchedulerPreempt as u32);
+        }
+        let (outgoing_bottom, outgoing_top) =
+            arch::x86_64::scheduler_preemption_stack_bounds(outgoing).unwrap_or_else(|| {
+                poole_kernel_emergency_panic(PanicCode::SchedulerPreempt as u32)
+            });
+        let (incoming_bottom, incoming_top) =
+            arch::x86_64::scheduler_preemption_stack_bounds(incoming_task).unwrap_or_else(|| {
+                poole_kernel_emergency_panic(PanicCode::SchedulerPreempt as u32)
+            });
+        if validate_scheduler_context_ownership(&SchedulerContextOwnership {
+            outgoing_rsp: frame.rsp,
+            outgoing_bottom,
+            outgoing_top,
+            incoming_rsp: value.rsp,
+            incoming_bottom,
+            incoming_top,
+            stack_alignment: 16,
+        })
+        .is_err()
+        {
+            poole_kernel_emergency_panic(PanicCode::SchedulerPreempt as u32);
+        }
+        Some(value)
+    } else {
+        None
+    };
+
+    let apic = IRQ_APIC_VIRTUAL.load(Ordering::Acquire);
+    let timer_count = SCHEDULER_PREEMPT_TIMER_COUNT.load(Ordering::Acquire);
+    if apic == 0 || timer_count == 0 {
+        poole_kernel_emergency_panic(PanicCode::SchedulerPreempt as u32);
+    }
+    let increment = |counter: &AtomicU32| {
+        if counter.fetch_add(1, Ordering::AcqRel) == u32::MAX {
+            poole_kernel_emergency_panic(PanicCode::SchedulerPreempt as u32);
+        }
+    };
+    increment(&IRQ_TIMER_DELIVERIES);
+    // SAFETY: selector 16 retains the guarded UC local-APIC mapping until final rollback.
+    unsafe { write_volatile((apic + 0xb0) as usize as *mut u32, 0) };
+    increment(&IRQ_EOI_COUNT);
+    if let Some(value) = incoming {
+        *frame = value;
+        increment(&SCHEDULER_PREEMPT_FRAME_SWITCHES);
+    }
+    if outcome.tick == 6 {
+        poole_scheduler_preempt_done.store(1, Ordering::Release);
+    } else {
+        // SAFETY: the LVT timer remains in one-shot mode and IF is still clear.
+        unsafe { write_volatile((apic + 0x380) as usize as *mut u32, timer_count) };
+    }
+    if SCHEDULER_SWITCH_LOCK.unlock(2).is_err() {
+        poole_kernel_emergency_panic(PanicCode::SchedulerPreempt as u32);
+    }
+    TRAP_DEPTH.store(0, Ordering::Release);
 }
 
 fn dispatch_interrupt_time(frame: &TrapFrame, depth: u32) {
@@ -8486,6 +8979,10 @@ extern "C" fn poole_kernel_trap_dispatch(frame_pointer: *mut TrapFrame) {
         .unwrap_or_else(|| poole_kernel_emergency_panic(PanicCode::TrapContract as u32));
     if scenario == DevelopmentTrapScenario::XstateException {
         dispatch_xstate_exception(frame, depth);
+        return;
+    }
+    if scenario == DevelopmentTrapScenario::SchedulerPreempt {
+        dispatch_scheduler_preemption(frame, depth);
         return;
     }
     if scenario == DevelopmentTrapScenario::InterruptTime {

@@ -62,11 +62,13 @@ This is not syscall entry, `SWAPGS`, per-thread FS/GS ownership, per-CPU
 `TSC_AUX`, a machine-check handler, MCA recovery, PMU ownership, AP state,
 target-hardware qualification, user mode, release, or production evidence.
 PKMSR1 executes zero MSR or control writes. The shared linked kernel contains
-31 `RDMSR` sites: twenty in the established CPU/entry policy paths, one each in
+37 `RDMSR` sites: twenty in the established CPU/entry policy paths, one each in
 the separately selected PKSMP1 and PKSMP2 lifecycles, and three isolated to the
 selector-14 PKSMP5 protected-mode trampoline, long-mode trampoline, and BSP
 transaction. Six more are isolated to the PKSCHED1 live context probe, which
 observes FS base, GS base, and kernel GS base before and after switching.
+Six more are isolated to the PKSCHED2 preemption launcher, which performs the
+same before-and-after FS/GS observation around the exact interrupt-frame switch.
 It contains two typed `IA32_APIC_BASE` `WRMSR` sites in the separately selected
 PKIRQ1 `InterruptTime` branch and one `IA32_EFER` long-mode-enablement write in
 the separately selected selector-14 PKSMP5 trampoline. Source and per-function linked

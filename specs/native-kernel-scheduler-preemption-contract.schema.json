@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.local/specs/native-kernel-scheduler-preemption-contract.schema.json",
+  "title": "PooleOS PKSCHED2 contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "contract_id", "selected_move_id", "status_date", "status", "production_ready", "production_promotion_allowed", "phase_mapping", "source_requirement_ids", "development_profile", "scheduler_preemption", "interrupt_frame", "stack_partition", "cleanup", "qualification", "required_negative_controls", "claims", "non_claims", "official_references"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_scheduler_preemption_contract"},
+    "contract_id": {"const": "PKSCHED2"},
+    "selected_move_id": {"const": "N12-SCHED-PREEMPT-001"},
+    "status_date": {"const": "2026-08-01"},
+    "status": {"const": "bounded_bsp_timer_and_wakeup_preemption_non_promoting"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "phase_mapping": {"type": "array", "minItems": 6, "uniqueItems": true, "items": {"type": "string"}},
+    "source_requirement_ids": {"type": "array", "minItems": 5, "uniqueItems": true, "items": {"type": "string"}},
+    "development_profile": {
+      "type": "object",
+      "required": ["feature", "selector", "selector_register", "machine", "cpu_model", "acceleration", "virtual_cpu_count", "bsp_only", "emulator_only"],
+      "properties": {
+        "feature": {"const": "development-scheduler-preempt"},
+        "selector": {"const": 16},
+        "virtual_cpu_count": {"const": 1},
+        "bsp_only": {"const": true},
+        "emulator_only": {"const": true}
+      }
+    },
+    "scheduler_preemption": {
+      "type": "object",
+      "required": ["parent_scheduler_contract", "parent_interrupt_time_contract", "timer_vector", "timer_mode", "quantum_ticks", "timer_tick_count", "task_count", "deferred_event_capacity", "deferred_event_count", "deferred_events", "next_task_trace", "reschedule_cause_trace", "runtime_tick_accounting", "context_switch_count", "scheduler_transaction_rollback"],
+      "properties": {
+        "timer_vector": {"const": 64},
+        "quantum_ticks": {"const": 2},
+        "timer_tick_count": {"const": 6},
+        "task_count": {"const": 4},
+        "deferred_event_capacity": {"const": 8},
+        "deferred_event_count": {"const": 3},
+        "next_task_trace": {"const": [0, 1, 2, 0, 3, 3]},
+        "reschedule_cause_trace": {"const": ["none", "quantum", "wake", "block", "wake", "none"]},
+        "runtime_tick_accounting": {"const": [3, 1, 1, 1]},
+        "context_switch_count": {"const": 4}
+      }
+    },
+    "interrupt_frame": {"type": "object", "required": ["frame_bytes", "general_register_count", "normalized_vector_and_error_words", "iret_state_words", "ist_index", "handler_interrupt_flag", "interrupted_interrupt_flag", "scheduler_lock_owner_token", "frames_saved", "frames_restored", "eoi_count", "nested_interrupt_count", "lock_contention_count", "same_cr3_required", "fs_gs_unchanged_required", "full_xstate_debug_pmu_switch"]},
+    "stack_partition": {"type": "object", "required": ["retained_kernel_stack_pages", "retained_kernel_stack_bytes", "task_region", "kernel_entry_region", "task_stack_count", "task_stack_bytes_each", "task_stack_alignment_bytes", "task_stack_bytes_cleared", "private_non_overlapping_ranges_required", "empty_stack_rsp_may_equal_exclusive_top", "low_and_high_canaries_required"]},
+    "cleanup": {"type": "object", "minProperties": 10},
+    "qualification": {"type": "object", "required": ["host_environment_count", "rust_preemption_test_count", "rust_kernel_test_count", "host_probe_receipt_count", "clean_media_generation_count", "qemu_run_count", "static_markers_exact_match_required", "dynamic_fields_revalidated_each_run", "screenshot_exact_match_required", "pbp1_exact_match_required", "negative_control_count", "hostile_case_count_minimum"]},
+    "required_negative_controls": {"type": "array", "minItems": 25, "maxItems": 25, "uniqueItems": true, "items": {"type": "string"}},
+    "claims": {"type": "object", "minProperties": 16, "additionalProperties": {"type": "boolean"}},
+    "non_claims": {"type": "array", "minItems": 12, "uniqueItems": true, "items": {"type": "string"}},
+    "official_references": {"type": "array", "minItems": 3, "uniqueItems": true, "items": {"type": "string", "format": "uri"}}
+  }
+}

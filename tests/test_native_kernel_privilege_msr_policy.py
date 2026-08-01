@@ -73,7 +73,7 @@ class NativeKernelPrivilegeMsrPolicyTests(unittest.TestCase):
 
     def test_linked_audit_scopes_pkirq1_pksmp_and_pksched_profiles(self) -> None:
         audit = self.readiness["build"]["linked_machine_code_audit"]
-        self.assertEqual(31, audit["instruction_counts"]["rdmsr"])
+        self.assertEqual(37, audit["instruction_counts"]["rdmsr"])
         self.assertEqual(3, audit["instruction_counts"]["wrmsr"])
         self.assertEqual(0, audit["pkmsr1_runtime_msr_write_count"])
         self.assertEqual(1, audit["pksmp1_linked_rdmsr_count"])
@@ -81,6 +81,7 @@ class NativeKernelPrivilegeMsrPolicyTests(unittest.TestCase):
         self.assertEqual(3, audit["pksmp3_linked_rdmsr_count"])
         self.assertEqual(1, audit["pksmp3_linked_wrmsr_count"])
         self.assertEqual(6, audit["pksched1_linked_rdmsr_count"])
+        self.assertEqual(6, audit["pksched2_linked_rdmsr_count"])
         self.assertEqual(
             {"rdmsr": 1, "wrmsr": 1},
             audit["privileged_function_instruction_counts"][
@@ -97,6 +98,12 @@ class NativeKernelPrivilegeMsrPolicyTests(unittest.TestCase):
             {"rdmsr": 12, "wrmsr": 0},
             audit["privileged_function_instruction_counts"][
                 "PooleKernelLinked::arch::x86_64::observe_privilege_msr_policy"
+            ],
+        )
+        self.assertEqual(
+            {"rdmsr": 6, "wrmsr": 0},
+            audit["privileged_function_instruction_counts"][
+                "PooleKernelLinked::arch::x86_64::run_scheduler_preemption_launcher"
             ],
         )
         self.assertEqual(

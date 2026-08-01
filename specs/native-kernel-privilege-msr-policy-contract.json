@@ -102,9 +102,9 @@
     "source_instruction_audit_required": true,
     "linked_machine_code_audit_required": true,
     "forbidden_linked_instructions": ["RDPMC", "SYSCALL", "SYSRET", "SWAPGS"],
-    "exact_linked_instruction_counts": {"RDMSR": 31, "WRMSR": 3},
-    "rdmsr_scope": "twenty PKMSR1/CPU-entry observations plus one IA32_EFER read in each separately selected PKSMP1 and PKSMP2 lifecycle and three selector-14 PKSMP4 reads isolated to its protected-mode trampoline, long-mode trampoline, and BSP transaction; PKMSR1 executes eleven support-gated reads",
-    "wrmsr_scope": "exactly two typed IA32_APIC_BASE writes in the separately selected PKIRQ1 InterruptTime branch plus one IA32_EFER long-mode-enablement write in the separately selected selector-14 PKSMP4 trampoline; PKMSR1 executes zero writes"
+    "exact_linked_instruction_counts": {"RDMSR": 37, "WRMSR": 3},
+    "rdmsr_scope": "twenty PKMSR1/CPU-entry observations plus one IA32_EFER read in each separately selected PKSMP1 and PKSMP2 lifecycle, three selector-14 PKSMP5 reads isolated to its protected-mode trampoline, long-mode trampoline, and BSP transaction, six PKSCHED1 context-probe reads, and six PKSCHED2 launcher reads; PKMSR1 executes eleven support-gated reads",
+    "wrmsr_scope": "exactly two typed IA32_APIC_BASE writes in the separately selected PKIRQ1 InterruptTime branch plus one IA32_EFER long-mode-enablement write in the separately selected selector-14 PKSMP5 trampoline; PKMSR1 executes zero writes"
   },
   "source_register": [
     {

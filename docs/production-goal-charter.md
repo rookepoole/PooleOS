@@ -1,13 +1,39 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-07-30
+Status date: 2026-08-01
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 142
+Last roadmap reconciliation: PooleOS Cycle 143
+
+Cycle 143 reconciliation (superseding current Cycle 142 implementation and
+next-move values): governance and external-key state are unchanged, and no
+key, signature, publication, privileged host probe, driver load, firmware
+change, physical-media write, tag, release, or production promotion occurred.
+The owner-independent `N12-SCHED-PREEMPT-001` move adds selector 16 PKSCHED2
+and closes only `FLAG-N12-SCHED-PREEMPT-001`. It composes PKSCHED1 and PKIRQ1
+through an allocation-free eight-event controller and exact 176-byte
+interrupt frames. Two exact 35-marker qemu64 BSP runs open six one-shot timer
+windows and reproduce task trace `0,1,2,0,3,3` with causes
+`none,quantum,wake,block,wake,none`. Six frames are saved, four are restored,
+six EOIs are issued, four hardware switches occur, and four isolated 16-KiB
+task stacks each enter exactly once. Pending work returns to zero; all tasks
+retire; controller state and MMIO mappings are restored; and 65,536 stack
+bytes are cleared. Seven focused tests within 158 kernel host tests and 25
+hostile-control categories covering 178 rejected cases pass. The exact kernel
+is 443,504 canonical bytes in a 557,056-byte, 136-page image with 1,086
+relocations and SHA-256
+`A5DE1DBD2ECA9243D90C2EAA2BEDCAC4B0FCC5E4A4779073E398C6722F30B943`.
+This is bounded BSP timer/wakeup preemption evidence, not the complete N12
+scheduler. Deferred reclamation/workers, live AP dispatch and cross-CPU
+migration, ring-3/address-space switching, complete per-task FS/GS and
+xstate/debug/PMU ownership, target execution, N12 exit, release, and
+production remain open. `production_ready=false`; the blocked external move
+remains `N0-HW-KEY-ACQUIRE-001`, and the next owner-independent move is
+`N12-SCHED-DEFERRED-001`.
 
 Cycle 142 reconciliation (superseding current Cycle 141 implementation and
 next-move values): governance and external-key state are unchanged, and no
