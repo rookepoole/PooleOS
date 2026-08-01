@@ -15,24 +15,24 @@ fn main() {
     };
     mappings[1] = Mapping {
         virtual_offset: 0xa000,
-        byte_count: 0x52000,
+        byte_count: 0x56000,
         permissions: Permissions::READ_EXECUTE,
     };
     mappings[2] = Mapping {
-        virtual_offset: 0x5c000,
+        virtual_offset: 0x60000,
         byte_count: 0xc000,
         permissions: Permissions::READ,
     };
     mappings[3] = Mapping {
-        virtual_offset: 0x68000,
-        byte_count: 0x14000,
+        virtual_offset: 0x6c000,
+        byte_count: 0x1c000,
         permissions: Permissions::READ_WRITE,
     };
     let request = Request {
         physical_base: PHYSICAL,
         virtual_base: VIRTUAL,
-        image_bytes: 0x7c000,
-        page_count: 124,
+        image_bytes: 0x88000,
+        page_count: 136,
         entry_virtual: VIRTUAL + 0xa000,
         mapping_count: 4,
         mappings,

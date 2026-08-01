@@ -163,9 +163,9 @@ checksum, physical access, and final ownership total from PBP1.
 | ACPI source / snapshot checksums | `0x078583AEEFDD6581 / 0x4089A5CFEC81CB41` |
 | ACPI range / receipt checksums | `0xC718FB26B45257F2 / 0x60DAA52A8A05ABD6` |
 
-The Cycle 142 requalification binds the kernel at 425,984 canonical bytes in a
-507,904-byte, 124-page image with 1,042 relocations and SHA-256
-`AFED4AF858404D83CD77215C118F8478C88E91BDDC0F0B1ABAC3C9324B6ED602`.
+The Cycle 143 requalification binds the kernel at 443,504 canonical bytes in a
+557,056-byte, 136-page image with 1,086 relocations and SHA-256
+`A5DE1DBD2ECA9243D90C2EAA2BEDCAC4B0FCC5E4A4779073E398C6722F30B943`.
 PKPMM7 also supplies PKVM3's exact generation-bound sparse ownership manifest;
 the 35-page retained-layout increase since Cycle 135 is fully reflected in source, managed,
 loader-protected, and dependent direct-map counts.

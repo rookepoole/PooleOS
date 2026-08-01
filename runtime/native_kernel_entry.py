@@ -29,6 +29,8 @@ IMPLEMENTATION_INPUTS = (
     Path("native/kernel/src/lib.rs"),
     Path("native/kernel/src/main.rs"),
     Path("native/kernel/src/arch/x86_64.rs"),
+    Path("native/kernel/src/scheduler.rs"),
+    Path("native/kernel/src/scheduler_preempt.rs"),
     Path("native/kernel/src/acpi.rs"),
     Path("native/kernel/src/physical_memory.rs"),
     Path("native/kernel/src/virtual_memory.rs"),
@@ -110,15 +112,15 @@ def contract_errors(contract: Any) -> list[str]:
         "format_contract": "PKELF1",
         "handoff_contract": "PBP1",
         "entry_offset": 0xA000,
-        "image_memory_bytes": 0x7C000,
-        "canonical_file_bytes": 0x68000,
+        "image_memory_bytes": 0x88000,
+        "canonical_file_bytes": 443_504,
         "maximum_relocations": 4096,
         "segment_boundaries": {
             "read_only_end": 0xA000,
             "text_start": 0xA000,
-            "text_end": 0x5C000,
-            "relro_end": 0x68000,
-            "image_end": 0x7C000,
+            "text_end": 0x60000,
+            "relro_end": 0x6C000,
+            "image_end": 0x88000,
         },
     }
     for key, value in expected_product.items():
@@ -166,7 +168,7 @@ def readiness_errors(readiness: Any, root: Path = ROOT) -> list[str]:
     ):
         if not isinstance(summary.get(total), int) or summary.get(passed) != summary.get(total):
             errors.append(f"readiness summary mismatch: {passed}")
-    if summary.get("rust_host_tests_total") != 151:
+    if summary.get("rust_host_tests_total") != 158:
         errors.append("readiness host-test count mismatch")
     if summary.get("clean_builds_total") != 2:
         errors.append("readiness clean-build count mismatch")

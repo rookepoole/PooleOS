@@ -4,7 +4,7 @@ use core::ptr::{
     addr_of, addr_of_mut, read_unaligned, read_volatile, write_bytes, write_unaligned,
     write_volatile,
 };
-use core::sync::atomic::{Ordering, compiler_fence};
+use core::sync::atomic::{AtomicU64, Ordering, compiler_fence};
 
 use poolekernel::{
     ByteSink, CPU_MSR_APIC_BASE, CPU_MSR_EFER, CPU_MSR_MTRR_CAP, CPU_MSR_MTRR_DEF_TYPE,
@@ -225,6 +225,36 @@ struct SchedulerStack([u8; SCHEDULER_STACK_BYTES]);
 static mut SCHEDULER_STACK_A: SchedulerStack = SchedulerStack([0; SCHEDULER_STACK_BYTES]);
 static mut SCHEDULER_STACK_B: SchedulerStack = SchedulerStack([0; SCHEDULER_STACK_BYTES]);
 
+pub const SCHEDULER_PREEMPT_TASK_COUNT: usize = 4;
+pub const SCHEDULER_PREEMPT_STACK_BYTES: usize = SCHEDULER_STACK_BYTES;
+const SCHEDULER_PREEMPT_INITIAL_RSP_RESERVE: usize = 128;
+const SCHEDULER_PREEMPT_TASK_REGISTERS: [[u64; 6]; SCHEDULER_PREEMPT_TASK_COUNT] = [
+    SCHEDULER_TASK_A_REGISTERS,
+    SCHEDULER_TASK_B_REGISTERS,
+    [
+        0xc0c0_d0d0_e0e0_f0f0,
+        0xc1c1_d1d1_e1e1_f1f1,
+        0xc2c2_d2d2_e2e2_f2f2,
+        0xc3c3_d3d3_e3e3_f3f3,
+        0xc4c4_d4d4_e4e4_f4f4,
+        0xc5c5_d5d5_e5e5_f5f5,
+    ],
+    [
+        0xd0d0_e0e0_f0f0_a0a0,
+        0xd1d1_e1e1_f1f1_a1a1,
+        0xd2d2_e2e2_f2f2_a2a2,
+        0xd3d3_e3e3_f3f3_a3a3,
+        0xd4d4_e4e4_f4f4_a4a4,
+        0xd5d5_e5e5_f5f5_a5a5,
+    ],
+];
+
+const RETAINED_KERNEL_STACK_BYTES: usize =
+    poole_kmap::STACK_PAGE_COUNT * poole_kmap::PAGE_SIZE as usize;
+const SCHEDULER_PREEMPT_REGION_BYTES: usize =
+    SCHEDULER_PREEMPT_TASK_COUNT * SCHEDULER_PREEMPT_STACK_BYTES;
+static SCHEDULER_PREEMPT_STACK_BASE: AtomicU64 = AtomicU64::new(0);
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum SchedulerSwitchHardwareError {
     Trace,
@@ -256,6 +286,44 @@ pub struct SchedulerSwitchProof {
     pub register_error_count: u32,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SchedulerPreemptionHardwareError {
+    InterruptState,
+    StackGeometry,
+    ContextGeometry,
+    EntryCount,
+    TransitionCount,
+    ControlState,
+    Clear,
+}
+
+impl SchedulerPreemptionHardwareError {
+    pub const fn label(self) -> &'static str {
+        match self {
+            Self::InterruptState => "launcher_interrupt_state",
+            Self::StackGeometry => "launcher_stack_geometry",
+            Self::ContextGeometry => "launcher_context_geometry",
+            Self::EntryCount => "launcher_entry_count",
+            Self::TransitionCount => "launcher_transition_count",
+            Self::ControlState => "launcher_control_state",
+            Self::Clear => "launcher_clear",
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SchedulerPreemptionHardwareProof {
+    pub task_entry_count: [u32; SCHEDULER_PREEMPT_TASK_COUNT],
+    pub launcher_transition_count: u32,
+    pub stack_count: u8,
+    pub stack_bytes_each: u32,
+    pub stack_alignment: u8,
+    pub stack_bytes_cleared: u32,
+    pub same_cr3: bool,
+    pub fs_gs_unchanged: bool,
+    pub returned_with_interrupts_disabled: bool,
+}
+
 unsafe extern "C" {
     fn poole_scheduler_context_switch(outgoing: *mut u64, incoming: *const u64);
     fn poole_scheduler_task_a_entry();
@@ -268,6 +336,26 @@ unsafe extern "C" {
     static mut poole_scheduler_last_task: u64;
     static mut poole_scheduler_transition_count: u64;
     static mut poole_scheduler_register_errors: u64;
+    fn poole_scheduler_preempt_task_a_entry();
+    fn poole_scheduler_preempt_task_a_end();
+    fn poole_scheduler_preempt_task_b_entry();
+    fn poole_scheduler_preempt_task_b_end();
+    fn poole_scheduler_preempt_task_c_entry();
+    fn poole_scheduler_preempt_task_c_end();
+    fn poole_scheduler_preempt_task_d_entry();
+    fn poole_scheduler_preempt_task_d_end();
+    fn poole_scheduler_preempt_launch(outgoing: *mut u64, incoming: *const u64);
+    static mut poole_scheduler_preempt_kernel_rsp: u64;
+    static mut poole_scheduler_preempt_task_a_rsp: u64;
+    static mut poole_scheduler_preempt_task_b_rsp: u64;
+    static mut poole_scheduler_preempt_task_c_rsp: u64;
+    static mut poole_scheduler_preempt_task_d_rsp: u64;
+    static mut poole_scheduler_preempt_task_a_entries: u64;
+    static mut poole_scheduler_preempt_task_b_entries: u64;
+    static mut poole_scheduler_preempt_task_c_entries: u64;
+    static mut poole_scheduler_preempt_task_d_entries: u64;
+    static mut poole_scheduler_preempt_flags_before: u64;
+    static mut poole_scheduler_preempt_flags_after: u64;
 }
 
 core::arch::global_asm!(
@@ -390,6 +478,87 @@ poole_scheduler_transition_count:
     .quad 0
     .global poole_scheduler_register_errors
 poole_scheduler_register_errors:
+    .quad 0
+"#
+);
+
+core::arch::global_asm!(
+    r#"
+    .section .text.poole_scheduler_preempt_tasks,"ax",@progbits
+    .balign 16
+
+    .global poole_scheduler_preempt_launch
+    .type poole_scheduler_preempt_launch,@function
+poole_scheduler_preempt_launch:
+    pushfq
+    pop rax
+    mov qword ptr [rip + poole_scheduler_preempt_flags_before], rax
+    call poole_scheduler_context_switch
+    pushfq
+    pop rax
+    mov qword ptr [rip + poole_scheduler_preempt_flags_after], rax
+    ret
+    .size poole_scheduler_preempt_launch, .-poole_scheduler_preempt_launch
+
+    .macro POOLE_SCHEDULER_PREEMPT_TASK name, end_name, entries, saved_rsp
+    .global \name
+    .type \name,@function
+\name:
+    inc qword ptr [rip + \entries]
+.L\name\()_loop:
+    cmp dword ptr [rip + poole_scheduler_preempt_done], 0
+    jne .L\name\()_return
+    pause
+    jmp .L\name\()_loop
+.L\name\()_return:
+    lea rdi, [rip + \saved_rsp]
+    lea rsi, [rip + poole_scheduler_preempt_kernel_rsp]
+    call poole_scheduler_context_switch
+    ud2
+    .global \end_name
+\end_name:
+    .size \name, .-\name
+    .endm
+
+    POOLE_SCHEDULER_PREEMPT_TASK poole_scheduler_preempt_task_a_entry, poole_scheduler_preempt_task_a_end, poole_scheduler_preempt_task_a_entries, poole_scheduler_preempt_task_a_rsp
+    POOLE_SCHEDULER_PREEMPT_TASK poole_scheduler_preempt_task_b_entry, poole_scheduler_preempt_task_b_end, poole_scheduler_preempt_task_b_entries, poole_scheduler_preempt_task_b_rsp
+    POOLE_SCHEDULER_PREEMPT_TASK poole_scheduler_preempt_task_c_entry, poole_scheduler_preempt_task_c_end, poole_scheduler_preempt_task_c_entries, poole_scheduler_preempt_task_c_rsp
+    POOLE_SCHEDULER_PREEMPT_TASK poole_scheduler_preempt_task_d_entry, poole_scheduler_preempt_task_d_end, poole_scheduler_preempt_task_d_entries, poole_scheduler_preempt_task_d_rsp
+
+    .section .bss.poole_scheduler_preempt_context,"aw",@nobits
+    .balign 8
+    .global poole_scheduler_preempt_kernel_rsp
+poole_scheduler_preempt_kernel_rsp:
+    .quad 0
+    .global poole_scheduler_preempt_task_a_rsp
+poole_scheduler_preempt_task_a_rsp:
+    .quad 0
+    .global poole_scheduler_preempt_task_b_rsp
+poole_scheduler_preempt_task_b_rsp:
+    .quad 0
+    .global poole_scheduler_preempt_task_c_rsp
+poole_scheduler_preempt_task_c_rsp:
+    .quad 0
+    .global poole_scheduler_preempt_task_d_rsp
+poole_scheduler_preempt_task_d_rsp:
+    .quad 0
+    .global poole_scheduler_preempt_task_a_entries
+poole_scheduler_preempt_task_a_entries:
+    .quad 0
+    .global poole_scheduler_preempt_task_b_entries
+poole_scheduler_preempt_task_b_entries:
+    .quad 0
+    .global poole_scheduler_preempt_task_c_entries
+poole_scheduler_preempt_task_c_entries:
+    .quad 0
+    .global poole_scheduler_preempt_task_d_entries
+poole_scheduler_preempt_task_d_entries:
+    .quad 0
+    .global poole_scheduler_preempt_flags_before
+poole_scheduler_preempt_flags_before:
+    .quad 0
+    .global poole_scheduler_preempt_flags_after
+poole_scheduler_preempt_flags_after:
     .quad 0
 "#
 );
@@ -3759,6 +3928,335 @@ pub fn run_scheduler_context_switch_probe(
         proof.stack_bytes_cleared = (2 * SCHEDULER_STACK_BYTES) as u32;
         proof
     })
+}
+
+fn scheduler_preemption_stack_base(task: usize) -> *mut u8 {
+    let base = SCHEDULER_PREEMPT_STACK_BASE.load(Ordering::Acquire);
+    (base as usize + task * SCHEDULER_PREEMPT_STACK_BYTES) as *mut u8
+}
+
+fn scheduler_preemption_saved_rsp(task: usize) -> *mut u64 {
+    match task {
+        0 => addr_of_mut!(poole_scheduler_preempt_task_a_rsp),
+        1 => addr_of_mut!(poole_scheduler_preempt_task_b_rsp),
+        2 => addr_of_mut!(poole_scheduler_preempt_task_c_rsp),
+        _ => addr_of_mut!(poole_scheduler_preempt_task_d_rsp),
+    }
+}
+
+fn scheduler_preemption_entry_counter(task: usize) -> *mut u64 {
+    match task {
+        0 => addr_of_mut!(poole_scheduler_preempt_task_a_entries),
+        1 => addr_of_mut!(poole_scheduler_preempt_task_b_entries),
+        2 => addr_of_mut!(poole_scheduler_preempt_task_c_entries),
+        _ => addr_of_mut!(poole_scheduler_preempt_task_d_entries),
+    }
+}
+
+fn scheduler_preemption_entry_bounds(task: usize) -> (u64, u64) {
+    match task {
+        0 => (
+            poole_scheduler_preempt_task_a_entry as *const () as usize as u64,
+            poole_scheduler_preempt_task_a_end as *const () as usize as u64,
+        ),
+        1 => (
+            poole_scheduler_preempt_task_b_entry as *const () as usize as u64,
+            poole_scheduler_preempt_task_b_end as *const () as usize as u64,
+        ),
+        2 => (
+            poole_scheduler_preempt_task_c_entry as *const () as usize as u64,
+            poole_scheduler_preempt_task_c_end as *const () as usize as u64,
+        ),
+        _ => (
+            poole_scheduler_preempt_task_d_entry as *const () as usize as u64,
+            poole_scheduler_preempt_task_d_end as *const () as usize as u64,
+        ),
+    }
+}
+
+pub fn scheduler_preemption_stack_bounds(task: usize) -> Option<(u64, u64)> {
+    if task >= SCHEDULER_PREEMPT_TASK_COUNT {
+        return None;
+    }
+    let bottom = scheduler_preemption_stack_base(task) as u64;
+    if bottom == task as u64 * SCHEDULER_PREEMPT_STACK_BYTES as u64 {
+        return None;
+    }
+    Some((bottom, bottom + SCHEDULER_PREEMPT_STACK_BYTES as u64))
+}
+
+fn scheduler_preemption_stack_valid(task: usize) -> bool {
+    let Some((bottom, top)) = scheduler_preemption_stack_bounds(task) else {
+        return false;
+    };
+    let base = bottom as usize as *const u8;
+    let canaries = unsafe {
+        read_volatile(base.cast::<u64>()) == SCHEDULER_STACK_CANARY
+            && read_volatile(base.add(SCHEDULER_HIGH_CANARY_OFFSET).cast::<u64>())
+                == SCHEDULER_STACK_CANARY
+    };
+    canaries
+        && bottom.is_multiple_of(SCHEDULER_STACK_ALIGNMENT as u64)
+        && top.is_multiple_of(SCHEDULER_STACK_ALIGNMENT as u64)
+}
+
+pub fn scheduler_preemption_context_valid(task: usize, frame: &TrapFrame) -> bool {
+    let Some((bottom, top)) = scheduler_preemption_stack_bounds(task) else {
+        return false;
+    };
+    let (entry, end) = scheduler_preemption_entry_bounds(task);
+    scheduler_preemption_stack_valid(task)
+        && frame.rip >= entry
+        && frame.rip < end
+        && frame.rsp >= bottom
+        && frame.rsp <= top
+        && frame.rsp.is_multiple_of(8)
+        && frame.code_selector == u64::from(KERNEL_CODE_SELECTOR)
+        && frame.data_selector == u64::from(KERNEL_DATA_SELECTOR)
+        && frame.rflags & ((1 << 1) | (1 << 9)) == (1 << 1) | (1 << 9)
+        && frame.rflags & ((1 << 14) | (1 << 17)) == 0
+}
+
+pub fn prepare_scheduler_preemption_contexts(
+    kernel_stack_top: u64,
+) -> Result<[TrapFrame; SCHEDULER_PREEMPT_TASK_COUNT], SchedulerPreemptionHardwareError> {
+    if read_rflags() & (1 << 9) != 0 {
+        return Err(SchedulerPreemptionHardwareError::InterruptState);
+    }
+    let kernel_stack_bottom = kernel_stack_top
+        .checked_sub(RETAINED_KERNEL_STACK_BYTES as u64)
+        .ok_or(SchedulerPreemptionHardwareError::StackGeometry)?;
+    let task_region_top = kernel_stack_bottom
+        .checked_add(SCHEDULER_PREEMPT_REGION_BYTES as u64)
+        .ok_or(SchedulerPreemptionHardwareError::StackGeometry)?;
+    let current_rsp: u64;
+    // SAFETY: this is a read-only observation of the current kernel stack pointer.
+    unsafe {
+        core::arch::asm!(
+            "mov {}, rsp",
+            out(reg) current_rsp,
+            options(nomem, nostack, preserves_flags)
+        );
+    }
+    if kernel_stack_top == 0
+        || !kernel_stack_top.is_multiple_of(poole_kmap::PAGE_SIZE)
+        || !kernel_stack_bottom.is_multiple_of(poole_kmap::PAGE_SIZE)
+        || task_region_top > kernel_stack_top
+        || current_rsp < task_region_top
+        || current_rsp >= kernel_stack_top
+        || SCHEDULER_PREEMPT_STACK_BASE
+            .compare_exchange(0, kernel_stack_bottom, Ordering::AcqRel, Ordering::Acquire)
+            .is_err()
+    {
+        return Err(SchedulerPreemptionHardwareError::StackGeometry);
+    }
+    for task in 0..SCHEDULER_PREEMPT_TASK_COUNT {
+        let base = scheduler_preemption_stack_base(task);
+        // SAFETY: selector 16 exclusively owns each fixed stack before interrupt enablement.
+        unsafe {
+            write_bytes(base, SCHEDULER_STACK_FILL, SCHEDULER_PREEMPT_STACK_BYTES);
+            write_volatile(base.cast::<u64>(), SCHEDULER_STACK_CANARY);
+            write_volatile(
+                base.add(SCHEDULER_HIGH_CANARY_OFFSET).cast::<u64>(),
+                SCHEDULER_STACK_CANARY,
+            );
+            write_volatile(scheduler_preemption_saved_rsp(task), 0);
+            write_volatile(scheduler_preemption_entry_counter(task), 0);
+        }
+    }
+    // SAFETY: task A is the sole cooperative launch context and owns stack A.
+    unsafe {
+        initialize_scheduler_stack(
+            scheduler_preemption_stack_base(0),
+            scheduler_preemption_saved_rsp(0),
+            poole_scheduler_preempt_task_a_entry,
+            SCHEDULER_PREEMPT_TASK_REGISTERS[0],
+        );
+        let launch_frame = read_volatile(scheduler_preemption_saved_rsp(0));
+        write_volatile(
+            (launch_frame as usize as *mut u64).add(6),
+            (1 << 1) | (1 << 9),
+        );
+        write_volatile(addr_of_mut!(poole_scheduler_preempt_kernel_rsp), 0);
+        write_volatile(addr_of_mut!(poole_scheduler_transition_count), 0);
+    }
+
+    let mut contexts = [TrapFrame {
+        r15: 0,
+        r14: 0,
+        r13: 0,
+        r12: 0,
+        r11: 0,
+        r10: 0,
+        r9: 0,
+        r8: 0,
+        rsi: 0,
+        rdi: 0,
+        rbp: 0,
+        rdx: 0,
+        rcx: 0,
+        rbx: 0,
+        rax: 0,
+        vector: u64::from(TIMER_VECTOR),
+        error_code: 0,
+        rip: 0,
+        code_selector: u64::from(KERNEL_CODE_SELECTOR),
+        rflags: (1 << 1) | (1 << 9),
+        rsp: 0,
+        data_selector: u64::from(KERNEL_DATA_SELECTOR),
+    }; SCHEDULER_PREEMPT_TASK_COUNT];
+    for task in 0..SCHEDULER_PREEMPT_TASK_COUNT {
+        let (entry, _) = scheduler_preemption_entry_bounds(task);
+        let (_, top) = scheduler_preemption_stack_bounds(task)
+            .ok_or(SchedulerPreemptionHardwareError::StackGeometry)?;
+        let registers = SCHEDULER_PREEMPT_TASK_REGISTERS[task];
+        contexts[task] = TrapFrame {
+            r15: registers[5],
+            r14: registers[4],
+            r13: registers[3],
+            r12: registers[2],
+            r11: 0x1100_0000_0000_0000 | task as u64,
+            r10: 0x1000_0000_0000_0000 | task as u64,
+            r9: 0x0900_0000_0000_0000 | task as u64,
+            r8: 0x0800_0000_0000_0000 | task as u64,
+            rsi: 0x0600_0000_0000_0000 | task as u64,
+            rdi: 0x0700_0000_0000_0000 | task as u64,
+            rbp: registers[1],
+            rdx: 0x0200_0000_0000_0000 | task as u64,
+            rcx: 0x0100_0000_0000_0000 | task as u64,
+            rbx: registers[0],
+            rax: 0x0a00_0000_0000_0000 | task as u64,
+            vector: u64::from(TIMER_VECTOR),
+            error_code: 0,
+            rip: entry,
+            code_selector: u64::from(KERNEL_CODE_SELECTOR),
+            rflags: (1 << 1) | (1 << 9),
+            rsp: top - SCHEDULER_PREEMPT_INITIAL_RSP_RESERVE as u64,
+            data_selector: u64::from(KERNEL_DATA_SELECTOR),
+        };
+        if !scheduler_preemption_context_valid(task, &contexts[task]) {
+            return Err(SchedulerPreemptionHardwareError::ContextGeometry);
+        }
+    }
+    Ok(contexts)
+}
+
+pub fn run_scheduler_preemption_launcher()
+-> Result<SchedulerPreemptionHardwareProof, SchedulerPreemptionHardwareError> {
+    if read_rflags() & (1 << 9) != 0 {
+        return Err(SchedulerPreemptionHardwareError::InterruptState);
+    }
+    for task in 0..SCHEDULER_PREEMPT_TASK_COUNT {
+        if !scheduler_preemption_stack_valid(task) {
+            return Err(SchedulerPreemptionHardwareError::StackGeometry);
+        }
+    }
+    // SAFETY: selector 16 executes at CPL0 and these are read-only control-state observations.
+    let (cr3_before, bases_before) = unsafe {
+        (
+            read_cr3(),
+            (
+                read_msr(IA32_FS_BASE),
+                read_msr(IA32_GS_BASE),
+                read_msr(IA32_KERNEL_GS_BASE),
+            ),
+        )
+    };
+    unsafe {
+        write_volatile(addr_of_mut!(poole_scheduler_preempt_flags_before), 0);
+        write_volatile(addr_of_mut!(poole_scheduler_preempt_flags_after), 0);
+    }
+    // SAFETY: task A has a validated private launch frame and returns only after the terminal tick.
+    unsafe {
+        poole_scheduler_preempt_launch(
+            addr_of_mut!(poole_scheduler_preempt_kernel_rsp),
+            scheduler_preemption_saved_rsp(0),
+        );
+    }
+    let current_rflags = read_rflags();
+    // SAFETY: these repeat the same read-only CPL0 observations after bounded return.
+    let (cr3_after, bases_after) = unsafe {
+        (
+            read_cr3(),
+            (
+                read_msr(IA32_FS_BASE),
+                read_msr(IA32_GS_BASE),
+                read_msr(IA32_KERNEL_GS_BASE),
+            ),
+        )
+    };
+    let mut entries = [0u32; SCHEDULER_PREEMPT_TASK_COUNT];
+    for (task, entry) in entries.iter_mut().enumerate() {
+        let observed = unsafe { read_volatile(scheduler_preemption_entry_counter(task)) };
+        *entry = observed
+            .try_into()
+            .map_err(|_| SchedulerPreemptionHardwareError::EntryCount)?;
+    }
+    let transitions = unsafe { read_volatile(addr_of!(poole_scheduler_transition_count)) };
+    let (switch_flags_before, switch_flags_after) = unsafe {
+        (
+            read_volatile(addr_of!(poole_scheduler_preempt_flags_before)),
+            read_volatile(addr_of!(poole_scheduler_preempt_flags_after)),
+        )
+    };
+    if entries != [1; SCHEDULER_PREEMPT_TASK_COUNT] {
+        return Err(SchedulerPreemptionHardwareError::EntryCount);
+    }
+    if transitions != 2 {
+        return Err(SchedulerPreemptionHardwareError::TransitionCount);
+    }
+    if switch_flags_before == 0
+        || switch_flags_after != switch_flags_before
+        || switch_flags_after & (1 << 9) != 0
+        || current_rflags & (1 << 9) != 0
+        || cr3_after != cr3_before
+        || bases_after != bases_before
+    {
+        return Err(SchedulerPreemptionHardwareError::ControlState);
+    }
+    Ok(SchedulerPreemptionHardwareProof {
+        task_entry_count: entries,
+        launcher_transition_count: transitions as u32,
+        stack_count: SCHEDULER_PREEMPT_TASK_COUNT as u8,
+        stack_bytes_each: SCHEDULER_PREEMPT_STACK_BYTES as u32,
+        stack_alignment: SCHEDULER_STACK_ALIGNMENT as u8,
+        stack_bytes_cleared: 0,
+        same_cr3: true,
+        fs_gs_unchanged: true,
+        returned_with_interrupts_disabled: true,
+    })
+}
+
+pub fn clear_scheduler_preemption_stacks(
+    mut proof: SchedulerPreemptionHardwareProof,
+) -> Result<SchedulerPreemptionHardwareProof, SchedulerPreemptionHardwareError> {
+    for task in 0..SCHEDULER_PREEMPT_TASK_COUNT {
+        let base = scheduler_preemption_stack_base(task);
+        // SAFETY: all four contexts are retired and timer delivery is masked with IF clear.
+        unsafe { write_bytes(base, 0, SCHEDULER_PREEMPT_STACK_BYTES) };
+    }
+    for task in 0..SCHEDULER_PREEMPT_TASK_COUNT {
+        let base = scheduler_preemption_stack_base(task);
+        for offset in 0..SCHEDULER_PREEMPT_STACK_BYTES {
+            if unsafe { read_volatile(base.add(offset)) } != 0 {
+                return Err(SchedulerPreemptionHardwareError::Clear);
+            }
+        }
+        unsafe {
+            write_volatile(scheduler_preemption_saved_rsp(task), 0);
+            write_volatile(scheduler_preemption_entry_counter(task), 0);
+        }
+    }
+    unsafe {
+        write_volatile(addr_of_mut!(poole_scheduler_preempt_kernel_rsp), 0);
+        write_volatile(addr_of_mut!(poole_scheduler_transition_count), 0);
+        write_volatile(addr_of_mut!(poole_scheduler_preempt_flags_before), 0);
+        write_volatile(addr_of_mut!(poole_scheduler_preempt_flags_after), 0);
+    }
+    SCHEDULER_PREEMPT_STACK_BASE.store(0, Ordering::Release);
+    proof.stack_bytes_cleared =
+        (SCHEDULER_PREEMPT_TASK_COUNT * SCHEDULER_PREEMPT_STACK_BYTES) as u32;
+    Ok(proof)
 }
 
 unsafe fn outb(port: u16, value: u8) {

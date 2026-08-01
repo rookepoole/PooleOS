@@ -23,6 +23,7 @@ development-smp-first-ap = ["development-transfer"]
 development-smp-percpu-runtime = ["development-transfer"]
 development-smp-ipi = ["development-transfer"]
 development-scheduler = ["development-transfer"]
+development-scheduler-preempt = ["development-transfer"]
 
 [lib]
 name = "pooleboot"

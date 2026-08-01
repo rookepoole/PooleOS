@@ -74,6 +74,7 @@ pub enum WakeReason {
     TimedOut = 2,
     LockGranted = 3,
     OwnerGone = 4,
+    Signalled = 5,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -236,6 +237,7 @@ pub struct SchedulerSummary {
     pub priority_inheritance_count: u32,
 }
 
+#[derive(Clone, Copy)]
 pub struct Scheduler {
     tasks: [Task; MAX_TASKS],
     queues: [RunQueue; MAX_CPUS],
@@ -412,6 +414,10 @@ impl Scheduler {
 
     pub fn timeout_wait(&mut self, id: TaskId, cpu: CpuId) -> Result<(), Error> {
         self.wake(id, cpu, WakeReason::TimedOut)
+    }
+
+    pub fn signal_wait(&mut self, id: TaskId, cpu: CpuId) -> Result<(), Error> {
+        self.wake(id, cpu, WakeReason::Signalled)
     }
 
     pub fn consume_wake(&mut self, cpu: CpuId) -> Result<WakeReason, Error> {

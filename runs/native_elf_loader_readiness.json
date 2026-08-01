@@ -48,9 +48,9 @@
         "sha256": "29CE9938C5C60DEA5AEA244A6961BB1924D88AEC601D1E02EAAA510B0B36E390"
       },
       {
-        "byte_count": 1482,
+        "byte_count": 1539,
         "path": "native/boot/Cargo.toml",
-        "sha256": "B12C0CE859D615D0DD1E844EFDC4FD06727A3F1843E3251436E5ADBD39A953D5"
+        "sha256": "D513DB53057148B4A784CC3B160FAA41461953C60E0FE0486082A693FF082327"
       },
       {
         "byte_count": 16266,
