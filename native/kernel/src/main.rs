@@ -53,6 +53,11 @@ use poolekernel::{
         RescheduleCause, validate_context_ownership as validate_scheduler_context_ownership,
         validate_interrupt_frame as validate_scheduler_interrupt_frame,
     },
+    scheduler_smp::{
+        self, CpuId as SchedulerSmpCpuId, RemoteAck as SchedulerSmpRemoteAck, SmpScheduler,
+        Summary as SchedulerSmpSummary, TaskId as SchedulerSmpTaskId,
+        TransferTicket as SchedulerSmpTicket,
+    },
     smp::{self, MailboxSnapshot, ResourceLayout},
     smp_ipi::{
         self, IpiSnapshot, Operation as IpiOperation, Request as IpiRequest, ShootdownRequest,
@@ -1230,6 +1235,83 @@ pksched3_fragment!(PKSCHED3_FLUSH, b"POOLEOS:KERNEL:SCHED-DEFERRED-FLUSH PASS co
 pksched3_fragment!(PKSCHED3_FAULT, b"POOLEOS:KERNEL:SCHED-DEFERRED-FAULT PASS contract=PKSCHED3 rollbacks=5 reserve=1 queue=1 execute=1 commit=1 cleanup=1 invariant=1 leaked_slots=0\n");
 pksched3_fragment!(PKSCHED3_CLEANUP, b"POOLEOS:KERNEL:SCHED-DEFERRED-CLEANUP PASS contract=PKSCHED3 intake_closed=1 shutdown_cancelled=1 slots_free=8 workers_retired=2 stack_bytes_cleared=32768 queue_entries=0 running=0 lock_released=1 apic_restored=1 pic_restored=1 hpet_restored=1 mmio_revoked=1\n");
 pksched3_fragment!(PKSCHED3_RESULT, b"POOLEOS:KERNEL:SCHED-DEFERRED-RESULT PASS contract=PKSCHED3 profile=qemu64_bsp_interrupt_deferred fixed_workers=1 bsp=1 ap_dispatch=0 drivers=0 services=0 ring3=0 address_spaces=1 xstate_switch=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n");
+
+macro_rules! pksched4_fragment {
+    ($name:ident, $value:literal) => {
+        #[used]
+        #[unsafe(link_section = ".text.pksched4_literals")]
+        static $name: [u8; $value.len()] = *$value;
+    };
+}
+
+pksched4_fragment!(PKSCHED4_EARLY, b"POOLEOS:KERNEL:SCHED-SMP-EARLY PASS contract=PKSCHED4 selector=18 parent_smp=PKSMP5 parent_scheduler=PKSCHED1 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n");
+pksched4_fragment!(
+    PKSCHED4_DENIED,
+    b"POOLEOS:KERNEL:SCHED-SMP-DENIED contract=PKSCHED4 reason="
+);
+pksched4_fragment!(
+    PKSCHED4_DENIED_TAIL,
+    b" cleanup=fail_closed authority=0 actions=0 production=0 terminal=panic\n"
+);
+pksched4_fragment!(
+    PKSCHED4_TOPOLOGY,
+    b"POOLEOS:KERNEL:SCHED-SMP-TOPOLOGY PASS contract=PKSCHED4 processors="
+);
+pksched4_fragment!(PKSCHED4_ENABLED, b" enabled=");
+pksched4_fragment!(PKSCHED4_BSP, b" bsp_apic_id=");
+pksched4_fragment!(PKSCHED4_TARGETS, b" target_apic_ids=1,2,3 online_mask=0x000000000000000F queue_count=4 task_capacity=8 balance=3,3 idle_owners=");
+pksched4_fragment!(
+    PKSCHED4_TRANSFER,
+    b"POOLEOS:KERNEL:SCHED-SMP-TRANSFER PASS contract=PKSCHED4 wake="
+);
+pksched4_fragment!(PKSCHED4_MIGRATIONS, b" migrations=");
+pksched4_fragment!(PKSCHED4_TRANSACTION_ACKS, b" transaction_acks=");
+pksched4_fragment!(PKSCHED4_REMOTE_ACKS, b" remote_acks=");
+pksched4_fragment!(
+    PKSCHED4_TRANSFER_TAIL,
+    b" queues=2,2,2 owner_transfer=ack_gated ack_mask=0x000000000000000E generation_safe=1\n"
+);
+pksched4_fragment!(
+    PKSCHED4_DISPATCH,
+    b"POOLEOS:KERNEL:SCHED-SMP-DISPATCH PASS contract=PKSCHED4 bsp_trace="
+);
+pksched4_fragment!(PKSCHED4_AP_TRACE, b" ap_trace=1:");
+pksched4_fragment!(PKSCHED4_COMMA, b",");
+pksched4_fragment!(PKSCHED4_CPU1, b",1:");
+pksched4_fragment!(PKSCHED4_CPU2, b",2:");
+pksched4_fragment!(PKSCHED4_CPU3, b",3:");
+pksched4_fragment!(PKSCHED4_BSP_DISPATCHES, b" bsp_dispatches=");
+pksched4_fragment!(PKSCHED4_AP_DISPATCHES, b" ap_dispatches=");
+pksched4_fragment!(PKSCHED4_DISPATCH_ACKS, b" dispatch_acks=");
+pksched4_fragment!(
+    PKSCHED4_DISPATCH_TAIL,
+    b" call_function_executions=9 task_entries=8 registers_restored=15\n"
+);
+pksched4_fragment!(PKSCHED4_FAIRNESS, b"POOLEOS:KERNEL:SCHED-SMP-FAIRNESS PASS contract=PKSCHED4 policy=fixed_priority_round_robin priorities=1-31 maximum_equal_priority_bypass=1 starvation_bound=7 lost_wake=0 duplicate_runnable=0 dead_task_dispatch=0 priority_inversion_violation=0\n");
+pksched4_fragment!(
+    PKSCHED4_ROLLBACK,
+    b"POOLEOS:KERNEL:SCHED-SMP-ROLLBACK PASS contract=PKSCHED4 offline_cpu="
+);
+pksched4_fragment!(PKSCHED4_TIMEOUTS, b" timeouts=");
+pksched4_fragment!(PKSCHED4_ROLLBACKS, b" rollbacks=");
+pksched4_fragment!(PKSCHED4_STALE, b" stale_rejections=");
+pksched4_fragment!(PKSCHED4_ROLLBACK_TAIL, b" late_ack_rejected=1 stale_generation_rejected=1 source_queue_restored=1 target_ownership_withheld=1\n");
+pksched4_fragment!(
+    PKSCHED4_CLEANUP,
+    b"POOLEOS:KERNEL:SCHED-SMP-CLEANUP PASS contract=PKSCHED4 tasks_dead="
+);
+pksched4_fragment!(PKSCHED4_IDLE, b" idle_before=");
+pksched4_fragment!(PKSCHED4_OWNER_EPOCH, b" owner_epoch_sum=");
+pksched4_fragment!(
+    PKSCHED4_ONLINE_AFTER,
+    b" online_after=0x0000000000000001 parked_mask=0x000000000000000E resource_pages="
+);
+pksched4_fragment!(PKSCHED4_FRAME_PAGES, b" frame_pages=");
+pksched4_fragment!(PKSCHED4_TOTAL_PAGES, b" total_pages=");
+pksched4_fragment!(PKSCHED4_ZEROED, b" zeroed_bytes=");
+pksched4_fragment!(PKSCHED4_VERIFIED, b" verified_bytes=");
+pksched4_fragment!(PKSCHED4_CLEANUP_TAIL, b" queues=0 running=0 scheduler_lock_released=1 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1\n");
+pksched4_fragment!(PKSCHED4_RESULT, b"POOLEOS:KERNEL:SCHED-SMP-RESULT PASS contract=PKSCHED4 profile=sandybridge_four_vcpu_ack_gated_scheduler scheduler=bounded_smp ap_dispatch=1 cross_cpu_wake=1 migration=1 topology=exact general_smp=0 ring3=0 address_spaces=1 per_task_xstate=0 target=0 signatures=0 authority=0 actions=0 n12_exit=0 production=0 terminal=halt\n");
 
 struct SchedulerPreemptionRuntimeCell(UnsafeCell<Option<BspPreemption>>);
 
@@ -3857,6 +3939,7 @@ enum SmpIpiLiveError {
     Base(smp::Error),
     Runtime(smp_runtime::Error),
     Ipi(smp_ipi::Error),
+    Scheduler(scheduler_smp::Error),
 }
 
 impl SmpIpiLiveError {
@@ -3866,6 +3949,7 @@ impl SmpIpiLiveError {
             Self::Base(error) => 0x1000 | error.code(),
             Self::Runtime(_) => 0x2000,
             Self::Ipi(_) => 0x3000,
+            Self::Scheduler(_) => 0x4000,
         };
         class | (SMP_IPI_FAILURE_STAGE.load(Ordering::Relaxed) << 16)
     }
@@ -3886,6 +3970,12 @@ impl From<smp_runtime::Error> for SmpIpiLiveError {
 impl From<smp_ipi::Error> for SmpIpiLiveError {
     fn from(value: smp_ipi::Error) -> Self {
         Self::Ipi(value)
+    }
+}
+
+impl From<scheduler_smp::Error> for SmpIpiLiveError {
+    fn from(value: scheduler_smp::Error) -> Self {
+        Self::Scheduler(value)
     }
 }
 
@@ -3966,6 +4056,19 @@ struct SmpIpiLiveProof {
     lifecycle: smp_ipi::MultiApReceipt,
     retirement: smp_ipi::MultiGenerationRetirementReceipt,
     premature_reclaim_rejections: u64,
+    scheduler: Option<SchedulerSmpLiveProof>,
+}
+
+#[derive(Clone, Copy)]
+struct SchedulerSmpLiveProof {
+    before_park: SchedulerSmpSummary,
+    after_park: SchedulerSmpSummary,
+    bsp_trace: [u8; 2],
+    ap_trace: [u8; 6],
+    owner_epoch_sum: u32,
+    offline_target: u8,
+    transaction_ack_count: u32,
+    dispatch_ack_count: u32,
 }
 
 type SmpIpiExecutionReceipt = (
@@ -3974,6 +4077,7 @@ type SmpIpiExecutionReceipt = (
     [ScrubReceipt; smp_ipi::AP_COUNT],
     smp_ipi::MultiGenerationRetirementReceipt,
     u64,
+    Option<SchedulerSmpLiveProof>,
 );
 
 const SMP_IPI_ENTRY_WRITE_THROUGH: u64 = 1 << 3;
@@ -4306,6 +4410,216 @@ fn smp_ipi_deliver(
     Ok(snapshot)
 }
 
+fn scheduler_smp_cpu(value: u8) -> Result<SchedulerSmpCpuId, SmpIpiLiveError> {
+    SchedulerSmpCpuId::new(value).map_err(Into::into)
+}
+
+fn scheduler_smp_remote_ack(
+    ticket: SchedulerSmpTicket,
+    snapshot: &IpiSnapshot,
+) -> SchedulerSmpRemoteAck {
+    SchedulerSmpRemoteAck {
+        target_cpu: ticket.target_cpu,
+        attempt: snapshot.ack_attempt,
+        sequence: snapshot.ack_sequence,
+        operation: snapshot.ack_operation,
+        status: snapshot.ack_status,
+        error: snapshot.ack_error,
+        result: snapshot.result,
+    }
+}
+
+fn scheduler_smp_deliver_ticket(
+    scheduler: &mut SmpScheduler,
+    hardware: &mut LiveInterruptHardware,
+    period_femtoseconds: u64,
+    resource: &SmpIpiApResource,
+    ticket: SchedulerSmpTicket,
+) -> Result<IpiSnapshot, SmpIpiLiveError> {
+    if ticket.target_cpu != resource.target_apic_id as u8 {
+        return Err(scheduler_smp::Error::TicketMismatch.into());
+    }
+    let request = IpiRequest::canonical(
+        ticket.request_attempt,
+        ticket.request_sequence,
+        IpiOperation::CallFunction,
+        resource.target_apic_id,
+    );
+    let snapshot = smp_ipi_deliver(
+        hardware,
+        period_femtoseconds,
+        IpiOperation::CallFunction,
+        &request,
+        smp_ipi::ACK_ACCEPTED,
+        smp_ipi::ERROR_NONE,
+        smp_ipi::RESULT_CALL_ALLOWLIST_NOOP,
+    )?;
+    scheduler.acknowledge(ticket, scheduler_smp_remote_ack(ticket, &snapshot))?;
+    Ok(snapshot)
+}
+
+fn scheduler_smp_live_profile(
+    hardware: &mut LiveInterruptHardware,
+    access: &mut BootstrapTableMemory,
+    period_femtoseconds: u64,
+    resources: &[SmpIpiApResource; smp_ipi::AP_COUNT],
+) -> Result<SchedulerSmpLiveProof, SmpIpiLiveError> {
+    let mut scheduler = SmpScheduler::new();
+    let affinities = [0x01, 0x03, 0x02, 0x06, 0x04, 0x0c, 0x08, 0x01];
+    let owners = [0, 0, 1, 1, 2, 2, 3, 0];
+    let mut tasks = [SchedulerSmpTaskId::new(0, 1)?; scheduler_smp::TASK_CAPACITY];
+    for slot in 0..scheduler_smp::TASK_CAPACITY {
+        let id = scheduler.create_task(slot as u8, 1, 16, affinities[slot])?;
+        scheduler.activate(id, scheduler_smp_cpu(owners[slot])?)?;
+        tasks[slot] = id;
+    }
+    scheduler.block_runnable(tasks[1])?;
+    if scheduler
+        .select_least_loaded(scheduler_smp::ONLINE_MASK)?
+        .value()
+        != 3
+        || scheduler
+            .select_least_loaded(scheduler_smp::AP_MASK)?
+            .value()
+            != 3
+    {
+        return Err(scheduler_smp::Error::Invariant.into());
+    }
+
+    SMP_IPI_FAILURE_STAGE.store(100, Ordering::Relaxed);
+    access
+        .ensure_mapped(resources[0].layout.local())
+        .map_err(|_| smp::Error::PhysicalAccess)?;
+    let offline =
+        scheduler.stage_offline_probe(tasks[3], scheduler_smp::OFFLINE_PROBE_CPU, 3, 2)?;
+    let offline_request = IpiRequest::canonical(
+        offline.request_attempt,
+        offline.request_sequence,
+        IpiOperation::CallFunction,
+        u32::from(scheduler_smp::OFFLINE_PROBE_CPU),
+    );
+    smp_ipi_publish_request(&offline_request);
+    smp_apic_command(
+        hardware,
+        u32::from(scheduler_smp::OFFLINE_PROBE_CPU),
+        u32::from(IpiOperation::CallFunction.vector()),
+    )?;
+    match smp_ipi_wait_ack(hardware, period_femtoseconds, offline.request_attempt) {
+        Err(SmpIpiLiveError::Base(smp::Error::Timeout)) => scheduler.timeout(offline)?,
+        Err(error) => return Err(error),
+        Ok(_) => return Err(scheduler_smp::Error::TimeoutTarget.into()),
+    }
+    scheduler.reject_stale_ack(
+        offline,
+        SchedulerSmpRemoteAck {
+            target_cpu: offline.target_cpu,
+            attempt: offline.request_attempt,
+            sequence: offline.request_sequence,
+            operation: scheduler_smp::CALL_FUNCTION_OPERATION,
+            status: scheduler_smp::ACK_ACCEPTED,
+            error: scheduler_smp::ERROR_NONE,
+            result: scheduler_smp::CALL_FUNCTION_RESULT,
+        },
+    )?;
+
+    for (index, resource) in resources.iter().enumerate() {
+        let ticket = match index {
+            0 => scheduler.stage_wake(tasks[1], scheduler_smp_cpu(1)?, 3, 2)?,
+            1 => scheduler.stage_migration(tasks[3], scheduler_smp_cpu(2)?, 3, 2)?,
+            2 => scheduler.stage_migration(tasks[5], scheduler_smp_cpu(3)?, 3, 2)?,
+            _ => return Err(scheduler_smp::Error::Invariant.into()),
+        };
+        access
+            .ensure_mapped(resource.layout.local())
+            .map_err(|_| smp::Error::PhysicalAccess)?;
+        scheduler_smp_deliver_ticket(
+            &mut scheduler,
+            hardware,
+            period_femtoseconds,
+            resource,
+            ticket,
+        )?;
+    }
+    if [
+        scheduler.queue_len(scheduler_smp_cpu(1)?)?,
+        scheduler.queue_len(scheduler_smp_cpu(2)?)?,
+        scheduler.queue_len(scheduler_smp_cpu(3)?)?,
+    ] != [2, 2, 2]
+    {
+        return Err(scheduler_smp::Error::Invariant.into());
+    }
+
+    let mut ap_trace = [u8::MAX; 6];
+    let mut trace_index = 0usize;
+    for (index, resource) in resources.iter().enumerate() {
+        let cpu = scheduler_smp_cpu((index + 1) as u8)?;
+        access
+            .ensure_mapped(resource.layout.local())
+            .map_err(|_| smp::Error::PhysicalAccess)?;
+        for (attempt, request_sequence) in [(4, 3), (5, 4)] {
+            let ticket = scheduler.stage_dispatch(cpu, attempt, request_sequence)?;
+            ap_trace[trace_index] = ticket.task.slot;
+            trace_index += 1;
+            scheduler_smp_deliver_ticket(
+                &mut scheduler,
+                hardware,
+                period_femtoseconds,
+                resource,
+                ticket,
+            )?;
+            scheduler.complete_current(cpu)?;
+        }
+    }
+    let bsp_trace = [
+        scheduler.dispatch_local(scheduler_smp_cpu(0)?)?.slot,
+        scheduler.dispatch_local(scheduler_smp_cpu(0)?)?.slot,
+    ];
+    if bsp_trace != [0, 7] || ap_trace != [2, 1, 4, 3, 6, 5] {
+        return Err(scheduler_smp::Error::Invariant.into());
+    }
+    let stale = SchedulerSmpTaskId::new(tasks[0].slot, 2)?;
+    if scheduler.task_snapshot(stale) != Err(scheduler_smp::Error::GenerationStale) {
+        return Err(scheduler_smp::Error::Invariant.into());
+    }
+    let before_park = scheduler.summary();
+    if before_park.dead_count != 8
+        || before_park.idle_cpu_count != 4
+        || before_park.remote_ack_count != 9
+        || before_park.timeout_count != 1
+        || before_park.rollback_count != 1
+        || before_park.stale_rejection_count != 2
+    {
+        return Err(scheduler_smp::Error::Invariant.into());
+    }
+    let mut owner_epoch_sum = 0u32;
+    for id in tasks {
+        owner_epoch_sum = owner_epoch_sum
+            .checked_add(scheduler.task_snapshot(id)?.owner_epoch)
+            .ok_or(scheduler_smp::Error::Counter)?;
+    }
+    for value in (1..scheduler_smp::CPU_COUNT as u8).rev() {
+        scheduler.offline_idle_cpu(scheduler_smp_cpu(value)?)?;
+    }
+    let after_park = scheduler.summary();
+    if owner_epoch_sum != 19
+        || after_park.online_mask != 1
+        || after_park.dead_count != 8
+        || scheduler.validate().is_err()
+    {
+        return Err(scheduler_smp::Error::Invariant.into());
+    }
+    Ok(SchedulerSmpLiveProof {
+        before_park,
+        after_park,
+        bsp_trace,
+        ap_trace,
+        owner_epoch_sum,
+        offline_target: scheduler_smp::OFFLINE_PROBE_CPU,
+        transaction_ack_count: 3,
+        dispatch_ack_count: 6,
+    })
+}
+
 fn smp_ipi_validate_post_ap_resources(
     access: &mut BootstrapTableMemory,
     layout: smp_runtime::ResourceLayout,
@@ -4627,11 +4941,18 @@ fn smp_ipi_stop_ap(
     access: &mut BootstrapTableMemory,
     period_femtoseconds: u64,
     resource: &SmpIpiApResource,
+    attempt: u64,
+    sequence: u64,
 ) -> Result<(RuntimeMailboxSnapshot, IpiSnapshot), SmpIpiLiveError> {
     access
         .ensure_mapped(resource.layout.local())
         .map_err(|_| smp::Error::PhysicalAccess)?;
-    let request = IpiRequest::canonical(4, 3, IpiOperation::Stop, resource.target_apic_id);
+    let request = IpiRequest::canonical(
+        attempt,
+        sequence,
+        IpiOperation::Stop,
+        resource.target_apic_id,
+    );
     let _ = smp_ipi_deliver(
         hardware,
         period_femtoseconds,
@@ -5431,6 +5752,7 @@ fn run_smp_ipi(
     handoff: &poole_handoff::Handoff<'_>,
     core: poole_handoff::CoreRecord,
     observed_cr3: u64,
+    scheduler_mode: bool,
 ) -> Result<SmpIpiLiveProof, SmpIpiLiveError> {
     SMP_IPI_FAILURE_DETAIL.store(0, Ordering::Relaxed);
     SMP_IPI_FAILURE_STAGE.store(1, Ordering::Relaxed);
@@ -5605,6 +5927,19 @@ fn run_smp_ipi(
             )?;
         }
 
+        let scheduler = if scheduler_mode {
+            Some(scheduler_smp_live_profile(
+                &mut hardware,
+                &mut page_access,
+                period,
+                &resources,
+            )?)
+        } else {
+            None
+        };
+        let shootdown_attempt = if scheduler_mode { 6 } else { 3 };
+        let shootdown_sequence = if scheduler_mode { 5 } else { 2 };
+
         let requests = [
             resources[0].shootdown,
             resources[1].shootdown,
@@ -5616,8 +5951,12 @@ fn run_smp_ipi(
         page_access
             .ensure_mapped(resources[0].layout.local())
             .map_err(|_| smp::Error::PhysicalAccess)?;
-        let offline_request =
-            IpiRequest::canonical(3, 2, IpiOperation::Shootdown, smp_ipi::OFFLINE_APIC_ID);
+        let offline_request = IpiRequest::canonical(
+            shootdown_attempt,
+            shootdown_sequence,
+            IpiOperation::Shootdown,
+            smp_ipi::OFFLINE_APIC_ID,
+        );
         smp_ipi_publish_request(&offline_request);
         smp_apic_command(
             &mut hardware,
@@ -5669,8 +6008,12 @@ fn run_smp_ipi(
                 smp_ipi::SHOOTDOWN_STATE_OFFSET,
                 smp_ipi::SHOOTDOWN_STATE_ARMED,
             );
-            let request =
-                IpiRequest::canonical(3, 2, IpiOperation::Shootdown, resource.target_apic_id);
+            let request = IpiRequest::canonical(
+                shootdown_attempt,
+                shootdown_sequence,
+                IpiOperation::Shootdown,
+                resource.target_apic_id,
+            );
             let ack = smp_ipi_deliver(
                 &mut hardware,
                 period,
@@ -5741,8 +6084,14 @@ fn run_smp_ipi(
         let mut ipis: [Option<IpiSnapshot>; smp_ipi::AP_COUNT] = [None; smp_ipi::AP_COUNT];
         for (index, resource) in resources.iter().enumerate() {
             SMP_IPI_FAILURE_STAGE.store(80 + index as u32 * 3, Ordering::Relaxed);
-            let (mailbox, ipi) =
-                smp_ipi_stop_ap(&mut hardware, &mut page_access, period, resource)?;
+            let (mailbox, ipi) = smp_ipi_stop_ap(
+                &mut hardware,
+                &mut page_access,
+                period,
+                resource,
+                if scheduler_mode { 7 } else { 4 },
+                if scheduler_mode { 6 } else { 3 },
+            )?;
             SMP_IPI_FAILURE_STAGE.store(81 + index as u32 * 3, Ordering::Relaxed);
             smp_runtime::validate_mailbox(
                 &mailbox,
@@ -5753,7 +6102,15 @@ fn run_smp_ipi(
                 bsp_tsc_after,
             )?;
             SMP_IPI_FAILURE_STAGE.store(82 + index as u32 * 3, Ordering::Relaxed);
-            smp_ipi::validate_final(&ipi, resource.target_apic_id, u32::from(index == 0))?;
+            if scheduler_mode {
+                smp_ipi::validate_scheduler_final(
+                    &ipi,
+                    resource.target_apic_id,
+                    u32::from(index == 0),
+                )?;
+            } else {
+                smp_ipi::validate_final(&ipi, resource.target_apic_id, u32::from(index == 0))?;
+            }
             mailboxes[index] = Some(mailbox);
             ipis[index] = Some(ipi);
         }
@@ -5777,6 +6134,7 @@ fn run_smp_ipi(
             ],
             retirement,
             premature_reclaim_rejections,
+            scheduler,
         ))
     })();
 
@@ -5801,7 +6159,7 @@ fn run_smp_ipi(
 
     let mut post_validation_error = None;
     let mut cleanup_failure_stage = 0u32;
-    if let Ok((mailboxes, _, _, _, _)) = &operation {
+    if let Ok((mailboxes, _, _, _, _, _)) = &operation {
         lifecycle.parked(parked_mask)?;
         SMP_IPI_FAILURE_STAGE.store(6, Ordering::Relaxed);
         for (index, resource) in resources.iter().enumerate() {
@@ -5870,7 +6228,8 @@ fn run_smp_ipi(
         return Err(error);
     }
     SMP_IPI_FAILURE_STAGE.store(61, Ordering::Relaxed);
-    let (mailboxes, ipis, old_releases, retirement, premature_reclaim_rejections) = operation;
+    let (mailboxes, ipis, old_releases, retirement, premature_reclaim_rejections, scheduler) =
+        operation;
     let mut operations: [Option<SmpIpiApOperationProof>; smp_ipi::AP_COUNT] =
         [None; smp_ipi::AP_COUNT];
     for index in 0..smp_ipi::AP_COUNT {
@@ -5906,6 +6265,7 @@ fn run_smp_ipi(
         lifecycle: lifecycle_receipt,
         retirement,
         premature_reclaim_rejections,
+        scheduler,
     })
 }
 
@@ -6080,6 +6440,7 @@ extern "C" fn poole_kernel_emergency_panic(code: u32) -> ! {
         0x1017 => PanicCode::Scheduler,
         0x1018 => PanicCode::SchedulerPreempt,
         0x1019 => PanicCode::SchedulerDeferred,
+        0x101a => PanicCode::SchedulerSmp,
         _ => PanicCode::UnexpectedReturn,
     };
     let disposition = PANIC_STATE.begin(code);
@@ -6214,6 +6575,14 @@ extern "C" fn poole_kernel_rust_entry(
             ring: &EARLY_RING,
         });
         logger.write_bytes(&PKSCHED3_EARLY);
+    }
+    if trap_scenario == DevelopmentTrapScenario::SchedulerSmp {
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        logger.write_bytes(&PKSCHED4_EARLY);
     }
 
     if let Err(error) = validate_entry_envelope(handoff_address, handoff_length, magic, stack_top) {
@@ -8389,7 +8758,7 @@ extern "C" fn poole_kernel_rust_entry(
                 debugcon: &mut debugcon,
                 ring: &EARLY_RING,
             });
-            let proof = match run_smp_ipi(&decoded, validated.core, observed_cr3) {
+            let proof = match run_smp_ipi(&decoded, validated.core, observed_cr3, false) {
                 Ok(value) => value,
                 Err(error) => {
                     logger.write_bytes(&PKSMP3_DENIED);
@@ -8564,7 +8933,7 @@ extern "C" fn poole_kernel_rust_entry(
             debugcon: &mut debugcon,
             ring: &EARLY_RING,
         });
-        let proof = match run_smp_ipi(&decoded, validated.core, observed_cr3) {
+        let proof = match run_smp_ipi(&decoded, validated.core, observed_cr3, false) {
             Ok(value) => value,
             Err(error) => {
                 logger.write_bytes(&PKSMP5_DENIED);
@@ -8771,6 +9140,132 @@ extern "C" fn poole_kernel_rust_entry(
         logger.write_decimal_u64(resource_pages + frame_pages);
         logger.write_bytes(&PKSMP5_RELEASE_TAIL);
         logger.write_bytes(&PKSMP5_RESULT);
+        halt_forever()
+    }
+
+    if trap_scenario == DevelopmentTrapScenario::SchedulerSmp {
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        let proof = match run_smp_ipi(&decoded, validated.core, observed_cr3, true) {
+            Ok(value) => value,
+            Err(error) => {
+                logger.write_bytes(&PKSCHED4_DENIED);
+                let reason =
+                    u64::from(error.code()) | SMP_IPI_FAILURE_DETAIL.load(Ordering::Relaxed);
+                logger.write_hex_u64(reason);
+                logger.write_bytes(&PKSCHED4_DENIED_TAIL);
+                poole_kernel_emergency_panic(PanicCode::SchedulerSmp as u32)
+            }
+        };
+        let scheduler = proof.scheduler.unwrap_or_else(|| {
+            logger.write_bytes(&PKSCHED4_DENIED);
+            logger.write_str("scheduler_evidence");
+            logger.write_bytes(&PKSCHED4_DENIED_TAIL);
+            poole_kernel_emergency_panic(PanicCode::SchedulerSmp as u32)
+        });
+        if proof.lifecycle.online_mask != smp_ipi::TARGET_CPU_MASK
+            || proof.lifecycle.quiesced_mask != smp_ipi::TARGET_CPU_MASK
+            || proof.lifecycle.parked_mask != smp_ipi::TARGET_CPU_MASK
+            || proof.lifecycle.released_mask != smp_ipi::TARGET_CPU_MASK
+            || scheduler.after_park.online_mask != 1
+        {
+            logger.write_bytes(&PKSCHED4_DENIED);
+            logger.write_str("lifecycle");
+            logger.write_bytes(&PKSCHED4_DENIED_TAIL);
+            poole_kernel_emergency_panic(PanicCode::SchedulerSmp as u32)
+        }
+
+        logger.write_bytes(&PKSCHED4_TOPOLOGY);
+        logger.write_decimal_u64(proof.processor_count);
+        logger.write_bytes(&PKSCHED4_ENABLED);
+        logger.write_decimal_u64(proof.enabled_processor_count);
+        logger.write_bytes(&PKSCHED4_BSP);
+        logger.write_decimal_u64(u64::from(proof.bsp_apic_id));
+        logger.write_bytes(&PKSCHED4_TARGETS);
+        logger.write_decimal_u64(u64::from(scheduler.before_park.idle_cpu_count));
+        logger.write_bytes(b"\n");
+
+        logger.write_bytes(&PKSCHED4_TRANSFER);
+        logger.write_decimal_u64(u64::from(scheduler.before_park.remote_wake_count));
+        logger.write_bytes(&PKSCHED4_MIGRATIONS);
+        logger.write_decimal_u64(u64::from(scheduler.before_park.migration_count));
+        logger.write_bytes(&PKSCHED4_TRANSACTION_ACKS);
+        logger.write_decimal_u64(u64::from(scheduler.transaction_ack_count));
+        logger.write_bytes(&PKSCHED4_REMOTE_ACKS);
+        logger.write_decimal_u64(u64::from(scheduler.before_park.remote_ack_count));
+        logger.write_bytes(&PKSCHED4_TRANSFER_TAIL);
+
+        logger.write_bytes(&PKSCHED4_DISPATCH);
+        logger.write_decimal_u64(u64::from(scheduler.bsp_trace[0]));
+        logger.write_bytes(&PKSCHED4_COMMA);
+        logger.write_decimal_u64(u64::from(scheduler.bsp_trace[1]));
+        logger.write_bytes(&PKSCHED4_AP_TRACE);
+        logger.write_decimal_u64(u64::from(scheduler.ap_trace[0]));
+        logger.write_bytes(&PKSCHED4_CPU1);
+        logger.write_decimal_u64(u64::from(scheduler.ap_trace[1]));
+        logger.write_bytes(&PKSCHED4_CPU2);
+        logger.write_decimal_u64(u64::from(scheduler.ap_trace[2]));
+        logger.write_bytes(&PKSCHED4_CPU2);
+        logger.write_decimal_u64(u64::from(scheduler.ap_trace[3]));
+        logger.write_bytes(&PKSCHED4_CPU3);
+        logger.write_decimal_u64(u64::from(scheduler.ap_trace[4]));
+        logger.write_bytes(&PKSCHED4_CPU3);
+        logger.write_decimal_u64(u64::from(scheduler.ap_trace[5]));
+        logger.write_bytes(&PKSCHED4_BSP_DISPATCHES);
+        logger.write_decimal_u64(u64::from(scheduler.before_park.bsp_dispatch_count));
+        logger.write_bytes(&PKSCHED4_AP_DISPATCHES);
+        logger.write_decimal_u64(u64::from(scheduler.before_park.ap_dispatch_count));
+        logger.write_bytes(&PKSCHED4_DISPATCH_ACKS);
+        logger.write_decimal_u64(u64::from(scheduler.dispatch_ack_count));
+        logger.write_bytes(&PKSCHED4_DISPATCH_TAIL);
+        logger.write_bytes(&PKSCHED4_FAIRNESS);
+
+        logger.write_bytes(&PKSCHED4_ROLLBACK);
+        logger.write_decimal_u64(u64::from(scheduler.offline_target));
+        logger.write_bytes(&PKSCHED4_TIMEOUTS);
+        logger.write_decimal_u64(u64::from(scheduler.before_park.timeout_count));
+        logger.write_bytes(&PKSCHED4_ROLLBACKS);
+        logger.write_decimal_u64(u64::from(scheduler.before_park.rollback_count));
+        logger.write_bytes(&PKSCHED4_STALE);
+        logger.write_decimal_u64(u64::from(scheduler.before_park.stale_rejection_count));
+        logger.write_bytes(&PKSCHED4_ROLLBACK_TAIL);
+
+        let mut resource_pages = 0u64;
+        let mut frame_pages = 0u64;
+        let mut zeroed_bytes = 0u64;
+        let mut verified_bytes = 0u64;
+        for operation in proof.operations {
+            resource_pages += operation.resource_release_receipt.page_count;
+            frame_pages += operation.old_frame_release_receipt.page_count
+                + operation.new_frame_release_receipt.page_count;
+            zeroed_bytes += operation.resource_release_receipt.zeroed_bytes
+                + operation.old_frame_release_receipt.zeroed_bytes
+                + operation.new_frame_release_receipt.zeroed_bytes;
+            verified_bytes += operation.resource_release_receipt.verified_bytes
+                + operation.old_frame_release_receipt.verified_bytes
+                + operation.new_frame_release_receipt.verified_bytes;
+        }
+        logger.write_bytes(&PKSCHED4_CLEANUP);
+        logger.write_decimal_u64(u64::from(scheduler.after_park.dead_count));
+        logger.write_bytes(&PKSCHED4_IDLE);
+        logger.write_decimal_u64(u64::from(scheduler.before_park.idle_cpu_count));
+        logger.write_bytes(&PKSCHED4_OWNER_EPOCH);
+        logger.write_decimal_u64(u64::from(scheduler.owner_epoch_sum));
+        logger.write_bytes(&PKSCHED4_ONLINE_AFTER);
+        logger.write_decimal_u64(resource_pages);
+        logger.write_bytes(&PKSCHED4_FRAME_PAGES);
+        logger.write_decimal_u64(frame_pages);
+        logger.write_bytes(&PKSCHED4_TOTAL_PAGES);
+        logger.write_decimal_u64(resource_pages + frame_pages);
+        logger.write_bytes(&PKSCHED4_ZEROED);
+        logger.write_decimal_u64(zeroed_bytes);
+        logger.write_bytes(&PKSCHED4_VERIFIED);
+        logger.write_decimal_u64(verified_bytes);
+        logger.write_bytes(&PKSCHED4_CLEANUP_TAIL);
+        logger.write_bytes(&PKSCHED4_RESULT);
         halt_forever()
     }
 
@@ -9250,6 +9745,9 @@ extern "C" fn poole_kernel_rust_entry(
         }
         DevelopmentTrapScenario::SchedulerDeferred => {
             poole_kernel_emergency_panic(PanicCode::SchedulerDeferred as u32)
+        }
+        DevelopmentTrapScenario::SchedulerSmp => {
+            poole_kernel_emergency_panic(PanicCode::SchedulerSmp as u32)
         }
     }
 }

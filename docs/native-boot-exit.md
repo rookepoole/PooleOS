@@ -16,7 +16,7 @@ Only `EFI_INVALID_PARAMETER` may retry, with a fresh map, and at most four attem
 
 On success, PooleBoot disables interrupts, rechecks the retained PBP1 bytes, emits evidence through direct COM1 and QEMU debugcon port I/O, records zero firmware calls after exit, and halts forever at `STOP BEFORE TRANSFER`.
 
-The retained objects are the loaded kernel pages, six distinct PBART1 page ranges, four private page-table pages, 32 guarded stack pages, and 256 read-only handoff pages. Their exact addresses, artifact roles/digests, firmware RSDP record, and mapping fingerprint are cross-bound between `PKMAP2`, the final PBP1 records, and the live marker transcript.
+The retained objects are the loaded kernel pages, six distinct PBART1 page ranges, four private page-table pages, 36 guarded stack pages, and 256 read-only handoff pages. Their exact addresses, artifact roles/digests, firmware RSDP record, and mapping fingerprint are cross-bound between `PKMAP2`, the final PBP1 records, and the live marker transcript.
 
 ## Non-Claims
 

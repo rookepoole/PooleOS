@@ -1461,6 +1461,41 @@ pub fn validate_final(
     Ok(())
 }
 
+pub fn validate_scheduler_final(
+    snapshot: &IpiSnapshot,
+    expected_target_apic_id: u32,
+    timeout_count: u32,
+) -> Result<(), Error> {
+    if snapshot.ack_attempt != 7
+        || snapshot.ack_sequence != 6
+        || snapshot.last_accepted_sequence != 6
+        || snapshot.delivery_count != 7
+        || snapshot.eoi_count != 7
+        || snapshot.accepted_count != 6
+        || snapshot.denied_count != 1
+        || snapshot.reschedule_count != 0
+        || snapshot.shootdown_count != 1
+        || snapshot.call_function_count != 3
+        || snapshot.diagnostic_count != 1
+        || snapshot.panic_count != 0
+        || snapshot.stop_count != 1
+        || snapshot.response_checksum != response_checksum(snapshot)
+    {
+        return Err(Error::Counter);
+    }
+    let mut normalized = *snapshot;
+    normalized.ack_attempt = LIVE_FINAL_ATTEMPT;
+    normalized.ack_sequence = LIVE_FINAL_SEQUENCE;
+    normalized.last_accepted_sequence = LIVE_FINAL_SEQUENCE;
+    normalized.delivery_count = LIVE_DELIVERY_COUNT;
+    normalized.eoi_count = LIVE_DELIVERY_COUNT;
+    normalized.accepted_count = LIVE_ACCEPTED_COUNT;
+    normalized.denied_count = LIVE_DENIED_COUNT;
+    normalized.call_function_count = 0;
+    normalized.response_checksum = response_checksum(&normalized);
+    validate_final(&normalized, expected_target_apic_id, timeout_count)
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TransactionStage {
     Empty,

@@ -56,10 +56,10 @@ The canonical development bundle binds these exact SHA-256 identities:
 
 | Identity | SHA-256 |
 | --- | --- |
-| Canonical stripped PKELF1 | `FC13CF79E94318FAE10AFF9E7198036B30C587CF2BFD10457A045ACC6EB7665E` |
-| Preferred loaded image | `60BD1D4B94FD8D6BC55A205F332E5DE629BB61CEADE26609E212EEE8B4EEA19C` |
+| Canonical stripped PKELF1 | `9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168` |
+| Preferred loaded image | `A8A26DF55F902FB8DB7F07C3B953703734AA7EC2C410C1548B3297CECFA6853A` |
 | Build ID text | `4E5AC7AB5D58D008BAB3379AE41EB4B22543001FAA843E7C529195BD3E4909CC` |
-| Full split-debug ELF | `334C5769B213E20EF3D6EFA8B3EEEF3F9D054868DADCF7257D9CF6F633DCF174` |
+| Full split-debug ELF | `AF7A1AD3A3111AEF73E9E7737EDAD156E12F626DA6550BC9EBD01507F08334C3` |
 | `native/kernel/manifest.pkm` | `32FFBCF9EADF8DDE80582F8EB7864C7791A8A0B3BE076F0547F145E4A7603678` |
 
 The qualification builds the full debug product twice and requires identical bytes. Both debug builds canonicalize to the exact stripped PKELF1 bytes. A separate release build must have no `.symtab` and no `.debug*` sections and must canonicalize to those same bytes.

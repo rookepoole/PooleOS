@@ -346,10 +346,21 @@ ADDED_REQUIREMENTS = [
     {
         "id": "ADD-N12-SCHED-SMP-001",
         "phase_id": "N12",
-        "requirement": "Integrate the scheduler and deferred-work foundations with AP-local run queues and workers, explicit CPU ownership transfer, remote reschedule IPI delivery and acknowledgement, generation-safe cross-CPU wake and migration, offline and timeout rollback, topology-aware balancing, per-CPU idle ownership, and complete park/scrub/release teardown before SMP scheduling or migration can be promoted.",
+        "requirement": "Integrate the scheduler with AP-local run queues, explicit CPU ownership transfer, remote reschedule IPI delivery and acknowledgement, generation-safe cross-CPU wake and migration, offline and timeout rollback, topology-aware balancing, per-CPU idle ownership, and complete park/scrub/release teardown before bounded SMP scheduling or migration can be promoted.",
         "basis": [
             "Cycle 144 PKSCHED3 intentionally remains BSP-only",
+            "Cycle 145 PKSCHED4 exact-topology SMP scheduler closeout",
             "PKSMP5 fixed-topology IPI and remote-invalidation foundation",
+            "master checklist sections 031-034",
+        ],
+    },
+    {
+        "id": "ADD-N12-SCHED-AP-WORKERS-001",
+        "phase_id": "N12",
+        "requirement": "Extend deferred work to AP-local workers and real kernel driver/service consumers with explicit queue and CPU ownership, remote wake and cancellation, flush and reclamation ordering, hot-unplug/offline rollback, starvation bounds, exact worker-stack cleanup, and independent SMP stress evidence without introducing arbitrary callbacks or production capability authority.",
+        "basis": [
+            "Cycle 145 PKSCHED4 proves AP-local task dispatch but explicitly excludes deferred workers and driver/service consumers",
+            "Cycle 144 PKSCHED3 bounded BSP deferred-work foundation",
             "master checklist sections 031-034",
         ],
     },
@@ -613,7 +624,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path, default=ROOT / SOURCE_RELATIVE)
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pooleos_native_checklist_coverage.json")
-    parser.add_argument("--status-date", default="2026-07-30")
+    parser.add_argument("--status-date", default="2026-08-08")
     args = parser.parse_args()
     artifact = build_coverage(args.source, args.status_date)
     args.out.parent.mkdir(parents=True, exist_ok=True)

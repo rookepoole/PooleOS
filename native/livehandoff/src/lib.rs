@@ -22,7 +22,7 @@ pub const MAX_DESCRIPTOR_BYTES: usize = 256;
 pub const MAX_MEMORY_ENTRIES: usize = 16_384;
 pub const MAX_TRANSCRIPT_CHUNK_BYTES: usize = 64;
 pub const RETAINED_TABLE_PAGE_COUNT: u32 = 4;
-pub const RETAINED_STACK_PAGE_COUNT: u32 = 32;
+pub const RETAINED_STACK_PAGE_COUNT: u32 = 36;
 pub const PROFILE_ARTIFACT_COUNT: usize = 10;
 pub const PROFILE_FIRMWARE_TABLE_COUNT: usize = 1;
 pub const FIRMWARE_TABLE_COPIED: u32 = 1 << 0;
@@ -911,7 +911,13 @@ mod tests {
     fn exit_raw_map(stride: usize) -> std::vec::Vec<u8> {
         let mut value = descriptor(2, 0x0020_0000, 48, 4, stride);
         value.extend(descriptor(2, 0x0030_0000, 4, 4, stride));
-        value.extend(descriptor(2, 0x0040_0000, 32, 4, stride));
+        value.extend(descriptor(
+            2,
+            0x0040_0000,
+            u64::from(RETAINED_STACK_PAGE_COUNT),
+            4,
+            stride,
+        ));
         value.extend(descriptor(2, 0x0050_0000, 256, 4, stride));
         value.extend(descriptor(11, 0x8000_0000, 1024, 1, stride));
         value
@@ -1155,6 +1161,7 @@ mod tests {
         assert_eq!(summary.firmware_table_count, 1);
         assert_eq!(summary.memory_entry_count, 5);
         assert_eq!(summary.artifact_count, PROFILE_ARTIFACT_COUNT);
+        assert_eq!(retained().stack_page_count, RETAINED_STACK_PAGE_COUNT);
         let decoded = pbp1::decode(bytes).unwrap();
         assert_eq!(validate_exit_development_profile(&decoded), Ok(()));
         let core = decoded.core().unwrap();

@@ -53,10 +53,10 @@
         "entry_symbol": {"const": "poole_kernel_entry"},
         "entry_offset": {"const": 40960},
         "image_memory_bytes": {"const": 557056},
-        "canonical_file_bytes": {"const": 460424},
+        "canonical_file_bytes": {"const": 476808},
         "maximum_linked_file_bytes": {"const": 8388608},
         "maximum_relocations": {"const": 4096},
-        "build_id": {"const": "PKBUILD1-CYCLE144-N12-SCHED-DEFER-V0001-0001"},
+        "build_id": {"const": "PKBUILD1-CYCLE145-N12-SCHED-SMP-V0001-000001"},
         "segment_boundaries": {
           "type": "object",
           "additionalProperties": false,
@@ -64,8 +64,8 @@
           "properties": {
             "read_only_end": {"const": 40960},
             "text_start": {"const": 40960},
-            "text_end": {"const": 409600},
-            "relro_end": {"const": 458752},
+            "text_end": {"const": 417792},
+            "relro_end": {"const": 475136},
             "image_end": {"const": 557056}
           }
         },

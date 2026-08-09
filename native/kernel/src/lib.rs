@@ -24,6 +24,7 @@ pub mod revalidation;
 pub mod scheduler;
 pub mod scheduler_deferred;
 pub mod scheduler_preempt;
+pub mod scheduler_smp;
 pub mod smp;
 pub mod smp_ipi;
 pub mod smp_runtime;
@@ -43,9 +44,10 @@ pub const XSTATE_EXCEPTION_CONTRACT_ID: &str = "PKXEXC1";
 pub const SCHEDULER_CONTRACT_ID: &str = scheduler::CONTRACT_ID;
 pub const SCHEDULER_DEFERRED_CONTRACT_ID: &str = scheduler_deferred::CONTRACT_ID;
 pub const SCHEDULER_PREEMPT_CONTRACT_ID: &str = scheduler_preempt::CONTRACT_ID;
+pub const SCHEDULER_SMP_CONTRACT_ID: &str = scheduler_smp::CONTRACT_ID;
 #[used]
 #[unsafe(link_section = ".text.pkbuild_literal")]
-static BUILD_ID_BYTES: [u8; 44] = *b"PKBUILD1-CYCLE144-N12-SCHED-DEFER-V0001-0001";
+static BUILD_ID_BYTES: [u8; 44] = *b"PKBUILD1-CYCLE145-N12-SCHED-SMP-V0001-000001";
 pub const BUILD_ID: &[u8] = &BUILD_ID_BYTES;
 pub const ENTRY_OFFSET: u64 = 0xa000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
@@ -64,7 +66,7 @@ pub const KERNEL_TSS_SELECTOR: u16 = 0x18;
 pub const GDT_LIMIT: u16 = 39;
 pub const IDT_LIMIT: u16 = 4095;
 pub const IST_STACK_BYTES: u64 = 8192;
-pub const BOOTSTRAP_STACK_PAGE_COUNT: u64 = 32;
+pub const BOOTSTRAP_STACK_PAGE_COUNT: u64 = 36;
 pub const INSTALLED_EXCEPTION_GATE_COUNT: u16 = 5;
 pub const INSTALLED_XSTATE_EXCEPTION_GATE_COUNT: u16 = 8;
 pub const INSTALLED_INTERRUPT_GATE_COUNT: u16 = 8;
@@ -101,6 +103,7 @@ pub enum PanicCode {
     Scheduler = 0x1017,
     SchedulerPreempt = 0x1018,
     SchedulerDeferred = 0x1019,
+    SchedulerSmp = 0x101a,
     UnexpectedReturn = 0x10ff,
 }
 
@@ -125,6 +128,7 @@ pub enum DevelopmentTrapScenario {
     Scheduler = 15,
     SchedulerPreempt = 16,
     SchedulerDeferred = 17,
+    SchedulerSmp = 18,
 }
 
 macro_rules! scenario_label {
@@ -153,6 +157,7 @@ scenario_label!(SCENARIO_SMP_IPI, b"smp_ipi");
 scenario_label!(SCENARIO_SCHEDULER, b"scheduler");
 scenario_label!(SCENARIO_SCHEDULER_PREEMPT, b"scheduler_preempt");
 scenario_label!(SCENARIO_SCHEDULER_DEFERRED, b"scheduler_deferred");
+scenario_label!(SCENARIO_SCHEDULER_SMP, b"scheduler_smp");
 
 const fn scenario_label_text(bytes: &'static [u8]) -> &'static str {
     // SAFETY: every caller supplies an ASCII byte string declared immediately above.
@@ -180,6 +185,7 @@ impl DevelopmentTrapScenario {
             15 => Some(Self::Scheduler),
             16 => Some(Self::SchedulerPreempt),
             17 => Some(Self::SchedulerDeferred),
+            18 => Some(Self::SchedulerSmp),
             _ => None,
         }
     }
@@ -204,6 +210,7 @@ impl DevelopmentTrapScenario {
             Self::Scheduler => scenario_label_text(&SCENARIO_SCHEDULER),
             Self::SchedulerPreempt => scenario_label_text(&SCENARIO_SCHEDULER_PREEMPT),
             Self::SchedulerDeferred => scenario_label_text(&SCENARIO_SCHEDULER_DEFERRED),
+            Self::SchedulerSmp => scenario_label_text(&SCENARIO_SCHEDULER_SMP),
         }
     }
 }
@@ -1775,7 +1782,11 @@ mod tests {
             DevelopmentTrapScenario::from_selector(17),
             Some(DevelopmentTrapScenario::SchedulerDeferred)
         );
-        assert_eq!(DevelopmentTrapScenario::from_selector(18), None);
+        assert_eq!(
+            DevelopmentTrapScenario::from_selector(18),
+            Some(DevelopmentTrapScenario::SchedulerSmp)
+        );
+        assert_eq!(DevelopmentTrapScenario::from_selector(19), None);
     }
 
     #[test]

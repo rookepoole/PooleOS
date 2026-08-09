@@ -33,6 +33,11 @@ name = "pksched3-probe"
 path = "src/bin/pksched3_probe.rs"
 required-features = ["host-probe"]
 
+[[bin]]
+name = "pksched4-probe"
+path = "src/bin/pksched4_probe.rs"
+required-features = ["host-probe"]
+
 [dependencies]
 poole-boot-trust = { path = "../trust" }
 poole-bootload = { path = "../bootload" }

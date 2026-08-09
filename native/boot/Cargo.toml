@@ -25,6 +25,7 @@ development-smp-ipi = ["development-transfer"]
 development-scheduler = ["development-transfer"]
 development-scheduler-preempt = ["development-transfer"]
 development-scheduler-deferred = ["development-transfer"]
+development-scheduler-smp = ["development-transfer"]
 
 [lib]
 name = "pooleboot"

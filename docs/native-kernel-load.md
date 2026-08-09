@@ -91,13 +91,13 @@ as persistent authority. PBTRUST1 is separate from PREC1 boot-attempt state.
 Before the first exit attempt, PooleBoot allocates and zeroes all storage needed
 after boot services become unavailable:
 
-- 66 kernel pages;
+- 136 kernel pages;
 - six distinct PBART1 page ranges, one page each in the canonical fixture;
 - one exact-file PSM1 range;
 - one exact-file PBTP1 range;
 - one exact-file PBTS1 range;
 - four PKMAP2 page-table pages;
-- fourteen kernel-stack pages with one absent guard page on each side;
+- 36 kernel-stack pages with one absent guard page on each side;
 - a 256-page, one-MiB handoff allocation;
 - fixed one-MiB raw-map and 640-KiB normalized-map work pools.
 

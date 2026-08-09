@@ -173,12 +173,26 @@ def _linked_invlpg_audit(toolchain_root: Path, expected_kernel: bytes, target_di
     if completed.returncode != 0:
         raise QualificationError("PKSMP5 linked disassembly failed")
     result = _linked_invlpg_scope(completed.stdout.decode("ascii", errors="replace").replace("\r\n", "\n"))
+    llvm_objdump = candidates[0]
+    try:
+        llvm_objdump_path = llvm_objdump.relative_to(ROOT)
+    except ValueError:
+        logical_toolchain_root = ROOT / ".toolchains"
+        try:
+            tool_relative = llvm_objdump.resolve(strict=True).relative_to(
+                logical_toolchain_root.resolve(strict=True)
+            )
+        except ValueError as error:
+            raise QualificationError(
+                "PKSMP5 llvm-objdump escaped the workspace-local toolchain"
+            ) from error
+        llvm_objdump_path = logical_toolchain_root.relative_to(ROOT) / tool_relative
     result.update({
         "linked_sha256": smp_ipi.sha256_bytes(linked), "linked_byte_count": len(linked),
         "canonical_sha256": smp_ipi.sha256_bytes(canonical), "canonical_byte_count": len(canonical),
         "relocation_count": plan.relocation_count,
-        "llvm_objdump_path": candidates[0].relative_to(ROOT).as_posix(),
-        "llvm_objdump_sha256": smp_ipi.sha256_bytes(candidates[0].read_bytes()),
+        "llvm_objdump_path": llvm_objdump_path.as_posix(),
+        "llvm_objdump_sha256": smp_ipi.sha256_bytes(llvm_objdump.read_bytes()),
     })
     return result
 

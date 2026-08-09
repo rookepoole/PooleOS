@@ -65,7 +65,8 @@ PKMSR1 executes zero MSR or control writes. The shared linked kernel contains
 43 `RDMSR` sites: twenty in the established CPU/entry policy paths, one each in
 the separately selected PKSMP1 and PKSMP2 lifecycles, and three isolated to the
 selector-14 PKSMP5 protected-mode trampoline, long-mode trampoline, and BSP
-transaction. Six more are isolated to the PKSCHED1 live context probe, which
+transaction; selector-18 PKSCHED4 reuses those exact sites without adding a
+privileged instruction site. Six more are isolated to the PKSCHED1 live context probe, which
 observes FS base, GS base, and kernel GS base before and after switching.
 Six more are isolated to the PKSCHED2 preemption launcher, which performs the
 same before-and-after FS/GS observation around the exact interrupt-frame switch.
@@ -73,6 +74,7 @@ Six more are isolated to PKSCHED3: three in worker preparation and three in
 worker clearing, binding before-and-after FS/GS ownership around deferred work.
 It contains two typed `IA32_APIC_BASE` `WRMSR` sites in the separately selected
 PKIRQ1 `InterruptTime` branch and one `IA32_EFER` long-mode-enablement write in
-the separately selected selector-14 PKSMP5 trampoline. Source and per-function linked
+the separately selected selector-14 PKSMP5 trampoline, also reused by selector-18
+PKSCHED4. Source and per-function linked
 audits bind every isolation. There are zero signatures, authority grants, authorized
 actions, firmware calls, and physical-media writes in this profile.
