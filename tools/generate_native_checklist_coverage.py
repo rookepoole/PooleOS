@@ -344,6 +344,16 @@ ADDED_REQUIREMENTS = [
         ],
     },
     {
+        "id": "ADD-N12-SCHED-SMP-001",
+        "phase_id": "N12",
+        "requirement": "Integrate the scheduler and deferred-work foundations with AP-local run queues and workers, explicit CPU ownership transfer, remote reschedule IPI delivery and acknowledgement, generation-safe cross-CPU wake and migration, offline and timeout rollback, topology-aware balancing, per-CPU idle ownership, and complete park/scrub/release teardown before SMP scheduling or migration can be promoted.",
+        "basis": [
+            "Cycle 144 PKSCHED3 intentionally remains BSP-only",
+            "PKSMP5 fixed-topology IPI and remote-invalidation foundation",
+            "master checklist sections 031-034",
+        ],
+    },
+    {
         "id": "ADD-CAP-001",
         "phase_id": "N13",
         "requirement": "Specify unforgeable capabilities, rights attenuation, derivation provenance, transfer, revocation, generation-safe handles, quotas, object destruction, and zero ambient authority; prove no authority amplification across IPC.",

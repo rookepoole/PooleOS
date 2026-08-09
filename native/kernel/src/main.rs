@@ -40,10 +40,18 @@ use poolekernel::{
         RawSpinLock as SchedulerRawSpinLock, Scheduler, TaskId as SchedulerTaskId,
         TaskState as SchedulerTaskState, validate_context_switch_contract,
     },
+    scheduler_deferred::{
+        DeferredWorkController, DispatchPermit as SchedulerDeferredPermit,
+        Error as SchedulerDeferredError, FaultPoint as SchedulerDeferredFault,
+        Operation as SchedulerDeferredOperation, Priority as SchedulerDeferredPriority,
+        TopHalfContext as SchedulerDeferredTopHalf, WorkId as SchedulerDeferredWorkId,
+        WorkRequest as SchedulerDeferredRequest, WorkState as SchedulerDeferredState,
+    },
     scheduler_preempt::{
         BspPreemption, ContextOwnership as SchedulerContextOwnership, DeferredEvent,
         DeferredEventKind, InterruptFrameContract as SchedulerInterruptFrameContract,
         RescheduleCause, validate_context_ownership as validate_scheduler_context_ownership,
+        validate_interrupt_frame as validate_scheduler_interrupt_frame,
     },
     smp::{self, MailboxSnapshot, ResourceLayout},
     smp_ipi::{
@@ -1193,6 +1201,36 @@ pksched2_fragment!(PKSCHED2_FRAME, b"POOLEOS:KERNEL:SCHED-PREEMPT-FRAME PASS con
 pksched2_fragment!(PKSCHED2_CLEANUP, b"POOLEOS:KERNEL:SCHED-PREEMPT-CLEANUP PASS contract=PKSCHED2 timer_masked=1 controller_retired=1 contexts_cleared=4 stack_bytes_cleared=65536 tasks_dead=4 queue_entries=0 running=0 blocked=0 lock_released=1 apic_restored=1 pic_restored=1 hpet_restored=1 mmio_revoked=1\n");
 pksched2_fragment!(PKSCHED2_RESULT, b"POOLEOS:KERNEL:SCHED-PREEMPT-RESULT PASS contract=PKSCHED2 profile=qemu64_bsp_interrupt_return preemption=timer_and_wakeup bsp=1 ap_dispatch=0 ring3=0 address_spaces=1 xstate_switch=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n");
 
+macro_rules! pksched3_fragment {
+    ($name:ident, $value:literal) => {
+        #[used]
+        #[unsafe(link_section = ".text.pksched3_literals")]
+        static $name: [u8; $value.len()] = *$value;
+    };
+}
+
+pksched3_fragment!(PKSCHED3_EARLY, b"POOLEOS:KERNEL:SCHED-DEFERRED-EARLY PASS contract=PKSCHED3 selector=17 parent_scheduler=PKSCHED2 parent_timer=PKIRQ1 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n");
+pksched3_fragment!(
+    PKSCHED3_DENIED,
+    b"POOLEOS:KERNEL:SCHED-DEFERRED-DENIED contract=PKSCHED3 reason="
+);
+pksched3_fragment!(
+    PKSCHED3_DENIED_TAIL,
+    b" rollback=fail_closed authority=0 actions=0 production=0 terminal=panic\n"
+);
+pksched3_fragment!(
+    PKSCHED3_ARM,
+    b"POOLEOS:KERNEL:SCHED-DEFERRED-ARM PASS contract=PKSCHED3 timer_vector=64 one_shot_count="
+);
+pksched3_fragment!(PKSCHED3_FREQUENCY, b" apic_ticks_per_second=");
+pksched3_fragment!(PKSCHED3_ARM_TAIL, b" capacity=8 workers=2 stack_bytes=16384 enqueue_batch=8 duplicate_attempts=1 queued_cancel=1 operation_tokens=fixed handler_if=0 interrupted_if=1\n");
+pksched3_fragment!(PKSCHED3_QUEUE, b"POOLEOS:KERNEL:SCHED-DEFERRED-QUEUE PASS contract=PKSCHED3 top_half_enqueued=8 duplicate_suppressed=1 queue_trace=H1,N2,H3,H4,H5,N6,N7,N8 queued_cancelled=1 eois=1 dispatch_before_eoi=0 permit_epoch=1\n");
+pksched3_fragment!(PKSCHED3_WORK, b"POOLEOS:KERNEL:SCHED-DEFERRED-WORK PASS contract=PKSCHED3 dispatch_trace=0:0,1:2,0:4,1:1,0:5,1:6 completed=5 cancelled=2 running_cancel=1 recursion_rejected=1 high_bypass=3 worker_entries=3,3 transitions=12 arbitrary_callbacks=0\n");
+pksched3_fragment!(PKSCHED3_FLUSH, b"POOLEOS:KERNEL:SCHED-DEFERRED-FLUSH PASS contract=PKSCHED3 watermark=8 complete=1 sum_lane=120 xor_lane=90 fence_lane=0 receipts=8 stale_rejected=1 generation_safe=1\n");
+pksched3_fragment!(PKSCHED3_FAULT, b"POOLEOS:KERNEL:SCHED-DEFERRED-FAULT PASS contract=PKSCHED3 rollbacks=5 reserve=1 queue=1 execute=1 commit=1 cleanup=1 invariant=1 leaked_slots=0\n");
+pksched3_fragment!(PKSCHED3_CLEANUP, b"POOLEOS:KERNEL:SCHED-DEFERRED-CLEANUP PASS contract=PKSCHED3 intake_closed=1 shutdown_cancelled=1 slots_free=8 workers_retired=2 stack_bytes_cleared=32768 queue_entries=0 running=0 lock_released=1 apic_restored=1 pic_restored=1 hpet_restored=1 mmio_revoked=1\n");
+pksched3_fragment!(PKSCHED3_RESULT, b"POOLEOS:KERNEL:SCHED-DEFERRED-RESULT PASS contract=PKSCHED3 profile=qemu64_bsp_interrupt_deferred fixed_workers=1 bsp=1 ap_dispatch=0 drivers=0 services=0 ring3=0 address_spaces=1 xstate_switch=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt\n");
+
 struct SchedulerPreemptionRuntimeCell(UnsafeCell<Option<BspPreemption>>);
 
 // SAFETY: selector 16 is BSP-only; IF and the scheduler lock serialize every access.
@@ -1221,6 +1259,130 @@ impl SchedulerPreemptionRuntimeCell {
     unsafe fn take(&self) -> Option<BspPreemption> {
         // SAFETY: the timer is masked and IF is clear after bounded launcher return.
         unsafe { (&mut *self.0.get()).take() }
+    }
+}
+
+struct SchedulerDeferredRuntimeCell(UnsafeCell<Option<DeferredWorkController>>);
+
+// SAFETY: selector 17 is BSP-only; IF and the scheduler lock serialize all access.
+unsafe impl Sync for SchedulerDeferredRuntimeCell {}
+
+impl SchedulerDeferredRuntimeCell {
+    const fn new() -> Self {
+        Self(UnsafeCell::new(None))
+    }
+
+    unsafe fn install(&self, controller: DeferredWorkController) -> Result<(), ()> {
+        // SAFETY: installation has exclusive ownership before the timer is armed.
+        let slot = unsafe { &mut *self.0.get() };
+        if slot.is_some() {
+            return Err(());
+        }
+        *slot = Some(controller);
+        Ok(())
+    }
+
+    unsafe fn with_mut<R>(
+        &self,
+        operation: impl FnOnce(&mut DeferredWorkController) -> R,
+    ) -> Option<R> {
+        // SAFETY: the caller holds the selector-17 scheduler lock with IF clear.
+        unsafe { (&mut *self.0.get()).as_mut().map(operation) }
+    }
+
+    unsafe fn take(&self) -> Option<DeferredWorkController> {
+        // SAFETY: the timer is masked, workers returned, and IF is clear.
+        unsafe { (&mut *self.0.get()).take() }
+    }
+}
+
+struct SchedulerDeferredEvidenceCell {
+    permit: UnsafeCell<Option<SchedulerDeferredPermit>>,
+    ids: UnsafeCell<[Option<SchedulerDeferredWorkId>; 8]>,
+    trace_slots: UnsafeCell<[u8; 6]>,
+    trace_workers: UnsafeCell<[u8; 6]>,
+    trace_states: UnsafeCell<[SchedulerDeferredState; 6]>,
+    trace_count: AtomicU32,
+}
+
+// SAFETY: selector 17 serializes mutation with IF clear and SCHEDULER_SWITCH_LOCK.
+unsafe impl Sync for SchedulerDeferredEvidenceCell {}
+
+impl SchedulerDeferredEvidenceCell {
+    const fn new() -> Self {
+        Self {
+            permit: UnsafeCell::new(None),
+            ids: UnsafeCell::new([None; 8]),
+            trace_slots: UnsafeCell::new([u8::MAX; 6]),
+            trace_workers: UnsafeCell::new([u8::MAX; 6]),
+            trace_states: UnsafeCell::new([SchedulerDeferredState::Free; 6]),
+            trace_count: AtomicU32::new(0),
+        }
+    }
+
+    unsafe fn install_ids(&self, ids: [Option<SchedulerDeferredWorkId>; 8]) {
+        // SAFETY: the top half is the only writer before worker dispatch begins.
+        unsafe { *self.ids.get() = ids };
+    }
+
+    unsafe fn install_permit(&self, permit: SchedulerDeferredPermit) {
+        // SAFETY: EOI has completed and no worker can run before interrupt return.
+        unsafe { *self.permit.get() = Some(permit) };
+    }
+
+    unsafe fn permit(&self) -> Option<SchedulerDeferredPermit> {
+        // SAFETY: the immutable permit remains live through all worker dispatches.
+        unsafe { *self.permit.get() }
+    }
+
+    unsafe fn ids(&self) -> [Option<SchedulerDeferredWorkId>; 8] {
+        // SAFETY: IDs are immutable after the top-half batch is committed.
+        unsafe { *self.ids.get() }
+    }
+
+    unsafe fn record(
+        &self,
+        worker: u8,
+        id: SchedulerDeferredWorkId,
+        state: SchedulerDeferredState,
+    ) -> Result<(), ()> {
+        let index = self.trace_count.load(Ordering::Acquire) as usize;
+        if index >= 6 {
+            return Err(());
+        }
+        // SAFETY: the worker lock gives one writer and index is capacity checked.
+        unsafe {
+            (*self.trace_slots.get())[index] = id.slot;
+            (*self.trace_workers.get())[index] = worker;
+            (*self.trace_states.get())[index] = state;
+        }
+        self.trace_count
+            .store((index + 1) as u32, Ordering::Release);
+        Ok(())
+    }
+
+    unsafe fn trace(&self) -> ([u8; 6], [u8; 6], [SchedulerDeferredState; 6], u32) {
+        // SAFETY: workers have returned and no further records can be appended.
+        unsafe {
+            (
+                *self.trace_slots.get(),
+                *self.trace_workers.get(),
+                *self.trace_states.get(),
+                self.trace_count.load(Ordering::Acquire),
+            )
+        }
+    }
+
+    unsafe fn clear(&self) {
+        // SAFETY: selector 17 has retired the controller and worker contexts.
+        unsafe {
+            *self.permit.get() = None;
+            *self.ids.get() = [None; 8];
+            *self.trace_slots.get() = [u8::MAX; 6];
+            *self.trace_workers.get() = [u8::MAX; 6];
+            *self.trace_states.get() = [SchedulerDeferredState::Free; 6];
+        }
+        self.trace_count.store(0, Ordering::Release);
     }
 }
 
@@ -1288,6 +1450,10 @@ static SCHEDULER_SWITCH_LOCK: SchedulerRawSpinLock = SchedulerRawSpinLock::new()
 static SCHEDULER_PREEMPT_RUNTIME: SchedulerPreemptionRuntimeCell =
     SchedulerPreemptionRuntimeCell::new();
 static SCHEDULER_PREEMPT_CONTEXTS: SchedulerPreemptionContexts = SchedulerPreemptionContexts::new();
+static SCHEDULER_DEFERRED_RUNTIME: SchedulerDeferredRuntimeCell =
+    SchedulerDeferredRuntimeCell::new();
+static SCHEDULER_DEFERRED_EVIDENCE: SchedulerDeferredEvidenceCell =
+    SchedulerDeferredEvidenceCell::new();
 static SCHEDULER_PREEMPT_TIMER_COUNT: AtomicU32 = AtomicU32::new(0);
 static SCHEDULER_PREEMPT_FRAME_SWITCHES: AtomicU32 = AtomicU32::new(0);
 #[unsafe(no_mangle)]
@@ -5913,6 +6079,7 @@ extern "C" fn poole_kernel_emergency_panic(code: u32) -> ! {
         0x1016 => PanicCode::SmpIpi,
         0x1017 => PanicCode::Scheduler,
         0x1018 => PanicCode::SchedulerPreempt,
+        0x1019 => PanicCode::SchedulerDeferred,
         _ => PanicCode::UnexpectedReturn,
     };
     let disposition = PANIC_STATE.begin(code);
@@ -6039,6 +6206,14 @@ extern "C" fn poole_kernel_rust_entry(
             ring: &EARLY_RING,
         });
         logger.write_bytes(&PKSCHED2_EARLY);
+    }
+    if trap_scenario == DevelopmentTrapScenario::SchedulerDeferred {
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        logger.write_bytes(&PKSCHED3_EARLY);
     }
 
     if let Err(error) = validate_entry_envelope(handoff_address, handoff_length, magic, stack_top) {
@@ -6975,7 +7150,9 @@ extern "C" fn poole_kernel_rust_entry(
 
     if matches!(
         trap_scenario,
-        DevelopmentTrapScenario::InterruptTime | DevelopmentTrapScenario::SchedulerPreempt
+        DevelopmentTrapScenario::InterruptTime
+            | DevelopmentTrapScenario::SchedulerPreempt
+            | DevelopmentTrapScenario::SchedulerDeferred
     ) {
         let mut logger = EarlyLogger::new(BootSink {
             serial: &mut serial,
@@ -6983,17 +7160,24 @@ extern "C" fn poole_kernel_rust_entry(
             ring: &EARLY_RING,
         });
         let scheduler_preempt = trap_scenario == DevelopmentTrapScenario::SchedulerPreempt;
-        let failure_head: &[u8] = if scheduler_preempt {
+        let scheduler_deferred = trap_scenario == DevelopmentTrapScenario::SchedulerDeferred;
+        let failure_head: &[u8] = if scheduler_deferred {
+            &PKSCHED3_DENIED
+        } else if scheduler_preempt {
             &PKSCHED2_DENIED
         } else {
             &PKIRQ_DENIED
         };
-        let failure_tail: &[u8] = if scheduler_preempt {
+        let failure_tail: &[u8] = if scheduler_deferred {
+            &PKSCHED3_DENIED_TAIL
+        } else if scheduler_preempt {
             &PKSCHED2_DENIED_TAIL
         } else {
             &PKIRQ_DENIED_TAIL
         };
-        let failure_panic = if scheduler_preempt {
+        let failure_panic = if scheduler_deferred {
+            PanicCode::SchedulerDeferred
+        } else if scheduler_preempt {
             PanicCode::SchedulerPreempt
         } else {
             PanicCode::InterruptTime
@@ -7269,6 +7453,255 @@ extern "C" fn poole_kernel_rust_entry(
             monotonic_start,
             max_sample_delta,
         ));
+        let mut deferred_evidence = None;
+        if scheduler_deferred {
+            macro_rules! defer_try {
+                ($operation:expr, $reason:literal) => {
+                    match $operation {
+                        Ok(value) => value,
+                        Err(_) => {
+                            logger.write_bytes(&PKSCHED3_DENIED);
+                            logger.write_str($reason);
+                            logger.write_bytes(&PKSCHED3_DENIED_TAIL);
+                            poole_kernel_emergency_panic(PanicCode::SchedulerDeferred as u32)
+                        }
+                    }
+                };
+            }
+            macro_rules! defer_require {
+                ($condition:expr, $reason:literal) => {
+                    if !$condition {
+                        logger.write_bytes(&PKSCHED3_DENIED);
+                        logger.write_str($reason);
+                        logger.write_bytes(&PKSCHED3_DENIED_TAIL);
+                        poole_kernel_emergency_panic(PanicCode::SchedulerDeferred as u32)
+                    }
+                };
+            }
+
+            // SAFETY: selector 17 has exclusive ownership before timer delivery is armed.
+            unsafe { SCHEDULER_DEFERRED_EVIDENCE.clear() };
+            defer_require!(
+                unsafe { SCHEDULER_DEFERRED_RUNTIME.install(DeferredWorkController::new()) }
+                    .is_ok(),
+                "controller_install"
+            );
+            let mut worker_hardware = defer_try!(
+                arch::x86_64::prepare_scheduler_deferred_workers(stack_top as u64),
+                "worker_prepare"
+            );
+
+            logger.write_bytes(&PKSCHED3_ARM);
+            logger.write_decimal_u64(u64::from(one_shot_count));
+            logger.write_bytes(&PKSCHED3_FREQUENCY);
+            logger.write_decimal_u64(calibration.apic_ticks_per_second);
+            logger.write_bytes(&PKSCHED3_ARM_TAIL);
+
+            irq_try!(hardware.apic_write(0x320, u32::from(TIMER_VECTOR)));
+            irq_try!(hardware.apic_write(0x380, one_shot_count));
+            // SAFETY: IDT, IST1, APIC mapping, timer ownership, and selector are validated.
+            unsafe { arch::x86_64::enable_interrupts_halt_disable() };
+            irq_try!(hardware.apic_write(0x320, u32::from(TIMER_VECTOR) | (1 << 16)));
+            defer_require!(
+                IRQ_TIMER_DELIVERIES.load(Ordering::Acquire) == 1
+                    && IRQ_EOI_COUNT.load(Ordering::Acquire) == 1
+                    && TRAP_DEPTH.load(Ordering::Acquire) == 0,
+                "top_half_delivery"
+            );
+            for worker in [0u8, 1, 0, 1, 0, 1] {
+                if let Err(error) =
+                    arch::x86_64::dispatch_scheduler_deferred_worker(&mut worker_hardware, worker)
+                {
+                    logger.write_bytes(&PKSCHED3_DENIED);
+                    logger.write_str(error.label());
+                    logger.write_bytes(&PKSCHED3_DENIED_TAIL);
+                    poole_kernel_emergency_panic(PanicCode::SchedulerDeferred as u32)
+                }
+            }
+            // SAFETY: timer is masked, IF is clear, and all worker stack entries returned.
+            let mut controller =
+                unsafe { SCHEDULER_DEFERRED_RUNTIME.take() }.unwrap_or_else(|| {
+                    poole_kernel_emergency_panic(PanicCode::SchedulerDeferred as u32)
+                });
+            let ids = unsafe {
+                // SAFETY: the top-half batch is immutable after interrupt return.
+                SCHEDULER_DEFERRED_EVIDENCE.ids()
+            };
+            let trace = unsafe {
+                // SAFETY: all six worker dispatches returned before trace capture.
+                SCHEDULER_DEFERRED_EVIDENCE.trace()
+            };
+            let flush = controller.begin_flush();
+            defer_require!(!controller.flush_complete(flush), "flush_premature");
+            let shutdown_cancelled = defer_try!(controller.begin_shutdown(), "shutdown_begin");
+            defer_require!(
+                shutdown_cancelled == 1 && controller.flush_complete(flush),
+                "flush_completion"
+            );
+            let shutdown_retired = defer_try!(controller.finish_shutdown(), "shutdown_finish");
+            defer_require!(shutdown_retired == 8, "shutdown_retirement");
+            let stale_rejected = matches!(
+                ids[0].and_then(|id| controller.cancel(id).err()),
+                Some(SchedulerDeferredError::StaleId)
+            );
+            let recursion_rejected = controller.enqueue_from_top_half(
+                SchedulerDeferredRequest {
+                    key: 9,
+                    source: 1,
+                    priority: SchedulerDeferredPriority::Normal,
+                    operation: SchedulerDeferredOperation::Add(1),
+                },
+                &SchedulerDeferredTopHalf {
+                    interrupt_depth: 1,
+                    interrupts_disabled: true,
+                    queue_lock_held: true,
+                    worker_context: true,
+                },
+                SchedulerDeferredFault::None,
+            ) == Err(SchedulerDeferredError::Recursion);
+            let summary = controller.summary();
+            defer_require!(
+                summary.shutdown_complete
+                    && !summary.intake_open
+                    && summary.enqueue_sequence == 8
+                    && summary.completion_sequence == 8
+                    && summary.eoi_epoch == 1
+                    && summary.enqueued == 8
+                    && summary.completed == 5
+                    && summary.cancelled == 3
+                    && summary.duplicate_suppressed == 1
+                    && summary.running_cancel_requests == 1
+                    && summary.dispatches == 6
+                    && summary.retired == 8
+                    && summary.rollback_count == 0
+                    && summary.pending == 0
+                    && summary.running == 0
+                    && summary.terminal == 0
+                    && summary.free == 8
+                    && summary.max_high_bypass_observed == 3
+                    && summary.sum_lane == 120
+                    && summary.xor_lane == 90
+                    && summary.fence_lane == 0
+                    && stale_rejected
+                    && recursion_rejected,
+                "controller_summary"
+            );
+            defer_require!(
+                trace.0 == [0, 2, 4, 1, 5, 6]
+                    && trace.1 == [0, 1, 0, 1, 0, 1]
+                    && trace.2
+                        == [
+                            SchedulerDeferredState::Completed,
+                            SchedulerDeferredState::Completed,
+                            SchedulerDeferredState::Completed,
+                            SchedulerDeferredState::Completed,
+                            SchedulerDeferredState::Completed,
+                            SchedulerDeferredState::Cancelled,
+                        ]
+                    && trace.3 == 6,
+                "worker_trace"
+            );
+
+            let mut fault_controller = DeferredWorkController::new();
+            let fault_context = SchedulerDeferredTopHalf {
+                interrupt_depth: 1,
+                interrupts_disabled: true,
+                queue_lock_held: true,
+                worker_context: false,
+            };
+            for (key, fault) in [
+                (10, SchedulerDeferredFault::AfterReserve),
+                (11, SchedulerDeferredFault::AfterQueue),
+            ] {
+                defer_require!(
+                    fault_controller.enqueue_from_top_half(
+                        SchedulerDeferredRequest {
+                            key,
+                            source: 2,
+                            priority: SchedulerDeferredPriority::High,
+                            operation: SchedulerDeferredOperation::Add(1),
+                        },
+                        &fault_context,
+                        fault,
+                    ) == Err(SchedulerDeferredError::FaultInjected),
+                    "enqueue_rollback"
+                );
+            }
+            let fault_id = defer_try!(
+                fault_controller.enqueue_from_top_half(
+                    SchedulerDeferredRequest {
+                        key: 12,
+                        source: 2,
+                        priority: SchedulerDeferredPriority::High,
+                        operation: SchedulerDeferredOperation::Add(1),
+                    },
+                    &fault_context,
+                    SchedulerDeferredFault::None,
+                ),
+                "fault_work_enqueue"
+            );
+            let fault_permit = defer_try!(fault_controller.observe_eoi(), "fault_eoi");
+            defer_require!(
+                fault_controller.claim_one(0, fault_permit, SchedulerDeferredFault::BeforeExecute,)
+                    == Err(SchedulerDeferredError::FaultInjected),
+                "execute_rollback"
+            );
+            defer_require!(
+                defer_try!(
+                    fault_controller.claim_one(0, fault_permit, SchedulerDeferredFault::None,),
+                    "fault_claim"
+                ) == fault_id,
+                "fault_claim_identity"
+            );
+            defer_require!(
+                fault_controller.finish_claimed(0, fault_id, SchedulerDeferredFault::BeforeCommit,)
+                    == Err(SchedulerDeferredError::FaultInjected),
+                "commit_rollback"
+            );
+            defer_try!(
+                fault_controller.dispatch_one(1, fault_permit),
+                "fault_recovery_dispatch"
+            );
+            defer_require!(
+                fault_controller.retire(fault_id, SchedulerDeferredFault::Cleanup)
+                    == Err(SchedulerDeferredError::FaultInjected),
+                "cleanup_rollback"
+            );
+            defer_try!(
+                fault_controller.retire(fault_id, SchedulerDeferredFault::None),
+                "fault_cleanup"
+            );
+            let fault_summary = fault_controller.summary();
+            defer_require!(
+                fault_summary.rollback_count == 5
+                    && fault_summary.free == 8
+                    && fault_summary.pending == 0
+                    && fault_summary.running == 0
+                    && fault_controller.validate().is_ok(),
+                "fault_summary"
+            );
+
+            let hardware_proof = defer_try!(
+                arch::x86_64::clear_scheduler_deferred_workers(worker_hardware),
+                "worker_cleanup"
+            );
+            defer_require!(
+                hardware_proof.worker_entry_count == [3, 3]
+                    && hardware_proof.dispatch_count == 6
+                    && hardware_proof.machine_transition_count == 12
+                    && hardware_proof.stack_count == 2
+                    && hardware_proof.stack_bytes_each == 16_384
+                    && hardware_proof.stack_alignment == 16
+                    && hardware_proof.stack_bytes_cleared == 32_768
+                    && hardware_proof.same_cr3
+                    && hardware_proof.fs_gs_unchanged
+                    && hardware_proof.returned_with_interrupts_disabled
+                    && hardware_proof.worker_error_count == 0
+                    && SCHEDULER_SWITCH_LOCK.owner() == 0,
+                "hardware_summary"
+            );
+            deferred_evidence = Some((summary, hardware_proof, fault_summary.rollback_count));
+        }
         let preempt_evidence = if scheduler_preempt {
             macro_rules! sched_try {
                 ($operation:expr, $reason:literal) => {
@@ -7452,16 +7885,18 @@ extern "C" fn poole_kernel_rust_entry(
             poole_scheduler_preempt_done.store(0, Ordering::Release);
             Some((summary, cleanup, hardware_proof, contexts_cleared))
         } else {
-            for expected in 1..=8u32 {
-                irq_try!(hardware.apic_write(0x320, u32::from(TIMER_VECTOR)));
-                irq_try!(hardware.apic_write(0x380, one_shot_count));
-                // SAFETY: IDT, UC APIC mapping, vector ownership, and one-shot timer are live.
-                unsafe { arch::x86_64::enable_interrupts_halt_disable() };
-                irq_try!(hardware.apic_write(0x320, u32::from(TIMER_VECTOR) | (1 << 16)));
-                irq_require!(
-                    IRQ_TIMER_DELIVERIES.load(Ordering::Acquire) == expected,
-                    interrupt_time::Error::TimerCount
-                );
+            if !scheduler_deferred {
+                for expected in 1..=8u32 {
+                    irq_try!(hardware.apic_write(0x320, u32::from(TIMER_VECTOR)));
+                    irq_try!(hardware.apic_write(0x380, one_shot_count));
+                    // SAFETY: IDT, UC APIC mapping, vector ownership, and one-shot timer are live.
+                    unsafe { arch::x86_64::enable_interrupts_halt_disable() };
+                    irq_try!(hardware.apic_write(0x320, u32::from(TIMER_VECTOR) | (1 << 16)));
+                    irq_require!(
+                        IRQ_TIMER_DELIVERIES.load(Ordering::Acquire) == expected,
+                        interrupt_time::Error::TimerCount
+                    );
+                }
             }
             None
         };
@@ -7472,8 +7907,15 @@ extern "C" fn poole_kernel_rust_entry(
         let error_count = IRQ_ERROR_COUNT.load(Ordering::Acquire);
         let spurious_count = IRQ_SPURIOUS_COUNT.load(Ordering::Acquire);
         let in_service_after = irq_try!(hardware.in_service_count());
+        let expected_timer_deliveries = if scheduler_deferred {
+            1
+        } else if scheduler_preempt {
+            6
+        } else {
+            8
+        };
         irq_require!(
-            timer_deliveries == if scheduler_preempt { 6 } else { 8 }
+            timer_deliveries == expected_timer_deliveries
                 && eoi_count == timer_deliveries
                 && error_count == 0
                 && spurious_count == 0
@@ -7547,6 +7989,37 @@ extern "C" fn poole_kernel_rust_entry(
             logger.write_bytes(&PKSCHED2_FRAME);
             logger.write_bytes(&PKSCHED2_CLEANUP);
             logger.write_bytes(&PKSCHED2_RESULT);
+            halt_forever()
+        }
+
+        if let Some((summary, hardware_proof, fault_rollbacks)) = deferred_evidence {
+            if timer_deliveries != 1
+                || eoi_count != 1
+                || error_count != 0
+                || spurious_count != 0
+                || in_service_after != 0
+                || summary.enqueued != 8
+                || summary.completed != 5
+                || summary.cancelled != 3
+                || summary.free != 8
+                || hardware_proof.worker_entry_count != [3, 3]
+                || hardware_proof.machine_transition_count != 12
+                || fault_rollbacks != 5
+                || SCHEDULER_SWITCH_LOCK.owner() != 0
+            {
+                logger.write_bytes(&PKSCHED3_DENIED);
+                logger.write_str("final_evidence");
+                logger.write_bytes(&PKSCHED3_DENIED_TAIL);
+                poole_kernel_emergency_panic(PanicCode::SchedulerDeferred as u32)
+            }
+            // SAFETY: controller, timer, and workers are retired before evidence reset.
+            unsafe { SCHEDULER_DEFERRED_EVIDENCE.clear() };
+            logger.write_bytes(&PKSCHED3_QUEUE);
+            logger.write_bytes(&PKSCHED3_WORK);
+            logger.write_bytes(&PKSCHED3_FLUSH);
+            logger.write_bytes(&PKSCHED3_FAULT);
+            logger.write_bytes(&PKSCHED3_CLEANUP);
+            logger.write_bytes(&PKSCHED3_RESULT);
             halt_forever()
         }
 
@@ -8775,6 +9248,9 @@ extern "C" fn poole_kernel_rust_entry(
         DevelopmentTrapScenario::SchedulerPreempt => {
             poole_kernel_emergency_panic(PanicCode::SchedulerPreempt as u32)
         }
+        DevelopmentTrapScenario::SchedulerDeferred => {
+            poole_kernel_emergency_panic(PanicCode::SchedulerDeferred as u32)
+        }
     }
 }
 
@@ -8915,6 +9391,168 @@ fn dispatch_scheduler_preemption(frame: &mut TrapFrame, depth: u32) {
     TRAP_DEPTH.store(0, Ordering::Release);
 }
 
+#[unsafe(no_mangle)]
+extern "C" fn poole_deferred_worker_step(worker: u32) -> u32 {
+    let Ok(worker) = u8::try_from(worker) else {
+        return 0;
+    };
+    if SCHEDULER_SWITCH_LOCK.lock_bounded(4, 1).is_err() {
+        return 0;
+    }
+    let result = unsafe {
+        // SAFETY: the selected private worker stack has IF clear and owns lock token 4.
+        SCHEDULER_DEFERRED_RUNTIME.with_mut(|controller| {
+            let permit = SCHEDULER_DEFERRED_EVIDENCE
+                .permit()
+                .ok_or(SchedulerDeferredError::DispatchBeforeEoi)?;
+            let id = controller.claim_one(worker, permit, SchedulerDeferredFault::None)?;
+            if matches!(
+                controller.request(id)?.operation,
+                SchedulerDeferredOperation::Fence(_)
+            ) {
+                controller.cancel(id)?;
+            }
+            let receipt = controller.finish_claimed(worker, id, SchedulerDeferredFault::None)?;
+            SCHEDULER_DEFERRED_EVIDENCE
+                .record(worker, id, receipt.state)
+                .map_err(|_| SchedulerDeferredError::Invariant)?;
+            Ok::<(), SchedulerDeferredError>(())
+        })
+    };
+    let unlock_ok = SCHEDULER_SWITCH_LOCK.unlock(4).is_ok();
+    u32::from(matches!(result, Some(Ok(()))) && unlock_ok)
+}
+
+fn dispatch_scheduler_deferred(frame: &TrapFrame, depth: u32) {
+    if SCHEDULER_SWITCH_LOCK.lock_bounded(3, 1).is_err() {
+        poole_kernel_emergency_panic(PanicCode::SchedulerDeferred as u32);
+    }
+    let frame_contract = SchedulerInterruptFrameContract {
+        depth,
+        vector: frame.vector,
+        error_code: frame.error_code,
+        code_selector: frame.code_selector,
+        data_selector: frame.data_selector,
+        interrupted_rflags: frame.rflags,
+        handler_interrupts_disabled: arch::x86_64::read_rflags() & (1 << 9) == 0,
+        scheduler_lock_held: SCHEDULER_SWITCH_LOCK.owner() == 3,
+        handler_rsp: frame as *const TrapFrame as u64,
+        frame_bytes: core::mem::size_of::<TrapFrame>() as u64,
+        ist_bottom: IST1_BOTTOM.load(Ordering::Acquire),
+        ist_top: IST1_TOP.load(Ordering::Acquire),
+    };
+    if validate_scheduler_interrupt_frame(&frame_contract).is_err() {
+        poole_kernel_emergency_panic(PanicCode::SchedulerDeferred as u32);
+    }
+    let requests = [
+        SchedulerDeferredRequest {
+            key: 1,
+            source: 1,
+            priority: SchedulerDeferredPriority::High,
+            operation: SchedulerDeferredOperation::Add(10),
+        },
+        SchedulerDeferredRequest {
+            key: 2,
+            source: 1,
+            priority: SchedulerDeferredPriority::Normal,
+            operation: SchedulerDeferredOperation::Xor(90),
+        },
+        SchedulerDeferredRequest {
+            key: 3,
+            source: 1,
+            priority: SchedulerDeferredPriority::High,
+            operation: SchedulerDeferredOperation::Add(20),
+        },
+        SchedulerDeferredRequest {
+            key: 4,
+            source: 1,
+            priority: SchedulerDeferredPriority::High,
+            operation: SchedulerDeferredOperation::Add(30),
+        },
+        SchedulerDeferredRequest {
+            key: 5,
+            source: 1,
+            priority: SchedulerDeferredPriority::High,
+            operation: SchedulerDeferredOperation::Add(40),
+        },
+        SchedulerDeferredRequest {
+            key: 6,
+            source: 1,
+            priority: SchedulerDeferredPriority::Normal,
+            operation: SchedulerDeferredOperation::Add(50),
+        },
+        SchedulerDeferredRequest {
+            key: 7,
+            source: 1,
+            priority: SchedulerDeferredPriority::Normal,
+            operation: SchedulerDeferredOperation::Fence(7),
+        },
+        SchedulerDeferredRequest {
+            key: 8,
+            source: 1,
+            priority: SchedulerDeferredPriority::Normal,
+            operation: SchedulerDeferredOperation::Add(60),
+        },
+    ];
+    let context = SchedulerDeferredTopHalf {
+        interrupt_depth: 1,
+        interrupts_disabled: true,
+        queue_lock_held: true,
+        worker_context: false,
+    };
+    let operation = unsafe {
+        // SAFETY: the interrupt gate cleared IF and lock token 3 owns the runtime cell.
+        SCHEDULER_DEFERRED_RUNTIME.with_mut(|controller| {
+            let mut ids = [None; 8];
+            for (index, request) in requests.into_iter().enumerate() {
+                ids[index] = Some(controller.enqueue_from_top_half(
+                    request,
+                    &context,
+                    SchedulerDeferredFault::None,
+                )?);
+            }
+            if controller.enqueue_from_top_half(requests[2], &context, SchedulerDeferredFault::None)
+                != Err(SchedulerDeferredError::Duplicate)
+            {
+                return Err(SchedulerDeferredError::Invariant);
+            }
+            controller.cancel(ids[3].ok_or(SchedulerDeferredError::Invariant)?)?;
+            SCHEDULER_DEFERRED_EVIDENCE.install_ids(ids);
+            Ok::<(), SchedulerDeferredError>(())
+        })
+    };
+    if !matches!(operation, Some(Ok(()))) {
+        poole_kernel_emergency_panic(PanicCode::SchedulerDeferred as u32);
+    }
+    let apic = IRQ_APIC_VIRTUAL.load(Ordering::Acquire);
+    if apic == 0 || frame.vector != u64::from(TIMER_VECTOR) {
+        poole_kernel_emergency_panic(PanicCode::SchedulerDeferred as u32);
+    }
+    if IRQ_TIMER_DELIVERIES.fetch_add(1, Ordering::AcqRel) == u32::MAX {
+        poole_kernel_emergency_panic(PanicCode::SchedulerDeferred as u32);
+    }
+    // SAFETY: selector 17 retains the guarded UC local-APIC mapping through rollback.
+    unsafe { write_volatile((apic + 0xb0) as usize as *mut u32, 0) };
+    if IRQ_EOI_COUNT.fetch_add(1, Ordering::AcqRel) == u32::MAX {
+        poole_kernel_emergency_panic(PanicCode::SchedulerDeferred as u32);
+    }
+    let permit = unsafe {
+        // SAFETY: EOI completed, the top half still owns token 3, and no worker can run yet.
+        SCHEDULER_DEFERRED_RUNTIME.with_mut(|controller| controller.observe_eoi())
+    };
+    match permit {
+        Some(Ok(value)) => unsafe {
+            // SAFETY: the permit is immutable until all worker dispatches return.
+            SCHEDULER_DEFERRED_EVIDENCE.install_permit(value)
+        },
+        _ => poole_kernel_emergency_panic(PanicCode::SchedulerDeferred as u32),
+    }
+    if SCHEDULER_SWITCH_LOCK.unlock(3).is_err() {
+        poole_kernel_emergency_panic(PanicCode::SchedulerDeferred as u32);
+    }
+    TRAP_DEPTH.store(0, Ordering::Release);
+}
+
 fn dispatch_interrupt_time(frame: &TrapFrame, depth: u32) {
     let ist_bottom = IST1_BOTTOM.load(Ordering::Acquire);
     let ist_top = IST1_TOP.load(Ordering::Acquire);
@@ -8983,6 +9621,10 @@ extern "C" fn poole_kernel_trap_dispatch(frame_pointer: *mut TrapFrame) {
     }
     if scenario == DevelopmentTrapScenario::SchedulerPreempt {
         dispatch_scheduler_preemption(frame, depth);
+        return;
+    }
+    if scenario == DevelopmentTrapScenario::SchedulerDeferred {
+        dispatch_scheduler_deferred(frame, depth);
         return;
     }
     if scenario == DevelopmentTrapScenario::InterruptTime {

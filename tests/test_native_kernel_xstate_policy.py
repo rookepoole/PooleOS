@@ -18,8 +18,8 @@ class NativeKernelXstatePolicyTests(unittest.TestCase):
         markers = list(readiness["execution"]["runs"][0]["markers"][:29])
         markers[23] = markers[23].replace("trap_scenario=4", "trap_scenario=5")
         markers[25] = markers[25].replace(
-            "PKBUILD1-CYCLE122-N7-XSTATE-POLICY-001",
             "PKBUILD1-CYCLE143-N12-SCHED-PREEMPT-V01-0001",
+            "PKBUILD1-CYCLE144-N12-SCHED-DEFER-V0001-0001",
         )
         markers.extend(
             [

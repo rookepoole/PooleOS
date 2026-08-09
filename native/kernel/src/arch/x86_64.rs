@@ -251,6 +251,8 @@ const SCHEDULER_PREEMPT_TASK_REGISTERS: [[u64; 6]; SCHEDULER_PREEMPT_TASK_COUNT]
 
 const RETAINED_KERNEL_STACK_BYTES: usize =
     poole_kmap::STACK_PAGE_COUNT * poole_kmap::PAGE_SIZE as usize;
+const SCHEDULER_DEFERRED_REGION_BYTES: usize = 2 * SCHEDULER_STACK_BYTES;
+static SCHEDULER_DEFERRED_STACK_BASE: AtomicU64 = AtomicU64::new(0);
 const SCHEDULER_PREEMPT_REGION_BYTES: usize =
     SCHEDULER_PREEMPT_TASK_COUNT * SCHEDULER_PREEMPT_STACK_BYTES;
 static SCHEDULER_PREEMPT_STACK_BASE: AtomicU64 = AtomicU64::new(0);
@@ -324,6 +326,58 @@ pub struct SchedulerPreemptionHardwareProof {
     pub returned_with_interrupts_disabled: bool,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SchedulerDeferredHardwareError {
+    InterruptState,
+    Worker,
+    StackGeometry,
+    StackCanary,
+    StackRange,
+    StackAlignment,
+    Step,
+    TransitionCount,
+    ControlState,
+    Clear,
+}
+
+impl SchedulerDeferredHardwareError {
+    pub const fn label(self) -> &'static str {
+        match self {
+            Self::InterruptState => "worker_interrupt_state",
+            Self::Worker => "worker_identity",
+            Self::StackGeometry => "worker_stack_geometry",
+            Self::StackCanary => "worker_stack_canary",
+            Self::StackRange => "worker_stack_range",
+            Self::StackAlignment => "worker_stack_alignment",
+            Self::Step => "worker_step",
+            Self::TransitionCount => "worker_transition_count",
+            Self::ControlState => "worker_control_state",
+            Self::Clear => "worker_stack_clear",
+        }
+    }
+}
+
+pub struct SchedulerDeferredHardwareContext {
+    cr3: u64,
+    bases: (u64, u64, u64),
+    dispatches: u32,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SchedulerDeferredHardwareProof {
+    pub worker_entry_count: [u32; 2],
+    pub dispatch_count: u32,
+    pub machine_transition_count: u32,
+    pub stack_count: u8,
+    pub stack_bytes_each: u32,
+    pub stack_alignment: u8,
+    pub stack_bytes_cleared: u32,
+    pub same_cr3: bool,
+    pub fs_gs_unchanged: bool,
+    pub returned_with_interrupts_disabled: bool,
+    pub worker_error_count: u32,
+}
+
 unsafe extern "C" {
     fn poole_scheduler_context_switch(outgoing: *mut u64, incoming: *const u64);
     fn poole_scheduler_task_a_entry();
@@ -356,6 +410,15 @@ unsafe extern "C" {
     static mut poole_scheduler_preempt_task_d_entries: u64;
     static mut poole_scheduler_preempt_flags_before: u64;
     static mut poole_scheduler_preempt_flags_after: u64;
+    fn poole_scheduler_deferred_worker_a_entry();
+    fn poole_scheduler_deferred_worker_b_entry();
+    static mut poole_scheduler_deferred_kernel_rsp: u64;
+    static mut poole_scheduler_deferred_worker_a_rsp: u64;
+    static mut poole_scheduler_deferred_worker_b_rsp: u64;
+    static mut poole_scheduler_deferred_worker_a_entries: u64;
+    static mut poole_scheduler_deferred_worker_b_entries: u64;
+    static mut poole_scheduler_deferred_transition_count: u64;
+    static mut poole_scheduler_deferred_errors: u64;
 }
 
 core::arch::global_asm!(
@@ -478,6 +541,60 @@ poole_scheduler_transition_count:
     .quad 0
     .global poole_scheduler_register_errors
 poole_scheduler_register_errors:
+    .quad 0
+"#
+);
+
+core::arch::global_asm!(
+    r#"
+    .section .text.poole_scheduler_deferred_workers,"ax",@progbits
+    .balign 16
+
+    .macro POOLE_SCHEDULER_DEFERRED_WORKER name, worker_id, entries, saved_rsp
+    .global \name
+    .type \name,@function
+\name:
+.L\name\()_loop:
+    mov edi, \worker_id
+    call poole_deferred_worker_step
+    cmp eax, 1
+    je .L\name\()_step_ok
+    inc qword ptr [rip + poole_scheduler_deferred_errors]
+.L\name\()_step_ok:
+    inc qword ptr [rip + \entries]
+    lea rdi, [rip + \saved_rsp]
+    lea rsi, [rip + poole_scheduler_deferred_kernel_rsp]
+    inc qword ptr [rip + poole_scheduler_deferred_transition_count]
+    call poole_scheduler_context_switch
+    jmp .L\name\()_loop
+    .size \name, .-\name
+    .endm
+
+    POOLE_SCHEDULER_DEFERRED_WORKER poole_scheduler_deferred_worker_a_entry, 0, poole_scheduler_deferred_worker_a_entries, poole_scheduler_deferred_worker_a_rsp
+    POOLE_SCHEDULER_DEFERRED_WORKER poole_scheduler_deferred_worker_b_entry, 1, poole_scheduler_deferred_worker_b_entries, poole_scheduler_deferred_worker_b_rsp
+
+    .section .bss.poole_scheduler_deferred_context,"aw",@nobits
+    .balign 8
+    .global poole_scheduler_deferred_kernel_rsp
+poole_scheduler_deferred_kernel_rsp:
+    .quad 0
+    .global poole_scheduler_deferred_worker_a_rsp
+poole_scheduler_deferred_worker_a_rsp:
+    .quad 0
+    .global poole_scheduler_deferred_worker_b_rsp
+poole_scheduler_deferred_worker_b_rsp:
+    .quad 0
+    .global poole_scheduler_deferred_worker_a_entries
+poole_scheduler_deferred_worker_a_entries:
+    .quad 0
+    .global poole_scheduler_deferred_worker_b_entries
+poole_scheduler_deferred_worker_b_entries:
+    .quad 0
+    .global poole_scheduler_deferred_transition_count
+poole_scheduler_deferred_transition_count:
+    .quad 0
+    .global poole_scheduler_deferred_errors
+poole_scheduler_deferred_errors:
     .quad 0
 "#
 );
@@ -3927,6 +4044,258 @@ pub fn run_scheduler_context_switch_probe(
     result.map(|mut proof| {
         proof.stack_bytes_cleared = (2 * SCHEDULER_STACK_BYTES) as u32;
         proof
+    })
+}
+
+fn scheduler_deferred_stack_base(worker: u8) -> *mut u8 {
+    let base = SCHEDULER_DEFERRED_STACK_BASE.load(Ordering::Acquire);
+    (base as usize + usize::from(worker) * SCHEDULER_STACK_BYTES) as *mut u8
+}
+
+fn scheduler_deferred_stack_pointer(worker: u8) -> *mut u64 {
+    match worker {
+        0 => addr_of_mut!(poole_scheduler_deferred_worker_a_rsp),
+        _ => addr_of_mut!(poole_scheduler_deferred_worker_b_rsp),
+    }
+}
+
+fn scheduler_deferred_stack_error(worker: u8) -> Option<SchedulerDeferredHardwareError> {
+    let base = scheduler_deferred_stack_base(worker);
+    let saved = unsafe { read_volatile(scheduler_deferred_stack_pointer(worker)) };
+    let low = base as u64;
+    let high = low + SCHEDULER_STACK_BYTES as u64;
+    if unsafe { read_volatile(base.cast::<u64>()) } != SCHEDULER_STACK_CANARY {
+        return Some(SchedulerDeferredHardwareError::StackCanary);
+    }
+    if saved < low + size_of::<u64>() as u64
+        || saved
+            .checked_add(SCHEDULER_CONTEXT_BYTES as u64)
+            .is_none_or(|end| end > high)
+    {
+        return Some(SchedulerDeferredHardwareError::StackRange);
+    }
+    if !saved.is_multiple_of(SCHEDULER_STACK_ALIGNMENT as u64) {
+        return Some(SchedulerDeferredHardwareError::StackAlignment);
+    }
+    None
+}
+
+pub fn prepare_scheduler_deferred_workers(
+    kernel_stack_top: u64,
+) -> Result<SchedulerDeferredHardwareContext, SchedulerDeferredHardwareError> {
+    if read_rflags() & (1 << 9) != 0 {
+        return Err(SchedulerDeferredHardwareError::InterruptState);
+    }
+    let kernel_stack_bottom = kernel_stack_top
+        .checked_sub(RETAINED_KERNEL_STACK_BYTES as u64)
+        .ok_or(SchedulerDeferredHardwareError::StackGeometry)?;
+    let worker_region_top = kernel_stack_bottom
+        .checked_add(SCHEDULER_DEFERRED_REGION_BYTES as u64)
+        .ok_or(SchedulerDeferredHardwareError::StackGeometry)?;
+    let current_rsp: u64;
+    // SAFETY: this observes only the current kernel stack pointer.
+    unsafe {
+        asm!("mov {}, rsp", out(reg) current_rsp, options(nomem, nostack, preserves_flags));
+    }
+    if kernel_stack_top == 0
+        || !kernel_stack_top.is_multiple_of(poole_kmap::PAGE_SIZE)
+        || !kernel_stack_bottom.is_multiple_of(poole_kmap::PAGE_SIZE)
+        || worker_region_top > kernel_stack_top
+        || current_rsp < worker_region_top
+        || current_rsp >= kernel_stack_top
+        || SCHEDULER_DEFERRED_STACK_BASE
+            .compare_exchange(0, kernel_stack_bottom, Ordering::AcqRel, Ordering::Acquire)
+            .is_err()
+    {
+        return Err(SchedulerDeferredHardwareError::StackGeometry);
+    }
+    let stack_a = scheduler_deferred_stack_base(0) as u64;
+    let stack_b = scheduler_deferred_stack_base(1) as u64;
+    let stack_a_end = stack_a
+        .checked_add(SCHEDULER_STACK_BYTES as u64)
+        .ok_or(SchedulerDeferredHardwareError::StackGeometry)?;
+    let stack_b_end = stack_b
+        .checked_add(SCHEDULER_STACK_BYTES as u64)
+        .ok_or(SchedulerDeferredHardwareError::StackGeometry)?;
+    if !stack_a.is_multiple_of(SCHEDULER_STACK_ALIGNMENT as u64)
+        || !stack_b.is_multiple_of(SCHEDULER_STACK_ALIGNMENT as u64)
+        || !(stack_a_end <= stack_b || stack_b_end <= stack_a)
+    {
+        return Err(SchedulerDeferredHardwareError::StackGeometry);
+    }
+    // SAFETY: selector 17 is single-entry BSP-only and exclusively owns these statics.
+    unsafe {
+        write_volatile(addr_of_mut!(poole_scheduler_deferred_kernel_rsp), 0);
+        write_volatile(addr_of_mut!(poole_scheduler_deferred_worker_a_entries), 0);
+        write_volatile(addr_of_mut!(poole_scheduler_deferred_worker_b_entries), 0);
+        write_volatile(addr_of_mut!(poole_scheduler_deferred_transition_count), 0);
+        write_volatile(addr_of_mut!(poole_scheduler_deferred_errors), 0);
+        initialize_scheduler_stack(
+            scheduler_deferred_stack_base(0),
+            scheduler_deferred_stack_pointer(0),
+            poole_scheduler_deferred_worker_a_entry,
+            SCHEDULER_TASK_A_REGISTERS,
+        );
+        initialize_scheduler_stack(
+            scheduler_deferred_stack_base(1),
+            scheduler_deferred_stack_pointer(1),
+            poole_scheduler_deferred_worker_b_entry,
+            SCHEDULER_TASK_B_REGISTERS,
+        );
+    }
+    if let Some(error) =
+        scheduler_deferred_stack_error(0).or_else(|| scheduler_deferred_stack_error(1))
+    {
+        return Err(error);
+    }
+    // SAFETY: selector 17 executes at CPL0 and only observes current control state.
+    let (cr3, bases) = unsafe {
+        (
+            read_cr3(),
+            (
+                read_msr(IA32_FS_BASE),
+                read_msr(IA32_GS_BASE),
+                read_msr(IA32_KERNEL_GS_BASE),
+            ),
+        )
+    };
+    Ok(SchedulerDeferredHardwareContext {
+        cr3,
+        bases,
+        dispatches: 0,
+    })
+}
+
+pub fn dispatch_scheduler_deferred_worker(
+    context: &mut SchedulerDeferredHardwareContext,
+    worker: u8,
+) -> Result<(), SchedulerDeferredHardwareError> {
+    if worker >= 2 {
+        return Err(SchedulerDeferredHardwareError::Worker);
+    }
+    if read_rflags() & (1 << 9) != 0 {
+        return Err(SchedulerDeferredHardwareError::InterruptState);
+    }
+    if let Some(error) = scheduler_deferred_stack_error(worker) {
+        return Err(error);
+    }
+    let entries_before = unsafe {
+        if worker == 0 {
+            read_volatile(addr_of!(poole_scheduler_deferred_worker_a_entries))
+        } else {
+            read_volatile(addr_of!(poole_scheduler_deferred_worker_b_entries))
+        }
+    };
+    let transitions_before =
+        unsafe { read_volatile(addr_of!(poole_scheduler_deferred_transition_count)) };
+    // SAFETY: the incoming RSP names a validated frame on the selected private stack.
+    unsafe {
+        write_volatile(
+            addr_of_mut!(poole_scheduler_deferred_transition_count),
+            transitions_before + 1,
+        );
+        poole_scheduler_context_switch(
+            addr_of_mut!(poole_scheduler_deferred_kernel_rsp),
+            scheduler_deferred_stack_pointer(worker),
+        );
+    }
+    let (entries_after, transitions_after, errors) = unsafe {
+        (
+            if worker == 0 {
+                read_volatile(addr_of!(poole_scheduler_deferred_worker_a_entries))
+            } else {
+                read_volatile(addr_of!(poole_scheduler_deferred_worker_b_entries))
+            },
+            read_volatile(addr_of!(poole_scheduler_deferred_transition_count)),
+            read_volatile(addr_of!(poole_scheduler_deferred_errors)),
+        )
+    };
+    if entries_after != entries_before + 1 || errors != 0 {
+        return Err(SchedulerDeferredHardwareError::Step);
+    }
+    if transitions_after != transitions_before + 2 {
+        return Err(SchedulerDeferredHardwareError::TransitionCount);
+    }
+    if let Some(error) = scheduler_deferred_stack_error(worker) {
+        return Err(error);
+    }
+    context.dispatches = context
+        .dispatches
+        .checked_add(1)
+        .ok_or(SchedulerDeferredHardwareError::TransitionCount)?;
+    Ok(())
+}
+
+pub fn clear_scheduler_deferred_workers(
+    context: SchedulerDeferredHardwareContext,
+) -> Result<SchedulerDeferredHardwareProof, SchedulerDeferredHardwareError> {
+    if read_rflags() & (1 << 9) != 0 {
+        return Err(SchedulerDeferredHardwareError::InterruptState);
+    }
+    // SAFETY: all work is terminal and these are read-only CPL0 observations.
+    let (cr3, bases) = unsafe {
+        (
+            read_cr3(),
+            (
+                read_msr(IA32_FS_BASE),
+                read_msr(IA32_GS_BASE),
+                read_msr(IA32_KERNEL_GS_BASE),
+            ),
+        )
+    };
+    if cr3 != context.cr3 || bases != context.bases {
+        return Err(SchedulerDeferredHardwareError::ControlState);
+    }
+    let (entry_a, entry_b, transitions, errors) = unsafe {
+        (
+            read_volatile(addr_of!(poole_scheduler_deferred_worker_a_entries)),
+            read_volatile(addr_of!(poole_scheduler_deferred_worker_b_entries)),
+            read_volatile(addr_of!(poole_scheduler_deferred_transition_count)),
+            read_volatile(addr_of!(poole_scheduler_deferred_errors)),
+        )
+    };
+    if entry_a + entry_b != u64::from(context.dispatches)
+        || transitions != u64::from(context.dispatches) * 2
+        || errors != 0
+    {
+        return Err(SchedulerDeferredHardwareError::TransitionCount);
+    }
+    for worker in 0..2 {
+        let base = scheduler_deferred_stack_base(worker);
+        // SAFETY: no worker can resume after the controller reaches terminal state.
+        unsafe { write_bytes(base, 0, SCHEDULER_STACK_BYTES) };
+    }
+    for worker in 0..2 {
+        let base = scheduler_deferred_stack_base(worker);
+        for offset in 0..SCHEDULER_STACK_BYTES {
+            if unsafe { read_volatile(base.add(offset)) } != 0 {
+                return Err(SchedulerDeferredHardwareError::Clear);
+            }
+        }
+        // SAFETY: the cleared and retired worker context cannot be consumed again.
+        unsafe { write_volatile(scheduler_deferred_stack_pointer(worker), 0) };
+    }
+    // SAFETY: all selector-17 context metadata is retired after proof capture.
+    unsafe {
+        write_volatile(addr_of_mut!(poole_scheduler_deferred_kernel_rsp), 0);
+        write_volatile(addr_of_mut!(poole_scheduler_deferred_worker_a_entries), 0);
+        write_volatile(addr_of_mut!(poole_scheduler_deferred_worker_b_entries), 0);
+        write_volatile(addr_of_mut!(poole_scheduler_deferred_transition_count), 0);
+        write_volatile(addr_of_mut!(poole_scheduler_deferred_errors), 0);
+    }
+    SCHEDULER_DEFERRED_STACK_BASE.store(0, Ordering::Release);
+    Ok(SchedulerDeferredHardwareProof {
+        worker_entry_count: [entry_a as u32, entry_b as u32],
+        dispatch_count: context.dispatches,
+        machine_transition_count: transitions as u32,
+        stack_count: 2,
+        stack_bytes_each: SCHEDULER_STACK_BYTES as u32,
+        stack_alignment: SCHEDULER_STACK_ALIGNMENT as u8,
+        stack_bytes_cleared: (2 * SCHEDULER_STACK_BYTES) as u32,
+        same_cr3: true,
+        fs_gs_unchanged: true,
+        returned_with_interrupts_disabled: true,
+        worker_error_count: errors as u32,
     })
 }
 
