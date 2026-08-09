@@ -223,7 +223,7 @@
     "firmware_calls_while_candidate_active_allowed": false,
     "original_cr3_restored_before_firmware_call": true,
     "candidate_tables_retained_through_exit": true,
-    "guarded_stack_page_count": 32,
+    "guarded_stack_page_count": 36,
     "guard_page_count": 2,
     "read_only_handoff_page_count": 256,
     "kernel_entry_called": false
@@ -603,7 +603,7 @@
     "PooleBoot reads exact PBTP1 and PBTS1 candidate records, binds them to the full PSM1, kernel, retained set, revocation-set identity, versions, generation, and epoch, then requires the exact unsigned-policy denial with zero signatures, authority grants, or state writes.",
     "The exact PSM1, PBTP1, and PBTS1 files are copied into retained loader-page allocations, reparsed from those final addresses, and represented by exact file byte counts and SHA-256 digests in PBP1.",
     "TRUSTST.PBS is an ESP development candidate, not authenticated monotonic authority; no backend selection, repair, commit, write, Secure Boot verification, TPM use, or live PooleKernel revalidation occurs.",
-    "PKMAP2 expands the r, rx, r, and rw kernel plan into exact supervisor 4 KiB leaves plus a 32-page guarded NX stack and a 256-page read-only NX handoff range.",
+    "PKMAP2 expands the r, rx, r, and rw kernel plan into exact supervisor 4 KiB leaves plus a 36-page guarded NX stack and a 256-page read-only NX handoff range.",
     "PooleBoot activates the candidate CR3 only for complete translation, permission, alias-hash, guard, and framebuffer checks, with zero firmware calls, then restores the original CR3.",
     "The kernel, six PBART1 ranges, exact PSM1/PBTP1/PBTS1 ranges, four private page-table pages, stack pages, and handoff pages remain retained through successful ExitBootServices.",
     "PBLIVE4 constructs PBP1 from the final descriptor-stride-aware map, records the canonical ACPI 2.0 RSDP configuration-table address, and cross-binds every retained range as loader-reserved memory.",

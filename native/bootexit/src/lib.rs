@@ -7,9 +7,9 @@ pub const MAX_EXIT_ATTEMPTS: usize = 4;
 pub const RAW_MEMORY_MAP_CAPACITY: usize = 1024 * 1024;
 pub const NORMALIZED_MEMORY_CAPACITY: usize = 16_384 * 40;
 pub const HANDOFF_CAPACITY_BYTES: usize = 1024 * 1024;
-pub const STACK_PAGE_COUNT: usize = 32;
+pub const STACK_PAGE_COUNT: usize = 36;
 pub const PAGE_SIZE: u64 = 4096;
-pub const MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = 17;
+pub const MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = 18;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Error {

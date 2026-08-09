@@ -415,6 +415,17 @@ def check_native_kernel_scheduler_deferred_readiness() -> CheckResult:
     )
 
 
+def check_native_kernel_scheduler_smp_readiness() -> CheckResult:
+    from tools import pooleos_release_gate
+
+    check = pooleos_release_gate.check_native_kernel_scheduler_smp_readiness()
+    return CheckResult(
+        name=check["name"],
+        ok=check["ok"],
+        detail=check["detail"],
+    )
+
+
 def check_native_initial_system_readiness() -> CheckResult:
     from tools import pooleos_release_gate
 
@@ -3668,6 +3679,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "tools" / "qualify_native_kernel_scheduler.py",
                 ROOT / "tools" / "qualify_native_kernel_scheduler_preempt.py",
                 ROOT / "tools" / "qualify_native_kernel_scheduler_deferred.py",
+                ROOT / "tools" / "qualify_native_kernel_scheduler_smp.py",
                 ROOT / "tools" / "generate_native_initial_system_vectors.py",
                 ROOT / "tools" / "qualify_native_initial_system.py",
                 ROOT / "tools" / "generate_native_recovery_vectors.py",
@@ -3716,6 +3728,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runtime" / "native_kernel_scheduler.py",
                 ROOT / "runtime" / "native_kernel_scheduler_preempt.py",
                 ROOT / "runtime" / "native_kernel_scheduler_deferred.py",
+                ROOT / "runtime" / "native_kernel_scheduler_smp.py",
                 ROOT / "runtime" / "native_initial_system.py",
                 ROOT / "runtime" / "native_recovery.py",
                 ROOT / "runtime" / "native_symbols.py",
@@ -3747,6 +3760,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "docs" / "native-kernel-scheduler.md",
                 ROOT / "docs" / "native-kernel-scheduler-preemption.md",
                 ROOT / "docs" / "native-kernel-scheduler-deferred.md",
+                ROOT / "docs" / "native-kernel-scheduler-smp.md",
                 ROOT / "docs" / "native-initial-system-bundle.md",
                 ROOT / "docs" / "native-recovery-bundle.md",
                 ROOT / "docs" / "native-symbol-bundle.md",
@@ -3826,6 +3840,8 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "native" / "kernel" / "src" / "smp_ipi.rs",
                 ROOT / "native" / "kernel" / "src" / "scheduler.rs",
                 ROOT / "native" / "kernel" / "src" / "bin" / "pksched1_probe.rs",
+                ROOT / "native" / "kernel" / "src" / "scheduler_smp.rs",
+                ROOT / "native" / "kernel" / "src" / "bin" / "pksched4_probe.rs",
                 ROOT / "native" / "kernel" / "src" / "bin" / "pkreval1_probe.rs",
                 ROOT / "native" / "kernel" / "src" / "arch" / "x86_64.rs",
                 ROOT / "native" / "cpupolicy" / "Cargo.toml",
@@ -3871,6 +3887,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "runs" / "native-kernel-scheduler-readiness.json",
                 ROOT / "runs" / "native-kernel-scheduler-preemption-readiness.json",
                 ROOT / "runs" / "native-kernel-scheduler-deferred-readiness.json",
+                ROOT / "runs" / "native-kernel-scheduler-smp-readiness.json",
                 ROOT / "runs" / "native_initial_system_readiness.json",
                 ROOT / "runs" / "native_recovery_readiness.json",
                 ROOT / "runs" / "native_symbol_readiness.json",
@@ -3935,6 +3952,9 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "specs" / "native-kernel-scheduler-deferred-contract.json",
                 ROOT / "specs" / "native-kernel-scheduler-deferred-contract.schema.json",
                 ROOT / "specs" / "native-kernel-scheduler-deferred-readiness.schema.json",
+                ROOT / "specs" / "native-kernel-scheduler-smp-contract.json",
+                ROOT / "specs" / "native-kernel-scheduler-smp-contract.schema.json",
+                ROOT / "specs" / "native-kernel-scheduler-smp-readiness.schema.json",
                 ROOT / "specs" / "native-initial-system-contract.json",
                 ROOT / "specs" / "native-initial-system-contract.schema.json",
                 ROOT / "specs" / "native-initial-system-golden-vectors.json",
@@ -4022,6 +4042,7 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT / "tests" / "test_native_kernel_scheduler.py",
                 ROOT / "tests" / "test_native_kernel_scheduler_preempt.py",
                 ROOT / "tests" / "test_native_kernel_scheduler_deferred.py",
+                ROOT / "tests" / "test_native_kernel_scheduler_smp.py",
                 ROOT / "specs" / "pdc-source-intake.schema.json",
                 ROOT / "specs" / "pdc-math-contract.schema.json",
                 ROOT / "specs" / "pdc-golden-vectors.schema.json",
@@ -4119,6 +4140,7 @@ def main(argv: list[str] | None = None) -> int:
     checks.append(check_native_kernel_scheduler_readiness())
     checks.append(check_native_kernel_scheduler_preemption_readiness())
     checks.append(check_native_kernel_scheduler_deferred_readiness())
+    checks.append(check_native_kernel_scheduler_smp_readiness())
     checks.append(check_native_initial_system_readiness())
     checks.append(check_native_recovery_readiness())
     checks.append(check_native_symbol_readiness())

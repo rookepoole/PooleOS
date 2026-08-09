@@ -7,7 +7,46 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 144
+Last roadmap reconciliation: PooleOS Cycle 145
+
+Cycle 145 reconciliation (superseding current Cycle 144 implementation and
+next-move values): governance and external-key state are unchanged, and no
+key, signature, publication, privileged host probe, driver load, firmware
+change, physical-media write, tag, release, or production promotion occurred.
+The owner-independent `N12-SCHED-SMP-001` move adds selector 18 PKSCHED4 and
+closes only `FLAG-N12-SCHED-SMP-001` for one exact BSP-0/AP-1,2,3
+SandyBridge-minus-AVX development topology. Its allocation-free controller
+owns four run queues, four idle owners, and eight generation-tagged task slots.
+One cross-CPU wake and two migrations commit only after exact AP
+acknowledgements bind task generation, owner epoch, source and target CPU,
+attempt, sequence, operation, status, error, and result. Each AP dispatches two
+local tasks and the BSP dispatches two. One deliberate APIC-4 timeout preserves
+the source queue and owner epoch, withholds target ownership, and rejects a late
+acknowledgement; a stale task generation is rejected independently. All eight
+tasks retire, all three APs quiesce and park, and 102 pages or 417,792 bytes are
+scrubbed, verified, and released. Eight focused tests within 173 kernel host
+tests, five exact independent Rust/Python host receipts, two exact 37-marker
+four-vCPU boots, and 32 hostile-control categories covering 209 rejected cases
+pass. The PKENTRY1 layout was expanded without changing its `0xA000` entry or
+557,056-byte, 136-page image: text now ends at `0x66000`, RELRO ends at
+`0x74000`, and writable data begins there. The canonical kernel is 476,808
+bytes with 1,181 relocations and SHA-256
+`9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168`.
+The first selector-18 execution exposed an exact low-guard stack fault at
+`RSP/CR2=0xFFFFFFFF80088BC8`, 1,080 bytes below the former 32-page stack. The
+shared retained layout now provides a 36-page, 144-KiB stack between the same
+absent guards and preserves one spare page-table leaf. A full dependency replay
+from PKLOAD6 through PKSCHED4 passed after the repair, with refreshed PBP1,
+PKPMM7, PKVM3, and downstream receipt identities.
+This is exact-topology SMP scheduler evidence, not general SMP. General
+topology/hotplug/x2APIC, general timer preemption, AP-local deferred workers and
+driver/service consumers, arbitrary callbacks, complete lock/reclamation
+families, ring-3/address-space switching, full per-task architectural state,
+target execution, N12 exit, release, and production remain open.
+`production_ready=false`; the blocked external move remains
+`N0-HW-KEY-ACQUIRE-001`, while `ADD-N12-SCHED-AP-WORKERS-001` and
+`FLAG-N12-SCHED-AP-WORKERS-001` bind `N12-SCHED-AP-WORKERS-001` as the next
+owner-independent move.
 
 Cycle 144 reconciliation (superseding current Cycle 143 implementation and
 next-move values): governance and external-key state are unchanged, and no

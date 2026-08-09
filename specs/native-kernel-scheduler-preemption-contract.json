@@ -56,10 +56,10 @@
     "full_xstate_debug_pmu_switch": false
   },
   "stack_partition": {
-    "retained_kernel_stack_pages": 32,
-    "retained_kernel_stack_bytes": 131072,
-    "task_region": "lower_half",
-    "kernel_entry_region": "upper_half",
+    "retained_kernel_stack_pages": 36,
+    "retained_kernel_stack_bytes": 147456,
+    "task_region": "lowest_64_kib",
+    "kernel_entry_region": "remaining_upper_80_kib",
     "task_stack_count": 4,
     "task_stack_bytes_each": 16384,
     "task_stack_alignment_bytes": 16,
@@ -83,7 +83,7 @@
   "qualification": {
     "host_environment_count": 1,
     "rust_preemption_test_count": 7,
-    "rust_kernel_test_count": 165,
+    "rust_kernel_test_count": 173,
     "host_probe_receipt_count": 3,
     "clean_media_generation_count": 2,
     "qemu_run_count": 2,

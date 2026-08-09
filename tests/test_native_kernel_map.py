@@ -161,33 +161,33 @@ class NativeKernelMapTests(unittest.TestCase):
             native_kernel_map.request_from_elf_plan(plan(), 48),
             native_kernel_map.RetainedRequest(
                 stack_physical_base=0x0400_0000,
-                stack_page_count=32,
+                stack_page_count=36,
                 handoff_physical_base=0x0500_0000,
                 handoff_capacity_bytes=1024 * 1024,
             ),
         )
-        self.assertEqual([136, 169], model["guard_page_indices"])
-        self.assertEqual(424, model["total_mapped_page_count"])
-        self.assertEqual(426, native_kernel_map.TEMPORARY_PAGE_INDEX)
-        self.assertEqual((427, 428, 5, 433), (
+        self.assertEqual([136, 173], model["guard_page_indices"])
+        self.assertEqual(428, model["total_mapped_page_count"])
+        self.assertEqual(430, native_kernel_map.TEMPORARY_PAGE_INDEX)
+        self.assertEqual((431, 432, 5, 437), (
             native_kernel_map.METADATA_GUARD_LOW_PAGE,
             native_kernel_map.METADATA_FIRST_PAGE,
             native_kernel_map.METADATA_PAGE_COUNT,
             native_kernel_map.METADATA_GUARD_HIGH_PAGE,
         ))
-        self.assertEqual((434, 435, 32, 467), (
+        self.assertEqual((438, 439, 32, 471), (
             native_kernel_map.LEDGER_A_GUARD_LOW_PAGE,
             native_kernel_map.LEDGER_A_FIRST_PAGE,
             native_kernel_map.LEDGER_A_PAGE_CAPACITY,
             native_kernel_map.LEDGER_A_GUARD_HIGH_PAGE,
         ))
-        self.assertEqual((468, 469, 32, 501), (
+        self.assertEqual((472, 473, 32, 505), (
             native_kernel_map.LEDGER_B_GUARD_LOW_PAGE,
             native_kernel_map.LEDGER_B_FIRST_PAGE,
             native_kernel_map.LEDGER_B_PAGE_CAPACITY,
             native_kernel_map.LEDGER_B_GUARD_HIGH_PAGE,
         ))
-        self.assertEqual((502, 503, 504, 505, 506), (
+        self.assertEqual((506, 507, 508, 509, 510), (
             native_kernel_map.MMIO_GUARD_LOW_PAGE,
             native_kernel_map.LOCAL_APIC_PAGE,
             native_kernel_map.MMIO_GUARD_MIDDLE_PAGE,
@@ -196,13 +196,20 @@ class NativeKernelMapTests(unittest.TestCase):
         ))
         self.assertEqual("rw", model["retained_leaves"][0]["permissions"])
         self.assertEqual("r", model["retained_leaves"][-1]["permissions"])
+        active_vm = (ROOT / "native/kernel/src/active_virtual_memory.rs").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(
+            "const STACK_PAGE_COUNT: u64 = crate::BOOTSTRAP_STACK_PAGE_COUNT;",
+            active_vm,
+        )
 
     def test_retained_model_rejects_overlap_range_and_kernel_guard_collision(self) -> None:
         request = native_kernel_map.request_from_elf_plan(plan(), 48)
         for retained in (
-            native_kernel_map.RetainedRequest(request.physical_base, 32, 0x0500_0000, 1024 * 1024),
-            native_kernel_map.RetainedRequest(0x0400_0001, 32, 0x0500_0000, 1024 * 1024),
-            native_kernel_map.RetainedRequest(0x0400_0000, 31, 0x0500_0000, 1024 * 1024),
+            native_kernel_map.RetainedRequest(request.physical_base, 36, 0x0500_0000, 1024 * 1024),
+            native_kernel_map.RetainedRequest(0x0400_0001, 36, 0x0500_0000, 1024 * 1024),
+            native_kernel_map.RetainedRequest(0x0400_0000, 35, 0x0500_0000, 1024 * 1024),
         ):
             with self.assertRaises(native_kernel_map.KernelMapError):
                 native_kernel_map.build_retained_model(request, retained)
@@ -212,17 +219,17 @@ class NativeKernelMapTests(unittest.TestCase):
         with self.assertRaises(native_kernel_map.KernelMapError):
             native_kernel_map.build_retained_model(
                 native_kernel_map.request_from_elf_plan(hostile, 48),
-                native_kernel_map.RetainedRequest(0x0400_0000, 32, 0x0500_0000, 1024 * 1024),
+                native_kernel_map.RetainedRequest(0x0400_0000, 36, 0x0500_0000, 1024 * 1024),
             )
 
     def test_retained_probe_and_lifecycle_are_exact(self) -> None:
         expected = native_kernel_map.build_retained_model(
             native_kernel_map.request_from_elf_plan(plan(), 48),
-            native_kernel_map.RetainedRequest(0x0400_0000, 32, 0x0500_0000, 1024 * 1024),
+            native_kernel_map.RetainedRequest(0x0400_0000, 36, 0x0500_0000, 1024 * 1024),
         )
         line = (
-            "PKMAP2 PASS kernel_pages=136 stack_pages=32 handoff_pages=256 guards=2 "
-            f"total_pages=424 stack_pt=137 handoff_pt=170 retained_fnv1a64={expected['retained_leaf_fingerprint']}"
+            "PKMAP2 PASS kernel_pages=136 stack_pages=36 handoff_pages=256 guards=2 "
+            f"total_pages=428 stack_pt=137 handoff_pt=174 retained_fnv1a64={expected['retained_leaf_fingerprint']}"
         )
         self.assertEqual(
             expected["retained_leaf_fingerprint"],

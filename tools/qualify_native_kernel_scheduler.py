@@ -221,7 +221,7 @@ def _source_audit() -> dict[str, Any]:
         texts["boot_manifest"],
     )
     scheduler._require(
-        "pub const MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = 17;" in texts["bootexit"],
+        "pub const MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = 18;" in texts["bootexit"],
         "PKSCHED1 transfer-state selector ceiling changed",
     )
     result["files"] = {
@@ -370,6 +370,20 @@ def _linked_switch_audit(
         completed.stdout.decode("ascii", errors="replace").replace("\r\n", "\n"),
         symbols.stdout.decode("ascii", errors="replace").replace("\r\n", "\n"),
     )
+    llvm_objdump = candidates[0]
+    try:
+        llvm_objdump_path = llvm_objdump.relative_to(ROOT)
+    except ValueError:
+        logical_toolchain_root = ROOT / ".toolchains"
+        try:
+            tool_relative = llvm_objdump.resolve(strict=True).relative_to(
+                logical_toolchain_root.resolve(strict=True)
+            )
+        except ValueError as error:
+            raise QualificationError(
+                "PKSCHED1 llvm-objdump escaped the workspace-local toolchain"
+            ) from error
+        llvm_objdump_path = logical_toolchain_root.relative_to(ROOT) / tool_relative
     result.update(
         {
             "linked_sha256": scheduler.sha256_bytes(linked),
@@ -377,8 +391,8 @@ def _linked_switch_audit(
             "canonical_sha256": scheduler.sha256_bytes(canonical),
             "canonical_byte_count": len(canonical),
             "relocation_count": plan.relocation_count,
-            "llvm_objdump_path": candidates[0].relative_to(ROOT).as_posix(),
-            "llvm_objdump_sha256": scheduler.sha256_bytes(candidates[0].read_bytes()),
+            "llvm_objdump_path": llvm_objdump_path.as_posix(),
+            "llvm_objdump_sha256": scheduler.sha256_bytes(llvm_objdump.read_bytes()),
         }
     )
     return result

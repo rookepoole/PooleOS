@@ -66,9 +66,11 @@ executes PKREVAL1 over the exact retained bytes, emits an independently bound
 terminal unsigned denial over serial and debugcon, and halts with zero authority
 or effects.
 
-Cycle 133 advances the current retained handoff to PBLIVE4, adds one canonical
-firmware record carrying the UEFI ACPI 2.0 RSDP address, expands the shared
-guarded stack to 32 pages, and rebinds the current 83-page PooleKernel. The
+Cycle 133 advanced the retained handoff to PBLIVE4, added one canonical
+firmware record carrying the UEFI ACPI 2.0 RSDP address, and expanded the shared
+guarded stack to 32 pages for that cycle's 83-page PooleKernel. Cycle 145
+expands the current stack to 36 pages after downstream PKVM3 qualification
+detected a low-guard write. The
 record is only a locator; PKACPI1 separately validates and copies its bounded
 required-table set inside PooleKernel before ACPI reclaim.
 
@@ -200,7 +202,7 @@ The receipt proves, on the pinned profile:
 - complete higher-half kernel alias verification with W^X, CR0.WP, and NX;
 - framebuffer translation and cache-bit preservation during the active audit;
 - retention of kernel, six profile artifacts, PSM1, PBTP1, and PBTS1 ranges,
-  four table pages, a 32-page guarded stack, and a one-MiB read-only/NX
+  four table pages, a 36-page guarded stack, and a one-MiB read-only/NX
   handoff range;
 - a final-map-bound post-exit development PBP1 reconstructed identically from
   both diagnostics transports;

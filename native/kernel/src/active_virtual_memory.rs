@@ -34,7 +34,7 @@ const DIRECT_PARENT_FLAGS: u64 = ENTRY_PRESENT | ENTRY_WRITABLE | ENTRY_NO_EXECU
 const USER_RW_NX_FLAGS: u64 = ENTRY_PRESENT | ENTRY_WRITABLE | ENTRY_USER | ENTRY_NO_EXECUTE;
 const SUPERVISOR_RW_NX_FLAGS: u64 = ENTRY_PRESENT | ENTRY_WRITABLE | ENTRY_NO_EXECUTE;
 const HARDWARE_LEAF_BITS: u64 = ENTRY_ACCESSED | ENTRY_DIRTY;
-const STACK_PAGE_COUNT: u64 = 32;
+const STACK_PAGE_COUNT: u64 = crate::BOOTSTRAP_STACK_PAGE_COUNT;
 const PROBE_VALUE: u8 = 0xa5;
 const PAGES_PER_PAGE_TABLE: u64 = TABLE_ENTRIES as u64;
 
@@ -1430,6 +1430,9 @@ mod tests {
     const ORIGINAL_ROOT: u64 = 0x0300_0000;
     const KERNEL_VIRTUAL: u64 = 0xffff_ffff_8000_0000;
     const KERNEL_PHYSICAL: u64 = 0x0020_0000;
+    const RETAINED_STACK_FIRST_PAGE: u64 = 137;
+    const RETAINED_STACK_TOP_PAGE: u64 = RETAINED_STACK_FIRST_PAGE + STACK_PAGE_COUNT;
+    const RETAINED_HANDOFF_FIRST_PAGE: u64 = RETAINED_STACK_TOP_PAGE + 1;
 
     struct Memory {
         pages: BTreeMap<u64, [u64; TABLE_ENTRIES]>,
@@ -1454,12 +1457,14 @@ mod tests {
                 pages.get_mut(&leaf).unwrap()[page] =
                     (KERNEL_PHYSICAL + page as u64 * PAGE_BYTES) | ENTRY_PRESENT;
             }
-            let stack_top = KERNEL_VIRTUAL + 97 * PAGE_BYTES;
-            for page in 65..97usize {
-                pages.get_mut(&leaf).unwrap()[page] =
-                    (0x0040_0000 + (page - 65) as u64 * PAGE_BYTES) | SUPERVISOR_RW_NX_FLAGS;
+            let stack_top = KERNEL_VIRTUAL + RETAINED_STACK_TOP_PAGE * PAGE_BYTES;
+            for page in RETAINED_STACK_FIRST_PAGE as usize..RETAINED_STACK_TOP_PAGE as usize {
+                pages.get_mut(&leaf).unwrap()[page] = (0x0040_0000
+                    + (page as u64 - RETAINED_STACK_FIRST_PAGE) * PAGE_BYTES)
+                    | SUPERVISOR_RW_NX_FLAGS;
             }
-            pages.get_mut(&leaf).unwrap()[80] = 0x0050_0000 | ENTRY_PRESENT | ENTRY_NO_EXECUTE;
+            pages.get_mut(&leaf).unwrap()[RETAINED_HANDOFF_FIRST_PAGE as usize] =
+                0x0050_0000 | ENTRY_PRESENT | ENTRY_NO_EXECUTE;
             let core = CoreRecord {
                 boot_flags: 0,
                 kernel_physical_base: KERNEL_PHYSICAL,
@@ -1470,7 +1475,7 @@ mod tests {
                 initial_stack_top_virtual: stack_top,
                 page_table_root_physical: ORIGINAL_ROOT,
                 handoff_physical_base: 0x0050_0000,
-                handoff_virtual_base: KERNEL_VIRTUAL + 80 * PAGE_BYTES,
+                handoff_virtual_base: KERNEL_VIRTUAL + RETAINED_HANDOFF_FIRST_PAGE * PAGE_BYTES,
                 handoff_byte_count: PAGE_BYTES,
                 uefi_system_table_physical: 0,
                 uefi_runtime_services_physical: 0,
