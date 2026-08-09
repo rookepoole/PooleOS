@@ -103,7 +103,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(checklist["section_count"], 171)
         self.assertEqual(checklist["coverage_status"], "pass")
         self.assertEqual(checklist["coverage_sha256"], hashlib.sha256(self.coverage_path.read_bytes()).hexdigest().upper())
-        self.assertEqual(checklist["added_requirement_count"], 50)
+        self.assertEqual(checklist["added_requirement_count"], 51)
 
     def test_phase_checklist_mapping_matches_coverage(self) -> None:
         coverage_by_phase = {item["phase_id"]: item for item in self.coverage["phase_coverage"]}
@@ -118,7 +118,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 143)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 144)
         self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 844)
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
@@ -135,9 +135,9 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertFalse(historical["production_ready"])
         self.assertEqual(historical["native_promotion_role"], "historical_non_promoting")
         current = self.roadmap["baseline"]["native_consistency_release_gate"]
-        self.assertEqual(current["passed_checks"], 99)
-        self.assertEqual(current["total_checks"], 99)
-        self.assertEqual(current["artifact_count"], 94)
+        self.assertEqual(current["passed_checks"], 100)
+        self.assertEqual(current["total_checks"], 100)
+        self.assertEqual(current["artifact_count"], 95)
         self.assertEqual(current["explicit_gap_count"], 20)
         self.assertFalse(current["production_ready"])
         self.assertEqual(self.roadmap["immediate_next_move"]["id"], "N0-HW-KEY-ACQUIRE-001")
@@ -159,10 +159,10 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N12-SCHED-PREEMPT-001")
+        self.assertEqual(protocol["selected_move_id"], "N12-SCHED-DEFERRED-001")
         self.assertEqual(
             protocol["owner_independent_next_move_id"],
-            "N12-SCHED-DEFERRED-001",
+            "N12-SCHED-SMP-001",
         )
         self.assertIn("runs/hardware_target_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_tier0_readiness.json", protocol["required_records"])
@@ -216,8 +216,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
     def test_flags_and_gaps_are_native_and_traceable(self) -> None:
         phase_ids = {phase["id"] for phase in self.roadmap["phases"]}
         flags = self.roadmap["implementation_flags"]
-        self.assertEqual(len(flags), 87)
-        self.assertEqual(len({flag["id"] for flag in flags}), 87)
+        self.assertEqual(len(flags), 88)
+        self.assertEqual(len({flag["id"] for flag in flags}), 88)
         self.assertTrue(any(flag["class"] == "STOP_SHIP" and flag["status"] == "open" for flag in flags))
         self.assertEqual(next(flag for flag in flags if flag["id"] == "FLAG-BUILDROOT-LEGACY-001")["status"], "closed")
         objectives_flag = next(flag for flag in flags if flag["id"] == "FLAG-N0-OBJECTIVES-001")
@@ -364,7 +364,16 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             flag for flag in flags if flag["id"] == "FLAG-N12-SCHED-DEFERRED-001"
         )
         self.assertEqual(deferred_flag["class"], "REQUIRED")
-        self.assertEqual(deferred_flag["status"], "open")
+        self.assertEqual(deferred_flag["status"], "closed")
+        self.assertIn(
+            "runs/native-kernel-scheduler-deferred-readiness.json",
+            deferred_flag["evidence"],
+        )
+        smp_scheduler_flag = next(
+            flag for flag in flags if flag["id"] == "FLAG-N12-SCHED-SMP-001"
+        )
+        self.assertEqual(smp_scheduler_flag["class"], "REQUIRED")
+        self.assertEqual(smp_scheduler_flag["status"], "open")
         pooleboot_proof_flag = next(flag for flag in flags if flag["id"] == "FLAG-N5-POOLEBOOT-PROOF-001")
         self.assertEqual(pooleboot_proof_flag["class"], "REQUIRED")
         self.assertEqual(pooleboot_proof_flag["status"], "closed")
@@ -733,13 +742,22 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         n12_statuses = {
             subphase["id"]: subphase["status"] for subphase in n12["subphases"]
         }
-        for subphase_id in ("N12.1", "N12.2", "N12.5", "N12.6", "N12.7"):
+        for subphase_id in (
+            "N12.1",
+            "N12.2",
+            "N12.3",
+            "N12.4",
+            "N12.5",
+            "N12.6",
+            "N12.7",
+        ):
             self.assertEqual(n12_statuses[subphase_id], "partial")
-        for subphase_id in ("N12.3", "N12.4", "N12.8"):
+        for subphase_id in ("N12.8",):
             self.assertEqual(n12_statuses[subphase_id], "not_started")
         self.assertIn("ADD-N12-SCHED-FOUNDATION-001", n12["added_requirement_ids"])
         self.assertIn("ADD-N12-SCHED-PREEMPT-001", n12["added_requirement_ids"])
         self.assertIn("ADD-N12-SCHED-DEFERRED-001", n12["added_requirement_ids"])
+        self.assertIn("ADD-N12-SCHED-SMP-001", n12["added_requirement_ids"])
         self.assertTrue(
             any(
                 item.startswith("runs/native-kernel-scheduler-readiness.json:")
@@ -747,12 +765,20 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             )
         )
         self.assertTrue(
-            any("Deferred work and kernel workers" in item for item in n12["current_gaps"])
+                any("AP-local scheduler queues and workers" in item for item in n12["current_gaps"])
         )
         self.assertTrue(
             any(
                 item.startswith(
                     "runs/native-kernel-scheduler-preemption-readiness.json:"
+                )
+                for item in n12["current_evidence"]
+            )
+        )
+        self.assertTrue(
+            any(
+                item.startswith(
+                    "runs/native-kernel-scheduler-deferred-readiness.json:"
                 )
                 for item in n12["current_evidence"]
             )

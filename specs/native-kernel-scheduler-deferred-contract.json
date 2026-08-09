@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_kernel_scheduler_deferred_contract",
+  "contract_id": "PKSCHED3",
+  "selected_move_id": "N12-SCHED-DEFERRED-001",
+  "status_date": "2026-08-08",
+  "status": "bounded_bsp_interrupt_deferred_worker_candidate_non_promoting",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "phase_mapping": ["N12.1", "N12.2", "N12.3", "N12.4", "N12.5", "N12.6", "N12.7"],
+  "source_requirement_ids": ["043", "044", "045", "046", "047", "048", "ADD-N12-SCHED-DEFERRED-001"],
+  "authorities": [
+    {
+      "role": "interrupt top-half and deferred-work architecture",
+      "title": "Linux kernel generic interrupt handling",
+      "url": "https://docs.kernel.org/core-api/genericirq.html"
+    },
+    {
+      "role": "workqueue cancellation, flush, and worker lifecycle reference",
+      "title": "Linux kernel workqueue API",
+      "url": "https://docs.kernel.org/core-api/workqueue.html"
+    },
+    {
+      "role": "x86-64 interrupt and local APIC semantics",
+      "title": "Intel 64 and IA-32 Architectures Software Developer Manuals",
+      "url": "https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html"
+    }
+  ],
+  "limits": {
+    "work_capacity": 8,
+    "worker_count": 2,
+    "worker_stack_bytes_each": 16384,
+    "maximum_high_priority_bypass": 3,
+    "live_timer_deliveries": 1,
+    "live_worker_dispatches": 6,
+    "fault_rollback_boundaries": 5,
+    "allocation_permitted": false,
+    "arbitrary_callback_permitted": false
+  },
+  "lifecycle": [
+    "free",
+    "reserved",
+    "queued",
+    "running",
+    "completed_or_cancelled",
+    "generation_checked_retirement"
+  ],
+  "ordering": {
+    "producer": "validated one-deep interrupt top half with IF clear and queue lock held",
+    "handoff": "local APIC EOI completes before a matching immutable dispatch permit is minted",
+    "consumer": "one of two fixed BSP kernel workers executes a typed operation token on a private stack",
+    "priority": "oldest high priority work may bypass normal work at most three consecutive times",
+    "flush": "all work at or below the captured enqueue watermark must be terminal",
+    "shutdown": "close intake, cancel queued work, request running cancellation, flush, retire, scrub stacks"
+  },
+  "required_negative_controls": [
+    "NEG-N12-PKSCHED3-MARKER-OMISSION",
+    "NEG-N12-PKSCHED3-MARKER-ORDER",
+    "NEG-N12-PKSCHED3-MARKER-DUPLICATE",
+    "NEG-N12-PKSCHED3-SELECTOR",
+    "NEG-N12-PKSCHED3-ARM-FIELD-MATRIX",
+    "NEG-N12-PKSCHED3-QUEUE-FIELD-MATRIX",
+    "NEG-N12-PKSCHED3-WORK-FIELD-MATRIX",
+    "NEG-N12-PKSCHED3-FLUSH-FIELD-MATRIX",
+    "NEG-N12-PKSCHED3-FAULT-FIELD-MATRIX",
+    "NEG-N12-PKSCHED3-CLEANUP-FIELD-MATRIX",
+    "NEG-N12-PKSCHED3-CLAIM-BOUNDARY-FIELD-MATRIX",
+    "NEG-N12-PKSCHED3-PROBE-OMISSION",
+    "NEG-N12-PKSCHED3-PROBE-ORDER",
+    "NEG-N12-PKSCHED3-PROBE-FIELD-MATRIX",
+    "NEG-N12-PKSCHED3-INDEPENDENT-ORACLE",
+    "NEG-N12-PKSCHED3-FIXED-CAPACITY",
+    "NEG-N12-PKSCHED3-DUPLICATE-SUPPRESSION",
+    "NEG-N12-PKSCHED3-TOP-HALF-CONTEXT",
+    "NEG-N12-PKSCHED3-RECURSION",
+    "NEG-N12-PKSCHED3-EOI-PERMIT",
+    "NEG-N12-PKSCHED3-PRIORITY-BYPASS",
+    "NEG-N12-PKSCHED3-QUEUED-CANCEL",
+    "NEG-N12-PKSCHED3-RUNNING-CANCEL",
+    "NEG-N12-PKSCHED3-FLUSH-WATERMARK",
+    "NEG-N12-PKSCHED3-STALE-GENERATION",
+    "NEG-N12-PKSCHED3-FAULT-ROLLBACK",
+    "NEG-N12-PKSCHED3-SHUTDOWN-ORDER",
+    "NEG-N12-PKSCHED3-NO-HEAP-OR-CALLBACK",
+    "NEG-N12-PKSCHED3-WORKER-STACK-OWNERSHIP",
+    "NEG-N12-PKSCHED3-INPUT-BINDING"
+  ],
+  "claims": {
+    "allocation_free_deferred_work_implemented": true,
+    "generation_safe_work_identity_implemented": true,
+    "interrupt_top_half_enqueue_verified": true,
+    "eoi_before_worker_dispatch_verified": true,
+    "two_private_bsp_worker_stacks_verified": true,
+    "duplicate_cancellation_flush_shutdown_verified": true,
+    "bounded_priority_bypass_verified": true,
+    "fault_rollback_and_reclamation_verified": true,
+    "arbitrary_kernel_callbacks_implemented": false,
+    "driver_or_service_async_consumers_implemented": false,
+    "live_ap_scheduler_dispatch_implemented": false,
+    "ring3_or_address_space_switch_implemented": false,
+    "physical_target_tested": false,
+    "n12_exit_gate_satisfied": false,
+    "production_ready": false
+  },
+  "acceptance": {
+    "rust_focused_tests": 7,
+    "rust_kernel_tests": 165,
+    "host_probe_receipts": 5,
+    "qemu_runs": 2,
+    "live_marker_count": 37,
+    "negative_control_categories": 30,
+    "exact_two_run_match_required": true,
+    "complete_cleanup_required": true
+  },
+  "nonclaims": [
+    "No arbitrary function pointer or callback may be enqueued.",
+    "No driver or service consumes deferred work yet.",
+    "No AP worker dispatch, cross-CPU migration, ring-3 execution, or address-space switch is implemented.",
+    "No physical target, N12 exit, release, promotion, or production-readiness claim follows."
+  ]
+}

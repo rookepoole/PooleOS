@@ -241,7 +241,8 @@
       "added_requirement_ids": [
         "ADD-N12-SCHED-FOUNDATION-001",
         "ADD-N12-SCHED-PREEMPT-001",
-        "ADD-N12-SCHED-DEFERRED-001"
+        "ADD-N12-SCHED-DEFERRED-001",
+        "ADD-N12-SCHED-SMP-001"
       ]
     },
     {
@@ -3003,6 +3004,16 @@
       "basis": [
         "N12.3-N12.4 deferred reclamation and kernel-worker exit requirements",
         "Cycle 143 PKSCHED2 intentionally leaves its bounded event queue drained synchronously",
+        "master checklist sections 031-034"
+      ]
+    },
+    {
+      "id": "ADD-N12-SCHED-SMP-001",
+      "phase_id": "N12",
+      "requirement": "Integrate the scheduler and deferred-work foundations with AP-local run queues and workers, explicit CPU ownership transfer, remote reschedule IPI delivery and acknowledgement, generation-safe cross-CPU wake and migration, offline and timeout rollback, topology-aware balancing, per-CPU idle ownership, and complete park/scrub/release teardown before SMP scheduling or migration can be promoted.",
+      "basis": [
+        "Cycle 144 PKSCHED3 intentionally remains BSP-only",
+        "PKSMP5 fixed-topology IPI and remote-invalidation foundation",
         "master checklist sections 031-034"
       ]
     },

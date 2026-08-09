@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.invalid/schemas/native-kernel-scheduler-deferred-contract.schema.json",
+  "title": "PooleOS PKSCHED3 Contract",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "contract_id",
+    "selected_move_id",
+    "status_date",
+    "status",
+    "production_ready",
+    "production_promotion_allowed",
+    "phase_mapping",
+    "source_requirement_ids",
+    "authorities",
+    "limits",
+    "lifecycle",
+    "ordering",
+    "required_negative_controls",
+    "claims",
+    "acceptance",
+    "nonclaims"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_scheduler_deferred_contract"},
+    "contract_id": {"const": "PKSCHED3"},
+    "selected_move_id": {"const": "N12-SCHED-DEFERRED-001"},
+    "status_date": {"type": "string", "format": "date"},
+    "status": {"type": "string", "minLength": 1},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "phase_mapping": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "source_requirement_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "authorities": {"type": "array", "minItems": 1, "items": {"type": "object"}},
+    "limits": {
+      "type": "object",
+      "required": ["work_capacity", "worker_count", "worker_stack_bytes_each", "maximum_high_priority_bypass", "live_timer_deliveries", "live_worker_dispatches", "fault_rollback_boundaries", "allocation_permitted", "arbitrary_callback_permitted"],
+      "properties": {
+        "work_capacity": {"const": 8},
+        "worker_count": {"const": 2},
+        "worker_stack_bytes_each": {"const": 16384},
+        "maximum_high_priority_bypass": {"const": 3},
+        "live_timer_deliveries": {"const": 1},
+        "live_worker_dispatches": {"const": 6},
+        "fault_rollback_boundaries": {"const": 5},
+        "allocation_permitted": {"const": false},
+        "arbitrary_callback_permitted": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "lifecycle": {"type": "array", "minItems": 6, "items": {"type": "string"}},
+    "ordering": {"type": "object"},
+    "required_negative_controls": {"type": "array", "minItems": 30, "maxItems": 30, "uniqueItems": true, "items": {"type": "string"}},
+    "claims": {"type": "object"},
+    "acceptance": {"type": "object"},
+    "nonclaims": {"type": "array", "minItems": 4, "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

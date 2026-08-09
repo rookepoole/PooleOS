@@ -1,13 +1,44 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-08-01
+Status date: 2026-08-08
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 143
+Last roadmap reconciliation: PooleOS Cycle 144
+
+Cycle 144 reconciliation (superseding current Cycle 143 implementation and
+next-move values): governance and external-key state are unchanged, and no
+key, signature, publication, privileged host probe, driver load, firmware
+change, physical-media write, tag, release, or production promotion occurred.
+The owner-independent `N12-SCHED-DEFERRED-001` move adds selector 17 PKSCHED3
+and closes only `FLAG-N12-SCHED-DEFERRED-001`. Its allocation-free eight-slot
+controller freezes generation-safe work identity, typed Add/Xor/Fence
+operations, duplicate suppression, EOI-gated dispatch, a maximum three-item
+high-priority bypass, queued and running cancellation, flush watermarks, exact
+retirement and shutdown, and five rollback boundaries. One real PKIRQ1
+local-APIC timer top half enqueues eight items and issues EOI before any worker
+dispatch. Two fixed BSP workers use private 16-KiB stacks inside retained
+bootstrap memory, alternate across slots `0,2,4,1,5,6`, enter three times each,
+and perform twelve exact hardware context transitions. Five items complete,
+three cancel, all eight retire, interrupt-controller state and MMIO mappings
+are restored, and all 32,768 worker-stack bytes are cleared. Seven focused
+tests within 165 kernel host tests, five exact independent Rust/Python host
+receipts, two exact 37-marker qemu64 runs, and 30 hostile-control categories
+covering 208 rejected cases pass. The exact kernel is 460,424 canonical bytes
+in a 557,056-byte, 136-page image with 1,125 relocations and SHA-256
+`FC13CF79E94318FAE10AFF9E7198036B30C587CF2BFD10457A045ACC6EB7665E`.
+This is bounded BSP deferred-work evidence with typed built-in operations, not
+the complete N12 scheduler or a callback API. Driver/service consumers,
+AP-local run queues and workers, remote reschedule IPIs, cross-CPU wake and
+migration, ring-3/address-space switching, complete per-task architectural
+state, target execution, N12 exit, release, and production remain open.
+`production_ready=false`; the blocked external move remains
+`N0-HW-KEY-ACQUIRE-001`, and `ADD-N12-SCHED-SMP-001` plus
+`FLAG-N12-SCHED-SMP-001` bind `N12-SCHED-SMP-001` as the next
+owner-independent move.
 
 Cycle 143 reconciliation (superseding current Cycle 142 implementation and
 next-move values): governance and external-key state are unchanged, and no

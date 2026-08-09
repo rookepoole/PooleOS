@@ -83,7 +83,7 @@
   "qualification": {
     "host_environment_count": 1,
     "rust_preemption_test_count": 7,
-    "rust_kernel_test_count": 158,
+    "rust_kernel_test_count": 165,
     "host_probe_receipt_count": 3,
     "clean_media_generation_count": 2,
     "qemu_run_count": 2,
