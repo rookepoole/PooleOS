@@ -40,6 +40,14 @@ use poolekernel::{
         RawSpinLock as SchedulerRawSpinLock, Scheduler, TaskId as SchedulerTaskId,
         TaskState as SchedulerTaskState, validate_context_switch_contract,
     },
+    scheduler_ap_workers::{
+        self, ApWorkerController, Consumer as SchedulerApWorkerConsumer,
+        DispatchPermit as SchedulerApWorkerPermit, DispatchTicket as SchedulerApWorkerTicket,
+        Error as SchedulerApWorkerError, Priority as SchedulerApWorkerPriority,
+        RemoteAck as SchedulerApWorkerRemoteAck, Summary as SchedulerApWorkerSummary,
+        TopHalfContext as SchedulerApWorkerTopHalf, WorkId as SchedulerApWorkerId,
+        WorkRequest as SchedulerApWorkerRequest,
+    },
     scheduler_deferred::{
         DeferredWorkController, DispatchPermit as SchedulerDeferredPermit,
         Error as SchedulerDeferredError, FaultPoint as SchedulerDeferredFault,
@@ -1312,6 +1320,97 @@ pksched4_fragment!(PKSCHED4_ZEROED, b" zeroed_bytes=");
 pksched4_fragment!(PKSCHED4_VERIFIED, b" verified_bytes=");
 pksched4_fragment!(PKSCHED4_CLEANUP_TAIL, b" queues=0 running=0 scheduler_lock_released=1 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1\n");
 pksched4_fragment!(PKSCHED4_RESULT, b"POOLEOS:KERNEL:SCHED-SMP-RESULT PASS contract=PKSCHED4 profile=sandybridge_four_vcpu_ack_gated_scheduler scheduler=bounded_smp ap_dispatch=1 cross_cpu_wake=1 migration=1 topology=exact general_smp=0 ring3=0 address_spaces=1 per_task_xstate=0 target=0 signatures=0 authority=0 actions=0 n12_exit=0 production=0 terminal=halt\n");
+
+macro_rules! pksched5_fragment {
+    ($name:ident, $value:literal) => {
+        #[used]
+        #[unsafe(link_section = ".text.pksched5_literals")]
+        static $name: [u8; $value.len()] = *$value;
+    };
+}
+
+pksched5_fragment!(PKSCHED5_EARLY, b"POOLEOS:KERNEL:SCHED-AP-WORK-EARLY PASS contract=PKSCHED5 selector=19 parent_deferred=PKSCHED3 parent_smp=PKSCHED4 parent_ipi=PKSMP5 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n");
+pksched5_fragment!(
+    PKSCHED5_DENIED,
+    b"POOLEOS:KERNEL:SCHED-AP-WORK-DENIED contract=PKSCHED5 reason="
+);
+pksched5_fragment!(PKSCHED5_DENIED_TAIL, b" terminal=halt production=0\n");
+pksched5_fragment!(
+    PKSCHED5_TOPOLOGY,
+    b"POOLEOS:KERNEL:SCHED-AP-WORK-TOPOLOGY PASS contract=PKSCHED5 processors="
+);
+pksched5_fragment!(PKSCHED5_ENABLED, b" enabled=");
+pksched5_fragment!(PKSCHED5_BSP, b" bsp_apic_id=");
+pksched5_fragment!(PKSCHED5_TOPOLOGY_TAIL, b" target_apic_ids=1,2,3 online_mask=0x000000000000000F workers=3 queues=3 capacity=15 stack_bytes_each=8192 stack_gate=ist1\n");
+pksched5_fragment!(
+    PKSCHED5_QUEUE,
+    b"POOLEOS:KERNEL:SCHED-AP-WORK-QUEUE PASS contract=PKSCHED5 top_half_enqueued="
+);
+pksched5_fragment!(PKSCHED5_DUPLICATE, b" duplicate_suppressed=");
+pksched5_fragment!(PKSCHED5_EOI, b" eois=");
+pksched5_fragment!(PKSCHED5_WATERMARK, b" flush_watermark=");
+pksched5_fragment!(PKSCHED5_QUEUED_CANCEL, b" queued_cancelled=");
+pksched5_fragment!(
+    PKSCHED5_QUEUE_TAIL,
+    b" driver_consumer=timer_vector_64 service_consumer=generation_reclaim arbitrary_callbacks=0\n"
+);
+pksched5_fragment!(
+    PKSCHED5_DISPATCH,
+    b"POOLEOS:KERNEL:SCHED-AP-WORK-DISPATCH PASS contract=PKSCHED5 trace=1:"
+);
+pksched5_fragment!(PKSCHED5_TRACE_COMMA, b",");
+pksched5_fragment!(PKSCHED5_TRACE_CPU2, b";2:");
+pksched5_fragment!(PKSCHED5_TRACE_CPU3, b";3:");
+pksched5_fragment!(PKSCHED5_WORKER_ENTRIES, b" worker_entries=");
+pksched5_fragment!(PKSCHED5_AP_CALLS, b" call_function_executions=");
+pksched5_fragment!(PKSCHED5_DRIVER_CALLS, b" typed_driver_calls=");
+pksched5_fragment!(PKSCHED5_SERVICE_CALLS, b" typed_service_calls=");
+pksched5_fragment!(PKSCHED5_BYPASS, b" maximum_high_bypass=");
+pksched5_fragment!(
+    PKSCHED5_DISPATCH_TAIL,
+    b" eoi_balanced=1 registers_restored=1 stack_gate=ist1\n"
+);
+pksched5_fragment!(
+    PKSCHED5_CANCEL,
+    b"POOLEOS:KERNEL:SCHED-AP-WORK-CANCEL PASS contract=PKSCHED5 offline_cpu="
+);
+pksched5_fragment!(PKSCHED5_TIMEOUTS, b" timeouts=");
+pksched5_fragment!(PKSCHED5_ROLLBACKS, b" rollbacks=");
+pksched5_fragment!(PKSCHED5_CANCEL_QUEUED, b" queued=");
+pksched5_fragment!(PKSCHED5_REMOTE_REQUESTS, b" remote_requests=");
+pksched5_fragment!(PKSCHED5_REMOTE_COMPLETIONS, b" remote_completions=");
+pksched5_fragment!(PKSCHED5_STALE, b" stale_rejections=");
+pksched5_fragment!(
+    PKSCHED5_CANCEL_TAIL,
+    b" late_ack_rejected=1 source_queue_restored=1 result_discarded=1\n"
+);
+pksched5_fragment!(
+    PKSCHED5_FLUSH,
+    b"POOLEOS:KERNEL:SCHED-AP-WORK-FLUSH PASS contract=PKSCHED5 complete="
+);
+pksched5_fragment!(PKSCHED5_COMPLETED, b" completed=");
+pksched5_fragment!(PKSCHED5_CANCELLED, b" cancelled=");
+pksched5_fragment!(PKSCHED5_DRIVER_SUM, b" driver_sum=");
+pksched5_fragment!(PKSCHED5_SERVICE_GENERATION, b" service_generation=");
+pksched5_fragment!(PKSCHED5_RECLAIMED, b" reclaimed=");
+pksched5_fragment!(
+    PKSCHED5_FLUSH_TAIL,
+    b" stale_id_rejected=1 flush_before_reclaim=1 exact_once=1\n"
+);
+pksched5_fragment!(
+    PKSCHED5_CLEANUP,
+    b"POOLEOS:KERNEL:SCHED-AP-WORK-CLEANUP PASS contract=PKSCHED5 online_after="
+);
+pksched5_fragment!(PKSCHED5_WORKERS_RETIRED, b" workers_retired=");
+pksched5_fragment!(PKSCHED5_FREE, b" free=");
+pksched5_fragment!(PKSCHED5_STACK_CLEARED, b" stack_bytes_cleared=");
+pksched5_fragment!(PKSCHED5_RESOURCE_PAGES, b" resource_pages=");
+pksched5_fragment!(PKSCHED5_FRAME_PAGES, b" frame_pages=");
+pksched5_fragment!(PKSCHED5_TOTAL_PAGES, b" total_pages=");
+pksched5_fragment!(PKSCHED5_ZEROED, b" zeroed_bytes=");
+pksched5_fragment!(PKSCHED5_VERIFIED, b" verified_bytes=");
+pksched5_fragment!(PKSCHED5_CLEANUP_TAIL, b" queues=0 dispatching=0 terminal=0 worker_authority_revoked=1 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1\n");
+pksched5_fragment!(PKSCHED5_RESULT, b"POOLEOS:KERNEL:SCHED-AP-WORK-RESULT PASS contract=PKSCHED5 profile=sandybridge_three_ap_typed_workers ap_local_workers=1 driver_consumer=1 service_consumer=1 remote_cancel=1 flush=1 reclamation=1 offline_rollback=1 arbitrary_callbacks=0 general_smp=0 ring3=0 address_spaces=1 target=0 signatures=0 authority=0 actions=0 n12_exit=0 production=0 terminal=halt\n");
 
 struct SchedulerPreemptionRuntimeCell(UnsafeCell<Option<BspPreemption>>);
 
@@ -3940,6 +4039,7 @@ enum SmpIpiLiveError {
     Runtime(smp_runtime::Error),
     Ipi(smp_ipi::Error),
     Scheduler(scheduler_smp::Error),
+    ApWorkers(scheduler_ap_workers::Error),
 }
 
 impl SmpIpiLiveError {
@@ -3950,6 +4050,7 @@ impl SmpIpiLiveError {
             Self::Runtime(_) => 0x2000,
             Self::Ipi(_) => 0x3000,
             Self::Scheduler(_) => 0x4000,
+            Self::ApWorkers(_) => 0x5000,
         };
         class | (SMP_IPI_FAILURE_STAGE.load(Ordering::Relaxed) << 16)
     }
@@ -3976,6 +4077,12 @@ impl From<smp_ipi::Error> for SmpIpiLiveError {
 impl From<scheduler_smp::Error> for SmpIpiLiveError {
     fn from(value: scheduler_smp::Error) -> Self {
         Self::Scheduler(value)
+    }
+}
+
+impl From<scheduler_ap_workers::Error> for SmpIpiLiveError {
+    fn from(value: scheduler_ap_workers::Error) -> Self {
+        Self::ApWorkers(value)
     }
 }
 
@@ -4057,6 +4164,7 @@ struct SmpIpiLiveProof {
     retirement: smp_ipi::MultiGenerationRetirementReceipt,
     premature_reclaim_rejections: u64,
     scheduler: Option<SchedulerSmpLiveProof>,
+    ap_workers: Option<SchedulerApWorkersLiveProof>,
 }
 
 #[derive(Clone, Copy)]
@@ -4071,6 +4179,18 @@ struct SchedulerSmpLiveProof {
     dispatch_ack_count: u32,
 }
 
+#[derive(Clone, Copy)]
+struct SchedulerApWorkersLiveProof {
+    dispatched: SchedulerApWorkerSummary,
+    reclaimed: SchedulerApWorkerSummary,
+    after_park: SchedulerApWorkerSummary,
+    trace: [[u8; 4]; smp_ipi::AP_COUNT],
+    offline_target: u8,
+    flush_watermark: u64,
+    flush_complete: bool,
+    stale_id_rejected: bool,
+}
+
 type SmpIpiExecutionReceipt = (
     [RuntimeMailboxSnapshot; smp_ipi::AP_COUNT],
     [IpiSnapshot; smp_ipi::AP_COUNT],
@@ -4078,6 +4198,7 @@ type SmpIpiExecutionReceipt = (
     smp_ipi::MultiGenerationRetirementReceipt,
     u64,
     Option<SchedulerSmpLiveProof>,
+    Option<SchedulerApWorkersLiveProof>,
 );
 
 const SMP_IPI_ENTRY_WRITE_THROUGH: u64 = 1 << 3;
@@ -4617,6 +4738,255 @@ fn scheduler_smp_live_profile(
         offline_target: scheduler_smp::OFFLINE_PROBE_CPU,
         transaction_ack_count: 3,
         dispatch_ack_count: 6,
+    })
+}
+
+fn scheduler_ap_worker_top_half() -> SchedulerApWorkerTopHalf {
+    SchedulerApWorkerTopHalf {
+        interrupt_depth: 1,
+        interrupts_disabled: true,
+        queue_lock_held: false,
+        worker_context: false,
+    }
+}
+
+fn scheduler_ap_worker_service(
+    key: u16,
+    cpu: u8,
+    retired_generation: u32,
+) -> SchedulerApWorkerRequest {
+    SchedulerApWorkerRequest {
+        key,
+        source_cpu: 0,
+        target_cpu: cpu,
+        priority: SchedulerApWorkerPriority::Normal,
+        consumer: SchedulerApWorkerConsumer::ServiceGenerationReclaim {
+            retired_generation,
+            active_generation: retired_generation + 1,
+        },
+    }
+}
+
+fn scheduler_ap_worker_driver(key: u16, cpu: u8, sample: u32) -> SchedulerApWorkerRequest {
+    SchedulerApWorkerRequest {
+        key,
+        source_cpu: 0,
+        target_cpu: cpu,
+        priority: SchedulerApWorkerPriority::High,
+        consumer: SchedulerApWorkerConsumer::DriverTimerBottomHalf { vector: 64, sample },
+    }
+}
+
+fn scheduler_ap_worker_remote_ack(
+    ticket: SchedulerApWorkerTicket,
+    snapshot: &IpiSnapshot,
+) -> SchedulerApWorkerRemoteAck {
+    SchedulerApWorkerRemoteAck {
+        target_cpu: ticket.target_cpu,
+        attempt: snapshot.ack_attempt,
+        sequence: snapshot.ack_sequence,
+        operation: snapshot.ack_operation,
+        status: snapshot.ack_status,
+        error: snapshot.ack_error,
+        result: snapshot.result,
+    }
+}
+
+fn scheduler_ap_worker_payload(
+    ticket: SchedulerApWorkerTicket,
+) -> Result<smp_ipi::CallPayload, SmpIpiLiveError> {
+    smp_ipi::CallPayload::from_token(ticket.payload).ok_or(smp_ipi::Error::Payload.into())
+}
+
+fn scheduler_ap_worker_deliver_ticket(
+    controller: &mut ApWorkerController,
+    hardware: &mut LiveInterruptHardware,
+    period_femtoseconds: u64,
+    resource: &SmpIpiApResource,
+    ticket: SchedulerApWorkerTicket,
+) -> Result<IpiSnapshot, SmpIpiLiveError> {
+    if ticket.target_cpu != resource.target_apic_id as u8 {
+        return Err(scheduler_ap_workers::Error::TicketMismatch.into());
+    }
+    let request = IpiRequest::canonical_call(
+        ticket.request_attempt,
+        ticket.request_sequence,
+        resource.target_apic_id,
+        scheduler_ap_worker_payload(ticket)?,
+    );
+    let snapshot = smp_ipi_deliver(
+        hardware,
+        period_femtoseconds,
+        IpiOperation::CallFunction,
+        &request,
+        smp_ipi::ACK_ACCEPTED,
+        smp_ipi::ERROR_NONE,
+        ticket.expected_result,
+    )?;
+    controller.acknowledge(ticket, scheduler_ap_worker_remote_ack(ticket, &snapshot))?;
+    Ok(snapshot)
+}
+
+fn scheduler_ap_workers_live_profile(
+    hardware: &mut LiveInterruptHardware,
+    access: &mut BootstrapTableMemory,
+    period_femtoseconds: u64,
+    resources: &[SmpIpiApResource; smp_ipi::AP_COUNT],
+) -> Result<SchedulerApWorkersLiveProof, SmpIpiLiveError> {
+    const WORK_ITEMS: usize = 13;
+
+    let mut controller = ApWorkerController::new();
+    let mut ids = [SchedulerApWorkerId::new(0, 1)?; WORK_ITEMS];
+    let mut item_index = 0usize;
+    for cpu in 1..=smp_ipi::AP_COUNT as u8 {
+        ids[item_index] = controller.enqueue_from_top_half(
+            scheduler_ap_worker_top_half(),
+            scheduler_ap_worker_service(100 + u16::from(cpu), cpu, cpu.into()),
+        )?;
+        item_index += 1;
+        for lane in 1..=3u8 {
+            ids[item_index] = controller.enqueue_from_top_half(
+                scheduler_ap_worker_top_half(),
+                scheduler_ap_worker_driver(
+                    200 + u16::from(cpu) * 10 + u16::from(lane),
+                    cpu,
+                    u32::from(cpu) * 10 + u32::from(lane),
+                ),
+            )?;
+            item_index += 1;
+        }
+    }
+    ids[item_index] = controller.enqueue_from_top_half(
+        scheduler_ap_worker_top_half(),
+        scheduler_ap_worker_driver(299, 1, 99),
+    )?;
+    if item_index + 1 != WORK_ITEMS
+        || controller.enqueue_from_top_half(
+            scheduler_ap_worker_top_half(),
+            scheduler_ap_worker_driver(211, 1, 11),
+        ) != Err(SchedulerApWorkerError::Duplicate)
+    {
+        return Err(scheduler_ap_workers::Error::Invariant.into());
+    }
+    controller.cancel(ids[12])?;
+    let flush = controller.begin_flush();
+    let permit: SchedulerApWorkerPermit = controller.observe_eoi()?;
+
+    SMP_IPI_FAILURE_STAGE.store(110, Ordering::Relaxed);
+    access
+        .ensure_mapped(resources[0].layout.local())
+        .map_err(|_| smp::Error::PhysicalAccess)?;
+    let offline = controller.stage_offline_probe(
+        ids[5],
+        scheduler_ap_workers::OFFLINE_PROBE_CPU,
+        permit,
+        3,
+        2,
+    )?;
+    let offline_request = IpiRequest::canonical_call(
+        offline.request_attempt,
+        offline.request_sequence,
+        u32::from(scheduler_ap_workers::OFFLINE_PROBE_CPU),
+        scheduler_ap_worker_payload(offline)?,
+    );
+    smp_ipi_publish_request(&offline_request);
+    smp_apic_command(
+        hardware,
+        u32::from(scheduler_ap_workers::OFFLINE_PROBE_CPU),
+        u32::from(IpiOperation::CallFunction.vector()),
+    )?;
+    match smp_ipi_wait_ack(hardware, period_femtoseconds, offline.request_attempt) {
+        Err(SmpIpiLiveError::Base(smp::Error::Timeout)) => controller.timeout(offline)?,
+        Err(error) => return Err(error),
+        Ok(_) => return Err(scheduler_ap_workers::Error::TimeoutTarget.into()),
+    }
+    controller.reject_stale_ack(
+        offline,
+        SchedulerApWorkerRemoteAck {
+            target_cpu: offline.target_cpu,
+            attempt: offline.request_attempt,
+            sequence: offline.request_sequence,
+            operation: IpiOperation::CallFunction as u32,
+            status: smp_ipi::ACK_ACCEPTED,
+            error: smp_ipi::ERROR_NONE,
+            result: offline.expected_result,
+        },
+    )?;
+
+    let mut trace = [[u8::MAX; 4]; smp_ipi::AP_COUNT];
+    for (resource_index, resource) in resources.iter().enumerate() {
+        access
+            .ensure_mapped(resource.layout.local())
+            .map_err(|_| smp::Error::PhysicalAccess)?;
+        let cpu = (resource_index + 1) as u8;
+        for (local_index, trace_slot) in trace[resource_index].iter_mut().enumerate() {
+            let ticket = controller.stage_dispatch(
+                cpu,
+                permit,
+                3 + local_index as u64,
+                2 + local_index as u64,
+            )?;
+            *trace_slot = ticket.id.slot;
+            if cpu == 2 && local_index == 0 {
+                controller.cancel(ticket.id)?;
+            }
+            scheduler_ap_worker_deliver_ticket(
+                &mut controller,
+                hardware,
+                period_femtoseconds,
+                resource,
+                ticket,
+            )?;
+        }
+    }
+    let dispatched = controller.summary();
+    if trace != [[1, 2, 0, 3], [5, 6, 4, 7], [9, 10, 8, 11]]
+        || dispatched.worker_entries != [4, 4, 4]
+        || dispatched.remote_acks != 12
+        || dispatched.driver_executions != 9
+        || dispatched.service_executions != 3
+        || dispatched.completed != 11
+        || dispatched.cancelled != 2
+        || dispatched.maximum_high_bypass != scheduler_ap_workers::MAX_HIGH_BYPASS
+        || dispatched.driver_sample_sum != 177
+        || dispatched.active_service_generation != 4
+        || dispatched.timeout_count != 1
+        || dispatched.rollback_count != 1
+        || dispatched.stale_rejections != 1
+        || dispatched.remote_cancel_completions != 1
+    {
+        return Err(scheduler_ap_workers::Error::Invariant.into());
+    }
+    let flush_complete = controller.flush_complete(flush);
+    if !flush_complete || controller.retire_all_terminal(flush)? != WORK_ITEMS as u8 {
+        return Err(scheduler_ap_workers::Error::FlushPending.into());
+    }
+    let stale_id_rejected = controller.request(ids[0]) == Err(SchedulerApWorkerError::StaleId);
+    if !stale_id_rejected {
+        return Err(scheduler_ap_workers::Error::Invariant.into());
+    }
+    let reclaimed = controller.summary();
+    for cpu in (1..=smp_ipi::AP_COUNT as u8).rev() {
+        controller.offline_worker(cpu)?;
+    }
+    controller.finish_shutdown()?;
+    let after_park = controller.summary();
+    if after_park.online_mask != 1
+        || after_park.worker_retirements != smp_ipi::AP_COUNT as u32
+        || after_park.free as usize != scheduler_ap_workers::WORK_CAPACITY
+        || controller.validate().is_err()
+    {
+        return Err(scheduler_ap_workers::Error::Invariant.into());
+    }
+    Ok(SchedulerApWorkersLiveProof {
+        dispatched,
+        reclaimed,
+        after_park,
+        trace,
+        offline_target: scheduler_ap_workers::OFFLINE_PROBE_CPU,
+        flush_watermark: flush.enqueue_watermark,
+        flush_complete,
+        stale_id_rejected,
     })
 }
 
@@ -5754,6 +6124,24 @@ fn run_smp_ipi(
     observed_cr3: u64,
     scheduler_mode: bool,
 ) -> Result<SmpIpiLiveProof, SmpIpiLiveError> {
+    run_smp_ipi_internal(handoff, core, observed_cr3, scheduler_mode, false)
+}
+
+fn run_smp_ipi_workers(
+    handoff: &poole_handoff::Handoff<'_>,
+    core: poole_handoff::CoreRecord,
+    observed_cr3: u64,
+) -> Result<SmpIpiLiveProof, SmpIpiLiveError> {
+    run_smp_ipi_internal(handoff, core, observed_cr3, false, true)
+}
+
+fn run_smp_ipi_internal(
+    handoff: &poole_handoff::Handoff<'_>,
+    core: poole_handoff::CoreRecord,
+    observed_cr3: u64,
+    scheduler_mode: bool,
+    ap_worker_mode: bool,
+) -> Result<SmpIpiLiveProof, SmpIpiLiveError> {
     SMP_IPI_FAILURE_DETAIL.store(0, Ordering::Relaxed);
     SMP_IPI_FAILURE_STAGE.store(1, Ordering::Relaxed);
     let physical_bits = arch::x86_64::physical_address_bits().ok_or(smp::Error::Memory)?;
@@ -5937,8 +6325,30 @@ fn run_smp_ipi(
         } else {
             None
         };
-        let shootdown_attempt = if scheduler_mode { 6 } else { 3 };
-        let shootdown_sequence = if scheduler_mode { 5 } else { 2 };
+        let ap_workers = if ap_worker_mode {
+            Some(scheduler_ap_workers_live_profile(
+                &mut hardware,
+                &mut page_access,
+                period,
+                &resources,
+            )?)
+        } else {
+            None
+        };
+        let shootdown_attempt = if scheduler_mode {
+            6
+        } else if ap_worker_mode {
+            7
+        } else {
+            3
+        };
+        let shootdown_sequence = if scheduler_mode {
+            5
+        } else if ap_worker_mode {
+            6
+        } else {
+            2
+        };
 
         let requests = [
             resources[0].shootdown,
@@ -6089,8 +6499,20 @@ fn run_smp_ipi(
                 &mut page_access,
                 period,
                 resource,
-                if scheduler_mode { 7 } else { 4 },
-                if scheduler_mode { 6 } else { 3 },
+                if scheduler_mode {
+                    7
+                } else if ap_worker_mode {
+                    8
+                } else {
+                    4
+                },
+                if scheduler_mode {
+                    6
+                } else if ap_worker_mode {
+                    7
+                } else {
+                    3
+                },
             )?;
             SMP_IPI_FAILURE_STAGE.store(81 + index as u32 * 3, Ordering::Relaxed);
             smp_runtime::validate_mailbox(
@@ -6104,6 +6526,12 @@ fn run_smp_ipi(
             SMP_IPI_FAILURE_STAGE.store(82 + index as u32 * 3, Ordering::Relaxed);
             if scheduler_mode {
                 smp_ipi::validate_scheduler_final(
+                    &ipi,
+                    resource.target_apic_id,
+                    u32::from(index == 0),
+                )?;
+            } else if ap_worker_mode {
+                smp_ipi::validate_ap_worker_final(
                     &ipi,
                     resource.target_apic_id,
                     u32::from(index == 0),
@@ -6135,6 +6563,7 @@ fn run_smp_ipi(
             retirement,
             premature_reclaim_rejections,
             scheduler,
+            ap_workers,
         ))
     })();
 
@@ -6159,7 +6588,7 @@ fn run_smp_ipi(
 
     let mut post_validation_error = None;
     let mut cleanup_failure_stage = 0u32;
-    if let Ok((mailboxes, _, _, _, _, _)) = &operation {
+    if let Ok((mailboxes, _, _, _, _, _, _)) = &operation {
         lifecycle.parked(parked_mask)?;
         SMP_IPI_FAILURE_STAGE.store(6, Ordering::Relaxed);
         for (index, resource) in resources.iter().enumerate() {
@@ -6228,8 +6657,15 @@ fn run_smp_ipi(
         return Err(error);
     }
     SMP_IPI_FAILURE_STAGE.store(61, Ordering::Relaxed);
-    let (mailboxes, ipis, old_releases, retirement, premature_reclaim_rejections, scheduler) =
-        operation;
+    let (
+        mailboxes,
+        ipis,
+        old_releases,
+        retirement,
+        premature_reclaim_rejections,
+        scheduler,
+        ap_workers,
+    ) = operation;
     let mut operations: [Option<SmpIpiApOperationProof>; smp_ipi::AP_COUNT] =
         [None; smp_ipi::AP_COUNT];
     for index in 0..smp_ipi::AP_COUNT {
@@ -6266,6 +6702,7 @@ fn run_smp_ipi(
         retirement,
         premature_reclaim_rejections,
         scheduler,
+        ap_workers,
     })
 }
 
@@ -6441,6 +6878,7 @@ extern "C" fn poole_kernel_emergency_panic(code: u32) -> ! {
         0x1018 => PanicCode::SchedulerPreempt,
         0x1019 => PanicCode::SchedulerDeferred,
         0x101a => PanicCode::SchedulerSmp,
+        0x101b => PanicCode::SchedulerApWorkers,
         _ => PanicCode::UnexpectedReturn,
     };
     let disposition = PANIC_STATE.begin(code);
@@ -6583,6 +7021,14 @@ extern "C" fn poole_kernel_rust_entry(
             ring: &EARLY_RING,
         });
         logger.write_bytes(&PKSCHED4_EARLY);
+    }
+    if trap_scenario == DevelopmentTrapScenario::SchedulerApWorkers {
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        logger.write_bytes(&PKSCHED5_EARLY);
     }
 
     if let Err(error) = validate_entry_envelope(handoff_address, handoff_length, magic, stack_top) {
@@ -9269,6 +9715,174 @@ extern "C" fn poole_kernel_rust_entry(
         halt_forever()
     }
 
+    if trap_scenario == DevelopmentTrapScenario::SchedulerApWorkers {
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        let proof = match run_smp_ipi_workers(&decoded, validated.core, observed_cr3) {
+            Ok(value) => value,
+            Err(error) => {
+                logger.write_bytes(&PKSCHED5_DENIED);
+                let reason =
+                    u64::from(error.code()) | SMP_IPI_FAILURE_DETAIL.load(Ordering::Relaxed);
+                logger.write_hex_u64(reason);
+                logger.write_bytes(&PKSCHED5_DENIED_TAIL);
+                poole_kernel_emergency_panic(PanicCode::SchedulerApWorkers as u32)
+            }
+        };
+        let workers = proof.ap_workers.unwrap_or_else(|| {
+            logger.write_bytes(&PKSCHED5_DENIED);
+            logger.write_str("worker_evidence");
+            logger.write_bytes(&PKSCHED5_DENIED_TAIL);
+            poole_kernel_emergency_panic(PanicCode::SchedulerApWorkers as u32)
+        });
+        if proof.lifecycle.online_mask != smp_ipi::TARGET_CPU_MASK
+            || proof.lifecycle.quiesced_mask != smp_ipi::TARGET_CPU_MASK
+            || proof.lifecycle.parked_mask != smp_ipi::TARGET_CPU_MASK
+            || proof.lifecycle.released_mask != smp_ipi::TARGET_CPU_MASK
+            || workers.after_park.online_mask != 1
+            || !workers.flush_complete
+            || !workers.stale_id_rejected
+        {
+            logger.write_bytes(&PKSCHED5_DENIED);
+            logger.write_str("lifecycle");
+            logger.write_bytes(&PKSCHED5_DENIED_TAIL);
+            poole_kernel_emergency_panic(PanicCode::SchedulerApWorkers as u32)
+        }
+
+        logger.write_bytes(&PKSCHED5_TOPOLOGY);
+        logger.write_decimal_u64(proof.processor_count);
+        logger.write_bytes(&PKSCHED5_ENABLED);
+        logger.write_decimal_u64(proof.enabled_processor_count);
+        logger.write_bytes(&PKSCHED5_BSP);
+        logger.write_decimal_u64(u64::from(proof.bsp_apic_id));
+        logger.write_bytes(&PKSCHED5_TOPOLOGY_TAIL);
+
+        logger.write_bytes(&PKSCHED5_QUEUE);
+        logger.write_decimal_u64(u64::from(workers.dispatched.enqueued));
+        logger.write_bytes(&PKSCHED5_DUPLICATE);
+        logger.write_decimal_u64(u64::from(workers.dispatched.duplicate_suppressed));
+        logger.write_bytes(&PKSCHED5_EOI);
+        logger.write_decimal_u64(workers.dispatched.eoi_epoch);
+        logger.write_bytes(&PKSCHED5_WATERMARK);
+        logger.write_decimal_u64(workers.flush_watermark);
+        logger.write_bytes(&PKSCHED5_QUEUED_CANCEL);
+        logger.write_decimal_u64(u64::from(workers.dispatched.queued_cancellations));
+        logger.write_bytes(&PKSCHED5_QUEUE_TAIL);
+
+        logger.write_bytes(&PKSCHED5_DISPATCH);
+        for (local_index, slot) in workers.trace[0].iter().enumerate() {
+            if local_index != 0 {
+                logger.write_bytes(&PKSCHED5_TRACE_COMMA);
+                logger.write_decimal_u64(1);
+                logger.write_bytes(b":");
+            }
+            logger.write_decimal_u64(u64::from(*slot));
+        }
+        logger.write_bytes(&PKSCHED5_TRACE_CPU2);
+        logger.write_decimal_u64(u64::from(workers.trace[1][0]));
+        for slot in workers.trace[1].iter().skip(1) {
+            logger.write_bytes(&PKSCHED5_TRACE_COMMA);
+            logger.write_decimal_u64(2);
+            logger.write_bytes(b":");
+            logger.write_decimal_u64(u64::from(*slot));
+        }
+        logger.write_bytes(&PKSCHED5_TRACE_CPU3);
+        logger.write_decimal_u64(u64::from(workers.trace[2][0]));
+        for slot in workers.trace[2].iter().skip(1) {
+            logger.write_bytes(&PKSCHED5_TRACE_COMMA);
+            logger.write_decimal_u64(3);
+            logger.write_bytes(b":");
+            logger.write_decimal_u64(u64::from(*slot));
+        }
+        logger.write_bytes(&PKSCHED5_WORKER_ENTRIES);
+        logger.write_decimal_u64(u64::from(workers.dispatched.worker_entries[0]));
+        logger.write_bytes(&PKSCHED5_TRACE_COMMA);
+        logger.write_decimal_u64(u64::from(workers.dispatched.worker_entries[1]));
+        logger.write_bytes(&PKSCHED5_TRACE_COMMA);
+        logger.write_decimal_u64(u64::from(workers.dispatched.worker_entries[2]));
+        logger.write_bytes(&PKSCHED5_AP_CALLS);
+        logger.write_decimal_u64(u64::from(workers.dispatched.remote_acks));
+        logger.write_bytes(&PKSCHED5_DRIVER_CALLS);
+        logger.write_decimal_u64(u64::from(workers.dispatched.driver_executions));
+        logger.write_bytes(&PKSCHED5_SERVICE_CALLS);
+        logger.write_decimal_u64(u64::from(workers.dispatched.service_executions));
+        logger.write_bytes(&PKSCHED5_BYPASS);
+        logger.write_decimal_u64(u64::from(workers.dispatched.maximum_high_bypass));
+        logger.write_bytes(&PKSCHED5_DISPATCH_TAIL);
+
+        logger.write_bytes(&PKSCHED5_CANCEL);
+        logger.write_decimal_u64(u64::from(workers.offline_target));
+        logger.write_bytes(&PKSCHED5_TIMEOUTS);
+        logger.write_decimal_u64(u64::from(workers.dispatched.timeout_count));
+        logger.write_bytes(&PKSCHED5_ROLLBACKS);
+        logger.write_decimal_u64(u64::from(workers.dispatched.rollback_count));
+        logger.write_bytes(&PKSCHED5_CANCEL_QUEUED);
+        logger.write_decimal_u64(u64::from(workers.dispatched.queued_cancellations));
+        logger.write_bytes(&PKSCHED5_REMOTE_REQUESTS);
+        logger.write_decimal_u64(u64::from(workers.dispatched.remote_cancel_requests));
+        logger.write_bytes(&PKSCHED5_REMOTE_COMPLETIONS);
+        logger.write_decimal_u64(u64::from(workers.dispatched.remote_cancel_completions));
+        logger.write_bytes(&PKSCHED5_STALE);
+        logger.write_decimal_u64(u64::from(workers.dispatched.stale_rejections));
+        logger.write_bytes(&PKSCHED5_CANCEL_TAIL);
+
+        logger.write_bytes(&PKSCHED5_FLUSH);
+        logger.write_decimal_u64(u64::from(workers.flush_complete));
+        logger.write_bytes(&PKSCHED5_COMPLETED);
+        logger.write_decimal_u64(u64::from(workers.reclaimed.completed));
+        logger.write_bytes(&PKSCHED5_CANCELLED);
+        logger.write_decimal_u64(u64::from(workers.reclaimed.cancelled));
+        logger.write_bytes(&PKSCHED5_DRIVER_SUM);
+        logger.write_decimal_u64(u64::from(workers.reclaimed.driver_sample_sum));
+        logger.write_bytes(&PKSCHED5_SERVICE_GENERATION);
+        logger.write_decimal_u64(u64::from(workers.reclaimed.active_service_generation));
+        logger.write_bytes(&PKSCHED5_RECLAIMED);
+        logger.write_decimal_u64(u64::from(workers.reclaimed.reclaimed));
+        logger.write_bytes(&PKSCHED5_FLUSH_TAIL);
+
+        let mut resource_pages = 0u64;
+        let mut frame_pages = 0u64;
+        let mut zeroed_bytes = 0u64;
+        let mut verified_bytes = 0u64;
+        for operation in proof.operations {
+            resource_pages += operation.resource_release_receipt.page_count;
+            frame_pages += operation.old_frame_release_receipt.page_count
+                + operation.new_frame_release_receipt.page_count;
+            zeroed_bytes += operation.resource_release_receipt.zeroed_bytes
+                + operation.old_frame_release_receipt.zeroed_bytes
+                + operation.new_frame_release_receipt.zeroed_bytes;
+            verified_bytes += operation.resource_release_receipt.verified_bytes
+                + operation.old_frame_release_receipt.verified_bytes
+                + operation.new_frame_release_receipt.verified_bytes;
+        }
+        logger.write_bytes(&PKSCHED5_CLEANUP);
+        logger.write_hex_u64(u64::from(workers.after_park.online_mask));
+        logger.write_bytes(&PKSCHED5_WORKERS_RETIRED);
+        logger.write_decimal_u64(u64::from(workers.after_park.worker_retirements));
+        logger.write_bytes(&PKSCHED5_FREE);
+        logger.write_decimal_u64(u64::from(workers.after_park.free));
+        logger.write_bytes(&PKSCHED5_STACK_CLEARED);
+        logger.write_decimal_u64(
+            u64::from(scheduler_ap_workers::WORKER_STACK_BYTES) * smp_ipi::AP_COUNT as u64,
+        );
+        logger.write_bytes(&PKSCHED5_RESOURCE_PAGES);
+        logger.write_decimal_u64(resource_pages);
+        logger.write_bytes(&PKSCHED5_FRAME_PAGES);
+        logger.write_decimal_u64(frame_pages);
+        logger.write_bytes(&PKSCHED5_TOTAL_PAGES);
+        logger.write_decimal_u64(resource_pages + frame_pages);
+        logger.write_bytes(&PKSCHED5_ZEROED);
+        logger.write_decimal_u64(zeroed_bytes);
+        logger.write_bytes(&PKSCHED5_VERIFIED);
+        logger.write_decimal_u64(verified_bytes);
+        logger.write_bytes(&PKSCHED5_CLEANUP_TAIL);
+        logger.write_bytes(&PKSCHED5_RESULT);
+        halt_forever()
+    }
+
     if trap_scenario == DevelopmentTrapScenario::Scheduler {
         let cpu = SchedulerCpuId::new(0)
             .unwrap_or_else(|_| poole_kernel_emergency_panic(PanicCode::Scheduler as u32));
@@ -9748,6 +10362,9 @@ extern "C" fn poole_kernel_rust_entry(
         }
         DevelopmentTrapScenario::SchedulerSmp => {
             poole_kernel_emergency_panic(PanicCode::SchedulerSmp as u32)
+        }
+        DevelopmentTrapScenario::SchedulerApWorkers => {
+            poole_kernel_emergency_panic(PanicCode::SchedulerApWorkers as u32)
         }
     }
 }

@@ -1,14 +1,13 @@
 {
   "schema_version": "1.0",
-  "artifact_kind": "pooleos_native_kernel_scheduler_smp_readiness",
+  "artifact_kind": "pooleos_native_kernel_scheduler_deferred_readiness",
   "status_date": "2026-08-08",
-  "status": "pass_single_host_two_run_sandybridge_four_vcpu_ack_gated_scheduler_non_promoting",
-  "contract_id": "PKSCHED4",
-  "selected_move_id": "N12-SCHED-SMP-001",
+  "status": "pass_single_host_two_run_qemu64_bsp_interrupt_deferred_workers_non_promoting",
+  "contract_id": "PKSCHED3",
+  "selected_move_id": "N12-SCHED-DEFERRED-001",
   "production_ready": false,
   "production_promotion_allowed": false,
   "n12_exit_gate_satisfied": false,
-  "flag_n12_sched_smp_001_closed": true,
   "phase_status": {
     "N12": "partial",
     "N12.1": "partial",
@@ -77,39 +76,39 @@
         "sha256": "C552B3960A70A4077FDDAEED22D56B11D26FFE1D29EA9B734F0832E5C9D5CB12"
       },
       {
-        "path": "native/kernel/src/scheduler_smp.rs",
-        "byte_count": 40079,
-        "sha256": "8C1C3E3F7BD07C9809D6FF94DF5E2EFF6F0940CC82DD99A4887592DD14431832"
+        "path": "native/kernel/src/scheduler_preempt.rs",
+        "byte_count": 24328,
+        "sha256": "DD93A83C27F49D78CBFBB1A5DB026DAC2206099E226E2038595B72DC7A81D0E4"
       },
       {
-        "path": "native/kernel/src/smp_ipi.rs",
-        "byte_count": 77894,
-        "sha256": "EBE5A48C9096489D15BED600988ED2E7A4B4239AD0EA5BE6452643D91BF5020A"
+        "path": "native/kernel/src/scheduler_deferred.rs",
+        "byte_count": 29212,
+        "sha256": "4AAE60E149A49AF5144D348D64AE552FC5B6C1D822CF48852A220FD9270860EA"
       },
       {
-        "path": "native/kernel/src/bin/pksched4_probe.rs",
-        "byte_count": 6140,
-        "sha256": "A1C92F33AB14AF77B88972F4E52D97667FDDB8A09EFAC64C498030F115FEAEC6"
+        "path": "native/kernel/src/bin/pksched3_probe.rs",
+        "byte_count": 6972,
+        "sha256": "E1D2DD627FED9FBCF6E3D5AE7CEC7D738F129540364E02540B0EAF4944EAC444"
       },
       {
-        "path": "runtime/native_kernel_scheduler_smp.py",
-        "byte_count": 20599,
-        "sha256": "723DF10249C92BD672C08E449F460DB96F05240251EE6091FA1B84B65F532908"
+        "path": "runtime/native_kernel_scheduler_deferred.py",
+        "byte_count": 20192,
+        "sha256": "02DE9CFF19822CE3D862359EC1FC6F758B37D64DF0D702681958B8B26A8FF0F8"
       },
       {
-        "path": "specs/native-kernel-scheduler-smp-contract.json",
-        "byte_count": 6216,
-        "sha256": "9B62E506FEF87EC58CB2358562EFB406832E6AE17E7D30659C5BD4862FDD36D1"
+        "path": "specs/native-kernel-scheduler-deferred-contract.json",
+        "byte_count": 4946,
+        "sha256": "DC7F02830EE3C75EA49AE64CB8AE9AB27D90049AFBF4D55337823BFBFE406561"
       },
       {
-        "path": "specs/native-kernel-scheduler-smp-contract.schema.json",
-        "byte_count": 1712,
-        "sha256": "D01D765A941320FAEC76A1CB840294F631BE47FCC80B74ACBEE538043DAFF4E6"
+        "path": "specs/native-kernel-scheduler-deferred-contract.schema.json",
+        "byte_count": 2568,
+        "sha256": "1E79D803E2FE57979E0A3CF6534CBACEBCD2F6461A40A8772F102694435F4A77"
       },
       {
-        "path": "specs/native-kernel-scheduler-smp-readiness.schema.json",
-        "byte_count": 1573,
-        "sha256": "333244027FA187E07B88C86C609B0F4548CF5468B7B9EDA8A53CC5B40D088915"
+        "path": "specs/native-kernel-scheduler-deferred-readiness.schema.json",
+        "byte_count": 1577,
+        "sha256": "54EF34FF57A17E7BD2516F6F3A3218837146945A173D1A508EC8B12262EA4790"
       },
       {
         "path": "tools/qualify_native_pooleboot.py",
@@ -117,19 +116,19 @@
         "sha256": "BB88A58DB1EB437176BCD9570B96041774DAA41138020927B873F4A436F0B461"
       },
       {
-        "path": "tools/qualify_native_kernel_scheduler_smp.py",
-        "byte_count": 20948,
-        "sha256": "078BF0F6E7D7AC88D3471C663FAEAF0156B40A37568CAAEC1A04BA4D270EA010"
+        "path": "tools/qualify_native_kernel_scheduler_deferred.py",
+        "byte_count": 20874,
+        "sha256": "498106A2266EF40218DADF781E4F32CEB34A65CF7D6F82B5C22613D2B8CB22E0"
       },
       {
-        "path": "tests/test_native_kernel_scheduler_smp.py",
-        "byte_count": 3882,
-        "sha256": "595D5D6AA116E10004206F4FBB87C416B7EB9C1A6725E4108DA37D216E788FFA"
+        "path": "tests/test_native_kernel_scheduler_deferred.py",
+        "byte_count": 3643,
+        "sha256": "10C973EB651958E34FFAA9925FB3A346B3DDAC1CEDB72444E550FE1F73D4117C"
       },
       {
-        "path": "docs/native-kernel-scheduler-smp.md",
-        "byte_count": 3836,
-        "sha256": "60A4EEB62304E7849E61506E2A309AE6B12D0C8A408573349F69FD992CAFFC8B"
+        "path": "docs/native-kernel-scheduler-deferred.md",
+        "byte_count": 5252,
+        "sha256": "2EB0A4B2CC5A72BFCBB90248D707E2F8F5E24AEC19807D679151AC8FEF65F4BA"
       }
     ]
   },
@@ -859,17 +858,17 @@
       "host_leakage_marker_count": 7,
       "host_leakage_hit_count": 0
     },
-    "scheduler_smp_pooleboot": {
+    "scheduler_deferred_pooleboot": {
       "host_contract_test_count": 8,
       "host_contract_test_pass_count": 8,
       "development_transfer_feature": true,
-      "selected_development_feature": "development-scheduler-smp",
+      "selected_development_feature": "development-scheduler-deferred",
       "clean_build_count": 2,
       "exact_clean_build_match": true,
-      "sha256": "B4AF532DC3F27E363742FDB1FAA211DB915DF66C6430988A65990BA0C91B85D8",
+      "sha256": "3CA95188A66F1A476708462222C2CFFB4C931774F78309C406D649A3E4950D7F",
       "byte_count": 208384,
       "inspection": {
-        "sha256": "B4AF532DC3F27E363742FDB1FAA211DB915DF66C6430988A65990BA0C91B85D8",
+        "sha256": "3CA95188A66F1A476708462222C2CFFB4C931774F78309C406D649A3E4950D7F",
         "byte_count": 208384,
         "format": "PE32+",
         "machine": 34404,
@@ -907,7 +906,7 @@
           {
             "name": ".rdata",
             "virtual_address": 159744,
-            "virtual_size": 51924,
+            "virtual_size": 51932,
             "raw_offset": 154624,
             "raw_size": 52224,
             "characteristics": 1073741888
@@ -939,76 +938,61 @@
     "default_transfer_marker_absent": true,
     "host_probe": {
       "lines": [
-        "PKSCHED4:TOPOLOGY PASS cpus=4 online_mask=0x0F ap_mask=0x0E queues=4 tasks=8 balance=3,3 idle_owners=4",
-        "PKSCHED4:TRANSFER PASS wake=1 migrations=2 transaction_acks=3 queues=2,2,2 owner_transfer=ack_gated timeout_target=4",
-        "PKSCHED4:DISPATCH PASS bsp_trace=0,7 ap_trace=1:2,1:1,2:4,2:3,3:6,3:5 bsp_dispatches=2 ap_dispatches=6 ipi_acks=9 call_function_executions=9 max_bypass=1",
-        "PKSCHED4:ROLLBACK PASS offline_cpu=4 timeouts=1 rollbacks=1 late_ack_rejected=1 stale_generation_rejected=1 stale_rejections=2 lost_wake=0 duplicate_runnable=0",
-        "PKSCHED4:CLEANUP PASS tasks_dead=8 queues=0 running=0 idle_before=4 owner_epoch_sum=19 online_after=0x01 parked_mask=0x0E teardown=8 valid=1"
+        "PKSCHED3:QUEUE PASS enqueued=8 duplicate=1 queued_cancelled=1 eoi=1 pending=7 flush_before=0",
+        "PKSCHED3:WORK PASS slots=0,2,4,1,5,6 workers=0,1,0,1,0,1 states=completed,completed,completed,completed,completed,cancelled max_bypass=3",
+        "PKSCHED3:FLUSH PASS watermark=8 completion=8 sum=120 xor=90 fence=0 completed=5 cancelled=3 running_cancel=1 retired=8 free=8",
+        "PKSCHED3:FAULT PASS rollbacks=5 free=8 valid=1",
+        "PKSCHED3:BOUNDARY PASS pre_eoi_rejected=1 recursion_rejected=1 stale_rejected=1 intake_rejected=1 arbitrary_callbacks=0"
       ],
       "trace": {
-        "balance": [
-          3,
-          3
-        ],
-        "queues_after_transfer": [
-          2,
-          2,
-          2
-        ],
-        "bsp_trace": [
+        "slots": [
           0,
+          2,
+          4,
+          1,
+          5,
+          6
+        ],
+        "workers": [
+          0,
+          1,
+          0,
+          1,
+          0,
+          1
+        ],
+        "states": [
+          "completed",
+          "completed",
+          "completed",
+          "completed",
+          "completed",
+          "cancelled"
+        ],
+        "max_bypass": 3,
+        "sum": 120,
+        "xor": 90,
+        "fence": 0,
+        "remaining_slots": [
           7
-        ],
-        "ap_trace": [
-          [
-            1,
-            2
-          ],
-          [
-            1,
-            1
-          ],
-          [
-            2,
-            4
-          ],
-          [
-            2,
-            3
-          ],
-          [
-            3,
-            6
-          ],
-          [
-            3,
-            5
-          ]
-        ],
-        "owner_epoch_sum": 19,
-        "remote_acks": 9,
-        "maximum_bypass": 1
+        ]
       },
       "receipt_count": 5,
       "rust_python_exact_agreement": true,
-      "output_sha256": "F9DB9156777EE7B96A04B5657D39360D94B38090D5CEBDABA54A0DCB8C7A9F3F"
+      "output_sha256": "0C0C9AC0356C73BD0359A24D08E62D0B5C060782BD92C9EECF56921BC881D219"
     },
     "source_audit": {
-      "focused_rust_test_count": 8,
-      "fixed_cpu_count": 4,
-      "fixed_task_capacity": 8,
+      "focused_rust_test_count": 7,
+      "fixed_work_capacity": 8,
+      "worker_count": 2,
+      "worker_stack_bytes_each": 16384,
       "allocation_free_controller": true,
       "arbitrary_callback_count": 0,
-      "ap_handler_saved_register_count": 15,
       "live_marker_count": 37,
       "files": {
-        "scheduler": {
-          "path": "native/kernel/src/scheduler_smp.rs",
-          "sha256": "8C1C3E3F7BD07C9809D6FF94DF5E2EFF6F0940CC82DD99A4887592DD14431832"
-        },
-        "ipi": {
-          "path": "native/kernel/src/smp_ipi.rs",
-          "sha256": "EBE5A48C9096489D15BED600988ED2E7A4B4239AD0EA5BE6452643D91BF5020A"
+        "deferred": {
+          "path": "native/kernel/src/scheduler_deferred.rs",
+          "sha256": "4AAE60E149A49AF5144D348D64AE552FC5B6C1D822CF48852A220FD9270860EA"
         },
         "arch": {
           "path": "native/kernel/src/arch/x86_64.rs",
@@ -1036,12 +1020,35 @@
         }
       }
     },
-    "linked_invlpg_audit": {
-      "scope": "poole_ap_ipi_trampoline_start..poole_ap_ipi_trampoline_end",
-      "invlpg_instruction_count": 1,
-      "runtime_execution_count": 3,
-      "operand": "(%rax)",
+    "linked_switch_audit": {
+      "scope": "poole_scheduler_context_switch..poole_scheduler_context_switch_end",
+      "instruction_count": 18,
+      "forbidden_instruction_count": 0,
+      "mnemonics": [
+        "pushfq",
+        "pushq",
+        "pushq",
+        "pushq",
+        "pushq",
+        "pushq",
+        "pushq",
+        "movq",
+        "incq",
+        "movq",
+        "popq",
+        "popq",
+        "popq",
+        "popq",
+        "popq",
+        "popq",
+        "popfq",
+        "retq"
+      ],
       "status": "pass",
+      "start_address": "0x000000000000A050",
+      "end_address": "0x000000000000A074",
+      "scope_byte_count": 36,
+      "end_symbol_verified": true,
       "linked_sha256": "46748EC3746FCDB5E617EDBC6E4F24C4EB8D42AE978EEFFFC7A2DE22BD05EFF4",
       "linked_byte_count": 6390008,
       "canonical_sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33",
@@ -1054,11 +1061,11 @@
   "media": {
     "clean_generation_count": 2,
     "exact_clean_generation_match": true,
-    "sha256": "56366B4042DB78E7EE9CB6A227D0A298DB9F3F6AFD226DFA9D2DFCA5C2066B7A",
+    "sha256": "44D9D6F63EB20419F494C90F8F11B018BF84094CB2BB315FD976FDAEF397F4C7",
     "byte_count": 67108864,
     "inspection": {
       "image": {
-        "sha256": "56366B4042DB78E7EE9CB6A227D0A298DB9F3F6AFD226DFA9D2DFCA5C2066B7A",
+        "sha256": "44D9D6F63EB20419F494C90F8F11B018BF84094CB2BB315FD976FDAEF397F4C7",
         "byte_count": 67108864,
         "sector_bytes": 512,
         "sector_count": 131072,
@@ -1092,7 +1099,7 @@
       "files": [
         {
           "path": "EFI/BOOT/BOOTX64.EFI",
-          "sha256": "B4AF532DC3F27E363742FDB1FAA211DB915DF66C6430988A65990BA0C91B85D8",
+          "sha256": "3CA95188A66F1A476708462222C2CFFB4C931774F78309C406D649A3E4950D7F",
           "byte_count": 208384,
           "cluster_count": 407
         },
@@ -1164,7 +1171,7 @@
         }
       ],
       "embedded_efi": {
-        "sha256": "B4AF532DC3F27E363742FDB1FAA211DB915DF66C6430988A65990BA0C91B85D8",
+        "sha256": "3CA95188A66F1A476708462222C2CFFB4C931774F78309C406D649A3E4950D7F",
         "byte_count": 208384,
         "format": "PE32+",
         "machine": 34404,
@@ -1202,7 +1209,7 @@
           {
             "name": ".rdata",
             "virtual_address": 159744,
-            "virtual_size": 51924,
+            "virtual_size": 51932,
             "raw_offset": 154624,
             "raw_size": 52224,
             "characteristics": 1073741888
@@ -1823,13 +1830,13 @@
   "execution": {
     "host_environment_count": 1,
     "run_count": 2,
-    "profile_id": "sandybridge-four-vcpu-ack-gated-scheduler",
+    "profile_id": "POOLEOS-TIER0-Q35-1",
     "machine": "pc-q35-11.0",
-    "cpu_model": "SandyBridge,-avx",
-    "virtual_cpu_count": 4,
-    "application_processor_count": 3,
-    "acceleration": "tcg_multi_thread",
-    "deterministic_instruction_clock": false,
+    "cpu_model": "qemu64",
+    "virtual_cpu_count": 1,
+    "bsp_only": true,
+    "acceleration": "tcg_single_thread",
+    "deterministic_instruction_clock": true,
     "qemu_sha256": "A930E028F93D0FA47E4D58BDAD2432F7466DC2B6AF0AE376F77EF7A298FFDD02",
     "firmware_code_sha256": "33090CC07675BAA5190D9F1E84BF5176B33BCBFA9BACAC522961150CDB6DBB2A",
     "vars_template_sha256": "5D2AC383371B408398ACCEE7EC27C8C09EA5B74A0DE0CEEA6513388B15BE5D1E",
@@ -1842,15 +1849,17 @@
       "-machine",
       "pc-q35-11.0,smm=off,usb=off,vmport=off",
       "-accel",
-      "tcg,thread=multi",
+      "tcg,thread=single",
       "-cpu",
-      "SandyBridge,-avx",
+      "qemu64",
       "-smp",
-      "4,sockets=1,dies=1,clusters=1,cores=4,threads=1,maxcpus=4",
+      "1,sockets=1,dies=1,clusters=1,cores=1,threads=1,maxcpus=1",
       "-m",
       "512M",
       "-rtc",
       "base=utc,clock=vm,driftfix=none",
+      "-icount",
+      "shift=0,align=off,sleep=off",
       "-global",
       "ICH9-LPC.disable_s3=1",
       "-global",
@@ -1897,7 +1906,7 @@
     "exact_pbp1_match": true,
     "runs": [
       {
-        "run_id": "scheduler-smp-run-1",
+        "run_id": "scheduler-deferred-run-1",
         "fresh_vars_copy": true,
         "media_read_only": true,
         "guest_network": false,
@@ -1939,26 +1948,26 @@
           "POOLEBOOT/0.1 FRAME READY",
           "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=136 ro=23 rx=95 rw=18 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=D8FA02A4C897B121",
           "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=136 physical_bits=40 mapped_fnv1a64=55D5E5D592AD7A52 framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
-          "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=36 handoff_pages=256 guards=2 total_pages=428 stack_pt=137 handoff_pt=174 kernel_phys=000000001E0E7000 root=000000001E1E2000 stack_phys=000000001E21F000 stack_top=FFFFFFFF800AD000 handoff_phys=000000001DE45000 handoff_virt=FFFFFFFF800AE000 retained_fnv1a64=2320AADD41E3FBF0 original_cr3=restored firmware_calls_while_active=0",
-          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5480 records=5 memory_entries=106 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=469670BA fnv1a64=2BFF6DB3E2C66C9E state=boot_services_exited bytes_unchanged=1",
-          "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=5088 descriptor_bytes=48 descriptors=106",
+          "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=36 handoff_pages=256 guards=2 total_pages=428 stack_pt=137 handoff_pt=174 kernel_phys=000000001DCFF000 root=000000001DDFA000 stack_phys=000000001DE37000 stack_top=FFFFFFFF800AD000 handoff_phys=000000001DA5D000 handoff_virt=FFFFFFFF800AE000 retained_fnv1a64=F23AB181F0D2D2C7 original_cr3=restored firmware_calls_while_active=0",
+          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5160 records=5 memory_entries=98 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=0657609A fnv1a64=B737428FA97B5AEF state=boot_services_exited bytes_unchanged=1",
+          "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4704 descriptor_bytes=48 descriptors=98",
           "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=136 artifact_pages=9 table_pages=4 stack_pages=36 handoff_pages=256",
-          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF8000A000 handoff=FFFFFFFF800AE000 bytes=5480 stack_top=FFFFFFFF800AD000 root=000000001E1E2000 cr3=000000001E1E2000 trap_scenario=18 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
+          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF8000A000 handoff=FFFFFFFF800AE000 bytes=5160 stack_top=FFFFFFFF800AD000 root=000000001DDFA000 cr3=000000001DDFA000 trap_scenario=17 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
           "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
-          "POOLEOS:KERNEL:SCHED-SMP-EARLY PASS contract=PKSCHED4 selector=18 parent_smp=PKSMP5 parent_scheduler=PKSCHED1 bsp=1 if=0 stack=validated_by_wrapper serial=initialized",
+          "POOLEOS:KERNEL:SCHED-DEFERRED-EARLY PASS contract=PKSCHED3 selector=17 parent_scheduler=PKSCHED2 parent_timer=PKIRQ1 bsp=1 if=0 stack=validated_by_wrapper serial=initialized",
           "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE146-N12-SCHED-APW-V0001-000001 entry_count=1 serial=present",
-          "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF800AE000 bytes=5480 entry=0xFFFFFFFF8000A000 stack_top=0xFFFFFFFF800AD000 root=0x000000001E1E2000 cr3=0x000000001E1E2000 rflags_if=0 rflags_df=0",
+          "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF800AE000 bytes=5160 entry=0xFFFFFFFF8000A000 stack_top=0xFFFFFFFF800AD000 root=0x000000001DDFA000 cr3=0x000000001DDFA000 rflags_if=0 rflags_df=0",
           "POOLEOS:KERNEL:PBP1 PASS profile=development records=5 artifacts=10 production_profile_valid=0",
           "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453 policy_sha256=40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B state_sha256=4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33 denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
-          "POOLEOS:KERNEL:SCHED-SMP-TOPOLOGY PASS contract=PKSCHED4 processors=4 enabled=4 bsp_apic_id=0 target_apic_ids=1,2,3 online_mask=0x000000000000000F queue_count=4 task_capacity=8 balance=3,3 idle_owners=4",
-          "POOLEOS:KERNEL:SCHED-SMP-TRANSFER PASS contract=PKSCHED4 wake=1 migrations=2 transaction_acks=3 remote_acks=9 queues=2,2,2 owner_transfer=ack_gated ack_mask=0x000000000000000E generation_safe=1",
-          "POOLEOS:KERNEL:SCHED-SMP-DISPATCH PASS contract=PKSCHED4 bsp_trace=0,7 ap_trace=1:2,1:1,2:4,2:3,3:6,3:5 bsp_dispatches=2 ap_dispatches=6 dispatch_acks=6 call_function_executions=9 task_entries=8 registers_restored=15",
-          "POOLEOS:KERNEL:SCHED-SMP-FAIRNESS PASS contract=PKSCHED4 policy=fixed_priority_round_robin priorities=1-31 maximum_equal_priority_bypass=1 starvation_bound=7 lost_wake=0 duplicate_runnable=0 dead_task_dispatch=0 priority_inversion_violation=0",
-          "POOLEOS:KERNEL:SCHED-SMP-ROLLBACK PASS contract=PKSCHED4 offline_cpu=4 timeouts=1 rollbacks=1 stale_rejections=2 late_ack_rejected=1 stale_generation_rejected=1 source_queue_restored=1 target_ownership_withheld=1",
-          "POOLEOS:KERNEL:SCHED-SMP-CLEANUP PASS contract=PKSCHED4 tasks_dead=8 idle_before=4 owner_epoch_sum=19 online_after=0x0000000000000001 parked_mask=0x000000000000000E resource_pages=96 frame_pages=6 total_pages=102 zeroed_bytes=417792 verified_bytes=417792 queues=0 running=0 scheduler_lock_released=1 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1",
-          "POOLEOS:KERNEL:SCHED-SMP-RESULT PASS contract=PKSCHED4 profile=sandybridge_four_vcpu_ack_gated_scheduler scheduler=bounded_smp ap_dispatch=1 cross_cpu_wake=1 migration=1 topology=exact general_smp=0 ring3=0 address_spaces=1 per_task_xstate=0 target=0 signatures=0 authority=0 actions=0 n12_exit=0 production=0 terminal=halt"
+          "POOLEOS:KERNEL:SCHED-DEFERRED-ARM PASS contract=PKSCHED3 timer_vector=64 one_shot_count=625000 apic_ticks_per_second=62500000 capacity=8 workers=2 stack_bytes=16384 enqueue_batch=8 duplicate_attempts=1 queued_cancel=1 operation_tokens=fixed handler_if=0 interrupted_if=1",
+          "POOLEOS:KERNEL:SCHED-DEFERRED-QUEUE PASS contract=PKSCHED3 top_half_enqueued=8 duplicate_suppressed=1 queue_trace=H1,N2,H3,H4,H5,N6,N7,N8 queued_cancelled=1 eois=1 dispatch_before_eoi=0 permit_epoch=1",
+          "POOLEOS:KERNEL:SCHED-DEFERRED-WORK PASS contract=PKSCHED3 dispatch_trace=0:0,1:2,0:4,1:1,0:5,1:6 completed=5 cancelled=2 running_cancel=1 recursion_rejected=1 high_bypass=3 worker_entries=3,3 transitions=12 arbitrary_callbacks=0",
+          "POOLEOS:KERNEL:SCHED-DEFERRED-FLUSH PASS contract=PKSCHED3 watermark=8 complete=1 sum_lane=120 xor_lane=90 fence_lane=0 receipts=8 stale_rejected=1 generation_safe=1",
+          "POOLEOS:KERNEL:SCHED-DEFERRED-FAULT PASS contract=PKSCHED3 rollbacks=5 reserve=1 queue=1 execute=1 commit=1 cleanup=1 invariant=1 leaked_slots=0",
+          "POOLEOS:KERNEL:SCHED-DEFERRED-CLEANUP PASS contract=PKSCHED3 intake_closed=1 shutdown_cancelled=1 slots_free=8 workers_retired=2 stack_bytes_cleared=32768 queue_entries=0 running=0 lock_released=1 apic_restored=1 pic_restored=1 hpet_restored=1 mmio_revoked=1",
+          "POOLEOS:KERNEL:SCHED-DEFERRED-RESULT PASS contract=PKSCHED3 profile=qemu64_bsp_interrupt_deferred fixed_workers=1 bsp=1 ap_dispatch=0 drivers=0 services=0 ring3=0 address_spaces=1 xstate_switch=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],
-        "marker_sha256": "DBF0F19CF3CD610F4AB81BFC430B8030EDCFD79716EC45BAD22DEC96BBA824DB",
+        "marker_sha256": "A80D818CFC1028F9BA587416598DAA0C530FB68DBA0C3C8B4A25C7C7FD49D941",
         "serial_debugcon_exact_match": true,
         "marker_summary": {
           "transfer_prefix": {
@@ -2047,16 +2056,16 @@
                 "state_monotonic": false
               },
               "pbp1": {
-                "byte_count": 5480,
+                "byte_count": 5160,
                 "record_count": 5,
-                "memory_entry_count": 106,
+                "memory_entry_count": 98,
                 "framebuffer_present": 1,
                 "firmware_table_count": 1,
                 "artifact_count": 10,
                 "descriptor_bytes": 48,
                 "exit_attempts": 1,
-                "message_crc32": "469670BA",
-                "fnv1a64": "2BFF6DB3E2C66C9E",
+                "message_crc32": "0657609A",
+                "fnv1a64": "B737428FA97B5AEF",
                 "pre_exit": false,
                 "boot_services_exited": true,
                 "development_mode_only": true,
@@ -2094,13 +2103,13 @@
                   "total_mapped_page_count": 428,
                   "stack_first_page_table_index": 137,
                   "handoff_first_page_table_index": 174,
-                  "kernel_physical_base": 504262656,
-                  "page_table_root_physical": 505290752,
-                  "stack_physical_base": 505540608,
+                  "kernel_physical_base": 500166656,
+                  "page_table_root_physical": 501194752,
+                  "stack_physical_base": 501444608,
                   "stack_top_virtual": 18446744071562776576,
-                  "handoff_physical_base": 501501952,
+                  "handoff_physical_base": 497405952,
                   "handoff_virtual_base": 18446744071562780672,
-                  "retained_leaf_fingerprint": "2320AADD41E3FBF0"
+                  "retained_leaf_fingerprint": "F23AB181F0D2D2C7"
                 }
               },
               "gop": {
@@ -2111,16 +2120,16 @@
                 "format": "BGR"
               },
               "memory_map": {
-                "byte_count": 5088,
+                "byte_count": 4704,
                 "descriptor_bytes": 48,
-                "descriptor_count": 106
+                "descriptor_count": 98
               },
               "boot_exit": {
                 "contract_id": "PBEXIT1",
                 "attempt_count": 1,
-                "map_byte_count": 5088,
+                "map_byte_count": 4704,
                 "descriptor_size": 48,
-                "descriptor_count": 106,
+                "descriptor_count": 98,
                 "firmware_calls_after_exit": 0,
                 "kernel_page_count": 136,
                 "artifact_page_count": 9,
@@ -2137,11 +2146,11 @@
               "emulator_only": 1,
               "entry": 18446744071562108928,
               "handoff": 18446744071562780672,
-              "handoff_bytes": 5480,
+              "handoff_bytes": 5160,
               "stack_top": 18446744071562776576,
-              "root": 505290752,
-              "cr3": 505290752,
-              "trap_scenario": 18,
+              "root": 501194752,
+              "cr3": 501194752,
+              "trap_scenario": 17,
               "signature_verifications": 0,
               "authority_grants": 0,
               "actions_authorized": 0,
@@ -2157,11 +2166,11 @@
             },
             "kernel_state": {
               "handoff": 18446744071562780672,
-              "handoff_bytes": 5480,
+              "handoff_bytes": 5160,
               "entry": 18446744071562108928,
               "stack_top": 18446744071562776576,
-              "root": 505290752,
-              "cr3": 505290752,
+              "root": 501194752,
+              "cr3": 501194752,
               "rflags_if": 0,
               "rflags_df": 0
             },
@@ -2188,120 +2197,93 @@
             },
             "synthetic_unsigned_terminal_used_for_prefix_parser_only": true
           },
-          "topology": {
-            "processor_count": 4,
-            "target_apic_ids": [
-              1,
-              2,
-              3
-            ],
-            "online_mask": 15,
-            "balance": [
+          "timer": {
+            "vector": 64,
+            "one_shot_count": 625000,
+            "apic_ticks_per_second": 62500000,
+            "deliveries": 1
+          },
+          "queue": {
+            "enqueued": 8,
+            "duplicate_suppressed": 1,
+            "queued_cancelled": 1
+          },
+          "workers": {
+            "dispatches": 6,
+            "entries": [
               3,
               3
-            ]
-          },
-          "transfers": {
-            "remote_wakes": 1,
-            "migrations": 2,
-            "transaction_acks": 3,
-            "remote_acks": 9
-          },
-          "dispatch": {
-            "bsp": 2,
-            "aps": 6,
+            ],
+            "transitions": 12,
             "trace": {
-              "balance": [
-                3,
-                3
-              ],
-              "queues_after_transfer": [
-                2,
-                2,
-                2
-              ],
-              "bsp_trace": [
+              "slots": [
                 0,
+                2,
+                4,
+                1,
+                5,
+                6
+              ],
+              "workers": [
+                0,
+                1,
+                0,
+                1,
+                0,
+                1
+              ],
+              "states": [
+                "completed",
+                "completed",
+                "completed",
+                "completed",
+                "completed",
+                "cancelled"
+              ],
+              "max_bypass": 3,
+              "sum": 120,
+              "xor": 90,
+              "fence": 0,
+              "remaining_slots": [
                 7
-              ],
-              "ap_trace": [
-                [
-                  1,
-                  2
-                ],
-                [
-                  1,
-                  1
-                ],
-                [
-                  2,
-                  4
-                ],
-                [
-                  2,
-                  3
-                ],
-                [
-                  3,
-                  6
-                ],
-                [
-                  3,
-                  5
-                ]
-              ],
-              "owner_epoch_sum": 19,
-              "remote_acks": 9,
-              "maximum_bypass": 1
-            },
-            "call_function_executions": 9
+              ]
+            }
           },
-          "rollback": {
-            "offline_cpu": 4,
-            "timeouts": 1,
-            "rollbacks": 1,
-            "stale_rejections": 2
+          "flush": {
+            "receipts": 8,
+            "sum_lane": 120,
+            "xor_lane": 90,
+            "fence_lane": 0
+          },
+          "faults": {
+            "rollbacks": 5,
+            "leaked_slots": 0
           },
           "cleanup": {
-            "tasks_dead": 8,
-            "idle_owners": 4,
-            "pages_released": 102,
-            "bytes_verified": 417792
+            "stack_bytes_cleared": 32768,
+            "slots_free": 8,
+            "mmio_revoked": 1
           },
           "result": {
-            "bounded_live_ap_scheduler": 1,
-            "general_smp": 0,
+            "fixed_bsp_workers": 1,
+            "live_ap_dispatch": 0,
             "production": 0
           }
         },
         "pbp1_transcript": {
           "contract_id": "PBLIVE4",
-          "byte_count": 5480,
-          "sha256": "A5B577AAD840C3289DA58894753ADAAEB76F3DFAE42487D8D60C378AA36B5E6E",
-          "message_crc32": "469670BA",
-          "fnv1a64": "2BFF6DB3E2C66C9E",
+          "byte_count": 5160,
+          "sha256": "4A4836DEB2BB2E0C5FFF6C94D0E9603711713A59AC358176781AF41360FE3D1B",
+          "message_crc32": "0657609A",
+          "fnv1a64": "B737428FA97B5AEF",
           "record_count": 5,
           "features": "000000000000001F",
           "required_features": "000000000000001B",
-          "memory_entry_count": 106,
+          "memory_entry_count": 98,
           "memory_entries": [
             {
               "physical_start": "0000000000000000",
-              "page_count": 135,
-              "attributes": "000000000000000F",
-              "kind": 1,
-              "source_type": 7
-            },
-            {
-              "physical_start": "0000000000087000",
-              "page_count": 1,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "0000000000088000",
-              "page_count": 24,
+              "page_count": 160,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
@@ -2350,651 +2332,602 @@
             },
             {
               "physical_start": "0000000001780000",
-              "page_count": 108573,
+              "page_count": 107636,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001BF9D000",
+              "physical_start": "000000001BBF4000",
               "page_count": 32,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001BFBD000",
-              "page_count": 7816,
+              "physical_start": "000000001BC14000",
+              "page_count": 7753,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001DE45000",
+              "physical_start": "000000001DA5D000",
               "page_count": 810,
               "attributes": "000000000000000F",
               "kind": 10,
               "source_type": 2
             },
             {
-              "physical_start": "000000001E16F000",
+              "physical_start": "000000001DD87000",
               "page_count": 115,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001E1E2000",
+              "physical_start": "000000001DDFA000",
               "page_count": 4,
               "attributes": "000000000000000F",
               "kind": 10,
               "source_type": 2
             },
             {
-              "physical_start": "000000001E1E6000",
+              "physical_start": "000000001DDFE000",
               "page_count": 54,
               "attributes": "000000000000000F",
               "kind": 10,
               "source_type": 1
             },
             {
-              "physical_start": "000000001E21C000",
+              "physical_start": "000000001DE34000",
               "page_count": 3,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001E21F000",
+              "physical_start": "000000001DE37000",
               "page_count": 43,
               "attributes": "000000000000000F",
               "kind": 10,
               "source_type": 2
             },
             {
-              "physical_start": "000000001E24A000",
-              "page_count": 1676,
+              "physical_start": "000000001DE62000",
+              "page_count": 1684,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001E8D6000",
+              "physical_start": "000000001E4F6000",
               "page_count": 224,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001E9B6000",
-              "page_count": 10,
+              "physical_start": "000000001E5D6000",
+              "page_count": 2,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001E9C0000",
-              "page_count": 2,
+              "physical_start": "000000001E5D8000",
+              "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 10,
               "source_type": 2
             },
             {
-              "physical_start": "000000001E9C2000",
+              "physical_start": "000000001E5D9000",
               "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001E9C3000",
-              "page_count": 92,
+              "physical_start": "000000001E5DA000",
+              "page_count": 7,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EA1F000",
+              "physical_start": "000000001E5E1000",
+              "page_count": 1,
+              "attributes": "000000000000000F",
+              "kind": 10,
+              "source_type": 2
+            },
+            {
+              "physical_start": "000000001E5E2000",
+              "page_count": 85,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E637000",
               "page_count": 34,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EA41000",
+              "physical_start": "000000001E659000",
               "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EA42000",
+              "physical_start": "000000001E65A000",
               "page_count": 22,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EA58000",
+              "physical_start": "000000001E670000",
               "page_count": 2,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EA5A000",
+              "physical_start": "000000001E672000",
               "page_count": 14,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EA68000",
+              "physical_start": "000000001E680000",
               "page_count": 7,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EA6F000",
+              "physical_start": "000000001E687000",
               "page_count": 6,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EA75000",
-              "page_count": 33,
+              "physical_start": "000000001E68D000",
+              "page_count": 41,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EA96000",
+              "physical_start": "000000001E6B6000",
               "page_count": 28,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EAB2000",
+              "physical_start": "000000001E6D2000",
+              "page_count": 1,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E6D3000",
+              "page_count": 5,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E6D8000",
+              "page_count": 5,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E6DD000",
+              "page_count": 36,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E701000",
+              "page_count": 2,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E703000",
+              "page_count": 23,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E71A000",
+              "page_count": 3,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E71D000",
+              "page_count": 41,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E746000",
+              "page_count": 1,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E747000",
+              "page_count": 5,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E74C000",
+              "page_count": 2,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E74E000",
+              "page_count": 25,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E767000",
+              "page_count": 5,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E76C000",
+              "page_count": 41,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E795000",
+              "page_count": 1,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E796000",
+              "page_count": 42,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E7C0000",
+              "page_count": 2,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E7C2000",
+              "page_count": 4,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E7C6000",
+              "page_count": 4,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E7CA000",
+              "page_count": 11,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E7D5000",
+              "page_count": 3,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E7D8000",
+              "page_count": 4,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E7DC000",
+              "page_count": 4,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E7E0000",
+              "page_count": 23,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E7F7000",
+              "page_count": 521,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001EA00000",
+              "page_count": 25,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EA19000",
+              "page_count": 3,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001EA1C000",
+              "page_count": 33,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EA3D000",
               "page_count": 6,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EAB8000",
-              "page_count": 47,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EAE7000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EAEA000",
-              "page_count": 13,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EAF7000",
-              "page_count": 2,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EAF9000",
-              "page_count": 13,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EB06000",
-              "page_count": 5,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EB0B000",
-              "page_count": 34,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EB2D000",
-              "page_count": 2,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EB2F000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EB32000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EB35000",
-              "page_count": 25,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EB4E000",
-              "page_count": 5,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EB53000",
-              "page_count": 41,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EB7C000",
-              "page_count": 1,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EB7D000",
-              "page_count": 42,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EBA7000",
-              "page_count": 2,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EBA9000",
-              "page_count": 4,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EBAD000",
-              "page_count": 4,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EBB1000",
-              "page_count": 11,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EBBC000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EBBF000",
-              "page_count": 4,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EBC3000",
-              "page_count": 4,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EBC7000",
-              "page_count": 23,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EBDE000",
-              "page_count": 9,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EBE7000",
-              "page_count": 25,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EC00000",
-              "page_count": 514,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EE02000",
-              "page_count": 9,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EE0B000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EE0E000",
-              "page_count": 24,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EE26000",
-              "page_count": 1,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EE27000",
+              "physical_start": "000000001EA43000",
               "page_count": 5,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EE2C000",
-              "page_count": 5,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EE31000",
+              "physical_start": "000000001EA48000",
               "page_count": 193,
               "attributes": "800000000000000F",
               "kind": 4,
               "source_type": 6
             },
             {
-              "physical_start": "000000001EEF2000",
-              "page_count": 29,
+              "physical_start": "000000001EB09000",
+              "page_count": 36,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EF0F000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EF12000",
-              "page_count": 11,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EF1D000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EF20000",
-              "page_count": 12,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EF2C000",
-              "page_count": 42,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EF56000",
-              "page_count": 29,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EF73000",
+              "physical_start": "000000001EB2D000",
               "page_count": 5,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EF78000",
-              "page_count": 3,
+              "physical_start": "000000001EB32000",
+              "page_count": 4,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EF7B000",
-              "page_count": 1,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EF7C000",
-              "page_count": 9,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EF85000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EF88000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EF8B000",
+              "physical_start": "000000001EB36000",
               "page_count": 4,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EF8F000",
-              "page_count": 1,
+              "physical_start": "000000001EB3A000",
+              "page_count": 8,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EF90000",
-              "page_count": 1024,
+              "physical_start": "000000001EB42000",
+              "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001F390000",
+              "physical_start": "000000001EB43000",
+              "page_count": 42,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EB6D000",
+              "page_count": 5,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001EB72000",
+              "page_count": 6,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EB78000",
+              "page_count": 1042,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001EF8A000",
               "page_count": 7,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001F397000",
-              "page_count": 1,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001F398000",
-              "page_count": 10,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001F3A2000",
+              "physical_start": "000000001EF91000",
               "page_count": 4,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001F3A6000",
+              "physical_start": "000000001EF95000",
+              "page_count": 11,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EFA0000",
+              "page_count": 6,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001EFA6000",
               "page_count": 23,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001F3BD000",
+              "physical_start": "000000001EFBD000",
               "page_count": 1328,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001F8ED000",
+              "physical_start": "000000001F4ED000",
               "page_count": 256,
               "attributes": "800000000000000F",
               "kind": 4,
               "source_type": 6
             },
             {
-              "physical_start": "000000001F9ED000",
+              "physical_start": "000000001F5ED000",
               "page_count": 256,
               "attributes": "800000000000000F",
               "kind": 3,
               "source_type": 5
             },
             {
-              "physical_start": "000000001FAED000",
-              "page_count": 128,
+              "physical_start": "000000001F6ED000",
+              "page_count": 135,
               "attributes": "000000000000000F",
-              "kind": 0,
-              "source_type": 0
+              "kind": 1,
+              "source_type": 7
             },
             {
-              "physical_start": "000000001FB6D000",
-              "page_count": 18,
+              "physical_start": "000000001F774000",
+              "page_count": 11,
               "attributes": "000000000000000F",
               "kind": 5,
               "source_type": 9
             },
             {
-              "physical_start": "000000001FB7F000",
+              "physical_start": "000000001F77F000",
               "page_count": 128,
               "attributes": "000000000000000F",
               "kind": 6,
               "source_type": 10
             },
             {
-              "physical_start": "000000001FBFF000",
-              "page_count": 513,
+              "physical_start": "000000001F7FF000",
+              "page_count": 1537,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
               "physical_start": "000000001FE00000",
-              "page_count": 182,
+              "page_count": 206,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001FEB6000",
+              "physical_start": "000000001FECE000",
               "page_count": 32,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001FED6000",
+              "physical_start": "000000001FEEE000",
               "page_count": 74,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001FF20000",
+              "physical_start": "000000001FF38000",
               "page_count": 4,
               "attributes": "000000000000000F",
               "kind": 0,
               "source_type": 0
             },
             {
-              "physical_start": "000000001FF24000",
+              "physical_start": "000000001FF3C000",
               "page_count": 2,
               "attributes": "000000000000000F",
               "kind": 6,
               "source_type": 10
             },
             {
-              "physical_start": "000000001FF26000",
+              "physical_start": "000000001FF3E000",
               "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001FF27000",
-              "page_count": 41,
+              "physical_start": "000000001FF3F000",
+              "page_count": 17,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
@@ -3026,20 +2959,27 @@
               "attributes": "8000000000000001",
               "kind": 7,
               "source_type": 11
+            },
+            {
+              "physical_start": "000000FD00000000",
+              "page_count": 3145728,
+              "attributes": "0000000000000000",
+              "kind": 0,
+              "source_type": 0
             }
           ],
           "core": {
             "boot_flags": "0000000000000011",
-            "kernel_physical_base": "000000001E0E7000",
+            "kernel_physical_base": "000000001DCFF000",
             "kernel_physical_size": 557056,
             "kernel_virtual_base": "FFFFFFFF80000000",
             "kernel_virtual_size": 557056,
             "kernel_entry_virtual": "FFFFFFFF8000A000",
             "initial_stack_top_virtual": "FFFFFFFF800AD000",
-            "page_table_root_physical": "000000001E1E2000",
-            "handoff_physical_base": "000000001DE45000",
+            "page_table_root_physical": "000000001DDFA000",
+            "handoff_physical_base": "000000001DA5D000",
             "handoff_virtual_base": "FFFFFFFF800AE000",
-            "handoff_byte_count": 5480,
+            "handoff_byte_count": 5160,
             "boot_attempt": 0,
             "boot_attempt_limit": 3,
             "boot_slot": 1,
@@ -3051,7 +2991,7 @@
             {
               "role": 1,
               "flags": 9,
-              "physical_base": "000000001E0E7000",
+              "physical_base": "000000001DCFF000",
               "physical_size": 557056,
               "virtual_base": "FFFFFFFF80000000",
               "virtual_size": 557056,
@@ -3061,7 +3001,7 @@
             {
               "role": 2,
               "flags": 1,
-              "physical_base": "000000001E9C0000",
+              "physical_base": "000000001E5D8000",
               "physical_size": 1860,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -3071,7 +3011,7 @@
             {
               "role": 3,
               "flags": 1,
-              "physical_base": "000000001E249000",
+              "physical_base": "000000001DE61000",
               "physical_size": 1088,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -3081,7 +3021,7 @@
             {
               "role": 4,
               "flags": 1,
-              "physical_base": "000000001E248000",
+              "physical_base": "000000001DE60000",
               "physical_size": 821,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -3091,7 +3031,7 @@
             {
               "role": 5,
               "flags": 1,
-              "physical_base": "000000001E247000",
+              "physical_base": "000000001DE5F000",
               "physical_size": 1504,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -3101,7 +3041,7 @@
             {
               "role": 6,
               "flags": 1,
-              "physical_base": "000000001E246000",
+              "physical_base": "000000001DE5E000",
               "physical_size": 1408,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -3111,7 +3051,7 @@
             {
               "role": 7,
               "flags": 1,
-              "physical_base": "000000001E245000",
+              "physical_base": "000000001DE5D000",
               "physical_size": 2080,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -3121,7 +3061,7 @@
             {
               "role": 9,
               "flags": 1,
-              "physical_base": "000000001E9C1000",
+              "physical_base": "000000001E5E1000",
               "physical_size": 2615,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -3131,7 +3071,7 @@
             {
               "role": 10,
               "flags": 1,
-              "physical_base": "000000001E244000",
+              "physical_base": "000000001DE5C000",
               "physical_size": 320,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -3141,7 +3081,7 @@
             {
               "role": 11,
               "flags": 1,
-              "physical_base": "000000001E243000",
+              "physical_base": "000000001DE5B000",
               "physical_size": 256,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -3152,7 +3092,7 @@
           "kernel_artifact": {
             "role": 1,
             "flags": 9,
-            "physical_base": "000000001E0E7000",
+            "physical_base": "000000001DCFF000",
             "physical_size": 557056,
             "virtual_base": "FFFFFFFF80000000",
             "virtual_size": 557056,
@@ -3175,7 +3115,7 @@
           "firmware_tables": [
             {
               "guid": "8868E871E4F111D3BC220080C73C8881",
-              "physical_address": "000000001FB7E014",
+              "physical_address": "000000001F77E014",
               "byte_count": 36,
               "flags": 6,
               "physical": true,
@@ -3204,8 +3144,8 @@
           "nonblank": true,
           "poole_identity_palette_observed": true
         },
-        "stderr_sha256": "6F56F5A44073C4AADF70227FF8D8AE7DE931431BDE4943E63990D8A18E25D302",
-        "stderr_byte_count": 736,
+        "stderr_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "stderr_byte_count": 0,
         "local_paths_recorded": false,
         "transcript_binding": {
           "exact_transfer_fields_bound": true,
@@ -3230,7 +3170,7 @@
         }
       },
       {
-        "run_id": "scheduler-smp-run-2",
+        "run_id": "scheduler-deferred-run-2",
         "fresh_vars_copy": true,
         "media_read_only": true,
         "guest_network": false,
@@ -3272,26 +3212,26 @@
           "POOLEBOOT/0.1 FRAME READY",
           "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=136 ro=23 rx=95 rw=18 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=D8FA02A4C897B121",
           "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=136 physical_bits=40 mapped_fnv1a64=55D5E5D592AD7A52 framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
-          "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=36 handoff_pages=256 guards=2 total_pages=428 stack_pt=137 handoff_pt=174 kernel_phys=000000001E0E7000 root=000000001E1E2000 stack_phys=000000001E21F000 stack_top=FFFFFFFF800AD000 handoff_phys=000000001DE45000 handoff_virt=FFFFFFFF800AE000 retained_fnv1a64=2320AADD41E3FBF0 original_cr3=restored firmware_calls_while_active=0",
-          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5480 records=5 memory_entries=106 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=469670BA fnv1a64=2BFF6DB3E2C66C9E state=boot_services_exited bytes_unchanged=1",
-          "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=5088 descriptor_bytes=48 descriptors=106",
+          "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=36 handoff_pages=256 guards=2 total_pages=428 stack_pt=137 handoff_pt=174 kernel_phys=000000001DCFF000 root=000000001DDFA000 stack_phys=000000001DE37000 stack_top=FFFFFFFF800AD000 handoff_phys=000000001DA5D000 handoff_virt=FFFFFFFF800AE000 retained_fnv1a64=F23AB181F0D2D2C7 original_cr3=restored firmware_calls_while_active=0",
+          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5160 records=5 memory_entries=98 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=0657609A fnv1a64=B737428FA97B5AEF state=boot_services_exited bytes_unchanged=1",
+          "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4704 descriptor_bytes=48 descriptors=98",
           "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=136 artifact_pages=9 table_pages=4 stack_pages=36 handoff_pages=256",
-          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF8000A000 handoff=FFFFFFFF800AE000 bytes=5480 stack_top=FFFFFFFF800AD000 root=000000001E1E2000 cr3=000000001E1E2000 trap_scenario=18 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
+          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF8000A000 handoff=FFFFFFFF800AE000 bytes=5160 stack_top=FFFFFFFF800AD000 root=000000001DDFA000 cr3=000000001DDFA000 trap_scenario=17 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
           "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
-          "POOLEOS:KERNEL:SCHED-SMP-EARLY PASS contract=PKSCHED4 selector=18 parent_smp=PKSMP5 parent_scheduler=PKSCHED1 bsp=1 if=0 stack=validated_by_wrapper serial=initialized",
+          "POOLEOS:KERNEL:SCHED-DEFERRED-EARLY PASS contract=PKSCHED3 selector=17 parent_scheduler=PKSCHED2 parent_timer=PKIRQ1 bsp=1 if=0 stack=validated_by_wrapper serial=initialized",
           "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE146-N12-SCHED-APW-V0001-000001 entry_count=1 serial=present",
-          "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF800AE000 bytes=5480 entry=0xFFFFFFFF8000A000 stack_top=0xFFFFFFFF800AD000 root=0x000000001E1E2000 cr3=0x000000001E1E2000 rflags_if=0 rflags_df=0",
+          "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF800AE000 bytes=5160 entry=0xFFFFFFFF8000A000 stack_top=0xFFFFFFFF800AD000 root=0x000000001DDFA000 cr3=0x000000001DDFA000 rflags_if=0 rflags_df=0",
           "POOLEOS:KERNEL:PBP1 PASS profile=development records=5 artifacts=10 production_profile_valid=0",
           "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453 policy_sha256=40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B state_sha256=4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33 denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
-          "POOLEOS:KERNEL:SCHED-SMP-TOPOLOGY PASS contract=PKSCHED4 processors=4 enabled=4 bsp_apic_id=0 target_apic_ids=1,2,3 online_mask=0x000000000000000F queue_count=4 task_capacity=8 balance=3,3 idle_owners=4",
-          "POOLEOS:KERNEL:SCHED-SMP-TRANSFER PASS contract=PKSCHED4 wake=1 migrations=2 transaction_acks=3 remote_acks=9 queues=2,2,2 owner_transfer=ack_gated ack_mask=0x000000000000000E generation_safe=1",
-          "POOLEOS:KERNEL:SCHED-SMP-DISPATCH PASS contract=PKSCHED4 bsp_trace=0,7 ap_trace=1:2,1:1,2:4,2:3,3:6,3:5 bsp_dispatches=2 ap_dispatches=6 dispatch_acks=6 call_function_executions=9 task_entries=8 registers_restored=15",
-          "POOLEOS:KERNEL:SCHED-SMP-FAIRNESS PASS contract=PKSCHED4 policy=fixed_priority_round_robin priorities=1-31 maximum_equal_priority_bypass=1 starvation_bound=7 lost_wake=0 duplicate_runnable=0 dead_task_dispatch=0 priority_inversion_violation=0",
-          "POOLEOS:KERNEL:SCHED-SMP-ROLLBACK PASS contract=PKSCHED4 offline_cpu=4 timeouts=1 rollbacks=1 stale_rejections=2 late_ack_rejected=1 stale_generation_rejected=1 source_queue_restored=1 target_ownership_withheld=1",
-          "POOLEOS:KERNEL:SCHED-SMP-CLEANUP PASS contract=PKSCHED4 tasks_dead=8 idle_before=4 owner_epoch_sum=19 online_after=0x0000000000000001 parked_mask=0x000000000000000E resource_pages=96 frame_pages=6 total_pages=102 zeroed_bytes=417792 verified_bytes=417792 queues=0 running=0 scheduler_lock_released=1 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1",
-          "POOLEOS:KERNEL:SCHED-SMP-RESULT PASS contract=PKSCHED4 profile=sandybridge_four_vcpu_ack_gated_scheduler scheduler=bounded_smp ap_dispatch=1 cross_cpu_wake=1 migration=1 topology=exact general_smp=0 ring3=0 address_spaces=1 per_task_xstate=0 target=0 signatures=0 authority=0 actions=0 n12_exit=0 production=0 terminal=halt"
+          "POOLEOS:KERNEL:SCHED-DEFERRED-ARM PASS contract=PKSCHED3 timer_vector=64 one_shot_count=625000 apic_ticks_per_second=62500000 capacity=8 workers=2 stack_bytes=16384 enqueue_batch=8 duplicate_attempts=1 queued_cancel=1 operation_tokens=fixed handler_if=0 interrupted_if=1",
+          "POOLEOS:KERNEL:SCHED-DEFERRED-QUEUE PASS contract=PKSCHED3 top_half_enqueued=8 duplicate_suppressed=1 queue_trace=H1,N2,H3,H4,H5,N6,N7,N8 queued_cancelled=1 eois=1 dispatch_before_eoi=0 permit_epoch=1",
+          "POOLEOS:KERNEL:SCHED-DEFERRED-WORK PASS contract=PKSCHED3 dispatch_trace=0:0,1:2,0:4,1:1,0:5,1:6 completed=5 cancelled=2 running_cancel=1 recursion_rejected=1 high_bypass=3 worker_entries=3,3 transitions=12 arbitrary_callbacks=0",
+          "POOLEOS:KERNEL:SCHED-DEFERRED-FLUSH PASS contract=PKSCHED3 watermark=8 complete=1 sum_lane=120 xor_lane=90 fence_lane=0 receipts=8 stale_rejected=1 generation_safe=1",
+          "POOLEOS:KERNEL:SCHED-DEFERRED-FAULT PASS contract=PKSCHED3 rollbacks=5 reserve=1 queue=1 execute=1 commit=1 cleanup=1 invariant=1 leaked_slots=0",
+          "POOLEOS:KERNEL:SCHED-DEFERRED-CLEANUP PASS contract=PKSCHED3 intake_closed=1 shutdown_cancelled=1 slots_free=8 workers_retired=2 stack_bytes_cleared=32768 queue_entries=0 running=0 lock_released=1 apic_restored=1 pic_restored=1 hpet_restored=1 mmio_revoked=1",
+          "POOLEOS:KERNEL:SCHED-DEFERRED-RESULT PASS contract=PKSCHED3 profile=qemu64_bsp_interrupt_deferred fixed_workers=1 bsp=1 ap_dispatch=0 drivers=0 services=0 ring3=0 address_spaces=1 xstate_switch=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],
-        "marker_sha256": "DBF0F19CF3CD610F4AB81BFC430B8030EDCFD79716EC45BAD22DEC96BBA824DB",
+        "marker_sha256": "A80D818CFC1028F9BA587416598DAA0C530FB68DBA0C3C8B4A25C7C7FD49D941",
         "serial_debugcon_exact_match": true,
         "marker_summary": {
           "transfer_prefix": {
@@ -3380,16 +3320,16 @@
                 "state_monotonic": false
               },
               "pbp1": {
-                "byte_count": 5480,
+                "byte_count": 5160,
                 "record_count": 5,
-                "memory_entry_count": 106,
+                "memory_entry_count": 98,
                 "framebuffer_present": 1,
                 "firmware_table_count": 1,
                 "artifact_count": 10,
                 "descriptor_bytes": 48,
                 "exit_attempts": 1,
-                "message_crc32": "469670BA",
-                "fnv1a64": "2BFF6DB3E2C66C9E",
+                "message_crc32": "0657609A",
+                "fnv1a64": "B737428FA97B5AEF",
                 "pre_exit": false,
                 "boot_services_exited": true,
                 "development_mode_only": true,
@@ -3427,13 +3367,13 @@
                   "total_mapped_page_count": 428,
                   "stack_first_page_table_index": 137,
                   "handoff_first_page_table_index": 174,
-                  "kernel_physical_base": 504262656,
-                  "page_table_root_physical": 505290752,
-                  "stack_physical_base": 505540608,
+                  "kernel_physical_base": 500166656,
+                  "page_table_root_physical": 501194752,
+                  "stack_physical_base": 501444608,
                   "stack_top_virtual": 18446744071562776576,
-                  "handoff_physical_base": 501501952,
+                  "handoff_physical_base": 497405952,
                   "handoff_virtual_base": 18446744071562780672,
-                  "retained_leaf_fingerprint": "2320AADD41E3FBF0"
+                  "retained_leaf_fingerprint": "F23AB181F0D2D2C7"
                 }
               },
               "gop": {
@@ -3444,16 +3384,16 @@
                 "format": "BGR"
               },
               "memory_map": {
-                "byte_count": 5088,
+                "byte_count": 4704,
                 "descriptor_bytes": 48,
-                "descriptor_count": 106
+                "descriptor_count": 98
               },
               "boot_exit": {
                 "contract_id": "PBEXIT1",
                 "attempt_count": 1,
-                "map_byte_count": 5088,
+                "map_byte_count": 4704,
                 "descriptor_size": 48,
-                "descriptor_count": 106,
+                "descriptor_count": 98,
                 "firmware_calls_after_exit": 0,
                 "kernel_page_count": 136,
                 "artifact_page_count": 9,
@@ -3470,11 +3410,11 @@
               "emulator_only": 1,
               "entry": 18446744071562108928,
               "handoff": 18446744071562780672,
-              "handoff_bytes": 5480,
+              "handoff_bytes": 5160,
               "stack_top": 18446744071562776576,
-              "root": 505290752,
-              "cr3": 505290752,
-              "trap_scenario": 18,
+              "root": 501194752,
+              "cr3": 501194752,
+              "trap_scenario": 17,
               "signature_verifications": 0,
               "authority_grants": 0,
               "actions_authorized": 0,
@@ -3490,11 +3430,11 @@
             },
             "kernel_state": {
               "handoff": 18446744071562780672,
-              "handoff_bytes": 5480,
+              "handoff_bytes": 5160,
               "entry": 18446744071562108928,
               "stack_top": 18446744071562776576,
-              "root": 505290752,
-              "cr3": 505290752,
+              "root": 501194752,
+              "cr3": 501194752,
               "rflags_if": 0,
               "rflags_df": 0
             },
@@ -3521,120 +3461,93 @@
             },
             "synthetic_unsigned_terminal_used_for_prefix_parser_only": true
           },
-          "topology": {
-            "processor_count": 4,
-            "target_apic_ids": [
-              1,
-              2,
-              3
-            ],
-            "online_mask": 15,
-            "balance": [
+          "timer": {
+            "vector": 64,
+            "one_shot_count": 625000,
+            "apic_ticks_per_second": 62500000,
+            "deliveries": 1
+          },
+          "queue": {
+            "enqueued": 8,
+            "duplicate_suppressed": 1,
+            "queued_cancelled": 1
+          },
+          "workers": {
+            "dispatches": 6,
+            "entries": [
               3,
               3
-            ]
-          },
-          "transfers": {
-            "remote_wakes": 1,
-            "migrations": 2,
-            "transaction_acks": 3,
-            "remote_acks": 9
-          },
-          "dispatch": {
-            "bsp": 2,
-            "aps": 6,
+            ],
+            "transitions": 12,
             "trace": {
-              "balance": [
-                3,
-                3
-              ],
-              "queues_after_transfer": [
-                2,
-                2,
-                2
-              ],
-              "bsp_trace": [
+              "slots": [
                 0,
+                2,
+                4,
+                1,
+                5,
+                6
+              ],
+              "workers": [
+                0,
+                1,
+                0,
+                1,
+                0,
+                1
+              ],
+              "states": [
+                "completed",
+                "completed",
+                "completed",
+                "completed",
+                "completed",
+                "cancelled"
+              ],
+              "max_bypass": 3,
+              "sum": 120,
+              "xor": 90,
+              "fence": 0,
+              "remaining_slots": [
                 7
-              ],
-              "ap_trace": [
-                [
-                  1,
-                  2
-                ],
-                [
-                  1,
-                  1
-                ],
-                [
-                  2,
-                  4
-                ],
-                [
-                  2,
-                  3
-                ],
-                [
-                  3,
-                  6
-                ],
-                [
-                  3,
-                  5
-                ]
-              ],
-              "owner_epoch_sum": 19,
-              "remote_acks": 9,
-              "maximum_bypass": 1
-            },
-            "call_function_executions": 9
+              ]
+            }
           },
-          "rollback": {
-            "offline_cpu": 4,
-            "timeouts": 1,
-            "rollbacks": 1,
-            "stale_rejections": 2
+          "flush": {
+            "receipts": 8,
+            "sum_lane": 120,
+            "xor_lane": 90,
+            "fence_lane": 0
+          },
+          "faults": {
+            "rollbacks": 5,
+            "leaked_slots": 0
           },
           "cleanup": {
-            "tasks_dead": 8,
-            "idle_owners": 4,
-            "pages_released": 102,
-            "bytes_verified": 417792
+            "stack_bytes_cleared": 32768,
+            "slots_free": 8,
+            "mmio_revoked": 1
           },
           "result": {
-            "bounded_live_ap_scheduler": 1,
-            "general_smp": 0,
+            "fixed_bsp_workers": 1,
+            "live_ap_dispatch": 0,
             "production": 0
           }
         },
         "pbp1_transcript": {
           "contract_id": "PBLIVE4",
-          "byte_count": 5480,
-          "sha256": "A5B577AAD840C3289DA58894753ADAAEB76F3DFAE42487D8D60C378AA36B5E6E",
-          "message_crc32": "469670BA",
-          "fnv1a64": "2BFF6DB3E2C66C9E",
+          "byte_count": 5160,
+          "sha256": "4A4836DEB2BB2E0C5FFF6C94D0E9603711713A59AC358176781AF41360FE3D1B",
+          "message_crc32": "0657609A",
+          "fnv1a64": "B737428FA97B5AEF",
           "record_count": 5,
           "features": "000000000000001F",
           "required_features": "000000000000001B",
-          "memory_entry_count": 106,
+          "memory_entry_count": 98,
           "memory_entries": [
             {
               "physical_start": "0000000000000000",
-              "page_count": 135,
-              "attributes": "000000000000000F",
-              "kind": 1,
-              "source_type": 7
-            },
-            {
-              "physical_start": "0000000000087000",
-              "page_count": 1,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "0000000000088000",
-              "page_count": 24,
+              "page_count": 160,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
@@ -3683,651 +3596,602 @@
             },
             {
               "physical_start": "0000000001780000",
-              "page_count": 108573,
+              "page_count": 107636,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001BF9D000",
+              "physical_start": "000000001BBF4000",
               "page_count": 32,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001BFBD000",
-              "page_count": 7816,
+              "physical_start": "000000001BC14000",
+              "page_count": 7753,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001DE45000",
+              "physical_start": "000000001DA5D000",
               "page_count": 810,
               "attributes": "000000000000000F",
               "kind": 10,
               "source_type": 2
             },
             {
-              "physical_start": "000000001E16F000",
+              "physical_start": "000000001DD87000",
               "page_count": 115,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001E1E2000",
+              "physical_start": "000000001DDFA000",
               "page_count": 4,
               "attributes": "000000000000000F",
               "kind": 10,
               "source_type": 2
             },
             {
-              "physical_start": "000000001E1E6000",
+              "physical_start": "000000001DDFE000",
               "page_count": 54,
               "attributes": "000000000000000F",
               "kind": 10,
               "source_type": 1
             },
             {
-              "physical_start": "000000001E21C000",
+              "physical_start": "000000001DE34000",
               "page_count": 3,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001E21F000",
+              "physical_start": "000000001DE37000",
               "page_count": 43,
               "attributes": "000000000000000F",
               "kind": 10,
               "source_type": 2
             },
             {
-              "physical_start": "000000001E24A000",
-              "page_count": 1676,
+              "physical_start": "000000001DE62000",
+              "page_count": 1684,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001E8D6000",
+              "physical_start": "000000001E4F6000",
               "page_count": 224,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001E9B6000",
-              "page_count": 10,
+              "physical_start": "000000001E5D6000",
+              "page_count": 2,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001E9C0000",
-              "page_count": 2,
+              "physical_start": "000000001E5D8000",
+              "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 10,
               "source_type": 2
             },
             {
-              "physical_start": "000000001E9C2000",
+              "physical_start": "000000001E5D9000",
               "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001E9C3000",
-              "page_count": 92,
+              "physical_start": "000000001E5DA000",
+              "page_count": 7,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EA1F000",
+              "physical_start": "000000001E5E1000",
+              "page_count": 1,
+              "attributes": "000000000000000F",
+              "kind": 10,
+              "source_type": 2
+            },
+            {
+              "physical_start": "000000001E5E2000",
+              "page_count": 85,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E637000",
               "page_count": 34,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EA41000",
+              "physical_start": "000000001E659000",
               "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EA42000",
+              "physical_start": "000000001E65A000",
               "page_count": 22,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EA58000",
+              "physical_start": "000000001E670000",
               "page_count": 2,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EA5A000",
+              "physical_start": "000000001E672000",
               "page_count": 14,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EA68000",
+              "physical_start": "000000001E680000",
               "page_count": 7,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EA6F000",
+              "physical_start": "000000001E687000",
               "page_count": 6,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EA75000",
-              "page_count": 33,
+              "physical_start": "000000001E68D000",
+              "page_count": 41,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EA96000",
+              "physical_start": "000000001E6B6000",
               "page_count": 28,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EAB2000",
+              "physical_start": "000000001E6D2000",
+              "page_count": 1,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E6D3000",
+              "page_count": 5,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E6D8000",
+              "page_count": 5,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E6DD000",
+              "page_count": 36,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E701000",
+              "page_count": 2,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E703000",
+              "page_count": 23,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E71A000",
+              "page_count": 3,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E71D000",
+              "page_count": 41,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E746000",
+              "page_count": 1,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E747000",
+              "page_count": 5,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E74C000",
+              "page_count": 2,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E74E000",
+              "page_count": 25,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E767000",
+              "page_count": 5,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E76C000",
+              "page_count": 41,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E795000",
+              "page_count": 1,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E796000",
+              "page_count": 42,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E7C0000",
+              "page_count": 2,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E7C2000",
+              "page_count": 4,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E7C6000",
+              "page_count": 4,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E7CA000",
+              "page_count": 11,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E7D5000",
+              "page_count": 3,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E7D8000",
+              "page_count": 4,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E7DC000",
+              "page_count": 4,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001E7E0000",
+              "page_count": 23,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001E7F7000",
+              "page_count": 521,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001EA00000",
+              "page_count": 25,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EA19000",
+              "page_count": 3,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001EA1C000",
+              "page_count": 33,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EA3D000",
               "page_count": 6,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EAB8000",
-              "page_count": 47,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EAE7000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EAEA000",
-              "page_count": 13,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EAF7000",
-              "page_count": 2,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EAF9000",
-              "page_count": 13,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EB06000",
-              "page_count": 5,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EB0B000",
-              "page_count": 34,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EB2D000",
-              "page_count": 2,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EB2F000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EB32000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EB35000",
-              "page_count": 25,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EB4E000",
-              "page_count": 5,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EB53000",
-              "page_count": 41,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EB7C000",
-              "page_count": 1,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EB7D000",
-              "page_count": 42,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EBA7000",
-              "page_count": 2,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EBA9000",
-              "page_count": 4,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EBAD000",
-              "page_count": 4,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EBB1000",
-              "page_count": 11,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EBBC000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EBBF000",
-              "page_count": 4,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EBC3000",
-              "page_count": 4,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EBC7000",
-              "page_count": 23,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EBDE000",
-              "page_count": 9,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EBE7000",
-              "page_count": 25,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EC00000",
-              "page_count": 514,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EE02000",
-              "page_count": 9,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EE0B000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EE0E000",
-              "page_count": 24,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EE26000",
-              "page_count": 1,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EE27000",
+              "physical_start": "000000001EA43000",
               "page_count": 5,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EE2C000",
-              "page_count": 5,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EE31000",
+              "physical_start": "000000001EA48000",
               "page_count": 193,
               "attributes": "800000000000000F",
               "kind": 4,
               "source_type": 6
             },
             {
-              "physical_start": "000000001EEF2000",
-              "page_count": 29,
+              "physical_start": "000000001EB09000",
+              "page_count": 36,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EF0F000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EF12000",
-              "page_count": 11,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EF1D000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EF20000",
-              "page_count": 12,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EF2C000",
-              "page_count": 42,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EF56000",
-              "page_count": 29,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EF73000",
+              "physical_start": "000000001EB2D000",
               "page_count": 5,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EF78000",
-              "page_count": 3,
+              "physical_start": "000000001EB32000",
+              "page_count": 4,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EF7B000",
-              "page_count": 1,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EF7C000",
-              "page_count": 9,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EF85000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001EF88000",
-              "page_count": 3,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001EF8B000",
+              "physical_start": "000000001EB36000",
               "page_count": 4,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001EF8F000",
-              "page_count": 1,
+              "physical_start": "000000001EB3A000",
+              "page_count": 8,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001EF90000",
-              "page_count": 1024,
+              "physical_start": "000000001EB42000",
+              "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001F390000",
+              "physical_start": "000000001EB43000",
+              "page_count": 42,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EB6D000",
+              "page_count": 5,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001EB72000",
+              "page_count": 6,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EB78000",
+              "page_count": 1042,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001EF8A000",
               "page_count": 7,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001F397000",
-              "page_count": 1,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 4
-            },
-            {
-              "physical_start": "000000001F398000",
-              "page_count": 10,
-              "attributes": "000000000000000F",
-              "kind": 2,
-              "source_type": 3
-            },
-            {
-              "physical_start": "000000001F3A2000",
+              "physical_start": "000000001EF91000",
               "page_count": 4,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001F3A6000",
+              "physical_start": "000000001EF95000",
+              "page_count": 11,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 3
+            },
+            {
+              "physical_start": "000000001EFA0000",
+              "page_count": 6,
+              "attributes": "000000000000000F",
+              "kind": 2,
+              "source_type": 4
+            },
+            {
+              "physical_start": "000000001EFA6000",
               "page_count": 23,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001F3BD000",
+              "physical_start": "000000001EFBD000",
               "page_count": 1328,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001F8ED000",
+              "physical_start": "000000001F4ED000",
               "page_count": 256,
               "attributes": "800000000000000F",
               "kind": 4,
               "source_type": 6
             },
             {
-              "physical_start": "000000001F9ED000",
+              "physical_start": "000000001F5ED000",
               "page_count": 256,
               "attributes": "800000000000000F",
               "kind": 3,
               "source_type": 5
             },
             {
-              "physical_start": "000000001FAED000",
-              "page_count": 128,
+              "physical_start": "000000001F6ED000",
+              "page_count": 135,
               "attributes": "000000000000000F",
-              "kind": 0,
-              "source_type": 0
+              "kind": 1,
+              "source_type": 7
             },
             {
-              "physical_start": "000000001FB6D000",
-              "page_count": 18,
+              "physical_start": "000000001F774000",
+              "page_count": 11,
               "attributes": "000000000000000F",
               "kind": 5,
               "source_type": 9
             },
             {
-              "physical_start": "000000001FB7F000",
+              "physical_start": "000000001F77F000",
               "page_count": 128,
               "attributes": "000000000000000F",
               "kind": 6,
               "source_type": 10
             },
             {
-              "physical_start": "000000001FBFF000",
-              "page_count": 513,
+              "physical_start": "000000001F7FF000",
+              "page_count": 1537,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
               "physical_start": "000000001FE00000",
-              "page_count": 182,
+              "page_count": 206,
               "attributes": "000000000000000F",
               "kind": 1,
               "source_type": 7
             },
             {
-              "physical_start": "000000001FEB6000",
+              "physical_start": "000000001FECE000",
               "page_count": 32,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
             },
             {
-              "physical_start": "000000001FED6000",
+              "physical_start": "000000001FEEE000",
               "page_count": 74,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001FF20000",
+              "physical_start": "000000001FF38000",
               "page_count": 4,
               "attributes": "000000000000000F",
               "kind": 0,
               "source_type": 0
             },
             {
-              "physical_start": "000000001FF24000",
+              "physical_start": "000000001FF3C000",
               "page_count": 2,
               "attributes": "000000000000000F",
               "kind": 6,
               "source_type": 10
             },
             {
-              "physical_start": "000000001FF26000",
+              "physical_start": "000000001FF3E000",
               "page_count": 1,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 3
             },
             {
-              "physical_start": "000000001FF27000",
-              "page_count": 41,
+              "physical_start": "000000001FF3F000",
+              "page_count": 17,
               "attributes": "000000000000000F",
               "kind": 2,
               "source_type": 4
@@ -4359,20 +4223,27 @@
               "attributes": "8000000000000001",
               "kind": 7,
               "source_type": 11
+            },
+            {
+              "physical_start": "000000FD00000000",
+              "page_count": 3145728,
+              "attributes": "0000000000000000",
+              "kind": 0,
+              "source_type": 0
             }
           ],
           "core": {
             "boot_flags": "0000000000000011",
-            "kernel_physical_base": "000000001E0E7000",
+            "kernel_physical_base": "000000001DCFF000",
             "kernel_physical_size": 557056,
             "kernel_virtual_base": "FFFFFFFF80000000",
             "kernel_virtual_size": 557056,
             "kernel_entry_virtual": "FFFFFFFF8000A000",
             "initial_stack_top_virtual": "FFFFFFFF800AD000",
-            "page_table_root_physical": "000000001E1E2000",
-            "handoff_physical_base": "000000001DE45000",
+            "page_table_root_physical": "000000001DDFA000",
+            "handoff_physical_base": "000000001DA5D000",
             "handoff_virtual_base": "FFFFFFFF800AE000",
-            "handoff_byte_count": 5480,
+            "handoff_byte_count": 5160,
             "boot_attempt": 0,
             "boot_attempt_limit": 3,
             "boot_slot": 1,
@@ -4384,7 +4255,7 @@
             {
               "role": 1,
               "flags": 9,
-              "physical_base": "000000001E0E7000",
+              "physical_base": "000000001DCFF000",
               "physical_size": 557056,
               "virtual_base": "FFFFFFFF80000000",
               "virtual_size": 557056,
@@ -4394,7 +4265,7 @@
             {
               "role": 2,
               "flags": 1,
-              "physical_base": "000000001E9C0000",
+              "physical_base": "000000001E5D8000",
               "physical_size": 1860,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -4404,7 +4275,7 @@
             {
               "role": 3,
               "flags": 1,
-              "physical_base": "000000001E249000",
+              "physical_base": "000000001DE61000",
               "physical_size": 1088,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -4414,7 +4285,7 @@
             {
               "role": 4,
               "flags": 1,
-              "physical_base": "000000001E248000",
+              "physical_base": "000000001DE60000",
               "physical_size": 821,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -4424,7 +4295,7 @@
             {
               "role": 5,
               "flags": 1,
-              "physical_base": "000000001E247000",
+              "physical_base": "000000001DE5F000",
               "physical_size": 1504,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -4434,7 +4305,7 @@
             {
               "role": 6,
               "flags": 1,
-              "physical_base": "000000001E246000",
+              "physical_base": "000000001DE5E000",
               "physical_size": 1408,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -4444,7 +4315,7 @@
             {
               "role": 7,
               "flags": 1,
-              "physical_base": "000000001E245000",
+              "physical_base": "000000001DE5D000",
               "physical_size": 2080,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -4454,7 +4325,7 @@
             {
               "role": 9,
               "flags": 1,
-              "physical_base": "000000001E9C1000",
+              "physical_base": "000000001E5E1000",
               "physical_size": 2615,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -4464,7 +4335,7 @@
             {
               "role": 10,
               "flags": 1,
-              "physical_base": "000000001E244000",
+              "physical_base": "000000001DE5C000",
               "physical_size": 320,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -4474,7 +4345,7 @@
             {
               "role": 11,
               "flags": 1,
-              "physical_base": "000000001E243000",
+              "physical_base": "000000001DE5B000",
               "physical_size": 256,
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
@@ -4485,7 +4356,7 @@
           "kernel_artifact": {
             "role": 1,
             "flags": 9,
-            "physical_base": "000000001E0E7000",
+            "physical_base": "000000001DCFF000",
             "physical_size": 557056,
             "virtual_base": "FFFFFFFF80000000",
             "virtual_size": 557056,
@@ -4508,7 +4379,7 @@
           "firmware_tables": [
             {
               "guid": "8868E871E4F111D3BC220080C73C8881",
-              "physical_address": "000000001FB7E014",
+              "physical_address": "000000001F77E014",
               "byte_count": 36,
               "flags": 6,
               "physical": true,
@@ -4537,8 +4408,8 @@
           "nonblank": true,
           "poole_identity_palette_observed": true
         },
-        "stderr_sha256": "6F56F5A44073C4AADF70227FF8D8AE7DE931431BDE4943E63990D8A18E25D302",
-        "stderr_byte_count": 736,
+        "stderr_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "stderr_byte_count": 0,
         "local_paths_recorded": false,
         "transcript_binding": {
           "exact_transfer_fields_bound": true,
@@ -4651,16 +4522,16 @@
           "state_monotonic": false
         },
         "pbp1": {
-          "byte_count": 5480,
+          "byte_count": 5160,
           "record_count": 5,
-          "memory_entry_count": 106,
+          "memory_entry_count": 98,
           "framebuffer_present": 1,
           "firmware_table_count": 1,
           "artifact_count": 10,
           "descriptor_bytes": 48,
           "exit_attempts": 1,
-          "message_crc32": "469670BA",
-          "fnv1a64": "2BFF6DB3E2C66C9E",
+          "message_crc32": "0657609A",
+          "fnv1a64": "B737428FA97B5AEF",
           "pre_exit": false,
           "boot_services_exited": true,
           "development_mode_only": true,
@@ -4698,13 +4569,13 @@
             "total_mapped_page_count": 428,
             "stack_first_page_table_index": 137,
             "handoff_first_page_table_index": 174,
-            "kernel_physical_base": 504262656,
-            "page_table_root_physical": 505290752,
-            "stack_physical_base": 505540608,
+            "kernel_physical_base": 500166656,
+            "page_table_root_physical": 501194752,
+            "stack_physical_base": 501444608,
             "stack_top_virtual": 18446744071562776576,
-            "handoff_physical_base": 501501952,
+            "handoff_physical_base": 497405952,
             "handoff_virtual_base": 18446744071562780672,
-            "retained_leaf_fingerprint": "2320AADD41E3FBF0"
+            "retained_leaf_fingerprint": "F23AB181F0D2D2C7"
           }
         },
         "gop": {
@@ -4715,16 +4586,16 @@
           "format": "BGR"
         },
         "memory_map": {
-          "byte_count": 5088,
+          "byte_count": 4704,
           "descriptor_bytes": 48,
-          "descriptor_count": 106
+          "descriptor_count": 98
         },
         "boot_exit": {
           "contract_id": "PBEXIT1",
           "attempt_count": 1,
-          "map_byte_count": 5088,
+          "map_byte_count": 4704,
           "descriptor_size": 48,
-          "descriptor_count": 106,
+          "descriptor_count": 98,
           "firmware_calls_after_exit": 0,
           "kernel_page_count": 136,
           "artifact_page_count": 9,
@@ -4741,11 +4612,11 @@
         "emulator_only": 1,
         "entry": 18446744071562108928,
         "handoff": 18446744071562780672,
-        "handoff_bytes": 5480,
+        "handoff_bytes": 5160,
         "stack_top": 18446744071562776576,
-        "root": 505290752,
-        "cr3": 505290752,
-        "trap_scenario": 18,
+        "root": 501194752,
+        "cr3": 501194752,
+        "trap_scenario": 17,
         "signature_verifications": 0,
         "authority_grants": 0,
         "actions_authorized": 0,
@@ -4761,11 +4632,11 @@
       },
       "kernel_state": {
         "handoff": 18446744071562780672,
-        "handoff_bytes": 5480,
+        "handoff_bytes": 5160,
         "entry": 18446744071562108928,
         "stack_top": 18446744071562776576,
-        "root": 505290752,
-        "cr3": 505290752,
+        "root": 501194752,
+        "cr3": 501194752,
         "rflags_if": 0,
         "rflags_df": 0
       },
@@ -4792,310 +4663,282 @@
       },
       "synthetic_unsigned_terminal_used_for_prefix_parser_only": true
     },
-    "topology": {
-      "processor_count": 4,
-      "target_apic_ids": [
-        1,
-        2,
-        3
-      ],
-      "online_mask": 15,
-      "balance": [
+    "timer": {
+      "vector": 64,
+      "one_shot_count": 625000,
+      "apic_ticks_per_second": 62500000,
+      "deliveries": 1
+    },
+    "queue": {
+      "enqueued": 8,
+      "duplicate_suppressed": 1,
+      "queued_cancelled": 1
+    },
+    "workers": {
+      "dispatches": 6,
+      "entries": [
         3,
         3
-      ]
-    },
-    "transfers": {
-      "remote_wakes": 1,
-      "migrations": 2,
-      "transaction_acks": 3,
-      "remote_acks": 9
-    },
-    "dispatch": {
-      "bsp": 2,
-      "aps": 6,
+      ],
+      "transitions": 12,
       "trace": {
-        "balance": [
-          3,
-          3
-        ],
-        "queues_after_transfer": [
-          2,
-          2,
-          2
-        ],
-        "bsp_trace": [
+        "slots": [
           0,
+          2,
+          4,
+          1,
+          5,
+          6
+        ],
+        "workers": [
+          0,
+          1,
+          0,
+          1,
+          0,
+          1
+        ],
+        "states": [
+          "completed",
+          "completed",
+          "completed",
+          "completed",
+          "completed",
+          "cancelled"
+        ],
+        "max_bypass": 3,
+        "sum": 120,
+        "xor": 90,
+        "fence": 0,
+        "remaining_slots": [
           7
-        ],
-        "ap_trace": [
-          [
-            1,
-            2
-          ],
-          [
-            1,
-            1
-          ],
-          [
-            2,
-            4
-          ],
-          [
-            2,
-            3
-          ],
-          [
-            3,
-            6
-          ],
-          [
-            3,
-            5
-          ]
-        ],
-        "owner_epoch_sum": 19,
-        "remote_acks": 9,
-        "maximum_bypass": 1
-      },
-      "call_function_executions": 9
+        ]
+      }
     },
-    "rollback": {
-      "offline_cpu": 4,
-      "timeouts": 1,
-      "rollbacks": 1,
-      "stale_rejections": 2
+    "flush": {
+      "receipts": 8,
+      "sum_lane": 120,
+      "xor_lane": 90,
+      "fence_lane": 0
+    },
+    "faults": {
+      "rollbacks": 5,
+      "leaked_slots": 0
     },
     "cleanup": {
-      "tasks_dead": 8,
-      "idle_owners": 4,
-      "pages_released": 102,
-      "bytes_verified": 417792
+      "stack_bytes_cleared": 32768,
+      "slots_free": 8,
+      "mmio_revoked": 1
     },
     "result": {
-      "bounded_live_ap_scheduler": 1,
-      "general_smp": 0,
+      "fixed_bsp_workers": 1,
+      "live_ap_dispatch": 0,
       "production": 0
     }
   },
   "negative_controls": [
     {
-      "id": "NEG-N12-PKSCHED4-MARKER-OMISSION",
+      "id": "NEG-N12-PKSCHED3-MARKER-OMISSION",
       "status": "pass",
       "expected": "rejected",
       "case_count": 37
     },
     {
-      "id": "NEG-N12-PKSCHED4-MARKER-ORDER",
+      "id": "NEG-N12-PKSCHED3-MARKER-ORDER",
       "status": "pass",
       "expected": "rejected",
       "case_count": 36
     },
     {
-      "id": "NEG-N12-PKSCHED4-MARKER-DUPLICATE",
+      "id": "NEG-N12-PKSCHED3-MARKER-DUPLICATE",
       "status": "pass",
       "expected": "rejected",
       "case_count": 37
     },
     {
-      "id": "NEG-N12-PKSCHED4-SELECTOR",
+      "id": "NEG-N12-PKSCHED3-SELECTOR",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED4-TOPOLOGY-FIELD-MATRIX",
+      "id": "NEG-N12-PKSCHED3-ARM-FIELD-MATRIX",
+      "status": "pass",
+      "expected": "rejected",
+      "case_count": 12
+    },
+    {
+      "id": "NEG-N12-PKSCHED3-QUEUE-FIELD-MATRIX",
+      "status": "pass",
+      "expected": "rejected",
+      "case_count": 7
+    },
+    {
+      "id": "NEG-N12-PKSCHED3-WORK-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
       "case_count": 9
     },
     {
-      "id": "NEG-N12-PKSCHED4-TRANSFER-FIELD-MATRIX",
-      "status": "pass",
-      "expected": "rejected",
-      "case_count": 7
-    },
-    {
-      "id": "NEG-N12-PKSCHED4-DISPATCH-FIELD-MATRIX",
-      "status": "pass",
-      "expected": "rejected",
-      "case_count": 7
-    },
-    {
-      "id": "NEG-N12-PKSCHED4-FAIRNESS-FIELD-MATRIX",
+      "id": "NEG-N12-PKSCHED3-FLUSH-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
       "case_count": 8
     },
     {
-      "id": "NEG-N12-PKSCHED4-ROLLBACK-FIELD-MATRIX",
+      "id": "NEG-N12-PKSCHED3-FAULT-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
       "case_count": 8
     },
     {
-      "id": "NEG-N12-PKSCHED4-CLEANUP-FIELD-MATRIX",
+      "id": "NEG-N12-PKSCHED3-CLEANUP-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
-      "case_count": 16
+      "case_count": 12
     },
     {
-      "id": "NEG-N12-PKSCHED4-CLAIM-BOUNDARY-FIELD-MATRIX",
+      "id": "NEG-N12-PKSCHED3-CLAIM-BOUNDARY-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
       "case_count": 13
     },
     {
-      "id": "NEG-N12-PKSCHED4-PROBE-OMISSION",
+      "id": "NEG-N12-PKSCHED3-PROBE-OMISSION",
       "status": "pass",
       "expected": "rejected",
       "case_count": 5
     },
     {
-      "id": "NEG-N12-PKSCHED4-PROBE-ORDER",
+      "id": "NEG-N12-PKSCHED3-PROBE-ORDER",
       "status": "pass",
       "expected": "rejected",
       "case_count": 2
     },
     {
-      "id": "NEG-N12-PKSCHED4-PROBE-FIELD-MATRIX",
+      "id": "NEG-N12-PKSCHED3-PROBE-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
       "case_count": 5
     },
     {
-      "id": "NEG-N12-PKSCHED4-INDEPENDENT-ORACLE",
+      "id": "NEG-N12-PKSCHED3-INDEPENDENT-ORACLE",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED4-EXACT-TOPOLOGY",
+      "id": "NEG-N12-PKSCHED3-FIXED-CAPACITY",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED4-DUPLICATE-RUNNABLE",
+      "id": "NEG-N12-PKSCHED3-DUPLICATE-SUPPRESSION",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED4-STALE-GENERATION",
+      "id": "NEG-N12-PKSCHED3-TOP-HALF-CONTEXT",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED4-OWNER-EPOCH",
+      "id": "NEG-N12-PKSCHED3-RECURSION",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED4-WAKE-ACK-BINDING",
+      "id": "NEG-N12-PKSCHED3-EOI-PERMIT",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED4-MIGRATION-ACK-BINDING",
+      "id": "NEG-N12-PKSCHED3-PRIORITY-BYPASS",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED4-DISPATCH-ACK-BINDING",
+      "id": "NEG-N12-PKSCHED3-QUEUED-CANCEL",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED4-OFFLINE-TIMEOUT",
+      "id": "NEG-N12-PKSCHED3-RUNNING-CANCEL",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED4-LATE-ACK",
+      "id": "NEG-N12-PKSCHED3-FLUSH-WATERMARK",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED4-SOURCE-QUEUE-ROLLBACK",
+      "id": "NEG-N12-PKSCHED3-STALE-GENERATION",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED4-TOPOLOGY-BALANCING",
+      "id": "NEG-N12-PKSCHED3-FAULT-ROLLBACK",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED4-FAIRNESS-BOUND",
+      "id": "NEG-N12-PKSCHED3-SHUTDOWN-ORDER",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED4-IDLE-OWNERSHIP",
+      "id": "NEG-N12-PKSCHED3-NO-HEAP-OR-CALLBACK",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED4-AP-REGISTER-RESTORE",
+      "id": "NEG-N12-PKSCHED3-WORKER-STACK-OWNERSHIP",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED4-PARK-SCRUB-RELEASE",
-      "status": "pass",
-      "expected": "rejected",
-      "case_count": 1
-    },
-    {
-      "id": "NEG-N12-PKSCHED4-NO-HEAP-OR-CALLBACK",
-      "status": "pass",
-      "expected": "rejected",
-      "case_count": 1
-    },
-    {
-      "id": "NEG-N12-PKSCHED4-INPUT-BINDING",
+      "id": "NEG-N12-PKSCHED3-INPUT-BINDING",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     }
   ],
   "claims": {
-    "allocation_free_exact_topology_smp_scheduler_implemented": true,
-    "four_ap_local_run_queues_and_idle_owners_verified": true,
-    "live_remote_reschedule_acknowledgement_verified": true,
-    "generation_safe_cross_cpu_wake_verified": true,
-    "generation_safe_cross_cpu_migration_verified": true,
-    "six_live_ap_dispatches_verified": true,
-    "offline_timeout_and_source_rollback_verified": true,
-    "topology_aware_balancing_verified": true,
-    "bounded_fairness_and_no_duplicate_runnable_verified": true,
-    "complete_ap_park_scrub_release_verified": true,
-    "general_topology_or_hotplug_implemented": false,
-    "general_smp_preemption_implemented": false,
+    "allocation_free_deferred_work_implemented": true,
+    "generation_safe_work_identity_implemented": true,
+    "interrupt_top_half_enqueue_verified": true,
+    "eoi_before_worker_dispatch_verified": true,
+    "two_private_bsp_worker_stacks_verified": true,
+    "duplicate_cancellation_flush_shutdown_verified": true,
+    "bounded_priority_bypass_verified": true,
+    "fault_rollback_and_reclamation_verified": true,
+    "arbitrary_kernel_callbacks_implemented": false,
+    "driver_or_service_async_consumers_implemented": false,
+    "live_ap_scheduler_dispatch_implemented": false,
     "ring3_or_address_space_switch_implemented": false,
-    "per_task_full_architectural_state_implemented": false,
     "physical_target_tested": false,
     "n12_exit_gate_satisfied": false,
     "production_ready": false
   },
   "nonclaims": [
-    "PKSCHED4 supports only the frozen BSP-0/AP-1,2,3 legacy-xAPIC QEMU topology; it is not general topology, hotplug, NUMA, multi-socket, or x2APIC scheduling.",
-    "The allowlisted AP CallFunction token is a bounded development execution primitive, not arbitrary callback or production capability authority.",
-    "No general SMP timer preemption, ring-3 task, address-space switch, per-task FS/GS, full xstate, debug, or PMU ownership is implemented.",
-    "No driver or service worker consumes this scheduler yet.",
+    "No arbitrary function pointer or callback may be enqueued.",
+    "No driver or service consumes deferred work yet.",
+    "No AP worker dispatch, cross-CPU migration, ring-3 execution, or address-space switch is implemented.",
     "No physical target, N12 exit, release, promotion, or production-readiness claim follows."
   ]
 }

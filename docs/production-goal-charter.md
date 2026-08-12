@@ -1,13 +1,45 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-08-08
+Status date: 2026-08-12
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 145
+Last roadmap reconciliation: PooleOS Cycle 146
+
+Cycle 146 reconciliation (superseding current Cycle 145 implementation and
+next-move values): governance and external-key state are unchanged, and no
+key, signature, publication, privileged host probe, driver load, firmware
+change, physical-media write, tag, release, or production promotion occurred.
+The owner-independent `N12-SCHED-AP-WORKERS-001` move adds selector 19
+PKSCHED5 and closes only `FLAG-N12-SCHED-AP-WORKERS-001` for one exact
+BSP-0/AP-1,2,3 SandyBridge-minus-AVX development topology. Three
+allocation-free AP-local queues and workers own fifteen generation-safe slots.
+One timer top half enqueues thirteen items; dispatch remains forbidden until
+EOI. Twelve exact typed call-function deliveries execute nine timer-driver and
+three generation-reclaim consumers on private guarded IST1 stacks. One queued
+cancellation and one remote in-flight cancellation complete with exact
+semantics; one APIC-4 timeout restores source ownership and rejects its late
+acknowledgement; flush reaches eleven completed and two cancelled items before
+all thirteen slots are reclaimed. All three workers retire, all three APs
+park, and 102 pages or 417,792 bytes are scrubbed, verified, and released. Ten
+focused tests within 184 kernel host tests, six exact independent Rust/Python
+host receipts, two exact 37-marker four-vCPU boots, and 34 hostile-control
+categories covering 226 rejected cases pass. The canonical kernel is 485,000
+bytes in a 557,056-byte, 136-page image with entry `0xA000`, text end
+`0x69000`, RELRO end and data start `0x76000`, 1,222 relocations, and SHA-256
+`D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33`.
+This is exact-topology typed AP-worker evidence, not an arbitrary callback API
+or complete driver/service runtime. General topology/hotplug/x2APIC, general
+SMP timer preemption, complete lock/reclamation families, ring-3/address-space
+switching, full per-task architectural state, target execution, N12 exit,
+release, and production remain open. `production_ready=false`; the blocked
+external move remains `N0-HW-KEY-ACQUIRE-001`, while
+`ADD-N12-SCHED-SMP-PREEMPT-001` and
+`FLAG-N12-SCHED-SMP-PREEMPT-001` bind `N12-SCHED-SMP-PREEMPT-001` as the
+next owner-independent move.
 
 Cycle 145 reconciliation (superseding current Cycle 144 implementation and
 next-move values): governance and external-key state are unchanged, and no

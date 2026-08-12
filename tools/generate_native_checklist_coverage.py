@@ -365,6 +365,16 @@ ADDED_REQUIREMENTS = [
         ],
     },
     {
+        "id": "ADD-N12-SCHED-SMP-PREEMPT-001",
+        "phase_id": "N12",
+        "requirement": "Extend bounded timer and wakeup preemption across the frozen four-CPU scheduler topology with explicit per-CPU timer, event, interrupt-frame, run-queue, and task ownership; acknowledgement-gated remote reschedule; deterministic concurrent tick, wake, cancel, and migration ordering; offline and timeout rollback; bounded starvation and watchdog latency; and exact AP-local teardown without claiming general topology, ring-3, address-space switching, target hardware, N12 exit, or production readiness.",
+        "basis": [
+            "Cycle 146 PKSCHED5 proves AP-local typed workers while explicitly excluding general SMP timer preemption",
+            "PKSCHED2 BSP timer/wakeup preemption and PKSCHED4 exact-topology SMP scheduler foundations",
+            "master checklist sections 031-034",
+        ],
+    },
+    {
         "id": "ADD-CAP-001",
         "phase_id": "N13",
         "requirement": "Specify unforgeable capabilities, rights attenuation, derivation provenance, transfer, revocation, generation-safe handles, quotas, object destruction, and zero ambient authority; prove no authority amplification across IPC.",

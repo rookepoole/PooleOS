@@ -84,12 +84,12 @@
         "contract": {
           "byte_count": 10872,
           "path": "specs/native-kernel-entry-contract.json",
-          "sha256": "4EF53DC62567B9641E2E4AA958805120C791432F6C80944BE49EE92227E44900"
+          "sha256": "27FEC92D3F67AD0CC8ECFB07ED9DBBC245935E9B6A0AB10EF77F12238301C994"
         },
         "contract_schema": {
           "byte_count": 3952,
           "path": "specs/native-kernel-entry-contract.schema.json",
-          "sha256": "A2CD4ECA8496C620A6EE820A60AAA0F860AFD6CB401937E8BBE8817CF0F3A339"
+          "sha256": "A124B03716555F586B6BC7417B66018F50FB4CF955A9548C705820184CF4D1EA"
         },
         "implementation_inputs": [
           {
@@ -103,9 +103,9 @@
             "sha256": "29CE9938C5C60DEA5AEA244A6961BB1924D88AEC601D1E02EAAA510B0B36E390"
           },
           {
-            "byte_count": 963,
+            "byte_count": 1066,
             "path": "native/kernel/Cargo.toml",
-            "sha256": "C2D57BEEFAAD04C285D26FA667B328F5ADDB7EAE854E30FA2227592391BC1C5E"
+            "sha256": "BD8947CC22AC814C9A3D3D58B1B17C5B226E808F900130F272F1657BC8AA00FF"
           },
           {
             "byte_count": 3199,
@@ -120,27 +120,27 @@
           {
             "byte_count": 2048,
             "path": "native/kernel/linker.ld",
-            "sha256": "6756381B5F93991A76FD46097B96875AACEA356F9DE19174DAF510D4B19A484D"
+            "sha256": "E499B4C4C953ABC4103EE86DDF46675A8860389B7B95F5C7D2F8EC98EED172A2"
           },
           {
             "byte_count": 447,
             "path": "native/kernel/manifest.pkm",
-            "sha256": "1EADF3567C14B6024A000D83E5812385614A83FF91968AB867F8A2C64793CEB5"
+            "sha256": "46367C48E2E28E6F979E7DF0738AA48E832068A6569A90189F765AF0880B95A7"
           },
           {
-            "byte_count": 63668,
+            "byte_count": 64211,
             "path": "native/kernel/src/lib.rs",
-            "sha256": "573F47022C12E4C12DFFCE7AD9691D2A89AD96C6BCBF5FE1D759F125176F6584"
+            "sha256": "037E6366057A01CAAA34004B092E0F95DC3CB97BB697D5B97D2BB38A25D4C4C6"
           },
           {
-            "byte_count": 451747,
+            "byte_count": 477211,
             "path": "native/kernel/src/main.rs",
-            "sha256": "F6E7D8422F3AE6C4DE2EC2083664770640EC73A2FF088ACDDDC78C33EA51256D"
+            "sha256": "1C2A84A0249A4433FF3CC71E02698890F52BE83C321E892672378622D90554FD"
           },
           {
-            "byte_count": 160118,
+            "byte_count": 161091,
             "path": "native/kernel/src/arch/x86_64.rs",
-            "sha256": "6FD98AE85401A9DF224014C038024E28F0B3F805BCFBE9B7BA36B04D61BF57BC"
+            "sha256": "D651B60A6D9F308F1D7E36B1813FB60C046C3F2CF02664342AEB0D51E74F921E"
           },
           {
             "byte_count": 47730,
@@ -195,22 +195,22 @@
           {
             "byte_count": 7720,
             "path": "runtime/native_kernel_entry.py",
-            "sha256": "A4989EE848C811BE0550184A8C0EA003BB2FCC20BD0C1763688B359B66486031"
+            "sha256": "B75DEDD184C9BEB3B25749016597445E2CBA774D869715E52D1B12CC943CF891"
           },
           {
             "byte_count": 25233,
             "path": "tools/qualify_native_kernel_entry.py",
-            "sha256": "06B80889A67052D7BA596B0A8A872F74E339D8567EF72FCD95B73FB02761DF49"
+            "sha256": "4A97E0AF7EE2AADD7723794524885C36F773204116C69F74F94E04E0D44B9562"
           },
           {
             "byte_count": 6406,
             "path": "tests/test_native_kernel_entry.py",
-            "sha256": "0969F3159DDFF3109E131AC8357DFEEF31C910BEFCA3E0DD7BA1695B43537A06"
+            "sha256": "6C15428111E33954B5C29E94A2AA278C46E69E92DA7E0DCCF16965267418386A"
           },
           {
             "byte_count": 4514,
             "path": "docs/native-kernel-entry.md",
-            "sha256": "5E6ED65CB5D834B935EA7841B7F448320AC3F7112D5BFA6E8DC3E1239A6385DB"
+            "sha256": "2C304958069ED4691790414292C9B453DCAEAEE27D16288915A06FB803127B91"
           }
         ],
         "pbp1_contract": {
@@ -287,8 +287,8 @@
           "poolekernel-fixture"
         ],
         "status": "pass",
-        "test_count": 173,
-        "test_pass_count": 173
+        "test_count": 184,
+        "test_pass_count": 184
       },
       "n6_exit_gate_satisfied": false,
       "negative_controls": [
@@ -609,31 +609,31 @@
         "N6.6": "partial"
       },
       "product": {
-        "canonical_byte_count": 476808,
-        "canonical_sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168",
+        "canonical_byte_count": 485000,
+        "canonical_sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33",
         "entry_offset": 40960,
         "entry_prefix_hex": "FAFC4889E14885C9743B48F7C10F00000075324889C848C1E01048C1F8104839C87522410F20D89C",
         "host_leakage_hits": [],
         "image_byte_count": 557056,
-        "linked_byte_count": 6199712,
-        "linked_sha256": "AF7A1AD3A3111AEF73E9E7737EDAD156E12F626DA6550BC9EBD01507F08334C3",
-        "loaded_sha256": "A8A26DF55F902FB8DB7F07C3B953703734AA7EC2C410C1548B3297CECFA6853A",
+        "linked_byte_count": 6390008,
+        "linked_sha256": "46748EC3746FCDB5E617EDBC6E4F24C4EB8D42AE978EEFFFC7A2DE22BD05EFF4",
+        "loaded_sha256": "779F6D34049C26ACA86A61A46DB3C9A44A850556C6656E7E057900D6A9D71FD6",
         "manifest_fields": {
-          "build_id": "PKBUILD1-CYCLE145-N12-SCHED-SMP-V0001-000001",
+          "build_id": "PKBUILD1-CYCLE146-N12-SCHED-APW-V0001-000001",
           "entry_contract": "PKENTRY1",
           "entry_offset": "0x0000A000",
           "handoff_contract": "PBP1",
           "image_contract": "PKELF1",
           "pbp1_contract_sha256": "89EA7517EF7D2E30C7EBEC4C28D092E3F01D95519EC6768E7B4D5C0F586B58E7",
           "pkelf1_contract_sha256": "A0CE48E9EF992B97333D84ECB2850E221D482E2ACF11BB312B5F769DAFF992AA",
-          "pkentry1_contract_sha256": "4EF53DC62567B9641E2E4AA958805120C791432F6C80944BE49EE92227E44900"
+          "pkentry1_contract_sha256": "27FEC92D3F67AD0CC8ECFB07ED9DBBC245935E9B6A0AB10EF77F12238301C994"
         },
         "manifest_offset": 544,
-        "relocation_canonical_offset": 417856,
-        "relocation_count": 1181,
-        "relocation_source_offset": 418016,
-        "relro_byte_count": 57344,
-        "relro_offset": 417792
+        "relocation_canonical_offset": 430144,
+        "relocation_count": 1222,
+        "relocation_source_offset": 430304,
+        "relro_byte_count": 53248,
+        "relro_offset": 430080
       },
       "production_promotion_allowed": false,
       "production_ready": false,
@@ -651,8 +651,8 @@
         "negative_controls_passed": 43,
         "negative_controls_total": 43,
         "production_claim_count": 0,
-        "rust_host_tests_passed": 173,
-        "rust_host_tests_total": 173,
+        "rust_host_tests_passed": 184,
+        "rust_host_tests_total": 184,
         "rustfmt_packages_passed": 2
       },
       "toolchain": {
@@ -798,12 +798,12 @@
               "virtual_size": 756
             }
           ],
-          "sha256": "8BA7832CE7CDA7DC1D17087532CD4D6D5A38A54D97493660E0236AB41512164F",
+          "sha256": "5BF840E40E940F55E05AE3B01C3E950B744DFD89DE6122CA2167ED1A391A1AD6",
           "subsystem": 10,
           "timestamp": 0
         },
         "selected_development_feature": "development-trap-double-fault",
-        "sha256": "8BA7832CE7CDA7DC1D17087532CD4D6D5A38A54D97493660E0236AB41512164F"
+        "sha256": "5BF840E40E940F55E05AE3B01C3E950B744DFD89DE6122CA2167ED1A391A1AD6"
       },
       "malformed_frame": {
         "byte_count": 208384,
@@ -872,12 +872,12 @@
               "virtual_size": 756
             }
           ],
-          "sha256": "96615EDCE921A776FEFF3810A88AF7B5095344DEFBD1E59DBBBE6309C8797DC3",
+          "sha256": "5A3508C34C437FD7A2B5024FF12F1C6D06A14E7BD2D117D9E98D1E5D99E2AA13",
           "subsystem": 10,
           "timestamp": 0
         },
         "selected_development_feature": "development-trap-malformed-frame",
-        "sha256": "96615EDCE921A776FEFF3810A88AF7B5095344DEFBD1E59DBBBE6309C8797DC3"
+        "sha256": "5A3508C34C437FD7A2B5024FF12F1C6D06A14E7BD2D117D9E98D1E5D99E2AA13"
       },
       "returning": {
         "byte_count": 208384,
@@ -946,12 +946,12 @@
               "virtual_size": 756
             }
           ],
-          "sha256": "851E2D5780442A9685438CA17835F9B03ED769B3A809DEF237FE2AE90B3D1F03",
+          "sha256": "0F394E73CD23ADAC2F74178D16A13BB1223025B0A3EEFAFEDED84C967A05BA9F",
           "subsystem": 10,
           "timestamp": 0
         },
         "selected_development_feature": "development-trap-returning",
-        "sha256": "851E2D5780442A9685438CA17835F9B03ED769B3A809DEF237FE2AE90B3D1F03"
+        "sha256": "0F394E73CD23ADAC2F74178D16A13BB1223025B0A3EEFAFEDED84C967A05BA9F"
       }
     }
   },
@@ -1070,15 +1070,15 @@
               "guest_host_exact_match": true,
               "manifest_bytes": 2615,
               "parser_count": 9,
-              "policy_sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+              "policy_sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
               "retained_file_bytes": 11952,
               "retained_file_count": 9,
-              "retained_set_sha256": "27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943",
-              "state_sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+              "retained_set_sha256": "8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453",
+              "state_sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
               "state_writes": 0
             },
             "local_paths_recorded": false,
-            "marker_sha256": "F268F2E3E6E976EC7230A0602C4675860A7A59E201523AFA20465659CDC5A81E",
+            "marker_sha256": "331C0CFAED7F6EDBB4C6C69DDC9FAD35419DCBBC3700F2C50814D2DE09C7AF30",
             "marker_summary": {
               "descriptor_setup": {
                 "bsp": 1,
@@ -1131,7 +1131,7 @@
                     "artifact_count": 6,
                     "contract_id": "PBART1",
                     "file_bytes": 8761,
-                    "fnv1a64": "39813B9E8BCABACA",
+                    "fnv1a64": "2DB4A9F17F90F07C",
                     "measured": false,
                     "page_count": 6,
                     "pages_retained": true,
@@ -1184,19 +1184,19 @@
                     "parser_count": 6,
                     "payload_bytes": 8185,
                     "proof_id": "N5-INNER-LIVE-PARSE-001",
-                    "retained_set_sha256": "27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943",
+                    "retained_set_sha256": "8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453",
                     "state_writes": 0
                   },
                   "kernel": {
                     "entry_offset": 40960,
-                    "file_byte_count": 476808,
+                    "file_byte_count": 485000,
                     "file_handles_closed": 12,
                     "file_pools_freed": 11,
                     "image_byte_count": 557056,
-                    "loaded_fnv1a64": "F25DA6C8C3BF1ABB",
+                    "loaded_fnv1a64": "55D5E5D592AD7A52",
                     "page_count": 136,
                     "pages_retained": true,
-                    "relocation_count": 1181,
+                    "relocation_count": 1222,
                     "resources_released": false
                   },
                   "kernel_map": {
@@ -1207,8 +1207,8 @@
                     "framebuffer_first_page_bytes": 2097152,
                     "framebuffer_last_page_bytes": 2097152,
                     "framebuffer_preserved": true,
-                    "leaf_fingerprint": "C5BB19BE8C1279A5",
-                    "mapped_fnv1a64": "F25DA6C8C3BF1ABB",
+                    "leaf_fingerprint": "D8FA02A4C897B121",
+                    "mapped_fnv1a64": "55D5E5D592AD7A52",
                     "mapped_page_count": 136,
                     "mapping_count": 4,
                     "original_cr3_restored": true,
@@ -1216,18 +1216,18 @@
                     "pdpt_index": 510,
                     "physical_address_bits": 40,
                     "pml4_index": 511,
-                    "read_execute_page_count": 92,
-                    "read_only_page_count": 24,
-                    "read_write_page_count": 20,
+                    "read_execute_page_count": 95,
+                    "read_only_page_count": 23,
+                    "read_write_page_count": 18,
                     "retained": {
                       "guard_page_count": 2,
                       "handoff_first_page_table_index": 174,
                       "handoff_page_count": 256,
-                      "handoff_physical_base": 497414144,
+                      "handoff_physical_base": 497405952,
                       "handoff_virtual_base": 18446744071562780672,
-                      "kernel_physical_base": 500174848,
+                      "kernel_physical_base": 500166656,
                       "page_table_root_physical": 501194752,
-                      "retained_leaf_fingerprint": "B33DE5BF9A7D8567",
+                      "retained_leaf_fingerprint": "F23AB181F0D2D2C7",
                       "stack_first_page_table_index": 137,
                       "stack_page_count": 36,
                       "stack_physical_base": 501444608,
@@ -1242,9 +1242,9 @@
                   "manifest": {
                     "artifact_count": 7,
                     "byte_count": 2615,
-                    "kernel_file_byte_count": 476808,
+                    "kernel_file_byte_count": 485000,
                     "kernel_image_byte_count": 557056,
-                    "kernel_sha256_prefix": "9C23236E85A6D2C7",
+                    "kernel_sha256_prefix": "D11591395FDD8CD7",
                     "kernel_version": 1,
                     "manifest_id_hash": "4A2625333244591C",
                     "manifest_version": 1,
@@ -1267,10 +1267,10 @@
                     "development_mode_only": true,
                     "exit_attempts": 1,
                     "firmware_table_count": 1,
-                    "fnv1a64": "2A2D7C88652D4670",
+                    "fnv1a64": "B737428FA97B5AEF",
                     "framebuffer_present": 1,
                     "memory_entry_count": 98,
-                    "message_crc32": "61220196",
+                    "message_crc32": "0657609A",
                     "pre_exit": false,
                     "record_count": 5,
                     "temporary_pools_released": false
@@ -1282,19 +1282,19 @@
                     "denial": "pbtrust_policy_unsigned",
                     "denial_count": 1,
                     "policy_bytes": 320,
-                    "policy_sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+                    "policy_sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
                     "signature_verifications": 0,
                     "state_authenticated": false,
                     "state_bytes": 256,
                     "state_monotonic": false,
-                    "state_sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+                    "state_sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
                     "state_source": "esp_candidate_not_persistent_authority",
                     "state_writes": 0
                   },
                   "uefi_revision": 131142
                 },
                 "kernel_entry": {
-                  "build_id": "PKBUILD1-CYCLE145-N12-SCHED-SMP-V0001-000001",
+                  "build_id": "PKBUILD1-CYCLE146-N12-SCHED-APW-V0001-000001",
                   "entry_contract": "PKENTRY1",
                   "entry_count": 1,
                   "serial": "present",
@@ -1314,11 +1314,11 @@
                   "denial": "pbtrust_policy_unsigned",
                   "manifest_bytes": 2615,
                   "parser_count": 9,
-                  "policy_sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+                  "policy_sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
                   "retained_file_bytes": 11952,
                   "retained_file_count": 9,
-                  "retained_set_sha256": "27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943",
-                  "state_sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+                  "retained_set_sha256": "8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453",
+                  "state_sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
                   "state_writes": 0
                 },
                 "kernel_state": {
@@ -1363,26 +1363,26 @@
               "POOLEBOOT/0.1 FILESYSTEM PASS loaded_image=1 simple_fs=1 root=1",
               "POOLEBOOT/0.1 BOOTCFG PASS bytes=229 entries=1 default_hash=61053F0E3EBBD272 timeout_ms=0 attempts=3 slot=1 manifest_max_bytes=65536",
               "POOLEBOOT/0.1 MANIFEST PASS bytes=2615 artifacts=7 id_hash=4A2625333244591C slot=1 version=1 minimum_secure_version=1",
-              "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=476808 image_bytes=557056 sha256_prefix=9C23236E85A6D2C7 path=manifest",
-              "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=476808 path=manifest_development",
-              "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=557056 pages=136 entry_offset=40960 relocations=1181 files_closed=12 pools_freed=11 fnv1a64=F25DA6C8C3BF1ABB",
-              "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=39813B9E8BCABACA retained=1 signatures=0 measured=0",
-              "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943 retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
-              "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D state_sha256=4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
+              "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=485000 image_bytes=557056 sha256_prefix=D11591395FDD8CD7 path=manifest",
+              "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=485000 path=manifest_development",
+              "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=557056 pages=136 entry_offset=40960 relocations=1222 files_closed=12 pools_freed=11 fnv1a64=55D5E5D592AD7A52",
+              "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=2DB4A9F17F90F07C retained=1 signatures=0 measured=0",
+              "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453 retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
+              "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B state_sha256=4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33 source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
               "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
               "POOLEBOOT/0.1 FRAME READY",
-              "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=136 ro=24 rx=92 rw=20 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=C5BB19BE8C1279A5",
-              "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=136 physical_bits=40 mapped_fnv1a64=F25DA6C8C3BF1ABB framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
-              "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=36 handoff_pages=256 guards=2 total_pages=428 stack_pt=137 handoff_pt=174 kernel_phys=000000001DD01000 root=000000001DDFA000 stack_phys=000000001DE37000 stack_top=FFFFFFFF800AD000 handoff_phys=000000001DA5F000 handoff_virt=FFFFFFFF800AE000 retained_fnv1a64=B33DE5BF9A7D8567 original_cr3=restored firmware_calls_while_active=0",
-              "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5160 records=5 memory_entries=98 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=61220196 fnv1a64=2A2D7C88652D4670 state=boot_services_exited bytes_unchanged=1",
+              "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=136 ro=23 rx=95 rw=18 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=D8FA02A4C897B121",
+              "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=136 physical_bits=40 mapped_fnv1a64=55D5E5D592AD7A52 framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
+              "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=36 handoff_pages=256 guards=2 total_pages=428 stack_pt=137 handoff_pt=174 kernel_phys=000000001DCFF000 root=000000001DDFA000 stack_phys=000000001DE37000 stack_top=FFFFFFFF800AD000 handoff_phys=000000001DA5D000 handoff_virt=FFFFFFFF800AE000 retained_fnv1a64=F23AB181F0D2D2C7 original_cr3=restored firmware_calls_while_active=0",
+              "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5160 records=5 memory_entries=98 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=0657609A fnv1a64=B737428FA97B5AEF state=boot_services_exited bytes_unchanged=1",
               "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4704 descriptor_bytes=48 descriptors=98",
               "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=136 artifact_pages=9 table_pages=4 stack_pages=36 handoff_pages=256",
               "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF8000A000 handoff=FFFFFFFF800AE000 bytes=5160 stack_top=FFFFFFFF800AD000 root=000000001DDFA000 cr3=000000001DDFA000 trap_scenario=1 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
               "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
-              "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE145-N12-SCHED-SMP-V0001-000001 entry_count=1 serial=present",
+              "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE146-N12-SCHED-APW-V0001-000001 entry_count=1 serial=present",
               "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF800AE000 bytes=5160 entry=0xFFFFFFFF8000A000 stack_top=0xFFFFFFFF800AD000 root=0x000000001DDFA000 cr3=0x000000001DDFA000 rflags_if=0 rflags_df=0",
               "POOLEOS:KERNEL:PBP1 PASS profile=development records=5 artifacts=10 production_profile_valid=0",
-              "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943 policy_sha256=190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D state_sha256=4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
+              "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453 policy_sha256=40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B state_sha256=4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33 denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
               "POOLEOS:KERNEL:TRAP-SETUP PASS contract=PKTRAP1 scenario=returning bsp=1 gdt_limit=39 idt_limit=4095 gates=5 tss=1 rsp0=1 ist1=1 ist2=2 stack_bytes=8192 if=0",
               "POOLEOS:KERNEL:TRAP-ARM PASS contract=PKTRAP1 scenario=returning sequence=3,6,14",
               "POOLEOS:KERNEL:TRAP-ENTER PASS contract=PKTRAP1 scenario=returning vector=3 error=0x0000000000000000 depth=1 ist=1",
@@ -1401,10 +1401,10 @@
                 {
                   "entry_virtual": "FFFFFFFF8000A000",
                   "flags": 9,
-                  "physical_base": "000000001DD01000",
+                  "physical_base": "000000001DCFF000",
                   "physical_size": 557056,
                   "role": 1,
-                  "sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168",
+                  "sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33",
                   "virtual_base": "FFFFFFFF80000000",
                   "virtual_size": 557056
                 },
@@ -1434,7 +1434,7 @@
                   "physical_base": "000000001DE60000",
                   "physical_size": 821,
                   "role": 4,
-                  "sha256": "70C705D7DCC80443807333044B67A1CC617056B1690B62557562F7B6BB02E6FF",
+                  "sha256": "BC08862FA90F23D770EA4F926BBE1A6135B78EAE7745E65857FF3AC1A75949ED",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -1464,7 +1464,7 @@
                   "physical_base": "000000001DE5D000",
                   "physical_size": 2080,
                   "role": 7,
-                  "sha256": "BF36B0ED1E71D3865A74C25BC398B4728B8823B07ABFB7BFB29D8CF3994CB59A",
+                  "sha256": "B74869FC474511B9B2B817CEC2BB3F151744C811025079180AAAA4E6A24AF4AD",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -1474,7 +1474,7 @@
                   "physical_base": "000000001E5E1000",
                   "physical_size": 2615,
                   "role": 9,
-                  "sha256": "D418B70BF2563CD42B1B86FD3E0B3E035B97CE66728F5D6F26667AC59A562858",
+                  "sha256": "A47A49D50F43987FD728F3C6FD8216A2D418E916F267E1B498685BA6CF07E561",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -1484,7 +1484,7 @@
                   "physical_base": "000000001DE5C000",
                   "physical_size": 320,
                   "role": 10,
-                  "sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+                  "sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -1494,7 +1494,7 @@
                   "physical_base": "000000001DE5B000",
                   "physical_size": 256,
                   "role": 11,
-                  "sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+                  "sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 }
@@ -1508,11 +1508,11 @@
                 "boot_flags": "0000000000000011",
                 "boot_slot": 1,
                 "handoff_byte_count": 5160,
-                "handoff_physical_base": "000000001DA5F000",
+                "handoff_physical_base": "000000001DA5D000",
                 "handoff_virtual_base": "FFFFFFFF800AE000",
                 "initial_stack_top_virtual": "FFFFFFFF800AD000",
                 "kernel_entry_virtual": "FFFFFFFF8000A000",
-                "kernel_physical_base": "000000001DD01000",
+                "kernel_physical_base": "000000001DCFF000",
                 "kernel_physical_size": 557056,
                 "kernel_virtual_base": "FFFFFFFF80000000",
                 "kernel_virtual_size": 557056,
@@ -1535,7 +1535,7 @@
                   "physical_address": "000000001F77E014"
                 }
               ],
-              "fnv1a64": "2A2D7C88652D4670",
+              "fnv1a64": "B737428FA97B5AEF",
               "framebuffer": {
                 "blue_mask": "000000FF",
                 "byte_count": 4096000,
@@ -1551,10 +1551,10 @@
               "kernel_artifact": {
                 "entry_virtual": "FFFFFFFF8000A000",
                 "flags": 9,
-                "physical_base": "000000001DD01000",
+                "physical_base": "000000001DCFF000",
                 "physical_size": 557056,
                 "role": 1,
-                "sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168",
+                "sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33",
                 "virtual_base": "FFFFFFFF80000000",
                 "virtual_size": 557056
               },
@@ -1626,7 +1626,7 @@
                 {
                   "attributes": "000000000000000F",
                   "kind": 1,
-                  "page_count": 7755,
+                  "page_count": 7753,
                   "physical_start": "000000001BC14000",
                   "source_type": 7
                 },
@@ -1634,14 +1634,14 @@
                   "attributes": "000000000000000F",
                   "kind": 10,
                   "page_count": 810,
-                  "physical_start": "000000001DA5F000",
+                  "physical_start": "000000001DA5D000",
                   "source_type": 2
                 },
                 {
                   "attributes": "000000000000000F",
                   "kind": 1,
-                  "page_count": 113,
-                  "physical_start": "000000001DD89000",
+                  "page_count": 115,
+                  "physical_start": "000000001DD87000",
                   "source_type": 7
                 },
                 {
@@ -2248,12 +2248,12 @@
                 }
               ],
               "memory_entry_count": 98,
-              "message_crc32": "61220196",
+              "message_crc32": "0657609A",
               "pre_exit_profile_validated": false,
               "record_count": 5,
               "required_features": "000000000000001B",
               "secret_bearing_records_present": false,
-              "sha256": "304DAF2CFAF6639F734C303A4459542577F50A05A22064458CA82A869D48F99F",
+              "sha256": "4A4836DEB2BB2E0C5FFF6C94D0E9603711713A59AC358176781AF41360FE3D1B",
               "transferable": false
             },
             "qemu_exit_code": 0,
@@ -2308,15 +2308,15 @@
               "guest_host_exact_match": true,
               "manifest_bytes": 2615,
               "parser_count": 9,
-              "policy_sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+              "policy_sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
               "retained_file_bytes": 11952,
               "retained_file_count": 9,
-              "retained_set_sha256": "27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943",
-              "state_sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+              "retained_set_sha256": "8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453",
+              "state_sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
               "state_writes": 0
             },
             "local_paths_recorded": false,
-            "marker_sha256": "F268F2E3E6E976EC7230A0602C4675860A7A59E201523AFA20465659CDC5A81E",
+            "marker_sha256": "331C0CFAED7F6EDBB4C6C69DDC9FAD35419DCBBC3700F2C50814D2DE09C7AF30",
             "marker_summary": {
               "descriptor_setup": {
                 "bsp": 1,
@@ -2369,7 +2369,7 @@
                     "artifact_count": 6,
                     "contract_id": "PBART1",
                     "file_bytes": 8761,
-                    "fnv1a64": "39813B9E8BCABACA",
+                    "fnv1a64": "2DB4A9F17F90F07C",
                     "measured": false,
                     "page_count": 6,
                     "pages_retained": true,
@@ -2422,19 +2422,19 @@
                     "parser_count": 6,
                     "payload_bytes": 8185,
                     "proof_id": "N5-INNER-LIVE-PARSE-001",
-                    "retained_set_sha256": "27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943",
+                    "retained_set_sha256": "8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453",
                     "state_writes": 0
                   },
                   "kernel": {
                     "entry_offset": 40960,
-                    "file_byte_count": 476808,
+                    "file_byte_count": 485000,
                     "file_handles_closed": 12,
                     "file_pools_freed": 11,
                     "image_byte_count": 557056,
-                    "loaded_fnv1a64": "F25DA6C8C3BF1ABB",
+                    "loaded_fnv1a64": "55D5E5D592AD7A52",
                     "page_count": 136,
                     "pages_retained": true,
-                    "relocation_count": 1181,
+                    "relocation_count": 1222,
                     "resources_released": false
                   },
                   "kernel_map": {
@@ -2445,8 +2445,8 @@
                     "framebuffer_first_page_bytes": 2097152,
                     "framebuffer_last_page_bytes": 2097152,
                     "framebuffer_preserved": true,
-                    "leaf_fingerprint": "C5BB19BE8C1279A5",
-                    "mapped_fnv1a64": "F25DA6C8C3BF1ABB",
+                    "leaf_fingerprint": "D8FA02A4C897B121",
+                    "mapped_fnv1a64": "55D5E5D592AD7A52",
                     "mapped_page_count": 136,
                     "mapping_count": 4,
                     "original_cr3_restored": true,
@@ -2454,18 +2454,18 @@
                     "pdpt_index": 510,
                     "physical_address_bits": 40,
                     "pml4_index": 511,
-                    "read_execute_page_count": 92,
-                    "read_only_page_count": 24,
-                    "read_write_page_count": 20,
+                    "read_execute_page_count": 95,
+                    "read_only_page_count": 23,
+                    "read_write_page_count": 18,
                     "retained": {
                       "guard_page_count": 2,
                       "handoff_first_page_table_index": 174,
                       "handoff_page_count": 256,
-                      "handoff_physical_base": 497414144,
+                      "handoff_physical_base": 497405952,
                       "handoff_virtual_base": 18446744071562780672,
-                      "kernel_physical_base": 500174848,
+                      "kernel_physical_base": 500166656,
                       "page_table_root_physical": 501194752,
-                      "retained_leaf_fingerprint": "B33DE5BF9A7D8567",
+                      "retained_leaf_fingerprint": "F23AB181F0D2D2C7",
                       "stack_first_page_table_index": 137,
                       "stack_page_count": 36,
                       "stack_physical_base": 501444608,
@@ -2480,9 +2480,9 @@
                   "manifest": {
                     "artifact_count": 7,
                     "byte_count": 2615,
-                    "kernel_file_byte_count": 476808,
+                    "kernel_file_byte_count": 485000,
                     "kernel_image_byte_count": 557056,
-                    "kernel_sha256_prefix": "9C23236E85A6D2C7",
+                    "kernel_sha256_prefix": "D11591395FDD8CD7",
                     "kernel_version": 1,
                     "manifest_id_hash": "4A2625333244591C",
                     "manifest_version": 1,
@@ -2505,10 +2505,10 @@
                     "development_mode_only": true,
                     "exit_attempts": 1,
                     "firmware_table_count": 1,
-                    "fnv1a64": "2A2D7C88652D4670",
+                    "fnv1a64": "B737428FA97B5AEF",
                     "framebuffer_present": 1,
                     "memory_entry_count": 98,
-                    "message_crc32": "61220196",
+                    "message_crc32": "0657609A",
                     "pre_exit": false,
                     "record_count": 5,
                     "temporary_pools_released": false
@@ -2520,19 +2520,19 @@
                     "denial": "pbtrust_policy_unsigned",
                     "denial_count": 1,
                     "policy_bytes": 320,
-                    "policy_sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+                    "policy_sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
                     "signature_verifications": 0,
                     "state_authenticated": false,
                     "state_bytes": 256,
                     "state_monotonic": false,
-                    "state_sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+                    "state_sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
                     "state_source": "esp_candidate_not_persistent_authority",
                     "state_writes": 0
                   },
                   "uefi_revision": 131142
                 },
                 "kernel_entry": {
-                  "build_id": "PKBUILD1-CYCLE145-N12-SCHED-SMP-V0001-000001",
+                  "build_id": "PKBUILD1-CYCLE146-N12-SCHED-APW-V0001-000001",
                   "entry_contract": "PKENTRY1",
                   "entry_count": 1,
                   "serial": "present",
@@ -2552,11 +2552,11 @@
                   "denial": "pbtrust_policy_unsigned",
                   "manifest_bytes": 2615,
                   "parser_count": 9,
-                  "policy_sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+                  "policy_sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
                   "retained_file_bytes": 11952,
                   "retained_file_count": 9,
-                  "retained_set_sha256": "27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943",
-                  "state_sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+                  "retained_set_sha256": "8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453",
+                  "state_sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
                   "state_writes": 0
                 },
                 "kernel_state": {
@@ -2601,26 +2601,26 @@
               "POOLEBOOT/0.1 FILESYSTEM PASS loaded_image=1 simple_fs=1 root=1",
               "POOLEBOOT/0.1 BOOTCFG PASS bytes=229 entries=1 default_hash=61053F0E3EBBD272 timeout_ms=0 attempts=3 slot=1 manifest_max_bytes=65536",
               "POOLEBOOT/0.1 MANIFEST PASS bytes=2615 artifacts=7 id_hash=4A2625333244591C slot=1 version=1 minimum_secure_version=1",
-              "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=476808 image_bytes=557056 sha256_prefix=9C23236E85A6D2C7 path=manifest",
-              "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=476808 path=manifest_development",
-              "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=557056 pages=136 entry_offset=40960 relocations=1181 files_closed=12 pools_freed=11 fnv1a64=F25DA6C8C3BF1ABB",
-              "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=39813B9E8BCABACA retained=1 signatures=0 measured=0",
-              "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943 retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
-              "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D state_sha256=4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
+              "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=485000 image_bytes=557056 sha256_prefix=D11591395FDD8CD7 path=manifest",
+              "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=485000 path=manifest_development",
+              "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=557056 pages=136 entry_offset=40960 relocations=1222 files_closed=12 pools_freed=11 fnv1a64=55D5E5D592AD7A52",
+              "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=2DB4A9F17F90F07C retained=1 signatures=0 measured=0",
+              "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453 retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
+              "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B state_sha256=4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33 source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
               "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
               "POOLEBOOT/0.1 FRAME READY",
-              "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=136 ro=24 rx=92 rw=20 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=C5BB19BE8C1279A5",
-              "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=136 physical_bits=40 mapped_fnv1a64=F25DA6C8C3BF1ABB framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
-              "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=36 handoff_pages=256 guards=2 total_pages=428 stack_pt=137 handoff_pt=174 kernel_phys=000000001DD01000 root=000000001DDFA000 stack_phys=000000001DE37000 stack_top=FFFFFFFF800AD000 handoff_phys=000000001DA5F000 handoff_virt=FFFFFFFF800AE000 retained_fnv1a64=B33DE5BF9A7D8567 original_cr3=restored firmware_calls_while_active=0",
-              "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5160 records=5 memory_entries=98 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=61220196 fnv1a64=2A2D7C88652D4670 state=boot_services_exited bytes_unchanged=1",
+              "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=136 ro=23 rx=95 rw=18 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=D8FA02A4C897B121",
+              "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=136 physical_bits=40 mapped_fnv1a64=55D5E5D592AD7A52 framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
+              "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=36 handoff_pages=256 guards=2 total_pages=428 stack_pt=137 handoff_pt=174 kernel_phys=000000001DCFF000 root=000000001DDFA000 stack_phys=000000001DE37000 stack_top=FFFFFFFF800AD000 handoff_phys=000000001DA5D000 handoff_virt=FFFFFFFF800AE000 retained_fnv1a64=F23AB181F0D2D2C7 original_cr3=restored firmware_calls_while_active=0",
+              "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5160 records=5 memory_entries=98 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=0657609A fnv1a64=B737428FA97B5AEF state=boot_services_exited bytes_unchanged=1",
               "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4704 descriptor_bytes=48 descriptors=98",
               "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=136 artifact_pages=9 table_pages=4 stack_pages=36 handoff_pages=256",
               "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF8000A000 handoff=FFFFFFFF800AE000 bytes=5160 stack_top=FFFFFFFF800AD000 root=000000001DDFA000 cr3=000000001DDFA000 trap_scenario=1 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
               "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
-              "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE145-N12-SCHED-SMP-V0001-000001 entry_count=1 serial=present",
+              "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE146-N12-SCHED-APW-V0001-000001 entry_count=1 serial=present",
               "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF800AE000 bytes=5160 entry=0xFFFFFFFF8000A000 stack_top=0xFFFFFFFF800AD000 root=0x000000001DDFA000 cr3=0x000000001DDFA000 rflags_if=0 rflags_df=0",
               "POOLEOS:KERNEL:PBP1 PASS profile=development records=5 artifacts=10 production_profile_valid=0",
-              "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943 policy_sha256=190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D state_sha256=4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
+              "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453 policy_sha256=40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B state_sha256=4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33 denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
               "POOLEOS:KERNEL:TRAP-SETUP PASS contract=PKTRAP1 scenario=returning bsp=1 gdt_limit=39 idt_limit=4095 gates=5 tss=1 rsp0=1 ist1=1 ist2=2 stack_bytes=8192 if=0",
               "POOLEOS:KERNEL:TRAP-ARM PASS contract=PKTRAP1 scenario=returning sequence=3,6,14",
               "POOLEOS:KERNEL:TRAP-ENTER PASS contract=PKTRAP1 scenario=returning vector=3 error=0x0000000000000000 depth=1 ist=1",
@@ -2639,10 +2639,10 @@
                 {
                   "entry_virtual": "FFFFFFFF8000A000",
                   "flags": 9,
-                  "physical_base": "000000001DD01000",
+                  "physical_base": "000000001DCFF000",
                   "physical_size": 557056,
                   "role": 1,
-                  "sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168",
+                  "sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33",
                   "virtual_base": "FFFFFFFF80000000",
                   "virtual_size": 557056
                 },
@@ -2672,7 +2672,7 @@
                   "physical_base": "000000001DE60000",
                   "physical_size": 821,
                   "role": 4,
-                  "sha256": "70C705D7DCC80443807333044B67A1CC617056B1690B62557562F7B6BB02E6FF",
+                  "sha256": "BC08862FA90F23D770EA4F926BBE1A6135B78EAE7745E65857FF3AC1A75949ED",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -2702,7 +2702,7 @@
                   "physical_base": "000000001DE5D000",
                   "physical_size": 2080,
                   "role": 7,
-                  "sha256": "BF36B0ED1E71D3865A74C25BC398B4728B8823B07ABFB7BFB29D8CF3994CB59A",
+                  "sha256": "B74869FC474511B9B2B817CEC2BB3F151744C811025079180AAAA4E6A24AF4AD",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -2712,7 +2712,7 @@
                   "physical_base": "000000001E5E1000",
                   "physical_size": 2615,
                   "role": 9,
-                  "sha256": "D418B70BF2563CD42B1B86FD3E0B3E035B97CE66728F5D6F26667AC59A562858",
+                  "sha256": "A47A49D50F43987FD728F3C6FD8216A2D418E916F267E1B498685BA6CF07E561",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -2722,7 +2722,7 @@
                   "physical_base": "000000001DE5C000",
                   "physical_size": 320,
                   "role": 10,
-                  "sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+                  "sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -2732,7 +2732,7 @@
                   "physical_base": "000000001DE5B000",
                   "physical_size": 256,
                   "role": 11,
-                  "sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+                  "sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 }
@@ -2746,11 +2746,11 @@
                 "boot_flags": "0000000000000011",
                 "boot_slot": 1,
                 "handoff_byte_count": 5160,
-                "handoff_physical_base": "000000001DA5F000",
+                "handoff_physical_base": "000000001DA5D000",
                 "handoff_virtual_base": "FFFFFFFF800AE000",
                 "initial_stack_top_virtual": "FFFFFFFF800AD000",
                 "kernel_entry_virtual": "FFFFFFFF8000A000",
-                "kernel_physical_base": "000000001DD01000",
+                "kernel_physical_base": "000000001DCFF000",
                 "kernel_physical_size": 557056,
                 "kernel_virtual_base": "FFFFFFFF80000000",
                 "kernel_virtual_size": 557056,
@@ -2773,7 +2773,7 @@
                   "physical_address": "000000001F77E014"
                 }
               ],
-              "fnv1a64": "2A2D7C88652D4670",
+              "fnv1a64": "B737428FA97B5AEF",
               "framebuffer": {
                 "blue_mask": "000000FF",
                 "byte_count": 4096000,
@@ -2789,10 +2789,10 @@
               "kernel_artifact": {
                 "entry_virtual": "FFFFFFFF8000A000",
                 "flags": 9,
-                "physical_base": "000000001DD01000",
+                "physical_base": "000000001DCFF000",
                 "physical_size": 557056,
                 "role": 1,
-                "sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168",
+                "sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33",
                 "virtual_base": "FFFFFFFF80000000",
                 "virtual_size": 557056
               },
@@ -2864,7 +2864,7 @@
                 {
                   "attributes": "000000000000000F",
                   "kind": 1,
-                  "page_count": 7755,
+                  "page_count": 7753,
                   "physical_start": "000000001BC14000",
                   "source_type": 7
                 },
@@ -2872,14 +2872,14 @@
                   "attributes": "000000000000000F",
                   "kind": 10,
                   "page_count": 810,
-                  "physical_start": "000000001DA5F000",
+                  "physical_start": "000000001DA5D000",
                   "source_type": 2
                 },
                 {
                   "attributes": "000000000000000F",
                   "kind": 1,
-                  "page_count": 113,
-                  "physical_start": "000000001DD89000",
+                  "page_count": 115,
+                  "physical_start": "000000001DD87000",
                   "source_type": 7
                 },
                 {
@@ -3486,12 +3486,12 @@
                 }
               ],
               "memory_entry_count": 98,
-              "message_crc32": "61220196",
+              "message_crc32": "0657609A",
               "pre_exit_profile_validated": false,
               "record_count": 5,
               "required_features": "000000000000001B",
               "secret_bearing_records_present": false,
-              "sha256": "304DAF2CFAF6639F734C303A4459542577F50A05A22064458CA82A869D48F99F",
+              "sha256": "4A4836DEB2BB2E0C5FFF6C94D0E9603711713A59AC358176781AF41360FE3D1B",
               "transferable": false
             },
             "qemu_exit_code": 0,
@@ -3558,15 +3558,15 @@
               "guest_host_exact_match": true,
               "manifest_bytes": 2615,
               "parser_count": 9,
-              "policy_sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+              "policy_sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
               "retained_file_bytes": 11952,
               "retained_file_count": 9,
-              "retained_set_sha256": "27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943",
-              "state_sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+              "retained_set_sha256": "8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453",
+              "state_sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
               "state_writes": 0
             },
             "local_paths_recorded": false,
-            "marker_sha256": "E0ACFFEC3EF4DDD0D041FF568601E0856FE7B6962EE572713CDF48D2D940C2CA",
+            "marker_sha256": "D3FC5D0871602BD89CAA0AEB03B12E3E313322A8D11F8EBF3C8512D59663A211",
             "marker_summary": {
               "descriptor_setup": {
                 "bsp": 1,
@@ -3605,7 +3605,7 @@
                     "artifact_count": 6,
                     "contract_id": "PBART1",
                     "file_bytes": 8761,
-                    "fnv1a64": "39813B9E8BCABACA",
+                    "fnv1a64": "2DB4A9F17F90F07C",
                     "measured": false,
                     "page_count": 6,
                     "pages_retained": true,
@@ -3658,19 +3658,19 @@
                     "parser_count": 6,
                     "payload_bytes": 8185,
                     "proof_id": "N5-INNER-LIVE-PARSE-001",
-                    "retained_set_sha256": "27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943",
+                    "retained_set_sha256": "8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453",
                     "state_writes": 0
                   },
                   "kernel": {
                     "entry_offset": 40960,
-                    "file_byte_count": 476808,
+                    "file_byte_count": 485000,
                     "file_handles_closed": 12,
                     "file_pools_freed": 11,
                     "image_byte_count": 557056,
-                    "loaded_fnv1a64": "F25DA6C8C3BF1ABB",
+                    "loaded_fnv1a64": "55D5E5D592AD7A52",
                     "page_count": 136,
                     "pages_retained": true,
-                    "relocation_count": 1181,
+                    "relocation_count": 1222,
                     "resources_released": false
                   },
                   "kernel_map": {
@@ -3681,8 +3681,8 @@
                     "framebuffer_first_page_bytes": 2097152,
                     "framebuffer_last_page_bytes": 2097152,
                     "framebuffer_preserved": true,
-                    "leaf_fingerprint": "C5BB19BE8C1279A5",
-                    "mapped_fnv1a64": "F25DA6C8C3BF1ABB",
+                    "leaf_fingerprint": "D8FA02A4C897B121",
+                    "mapped_fnv1a64": "55D5E5D592AD7A52",
                     "mapped_page_count": 136,
                     "mapping_count": 4,
                     "original_cr3_restored": true,
@@ -3690,18 +3690,18 @@
                     "pdpt_index": 510,
                     "physical_address_bits": 40,
                     "pml4_index": 511,
-                    "read_execute_page_count": 92,
-                    "read_only_page_count": 24,
-                    "read_write_page_count": 20,
+                    "read_execute_page_count": 95,
+                    "read_only_page_count": 23,
+                    "read_write_page_count": 18,
                     "retained": {
                       "guard_page_count": 2,
                       "handoff_first_page_table_index": 174,
                       "handoff_page_count": 256,
-                      "handoff_physical_base": 497414144,
+                      "handoff_physical_base": 497405952,
                       "handoff_virtual_base": 18446744071562780672,
-                      "kernel_physical_base": 500174848,
+                      "kernel_physical_base": 500166656,
                       "page_table_root_physical": 501194752,
-                      "retained_leaf_fingerprint": "B33DE5BF9A7D8567",
+                      "retained_leaf_fingerprint": "F23AB181F0D2D2C7",
                       "stack_first_page_table_index": 137,
                       "stack_page_count": 36,
                       "stack_physical_base": 501444608,
@@ -3716,9 +3716,9 @@
                   "manifest": {
                     "artifact_count": 7,
                     "byte_count": 2615,
-                    "kernel_file_byte_count": 476808,
+                    "kernel_file_byte_count": 485000,
                     "kernel_image_byte_count": 557056,
-                    "kernel_sha256_prefix": "9C23236E85A6D2C7",
+                    "kernel_sha256_prefix": "D11591395FDD8CD7",
                     "kernel_version": 1,
                     "manifest_id_hash": "4A2625333244591C",
                     "manifest_version": 1,
@@ -3741,10 +3741,10 @@
                     "development_mode_only": true,
                     "exit_attempts": 1,
                     "firmware_table_count": 1,
-                    "fnv1a64": "2A2D7C88652D4670",
+                    "fnv1a64": "B737428FA97B5AEF",
                     "framebuffer_present": 1,
                     "memory_entry_count": 98,
-                    "message_crc32": "61220196",
+                    "message_crc32": "0657609A",
                     "pre_exit": false,
                     "record_count": 5,
                     "temporary_pools_released": false
@@ -3756,19 +3756,19 @@
                     "denial": "pbtrust_policy_unsigned",
                     "denial_count": 1,
                     "policy_bytes": 320,
-                    "policy_sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+                    "policy_sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
                     "signature_verifications": 0,
                     "state_authenticated": false,
                     "state_bytes": 256,
                     "state_monotonic": false,
-                    "state_sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+                    "state_sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
                     "state_source": "esp_candidate_not_persistent_authority",
                     "state_writes": 0
                   },
                   "uefi_revision": 131142
                 },
                 "kernel_entry": {
-                  "build_id": "PKBUILD1-CYCLE145-N12-SCHED-SMP-V0001-000001",
+                  "build_id": "PKBUILD1-CYCLE146-N12-SCHED-APW-V0001-000001",
                   "entry_contract": "PKENTRY1",
                   "entry_count": 1,
                   "serial": "present",
@@ -3788,11 +3788,11 @@
                   "denial": "pbtrust_policy_unsigned",
                   "manifest_bytes": 2615,
                   "parser_count": 9,
-                  "policy_sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+                  "policy_sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
                   "retained_file_bytes": 11952,
                   "retained_file_count": 9,
-                  "retained_set_sha256": "27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943",
-                  "state_sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+                  "retained_set_sha256": "8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453",
+                  "state_sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
                   "state_writes": 0
                 },
                 "kernel_state": {
@@ -3837,26 +3837,26 @@
               "POOLEBOOT/0.1 FILESYSTEM PASS loaded_image=1 simple_fs=1 root=1",
               "POOLEBOOT/0.1 BOOTCFG PASS bytes=229 entries=1 default_hash=61053F0E3EBBD272 timeout_ms=0 attempts=3 slot=1 manifest_max_bytes=65536",
               "POOLEBOOT/0.1 MANIFEST PASS bytes=2615 artifacts=7 id_hash=4A2625333244591C slot=1 version=1 minimum_secure_version=1",
-              "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=476808 image_bytes=557056 sha256_prefix=9C23236E85A6D2C7 path=manifest",
-              "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=476808 path=manifest_development",
-              "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=557056 pages=136 entry_offset=40960 relocations=1181 files_closed=12 pools_freed=11 fnv1a64=F25DA6C8C3BF1ABB",
-              "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=39813B9E8BCABACA retained=1 signatures=0 measured=0",
-              "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943 retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
-              "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D state_sha256=4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
+              "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=485000 image_bytes=557056 sha256_prefix=D11591395FDD8CD7 path=manifest",
+              "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=485000 path=manifest_development",
+              "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=557056 pages=136 entry_offset=40960 relocations=1222 files_closed=12 pools_freed=11 fnv1a64=55D5E5D592AD7A52",
+              "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=2DB4A9F17F90F07C retained=1 signatures=0 measured=0",
+              "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453 retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
+              "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B state_sha256=4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33 source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
               "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
               "POOLEBOOT/0.1 FRAME READY",
-              "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=136 ro=24 rx=92 rw=20 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=C5BB19BE8C1279A5",
-              "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=136 physical_bits=40 mapped_fnv1a64=F25DA6C8C3BF1ABB framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
-              "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=36 handoff_pages=256 guards=2 total_pages=428 stack_pt=137 handoff_pt=174 kernel_phys=000000001DD01000 root=000000001DDFA000 stack_phys=000000001DE37000 stack_top=FFFFFFFF800AD000 handoff_phys=000000001DA5F000 handoff_virt=FFFFFFFF800AE000 retained_fnv1a64=B33DE5BF9A7D8567 original_cr3=restored firmware_calls_while_active=0",
-              "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5160 records=5 memory_entries=98 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=61220196 fnv1a64=2A2D7C88652D4670 state=boot_services_exited bytes_unchanged=1",
+              "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=136 ro=23 rx=95 rw=18 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=D8FA02A4C897B121",
+              "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=136 physical_bits=40 mapped_fnv1a64=55D5E5D592AD7A52 framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
+              "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=36 handoff_pages=256 guards=2 total_pages=428 stack_pt=137 handoff_pt=174 kernel_phys=000000001DCFF000 root=000000001DDFA000 stack_phys=000000001DE37000 stack_top=FFFFFFFF800AD000 handoff_phys=000000001DA5D000 handoff_virt=FFFFFFFF800AE000 retained_fnv1a64=F23AB181F0D2D2C7 original_cr3=restored firmware_calls_while_active=0",
+              "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5160 records=5 memory_entries=98 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=0657609A fnv1a64=B737428FA97B5AEF state=boot_services_exited bytes_unchanged=1",
               "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4704 descriptor_bytes=48 descriptors=98",
               "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=136 artifact_pages=9 table_pages=4 stack_pages=36 handoff_pages=256",
               "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF8000A000 handoff=FFFFFFFF800AE000 bytes=5160 stack_top=FFFFFFFF800AD000 root=000000001DDFA000 cr3=000000001DDFA000 trap_scenario=2 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
               "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
-              "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE145-N12-SCHED-SMP-V0001-000001 entry_count=1 serial=present",
+              "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE146-N12-SCHED-APW-V0001-000001 entry_count=1 serial=present",
               "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF800AE000 bytes=5160 entry=0xFFFFFFFF8000A000 stack_top=0xFFFFFFFF800AD000 root=0x000000001DDFA000 cr3=0x000000001DDFA000 rflags_if=0 rflags_df=0",
               "POOLEOS:KERNEL:PBP1 PASS profile=development records=5 artifacts=10 production_profile_valid=0",
-              "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943 policy_sha256=190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D state_sha256=4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
+              "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453 policy_sha256=40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B state_sha256=4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33 denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
               "POOLEOS:KERNEL:TRAP-SETUP PASS contract=PKTRAP1 scenario=double_fault bsp=1 gdt_limit=39 idt_limit=4095 gates=5 tss=1 rsp0=1 ist1=1 ist2=2 stack_bytes=8192 if=0",
               "POOLEOS:KERNEL:TRAP-ARM PASS contract=PKTRAP1 scenario=double_fault trigger=gp_delivery_failure gp_gate_present=0",
               "POOLEOS:KERNEL:TRAP-ENTER PASS contract=PKTRAP1 scenario=double_fault vector=8 error=0x0000000000000000 depth=1 ist=2",
@@ -3870,10 +3870,10 @@
                 {
                   "entry_virtual": "FFFFFFFF8000A000",
                   "flags": 9,
-                  "physical_base": "000000001DD01000",
+                  "physical_base": "000000001DCFF000",
                   "physical_size": 557056,
                   "role": 1,
-                  "sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168",
+                  "sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33",
                   "virtual_base": "FFFFFFFF80000000",
                   "virtual_size": 557056
                 },
@@ -3903,7 +3903,7 @@
                   "physical_base": "000000001DE60000",
                   "physical_size": 821,
                   "role": 4,
-                  "sha256": "70C705D7DCC80443807333044B67A1CC617056B1690B62557562F7B6BB02E6FF",
+                  "sha256": "BC08862FA90F23D770EA4F926BBE1A6135B78EAE7745E65857FF3AC1A75949ED",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -3933,7 +3933,7 @@
                   "physical_base": "000000001DE5D000",
                   "physical_size": 2080,
                   "role": 7,
-                  "sha256": "BF36B0ED1E71D3865A74C25BC398B4728B8823B07ABFB7BFB29D8CF3994CB59A",
+                  "sha256": "B74869FC474511B9B2B817CEC2BB3F151744C811025079180AAAA4E6A24AF4AD",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -3943,7 +3943,7 @@
                   "physical_base": "000000001E5E1000",
                   "physical_size": 2615,
                   "role": 9,
-                  "sha256": "D418B70BF2563CD42B1B86FD3E0B3E035B97CE66728F5D6F26667AC59A562858",
+                  "sha256": "A47A49D50F43987FD728F3C6FD8216A2D418E916F267E1B498685BA6CF07E561",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -3953,7 +3953,7 @@
                   "physical_base": "000000001DE5C000",
                   "physical_size": 320,
                   "role": 10,
-                  "sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+                  "sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -3963,7 +3963,7 @@
                   "physical_base": "000000001DE5B000",
                   "physical_size": 256,
                   "role": 11,
-                  "sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+                  "sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 }
@@ -3977,11 +3977,11 @@
                 "boot_flags": "0000000000000011",
                 "boot_slot": 1,
                 "handoff_byte_count": 5160,
-                "handoff_physical_base": "000000001DA5F000",
+                "handoff_physical_base": "000000001DA5D000",
                 "handoff_virtual_base": "FFFFFFFF800AE000",
                 "initial_stack_top_virtual": "FFFFFFFF800AD000",
                 "kernel_entry_virtual": "FFFFFFFF8000A000",
-                "kernel_physical_base": "000000001DD01000",
+                "kernel_physical_base": "000000001DCFF000",
                 "kernel_physical_size": 557056,
                 "kernel_virtual_base": "FFFFFFFF80000000",
                 "kernel_virtual_size": 557056,
@@ -4004,7 +4004,7 @@
                   "physical_address": "000000001F77E014"
                 }
               ],
-              "fnv1a64": "2A2D7C88652D4670",
+              "fnv1a64": "B737428FA97B5AEF",
               "framebuffer": {
                 "blue_mask": "000000FF",
                 "byte_count": 4096000,
@@ -4020,10 +4020,10 @@
               "kernel_artifact": {
                 "entry_virtual": "FFFFFFFF8000A000",
                 "flags": 9,
-                "physical_base": "000000001DD01000",
+                "physical_base": "000000001DCFF000",
                 "physical_size": 557056,
                 "role": 1,
-                "sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168",
+                "sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33",
                 "virtual_base": "FFFFFFFF80000000",
                 "virtual_size": 557056
               },
@@ -4095,7 +4095,7 @@
                 {
                   "attributes": "000000000000000F",
                   "kind": 1,
-                  "page_count": 7755,
+                  "page_count": 7753,
                   "physical_start": "000000001BC14000",
                   "source_type": 7
                 },
@@ -4103,14 +4103,14 @@
                   "attributes": "000000000000000F",
                   "kind": 10,
                   "page_count": 810,
-                  "physical_start": "000000001DA5F000",
+                  "physical_start": "000000001DA5D000",
                   "source_type": 2
                 },
                 {
                   "attributes": "000000000000000F",
                   "kind": 1,
-                  "page_count": 113,
-                  "physical_start": "000000001DD89000",
+                  "page_count": 115,
+                  "physical_start": "000000001DD87000",
                   "source_type": 7
                 },
                 {
@@ -4717,12 +4717,12 @@
                 }
               ],
               "memory_entry_count": 98,
-              "message_crc32": "61220196",
+              "message_crc32": "0657609A",
               "pre_exit_profile_validated": false,
               "record_count": 5,
               "required_features": "000000000000001B",
               "secret_bearing_records_present": false,
-              "sha256": "304DAF2CFAF6639F734C303A4459542577F50A05A22064458CA82A869D48F99F",
+              "sha256": "4A4836DEB2BB2E0C5FFF6C94D0E9603711713A59AC358176781AF41360FE3D1B",
               "transferable": false
             },
             "qemu_exit_code": 0,
@@ -4777,15 +4777,15 @@
               "guest_host_exact_match": true,
               "manifest_bytes": 2615,
               "parser_count": 9,
-              "policy_sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+              "policy_sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
               "retained_file_bytes": 11952,
               "retained_file_count": 9,
-              "retained_set_sha256": "27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943",
-              "state_sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+              "retained_set_sha256": "8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453",
+              "state_sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
               "state_writes": 0
             },
             "local_paths_recorded": false,
-            "marker_sha256": "E0ACFFEC3EF4DDD0D041FF568601E0856FE7B6962EE572713CDF48D2D940C2CA",
+            "marker_sha256": "D3FC5D0871602BD89CAA0AEB03B12E3E313322A8D11F8EBF3C8512D59663A211",
             "marker_summary": {
               "descriptor_setup": {
                 "bsp": 1,
@@ -4824,7 +4824,7 @@
                     "artifact_count": 6,
                     "contract_id": "PBART1",
                     "file_bytes": 8761,
-                    "fnv1a64": "39813B9E8BCABACA",
+                    "fnv1a64": "2DB4A9F17F90F07C",
                     "measured": false,
                     "page_count": 6,
                     "pages_retained": true,
@@ -4877,19 +4877,19 @@
                     "parser_count": 6,
                     "payload_bytes": 8185,
                     "proof_id": "N5-INNER-LIVE-PARSE-001",
-                    "retained_set_sha256": "27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943",
+                    "retained_set_sha256": "8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453",
                     "state_writes": 0
                   },
                   "kernel": {
                     "entry_offset": 40960,
-                    "file_byte_count": 476808,
+                    "file_byte_count": 485000,
                     "file_handles_closed": 12,
                     "file_pools_freed": 11,
                     "image_byte_count": 557056,
-                    "loaded_fnv1a64": "F25DA6C8C3BF1ABB",
+                    "loaded_fnv1a64": "55D5E5D592AD7A52",
                     "page_count": 136,
                     "pages_retained": true,
-                    "relocation_count": 1181,
+                    "relocation_count": 1222,
                     "resources_released": false
                   },
                   "kernel_map": {
@@ -4900,8 +4900,8 @@
                     "framebuffer_first_page_bytes": 2097152,
                     "framebuffer_last_page_bytes": 2097152,
                     "framebuffer_preserved": true,
-                    "leaf_fingerprint": "C5BB19BE8C1279A5",
-                    "mapped_fnv1a64": "F25DA6C8C3BF1ABB",
+                    "leaf_fingerprint": "D8FA02A4C897B121",
+                    "mapped_fnv1a64": "55D5E5D592AD7A52",
                     "mapped_page_count": 136,
                     "mapping_count": 4,
                     "original_cr3_restored": true,
@@ -4909,18 +4909,18 @@
                     "pdpt_index": 510,
                     "physical_address_bits": 40,
                     "pml4_index": 511,
-                    "read_execute_page_count": 92,
-                    "read_only_page_count": 24,
-                    "read_write_page_count": 20,
+                    "read_execute_page_count": 95,
+                    "read_only_page_count": 23,
+                    "read_write_page_count": 18,
                     "retained": {
                       "guard_page_count": 2,
                       "handoff_first_page_table_index": 174,
                       "handoff_page_count": 256,
-                      "handoff_physical_base": 497414144,
+                      "handoff_physical_base": 497405952,
                       "handoff_virtual_base": 18446744071562780672,
-                      "kernel_physical_base": 500174848,
+                      "kernel_physical_base": 500166656,
                       "page_table_root_physical": 501194752,
-                      "retained_leaf_fingerprint": "B33DE5BF9A7D8567",
+                      "retained_leaf_fingerprint": "F23AB181F0D2D2C7",
                       "stack_first_page_table_index": 137,
                       "stack_page_count": 36,
                       "stack_physical_base": 501444608,
@@ -4935,9 +4935,9 @@
                   "manifest": {
                     "artifact_count": 7,
                     "byte_count": 2615,
-                    "kernel_file_byte_count": 476808,
+                    "kernel_file_byte_count": 485000,
                     "kernel_image_byte_count": 557056,
-                    "kernel_sha256_prefix": "9C23236E85A6D2C7",
+                    "kernel_sha256_prefix": "D11591395FDD8CD7",
                     "kernel_version": 1,
                     "manifest_id_hash": "4A2625333244591C",
                     "manifest_version": 1,
@@ -4960,10 +4960,10 @@
                     "development_mode_only": true,
                     "exit_attempts": 1,
                     "firmware_table_count": 1,
-                    "fnv1a64": "2A2D7C88652D4670",
+                    "fnv1a64": "B737428FA97B5AEF",
                     "framebuffer_present": 1,
                     "memory_entry_count": 98,
-                    "message_crc32": "61220196",
+                    "message_crc32": "0657609A",
                     "pre_exit": false,
                     "record_count": 5,
                     "temporary_pools_released": false
@@ -4975,19 +4975,19 @@
                     "denial": "pbtrust_policy_unsigned",
                     "denial_count": 1,
                     "policy_bytes": 320,
-                    "policy_sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+                    "policy_sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
                     "signature_verifications": 0,
                     "state_authenticated": false,
                     "state_bytes": 256,
                     "state_monotonic": false,
-                    "state_sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+                    "state_sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
                     "state_source": "esp_candidate_not_persistent_authority",
                     "state_writes": 0
                   },
                   "uefi_revision": 131142
                 },
                 "kernel_entry": {
-                  "build_id": "PKBUILD1-CYCLE145-N12-SCHED-SMP-V0001-000001",
+                  "build_id": "PKBUILD1-CYCLE146-N12-SCHED-APW-V0001-000001",
                   "entry_contract": "PKENTRY1",
                   "entry_count": 1,
                   "serial": "present",
@@ -5007,11 +5007,11 @@
                   "denial": "pbtrust_policy_unsigned",
                   "manifest_bytes": 2615,
                   "parser_count": 9,
-                  "policy_sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+                  "policy_sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
                   "retained_file_bytes": 11952,
                   "retained_file_count": 9,
-                  "retained_set_sha256": "27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943",
-                  "state_sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+                  "retained_set_sha256": "8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453",
+                  "state_sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
                   "state_writes": 0
                 },
                 "kernel_state": {
@@ -5056,26 +5056,26 @@
               "POOLEBOOT/0.1 FILESYSTEM PASS loaded_image=1 simple_fs=1 root=1",
               "POOLEBOOT/0.1 BOOTCFG PASS bytes=229 entries=1 default_hash=61053F0E3EBBD272 timeout_ms=0 attempts=3 slot=1 manifest_max_bytes=65536",
               "POOLEBOOT/0.1 MANIFEST PASS bytes=2615 artifacts=7 id_hash=4A2625333244591C slot=1 version=1 minimum_secure_version=1",
-              "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=476808 image_bytes=557056 sha256_prefix=9C23236E85A6D2C7 path=manifest",
-              "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=476808 path=manifest_development",
-              "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=557056 pages=136 entry_offset=40960 relocations=1181 files_closed=12 pools_freed=11 fnv1a64=F25DA6C8C3BF1ABB",
-              "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=39813B9E8BCABACA retained=1 signatures=0 measured=0",
-              "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943 retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
-              "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D state_sha256=4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
+              "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=485000 image_bytes=557056 sha256_prefix=D11591395FDD8CD7 path=manifest",
+              "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=485000 path=manifest_development",
+              "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=557056 pages=136 entry_offset=40960 relocations=1222 files_closed=12 pools_freed=11 fnv1a64=55D5E5D592AD7A52",
+              "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=2DB4A9F17F90F07C retained=1 signatures=0 measured=0",
+              "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453 retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
+              "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B state_sha256=4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33 source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
               "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
               "POOLEBOOT/0.1 FRAME READY",
-              "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=136 ro=24 rx=92 rw=20 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=C5BB19BE8C1279A5",
-              "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=136 physical_bits=40 mapped_fnv1a64=F25DA6C8C3BF1ABB framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
-              "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=36 handoff_pages=256 guards=2 total_pages=428 stack_pt=137 handoff_pt=174 kernel_phys=000000001DD01000 root=000000001DDFA000 stack_phys=000000001DE37000 stack_top=FFFFFFFF800AD000 handoff_phys=000000001DA5F000 handoff_virt=FFFFFFFF800AE000 retained_fnv1a64=B33DE5BF9A7D8567 original_cr3=restored firmware_calls_while_active=0",
-              "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5160 records=5 memory_entries=98 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=61220196 fnv1a64=2A2D7C88652D4670 state=boot_services_exited bytes_unchanged=1",
+              "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=136 ro=23 rx=95 rw=18 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=D8FA02A4C897B121",
+              "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=136 physical_bits=40 mapped_fnv1a64=55D5E5D592AD7A52 framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
+              "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=36 handoff_pages=256 guards=2 total_pages=428 stack_pt=137 handoff_pt=174 kernel_phys=000000001DCFF000 root=000000001DDFA000 stack_phys=000000001DE37000 stack_top=FFFFFFFF800AD000 handoff_phys=000000001DA5D000 handoff_virt=FFFFFFFF800AE000 retained_fnv1a64=F23AB181F0D2D2C7 original_cr3=restored firmware_calls_while_active=0",
+              "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5160 records=5 memory_entries=98 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=0657609A fnv1a64=B737428FA97B5AEF state=boot_services_exited bytes_unchanged=1",
               "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4704 descriptor_bytes=48 descriptors=98",
               "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=136 artifact_pages=9 table_pages=4 stack_pages=36 handoff_pages=256",
               "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF8000A000 handoff=FFFFFFFF800AE000 bytes=5160 stack_top=FFFFFFFF800AD000 root=000000001DDFA000 cr3=000000001DDFA000 trap_scenario=2 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
               "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
-              "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE145-N12-SCHED-SMP-V0001-000001 entry_count=1 serial=present",
+              "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE146-N12-SCHED-APW-V0001-000001 entry_count=1 serial=present",
               "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF800AE000 bytes=5160 entry=0xFFFFFFFF8000A000 stack_top=0xFFFFFFFF800AD000 root=0x000000001DDFA000 cr3=0x000000001DDFA000 rflags_if=0 rflags_df=0",
               "POOLEOS:KERNEL:PBP1 PASS profile=development records=5 artifacts=10 production_profile_valid=0",
-              "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943 policy_sha256=190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D state_sha256=4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
+              "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453 policy_sha256=40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B state_sha256=4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33 denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
               "POOLEOS:KERNEL:TRAP-SETUP PASS contract=PKTRAP1 scenario=double_fault bsp=1 gdt_limit=39 idt_limit=4095 gates=5 tss=1 rsp0=1 ist1=1 ist2=2 stack_bytes=8192 if=0",
               "POOLEOS:KERNEL:TRAP-ARM PASS contract=PKTRAP1 scenario=double_fault trigger=gp_delivery_failure gp_gate_present=0",
               "POOLEOS:KERNEL:TRAP-ENTER PASS contract=PKTRAP1 scenario=double_fault vector=8 error=0x0000000000000000 depth=1 ist=2",
@@ -5089,10 +5089,10 @@
                 {
                   "entry_virtual": "FFFFFFFF8000A000",
                   "flags": 9,
-                  "physical_base": "000000001DD01000",
+                  "physical_base": "000000001DCFF000",
                   "physical_size": 557056,
                   "role": 1,
-                  "sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168",
+                  "sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33",
                   "virtual_base": "FFFFFFFF80000000",
                   "virtual_size": 557056
                 },
@@ -5122,7 +5122,7 @@
                   "physical_base": "000000001DE60000",
                   "physical_size": 821,
                   "role": 4,
-                  "sha256": "70C705D7DCC80443807333044B67A1CC617056B1690B62557562F7B6BB02E6FF",
+                  "sha256": "BC08862FA90F23D770EA4F926BBE1A6135B78EAE7745E65857FF3AC1A75949ED",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -5152,7 +5152,7 @@
                   "physical_base": "000000001DE5D000",
                   "physical_size": 2080,
                   "role": 7,
-                  "sha256": "BF36B0ED1E71D3865A74C25BC398B4728B8823B07ABFB7BFB29D8CF3994CB59A",
+                  "sha256": "B74869FC474511B9B2B817CEC2BB3F151744C811025079180AAAA4E6A24AF4AD",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -5162,7 +5162,7 @@
                   "physical_base": "000000001E5E1000",
                   "physical_size": 2615,
                   "role": 9,
-                  "sha256": "D418B70BF2563CD42B1B86FD3E0B3E035B97CE66728F5D6F26667AC59A562858",
+                  "sha256": "A47A49D50F43987FD728F3C6FD8216A2D418E916F267E1B498685BA6CF07E561",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -5172,7 +5172,7 @@
                   "physical_base": "000000001DE5C000",
                   "physical_size": 320,
                   "role": 10,
-                  "sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+                  "sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -5182,7 +5182,7 @@
                   "physical_base": "000000001DE5B000",
                   "physical_size": 256,
                   "role": 11,
-                  "sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+                  "sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 }
@@ -5196,11 +5196,11 @@
                 "boot_flags": "0000000000000011",
                 "boot_slot": 1,
                 "handoff_byte_count": 5160,
-                "handoff_physical_base": "000000001DA5F000",
+                "handoff_physical_base": "000000001DA5D000",
                 "handoff_virtual_base": "FFFFFFFF800AE000",
                 "initial_stack_top_virtual": "FFFFFFFF800AD000",
                 "kernel_entry_virtual": "FFFFFFFF8000A000",
-                "kernel_physical_base": "000000001DD01000",
+                "kernel_physical_base": "000000001DCFF000",
                 "kernel_physical_size": 557056,
                 "kernel_virtual_base": "FFFFFFFF80000000",
                 "kernel_virtual_size": 557056,
@@ -5223,7 +5223,7 @@
                   "physical_address": "000000001F77E014"
                 }
               ],
-              "fnv1a64": "2A2D7C88652D4670",
+              "fnv1a64": "B737428FA97B5AEF",
               "framebuffer": {
                 "blue_mask": "000000FF",
                 "byte_count": 4096000,
@@ -5239,10 +5239,10 @@
               "kernel_artifact": {
                 "entry_virtual": "FFFFFFFF8000A000",
                 "flags": 9,
-                "physical_base": "000000001DD01000",
+                "physical_base": "000000001DCFF000",
                 "physical_size": 557056,
                 "role": 1,
-                "sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168",
+                "sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33",
                 "virtual_base": "FFFFFFFF80000000",
                 "virtual_size": 557056
               },
@@ -5314,7 +5314,7 @@
                 {
                   "attributes": "000000000000000F",
                   "kind": 1,
-                  "page_count": 7755,
+                  "page_count": 7753,
                   "physical_start": "000000001BC14000",
                   "source_type": 7
                 },
@@ -5322,14 +5322,14 @@
                   "attributes": "000000000000000F",
                   "kind": 10,
                   "page_count": 810,
-                  "physical_start": "000000001DA5F000",
+                  "physical_start": "000000001DA5D000",
                   "source_type": 2
                 },
                 {
                   "attributes": "000000000000000F",
                   "kind": 1,
-                  "page_count": 113,
-                  "physical_start": "000000001DD89000",
+                  "page_count": 115,
+                  "physical_start": "000000001DD87000",
                   "source_type": 7
                 },
                 {
@@ -5936,12 +5936,12 @@
                 }
               ],
               "memory_entry_count": 98,
-              "message_crc32": "61220196",
+              "message_crc32": "0657609A",
               "pre_exit_profile_validated": false,
               "record_count": 5,
               "required_features": "000000000000001B",
               "secret_bearing_records_present": false,
-              "sha256": "304DAF2CFAF6639F734C303A4459542577F50A05A22064458CA82A869D48F99F",
+              "sha256": "4A4836DEB2BB2E0C5FFF6C94D0E9603711713A59AC358176781AF41360FE3D1B",
               "transferable": false
             },
             "qemu_exit_code": 0,
@@ -6008,15 +6008,15 @@
               "guest_host_exact_match": true,
               "manifest_bytes": 2615,
               "parser_count": 9,
-              "policy_sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+              "policy_sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
               "retained_file_bytes": 11952,
               "retained_file_count": 9,
-              "retained_set_sha256": "27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943",
-              "state_sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+              "retained_set_sha256": "8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453",
+              "state_sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
               "state_writes": 0
             },
             "local_paths_recorded": false,
-            "marker_sha256": "0534D77629247725D742F371C1CBB69F17F9E1D83B099B966A949CB6D1708216",
+            "marker_sha256": "B5624C43A5A0F614143A21D6A168486CB28CE164A9881FB513C3A6B8536FA0DB",
             "marker_summary": {
               "descriptor_setup": {
                 "bsp": 1,
@@ -6055,7 +6055,7 @@
                     "artifact_count": 6,
                     "contract_id": "PBART1",
                     "file_bytes": 8761,
-                    "fnv1a64": "39813B9E8BCABACA",
+                    "fnv1a64": "2DB4A9F17F90F07C",
                     "measured": false,
                     "page_count": 6,
                     "pages_retained": true,
@@ -6108,19 +6108,19 @@
                     "parser_count": 6,
                     "payload_bytes": 8185,
                     "proof_id": "N5-INNER-LIVE-PARSE-001",
-                    "retained_set_sha256": "27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943",
+                    "retained_set_sha256": "8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453",
                     "state_writes": 0
                   },
                   "kernel": {
                     "entry_offset": 40960,
-                    "file_byte_count": 476808,
+                    "file_byte_count": 485000,
                     "file_handles_closed": 12,
                     "file_pools_freed": 11,
                     "image_byte_count": 557056,
-                    "loaded_fnv1a64": "F25DA6C8C3BF1ABB",
+                    "loaded_fnv1a64": "55D5E5D592AD7A52",
                     "page_count": 136,
                     "pages_retained": true,
-                    "relocation_count": 1181,
+                    "relocation_count": 1222,
                     "resources_released": false
                   },
                   "kernel_map": {
@@ -6131,8 +6131,8 @@
                     "framebuffer_first_page_bytes": 2097152,
                     "framebuffer_last_page_bytes": 2097152,
                     "framebuffer_preserved": true,
-                    "leaf_fingerprint": "C5BB19BE8C1279A5",
-                    "mapped_fnv1a64": "F25DA6C8C3BF1ABB",
+                    "leaf_fingerprint": "D8FA02A4C897B121",
+                    "mapped_fnv1a64": "55D5E5D592AD7A52",
                     "mapped_page_count": 136,
                     "mapping_count": 4,
                     "original_cr3_restored": true,
@@ -6140,18 +6140,18 @@
                     "pdpt_index": 510,
                     "physical_address_bits": 40,
                     "pml4_index": 511,
-                    "read_execute_page_count": 92,
-                    "read_only_page_count": 24,
-                    "read_write_page_count": 20,
+                    "read_execute_page_count": 95,
+                    "read_only_page_count": 23,
+                    "read_write_page_count": 18,
                     "retained": {
                       "guard_page_count": 2,
                       "handoff_first_page_table_index": 174,
                       "handoff_page_count": 256,
-                      "handoff_physical_base": 497414144,
+                      "handoff_physical_base": 497405952,
                       "handoff_virtual_base": 18446744071562780672,
-                      "kernel_physical_base": 500174848,
+                      "kernel_physical_base": 500166656,
                       "page_table_root_physical": 501194752,
-                      "retained_leaf_fingerprint": "B33DE5BF9A7D8567",
+                      "retained_leaf_fingerprint": "F23AB181F0D2D2C7",
                       "stack_first_page_table_index": 137,
                       "stack_page_count": 36,
                       "stack_physical_base": 501444608,
@@ -6166,9 +6166,9 @@
                   "manifest": {
                     "artifact_count": 7,
                     "byte_count": 2615,
-                    "kernel_file_byte_count": 476808,
+                    "kernel_file_byte_count": 485000,
                     "kernel_image_byte_count": 557056,
-                    "kernel_sha256_prefix": "9C23236E85A6D2C7",
+                    "kernel_sha256_prefix": "D11591395FDD8CD7",
                     "kernel_version": 1,
                     "manifest_id_hash": "4A2625333244591C",
                     "manifest_version": 1,
@@ -6191,10 +6191,10 @@
                     "development_mode_only": true,
                     "exit_attempts": 1,
                     "firmware_table_count": 1,
-                    "fnv1a64": "2A2D7C88652D4670",
+                    "fnv1a64": "B737428FA97B5AEF",
                     "framebuffer_present": 1,
                     "memory_entry_count": 98,
-                    "message_crc32": "61220196",
+                    "message_crc32": "0657609A",
                     "pre_exit": false,
                     "record_count": 5,
                     "temporary_pools_released": false
@@ -6206,19 +6206,19 @@
                     "denial": "pbtrust_policy_unsigned",
                     "denial_count": 1,
                     "policy_bytes": 320,
-                    "policy_sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+                    "policy_sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
                     "signature_verifications": 0,
                     "state_authenticated": false,
                     "state_bytes": 256,
                     "state_monotonic": false,
-                    "state_sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+                    "state_sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
                     "state_source": "esp_candidate_not_persistent_authority",
                     "state_writes": 0
                   },
                   "uefi_revision": 131142
                 },
                 "kernel_entry": {
-                  "build_id": "PKBUILD1-CYCLE145-N12-SCHED-SMP-V0001-000001",
+                  "build_id": "PKBUILD1-CYCLE146-N12-SCHED-APW-V0001-000001",
                   "entry_contract": "PKENTRY1",
                   "entry_count": 1,
                   "serial": "present",
@@ -6238,11 +6238,11 @@
                   "denial": "pbtrust_policy_unsigned",
                   "manifest_bytes": 2615,
                   "parser_count": 9,
-                  "policy_sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+                  "policy_sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
                   "retained_file_bytes": 11952,
                   "retained_file_count": 9,
-                  "retained_set_sha256": "27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943",
-                  "state_sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+                  "retained_set_sha256": "8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453",
+                  "state_sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
                   "state_writes": 0
                 },
                 "kernel_state": {
@@ -6287,26 +6287,26 @@
               "POOLEBOOT/0.1 FILESYSTEM PASS loaded_image=1 simple_fs=1 root=1",
               "POOLEBOOT/0.1 BOOTCFG PASS bytes=229 entries=1 default_hash=61053F0E3EBBD272 timeout_ms=0 attempts=3 slot=1 manifest_max_bytes=65536",
               "POOLEBOOT/0.1 MANIFEST PASS bytes=2615 artifacts=7 id_hash=4A2625333244591C slot=1 version=1 minimum_secure_version=1",
-              "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=476808 image_bytes=557056 sha256_prefix=9C23236E85A6D2C7 path=manifest",
-              "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=476808 path=manifest_development",
-              "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=557056 pages=136 entry_offset=40960 relocations=1181 files_closed=12 pools_freed=11 fnv1a64=F25DA6C8C3BF1ABB",
-              "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=39813B9E8BCABACA retained=1 signatures=0 measured=0",
-              "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943 retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
-              "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D state_sha256=4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
+              "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=485000 image_bytes=557056 sha256_prefix=D11591395FDD8CD7 path=manifest",
+              "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=485000 path=manifest_development",
+              "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=557056 pages=136 entry_offset=40960 relocations=1222 files_closed=12 pools_freed=11 fnv1a64=55D5E5D592AD7A52",
+              "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=2DB4A9F17F90F07C retained=1 signatures=0 measured=0",
+              "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453 retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
+              "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B state_sha256=4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33 source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
               "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
               "POOLEBOOT/0.1 FRAME READY",
-              "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=136 ro=24 rx=92 rw=20 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=C5BB19BE8C1279A5",
-              "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=136 physical_bits=40 mapped_fnv1a64=F25DA6C8C3BF1ABB framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
-              "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=36 handoff_pages=256 guards=2 total_pages=428 stack_pt=137 handoff_pt=174 kernel_phys=000000001DD01000 root=000000001DDFA000 stack_phys=000000001DE37000 stack_top=FFFFFFFF800AD000 handoff_phys=000000001DA5F000 handoff_virt=FFFFFFFF800AE000 retained_fnv1a64=B33DE5BF9A7D8567 original_cr3=restored firmware_calls_while_active=0",
-              "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5160 records=5 memory_entries=98 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=61220196 fnv1a64=2A2D7C88652D4670 state=boot_services_exited bytes_unchanged=1",
+              "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=136 ro=23 rx=95 rw=18 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=D8FA02A4C897B121",
+              "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=136 physical_bits=40 mapped_fnv1a64=55D5E5D592AD7A52 framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
+              "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=36 handoff_pages=256 guards=2 total_pages=428 stack_pt=137 handoff_pt=174 kernel_phys=000000001DCFF000 root=000000001DDFA000 stack_phys=000000001DE37000 stack_top=FFFFFFFF800AD000 handoff_phys=000000001DA5D000 handoff_virt=FFFFFFFF800AE000 retained_fnv1a64=F23AB181F0D2D2C7 original_cr3=restored firmware_calls_while_active=0",
+              "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5160 records=5 memory_entries=98 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=0657609A fnv1a64=B737428FA97B5AEF state=boot_services_exited bytes_unchanged=1",
               "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4704 descriptor_bytes=48 descriptors=98",
               "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=136 artifact_pages=9 table_pages=4 stack_pages=36 handoff_pages=256",
               "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF8000A000 handoff=FFFFFFFF800AE000 bytes=5160 stack_top=FFFFFFFF800AD000 root=000000001DDFA000 cr3=000000001DDFA000 trap_scenario=3 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
               "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
-              "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE145-N12-SCHED-SMP-V0001-000001 entry_count=1 serial=present",
+              "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE146-N12-SCHED-APW-V0001-000001 entry_count=1 serial=present",
               "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF800AE000 bytes=5160 entry=0xFFFFFFFF8000A000 stack_top=0xFFFFFFFF800AD000 root=0x000000001DDFA000 cr3=0x000000001DDFA000 rflags_if=0 rflags_df=0",
               "POOLEOS:KERNEL:PBP1 PASS profile=development records=5 artifacts=10 production_profile_valid=0",
-              "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943 policy_sha256=190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D state_sha256=4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
+              "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453 policy_sha256=40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B state_sha256=4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33 denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
               "POOLEOS:KERNEL:TRAP-SETUP PASS contract=PKTRAP1 scenario=malformed_frame bsp=1 gdt_limit=39 idt_limit=4095 gates=5 tss=1 rsp0=1 ist1=1 ist2=2 stack_bytes=8192 if=0",
               "POOLEOS:KERNEL:TRAP-ARM PASS contract=PKTRAP1 scenario=malformed_frame vector=3 control=code_selector",
               "POOLEOS:KERNEL:TRAP-ENTER PASS contract=PKTRAP1 scenario=malformed_frame vector=3 error=0x0000000000000000 depth=1 ist=1",
@@ -6321,10 +6321,10 @@
                 {
                   "entry_virtual": "FFFFFFFF8000A000",
                   "flags": 9,
-                  "physical_base": "000000001DD01000",
+                  "physical_base": "000000001DCFF000",
                   "physical_size": 557056,
                   "role": 1,
-                  "sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168",
+                  "sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33",
                   "virtual_base": "FFFFFFFF80000000",
                   "virtual_size": 557056
                 },
@@ -6354,7 +6354,7 @@
                   "physical_base": "000000001DE60000",
                   "physical_size": 821,
                   "role": 4,
-                  "sha256": "70C705D7DCC80443807333044B67A1CC617056B1690B62557562F7B6BB02E6FF",
+                  "sha256": "BC08862FA90F23D770EA4F926BBE1A6135B78EAE7745E65857FF3AC1A75949ED",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -6384,7 +6384,7 @@
                   "physical_base": "000000001DE5D000",
                   "physical_size": 2080,
                   "role": 7,
-                  "sha256": "BF36B0ED1E71D3865A74C25BC398B4728B8823B07ABFB7BFB29D8CF3994CB59A",
+                  "sha256": "B74869FC474511B9B2B817CEC2BB3F151744C811025079180AAAA4E6A24AF4AD",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -6394,7 +6394,7 @@
                   "physical_base": "000000001E5E1000",
                   "physical_size": 2615,
                   "role": 9,
-                  "sha256": "D418B70BF2563CD42B1B86FD3E0B3E035B97CE66728F5D6F26667AC59A562858",
+                  "sha256": "A47A49D50F43987FD728F3C6FD8216A2D418E916F267E1B498685BA6CF07E561",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -6404,7 +6404,7 @@
                   "physical_base": "000000001DE5C000",
                   "physical_size": 320,
                   "role": 10,
-                  "sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+                  "sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -6414,7 +6414,7 @@
                   "physical_base": "000000001DE5B000",
                   "physical_size": 256,
                   "role": 11,
-                  "sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+                  "sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 }
@@ -6428,11 +6428,11 @@
                 "boot_flags": "0000000000000011",
                 "boot_slot": 1,
                 "handoff_byte_count": 5160,
-                "handoff_physical_base": "000000001DA5F000",
+                "handoff_physical_base": "000000001DA5D000",
                 "handoff_virtual_base": "FFFFFFFF800AE000",
                 "initial_stack_top_virtual": "FFFFFFFF800AD000",
                 "kernel_entry_virtual": "FFFFFFFF8000A000",
-                "kernel_physical_base": "000000001DD01000",
+                "kernel_physical_base": "000000001DCFF000",
                 "kernel_physical_size": 557056,
                 "kernel_virtual_base": "FFFFFFFF80000000",
                 "kernel_virtual_size": 557056,
@@ -6455,7 +6455,7 @@
                   "physical_address": "000000001F77E014"
                 }
               ],
-              "fnv1a64": "2A2D7C88652D4670",
+              "fnv1a64": "B737428FA97B5AEF",
               "framebuffer": {
                 "blue_mask": "000000FF",
                 "byte_count": 4096000,
@@ -6471,10 +6471,10 @@
               "kernel_artifact": {
                 "entry_virtual": "FFFFFFFF8000A000",
                 "flags": 9,
-                "physical_base": "000000001DD01000",
+                "physical_base": "000000001DCFF000",
                 "physical_size": 557056,
                 "role": 1,
-                "sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168",
+                "sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33",
                 "virtual_base": "FFFFFFFF80000000",
                 "virtual_size": 557056
               },
@@ -6546,7 +6546,7 @@
                 {
                   "attributes": "000000000000000F",
                   "kind": 1,
-                  "page_count": 7755,
+                  "page_count": 7753,
                   "physical_start": "000000001BC14000",
                   "source_type": 7
                 },
@@ -6554,14 +6554,14 @@
                   "attributes": "000000000000000F",
                   "kind": 10,
                   "page_count": 810,
-                  "physical_start": "000000001DA5F000",
+                  "physical_start": "000000001DA5D000",
                   "source_type": 2
                 },
                 {
                   "attributes": "000000000000000F",
                   "kind": 1,
-                  "page_count": 113,
-                  "physical_start": "000000001DD89000",
+                  "page_count": 115,
+                  "physical_start": "000000001DD87000",
                   "source_type": 7
                 },
                 {
@@ -7168,12 +7168,12 @@
                 }
               ],
               "memory_entry_count": 98,
-              "message_crc32": "61220196",
+              "message_crc32": "0657609A",
               "pre_exit_profile_validated": false,
               "record_count": 5,
               "required_features": "000000000000001B",
               "secret_bearing_records_present": false,
-              "sha256": "304DAF2CFAF6639F734C303A4459542577F50A05A22064458CA82A869D48F99F",
+              "sha256": "4A4836DEB2BB2E0C5FFF6C94D0E9603711713A59AC358176781AF41360FE3D1B",
               "transferable": false
             },
             "qemu_exit_code": 0,
@@ -7228,15 +7228,15 @@
               "guest_host_exact_match": true,
               "manifest_bytes": 2615,
               "parser_count": 9,
-              "policy_sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+              "policy_sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
               "retained_file_bytes": 11952,
               "retained_file_count": 9,
-              "retained_set_sha256": "27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943",
-              "state_sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+              "retained_set_sha256": "8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453",
+              "state_sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
               "state_writes": 0
             },
             "local_paths_recorded": false,
-            "marker_sha256": "0534D77629247725D742F371C1CBB69F17F9E1D83B099B966A949CB6D1708216",
+            "marker_sha256": "B5624C43A5A0F614143A21D6A168486CB28CE164A9881FB513C3A6B8536FA0DB",
             "marker_summary": {
               "descriptor_setup": {
                 "bsp": 1,
@@ -7275,7 +7275,7 @@
                     "artifact_count": 6,
                     "contract_id": "PBART1",
                     "file_bytes": 8761,
-                    "fnv1a64": "39813B9E8BCABACA",
+                    "fnv1a64": "2DB4A9F17F90F07C",
                     "measured": false,
                     "page_count": 6,
                     "pages_retained": true,
@@ -7328,19 +7328,19 @@
                     "parser_count": 6,
                     "payload_bytes": 8185,
                     "proof_id": "N5-INNER-LIVE-PARSE-001",
-                    "retained_set_sha256": "27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943",
+                    "retained_set_sha256": "8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453",
                     "state_writes": 0
                   },
                   "kernel": {
                     "entry_offset": 40960,
-                    "file_byte_count": 476808,
+                    "file_byte_count": 485000,
                     "file_handles_closed": 12,
                     "file_pools_freed": 11,
                     "image_byte_count": 557056,
-                    "loaded_fnv1a64": "F25DA6C8C3BF1ABB",
+                    "loaded_fnv1a64": "55D5E5D592AD7A52",
                     "page_count": 136,
                     "pages_retained": true,
-                    "relocation_count": 1181,
+                    "relocation_count": 1222,
                     "resources_released": false
                   },
                   "kernel_map": {
@@ -7351,8 +7351,8 @@
                     "framebuffer_first_page_bytes": 2097152,
                     "framebuffer_last_page_bytes": 2097152,
                     "framebuffer_preserved": true,
-                    "leaf_fingerprint": "C5BB19BE8C1279A5",
-                    "mapped_fnv1a64": "F25DA6C8C3BF1ABB",
+                    "leaf_fingerprint": "D8FA02A4C897B121",
+                    "mapped_fnv1a64": "55D5E5D592AD7A52",
                     "mapped_page_count": 136,
                     "mapping_count": 4,
                     "original_cr3_restored": true,
@@ -7360,18 +7360,18 @@
                     "pdpt_index": 510,
                     "physical_address_bits": 40,
                     "pml4_index": 511,
-                    "read_execute_page_count": 92,
-                    "read_only_page_count": 24,
-                    "read_write_page_count": 20,
+                    "read_execute_page_count": 95,
+                    "read_only_page_count": 23,
+                    "read_write_page_count": 18,
                     "retained": {
                       "guard_page_count": 2,
                       "handoff_first_page_table_index": 174,
                       "handoff_page_count": 256,
-                      "handoff_physical_base": 497414144,
+                      "handoff_physical_base": 497405952,
                       "handoff_virtual_base": 18446744071562780672,
-                      "kernel_physical_base": 500174848,
+                      "kernel_physical_base": 500166656,
                       "page_table_root_physical": 501194752,
-                      "retained_leaf_fingerprint": "B33DE5BF9A7D8567",
+                      "retained_leaf_fingerprint": "F23AB181F0D2D2C7",
                       "stack_first_page_table_index": 137,
                       "stack_page_count": 36,
                       "stack_physical_base": 501444608,
@@ -7386,9 +7386,9 @@
                   "manifest": {
                     "artifact_count": 7,
                     "byte_count": 2615,
-                    "kernel_file_byte_count": 476808,
+                    "kernel_file_byte_count": 485000,
                     "kernel_image_byte_count": 557056,
-                    "kernel_sha256_prefix": "9C23236E85A6D2C7",
+                    "kernel_sha256_prefix": "D11591395FDD8CD7",
                     "kernel_version": 1,
                     "manifest_id_hash": "4A2625333244591C",
                     "manifest_version": 1,
@@ -7411,10 +7411,10 @@
                     "development_mode_only": true,
                     "exit_attempts": 1,
                     "firmware_table_count": 1,
-                    "fnv1a64": "2A2D7C88652D4670",
+                    "fnv1a64": "B737428FA97B5AEF",
                     "framebuffer_present": 1,
                     "memory_entry_count": 98,
-                    "message_crc32": "61220196",
+                    "message_crc32": "0657609A",
                     "pre_exit": false,
                     "record_count": 5,
                     "temporary_pools_released": false
@@ -7426,19 +7426,19 @@
                     "denial": "pbtrust_policy_unsigned",
                     "denial_count": 1,
                     "policy_bytes": 320,
-                    "policy_sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+                    "policy_sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
                     "signature_verifications": 0,
                     "state_authenticated": false,
                     "state_bytes": 256,
                     "state_monotonic": false,
-                    "state_sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+                    "state_sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
                     "state_source": "esp_candidate_not_persistent_authority",
                     "state_writes": 0
                   },
                   "uefi_revision": 131142
                 },
                 "kernel_entry": {
-                  "build_id": "PKBUILD1-CYCLE145-N12-SCHED-SMP-V0001-000001",
+                  "build_id": "PKBUILD1-CYCLE146-N12-SCHED-APW-V0001-000001",
                   "entry_contract": "PKENTRY1",
                   "entry_count": 1,
                   "serial": "present",
@@ -7458,11 +7458,11 @@
                   "denial": "pbtrust_policy_unsigned",
                   "manifest_bytes": 2615,
                   "parser_count": 9,
-                  "policy_sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+                  "policy_sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
                   "retained_file_bytes": 11952,
                   "retained_file_count": 9,
-                  "retained_set_sha256": "27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943",
-                  "state_sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+                  "retained_set_sha256": "8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453",
+                  "state_sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
                   "state_writes": 0
                 },
                 "kernel_state": {
@@ -7507,26 +7507,26 @@
               "POOLEBOOT/0.1 FILESYSTEM PASS loaded_image=1 simple_fs=1 root=1",
               "POOLEBOOT/0.1 BOOTCFG PASS bytes=229 entries=1 default_hash=61053F0E3EBBD272 timeout_ms=0 attempts=3 slot=1 manifest_max_bytes=65536",
               "POOLEBOOT/0.1 MANIFEST PASS bytes=2615 artifacts=7 id_hash=4A2625333244591C slot=1 version=1 minimum_secure_version=1",
-              "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=476808 image_bytes=557056 sha256_prefix=9C23236E85A6D2C7 path=manifest",
-              "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=476808 path=manifest_development",
-              "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=557056 pages=136 entry_offset=40960 relocations=1181 files_closed=12 pools_freed=11 fnv1a64=F25DA6C8C3BF1ABB",
-              "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=39813B9E8BCABACA retained=1 signatures=0 measured=0",
-              "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943 retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
-              "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D state_sha256=4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
+              "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=485000 image_bytes=557056 sha256_prefix=D11591395FDD8CD7 path=manifest",
+              "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=485000 path=manifest_development",
+              "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=557056 pages=136 entry_offset=40960 relocations=1222 files_closed=12 pools_freed=11 fnv1a64=55D5E5D592AD7A52",
+              "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=2DB4A9F17F90F07C retained=1 signatures=0 measured=0",
+              "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453 retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
+              "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B state_sha256=4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33 source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
               "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
               "POOLEBOOT/0.1 FRAME READY",
-              "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=136 ro=24 rx=92 rw=20 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=C5BB19BE8C1279A5",
-              "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=136 physical_bits=40 mapped_fnv1a64=F25DA6C8C3BF1ABB framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
-              "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=36 handoff_pages=256 guards=2 total_pages=428 stack_pt=137 handoff_pt=174 kernel_phys=000000001DD01000 root=000000001DDFA000 stack_phys=000000001DE37000 stack_top=FFFFFFFF800AD000 handoff_phys=000000001DA5F000 handoff_virt=FFFFFFFF800AE000 retained_fnv1a64=B33DE5BF9A7D8567 original_cr3=restored firmware_calls_while_active=0",
-              "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5160 records=5 memory_entries=98 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=61220196 fnv1a64=2A2D7C88652D4670 state=boot_services_exited bytes_unchanged=1",
+              "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=136 ro=23 rx=95 rw=18 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=D8FA02A4C897B121",
+              "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=4 kernel_pages=136 physical_bits=40 mapped_fnv1a64=55D5E5D592AD7A52 framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
+              "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=4 stack_pages=36 handoff_pages=256 guards=2 total_pages=428 stack_pt=137 handoff_pt=174 kernel_phys=000000001DCFF000 root=000000001DDFA000 stack_phys=000000001DE37000 stack_top=FFFFFFFF800AD000 handoff_phys=000000001DA5D000 handoff_virt=FFFFFFFF800AE000 retained_fnv1a64=F23AB181F0D2D2C7 original_cr3=restored firmware_calls_while_active=0",
+              "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5160 records=5 memory_entries=98 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=0657609A fnv1a64=B737428FA97B5AEF state=boot_services_exited bytes_unchanged=1",
               "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4704 descriptor_bytes=48 descriptors=98",
               "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=136 artifact_pages=9 table_pages=4 stack_pages=36 handoff_pages=256",
               "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF8000A000 handoff=FFFFFFFF800AE000 bytes=5160 stack_top=FFFFFFFF800AD000 root=000000001DDFA000 cr3=000000001DDFA000 trap_scenario=3 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
               "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
-              "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE145-N12-SCHED-SMP-V0001-000001 entry_count=1 serial=present",
+              "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE146-N12-SCHED-APW-V0001-000001 entry_count=1 serial=present",
               "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF800AE000 bytes=5160 entry=0xFFFFFFFF8000A000 stack_top=0xFFFFFFFF800AD000 root=0x000000001DDFA000 cr3=0x000000001DDFA000 rflags_if=0 rflags_df=0",
               "POOLEOS:KERNEL:PBP1 PASS profile=development records=5 artifacts=10 production_profile_valid=0",
-              "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943 policy_sha256=190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D state_sha256=4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
+              "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453 policy_sha256=40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B state_sha256=4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33 denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
               "POOLEOS:KERNEL:TRAP-SETUP PASS contract=PKTRAP1 scenario=malformed_frame bsp=1 gdt_limit=39 idt_limit=4095 gates=5 tss=1 rsp0=1 ist1=1 ist2=2 stack_bytes=8192 if=0",
               "POOLEOS:KERNEL:TRAP-ARM PASS contract=PKTRAP1 scenario=malformed_frame vector=3 control=code_selector",
               "POOLEOS:KERNEL:TRAP-ENTER PASS contract=PKTRAP1 scenario=malformed_frame vector=3 error=0x0000000000000000 depth=1 ist=1",
@@ -7541,10 +7541,10 @@
                 {
                   "entry_virtual": "FFFFFFFF8000A000",
                   "flags": 9,
-                  "physical_base": "000000001DD01000",
+                  "physical_base": "000000001DCFF000",
                   "physical_size": 557056,
                   "role": 1,
-                  "sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168",
+                  "sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33",
                   "virtual_base": "FFFFFFFF80000000",
                   "virtual_size": 557056
                 },
@@ -7574,7 +7574,7 @@
                   "physical_base": "000000001DE60000",
                   "physical_size": 821,
                   "role": 4,
-                  "sha256": "70C705D7DCC80443807333044B67A1CC617056B1690B62557562F7B6BB02E6FF",
+                  "sha256": "BC08862FA90F23D770EA4F926BBE1A6135B78EAE7745E65857FF3AC1A75949ED",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -7604,7 +7604,7 @@
                   "physical_base": "000000001DE5D000",
                   "physical_size": 2080,
                   "role": 7,
-                  "sha256": "BF36B0ED1E71D3865A74C25BC398B4728B8823B07ABFB7BFB29D8CF3994CB59A",
+                  "sha256": "B74869FC474511B9B2B817CEC2BB3F151744C811025079180AAAA4E6A24AF4AD",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -7614,7 +7614,7 @@
                   "physical_base": "000000001E5E1000",
                   "physical_size": 2615,
                   "role": 9,
-                  "sha256": "D418B70BF2563CD42B1B86FD3E0B3E035B97CE66728F5D6F26667AC59A562858",
+                  "sha256": "A47A49D50F43987FD728F3C6FD8216A2D418E916F267E1B498685BA6CF07E561",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -7624,7 +7624,7 @@
                   "physical_base": "000000001DE5C000",
                   "physical_size": 320,
                   "role": 10,
-                  "sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+                  "sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 },
@@ -7634,7 +7634,7 @@
                   "physical_base": "000000001DE5B000",
                   "physical_size": 256,
                   "role": 11,
-                  "sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+                  "sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
                   "virtual_base": "0000000000000000",
                   "virtual_size": 0
                 }
@@ -7648,11 +7648,11 @@
                 "boot_flags": "0000000000000011",
                 "boot_slot": 1,
                 "handoff_byte_count": 5160,
-                "handoff_physical_base": "000000001DA5F000",
+                "handoff_physical_base": "000000001DA5D000",
                 "handoff_virtual_base": "FFFFFFFF800AE000",
                 "initial_stack_top_virtual": "FFFFFFFF800AD000",
                 "kernel_entry_virtual": "FFFFFFFF8000A000",
-                "kernel_physical_base": "000000001DD01000",
+                "kernel_physical_base": "000000001DCFF000",
                 "kernel_physical_size": 557056,
                 "kernel_virtual_base": "FFFFFFFF80000000",
                 "kernel_virtual_size": 557056,
@@ -7675,7 +7675,7 @@
                   "physical_address": "000000001F77E014"
                 }
               ],
-              "fnv1a64": "2A2D7C88652D4670",
+              "fnv1a64": "B737428FA97B5AEF",
               "framebuffer": {
                 "blue_mask": "000000FF",
                 "byte_count": 4096000,
@@ -7691,10 +7691,10 @@
               "kernel_artifact": {
                 "entry_virtual": "FFFFFFFF8000A000",
                 "flags": 9,
-                "physical_base": "000000001DD01000",
+                "physical_base": "000000001DCFF000",
                 "physical_size": 557056,
                 "role": 1,
-                "sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168",
+                "sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33",
                 "virtual_base": "FFFFFFFF80000000",
                 "virtual_size": 557056
               },
@@ -7766,7 +7766,7 @@
                 {
                   "attributes": "000000000000000F",
                   "kind": 1,
-                  "page_count": 7755,
+                  "page_count": 7753,
                   "physical_start": "000000001BC14000",
                   "source_type": 7
                 },
@@ -7774,14 +7774,14 @@
                   "attributes": "000000000000000F",
                   "kind": 10,
                   "page_count": 810,
-                  "physical_start": "000000001DA5F000",
+                  "physical_start": "000000001DA5D000",
                   "source_type": 2
                 },
                 {
                   "attributes": "000000000000000F",
                   "kind": 1,
-                  "page_count": 113,
-                  "physical_start": "000000001DD89000",
+                  "page_count": 115,
+                  "physical_start": "000000001DD87000",
                   "source_type": 7
                 },
                 {
@@ -8388,12 +8388,12 @@
                 }
               ],
               "memory_entry_count": 98,
-              "message_crc32": "61220196",
+              "message_crc32": "0657609A",
               "pre_exit_profile_validated": false,
               "record_count": 5,
               "required_features": "000000000000001B",
               "secret_bearing_records_present": false,
-              "sha256": "304DAF2CFAF6639F734C303A4459542577F50A05A22064458CA82A869D48F99F",
+              "sha256": "4A4836DEB2BB2E0C5FFF6C94D0E9603711713A59AC358176781AF41360FE3D1B",
               "transferable": false
             },
             "qemu_exit_code": 0,
@@ -8450,49 +8450,49 @@
     },
     "implementation_inputs": [
       {
-        "byte_count": 1650,
+        "byte_count": 1710,
         "path": "native/boot/Cargo.toml",
-        "sha256": "96F56894F9FCB9B9C787E24402062B24F64D2F81AA1F0049DF41A357A2FA377B"
+        "sha256": "D9D7945CE4DF43F44BA8307BDD80F686BA9B402677AC1115F456CAD0F83A2069"
       },
       {
-        "byte_count": 39966,
+        "byte_count": 41080,
         "path": "native/boot/src/exit.rs",
-        "sha256": "41F57BDF8B2DA3D3A02A10D3075E80F37A2AD9CD247EA56A84799DDEFAF33A14"
+        "sha256": "E58A77AF428917E142B7CE768699B4573CBFBE6F100D562E97148D3B9AFA4767"
       },
       {
         "byte_count": 18272,
         "path": "native/bootexit/src/lib.rs",
-        "sha256": "BA734FE5C45EF3C7B57F5AF8792B6FF8FB98AF105E6C5296385884C20E0ABD33"
+        "sha256": "710C1E34AC61774ED92901D1558266ED59696DA6356ECAD08EE37BBD3A8C527A"
       },
       {
         "byte_count": 2048,
         "path": "native/kernel/linker.ld",
-        "sha256": "6756381B5F93991A76FD46097B96875AACEA356F9DE19174DAF510D4B19A484D"
+        "sha256": "E499B4C4C953ABC4103EE86DDF46675A8860389B7B95F5C7D2F8EC98EED172A2"
       },
       {
         "byte_count": 447,
         "path": "native/kernel/manifest.pkm",
-        "sha256": "1EADF3567C14B6024A000D83E5812385614A83FF91968AB867F8A2C64793CEB5"
+        "sha256": "46367C48E2E28E6F979E7DF0738AA48E832068A6569A90189F765AF0880B95A7"
       },
       {
-        "byte_count": 160118,
+        "byte_count": 161091,
         "path": "native/kernel/src/arch/x86_64.rs",
-        "sha256": "6FD98AE85401A9DF224014C038024E28F0B3F805BCFBE9B7BA36B04D61BF57BC"
+        "sha256": "D651B60A6D9F308F1D7E36B1813FB60C046C3F2CF02664342AEB0D51E74F921E"
       },
       {
-        "byte_count": 63668,
+        "byte_count": 64211,
         "path": "native/kernel/src/lib.rs",
-        "sha256": "573F47022C12E4C12DFFCE7AD9691D2A89AD96C6BCBF5FE1D759F125176F6584"
+        "sha256": "037E6366057A01CAAA34004B092E0F95DC3CB97BB697D5B97D2BB38A25D4C4C6"
       },
       {
-        "byte_count": 451747,
+        "byte_count": 477211,
         "path": "native/kernel/src/main.rs",
-        "sha256": "F6E7D8422F3AE6C4DE2EC2083664770640EC73A2FF088ACDDDC78C33EA51256D"
+        "sha256": "1C2A84A0249A4433FF3CC71E02698890F52BE83C321E892672378622D90554FD"
       },
       {
         "byte_count": 23961,
         "path": "runtime/native_kernel_transfer.py",
-        "sha256": "BF2964FA64174AFC633F2633DDC17A16F2BA4300D49624416AAC00955E21A16D"
+        "sha256": "472B58541C6AC046FED242CDD79AA39C240669F73BCF70C83B7EDE739A6B84C9"
       },
       {
         "byte_count": 18054,
@@ -8518,7 +8518,7 @@
     "kernel_entry_contract": {
       "byte_count": 10872,
       "path": "specs/native-kernel-entry-contract.json",
-      "sha256": "4EF53DC62567B9641E2E4AA958805120C791432F6C80944BE49EE92227E44900"
+      "sha256": "27FEC92D3F67AD0CC8ECFB07ED9DBBC245935E9B6A0AB10EF77F12238301C994"
     },
     "kernel_transfer_contract": {
       "byte_count": 8096,
@@ -8585,13 +8585,13 @@
               {
                 "contract_id": "PBART1",
                 "file_bytes": 821,
-                "file_sha256": "70C705D7DCC80443807333044B67A1CC617056B1690B62557562F7B6BB02E6FF",
-                "loaded_fnv1a64": "51BD3361671D0B1C",
+                "file_sha256": "BC08862FA90F23D770EA4F926BBE1A6135B78EAE7745E65857FF3AC1A75949ED",
+                "loaded_fnv1a64": "AC452FE5C4E0E467",
                 "manifest_id": "d_symbols",
                 "page_count": 1,
                 "path": "EFI/POOLEOS/SYMBOLS.PBA",
                 "payload_bytes": 725,
-                "payload_sha256": "9F7E0DE4109F09C9CD173E17EA0ECC41BAD16121894A8E3B74EE4D7FAAAA464C",
+                "payload_sha256": "929B5827E7AE80F607EB945BEA729BC63E6D31863C017BE4224BAF85BE466671",
                 "role": 4,
                 "role_name": "symbols",
                 "version": 1
@@ -8627,13 +8627,13 @@
               {
                 "contract_id": "PBART1",
                 "file_bytes": 2080,
-                "file_sha256": "BF36B0ED1E71D3865A74C25BC398B4728B8823B07ABFB7BFB29D8CF3994CB59A",
-                "loaded_fnv1a64": "A0FE5C6E34589DDE",
+                "file_sha256": "B74869FC474511B9B2B817CEC2BB3F151744C811025079180AAAA4E6A24AF4AD",
+                "loaded_fnv1a64": "31277A673C355E53",
                 "manifest_id": "g_policy",
                 "page_count": 1,
                 "path": "EFI/POOLEOS/POLICY.PBA",
                 "payload_bytes": 1984,
-                "payload_sha256": "A7C6A4B8B829019B1F97D9A97FDD5A2931BE5174A5192AADF5FC3B47F4184987",
+                "payload_sha256": "0B81D4E63F15A8C3B95E49755B78993EBE9D6FE86CC45BF219A6F27C10D011F2",
                 "role": 7,
                 "role_name": "policy",
                 "version": 1
@@ -8641,7 +8641,7 @@
             ],
             "contract_id": "PBART1",
             "file_bytes": 8761,
-            "fnv1a64": "39813B9E8BCABACA",
+            "fnv1a64": "2DB4A9F17F90F07C",
             "measured": false,
             "page_count": 6,
             "semantics_applied": false,
@@ -8715,7 +8715,7 @@
                 "virtual_size": 756
               }
             ],
-            "sha256": "851E2D5780442A9685438CA17835F9B03ED769B3A809DEF237FE2AE90B3D1F03",
+            "sha256": "0F394E73CD23ADAC2F74178D16A13BB1223025B0A3EEFAFEDED84C967A05BA9F",
             "subsystem": 10,
             "timestamp": 0
           },
@@ -8742,7 +8742,7 @@
               "byte_count": 208384,
               "cluster_count": 407,
               "path": "EFI/BOOT/BOOTX64.EFI",
-              "sha256": "851E2D5780442A9685438CA17835F9B03ED769B3A809DEF237FE2AE90B3D1F03"
+              "sha256": "0F394E73CD23ADAC2F74178D16A13BB1223025B0A3EEFAFEDED84C967A05BA9F"
             },
             {
               "byte_count": 229,
@@ -8754,13 +8754,13 @@
               "byte_count": 2615,
               "cluster_count": 6,
               "path": "EFI/POOLEOS/SYSTEM_A.PBM",
-              "sha256": "D418B70BF2563CD42B1B86FD3E0B3E035B97CE66728F5D6F26667AC59A562858"
+              "sha256": "A47A49D50F43987FD728F3C6FD8216A2D418E916F267E1B498685BA6CF07E561"
             },
             {
-              "byte_count": 476808,
-              "cluster_count": 932,
+              "byte_count": 485000,
+              "cluster_count": 948,
               "path": "EFI/POOLEOS/KERNEL.ELF",
-              "sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168"
+              "sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33"
             },
             {
               "byte_count": 1860,
@@ -8778,7 +8778,7 @@
               "byte_count": 821,
               "cluster_count": 2,
               "path": "EFI/POOLEOS/SYMBOLS.PBA",
-              "sha256": "70C705D7DCC80443807333044B67A1CC617056B1690B62557562F7B6BB02E6FF"
+              "sha256": "BC08862FA90F23D770EA4F926BBE1A6135B78EAE7745E65857FF3AC1A75949ED"
             },
             {
               "byte_count": 1504,
@@ -8796,19 +8796,19 @@
               "byte_count": 2080,
               "cluster_count": 5,
               "path": "EFI/POOLEOS/POLICY.PBA",
-              "sha256": "BF36B0ED1E71D3865A74C25BC398B4728B8823B07ABFB7BFB29D8CF3994CB59A"
+              "sha256": "B74869FC474511B9B2B817CEC2BB3F151744C811025079180AAAA4E6A24AF4AD"
             },
             {
               "byte_count": 320,
               "cluster_count": 1,
               "path": "EFI/POOLEOS/TRUST.PBT",
-              "sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D"
+              "sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B"
             },
             {
               "byte_count": 256,
               "cluster_count": 1,
               "path": "EFI/POOLEOS/TRUSTST.PBS",
-              "sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB"
+              "sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33"
             }
           ],
           "firmware": {
@@ -8898,7 +8898,7 @@
             "protective_mbr_valid": true,
             "sector_bytes": 512,
             "sector_count": 131072,
-            "sha256": "75FEF0BA5411464C3041B09458B4109A7718351663A2007FC1355077E0F2DD24"
+            "sha256": "35D5FB70C6FBD0BD898EE16DEE2311D82E9B3E06E8F7296369363FD6B03E2BE6"
           },
           "initial_system": {
             "activation_allowed": false,
@@ -8952,17 +8952,17 @@
             "payload_bytes": 8185,
             "policy_payload_digests_bound": true,
             "proof_id": "N5-INNER-LIVE-PARSE-001",
-            "retained_set_sha256": "27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943",
+            "retained_set_sha256": "8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453",
             "state_writes": 0
           },
           "kernel": {
-            "loaded_fnv1a64": "F25DA6C8C3BF1ABB",
-            "loaded_sha256": "A8A26DF55F902FB8DB7F07C3B953703734AA7EC2C410C1548B3297CECFA6853A",
+            "loaded_fnv1a64": "55D5E5D592AD7A52",
+            "loaded_sha256": "779F6D34049C26ACA86A61A46DB3C9A44A850556C6656E7E057900D6A9D71FD6",
             "plan": {
               "entry_offset": 40960,
               "entry_physical": 33595392,
               "entry_virtual": 18446744071562108928,
-              "file_size": 476808,
+              "file_size": 485000,
               "image_size": 557056,
               "mappings": [
                 {
@@ -8971,26 +8971,26 @@
                   "virtual_offset": 0
                 },
                 {
-                  "memory_size": 376832,
+                  "memory_size": 389120,
                   "permissions": "rx",
                   "virtual_offset": 40960
                 },
                 {
-                  "memory_size": 57344,
+                  "memory_size": 53248,
                   "permissions": "r",
-                  "virtual_offset": 417792
+                  "virtual_offset": 430080
                 },
                 {
-                  "memory_size": 81920,
+                  "memory_size": 73728,
                   "permissions": "rw",
-                  "virtual_offset": 475136
+                  "virtual_offset": 483328
                 }
               ],
               "physical_base": 33554432,
-              "relocation_address": 417856,
-              "relocation_count": 1181,
-              "relro_offset": 417792,
-              "relro_size": 57344,
+              "relocation_address": 430144,
+              "relocation_count": 1222,
+              "relro_offset": 430080,
+              "relro_size": 53248,
               "segments": [
                 {
                   "file_offset": 0,
@@ -9001,17 +9001,17 @@
                 },
                 {
                   "file_offset": 40960,
-                  "file_size": 376832,
-                  "memory_size": 376832,
+                  "file_size": 389120,
+                  "memory_size": 389120,
                   "permissions": "rx",
                   "virtual_offset": 40960
                 },
                 {
-                  "file_offset": 417792,
-                  "file_size": 59016,
-                  "memory_size": 139264,
+                  "file_offset": 430080,
+                  "file_size": 54920,
+                  "memory_size": 126976,
                   "permissions": "rw",
-                  "virtual_offset": 417792
+                  "virtual_offset": 430080
                 }
               ],
               "virtual_base": 18446744071562067968
@@ -9022,12 +9022,12 @@
             "artifacts": [
               {
                 "entry_contract": "PKENTRY1",
-                "file_bytes": 476808,
+                "file_bytes": 485000,
                 "format": "PKELF1",
                 "id": "a_kernel",
                 "image_bytes": 557056,
                 "path": "\\EFI\\POOLEOS\\KERNEL.ELF",
-                "sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168",
+                "sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33",
                 "type": "kernel",
                 "version": 1
               },
@@ -9060,7 +9060,7 @@
                 "id": "d_symbols",
                 "image_bytes": 0,
                 "path": "\\EFI\\POOLEOS\\SYMBOLS.PBA",
-                "sha256": "70C705D7DCC80443807333044B67A1CC617056B1690B62557562F7B6BB02E6FF",
+                "sha256": "BC08862FA90F23D770EA4F926BBE1A6135B78EAE7745E65857FF3AC1A75949ED",
                 "type": "symbols",
                 "version": 1
               },
@@ -9093,18 +9093,18 @@
                 "id": "g_policy",
                 "image_bytes": 0,
                 "path": "\\EFI\\POOLEOS\\POLICY.PBA",
-                "sha256": "BF36B0ED1E71D3865A74C25BC398B4728B8823B07ABFB7BFB29D8CF3994CB59A",
+                "sha256": "B74869FC474511B9B2B817CEC2BB3F151744C811025079180AAAA4E6A24AF4AD",
                 "type": "policy",
                 "version": 1
               }
             ],
             "byte_count": 2615,
-            "kernel_sha256_prefix": "9C23236E85A6D2C7",
+            "kernel_sha256_prefix": "D11591395FDD8CD7",
             "manifest_id": "PSM-CYCLE107-SLOT1",
             "manifest_id_hash": "4A2625333244591C",
             "manifest_version": 1,
             "minimum_secure_version": 1,
-            "sha256": "D418B70BF2563CD42B1B86FD3E0B3E035B97CE66728F5D6F26667AC59A562858",
+            "sha256": "A47A49D50F43987FD728F3C6FD8216A2D418E916F267E1B498685BA6CF07E561",
             "slot": 1
           },
           "microcode": {
@@ -9177,7 +9177,7 @@
               "ppol_activation_receipt_store"
             ],
             "authority_created": false,
-            "bundle_sha256": "A7C6A4B8B829019B1F97D9A97FDD5A2931BE5174A5192AADF5FC3B47F4184987",
+            "bundle_sha256": "0B81D4E63F15A8C3B95E49755B78993EBE9D6FE86CC45BF219A6F27C10D011F2",
             "bundle_version": 1,
             "capability_rule_count": 11,
             "contract_id": "PPOL1",
@@ -9186,7 +9186,7 @@
             "initial_system_cross_bound": true,
             "initial_system_sha256": "FFE7243CEE75963D84905E6C9BF9F0D04310EEDBF097757C32E0EBE30FA0C3ED",
             "mode_count": 6,
-            "outer_payload_sha256": "A7C6A4B8B829019B1F97D9A97FDD5A2931BE5174A5192AADF5FC3B47F4184987",
+            "outer_payload_sha256": "0B81D4E63F15A8C3B95E49755B78993EBE9D6FE86CC45BF219A6F27C10D011F2",
             "physical_media_written": false,
             "policy_decision_applied": false,
             "pooleboot_enforced": false,
@@ -9257,31 +9257,31 @@
               "psym_activation_diagnostics_authority"
             ],
             "authority_created": false,
-            "bundle_sha256": "9F7E0DE4109F09C9CD173E17EA0ECC41BAD16121894A8E3B74EE4D7FAAAA464C",
+            "bundle_sha256": "929B5827E7AE80F607EB945BEA729BC63E6D31863C017BE4224BAF85BE466671",
             "bundle_version": 1,
             "contract_id": "PSYM1",
             "full_debug_file_on_media": false,
             "maximum_lookup_steps": 13,
-            "outer_payload_sha256": "9F7E0DE4109F09C9CD173E17EA0ECC41BAD16121894A8E3B74EE4D7FAAAA464C",
+            "outer_payload_sha256": "929B5827E7AE80F607EB945BEA729BC63E6D31863C017BE4224BAF85BE466671",
             "pooleboot_enforced": false,
             "poolekernel_enforced": false,
             "runtime_addresses_disclosed": false,
             "segment_count": 4,
             "string_bytes": 69,
             "summary": {
-              "body_sha256": "64F5F7F27DA80FAF3489B34B73163B5B66B9CB040678E4AD71BC246E1B719B15",
-              "build_id_sha256": "59D37099F7C948BB754AB137FDC4D5A41ED2F991F37A0583655EDC101417C219",
+              "body_sha256": "D7796B9162DFA19E61B81CF65933B43F239DF027C08730FA4BD8FC3032F807C6",
+              "build_id_sha256": "900C7B31588886B9A1E9DA985289FE3D1E74C826841F5327F0D65E09532E0C6D",
               "bundle_bytes": 725,
-              "canonical_file_sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168",
+              "canonical_file_sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33",
               "contract_id": "PSYM1",
-              "debug_file_sha256": "AF7A1AD3A3111AEF73E9E7737EDAD156E12F626DA6550BC9EBD01507F08334C3",
+              "debug_file_sha256": "46748EC3746FCDB5E617EDBC6E4F24C4EB8D42AE978EEFFFC7A2DE22BD05EFF4",
               "entry_offset": 40960,
               "image_bytes": 557056,
-              "preferred_loaded_sha256": "A8A26DF55F902FB8DB7F07C3B953703734AA7EC2C410C1548B3297CECFA6853A",
+              "preferred_loaded_sha256": "779F6D34049C26ACA86A61A46DB3C9A44A850556C6656E7E057900D6A9D71FD6",
               "preferred_virtual_base": 18446744071562067968,
               "segment_count": 4,
               "slide_alignment": 2097152,
-              "source_manifest_sha256": "1EADF3567C14B6024A000D83E5812385614A83FF91968AB867F8A2C64793CEB5",
+              "source_manifest_sha256": "46367C48E2E28E6F979E7DF0738AA48E832068A6569A90189F765AF0880B95A7",
               "string_bytes": 69,
               "symbol_count": 3,
               "version": "1.0",
@@ -9300,13 +9300,13 @@
             "development_unsigned": true,
             "monotonic_backend_observations": 0,
             "policy_bytes": 320,
-            "policy_sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+            "policy_sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
             "signature_verifications": 0,
             "state_authenticated": false,
             "state_backend_writable": false,
             "state_bytes": 256,
             "state_monotonic": false,
-            "state_sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+            "state_sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
             "state_source": "esp_candidate_not_persistent_authority",
             "state_writes": 0
           }
@@ -9314,7 +9314,7 @@
         "ordinary_workspace_file_only": true,
         "physical_media_write_performed": false,
         "scenario": "returning",
-        "sha256": "75FEF0BA5411464C3041B09458B4109A7718351663A2007FC1355077E0F2DD24"
+        "sha256": "35D5FB70C6FBD0BD898EE16DEE2311D82E9B3E06E8F7296369363FD6B03E2BE6"
       },
       {
         "byte_count": 67108864,
@@ -9355,13 +9355,13 @@
               {
                 "contract_id": "PBART1",
                 "file_bytes": 821,
-                "file_sha256": "70C705D7DCC80443807333044B67A1CC617056B1690B62557562F7B6BB02E6FF",
-                "loaded_fnv1a64": "51BD3361671D0B1C",
+                "file_sha256": "BC08862FA90F23D770EA4F926BBE1A6135B78EAE7745E65857FF3AC1A75949ED",
+                "loaded_fnv1a64": "AC452FE5C4E0E467",
                 "manifest_id": "d_symbols",
                 "page_count": 1,
                 "path": "EFI/POOLEOS/SYMBOLS.PBA",
                 "payload_bytes": 725,
-                "payload_sha256": "9F7E0DE4109F09C9CD173E17EA0ECC41BAD16121894A8E3B74EE4D7FAAAA464C",
+                "payload_sha256": "929B5827E7AE80F607EB945BEA729BC63E6D31863C017BE4224BAF85BE466671",
                 "role": 4,
                 "role_name": "symbols",
                 "version": 1
@@ -9397,13 +9397,13 @@
               {
                 "contract_id": "PBART1",
                 "file_bytes": 2080,
-                "file_sha256": "BF36B0ED1E71D3865A74C25BC398B4728B8823B07ABFB7BFB29D8CF3994CB59A",
-                "loaded_fnv1a64": "A0FE5C6E34589DDE",
+                "file_sha256": "B74869FC474511B9B2B817CEC2BB3F151744C811025079180AAAA4E6A24AF4AD",
+                "loaded_fnv1a64": "31277A673C355E53",
                 "manifest_id": "g_policy",
                 "page_count": 1,
                 "path": "EFI/POOLEOS/POLICY.PBA",
                 "payload_bytes": 1984,
-                "payload_sha256": "A7C6A4B8B829019B1F97D9A97FDD5A2931BE5174A5192AADF5FC3B47F4184987",
+                "payload_sha256": "0B81D4E63F15A8C3B95E49755B78993EBE9D6FE86CC45BF219A6F27C10D011F2",
                 "role": 7,
                 "role_name": "policy",
                 "version": 1
@@ -9411,7 +9411,7 @@
             ],
             "contract_id": "PBART1",
             "file_bytes": 8761,
-            "fnv1a64": "39813B9E8BCABACA",
+            "fnv1a64": "2DB4A9F17F90F07C",
             "measured": false,
             "page_count": 6,
             "semantics_applied": false,
@@ -9485,7 +9485,7 @@
                 "virtual_size": 756
               }
             ],
-            "sha256": "8BA7832CE7CDA7DC1D17087532CD4D6D5A38A54D97493660E0236AB41512164F",
+            "sha256": "5BF840E40E940F55E05AE3B01C3E950B744DFD89DE6122CA2167ED1A391A1AD6",
             "subsystem": 10,
             "timestamp": 0
           },
@@ -9512,7 +9512,7 @@
               "byte_count": 208384,
               "cluster_count": 407,
               "path": "EFI/BOOT/BOOTX64.EFI",
-              "sha256": "8BA7832CE7CDA7DC1D17087532CD4D6D5A38A54D97493660E0236AB41512164F"
+              "sha256": "5BF840E40E940F55E05AE3B01C3E950B744DFD89DE6122CA2167ED1A391A1AD6"
             },
             {
               "byte_count": 229,
@@ -9524,13 +9524,13 @@
               "byte_count": 2615,
               "cluster_count": 6,
               "path": "EFI/POOLEOS/SYSTEM_A.PBM",
-              "sha256": "D418B70BF2563CD42B1B86FD3E0B3E035B97CE66728F5D6F26667AC59A562858"
+              "sha256": "A47A49D50F43987FD728F3C6FD8216A2D418E916F267E1B498685BA6CF07E561"
             },
             {
-              "byte_count": 476808,
-              "cluster_count": 932,
+              "byte_count": 485000,
+              "cluster_count": 948,
               "path": "EFI/POOLEOS/KERNEL.ELF",
-              "sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168"
+              "sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33"
             },
             {
               "byte_count": 1860,
@@ -9548,7 +9548,7 @@
               "byte_count": 821,
               "cluster_count": 2,
               "path": "EFI/POOLEOS/SYMBOLS.PBA",
-              "sha256": "70C705D7DCC80443807333044B67A1CC617056B1690B62557562F7B6BB02E6FF"
+              "sha256": "BC08862FA90F23D770EA4F926BBE1A6135B78EAE7745E65857FF3AC1A75949ED"
             },
             {
               "byte_count": 1504,
@@ -9566,19 +9566,19 @@
               "byte_count": 2080,
               "cluster_count": 5,
               "path": "EFI/POOLEOS/POLICY.PBA",
-              "sha256": "BF36B0ED1E71D3865A74C25BC398B4728B8823B07ABFB7BFB29D8CF3994CB59A"
+              "sha256": "B74869FC474511B9B2B817CEC2BB3F151744C811025079180AAAA4E6A24AF4AD"
             },
             {
               "byte_count": 320,
               "cluster_count": 1,
               "path": "EFI/POOLEOS/TRUST.PBT",
-              "sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D"
+              "sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B"
             },
             {
               "byte_count": 256,
               "cluster_count": 1,
               "path": "EFI/POOLEOS/TRUSTST.PBS",
-              "sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB"
+              "sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33"
             }
           ],
           "firmware": {
@@ -9668,7 +9668,7 @@
             "protective_mbr_valid": true,
             "sector_bytes": 512,
             "sector_count": 131072,
-            "sha256": "C49F41A27C38D9E1B7DD686432366AAE833BB4E807416881F95AB212B4862511"
+            "sha256": "24F7BFF4AF4CB3F79300C7199C73322DD8D01C5870186E96639606CDEB3F29B7"
           },
           "initial_system": {
             "activation_allowed": false,
@@ -9722,17 +9722,17 @@
             "payload_bytes": 8185,
             "policy_payload_digests_bound": true,
             "proof_id": "N5-INNER-LIVE-PARSE-001",
-            "retained_set_sha256": "27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943",
+            "retained_set_sha256": "8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453",
             "state_writes": 0
           },
           "kernel": {
-            "loaded_fnv1a64": "F25DA6C8C3BF1ABB",
-            "loaded_sha256": "A8A26DF55F902FB8DB7F07C3B953703734AA7EC2C410C1548B3297CECFA6853A",
+            "loaded_fnv1a64": "55D5E5D592AD7A52",
+            "loaded_sha256": "779F6D34049C26ACA86A61A46DB3C9A44A850556C6656E7E057900D6A9D71FD6",
             "plan": {
               "entry_offset": 40960,
               "entry_physical": 33595392,
               "entry_virtual": 18446744071562108928,
-              "file_size": 476808,
+              "file_size": 485000,
               "image_size": 557056,
               "mappings": [
                 {
@@ -9741,26 +9741,26 @@
                   "virtual_offset": 0
                 },
                 {
-                  "memory_size": 376832,
+                  "memory_size": 389120,
                   "permissions": "rx",
                   "virtual_offset": 40960
                 },
                 {
-                  "memory_size": 57344,
+                  "memory_size": 53248,
                   "permissions": "r",
-                  "virtual_offset": 417792
+                  "virtual_offset": 430080
                 },
                 {
-                  "memory_size": 81920,
+                  "memory_size": 73728,
                   "permissions": "rw",
-                  "virtual_offset": 475136
+                  "virtual_offset": 483328
                 }
               ],
               "physical_base": 33554432,
-              "relocation_address": 417856,
-              "relocation_count": 1181,
-              "relro_offset": 417792,
-              "relro_size": 57344,
+              "relocation_address": 430144,
+              "relocation_count": 1222,
+              "relro_offset": 430080,
+              "relro_size": 53248,
               "segments": [
                 {
                   "file_offset": 0,
@@ -9771,17 +9771,17 @@
                 },
                 {
                   "file_offset": 40960,
-                  "file_size": 376832,
-                  "memory_size": 376832,
+                  "file_size": 389120,
+                  "memory_size": 389120,
                   "permissions": "rx",
                   "virtual_offset": 40960
                 },
                 {
-                  "file_offset": 417792,
-                  "file_size": 59016,
-                  "memory_size": 139264,
+                  "file_offset": 430080,
+                  "file_size": 54920,
+                  "memory_size": 126976,
                   "permissions": "rw",
-                  "virtual_offset": 417792
+                  "virtual_offset": 430080
                 }
               ],
               "virtual_base": 18446744071562067968
@@ -9792,12 +9792,12 @@
             "artifacts": [
               {
                 "entry_contract": "PKENTRY1",
-                "file_bytes": 476808,
+                "file_bytes": 485000,
                 "format": "PKELF1",
                 "id": "a_kernel",
                 "image_bytes": 557056,
                 "path": "\\EFI\\POOLEOS\\KERNEL.ELF",
-                "sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168",
+                "sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33",
                 "type": "kernel",
                 "version": 1
               },
@@ -9830,7 +9830,7 @@
                 "id": "d_symbols",
                 "image_bytes": 0,
                 "path": "\\EFI\\POOLEOS\\SYMBOLS.PBA",
-                "sha256": "70C705D7DCC80443807333044B67A1CC617056B1690B62557562F7B6BB02E6FF",
+                "sha256": "BC08862FA90F23D770EA4F926BBE1A6135B78EAE7745E65857FF3AC1A75949ED",
                 "type": "symbols",
                 "version": 1
               },
@@ -9863,18 +9863,18 @@
                 "id": "g_policy",
                 "image_bytes": 0,
                 "path": "\\EFI\\POOLEOS\\POLICY.PBA",
-                "sha256": "BF36B0ED1E71D3865A74C25BC398B4728B8823B07ABFB7BFB29D8CF3994CB59A",
+                "sha256": "B74869FC474511B9B2B817CEC2BB3F151744C811025079180AAAA4E6A24AF4AD",
                 "type": "policy",
                 "version": 1
               }
             ],
             "byte_count": 2615,
-            "kernel_sha256_prefix": "9C23236E85A6D2C7",
+            "kernel_sha256_prefix": "D11591395FDD8CD7",
             "manifest_id": "PSM-CYCLE107-SLOT1",
             "manifest_id_hash": "4A2625333244591C",
             "manifest_version": 1,
             "minimum_secure_version": 1,
-            "sha256": "D418B70BF2563CD42B1B86FD3E0B3E035B97CE66728F5D6F26667AC59A562858",
+            "sha256": "A47A49D50F43987FD728F3C6FD8216A2D418E916F267E1B498685BA6CF07E561",
             "slot": 1
           },
           "microcode": {
@@ -9947,7 +9947,7 @@
               "ppol_activation_receipt_store"
             ],
             "authority_created": false,
-            "bundle_sha256": "A7C6A4B8B829019B1F97D9A97FDD5A2931BE5174A5192AADF5FC3B47F4184987",
+            "bundle_sha256": "0B81D4E63F15A8C3B95E49755B78993EBE9D6FE86CC45BF219A6F27C10D011F2",
             "bundle_version": 1,
             "capability_rule_count": 11,
             "contract_id": "PPOL1",
@@ -9956,7 +9956,7 @@
             "initial_system_cross_bound": true,
             "initial_system_sha256": "FFE7243CEE75963D84905E6C9BF9F0D04310EEDBF097757C32E0EBE30FA0C3ED",
             "mode_count": 6,
-            "outer_payload_sha256": "A7C6A4B8B829019B1F97D9A97FDD5A2931BE5174A5192AADF5FC3B47F4184987",
+            "outer_payload_sha256": "0B81D4E63F15A8C3B95E49755B78993EBE9D6FE86CC45BF219A6F27C10D011F2",
             "physical_media_written": false,
             "policy_decision_applied": false,
             "pooleboot_enforced": false,
@@ -10027,31 +10027,31 @@
               "psym_activation_diagnostics_authority"
             ],
             "authority_created": false,
-            "bundle_sha256": "9F7E0DE4109F09C9CD173E17EA0ECC41BAD16121894A8E3B74EE4D7FAAAA464C",
+            "bundle_sha256": "929B5827E7AE80F607EB945BEA729BC63E6D31863C017BE4224BAF85BE466671",
             "bundle_version": 1,
             "contract_id": "PSYM1",
             "full_debug_file_on_media": false,
             "maximum_lookup_steps": 13,
-            "outer_payload_sha256": "9F7E0DE4109F09C9CD173E17EA0ECC41BAD16121894A8E3B74EE4D7FAAAA464C",
+            "outer_payload_sha256": "929B5827E7AE80F607EB945BEA729BC63E6D31863C017BE4224BAF85BE466671",
             "pooleboot_enforced": false,
             "poolekernel_enforced": false,
             "runtime_addresses_disclosed": false,
             "segment_count": 4,
             "string_bytes": 69,
             "summary": {
-              "body_sha256": "64F5F7F27DA80FAF3489B34B73163B5B66B9CB040678E4AD71BC246E1B719B15",
-              "build_id_sha256": "59D37099F7C948BB754AB137FDC4D5A41ED2F991F37A0583655EDC101417C219",
+              "body_sha256": "D7796B9162DFA19E61B81CF65933B43F239DF027C08730FA4BD8FC3032F807C6",
+              "build_id_sha256": "900C7B31588886B9A1E9DA985289FE3D1E74C826841F5327F0D65E09532E0C6D",
               "bundle_bytes": 725,
-              "canonical_file_sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168",
+              "canonical_file_sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33",
               "contract_id": "PSYM1",
-              "debug_file_sha256": "AF7A1AD3A3111AEF73E9E7737EDAD156E12F626DA6550BC9EBD01507F08334C3",
+              "debug_file_sha256": "46748EC3746FCDB5E617EDBC6E4F24C4EB8D42AE978EEFFFC7A2DE22BD05EFF4",
               "entry_offset": 40960,
               "image_bytes": 557056,
-              "preferred_loaded_sha256": "A8A26DF55F902FB8DB7F07C3B953703734AA7EC2C410C1548B3297CECFA6853A",
+              "preferred_loaded_sha256": "779F6D34049C26ACA86A61A46DB3C9A44A850556C6656E7E057900D6A9D71FD6",
               "preferred_virtual_base": 18446744071562067968,
               "segment_count": 4,
               "slide_alignment": 2097152,
-              "source_manifest_sha256": "1EADF3567C14B6024A000D83E5812385614A83FF91968AB867F8A2C64793CEB5",
+              "source_manifest_sha256": "46367C48E2E28E6F979E7DF0738AA48E832068A6569A90189F765AF0880B95A7",
               "string_bytes": 69,
               "symbol_count": 3,
               "version": "1.0",
@@ -10070,13 +10070,13 @@
             "development_unsigned": true,
             "monotonic_backend_observations": 0,
             "policy_bytes": 320,
-            "policy_sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+            "policy_sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
             "signature_verifications": 0,
             "state_authenticated": false,
             "state_backend_writable": false,
             "state_bytes": 256,
             "state_monotonic": false,
-            "state_sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+            "state_sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
             "state_source": "esp_candidate_not_persistent_authority",
             "state_writes": 0
           }
@@ -10084,7 +10084,7 @@
         "ordinary_workspace_file_only": true,
         "physical_media_write_performed": false,
         "scenario": "double_fault",
-        "sha256": "C49F41A27C38D9E1B7DD686432366AAE833BB4E807416881F95AB212B4862511"
+        "sha256": "24F7BFF4AF4CB3F79300C7199C73322DD8D01C5870186E96639606CDEB3F29B7"
       },
       {
         "byte_count": 67108864,
@@ -10125,13 +10125,13 @@
               {
                 "contract_id": "PBART1",
                 "file_bytes": 821,
-                "file_sha256": "70C705D7DCC80443807333044B67A1CC617056B1690B62557562F7B6BB02E6FF",
-                "loaded_fnv1a64": "51BD3361671D0B1C",
+                "file_sha256": "BC08862FA90F23D770EA4F926BBE1A6135B78EAE7745E65857FF3AC1A75949ED",
+                "loaded_fnv1a64": "AC452FE5C4E0E467",
                 "manifest_id": "d_symbols",
                 "page_count": 1,
                 "path": "EFI/POOLEOS/SYMBOLS.PBA",
                 "payload_bytes": 725,
-                "payload_sha256": "9F7E0DE4109F09C9CD173E17EA0ECC41BAD16121894A8E3B74EE4D7FAAAA464C",
+                "payload_sha256": "929B5827E7AE80F607EB945BEA729BC63E6D31863C017BE4224BAF85BE466671",
                 "role": 4,
                 "role_name": "symbols",
                 "version": 1
@@ -10167,13 +10167,13 @@
               {
                 "contract_id": "PBART1",
                 "file_bytes": 2080,
-                "file_sha256": "BF36B0ED1E71D3865A74C25BC398B4728B8823B07ABFB7BFB29D8CF3994CB59A",
-                "loaded_fnv1a64": "A0FE5C6E34589DDE",
+                "file_sha256": "B74869FC474511B9B2B817CEC2BB3F151744C811025079180AAAA4E6A24AF4AD",
+                "loaded_fnv1a64": "31277A673C355E53",
                 "manifest_id": "g_policy",
                 "page_count": 1,
                 "path": "EFI/POOLEOS/POLICY.PBA",
                 "payload_bytes": 1984,
-                "payload_sha256": "A7C6A4B8B829019B1F97D9A97FDD5A2931BE5174A5192AADF5FC3B47F4184987",
+                "payload_sha256": "0B81D4E63F15A8C3B95E49755B78993EBE9D6FE86CC45BF219A6F27C10D011F2",
                 "role": 7,
                 "role_name": "policy",
                 "version": 1
@@ -10181,7 +10181,7 @@
             ],
             "contract_id": "PBART1",
             "file_bytes": 8761,
-            "fnv1a64": "39813B9E8BCABACA",
+            "fnv1a64": "2DB4A9F17F90F07C",
             "measured": false,
             "page_count": 6,
             "semantics_applied": false,
@@ -10255,7 +10255,7 @@
                 "virtual_size": 756
               }
             ],
-            "sha256": "96615EDCE921A776FEFF3810A88AF7B5095344DEFBD1E59DBBBE6309C8797DC3",
+            "sha256": "5A3508C34C437FD7A2B5024FF12F1C6D06A14E7BD2D117D9E98D1E5D99E2AA13",
             "subsystem": 10,
             "timestamp": 0
           },
@@ -10282,7 +10282,7 @@
               "byte_count": 208384,
               "cluster_count": 407,
               "path": "EFI/BOOT/BOOTX64.EFI",
-              "sha256": "96615EDCE921A776FEFF3810A88AF7B5095344DEFBD1E59DBBBE6309C8797DC3"
+              "sha256": "5A3508C34C437FD7A2B5024FF12F1C6D06A14E7BD2D117D9E98D1E5D99E2AA13"
             },
             {
               "byte_count": 229,
@@ -10294,13 +10294,13 @@
               "byte_count": 2615,
               "cluster_count": 6,
               "path": "EFI/POOLEOS/SYSTEM_A.PBM",
-              "sha256": "D418B70BF2563CD42B1B86FD3E0B3E035B97CE66728F5D6F26667AC59A562858"
+              "sha256": "A47A49D50F43987FD728F3C6FD8216A2D418E916F267E1B498685BA6CF07E561"
             },
             {
-              "byte_count": 476808,
-              "cluster_count": 932,
+              "byte_count": 485000,
+              "cluster_count": 948,
               "path": "EFI/POOLEOS/KERNEL.ELF",
-              "sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168"
+              "sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33"
             },
             {
               "byte_count": 1860,
@@ -10318,7 +10318,7 @@
               "byte_count": 821,
               "cluster_count": 2,
               "path": "EFI/POOLEOS/SYMBOLS.PBA",
-              "sha256": "70C705D7DCC80443807333044B67A1CC617056B1690B62557562F7B6BB02E6FF"
+              "sha256": "BC08862FA90F23D770EA4F926BBE1A6135B78EAE7745E65857FF3AC1A75949ED"
             },
             {
               "byte_count": 1504,
@@ -10336,19 +10336,19 @@
               "byte_count": 2080,
               "cluster_count": 5,
               "path": "EFI/POOLEOS/POLICY.PBA",
-              "sha256": "BF36B0ED1E71D3865A74C25BC398B4728B8823B07ABFB7BFB29D8CF3994CB59A"
+              "sha256": "B74869FC474511B9B2B817CEC2BB3F151744C811025079180AAAA4E6A24AF4AD"
             },
             {
               "byte_count": 320,
               "cluster_count": 1,
               "path": "EFI/POOLEOS/TRUST.PBT",
-              "sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D"
+              "sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B"
             },
             {
               "byte_count": 256,
               "cluster_count": 1,
               "path": "EFI/POOLEOS/TRUSTST.PBS",
-              "sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB"
+              "sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33"
             }
           ],
           "firmware": {
@@ -10438,7 +10438,7 @@
             "protective_mbr_valid": true,
             "sector_bytes": 512,
             "sector_count": 131072,
-            "sha256": "153698926615A96E3F0455DABF1D1950B770C019CECF4B072B57440CB020DE27"
+            "sha256": "8C1952CB109EDAA9CB0FFE535A7942C6BCB3949525491FC870924A4D42086DF3"
           },
           "initial_system": {
             "activation_allowed": false,
@@ -10492,17 +10492,17 @@
             "payload_bytes": 8185,
             "policy_payload_digests_bound": true,
             "proof_id": "N5-INNER-LIVE-PARSE-001",
-            "retained_set_sha256": "27AE91CBAC981C48DBA99CE243F6AFF3835B0970850848AE656A2EE0C90A3943",
+            "retained_set_sha256": "8E4BA7924EBE995F216DF418E29E2EE3AB2CA624FFB883F6ABC2555F83AFE453",
             "state_writes": 0
           },
           "kernel": {
-            "loaded_fnv1a64": "F25DA6C8C3BF1ABB",
-            "loaded_sha256": "A8A26DF55F902FB8DB7F07C3B953703734AA7EC2C410C1548B3297CECFA6853A",
+            "loaded_fnv1a64": "55D5E5D592AD7A52",
+            "loaded_sha256": "779F6D34049C26ACA86A61A46DB3C9A44A850556C6656E7E057900D6A9D71FD6",
             "plan": {
               "entry_offset": 40960,
               "entry_physical": 33595392,
               "entry_virtual": 18446744071562108928,
-              "file_size": 476808,
+              "file_size": 485000,
               "image_size": 557056,
               "mappings": [
                 {
@@ -10511,26 +10511,26 @@
                   "virtual_offset": 0
                 },
                 {
-                  "memory_size": 376832,
+                  "memory_size": 389120,
                   "permissions": "rx",
                   "virtual_offset": 40960
                 },
                 {
-                  "memory_size": 57344,
+                  "memory_size": 53248,
                   "permissions": "r",
-                  "virtual_offset": 417792
+                  "virtual_offset": 430080
                 },
                 {
-                  "memory_size": 81920,
+                  "memory_size": 73728,
                   "permissions": "rw",
-                  "virtual_offset": 475136
+                  "virtual_offset": 483328
                 }
               ],
               "physical_base": 33554432,
-              "relocation_address": 417856,
-              "relocation_count": 1181,
-              "relro_offset": 417792,
-              "relro_size": 57344,
+              "relocation_address": 430144,
+              "relocation_count": 1222,
+              "relro_offset": 430080,
+              "relro_size": 53248,
               "segments": [
                 {
                   "file_offset": 0,
@@ -10541,17 +10541,17 @@
                 },
                 {
                   "file_offset": 40960,
-                  "file_size": 376832,
-                  "memory_size": 376832,
+                  "file_size": 389120,
+                  "memory_size": 389120,
                   "permissions": "rx",
                   "virtual_offset": 40960
                 },
                 {
-                  "file_offset": 417792,
-                  "file_size": 59016,
-                  "memory_size": 139264,
+                  "file_offset": 430080,
+                  "file_size": 54920,
+                  "memory_size": 126976,
                   "permissions": "rw",
-                  "virtual_offset": 417792
+                  "virtual_offset": 430080
                 }
               ],
               "virtual_base": 18446744071562067968
@@ -10562,12 +10562,12 @@
             "artifacts": [
               {
                 "entry_contract": "PKENTRY1",
-                "file_bytes": 476808,
+                "file_bytes": 485000,
                 "format": "PKELF1",
                 "id": "a_kernel",
                 "image_bytes": 557056,
                 "path": "\\EFI\\POOLEOS\\KERNEL.ELF",
-                "sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168",
+                "sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33",
                 "type": "kernel",
                 "version": 1
               },
@@ -10600,7 +10600,7 @@
                 "id": "d_symbols",
                 "image_bytes": 0,
                 "path": "\\EFI\\POOLEOS\\SYMBOLS.PBA",
-                "sha256": "70C705D7DCC80443807333044B67A1CC617056B1690B62557562F7B6BB02E6FF",
+                "sha256": "BC08862FA90F23D770EA4F926BBE1A6135B78EAE7745E65857FF3AC1A75949ED",
                 "type": "symbols",
                 "version": 1
               },
@@ -10633,18 +10633,18 @@
                 "id": "g_policy",
                 "image_bytes": 0,
                 "path": "\\EFI\\POOLEOS\\POLICY.PBA",
-                "sha256": "BF36B0ED1E71D3865A74C25BC398B4728B8823B07ABFB7BFB29D8CF3994CB59A",
+                "sha256": "B74869FC474511B9B2B817CEC2BB3F151744C811025079180AAAA4E6A24AF4AD",
                 "type": "policy",
                 "version": 1
               }
             ],
             "byte_count": 2615,
-            "kernel_sha256_prefix": "9C23236E85A6D2C7",
+            "kernel_sha256_prefix": "D11591395FDD8CD7",
             "manifest_id": "PSM-CYCLE107-SLOT1",
             "manifest_id_hash": "4A2625333244591C",
             "manifest_version": 1,
             "minimum_secure_version": 1,
-            "sha256": "D418B70BF2563CD42B1B86FD3E0B3E035B97CE66728F5D6F26667AC59A562858",
+            "sha256": "A47A49D50F43987FD728F3C6FD8216A2D418E916F267E1B498685BA6CF07E561",
             "slot": 1
           },
           "microcode": {
@@ -10717,7 +10717,7 @@
               "ppol_activation_receipt_store"
             ],
             "authority_created": false,
-            "bundle_sha256": "A7C6A4B8B829019B1F97D9A97FDD5A2931BE5174A5192AADF5FC3B47F4184987",
+            "bundle_sha256": "0B81D4E63F15A8C3B95E49755B78993EBE9D6FE86CC45BF219A6F27C10D011F2",
             "bundle_version": 1,
             "capability_rule_count": 11,
             "contract_id": "PPOL1",
@@ -10726,7 +10726,7 @@
             "initial_system_cross_bound": true,
             "initial_system_sha256": "FFE7243CEE75963D84905E6C9BF9F0D04310EEDBF097757C32E0EBE30FA0C3ED",
             "mode_count": 6,
-            "outer_payload_sha256": "A7C6A4B8B829019B1F97D9A97FDD5A2931BE5174A5192AADF5FC3B47F4184987",
+            "outer_payload_sha256": "0B81D4E63F15A8C3B95E49755B78993EBE9D6FE86CC45BF219A6F27C10D011F2",
             "physical_media_written": false,
             "policy_decision_applied": false,
             "pooleboot_enforced": false,
@@ -10797,31 +10797,31 @@
               "psym_activation_diagnostics_authority"
             ],
             "authority_created": false,
-            "bundle_sha256": "9F7E0DE4109F09C9CD173E17EA0ECC41BAD16121894A8E3B74EE4D7FAAAA464C",
+            "bundle_sha256": "929B5827E7AE80F607EB945BEA729BC63E6D31863C017BE4224BAF85BE466671",
             "bundle_version": 1,
             "contract_id": "PSYM1",
             "full_debug_file_on_media": false,
             "maximum_lookup_steps": 13,
-            "outer_payload_sha256": "9F7E0DE4109F09C9CD173E17EA0ECC41BAD16121894A8E3B74EE4D7FAAAA464C",
+            "outer_payload_sha256": "929B5827E7AE80F607EB945BEA729BC63E6D31863C017BE4224BAF85BE466671",
             "pooleboot_enforced": false,
             "poolekernel_enforced": false,
             "runtime_addresses_disclosed": false,
             "segment_count": 4,
             "string_bytes": 69,
             "summary": {
-              "body_sha256": "64F5F7F27DA80FAF3489B34B73163B5B66B9CB040678E4AD71BC246E1B719B15",
-              "build_id_sha256": "59D37099F7C948BB754AB137FDC4D5A41ED2F991F37A0583655EDC101417C219",
+              "body_sha256": "D7796B9162DFA19E61B81CF65933B43F239DF027C08730FA4BD8FC3032F807C6",
+              "build_id_sha256": "900C7B31588886B9A1E9DA985289FE3D1E74C826841F5327F0D65E09532E0C6D",
               "bundle_bytes": 725,
-              "canonical_file_sha256": "9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168",
+              "canonical_file_sha256": "D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33",
               "contract_id": "PSYM1",
-              "debug_file_sha256": "AF7A1AD3A3111AEF73E9E7737EDAD156E12F626DA6550BC9EBD01507F08334C3",
+              "debug_file_sha256": "46748EC3746FCDB5E617EDBC6E4F24C4EB8D42AE978EEFFFC7A2DE22BD05EFF4",
               "entry_offset": 40960,
               "image_bytes": 557056,
-              "preferred_loaded_sha256": "A8A26DF55F902FB8DB7F07C3B953703734AA7EC2C410C1548B3297CECFA6853A",
+              "preferred_loaded_sha256": "779F6D34049C26ACA86A61A46DB3C9A44A850556C6656E7E057900D6A9D71FD6",
               "preferred_virtual_base": 18446744071562067968,
               "segment_count": 4,
               "slide_alignment": 2097152,
-              "source_manifest_sha256": "1EADF3567C14B6024A000D83E5812385614A83FF91968AB867F8A2C64793CEB5",
+              "source_manifest_sha256": "46367C48E2E28E6F979E7DF0738AA48E832068A6569A90189F765AF0880B95A7",
               "string_bytes": 69,
               "symbol_count": 3,
               "version": "1.0",
@@ -10840,13 +10840,13 @@
             "development_unsigned": true,
             "monotonic_backend_observations": 0,
             "policy_bytes": 320,
-            "policy_sha256": "190382019CEC8877B417143A891568C6E1C2D5E6338AF55608EA0A199E08C10D",
+            "policy_sha256": "40AAE793E34202AF9652A699F64082910DE2E2E73A28203956F682A9CA19521B",
             "signature_verifications": 0,
             "state_authenticated": false,
             "state_backend_writable": false,
             "state_bytes": 256,
             "state_monotonic": false,
-            "state_sha256": "4E2F619ACBB540653A9140A57FD3665482AF4510AC6080AC823F9A89C41123FB",
+            "state_sha256": "4CCE1EC19DD3CEE49D870244C315210FA22C2B4085EA56A0DFBB4BB4825CCF33",
             "state_source": "esp_candidate_not_persistent_authority",
             "state_writes": 0
           }
@@ -10854,7 +10854,7 @@
         "ordinary_workspace_file_only": true,
         "physical_media_write_performed": false,
         "scenario": "malformed_frame",
-        "sha256": "153698926615A96E3F0455DABF1D1950B770C019CECF4B072B57440CB020DE27"
+        "sha256": "8C1952CB109EDAA9CB0FFE535A7942C6BCB3949525491FC870924A4D42086DF3"
       }
     ]
   },
