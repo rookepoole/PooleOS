@@ -148,7 +148,7 @@ def _source_audit() -> dict[str, Any]:
     if (
         'development-scheduler-smp = ["development-transfer"]' not in texts["boot_manifest"]
         or 'feature = "development-scheduler-smp"' not in texts["boot_exit"]
-        or "MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = 18" not in texts["bootexit"]
+        or "MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = 19" not in texts["bootexit"]
         or '"development-scheduler-smp"' not in texts["pooleboot_qualifier"]
     ):
         raise QualificationError("PKSCHED4 selector isolation source audit failed")

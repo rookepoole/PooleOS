@@ -72,6 +72,8 @@ pub const RESPONSE_CHECKSUM_SEED: u64 = 0x4950_4952_5350_0001;
 pub const RESCHEDULE_PAYLOAD: u64 = 0;
 pub const SHOOTDOWN_GENERATION: u64 = 2;
 pub const CALL_NOOP_TOKEN: u64 = 0x504b_4e4f_4f50_0001;
+pub const CALL_DRIVER_TIMER_TOKEN: u64 = 0x504b_4452_5652_0001;
+pub const CALL_SERVICE_RECLAIM_TOKEN: u64 = 0x504b_5352_5643_0001;
 pub const DIAGNOSTIC_TOKEN: u64 = 0x504b_4449_4147_0001;
 pub const PANIC_NOTICE_TOKEN: u64 = 0x504b_5041_4e49_0001;
 pub const STOP_TOKEN: u64 = 0x504b_5354_4f50_0001;
@@ -79,6 +81,8 @@ pub const STOP_TOKEN: u64 = 0x504b_5354_4f50_0001;
 pub const RESULT_RESCHEDULE_OBSERVED: u64 = 0x5253_4348_4544_0001;
 pub const RESULT_SHOOTDOWN_INVALIDATED: u64 = 0x5348_4f4f_5400_0002;
 pub const RESULT_CALL_ALLOWLIST_NOOP: u64 = 0x4341_4c4c_4e4f_4f50;
+pub const RESULT_CALL_DRIVER_TIMER: u64 = 0x4452_5652_5449_4d45;
+pub const RESULT_CALL_SERVICE_RECLAIM: u64 = 0x5352_5643_5243_4c4d;
 pub const RESULT_DIAGNOSTIC_OBSERVED: u64 = 0x4449_4147_4e4f_0001;
 pub const RESULT_PANIC_LATCHED: u64 = 0x5041_4e49_4300_0001;
 pub const RESULT_STOP_QUIESCED: u64 = 0x5354_4f50_0000_0001;
@@ -173,6 +177,47 @@ pub enum Operation {
     Diagnostic = 4,
     Panic = 5,
     Stop = 6,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(u8)]
+pub enum CallPayload {
+    Noop = 1,
+    DriverTimerBottomHalf = 2,
+    ServiceGenerationReclaim = 3,
+}
+
+impl CallPayload {
+    pub const ALL: [Self; 3] = [
+        Self::Noop,
+        Self::DriverTimerBottomHalf,
+        Self::ServiceGenerationReclaim,
+    ];
+
+    pub const fn token(self) -> u64 {
+        match self {
+            Self::Noop => CALL_NOOP_TOKEN,
+            Self::DriverTimerBottomHalf => CALL_DRIVER_TIMER_TOKEN,
+            Self::ServiceGenerationReclaim => CALL_SERVICE_RECLAIM_TOKEN,
+        }
+    }
+
+    pub const fn result(self) -> u64 {
+        match self {
+            Self::Noop => RESULT_CALL_ALLOWLIST_NOOP,
+            Self::DriverTimerBottomHalf => RESULT_CALL_DRIVER_TIMER,
+            Self::ServiceGenerationReclaim => RESULT_CALL_SERVICE_RECLAIM,
+        }
+    }
+
+    pub const fn from_token(token: u64) -> Option<Self> {
+        match token {
+            CALL_NOOP_TOKEN => Some(Self::Noop),
+            CALL_DRIVER_TIMER_TOKEN => Some(Self::DriverTimerBottomHalf),
+            CALL_SERVICE_RECLAIM_TOKEN => Some(Self::ServiceGenerationReclaim),
+            _ => None,
+        }
+    }
 }
 
 impl Operation {
@@ -1199,6 +1244,19 @@ impl Request {
         value.checksum = request_checksum(&value);
         value
     }
+
+    #[inline(always)]
+    pub const fn canonical_call(
+        attempt: u64,
+        sequence: u64,
+        target_apic_id: u32,
+        payload: CallPayload,
+    ) -> Self {
+        let mut value = Self::canonical(attempt, sequence, Operation::CallFunction, target_apic_id);
+        value.payload = payload.token();
+        value.checksum = request_checksum(&value);
+        value
+    }
 }
 
 pub const fn request_checksum(request: &Request) -> u64 {
@@ -1229,7 +1287,11 @@ pub const fn response_checksum(snapshot: &IpiSnapshot) -> u64 {
 
 #[cfg(not(target_os = "none"))]
 fn payload_valid(operation: Operation, payload: u64) -> bool {
-    payload == operation.payload()
+    if operation == Operation::CallFunction {
+        CallPayload::from_token(payload).is_some()
+    } else {
+        payload == operation.payload()
+    }
 }
 
 #[cfg(not(target_os = "none"))]
@@ -1496,6 +1558,41 @@ pub fn validate_scheduler_final(
     validate_final(&normalized, expected_target_apic_id, timeout_count)
 }
 
+pub fn validate_ap_worker_final(
+    snapshot: &IpiSnapshot,
+    expected_target_apic_id: u32,
+    timeout_count: u32,
+) -> Result<(), Error> {
+    if snapshot.ack_attempt != 8
+        || snapshot.ack_sequence != 7
+        || snapshot.last_accepted_sequence != 7
+        || snapshot.delivery_count != 8
+        || snapshot.eoi_count != 8
+        || snapshot.accepted_count != 7
+        || snapshot.denied_count != 1
+        || snapshot.reschedule_count != 0
+        || snapshot.shootdown_count != 1
+        || snapshot.call_function_count != 4
+        || snapshot.diagnostic_count != 1
+        || snapshot.panic_count != 0
+        || snapshot.stop_count != 1
+        || snapshot.response_checksum != response_checksum(snapshot)
+    {
+        return Err(Error::Counter);
+    }
+    let mut normalized = *snapshot;
+    normalized.ack_attempt = LIVE_FINAL_ATTEMPT;
+    normalized.ack_sequence = LIVE_FINAL_SEQUENCE;
+    normalized.last_accepted_sequence = LIVE_FINAL_SEQUENCE;
+    normalized.delivery_count = LIVE_DELIVERY_COUNT;
+    normalized.eoi_count = LIVE_DELIVERY_COUNT;
+    normalized.accepted_count = LIVE_ACCEPTED_COUNT;
+    normalized.denied_count = LIVE_DENIED_COUNT;
+    normalized.call_function_count = 0;
+    normalized.response_checksum = response_checksum(&normalized);
+    validate_final(&normalized, expected_target_apic_id, timeout_count)
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TransactionStage {
     Empty,
@@ -1724,6 +1821,25 @@ mod tests {
             }
             assert_ne!(hostile.checksum, request_checksum(&hostile));
         }
+    }
+
+    #[test]
+    fn call_function_accepts_only_three_typed_payloads() {
+        for payload in CallPayload::ALL {
+            let request = Request::canonical_call(1, 1, 1, payload);
+            assert_eq!(request.payload, payload.token());
+            assert_eq!(
+                validate_request(&request, Operation::CallFunction, 1, 0, 0, false),
+                Ok(())
+            );
+        }
+        let mut forged = Request::canonical_call(1, 1, 1, CallPayload::Noop);
+        forged.payload = 0xdead_beef;
+        forged.checksum = request_checksum(&forged);
+        assert_eq!(
+            validate_request(&forged, Operation::CallFunction, 1, 0, 0, false),
+            Err(ERROR_PAYLOAD)
+        );
     }
 
     #[test]

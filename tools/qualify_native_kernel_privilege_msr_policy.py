@@ -258,7 +258,7 @@ def _linked_machine_audit(toolchain_root: Path, temporary_root: Path) -> tuple[d
         for name in (
             "poole_ap_ipi_trampoline_protected_entry",
             "poole_ap_ipi_trampoline_long_entry",
-            "PooleKernelLinked::run_smp_ipi",
+            "PooleKernelLinked::run_smp_ipi_internal",
             "PooleKernelLinked::run_smp_first_ap",
             "PooleKernelLinked::run_smp_percpu_runtime",
             "PooleKernelLinked::arch::x86_64::observe_cpu_policy",
@@ -273,7 +273,7 @@ def _linked_machine_audit(toolchain_root: Path, temporary_root: Path) -> tuple[d
     expected_function_counts = {
         "poole_ap_ipi_trampoline_protected_entry": {"rdmsr": 1, "wrmsr": 1},
         "poole_ap_ipi_trampoline_long_entry": {"rdmsr": 1, "wrmsr": 0},
-        "PooleKernelLinked::run_smp_ipi": {"rdmsr": 1, "wrmsr": 0},
+        "PooleKernelLinked::run_smp_ipi_internal": {"rdmsr": 1, "wrmsr": 0},
         "PooleKernelLinked::run_smp_first_ap": {"rdmsr": 1, "wrmsr": 0},
         "PooleKernelLinked::run_smp_percpu_runtime": {"rdmsr": 1, "wrmsr": 0},
         "PooleKernelLinked::arch::x86_64::observe_cpu_policy": {"rdmsr": 5, "wrmsr": 0},

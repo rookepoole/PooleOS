@@ -2706,8 +2706,17 @@ poole_ap_ipi_stop:
     mov ebx, {shootdown_active_generation}
     jmp .Lpoole_ap_ipi_payload_compare
 .Lpoole_ap_ipi_payload_call:
+    mov rax, qword ptr [rdi + {payload_offset}]
     mov rbx, {call_token}
-    jmp .Lpoole_ap_ipi_payload_compare
+    cmp rax, rbx
+    je .Lpoole_ap_ipi_payload_valid
+    mov rbx, {call_driver_token}
+    cmp rax, rbx
+    je .Lpoole_ap_ipi_payload_valid
+    mov rbx, {call_service_token}
+    cmp rax, rbx
+    je .Lpoole_ap_ipi_payload_valid
+    jmp .Lpoole_ap_ipi_deny_payload
 .Lpoole_ap_ipi_payload_diagnostic:
     mov rbx, {diagnostic_token}
     jmp .Lpoole_ap_ipi_payload_compare
@@ -2842,7 +2851,20 @@ poole_ap_ipi_stop:
     mov r12, {result_shootdown}
     jmp .Lpoole_ap_ipi_respond
 .Lpoole_ap_ipi_result_call:
+    mov rax, qword ptr [rdi + {payload_offset}]
+    mov rbx, {call_driver_token}
+    cmp rax, rbx
+    je .Lpoole_ap_ipi_result_call_driver
+    mov rbx, {call_service_token}
+    cmp rax, rbx
+    je .Lpoole_ap_ipi_result_call_service
     mov r12, {result_call}
+    jmp .Lpoole_ap_ipi_respond
+.Lpoole_ap_ipi_result_call_driver:
+    mov r12, {result_call_driver}
+    jmp .Lpoole_ap_ipi_respond
+.Lpoole_ap_ipi_result_call_service:
+    mov r12, {result_call_service}
     jmp .Lpoole_ap_ipi_respond
 .Lpoole_ap_ipi_result_diagnostic:
     mov r12, {result_diagnostic}
@@ -3143,12 +3165,16 @@ poole_ap_ipi_trampoline_end:
     request_checksum_seed = const smp_ipi::REQUEST_CHECKSUM_SEED,
     response_checksum_seed = const smp_ipi::RESPONSE_CHECKSUM_SEED,
     call_token = const smp_ipi::CALL_NOOP_TOKEN,
+    call_driver_token = const smp_ipi::CALL_DRIVER_TIMER_TOKEN,
+    call_service_token = const smp_ipi::CALL_SERVICE_RECLAIM_TOKEN,
     diagnostic_token = const smp_ipi::DIAGNOSTIC_TOKEN,
     panic_token = const smp_ipi::PANIC_NOTICE_TOKEN,
     stop_token = const smp_ipi::STOP_TOKEN,
     result_reschedule = const smp_ipi::RESULT_RESCHEDULE_OBSERVED,
     result_shootdown = const smp_ipi::RESULT_SHOOTDOWN_INVALIDATED,
     result_call = const smp_ipi::RESULT_CALL_ALLOWLIST_NOOP,
+    result_call_driver = const smp_ipi::RESULT_CALL_DRIVER_TIMER,
+    result_call_service = const smp_ipi::RESULT_CALL_SERVICE_RECLAIM,
     result_diagnostic = const smp_ipi::RESULT_DIAGNOSTIC_OBSERVED,
     result_panic = const smp_ipi::RESULT_PANIC_LATCHED,
     result_stop = const smp_ipi::RESULT_STOP_QUIESCED,

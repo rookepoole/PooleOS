@@ -48,7 +48,15 @@ class PdcEvidenceTests(unittest.TestCase):
         self.assertGreaterEqual(len(candidates), 26)
         self.assertEqual(self.intake["summary"]["raw_imported_count"], 0)
         self.assertTrue(all(candidate["status"] == "indexed_not_imported" for candidate in candidates))
-        self.assertTrue(all(Path(candidate["path"]).is_file() for candidate in candidates))
+        for candidate in candidates:
+            path = Path(candidate["path"])
+            self.assertTrue(path.is_absolute())
+            self.assertEqual(candidate["duplicate_of"] is None, candidate["sha256"] not in {
+                prior["sha256"] for prior in candidates if prior["id"] < candidate["id"]
+            })
+            if path.is_file():
+                self.assertEqual(path.stat().st_size, candidate["size_bytes"])
+                self.assertEqual(pdc_source_intake.sha256_file(path), candidate["sha256"])
 
     def test_contract_is_bound_to_the_exact_intake_artifact(self) -> None:
         binding = self.contract["source_binding"]

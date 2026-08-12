@@ -289,6 +289,29 @@ const EFI_ALLOCATE_ANY_PAGES: u32 = 0;
             feature = "development-scheduler-deferred"
         )
     ),
+    all(
+        feature = "development-scheduler-ap-workers",
+        any(
+            feature = "development-trap-returning",
+            feature = "development-trap-double-fault",
+            feature = "development-trap-malformed-frame",
+            feature = "development-cpu-policy",
+            feature = "development-xstate-policy",
+            feature = "development-xstate-exception",
+            feature = "development-privilege-msr-policy",
+            feature = "development-physical-memory",
+            feature = "development-virtual-memory",
+            feature = "development-active-virtual-memory",
+            feature = "development-interrupt-time",
+            feature = "development-smp-first-ap",
+            feature = "development-smp-percpu-runtime",
+            feature = "development-smp-ipi",
+            feature = "development-scheduler",
+            feature = "development-scheduler-preempt",
+            feature = "development-scheduler-deferred",
+            feature = "development-scheduler-smp"
+        )
+    ),
 ))]
 compile_error!("only one post-PKXFER1 development scenario may be selected");
 
@@ -329,6 +352,8 @@ const DEVELOPMENT_TRAP_SCENARIO: u8 = if cfg!(feature = "development-trap-return
     17
 } else if cfg!(feature = "development-scheduler-smp") {
     18
+} else if cfg!(feature = "development-scheduler-ap-workers") {
+    19
 } else {
     0
 };

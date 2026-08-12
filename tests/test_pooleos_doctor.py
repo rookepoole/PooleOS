@@ -25,7 +25,7 @@ class PooleOSDoctorTests(unittest.TestCase):
                     "pooleos:unittest",
                     [pooleos_doctor.sys.executable, "-m", "unittest", "discover", "-s", "tests"],
                     pooleos_doctor.ROOT,
-                    600,
+                    1200,
                 )
             ],
         )
