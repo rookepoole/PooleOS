@@ -12,8 +12,10 @@ CONTRACT_ID = "PKMAP1"
 RETAINED_CONTRACT_ID = "PKMAP2"
 PAGE_SIZE = 4096
 TABLE_ENTRIES = 512
-TABLE_PAGE_COUNT = 4
+TABLE_PAGE_COUNT = 5
 WINDOW_BYTES = 2 * 1024 * 1024
+RETAINED_WINDOW_BYTES = 2 * WINDOW_BYTES
+RETAINED_TABLE_ENTRIES = 2 * TABLE_ENTRIES
 MIN_VIRTUAL_BASE = 0xFFFF_FFFF_8000_0000
 MAX_VIRTUAL_EXCLUSIVE = 0xFFFF_FFFF_C000_0000
 MAX_MAPPINGS = 8
@@ -28,7 +30,7 @@ FNV_OFFSET = 0xCBF2_9CE4_8422_2325
 FNV_PRIME = 0x0000_0100_0000_01B3
 ORACLE_ORIGINAL_ROOT = 0x0010_0000
 ORACLE_TABLE_BASE = 0x0300_0000
-STACK_GUARD_LOW_PAGE = 136
+STACK_GUARD_LOW_PAGE = 143
 STACK_FIRST_PAGE = STACK_GUARD_LOW_PAGE + 1
 STACK_PAGE_COUNT = 36
 STACK_GUARD_HIGH_PAGE = STACK_FIRST_PAGE + STACK_PAGE_COUNT
@@ -428,7 +430,7 @@ def build_retained_model(
     _require(
         STACK_FIRST_PAGE + STACK_PAGE_COUNT == STACK_GUARD_HIGH_PAGE
         and STACK_GUARD_HIGH_PAGE < HANDOFF_FIRST_PAGE
-        and HANDOFF_FIRST_PAGE + HANDOFF_PAGE_COUNT <= TABLE_ENTRIES,
+        and HANDOFF_FIRST_PAGE + HANDOFF_PAGE_COUNT <= RETAINED_TABLE_ENTRIES,
         "retained virtual layout is invalid",
     )
     stack_bottom = request.virtual_base + STACK_FIRST_PAGE * PAGE_SIZE
@@ -440,7 +442,7 @@ def build_retained_model(
         and _canonical_48(stack_top - 1)
         and _canonical_48(handoff_virtual)
         and _canonical_48(handoff_end - 1)
-        and handoff_end <= request.virtual_base + WINDOW_BYTES,
+        and handoff_end <= request.virtual_base + RETAINED_WINDOW_BYTES,
         "retained virtual range is invalid",
     )
     fingerprint = FNV_OFFSET

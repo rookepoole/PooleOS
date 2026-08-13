@@ -27,6 +27,7 @@ development-scheduler-preempt = ["development-transfer"]
 development-scheduler-deferred = ["development-transfer"]
 development-scheduler-smp = ["development-transfer"]
 development-scheduler-ap-workers = ["development-transfer"]
+development-scheduler-smp-preempt = ["development-transfer"]
 
 [lib]
 name = "pooleboot"

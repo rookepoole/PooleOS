@@ -103,7 +103,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(checklist["section_count"], 171)
         self.assertEqual(checklist["coverage_status"], "pass")
         self.assertEqual(checklist["coverage_sha256"], hashlib.sha256(self.coverage_path.read_bytes()).hexdigest().upper())
-        self.assertEqual(checklist["added_requirement_count"], 53)
+        self.assertEqual(checklist["added_requirement_count"], 54)
 
     def test_phase_checklist_mapping_matches_coverage(self) -> None:
         coverage_by_phase = {item["phase_id"]: item for item in self.coverage["phase_coverage"]}
@@ -118,8 +118,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 146)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 866)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 147)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 874)
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
         self.assertTrue(native["pooleboot_exists"])
@@ -135,9 +135,9 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertFalse(historical["production_ready"])
         self.assertEqual(historical["native_promotion_role"], "historical_non_promoting")
         current = self.roadmap["baseline"]["native_consistency_release_gate"]
-        self.assertEqual(current["passed_checks"], 102)
-        self.assertEqual(current["total_checks"], 102)
-        self.assertEqual(current["artifact_count"], 99)
+        self.assertEqual(current["passed_checks"], 103)
+        self.assertEqual(current["total_checks"], 103)
+        self.assertEqual(current["artifact_count"], 100)
         self.assertEqual(current["explicit_gap_count"], 20)
         self.assertFalse(current["production_ready"])
         self.assertEqual(self.roadmap["immediate_next_move"]["id"], "N0-HW-KEY-ACQUIRE-001")
@@ -159,10 +159,10 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N12-SCHED-AP-WORKERS-001")
+        self.assertEqual(protocol["selected_move_id"], "N12-SCHED-SMP-PREEMPT-001")
         self.assertEqual(
             protocol["owner_independent_next_move_id"],
-            "N12-SCHED-SMP-PREEMPT-001",
+            "N12-CONCURRENCY-ATOMICS-001",
         )
         self.assertIn("runs/hardware_target_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_tier0_readiness.json", protocol["required_records"])
@@ -224,8 +224,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
     def test_flags_and_gaps_are_native_and_traceable(self) -> None:
         phase_ids = {phase["id"] for phase in self.roadmap["phases"]}
         flags = self.roadmap["implementation_flags"]
-        self.assertEqual(len(flags), 90)
-        self.assertEqual(len({flag["id"] for flag in flags}), 90)
+        self.assertEqual(len(flags), 91)
+        self.assertEqual(len({flag["id"] for flag in flags}), 91)
         self.assertTrue(any(flag["class"] == "STOP_SHIP" and flag["status"] == "open" for flag in flags))
         self.assertEqual(next(flag for flag in flags if flag["id"] == "FLAG-BUILDROOT-LEGACY-001")["status"], "closed")
         objectives_flag = next(flag for flag in flags if flag["id"] == "FLAG-N0-OBJECTIVES-001")
@@ -399,11 +399,16 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             flag for flag in flags if flag["id"] == "FLAG-N12-SCHED-SMP-PREEMPT-001"
         )
         self.assertEqual(smp_preemption_flag["class"], "REQUIRED")
-        self.assertEqual(smp_preemption_flag["status"], "open")
+        self.assertEqual(smp_preemption_flag["status"], "closed")
         self.assertIn(
-            "runs/native-kernel-scheduler-ap-workers-readiness.json",
+            "runs/native-kernel-scheduler-smp-preempt-readiness.json",
             smp_preemption_flag["evidence"],
         )
+        atomics_flag = next(
+            flag for flag in flags if flag["id"] == "FLAG-N12-CONCURRENCY-ATOMICS-001"
+        )
+        self.assertEqual(atomics_flag["class"], "REQUIRED")
+        self.assertEqual(atomics_flag["status"], "open")
         pooleboot_proof_flag = next(flag for flag in flags if flag["id"] == "FLAG-N5-POOLEBOOT-PROOF-001")
         self.assertEqual(pooleboot_proof_flag["class"], "REQUIRED")
         self.assertEqual(pooleboot_proof_flag["status"], "closed")
@@ -790,13 +795,14 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertIn("ADD-N12-SCHED-SMP-001", n12["added_requirement_ids"])
         self.assertIn("ADD-N12-SCHED-AP-WORKERS-001", n12["added_requirement_ids"])
         self.assertIn("ADD-N12-SCHED-SMP-PREEMPT-001", n12["added_requirement_ids"])
+        self.assertIn("ADD-N12-CONCURRENCY-ATOMICS-001", n12["added_requirement_ids"])
         self.assertTrue(
             any(
                 item.startswith("runs/native-kernel-scheduler-readiness.json:")
                 for item in n12["current_evidence"]
             )
         )
-        self.assertTrue(any("general SMP timer preemption" in item for item in n12["current_gaps"]))
+        self.assertTrue(any("AP-local timer interrupt delivery" in item for item in n12["current_gaps"]))
         self.assertTrue(
             any(
                 item.startswith(

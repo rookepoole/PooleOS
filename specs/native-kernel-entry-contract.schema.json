@@ -52,11 +52,11 @@
         "handoff_contract": {"const": "PBP1"},
         "entry_symbol": {"const": "poole_kernel_entry"},
         "entry_offset": {"const": 40960},
-        "image_memory_bytes": {"const": 557056},
-        "canonical_file_bytes": {"const": 485000},
+        "image_memory_bytes": {"const": 585728},
+        "canonical_file_bytes": {"const": 513672},
         "maximum_linked_file_bytes": {"const": 8388608},
         "maximum_relocations": {"const": 4096},
-        "build_id": {"const": "PKBUILD1-CYCLE146-N12-SCHED-APW-V0001-000001"},
+        "build_id": {"const": "PKBUILD1-CYCLE147-N12-SMP-PREEMPT-V0001-0001"},
         "segment_boundaries": {
           "type": "object",
           "additionalProperties": false,
@@ -64,9 +64,9 @@
           "properties": {
             "read_only_end": {"const": 40960},
             "text_start": {"const": 40960},
-            "text_end": {"const": 430080},
-            "relro_end": {"const": 483328},
-            "image_end": {"const": 557056}
+            "text_end": {"const": 458752},
+            "relro_end": {"const": 512000},
+            "image_end": {"const": 585728}
           }
         },
         "manifest_path": {"const": "native/kernel/manifest.pkm"},

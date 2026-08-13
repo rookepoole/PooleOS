@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_kind": "pooleos_native_checklist_coverage",
-  "status_date": "2026-08-08",
+  "status_date": "2026-08-12",
   "status": "pass",
   "source": {
     "path": "sources/requirements/sha256/a8c94719faf9428c1f133010ba2603c0270c4e1efd7327af8eab9c8c362abb3d/PooleOS_From_Scratch_Master_Checklist.md",
@@ -244,7 +244,8 @@
         "ADD-N12-SCHED-DEFERRED-001",
         "ADD-N12-SCHED-SMP-001",
         "ADD-N12-SCHED-AP-WORKERS-001",
-        "ADD-N12-SCHED-SMP-PREEMPT-001"
+        "ADD-N12-SCHED-SMP-PREEMPT-001",
+        "ADD-N12-CONCURRENCY-ATOMICS-001"
       ]
     },
     {
@@ -3037,6 +3038,16 @@
       "basis": [
         "Cycle 146 PKSCHED5 proves AP-local typed workers while explicitly excluding general SMP timer preemption",
         "PKSCHED2 BSP timer/wakeup preemption and PKSCHED4 exact-topology SMP scheduler foundations",
+        "master checklist sections 031-034"
+      ]
+    },
+    {
+      "id": "ADD-N12-CONCURRENCY-ATOMICS-001",
+      "phase_id": "N12",
+      "requirement": "Freeze typed kernel atomic operations and their compiler and x86-64 memory-order contracts; independently qualify supported load, store, exchange, compare-exchange, read-modify-write, fence, and interrupt-context patterns through deterministic litmus tests, generated-instruction review, invalid-order rejection, and documented progress and portability boundaries before broader lock, reclamation, or SMP scheduler promotion.",
+      "basis": [
+        "N12.1 typed-atomic and generated-assembly requirements",
+        "Cycle 147 PKSCHED6 closes bounded exact-topology preemption while explicitly leaving complete atomics, lock, and reclamation families open",
         "master checklist sections 031-034"
       ]
     },

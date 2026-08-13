@@ -33,7 +33,7 @@ The independent Python oracle reproduces the queue transforms and traces:
 - CPU 2: `4,3`;
 - CPU 3: `6,5`.
 
-The qualifier requires two exact fresh-vars QEMU runs, the five-receipt host probe, eight focused Rust tests within the 173-test kernel suite, input hashes, exact marker equality, exact frame and PBP1 equality, source audits, and 32 hostile-control categories covering 209 rejected cases. Both four-vCPU runs reproduce all 37 markers, six AP dispatches, two BSP dispatches, nine `CallFunction` executions, one timeout rollback, two stale-acknowledgement rejections, and complete cleanup.
+The qualifier requires two exact fresh-vars QEMU runs, the five-receipt host probe, eight focused Rust tests within the 189-test kernel suite, input hashes, exact marker equality, exact frame and PBP1 equality, source audits, and 32 hostile-control categories covering 209 rejected cases. Both four-vCPU runs reproduce all 37 markers, six AP dispatches, two BSP dispatches, nine `CallFunction` executions, one timeout rollback, two stale-acknowledgement rejections, and complete cleanup.
 
 The scheduler pushed PKENTRY1 beyond its former text reservation, so Cycle 145 also requalifies a coherent page-aligned image layout: entry `0xA000`, text end `0x66000`, RELRO end and writable-data start `0x74000`, and unchanged image end `0x88000`. After the downstream stack repair, the canonical kernel is 476,808 bytes with 1,181 relocations and SHA-256 `9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168`; the in-memory image remains 557,056 bytes or 136 pages with no writable-executable mapping.
 

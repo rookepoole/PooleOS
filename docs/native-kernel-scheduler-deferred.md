@@ -57,7 +57,7 @@ A separate live-kernel controller injects faults after reservation, after queue 
 
 The qualification requires:
 
-- seven focused PKSCHED3 Rust tests within 173 PooleKernel tests;
+- seven focused PKSCHED3 Rust tests within 189 PooleKernel tests;
 - a five-receipt Rust host probe checked by an independent Python priority and operation oracle;
 - two byte-identical selector-17 QEMU/OVMF runs with exactly 37 ordered markers;
 - exact screenshot and PBP1 handoff equality;

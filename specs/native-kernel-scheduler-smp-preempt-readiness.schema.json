@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.invalid/schemas/native-kernel-scheduler-smp-preempt-readiness.schema.json",
+  "title": "PooleOS PKSCHED6 Readiness",
+  "type": "object",
+  "required": ["schema_version", "artifact_kind", "status_date", "status", "contract_id", "selected_move_id", "production_ready", "production_promotion_allowed", "n12_exit_gate_satisfied", "flag_n12_sched_smp_preempt_001_closed", "phase_status", "inputs", "build", "media", "execution", "observation", "negative_controls", "claims", "nonclaims"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_scheduler_smp_preempt_readiness"},
+    "status_date": {"type": "string", "format": "date"},
+    "status": {"type": "string", "minLength": 1},
+    "contract_id": {"const": "PKSCHED6"},
+    "selected_move_id": {"const": "N12-SCHED-SMP-PREEMPT-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "n12_exit_gate_satisfied": {"const": false},
+    "flag_n12_sched_smp_preempt_001_closed": {"const": true},
+    "phase_status": {"type": "object"},
+    "inputs": {"type": "object"},
+    "build": {"type": "object"},
+    "media": {"type": "object"},
+    "execution": {"type": "object"},
+    "observation": {"type": "object"},
+    "negative_controls": {"type": "array", "minItems": 34, "maxItems": 34, "items": {"type": "object"}},
+    "claims": {"type": "object"},
+    "nonclaims": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}
