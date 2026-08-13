@@ -1593,6 +1593,44 @@ pub fn validate_ap_worker_final(
     validate_final(&normalized, expected_target_apic_id, timeout_count)
 }
 
+pub fn validate_smp_preempt_final(
+    snapshot: &IpiSnapshot,
+    expected_target_apic_id: u32,
+    timeout_count: u32,
+    expected_reschedules: u32,
+) -> Result<(), Error> {
+    let expected_final_attempt = u64::from(expected_reschedules) + 4;
+    let expected_final_sequence = u64::from(expected_reschedules) + 3;
+    if !(1..=4).contains(&expected_reschedules)
+        || snapshot.ack_attempt != expected_final_attempt
+        || snapshot.ack_sequence != expected_final_sequence
+        || snapshot.last_accepted_sequence != expected_final_sequence
+        || snapshot.delivery_count != LIVE_DELIVERY_COUNT + expected_reschedules
+        || snapshot.eoi_count != LIVE_DELIVERY_COUNT + expected_reschedules
+        || snapshot.accepted_count != LIVE_ACCEPTED_COUNT + expected_reschedules
+        || snapshot.denied_count != LIVE_DENIED_COUNT
+        || snapshot.reschedule_count != expected_reschedules
+        || snapshot.shootdown_count != 1
+        || snapshot.call_function_count != 0
+        || snapshot.diagnostic_count != 1
+        || snapshot.panic_count != 0
+        || snapshot.stop_count != 1
+        || snapshot.response_checksum != response_checksum(snapshot)
+    {
+        return Err(Error::Counter);
+    }
+    let mut normalized = *snapshot;
+    normalized.ack_attempt = LIVE_FINAL_ATTEMPT;
+    normalized.ack_sequence = LIVE_FINAL_SEQUENCE;
+    normalized.last_accepted_sequence = LIVE_FINAL_SEQUENCE;
+    normalized.delivery_count = LIVE_DELIVERY_COUNT;
+    normalized.eoi_count = LIVE_DELIVERY_COUNT;
+    normalized.accepted_count = LIVE_ACCEPTED_COUNT;
+    normalized.reschedule_count = 0;
+    normalized.response_checksum = response_checksum(&normalized);
+    validate_final(&normalized, expected_target_apic_id, timeout_count)
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TransactionStage {
     Empty,

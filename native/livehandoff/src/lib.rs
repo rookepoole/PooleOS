@@ -21,7 +21,7 @@ pub const MIN_DESCRIPTOR_BYTES: usize = 40;
 pub const MAX_DESCRIPTOR_BYTES: usize = 256;
 pub const MAX_MEMORY_ENTRIES: usize = 16_384;
 pub const MAX_TRANSCRIPT_CHUNK_BYTES: usize = 64;
-pub const RETAINED_TABLE_PAGE_COUNT: u32 = 4;
+pub const RETAINED_TABLE_PAGE_COUNT: u32 = 5;
 pub const RETAINED_STACK_PAGE_COUNT: u32 = 36;
 pub const PROFILE_ARTIFACT_COUNT: usize = 10;
 pub const PROFILE_FIRMWARE_TABLE_COUNT: usize = 1;
@@ -910,7 +910,13 @@ mod tests {
 
     fn exit_raw_map(stride: usize) -> std::vec::Vec<u8> {
         let mut value = descriptor(2, 0x0020_0000, 48, 4, stride);
-        value.extend(descriptor(2, 0x0030_0000, 4, 4, stride));
+        value.extend(descriptor(
+            2,
+            0x0030_0000,
+            u64::from(RETAINED_TABLE_PAGE_COUNT),
+            4,
+            stride,
+        ));
         value.extend(descriptor(
             2,
             0x0040_0000,

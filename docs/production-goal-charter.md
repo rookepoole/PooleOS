@@ -7,7 +7,38 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 146
+Last roadmap reconciliation: PooleOS Cycle 147
+
+Cycle 147 reconciliation (superseding current Cycle 146 implementation and
+next-move values): governance and external-key state are unchanged, and no
+key, signature, publication, privileged host probe, driver load, firmware
+change, physical-media write, tag, release, or production promotion occurred.
+The owner-independent `N12-SCHED-SMP-PREEMPT-001` move adds selector 20
+PKSCHED6 and closes only `FLAG-N12-SCHED-SMP-PREEMPT-001` for one exact
+BSP-0/AP-1,2,3 SandyBridge-minus-AVX development topology. Four
+allocation-free timer/event/frame/run-queue lanes apply deterministic cancel,
+wake, and migration ordering. Eight live reschedule IPIs and five modeled
+exact acknowledgements gate ownership; three two-tick quantum switches
+complete; one APIC-4 timeout restores source ownership and rejects its late
+acknowledgement; maximum bypass and watchdog age remain two. All eight tasks
+retire, all timer/frame owners are revoked, all three APs park, and 102 pages
+or 417,792 bytes are scrubbed, verified, and released. Five focused tests
+within 189 kernel host tests, seven exact Rust/Python host receipts, two exact
+38-marker four-vCPU boots, and 34 hostile-control categories covering 232
+rejected cases pass. The canonical kernel is 513,672 bytes in a 585,728-byte,
+143-page image with entry `0xA000`, text end `0x70000`, RELRO end and data
+start `0x7D000`, 1,264 relocations, and SHA-256
+`FCE5C1F2478651D010A2F2781B80494FD0D9721880D33CE8C66A499B35C8DAB6`.
+The retained layout now uses two leaf tables and five table pages. AP-local
+timer/frame lanes remain bounded semantic inputs; this is not AP-local timer
+interrupt delivery or general SMP. General topology/hotplug/x2APIC, complete
+atomics/lock/reclamation families, ring-3/address-space switching, full
+per-task architectural state, target execution, N12 exit, release, and
+production remain open. `production_ready=false`; the blocked external move
+remains `N0-HW-KEY-ACQUIRE-001`, while
+`ADD-N12-CONCURRENCY-ATOMICS-001` and
+`FLAG-N12-CONCURRENCY-ATOMICS-001` bind `N12-CONCURRENCY-ATOMICS-001` as the
+next owner-independent move.
 
 Cycle 146 reconciliation (superseding current Cycle 145 implementation and
 next-move values): governance and external-key state are unchanged, and no

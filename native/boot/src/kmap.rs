@@ -433,6 +433,7 @@ fn prepare_and_activate(
     let pdpt = table_mut(addresses.pdpt)?;
     let page_directory = table_mut(addresses.page_directory)?;
     let page_table = table_mut(addresses.page_table)?;
+    let retained_page_table = table_mut(addresses.retained_page_table)?;
     let retained_plan = match retained {
         Some(retained) => Some(
             poole_kmap::populate_retained(
@@ -444,6 +445,7 @@ fn prepare_and_activate(
                 pdpt,
                 page_directory,
                 page_table,
+                retained_page_table,
             )
             .map_err(|error| contract_failure("kmap.populate_retained", error))?,
         ),

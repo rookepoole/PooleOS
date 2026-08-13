@@ -15,24 +15,24 @@ fn main() {
     };
     mappings[1] = Mapping {
         virtual_offset: 0xa000,
-        byte_count: 0x56000,
+        byte_count: 0x66000,
         permissions: Permissions::READ_EXECUTE,
     };
     mappings[2] = Mapping {
-        virtual_offset: 0x60000,
-        byte_count: 0xc000,
+        virtual_offset: 0x70000,
+        byte_count: 0xd000,
         permissions: Permissions::READ,
     };
     mappings[3] = Mapping {
-        virtual_offset: 0x6c000,
-        byte_count: 0x1c000,
+        virtual_offset: 0x7d000,
+        byte_count: 0x12000,
         permissions: Permissions::READ_WRITE,
     };
     let request = Request {
         physical_base: PHYSICAL,
         virtual_base: VIRTUAL,
-        image_bytes: 0x88000,
-        page_count: 136,
+        image_bytes: 0x8F000,
+        page_count: 143,
         entry_virtual: VIRTUAL + 0xa000,
         mapping_count: 4,
         mappings,
@@ -51,6 +51,7 @@ fn main() {
     let mut pdpt = [0u64; TABLE_ENTRIES];
     let mut directory = [0u64; TABLE_ENTRIES];
     let mut table = [0u64; TABLE_ENTRIES];
+    let mut retained_table = [0u64; TABLE_ENTRIES];
     let summary = populate_retained(
         &request,
         retained,
@@ -60,6 +61,7 @@ fn main() {
         &mut pdpt,
         &mut directory,
         &mut table,
+        &mut retained_table,
     )
     .expect("canonical PKMAP2 request");
     println!(

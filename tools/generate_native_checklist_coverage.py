@@ -375,6 +375,16 @@ ADDED_REQUIREMENTS = [
         ],
     },
     {
+        "id": "ADD-N12-CONCURRENCY-ATOMICS-001",
+        "phase_id": "N12",
+        "requirement": "Freeze typed kernel atomic operations and their compiler and x86-64 memory-order contracts; independently qualify supported load, store, exchange, compare-exchange, read-modify-write, fence, and interrupt-context patterns through deterministic litmus tests, generated-instruction review, invalid-order rejection, and documented progress and portability boundaries before broader lock, reclamation, or SMP scheduler promotion.",
+        "basis": [
+            "N12.1 typed-atomic and generated-assembly requirements",
+            "Cycle 147 PKSCHED6 closes bounded exact-topology preemption while explicitly leaving complete atomics, lock, and reclamation families open",
+            "master checklist sections 031-034",
+        ],
+    },
+    {
         "id": "ADD-CAP-001",
         "phase_id": "N13",
         "requirement": "Specify unforgeable capabilities, rights attenuation, derivation provenance, transfer, revocation, generation-safe handles, quotas, object destruction, and zero ambient authority; prove no authority amplification across IPC.",
@@ -634,7 +644,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path, default=ROOT / SOURCE_RELATIVE)
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pooleos_native_checklist_coverage.json")
-    parser.add_argument("--status-date", default="2026-08-08")
+    parser.add_argument("--status-date", default="2026-08-12")
     args = parser.parse_args()
     artifact = build_coverage(args.source, args.status_date)
     args.out.parent.mkdir(parents=True, exist_ok=True)

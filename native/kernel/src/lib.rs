@@ -26,6 +26,7 @@ pub mod scheduler_ap_workers;
 pub mod scheduler_deferred;
 pub mod scheduler_preempt;
 pub mod scheduler_smp;
+pub mod scheduler_smp_preempt;
 pub mod smp;
 pub mod smp_ipi;
 pub mod smp_runtime;
@@ -47,9 +48,10 @@ pub const SCHEDULER_DEFERRED_CONTRACT_ID: &str = scheduler_deferred::CONTRACT_ID
 pub const SCHEDULER_PREEMPT_CONTRACT_ID: &str = scheduler_preempt::CONTRACT_ID;
 pub const SCHEDULER_AP_WORKERS_CONTRACT_ID: &str = scheduler_ap_workers::CONTRACT_ID;
 pub const SCHEDULER_SMP_CONTRACT_ID: &str = scheduler_smp::CONTRACT_ID;
+pub const SCHEDULER_SMP_PREEMPT_CONTRACT_ID: &str = scheduler_smp_preempt::CONTRACT_ID;
 #[used]
 #[unsafe(link_section = ".text.pkbuild_literal")]
-static BUILD_ID_BYTES: [u8; 44] = *b"PKBUILD1-CYCLE146-N12-SCHED-APW-V0001-000001";
+static BUILD_ID_BYTES: [u8; 44] = *b"PKBUILD1-CYCLE147-N12-SMP-PREEMPT-V0001-0001";
 pub const BUILD_ID: &[u8] = &BUILD_ID_BYTES;
 pub const ENTRY_OFFSET: u64 = 0xa000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;
@@ -107,6 +109,7 @@ pub enum PanicCode {
     SchedulerDeferred = 0x1019,
     SchedulerSmp = 0x101a,
     SchedulerApWorkers = 0x101b,
+    SchedulerSmpPreempt = 0x101c,
     UnexpectedReturn = 0x10ff,
 }
 
@@ -133,6 +136,7 @@ pub enum DevelopmentTrapScenario {
     SchedulerDeferred = 17,
     SchedulerSmp = 18,
     SchedulerApWorkers = 19,
+    SchedulerSmpPreempt = 20,
 }
 
 macro_rules! scenario_label {
@@ -163,6 +167,7 @@ scenario_label!(SCENARIO_SCHEDULER_PREEMPT, b"scheduler_preempt");
 scenario_label!(SCENARIO_SCHEDULER_DEFERRED, b"scheduler_deferred");
 scenario_label!(SCENARIO_SCHEDULER_SMP, b"scheduler_smp");
 scenario_label!(SCENARIO_SCHEDULER_AP_WORKERS, b"scheduler_ap_workers");
+scenario_label!(SCENARIO_SCHEDULER_SMP_PREEMPT, b"scheduler_smp_preempt");
 
 const fn scenario_label_text(bytes: &'static [u8]) -> &'static str {
     // SAFETY: every caller supplies an ASCII byte string declared immediately above.
@@ -192,6 +197,7 @@ impl DevelopmentTrapScenario {
             17 => Some(Self::SchedulerDeferred),
             18 => Some(Self::SchedulerSmp),
             19 => Some(Self::SchedulerApWorkers),
+            20 => Some(Self::SchedulerSmpPreempt),
             _ => None,
         }
     }
@@ -218,6 +224,7 @@ impl DevelopmentTrapScenario {
             Self::SchedulerDeferred => scenario_label_text(&SCENARIO_SCHEDULER_DEFERRED),
             Self::SchedulerSmp => scenario_label_text(&SCENARIO_SCHEDULER_SMP),
             Self::SchedulerApWorkers => scenario_label_text(&SCENARIO_SCHEDULER_AP_WORKERS),
+            Self::SchedulerSmpPreempt => scenario_label_text(&SCENARIO_SCHEDULER_SMP_PREEMPT),
         }
     }
 }
@@ -1797,7 +1804,11 @@ mod tests {
             DevelopmentTrapScenario::from_selector(19),
             Some(DevelopmentTrapScenario::SchedulerApWorkers)
         );
-        assert_eq!(DevelopmentTrapScenario::from_selector(20), None);
+        assert_eq!(
+            DevelopmentTrapScenario::from_selector(20),
+            Some(DevelopmentTrapScenario::SchedulerSmpPreempt)
+        );
+        assert_eq!(DevelopmentTrapScenario::from_selector(21), None);
     }
 
     #[test]

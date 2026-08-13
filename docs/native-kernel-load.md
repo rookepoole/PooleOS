@@ -52,9 +52,9 @@ equality is real but not security trust: the manifest and artifacts are
 unsigned and attacker-controllable in this development profile.
 
 PKELF1 accepts the frozen x86-64 `ET_DYN` profile, computes the four mapping
-ranges, allocates 70 loader pages, copies segments, applies 593 relative
-relocations, verifies the 286,720-byte loaded image, and binds the entry at
-offset `0x8000`.
+ranges, allocates 143 loader pages, copies segments, applies 1,264 relative
+relocations, verifies the 585,728-byte loaded image, and binds the entry at
+offset `0xA000`.
 Every file and temporary intake pool is closed or freed before the final map.
 
 Each non-kernel file has a fixed 96-byte PBART1 header. PooleBoot validates its
@@ -91,12 +91,12 @@ as persistent authority. PBTRUST1 is separate from PREC1 boot-attempt state.
 Before the first exit attempt, PooleBoot allocates and zeroes all storage needed
 after boot services become unavailable:
 
-- 136 kernel pages;
+- 143 kernel pages;
 - six distinct PBART1 page ranges, one page each in the canonical fixture;
 - one exact-file PSM1 range;
 - one exact-file PBTP1 range;
 - one exact-file PBTS1 range;
-- four PKMAP2 page-table pages;
+- five PKMAP2 page-table pages;
 - 36 kernel-stack pages with one absent guard page on each side;
 - a 256-page, one-MiB handoff allocation;
 - fixed one-MiB raw-map and 640-KiB normalized-map work pools.

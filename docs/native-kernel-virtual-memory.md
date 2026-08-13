@@ -33,8 +33,8 @@ works because allocation changes ownership category without changing admitted
 coverage. A stale or forged range set, generation, count, boundary, cache
 policy, or checksum fails closed.
 
-The live qemu64 profile covers 117,830 owned pages in eleven ranges. It leaves
-12,935 pages of physical holes unmapped. Its selector does not run the separate
+The live qemu64 profile covers 117,822 owned pages in eleven ranges. It leaves
+12,943 pages of physical holes unmapped. Its selector does not run the separate
 PKACPI1 retained-snapshot lifecycle, so the live retained-exclusion count is
 zero; a host test inserts a retained allocation and proves the resulting hole
 is excluded and untranslated.
@@ -94,19 +94,18 @@ shootdown dependency.
 ## Qualification
 
 Two fresh-vars QEMU/OVMF executions reproduce the same 40 markers, framebuffer,
-and exact PBP1 transcript. One hundred seventy-three PooleKernel host tests, 43 PKENTRY1
+and exact PBP1 transcript. One hundred eighty-nine PooleKernel host tests, 43 PKENTRY1
 controls, and 46 PKVM3 hostile controls pass. An independent Python oracle
 reconstructs PMM ranges, page-zero exclusion, DMA32 first fit, topology,
 addresses, gap counts, and the coverage checksum from the PBP1 transcript.
 
-The Cycle 145 stack-remediation requalification records 117,830 mapped pages,
-eleven ranges, 12,935 gap pages, 237 direct leaf tables, one direct directory,
-243 total table pages, checksum `0x0F19BDCE2F42383C`, 367,417 physical table
-writes, 950,626 temporary-PTE
+The Cycle 147 replay records 117,822 mapped pages, eleven ranges, 12,943 gap
+pages, 237 direct leaf tables, one direct directory, 243 total table pages,
+checksum `0xFCC0E421FB56C627`, 367,409 physical table writes, 950,674 temporary-PTE
 writes and matching bootstrap invalidations, two CR3 writes, three local leaf
-invalidations, and one generation-retirement receipt. The 476,808-byte
-canonical kernel occupies a 136-page, 557,056-byte image, has 1,181 relocations,
-and SHA-256 `9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168`.
+invalidations, and one generation-retirement receipt. The 513,672-byte
+canonical kernel occupies a 143-page, 585,728-byte image, has 1,264 relocations,
+and SHA-256 `FCE5C1F2478651D010A2F2781B80494FD0D9721880D33CE8C66A499B35C8DAB6`.
 
 ## Remaining Boundary
 

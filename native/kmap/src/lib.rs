@@ -5,12 +5,14 @@ pub const CONTRACT_ID: &str = "PKMAP1";
 pub const RETAINED_CONTRACT_ID: &str = "PKMAP2";
 pub const PAGE_SIZE: u64 = 4096;
 pub const TABLE_ENTRIES: usize = 512;
-pub const TABLE_PAGE_COUNT: usize = 4;
+pub const TABLE_PAGE_COUNT: usize = 5;
 pub const MAX_MAPPINGS: usize = 8;
 pub const WINDOW_BYTES: u64 = 2 * 1024 * 1024;
+pub const RETAINED_WINDOW_BYTES: u64 = 2 * WINDOW_BYTES;
+pub const RETAINED_TABLE_ENTRIES: usize = 2 * TABLE_ENTRIES;
 pub const MIN_VIRTUAL_BASE: u64 = 0xffff_ffff_8000_0000;
 pub const MAX_VIRTUAL_EXCLUSIVE: u64 = 0xffff_ffff_c000_0000;
-pub const STACK_GUARD_LOW_PAGE: usize = 136;
+pub const STACK_GUARD_LOW_PAGE: usize = 143;
 pub const STACK_FIRST_PAGE: usize = STACK_GUARD_LOW_PAGE + 1;
 pub const STACK_PAGE_COUNT: usize = 36;
 pub const STACK_GUARD_HIGH_PAGE: usize = STACK_FIRST_PAGE + STACK_PAGE_COUNT;
@@ -249,6 +251,7 @@ pub struct TableAddresses {
     pub pdpt: u64,
     pub page_directory: u64,
     pub page_table: u64,
+    pub retained_page_table: u64,
 }
 
 impl TableAddresses {
@@ -260,12 +263,16 @@ impl TableAddresses {
         let page_table = page_directory
             .checked_add(PAGE_SIZE)
             .ok_or(Error::TableAddress)?;
+        let retained_page_table = page_table
+            .checked_add(PAGE_SIZE)
+            .ok_or(Error::TableAddress)?;
         Ok(Self {
             original_root,
             candidate_root: allocation_base,
             pdpt,
             page_directory,
             page_table,
+            retained_page_table,
         })
     }
 }
@@ -427,6 +434,7 @@ fn request_summary(request: &Request, addresses: TableAddresses) -> Result<Summa
         addresses.pdpt,
         addresses.page_directory,
         addresses.page_table,
+        addresses.retained_page_table,
     ];
     for value in table_values {
         if value == 0 || value & (PAGE_SIZE - 1) != 0 || value & !address_mask != 0 {
@@ -436,6 +444,7 @@ fn request_summary(request: &Request, addresses: TableAddresses) -> Result<Summa
     if addresses.pdpt != addresses.candidate_root + PAGE_SIZE
         || addresses.page_directory != addresses.pdpt + PAGE_SIZE
         || addresses.page_table != addresses.page_directory + PAGE_SIZE
+        || addresses.retained_page_table != addresses.page_table + PAGE_SIZE
     {
         return Err(Error::TableAddress);
     }
@@ -739,10 +748,11 @@ fn retained_summary(
         || !is_canonical_48(stack_top_virtual - 1)
         || !is_canonical_48(handoff_virtual_base)
         || !is_canonical_48(handoff_end - 1)
-        || handoff_end > request.virtual_base + WINDOW_BYTES
+        || handoff_end > request.virtual_base + RETAINED_WINDOW_BYTES
         || STACK_FIRST_PAGE + STACK_PAGE_COUNT != STACK_GUARD_HIGH_PAGE
         || STACK_GUARD_HIGH_PAGE >= HANDOFF_FIRST_PAGE
-        || HANDOFF_FIRST_PAGE + HANDOFF_PAGE_COUNT > TABLE_ENTRIES
+        || HANDOFF_FIRST_PAGE + HANDOFF_PAGE_COUNT > RETAINED_TABLE_ENTRIES
+        || usize::from(kernel.page_directory_index) + 1 >= TABLE_ENTRIES
     {
         return Err(Error::RetainedRange);
     }
@@ -814,6 +824,7 @@ pub fn populate_retained(
     pdpt: &mut [u64; TABLE_ENTRIES],
     page_directory: &mut [u64; TABLE_ENTRIES],
     page_table: &mut [u64; TABLE_ENTRIES],
+    retained_page_table: &mut [u64; TABLE_ENTRIES],
 ) -> Result<RetainedSummary, Error> {
     let summary = retained_summary(request, addresses, retained)?;
     populate(
@@ -825,6 +836,9 @@ pub fn populate_retained(
         page_directory,
         page_table,
     )?;
+    retained_page_table.fill(0);
+    let retained_directory_index = usize::from(summary.kernel.page_directory_index) + 1;
+    page_directory[retained_directory_index] = addresses.retained_page_table | PARENT_FLAGS;
     for (index, entry) in page_table
         .iter_mut()
         .enumerate()
@@ -850,6 +864,7 @@ pub fn populate_retained(
         pdpt,
         page_directory,
         page_table,
+        retained_page_table,
     )?;
     if observed != summary {
         return Err(Error::LeafEntry);
@@ -867,6 +882,7 @@ pub fn verify_retained(
     pdpt: &[u64; TABLE_ENTRIES],
     page_directory: &[u64; TABLE_ENTRIES],
     page_table: &[u64; TABLE_ENTRIES],
+    retained_page_table: &[u64; TABLE_ENTRIES],
 ) -> Result<RetainedSummary, Error> {
     let summary = retained_summary(request, addresses, retained)?;
     let root_index = usize::from(summary.kernel.pml4_index);
@@ -899,6 +915,8 @@ pub fn verify_retained(
         };
         let expected_directory = if index == directory_target {
             addresses.page_table | PARENT_FLAGS
+        } else if index == directory_target + 1 {
+            addresses.retained_page_table | PARENT_FLAGS
         } else {
             0
         };
@@ -922,6 +940,16 @@ pub fn verify_retained(
                     Error::UnexpectedEntry
                 },
             );
+        }
+    }
+    for (index, observed) in retained_page_table.iter().enumerate() {
+        let expected = retained_leaf(request, retained, TABLE_ENTRIES + index)?;
+        if *observed != expected {
+            return Err(if expected != 0 {
+                Error::LeafEntry
+            } else {
+                Error::UnexpectedEntry
+            });
         }
     }
     Ok(summary)
@@ -1432,6 +1460,7 @@ mod tests {
         let mut pdpt = [0u64; TABLE_ENTRIES];
         let mut directory = [0u64; TABLE_ENTRIES];
         let mut table = [0u64; TABLE_ENTRIES];
+        let mut retained_table = [0u64; TABLE_ENTRIES];
         let summary = populate_retained(
             &request(),
             retained(),
@@ -1441,6 +1470,7 @@ mod tests {
             &mut pdpt,
             &mut directory,
             &mut table,
+            &mut retained_table,
         )
         .unwrap();
         assert_eq!(summary.stack_page_count, STACK_PAGE_COUNT as u32);
@@ -1476,6 +1506,7 @@ mod tests {
         let mut pdpt = [0u64; TABLE_ENTRIES];
         let mut directory = [0u64; TABLE_ENTRIES];
         let mut table = [0u64; TABLE_ENTRIES];
+        let mut retained_table = [0u64; TABLE_ENTRIES];
         populate_retained(
             &request(),
             retained(),
@@ -1485,6 +1516,7 @@ mod tests {
             &mut pdpt,
             &mut directory,
             &mut table,
+            &mut retained_table,
         )
         .unwrap();
         table[STACK_GUARD_LOW_PAGE] = 0x0700_0000 | ENTRY_PRESENT | ENTRY_NO_EXECUTE;
@@ -1498,6 +1530,7 @@ mod tests {
                 &pdpt,
                 &directory,
                 &table,
+                &retained_table,
             ),
             Err(Error::GuardPage)
         );
@@ -1660,6 +1693,7 @@ mod tests {
         let mut pdpt = [0u64; TABLE_ENTRIES];
         let mut directory = [0u64; TABLE_ENTRIES];
         let mut table = [0u64; TABLE_ENTRIES];
+        let mut retained_table = [0u64; TABLE_ENTRIES];
         let summary = populate_retained(
             &request(),
             retained(),
@@ -1669,6 +1703,7 @@ mod tests {
             &mut pdpt,
             &mut directory,
             &mut table,
+            &mut retained_table,
         )
         .unwrap();
         let mut tables = BTreeMap::new();
@@ -1676,6 +1711,7 @@ mod tests {
         tables.insert(addresses().pdpt, pdpt);
         tables.insert(addresses().page_directory, directory);
         tables.insert(addresses().page_table, table);
+        tables.insert(addresses().retained_page_table, retained_table);
         (Reader { tables }, summary)
     }
 

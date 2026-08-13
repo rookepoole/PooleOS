@@ -32,7 +32,7 @@ The independent Python oracle reproduces the exact AP traces:
 - CPU 2: `5,6,4,7`;
 - CPU 3: `9,10,8,11`.
 
-The qualifier requires two exact fresh-vars QEMU runs, six host-probe receipts, ten focused Rust tests within the 184-test kernel suite, input hashes, exact marker/frame/PBP1 equality, source and linked-handler audits, and 34 hostile-control categories covering 226 rejected cases. Both runs must reproduce all 37 markers, twelve typed `CallFunction` executions, both cancellation paths, offline rollback, flush-gated reclamation, and complete cleanup.
+The qualifier requires two exact fresh-vars QEMU runs, six host-probe receipts, ten focused Rust tests within the 189-test kernel suite, input hashes, exact marker/frame/PBP1 equality, source and linked-handler audits, and 34 hostile-control categories covering 226 rejected cases. Both runs must reproduce all 37 markers, twelve typed `CallFunction` executions, both cancellation paths, offline rollback, flush-gated reclamation, and complete cleanup.
 
 Cycle 146 also requalifies the expanded PKENTRY1 layout: entry `0xA000`, text end `0x69000`, RELRO end and writable-data start `0x76000`, and unchanged image end `0x88000`. The canonical kernel is 485,000 bytes with 1,222 relocations and SHA-256 `D11591395FDD8CD7BEEFA0D847A5C99EB133ED15F8DCDDE3392BFA499DCEDC33`; the in-memory image remains 557,056 bytes or 136 pages with no writable-executable mapping.
 

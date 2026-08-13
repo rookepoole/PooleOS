@@ -8,9 +8,11 @@ pub const ONLINE_MASK: u8 = 0x0f;
 pub const AP_MASK: u8 = 0x0e;
 pub const OFFLINE_PROBE_CPU: u8 = 4;
 pub const CALL_FUNCTION_OPERATION: u32 = 3;
+pub const RESCHEDULE_OPERATION: u32 = 1;
 pub const ACK_ACCEPTED: u32 = 1;
 pub const ERROR_NONE: u32 = 0;
 pub const CALL_FUNCTION_RESULT: u64 = 0x4341_4c4c_4e4f_4f50;
+pub const RESCHEDULE_RESULT: u64 = 0x5253_4348_4544_0001;
 pub const MAX_EQUAL_PRIORITY_BYPASS: u8 = (TASK_CAPACITY - 1) as u8;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -78,6 +80,7 @@ pub enum TransferKind {
     Migration = 2,
     Dispatch = 3,
     OfflineProbe = 4,
+    Preempt = 5,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -290,6 +293,7 @@ struct Pending {
     ticket: TransferTicket,
 }
 
+#[derive(Clone, Copy)]
 pub struct SmpScheduler {
     tasks: [Task; TASK_CAPACITY],
     queues: [Queue; CPU_COUNT],
@@ -532,7 +536,47 @@ impl SmpScheduler {
         )
     }
 
+    pub fn stage_preempt(
+        &mut self,
+        cpu: CpuId,
+        attempt: u64,
+        sequence: u64,
+    ) -> Result<TransferTicket, Error> {
+        self.require_no_pending()?;
+        self.require_online(cpu)?;
+        let current = self.current[cpu.index()].ok_or(Error::CpuNotIdle)?;
+        if self.queues[cpu.index()].len == 0 {
+            return Err(Error::QueueMissing);
+        }
+        self.install_pending(
+            TransferKind::Preempt,
+            current,
+            cpu.value(),
+            cpu.value(),
+            attempt,
+            sequence,
+        )
+    }
+
     pub fn acknowledge(&mut self, ticket: TransferTicket, ack: RemoteAck) -> Result<(), Error> {
+        self.acknowledge_expected(ticket, ack, CALL_FUNCTION_OPERATION, CALL_FUNCTION_RESULT)
+    }
+
+    pub fn acknowledge_reschedule(
+        &mut self,
+        ticket: TransferTicket,
+        ack: RemoteAck,
+    ) -> Result<(), Error> {
+        self.acknowledge_expected(ticket, ack, RESCHEDULE_OPERATION, RESCHEDULE_RESULT)
+    }
+
+    fn acknowledge_expected(
+        &mut self,
+        ticket: TransferTicket,
+        ack: RemoteAck,
+        operation: u32,
+        result: u64,
+    ) -> Result<(), Error> {
         let pending = self.pending.ok_or(Error::PendingMissing)?;
         if pending.ticket != ticket {
             return Err(Error::TicketMismatch);
@@ -540,10 +584,10 @@ impl SmpScheduler {
         if ack.target_cpu != ticket.target_cpu
             || ack.attempt != ticket.request_attempt
             || ack.sequence != ticket.request_sequence
-            || ack.operation != CALL_FUNCTION_OPERATION
+            || ack.operation != operation
             || ack.status != ACK_ACCEPTED
             || ack.error != ERROR_NONE
-            || ack.result != CALL_FUNCTION_RESULT
+            || ack.result != result
         {
             return Err(Error::Acknowledgement);
         }
@@ -594,12 +638,88 @@ impl SmpScheduler {
                     self.ap_dispatch_count = increment(self.ap_dispatch_count)?;
                 }
             }
+            TransferKind::Preempt => {
+                if self.current[target.index()] != Some(ticket.task)
+                    || self.tasks[index].state != TaskState::Running
+                {
+                    return Err(Error::State);
+                }
+                self.current[target.index()] = None;
+                self.tasks[index].state = TaskState::Runnable;
+                self.tasks[index].queued_cpu = None;
+                self.enqueue(index, target)?;
+
+                let queue_index = self.pick(target)?;
+                let next = self.queues[target.index()].remove_at(queue_index)?;
+                let next_index = self.task_index(next)?;
+                let selected_priority = self.tasks[next_index].priority;
+                for cursor in 0..self.queues[target.index()].len {
+                    let other =
+                        self.queues[target.index()].entries[cursor].ok_or(Error::Invariant)?;
+                    let other_index = self.task_index(other)?;
+                    if self.tasks[other_index].priority == selected_priority {
+                        self.tasks[other_index].bypass_count = self.tasks[other_index]
+                            .bypass_count
+                            .checked_add(1)
+                            .ok_or(Error::Counter)?;
+                        if self.tasks[other_index].bypass_count > MAX_EQUAL_PRIORITY_BYPASS {
+                            return Err(Error::Counter);
+                        }
+                        self.maximum_bypass = self
+                            .maximum_bypass
+                            .max(self.tasks[other_index].bypass_count);
+                    }
+                }
+                self.tasks[next_index].state = TaskState::Running;
+                self.tasks[next_index].owner_cpu = Some(target);
+                self.tasks[next_index].owner_epoch = increment(self.tasks[next_index].owner_epoch)?;
+                self.tasks[next_index].queued_cpu = None;
+                self.tasks[next_index].bypass_count = 0;
+                self.tasks[next_index].dispatch_count =
+                    increment(self.tasks[next_index].dispatch_count)?;
+                self.current[target.index()] = Some(next);
+                self.dispatch_count = increment(self.dispatch_count)?;
+                if target.value() == 0 {
+                    self.bsp_dispatch_count = increment(self.bsp_dispatch_count)?;
+                } else {
+                    self.ap_dispatch_count = increment(self.ap_dispatch_count)?;
+                }
+            }
             TransferKind::OfflineProbe => return Err(Error::Acknowledgement),
         }
         self.pending = None;
         self.remote_ack_count = increment(self.remote_ack_count)?;
         self.bump();
         self.validate()
+    }
+
+    pub fn cancel_task(&mut self, id: TaskId) -> Result<(), Error> {
+        self.require_no_pending()?;
+        let index = self.task_index(id)?;
+        match self.tasks[index].state {
+            TaskState::Runnable => {
+                let cpu = self.tasks[index].queued_cpu.ok_or(Error::QueueMissing)?;
+                self.queues[cpu.index()].remove(id)?;
+            }
+            TaskState::Blocked => {}
+            _ => return Err(Error::State),
+        }
+        self.tasks[index].state = TaskState::Dead;
+        self.tasks[index].owner_cpu = None;
+        self.tasks[index].queued_cpu = None;
+        self.tasks[index].bypass_count = 0;
+        self.teardown_count = increment(self.teardown_count)?;
+        self.bump();
+        self.validate()
+    }
+
+    pub fn current(&self, cpu: CpuId) -> Result<Option<TaskId>, Error> {
+        self.require_online(cpu)?;
+        Ok(self.current[cpu.index()])
+    }
+
+    pub const fn has_pending(&self) -> bool {
+        self.pending.is_some()
     }
 
     pub fn timeout(&mut self, ticket: TransferTicket) -> Result<(), Error> {

@@ -102,8 +102,8 @@
     },
     "added_requirements": {
       "type": "array",
-      "minItems": 53,
-      "maxItems": 53,
+      "minItems": 54,
+      "maxItems": 54,
       "items": {
         "type": "object",
         "additionalProperties": false,

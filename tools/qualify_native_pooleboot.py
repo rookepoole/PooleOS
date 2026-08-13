@@ -174,6 +174,7 @@ def _build_and_test(
         "development-scheduler-deferred",
         "development-scheduler-smp",
         "development-scheduler-ap-workers",
+        "development-scheduler-smp-preempt",
     }
     if development_feature is not None and development_feature not in allowed_features:
         raise QualificationError("unknown PooleBoot development feature")

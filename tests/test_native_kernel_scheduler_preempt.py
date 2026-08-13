@@ -81,12 +81,12 @@ class NativeKernelSchedulerPreemptTests(unittest.TestCase):
     def test_retained_stack_partition_preserves_map_capacities(self) -> None:
         contract = json.loads((ROOT / "specs/native-kernel-map-contract.json").read_text(encoding="utf-8"))
         layout = contract["bounded_layout"]
-        self.assertEqual(136, layout["kernel_maximum_page_count"])
+        self.assertEqual(143, layout["kernel_maximum_page_count"])
         self.assertEqual(36, layout["stack_page_count"])
         self.assertEqual(256, layout["handoff_page_count"])
         self.assertEqual(32, layout["ledger_a_page_capacity"])
         self.assertEqual(32, layout["ledger_b_page_capacity"])
-        self.assertLess(layout["mmio_guard_high_page_index"], 512)
+        self.assertLess(layout["mmio_guard_high_page_index"], 1024)
 
 
 if __name__ == "__main__":
