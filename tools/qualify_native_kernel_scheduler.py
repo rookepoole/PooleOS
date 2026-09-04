@@ -221,7 +221,7 @@ def _source_audit() -> dict[str, Any]:
         texts["boot_manifest"],
     )
     scheduler._require(
-        "pub const MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = 20;" in texts["bootexit"],
+        "pub const MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = 21;" in texts["bootexit"],
         "PKSCHED1 transfer-state selector ceiling changed",
     )
     result["files"] = {

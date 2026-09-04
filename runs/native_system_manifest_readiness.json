@@ -704,8 +704,8 @@
       }
     ],
     "pooleboot_uefi_integration": {
-      "byte_count": 206336,
-      "sha256": "B8F9EFA472A898B4A937F5E1BCEADC9581226158D6E2172CBA4FBAD061805B04",
+      "byte_count": 207360,
+      "sha256": "E4D485FEDCC189786786BF130B7EF042307132F9CE91A2157DB70E80C15CFE0B",
       "status": "pass"
     },
     "rust_host_target": "x86_64-pc-windows-msvc",

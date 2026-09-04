@@ -10,6 +10,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +31,10 @@ TARGET_CONTRACT_PATH = ROOT / "specs" / "native-target-contract.json"
 NATIVE_ROOT = ROOT / "native"
 DEFAULT_TOOLCHAIN_ROOT = ROOT / ".toolchains" / "rust-1.97.0"
 DEFAULT_OUT = ROOT / "runs" / "native_toolchain_qualification.json"
+DEFAULT_COMMAND_TIMEOUT_SECONDS = 300
+MAX_TREE_FILES = 4096
+MAX_TREE_BYTES = 1024 * 1024 * 1024
+MAX_TREE_FILE_BYTES = 512 * 1024 * 1024
 BUILD_INPUTS = (
     "native/Cargo.toml",
     "native/Cargo.lock",
@@ -58,20 +63,66 @@ def file_binding(relative_path: str) -> dict[str, Any]:
     return {"path": relative_path, "sha256": sha256_bytes(data), "byte_count": len(data)}
 
 
-def tree_binding(path: Path, role: str) -> dict[str, Any]:
+def _is_reparse_directory(path: Path) -> bool:
+    is_junction = getattr(path, "is_junction", None)
+    return path.is_symlink() or bool(is_junction and is_junction())
+
+
+def _bounded_file_digest(path: Path, *, max_file_bytes: int) -> tuple[bytes, int]:
+    byte_count = path.stat().st_size
+    if byte_count > max_file_bytes:
+        raise QualificationError(f"toolchain file exceeds byte limit: {path.name}")
+    digest = hashlib.sha256()
+    observed = 0
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            observed += len(chunk)
+            if observed > max_file_bytes:
+                raise QualificationError(f"toolchain file grew beyond byte limit: {path.name}")
+            digest.update(chunk)
+    if observed != byte_count:
+        raise QualificationError(f"toolchain file changed while hashing: {path.name}")
+    return digest.digest(), observed
+
+
+def tree_binding(
+    path: Path,
+    role: str,
+    *,
+    max_files: int = MAX_TREE_FILES,
+    max_bytes: int = MAX_TREE_BYTES,
+    max_file_bytes: int = MAX_TREE_FILE_BYTES,
+) -> dict[str, Any]:
     if not path.is_dir():
         raise QualificationError(f"missing toolchain directory for {role}")
+    root = path.resolve()
     digest = hashlib.sha256()
     file_count = 0
     byte_count = 0
-    for item in sorted((candidate for candidate in path.rglob("*") if candidate.is_file()), key=lambda p: p.as_posix()):
-        relative = item.relative_to(path).as_posix().encode("utf-8")
-        data = item.read_bytes()
+    files: list[Path] = []
+    pending = [root]
+    while pending:
+        current = pending.pop()
+        children = sorted(current.iterdir(), key=lambda item: item.name)
+        for item in children:
+            if item.is_dir():
+                if _is_reparse_directory(item):
+                    raise QualificationError(f"reparse directory in toolchain tree for {role}: {item.name}")
+                pending.append(item)
+            elif item.is_file():
+                files.append(item)
+                if len(files) > max_files:
+                    raise QualificationError(f"toolchain tree exceeds file limit for {role}")
+    for item in sorted(files, key=lambda candidate: candidate.relative_to(root).as_posix()):
+        relative = item.relative_to(root).as_posix().encode("utf-8")
+        file_digest, file_bytes = _bounded_file_digest(item, max_file_bytes=max_file_bytes)
+        byte_count += file_bytes
+        if byte_count > max_bytes:
+            raise QualificationError(f"toolchain tree exceeds byte limit for {role}")
         digest.update(relative)
         digest.update(b"\0")
-        digest.update(hashlib.sha256(data).digest())
+        digest.update(file_digest)
         file_count += 1
-        byte_count += len(data)
     if not file_count:
         raise QualificationError(f"empty toolchain directory for {role}")
     return {
@@ -93,16 +144,81 @@ def normalized_output(completed: subprocess.CompletedProcess[str]) -> str:
     return "\n".join(line.rstrip() for line in completed.stdout.replace("\r\n", "\n").split("\n") if line.rstrip())
 
 
-def run_checked(command: list[str], *, cwd: Path, env: dict[str, str]) -> str:
-    completed = subprocess.run(
-        command,
-        cwd=cwd,
-        env=env,
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        check=False,
-    )
+def _terminate_process_tree(process: subprocess.Popen[str], env: dict[str, str]) -> None:
+    if process.poll() is not None:
+        return
+    if os.name != "nt":
+        process.kill()
+        return
+    system_root = Path(env.get("SystemRoot", r"C:\Windows"))
+    taskkill = system_root / "System32" / "taskkill.exe"
+
+    def request_tree_termination() -> None:
+        try:
+            subprocess.Popen(
+                [str(taskkill), "/PID", str(process.pid), "/T", "/F"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+            )
+        except OSError:
+            pass
+
+    threading.Thread(target=request_tree_termination, daemon=True).start()
+    try:
+        process.kill()
+    except OSError:
+        pass
+
+
+def run_checked(
+    command: list[str],
+    *,
+    cwd: Path,
+    env: dict[str, str],
+    timeout_seconds: int = DEFAULT_COMMAND_TIMEOUT_SECONDS,
+) -> str:
+    state: dict[str, Any] = {}
+    finished = threading.Event()
+    cancelled = threading.Event()
+    creation_flags = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0) if os.name == "nt" else 0
+
+    def worker() -> None:
+        try:
+            process = subprocess.Popen(
+                command,
+                cwd=cwd,
+                env=env,
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                creationflags=creation_flags,
+            )
+            state["process"] = process
+            if cancelled.is_set():
+                _terminate_process_tree(process, env)
+                return
+            stdout, _ = process.communicate()
+            state["stdout"] = stdout
+            state["returncode"] = process.returncode
+        except BaseException as error:  # pragma: no cover - OS launch failure path
+            state["error"] = error
+        finally:
+            finished.set()
+
+    threading.Thread(target=worker, daemon=True).start()
+    if not finished.wait(timeout_seconds):
+        cancelled.set()
+        process = state.get("process")
+        if isinstance(process, subprocess.Popen):
+            _terminate_process_tree(process, env)
+        raise QualificationError(
+            f"command timed out after {timeout_seconds}s: {Path(command[0]).name}"
+        )
+    error = state.get("error")
+    if isinstance(error, BaseException):
+        raise QualificationError(f"command failed to start: {Path(command[0]).name}: {error}") from error
+    completed = subprocess.CompletedProcess(command, int(state["returncode"]), str(state["stdout"]))
     output = normalized_output(completed)
     if completed.returncode != 0:
         tail = "\n".join(output.splitlines()[-20:])
@@ -240,7 +356,12 @@ def negative_controls(boot_data: bytes, kernel_data: bytes, markers: dict[str, s
     return controls
 
 
-def make_report(toolchain_root: Path, status_date: str) -> tuple[dict[str, Any], dict[str, bytes]]:
+def make_report(
+    toolchain_root: Path,
+    status_date: str,
+    *,
+    command_timeout_seconds: int = DEFAULT_COMMAND_TIMEOUT_SECONDS,
+) -> tuple[dict[str, Any], dict[str, bytes]]:
     lock = json.loads(LOCK_PATH.read_text(encoding="utf-8"))
     contract = json.loads(TARGET_CONTRACT_PATH.read_text(encoding="utf-8"))
     channel = lock["toolchain"]["channel"]
@@ -256,11 +377,13 @@ def make_report(toolchain_root: Path, status_date: str) -> tuple[dict[str, Any],
             raise QualificationError(f"{role} is missing; run tools/bootstrap_native_toolchain.ps1")
 
     env = isolated_environment(toolchain_root, toolchain_bin, rustc)
+    print("NATIVE_TOOLCHAIN_QUALIFICATION STAGE versions", flush=True)
+    version_timeout = min(command_timeout_seconds, 30)
     versions = {
-        "rustc": run_checked([str(rustc), "--version", "--verbose"], cwd=ROOT, env=env),
-        "cargo": run_checked([str(cargo), "--version", "--verbose"], cwd=ROOT, env=env),
-        "rust_lld": run_checked([str(lld), "-flavor", "gnu", "--version"], cwd=ROOT, env=env),
-        "rustup": run_checked([str(rustup), "--version"], cwd=ROOT, env=env).splitlines()[0],
+        "rustc": run_checked([str(rustc), "--version", "--verbose"], cwd=ROOT, env=env, timeout_seconds=version_timeout),
+        "cargo": run_checked([str(cargo), "--version", "--verbose"], cwd=ROOT, env=env, timeout_seconds=version_timeout),
+        "rust_lld": run_checked([str(lld), "-flavor", "gnu", "--version"], cwd=ROOT, env=env, timeout_seconds=version_timeout),
+        "rustup": run_checked([str(rustup), "--version"], cwd=ROOT, env=env, timeout_seconds=version_timeout).splitlines()[0],
     }
     if lock["channel_manifest"]["rust_version"] not in versions["rustc"]:
         raise QualificationError("installed rustc does not match the locked channel manifest")
@@ -273,8 +396,17 @@ def make_report(toolchain_root: Path, status_date: str) -> tuple[dict[str, Any],
         for run_index in (1, 2):
             target_dir = temp_root / f"run-{run_index}" / "target"
             for target in contract["targets"]:
+                print(
+                    f"NATIVE_TOOLCHAIN_QUALIFICATION STAGE build run={run_index} target={target['id']}",
+                    flush=True,
+                )
                 command = build_command(cargo, target, target_dir)
-                run_checked(command, cwd=NATIVE_ROOT, env=env)
+                run_checked(
+                    command,
+                    cwd=NATIVE_ROOT,
+                    env=env,
+                    timeout_seconds=command_timeout_seconds,
+                )
                 binary = target_dir / target["triple"] / "release" / target["binary_name"]
                 if not binary.is_file():
                     raise QualificationError(f"expected build output is missing for {target['id']}")
@@ -326,6 +458,7 @@ def make_report(toolchain_root: Path, status_date: str) -> tuple[dict[str, Any],
         executable_binding(cargo, "cargo"),
         executable_binding(lld, "rust_lld"),
     ]
+    print("NATIVE_TOOLCHAIN_QUALIFICATION STAGE target_tree_hashes", flush=True)
     target_trees = [
         tree_binding(installed / "lib" / "rustlib" / "x86_64-unknown-uefi" / "lib", "rust_std_uefi"),
         tree_binding(installed / "lib" / "rustlib" / "x86_64-unknown-none" / "lib", "rust_std_none"),
@@ -398,9 +531,20 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--artifacts-dir", type=Path)
     parser.add_argument("--status-date", default="2026-07-16")
+    parser.add_argument(
+        "--command-timeout-seconds",
+        type=int,
+        default=DEFAULT_COMMAND_TIMEOUT_SECONDS,
+    )
     args = parser.parse_args(argv)
+    if not 1 <= args.command_timeout_seconds <= 3600:
+        parser.error("--command-timeout-seconds must be between 1 and 3600")
     try:
-        report, artifacts = make_report(args.toolchain_root.resolve(), args.status_date)
+        report, artifacts = make_report(
+            args.toolchain_root.resolve(),
+            args.status_date,
+            command_timeout_seconds=args.command_timeout_seconds,
+        )
     except (OSError, QualificationError, BinaryFormatError, json.JSONDecodeError) as error:
         print(f"NATIVE_TOOLCHAIN_QUALIFICATION FAIL {type(error).__name__}: {error}")
         return 1

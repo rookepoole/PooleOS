@@ -1,0 +1,215 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_kernel_atomics_contract",
+  "contract_id": "PKATOM1",
+  "selected_move_id": "N12-CONCURRENCY-ATOMICS-001",
+  "status_date": "2026-09-03",
+  "status": "candidate_typed_x86_64_atomic_substrate_single_host_non_promoting",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "phase_mapping": [
+    "N12.1"
+  ],
+  "source_requirement_ids": [
+    "031.1",
+    "ADD-N12-CONCURRENCY-ATOMICS-001"
+  ],
+  "parent_contract_ids": [
+    "PKENTRY1",
+    "PKIRQ1",
+    "PKSCHED6"
+  ],
+  "authorities": [
+    {
+      "role": "language memory-order and atomic-operation semantics",
+      "title": "Rust core::sync::atomic",
+      "url": "https://doc.rust-lang.org/core/sync/atomic/"
+    },
+    {
+      "role": "target atomic-width availability",
+      "title": "Rust Reference target_has_atomic",
+      "url": "https://doc.rust-lang.org/reference/conditional-compilation.html#target_has_atomic"
+    },
+    {
+      "role": "x86-64 processor memory ordering and locked-instruction semantics",
+      "title": "Intel 64 and IA-32 Software Developer Manual Volume 3A",
+      "url": "https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html"
+    },
+    {
+      "role": "compiler atomic lowering semantics",
+      "title": "LLVM Atomic Instructions and Concurrency Guide",
+      "url": "https://llvm.org/docs/Atomics.html"
+    }
+  ],
+  "type_surface": {
+    "integer_types": [
+      "u32",
+      "u64",
+      "usize"
+    ],
+    "pointer_type": "AtomicPtr<T>",
+    "reference_count_max": 4294967294,
+    "unsupported_widths": [
+      "u8",
+      "u16",
+      "u128"
+    ],
+    "implementation": "core::sync::atomic portable intrinsics constrained by typed PooleKernel order enums"
+  },
+  "operation_surface": [
+    "load",
+    "store",
+    "exchange",
+    "compare_exchange",
+    "compare_exchange_weak",
+    "fetch_add",
+    "fetch_sub",
+    "fetch_and",
+    "fetch_or",
+    "fetch_xor",
+    "fetch_set_bit",
+    "fetch_clear_bit",
+    "fence",
+    "compiler_fence",
+    "reference_acquire",
+    "reference_release"
+  ],
+  "order_matrix": {
+    "load_orders": 3,
+    "store_orders": 3,
+    "rmw_orders": 5,
+    "fence_orders": 4,
+    "compare_exchange_pairs": 9,
+    "rejected_combinations": 11,
+    "allowed_failure": {
+      "relaxed": [
+        "relaxed"
+      ],
+      "acquire": [
+        "acquire",
+        "relaxed"
+      ],
+      "release": [
+        "relaxed"
+      ],
+      "acq_rel": [
+        "acquire",
+        "relaxed"
+      ],
+      "seq_cst": [
+        "acquire",
+        "relaxed",
+        "seq_cst"
+      ]
+    }
+  },
+  "memory_model": {
+    "language_contract": "Rust atomic happens-before semantics; no ordering is inferred from x86 strength alone",
+    "compiler_contract": "every operation carries an explicit typed order and critical target lowering is reviewed in the linked image",
+    "x86_64_contract": "aligned 32-bit, 64-bit, and native-width atomics on ordinary write-back memory only",
+    "device_memory_boundary": "atomic wrappers do not replace volatile MMIO access or device-specific ordering",
+    "dma_boundary": "CPU atomics do not establish device or DMA coherence",
+    "aba_boundary": "pointer compare-exchange does not prevent ABA or make object reclamation safe"
+  },
+  "litmus_profiles": {
+    "publication": {
+      "threads": 2,
+      "rounds": 4096,
+      "contract": "relaxed payload followed by release publication and acquire observation",
+      "forbidden": "published sequence with stale payload"
+    },
+    "contention": {
+      "threads": 4,
+      "fetch_add_operations": 16384,
+      "compare_exchange_operations": 4096,
+      "forbidden": "lost committed increment"
+    },
+    "sequential_consistency": {
+      "threads": 2,
+      "rounds": 2048,
+      "contract": "two sequentially consistent stores followed by opposite-location loads",
+      "forbidden": "both loads observe zero"
+    }
+  },
+  "interrupt_profile": {
+    "selector": 21,
+    "parent": "PKIRQ1 qemu64 one-BSP local-APIC one-shot profile",
+    "timer_deliveries": 8,
+    "operations": [
+      "acquire publication load",
+      "acq_rel fetch_add",
+      "acq_rel fetch_or"
+    ],
+    "rule": "interrupt-context atomic calls are single-operation, allocation-free, non-sleeping, and contain no caller retry loop",
+    "cleanup": "publication, count, and bit-mask state return to zero after evidence capture"
+  },
+  "assembly_contract": {
+    "target": "x86_64-unknown-none",
+    "tool": "hash-bound workspace-local llvm-objdump",
+    "symbols": [
+      "poole_atomic_audit_load_acquire",
+      "poole_atomic_audit_store_release",
+      "poole_atomic_audit_exchange_seqcst",
+      "poole_atomic_audit_compare_exchange_acqrel",
+      "poole_atomic_audit_fetch_add_relaxed",
+      "poole_atomic_audit_fetch_or_acqrel",
+      "poole_atomic_audit_fence_seqcst"
+    ],
+    "review_rule": "each exact symbol body is extracted from the final linked kernel and matched against its operation-specific instruction class"
+  },
+  "progress_guarantees": {
+    "single_primitive": "native x86-64 atomic instruction or compiler-only order barrier as confirmed by linked audit",
+    "compare_exchange_loop": "lock-free attempt primitive but caller loops have no wait-free starvation bound",
+    "reference_count": "overflow-safe CAS loop for process context; forbidden as an unbounded interrupt-context loop",
+    "system_progress": "no global lock-free, fairness, starvation, reclamation, or scheduler-progress claim"
+  },
+  "required_negative_controls": [
+    "NEG-N12-PKATOM1-MARKER-OMISSION",
+    "NEG-N12-PKATOM1-MARKER-ORDER",
+    "NEG-N12-PKATOM1-MARKER-DUPLICATE",
+    "NEG-N12-PKATOM1-SELECTOR",
+    "NEG-N12-PKATOM1-TYPES-FIELD-MATRIX",
+    "NEG-N12-PKATOM1-ORDERS-FIELD-MATRIX",
+    "NEG-N12-PKATOM1-OPS-FIELD-MATRIX",
+    "NEG-N12-PKATOM1-IRQ-FIELD-MATRIX",
+    "NEG-N12-PKATOM1-CLAIM-BOUNDARY-FIELD-MATRIX",
+    "NEG-N12-PKATOM1-PROBE-OMISSION",
+    "NEG-N12-PKATOM1-PROBE-ORDER",
+    "NEG-N12-PKATOM1-PROBE-FIELD-MATRIX",
+    "NEG-N12-PKATOM1-ORDER-ORACLE",
+    "NEG-N12-PKATOM1-INVALID-LOAD",
+    "NEG-N12-PKATOM1-INVALID-STORE",
+    "NEG-N12-PKATOM1-INVALID-FENCE",
+    "NEG-N12-PKATOM1-CAS-FAILURE-STRENGTH",
+    "NEG-N12-PKATOM1-PUBLICATION-STALE",
+    "NEG-N12-PKATOM1-FETCH-ADD-LOSS",
+    "NEG-N12-PKATOM1-CAS-LOSS",
+    "NEG-N12-PKATOM1-SEQCST-FORBIDDEN",
+    "NEG-N12-PKATOM1-ASSEMBLY-SYMBOL",
+    "NEG-N12-PKATOM1-ASSEMBLY-INSTRUCTION",
+    "NEG-N12-PKATOM1-INTERRUPT-PUBLICATION",
+    "NEG-N12-PKATOM1-INTERRUPT-RMW",
+    "NEG-N12-PKATOM1-INTERRUPT-EOI",
+    "NEG-N12-PKATOM1-DYNAMIC-STORAGE",
+    "NEG-N12-PKATOM1-PRODUCTION-OVERCLAIM",
+    "NEG-N12-PKATOM1-INPUT-BINDING"
+  ],
+  "claims": {
+    "typed_integer_atomics_implemented": true,
+    "typed_pointer_atomics_implemented": true,
+    "invalid_memory_orders_rejected": true,
+    "overflow_safe_reference_count_implemented": true,
+    "release_acquire_publication_litmus_verified": true,
+    "contended_rmw_and_cas_litmus_verified": true,
+    "sequential_consistency_litmus_verified": true,
+    "linked_x86_64_instruction_mapping_verified": true,
+    "live_bsp_interrupt_context_verified": true,
+    "live_multi_ap_atomic_litmus_verified": false,
+    "general_lock_family_implemented": false,
+    "deferred_reclamation_implemented": false,
+    "non_x86_portability_verified": false,
+    "physical_target_tested": false,
+    "n12_exit_gate_satisfied": false,
+    "production_ready": false
+  }
+}

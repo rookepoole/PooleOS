@@ -2,16 +2,16 @@
   "artifact_kind": "pooleos_tier1_hardware_observation",
   "bindings": {
     "collector": {
-      "byte_count": 22051,
+      "byte_count": 22049,
       "path": "tools/collect_tier1_hardware.ps1",
-      "sha256": "21A7340373890AA2A5DB88958D4F04E86F6AD7510B729E429EBE226EEEE0AE82"
+      "sha256": "5A0F9C538FBE6FC8BC4BBB49114F3434208B3AE32F7034FE09AC5FA868314241"
     },
     "private_capture": {
       "artifact_kind": "pooleos_tier1_hardware_private_capture",
-      "byte_count": 108739,
+      "byte_count": 109931,
       "content_publication_allowed": false,
       "path_recorded": false,
-      "sha256": "121FAEA3AAF532F8C6C066E0C44DCB6BB9FAA5E848C7B015159C95215802017D"
+      "sha256": "B35E059EBB72257EBFB5989824DBC28475C3DBF87AA9462721B804E0BA14B145"
     },
     "probe_policy": {
       "byte_count": 8315,
@@ -242,6 +242,7 @@
       "HID\\VID_046D&PID_C53F&MI_02&COL03",
       "HID\\VID_048D&PID_5702&COL01",
       "HID\\VID_048D&PID_5702&COL02",
+      "HID\\VID_1050&PID_0402",
       "HID\\VID_1B1C&PID_1B0A&MI_00",
       "HID\\VID_1B1C&PID_1B0A&MI_01",
       "HID\\VID_1B1C&PID_1B0A&MI_02",
@@ -304,9 +305,9 @@
       "SCSI\\DISK&VEN_&PROD_CT2000BX500SSD1",
       "SCSI\\DISK&VEN_NVME&PROD_SAMSUNG_SSD_970",
       "STORAGE\\VOLUME",
-      "STORAGE\\VOLUMESNAPSHOT",
       "SWD\\COMPUTER",
       "SWD\\DRIVERENUM",
+      "SWD\\MIDISRV",
       "SWD\\MMDEVAPI",
       "SWD\\MSDAS",
       "SWD\\MSRRAS",
@@ -314,6 +315,7 @@
       "SWD\\RADIO",
       "SWD\\WPDBUSENUM",
       "SWD\\XVDDENUM",
+      "SW\\{96E080C7-143C-11D1-B40F-00A0C9223196}",
       "SW\\{EEAB7790-C514-11D1-B42B-00805FC1270E}",
       "UEFI\\RES_{00000000-0000-0000-0000-000000000000}",
       "USB\\ROOT_HUB30",
@@ -323,11 +325,8 @@
       "USB\\VID_046D&PID_C53F&MI_01",
       "USB\\VID_046D&PID_C53F&MI_02",
       "USB\\VID_048D&PID_5702",
-      "USB\\VID_04E8&PID_6860",
-      "USB\\VID_04E8&PID_6860&ADB",
-      "USB\\VID_04E8&PID_6860&MODEM",
-      "USB\\VID_04E8&PID_6860&MS_COMP_MTP&SAMSUNG_ANDROID",
       "USB\\VID_0BDA&PID_B850",
+      "USB\\VID_1050&PID_0402",
       "USB\\VID_1235&PID_8205",
       "USB\\VID_1B1C&PID_1B0A",
       "USB\\VID_1B1C&PID_1B0A&MI_00",

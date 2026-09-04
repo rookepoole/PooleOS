@@ -1,14 +1,14 @@
 {
   "schema_version": "1.0",
-  "artifact_kind": "pooleos_native_kernel_scheduler_ap_workers_readiness",
+  "artifact_kind": "pooleos_native_kernel_scheduler_smp_preempt_readiness",
   "status_date": "2026-08-12",
-  "status": "pass_single_host_two_run_sandybridge_four_vcpu_typed_ap_workers_non_promoting",
-  "contract_id": "PKSCHED5",
-  "selected_move_id": "N12-SCHED-AP-WORKERS-001",
+  "status": "pass_single_host_two_run_sandybridge_four_vcpu_ack_gated_preemption_non_promoting",
+  "contract_id": "PKSCHED6",
+  "selected_move_id": "N12-SCHED-SMP-PREEMPT-001",
   "production_ready": false,
   "production_promotion_allowed": false,
   "n12_exit_gate_satisfied": false,
-  "flag_n12_sched_ap_workers_001_closed": true,
+  "flag_n12_sched_smp_preempt_001_closed": true,
   "phase_status": {
     "N12": "partial",
     "N12.1": "partial",
@@ -72,9 +72,24 @@
         "sha256": "D651B60A6D9F308F1D7E36B1813FB60C046C3F2CF02664342AEB0D51E74F921E"
       },
       {
+        "path": "native/kernel/src/scheduler_preempt.rs",
+        "byte_count": 24328,
+        "sha256": "DD93A83C27F49D78CBFBB1A5DB026DAC2206099E226E2038595B72DC7A81D0E4"
+      },
+      {
+        "path": "native/kernel/src/scheduler_smp.rs",
+        "byte_count": 44850,
+        "sha256": "8C3C13140D867F3766F6209B1B918970BA095EA5FA35634C721D5C0509469390"
+      },
+      {
         "path": "native/kernel/src/scheduler_ap_workers.rs",
         "byte_count": 40352,
         "sha256": "E61261956C2CBDBD7B5B238FC014AC6A291BDC1E48C6D97D34DD7C12D131BBC4"
+      },
+      {
+        "path": "native/kernel/src/scheduler_smp_preempt.rs",
+        "byte_count": 31212,
+        "sha256": "136026047A7C28693585DB3FB6338096527036EEA6154DDB722F1ACE4EE5EDBA"
       },
       {
         "path": "native/kernel/src/smp_ipi.rs",
@@ -87,29 +102,29 @@
         "sha256": "322A687E6EE09E9438166EF09097C65FD00A3999448C4A7014AD88221BB4AFDD"
       },
       {
-        "path": "native/kernel/src/bin/pksched5_probe.rs",
-        "byte_count": 7033,
-        "sha256": "7CCC0E7F5C39A00EDC569B0E61137E6A85634287381FC583F43E88ECFCA0C7AD"
+        "path": "native/kernel/src/bin/pksched6_probe.rs",
+        "byte_count": 6364,
+        "sha256": "1DEAC6140ABCBF887AC2FE393C12DC8C9E788351CFC5A5B7F4749BECCACBA7D0"
       },
       {
-        "path": "runtime/native_kernel_scheduler_ap_workers.py",
-        "byte_count": 21095,
-        "sha256": "12F4F8C5B3029BDC232C155E98CE591D6B45C4E5AE79D865BF399F5D58C6477C"
+        "path": "runtime/native_kernel_scheduler_smp_preempt.py",
+        "byte_count": 18543,
+        "sha256": "D7DBE511FA946FF56E6549CFFC3E226B088DF85EB25972C78CE04A1CF96C7B2A"
       },
       {
-        "path": "specs/native-kernel-scheduler-ap-workers-contract.json",
-        "byte_count": 6603,
-        "sha256": "68F20C80E81756FE7512080B0D590F4A673DC4EAABD8E83A958303B736FC4117"
+        "path": "specs/native-kernel-scheduler-smp-preempt-contract.json",
+        "byte_count": 6554,
+        "sha256": "67AF3F55DDD437EF7E928FF868F58AE4ED009473B18CAD864F4CBC4D9A52B7AD"
       },
       {
-        "path": "specs/native-kernel-scheduler-ap-workers-contract.schema.json",
-        "byte_count": 1734,
-        "sha256": "369951B827C80C9C41D075290A0EBA3609757146F54D726E9918BA725A2766FF"
+        "path": "specs/native-kernel-scheduler-smp-preempt-contract.schema.json",
+        "byte_count": 1737,
+        "sha256": "A7B484DF133C51FB2D3276F8B1357454115034DEBE0F753B492669E844685347"
       },
       {
-        "path": "specs/native-kernel-scheduler-ap-workers-readiness.schema.json",
-        "byte_count": 1608,
-        "sha256": "9E83FF405F5B811CB51CB29CD939E897EF65AB803128CC231585C22D1BAB7C88"
+        "path": "specs/native-kernel-scheduler-smp-preempt-readiness.schema.json",
+        "byte_count": 1613,
+        "sha256": "4DA351131A26F566E6F8364054A15C5C8BB33CF9458E188185E5E42F338B8C65"
       },
       {
         "path": "tools/qualify_native_pooleboot.py",
@@ -117,19 +132,19 @@
         "sha256": "0B00EF5E11F66E1E7EE39FEA190B795E01C32F3A76AC47D17E9AA639983FFFEF"
       },
       {
-        "path": "tools/qualify_native_kernel_scheduler_ap_workers.py",
-        "byte_count": 22208,
-        "sha256": "A29D74CF254D7315484A829F6861DD455F0529A3A9499F406F9DD2FEA3919F30"
+        "path": "tools/qualify_native_kernel_scheduler_smp_preempt.py",
+        "byte_count": 22267,
+        "sha256": "B7B8E42293A5C76633F9A111891EFB33FA0F4A45F107A8A0F842AE8EAEBD8C41"
       },
       {
-        "path": "tests/test_native_kernel_scheduler_ap_workers.py",
-        "byte_count": 4738,
-        "sha256": "00E02349B4DD011E79E72D5B233605409A07FE5547580A98D594D6DF57AAC696"
+        "path": "tests/test_native_kernel_scheduler_smp_preempt.py",
+        "byte_count": 4727,
+        "sha256": "5E1AD5469A24147445F7832C25FE6416FDFEE51B058F699E1BC622F9E68CAE3F"
       },
       {
-        "path": "docs/native-kernel-scheduler-ap-workers.md",
-        "byte_count": 3979,
-        "sha256": "D020D1921F83358698733F79B14B85111E726297FF993BAE2CA2B84B97F80581"
+        "path": "docs/native-kernel-scheduler-smp-preempt.md",
+        "byte_count": 2820,
+        "sha256": "B374AF92704A7361CB7E233C871C2FD4C83B62E7854D1F074AE60F161256E006"
       }
     ]
   },
@@ -859,17 +874,17 @@
       "host_leakage_marker_count": 7,
       "host_leakage_hit_count": 0
     },
-    "scheduler_ap_workers_pooleboot": {
+    "scheduler_smp_preempt_pooleboot": {
       "host_contract_test_count": 8,
       "host_contract_test_pass_count": 8,
       "development_transfer_feature": true,
-      "selected_development_feature": "development-scheduler-ap-workers",
+      "selected_development_feature": "development-scheduler-smp-preempt",
       "clean_build_count": 2,
       "exact_clean_build_match": true,
-      "sha256": "46B56A6296E486301DEAB20B24FAF395332104DD0C899A7A9ADDD9A15FCC14CE",
+      "sha256": "89333F4D62A1FA1692BE0630EE9E6B7571E2245CB813702897B9E4819F1D25FA",
       "byte_count": 208896,
       "inspection": {
-        "sha256": "46B56A6296E486301DEAB20B24FAF395332104DD0C899A7A9ADDD9A15FCC14CE",
+        "sha256": "89333F4D62A1FA1692BE0630EE9E6B7571E2245CB813702897B9E4819F1D25FA",
         "byte_count": 208896,
         "format": "PE32+",
         "machine": 34404,
@@ -939,43 +954,62 @@
     "default_transfer_marker_absent": true,
     "host_probe": {
       "lines": [
-        "PKSCHED5:TOPOLOGY PASS cpus=4 aps=3 online_mask=0x0F ap_mask=0x0E workers=3 queues=3 capacity=15 stack_bytes_each=8192",
-        "PKSCHED5:QUEUE PASS enqueued=13 duplicate_suppressed=1 eoi_epoch=1 flush_watermark=13 queued_cancelled=1",
-        "PKSCHED5:DISPATCH PASS trace=1:1,1:2,1:0,1:3;2:5,2:6,2:4,2:7;3:9,3:10,3:8,3:11 worker_entries=4,4,4 ap_calls=12 driver_calls=9 service_calls=3 maximum_high_bypass=2",
-        "PKSCHED5:CANCEL PASS offline_cpu=4 timeouts=1 rollbacks=1 queued=1 remote_requests=1 remote_completions=1 stale_rejections=1 source_queue_restored=1",
-        "PKSCHED5:FLUSH PASS complete=1 completed=11 cancelled=2 driver_sum=177 service_generation=4 reclaimed=13 stale_id_rejected=1",
-        "PKSCHED5:CLEANUP PASS online_after=0x01 workers_retired=3 free=15 queued=0 dispatching=0 terminal=0 stack_bytes_cleared=24576 valid=1"
+        "PKSCHED6:TOPOLOGY PASS cpus=4 aps=3 online_mask=0x0F queues=4 tasks=8 timer_lanes=4 frame_lanes=4 event_capacity=16 quantum=2",
+        "PKSCHED6:EVENT PASS cpu1_order=1,2 cpu2_order=3 cancelled=1 wake=1 migration=1 pending=0 deterministic=1",
+        "PKSCHED6:RESCHEDULE PASS acks=5 wake=1 migration=1 quantum=3 context_switches=3 ack_gated=1",
+        "PKSCHED6:OWNERSHIP PASS frame_epochs=2,2,2,4 timer_ticks=2,2,2,4 trace=1:2>1;3:6>7>5 per_cpu=1",
+        "PKSCHED6:ROLLBACK PASS offline_cpu=4 timeouts=1 rollbacks=1 stale_rejections=1 source_queue_restored=1 late_ack_rejected=1",
+        "PKSCHED6:BOUNDS PASS quantum=2 event_latency=0 watchdog_age=2 maximum_bypass=2 starvation=0 lost_wake=0 duplicate_runnable=0",
+        "PKSCHED6:CLEANUP PASS online_after=0x01 dead=8 teardown=8 frame_owners_revoked=3 timer_owners_revoked=3 pending_events=0 pending_remote=0 valid=1"
       ],
       "trace": {
-        "trace": "1:1,1:2,1:0,1:3;2:5,2:6,2:4,2:7;3:9,3:10,3:8,3:11",
-        "worker_entries": [
-          4,
-          4,
+        "event_order": [
+          [
+            1,
+            2
+          ],
+          [
+            3
+          ]
+        ],
+        "frame_epochs": [
+          2,
+          2,
+          2,
           4
         ],
-        "driver_calls": 9,
-        "service_calls": 3,
-        "driver_sum": 177,
-        "service_generation": 4,
-        "maximum_high_bypass": 2
+        "timer_ticks": [
+          2,
+          2,
+          2,
+          4
+        ],
+        "trace": "1:2>1;3:6>7>5",
+        "model_acks": 5,
+        "live_ipis": 8,
+        "quantum_preemptions": 3,
+        "context_switches": 3,
+        "maximum_event_latency": 0,
+        "maximum_watchdog_age": 2,
+        "maximum_bypass": 2
       },
-      "receipt_count": 6,
+      "receipt_count": 7,
       "rust_python_exact_agreement": true,
-      "output_sha256": "D18EAF128BD0926244D77148599C516EF1D3F973705018850C0191F93290B605"
+      "output_sha256": "CE2B0FE8721B9B876809F06CB77849E8F540AAC33422C12FD64BB9C127A76463"
     },
     "source_audit": {
-      "focused_rust_test_count": 10,
-      "fixed_worker_count": 3,
-      "fixed_work_capacity": 15,
+      "focused_rust_test_count": 5,
+      "cpu_lane_count": 4,
+      "event_capacity": 16,
       "allocation_free_controller": true,
-      "typed_consumer_count": 2,
-      "arbitrary_callback_count": 0,
+      "live_reschedule_count": 8,
+      "ap_timer_interrupt_delivery": false,
       "ap_handler_saved_register_count": 15,
-      "live_marker_count": 37,
+      "live_marker_count": 38,
       "files": {
-        "workers": {
-          "path": "native/kernel/src/scheduler_ap_workers.rs",
-          "sha256": "E61261956C2CBDBD7B5B238FC014AC6A291BDC1E48C6D97D34DD7C12D131BBC4"
+        "controller": {
+          "path": "native/kernel/src/scheduler_smp_preempt.rs",
+          "sha256": "136026047A7C28693585DB3FB6338096527036EEA6154DDB722F1ACE4EE5EDBA"
         },
         "ipi": {
           "path": "native/kernel/src/smp_ipi.rs",
@@ -1025,11 +1059,11 @@
   "media": {
     "clean_generation_count": 2,
     "exact_clean_generation_match": true,
-    "sha256": "2E58A90D164825056C492BBDC393F5845BBB669A55CA6A4D6D5026F18396DF1F",
+    "sha256": "65FAB998735474BB70B6A7711025326FDA1E6417F20C834490E307A0A38C6748",
     "byte_count": 67108864,
     "inspection": {
       "image": {
-        "sha256": "2E58A90D164825056C492BBDC393F5845BBB669A55CA6A4D6D5026F18396DF1F",
+        "sha256": "65FAB998735474BB70B6A7711025326FDA1E6417F20C834490E307A0A38C6748",
         "byte_count": 67108864,
         "sector_bytes": 512,
         "sector_count": 131072,
@@ -1063,7 +1097,7 @@
       "files": [
         {
           "path": "EFI/BOOT/BOOTX64.EFI",
-          "sha256": "46B56A6296E486301DEAB20B24FAF395332104DD0C899A7A9ADDD9A15FCC14CE",
+          "sha256": "89333F4D62A1FA1692BE0630EE9E6B7571E2245CB813702897B9E4819F1D25FA",
           "byte_count": 208896,
           "cluster_count": 408
         },
@@ -1135,7 +1169,7 @@
         }
       ],
       "embedded_efi": {
-        "sha256": "46B56A6296E486301DEAB20B24FAF395332104DD0C899A7A9ADDD9A15FCC14CE",
+        "sha256": "89333F4D62A1FA1692BE0630EE9E6B7571E2245CB813702897B9E4819F1D25FA",
         "byte_count": 208896,
         "format": "PE32+",
         "machine": 34404,
@@ -1794,12 +1828,14 @@
   "execution": {
     "host_environment_count": 1,
     "run_count": 2,
-    "profile_id": "sandybridge-four-vcpu-typed-ap-workers",
+    "profile_id": "sandybridge-four-vcpu-ack-gated-smp-preemption",
     "machine": "pc-q35-11.0",
     "cpu_model": "SandyBridge,-avx",
     "virtual_cpu_count": 4,
     "application_processor_count": 3,
-    "worker_count": 3,
+    "timer_lane_count": 4,
+    "frame_lane_count": 4,
+    "live_reschedule_ipi_count": 8,
     "acceleration": "tcg_multi_thread",
     "deterministic_instruction_clock": false,
     "qemu_sha256": "A930E028F93D0FA47E4D58BDAD2432F7466DC2B6AF0AE376F77EF7A298FFDD02",
@@ -1869,7 +1905,7 @@
     "exact_pbp1_match": true,
     "runs": [
       {
-        "run_id": "scheduler-ap-workers-run-1",
+        "run_id": "scheduler-smp-preempt-run-1",
         "fresh_vars_copy": true,
         "media_read_only": true,
         "guest_network": false,
@@ -1915,22 +1951,23 @@
           "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5480 records=5 memory_entries=106 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=E3DA4316 fnv1a64=C7D38F563688703F state=boot_services_exited bytes_unchanged=1",
           "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=5088 descriptor_bytes=48 descriptors=106",
           "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=143 artifact_pages=9 table_pages=5 stack_pages=36 handoff_pages=256",
-          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF8000A000 handoff=FFFFFFFF800B5000 bytes=5480 stack_top=FFFFFFFF800B4000 root=000000001E1E0000 cr3=000000001E1E0000 trap_scenario=19 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
+          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF8000A000 handoff=FFFFFFFF800B5000 bytes=5480 stack_top=FFFFFFFF800B4000 root=000000001E1E0000 cr3=000000001E1E0000 trap_scenario=20 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
           "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
-          "POOLEOS:KERNEL:SCHED-AP-WORK-EARLY PASS contract=PKSCHED5 selector=19 parent_deferred=PKSCHED3 parent_smp=PKSCHED4 parent_ipi=PKSMP5 bsp=1 if=0 stack=validated_by_wrapper serial=initialized",
+          "POOLEOS:KERNEL:SCHED-SMP-PREEMPT-EARLY PASS contract=PKSCHED6 selector=20 parent_preempt=PKSCHED2 parent_smp=PKSCHED4 parent_workers=PKSCHED5 parent_ipi=PKSMP5 bsp=1 if=0 stack=validated_by_wrapper serial=initialized",
           "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE148-N12-ATOMICS-V0001-00000001 entry_count=1 serial=present",
           "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF800B5000 bytes=5480 entry=0xFFFFFFFF8000A000 stack_top=0xFFFFFFFF800B4000 root=0x000000001E1E0000 cr3=0x000000001E1E0000 rflags_if=0 rflags_df=0",
           "POOLEOS:KERNEL:PBP1 PASS profile=development records=5 artifacts=10 production_profile_valid=0",
           "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=C44967F61AD1BD3E3F7283E2BC73312BBA04E655328B8883E41F57323893BB50 policy_sha256=3E6A0C6B2E7D65427078BF3F3C216C66779990C7C062EDE5F922A9BC957F80B8 state_sha256=8B87F8A97758F41A039671754FBB9F6162F75F827F3E35EA739805E26439248D denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
-          "POOLEOS:KERNEL:SCHED-AP-WORK-TOPOLOGY PASS contract=PKSCHED5 processors=4 enabled=4 bsp_apic_id=0 target_apic_ids=1,2,3 online_mask=0x000000000000000F workers=3 queues=3 capacity=15 stack_bytes_each=8192 stack_gate=ist1",
-          "POOLEOS:KERNEL:SCHED-AP-WORK-QUEUE PASS contract=PKSCHED5 top_half_enqueued=13 duplicate_suppressed=1 eois=1 flush_watermark=13 queued_cancelled=1 driver_consumer=timer_vector_64 service_consumer=generation_reclaim arbitrary_callbacks=0",
-          "POOLEOS:KERNEL:SCHED-AP-WORK-DISPATCH PASS contract=PKSCHED5 trace=1:1,1:2,1:0,1:3;2:5,2:6,2:4,2:7;3:9,3:10,3:8,3:11 worker_entries=4,4,4 call_function_executions=12 typed_driver_calls=9 typed_service_calls=3 maximum_high_bypass=2 eoi_balanced=1 registers_restored=1 stack_gate=ist1",
-          "POOLEOS:KERNEL:SCHED-AP-WORK-CANCEL PASS contract=PKSCHED5 offline_cpu=4 timeouts=1 rollbacks=1 queued=1 remote_requests=1 remote_completions=1 stale_rejections=1 late_ack_rejected=1 source_queue_restored=1 result_discarded=1",
-          "POOLEOS:KERNEL:SCHED-AP-WORK-FLUSH PASS contract=PKSCHED5 complete=1 completed=11 cancelled=2 driver_sum=177 service_generation=4 reclaimed=13 stale_id_rejected=1 flush_before_reclaim=1 exact_once=1",
-          "POOLEOS:KERNEL:SCHED-AP-WORK-CLEANUP PASS contract=PKSCHED5 online_after=0x0000000000000001 workers_retired=3 free=15 stack_bytes_cleared=24576 resource_pages=96 frame_pages=6 total_pages=102 zeroed_bytes=417792 verified_bytes=417792 queues=0 dispatching=0 terminal=0 worker_authority_revoked=1 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1",
-          "POOLEOS:KERNEL:SCHED-AP-WORK-RESULT PASS contract=PKSCHED5 profile=sandybridge_three_ap_typed_workers ap_local_workers=1 driver_consumer=1 service_consumer=1 remote_cancel=1 flush=1 reclamation=1 offline_rollback=1 arbitrary_callbacks=0 general_smp=0 ring3=0 address_spaces=1 target=0 signatures=0 authority=0 actions=0 n12_exit=0 production=0 terminal=halt"
+          "POOLEOS:KERNEL:SCHED-SMP-PREEMPT-TOPOLOGY PASS contract=PKSCHED6 processors=4 enabled=4 bsp_apic_id=0 target_apic_ids=1,2,3 online_mask=0x000000000000000F queues=4 tasks=8 timer_lanes=4 frame_lanes=4 event_capacity=16 quantum=2 ist_bytes_each=8192",
+          "POOLEOS:KERNEL:SCHED-SMP-PREEMPT-EVENT PASS contract=PKSCHED6 cpu1_order=1,2 cpu2_order=3 cancelled=1 wake=1 migration=1 pending=0 deterministic=1 order=cancel,wake,migrate",
+          "POOLEOS:KERNEL:SCHED-SMP-PREEMPT-RESCHEDULE PASS contract=PKSCHED6 live_ipis=8 model_acks=5 quantum_preemptions=3 context_switches=3 wake=1 migration=1 ack_gated=1 result=observed",
+          "POOLEOS:KERNEL:SCHED-SMP-PREEMPT-OWNERSHIP PASS contract=PKSCHED6 frame_epochs=2,2,2,4 timer_ticks=2,2,2,4 trace=1:2>1;3:6>7>5 per_cpu=1 frame_owner_exact=1 timer_owner_exact=1 run_queue_owner_exact=1",
+          "POOLEOS:KERNEL:SCHED-SMP-PREEMPT-ROLLBACK PASS contract=PKSCHED6 offline_cpu=4 timeouts=1 rollbacks=1 stale_rejections=1 source_queue_restored=1 late_ack_rejected=1 target_ownership_withheld=1",
+          "POOLEOS:KERNEL:SCHED-SMP-PREEMPT-BOUNDS PASS contract=PKSCHED6 quantum=2 event_latency=0 watchdog_age=2 maximum_bypass=2 starvation=0 lost_wake=0 duplicate_runnable=0 watchdog_tripped=0",
+          "POOLEOS:KERNEL:SCHED-SMP-PREEMPT-CLEANUP PASS contract=PKSCHED6 online_after=0x0000000000000001 dead=8 teardown=8 frame_owners_revoked=3 timer_owners_revoked=3 resource_pages=96 frame_pages=6 total_pages=102 zeroed_bytes=417792 verified_bytes=417792 pending_events=0 pending_remote=0 scheduler_lock_released=1 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1",
+          "POOLEOS:KERNEL:SCHED-SMP-PREEMPT-RESULT PASS contract=PKSCHED6 profile=sandybridge_four_vcpu_ack_gated_preemption per_cpu_timers=bounded_model per_cpu_frames=bounded_model live_reschedule_ipi=1 deterministic_events=1 offline_rollback=1 watchdog_bound=1 exact_teardown=1 general_smp=0 ap_timer_interrupts=0 ring3=0 address_spaces=1 target=0 signatures=0 authority=0 actions=0 n12_exit=0 production=0 terminal=halt"
         ],
-        "marker_sha256": "FFC67E25CECA72A2B01B3D4AB18B7FAE7DFCF00026134052BA3E85145B03CA47",
+        "marker_sha256": "A358ECCAD176E801DF9CF016FEDF0ACD0D36CFE9F6ABD63B49DFA31932B4C673",
         "serial_debugcon_exact_match": true,
         "marker_summary": {
           "transfer_prefix": {
@@ -2113,7 +2150,7 @@
               "stack_top": 18446744071562805248,
               "root": 505282560,
               "cr3": 505282560,
-              "trap_scenario": 19,
+              "trap_scenario": 20,
               "signature_verifications": 0,
               "authority_grants": 0,
               "actions_authorized": 0,
@@ -2166,53 +2203,46 @@
               1,
               2,
               3
+            ]
+          },
+          "events": {
+            "order": "cancel,wake,migrate",
+            "pending": 0
+          },
+          "reschedule": {
+            "live_ipis": 8,
+            "model_acks": 5,
+            "quantum_preemptions": 3
+          },
+          "ownership": {
+            "frame_epochs": [
+              2,
+              2,
+              2,
+              4
             ],
-            "worker_stack_bytes_each": 8192
+            "timer_ticks": [
+              2,
+              2,
+              2,
+              4
+            ],
+            "trace": "1:2>1;3:6>7>5"
           },
-          "queue": {
-            "enqueued": 13,
-            "queued_cancelled": 1,
-            "flush_watermark": 13
-          },
-          "dispatch": {
-            "trace": {
-              "trace": "1:1,1:2,1:0,1:3;2:5,2:6,2:4,2:7;3:9,3:10,3:8,3:11",
-              "worker_entries": [
-                4,
-                4,
-                4
-              ],
-              "driver_calls": 9,
-              "service_calls": 3,
-              "driver_sum": 177,
-              "service_generation": 4,
-              "maximum_high_bypass": 2
-            },
-            "call_function_executions": 12,
-            "driver_calls": 9,
-            "service_calls": 3
-          },
-          "cancellation": {
-            "queued": 1,
-            "remote": 1,
-            "offline_timeouts": 1,
-            "rollbacks": 1
-          },
-          "flush": {
-            "completed": 11,
-            "cancelled": 2,
-            "reclaimed": 13,
-            "driver_sum": 177,
-            "service_generation": 4
+          "bounds": {
+            "event_latency": 0,
+            "watchdog_age": 2,
+            "maximum_bypass": 2
           },
           "cleanup": {
-            "workers_retired": 3,
-            "stack_bytes_cleared": 24576,
+            "dead": 8,
+            "owners_revoked": 3,
             "pages_released": 102,
             "bytes_verified": 417792
           },
           "result": {
-            "bounded_ap_local_workers": 1,
+            "bounded_model": 1,
+            "ap_timer_interrupts": 0,
             "general_smp": 0,
             "production": 0
           }
@@ -3173,7 +3203,7 @@
         }
       },
       {
-        "run_id": "scheduler-ap-workers-run-2",
+        "run_id": "scheduler-smp-preempt-run-2",
         "fresh_vars_copy": true,
         "media_read_only": true,
         "guest_network": false,
@@ -3219,22 +3249,23 @@
           "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5480 records=5 memory_entries=106 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=E3DA4316 fnv1a64=C7D38F563688703F state=boot_services_exited bytes_unchanged=1",
           "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=5088 descriptor_bytes=48 descriptors=106",
           "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=143 artifact_pages=9 table_pages=5 stack_pages=36 handoff_pages=256",
-          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF8000A000 handoff=FFFFFFFF800B5000 bytes=5480 stack_top=FFFFFFFF800B4000 root=000000001E1E0000 cr3=000000001E1E0000 trap_scenario=19 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
+          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF8000A000 handoff=FFFFFFFF800B5000 bytes=5480 stack_top=FFFFFFFF800B4000 root=000000001E1E0000 cr3=000000001E1E0000 trap_scenario=20 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
           "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
-          "POOLEOS:KERNEL:SCHED-AP-WORK-EARLY PASS contract=PKSCHED5 selector=19 parent_deferred=PKSCHED3 parent_smp=PKSCHED4 parent_ipi=PKSMP5 bsp=1 if=0 stack=validated_by_wrapper serial=initialized",
+          "POOLEOS:KERNEL:SCHED-SMP-PREEMPT-EARLY PASS contract=PKSCHED6 selector=20 parent_preempt=PKSCHED2 parent_smp=PKSCHED4 parent_workers=PKSCHED5 parent_ipi=PKSMP5 bsp=1 if=0 stack=validated_by_wrapper serial=initialized",
           "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE148-N12-ATOMICS-V0001-00000001 entry_count=1 serial=present",
           "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF800B5000 bytes=5480 entry=0xFFFFFFFF8000A000 stack_top=0xFFFFFFFF800B4000 root=0x000000001E1E0000 cr3=0x000000001E1E0000 rflags_if=0 rflags_df=0",
           "POOLEOS:KERNEL:PBP1 PASS profile=development records=5 artifacts=10 production_profile_valid=0",
           "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=C44967F61AD1BD3E3F7283E2BC73312BBA04E655328B8883E41F57323893BB50 policy_sha256=3E6A0C6B2E7D65427078BF3F3C216C66779990C7C062EDE5F922A9BC957F80B8 state_sha256=8B87F8A97758F41A039671754FBB9F6162F75F827F3E35EA739805E26439248D denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
-          "POOLEOS:KERNEL:SCHED-AP-WORK-TOPOLOGY PASS contract=PKSCHED5 processors=4 enabled=4 bsp_apic_id=0 target_apic_ids=1,2,3 online_mask=0x000000000000000F workers=3 queues=3 capacity=15 stack_bytes_each=8192 stack_gate=ist1",
-          "POOLEOS:KERNEL:SCHED-AP-WORK-QUEUE PASS contract=PKSCHED5 top_half_enqueued=13 duplicate_suppressed=1 eois=1 flush_watermark=13 queued_cancelled=1 driver_consumer=timer_vector_64 service_consumer=generation_reclaim arbitrary_callbacks=0",
-          "POOLEOS:KERNEL:SCHED-AP-WORK-DISPATCH PASS contract=PKSCHED5 trace=1:1,1:2,1:0,1:3;2:5,2:6,2:4,2:7;3:9,3:10,3:8,3:11 worker_entries=4,4,4 call_function_executions=12 typed_driver_calls=9 typed_service_calls=3 maximum_high_bypass=2 eoi_balanced=1 registers_restored=1 stack_gate=ist1",
-          "POOLEOS:KERNEL:SCHED-AP-WORK-CANCEL PASS contract=PKSCHED5 offline_cpu=4 timeouts=1 rollbacks=1 queued=1 remote_requests=1 remote_completions=1 stale_rejections=1 late_ack_rejected=1 source_queue_restored=1 result_discarded=1",
-          "POOLEOS:KERNEL:SCHED-AP-WORK-FLUSH PASS contract=PKSCHED5 complete=1 completed=11 cancelled=2 driver_sum=177 service_generation=4 reclaimed=13 stale_id_rejected=1 flush_before_reclaim=1 exact_once=1",
-          "POOLEOS:KERNEL:SCHED-AP-WORK-CLEANUP PASS contract=PKSCHED5 online_after=0x0000000000000001 workers_retired=3 free=15 stack_bytes_cleared=24576 resource_pages=96 frame_pages=6 total_pages=102 zeroed_bytes=417792 verified_bytes=417792 queues=0 dispatching=0 terminal=0 worker_authority_revoked=1 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1",
-          "POOLEOS:KERNEL:SCHED-AP-WORK-RESULT PASS contract=PKSCHED5 profile=sandybridge_three_ap_typed_workers ap_local_workers=1 driver_consumer=1 service_consumer=1 remote_cancel=1 flush=1 reclamation=1 offline_rollback=1 arbitrary_callbacks=0 general_smp=0 ring3=0 address_spaces=1 target=0 signatures=0 authority=0 actions=0 n12_exit=0 production=0 terminal=halt"
+          "POOLEOS:KERNEL:SCHED-SMP-PREEMPT-TOPOLOGY PASS contract=PKSCHED6 processors=4 enabled=4 bsp_apic_id=0 target_apic_ids=1,2,3 online_mask=0x000000000000000F queues=4 tasks=8 timer_lanes=4 frame_lanes=4 event_capacity=16 quantum=2 ist_bytes_each=8192",
+          "POOLEOS:KERNEL:SCHED-SMP-PREEMPT-EVENT PASS contract=PKSCHED6 cpu1_order=1,2 cpu2_order=3 cancelled=1 wake=1 migration=1 pending=0 deterministic=1 order=cancel,wake,migrate",
+          "POOLEOS:KERNEL:SCHED-SMP-PREEMPT-RESCHEDULE PASS contract=PKSCHED6 live_ipis=8 model_acks=5 quantum_preemptions=3 context_switches=3 wake=1 migration=1 ack_gated=1 result=observed",
+          "POOLEOS:KERNEL:SCHED-SMP-PREEMPT-OWNERSHIP PASS contract=PKSCHED6 frame_epochs=2,2,2,4 timer_ticks=2,2,2,4 trace=1:2>1;3:6>7>5 per_cpu=1 frame_owner_exact=1 timer_owner_exact=1 run_queue_owner_exact=1",
+          "POOLEOS:KERNEL:SCHED-SMP-PREEMPT-ROLLBACK PASS contract=PKSCHED6 offline_cpu=4 timeouts=1 rollbacks=1 stale_rejections=1 source_queue_restored=1 late_ack_rejected=1 target_ownership_withheld=1",
+          "POOLEOS:KERNEL:SCHED-SMP-PREEMPT-BOUNDS PASS contract=PKSCHED6 quantum=2 event_latency=0 watchdog_age=2 maximum_bypass=2 starvation=0 lost_wake=0 duplicate_runnable=0 watchdog_tripped=0",
+          "POOLEOS:KERNEL:SCHED-SMP-PREEMPT-CLEANUP PASS contract=PKSCHED6 online_after=0x0000000000000001 dead=8 teardown=8 frame_owners_revoked=3 timer_owners_revoked=3 resource_pages=96 frame_pages=6 total_pages=102 zeroed_bytes=417792 verified_bytes=417792 pending_events=0 pending_remote=0 scheduler_lock_released=1 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1",
+          "POOLEOS:KERNEL:SCHED-SMP-PREEMPT-RESULT PASS contract=PKSCHED6 profile=sandybridge_four_vcpu_ack_gated_preemption per_cpu_timers=bounded_model per_cpu_frames=bounded_model live_reschedule_ipi=1 deterministic_events=1 offline_rollback=1 watchdog_bound=1 exact_teardown=1 general_smp=0 ap_timer_interrupts=0 ring3=0 address_spaces=1 target=0 signatures=0 authority=0 actions=0 n12_exit=0 production=0 terminal=halt"
         ],
-        "marker_sha256": "FFC67E25CECA72A2B01B3D4AB18B7FAE7DFCF00026134052BA3E85145B03CA47",
+        "marker_sha256": "A358ECCAD176E801DF9CF016FEDF0ACD0D36CFE9F6ABD63B49DFA31932B4C673",
         "serial_debugcon_exact_match": true,
         "marker_summary": {
           "transfer_prefix": {
@@ -3417,7 +3448,7 @@
               "stack_top": 18446744071562805248,
               "root": 505282560,
               "cr3": 505282560,
-              "trap_scenario": 19,
+              "trap_scenario": 20,
               "signature_verifications": 0,
               "authority_grants": 0,
               "actions_authorized": 0,
@@ -3470,53 +3501,46 @@
               1,
               2,
               3
+            ]
+          },
+          "events": {
+            "order": "cancel,wake,migrate",
+            "pending": 0
+          },
+          "reschedule": {
+            "live_ipis": 8,
+            "model_acks": 5,
+            "quantum_preemptions": 3
+          },
+          "ownership": {
+            "frame_epochs": [
+              2,
+              2,
+              2,
+              4
             ],
-            "worker_stack_bytes_each": 8192
+            "timer_ticks": [
+              2,
+              2,
+              2,
+              4
+            ],
+            "trace": "1:2>1;3:6>7>5"
           },
-          "queue": {
-            "enqueued": 13,
-            "queued_cancelled": 1,
-            "flush_watermark": 13
-          },
-          "dispatch": {
-            "trace": {
-              "trace": "1:1,1:2,1:0,1:3;2:5,2:6,2:4,2:7;3:9,3:10,3:8,3:11",
-              "worker_entries": [
-                4,
-                4,
-                4
-              ],
-              "driver_calls": 9,
-              "service_calls": 3,
-              "driver_sum": 177,
-              "service_generation": 4,
-              "maximum_high_bypass": 2
-            },
-            "call_function_executions": 12,
-            "driver_calls": 9,
-            "service_calls": 3
-          },
-          "cancellation": {
-            "queued": 1,
-            "remote": 1,
-            "offline_timeouts": 1,
-            "rollbacks": 1
-          },
-          "flush": {
-            "completed": 11,
-            "cancelled": 2,
-            "reclaimed": 13,
-            "driver_sum": 177,
-            "service_generation": 4
+          "bounds": {
+            "event_latency": 0,
+            "watchdog_age": 2,
+            "maximum_bypass": 2
           },
           "cleanup": {
-            "workers_retired": 3,
-            "stack_bytes_cleared": 24576,
+            "dead": 8,
+            "owners_revoked": 3,
             "pages_released": 102,
             "bytes_verified": 417792
           },
           "result": {
-            "bounded_ap_local_workers": 1,
+            "bounded_model": 1,
+            "ap_timer_interrupts": 0,
             "general_smp": 0,
             "production": 0
           }
@@ -4659,7 +4683,7 @@
         "stack_top": 18446744071562805248,
         "root": 505282560,
         "cr3": 505282560,
-        "trap_scenario": 19,
+        "trap_scenario": 20,
         "signature_verifications": 0,
         "authority_grants": 0,
         "actions_authorized": 0,
@@ -4712,274 +4736,265 @@
         1,
         2,
         3
+      ]
+    },
+    "events": {
+      "order": "cancel,wake,migrate",
+      "pending": 0
+    },
+    "reschedule": {
+      "live_ipis": 8,
+      "model_acks": 5,
+      "quantum_preemptions": 3
+    },
+    "ownership": {
+      "frame_epochs": [
+        2,
+        2,
+        2,
+        4
       ],
-      "worker_stack_bytes_each": 8192
+      "timer_ticks": [
+        2,
+        2,
+        2,
+        4
+      ],
+      "trace": "1:2>1;3:6>7>5"
     },
-    "queue": {
-      "enqueued": 13,
-      "queued_cancelled": 1,
-      "flush_watermark": 13
-    },
-    "dispatch": {
-      "trace": {
-        "trace": "1:1,1:2,1:0,1:3;2:5,2:6,2:4,2:7;3:9,3:10,3:8,3:11",
-        "worker_entries": [
-          4,
-          4,
-          4
-        ],
-        "driver_calls": 9,
-        "service_calls": 3,
-        "driver_sum": 177,
-        "service_generation": 4,
-        "maximum_high_bypass": 2
-      },
-      "call_function_executions": 12,
-      "driver_calls": 9,
-      "service_calls": 3
-    },
-    "cancellation": {
-      "queued": 1,
-      "remote": 1,
-      "offline_timeouts": 1,
-      "rollbacks": 1
-    },
-    "flush": {
-      "completed": 11,
-      "cancelled": 2,
-      "reclaimed": 13,
-      "driver_sum": 177,
-      "service_generation": 4
+    "bounds": {
+      "event_latency": 0,
+      "watchdog_age": 2,
+      "maximum_bypass": 2
     },
     "cleanup": {
-      "workers_retired": 3,
-      "stack_bytes_cleared": 24576,
+      "dead": 8,
+      "owners_revoked": 3,
       "pages_released": 102,
       "bytes_verified": 417792
     },
     "result": {
-      "bounded_ap_local_workers": 1,
+      "bounded_model": 1,
+      "ap_timer_interrupts": 0,
       "general_smp": 0,
       "production": 0
     }
   },
   "negative_controls": [
     {
-      "id": "NEG-N12-PKSCHED5-MARKER-OMISSION",
+      "id": "NEG-N12-PKSCHED6-MARKER-OMISSION",
+      "status": "pass",
+      "expected": "rejected",
+      "case_count": 38
+    },
+    {
+      "id": "NEG-N12-PKSCHED6-MARKER-ORDER",
       "status": "pass",
       "expected": "rejected",
       "case_count": 37
     },
     {
-      "id": "NEG-N12-PKSCHED5-MARKER-ORDER",
+      "id": "NEG-N12-PKSCHED6-MARKER-DUPLICATE",
       "status": "pass",
       "expected": "rejected",
-      "case_count": 36
+      "case_count": 38
     },
     {
-      "id": "NEG-N12-PKSCHED5-MARKER-DUPLICATE",
-      "status": "pass",
-      "expected": "rejected",
-      "case_count": 37
-    },
-    {
-      "id": "NEG-N12-PKSCHED5-SELECTOR",
+      "id": "NEG-N12-PKSCHED6-SELECTOR",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED5-TOPOLOGY-FIELD-MATRIX",
+      "id": "NEG-N12-PKSCHED6-TOPOLOGY-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
-      "case_count": 10
+      "case_count": 12
     },
     {
-      "id": "NEG-N12-PKSCHED5-QUEUE-FIELD-MATRIX",
+      "id": "NEG-N12-PKSCHED6-EVENT-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
       "case_count": 8
     },
     {
-      "id": "NEG-N12-PKSCHED5-DISPATCH-FIELD-MATRIX",
+      "id": "NEG-N12-PKSCHED6-RESCHEDULE-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
-      "case_count": 9
+      "case_count": 8
     },
     {
-      "id": "NEG-N12-PKSCHED5-CANCEL-FIELD-MATRIX",
+      "id": "NEG-N12-PKSCHED6-OWNERSHIP-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
-      "case_count": 10
+      "case_count": 7
     },
     {
-      "id": "NEG-N12-PKSCHED5-FLUSH-FIELD-MATRIX",
+      "id": "NEG-N12-PKSCHED6-ROLLBACK-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
-      "case_count": 9
+      "case_count": 7
     },
     {
-      "id": "NEG-N12-PKSCHED5-CLEANUP-FIELD-MATRIX",
+      "id": "NEG-N12-PKSCHED6-BOUNDS-FIELD-MATRIX",
+      "status": "pass",
+      "expected": "rejected",
+      "case_count": 8
+    },
+    {
+      "id": "NEG-N12-PKSCHED6-CLEANUP-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
       "case_count": 18
     },
     {
-      "id": "NEG-N12-PKSCHED5-CLAIM-BOUNDARY-FIELD-MATRIX",
+      "id": "NEG-N12-PKSCHED6-CLAIM-BOUNDARY-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
-      "case_count": 17
+      "case_count": 15
     },
     {
-      "id": "NEG-N12-PKSCHED5-PROBE-OMISSION",
+      "id": "NEG-N12-PKSCHED6-PROBE-OMISSION",
       "status": "pass",
       "expected": "rejected",
-      "case_count": 6
+      "case_count": 7
     },
     {
-      "id": "NEG-N12-PKSCHED5-PROBE-ORDER",
+      "id": "NEG-N12-PKSCHED6-PROBE-ORDER",
       "status": "pass",
       "expected": "rejected",
       "case_count": 2
     },
     {
-      "id": "NEG-N12-PKSCHED5-PROBE-FIELD-MATRIX",
+      "id": "NEG-N12-PKSCHED6-PROBE-FIELD-MATRIX",
       "status": "pass",
       "expected": "rejected",
-      "case_count": 6
+      "case_count": 7
     },
     {
-      "id": "NEG-N12-PKSCHED5-INDEPENDENT-ORACLE",
-      "status": "pass",
-      "expected": "rejected",
-      "case_count": 1
-    },
-    {
-      "id": "NEG-N12-PKSCHED5-TYPED-CALL-ALLOWLIST",
+      "id": "NEG-N12-PKSCHED6-INDEPENDENT-ORACLE",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED5-ARBITRARY-CALLBACK",
+      "id": "NEG-N12-PKSCHED6-FRAME-CPU",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED5-TOP-HALF-CONTEXT",
+      "id": "NEG-N12-PKSCHED6-FRAME-APIC",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED5-DISPATCH-BEFORE-EOI",
+      "id": "NEG-N12-PKSCHED6-FRAME-EPOCH",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED5-DUPLICATE-WORK",
+      "id": "NEG-N12-PKSCHED6-FRAME-STACK",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED5-QUEUED-CANCEL",
+      "id": "NEG-N12-PKSCHED6-TIMER-EPOCH",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED5-REMOTE-CANCEL",
+      "id": "NEG-N12-PKSCHED6-EVENT-DEADLINE",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED5-ACK-BINDING",
+      "id": "NEG-N12-PKSCHED6-EVENT-ORDER",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED5-OFFLINE-TIMEOUT",
+      "id": "NEG-N12-PKSCHED6-ACK-BINDING",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED5-SOURCE-QUEUE-ROLLBACK",
+      "id": "NEG-N12-PKSCHED6-ACK-GATED-OWNER",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED5-LATE-ACK",
+      "id": "NEG-N12-PKSCHED6-OFFLINE-TIMEOUT",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED5-FAIRNESS-BOUND",
+      "id": "NEG-N12-PKSCHED6-SOURCE-QUEUE-ROLLBACK",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED5-FLUSH-WATERMARK",
+      "id": "NEG-N12-PKSCHED6-LATE-ACK",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED5-RECLAIM-GENERATION",
+      "id": "NEG-N12-PKSCHED6-WATCHDOG-BOUND",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED5-STALE-ID",
+      "id": "NEG-N12-PKSCHED6-STARVATION-BOUND",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED5-IST1-STACK-GATE",
+      "id": "NEG-N12-PKSCHED6-DUPLICATE-RUNNABLE",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED5-AP-REGISTER-RESTORE",
+      "id": "NEG-N12-PKSCHED6-AP-REGISTER-RESTORE",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED5-PARK-SCRUB-RELEASE",
+      "id": "NEG-N12-PKSCHED6-PARK-SCRUB-RELEASE",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     },
     {
-      "id": "NEG-N12-PKSCHED5-INPUT-BINDING",
+      "id": "NEG-N12-PKSCHED6-INPUT-BINDING",
       "status": "pass",
       "expected": "rejected",
       "case_count": 1
     }
   ],
   "claims": {
-    "allocation_free_ap_local_deferred_workers_implemented": true,
-    "three_private_guarded_worker_stacks_verified": true,
-    "typed_timer_driver_consumer_verified": true,
-    "typed_generation_reclaim_service_verified": true,
-    "live_remote_cancellation_verified": true,
-    "flush_gated_generation_reclamation_verified": true,
+    "allocation_free_exact_topology_preemption_model_implemented": true,
+    "per_cpu_timer_event_frame_and_run_queue_ownership_verified": true,
+    "live_reschedule_ipi_acknowledgement_verified": true,
+    "deterministic_cancel_wake_migration_ordering_verified": true,
     "offline_timeout_and_source_rollback_verified": true,
-    "bounded_priority_starvation_verified": true,
-    "complete_worker_park_scrub_release_verified": true,
-    "arbitrary_callbacks_implemented": false,
+    "bounded_quantum_starvation_and_watchdog_verified": true,
+    "complete_task_owner_park_scrub_release_verified": true,
+    "ap_local_timer_interrupt_delivery_implemented": false,
     "general_topology_or_hotplug_implemented": false,
     "general_smp_preemption_implemented": false,
     "ring3_or_address_space_switch_implemented": false,
@@ -4988,10 +5003,10 @@
     "production_ready": false
   },
   "nonclaims": [
-    "PKSCHED5 supports only the frozen BSP-0/AP-1,2,3 legacy-xAPIC QEMU topology; it is not general topology, hotplug, NUMA, multi-socket, or x2APIC scheduling.",
-    "Only the fixed timer bottom-half and generation-reclaim payloads are added; arbitrary callbacks, function pointers, and dynamic worker registration are rejected.",
-    "The consumers are bounded kernel qualification consumers, not a complete production driver framework or service runtime.",
-    "No general SMP timer preemption, ring-3 task, address-space switch, or complete per-task architectural ownership is implemented.",
-    "No physical target, N12 exit, release, promotion, or production-readiness claim follows."
+    "PKSCHED6 supports only the frozen BSP-0/AP-1,2,3 legacy-xAPIC QEMU topology; it is not general topology, hotplug, NUMA, multi-socket, or x2APIC scheduling.",
+    "Per-CPU timer and interrupt frames are allocation-free semantic lanes driven by the qualification controller; AP-local hardware timer interrupt delivery is not yet implemented.",
+    "The live AP execution proves the reschedule IPI acknowledgement boundary, not unrestricted scheduler callbacks or a complete general driver/service runtime.",
+    "No ring-3 task, address-space switch, full per-task architectural state, or physical-target result is implemented.",
+    "No N12 exit, release, promotion, or production-readiness claim follows."
   ]
 }

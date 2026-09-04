@@ -200,7 +200,7 @@ function Read-CpuidRecord([uint32]$Leaf, [uint32]$Subleaf) {
     return [ordered]@{ values = $values; record = $record }
 }
 
-$collectorHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $PSCommandPath).Hash
+$collectorHash = Get-Sha256Bytes ([System.IO.File]::ReadAllBytes($PSCommandPath))
 $collectorErrors = [System.Collections.Generic.List[object]]::new()
 
 function Get-CimRecords([string]$ClassName, [string]$Namespace = "root\cimv2") {

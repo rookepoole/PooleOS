@@ -36,8 +36,9 @@ def _check(name: str, ok: bool, detail: str) -> dict[str, Any]:
 
 
 def _run_git(path: Path, args: list[str]) -> tuple[int, str]:
+    trusted_path = str(path.resolve())
     completed = subprocess.run(
-        ["git", "-C", str(path), *args],
+        ["git", "-c", f"safe.directory={trusted_path}", "-C", trusted_path, *args],
         text=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,

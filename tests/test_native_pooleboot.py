@@ -72,6 +72,10 @@ class NativePooleBootTests(unittest.TestCase):
         self.assertEqual(2, execution["run_count"])
         self.assertTrue(execution["exact_marker_match"])
         self.assertTrue(execution["exact_screenshot_match"])
+        self.assertTrue(all(native_pooleboot.qemu_stderr_allowed(run) for run in execution["runs"]))
+        unreviewed = copy.deepcopy(execution["runs"][0])
+        unreviewed["stderr_sha256"] = "0" * 64
+        self.assertFalse(native_pooleboot.qemu_stderr_allowed(unreviewed))
 
     def test_report_preserves_all_nonclaims(self) -> None:
         self.assertEqual(native_pooleboot.expected_claims(), self.readiness["claims"])

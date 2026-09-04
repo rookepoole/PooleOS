@@ -120,7 +120,7 @@
   },
   "acceptance": {
     "rust_focused_tests": 5,
-    "rust_kernel_tests": 189,
+    "rust_kernel_tests": 196,
     "host_probe_receipts": 7,
     "qemu_runs": 2,
     "live_marker_count": 38,

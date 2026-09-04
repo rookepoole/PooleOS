@@ -20,6 +20,7 @@ from runtime.native_binary import (  # noqa: E402
 )
 from runtime.schema_validation import validate_json  # noqa: E402
 from tools import pooleos_release_gate  # noqa: E402
+from tools.qualify_native_toolchain import QualificationError, run_checked, tree_binding  # noqa: E402
 
 
 def synthetic_pe32_plus() -> bytes:
@@ -157,6 +158,19 @@ class NativeToolchainQualificationTests(unittest.TestCase):
                 {"marker_id": "synthetic_path", "encoding": "utf8_or_ascii"},
             ],
         )
+        with tempfile.TemporaryDirectory() as tmp:
+            tree = Path(tmp)
+            (tree / "a").write_bytes(b"a")
+            (tree / "b").write_bytes(b"b")
+            with self.assertRaises(QualificationError):
+                tree_binding(tree, "bounded_test", max_files=1)
+        with self.assertRaisesRegex(QualificationError, "timed out after 1s"):
+            run_checked(
+                [sys.executable, "-c", "import time; time.sleep(60)"],
+                cwd=ROOT,
+                env=dict(os.environ),
+                timeout_seconds=1,
+            )
 
     def test_generator_reproduces_public_ledger_when_local_toolchain_is_available(self) -> None:
         toolchain = ROOT / ".toolchains" / "rust-1.97.0"
@@ -179,6 +193,7 @@ class NativeToolchainQualificationTests(unittest.TestCase):
                 stderr=subprocess.STDOUT,
                 check=False,
                 env={**os.environ, "PYTHONHASHSEED": "0"},
+                timeout=60,
             )
             self.assertEqual(completed.returncode, 0, completed.stdout)
             self.assertEqual(output.read_bytes(), self.report_path.read_bytes())

@@ -200,7 +200,7 @@ def _source_audit() -> dict[str, Any]:
         'development-scheduler-ap-workers = ["development-transfer"]'
         not in texts["boot_manifest"]
         or 'feature = "development-scheduler-ap-workers"' not in texts["boot_exit"]
-        or "MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = 20" not in texts["bootexit"]
+        or "MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = 21" not in texts["bootexit"]
         or '"development-scheduler-ap-workers"' not in texts["pooleboot_qualifier"]
     ):
         raise QualificationError("PKSCHED5 selector isolation source audit failed")

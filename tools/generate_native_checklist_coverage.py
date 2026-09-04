@@ -385,6 +385,16 @@ ADDED_REQUIREMENTS = [
         ],
     },
     {
+        "id": "ADD-N12-CONCURRENCY-LOCKS-001",
+        "phase_id": "N12",
+        "requirement": "Build and independently qualify the complete bounded kernel lock family on PKATOM1: raw spinlocks, interrupt-save spinlocks, ownership-tracked mutexes with bounded priority inheritance, reader-writer locks, seqlocks, try and timed paths, explicit recursion and interrupt/preemption nesting rules, a machine-checkable lock-order graph and ranks, owner-death and teardown behavior, starvation and fairness bounds, failure rollback, and exact-topology live contention without claiming reclamation, general SMP, target hardware, N12 exit, or production readiness.",
+        "basis": [
+            "N12.2 synchronization, lock-order, priority-inversion, and interrupt-context requirements",
+            "Cycle 148 PKATOM1 typed atomic and memory-order foundation",
+            "master checklist sections 031-034",
+        ],
+    },
+    {
         "id": "ADD-CAP-001",
         "phase_id": "N13",
         "requirement": "Specify unforgeable capabilities, rights attenuation, derivation provenance, transfer, revocation, generation-safe handles, quotas, object destruction, and zero ambient authority; prove no authority amplification across IPC.",

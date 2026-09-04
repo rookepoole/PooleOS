@@ -80,8 +80,8 @@ class NativeChecklistCoverageTests(unittest.TestCase):
         self.assertEqual(sum(phase["source_line_count"] for phase in phases) + 16, 10512)
         self.assertEqual(sum(phase["source_checkbox_count"] for phase in phases) + 10, 8996)
         additions = self.artifact["added_requirements"]
-        self.assertEqual(len(additions), 54)
-        self.assertEqual(len({item["id"] for item in additions}), 54)
+        self.assertEqual(len(additions), 55)
+        self.assertEqual(len({item["id"] for item in additions}), 55)
         memory = next(item for item in additions if item["id"] == "ADD-MEM-001")
         self.assertEqual(memory["phase_id"], "N9")
         scheduler = next(
@@ -104,6 +104,12 @@ class NativeChecklistCoverageTests(unittest.TestCase):
         )
         self.assertEqual(atomics["phase_id"], "N12")
         self.assertIn("memory-order contracts", atomics["requirement"])
+        locks = next(
+            item for item in additions if item["id"] == "ADD-N12-CONCURRENCY-LOCKS-001"
+        )
+        self.assertEqual(locks["phase_id"], "N12")
+        self.assertIn("interrupt-save spinlocks", locks["requirement"])
+        self.assertIn("lock-order graph", locks["requirement"])
         digest_provider = next(item for item in additions if item["id"] == "ADD-BOOT-003")
         self.assertEqual(digest_provider["phase_id"], "N6")
         artifact_profile = next(item for item in additions if item["id"] == "ADD-BOOT-004")

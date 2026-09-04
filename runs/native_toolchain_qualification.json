@@ -78,8 +78,8 @@
       },
       {
         "path": "tools/qualify_native_toolchain.py",
-        "sha256": "8C9F975F483DF6CF3337475EAE9D777BF707B52C1E719C4BA5FFD7BFAEDF63F1",
-        "byte_count": 16666
+        "sha256": "4B3CED28CE9F1F9AB94AA8FFF5622799A32E7EDDEBC7CD049629A11D491BA006",
+        "byte_count": 22143
       }
     ]
   },
