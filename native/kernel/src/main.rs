@@ -21,6 +21,14 @@ use poolekernel::{
     active_virtual_memory::{
         self, ActiveHardware, run_profile as run_active_virtual_memory_profile,
     },
+    atomics::{
+        self, AtomicPtr as KernelAtomicPtr, AtomicU32 as KernelAtomicU32,
+        AtomicU64 as KernelAtomicU64, AtomicUsize as KernelAtomicUsize,
+        CompareExchangeOrder as KernelCompareExchangeOrder, FenceOrder as KernelFenceOrder,
+        LoadOrder as KernelLoadOrder, RefCount as KernelRefCount,
+        RefCountError as KernelRefCountError, RmwOrder as KernelRmwOrder,
+        StoreOrder as KernelStoreOrder,
+    },
     decode_cpu_identity,
     interrupt_time::{
         self, APIC_BASE_ENABLE, APIC_BASE_X2APIC, APIC_ERROR_VECTOR, HpetClock, SPURIOUS_VECTOR,
@@ -1509,6 +1517,29 @@ pksched6_fragment!(PKSCHED6_VERIFIED, b" verified_bytes=");
 pksched6_fragment!(PKSCHED6_CLEANUP_TAIL, b" pending_events=0 pending_remote=0 scheduler_lock_released=1 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1\n");
 pksched6_fragment!(PKSCHED6_RESULT, b"POOLEOS:KERNEL:SCHED-SMP-PREEMPT-RESULT PASS contract=PKSCHED6 profile=sandybridge_four_vcpu_ack_gated_preemption per_cpu_timers=bounded_model per_cpu_frames=bounded_model live_reschedule_ipi=1 deterministic_events=1 offline_rollback=1 watchdog_bound=1 exact_teardown=1 general_smp=0 ap_timer_interrupts=0 ring3=0 address_spaces=1 target=0 signatures=0 authority=0 actions=0 n12_exit=0 production=0 terminal=halt\n");
 
+macro_rules! pkatom1_fragment {
+    ($name:ident, $value:literal) => {
+        #[used]
+        #[unsafe(link_section = ".text.pkatom1_literals")]
+        static $name: [u8; $value.len()] = *$value;
+    };
+}
+
+pkatom1_fragment!(PKATOM1_EARLY, b"POOLEOS:KERNEL:ATOMICS-EARLY PASS contract=PKATOM1 selector=21 parent_irq=PKIRQ1 parent_sched=PKSCHED6 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n");
+pkatom1_fragment!(
+    PKATOM1_DENIED,
+    b"POOLEOS:KERNEL:ATOMICS-DENIED contract=PKATOM1 reason="
+);
+pkatom1_fragment!(
+    PKATOM1_DENIED_TAIL,
+    b" cleanup=fail_closed authority=0 actions=0 production=0 terminal=panic\n"
+);
+pkatom1_fragment!(PKATOM1_TYPES, b"POOLEOS:KERNEL:ATOMICS-TYPES PASS contract=PKATOM1 integer=u32,u64,usize pointer=typed intrinsics=core target=x86_64 widths=32,64,native\n");
+pkatom1_fragment!(PKATOM1_ORDERS, b"POOLEOS:KERNEL:ATOMICS-ORDERS PASS contract=PKATOM1 load=3 store=3 rmw=5 fence=4 cas_pairs=9 invalid_rejected=11 compiler_order=explicit x86_tso=documented\n");
+pkatom1_fragment!(PKATOM1_OPS, b"POOLEOS:KERNEL:ATOMICS-OPS PASS contract=PKATOM1 load_store=1 exchange=1 compare_exchange=1 fetch_add_sub=1 bit_modify=1 pointer=1 refcount=1 overflow_rejected=1 underflow_rejected=1 audit_symbols=7\n");
+pkatom1_fragment!(PKATOM1_IRQ, b"POOLEOS:KERNEL:ATOMICS-IRQ PASS contract=PKATOM1 timer_deliveries=8 atomic_updates=8 observed_mask=0x000000FF publication=0x00000000C0DEC0DE release_acquire=1 eoi_ordered=1 cleanup=1\n");
+pkatom1_fragment!(PKATOM1_RESULT, b"POOLEOS:KERNEL:ATOMICS-RESULT PASS contract=PKATOM1 profile=qemu64_bsp_interrupt typed_atomics=1 invalid_orders=11 live_interrupt=1 host_smp_litmus=external linked_instruction_audit=external general_locks=0 reclamation=0 general_smp=0 ring3=0 target=0 signatures=0 authority=0 actions=0 n12_exit=0 production=0 terminal=halt\n");
+
 struct SchedulerPreemptionRuntimeCell(UnsafeCell<Option<BspPreemption>>);
 
 // SAFETY: selector 16 is BSP-only; IF and the scheduler lock serialize every access.
@@ -1722,6 +1753,9 @@ static IRQ_TIMER_DELIVERIES: AtomicU32 = AtomicU32::new(0);
 static IRQ_EOI_COUNT: AtomicU32 = AtomicU32::new(0);
 static IRQ_ERROR_COUNT: AtomicU32 = AtomicU32::new(0);
 static IRQ_SPURIOUS_COUNT: AtomicU32 = AtomicU32::new(0);
+static PKATOM_IRQ_COUNT: KernelAtomicU32 = KernelAtomicU32::new(0);
+static PKATOM_IRQ_MASK: KernelAtomicU32 = KernelAtomicU32::new(0);
+static PKATOM_IRQ_PUBLICATION: KernelAtomicU64 = KernelAtomicU64::new(0);
 static SMP_IPI_FAILURE_STAGE: AtomicU32 = AtomicU32::new(0);
 static SMP_IPI_FAILURE_DETAIL: AtomicU64 = AtomicU64::new(0);
 static SCHEDULER_SWITCH_LOCK: SchedulerRawSpinLock = SchedulerRawSpinLock::new();
@@ -1736,6 +1770,118 @@ static SCHEDULER_PREEMPT_TIMER_COUNT: AtomicU32 = AtomicU32::new(0);
 static SCHEDULER_PREEMPT_FRAME_SWITCHES: AtomicU32 = AtomicU32::new(0);
 #[unsafe(no_mangle)]
 static poole_scheduler_preempt_done: AtomicU32 = AtomicU32::new(0);
+
+fn validate_atomic_live_profile() -> bool {
+    let matrix = atomics::classify_order_matrix();
+    if matrix.load_orders != 3
+        || matrix.store_orders != 3
+        || matrix.rmw_orders != 5
+        || matrix.fence_orders != 4
+        || matrix.compare_exchange_pairs != 9
+        || matrix.rejected_combinations != 11
+        || PKATOM_IRQ_COUNT.load(KernelLoadOrder::Acquire) != 8
+        || PKATOM_IRQ_MASK.load(KernelLoadOrder::Acquire) != 0xff
+        || PKATOM_IRQ_PUBLICATION.load(KernelLoadOrder::Acquire) != 0xc0de_c0de
+    {
+        return false;
+    }
+
+    let value = KernelAtomicU64::new(7);
+    value.store(9, KernelStoreOrder::Release);
+    if value.exchange(11, KernelRmwOrder::AcqRel) != 9
+        || value.compare_exchange(11, 13, KernelCompareExchangeOrder::ACQ_REL) != Ok(11)
+        || value.fetch_add(5, KernelRmwOrder::Relaxed) != 13
+        || value.fetch_sub(2, KernelRmwOrder::Acquire) != 18
+        || value.fetch_or(0x20, KernelRmwOrder::Release) != 16
+        || value.fetch_xor(0x10, KernelRmwOrder::SeqCst) != 48
+        || value.fetch_and(0x1f, KernelRmwOrder::AcqRel) != 32
+        || value.load(KernelLoadOrder::SeqCst) != 0
+    {
+        return false;
+    }
+
+    let bits = KernelAtomicU32::new(0);
+    if bits.fetch_set_bit(31, KernelRmwOrder::AcqRel) != Ok(false)
+        || bits.fetch_set_bit(31, KernelRmwOrder::AcqRel) != Ok(true)
+        || bits.fetch_clear_bit(31, KernelRmwOrder::AcqRel) != Ok(true)
+        || bits.fetch_set_bit(32, KernelRmwOrder::AcqRel).is_ok()
+    {
+        return false;
+    }
+    let word = KernelAtomicUsize::new(3);
+    if word.fetch_add(2, KernelRmwOrder::Relaxed) != 3 || word.load(KernelLoadOrder::Acquire) != 5 {
+        return false;
+    }
+
+    let mut first = 0x1111u64;
+    let mut second = 0x2222u64;
+    let first_pointer = &mut first as *mut u64;
+    let second_pointer = &mut second as *mut u64;
+    let pointer = KernelAtomicPtr::new(first_pointer);
+    if pointer.exchange(second_pointer, KernelRmwOrder::AcqRel) != first_pointer
+        || pointer.compare_exchange(
+            second_pointer,
+            core::ptr::null_mut(),
+            KernelCompareExchangeOrder::ACQ_REL,
+        ) != Ok(second_pointer)
+        || !pointer.load(KernelLoadOrder::Acquire).is_null()
+    {
+        return false;
+    }
+
+    let count = match KernelRefCount::try_new(1) {
+        Ok(value) => value,
+        Err(_) => return false,
+    };
+    if count.acquire() != Ok(2) {
+        return false;
+    }
+    let retained = match count.release() {
+        Ok(value) => value,
+        Err(_) => return false,
+    };
+    if retained.remaining != 1 || retained.became_zero || count.load() != 1 {
+        return false;
+    }
+    let terminal = match count.release() {
+        Ok(value) => value,
+        Err(_) => return false,
+    };
+    let maximum = match KernelRefCount::try_new(atomics::MAX_REFCOUNT) {
+        Ok(value) => value,
+        Err(_) => return false,
+    };
+    if !terminal.became_zero
+        || terminal.remaining != 0
+        || count.release() != Err(KernelRefCountError::Underflow)
+        || maximum.acquire() != Err(KernelRefCountError::Overflow)
+    {
+        return false;
+    }
+
+    let audit = KernelAtomicU64::new(1);
+    // SAFETY: every audit call receives the live, aligned local atomic.
+    let audit_valid = unsafe {
+        atomics::poole_atomic_audit_store_release(&audit, 2);
+        atomics::poole_atomic_audit_load_acquire(&audit) == 2
+            && atomics::poole_atomic_audit_exchange_seqcst(&audit, 3) == 2
+            && atomics::poole_atomic_audit_compare_exchange_acqrel(&audit, 3, 4) == 3
+            && atomics::poole_atomic_audit_fetch_add_relaxed(&audit, 2) == 4
+            && atomics::poole_atomic_audit_fetch_or_acqrel(&audit, 8) == 6
+    };
+    atomics::compiler_fence(KernelFenceOrder::AcqRel);
+    atomics::poole_atomic_audit_fence_seqcst();
+    if !audit_valid || audit.load(KernelLoadOrder::Acquire) != 14 {
+        return false;
+    }
+
+    PKATOM_IRQ_COUNT.store(0, KernelStoreOrder::Release);
+    PKATOM_IRQ_MASK.store(0, KernelStoreOrder::Release);
+    PKATOM_IRQ_PUBLICATION.store(0, KernelStoreOrder::Release);
+    PKATOM_IRQ_COUNT.load(KernelLoadOrder::Acquire) == 0
+        && PKATOM_IRQ_MASK.load(KernelLoadOrder::Acquire) == 0
+        && PKATOM_IRQ_PUBLICATION.load(KernelLoadOrder::Acquire) == 0
+}
 
 core::arch::global_asm!(
     r#"
@@ -7578,6 +7724,14 @@ extern "C" fn poole_kernel_rust_entry(
         });
         logger.write_bytes(&PKSCHED6_EARLY);
     }
+    if trap_scenario == DevelopmentTrapScenario::Atomics {
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        logger.write_bytes(&PKATOM1_EARLY);
+    }
 
     if let Err(error) = validate_entry_envelope(handoff_address, handoff_length, magic, stack_top) {
         poole_kernel_emergency_panic(error.panic_code() as u32);
@@ -8516,6 +8670,7 @@ extern "C" fn poole_kernel_rust_entry(
         DevelopmentTrapScenario::InterruptTime
             | DevelopmentTrapScenario::SchedulerPreempt
             | DevelopmentTrapScenario::SchedulerDeferred
+            | DevelopmentTrapScenario::Atomics
     ) {
         let mut logger = EarlyLogger::new(BootSink {
             serial: &mut serial,
@@ -8524,21 +8679,28 @@ extern "C" fn poole_kernel_rust_entry(
         });
         let scheduler_preempt = trap_scenario == DevelopmentTrapScenario::SchedulerPreempt;
         let scheduler_deferred = trap_scenario == DevelopmentTrapScenario::SchedulerDeferred;
-        let failure_head: &[u8] = if scheduler_deferred {
+        let atomic_profile = trap_scenario == DevelopmentTrapScenario::Atomics;
+        let failure_head: &[u8] = if atomic_profile {
+            &PKATOM1_DENIED
+        } else if scheduler_deferred {
             &PKSCHED3_DENIED
         } else if scheduler_preempt {
             &PKSCHED2_DENIED
         } else {
             &PKIRQ_DENIED
         };
-        let failure_tail: &[u8] = if scheduler_deferred {
+        let failure_tail: &[u8] = if atomic_profile {
+            &PKATOM1_DENIED_TAIL
+        } else if scheduler_deferred {
             &PKSCHED3_DENIED_TAIL
         } else if scheduler_preempt {
             &PKSCHED2_DENIED_TAIL
         } else {
             &PKIRQ_DENIED_TAIL
         };
-        let failure_panic = if scheduler_deferred {
+        let failure_panic = if atomic_profile {
+            PanicCode::Atomics
+        } else if scheduler_deferred {
             PanicCode::SchedulerDeferred
         } else if scheduler_preempt {
             PanicCode::SchedulerPreempt
@@ -8802,6 +8964,11 @@ extern "C" fn poole_kernel_rust_entry(
         IRQ_EOI_COUNT.store(0, Ordering::Release);
         IRQ_ERROR_COUNT.store(0, Ordering::Release);
         IRQ_SPURIOUS_COUNT.store(0, Ordering::Release);
+        if atomic_profile {
+            PKATOM_IRQ_COUNT.store(0, KernelStoreOrder::Release);
+            PKATOM_IRQ_MASK.store(0, KernelStoreOrder::Release);
+            PKATOM_IRQ_PUBLICATION.store(0xc0de_c0de, KernelStoreOrder::Release);
+        }
         IRQ_APIC_VIRTUAL.store(apic_virtual, Ordering::Release);
 
         irq_try!(hardware.apic_write(0x370, u32::from(APIC_ERROR_VECTOR)));
@@ -9456,6 +9623,19 @@ extern "C" fn poole_kernel_rust_entry(
         logger.write_bytes(&PKIRQ_RESULT);
         logger.write_decimal_u64(u64::from(timer_deliveries));
         logger.write_bytes(&PKIRQ_RESULT_TAIL);
+        if atomic_profile {
+            if !validate_atomic_live_profile() {
+                logger.write_bytes(&PKATOM1_DENIED);
+                logger.write_str("final_evidence");
+                logger.write_bytes(&PKATOM1_DENIED_TAIL);
+                poole_kernel_emergency_panic(PanicCode::Atomics as u32)
+            }
+            logger.write_bytes(&PKATOM1_TYPES);
+            logger.write_bytes(&PKATOM1_ORDERS);
+            logger.write_bytes(&PKATOM1_OPS);
+            logger.write_bytes(&PKATOM1_IRQ);
+            logger.write_bytes(&PKATOM1_RESULT);
+        }
         halt_forever()
     }
 
@@ -11069,6 +11249,7 @@ extern "C" fn poole_kernel_rust_entry(
         DevelopmentTrapScenario::SchedulerSmpPreempt => {
             poole_kernel_emergency_panic(PanicCode::SchedulerSmpPreempt as u32)
         }
+        DevelopmentTrapScenario::Atomics => poole_kernel_emergency_panic(PanicCode::Atomics as u32),
     }
 }
 
@@ -11372,6 +11553,13 @@ fn dispatch_scheduler_deferred(frame: &TrapFrame, depth: u32) {
 }
 
 fn dispatch_interrupt_time(frame: &TrapFrame, depth: u32) {
+    let atomic_profile =
+        TRAP_SCENARIO.load(Ordering::Acquire) == DevelopmentTrapScenario::Atomics as u64;
+    let panic_code = if atomic_profile {
+        PanicCode::Atomics
+    } else {
+        PanicCode::InterruptTime
+    };
     let ist_bottom = IST1_BOTTOM.load(Ordering::Acquire);
     let ist_top = IST1_TOP.load(Ordering::Acquire);
     let handler_rsp = frame as *const TrapFrame as u64;
@@ -11387,21 +11575,31 @@ fn dispatch_interrupt_time(frame: &TrapFrame, depth: u32) {
             .checked_add(core::mem::size_of::<TrapFrame>() as u64)
             .is_none_or(|end| end > ist_top)
     {
-        poole_kernel_emergency_panic(PanicCode::InterruptTime as u32);
+        poole_kernel_emergency_panic(panic_code as u32);
     }
     let apic = IRQ_APIC_VIRTUAL.load(Ordering::Acquire);
     if apic == 0 {
-        poole_kernel_emergency_panic(PanicCode::InterruptTime as u32);
+        poole_kernel_emergency_panic(panic_code as u32);
     }
     let increment = |counter: &AtomicU32| {
         let previous = counter.fetch_add(1, Ordering::AcqRel);
         if previous == u32::MAX {
-            poole_kernel_emergency_panic(PanicCode::InterruptTime as u32);
+            poole_kernel_emergency_panic(panic_code as u32);
         }
     };
     match frame.vector {
         vector if vector == u64::from(TIMER_VECTOR) => {
             increment(&IRQ_TIMER_DELIVERIES);
+            if atomic_profile {
+                if PKATOM_IRQ_PUBLICATION.load(KernelLoadOrder::Acquire) != 0xc0de_c0de {
+                    poole_kernel_emergency_panic(PanicCode::Atomics as u32);
+                }
+                let prior = PKATOM_IRQ_COUNT.fetch_add(1, KernelRmwOrder::AcqRel);
+                if prior >= 8 {
+                    poole_kernel_emergency_panic(PanicCode::Atomics as u32);
+                }
+                PKATOM_IRQ_MASK.fetch_or(1u32 << prior, KernelRmwOrder::AcqRel);
+            }
             // SAFETY: PKIRQ1 keeps the guarded UC local-APIC mapping live until IF closes.
             unsafe { write_volatile((apic + 0xb0) as usize as *mut u32, 0) };
             increment(&IRQ_EOI_COUNT);
@@ -11415,7 +11613,7 @@ fn dispatch_interrupt_time(frame: &TrapFrame, depth: u32) {
         vector if vector == u64::from(SPURIOUS_VECTOR) => {
             increment(&IRQ_SPURIOUS_COUNT);
         }
-        _ => poole_kernel_emergency_panic(PanicCode::InterruptTime as u32),
+        _ => poole_kernel_emergency_panic(panic_code as u32),
     }
     TRAP_DEPTH.store(0, Ordering::Release);
 }
@@ -11445,7 +11643,10 @@ extern "C" fn poole_kernel_trap_dispatch(frame_pointer: *mut TrapFrame) {
         dispatch_scheduler_deferred(frame, depth);
         return;
     }
-    if scenario == DevelopmentTrapScenario::InterruptTime {
+    if matches!(
+        scenario,
+        DevelopmentTrapScenario::InterruptTime | DevelopmentTrapScenario::Atomics
+    ) {
         dispatch_interrupt_time(frame, depth);
         return;
     }

@@ -12,7 +12,7 @@
     "golden_vectors": {
       "path": "specs/native-policy-golden-vectors.json",
       "bytes": 43996,
-      "sha256": "4B0E898B30AF2656D8C680FA9AF61BA0B5D56989B1400E5D8796FC19D84F9858"
+      "sha256": "2DCD1C278E9F4999F75A38E7030605741917E84C2C99E1C1C00CBF745FCB607D"
     },
     "toolchain_lock": {
       "path": "specs/native-toolchain-lock.json",
@@ -22,7 +22,7 @@
     "toolchain_qualification": {
       "path": "runs/native_toolchain_qualification.json",
       "bytes": 14423,
-      "sha256": "D39510979D5C67C9FB0DCE618071BC2C402FC327939E2FA50D9BD6E4550976EC"
+      "sha256": "7D38E83F0A9078D7426DDB9A1D1D0A8F43E5E18057066D2151F81CBDA40464FF"
     },
     "tier1_profile": {
       "path": "specs/tier1-hardware-target.json",

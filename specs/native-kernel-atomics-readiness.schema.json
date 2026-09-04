@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.invalid/specs/native-kernel-atomics-readiness.schema.json",
+  "title": "PooleOS PKATOM1 readiness",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "status",
+    "contract_id",
+    "selected_move_id",
+    "production_ready",
+    "production_promotion_allowed",
+    "n12_exit_gate_satisfied",
+    "flag_n12_concurrency_atomics_001_closed",
+    "kernel_summary",
+    "host_probe",
+    "linked_instruction_audit",
+    "execution",
+    "negative_controls",
+    "inputs",
+    "claims",
+    "remaining_gaps"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_atomics_readiness"},
+    "status_date": {"type": "string", "format": "date"},
+    "status": {"const": "pass_single_host_typed_x86_64_atomics_bsp_interrupt_non_promoting"},
+    "contract_id": {"const": "PKATOM1"},
+    "selected_move_id": {"const": "N12-CONCURRENCY-ATOMICS-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "n12_exit_gate_satisfied": {"const": false},
+    "flag_n12_concurrency_atomics_001_closed": {"const": true},
+    "kernel_summary": {"type": "object"},
+    "host_probe": {"type": "object"},
+    "linked_instruction_audit": {"type": "object"},
+    "execution": {"type": "object"},
+    "negative_controls": {
+      "type": "array",
+      "minItems": 29,
+      "maxItems": 29,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status", "expected", "case_count"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^NEG-N12-PKATOM1-"},
+          "status": {"const": "pass"},
+          "expected": {"const": "rejected"},
+          "case_count": {"type": "integer", "minimum": 1}
+        }
+      }
+    },
+    "inputs": {"type": "object"},
+    "claims": {"type": "object", "additionalProperties": {"type": "boolean"}},
+    "remaining_gaps": {"type": "array", "minItems": 6, "items": {"type": "string"}}
+  }
+}

@@ -3,9 +3,9 @@
   "binding_errors": [],
   "bindings": {
     "collector": {
-      "byte_count": 22051,
+      "byte_count": 22049,
       "path": "tools/collect_tier1_hardware.ps1",
-      "sha256": "21A7340373890AA2A5DB88958D4F04E86F6AD7510B729E429EBE226EEEE0AE82"
+      "sha256": "5A0F9C538FBE6FC8BC4BBB49114F3434208B3AE32F7034FE09AC5FA868314241"
     },
     "runtime": {
       "byte_count": 42835,
@@ -13,9 +13,9 @@
       "sha256": "AAA27935B1D94C7E93AAF2AAFA299B0C18664A9C189F59A89CF6C64866F6FFB3"
     },
     "sanitized_observation": {
-      "byte_count": 16681,
+      "byte_count": 16620,
       "path": "runs/tier1_hardware_observation.json",
-      "sha256": "1F9FFF6C02751E35E7FCD2B55D80E5988D5940CADAF0DE3817A673F2706FEF7B"
+      "sha256": "31AAFB5A2083CDA060F02EC079172A8734EC0CC8E55572935C8C7302EDD62B9C"
     },
     "standards_register": {
       "byte_count": 13553,
@@ -639,6 +639,7 @@
           "HID\\VID_046D&PID_C53F&MI_02&COL03",
           "HID\\VID_048D&PID_5702&COL01",
           "HID\\VID_048D&PID_5702&COL02",
+          "HID\\VID_1050&PID_0402",
           "HID\\VID_1B1C&PID_1B0A&MI_00",
           "HID\\VID_1B1C&PID_1B0A&MI_01",
           "HID\\VID_1B1C&PID_1B0A&MI_02",
@@ -701,9 +702,9 @@
           "SCSI\\DISK&VEN_&PROD_CT2000BX500SSD1",
           "SCSI\\DISK&VEN_NVME&PROD_SAMSUNG_SSD_970",
           "STORAGE\\VOLUME",
-          "STORAGE\\VOLUMESNAPSHOT",
           "SWD\\COMPUTER",
           "SWD\\DRIVERENUM",
+          "SWD\\MIDISRV",
           "SWD\\MMDEVAPI",
           "SWD\\MSDAS",
           "SWD\\MSRRAS",
@@ -711,6 +712,7 @@
           "SWD\\RADIO",
           "SWD\\WPDBUSENUM",
           "SWD\\XVDDENUM",
+          "SW\\{96E080C7-143C-11D1-B40F-00A0C9223196}",
           "SW\\{EEAB7790-C514-11D1-B42B-00805FC1270E}",
           "UEFI\\RES_{00000000-0000-0000-0000-000000000000}",
           "USB\\ROOT_HUB30",
@@ -720,11 +722,8 @@
           "USB\\VID_046D&PID_C53F&MI_01",
           "USB\\VID_046D&PID_C53F&MI_02",
           "USB\\VID_048D&PID_5702",
-          "USB\\VID_04E8&PID_6860",
-          "USB\\VID_04E8&PID_6860&ADB",
-          "USB\\VID_04E8&PID_6860&MODEM",
-          "USB\\VID_04E8&PID_6860&MS_COMP_MTP&SAMSUNG_ANDROID",
           "USB\\VID_0BDA&PID_B850",
+          "USB\\VID_1050&PID_0402",
           "USB\\VID_1235&PID_8205",
           "USB\\VID_1B1C&PID_1B0A",
           "USB\\VID_1B1C&PID_1B0A&MI_00",

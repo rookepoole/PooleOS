@@ -55,6 +55,8 @@ ALLOWED_RUNS = {
     "runs/native-kernel-scheduler-deferred-readiness.json",
     "runs/native-kernel-scheduler-smp-readiness.json",
     "runs/native-kernel-scheduler-ap-workers-readiness.json",
+    "runs/native-kernel-scheduler-smp-preempt-readiness.json",
+    "runs/native-kernel-atomics-readiness.json",
     "runs/native-kernel-virtual-memory-readiness.json",
     "runs/native_model_readiness.json",
     "runs/native_microcode_readiness.json",

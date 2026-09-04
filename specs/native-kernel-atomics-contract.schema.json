@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.invalid/specs/native-kernel-atomics-contract.schema.json",
+  "title": "PooleOS PKATOM1 contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "contract_id",
+    "selected_move_id",
+    "status_date",
+    "status",
+    "production_ready",
+    "production_promotion_allowed",
+    "phase_mapping",
+    "source_requirement_ids",
+    "parent_contract_ids",
+    "authorities",
+    "type_surface",
+    "operation_surface",
+    "order_matrix",
+    "memory_model",
+    "litmus_profiles",
+    "interrupt_profile",
+    "assembly_contract",
+    "progress_guarantees",
+    "required_negative_controls",
+    "claims"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_atomics_contract"},
+    "contract_id": {"const": "PKATOM1"},
+    "selected_move_id": {"const": "N12-CONCURRENCY-ATOMICS-001"},
+    "status_date": {"type": "string", "format": "date"},
+    "status": {"const": "candidate_typed_x86_64_atomic_substrate_single_host_non_promoting"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "phase_mapping": {"const": ["N12.1"]},
+    "source_requirement_ids": {"const": ["031.1", "ADD-N12-CONCURRENCY-ATOMICS-001"]},
+    "parent_contract_ids": {"const": ["PKENTRY1", "PKIRQ1", "PKSCHED6"]},
+    "authorities": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role", "title", "url"],
+        "properties": {
+          "role": {"type": "string", "minLength": 1},
+          "title": {"type": "string", "minLength": 1},
+          "url": {"type": "string", "pattern": "^https://"}
+        }
+      }
+    },
+    "type_surface": {"type": "object"},
+    "operation_surface": {"type": "array", "minItems": 16, "uniqueItems": true},
+    "order_matrix": {
+      "type": "object",
+      "required": ["load_orders", "store_orders", "rmw_orders", "fence_orders", "compare_exchange_pairs", "rejected_combinations", "allowed_failure"],
+      "properties": {
+        "load_orders": {"const": 3},
+        "store_orders": {"const": 3},
+        "rmw_orders": {"const": 5},
+        "fence_orders": {"const": 4},
+        "compare_exchange_pairs": {"const": 9},
+        "rejected_combinations": {"const": 11},
+        "allowed_failure": {"type": "object"}
+      }
+    },
+    "memory_model": {"type": "object"},
+    "litmus_profiles": {"type": "object"},
+    "interrupt_profile": {"type": "object"},
+    "assembly_contract": {"type": "object"},
+    "progress_guarantees": {"type": "object"},
+    "required_negative_controls": {
+      "type": "array",
+      "minItems": 29,
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^NEG-N12-PKATOM1-"}
+    },
+    "claims": {
+      "type": "object",
+      "minProperties": 16,
+      "additionalProperties": {"type": "boolean"}
+    }
+  }
+}

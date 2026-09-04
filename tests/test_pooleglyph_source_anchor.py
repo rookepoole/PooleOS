@@ -1,10 +1,12 @@
 import io
 import json
+import subprocess
 import sys
 import tempfile
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -38,12 +40,15 @@ class PooleGlyphSourceAnchorTests(unittest.TestCase):
     def test_anchor_schema_accepts_live_shape_without_git(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = self._make_fake_pooleglyph(Path(tmp))
-            anchor = pooleglyph_source_anchor.make_source_anchor(pooleglyph_path=root)
+            with patch.object(pooleglyph_source_anchor.subprocess, "run", wraps=subprocess.run) as run_git:
+                anchor = pooleglyph_source_anchor.make_source_anchor(pooleglyph_path=root)
             schema = json.loads((ROOT / "specs" / "pooleglyph-source-anchor.schema.json").read_text(encoding="utf-8"))
             self.assertEqual(validate_json(anchor, schema), [])
             self.assertEqual(anchor["latest_checkpoint"]["checkpoint"], "Phase 19 - import/export enforcement")
             self.assertEqual(anchor["summary"]["checkpoint_manifest_count"], 1)
             self.assertEqual(anchor["summary"]["missing_required_file_count"], 0)
+            first_git_command = run_git.call_args_list[0].args[0]
+            self.assertEqual(first_git_command[:3], ["git", "-c", f"safe.directory={root.resolve()}"])
 
     def test_default_path_prefers_home_pooleglyph_when_present(self) -> None:
         selected = pooleglyph_source_anchor.default_pooleglyph_path(workspace_root=ROOT.parent)

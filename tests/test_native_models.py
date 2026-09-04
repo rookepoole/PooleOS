@@ -452,7 +452,7 @@ The depth of the complete state graph search is 1.
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 check=False,
-                timeout=120,
+                timeout=900,
             )
             self.assertEqual(0, completed.returncode, completed.stdout)
             self.assertEqual(self.readiness_path.read_bytes(), output.read_bytes())

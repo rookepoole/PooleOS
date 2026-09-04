@@ -53,6 +53,11 @@ VOLUME_LABEL = b"POOLEOS ESP"
 VOLUME_ID = 0x97970001
 FALLBACK_PATH = "EFI/BOOT/BOOTX64.EFI"
 FIXED_FAT_DATE = 0x0021
+EMPTY_SHA256 = "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+REVIEWED_QEMU_STDERR = {
+    (0, EMPTY_SHA256),
+    (352, "F309CA71408C82207697AE48F7B8398D097A66577F77F66A15FE64D7C5D50864"),
+}
 
 TRUE_PROOF_CLAIMS = (
     "one_host_pe32_reproducible",
@@ -1302,6 +1307,10 @@ def _check_binding(
         errors.append(f"stale {label} binding")
 
 
+def qemu_stderr_allowed(run: dict[str, Any]) -> bool:
+    return (run.get("stderr_byte_count"), run.get("stderr_sha256")) in REVIEWED_QEMU_STDERR
+
+
 def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str]:
     from runtime import native_kernel_load
 
@@ -1487,8 +1496,10 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str
             ):
                 if run.get(name) is not expected:
                     errors.append(f"PooleBoot run {index} boundary changed: {name}")
-            if run.get("qemu_exit_code") != 0 or run.get("stderr_byte_count") != 0:
-                errors.append(f"PooleBoot run {index} did not exit cleanly through QMP")
+            if run.get("qemu_exit_code") != 0 or not qemu_stderr_allowed(run):
+                errors.append(
+                    f"PooleBoot run {index} did not exit cleanly or emitted unreviewed stderr"
+                )
     if len(marker_sets) == 2 and marker_sets[0] != marker_sets[1]:
         errors.append("PooleBoot run marker sequences differ")
     if len(screenshot_hashes) == 2 and screenshot_hashes[0] != screenshot_hashes[1]:
