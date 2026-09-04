@@ -1,7 +1,7 @@
 # PooleOS ADR Ratification and Governance-Key Ceremony
 
-Status: owner direction recorded; selected hardware key unavailable; signatures, tag, merge, and publication unauthorized
-Date: 2026-07-16
+Status: governance public key registered; recovery custody and signature verification pending
+Date: 2026-09-04
 Move: `N0-RATIFY-001`
 Decision and signing authority: Rooke Poole
 
@@ -16,22 +16,24 @@ The ceremony does not generate or approve a Secure Boot key, release-media key, 
 - ADR-0001 through ADR-0007 are `accepted-owner-directed` but cryptographically unsigned.
 - `POOLEOS-WORKSTATION-V1-CANDIDATE` carries owner-directed acceptance for all 38 target definitions; zero targets have measured implementation evidence.
 - `specs/n0-owner-response.json` and `runs/n0_owner_response_receipt.json` bind the completed response to the exact historical packet and pass 16/16 fail-closed controls.
-- `hardware_fido2_ed25519_sk` is selected, but Rooke Poole reports no FIDO2 hardware key is currently available. Software-key risk is therefore `not_applicable`.
-- Public-key publication remains `not_yet`. Key generation, private-key use, signing, merge, tagging, and publication remain separately gated and unauthorized.
-- The public allowed-signers file has zero keys. No local Git signing key, GPG backend, or GitHub SSH signing key was configured when this package was generated.
-- PRs #1 through #5 are merged into public `main`. Required signed-commit enforcement must not be enabled until the remaining pre-signing history and merge strategy are resolved under `N1-SCM-CLOSE-001`.
+- `security/governance-key-registration.json` records the completed owner-present enrollment, explicit fingerprint confirmation, and exact GitHub signing-key readback for `hardware_fido2_ed25519_sk`. Software-key risk remains `not_applicable`.
+- The owner approved key generation/use, public-key publication, and signing in Cycle 118 and explicitly confirmed this key's fingerprint and registration on 2026-09-04. These authorizations remain subject to the existing custody and qualification gates.
+- `security/owner-adr-signers.allowed` contains the one confirmed public signer. GitHub registration `1158225` belongs to `rookepoole`, with fingerprint `SHA256:ezVHRzgJ4y4k4Irynu9TIXPp1z3TsogL13mz3g9gx9w`. No governance signature or architecture tag has been produced.
+- PR #67 merged Cycle 149 into public `main`. Required signed-commit enforcement remains a later `N1-SCM-CLOSE-001` action.
 - `docs/n0-owner-decision-packet.md` and `runs/n0_owner_decision_packet.json` remain a byte-frozen historical review surface over 16 exact sources. Every original packet selection remains unselected so the reviewed input is not rewritten after the response.
 
 ## Recorded Decisions and Remaining Gates
 
-The completed response records the following unsigned owner direction:
+The byte-frozen historical response records the following unsigned owner direction; current custody and publication facts are superseded by the registration record above:
 
 1. ADR-0003 and ADR-0004: accept exactly as written.
 2. Workstation v1 and all 38 target values: accept exactly as definitions, with no measurement acceptance.
 3. Governance-key profile: `hardware_fido2_ed25519_sk`; hardware availability: `do_not_have`; software-key risk: `not_applicable`.
 4. Public-key publication: `not_yet`.
 
-The next gate is `N0-HW-KEY-ACQUIRE-001`: Rooke Poole obtains a compatible FIDO2 security key. After that, key generation or use still requires a separate explicit approval. Public fingerprint review, allowed-signer registration, detached signing, merge, signed tagging, and publication each remain later separately gated actions.
+`N0-HW-KEY-ACQUIRE-001` is satisfied for the primary signer. The immediate move is `N0-GOVERNANCE-CUSTODY-001`: verify a namespaced enrollment signature and establish the separately controlled recovery signer required by the custody policy. Then prepare and review the exact architecture manifest, execute its already authorized owner-present signature, and verify the signed tag and remote receipt. Registration alone does not complete N0.
+
+The successful Windows enrollment used Git for Windows OpenSSH 10.5p1 with its `usr/bin` directory prepended only to the enrollment process's PATH, an existing protected user SSH directory, and `-O verify-required`. The key is non-resident: preserve its local hardware handle under controlled custody as well as the physical key. The built-in Windows OpenSSH 9.5 attempt failed before saving; its cause was not conclusively established. Later Git OpenSSH attempts exposed a missing DLL search path and missing destination directory, both corrected before successful enrollment.
 
 Any future amendment or rejection stops this ceremony. The affected source must be revised or superseded, the baseline regenerated, and the complete set reviewed again.
 
@@ -46,7 +48,7 @@ Any future amendment or rejection stops this ceremony. The affected source must 
 
 ## Owner-Executed Procedure
 
-These commands are examples for owner review. Codex must not execute key generation, GitHub registration, signing, tag creation, or branch-enforcement changes without explicit approval.
+Enrollment and public registration are complete for the primary signer. Do not repeat key generation or overwrite its handle. The commands below remain a reference for a separately reviewed replacement or recovery ceremony; current owner authorization is recorded above.
 
 1. Create a dedicated key outside the repository. Prefer a hardware key:
 

@@ -9,7 +9,7 @@
     "schema_version": {"const": "1.1"},
     "artifact_kind": {"const": "pooleos_adr_ratification_readiness"},
     "status_date": {"type": "string"},
-    "status": {"enum": ["pending_owner_action", "owner_direction_recorded_hardware_key_pending", "ratified"]},
+    "status": {"enum": ["pending_owner_action", "owner_direction_recorded_hardware_key_pending", "governance_key_registered_custody_pending", "ratified"]},
     "selected_move_id": {"const": "N0-RATIFY-001"},
     "production_ready": {"const": false},
     "production_promotion_allowed": {"type": "boolean"},

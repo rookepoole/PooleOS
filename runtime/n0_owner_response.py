@@ -228,9 +228,6 @@ def _build_core(root: Path) -> dict[str, Any]:
         raise ValueError("live objectives source is invalid: " + "; ".join(objective_errors[:8]))
     objective_owner = objectives["owner_ratification"]
     measured_count = sum(target.get("evidence_status") != "not_measured" for target in objectives["targets"])
-    signers, signer_errors = adr_ratification.parse_allowed_signers(root)
-    if signer_errors:
-        raise ValueError("public signer store is invalid: " + "; ".join(signer_errors))
 
     def live_adr(adr_id: str) -> dict[str, Any]:
         item = adrs[adr_id]
@@ -311,15 +308,16 @@ def _build_core(root: Path) -> dict[str, Any]:
                 and objective_owner["target_values_accepted"] is True
             ),
         },
+        # This receipt records the original response, not subsequent enrollment or signing.
         "trust_state": {
             "selected_key_profile": selections["governance_key_profile"],
             "hardware_key_available": False,
             "hardware_acquisition_required": True,
-            "trusted_signer_count": len(signers),
+            "trusted_signer_count": 0,
             "public_key_present": False,
-            "detached_signature_present": (root / adr_ratification.SIGNATURE_RELATIVE).is_file(),
+            "detached_signature_present": False,
             "signed_tag_present": False,
-            "remote_publication_receipt_present": (root / adr_ratification.RECEIPT_RELATIVE).is_file(),
+            "remote_publication_receipt_present": False,
         },
         "execution_boundary": {
             "key_generation_authorized": execution["key_generation"],

@@ -3,6 +3,7 @@ import json
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 
@@ -82,6 +83,15 @@ class N0OwnerResponseTests(unittest.TestCase):
         self.assertTrue(state["objectives"]["target_values_accepted"])
         self.assertFalse(state["objectives"]["cryptographic_signature_present"])
         self.assertEqual(state["objectives"]["measured_target_count"], 0)
+
+    def test_historical_receipt_is_independent_of_later_signing_state(self) -> None:
+        with (
+            mock.patch.object(n0_owner_response.adr_ratification, "parse_allowed_signers", side_effect=AssertionError("historical receipt must not read live signers")),
+            mock.patch.object(n0_owner_response.adr_ratification, "SIGNATURE_RELATIVE", n0_owner_response.RESPONSE_RELATIVE),
+            mock.patch.object(n0_owner_response.adr_ratification, "RECEIPT_RELATIVE", n0_owner_response.RESPONSE_RELATIVE),
+        ):
+            rebuilt = n0_owner_response.build_receipt(ROOT)
+        self.assertEqual(n0_owner_response.canonical_json_bytes(rebuilt), self.receipt_path.read_bytes())
 
     def test_hardware_profile_is_selected_but_unavailable(self) -> None:
         custody = self.receipt["accepted_decisions"]["custody"]

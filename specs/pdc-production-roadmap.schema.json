@@ -51,7 +51,7 @@
         "new_work_must_be_flagged": {"const": true},
         "last_updated_cycle": {"const": 149},
         "selected_move_id": {"const": "N12-CONCURRENCY-LOCKS-001"},
-        "immediate_next_move_id": {"const": "N0-HW-KEY-ACQUIRE-001"},
+        "immediate_next_move_id": {"const": "N0-GOVERNANCE-CUSTODY-001"},
         "owner_independent_next_move_id": {"const": "N12-CONCURRENCY-RECLAMATION-001"},
         "required_records": {"type": "array", "minItems": 7, "items": {"type": "string"}, "uniqueItems": true},
         "flag_classes": {"type": "array", "minItems": 8, "items": {"type": "string"}, "uniqueItems": true}
@@ -168,7 +168,7 @@
       "additionalProperties": false,
       "required": ["id", "phase_ids", "title", "entry_evidence", "exit_evidence", "blocked"],
       "properties": {
-        "id": {"const": "N0-HW-KEY-ACQUIRE-001"},
+        "id": {"const": "N0-GOVERNANCE-CUSTODY-001"},
         "phase_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
         "title": {"type": "string"},
         "entry_evidence": {"type": "array", "minItems": 1, "items": {"type": "string"}},

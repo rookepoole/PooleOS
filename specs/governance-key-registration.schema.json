@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PooleOS Public Governance Key Registration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_kind", "status_date", "account", "key_profile", "public_key", "fingerprint", "owner_fingerprint_confirmed", "key_generation_authorized", "registration_authorized", "hardware_key_available", "github", "custody", "architecture_ratification_verified", "production_ready"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_governance_key_registration"},
+    "status_date": {"type": "string", "format": "date"},
+    "account": {"const": "rookepoole"},
+    "key_profile": {"const": "hardware_fido2_ed25519_sk"},
+    "public_key": {"type": "string", "pattern": "^sk-ssh-ed25519@openssh.com [A-Za-z0-9+/]+={0,2}$"},
+    "fingerprint": {"type": "string", "pattern": "^SHA256:[A-Za-z0-9+/]{43}$"},
+    "owner_fingerprint_confirmed": {"const": true},
+    "key_generation_authorized": {"const": true},
+    "registration_authorized": {"const": true},
+    "hardware_key_available": {"const": true},
+    "github": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["registration_id", "key_type", "title", "created_at", "exact_public_key_readback_verified"],
+      "properties": {
+        "registration_id": {"type": "integer", "minimum": 1},
+        "key_type": {"const": "signing"},
+        "title": {"type": "string", "minLength": 1},
+        "created_at": {"type": "string", "format": "date-time"},
+        "exact_public_key_readback_verified": {"const": true}
+      }
+    },
+    "custody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["owner_present_enrollment_completed", "private_stub_outside_repository", "user_verification_requested", "separate_recovery_signer_verified", "enrollment_signature_test_completed"],
+      "properties": {
+        "owner_present_enrollment_completed": {"const": true},
+        "private_stub_outside_repository": {"const": true},
+        "user_verification_requested": {"const": true},
+        "separate_recovery_signer_verified": {"const": false},
+        "enrollment_signature_test_completed": {"const": false}
+      }
+    },
+    "architecture_ratification_verified": {"const": false},
+    "production_ready": {"const": false}
+  }
+}

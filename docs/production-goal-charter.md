@@ -9,6 +9,17 @@ Machine ledger: `runs/pdc_production_roadmap.json`
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
 Last roadmap reconciliation: PooleOS Cycle 149
 
+Post-Cycle 149 registration update (2026-09-04): the primary FIDO2 governance
+key is enrolled, its exact fingerprint is owner-confirmed, and GitHub SSH
+signing-key registration `1158225` is verified for `rookepoole`.
+`security/governance-key-registration.json` supersedes earlier unavailable-key
+statements for current status; historical owner receipts retain their original
+bytes. `N0-HW-KEY-ACQUIRE-001` is satisfied for the primary key. The immediate
+move is `N0-GOVERNANCE-CUSTODY-001`: verify an enrollment signature and establish
+the separately controlled recovery signer. `FLAG-N0-GOVERNANCE-KEY-001` remains
+open for those requirements. Architecture signing and production gates remain
+open, and `N12-CONCURRENCY-RECLAMATION-001` remains the next kernel move.
+
 Cycle 149 reconciliation (superseding current Cycle 148 implementation and
 next-move values): governance and external-key state are unchanged. The
 owner-independent `N12-CONCURRENCY-LOCKS-001` move adds selector 22 PKLOCK1
@@ -30,7 +41,7 @@ N12.2 is complete only for this frozen profile. Deferred reclamation and
 ABA-safe object lifetime, general SMP, ring-3/address-space switching, full
 per-task architectural state, target execution, N12 exit, release, and
 production remain open. `production_ready=false`; the blocked external move
-remains `N0-HW-KEY-ACQUIRE-001`, while
+was `N0-HW-KEY-ACQUIRE-001` at the Cycle 149 engineering close, while
 `ADD-N12-CONCURRENCY-RECLAMATION-001` and
 `FLAG-N12-CONCURRENCY-RECLAMATION-001` bind
 `N12-CONCURRENCY-RECLAMATION-001` as the next owner-independent move. No key,

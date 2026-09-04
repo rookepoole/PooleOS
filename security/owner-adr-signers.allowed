@@ -1,3 +1,2 @@
-# Intentionally empty pending OWNER-SIGNING-CUSTODY-001.
-# Required form after owner approval:
-# rookepoole namespaces="git,pooleos-adr-ratification-v1@github.com/rookepoole/PooleOS" <PUBLIC_SSH_KEY>
+# Owner-confirmed public governance signer; registration evidence is adjacent.
+rookepoole namespaces="git,pooleos-adr-ratification-v1@github.com/rookepoole/PooleOS" sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIL2JUAmsLJFc24N2eVjPiURPbBXkDypYVIug6KoJ8t4gAAAABHNzaDo= PooleOS ADR governance signing key
