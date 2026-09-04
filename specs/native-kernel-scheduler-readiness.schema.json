@@ -8,7 +8,7 @@
   "properties": {
     "schema_version": {"const": "1.0"},
     "artifact_kind": {"const": "pooleos_native_kernel_scheduler_readiness"},
-    "status_date": {"const": "2026-07-30"},
+    "status_date": {"const": "2026-09-04"},
     "status": {"const": "pass_single_host_two_run_qemu64_bsp_cooperative_scheduler_foundation_non_promoting"},
     "contract_id": {"const": "PKSCHED1"},
     "selected_move_id": {"const": "N12-SCHED-001"},

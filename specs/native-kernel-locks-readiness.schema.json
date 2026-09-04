@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.invalid/specs/native-kernel-locks-readiness.schema.json",
+  "title": "PooleOS PKLOCK1 readiness",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "status_date",
+    "status",
+    "contract_id",
+    "selected_move_id",
+    "production_ready",
+    "production_promotion_allowed",
+    "n12_exit_gate_satisfied",
+    "flag_n12_concurrency_locks_001_closed",
+    "phase_status",
+    "inputs",
+    "build",
+    "media",
+    "execution",
+    "observation",
+    "negative_controls",
+    "claims",
+    "nonclaims"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_locks_readiness"},
+    "status_date": {"type": "string", "format": "date"},
+    "status": {"const": "pass_single_host_two_run_sandybridge_four_vcpu_lock_family_non_promoting"},
+    "contract_id": {"const": "PKLOCK1"},
+    "selected_move_id": {"const": "N12-CONCURRENCY-LOCKS-001"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "n12_exit_gate_satisfied": {"const": false},
+    "flag_n12_concurrency_locks_001_closed": {"const": true},
+    "phase_status": {"const": {"N12": "partial", "N12.2": "complete"}},
+    "inputs": {"type": "object"},
+    "build": {"type": "object"},
+    "media": {"type": "object"},
+    "execution": {"type": "object"},
+    "observation": {"type": "object"},
+    "negative_controls": {
+      "type": "array",
+      "minItems": 30,
+      "maxItems": 30,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status", "expected", "case_count"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^NEG-N12-PKLOCK1-"},
+          "status": {"const": "pass"},
+          "expected": {"const": "rejected"},
+          "case_count": {"type": "integer", "minimum": 1}
+        }
+      }
+    },
+    "claims": {"type": "object", "additionalProperties": {"type": "boolean"}},
+    "nonclaims": {"type": "array", "minItems": 4, "items": {"type": "string"}}
+  }
+}

@@ -196,11 +196,13 @@ def _source_audit() -> dict[str, Any]:
         raise QualificationError("PKSCHED5 typed IPI source audit failed")
     if not all(token in texts["arch"] for token in required_arch):
         raise QualificationError("PKSCHED5 AP handler source audit failed")
+    maximum_match = re.search(r"MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = (\d+);", texts["bootexit"])
     if (
         'development-scheduler-ap-workers = ["development-transfer"]'
         not in texts["boot_manifest"]
         or 'feature = "development-scheduler-ap-workers"' not in texts["boot_exit"]
-        or "MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = 21" not in texts["bootexit"]
+        or maximum_match is None
+        or int(maximum_match.group(1)) < 19
         or '"development-scheduler-ap-workers"' not in texts["pooleboot_qualifier"]
     ):
         raise QualificationError("PKSCHED5 selector isolation source audit failed")
@@ -209,6 +211,7 @@ def _source_audit() -> dict[str, Any]:
     if re.search(r"\b(?:Vec|Box|String|HashMap|dyn)\b", texts["workers"]):
         raise QualificationError("PKSCHED5 controller gained heap or dynamic storage")
     return {
+        "max_development_trap_scenario": int(maximum_match.group(1)),
         "focused_rust_test_count": 10,
         "fixed_worker_count": 3,
         "fixed_work_capacity": 15,

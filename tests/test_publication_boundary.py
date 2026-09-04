@@ -86,6 +86,7 @@ class PublicationBoundaryTests(unittest.TestCase):
             "runs/native-kernel-scheduler-ap-workers-readiness.json",
             "runs/native-kernel-scheduler-smp-preempt-readiness.json",
             "runs/native-kernel-atomics-readiness.json",
+            "runs/native-kernel-locks-readiness.json",
             "runs/native_microcode_readiness.json",
             "runs/native_recovery_readiness.json",
             "runs/native_system_manifest_readiness.json",

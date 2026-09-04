@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_kind": "pooleos_native_checklist_coverage",
-  "status_date": "2026-08-12",
+  "status_date": "2026-09-04",
   "status": "pass",
   "source": {
     "path": "sources/requirements/sha256/a8c94719faf9428c1f133010ba2603c0270c4e1efd7327af8eab9c8c362abb3d/PooleOS_From_Scratch_Master_Checklist.md",
@@ -246,7 +246,8 @@
         "ADD-N12-SCHED-AP-WORKERS-001",
         "ADD-N12-SCHED-SMP-PREEMPT-001",
         "ADD-N12-CONCURRENCY-ATOMICS-001",
-        "ADD-N12-CONCURRENCY-LOCKS-001"
+        "ADD-N12-CONCURRENCY-LOCKS-001",
+        "ADD-N12-CONCURRENCY-RECLAMATION-001"
       ]
     },
     {
@@ -3060,6 +3061,16 @@
         "N12.2 synchronization, lock-order, priority-inversion, and interrupt-context requirements",
         "Cycle 148 PKATOM1 typed atomic and memory-order foundation",
         "master checklist sections 031-034"
+      ]
+    },
+    {
+      "id": "ADD-N12-CONCURRENCY-RECLAMATION-001",
+      "phase_id": "N12",
+      "requirement": "Define and independently qualify bounded deferred reclamation and ABA-safe object lifetime over PKATOM1 and PKLOCK1: select explicit grace-period or hazard/epoch ownership rules, bind generation and reference transitions to scheduler and address-space lifetime, require acknowledged cross-CPU quiescence before reuse, reject stale handles and premature reclaim, provide timeout, cancellation, CPU-offline, owner-death, pressure, and shutdown rollback, and prove exact-topology host and live behavior without claiming general SMP, hotplug, target hardware, N12 exit, or production readiness.",
+      "basis": [
+        "N12.3 deferred reclamation, lock-free lifetime, and ABA requirements",
+        "Cycle 149 PKLOCK1 bounded lock-family and exact four-vCPU contention evidence",
+        "PKATOM1 reference counts, PKSMP5 acknowledged shootdown, PKVM3 generation retirement, and master checklist sections 031-034"
       ]
     },
     {

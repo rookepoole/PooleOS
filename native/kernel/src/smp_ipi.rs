@@ -386,6 +386,7 @@ pub const SHOOTDOWN_MAGIC_OFFSET: usize = extension_offset!(shootdown_magic);
 pub const SHOOTDOWN_VERSION_OFFSET: usize = extension_offset!(shootdown_version);
 pub const SHOOTDOWN_STATE_OFFSET: usize = extension_offset!(shootdown_state);
 pub const SHOOTDOWN_ERROR_OFFSET: usize = extension_offset!(shootdown_error);
+pub const SHOOTDOWN_RESERVED_OFFSET: usize = extension_offset!(shootdown_reserved);
 pub const SHOOTDOWN_ROOT_PHYSICAL_OFFSET: usize = extension_offset!(shootdown_root_physical);
 pub const SHOOTDOWN_VIRTUAL_ADDRESS_OFFSET: usize = extension_offset!(shootdown_virtual_address);
 pub const SHOOTDOWN_RETIRED_GENERATION_OFFSET: usize =
@@ -1553,6 +1554,40 @@ pub fn validate_scheduler_final(
     normalized.eoi_count = LIVE_DELIVERY_COUNT;
     normalized.accepted_count = LIVE_ACCEPTED_COUNT;
     normalized.denied_count = LIVE_DENIED_COUNT;
+    normalized.call_function_count = 0;
+    normalized.response_checksum = response_checksum(&normalized);
+    validate_final(&normalized, expected_target_apic_id, timeout_count)
+}
+
+pub fn validate_lock_final(
+    snapshot: &IpiSnapshot,
+    expected_target_apic_id: u32,
+    timeout_count: u32,
+) -> Result<(), Error> {
+    if snapshot.ack_attempt != 5
+        || snapshot.ack_sequence != 4
+        || snapshot.last_accepted_sequence != 4
+        || snapshot.delivery_count != 5
+        || snapshot.eoi_count != 5
+        || snapshot.accepted_count != 4
+        || snapshot.denied_count != 1
+        || snapshot.reschedule_count != 0
+        || snapshot.shootdown_count != 1
+        || snapshot.call_function_count != 1
+        || snapshot.diagnostic_count != 1
+        || snapshot.panic_count != 0
+        || snapshot.stop_count != 1
+        || snapshot.response_checksum != response_checksum(snapshot)
+    {
+        return Err(Error::Counter);
+    }
+    let mut normalized = *snapshot;
+    normalized.ack_attempt = LIVE_FINAL_ATTEMPT;
+    normalized.ack_sequence = LIVE_FINAL_SEQUENCE;
+    normalized.last_accepted_sequence = LIVE_FINAL_SEQUENCE;
+    normalized.delivery_count = LIVE_DELIVERY_COUNT;
+    normalized.eoi_count = LIVE_DELIVERY_COUNT;
+    normalized.accepted_count = LIVE_ACCEPTED_COUNT;
     normalized.call_function_count = 0;
     normalized.response_checksum = response_checksum(&normalized);
     validate_final(&normalized, expected_target_apic_id, timeout_count)

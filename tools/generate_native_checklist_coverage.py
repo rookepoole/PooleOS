@@ -395,6 +395,16 @@ ADDED_REQUIREMENTS = [
         ],
     },
     {
+        "id": "ADD-N12-CONCURRENCY-RECLAMATION-001",
+        "phase_id": "N12",
+        "requirement": "Define and independently qualify bounded deferred reclamation and ABA-safe object lifetime over PKATOM1 and PKLOCK1: select explicit grace-period or hazard/epoch ownership rules, bind generation and reference transitions to scheduler and address-space lifetime, require acknowledged cross-CPU quiescence before reuse, reject stale handles and premature reclaim, provide timeout, cancellation, CPU-offline, owner-death, pressure, and shutdown rollback, and prove exact-topology host and live behavior without claiming general SMP, hotplug, target hardware, N12 exit, or production readiness.",
+        "basis": [
+            "N12.3 deferred reclamation, lock-free lifetime, and ABA requirements",
+            "Cycle 149 PKLOCK1 bounded lock-family and exact four-vCPU contention evidence",
+            "PKATOM1 reference counts, PKSMP5 acknowledged shootdown, PKVM3 generation retirement, and master checklist sections 031-034",
+        ],
+    },
+    {
         "id": "ADD-CAP-001",
         "phase_id": "N13",
         "requirement": "Specify unforgeable capabilities, rights attenuation, derivation provenance, transfer, revocation, generation-safe handles, quotas, object destruction, and zero ambient authority; prove no authority amplification across IPC.",
@@ -654,7 +664,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path, default=ROOT / SOURCE_RELATIVE)
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pooleos_native_checklist_coverage.json")
-    parser.add_argument("--status-date", default="2026-08-12")
+    parser.add_argument("--status-date", default="2026-09-04")
     args = parser.parse_args()
     artifact = build_coverage(args.source, args.status_date)
     args.out.parent.mkdir(parents=True, exist_ok=True)

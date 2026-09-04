@@ -35,6 +35,7 @@ use poolekernel::{
         TIMER_VECTOR, VectorLedger, calibrate_apic_timer, parse_hpet, parse_madt,
         timer_initial_count, validate_apic_discovery,
     },
+    locks,
     physical_memory::{
         AllocationHandle, DEFAULT_QUOTA_PAGES, LEDGER_ARENA_PAGE_CAPACITY, LEDGER_GUARD_PAGE_COUNT,
         METADATA_ARENA_PAGE_COUNT, MetadataArenaAccess, PageAccessError, PhysicalMemoryError,
@@ -1539,6 +1540,39 @@ pkatom1_fragment!(PKATOM1_ORDERS, b"POOLEOS:KERNEL:ATOMICS-ORDERS PASS contract=
 pkatom1_fragment!(PKATOM1_OPS, b"POOLEOS:KERNEL:ATOMICS-OPS PASS contract=PKATOM1 load_store=1 exchange=1 compare_exchange=1 fetch_add_sub=1 bit_modify=1 pointer=1 refcount=1 overflow_rejected=1 underflow_rejected=1 audit_symbols=7\n");
 pkatom1_fragment!(PKATOM1_IRQ, b"POOLEOS:KERNEL:ATOMICS-IRQ PASS contract=PKATOM1 timer_deliveries=8 atomic_updates=8 observed_mask=0x000000FF publication=0x00000000C0DEC0DE release_acquire=1 eoi_ordered=1 cleanup=1\n");
 pkatom1_fragment!(PKATOM1_RESULT, b"POOLEOS:KERNEL:ATOMICS-RESULT PASS contract=PKATOM1 profile=qemu64_bsp_interrupt typed_atomics=1 invalid_orders=11 live_interrupt=1 host_smp_litmus=external linked_instruction_audit=external general_locks=0 reclamation=0 general_smp=0 ring3=0 target=0 signatures=0 authority=0 actions=0 n12_exit=0 production=0 terminal=halt\n");
+
+macro_rules! pklock1_fragment {
+    ($name:ident, $value:literal) => {
+        #[used]
+        #[unsafe(link_section = ".text.pklock1_literals")]
+        static $name: [u8; $value.len()] = *$value;
+    };
+}
+
+pklock1_fragment!(PKLOCK1_EARLY, b"POOLEOS:KERNEL:LOCKS-EARLY PASS contract=PKLOCK1 selector=22 parent_atomics=PKATOM1 parent_sched=PKSCHED6 parent_smp=PKSMP5 bsp=1 if=0 stack=validated_by_wrapper serial=initialized\n");
+pklock1_fragment!(
+    PKLOCK1_DENIED,
+    b"POOLEOS:KERNEL:LOCKS-DENIED contract=PKLOCK1 reason="
+);
+pklock1_fragment!(
+    PKLOCK1_DENIED_TAIL,
+    b" cleanup=fail_closed authority=0 actions=0 production=0 terminal=panic\n"
+);
+pklock1_fragment!(PKLOCK1_FAMILY, b"POOLEOS:KERNEL:LOCKS-FAMILY PASS contract=PKLOCK1 raw_spin=ticket irqsave_spin=1 sleeping_mutex=1 notification=1 rwlock=writer_preferred seqlock=1 allocation=none rank_count=5\n");
+pklock1_fragment!(PKLOCK1_POLICY, b"POOLEOS:KERNEL:LOCKS-POLICY PASS contract=PKLOCK1 try=1 timed=1 owner=1 recursion_rejected=1 irq_nesting_rejected=1 preempt_nesting_rejected=1 priority_inheritance=bounded maximum_bypass=7 deadlock_graph=1 owner_death=1 exact_rollback=1\n");
+pklock1_fragment!(PKLOCK1_LIVE, b"POOLEOS:KERNEL:LOCKS-LIVE PASS contract=PKLOCK1 profile=sandybridge_four_vcpu_ticket_contention next=");
+pklock1_fragment!(PKLOCK1_SERVING, b" serving=");
+pklock1_fragment!(PKLOCK1_ACQUISITIONS, b" acquisitions=");
+pklock1_fragment!(PKLOCK1_CPU_MASK, b" cpu_mask=");
+pklock1_fragment!(PKLOCK1_TICKETS, b" tickets=");
+pklock1_fragment!(PKLOCK1_MAPPINGS, b" mappings_installed=");
+pklock1_fragment!(PKLOCK1_REVOKED, b" mappings_revoked=");
+pklock1_fragment!(
+    PKLOCK1_LIVE_TAIL,
+    b" queue_drained=1 owner=0 unique_tickets=4 exact_topology=1\n"
+);
+pklock1_fragment!(PKLOCK1_HOST, b"POOLEOS:KERNEL:LOCKS-HOST PASS contract=PKLOCK1 exact_four_thread=external scheduler_sleep_path=external fairness=external rw_contention=external seqlock_contention=external hostile_controls=external\n");
+pklock1_fragment!(PKLOCK1_RESULT, b"POOLEOS:KERNEL:LOCKS-RESULT PASS contract=PKLOCK1 profile=bounded_x86_64_four_vcpu lock_family=1 live_multi_ap_contention=1 host_concurrency=external scheduler_sleep=external reclamation=0 general_smp=0 ring3=0 address_spaces=1 target=0 signatures=0 authority=0 actions=0 n12_exit=0 production=0 terminal=halt\n");
 
 struct SchedulerPreemptionRuntimeCell(UnsafeCell<Option<BspPreemption>>);
 
@@ -4421,6 +4455,18 @@ struct SmpIpiLiveProof {
     scheduler: Option<SchedulerSmpLiveProof>,
     ap_workers: Option<SchedulerApWorkersLiveProof>,
     smp_preempt: Option<SchedulerSmpPreemptLiveProof>,
+    locks: Option<LockLiveProof>,
+}
+
+#[derive(Clone, Copy)]
+struct LockLiveProof {
+    next: u32,
+    serving: u32,
+    acquisitions: u32,
+    cpu_mask: u32,
+    tickets: [u32; 4],
+    mappings_installed: u32,
+    mappings_revoked: u32,
 }
 
 #[derive(Clone, Copy)]
@@ -4475,6 +4521,7 @@ type SmpIpiExecutionReceipt = (
     Option<SchedulerSmpLiveProof>,
     Option<SchedulerApWorkersLiveProof>,
     Option<SchedulerSmpPreemptLiveProof>,
+    Option<LockLiveProof>,
 );
 
 const SMP_IPI_ENTRY_WRITE_THROUGH: u64 = 1 << 3;
@@ -6765,13 +6812,226 @@ fn run_smp_ipi_legacy(
     }
 }
 
+fn lock_probe_pointer(offset: usize) -> Result<*const AtomicU32, SmpIpiLiveError> {
+    if !offset.is_multiple_of(core::mem::align_of::<AtomicU32>())
+        || offset + core::mem::size_of::<AtomicU32>() > poole_handoff::PAGE_BYTES as usize
+    {
+        return Err(smp_ipi::Error::MailboxShape.into());
+    }
+    Ok((virtual_memory::TEMPORARY_MAP_START as usize + offset) as *const AtomicU32)
+}
+
+fn lock_probe_store(offset: usize, value: u32, order: Ordering) -> Result<(), SmpIpiLiveError> {
+    let pointer = lock_probe_pointer(offset)?;
+    // SAFETY: the caller maps the exclusively owned shared probe frame at the
+    // temporary virtual address for the complete atomic operation.
+    unsafe { (&*pointer).store(value, order) };
+    Ok(())
+}
+
+fn lock_probe_load(offset: usize, order: Ordering) -> Result<u32, SmpIpiLiveError> {
+    let pointer = lock_probe_pointer(offset)?;
+    // SAFETY: the caller maps the live shared probe frame for this atomic load.
+    Ok(unsafe { (&*pointer).load(order) })
+}
+
+fn lock_probe_fetch_add(
+    offset: usize,
+    value: u32,
+    order: Ordering,
+) -> Result<u32, SmpIpiLiveError> {
+    let pointer = lock_probe_pointer(offset)?;
+    // SAFETY: the caller maps the live shared probe frame for this atomic RMW.
+    Ok(unsafe { (&*pointer).fetch_add(value, order) })
+}
+
+fn lock_probe_fetch_or(offset: usize, value: u32, order: Ordering) -> Result<u32, SmpIpiLiveError> {
+    let pointer = lock_probe_pointer(offset)?;
+    // SAFETY: the caller maps the live shared probe frame for this atomic RMW.
+    Ok(unsafe { (&*pointer).fetch_or(value, order) })
+}
+
+fn smp_lock_live_profile(
+    hardware: &mut LiveInterruptHardware,
+    access: &mut BootstrapTableMemory,
+    period_femtoseconds: u64,
+    resources: &[SmpIpiApResource; smp_ipi::AP_COUNT],
+) -> Result<LockLiveProof, SmpIpiLiveError> {
+    let shared_physical = resources[0].old_frame_physical;
+    access
+        .ensure_mapped(shared_physical)
+        .map_err(|_| smp::Error::PhysicalAccess)?;
+    for offset in [
+        locks::LIVE_NEXT_OFFSET,
+        locks::LIVE_SERVING_OFFSET,
+        locks::LIVE_OWNER_OFFSET,
+        locks::LIVE_ACQUISITIONS_OFFSET,
+        locks::LIVE_CPU_MASK_OFFSET,
+    ] {
+        lock_probe_store(offset, 0, Ordering::Relaxed)?;
+    }
+    for cpu in 0..4 {
+        lock_probe_store(
+            locks::LIVE_TICKET_BASE_OFFSET + cpu * core::mem::size_of::<u32>(),
+            u32::MAX,
+            Ordering::Relaxed,
+        )?;
+    }
+    lock_probe_store(locks::LIVE_NEXT_OFFSET, 1, Ordering::Release)?;
+    lock_probe_store(locks::LIVE_OWNER_OFFSET, 1, Ordering::Release)?;
+    lock_probe_store(locks::LIVE_TICKET_BASE_OFFSET, 0, Ordering::Release)?;
+
+    let shared_leaf =
+        shared_physical | smp::ENTRY_PRESENT | smp::ENTRY_WRITABLE | smp::ENTRY_NO_EXECUTE;
+    for resource in resources {
+        TableMemory::write_entry(
+            access,
+            resource.layout.page_table(),
+            locks::LIVE_PROBE_PAGE_TABLE_INDEX,
+            shared_leaf,
+        )
+        .map_err(|_| smp::Error::Memory)?;
+        if TableMemory::read_entry(
+            access,
+            resource.layout.page_table(),
+            locks::LIVE_PROBE_PAGE_TABLE_INDEX,
+        )
+        .map_err(|_| smp::Error::Memory)?
+            != shared_leaf
+        {
+            return Err(smp_ipi::Error::PageRole.into());
+        }
+    }
+    arch::x86_64::memory_fence();
+
+    for resource in resources {
+        access
+            .ensure_mapped(resource.layout.local())
+            .map_err(|_| smp::Error::PhysicalAccess)?;
+        smp_ipi_mailbox_write_u32(
+            smp_ipi::SHOOTDOWN_RESERVED_OFFSET,
+            locks::LIVE_PROBE_MODE_MAGIC,
+        );
+        let request =
+            IpiRequest::canonical_call(3, 2, resource.target_apic_id, smp_ipi::CallPayload::Noop);
+        smp_ipi_publish_request(&request);
+        smp_apic_command(
+            hardware,
+            resource.target_apic_id,
+            u32::from(IpiOperation::CallFunction.vector()),
+        )?;
+    }
+
+    access
+        .ensure_mapped(shared_physical)
+        .map_err(|_| smp::Error::PhysicalAccess)?;
+    let target = smp_hpet_ticks(SMP_MAILBOX_TIMEOUT_NANOSECONDS, period_femtoseconds)?;
+    let start = hardware.hpet_read(0xf0).map_err(|_| smp::Error::Hpet)?;
+    loop {
+        if lock_probe_load(locks::LIVE_NEXT_OFFSET, Ordering::Acquire)? == 4 {
+            break;
+        }
+        let current = hardware.hpet_read(0xf0).map_err(|_| smp::Error::Hpet)?;
+        if current.wrapping_sub(start) >= target {
+            return Err(smp::Error::Timeout.into());
+        }
+        core::hint::spin_loop();
+    }
+    if lock_probe_fetch_add(locks::LIVE_ACQUISITIONS_OFFSET, 1, Ordering::AcqRel)? != 0
+        || lock_probe_fetch_or(locks::LIVE_CPU_MASK_OFFSET, 1, Ordering::AcqRel)? != 0
+    {
+        return Err(smp_ipi::Error::Counter.into());
+    }
+    lock_probe_store(locks::LIVE_OWNER_OFFSET, 0, Ordering::Release)?;
+    let _ = lock_probe_fetch_add(locks::LIVE_SERVING_OFFSET, 1, Ordering::Release)?;
+
+    for resource in resources {
+        access
+            .ensure_mapped(resource.layout.local())
+            .map_err(|_| smp::Error::PhysicalAccess)?;
+        let snapshot = smp_ipi_wait_ack(hardware, period_femtoseconds, 3)?;
+        if snapshot.ack_sequence != 2
+            || snapshot.ack_operation != IpiOperation::CallFunction as u32
+            || snapshot.ack_status != smp_ipi::ACK_ACCEPTED
+            || snapshot.ack_error != smp_ipi::ERROR_NONE
+            || snapshot.result != smp_ipi::RESULT_CALL_ALLOWLIST_NOOP
+        {
+            return Err(smp_ipi::Error::Result.into());
+        }
+        smp_ipi_mailbox_write_u32(smp_ipi::SHOOTDOWN_RESERVED_OFFSET, 0);
+    }
+
+    access
+        .ensure_mapped(shared_physical)
+        .map_err(|_| smp::Error::PhysicalAccess)?;
+    let proof = LockLiveProof {
+        next: lock_probe_load(locks::LIVE_NEXT_OFFSET, Ordering::Acquire)?,
+        serving: lock_probe_load(locks::LIVE_SERVING_OFFSET, Ordering::Acquire)?,
+        acquisitions: lock_probe_load(locks::LIVE_ACQUISITIONS_OFFSET, Ordering::Acquire)?,
+        cpu_mask: lock_probe_load(locks::LIVE_CPU_MASK_OFFSET, Ordering::Acquire)?,
+        tickets: [
+            lock_probe_load(locks::LIVE_TICKET_BASE_OFFSET, Ordering::Acquire)?,
+            lock_probe_load(locks::LIVE_TICKET_BASE_OFFSET + 4, Ordering::Acquire)?,
+            lock_probe_load(locks::LIVE_TICKET_BASE_OFFSET + 8, Ordering::Acquire)?,
+            lock_probe_load(locks::LIVE_TICKET_BASE_OFFSET + 12, Ordering::Acquire)?,
+        ],
+        mappings_installed: 3,
+        mappings_revoked: 3,
+    };
+    let mut ticket_mask = 0u32;
+    for ticket in proof.tickets {
+        if ticket >= 4 {
+            return Err(smp_ipi::Error::Counter.into());
+        }
+        ticket_mask |= 1 << ticket;
+    }
+    if proof.next != 4
+        || proof.serving != 4
+        || proof.acquisitions != 4
+        || proof.cpu_mask != 0x0f
+        || proof.tickets[0] != 0
+        || ticket_mask != 0x0f
+    {
+        return Err(smp_ipi::Error::Counter.into());
+    }
+
+    for resource in resources {
+        TableMemory::write_entry(
+            access,
+            resource.layout.page_table(),
+            locks::LIVE_PROBE_PAGE_TABLE_INDEX,
+            0,
+        )
+        .map_err(|_| smp::Error::Memory)?;
+        if TableMemory::read_entry(
+            access,
+            resource.layout.page_table(),
+            locks::LIVE_PROBE_PAGE_TABLE_INDEX,
+        )
+        .map_err(|_| smp::Error::Memory)?
+            != 0
+        {
+            return Err(smp_ipi::Error::PageRole.into());
+        }
+    }
+    Ok(proof)
+}
+
 fn run_smp_ipi(
     handoff: &poole_handoff::Handoff<'_>,
     core: poole_handoff::CoreRecord,
     observed_cr3: u64,
     scheduler_mode: bool,
 ) -> Result<SmpIpiLiveProof, SmpIpiLiveError> {
-    run_smp_ipi_internal(handoff, core, observed_cr3, scheduler_mode, false, false)
+    run_smp_ipi_internal(
+        handoff,
+        core,
+        observed_cr3,
+        scheduler_mode,
+        false,
+        false,
+        false,
+    )
 }
 
 fn run_smp_ipi_workers(
@@ -6779,7 +7039,7 @@ fn run_smp_ipi_workers(
     core: poole_handoff::CoreRecord,
     observed_cr3: u64,
 ) -> Result<SmpIpiLiveProof, SmpIpiLiveError> {
-    run_smp_ipi_internal(handoff, core, observed_cr3, false, true, false)
+    run_smp_ipi_internal(handoff, core, observed_cr3, false, true, false, false)
 }
 
 fn run_smp_ipi_preempt(
@@ -6787,7 +7047,15 @@ fn run_smp_ipi_preempt(
     core: poole_handoff::CoreRecord,
     observed_cr3: u64,
 ) -> Result<SmpIpiLiveProof, SmpIpiLiveError> {
-    run_smp_ipi_internal(handoff, core, observed_cr3, false, false, true)
+    run_smp_ipi_internal(handoff, core, observed_cr3, false, false, true, false)
+}
+
+fn run_smp_ipi_locks(
+    handoff: &poole_handoff::Handoff<'_>,
+    core: poole_handoff::CoreRecord,
+    observed_cr3: u64,
+) -> Result<SmpIpiLiveProof, SmpIpiLiveError> {
+    run_smp_ipi_internal(handoff, core, observed_cr3, false, false, false, true)
 }
 
 fn run_smp_ipi_internal(
@@ -6797,6 +7065,7 @@ fn run_smp_ipi_internal(
     scheduler_mode: bool,
     ap_worker_mode: bool,
     smp_preempt_mode: bool,
+    lock_mode: bool,
 ) -> Result<SmpIpiLiveProof, SmpIpiLiveError> {
     SMP_IPI_FAILURE_DETAIL.store(0, Ordering::Relaxed);
     SMP_IPI_FAILURE_STAGE.store(1, Ordering::Relaxed);
@@ -7001,8 +7270,20 @@ fn run_smp_ipi_internal(
         } else {
             None
         };
+        let lock_proof = if lock_mode {
+            Some(smp_lock_live_profile(
+                &mut hardware,
+                &mut page_access,
+                period,
+                &resources,
+            )?)
+        } else {
+            None
+        };
         let (shootdown_attempts, shootdown_sequences) = if smp_preempt_mode {
             ([6, 4, 7], [5, 3, 6])
+        } else if lock_mode {
+            ([4; smp_ipi::AP_COUNT], [3; smp_ipi::AP_COUNT])
         } else {
             let attempt = if scheduler_mode {
                 6
@@ -7176,6 +7457,8 @@ fn run_smp_ipi_internal(
                     8
                 } else if smp_preempt_mode {
                     [7, 5, 8][index]
+                } else if lock_mode {
+                    5
                 } else {
                     4
                 },
@@ -7185,6 +7468,8 @@ fn run_smp_ipi_internal(
                     7
                 } else if smp_preempt_mode {
                     [6, 4, 7][index]
+                } else if lock_mode {
+                    4
                 } else {
                     3
                 },
@@ -7218,6 +7503,8 @@ fn run_smp_ipi_internal(
                     u32::from(index == 0),
                     [3, 1, 4][index],
                 )?;
+            } else if lock_mode {
+                smp_ipi::validate_lock_final(&ipi, resource.target_apic_id, u32::from(index == 0))?;
             } else {
                 smp_ipi::validate_final(&ipi, resource.target_apic_id, u32::from(index == 0))?;
             }
@@ -7247,6 +7534,7 @@ fn run_smp_ipi_internal(
             scheduler,
             ap_workers,
             smp_preempt,
+            lock_proof,
         ))
     })();
 
@@ -7271,7 +7559,7 @@ fn run_smp_ipi_internal(
 
     let mut post_validation_error = None;
     let mut cleanup_failure_stage = 0u32;
-    if let Ok((mailboxes, _, _, _, _, _, _, _)) = &operation {
+    if let Ok((mailboxes, _, _, _, _, _, _, _, _)) = &operation {
         lifecycle.parked(parked_mask)?;
         SMP_IPI_FAILURE_STAGE.store(6, Ordering::Relaxed);
         for (index, resource) in resources.iter().enumerate() {
@@ -7349,6 +7637,7 @@ fn run_smp_ipi_internal(
         scheduler,
         ap_workers,
         smp_preempt,
+        lock_proof,
     ) = operation;
     let mut operations: [Option<SmpIpiApOperationProof>; smp_ipi::AP_COUNT] =
         [None; smp_ipi::AP_COUNT];
@@ -7388,6 +7677,7 @@ fn run_smp_ipi_internal(
         scheduler,
         ap_workers,
         smp_preempt,
+        locks: lock_proof,
     })
 }
 
@@ -7565,6 +7855,8 @@ extern "C" fn poole_kernel_emergency_panic(code: u32) -> ! {
         0x101a => PanicCode::SchedulerSmp,
         0x101b => PanicCode::SchedulerApWorkers,
         0x101c => PanicCode::SchedulerSmpPreempt,
+        0x101d => PanicCode::Atomics,
+        0x101e => PanicCode::Locks,
         _ => PanicCode::UnexpectedReturn,
     };
     let disposition = PANIC_STATE.begin(code);
@@ -7731,6 +8023,14 @@ extern "C" fn poole_kernel_rust_entry(
             ring: &EARLY_RING,
         });
         logger.write_bytes(&PKATOM1_EARLY);
+    }
+    if trap_scenario == DevelopmentTrapScenario::Locks {
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        logger.write_bytes(&PKLOCK1_EARLY);
     }
 
     if let Err(error) = validate_entry_envelope(handoff_address, handoff_length, magic, stack_top) {
@@ -10763,6 +11063,85 @@ extern "C" fn poole_kernel_rust_entry(
         halt_forever()
     }
 
+    if trap_scenario == DevelopmentTrapScenario::Locks {
+        let mut logger = EarlyLogger::new(BootSink {
+            serial: &mut serial,
+            debugcon: &mut debugcon,
+            ring: &EARLY_RING,
+        });
+        let proof = match run_smp_ipi_locks(&decoded, validated.core, observed_cr3) {
+            Ok(value) => value,
+            Err(error) => {
+                logger.write_bytes(&PKLOCK1_DENIED);
+                let reason =
+                    u64::from(error.code()) | SMP_IPI_FAILURE_DETAIL.load(Ordering::Relaxed);
+                logger.write_hex_u64(reason);
+                logger.write_bytes(&PKLOCK1_DENIED_TAIL);
+                poole_kernel_emergency_panic(PanicCode::Locks as u32)
+            }
+        };
+        let lock_proof = proof.locks.unwrap_or_else(|| {
+            logger.write_bytes(&PKLOCK1_DENIED);
+            logger.write_str("lock_evidence");
+            logger.write_bytes(&PKLOCK1_DENIED_TAIL);
+            poole_kernel_emergency_panic(PanicCode::Locks as u32)
+        });
+        if proof.processor_count != 4
+            || proof.enabled_processor_count != 4
+            || proof.bsp_apic_id != 0
+            || proof.target_apic_ids != [1, 2, 3]
+            || proof.lifecycle.online_mask != smp_ipi::TARGET_CPU_MASK
+            || proof.lifecycle.quiesced_mask != smp_ipi::TARGET_CPU_MASK
+            || proof.lifecycle.parked_mask != smp_ipi::TARGET_CPU_MASK
+            || proof.lifecycle.released_mask != smp_ipi::TARGET_CPU_MASK
+            || lock_proof.next != 4
+            || lock_proof.serving != 4
+            || lock_proof.acquisitions != 4
+            || lock_proof.cpu_mask != 0x0f
+            || lock_proof.mappings_installed != 3
+            || lock_proof.mappings_revoked != 3
+        {
+            logger.write_bytes(&PKLOCK1_DENIED);
+            logger.write_str("lifecycle");
+            logger.write_bytes(&PKLOCK1_DENIED_TAIL);
+            poole_kernel_emergency_panic(PanicCode::Locks as u32)
+        }
+
+        logger.write_bytes(&PKLOCK1_FAMILY);
+        logger.write_bytes(&PKLOCK1_POLICY);
+        logger.write_bytes(&PKLOCK1_LIVE);
+        logger.write_decimal_u64(u64::from(lock_proof.next));
+        logger.write_bytes(&PKLOCK1_SERVING);
+        logger.write_decimal_u64(u64::from(lock_proof.serving));
+        logger.write_bytes(&PKLOCK1_ACQUISITIONS);
+        logger.write_decimal_u64(u64::from(lock_proof.acquisitions));
+        logger.write_bytes(&PKLOCK1_CPU_MASK);
+        logger.write_hex_u64(u64::from(lock_proof.cpu_mask));
+        logger.write_bytes(&PKLOCK1_TICKETS);
+        let mut canonical_tickets = lock_proof.tickets;
+        for left in 0..canonical_tickets.len() {
+            for right in (left + 1)..canonical_tickets.len() {
+                if canonical_tickets[right] < canonical_tickets[left] {
+                    canonical_tickets.swap(left, right);
+                }
+            }
+        }
+        for (index, ticket) in canonical_tickets.iter().enumerate() {
+            if index != 0 {
+                logger.write_bytes(b",");
+            }
+            logger.write_decimal_u64(u64::from(*ticket));
+        }
+        logger.write_bytes(&PKLOCK1_MAPPINGS);
+        logger.write_decimal_u64(u64::from(lock_proof.mappings_installed));
+        logger.write_bytes(&PKLOCK1_REVOKED);
+        logger.write_decimal_u64(u64::from(lock_proof.mappings_revoked));
+        logger.write_bytes(&PKLOCK1_LIVE_TAIL);
+        logger.write_bytes(&PKLOCK1_HOST);
+        logger.write_bytes(&PKLOCK1_RESULT);
+        halt_forever()
+    }
+
     if trap_scenario == DevelopmentTrapScenario::Scheduler {
         let cpu = SchedulerCpuId::new(0)
             .unwrap_or_else(|_| poole_kernel_emergency_panic(PanicCode::Scheduler as u32));
@@ -11250,6 +11629,7 @@ extern "C" fn poole_kernel_rust_entry(
             poole_kernel_emergency_panic(PanicCode::SchedulerSmpPreempt as u32)
         }
         DevelopmentTrapScenario::Atomics => poole_kernel_emergency_panic(PanicCode::Atomics as u32),
+        DevelopmentTrapScenario::Locks => poole_kernel_emergency_panic(PanicCode::Locks as u32),
     }
 }
 

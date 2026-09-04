@@ -3,9 +3,9 @@
   "binding_errors": [],
   "bindings": {
     "collector": {
-      "byte_count": 22049,
+      "byte_count": 22050,
       "path": "tools/collect_tier1_hardware.ps1",
-      "sha256": "5A0F9C538FBE6FC8BC4BBB49114F3434208B3AE32F7034FE09AC5FA868314241"
+      "sha256": "3DB5A88899BE304A3954763872F03E0217F8B6ACFE2D663F8B0ABD8EA0C87672"
     },
     "runtime": {
       "byte_count": 42835,
@@ -13,9 +13,9 @@
       "sha256": "AAA27935B1D94C7E93AAF2AAFA299B0C18664A9C189F59A89CF6C64866F6FFB3"
     },
     "sanitized_observation": {
-      "byte_count": 16620,
+      "byte_count": 16619,
       "path": "runs/tier1_hardware_observation.json",
-      "sha256": "31AAFB5A2083CDA060F02EC079172A8734EC0CC8E55572935C8C7302EDD62B9C"
+      "sha256": "4F9E462653AC7BB9F31E188EA7F6D806A3979FF489FBE3C58286B68BB48279AD"
     },
     "standards_register": {
       "byte_count": 13553,

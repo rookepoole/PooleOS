@@ -152,17 +152,21 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
         with self.assertRaises(smp_ipi.KernelSmpIpiError):
             qualify._audit_source_text(arch.replace(".Lpoole_ap_ipi_count_stop:", ".Lpoole_ap_ipi_count_terminal:", 1), main, ipi)
 
-    def test_linked_invlpg_scope_is_one_instruction_executed_per_ap(self) -> None:
+    def test_linked_invlpg_scope_separates_ipi_and_successor_profile(self) -> None:
         disassembly = (
             "0000000000001000 <poole_ap_ipi_trampoline_start>:\n"
             "    1000: 0f 01 38\tinvlpg\t(%rax)\n"
-            "0000000000001003 <poole_ap_ipi_trampoline_end>:\n"
+            "    1003: 0f 01 3b\tinvlpg\t(%rbx)\n"
+            "0000000000001006 <poole_ap_ipi_trampoline_end>:\n"
         )
         audit = qualify._linked_invlpg_scope(disassembly)
-        self.assertEqual(1, audit["invlpg_instruction_count"])
+        self.assertEqual(2, audit["invlpg_instruction_count"])
+        self.assertEqual(1, audit["remote_shootdown_invlpg_instruction_count"])
         self.assertEqual(3, audit["runtime_execution_count"])
+        self.assertEqual(1, audit["successor_profile_invlpg_instruction_count"])
+        self.assertFalse(audit["successor_profile_executed"])
         with self.assertRaises(smp_ipi.KernelSmpIpiError):
-            qualify._linked_invlpg_scope(disassembly.replace("invlpg", "nop"))
+            qualify._linked_invlpg_scope(disassembly.replace("invlpg", "nop", 1))
 
     def test_live_readiness_and_hostile_cases_when_generated(self) -> None:
         path = smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE

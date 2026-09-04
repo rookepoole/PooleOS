@@ -8,7 +8,7 @@
   "properties": {
     "schema_version": {"const": "1.0"},
     "artifact_kind": {"const": "pooleos_native_kernel_scheduler_preemption_readiness"},
-    "status_date": {"const": "2026-08-01"},
+    "status_date": {"const": "2026-09-04"},
     "status": {"const": "pass_single_host_two_run_qemu64_bsp_timer_and_wakeup_preemption_non_promoting"},
     "contract_id": {"const": "PKSCHED2"},
     "selected_move_id": {"const": "N12-SCHED-PREEMPT-001"},

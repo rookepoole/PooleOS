@@ -145,10 +145,12 @@ def _source_audit() -> dict[str, Any]:
         raise QualificationError("PKSCHED4 AP handler source audit failed")
     if "pub fn validate_scheduler_final" not in texts["ipi"]:
         raise QualificationError("PKSCHED4 IPI final validator is missing")
+    maximum_match = re.search(r"MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = (\d+);", texts["bootexit"])
     if (
         'development-scheduler-smp = ["development-transfer"]' not in texts["boot_manifest"]
         or 'feature = "development-scheduler-smp"' not in texts["boot_exit"]
-        or "MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = 21" not in texts["bootexit"]
+        or maximum_match is None
+        or int(maximum_match.group(1)) < 18
         or '"development-scheduler-smp"' not in texts["pooleboot_qualifier"]
     ):
         raise QualificationError("PKSCHED4 selector isolation source audit failed")
@@ -157,6 +159,7 @@ def _source_audit() -> dict[str, Any]:
     if re.search(r"\b(?:Vec|Box|String|HashMap|dyn)\b", texts["scheduler"]):
         raise QualificationError("PKSCHED4 controller gained heap or dynamic storage")
     return {
+        "max_development_trap_scenario": int(maximum_match.group(1)),
         "focused_rust_test_count": 8,
         "fixed_cpu_count": 4,
         "fixed_task_capacity": 8,

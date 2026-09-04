@@ -25,12 +25,16 @@
       "properties": {
         "linked_invlpg_audit": {
           "type": "object",
-          "required": ["scope", "invlpg_instruction_count", "runtime_execution_count", "operand", "status", "canonical_sha256"],
+          "required": ["scope", "invlpg_instruction_count", "remote_shootdown_invlpg_instruction_count", "runtime_execution_count", "operand", "successor_profile_invlpg_instruction_count", "successor_profile_operand", "successor_profile_executed", "status", "canonical_sha256"],
           "properties": {
             "scope": {"const": "poole_ap_ipi_trampoline_start..poole_ap_ipi_trampoline_end"},
-            "invlpg_instruction_count": {"const": 1},
+            "invlpg_instruction_count": {"const": 2},
+            "remote_shootdown_invlpg_instruction_count": {"const": 1},
             "runtime_execution_count": {"const": 3},
             "operand": {"const": "(%rax)"},
+            "successor_profile_invlpg_instruction_count": {"const": 1},
+            "successor_profile_operand": {"const": "(%rbx)"},
+            "successor_profile_executed": {"const": false},
             "status": {"const": "pass"},
             "canonical_sha256": {"type": "string", "pattern": "^[0-9A-F]{64}$"}
           }

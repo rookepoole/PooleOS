@@ -176,10 +176,12 @@ def _source_audit() -> dict[str, Any]:
         raise QualificationError("PKSCHED2 architecture source audit failed")
     if not all(token in texts["main"] for token in required_main):
         raise QualificationError("PKSCHED2 live path source audit failed")
+    maximum_match = re.search(r"MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = (\d+);", texts["bootexit"])
     if (
         'development-scheduler-preempt = ["development-transfer"]' not in texts["boot_manifest"]
         or 'feature = "development-scheduler-preempt"' not in texts["boot_exit"]
-        or "MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = 21" not in texts["bootexit"]
+        or maximum_match is None
+        or int(maximum_match.group(1)) < 16
         or '"development-scheduler-preempt"' not in texts["pooleboot_qualifier"]
     ):
         raise QualificationError("PKSCHED2 selector isolation source audit failed")
@@ -191,6 +193,7 @@ def _source_audit() -> dict[str, Any]:
     if any(token in "".join(texts.values()) for token in diagnostics):
         raise QualificationError("PKSCHED2 transient diagnostics remain")
     return {
+        "max_development_trap_scenario": int(maximum_match.group(1)),
         "focused_rust_test_count": 7,
         "fixed_deferred_capacity": 8,
         "task_stack_count": 4,

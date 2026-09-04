@@ -1,13 +1,63 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-08-12
+Status date: 2026-09-04
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 147
+Last roadmap reconciliation: PooleOS Cycle 149
+
+Cycle 149 reconciliation (superseding current Cycle 148 implementation and
+next-move values): governance and external-key state are unchanged. The
+owner-independent `N12-CONCURRENCY-LOCKS-001` move adds selector 22 PKLOCK1
+and closes only `FLAG-N12-CONCURRENCY-LOCKS-001` for one bounded x86-64
+development scope. The allocation-free lock family provides FIFO ticket and
+IRQ-save spinlocks, a sleeping mutex with direct bounded priority donation,
+FIFO notification, a writer-preferred reader-writer lock, and a seqlock.
+Five lock ranks, cycle and recursion rejection, owner-death handling,
+try/timed paths, and exact rollback are enforced. Nine exact host receipts
+include 8,192 FIFO ticket acquisitions. Two exact 35-marker four-vCPU runs
+exercise one shared live ticket lock across the BSP and three APs, then revoke
+all three shared aliases before shootdown, park, scrub, and release. Ten
+focused lock tests within 206 kernel host tests and 30 hostile-control
+categories covering 103 rejected cases pass. The canonical kernel is 513,680
+bytes in a 585,728-byte, 143-page image with entry `0xA000`, text end
+`0x70000`, RELRO end and data start `0x7D000`, 1,295 relocations, and SHA-256
+`9029AEE51A4D557EF5B29945985E4A1F07C67DDE9C8C367C80BD1B9EDD9D409E`.
+N12.2 is complete only for this frozen profile. Deferred reclamation and
+ABA-safe object lifetime, general SMP, ring-3/address-space switching, full
+per-task architectural state, target execution, N12 exit, release, and
+production remain open. `production_ready=false`; the blocked external move
+remains `N0-HW-KEY-ACQUIRE-001`, while
+`ADD-N12-CONCURRENCY-RECLAMATION-001` and
+`FLAG-N12-CONCURRENCY-RECLAMATION-001` bind
+`N12-CONCURRENCY-RECLAMATION-001` as the next owner-independent move. No key,
+signature, public-key publication, driver load, firmware change,
+physical-media write, tag, release, or production promotion occurred.
+
+Cycle 148 reconciliation (superseding current Cycle 147 implementation and
+next-move values): governance and external-key state are unchanged. The
+owner-independent `N12-CONCURRENCY-ATOMICS-001` move adds selector 21 PKATOM1
+and closes only `FLAG-N12-CONCURRENCY-ATOMICS-001` for the frozen x86-64
+scope. Typed integer and pointer atomics, operation-specific ordering, nine
+accepted and eleven rejected compare-exchange order pairs, overflow-safe
+references, 4,096 publication rounds, 20,480 contended RMW/CAS operations,
+2,048 sequential-consistency rounds, seven linked instruction audits, and one
+BSP process-to-interrupt ordering profile pass. Seven focused tests within
+196 kernel host tests, eight exact host receipts, two exact 41-marker runs,
+and 29 hostile-control categories covering 78 rejected cases pass. The
+canonical kernel is 513,672 bytes in a 585,728-byte, 143-page image with
+1,289 relocations and SHA-256
+`3CBDF56E90D957E62FC35EAEFF376580BEBDA3623FE4591AB6718984AB258EB7`.
+N12.1 is complete only for this frozen profile. General locks, reclamation,
+general SMP, target execution, N12 exit, release, and production remain open.
+`production_ready=false`; the blocked external move remains
+`N0-HW-KEY-ACQUIRE-001`, while `N12-CONCURRENCY-LOCKS-001` became the next
+owner-independent move. No key, signature, public-key publication,
+privileged host probe, driver load, firmware change, physical-media write,
+tag, release, or production promotion occurred.
 
 Cycle 147 reconciliation (superseding current Cycle 146 implementation and
 next-move values): governance and external-key state are unchanged, and no

@@ -2,16 +2,16 @@
   "artifact_kind": "pooleos_tier1_hardware_observation",
   "bindings": {
     "collector": {
-      "byte_count": 22049,
+      "byte_count": 22050,
       "path": "tools/collect_tier1_hardware.ps1",
-      "sha256": "5A0F9C538FBE6FC8BC4BBB49114F3434208B3AE32F7034FE09AC5FA868314241"
+      "sha256": "3DB5A88899BE304A3954763872F03E0217F8B6ACFE2D663F8B0ABD8EA0C87672"
     },
     "private_capture": {
       "artifact_kind": "pooleos_tier1_hardware_private_capture",
-      "byte_count": 109931,
+      "byte_count": 61631,
       "content_publication_allowed": false,
       "path_recorded": false,
-      "sha256": "B35E059EBB72257EBFB5989824DBC28475C3DBF87AA9462721B804E0BA14B145"
+      "sha256": "F494B066398A1B1230FACFB525475DE6FE9F29CF41EDD2C666F35B1A6F1D05D8"
     },
     "probe_policy": {
       "byte_count": 8315,
