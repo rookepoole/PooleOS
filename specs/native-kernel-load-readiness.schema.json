@@ -32,7 +32,7 @@
   "properties": {
     "schema_version": {"const": "1.0"},
     "artifact_kind": {"const": "pooleos_native_kernel_load_readiness"},
-    "status_date": {"const": "2026-07-18"},
+    "status_date": {"const": "2026-09-04"},
     "status": {"const": "pass_single_host_two_run_live_pbtrust1_denial_pkmap2_exit_then_stop_non_promoting"},
     "contract_id": {"const": "PKLOAD6"},
     "selected_move_id": {"const": "N5-INNER-TRUST-STATE-001"},

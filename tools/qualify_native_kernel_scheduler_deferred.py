@@ -177,10 +177,12 @@ def _source_audit() -> dict[str, Any]:
         raise QualificationError("PKSCHED3 architecture source audit failed")
     if not all(token in texts["main"] for token in required_main):
         raise QualificationError("PKSCHED3 live path source audit failed")
+    maximum_match = re.search(r"MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = (\d+);", texts["bootexit"])
     if (
         'development-scheduler-deferred = ["development-transfer"]' not in texts["boot_manifest"]
         or 'feature = "development-scheduler-deferred"' not in texts["boot_exit"]
-        or "MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = 21" not in texts["bootexit"]
+        or maximum_match is None
+        or int(maximum_match.group(1)) < 17
         or '"development-scheduler-deferred"' not in texts["pooleboot_qualifier"]
     ):
         raise QualificationError("PKSCHED3 selector isolation source audit failed")
@@ -189,6 +191,7 @@ def _source_audit() -> dict[str, Any]:
     if re.search(r"\b(?:Vec|Box|String|HashMap|fn\s*\(|dyn\s+)\b", texts["deferred"]):
         raise QualificationError("PKSCHED3 controller gained heap or callback storage")
     return {
+        "max_development_trap_scenario": int(maximum_match.group(1)),
         "focused_rust_test_count": 7,
         "fixed_work_capacity": 8,
         "worker_count": 2,

@@ -2858,6 +2858,33 @@ poole_ap_ipi_stop:
     mov rbx, {call_service_token}
     cmp rax, rbx
     je .Lpoole_ap_ipi_result_call_service
+    cmp dword ptr [rdi + {lock_probe_mode_offset}], {lock_probe_mode_magic}
+    je .Lpoole_ap_ipi_result_call_lock
+    mov r12, {result_call}
+    jmp .Lpoole_ap_ipi_respond
+.Lpoole_ap_ipi_result_call_lock:
+    mov rbx, {lock_probe_virtual}
+    mov eax, 1
+    lock xadd dword ptr [rbx + {lock_next_offset}], eax
+    mov r10d, eax
+.Lpoole_ap_ipi_result_call_lock_wait:
+    cmp dword ptr [rbx + {lock_serving_offset}], r10d
+    je .Lpoole_ap_ipi_result_call_lock_acquired
+    pause
+    jmp .Lpoole_ap_ipi_result_call_lock_wait
+.Lpoole_ap_ipi_result_call_lock_acquired:
+    mov ecx, dword ptr [rdi + 28]
+    mov dword ptr [rbx + {lock_ticket_base_offset} + rcx*4], r10d
+    lea edx, [ecx + 1]
+    xor eax, eax
+    lock cmpxchg dword ptr [rbx + {lock_owner_offset}], edx
+    jne poole_ap_ipi_trampoline_fault
+    lock inc dword ptr [rbx + {lock_acquisitions_offset}]
+    lock bts dword ptr [rbx + {lock_cpu_mask_offset}], ecx
+    mov dword ptr [rbx + {lock_owner_offset}], 0
+    mfence
+    lock inc dword ptr [rbx + {lock_serving_offset}]
+    invlpg [rbx]
     mov r12, {result_call}
     jmp .Lpoole_ap_ipi_respond
 .Lpoole_ap_ipi_result_call_driver:
@@ -3121,6 +3148,7 @@ poole_ap_ipi_trampoline_end:
     shootdown_version_offset = const smp_ipi::SHOOTDOWN_VERSION_OFFSET,
     shootdown_state_offset = const smp_ipi::SHOOTDOWN_STATE_OFFSET,
     shootdown_error_offset = const smp_ipi::SHOOTDOWN_ERROR_OFFSET,
+    lock_probe_mode_offset = const smp_ipi::SHOOTDOWN_RESERVED_OFFSET,
     shootdown_root_offset = const smp_ipi::SHOOTDOWN_ROOT_PHYSICAL_OFFSET,
     shootdown_virtual_offset = const smp_ipi::SHOOTDOWN_VIRTUAL_ADDRESS_OFFSET,
     shootdown_retired_generation_offset = const smp_ipi::SHOOTDOWN_RETIRED_GENERATION_OFFSET,
@@ -3167,6 +3195,14 @@ poole_ap_ipi_trampoline_end:
     call_token = const smp_ipi::CALL_NOOP_TOKEN,
     call_driver_token = const smp_ipi::CALL_DRIVER_TIMER_TOKEN,
     call_service_token = const smp_ipi::CALL_SERVICE_RECLAIM_TOKEN,
+    lock_probe_mode_magic = const crate::locks::LIVE_PROBE_MODE_MAGIC,
+    lock_probe_virtual = const crate::locks::LIVE_PROBE_VIRTUAL_ADDRESS,
+    lock_next_offset = const crate::locks::LIVE_NEXT_OFFSET,
+    lock_serving_offset = const crate::locks::LIVE_SERVING_OFFSET,
+    lock_owner_offset = const crate::locks::LIVE_OWNER_OFFSET,
+    lock_acquisitions_offset = const crate::locks::LIVE_ACQUISITIONS_OFFSET,
+    lock_cpu_mask_offset = const crate::locks::LIVE_CPU_MASK_OFFSET,
+    lock_ticket_base_offset = const crate::locks::LIVE_TICKET_BASE_OFFSET,
     diagnostic_token = const smp_ipi::DIAGNOSTIC_TOKEN,
     panic_token = const smp_ipi::PANIC_NOTICE_TOKEN,
     stop_token = const smp_ipi::STOP_TOKEN,

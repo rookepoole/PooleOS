@@ -21,7 +21,7 @@ class NativeKernelXstateExceptionTests(unittest.TestCase):
         markers[23] = markers[23].replace("trap_scenario=4", "trap_scenario=6")
         markers[25] = markers[25].replace(
             "PKBUILD1-CYCLE143-N12-SCHED-PREEMPT-V01-0001",
-            "PKBUILD1-CYCLE148-N12-ATOMICS-V0001-00000001",
+            "PKBUILD1-CYCLE149-N12-LOCKS-V0001-0000000001",
         )
         markers.extend(
             [

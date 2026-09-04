@@ -132,7 +132,14 @@ def _run_host_probe(toolchain_root: Path, target_dir: Path) -> dict[str, Any]:
     return result
 
 
-def _audit_atomic_source(core: str, main: str, boot_exit: str, boot_manifest: str, bootexit: str) -> dict[str, Any]:
+def _audit_atomic_source(
+    core: str,
+    main: str,
+    kernel_lib: str,
+    boot_exit: str,
+    boot_manifest: str,
+    bootexit: str,
+) -> dict[str, Any]:
     production_core = core.split("#[cfg(test)]", 1)[0]
     forbidden = tuple(
         token
@@ -171,17 +178,21 @@ def _audit_atomic_source(core: str, main: str, boot_exit: str, boot_manifest: st
         'development-atomics = ["development-transfer"]',
         'feature = "development-atomics"',
         'cfg!(feature = "development-atomics")',
-        "MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = 21",
     )
+    selector_required = ("Atomics = 21,", "21 => Some(Self::Atomics),")
+    maximum_match = re.search(r"MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = (\d+);", bootexit)
+    maximum = int(maximum_match.group(1)) if maximum_match is not None else -1
     missing = {
         "core": [token for token in core_required if token not in core],
         "main": [token for token in main_required if token not in main],
+        "selector": [token for token in selector_required if token not in kernel_lib],
         "boot": [token for token in boot_required if token not in "\n".join((boot_manifest, boot_exit, bootexit))],
     }
     test_count = core.count("#[test]")
-    if forbidden or any(missing.values()) or test_count != 7:
+    if forbidden or any(missing.values()) or maximum < 21 or test_count != 7:
         raise QualificationError(
-            f"PKATOM1 source scope changed: forbidden={forbidden}; missing={missing}; tests={test_count}"
+            "PKATOM1 source scope changed: "
+            f"forbidden={forbidden}; missing={missing}; maximum={maximum}; tests={test_count}"
         )
     return {
         "heap_api_token_count": 0,
@@ -190,6 +201,8 @@ def _audit_atomic_source(core: str, main: str, boot_exit: str, boot_manifest: st
         "audit_symbol_count": 7,
         "unit_test_count": test_count,
         "interrupt_retry_loop_count": 0,
+        "atomics_selector": 21,
+        "max_development_trap_scenario": maximum,
         "result": "pass_allocation_free_typed_atomic_source_audit",
     }
 
@@ -198,13 +211,19 @@ def _source_audit() -> dict[str, Any]:
     paths = {
         "core": ROOT / "native/kernel/src/atomics.rs",
         "main": ROOT / "native/kernel/src/main.rs",
+        "kernel_lib": ROOT / "native/kernel/src/lib.rs",
         "boot_exit": ROOT / "native/boot/src/exit.rs",
         "boot_manifest": ROOT / "native/boot/Cargo.toml",
         "bootexit": ROOT / "native/bootexit/src/lib.rs",
     }
     texts = {name: path.read_text(encoding="utf-8") for name, path in paths.items()}
     result = _audit_atomic_source(
-        texts["core"], texts["main"], texts["boot_exit"], texts["boot_manifest"], texts["bootexit"]
+        texts["core"],
+        texts["main"],
+        texts["kernel_lib"],
+        texts["boot_exit"],
+        texts["boot_manifest"],
+        texts["bootexit"],
     )
     result["files"] = {
         name: {
@@ -328,7 +347,10 @@ def _contract_operation(candidate: dict[str, Any]) -> Callable[[], Any]:
 
 
 def _negative_controls(
-    markers: list[str], probe_lines: list[str], disassembly: str, source_texts: tuple[str, str, str, str, str]
+    markers: list[str],
+    probe_lines: list[str],
+    disassembly: str,
+    source_texts: tuple[str, str, str, str, str, str],
 ) -> list[dict[str, Any]]:
     controls: list[dict[str, Any]] = []
     ids = atomics.NEGATIVE_CONTROL_IDS
@@ -409,11 +431,20 @@ def _negative_controls(
     eoi = markers.copy()
     eoi[39] = _set_field(eoi[39], "eoi_ordered", "0")
     controls.append(_require_rejections(ids[25], [_marker_operation(eoi)]))
-    core, main, boot_exit, boot_manifest, bootexit = source_texts
+    core, main, kernel_lib, boot_exit, boot_manifest, bootexit = source_texts
     controls.append(
         _require_rejections(
             ids[26],
-            [lambda: _audit_atomic_source("use alloc::vec::Vec;\n" + core, main, boot_exit, boot_manifest, bootexit)],
+            [
+                lambda: _audit_atomic_source(
+                    "use alloc::vec::Vec;\n" + core,
+                    main,
+                    kernel_lib,
+                    boot_exit,
+                    boot_manifest,
+                    bootexit,
+                )
+            ],
         )
     )
     overclaim = markers.copy()
@@ -522,6 +553,7 @@ def make_readiness(toolchain_root: Path, qemu_root: Path, status_date: str, time
         source_paths = (
             ROOT / "native/kernel/src/atomics.rs",
             ROOT / "native/kernel/src/main.rs",
+            ROOT / "native/kernel/src/lib.rs",
             ROOT / "native/boot/src/exit.rs",
             ROOT / "native/boot/Cargo.toml",
             ROOT / "native/bootexit/src/lib.rs",

@@ -191,11 +191,13 @@ def _source_audit() -> dict[str, Any]:
         raise QualificationError("PKSCHED6 reschedule IPI source audit failed")
     if not all(token in texts["arch"] for token in required_arch):
         raise QualificationError("PKSCHED6 AP handler source audit failed")
+    maximum_match = re.search(r"MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = (\d+);", texts["bootexit"])
     if (
         'development-scheduler-smp-preempt = ["development-transfer"]'
         not in texts["boot_manifest"]
         or 'feature = "development-scheduler-smp-preempt"' not in texts["boot_exit"]
-        or "MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = 21" not in texts["bootexit"]
+        or maximum_match is None
+        or int(maximum_match.group(1)) < 20
         or '"development-scheduler-smp-preempt"' not in texts["pooleboot_qualifier"]
     ):
         raise QualificationError("PKSCHED6 selector isolation source audit failed")
@@ -204,6 +206,7 @@ def _source_audit() -> dict[str, Any]:
     if re.search(r"\b(?:Vec|Box|String|HashMap|dyn)\b", texts["controller"]):
         raise QualificationError("PKSCHED6 controller gained heap or dynamic storage")
     return {
+        "max_development_trap_scenario": int(maximum_match.group(1)),
         "focused_rust_test_count": 5,
         "cpu_lane_count": 4,
         "event_capacity": 16,

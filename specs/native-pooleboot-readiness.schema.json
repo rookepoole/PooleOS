@@ -28,7 +28,7 @@
   "properties": {
     "schema_version": {"const": "1.0"},
     "artifact_kind": {"const": "pooleos_native_pooleboot_readiness"},
-    "status_date": {"const": "2026-07-18"},
+    "status_date": {"const": "2026-09-04"},
     "status": {"const": "pass_single_host_two_run_unsigned_live_profile_artifacts_pbtrust1_denied_post_exit_pbp1_retained_pkmap2_stop_before_transfer_non_promoting"},
     "contract_id": {"const": "POOLEOS-N5-POOLEBOOT-7"},
     "selected_move_id": {"const": "N5-INNER-TRUST-STATE-001"},

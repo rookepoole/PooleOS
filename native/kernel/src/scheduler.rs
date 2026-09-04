@@ -83,6 +83,7 @@ pub enum WaitKind {
     None = 0,
     Event = 1,
     Mutex = 2,
+    ExternalLock = 3,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -246,6 +247,7 @@ pub struct Scheduler {
     mutex_owner: Option<TaskId>,
     mutex_waiters: [Option<TaskId>; MAX_TASKS],
     mutex_waiter_count: usize,
+    external_priority_donation: [u8; MAX_TASKS],
     sequence: u64,
     dispatch_count: u32,
     migration_count: u32,
@@ -267,6 +269,7 @@ impl Scheduler {
             mutex_owner: None,
             mutex_waiters: [None; MAX_TASKS],
             mutex_waiter_count: 0,
+            external_priority_donation: [0; MAX_TASKS],
             sequence: 0,
             dispatch_count: 0,
             migration_count: 0,
@@ -406,6 +409,71 @@ impl Scheduler {
         self.bump_sequence();
         self.validate()?;
         Ok(id)
+    }
+
+    pub fn block_current_for_lock(&mut self, cpu: CpuId) -> Result<TaskId, Error> {
+        let id = self.take_current(cpu)?;
+        let index = self.task_index(id)?;
+        let task = &mut self.tasks[index];
+        task.state = TaskState::Blocked;
+        task.assigned_cpu = Some(cpu);
+        task.wait_kind = WaitKind::ExternalLock;
+        task.wake_reason = WakeReason::None;
+        task.bypass_count = 0;
+        self.bump_sequence();
+        self.validate()?;
+        Ok(id)
+    }
+
+    pub fn wake_lock_waiter(
+        &mut self,
+        id: TaskId,
+        cpu: CpuId,
+        reason: WakeReason,
+    ) -> Result<(), Error> {
+        if !matches!(
+            reason,
+            WakeReason::LockGranted
+                | WakeReason::OwnerGone
+                | WakeReason::Cancelled
+                | WakeReason::TimedOut
+        ) {
+            return Err(Error::WakePending);
+        }
+        self.wake_kind(id, cpu, reason, WaitKind::ExternalLock)
+    }
+
+    pub fn donate_priority(&mut self, id: TaskId, priority: u8) -> Result<(), Error> {
+        if !(MIN_PRIORITY..=MAX_PRIORITY).contains(&priority) {
+            return Err(Error::Priority);
+        }
+        let index = self.task_index(id)?;
+        if !matches!(
+            self.tasks[index].state,
+            TaskState::Runnable | TaskState::Running
+        ) {
+            return Err(Error::State);
+        }
+        let before = self.tasks[index].effective_priority;
+        self.external_priority_donation[index] =
+            self.external_priority_donation[index].max(priority);
+        self.recompute_effective_priorities()?;
+        if self.tasks[index].effective_priority > before {
+            self.priority_inheritance_count = self
+                .priority_inheritance_count
+                .checked_add(1)
+                .ok_or(Error::Invariant)?;
+        }
+        self.bump_sequence();
+        self.validate()
+    }
+
+    pub fn revoke_priority_donation(&mut self, id: TaskId) -> Result<(), Error> {
+        let index = self.task_index(id)?;
+        self.external_priority_donation[index] = 0;
+        self.recompute_effective_priorities()?;
+        self.bump_sequence();
+        self.validate()
     }
 
     pub fn cancel_wait(&mut self, id: TaskId, cpu: CpuId) -> Result<(), Error> {
@@ -582,6 +650,7 @@ impl Scheduler {
         task.wait_kind = WaitKind::None;
         task.bypass_count = 0;
         task.effective_priority = task.base_priority;
+        self.external_priority_donation[index] = 0;
         self.recompute_effective_priorities()?;
         self.teardown_count = self.teardown_count.checked_add(1).ok_or(Error::Invariant)?;
         self.bump_sequence();
@@ -873,9 +942,19 @@ impl Scheduler {
         if reason == WakeReason::None || reason == WakeReason::LockGranted {
             return Err(Error::WakePending);
         }
+        self.wake_kind(id, cpu, reason, WaitKind::Event)
+    }
+
+    fn wake_kind(
+        &mut self,
+        id: TaskId,
+        cpu: CpuId,
+        reason: WakeReason,
+        wait_kind: WaitKind,
+    ) -> Result<(), Error> {
         let index = self.task_index(id)?;
         let task = self.tasks[index];
-        if task.state != TaskState::Blocked || task.wait_kind != WaitKind::Event {
+        if task.state != TaskState::Blocked || task.wait_kind != wait_kind {
             return Err(Error::WaitKind);
         }
         if task.wake_reason != WakeReason::None {
@@ -928,14 +1007,18 @@ impl Scheduler {
     }
 
     fn recompute_effective_priorities(&mut self) -> Result<(), Error> {
-        for task in &mut self.tasks {
+        for (index, task) in self.tasks.iter_mut().enumerate() {
             if task.generation != 0 {
-                task.effective_priority = task.base_priority;
+                task.effective_priority = task
+                    .base_priority
+                    .max(self.external_priority_donation[index]);
             }
         }
         if let Some(owner) = self.mutex_owner {
             let owner_index = self.task_index(owner)?;
-            let mut required = self.tasks[owner_index].base_priority;
+            let mut required = self.tasks[owner_index]
+                .base_priority
+                .max(self.external_priority_donation[owner_index]);
             for cursor in 0..self.mutex_waiter_count {
                 let waiter = self.mutex_waiters[cursor].ok_or(Error::Invariant)?;
                 required = required.max(self.tasks[waiter.index()].base_priority);

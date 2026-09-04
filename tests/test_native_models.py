@@ -5,6 +5,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -452,10 +453,21 @@ The depth of the complete state graph search is 1.
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 check=False,
-                timeout=900,
+                timeout=native_models.QUALIFIER_TIMEOUT_SECONDS,
             )
             self.assertEqual(0, completed.returncode, completed.stdout)
             self.assertEqual(self.readiness_path.read_bytes(), output.read_bytes())
+
+    def test_private_run_directory_creation_is_bounded_and_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            created = native_models._create_private_run_directory(root, "case-")
+            self.assertTrue(created.is_dir())
+            self.assertEqual(root, created.parent)
+        with mock.patch.object(Path, "mkdir", side_effect=PermissionError("denied")) as mkdir:
+            with self.assertRaisesRegex(native_models.NativeModelError, "cannot create private TLC run directory"):
+                native_models._create_private_run_directory(Path("private"), "case-")
+            mkdir.assert_called_once_with(parents=False, exist_ok=False)
 
 
 if __name__ == "__main__":

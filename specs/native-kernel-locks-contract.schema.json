@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pooleos.invalid/specs/native-kernel-locks-contract.schema.json",
+  "title": "PooleOS PKLOCK1 contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_kind",
+    "contract_id",
+    "selected_move_id",
+    "status_date",
+    "status",
+    "production_ready",
+    "production_promotion_allowed",
+    "phase_mapping",
+    "source_requirement_ids",
+    "parent_contract_ids",
+    "authorities",
+    "family",
+    "bounds",
+    "ownership_and_ordering",
+    "execution_context",
+    "mutex_policy",
+    "memory_model",
+    "host_profiles",
+    "live_profile",
+    "failure_and_rollback",
+    "progress_guarantees",
+    "required_negative_controls",
+    "claims",
+    "nonclaims"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_kind": {"const": "pooleos_native_kernel_locks_contract"},
+    "contract_id": {"const": "PKLOCK1"},
+    "selected_move_id": {"const": "N12-CONCURRENCY-LOCKS-001"},
+    "status_date": {"type": "string", "format": "date"},
+    "status": {"const": "candidate_bounded_x86_64_lock_family_single_host_non_promoting"},
+    "production_ready": {"const": false},
+    "production_promotion_allowed": {"const": false},
+    "phase_mapping": {"const": ["N12.2"]},
+    "source_requirement_ids": {"const": ["031.2", "ADD-N12-CONCURRENCY-LOCKS-001"]},
+    "parent_contract_ids": {"const": ["PKATOM1", "PKSCHED1", "PKSCHED6", "PKSMP5", "PKVM3"]},
+    "authorities": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role", "title", "url"],
+        "properties": {
+          "role": {"type": "string", "minLength": 1},
+          "title": {"type": "string", "minLength": 1},
+          "url": {"type": "string", "pattern": "^https://"}
+        }
+      }
+    },
+    "family": {"type": "object", "minProperties": 8},
+    "bounds": {"type": "object", "minProperties": 9},
+    "ownership_and_ordering": {"type": "object", "minProperties": 7},
+    "execution_context": {"type": "object", "minProperties": 7},
+    "mutex_policy": {"type": "object", "minProperties": 7},
+    "memory_model": {"type": "object", "minProperties": 6},
+    "host_profiles": {"type": "object", "minProperties": 8},
+    "live_profile": {"type": "object", "minProperties": 15},
+    "failure_and_rollback": {"type": "object", "minProperties": 7},
+    "progress_guarantees": {"type": "object", "minProperties": 6},
+    "required_negative_controls": {
+      "type": "array",
+      "minItems": 30,
+      "maxItems": 30,
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^NEG-N12-PKLOCK1-"}
+    },
+    "claims": {
+      "type": "object",
+      "minProperties": 18,
+      "additionalProperties": {"type": "boolean"}
+    },
+    "nonclaims": {"type": "array", "minItems": 4, "items": {"type": "string"}}
+  }
+}

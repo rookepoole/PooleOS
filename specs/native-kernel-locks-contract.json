@@ -1,0 +1,261 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_native_kernel_locks_contract",
+  "contract_id": "PKLOCK1",
+  "selected_move_id": "N12-CONCURRENCY-LOCKS-001",
+  "status_date": "2026-09-04",
+  "status": "candidate_bounded_x86_64_lock_family_single_host_non_promoting",
+  "production_ready": false,
+  "production_promotion_allowed": false,
+  "phase_mapping": [
+    "N12.2"
+  ],
+  "source_requirement_ids": [
+    "031.2",
+    "ADD-N12-CONCURRENCY-LOCKS-001"
+  ],
+  "parent_contract_ids": [
+    "PKATOM1",
+    "PKSCHED1",
+    "PKSCHED6",
+    "PKSMP5",
+    "PKVM3"
+  ],
+  "authorities": [
+    {
+      "role": "language atomic and happens-before semantics",
+      "title": "Rust core::sync::atomic",
+      "url": "https://doc.rust-lang.org/core/sync/atomic/"
+    },
+    {
+      "role": "x86-64 locked operations and memory ordering",
+      "title": "Intel 64 and IA-32 Software Developer Manual Volume 3A",
+      "url": "https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html"
+    },
+    {
+      "role": "interrupt-safe and sleeping-lock design reference",
+      "title": "FreeBSD Kernel Developer's Manual locking(9)",
+      "url": "https://man.freebsd.org/cgi/man.cgi?query=locking&sektion=9"
+    },
+    {
+      "role": "sequence-counter and seqlock design reference",
+      "title": "Linux kernel sequence counters and sequential locks",
+      "url": "https://docs.kernel.org/locking/seqlock.html"
+    },
+    {
+      "role": "priority-inheritance implementation reference",
+      "title": "Linux kernel RT-mutex design",
+      "url": "https://docs.kernel.org/locking/rt-mutex-design.html"
+    }
+  ],
+  "family": {
+    "raw_spinlock": "FIFO ticket lock with try, unbounded, and bounded acquisition",
+    "interrupt_save_spinlock": "ticket lock plus exact interrupt-enable and preemption-depth restoration",
+    "sleeping_mutex": "fixed-capacity ownership-tracked handoff mutex with direct bounded priority donation",
+    "notification": "fixed-capacity FIFO wait, wake-one, wake-all, timeout, and cancellation queue",
+    "reader_writer_lock": "writer-ticketed and writer-preferred lock with try, bounded, and unbounded paths",
+    "sequence_lock": "ticket-serialized writer and retrying stable-even reader protocol",
+    "dynamic_allocation": false,
+    "pkatom1_only": true
+  },
+  "bounds": {
+    "maximum_outstanding_spin_tickets": 32,
+    "maximum_held_rank_classes_per_context": 8,
+    "maximum_mutex_waiters": 8,
+    "maximum_notification_waiters": 8,
+    "maximum_mutex_bypass": 7,
+    "reader_owner_tokens": 31,
+    "lock_rank_count": 5,
+    "mutex_priority_minimum": 1,
+    "mutex_priority_maximum": 31,
+    "timed_paths": "caller-supplied finite attempt or monotonic-deadline bound"
+  },
+  "ownership_and_ordering": {
+    "owner_zero_reserved": true,
+    "non_owner_unlock_rejected": true,
+    "recursive_acquire_rejected": true,
+    "rank_classes": [
+      "irq",
+      "run_queue",
+      "mutex",
+      "reader_writer",
+      "sequence"
+    ],
+    "rank_rule": "strictly increasing; same-rank nesting is rejected in PKLOCK1",
+    "release_rule": "strict last-acquired-first-released",
+    "graph": "fixed five-node directed graph with precommit cycle detection and rollback",
+    "guard_binding": "interrupt-save guards bind owner, rank, ticket, and originating lock address"
+  },
+  "execution_context": {
+    "raw_spinlock": "non-sleeping; caller owns interrupt and preemption discipline",
+    "interrupt_save_spinlock": "task context at interrupt depth zero and preemption depth zero",
+    "sleeping_mutex": "sleep-capable task context at interrupt depth zero and preemption depth zero",
+    "notification_wait": "sleep-capable task context at interrupt depth zero and preemption depth zero",
+    "interrupt_recursion": "rejected",
+    "preemption_nesting": "rejected",
+    "scheduler_bridge": "PKSCHED1 ExternalLock block/wake reasons and one direct external priority donation slot"
+  },
+  "mutex_policy": {
+    "selection": "highest priority, FIFO within equal priority, oldest waiter after seven bypasses",
+    "priority_inheritance": "direct one-level maximum waiter priority only; no transitive chain claim",
+    "handoff": "ownership is reserved for the selected waiter until its exact wake receipt is claimed",
+    "timeout": "deadline-expired waiter is removed exactly once and donation is recomputed",
+    "cancellation": "named waiter is removed exactly once and donation is recomputed",
+    "owner_death": "all waiters receive OwnerDead and ownership/donation state is cleared",
+    "starvation_bound": "a continuously queued mutex waiter may be bypassed at most seven selections"
+  },
+  "memory_model": {
+    "spin_handoff": "release of owner and serving; acquire observation before claim",
+    "reader_writer": "acquire admission, release departure, and writer-pending exclusion of new readers",
+    "sequence_lock": "odd sequence brackets relaxed payload write; readers require equal acquire snapshots",
+    "ordinary_memory_only": true,
+    "mmio_or_dma_ordering_provided": false,
+    "reclamation_or_aba_safety_provided": false
+  },
+  "host_profiles": {
+    "ticket_contention": {
+      "threads": 4,
+      "rounds_per_thread": 2048,
+      "acquisitions": 8192,
+      "lost_updates": 0,
+      "fifo_mismatches": 0
+    },
+    "mutex_fairness": {
+      "waiters": 8,
+      "handoff_order": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        2
+      ],
+      "maximum_bypass": 7,
+      "owner_death_wakes": 2
+    },
+    "notification": {
+      "waiters": 4,
+      "fifo_wakes": 4,
+      "timeouts": 1,
+      "cancellations": 1
+    },
+    "reader_writer": {
+      "readers": 3,
+      "writers": 1,
+      "rounds": 1024,
+      "writer_timeouts": 0
+    },
+    "sequence_lock": {
+      "readers": 3,
+      "writers": 1,
+      "rounds": 2048,
+      "odd_snapshots": 0
+    },
+    "receipt_count": 9,
+    "focused_rust_test_count": 10,
+    "kernel_rust_test_count": 206
+  },
+  "live_profile": {
+    "selector": 22,
+    "machine": "pc-q35-11.0",
+    "cpu_model": "SandyBridge,-avx",
+    "virtual_cpu_count": 4,
+    "bsp_apic_id": 0,
+    "application_processor_apic_ids": [
+      1,
+      2,
+      3
+    ],
+    "shared_page_virtual_address": "0x00000000001FE000",
+    "acquisition_count": 4,
+    "canonical_ticket_set": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "cpu_mask": "0x000000000000000F",
+    "shared_mappings_installed": 3,
+    "shared_mappings_revoked": 3,
+    "queue_drained": true,
+    "owner_cleared": true,
+    "cleanup": "shared aliases revoked before existing PKSMP5 shootdown, park, scrub, and release"
+  },
+  "failure_and_rollback": {
+    "failed_spin_timeout": "cancel exact ticket and skip it only while owner is clear",
+    "failed_irq_acquire": "restore context and lock-order graph",
+    "foreign_irq_guard": "reject before context or lock mutation",
+    "failed_writer_reservation": "remove waiting-writer state and cancel exact writer ticket",
+    "invalid_sequence_state": "reject before opening a writer interval",
+    "counter_failure": "preflight fallible diagnostics before ownership mutation where applicable",
+    "panic_profile": "selector failure emits PKLOCK1 denial and PanicCode 0x101E"
+  },
+  "progress_guarantees": {
+    "raw_spinlock": "FIFO among non-cancelled reserved tickets under continued execution of the current owner",
+    "sleeping_mutex": "bounded bypass of seven for continuously queued waiters; direct donation only",
+    "notification": "FIFO for non-cancelled non-expired waiters",
+    "reader_writer": "queued writers exclude new readers; no wall-clock latency guarantee",
+    "sequence_lock": "writers serialize; unbounded readers may retry indefinitely under continuous writes",
+    "system_progress": "no wait-free, transitive-donation, NMI-safe, hotplug, general-SMP, or reclamation guarantee"
+  },
+  "required_negative_controls": [
+    "NEG-N12-PKLOCK1-MARKER-OMISSION",
+    "NEG-N12-PKLOCK1-MARKER-ORDER",
+    "NEG-N12-PKLOCK1-MARKER-DUPLICATE",
+    "NEG-N12-PKLOCK1-SELECTOR",
+    "NEG-N12-PKLOCK1-FAMILY-FIELD-MATRIX",
+    "NEG-N12-PKLOCK1-POLICY-FIELD-MATRIX",
+    "NEG-N12-PKLOCK1-LIVE-FIELD-MATRIX",
+    "NEG-N12-PKLOCK1-HOST-FIELD-MATRIX",
+    "NEG-N12-PKLOCK1-CLAIM-BOUNDARY-FIELD-MATRIX",
+    "NEG-N12-PKLOCK1-PROBE-OMISSION",
+    "NEG-N12-PKLOCK1-PROBE-ORDER",
+    "NEG-N12-PKLOCK1-PROBE-STATUS-MATRIX",
+    "NEG-N12-PKLOCK1-TICKET-FIFO",
+    "NEG-N12-PKLOCK1-IRQ-RESTORE",
+    "NEG-N12-PKLOCK1-IRQ-NESTING",
+    "NEG-N12-PKLOCK1-MUTEX-FAIRNESS",
+    "NEG-N12-PKLOCK1-PRIORITY-INHERITANCE",
+    "NEG-N12-PKLOCK1-OWNER-DEATH",
+    "NEG-N12-PKLOCK1-NOTIFICATION-FIFO",
+    "NEG-N12-PKLOCK1-NOTIFICATION-TIMEOUT-CANCEL",
+    "NEG-N12-PKLOCK1-RW-FINAL",
+    "NEG-N12-PKLOCK1-WRITER-PREFERENCE",
+    "NEG-N12-PKLOCK1-SEQ-FINAL",
+    "NEG-N12-PKLOCK1-SEQ-ODD-SNAPSHOT",
+    "NEG-N12-PKLOCK1-ORDER-CYCLE",
+    "NEG-N12-PKLOCK1-RECURSION",
+    "NEG-N12-PKLOCK1-TIMEOUT-ROLLBACK",
+    "NEG-N12-PKLOCK1-DYNAMIC-STORAGE",
+    "NEG-N12-PKLOCK1-INPUT-BINDING",
+    "NEG-N12-PKLOCK1-PRODUCTION-OVERCLAIM"
+  ],
+  "claims": {
+    "allocation_free_lock_family_implemented": true,
+    "fifo_ticket_spinlock_verified": true,
+    "irqsave_and_preemption_restore_verified": true,
+    "sleeping_mutex_scheduler_path_verified": true,
+    "bounded_priority_inheritance_and_fairness_verified": true,
+    "notification_wait_wake_timeout_cancel_verified": true,
+    "writer_preferred_reader_writer_lock_verified": true,
+    "sequence_lock_retry_protocol_verified": true,
+    "lock_order_recursion_and_nesting_rejection_verified": true,
+    "owner_death_and_exact_rollback_verified": true,
+    "host_four_thread_contention_verified": true,
+    "live_four_vcpu_ticket_contention_verified": true,
+    "deferred_reclamation_implemented": false,
+    "general_smp_or_hotplug_implemented": false,
+    "non_x86_portability_verified": false,
+    "physical_target_tested": false,
+    "n12_exit_gate_satisfied": false,
+    "production_ready": false
+  },
+  "nonclaims": [
+    "PKLOCK1 does not implement RCU, hazard pointers, epoch reclamation, or ABA-safe object lifetime.",
+    "PKLOCK1 does not prove transitive priority donation, NMI-safe locking, arbitrary topology, hotplug, x2APIC, or non-x86 memory models.",
+    "The live profile exercises one shared ticket lock on one exact four-vCPU QEMU topology; host probes own sleeping, notification, reader-writer, and seqlock contention evidence.",
+    "No physical target, production authority, signature, N12 exit, release, or production-readiness claim is made."
+  ]
+}

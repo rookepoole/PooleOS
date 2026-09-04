@@ -118,6 +118,7 @@ def _audit_source_text(arch_text: str, main_text: str, ipi_text: str) -> dict[st
     smp_ipi._require(all(token in arch_text for token in required_arch), "PKSMP5 trampoline source audit failed")
     smp_ipi._require(arch_text.count("xsave64 [rbx]") >= 2 and arch_text.count("xrstor64 [rbx]") >= 2, "PKSMP5 inherited and IPI xstate paths are incomplete")
     smp_ipi._require(arch_text.count("invlpg [rax]") == 1, "PKSMP5 remote INVLPG source scope changed")
+    smp_ipi._require(arch_text.count("invlpg [rbx]") == 1, "PKLOCK1 successor INVLPG source scope changed")
     smp_ipi._require(all(token in main_text for token in required_main), "PKSMP5 lifecycle source audit failed")
     smp_ipi._require(all(token in ipi_text for token in required_ipi), "PKSMP5 coordinator source audit failed")
     diagnostic_tokens = ("PKSMP5DBG", "SMP_MULTI_DEBUG", "MULTI_AP_FORCE_PASS")
@@ -129,6 +130,7 @@ def _audit_source_text(arch_text: str, main_text: str, ipi_text: str) -> dict[st
         "xsave_instruction_count": arch_text.count("xsave64 [rbx]"),
         "xrstor_instruction_count": arch_text.count("xrstor64 [rbx]"),
         "remote_shootdown_invlpg_source_count": 1,
+        "successor_lock_alias_revoke_invlpg_source_count": 1,
         "application_processor_count": 3,
         "resource_page_count_per_ap": 32,
         "total_runtime_page_count": 96,
@@ -155,8 +157,21 @@ def _linked_invlpg_scope(disassembly: str) -> dict[str, Any]:
     matches = re.findall(r"(?ms)^[0-9a-f]+ <poole_ap_ipi_trampoline_start>:\n(?P<body>.*?)^[0-9a-f]+ <poole_ap_ipi_trampoline_end>:", disassembly)
     smp_ipi._require(len(matches) == 1, "PKSMP5 linked AP-trampoline scope changed")
     instructions = re.findall(r"(?m)^\s*[0-9a-f]+:.*\tinvlpg\t([^\r\n]+)$", matches[0])
-    smp_ipi._require(instructions == ["(%rax)"], "PKSMP5 linked AP-trampoline INVLPG scope changed")
-    return {"scope": "poole_ap_ipi_trampoline_start..poole_ap_ipi_trampoline_end", "invlpg_instruction_count": 1, "runtime_execution_count": 3, "operand": "(%rax)", "status": "pass"}
+    smp_ipi._require(
+        instructions == ["(%rax)", "(%rbx)"],
+        "PKSMP5 linked AP-trampoline INVLPG scope changed",
+    )
+    return {
+        "scope": "poole_ap_ipi_trampoline_start..poole_ap_ipi_trampoline_end",
+        "invlpg_instruction_count": 2,
+        "remote_shootdown_invlpg_instruction_count": 1,
+        "runtime_execution_count": 3,
+        "operand": "(%rax)",
+        "successor_profile_invlpg_instruction_count": 1,
+        "successor_profile_operand": "(%rbx)",
+        "successor_profile_executed": False,
+        "status": "pass",
+    }
 
 
 def _linked_invlpg_audit(toolchain_root: Path, expected_kernel: bytes, target_dir: Path) -> dict[str, Any]:

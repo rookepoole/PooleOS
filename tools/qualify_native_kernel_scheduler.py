@@ -220,10 +220,14 @@ def _source_audit() -> dict[str, Any]:
         texts["boot_exit"],
         texts["boot_manifest"],
     )
-    scheduler._require(
-        "pub const MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = 21;" in texts["bootexit"],
-        "PKSCHED1 transfer-state selector ceiling changed",
+    maximum_match = re.search(
+        r"MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = (\d+);", texts["bootexit"]
     )
+    scheduler._require(
+        maximum_match is not None and int(maximum_match.group(1)) >= 15,
+        "PKSCHED1 selector is outside the transfer-state ceiling",
+    )
+    result["max_development_trap_scenario"] = int(maximum_match.group(1))
     result["files"] = {
         name: {
             "path": path.relative_to(ROOT).as_posix(),

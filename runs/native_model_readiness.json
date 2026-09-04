@@ -22,8 +22,8 @@
     "implementation_inputs": [
       {
         "path": "runtime/native_models.py",
-        "byte_count": 48697,
-        "sha256": "61E42AB84893CDFBD2BE9CEC39FC62DEA46AAF3902A56E60BCCCA09DA73F0B48"
+        "byte_count": 49546,
+        "sha256": "C72624CCAF3B28E348A2C83E4FA081AC2D06C9F1243FFA72A142E52CCECD4262"
       },
       {
         "path": "tools/bootstrap_native_models.ps1",

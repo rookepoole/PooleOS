@@ -53,6 +53,11 @@ name = "pkatom1-probe"
 path = "src/bin/pkatom1_probe.rs"
 required-features = ["host-probe"]
 
+[[bin]]
+name = "pklock1-probe"
+path = "src/bin/pklock1_probe.rs"
+required-features = ["host-probe"]
+
 [dependencies]
 poole-boot-trust = { path = "../trust" }
 poole-bootload = { path = "../bootload" }

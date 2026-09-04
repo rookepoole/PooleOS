@@ -8,7 +8,7 @@ import json
 import os
 import re
 import subprocess
-import tempfile
+import uuid
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -23,6 +23,9 @@ CONTRACT_SCHEMA_RELATIVE = Path("specs/native-model-contract.schema.json")
 READINESS_RELATIVE = Path("runs/native_model_readiness.json")
 READINESS_SCHEMA_RELATIVE = Path("specs/native-model-readiness.schema.json")
 DEFAULT_TOOLCHAIN_ROOT = ROOT / ".toolchains" / "native-models"
+TOOLCHAIN_PROBE_TIMEOUT_SECONDS = 30
+TLC_RUN_TIMEOUT_SECONDS = 60
+QUALIFIER_TIMEOUT_GRACE_SECONDS = 30
 MODEL_INPUTS = (
     "models/tla/PooleBootSlots.tla",
     "models/tla/PooleBootSlots.safe.cfg",
@@ -91,6 +94,11 @@ RUN_IDS = (
     "poolefs_transaction_recovery.unsafe_non_idempotent_replay",
     "poolefs_transaction_recovery.unsafe_checksum_acceptance",
     "poolefs_transaction_recovery.unsafe_recovery_leak",
+)
+QUALIFIER_TIMEOUT_SECONDS = (
+    TOOLCHAIN_PROBE_TIMEOUT_SECONDS
+    + len(RUN_IDS) * 2 * TLC_RUN_TIMEOUT_SECONDS
+    + QUALIFIER_TIMEOUT_GRACE_SECONDS
 )
 NEGATIVE_CONTROL_IDS = (
     "NEG-N4-MODEL-TLC-PRERELEASE",
@@ -460,7 +468,7 @@ def verify_toolchain(lock: dict[str, Any], toolchain_root: Path = DEFAULT_TOOLCH
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         check=False,
-        timeout=30,
+        timeout=TOOLCHAIN_PROBE_TIMEOUT_SECONDS,
     )
     version_lines = [line.strip() for line in completed.stdout.splitlines() if line.strip()]
     if completed.returncode != 0 or version_lines != lock["java"]["version_lines"]:
@@ -577,7 +585,10 @@ def _run_once(
     private_root: Path,
     repeat_index: int,
 ) -> dict[str, Any]:
-    case_root = Path(tempfile.mkdtemp(prefix=f"{model['id']}-{case['id']}-{repeat_index}-", dir=private_root))
+    case_root = _create_private_run_directory(
+        private_root,
+        f"{model['id']}-{case['id']}-{repeat_index}-",
+    )
     metadata = case_root / "tlc-metadata"
     command = _actual_command(contract, model, case, toolchain, metadata)
     environment = os.environ.copy()
@@ -593,7 +604,7 @@ def _run_once(
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         check=False,
-        timeout=60,
+        timeout=TLC_RUN_TIMEOUT_SECONDS,
     )
     (case_root / "tlc-output.private.log").write_text(completed.stdout, encoding="utf-8", newline="\n")
     parsed = parse_tlc_output(completed.stdout, completed.returncode)
@@ -601,6 +612,18 @@ def _run_once(
         raise NativeModelError("TLC tool banner changed")
     parsed.pop("tool_banner")
     return parsed
+
+
+def _create_private_run_directory(private_root: Path, prefix: str) -> Path:
+    candidate = private_root / f"{prefix}{uuid.uuid4().hex}"
+    try:
+        candidate.mkdir(parents=False, exist_ok=False)
+    except OSError as error:
+        raise NativeModelError(
+            f"cannot create private TLC run directory under {private_root.name}: "
+            f"{error.strerror or type(error).__name__}"
+        ) from error
+    return candidate
 
 
 def _expected_tuple(outcome: dict[str, Any]) -> tuple[int, int, int, int, int, int]:
@@ -728,8 +751,9 @@ def build_readiness(toolchain_root: Path = DEFAULT_TOOLCHAIN_ROOT, root: Path = 
     toolchain = verify_toolchain(lock, toolchain_root)
     private_root = toolchain["root"] / "evidence"
     private_root.mkdir(parents=True, exist_ok=True)
+    session_root = _create_private_run_directory(private_root, "qualification-")
     runs = [
-        execute_case(contract, model, case, toolchain, private_root)
+        execute_case(contract, model, case, toolchain, session_root)
         for model in contract["models"]
         for case in model["cases"]
     ]
