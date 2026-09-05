@@ -41,6 +41,14 @@ acknowledged cross-CPU quiescence and live failure/rollback evidence. N12.3,
 its flag, all 20 program gaps and production remain open. See
 `docs/native-kernel-reclamation-core.md` and its source-bound readiness receipt.
 
+The first aggregate attempt rejected stale source bindings in 24 dependent
+native profiles. All 24 were requalified through their existing runners in
+dependency order, including fresh emulator runs where required. The original
+failed gate is retained locally. No source validator was relaxed, and these
+replays do not establish live execution of PKRECLAIM1-CORE. The consistency
+gate covers 62 configured artifact paths; that count is distinct from the
+roadmap's evidence references and the architecture baseline's 219 bound sources.
+
 Cycle 149 closes only the bounded scope of
 `FLAG-N12-CONCURRENCY-LOCKS-001`. PKLOCK1 adds an allocation-free FIFO ticket
 spinlock, IRQ-save spinlock, sleeping mutex with direct bounded priority

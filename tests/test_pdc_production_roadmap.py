@@ -155,7 +155,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         current = self.roadmap["baseline"]["native_consistency_release_gate"]
         self.assertEqual(current["passed_checks"], 105)
         self.assertEqual(current["total_checks"], 105)
-        self.assertEqual(current["artifact_count"], 102)
+        self.assertEqual(current["artifact_count"], 62)
         self.assertEqual(current["explicit_gap_count"], 20)
         self.assertFalse(current["production_ready"])
         self.assertEqual(self.roadmap["immediate_next_move"]["id"], "N0-GOVERNANCE-CUSTODY-001")

@@ -10,6 +10,8 @@ exact-once payload transfer and shutdown retention. Nineteen tests pass in
 each of two host profiles plus 206 kernel regressions and freestanding checks.
 The linked boot kernel remains byte-identical to Cycle 149. Scheduler and
 cross-CPU integration are next; N12.3 and production remain open.
+All 24 dependent native qualification profiles were rerun against the updated
+source. Their emulator evidence does not establish live use of the new core.
 
 ## Native Architecture Contract
 

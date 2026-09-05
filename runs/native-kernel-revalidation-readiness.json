@@ -51,8 +51,8 @@
       },
       {
         "path": "native/kernel/src/lib.rs",
-        "sha256": "4700E45E5F9B848F2098EE77B4B49735AEF7A845C1F1E762CA83D9F2EF21DDD3",
-        "byte_count": 65563
+        "sha256": "50225A83A7CB7C2E66AABD5D479B2F48D57DDAE365047D2BF3581F8741AB5CA0",
+        "byte_count": 65667
       },
       {
         "path": "native/kernel/src/main.rs",
@@ -135,7 +135,7 @@
     "rustc": "rustc.exe",
     "host_test_count": 206,
     "format_check": "pass",
-    "host_probe_sha256": "6DF01858D429DA38B66E3A8B59BFBFF3D7EB20453B2E29A6F12CC570D81613B3",
+    "host_probe_sha256": "0D1DC9315E94CDB55181767DB9D0C7490C2CF455F9D604061B444784F27AB2EC",
     "targets": {
       "x86_64-unknown-none": {
         "package": "poolekernel",

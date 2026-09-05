@@ -20,6 +20,11 @@ for actual scheduler/address-space lifecycle binding, acknowledged cross-CPU
 quiescence, independent oracle and live failure/rollback qualification. No
 governance, hardware, signing, release or production boundary changes.
 
+Cycle 150 also requalifies all 24 dependent native profiles after the first
+aggregate attempt correctly rejected stale source bindings. Existing checks
+remain unchanged; fresh dependency evidence cannot promote the new core from
+host-only qualification to live reclamation integration.
+
 Post-Cycle 149 registration update (2026-09-04): the primary FIDO2 governance
 key is enrolled, its exact fingerprint is owner-confirmed, and GitHub SSH
 signing-key registration `1158225` is verified for `rookepoole`.
