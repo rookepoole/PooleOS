@@ -89,8 +89,9 @@ typography notice are in `boot/assets/`. The guest has no PNG or font parser for
 the boot image. Native compositor materials, animation, user preferences, trusted
 UI and full accessibility remain explicit open work under `FLAG-NATIVE-UI-001`.
 
-Automated production CI still qualifies the canonical native products separately.
-This demo requires its additional build and optical qualifier; passing the
+The canonical qualification suite tests the native products separately.
+Continuous-integration automation for this additional demo lane remains open.
+This demo requires its own build and optical qualifier; passing the
 existing aggregate gate alone is not evidence that a new demo ISO works.
 Public release signing, second-host reproduction, target hardware, installer,
 hybrid media, and production promotion are not part of this deliverable.
