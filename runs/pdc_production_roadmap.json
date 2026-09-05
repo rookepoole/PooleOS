@@ -43,8 +43,8 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 154,
-    "selected_move_id": "N5-SYMBOLS-SEMANTICS-001",
+    "last_updated_cycle": 155,
+    "selected_move_id": "N7-TRAP-001",
     "immediate_next_move_id": "N0-GOVERNANCE-CUSTODY-001",
     "owner_independent_next_move_id": "N12-CONCURRENCY-LOCKS-001",
     "required_records": [
@@ -122,12 +122,12 @@
     "implementation_item_count": 8996,
     "section_count": 171,
     "coverage_path": "runs/pooleos_native_checklist_coverage.json",
-    "coverage_sha256": "1F80EFCA466047876B6215714364E4AD73971D3F3892DBDD0DA571EFA0606F5F",
+    "coverage_sha256": "9ED3FA7A24A1FD495C34432D6869329AAFDF3C6E4CC1E2FD56D47F9DB2742619",
     "coverage_status": "pass",
-    "added_requirement_count": 56
+    "added_requirement_count": 57
   },
   "baseline": {
-    "pooleos_cycle": 154,
+    "pooleos_cycle": 155,
     "entry_cycle": 79,
     "pooleos_test_count": 915,
     "historical_consistency_release_gate": {
@@ -148,6 +148,21 @@
       "qualification_status": "pending_full_candidate_replay",
       "last_fully_qualified_cycle": 152,
       "last_fully_qualified_passed_checks": 105,
+      "focused_current_source_projection": {
+        "cycle": 155,
+        "scope": "selected_boot_chain_and_n7_checks_only",
+        "passed_checks": 12,
+        "total_checks": 12,
+        "pending_downstream_native_checks": 14,
+        "final_receipt_fresh_qemu_runs": 14,
+        "n7_marker_controls": 225,
+        "n7_python_tests": 41,
+        "trap_receipt_mutations": 25,
+        "trap_release_boundary_controls": 8,
+        "canonical_full_replay_performed": false,
+        "projection_sha256": "480C72B5CFB848AA3A724F864F59FF1AFBFBEC352BCFD8650719B094CC83536F",
+        "next_dependency_move_id": "N9-PMM-ACPI-CONSUMER-001"
+      },
       "candidate_replay_diagnostic": {
         "cycle": 154,
         "status": "failed_noncanonical_invocation",
@@ -899,7 +914,7 @@
         "ADD-KERNEL-001: explicit temporary framebuffer identity mapping, cache-policy preservation, lifetime, replacement, and revocation dependency"
       ],
       "current_gaps": [
-        "A reproducible real 143-page PooleKernel PKELF1 image, PKENTRY1 intake, allocation-free PKREVAL1 verifier, bounded diagnostics, an opt-in QEMU-only live transfer, and bounded descriptor/exception, CPU, xstate, MSR, physical-memory, ACPI-container, virtual-memory, interrupt/time, first-AP, AP-local runtime, fixed-vector IPI, one-page remote-shootdown, cooperative scheduler, BSP timer/wakeup preemption, BSP deferred-work, exact-topology SMP scheduler, typed AP-local worker, and exact-topology SMP-preemption profiles now exist on one host; authenticated boot trust, measured boot, production transfer, final framebuffer remap/revocation, production capability authority, retained crash paths, target execution, and N6 exit remain open"
+        "A reproducible real 144-page PooleKernel PKELF1 candidate with current downstream replay still pending against the fully qualified 143-page baseline, PKENTRY1 intake, allocation-free PKREVAL1 verifier, bounded diagnostics, an opt-in QEMU-only live transfer, and bounded descriptor/exception, CPU, xstate, MSR, physical-memory, ACPI-container, virtual-memory, interrupt/time, first-AP, AP-local runtime, fixed-vector IPI, one-page remote-shootdown, cooperative scheduler, BSP timer/wakeup preemption, BSP deferred-work, exact-topology SMP scheduler, typed AP-local worker, and exact-topology SMP-preemption profiles now exist on one host; authenticated boot trust, measured boot, production transfer, final framebuffer remap/revocation, production capability authority, retained crash paths, target execution, and N6 exit remain open"
       ],
       "exit_gate": "every accepted boot is signature/digest/version bound; revocation and malformed signatures fail closed into recovery; deliberate failures at every early stage yield retained serial evidence without silent reset loops."
     },
@@ -953,17 +968,19 @@
         "ADD-N7-XSTATE-001"
       ],
       "current_evidence": [
+        "Cycle 155 current-source replay: fourteen fresh QEMU/OVMF boots across PKTRAP1 (six), PKCPU1, PKXSTATE1, PKXEXC1 and PKMSR1 (two each), 225 marker controls and 41 focused Python tests pass on kernel SHA256 BDEECCB27B1B91406911F91169B9BF5F9DF0439BB39FA0E1882C07E1AF3B81EF. The unchanged PKERR1 receipt remains current. PKTRAP1 also rejects 25 recorded-evidence mutations and eight release-boundary controls. No native executable bytes, authority, target or production status change",
+        "ADD-N36-RECEIPT-COVERAGE-001 / FLAG-N36-RECEIPT-COVERAGE-001 preserve the newly discovered cross-profile receipt audit: the local trap repair does not certify PKCPU1 or other validators, authenticate observations or replace fresh execution",
         "specs/native-kernel-trap-contract.json and docs/native-kernel-trap.md: PKTRAP1 freezes a BSP-only QEMU development boundary for GDT/TSS/IDT installation, uniform integer trap frames, three deliberate returning exceptions, terminal double-fault containment, and explicit semantic malformed-frame rejection",
         "native/kernel/src/arch/x86_64.rs and native/kernel/src/main.rs: five-entry BSP GDT, 104-byte TSS, 256-entry IDT allocation with five present gates, distinct 8192-byte IST1/IST2 arrays, 176-byte normalized frame, descriptor/control-state readback, exact deliberate origins, and terminal fail-closed handlers",
         "runs/native-kernel-trap-readiness.json: 3 scenarios, 6 fresh-vars QEMU/OVMF runs, exact per-scenario serial/debugcon markers, screenshots, and PBP1 bytes, 3 returning exceptions, 1 terminal processor-delivered double fault, 1 semantic malformed-frame rejection, and 51/51 hostile controls with zero authority or effects",
         "specs/native-kernel-cpu-policy-contract.json and docs/native-kernel-cpu-policy.md: PKCPU1 freezes a bounded BSP-only, read-only QEMU policy for required CPUID leaves and features, CR0/CR4/EFER state, XCR0, APIC/PAT/MTRR MSRs, topology, address widths, and explicit no-write/no-authority boundaries",
         "native/kernel/src/arch/x86_64.rs, native/kernel/src/lib.rs, and native/kernel/src/main.rs: support-gated CPUID, control-register, XGETBV, and RDMSR observation plus allocation-free policy validation and an opt-in selector-4 terminal development profile",
-        "runs/native-kernel-cpu-policy-readiness.json: 206/206 kernel host tests, 2 exact fresh-vars qemu64 QEMU/OVMF runs, 35 ordered markers, 41/41 hostile controls, exact Rust/Python agreement, AuthenticAMD family 15 model 107 stepping 1 observation, 5 MSR reads, zero MSR writes, and zero authority or actions",
+        "runs/native-kernel-cpu-policy-readiness.json: 214/214 kernel host tests, 2 exact fresh-vars qemu64 QEMU/OVMF runs, 35 ordered markers, 41/41 hostile controls, exact Rust/Python agreement, AuthenticAMD family 15 model 107 stepping 1 observation, 5 MSR reads, zero MSR writes, and zero authority or actions",
         "specs/native-kernel-errata-policy-contract.json and docs/native-kernel-errata-policy.md: PKERR1 freezes exact Ryzen 7 9800X3D identity, mandatory features, board-lineage-specific BIOS floors, AMD-SB-7033 and AMD-SB-7055 AGESA floors, RDSEED policy, source applicability, and explicit no-authority boundaries",
         "native/cpupolicy and runtime/native_kernel_errata_policy.py: independent allocation-free no_std Rust and Python pure-policy evaluators with ten fail-closed reason bits and no privileged or mutating path",
         "runs/native-kernel-errata-policy-readiness.json: 6/6 Rust tests, both no_std targets, 128 cross-language vectors, 24/24 hostile controls, seven exact source records, homogeneous 16-record read-only Windows metadata, and exact six-reason current denial with zero privileged reads, writes, authority, or actions",
         "specs/native-kernel-xstate-policy-contract.json and docs/native-kernel-xstate-policy.md: PKXSTATE1 freezes eager standard-format x87/SSE ownership, XCR0 0x3, XSS zero, 4,096-byte aligned images, canonical FCW/MXCSR state, context-switch preconditions, sensitive-image clearing, and kernel-SIMD prohibition",
-        "runs/native-kernel-xstate-policy-readiness.json: 206/206 kernel host tests, two exact fresh-vars EPYC-Rome-v4 x87/SSE QEMU/OVMF runs, 35 markers, 43/43 hostile controls, two context saves, four restores, 8,192 cleared image bytes, three bounded control writes, zero authority, and explicit scheduler/SMP/target nonclaims",
+        "runs/native-kernel-xstate-policy-readiness.json: 214/214 kernel host tests, two exact fresh-vars EPYC-Rome-v4 x87/SSE QEMU/OVMF runs, 35 markers, 43/43 hostile controls, two context saves, four restores, 8,192 cleared image bytes, three bounded control writes, zero authority, and explicit scheduler/SMP/target nonclaims",
         "specs/native-kernel-xstate-exception-contract.json and docs/native-kernel-xstate-exception.md: PKXEXC1 freezes deliberate #MF/#XM delivery and exact recovery plus terminal test-only #NM eager-policy rejection under a hardware-accelerated one-BSP development boundary",
         "runs/native-kernel-xstate-exception-readiness.json: two exact fresh-vars WHPX QEMU/OVMF runs, one expected TCG limitation probe, 41 markers, 43/43 hostile controls, three processor-delivered exceptions, two exact recoveries, one terminal #NM rejection, linked machine-code scope audit, four bounded configuration writes, two recovery writes, zero authority, and explicit scheduler/SMP/target nonclaims",
         "specs/native-kernel-privilege-msr-policy-contract.json and docs/native-kernel-privilege-msr-policy.md: PKMSR1 freezes a read-only qemu64 BSP policy for system-linkage, FS/GS, support-gated TSC_AUX, global machine-check, and unsupported-PMU state without activation",
@@ -2909,6 +2926,7 @@
       "source_checkbox_count": 272,
       "added_requirement_ids": [
         "ADD-ASSURE-002",
+        "ADD-N36-RECEIPT-COVERAGE-001",
         "ADD-TEST-001"
       ],
       "current_evidence": [
@@ -2916,7 +2934,7 @@
         "native binary parser, reproduction, leakage, malformed, substitution, governance, hardware, Tier 0, bounded-model, deterministic boot-media, PBP1/PBC1/PSM1/PBART1, six inner-format, PBTRUST1/PBSTATE1, PKELF1, PKENTRY1, PKLOAD6/PBLIVE4/PKMAP2/PBEXIT1, PKREVAL1, PKXFER1, PKTRAP1, PKCPU1, PKERR1, PKXSTATE1, PKXEXC1, PKMSR1, PKPMM7/PKACPI1, PKVM1, PKVM3, PKIRQ1, PKSMP1, PKSMP2, PKSMP5, PKSCHED1 through PKSCHED6, PKATOM1, and PKLOCK1 source/live/zero-authority controls, PKRECLAIM1-CORE host-only evidence and source-freshness controls, canonical-LF readiness regression controls, PooleGlyph roadmap bindings, Doctor external-report nonmutation, and collector-smoke negatives"
       ],
       "current_gaps": [
-        "No native system, power-loss, hardware, accessibility, soak, or external security suite exists"
+        "No native system, power-loss, hardware, accessibility, soak, or external security suite exists. ADD-N36-RECEIPT-COVERAGE-001 requires a per-profile recorded-evidence audit and malformed/missing/duplicate/substitution controls through validators and release gates; Cycle 155 hardens only PKTRAP1, and similar PKCPU1 summary-only acceptance remains under review"
       ],
       "exit_gate": "all required suites pass from clean inputs; failures and flakes are retained and classified; external review closes critical/high findings; no coverage claim exceeds measured evidence."
     },
@@ -6876,6 +6894,23 @@
       ]
     },
     {
+      "id": "FLAG-N36-RECEIPT-COVERAGE-001",
+      "class": "REQUIRED",
+      "status": "open",
+      "phase_id": "N36",
+      "closure_condition": "Close ADD-N36-RECEIPT-COVERAGE-001 with a per-profile exact scenario/run/dependency/observation matrix and negative controls through component validators and release gates; keep consistency, fresh execution, authentication, independent builders and hardware evidence separate",
+      "evidence": [
+        "docs/pdc-production-build-plan.md",
+        "runs/pooleos_native_checklist_coverage.json",
+        "runtime/native_kernel_trap.py",
+        "tests/test_native_kernel_trap.py",
+        "docs/native-kernel-trap.md",
+        "runs/native-kernel-trap-readiness.json",
+        "runtime/native_kernel_cpu_policy.py",
+        "tools/pooleos_release_gate.py"
+      ]
+    },
+    {
       "id": "FLAG-NATIVE-HW-001",
       "class": "STOP_SHIP",
       "status": "open",
@@ -7109,7 +7144,7 @@
       "Rust PE32+/ELF64 fixtures pass one-host qualification, but second-host reproduction, source provenance, C17/assembly/ABI tools, and image tooling remain open",
       "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, bounded checks for all seven required boot-slot/capability/virtual-memory/IPC/scheduler/update/PooleFS domains detect their required hostile violations, and a bounded PooleBoot proof executes under pinned OVMF, but source-rebuilt current QEMU/EDK II, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open",
       "A reproducible unsigned PooleBoot proof application boots twice with deterministic twelve-file GPT/FAT32 media, exact GOP frames, retained PKMAP2 kernel/PSM1/six-artifact/PBTP1/PBTS1/table/guarded-stack/handoff storage, independently reconstructed PBLIVE4 bytes including a firmware RSDP record, bounded PBEXIT1 retry, successful ExitBootServices, and zero later firmware calls. The ordinary build stops before transfer; a separate opt-in QEMU-only PKXFER1 build installs retained CR3/RSP, transfers once, and live-executes PKREVAL1 over all nine retained files before an exact terminal unsigned-policy denial with zero signatures, authority, actions, writes, or firmware calls. PBSTATE1 still only models authenticated monotonic-anchor validation, deterministic redundant-copy selection, rollback/future rejection, repair/migration planning, and nine interrupted-transition recovery boundaries with no performed effects. Policy signature verification, authenticated revocation, a real cryptographic monotonic writable state provider, persistent backend I/O and executed repair/migration, Secure Boot-state verification, capability creation, activation or update application, policy application, recovery execution or symbol consumption, licensed real vendor payload intake and validation, live FMP/ESRT/PLDM inventory, privileged per-processor revision observation, initial-system execution, final framebuffer remap/revocation, production transfer, target-firmware and physical-media qualification, and N5 exit remain open",
-      "A real reproducible 143-page PooleKernel image, PKENTRY1 intake, allocation-free PKREVAL1 verifier, bounded early diagnostics, opt-in QEMU-only live entry, BSP-only PKTRAP1 descriptor/exception containment, bounded BSP PKXSTATE1 x87/SSE ownership, PKPMM7 scrubbed lifecycle and checked repeated ledger growth, guarded stable-manager and generation-owned active-ledger transactions, PKACPI1 required-table snapshot/reclaim evidence, PKVM3 sparse PMM-owned direct-map evidence, PKIRQ1 one-BSP timer evidence, PKSMP1 one-AP lifecycle evidence, PKSMP2 one-AP processor-local runtime evidence, PKSMP5 fixed four-vCPU/three-AP startup, rollback, IPI, and one-page-per-root remote-invalidation evidence, PKSCHED1 cooperative scheduler/context-switch evidence, PKSCHED2 bounded BSP timer/wakeup preemption evidence, PKSCHED3 bounded BSP deferred-work evidence, PKSCHED4 exact-topology live AP scheduler ownership/wake/migration evidence, PKSCHED5 exact-topology typed AP-local worker evidence, PKSCHED6 bounded exact-topology SMP-preemption evidence, PKATOM1 typed atomic/memory-order evidence, and PKLOCK1 bounded lock-family/exact-topology contention evidence exist, but authenticated boot trust, measured boot, production transfer, production capability authority, general topology and shootdown, AP-local timer interrupt delivery, deferred reclamation and ABA-safe object lifetime, a general driver/service framework, arbitrary callbacks, general SMP preemption, retained crash evidence, target execution, and N6/N7/N8/N9/N12 exit remain open",
+      "A reproducible 144-page PooleKernel candidate, with complete downstream replay still pending against the last fully qualified 143-page baseline, PKENTRY1 intake, allocation-free PKREVAL1 verifier, bounded early diagnostics, opt-in QEMU-only live entry, BSP-only PKTRAP1 descriptor/exception containment, bounded BSP PKXSTATE1 x87/SSE ownership, PKPMM7 scrubbed lifecycle and checked repeated ledger growth, guarded stable-manager and generation-owned active-ledger transactions, PKACPI1 required-table snapshot/reclaim evidence, PKVM3 sparse PMM-owned direct-map evidence, PKIRQ1 one-BSP timer evidence, PKSMP1 one-AP lifecycle evidence, PKSMP2 one-AP processor-local runtime evidence, PKSMP5 fixed four-vCPU/three-AP startup, rollback, IPI, and one-page-per-root remote-invalidation evidence, PKSCHED1 cooperative scheduler/context-switch evidence, PKSCHED2 bounded BSP timer/wakeup preemption evidence, PKSCHED3 bounded BSP deferred-work evidence, PKSCHED4 exact-topology live AP scheduler ownership/wake/migration evidence, PKSCHED5 exact-topology typed AP-local worker evidence, PKSCHED6 bounded exact-topology SMP-preemption evidence, PKATOM1 typed atomic/memory-order evidence, and PKLOCK1 bounded lock-family/exact-topology contention evidence exist, but authenticated boot trust, measured boot, production transfer, production capability authority, general topology and shootdown, AP-local timer interrupt delivery, deferred reclamation and ABA-safe object lifetime, a general driver/service framework, arbitrary callbacks, general SMP preemption, retained crash evidence, target execution, and N6/N7/N8/N9/N12 exit remain open",
       "PKERR1 freezes a pure exact-target CPU/errata rejection policy, PKXSTATE1 proves bounded x87/SSE standard-XSAVE ownership, PKXEXC1 proves deliberate #MF/#XM recovery plus terminal test-only #NM rejection with a linked scope audit under WHPX, and PKMSR1 proves only a read-only qemu64 BSP system-linkage/global-MCA/unsupported-PMU observation. PKPMM7 supplies bounded physical ownership, scrubbed lifecycle transactions, a stable guarded five-page manager, external generation-owned active ledgers, checked automatic growth with retirement, bounded-window fallback and pre-effect rejection, streamed lifecycle-gated Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation and retained copy/readback; PKVM1 supplies inactive page-table transactions; PKVM3 proves one-BSP activation/restoration of a complete-profile PMM-owned sparse direct map; PKIRQ1 proves one bounded local timer transaction; PKSMP1 proves one first-AP start/quiesce/park lifecycle; PKSMP2 proves one AP-local GDT/TSS/IDT, guarded-stack, x87/SSE-owner, and interrupt-vector runtime transaction; and PKSMP5 proves three simultaneous AP-local runtimes, partial-start rollback with fresh retry, six fixed IPI classes per AP, three AP-side one-page INVLPG operations, aggregate acknowledgement, and one deferred generation retirement. No target-qualified complete native CPU policy, applicable Model 40h-4Fh errata authority, direct numeric client microcode floor or ratified replacement, target-specific privileged-MSR semantics, syscall/MCE/PMU activation, AVX/extended state, user-task exception delivery, scheduler or migration integration, general interrupt routing/time services, production capability authority, general topology or SMP shootdown, AML or complete ACPI resource-graph execution, complete kernel/user address spaces, heap, MMIO/PAT/MTRR qualification, interrupt-context or concurrent allocator, general pressure, or OOM implementation exists",
       "The exact Tier 1 identity passes 24/24 required checks and 16 allowlisted user-mode CPUID records are captured with zero public raw registers, but seven required channels remain non-complete in total, including partial CPU/MSR and SPD/topology; 15 standards hashes, ten lab-safety prerequisites, native parsing, and physical qualification also remain open",
       "No native DMA/IOMMU/interrupt-remapping confinement",
@@ -7122,7 +7157,7 @@
       "No source-bound signed PDC dynamics or portable/native PDC backends",
       "No native PDC control-plane services or bounded actuator proof",
       "PooleGlyph Phase 66 and the source, semantic, Core IR, PGASM, PGB2, PGVM2, host-ABI, policy, toolchain, compatibility, IP-boundary, private-backend-equivalence, and native-integration gates remain open",
-      "No native integrated fuzz/fault/power-loss/security/conformance/soak evidence",
+      "No native integrated fuzz/fault/power-loss/security/conformance/soak evidence; ADD-N36-RECEIPT-COVERAGE-001 also requires cross-profile recorded scenario/run/dependency/oracle validation and negative controls before qualification closure",
       "No native SBOM/provenance/signing ceremony/operations/release manifest",
       "No reproducible signed native ISO or exact clean-media QEMU/physical release receipt"
     ],
@@ -7150,6 +7185,7 @@
     "blocked": true
   },
   "claim_boundaries": [
+    "Cycle 155 replays five N7 live profiles through fourteen fresh boots and 225 marker controls; the unchanged pure PKERR1 receipt remains current. Twelve selected N5/N7 gates pass, fourteen downstream native checks remain stale, and no full candidate aggregate or Doctor pass is claimed. PKTRAP1 recorded-run validation is repaired with 25 mutation cases and eight release-boundary controls; ADD-N36-RECEIPT-COVERAGE-001 and its open flag require the broader audit. No executable kernel bytes, main, demo, signing trust, firmware, physical media or production status change. Next re-derive PMM manager/layout/ownership accounting under N9-PMM-ACPI-CONSUMER-001, then replay VM, interrupts, SMP, scheduler, atomics and locks before full qualification and any merge. N12.2 and N12.3 remain open; N0 custody is separately blocked without requiring new owner action for this replay.",
     "Cycle 154 completes six current-source N5 boot-chain checks for the unmerged Cycle 153 image, not the overall N5 exit or candidate release gate. PSYM1 and PPOL1 dependency drift is repaired; two-run PKLOAD6/PooleBoot and PKXFER1 plus host PKREVAL1 agree on exact retained bytes and unsigned denial. 63 focused regressions pass. Replay N7-TRAP-001 then CPU, memory, SMP, scheduler, atomics and locks before N12.2 closure or merge; mandatory N12.3 ownership and independent lifetime oracle remain later work. N0 custody remains externally blocked; no owner action is needed for this development step. No governance/release key use, firmware mutation, physical-media write, demo rebase or production operation occurred. Isolated disposable signing fixtures in the full host suite confer no production trust.",
     "Cycle 153 is an unmerged native allocator/teardown candidate. Explicit retention protects pages from copied handles; tokens survive migration and ledger growth and fail closed when lost. The three-AP implementation now parks all APs before ending old-frame retention. The changed 144-page kernel and shifted retained layout invalidate prior current-candidate bindings; complete replay remains pending. The last fully qualified main baseline is Cycle 152. Mandatory ownership for all task resources, an independent lifecycle oracle and explicit live retention/failure evidence remain open. The separate demo is unchanged; N12.3 and production remain open.",
     "Cycle 152 PKLIFE1 composes the actual scheduler, object pool and inactive address spaces with generation-safe task-slot retention, exact-once resource return, cancellation, pending/running dispatch retention, timeout, shutdown and owner-loss handling. Nineteen new lifecycle tests pass in both host profiles and no unsafe code is added. Copyable PMM handles, active-root ownership, hardware quiescence, an independent lifecycle oracle and a new live selector remain open. Canonical linked kernel and the separate demo remain unchanged; N12.3 and production remain open.",

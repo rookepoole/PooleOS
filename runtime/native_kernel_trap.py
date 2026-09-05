@@ -8,7 +8,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from runtime import native_kernel_transfer
+from runtime import native_kernel_transfer, native_pooleboot
 from runtime.schema_validation import validate_json
 
 
@@ -50,6 +50,7 @@ IMPLEMENTATION_INPUTS = (
     "native/kernel/src/lib.rs",
     "native/kernel/src/main.rs",
     "runtime/native_kernel_transfer.py",
+    "runtime/native_pooleboot.py",
     "runtime/native_kernel_trap.py",
     "tools/qualify_native_kernel_trap.py",
     "tests/test_native_kernel_trap.py",
@@ -244,6 +245,93 @@ def contract_errors(contract: dict[str, Any]) -> list[str]:
     return errors
 
 
+def recorded_execution_errors(execution: Any) -> list[str]:
+    """Check recorded run consistency without claiming fresh execution or authentication."""
+    scenarios = execution.get("scenarios") if isinstance(execution, dict) else None
+    if (
+        not isinstance(scenarios, list)
+        or any(not isinstance(item, dict) for item in scenarios)
+        or [item.get("scenario") for item in scenarios] != list(SCENARIOS)
+    ):
+        return ["PKTRAP1 recorded scenario coverage changed"]
+    errors: list[str] = []
+    for item, (name, profile) in zip(scenarios, SCENARIOS.items(), strict=True):
+        if (
+            (item.get("selector"), item.get("feature"), item.get("marker_count"))
+            != (profile["selector"], profile["feature"], profile["marker_count"])
+            or item.get("run_count") != 2
+            or any(
+                type(item.get(key)) is not int
+                for key in ("selector", "marker_count", "run_count")
+            )
+            or any(
+                item.get(key) is not True
+                for key in ("exact_marker_match", "exact_screenshot_match", "exact_pbp1_match")
+            )
+        ):
+            errors.append(f"PKTRAP1 {name} recorded scenario metadata changed")
+        runs = item.get("runs")
+        if (
+            not isinstance(runs, list)
+            or len(runs) != 2
+            or any(not isinstance(run, dict) for run in runs)
+            or [run.get("run_id") for run in runs] != [f"{name}-run-1", f"{name}-run-2"]
+        ):
+            errors.append(f"PKTRAP1 {name} recorded run coverage changed")
+            continue
+        for run in runs:
+            try:
+                frame = run["screenshot"]
+                if (
+                    not isinstance(frame, dict)
+                    or frame.get("nonblank") is not True
+                    or not isinstance(frame.get("sha256"), str)
+                    or re.fullmatch(r"[0-9A-F]{64}", frame["sha256"]) is None
+                ):
+                    raise KernelTrapError("recorded frame summary is missing or malformed")
+                markers = run["markers"]
+                if not isinstance(markers, list) or any(
+                    not isinstance(marker, str) for marker in markers
+                ):
+                    raise KernelTrapError("recorded markers are not a string list")
+                parsed = validate_markers(markers, name)
+                if run.get("marker_summary") != parsed:
+                    raise KernelTrapError("recorded marker summary differs from parsed markers")
+                marker_digest = sha256_bytes(native_pooleboot.canonical_json_bytes(markers))
+                if run.get("marker_sha256") != marker_digest:
+                    raise KernelTrapError("recorded marker digest differs from exact markers")
+                transcript = run["pbp1_transcript"]
+                if not isinstance(transcript, dict) or not isinstance(transcript.get("core"), dict):
+                    raise KernelTrapError("recorded handoff or core is not an object")
+                binding = native_kernel_transfer.validate_transcript_binding(
+                    parsed["transfer_prefix"], transcript
+                )
+                if run.get("transcript_binding") != binding:
+                    raise KernelTrapError("recorded handoff binding changed")
+                oracle = run["independent_kernel_revalidation"]
+                guest = parsed["transfer_prefix"]["kernel_revalidation"]
+                if (
+                    not isinstance(oracle, dict)
+                    or oracle.get("contract_id") != "PKREVAL1"
+                    or oracle.get("guest_host_exact_match") is not True
+                    or any(oracle.get(key) != value for key, value in guest.items())
+                ):
+                    raise KernelTrapError("recorded kernel revalidation differs from guest markers")
+                if any(
+                    run.get(key) is not True
+                    for key in ("serial_debugcon_exact_match", "pbp1_serial_debugcon_exact_match")
+                ):
+                    raise KernelTrapError("recorded dual-channel agreement changed")
+            except (KeyError, TypeError, ValueError) as error:
+                errors.append(f"PKTRAP1 {run['run_id']} invalid recorded evidence: {error}")
+        if any(
+            runs[0].get(key) != runs[1].get(key)
+            for key in ("markers", "pbp1_transcript", "screenshot")
+        ):
+            errors.append(f"PKTRAP1 {name} recorded two-run equality changed")
+    return errors
+
+
 def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     schema = read_json(root / SCHEMA_RELATIVE)
     errors = [f"schema {item.path}: {item.message}" for item in validate_json(readiness, schema)]
@@ -252,21 +340,7 @@ def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     if readiness.get("inputs") != expected_inputs(root):
         errors.append("PKTRAP1 readiness input bindings are stale")
     execution = readiness.get("execution", {})
-    scenario_runs = execution.get("scenarios", []) if isinstance(execution, dict) else []
-    if (
-        not isinstance(scenario_runs, list)
-        or len(scenario_runs) != 3
-        or sum(item.get("run_count", 0) for item in scenario_runs if isinstance(item, dict)) != 6
-        or any(
-            not isinstance(item, dict)
-            or item.get("run_count") != 2
-            or item.get("exact_marker_match") is not True
-            or item.get("exact_screenshot_match") is not True
-            or item.get("exact_pbp1_match") is not True
-            for item in scenario_runs
-        )
-    ):
-        errors.append("PKTRAP1 six-run evidence changed")
+    errors.extend(recorded_execution_errors(execution))
     controls = readiness.get("negative_controls", [])
     if (
         not isinstance(controls, list)

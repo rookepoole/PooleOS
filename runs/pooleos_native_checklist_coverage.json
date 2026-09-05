@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_kind": "pooleos_native_checklist_coverage",
-  "status_date": "2026-09-04",
+  "status_date": "2026-09-05",
   "status": "pass",
   "source": {
     "path": "sources/requirements/sha256/a8c94719faf9428c1f133010ba2603c0270c4e1efd7327af8eab9c8c362abb3d/PooleOS_From_Scratch_Master_Checklist.md",
@@ -631,6 +631,7 @@
       "source_checkbox_count": 272,
       "added_requirement_ids": [
         "ADD-ASSURE-002",
+        "ADD-N36-RECEIPT-COVERAGE-001",
         "ADD-TEST-001"
       ]
     },
@@ -2773,6 +2774,16 @@
       "requirement": "Record proof assumptions and coverage boundaries; formal models supplement but never replace executable negative, concurrency, fault, hardware, and recovery tests.",
       "basis": [
         "https://sel4.systems/Verification/assumptions.html"
+      ]
+    },
+    {
+      "id": "ADD-N36-RECEIPT-COVERAGE-001",
+      "phase_id": "N36",
+      "requirement": "Validate every qualification receipt against its exact scenario and run inventory, distinct run identities, parsed observations, byte digests, current dependency bindings and independent-oracle results. Reject missing, duplicated, malformed, stale, substituted or contradictory evidence through both component validators and release gates. Separate recorded consistency from fresh execution, authentication, independent builders and target qualification; retain a per-profile audit and negative-test matrix before qualification closure.",
+      "basis": [
+        "Cycle 155 PKTRAP1 recorded scenario/run acceptance repair",
+        "runtime/native_kernel_trap.py and tests/test_native_kernel_trap.py",
+        "runtime/native_kernel_cpu_policy.py: cross-profile coverage review pending"
       ]
     },
     {

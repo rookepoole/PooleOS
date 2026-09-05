@@ -7,7 +7,26 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 154
+Last roadmap reconciliation: PooleOS Cycle 155
+
+Cycle 155 reconstructs the current kernel's trap/CPU/xstate/MSR evidence through
+fourteen fresh QEMU/OVMF boots in the final receipts, 225 marker controls across
+five profiles, 41 focused N7 Python tests and the unchanged current PKERR1 gate.
+It also repairs PKTRAP1's acceptance of incomplete or contradictory recorded
+run evidence: 25 receipt mutations and eight release-boundary controls reject.
+The broader per-profile audit remains required under new
+ADD-N36-RECEIPT-COVERAGE-001 and FLAG-N36-RECEIPT-COVERAGE-001.
+The focused projection passes twelve selected N5/N7 gates; fourteen downstream
+native checks remain stale. This is not a full canonical or Doctor pass.
+No kernel bytes, main, frozen demo, signing trust or production status change.
+The ledger now has 57 ADD requirements and 94 flags, including 36 open flags;
+all locked checklist coverage, 40 phases/301 subphases and 20 gaps remain.
+Next re-derive PMM ownership/layout accounting under
+N9-PMM-ACPI-CONSUMER-001, then replay VM, interrupts, SMP, scheduler, atomics
+and locks before the complete current-candidate suite and merge gate.
+N12.2 and N12.3 remain partial/open. N0 custody is independently blocked;
+this development step needs no new owner action. Historical failures and
+qualification boundaries below remain authoritative for their exact candidates.
 
 Cycle 154 reconstructs the N5 prerequisites for the changed-kernel and reopened
 N12.2 lock replay. PSYM1 is rebound from measured debug/loaded/kernel/manifest
