@@ -136,7 +136,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 152)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 153)
         self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 915)
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
@@ -153,7 +153,10 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertFalse(historical["production_ready"])
         self.assertEqual(historical["native_promotion_role"], "historical_non_promoting")
         current = self.roadmap["baseline"]["native_consistency_release_gate"]
-        self.assertEqual(current["passed_checks"], 105)
+        self.assertIsNone(current["passed_checks"])
+        self.assertEqual(current["qualification_status"], "pending_full_candidate_replay")
+        self.assertEqual(current["last_fully_qualified_cycle"], 152)
+        self.assertEqual(current["last_fully_qualified_passed_checks"], 105)
         self.assertEqual(current["total_checks"], 105)
         self.assertEqual(current["artifact_count"], 62)
         self.assertEqual(current["explicit_gap_count"], 20)
@@ -180,7 +183,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(protocol["selected_move_id"], "N12-CONCURRENCY-RECLAMATION-001")
         self.assertEqual(
             protocol["owner_independent_next_move_id"],
-            "N12-CONCURRENCY-RECLAMATION-001",
+            "N12-CONCURRENCY-LOCKS-001",
         )
         self.assertIn("runs/hardware_target_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_tier0_readiness.json", protocol["required_records"])
@@ -436,7 +439,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             flag for flag in flags if flag["id"] == "FLAG-N12-CONCURRENCY-LOCKS-001"
         )
         self.assertEqual(locks_flag["class"], "REQUIRED")
-        self.assertEqual(locks_flag["status"], "closed")
+        self.assertEqual(locks_flag["status"], "open")
         self.assertIn(
             "runs/native-kernel-locks-readiness.json", locks_flag["evidence"]
         )
@@ -816,7 +819,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             subphase["id"]: subphase["status"] for subphase in n12["subphases"]
         }
         self.assertEqual(n12_statuses["N12.1"], "complete")
-        self.assertEqual(n12_statuses["N12.2"], "complete")
+        self.assertEqual(n12_statuses["N12.2"], "partial")
         for subphase_id in (
             "N12.3",
             "N12.4",

@@ -3,8 +3,19 @@
 ## Status
 
 PKLOCK1 is the bounded N12.2 lock family for the native x86-64 PooleKernel. It
-is pre-production evidence. It completes only N12.2 and does not complete N12,
-deferred reclamation, general SMP, physical-target qualification, or release.
+is pre-production evidence. Cycle 153 reopens N12.2 and
+`FLAG-N12-CONCURRENCY-LOCKS-001` after the host contention probe returned
+`QueueFull` with only four participants. Ticket admission could combine an older
+`next` with a newer `serving` value. The candidate retries an apparently full
+window when `next` changed, in both raw and writer-ticket reservation. Genuine
+32-ticket exhaustion remains rejected without mutation. Existing unit tests now
+also cover that capacity at ordinary and wrapping counters and 8,192 acquisitions
+by four threads for each reservation path. These are host stress and boundary
+tests, not an exhaustive memory-model proof. Current-source profile and aggregate
+qualification must pass before this flag closes again. The historical Cycle 149
+receipt remains intact, but does not qualify this repair or the new kernel image.
+N12, deferred reclamation, general SMP, physical-target qualification and release
+remain incomplete.
 
 The authoritative machine-readable files are:
 

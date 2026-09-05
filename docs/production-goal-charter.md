@@ -1,13 +1,41 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-09-04
+Status date: 2026-09-05
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 152
+Last roadmap reconciliation: PooleOS Cycle 153
+
+Cycle 153 implements PKRETAIN1 allocator-enforced retention under the existing
+N12.3 reclamation move. Non-copyable tokens protect explicitly retained physical
+allocations from every ordinary free path, survive metadata migration and ledger
+growth, and fail closed on lost ownership. The three-AP path now retains its old
+frames through stop acknowledgements and final INIT parking before scrub/release.
+Attempted starts are counted before issuing startup commands, so a missing
+online acknowledgement cannot bypass final parking during failure cleanup.
+The task-lifetime harness demonstrates retained physical page-table ownership.
+Host qualification passes; the linked image and retained boot layout change.
+Complete dependency replay and the full current-candidate gate are pending.
+The first aggregate attempt, before the final startup-mask repair, failed
+25/105 checks; preserve that result and rerun affected evidence, never inherit
+its passing subset as a current-candidate aggregate pass.
+Cycle 152 is the last fully qualified main baseline; its receipts must not be
+inherited for Cycle 153 bytes. No merge, release, demo rebase or production
+promotion is authorized by partial qualification. The next move is to finish
+this candidate's replay, then mandatory active task/root ownership and an
+independent live retirement/failure oracle. N12.3, its flag and all 20 gaps remain
+open. See `docs/native-kernel-physical-retention.md`.
+
+Cycle 153 also reopens `FLAG-N12-CONCURRENCY-LOCKS-001` and N12.2 after a
+four-participant host probe exposed a stale-counter `QueueFull` result. Raw and
+writer-ticket reservation now retry that inconsistent sample; capacity,
+wraparound and concurrent progress coverage expands within the existing tests.
+Resolve current-source lock/profile and aggregate replay before extending N12.3.
+The repair and historical failed run remain documented; no historical pass
+overrides the newly discovered regression.
 
 Cycle 152 resumes owner-independent native development under
 `N12-CONCURRENCY-RECLAMATION-001`. PKLIFE1 owns the actual PKSCHED4 scheduler

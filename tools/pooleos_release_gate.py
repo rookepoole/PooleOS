@@ -3769,8 +3769,8 @@ def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINE
         )
     errors.extend(native_kernel_entry.readiness_errors(artifact))
     expected_summary = {
-        "rust_host_tests_passed": 206,
-        "rust_host_tests_total": 206,
+        "rust_host_tests_passed": 214,
+        "rust_host_tests_total": 214,
         "rustfmt_packages_passed": 2,
         "clippy_runs_passed": 2,
         "clippy_runs_total": 2,
@@ -3786,20 +3786,20 @@ def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINE
         errors.append("PKENTRY1 qualification summary changed")
     product = artifact.get("product", {})
     if (
-        product.get("canonical_byte_count") != 513_680
-        or product.get("image_byte_count") != 585_728
+        product.get("canonical_byte_count") != 517_784
+        or product.get("image_byte_count") != 589_824
         or product.get("entry_offset") != 0xA000
-        or product.get("relocation_count") != 1295
+        or product.get("relocation_count") != 1304
         or product.get("canonical_sha256")
-        != "9029AEE51A4D557EF5B29945985E4A1F07C67DDE9C8C367C80BD1B9EDD9D409E"
+        != "BDEECCB27B1B91406911F91169B9BF5F9DF0439BB39FA0E1882C07E1AF3B81EF"
     ):
         errors.append("PKENTRY1 product identity changed")
     if artifact.get("claims") != native_kernel_entry.expected_claims():
         errors.append("PKENTRY1 claim boundary changed")
     detail = (
-        "contract=PKENTRY1; kernel_tests=206/206; clean_builds=2/2; negative=43/43; "
-        "exact_loaded=2/2; bytes=513680; image_bytes=585728; entry=0xA000; "
-        "relocations=1295; live_transfer=false; "
+        "contract=PKENTRY1; kernel_tests=214/214; clean_builds=2/2; negative=43/43; "
+        "exact_loaded=2/2; bytes=517784; image_bytes=589824; entry=0xA000; "
+        "relocations=1304; live_transfer=false; "
         "target_execution=false; n6_exit=false; production_ready=false"
     )
     return readiness.make_check(

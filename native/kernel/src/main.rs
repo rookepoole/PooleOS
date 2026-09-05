@@ -4396,13 +4396,13 @@ impl From<SmpRuntimeLiveError> for SmpIpiLiveError {
     }
 }
 
-#[derive(Clone, Copy)]
 struct SmpIpiApResource {
     target_apic_id: u32,
     allocation: AllocationHandle,
     allocation_receipt: ScrubReceipt,
     layout: smp_runtime::ResourceLayout,
     old_frame: Option<AllocationHandle>,
+    old_frame_retention: Option<poolekernel::physical_memory::RetainedAllocation>,
     old_frame_allocation_receipt: ScrubReceipt,
     old_frame_physical: u64,
     new_frame: Option<AllocationHandle>,
@@ -4439,7 +4439,6 @@ struct SmpIpiPartialRollbackProof {
     verified_bytes: u64,
 }
 
-#[derive(Clone, Copy)]
 struct SmpIpiLiveProof {
     processor_count: u64,
     enabled_processor_count: u64,
@@ -5817,7 +5816,7 @@ fn smp_ipi_allocate_ap_resource(
         .start_page
         .checked_mul(smp_ipi::PAGE_BYTES)
         .ok_or(smp::Error::Memory)?;
-    let prepare_result = (|| -> Result<(usize, smp_ipi::HandlerLayout), SmpIpiLiveError> {
+    let prepare_result = (|| -> Result<_, SmpIpiLiveError> {
         PhysicalPageAccess::write_word(access, old_frame_physical, 0, smp_ipi::OLD_FRAME_VALUE)
             .map_err(|_| smp::Error::Memory)?;
         PhysicalPageAccess::write_word(access, new_frame_physical, 0, smp_ipi::NEW_FRAME_VALUE)
@@ -5844,22 +5843,27 @@ fn smp_ipi_allocate_ap_resource(
             target_apic_id,
         )
         .map_err(|_| smp_ipi::Error::Result)?;
-        smp_ipi_prepare_resources(
+        let (bytes, handlers) = smp_ipi_prepare_resources(
             access,
             layout,
             bsp_apic_id,
             target_apic_id,
             apic_physical,
             &shootdown,
-        )
+        )?;
+        let retained = manager
+            .retain_allocation(old_frame)
+            .map_err(smp_ipi_memory_error)?;
+        Ok((bytes, handlers, retained))
     })();
     match prepare_result {
-        Ok((trampoline_bytes, handlers)) => Ok(SmpIpiApResource {
+        Ok((trampoline_bytes, handlers, retained)) => Ok(SmpIpiApResource {
             target_apic_id,
             allocation,
             allocation_receipt,
             layout,
             old_frame: Some(old_frame),
+            old_frame_retention: Some(retained),
             old_frame_allocation_receipt,
             old_frame_physical,
             new_frame: Some(new_frame),
@@ -5883,6 +5887,30 @@ fn smp_ipi_allocate_ap_resource(
     }
 }
 
+fn smp_ipi_end_old_frame_retention(
+    manager: &mut PhysicalMemoryManager,
+    resource: &mut SmpIpiApResource,
+) -> Result<(), SmpIpiLiveError> {
+    let Some(retained) = resource.old_frame_retention.take() else {
+        return if resource.old_frame.is_none() {
+            Ok(())
+        } else {
+            Err(smp_ipi::Error::Transition.into())
+        };
+    };
+    if Some(retained.handle()) != resource.old_frame {
+        resource.old_frame_retention = Some(retained);
+        return Err(smp_ipi::Error::Transition.into());
+    }
+    match manager.release_retention(retained) {
+        Ok(_) => Ok(()),
+        Err((error, retained)) => {
+            resource.old_frame_retention = Some(retained);
+            Err(smp_ipi_memory_error(error))
+        }
+    }
+}
+
 fn smp_ipi_release_ap_resource(
     manager: &mut PhysicalMemoryManager,
     access: &mut BootstrapTableMemory,
@@ -5890,6 +5918,8 @@ fn smp_ipi_release_ap_resource(
     mmio_active: bool,
 ) -> Result<SmpIpiReleaseProof, SmpIpiLiveError> {
     SMP_IPI_FAILURE_STAGE.store(40, Ordering::Relaxed);
+    // Callers either have not started this AP or have completed final INIT.
+    smp_ipi_end_old_frame_retention(manager, resource)?;
     let old_frame = match resource.old_frame.take() {
         Some(handle) => Some(
             manager
@@ -6071,9 +6101,10 @@ fn smp_ipi_run_partial_rollback(
     let attempt = (|| -> Result<(), SmpIpiLiveError> {
         for (index, resource) in resources.iter().take(2).enumerate() {
             SMP_IPI_FAILURE_STAGE.store(22 + index as u32, Ordering::Relaxed);
-            smp_ipi_start_ap(hardware, access, period_femtoseconds, resource)?;
+            // A failed online acknowledgement does not prove the AP never started.
             started_mask |= smp_ipi::local_target_mask(resource.target_apic_id)
                 .ok_or(smp_ipi::Error::Target)?;
+            smp_ipi_start_ap(hardware, access, period_femtoseconds, resource)?;
         }
         SMP_IPI_FAILURE_STAGE.store(24, Ordering::Relaxed);
         transaction.partial_started(started_mask)?;
@@ -7193,17 +7224,33 @@ fn run_smp_ipi_internal(
     lifecycle.retry_prepare()?;
 
     let mut started_mask = 0u64;
+    let mut parked_mask = 0u64;
     let bsp_tsc_before = arch::x86_64::read_tsc_ordered();
     let operation = (|| -> Result<SmpIpiExecutionReceipt, SmpIpiLiveError> {
         SMP_IPI_FAILURE_STAGE.store(3, Ordering::Relaxed);
         for resource in &resources {
-            smp_ipi_start_ap(&mut hardware, &mut page_access, period, resource)?;
+            // Include uncertain SIPI delivery in final INIT cleanup.
             started_mask |= smp_ipi::local_target_mask(resource.target_apic_id)
                 .ok_or(smp_ipi::Error::Target)?;
+            smp_ipi_start_ap(&mut hardware, &mut page_access, period, resource)?;
         }
         let bsp_tsc_after = arch::x86_64::read_tsc_ordered();
         lifecycle.all_online(started_mask, started_mask)?;
         SMP_IPI_FAILURE_STAGE.store(4, Ordering::Relaxed);
+
+        for resource in &resources {
+            let handle = resource.old_frame.ok_or(smp_ipi::Error::Transition)?;
+            let before = manager.summary();
+            if manager.free(handle) != Err(PhysicalMemoryError::AllocationRetained)
+                || manager.free_scrubbed(handle, &mut page_access)
+                    != Err(PhysicalMemoryError::AllocationRetained)
+                || manager.free_scrubbed_automatic(handle, &mut page_access)
+                    != Err(PhysicalMemoryError::AllocationRetained)
+                || manager.summary() != before
+            {
+                return Err(smp_ipi::Error::Transition.into());
+            }
+        }
 
         for resource in &resources {
             page_access
@@ -7406,38 +7453,13 @@ fn run_smp_ipi_internal(
         lifecycle.exercised(retirement.ack_mask)?;
         SMP_IPI_FAILURE_STAGE.store(5, Ordering::Relaxed);
 
-        let mut old_releases: [Option<ScrubReceipt>; smp_ipi::AP_COUNT] = [None; smp_ipi::AP_COUNT];
-        for (index, resource) in resources.iter_mut().enumerate() {
-            SMP_IPI_FAILURE_STAGE.store(70 + index as u32, Ordering::Relaxed);
-            page_access
-                .ensure_mapped(resource.layout.local())
-                .map_err(|_| smp::Error::PhysicalAccess)?;
-            smp_ipi_mailbox_write_u32(
-                smp_ipi::SHOOTDOWN_RECLAIM_STATE_OFFSET,
-                smp_ipi::RECLAIM_AUTHORIZED,
-            );
-            let handle = resource
-                .old_frame
-                .take()
-                .ok_or(smp_ipi::Error::Transition)?;
-            old_releases[index] = Some(
-                manager
-                    .free_scrubbed(handle, &mut page_access)
-                    .map_err(|_| smp::Error::Memory)?,
-            );
-        }
-        SMP_IPI_FAILURE_STAGE.store(74, Ordering::Relaxed);
-        reclaim
-            .released(retirement)
-            .map_err(|_| smp_ipi::Error::Transition)?;
-        SMP_IPI_FAILURE_STAGE.store(75, Ordering::Relaxed);
         for resource in &resources {
             page_access
                 .ensure_mapped(resource.layout.local())
                 .map_err(|_| smp::Error::PhysicalAccess)?;
             smp_ipi_mailbox_write_u32(
                 smp_ipi::SHOOTDOWN_RECLAIM_STATE_OFFSET,
-                smp_ipi::RECLAIM_RELEASED,
+                smp_ipi::RECLAIM_AUTHORIZED,
             );
         }
 
@@ -7483,6 +7505,48 @@ fn run_smp_ipi_internal(
                 bsp_tsc_before,
                 bsp_tsc_after,
             )?;
+            mailboxes[index] = Some(mailbox);
+            ipis[index] = Some(ipi);
+        }
+        lifecycle.quiesced(smp_ipi::TARGET_CPU_MASK)?;
+
+        // Shared lock aliases need more than the one-page shootdown. Complete
+        // final INIT on every AP before ending retention or touching old frames.
+        for resource in resources.iter().rev() {
+            smp_init_sequence(&mut hardware, resource.target_apic_id, period)
+                .map_err(|_| smp_ipi::Error::Rollback)?;
+            parked_mask |= smp_ipi::local_target_mask(resource.target_apic_id)
+                .ok_or(smp_ipi::Error::Target)?;
+        }
+        if parked_mask != started_mask || parked_mask != smp_ipi::TARGET_CPU_MASK {
+            return Err(smp_ipi::Error::Rollback.into());
+        }
+
+        let mut old_releases: [Option<ScrubReceipt>; smp_ipi::AP_COUNT] = [None; smp_ipi::AP_COUNT];
+        for (index, resource) in resources.iter_mut().enumerate() {
+            SMP_IPI_FAILURE_STAGE.store(70 + index as u32, Ordering::Relaxed);
+            smp_ipi_end_old_frame_retention(manager, resource)?;
+            let handle = resource.old_frame.ok_or(smp_ipi::Error::Transition)?;
+            old_releases[index] = Some(
+                manager
+                    .free_scrubbed(handle, &mut page_access)
+                    .map_err(|_| smp::Error::Memory)?,
+            );
+            resource.old_frame = None;
+        }
+        reclaim
+            .released(retirement)
+            .map_err(|_| smp_ipi::Error::Transition)?;
+
+        for (index, resource) in resources.iter().enumerate() {
+            page_access
+                .ensure_mapped(resource.layout.local())
+                .map_err(|_| smp::Error::PhysicalAccess)?;
+            smp_ipi_mailbox_write_u32(
+                smp_ipi::SHOOTDOWN_RECLAIM_STATE_OFFSET,
+                smp_ipi::RECLAIM_RELEASED,
+            );
+            let ipi = smp_ipi_mailbox_snapshot();
             SMP_IPI_FAILURE_STAGE.store(82 + index as u32 * 3, Ordering::Relaxed);
             if scheduler_mode {
                 smp_ipi::validate_scheduler_final(
@@ -7508,11 +7572,9 @@ fn run_smp_ipi_internal(
             } else {
                 smp_ipi::validate_final(&ipi, resource.target_apic_id, u32::from(index == 0))?;
             }
-            mailboxes[index] = Some(mailbox);
             ipis[index] = Some(ipi);
         }
         SMP_IPI_FAILURE_STAGE.store(90, Ordering::Relaxed);
-        lifecycle.quiesced(smp_ipi::TARGET_CPU_MASK)?;
         Ok((
             [
                 mailboxes[0].ok_or(smp_ipi::Error::Transition)?,
@@ -7543,11 +7605,10 @@ fn run_smp_ipi_internal(
     } else {
         0
     };
-    let mut parked_mask = 0u64;
     for resource in resources.iter().rev() {
         let local_mask =
             smp_ipi::local_target_mask(resource.target_apic_id).ok_or(smp_ipi::Error::Target)?;
-        if started_mask & local_mask != 0 {
+        if started_mask & local_mask != 0 && parked_mask & local_mask == 0 {
             smp_init_sequence(&mut hardware, resource.target_apic_id, period)
                 .map_err(|_| smp_ipi::Error::Rollback)?;
             parked_mask |= local_mask;
@@ -10477,7 +10538,7 @@ extern "C" fn poole_kernel_rust_entry(
         let mut resource_verified_bytes = 0u64;
         let mut frame_verified_bytes = 0u64;
         for index in 0..smp_ipi::AP_COUNT {
-            let resource = proof.aps[index];
+            let resource = &proof.aps[index];
             let operation = proof.operations[index];
             let ipi = operation.ipi;
             let mailbox = operation.mailbox;

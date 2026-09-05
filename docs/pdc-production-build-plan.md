@@ -1,8 +1,8 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-09-04
-Plan version: 2.58.0-native-task-lifetimes
-Roadmap cycle: PooleOS Cycle 152
+Status date: 2026-09-05
+Plan version: 2.59.0-native-physical-retention
+Roadmap cycle: PooleOS Cycle 153
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
@@ -27,6 +27,46 @@ recovery profile is accepted, and no fallback key may be inferred from primary
 registration. The governance flag and all production boundaries remain open.
 
 ## 1. Architecture Decision
+
+Cycle 153 advances N12.3 with real allocator-enforced retention and an AP
+teardown ordering change. Explicitly retained allocations now reject copied
+handles at all three PMM free APIs. A non-copyable token, checked boot-lifetime
+identity and metadata/ledger integrity binding govern ending retention; lost
+tokens leave pages retained. The live three-AP implementation retains its old
+probe frames through all stop acknowledgements and final INIT parking, including
+the shared lock frame whose additional cached aliases are not covered by the
+existing one-page shootdown. A PKLIFE1 test binds actual table ownership to the
+final task reader. See `docs/native-kernel-physical-retention.md`.
+
+Both three-AP startup loops now include attempted targets in cleanup before
+issuing startup commands: a missing online acknowledgement cannot authorize
+release. The first full candidate audit completed at 80/105 checks (Doctor
+684/708), rejecting 24 stale native profile bindings plus the aggregate check.
+That audit preceded the final startup-mask repair; it is preserved as a failed
+attempt, not a current-image pass. No merge or gate waiver follows from it.
+
+The next host lock run exposed stale-counter sampling that could return
+`QueueFull` with four participants. Raw and writer-ticket admission now retry
+changed samples before rejecting capacity; existing tests add genuine capacity,
+wrapping counters and four-thread progress cases in both host profiles. This
+reopens `FLAG-N12-CONCURRENCY-LOCKS-001` and returns N12.2 to partial until its
+current-source profile and full aggregate replay pass. Resolve this earlier
+dependency before extending N12.3. Historical passing receipts are not erased.
+
+This is an unmerged candidate, not a completed production increment. Eight new
+allocator tests join the 206 kernel regressions; 20 task-lifetime and 19 pool
+tests pass in both host profiles, with five borrow compile-fail tests. The kernel
+grows to 144 pages, and the guarded retained layout shifts by one page. Fresh
+image-dependent qualification is in progress. The roadmap explicitly withholds
+a current-candidate aggregate pass; Cycle 152 is the last fully qualified main
+baseline. All 24 dependent native profiles, independent live retention telemetry
+and failure-oracle work must be reconciled before stronger claims. No requirement
+or flag closes. Mandatory retention for all task/root/data/stack resources is
+still open; the existing `Resources::new` remains an opt-in composition boundary.
+The unchanged Cycle 151 demo is not this candidate. PooleGlyph remains Phase 65,
+with Phase 66 and all native integration gates open. Architecture binding expands
+to 225 sources; checklist counts, 56 ADD requirements, 93 flags and 20 gaps stay
+unchanged.
 
 Cycle 152 resumes chronological kernel development with PKLIFE1 under
 `N12-CONCURRENCY-RECLAMATION-001`. The native controller owns the actual
@@ -1261,6 +1301,17 @@ and Running task retention, late ACK rejection, timeout, shutdown and owner loss
 The next substep is active physical ownership and exact remote quiescence;
 the independent oracle and live selector must precede any N12.3 closure.
 
+Cycle 153 adds PKRETAIN1 under this same requirement and flag. Completed substeps:
+allocator retention identity and all-free-path enforcement; migration/ledger
+integrity and ownership tests; one actual task-reader/table-allocation composition;
+and implementation of stop/park-before-old-frame-release in the fixed three-AP
+path, including conservative cleanup of uncertain AP starts. Current substep:
+requalify the changed kernel and retained layout, preserve
+failed candidate logs, reconcile dependent oracles and run the complete gate.
+Next substeps: mandatory task/root/data/stack retention, independent lifecycle
+oracle and explicit two-run live retention/failure evidence. Mapping and compiled
+integration remain distinct from live and production qualification.
+
 Exit gate: deterministic and randomized SMP schedule tests show no lost wakeup, duplicate runnable task, dead task, priority inversion violation, register leak, or starvation beyond declared bounds.
 
 ### N13 - Tasks, Syscalls, Events, and Capability Object Model (`not_started`)
@@ -1861,8 +1912,8 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 | `FLAG-N12-SCHED-AP-WORKERS-001` | REQUIRED | Closed in Cycle 146 | PKSCHED5 proves three AP-local queues and workers, fixed typed timer-driver and generation-reclaim consumers, EOI-gated dispatch, queued and remote cancellation, offline rollback, flush-before-reclaim, bounded priority bypass, exact retirement, and complete park/scrub/release only for one frozen four-vCPU development topology |
 | `FLAG-N12-SCHED-SMP-PREEMPT-001` | REQUIRED | Closed in Cycle 147 | PKSCHED6 proves four bounded timer/event/frame/run-queue lanes, deterministic cancel/wake/migration ordering, eight live acknowledgement-gated reschedule IPIs, three quantum switches, offline rollback, watchdog/fairness bounds, eight task retirements, and exact 102-page teardown only for one frozen four-vCPU development topology; AP-local timer interrupts and general SMP remain open |
 | `FLAG-N12-CONCURRENCY-ATOMICS-001` | REQUIRED | Closed in Cycle 148 | PKATOM1 freezes allocation-free typed `u32`/`u64`/`usize`/pointer atomics and operation-specific order types; rejects invalid orderings; proves host publication, contended RMW/CAS, sequential consistency, overflow-safe reference counts, seven linked x86-64 mappings, and one BSP process-to-interrupt release/acquire plus RMW path ordered before EOI without claiming general locks, live multi-AP contention, reclamation, portability, target, N12 exit, or production |
-| `FLAG-N12-CONCURRENCY-LOCKS-001` | REQUIRED | Closed in Cycle 149 | PKLOCK1 proves an allocation-free FIFO ticket/IRQ-save/sleeping-mutex/notification/writer-preferred-reader-writer/seqlock family; direct bounded donation, five-rank order and cycle rejection, owner death, exact rollback, 8,192 host ticket acquisitions, and one exact four-vCPU live ticket-lock profile without claiming reclamation, general SMP, target, N12 exit, or production |
-| `FLAG-N12-CONCURRENCY-RECLAMATION-001` | REQUIRED | Open; core and inactive task lifetimes host-qualified through Cycle 152 | PKRECLAIM1-CORE and PKLIFE1 bind real payloads, the actual scheduler and inactive address spaces, pins, retirement and exact-once reclaim. Still required: active physical ownership despite copyable PMM handles, acknowledged cross-CPU quiescence, live timeout/offline/owner-death/pressure/shutdown rollback, independent oracle and exact-topology live evidence; no general-SMP, hotplug, target, N12-exit or production claim |
+| `FLAG-N12-CONCURRENCY-LOCKS-001` | REQUIRED | Reopened in Cycle 153; N12.2 partial | Repair stale-counter capacity rejection in raw and writer-ticket admission, preserve genuine capacity and timeout behavior, and replay current-source contention/profile and aggregate evidence before restoring the historical bounded closure. No general SMP, target, N12 exit or production claim |
+| `FLAG-N12-CONCURRENCY-RECLAMATION-001` | REQUIRED | Open; explicit allocator retention host-qualified in Cycle 153 | PKRECLAIM1-CORE, PKLIFE1 and PKRETAIN1 bind real payloads, inactive task resources and explicit physical retention tokens. Old AP frames remain retained through stop and final parking. Complete changed-image qualification, mandatory task/root/data/stack ownership, independent oracle and live failure evidence before closure; no general-SMP, hotplug, target, N12-exit or production claim |
 | `FLAG-NATIVE-KERNEL-001` | STOP_SHIP | Open | PooleKernel boots, enforces memory/capabilities/IPC, and runs ring 3 |
 | `FLAG-NATIVE-IOMMU-001` | STOP_SHIP | Open | DMA and interrupt remapping confine every bus-mastering driver |
 | `FLAG-NATIVE-DRIVER-001` | STOP_SHIP | Open | User-space driver domains survive crash/reset/revoke without stale authority |

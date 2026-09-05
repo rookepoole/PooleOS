@@ -4,6 +4,16 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
+Cycle 153 is an unmerged [physical-retention candidate](docs/native-kernel-physical-retention.md).
+The allocator rejects copied-handle frees for explicitly retained pages, and
+the three-AP teardown now waits for stop acknowledgement and final parking
+before releasing old frames. Host ownership/lifetime tests and two fresh
+four-CPU boots pass after a one-page kernel/layout expansion. Qualification also
+found and repaired stale-counter ticket admission; its lock milestone is
+reopened pending full current-source dependency replay. Cycle 152 remains the
+last main baseline with a passing aggregate gate. The demo ISO is unchanged;
+no production or current-candidate aggregate pass is claimed.
+
 Cycle 152 adds [PKLIFE1 task lifetimes](docs/native-kernel-task-lifetimes.md):
 the real scheduler now has an optional native controller that retains moved
 inactive address spaces and task payloads until retirement and final reader

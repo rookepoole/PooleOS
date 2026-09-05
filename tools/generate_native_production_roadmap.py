@@ -119,7 +119,7 @@ SUBPHASE_OVERRIDES = {
     "N9.3": "partial",
     "N9.4": "partial",
     "N12.1": "complete",
-    "N12.2": "complete",
+    "N12.2": "partial",
     "N12.3": "partial",
     "N12.4": "partial",
     "N12.5": "partial",
@@ -327,7 +327,9 @@ PHASE_EVIDENCE = {
         "runs/native-kernel-locks-readiness.json: 10/10 focused lock tests within 206/206 kernel host tests, nine exact host-probe receipts including 8,192 FIFO ticket acquisitions, two exact 35-marker four-vCPU SandyBridge selector-22 runs, exact tickets 0,1,2,3 across BSP plus three APs, three installed and revoked shared aliases, and 30/30 hostile-control categories covering 103 rejected cases",
         "runs/native-kernel-reclamation-core-readiness.json: Cycle 150 PKRECLAIM1-CORE owns real values in a bounded no_std pool with pool-bound generation handles, RAII pins, retire-before-reclaim, exact-once transfer, nonwrapping limits, pressure retention and shutdown sealing; 19 tests pass in debug and optimized host profiles, one borrow compile-fail test and 206 kernel regressions pass; freestanding Clippy passes and canonical linked bytes remain unchanged; no live integration or CPU grace-period claim",
         "docs/native-kernel-task-lifetimes.md and runs/native-kernel-reclamation-core-readiness.json: Cycle 152 PKLIFE1 owns the actual PKSCHED4 scheduler and moved inactive PKVM1 address spaces, binds checked task/root generations, retains pinned retired resources, and blocks premature task-slot reuse. Nineteen lifecycle and nineteen core tests pass in each of two host profiles; three borrow compile-fail tests and 206 kernel regressions pass. No new guest selector or physical quiescence evidence is claimed",
-        "ADD-N12-CONCURRENCY-RECLAMATION-001: scoped object and serialized inactive task ownership are host-qualified; bind active physical ownership despite copyable PMM handles, acknowledged cross-CPU quiescence, live timeout/offline/death/pressure/shutdown rollback, an independent oracle and exact-topology live evidence before closing N12.3",
+        "docs/native-kernel-physical-retention.md: Cycle 153 implements allocator-enforced retention for explicit tokens and stop/park-before-old-frame-release in the three-AP path, including uncertain startup targets in final cleanup. Eight allocator tests within 214 kernel tests, 20 task-lifetime tests, 19 pool tests and five borrowing compile-fail tests pass; the new 144-page image requires complete dependency replay. The first aggregate audit failed 25/105 checks before the final startup-mask repair. This candidate is unmerged and has no current aggregate pass. Mandatory all-task/root/data/stack ownership and independent live retention/failure qualification remain open",
+        "FLAG-N12-CONCURRENCY-LOCKS-001: reopened in Cycle 153 after stale-counter sampling produced QueueFull with four host participants; raw and writer-ticket admission now retry changed samples. Replay current-source lock and aggregate evidence before extending N12.3",
+        "ADD-N12-CONCURRENCY-RECLAMATION-001: finish Cycle 153 changed-image qualification, then mandatory active physical ownership, acknowledged cross-CPU quiescence, live timeout/offline/death/pressure/shutdown rollback, an independent oracle and exact-topology live evidence before closing N12.3",
     ],
     "N15": ["runs/microkernel_isolation.json", "runs/capability_trap_proof.json", "runs/capability_trap_fuzz.json"],
     "N29": [
@@ -370,7 +372,7 @@ PHASE_GAPS = {
     "N9": ["PKPMM7 consumes the live PBLIVE4/PBP1 map and provides bounded generation-safe physical ownership, scrub-before-allocation/reuse, a stable guarded five-page manager, external generation-owned guarded active ledgers, checked automatic growth, verified predecessor retirement, bounded-window fallback/rejection, exact Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required RSDP/XSDT/APIC/FACP/HPET/MCFG validation and retained snapshot copy/readback. PKVM1 supplies inactive page-table transactions. PKVM3 adds a kernel-complete one-BSP candidate root with a PMM-derived complete-profile sparse physical direct map, exact hole and retained-range exclusion, write-back cache-alias rejection, exact CR3 activation/restoration, architectural Accessed/Dirty handling, three active local invalidation receipts, and generation-retirement gating. PKSMP5 proves three AP-side INVLPG operations for three AP-owned roots, one page per root, one generation, aggregate target/ack mask 0xE, stale and duplicate rejection, premature-reclaim denial, retirement, and exact frame release. General topology or address-space-wide shootdown, multiple concurrent generations, production capability authority, incremental concurrent map replacement, huge pages, PCID, COW, user faults, pager IPC, heaps/object caches, MMIO/PAT/MTRR qualification, interrupt-context and concurrent allocation, pressure/OOM policy beyond bounded metadata pressure, target hardware, and the N9 exit gate remain open"],
     "N10": ["PKACPI1 validates and retains only the required RSDP/XSDT/APIC/FACP/HPET/MCFG container set; no AML execution, complete ACPI namespace/resource graph, SMBIOS graph, or PCIe enumeration/configuration graph exists"],
     "N11": ["No AMD IOMMU or interrupt-remapping confinement exists"],
-    "N12": ["PKSCHED1 supplies a bounded allocation-free scheduler core, neutral fixed-priority round-robin policy, selected lifecycle primitives, and a live cooperative BSP two-task context switch. PKSCHED2 integrates that core with PKIRQ1 through exact interrupt frames and proves bounded BSP quantum and wakeup preemption. PKSCHED3 adds allocation-free interrupt-deferred work, two fixed BSP workers, generation-safe slot reclamation, cancellation, flush, rollback, shutdown, and complete cleanup. PKSCHED4 adds four AP/BSP-local run queues on one exact topology, acknowledgement-gated ownership, one generation-safe cross-CPU wake, two migrations, six live AP dispatches, topology balancing, per-CPU idle ownership, timeout rollback, stale-ack rejection, and exact teardown. PKSCHED5 adds three AP-local workers and fixed typed timer-driver and generation-reclaim consumers. PKSCHED6 composes those foundations into four bounded timer/event/frame/run-queue lanes, deterministic cancel/wake/migration ordering, eight live acknowledgement-gated reschedule IPIs, three quantum switches, offline rollback, watchdog/fairness bounds, and exact teardown on the frozen topology. PKATOM1 closes N12.1 for typed 32-bit, 64-bit, pointer, reference-count, RMW, CAS, and fence primitives with explicit order domains, deterministic host stress, linked-code auditing, interrupt-context publication, two live QEMU runs, and invalid-order rejection. PKLOCK1 closes N12.2 for the bounded allocation-free ticket/IRQ-save/mutex/notification/reader-writer/seqlock family, direct priority donation, five-rank order graph, owner death, exact rollback, host contention, and one exact four-vCPU live ticket-lock profile. AP-local timer interrupt delivery, arbitrary callbacks and a general driver/service framework, general topology/hotplug/x2APIC scheduling, deferred reclamation and ABA-safe object lifetime, ring-3 and address-space switching, per-task FS/GS and full xstate/debug/PMU ownership, target-hardware evidence, and the N12 exit gate remain open"],
+    "N12": ["PKSCHED1 supplies a bounded allocation-free scheduler core, neutral fixed-priority round-robin policy, selected lifecycle primitives, and a live cooperative BSP two-task context switch. PKSCHED2 integrates that core with PKIRQ1 through exact interrupt frames and proves bounded BSP quantum and wakeup preemption. PKSCHED3 adds allocation-free interrupt-deferred work, two fixed BSP workers, generation-safe slot reclamation, cancellation, flush, rollback, shutdown, and complete cleanup. PKSCHED4 adds four AP/BSP-local run queues on one exact topology, acknowledgement-gated ownership, one generation-safe cross-CPU wake, two migrations, six live AP dispatches, topology balancing, per-CPU idle ownership, timeout rollback, stale-ack rejection, and exact teardown. PKSCHED5 adds three AP-local workers and fixed typed timer-driver and generation-reclaim consumers. PKSCHED6 composes those foundations into four bounded timer/event/frame/run-queue lanes, deterministic cancel/wake/migration ordering, eight live acknowledgement-gated reschedule IPIs, three quantum switches, offline rollback, watchdog/fairness bounds, and exact teardown on the frozen topology. PKATOM1 closes N12.1 for typed 32-bit, 64-bit, pointer, reference-count, RMW, CAS, and fence primitives with explicit order domains, deterministic host stress, linked-code auditing, interrupt-context publication, two live QEMU runs, and invalid-order rejection. Cycle 149 historically closed N12.2 for the bounded allocation-free ticket/IRQ-save/mutex/notification/reader-writer/seqlock family, direct priority donation, five-rank order graph, owner death, exact rollback, host contention, and one exact four-vCPU live ticket-lock profile. Cycle 153 reopens N12.2 and its existing lock flag after stale-counter admission produced QueueFull with four participants; current-source repair and aggregate replay are required before further N12.3 promotion. AP-local timer interrupt delivery, arbitrary callbacks and a general driver/service framework, general topology/hotplug/x2APIC scheduling, deferred reclamation and ABA-safe object lifetime, ring-3 and address-space switching, per-task FS/GS and full xstate/debug/PMU ownership, target-hardware evidence, and the N12 exit gate remain open"],
     "N13": ["No ring-3 task, syscall, or capability object implementation exists"],
     "N14": ["No native IPC, isolation, async completion, or quota implementation exists"],
     "N15": ["Current security artifacts are simulations; native crypto, TPM, MAC, and mitigations are absent"],
@@ -1232,6 +1234,9 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 "native/kernel/src/reclamation/task_lifetimes.rs",
                 "native/kernel/tests/task_lifetimes.rs",
                 "docs/native-kernel-task-lifetimes.md",
+                "native/kernel/src/physical_memory/retention.rs",
+                "native/kernel/src/physical_memory/tests/retention.rs",
+                "docs/native-kernel-physical-retention.md",
                 "native/kernel/tests/reclamation_core.rs",
                 "tools/qualify_native_reclamation_core.py",
                 "tests/test_native_reclamation_core.py",
@@ -1412,9 +1417,10 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             {
                 "id": flag_id,
                 "class": flag_class,
+                # Cycle 153 found a stale-counter admission defect in PKLOCK1.
                 "status": "closed"
                 if flag_class == "SUPERSEDED"
-                or flag_id in {"FLAG-N0-RATIFICATION-SCOPE-001", "FLAG-N2-CPUID-001", "FLAG-N4-PROFILE-001", "FLAG-N4-IPC-MODEL-001", "FLAG-N4-SCHEDULER-MODEL-001", "FLAG-N4-POOLEFS-MODEL-001", "FLAG-N5-POOLEBOOT-PROOF-001", "FLAG-N5-BOOTPROTO-001", "FLAG-N5-BOOTCFG-001", "FLAG-N5-ELF-001", "FLAG-N5-KLOAD-001", "FLAG-N5-MANIFEST-001", "FLAG-N5-PBP1-LIVE-001", "FLAG-N5-KMAP-001", "FLAG-N5-HANDOFF-EXIT-001", "FLAG-N5-INIT-SYSTEM-001", "FLAG-N5-INIT-BUNDLE-001", "FLAG-N5-RECOVERY-BUNDLE-001", "FLAG-N5-SYMBOL-BUNDLE-001", "FLAG-N5-MICROCODE-BUNDLE-001", "FLAG-N5-FIRMWARE-BUNDLE-001", "FLAG-N5-POLICY-BUNDLE-001", "FLAG-N5-INIT-SEMANTICS-001", "FLAG-N5-INNER-PARSE-001", "FLAG-N5-INNER-TRUST-CONTRACT-001", "FLAG-N5-INNER-TRUST-BACKEND-MODEL-001", "FLAG-N5-INNER-KERNEL-REVALIDATE-001", "FLAG-N5-KERNEL-TRANSFER-001", "FLAG-N6-KENTRY-001", "FLAG-N7-TRAP-001", "FLAG-N7-CPU-POLICY-001", "FLAG-N7-ERRATA-POLICY-001", "FLAG-N7-XSTATE-POLICY-001", "FLAG-N7-XSTATE-EXCEPTION-001", "FLAG-N7-PRIVILEGE-MSR-POLICY-001", "FLAG-N8-SMP-FIRST-AP-001", "FLAG-N8-SMP-PERCPU-RUNTIME-001", "FLAG-N8-SMP-IPI-001", "FLAG-N8-SMP-MULTI-AP-001", "FLAG-N9-PMM-FOUNDATION-001", "FLAG-N9-VM-FOUNDATION-001", "FLAG-N9-VM-ACTIVE-001", "FLAG-N9-PMM-SCRUB-001", "FLAG-N9-PMM-METADATA-001", "FLAG-N9-PMM-RECLAIM-001", "FLAG-N9-PMM-GROWTH-001", "FLAG-N9-PMM-GROWTH-AUTOMATION-001", "FLAG-N9-PMM-ACPI-CONSUMER-001", "FLAG-N9-VM-DIRECT-MAP-001", "FLAG-N9-SMP-SHOOTDOWN-001", "FLAG-N12-SCHED-FOUNDATION-001", "FLAG-N12-SCHED-PREEMPT-001", "FLAG-N12-SCHED-DEFERRED-001", "FLAG-N12-SCHED-SMP-001", "FLAG-N12-SCHED-AP-WORKERS-001", "FLAG-N12-SCHED-SMP-PREEMPT-001", "FLAG-N12-CONCURRENCY-ATOMICS-001", "FLAG-N12-CONCURRENCY-LOCKS-001"}
+                or flag_id in {"FLAG-N0-RATIFICATION-SCOPE-001", "FLAG-N2-CPUID-001", "FLAG-N4-PROFILE-001", "FLAG-N4-IPC-MODEL-001", "FLAG-N4-SCHEDULER-MODEL-001", "FLAG-N4-POOLEFS-MODEL-001", "FLAG-N5-POOLEBOOT-PROOF-001", "FLAG-N5-BOOTPROTO-001", "FLAG-N5-BOOTCFG-001", "FLAG-N5-ELF-001", "FLAG-N5-KLOAD-001", "FLAG-N5-MANIFEST-001", "FLAG-N5-PBP1-LIVE-001", "FLAG-N5-KMAP-001", "FLAG-N5-HANDOFF-EXIT-001", "FLAG-N5-INIT-SYSTEM-001", "FLAG-N5-INIT-BUNDLE-001", "FLAG-N5-RECOVERY-BUNDLE-001", "FLAG-N5-SYMBOL-BUNDLE-001", "FLAG-N5-MICROCODE-BUNDLE-001", "FLAG-N5-FIRMWARE-BUNDLE-001", "FLAG-N5-POLICY-BUNDLE-001", "FLAG-N5-INIT-SEMANTICS-001", "FLAG-N5-INNER-PARSE-001", "FLAG-N5-INNER-TRUST-CONTRACT-001", "FLAG-N5-INNER-TRUST-BACKEND-MODEL-001", "FLAG-N5-INNER-KERNEL-REVALIDATE-001", "FLAG-N5-KERNEL-TRANSFER-001", "FLAG-N6-KENTRY-001", "FLAG-N7-TRAP-001", "FLAG-N7-CPU-POLICY-001", "FLAG-N7-ERRATA-POLICY-001", "FLAG-N7-XSTATE-POLICY-001", "FLAG-N7-XSTATE-EXCEPTION-001", "FLAG-N7-PRIVILEGE-MSR-POLICY-001", "FLAG-N8-SMP-FIRST-AP-001", "FLAG-N8-SMP-PERCPU-RUNTIME-001", "FLAG-N8-SMP-IPI-001", "FLAG-N8-SMP-MULTI-AP-001", "FLAG-N9-PMM-FOUNDATION-001", "FLAG-N9-VM-FOUNDATION-001", "FLAG-N9-VM-ACTIVE-001", "FLAG-N9-PMM-SCRUB-001", "FLAG-N9-PMM-METADATA-001", "FLAG-N9-PMM-RECLAIM-001", "FLAG-N9-PMM-GROWTH-001", "FLAG-N9-PMM-GROWTH-AUTOMATION-001", "FLAG-N9-PMM-ACPI-CONSUMER-001", "FLAG-N9-VM-DIRECT-MAP-001", "FLAG-N9-SMP-SHOOTDOWN-001", "FLAG-N12-SCHED-FOUNDATION-001", "FLAG-N12-SCHED-PREEMPT-001", "FLAG-N12-SCHED-DEFERRED-001", "FLAG-N12-SCHED-SMP-001", "FLAG-N12-SCHED-AP-WORKERS-001", "FLAG-N12-SCHED-SMP-PREEMPT-001", "FLAG-N12-CONCURRENCY-ATOMICS-001"}
                 else "open",
                 "phase_id": phase_id,
                 "closure_condition": closure,
@@ -1452,10 +1458,10 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "inspect_live_pooleglyph_each_turn": True,
             "verify_master_checklist_coverage_each_turn": True,
             "new_work_must_be_flagged": True,
-            "last_updated_cycle": 152,
+            "last_updated_cycle": 153,
             "selected_move_id": "N12-CONCURRENCY-RECLAMATION-001",
             "immediate_next_move_id": "N0-GOVERNANCE-CUSTODY-001",
-            "owner_independent_next_move_id": "N12-CONCURRENCY-RECLAMATION-001",
+            "owner_independent_next_move_id": "N12-CONCURRENCY-LOCKS-001",
             "required_records": [
                 "docs/production-goal-charter.md",
                 "docs/pdc-production-build-plan.md",
@@ -1527,7 +1533,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "added_requirement_count": len(coverage["added_requirements"]),
         },
         "baseline": {
-            "pooleos_cycle": 152,
+            "pooleos_cycle": 153,
             "entry_cycle": 79,
             "pooleos_test_count": test_count,
             "historical_consistency_release_gate": {
@@ -1539,12 +1545,15 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 "native_promotion_role": "historical_non_promoting",
             },
             "native_consistency_release_gate": {
-                "passed_checks": 105,
+                "passed_checks": None,
                 "total_checks": 105,
                 "artifact_count": 62,
                 "explicit_gap_count": len(PROGRAM_GAPS),
                 "production_ready": False,
-                "native_promotion_role": "planning_and_evidence_consistency_non_promoting",
+                "native_promotion_role": "candidate_unqualified_pending_dependency_replay",
+                "qualification_status": "pending_full_candidate_replay",
+                "last_fully_qualified_cycle": 152,
+                "last_fully_qualified_passed_checks": 105,
             },
             "native": {
                 "source_controlled": True,
@@ -1588,6 +1597,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "blocked": True,
         },
         "claim_boundaries": [
+            "Cycle 153 is an unmerged native allocator/teardown candidate. Explicit retention protects pages from copied handles; tokens survive migration and ledger growth and fail closed when lost. The three-AP implementation now parks all APs before ending old-frame retention. The changed 144-page kernel and shifted retained layout invalidate prior current-candidate bindings; complete replay remains pending. The last fully qualified main baseline is Cycle 152. Mandatory ownership for all task resources, an independent lifecycle oracle and explicit live retention/failure evidence remain open. The separate demo is unchanged; N12.3 and production remain open.",
             "Cycle 152 PKLIFE1 composes the actual scheduler, object pool and inactive address spaces with generation-safe task-slot retention, exact-once resource return, cancellation, pending/running dispatch retention, timeout, shutdown and owner-loss handling. Nineteen new lifecycle tests pass in both host profiles and no unsafe code is added. Copyable PMM handles, active-root ownership, hardware quiescence, an independent lifecycle oracle and a new live selector remain open. Canonical linked kernel and the separate demo remain unchanged; N12.3 and production remain open.",
             "Cycle 151 provides the owner-requested unsigned QEMU-only optical demo with a demo-only PooleGlass static renderer. Two fresh four-vCPU optical boots pass PKLOCK1 and exact boot-frame comparison while canonical native source and kernel bytes stay unchanged. The OS-wide design system records PG-01 through PG-10 under FLAG-NATIVE-UI-001; N29.8 is partial only. No compositor, animation, installer, physical target, N5/N29/N39 exit or production claim follows; N12-CONCURRENCY-RECLAMATION-001 remains the next chronological kernel move.",
             "Cycle 150 implements and host-qualifies PKRECLAIM1-CORE only. The fixed-capacity no_std object pool uses PKLOCK1 admission and PKATOM1 pins, pool-bound nonwrapping generation handles, actual payload ownership, retirement, exact-once reclamation and shutdown retention. N12.3 and FLAG-N12-CONCURRENCY-RECLAMATION-001 remain open for scheduler/address-space lifecycle binding, acknowledged cross-CPU quiescence, failure rollback and two-run live evidence. Existing canonical linked kernel bytes are unchanged; no new guest execution, target, N12-exit or production claim follows.",
@@ -1662,7 +1672,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
     parser.add_argument("--test-count", type=int, default=915)
-    parser.add_argument("--status-date", default="2026-09-04")
+    parser.add_argument("--status-date", default="2026-09-05")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)
     args.out.write_text(json.dumps(roadmap, indent=2, ensure_ascii=True) + "\n", encoding="utf-8", newline="\n")
