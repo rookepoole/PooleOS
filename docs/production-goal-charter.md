@@ -7,7 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 149
+Last roadmap reconciliation: PooleOS Cycle 150
+
+Cycle 150 advances N12.3 with the PKRECLAIM1-CORE bounded object pool:
+actual payload ownership, pool-bound generation handles, scoped reader pins,
+retirement, exact-once reclamation, exhaustion handling and shutdown retention.
+Nineteen tests pass in each of two host profiles, one compile-fail borrow test
+and 206 existing kernel tests pass, and freestanding checks pass. The linked
+kernel bytes remain identical to Cycle 149. This is host-qualified kernel
+library implementation, not live integration. N12.3 and its flag remain open
+for actual scheduler/address-space lifecycle binding, acknowledged cross-CPU
+quiescence, independent oracle and live failure/rollback qualification. No
+governance, hardware, signing, release or production boundary changes.
 
 Post-Cycle 149 registration update (2026-09-04): the primary FIDO2 governance
 key is enrolled, its exact fingerprint is owner-confirmed, and GitHub SSH

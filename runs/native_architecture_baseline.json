@@ -611,15 +611,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "8B823D5F4008934342AF28AF8CCDF26D6B231937384440D2CD6BEDA4B4B201BB",
-      "byte_count": 59273,
-      "line_count": 748
+      "sha256": "682BE7327AC23B00947974F87491BE2BF65BBEC99DA6EC36BDA2CD1493848EB8",
+      "byte_count": 60032,
+      "line_count": 759
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "EB60C1550050B4B0F1244224FCD7EA128CBE1AECBC80765C09904D1EB7E3E621",
-      "byte_count": 335105,
-      "line_count": 1944
+      "sha256": "A08FB01E730B2B96AC7B768889475963148B87E1F434974C6461CA5F9D50D2BF",
+      "byte_count": 336802,
+      "line_count": 1968
     },
     {
       "path": "docs/publication-boundary.md",
@@ -1328,6 +1328,42 @@
       "sha256": "DC855A94C64333C7E5289962C5736E62318EA55D4D390B4EBF974C42A1F446CC",
       "byte_count": 194106,
       "line_count": 5011
+    },
+    {
+      "path": "native/kernel/src/reclamation.rs",
+      "sha256": "2570E6651ACE5B1A29E6198474CD1A3B57A6379C0A843532C10EFA4B1874DC1C",
+      "byte_count": 11591,
+      "line_count": 363
+    },
+    {
+      "path": "native/kernel/tests/reclamation_core.rs",
+      "sha256": "43D28759ABC933FE5A4F85D22AFE8A588EEE559FDC20C6188C3347B8D2F74FCA",
+      "byte_count": 15516,
+      "line_count": 432
+    },
+    {
+      "path": "tools/qualify_native_reclamation_core.py",
+      "sha256": "626D4FDD4E10DB176A6868FE4013447909B47AAD37C64601A50B8D54338A68CC",
+      "byte_count": 8772,
+      "line_count": 177
+    },
+    {
+      "path": "tests/test_native_reclamation_core.py",
+      "sha256": "C83BF9B31ADE9510D3DCE0357ED1EC23298E26F042CD9DC5E6C27689B576C9D1",
+      "byte_count": 2789,
+      "line_count": 65
+    },
+    {
+      "path": "docs/native-kernel-reclamation-core.md",
+      "sha256": "3F3E4E14427F94E93EAC2276DEE67A059CBBB74971BEAA481CE4789BFE382F54",
+      "byte_count": 6986,
+      "line_count": 117
+    },
+    {
+      "path": "runs/native-kernel-reclamation-core-readiness.json",
+      "sha256": "352CFD1FFCDD8B13C1A4F486BC494129DEBB8324504E3BDC89748BC639D81763",
+      "byte_count": 3464,
+      "line_count": 89
     },
     {
       "path": "runtime/native_kernel_physical_memory.py",

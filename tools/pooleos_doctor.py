@@ -459,6 +459,19 @@ def check_native_kernel_locks_readiness() -> CheckResult:
     )
 
 
+def check_native_reclamation_core_readiness() -> CheckResult:
+    from tools import qualify_native_reclamation_core as core
+
+    try:
+        core.validate_report(load_json(core.REPORT))
+    except (OSError, ValueError, TypeError, KeyError) as error:
+        return CheckResult("native-reclamation-core", False, str(error))
+    return CheckResult(
+        "native-reclamation-core", True,
+        "PKRECLAIM1 core: 19 tests in two host profiles; source-bound; live integration pending",
+    )
+
+
 def check_native_initial_system_readiness() -> CheckResult:
     from tools import pooleos_release_gate
 
@@ -4207,6 +4220,7 @@ def main(argv: list[str] | None = None) -> int:
     checks.append(check_native_kernel_scheduler_ap_workers_readiness())
     checks.append(check_native_kernel_atomics_readiness())
     checks.append(check_native_kernel_locks_readiness())
+    checks.append(check_native_reclamation_core_readiness())
     checks.append(check_native_initial_system_readiness())
     checks.append(check_native_recovery_readiness())
     checks.append(check_native_symbol_readiness())

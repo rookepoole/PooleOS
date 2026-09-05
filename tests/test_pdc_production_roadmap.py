@@ -136,8 +136,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 149)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 902)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 150)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 913)
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
         self.assertTrue(native["pooleboot_exists"])
@@ -177,7 +177,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N12-CONCURRENCY-LOCKS-001")
+        self.assertEqual(protocol["selected_move_id"], "N12-CONCURRENCY-RECLAMATION-001")
         self.assertEqual(
             protocol["owner_independent_next_move_id"],
             "N12-CONCURRENCY-RECLAMATION-001",
@@ -445,6 +445,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         )
         self.assertEqual(reclamation_flag["class"], "REQUIRED")
         self.assertEqual(reclamation_flag["status"], "open")
+        self.assertIn("runs/native-kernel-reclamation-core-readiness.json", reclamation_flag["evidence"])
+        self.assertFalse(self.roadmap["production_ready"])
         pooleboot_proof_flag = next(flag for flag in flags if flag["id"] == "FLAG-N5-POOLEBOOT-PROOF-001")
         self.assertEqual(pooleboot_proof_flag["class"], "REQUIRED")
         self.assertEqual(pooleboot_proof_flag["status"], "closed")
