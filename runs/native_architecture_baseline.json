@@ -371,9 +371,9 @@
     },
     {
       "path": "docs/adr-ratification-ceremony.md",
-      "sha256": "22D236EA8ACD8DF75B05C1E635C55D5CEF0ECF5BAB913DB61D93F04F9904BD50",
-      "byte_count": 9763,
-      "line_count": 117
+      "sha256": "D260AE7B0F417800AA5D57ADC203DBCD117A191F8DC31FDE153D2AC04E6B9171",
+      "byte_count": 10149,
+      "line_count": 123
     },
     {
       "path": "security/governance-key-registration.json",
@@ -611,15 +611,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "8FD3C7F4DE3B7ECD7228E4AD503D24C758484CFD27FD1621394E8C33B97961B2",
-      "byte_count": 58767,
-      "line_count": 740
+      "sha256": "8B823D5F4008934342AF28AF8CCDF26D6B231937384440D2CD6BEDA4B4B201BB",
+      "byte_count": 59273,
+      "line_count": 748
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "79F9E34D397461CAAE854A480A00BE110F151F85E9CA64F5A96BED45FDB742F0",
-      "byte_count": 334530,
-      "line_count": 1937
+      "sha256": "EB60C1550050B4B0F1244224FCD7EA128CBE1AECBC80765C09904D1EB7E3E621",
+      "byte_count": 335105,
+      "line_count": 1944
     },
     {
       "path": "docs/publication-boundary.md",

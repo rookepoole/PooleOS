@@ -19,6 +19,13 @@ move: a verified enrollment signature and separately controlled recovery signer
 remain pending. The historical response and Cycle 149 kernel evidence remain
 unchanged; this registration update advances no kernel phase or production gate.
 
+Post-merge qualification: Rooke Poole merged PR #68 as `4ade40f`.
+That exact source passed all 707 Doctor checks, the 105-check consistency gate,
+and the publication scan; the full PooleGlyph stack passed separately in a
+disposable source copy. Independent recovery is not provisioned. No alternate
+recovery profile is accepted, and no fallback key may be inferred from primary
+registration. The governance flag and all production boundaries remain open.
+
 ## 1. Architecture Decision
 
 Cycle 149 closes only the bounded scope of
@@ -242,7 +249,7 @@ Cycle 141 upgrades selector `14` to PKSMP5 and closes only `FLAG-N8-SMP-MULTI-AP
 | Test suite | Cycle 149: 902 Python tests collected; 206/206 Rust kernel host tests add typed atomic/order/refcount coverage, exact host contention/litmus receipts, linked-instruction review, BSP process-to-interrupt publication/RMW ordering, rollback, cleanup, and hostile controls while retaining PKSCHED6 through PKSCHED1/PKSMP5/PKSMP2/PKIRQ1/PMM/PKVM3 coverage | Partial N36 | Predominantly host/reference, bounded-model, emulator, and artifact tests; no authenticated authority, target-firmware, or physical-hardware result exists |
 | Release gate | Cycle 149: the roadmap inventories 102 canonical evidence artifacts; the exact gate invocation evaluates 105 consistency checks over 62 explicit/default artifact paths while retaining 20 native gaps | Partial N37 | `production_ready=false`; not a release acceptance gate |
 | Source control | Public `rookepoole/PooleOS`, protected `main`, topic-branch workflow, private vulnerability reporting | Partial N1/N37 | Initial commit unsigned; signed tags, immutable release refs, retained CI, and full review policy remain open |
-| ADR ratification | Frozen 16-source owner packet, completed public-safe response receipt, 2/2 ADR dispositions, 38/38 definition dispositions, canonical OpenSSH `SSHSIG` contract, public trust/revocation files, signed-tag/remote verifier, and 38 combined packet/response/ceremony controls | Partial N0/N1/N37 | Packet stays historically unselected; all seven ADRs are owner-directed but unsigned; selected hardware key unavailable; zero trusted keys. Cycle 118 authorizes acquisition, key use, publication, signing, releases, and promotion, but no such operation has occurred and every custody/qualification/release gate remains open |
+| ADR ratification | Frozen 16-source owner packet, completed public-safe response receipt, 2/2 ADR dispositions, 38/38 definition dispositions, canonical OpenSSH `SSHSIG` contract, one owner-confirmed registered hardware-backed public signer, signed-tag/remote verifier, and 38 combined packet/response/ceremony controls | Partial N0/N1/N37 | Packet stays historically unselected; all seven ADRs are owner-directed but unsigned. Enrollment signature verification and independent recovery custody remain pending; no alternate recovery profile is accepted, and no architecture or production gate is complete |
 | Native toolchain | Rust 1.97.0/Cargo 1.97.0/LLD 22.1.6; dedicated empty PE32+/ELF64 fixtures and the PooleBoot product each reproduce exactly on one host | Partial N3 | Second host, source provenance, and remaining tool families are open |
 | Tier 1 hardware | Exact target matches 24/24 required identity checks; 16 allowlisted user-mode CPUID records are captured and decoded; 14/14 negative controls pass with zero privacy violations | Partial N2 | Seven required channels remain non-complete, including partial CPU/MSR and SPD/topology; 15 standards hashes, ten lab prerequisites, and native comparison remain open |
 | Native bootloader | Reproducible unsigned Poole-authored PE32+ UEFI application with live PBC1/PSM1/PKELF1/PBART1/PBTP1/PBTS1 intake, retained PKMAP2 kernel/nine-file/root/stack/handoff ranges, final PBLIVE4 with a firmware RSDP record, bounded PBEXIT1, successful `ExitBootServices`, a default firmware-free stop, and an opt-in QEMU-only one-way transfer | Partial N5.1-N5.8 | No signature-authenticated manifest/artifacts, trusted rollback state, payload authority, initial-system execution, production transfer, final framebuffer remap, target firmware, or N5 exit |
@@ -404,7 +411,7 @@ Cycle 81-91 evidence:
 Open N0 work:
 
 - No ADR has an owner-controlled cryptographic signature. ADR-0003 and ADR-0004 now carry owner-directed acceptance, while trademark review and full toolchain qualification also remain open.
-- Rooke Poole selected `hardware_fido2_ed25519_sk` but reports no FIDO2 hardware key is available. Obtaining and confirming possession of compatible hardware remains the next external step.
+- The `hardware_fido2_ed25519_sk` primary key is enrolled and registered as GitHub signing key `1158225`. Enrollment signature verification and independent recovery custody remain pending. No alternate recovery profile is accepted or provisioned; a change to that policy requires separate owner review and qualification.
 - Cycle 118 explicitly authorizes compatible-key acquisition, key generation/use, public-key publication, signing, secrets use, privileged probes, driver loading, firmware changes, physical-media writes, tag/release publication, and production promotion. This current authority does not alter the historical response receipt, prove safe execution, or waive owner presence, custody, backup, recovery, safe-target, qualification, and exact-release gates. Codex generated or used no key and performed no newly authorized cryptographic, privileged, mutating, publication, release, or promotion action in Cycle 118.
 - All 38 target definitions are accepted, but every target remains `not_measured`; implementation-bound baselines and passing evidence remain open across N4-N39.
 - Cycle 93 preserves the original packet unchanged, records only the explicit source/objective/custody dispositions, and grants no key, signing, merge, tag, publication, measurement, or production authority.
@@ -436,7 +443,7 @@ Cycle 81-83 evidence:
 - `tools/check_publication_boundary.py` scans exact indexed bytes for prohibited paths, unapproved run artifacts, release media, credential containers, secret signatures, and workstation-specific paths.
 - `security/owner-adr-signers.allowed` and `security/revoked-adr-signers` are public-only trust inputs and intentionally contain no key. Private signing material remains prohibited by path, suffix, and content scans.
 
-Open N1 work: owner custody choice, owner-controlled commit/tag signing, a signed baseline tag, immutable release references, retained CI evidence, reviewer quorum, contributor policy, and legal/patent/export/trademark/component-license review remain open. Required signed commits must not be enabled until the existing unsigned setup history and merge strategy are resolved. Administrator enforcement and approval count must be revisited when another maintainer is configured.
+Open N1 work: verified independent recovery custody, owner-controlled commit/tag signing, a signed baseline tag, immutable release references, retained CI evidence, reviewer quorum, contributor policy, and legal/patent/export/trademark/component-license review remain open. Required signed commits must not be enabled until the existing unsigned setup history and merge strategy are resolved. Administrator enforcement and approval count must be revisited when another maintainer is configured.
 
 Exit gate: PooleOS is source-controlled; every required decision has an owner and due gate; deletions and deferrals are reviewable; no component lacks licensing/provenance classification.
 

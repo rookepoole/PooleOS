@@ -92,6 +92,12 @@ Current engineering baseline remains Cycle 149: 40 phases remain non-complete. `
 
 ## Validation
 
+Rooke Poole merged the governance registration in PR #68 (`4ade40f`). That
+source passed 707 Doctor checks, the 105-check consistency gate, and the public
+boundary scan; the full PooleGlyph stack passed separately. Independent
+recovery remains unprovisioned, with no alternate recovery profile accepted.
+This is pre-production qualification, not a signature or release.
+
 ```powershell
 python .\tools\generate_native_checklist_coverage.py
 python .\tools\generate_native_v1_objectives_readiness.py

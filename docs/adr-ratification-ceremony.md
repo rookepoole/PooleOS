@@ -33,6 +33,12 @@ The byte-frozen historical response records the following unsigned owner directi
 
 `N0-HW-KEY-ACQUIRE-001` is satisfied for the primary signer. The immediate move is `N0-GOVERNANCE-CUSTODY-001`: verify a namespaced enrollment signature and establish the separately controlled recovery signer required by the custody policy. Then prepare and review the exact architecture manifest, execute its already authorized owner-present signature, and verify the signed tag and remote receipt. Registration alone does not complete N0.
 
+Independent recovery is not currently provisioned. No alternate recovery-key
+profile is accepted or generated. Any proposed software recovery path needs
+separate owner risk review, independent storage and restore evidence, and a
+reviewed custody-policy change before execution; it must not silently replace
+the existing hardware-backed primary or acquire production signing authority.
+
 The successful Windows enrollment used Git for Windows OpenSSH 10.5p1 with its `usr/bin` directory prepended only to the enrollment process's PATH, an existing protected user SSH directory, and `-O verify-required`. The key is non-resident: preserve its local hardware handle under controlled custody as well as the physical key. The built-in Windows OpenSSH 9.5 attempt failed before saving; its cause was not conclusively established. Later Git OpenSSH attempts exposed a missing DLL search path and missing destination directory, both corrected before successful enrollment.
 
 Any future amendment or rejection stops this ceremony. The affected source must be revised or superseded, the baseline regenerated, and the complete set reviewed again.

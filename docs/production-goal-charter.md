@@ -20,6 +20,14 @@ the separately controlled recovery signer. `FLAG-N0-GOVERNANCE-KEY-001` remains
 open for those requirements. Architecture signing and production gates remain
 open, and `N12-CONCURRENCY-RECLAMATION-001` remains the next kernel move.
 
+Rooke Poole merged registration PR #68 as `4ade40f`. Post-merge qualification
+of that source passed 707 Doctor checks, all 105 consistency-gate checks, and
+the publication scan; the full PooleGlyph stack passed in a disposable copy.
+Independent recovery remains unprovisioned. No alternate recovery-key profile
+is accepted, no recovery key was generated, and no custody or production
+requirement was weakened. Owner-independent native development may continue
+while this external dependency remains open.
+
 Cycle 149 reconciliation (superseding current Cycle 148 implementation and
 next-move values): governance and external-key state are unchanged. The
 owner-independent `N12-CONCURRENCY-LOCKS-001` move adds selector 22 PKLOCK1

@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from runtime.schema_validation import validate_json  # noqa: E402
+from tools import pooleos_release_gate  # noqa: E402
 
 
 class PdcProductionRoadmapTests(unittest.TestCase):
@@ -38,6 +39,23 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertFalse(architecture["production_kernel_modules_v1"])
         for forbidden in ("Linux", "Debian", "Buildroot", "GRUB", "Limine", "systemd"):
             self.assertIn(forbidden, architecture["forbidden_production_substitutes"])
+
+    def test_current_governance_gaps_preserve_registration_and_pending_recovery(self) -> None:
+        readiness = json.loads((ROOT / "runs/adr_ratification_readiness.json").read_text(encoding="utf-8"))
+        self.assertEqual(readiness["trust_bootstrap"]["trusted_signer_count"], 1)
+        self.assertEqual(readiness["trust_bootstrap"]["public_key_publication"], "registered")
+        for gap in (self.roadmap["gap_summary"]["native_program_gaps"][0], pooleos_release_gate.DEFAULT_GAPS[0]):
+            with self.subTest(gap=gap):
+                self.assertIn("key is enrolled and registered", gap)
+                self.assertIn("Enrollment signature verification, independent recovery custody", gap)
+                self.assertIn("No alternate recovery-key profile is accepted or provisioned", gap)
+                self.assertNotIn("key is unavailable", gap)
+        n0 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N0")
+        evidence = next(item for item in n0["current_evidence"] if item.startswith("runs/adr_ratification_readiness.json:"))
+        self.assertIn("one registered hardware-backed public signer", evidence)
+        self.assertNotIn("zero trusted signers", evidence)
+        self.assertFalse(readiness["summary"]["ready_for_signature"])
+        self.assertFalse(self.roadmap["production_ready"])
 
     def test_phase_summary_subphases_and_dependencies_are_consistent(self) -> None:
         phases = self.roadmap["phases"]
