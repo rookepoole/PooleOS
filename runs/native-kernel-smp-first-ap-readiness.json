@@ -128,9 +128,9 @@
             "sha256": "2C08B9C8C092800726D92862496ECA3FFE602AEFC23439957995066F479CE90D"
           },
           {
-            "byte_count": 65563,
+            "byte_count": 65667,
             "path": "native/kernel/src/lib.rs",
-            "sha256": "4700E45E5F9B848F2098EE77B4B49735AEF7A845C1F1E762CA83D9F2EF21DDD3"
+            "sha256": "50225A83A7CB7C2E66AABD5D479B2F48D57DDAE365047D2BF3581F8741AB5CA0"
           },
           {
             "byte_count": 528399,
@@ -953,10 +953,10 @@
         "production": 0
       },
       "stop": {
-        "checksum": 18369388101642747161,
+        "checksum": 7714262405564708319,
         "parked": true,
-        "tsc_online": 1971770917,
-        "tsc_stop": 1971971025
+        "tsc_online": 1971771402,
+        "tsc_stop": 1971971500
       },
       "topology": {
         "bsp_apic_id": 0,
@@ -1218,7 +1218,7 @@
           "state_writes": 0
         },
         "local_paths_recorded": false,
-        "marker_sha256": "F0F0137401D97C695BD781D0A14719AE928ED35CAEF081993F0DA16E09AD1965",
+        "marker_sha256": "15EF9FFDD19556FEBD67852F6FC00BD8C204470230210972FE8D75207AC9B834",
         "marker_summary": {
           "online": {
             "cr0": 3758161937,
@@ -1251,10 +1251,10 @@
             "production": 0
           },
           "stop": {
-            "checksum": 18369388101642747161,
+            "checksum": 7714262405564708319,
             "parked": true,
-            "tsc_online": 1971770917,
-            "tsc_stop": 1971971025
+            "tsc_online": 1971771402,
+            "tsc_stop": 1971971500
           },
           "topology": {
             "bsp_apic_id": 0,
@@ -1527,7 +1527,7 @@
           "POOLEOS:KERNEL:SMP-TABLES PASS contract=PKSMP1 pml4=0x0000000000002000 pdpt=0x0000000000003000 pd=0x0000000000004000 pt=0x0000000000005000 identity_pages=6 trampoline=rx stack=rw_nx per_cpu=rw_nx guards=absent high_alias=revocable",
           "POOLEOS:KERNEL:SMP-START PASS contract=PKSMP1 init_asserts=1 init_deasserts=1 sipis=2 delivery_timeouts=0 sequence=init_sipi_sipi",
           "POOLEOS:KERNEL:SMP-ONLINE PASS contract=PKSMP1 state=2 observed_apic_id=1 leaf1_ecx=0x0000000080002001 leaf1_edx=0x00000000178BFBFD cr0=0x00000000E0010011 cr3=0x0000000000002000 cr4=0x0000000000000020 efer=0x0000000000000D00 mode=x86_64 tsc_order=validated",
-          "POOLEOS:KERNEL:SMP-STOP PASS contract=PKSMP1 command=1 state=3 tsc_online=0x000000007586D625 tsc_stop=0x000000007589E3D1 checksum=0xFEED2D273BB3FD19 final_init=1 parked=1 mailbox_validated=1",
+          "POOLEOS:KERNEL:SMP-STOP PASS contract=PKSMP1 command=1 state=3 tsc_online=0x000000007586D80A tsc_stop=0x000000007589E5AC checksum=0x6B0E90C933D5B5DF final_init=1 parked=1 mailbox_validated=1",
           "POOLEOS:KERNEL:SMP-RELEASE PASS contract=PKSMP1 release_sequence=3 zeroed_bytes=57344 verified_bytes=57344 resources_released=14 mailbox_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged",
           "POOLEOS:KERNEL:SMP-RESULT PASS contract=PKSMP1 profile=qemu64_tier0_two_vcpu bsp=1 ap_started=1 ap_online=1 ap_quiesced=1 ap_parked=1 per_cpu=1 stack_pages=4 guards=4 rollback=host_verified ipi_service=0 shootdown=0 scheduler=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],
@@ -2487,8 +2487,8 @@
           "width": 1280
         },
         "serial_debugcon_exact_match": true,
-        "stderr_byte_count": 0,
-        "stderr_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "stderr_byte_count": 352,
+        "stderr_sha256": "F309CA71408C82207697AE48F7B8398D097A66577F77F66A15FE64D7C5D50864",
         "timestamped_qmp_events_excluded_from_equality": true,
         "transcript_binding": {
           "development_revalidation_profile_accepted": true,
@@ -2517,7 +2517,7 @@
           "state_writes": 0
         },
         "local_paths_recorded": false,
-        "marker_sha256": "7EA698D1FF4F03A809030E42AB1AD8CC2F6028082B13D5EF8D51CD286890313E",
+        "marker_sha256": "1B79E78AFE9CC9147E67B84C8CD9C3C8BDBF32C9F71ABF1289C3A3F787829CBD",
         "marker_summary": {
           "online": {
             "cr0": 3758161937,
@@ -2550,10 +2550,10 @@
             "production": 0
           },
           "stop": {
-            "checksum": 13507915386839165092,
+            "checksum": 3728244076078345106,
             "parked": true,
-            "tsc_online": 1971770359,
-            "tsc_stop": 1971970467
+            "tsc_online": 1971769241,
+            "tsc_stop": 1971969339
           },
           "topology": {
             "bsp_apic_id": 0,
@@ -2826,7 +2826,7 @@
           "POOLEOS:KERNEL:SMP-TABLES PASS contract=PKSMP1 pml4=0x0000000000002000 pdpt=0x0000000000003000 pd=0x0000000000004000 pt=0x0000000000005000 identity_pages=6 trampoline=rx stack=rw_nx per_cpu=rw_nx guards=absent high_alias=revocable",
           "POOLEOS:KERNEL:SMP-START PASS contract=PKSMP1 init_asserts=1 init_deasserts=1 sipis=2 delivery_timeouts=0 sequence=init_sipi_sipi",
           "POOLEOS:KERNEL:SMP-ONLINE PASS contract=PKSMP1 state=2 observed_apic_id=1 leaf1_ecx=0x0000000080002001 leaf1_edx=0x00000000178BFBFD cr0=0x00000000E0010011 cr3=0x0000000000002000 cr4=0x0000000000000020 efer=0x0000000000000D00 mode=x86_64 tsc_order=validated",
-          "POOLEOS:KERNEL:SMP-STOP PASS contract=PKSMP1 command=1 state=3 tsc_online=0x000000007586D3F7 tsc_stop=0x000000007589E1A3 checksum=0xBB75C179F094E8A4 final_init=1 parked=1 mailbox_validated=1",
+          "POOLEOS:KERNEL:SMP-STOP PASS contract=PKSMP1 command=1 state=3 tsc_online=0x000000007586CF99 tsc_stop=0x000000007589DD3B checksum=0x33BD623BEE9AAB92 final_init=1 parked=1 mailbox_validated=1",
           "POOLEOS:KERNEL:SMP-RELEASE PASS contract=PKSMP1 release_sequence=3 zeroed_bytes=57344 verified_bytes=57344 resources_released=14 mailbox_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged",
           "POOLEOS:KERNEL:SMP-RESULT PASS contract=PKSMP1 profile=qemu64_tier0_two_vcpu bsp=1 ap_started=1 ap_online=1 ap_quiesced=1 ap_parked=1 per_cpu=1 stack_pages=4 guards=4 rollback=host_verified ipi_service=0 shootdown=0 scheduler=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],
@@ -3786,8 +3786,8 @@
           "width": 1280
         },
         "serial_debugcon_exact_match": true,
-        "stderr_byte_count": 0,
-        "stderr_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "stderr_byte_count": 352,
+        "stderr_sha256": "F309CA71408C82207697AE48F7B8398D097A66577F77F66A15FE64D7C5D50864",
         "timestamped_qmp_events_excluded_from_equality": true,
         "transcript_binding": {
           "development_revalidation_profile_accepted": true,
@@ -3839,9 +3839,9 @@
         "sha256": "2C08B9C8C092800726D92862496ECA3FFE602AEFC23439957995066F479CE90D"
       },
       {
-        "byte_count": 65563,
+        "byte_count": 65667,
         "path": "native/kernel/src/lib.rs",
-        "sha256": "4700E45E5F9B848F2098EE77B4B49735AEF7A845C1F1E762CA83D9F2EF21DDD3"
+        "sha256": "50225A83A7CB7C2E66AABD5D479B2F48D57DDAE365047D2BF3581F8741AB5CA0"
       },
       {
         "byte_count": 528399,

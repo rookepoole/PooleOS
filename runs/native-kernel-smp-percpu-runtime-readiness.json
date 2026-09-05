@@ -128,9 +128,9 @@
             "sha256": "2C08B9C8C092800726D92862496ECA3FFE602AEFC23439957995066F479CE90D"
           },
           {
-            "byte_count": 65563,
+            "byte_count": 65667,
             "path": "native/kernel/src/lib.rs",
-            "sha256": "4700E45E5F9B848F2098EE77B4B49735AEF7A845C1F1E762CA83D9F2EF21DDD3"
+            "sha256": "50225A83A7CB7C2E66AABD5D479B2F48D57DDAE365047D2BF3581F8741AB5CA0"
           },
           {
             "byte_count": 528399,
@@ -971,11 +971,11 @@
         "rsp0": 45056
       },
       "stop": {
-        "baseline_checksum": 10551687086947095343,
+        "baseline_checksum": 2456582646702805339,
         "parked": true,
-        "runtime_checksum": 14888944797450122638,
-        "tsc_online": 7316776433,
-        "tsc_stop": 7318554161
+        "runtime_checksum": 3561855974429338953,
+        "tsc_online": 7434801244,
+        "tsc_stop": 7436254860
       },
       "topology": {
         "bsp_apic_id": 0,
@@ -1243,7 +1243,7 @@
           "state_writes": 0
         },
         "local_paths_recorded": false,
-        "marker_sha256": "13580C74242C8E93D1FED0447586847BF5963519D9763C4374A32030EB6DC473",
+        "marker_sha256": "F91283F6758734B5F21C1A2E4DE3718F9813AD99BBB26470BA2CB62E86F3FEBD",
         "marker_summary": {
           "descriptors": {
             "gates": 27,
@@ -1293,11 +1293,11 @@
             "rsp0": 45056
           },
           "stop": {
-            "baseline_checksum": 10551687086947095343,
+            "baseline_checksum": 2456582646702805339,
             "parked": true,
-            "runtime_checksum": 14888944797450122638,
-            "tsc_online": 7316776433,
-            "tsc_stop": 7318554161
+            "runtime_checksum": 3561855974429338953,
+            "tsc_online": 7434801244,
+            "tsc_stop": 7436254860
           },
           "topology": {
             "bsp_apic_id": 0,
@@ -1580,7 +1580,7 @@
           "POOLEOS:KERNEL:SMP-RUNTIME-XSTATE PASS contract=PKSMP2 base=0x000000000001E000 bytes=4096 supported_xcr0=0x0000000000000003 enabled_bytes=576 maximum_bytes=576 xcr0=0x0000000000000003 xstate_bv=0x0000000000000003 fcw=0x000000000000037F mxcsr=0x0000000000001F80 owner_initial=0x0000000050580001 owner_final=0x0000000000000000 saves=1 restores=1 image_verified=1 policy=eager",
           "POOLEOS:KERNEL:SMP-RUNTIME-VECTORS PASS contract=PKSMP2 exceptions=8 interrupts=19 timer=64 ipi_first=224 ipi_last=239 error=240 spurious=255 if=0 fault=0",
           "POOLEOS:KERNEL:SMP-RUNTIME-ONLINE PASS contract=PKSMP2 state=2 runtime_state=4 observed_apic_id=1 leaf1_ecx=0x000000008EB82203 leaf1_edx=0x00000000178BFBFD cr0=0x00000000E0010033 cr3=0x0000000000002000 cr4=0x0000000000040620 efer=0x0000000000000D00 rflags=0x0000000000000006 mode=x86_64 tsc_order=validated",
-          "POOLEOS:KERNEL:SMP-RUNTIME-STOP PASS contract=PKSMP2 command=1 state=3 runtime_state=5 tsc_online=0x00000001B41D25F1 tsc_stop=0x00000001B4384631 baseline_checksum=0x926F1F80168ED32F runtime_checksum=0xCEA02868846A358E final_init=1 parked=1 mailbox_validated=1 resources_validated=1",
+          "POOLEOS:KERNEL:SMP-RUNTIME-STOP PASS contract=PKSMP2 command=1 state=3 runtime_state=5 tsc_online=0x00000001BB26105C tsc_stop=0x00000001BB3C3E8C baseline_checksum=0x221788E6D21C115B runtime_checksum=0x316E412320F6AD49 final_init=1 parked=1 mailbox_validated=1 resources_validated=1",
           "POOLEOS:KERNEL:SMP-RUNTIME-RELEASE PASS contract=PKSMP2 release_sequence=3 zeroed_bytes=131072 verified_bytes=131072 resources_released=32 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged",
           "POOLEOS:KERNEL:SMP-RUNTIME-RESULT PASS contract=PKSMP2 profile=sandybridge_x87_sse_two_vcpu bsp=1 ap_started=1 ap_online=1 descriptors=1 stacks=3 xstate=1 vectors=27 ap_quiesced=1 ap_parked=1 resources_released=32 rollback=host_verified ipi_service=0 shootdown=0 scheduler=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],
@@ -2561,8 +2561,8 @@
           "width": 1280
         },
         "serial_debugcon_exact_match": true,
-        "stderr_byte_count": 368,
-        "stderr_sha256": "35EB92582B8E821A5270B703785465DE73A9FE72FFECB4EF88512E244E579EF7",
+        "stderr_byte_count": 720,
+        "stderr_sha256": "DE024FA83019BE869C974890914F88DD79774360835A8A09375977283B01CA4B",
         "timestamped_qmp_events_excluded_from_equality": true,
         "transcript_binding": {
           "development_revalidation_profile_accepted": true,
@@ -2591,7 +2591,7 @@
           "state_writes": 0
         },
         "local_paths_recorded": false,
-        "marker_sha256": "19ED6859544A3F3C32BABE0638F0D93A101B1B197CC1D0315EE9574198BE332D",
+        "marker_sha256": "1137C1B0E394D532058F5B9202DF9E149550D7CD432FB950948FE6EF0A793E86",
         "marker_summary": {
           "descriptors": {
             "gates": 27,
@@ -2641,11 +2641,11 @@
             "rsp0": 45056
           },
           "stop": {
-            "baseline_checksum": 14645802497779957533,
+            "baseline_checksum": 4280270063341269339,
             "parked": true,
-            "runtime_checksum": 17981933007306031531,
-            "tsc_online": 7283203120,
-            "tsc_stop": 7284572371
+            "runtime_checksum": 11413030064601315657,
+            "tsc_online": 7352475292,
+            "tsc_stop": 7353941316
           },
           "topology": {
             "bsp_apic_id": 0,
@@ -2928,7 +2928,7 @@
           "POOLEOS:KERNEL:SMP-RUNTIME-XSTATE PASS contract=PKSMP2 base=0x000000000001E000 bytes=4096 supported_xcr0=0x0000000000000003 enabled_bytes=576 maximum_bytes=576 xcr0=0x0000000000000003 xstate_bv=0x0000000000000003 fcw=0x000000000000037F mxcsr=0x0000000000001F80 owner_initial=0x0000000050580001 owner_final=0x0000000000000000 saves=1 restores=1 image_verified=1 policy=eager",
           "POOLEOS:KERNEL:SMP-RUNTIME-VECTORS PASS contract=PKSMP2 exceptions=8 interrupts=19 timer=64 ipi_first=224 ipi_last=239 error=240 spurious=255 if=0 fault=0",
           "POOLEOS:KERNEL:SMP-RUNTIME-ONLINE PASS contract=PKSMP2 state=2 runtime_state=4 observed_apic_id=1 leaf1_ecx=0x000000008EB82203 leaf1_edx=0x00000000178BFBFD cr0=0x00000000E0010033 cr3=0x0000000000002000 cr4=0x0000000000040620 efer=0x0000000000000D00 rflags=0x0000000000000006 mode=x86_64 tsc_order=validated",
-          "POOLEOS:KERNEL:SMP-RUNTIME-STOP PASS contract=PKSMP2 command=1 state=3 runtime_state=5 tsc_online=0x00000001B21CDC30 tsc_stop=0x00000001B231C0D3 baseline_checksum=0xCB4057C662B3FF1D runtime_checksum=0xF98CA8CC3B5901AB final_init=1 parked=1 mailbox_validated=1 resources_validated=1",
+          "POOLEOS:KERNEL:SMP-RUNTIME-STOP PASS contract=PKSMP2 command=1 state=3 runtime_state=5 tsc_online=0x00000001B63DDE9C tsc_stop=0x00000001B6543D44 baseline_checksum=0x3B6692F1DC31F15B runtime_checksum=0x9E633A5FFB6A3949 final_init=1 parked=1 mailbox_validated=1 resources_validated=1",
           "POOLEOS:KERNEL:SMP-RUNTIME-RELEASE PASS contract=PKSMP2 release_sequence=3 zeroed_bytes=131072 verified_bytes=131072 resources_released=32 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged",
           "POOLEOS:KERNEL:SMP-RUNTIME-RESULT PASS contract=PKSMP2 profile=sandybridge_x87_sse_two_vcpu bsp=1 ap_started=1 ap_online=1 descriptors=1 stacks=3 xstate=1 vectors=27 ap_quiesced=1 ap_parked=1 resources_released=32 rollback=host_verified ipi_service=0 shootdown=0 scheduler=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],
@@ -3909,8 +3909,8 @@
           "width": 1280
         },
         "serial_debugcon_exact_match": true,
-        "stderr_byte_count": 368,
-        "stderr_sha256": "35EB92582B8E821A5270B703785465DE73A9FE72FFECB4EF88512E244E579EF7",
+        "stderr_byte_count": 720,
+        "stderr_sha256": "DE024FA83019BE869C974890914F88DD79774360835A8A09375977283B01CA4B",
         "timestamped_qmp_events_excluded_from_equality": true,
         "transcript_binding": {
           "development_revalidation_profile_accepted": true,
@@ -3962,9 +3962,9 @@
         "sha256": "2C08B9C8C092800726D92862496ECA3FFE602AEFC23439957995066F479CE90D"
       },
       {
-        "byte_count": 65563,
+        "byte_count": 65667,
         "path": "native/kernel/src/lib.rs",
-        "sha256": "4700E45E5F9B848F2098EE77B4B49735AEF7A845C1F1E762CA83D9F2EF21DDD3"
+        "sha256": "50225A83A7CB7C2E66AABD5D479B2F48D57DDAE365047D2BF3581F8741AB5CA0"
       },
       {
         "byte_count": 528399,

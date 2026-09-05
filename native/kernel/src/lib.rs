@@ -1455,6 +1455,9 @@ fn glyph_rows(byte: u8) -> [u8; 7] {
     }
 }
 
+// Not yet wired into a live selector; preserve existing diagnostic source lines.
+pub mod reclamation;
+
 #[cfg(test)]
 mod tests {
     extern crate std;

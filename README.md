@@ -4,6 +4,15 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
+Cycle 150 adds the [PKRECLAIM1 object-lifetime core](docs/native-kernel-reclamation-core.md)
+to PooleKernel: generation-bound handles, reader pins, deferred reclamation,
+exact-once payload transfer and shutdown retention. Nineteen tests pass in
+each of two host profiles plus 206 kernel regressions and freestanding checks.
+The linked boot kernel remains byte-identical to Cycle 149. Scheduler and
+cross-CPU integration are next; N12.3 and production remain open.
+All 24 dependent native qualification profiles were rerun against the updated
+source. Their emulator evidence does not establish live use of the new core.
+
 ## Native Architecture Contract
 
 Linux, Debian, Buildroot, GRUB, Limine, and systemd are not production foundations or release-media dependencies. QEMU, OVMF, EDK II, Windows, WSL, Linux, and Buildroot may be used only as development tools, references, compatibility environments, or historical evidence.

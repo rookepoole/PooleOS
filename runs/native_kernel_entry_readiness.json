@@ -48,9 +48,9 @@
         "sha256": "2C08B9C8C092800726D92862496ECA3FFE602AEFC23439957995066F479CE90D"
       },
       {
-        "byte_count": 65563,
+        "byte_count": 65667,
         "path": "native/kernel/src/lib.rs",
-        "sha256": "4700E45E5F9B848F2098EE77B4B49735AEF7A845C1F1E762CA83D9F2EF21DDD3"
+        "sha256": "50225A83A7CB7C2E66AABD5D479B2F48D57DDAE365047D2BF3581F8741AB5CA0"
       },
       {
         "byte_count": 528399,

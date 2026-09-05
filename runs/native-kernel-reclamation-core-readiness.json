@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "contract_id": "PKRECLAIM1-CORE",
+  "selected_move_id": "N12-CONCURRENCY-RECLAMATION-001",
+  "phase": "N12.3",
+  "status": "host_verified_live_integration_pending",
+  "production_ready": false,
+  "live_integration_verified": false,
+  "cross_cpu_quiescence_verified": false,
+  "n12_3_complete": false,
+  "focused_test_count": 19,
+  "kernel_regression_count": 206,
+  "compile_fail_borrow_tests": 1,
+  "linked_kernel_sha256": "9029AEE51A4D557EF5B29945985E4A1F07C67DDE9C8C367C80BD1B9EDD9D409E",
+  "linked_kernel_byte_count": 513680,
+  "sources": {
+    "native/kernel/src/reclamation.rs": "2570E6651ACE5B1A29E6198474CD1A3B57A6379C0A843532C10EFA4B1874DC1C",
+    "native/kernel/src/lib.rs": "50225A83A7CB7C2E66AABD5D479B2F48D57DDAE365047D2BF3581F8741AB5CA0",
+    "native/kernel/src/atomics.rs": "1B4228C921F0746C101B307A20E34DCF7D7D859895A440D027005FADE48D0B90",
+    "native/kernel/src/locks.rs": "BA5DA63D18306C3787E6D6646F1E327FC952F8AD43634604449AEE4699CEB707",
+    "native/kernel/tests/reclamation_core.rs": "43D28759ABC933FE5A4F85D22AFE8A588EEE559FDC20C6188C3347B8D2F74FCA",
+    "native/kernel/Cargo.toml": "F9F3AB6D84008B0354A5B82B0F616C5652C076C15F3313F14B862ED0DB1C1C43",
+    "native/Cargo.lock": "29CE9938C5C60DEA5AEA244A6961BB1924D88AEC601D1E02EAAA510B0B36E390",
+    "specs/native-toolchain-lock.json": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E",
+    "tools/qualify_native_reclamation_core.py": "626D4FDD4E10DB176A6868FE4013447909B47AAD37C64601A50B8D54338A68CC"
+  },
+  "stages": [
+    {
+      "name": "format",
+      "status": "pass",
+      "output_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "name": "host-build-debug",
+      "status": "pass",
+      "output_sha256": "CDE9F16E619928E90DA1EC070E61CE58179E83FA9B64E16DE9FCB8D239AFB388"
+    },
+    {
+      "name": "test-build-debug",
+      "status": "pass",
+      "output_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "name": "tests-debug",
+      "status": "pass",
+      "output_sha256": "5CE78BE1CEEC12E3CAE4891CC41EB69E6F30D51836A61FA7C22FC959364BBC2C"
+    },
+    {
+      "name": "host-build-release",
+      "status": "pass",
+      "output_sha256": "1C90D2D66C695498F1A87D80785E0EFD05ED1788BF33998CEAF959D0039B20F1"
+    },
+    {
+      "name": "test-build-release",
+      "status": "pass",
+      "output_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "name": "tests-release",
+      "status": "pass",
+      "output_sha256": "5CE78BE1CEEC12E3CAE4891CC41EB69E6F30D51836A61FA7C22FC959364BBC2C"
+    },
+    {
+      "name": "borrow-doctests",
+      "status": "pass",
+      "output_sha256": "5D8EBCB230062C8D4B9D4EED53989610D8ECFD61A8886758AE88DB084C1E4E60"
+    },
+    {
+      "name": "kernel-regressions",
+      "status": "pass",
+      "output_sha256": "A5EDDB951564BD275471817FF1B81AA6E8A20AF509E714C8F34187E9579D75A7"
+    },
+    {
+      "name": "host-clippy",
+      "status": "pass",
+      "output_sha256": "B42B3F375A8E0403A0B3192A8F30BAB1FFCB00635676779862C7E7911AEB12FB"
+    },
+    {
+      "name": "freestanding-clippy",
+      "status": "pass",
+      "output_sha256": "3D7627439392A0B2FDAD63B35F98BAB2231AF08C8A583605A000B1AB98F05965"
+    },
+    {
+      "name": "linked-kernel-build",
+      "status": "pass",
+      "output_sha256": "019DCF6CF581D6FDAC47C19478B97515E6C3C703EDE8821B491F9DEE15161877"
+    }
+  ]
+}

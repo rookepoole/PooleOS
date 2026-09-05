@@ -200,9 +200,9 @@
             "sha256": "2C08B9C8C092800726D92862496ECA3FFE602AEFC23439957995066F479CE90D"
           },
           {
-            "byte_count": 65563,
+            "byte_count": 65667,
             "path": "native/kernel/src/lib.rs",
-            "sha256": "4700E45E5F9B848F2098EE77B4B49735AEF7A845C1F1E762CA83D9F2EF21DDD3"
+            "sha256": "50225A83A7CB7C2E66AABD5D479B2F48D57DDAE365047D2BF3581F8741AB5CA0"
           },
           {
             "byte_count": 528399,
@@ -811,7 +811,7 @@
       "canonical_sha256": "9029AEE51A4D557EF5B29945985E4A1F07C67DDE9C8C367C80BD1B9EDD9D409E",
       "disassembler": "LLVM version 22.1.6-rust-1.97.0-stable",
       "disassembly_byte_count": 4632331,
-      "disassembly_sha256": "9790D56FB0E370AC6D6E2C5C0D7D87DF5B5DC8414345FA0ADF6E0209792CED94",
+      "disassembly_sha256": "8841AC0FA7213E4D31FBD105B612256D2A5C0F541529FDE2E97F2719DEB958A5",
       "extended_vector_instruction_count": 0,
       "handler_recovery_instruction_counts": {
         "fninit": 1,
@@ -2551,8 +2551,8 @@
           "width": 1280
         },
         "serial_debugcon_exact_match": true,
-        "stderr_byte_count": 144,
-        "stderr_sha256": "864A6BEFB43B6A6FF71D9730DFEA39DE93E0F4AFC484F0262952C0A4A91B2AC0",
+        "stderr_byte_count": 496,
+        "stderr_sha256": "140F4587D4943295AEAB6FCCC84D22E8F85DE28859BDC2914E1BCF102F35CC0D",
         "timestamped_qmp_events_excluded_from_equality": true,
         "transcript_binding": {
           "development_revalidation_profile_accepted": true,
@@ -3962,8 +3962,8 @@
           "width": 1280
         },
         "serial_debugcon_exact_match": true,
-        "stderr_byte_count": 144,
-        "stderr_sha256": "864A6BEFB43B6A6FF71D9730DFEA39DE93E0F4AFC484F0262952C0A4A91B2AC0",
+        "stderr_byte_count": 496,
+        "stderr_sha256": "140F4587D4943295AEAB6FCCC84D22E8F85DE28859BDC2914E1BCF102F35CC0D",
         "timestamped_qmp_events_excluded_from_equality": true,
         "transcript_binding": {
           "development_revalidation_profile_accepted": true,
@@ -3977,7 +3977,7 @@
       "cpu_model": "EPYC-Rome-v4,-avx,-avx2,-fma,-f16c,-pku",
       "cr4_osxmmexcpt_set": true,
       "debugcon_byte_count": 145356,
-      "debugcon_sha256": "F902D08D12EFA3732913C599B69F229FA22CD6DB892C2F33252950B3291860E1",
+      "debugcon_sha256": "41F419F041AA51A252D4161A28B0F8A587B96266CB38518BBCEB3E605029F16A",
       "mxcsr_after_undelivered_divss": 7937,
       "mxcsr_invalid_mask_clear": true,
       "mxcsr_invalid_status_set": true,
@@ -4090,9 +4090,9 @@
         "sha256": "F39BB4327F83BC44AE4E38DDFA0F46793209F30D7CA3B7A0A44342FC1BBDC058"
       },
       {
-        "byte_count": 65563,
+        "byte_count": 65667,
         "path": "native/kernel/src/lib.rs",
-        "sha256": "4700E45E5F9B848F2098EE77B4B49735AEF7A845C1F1E762CA83D9F2EF21DDD3"
+        "sha256": "50225A83A7CB7C2E66AABD5D479B2F48D57DDAE365047D2BF3581F8741AB5CA0"
       },
       {
         "byte_count": 528399,

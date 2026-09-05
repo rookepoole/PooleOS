@@ -128,9 +128,9 @@
             "sha256": "2C08B9C8C092800726D92862496ECA3FFE602AEFC23439957995066F479CE90D"
           },
           {
-            "byte_count": 65563,
+            "byte_count": 65667,
             "path": "native/kernel/src/lib.rs",
-            "sha256": "4700E45E5F9B848F2098EE77B4B49735AEF7A845C1F1E762CA83D9F2EF21DDD3"
+            "sha256": "50225A83A7CB7C2E66AABD5D479B2F48D57DDAE365047D2BF3581F8741AB5CA0"
           },
           {
             "byte_count": 528399,
@@ -2286,8 +2286,8 @@
               "width": 1280
             },
             "serial_debugcon_exact_match": true,
-            "stderr_byte_count": 0,
-            "stderr_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+            "stderr_byte_count": 352,
+            "stderr_sha256": "F309CA71408C82207697AE48F7B8398D097A66577F77F66A15FE64D7C5D50864",
             "timestamped_qmp_events_excluded_from_equality": true,
             "transcript_binding": {
               "development_revalidation_profile_accepted": true,
@@ -3524,8 +3524,8 @@
               "width": 1280
             },
             "serial_debugcon_exact_match": true,
-            "stderr_byte_count": 0,
-            "stderr_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+            "stderr_byte_count": 352,
+            "stderr_sha256": "F309CA71408C82207697AE48F7B8398D097A66577F77F66A15FE64D7C5D50864",
             "timestamped_qmp_events_excluded_from_equality": true,
             "transcript_binding": {
               "development_revalidation_profile_accepted": true,
@@ -4755,8 +4755,8 @@
               "width": 1280
             },
             "serial_debugcon_exact_match": true,
-            "stderr_byte_count": 0,
-            "stderr_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+            "stderr_byte_count": 352,
+            "stderr_sha256": "F309CA71408C82207697AE48F7B8398D097A66577F77F66A15FE64D7C5D50864",
             "timestamped_qmp_events_excluded_from_equality": true,
             "transcript_binding": {
               "development_revalidation_profile_accepted": true,
@@ -5974,8 +5974,8 @@
               "width": 1280
             },
             "serial_debugcon_exact_match": true,
-            "stderr_byte_count": 0,
-            "stderr_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+            "stderr_byte_count": 352,
+            "stderr_sha256": "F309CA71408C82207697AE48F7B8398D097A66577F77F66A15FE64D7C5D50864",
             "timestamped_qmp_events_excluded_from_equality": true,
             "transcript_binding": {
               "development_revalidation_profile_accepted": true,
@@ -7206,8 +7206,8 @@
               "width": 1280
             },
             "serial_debugcon_exact_match": true,
-            "stderr_byte_count": 0,
-            "stderr_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+            "stderr_byte_count": 352,
+            "stderr_sha256": "F309CA71408C82207697AE48F7B8398D097A66577F77F66A15FE64D7C5D50864",
             "timestamped_qmp_events_excluded_from_equality": true,
             "transcript_binding": {
               "development_revalidation_profile_accepted": true,
@@ -8426,8 +8426,8 @@
               "width": 1280
             },
             "serial_debugcon_exact_match": true,
-            "stderr_byte_count": 0,
-            "stderr_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+            "stderr_byte_count": 352,
+            "stderr_sha256": "F309CA71408C82207697AE48F7B8398D097A66577F77F66A15FE64D7C5D50864",
             "timestamped_qmp_events_excluded_from_equality": true,
             "transcript_binding": {
               "development_revalidation_profile_accepted": true,
@@ -8480,9 +8480,9 @@
         "sha256": "F39BB4327F83BC44AE4E38DDFA0F46793209F30D7CA3B7A0A44342FC1BBDC058"
       },
       {
-        "byte_count": 65563,
+        "byte_count": 65667,
         "path": "native/kernel/src/lib.rs",
-        "sha256": "4700E45E5F9B848F2098EE77B4B49735AEF7A845C1F1E762CA83D9F2EF21DDD3"
+        "sha256": "50225A83A7CB7C2E66AABD5D479B2F48D57DDAE365047D2BF3581F8741AB5CA0"
       },
       {
         "byte_count": 528399,
