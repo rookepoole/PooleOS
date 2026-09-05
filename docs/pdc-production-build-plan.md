@@ -1,8 +1,8 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-05
-Plan version: 2.64.0-native-task-retention
-Roadmap cycle: PooleOS Cycle 158
+Plan version: 2.65.0-native-boot-chain-replay
+Roadmap cycle: PooleOS Cycle 159
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
@@ -28,7 +28,48 @@ registration. The governance flag and all production boundaries remain open.
 
 ## 1. Architecture Decision
 
-Cycle 158 implements mandatory inactive task-page ownership in original
+Cycle 159 completes current-source N5 boot-chain replay for the unchanged
+Cycle 158 mandatory-retention kernel. This follows N5-SYMBOLS-SEMANTICS-001 at
+N5.6/N5.9 through the N5.5/N5.8 loader and N5-KERNEL-TRANSFER-001 boundary;
+ADD-BOOT-010, ADD-BOOT-011 and ADD-BOOT-012 retain their existing scope.
+No new requirement or flag is needed for this dependency replay.
+
+- PSYM1: two identical split-debug builds, independent stripped correspondence,
+  158 controls and 32,768 parser/lookup comparisons.
+- PPOL1: rejected stale symbol-dependent inputs, regenerated vectors, 116
+  controls and 32,768 differential comparisons with zero mismatch.
+- PKLOAD6: 304 host tests, two clean kernel/boot/media builds, two fresh boots,
+  25 ordered markers and 155 controls with exact PBP1/GOP/oracle agreement.
+- PooleBoot: eight host tests and two independent fresh boots, with the same
+  155 controls and mandatory default stop before kernel transfer.
+- PKREVAL1: 219 kernel host tests, both native targets, 36 controls and 32,768
+  rejected post-loader mutations spanning all nine retained roles.
+- PKXFER1: two actual kernel entries, 30 ordered markers and 58 controls;
+  all nine retained files match the independent host oracle before unsigned
+  terminal denial, with zero authority, actions, state writes or firmware calls.
+
+All six selected current-source gates and 68 focused Python tests pass. The
+added previous-build-ID subcase rejects the old identity without changing
+suite discovery count. Exact kernel SHA-256 remains
+`18EDADA10E141DBADA8C95C1C0B3454696122C5E96C528F45E0AECE6ADD2F07D`.
+The six-file retained-set SHA-256 is
+`7B68DDA305B46690E02CA7597633F16ADBDAAF7607759253F95EB919F2493B9F`.
+Runtime/gate bindings were updated only after actual measurement and replay.
+The initial transfer test run rejected its stale receipt; fresh qualification
+then passed. No stale receipt was relabeled or inherited from another kernel.
+
+Nineteen N7-through-N12 native checks still reject stale receipts. The focused
+projection is separate from the preserved failed full Cycle 158 audit below;
+it is not a 105-check or Doctor replay. Next is N7-TRAP-001, then CPU/xstate/MSR,
+PMM/VM, IRQ/SMP, scheduler/atomics/locks and the complete exact-candidate suite.
+Only after prerequisite replay should N12.3 active-root and execution-stack
+ownership proceed. N36 cross-profile evidence review and N0 custody stay open.
+Counts remain 40 phases, 301 subphases, 57 ADD requirements, 94 flags (35 open),
+20 gaps and complete locked checklist coverage. No phase or flag closes. The
+frozen demo, kernel Rust implementation, PooleGlyph and production boundaries
+are unchanged. Draft PR #74 preserves the cloud checkpoint without merging.
+
+Historical Cycle 158 implements mandatory inactive task-page ownership in original
 `no_std` PooleKernel code under N12.3, source section 031.3,
 `ADD-N12-CONCURRENCY-RECLAMATION-001` and its existing open flag.
 `Resources::new` must now retain the actual PKVM1 root allocation and every

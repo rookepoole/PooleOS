@@ -7,9 +7,25 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 158
+Last roadmap reconciliation: PooleOS Cycle 159
 
-Cycle 158 implements mandatory physical retention for inactive scheduler-task
+Cycle 159 requalifies the changed kernel's PSYM1, PPOL1, PKLOAD6, PooleBoot,
+PKREVAL1 and PKXFER1 dependencies under N5-SYMBOLS-SEMANTICS-001. Six fresh
+headless QEMU/OVMF boots include two actual PooleKernel entries; all nine
+retained files agree with independent host reconstruction. All six selected
+current-source gates and 68 focused Python tests pass. A stale build-ID
+regression rejects the previous kernel identity. The native kernel bytes and
+frozen demo are unchanged; no phase or flag closes and no N5 exit is claimed.
+Nineteen downstream native checks remain stale. The preserved full Cycle 158
+audit still records 80/105 and Doctor684/708, not a new current aggregate pass.
+Next replay N7-TRAP-001, then CPU, memory, IRQ, SMP, scheduler, atomics and locks
+before the full exact-candidate suite and any main merge. N12.3 active-root,
+execution-stack and CPU-retirement ownership and N0 custody remain open.
+PooleGlyph Phase 65/report and the complete locked checklist remain unchanged.
+The source is backed up on the agent branch with draft PR #74; backup is not
+release or production promotion.
+
+Historical Cycle 158 implements mandatory physical retention for inactive scheduler-task
 page tables and all bound data frames, including aliases and pending unmaps.
 All-or-nothing group acquisition/release preserves the full owner on late
 failure. Twenty-four task-lifetime tests, nineteen pool tests, 219 kernel

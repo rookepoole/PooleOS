@@ -1,11 +1,12 @@
-# Cycle 159 In-Progress Cloud Checkpoint
+# Cycle 159 Boot-Chain Replay Checkpoint
 
 Status date: 2026-09-05. Pre-production; not eligible for merge to main.
 
-This is a backup of ongoing N5-SYMBOLS-SEMANTICS-001 prerequisite replay,
-not a completed Cycle 159 reconciliation or a new canonical qualification.
-The charter, build plan and roadmap retain Cycle 158 as the last completed
-reconciliation. No phase, subphase, flag, gap or production gate closes here.
+Cycle 159 completes the six selected N5-SYMBOLS-SEMANTICS-001 boot-chain
+prerequisite checks for the Cycle 158 kernel, not the full candidate suite.
+The charter, build plan and roadmap now record reconciliation 159. No phase,
+subphase, flag, gap or production gate closes here. The earlier in-progress
+backup remains in Git at `84e5af4`, with draft PR #74 targeting main.
 
 ## Saved State
 
@@ -15,10 +16,10 @@ reconciliation. No phase, subphase, flag, gap or production gate closes here.
   on `agent/n12-mandatory-task-retention`, commit
   `8edcd322b4a4fb33f887d89e81b950117472d7fa`.
 - This checkpoint adds measured symbol identities, regenerated PSYM1 and
-  dependent PPOL1 vectors, and their genuinely rerun qualification receipts.
-- PKREVAL1's host-test expectation is updated from 214 to the 219 tests
-  established by Cycle 158. PKREVAL1 itself has NOT yet been requalified;
-  its old receipt remains stale and must fail current-source validation.
+  dependent PPOL1 vectors, and six genuinely rerun qualification receipts.
+- PKREVAL1's host-test expectation now matches the 219 measured kernel tests.
+  Its old receipt was rejected before actual requalification. Loader/transfer
+  fixtures and release checks now bind current measured source and guest bytes.
 
 ## Verified Scope
 
@@ -27,13 +28,20 @@ parser comparisons, 16,384 lookup comparisons and two identical debug builds.
 The independent stripped build matches the same canonical kernel bytes.
 The policy qualifier passed 116 controls and 32,768 comparisons with zero
 mismatches. Its old symbol-dependent inputs were rejected before regeneration.
-The 23 focused Python symbol/policy tests pass on this working candidate.
+PKLOAD6 passed 304 host tests, two fresh boots and 155 controls. PooleBoot
+passed eight host tests, two additional fresh boots and 155 controls. PKREVAL1
+passed 219 kernel tests, 36 controls and 32,768 rejected mutations spanning all
+nine retained roles. PKXFER1 passed two real kernel entries, 30 ordered markers,
+58 controls and exact nine-file guest/host revalidation with unsigned denial.
+All six selected gates and 68 focused Python tests pass, including a regression
+that rejects substitution of the previous build ID. This remains a single-host
+qualification, not independent-builder or physical-target reproduction.
 
 Kernel identity remains `PKBUILD1-CYCLE158-N12-RETAIN-V002-0000000001`;
 canonical SHA-256:
 `18EDADA10E141DBADA8C95C1C0B3454696122C5E96C528F45E0AECE6ADD2F07D`.
-No kernel Rust implementation changes, live guest replay or demo ISO changes
-are included in this in-progress checkpoint.
+Six fresh headless QEMU/OVMF boots are included in the final receipts. No kernel
+Rust implementation or demo ISO changes are included in this checkpoint.
 
 ## Merge Blocker And Resume Point
 
@@ -43,12 +51,13 @@ audit has not been rerun for this checkpoint. Its SHA-256 remains
 `BB43C8A08A390893B48CDB8259752AC431D9A9AADBDDA63A2227EA347697DE4B`.
 Focused passes do not replace that audit or authorize a main merge.
 
-Next: reconstruct current loader/transfer fixture bindings from measured
-artifacts; requalify PKLOAD6, PKREVAL1, PooleBoot and PKXFER1 with headless
-QEMU where applicable; replay remaining native dependencies; reconcile all
-progress authorities; then run the exact-final canonical, publication and
-configured GitHub checks before considering main. Active-root and execution-
-stack ownership follow prerequisite replay. N0 custody remains separately open.
+The current focused projection passes six checks, with nineteen downstream
+native checks still rejecting stale receipts. Its SHA-256 is
+`D089D039F396D3DFD822E27C3D9F5C87AB8C029E64CC0C656E498BA9174A5C46`.
+Next is N7-TRAP-001, then CPU/xstate/MSR, memory, IRQ/SMP, scheduler, atomics and
+locks before the exact-final canonical, publication and configured GitHub checks
+and any main merge. Active-root and execution-stack ownership follow prerequisite
+replay. N0 custody and N36 cross-profile evidence review remain separately open.
 
 Only publication-approved source, fixtures and public receipts belong in this
 Git checkpoint. Private diagnostic logs, local build products, keys and ISO

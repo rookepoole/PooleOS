@@ -65,7 +65,7 @@ owned byte slices.
 The pinned single-host qualifier builds PooleKernel for
 `x86_64-unknown-none`, PooleBoot for `x86_64-unknown-uefi`, and a host probe from
 the same `no_std` verifier. Rust and an independent Python oracle must agree on
-the canonical nine-file result through 19 Rust tests, 8 Python tests, 36
+the canonical nine-file result through 219 kernel host tests, 8 Python tests, 36
 targeted hostile controls, and 32,768
 deterministic post-loader mutations spanning every retained role. All mutation
 cases must reject at the exact-file digest boundary; controls also cover source

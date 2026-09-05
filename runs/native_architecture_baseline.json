@@ -461,8 +461,8 @@
     },
     {
       "path": "docs/native-kernel-revalidation.md",
-      "sha256": "7900D672D1657A64521F28B703956C0241485FEE9160D64D4438C1FBEFF62C77",
-      "byte_count": 6506,
+      "sha256": "A135D36AEA5A4009A4793C56AC7F0111FF8D138743AABE6DD3F50159C0D789FB",
+      "byte_count": 6514,
       "line_count": 119
     },
     {
@@ -569,9 +569,9 @@
     },
     {
       "path": "docs/native-symbol-bundle.md",
-      "sha256": "DD9AF0B774A34D0E9B31653F7D422B78567AD5E98CFB9090E861F3C146E7D757",
-      "byte_count": 7701,
-      "line_count": 118
+      "sha256": "665DC92D83CFCC9311A674AE0B46E5E87B1FA08616D1EEA1C830F99F7E541B4F",
+      "byte_count": 8087,
+      "line_count": 124
     },
     {
       "path": "docs/native-system-manifest.md",
@@ -611,15 +611,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "F5F3CF06E104358EC7BE1E09C3C4560C78DBD4EAE9619CBA6055BE053D92726A",
-      "byte_count": 71322,
-      "line_count": 919
+      "sha256": "041938C1C7031F2D4937228AFAFC87C07666A29A1652EF5978F19512A15B6D36",
+      "byte_count": 72442,
+      "line_count": 935
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "1EB7B403B0760CBC7CEC4E9B04C479F33FC9608716F2EEE86317396D7FCCD55B",
-      "byte_count": 363570,
-      "line_count": 2355
+      "sha256": "5FA5FB62059895FC9DCC45DDAAE782BD8059FA586E9E096CFD9B863D27BF733F",
+      "byte_count": 366299,
+      "line_count": 2396
     },
     {
       "path": "docs/publication-boundary.md",
@@ -701,20 +701,20 @@
     },
     {
       "path": "runs/native_kernel_load_readiness.json",
-      "sha256": "DD719B52069CD4089D2E689962E37161AC88369F0AC6262303682957DCCD11AD",
+      "sha256": "4374B220AA48260A04F727BEB6678437A44359CAB8FD8D638200FFDF108E1E02",
       "byte_count": 189967,
       "line_count": 5365
     },
     {
       "path": "runs/native-kernel-revalidation-readiness.json",
-      "sha256": "C98DD2BAD8B605F45958A06CEA015F3F97BA1EF5769E4DC45954E1F39311E807",
+      "sha256": "7EA71B40DB0730F4823440CFDFD6F813A163F3542C500B098720A7DD934CB8D4",
       "byte_count": 16447,
       "line_count": 472
     },
     {
       "path": "runs/native-kernel-transfer-readiness.json",
-      "sha256": "78693B84BC4D6086E9C0069C1622A650E6E27F11C031E0BCC1043E15655DD9FE",
-      "byte_count": 168546,
+      "sha256": "E393ECD0328D7DABCB42C0509EBF08799DD9A6D751C35E7BE857BD518A27DBDA",
+      "byte_count": 168547,
       "line_count": 4622
     },
     {
@@ -797,13 +797,13 @@
     },
     {
       "path": "runs/native_pooleboot_readiness.json",
-      "sha256": "792820A526F194D3CB52CF23B36451BD6E71AF1990892C0E71BC585AB68FF541",
+      "sha256": "F8ACFA26AD4B2941E368224CA2DDDB5AA6EDF3BA1230ACAC89E04B895D3FD178",
       "byte_count": 186912,
       "line_count": 5270
     },
     {
       "path": "runs/native_policy_readiness.json",
-      "sha256": "4F7274F95864DD1E42A5B5372FBE2B448CF9E11CAFAAD7D1F1DDF87F4911306E",
+      "sha256": "539CBFE7AACFBBC57904B1F24B941DDB6F506A3BF5EEC035A68630F163AAC5EC",
       "byte_count": 23405,
       "line_count": 834
     },
@@ -815,7 +815,7 @@
     },
     {
       "path": "runs/native_symbol_readiness.json",
-      "sha256": "99E57B39DD2DA92FB9C90D175C83E0305D431C12810887A86181BAE84C55C230",
+      "sha256": "C2A2498D9254F5610FC089BEB32F06ED5511D514238940513623B374259CB134",
       "byte_count": 39632,
       "line_count": 1371
     },
@@ -1517,7 +1517,7 @@
     },
     {
       "path": "specs/native-policy-contract.json",
-      "sha256": "E52406625BC0FFFC9B9BC59C03BB89A246F0D137D8E8FB133B4FDE5E0BC622D7",
+      "sha256": "561DA649CECFB43A5E19FAC5B55C6233365E669A1FE8C32C60ECC1399C66CB3A",
       "byte_count": 8222,
       "line_count": 251
     },
@@ -1529,7 +1529,7 @@
     },
     {
       "path": "specs/native-policy-golden-vectors.json",
-      "sha256": "FD209C26838CC86E09A0EA000D7F5AB3AB0523438C9EB6197DA3AD6C64838D2C",
+      "sha256": "023109F58DABD9951CC872578B77BC0D8B863CC57D3E4576EB934A60A7A026AB",
       "byte_count": 43996,
       "line_count": 61
     },
@@ -1589,7 +1589,7 @@
     },
     {
       "path": "specs/native-symbol-golden-vectors.json",
-      "sha256": "BDD86E8995852F4E18A09E3C9DB77E0152DF0856CC0218230B7598442F883E00",
+      "sha256": "0E9C07D3AAFD24D54AD329150AFD95220D8FF8FD7D9BD1569288CB42C08E3C38",
       "byte_count": 9878,
       "line_count": 1
     },
