@@ -521,27 +521,27 @@
     },
     {
       "path": "docs/native-kernel-interrupt-time.md",
-      "sha256": "91EEA33907ED57DE059198B63BC8DE09A0EBB2FA2237CD4FA502869C680BD787",
-      "byte_count": 6303,
-      "line_count": 62
+      "sha256": "21797E7FB4396E7B4A53472D3E024779223571C5E2A9452607C08DC2FB63E292",
+      "byte_count": 6887,
+      "line_count": 68
     },
     {
       "path": "docs/native-kernel-smp-first-ap.md",
-      "sha256": "A18EB000F6364E998A31E113C273903CE0607763908F22BF80B750CC16CBAF17",
-      "byte_count": 3546,
-      "line_count": 45
+      "sha256": "C5E86EDBDE4BBA2D7619AEAAFEABD291740FF11DC4A499ECDE9E2695A9B7C1BD",
+      "byte_count": 3927,
+      "line_count": 51
     },
     {
       "path": "docs/native-kernel-smp-percpu-runtime.md",
-      "sha256": "A26935E66C934BD634F38DD890BE39FC201B0EA0E68598694F183BA8A6387069",
-      "byte_count": 2489,
-      "line_count": 21
+      "sha256": "027903D4F7E46EB0D0C34FADF1B518811B5CA7C2ABC1214D6FDF8901AEC27D70",
+      "byte_count": 2867,
+      "line_count": 27
     },
     {
       "path": "docs/native-kernel-smp-ipi.md",
-      "sha256": "231FE1F11CF45B0D20A2236091CE8435AA301ED2018F470BD3F81895468EE074",
-      "byte_count": 3533,
-      "line_count": 15
+      "sha256": "A3D5C8CD271A22FB92F7CADE8C2BB3250365E066D37015CDDFA8DA56D9C5B4B9",
+      "byte_count": 4669,
+      "line_count": 27
     },
     {
       "path": "docs/native-microcode-bundle.md",
@@ -611,15 +611,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "BA0C9FCC8A8899EFC83F62E77403080D72BEA58DB1360D16C60407B68E5A4805",
-      "byte_count": 68589,
-      "line_count": 881
+      "sha256": "01F6E72F8DA739F4311FF2B9B8B17B5E93126F20F4995D8D9D095C9113A62AF1",
+      "byte_count": 70006,
+      "line_count": 901
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "953174658657AFB7D54B89267C3966EF66CFD97AFE8F3C0FB58D09669F4001A0",
-      "byte_count": 358224,
-      "line_count": 2277
+      "sha256": "A7E0F07C5AF600441750023CF44FE36839046F8057E79C30E7E6F5BB23AE8A24",
+      "byte_count": 360900,
+      "line_count": 2315
     },
     {
       "path": "docs/publication-boundary.md",
@@ -767,27 +767,27 @@
     },
     {
       "path": "runs/native-kernel-interrupt-time-readiness.json",
-      "sha256": "F6D5052B3218C6B00E21B5837A7AB8D72B0B695A444B82619883D8B39CAE4556",
-      "byte_count": 184185,
-      "line_count": 5028
+      "sha256": "8DDB9C8BBB4C5FFD834C11B10D51EEECC6365D3036ED17FC90C2619A0F6A54E4",
+      "byte_count": 184816,
+      "line_count": 5043
     },
     {
       "path": "runs/native-kernel-smp-first-ap-readiness.json",
-      "sha256": "B9C627F60752B37D53678845538F0408951CD98C9B2BF012D30AFB626B4EBD11",
-      "byte_count": 186870,
-      "line_count": 5111
+      "sha256": "4D51729E463478B436D615CA593D4B906ACE36B0183752E8B5329FD2FEDD516C",
+      "byte_count": 187502,
+      "line_count": 5126
     },
     {
       "path": "runs/native-kernel-smp-percpu-runtime-readiness.json",
-      "sha256": "7A9629BE0067163AFBEC626F3BF8ED4EA1838D70FE6C1A8C95BF928B25C24C41",
-      "byte_count": 188864,
-      "line_count": 5006
+      "sha256": "810005B00ACE1821A968F22ECAF086D7CCD5873784CD29561AFF6F79A8F784AA",
+      "byte_count": 189498,
+      "line_count": 5021
     },
     {
       "path": "runs/native-kernel-smp-ipi-readiness.json",
-      "sha256": "A990D7E081772D5F5DA87090CF7D2BA418BB52C454194A953AB3EC8E4DCF01D7",
-      "byte_count": 208194,
-      "line_count": 5703
+      "sha256": "10C6288CC83E3E0EA503BC0BC79208179A8FAAB5A75CB4090F9628710A434951",
+      "byte_count": 208825,
+      "line_count": 5718
     },
     {
       "path": "runs/native_microcode_readiness.json",

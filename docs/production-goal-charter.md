@@ -7,9 +7,29 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 156
+Last roadmap reconciliation: PooleOS Cycle 157
 
-Cycle 156 requalifies PKPMM7/PKACPI1 and PKVM3 for the existing unmerged
+Cycle 157 completes current-source replay from N8-IRQ-001 through the reopened
+N12-CONCURRENCY-LOCKS-001 dependency: twelve fresh profile receipts contain
+24 headless QEMU/OVMF boots, 421 control groups and 1,881 rejected cases.
+All 26 selected N5/N7/memory/IRQ/SMP/scheduler/atomic/lock gates pass. The
+unchanged retention kernel passes 214 host tests in each profile. Stale date,
+stack-layout, test-count and linked-kernel acceptance bindings are corrected
+from measured evidence; three IRQ/SMP error-formatting paths now return failed
+checks for invalid schema records. Two new regression methods cover twelve
+production-overclaim and three schema-error cases. The broad N36 receipt audit
+remains open. The canonical candidate replay passes all 105 gates and 708 Doctor
+checks, including the 917-test suite. This restores only the bounded N12.2
+PKLOCK1 milestone and closes its reopened flag. All 57 ADD requirements,
+94 flags (35 open),
+20 gaps, 40 phases, 301 subphases and locked checklist mapping remain intact.
+PooleGlyph Phase 65 and its user-modified report are unchanged. The separate
+demo, production boundary, governance custody and N12.3 ownership work remain
+unchanged. Checkpoints through Cycle 156 are already on the remote agent branch;
+main may advance only after the complete exact-final local and configured
+GitHub gates. N12-CONCURRENCY-RECLAMATION-001 is the next engineering move.
+
+Historical Cycle 156 requalifies PKPMM7/PKACPI1 and PKVM3 for the existing unmerged
 retention-capable kernel. The exact manager contract is now 15,632 bytes;
 old-size contract and marker controls reject. Independent PBP1 accounting
 binds the one-page usable-to-loader ownership shift, allocator growth and

@@ -136,8 +136,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 156)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 915)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 157)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 917)
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
         self.assertTrue(native["pooleboot_exists"])
@@ -153,16 +153,21 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertFalse(historical["production_ready"])
         self.assertEqual(historical["native_promotion_role"], "historical_non_promoting")
         current = self.roadmap["baseline"]["native_consistency_release_gate"]
-        self.assertIsNone(current["passed_checks"])
-        self.assertEqual(current["qualification_status"], "pending_full_candidate_replay")
-        self.assertEqual(current["last_fully_qualified_cycle"], 152)
+        self.assertEqual(current["passed_checks"], 105)
+        self.assertEqual(current["qualification_status"], "pass_current_candidate_non_promoting")
+        self.assertEqual(current["last_fully_qualified_cycle"], 157)
         self.assertEqual(current["last_fully_qualified_passed_checks"], 105)
+        replay = current["canonical_replay"]
+        self.assertEqual(replay["doctor_passed_checks"], 708)
+        self.assertEqual(replay["pooleos_test_count"], 917)
+        self.assertTrue(replay["both_bundle_and_replay_inputs_supplied"])
+        self.assertFalse(replay["production_ready"])
         projection = current["focused_current_source_projection"]
-        self.assertEqual(projection["cycle"], 156)
-        self.assertEqual(projection["passed_checks"], 14)
-        self.assertEqual(projection["pending_downstream_native_checks"], 12)
+        self.assertEqual(projection["cycle"], 157)
+        self.assertEqual(projection["passed_checks"], 26)
+        self.assertEqual(projection["pending_downstream_native_checks"], 0)
         self.assertFalse(projection["canonical_full_replay_performed"])
-        self.assertEqual(projection["next_dependency_move_id"], "N8-IRQ-001")
+        self.assertEqual(projection["next_dependency_move_id"], "N12-CONCURRENCY-RECLAMATION-001")
         self.assertEqual(current["total_checks"], 105)
         self.assertEqual(current["artifact_count"], 62)
         self.assertEqual(current["explicit_gap_count"], 20)
@@ -192,10 +197,10 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N9-PMM-ACPI-CONSUMER-001")
+        self.assertEqual(protocol["selected_move_id"], "N8-IRQ-001")
         self.assertEqual(
             protocol["owner_independent_next_move_id"],
-            "N12-CONCURRENCY-LOCKS-001",
+            "N12-CONCURRENCY-RECLAMATION-001",
         )
         self.assertIn("runs/hardware_target_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_tier0_readiness.json", protocol["required_records"])
@@ -455,7 +460,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             flag for flag in flags if flag["id"] == "FLAG-N12-CONCURRENCY-LOCKS-001"
         )
         self.assertEqual(locks_flag["class"], "REQUIRED")
-        self.assertEqual(locks_flag["status"], "open")
+        self.assertEqual(locks_flag["status"], "closed")
         self.assertIn(
             "runs/native-kernel-locks-readiness.json", locks_flag["evidence"]
         )
@@ -835,7 +840,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             subphase["id"]: subphase["status"] for subphase in n12["subphases"]
         }
         self.assertEqual(n12_statuses["N12.1"], "complete")
-        self.assertEqual(n12_statuses["N12.2"], "partial")
+        self.assertEqual(n12_statuses["N12.2"], "complete")
         for subphase_id in (
             "N12.3",
             "N12.4",

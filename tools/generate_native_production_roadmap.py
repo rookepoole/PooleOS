@@ -119,7 +119,7 @@ SUBPHASE_OVERRIDES = {
     "N9.3": "partial",
     "N9.4": "partial",
     "N12.1": "complete",
-    "N12.2": "partial",
+    "N12.2": "complete",
     "N12.3": "partial",
     "N12.4": "partial",
     "N12.5": "partial",
@@ -282,14 +282,14 @@ PHASE_EVIDENCE = {
     "N8": [
         "specs/native-kernel-interrupt-time-contract.json and docs/native-kernel-interrupt-time.md: PKIRQ1 freezes a bounded one-BSP qemu64 xAPIC/HPET transaction, complete retained MADT/HPET parsing, vector ownership, guarded uncacheable MMIO, exact local timer delivery and EOI accounting, normal-path rollback, and explicit no-AP/no-IPI/no-target/nonproduction boundaries",
         "native/kernel/src/interrupt_time.rs, native/kernel/src/arch/x86_64.rs, and native/kernel/src/main.rs: allocation-free MADT/HPET parsing and checked clock arithmetic, typed APIC/PIC/IDT/MSR operations, selector-11 controller transaction, eight interrupt windows, and exact controller/clock/PIC/MSR/MMIO restoration",
-        "runs/native-kernel-interrupt-time-readiness.json: 206/206 kernel host tests, two exact fresh-vars qemu64 QEMU/OVMF runs, 36 ordered markers, 58/58 hostile controls, eight timer deliveries, eight EOIs, zero APIC-error or spurious deliveries, three absent MMIO guards, exact LAPIC/HPET mapping revocation, zero AP starts, and zero signatures, authority, actions, or production claims",
+        "runs/native-kernel-interrupt-time-readiness.json: 214/214 kernel host tests, two exact fresh-vars qemu64 QEMU/OVMF runs, 36 ordered markers, 58/58 hostile controls, eight timer deliveries, eight EOIs, zero APIC-error or spurious deliveries, three absent MMIO guards, exact LAPIC/HPET mapping revocation, zero AP starts, and zero signatures, authority, actions, or production claims",
         "specs/native-kernel-smp-first-ap-contract.json and docs/native-kernel-smp-first-ap.md: PKSMP1 freezes one bounded xAPIC first-AP lifecycle with a below-1-MiB RX trampoline, pre-accessed GDT, guarded RW/NX stack and mailbox, INIT-SIPI-SIPI startup, observed long-mode state, stop/quiesce/final-INIT park, exact scrub/release, and explicit no-general-SMP/no-IPI/no-shootdown/no-target/nonproduction boundaries",
         "native/kernel/src/smp.rs, native/kernel/src/arch/x86_64.rs, and native/kernel/src/main.rs: allocation-free first-AP selection and transaction model, 16-to-32-to-64-bit trampoline, two-vCPU selector-12 live path, fail-closed final-park ownership retention, alias revocation, and exact resource cleanup",
-        "runs/native-kernel-smp-first-ap-readiness.json: 206/206 kernel host tests, two exact fresh-vars two-vCPU qemu64 QEMU/OVMF runs, 38 ordered markers, 72/72 hostile controls, exactly one AP started/online/quiesced/parked, fourteen pages and 57,344 bytes scrubbed/verified/released, and zero signatures, authority, target, N8-exit, or production claims",
+        "runs/native-kernel-smp-first-ap-readiness.json: 214/214 kernel host tests, two exact fresh-vars two-vCPU qemu64 QEMU/OVMF runs, 38 ordered markers, 72/72 hostile controls, exactly one AP started/online/quiesced/parked, fourteen pages and 57,344 bytes scrubbed/verified/released, and zero signatures, authority, target, N8-exit, or production claims",
         "specs/native-kernel-smp-percpu-runtime-contract.json, native/kernel/src/smp_runtime.rs, runtime/native_kernel_smp_percpu_runtime.py, and docs/native-kernel-smp-percpu-runtime.md: PKSMP2 freezes one AP-local runtime transaction with processor-local GDT/TSS/IDT, guarded RSP0/IST stacks, x87/SSE xstate ownership, interrupt-vector ownership, final INIT parking, exact scrub/release, and explicit no-IPI/no-shootdown/no-scheduler/no-target/nonproduction boundaries",
-        "runs/native-kernel-smp-percpu-runtime-readiness.json: 206/206 kernel host tests, two exact fresh-vars two-vCPU SandyBridge-minus-AVX TCG QEMU/OVMF runs, 42 ordered markers, 19/19 hostile-control categories covering 159 rejected cases, exactly one AP-local descriptor set, three guarded stack classes, 27 gates, one xstate round trip, and 32 pages or 131,072 bytes scrubbed/verified/released with zero signatures, authority, N8-exit, or production claims",
+        "runs/native-kernel-smp-percpu-runtime-readiness.json: 214/214 kernel host tests, two exact fresh-vars two-vCPU SandyBridge-minus-AVX TCG QEMU/OVMF runs, 42 ordered markers, 19/19 hostile-control categories covering 159 rejected cases, exactly one AP-local descriptor set, three guarded stack classes, 27 gates, one xstate round trip, and 32 pages or 131,072 bytes scrubbed/verified/released with zero signatures, authority, N8-exit, or production claims",
         "specs/native-kernel-smp-ipi-contract.json, native/kernel/src/smp_ipi.rs, runtime/native_kernel_smp_ipi.py, and docs/native-kernel-smp-ipi.md: PKSMP5 freezes one exact four-vCPU/three-AP topology with private AP runtimes, dynamic local masks, aggregate target and acknowledgement mask 0xE, partial-start timeout and complete rollback, fresh retry, six fixed development IPI classes per AP, three generation-bound one-page remote invalidations, deferred-reclaim ordering, exact cleanup, and explicit no-general-topology/no-general-shootdown/no-scheduler/no-target/nonproduction boundaries",
-        "runs/native-kernel-smp-ipi-readiness.json: 206/206 kernel host tests, two exact fresh-vars four-vCPU SandyBridge-minus-AVX TCG QEMU/OVMF runs, 40 ordered markers, 30/30 hostile-control categories covering 243 rejected cases, three APs simultaneously online, nine accepted and three denied live deliveries, twelve EOIs, one partial-start timeout and rollback, one fresh retry, three exact AP-side INVLPG operations, aggregate target/ack mask 0xE, one retired generation, two premature-reclaim rejections, and 102 pages or 417,792 bytes scrubbed/verified/released with zero signatures, authority, N8/N9-exit, or production claims",
+        "runs/native-kernel-smp-ipi-readiness.json: 214/214 kernel host tests, two exact fresh-vars four-vCPU SandyBridge-minus-AVX TCG QEMU/OVMF runs, 40 ordered markers, 30/30 hostile-control categories covering 243 rejected cases, three APs simultaneously online, nine accepted and three denied live deliveries, twelve EOIs, one partial-start timeout and rollback, one fresh retry, three exact AP-side INVLPG operations, aggregate target/ack mask 0xE, one retired generation, two premature-reclaim rejections, and 102 pages or 417,792 bytes scrubbed/verified/released with zero signatures, authority, N8/N9-exit, or production claims",
     ],
     "N9": [
         "Cycle 156 current-source replay: N9-PMM-ACPI-CONSUMER-001 and N9-VM-DIRECT-MAP-001 pass four final headless QEMU/OVMF boots and 237 negative controls on the unchanged Cycle 153 kernel. The manager contract is 15632 bytes; old-size contract and marker controls reject. Independent PBP1 accounting proves the one-page usable-to-loader shift, current sparse coverage and address-bound checksums. Thirty-two existing allocator host tests pass. Allocation retention does not itself exclude direct-map admission. No N9 exit, general concurrent lifetime, authenticated evidence or production claim follows",
@@ -304,32 +304,33 @@ PHASE_EVIDENCE = {
         "ADD-MEM-002: replace the bounded nine-page PKVM2 mapping with one complete generation-owned sparse physical direct map that excludes holes and forbidden ranges, prevents incompatible cache aliases, preserves retained bootstrap and ACPI snapshot exclusions, switches transactionally, records local invalidation and future SMP-shootdown dependencies, and defers reclamation until exact generation receipts permit it",
     ],
     "N12": [
+        "Cycle 157 current qualification supersedes the historical pending-replay statements below: 24 final boots across all twelve IRQ/SMP/scheduler/atomic/lock profiles, 1881 negative cases, 214 kernel host tests and the 105-gate/708-Doctor/917-test suite pass. The repaired bounded PKLOCK1 milestone closes again; N12.3 ownership and live failure evidence remain open",
         "specs/native-kernel-scheduler-contract.json and docs/native-kernel-scheduler.md: PKSCHED1 freezes a bounded allocation-free four-CPU/eight-task scheduler foundation, neutral fixed-priority round-robin policy, maximum bypass bound, task lifecycle, affinity, migration, cancellation, timeout, accounting, one-mutex direct priority inheritance, reference lifetime, raw spinlock, context-state, stack, cleanup, and strict cooperative-BSP nonclaims",
         "native/kernel/src/scheduler.rs, native/kernel/src/arch/x86_64.rs, native/kernel/src/main.rs, and native/kernel/src/bin/pksched1_probe.rs: generation-safe fixed-capacity scheduler core, host stress probe, and exact 18-instruction live context switch over two isolated 16-KiB kernel stacks",
         "runtime/native_kernel_scheduler.py, tools/qualify_native_kernel_scheduler.py, and tests/test_native_kernel_scheduler.py: independent deterministic scheduler oracle, marker and linked-image audits, source controls, model overlap, hostile mutations, and exact receipt validation",
-        "runs/native-kernel-scheduler-readiness.json: 14/14 scheduler Rust tests within 206/206 kernel host tests, four exact Rust/Python host-probe receipts over 4,096 steps, 1,761 dispatches and 2,334 migrations, two exact 17-marker qemu64 BSP runs, eight live dispatches, sixteen context transitions, 32,768 stack bytes cleared, and 28/28 hostile-control categories covering 115 rejected cases with zero live AP dispatch, ring-3/address-space switch, authority, N12-exit, or production claims",
+        "runs/native-kernel-scheduler-readiness.json: 14/14 scheduler Rust tests within 214/214 kernel host tests, four exact Rust/Python host-probe receipts over 4,096 steps, 1,761 dispatches and 2,334 migrations, two exact 17-marker qemu64 BSP runs, eight live dispatches, sixteen context transitions, 32,768 stack bytes cleared, and 28/28 hostile-control categories covering 115 rejected cases with zero live AP dispatch, ring-3/address-space switch, authority, N12-exit, or production claims",
         "ADD-N12-SCHED-FOUNDATION-001: preserve exact task identity, ownership, fairness, lifecycle, synchronization, context, stack, and cleanup boundaries while separating this cooperative BSP foundation from later interrupt-preemptive, SMP, ring-3, address-space, and production promotion",
         "specs/native-kernel-scheduler-preemption-contract.json, native/kernel/src/scheduler_preempt.rs, runtime/native_kernel_scheduler_preempt.py, tools/qualify_native_kernel_scheduler_preempt.py, tests/test_native_kernel_scheduler_preempt.py, and docs/native-kernel-scheduler-preemption.md: PKSCHED2 freezes bounded BSP timer/wakeup preemption, exact interrupt-frame and task-stack ownership, an eight-event deferred-reschedule controller, deterministic quantum/wake/block ordering, balanced EOI and rollback rules, teardown, cleanup, and strict no-live-AP/no-ring-3/no-address-space/no-target/nonproduction boundaries",
-        "runs/native-kernel-scheduler-preemption-readiness.json: 7/7 focused preemption tests within 206/206 kernel host tests, three exact Rust/Python host-probe receipts, two exact 35-marker selector-16 qemu64 BSP runs, six timer windows and EOIs, task trace 0,1,2,0,3,3, six saved and four restored interrupt frames, four hardware switches, 65,536 stack bytes cleared, and 25/25 hostile-control categories covering 178 rejected cases with zero live AP dispatch, ring-3/address-space switch, authority, N12-exit, or production claims",
+        "runs/native-kernel-scheduler-preemption-readiness.json: 7/7 focused preemption tests within 214/214 kernel host tests, three exact Rust/Python host-probe receipts, two exact 35-marker selector-16 qemu64 BSP runs, six timer windows and EOIs, task trace 0,1,2,0,3,3, six saved and four restored interrupt frames, four hardware switches, 65,536 stack bytes cleared, and 25/25 hostile-control categories covering 178 rejected cases with zero live AP dispatch, ring-3/address-space switch, authority, N12-exit, or production claims",
         "ADD-N12-SCHED-PREEMPT-001: preserve exact timer/event/frame/context/stack/EOI/rollback/cleanup ownership while separating bounded BSP preemption from deferred workers, SMP, ring-3, address-space, target, and production promotion",
         "specs/native-kernel-scheduler-deferred-contract.json, native/kernel/src/scheduler_deferred.rs, runtime/native_kernel_scheduler_deferred.py, tools/qualify_native_kernel_scheduler_deferred.py, tests/test_native_kernel_scheduler_deferred.py, and docs/native-kernel-scheduler-deferred.md: PKSCHED3 freezes an allocation-free eight-slot deferred-work controller, generation-safe identity, fixed typed operations, duplicate suppression, EOI-gated dispatch, two retained-memory BSP worker stacks, bounded priority bypass, queued/running cancellation, flush watermarks, five rollback boundaries, exact shutdown, and strict no-callback/no-consumer/no-live-AP/no-ring-3/no-target/nonproduction boundaries",
-        "runs/native-kernel-scheduler-deferred-readiness.json: 7/7 focused deferred-work tests within 206/206 kernel host tests, five exact Rust/Python host-probe receipts, two exact 37-marker selector-17 qemu64 BSP runs, eight enqueues, six worker dispatches, twelve context transitions, five completions, three cancellations, five fault rollbacks, 32,768 stack bytes cleared, and 30/30 hostile-control categories covering 208 rejected cases with zero arbitrary callbacks, driver/service consumers, live AP dispatch, authority, N12-exit, or production claims",
+        "runs/native-kernel-scheduler-deferred-readiness.json: 7/7 focused deferred-work tests within 214/214 kernel host tests, five exact Rust/Python host-probe receipts, two exact 37-marker selector-17 qemu64 BSP runs, eight enqueues, six worker dispatches, twelve context transitions, five completions, three cancellations, five fault rollbacks, 32,768 stack bytes cleared, and 30/30 hostile-control categories covering 208 rejected cases with zero arbitrary callbacks, driver/service consumers, live AP dispatch, authority, N12-exit, or production claims",
         "ADD-N12-SCHED-DEFERRED-001: preserve exact queue/work/receipt/generation/EOI/cancellation/flush/rollback/shutdown/stack-cleanup ownership while separating bounded BSP deferred work from arbitrary callbacks, driver/service consumers, SMP, ring-3, target, and production promotion",
         "specs/native-kernel-scheduler-smp-contract.json, native/kernel/src/scheduler_smp.rs, runtime/native_kernel_scheduler_smp.py, tools/qualify_native_kernel_scheduler_smp.py, tests/test_native_kernel_scheduler_smp.py, and docs/native-kernel-scheduler-smp.md: PKSCHED4 freezes one allocation-free exact-topology four-CPU/eight-task scheduler with acknowledgement-gated ownership, generation-safe wake/migration, six live AP dispatches, bounded fairness, offline timeout rollback, exact cleanup, and strict no-general-SMP/no-ring-3/no-target/nonproduction boundaries",
-        "runs/native-kernel-scheduler-smp-readiness.json: 8/8 focused SMP scheduler tests within 206/206 kernel host tests, five exact Rust/Python host-probe receipts, two exact 37-marker four-vCPU selector-18 runs, one cross-CPU wake, two migrations, three transaction acknowledgements, six AP dispatches, one APIC-4 timeout rollback, two stale acknowledgement rejections, eight task retirements, and 32/32 hostile-control categories covering 209 rejected cases; 102 pages or 417,792 bytes are scrubbed, verified, and released",
+        "runs/native-kernel-scheduler-smp-readiness.json: 8/8 focused SMP scheduler tests within 214/214 kernel host tests, five exact Rust/Python host-probe receipts, two exact 37-marker four-vCPU selector-18 runs, one cross-CPU wake, two migrations, three transaction acknowledgements, six AP dispatches, one APIC-4 timeout rollback, two stale acknowledgement rejections, eight task retirements, and 32/32 hostile-control categories covering 209 rejected cases; 102 pages or 417,792 bytes are scrubbed, verified, and released",
         "ADD-N12-SCHED-SMP-001: exact-topology AP-local run queues, remote reschedule acknowledgement, generation-safe cross-CPU wake/migration, offline timeout rollback, topology balancing, idle ownership, and exact teardown close only for PKSCHED4's bounded development profile",
         "ADD-N12-SCHED-AP-WORKERS-001: extend PKSCHED3 deferred work to AP-local workers and real driver/service consumers with remote cancellation, flush, reclamation, offline rollback, starvation, and cleanup evidence",
         "specs/native-kernel-scheduler-ap-workers-contract.json, native/kernel/src/scheduler_ap_workers.rs, runtime/native_kernel_scheduler_ap_workers.py, tools/qualify_native_kernel_scheduler_ap_workers.py, tests/test_native_kernel_scheduler_ap_workers.py, and docs/native-kernel-scheduler-ap-workers.md: PKSCHED5 freezes three allocation-free AP-local workers, two fixed typed timer-driver and generation-reclaim consumers, EOI-gated dispatch, remote cancellation, flush/reclamation ordering, offline rollback, bounded starvation, exact cleanup, and strict no-arbitrary-callback/no-general-preemption/no-target/nonproduction boundaries",
-        "runs/native-kernel-scheduler-ap-workers-readiness.json: 10/10 focused AP-worker tests within 206/206 kernel host tests, six exact Rust/Python host-probe receipts, two exact 37-marker four-vCPU selector-19 runs, thirteen enqueues, twelve typed AP calls, eleven completions, two cancellations, one offline timeout rollback, thirteen reclaimed slots, and 34/34 hostile-control categories covering 226 rejected cases; three workers retire and all 102 pages or 417,792 bytes are scrubbed, verified, and released",
+        "runs/native-kernel-scheduler-ap-workers-readiness.json: 10/10 focused AP-worker tests within 214/214 kernel host tests, six exact Rust/Python host-probe receipts, two exact 37-marker four-vCPU selector-19 runs, thirteen enqueues, twelve typed AP calls, eleven completions, two cancellations, one offline timeout rollback, thirteen reclaimed slots, and 34/34 hostile-control categories covering 226 rejected cases; three workers retire and all 102 pages or 417,792 bytes are scrubbed, verified, and released",
         "ADD-N12-SCHED-SMP-PREEMPT-001: compose PKSCHED2 timer/wakeup preemption with PKSCHED4/PKSCHED5 exact-topology CPU and worker ownership, including per-CPU timers, remote reschedule acknowledgement, concurrent event ordering, offline rollback, watchdog/latency bounds, and exact teardown without claiming general topology, ring 3, target, N12 exit, or production",
         "specs/native-kernel-scheduler-smp-preempt-contract.json, native/kernel/src/scheduler_smp_preempt.rs, runtime/native_kernel_scheduler_smp_preempt.py, tools/qualify_native_kernel_scheduler_smp_preempt.py, tests/test_native_kernel_scheduler_smp_preempt.py, and docs/native-kernel-scheduler-smp-preempt.md: PKSCHED6 freezes bounded exact-topology per-CPU timer/event/frame/run-queue ownership, acknowledgement-gated live reschedule IPIs, deterministic cancel/wake/migration ordering, offline rollback, watchdog/fairness bounds, exact cleanup, and strict no-AP-timer/no-general-SMP/no-ring-3/no-target/nonproduction boundaries",
-        "runs/native-kernel-scheduler-smp-preempt-readiness.json: 5/5 focused SMP-preemption tests within 206/206 kernel host tests, seven exact Rust/Python host receipts, two exact 38-marker four-vCPU selector-20 runs, eight live reschedule IPIs, five modeled acknowledgements, three quantum switches, one offline rollback, eight task retirements, and 34/34 hostile-control categories covering 232 rejected cases; all 102 pages or 417,792 bytes are scrubbed, verified, and released",
+        "runs/native-kernel-scheduler-smp-preempt-readiness.json: 5/5 focused SMP-preemption tests within 214/214 kernel host tests, seven exact Rust/Python host receipts, two exact 38-marker four-vCPU selector-20 runs, eight live reschedule IPIs, five modeled acknowledgements, three quantum switches, one offline rollback, eight task retirements, and 34/34 hostile-control categories covering 232 rejected cases; all 102 pages or 417,792 bytes are scrubbed, verified, and released",
         "ADD-N12-CONCURRENCY-ATOMICS-001: qualify typed atomics and compiler/x86 memory-order contracts before broader locks, reclamation, or SMP scheduler promotion",
         "specs/native-kernel-atomics-contract.json, native/kernel/src/atomics.rs, runtime/native_kernel_atomics.py, tools/qualify_native_kernel_atomics.py, tests/test_native_kernel_atomics.py, and docs/native-kernel-atomics.md: PKATOM1 freezes typed load/store/RMW/fence order domains, nine valid and eleven invalid compare-exchange order pairs, fixed-width and pointer atomics, bounded references, interrupt-context publication, linked-code auditing, deterministic host stress, and strict no-lock/no-reclamation/no-general-SMP/no-target/nonproduction boundaries",
-        "runs/native-kernel-atomics-readiness.json: 7/7 focused atomics tests within 206/206 kernel host tests, eight exact host-probe receipts, two exact 41-marker qemu64 selector-21 runs, 4,096 publication rounds with zero stale reads, 16,384 contended fetch-adds plus 4,096 CAS increments with zero lost updates, 2,048 sequentially consistent rounds with zero forbidden outcomes, seven linked audit symbols, and 29/29 hostile-control categories covering 78 rejected cases",
+        "runs/native-kernel-atomics-readiness.json: 7/7 focused atomics tests within 214/214 kernel host tests, eight exact host-probe receipts, two exact 41-marker qemu64 selector-21 runs, 4,096 publication rounds with zero stale reads, 16,384 contended fetch-adds plus 4,096 CAS increments with zero lost updates, 2,048 sequentially consistent rounds with zero forbidden outcomes, seven linked audit symbols, and 29/29 hostile-control categories covering 78 rejected cases",
         "ADD-N12-CONCURRENCY-LOCKS-001: build the complete bounded lock family over PKATOM1 with interrupt, preemption, ownership, priority-inheritance, lock-order, teardown, fairness, and rollback evidence before reclamation or broader SMP promotion",
         "specs/native-kernel-locks-contract.json, native/kernel/src/locks.rs, runtime/native_kernel_locks.py, tools/qualify_native_kernel_locks.py, tests/test_native_kernel_locks.py, and docs/native-kernel-locks.md: PKLOCK1 freezes an allocation-free FIFO ticket spinlock, IRQ-save lock, sleeping mutex, notification, writer-preferred reader-writer lock, seqlock, five-rank lock-order graph, direct bounded priority donation, exact owner-death and rollback rules, and strict no-reclamation/no-general-SMP/no-target/nonproduction boundaries",
-        "runs/native-kernel-locks-readiness.json: 10/10 focused lock tests within 206/206 kernel host tests, nine exact host-probe receipts including 8,192 FIFO ticket acquisitions, two exact 35-marker four-vCPU SandyBridge selector-22 runs, exact tickets 0,1,2,3 across BSP plus three APs, three installed and revoked shared aliases, and 30/30 hostile-control categories covering 103 rejected cases",
+        "runs/native-kernel-locks-readiness.json: 10/10 focused lock tests within 214/214 kernel host tests, nine exact host-probe receipts including 8,192 FIFO ticket acquisitions, two exact 35-marker four-vCPU SandyBridge selector-22 runs, exact tickets 0,1,2,3 across BSP plus three APs, three installed and revoked shared aliases, and 30/30 hostile-control categories covering 103 rejected cases",
         "runs/native-kernel-reclamation-core-readiness.json: Cycle 150 PKRECLAIM1-CORE owns real values in a bounded no_std pool with pool-bound generation handles, RAII pins, retire-before-reclaim, exact-once transfer, nonwrapping limits, pressure retention and shutdown sealing; 19 tests pass in debug and optimized host profiles, one borrow compile-fail test and 206 kernel regressions pass; freestanding Clippy passes and canonical linked bytes remain unchanged; no live integration or CPU grace-period claim",
         "docs/native-kernel-task-lifetimes.md and runs/native-kernel-reclamation-core-readiness.json: Cycle 152 PKLIFE1 owns the actual PKSCHED4 scheduler and moved inactive PKVM1 address spaces, binds checked task/root generations, retains pinned retired resources, and blocks premature task-slot reuse. Nineteen lifecycle and nineteen core tests pass in each of two host profiles; three borrow compile-fail tests and 206 kernel regressions pass. No new guest selector or physical quiescence evidence is claimed",
         "docs/native-kernel-physical-retention.md: Cycle 153 implements allocator-enforced retention for explicit tokens and stop/park-before-old-frame-release in the three-AP path, including uncertain startup targets in final cleanup. Eight allocator tests within 214 kernel tests, 20 task-lifetime tests, 19 pool tests and five borrowing compile-fail tests pass; the new 144-page image requires complete dependency replay. The first aggregate audit failed 25/105 checks before the final startup-mask repair. This candidate is unmerged and has no current aggregate pass. Mandatory all-task/root/data/stack ownership and independent live retention/failure qualification remain open",
@@ -1421,6 +1422,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             )
         if flag_id == "FLAG-N36-RECEIPT-COVERAGE-001":
             evidence.extend([
+                "tests/test_native_dependency_release_boundaries.py",
                 "runtime/native_kernel_trap.py",
                 "tests/test_native_kernel_trap.py",
                 "docs/native-kernel-trap.md",
@@ -1432,9 +1434,10 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             {
                 "id": flag_id,
                 "class": flag_class,
-                # Cycle 153 found a stale-counter admission defect in PKLOCK1.
+                # Cycle 157 requalifies the repaired bounded PKLOCK1 contract.
                 "status": "closed"
                 if flag_class == "SUPERSEDED"
+                or flag_id == "FLAG-N12-CONCURRENCY-LOCKS-001"
                 or flag_id in {"FLAG-N0-RATIFICATION-SCOPE-001", "FLAG-N2-CPUID-001", "FLAG-N4-PROFILE-001", "FLAG-N4-IPC-MODEL-001", "FLAG-N4-SCHEDULER-MODEL-001", "FLAG-N4-POOLEFS-MODEL-001", "FLAG-N5-POOLEBOOT-PROOF-001", "FLAG-N5-BOOTPROTO-001", "FLAG-N5-BOOTCFG-001", "FLAG-N5-ELF-001", "FLAG-N5-KLOAD-001", "FLAG-N5-MANIFEST-001", "FLAG-N5-PBP1-LIVE-001", "FLAG-N5-KMAP-001", "FLAG-N5-HANDOFF-EXIT-001", "FLAG-N5-INIT-SYSTEM-001", "FLAG-N5-INIT-BUNDLE-001", "FLAG-N5-RECOVERY-BUNDLE-001", "FLAG-N5-SYMBOL-BUNDLE-001", "FLAG-N5-MICROCODE-BUNDLE-001", "FLAG-N5-FIRMWARE-BUNDLE-001", "FLAG-N5-POLICY-BUNDLE-001", "FLAG-N5-INIT-SEMANTICS-001", "FLAG-N5-INNER-PARSE-001", "FLAG-N5-INNER-TRUST-CONTRACT-001", "FLAG-N5-INNER-TRUST-BACKEND-MODEL-001", "FLAG-N5-INNER-KERNEL-REVALIDATE-001", "FLAG-N5-KERNEL-TRANSFER-001", "FLAG-N6-KENTRY-001", "FLAG-N7-TRAP-001", "FLAG-N7-CPU-POLICY-001", "FLAG-N7-ERRATA-POLICY-001", "FLAG-N7-XSTATE-POLICY-001", "FLAG-N7-XSTATE-EXCEPTION-001", "FLAG-N7-PRIVILEGE-MSR-POLICY-001", "FLAG-N8-SMP-FIRST-AP-001", "FLAG-N8-SMP-PERCPU-RUNTIME-001", "FLAG-N8-SMP-IPI-001", "FLAG-N8-SMP-MULTI-AP-001", "FLAG-N9-PMM-FOUNDATION-001", "FLAG-N9-VM-FOUNDATION-001", "FLAG-N9-VM-ACTIVE-001", "FLAG-N9-PMM-SCRUB-001", "FLAG-N9-PMM-METADATA-001", "FLAG-N9-PMM-RECLAIM-001", "FLAG-N9-PMM-GROWTH-001", "FLAG-N9-PMM-GROWTH-AUTOMATION-001", "FLAG-N9-PMM-ACPI-CONSUMER-001", "FLAG-N9-VM-DIRECT-MAP-001", "FLAG-N9-SMP-SHOOTDOWN-001", "FLAG-N12-SCHED-FOUNDATION-001", "FLAG-N12-SCHED-PREEMPT-001", "FLAG-N12-SCHED-DEFERRED-001", "FLAG-N12-SCHED-SMP-001", "FLAG-N12-SCHED-AP-WORKERS-001", "FLAG-N12-SCHED-SMP-PREEMPT-001", "FLAG-N12-CONCURRENCY-ATOMICS-001"}
                 else "open",
                 "phase_id": phase_id,
@@ -1473,10 +1476,10 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "inspect_live_pooleglyph_each_turn": True,
             "verify_master_checklist_coverage_each_turn": True,
             "new_work_must_be_flagged": True,
-            "last_updated_cycle": 156,
-            "selected_move_id": "N9-PMM-ACPI-CONSUMER-001",
+            "last_updated_cycle": 157,
+            "selected_move_id": "N8-IRQ-001",
             "immediate_next_move_id": "N0-GOVERNANCE-CUSTODY-001",
-            "owner_independent_next_move_id": "N12-CONCURRENCY-LOCKS-001",
+            "owner_independent_next_move_id": "N12-CONCURRENCY-RECLAMATION-001",
             "required_records": [
                 "docs/production-goal-charter.md",
                 "docs/pdc-production-build-plan.md",
@@ -1548,7 +1551,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "added_requirement_count": len(coverage["added_requirements"]),
         },
         "baseline": {
-            "pooleos_cycle": 156,
+            "pooleos_cycle": 157,
             "entry_cycle": 79,
             "pooleos_test_count": test_count,
             "historical_consistency_release_gate": {
@@ -1560,29 +1563,41 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 "native_promotion_role": "historical_non_promoting",
             },
             "native_consistency_release_gate": {
-                "passed_checks": None,
+                "passed_checks": 105,
                 "total_checks": 105,
                 "artifact_count": 62,
                 "explicit_gap_count": len(PROGRAM_GAPS),
                 "production_ready": False,
-                "native_promotion_role": "candidate_unqualified_pending_dependency_replay",
-                "qualification_status": "pending_full_candidate_replay",
-                "last_fully_qualified_cycle": 152,
+                "native_promotion_role": "qualified_development_non_promoting",
+                "qualification_status": "pass_current_candidate_non_promoting",
+                "last_fully_qualified_cycle": 157,
                 "last_fully_qualified_passed_checks": 105,
+                "canonical_replay": {
+                    "cycle": 157,
+                    "passed_checks": 105,
+                    "doctor_passed_checks": 708,
+                    "doctor_total_checks": 708,
+                    "pooleos_test_count": 917,
+                    "both_bundle_and_replay_inputs_supplied": True,
+                    "pre_closeout_receipt_sha256": "09E28D0CB455D9D370102263D5F9B4FA0B02F5EE6A6F53401D6EC4A99C4040E6",
+                    "merge_requires_exact_final_replay_publication_and_review_checks": True,
+                    "production_ready": False,
+                },
                 "focused_current_source_projection": {
-                    "cycle": 156,
-                    "scope": "selected_boot_chain_n7_and_memory_checks_only",
-                    "passed_checks": 14,
-                    "total_checks": 14,
-                    "pending_downstream_native_checks": 12,
-                    "final_receipt_fresh_qemu_runs": 4,
-                    "memory_marker_controls": 237,
-                    "allocator_host_tests": 32,
-                    "memory_python_tests": 15,
-                    "memory_release_boundary_controls": 3,
+                    "cycle": 157,
+                    "scope": "all_26_selected_native_dependency_checks",
+                    "passed_checks": 26,
+                    "total_checks": 26,
+                    "pending_downstream_native_checks": 0,
+                    "final_receipt_fresh_qemu_runs": 24,
+                    "negative_control_groups": 421,
+                    "negative_control_cases": 1881,
+                    "kernel_host_tests": 214,
+                    "production_overclaim_controls": 12,
+                    "schema_error_reporting_controls": 3,
                     "canonical_full_replay_performed": False,
-                    "projection_sha256": "D365F7ACAD0980B4C1C48A38FB6D48A6F91A070B74D6EBC1C0DD599F9FD22C0A",
-                    "next_dependency_move_id": "N8-IRQ-001",
+                    "projection_sha256": "097E8880ECDD525A4ED1C1CB6E2F5C55B9C1A98869DCE278FE2A8047939C18EE",
+                    "next_dependency_move_id": "N12-CONCURRENCY-RECLAMATION-001",
                 },
                 "candidate_replay_diagnostic": {
                     "cycle": 154,
@@ -1642,6 +1657,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "blocked": True,
         },
         "claim_boundaries": [
+            "Cycle 157 completes all twelve current IRQ/SMP/scheduler/atomic/lock profiles through 24 final headless boots, 421 control groups and 1881 rejected cases on the unchanged retention kernel. All 26 selected dependency checks and the complete 105-gate/708-Doctor/917-test candidate suite pass. Only the bounded N12.2 lock milestone closes again; N12.3 mandatory physical ownership, independent retirement/failure evidence, N36 recorded-evidence audit and N0 custody remain open. Three invalid-schema error-formatting paths now return failed gates, covered by two new regression methods. Main merge remains conditional on exact-final qualification, publication and clean GitHub review/check state; no production promotion, key, firmware, physical-media or demo change follows.",
             "Cycle 155 replays five N7 live profiles through fourteen fresh boots and 225 marker controls; the unchanged pure PKERR1 receipt remains current. Twelve selected N5/N7 gates pass, fourteen downstream native checks remain stale, and no full candidate aggregate or Doctor pass is claimed. PKTRAP1 recorded-run validation is repaired with 25 mutation cases and eight release-boundary controls; ADD-N36-RECEIPT-COVERAGE-001 and its open flag require the broader audit. No executable kernel bytes, main, demo, signing trust, firmware, physical media or production status change. Next re-derive PMM manager/layout/ownership accounting under N9-PMM-ACPI-CONSUMER-001, then replay VM, interrupts, SMP, scheduler, atomics and locks before full qualification and any merge. N12.2 and N12.3 remain open; N0 custody is separately blocked without requiring new owner action for this replay.",
             "Cycle 154 completes six current-source N5 boot-chain checks for the unmerged Cycle 153 image, not the overall N5 exit or candidate release gate. PSYM1 and PPOL1 dependency drift is repaired; two-run PKLOAD6/PooleBoot and PKXFER1 plus host PKREVAL1 agree on exact retained bytes and unsigned denial. 63 focused regressions pass. Replay N7-TRAP-001 then CPU, memory, SMP, scheduler, atomics and locks before N12.2 closure or merge; mandatory N12.3 ownership and independent lifetime oracle remain later work. N0 custody remains externally blocked; no owner action is needed for this development step. No governance/release key use, firmware mutation, physical-media write, demo rebase or production operation occurred. Isolated disposable signing fixtures in the full host suite confer no production trust.",
             "Cycle 153 is an unmerged native allocator/teardown candidate. Explicit retention protects pages from copied handles; tokens survive migration and ledger growth and fail closed when lost. The three-AP implementation now parks all APs before ending old-frame retention. The changed 144-page kernel and shifted retained layout invalidate prior current-candidate bindings; complete replay remains pending. The last fully qualified main baseline is Cycle 152. Mandatory ownership for all task resources, an independent lifecycle oracle and explicit live retention/failure evidence remain open. The separate demo is unchanged; N12.3 and production remain open.",
@@ -1718,7 +1734,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=915)
+    parser.add_argument("--test-count", type=int, default=917)
     parser.add_argument("--status-date", default="2026-09-05")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

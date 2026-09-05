@@ -4,7 +4,18 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
-Cycle 156 requalifies the allocator, ACPI memory reclamation and sparse virtual
+Cycle 157 completes current-kernel interrupt, SMP, scheduler, atomic and lock
+replay: twelve refreshed profiles, 24 final virtual boots and 1,881 negative
+cases pass. All 26 selected native dependency gates pass. Invalid IRQ/SMP
+receipts now produce failed checks instead of error-formatting exceptions.
+The canonical suite passes all 105 gates and 708 Doctor checks, including the
+917-test suite. The bounded N12.2 lock milestone closes again; N12.3 resource
+ownership remains next. Checkpoints are backed up on GitHub's
+`agent/n12-physical-retention` branch, with main merge subject to exact final
+qualification and publication/review checks. Native kernel bytes, the separate
+demo ISO and production status are unchanged.
+
+Historical Cycle 156 requalifies the allocator, ACPI memory reclamation and sparse virtual
 memory for the retention-capable kernel. The manager contract now matches its
 measured 15,632-byte layout, with regressions rejecting the old size. Four final
 virtual boots and 237 negative controls pass; independent accounting confirms

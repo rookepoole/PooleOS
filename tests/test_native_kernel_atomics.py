@@ -121,7 +121,7 @@ class NativeKernelAtomicsTests(unittest.TestCase):
     def test_release_gate_accepts_only_the_bounded_receipt(self) -> None:
         check = pooleos_release_gate.check_native_kernel_atomics_readiness()
         self.assertTrue(check["ok"], check["detail"])
-        self.assertIn("kernel_tests=206/206", check["detail"])
+        self.assertIn("kernel_tests=214/214", check["detail"])
         self.assertIn("linked_symbols=7", check["detail"])
         self.assertIn("general_locks=false", check["detail"])
         self.assertIn("production_ready=false", check["detail"])

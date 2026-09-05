@@ -1,6 +1,6 @@
 # PooleKernel PKSMP1 First-AP Qualification
 
-Status date: 2026-07-28
+Status date: 2026-09-05
 Selected move: `N8-SMP-FIRST-AP-001`
 Contract: `PKSMP1`
 Status: bounded qemu64 two-vCPU evidence; non-promoting
@@ -39,6 +39,12 @@ After the AP reports online, the BSP writes the stop command and waits for quies
 The qualifier requires two clean kernel builds, two clean PooleBoot builds, two identical media generations, and two fresh QEMU/OVMF runs with two virtual CPUs. Static markers, screenshots, and PBP1 bytes must match. TSC values are dynamic; each run independently validates order and its dependent mailbox checksum before those three fields are normalized for the static-marker comparison.
 
 Seventy-two hostile controls cover marker shape and ordering, topology, low-memory geometry, W^X/NX/guards, startup counts, AP identity and control state, TSC/checksum integrity, final park, complete cleanup, claim overreach, the GDT accessed-bit regression, x2APIC rejection, and missing-target rejection.
+
+The Cycle 157 replay candidate is the unchanged retention-capable Cycle 153
+kernel, with 214 host tests, 517,784 canonical bytes and a 144-page image,
+SHA-256 `BDEECCB27B1B91406911F91169B9BF5F9DF0439BB39FA0E1882C07E1AF3B81EF`.
+Acceptance requires fresh runs bound to these exact inputs; it does not inherit
+historical first-AP qualification or prove general concurrent ownership.
 
 ## Non-Claims
 

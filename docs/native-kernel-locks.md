@@ -96,7 +96,7 @@ No wait-free, reclamation, hotplug, or general-topology guarantee exists.
 
 The PKLOCK1 qualifier establishes the following on one Windows host:
 
-1. The canonical PKENTRY1 build, formatting, Clippy, and all 206 PooleKernel
+1. The canonical PKENTRY1 build, formatting, Clippy, and all 214 PooleKernel
    host tests pass under the pinned workspace-local Rust toolchain.
 2. Four host threads complete 8,192 FIFO ticket acquisitions with no protected
    update loss or ticket-order mismatch under forced contention.
