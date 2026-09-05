@@ -7,7 +7,19 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 150
+Last roadmap reconciliation: PooleOS Cycle 151
+
+Cycle 151 adds the owner-requested unsigned optical demo and demo-only PooleGlass
+static boot renderer without modifying production native source or kernel bytes.
+Two fresh QEMU optical boots pass the existing PKLOCK1 diagnostics, dual-channel
+handoff checks, and exact boot-frame comparison. The design system and PG-01
+through PG-10 implementation register in `docs/pooleglass-design-system.md`
+govern the visual direction across the future OS. N29.8 is partial, the UI flag
+remains open, and no desktop, live material renderer, animated boot, installer,
+hardware qualification or production promotion is implied. N12 reclamation
+integration remains the next chronological kernel move. Demo source and extra
+qualification live under `demos/native_iso/`; it does not replace any production
+gate or resume the paused production goal automatically.
 
 Cycle 150 advances N12.3 with the PKRECLAIM1-CORE bounded object pool:
 actual payload ownership, pool-bound generation handles, scoped reader pins,
@@ -621,6 +633,12 @@ PDC must never control boot trust, signing roots, key storage, recovery availabi
 ## 7. UI and Boot Identity Contract
 
 PooleOS must provide an original coherent Liquid Glass visual system across desktop, shell, applications, installer, settings, permissions, diagnostics, and recovery.
+
+The Cycle 151 design direction is `docs/pooleglass-design-system.md`, with initial
+semantic tokens in `specs/pooleglass-design-tokens.json`. Its implementation
+register is subordinate to the N0-N39 dependency order and this charter.
+Do not mark native rendering, accessibility, animation, or performance complete
+from a bitmap, design document, host preview, or a successful demo boot alone.
 
 Required properties include:
 

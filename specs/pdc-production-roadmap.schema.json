@@ -49,8 +49,8 @@
         "inspect_live_pooleglyph_each_turn": {"const": true},
         "verify_master_checklist_coverage_each_turn": {"const": true},
         "new_work_must_be_flagged": {"const": true},
-        "last_updated_cycle": {"const": 150},
-        "selected_move_id": {"const": "N12-CONCURRENCY-RECLAMATION-001"},
+        "last_updated_cycle": {"const": 151},
+        "selected_move_id": {"const": "N5-DEMO-ISO-001"},
         "immediate_next_move_id": {"const": "N0-GOVERNANCE-CUSTODY-001"},
         "owner_independent_next_move_id": {"const": "N12-CONCURRENCY-RECLAMATION-001"},
         "required_records": {"type": "array", "minItems": 7, "items": {"type": "string"}, "uniqueItems": true},
@@ -92,9 +92,9 @@
       "properties": {
         "total": {"const": 40},
         "complete": {"const": 0},
-        "partial": {"const": 18},
+        "partial": {"const": 19},
         "blocked": {"const": 1},
-        "not_started": {"const": 21},
+        "not_started": {"const": 20},
         "subphase_total": {"const": 301}
       }
     },

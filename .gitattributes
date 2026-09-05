@@ -21,3 +21,10 @@ tools/bootstrap_native_toolchain.ps1 text eol=lf
 
 # Preserve checksum-verified upstream Cargo sources byte-for-byte.
 native/vendor/** -whitespace
+
+# Preserve the imported typography notice and exact firmware texture bytes.
+demos/native_iso/boot/assets/FONT-LICENSE.txt -whitespace
+demos/native_iso/boot/assets/*.alpha4 binary
+demos/native_iso/boot/assets/*.index8 binary
+demos/native_iso/boot/assets/*.rgb binary
+demos/native_iso/Launch-PooleOS-Demo.cmd text eol=lf

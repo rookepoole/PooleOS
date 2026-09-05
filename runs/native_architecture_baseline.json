@@ -611,15 +611,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "7B349AC533E77A796417B6BFB738FE2D33F9F9DDE3E76D16E030EE2A177CB0D1",
-      "byte_count": 60319,
-      "line_count": 764
+      "sha256": "85D9B0C1FD316CE4628E57A1A7AD80C4357CA51CFB4B806CF8040641B81D1189",
+      "byte_count": 61561,
+      "line_count": 782
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "154D22AF901D020BBFF1CD55953D661709FBACD7F0FE1FEF1F7C9ED02FEC3448",
-      "byte_count": 337337,
-      "line_count": 1976
+      "sha256": "E3A7FB9286C8420E0F06DD680E57B4F3B9B5F3391467D91F456B9068AFE9A873",
+      "byte_count": 339755,
+      "line_count": 2009
     },
     {
       "path": "docs/publication-boundary.md",

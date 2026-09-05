@@ -1,8 +1,8 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-04
-Plan version: 2.56.0-native-reclamation-core
-Roadmap cycle: PooleOS Cycle 150
+Plan version: 2.57.0-native-pooleglass-demo
+Roadmap cycle: PooleOS Cycle 151
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
@@ -27,6 +27,31 @@ recovery profile is accepted, and no fallback key may be inferred from primary
 registration. The governance flag and all production boundaries remain open.
 
 ## 1. Architecture Decision
+
+Cycle 151 delivers the owner-requested isolated native demo under
+`N5-DEMO-ISO-001`, with presentation tracked by `FLAG-NATIVE-UI-001` and
+`ADD-UI-001`. A real UEFI El Torito optical ISO boots PooleBoot and the unchanged
+canonical PooleKernel in two fresh four-vCPU QEMU/OVMF runs. The demo-only
+PooleGlass renderer supplies a clear-glass P, wordmark and explicit engineering
+preview caption; actual boot pixels match the compiled host renderer. Native
+PKLOCK1 and dual-channel PBP1 evidence pass. This is an unsigned optical demo,
+not a desktop, installer, physical-hardware qualification, or production release.
+The kernel replaces the splash with its diagnostic console. Animation is open.
+
+`docs/pooleglass-design-system.md` and `specs/pooleglass-design-tokens.json`
+carry the visual direction through the complete OS: glass navigation, opaque
+content and trusted UI, shared typography and controls, accessibility, recovery,
+motion and explicitly unmeasured performance budgets. Its PG-01 through PG-10
+register makes the remaining implementation work explicit under N29 and the
+existing UI flag. N29.8 is partial for this static demo only. Native production
+source, feature defaults, and boot/kernel readiness receipts remain unchanged.
+The architecture inventory refreshes only its plan and charter hashes. The next
+chronological kernel move stays `N12-CONCURRENCY-RECLAMATION-001`; N12.3,
+all 20 program gaps, the governance custody boundary, and production remain open.
+Demo instructions and its additional qualification boundary live in
+`demos/native_iso/README.md`. The existing aggregate gate alone cannot qualify
+this new optical artifact. No key, host firmware, or physical disk operation is
+needed to run it.
 
 Cycle 150 advances N12.3 with `PKRECLAIM1-CORE`: a real allocation-free
 PooleKernel object pool, pool-bound generation handles, scoped reader pins,
@@ -1477,10 +1502,18 @@ Subphases:
 
 Exit gate: selected playback/capture path meets glitch, latency, privacy, and crash-recovery gates; malformed streams/codecs cannot escape service sandboxes.
 
-### N29 - Compositor, Text, Desktop, GUI Toolkit, and Accessibility (`not_started`)
+### N29 - Compositor, Text, Desktop, GUI Toolkit, and Accessibility (`partial`)
 
 Inherited sections: `101-103`, `160-161`. Added: `ADD-UI-001`.  
 Goal: build the original PooleGlass desktop and Liquid Glass identity on native services with accessible fallbacks.
+
+Cycle 151 evidence is limited to the demo static boot mark and an OS-wide design
+specification, not a live compositor or toolkit. The PG-01 through PG-10 register
+in `docs/pooleglass-design-system.md` maps remaining material rendering, controls,
+accessibility, animated transition, trusted/recovery UI and visual qualification
+to these subphases. `FLAG-NATIVE-UI-001` remains open. Reuse
+`specs/pooleglass-design-tokens.json` as the initial semantic design direction;
+its budgets are not measured results and production adoption requires review.
 
 Subphases:
 
@@ -1805,7 +1838,7 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 | `FLAG-NATIVE-FS-001` | STOP_SHIP | Open | PooleFS durability and repair pass randomized power-cut testing |
 | `FLAG-NATIVE-UPDATE-001` | STOP_SHIP | Open | Signed A/B update, rollback, key compromise, and recovery tests pass |
 | `FLAG-NATIVE-SEC-001` | STOP_SHIP | Open | Threat model, crypto/RNG, boot trust, isolation, and external review gates pass |
-| `FLAG-NATIVE-UI-001` | REQUIRED | Open | Native PooleGlass and accessibility/fallback paths pass supported profiles |
+| `FLAG-NATIVE-UI-001` | REQUIRED | Open; static demo and design specification in Cycle 151 | Complete PG-01 through PG-10 in the PooleGlass design register; native materials, controls, accessibility, animation, trusted UI, recovery, and target measurements remain open |
 | `FLAG-NATIVE-PGL-001` | BLOCKER | Open | Close the promoted PooleGlyph language, Phase 66, PGB2/PGVM2 v1, host-ABI, compatibility, native-integration, and recovery gates |
 | `FLAG-PGL-CODEV-001` | REQUIRED | Open | Bind exact PooleGlyph and PooleOS revisions, checkpoint evidence, change impacts, and compatibility profiles so neither repository drifts silently |
 | `FLAG-PGL-CORE-IR-001` | BLOCKER | Open | Accept Phase 66 classification and independent validation proving metadata cannot become executable or privileged Core IR |

@@ -62,6 +62,7 @@ DEPENDENCIES = {
 
 
 SUBPHASE_OVERRIDES = {
+    "N29.8": "partial",
     "N0.1": "partial",
     "N0.2": "partial",
     "N0.3": "partial",
@@ -195,6 +196,7 @@ PHASE_EVIDENCE = {
         "docs/native-formal-models.md: frozen assumptions, reproduction, trace normalization, open domains, and explicit non-proof boundary",
     ],
     "N5": [
+        "demos/native_iso/evidence.json: Cycle 151 non-promoting UEFI El Torito optical demo, two fresh four-vCPU PKLOCK1 boots, unchanged canonical kernel and native source, exact static PooleGlass guest pixels; not a signed or production ISO",
         "specs/native-pooleboot-proof.json: POOLEOS-N5-POOLEBOOT-7 bounded unsigned aggregate contract across N5.1-N5.9",
         "native/boot: Poole-authored no_std PE32+ UEFI application with reviewed firmware bindings, live bounded filesystem/config/kernel/PBART1/PBTP1/PBTS1 intake, exact retained-page inner parsing, GOP identity, retained PKMAP2 kernel/six-artifact/PSM1/trust-policy/trust-state/table/guarded-stack/handoff storage, final PBLIVE4 production with a firmware RSDP record, bounded PBEXIT1 retry, successful ExitBootServices, direct post-exit serial/debugcon diagnostics, a default permanent stop, and a separately feature-gated QEMU-only one-way development transfer",
         "native/artifact, runtime/native_boot_artifact.py, and docs/native-initial-system-profile.md: PBART1 fixed envelope, exact PBASET1 seven-role development profile, independent parser/oracle, role/version/payload/whole-file digest boundaries, and explicit no-authentication/no-activation contract",
@@ -327,6 +329,10 @@ PHASE_EVIDENCE = {
         "ADD-N12-CONCURRENCY-RECLAMATION-001: the scoped object-pool core is host-qualified; bind actual scheduler and virtual-memory generations, acknowledged cross-CPU quiescence, timeout/offline/death/pressure/shutdown rollback and exact-topology live evidence before closing N12.3",
     ],
     "N15": ["runs/microkernel_isolation.json", "runs/capability_trap_proof.json", "runs/capability_trap_fuzz.json"],
+    "N29": [
+        "docs/pooleglass-design-system.md and specs/pooleglass-design-tokens.json: OS-wide visual direction and PG-01 through PG-10 implementation register under FLAG-NATIVE-UI-001; performance budgets are unmeasured targets",
+        "demos/native_iso/boot: demo-only static glass emblem and licensed fixed wordmark; four Rust renderer tests, two fresh optical boots and exact guest/host pixels; no native compositor or animation claim",
+    ],
     "N31": ["existing signed receipt and benchmark methodology artifacts"],
     "N32": ["PDC-MATH-0.1", "PDC-REP-0.1", "PDC-GOLDEN-0.2", "PDC-QP-0.1", "PDC-QP-STABILITY-0.1"],
     "N33": ["existing PDC receipt schemas and guarded-route source documents; no native services"],
@@ -380,7 +386,7 @@ PHASE_GAPS = {
     "N26": ["No native network stack, services, firewall, or TLS integration exists"],
     "N27": ["No native software renderer or virtio-gpu path exists; RTX support remains research"],
     "N28": ["No native audio path or media/peripheral service exists"],
-    "N29": ["No native compositor, PooleGlass desktop, toolkit, accessibility, or boot identity exists"],
+    "N29": ["Cycle 151 supplies a demo-only static PooleGlass boot mark and design specification, but no native compositor, desktop, toolkit, accessibility stack, live glass material renderer, preference integration or animated transition; PG-01 through PG-10 remain under FLAG-NATIVE-UI-001"],
     "N30": ["No native application ABI, SDK, sandbox, or portal model exists"],
     "N31": ["No native debugger, crash dump, trace, PMU, or system metrics implementation exists"],
     "N32": ["Signed dynamics and portable/native C/CPU/RAM/GPU execution remain open"],
@@ -1442,8 +1448,8 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "inspect_live_pooleglyph_each_turn": True,
             "verify_master_checklist_coverage_each_turn": True,
             "new_work_must_be_flagged": True,
-            "last_updated_cycle": 150,
-            "selected_move_id": "N12-CONCURRENCY-RECLAMATION-001",
+            "last_updated_cycle": 151,
+            "selected_move_id": "N5-DEMO-ISO-001",
             "immediate_next_move_id": "N0-GOVERNANCE-CUSTODY-001",
             "owner_independent_next_move_id": "N12-CONCURRENCY-RECLAMATION-001",
             "required_records": [
@@ -1517,7 +1523,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "added_requirement_count": len(coverage["added_requirements"]),
         },
         "baseline": {
-            "pooleos_cycle": 150,
+            "pooleos_cycle": 151,
             "entry_cycle": 79,
             "pooleos_test_count": test_count,
             "historical_consistency_release_gate": {
@@ -1578,6 +1584,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "blocked": True,
         },
         "claim_boundaries": [
+            "Cycle 151 provides the owner-requested unsigned QEMU-only optical demo with a demo-only PooleGlass static renderer. Two fresh four-vCPU optical boots pass PKLOCK1 and exact boot-frame comparison while canonical native source and kernel bytes stay unchanged. The OS-wide design system records PG-01 through PG-10 under FLAG-NATIVE-UI-001; N29.8 is partial only. No compositor, animation, installer, physical target, N5/N29/N39 exit or production claim follows; N12-CONCURRENCY-RECLAMATION-001 remains the next chronological kernel move.",
             "Cycle 150 implements and host-qualifies PKRECLAIM1-CORE only. The fixed-capacity no_std object pool uses PKLOCK1 admission and PKATOM1 pins, pool-bound nonwrapping generation handles, actual payload ownership, retirement, exact-once reclamation and shutdown retention. N12.3 and FLAG-N12-CONCURRENCY-RECLAMATION-001 remain open for scheduler/address-space lifecycle binding, acknowledged cross-CPU quiescence, failure rollback and two-run live evidence. Existing canonical linked kernel bytes are unchanged; no new guest execution, target, N12-exit or production claim follows.",
             "Post-Cycle 149 registration evidence supersedes historical unavailable-key statements for the primary signer only. Enrollment signature verification, recovery custody, architecture ratification, and production remain pending.",
             "Buildroot and Linux artifacts are historical reference evidence and cannot satisfy native PooleOS gates.",
