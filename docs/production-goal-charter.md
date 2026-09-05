@@ -7,7 +7,22 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 151
+Last roadmap reconciliation: PooleOS Cycle 152
+
+Cycle 152 resumes owner-independent native development under
+`N12-CONCURRENCY-RECLAMATION-001`. PKLIFE1 owns the actual PKSCHED4 scheduler
+and binds moved inactive PKVM1 address-space resources to PKRECLAIM1 reader
+pins, checked task generations, cancellation, retirement and exact-once reclaim.
+Nineteen lifetime tests and nineteen pool tests pass in both host profiles;
+three borrowing compile-fail tests, 206 unchanged kernel regressions and
+freestanding checks pass. Canonical linked boot bytes remain unchanged.
+This is serialized inactive-object integration, not active-root ownership,
+hardware quiescence, a live selector, ring 3 or production. Existing PMM handle
+copyability is an explicit remaining ownership boundary. The next chronological
+step is acknowledged remote teardown and physical ownership, followed by an
+independent oracle and two-run live failure qualification. N12.3 and its flag
+remain open. The isolated demo, governance custody and all 20 gaps are unchanged.
+See `docs/native-kernel-task-lifetimes.md` for invariants and retained limitations.
 
 Cycle 151 adds the owner-requested unsigned optical demo and demo-only PooleGlass
 static boot renderer without modifying production native source or kernel bytes.

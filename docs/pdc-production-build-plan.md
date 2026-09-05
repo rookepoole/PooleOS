@@ -1,8 +1,8 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-04
-Plan version: 2.57.0-native-pooleglass-demo
-Roadmap cycle: PooleOS Cycle 151
+Plan version: 2.58.0-native-task-lifetimes
+Roadmap cycle: PooleOS Cycle 152
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
@@ -27,6 +27,27 @@ recovery profile is accepted, and no fallback key may be inferred from primary
 registration. The governance flag and all production boundaries remain open.
 
 ## 1. Architecture Decision
+
+Cycle 152 resumes chronological kernel development with PKLIFE1 under
+`N12-CONCURRENCY-RECLAMATION-001`. The native controller owns the actual
+PKSCHED4 scheduler and moves actual inactive PKVM1 address spaces into the
+PKRECLAIM1 pool. Retired resources and task slots remain unavailable until all
+readers release; cancellation, pending/running dispatch, exact scheduler ACK
+checks, offline rollback, shutdown and stale-generation rejection are covered.
+Nineteen lifetime tests and nineteen pool tests pass in each of two host
+profiles, along with three borrow compile-fail tests, 206 unchanged kernel
+regressions and host/freestanding checks. The linked boot kernel remains
+byte-identical to Cycle 149; no new live selector or demo rebuild is claimed.
+
+The exact boundary and ordered next steps are recorded in
+`docs/native-kernel-task-lifetimes.md`. Next: active physical ownership and
+acknowledged cross-CPU alias/shootdown/park/scrub/release integration, an
+independent oracle and two live runs with failure retention. Existing copyable
+PMM handles and inactive PKVM1 metadata do not prove global physical ownership.
+N12.3, its existing flag, all 20 program gaps and production remain open. No
+new phase or requirement is closed; the architecture inventory now binds 222
+sources. PooleGlyph remains at the unchanged Phase 65/66 boundary, with its
+existing generated report preserved. The separate Cycle 151 demo remains frozen.
 
 Cycle 151 delivers the owner-requested isolated native demo under
 `N5-DEMO-ISO-001`, with presentation tracked by `FLAG-NATIVE-UI-001` and
@@ -1230,6 +1251,16 @@ acknowledged remote quiescence and alias/shootdown coupling; timeout, cancellati
 offline/death/pressure/shutdown rollback; independent oracle and two live runs.
 This is partial N12.3 evidence; no new requirement is silently closed or added.
 
+Cycle 152 completes the serialized inactive-object part of the first substep
+through PKLIFE1. Its source and tests live under `native/kernel/src/reclamation/`
+and `native/kernel/tests/task_lifetimes.rs`, with source-bound qualification in
+the version 1.1 reclamation receipt. Nineteen lifetime tests cover actual PMM/VM
+objects, eight task slots, 128 exact resource-destruction cycles, four host
+readers, malformed admission without generation-budget consumption, pending
+and Running task retention, late ACK rejection, timeout, shutdown and owner loss.
+The next substep is active physical ownership and exact remote quiescence;
+the independent oracle and live selector must precede any N12.3 closure.
+
 Exit gate: deterministic and randomized SMP schedule tests show no lost wakeup, duplicate runnable task, dead task, priority inversion violation, register leak, or starvation beyond declared bounds.
 
 ### N13 - Tasks, Syscalls, Events, and Capability Object Model (`not_started`)
@@ -1831,7 +1862,7 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 | `FLAG-N12-SCHED-SMP-PREEMPT-001` | REQUIRED | Closed in Cycle 147 | PKSCHED6 proves four bounded timer/event/frame/run-queue lanes, deterministic cancel/wake/migration ordering, eight live acknowledgement-gated reschedule IPIs, three quantum switches, offline rollback, watchdog/fairness bounds, eight task retirements, and exact 102-page teardown only for one frozen four-vCPU development topology; AP-local timer interrupts and general SMP remain open |
 | `FLAG-N12-CONCURRENCY-ATOMICS-001` | REQUIRED | Closed in Cycle 148 | PKATOM1 freezes allocation-free typed `u32`/`u64`/`usize`/pointer atomics and operation-specific order types; rejects invalid orderings; proves host publication, contended RMW/CAS, sequential consistency, overflow-safe reference counts, seven linked x86-64 mappings, and one BSP process-to-interrupt release/acquire plus RMW path ordered before EOI without claiming general locks, live multi-AP contention, reclamation, portability, target, N12 exit, or production |
 | `FLAG-N12-CONCURRENCY-LOCKS-001` | REQUIRED | Closed in Cycle 149 | PKLOCK1 proves an allocation-free FIFO ticket/IRQ-save/sleeping-mutex/notification/writer-preferred-reader-writer/seqlock family; direct bounded donation, five-rank order and cycle rejection, owner death, exact rollback, 8,192 host ticket acquisitions, and one exact four-vCPU live ticket-lock profile without claiming reclamation, general SMP, target, N12 exit, or production |
-| `FLAG-N12-CONCURRENCY-RECLAMATION-001` | REQUIRED | Open; core host-qualified in Cycle 150 | PKRECLAIM1-CORE implements real payload ownership, generation handles, pins, retirement and exact-once reclaim. Still required: actual scheduler/address-space lifecycle binding, acknowledged cross-CPU quiescence, timeout/offline/owner-death/pressure/shutdown rollback, independent oracle and exact-topology live evidence; no general-SMP, hotplug, target, N12-exit or production claim |
+| `FLAG-N12-CONCURRENCY-RECLAMATION-001` | REQUIRED | Open; core and inactive task lifetimes host-qualified through Cycle 152 | PKRECLAIM1-CORE and PKLIFE1 bind real payloads, the actual scheduler and inactive address spaces, pins, retirement and exact-once reclaim. Still required: active physical ownership despite copyable PMM handles, acknowledged cross-CPU quiescence, live timeout/offline/owner-death/pressure/shutdown rollback, independent oracle and exact-topology live evidence; no general-SMP, hotplug, target, N12-exit or production claim |
 | `FLAG-NATIVE-KERNEL-001` | STOP_SHIP | Open | PooleKernel boots, enforces memory/capabilities/IPC, and runs ring 3 |
 | `FLAG-NATIVE-IOMMU-001` | STOP_SHIP | Open | DMA and interrupt remapping confine every bus-mastering driver |
 | `FLAG-NATIVE-DRIVER-001` | STOP_SHIP | Open | User-space driver domains survive crash/reset/revoke without stale authority |

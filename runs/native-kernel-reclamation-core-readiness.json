@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "contract_id": "PKRECLAIM1-CORE",
   "selected_move_id": "N12-CONCURRENCY-RECLAMATION-001",
   "phase": "N12.3",
@@ -10,19 +10,28 @@
   "n12_3_complete": false,
   "focused_test_count": 19,
   "kernel_regression_count": 206,
-  "compile_fail_borrow_tests": 1,
+  "compile_fail_borrow_tests": 3,
+  "task_lifetime_contract_id": "PKLIFE1",
+  "task_lifetime_test_count": 19,
+  "task_lifetime_scope": "host_executed_scheduler_and_inactive_address_space_ownership",
   "linked_kernel_sha256": "9029AEE51A4D557EF5B29945985E4A1F07C67DDE9C8C367C80BD1B9EDD9D409E",
   "linked_kernel_byte_count": 513680,
   "sources": {
-    "native/kernel/src/reclamation.rs": "2570E6651ACE5B1A29E6198474CD1A3B57A6379C0A843532C10EFA4B1874DC1C",
+    "native/kernel/src/reclamation.rs": "D83CC01443435BD993C6A688B7BDD169A05B87B20AC32B083FFEB81988206A62",
+    "native/kernel/src/reclamation/task_lifetimes.rs": "86D9CF9E560507035B45C2564D0444ED176E8CBBFA4B5D68D74F7CAF48893093",
     "native/kernel/src/lib.rs": "50225A83A7CB7C2E66AABD5D479B2F48D57DDAE365047D2BF3581F8741AB5CA0",
     "native/kernel/src/atomics.rs": "1B4228C921F0746C101B307A20E34DCF7D7D859895A440D027005FADE48D0B90",
     "native/kernel/src/locks.rs": "BA5DA63D18306C3787E6D6646F1E327FC952F8AD43634604449AEE4699CEB707",
     "native/kernel/tests/reclamation_core.rs": "43D28759ABC933FE5A4F85D22AFE8A588EEE559FDC20C6188C3347B8D2F74FCA",
+    "native/kernel/tests/task_lifetimes.rs": "9376435ED122AED7B9F6956D6A560B7D107B32FF74FDD15474D2C8C2017D281B",
+    "native/kernel/src/scheduler_smp.rs": "8C3C13140D867F3766F6209B1B918970BA095EA5FA35634C721D5C0509469390",
+    "native/kernel/src/virtual_memory.rs": "54F6CDB1C94896640247E45FEC4394F2D66844CCA7FDEF7EFD4C439C68F97BAD",
+    "native/kernel/src/physical_memory.rs": "DC855A94C64333C7E5289962C5736E62318EA55D4D390B4EBF974C42A1F446CC",
+    "native/handoff/src/lib.rs": "983DAFD71E0B892F6F98C614D43600CBEBDDBD7C0AA1E2D81CDAA545E165B110",
     "native/kernel/Cargo.toml": "F9F3AB6D84008B0354A5B82B0F616C5652C076C15F3313F14B862ED0DB1C1C43",
     "native/Cargo.lock": "29CE9938C5C60DEA5AEA244A6961BB1924D88AEC601D1E02EAAA510B0B36E390",
     "specs/native-toolchain-lock.json": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E",
-    "tools/qualify_native_reclamation_core.py": "626D4FDD4E10DB176A6868FE4013447909B47AAD37C64601A50B8D54338A68CC"
+    "tools/qualify_native_reclamation_core.py": "3798F151626559545B07A71D19ADF76ECB629CA8140D67938CA86AC34B0B64FE"
   },
   "stages": [
     {
@@ -33,7 +42,7 @@
     {
       "name": "host-build-debug",
       "status": "pass",
-      "output_sha256": "CDE9F16E619928E90DA1EC070E61CE58179E83FA9B64E16DE9FCB8D239AFB388"
+      "output_sha256": "EA0EE4B508C31EEE8261C822DE176FF9A9A117597A2A753ACD1AEECA525D100E"
     },
     {
       "name": "test-build-debug",
@@ -46,9 +55,19 @@
       "output_sha256": "5CE78BE1CEEC12E3CAE4891CC41EB69E6F30D51836A61FA7C22FC959364BBC2C"
     },
     {
+      "name": "lifetime-build-debug",
+      "status": "pass",
+      "output_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "name": "lifetime-tests-debug",
+      "status": "pass",
+      "output_sha256": "CC96A379A5A1F0EAC3C61DF00CFB7D369E3DAA28B6709F1953499A027C6E7E49"
+    },
+    {
       "name": "host-build-release",
       "status": "pass",
-      "output_sha256": "1C90D2D66C695498F1A87D80785E0EFD05ED1788BF33998CEAF959D0039B20F1"
+      "output_sha256": "5FBCF43024FE526E44C8DC13F6737FA3A1EDB5FE17658C5D0154DC269A5C3AAD"
     },
     {
       "name": "test-build-release",
@@ -61,29 +80,39 @@
       "output_sha256": "5CE78BE1CEEC12E3CAE4891CC41EB69E6F30D51836A61FA7C22FC959364BBC2C"
     },
     {
+      "name": "lifetime-build-release",
+      "status": "pass",
+      "output_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "name": "lifetime-tests-release",
+      "status": "pass",
+      "output_sha256": "94E2BCC7827B473107ABAD9C9D773E192796DC33D687F9FE1816DCF9EB0A856A"
+    },
+    {
       "name": "borrow-doctests",
       "status": "pass",
-      "output_sha256": "5D8EBCB230062C8D4B9D4EED53989610D8ECFD61A8886758AE88DB084C1E4E60"
+      "output_sha256": "F24727B1E12BBF36A812B05A589D1149E463606F4C3C2036C247B94BC78E9A6B"
     },
     {
       "name": "kernel-regressions",
       "status": "pass",
-      "output_sha256": "A5EDDB951564BD275471817FF1B81AA6E8A20AF509E714C8F34187E9579D75A7"
+      "output_sha256": "98F857C20DA1076C29601D336F9777BF5CF4F4A180D6F6597E38A055EFDA98FA"
     },
     {
       "name": "host-clippy",
       "status": "pass",
-      "output_sha256": "B42B3F375A8E0403A0B3192A8F30BAB1FFCB00635676779862C7E7911AEB12FB"
+      "output_sha256": "B3BA9E02F5C859A9AB34E6EB5181263582AEDD4A25936C6788AF7FB4E3F8E360"
     },
     {
       "name": "freestanding-clippy",
       "status": "pass",
-      "output_sha256": "3D7627439392A0B2FDAD63B35F98BAB2231AF08C8A583605A000B1AB98F05965"
+      "output_sha256": "4443FC8CC24F92EBACC6598D17E44E4575F5D505208C44135ABB7EDC8376DA5D"
     },
     {
       "name": "linked-kernel-build",
       "status": "pass",
-      "output_sha256": "019DCF6CF581D6FDAC47C19478B97515E6C3C703EDE8821B491F9DEE15161877"
+      "output_sha256": "DC1570BE796E42D9F28A9C02F301B75C96EB4FE6F64A4B3D7D75AF7304F7423C"
     }
   ]
 }

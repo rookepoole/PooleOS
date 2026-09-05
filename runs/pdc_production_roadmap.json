@@ -43,8 +43,8 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 151,
-    "selected_move_id": "N5-DEMO-ISO-001",
+    "last_updated_cycle": 152,
+    "selected_move_id": "N12-CONCURRENCY-RECLAMATION-001",
     "immediate_next_move_id": "N0-GOVERNANCE-CUSTODY-001",
     "owner_independent_next_move_id": "N12-CONCURRENCY-RECLAMATION-001",
     "required_records": [
@@ -127,9 +127,9 @@
     "added_requirement_count": 56
   },
   "baseline": {
-    "pooleos_cycle": 151,
+    "pooleos_cycle": 152,
     "entry_cycle": 79,
-    "pooleos_test_count": 913,
+    "pooleos_test_count": 915,
     "historical_consistency_release_gate": {
       "passed_checks": 58,
       "total_checks": 58,
@@ -1295,7 +1295,8 @@
         "specs/native-kernel-locks-contract.json, native/kernel/src/locks.rs, runtime/native_kernel_locks.py, tools/qualify_native_kernel_locks.py, tests/test_native_kernel_locks.py, and docs/native-kernel-locks.md: PKLOCK1 freezes an allocation-free FIFO ticket spinlock, IRQ-save lock, sleeping mutex, notification, writer-preferred reader-writer lock, seqlock, five-rank lock-order graph, direct bounded priority donation, exact owner-death and rollback rules, and strict no-reclamation/no-general-SMP/no-target/nonproduction boundaries",
         "runs/native-kernel-locks-readiness.json: 10/10 focused lock tests within 206/206 kernel host tests, nine exact host-probe receipts including 8,192 FIFO ticket acquisitions, two exact 35-marker four-vCPU SandyBridge selector-22 runs, exact tickets 0,1,2,3 across BSP plus three APs, three installed and revoked shared aliases, and 30/30 hostile-control categories covering 103 rejected cases",
         "runs/native-kernel-reclamation-core-readiness.json: Cycle 150 PKRECLAIM1-CORE owns real values in a bounded no_std pool with pool-bound generation handles, RAII pins, retire-before-reclaim, exact-once transfer, nonwrapping limits, pressure retention and shutdown sealing; 19 tests pass in debug and optimized host profiles, one borrow compile-fail test and 206 kernel regressions pass; freestanding Clippy passes and canonical linked bytes remain unchanged; no live integration or CPU grace-period claim",
-        "ADD-N12-CONCURRENCY-RECLAMATION-001: the scoped object-pool core is host-qualified; bind actual scheduler and virtual-memory generations, acknowledged cross-CPU quiescence, timeout/offline/death/pressure/shutdown rollback and exact-topology live evidence before closing N12.3"
+        "docs/native-kernel-task-lifetimes.md and runs/native-kernel-reclamation-core-readiness.json: Cycle 152 PKLIFE1 owns the actual PKSCHED4 scheduler and moved inactive PKVM1 address spaces, binds checked task/root generations, retains pinned retired resources, and blocks premature task-slot reuse. Nineteen lifecycle and nineteen core tests pass in each of two host profiles; three borrow compile-fail tests and 206 kernel regressions pass. No new guest selector or physical quiescence evidence is claimed",
+        "ADD-N12-CONCURRENCY-RECLAMATION-001: scoped object and serialized inactive task ownership are host-qualified; bind active physical ownership despite copyable PMM handles, acknowledged cross-CPU quiescence, live timeout/offline/death/pressure/shutdown rollback, an independent oracle and exact-topology live evidence before closing N12.3"
       ],
       "current_gaps": [
         "PKSCHED1 supplies a bounded allocation-free scheduler core, neutral fixed-priority round-robin policy, selected lifecycle primitives, and a live cooperative BSP two-task context switch. PKSCHED2 integrates that core with PKIRQ1 through exact interrupt frames and proves bounded BSP quantum and wakeup preemption. PKSCHED3 adds allocation-free interrupt-deferred work, two fixed BSP workers, generation-safe slot reclamation, cancellation, flush, rollback, shutdown, and complete cleanup. PKSCHED4 adds four AP/BSP-local run queues on one exact topology, acknowledgement-gated ownership, one generation-safe cross-CPU wake, two migrations, six live AP dispatches, topology balancing, per-CPU idle ownership, timeout rollback, stale-ack rejection, and exact teardown. PKSCHED5 adds three AP-local workers and fixed typed timer-driver and generation-reclaim consumers. PKSCHED6 composes those foundations into four bounded timer/event/frame/run-queue lanes, deterministic cancel/wake/migration ordering, eight live acknowledgement-gated reschedule IPIs, three quantum switches, offline rollback, watchdog/fairness bounds, and exact teardown on the frozen topology. PKATOM1 closes N12.1 for typed 32-bit, 64-bit, pointer, reference-count, RMW, CAS, and fence primitives with explicit order domains, deterministic host stress, linked-code auditing, interrupt-context publication, two live QEMU runs, and invalid-order rejection. PKLOCK1 closes N12.2 for the bounded allocation-free ticket/IRQ-save/mutex/notification/reader-writer/seqlock family, direct priority donation, five-rank order graph, owner death, exact rollback, host contention, and one exact four-vCPU live ticket-lock profile. AP-local timer interrupt delivery, arbitrary callbacks and a general driver/service framework, general topology/hotplug/x2APIC scheduling, deferred reclamation and ABA-safe object lifetime, ring-3 and address-space switching, per-task FS/GS and full xstate/debug/PMU ownership, target-hardware evidence, and the N12 exit gate remain open"
@@ -2886,7 +2887,7 @@
         "ADD-TEST-001"
       ],
       "current_evidence": [
-        "Cycle 150 host baseline: 913 tests with three expected environment skips",
+        "Cycle 150 host baseline: 915 tests with three expected environment skips",
         "native binary parser, reproduction, leakage, malformed, substitution, governance, hardware, Tier 0, bounded-model, deterministic boot-media, PBP1/PBC1/PSM1/PBART1, six inner-format, PBTRUST1/PBSTATE1, PKELF1, PKENTRY1, PKLOAD6/PBLIVE4/PKMAP2/PBEXIT1, PKREVAL1, PKXFER1, PKTRAP1, PKCPU1, PKERR1, PKXSTATE1, PKXEXC1, PKMSR1, PKPMM7/PKACPI1, PKVM1, PKVM3, PKIRQ1, PKSMP1, PKSMP2, PKSMP5, PKSCHED1 through PKSCHED6, PKATOM1, and PKLOCK1 source/live/zero-authority controls, PKRECLAIM1-CORE host-only evidence and source-freshness controls, canonical-LF readiness regression controls, PooleGlyph roadmap bindings, Doctor external-report nonmutation, and collector-smoke negatives"
       ],
       "current_gaps": [
@@ -6646,6 +6647,9 @@
         "docs/pdc-production-build-plan.md",
         "runs/pooleos_native_checklist_coverage.json",
         "native/kernel/src/reclamation.rs",
+        "native/kernel/src/reclamation/task_lifetimes.rs",
+        "native/kernel/tests/task_lifetimes.rs",
+        "docs/native-kernel-task-lifetimes.md",
         "native/kernel/tests/reclamation_core.rs",
         "tools/qualify_native_reclamation_core.py",
         "tests/test_native_reclamation_core.py",
@@ -7118,6 +7122,7 @@
     "blocked": true
   },
   "claim_boundaries": [
+    "Cycle 152 PKLIFE1 composes the actual scheduler, object pool and inactive address spaces with generation-safe task-slot retention, exact-once resource return, cancellation, pending/running dispatch retention, timeout, shutdown and owner-loss handling. Nineteen new lifecycle tests pass in both host profiles and no unsafe code is added. Copyable PMM handles, active-root ownership, hardware quiescence, an independent lifecycle oracle and a new live selector remain open. Canonical linked kernel and the separate demo remain unchanged; N12.3 and production remain open.",
     "Cycle 151 provides the owner-requested unsigned QEMU-only optical demo with a demo-only PooleGlass static renderer. Two fresh four-vCPU optical boots pass PKLOCK1 and exact boot-frame comparison while canonical native source and kernel bytes stay unchanged. The OS-wide design system records PG-01 through PG-10 under FLAG-NATIVE-UI-001; N29.8 is partial only. No compositor, animation, installer, physical target, N5/N29/N39 exit or production claim follows; N12-CONCURRENCY-RECLAMATION-001 remains the next chronological kernel move.",
     "Cycle 150 implements and host-qualifies PKRECLAIM1-CORE only. The fixed-capacity no_std object pool uses PKLOCK1 admission and PKATOM1 pins, pool-bound nonwrapping generation handles, actual payload ownership, retirement, exact-once reclamation and shutdown retention. N12.3 and FLAG-N12-CONCURRENCY-RECLAMATION-001 remain open for scheduler/address-space lifecycle binding, acknowledged cross-CPU quiescence, failure rollback and two-run live evidence. Existing canonical linked kernel bytes are unchanged; no new guest execution, target, N12-exit or production claim follows.",
     "Post-Cycle 149 registration evidence supersedes historical unavailable-key statements for the primary signer only. Enrollment signature verification, recovery custody, architecture ratification, and production remain pending.",

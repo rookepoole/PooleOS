@@ -18,10 +18,16 @@ from tools import qualify_native_kernel_entry as entry  # noqa: E402
 
 SOURCES = (
     "native/kernel/src/reclamation.rs",
+    "native/kernel/src/reclamation/task_lifetimes.rs",
     "native/kernel/src/lib.rs",
     "native/kernel/src/atomics.rs",
     "native/kernel/src/locks.rs",
     "native/kernel/tests/reclamation_core.rs",
+    "native/kernel/tests/task_lifetimes.rs",
+    "native/kernel/src/scheduler_smp.rs",
+    "native/kernel/src/virtual_memory.rs",
+    "native/kernel/src/physical_memory.rs",
+    "native/handoff/src/lib.rs",
     "native/kernel/Cargo.toml",
     "native/Cargo.lock",
     "specs/native-toolchain-lock.json",
@@ -29,10 +35,13 @@ SOURCES = (
 )
 REPORT = ROOT / "runs/native-kernel-reclamation-core-readiness.json"
 TEST_COUNT = 19
+LIFETIME_TEST_COUNT = 19
 KERNEL_SHA256 = "9029AEE51A4D557EF5B29945985E4A1F07C67DDE9C8C367C80BD1B9EDD9D409E"
 STAGES = (
     "format", "host-build-debug", "test-build-debug", "tests-debug",
-    "host-build-release", "test-build-release", "tests-release", "borrow-doctests",
+    "lifetime-build-debug", "lifetime-tests-debug",
+    "host-build-release", "test-build-release", "tests-release",
+    "lifetime-build-release", "lifetime-tests-release", "borrow-doctests",
     "kernel-regressions", "host-clippy", "freestanding-clippy", "linked-kernel-build",
 )
 
@@ -50,12 +59,15 @@ def require_test_result(output: str, count: int) -> None:
 
 def validate_report(report: dict, root: Path = ROOT) -> None:
     expected = {
-        "schema_version": "1.0", "contract_id": "PKRECLAIM1-CORE",
+        "schema_version": "1.1", "contract_id": "PKRECLAIM1-CORE",
         "selected_move_id": "N12-CONCURRENCY-RECLAMATION-001", "phase": "N12.3",
         "status": "host_verified_live_integration_pending", "production_ready": False,
         "live_integration_verified": False, "cross_cpu_quiescence_verified": False,
         "n12_3_complete": False, "focused_test_count": TEST_COUNT,
-        "kernel_regression_count": 206, "compile_fail_borrow_tests": 1,
+        "kernel_regression_count": 206, "compile_fail_borrow_tests": 3,
+        "task_lifetime_contract_id": "PKLIFE1",
+        "task_lifetime_test_count": LIFETIME_TEST_COUNT,
+        "task_lifetime_scope": "host_executed_scheduler_and_inactive_address_space_ownership",
         "linked_kernel_sha256": KERNEL_SHA256, "linked_kernel_byte_count": 513680,
     }
     if not isinstance(report, dict) or set(report) != set(expected) | {"sources", "stages"}:
@@ -126,8 +138,20 @@ def qualify(work: Path) -> dict:
             "-L", f"dependency={artifacts / 'deps'}", "-o", str(binary),
         ])
         run(f"tests-{profile}", [str(binary), "--test-threads=1"], TEST_COUNT)
+        handoff_libraries = sorted((artifacts / "deps").glob("libpoole_handoff-*.rlib"))
+        if len(handoff_libraries) != 1:
+            raise ValueError("expected one exact host handoff library")
+        lifetime_binary = work / f"task-lifetimes-{profile}.exe"
+        run(f"lifetime-build-{profile}", [
+            str(rustc), "--test", str(ROOT / "native/kernel/tests/task_lifetimes.rs"),
+            "--edition=2024", "--target", entry.HOST_TARGET, "-C", f"opt-level={opt}",
+            "--extern", f"poolekernel={artifacts / 'libpoolekernel.rlib'}",
+            "--extern", f"poole_handoff={handoff_libraries[0]}",
+            "-L", f"dependency={artifacts / 'deps'}", "-o", str(lifetime_binary),
+        ])
+        run(f"lifetime-tests-{profile}", [str(lifetime_binary), "--test-threads=1"], LIFETIME_TEST_COUNT)
     env.pop("CARGO_PROFILE_RELEASE_PANIC", None)
-    run("borrow-doctests", [str(cargo), "test", *base, "--doc", *host], 1)
+    run("borrow-doctests", [str(cargo), "test", *base, "--doc", *host], 3)
     run("kernel-regressions", [str(cargo), "test", *base, "--lib", *host, "--", "--test-threads=1"], 206)
     run("host-clippy", [str(cargo), "clippy", *base, "--lib", *host, "--", "-D", "warnings"])
     run("freestanding-clippy", [str(cargo), "clippy", *base, "--lib", "--release",
@@ -148,12 +172,15 @@ def qualify(work: Path) -> dict:
     if before != bind_sources():
         raise ValueError("source changed during qualification")
     report = {
-        "schema_version": "1.0", "contract_id": "PKRECLAIM1-CORE",
+        "schema_version": "1.1", "contract_id": "PKRECLAIM1-CORE",
         "selected_move_id": "N12-CONCURRENCY-RECLAMATION-001", "phase": "N12.3",
         "status": "host_verified_live_integration_pending", "production_ready": False,
         "live_integration_verified": False, "cross_cpu_quiescence_verified": False,
         "n12_3_complete": False, "focused_test_count": TEST_COUNT,
-        "kernel_regression_count": 206, "compile_fail_borrow_tests": 1,
+        "kernel_regression_count": 206, "compile_fail_borrow_tests": 3,
+        "task_lifetime_contract_id": "PKLIFE1",
+        "task_lifetime_test_count": LIFETIME_TEST_COUNT,
+        "task_lifetime_scope": "host_executed_scheduler_and_inactive_address_space_ownership",
         "linked_kernel_sha256": KERNEL_SHA256, "linked_kernel_byte_count": len(canonical),
         "sources": before, "stages": stages,
     }
@@ -169,7 +196,7 @@ def main() -> int:
     report = qualify(args.work.resolve())
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n")
-    print(f"PKRECLAIM1_CORE PASS tests={TEST_COUNT} profiles=2 regressions=206 live=0 production=0")
+    print(f"PKRECLAIM1_CORE PASS tests={TEST_COUNT} lifecycle={LIFETIME_TEST_COUNT} profiles=2 regressions=206 live=0 production=0")
     return 0
 
 

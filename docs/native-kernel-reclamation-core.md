@@ -1,5 +1,12 @@
 # PKRECLAIM1 Core
 
+Cycle 152 adds [PKLIFE1 task lifetimes](native-kernel-task-lifetimes.md): actual
+PKSCHED4 scheduler ownership and moved inactive PKVM1 address spaces, protected
+by this pool. Nineteen additional tests pass in each host profile and two more
+borrow compile-fail cases pass. The current source-bound receipt is version
+1.1. This advances the first remaining integration step below only for the
+serialized inactive-address-space scope; live CPU quiescence remains open.
+
 Cycle 150 advances `N12-CONCURRENCY-RECLAMATION-001`, N12.3, source requirement
 031.3 and `ADD-N12-CONCURRENCY-RECLAMATION-001`. The requirement and flag remain
 open. This is original `no_std` PooleKernel code with host execution evidence,
@@ -74,8 +81,8 @@ python -m unittest tests.test_native_reclamation_core
 The runner retains raw logs locally, binds source SHA-256 values before and
 after execution, enforces a 180-second limit per command, and emits
 `runs/native-kernel-reclamation-core-readiness.json` only after all stages pass.
-It runs 19 tests in debug and optimized host profiles, one borrow compile-fail
-test, 206 preexisting kernel regressions, formatting, host Clippy and
+It runs 19 core and 19 task-lifetime tests in debug and optimized host profiles,
+three borrow compile-fail tests, 206 preexisting kernel regressions, formatting, host Clippy and
 freestanding x86-64 Clippy with warnings denied. A canonical linked-kernel
 rebuild must also retain the exact
 513,680-byte Cycle 149 SHA-256
