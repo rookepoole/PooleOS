@@ -89,7 +89,7 @@
   },
   "metadata_arena": {
     "owner_id": 19781,
-    "manager_byte_count": 15376,
+    "manager_byte_count": 15632,
     "page_count": 5,
     "guard_page_count": 2,
     "mapping_permissions": "supervisor_rw_nx_wb",

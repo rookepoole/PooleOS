@@ -7,7 +7,27 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 155
+Last roadmap reconciliation: PooleOS Cycle 156
+
+Cycle 156 requalifies PKPMM7/PKACPI1 and PKVM3 for the existing unmerged
+retention-capable kernel. The exact manager contract is now 15,632 bytes;
+old-size contract and marker controls reject. Independent PBP1 accounting
+binds the one-page usable-to-loader ownership shift, allocator growth and
+reclaim, and the sparse direct map. Final receipts contain four fresh boots
+and 237 negative controls; native executable bytes do not change. Shared map
+addresses and current checksums are documented from measurements. Retention
+does not itself remove direct-map admission. No phase/flag, full canonical
+gate, N9/N12 exit, frozen demo, main or production promotion is claimed.
+Counts remain 57 ADD requirements, 94 flags (36 open), 20 gaps, 40 phases and
+301 subphases with complete locked checklist mapping. Next replay N8-IRQ-001,
+first-AP/AP-runtime/IPI, scheduler, atomics and locks; then run the full current
+candidate suite. N0 custody and N12.3 mandatory ownership remain open. The
+broader N36 recorded-evidence audit is not closed by these live runs.
+Four stale PKMAP2 fixture cases were also repaired against current measured
+geometry, preserving the specific guard-collision rejection. The focused
+current-source gate projection passes fourteen checks; twelve downstream
+native checks remain stale. It is not a canonical or Doctor pass.
+Historical failures and prior exact-candidate acceptance remain preserved.
 
 Cycle 155 reconstructs the current kernel's trap/CPU/xstate/MSR evidence through
 fourteen fresh QEMU/OVMF boots in the final receipts, 225 marker controls across

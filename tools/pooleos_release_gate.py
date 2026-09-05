@@ -1632,8 +1632,8 @@ def check_native_kernel_physical_memory_readiness(
         "bootstrap_temporary_pte_writes": 23172,
         "complete_address_space_mapping_operations": 0,
         "final_temporary_alias_revoked": True,
-        "loader_reserved_pages_protected": 921,
-        "managed_pages": 129083,
+        "loader_reserved_pages_protected": 922,
+        "managed_pages": 129082,
         "marker_count": 45,
         "memory_entry_count": 98,
         "metadata_allocation_records_at_handoff": 1,
@@ -1641,7 +1641,7 @@ def check_native_kernel_physical_memory_readiness(
         "metadata_free_extents": 11,
         "metadata_guard_pages": 2,
         "metadata_integrity_verified": True,
-        "metadata_manager_bytes": 15376,
+        "metadata_manager_bytes": 15632,
         "metadata_mapping_retained": True,
         "metadata_pte_writes": 5,
         "metadata_receipt_records_at_handoff": 1,
@@ -1693,7 +1693,7 @@ def check_native_kernel_physical_memory_readiness(
         "scrub_receipts": 128,
         "scrubbed_bytes": 46993408,
         "signature_verifications": 0,
-        "source_usable_pages": 117823,
+        "source_usable_pages": 117822,
         "verified_bytes": 46993408,
     }
     if artifact.get("summary") != expected_summary:
@@ -1707,8 +1707,8 @@ def check_native_kernel_physical_memory_readiness(
         errors.append("PKPMM7 overclaims N9 exit or production readiness")
     detail = (
         "contract=PKPMM7+PKACPI1; qemu64_bsp=1; runs=2/2; markers=45/45; controls=191/191; "
-        "map_entries=98; usable=117823; managed=129083; stack_pages=36; "
-        "metadata=5+2_guards; manager_bytes=15376; metadata_receipts=1; "
+        "map_entries=98; usable=117822; managed=129082; stack_pages=36; "
+        "metadata=5+2_guards; manager_bytes=15632; metadata_receipts=1; "
         "ledger_growth=4_to_8_to_15_to_29_pages; capacities=2048/256/2048/128/16; "
         "ledger_guards=4; ledger_pte_writes=83; ledger_retired=27; "
         "pressure=119/7/3; fallback=3; hard_reject=1; pre_effect=host_verified; "
@@ -1751,24 +1751,24 @@ def check_native_kernel_virtual_memory_readiness(
         "active_invalidation_receipts": 3,
         "active_leaf_mutations": 3,
         "authority_grants": 0,
-        "bootstrap_hardware_tlb_invalidations": 950674,
-        "coverage_checksum": "0xFCC0E421FB56C627",
+        "bootstrap_hardware_tlb_invalidations": 950682,
+        "coverage_checksum": "0x64E09067B6BFDCB3",
         "direct_directory_tables": 1,
-        "direct_map_gap_pages": 12943,
+        "direct_map_gap_pages": 12944,
         "direct_map_ranges": 11,
         "direct_page_tables": 237,
         "generation_retirement_receipts": 1,
         "marker_count": 40,
-        "mapped_owned_pages": 117822,
+        "mapped_owned_pages": 117821,
         "negative_controls_passed": 46,
-        "physical_table_writes": 367409,
+        "physical_table_writes": 367408,
         "production_claim_count": 0,
         "qemu_run_count": 2,
         "remote_shootdowns_pending": 0,
         "retained_excluded_pages": 0,
         "signature_verifications": 0,
         "table_pages_materialized": 243,
-        "temporary_pte_writes": 950674,
+        "temporary_pte_writes": 950682,
     }
     if artifact.get("summary") != expected_summary:
         errors.append("PKVM3 readiness summary changed")
@@ -1781,8 +1781,8 @@ def check_native_kernel_virtual_memory_readiness(
         errors.append("PKVM3 overclaims N9 exit or production readiness")
     detail = (
         "contract=PKVM3; qemu64_bsp=1; runs=2/2; markers=40/40; controls=46/46; "
-        "ranges=11; gaps=12943; tables=243; owned_pages=117822; "
-        "physical_writes=367409; temporary_pte_writes=950674; cr3_writes=2; "
+        "ranges=11; gaps=12944; tables=243; owned_pages=117821; "
+        "physical_writes=367408; temporary_pte_writes=950682; cr3_writes=2; "
         "active_invlpg=3; retirement_receipts=1; remote_shootdowns=0; authority=0; "
         "target=false; n9_exit=false; production_ready=false"
     )

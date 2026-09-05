@@ -1,5 +1,5 @@
 {
-  "artifact_kind": "pooleos_native_kernel_physical_memory_readiness",
+  "artifact_kind": "pooleos_native_kernel_virtual_memory_readiness",
   "build": {
     "all_profile_binaries_distinct": true,
     "default_pooleboot": {
@@ -744,7 +744,26 @@
         "target": "x86_64-unknown-none"
       }
     },
-    "physical_memory_pooleboot": {
+    "profile_count": 2,
+    "source_audit": {
+      "active_cr3_write_count": 2,
+      "active_local_invalidation_count": 3,
+      "adapter_path": "native/kernel/src/main.rs",
+      "adapter_sha256": "3EAA0680A89CDE516A652FA0E0F3FD935121185B982F9F02C485CA45AB5544D9",
+      "architecture_path": "native/kernel/src/arch/x86_64.rs",
+      "architecture_sha256": "F39BB4327F83BC44AE4E38DDFA0F46793209F30D7CA3B7A0A44342FC1BBDC058",
+      "bootstrap_temporary_mapping_uses_invlpg": true,
+      "core_path": "native/kernel/src/active_virtual_memory.rs",
+      "core_sha256": "65B848248785E06B070B802D51E8B79F1BE332A89B101A432D2B227B0243189F",
+      "heap_api_token_count": 0,
+      "live_cpuid_physical_width_validated": true,
+      "max_direct_directory_table_count": 4,
+      "max_direct_page_table_count": 512,
+      "result": "pass_sparse_pmm_owned_direct_map_generation_retirement_and_local_receipt_adapter",
+      "table_page_count_derived_from_manifest": true,
+      "volatile_physical_adapter": true
+    },
+    "virtual_memory_pooleboot": {
       "byte_count": 208896,
       "clean_build_count": 2,
       "development_transfer_feature": true,
@@ -811,90 +830,36 @@
             "virtual_size": 760
           }
         ],
-        "sha256": "D7A6E5B30E05FD50FBA0D4B1C4CAC198819137D6422014FFC8EE8798DF1BFCCD",
+        "sha256": "CDA5AFBE29F609987FF98F0044A94FF2EEB7297C1FEF01516517B9FFEDB0AFB9",
         "subsystem": 10,
         "timestamp": 0
       },
-      "selected_development_feature": "development-physical-memory",
-      "sha256": "D7A6E5B30E05FD50FBA0D4B1C4CAC198819137D6422014FFC8EE8798DF1BFCCD"
-    },
-    "profile_count": 2,
-    "source_audit": {
-      "active_fixed_capacity_ledger_count": 0,
-      "adapter_path": "native/kernel/src/main.rs",
-      "adapter_sha256": "3EAA0680A89CDE516A652FA0E0F3FD935121185B982F9F02C485CA45AB5544D9",
-      "authorized_generation_storage_unsafe_site_count": 5,
-      "authorized_metadata_migration_unsafe_site_count": 4,
-      "authorized_utf8_and_mapped_read_unsafe_site_count": 3,
-      "bootstrap_fixed_capacity_ledger_count": 5,
-      "core_path": "native/kernel/src/physical_memory.rs",
-      "core_sha256": "26AF4FED4DFFA50D271B0B54ADABF9CD2EBDF3DCFEE3C4566E501C00F0B1C673",
-      "final_guarded_metadata_mapping_retention_required": true,
-      "final_temporary_alias_revocation_required": true,
-      "heap_api_token_count": 0,
-      "implementation_unauthorized_unsafe_token_count": 0,
-      "live_adapter_volatile_read_site_count": 15,
-      "live_adapter_volatile_write_site_count": 13,
-      "pksmp1_mailbox_volatile_read_site_count": 2,
-      "pksmp1_mailbox_volatile_write_site_count": 2,
-      "pksmp2_mailbox_volatile_read_site_count": 2,
-      "pksmp2_mailbox_volatile_write_site_count": 2,
-      "pksmp3_mailbox_volatile_read_site_count": 2,
-      "pksmp3_mailbox_volatile_write_site_count": 2,
-      "result": "pass_acpi_snapshot_gated_dual_reclaim_with_audited_live_page_adapter"
+      "selected_development_feature": "development-active-virtual-memory",
+      "sha256": "CDA5AFBE29F609987FF98F0044A94FF2EEB7297C1FEF01516517B9FFEDB0AFB9"
     }
   },
   "claims": {
-    "acpi20_rsdp_handoff_consumed": true,
-    "acpi_reclaim_activated": true,
-    "acpi_reclaim_timing_enforced": true,
-    "acpi_release_requires_opaque_consumer_evidence": true,
-    "acpi_required_tables_copied_and_readback_verified": true,
-    "acpi_snapshot_retained_and_release_excluded": true,
-    "acpi_xsdt_and_required_tables_validated": true,
-    "allocation_scrub_before_handle_commit": true,
-    "boot_services_reclaim_lifecycle_enforced": true,
-    "boot_services_reclaim_scrubbed_and_activated": true,
-    "bootstrap_temporary_alias_revoked": true,
-    "bounded_allocate_free_and_coalesce_exercised": true,
-    "complete_direct_map_or_address_space_claimed": false,
-    "concurrent_or_smp_allocator_qualified": false,
-    "dma_dma32_normal_zone_accounting_enforced": true,
-    "firmware_source_kind_pairs_revalidated": true,
-    "full_page_readback_verified": true,
-    "generation_and_sequence_bound_scrub_receipts": true,
-    "generation_bound_reclaim_receipt_enforced": true,
-    "kernel_handoff_and_root_loader_ownership_audited": true,
-    "live_pbp1_memory_map_consumed_by_poolekernel": true,
-    "metadata_all_ledger_capacities_expanded": true,
-    "metadata_alternate_guarded_windows_enforced": true,
-    "metadata_arena_guarded_mapping_retained": true,
-    "metadata_bootstrap_ledgers_migrated": true,
-    "metadata_bounded_window_hard_rejection_pre_effect_host_tested": true,
-    "metadata_bounded_window_soft_fallback_exercised": true,
-    "metadata_generation_owned_ledgers_active": true,
-    "metadata_growth_precommit_rollback_host_tested": true,
-    "metadata_handoff_and_mapping_rollback_host_tested": true,
-    "metadata_logical_integrity_seal_enforced": true,
-    "metadata_old_generation_revoked_scrubbed_retired": true,
-    "metadata_poison_state_exercised": true,
-    "metadata_pressure_capacity_checked_before_automatic_operations": true,
-    "metadata_pressure_repeated_multi_generation_growth_exercised": true,
-    "metadata_pressure_retry_headroom_enforced": true,
-    "metadata_release_exclusion_enforced": true,
-    "metadata_retirement_failure_recovery_host_tested": true,
+    "active_address_space_local_invalidation_receipts_exercised": true,
+    "architectural_accessed_dirty_bits_handled": true,
+    "bootstrap_temporary_mapping_activated_and_revoked": true,
+    "canonical_48_bit_layout_frozen": true,
+    "complete_profile_pmm_ownership_direct_map_activated": true,
+    "frame_reuse_before_user_and_direct_receipts_rejected": true,
+    "future_smp_shootdown_dependency_enforced": true,
+    "generation_retirement_receipt_enforced": true,
+    "kernel_complete_candidate_root_materialized": true,
+    "kernel_stack_and_handoff_mappings_inherited_exactly": true,
+    "live_pmm_generation_bound_table_and_data_frames": true,
     "n9_exit_gate_satisfied": false,
-    "physical_page_contents_scrubbed": true,
+    "one_bsp_candidate_root_installed_and_restored": true,
     "production_ready": false,
-    "quota_and_double_free_rejection_exercised": true,
-    "reclaim_atomicity_rollback_and_idempotence_host_tested": true,
-    "reclaim_capacity_and_retained_range_preflight_enforced": true,
-    "release_scrub_before_reuse": true,
-    "scrub_failure_ownership_rollback_host_tested": true,
-    "stale_pattern_absent_after_exact_reuse": true,
-    "usable_only_initial_ownership_enforced": true
+    "ring3_huge_pages_pcid_cow_user_faults_or_pager_implemented": false,
+    "single_write_back_cache_policy_enforced": true,
+    "smp_shootdown_implemented": false,
+    "sparse_holes_and_retained_ranges_unmapped": true,
+    "transactional_leaf_and_cr3_rollback_host_tested": true
   },
-  "contract_id": "PKPMM7",
+  "contract_id": "PKVM3",
   "execution": {
     "acceleration": "tcg_single_thread",
     "cpu_model": "qemu64",
@@ -949,6 +914,73 @@
         "receipt_checksum": 6767390971658308632,
         "scrub_bytes": 46080000,
         "source_record_count": 70
+      },
+      "direct_map": {
+        "coverage_checksum": 7268968573698038963,
+        "direct_directory_tables": 1,
+        "direct_page_tables": 237,
+        "end_page": 130766,
+        "first_page": 1,
+        "gap_pages": 12944,
+        "mapped_pages": 117821,
+        "ranges": [
+          {
+            "cache": "write_back",
+            "page_count": 159,
+            "start_page": 1
+          },
+          {
+            "cache": "write_back",
+            "page_count": 1798,
+            "start_page": 256
+          },
+          {
+            "cache": "write_back",
+            "page_count": 4,
+            "start_page": 2055
+          },
+          {
+            "cache": "write_back",
+            "page_count": 20,
+            "start_page": 2060
+          },
+          {
+            "cache": "write_back",
+            "page_count": 107636,
+            "start_page": 6016
+          },
+          {
+            "cache": "write_back",
+            "page_count": 7736,
+            "start_page": 113684
+          },
+          {
+            "cache": "write_back",
+            "page_count": 122,
+            "start_page": 122238
+          },
+          {
+            "cache": "write_back",
+            "page_count": 4,
+            "start_page": 122419
+          },
+          {
+            "cache": "write_back",
+            "page_count": 1,
+            "start_page": 124377
+          },
+          {
+            "cache": "write_back",
+            "page_count": 135,
+            "start_page": 128749
+          },
+          {
+            "cache": "write_back",
+            "page_count": 206,
+            "start_page": 130560
+          }
+        ],
+        "table_pages": 243
       },
       "entry_count": 98,
       "first_free_address": [
@@ -1063,209 +1095,83 @@
     ],
     "normalized_command_sha256": "BF26B10D53C21F195065BE2F2261FCDEED04E2013068AC329F1BB1D0A3766C32",
     "observation": {
-      "acpi_reclaim": {
-        "atomic": 1,
-        "class": "acpi",
-        "dma32_pages": 11,
-        "dma_pages": 0,
-        "idempotent": 1,
-        "normal_pages": 0,
-        "pages": 11,
-        "post_extents": 15,
-        "pre_extents": 15,
-        "range_checksum": 14346492756641339378,
-        "ranges": 1,
-        "receipt_checksum": 6979072174686841814,
-        "rollback": "host_verified",
-        "scrub_bytes": 45056,
-        "sequence": 2,
-        "snapshot_retained": 1,
-        "source_records": 1,
-        "stage": "acpi_tables_released",
-        "verified_bytes": 45056
+      "activation": {
+        "bsp": 1,
+        "candidate_readback": "exact",
+        "cr3_writes": 2,
+        "original_restore": "exact",
+        "rollback_control": "host_verified",
+        "smp": 0
       },
-      "acpi_snapshot": {
-        "aml": 0,
-        "apic_bytes": 120,
-        "contract_id": "PKACPI1",
-        "copied_bytes": 600,
-        "copy_verified": 1,
-        "facp_bytes": 244,
-        "hpet_bytes": 56,
-        "lifecycle_released": 1,
-        "mcfg_bytes": 60,
-        "pmm_contract_id": "PKPMM7",
-        "production": 0,
-        "required": "APIC,FACP,HPET,MCFG",
-        "required_mask": 15,
-        "retained": 1,
-        "rsdp": 527949844,
-        "smp": 0,
-        "snapshot": 24678400,
-        "snapshot_bytes": 616,
-        "snapshot_checksum": 4650430402681490241,
-        "snapshot_pages": 1,
-        "source_checksum": 541984117539825025,
-        "target": 0,
-        "xsdt": 527945960,
-        "xsdt_entries": 6
+      "candidate": {
+        "bootstrap_alias_revoked": 1,
+        "cache": "write_back",
+        "cache_alias_rejected": 1,
+        "candidate_root": 24641536,
+        "coverage_checksum": 7268968573698038963,
+        "data": 25636864,
+        "data_generation": 2,
+        "direct_first": 18446620928407244800,
+        "direct_generation": 1,
+        "direct_last": 18446620928942858239,
+        "direct_ranges": 11,
+        "gap_pages": 12944,
+        "guarded_stack": "exact",
+        "handoff": "exact",
+        "inherited_kernel": "exact",
+        "original_root": 501186560,
+        "retained_excluded_pages": 0,
+        "root_active": 0,
+        "table_generation": 1
       },
-      "growth": {
-        "actions": 0,
-        "allocation_capacity": 256,
-        "atomic": 1,
-        "authority": 0,
-        "automatic_growths": 3,
-        "checksum": 14365360863561598797,
-        "concurrency": 0,
-        "final_generation": 33,
-        "final_pages": 29,
-        "free_capacity": 2048,
-        "growth_headroom_allocation": 1,
-        "growth_headroom_scrub": 4,
-        "guard_pages": 4,
-        "hard_rejections": 1,
-        "initial_generation": 2,
-        "initial_pages": 4,
-        "integrity": 1,
-        "mapped_pages": 29,
-        "mapping_events": 4,
-        "next_pages": 58,
-        "pre_effect": "host_verified",
-        "pressure_checks": 119,
-        "pressure_cycles": 59,
-        "pressure_triggers": 7,
-        "production": 0,
-        "pte_writes": 83,
-        "reclaim_capacity": 16,
-        "retired_generation": 17,
-        "retired_pages": 15,
-        "retirement_failures": 0,
-        "retirement_retry": 0,
-        "revoked": 3,
-        "rollbacks": 0,
-        "scrub_capacity": 128,
-        "smp": 0,
-        "soft_fallbacks": 3,
-        "source_capacity": 2048,
-        "window_capacity": 32
+      "invalidation": {
+        "active_receipts": 3,
+        "direct_unmap": 1,
+        "exact_release_receipt": 1,
+        "future_smp_shootdown_required": 1,
+        "generation_retirement_receipts": 1,
+        "local_context_flushes": 1,
+        "local_invlpg": 3,
+        "old_generation_reclaim_deferred": 1,
+        "premature_reuse_rejected": 1,
+        "probe": 165,
+        "protect": 1,
+        "remote_shootdowns_pending": 0,
+        "shootdown": 0,
+        "stale_root_rejected": "host",
+        "user_unmap": 1
       },
-      "map": {
-        "boot_reclaimable_pages": 11250,
-        "entries": 98,
-        "loader_reserved_pages": 922,
-        "null_guard_pages": 1,
-        "usable_pages": 117822
-      },
-      "metadata": {
-        "allocation_records": 1,
-        "corruption": "host_verified",
-        "final_checksum": 14686428968376818860,
-        "free_extents": 11,
-        "generation": 1,
-        "guard_pages": 2,
-        "handoff": "validated",
-        "handoff_checksum": 15273988509169102937,
-        "integrity": 1,
-        "manager_bytes": 15632,
-        "mapping_rollbacks": 0,
-        "mappings": 5,
-        "owner": 19781,
-        "pages": 5,
-        "physical_start": 24641536,
-        "pte_writes": 5,
-        "receipt_records": 1,
-        "release_excluded": 1,
-        "release_rejected": 1,
-        "reservation_rollbacks": 0,
-        "rollback": "host_verified",
-        "source_records": 98,
-        "virtual_start": 18446744071563870208
-      },
-      "ownership": {
-        "handoff_base": 497336320,
-        "handoff_pages": 2,
-        "kernel_base": 500097024,
-        "kernel_pages": 144,
-        "protected": 1,
-        "root": 501186560
-      },
-      "reclaim": {
-        "acpi_early_rejected": 1,
-        "acpi_held_pages": 11,
-        "atomic": 1,
-        "class": "boot_services",
-        "dma32_pages": 9232,
-        "dma_pages": 2018,
-        "idempotent": 1,
-        "normal_pages": 0,
-        "pages": 11250,
-        "post_extents": 15,
-        "pre_extents": 13,
-        "range_checksum": 18278818544862638727,
-        "ranges": 12,
-        "receipt_checksum": 6767390971658308632,
-        "retained_excluded": 1,
-        "rollback": "host_verified",
-        "scrub_bytes": 46080000,
-        "sequence": 1,
-        "source_records": 70,
-        "stage": "post_exit_boot_services",
-        "verified_bytes": 46080000
+      "layout": {
+        "direct_directory_tables": 1,
+        "direct_page_tables": 237,
+        "mapped_pages": 117821,
+        "table_pages": 243
       },
       "result": {
-        "acpi_reclaim": 1,
-        "acpi_snapshot_retained": 1,
         "actions": 0,
-        "alias_revoked": 1,
-        "allocated_pages": 35,
+        "active_cr3_writes": 2,
+        "active_invlpg": 3,
+        "allocated_pages": 0,
+        "allocations": 2,
         "authority": 0,
-        "bootstrap_invlpg": 23172,
-        "concurrency": 0,
-        "ledger_generation_retained": 1,
-        "managed_pages": 129082,
-        "mappings": "temporary_single_page_plus_guarded_metadata_and_repeated_ledger_generations",
-        "metadata_retained": 1,
-        "physical_reads": 5879957,
-        "physical_writes": 5875277,
+        "bootstrap_invlpg": 950682,
+        "cow": 0,
+        "data_released": 1,
+        "frees": 2,
+        "heap": 0,
+        "huge_pages": 0,
+        "pager": 0,
+        "pcid": 0,
+        "physical_writes": 367408,
         "production": 0,
-        "reclaim": 1,
+        "ring3": 0,
+        "root_released": 1,
+        "shootdown": 0,
         "signatures": 0,
         "smp": 0,
-        "temporary_pte_writes": 23172,
-        "terminal": "halt"
-      },
-      "scrub": {
-        "allocation_receipts": 2,
-        "allocations": 66,
-        "coalesces": 72,
-        "double_free_rejected": 1,
-        "first_generation": 3,
-        "frees": 63,
-        "metadata_poison": 63,
-        "quota_rejected": 1,
-        "release_receipts": 2,
-        "reuse_generation": 4,
-        "rollback": "host_verified",
-        "scrub_bytes": 46993408,
-        "scrub_pages": 11473,
-        "stale_absent": 1,
-        "stale_pattern": 11936045733293276220,
-        "start": 24678400,
-        "unavailable_rejected": 1,
-        "verified_bytes": 46993408
-      },
-      "zones": {
-        "dma32_managed": 115840,
-        "dma32_source": 115840,
-        "dma_managed": 1981,
-        "dma_source": 1982,
-        "extents": 11,
-        "largest_dma": 1798,
-        "largest_dma32": 107631,
-        "largest_normal": 0,
-        "normal_managed": 0,
-        "normal_source": 0
+        "temporary_pte_writes": 950682,
+        "terminal": "halt",
+        "user_faults": 0
       }
     },
     "profile_id": "bootstrap-debug",
@@ -1292,7 +1198,7 @@
           "state_sha256": "8DCB0EDFC7278D026018AD0BFBB14CB98BE540D6E204B70E4AE6C884DA8E68E9",
           "state_writes": 0
         },
-        "independent_physical_memory": {
+        "independent_virtual_memory": {
           "acpi_reclaim": {
             "coalesce_events": 1,
             "page_count": 11,
@@ -1338,6 +1244,73 @@
             "receipt_checksum": 6767390971658308632,
             "scrub_bytes": 46080000,
             "source_record_count": 70
+          },
+          "direct_map": {
+            "coverage_checksum": 7268968573698038963,
+            "direct_directory_tables": 1,
+            "direct_page_tables": 237,
+            "end_page": 130766,
+            "first_page": 1,
+            "gap_pages": 12944,
+            "mapped_pages": 117821,
+            "ranges": [
+              {
+                "cache": "write_back",
+                "page_count": 159,
+                "start_page": 1
+              },
+              {
+                "cache": "write_back",
+                "page_count": 1798,
+                "start_page": 256
+              },
+              {
+                "cache": "write_back",
+                "page_count": 4,
+                "start_page": 2055
+              },
+              {
+                "cache": "write_back",
+                "page_count": 20,
+                "start_page": 2060
+              },
+              {
+                "cache": "write_back",
+                "page_count": 107636,
+                "start_page": 6016
+              },
+              {
+                "cache": "write_back",
+                "page_count": 7736,
+                "start_page": 113684
+              },
+              {
+                "cache": "write_back",
+                "page_count": 122,
+                "start_page": 122238
+              },
+              {
+                "cache": "write_back",
+                "page_count": 4,
+                "start_page": 122419
+              },
+              {
+                "cache": "write_back",
+                "page_count": 1,
+                "start_page": 124377
+              },
+              {
+                "cache": "write_back",
+                "page_count": 135,
+                "start_page": 128749
+              },
+              {
+                "cache": "write_back",
+                "page_count": 206,
+                "start_page": 130560
+              }
+            ],
+            "table_pages": 243
           },
           "entry_count": 98,
           "first_free_address": [
@@ -1390,207 +1363,93 @@
           ]
         },
         "local_paths_recorded": false,
-        "marker_sha256": "EAF4AADA0657699443E440830117FF125AAC47DDFB862424123DC5B6C752C22B",
+        "marker_sha256": "8B3265EBDB183DF56301D2E9B041954ADC85A1478FE7D2FC60BFE784E5972AEC",
         "marker_summary": {
-          "acpi_reclaim": {
-            "atomic": 1,
-            "class": "acpi",
-            "dma32_pages": 11,
-            "dma_pages": 0,
-            "idempotent": 1,
-            "normal_pages": 0,
-            "pages": 11,
-            "post_extents": 15,
-            "pre_extents": 15,
-            "range_checksum": 14346492756641339378,
-            "ranges": 1,
-            "receipt_checksum": 6979072174686841814,
-            "rollback": "host_verified",
-            "scrub_bytes": 45056,
-            "sequence": 2,
-            "snapshot_retained": 1,
-            "source_records": 1,
-            "stage": "acpi_tables_released",
-            "verified_bytes": 45056
+          "activation": {
+            "bsp": 1,
+            "candidate_readback": "exact",
+            "cr3_writes": 2,
+            "original_restore": "exact",
+            "rollback_control": "host_verified",
+            "smp": 0
           },
-          "acpi_snapshot": {
-            "aml": 0,
-            "apic_bytes": 120,
-            "contract_id": "PKACPI1",
-            "copied_bytes": 600,
-            "copy_verified": 1,
-            "facp_bytes": 244,
-            "hpet_bytes": 56,
-            "lifecycle_released": 1,
-            "mcfg_bytes": 60,
-            "pmm_contract_id": "PKPMM7",
-            "production": 0,
-            "required": "APIC,FACP,HPET,MCFG",
-            "required_mask": 15,
-            "retained": 1,
-            "rsdp": 527949844,
-            "smp": 0,
-            "snapshot": 24678400,
-            "snapshot_bytes": 616,
-            "snapshot_checksum": 4650430402681490241,
-            "snapshot_pages": 1,
-            "source_checksum": 541984117539825025,
-            "target": 0,
-            "xsdt": 527945960,
-            "xsdt_entries": 6
+          "candidate": {
+            "bootstrap_alias_revoked": 1,
+            "cache": "write_back",
+            "cache_alias_rejected": 1,
+            "candidate_root": 24641536,
+            "coverage_checksum": 7268968573698038963,
+            "data": 25636864,
+            "data_generation": 2,
+            "direct_first": 18446620928407244800,
+            "direct_generation": 1,
+            "direct_last": 18446620928942858239,
+            "direct_ranges": 11,
+            "gap_pages": 12944,
+            "guarded_stack": "exact",
+            "handoff": "exact",
+            "inherited_kernel": "exact",
+            "original_root": 501186560,
+            "retained_excluded_pages": 0,
+            "root_active": 0,
+            "table_generation": 1
           },
           "early": {
             "bsp": 1,
-            "interrupt_flag": 0,
-            "selector": 8,
+            "if": 0,
+            "selector": 10,
             "serial": "initialized",
             "stack": "validated_by_wrapper"
           },
-          "growth": {
-            "actions": 0,
-            "allocation_capacity": 256,
-            "atomic": 1,
-            "authority": 0,
-            "automatic_growths": 3,
-            "checksum": 14365360863561598797,
-            "concurrency": 0,
-            "final_generation": 33,
-            "final_pages": 29,
-            "free_capacity": 2048,
-            "growth_headroom_allocation": 1,
-            "growth_headroom_scrub": 4,
-            "guard_pages": 4,
-            "hard_rejections": 1,
-            "initial_generation": 2,
-            "initial_pages": 4,
-            "integrity": 1,
-            "mapped_pages": 29,
-            "mapping_events": 4,
-            "next_pages": 58,
-            "pre_effect": "host_verified",
-            "pressure_checks": 119,
-            "pressure_cycles": 59,
-            "pressure_triggers": 7,
-            "production": 0,
-            "pte_writes": 83,
-            "reclaim_capacity": 16,
-            "retired_generation": 17,
-            "retired_pages": 15,
-            "retirement_failures": 0,
-            "retirement_retry": 0,
-            "revoked": 3,
-            "rollbacks": 0,
-            "scrub_capacity": 128,
-            "smp": 0,
-            "soft_fallbacks": 3,
-            "source_capacity": 2048,
-            "window_capacity": 32
+          "invalidation": {
+            "active_receipts": 3,
+            "direct_unmap": 1,
+            "exact_release_receipt": 1,
+            "future_smp_shootdown_required": 1,
+            "generation_retirement_receipts": 1,
+            "local_context_flushes": 1,
+            "local_invlpg": 3,
+            "old_generation_reclaim_deferred": 1,
+            "premature_reuse_rejected": 1,
+            "probe": 165,
+            "protect": 1,
+            "remote_shootdowns_pending": 0,
+            "shootdown": 0,
+            "stale_root_rejected": "host",
+            "user_unmap": 1
           },
-          "map": {
-            "boot_reclaimable_pages": 11250,
-            "entries": 98,
-            "loader_reserved_pages": 922,
-            "null_guard_pages": 1,
-            "usable_pages": 117822
+          "layout": {
+            "direct_directory_tables": 1,
+            "direct_page_tables": 237,
+            "mapped_pages": 117821,
+            "table_pages": 243
           },
-          "marker_count": 45,
-          "metadata": {
-            "allocation_records": 1,
-            "corruption": "host_verified",
-            "final_checksum": 14686428968376818860,
-            "free_extents": 11,
-            "generation": 1,
-            "guard_pages": 2,
-            "handoff": "validated",
-            "handoff_checksum": 15273988509169102937,
-            "integrity": 1,
-            "manager_bytes": 15632,
-            "mapping_rollbacks": 0,
-            "mappings": 5,
-            "owner": 19781,
-            "pages": 5,
-            "physical_start": 24641536,
-            "pte_writes": 5,
-            "receipt_records": 1,
-            "release_excluded": 1,
-            "release_rejected": 1,
-            "reservation_rollbacks": 0,
-            "rollback": "host_verified",
-            "source_records": 98,
-            "virtual_start": 18446744071563870208
-          },
-          "ownership": {
-            "handoff_base": 497336320,
-            "handoff_pages": 2,
-            "kernel_base": 500097024,
-            "kernel_pages": 144,
-            "protected": 1,
-            "root": 501186560
-          },
-          "reclaim": {
-            "acpi_early_rejected": 1,
-            "acpi_held_pages": 11,
-            "atomic": 1,
-            "class": "boot_services",
-            "dma32_pages": 9232,
-            "dma_pages": 2018,
-            "idempotent": 1,
-            "normal_pages": 0,
-            "pages": 11250,
-            "post_extents": 15,
-            "pre_extents": 13,
-            "range_checksum": 18278818544862638727,
-            "ranges": 12,
-            "receipt_checksum": 6767390971658308632,
-            "retained_excluded": 1,
-            "rollback": "host_verified",
-            "scrub_bytes": 46080000,
-            "sequence": 1,
-            "source_records": 70,
-            "stage": "post_exit_boot_services",
-            "verified_bytes": 46080000
-          },
+          "marker_count": 40,
           "result": {
-            "acpi_reclaim": 1,
-            "acpi_snapshot_retained": 1,
             "actions": 0,
-            "alias_revoked": 1,
-            "allocated_pages": 35,
+            "active_cr3_writes": 2,
+            "active_invlpg": 3,
+            "allocated_pages": 0,
+            "allocations": 2,
             "authority": 0,
-            "bootstrap_invlpg": 23172,
-            "concurrency": 0,
-            "ledger_generation_retained": 1,
-            "managed_pages": 129082,
-            "mappings": "temporary_single_page_plus_guarded_metadata_and_repeated_ledger_generations",
-            "metadata_retained": 1,
-            "physical_reads": 5879957,
-            "physical_writes": 5875277,
+            "bootstrap_invlpg": 950682,
+            "cow": 0,
+            "data_released": 1,
+            "frees": 2,
+            "heap": 0,
+            "huge_pages": 0,
+            "pager": 0,
+            "pcid": 0,
+            "physical_writes": 367408,
             "production": 0,
-            "reclaim": 1,
+            "ring3": 0,
+            "root_released": 1,
+            "shootdown": 0,
             "signatures": 0,
             "smp": 0,
-            "temporary_pte_writes": 23172,
-            "terminal": "halt"
-          },
-          "scrub": {
-            "allocation_receipts": 2,
-            "allocations": 66,
-            "coalesces": 72,
-            "double_free_rejected": 1,
-            "first_generation": 3,
-            "frees": 63,
-            "metadata_poison": 63,
-            "quota_rejected": 1,
-            "release_receipts": 2,
-            "reuse_generation": 4,
-            "rollback": "host_verified",
-            "scrub_bytes": 46993408,
-            "scrub_pages": 11473,
-            "stale_absent": 1,
-            "stale_pattern": 11936045733293276220,
-            "start": 24678400,
-            "unavailable_rejected": 1,
-            "verified_bytes": 46993408
+            "temporary_pte_writes": 950682,
+            "terminal": "halt",
+            "user_faults": 0
           },
           "stages": [
             1,
@@ -1823,20 +1682,8 @@
               "signature_verifications": 0,
               "stack_top": 18446744071562809344,
               "state_writes": 0,
-              "trap_scenario": 8
+              "trap_scenario": 10
             }
-          },
-          "zones": {
-            "dma32_managed": 115840,
-            "dma32_source": 115840,
-            "dma_managed": 1981,
-            "dma_source": 1982,
-            "extents": 11,
-            "largest_dma": 1798,
-            "largest_dma32": 107631,
-            "largest_normal": 0,
-            "normal_managed": 0,
-            "normal_source": 0
           }
         },
         "markers": [
@@ -1863,28 +1710,23 @@
           "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5160 records=5 memory_entries=98 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=C1C8FF61 fnv1a64=FED7D27217F73CF9 state=boot_services_exited bytes_unchanged=1",
           "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4704 descriptor_bytes=48 descriptors=98",
           "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=144 artifact_pages=9 table_pages=5 stack_pages=36 handoff_pages=256",
-          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF8000A000 handoff=FFFFFFFF800B6000 bytes=5160 stack_top=FFFFFFFF800B5000 root=000000001DDF8000 cr3=000000001DDF8000 trap_scenario=8 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
+          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF8000A000 handoff=FFFFFFFF800B6000 bytes=5160 stack_top=FFFFFFFF800B5000 root=000000001DDF8000 cr3=000000001DDF8000 trap_scenario=10 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
           "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
-          "POOLEOS:KERNEL:PMM-EARLY PASS contract=PKPMM7 selector=8 bsp=1 if=0 stack=validated_by_wrapper serial=initialized",
-          "POOLEOS:KERNEL:PMM-STAGE PASS contract=PKPMM7 stage=1",
-          "POOLEOS:KERNEL:PMM-STAGE PASS contract=PKPMM7 stage=2",
-          "POOLEOS:KERNEL:PMM-STAGE PASS contract=PKPMM7 stage=3",
-          "POOLEOS:KERNEL:PMM-STAGE PASS contract=PKPMM7 stage=4",
-          "POOLEOS:KERNEL:PMM-STAGE PASS contract=PKPMM7 stage=5",
+          "POOLEOS:KERNEL:ACTIVE-VM-EARLY PASS contract=PKVM3 selector=10 bsp=1 if=0 stack=validated_by_wrapper serial=initialized",
+          "POOLEOS:KERNEL:ACTIVE-VM-STAGE PASS contract=PKVM3 stage=1",
+          "POOLEOS:KERNEL:ACTIVE-VM-STAGE PASS contract=PKVM3 stage=2",
+          "POOLEOS:KERNEL:ACTIVE-VM-STAGE PASS contract=PKVM3 stage=3",
+          "POOLEOS:KERNEL:ACTIVE-VM-STAGE PASS contract=PKVM3 stage=4",
+          "POOLEOS:KERNEL:ACTIVE-VM-STAGE PASS contract=PKVM3 stage=5",
           "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE153-N12-RETAIN-V001-0000000001 entry_count=1 serial=present",
           "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF800B6000 bytes=5160 entry=0xFFFFFFFF8000A000 stack_top=0xFFFFFFFF800B5000 root=0x000000001DDF8000 cr3=0x000000001DDF8000 rflags_if=0 rflags_df=0",
           "POOLEOS:KERNEL:PBP1 PASS profile=development records=5 artifacts=10 production_profile_valid=0",
           "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=99DB2125174F65A067F619FD65D61EBC5806D2AFCCCAB3E66411A42A1EFC5342 policy_sha256=F0DE1E25E99B8444E47ABD029B2363B00BC663681DA2F76BA79D2C27ACC7AC30 state_sha256=8DCB0EDFC7278D026018AD0BFBB14CB98BE540D6E204B70E4AE6C884DA8E68E9 denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
-          "POOLEOS:KERNEL:PMM-MAP PASS contract=PKPMM7 entries=98 usable_pages=117822 boot_reclaimable_pages=11250 loader_reserved_pages=922 null_guard_pages=1",
-          "POOLEOS:KERNEL:PMM-ZONES PASS contract=PKPMM7 dma_source=1982 dma_managed=1981 dma32_source=115840 dma32_managed=115840 normal_source=0 normal_managed=0 extents=11 largest_dma=1798 largest_dma32=107631 largest_normal=0",
-          "POOLEOS:KERNEL:PMM-OWNERSHIP PASS contract=PKPMM7 kernel_base=0x000000001DCEE000 kernel_pages=144 handoff_base=0x000000001DA4C000 handoff_pages=2 root=0x000000001DDF8000 protected=1",
-          "POOLEOS:KERNEL:PMM-METADATA PASS contract=PKPMM7 pages=5 physical_start=0x0000000001780000 virtual_start=0xFFFFFFFF801B8000 generation=1 owner=19781 manager_bytes=15632 source_records=98 free_extents=11 allocation_records=1 receipt_records=1 handoff_checksum=0xD3F81B9FC06C3059 final_checksum=0xCBD0AD55AF1B5CAC guard_pages=2 mappings=5 pte_writes=5 release_excluded=1 release_rejected=1 integrity=1 reservation_rollbacks=0 mapping_rollbacks=0 handoff=validated corruption=host_verified rollback=host_verified",
-          "POOLEOS:KERNEL:PMM-GROWTH PASS contract=PKPMM7 initial_generation=2 final_generation=33 initial_pages=4 final_pages=29 free_capacity=2048 allocation_capacity=256 source_capacity=2048 scrub_capacity=128 reclaim_capacity=16 retired_generation=17 retired_pages=15 mapped_pages=29 pte_writes=83 checksum=0xC75C03982EE3474D guard_pages=4 mapping_events=4 revoked=3 integrity=1 atomic=1 rollbacks=0 retirement_failures=0 retirement_retry=0 pressure_checks=119 pressure_triggers=7 automatic_growths=3 pressure_cycles=59 soft_fallbacks=3 hard_rejections=1 growth_headroom_allocation=1 growth_headroom_scrub=4 window_capacity=32 next_pages=58 pre_effect=host_verified concurrency=0 smp=0 authority=0 actions=0 production=0",
-          "POOLEOS:KERNEL:PMM-RECLAIM PASS contract=PKPMM7 stage=post_exit_boot_services class=boot_services sequence=1 source_records=70 ranges=12 pages=11250 dma_pages=2018 dma32_pages=9232 normal_pages=0 pre_extents=13 post_extents=15 scrub_bytes=46080000 verified_bytes=46080000 range_checksum=0xFDAB689F085C3287 receipt_checksum=0x5DEA9A3BC9E10C18 idempotent=1 acpi_held_pages=11 acpi_early_rejected=1 retained_excluded=1 atomic=1 rollback=host_verified",
-          "POOLEOS:KERNEL:PMM-ACPI-SNAPSHOT PASS contract=PKACPI1 pmm=PKPMM7 rsdp=0x000000001F77E014 xsdt=0x000000001F77D0E8 xsdt_entries=6 required_mask=0x000000000000000F facp_bytes=244 apic_bytes=120 hpet_bytes=56 mcfg_bytes=60 snapshot=0x0000000001789000 snapshot_pages=1 snapshot_bytes=616 copied_bytes=600 source_checksum=0x078583AEEFDD6581 snapshot_checksum=0x4089A5CFEC81CB41 required=APIC,FACP,HPET,MCFG copy_verified=1 lifecycle_released=1 retained=1 aml=0 smp=0 target=0 production=0",
-          "POOLEOS:KERNEL:PMM-ACPI-RECLAIM PASS contract=PKPMM7 stage=acpi_tables_released class=acpi sequence=2 source_records=1 ranges=1 pages=11 dma_pages=0 dma32_pages=11 normal_pages=0 pre_extents=15 post_extents=15 scrub_bytes=45056 verified_bytes=45056 range_checksum=0xC718FB26B45257F2 receipt_checksum=0x60DAA52A8A05ABD6 idempotent=1 snapshot_retained=1 atomic=1 rollback=host_verified",
-          "POOLEOS:KERNEL:PMM-SCRUB PASS contract=PKPMM7 allocations=66 frees=63 start=0x0000000001789000 first_generation=3 reuse_generation=4 allocation_receipts=2 release_receipts=2 scrub_pages=11473 scrub_bytes=46993408 verified_bytes=46993408 stale_pattern=0xA5A55A5AC3C33C3C stale_absent=1 double_free_rejected=1 quota_rejected=1 unavailable_rejected=1 metadata_poison=63 coalesces=72 rollback=host_verified",
-          "POOLEOS:KERNEL:PMM-RESULT PASS contract=PKPMM7 profile=qemu64_tier0 managed_pages=129082 allocated_pages=35 physical_writes=5875277 physical_reads=5879957 temporary_pte_writes=23172 bootstrap_invlpg=23172 alias_revoked=1 metadata_retained=1 ledger_generation_retained=1 acpi_snapshot_retained=1 mappings=temporary_single_page_plus_guarded_metadata_and_repeated_ledger_generations reclaim=1 acpi_reclaim=1 concurrency=0 smp=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
+          "POOLEOS:KERNEL:ACTIVE-VM-LAYOUT PASS contract=PKVM3 canonical_bits=48 direct_start=0xFFFF900000000000 direct_end=0xFFFFD00000000000 user_start=0x0000000040000000 page_bytes=4096 table_pages=243 direct_directory_tables=1 direct_page_tables=237 mapped_pages=117821",
+          "POOLEOS:KERNEL:ACTIVE-VM-CANDIDATE PASS contract=PKVM3 original_root=0x000000001DDF8000 candidate_root=0x0000000001780000 table_generation=1 data=0x0000000001873000 data_generation=2 direct_first=0xFFFF900000001000 direct_last=0xFFFF90001FECDFFF direct_generation=1 direct_ranges=11 gap_pages=12944 retained_excluded_pages=0 coverage_checksum=0x64E09067B6BFDCB3 cache=write_back cache_alias_rejected=1 inherited_kernel=exact guarded_stack=exact handoff=exact bootstrap_alias_revoked=1 root_active=0",
+          "POOLEOS:KERNEL:ACTIVE-VM-ACTIVATION PASS contract=PKVM3 cr3_writes=2 candidate_readback=exact original_restore=exact rollback_control=host_verified bsp=1 smp=0",
+          "POOLEOS:KERNEL:ACTIVE-VM-INVALIDATION PASS contract=PKVM3 local_invlpg=3 active_receipts=3 probe=0x00000000000000A5 protect=1 user_unmap=1 direct_unmap=1 stale_root_rejected=host premature_reuse_rejected=1 generation_retirement_receipts=1 local_context_flushes=1 remote_shootdowns_pending=0 future_smp_shootdown_required=1 old_generation_reclaim_deferred=1 exact_release_receipt=1 shootdown=0",
+          "POOLEOS:KERNEL:ACTIVE-VM-RESULT PASS contract=PKVM3 profile=qemu64_tier0 root_released=1 data_released=1 allocated_pages=0 physical_writes=367408 temporary_pte_writes=950682 bootstrap_invlpg=950682 allocations=2 frees=2 active_cr3_writes=2 active_invlpg=3 shootdown=0 ring3=0 huge_pages=0 pcid=0 cow=0 user_faults=0 pager=0 heap=0 smp=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],
         "media_read_only": true,
         "pbp1_serial_debugcon_exact_match": true,
@@ -2765,7 +2607,7 @@
         },
         "qmp_loopback_only": true,
         "qmp_quit_requested": true,
-        "run_id": "physical-memory-run-1",
+        "run_id": "active-virtual-memory-run-1",
         "screenshot": {
           "bright_cyan_pixel_count": 44970,
           "byte_count": 3072016,
@@ -2808,7 +2650,7 @@
           "state_sha256": "8DCB0EDFC7278D026018AD0BFBB14CB98BE540D6E204B70E4AE6C884DA8E68E9",
           "state_writes": 0
         },
-        "independent_physical_memory": {
+        "independent_virtual_memory": {
           "acpi_reclaim": {
             "coalesce_events": 1,
             "page_count": 11,
@@ -2854,6 +2696,73 @@
             "receipt_checksum": 6767390971658308632,
             "scrub_bytes": 46080000,
             "source_record_count": 70
+          },
+          "direct_map": {
+            "coverage_checksum": 7268968573698038963,
+            "direct_directory_tables": 1,
+            "direct_page_tables": 237,
+            "end_page": 130766,
+            "first_page": 1,
+            "gap_pages": 12944,
+            "mapped_pages": 117821,
+            "ranges": [
+              {
+                "cache": "write_back",
+                "page_count": 159,
+                "start_page": 1
+              },
+              {
+                "cache": "write_back",
+                "page_count": 1798,
+                "start_page": 256
+              },
+              {
+                "cache": "write_back",
+                "page_count": 4,
+                "start_page": 2055
+              },
+              {
+                "cache": "write_back",
+                "page_count": 20,
+                "start_page": 2060
+              },
+              {
+                "cache": "write_back",
+                "page_count": 107636,
+                "start_page": 6016
+              },
+              {
+                "cache": "write_back",
+                "page_count": 7736,
+                "start_page": 113684
+              },
+              {
+                "cache": "write_back",
+                "page_count": 122,
+                "start_page": 122238
+              },
+              {
+                "cache": "write_back",
+                "page_count": 4,
+                "start_page": 122419
+              },
+              {
+                "cache": "write_back",
+                "page_count": 1,
+                "start_page": 124377
+              },
+              {
+                "cache": "write_back",
+                "page_count": 135,
+                "start_page": 128749
+              },
+              {
+                "cache": "write_back",
+                "page_count": 206,
+                "start_page": 130560
+              }
+            ],
+            "table_pages": 243
           },
           "entry_count": 98,
           "first_free_address": [
@@ -2906,207 +2815,93 @@
           ]
         },
         "local_paths_recorded": false,
-        "marker_sha256": "EAF4AADA0657699443E440830117FF125AAC47DDFB862424123DC5B6C752C22B",
+        "marker_sha256": "8B3265EBDB183DF56301D2E9B041954ADC85A1478FE7D2FC60BFE784E5972AEC",
         "marker_summary": {
-          "acpi_reclaim": {
-            "atomic": 1,
-            "class": "acpi",
-            "dma32_pages": 11,
-            "dma_pages": 0,
-            "idempotent": 1,
-            "normal_pages": 0,
-            "pages": 11,
-            "post_extents": 15,
-            "pre_extents": 15,
-            "range_checksum": 14346492756641339378,
-            "ranges": 1,
-            "receipt_checksum": 6979072174686841814,
-            "rollback": "host_verified",
-            "scrub_bytes": 45056,
-            "sequence": 2,
-            "snapshot_retained": 1,
-            "source_records": 1,
-            "stage": "acpi_tables_released",
-            "verified_bytes": 45056
+          "activation": {
+            "bsp": 1,
+            "candidate_readback": "exact",
+            "cr3_writes": 2,
+            "original_restore": "exact",
+            "rollback_control": "host_verified",
+            "smp": 0
           },
-          "acpi_snapshot": {
-            "aml": 0,
-            "apic_bytes": 120,
-            "contract_id": "PKACPI1",
-            "copied_bytes": 600,
-            "copy_verified": 1,
-            "facp_bytes": 244,
-            "hpet_bytes": 56,
-            "lifecycle_released": 1,
-            "mcfg_bytes": 60,
-            "pmm_contract_id": "PKPMM7",
-            "production": 0,
-            "required": "APIC,FACP,HPET,MCFG",
-            "required_mask": 15,
-            "retained": 1,
-            "rsdp": 527949844,
-            "smp": 0,
-            "snapshot": 24678400,
-            "snapshot_bytes": 616,
-            "snapshot_checksum": 4650430402681490241,
-            "snapshot_pages": 1,
-            "source_checksum": 541984117539825025,
-            "target": 0,
-            "xsdt": 527945960,
-            "xsdt_entries": 6
+          "candidate": {
+            "bootstrap_alias_revoked": 1,
+            "cache": "write_back",
+            "cache_alias_rejected": 1,
+            "candidate_root": 24641536,
+            "coverage_checksum": 7268968573698038963,
+            "data": 25636864,
+            "data_generation": 2,
+            "direct_first": 18446620928407244800,
+            "direct_generation": 1,
+            "direct_last": 18446620928942858239,
+            "direct_ranges": 11,
+            "gap_pages": 12944,
+            "guarded_stack": "exact",
+            "handoff": "exact",
+            "inherited_kernel": "exact",
+            "original_root": 501186560,
+            "retained_excluded_pages": 0,
+            "root_active": 0,
+            "table_generation": 1
           },
           "early": {
             "bsp": 1,
-            "interrupt_flag": 0,
-            "selector": 8,
+            "if": 0,
+            "selector": 10,
             "serial": "initialized",
             "stack": "validated_by_wrapper"
           },
-          "growth": {
-            "actions": 0,
-            "allocation_capacity": 256,
-            "atomic": 1,
-            "authority": 0,
-            "automatic_growths": 3,
-            "checksum": 14365360863561598797,
-            "concurrency": 0,
-            "final_generation": 33,
-            "final_pages": 29,
-            "free_capacity": 2048,
-            "growth_headroom_allocation": 1,
-            "growth_headroom_scrub": 4,
-            "guard_pages": 4,
-            "hard_rejections": 1,
-            "initial_generation": 2,
-            "initial_pages": 4,
-            "integrity": 1,
-            "mapped_pages": 29,
-            "mapping_events": 4,
-            "next_pages": 58,
-            "pre_effect": "host_verified",
-            "pressure_checks": 119,
-            "pressure_cycles": 59,
-            "pressure_triggers": 7,
-            "production": 0,
-            "pte_writes": 83,
-            "reclaim_capacity": 16,
-            "retired_generation": 17,
-            "retired_pages": 15,
-            "retirement_failures": 0,
-            "retirement_retry": 0,
-            "revoked": 3,
-            "rollbacks": 0,
-            "scrub_capacity": 128,
-            "smp": 0,
-            "soft_fallbacks": 3,
-            "source_capacity": 2048,
-            "window_capacity": 32
+          "invalidation": {
+            "active_receipts": 3,
+            "direct_unmap": 1,
+            "exact_release_receipt": 1,
+            "future_smp_shootdown_required": 1,
+            "generation_retirement_receipts": 1,
+            "local_context_flushes": 1,
+            "local_invlpg": 3,
+            "old_generation_reclaim_deferred": 1,
+            "premature_reuse_rejected": 1,
+            "probe": 165,
+            "protect": 1,
+            "remote_shootdowns_pending": 0,
+            "shootdown": 0,
+            "stale_root_rejected": "host",
+            "user_unmap": 1
           },
-          "map": {
-            "boot_reclaimable_pages": 11250,
-            "entries": 98,
-            "loader_reserved_pages": 922,
-            "null_guard_pages": 1,
-            "usable_pages": 117822
+          "layout": {
+            "direct_directory_tables": 1,
+            "direct_page_tables": 237,
+            "mapped_pages": 117821,
+            "table_pages": 243
           },
-          "marker_count": 45,
-          "metadata": {
-            "allocation_records": 1,
-            "corruption": "host_verified",
-            "final_checksum": 14686428968376818860,
-            "free_extents": 11,
-            "generation": 1,
-            "guard_pages": 2,
-            "handoff": "validated",
-            "handoff_checksum": 15273988509169102937,
-            "integrity": 1,
-            "manager_bytes": 15632,
-            "mapping_rollbacks": 0,
-            "mappings": 5,
-            "owner": 19781,
-            "pages": 5,
-            "physical_start": 24641536,
-            "pte_writes": 5,
-            "receipt_records": 1,
-            "release_excluded": 1,
-            "release_rejected": 1,
-            "reservation_rollbacks": 0,
-            "rollback": "host_verified",
-            "source_records": 98,
-            "virtual_start": 18446744071563870208
-          },
-          "ownership": {
-            "handoff_base": 497336320,
-            "handoff_pages": 2,
-            "kernel_base": 500097024,
-            "kernel_pages": 144,
-            "protected": 1,
-            "root": 501186560
-          },
-          "reclaim": {
-            "acpi_early_rejected": 1,
-            "acpi_held_pages": 11,
-            "atomic": 1,
-            "class": "boot_services",
-            "dma32_pages": 9232,
-            "dma_pages": 2018,
-            "idempotent": 1,
-            "normal_pages": 0,
-            "pages": 11250,
-            "post_extents": 15,
-            "pre_extents": 13,
-            "range_checksum": 18278818544862638727,
-            "ranges": 12,
-            "receipt_checksum": 6767390971658308632,
-            "retained_excluded": 1,
-            "rollback": "host_verified",
-            "scrub_bytes": 46080000,
-            "sequence": 1,
-            "source_records": 70,
-            "stage": "post_exit_boot_services",
-            "verified_bytes": 46080000
-          },
+          "marker_count": 40,
           "result": {
-            "acpi_reclaim": 1,
-            "acpi_snapshot_retained": 1,
             "actions": 0,
-            "alias_revoked": 1,
-            "allocated_pages": 35,
+            "active_cr3_writes": 2,
+            "active_invlpg": 3,
+            "allocated_pages": 0,
+            "allocations": 2,
             "authority": 0,
-            "bootstrap_invlpg": 23172,
-            "concurrency": 0,
-            "ledger_generation_retained": 1,
-            "managed_pages": 129082,
-            "mappings": "temporary_single_page_plus_guarded_metadata_and_repeated_ledger_generations",
-            "metadata_retained": 1,
-            "physical_reads": 5879957,
-            "physical_writes": 5875277,
+            "bootstrap_invlpg": 950682,
+            "cow": 0,
+            "data_released": 1,
+            "frees": 2,
+            "heap": 0,
+            "huge_pages": 0,
+            "pager": 0,
+            "pcid": 0,
+            "physical_writes": 367408,
             "production": 0,
-            "reclaim": 1,
+            "ring3": 0,
+            "root_released": 1,
+            "shootdown": 0,
             "signatures": 0,
             "smp": 0,
-            "temporary_pte_writes": 23172,
-            "terminal": "halt"
-          },
-          "scrub": {
-            "allocation_receipts": 2,
-            "allocations": 66,
-            "coalesces": 72,
-            "double_free_rejected": 1,
-            "first_generation": 3,
-            "frees": 63,
-            "metadata_poison": 63,
-            "quota_rejected": 1,
-            "release_receipts": 2,
-            "reuse_generation": 4,
-            "rollback": "host_verified",
-            "scrub_bytes": 46993408,
-            "scrub_pages": 11473,
-            "stale_absent": 1,
-            "stale_pattern": 11936045733293276220,
-            "start": 24678400,
-            "unavailable_rejected": 1,
-            "verified_bytes": 46993408
+            "temporary_pte_writes": 950682,
+            "terminal": "halt",
+            "user_faults": 0
           },
           "stages": [
             1,
@@ -3339,20 +3134,8 @@
               "signature_verifications": 0,
               "stack_top": 18446744071562809344,
               "state_writes": 0,
-              "trap_scenario": 8
+              "trap_scenario": 10
             }
-          },
-          "zones": {
-            "dma32_managed": 115840,
-            "dma32_source": 115840,
-            "dma_managed": 1981,
-            "dma_source": 1982,
-            "extents": 11,
-            "largest_dma": 1798,
-            "largest_dma32": 107631,
-            "largest_normal": 0,
-            "normal_managed": 0,
-            "normal_source": 0
           }
         },
         "markers": [
@@ -3379,28 +3162,23 @@
           "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5160 records=5 memory_entries=98 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=C1C8FF61 fnv1a64=FED7D27217F73CF9 state=boot_services_exited bytes_unchanged=1",
           "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4704 descriptor_bytes=48 descriptors=98",
           "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=144 artifact_pages=9 table_pages=5 stack_pages=36 handoff_pages=256",
-          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF8000A000 handoff=FFFFFFFF800B6000 bytes=5160 stack_top=FFFFFFFF800B5000 root=000000001DDF8000 cr3=000000001DDF8000 trap_scenario=8 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
+          "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF8000A000 handoff=FFFFFFFF800B6000 bytes=5160 stack_top=FFFFFFFF800B5000 root=000000001DDF8000 cr3=000000001DDF8000 trap_scenario=10 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
           "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=armed exit_boot_services=called transfer=one_way_development",
-          "POOLEOS:KERNEL:PMM-EARLY PASS contract=PKPMM7 selector=8 bsp=1 if=0 stack=validated_by_wrapper serial=initialized",
-          "POOLEOS:KERNEL:PMM-STAGE PASS contract=PKPMM7 stage=1",
-          "POOLEOS:KERNEL:PMM-STAGE PASS contract=PKPMM7 stage=2",
-          "POOLEOS:KERNEL:PMM-STAGE PASS contract=PKPMM7 stage=3",
-          "POOLEOS:KERNEL:PMM-STAGE PASS contract=PKPMM7 stage=4",
-          "POOLEOS:KERNEL:PMM-STAGE PASS contract=PKPMM7 stage=5",
+          "POOLEOS:KERNEL:ACTIVE-VM-EARLY PASS contract=PKVM3 selector=10 bsp=1 if=0 stack=validated_by_wrapper serial=initialized",
+          "POOLEOS:KERNEL:ACTIVE-VM-STAGE PASS contract=PKVM3 stage=1",
+          "POOLEOS:KERNEL:ACTIVE-VM-STAGE PASS contract=PKVM3 stage=2",
+          "POOLEOS:KERNEL:ACTIVE-VM-STAGE PASS contract=PKVM3 stage=3",
+          "POOLEOS:KERNEL:ACTIVE-VM-STAGE PASS contract=PKVM3 stage=4",
+          "POOLEOS:KERNEL:ACTIVE-VM-STAGE PASS contract=PKVM3 stage=5",
           "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE153-N12-RETAIN-V001-0000000001 entry_count=1 serial=present",
           "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF800B6000 bytes=5160 entry=0xFFFFFFFF8000A000 stack_top=0xFFFFFFFF800B5000 root=0x000000001DDF8000 cr3=0x000000001DDF8000 rflags_if=0 rflags_df=0",
           "POOLEOS:KERNEL:PBP1 PASS profile=development records=5 artifacts=10 production_profile_valid=0",
           "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=99DB2125174F65A067F619FD65D61EBC5806D2AFCCCAB3E66411A42A1EFC5342 policy_sha256=F0DE1E25E99B8444E47ABD029B2363B00BC663681DA2F76BA79D2C27ACC7AC30 state_sha256=8DCB0EDFC7278D026018AD0BFBB14CB98BE540D6E204B70E4AE6C884DA8E68E9 denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
-          "POOLEOS:KERNEL:PMM-MAP PASS contract=PKPMM7 entries=98 usable_pages=117822 boot_reclaimable_pages=11250 loader_reserved_pages=922 null_guard_pages=1",
-          "POOLEOS:KERNEL:PMM-ZONES PASS contract=PKPMM7 dma_source=1982 dma_managed=1981 dma32_source=115840 dma32_managed=115840 normal_source=0 normal_managed=0 extents=11 largest_dma=1798 largest_dma32=107631 largest_normal=0",
-          "POOLEOS:KERNEL:PMM-OWNERSHIP PASS contract=PKPMM7 kernel_base=0x000000001DCEE000 kernel_pages=144 handoff_base=0x000000001DA4C000 handoff_pages=2 root=0x000000001DDF8000 protected=1",
-          "POOLEOS:KERNEL:PMM-METADATA PASS contract=PKPMM7 pages=5 physical_start=0x0000000001780000 virtual_start=0xFFFFFFFF801B8000 generation=1 owner=19781 manager_bytes=15632 source_records=98 free_extents=11 allocation_records=1 receipt_records=1 handoff_checksum=0xD3F81B9FC06C3059 final_checksum=0xCBD0AD55AF1B5CAC guard_pages=2 mappings=5 pte_writes=5 release_excluded=1 release_rejected=1 integrity=1 reservation_rollbacks=0 mapping_rollbacks=0 handoff=validated corruption=host_verified rollback=host_verified",
-          "POOLEOS:KERNEL:PMM-GROWTH PASS contract=PKPMM7 initial_generation=2 final_generation=33 initial_pages=4 final_pages=29 free_capacity=2048 allocation_capacity=256 source_capacity=2048 scrub_capacity=128 reclaim_capacity=16 retired_generation=17 retired_pages=15 mapped_pages=29 pte_writes=83 checksum=0xC75C03982EE3474D guard_pages=4 mapping_events=4 revoked=3 integrity=1 atomic=1 rollbacks=0 retirement_failures=0 retirement_retry=0 pressure_checks=119 pressure_triggers=7 automatic_growths=3 pressure_cycles=59 soft_fallbacks=3 hard_rejections=1 growth_headroom_allocation=1 growth_headroom_scrub=4 window_capacity=32 next_pages=58 pre_effect=host_verified concurrency=0 smp=0 authority=0 actions=0 production=0",
-          "POOLEOS:KERNEL:PMM-RECLAIM PASS contract=PKPMM7 stage=post_exit_boot_services class=boot_services sequence=1 source_records=70 ranges=12 pages=11250 dma_pages=2018 dma32_pages=9232 normal_pages=0 pre_extents=13 post_extents=15 scrub_bytes=46080000 verified_bytes=46080000 range_checksum=0xFDAB689F085C3287 receipt_checksum=0x5DEA9A3BC9E10C18 idempotent=1 acpi_held_pages=11 acpi_early_rejected=1 retained_excluded=1 atomic=1 rollback=host_verified",
-          "POOLEOS:KERNEL:PMM-ACPI-SNAPSHOT PASS contract=PKACPI1 pmm=PKPMM7 rsdp=0x000000001F77E014 xsdt=0x000000001F77D0E8 xsdt_entries=6 required_mask=0x000000000000000F facp_bytes=244 apic_bytes=120 hpet_bytes=56 mcfg_bytes=60 snapshot=0x0000000001789000 snapshot_pages=1 snapshot_bytes=616 copied_bytes=600 source_checksum=0x078583AEEFDD6581 snapshot_checksum=0x4089A5CFEC81CB41 required=APIC,FACP,HPET,MCFG copy_verified=1 lifecycle_released=1 retained=1 aml=0 smp=0 target=0 production=0",
-          "POOLEOS:KERNEL:PMM-ACPI-RECLAIM PASS contract=PKPMM7 stage=acpi_tables_released class=acpi sequence=2 source_records=1 ranges=1 pages=11 dma_pages=0 dma32_pages=11 normal_pages=0 pre_extents=15 post_extents=15 scrub_bytes=45056 verified_bytes=45056 range_checksum=0xC718FB26B45257F2 receipt_checksum=0x60DAA52A8A05ABD6 idempotent=1 snapshot_retained=1 atomic=1 rollback=host_verified",
-          "POOLEOS:KERNEL:PMM-SCRUB PASS contract=PKPMM7 allocations=66 frees=63 start=0x0000000001789000 first_generation=3 reuse_generation=4 allocation_receipts=2 release_receipts=2 scrub_pages=11473 scrub_bytes=46993408 verified_bytes=46993408 stale_pattern=0xA5A55A5AC3C33C3C stale_absent=1 double_free_rejected=1 quota_rejected=1 unavailable_rejected=1 metadata_poison=63 coalesces=72 rollback=host_verified",
-          "POOLEOS:KERNEL:PMM-RESULT PASS contract=PKPMM7 profile=qemu64_tier0 managed_pages=129082 allocated_pages=35 physical_writes=5875277 physical_reads=5879957 temporary_pte_writes=23172 bootstrap_invlpg=23172 alias_revoked=1 metadata_retained=1 ledger_generation_retained=1 acpi_snapshot_retained=1 mappings=temporary_single_page_plus_guarded_metadata_and_repeated_ledger_generations reclaim=1 acpi_reclaim=1 concurrency=0 smp=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
+          "POOLEOS:KERNEL:ACTIVE-VM-LAYOUT PASS contract=PKVM3 canonical_bits=48 direct_start=0xFFFF900000000000 direct_end=0xFFFFD00000000000 user_start=0x0000000040000000 page_bytes=4096 table_pages=243 direct_directory_tables=1 direct_page_tables=237 mapped_pages=117821",
+          "POOLEOS:KERNEL:ACTIVE-VM-CANDIDATE PASS contract=PKVM3 original_root=0x000000001DDF8000 candidate_root=0x0000000001780000 table_generation=1 data=0x0000000001873000 data_generation=2 direct_first=0xFFFF900000001000 direct_last=0xFFFF90001FECDFFF direct_generation=1 direct_ranges=11 gap_pages=12944 retained_excluded_pages=0 coverage_checksum=0x64E09067B6BFDCB3 cache=write_back cache_alias_rejected=1 inherited_kernel=exact guarded_stack=exact handoff=exact bootstrap_alias_revoked=1 root_active=0",
+          "POOLEOS:KERNEL:ACTIVE-VM-ACTIVATION PASS contract=PKVM3 cr3_writes=2 candidate_readback=exact original_restore=exact rollback_control=host_verified bsp=1 smp=0",
+          "POOLEOS:KERNEL:ACTIVE-VM-INVALIDATION PASS contract=PKVM3 local_invlpg=3 active_receipts=3 probe=0x00000000000000A5 protect=1 user_unmap=1 direct_unmap=1 stale_root_rejected=host premature_reuse_rejected=1 generation_retirement_receipts=1 local_context_flushes=1 remote_shootdowns_pending=0 future_smp_shootdown_required=1 old_generation_reclaim_deferred=1 exact_release_receipt=1 shootdown=0",
+          "POOLEOS:KERNEL:ACTIVE-VM-RESULT PASS contract=PKVM3 profile=qemu64_tier0 root_released=1 data_released=1 allocated_pages=0 physical_writes=367408 temporary_pte_writes=950682 bootstrap_invlpg=950682 allocations=2 frees=2 active_cr3_writes=2 active_invlpg=3 shootdown=0 ring3=0 huge_pages=0 pcid=0 cow=0 user_faults=0 pager=0 heap=0 smp=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],
         "media_read_only": true,
         "pbp1_serial_debugcon_exact_match": true,
@@ -4281,7 +4059,7 @@
         },
         "qmp_loopback_only": true,
         "qmp_quit_requested": true,
-        "run_id": "physical-memory-run-2",
+        "run_id": "active-virtual-memory-run-2",
         "screenshot": {
           "bright_cyan_pixel_count": 44970,
           "byte_count": 3072016,
@@ -4309,16 +4087,21 @@
   },
   "inputs": {
     "contract": {
-      "byte_count": 26185,
-      "path": "specs/native-kernel-physical-memory-contract.json",
-      "sha256": "B1F49ABED4964785A7355F8847357C88B6494008C260076C58E5665EC2F9D16F"
+      "byte_count": 11351,
+      "path": "specs/native-kernel-virtual-memory-contract.json",
+      "sha256": "FDC6A7FC8BD2A621370442D19027AFD2DC82480B276491ACD23347D0E683FAC0"
     },
     "contract_schema": {
-      "byte_count": 1937,
-      "path": "specs/native-kernel-physical-memory-contract.schema.json",
-      "sha256": "169A342372B8822B2122BF020A2F311F7620F16EF92E084D69C743ECEEAB6FED"
+      "byte_count": 1360,
+      "path": "specs/native-kernel-virtual-memory-contract.schema.json",
+      "sha256": "642339CCE2BC68EA530959481E592551B2E3583CB8D1C4B955E45E3BB2456B21"
     },
     "implementation_inputs": [
+      {
+        "byte_count": 4193,
+        "path": "native/Cargo.lock",
+        "sha256": "29CE9938C5C60DEA5AEA244A6961BB1924D88AEC601D1E02EAAA510B0B36E390"
+      },
       {
         "byte_count": 1863,
         "path": "native/boot/Cargo.toml",
@@ -4335,29 +4118,14 @@
         "sha256": "B38A280AA2390DB005DA05FE3BC60BB507A67A1A1A6608183D9DE294EC980ECF"
       },
       {
-        "byte_count": 48608,
-        "path": "native/handoff/src/lib.rs",
-        "sha256": "983DAFD71E0B892F6F98C614D43600CBEBDDBD7C0AA1E2D81CDAA545E165B110"
-      },
-      {
-        "byte_count": 61575,
-        "path": "native/kmap/src/lib.rs",
-        "sha256": "F717645EAE175BF5F354219836F4149630DD16D6E4959A8B77E3A5C6F3D88532"
-      },
-      {
-        "byte_count": 43722,
-        "path": "native/livehandoff/src/lib.rs",
-        "sha256": "71A36809F50C9ACB76143964BA8AD5B4B2E5B51461405EF9E5055D68A3D73562"
+        "byte_count": 1371,
+        "path": "native/kernel/Cargo.toml",
+        "sha256": "F9F3AB6D84008B0354A5B82B0F616C5652C076C15F3313F14B862ED0DB1C1C43"
       },
       {
         "byte_count": 2048,
         "path": "native/kernel/linker.ld",
         "sha256": "562442E18F1D29F984A0E9745E3734F8F51FC0C6C83CE2B75F9FAC1FD6B05F65"
-      },
-      {
-        "byte_count": 447,
-        "path": "native/kernel/manifest.pkm",
-        "sha256": "3F9C95AFD48CC980356394A3B5B08B78818A00A403B4BCD440A86A4DB0FD23E3"
       },
       {
         "byte_count": 65667,
@@ -4370,9 +4138,14 @@
         "sha256": "3EAA0680A89CDE516A652FA0E0F3FD935121185B982F9F02C485CA45AB5544D9"
       },
       {
-        "byte_count": 33519,
-        "path": "native/kernel/src/acpi.rs",
-        "sha256": "E018A4DED4146791A2F88374B49CADD7356C8187807EDFBDD6FEAAA4527EB58F"
+        "byte_count": 162769,
+        "path": "native/kernel/src/arch/x86_64.rs",
+        "sha256": "F39BB4327F83BC44AE4E38DDFA0F46793209F30D7CA3B7A0A44342FC1BBDC058"
+      },
+      {
+        "byte_count": 71442,
+        "path": "native/kernel/src/active_virtual_memory.rs",
+        "sha256": "65B848248785E06B070B802D51E8B79F1BE332A89B101A432D2B227B0243189F"
       },
       {
         "byte_count": 195330,
@@ -4380,19 +4153,19 @@
         "sha256": "26AF4FED4DFFA50D271B0B54ADABF9CD2EBDF3DCFEE3C4566E501C00F0B1C673"
       },
       {
-        "byte_count": 14384,
-        "path": "native/kernel/src/revalidation.rs",
-        "sha256": "875138AB0D62A8FD8061656CBC2DD9136366DABAB255AAC9A6E0D63455D11EF8"
+        "byte_count": 39930,
+        "path": "native/kernel/src/virtual_memory.rs",
+        "sha256": "54F6CDB1C94896640247E45FEC4394F2D66844CCA7FDEF7EFD4C439C68F97BAD"
       },
       {
-        "byte_count": 7391,
-        "path": "runtime/native_boot_exit.py",
-        "sha256": "902B30BD630474BF461FA24D03AD9C51C24905CE4E3ADA9EEEF3AD4FE7A6F9BC"
+        "byte_count": 61575,
+        "path": "native/kmap/src/lib.rs",
+        "sha256": "F717645EAE175BF5F354219836F4149630DD16D6E4959A8B77E3A5C6F3D88532"
       },
       {
-        "byte_count": 25583,
-        "path": "runtime/native_kernel_map.py",
-        "sha256": "1DF062DD2CE37E908A103ABD4CD3314BBC5AB78FDF5F5235D222E5D90A816F5B"
+        "byte_count": 8058,
+        "path": "models/tla/PooleVirtualMemory.tla",
+        "sha256": "46F0AC1883DEBC488DD4074370C49CEA6C8CA71140955D85E9D7D268B4B7304D"
       },
       {
         "byte_count": 74038,
@@ -4405,14 +4178,14 @@
         "sha256": "0D7BBCE5D9E7594D85EBB790C41ED3A38C6ED28224C6BF86A1B0D60E6ADF6CED"
       },
       {
+        "byte_count": 25462,
+        "path": "runtime/native_kernel_virtual_memory.py",
+        "sha256": "B08A7B08F7867CB9A8AFE6C55E17883DCF21C1A4DAC13CC78789AE564A0203A2"
+      },
+      {
         "byte_count": 10872,
         "path": "specs/native-kernel-entry-contract.json",
         "sha256": "AA7F75882E3823FCC638BB72F43487612B79E428BE81053FD3B124F07CF9F607"
-      },
-      {
-        "byte_count": 28458,
-        "path": "specs/native-kernel-load-contract.json",
-        "sha256": "AFFE361C2067F958F212284EAB17A5D3A0C664A2C0D0B428FB0E26972E33238E"
       },
       {
         "byte_count": 7071,
@@ -4420,19 +4193,19 @@
         "sha256": "3D94A7D8FC671327C1B9772EF0DB7557B2EB479E11265DE46F05D3516D2877BF"
       },
       {
-        "byte_count": 38287,
-        "path": "tools/qualify_native_kernel_physical_memory.py",
-        "sha256": "B09095B6F183E9F081F64676FE9D068383E139DB4D888335C3021D51266A6C6F"
+        "byte_count": 22579,
+        "path": "tools/qualify_native_kernel_virtual_memory.py",
+        "sha256": "9A392D40310F1E8C0D6514261EFC337F819EDB304055D98552E3DE1286819909"
       },
       {
-        "byte_count": 10608,
-        "path": "tests/test_native_kernel_physical_memory.py",
-        "sha256": "C5CC9A451E0E603F15D0F4EDEBBB542B1E472FF5BA2E41D1E124CB653C2CB552"
+        "byte_count": 5534,
+        "path": "tests/test_native_kernel_virtual_memory.py",
+        "sha256": "A181844550D791314224ECF7CE47E52B714D6E1DFABBB6540555A5A150D4FDCD"
       },
       {
-        "byte_count": 10226,
-        "path": "docs/native-kernel-physical-memory.md",
-        "sha256": "5B0AA2F319E489500494D7CE7E3AB7855548C90051AC5D8F5EA4460E5419BAB3"
+        "byte_count": 7224,
+        "path": "docs/native-kernel-virtual-memory.md",
+        "sha256": "745455D1C969D30D9363DAC94CD4D865F8CD06AC540CD494EFFC2B7450CCE5DE"
       },
       {
         "byte_count": 168546,
@@ -4625,7 +4398,7 @@
             "virtual_size": 760
           }
         ],
-        "sha256": "D7A6E5B30E05FD50FBA0D4B1C4CAC198819137D6422014FFC8EE8798DF1BFCCD",
+        "sha256": "CDA5AFBE29F609987FF98F0044A94FF2EEB7297C1FEF01516517B9FFEDB0AFB9",
         "subsystem": 10,
         "timestamp": 0
       },
@@ -4652,7 +4425,7 @@
           "byte_count": 208896,
           "cluster_count": 408,
           "path": "EFI/BOOT/BOOTX64.EFI",
-          "sha256": "D7A6E5B30E05FD50FBA0D4B1C4CAC198819137D6422014FFC8EE8798DF1BFCCD"
+          "sha256": "CDA5AFBE29F609987FF98F0044A94FF2EEB7297C1FEF01516517B9FFEDB0AFB9"
         },
         {
           "byte_count": 229,
@@ -4808,7 +4581,7 @@
         "protective_mbr_valid": true,
         "sector_bytes": 512,
         "sector_count": 131072,
-        "sha256": "52456FBDE6D96545B1C02FE37775E0D5C41E57C3D68F179CC812944E9139BAFC"
+        "sha256": "CC0E48BDE2AF5A66BF50A4EEEFD20A004F139125FAEAF6F2DC5B2342155F8C3A"
       },
       "initial_system": {
         "activation_allowed": false,
@@ -5223,1080 +4996,292 @@
     },
     "ordinary_workspace_file_only": true,
     "physical_media_write_performed": false,
-    "sha256": "52456FBDE6D96545B1C02FE37775E0D5C41E57C3D68F179CC812944E9139BAFC"
+    "sha256": "CC0E48BDE2AF5A66BF50A4EEEFD20A004F139125FAEAF6F2DC5B2342155F8C3A"
   },
   "n9_exit_gate_satisfied": false,
   "negative_controls": [
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-MARKER-OMISSION",
+      "id": "NEG-N9-PKVM3-MARKER-OMISSION",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-MARKER-ORDER",
+      "id": "NEG-N9-PKVM3-MARKER-ORDER",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-MARKER-DUPLICATE",
+      "id": "NEG-N9-PKVM3-MARKER-DUPLICATE",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-SELECTOR",
+      "id": "NEG-N9-PKVM3-SELECTOR",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-CONTRACT",
+      "id": "NEG-N9-PKVM3-CONTRACT",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ENTRY-COUNT",
+      "id": "NEG-N9-PKVM3-TOPOLOGY",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-USABLE-PAGES",
+      "id": "NEG-N9-PKVM3-ORIGINAL-ROOT",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-BOOT-RECLAIMABLE",
+      "id": "NEG-N9-PKVM3-CANDIDATE-ALIGNMENT",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-LOADER-RESERVED",
+      "id": "NEG-N9-PKVM3-TABLE-GENERATION",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-NULL-GUARD",
+      "id": "NEG-N9-PKVM3-DATA-CONTIGUITY",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-DMA-SOURCE",
+      "id": "NEG-N9-PKVM3-DATA-GENERATION",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-DMA-MANAGED",
+      "id": "NEG-N9-PKVM3-DIRECT-FIRST",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-DMA32-SOURCE",
+      "id": "NEG-N9-PKVM3-DIRECT-LAST",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-DMA32-MANAGED",
+      "id": "NEG-N9-PKVM3-DIRECT-GENERATION",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-NORMAL-SOURCE",
+      "id": "NEG-N9-PKVM3-DIRECT-RANGES",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-NORMAL-MANAGED",
+      "id": "NEG-N9-PKVM3-MAPPED-PAGES",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-EXTENT-COUNT",
+      "id": "NEG-N9-PKVM3-GAP-PAGES",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-LARGEST-DMA",
+      "id": "NEG-N9-PKVM3-RETAINED-EXCLUSION",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-LARGEST-DMA32",
+      "id": "NEG-N9-PKVM3-COVERAGE-CHECKSUM",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-LARGEST-NORMAL",
+      "id": "NEG-N9-PKVM3-CACHE-POLICY",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-KERNEL-BASE",
+      "id": "NEG-N9-PKVM3-CACHE-ALIAS",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-KERNEL-PAGES",
+      "id": "NEG-N9-PKVM3-INHERITED-KERNEL",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-HANDOFF-BASE",
+      "id": "NEG-N9-PKVM3-GUARDED-STACK",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-HANDOFF-PAGES",
+      "id": "NEG-N9-PKVM3-HANDOFF",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ROOT",
+      "id": "NEG-N9-PKVM3-BOOTSTRAP-REVOCATION",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-PROTECTED",
+      "id": "NEG-N9-PKVM3-PRE-ACTIVE-STATE",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-PAGES",
+      "id": "NEG-N9-PKVM3-CR3-WRITES",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-PHYSICAL",
+      "id": "NEG-N9-PKVM3-CANDIDATE-READBACK",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-VIRTUAL",
+      "id": "NEG-N9-PKVM3-ORIGINAL-RESTORE",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-GENERATION",
+      "id": "NEG-N9-PKVM3-ROLLBACK-CONTROL",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-OWNER",
+      "id": "NEG-N9-PKVM3-BSP",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-MANAGER-BYTES",
+      "id": "NEG-N9-PKVM3-ACTIVATION-SMP",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-SOURCE-RECORDS",
+      "id": "NEG-N9-PKVM3-LOCAL-INVLPG",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-FREE-EXTENTS",
+      "id": "NEG-N9-PKVM3-ACTIVE-RECEIPTS",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-ALLOCATION-RECORDS",
+      "id": "NEG-N9-PKVM3-PROBE",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-RECEIPT-RECORDS",
+      "id": "NEG-N9-PKVM3-LEAF-MUTATIONS",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-HANDOFF-CHECKSUM",
+      "id": "NEG-N9-PKVM3-RETIREMENT-RECEIPT",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-FINAL-CHECKSUM",
+      "id": "NEG-N9-PKVM3-CONTEXT-FLUSH",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-GUARD-PAGES",
+      "id": "NEG-N9-PKVM3-REMOTE-PENDING",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-MAPPING-COUNT",
+      "id": "NEG-N9-PKVM3-FUTURE-SMP",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-PTE-WRITES",
+      "id": "NEG-N9-PKVM3-DEFERRED-RECLAIM",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-RELEASE-EXCLUDED",
+      "id": "NEG-N9-PKVM3-EXACT-RELEASE",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-RELEASE-REJECTED",
+      "id": "NEG-N9-PKVM3-PHYSICAL-WRITES",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-INTEGRITY",
+      "id": "NEG-N9-PKVM3-TEMPORARY-MAPPING",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-RESERVATION-ROLLBACK",
+      "id": "NEG-N9-PKVM3-OVERCLAIM",
       "status": "pass"
     },
     {
       "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-MAPPING-ROLLBACK",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-HANDOFF",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-CORRUPTION",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-ROLLBACK",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-INITIAL-GENERATION",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-FINAL-GENERATION",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-INITIAL-PAGES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-FINAL-PAGES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-FREE-CAPACITY",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-ALLOCATION-CAPACITY",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-SOURCE-CAPACITY",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-SCRUB-CAPACITY",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-RECLAIM-CAPACITY",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-RETIRED-GENERATION",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-RETIRED-PAGES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-MAPPED-PAGES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-PTE-WRITES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-CHECKSUM",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-GUARDS",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-MAPPING-EVENTS",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-REVOCATION",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-INTEGRITY",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-ATOMIC",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-ROLLBACKS",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-RETIREMENT-FAILURES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-RETIREMENT-RETRY",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-PRESSURE-CHECKS",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-PRESSURE-TRIGGERS",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-PRESSURE-AUTO-GROWTHS",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-PRESSURE-CYCLES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-PRESSURE-SOFT-FALLBACKS",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-PRESSURE-HARD-REJECTIONS",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-PRESSURE-HEADROOM",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-WINDOW-BOUND",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-NEXT-LAYOUT",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-PRESSURE-PRE-EFFECT",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-CONCURRENCY",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-SMP",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-AUTHORITY",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-ACTIONS",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-GROWTH-PRODUCTION",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM-STAGE",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM-CLASS",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM-SEQUENCE",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM-SOURCE-RECORDS",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM-RANGES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM-PAGES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM-DMA-PAGES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM-DMA32-PAGES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM-NORMAL-PAGES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM-PRE-EXTENTS",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM-POST-EXTENTS",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM-SCRUB-BYTES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM-VERIFIED-BYTES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM-RANGE-CHECKSUM",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM-RECEIPT-CHECKSUM",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM-IDEMPOTENT",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM-ACPI-HELD",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM-ACPI-EARLY",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM-RETAINED",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM-ATOMIC",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM-ROLLBACK",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-CONTRACT",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-PMM",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-RSDP",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-XSDT",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-XSDT-ENTRIES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-REQUIRED-MASK",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-FACP-BYTES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-APIC-BYTES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-HPET-BYTES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-MCFG-BYTES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-DESTINATION",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-PAGES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-BYTES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-COPIED-BYTES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-SOURCE-CHECKSUM",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-DESTINATION-CHECKSUM",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-REQUIRED-TABLES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-COPY-VERIFIED",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-LIFECYCLE",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-RETAINED",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-AML",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-SMP",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-TARGET",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-PRODUCTION",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-RECLAIM-STAGE",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-RECLAIM-CLASS",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-RECLAIM-SEQUENCE",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-RECLAIM-SOURCE-RECORDS",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-RECLAIM-RANGES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-RECLAIM-PAGES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-RECLAIM-DMA-PAGES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-RECLAIM-DMA32-PAGES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-RECLAIM-NORMAL-PAGES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-RECLAIM-PRE-EXTENTS",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-RECLAIM-POST-EXTENTS",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-RECLAIM-SCRUB-BYTES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-RECLAIM-VERIFIED-BYTES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-RECLAIM-RANGE-CHECKSUM",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-RECLAIM-RECEIPT-CHECKSUM",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-RECLAIM-IDEMPOTENT",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-RECLAIM-SNAPSHOT-RETAINED",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-RECLAIM-ATOMIC",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-RECLAIM-ROLLBACK",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ALLOCATION-COUNT",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-FREE-COUNT",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-START",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-FIRST-GENERATION",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-REUSE-GENERATION",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ALLOCATION-RECEIPTS",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RELEASE-RECEIPTS",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-SCRUB-PAGES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-SCRUB-BYTES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-VERIFIED-BYTES",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-STALE-PATTERN",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-STALE-ABSENT",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-DOUBLE-FREE",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-QUOTA",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-UNAVAILABLE",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-POISON",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-COALESCE",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ROLLBACK",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-MANAGED-TOTAL",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ALLOCATED-RESIDUE",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-PHYSICAL-WRITE",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-PHYSICAL-READ",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-TEMPORARY-PTE-WRITE",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-BOOTSTRAP-INVLPG",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ALIAS-REVOCATION",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-METADATA-RETAINED",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-LEDGER-GENERATION-RETAINED",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-SNAPSHOT-RESULT-RETAINED",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-MAPPING",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-RECLAIM",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACPI-RECLAIM",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-CONCURRENCY",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-SMP",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-SIGNATURE",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-AUTHORITY",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-ACTION",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-PRODUCTION",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-TERMINAL",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-PBP1-OVERLAP",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-PBP1-SOURCE-KIND",
-      "status": "pass"
-    },
-    {
-      "expected": "rejected",
-      "id": "NEG-N9-PKPMM-PBP1-CORE-OWNERSHIP",
+      "id": "NEG-N9-PKVM3-PBP1-BINDING",
       "status": "pass"
     }
   ],
   "non_claims": [
-    "PKPMM7 qualifies checked pressure-triggered PMM ledger growth, PKACPI1 required-table capture, and one-BSP Boot Services plus ACPI reclaim transactions only inside the bounded qemu64 selector-8 profile.",
-    "Raw allocate and free APIs retained for predecessor PKVM1 and PKVM2 profiles are non-production and are not covered by the PKPMM7 scrub, metadata-growth, pressure, or reclaim claim.",
-    "The retained mappings are one guarded five-page stable manager arena, one active guarded ledger-generation window after three predecessor-generation revocations, and one revoked temporary supervisor RW/NX page alias; no complete direct map or address-space policy is claimed.",
-    "PKACPI1 validates and retains only RSDP, XSDT, APIC, FACP, HPET, and MCFG bytes; it does not interpret AML, activate SMP, configure timers, enumerate PCI, or authorize drivers.",
-    "Automatic growth is serial one-BSP behavior bounded by the current 32-page retained leaf-table windows; the 58-page next layout is rejected, and concurrency-safe growth, interrupt-context allocation, and SMP allocation are not qualified.",
-    "No target hardware, second host, signature, release, or production claim is made."
+    "PKVM3 maps every page admitted by the selector-10 PKPMM7 lifecycle; Boot Services and ACPI reclaim classes not admitted in that lifecycle remain unmapped.",
+    "PKVM3 excludes release-retained ownership generically and host-proves a sparse retained hole, but selector 10 does not execute the separate PKACPI1 snapshot/reclaim profile.",
+    "The four-directory and 512-leaf-table maxima bound the one-host qemu64 development profile; they are not a target-hardware capacity claim.",
+    "One local CR3 context flush and three INVLPG receipts are not an inter-processor shootdown protocol and do not prove SMP TLB coherence.",
+    "No ring 3 transition, syscall, PCID, global-page policy, huge page, COW, user-fault delivery, stack growth, pager, heap, MMIO/PAT/MTRR, pressure, or OOM path is implemented.",
+    "The active profile is unsigned qemu64 development evidence and grants no authority or actions.",
+    "No target hardware, second host, N9 exit, release, or production claim is made."
   ],
   "open_items": [
-    "Extend PKACPI1 beyond required-table structural capture into AML namespace ownership under N10; this receipt makes no AML claim.",
-    "Implement N9.3/N9.4 virtual layout, page-table ownership, map/unmap, TLB, PCID, guard, and huge-page contracts.",
-    "Implement randomized, concurrent, interrupt-context, SMP, fragmentation, quota, and OOM allocator stress.",
-    "Implement heap, object caches, kernel stacks, cacheability policy, target hardware, and second-host qualification.",
-    "Replace the bounded retained-leaf growth windows with the later N9.3 generation-owned virtual mapping policy before production scale is claimed."
+    "Implement AP startup plus inter-processor TLB shootdown requests, acknowledgements, timeout/failure handling, and generation-safe deferred reclaim.",
+    "Integrate the complete map with concurrent allocation and lifecycle-driven incremental map-generation replacement.",
+    "Implement huge-page promotion and demotion, PCID policy, KASLR, copy-on-write, user faults, stack growth, and pager IPC.",
+    "Qualify MMIO cache policy and alias auditing against PAT/MTRR policy on target hardware.",
+    "Complete randomized concurrent memory stress, pressure/OOM policy, target hardware, second-host, and N9 exit gates."
   ],
   "phase_status": {
     "N9": "partial",
-    "N9.1": "partial",
-    "N9.2": "partial"
+    "N9.3": "partial",
+    "N9.4": "partial"
   },
   "production_promotion_allowed": false,
   "production_ready": false,
   "schema_version": "1.0",
-  "selected_move_id": "N9-PMM-ACPI-CONSUMER-001",
-  "status": "pass_single_host_two_run_qemu64_acpi_snapshot_gated_dual_reclaim_non_promoting",
+  "selected_move_id": "N9-VM-DIRECT-MAP-001",
+  "status": "pass_single_host_two_run_qemu64_complete_profile_sparse_direct_map_exact_restore_non_promoting",
   "status_date": "2026-09-05",
   "summary": {
-    "acpi_early_reclaim_rejected": true,
-    "acpi_reclaim_idempotent": true,
-    "acpi_reclaim_receipts": 1,
-    "acpi_reclaimable_pages_held_before_release": 11,
-    "acpi_reclaimable_pages_reclaimed": 11,
-    "acpi_snapshot_bytes": 616,
-    "acpi_snapshot_copied_bytes": 600,
-    "acpi_snapshot_pages_retained": 1,
     "actions_authorized": 0,
-    "allocator_operations": 129,
+    "active_cr3_writes": 2,
+    "active_hardware_tlb_invalidations": 3,
+    "active_invalidation_receipts": 3,
+    "active_leaf_mutations": 3,
     "authority_grants": 0,
-    "boot_reclaim_idempotent": true,
-    "boot_reclaim_pages_by_zone": [
-      2018,
-      9232,
-      0
-    ],
-    "boot_reclaim_ranges": 12,
-    "boot_reclaim_receipts": 1,
-    "boot_reclaim_source_records": 70,
-    "boot_reclaimable_pages_reclaimed": 11250,
-    "bootstrap_invalidations": 23172,
-    "bootstrap_temporary_pte_writes": 23172,
-    "complete_address_space_mapping_operations": 0,
-    "final_temporary_alias_revoked": true,
-    "ledger_generation_growth": {
-      "allocation_capacity": 256,
-      "atomic": 1,
-      "automatic_growths": 3,
-      "final_generation": 33,
-      "final_pages": 29,
-      "free_capacity": 2048,
-      "growth_headroom_allocation": 1,
-      "growth_headroom_scrub": 4,
-      "guard_pages": 4,
-      "hard_rejections": 1,
-      "initial_generation": 2,
-      "initial_pages": 4,
-      "integrity": 1,
-      "mapped_pages": 29,
-      "mapping_events": 4,
-      "next_pages": 58,
-      "pre_effect": "host_verified",
-      "pressure_checks": 119,
-      "pressure_cycles": 59,
-      "pressure_triggers": 7,
-      "pte_writes": 83,
-      "reclaim_capacity": 16,
-      "retired_generation": 17,
-      "retired_pages": 15,
-      "retirement_failures": 0,
-      "retirement_retry": 0,
-      "revoked": 3,
-      "rollbacks": 0,
-      "scrub_capacity": 128,
-      "soft_fallbacks": 3,
-      "source_capacity": 2048,
-      "window_capacity": 32
-    },
-    "loader_reserved_pages_protected": 922,
-    "managed_pages": 129082,
-    "marker_count": 45,
-    "memory_entry_count": 98,
-    "metadata_allocation_records_at_handoff": 1,
-    "metadata_arena_pages": 5,
-    "metadata_free_extents": 11,
-    "metadata_guard_pages": 2,
-    "metadata_integrity_verified": true,
-    "metadata_manager_bytes": 15632,
-    "metadata_mapping_retained": true,
-    "metadata_pte_writes": 5,
-    "metadata_receipt_records_at_handoff": 1,
-    "metadata_release_excluded": true,
-    "metadata_scrub_receipts": 1,
-    "metadata_source_records": 98,
-    "negative_controls_passed": 191,
-    "physical_word_reads": 5879957,
-    "physical_word_writes": 5875277,
+    "bootstrap_hardware_tlb_invalidations": 950682,
+    "coverage_checksum": "0x64E09067B6BFDCB3",
+    "direct_directory_tables": 1,
+    "direct_map_gap_pages": 12944,
+    "direct_map_ranges": 11,
+    "direct_page_tables": 237,
+    "generation_retirement_receipts": 1,
+    "mapped_owned_pages": 117821,
+    "marker_count": 40,
+    "negative_controls_passed": 46,
+    "physical_table_writes": 367408,
     "production_claim_count": 0,
     "qemu_run_count": 2,
-    "reclaim_operations": 2,
-    "sample_scrub_receipts": 4,
-    "scrub_page_count": 11473,
-    "scrub_receipts": 128,
-    "scrubbed_bytes": 46993408,
+    "remote_shootdowns_pending": 0,
+    "retained_excluded_pages": 0,
     "signature_verifications": 0,
-    "source_usable_pages": 117822,
-    "verified_bytes": 46993408
+    "table_pages_materialized": 243,
+    "temporary_pte_writes": 950682
   }
 }

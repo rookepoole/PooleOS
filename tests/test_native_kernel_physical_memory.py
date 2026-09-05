@@ -24,6 +24,9 @@ class NativeKernelPhysicalMemoryTests(unittest.TestCase):
         self.assertEqual([], physical_memory.readiness_errors(self.readiness))
         self.assertFalse(self.readiness["production_ready"])
         self.assertFalse(self.readiness["n9_exit_gate_satisfied"])
+        stale_layout = copy.deepcopy(self.contract)
+        stale_layout["metadata_arena"]["manager_byte_count"] = 15376
+        self.assertTrue(physical_memory.contract_errors(stale_layout))
 
     def test_live_markers_bind_to_independent_pbp1_accounting(self) -> None:
         observation = physical_memory.validate_markers(self.markers)
@@ -50,7 +53,15 @@ class NativeKernelPhysicalMemoryTests(unittest.TestCase):
         )
         self.assertEqual(5, observation["metadata"]["pages"])
         self.assertEqual(2, observation["metadata"]["guard_pages"])
-        self.assertEqual(15376, observation["metadata"]["manager_bytes"])
+        self.assertEqual(15632, observation["metadata"]["manager_bytes"])
+        stale_markers = list(self.markers)
+        stale_markers[38] = stale_markers[38].replace(
+            "manager_bytes=15632", "manager_bytes=15376", 1
+        )
+        with self.assertRaisesRegex(
+            physical_memory.KernelPhysicalMemoryError, "metadata arena boundary changed"
+        ):
+            physical_memory.validate_markers(stale_markers)
         self.assertEqual(33, observation["growth"]["final_generation"])
         self.assertEqual(29, observation["growth"]["final_pages"])
         self.assertEqual([2048, 256, 2048, 128, 16], [

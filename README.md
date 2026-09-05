@@ -4,6 +4,15 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
+Cycle 156 requalifies the allocator, ACPI memory reclamation and sparse virtual
+memory for the retention-capable kernel. The manager contract now matches its
+measured 15,632-byte layout, with regressions rejecting the old size. Four final
+virtual boots and 237 negative controls pass; independent accounting confirms
+the larger kernel protects one additional page. Kernel bytes and the demo ISO
+are unchanged. Interrupts and SMP are next, followed by scheduler/lock replay
+and the full candidate gate. This is pre-production memory qualification, not
+a new desktop or a production release.
+
 Cycle 155 replays the current kernel's exception, CPU, x87/SSE and MSR profiles:
 fourteen fresh virtual boots, 225 marker controls and 41 focused Python tests
 pass. Trap receipts now reject missing runs, duplicated scenarios and altered
