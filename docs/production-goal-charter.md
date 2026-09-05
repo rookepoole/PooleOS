@@ -1,13 +1,117 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-09-04
+Status date: 2026-09-05
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 152
+Last roadmap reconciliation: PooleOS Cycle 157
+
+Cycle 157 completes current-source replay from N8-IRQ-001 through the reopened
+N12-CONCURRENCY-LOCKS-001 dependency: twelve fresh profile receipts contain
+24 headless QEMU/OVMF boots, 421 control groups and 1,881 rejected cases.
+All 26 selected N5/N7/memory/IRQ/SMP/scheduler/atomic/lock gates pass. The
+unchanged retention kernel passes 214 host tests in each profile. Stale date,
+stack-layout, test-count and linked-kernel acceptance bindings are corrected
+from measured evidence; three IRQ/SMP error-formatting paths now return failed
+checks for invalid schema records. Two new regression methods cover twelve
+production-overclaim and three schema-error cases. The broad N36 receipt audit
+remains open. The canonical candidate replay passes all 105 gates and 708 Doctor
+checks, including the 917-test suite. This restores only the bounded N12.2
+PKLOCK1 milestone and closes its reopened flag. All 57 ADD requirements,
+94 flags (35 open),
+20 gaps, 40 phases, 301 subphases and locked checklist mapping remain intact.
+PooleGlyph Phase 65 and its user-modified report are unchanged. The separate
+demo, production boundary, governance custody and N12.3 ownership work remain
+unchanged. Checkpoints through Cycle 156 are already on the remote agent branch;
+main may advance only after the complete exact-final local and configured
+GitHub gates. N12-CONCURRENCY-RECLAMATION-001 is the next engineering move.
+
+Historical Cycle 156 requalifies PKPMM7/PKACPI1 and PKVM3 for the existing unmerged
+retention-capable kernel. The exact manager contract is now 15,632 bytes;
+old-size contract and marker controls reject. Independent PBP1 accounting
+binds the one-page usable-to-loader ownership shift, allocator growth and
+reclaim, and the sparse direct map. Final receipts contain four fresh boots
+and 237 negative controls; native executable bytes do not change. Shared map
+addresses and current checksums are documented from measurements. Retention
+does not itself remove direct-map admission. No phase/flag, full canonical
+gate, N9/N12 exit, frozen demo, main or production promotion is claimed.
+Counts remain 57 ADD requirements, 94 flags (36 open), 20 gaps, 40 phases and
+301 subphases with complete locked checklist mapping. Next replay N8-IRQ-001,
+first-AP/AP-runtime/IPI, scheduler, atomics and locks; then run the full current
+candidate suite. N0 custody and N12.3 mandatory ownership remain open. The
+broader N36 recorded-evidence audit is not closed by these live runs.
+Four stale PKMAP2 fixture cases were also repaired against current measured
+geometry, preserving the specific guard-collision rejection. The focused
+current-source gate projection passes fourteen checks; twelve downstream
+native checks remain stale. It is not a canonical or Doctor pass.
+Historical failures and prior exact-candidate acceptance remain preserved.
+
+Cycle 155 reconstructs the current kernel's trap/CPU/xstate/MSR evidence through
+fourteen fresh QEMU/OVMF boots in the final receipts, 225 marker controls across
+five profiles, 41 focused N7 Python tests and the unchanged current PKERR1 gate.
+It also repairs PKTRAP1's acceptance of incomplete or contradictory recorded
+run evidence: 25 receipt mutations and eight release-boundary controls reject.
+The broader per-profile audit remains required under new
+ADD-N36-RECEIPT-COVERAGE-001 and FLAG-N36-RECEIPT-COVERAGE-001.
+The focused projection passes twelve selected N5/N7 gates; fourteen downstream
+native checks remain stale. This is not a full canonical or Doctor pass.
+No kernel bytes, main, frozen demo, signing trust or production status change.
+The ledger now has 57 ADD requirements and 94 flags, including 36 open flags;
+all locked checklist coverage, 40 phases/301 subphases and 20 gaps remain.
+Next re-derive PMM ownership/layout accounting under
+N9-PMM-ACPI-CONSUMER-001, then replay VM, interrupts, SMP, scheduler, atomics
+and locks before the complete current-candidate suite and merge gate.
+N12.2 and N12.3 remain partial/open. N0 custody is independently blocked;
+this development step needs no new owner action. Historical failures and
+qualification boundaries below remain authoritative for their exact candidates.
+
+Cycle 154 reconstructs the N5 prerequisites for the changed-kernel and reopened
+N12.2 lock replay. PSYM1 is rebound from measured debug/loaded/kernel/manifest
+identities and independently requalified; PPOL1 now rejects readiness whose
+current canonical dependency vectors differ, and binds the payload-reference
+implementations. Fresh policy, symbol, loader, aggregate PooleBoot and retained-byte
+revalidation qualification pass. Two PKXFER1 runs enter the actual kernel and
+reparse nine retained files before terminal unsigned denial; 63 focused Python
+tests and all six corresponding boot-chain gates pass. This changes neither
+kernel bytes, symbol consumption, signature acceptance, authority nor production
+status. Replay the remaining trap/CPU/memory/SMP/scheduler/lock profiles next,
+starting with N7-TRAP-001, before the reopened N12.2 milestone can close.
+Keep the full dependency and aggregate gate pending until actual replay passes.
+The Cycle 154 diagnostic audit still rejects 19 downstream native checks and
+the aggregate suite; two omitted CLI inputs were checked separately, not folded
+into an invented canonical pass. Preserve this failed audit and its limitation.
+No checklist requirement, program gap, N5 exit or reopened lock flag closes.
+
+Cycle 153 implements PKRETAIN1 allocator-enforced retention under the existing
+N12.3 reclamation move. Non-copyable tokens protect explicitly retained physical
+allocations from every ordinary free path, survive metadata migration and ledger
+growth, and fail closed on lost ownership. The three-AP path now retains its old
+frames through stop acknowledgements and final INIT parking before scrub/release.
+Attempted starts are counted before issuing startup commands, so a missing
+online acknowledgement cannot bypass final parking during failure cleanup.
+The task-lifetime harness demonstrates retained physical page-table ownership.
+Host qualification passes; the linked image and retained boot layout change.
+Complete dependency replay and the full current-candidate gate are pending.
+The first aggregate attempt, before the final startup-mask repair, failed
+25/105 checks; preserve that result and rerun affected evidence, never inherit
+its passing subset as a current-candidate aggregate pass.
+Cycle 152 is the last fully qualified main baseline; its receipts must not be
+inherited for Cycle 153 bytes. No merge, release, demo rebase or production
+promotion is authorized by partial qualification. The next move is to finish
+this candidate's replay, then mandatory active task/root ownership and an
+independent live retirement/failure oracle. N12.3, its flag and all 20 gaps remain
+open. See `docs/native-kernel-physical-retention.md`.
+
+Cycle 153 also reopens `FLAG-N12-CONCURRENCY-LOCKS-001` and N12.2 after a
+four-participant host probe exposed a stale-counter `QueueFull` result. Raw and
+writer-ticket reservation now retry that inconsistent sample; capacity,
+wraparound and concurrent progress coverage expands within the existing tests.
+Resolve current-source lock/profile and aggregate replay before extending N12.3.
+The repair and historical failed run remain documented; no historical pass
+overrides the newly discovered regression.
 
 Cycle 152 resumes owner-independent native development under
 `N12-CONCURRENCY-RECLAMATION-001`. PKLIFE1 owns the actual PKSCHED4 scheduler

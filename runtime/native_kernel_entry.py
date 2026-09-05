@@ -33,8 +33,11 @@ IMPLEMENTATION_INPUTS = (
     Path("native/kernel/src/scheduler_preempt.rs"),
     Path("native/kernel/src/acpi.rs"),
     Path("native/kernel/src/physical_memory.rs"),
+    Path("native/kernel/src/physical_memory/retention.rs"),
+    Path("native/kernel/src/physical_memory/tests/retention.rs"),
     Path("native/kernel/src/virtual_memory.rs"),
     Path("native/kernel/src/active_virtual_memory.rs"),
+    Path("native/kmap/src/lib.rs"),
     Path("native/fixtures/poolekernel/Cargo.toml"),
     Path("native/fixtures/poolekernel/README.md"),
     Path("native/fixtures/poolekernel/src/main.rs"),
@@ -112,15 +115,15 @@ def contract_errors(contract: Any) -> list[str]:
         "format_contract": "PKELF1",
         "handoff_contract": "PBP1",
         "entry_offset": 0xA000,
-        "image_memory_bytes": 0x8F000,
-        "canonical_file_bytes": 513_680,
+        "image_memory_bytes": 0x90000,
+        "canonical_file_bytes": 517_784,
         "maximum_relocations": 4096,
         "segment_boundaries": {
             "read_only_end": 0xA000,
             "text_start": 0xA000,
-            "text_end": 0x70000,
-            "relro_end": 0x7D000,
-            "image_end": 0x8F000,
+            "text_end": 0x71000,
+            "relro_end": 0x7E000,
+            "image_end": 0x90000,
         },
     }
     for key, value in expected_product.items():
@@ -168,7 +171,7 @@ def readiness_errors(readiness: Any, root: Path = ROOT) -> list[str]:
     ):
         if not isinstance(summary.get(total), int) or summary.get(passed) != summary.get(total):
             errors.append(f"readiness summary mismatch: {passed}")
-    if summary.get("rust_host_tests_total") != 206:
+    if summary.get("rust_host_tests_total") != 214:
         errors.append("readiness host-test count mismatch")
     if summary.get("clean_builds_total") != 2:
         errors.append("readiness clean-build count mismatch")

@@ -121,7 +121,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(checklist["section_count"], 171)
         self.assertEqual(checklist["coverage_status"], "pass")
         self.assertEqual(checklist["coverage_sha256"], hashlib.sha256(self.coverage_path.read_bytes()).hexdigest().upper())
-        self.assertEqual(checklist["added_requirement_count"], 56)
+        self.assertEqual(checklist["added_requirement_count"], 57)
 
     def test_phase_checklist_mapping_matches_coverage(self) -> None:
         coverage_by_phase = {item["phase_id"]: item for item in self.coverage["phase_coverage"]}
@@ -136,8 +136,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 152)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 915)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 157)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 917)
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
         self.assertTrue(native["pooleboot_exists"])
@@ -154,10 +154,30 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(historical["native_promotion_role"], "historical_non_promoting")
         current = self.roadmap["baseline"]["native_consistency_release_gate"]
         self.assertEqual(current["passed_checks"], 105)
+        self.assertEqual(current["qualification_status"], "pass_current_candidate_non_promoting")
+        self.assertEqual(current["last_fully_qualified_cycle"], 157)
+        self.assertEqual(current["last_fully_qualified_passed_checks"], 105)
+        replay = current["canonical_replay"]
+        self.assertEqual(replay["doctor_passed_checks"], 708)
+        self.assertEqual(replay["pooleos_test_count"], 917)
+        self.assertTrue(replay["both_bundle_and_replay_inputs_supplied"])
+        self.assertFalse(replay["production_ready"])
+        projection = current["focused_current_source_projection"]
+        self.assertEqual(projection["cycle"], 157)
+        self.assertEqual(projection["passed_checks"], 26)
+        self.assertEqual(projection["pending_downstream_native_checks"], 0)
+        self.assertFalse(projection["canonical_full_replay_performed"])
+        self.assertEqual(projection["next_dependency_move_id"], "N12-CONCURRENCY-RECLAMATION-001")
         self.assertEqual(current["total_checks"], 105)
         self.assertEqual(current["artifact_count"], 62)
         self.assertEqual(current["explicit_gap_count"], 20)
         self.assertFalse(current["production_ready"])
+        diagnostic = current["candidate_replay_diagnostic"]
+        self.assertEqual(diagnostic["status"], "failed_noncanonical_invocation")
+        self.assertEqual(diagnostic["stale_downstream_native_checks"], 19)
+        self.assertEqual(diagnostic["omitted_input_flags"], ["--bundle", "--replay-proof"])
+        self.assertEqual(diagnostic["corrected_input_checks_passed_separately"], 2)
+        self.assertFalse(diagnostic["canonical_full_replay_passed"])
         self.assertEqual(self.roadmap["immediate_next_move"]["id"], "N0-GOVERNANCE-CUSTODY-001")
         self.assertTrue(self.roadmap["immediate_next_move"]["blocked"])
 
@@ -177,7 +197,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N12-CONCURRENCY-RECLAMATION-001")
+        self.assertEqual(protocol["selected_move_id"], "N8-IRQ-001")
         self.assertEqual(
             protocol["owner_independent_next_move_id"],
             "N12-CONCURRENCY-RECLAMATION-001",
@@ -244,8 +264,12 @@ class PdcProductionRoadmapTests(unittest.TestCase):
     def test_flags_and_gaps_are_native_and_traceable(self) -> None:
         phase_ids = {phase["id"] for phase in self.roadmap["phases"]}
         flags = self.roadmap["implementation_flags"]
-        self.assertEqual(len(flags), 93)
-        self.assertEqual(len({flag["id"] for flag in flags}), 93)
+        self.assertEqual(len(flags), 94)
+        self.assertEqual(len({flag["id"] for flag in flags}), 94)
+        receipt_flag = next(flag for flag in flags if flag["id"] == "FLAG-N36-RECEIPT-COVERAGE-001")
+        self.assertEqual(receipt_flag["phase_id"], "N36")
+        self.assertEqual(receipt_flag["status"], "open")
+        self.assertIn("runtime/native_kernel_trap.py", receipt_flag["evidence"])
         self.assertTrue(any(flag["class"] == "STOP_SHIP" and flag["status"] == "open" for flag in flags))
         self.assertEqual(next(flag for flag in flags if flag["id"] == "FLAG-BUILDROOT-LEGACY-001")["status"], "closed")
         objectives_flag = next(flag for flag in flags if flag["id"] == "FLAG-N0-OBJECTIVES-001")

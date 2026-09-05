@@ -210,6 +210,11 @@ IMPLEMENTATION_INPUTS: Final = (
     "native/policy/src/bin/ppol1_probe.rs",
     "runtime/native_policy.py",
     "runtime/native_boot_artifact.py",
+    "runtime/native_initial_system.py",
+    "runtime/native_recovery.py",
+    "runtime/native_symbols.py",
+    "runtime/native_microcode.py",
+    "runtime/native_firmware.py",
     "tools/generate_native_policy_vectors.py",
     "tools/qualify_native_policy.py",
     "tests/test_native_policy.py",
@@ -1313,6 +1318,11 @@ def readiness_errors(value: dict[str, Any], root: Path = ROOT) -> list[str]:
     errors = _schema_errors(value, root, READINESS_SCHEMA_RELATIVE)
     if errors:
         return errors
+    try:
+        errors.extend(contract_errors(read_json(root / CONTRACT_RELATIVE), root))
+        errors.extend(golden_errors(read_json(root / GOLDEN_RELATIVE), root))
+    except (OSError, ValueError) as error:
+        errors.append(f"PPOL1 current reference inputs cannot be validated: {error}")
     if value.get("status") != "pass" or value.get("contract_id") != CONTRACT_ID:
         errors.append("PPOL1 readiness status changed")
     inputs = value.get("inputs", {})

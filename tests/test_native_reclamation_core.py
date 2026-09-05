@@ -19,6 +19,7 @@ class ReclamationCoreTests(unittest.TestCase):
             "production_ready", "live_integration_verified", "cross_cpu_quiescence_verified",
             "n12_3_complete", "focused_test_count", "kernel_regression_count", "compile_fail_borrow_tests",
             "task_lifetime_test_count",
+            "physical_retention_test_count", "physical_retention_live_verified",
         ):
             with self.subTest(key=key):
                 changed = copy.deepcopy(self.report)
@@ -31,6 +32,8 @@ class ReclamationCoreTests(unittest.TestCase):
             ("task_lifetime_scope", "live_active_address_space_quiescence"),
             ("task_lifetime_contract_id", "PKLIFE2"),
             ("schema_version", "1.0"),
+            ("physical_retention_scope", "global_active_address_space_ownership"),
+            ("physical_retention_contract_id", "PKRETAIN2"),
         ):
             changed = copy.deepcopy(self.report)
             changed[key] = value

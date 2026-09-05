@@ -26,7 +26,7 @@ The live profile delivers one local-APIC one-shot timer interrupt on IST1. The h
 
 ## Worker execution
 
-Two fixed 16-KiB worker stacks are reserved in the lower 32 KiB of the already retained 128-KiB bootstrap-stack partition, canary checked, and entered with IF clear through the PKSCHED1 context-switch primitive. They add no image BSS pages and cannot overlap the live bootstrap RSP. The live dispatch trace is:
+Two fixed 16-KiB worker stacks are reserved in the lower 32 KiB of the already retained 144-KiB bootstrap-stack partition, canary checked, and entered with IF clear through the PKSCHED1 context-switch primitive. They add no image BSS pages and cannot overlap the live bootstrap RSP. The live dispatch trace is:
 
 ```text
 worker:slot = 0:0,1:2,0:4,1:1,0:5,1:6
@@ -57,7 +57,7 @@ A separate live-kernel controller injects faults after reservation, after queue 
 
 The qualification requires:
 
-- seven focused PKSCHED3 Rust tests within 189 PooleKernel tests;
+- seven focused PKSCHED3 Rust tests within 214 PooleKernel tests;
 - a five-receipt Rust host probe checked by an independent Python priority and operation oracle;
 - two byte-identical selector-17 QEMU/OVMF runs with exactly 37 ordered markers;
 - exact screenshot and PBP1 handoff equality;

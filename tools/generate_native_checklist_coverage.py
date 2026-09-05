@@ -118,6 +118,16 @@ ADDED_REQUIREMENTS = [
         "basis": ["https://sel4.systems/Verification/assumptions.html"],
     },
     {
+        "id": "ADD-N36-RECEIPT-COVERAGE-001",
+        "phase_id": "N36",
+        "requirement": "Validate every qualification receipt against its exact scenario and run inventory, distinct run identities, parsed observations, byte digests, current dependency bindings and independent-oracle results. Reject missing, duplicated, malformed, stale, substituted or contradictory evidence through both component validators and release gates. Separate recorded consistency from fresh execution, authentication, independent builders and target qualification; retain a per-profile audit and negative-test matrix before qualification closure.",
+        "basis": [
+            "Cycle 155 PKTRAP1 recorded scenario/run acceptance repair",
+            "runtime/native_kernel_trap.py and tests/test_native_kernel_trap.py",
+            "runtime/native_kernel_cpu_policy.py: cross-profile coverage review pending",
+        ],
+    },
+    {
         "id": "ADD-VIRTIO-001",
         "phase_id": "N4",
         "requirement": "Add OASIS VIRTIO 1.3 as the QEMU-first reference-device contract and implement modern PCI transport negotiation before physical-device drivers.",
@@ -664,7 +674,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path, default=ROOT / SOURCE_RELATIVE)
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pooleos_native_checklist_coverage.json")
-    parser.add_argument("--status-date", default="2026-09-04")
+    parser.add_argument("--status-date", default="2026-09-05")
     args = parser.parse_args()
     artifact = build_coverage(args.source, args.status_date)
     args.out.parent.mkdir(parents=True, exist_ok=True)

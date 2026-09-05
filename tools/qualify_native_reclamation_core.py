@@ -27,6 +27,12 @@ SOURCES = (
     "native/kernel/src/scheduler_smp.rs",
     "native/kernel/src/virtual_memory.rs",
     "native/kernel/src/physical_memory.rs",
+    "native/kernel/src/physical_memory/retention.rs",
+    "native/kernel/src/physical_memory/tests/retention.rs",
+    "native/kernel/src/main.rs",
+    "native/kernel/linker.ld",
+    "native/kernel/manifest.pkm",
+    "native/kmap/src/lib.rs",
     "native/handoff/src/lib.rs",
     "native/kernel/Cargo.toml",
     "native/Cargo.lock",
@@ -35,13 +41,13 @@ SOURCES = (
 )
 REPORT = ROOT / "runs/native-kernel-reclamation-core-readiness.json"
 TEST_COUNT = 19
-LIFETIME_TEST_COUNT = 19
-KERNEL_SHA256 = "9029AEE51A4D557EF5B29945985E4A1F07C67DDE9C8C367C80BD1B9EDD9D409E"
+LIFETIME_TEST_COUNT = 20
+KERNEL_SHA256 = "BDEECCB27B1B91406911F91169B9BF5F9DF0439BB39FA0E1882C07E1AF3B81EF"
 STAGES = (
     "format", "host-build-debug", "test-build-debug", "tests-debug",
     "lifetime-build-debug", "lifetime-tests-debug",
     "host-build-release", "test-build-release", "tests-release",
-    "lifetime-build-release", "lifetime-tests-release", "borrow-doctests",
+    "lifetime-build-release", "lifetime-tests-release", "kernel-regressions-release", "borrow-doctests",
     "kernel-regressions", "host-clippy", "freestanding-clippy", "linked-kernel-build",
 )
 
@@ -59,16 +65,19 @@ def require_test_result(output: str, count: int) -> None:
 
 def validate_report(report: dict, root: Path = ROOT) -> None:
     expected = {
-        "schema_version": "1.1", "contract_id": "PKRECLAIM1-CORE",
+        "schema_version": "1.2", "contract_id": "PKRECLAIM1-CORE",
         "selected_move_id": "N12-CONCURRENCY-RECLAMATION-001", "phase": "N12.3",
         "status": "host_verified_live_integration_pending", "production_ready": False,
         "live_integration_verified": False, "cross_cpu_quiescence_verified": False,
         "n12_3_complete": False, "focused_test_count": TEST_COUNT,
-        "kernel_regression_count": 206, "compile_fail_borrow_tests": 3,
+        "kernel_regression_count": 214, "compile_fail_borrow_tests": 5,
+        "physical_retention_contract_id": "PKRETAIN1",
+        "physical_retention_scope": "allocator_enforced_for_explicitly_retained_allocations",
+        "physical_retention_test_count": 8, "physical_retention_live_verified": False,
         "task_lifetime_contract_id": "PKLIFE1",
         "task_lifetime_test_count": LIFETIME_TEST_COUNT,
         "task_lifetime_scope": "host_executed_scheduler_and_inactive_address_space_ownership",
-        "linked_kernel_sha256": KERNEL_SHA256, "linked_kernel_byte_count": 513680,
+        "linked_kernel_sha256": KERNEL_SHA256, "linked_kernel_byte_count": 517784,
     }
     if not isinstance(report, dict) or set(report) != set(expected) | {"sources", "stages"}:
         raise ValueError("reclamation report fields changed")
@@ -150,9 +159,12 @@ def qualify(work: Path) -> dict:
             "-L", f"dependency={artifacts / 'deps'}", "-o", str(lifetime_binary),
         ])
         run(f"lifetime-tests-{profile}", [str(lifetime_binary), "--test-threads=1"], LIFETIME_TEST_COUNT)
+        if profile == "release":
+            run("kernel-regressions-release", [str(cargo), "test", *base, "--lib", *host,
+                "--release", "--", "--test-threads=1"], 214)
     env.pop("CARGO_PROFILE_RELEASE_PANIC", None)
-    run("borrow-doctests", [str(cargo), "test", *base, "--doc", *host], 3)
-    run("kernel-regressions", [str(cargo), "test", *base, "--lib", *host, "--", "--test-threads=1"], 206)
+    run("borrow-doctests", [str(cargo), "test", *base, "--doc", *host], 5)
+    run("kernel-regressions", [str(cargo), "test", *base, "--lib", *host, "--", "--test-threads=1"], 214)
     run("host-clippy", [str(cargo), "clippy", *base, "--lib", *host, "--", "-D", "warnings"])
     run("freestanding-clippy", [str(cargo), "clippy", *base, "--lib", "--release",
         "--target", entry.PRODUCT_TARGET, "--locked", "--offline", "--target-dir", str(target),
@@ -167,17 +179,20 @@ def qualify(work: Path) -> dict:
         env = host_env
     linked = (target / entry.PRODUCT_TARGET / "release/PooleKernelLinked").read_bytes()
     canonical, _ = entry.kernel_image.canonicalize_linked_image(linked)
-    if len(canonical) != 513680 or hashlib.sha256(canonical).hexdigest().upper() != KERNEL_SHA256:
+    if len(canonical) != 517784 or hashlib.sha256(canonical).hexdigest().upper() != KERNEL_SHA256:
         raise ValueError("linked kernel changed; existing live receipts cannot be inherited")
     if before != bind_sources():
         raise ValueError("source changed during qualification")
     report = {
-        "schema_version": "1.1", "contract_id": "PKRECLAIM1-CORE",
+        "schema_version": "1.2", "contract_id": "PKRECLAIM1-CORE",
         "selected_move_id": "N12-CONCURRENCY-RECLAMATION-001", "phase": "N12.3",
         "status": "host_verified_live_integration_pending", "production_ready": False,
         "live_integration_verified": False, "cross_cpu_quiescence_verified": False,
         "n12_3_complete": False, "focused_test_count": TEST_COUNT,
-        "kernel_regression_count": 206, "compile_fail_borrow_tests": 3,
+        "kernel_regression_count": 214, "compile_fail_borrow_tests": 5,
+        "physical_retention_contract_id": "PKRETAIN1",
+        "physical_retention_scope": "allocator_enforced_for_explicitly_retained_allocations",
+        "physical_retention_test_count": 8, "physical_retention_live_verified": False,
         "task_lifetime_contract_id": "PKLIFE1",
         "task_lifetime_test_count": LIFETIME_TEST_COUNT,
         "task_lifetime_scope": "host_executed_scheduler_and_inactive_address_space_ownership",
@@ -196,7 +211,7 @@ def main() -> int:
     report = qualify(args.work.resolve())
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n")
-    print(f"PKRECLAIM1_CORE PASS tests={TEST_COUNT} lifecycle={LIFETIME_TEST_COUNT} profiles=2 regressions=206 live=0 production=0")
+    print(f"PKRECLAIM1_CORE PASS tests={TEST_COUNT} lifecycle={LIFETIME_TEST_COUNT} retention=8 profiles=2 regressions=214 live=0 production=0")
     return 0
 
 

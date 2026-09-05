@@ -394,6 +394,11 @@ impl TicketSpinLock {
             let next = self.next.load(LoadOrder::Acquire);
             let serving = self.serving.load(LoadOrder::Acquire);
             if next.wrapping_sub(serving) >= MAX_OUTSTANDING_TICKETS {
+                // Other owners can advance both counters between the loads.
+                if self.next.load(LoadOrder::Acquire) != next {
+                    spin_loop();
+                    continue;
+                }
                 return Err(Error::QueueFull);
             }
             match self.next.compare_exchange_weak(
@@ -1269,6 +1274,10 @@ impl ReaderWriterLock {
             let next = self.writer_next.load(LoadOrder::Acquire);
             let serving = self.writer_serving.load(LoadOrder::Acquire);
             if next.wrapping_sub(serving) >= MAX_OUTSTANDING_TICKETS {
+                if self.writer_next.load(LoadOrder::Acquire) != next {
+                    spin_loop();
+                    continue;
+                }
                 return Err(Error::QueueFull);
             }
             if self
@@ -1513,6 +1522,8 @@ fn increment(value: u32) -> Result<u32, Error> {
 
 #[cfg(test)]
 mod tests {
+    extern crate std;
+
     use super::*;
 
     #[test]
@@ -1534,6 +1545,36 @@ mod tests {
         assert_eq!(snapshot.owner, 0);
         assert_eq!(snapshot.cancelled, 0);
         assert_eq!(snapshot.timeouts, 1);
+
+        for start in [0, u32::MAX - 16] {
+            let lock = TicketSpinLock::new();
+            lock.next.store(start, StoreOrder::Relaxed);
+            lock.serving.store(start, StoreOrder::Relaxed);
+            for offset in 0..MAX_OUTSTANDING_TICKETS {
+                assert_eq!(lock.reserve_ticket(), Ok(start.wrapping_add(offset)));
+            }
+            let before = lock.snapshot();
+            assert_eq!(lock.reserve_ticket(), Err(Error::QueueFull));
+            assert_eq!(lock.snapshot(), before);
+        }
+
+        let lock = TicketSpinLock::new();
+        std::thread::scope(|scope| {
+            for owner in 1..=4 {
+                let lock = &lock;
+                scope.spawn(move || {
+                    for _ in 0..2048 {
+                        let permit = lock.lock(owner).unwrap();
+                        lock.unlock(permit).unwrap();
+                    }
+                });
+            }
+        });
+        let snapshot = lock.snapshot();
+        assert_eq!(snapshot.next, 8192);
+        assert_eq!(snapshot.serving, snapshot.next);
+        assert_eq!(snapshot.acquisitions, snapshot.next);
+        assert_eq!(snapshot.owner, 0);
     }
 
     #[test]
@@ -1747,6 +1788,36 @@ mod tests {
         assert_eq!(snapshot.0, 0);
         assert_eq!(snapshot.3, 1);
         assert_eq!(snapshot.4, 0);
+
+        for start in [0, u32::MAX - 16] {
+            let lock = ReaderWriterLock::new();
+            lock.writer_next.store(start, StoreOrder::Relaxed);
+            lock.writer_serving.store(start, StoreOrder::Relaxed);
+            for offset in 0..MAX_OUTSTANDING_TICKETS {
+                assert_eq!(lock.reserve_writer(), Ok(start.wrapping_add(offset)));
+            }
+            let next = lock.writer_next.load(LoadOrder::Acquire);
+            assert_eq!(lock.reserve_writer(), Err(Error::QueueFull));
+            assert_eq!(lock.writer_next.load(LoadOrder::Acquire), next);
+            assert_eq!(lock.writer_serving.load(LoadOrder::Acquire), start);
+        }
+
+        let lock = ReaderWriterLock::new();
+        std::thread::scope(|scope| {
+            for owner in 1..=4 {
+                let lock = &lock;
+                scope.spawn(move || {
+                    for _ in 0..2048 {
+                        let permit = lock.write_lock(owner).unwrap();
+                        lock.write_unlock(permit).unwrap();
+                    }
+                });
+            }
+        });
+        assert_eq!(lock.writer_next.load(LoadOrder::Acquire), 8192);
+        assert_eq!(lock.writer_serving.load(LoadOrder::Acquire), 8192);
+        assert_eq!(lock.writer_owner.load(LoadOrder::Acquire), 0);
+        assert_eq!(lock.state.load(LoadOrder::Acquire), 0);
     }
 
     #[test]

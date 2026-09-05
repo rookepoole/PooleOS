@@ -8,6 +8,7 @@ import subprocess
 import sys
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,6 +28,38 @@ class NativePolicyTests(unittest.TestCase):
         self.assertEqual([], ppol1.contract_errors(self.contract, ROOT))
         self.assertEqual([], ppol1.golden_errors(self.golden, ROOT))
         self.assertEqual([], ppol1.readiness_errors(self.readiness, ROOT))
+        with mock.patch.object(
+            ppol1.psym1, "canonical_bundle", return_value=b"changed-symbol-binding"
+        ):
+            self.assertIn(
+                "PPOL1 golden vectors differ from implementation-derived vectors",
+                ppol1.readiness_errors(self.readiness, ROOT),
+            )
+        read_json = ppol1.read_json
+
+        def changed_contract(path: Path) -> dict:
+            if path == ROOT / ppol1.CONTRACT_RELATIVE:
+                return {**self.contract, "authority_equation": "changed-reference"}
+            return read_json(path)
+
+        with mock.patch.object(ppol1, "read_json", side_effect=changed_contract):
+            self.assertIn(
+                "PPOL1 contract differs from implementation-derived contract",
+                ppol1.readiness_errors(self.readiness, ROOT),
+            )
+
+        def missing_vectors(path: Path) -> dict:
+            if path == ROOT / ppol1.GOLDEN_RELATIVE:
+                raise OSError("unavailable")
+            return read_json(path)
+
+        with mock.patch.object(ppol1, "read_json", side_effect=missing_vectors):
+            self.assertTrue(
+                any(
+                    "PPOL1 current reference inputs cannot be validated" in error
+                    for error in ppol1.readiness_errors(self.readiness, ROOT)
+                )
+            )
 
     def test_generated_outputs_are_current(self) -> None:
         completed = subprocess.run(

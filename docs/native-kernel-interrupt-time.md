@@ -8,7 +8,7 @@ The authoritative machine-readable contract is `specs/native-kernel-interrupt-ti
 
 ## Implemented Boundary
 
-The opt-in `development-interrupt-time` PooleBoot feature passes selector 11 in `R10`. The ordinary PooleBoot profile remains a permanent stop-before-transfer path. The development selector is accepted by PBEXIT1 only through the bounded maximum value 11; selector 12 remains invalid.
+The opt-in `development-interrupt-time` PooleBoot feature passes selector 11 in `R10`. The ordinary PooleBoot profile remains a permanent stop-before-transfer path. PBEXIT1 validates the shared bounded development-selector range; PKIRQ1 accepts only its own selector. Other explicitly built development features, including selector 12 first-AP startup, have separate qualification contracts and do not expand this profile.
 
 PooleKernel re-executes PKPMM7 to obtain the already copied and read-back-verified PKACPI1 snapshot. PKIRQ1 then walks the entire MADT without AML execution. It recognizes local APIC, x2APIC, I/O APIC, interrupt-source override, NMI source, local APIC NMI, local APIC address override, and x2APIC NMI structures. Known structures require exact lengths. Reserved flag encodings, duplicate processors, duplicate I/O APIC IDs, duplicate bus/source overrides, duplicate LAPIC address overrides, invalid LINT values, unaligned addresses, capacity exhaustion, missing processors, and a missing enabled processor fail closed. Unknown structures are counted and skipped only by their validated declared length.
 
@@ -16,15 +16,15 @@ The HPET table parser accepts only system-memory GAS descriptions with bounded 6
 
 ## Mapping And Controller Transaction
 
-PKMAP2 reserves the following absent leaves inside the retained two-MiB bootstrap window:
+PKMAP2 reserves the following absent leaves in its shared two-leaf retained layout. These are global 4 KiB page indices, not indices within one leaf table:
 
 | Leaf | Purpose |
 |---:|---|
-| 455 | low MMIO guard |
-| 456 | local APIC |
-| 457 | middle MMIO guard |
-| 458 | HPET |
-| 459 | high MMIO guard |
+| 514 | low MMIO guard |
+| 515 | local APIC |
+| 516 | middle MMIO guard |
+| 517 | HPET |
+| 518 | high MMIO guard |
 
 The LAPIC and HPET leaves are installed as supervisor RW/NX with PWT=1, PCD=1, and PAT=0. Translation readback must prove the exact physical target, permissions, and effective uncacheable bits. All three guards must remain absent. Only those two simultaneous mappings are allowed, and both are revoked and independently re-walked before the terminal result.
 
@@ -55,7 +55,13 @@ python tools/qualify_native_kernel_interrupt_time.py
 python -m unittest tests.test_native_kernel_interrupt_time
 ```
 
-Qualification requires two byte-identical clean PooleKernel builds, two byte-identical feature-enabled PooleBoot builds, two deterministic ordinary-file media generations, two fresh-variable qemu64 TCG executions, exact marker/screenshot/PBP1 equality, independent boot and handoff binding, 99 or more kernel host tests, and all 58 hostile controls.
+Qualification requires two byte-identical clean PooleKernel builds, two byte-identical feature-enabled PooleBoot builds, two deterministic ordinary-file media generations, two fresh-variable qemu64 TCG executions, exact marker/screenshot/PBP1 equality, independent boot and handoff binding, all 214 current kernel host tests, and all 58 hostile controls.
+
+The Cycle 157 replay candidate is the unchanged retention-capable Cycle 153
+kernel: 517,784 canonical bytes, a 589,824-byte/144-page image, and SHA-256
+`BDEECCB27B1B91406911F91169B9BF5F9DF0439BB39FA0E1882C07E1AF3B81EF`.
+Current-source acceptance requires a fresh receipt bound to this documentation
+and the implementation. Historical profile success is not that acceptance.
 
 ## Nonclaims
 

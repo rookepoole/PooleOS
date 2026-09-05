@@ -50,6 +50,19 @@ The malformed-frame scenario first validates a real `#BP` frame. It then copies 
 
 The public outputs are `runs/native-kernel-trap-readiness.json` and `runs/native-kernel-trap-frame.ppm`. The receipt remains single-host, QEMU-only, unsigned, non-promoting, and `production_ready=false`.
 
+Cycle 155 also hardens recorded-receipt acceptance: the validator requires all
+three scenarios in their declared order and two distinct run IDs for each,
+reparses the exact markers, recomputes their canonical digest, binds the recorded
+handoff transfer fields and independent revalidation summary, and checks actual
+within-scenario equality of markers, handoff summaries and frame summaries.
+Missing runs, duplicated scenarios, malformed structures and altered results
+cannot be accepted through declared counts or equality booleans alone. These
+checks establish internal consistency only. Fresh execution, full handoff bytes,
+retained-file reconstruction and raster checks still belong to the qualifier;
+the receipt is not authenticated, and two runs on one host are not independent
+builders or hardware qualification. Other profile validators require their own
+coverage review; this repair makes no cross-profile hardening claim.
+
 ## Remaining N7 work
 
 - N7.1: PKCPU1 closes only a bounded qemu64 BSP CPUID/feature/topology/address-width observation; exact Tier 1 inventory and AP-local policy remain open.

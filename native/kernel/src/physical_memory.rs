@@ -5,6 +5,9 @@ use poole_handoff::{
 
 use crate::acpi::{self, AcpiSnapshotReceipt};
 
+mod retention;
+pub use retention::RetainedAllocation;
+
 pub const CONTRACT_ID: &str = "PKPMM7";
 pub const MAX_MEMORY_ENTRIES: usize = 256;
 pub const MAX_FREE_EXTENTS: usize = 256;
@@ -265,6 +268,9 @@ pub enum PhysicalMemoryError {
     DirectMapCapacity,
     DirectMapOwnership,
     ExerciseInvariant,
+    AllocationRetained,
+    RetentionIdentity,
+    RetentionExhausted,
 }
 
 macro_rules! pmm_label {
@@ -311,6 +317,9 @@ pmm_label!(PMM_LABEL_ACPI_CONSUMER, b"acpi_consumer");
 pmm_label!(PMM_LABEL_DIRECT_MAP_CAPACITY, b"direct_map_capacity");
 pmm_label!(PMM_LABEL_DIRECT_MAP_OWNERSHIP, b"direct_map_ownership");
 pmm_label!(PMM_LABEL_EXERCISE_INVARIANT, b"exercise_invariant");
+pmm_label!(PMM_LABEL_ALLOCATION_RETAINED, b"allocation_retained");
+pmm_label!(PMM_LABEL_RETENTION_IDENTITY, b"retention_identity");
+pmm_label!(PMM_LABEL_RETENTION_EXHAUSTED, b"retention_exhausted");
 
 const fn pmm_label_text(bytes: &'static [u8]) -> &'static str {
     // SAFETY: every caller passes an ASCII byte string declared immediately above.
@@ -356,6 +365,9 @@ impl PhysicalMemoryError {
             Self::DirectMapCapacity => pmm_label_text(&PMM_LABEL_DIRECT_MAP_CAPACITY),
             Self::DirectMapOwnership => pmm_label_text(&PMM_LABEL_DIRECT_MAP_OWNERSHIP),
             Self::ExerciseInvariant => pmm_label_text(&PMM_LABEL_EXERCISE_INVARIANT),
+            Self::AllocationRetained => pmm_label_text(&PMM_LABEL_ALLOCATION_RETAINED),
+            Self::RetentionIdentity => pmm_label_text(&PMM_LABEL_RETENTION_IDENTITY),
+            Self::RetentionExhausted => pmm_label_text(&PMM_LABEL_RETENTION_EXHAUSTED),
         }
     }
 }
@@ -436,6 +448,7 @@ struct Allocation {
     owner: u16,
     metadata_poisoned: bool,
     release_excluded: bool,
+    retention_id: u64,
 }
 
 const EMPTY_ALLOCATION: Allocation = Allocation {
@@ -447,6 +460,7 @@ const EMPTY_ALLOCATION: Allocation = Allocation {
     owner: 0,
     metadata_poisoned: false,
     release_excluded: false,
+    retention_id: 0,
 };
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -1665,6 +1679,7 @@ impl PhysicalMemoryManager {
                 u64::from(allocation.owner),
                 u64::from(allocation.metadata_poisoned),
                 u64::from(allocation.release_excluded),
+                allocation.retention_id,
             ] {
                 state = fnv_u64(state, value);
             }
@@ -1778,6 +1793,7 @@ impl PhysicalMemoryManager {
                 u64::from(allocation.owner),
                 u64::from(allocation.metadata_poisoned),
                 u64::from(allocation.release_excluded),
+                allocation.retention_id,
             ] {
                 state = fnv_u64(state, value);
             }
@@ -3036,6 +3052,7 @@ impl PhysicalMemoryManager {
             owner: plan.owner,
             metadata_poisoned: false,
             release_excluded: false,
+            retention_id: 0,
         };
         self.allocated_pages += pages;
         self.allocation_count += 1;
@@ -3161,6 +3178,9 @@ impl PhysicalMemoryManager {
             }
             let slot = usize::from(handle.slot);
             let allocation = self.allocation_entries()[slot];
+            if allocation.retention_id != 0 {
+                return Err(PhysicalMemoryError::AllocationRetained);
+            }
             if allocation.release_excluded {
                 self.metadata_release_rejections += 1;
                 return Err(PhysicalMemoryError::MetadataOwnership);
@@ -3191,6 +3211,9 @@ impl PhysicalMemoryManager {
             }
             let slot = usize::from(handle.slot);
             let allocation = self.allocation_entries()[slot];
+            if allocation.retention_id != 0 {
+                return Err(PhysicalMemoryError::AllocationRetained);
+            }
             if allocation.release_excluded {
                 self.metadata_release_rejections += 1;
                 return Err(PhysicalMemoryError::MetadataOwnership);
@@ -3229,6 +3252,9 @@ impl PhysicalMemoryManager {
             return Err(PhysicalMemoryError::StaleHandle);
         }
         let allocation = self.allocation_entries()[usize::from(handle.slot)];
+        if allocation.retention_id != 0 {
+            return Err(PhysicalMemoryError::AllocationRetained);
+        }
         if allocation.release_excluded {
             self.metadata_release_rejections = self.metadata_release_rejections.saturating_add(1);
             self.seal_metadata_integrity();
@@ -3796,6 +3822,8 @@ fn range_has_kind(
 mod tests {
     extern crate std;
 
+    mod retention;
+
     use super::*;
     use poole_handoff::{
         BOOT_SERVICES_EXITED, DEVELOPMENT_MODE, Encoder, RECORD_ARRAY, RECORD_CORE,
@@ -4206,8 +4234,8 @@ mod tests {
 
     #[test]
     fn manager_fits_the_guarded_metadata_arena() {
-        assert_eq!(15376, core::mem::size_of::<PhysicalMemoryManager>());
-        assert!(15376 <= METADATA_ARENA_BYTE_CAPACITY);
+        assert_eq!(15632, core::mem::size_of::<PhysicalMemoryManager>());
+        assert!(15632 <= METADATA_ARENA_BYTE_CAPACITY);
         assert!(core::mem::size_of::<ReclaimPlan>() <= 160);
         assert!(core::mem::size_of::<ReclaimCursor>() <= 64);
     }
@@ -4471,6 +4499,7 @@ mod tests {
             owner: 7,
             metadata_poisoned: false,
             release_excluded: false,
+            retention_id: 0,
         };
         manager.allocated_pages = 1;
         let handle = AllocationHandle {
@@ -4510,6 +4539,7 @@ mod tests {
             owner: 7,
             metadata_poisoned: false,
             release_excluded: false,
+            retention_id: 0,
         };
         manager.allocated_pages = 1;
         let handle = AllocationHandle {
@@ -4965,6 +4995,7 @@ mod tests {
             owner: 7,
             metadata_poisoned: false,
             release_excluded: false,
+            retention_id: 0,
         };
         manager.allocated_pages = 1;
         let handle = AllocationHandle {

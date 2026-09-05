@@ -119,6 +119,47 @@ fn space(manager: &mut PhysicalMemoryManager, memory: &mut Memory) -> AddressSpa
     AddressSpace::initialize(manager, tables, memory).unwrap()
 }
 
+#[test]
+fn task_reader_retains_physical_tables_against_copied_allocator_handles() {
+    use poolekernel::physical_memory::PhysicalMemoryError;
+
+    let (mut manager, mut memory) = fixture();
+    let tables = manager
+        .allocate(Zone::Dma32, vm::TABLE_PAGE_COUNT, vm::TABLE_OWNER)
+        .unwrap();
+    let address = AddressSpace::initialize(&mut manager, tables, &mut memory).unwrap();
+    let retained = manager.retain_allocation(tables).unwrap();
+    let mut store = Storage::new(Limits::default()).unwrap();
+    let mut tasks = store.attach().unwrap();
+    let id = tasks
+        .create(0, 1, 1, Resources::new(address, retained))
+        .ok()
+        .unwrap();
+    tasks.activate(id, cpu(0)).unwrap();
+    let reader = tasks.pin(id).unwrap();
+    assert_eq!(reader.payload().handle(), tables);
+    tasks.cancel(id).unwrap();
+    assert_eq!(
+        tasks.reclaim(id).err(),
+        Some(Error::Pool(PoolError::Pinned))
+    );
+    assert_eq!(
+        manager.free(tables),
+        Err(PhysicalMemoryError::AllocationRetained)
+    );
+    drop(reader);
+    let resources = tasks.reclaim(id).unwrap();
+    assert_eq!(
+        manager.free(tables),
+        Err(PhysicalMemoryError::AllocationRetained)
+    );
+    let (mut address, retained) = resources.into_parts();
+    manager.release_retention(retained).unwrap();
+    address.release(&mut manager, &mut memory).unwrap();
+    assert_eq!(manager.free(tables), Err(PhysicalMemoryError::StaleHandle));
+    assert_eq!(manager.summary().allocated_pages, 0);
+}
+
 fn cpu(value: u8) -> CpuId {
     CpuId::new(value).unwrap()
 }

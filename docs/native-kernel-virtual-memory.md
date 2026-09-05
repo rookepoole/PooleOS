@@ -21,7 +21,9 @@ the deterministic live receipt is
 It merges every current free extent with every active allocation that is not
 marked `release_excluded`, sorts and coalesces the resulting physical ranges,
 and rejects overlap, arithmetic overflow, capacity overflow, or accounting
-drift. Retained allocations are counted but omitted. The manifest binds its
+drift. Release-excluded allocations are counted but omitted. A PKRETAIN1 token
+instead prevents ordinary freeing without changing direct-map admission; the
+physical-memory host tests verify that distinction. The manifest binds its
 PMM generation, exact ranges, mapped-page count, gap-page count, retained
 exclusion count, first and ending page, write-back cache policy, and a 64-bit
 FNV coverage checksum.
@@ -33,10 +35,10 @@ works because allocation changes ownership category without changing admitted
 coverage. A stale or forged range set, generation, count, boundary, cache
 policy, or checksum fails closed.
 
-The live qemu64 profile covers 117,822 owned pages in eleven ranges. It leaves
-12,943 pages of physical holes unmapped. Its selector does not run the separate
+The live qemu64 profile covers 117,821 owned pages in eleven ranges. It leaves
+12,944 pages of physical holes unmapped. Its selector does not run the separate
 PKACPI1 retained-snapshot lifecycle, so the live retained-exclusion count is
-zero; a host test inserts a retained allocation and proves the resulting hole
+zero; a host test inserts a release-excluded allocation and proves the resulting hole
 is excluded and untranslated.
 
 ## Sparse Topology
@@ -94,18 +96,23 @@ shootdown dependency.
 ## Qualification
 
 Two fresh-vars QEMU/OVMF executions reproduce the same 40 markers, framebuffer,
-and exact PBP1 transcript. One hundred eighty-nine PooleKernel host tests, 43 PKENTRY1
+and exact PBP1 transcript. Two hundred fourteen PooleKernel host tests, 43 PKENTRY1
 controls, and 46 PKVM3 hostile controls pass. An independent Python oracle
 reconstructs PMM ranges, page-zero exclusion, DMA32 first fit, topology,
 addresses, gap counts, and the coverage checksum from the PBP1 transcript.
 
-The Cycle 147 replay records 117,822 mapped pages, eleven ranges, 12,943 gap
+The Cycle 156 replay records 117,821 mapped pages, eleven ranges, 12,944 gap
 pages, 237 direct leaf tables, one direct directory, 243 total table pages,
-checksum `0xFCC0E421FB56C627`, 367,409 physical table writes, 950,674 temporary-PTE
+checksum `0x64E09067B6BFDCB3`, 367,408 physical table writes, 950,682 temporary-PTE
 writes and matching bootstrap invalidations, two CR3 writes, three local leaf
-invalidations, and one generation-retirement receipt. The 513,672-byte
-canonical kernel occupies a 143-page, 585,728-byte image, has 1,264 relocations,
-and SHA-256 `FCE5C1F2478651D010A2F2781B80494FD0D9721880D33CE8C66A499B35C8DAB6`.
+invalidations, and one generation-retirement receipt. The 517,784-byte
+canonical kernel occupies a 144-page, 589,824-byte image, has 1,304 relocations,
+and SHA-256 `BDEECCB27B1B91406911F91169B9BF5F9DF0439BB39FA0E1882C07E1AF3B81EF`.
+The independent PBP1 oracle accounts for one additional loader-protected page
+and one fewer admitted direct-map page than the preceding receipt. The table
+topology and CR3, invalidation, and retirement sequence are unchanged. This
+replay changes no native executable bytes and does not qualify concurrent
+retention or general inter-processor reclamation.
 
 ## Remaining Boundary
 
