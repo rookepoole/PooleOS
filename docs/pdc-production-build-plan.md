@@ -49,6 +49,15 @@ merged as main `4ad5b11` through PR #73. New work stays on an agent branch until
 qualified. No new virtual or physical boot, frozen demo update, production
 promotion or phase/flag closure is claimed.
 
+The actual canonical audit, with runtime and both bundle/replay inputs, fails
+25/105 checks: 24 stale native receipts and the aggregate Doctor/test check.
+Doctor passes 684/708. Receipt SHA-256 is
+`BB43C8A08A390893B48CDB8259752AC431D9A9AADBDDA63A2227EA347697DE4B`.
+This is pre-closeout evidence for checkpoint `bc5a1e4`, not a final passing
+candidate. The 29 focused Python tests pass, and the source/schema/hash/count
+replay preserves all locked requirements. No stale receipt has been refreshed
+without executing its qualifier. The prior merged passing gate is preserved.
+
 Next substeps, in order: qualify the identified image and replay affected N5
 boot-chain dependencies; bind active PKVM3 roots and execution stacks to real
 scheduler context ownership; join pins to acknowledged alias invalidation and

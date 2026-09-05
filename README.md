@@ -12,6 +12,8 @@ checks. Active roots, execution stacks and live CPU retirement remain open.
 The new kernel requires fresh dependency qualification before merging; main
 already contains the qualified Cycles 153-157 checkpoint through PR #73.
 The separate demo ISO is unchanged. PooleOS remains pre-production.
+The full new-candidate audit fails 25/105 checks because downstream receipts
+are stale and the aggregate suite is not passing; 29 focused Python tests pass.
 
 Historical Cycle 157 completes current-kernel interrupt, SMP, scheduler, atomic and lock
 replay: twelve refreshed profiles, 24 final virtual boots and 1,881 negative

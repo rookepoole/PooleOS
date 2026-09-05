@@ -19,6 +19,9 @@ quiescence are still open under N12.3 and its existing reclamation flag.
 The new build identity changes kernel bytes; Cycle 157's merged canonical pass
 is historical, not current-candidate qualification. Replay dependencies before
 the next main merge. No phase or flag closes, and the frozen demo is unchanged.
+The canonical audit fails 25/105 checks (24 stale native receipts plus the
+aggregate check); Doctor passes 684/708. This is recorded failed pre-closeout
+evidence, not a qualified current candidate. All 29 focused Python tests pass.
 N0 governance custody remains independently blocked. PooleGlyph Phase 65,
 the owner's modified report and the complete locked checklist are preserved.
 Continue N12-CONCURRENCY-RECLAMATION-001, with changed-image prerequisite

@@ -153,8 +153,13 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertFalse(historical["production_ready"])
         self.assertEqual(historical["native_promotion_role"], "historical_non_promoting")
         current = self.roadmap["baseline"]["native_consistency_release_gate"]
-        self.assertIsNone(current["passed_checks"])
-        self.assertEqual(current["qualification_status"], "changed_kernel_dependency_replay_pending")
+        self.assertEqual(current["passed_checks"], 80)
+        self.assertEqual(current["qualification_status"], "failed_current_candidate_dependency_replay_pending")
+        audit = current["current_candidate_audit"]
+        self.assertEqual(audit["status"], "fail")
+        self.assertEqual(audit["failed_checks"], 25)
+        self.assertFalse(audit["aggregate_suite_passed"])
+        self.assertTrue(audit["both_bundle_and_replay_inputs_supplied"])
         self.assertEqual(current["last_fully_qualified_cycle"], 157)
         self.assertEqual(current["last_fully_qualified_passed_checks"], 105)
         replay = current["canonical_replay"]

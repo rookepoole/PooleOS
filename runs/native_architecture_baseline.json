@@ -611,15 +611,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "B80E4CE11E5E041CFEC3759F4F9EE4E02033BC284ACAA43C950D412443D7A9AA",
-      "byte_count": 71090,
-      "line_count": 916
+      "sha256": "F5F3CF06E104358EC7BE1E09C3C4560C78DBD4EAE9619CBA6055BE053D92726A",
+      "byte_count": 71322,
+      "line_count": 919
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "F30594A5BA2780E8E03256BADBDAB0E5D60D9F00F25F0C939B946A97EBCD3B31",
-      "byte_count": 362995,
-      "line_count": 2346
+      "sha256": "1EB7B403B0760CBC7CEC4E9B04C479F33FC9608716F2EEE86317396D7FCCD55B",
+      "byte_count": 363570,
+      "line_count": 2355
     },
     {
       "path": "docs/publication-boundary.md",
@@ -1391,9 +1391,9 @@
     },
     {
       "path": "docs/native-kernel-reclamation-core.md",
-      "sha256": "E5920E9B8DA02B8EE54F489DC124AC364ADCABAD3891C0C690C7FC9FCAEC4C67",
-      "byte_count": 7482,
-      "line_count": 124
+      "sha256": "5AECFE96478FCFFD4850436278FA9AE281668D8B267BA1E58D5B157172136749",
+      "byte_count": 8269,
+      "line_count": 137
     },
     {
       "path": "runs/native-kernel-reclamation-core-readiness.json",
