@@ -136,7 +136,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 153)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 154)
         self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 915)
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
@@ -161,6 +161,12 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(current["artifact_count"], 62)
         self.assertEqual(current["explicit_gap_count"], 20)
         self.assertFalse(current["production_ready"])
+        diagnostic = current["candidate_replay_diagnostic"]
+        self.assertEqual(diagnostic["status"], "failed_noncanonical_invocation")
+        self.assertEqual(diagnostic["stale_downstream_native_checks"], 19)
+        self.assertEqual(diagnostic["omitted_input_flags"], ["--bundle", "--replay-proof"])
+        self.assertEqual(diagnostic["corrected_input_checks_passed_separately"], 2)
+        self.assertFalse(diagnostic["canonical_full_replay_passed"])
         self.assertEqual(self.roadmap["immediate_next_move"]["id"], "N0-GOVERNANCE-CUSTODY-001")
         self.assertTrue(self.roadmap["immediate_next_move"]["blocked"])
 
@@ -180,7 +186,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N12-CONCURRENCY-RECLAMATION-001")
+        self.assertEqual(protocol["selected_move_id"], "N5-SYMBOLS-SEMANTICS-001")
         self.assertEqual(
             protocol["owner_independent_next_move_id"],
             "N12-CONCURRENCY-LOCKS-001",

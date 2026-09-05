@@ -6,13 +6,13 @@
   "inputs": {
     "contract": {
       "path": "specs/native-policy-contract.json",
-      "bytes": 7406,
-      "sha256": "35691220F705F524D916996063D2FCA5602D9DAACAB44AFCA151511A404DCE67"
+      "bytes": 8222,
+      "sha256": "E52406625BC0FFFC9B9BC59C03BB89A246F0D137D8E8FB133B4FDE5E0BC622D7"
     },
     "golden_vectors": {
       "path": "specs/native-policy-golden-vectors.json",
       "bytes": 43996,
-      "sha256": "BC8CA23B08198F329BBB55B0678145B4B2FC319A19805FF2B6577460FEA12E65"
+      "sha256": "FD209C26838CC86E09A0EA000D7F5AB3AB0523438C9EB6197DA3AD6C64838D2C"
     },
     "toolchain_lock": {
       "path": "specs/native-toolchain-lock.json",
@@ -57,13 +57,38 @@
       },
       {
         "path": "runtime/native_policy.py",
-        "bytes": 57996,
-        "sha256": "28DC24E943BB0B7FA37C99FC9DFF14AB51E0C6E0028E0D6230DE5283C7E690A2"
+        "bytes": 58470,
+        "sha256": "6B7240337791A2AF2377F321109144FCE4E0861E2D99BD773CBA19E1CAAAC39B"
       },
       {
         "path": "runtime/native_boot_artifact.py",
         "bytes": 8217,
         "sha256": "518F0392D35DFDE8EB2A3971DA382E455822A7FD2344163FB65D0FCC95FC63ED"
+      },
+      {
+        "path": "runtime/native_initial_system.py",
+        "bytes": 68796,
+        "sha256": "C7213D00230A8A4BC4423CA63893663ADC637ACD5BC107C6C6A2E89D43387A7E"
+      },
+      {
+        "path": "runtime/native_recovery.py",
+        "bytes": 60364,
+        "sha256": "9FE923CB2A1DA1083858750FE324321ADB4CB56D9D69DC33B2DBA7D36625E95D"
+      },
+      {
+        "path": "runtime/native_symbols.py",
+        "bytes": 54084,
+        "sha256": "ABAB33691EC2DBE6C9C5CC06585D0FAF606039CBD3FDBA5B0F18229091DE6B5F"
+      },
+      {
+        "path": "runtime/native_microcode.py",
+        "bytes": 52453,
+        "sha256": "089AE566AA73BD23C9A9E648AE6F221406EB49EB9D44EF672BAE119F5D887772"
+      },
+      {
+        "path": "runtime/native_firmware.py",
+        "bytes": 51184,
+        "sha256": "9787C5D73D8EA045E2F3CF088CFF39FABC453FC779DCD2D71FCD11393DC37808"
       },
       {
         "path": "tools/generate_native_policy_vectors.py",
@@ -77,8 +102,8 @@
       },
       {
         "path": "tests/test_native_policy.py",
-        "bytes": 6251,
-        "sha256": "1C974EE8B1B116BDA4F201BD115F219B44EB170D3E2917BDA591AD0B1857EF68"
+        "bytes": 7623,
+        "sha256": "AB478682CFA38217722D185873FDB1DC30A7729FF5CC145664015C79A7EA8F18"
       },
       {
         "path": "docs/native-policy-bundle.md",

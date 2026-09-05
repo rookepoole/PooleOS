@@ -43,8 +43,8 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 153,
-    "selected_move_id": "N12-CONCURRENCY-RECLAMATION-001",
+    "last_updated_cycle": 154,
+    "selected_move_id": "N5-SYMBOLS-SEMANTICS-001",
     "immediate_next_move_id": "N0-GOVERNANCE-CUSTODY-001",
     "owner_independent_next_move_id": "N12-CONCURRENCY-LOCKS-001",
     "required_records": [
@@ -127,7 +127,7 @@
     "added_requirement_count": 56
   },
   "baseline": {
-    "pooleos_cycle": 153,
+    "pooleos_cycle": 154,
     "entry_cycle": 79,
     "pooleos_test_count": 915,
     "historical_consistency_release_gate": {
@@ -147,7 +147,25 @@
       "native_promotion_role": "candidate_unqualified_pending_dependency_replay",
       "qualification_status": "pending_full_candidate_replay",
       "last_fully_qualified_cycle": 152,
-      "last_fully_qualified_passed_checks": 105
+      "last_fully_qualified_passed_checks": 105,
+      "candidate_replay_diagnostic": {
+        "cycle": 154,
+        "status": "failed_noncanonical_invocation",
+        "passed_checks": 83,
+        "total_checks": 105,
+        "artifact_count": 60,
+        "stale_downstream_native_checks": 19,
+        "doctor_passed_checks": 689,
+        "doctor_total_checks": 708,
+        "omitted_input_flags": [
+          "--bundle",
+          "--replay-proof"
+        ],
+        "corrected_input_checks_passed_separately": 2,
+        "canonical_full_replay_passed": false,
+        "diagnostic_sha256": "7FAFEF81C698C2BCABFE216E7FA9C04D39FE92ECC71B623BCCDDEAB01D538A45",
+        "input_correction_sha256": "B35EE5B3657A3B523F71A249589845A09C8E2CA82EEEBC441808101F71B0C713"
+      }
     },
     "native": {
       "source_controlled": true,
@@ -753,6 +771,8 @@
         "ADD-BOOT-012"
       ],
       "current_evidence": [
+        "Cycle 154 current-source replay: measured PSYM1 identities and PPOL1 current-reference validation pass; PKLOAD6 and aggregate PooleBoot each pass two exact runs, PKREVAL1 passes 36 controls and 32768 mutations, and PKXFER1 passes two real kernel entries, nine-file revalidation and 58 controls. All six boot-chain gates and 63 focused Python tests pass. Inner SHA256 99DB2125174F65A067F619FD65D61EBC5806D2AFCCCAB3E66411A42A1EFC5342 agrees with independent source reconstruction and Rust/guest evidence. Remaining downstream profiles and the full candidate gate are still pending; no N5 exit or production claim",
+        "ADD-BOOT-010 / FLAG-N5-POLICY-BUNDLE-001: Cycle 154 repairs a readiness validation gap that accepted an old policy receipt despite stale current PSYM1-derived vectors. Bind all five payload-reference implementations and validate the current contract and golden vectors; dependency drift, changed contract and unavailable-vector controls reject. Existing ADD-BOOT-011 governs subsequent exact retained-byte replay; no requirement is waived",
         "demos/native_iso/evidence.json: Cycle 151 non-promoting UEFI El Torito optical demo, two fresh four-vCPU PKLOCK1 boots, unchanged canonical kernel and native source, exact static PooleGlass guest pixels; not a signed or production ISO",
         "specs/native-pooleboot-proof.json: POOLEOS-N5-POOLEBOOT-7 bounded unsigned aggregate contract across N5.1-N5.9",
         "native/boot: Poole-authored no_std PE32+ UEFI application with reviewed firmware bindings, live bounded filesystem/config/kernel/PBART1/PBTP1/PBTS1 intake, exact retained-page inner parsing, GOP identity, retained PKMAP2 kernel/six-artifact/PSM1/trust-policy/trust-state/table/guarded-stack/handoff storage, final PBLIVE4 production with a firmware RSDP record, bounded PBEXIT1 retry, successful ExitBootServices, direct post-exit serial/debugcon diagnostics, a default permanent stop, and a separately feature-gated QEMU-only one-way development transfer",
@@ -797,12 +817,12 @@
         "runs/native_system_manifest_readiness.json: 8/8 Rust tests, 2/2 no_std target builds, one PooleBoot integration build, 3/3 golden vectors, 64/64 hostile controls, 16,384 differential cases, and 1,027 SHA-256 agreement cases with zero mismatches",
         "specs/native-kernel-load-contract.json and docs/native-kernel-load.md: PKLOAD6 freezes live UEFI intake, PSM1/PBART1 digest binding, exact PBASET1 plus PSM1/PBTP1/PBTS1 loading and retention, six-format retained-page parsing and denial, PBTRUST1 policy/state candidate parsing, fourteen cross-bindings and exact unsigned-policy denial, retained PKMAP2 storage, final ten-role PBLIVE4 production with a firmware RSDP record, bounded PBEXIT1 retry, successful ExitBootServices, stop-before-transfer, trust, semantics, and nonclaim boundaries",
         "native/bootload, native/inner, native/trust, native/boot/src/kload.rs, native/boot/src/kmap.rs, native/boot/src/exit.rs, native/bootexit, runtime/native_inner_live.py, runtime/native_boot_trust.py, and runtime/native_kernel_load.py: dependency-free contracts, reviewed raw UEFI adapters, and independent retained-set/trust/media/map/exit oracle implementation",
-        "specs/native-kernel-map-contract.json, native/kmap, runtime/native_kernel_map.py, and docs/native-kernel-map.md: PKMAP2 exact 143-page 4 KiB supervisor kernel mapping, two retained leaf tables, guarded stack, read-only handoff, W^X/WP/NX, active-root audit, framebuffer preservation, ten-role retained allocation coverage, and nonclaim contract",
+        "specs/native-kernel-map-contract.json, native/kmap, runtime/native_kernel_map.py, and docs/native-kernel-map.md: current PKMAP2 exact 144-page 4 KiB supervisor kernel mapping, two retained leaf tables, guarded stack starting at page 145, read-only handoff starting at page 182, W^X/WP/NX, active-root audit, framebuffer preservation, ten-role retained allocation coverage, and nonclaim contract",
         "specs/native-boot-exit-contract.json, native/bootexit, runtime/native_boot_exit.py, and docs/native-boot-exit.md: PBEXIT1 final-map, current-key, bounded stale-key retry, no-post-attempt-service, no-post-exit-firmware, and permanent pre-transfer-stop contract",
-        "runs/native_kernel_load_readiness.json: exact 274/274 aggregate Rust host tests, 2/2 exact PooleBoot builds, 2/2 exact PooleKernel builds, 2/2 exact twelve-file media generations, 2/2 QEMU/OVMF runs, 25 ordered markers, 155 integrated hostile controls, exact retained PINIT1, PREC1, PSYM1, PMCU1, PFWM1, and PPOL1 parsing with payload/route cross-binding and mandatory development denial, exact retained PSM1/PBTP1/PBTS1 parsing with fourteen trust cross-bindings and unsigned-policy denial, two exact post-exit PBLIVE4 PBP1 reconstructions, exact 143-page kernel plus nine retained files/five table pages/36-page guarded-stack/handoff/firmware-record agreement, successful ExitBootServices, zero later firmware calls, and exact guest/oracle agreement",
+        "runs/native_kernel_load_readiness.json: Cycle 154 exact 299/299 aggregate Rust host tests, 2/2 exact PooleBoot builds, 2/2 exact PooleKernel builds, 2/2 exact twelve-file media generations, 2/2 QEMU/OVMF runs, 25 ordered markers, 155 integrated hostile controls, exact retained PINIT1, PREC1, PSYM1, PMCU1, PFWM1, and PPOL1 parsing with payload/route cross-binding and mandatory development denial, exact retained PSM1/PBTP1/PBTS1 parsing with fourteen trust cross-bindings and unsigned-policy denial, two exact post-exit PBLIVE4 PBP1 reconstructions, exact 144-page kernel plus nine retained files/five table pages/36-page guarded-stack/handoff/firmware-record agreement, successful ExitBootServices, zero later firmware calls, and exact guest/oracle agreement",
         "specs/native-kernel-revalidation-contract.json and docs/native-kernel-revalidation.md: PKREVAL1 freezes independent allocation-free no_std PooleKernel reparsing of exact retained PSM1, six PBART1 inner files, PBTP1, and PBTS1 bytes before authority, with exact role/order/range/digest/binding/denial requirements and standalone-execution nonclaims",
         "native/kernel/src/revalidation.rs, native/kernel/src/bin/pkreval1_probe.rs, runtime/native_kernel_revalidation.py, and tests/test_native_kernel_revalidation.py: independent kernel-side verifier, host probe, Python oracle, loader-summary substitution controls, post-load mutation controls, and deterministic role-complete differential campaign",
-        "runs/native-kernel-revalidation-readiness.json: 206/206 kernel Rust tests, 8/8 Python tests, both no_std target builds, nine exact retained files and parsers, 36/36 hostile controls, 32,768/32,768 deterministic mutation rejects, exact unsigned-policy denial, zero authority grants/actions/state writes, and no standalone live-entry claim",
+        "runs/native-kernel-revalidation-readiness.json: Cycle 154 214/214 kernel Rust tests, 8/8 Python tests, both no_std target builds, nine exact retained files and parsers, 36/36 hostile controls, 32,768/32,768 deterministic mutation rejects, exact unsigned-policy denial, zero authority grants/actions/state writes, and no standalone live-entry claim",
         "specs/native-kernel-transfer-contract.json, runtime/native_kernel_transfer.py, tools/qualify_native_kernel_transfer.py, tests/test_native_kernel_transfer.py, and docs/native-kernel-transfer.md: PKXFER1 freezes an opt-in QEMU-only one-way transfer while preserving the default stop-before-transfer build",
         "runs/native-kernel-transfer-readiness.json: 2/2 exact PooleKernel builds, 2/2 feature-enabled PooleBoot builds plus one default isolation build, 2/2 exact media generations and fresh-vars QEMU/OVMF runs, 30 ordered markers, exact serial/debugcon and PBP1 agreement, 58/58 hostile controls, live nine-file PKREVAL1 execution, and terminal unsigned denial with zero authority, actions, writes, signatures, or post-exit firmware calls"
       ],
@@ -873,7 +893,7 @@
         "specs/native-kernel-entry-contract.json and docs/native-kernel-entry.md: PKENTRY1 transfer, mapping, diagnostic, panic, build, and explicit nonclaim boundary",
         "native/kernel: real freestanding PooleKernel product with fixed entry assembly, allocation-free PBP1 intake and PKREVAL1 retained-byte verifier, static early ring, bounded COM1 candidate, optional volatile framebuffer sink, and terminal panic path",
         "runtime/native_kernel_image.py: fail-closed pinned-LLD input validation and deterministic PKELF1 canonicalization",
-        "runs/native_kernel_entry_readiness.json: 206/206 host tests, 2/2 exact clean linked and canonical builds, 43/43 hostile controls, 1,295 relative relocations, exact independent Rust/Python loaded bytes, and canonical SHA-256 9029AEE51A4D557EF5B29945985E4A1F07C67DDE9C8C367C80BD1B9EDD9D409E",
+        "runs/native_kernel_entry_readiness.json: current Cycle 153 candidate with 214/214 host tests, 2/2 exact clean linked and canonical builds, 43/43 hostile controls, 1,304 relative relocations, exact independent Rust/Python loaded bytes, and canonical SHA-256 BDEECCB27B1B91406911F91169B9BF5F9DF0439BB39FA0E1882C07E1AF3B81EF; independently rebuilt again inside Cycle 154 loader/transfer qualification",
         "specs/native-boot-digest-provider.json: PBDIGEST1 pins vendored RustCrypto sha2 0.11.0, the soft-compact UEFI backend, locked transitive packages, and reproducible /pooleos/native source-path remapping while retaining independent security review and provider promotion as open",
         "ADD-BOOT-003: boot-time digest-provider pinning, reproducible path remapping, qualification, independent review, and target-backend promotion boundary",
         "ADD-KERNEL-001: explicit temporary framebuffer identity mapping, cache-policy preservation, lifetime, replacement, and revocation dependency"
@@ -7130,6 +7150,7 @@
     "blocked": true
   },
   "claim_boundaries": [
+    "Cycle 154 completes six current-source N5 boot-chain checks for the unmerged Cycle 153 image, not the overall N5 exit or candidate release gate. PSYM1 and PPOL1 dependency drift is repaired; two-run PKLOAD6/PooleBoot and PKXFER1 plus host PKREVAL1 agree on exact retained bytes and unsigned denial. 63 focused regressions pass. Replay N7-TRAP-001 then CPU, memory, SMP, scheduler, atomics and locks before N12.2 closure or merge; mandatory N12.3 ownership and independent lifetime oracle remain later work. N0 custody remains externally blocked; no owner action is needed for this development step. No governance/release key use, firmware mutation, physical-media write, demo rebase or production operation occurred. Isolated disposable signing fixtures in the full host suite confer no production trust.",
     "Cycle 153 is an unmerged native allocator/teardown candidate. Explicit retention protects pages from copied handles; tokens survive migration and ledger growth and fail closed when lost. The three-AP implementation now parks all APs before ending old-frame retention. The changed 144-page kernel and shifted retained layout invalidate prior current-candidate bindings; complete replay remains pending. The last fully qualified main baseline is Cycle 152. Mandatory ownership for all task resources, an independent lifecycle oracle and explicit live retention/failure evidence remain open. The separate demo is unchanged; N12.3 and production remain open.",
     "Cycle 152 PKLIFE1 composes the actual scheduler, object pool and inactive address spaces with generation-safe task-slot retention, exact-once resource return, cancellation, pending/running dispatch retention, timeout, shutdown and owner-loss handling. Nineteen new lifecycle tests pass in both host profiles and no unsafe code is added. Copyable PMM handles, active-root ownership, hardware quiescence, an independent lifecycle oracle and a new live selector remain open. Canonical linked kernel and the separate demo remain unchanged; N12.3 and production remain open.",
     "Cycle 151 provides the owner-requested unsigned QEMU-only optical demo with a demo-only PooleGlass static renderer. Two fresh four-vCPU optical boots pass PKLOCK1 and exact boot-frame comparison while canonical native source and kernel bytes stay unchanged. The OS-wide design system records PG-01 through PG-10 under FLAG-NATIVE-UI-001; N29.8 is partial only. No compositor, animation, installer, physical target, N5/N29/N39 exit or production claim follows; N12-CONCURRENCY-RECLAMATION-001 remains the next chronological kernel move.",

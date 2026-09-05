@@ -1001,7 +1001,7 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
         "inner_set_parser_count": 6,
         "inner_set_cross_binding_count": 6,
         "inner_set_development_denial_count": 6,
-        "inner_set_retained_set_sha256": "1E00D9C23518BDD779CF26A1DCA0EE708EE3C3CD4FD4C0207E0F6E4EDDDDB117",
+        "inner_set_retained_set_sha256": "99DB2125174F65A067F619FD65D61EBC5806D2AFCCCAB3E66411A42A1EFC5342",
         "inner_set_authority_grants": 0,
         "inner_set_actions_authorized": 0,
         "inner_set_state_writes": 0,
@@ -1016,8 +1016,8 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
         "policy_profile": "synthetic_qualification_only",
         "trust_binding_count": 14,
         "trust_denial": "pbtrust_policy_unsigned",
-        "trust_policy_sha256": "92F6FA472674E24C8974346C843299ED8CEEBE7353C3253747B8AC6B6179E9CF",
-        "trust_state_sha256": "AAC5A1728B879C404E577781735EC2A9D7414328A3CD652D00183AECA552D3EE",
+        "trust_policy_sha256": "F0DE1E25E99B8444E47ABD029B2363B00BC663681DA2F76BA79D2C27ACC7AC30",
+        "trust_state_sha256": "8DCB0EDFC7278D026018AD0BFBB14CB98BE540D6E204B70E4AE6C884DA8E68E9",
         "trust_authority_grants": 0,
         "trust_state_writes": 0,
         "production_claim_count": 0,
@@ -1031,7 +1031,7 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
     detail = (
         "contract=POOLEOS-N5-POOLEBOOT-7; host_tests=8/8; builds=2/2; media=2/2; "
         "guest_runs=2/2; markers=25; serial_debugcon=2/2; gop_frames=2/2; "
-        "retained_files=9; inner=6/6; inner_sha256=1E00D9C23518; authority=0; actions=0; state=0; hardware=0; "
+        "retained_files=9; inner=6/6; inner_sha256=99DB2125174F; authority=0; actions=0; state=0; hardware=0; "
         "trust=unsigned-deny; trust_bindings=14; trust_authority=0; trust_writes=0; "
         "pbp1=2/2; kmap=2/2; exit=2/2; negatives=155/155; pmcu1=synthetic-never-apply; pfwm1=synthetic-never-apply; ppol1=qualification-only; production_claims=0; n5_exit=false; production_ready=false"
     )
@@ -1060,7 +1060,7 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     summary = artifact.get("summary", {})
     if summary.get("guest_runs_passed") != 2 or summary.get("guest_runs_total") != 2:
         errors.append("PKLOAD6 guest-run evidence is incomplete")
-    if summary.get("rust_host_tests_passed") != 291 or summary.get("rust_host_tests_total") != 291:
+    if summary.get("rust_host_tests_passed") != 299 or summary.get("rust_host_tests_total") != 299:
         errors.append("PKLOAD6 Rust host-test evidence is incomplete")
     if summary.get("ordered_marker_count") != 25:
         errors.append("PKLOAD6 marker evidence is incomplete")
@@ -1073,7 +1073,7 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     ) != 155:
         errors.append("PKLOAD6 negative controls are incomplete")
     if summary.get("inner_retained_set_sha256") != (
-        "1E00D9C23518BDD779CF26A1DCA0EE708EE3C3CD4FD4C0207E0F6E4EDDDDB117"
+        "99DB2125174F65A067F619FD65D61EBC5806D2AFCCCAB3E66411A42A1EFC5342"
     ):
         errors.append("PKLOAD6 retained inner-set identity changed")
     if artifact.get("claims") != native_kernel_load.expected_claims():
@@ -1083,9 +1083,9 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     ) is not False:
         errors.append("PKLOAD6 overclaims N5 exit or production readiness")
     detail = (
-        "contract=PKLOAD6; rust_tests=291/291; boot_builds=2/2; kernel_builds=2/2; "
+        "contract=PKLOAD6; rust_tests=299/299; boot_builds=2/2; kernel_builds=2/2; "
         "media=2/2; guest_runs=2/2; markers=25; retained_files=9; inner=6/6; "
-        "inner_sha256=1E00D9C23518; "
+        "inner_sha256=99DB2125174F; "
         "trust=unsigned-deny; trust_bindings=14; trust_authority=0; trust_writes=0; "
         "oracle=2/2; pbp1=2/2; kmap=2/2; exit=2/2; firmware_after_exit=0; "
         "negatives=155/155; pmcu1=synthetic-never-apply; pfwm1=synthetic-never-apply; "
@@ -1116,7 +1116,7 @@ def check_native_kernel_revalidation_readiness(
         )
     errors.extend(native_kernel_revalidation.readiness_errors(artifact, ROOT))
     build = artifact.get("build", {})
-    if not isinstance(build, dict) or build.get("host_test_count") != 206:
+    if not isinstance(build, dict) or build.get("host_test_count") != 214:
         errors.append("PKREVAL1 host-test evidence is incomplete")
     controls = artifact.get("negative_controls", [])
     if (
@@ -1145,7 +1145,7 @@ def check_native_kernel_revalidation_readiness(
     ) != (
         9,
         9,
-        "1E00D9C23518BDD779CF26A1DCA0EE708EE3C3CD4FD4C0207E0F6E4EDDDDB117",
+        "99DB2125174F65A067F619FD65D61EBC5806D2AFCCCAB3E66411A42A1EFC5342",
         "pbtrust_policy_unsigned",
         0,
         0,
@@ -1160,7 +1160,7 @@ def check_native_kernel_revalidation_readiness(
     ) is not False:
         errors.append("PKREVAL1 overclaims production readiness")
     detail = (
-        "contract=PKREVAL1; kernel_tests=206/206; python_tests=8/8; targets=2/2; "
+        "contract=PKREVAL1; kernel_tests=214/214; python_tests=8/8; targets=2/2; "
         "retained_files=9; parsers=9; controls=36/36; differential=32768/32768; "
         "denial=pbtrust_policy_unsigned; authority=0; actions=0; state_writes=0; "
         "live_kernel_entry=false; production_ready=false"

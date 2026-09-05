@@ -7,7 +7,24 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 153
+Last roadmap reconciliation: PooleOS Cycle 154
+
+Cycle 154 reconstructs the N5 prerequisites for the changed-kernel and reopened
+N12.2 lock replay. PSYM1 is rebound from measured debug/loaded/kernel/manifest
+identities and independently requalified; PPOL1 now rejects readiness whose
+current canonical dependency vectors differ, and binds the payload-reference
+implementations. Fresh policy, symbol, loader, aggregate PooleBoot and retained-byte
+revalidation qualification pass. Two PKXFER1 runs enter the actual kernel and
+reparse nine retained files before terminal unsigned denial; 63 focused Python
+tests and all six corresponding boot-chain gates pass. This changes neither
+kernel bytes, symbol consumption, signature acceptance, authority nor production
+status. Replay the remaining trap/CPU/memory/SMP/scheduler/lock profiles next,
+starting with N7-TRAP-001, before the reopened N12.2 milestone can close.
+Keep the full dependency and aggregate gate pending until actual replay passes.
+The Cycle 154 diagnostic audit still rejects 19 downstream native checks and
+the aggregate suite; two omitted CLI inputs were checked separately, not folded
+into an invented canonical pass. Preserve this failed audit and its limitation.
+No checklist requirement, program gap, N5 exit or reopened lock flag closes.
 
 Cycle 153 implements PKRETAIN1 allocator-enforced retention under the existing
 N12.3 reclamation move. Non-copyable tokens protect explicitly retained physical

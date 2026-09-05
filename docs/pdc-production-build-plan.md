@@ -1,8 +1,8 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-05
-Plan version: 2.59.0-native-physical-retention
-Roadmap cycle: PooleOS Cycle 153
+Plan version: 2.60.0-native-boot-chain-replay
+Roadmap cycle: PooleOS Cycle 154
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
@@ -27,6 +27,68 @@ recovery profile is accepted, and no fallback key may be inferred from primary
 registration. The governance flag and all production boundaries remain open.
 
 ## 1. Architecture Decision
+
+Cycle 154 follows the reopened lock dependency back through its required N5
+boot-artifact chain. `N5-SYMBOLS-SEMANTICS-001` (N5.6/N5.9) rebinds PSYM1 to
+the measured Cycle 153 kernel, its loaded image, debug file, source manifest and
+three public symbols. Two clean debug builds, 158 negative controls and 32,768
+parser/lookup differential cases pass without enabling symbol consumption.
+PPOL1 now binds all five canonical payload-reference implementations and checks
+current reference vectors when validating readiness. A prior policy receipt
+could otherwise pass while the current symbol-derived vector was stale. Fresh
+policy qualification passes 116 controls and 32,768 differential cases.
+
+Current-source PKLOAD6 passes 299 host tests, two clean boot/kernel/media builds,
+two QEMU/OVMF runs, 25 markers and all 155 negative controls. Aggregate PooleBoot
+passes its own two-run replay and exact GOP/serial/debugcon/PBP1 checks. The
+PKMAP2 host probe and fixed marker fixtures now describe the measured 144-page
+kernel and its shifted guards, stack and handoff; an old fixture failed rather
+than weakening retained-page validation. PKREVAL1 passes 214 kernel tests, both
+native targets, 36 controls and 32,768 exact-byte mutations. PKXFER1 then enters
+the real kernel in two fresh boots, reparses all nine retained files, agrees
+with the independent host oracle, rejects 58 marker controls and reaches the
+expected terminal unsigned-policy denial. All six corresponding boot-chain
+gates and 63 focused Python tests pass. Source and failed-attempt evidence are
+retained; synthetic fixture checks are not substituted for live runs.
+
+The policy readiness defect is resolved within existing ADD-BOOT-010 and its
+policy-bundle flag; exact retained-byte replay remains under ADD-BOOT-011.
+No new requirement or flag is needed for this implementation repair, and no
+existing requirement is removed. The inner-set SHA-256, independently derived
+from the six current role-bound files and matched by Rust and the guest, is
+`99DB2125174F65A067F619FD65D61EBC5806D2AFCCCAB3E66411A42A1EFC5342`.
+No production policy/firmware action, governance or release signing-key use,
+or physical write occurs. The full host suite uses isolated disposable
+software signing fixtures; those never provision production trust.
+
+This is dependency reconstruction, not a new kernel ABI or production release.
+Kernel SHA-256 remains
+`BDEECCB27B1B91406911F91169B9BF5F9DF0439BB39FA0E1882C07E1AF3B81EF`.
+N12.2 and its lock flag stay open until complete current-source qualification.
+The later mandatory task/root/data/stack ownership and independent live
+retirement/failure oracle remain required. N0 custody is still externally
+blocked; this N5 work needs no new owner action. No signature, authority,
+firmware, physical-media or demo-promotion gate changes.
+
+Exact next owner-independent step: replay N7-TRAP-001 on these frozen bytes,
+then CPU/errata/xstate/MSR, PMM/VM, interrupt/SMP, scheduler, atomics and lock
+dependencies in order. Re-derive actual PMM metadata size and layout evidence;
+do not copy old 143-page or 15,376-byte-manager expectations forward. Only
+after all current profiles, the canonical 915-test suite, 105-check aggregate,
+publication boundary and required PR checks pass may N12.2 or a merge advance.
+Then resume N12.3 mandatory active task/root/data/stack retention and the
+independent live retirement/failure oracle. No new owner action is required
+for this replay; separate governance custody remains externally blocked.
+
+Cycle 154 diagnostic audit completed, not a canonical acceptance run: 83/105
+checks passed across 60 supplied artifacts, with 19 stale downstream native
+checks, the failing Doctor aggregate (689/708), and two invocation omissions
+(`--bundle` and `--replay-proof`). The two intended artifact checks subsequently
+passed independently. Preserve both records; do not merge their counts into a
+claimed 85/105 full run. The canonical suite was exercised but did not pass.
+The next full acceptance replay must supply both artifacts and all current
+native receipts; the historical Cycle 152 gate remains non-promoting for this
+candidate. Final authority-only reconciliation receives a focused rerun.
 
 Cycle 153 advances N12.3 with real allocator-enforced retention and an AP
 teardown ordering change. Explicitly retained allocations now reject copied
