@@ -68,9 +68,11 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 219)
+        self.assertEqual(len(self.artifact["bound_sources"]), 222)
         bound_paths = {binding["path"] for binding in self.artifact["bound_sources"]}
         self.assertIn("native/kernel/src/reclamation.rs", bound_paths)
+        self.assertIn("native/kernel/src/reclamation/task_lifetimes.rs", bound_paths)
+        self.assertIn("native/kernel/tests/task_lifetimes.rs", bound_paths)
         self.assertIn("runs/native-kernel-reclamation-core-readiness.json", bound_paths)
         self.assertIn("security/governance-key-registration.json", bound_paths)
         self.assertIn("specs/governance-key-registration.schema.json", bound_paths)

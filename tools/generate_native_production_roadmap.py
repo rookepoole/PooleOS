@@ -326,7 +326,8 @@ PHASE_EVIDENCE = {
         "specs/native-kernel-locks-contract.json, native/kernel/src/locks.rs, runtime/native_kernel_locks.py, tools/qualify_native_kernel_locks.py, tests/test_native_kernel_locks.py, and docs/native-kernel-locks.md: PKLOCK1 freezes an allocation-free FIFO ticket spinlock, IRQ-save lock, sleeping mutex, notification, writer-preferred reader-writer lock, seqlock, five-rank lock-order graph, direct bounded priority donation, exact owner-death and rollback rules, and strict no-reclamation/no-general-SMP/no-target/nonproduction boundaries",
         "runs/native-kernel-locks-readiness.json: 10/10 focused lock tests within 206/206 kernel host tests, nine exact host-probe receipts including 8,192 FIFO ticket acquisitions, two exact 35-marker four-vCPU SandyBridge selector-22 runs, exact tickets 0,1,2,3 across BSP plus three APs, three installed and revoked shared aliases, and 30/30 hostile-control categories covering 103 rejected cases",
         "runs/native-kernel-reclamation-core-readiness.json: Cycle 150 PKRECLAIM1-CORE owns real values in a bounded no_std pool with pool-bound generation handles, RAII pins, retire-before-reclaim, exact-once transfer, nonwrapping limits, pressure retention and shutdown sealing; 19 tests pass in debug and optimized host profiles, one borrow compile-fail test and 206 kernel regressions pass; freestanding Clippy passes and canonical linked bytes remain unchanged; no live integration or CPU grace-period claim",
-        "ADD-N12-CONCURRENCY-RECLAMATION-001: the scoped object-pool core is host-qualified; bind actual scheduler and virtual-memory generations, acknowledged cross-CPU quiescence, timeout/offline/death/pressure/shutdown rollback and exact-topology live evidence before closing N12.3",
+        "docs/native-kernel-task-lifetimes.md and runs/native-kernel-reclamation-core-readiness.json: Cycle 152 PKLIFE1 owns the actual PKSCHED4 scheduler and moved inactive PKVM1 address spaces, binds checked task/root generations, retains pinned retired resources, and blocks premature task-slot reuse. Nineteen lifecycle and nineteen core tests pass in each of two host profiles; three borrow compile-fail tests and 206 kernel regressions pass. No new guest selector or physical quiescence evidence is claimed",
+        "ADD-N12-CONCURRENCY-RECLAMATION-001: scoped object and serialized inactive task ownership are host-qualified; bind active physical ownership despite copyable PMM handles, acknowledged cross-CPU quiescence, live timeout/offline/death/pressure/shutdown rollback, an independent oracle and exact-topology live evidence before closing N12.3",
     ],
     "N15": ["runs/microkernel_isolation.json", "runs/capability_trap_proof.json", "runs/capability_trap_fuzz.json"],
     "N29": [
@@ -1228,6 +1229,9 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
         if flag_id == "FLAG-N12-CONCURRENCY-RECLAMATION-001":
             evidence.extend([
                 "native/kernel/src/reclamation.rs",
+                "native/kernel/src/reclamation/task_lifetimes.rs",
+                "native/kernel/tests/task_lifetimes.rs",
+                "docs/native-kernel-task-lifetimes.md",
                 "native/kernel/tests/reclamation_core.rs",
                 "tools/qualify_native_reclamation_core.py",
                 "tests/test_native_reclamation_core.py",
@@ -1448,8 +1452,8 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "inspect_live_pooleglyph_each_turn": True,
             "verify_master_checklist_coverage_each_turn": True,
             "new_work_must_be_flagged": True,
-            "last_updated_cycle": 151,
-            "selected_move_id": "N5-DEMO-ISO-001",
+            "last_updated_cycle": 152,
+            "selected_move_id": "N12-CONCURRENCY-RECLAMATION-001",
             "immediate_next_move_id": "N0-GOVERNANCE-CUSTODY-001",
             "owner_independent_next_move_id": "N12-CONCURRENCY-RECLAMATION-001",
             "required_records": [
@@ -1523,7 +1527,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "added_requirement_count": len(coverage["added_requirements"]),
         },
         "baseline": {
-            "pooleos_cycle": 151,
+            "pooleos_cycle": 152,
             "entry_cycle": 79,
             "pooleos_test_count": test_count,
             "historical_consistency_release_gate": {
@@ -1584,6 +1588,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "blocked": True,
         },
         "claim_boundaries": [
+            "Cycle 152 PKLIFE1 composes the actual scheduler, object pool and inactive address spaces with generation-safe task-slot retention, exact-once resource return, cancellation, pending/running dispatch retention, timeout, shutdown and owner-loss handling. Nineteen new lifecycle tests pass in both host profiles and no unsafe code is added. Copyable PMM handles, active-root ownership, hardware quiescence, an independent lifecycle oracle and a new live selector remain open. Canonical linked kernel and the separate demo remain unchanged; N12.3 and production remain open.",
             "Cycle 151 provides the owner-requested unsigned QEMU-only optical demo with a demo-only PooleGlass static renderer. Two fresh four-vCPU optical boots pass PKLOCK1 and exact boot-frame comparison while canonical native source and kernel bytes stay unchanged. The OS-wide design system records PG-01 through PG-10 under FLAG-NATIVE-UI-001; N29.8 is partial only. No compositor, animation, installer, physical target, N5/N29/N39 exit or production claim follows; N12-CONCURRENCY-RECLAMATION-001 remains the next chronological kernel move.",
             "Cycle 150 implements and host-qualifies PKRECLAIM1-CORE only. The fixed-capacity no_std object pool uses PKLOCK1 admission and PKATOM1 pins, pool-bound nonwrapping generation handles, actual payload ownership, retirement, exact-once reclamation and shutdown retention. N12.3 and FLAG-N12-CONCURRENCY-RECLAMATION-001 remain open for scheduler/address-space lifecycle binding, acknowledged cross-CPU quiescence, failure rollback and two-run live evidence. Existing canonical linked kernel bytes are unchanged; no new guest execution, target, N12-exit or production claim follows.",
             "Post-Cycle 149 registration evidence supersedes historical unavailable-key statements for the primary signer only. Enrollment signature verification, recovery custody, architecture ratification, and production remain pending.",
@@ -1656,7 +1661,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=913)
+    parser.add_argument("--test-count", type=int, default=915)
     parser.add_argument("--status-date", default="2026-09-04")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

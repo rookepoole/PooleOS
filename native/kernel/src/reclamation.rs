@@ -361,3 +361,5 @@ impl<T, const N: usize> Drop for Pool<T, N> {
         }
     }
 }
+
+pub mod task_lifetimes;

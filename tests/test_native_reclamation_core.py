@@ -18,12 +18,31 @@ class ReclamationCoreTests(unittest.TestCase):
         for key in (
             "production_ready", "live_integration_verified", "cross_cpu_quiescence_verified",
             "n12_3_complete", "focused_test_count", "kernel_regression_count", "compile_fail_borrow_tests",
+            "task_lifetime_test_count",
         ):
             with self.subTest(key=key):
                 changed = copy.deepcopy(self.report)
                 changed[key] = True if type(changed[key]) is bool else changed[key] + 1
                 with self.assertRaises(ValueError):
                     core.validate_report(changed)
+
+    def test_lifetime_scope_and_contract_mutations_reject(self):
+        for key, value in (
+            ("task_lifetime_scope", "live_active_address_space_quiescence"),
+            ("task_lifetime_contract_id", "PKLIFE2"),
+            ("schema_version", "1.0"),
+        ):
+            changed = copy.deepcopy(self.report)
+            changed[key] = value
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                core.validate_report(changed)
+
+    def test_lifetime_count_wrong_types_reject(self):
+        for value in (True, float(core.LIFETIME_TEST_COUNT), str(core.LIFETIME_TEST_COUNT)):
+            changed = copy.deepcopy(self.report)
+            changed["task_lifetime_test_count"] = value
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                core.validate_report(changed)
 
     def test_missing_reordered_or_failed_stage_rejects(self):
         for mutation in ("missing", "reordered", "failed", "digest", "extra"):
