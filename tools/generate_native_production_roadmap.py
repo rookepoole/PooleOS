@@ -344,7 +344,7 @@ PHASE_EVIDENCE = {
 
 PHASE_GAPS = {
     "N0": [
-        "The completed response records exact owner direction for ADR-0003, ADR-0004, and all 38 objective definitions. Cycle 118 separately authorizes compatible-key acquisition, key generation/use, public-key publication, signing, secrets, privileged probes, drivers, firmware changes, physical-media writes, tags/releases, and production promotion, but the selected hardware-backed governance key is still physically unavailable; no key, signature, publication, privileged/mutating operation, release, or promotion has occurred, and all charter qualification and operation-safety gates remain mandatory",
+        "The completed historical response records owner direction for ADR-0003, ADR-0004, and all 38 definitions. The 2026-09-04 registration record confirms primary hardware-key enrollment, owner fingerprint review, and exact GitHub signing-key registration. A verified enrollment signature, separately controlled recovery signer, architecture signature, signed tag, and publication receipt remain pending under the existing owner authorization and qualification gates",
         "The 38 reliability, accessibility, compatibility, privacy, and performance definitions are owner-directed but cryptographically unsigned; every implementation-bound measurement remains open",
         "The extracted-tree scanner does not yet parse ISO/GPT/ESP/El Torito/signature structures",
     ],
@@ -402,7 +402,7 @@ FLAGS = [
     ("FLAG-NATIVE-ADR-001", "BLOCKER", "N0", "Ratify the native architecture, TCB, reuse, language, ABI, driver, filesystem, and release ADR set"),
     ("FLAG-N0-OBJECTIVES-001", "REQUIRED", "N0", "Owner-ratify the native v1 profile and all 38 target values, then bind passing implementation evidence to every target"),
     ("FLAG-N0-RATIFICATION-SCOPE-001", "REQUIRED", "N0", "Bind the exact objective definitions and schema into the owner ceremony while excluding measurements and all production promotion"),
-    ("FLAG-N0-GOVERNANCE-KEY-001", "BLOCKER", "N0", "Obtain a compatible FIDO2 hardware key, then execute the already authorized governance-key generation/use, public fingerprint review and publication, signer registration, and recovery custody under owner presence without exposing private material"),
+    ("FLAG-N0-GOVERNANCE-KEY-001", "BLOCKER", "N0", "Primary hardware key is enrolled, fingerprint-confirmed, and registered; verify an enrollment signature and establish separately controlled recovery custody under the existing owner authorization"),
     ("FLAG-NATIVE-BOOT-001", "STOP_SHIP", "N5", "Boot reproducible PooleBoot PE32+ and transfer through the frozen handoff"),
     ("FLAG-N5-POOLEBOOT-PROOF-001", "REQUIRED", "N5", "Reproduce the bounded unsigned PooleBoot PE32+ proof, deterministic GPT/FAT32 media, ordered dual-channel diagnostics, GOP frame, and hostile corpus without claiming the complete loader or N5 exit"),
     ("FLAG-N5-BOOTPROTO-001", "REQUIRED", "N5", "Qualify the canonical PBP1 byte schema with no_std codec, independent decoder, layout assertions, golden bytes, downgrade controls, malformed corpus, and deterministic differential fuzzing before loader or kernel entry code depends on it"),
@@ -789,6 +789,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                     "runs/n0_owner_response_receipt.json",
                     "runs/adr_ratification_readiness.json",
                     "security/owner-adr-signers.allowed",
+                    "security/governance-key-registration.json",
                 ]
             )
         if flag_id == "FLAG-N5-BOOTPROTO-001":
@@ -1433,7 +1434,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "new_work_must_be_flagged": True,
             "last_updated_cycle": 149,
             "selected_move_id": "N12-CONCURRENCY-LOCKS-001",
-            "immediate_next_move_id": "N0-HW-KEY-ACQUIRE-001",
+            "immediate_next_move_id": "N0-GOVERNANCE-CUSTODY-001",
             "owner_independent_next_move_id": "N12-CONCURRENCY-RECLAMATION-001",
             "required_records": [
                 "docs/production-goal-charter.md",
@@ -1442,6 +1443,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
                 "runs/pooleos_native_checklist_coverage.json",
                 "runs/native_toolchain_qualification.json",
                 "runs/adr_ratification_readiness.json",
+                "security/governance-key-registration.json",
                 "runs/n0_owner_decision_packet.json",
                 "runs/n0_owner_response_receipt.json",
                 "runs/hardware_target_readiness.json",
@@ -1557,14 +1559,15 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             "historical_release_gaps_are_non_promoting": True,
         },
         "immediate_next_move": {
-            "id": "N0-HW-KEY-ACQUIRE-001",
+            "id": "N0-GOVERNANCE-CUSTODY-001",
             "phase_ids": ["N0", "N1"],
-            "title": "Obtain and confirm possession of the selected compatible FIDO2 hardware key before the already authorized governance-key ceremony",
-            "entry_evidence": ["specs/n0-owner-response.json", "runs/n0_owner_response_receipt.json", "runs/adr_ratification_readiness.json", "docs/adr-ratification-ceremony.md"],
-            "exit_evidence": ["owner confirms possession of a compatible FIDO2 hardware key", "owner-presence and recovery-custody procedure reviewed before execution", "exact public fingerprint and signer-registration procedure prepared without exposing private material"],
+            "title": "Verify the enrolled primary governance key and establish separately controlled recovery custody",
+            "entry_evidence": ["security/governance-key-registration.json", "security/owner-adr-signers.allowed", "runs/adr_ratification_readiness.json", "docs/adr-ratification-ceremony.md"],
+            "exit_evidence": ["owner-present namespaced enrollment signature verifies with the registered public key", "separately controlled recovery signer and hardware-handle custody verified", "exact architecture manifest prepared for the already authorized signing ceremony"],
             "blocked": True,
         },
         "claim_boundaries": [
+            "Post-Cycle 149 registration evidence supersedes historical unavailable-key statements for the primary signer only. Enrollment signature verification, recovery custody, architecture ratification, and production remain pending.",
             "Buildroot and Linux artifacts are historical reference evidence and cannot satisfy native PooleOS gates.",
             "Checklist mapping is not implementation completion.",
             "Host simulations and schemas are not native kernel enforcement.",

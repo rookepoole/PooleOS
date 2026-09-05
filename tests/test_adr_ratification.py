@@ -114,7 +114,7 @@ class AdrRatificationTests(unittest.TestCase):
         policy_schema = json.loads((ROOT / adr_ratification.POLICY_SCHEMA_RELATIVE).read_text(encoding="utf-8"))
         self.assertEqual(validate_json(self.policy, policy_schema), [])
         self.assertEqual(validate_json(self.readiness, self.readiness_schema), [])
-        self.assertEqual(self.readiness["status"], "owner_direction_recorded_hardware_key_pending")
+        self.assertEqual(self.readiness["status"], "governance_key_registered_custody_pending")
         self.assertEqual(self.readiness["adr_set"]["present_count"], 7)
         self.assertEqual(self.readiness["adr_set"]["pending_owner_disposition"], [])
         self.assertEqual(self.readiness["adr_set"]["accepted_owner_directed_count"], 7)
@@ -123,7 +123,9 @@ class AdrRatificationTests(unittest.TestCase):
         self.assertEqual(self.readiness["decision_inputs"]["objectives"]["target_count"], 38)
         self.assertEqual(self.readiness["decision_inputs"]["objectives"]["measured_target_count"], 0)
         self.assertFalse(self.readiness["decision_inputs"]["objectives"]["owner_ratification_pending"])
-        self.assertEqual(self.readiness["trust_bootstrap"]["trusted_signer_count"], 0)
+        self.assertEqual(self.readiness["trust_bootstrap"]["trusted_signer_count"], 1)
+        self.assertTrue(self.readiness["trust_bootstrap"]["hardware_key_available"])
+        self.assertEqual(self.readiness["trust_bootstrap"]["public_key_publication"], "registered")
         self.assertTrue(self.readiness["summary"]["ready_for_owner_action"])
         self.assertFalse(self.readiness["summary"]["ready_for_signature"])
         self.assertEqual(self.readiness["summary"]["blocking_owner_action_count"], 4)
@@ -133,7 +135,7 @@ class AdrRatificationTests(unittest.TestCase):
         self.assertFalse(self.readiness["production_ready"])
         gate = pooleos_release_gate.check_adr_ratification_readiness()
         self.assertTrue(gate["ok"], gate["detail"])
-        self.assertIn("status=owner_direction_recorded_hardware_key_pending", gate["detail"])
+        self.assertIn("status=governance_key_registered_custody_pending", gate["detail"])
 
     def test_readiness_generator_reproduces_exact_bytes(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -155,13 +157,63 @@ class AdrRatificationTests(unittest.TestCase):
                 owner_accept_all_exact=True,
                 owner_accept_objectives_exact=False,
             )
-        with self.assertRaisesRegex(ValueError, "exactly one owner bootstrap signer"):
-            adr_ratification.build_manifest(
-                ROOT,
-                owner_accept_all_exact=True,
-                owner_accept_objectives_exact=True,
-            )
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            self._copy_contract(repo)
+            (repo / "security/owner-adr-signers.allowed").write_text("# No signer\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "exactly one owner bootstrap signer"):
+                adr_ratification.build_manifest(
+                    repo,
+                    owner_accept_all_exact=True,
+                    owner_accept_objectives_exact=True,
+                )
 
+    def test_registration_binds_owner_fingerprint_and_exact_scoped_public_key(self) -> None:
+        signers, errors = adr_ratification.parse_allowed_signers(ROOT)
+        self.assertEqual(errors, [])
+        registration = adr_ratification.load_key_registration(ROOT, signers)
+        self.assertEqual(registration["github"]["registration_id"], 1158225)
+        self.assertEqual(registration["fingerprint"], "SHA256:ezVHRzgJ4y4k4Irynu9TIXPp1z3TsogL13mz3g9gx9w")
+        self.assertFalse(registration["custody"]["separate_recovery_signer_verified"])
+        for changed in ({**signers[0], "fingerprint": "SHA256:" + "A" * 43},
+                        {**signers[0], "public_key": "sk-ssh-ed25519@openssh.com AAAA"},
+                        {**signers[0], "principal": "different-owner"}):
+            with self.subTest(changed=changed):
+                with self.assertRaisesRegex(ValueError, "does not match"):
+                    adr_ratification.load_key_registration(ROOT, [changed])
+        with self.assertRaisesRegex(ValueError, "exactly one"):
+            adr_ratification.load_key_registration(ROOT, [])
+
+    def test_registration_rejects_unconfirmed_or_promoting_records(self) -> None:
+        signers, _ = adr_ratification.parse_allowed_signers(ROOT)
+        original = json.loads((ROOT / adr_ratification.REGISTRATION_RELATIVE).read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            (repo / "security").mkdir()
+            (repo / "specs").mkdir()
+            shutil.copy2(ROOT / adr_ratification.REGISTRATION_SCHEMA_RELATIVE, repo / adr_ratification.REGISTRATION_SCHEMA_RELATIVE)
+            self.assertIsNone(adr_ratification.load_key_registration(repo, signers))
+            for field, value in (("owner_fingerprint_confirmed", False), ("account", "other"),
+                                 ("registration_authorized", False), ("production_ready", True),
+                                 ("unexpected_private_material", "must reject unknown fields")):
+                with self.subTest(field=field):
+                    bad = {**original, field: value}
+                    adr_ratification.write_json(bad, repo / adr_ratification.REGISTRATION_RELATIVE)
+                    with self.assertRaisesRegex(ValueError, "invalid governance registration"):
+                        adr_ratification.load_key_registration(repo, signers)
+
+    def test_registered_manifest_preparation_does_not_sign_or_promote(self) -> None:
+        manifest = adr_ratification.build_manifest(
+            ROOT, owner_accept_all_exact=True, owner_accept_objectives_exact=True,
+        )
+        self.assertEqual(manifest["signer"]["key_profile"], "hardware_fido2_ed25519_sk")
+        self.assertFalse(manifest["objectives_acceptance"]["measurement_evidence_accepted"])
+        self.assertFalse((ROOT / adr_ratification.MANIFEST_RELATIVE).exists())
+        self.assertFalse((ROOT / adr_ratification.SIGNATURE_RELATIVE).exists())
+        self.assertFalse(adr_ratification.build_readiness(ROOT)["summary"]["ready_for_signature"])
+
+    @unittest.skipUnless(shutil.which("ssh-keygen"), "OpenSSH ssh-keygen is unavailable")
+    def test_provisional_test_manifest_binds_exact_decision_sources(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             parent = Path(tmp)
             repo = parent / "repo"

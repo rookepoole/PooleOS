@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "artifact_kind": "pooleos_governance_key_registration",
+  "status_date": "2026-09-04",
+  "account": "rookepoole",
+  "key_profile": "hardware_fido2_ed25519_sk",
+  "public_key": "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIL2JUAmsLJFc24N2eVjPiURPbBXkDypYVIug6KoJ8t4gAAAABHNzaDo=",
+  "fingerprint": "SHA256:ezVHRzgJ4y4k4Irynu9TIXPp1z3TsogL13mz3g9gx9w",
+  "owner_fingerprint_confirmed": true,
+  "key_generation_authorized": true,
+  "registration_authorized": true,
+  "hardware_key_available": true,
+  "github": {
+    "registration_id": 1158225,
+    "key_type": "signing",
+    "title": "PooleOS ADR governance - ED25519-SK",
+    "created_at": "2026-09-04T21:16:21.432Z",
+    "exact_public_key_readback_verified": true
+  },
+  "custody": {
+    "owner_present_enrollment_completed": true,
+    "private_stub_outside_repository": true,
+    "user_verification_requested": true,
+    "separate_recovery_signer_verified": false,
+    "enrollment_signature_test_completed": false
+  },
+  "architecture_ratification_verified": false,
+  "production_ready": false
+}

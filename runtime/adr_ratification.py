@@ -29,6 +29,8 @@ SIGNATURE_RELATIVE = "runs/adr_ratification_manifest.json.sig"
 RECEIPT_RELATIVE = "runs/adr_ratification_receipt.json"
 OWNER_RESPONSE_RELATIVE = "specs/n0-owner-response.json"
 OWNER_RESPONSE_RECEIPT_RELATIVE = "runs/n0_owner_response_receipt.json"
+REGISTRATION_RELATIVE = "security/governance-key-registration.json"
+REGISTRATION_SCHEMA_RELATIVE = "specs/governance-key-registration.schema.json"
 
 ADR_NAMES = (
     "0001-native-pooleos-constitution.md",
@@ -220,6 +222,25 @@ def _load_valid_objectives(root: Path) -> dict[str, Any]:
     return objectives
 
 
+def load_key_registration(root: Path, signers: list[dict[str, Any]]) -> dict[str, Any] | None:
+    path = root / REGISTRATION_RELATIVE
+    if not path.is_file():
+        return None
+    registration = _read_json(path)
+    errors = _schema_errors(registration, root, REGISTRATION_SCHEMA_RELATIVE)
+    if errors:
+        raise ValueError("invalid governance registration: " + "; ".join(errors[:3]))
+    if len(signers) != 1:
+        raise ValueError("governance registration requires exactly one scoped signer")
+    signer = signers[0]
+    if any(registration[field] != signer[signer_field] for field, signer_field in (
+        ("account", "principal"), ("key_profile", "key_profile"),
+        ("public_key", "public_key"), ("fingerprint", "fingerprint"),
+    )):
+        raise ValueError("governance registration does not match the allowed signer")
+    return registration
+
+
 def build_readiness(root: Path = ROOT) -> dict[str, Any]:
     policy = load_policy(root)
     policy_errors = _schema_errors(policy, root, POLICY_SCHEMA_RELATIVE) + _policy_contract_errors(policy)
@@ -238,6 +259,7 @@ def build_readiness(root: Path = ROOT) -> dict[str, Any]:
     bound_sources = [bind_file(root, path) for path in REQUIRED_BOUND_SOURCES]
     status_counts = Counter(item["source_status"] for item in adrs)
     signers, signer_errors = parse_allowed_signers(root, policy)
+    registration = load_key_registration(root, signers)
     artifacts = {
         "owner_response_receipt": {
             "path": OWNER_RESPONSE_RECEIPT_RELATIVE,
@@ -263,6 +285,10 @@ def build_readiness(root: Path = ROOT) -> dict[str, Any]:
         and len(signers) == 1
         and artifacts["manifest"]["present"]
         and not artifacts["signature"]["present"]
+        and (registration is None or (
+            registration["custody"]["separate_recovery_signer_verified"]
+            and registration["custody"]["enrollment_signature_test_completed"]
+        ))
     )
 
     owner_actions = [
@@ -280,26 +306,26 @@ def build_readiness(root: Path = ROOT) -> dict[str, Any]:
         },
         {
             "id": "OWNER-SIGNING-CUSTODY-001",
-            "status": "blocked_hardware_key_unavailable" if (
+            "status": "pending_recovery_and_signature_test" if registration else ("blocked_hardware_key_unavailable" if (
                 response_selections.get("governance_key_profile") == "hardware_fido2_ed25519_sk"
                 and response_selections.get("fido2_hardware_key_available") == "do_not_have"
                 and not signers
-            ) else ("pending" if not signers else "satisfied"),
-            "description": "Choose an allowed owner-controlled SSH governance-key profile and record its public key and fingerprint without publishing private material.",
+            ) else ("pending" if not signers else "satisfied")),
+            "description": "Record the confirmed governance public key, verify a namespaced enrollment signature, and establish the separately controlled recovery signer required by the custody policy.",
         },
         {
             "id": "OWNER-DETACHED-SIGN-001",
-            "status": "not_authorized" if not artifacts["signature"]["present"] else "evidence_present_unverified",
+            "status": ("authorized_prerequisites_pending" if registration else "not_authorized") if not artifacts["signature"]["present"] else "evidence_present_unverified",
             "description": "Sign the canonical manifest with the PooleOS ADR namespace and verify it against the public allowed-signers and revocation files.",
         },
         {
             "id": "OWNER-SIGNED-TAG-001",
-            "status": "not_authorized",
+            "status": "authorized_prerequisites_pending" if registration else "not_authorized",
             "description": "Create the non-replaceable owner-signed annotated architecture baseline tag over the revision carrying the manifest and detached signature.",
         },
         {
             "id": "OWNER-PUBLISH-RECEIPT-001",
-            "status": "not_authorized" if not artifacts["receipt"]["present"] else "evidence_present_unverified",
+            "status": ("authorized_prerequisites_pending" if registration else "not_authorized") if not artifacts["receipt"]["present"] else "evidence_present_unverified",
             "description": "Publish the exact main revision and signed tag, verify remote object identities, and retain the machine receipt.",
         },
     ]
@@ -307,8 +333,8 @@ def build_readiness(root: Path = ROOT) -> dict[str, Any]:
     return {
         "schema_version": "1.1",
         "artifact_kind": "pooleos_adr_ratification_readiness",
-        "status_date": policy["status_date"],
-        "status": "owner_direction_recorded_hardware_key_pending",
+        "status_date": registration["status_date"] if registration else policy["status_date"],
+        "status": "governance_key_registered_custody_pending" if registration else "owner_direction_recorded_hardware_key_pending",
         "selected_move_id": "N0-RATIFY-001",
         "production_ready": False,
         "production_promotion_allowed": False,
@@ -349,11 +375,13 @@ def build_readiness(root: Path = ROOT) -> dict[str, Any]:
             "signer_file_errors": signer_errors,
             "owner_response": bind_file(root, OWNER_RESPONSE_RELATIVE),
             "selected_key_profile": response_selections["governance_key_profile"],
-            "hardware_key_availability": response_selections["fido2_hardware_key_available"],
-            "hardware_key_available": False,
+            "hardware_key_availability": "have" if registration else response_selections["fido2_hardware_key_available"],
+            "hardware_key_available": registration is not None,
             "provisional_software_key_risk": response_selections["provisional_software_key_risk_accepted"],
-            "public_key_publication": response_selections["public_key_publication"],
-            "key_generation_authorized": owner_response["execution_authorization"]["key_generation"],
+            "public_key_publication": "registered" if registration else response_selections["public_key_publication"],
+            "key_generation_authorized": bool(registration) or owner_response["execution_authorization"]["key_generation"],
+            "registration": bind_file(root, REGISTRATION_RELATIVE) if registration else None,
+            "historical_response_superseded_for_current_custody": registration is not None,
         },
         "artifacts": artifacts,
         "summary": {

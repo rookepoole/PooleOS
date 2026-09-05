@@ -371,9 +371,27 @@
     },
     {
       "path": "docs/adr-ratification-ceremony.md",
-      "sha256": "3F81258F02767538E108DD7125A78A3C4D15546785B964E1FFFBA27C73941ABD",
-      "byte_count": 8712,
-      "line_count": 115
+      "sha256": "22D236EA8ACD8DF75B05C1E635C55D5CEF0ECF5BAB913DB61D93F04F9904BD50",
+      "byte_count": 9763,
+      "line_count": 117
+    },
+    {
+      "path": "security/governance-key-registration.json",
+      "sha256": "700204CBC0F99529AB418200D5492E5D0929DDEE4CF42EF93879CD33DA49BDEE",
+      "byte_count": 1105,
+      "line_count": 29
+    },
+    {
+      "path": "security/owner-adr-signers.allowed",
+      "sha256": "BD465DB0612E055613FB46EA6E5E4904E6E2FA92C0DFD628CB20577CAC95D4A9",
+      "byte_count": 328,
+      "line_count": 2
+    },
+    {
+      "path": "specs/governance-key-registration.schema.json",
+      "sha256": "11F72B9E334189EA0AB767C6A864DD039A178F7F57DEACB2A6EA2865CA2C62A9",
+      "byte_count": 2388,
+      "line_count": 46
     },
     {
       "path": "docs/hardware-target-and-lab-safety.md",
@@ -593,15 +611,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "D7F0A99F67056E83D3A38463F3F11EA2C1B2A2ED46F8DE8180FE4C604EEFF1F9",
-      "byte_count": 57967,
-      "line_count": 729
+      "sha256": "8FD3C7F4DE3B7ECD7228E4AD503D24C758484CFD27FD1621394E8C33B97961B2",
+      "byte_count": 58767,
+      "line_count": 740
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "2F81CA27F2EA79CFB22637C2DDD264A5DDCEEA7A7DDB7DD671D6E90D91C095CD",
-      "byte_count": 333825,
-      "line_count": 1927
+      "sha256": "79F9E34D397461CAAE854A480A00BE110F151F85E9CA64F5A96BED45FDB742F0",
+      "byte_count": 334530,
+      "line_count": 1937
     },
     {
       "path": "docs/publication-boundary.md",
@@ -623,9 +641,9 @@
     },
     {
       "path": "runs/adr_ratification_readiness.json",
-      "sha256": "FBBCA1A4D3D518A7116926CB56E4304E1DF82A29BFD503959A908F373D52265D",
-      "byte_count": 9467,
-      "line_count": 231
+      "sha256": "88DDE386580064B7F16C31C2740FF3D16600595BEDB3A281C474FB8B20A13CA9",
+      "byte_count": 9808,
+      "line_count": 237
     },
     {
       "path": "runs/hardware_target_readiness.json",

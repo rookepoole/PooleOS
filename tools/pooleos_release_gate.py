@@ -453,8 +453,10 @@ def check_adr_ratification_readiness(path: Path = ADR_RATIFICATION_READINESS) ->
         errors.append(f"ratification verifier failed closed: {type(error).__name__}: {error}")
         receipt = {"status": "invalid", "production_promotion_allowed": False}
 
-    if artifact.get("status") != "owner_direction_recorded_hardware_key_pending":
-        errors.append("current readiness status does not preserve the owner-direction and unavailable-key boundary")
+    registered = (ROOT / adr_ratification.REGISTRATION_RELATIVE).is_file()
+    expected_status = "governance_key_registered_custody_pending" if registered else "owner_direction_recorded_hardware_key_pending"
+    if artifact.get("status") != expected_status:
+        errors.append("current readiness status does not match the governance registration evidence")
     if artifact.get("selected_move_id") != "N0-RATIFY-001":
         errors.append("readiness does not bind N0-RATIFY-001")
     if artifact.get("production_ready") is not False or artifact.get("production_promotion_allowed") is not False:
@@ -469,15 +471,15 @@ def check_adr_ratification_readiness(path: Path = ADR_RATIFICATION_READINESS) ->
     if adr_set.get("cryptographically_ratified_count") != 0:
         errors.append("readiness overclaims cryptographic ADR ratification")
     trust = artifact.get("trust_bootstrap", {})
-    if trust.get("trusted_signer_count") != 0 or trust.get("signer_file_errors") != []:
-        errors.append("current public trust bootstrap does not match the deliberate zero-signer state")
+    if trust.get("trusted_signer_count") != int(registered) or trust.get("signer_file_errors") != []:
+        errors.append("current public trust bootstrap does not match the registration evidence")
     if (
         trust.get("selected_key_profile") != "hardware_fido2_ed25519_sk"
-        or trust.get("hardware_key_availability") != "do_not_have"
-        or trust.get("hardware_key_available") is not False
-        or trust.get("key_generation_authorized") is not False
+        or trust.get("hardware_key_availability") != ("have" if registered else "do_not_have")
+        or trust.get("hardware_key_available") is not registered
+        or trust.get("key_generation_authorized") is not registered
     ):
-        errors.append("ratification readiness does not preserve the selected unavailable hardware-key boundary")
+        errors.append("ratification readiness does not match current hardware-key evidence and authorization")
     summary = artifact.get("summary", {})
     if summary.get("ready_for_owner_action") is not True or summary.get("ready_for_signature") is not False:
         errors.append("readiness owner/signature boundary is inconsistent")
@@ -510,6 +512,7 @@ def check_adr_ratification_readiness(path: Path = ADR_RATIFICATION_READINESS) ->
         artifact.get("policy", {}),
         *adr_set.get("adrs", []),
         *decision_inputs.get("bound_sources", []),
+        *([trust.get("registration", {})] if registered else []),
     ]:
         relative = binding.get("path")
         if not isinstance(relative, str):
@@ -530,7 +533,7 @@ def check_adr_ratification_readiness(path: Path = ADR_RATIFICATION_READINESS) ->
 
     detail = (
         "policy=scope_hardened; adrs=7; proposed=0; owner_directed=7; bound_sources=6; objectives=38; measured=0; "
-        "trusted_signers=0; negative_controls=12; owner_actions=4; status=owner_direction_recorded_hardware_key_pending; "
+        f"trusted_signers={int(registered)}; negative_controls=12; owner_actions=4; status={expected_status}; "
         "production_promotion_allowed=false"
     )
     return readiness.make_check(

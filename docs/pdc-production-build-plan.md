@@ -9,6 +9,16 @@ Machine ledger: `runs/pdc_production_roadmap.json`
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
+Post-Cycle 149 registration update (2026-09-04): the primary governance key is
+enrolled and its owner-confirmed public key is registered on GitHub as SSH
+signing key `1158225`. `security/governance-key-registration.json` and
+`security/owner-adr-signers.allowed` bind the exact public identity. Primary-key
+acquisition, enrollment, fingerprint review, and registration are complete.
+`N0-GOVERNANCE-CUSTODY-001` replaces primary-key acquisition as the immediate
+move: a verified enrollment signature and separately controlled recovery signer
+remain pending. The historical response and Cycle 149 kernel evidence remain
+unchanged; this registration update advances no kernel phase or production gate.
+
 ## 1. Architecture Decision
 
 Cycle 149 closes only the bounded scope of
@@ -1688,7 +1698,7 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 | `FLAG-NATIVE-ADR-001` | BLOCKER | Open | Ratify kernel, reuse, language, TCB, ABI, driver, filesystem, and release ADRs |
 | `FLAG-N0-OBJECTIVES-001` | REQUIRED | Open | Owner-ratify the v1 profile and 38 target values, then bind passing native evidence to every target |
 | `FLAG-N0-RATIFICATION-SCOPE-001` | REQUIRED | Closed in Cycle 86 | Bind exact objective definitions and schema into the owner ceremony while excluding measurements and production promotion |
-| `FLAG-N0-GOVERNANCE-KEY-001` | BLOCKER | Open in Cycle 93 | Obtain compatible FIDO2 hardware, then separately authorize and verify governance-key generation, public fingerprint review, signer registration, and recovery custody without exposing private material |
+| `FLAG-N0-GOVERNANCE-KEY-001` | BLOCKER | Open in Cycle 93; primary registration complete 2026-09-04 | Verify the enrolled primary key with a namespaced signature and establish separate recovery custody; primary acquisition, enrollment, fingerprint confirmation, and GitHub registration are complete |
 | `FLAG-NATIVE-BOOT-001` | STOP_SHIP | Open | Reproducible PooleBoot PE32+ boots and transfers through the frozen handoff |
 | `FLAG-N5-POOLEBOOT-PROOF-001` | REQUIRED | Closed in Cycle 97 | Bounded unsigned PooleBoot PE32+ proof, deterministic GPT/FAT32 media, dual-channel markers, GOP frame, hostile controls, and nonclaims reproduce exactly |
 | `FLAG-N5-BOOTPROTO-001` | REQUIRED | Closed in Cycle 98 | Canonical PBP1 schema, `no_std` codec, independent decoder, layouts, golden bytes, downgrade/malformed controls, and differential fuzz receipt reproduce exactly |
@@ -1847,7 +1857,7 @@ Cycle 138 closes only `FLAG-N8-SMP-IPI-001`. PKSMP3 extends the proven one-AP ru
 
 | Order | Move | Required output |
 |---:|---|---|
-| 1 | `N0-HW-KEY-ACQUIRE-001` | Acquire and confirm possession of a compatible FIDO2 hardware security key; generation/use/publication/signing are already authorized but still require owner presence, reviewed custody/recovery steps, exact fingerprint review, and no private-material disclosure |
+| 1 | `N0-GOVERNANCE-CUSTODY-001` | Primary key acquired, enrolled, fingerprint-confirmed, and registered. Verify an enrollment signature and establish the separately controlled recovery signer, then complete the already authorized architecture-signing ceremony |
 | 2 | `N1-SCM-CLOSE-001` | Signed-commit policy, immutable refs, retained CI/review policy, and protected-workflow closure after the pre-signing history is resolved |
 | 3 | `N2-HW-002` | Complete reviewed read-only MSR, PCI configuration, duplicate ACPI, EDID/SPD, UEFI-variable, sensor/power, and native-comparison evidence; direct CPUID is complete but grants no privileged authorization |
 | 4 | `N5-BOOTCFG-001` | Cycle 99 complete boundary: bounded boot configuration grammar with duplicate, unknown-key, traversal, range, truncation, incompatible-version, and oversized-artifact rejection |

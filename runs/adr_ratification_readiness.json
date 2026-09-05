@@ -162,24 +162,24 @@
       "status": "satisfied"
     },
     {
-      "description": "Choose an allowed owner-controlled SSH governance-key profile and record its public key and fingerprint without publishing private material.",
+      "description": "Record the confirmed governance public key, verify a namespaced enrollment signature, and establish the separately controlled recovery signer required by the custody policy.",
       "id": "OWNER-SIGNING-CUSTODY-001",
-      "status": "blocked_hardware_key_unavailable"
+      "status": "pending_recovery_and_signature_test"
     },
     {
       "description": "Sign the canonical manifest with the PooleOS ADR namespace and verify it against the public allowed-signers and revocation files.",
       "id": "OWNER-DETACHED-SIGN-001",
-      "status": "not_authorized"
+      "status": "authorized_prerequisites_pending"
     },
     {
       "description": "Create the non-replaceable owner-signed annotated architecture baseline tag over the revision carrying the manifest and detached signature.",
       "id": "OWNER-SIGNED-TAG-001",
-      "status": "not_authorized"
+      "status": "authorized_prerequisites_pending"
     },
     {
       "description": "Publish the exact main revision and signed tag, verify remote object identities, and retain the machine receipt.",
       "id": "OWNER-PUBLISH-RECEIPT-001",
-      "status": "not_authorized"
+      "status": "authorized_prerequisites_pending"
     }
   ],
   "policy": {
@@ -191,8 +191,8 @@
   "production_ready": false,
   "schema_version": "1.1",
   "selected_move_id": "N0-RATIFY-001",
-  "status": "owner_direction_recorded_hardware_key_pending",
-  "status_date": "2026-07-16",
+  "status": "governance_key_registered_custody_pending",
+  "status_date": "2026-09-04",
   "summary": {
     "blocking_owner_action_count": 4,
     "defined_negative_control_count": 12,
@@ -211,9 +211,10 @@
     "allowed_signers_path": "security/owner-adr-signers.allowed",
     "backend": "OpenSSH",
     "format": "SSHSIG",
-    "hardware_key_availability": "do_not_have",
-    "hardware_key_available": false,
-    "key_generation_authorized": false,
+    "hardware_key_availability": "have",
+    "hardware_key_available": true,
+    "historical_response_superseded_for_current_custody": true,
+    "key_generation_authorized": true,
     "namespace": "pooleos-adr-ratification-v1@github.com/rookepoole/PooleOS",
     "owner_response": {
       "byte_count": 2646,
@@ -221,11 +222,16 @@
       "sha256": "CC188374DFC2FDDE78B3461DCCAF0F739FB2628D7E830B8E7C6A0F649DC3F5AF"
     },
     "provisional_software_key_risk": "not_applicable",
-    "public_key_publication": "not_yet",
+    "public_key_publication": "registered",
+    "registration": {
+      "byte_count": 1105,
+      "path": "security/governance-key-registration.json",
+      "sha256": "700204CBC0F99529AB418200D5492E5D0929DDEE4CF42EF93879CD33DA49BDEE"
+    },
     "revocation_path": "security/revoked-adr-signers",
     "selected_key_profile": "hardware_fido2_ed25519_sk",
     "signer_file_errors": [],
     "signer_principal": "rookepoole",
-    "trusted_signer_count": 0
+    "trusted_signer_count": 1
   }
 }

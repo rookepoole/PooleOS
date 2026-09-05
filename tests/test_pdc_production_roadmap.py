@@ -140,7 +140,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(current["artifact_count"], 102)
         self.assertEqual(current["explicit_gap_count"], 20)
         self.assertFalse(current["production_ready"])
-        self.assertEqual(self.roadmap["immediate_next_move"]["id"], "N0-HW-KEY-ACQUIRE-001")
+        self.assertEqual(self.roadmap["immediate_next_move"]["id"], "N0-GOVERNANCE-CUSTODY-001")
         self.assertTrue(self.roadmap["immediate_next_move"]["blocked"])
 
     def test_goal_charter_and_turn_protocol_are_bound(self) -> None:
