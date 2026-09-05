@@ -7,9 +7,24 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 157
+Last roadmap reconciliation: PooleOS Cycle 158
 
-Cycle 157 completes current-source replay from N8-IRQ-001 through the reopened
+Cycle 158 implements mandatory physical retention for inactive scheduler-task
+page tables and all bound data frames, including aliases and pending unmaps.
+All-or-nothing group acquisition/release preserves the full owner on late
+failure. Twenty-four task-lifetime tests, nineteen pool tests, 219 kernel
+regressions including thirteen retention cases, and seven compile-fail tests
+cover the bounded host contract. Active roots, execution stacks and live CPU
+quiescence are still open under N12.3 and its existing reclamation flag.
+The new build identity changes kernel bytes; Cycle 157's merged canonical pass
+is historical, not current-candidate qualification. Replay dependencies before
+the next main merge. No phase or flag closes, and the frozen demo is unchanged.
+N0 governance custody remains independently blocked. PooleGlyph Phase 65,
+the owner's modified report and the complete locked checklist are preserved.
+Continue N12-CONCURRENCY-RECLAMATION-001, with changed-image prerequisite
+qualification first, then active-root and execution-stack lifecycle ownership.
+
+Historical Cycle 157 completes current-source replay from N8-IRQ-001 through the reopened
 N12-CONCURRENCY-LOCKS-001 dependency: twelve fresh profile receipts contain
 24 headless QEMU/OVMF boots, 421 control groups and 1,881 rejected cases.
 All 26 selected N5/N7/memory/IRQ/SMP/scheduler/atomic/lock gates pass. The

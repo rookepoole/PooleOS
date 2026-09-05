@@ -1,8 +1,8 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-05
-Plan version: 2.63.0-native-dependency-replay
-Roadmap cycle: PooleOS Cycle 157
+Plan version: 2.64.0-native-task-retention
+Roadmap cycle: PooleOS Cycle 158
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
@@ -28,7 +28,38 @@ registration. The governance flag and all production boundaries remain open.
 
 ## 1. Architecture Decision
 
-Cycle 157 completes current-source replay of `N8-IRQ-001`, first-AP, per-CPU
+Cycle 158 implements mandatory inactive task-page ownership in original
+`no_std` PooleKernel code under N12.3, source section 031.3,
+`ADD-N12-CONCURRENCY-RECLAMATION-001` and its existing open flag.
+`Resources::new` must now retain the actual PKVM1 root allocation and every
+bound frame before scheduler admission, including aliased and pending-unmap
+frames. Atomic-as-a-group admission/release validates all members before
+metadata changes. Late failures return the complete original owner, and
+dropping ownership never frees retained pages. The group is serialized by
+exclusive PMM access; it is not an interrupt-safe or power-loss transaction.
+
+Qualification covers 24 task-lifetime tests and 19 pool tests in both debug and
+optimized host profiles, 219 kernel regressions including 13 retention tests,
+seven compile-fail checks, host/freestanding Clippy and the identified linked
+kernel. The initial qualifier correctly rejected the old linked digest. The
+new image remains 517,784 canonical bytes/144 pages with 1,305 relocations and
+build ID `PKBUILD1-CYCLE158-N12-RETAIN-V002-0000000001`. Its complete dependency
+and aggregate replay is pending; the prior 105/105 gate belongs to Cycle 157,
+merged as main `4ad5b11` through PR #73. New work stays on an agent branch until
+qualified. No new virtual or physical boot, frozen demo update, production
+promotion or phase/flag closure is claimed.
+
+Next substeps, in order: qualify the identified image and replay affected N5
+boot-chain dependencies; bind active PKVM3 roots and execution stacks to real
+scheduler context ownership; join pins to acknowledged alias invalidation and
+CPU shutdown; then qualify an independent retirement oracle and live missing-ACK,
+offline, owner-death, pressure and rollback cases. The inactive ownership
+increment does not close N12.3. Arbitrary payload allocations and raw alias
+writes are outside it. All 57 ADD requirements, 94 flags (35 open), 20 gaps,
+40 phases/301 subphases and 8,996 checklist requirements remain represented.
+PooleGlyph Phase 65/report and N0 custody boundaries are unchanged.
+
+Historical Cycle 157 completes current-source replay of `N8-IRQ-001`, first-AP, per-CPU
 runtime, IPI, PKSCHED1-6, PKATOM1 and PKLOCK1. The twelve final receipts contain
 24 fresh headless QEMU/OVMF boots, 421 negative-control groups and 1,881 rejected
 cases. Each rebuilds the same 517,784-byte, 144-page retention kernel with 214

@@ -4,7 +4,16 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
-Cycle 157 completes current-kernel interrupt, SMP, scheduler, atomic and lock
+Cycle 158 makes physical-page retention mandatory for inactive scheduler-task
+page tables and bound data frames, including aliases and pending unmaps.
+Group failure preserves every resource for retry. The bounded host harness
+covers 24 lifetime tests, 19 pool tests, 219 kernel tests and seven compile-fail
+checks. Active roots, execution stacks and live CPU retirement remain open.
+The new kernel requires fresh dependency qualification before merging; main
+already contains the qualified Cycles 153-157 checkpoint through PR #73.
+The separate demo ISO is unchanged. PooleOS remains pre-production.
+
+Historical Cycle 157 completes current-kernel interrupt, SMP, scheduler, atomic and lock
 replay: twelve refreshed profiles, 24 final virtual boots and 1,881 negative
 cases pass. All 26 selected native dependency gates pass. Invalid IRQ/SMP
 receipts now produce failed checks instead of error-formatting exceptions.
