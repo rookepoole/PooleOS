@@ -1,0 +1,26 @@
+{
+  "pillow_version": "12.3.0",
+  "purpose": "technical_asset_encoding_not_art_generation",
+  "source": {
+    "pooleglass-emblem.png": "D3CEED562470EFD0D9F726AAC26A188566E16D636B9AB4CE88F5A5FEFE9BC09E",
+    "Vera.ttf": "C4C45690B345435B2CBA52ECABE275F05E49B389B39FE68AD03AFBB551288D3D"
+  },
+  "encoded": {
+    "emblem.index8": {
+      "bytes": 36864,
+      "sha256": "7F2BB604AF93BBA6E24811C0B553FA44833C7135E9AF12B2079C027849ABF663"
+    },
+    "emblem.rgb": {
+      "bytes": 768,
+      "sha256": "ABB68DA4E544C1248D809181E62EF6BA7DC04981822A0DC6C7F901516D1C01FF"
+    },
+    "title.alpha4": {
+      "bytes": 4608,
+      "sha256": "D9D303E011936630C79C0B24A2F8411B67B2C9A2C7D36016F09DBB4FA59BE307"
+    },
+    "caption.alpha4": {
+      "bytes": 2240,
+      "sha256": "47AB3D3E1C75012813142EB47F9B1A6988D049C355067E3535960F07AF994DD5"
+    }
+  }
+}

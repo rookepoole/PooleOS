@@ -1,0 +1,29 @@
+{
+  "contract_id": "POOLEGLASS-DESIGN-0.1",
+  "status": "design_targets_not_production_measurements",
+  "production_ready": false,
+  "colors": {
+    "canvas_dark": "#0C0F14",
+    "surface_dark": "#181C22",
+    "canvas_light": "#F5F7F9",
+    "surface_light": "#FFFFFF",
+    "text_on_dark": "#EEF2F5",
+    "secondary_on_dark": "#A4B1BD",
+    "text_on_light": "#18202A",
+    "accent_aqua": "#75D8D2",
+    "optical_rose": "#DDB6C5",
+    "success": "#72C79A",
+    "warning": "#E8C06B",
+    "danger": "#F09090"
+  },
+  "spacing_px": [4, 8, 12, 16, 24, 32, 48],
+  "radii_px": {"control": 6, "item": 8, "dialog": 8},
+  "type_px": {"secondary": [12, 16], "body": [14, 20], "section": [18, 24], "screen_title": [32, 40]},
+  "letter_spacing": 0,
+  "motion_ms": {"response": 120, "surface": 180, "boot_reveal_max": 800, "minimum_boot_delay": 0},
+  "contrast_minimum": {"text": 4.5, "large_text": 3, "non_text": 3, "high_contrast_text": 7},
+  "material_limits": {"backdrop_layers": 2, "blur_radius_logical_px": 24, "cache_mib": 64},
+  "provisional_frame_budget_ms": {"total": 16.67, "material_effects": 3},
+  "fallbacks_required": ["opaque", "high_contrast", "reduced_motion", "software", "independent_recovery"],
+  "production_flag": "FLAG-NATIVE-UI-001"
+}

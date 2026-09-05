@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "scope": "host_only_demo_iso_authoring_not_shipped_on_media",
+  "name": "pycdlib",
+  "version": "1.20.0",
+  "license": "LGPL-2.1-only",
+  "source": "https://github.com/clalancette/pycdlib",
+  "metadata_source": "https://pypi.org/pypi/pycdlib/1.20.0/json",
+  "filename": "pycdlib-1.20.0-py2.py3-none-any.whl",
+  "url": "https://files.pythonhosted.org/packages/d8/2e/624824081e1ceb69bcd2c3b2358d01e8ba7e7c84a0f019bf24e1e822ec01/pycdlib-1.20.0-py2.py3-none-any.whl",
+  "sha256": "CB675959DD6D61E94F02560ED7E9A5D368A3188B5F7F31813BC25A750CFF0863",
+  "byte_count": 228561,
+  "network_required_for_boot": false,
+  "global_installation": false
+}

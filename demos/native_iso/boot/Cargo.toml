@@ -1,0 +1,72 @@
+[package]
+name = "pooleglass-demo-boot"
+version = "0.1.0"
+edition = "2024"
+license-file = "../../../LICENSE"
+publish = false
+autobins = false
+
+[workspace]
+resolver = "3"
+
+[lib]
+name = "pooleboot"
+path = "src/lib.rs"
+
+[[bin]]
+name = "PooleGlassDemo"
+path = "../../../native/boot/src/main.rs"
+test = false
+bench = false
+
+[[example]]
+name = "render"
+path = "examples/render.rs"
+
+[features]
+default = []
+development-transfer = []
+development-trap-returning = ["development-transfer"]
+development-trap-double-fault = ["development-transfer"]
+development-trap-malformed-frame = ["development-transfer"]
+development-cpu-policy = ["development-transfer"]
+development-xstate-policy = ["development-transfer"]
+development-xstate-exception = ["development-transfer"]
+development-privilege-msr-policy = ["development-transfer"]
+development-physical-memory = ["development-transfer"]
+development-virtual-memory = ["development-transfer"]
+development-active-virtual-memory = ["development-transfer"]
+development-interrupt-time = ["development-transfer"]
+development-smp-first-ap = ["development-transfer"]
+development-smp-percpu-runtime = ["development-transfer"]
+development-smp-ipi = ["development-transfer"]
+development-scheduler = ["development-transfer"]
+development-scheduler-preempt = ["development-transfer"]
+development-scheduler-deferred = ["development-transfer"]
+development-scheduler-smp = ["development-transfer"]
+development-scheduler-ap-workers = ["development-transfer"]
+development-scheduler-smp-preempt = ["development-transfer"]
+development-atomics = ["development-transfer"]
+development-locks = ["development-transfer"]
+
+[dependencies]
+pooleboot_base = { package = "pooleboot", path = "../../../native/boot" }
+poole-boot-exit = { path = "../../../native/bootexit" }
+poole-bootload = { path = "../../../native/bootload" }
+poole-boot-config = { path = "../../../native/bootcfg" }
+poole-boot-trust = { path = "../../../native/trust" }
+poole-elf = { path = "../../../native/elf" }
+poole-handoff = { path = "../../../native/handoff" }
+poole-inner-live = { path = "../../../native/inner" }
+poole-kmap = { path = "../../../native/kmap" }
+poole-live-handoff = { path = "../../../native/livehandoff" }
+
+[profile.release]
+codegen-units = 1
+debug = 0
+incremental = false
+lto = false
+opt-level = "s"
+overflow-checks = true
+panic = "abort"
+strip = "symbols"

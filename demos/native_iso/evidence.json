@@ -1,0 +1,182 @@
+{
+  "animation_implemented": false,
+  "claim_boundary": "Local demo build and optical evidence only; not a production gate, signature, second-host result or new kernel feature.",
+  "contract_id": "POOLEOS-NATIVE-DEMO-ISO-1",
+  "cycle": 151,
+  "demo_efi": {
+    "byte_count": 254464,
+    "sha256": "66CBAFE29EED0483D94DB707DCBE17666CCAFAA9127C5C32A4CBB65C1C4CFB23"
+  },
+  "desktop_present": false,
+  "headless_capture_viewer_test": "pass",
+  "inputs": [
+    {
+      "byte_count": 2372,
+      "path": "demos/native_iso/boot/assets/ARTWORK.md",
+      "sha256": "39C4CF3E17D773505C86467B2D195E41EA326220D8D88961D0B1D28A8469C2C7"
+    },
+    {
+      "byte_count": 2240,
+      "path": "demos/native_iso/boot/assets/caption.alpha4",
+      "sha256": "47AB3D3E1C75012813142EB47F9B1A6988D049C355067E3535960F07AF994DD5"
+    },
+    {
+      "byte_count": 36864,
+      "path": "demos/native_iso/boot/assets/emblem.index8",
+      "sha256": "7F2BB604AF93BBA6E24811C0B553FA44833C7135E9AF12B2079C027849ABF663"
+    },
+    {
+      "byte_count": 768,
+      "path": "demos/native_iso/boot/assets/emblem.rgb",
+      "sha256": "ABB68DA4E544C1248D809181E62EF6BA7DC04981822A0DC6C7F901516D1C01FF"
+    },
+    {
+      "byte_count": 844,
+      "path": "demos/native_iso/boot/assets/encoding.json",
+      "sha256": "0F5019F63FFE82388FA844B54FF8D7B3AE725548F0A6CEBF11A47683201ED9A1"
+    },
+    {
+      "byte_count": 5954,
+      "path": "demos/native_iso/boot/assets/FONT-LICENSE.txt",
+      "sha256": "3361D054759A2FC686A2C058BE82DEAF9C2E6FE549BE9004D7935A6C1736315D"
+    },
+    {
+      "byte_count": 1377480,
+      "path": "demos/native_iso/boot/assets/pooleglass-emblem.png",
+      "sha256": "D3CEED562470EFD0D9F726AAC26A188566E16D636B9AB4CE88F5A5FEFE9BC09E"
+    },
+    {
+      "byte_count": 4608,
+      "path": "demos/native_iso/boot/assets/title.alpha4",
+      "sha256": "D9D303E011936630C79C0B24A2F8411B67B2C9A2C7D36016F09DBB4FA59BE307"
+    },
+    {
+      "byte_count": 4120,
+      "path": "demos/native_iso/boot/Cargo.lock",
+      "sha256": "5008C6C6A44F70BA8BE5B0700CFE2947525061EF5EA02791490EE4B8E5D7ACBC"
+    },
+    {
+      "byte_count": 2352,
+      "path": "demos/native_iso/boot/Cargo.toml",
+      "sha256": "9BE8C045347C6499831748863FA62EFBC93200E50E2191A046C167278660B747"
+    },
+    {
+      "byte_count": 651,
+      "path": "demos/native_iso/boot/examples/render.rs",
+      "sha256": "6A842FCF030801B75962B859E072B1883B832007953F33298C9BF4ECF8FC982C"
+    },
+    {
+      "byte_count": 4971,
+      "path": "demos/native_iso/boot/src/lib.rs",
+      "sha256": "601F7D5FFEEA9CFD4AC8ACADC0388897FD3E1EF941DC3AACD3FB2FDDB1E4E6D4"
+    },
+    {
+      "byte_count": 92102,
+      "path": "demos/native_iso/boot-preview.png",
+      "sha256": "13AB9F7C012A9490B55E3E49E42C6580E00D178BEBBF1636367FEDA2974D26B1"
+    },
+    {
+      "byte_count": 2324,
+      "path": "demos/native_iso/bootstrap.py",
+      "sha256": "B2FEEDC77984846E4EE71B390F4CDD2CA1F43AD8F1287220B9BB09F754BE1372"
+    },
+    {
+      "byte_count": 3039,
+      "path": "demos/native_iso/build.py",
+      "sha256": "C1FA7D40C280B0D29AB72ACBEEB4B058C13BA7F775666FF10BDD68C8DC02AC93"
+    },
+    {
+      "byte_count": 2836,
+      "path": "demos/native_iso/build_boot.py",
+      "sha256": "9D0374322201B4A7662B7C7B1F6E87694D4CFC6E402AAE8D68360F9CC4798EDD"
+    },
+    {
+      "byte_count": 2367,
+      "path": "demos/native_iso/encode_assets.py",
+      "sha256": "7C03757D8342D96E48EFA274007355C0F69E2E1836F52C7B3D665B1D44B135DF"
+    },
+    {
+      "byte_count": 393,
+      "path": "demos/native_iso/Launch-PooleOS-Demo.cmd",
+      "sha256": "EF2CE401B2BE7AB00E901DA719A82F7C7FED2AE9056DB5BD2FEDFAC7548A3CD2"
+    },
+    {
+      "byte_count": 4826,
+      "path": "demos/native_iso/launch.py",
+      "sha256": "81B574FA9716A9B7322B71DCAC590283975AFC37D8A9EF8E7F5CCCC2811094C9"
+    },
+    {
+      "byte_count": 9747,
+      "path": "demos/native_iso/package.py",
+      "sha256": "FD5E1372DE487CF0782D0769AF06DD3358CF7F7548C0AAEF11FAF805B591F956"
+    },
+    {
+      "byte_count": 9953,
+      "path": "demos/native_iso/qualify.py",
+      "sha256": "609674CAC3FA1A7143BBBF907E34F978F2B6A578E64EBA1DC6956A9DD5276C28"
+    },
+    {
+      "byte_count": 5489,
+      "path": "demos/native_iso/README.md",
+      "sha256": "2B894D9A693D037E728139F79705ACE8D46145E138E12554CED881C0CADCADAA"
+    },
+    {
+      "byte_count": 1345,
+      "path": "demos/native_iso/README.txt",
+      "sha256": "D4CF557D19E15F603DEE64061571F0A596AC9C2E57A62578C4266A80BFCAF989"
+    },
+    {
+      "byte_count": 3797,
+      "path": "demos/native_iso/record_evidence.py",
+      "sha256": "8BD373C20054747739663EB4CAA3AE1260FC9A673F5080954EFDB8FDFDC31E55"
+    },
+    {
+      "byte_count": 6160,
+      "path": "demos/native_iso/test_demo.py",
+      "sha256": "59D4E8D71B474FDB5154EF821D866084E8485C5441426229F3FB694447C2D34B"
+    },
+    {
+      "byte_count": 670,
+      "path": "demos/native_iso/toolchain.json",
+      "sha256": "E98DBE9EAED6247B13C60DA922682E8F7981860EA2370FC7FE19DA942E1F7741"
+    }
+  ],
+  "iso_bytes": 66115584,
+  "iso_sha256": "3533965B0DFEA0BFC55399929A9770979B50E4077E77201A68B8331D76570378",
+  "kernel": {
+    "byte_count": 513680,
+    "sha256": "9029AEE51A4D557EF5B29945985E4A1F07C67DDE9C8C367C80BD1B9EDD9D409E"
+  },
+  "local_demo_tests": 24,
+  "native_source_commit": "73cfdb1a903c73f5e20c4b4cc78ccf9cab150d78",
+  "optical_runs": [
+    {
+      "exact_pixel_oracle_match": true,
+      "frame_sha256": "5FB7F75E65F69C22A763A7F27B694178E514400E72D65F9729AA879A2F49F161",
+      "marker_count": 35,
+      "marker_sha256": "E69BD6B8E1CFEA0D862C23E3BF3C075BCBF6D18D15A1D0E09E4762963CE2F534",
+      "size": [
+        1280,
+        800
+      ]
+    },
+    {
+      "exact_pixel_oracle_match": true,
+      "frame_sha256": "5FB7F75E65F69C22A763A7F27B694178E514400E72D65F9729AA879A2F49F161",
+      "marker_count": 35,
+      "marker_sha256": "E69BD6B8E1CFEA0D862C23E3BF3C075BCBF6D18D15A1D0E09E4762963CE2F534",
+      "size": [
+        1280,
+        800
+      ]
+    }
+  ],
+  "physical_hardware_qualified": false,
+  "production_ready": false,
+  "qemu_sdl_display": "disabled_after_host_crash_root_cause_unresolved",
+  "rust_renderer_tests": 4,
+  "signed": false,
+  "status": "pass_demo_only_single_host",
+  "test_log_sha256": "1BCEF3D0F12291001D4A75C6F75864CF5546BA9AACCDF90D45370F829176B4A0",
+  "viewer_log_sha256": "9EE12C36D5BBAA7C05934B95A271C05542A6C75AFE453BA9700A7448E65505CB"
+}
