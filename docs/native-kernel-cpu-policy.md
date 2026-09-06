@@ -43,6 +43,18 @@ The qualified Tier 0 observation is `AuthenticAMD`, family 15, model 107, steppi
 
 ## Claim boundary
 
+Cycle 160 strengthens recorded-receipt validation under
+`ADD-N36-RECEIPT-COVERAGE-001`. Two declared runs or equality flags are not
+enough: require two distinct expected run IDs, reparse each complete marker
+sequence, recompute its digest, match its recorded summary and CPU observation,
+validate handoff transfer fields, cross-check the revalidation summary against
+guest markers, and compare the actual recorded marker, handoff and frame
+summaries. Missing, duplicated and contradictory evidence must reject. The
+reported CPU identity, widths, read count and zero-effect summary must agree.
+These checks prove internal consistency only, not fresh execution, signature
+authenticity, raw-frame availability, independent builders or target hardware.
+The broader cross-profile N36 evidence review remains open.
+
 The pinned `qemu64` model is intentionally limited and QEMU does not recommend it as an optimal or secure production CPU model. Exact two-run Tier 0 agreement therefore tests determinism and policy plumbing, not the AMD Ryzen 7 9800X3D target.
 
 Target family/model/stepping acceptance, a public Granite Ridge revision guide, microcode revision policy, errata mitigations, AP-local discovery, x87/SSE/AVX/XSAVE context ownership, dynamic state transitions, target firmware, and physical-hardware measurements remain open. The existing sanitized Windows Tier 1 inventory is planning evidence only and is not consumed as native PKCPU1 qualification. No part of this receipt authorizes signing, publication, production promotion, firmware mutation, driver loading, or physical-media writes.
