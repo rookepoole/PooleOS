@@ -8,7 +8,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from runtime import native_kernel_transfer
+from runtime import native_kernel_transfer, native_pooleboot
 from runtime.schema_validation import validate_json
 
 
@@ -58,6 +58,7 @@ IMPLEMENTATION_INPUTS = (
     "native/kernel/src/main.rs",
     "runtime/native_kernel_cpu_policy.py",
     "runtime/native_kernel_transfer.py",
+    "runtime/native_pooleboot.py",
     "tools/qualify_native_kernel_cpu_policy.py",
     "tests/test_native_kernel_cpu_policy.py",
     "docs/native-kernel-cpu-policy.md",
@@ -253,6 +254,78 @@ def contract_errors(contract: dict[str, Any]) -> list[str]:
     return errors
 
 
+def recorded_execution_errors(execution: Any) -> list[str]:
+    """Check recorded consistency; fresh execution and authentication remain separate."""
+    if not isinstance(execution, dict):
+        return ["PKCPU1 recorded execution is not an object"]
+    errors: list[str] = []
+    if (
+        type(execution.get("run_count")) is not int
+        or execution.get("run_count") != 2
+        or any(execution.get(key) is not True for key in (
+            "exact_marker_match", "exact_screenshot_match", "exact_pbp1_match"
+        ))
+    ):
+        errors.append("PKCPU1 recorded two-run metadata changed")
+    runs = execution.get("runs")
+    if (
+        not isinstance(runs, list)
+        or len(runs) != 2
+        or any(not isinstance(run, dict) for run in runs)
+        or [run.get("run_id") for run in runs] != ["cpu-policy-run-1", "cpu-policy-run-2"]
+    ):
+        return [*errors, "PKCPU1 recorded run coverage changed"]
+    for run in runs:
+        try:
+            frame = run["screenshot"]
+            if (
+                not isinstance(frame, dict)
+                or frame.get("nonblank") is not True
+                or not isinstance(frame.get("sha256"), str)
+                or re.fullmatch(r"[0-9A-F]{64}", frame["sha256"]) is None
+            ):
+                raise KernelCpuPolicyError("recorded frame is missing or malformed")
+            markers = run["markers"]
+            if not isinstance(markers, list) or any(not isinstance(item, str) for item in markers):
+                raise KernelCpuPolicyError("recorded markers are not a string list")
+            parsed = validate_markers(markers)
+            if run.get("marker_summary") != parsed:
+                raise KernelCpuPolicyError("recorded summary differs from parsed markers")
+            if run.get("marker_sha256") != sha256_bytes(native_pooleboot.canonical_json_bytes(markers)):
+                raise KernelCpuPolicyError("recorded digest differs from exact markers")
+            observation = {key: parsed[key] for key in (
+                "discovery", "topology", "features", "xsave", "state", "result"
+            )}
+            if execution.get("observation") != observation:
+                raise KernelCpuPolicyError("recorded CPU observation differs from guest markers")
+            transcript = run["pbp1_transcript"]
+            if not isinstance(transcript, dict) or not isinstance(transcript.get("core"), dict):
+                raise KernelCpuPolicyError("recorded handoff or core is not an object")
+            prefix = parsed["transfer_prefix"]
+            binding = native_kernel_transfer.validate_transcript_binding(prefix, transcript)
+            if run.get("transcript_binding") != binding:
+                raise KernelCpuPolicyError("recorded handoff binding changed")
+            oracle = run["independent_kernel_revalidation"]
+            if (
+                not isinstance(oracle, dict)
+                or oracle.get("contract_id") != "PKREVAL1"
+                or oracle.get("guest_host_exact_match") is not True
+                or any(oracle.get(key) != value for key, value in prefix["kernel_revalidation"].items())
+            ):
+                raise KernelCpuPolicyError("recorded revalidation differs from guest markers")
+            if any(run.get(key) is not True for key in (
+                "serial_debugcon_exact_match", "pbp1_serial_debugcon_exact_match"
+            )):
+                raise KernelCpuPolicyError("recorded dual-channel agreement changed")
+        except (KeyError, TypeError, ValueError) as error:
+            errors.append(f"PKCPU1 {run['run_id']} invalid recorded evidence: {error}")
+    if any(runs[0].get(key) != runs[1].get(key) for key in (
+        "markers", "pbp1_transcript", "screenshot"
+    )):
+        errors.append("PKCPU1 recorded two-run equality changed")
+    return errors
+
+
 def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     schema = read_json(root / SCHEMA_RELATIVE)
     errors = [f"schema {item.path}: {item.message}" for item in validate_json(readiness, schema)]
@@ -261,11 +334,8 @@ def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     if readiness.get("inputs") != expected_inputs(root):
         errors.append("PKCPU1 readiness input bindings are stale")
     execution = readiness.get("execution", {})
-    if not isinstance(execution, dict) or tuple(
-        execution.get(key)
-        for key in ("run_count", "exact_marker_match", "exact_screenshot_match", "exact_pbp1_match")
-    ) != (2, True, True, True):
-        errors.append("PKCPU1 two-run evidence changed")
+    execution_errors = recorded_execution_errors(execution)
+    errors.extend(execution_errors)
     controls = readiness.get("negative_controls", [])
     if (
         not isinstance(controls, list)
@@ -286,6 +356,20 @@ def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
         )
     ) != (2, MARKER_COUNT, len(NEGATIVE_CONTROL_IDS), 0, 0, 0):
         errors.append("PKCPU1 summary changed")
+    if not execution_errors and isinstance(summary, dict):
+        observation = execution["observation"]
+        discovery = observation["discovery"]
+        derived = {
+            **{f"cpuid_{key}": discovery[key] for key in ("vendor", "family", "model", "stepping")},
+            "physical_width": discovery["physical_width"],
+            "linear_width": discovery["linear_width"],
+            "msr_read_count": observation["state"]["msr_read_mask"].bit_count(),
+            "signature_verifications": 0,
+            "actions_authorized": 0,
+            "firmware_calls_after_exit": 0,
+        }
+        if any(summary.get(key) != value for key, value in derived.items()):
+            errors.append("PKCPU1 summary differs from recorded CPU evidence")
     if readiness.get("claims") != expected_claims() or readiness.get("non_claims") != contract.get("non_claims"):
         errors.append("PKCPU1 readiness claim boundary changed")
     if (

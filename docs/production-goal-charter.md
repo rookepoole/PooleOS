@@ -1,15 +1,67 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-09-05
+Status date: 2026-09-06
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 157
+Last roadmap reconciliation: PooleOS Cycle 160
 
-Cycle 157 completes current-source replay from N8-IRQ-001 through the reopened
+Cycle 160 completes N7-TRAP-001 prerequisite replay for the Cycle 158 kernel:
+five live trap/CPU/xstate/MSR profiles pass fourteen fresh headless boots,
+225 marker controls and 41 focused Python tests. One expected TCG exception
+non-delivery diagnostic is recorded separately. All twelve selected N5/N7
+checks pass; fourteen memory/IRQ/SMP/scheduler/atomic/lock checks remain stale.
+PKCPU1 recorded-evidence validation now rejects missing or contradictory runs,
+with 28 receipt and eight summary/gate mutation cases. This is consistency
+validation, not authentication; the broader N36 audit remains open.
+No kernel Rust or demo bytes change. The preserved full Cycle 158 audit is
+still 80/105 and Doctor684/708, not a new aggregate pass. No phase, flag or
+production gate closes. N0 custody and N12.3 active-root, execution-stack and
+CPU-retirement ownership remain open. Next is N9-PMM-ACPI-CONSUMER-001, then
+VM, IRQ/SMP, scheduler, atomics and locks before full exact-final qualification
+and any main merge. PooleGlyph Phase 65, the owner's modified report, all
+57 ADD requirements and the complete locked checklist remain unchanged.
+The partial checkpoint is already backed up in PR #74 at 4f3b4f6; this
+reconciliation remains pre-production and does not promote the frozen demo.
+
+Historical Cycle 159 requalifies the changed kernel's PSYM1, PPOL1, PKLOAD6, PooleBoot,
+PKREVAL1 and PKXFER1 dependencies under N5-SYMBOLS-SEMANTICS-001. Six fresh
+headless QEMU/OVMF boots include two actual PooleKernel entries; all nine
+retained files agree with independent host reconstruction. All six selected
+current-source gates and 68 focused Python tests pass. A stale build-ID
+regression rejects the previous kernel identity. The native kernel bytes and
+frozen demo are unchanged; no phase or flag closes and no N5 exit is claimed.
+Nineteen downstream native checks remain stale. The preserved full Cycle 158
+audit still records 80/105 and Doctor684/708, not a new current aggregate pass.
+Next replay N7-TRAP-001, then CPU, memory, IRQ, SMP, scheduler, atomics and locks
+before the full exact-candidate suite and any main merge. N12.3 active-root,
+execution-stack and CPU-retirement ownership and N0 custody remain open.
+PooleGlyph Phase 65/report and the complete locked checklist remain unchanged.
+The source is backed up on the agent branch with draft PR #74; backup is not
+release or production promotion.
+
+Historical Cycle 158 implements mandatory physical retention for inactive scheduler-task
+page tables and all bound data frames, including aliases and pending unmaps.
+All-or-nothing group acquisition/release preserves the full owner on late
+failure. Twenty-four task-lifetime tests, nineteen pool tests, 219 kernel
+regressions including thirteen retention cases, and seven compile-fail tests
+cover the bounded host contract. Active roots, execution stacks and live CPU
+quiescence are still open under N12.3 and its existing reclamation flag.
+The new build identity changes kernel bytes; Cycle 157's merged canonical pass
+is historical, not current-candidate qualification. Replay dependencies before
+the next main merge. No phase or flag closes, and the frozen demo is unchanged.
+The canonical audit fails 25/105 checks (24 stale native receipts plus the
+aggregate check); Doctor passes 684/708. This is recorded failed pre-closeout
+evidence, not a qualified current candidate. All 29 focused Python tests pass.
+N0 governance custody remains independently blocked. PooleGlyph Phase 65,
+the owner's modified report and the complete locked checklist are preserved.
+Continue N12-CONCURRENCY-RECLAMATION-001, with changed-image prerequisite
+qualification first, then active-root and execution-stack lifecycle ownership.
+
+Historical Cycle 157 completes current-source replay from N8-IRQ-001 through the reopened
 N12-CONCURRENCY-LOCKS-001 dependency: twelve fresh profile receipts contain
 24 headless QEMU/OVMF boots, 421 control groups and 1,881 rejected cases.
 All 26 selected N5/N7/memory/IRQ/SMP/scheduler/atomic/lock gates pass. The

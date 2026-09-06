@@ -4,7 +4,36 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
-Cycle 157 completes current-kernel interrupt, SMP, scheduler, atomic and lock
+Cycle 160 completes current-kernel trap, CPU, x87/SSE and read-only MSR replay:
+fourteen fresh virtual boots, 225 marker controls and 41 focused tests pass.
+The CPU receipt validator now rejects missing and contradictory recorded
+evidence. All twelve selected boot-chain/N7 checks pass; fourteen downstream
+memory/SMP/scheduler/lock checks and the full candidate suite remain pending.
+Physical-memory qualification is next. Source is backed up in draft PR #74;
+main and the frozen demo ISO remain unchanged. PooleOS is pre-production.
+[Checkpoint details](docs/checkpoints/cycle160-cpu-evidence.md).
+
+Historical Cycle 159 requalifies the updated kernel's boot chain: six fresh headless
+virtual boots include two actual PooleKernel entries and independent checking
+of all nine retained files. All six selected boot-chain gates and 68 focused
+tests pass. Nineteen downstream native checks and the full qualification replay
+remain pending, starting with N7 traps. The latest full audit is still the
+preserved failed Cycle 158 result, not a new aggregate pass. Source checkpoints
+are on GitHub with draft PR #74; the demo ISO is unchanged and PooleOS remains
+pre-production. [Checkpoint details](docs/checkpoints/cycle159-cloud-backup.md).
+
+Historical Cycle 158 makes physical-page retention mandatory for inactive scheduler-task
+page tables and bound data frames, including aliases and pending unmaps.
+Group failure preserves every resource for retry. The bounded host harness
+covers 24 lifetime tests, 19 pool tests, 219 kernel tests and seven compile-fail
+checks. Active roots, execution stacks and live CPU retirement remain open.
+The new kernel requires fresh dependency qualification before merging; main
+already contains the qualified Cycles 153-157 checkpoint through PR #73.
+The separate demo ISO is unchanged. PooleOS remains pre-production.
+The full new-candidate audit fails 25/105 checks because downstream receipts
+are stale and the aggregate suite is not passing; 29 focused Python tests pass.
+
+Historical Cycle 157 completes current-kernel interrupt, SMP, scheduler, atomic and lock
 replay: twelve refreshed profiles, 24 final virtual boots and 1,881 negative
 cases pass. All 26 selected native dependency gates pass. Invalid IRQ/SMP
 receipts now produce failed checks instead of error-formatting exceptions.

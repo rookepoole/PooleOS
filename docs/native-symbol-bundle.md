@@ -2,6 +2,12 @@
 
 Status: candidate pre-ABI, single-host qualified, unsigned, non-promoting.
 
+Cycle 159 re-derives the identities below from a fresh split-debug build of
+the unchanged Cycle 158 kernel. Qualification must rebuild independently and
+match the exact canonical, loaded, debug, build-ID and manifest bytes. This
+replays N5-SYMBOLS-SEMANTICS-001 (N5.6/N5.9); it does not enable consumption or
+inherit the prior kernel's live evidence. Earlier identities remain in Git.
+
 PSYM1 is the bounded public diagnostic index for one exact PooleKernel image. It is not an executable table, dynamic linker interface, syscall ABI, kernel export namespace, capability grant, or substitute for a private split-debug file. The current development bundle cannot be consumed because all production signature preconditions are false.
 
 ## Scope
@@ -45,7 +51,7 @@ Every segment and symbol address is an offset from the loaded image base. The bu
 - Preferred base: `0xFFFFFFFF80000000`
 - Window end, exclusive: `0xFFFFFFFFC0000000`
 - Slide alignment: 2 MiB
-- Current image bytes: `0x7C000`
+- Current image bytes: `0x90000`
 - Current entry offset: `0xA000`
 
 Lookup rejects noncanonical x86-64 addresses, unaligned bases, bases outside the window, and addresses outside the image. A hit returns symbol ID, name, intra-symbol offset, and search-step count. A valid gap returns `unknown`; it never falls back to the preceding symbol.
@@ -56,11 +62,11 @@ The canonical development bundle binds these exact SHA-256 identities:
 
 | Identity | SHA-256 |
 | --- | --- |
-| Canonical stripped PKELF1 | `9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168` |
-| Preferred loaded image | `A8A26DF55F902FB8DB7F07C3B953703734AA7EC2C410C1548B3297CECFA6853A` |
-| Build ID text | `4E5AC7AB5D58D008BAB3379AE41EB4B22543001FAA843E7C529195BD3E4909CC` |
-| Full split-debug ELF | `AF7A1AD3A3111AEF73E9E7737EDAD156E12F626DA6550BC9EBD01507F08334C3` |
-| `native/kernel/manifest.pkm` | `32FFBCF9EADF8DDE80582F8EB7864C7791A8A0B3BE076F0547F145E4A7603678` |
+| Canonical stripped PKELF1 | `18EDADA10E141DBADA8C95C1C0B3454696122C5E96C528F45E0AECE6ADD2F07D` |
+| Preferred loaded image | `0F04D39C2F9E9D06FD732A72D1991E6EC03514ECDF8295C246DAE91DC0A88653` |
+| Build ID text | `0C724404C83C1760B18F1B37DF42A0F7551AF234EA421A0753447E4E21FF02E2` |
+| Full split-debug ELF | `424FA13AD55F709C3C5F30E3A246B0F694F4EECD688F598F5B7214BE2FD137E5` |
+| `native/kernel/manifest.pkm` | `E9FAA51A5273D96872AC8F96635806217D86CC8AE152D002FA5DAF8CA5D319DF` |
 
 The qualification builds the full debug product twice and requires identical bytes. Both debug builds canonicalize to the exact stripped PKELF1 bytes. A separate release build must have no `.symtab` and no `.debug*` sections and must canonicalize to those same bytes.
 
@@ -73,8 +79,8 @@ Only these real global default-visible functions are selected today:
 | Symbol | Offset | Bytes | Policy |
 | --- | ---: | ---: | --- |
 | `poole_kernel_entry` | `0xA000` | 71 | entry, executable, public diagnostic |
-| `poole_kernel_emergency_panic` | `0x231A7` | 198 | panic-safe, executable, public diagnostic |
-| `poole_kernel_rust_entry` | `0x2326D` | 49,654 | executable, public diagnostic |
+| `poole_kernel_emergency_panic` | `0x294D3` | 198 | panic-safe, executable, public diagnostic |
+| `poole_kernel_rust_entry` | `0x29599` | 70,594 | executable, public diagnostic |
 
 ## Name And Privacy Policy
 

@@ -1,8 +1,8 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-09-05
-Plan version: 2.63.0-native-dependency-replay
-Roadmap cycle: PooleOS Cycle 157
+Status date: 2026-09-06
+Plan version: 2.66.0-native-cpu-evidence-replay
+Roadmap cycle: PooleOS Cycle 160
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
@@ -28,7 +28,125 @@ registration. The governance flag and all production boundaries remain open.
 
 ## 1. Architecture Decision
 
-Cycle 157 completes current-source replay of `N8-IRQ-001`, first-AP, per-CPU
+Cycle 160 completes the N7-TRAP-001 dependency replay at N7.5/N7.6, with
+CPU/xstate/MSR prerequisites at N7.1/N7.3/N7.4, for the unchanged Cycle 158
+mandatory-retention kernel. ADD-N36-RECEIPT-COVERAGE-001 and its existing open
+flag cover the repaired CPU receipt validator; no added requirement is waived.
+
+- PKTRAP1: three scenarios, six fresh boots and 51 marker controls.
+- PKCPU1: two fresh boots and 41 marker controls after actual validator repair.
+- PKXSTATE1: two fresh boots, 43 controls and bounded x87/SSE state ownership.
+- PKXEXC1: two WHPX boots, 43 controls, three delivered exceptions and two
+  recoveries; the expected TCG non-delivery diagnostic is separate evidence.
+- PKMSR1: two fresh boots, 47 controls, eleven support-gated MSR reads and
+  source/linked-code checks with no writes in the selected read-only profile.
+
+Fourteen successful boots and 225 marker controls are from these five final
+N7 receipts only; the initial CPU baseline and prior N5 boots are not counted
+again. Every live qualifier retains the 219-test kernel host baseline. All
+41 N7 Python tests and twelve selected current-source N5/N7 gates pass.
+
+The CPU precheck actually accepted four corruptions of a valid fresh receipt:
+empty run records, duplicate run ID, altered observation and altered digest.
+The repair reparses markers, checks run coverage and identities, binds recorded
+observations/handoff/revalidation, and derives the summary. Twenty-eight
+recorded-evidence mutations and eight summary/gate cases now reject. This
+proves recorded consistency only; other profiles, authentication, independent
+builders and physical execution remain open under N36.
+
+Fourteen downstream native checks still reject stale receipts. Next is
+N9-PMM-ACPI-CONSUMER-001, then VM, IRQ/SMP, scheduler, atomics and locks before
+the full exact-candidate suite and main merge. The actual full Cycle 158 audit
+remains failed at 80/105; the new focused projection does not replace it.
+N12.3 active-root/execution-stack ownership follows prerequisite replay.
+N0 custody, N36 review, all 40 phases/301 subphases, 57 ADD requirements,
+94 flags (35 open), 20 gaps and locked checklist bindings remain intact.
+No native Rust, demo ISO, PooleGlyph, phase/flag closure or production change.
+The partial work was cloud-backed at 4f3b4f6 in draft PR #74; the full current
+record is [Cycle 160 checkpoint](checkpoints/cycle160-cpu-evidence.md).
+
+Historical Cycle 159 completes current-source N5 boot-chain replay for the unchanged
+Cycle 158 mandatory-retention kernel. This follows N5-SYMBOLS-SEMANTICS-001 at
+N5.6/N5.9 through the N5.5/N5.8 loader and N5-KERNEL-TRANSFER-001 boundary;
+ADD-BOOT-010, ADD-BOOT-011 and ADD-BOOT-012 retain their existing scope.
+No new requirement or flag is needed for this dependency replay.
+
+- PSYM1: two identical split-debug builds, independent stripped correspondence,
+  158 controls and 32,768 parser/lookup comparisons.
+- PPOL1: rejected stale symbol-dependent inputs, regenerated vectors, 116
+  controls and 32,768 differential comparisons with zero mismatch.
+- PKLOAD6: 304 host tests, two clean kernel/boot/media builds, two fresh boots,
+  25 ordered markers and 155 controls with exact PBP1/GOP/oracle agreement.
+- PooleBoot: eight host tests and two independent fresh boots, with the same
+  155 controls and mandatory default stop before kernel transfer.
+- PKREVAL1: 219 kernel host tests, both native targets, 36 controls and 32,768
+  rejected post-loader mutations spanning all nine retained roles.
+- PKXFER1: two actual kernel entries, 30 ordered markers and 58 controls;
+  all nine retained files match the independent host oracle before unsigned
+  terminal denial, with zero authority, actions, state writes or firmware calls.
+
+All six selected current-source gates and 68 focused Python tests pass. The
+added previous-build-ID subcase rejects the old identity without changing
+suite discovery count. Exact kernel SHA-256 remains
+`18EDADA10E141DBADA8C95C1C0B3454696122C5E96C528F45E0AECE6ADD2F07D`.
+The six-file retained-set SHA-256 is
+`7B68DDA305B46690E02CA7597633F16ADBDAAF7607759253F95EB919F2493B9F`.
+Runtime/gate bindings were updated only after actual measurement and replay.
+The initial transfer test run rejected its stale receipt; fresh qualification
+then passed. No stale receipt was relabeled or inherited from another kernel.
+
+Nineteen N7-through-N12 native checks still reject stale receipts. The focused
+projection is separate from the preserved failed full Cycle 158 audit below;
+it is not a 105-check or Doctor replay. Next is N7-TRAP-001, then CPU/xstate/MSR,
+PMM/VM, IRQ/SMP, scheduler/atomics/locks and the complete exact-candidate suite.
+Only after prerequisite replay should N12.3 active-root and execution-stack
+ownership proceed. N36 cross-profile evidence review and N0 custody stay open.
+Counts remain 40 phases, 301 subphases, 57 ADD requirements, 94 flags (35 open),
+20 gaps and complete locked checklist coverage. No phase or flag closes. The
+frozen demo, kernel Rust implementation, PooleGlyph and production boundaries
+are unchanged. Draft PR #74 preserves the cloud checkpoint without merging.
+
+Historical Cycle 158 implements mandatory inactive task-page ownership in original
+`no_std` PooleKernel code under N12.3, source section 031.3,
+`ADD-N12-CONCURRENCY-RECLAMATION-001` and its existing open flag.
+`Resources::new` must now retain the actual PKVM1 root allocation and every
+bound frame before scheduler admission, including aliased and pending-unmap
+frames. Atomic-as-a-group admission/release validates all members before
+metadata changes. Late failures return the complete original owner, and
+dropping ownership never frees retained pages. The group is serialized by
+exclusive PMM access; it is not an interrupt-safe or power-loss transaction.
+
+Qualification covers 24 task-lifetime tests and 19 pool tests in both debug and
+optimized host profiles, 219 kernel regressions including 13 retention tests,
+seven compile-fail checks, host/freestanding Clippy and the identified linked
+kernel. The initial qualifier correctly rejected the old linked digest. The
+new image remains 517,784 canonical bytes/144 pages with 1,305 relocations and
+build ID `PKBUILD1-CYCLE158-N12-RETAIN-V002-0000000001`. Its complete dependency
+and aggregate replay is pending; the prior 105/105 gate belongs to Cycle 157,
+merged as main `4ad5b11` through PR #73. New work stays on an agent branch until
+qualified. No new virtual or physical boot, frozen demo update, production
+promotion or phase/flag closure is claimed.
+
+The actual canonical audit, with runtime and both bundle/replay inputs, fails
+25/105 checks: 24 stale native receipts and the aggregate Doctor/test check.
+Doctor passes 684/708. Receipt SHA-256 is
+`BB43C8A08A390893B48CDB8259752AC431D9A9AADBDDA63A2227EA347697DE4B`.
+This is pre-closeout evidence for checkpoint `bc5a1e4`, not a final passing
+candidate. The 29 focused Python tests pass, and the source/schema/hash/count
+replay preserves all locked requirements. No stale receipt has been refreshed
+without executing its qualifier. The prior merged passing gate is preserved.
+
+Next substeps, in order: qualify the identified image and replay affected N5
+boot-chain dependencies; bind active PKVM3 roots and execution stacks to real
+scheduler context ownership; join pins to acknowledged alias invalidation and
+CPU shutdown; then qualify an independent retirement oracle and live missing-ACK,
+offline, owner-death, pressure and rollback cases. The inactive ownership
+increment does not close N12.3. Arbitrary payload allocations and raw alias
+writes are outside it. All 57 ADD requirements, 94 flags (35 open), 20 gaps,
+40 phases/301 subphases and 8,996 checklist requirements remain represented.
+PooleGlyph Phase 65/report and N0 custody boundaries are unchanged.
+
+Historical Cycle 157 completes current-source replay of `N8-IRQ-001`, first-AP, per-CPU
 runtime, IPI, PKSCHED1-6, PKATOM1 and PKLOCK1. The twelve final receipts contain
 24 fresh headless QEMU/OVMF boots, 421 negative-control groups and 1,881 rejected
 cases. Each rebuilds the same 517,784-byte, 144-page retention kernel with 214

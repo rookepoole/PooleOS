@@ -468,7 +468,7 @@ def check_native_reclamation_core_readiness() -> CheckResult:
         return CheckResult("native-reclamation-core", False, str(error))
     return CheckResult(
         "native-reclamation-core", True,
-        "PKRECLAIM1/PKLIFE1: 19 core + 19 lifecycle tests in two host profiles; source-bound; live integration pending",
+        "PKRECLAIM1/PKLIFE1: 19 core + 24 lifecycle tests in two host profiles; mandatory inactive table/frame retention; 219 kernel tests; live integration pending",
     )
 
 
