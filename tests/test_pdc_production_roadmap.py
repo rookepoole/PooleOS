@@ -136,7 +136,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 159)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 160)
         self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 917)
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
@@ -170,17 +170,22 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(replay["both_bundle_and_replay_inputs_supplied"])
         self.assertFalse(replay["production_ready"])
         focused = current["current_focused_source_projection"]
-        self.assertEqual(focused["cycle"], 159)
-        self.assertEqual(focused["passed_checks"], 6)
-        self.assertEqual(focused["total_checks"], 6)
-        self.assertEqual(focused["pending_downstream_native_checks"], 19)
-        self.assertEqual(focused["final_receipt_fresh_qemu_runs"], 6)
+        self.assertEqual(focused["cycle"], 160)
+        self.assertEqual(focused["passed_checks"], 12)
+        self.assertEqual(focused["total_checks"], 12)
+        self.assertEqual(focused["pending_downstream_native_checks"], 14)
+        self.assertEqual(focused["final_receipt_fresh_qemu_runs"], 14)
+        self.assertEqual(focused["fresh_qemu_run_count_scope"], "five_requalified_N7_profiles_in_cycle160")
+        self.assertEqual(focused["expected_tcg_limitation_probes"], 1)
+        self.assertEqual(focused["negative_control_groups"], 225)
         self.assertEqual(focused["kernel_host_tests"], 219)
         self.assertEqual(focused["loader_host_tests"], 304)
-        self.assertEqual(focused["focused_python_test_count"], 68)
+        self.assertEqual(focused["cpu_recorded_evidence_controls"], 28)
+        self.assertEqual(focused["cpu_summary_gate_controls"], 8)
+        self.assertEqual(focused["focused_python_test_count"], 41)
         self.assertFalse(focused["canonical_full_replay_performed"])
         self.assertFalse(focused["production_ready"])
-        self.assertEqual(focused["next_dependency_move_id"], "N7-TRAP-001")
+        self.assertEqual(focused["next_dependency_move_id"], "N9-PMM-ACPI-CONSUMER-001")
         projection = current["historical_focused_source_projection"]
         self.assertEqual(projection["cycle"], 157)
         self.assertEqual(projection["passed_checks"], 26)
@@ -222,10 +227,10 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N5-SYMBOLS-SEMANTICS-001")
+        self.assertEqual(protocol["selected_move_id"], "N7-TRAP-001")
         self.assertEqual(
             protocol["owner_independent_next_move_id"],
-            "N7-TRAP-001",
+            "N9-PMM-ACPI-CONSUMER-001",
         )
         self.assertIn("runs/hardware_target_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_tier0_readiness.json", protocol["required_records"])

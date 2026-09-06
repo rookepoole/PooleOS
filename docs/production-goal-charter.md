@@ -1,15 +1,33 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-09-05
+Status date: 2026-09-06
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 159
+Last roadmap reconciliation: PooleOS Cycle 160
 
-Cycle 159 requalifies the changed kernel's PSYM1, PPOL1, PKLOAD6, PooleBoot,
+Cycle 160 completes N7-TRAP-001 prerequisite replay for the Cycle 158 kernel:
+five live trap/CPU/xstate/MSR profiles pass fourteen fresh headless boots,
+225 marker controls and 41 focused Python tests. One expected TCG exception
+non-delivery diagnostic is recorded separately. All twelve selected N5/N7
+checks pass; fourteen memory/IRQ/SMP/scheduler/atomic/lock checks remain stale.
+PKCPU1 recorded-evidence validation now rejects missing or contradictory runs,
+with 28 receipt and eight summary/gate mutation cases. This is consistency
+validation, not authentication; the broader N36 audit remains open.
+No kernel Rust or demo bytes change. The preserved full Cycle 158 audit is
+still 80/105 and Doctor684/708, not a new aggregate pass. No phase, flag or
+production gate closes. N0 custody and N12.3 active-root, execution-stack and
+CPU-retirement ownership remain open. Next is N9-PMM-ACPI-CONSUMER-001, then
+VM, IRQ/SMP, scheduler, atomics and locks before full exact-final qualification
+and any main merge. PooleGlyph Phase 65, the owner's modified report, all
+57 ADD requirements and the complete locked checklist remain unchanged.
+The partial checkpoint is already backed up in PR #74 at 4f3b4f6; this
+reconciliation remains pre-production and does not promote the frozen demo.
+
+Historical Cycle 159 requalifies the changed kernel's PSYM1, PPOL1, PKLOAD6, PooleBoot,
 PKREVAL1 and PKXFER1 dependencies under N5-SYMBOLS-SEMANTICS-001. Six fresh
 headless QEMU/OVMF boots include two actual PooleKernel entries; all nine
 retained files agree with independent host reconstruction. All six selected

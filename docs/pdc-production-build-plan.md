@@ -1,8 +1,8 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-09-05
-Plan version: 2.65.0-native-boot-chain-replay
-Roadmap cycle: PooleOS Cycle 159
+Status date: 2026-09-06
+Plan version: 2.66.0-native-cpu-evidence-replay
+Roadmap cycle: PooleOS Cycle 160
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
@@ -28,7 +28,44 @@ registration. The governance flag and all production boundaries remain open.
 
 ## 1. Architecture Decision
 
-Cycle 159 completes current-source N5 boot-chain replay for the unchanged
+Cycle 160 completes the N7-TRAP-001 dependency replay at N7.5/N7.6, with
+CPU/xstate/MSR prerequisites at N7.1/N7.3/N7.4, for the unchanged Cycle 158
+mandatory-retention kernel. ADD-N36-RECEIPT-COVERAGE-001 and its existing open
+flag cover the repaired CPU receipt validator; no added requirement is waived.
+
+- PKTRAP1: three scenarios, six fresh boots and 51 marker controls.
+- PKCPU1: two fresh boots and 41 marker controls after actual validator repair.
+- PKXSTATE1: two fresh boots, 43 controls and bounded x87/SSE state ownership.
+- PKXEXC1: two WHPX boots, 43 controls, three delivered exceptions and two
+  recoveries; the expected TCG non-delivery diagnostic is separate evidence.
+- PKMSR1: two fresh boots, 47 controls, eleven support-gated MSR reads and
+  source/linked-code checks with no writes in the selected read-only profile.
+
+Fourteen successful boots and 225 marker controls are from these five final
+N7 receipts only; the initial CPU baseline and prior N5 boots are not counted
+again. Every live qualifier retains the 219-test kernel host baseline. All
+41 N7 Python tests and twelve selected current-source N5/N7 gates pass.
+
+The CPU precheck actually accepted four corruptions of a valid fresh receipt:
+empty run records, duplicate run ID, altered observation and altered digest.
+The repair reparses markers, checks run coverage and identities, binds recorded
+observations/handoff/revalidation, and derives the summary. Twenty-eight
+recorded-evidence mutations and eight summary/gate cases now reject. This
+proves recorded consistency only; other profiles, authentication, independent
+builders and physical execution remain open under N36.
+
+Fourteen downstream native checks still reject stale receipts. Next is
+N9-PMM-ACPI-CONSUMER-001, then VM, IRQ/SMP, scheduler, atomics and locks before
+the full exact-candidate suite and main merge. The actual full Cycle 158 audit
+remains failed at 80/105; the new focused projection does not replace it.
+N12.3 active-root/execution-stack ownership follows prerequisite replay.
+N0 custody, N36 review, all 40 phases/301 subphases, 57 ADD requirements,
+94 flags (35 open), 20 gaps and locked checklist bindings remain intact.
+No native Rust, demo ISO, PooleGlyph, phase/flag closure or production change.
+The partial work was cloud-backed at 4f3b4f6 in draft PR #74; the full current
+record is [Cycle 160 checkpoint](checkpoints/cycle160-cpu-evidence.md).
+
+Historical Cycle 159 completes current-source N5 boot-chain replay for the unchanged
 Cycle 158 mandatory-retention kernel. This follows N5-SYMBOLS-SEMANTICS-001 at
 N5.6/N5.9 through the N5.5/N5.8 loader and N5-KERNEL-TRANSFER-001 boundary;
 ADD-BOOT-010, ADD-BOOT-011 and ADD-BOOT-012 retain their existing scope.
