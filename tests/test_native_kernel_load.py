@@ -4,6 +4,7 @@ import struct
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,6 +12,7 @@ sys.path.insert(0, str(ROOT))
 
 from runtime import native_elf_loader, native_kernel_load, native_pooleboot  # noqa: E402
 from runtime.schema_validation import validate_json  # noqa: E402
+from tools import pooleos_release_gate  # noqa: E402
 
 
 def synthetic_pooleboot() -> bytes:
@@ -31,7 +33,7 @@ def synthetic_pooleboot() -> bytes:
 
 
 def valid_markers() -> list[str]:
-    # Fixed Cycle 154 transcript; expectations do not come from the report under test.
+    # Fixed synthetic current-geometry markers, not measured boot evidence.
     return [
         "POOLEBOOT/0.1 ENTRY",
         "POOLEBOOT/0.1 SYSTEM_TABLE PASS revision=0x00020046",
@@ -42,20 +44,20 @@ def valid_markers() -> list[str]:
         "POOLEBOOT/0.1 FILESYSTEM PASS loaded_image=1 simple_fs=1 root=1",
         "POOLEBOOT/0.1 BOOTCFG PASS bytes=229 entries=1 default_hash=61053F0E3EBBD272 timeout_ms=0 attempts=3 slot=1 manifest_max_bytes=65536",
         "POOLEBOOT/0.1 MANIFEST PASS bytes=2615 artifacts=7 id_hash=4A2625333244591C slot=1 version=1 minimum_secure_version=1",
-        "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=517784 image_bytes=589824 sha256_prefix=18EDADA10E141DBA path=manifest",
-        "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=517784 path=manifest_development",
-        "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=589824 pages=144 entry_offset=40960 relocations=1304 files_closed=12 pools_freed=11 fnv1a64=0D60A27A4D9E7F55",
+        "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=525976 image_bytes=598016 sha256_prefix=D0AA3295F66AF02D path=manifest",
+        "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=525976 path=manifest_development",
+        "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=598016 pages=146 entry_offset=40960 relocations=1319 files_closed=12 pools_freed=11 fnv1a64=0D60A27A4D9E7F55",
         "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=B9255EF0A03EAD38 retained=1 signatures=0 measured=0",
-        "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=7B68DDA305B46690E02CA7597633F16ADBDAAF7607759253F95EB919F2493B9F retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
-        "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=D81F916D655315273E1945A92C6668C021220F74CCD30A19FB75B2CCB472DAF9 state_sha256=DF907AE5AFD573E9C4514E50A65A271889904BB3DF57260CBCF751EDEDE84215 source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
+        "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=864A7094E7ED3AFDF282791CC53D97D5D1CD4064E998D1678BD7ED79EBF6B79D retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
+        "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=CE706CB7FA195B94B18E423D8DE9B488A88F763F9621B4DA89EB25284AF5D888 state_sha256=7F50BF7ABE1B5201618FD82D1DADA0391F381CD1CE9D92338FD31C30522E1A22 source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
         "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
         "POOLEBOOT/0.1 FRAME READY",
-        "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=144 ro=23 rx=103 rw=18 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=2983F755CDE43D21",
-        "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=5 kernel_pages=144 physical_bits=40 mapped_fnv1a64=0D60A27A4D9E7F55 framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
-        "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=5 stack_pages=36 handoff_pages=256 guards=2 total_pages=436 stack_pt=145 handoff_pt=182 kernel_phys=000000001DCEF000 root=000000001DDF9000 stack_phys=000000001DE37000 stack_top=FFFFFFFF800B5000 handoff_phys=000000001DA4D000 handoff_virt=FFFFFFFF800B6000 retained_fnv1a64=418F619F23319B17 original_cr3=restored firmware_calls_while_active=0",
+        "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=146 ro=24 rx=104 rw=18 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=2983F755CDE43D21",
+        "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=5 kernel_pages=146 physical_bits=40 mapped_fnv1a64=0D60A27A4D9E7F55 framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
+        "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=5 stack_pages=36 handoff_pages=256 guards=2 total_pages=438 stack_pt=147 handoff_pt=184 kernel_phys=000000001DCEF000 root=000000001DDF9000 stack_phys=000000001DE37000 stack_top=FFFFFFFF800B7000 handoff_phys=000000001DA4D000 handoff_virt=FFFFFFFF800B8000 retained_fnv1a64=418F619F23319B17 original_cr3=restored firmware_calls_while_active=0",
         "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5160 records=5 memory_entries=98 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=8FCFF823 fnv1a64=CC235C8212BEF0B2 state=boot_services_exited bytes_unchanged=1",
         "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=4704 descriptor_bytes=48 descriptors=98",
-        "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=144 artifact_pages=9 table_pages=5 stack_pages=36 handoff_pages=256",
+        "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=146 artifact_pages=9 table_pages=5 stack_pages=36 handoff_pages=256",
         "POOLEBOOT/0.1 BOUNDARY unsigned=1 secure_boot=not_tested selection=manifest_digest_untrusted artifacts=digest_verified_untrusted semantics=parsed_live_unsigned_denied authority=none actions=none kernel=retained handoff=retained mappings=retained entry=not_called exit_boot_services=called transfer=stopped",
         "POOLEBOOT/0.1 STOP BEFORE TRANSFER",
     ]
@@ -86,6 +88,29 @@ class NativeKernelLoadTests(unittest.TestCase):
         self.assertEqual(229, len(data))
         self.assertTrue(data.endswith(b"end=PBC1\n"))
         self.assertIn(b"default_entry=normal\n", data)
+
+    def test_readiness_date_is_calendar_valid_not_a_fixed_day(self) -> None:
+        for value in ("2026-09-05", "2026-09-08", "2024-02-29"):
+            candidate = copy.deepcopy(self.readiness)
+            candidate["status_date"] = value
+            with self.subTest(valid_date=value):
+                errors = native_kernel_load.readiness_errors(candidate, ROOT)
+                self.assertFalse(any("status_date" in item for item in errors))
+        invalid_dates = (
+            None, 7, True, "", "20260908", "2026-9-8", "2026-02-29",
+            "2026-04-31", "2026-13-01", "2026-09-08T00:00:00",
+        )
+        for value in invalid_dates:
+            candidate = copy.deepcopy(self.readiness)
+            candidate["status_date"] = value
+            with self.subTest(invalid_date=value), patch.object(
+                pooleos_release_gate, "_load_schema_artifact", return_value=(candidate, [])
+            ):
+                expected = "readiness status_date is not a canonical calendar date"
+                self.assertIn(expected, native_kernel_load.readiness_errors(candidate, ROOT))
+                check = pooleos_release_gate.check_native_kernel_load_readiness()
+                self.assertFalse(check["ok"])
+                self.assertIn(expected, check["detail"])
 
     def test_extended_media_is_deterministic_and_exactly_inspected(self) -> None:
         efi = synthetic_pooleboot()
@@ -208,9 +233,9 @@ class NativeKernelLoadTests(unittest.TestCase):
         self.assertEqual(0, summary["inner_set"]["authority_grants"])
         self.assertEqual("pbtrust_policy_unsigned", summary["trust_state"]["denial"])
         self.assertEqual(0, summary["trust_state"]["authority_grants"])
-        self.assertEqual(144, summary["kernel"]["page_count"])
+        self.assertEqual(146, summary["kernel"]["page_count"])
         self.assertEqual(0, summary["kernel_map"]["writable_executable_page_count"])
-        self.assertEqual(144, summary["kernel_map"]["mapped_page_count"])
+        self.assertEqual(146, summary["kernel_map"]["mapped_page_count"])
         self.assertTrue(summary["kernel_map"]["original_cr3_restored"])
         self.assertTrue(summary["kernel_map"]["tables_retained"])
         self.assertTrue(summary["kernel"]["pages_retained"])
@@ -227,7 +252,7 @@ class NativeKernelLoadTests(unittest.TestCase):
         with self.assertRaises(native_kernel_load.KernelLoadError):
             native_kernel_load.validate_markers(writable)
         page_mismatch = markers[:]
-        page_mismatch[11] = page_mismatch[11].replace("pages=144", "pages=143")
+        page_mismatch[11] = page_mismatch[11].replace("pages=146", "pages=145")
         with self.assertRaises(native_kernel_load.KernelLoadError):
             native_kernel_load.validate_markers(page_mismatch)
         active_mismatch = markers[:]

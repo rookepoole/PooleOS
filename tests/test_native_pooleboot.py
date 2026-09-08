@@ -5,6 +5,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -47,6 +48,29 @@ class NativePooleBootTests(unittest.TestCase):
             with self.subTest(schema=schema_relative):
                 schema = native_pooleboot.read_json(ROOT / schema_relative)
                 self.assertEqual([], list(validate_json(value, schema)))
+
+    def test_readiness_date_is_calendar_valid_not_a_fixed_day(self) -> None:
+        for value in ("2026-09-05", "2026-09-08", "2024-02-29"):
+            candidate = copy.deepcopy(self.readiness)
+            candidate["status_date"] = value
+            with self.subTest(valid_date=value):
+                errors = native_pooleboot.readiness_contract_errors(candidate, ROOT)
+                self.assertFalse(any("status_date" in item for item in errors))
+        invalid_dates = (
+            None, 7, True, "", "20260908", "2026-9-8", "2026-02-29",
+            "2026-04-31", "2026-13-01", "2026-09-08T00:00:00",
+        )
+        for value in invalid_dates:
+            candidate = copy.deepcopy(self.readiness)
+            candidate["status_date"] = value
+            with self.subTest(invalid_date=value), patch.object(
+                pooleos_release_gate, "_load_schema_artifact", return_value=(candidate, [])
+            ):
+                expected = "readiness status_date is not a canonical calendar date"
+                self.assertIn(expected, native_pooleboot.readiness_contract_errors(candidate, ROOT))
+                check = pooleos_release_gate.check_native_pooleboot_readiness()
+                self.assertFalse(check["ok"])
+                self.assertIn(expected, check["detail"])
 
     def test_contract_and_readiness_pass_semantic_validation(self) -> None:
         self.assertEqual([], native_pooleboot.proof_contract_errors(self.contract, ROOT))

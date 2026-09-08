@@ -1,23 +1,31 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-09-07
-Plan version: 2.68.0-native-active-root-retention
-Roadmap cycle: PooleOS Cycle 162
+Status date: 2026-09-08
+Plan version: 2.69.0-native-boot-chain-replay
+Roadmap cycle: PooleOS Cycle 163
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-Cloud checkpoint during Cycle 163 (in progress): the N5 symbol and policy
-replay is saved with draft PR #75. Its component receipts and 23 focused tests
-pass, but loader/PooleBoot/revalidation/transfer and downstream replay are not
-complete. Cycle 162 remains the last reconciled machine-ledger cycle; its
-4/27 projection and 81/105 audit are historical, not current aggregate scores.
-Main remains qualified Cycle 161 through merged PR #74. No merge or phase
-closure is authorized by this backup. See the
-[partial checkpoint](checkpoints/cycle163-symbol-policy-wip.md) for evidence
-and the exact remaining integration steps.
+Cycle 163 completes the selected N5 boot-chain replay begun in the
+[interrupted cloud checkpoint](checkpoints/cycle163-symbol-policy-wip.md).
+All six component gates pass; six final headless boots include two real
+PooleKernel entries and independent nine-file retained-input agreement.
+Seventy focused Python tests pass. Loader and PooleBoot receipts now validate
+canonical calendar dates instead of one fixed day; six valid/twenty invalid
+cases pass. This repairs another instance of the existing
+ADD-N36-RECEIPT-COVERAGE-001 concern without closing its broader review.
+
+The current selected projection passes 8/27 checks; nineteen downstream
+receipts require replay starting with N7-TRAP-001. A replaced transfer receipt
+also makes the Cycle 162 VM receipt stale despite unchanged kernel bytes.
+The historical Cycle 162 full audit remains failed at 81/105, Doctor683/706;
+it is not a current aggregate score. Main remains qualified Cycle 161 through
+merged PR #74; draft PR #75 is the cloud backup. No phase or flag closes,
+PooleGlyph and the frozen demo are unchanged, and production remains false.
+[Cycle 163 evidence](checkpoints/cycle163-boot-chain-replay.md).
 
 Post-Cycle 149 registration update (2026-09-04): the primary governance key is
 enrolled and its owner-confirmed public key is registered on GitHub as SSH
@@ -38,7 +46,7 @@ registration. The governance flag and all production boundaries remain open.
 
 ## 1. Architecture Decision
 
-Cycle 162 implements mandatory PKVM3 active table/data retention under N12.3,
+Historical Cycle 162 implements mandatory PKVM3 active table/data retention under N12.3,
 N12-CONCURRENCY-RECLAMATION-001 and its existing ADD/FLAG. Owner-authorized PMM
 freeing preserves retention on failure. The expanded kernel also required a
 PKMAP2 retained-layout repair under N5.5/N5.8; stack guards remain intact.
@@ -47,7 +55,7 @@ compile-fail cases, two clean linked builds and two fresh headless VM boots
 pass. The live profile records six allocator rejections and 48 negative
 controls. [Cycle 162 evidence](checkpoints/cycle162-active-root-retention.md).
 
-The measured current projection passes 4/27 selected native checks; 23
+That cycle's measured projection passes 4/27 selected native checks; 23
 changed-image receipts require replay. The pre-closeout candidate audit passes
 81/105 gates and Doctor683/706 with optional PooleGlyph runtime excluded;
 those two checks pass separately. The aggregate remains failed, and a
@@ -2356,7 +2364,16 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 
 ## 12. Near-Term Execution Sequence
 
-Cycle 149 closes only `FLAG-N12-CONCURRENCY-LOCKS-001`. PKLOCK1 adds
+Current Cycle 163 sequence: replay N7-TRAP-001, CPU/xstate/MSR, physical
+memory and VM, IRQ/SMP, scheduler, atomics and locks on the unchanged Cycle
+162 kernel. All six N5 component gates now pass. Nineteen selected downstream
+receipts and runtime-inclusive exact-final qualification still block merging
+draft PR #75. Resume N12.3 execution-stack and CPU-retirement ownership after
+that qualified baseline. N0-GOVERNANCE-CUSTODY-001 remains separately blocked;
+no new owner action is required for the current virtual-machine replay.
+The older cycle descriptions below retain their historical scope.
+
+Historical Cycle 149 closes only `FLAG-N12-CONCURRENCY-LOCKS-001`. PKLOCK1 adds
 selector 22 and freezes six allocation-free PKATOM1-based primitives, explicit
 context and rank rules, direct bounded priority donation, owner-death teardown,
 and exact failure rollback. Nine host receipts cover 8,192 FIFO ticket

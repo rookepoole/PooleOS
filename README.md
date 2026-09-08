@@ -4,7 +4,17 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
-Cycle 162 adds mandatory ownership of active page tables and data frames.
+Cycle 163 requalifies the current kernel's boot chain: six fresh virtual
+boots include two PooleKernel entries that independently revalidate nine
+retained files before the expected unsigned-policy halt. Seventy focused
+tests pass, including repairs to two fixed-date receipt validators. All six
+boot-chain gates pass; nineteen downstream dependencies still need replay,
+starting with traps and CPU state. Main remains qualified Cycle 161 and
+PR #75 remains draft. Kernel bytes and the separate demo ISO are unchanged;
+PooleOS remains pre-production.
+[Cycle 163 checkpoint](docs/checkpoints/cycle163-boot-chain-replay.md).
+
+Historical Cycle 162 adds mandatory ownership of active page tables and data frames.
 The kernel rejects copied-handle frees and keeps pages retained when cleanup
 fails. The larger image's guarded boot mapping is updated and independently
 checked. 228 kernel tests and two fresh headless VM boots pass; the live path

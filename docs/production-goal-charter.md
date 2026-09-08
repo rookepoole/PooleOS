@@ -1,15 +1,30 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-09-07
+Status date: 2026-09-08
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 162
+Last roadmap reconciliation: PooleOS Cycle 163
 
-Cycle 162 implements mandatory active table/data retention in the native
+Cycle 163 completes PSYM1, PPOL1, PKLOAD6, PooleBoot, PKREVAL1 and PKXFER1
+replay for the unchanged Cycle 162 kernel. Six final headless boots include
+two kernel entries with independent nine-file retained-input agreement.
+Seventy focused tests pass. Loader and PooleBoot calendar-date validation
+repairs two fixed-day schema blockers, with six valid/twenty invalid cases.
+This does not close the existing broader N36 schema/evidence review.
+The current selected projection passes 8/27; nineteen downstream receipts
+remain stale, including transfer-dependent VM evidence. Historical Cycle 162
+81/105 and Doctor683/706 are not current aggregate scores. Main remains
+qualified Cycle 161 through PR74; PR75 stays draft pending complete replay
+and runtime-inclusive exact-final qualification. No phase/flag closes, and
+kernel/demo bytes and PooleGlyph remain unchanged. Next: N7-TRAP-001, then
+CPU/memory/IRQ/SMP/scheduler/lock replay before further N12.3 ownership work.
+N0 custody and all production exits remain open. Charter scope is unchanged.
+
+Historical Cycle 162 implements mandatory active table/data retention in the native
 PKVM3 path, with ownership-preserving failure cleanup and synchronized PKMAP2
 retained geometry for the 146-page kernel. 228 kernel tests in both modes,
 24 lifetime/19 pool cases, seven compile-fail checks, two identical builds

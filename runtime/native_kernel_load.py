@@ -7,6 +7,7 @@ import hashlib
 import json
 import re
 import struct
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -2398,6 +2399,16 @@ def contract_errors(contract: dict[str, Any], root: Path) -> list[str]:
 
 def readiness_errors(readiness: dict[str, Any], root: Path) -> list[str]:
     errors = _schema_errors(readiness, root, READINESS_SCHEMA_RELATIVE)
+    status_date = readiness.get("status_date")
+    try:
+        if (
+            not isinstance(status_date, str)
+            or len(status_date) != 10
+            or date.fromisoformat(status_date).isoformat() != status_date
+        ):
+            raise ValueError("noncanonical date")
+    except ValueError:
+        errors.append("readiness status_date is not a canonical calendar date")
     try:
         contract = read_json(root / CONTRACT_RELATIVE)
     except (OSError, json.JSONDecodeError, KernelLoadError) as error:

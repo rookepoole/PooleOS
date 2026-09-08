@@ -3,6 +3,10 @@
 Status: unfinished cloud checkpoint on draft PR #75, not merge qualification.
 Scope: N5.6 `N5-SYMBOLS-SEMANTICS-001` and dependent policy binding.
 
+Historical interruption record. The subsequent
+[Cycle 163 replay](cycle163-boot-chain-replay.md) completes this N5 increment
+without claiming complete downstream qualification or merge readiness.
+
 ## Why Main Has Not Advanced
 
 Main already includes the qualified Cycle 161 checkpoint through merged
