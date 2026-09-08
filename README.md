@@ -4,6 +4,14 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
+Cycle 164 partial cloud checkpoint: the current kernel's trap qualifier passes
+six headless boots, 51 controls and seven focused Python tests. The selected
+native projection is now 9/27; eighteen dependencies still require replay.
+This work belongs to draft PR #75, not a qualified main merge. Cycle 163 below
+remains the last reconciled roadmap baseline; its aggregate bindings are not
+claimed current for this unfinished checkpoint. Kernel/demo bytes are unchanged.
+[Cloud backup and merge blockers](docs/checkpoints/cycle164-trap-wip.md).
+
 Cycle 163 requalifies the current kernel's boot chain: six fresh virtual
 boots include two PooleKernel entries that independently revalidate nine
 retained files before the expected unsigned-policy halt. Seventy focused

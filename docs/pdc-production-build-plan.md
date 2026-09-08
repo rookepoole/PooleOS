@@ -9,6 +9,21 @@ Machine ledger: `runs/pdc_production_roadmap.json`
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
+## Cycle 164 Partial Cloud Checkpoint
+
+For the owner's cloud-backup request, the in-progress N7.5/N7.6 trap replay is
+recorded in [the partial checkpoint](checkpoints/cycle164-trap-wip.md). Six
+headless boots, 51 controls and seven focused tests pass on the unchanged
+Cycle 162 kernel. The trap gate now binds that measured product. The selected
+native projection passes 9/27; eighteen dependencies and complete final
+qualification remain pending. No main merge or merge-gate waiver is claimed.
+Resume CPU, xstate, exception-state and MSR replay before physical memory/VM,
+IRQ/SMP, scheduler, atomics and locks. Cycle 163 remains the last reconciled
+machine ledger; source-bound aggregate reconciliation is pending and must not
+be inferred from its historical scores. No phase, flag or production exit closes.
+
+## Last Reconciled Cycle
+
 Cycle 163 completes the selected N5 boot-chain replay begun in the
 [interrupted cloud checkpoint](checkpoints/cycle163-symbol-policy-wip.md).
 All six component gates pass; six final headless boots include two real

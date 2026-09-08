@@ -9,6 +9,16 @@ Machine ledger: `runs/pdc_production_roadmap.json`
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
 Last roadmap reconciliation: PooleOS Cycle 163
 
+Cycle 164 cloud-backup notice: the bounded trap replay passes six boots,
+51 controls and seven focused tests. The current selected native projection
+is 9/27 with eighteen dependencies pending, not a canonical suite pass.
+See [the partial checkpoint](checkpoints/cycle164-trap-wip.md). The machine
+ledger remains the last reconciled Cycle 163 baseline; current-source
+aggregate reconciliation is pending. PR #75 remains draft until complete
+dependency replay, runtime-inclusive exact-final qualification, publication
+and GitHub merge/review gates pass. This notice changes no charter scope,
+authority, phase completion, production exit or main-merge requirement.
+
 Cycle 163 completes PSYM1, PPOL1, PKLOAD6, PooleBoot, PKREVAL1 and PKXFER1
 replay for the unchanged Cycle 162 kernel. Six final headless boots include
 two kernel entries with independent nine-file retained-input agreement.
