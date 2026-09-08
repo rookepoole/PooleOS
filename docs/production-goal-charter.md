@@ -9,7 +9,17 @@ Machine ledger: `runs/pdc_production_roadmap.json`
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
 Last roadmap reconciliation: PooleOS Cycle 165
 
-Cycle 165 completes fourteen memory, interrupt, SMP, scheduler, atomic and lock
+Current cloud checkpoint: qualified Cycles 162-165 merged through PR #75 at
+`6f9399c3cd70ebef2f7610f8b6fdb40ae262e27f`. The exact merged tree passed
+105 canonical gates and 708 Doctor checks. Cycles 166-167 are unfinished
+AP-resource ownership work in draft PR #76. Entry qualification passes, but
+reclamation's named-test accounting fails and fresh SMP/dependency execution,
+machine-ledger reconciliation and exact-final qualification remain pending.
+The Cycle 165 machine ledger and older receipts are not current-branch passes.
+The checkpoint is cloud backup only; no charter condition or phase closes.
+[Current checkpoint and next move](checkpoints/cycle167-ap-live-controls-wip.md).
+
+Historical Cycle 165 pre-merge summary: fourteen memory, interrupt, SMP, scheduler, atomic and lock
 profiles on the unchanged Cycle 162 kernel: 28 final successful headless boots,
 660 negative-control groups and 2,120 rejected cases. Six superseded initial
 boots are preserved separately after correcting three stale test expectations.

@@ -20,6 +20,7 @@ class ReclamationCoreTests(unittest.TestCase):
             "n12_3_complete", "focused_test_count", "kernel_regression_count", "compile_fail_borrow_tests",
             "task_lifetime_test_count",
             "physical_retention_test_count", "physical_retention_live_verified",
+            "ap_resource_test_count", "ap_resource_live_verified",
         ):
             with self.subTest(key=key):
                 changed = copy.deepcopy(self.report)
@@ -36,6 +37,9 @@ class ReclamationCoreTests(unittest.TestCase):
             ("schema_version", "1.2"),
             ("physical_retention_scope", "global_active_address_space_ownership"),
             ("physical_retention_contract_id", "PKRETAIN2"),
+            ("ap_resource_contract_id", "PKAPOWN2"),
+            ("ap_resource_scope", "general_cpu_retirement"),
+            ("schema_version", "1.3"),
         ):
             changed = copy.deepcopy(self.report)
             changed[key] = value
@@ -83,6 +87,18 @@ class ReclamationCoreTests(unittest.TestCase):
         ):
             with self.subTest(output=bad), self.assertRaises(ValueError):
                 core.require_test_result(bad, 19)
+
+
+    def test_named_cases_reject_missing_duplicate_and_failed_tests(self):
+        prefix = "physical_memory::tests::ap_resources::"
+        good = f"test {prefix}one ... ok\ntest {prefix}two ... ok\n"
+        core.require_named_test_result(good, prefix, 2)
+        for bad in (
+            "", good.replace("two", "one"), good.replace("two ... ok", "two ... FAILED"),
+            good + f"test {prefix}three ... ok\n", good.replace(prefix, "unrelated::"),
+        ):
+            with self.subTest(output=bad), self.assertRaises(ValueError):
+                core.require_named_test_result(bad, prefix, 2)
 
 
 if __name__ == "__main__":

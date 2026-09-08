@@ -18,6 +18,7 @@ from tools import qualify_native_kernel_entry as entry  # noqa: E402
 
 SOURCES = (
     "native/kernel/src/reclamation.rs",
+    "native/kernel/src/reclamation/ap_resources.rs",
     "native/kernel/src/reclamation/task_lifetimes.rs",
     "native/kernel/src/lib.rs",
     "native/kernel/src/atomics.rs",
@@ -30,6 +31,8 @@ SOURCES = (
     "native/kernel/src/physical_memory.rs",
     "native/kernel/src/physical_memory/retention.rs",
     "native/kernel/src/physical_memory/tests/retention.rs",
+    "native/kernel/src/physical_memory/tests/ap_resources.rs",
+    "tests/test_native_reclamation_core.py",
     "native/kernel/src/main.rs",
     "native/kernel/linker.ld",
     "native/kernel/manifest.pkm",
@@ -45,7 +48,7 @@ SOURCES = (
 REPORT = ROOT / "runs/native-kernel-reclamation-core-readiness.json"
 TEST_COUNT = 19
 LIFETIME_TEST_COUNT = 24
-KERNEL_SHA256 = "D0AA3295F66AF02D48476BCEDC44D962A873E98FBA21F48A6753AA7BB9B24EA4"
+KERNEL_SHA256 = "4C0D2D64D1572FE0ACE3105BE066C89588181CAD7C927765063D7C50187DE7F8"
 STAGES = (
     "format", "host-build-debug", "test-build-debug", "tests-debug",
     "lifetime-build-debug", "lifetime-tests-debug",
@@ -66,21 +69,34 @@ def require_test_result(output: str, count: int) -> None:
         raise ValueError(f"expected exactly {count} passing tests, no failures/skips/filters")
 
 
+def require_named_test_result(output: str, prefix: str, count: int) -> None:
+    names = re.findall(
+        rf"^test ({re.escape(prefix)}[A-Za-z0-9_]+) \.\.\. ok$",
+        output.replace("\r\n", "\n"), re.MULTILINE,
+    )
+    if len(names) != count or len(set(names)) != count:
+        raise ValueError(f"expected {count} unique passing {prefix} tests")
+
+
 def validate_report(report: dict, root: Path = ROOT) -> None:
     expected = {
-        "schema_version": "1.3", "contract_id": "PKRECLAIM1-CORE",
+        "schema_version": "1.4", "contract_id": "PKRECLAIM1-CORE",
         "selected_move_id": "N12-CONCURRENCY-RECLAMATION-001", "phase": "N12.3",
         "status": "host_verified_live_integration_pending", "production_ready": False,
         "live_integration_verified": False, "cross_cpu_quiescence_verified": False,
         "n12_3_complete": False, "focused_test_count": TEST_COUNT,
-        "kernel_regression_count": 228, "compile_fail_borrow_tests": 7,
+        "kernel_regression_count": 243, "compile_fail_borrow_tests": 9,
         "physical_retention_contract_id": "PKRETAIN1",
         "physical_retention_scope": "allocator_enforced_for_explicitly_retained_allocations",
-        "physical_retention_test_count": 16, "physical_retention_live_verified": False,
+        "physical_retention_test_count": 20, "physical_retention_live_verified": False,
+        "ap_resource_contract_id": "PKAPOWN1",
+        "ap_resource_test_count": 11,
+        "ap_resource_scope": "mandatory_three_ap_runtime_and_two_frames",
+        "ap_resource_live_verified": False,
         "task_lifetime_contract_id": "PKLIFE1",
         "task_lifetime_test_count": LIFETIME_TEST_COUNT,
         "task_lifetime_scope": "mandatory_inactive_table_and_bound_frame_retention",
-        "linked_kernel_sha256": KERNEL_SHA256, "linked_kernel_byte_count": 525976,
+        "linked_kernel_sha256": KERNEL_SHA256, "linked_kernel_byte_count": 530072,
     }
     if not isinstance(report, dict) or set(report) != set(expected) | {"sources", "stages"}:
         raise ValueError("reclamation report fields changed")
@@ -126,6 +142,9 @@ def qualify(work: Path) -> dict:
             raise RuntimeError(f"{name} failed; see {log}\n{output[-5000:]}")
         if count is not None:
             require_test_result(output, count)
+        if name in {"kernel-regressions", "kernel-regressions-release"}:
+            require_named_test_result(output, "physical_memory::tests::retention::", 20)
+            require_named_test_result(output, "physical_memory::tests::ap_resources::", 11)
         stages.append({"name": name, "status": "pass", "output_sha256": hashlib.sha256(raw).hexdigest().upper()})
 
     base = ["--manifest-path", str(entry.NATIVE_ROOT / "Cargo.toml"), "--package", "poolekernel"]
@@ -164,10 +183,10 @@ def qualify(work: Path) -> dict:
         run(f"lifetime-tests-{profile}", [str(lifetime_binary), "--test-threads=1"], LIFETIME_TEST_COUNT)
         if profile == "release":
             run("kernel-regressions-release", [str(cargo), "test", *base, "--lib", *host,
-                "--release", "--", "--test-threads=1"], 228)
+                "--release", "--", "--test-threads=1"], 243)
     env.pop("CARGO_PROFILE_RELEASE_PANIC", None)
-    run("borrow-doctests", [str(cargo), "test", *base, "--doc", *host], 7)
-    run("kernel-regressions", [str(cargo), "test", *base, "--lib", *host, "--", "--test-threads=1"], 228)
+    run("borrow-doctests", [str(cargo), "test", *base, "--doc", *host], 9)
+    run("kernel-regressions", [str(cargo), "test", *base, "--lib", *host, "--", "--test-threads=1"], 243)
     run("host-clippy", [str(cargo), "clippy", *base, "--lib", *host, "--", "-D", "warnings"])
     run("freestanding-clippy", [str(cargo), "clippy", *base, "--lib", "--release",
         "--target", entry.PRODUCT_TARGET, "--locked", "--offline", "--target-dir", str(target),
@@ -182,20 +201,24 @@ def qualify(work: Path) -> dict:
         env = host_env
     linked = (target / entry.PRODUCT_TARGET / "release/PooleKernelLinked").read_bytes()
     canonical, _ = entry.kernel_image.canonicalize_linked_image(linked)
-    if len(canonical) != 525976 or hashlib.sha256(canonical).hexdigest().upper() != KERNEL_SHA256:
+    if len(canonical) != 530072 or hashlib.sha256(canonical).hexdigest().upper() != KERNEL_SHA256:
         raise ValueError("linked kernel changed; existing live receipts cannot be inherited")
     if before != bind_sources():
         raise ValueError("source changed during qualification")
     report = {
-        "schema_version": "1.3", "contract_id": "PKRECLAIM1-CORE",
+        "schema_version": "1.4", "contract_id": "PKRECLAIM1-CORE",
         "selected_move_id": "N12-CONCURRENCY-RECLAMATION-001", "phase": "N12.3",
         "status": "host_verified_live_integration_pending", "production_ready": False,
         "live_integration_verified": False, "cross_cpu_quiescence_verified": False,
         "n12_3_complete": False, "focused_test_count": TEST_COUNT,
-        "kernel_regression_count": 228, "compile_fail_borrow_tests": 7,
+        "kernel_regression_count": 243, "compile_fail_borrow_tests": 9,
         "physical_retention_contract_id": "PKRETAIN1",
         "physical_retention_scope": "allocator_enforced_for_explicitly_retained_allocations",
-        "physical_retention_test_count": 16, "physical_retention_live_verified": False,
+        "physical_retention_test_count": 20, "physical_retention_live_verified": False,
+        "ap_resource_contract_id": "PKAPOWN1",
+        "ap_resource_test_count": 11,
+        "ap_resource_scope": "mandatory_three_ap_runtime_and_two_frames",
+        "ap_resource_live_verified": False,
         "task_lifetime_contract_id": "PKLIFE1",
         "task_lifetime_test_count": LIFETIME_TEST_COUNT,
         "task_lifetime_scope": "mandatory_inactive_table_and_bound_frame_retention",
@@ -214,7 +237,7 @@ def main() -> int:
     report = qualify(args.work.resolve())
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n")
-    print(f"PKRECLAIM1_CORE PASS tests={TEST_COUNT} lifecycle={LIFETIME_TEST_COUNT} retention=16 profiles=2 regressions=228 live=0 production=0")
+    print(f"PKRECLAIM1_CORE PASS tests={TEST_COUNT} lifecycle={LIFETIME_TEST_COUNT} retention=20 ap_resources=11 profiles=2 regressions=243 live=0 production=0")
     return 0
 
 

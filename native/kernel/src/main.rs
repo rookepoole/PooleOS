@@ -1125,6 +1125,8 @@ pksmp5_fragment!(PKSMP5_RESOURCE_PAGES, b" resource_pages=");
 pksmp5_fragment!(PKSMP5_FRAME_PAGES, b" frame_pages=");
 pksmp5_fragment!(PKSMP5_ZEROED_BYTES, b" zeroed_bytes=");
 pksmp5_fragment!(PKSMP5_VERIFIED_BYTES, b" verified_bytes=");
+pksmp5_fragment!(PKSMP5_RETAINED_FREES, b" retained_free_rejections=");
+pksmp5_fragment!(PKSMP5_OWNER_RELEASES, b" owner_release_rejections=");
 pksmp5_fragment!(PKSMP5_PARTIAL_TAIL, b" fresh_allocation_required=1\n");
 pksmp5_fragment!(PKSMP5_PARTIAL_ROLLBACK_COUNT, b" partial_rollback_count=");
 pksmp5_fragment!(PKSMP5_STARTED_MASK, b" started_mask=");
@@ -4438,6 +4440,13 @@ struct SmpIpiPartialRollbackProof {
     frame_pages_released: u64,
     zeroed_bytes: u64,
     verified_bytes: u64,
+    retention: SmpIpiRetentionProof,
+}
+
+#[derive(Clone, Copy, Default)]
+struct SmpIpiRetentionProof {
+    copied_frees: u64,
+    owner_releases: u64,
 }
 
 struct SmpIpiLiveProof {
@@ -4452,6 +4461,7 @@ struct SmpIpiLiveProof {
     lifecycle: smp_ipi::MultiApReceipt,
     retirement: smp_ipi::MultiGenerationRetirementReceipt,
     premature_reclaim_rejections: u64,
+    retention: SmpIpiRetentionProof,
     scheduler: Option<SchedulerSmpLiveProof>,
     ap_workers: Option<SchedulerApWorkersLiveProof>,
     smp_preempt: Option<SchedulerSmpPreemptLiveProof>,
@@ -6039,6 +6049,13 @@ fn smp_ipi_start_ap(
     period_femtoseconds: u64,
     resource: &SmpIpiApResource,
 ) -> Result<(), SmpIpiLiveError> {
+    let target_mask =
+        smp_ipi::local_target_mask(resource.target_apic_id).ok_or(smp_ipi::Error::Target)?;
+    if resource.ownership.state() != ap_resources::State::MayExecute
+        || resource.ownership.possible_cpu_mask() & target_mask == 0
+    {
+        return Err(smp_ipi::Error::Transition.into());
+    }
     access
         .ensure_mapped(resource.layout.local())
         .map_err(|_| smp::Error::PhysicalAccess)?;
@@ -6111,6 +6128,52 @@ fn smp_ipi_stop_ap(
     Ok((smp_runtime_mailbox_snapshot(), ipi))
 }
 
+fn smp_ipi_probe_retained_resources(
+    manager: &mut PhysicalMemoryManager,
+    access: &mut BootstrapTableMemory,
+    resources: &mut [SmpIpiApResource; smp_ipi::AP_COUNT],
+    possible_cpu_mask: u64,
+) -> Result<SmpIpiRetentionProof, SmpIpiLiveError> {
+    let mut proof = SmpIpiRetentionProof::default();
+    for resource in resources {
+        if resource.ownership.state() != ap_resources::State::MayExecute
+            || resource.ownership.possible_cpu_mask() != possible_cpu_mask
+        {
+            return Err(smp_ipi::Error::Transition.into());
+        }
+        for part in [
+            ApResourcePart::Runtime,
+            ApResourcePart::OldFrame,
+            ApResourcePart::NewFrame,
+        ] {
+            let handle = resource.ownership.handle(part);
+            let before = manager.summary();
+            let effects = (access.reads, access.writes, access.temporary_pte_writes);
+            if manager.free(handle) != Err(PhysicalMemoryError::AllocationRetained)
+                || manager.free_scrubbed(handle, access)
+                    != Err(PhysicalMemoryError::AllocationRetained)
+                || manager.free_scrubbed_automatic(handle, access)
+                    != Err(PhysicalMemoryError::AllocationRetained)
+                || resource.ownership.release_scrubbed(part, manager, access)
+                    != Err(ap_resources::Error::State)
+                || resource
+                    .ownership
+                    .release_scrubbed_automatic(part, manager, access)
+                    != Err(ap_resources::Error::State)
+                || manager.summary() != before
+                || (access.reads, access.writes, access.temporary_pte_writes) != effects
+                || resource.ownership.state() != ap_resources::State::MayExecute
+                || resource.ownership.possible_cpu_mask() != possible_cpu_mask
+            {
+                return Err(smp_ipi::Error::Transition.into());
+            }
+            proof.copied_frees += 3;
+            proof.owner_releases += 2;
+        }
+    }
+    Ok(proof)
+}
+
 fn smp_ipi_run_partial_rollback(
     manager: &mut PhysicalMemoryManager,
     access: &mut BootstrapTableMemory,
@@ -6132,6 +6195,7 @@ fn smp_ipi_run_partial_rollback(
     transaction.reserve()?;
     transaction.prepare()?;
     let mut started_mask = 0u64;
+    let mut retention = SmpIpiRetentionProof::default();
     let attempt = (|| -> Result<(), SmpIpiLiveError> {
         let targets = resources.each_ref().map(|resource| resource.target_apic_id);
         for (index, &target) in targets.iter().take(2).enumerate() {
@@ -6148,6 +6212,8 @@ fn smp_ipi_run_partial_rollback(
         }
         SMP_IPI_FAILURE_STAGE.store(24, Ordering::Relaxed);
         transaction.partial_started(started_mask)?;
+        retention =
+            smp_ipi_probe_retained_resources(manager, access, &mut resources, started_mask)?;
         access
             .ensure_mapped(resources[2].layout.local())
             .map_err(|_| smp::Error::PhysicalAccess)?;
@@ -6252,6 +6318,7 @@ fn smp_ipi_run_partial_rollback(
         frame_pages_released,
         zeroed_bytes,
         verified_bytes,
+        retention,
     })
 }
 
@@ -7271,6 +7338,7 @@ fn run_smp_ipi_internal(
 
     let mut started_mask = 0u64;
     let mut parked_mask = 0u64;
+    let mut retention = SmpIpiRetentionProof::default();
     let bsp_tsc_before = arch::x86_64::read_tsc_ordered();
     let operation = (|| -> Result<SmpIpiExecutionReceipt, SmpIpiLiveError> {
         SMP_IPI_FAILURE_STAGE.store(3, Ordering::Relaxed);
@@ -7289,19 +7357,12 @@ fn run_smp_ipi_internal(
         lifecycle.all_online(started_mask, started_mask)?;
         SMP_IPI_FAILURE_STAGE.store(4, Ordering::Relaxed);
 
-        for resource in &resources {
-            let handle = resource.old_frame.ok_or(smp_ipi::Error::Transition)?;
-            let before = manager.summary();
-            if manager.free(handle) != Err(PhysicalMemoryError::AllocationRetained)
-                || manager.free_scrubbed(handle, &mut page_access)
-                    != Err(PhysicalMemoryError::AllocationRetained)
-                || manager.free_scrubbed_automatic(handle, &mut page_access)
-                    != Err(PhysicalMemoryError::AllocationRetained)
-                || manager.summary() != before
-            {
-                return Err(smp_ipi::Error::Transition.into());
-            }
-        }
+        retention = smp_ipi_probe_retained_resources(
+            manager,
+            &mut page_access,
+            &mut resources,
+            started_mask,
+        )?;
 
         for resource in &resources {
             page_access
@@ -7801,6 +7862,7 @@ fn run_smp_ipi_internal(
         ap_workers,
         smp_preempt,
         locks: lock_proof,
+        retention,
     })
 }
 
@@ -10583,6 +10645,10 @@ extern "C" fn poole_kernel_rust_entry(
         logger.write_decimal_u64(proof.partial.zeroed_bytes);
         logger.write_bytes(&PKSMP5_VERIFIED_BYTES);
         logger.write_decimal_u64(proof.partial.verified_bytes);
+        logger.write_bytes(&PKSMP5_RETAINED_FREES);
+        logger.write_decimal_u64(proof.partial.retention.copied_frees);
+        logger.write_bytes(&PKSMP5_OWNER_RELEASES);
+        logger.write_decimal_u64(proof.partial.retention.owner_releases);
         logger.write_bytes(&PKSMP5_PARTIAL_TAIL);
 
         logger.write_bytes(&PKSMP5_RETRY);
@@ -10701,6 +10767,10 @@ extern "C" fn poole_kernel_rust_entry(
         logger.write_hex_u64(proof.retirement.new_frame_checksum);
         logger.write_bytes(&PKSMP5_PREMATURE_RECLAIM_REJECTIONS);
         logger.write_decimal_u64(proof.premature_reclaim_rejections);
+        logger.write_bytes(&PKSMP5_RETAINED_FREES);
+        logger.write_decimal_u64(proof.retention.copied_frees);
+        logger.write_bytes(&PKSMP5_OWNER_RELEASES);
+        logger.write_decimal_u64(proof.retention.owner_releases);
         logger.write_bytes(&PKSMP5_SHOOTDOWN_TAIL);
 
         logger.write_bytes(&PKSMP5_LIFECYCLE);

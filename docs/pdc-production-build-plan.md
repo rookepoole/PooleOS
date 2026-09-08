@@ -9,7 +9,36 @@ Machine ledger: `runs/pdc_production_roadmap.json`
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 166 Branch Checkpoint: Qualification Pending
+## Cycle 167 Branch Checkpoint: Merge Blockers Remain
+
+Qualified work through Cycle 165 is already on `main` through PR #75.
+Cycles 166-167 are backed up through draft PR #76 on
+`agent/n12-ap-execution-ownership`; backup does not require merging unfinished
+kernel changes into the qualified baseline.
+
+Under N12.3 and the existing concurrency/reclamation ADD and flag, Cycle 167
+adds all-region AP ownership probes and observed-counter validation to the
+partial-start and full-start paths. The newly measured 147-page kernel passes
+PKENTRY1: 243 host tests, 43 negative controls and two byte-identical clean
+same-host builds. The reclamation qualifier then fails its named-test check:
+18 retention tests are in one module and two in another, while it expects all
+20 in the first. The underlying 243-test release run passes. This diagnostic
+does not substitute for a repaired qualifier and successful rerun.
+
+Fresh SMP guest boots have not run. Updated map fixtures, measured SMP control
+counts, source-bound receipts, machine-roadmap/architecture reconciliation,
+dependency-ordered native replay and the exact-final canonical suite remain
+pending. The machine ledger still describes Cycle 165; it does not qualify this
+work-in-progress branch. No phase, requirement, flag or production gate closes.
+The frozen demo and PooleGlyph remain unchanged.
+
+Next move: repair and negatively test the retention-count accounting, rerun
+reclamation and SMP qualification, then begin changed-image dependencies at
+N5-SYMBOLS-SEMANTICS-001. Complete the authority and receipt reconciliation
+before exact-final qualification and a main merge.
+[Cycle 167 evidence, failures and merge blockers](checkpoints/cycle167-ap-live-controls-wip.md).
+
+## Historical Cycle 166 Branch Checkpoint
 
 The requested checkpoint consolidation is complete through Cycle 165:
 [PR #75](https://github.com/rookepoole/PooleOS/pull/75) merged as `6f9399c`,

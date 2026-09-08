@@ -1,3 +1,4 @@
+import copy
 import tempfile
 import unittest
 from pathlib import Path
@@ -21,7 +22,7 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
         contract = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.CONTRACT_RELATIVE)
         self.assertEqual([], smp_ipi.contract_errors(contract))
         self.assertEqual(30, len(smp_ipi.NEGATIVE_CONTROL_IDS))
-        self.assertEqual(243, contract["qualification"]["hostile_case_count"])
+        self.assertEqual(249, contract["qualification"]["hostile_case_count"])
 
     def test_three_private_resource_layouts_fit_below_one_mib(self) -> None:
         layouts = [smp_ipi.resource_layout(page, 32) for page in (1, 35, 69)]
@@ -180,9 +181,58 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
         self.assertEqual(3, observation["result"]["application_processors_online"])
         controls = qualify._negative_controls(readiness["execution"]["runs"][0]["markers"])
         self.assertEqual(list(smp_ipi.NEGATIVE_CONTROL_IDS), [item["id"] for item in controls])
-        self.assertEqual(243, sum(item["case_count"] for item in controls))
+        self.assertEqual(249, sum(item["case_count"] for item in controls))
         check = pooleos_release_gate.check_native_kernel_smp_ipi_readiness()
         self.assertTrue(check["ok"], check["detail"])
+
+
+    def test_ownership_contract_rejects_missing_or_changed_fields(self) -> None:
+        contract = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.CONTRACT_RELATIVE)
+        for field in contract["execution_ownership"]:
+            changed = copy.deepcopy(contract)
+            del changed["execution_ownership"][field]
+            with self.subTest(missing=field):
+                self.assertTrue(smp_ipi.contract_errors(changed))
+        for field, value in (
+            ("retained_regions_per_ap", 1), ("retained_free_rejections_per_attempt", 9),
+            ("owner_release_rejections_per_attempt", 0), ("attempt_count", 1),
+            ("park_boundary", "mailbox_only"), ("general_cpu_retirement_verified", True),
+        ):
+            changed = copy.deepcopy(contract)
+            changed["execution_ownership"][field] = value
+            with self.subTest(changed=field):
+                self.assertTrue(smp_ipi.contract_errors(changed))
+
+    def test_source_audit_requires_live_ownership_controls(self) -> None:
+        arch = (smp_ipi.ROOT / "native/kernel/src/arch/x86_64.rs").read_text(encoding="utf-8")
+        main = (smp_ipi.ROOT / "native/kernel/src/main.rs").read_text(encoding="utf-8")
+        ipi = (smp_ipi.ROOT / "native/kernel/src/smp_ipi.rs").read_text(encoding="utf-8")
+        qualify._audit_source_text(arch, main, ipi)
+        probe = main.partition("fn smp_ipi_probe_retained_resources(")[2].split("\nfn ", 1)[0]
+        for token in (
+            "ApResourcePart::Runtime", "ApResourcePart::OldFrame", "ApResourcePart::NewFrame",
+            "manager.free(handle)", "manager.free_scrubbed(handle, access)",
+            "manager.free_scrubbed_automatic(handle, access)",
+            "release_scrubbed(part, manager, access)",
+            "release_scrubbed_automatic(part, manager, access)",
+            "manager.summary() != before",
+        ):
+            with self.subTest(omitted=token), self.assertRaises(smp_ipi.KernelSmpIpiError):
+                qualify._audit_source_text(arch, main.replace(probe, probe.replace(token, "omitted", 1), 1), ipi)
+
+    def test_recorded_ownership_cannot_disagree_with_live_markers(self) -> None:
+        report = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        self.assertEqual([], smp_ipi.readiness_errors(report))
+        for mode in ("missing_run", "run_summary", "aggregate"):
+            changed = copy.deepcopy(report)
+            if mode == "missing_run":
+                changed["execution"]["runs"].pop()
+            elif mode == "run_summary":
+                changed["execution"]["runs"][1]["marker_summary"]["execution_ownership"]["owner_release_rejections_per_attempt"] = 0
+            else:
+                changed["execution"]["observation"]["execution_ownership"]["general_cpu_retirement_verified"] = True
+            with self.subTest(mode=mode):
+                self.assertTrue(smp_ipi.readiness_errors(changed))
 
 
 if __name__ == "__main__":
