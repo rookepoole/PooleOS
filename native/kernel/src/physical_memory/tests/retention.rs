@@ -1,6 +1,106 @@
 use super::*;
 
 #[test]
+fn retained_scrub_keeps_identity_through_failure_and_retry() {
+    for automatic in [false, true] {
+        let mut manager = manager();
+        let handle = manager.allocate(Zone::Dma32, 2, 7).unwrap();
+        let token = manager.retain_allocation(handle).unwrap();
+        let mut access = FakePageAccess::new(handle.start_page, 2, STALE_PATTERN);
+        access.fail_write = Some((handle.start_page + 1, 7));
+        let result = if automatic {
+            manager
+                .free_retained_scrubbed_automatic(token, &mut access)
+                .map(|(receipt, _)| receipt)
+        } else {
+            manager.free_retained_scrubbed(token, &mut access)
+        };
+        let (error, token) = result.unwrap_err();
+        assert_eq!(error, PhysicalMemoryError::ScrubAccess);
+        assert_eq!(token.handle(), handle);
+        rejects_all_free_paths(&mut manager, &mut access, handle);
+        assert_eq!(manager.summary().allocated_pages, 2);
+        access.fail_write = None;
+        let receipt = manager.free_retained_scrubbed(token, &mut access).unwrap();
+        assert_eq!(receipt.verified_bytes, 2 * PAGE_BYTES);
+        assert_eq!(manager.free(handle), Err(PhysicalMemoryError::StaleHandle));
+    }
+}
+
+#[test]
+fn retained_scrub_wrong_manager_rejects_before_scrub_or_growth() {
+    for automatic in [false, true] {
+        let mut first = manager();
+        let mut other = manager();
+        let handle = first.allocate(Zone::Dma32, 1, 7).unwrap();
+        assert_eq!(other.allocate(Zone::Dma32, 1, 7).unwrap(), handle);
+        let token = first.retain_allocation(handle).unwrap();
+        let mut access = FakePageAccess::new(handle.start_page, 1, STALE_PATTERN);
+        let before = other.summary();
+        let result = if automatic {
+            other
+                .free_retained_scrubbed_automatic(token, &mut access)
+                .map(|(receipt, _)| receipt)
+        } else {
+            other.free_retained_scrubbed(token, &mut access)
+        };
+        let (error, token) = result.unwrap_err();
+        assert_eq!(error, PhysicalMemoryError::RetentionIdentity);
+        assert_eq!(other.summary(), before);
+        assert_eq!((access.read_count, access.write_count), (0, 0));
+        first.free_retained_scrubbed(token, &mut access).unwrap();
+    }
+}
+
+#[test]
+fn retained_automatic_scrub_survives_migration_and_growth() {
+    let mut bootstrap = manager();
+    let handle = bootstrap.allocate(Zone::Dma32, 1, 7).unwrap();
+    let token = bootstrap.retain_allocation(handle).unwrap();
+    let mut access = FakePageAccess::new(DMA_END_PAGE, 128, STALE_PATTERN);
+    let migration = bootstrap.migrate_to_metadata(&mut access).unwrap();
+    // SAFETY: the test-owned arena outlives the sealed migrated manager.
+    let manager =
+        unsafe { &mut *(migration.manager_address as usize as *mut PhysicalMemoryManager) };
+    manager.grow_metadata_ledgers(&mut access).unwrap();
+    access.fail_read = Some((handle.start_page, 3));
+    let (error, token) = manager
+        .free_retained_scrubbed_automatic(token, &mut access)
+        .unwrap_err();
+    assert_eq!(error, PhysicalMemoryError::ScrubAccess);
+    assert_eq!(manager.verify_metadata_integrity(), Ok(()));
+    rejects_all_free_paths(manager, &mut access, handle);
+    access.fail_read = None;
+    manager.grow_metadata_ledgers(&mut access).unwrap();
+    manager
+        .free_retained_scrubbed_automatic(token, &mut access)
+        .unwrap();
+    assert_eq!(manager.verify_metadata_integrity(), Ok(()));
+}
+
+#[test]
+fn retained_scrub_excluded_metadata_failure_returns_the_token() {
+    let mut manager = manager();
+    let handle = manager.allocate(Zone::Dma32, 1, 7).unwrap();
+    let token = manager.retain_allocation(handle).unwrap();
+    let mut access = FakePageAccess::new(handle.start_page, 1, STALE_PATTERN);
+    manager.allocation_entries_mut()[usize::from(handle.slot)].release_excluded = true;
+    let (error, token) = manager
+        .free_retained_scrubbed_automatic(token, &mut access)
+        .unwrap_err();
+    assert_eq!(error, PhysicalMemoryError::MetadataOwnership);
+    assert_eq!((access.read_count, access.write_count), (0, 0));
+    assert_eq!(
+        manager.free(handle),
+        Err(PhysicalMemoryError::AllocationRetained)
+    );
+    manager.allocation_entries_mut()[usize::from(handle.slot)].release_excluded = false;
+    manager
+        .free_retained_scrubbed_automatic(token, &mut access)
+        .unwrap();
+}
+
+#[test]
 fn retained_free_commits_once_and_wrong_manager_returns_the_owner() {
     let mut first = manager();
     let mut other = manager();

@@ -4,12 +4,22 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
-Cycle 165 completes memory-through-lock dependency replay on the current kernel:
+**Cloud status:** qualified checkpoints through Cycle 165 are merged into `main`
+at `6f9399c` via [PR #75](https://github.com/rookepoole/PooleOS/pull/75).
+The exact merged tree passed all 105 canonical gates and 708 Doctor checks.
+Cycle 166 is an unfinished AP-resource ownership checkpoint on
+`agent/n12-ap-execution-ownership`: 243 debug and release kernel tests,
+nine compile-fail tests, Clippy and the freestanding build pass. Fresh native
+execution evidence, acceptance bindings and full qualification still gate its
+merge. Branch backup is not qualification or production promotion.
+[Cycle 166 scope and remaining work](docs/checkpoints/cycle166-ap-ownership-wip.md).
+
+Historical Cycle 165 pre-merge summary: memory-through-lock dependency replay:
 fourteen profiles, 28 final headless boots, 660 negative-control groups and
 2,120 rejected cases. All 27 selected native checks pass. The 142-test profile
 suite passes with two optional local-transcript skips. Full runtime-inclusive
-qualification and publication/review gates still precede merging draft PR #75;
-main remains qualified Cycle 161. No native kernel, PooleGlyph or demo ISO bytes
+qualification and publication/review gates were then pending for draft PR #75;
+main then remained qualified Cycle 161. No native kernel, PooleGlyph or demo ISO bytes
 change, and no phase or production gate closes.
 [Cycle 165 checkpoint](docs/checkpoints/cycle165-native-dependency-replay.md).
 

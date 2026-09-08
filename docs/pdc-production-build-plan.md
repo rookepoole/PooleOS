@@ -9,7 +9,38 @@ Machine ledger: `runs/pdc_production_roadmap.json`
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 165 Native Dependency Replay
+## Cycle 166 Branch Checkpoint: Qualification Pending
+
+The requested checkpoint consolidation is complete through Cycle 165:
+[PR #75](https://github.com/rookepoole/PooleOS/pull/75) merged as `6f9399c`,
+with identical tested and merged trees. Its exact-final run passed 105/105
+canonical gates and 708/708 Doctor checks; the full Python suite succeeded
+with 924 discovered tests. This supersedes the historical pre-merge status
+below, not the qualification requirements for newly changed source.
+
+Current branch work is N12.3, `ADD-N12-CONCURRENCY-RECLAMATION-001` and
+`FLAG-N12-CONCURRENCY-RECLAMATION-001`. The actual three-AP path now uses a
+retained owner for the runtime/stack allocation and both data frames, tracks
+potential CPU exposure, and preserves retention across fallible scrubbing.
+Host verification passes 243 kernel tests in both modes, nine compile-fail
+tests, host/freestanding Clippy and a freestanding link. The initial unused
+field build failure and its repair are recorded. No new live boot is claimed.
+
+This is a source-backup checkpoint, not a completed roadmap reconciliation.
+The machine roadmap, architecture bindings and readiness ledgers still record
+the Cycle 165 baseline; they do not qualify the changed branch. Preserve the
+40 phases, 301 subphases, 57 ADD requirements, 94 flags (35 open), twenty gaps
+and all 8,996 checklist requirements. No phase or flag closes.
+
+Before this branch can merge: complete runtime/new-frame live ownership
+controls and review the hardware park boundary; assign and measure the new
+kernel identity/layout; replay changed-image dependencies; reconcile every
+affected source-bound readiness/roadmap/schema/test artifact; then pass the
+runtime-inclusive exact-final suite, publication scan and GitHub review gates.
+N0 custody remains separate. The frozen demo and PooleGlyph are unchanged.
+[Cycle 166 checkpoint and next move](checkpoints/cycle166-ap-ownership-wip.md).
+
+## Historical Cycle 165 Native Dependency Replay
 
 The N9.1/N9.2 `N9-PMM-ACPI-CONSUMER-001` and N9.3/N9.4
 `N9-VM-DIRECT-MAP-001` replay continues through the existing N8 interrupt/SMP
