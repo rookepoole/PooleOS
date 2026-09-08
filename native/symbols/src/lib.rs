@@ -990,7 +990,7 @@ mod tests {
     fn lookup_is_image_relative_and_bounded() {
         let bundle = parse(CANONICAL).expect("canonical PSYM1");
         let base = bundle.preferred_virtual_base;
-        let result = lookup(&bundle, base, base + 0x29599)
+        let result = lookup(&bundle, base, base + 0x29AEE)
             .expect("lookup")
             .expect("known symbol");
         assert_eq!(result.symbol.name, b"poole_kernel_rust_entry");
@@ -999,6 +999,10 @@ mod tests {
         assert_eq!(lookup(&bundle, base, base + 0xA047).expect("gap"), None);
         assert_eq!(
             lookup(&bundle, base, base + 0x28A08).expect("old symbol gap"),
+            None
+        );
+        assert_eq!(
+            lookup(&bundle, base, base + 0x29599).expect("previous kernel symbol gap"),
             None
         );
     }

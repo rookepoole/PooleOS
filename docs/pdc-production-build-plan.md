@@ -9,6 +9,16 @@ Machine ledger: `runs/pdc_production_roadmap.json`
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
+Cloud checkpoint during Cycle 163 (in progress): the N5 symbol and policy
+replay is saved with draft PR #75. Its component receipts and 23 focused tests
+pass, but loader/PooleBoot/revalidation/transfer and downstream replay are not
+complete. Cycle 162 remains the last reconciled machine-ledger cycle; its
+4/27 projection and 81/105 audit are historical, not current aggregate scores.
+Main remains qualified Cycle 161 through merged PR #74. No merge or phase
+closure is authorized by this backup. See the
+[partial checkpoint](checkpoints/cycle163-symbol-policy-wip.md) for evidence
+and the exact remaining integration steps.
+
 Post-Cycle 149 registration update (2026-09-04): the primary governance key is
 enrolled and its owner-confirmed public key is registered on GitHub as SSH
 signing key `1158225`. `security/governance-key-registration.json` and
