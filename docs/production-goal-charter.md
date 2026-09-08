@@ -1,15 +1,39 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-09-06
+Status date: 2026-09-07
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 160
+Last roadmap reconciliation: PooleOS Cycle 161
 
-Cycle 160 completes N7-TRAP-001 prerequisite replay for the Cycle 158 kernel:
+Cycle 161 completes the changed-kernel dependency replay begun in Cycle 158.
+Fourteen current-source memory, IRQ/SMP, scheduler, atomic and lock profiles
+pass 28 final headless boots, 658 control groups and 2,118 rejected cases.
+Each qualifier passes 219 kernel host tests on the unchanged mandatory-retention
+kernel. All 26 selected native checks and the pre-closeout canonical suite
+pass: 105 consistency gates, 708 Doctor checks and 917 discovered Python tests.
+Exact-final qualification, publication and GitHub review checks still gate
+the main merge; this source checkpoint itself does not assert remote merge.
+
+Two fixed-day scheduler readiness schemas were repaired with explicit runtime
+calendar validation and six valid/twenty invalid date cases. The shared small
+schema engine still does not enforce pattern/format; the broader N36 audit
+remains open. Two overlapping scheduler boots were excluded and replaced by
+a frozen-source rerun. The actual failed Cycle 158 full audit is preserved.
+No native Rust or demo ISO bytes change and no phase or flag closes.
+
+Next is N12-CONCURRENCY-RECLAMATION-001: active-root, execution-stack and
+acknowledged CPU-retirement ownership, followed by independent live evidence.
+N0 custody remains separately blocked. The 40 phases, 301 subphases, 57 ADD
+requirements, 94 flags (35 open), 20 gaps and all 8,996 locked implementation
+requirements are preserved. PooleGlyph Phase 65 and its owner's modified
+report are unchanged. This is a pre-production development checkpoint,
+not a release, signed ISO, desktop completion or production promotion.
+
+Historical Cycle 160 completes N7-TRAP-001 prerequisite replay for the Cycle 158 kernel:
 five live trap/CPU/xstate/MSR profiles pass fourteen fresh headless boots,
 225 marker controls and 41 focused Python tests. One expected TCG exception
 non-delivery diagnostic is recorded separately. All twelve selected N5/N7

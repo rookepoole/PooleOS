@@ -4,7 +4,17 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
-Cycle 160 completes current-kernel trap, CPU, x87/SSE and read-only MSR replay:
+Cycle 161 completes qualification of the mandatory native task-retention
+checkpoint: 28 final memory/SMP/scheduler/lock virtual boots and 2,118 negative
+cases pass. All 26 selected native checks and the pre-closeout canonical suite
+pass, including 105 consistency gates and 708 Doctor checks. Scheduler receipts
+now validate real calendar dates instead of one fixed day. Exact-final
+qualification and publication/review checks still gate merging PR #74 to main.
+The next kernel work is active-root and execution-stack ownership. The separate
+demo ISO is unchanged; PooleOS remains pre-production.
+[Checkpoint details](docs/checkpoints/cycle161-qualified-checkpoints.md).
+
+Historical Cycle 160 completes current-kernel trap, CPU, x87/SSE and read-only MSR replay:
 fourteen fresh virtual boots, 225 marker controls and 41 focused tests pass.
 The CPU receipt validator now rejects missing and contradictory recorded
 evidence. All twelve selected boot-chain/N7 checks pass; fourteen downstream
