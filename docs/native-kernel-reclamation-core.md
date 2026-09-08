@@ -1,9 +1,16 @@
 # PKRECLAIM1 Core
 
-Cycle 152 adds [PKLIFE1 task lifetimes](native-kernel-task-lifetimes.md): actual
+Cycle 168's current source-bound receipt is version 1.4. It verifies 19 pool
+and 24 task-lifetime tests per host profile, 243 kernel regressions in both
+profiles, 20 retention cases across two modules, 11 AP-owner cases and nine
+compile-fail tests. Host evidence remains separate from live quiescence proof.
+The [bounded AP execution-ownership checkpoint](checkpoints/cycle168-ap-ownership-qualification.md)
+records the distinct two-run PKSMP5 integration; general retirement remains open.
+
+Historical Cycle 152 adds [PKLIFE1 task lifetimes](native-kernel-task-lifetimes.md): actual
 PKSCHED4 scheduler ownership and moved inactive PKVM1 address spaces, protected
 by this pool. Nineteen additional tests pass in each host profile and two more
-borrow compile-fail cases pass. The current source-bound receipt is version
+borrow compile-fail cases pass. That checkpoint's source-bound receipt is version
 1.1. This advances the first remaining integration step below only for the
 serialized inactive-address-space scope; live CPU quiescence remains open.
 

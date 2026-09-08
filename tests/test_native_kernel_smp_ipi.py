@@ -1,7 +1,9 @@
 import copy
+import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from runtime import native_kernel_smp_ipi as smp_ipi
 from runtime import native_tier0
@@ -233,6 +235,36 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
                 changed["execution"]["observation"]["execution_ownership"]["general_cpu_retirement_verified"] = True
             with self.subTest(mode=mode):
                 self.assertTrue(smp_ipi.readiness_errors(changed))
+
+
+    def test_marker_observations_survive_json_round_trip(self) -> None:
+        report = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        for run in report["execution"]["runs"]:
+            observed = smp_ipi.validate_markers(run["markers"])
+            self.assertEqual(observed, json.loads(json.dumps(observed)))
+
+    def test_malformed_receipt_shapes_return_errors(self) -> None:
+        for value in (None, [], "receipt", 1, {"execution": None}, {"negative_controls": None}):
+            with self.subTest(value=value):
+                self.assertTrue(smp_ipi.readiness_errors(value))
+
+
+    def test_release_gate_rejects_stale_kernel_and_ownership_summaries(self) -> None:
+        report = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        check = pooleos_release_gate.check_native_kernel_smp_ipi_readiness()
+        self.assertTrue(check["ok"], check["detail"])
+        for field in ("kernel", "count", "ownership", "retirement_type"):
+            changed = copy.deepcopy(report)
+            if field == "kernel":
+                changed["build"]["kernel_entry"]["product"]["canonical_sha256"] = "D0AA3295F66AF02D48476BCEDC44D962A873E98FBA21F48A6753AA7BB9B24EA4"
+            elif field == "count":
+                changed["summary"]["hostile_cases_total"] = 243
+            elif field == "ownership":
+                changed["execution"]["observation"]["execution_ownership"]["owner_release_rejections_per_attempt"] = 0
+            else:
+                changed["execution"]["observation"]["execution_ownership"]["general_cpu_retirement_verified"] = 0
+            with self.subTest(field=field), patch.object(pooleos_release_gate, "_load_schema_artifact", return_value=(changed, [])):
+                self.assertFalse(pooleos_release_gate.check_native_kernel_smp_ipi_readiness()["ok"])
 
 
 if __name__ == "__main__":

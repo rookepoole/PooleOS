@@ -1,15 +1,48 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-08
-Plan version: 2.71.0-native-dependency-replay
-Roadmap cycle: PooleOS Cycle 165
+Plan version: 2.72.0-native-ap-ownership
+Roadmap cycle: PooleOS Cycle 168
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 167 Branch Checkpoint: Merge Blockers Remain
+## Cycle 168: Bounded AP Ownership Qualified
+
+N12.3 now has actual three-AP runtime/stack and two-frame retention, exposure
+tracking before startup, release denial during possible execution, and
+ownership-preserving scrub/readback/allocator commit. Two final four-vCPU
+guest runs exercise partial startup rollback and complete startup, each with
+27 copied-free and 18 owner-release rejections per attempt. Cleanup releases
+96 runtime pages and six frame pages only after parking and verification.
+
+The measured 147-page kernel passes 243 host tests, 43 entry negative controls,
+two identical clean same-host builds, 30 SMP control groups / 249 cases and
+56 focused regressions. The Rust retained-map probe and independent Python
+model agree. Test-count, serialized-receipt, build-ID and mapping-diagnostic
+failures are retained alongside the repairs and final reruns.
+
+The current projection passes 4/27 selected native checks, with reclamation
+separately source-verified. Twenty-three changed-image dependencies need replay.
+The machine ledger preserves old boot/CPU/dependency receipts as historical;
+the exact-final qualified Cycle 165 main revision does not qualify this image.
+PR #76 stays draft until full qualification and merge conditions pass.
+
+Existing ADD/FLAG-N12-CONCURRENCY-RECLAMATION-001 and the N36 receipt-coverage
+flag remain open. No phase, subphase, requirement or flag closes. Preserve
+40 phases, 301 subphases, 57 ADD requirements, 94 flags (35 open), 20 gaps and
+8,996 checklist requirements. General task-stack ownership, CPU retirement,
+hardware quiescence and whole-OS production functionality remain open.
+
+Next move: N5-SYMBOLS-SEMANTICS-001, followed by dependency-ordered boot, CPU,
+memory, interrupt, scheduler, atomic and lock replay. Then freeze and pass
+runtime-inclusive exact-final qualification, publication and GitHub review
+conditions. N0 custody is separate; PooleGlyph and the frozen demo are unchanged.
+[Cycle 168 evidence and retained failure history](checkpoints/cycle168-ap-ownership-qualification.md).
+
+## Historical Cycle 167 Branch Checkpoint
 
 Qualified work through Cycle 165 is already on `main` through PR #75.
 Cycles 166-167 are backed up through draft PR #76 on

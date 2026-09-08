@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.3",
+  "schema_version": "1.4",
   "contract_id": "PKRECLAIM1-CORE",
   "selected_move_id": "N12-CONCURRENCY-RECLAMATION-001",
   "phase": "N12.3",
@@ -9,21 +9,26 @@
   "cross_cpu_quiescence_verified": false,
   "n12_3_complete": false,
   "focused_test_count": 19,
-  "kernel_regression_count": 228,
-  "compile_fail_borrow_tests": 7,
+  "kernel_regression_count": 243,
+  "compile_fail_borrow_tests": 9,
   "physical_retention_contract_id": "PKRETAIN1",
   "physical_retention_scope": "allocator_enforced_for_explicitly_retained_allocations",
-  "physical_retention_test_count": 16,
+  "physical_retention_test_count": 20,
   "physical_retention_live_verified": false,
+  "ap_resource_contract_id": "PKAPOWN1",
+  "ap_resource_test_count": 11,
+  "ap_resource_scope": "mandatory_three_ap_runtime_and_two_frames",
+  "ap_resource_live_verified": false,
   "task_lifetime_contract_id": "PKLIFE1",
   "task_lifetime_test_count": 24,
   "task_lifetime_scope": "mandatory_inactive_table_and_bound_frame_retention",
-  "linked_kernel_sha256": "D0AA3295F66AF02D48476BCEDC44D962A873E98FBA21F48A6753AA7BB9B24EA4",
-  "linked_kernel_byte_count": 525976,
+  "linked_kernel_sha256": "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625",
+  "linked_kernel_byte_count": 530072,
   "sources": {
-    "native/kernel/src/reclamation.rs": "D83CC01443435BD993C6A688B7BDD169A05B87B20AC32B083FFEB81988206A62",
+    "native/kernel/src/reclamation.rs": "118197DAEB079295F6A3E9279AC986D6EBE6C306155E85293A9D4F3DCCA4CCD7",
+    "native/kernel/src/reclamation/ap_resources.rs": "3EDF558319B69961D0E19D0350A440CEE34C04C82A22C3AF336982FDB6ED3CF7",
     "native/kernel/src/reclamation/task_lifetimes.rs": "A5CDF65682124F707EDCAD2C120FE41C2E7B179A8D3ABC0F34C211C18208EBF2",
-    "native/kernel/src/lib.rs": "32326BA195A43C10A772E4B57FA8F1C946B37C5A57EB305D89BE7F8AF9639209",
+    "native/kernel/src/lib.rs": "A462E54DDE5D98BBCD1E08A739516831708AB98D40890B14E76F5D435348BC09",
     "native/kernel/src/atomics.rs": "1B4228C921F0746C101B307A20E34DCF7D7D859895A440D027005FADE48D0B90",
     "native/kernel/src/locks.rs": "102A453683238E01DEE0516359B6FB80368AE89A9BAE19F0699FE8C3E123DF9A",
     "native/kernel/tests/reclamation_core.rs": "43D28759ABC933FE5A4F85D22AFE8A588EEE559FDC20C6188C3347B8D2F74FCA",
@@ -31,20 +36,22 @@
     "native/kernel/src/scheduler_smp.rs": "8C3C13140D867F3766F6209B1B918970BA095EA5FA35634C721D5C0509469390",
     "native/kernel/src/virtual_memory.rs": "956CB1A42A93B82B1F56637158ECF3AF7DE0ED55DF2565E3A0BCDD2DDB7E601D",
     "native/kernel/src/active_virtual_memory.rs": "A922E790E573B9D92A9882DB7498CB9017487FAB933B83B4B7BFCBEE11AA9DED",
-    "native/kernel/src/physical_memory.rs": "62BCA3E37E738371D86989BCDD5A3558D5716B0CAEA2FA86CAD54DC67D973DEB",
-    "native/kernel/src/physical_memory/retention.rs": "3C71681C06BE03F035D67465051743C293A386718C2749D8B071EE1E776F1AE1",
-    "native/kernel/src/physical_memory/tests/retention.rs": "E836ED901588DF00C3B80C4996E2E4BC2E780E62A9F6F0EA09398EEBCD70E73F",
-    "native/kernel/src/main.rs": "BAC5CEB12DB816DDC70B2505D352E464FA8D14A5619616866B983FE8EEFDF662",
-    "native/kernel/linker.ld": "BAB2ACFAEA742F2C5BB3BD7166018A2D9480CA2D3B83795F5D4FEF7AEB130873",
-    "native/kernel/manifest.pkm": "68D111CC7E4C79BD798FAA4269F1FB8AF77BE5DA85AC2ACAD80645688400CE7C",
-    "specs/native-kernel-entry-contract.json": "1C838566B54645397CFD477C23F9DC3F65AB030DC4F4BA5BCD12DB056FA2A6C6",
-    "specs/native-kernel-entry-contract.schema.json": "B16B4B97FD780A3E97913F924D7383A3E1AF2C1E98D66D8B5CDC047745074FF0",
-    "native/kmap/src/lib.rs": "F934F7B5B7FB1A61EF0F4D84787AD389664C825AA940D7F39C589C0A3CFA7AF5",
+    "native/kernel/src/physical_memory.rs": "ABFEF48FEE61D4BA7AC00E067901804795FEBBBB1611878E84D5C40892587F72",
+    "native/kernel/src/physical_memory/retention.rs": "CEBC587CFCD784D747C202EF4935EDCFD5A1FEE6E97F28EDCB3AD8EA6CD61EB8",
+    "native/kernel/src/physical_memory/tests/retention.rs": "4489C91A41BA378B0330BFC88EB9E0F0FC4CD2E52009F93DE13CDAB812180F78",
+    "native/kernel/src/physical_memory/tests/ap_resources.rs": "B3CDC5A67BC98AC4918184D01DAB57BA1FBB8A33887D45E1B741B3A37656682C",
+    "tests/test_native_reclamation_core.py": "8D4F717D63146520928C78481B44C109DAE28979F24220E68782C164EC9333B7",
+    "native/kernel/src/main.rs": "58FC29B2585F62C68C55A398B12D63C41571E6507FD1EBA480C65AC0CE9D0EB7",
+    "native/kernel/linker.ld": "1D5CD169A537957B4D61A734DBC71974702A1B825F0A58A10B022F8A2D3E8AC0",
+    "native/kernel/manifest.pkm": "51BD6E01E5A300FE3444EC2FF6352F7A6EAFE38C4728014596C540290A4779F2",
+    "specs/native-kernel-entry-contract.json": "2B7AE3FF260D8D8C1246BC73AFD0B9322BDFBFD3DDC6AC941EC9F1A938A8B413",
+    "specs/native-kernel-entry-contract.schema.json": "71D81893A6B877C49A506772B8CE54D3C6581EE8F5908C320A2185F3BD21D01E",
+    "native/kmap/src/lib.rs": "5CFD8D3308B429C29E1FF7143F43410E081275FFD33F71715A2B626189699CD1",
     "native/handoff/src/lib.rs": "983DAFD71E0B892F6F98C614D43600CBEBDDBD7C0AA1E2D81CDAA545E165B110",
     "native/kernel/Cargo.toml": "F9F3AB6D84008B0354A5B82B0F616C5652C076C15F3313F14B862ED0DB1C1C43",
     "native/Cargo.lock": "29CE9938C5C60DEA5AEA244A6961BB1924D88AEC601D1E02EAAA510B0B36E390",
     "specs/native-toolchain-lock.json": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E",
-    "tools/qualify_native_reclamation_core.py": "13AAF48E99F7598D437BC0438D680F0F6E016BC1412D9892BFDFA8DA9194B79B"
+    "tools/qualify_native_reclamation_core.py": "7CA05761B3F150A8E10406B6376996FA802AE8BDF3FBB7978A5EEA4B409BF7A2"
   },
   "stages": [
     {
@@ -55,7 +62,7 @@
     {
       "name": "host-build-debug",
       "status": "pass",
-      "output_sha256": "808E98EB9B576294E593DF00B8F1A0D981516CF0F2A7777F1E736D9C40EDFE79"
+      "output_sha256": "BFE396255D8DFF5DDA08ABF78FEFA7B97D7AE3E41544CD98B20B7342BF9DA51E"
     },
     {
       "name": "test-build-debug",
@@ -80,7 +87,7 @@
     {
       "name": "host-build-release",
       "status": "pass",
-      "output_sha256": "6DA5FE805B16CCCC4D50FE5A91B45859606A82C4021B9541D7ACE6629F1FA46D"
+      "output_sha256": "82BDE9CE23AF9933B87D8DC52ABC4B89FE70F9A0095D66129F024665B3D98007"
     },
     {
       "name": "test-build-release",
@@ -105,32 +112,32 @@
     {
       "name": "kernel-regressions-release",
       "status": "pass",
-      "output_sha256": "381FB75309E8E9EB0463530FDB451B089EC4806F1C8CC624DCE451514861DA7B"
+      "output_sha256": "0AAD9A57C71CFA56BC6AFAD787FD51419B3941BDAD1C8D339A4B2255FD86C9EC"
     },
     {
       "name": "borrow-doctests",
       "status": "pass",
-      "output_sha256": "A04814951468D5D58829B437E3BA4F31E448A7C503FB07188737C3C1AC88C164"
+      "output_sha256": "13FA84230B08B5EA275A93A4115A90FAC179B2F2E26A3E0B3BCFD5601FD0E860"
     },
     {
       "name": "kernel-regressions",
       "status": "pass",
-      "output_sha256": "92BE1FE597B20BFBC834502A9EBCA6BA8DF65744364D23F92F83D72E08A3A021"
+      "output_sha256": "90295D7A1DF918C5D2A924DC6715E49A159E0BAAD858A3C75FB1C98823935119"
     },
     {
       "name": "host-clippy",
       "status": "pass",
-      "output_sha256": "7CE2EDEFB8C57528F068788E4FE6A0DE71B0958C0092E06BBFF539F10E6DD232"
+      "output_sha256": "0D4DA6A972197F716B544D65A7604BA9AEF2DB0D8A99611A5FD3FEB393E9809D"
     },
     {
       "name": "freestanding-clippy",
       "status": "pass",
-      "output_sha256": "4C75836EDC94405D98D4CB7FBC67409BC0A0EA0308F82E9DCE2D191E0D77F4BD"
+      "output_sha256": "171AA9FE2A68E549133F414987921A4ED620E7EFCC51EAE95C218EB9AD252786"
     },
     {
       "name": "linked-kernel-build",
       "status": "pass",
-      "output_sha256": "A6412E1AE4CDB0DEFDA7800BD6EEF80AA587FA198977B29F3DC1FAB34D71030C"
+      "output_sha256": "3B9F1CDA6F788B757C8A2CC77639E06D66EF73E69873D78B3989E2674C1167D4"
     }
   ]
 }

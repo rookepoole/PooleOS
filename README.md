@@ -7,16 +7,16 @@ PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available
 **Cloud status:** qualified checkpoints through Cycle 165 are merged into `main`
 at `6f9399c` via [PR #75](https://github.com/rookepoole/PooleOS/pull/75).
 The exact merged tree passed all 105 canonical gates and 708 Doctor checks.
-Cycles 166-167 are unfinished AP-resource ownership work on
+Cycle 168 qualifies bounded AP-resource ownership on
 `agent/n12-ap-execution-ownership`, tracked by
 [draft PR #76](https://github.com/rookepoole/PooleOS/pull/76).
-Cycle 167 passes the entry qualifier with 243 kernel tests, 43 negative controls
-and identical bytes from two clean same-host builds. Reclamation qualification
-stopped at a named-test count mismatch; fresh guest execution, changed-image
-dependency replay and exact-final qualification remain pending. These are
-actual merge blockers, not a requirement to leave source only on a workstation.
-Branch backup is not qualification or production promotion.
-[Cycle 167 checkpoint and merge blockers](docs/checkpoints/cycle167-ap-live-controls-wip.md).
+The new kernel passes 243 host tests, two final four-CPU guest runs, 249 SMP
+negative controls and 56 focused regressions. Runtime stacks and both AP data
+frames remain retained through possible execution and fallible scrubbing.
+Four of 27 selected native checks are current; 23 changed-image dependencies
+still need replay, beginning with N5 symbols/semantics. The full current-source
+suite remains pending, so PR #76 is not yet merge-qualified or production-ready.
+[Cycle 168 proof, failures and next move](docs/checkpoints/cycle168-ap-ownership-qualification.md).
 
 Historical Cycle 165 pre-merge summary: memory-through-lock dependency replay:
 fourteen profiles, 28 final headless boots, 660 negative-control groups and

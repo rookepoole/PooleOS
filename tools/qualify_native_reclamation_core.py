@@ -48,7 +48,7 @@ SOURCES = (
 REPORT = ROOT / "runs/native-kernel-reclamation-core-readiness.json"
 TEST_COUNT = 19
 LIFETIME_TEST_COUNT = 24
-KERNEL_SHA256 = "4C0D2D64D1572FE0ACE3105BE066C89588181CAD7C927765063D7C50187DE7F8"
+KERNEL_SHA256 = "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625"
 STAGES = (
     "format", "host-build-debug", "test-build-debug", "tests-debug",
     "lifetime-build-debug", "lifetime-tests-debug",
@@ -70,12 +70,20 @@ def require_test_result(output: str, count: int) -> None:
 
 
 def require_named_test_result(output: str, prefix: str, count: int) -> None:
-    names = re.findall(
-        rf"^test ({re.escape(prefix)}[A-Za-z0-9_]+) \.\.\. ok$",
+    records = re.findall(
+        rf"^test ({re.escape(prefix)}[A-Za-z0-9_]+) \.\.\. (.*)$",
         output.replace("\r\n", "\n"), re.MULTILINE,
     )
-    if len(names) != count or len(set(names)) != count:
+    if (len(records) != count or len({name for name, _ in records}) != count
+            or any(status != "ok" for _, status in records)):
         raise ValueError(f"expected {count} unique passing {prefix} tests")
+
+
+def require_ownership_test_results(output: str) -> None:
+    # Retention includes two identity-exhaustion tests in its private module.
+    require_named_test_result(output, "physical_memory::tests::retention::", 18)
+    require_named_test_result(output, "physical_memory::retention::tests::", 2)
+    require_named_test_result(output, "physical_memory::tests::ap_resources::", 11)
 
 
 def validate_report(report: dict, root: Path = ROOT) -> None:
@@ -143,8 +151,7 @@ def qualify(work: Path) -> dict:
         if count is not None:
             require_test_result(output, count)
         if name in {"kernel-regressions", "kernel-regressions-release"}:
-            require_named_test_result(output, "physical_memory::tests::retention::", 20)
-            require_named_test_result(output, "physical_memory::tests::ap_resources::", 11)
+            require_ownership_test_results(output)
         stages.append({"name": name, "status": "pass", "output_sha256": hashlib.sha256(raw).hexdigest().upper()})
 
     base = ["--manifest-path", str(entry.NATIVE_ROOT / "Cargo.toml"), "--package", "poolekernel"]

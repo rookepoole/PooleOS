@@ -455,6 +455,8 @@ def make_readiness(toolchain_root: Path, qemu_root: Path, status_date: str, time
         "summary": {"application_processors_online": 3, "operation_classes_installed_per_ap": 6, "accepted_deliveries": 9, "denied_deliveries": 3, "offline_timeouts": 1, "partial_start_rollbacks": 1, "fresh_retries": 1, "eois": 12, "remote_tlb_invalidations": 3, "retired_generations": 1, "premature_reclaim_rejections": 2, "resource_pages_released": 96, "frame_pages_released": 6, "verified_bytes": 417792, "negative_controls_total": len(controls), "hostile_cases_total": sum(item["case_count"] for item in controls), "production_claim_count": 0},
         "open_items": ["scheduler ownership and CPU affinity", "general topology and x2APIC", "concurrent address-space replacement", "address-space-wide and concurrent-generation shootdown", "production capability minting and revocation", "additional live failure interleavings", "physical-target evidence", "N8 and N9 exit gates", "production signing and promotion"],
     }
+    # Validate the JSON value that readers will receive, not only Python objects.
+    report = json.loads(json.dumps(report))
     errors = smp_ipi.readiness_errors(report, ROOT)
     if errors:
         raise QualificationError("; ".join(errors))

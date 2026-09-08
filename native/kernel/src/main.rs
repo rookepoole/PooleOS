@@ -444,7 +444,7 @@ pkvm_fragment!(
 );
 pkvm_fragment!(
     PKVM_LAYOUT,
-    b"POOLEOS:KERNEL:VM-LAYOUT PASS contract=PKVM1 canonical_bits=48 null_guard_end=0x0000000000010000 user_end=0x0000800000000000 kernel_start=0xFFFF800000000000 direct_start=0xFFFF900000000000 direct_end=0xFFFFD00000000000 temp_start=0xFFFFFFFF801B8000 temp_end=0xFFFFFFFF801B9000 kernel_image_start=0xFFFFFFFF80000000 kernel_image_end=0xFFFFFFFFC0000000 window_start=0x0000000040000000 window_pages=512\n"
+    b"POOLEOS:KERNEL:VM-LAYOUT PASS contract=PKVM1 canonical_bits=48 null_guard_end=0x0000000000010000 user_end=0x0000800000000000 kernel_start=0xFFFF800000000000 direct_start=0xFFFF900000000000 direct_end=0xFFFFD00000000000 temp_start=0xFFFFFFFF801B9000 temp_end=0xFFFFFFFF801BA000 kernel_image_start=0xFFFFFFFF80000000 kernel_image_end=0xFFFFFFFFC0000000 window_start=0x0000000040000000 window_pages=512\n"
 );
 pkvm_fragment!(
     PKVM_TABLES,

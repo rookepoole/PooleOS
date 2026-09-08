@@ -207,6 +207,8 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
 def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     issues = validate_json(readiness, read_json(root / READINESS_SCHEMA_RELATIVE))
     errors = [f"schema {issue.path}: {issue.message}" for issue in issues]
+    if errors:
+        return errors
     if readiness.get("inputs") != expected_inputs(root):
         errors.append("readiness input bindings are stale")
     controls = readiness.get("negative_controls", [])
@@ -515,7 +517,7 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         frame_allocations = _csv_numbers(match.group("frame_allocations"))
         frame_releases = _csv_numbers(match.group("frame_releases"))
         layouts.append(layout)
-        aps.append({"index": index, "apic_id": EXPECTED_APIC_IDS[index], "layout": layout, "allocation_sequence": _dec(match, "allocation"), "frame_allocation_sequences": frame_allocations, "frame_release_sequences": frame_releases, "resource_release_sequence": _dec(match, "resource_release"), "trampoline_bytes": _dec(match, "trampoline"), "response_checksum": response_expected})
+        aps.append({"index": index, "apic_id": EXPECTED_APIC_IDS[index], "layout": layout, "allocation_sequence": _dec(match, "allocation"), "frame_allocation_sequences": list(frame_allocations), "frame_release_sequences": list(frame_releases), "resource_release_sequence": _dec(match, "resource_release"), "trampoline_bytes": _dec(match, "trampoline"), "response_checksum": response_expected})
     validate_receipt_sequences(aps)
     _require([item["start"] for item in layouts] == [0x1000, 0x23000, 0x45000], "PKSMP5 private resource placement changed")
     _require(len({item["pml4"] for item in layouts}) == AP_COUNT, "PKSMP5 private roots alias")

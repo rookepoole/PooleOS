@@ -7,17 +7,21 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 165
+Last roadmap reconciliation: PooleOS Cycle 168
 
 Current cloud checkpoint: qualified Cycles 162-165 merged through PR #75 at
 `6f9399c3cd70ebef2f7610f8b6fdb40ae262e27f`. The exact merged tree passed
-105 canonical gates and 708 Doctor checks. Cycles 166-167 are unfinished
-AP-resource ownership work in draft PR #76. Entry qualification passes, but
-reclamation's named-test accounting fails and fresh SMP/dependency execution,
-machine-ledger reconciliation and exact-final qualification remain pending.
-The Cycle 165 machine ledger and older receipts are not current-branch passes.
-The checkpoint is cloud backup only; no charter condition or phase closes.
-[Current checkpoint and next move](checkpoints/cycle167-ap-live-controls-wip.md).
+105 canonical gates and 708 Doctor checks. Cycle 168 qualifies bounded AP
+runtime/stack/frame ownership in two final four-vCPU runs with 27 copied-free
+and 18 owner-release rejections per partial/full attempt, 249 negative cases,
+243 kernel tests and 56 focused regressions. The checker, serialized-receipt
+and mapping/identity failures are repaired and preserved in the checkpoint.
+The machine ledger distinguishes this 4/27 selected-native projection from
+historical qualification; 23 changed-image dependencies remain pending.
+Next is N5-SYMBOLS-SEMANTICS-001, then ordered replay and runtime-inclusive
+exact-final qualification before PR #76 may merge. No charter condition,
+phase or flag closes; general task-stack/CPU retirement and N0 remain open.
+[Current checkpoint and next move](checkpoints/cycle168-ap-ownership-qualification.md).
 
 Historical Cycle 165 pre-merge summary: fourteen memory, interrupt, SMP, scheduler, atomic and lock
 profiles on the unchanged Cycle 162 kernel: 28 final successful headless boots,
