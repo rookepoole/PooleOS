@@ -1,15 +1,53 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-08
-Plan version: 2.70.0-native-cpu-state-replay
-Roadmap cycle: PooleOS Cycle 164
+Plan version: 2.71.0-native-dependency-replay
+Roadmap cycle: PooleOS Cycle 165
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 164 CPU-State Replay
+## Cycle 165 Native Dependency Replay
+
+The N9.1/N9.2 `N9-PMM-ACPI-CONSUMER-001` and N9.3/N9.4
+`N9-VM-DIRECT-MAP-001` replay continues through the existing N8 interrupt/SMP
+and N12 scheduler/atomic/lock profiles. Fourteen exact current-kernel receipts
+pass 28 final headless boots, 660 negative-control groups and 2,120 rejected
+cases. Every live qualifier passes 228 kernel host tests. Six initial boots
+are preserved but superseded after correcting three stale test expectations;
+they are excluded from the final 28. No native Rust or executable contract changes.
+
+The 142-test focused profile/map/gate suite passes with two optional local
+transcript skips. Fresh live qualifiers independently check their own actual
+transcripts. Twenty-five stale/off-by-one gate controls and fourteen
+production-overclaim controls reject. All 27 selected native checks now pass,
+including the previously current N5/N7 chain. This is not a full canonical
+or Doctor qualification. The historical failed Cycle 162 audit is unchanged.
+
+The larger kernel accounts for two additional protected pages: source usable
+117,820, loader protected 924 and final PMM managed 129,080. The VM maps 117,819
+owned pages with 12,946 hole pages and 243 tables; its six retained-free
+rejections, three local invalidation receipts and exact retirement still pass.
+The memory guide now matches the 146-page PKMAP2 layout. Its VM data-release
+description explicitly leaves scrub-before-reuse integration open, separately
+from the scrubbed allocator diagnostic and table-zeroing path.
+
+No phase or flag closes. All 40 phases, 301 subphases, 57 ADD requirements,
+94 flags (35 open), twenty program gaps and 8,996 locked requirements remain
+conserved. Existing `FLAG-N36-RECEIPT-COVERAGE-001` records the limited evidence
+repairs without closing the broader cross-profile audit. N9/N12 still require
+data-frame hygiene, execution-stack ownership, general CPU retirement and their
+other production work. PooleGlyph Phase 65 and the frozen demo remain unchanged.
+
+Next gate: runtime-inclusive exact-final canonical qualification with both
+bundle and replay inputs, followed by publication and GitHub merge/review checks.
+Then resume `N12-CONCURRENCY-RECLAMATION-001`. N0 custody remains independently
+blocked; no new owner action is needed for the next development qualification.
+[Cycle 165 evidence](checkpoints/cycle165-native-dependency-replay.md).
+
+## Historical Cycle 164 CPU-State Replay
 
 The selected N7.5/N7.6 `N7-TRAP-001` replay and dependent N7.1/N7.3/N7.4
 CPU-state checks are complete for the unchanged Cycle 162 kernel. PKTRAP1,
@@ -2406,13 +2444,15 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 
 ## 12. Near-Term Execution Sequence
 
-Current Cycle 164 sequence: start N9-PMM-ACPI-CONSUMER-001, then replay VM,
-IRQ/SMP, scheduler, atomics and locks on the unchanged Cycle 162 kernel.
-The six N5 and five N7 live component gates pass. Fourteen selected downstream
-receipts and runtime-inclusive exact-final qualification still block merging
-draft PR #75. Resume N12.3 execution-stack and CPU-retirement ownership after
-that qualified baseline. N0-GOVERNANCE-CUSTODY-001 remains separately blocked;
-no new owner action is required for the current virtual-machine replay.
+Current Cycle 165 sequence: all 27 selected native dependency checks pass on
+the unchanged Cycle 162 kernel. Run the full exact-final canonical qualification
+with `--include-runtime`, `--bundle` and `--replay-proof`, then the publication
+scan and GitHub merge/review gates before merging draft PR #75. Resume N12.3
+execution-stack and CPU-retirement ownership under
+`N12-CONCURRENCY-RECLAMATION-001` after that qualified baseline. Keep PKVM3
+data-frame scrub-before-reuse integration explicit in N9/N12 gaps.
+N0-GOVERNANCE-CUSTODY-001 remains separately blocked; no new owner action is
+required for the next development qualification.
 The older cycle descriptions below retain their historical scope.
 
 Historical Cycle 149 closes only `FLAG-N12-CONCURRENCY-LOCKS-001`. PKLOCK1 adds

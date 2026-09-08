@@ -7,9 +7,24 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 164
+Last roadmap reconciliation: PooleOS Cycle 165
 
-Cycle 164 completes the trap/CPU/xstate/exception/MSR replay on the unchanged
+Cycle 165 completes fourteen memory, interrupt, SMP, scheduler, atomic and lock
+profiles on the unchanged Cycle 162 kernel: 28 final successful headless boots,
+660 negative-control groups and 2,120 rejected cases. Six superseded initial
+boots are preserved separately after correcting three stale test expectations.
+All 27 selected native checks pass; this is not a full canonical or Doctor pass.
+Memory layout documentation and measured acceptance pins are reconciled, with
+25 stale/off-by-one gate controls and fourteen production-overclaim controls.
+PKVM3 data-frame scrub-before-reuse integration remains explicitly open.
+No phase, flag, charter scope or production condition changes. Main remains
+qualified Cycle 161. Runtime-inclusive exact-final qualification with bundle
+and replay inputs, publication and GitHub review gates must pass before merge
+and further N12.3 execution-stack/general CPU-retirement ownership work.
+N0 custody, PooleGlyph and the frozen demo are unchanged.
+[Cycle 165 evidence](checkpoints/cycle165-native-dependency-replay.md).
+
+Historical Cycle 164 completes the trap/CPU/xstate/exception/MSR replay on the unchanged
 Cycle 162 kernel. Five live profiles pass fourteen final headless boots,
 225 marker controls and 41 focused N7 tests, including the unchanged pure
 errata-policy tests. The six pre-backup trap boots are included once; one

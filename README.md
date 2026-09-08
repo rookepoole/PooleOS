@@ -4,7 +4,16 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
-Cycle 164 completes current-kernel trap and CPU-state replay: five live
+Cycle 165 completes memory-through-lock dependency replay on the current kernel:
+fourteen profiles, 28 final headless boots, 660 negative-control groups and
+2,120 rejected cases. All 27 selected native checks pass. The 142-test profile
+suite passes with two optional local-transcript skips. Full runtime-inclusive
+qualification and publication/review gates still precede merging draft PR #75;
+main remains qualified Cycle 161. No native kernel, PooleGlyph or demo ISO bytes
+change, and no phase or production gate closes.
+[Cycle 165 checkpoint](docs/checkpoints/cycle165-native-dependency-replay.md).
+
+Historical Cycle 164 completes current-kernel trap and CPU-state replay: five live
 profiles pass fourteen headless boots, 225 marker controls and 41 focused
 N7 tests. One expected TCG exception diagnostic is counted separately.
 The selected native projection now passes 13/27; fourteen memory-through-lock
