@@ -4,6 +4,10 @@ Status date: 2026-09-08
 Status: unfinished development checkpoint, not merge qualification.
 Scope: N7.5/N7.6, `N7-TRAP-001`; continued dependency replay is required.
 
+Historical partial checkpoint. The subsequent
+[Cycle 164 CPU-state replay](cycle164-cpu-replay.md) completes this N7
+increment without claiming full downstream qualification or merge readiness.
+
 ## Cloud and Main Status
 
 Main contains the qualified Cycle 161 checkpoint through merged

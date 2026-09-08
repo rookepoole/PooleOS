@@ -7,19 +7,26 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 163
+Last roadmap reconciliation: PooleOS Cycle 164
 
-Cycle 164 cloud-backup notice: the bounded trap replay passes six boots,
-51 controls and seven focused tests. The current selected native projection
-is 9/27 with eighteen dependencies pending, not a canonical suite pass.
-See [the partial checkpoint](checkpoints/cycle164-trap-wip.md). The machine
-ledger remains the last reconciled Cycle 163 baseline; current-source
-aggregate reconciliation is pending. PR #75 remains draft until complete
-dependency replay, runtime-inclusive exact-final qualification, publication
-and GitHub merge/review gates pass. This notice changes no charter scope,
-authority, phase completion, production exit or main-merge requirement.
+Cycle 164 completes the trap/CPU/xstate/exception/MSR replay on the unchanged
+Cycle 162 kernel. Five live profiles pass fourteen final headless boots,
+225 marker controls and 41 focused N7 tests, including the unchanged pure
+errata-policy tests. The six pre-backup trap boots are included once; one
+expected TCG exception non-delivery diagnostic is counted separately from
+the two successful WHPX exception boots. A contradictory profile description
+and stale current-summary counts are corrected without changing native code.
+The selected native projection is 13/27, with fourteen memory-through-lock
+dependencies still requiring replay. Historical full audits are not current
+aggregate scores. No phase, flag or production gate closes. Main remains
+qualified Cycle 161; draft PR #75 holds the source checkpoint. Next is
+N9-PMM-ACPI-CONSUMER-001, followed by VM/IRQ/SMP/scheduler/atomic/lock replay
+and runtime-inclusive exact-final qualification before any main merge.
+PooleGlyph, the frozen demo, N0 custody and the charter scope are unchanged.
+[Cycle 164 evidence](checkpoints/cycle164-cpu-replay.md) supersedes the partial
+cloud-backup notice while preserving its historical record.
 
-Cycle 163 completes PSYM1, PPOL1, PKLOAD6, PooleBoot, PKREVAL1 and PKXFER1
+Historical Cycle 163 completes PSYM1, PPOL1, PKLOAD6, PooleBoot, PKREVAL1 and PKXFER1
 replay for the unchanged Cycle 162 kernel. Six final headless boots include
 two kernel entries with independent nine-file retained-input agreement.
 Seventy focused tests pass. Loader and PooleBoot calendar-date validation
