@@ -63,6 +63,7 @@ class NativeKernelVirtualMemoryTests(unittest.TestCase):
         self.assertEqual(1, observation["invalidation"]["future_smp_shootdown_required"])
         self.assertEqual(1, observation["invalidation"]["old_generation_reclaim_deferred"])
         self.assertEqual(1, observation["invalidation"]["exact_release_receipt"])
+        self.assertEqual(6, observation["invalidation"]["retained_free_rejections"])
         self.assertEqual(3, observation["result"]["active_invlpg"])
         self.assertEqual(
             observation["result"]["temporary_pte_writes"],
@@ -100,6 +101,28 @@ class NativeKernelVirtualMemoryTests(unittest.TestCase):
         self.assertTrue(audit["volatile_physical_adapter"])
         self.assertTrue(audit["bootstrap_temporary_mapping_uses_invlpg"])
         self.assertTrue(audit["live_cpuid_physical_width_validated"])
+
+    def test_recorded_retention_cannot_be_inferred_from_summary_only(self) -> None:
+        for case in ("missing_runs", "one_run", "wrong_count", "missing_count",
+                     "summary", "observation"):
+            with self.subTest(case=case):
+                receipt = copy.deepcopy(self.readiness)
+                execution = receipt["execution"]
+                if case == "missing_runs":
+                    execution.pop("runs")
+                elif case == "one_run":
+                    execution["runs"].pop()
+                elif case in ("wrong_count", "missing_count"):
+                    marker = execution["runs"][1]["markers"][38]
+                    execution["runs"][1]["markers"][38] = marker.replace(
+                        " retained_free_rejections=6",
+                        " retained_free_rejections=5" if case == "wrong_count" else "",
+                    )
+                elif case == "summary":
+                    receipt["summary"]["retained_free_rejections"] = 5
+                else:
+                    execution["observation"]["invalidation"]["retained_free_rejections"] = 5
+                self.assertTrue(virtual_memory.readiness_errors(receipt))
 
 
 if __name__ == "__main__":

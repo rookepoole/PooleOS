@@ -4,13 +4,25 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
-Cycle 161 completes qualification of the mandatory native task-retention
+Cycle 162 adds mandatory ownership of active page tables and data frames.
+The kernel rejects copied-handle frees and keeps pages retained when cleanup
+fails. The larger image's guarded boot mapping is updated and independently
+checked. 228 kernel tests and two fresh headless VM boots pass; the live path
+observes six retained-free rejections. Other changed-image dependencies still
+need replay before merging; the candidate audit is failed at 81/105 gates.
+Main holds the qualified Cycle 161 checkpoint merged through
+[PR #74](https://github.com/rookepoole/PooleOS/pull/74);
+the demo ISO is unchanged. PooleOS remains pre-production.
+[Cycle 162 checkpoint](docs/checkpoints/cycle162-active-root-retention.md).
+
+Historical Cycle 161 completes qualification of the mandatory native task-retention
 checkpoint: 28 final memory/SMP/scheduler/lock virtual boots and 2,118 negative
 cases pass. All 26 selected native checks and the pre-closeout canonical suite
 pass, including 105 consistency gates and 708 Doctor checks. Scheduler receipts
-now validate real calendar dates instead of one fixed day. Exact-final
-qualification and publication/review checks still gate merging PR #74 to main.
-The next kernel work is active-root and execution-stack ownership. The separate
+now validate real calendar dates instead of one fixed day. Subsequent exact-final
+qualification and publication/review checks passed, and PR #74 merged as
+`a4c3c27`. Active-root ownership is developed in Cycle 162; execution-stack
+ownership remains open. The separate
 demo ISO is unchanged; PooleOS remains pre-production.
 [Checkpoint details](docs/checkpoints/cycle161-qualified-checkpoints.md).
 

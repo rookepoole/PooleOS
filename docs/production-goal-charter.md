@@ -7,9 +7,24 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 161
+Last roadmap reconciliation: PooleOS Cycle 162
 
-Cycle 161 completes the changed-kernel dependency replay begun in Cycle 158.
+Cycle 162 implements mandatory active table/data retention in the native
+PKVM3 path, with ownership-preserving failure cleanup and synchronized PKMAP2
+retained geometry for the 146-page kernel. 228 kernel tests in both modes,
+24 lifetime/19 pool cases, seven compile-fail checks, two identical builds
+and two fresh headless VM boots pass. Six allocator rejections are observed
+per boot. The selected projection passes 4/27; 23 dependency receipts remain
+stale. The actual pre-closeout audit is failed at81/105, Doctor683/706; the
+optional PooleGlyph runtime pair was excluded and passes separately without
+changing that audit. Runtime-inclusive exact-final qualification still gates
+merging. Historical Cycle 161 main was merged
+through PR74; its aggregate pass is not inherited by changed image bytes.
+N12.3, N0 custody and N36 remain open; no phase or flag closes, and neither
+PooleGlyph nor the frozen demo ISO changes. The next owner-independent move
+is N5-SYMBOLS-SEMANTICS-001 and dependency-ordered replay before main merge.
+
+Historical Cycle 161 completes the changed-kernel dependency replay begun in Cycle 158.
 Fourteen current-source memory, IRQ/SMP, scheduler, atomic and lock profiles
 pass 28 final headless boots, 658 control groups and 2,118 rejected cases.
 Each qualifier passes 219 kernel host tests on the unchanged mandatory-retention

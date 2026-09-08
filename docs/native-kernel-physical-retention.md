@@ -1,5 +1,12 @@
 # Native Physical Allocation Retention
 
+Cycle 162 adds mandatory PKVM3 active table/data retention and a PMM
+`free_retained` commit path that returns the exact owner on failure without
+an intermediate unretained allocation. See `docs/native-kernel-virtual-memory.md`.
+The new kernel has 228 host tests, including 16 allocation-retention cases;
+execution-stack ownership, general CPU retirement and the N12 exit remain open.
+The following Cycle 158 account is historical, not current-image qualification.
+
 Contract: PKRETAIN1. Cycle 158, N12.3,
 `N12-CONCURRENCY-RECLAMATION-001`, existing
 `ADD-N12-CONCURRENCY-RECLAMATION-001` and

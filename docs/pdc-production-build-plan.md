@@ -1,8 +1,8 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-07
-Plan version: 2.67.0-native-qualified-checkpoints
-Roadmap cycle: PooleOS Cycle 161
+Plan version: 2.68.0-native-active-root-retention
+Roadmap cycle: PooleOS Cycle 162
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
@@ -28,7 +28,28 @@ registration. The governance flag and all production boundaries remain open.
 
 ## 1. Architecture Decision
 
-Cycle 161 completes the changed-kernel dependency replay begun in Cycle 158.
+Cycle 162 implements mandatory PKVM3 active table/data retention under N12.3,
+N12-CONCURRENCY-RECLAMATION-001 and its existing ADD/FLAG. Owner-authorized PMM
+freeing preserves retention on failure. The expanded kernel also required a
+PKMAP2 retained-layout repair under N5.5/N5.8; stack guards remain intact.
+228 debug/release kernel tests, 24 lifetime tests, 19 pool tests, seven
+compile-fail cases, two clean linked builds and two fresh headless VM boots
+pass. The live profile records six allocator rejections and 48 negative
+controls. [Cycle 162 evidence](checkpoints/cycle162-active-root-retention.md).
+
+The measured current projection passes 4/27 selected native checks; 23
+changed-image receipts require replay. The pre-closeout candidate audit passes
+81/105 gates and Doctor683/706 with optional PooleGlyph runtime excluded;
+those two checks pass separately. The aggregate remains failed, and a
+runtime-inclusive exact-final replay still gates merging. Cycle 161's 105/708
+pass is historical, not inherited. No phase,
+flag or production gate closes. Next is N5-SYMBOLS-SEMANTICS-001 and dependent
+boot/CPU/memory/SMP/scheduler replay before main merge and further N12.3 work.
+Execution stacks, general CPU-retirement ownership, N0 custody, broader N36
+review and all production exits remain open. PooleGlyph and the demo ISO are
+unchanged; checklist, phase, subphase, ADD, flag and gap counts are preserved.
+
+Historical Cycle 161 completes the changed-kernel dependency replay begun in Cycle 158.
 Fourteen current-source memory, IRQ/SMP, scheduler, atomic and lock profiles
 pass 28 final headless boots, 658 control groups and 2,118 rejected cases.
 Each qualifier passes 219 kernel host tests on the unchanged mandatory-retention

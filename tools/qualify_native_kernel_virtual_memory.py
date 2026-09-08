@@ -134,6 +134,15 @@ def _negative_controls(
         )
     else:
         raise QualificationError("PKVM3 hostile PBP1 first-fit control did not reject")
+    controls.append(_require_marker_rejection(
+        virtual_memory.NEGATIVE_CONTROL_IDS[46],
+        changed(38, "retained_free_rejections", "5"), transcript,
+    ))
+    missing = markers.copy()
+    missing[38] = re.sub(r" retained_free_rejections=[0-9]+", "", missing[38])
+    controls.append(_require_marker_rejection(
+        virtual_memory.NEGATIVE_CONTROL_IDS[47], missing, transcript,
+    ))
     if [item["id"] for item in controls] != list(virtual_memory.NEGATIVE_CONTROL_IDS):
         raise QualificationError("PKVM3 hostile-control order changed")
     return controls
@@ -170,6 +179,10 @@ def _source_audit() -> dict[str, Any]:
         "GenerationRetirementReceipt",
         "pub fn restore",
         "pub fn release_tables",
+        "check_retainable_allocations",
+        ".retain_allocations(handles)",
+        "manager.free_retained(token)",
+        "retained_free_rejections != 6",
     )
     missing = tuple(token for token in required if token not in core)
     adapter_required = (
@@ -407,6 +420,7 @@ def make_readiness(
             "temporary_pte_writes": observation["result"]["temporary_pte_writes"],
             "active_leaf_mutations": 3,
             "active_invalidation_receipts": observation["invalidation"]["active_receipts"],
+            "retained_free_rejections": observation["invalidation"]["retained_free_rejections"],
             "active_cr3_writes": observation["result"]["active_cr3_writes"],
             "active_hardware_tlb_invalidations": observation["result"]["active_invlpg"],
             "bootstrap_hardware_tlb_invalidations": observation["result"]["bootstrap_invlpg"],

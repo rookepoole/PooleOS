@@ -443,7 +443,7 @@ pkvm_fragment!(
 );
 pkvm_fragment!(
     PKVM_LAYOUT,
-    b"POOLEOS:KERNEL:VM-LAYOUT PASS contract=PKVM1 canonical_bits=48 null_guard_end=0x0000000000010000 user_end=0x0000800000000000 kernel_start=0xFFFF800000000000 direct_start=0xFFFF900000000000 direct_end=0xFFFFD00000000000 temp_start=0xFFFFFFFF80150000 temp_end=0xFFFFFFFF80151000 kernel_image_start=0xFFFFFFFF80000000 kernel_image_end=0xFFFFFFFFC0000000 window_start=0x0000000040000000 window_pages=512\n"
+    b"POOLEOS:KERNEL:VM-LAYOUT PASS contract=PKVM1 canonical_bits=48 null_guard_end=0x0000000000010000 user_end=0x0000800000000000 kernel_start=0xFFFF800000000000 direct_start=0xFFFF900000000000 direct_end=0xFFFFD00000000000 temp_start=0xFFFFFFFF801B8000 temp_end=0xFFFFFFFF801B9000 kernel_image_start=0xFFFFFFFF80000000 kernel_image_end=0xFFFFFFFFC0000000 window_start=0x0000000040000000 window_pages=512\n"
 );
 pkvm_fragment!(
     PKVM_TABLES,
@@ -550,9 +550,10 @@ pkavm_fragment!(
 );
 pkavm_fragment!(PKAVM_RECEIPTS, b" active_receipts=");
 pkavm_fragment!(PKAVM_PROBE, b" probe=");
+pkavm_fragment!(PKAVM_NEWLINE, b"\n");
 pkavm_fragment!(
     PKAVM_INVALIDATION_TAIL,
-    b" protect=1 user_unmap=1 direct_unmap=1 stale_root_rejected=host premature_reuse_rejected=1 generation_retirement_receipts=1 local_context_flushes=1 remote_shootdowns_pending=0 future_smp_shootdown_required=1 old_generation_reclaim_deferred=1 exact_release_receipt=1 shootdown=0\n"
+    b" protect=1 user_unmap=1 direct_unmap=1 stale_root_rejected=host premature_reuse_rejected=1 generation_retirement_receipts=1 local_context_flushes=1 remote_shootdowns_pending=0 future_smp_shootdown_required=1 old_generation_reclaim_deferred=1 exact_release_receipt=1 shootdown=0 retained_free_rejections="
 );
 pkavm_fragment!(
     PKAVM_RESULT,
@@ -9010,6 +9011,8 @@ extern "C" fn poole_kernel_rust_entry(
         logger.write_bytes(&PKAVM_PROBE);
         logger.write_hex_u64(u64::from(proof.probe_value));
         logger.write_bytes(&PKAVM_INVALIDATION_TAIL);
+        logger.write_decimal_u64(proof.retained_free_rejections);
+        logger.write_bytes(&PKAVM_NEWLINE);
         logger.write_bytes(&PKAVM_RESULT);
         logger.write_decimal_u64(proof.final_allocated_pages);
         logger.write_bytes(&PKAVM_PHYSICAL_WRITES);

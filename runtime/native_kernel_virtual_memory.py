@@ -43,6 +43,8 @@ IMPLEMENTATION_INPUTS = (
     "native/kernel/src/arch/x86_64.rs",
     "native/kernel/src/active_virtual_memory.rs",
     "native/kernel/src/physical_memory.rs",
+    "native/kernel/src/physical_memory/retention.rs",
+    "native/kernel/src/physical_memory/tests/retention.rs",
     "native/kernel/src/virtual_memory.rs",
     "native/kmap/src/lib.rs",
     "models/tla/PooleVirtualMemory.tla",
@@ -104,6 +106,8 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N9-PKVM3-TEMPORARY-MAPPING",
     "NEG-N9-PKVM3-OVERCLAIM",
     "NEG-N9-PKVM3-PBP1-BINDING",
+    "NEG-N9-PKVM3-RETAINED-FREE-COUNT",
+    "NEG-N9-PKVM3-RETAINED-FREE-MISSING",
 )
 
 HEX = r"(0x[0-9A-F]{16})"
@@ -139,7 +143,8 @@ INVALIDATION = re.compile(
     rf"active_receipts={DEC} probe={HEX} protect={DEC} user_unmap={DEC} direct_unmap={DEC} "
     rf"stale_root_rejected=(host) premature_reuse_rejected={DEC} generation_retirement_receipts={DEC} "
     rf"local_context_flushes={DEC} remote_shootdowns_pending={DEC} future_smp_shootdown_required={DEC} "
-    rf"old_generation_reclaim_deferred={DEC} exact_release_receipt={DEC} shootdown={DEC}$"
+    rf"old_generation_reclaim_deferred={DEC} exact_release_receipt={DEC} shootdown={DEC} "
+    rf"retained_free_rejections={DEC}$"
 )
 RESULT = re.compile(
     rf"^POOLEOS:KERNEL:ACTIVE-VM-RESULT PASS contract=(PKVM3) profile=(qemu64_tier0) "
@@ -259,6 +264,30 @@ def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
         for key in ("run_count", "exact_marker_match", "exact_screenshot_match", "exact_pbp1_match")
     ) != (2, True, True, True):
         errors.append("PKVM3 exact two-run evidence changed")
+    runs = execution.get("runs") if isinstance(execution, dict) else None
+    observations = []
+    if not isinstance(runs, list) or len(runs) != 2:
+        errors.append("PKVM3 requires two recorded runs for active retention")
+    else:
+        for index, run in enumerate(runs):
+            try:
+                if not isinstance(run, dict):
+                    raise KernelVirtualMemoryError("recorded run is not an object")
+                observation = validate_markers(run["markers"])
+                validate_observation_binding(observation, run["pbp1_transcript"])
+                observations.append({key: observation[key] for key in (
+                    "layout", "candidate", "activation", "invalidation", "result"
+                )})
+            except (KeyError, TypeError, ValueError, IndexError, AttributeError) as error:
+                errors.append(f"PKVM3 recorded run {index} rejected: {error}")
+        if len(observations) == 2 and (
+            observations[0] != observations[1]
+            or execution.get("observation") != observations[0]
+        ):
+            errors.append("PKVM3 recorded observation differs from both live runs")
+    summary = readiness.get("summary")
+    if not isinstance(summary, dict) or summary.get("retained_free_rejections") != 6:
+        errors.append("PKVM3 retained-free summary changed")
     controls = readiness.get("negative_controls", [])
     if (
         not isinstance(controls, list)
@@ -375,6 +404,7 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         "old_generation_reclaim_deferred": int(invalidation_match.group(14)),
         "exact_release_receipt": int(invalidation_match.group(15)),
         "shootdown": int(invalidation_match.group(16)),
+        "retained_free_rejections": int(invalidation_match.group(17)),
     }
     names = (
         "root_released",
@@ -440,7 +470,7 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
     if tuple(activation.values()) != (2, "exact", "exact", "host_verified", 1, 0):
         raise KernelVirtualMemoryError("PKVM3 activation proof changed")
     if tuple(invalidation.values()) != (
-        3, 3, 0xA5, 1, 1, 1, "host", 1, 1, 1, 0, 1, 1, 1, 0
+        3, 3, 0xA5, 1, 1, 1, "host", 1, 1, 1, 0, 1, 1, 1, 0, 6
     ):
         raise KernelVirtualMemoryError("PKVM3 invalidation proof changed")
     expected_physical_writes = (

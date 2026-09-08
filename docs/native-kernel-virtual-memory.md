@@ -1,5 +1,31 @@
 # PKVM3 PMM-Owned Sparse Direct Map
 
+## Cycle 162 Active Ownership
+
+The N12.3 candidate adds mandatory exclusive retention of the PKVM3 table and
+data allocations. Initialization takes an exclusive PMM borrow, rejects any
+retention conflict before table writes, audits the candidate, then atomically
+acquires both tokens. A failed initialization does not retain a partial owner.
+Ordinary copied handles cannot free either allocation. Cleanup consumes a token
+only after a committed PMM free; wrong-manager, extent-capacity and metadata
+failures return the token. Table zeroing or temporary-alias cleanup failures
+leave the root retained and retryable after its existing retirement receipt.
+
+The selector-10 exercise checks six ordinary-free rejections: table and data
+before activation, both after activation, data after only the first unmap, and
+tables after restoration but before authorized cleanup. The diagnostic reports
+the observed count, and the independent parser rejects missing or altered counts.
+This candidate still requires fresh linked-image and live-profile qualification;
+Cycle 161 receipts must not be relabeled as evidence for the changed image.
+
+Dropping or forgetting the owner retains its allocations. Rust does not guarantee
+that destructors run, so allocator retention must not depend on a destructor:
+[Rust `mem::forget` safety](https://doc.rust-lang.org/core/mem/fn.forget.html).
+This is allocation ownership, not a hardware quiescence proof, a capability,
+manager-provenance isolation, execution-stack ownership or general SMP retirement.
+The existing data release is not a scrub-before-reuse implementation; this change
+does not expand its claims. Those memory and N12 exit requirements remain open.
+
 ## Scope
 
 PKVM3 is the Cycle 134 `N9-VM-DIRECT-MAP-001` increment. It replaces the
