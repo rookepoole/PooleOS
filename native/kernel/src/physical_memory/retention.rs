@@ -48,6 +48,71 @@ impl RetainedAllocation {
 }
 
 impl PhysicalMemoryManager {
+    /// Serialized, all-or-nothing retention for one owning kernel object.
+    /// Validate every member before reserving identities or changing metadata.
+    pub(crate) fn retain_allocations<const N: usize>(
+        &mut self,
+        handles: [Option<AllocationHandle>; N],
+    ) -> Result<[Option<RetainedAllocation>; N], Error> {
+        self.require_operational()?;
+        for (index, handle) in handles.iter().enumerate() {
+            let Some(handle) = handle else { continue };
+            self.validate_allocation_inner(*handle)?;
+            if handles[..index].contains(&Some(*handle)) {
+                return Err(Error::RetentionIdentity);
+            }
+            let allocation = self.allocation_entries()[usize::from(handle.slot)];
+            if allocation.release_excluded {
+                return Err(Error::MetadataOwnership);
+            }
+            if allocation.retention_id != 0 {
+                return Err(Error::AllocationRetained);
+            }
+        }
+        let count = handles.iter().flatten().count() as u64;
+        let mut identity = reserve_identities(&NEXT_RETENTION_ID, count)?;
+        let retained = handles.map(|handle| {
+            handle.map(|handle| {
+                self.allocation_entries_mut()[usize::from(handle.slot)].retention_id = identity;
+                let token = RetainedAllocation { handle, identity };
+                identity += 1;
+                token
+            })
+        });
+        self.seal_metadata_integrity();
+        Ok(retained)
+    }
+
+    /// A failed group release returns every token with no retention removed.
+    #[allow(clippy::result_large_err)]
+    pub(crate) fn release_retentions<const N: usize>(
+        &mut self,
+        retained: [Option<RetainedAllocation>; N],
+    ) -> Result<(), (Error, [Option<RetainedAllocation>; N])> {
+        let validate = (|| {
+            self.require_operational()?;
+            for token in retained.iter().flatten() {
+                self.validate_allocation_inner(token.handle)?;
+                let allocation = self.allocation_entries()[usize::from(token.handle.slot)];
+                if allocation.retention_id != token.identity || token.identity == 0 {
+                    return Err(Error::RetentionIdentity);
+                }
+                if allocation.release_excluded {
+                    return Err(Error::MetadataOwnership);
+                }
+            }
+            Ok(())
+        })();
+        if let Err(error) = validate {
+            return Err((error, retained));
+        }
+        for token in retained.into_iter().flatten() {
+            self.allocation_entries_mut()[usize::from(token.handle.slot)].retention_id = 0;
+        }
+        self.seal_metadata_integrity();
+        Ok(())
+    }
+
     /// Retain a currently live ordinary allocation. All free entry points reject
     /// even a previously copied handle until this exact token is consumed.
     pub fn retain_allocation(
@@ -98,6 +163,13 @@ impl PhysicalMemoryManager {
     }
 }
 
+fn reserve_identities(next: &AtomicU64, count: u64) -> Result<u64, Error> {
+    next.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
+        value.checked_add(count)
+    })
+    .map_err(|_| Error::RetentionExhausted)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -109,6 +181,16 @@ mod tests {
         for _ in 0..3 {
             assert_eq!(reserve_identity(&next), Err(Error::RetentionExhausted));
         }
+        assert_eq!(next.load(Ordering::Relaxed), u64::MAX);
+    }
+
+    #[test]
+    fn group_identity_exhaustion_is_atomic() {
+        let next = AtomicU64::new(u64::MAX - 2);
+        assert_eq!(reserve_identities(&next, 3), Err(Error::RetentionExhausted));
+        assert_eq!(next.load(Ordering::Relaxed), u64::MAX - 2);
+        assert_eq!(reserve_identities(&next, 2), Ok(u64::MAX - 2));
+        assert_eq!(reserve_identity(&next), Err(Error::RetentionExhausted));
         assert_eq!(next.load(Ordering::Relaxed), u64::MAX);
     }
 }

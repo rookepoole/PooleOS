@@ -5,7 +5,7 @@ use std::sync::{
 };
 
 use poole_handoff::*;
-use poolekernel::physical_memory::{PhysicalMemoryManager, Zone};
+use poolekernel::physical_memory::{PhysicalMemoryError, PhysicalMemoryManager, Zone};
 use poolekernel::reclamation::task_lifetimes::{Error, Resources, Storage};
 use poolekernel::reclamation::{Error as PoolError, Limits};
 use poolekernel::scheduler_smp::{self as sched, CpuId, TaskId, TaskState};
@@ -119,6 +119,16 @@ fn space(manager: &mut PhysicalMemoryManager, memory: &mut Memory) -> AddressSpa
     AddressSpace::initialize(manager, tables, memory).unwrap()
 }
 
+fn resource<T>(
+    manager: &mut PhysicalMemoryManager,
+    memory: &mut Memory,
+    payload: T,
+) -> Resources<T> {
+    Resources::new(space(manager, memory), payload, manager)
+        .ok()
+        .unwrap()
+}
+
 #[test]
 fn task_reader_retains_physical_tables_against_copied_allocator_handles() {
     use poolekernel::physical_memory::PhysicalMemoryError;
@@ -128,16 +138,23 @@ fn task_reader_retains_physical_tables_against_copied_allocator_handles() {
         .allocate(Zone::Dma32, vm::TABLE_PAGE_COUNT, vm::TABLE_OWNER)
         .unwrap();
     let address = AddressSpace::initialize(&mut manager, tables, &mut memory).unwrap();
-    let retained = manager.retain_allocation(tables).unwrap();
     let mut store = Storage::new(Limits::default()).unwrap();
     let mut tasks = store.attach().unwrap();
     let id = tasks
-        .create(0, 1, 1, Resources::new(address, retained))
+        .create(
+            0,
+            1,
+            1,
+            Resources::new(address, (), &mut manager).ok().unwrap(),
+        )
         .ok()
         .unwrap();
     tasks.activate(id, cpu(0)).unwrap();
     let reader = tasks.pin(id).unwrap();
-    assert_eq!(reader.payload().handle(), tables);
+    assert_eq!(
+        reader.address_space().summary().root_generation,
+        tables.generation
+    );
     tasks.cancel(id).unwrap();
     assert_eq!(
         tasks.reclaim(id).err(),
@@ -153,8 +170,7 @@ fn task_reader_retains_physical_tables_against_copied_allocator_handles() {
         manager.free(tables),
         Err(PhysicalMemoryError::AllocationRetained)
     );
-    let (mut address, retained) = resources.into_parts();
-    manager.release_retention(retained).unwrap();
+    let (mut address, ()) = resources.into_parts(&mut manager).ok().unwrap();
     address.release(&mut manager, &mut memory).unwrap();
     assert_eq!(manager.free(tables), Err(PhysicalMemoryError::StaleHandle));
     assert_eq!(manager.summary().allocated_pages, 0);
@@ -191,7 +207,12 @@ fn retains_actual_space_until_last_reader_and_explicit_physical_release() {
     let mut store = Storage::new(Limits::default()).unwrap();
     let mut tasks = store.attach().unwrap();
     let id = tasks
-        .create(0, 1, 1, Resources::new(address, 42))
+        .create(
+            0,
+            1,
+            1,
+            Resources::new(address, 42, &mut manager).ok().unwrap(),
+        )
         .ok()
         .unwrap();
     tasks.activate(id, cpu(0)).unwrap();
@@ -209,7 +230,12 @@ fn retains_actual_space_until_last_reader_and_explicit_physical_release() {
     );
     assert_eq!(*reader.payload(), 42);
     drop(reader);
-    let (mut address, payload) = tasks.reclaim(id).unwrap().into_parts();
+    let (mut address, payload) = tasks
+        .reclaim(id)
+        .unwrap()
+        .into_parts(&mut manager)
+        .ok()
+        .unwrap();
     assert_eq!(payload, 42);
     assert_eq!(manager.summary().allocated_pages, 4);
     address.release(&mut manager, &mut memory).unwrap();
@@ -229,11 +255,11 @@ fn task_slot_cannot_recycle_until_reclaimed_and_old_generation_stays_stale() {
     let mut store = Storage::new(Limits::default()).unwrap();
     let mut tasks = store.attach().unwrap();
     let first = tasks
-        .create(0, 1, 1, Resources::new(space(&mut manager, &mut memory), 1))
+        .create(0, 1, 1, resource(&mut manager, &mut memory, 1))
         .ok()
         .unwrap();
     tasks.cancel_dormant(first).unwrap();
-    let second = Resources::new(space(&mut manager, &mut memory), 2);
+    let second = resource(&mut manager, &mut memory, 2);
     let (error, second) = tasks.create(0, 1, 1, second).err().unwrap();
     assert_eq!(error, Error::Occupied);
     let _first = tasks.reclaim(first).unwrap();
@@ -272,7 +298,7 @@ fn failed_scheduler_admission_returns_owned_resources_without_a_task() {
     let drops = Arc::new(AtomicUsize::new(0));
     let mut store = Storage::new(Limits::default()).unwrap();
     let mut tasks = store.attach().unwrap();
-    let mut resource = Resources::new(space(&mut manager, &mut memory), Payload(drops.clone()));
+    let mut resource = resource(&mut manager, &mut memory, Payload(drops.clone()));
     let root = resource.address_space().summary();
     for (slot, priority, affinity) in [(9, 1, 1), (0, 0, 1), (0, 32, 1), (0, 1, 0), (0, 1, 16)] {
         let before = tasks.scheduler().summary();
@@ -299,12 +325,7 @@ fn cancellation_removes_runnable_and_blocked_ownership() {
     let mut tasks = store.attach().unwrap();
     for slot in 0..2 {
         let id = tasks
-            .create(
-                slot,
-                1,
-                15,
-                Resources::new(space(&mut manager, &mut memory), slot),
-            )
+            .create(slot, 1, 15, resource(&mut manager, &mut memory, slot))
             .ok()
             .unwrap();
         tasks.activate(id, cpu(slot)).unwrap();
@@ -326,7 +347,7 @@ fn remote_transfer_running_and_bad_ack_cannot_reclaim() {
     let mut store = Storage::new(Limits::default()).unwrap();
     let mut tasks = store.attach().unwrap();
     let id = tasks
-        .create(0, 1, 2, Resources::new(space(&mut manager, &mut memory), 7))
+        .create(0, 1, 2, resource(&mut manager, &mut memory, 7))
         .ok()
         .unwrap();
     tasks.activate(id, cpu(1)).unwrap();
@@ -368,7 +389,7 @@ fn offline_timeout_restores_scheduler_but_does_not_release_resources() {
     let mut store = Storage::new(Limits::default()).unwrap();
     let mut tasks = store.attach().unwrap();
     let id = tasks
-        .create(0, 1, 1, Resources::new(space(&mut manager, &mut memory), 9))
+        .create(0, 1, 1, resource(&mut manager, &mut memory, 9))
         .ok()
         .unwrap();
     tasks.activate(id, cpu(0)).unwrap();
@@ -404,7 +425,7 @@ fn shutdown_seals_admission_but_allows_retirement_and_drain() {
     let mut store = Storage::new(Limits::default()).unwrap();
     let mut tasks = store.attach().unwrap();
     let id = tasks
-        .create(0, 1, 1, Resources::new(space(&mut manager, &mut memory), 4))
+        .create(0, 1, 1, resource(&mut manager, &mut memory, 4))
         .ok()
         .unwrap();
     let reader = tasks.pin(id).unwrap();
@@ -414,7 +435,7 @@ fn shutdown_seals_admission_but_allows_retirement_and_drain() {
     assert_eq!(tasks.pin(id).err(), Some(Error::Draining));
     assert_eq!(tasks.activate(id, cpu(0)), Err(Error::Draining));
     assert_eq!(tasks.dispatch_local(cpu(0)), Err(Error::Draining));
-    let rejected = Resources::new(space(&mut manager, &mut memory), 5);
+    let rejected = resource(&mut manager, &mut memory, 5);
     let (error, returned) = tasks.create(1, 1, 1, rejected).err().unwrap();
     assert_eq!(error, Error::Draining);
     assert_eq!(*returned.payload(), 5);
@@ -434,7 +455,7 @@ fn shutdown_with_pending_dispatch_retains_until_ack_completion_and_reader_drop()
     let mut store = Storage::new(Limits::default()).unwrap();
     let mut tasks = store.attach().unwrap();
     let id = tasks
-        .create(0, 1, 2, Resources::new(space(&mut manager, &mut memory), 1))
+        .create(0, 1, 2, resource(&mut manager, &mut memory, 1))
         .ok()
         .unwrap();
     tasks.activate(id, cpu(1)).unwrap();
@@ -454,7 +475,7 @@ fn forgotten_reader_retains_capacity_without_forced_reclamation() {
     let mut store = Storage::new(Limits::default()).unwrap();
     let mut tasks = store.attach().unwrap();
     let id = tasks
-        .create(0, 1, 1, Resources::new(space(&mut manager, &mut memory), 1))
+        .create(0, 1, 1, resource(&mut manager, &mut memory, 1))
         .ok()
         .unwrap();
     std::mem::forget(tasks.pin(id).unwrap());
@@ -476,12 +497,7 @@ fn scoped_host_readers_survive_task_retirement() {
     let mut store = Storage::new(Limits::default()).unwrap();
     let mut tasks = store.attach().unwrap();
     let id = tasks
-        .create(
-            0,
-            1,
-            1,
-            Resources::new(space(&mut manager, &mut memory), 17),
-        )
+        .create(0, 1, 1, resource(&mut manager, &mut memory, 17))
         .ok()
         .unwrap();
     let ready = Barrier::new(5);
@@ -517,7 +533,7 @@ fn bounded_generations_exhaust_without_wrapping_or_losing_value() {
     })
     .unwrap();
     let mut tasks = store.attach().unwrap();
-    let mut resources = Resources::new(space(&mut manager, &mut memory), 1);
+    let mut resources = resource(&mut manager, &mut memory, 1);
     for generation in 1..=8 {
         let id = tasks.create(0, 1, 1, resources).ok().unwrap();
         assert_eq!(id.generation, generation);
@@ -541,7 +557,7 @@ fn pin_budget_failure_preserves_existing_reader_and_state() {
     .unwrap();
     let mut tasks = store.attach().unwrap();
     let id = tasks
-        .create(0, 1, 1, Resources::new(space(&mut manager, &mut memory), 3))
+        .create(0, 1, 1, resource(&mut manager, &mut memory, 3))
         .ok()
         .unwrap();
     let reader = tasks.pin(id).unwrap();
@@ -561,7 +577,7 @@ fn controller_drop_retains_readers_and_forbids_namespace_reset() {
             0,
             1,
             1,
-            Resources::new(space(&mut manager, &mut memory), Payload(drops.clone())),
+            resource(&mut manager, &mut memory, Payload(drops.clone())),
         )
         .ok()
         .unwrap();
@@ -581,14 +597,10 @@ fn rejects_already_released_address_space() {
     let (mut manager, mut memory) = fixture();
     let mut address = space(&mut manager, &mut memory);
     address.release(&mut manager, &mut memory).unwrap();
-    let mut store = Storage::new(Limits::default()).unwrap();
-    let mut tasks = store.attach().unwrap();
-    let (error, resources) = tasks
-        .create(0, 1, 1, Resources::new(address, 2))
-        .err()
-        .unwrap();
+    let (error, address, payload) = Resources::new(address, 2, &mut manager).err().unwrap();
     assert_eq!(error, Error::AddressSpace);
-    assert!(resources.address_space().summary().root_released);
+    assert!(address.summary().root_released);
+    assert_eq!(payload, 2);
 }
 
 #[test]
@@ -612,7 +624,12 @@ fn mapped_space_keeps_frame_and_unmap_receipt_until_owned_again() {
     let mut store = Storage::new(Limits::default()).unwrap();
     let mut tasks = store.attach().unwrap();
     let id = tasks
-        .create(0, 1, 1, Resources::new(address, 1))
+        .create(
+            0,
+            1,
+            1,
+            Resources::new(address, 1, &mut manager).ok().unwrap(),
+        )
         .ok()
         .unwrap();
     let reader = tasks.pin(id).unwrap();
@@ -620,7 +637,12 @@ fn mapped_space_keeps_frame_and_unmap_receipt_until_owned_again() {
     assert_eq!(reader.address_space().summary().pending_invalidations, 1);
     assert_eq!(manager.summary().allocated_pages, 5);
     drop(reader);
-    let (mut address, _) = tasks.reclaim(id).unwrap().into_parts();
+    let (mut address, _) = tasks
+        .reclaim(id)
+        .unwrap()
+        .into_parts(&mut manager)
+        .ok()
+        .unwrap();
     assert_eq!(
         address.release(&mut manager, &mut memory),
         Err(vm::Error::ReleaseBusy)
@@ -645,7 +667,7 @@ fn all_eight_task_slots_recycle_with_exact_destructor_counts() {
                         slot,
                         1,
                         15,
-                        Resources::new(space(&mut manager, &mut memory), Payload(drops.clone())),
+                        resource(&mut manager, &mut memory, Payload(drops.clone())),
                     )
                     .ok()
                     .unwrap()
@@ -653,7 +675,12 @@ fn all_eight_task_slots_recycle_with_exact_destructor_counts() {
             .collect();
         for id in ids {
             tasks.cancel_dormant(id).unwrap();
-            let (mut address, payload) = tasks.reclaim(id).unwrap().into_parts();
+            let (mut address, payload) = tasks
+                .reclaim(id)
+                .unwrap()
+                .into_parts(&mut manager)
+                .ok()
+                .unwrap();
             address.release(&mut manager, &mut memory).unwrap();
             drop(payload);
         }
@@ -674,7 +701,7 @@ fn invalid_requests_do_not_consume_finite_pool_generation_budget() {
     })
     .unwrap();
     let mut tasks = store.attach().unwrap();
-    let mut resources = Resources::new(space(&mut manager, &mut memory), 1);
+    let mut resources = resource(&mut manager, &mut memory, 1);
     for _ in 0..64 {
         let (error, returned) = tasks.create(0, 0, 1, resources).err().unwrap();
         assert_eq!(error, Error::Scheduler(sched::Error::Priority));
@@ -690,22 +717,198 @@ fn duplicate_root_is_rejected_even_while_first_owner_is_retired() {
         .allocate(Zone::Dma32, vm::TABLE_PAGE_COUNT, vm::TABLE_OWNER)
         .unwrap();
     let first = AddressSpace::initialize(&manager, tables, &mut memory).unwrap();
-    // The caller can currently duplicate PKVM1 metadata using its copyable PMM
-    // handle. Admission must reject two task owners of that physical root.
+    // Duplicated inactive metadata must not admit a second physical owner.
     let duplicate = AddressSpace::initialize(&manager, tables, &mut memory).unwrap();
     let mut store = Storage::new(Limits::default()).unwrap();
     let mut tasks = store.attach().unwrap();
     let id = tasks
-        .create(0, 1, 1, Resources::new(first, 1))
+        .create(
+            0,
+            1,
+            1,
+            Resources::new(first, 1, &mut manager).ok().unwrap(),
+        )
         .ok()
         .unwrap();
     tasks.cancel_dormant(id).unwrap();
     let before = tasks.scheduler().summary();
-    let (error, returned) = tasks
-        .create(1, 1, 1, Resources::new(duplicate, 2))
+    let (error, returned, payload) = Resources::new(duplicate, 2, &mut manager).err().unwrap();
+    assert_eq!(
+        error,
+        Error::PhysicalMemory(
+            poolekernel::physical_memory::PhysicalMemoryError::AllocationRetained
+        )
+    );
+    assert_eq!(returned.summary().root_generation, tables.generation);
+    assert_eq!(payload, 2);
+    assert_eq!(tasks.scheduler().summary(), before);
+}
+
+#[test]
+fn all_frames_aliases_and_pending_unmaps_are_mandatorily_retained() {
+    let (mut manager, mut memory) = fixture();
+    let tables = manager
+        .allocate(Zone::Dma32, vm::TABLE_PAGE_COUNT, vm::TABLE_OWNER)
+        .unwrap();
+    let mut address = AddressSpace::initialize(&manager, tables, &mut memory).unwrap();
+    let mut frames = Vec::new();
+    for index in 0..vm::MAX_FRAMES {
+        let frame = manager.allocate(Zone::Dma32, 1, vm::DATA_OWNER).unwrap();
+        address
+            .map(
+                &manager,
+                &mut memory,
+                vm::USER_WINDOW_START + index as u64 * 4096,
+                frame,
+                vm::Permissions::USER_RW,
+                vm::CachePolicy::WriteBack,
+            )
+            .unwrap();
+        frames.push(frame);
+    }
+    let alias = vm::USER_WINDOW_START + 4 * 4096;
+    address
+        .map(
+            &manager,
+            &mut memory,
+            alias,
+            frames[0],
+            vm::Permissions::USER_RW,
+            vm::CachePolicy::WriteBack,
+        )
+        .unwrap();
+    let pending = address
+        .begin_unmap(&mut memory, vm::USER_WINDOW_START + 4096)
+        .unwrap();
+    let mut store = Storage::new(Limits::default()).unwrap();
+    let mut tasks = store.attach().unwrap();
+    let id = tasks
+        .create(
+            0,
+            1,
+            2,
+            Resources::new(address, (), &mut manager).ok().unwrap(),
+        )
+        .ok()
+        .unwrap();
+    tasks.activate(id, cpu(1)).unwrap();
+    let reader = tasks.pin(id).unwrap();
+    let ticket = tasks.stage_dispatch(cpu(1), 99, 1).unwrap();
+    for handle in std::iter::once(tables).chain(frames.iter().copied()) {
+        assert_eq!(
+            manager.free(handle),
+            Err(PhysicalMemoryError::AllocationRetained)
+        );
+    }
+    tasks.acknowledge(ticket, ack(ticket)).unwrap();
+    assert_eq!(tasks.complete_current(cpu(1)).unwrap(), id);
+    assert_eq!(
+        tasks.reclaim(id).err(),
+        Some(Error::Pool(PoolError::Pinned))
+    );
+    assert_eq!(
+        reader.address_space().summary().bound_frames,
+        vm::MAX_FRAMES
+    );
+    drop(reader);
+    let resources = tasks.reclaim(id).unwrap();
+    for handle in std::iter::once(tables).chain(frames.iter().copied()) {
+        assert_eq!(
+            manager.free(handle),
+            Err(PhysicalMemoryError::AllocationRetained)
+        );
+    }
+    let (mut address, ()) = resources.into_parts(&mut manager).ok().unwrap();
+    address.acknowledge_inactive(pending).unwrap();
+    address.complete_unmap(&mut manager, pending).unwrap();
+    for index in [0, 2, 3, 4] {
+        let pending = address
+            .begin_unmap(&mut memory, vm::USER_WINDOW_START + index * 4096)
+            .unwrap();
+        address.acknowledge_inactive(pending).unwrap();
+        address.complete_unmap(&mut manager, pending).unwrap();
+    }
+    address.release(&mut manager, &mut memory).unwrap();
+    assert_eq!(manager.summary().allocated_pages, 0);
+}
+
+#[test]
+fn late_frame_retention_failure_returns_original_space_and_payload() {
+    let (mut manager, mut memory) = fixture();
+    let tables = manager
+        .allocate(Zone::Dma32, vm::TABLE_PAGE_COUNT, vm::TABLE_OWNER)
+        .unwrap();
+    let mut address = AddressSpace::initialize(&manager, tables, &mut memory).unwrap();
+    let frame = manager.allocate(Zone::Dma32, 1, vm::DATA_OWNER).unwrap();
+    address
+        .map(
+            &manager,
+            &mut memory,
+            vm::USER_WINDOW_START,
+            frame,
+            vm::Permissions::USER_RW,
+            vm::CachePolicy::WriteBack,
+        )
+        .unwrap();
+    let conflict = manager.retain_allocation(frame).unwrap();
+    let before = address.summary();
+    let drops = Arc::new(AtomicUsize::new(0));
+    let (error, address, payload) = Resources::new(address, Payload(drops.clone()), &mut manager)
         .err()
         .unwrap();
+    assert_eq!(
+        error,
+        Error::PhysicalMemory(PhysicalMemoryError::AllocationRetained)
+    );
+    assert_eq!(address.summary(), before);
+    assert_eq!(drops.load(Ordering::SeqCst), 0);
+    let tables_token = manager.retain_allocation(tables).unwrap();
+    manager.release_retention(tables_token).unwrap();
+    manager.release_retention(conflict).unwrap();
+    let resources = Resources::new(address, payload, &mut manager).ok().unwrap();
+    drop(resources);
+    assert_eq!(drops.load(Ordering::SeqCst), 1);
+    for handle in [tables, frame] {
+        assert_eq!(
+            manager.free(handle),
+            Err(PhysicalMemoryError::AllocationRetained)
+        );
+    }
+}
+
+#[test]
+fn failed_owner_release_returns_retention_for_retry_with_original_manager() {
+    let (mut manager, mut memory) = fixture();
+    let (mut other, mut other_memory) = fixture();
+    let resources = resource(&mut manager, &mut memory, 41);
+    let other_resources = resource(&mut other, &mut other_memory, 42);
+    let summary = resources.address_space().summary();
+    let (error, resources) = resources.into_parts(&mut other).err().unwrap();
+    assert_eq!(
+        error,
+        Error::PhysicalMemory(PhysicalMemoryError::RetentionIdentity)
+    );
+    assert_eq!(resources.address_space().summary(), summary);
+    assert_eq!(*resources.payload(), 41);
+    let (mut address, _) = resources.into_parts(&mut manager).ok().unwrap();
+    address.release(&mut manager, &mut memory).unwrap();
+    let (mut address, _) = other_resources.into_parts(&mut other).ok().unwrap();
+    address.release(&mut other, &mut other_memory).unwrap();
+    assert_eq!(manager.summary().allocated_pages, 0);
+    assert_eq!(other.summary().allocated_pages, 0);
+}
+
+#[test]
+fn scheduler_rejects_duplicate_physical_roots_from_distinct_manager_namespaces() {
+    let (mut manager, mut memory) = fixture();
+    let (mut other, mut other_memory) = fixture();
+    let first = resource(&mut manager, &mut memory, 1);
+    let second = resource(&mut other, &mut other_memory, 2);
+    let mut store = Storage::new(Limits::default()).unwrap();
+    let mut tasks = store.attach().unwrap();
+    let id = tasks.create(0, 1, 1, first).ok().unwrap();
+    tasks.cancel_dormant(id).unwrap();
+    let (error, returned) = tasks.create(1, 1, 1, second).err().unwrap();
     assert_eq!(error, Error::DuplicateRoot);
     assert_eq!(*returned.payload(), 2);
-    assert_eq!(tasks.scheduler().summary(), before);
 }

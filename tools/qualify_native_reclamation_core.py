@@ -32,6 +32,8 @@ SOURCES = (
     "native/kernel/src/main.rs",
     "native/kernel/linker.ld",
     "native/kernel/manifest.pkm",
+    "specs/native-kernel-entry-contract.json",
+    "specs/native-kernel-entry-contract.schema.json",
     "native/kmap/src/lib.rs",
     "native/handoff/src/lib.rs",
     "native/kernel/Cargo.toml",
@@ -41,8 +43,8 @@ SOURCES = (
 )
 REPORT = ROOT / "runs/native-kernel-reclamation-core-readiness.json"
 TEST_COUNT = 19
-LIFETIME_TEST_COUNT = 20
-KERNEL_SHA256 = "BDEECCB27B1B91406911F91169B9BF5F9DF0439BB39FA0E1882C07E1AF3B81EF"
+LIFETIME_TEST_COUNT = 24
+KERNEL_SHA256 = "18EDADA10E141DBADA8C95C1C0B3454696122C5E96C528F45E0AECE6ADD2F07D"
 STAGES = (
     "format", "host-build-debug", "test-build-debug", "tests-debug",
     "lifetime-build-debug", "lifetime-tests-debug",
@@ -65,18 +67,18 @@ def require_test_result(output: str, count: int) -> None:
 
 def validate_report(report: dict, root: Path = ROOT) -> None:
     expected = {
-        "schema_version": "1.2", "contract_id": "PKRECLAIM1-CORE",
+        "schema_version": "1.3", "contract_id": "PKRECLAIM1-CORE",
         "selected_move_id": "N12-CONCURRENCY-RECLAMATION-001", "phase": "N12.3",
         "status": "host_verified_live_integration_pending", "production_ready": False,
         "live_integration_verified": False, "cross_cpu_quiescence_verified": False,
         "n12_3_complete": False, "focused_test_count": TEST_COUNT,
-        "kernel_regression_count": 214, "compile_fail_borrow_tests": 5,
+        "kernel_regression_count": 219, "compile_fail_borrow_tests": 7,
         "physical_retention_contract_id": "PKRETAIN1",
         "physical_retention_scope": "allocator_enforced_for_explicitly_retained_allocations",
-        "physical_retention_test_count": 8, "physical_retention_live_verified": False,
+        "physical_retention_test_count": 13, "physical_retention_live_verified": False,
         "task_lifetime_contract_id": "PKLIFE1",
         "task_lifetime_test_count": LIFETIME_TEST_COUNT,
-        "task_lifetime_scope": "host_executed_scheduler_and_inactive_address_space_ownership",
+        "task_lifetime_scope": "mandatory_inactive_table_and_bound_frame_retention",
         "linked_kernel_sha256": KERNEL_SHA256, "linked_kernel_byte_count": 517784,
     }
     if not isinstance(report, dict) or set(report) != set(expected) | {"sources", "stages"}:
@@ -161,10 +163,10 @@ def qualify(work: Path) -> dict:
         run(f"lifetime-tests-{profile}", [str(lifetime_binary), "--test-threads=1"], LIFETIME_TEST_COUNT)
         if profile == "release":
             run("kernel-regressions-release", [str(cargo), "test", *base, "--lib", *host,
-                "--release", "--", "--test-threads=1"], 214)
+                "--release", "--", "--test-threads=1"], 219)
     env.pop("CARGO_PROFILE_RELEASE_PANIC", None)
-    run("borrow-doctests", [str(cargo), "test", *base, "--doc", *host], 5)
-    run("kernel-regressions", [str(cargo), "test", *base, "--lib", *host, "--", "--test-threads=1"], 214)
+    run("borrow-doctests", [str(cargo), "test", *base, "--doc", *host], 7)
+    run("kernel-regressions", [str(cargo), "test", *base, "--lib", *host, "--", "--test-threads=1"], 219)
     run("host-clippy", [str(cargo), "clippy", *base, "--lib", *host, "--", "-D", "warnings"])
     run("freestanding-clippy", [str(cargo), "clippy", *base, "--lib", "--release",
         "--target", entry.PRODUCT_TARGET, "--locked", "--offline", "--target-dir", str(target),
@@ -184,18 +186,18 @@ def qualify(work: Path) -> dict:
     if before != bind_sources():
         raise ValueError("source changed during qualification")
     report = {
-        "schema_version": "1.2", "contract_id": "PKRECLAIM1-CORE",
+        "schema_version": "1.3", "contract_id": "PKRECLAIM1-CORE",
         "selected_move_id": "N12-CONCURRENCY-RECLAMATION-001", "phase": "N12.3",
         "status": "host_verified_live_integration_pending", "production_ready": False,
         "live_integration_verified": False, "cross_cpu_quiescence_verified": False,
         "n12_3_complete": False, "focused_test_count": TEST_COUNT,
-        "kernel_regression_count": 214, "compile_fail_borrow_tests": 5,
+        "kernel_regression_count": 219, "compile_fail_borrow_tests": 7,
         "physical_retention_contract_id": "PKRETAIN1",
         "physical_retention_scope": "allocator_enforced_for_explicitly_retained_allocations",
-        "physical_retention_test_count": 8, "physical_retention_live_verified": False,
+        "physical_retention_test_count": 13, "physical_retention_live_verified": False,
         "task_lifetime_contract_id": "PKLIFE1",
         "task_lifetime_test_count": LIFETIME_TEST_COUNT,
-        "task_lifetime_scope": "host_executed_scheduler_and_inactive_address_space_ownership",
+        "task_lifetime_scope": "mandatory_inactive_table_and_bound_frame_retention",
         "linked_kernel_sha256": KERNEL_SHA256, "linked_kernel_byte_count": len(canonical),
         "sources": before, "stages": stages,
     }
@@ -211,7 +213,7 @@ def main() -> int:
     report = qualify(args.work.resolve())
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n")
-    print(f"PKRECLAIM1_CORE PASS tests={TEST_COUNT} lifecycle={LIFETIME_TEST_COUNT} retention=8 profiles=2 regressions=214 live=0 production=0")
+    print(f"PKRECLAIM1_CORE PASS tests={TEST_COUNT} lifecycle={LIFETIME_TEST_COUNT} retention=13 profiles=2 regressions=219 live=0 production=0")
     return 0
 
 

@@ -1,13 +1,19 @@
 # Native Physical Allocation Retention
 
-Contract: PKRETAIN1. Cycle 153, N12.3,
+Contract: PKRETAIN1. Cycle 158, N12.3,
 `N12-CONCURRENCY-RECLAMATION-001`, existing
 `ADD-N12-CONCURRENCY-RECLAMATION-001` and
 `FLAG-N12-CONCURRENCY-RECLAMATION-001`.
 
-Status: implemented and host-qualified; the existing four-CPU lock profile passes
-two fresh boots. Dedicated retention/failure evidence and complete candidate
-qualification remain pending. No N12 exit or production claim.
+Status: mandatory inactive task table/frame ownership is implemented through
+all-or-nothing group retention and release. See
+`docs/native-kernel-task-lifetimes.md`. Twenty-four lifetime, nineteen core,
+219 kernel and seven compile-fail cases run in the bounded host qualifier;
+thirteen kernel cases concern physical retention. The changed kernel requires
+fresh downstream evidence. Active roots, execution stacks, dedicated live
+retention/failure evidence and complete qualification remain pending.
+No N12 exit or production claim. The Cycle 153 implementation and its exact
+historical evidence below are preserved, not relabeled as Cycle 158 boots.
 
 ## Mechanism
 
@@ -68,13 +74,14 @@ started. Even that uncertain target must complete final INIT before cleanup
 releases its resources. The partial rollback and normal startup paths use the
 same conservative ordering; injected missing-ACK live evidence remains pending.
 
-The PKLIFE1 harness moves a real table allocation's retention token into a task's
+The historical Cycle 153 PKLIFE1 harness moves a real table allocation's retention token into a task's
 payload. It proves copied-handle free rejection while a reader remains, after
 retirement, and after object reclamation until the returned token is consumed.
 Only then does actual PKVM1 table release complete. This is a concrete composition
-test, not mandatory retention in every `Resources::new` call.
+test, not mandatory retention in every `Resources::new` call. Cycle 158 replaces
+that optional composition with mandatory table and bound-frame ownership.
 
-## Evidence
+## Historical Evidence
 
 The source-bound version 1.2 reclamation receipt records:
 

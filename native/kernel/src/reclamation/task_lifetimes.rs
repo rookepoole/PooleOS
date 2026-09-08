@@ -4,8 +4,9 @@
 #![forbid(unsafe_code)]
 
 use super::{Handle, Limits, Owner, Pin, Pool};
+use crate::physical_memory::{PhysicalMemoryError, PhysicalMemoryManager, RetainedAllocation};
 use crate::scheduler_smp::{self as sched, CpuId, SmpScheduler, TaskId, TaskState};
-use crate::virtual_memory::AddressSpace;
+use crate::virtual_memory::{AddressSpace, MAX_FRAMES};
 
 pub const CONTRACT_ID: &str = "PKLIFE1";
 const CAPACITY: usize = sched::TASK_CAPACITY;
@@ -21,6 +22,7 @@ pub enum Error {
     Stale,
     GenerationExhausted,
     AddressSpace,
+    PhysicalMemory(PhysicalMemoryError),
     DuplicateRoot,
     NotDead,
     Retired,
@@ -39,15 +41,51 @@ impl From<super::Error> for Error {
     }
 }
 
-/// Moves the actual PKVM1 object, not a caller-provided generation label.
+/// Owns the actual PKVM1 object and mandatory retention of its tables and frames.
+/// No mutable address-space or retention-token access escapes through a reader.
+/// Dropping resources retains physical allocations; it never fabricates quiescence.
+///
+/// ```compile_fail
+/// use poolekernel::reclamation::task_lifetimes::Resources;
+/// use poolekernel::virtual_memory::AddressSpace;
+/// fn unretained(space: AddressSpace) {
+///     let _ = Resources::new(space, ());
+/// }
+/// ```
+///
+/// ```compile_fail
+/// use poolekernel::reclamation::task_lifetimes::Resources;
+/// use poolekernel::virtual_memory::AddressSpace;
+/// fn bypass(resources: &mut Resources<()>) -> &mut AddressSpace {
+///     resources.address_space()
+/// }
+/// ```
 pub struct Resources<T> {
     space: AddressSpace,
     payload: T,
+    retained: [Option<RetainedAllocation>; MAX_FRAMES + 1],
 }
 
 impl<T> Resources<T> {
-    pub const fn new(space: AddressSpace, payload: T) -> Self {
-        Self { space, payload }
+    /// Failure returns the original objects and leaves all retention unchanged.
+    #[allow(clippy::result_large_err)]
+    pub fn new(
+        space: AddressSpace,
+        payload: T,
+        manager: &mut PhysicalMemoryManager,
+    ) -> Result<Self, (Error, AddressSpace, T)> {
+        let summary = space.summary();
+        if summary.root_active || summary.root_released || summary.root_generation == 0 {
+            return Err((Error::AddressSpace, space, payload));
+        }
+        match manager.retain_allocations(space.allocation_handles()) {
+            Ok(retained) => Ok(Self {
+                space,
+                payload,
+                retained,
+            }),
+            Err(error) => Err((Error::PhysicalMemory(error), space, payload)),
+        }
     }
 
     pub const fn address_space(&self) -> &AddressSpace {
@@ -58,9 +96,30 @@ impl<T> Resources<T> {
         &self.payload
     }
 
-    /// Physical release remains an explicit PKVM1/PKPMM operation by the owner.
-    pub fn into_parts(self) -> (AddressSpace, T) {
-        (self.space, self.payload)
+    /// Only an exclusive owner (never a pinned reader) can end retention.
+    /// This returns an inactive PKVM1 object; unmap receipts and physical release
+    /// still belong to that object. Failure returns the complete retained owner.
+    #[allow(clippy::result_large_err)]
+    pub fn into_parts(
+        self,
+        manager: &mut PhysicalMemoryManager,
+    ) -> Result<(AddressSpace, T), (Error, Self)> {
+        let Self {
+            space,
+            payload,
+            retained,
+        } = self;
+        match manager.release_retentions(retained) {
+            Ok(()) => Ok((space, payload)),
+            Err((error, retained)) => Err((
+                Error::PhysicalMemory(error),
+                Self {
+                    space,
+                    payload,
+                    retained,
+                },
+            )),
+        }
     }
 }
 
@@ -82,8 +141,8 @@ pub type Reader<'a, T> = Pin<'a, Resources<T>, CAPACITY>;
 ///
 /// ```compile_fail
 /// use poolekernel::reclamation::task_lifetimes::Reader;
-/// fn invalid(reader: Reader<'_, u64>) {
-///     let _owned_address_space = reader.into_parts();
+/// fn invalid(reader: Reader<'_, u64>, manager: &mut poolekernel::physical_memory::PhysicalMemoryManager) {
+///     let _owned_address_space = reader.into_parts(manager);
 /// }
 /// ```
 pub struct Storage<T> {

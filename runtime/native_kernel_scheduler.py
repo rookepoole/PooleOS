@@ -6,6 +6,7 @@ import hashlib
 import json
 import re
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -243,6 +244,16 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
 def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     issues = validate_json(readiness, read_json(root / READINESS_SCHEMA_RELATIVE))
     errors = [f"schema {issue.path}: {issue.message}" for issue in issues]
+    status_date = readiness.get("status_date")
+    try:
+        if (
+            not isinstance(status_date, str)
+            or len(status_date) != 10
+            or date.fromisoformat(status_date).isoformat() != status_date
+        ):
+            raise ValueError("noncanonical date")
+    except ValueError:
+        errors.append("readiness status_date is not a canonical calendar date")
     if readiness.get("inputs") != expected_inputs(root):
         errors.append("readiness input bindings are stale")
     controls = readiness.get("negative_controls", [])

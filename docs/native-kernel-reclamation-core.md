@@ -71,6 +71,18 @@ This chooses retention over unsafe reuse; eventual reclamation is not promised.
 
 ## Qualification
 
+Current Cycle 158 qualification is recorded by the version 1.3 receipt and
+`docs/native-kernel-task-lifetimes.md`: 19 core tests, 24 lifetime tests, 219
+kernel tests (13 retention cases) in both host profiles, seven compile-fail
+checks, formatting and host/freestanding Clippy. Mandatory retention now covers
+inactive task tables and all bound/pending frames. The identified image has
+SHA-256 `18EDADA10E141DBADA8C95C1C0B3454696122C5E96C528F45E0AECE6ADD2F07D`.
+Its changed bytes require fresh downstream qualification. The canonical audit
+fails 25/105 checks; no current full-suite pass or live reclamation is claimed.
+
+The following describes the historical Cycle 149/152 qualification, not the
+current runner's counts or expected image:
+
 Run with the repository's pinned Python and Rust toolchain:
 
 ```text
@@ -100,7 +112,8 @@ checks. No production panic profile or system-wide environment is changed.
 
 ## Remaining Work
 
-1. Bind pool ownership to actual scheduler/task and address-space lifecycles.
+1. Extend the implemented scheduler/inactive-task retention to active roots
+   and architectural execution-stack lifecycles.
 2. Couple retirement to acknowledged cross-CPU quiescence, alias revocation,
    TLB shootdown and complete park/scrub/release ordering on the frozen topology.
 3. Qualify timeout, cancellation, offline/death, memory-pressure and shutdown

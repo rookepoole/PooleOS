@@ -421,6 +421,16 @@ pub struct AddressSpace {
 }
 
 impl AddressSpace {
+    /// Includes frames awaiting invalidation, not only currently mapped leaves.
+    pub(crate) fn allocation_handles(&self) -> [Option<AllocationHandle>; MAX_FRAMES + 1] {
+        let mut handles = [None; MAX_FRAMES + 1];
+        handles[0] = Some(self.table_allocation);
+        for (index, frame) in self.frames.iter().enumerate() {
+            handles[index + 1] = frame.map(|record| record.frame);
+        }
+        handles
+    }
+
     pub fn initialize<M: TableMemory>(
         manager: &PhysicalMemoryManager,
         table_allocation: AllocationHandle,

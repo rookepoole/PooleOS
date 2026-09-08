@@ -1,9 +1,36 @@
 # PKLIFE1 Task Lifetimes
 
-Cycle 152 advances `N12-CONCURRENCY-RECLAMATION-001`, N12.3, source section
+Cycle 158 advances `N12-CONCURRENCY-RECLAMATION-001`, N12.3, source section
 031.3 and `ADD-N12-CONCURRENCY-RECLAMATION-001`. The existing requirement and
 flag remain open. This is original, allocation-free `no_std` kernel code,
 host-executed and freestanding-checked, not a new guest boot selector.
+
+## Mandatory Physical Ownership
+
+`Resources::new(space, payload, manager)` now acquires allocator retention for
+the four-page root allocation and every distinct frame bound to the actual
+inactive PKVM1 object. This includes frames with pending invalidations and
+multiple virtual aliases. Retention is no longer an optional generic payload.
+There is no public unretained constructor or mutable address-space escape.
+Execution stacks and active PKVM3 roots are not covered by this contract.
+
+The crate-private PKPMM group operation validates every handle, duplicate,
+retention and metadata-exclusion condition before reserving a contiguous,
+nonwrapping identity range or changing allocation records. A failure in the
+last member leaves the first member unchanged. Group release also validates
+every token before clearing any record; failure returns the entire owner for
+retry, including after manager migration or identity mismatch. These are
+serialized transactions under exclusive manager access, not hardware atomics
+over the whole group, power-loss transactions or interrupt-safe allocation.
+
+`into_parts(manager)` consumes an exclusive resource owner after scheduler
+reclamation (or before admission), ends retention, and returns the inactive
+PKVM1 object and original payload. It does not free pages or waive pending
+unmap receipts. Dropping the resources or storage never releases their pages.
+This remains a trusted-kernel ownership boundary: copyable low-level handles,
+raw memory backends and duplicate PKVM1 metadata are not capabilities. No
+global physical-manager uniqueness or protection against raw alias writes is
+implied.
 
 ## Implementation
 
@@ -60,13 +87,15 @@ memory; it is not a production supervisor recovery strategy.
 | TL5 | Failure does not lose payloads or grant ownership | Parameter, finite-budget, stale-ID, duplicate-root, pin-budget tests |
 | TL6 | Shutdown or owner loss cannot force a pinned object free | Forgotten-reader, pending-shutdown, controller-drop and sealed-admission tests |
 | TL7 | Host object evidence does not imply physical quiescence | Strict receipt fields, promotion mutation tests, explicit boundaries below |
+| TL8 | Every admitted root and bound/pending frame resists ordinary free | Mandatory group constructor; all-frame, alias and pending-invalidation tests |
+| TL9 | Late acquisition/release failure cannot partially transfer retention | Sparse group, stale/duplicate/conflicting handle, wrong-manager and migration tests |
 
 ## Qualification
 
-The existing `tools/qualify_native_reclamation_core.py` now emits a version 1.1
-source-bound receipt that includes PKLIFE1. Nineteen core tests and nineteen
-lifetime tests run separately in both debug and optimized host profiles. Three
-compile-fail borrowing tests, 206 unchanged kernel regressions, formatting,
+The existing `tools/qualify_native_reclamation_core.py` now emits a version 1.3
+source-bound receipt that includes PKLIFE1. Nineteen core tests and twenty-four
+lifetime tests run separately in both debug and optimized host profiles. Seven
+compile-fail borrowing tests, 219 kernel regressions (13 retention tests), formatting,
 host Clippy and freestanding x86-64 Clippy also run. Every subprocess has a
 180-second limit; source hashes are checked before and after qualification.
 
@@ -75,17 +104,23 @@ PKVM1 page-table words in bounded host-backed storage, moves AddressSpace into
 the task controller, and verifies explicit unmap/invalidation/release after
 reclamation. The page-table backend is simulated; no hardware TLB is tested.
 
-A canonical linked build must still exactly reproduce the 513,680-byte kernel
-SHA-256 `9029AEE51A4D557EF5B29945985E4A1F07C67DDE9C8C367C80BD1B9EDD9D409E`.
-That confirms the new library slice is not yet reachable from a live selector.
+A canonical linked build must reproduce the exact new digest frozen in the
+qualifier. The initial build rejected the Cycle 157 digest as expected: the
+kernel remains 517,784 bytes/144 pages but now has 1,305 relocations. Build ID
+is `PKBUILD1-CYCLE158-N12-RETAIN-V002-0000000001`. Changed bytes require fresh
+downstream boot evidence; the old aggregate pass is historical only. A matching
+digest alone would not prove whether a function is reachable from a selector.
+PKENTRY1 independently reproduces two identical clean linked/canonical builds
+with 219 host tests and 43 rejection controls. The final canonical SHA-256 is
+`18EDADA10E141DBADA8C95C1C0B3454696122C5E96C528F45E0AECE6ADD2F07D`.
 The isolated Cycle 151 demo is left frozen, not relabeled as a PKLIFE1 demo.
 
 ## Remaining Work
 
-1. Bind active address-space and physical-allocation ownership, not merely the
-   inactive PKVM1 object. Existing PMM handles are copyable and PKVM1 permits
-   metadata reconstruction; callers can still access those lower-level APIs.
-   Namespace duplicate detection is not a global physical-ownership proof.
+1. Bind active PKVM3 roots, their data and architectural execution stacks to
+   mandatory retention and scheduler context ownership. Inactive PKVM1 tables
+   and bound frames are now mandatory, but arbitrary payload allocations are
+   not enumerated. Replay the changed kernel's dependencies before any merge.
 2. Join scoped object pins to the exact PKSMP5 alias revocation, acknowledged
    shootdown, CPU park, scrub verification and allocator-release path. A Dead
    task, scheduler ACK, offline label or zero Rust pins is not a CPU grace period.

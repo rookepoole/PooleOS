@@ -30,8 +30,10 @@ class ReclamationCoreTests(unittest.TestCase):
     def test_lifetime_scope_and_contract_mutations_reject(self):
         for key, value in (
             ("task_lifetime_scope", "live_active_address_space_quiescence"),
+            ("task_lifetime_scope", "host_executed_scheduler_and_inactive_address_space_ownership"),
             ("task_lifetime_contract_id", "PKLIFE2"),
             ("schema_version", "1.0"),
+            ("schema_version", "1.2"),
             ("physical_retention_scope", "global_active_address_space_ownership"),
             ("physical_retention_contract_id", "PKRETAIN2"),
         ):

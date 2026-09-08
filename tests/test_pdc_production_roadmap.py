@@ -136,7 +136,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 157)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 161)
         self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 917)
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
@@ -154,20 +154,59 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(historical["native_promotion_role"], "historical_non_promoting")
         current = self.roadmap["baseline"]["native_consistency_release_gate"]
         self.assertEqual(current["passed_checks"], 105)
-        self.assertEqual(current["qualification_status"], "pass_current_candidate_non_promoting")
-        self.assertEqual(current["last_fully_qualified_cycle"], 157)
+        self.assertEqual(current["qualification_status"], "current_source_replay_passed_final_merge_checks_required")
+        self.assertEqual(current["passed_check_count_scope"], "cycle161_pre_closeout_canonical_audit")
+        audit = current["current_candidate_audit"]
+        self.assertEqual(audit["cycle"], 161)
+        self.assertEqual(audit["status"], "pass")
+        self.assertEqual(audit["failed_checks"], 0)
+        self.assertTrue(audit["aggregate_suite_passed"])
+        self.assertTrue(audit["both_bundle_and_replay_inputs_supplied"])
+        failed = current["historical_failed_candidate_audit"]
+        self.assertEqual(failed["cycle"], 158)
+        self.assertEqual(failed["status"], "fail")
+        self.assertEqual(failed["passed_checks"], 80)
+        self.assertEqual(failed["failed_checks"], 25)
+        self.assertFalse(failed["aggregate_suite_passed"])
+        self.assertEqual(current["last_fully_qualified_cycle"], 161)
         self.assertEqual(current["last_fully_qualified_passed_checks"], 105)
         replay = current["canonical_replay"]
+        self.assertEqual(replay["cycle"], 161)
         self.assertEqual(replay["doctor_passed_checks"], 708)
         self.assertEqual(replay["pooleos_test_count"], 917)
         self.assertTrue(replay["both_bundle_and_replay_inputs_supplied"])
         self.assertFalse(replay["production_ready"])
-        projection = current["focused_current_source_projection"]
+        self.assertEqual(current["historical_canonical_replay"]["cycle"], 157)
+        self.assertEqual(current["historical_cycle160_source_projection"]["passed_checks"], 12)
+        focused = current["current_focused_source_projection"]
+        self.assertEqual(focused["cycle"], 161)
+        self.assertEqual(focused["passed_checks"], 26)
+        self.assertEqual(focused["total_checks"], 26)
+        self.assertEqual(focused["pending_downstream_native_checks"], 0)
+        self.assertEqual(focused["final_receipt_fresh_qemu_runs"], 28)
+        self.assertEqual(focused["fresh_qemu_run_count_scope"], "fourteen_requalified_memory_through_lock_profiles_in_cycle161")
+        self.assertEqual(focused["excluded_overlapping_scheduler_runs"], 2)
+        self.assertEqual(focused["negative_control_groups"], 658)
+        self.assertEqual(focused["negative_control_cases"], 2118)
+        self.assertEqual(focused["kernel_host_tests"], 219)
+        self.assertEqual(focused["production_overclaim_controls"], 14)
+        self.assertEqual(focused["valid_calendar_date_cases"], 6)
+        self.assertEqual(focused["invalid_calendar_date_cases"], 20)
+        self.assertFalse(focused["canonical_full_replay_performed"])
+        self.assertFalse(focused["production_ready"])
+        self.assertEqual(focused["next_dependency_move_id"], "N12-CONCURRENCY-RECLAMATION-001")
+        projection = current["historical_focused_source_projection"]
         self.assertEqual(projection["cycle"], 157)
         self.assertEqual(projection["passed_checks"], 26)
         self.assertEqual(projection["pending_downstream_native_checks"], 0)
         self.assertFalse(projection["canonical_full_replay_performed"])
         self.assertEqual(projection["next_dependency_move_id"], "N12-CONCURRENCY-RECLAMATION-001")
+        ownership = current["current_ownership_qualification"]
+        self.assertEqual(ownership["cycle"], 158)
+        self.assertEqual(ownership["kernel_tests_per_host_profile"], 219)
+        self.assertEqual(ownership["lifetime_tests_per_host_profile"], 24)
+        self.assertTrue(ownership["current_candidate_full_gate_passed"])
+        self.assertFalse(ownership["live_integration_verified"])
         self.assertEqual(current["total_checks"], 105)
         self.assertEqual(current["artifact_count"], 62)
         self.assertEqual(current["explicit_gap_count"], 20)
@@ -197,7 +236,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N8-IRQ-001")
+        self.assertEqual(protocol["selected_move_id"], "N9-PMM-ACPI-CONSUMER-001")
         self.assertEqual(
             protocol["owner_independent_next_move_id"],
             "N12-CONCURRENCY-RECLAMATION-001",

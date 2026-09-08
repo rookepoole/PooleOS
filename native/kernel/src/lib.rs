@@ -55,7 +55,7 @@ pub const ATOMICS_CONTRACT_ID: &str = atomics::CONTRACT_ID;
 pub const LOCKS_CONTRACT_ID: &str = locks::CONTRACT_ID;
 #[used]
 #[unsafe(link_section = ".text.pkbuild_literal")]
-static BUILD_ID_BYTES: [u8; 44] = *b"PKBUILD1-CYCLE153-N12-RETAIN-V001-0000000001";
+static BUILD_ID_BYTES: [u8; 44] = *b"PKBUILD1-CYCLE158-N12-RETAIN-V002-0000000001";
 pub const BUILD_ID: &[u8] = &BUILD_ID_BYTES;
 pub const ENTRY_OFFSET: u64 = 0xa000;
 pub const EARLY_LOG_CAPACITY: usize = 4096;

@@ -3,6 +3,7 @@ import json
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -10,6 +11,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from runtime import native_kernel_scheduler_preempt as preempt  # noqa: E402
+from tools import pooleos_release_gate  # noqa: E402
 
 
 PROBE = """\
@@ -25,6 +27,28 @@ class NativeKernelSchedulerPreemptTests(unittest.TestCase):
         self.assertEqual([], preempt.contract_errors(contract, ROOT))
         self.assertEqual(list(preempt.NEGATIVE_CONTROL_IDS), contract["required_negative_controls"])
         self.assertEqual(preempt.expected_claims(), contract["claims"])
+        baseline = preempt.read_json(ROOT / preempt.READINESS_RELATIVE)
+        for value in ("2026-09-05", "2026-09-07", "2024-02-29"):
+            candidate = copy.deepcopy(baseline)
+            candidate["status_date"] = value
+            with self.subTest(valid_date=value):
+                self.assertFalse(any("status_date" in item for item in preempt.readiness_errors(candidate, ROOT)))
+        invalid_dates = (
+            None, 7, True, "", "20260907", "2026-9-7", "2026-02-29",
+            "2026-04-31", "2026-13-01", "2026-09-07T00:00:00",
+        )
+        self.assertEqual(10, len(invalid_dates))
+        for value in invalid_dates:
+            candidate = copy.deepcopy(baseline)
+            candidate["status_date"] = value
+            with self.subTest(invalid_date=value), patch.object(
+                pooleos_release_gate, "_load_schema_artifact", return_value=(candidate, [])
+            ):
+                expected = "readiness status_date is not a canonical calendar date"
+                self.assertIn(expected, preempt.readiness_errors(candidate, ROOT))
+                check = pooleos_release_gate.check_native_kernel_scheduler_preemption_readiness()
+                self.assertFalse(check["ok"])
+                self.assertIn(expected, check["detail"])
 
     def test_independent_trace_oracle_is_frozen(self) -> None:
         self.assertEqual(

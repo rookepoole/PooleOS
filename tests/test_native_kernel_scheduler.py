@@ -1,9 +1,11 @@
+import copy
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from runtime import native_kernel_scheduler as scheduler
-from tools import qualify_native_kernel_scheduler as qualify
+from tools import pooleos_release_gate, qualify_native_kernel_scheduler as qualify
 
 
 PROBE_OUTPUT = """\
@@ -58,6 +60,28 @@ class NativeKernelSchedulerTests(unittest.TestCase):
         self.assertEqual(115, contract["qualification"]["hostile_case_count"])
         self.assertFalse(contract["production_ready"])
         self.assertFalse(contract["claims"]["general_scheduler_implemented"])
+        baseline = scheduler.read_json(scheduler.ROOT / scheduler.READINESS_RELATIVE)
+        for value in ("2026-09-05", "2026-09-07", "2024-02-29"):
+            candidate = copy.deepcopy(baseline)
+            candidate["status_date"] = value
+            with self.subTest(valid_date=value):
+                self.assertFalse(any("status_date" in item for item in scheduler.readiness_errors(candidate)))
+        invalid_dates = (
+            None, 7, True, "", "20260907", "2026-9-7", "2026-02-29",
+            "2026-04-31", "2026-13-01", "2026-09-07T00:00:00",
+        )
+        self.assertEqual(10, len(invalid_dates))
+        for value in invalid_dates:
+            candidate = copy.deepcopy(baseline)
+            candidate["status_date"] = value
+            with self.subTest(invalid_date=value), patch.object(
+                pooleos_release_gate, "_load_schema_artifact", return_value=(candidate, [])
+            ):
+                expected = "readiness status_date is not a canonical calendar date"
+                self.assertIn(expected, scheduler.readiness_errors(candidate))
+                check = pooleos_release_gate.check_native_kernel_scheduler_readiness()
+                self.assertFalse(check["ok"])
+                self.assertIn(expected, check["detail"])
 
     def test_independent_stress_oracle_is_frozen(self) -> None:
         receipt = scheduler.stress_oracle()
