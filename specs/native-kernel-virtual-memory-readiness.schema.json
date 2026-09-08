@@ -17,7 +17,7 @@
     "build": {"type": "object"},
     "media": {"type": "object"},
     "execution": {"type": "object"},
-    "negative_controls": {"type": "array", "minItems": 46, "maxItems": 46, "items": {"type": "object"}},
+    "negative_controls": {"type": "array", "minItems": 48, "maxItems": 48, "items": {"type": "object"}},
     "claims": {"type": "object"},
     "non_claims": {"type": "array", "minItems": 5, "items": {"type": "string"}},
     "summary": {"type": "object"},

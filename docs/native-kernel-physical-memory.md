@@ -78,14 +78,14 @@ repeats return the immutable receipt without physical access.
 ## Stable Manager and Ledgers
 
 The stable 15,632-byte manager occupies five scrubbed DMA32 pages owned by
-`0x4D45` and mapped supervisor RW/NX at `0xFFFFFFFF801B8000` between absent
+`0x4D45` and mapped supervisor RW/NX at `0xFFFFFFFF801BA000` between absent
 guards. It stores bounded bootstrap arrays, the active generation descriptor,
 integrity state, and rollback state. Once a ledger generation is active, all
 ordinary source, extent, allocation, scrub-receipt, and reclaim-receipt
 operations use that mapped generation.
 
-Two alternate guarded 32-page windows begin at `0xFFFFFFFF801BF000` and
-`0xFFFFFFFF801E1000`. PKPMM7 materializes four active generations:
+Two alternate guarded 32-page windows begin at `0xFFFFFFFF801C1000` and
+`0xFFFFFFFF801E3000`. PKPMM7 materializes four active generations:
 
 1. generation 2: 4 pages, capacities `256/32/256/16/2`;
 2. generation 5: 8 pages, capacities `512/64/512/32/4`;
@@ -107,25 +107,26 @@ allocations, block further growth, and require explicit retry.
 
 ## Retained Layout
 
-The current 144-page kernel and 36-page bootstrap stack use this shared PKMAP2
-two-leaf geometry:
+The Cycle 162 candidate's 146-page kernel and 36-page bootstrap stack use this
+shared PKMAP2 two-leaf geometry from `native/kmap/src/lib.rs`. These indices
+describe the current source, not a claim that the older live receipt is current:
 
 | Indices | Role |
 | --- | --- |
-| `0-143` | PooleKernel image |
-| `144` | absent low stack guard |
-| `145-180` | bootstrap stack |
-| `181` | absent high stack guard |
-| `182-437` | read-only PBP1 handoff |
-| `438` | temporary physical alias |
-| `439 / 445` | stable-manager guards |
-| `440-444` | stable manager |
-| `446 / 479` | ledger-window A guards |
-| `447-478` | ledger-window A |
-| `480 / 513` | ledger-window B guards |
-| `481-512` | ledger-window B |
-| `514 / 516 / 518` | PKIRQ1 MMIO guards |
-| `515 / 517` | transient local-APIC / HPET leaves |
+| `0-145` | PooleKernel image |
+| `146` | absent low stack guard |
+| `147-182` | bootstrap stack |
+| `183` | absent high stack guard |
+| `184-439` | read-only PBP1 handoff |
+| `440` | temporary physical alias |
+| `441 / 447` | stable-manager guards |
+| `442-446` | stable manager |
+| `448 / 481` | ledger-window A guards |
+| `449-480` | ledger-window A |
+| `482 / 515` | ledger-window B guards |
+| `483-514` | ledger-window B |
+| `516 / 518 / 520` | PKIRQ1 MMIO guards |
+| `517 / 519` | transient local-APIC / HPET leaves |
 
 Closeout found and fixed two consumers that still used the former 14-page
 stack size. PKTRAP1 had calculated its deliberate low-guard page from the old
@@ -136,9 +137,9 @@ after a live PKVM3 replay caught a write 1,080 bytes below the former 32-page
 stack; the active-VM consumer now derives the size directly from the shared
 PooleKernel constant.
 
-## Canonical Evidence
+## Historical Cycle 156 Evidence
 
-Cycle 156 requalifies the current retention-capable kernel. Thirty-two existing
+Cycle 156 requalified its then-current retention-capable kernel. Thirty-two existing
 Rust physical-memory tests pass, including the exact 15,632-byte manager and
 retention across migration, growth and failed retirement. The extra 256 bytes
 come from retention identities in 32 bootstrap allocation records. The manager
@@ -178,7 +179,7 @@ The Cycle 156 replay binds the kernel at 517,784 canonical bytes in a
 589,824-byte, 144-page image with 1,304 relocations and SHA-256
 `BDEECCB27B1B91406911F91169B9BF5F9DF0439BB39FA0E1882C07E1AF3B81EF`.
 PKPMM7 also supplies PKVM3's exact generation-bound sparse ownership manifest;
-the current kernel growth and second retained leaf are fully reflected in
+that cycle's kernel growth and second retained leaf are fully reflected in
 source, managed, loader-protected, and dependent direct-map counts.
 Compared with the prior 143-page receipt, exactly one usable page becomes
 loader-protected. Independent PBP1 reconstruction agrees; reclaim ranges,

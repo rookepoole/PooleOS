@@ -12,7 +12,8 @@ The contract is `specs/native-kernel-xstate-exception-contract.json`. The indepe
 
 - opt-in PooleBoot feature `development-xstate-exception` and transfer selector `6`;
 - pinned QEMU/OVMF q35 foundation with WHPX hardware acceleration and CPU overlay `EPYC-Rome-v4,-avx,-avx2,-fma,-f16c,-pku`;
-- one BSP, one vCPU, TCG single-thread, two runs with fresh copied VARS;
+- one BSP, one vCPU, two WHPX runs with fresh copied VARS;
+- one separate TCG single-thread limitation probe, excluded from the successful exception-run count;
 - parent PKXSTATE1 policy re-executed and validated before exception gates are installed;
 - vectors 7, 16, and 19 installed as ring-0 interrupt gates on IST1;
 - execution on a host reporting `AMD Ryzen 7 9800X3D 8-Core Processor`, without promoting the virtualized receipt into bare-metal target qualification;

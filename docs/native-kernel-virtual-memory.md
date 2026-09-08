@@ -1,5 +1,33 @@
 # PKVM3 PMM-Owned Sparse Direct Map
 
+## Cycle 162 Active Ownership
+
+The N12.3 candidate adds mandatory exclusive retention of the PKVM3 table and
+data allocations. Initialization takes an exclusive PMM borrow, rejects any
+retention conflict before table writes, audits the candidate, then atomically
+acquires both tokens. A failed initialization does not retain a partial owner.
+Ordinary copied handles cannot free either allocation. Cleanup consumes a token
+only after a committed PMM free; wrong-manager, extent-capacity and metadata
+failures return the token. Table zeroing or temporary-alias cleanup failures
+leave the root retained and retryable after its existing retirement receipt.
+
+The selector-10 exercise checks six ordinary-free rejections: table and data
+before activation, both after activation, data after only the first unmap, and
+tables after restoration but before authorized cleanup. The diagnostic reports
+the observed count, and the independent parser rejects missing or altered counts.
+The exact candidate and its current transfer dependency require their own
+linked-image and live-profile qualification; Cycle 161 receipts must not be
+relabeled as evidence for the changed image. Current replay evidence belongs
+in the source-bound readiness receipt and dated checkpoint, not in this history.
+
+Dropping or forgetting the owner retains its allocations. Rust does not guarantee
+that destructors run, so allocator retention must not depend on a destructor:
+[Rust `mem::forget` safety](https://doc.rust-lang.org/core/mem/fn.forget.html).
+This is allocation ownership, not a hardware quiescence proof, a capability,
+manager-provenance isolation, execution-stack ownership or general SMP retirement.
+The existing data release is not a scrub-before-reuse implementation; this change
+does not expand its claims. Those memory and N12 exit requirements remain open.
+
 ## Scope
 
 PKVM3 is the Cycle 134 `N9-VM-DIRECT-MAP-001` increment. It replaces the
@@ -35,8 +63,8 @@ works because allocation changes ownership category without changing admitted
 coverage. A stale or forged range set, generation, count, boundary, cache
 policy, or checksum fails closed.
 
-The live qemu64 profile covers 117,821 owned pages in eleven ranges. It leaves
-12,944 pages of physical holes unmapped. Its selector does not run the separate
+The historical Cycle 156 qemu64 profile covered 117,821 owned pages in eleven
+ranges, leaving 12,944 pages of physical holes unmapped. Its selector does not run the separate
 PKACPI1 retained-snapshot lifecycle, so the live retained-exclusion count is
 zero; a host test inserts a release-excluded allocation and proves the resulting hole
 is excluded and untranslated.
@@ -57,7 +85,7 @@ pages, and other release-excluded ownership receive no direct leaf. PWT or PCD
 on an audited leaf is rejected as an incompatible cache alias. Large pages are
 not admitted.
 
-The current live topology contains 237 direct leaf tables, one direct
+The historical Cycle 156 live topology contains 237 direct leaf tables, one direct
 directory, and five fixed tables, for 243 generation-owned table pages. It
 retains the exact PKMAP2 kernel image, RX entry, 36-page guarded stack, and
 read-only/NX PBP1 handoff mappings. The bootstrap temporary alias is revoked
@@ -77,8 +105,10 @@ and translation-checked immediately before activation.
    the user leaf, and revoke the data direct alias. Each commit creates a
    root-, generation-, CPU-, address-, kind-, and sequence-bound local INVLPG
    receipt. Hardware Accessed/Dirty bits are preserved; all other drift fails.
-5. Reject data-frame reuse until both unmap receipts are exact, then scrub and
-   release that allocation.
+5. Reject data-frame reuse until both unmap receipts are exact, then perform
+   owner-authorized release. This data-release path does not scrub the frame;
+   scrub-before-reuse integration remains required and is not implied by the
+   separate table-zeroing path or the scrubbed PKPMM7 diagnostic.
 6. Reject root retirement for any active-processor count other than one with
    `ShootdownRequired`. For the one-BSP profile, restore and read back the
    retained root, perform the local context flush implicit in CR3 replacement,
@@ -93,7 +123,7 @@ attribute drift, candidate-write rollback, CR3 rollback, premature reuse,
 missing and stale retirement receipts, and the future multi-processor
 shootdown dependency.
 
-## Qualification
+## Historical Cycle 156 Qualification
 
 Two fresh-vars QEMU/OVMF executions reproduce the same 40 markers, framebuffer,
 and exact PBP1 transcript. Two hundred fourteen PooleKernel host tests, 43 PKENTRY1

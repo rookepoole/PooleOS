@@ -4,13 +4,53 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
-Cycle 161 completes qualification of the mandatory native task-retention
+Cycle 165 completes memory-through-lock dependency replay on the current kernel:
+fourteen profiles, 28 final headless boots, 660 negative-control groups and
+2,120 rejected cases. All 27 selected native checks pass. The 142-test profile
+suite passes with two optional local-transcript skips. Full runtime-inclusive
+qualification and publication/review gates still precede merging draft PR #75;
+main remains qualified Cycle 161. No native kernel, PooleGlyph or demo ISO bytes
+change, and no phase or production gate closes.
+[Cycle 165 checkpoint](docs/checkpoints/cycle165-native-dependency-replay.md).
+
+Historical Cycle 164 completes current-kernel trap and CPU-state replay: five live
+profiles pass fourteen headless boots, 225 marker controls and 41 focused
+N7 tests. One expected TCG exception diagnostic is counted separately.
+The selected native projection now passes 13/27; fourteen memory-through-lock
+dependencies and full exact-final qualification remain pending before merging
+draft PR #75. Main remains qualified Cycle 161. Kernel bytes, PooleGlyph and
+the separate demo ISO are unchanged; PooleOS remains pre-production.
+[Cycle 164 checkpoint](docs/checkpoints/cycle164-cpu-replay.md).
+
+Historical Cycle 163 requalifies the current kernel's boot chain: six fresh virtual
+boots include two PooleKernel entries that independently revalidate nine
+retained files before the expected unsigned-policy halt. Seventy focused
+tests pass, including repairs to two fixed-date receipt validators. All six
+boot-chain gates pass; nineteen downstream dependencies still need replay,
+starting with traps and CPU state. Main remains qualified Cycle 161 and
+PR #75 remains draft. Kernel bytes and the separate demo ISO are unchanged;
+PooleOS remains pre-production.
+[Cycle 163 checkpoint](docs/checkpoints/cycle163-boot-chain-replay.md).
+
+Historical Cycle 162 adds mandatory ownership of active page tables and data frames.
+The kernel rejects copied-handle frees and keeps pages retained when cleanup
+fails. The larger image's guarded boot mapping is updated and independently
+checked. 228 kernel tests and two fresh headless VM boots pass; the live path
+observes six retained-free rejections. Other changed-image dependencies still
+need replay before merging; the candidate audit is failed at 81/105 gates.
+Main holds the qualified Cycle 161 checkpoint merged through
+[PR #74](https://github.com/rookepoole/PooleOS/pull/74);
+the demo ISO is unchanged. PooleOS remains pre-production.
+[Cycle 162 checkpoint](docs/checkpoints/cycle162-active-root-retention.md).
+
+Historical Cycle 161 completes qualification of the mandatory native task-retention
 checkpoint: 28 final memory/SMP/scheduler/lock virtual boots and 2,118 negative
 cases pass. All 26 selected native checks and the pre-closeout canonical suite
 pass, including 105 consistency gates and 708 Doctor checks. Scheduler receipts
-now validate real calendar dates instead of one fixed day. Exact-final
-qualification and publication/review checks still gate merging PR #74 to main.
-The next kernel work is active-root and execution-stack ownership. The separate
+now validate real calendar dates instead of one fixed day. Subsequent exact-final
+qualification and publication/review checks passed, and PR #74 merged as
+`a4c3c27`. Active-root ownership is developed in Cycle 162; execution-stack
+ownership remains open. The separate
 demo ISO is unchanged; PooleOS remains pre-production.
 [Checkpoint details](docs/checkpoints/cycle161-qualified-checkpoints.md).
 

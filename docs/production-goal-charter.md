@@ -1,15 +1,77 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-09-07
+Status date: 2026-09-08
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 161
+Last roadmap reconciliation: PooleOS Cycle 165
 
-Cycle 161 completes the changed-kernel dependency replay begun in Cycle 158.
+Cycle 165 completes fourteen memory, interrupt, SMP, scheduler, atomic and lock
+profiles on the unchanged Cycle 162 kernel: 28 final successful headless boots,
+660 negative-control groups and 2,120 rejected cases. Six superseded initial
+boots are preserved separately after correcting three stale test expectations.
+All 27 selected native checks pass; this is not a full canonical or Doctor pass.
+Memory layout documentation and measured acceptance pins are reconciled, with
+25 stale/off-by-one gate controls and fourteen production-overclaim controls.
+PKVM3 data-frame scrub-before-reuse integration remains explicitly open.
+No phase, flag, charter scope or production condition changes. Main remains
+qualified Cycle 161. Runtime-inclusive exact-final qualification with bundle
+and replay inputs, publication and GitHub review gates must pass before merge
+and further N12.3 execution-stack/general CPU-retirement ownership work.
+N0 custody, PooleGlyph and the frozen demo are unchanged.
+[Cycle 165 evidence](checkpoints/cycle165-native-dependency-replay.md).
+
+Historical Cycle 164 completes the trap/CPU/xstate/exception/MSR replay on the unchanged
+Cycle 162 kernel. Five live profiles pass fourteen final headless boots,
+225 marker controls and 41 focused N7 tests, including the unchanged pure
+errata-policy tests. The six pre-backup trap boots are included once; one
+expected TCG exception non-delivery diagnostic is counted separately from
+the two successful WHPX exception boots. A contradictory profile description
+and stale current-summary counts are corrected without changing native code.
+The selected native projection is 13/27, with fourteen memory-through-lock
+dependencies still requiring replay. Historical full audits are not current
+aggregate scores. No phase, flag or production gate closes. Main remains
+qualified Cycle 161; draft PR #75 holds the source checkpoint. Next is
+N9-PMM-ACPI-CONSUMER-001, followed by VM/IRQ/SMP/scheduler/atomic/lock replay
+and runtime-inclusive exact-final qualification before any main merge.
+PooleGlyph, the frozen demo, N0 custody and the charter scope are unchanged.
+[Cycle 164 evidence](checkpoints/cycle164-cpu-replay.md) supersedes the partial
+cloud-backup notice while preserving its historical record.
+
+Historical Cycle 163 completes PSYM1, PPOL1, PKLOAD6, PooleBoot, PKREVAL1 and PKXFER1
+replay for the unchanged Cycle 162 kernel. Six final headless boots include
+two kernel entries with independent nine-file retained-input agreement.
+Seventy focused tests pass. Loader and PooleBoot calendar-date validation
+repairs two fixed-day schema blockers, with six valid/twenty invalid cases.
+This does not close the existing broader N36 schema/evidence review.
+The current selected projection passes 8/27; nineteen downstream receipts
+remain stale, including transfer-dependent VM evidence. Historical Cycle 162
+81/105 and Doctor683/706 are not current aggregate scores. Main remains
+qualified Cycle 161 through PR74; PR75 stays draft pending complete replay
+and runtime-inclusive exact-final qualification. No phase/flag closes, and
+kernel/demo bytes and PooleGlyph remain unchanged. Next: N7-TRAP-001, then
+CPU/memory/IRQ/SMP/scheduler/lock replay before further N12.3 ownership work.
+N0 custody and all production exits remain open. Charter scope is unchanged.
+
+Historical Cycle 162 implements mandatory active table/data retention in the native
+PKVM3 path, with ownership-preserving failure cleanup and synchronized PKMAP2
+retained geometry for the 146-page kernel. 228 kernel tests in both modes,
+24 lifetime/19 pool cases, seven compile-fail checks, two identical builds
+and two fresh headless VM boots pass. Six allocator rejections are observed
+per boot. The selected projection passes 4/27; 23 dependency receipts remain
+stale. The actual pre-closeout audit is failed at81/105, Doctor683/706; the
+optional PooleGlyph runtime pair was excluded and passes separately without
+changing that audit. Runtime-inclusive exact-final qualification still gates
+merging. Historical Cycle 161 main was merged
+through PR74; its aggregate pass is not inherited by changed image bytes.
+N12.3, N0 custody and N36 remain open; no phase or flag closes, and neither
+PooleGlyph nor the frozen demo ISO changes. The next owner-independent move
+is N5-SYMBOLS-SEMANTICS-001 and dependency-ordered replay before main merge.
+
+Historical Cycle 161 completes the changed-kernel dependency replay begun in Cycle 158.
 Fourteen current-source memory, IRQ/SMP, scheduler, atomic and lock profiles
 pass 28 final headless boots, 658 control groups and 2,118 rejected cases.
 Each qualifier passes 219 kernel host tests on the unchanged mandatory-retention

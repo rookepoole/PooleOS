@@ -9,41 +9,42 @@
   "cross_cpu_quiescence_verified": false,
   "n12_3_complete": false,
   "focused_test_count": 19,
-  "kernel_regression_count": 219,
+  "kernel_regression_count": 228,
   "compile_fail_borrow_tests": 7,
   "physical_retention_contract_id": "PKRETAIN1",
   "physical_retention_scope": "allocator_enforced_for_explicitly_retained_allocations",
-  "physical_retention_test_count": 13,
+  "physical_retention_test_count": 16,
   "physical_retention_live_verified": false,
   "task_lifetime_contract_id": "PKLIFE1",
   "task_lifetime_test_count": 24,
   "task_lifetime_scope": "mandatory_inactive_table_and_bound_frame_retention",
-  "linked_kernel_sha256": "18EDADA10E141DBADA8C95C1C0B3454696122C5E96C528F45E0AECE6ADD2F07D",
-  "linked_kernel_byte_count": 517784,
+  "linked_kernel_sha256": "D0AA3295F66AF02D48476BCEDC44D962A873E98FBA21F48A6753AA7BB9B24EA4",
+  "linked_kernel_byte_count": 525976,
   "sources": {
     "native/kernel/src/reclamation.rs": "D83CC01443435BD993C6A688B7BDD169A05B87B20AC32B083FFEB81988206A62",
     "native/kernel/src/reclamation/task_lifetimes.rs": "A5CDF65682124F707EDCAD2C120FE41C2E7B179A8D3ABC0F34C211C18208EBF2",
-    "native/kernel/src/lib.rs": "560EF6FF38EF08DC34AD7BC57E4D07C19AA43F291AD3DF8606C7FF77AF34E05E",
+    "native/kernel/src/lib.rs": "32326BA195A43C10A772E4B57FA8F1C946B37C5A57EB305D89BE7F8AF9639209",
     "native/kernel/src/atomics.rs": "1B4228C921F0746C101B307A20E34DCF7D7D859895A440D027005FADE48D0B90",
     "native/kernel/src/locks.rs": "102A453683238E01DEE0516359B6FB80368AE89A9BAE19F0699FE8C3E123DF9A",
     "native/kernel/tests/reclamation_core.rs": "43D28759ABC933FE5A4F85D22AFE8A588EEE559FDC20C6188C3347B8D2F74FCA",
     "native/kernel/tests/task_lifetimes.rs": "543A7713E61829CDFB505E38BA28C1070622321D496CFD928A526555B1B6DA1C",
     "native/kernel/src/scheduler_smp.rs": "8C3C13140D867F3766F6209B1B918970BA095EA5FA35634C721D5C0509469390",
     "native/kernel/src/virtual_memory.rs": "956CB1A42A93B82B1F56637158ECF3AF7DE0ED55DF2565E3A0BCDD2DDB7E601D",
-    "native/kernel/src/physical_memory.rs": "26AF4FED4DFFA50D271B0B54ADABF9CD2EBDF3DCFEE3C4566E501C00F0B1C673",
-    "native/kernel/src/physical_memory/retention.rs": "8BEDD88B79E57C7BB2F53E9BCA27E6043DEE7A63194DEC2E14FA7DE55E87F06F",
-    "native/kernel/src/physical_memory/tests/retention.rs": "4483881D641F06B0372E0CE049D0FF27813B4F36A7FBF6A3E0F6074BB54941DD",
-    "native/kernel/src/main.rs": "3EAA0680A89CDE516A652FA0E0F3FD935121185B982F9F02C485CA45AB5544D9",
-    "native/kernel/linker.ld": "562442E18F1D29F984A0E9745E3734F8F51FC0C6C83CE2B75F9FAC1FD6B05F65",
-    "native/kernel/manifest.pkm": "E9FAA51A5273D96872AC8F96635806217D86CC8AE152D002FA5DAF8CA5D319DF",
-    "specs/native-kernel-entry-contract.json": "B1F2C5E8238D6D2E14EF905F5F5CCCA46E668756D50F68F9CCE9C5631A7DBB27",
-    "specs/native-kernel-entry-contract.schema.json": "F254AB0959BA1D266F72159352F0564BF5E33F90A158B68C38633A2665B4081D",
-    "native/kmap/src/lib.rs": "F717645EAE175BF5F354219836F4149630DD16D6E4959A8B77E3A5C6F3D88532",
+    "native/kernel/src/active_virtual_memory.rs": "A922E790E573B9D92A9882DB7498CB9017487FAB933B83B4B7BFCBEE11AA9DED",
+    "native/kernel/src/physical_memory.rs": "62BCA3E37E738371D86989BCDD5A3558D5716B0CAEA2FA86CAD54DC67D973DEB",
+    "native/kernel/src/physical_memory/retention.rs": "3C71681C06BE03F035D67465051743C293A386718C2749D8B071EE1E776F1AE1",
+    "native/kernel/src/physical_memory/tests/retention.rs": "E836ED901588DF00C3B80C4996E2E4BC2E780E62A9F6F0EA09398EEBCD70E73F",
+    "native/kernel/src/main.rs": "BAC5CEB12DB816DDC70B2505D352E464FA8D14A5619616866B983FE8EEFDF662",
+    "native/kernel/linker.ld": "BAB2ACFAEA742F2C5BB3BD7166018A2D9480CA2D3B83795F5D4FEF7AEB130873",
+    "native/kernel/manifest.pkm": "68D111CC7E4C79BD798FAA4269F1FB8AF77BE5DA85AC2ACAD80645688400CE7C",
+    "specs/native-kernel-entry-contract.json": "1C838566B54645397CFD477C23F9DC3F65AB030DC4F4BA5BCD12DB056FA2A6C6",
+    "specs/native-kernel-entry-contract.schema.json": "B16B4B97FD780A3E97913F924D7383A3E1AF2C1E98D66D8B5CDC047745074FF0",
+    "native/kmap/src/lib.rs": "F934F7B5B7FB1A61EF0F4D84787AD389664C825AA940D7F39C589C0A3CFA7AF5",
     "native/handoff/src/lib.rs": "983DAFD71E0B892F6F98C614D43600CBEBDDBD7C0AA1E2D81CDAA545E165B110",
     "native/kernel/Cargo.toml": "F9F3AB6D84008B0354A5B82B0F616C5652C076C15F3313F14B862ED0DB1C1C43",
     "native/Cargo.lock": "29CE9938C5C60DEA5AEA244A6961BB1924D88AEC601D1E02EAAA510B0B36E390",
     "specs/native-toolchain-lock.json": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E",
-    "tools/qualify_native_reclamation_core.py": "F3B71303DC7A2BA013668E68A5A10D9443A456226019B9540FCC8720F1681D7A"
+    "tools/qualify_native_reclamation_core.py": "13AAF48E99F7598D437BC0438D680F0F6E016BC1412D9892BFDFA8DA9194B79B"
   },
   "stages": [
     {
@@ -54,7 +55,7 @@
     {
       "name": "host-build-debug",
       "status": "pass",
-      "output_sha256": "7BAB9A1622C1F3F492627DB6FA73ED55023C557E3EB3A7D0C3A66BE8B084E906"
+      "output_sha256": "808E98EB9B576294E593DF00B8F1A0D981516CF0F2A7777F1E736D9C40EDFE79"
     },
     {
       "name": "test-build-debug",
@@ -79,7 +80,7 @@
     {
       "name": "host-build-release",
       "status": "pass",
-      "output_sha256": "6D402B226A01C8E4845F274060E3A2B4B3A6962676CE61F78CB684A1C577E062"
+      "output_sha256": "6DA5FE805B16CCCC4D50FE5A91B45859606A82C4021B9541D7ACE6629F1FA46D"
     },
     {
       "name": "test-build-release",
@@ -104,32 +105,32 @@
     {
       "name": "kernel-regressions-release",
       "status": "pass",
-      "output_sha256": "313729651D141D1B15AA5CE0E65068E290CABCBC6CDFEA6308734B9BECD636F0"
+      "output_sha256": "381FB75309E8E9EB0463530FDB451B089EC4806F1C8CC624DCE451514861DA7B"
     },
     {
       "name": "borrow-doctests",
       "status": "pass",
-      "output_sha256": "4F149C12D4F1D13C0003EDC8A8630AA64531274EAF3938C2AF65258AB5E126D0"
+      "output_sha256": "A04814951468D5D58829B437E3BA4F31E448A7C503FB07188737C3C1AC88C164"
     },
     {
       "name": "kernel-regressions",
       "status": "pass",
-      "output_sha256": "AFA1B0CEF0BB1957583F8086060C83BEF1B1982077DD10924384A38FDBACACE2"
+      "output_sha256": "92BE1FE597B20BFBC834502A9EBCA6BA8DF65744364D23F92F83D72E08A3A021"
     },
     {
       "name": "host-clippy",
       "status": "pass",
-      "output_sha256": "E7CCADE8E6D18B4BC286AA397B448CA9FCE355D2A70E3453DECC31EB21A69D86"
+      "output_sha256": "7CE2EDEFB8C57528F068788E4FE6A0DE71B0958C0092E06BBFF539F10E6DD232"
     },
     {
       "name": "freestanding-clippy",
       "status": "pass",
-      "output_sha256": "2CF8E62F6356A20FB7842052B9C4F509C00C84F1773B2EB7B16F675CE470B3D3"
+      "output_sha256": "4C75836EDC94405D98D4CB7FBC67409BC0A0EA0308F82E9DCE2D191E0D77F4BD"
     },
     {
       "name": "linked-kernel-build",
       "status": "pass",
-      "output_sha256": "4DB1D1A6408ACBB19F15CC8FF3B224F3296A6D6EC7D32103BC6B05F15F72581A"
+      "output_sha256": "A6412E1AE4CDB0DEFDA7800BD6EEF80AA587FA198977B29F3DC1FAB34D71030C"
     }
   ]
 }

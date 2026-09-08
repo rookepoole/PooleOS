@@ -1,6 +1,71 @@
 use super::*;
 
 #[test]
+fn retained_free_commits_once_and_wrong_manager_returns_the_owner() {
+    let mut first = manager();
+    let mut other = manager();
+    let handle = first.allocate(Zone::Dma32, 1, 7).unwrap();
+    assert_eq!(other.allocate(Zone::Dma32, 1, 7).unwrap(), handle);
+    let token = first.retain_allocation(handle).unwrap();
+    let (error, token) = other.free_retained(token).unwrap_err();
+    assert_eq!(error, PhysicalMemoryError::RetentionIdentity);
+    assert_eq!(
+        first.free(handle),
+        Err(PhysicalMemoryError::AllocationRetained)
+    );
+    assert_eq!(other.validate_allocation(handle), Ok(()));
+    first.free_retained(token).unwrap();
+    assert_eq!(first.free(handle), Err(PhysicalMemoryError::StaleHandle));
+    other.free(handle).unwrap();
+}
+
+#[test]
+fn retained_free_metadata_failure_returns_token_without_losing_retention() {
+    let mut manager = manager();
+    let handle = manager.allocate(Zone::Dma32, 1, 7).unwrap();
+    let token = manager.retain_allocation(handle).unwrap();
+    manager.allocation_entries_mut()[usize::from(handle.slot)].release_excluded = true;
+    let (error, token) = manager.free_retained(token).unwrap_err();
+    assert_eq!(error, PhysicalMemoryError::MetadataOwnership);
+    assert_eq!(
+        manager.free(handle),
+        Err(PhysicalMemoryError::AllocationRetained)
+    );
+    manager.allocation_entries_mut()[usize::from(handle.slot)].release_excluded = false;
+    manager.free_retained(token).unwrap();
+}
+
+#[test]
+fn retained_free_capacity_failure_is_atomic_and_retryable() {
+    let mut manager = PhysicalMemoryManager::test_manager(4096, 128, 64);
+    let handle = manager.allocate(Zone::Dma32, 1, 7).unwrap();
+    let token = manager.retain_allocation(handle).unwrap();
+    // A full fragmented free ledger exercises the allocator's insertion failure.
+    let saved_free = manager.free;
+    let saved_count = manager.free_count;
+    for index in 0..MAX_FREE_EXTENTS {
+        manager.free[index] = Extent {
+            start_page: 1 + index as u64 * 2,
+            page_count: 1,
+            zone: Zone::Dma,
+        };
+    }
+    manager.free_count = MAX_FREE_EXTENTS;
+    let before = manager.summary();
+    let (error, token) = manager.free_retained(token).unwrap_err();
+    assert_eq!(error, PhysicalMemoryError::ExtentCapacity);
+    assert_eq!(manager.summary(), before);
+    assert_eq!(
+        manager.free(handle),
+        Err(PhysicalMemoryError::AllocationRetained)
+    );
+    manager.free = saved_free;
+    manager.free_count = saved_count;
+    manager.free_retained(token).unwrap();
+    assert_eq!(manager.summary().allocated_pages, 0);
+}
+
+#[test]
 fn group_retention_covers_sparse_members_and_all_free_paths() {
     let mut manager = manager();
     let a = manager.allocate(Zone::Dma32, 1, 7).unwrap();

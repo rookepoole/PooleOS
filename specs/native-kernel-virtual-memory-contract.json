@@ -32,8 +32,8 @@
     "kernel_start": "0xFFFF800000000000",
     "direct_map_start": "0xFFFF900000000000",
     "direct_map_end_exclusive": "0xFFFFD00000000000",
-    "temporary_map_start": "0xFFFFFFFF80150000",
-    "temporary_map_end_exclusive": "0xFFFFFFFF80151000",
+    "temporary_map_start": "0xFFFFFFFF801B8000",
+    "temporary_map_end_exclusive": "0xFFFFFFFF801B9000",
     "kernel_image_start": "0xFFFFFFFF80000000",
     "kernel_image_end_exclusive": "0xFFFFFFFFC0000000",
     "implemented_user_window_start": "0x0000000040000000",
@@ -72,6 +72,7 @@
     "occupied_direct_root_slot_allowed": false
   },
   "transaction_policy": {
+    "allocation_retention": "exclusive non-copyable table and data owners acquired atomically after candidate audit; conflicts rejected before table writes; ordinary copied-handle frees reject in prepared, active and restored states; failed cleanup retains ownership",
     "candidate_audit_before_activation": true,
     "manifest_revalidation_after_allocation": true,
     "cr3_precondition": "IF clear, BSP id 0, exact retained original CR3",
@@ -159,7 +160,7 @@
     "exact_markers_frame_and_pbp1_required": true,
     "independent_pbp1_ownership_manifest_oracle_required": true,
     "rust_manifest_sparse_hole_cache_rollback_and_retirement_tests_required": true,
-    "negative_control_count": 46
+    "negative_control_count": 48
   },
   "required_negative_controls": [
     "NEG-N9-PKVM3-MARKER-OMISSION",
@@ -207,7 +208,9 @@
     "NEG-N9-PKVM3-PHYSICAL-WRITES",
     "NEG-N9-PKVM3-TEMPORARY-MAPPING",
     "NEG-N9-PKVM3-OVERCLAIM",
-    "NEG-N9-PKVM3-PBP1-BINDING"
+    "NEG-N9-PKVM3-PBP1-BINDING",
+    "NEG-N9-PKVM3-RETAINED-FREE-COUNT",
+    "NEG-N9-PKVM3-RETAINED-FREE-MISSING"
   ],
   "claims": {
     "canonical_48_bit_layout_frozen": true,

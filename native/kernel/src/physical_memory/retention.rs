@@ -54,6 +54,25 @@ impl PhysicalMemoryManager {
         &mut self,
         handles: [Option<AllocationHandle>; N],
     ) -> Result<[Option<RetainedAllocation>; N], Error> {
+        self.check_retainable_allocations(&handles)?;
+        let count = handles.iter().flatten().count() as u64;
+        let mut identity = reserve_identities(&NEXT_RETENTION_ID, count)?;
+        let retained = handles.map(|handle| {
+            handle.map(|handle| {
+                self.allocation_entries_mut()[usize::from(handle.slot)].retention_id = identity;
+                let token = RetainedAllocation { handle, identity };
+                identity += 1;
+                token
+            })
+        });
+        self.seal_metadata_integrity();
+        Ok(retained)
+    }
+
+    pub(crate) fn check_retainable_allocations(
+        &self,
+        handles: &[Option<AllocationHandle>],
+    ) -> Result<(), Error> {
         self.require_operational()?;
         for (index, handle) in handles.iter().enumerate() {
             let Some(handle) = handle else { continue };
@@ -69,18 +88,22 @@ impl PhysicalMemoryManager {
                 return Err(Error::AllocationRetained);
             }
         }
-        let count = handles.iter().flatten().count() as u64;
-        let mut identity = reserve_identities(&NEXT_RETENTION_ID, count)?;
-        let retained = handles.map(|handle| {
-            handle.map(|handle| {
-                self.allocation_entries_mut()[usize::from(handle.slot)].retention_id = identity;
-                let token = RetainedAllocation { handle, identity };
-                identity += 1;
-                token
-            })
-        });
-        self.seal_metadata_integrity();
-        Ok(retained)
+        Ok(())
+    }
+
+    /// Commit an owner's release without an intermediate unretained state.
+    /// Alias revocation and scrubbing remain the caller's responsibility.
+    pub(crate) fn free_retained(
+        &mut self,
+        retained: RetainedAllocation,
+    ) -> Result<(), (Error, RetainedAllocation)> {
+        if retained.identity == 0 {
+            return Err((Error::RetentionIdentity, retained));
+        }
+        match self.free_with_retention(retained.handle, retained.identity) {
+            Ok(()) => Ok(()),
+            Err(error) => Err((error, retained)),
+        }
     }
 
     /// A failed group release returns every token with no retention removed.

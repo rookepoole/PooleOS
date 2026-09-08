@@ -3170,6 +3170,14 @@ impl PhysicalMemoryManager {
     }
 
     pub fn free(&mut self, handle: AllocationHandle) -> Result<(), PhysicalMemoryError> {
+        self.free_with_retention(handle, 0)
+    }
+
+    fn free_with_retention(
+        &mut self,
+        handle: AllocationHandle,
+        retention_id: u64,
+    ) -> Result<(), PhysicalMemoryError> {
         self.require_operational()?;
         let result = (|| {
             if self.validate_allocation_inner(handle).is_err() {
@@ -3178,8 +3186,12 @@ impl PhysicalMemoryManager {
             }
             let slot = usize::from(handle.slot);
             let allocation = self.allocation_entries()[slot];
-            if allocation.retention_id != 0 {
-                return Err(PhysicalMemoryError::AllocationRetained);
+            if allocation.retention_id != retention_id {
+                return Err(if retention_id == 0 {
+                    PhysicalMemoryError::AllocationRetained
+                } else {
+                    PhysicalMemoryError::RetentionIdentity
+                });
             }
             if allocation.release_excluded {
                 self.metadata_release_rejections += 1;

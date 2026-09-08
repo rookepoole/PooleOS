@@ -17,7 +17,7 @@
     "transaction_policy": {"type": "object"},
     "threat_model": {"type": "object"},
     "qualification": {"type": "object"},
-    "required_negative_controls": {"type": "array", "minItems": 46, "maxItems": 46, "items": {"type": "string", "pattern": "^NEG-N9-PKVM3-"}},
+    "required_negative_controls": {"type": "array", "minItems": 48, "maxItems": 48, "items": {"type": "string", "pattern": "^NEG-N9-PKVM3-"}},
     "claims": {"type": "object"},
     "non_claims": {"type": "array", "minItems": 5, "items": {"type": "string"}}
   },

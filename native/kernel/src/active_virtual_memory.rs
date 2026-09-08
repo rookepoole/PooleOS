@@ -1,7 +1,8 @@
 use poole_handoff::{CoreRecord, Handoff, PAGE_BYTES};
 
 use crate::physical_memory::{
-    AllocationHandle, DirectMapCachePolicy, DirectMapManifest, PhysicalMemoryManager, Zone,
+    AllocationHandle, DirectMapCachePolicy, DirectMapManifest, PhysicalMemoryError,
+    PhysicalMemoryManager, RetainedAllocation, Zone,
 };
 use crate::virtual_memory::{
     DIRECT_MAP_END_EXCLUSIVE, DIRECT_MAP_START, TableMemory, USER_WINDOW_START,
@@ -265,6 +266,7 @@ pub struct ActiveVirtualMemoryProof {
     pub protected_translation: Translation,
     pub probe_value: u8,
     pub premature_reuse_rejected: bool,
+    pub retained_free_rejections: u64,
     pub release_while_active_rejected: bool,
     pub release_without_retirement_rejected: bool,
     pub smp_reclaim_rejected: bool,
@@ -526,6 +528,7 @@ impl DirectMapTopology {
 pub struct ActiveAddressSpace {
     table_allocation: AllocationHandle,
     data_allocation: AllocationHandle,
+    retained: [Option<RetainedAllocation>; 2],
     tables: [u64; MAX_TABLE_PAGE_COUNT],
     topology: DirectMapTopology,
     manifest: DirectMapManifest,
@@ -553,7 +556,7 @@ pub struct ActiveAddressSpaceInput {
 
 impl ActiveAddressSpace {
     pub fn initialize<M: TableMemory>(
-        manager: &PhysicalMemoryManager,
+        manager: &mut PhysicalMemoryManager,
         table_allocation: AllocationHandle,
         data_allocation: AllocationHandle,
         memory: &mut M,
@@ -570,6 +573,12 @@ impl ActiveAddressSpace {
             .map_err(|_| Error::Pmm)?;
         manager
             .validate_allocation(data_allocation)
+            .map_err(|_| Error::Pmm)?;
+        // Reject competing ownership before any page-table write. The exclusive
+        // manager borrow spans this preflight, table audit and atomic retention.
+        let handles = [Some(table_allocation), Some(data_allocation)];
+        manager
+            .check_retainable_allocations(&handles)
             .map_err(|_| Error::Pmm)?;
         manager
             .validate_direct_map_manifest(manifest, table_allocation)
@@ -748,9 +757,10 @@ impl ActiveAddressSpace {
             }
         }
 
-        let space = Self {
+        let mut space = Self {
             table_allocation,
             data_allocation,
+            retained: [None, None],
             tables,
             topology,
             manifest,
@@ -768,6 +778,9 @@ impl ActiveAddressSpace {
             tables_released: false,
         };
         space.audit(memory, core, physical_address_bits)?;
+        space.retained = manager
+            .retain_allocations(handles)
+            .map_err(|_| Error::Pmm)?;
         Ok(space)
     }
 
@@ -1197,7 +1210,7 @@ impl ActiveAddressSpace {
         {
             return Err(Error::StaleReceipt);
         }
-        manager.free(self.data_allocation).map_err(|_| Error::Pmm)?;
+        self.free_owned_allocation(manager, 1)?;
         self.data_released = true;
         Ok(())
     }
@@ -1272,12 +1285,25 @@ impl ActiveAddressSpace {
             }
         }
         memory.finish().map_err(|_| Error::MemoryAccess)?;
-        manager
-            .free(self.table_allocation)
-            .map_err(|_| Error::Pmm)?;
+        self.free_owned_allocation(manager, 0)?;
         self.tables_released = true;
         self.lifecycle = Lifecycle::Released;
         Ok(())
+    }
+
+    fn free_owned_allocation(
+        &mut self,
+        manager: &mut PhysicalMemoryManager,
+        index: usize,
+    ) -> Result<(), Error> {
+        let token = self.retained[index].take().ok_or(Error::Pmm)?;
+        match manager.free_retained(token) {
+            Ok(()) => Ok(()),
+            Err((_error, token)) => {
+                self.retained[index] = Some(token);
+                Err(Error::Pmm)
+            }
+        }
     }
 
     pub fn summary(&self) -> Summary {
@@ -1350,7 +1376,7 @@ pub fn run_profile<M: TableMemory, H: ActiveHardware>(
         .allocate(Zone::Dma32, 1, DATA_OWNER)
         .map_err(|_| Error::DataAllocation)?;
     let mut space = ActiveAddressSpace::initialize(
-        &manager,
+        &mut manager,
         tables,
         data,
         memory,
@@ -1361,20 +1387,33 @@ pub fn run_profile<M: TableMemory, H: ActiveHardware>(
             physical_address_bits,
         },
     )?;
+    let mut retained_free_rejections = 0;
+    for handle in [tables, data] {
+        reject_copied_free(&mut manager, handle)?;
+        retained_free_rejections += 1;
+    }
     memory.finish().map_err(|_| Error::MemoryAccess)?;
     space.activate(hardware)?;
+    for handle in [tables, data] {
+        reject_copied_free(&mut manager, handle)?;
+        retained_free_rejections += 1;
+    }
     let probe_value = space.write_probe(hardware)?;
     let (_protect_receipt, protected_translation) = space.protect_user(hardware)?;
     let user_receipt = space.begin_user_unmap(hardware)?;
     let premature_reuse_rejected =
         space.complete_data_release(&mut manager, hardware, user_receipt, None)
             == Err(Error::InvalidationRequired);
+    reject_copied_free(&mut manager, data)?;
+    retained_free_rejections += 1;
     let direct_receipt = space.revoke_data_direct_map(hardware)?;
     space.complete_data_release(&mut manager, hardware, user_receipt, Some(direct_receipt))?;
     let release_while_active_rejected =
         space.release_tables(&mut manager, memory, None) == Err(Error::Lifecycle);
     let smp_reclaim_rejected = space.restore(hardware, 2) == Err(Error::ShootdownRequired);
     let retirement = space.restore(hardware, 1)?;
+    reject_copied_free(&mut manager, tables)?;
+    retained_free_rejections += 1;
     let release_without_retirement_rejected =
         space.release_tables(&mut manager, memory, None) == Err(Error::InvalidationRequired);
     space.release_tables(&mut manager, memory, Some(retirement))?;
@@ -1382,6 +1421,7 @@ pub fn run_profile<M: TableMemory, H: ActiveHardware>(
     let summary = space.summary();
     let final_pmm = manager.summary();
     if probe_value != PROBE_VALUE
+        || retained_free_rejections != 6
         || !premature_reuse_rejected
         || !release_while_active_rejected
         || !release_without_retirement_rejected
@@ -1408,6 +1448,7 @@ pub fn run_profile<M: TableMemory, H: ActiveHardware>(
         protected_translation,
         probe_value,
         premature_reuse_rejected,
+        retained_free_rejections,
         release_while_active_rejected,
         release_without_retirement_rejected,
         smp_reclaim_rejected,
@@ -1419,6 +1460,17 @@ pub fn run_profile<M: TableMemory, H: ActiveHardware>(
         final_allocation_count: final_pmm.allocation_count,
         final_free_count: final_pmm.free_count,
     })
+}
+
+fn reject_copied_free(
+    manager: &mut PhysicalMemoryManager,
+    handle: AllocationHandle,
+) -> Result<(), Error> {
+    if manager.free(handle) == Err(PhysicalMemoryError::AllocationRetained) {
+        Ok(())
+    } else {
+        Err(Error::ExerciseInvariant)
+    }
 }
 
 #[cfg(test)]
@@ -1438,6 +1490,8 @@ mod tests {
         pages: BTreeMap<u64, [u64; TABLE_ENTRIES]>,
         writes: u64,
         reject_next_write: bool,
+        reject_write_at: Option<u64>,
+        reject_finish: bool,
     }
 
     impl Memory {
@@ -1490,6 +1544,8 @@ mod tests {
                     pages,
                     writes: 0,
                     reject_next_write: false,
+                    reject_write_at: None,
+                    reject_finish: false,
                 },
                 core,
             )
@@ -1528,6 +1584,10 @@ mod tests {
                 self.reject_next_write = false;
                 return Err(virtual_memory::Error::MemoryAccess);
             }
+            if self.reject_write_at == Some(self.writes) {
+                self.reject_write_at = None;
+                return Err(virtual_memory::Error::MemoryAccess);
+            }
             let entry = self
                 .pages
                 .get_mut(&table_address)
@@ -1539,7 +1599,11 @@ mod tests {
         }
 
         fn finish(&mut self) -> Result<(), virtual_memory::Error> {
-            Ok(())
+            if self.reject_finish {
+                Err(virtual_memory::Error::MemoryAccess)
+            } else {
+                Ok(())
+            }
         }
 
         fn physical_write_count(&self) -> u64 {
@@ -1562,6 +1626,7 @@ mod tests {
         cpu_id: u32,
         interrupts_disabled: bool,
         reject_candidate_readback: bool,
+        reject_original_write: bool,
         reject_next_table_write: bool,
         invalidations: std::vec::Vec<u64>,
         probe: u8,
@@ -1585,6 +1650,9 @@ mod tests {
         }
 
         fn write_cr3(&mut self, value: u64) -> Result<(), Error> {
+            if self.reject_original_write && value == ORIGINAL_ROOT {
+                return Err(Error::MemoryAccess);
+            }
             self.cr3 = value;
             Ok(())
         }
@@ -1651,7 +1719,7 @@ mod tests {
             .unwrap();
         let data = manager.allocate(Zone::Dma32, 1, DATA_OWNER).unwrap();
         let space = ActiveAddressSpace::initialize(
-            &manager,
+            &mut manager,
             tables,
             data,
             &mut memory,
@@ -1692,6 +1760,7 @@ mod tests {
             cpu_id: BSP_CPU_ID,
             interrupts_disabled: true,
             reject_candidate_readback: true,
+            reject_original_write: false,
             reject_next_table_write: false,
             invalidations: std::vec::Vec::new(),
             probe: 0,
@@ -1716,6 +1785,7 @@ mod tests {
             cpu_id: BSP_CPU_ID,
             interrupts_disabled: true,
             reject_candidate_readback: false,
+            reject_original_write: false,
             reject_next_table_write: false,
             invalidations: std::vec::Vec::new(),
             probe: 0,
@@ -1742,6 +1812,7 @@ mod tests {
             cpu_id: BSP_CPU_ID,
             interrupts_disabled: true,
             reject_candidate_readback: false,
+            reject_original_write: false,
             reject_next_table_write: false,
             invalidations: std::vec::Vec::new(),
             probe: 0,
@@ -1794,6 +1865,7 @@ mod tests {
             cpu_id: BSP_CPU_ID,
             interrupts_disabled: true,
             reject_candidate_readback: false,
+            reject_original_write: false,
             reject_next_table_write: false,
             invalidations: std::vec::Vec::new(),
             probe: 0,
@@ -1822,7 +1894,7 @@ mod tests {
             .unwrap();
         let data = manager.allocate(Zone::Dma32, 1, DATA_OWNER).unwrap();
         let space = ActiveAddressSpace::initialize(
-            &manager,
+            &mut manager,
             tables,
             data,
             &mut memory,
@@ -1883,7 +1955,7 @@ mod tests {
         manifest.coverage_checksum ^= 1;
         assert!(matches!(
             ActiveAddressSpace::initialize(
-                &manager,
+                &mut manager,
                 tables,
                 data,
                 &mut memory,
@@ -1912,7 +1984,7 @@ mod tests {
         let data = manager.allocate(Zone::Dma32, 1, DATA_OWNER).unwrap();
         assert!(matches!(
             ActiveAddressSpace::initialize(
-                &manager,
+                &mut manager,
                 tables,
                 data,
                 &mut memory,
@@ -1925,5 +1997,229 @@ mod tests {
             ),
             Err(Error::RootSlotOccupied)
         ));
+        manager.free(tables).unwrap();
+        manager.free(data).unwrap();
+    }
+
+    fn hardware(memory: &mut Memory, candidate: u64) -> Hardware<'_> {
+        Hardware {
+            memory,
+            cr3: ORIGINAL_ROOT,
+            candidate,
+            cpu_id: BSP_CPU_ID,
+            interrupts_disabled: true,
+            reject_candidate_readback: false,
+            reject_original_write: false,
+            reject_next_table_write: false,
+            invalidations: std::vec::Vec::new(),
+            probe: 0,
+        }
+    }
+
+    fn assert_retained(manager: &mut PhysicalMemoryManager, handles: &[AllocationHandle]) {
+        let before = manager.summary();
+        for &handle in handles {
+            assert_eq!(
+                manager.free(handle),
+                Err(PhysicalMemoryError::AllocationRetained)
+            );
+        }
+        assert_eq!(manager.summary(), before);
+    }
+
+    #[test]
+    fn prepared_and_lost_active_owners_keep_copied_handles_retained() {
+        for activate in [false, true] {
+            let (mut manager, mut space, mut memory, _) = prepared();
+            let handles = [space.table_allocation, space.data_allocation];
+            assert_retained(&mut manager, &handles);
+            if activate {
+                space
+                    .activate(&mut hardware(&mut memory, space.tables[0]))
+                    .unwrap();
+            }
+            assert_retained(&mut manager, &handles);
+            core::mem::forget(space);
+            assert_retained(&mut manager, &handles);
+        }
+    }
+
+    #[test]
+    fn duplicate_initialization_rejects_before_any_table_write() {
+        let (mut manager, space, mut memory, core) = prepared();
+        let pages = memory.pages.clone();
+        let writes = memory.writes;
+        assert!(matches!(
+            ActiveAddressSpace::initialize(
+                &mut manager,
+                space.table_allocation,
+                space.data_allocation,
+                &mut memory,
+                ActiveAddressSpaceInput {
+                    manifest: space.manifest,
+                    original_cr3: ORIGINAL_ROOT,
+                    core,
+                    physical_address_bits: 48
+                },
+            ),
+            Err(Error::Pmm)
+        ));
+        assert_eq!(memory.pages, pages);
+        assert_eq!(memory.writes, writes);
+        assert_retained(
+            &mut manager,
+            &[space.table_allocation, space.data_allocation],
+        );
+    }
+
+    #[test]
+    fn initialization_late_retention_conflict_and_write_failure_do_not_pin_partial_owner() {
+        for conflict in [false, true] {
+            let (mut memory, core) = Memory::fixture();
+            let mut manager = PhysicalMemoryManager::test_manager(4096, 128, 24);
+            let manifest = manager.preview_direct_map_manifest().unwrap();
+            let tables = manager.allocate(Zone::Dma32, 7, TABLE_OWNER).unwrap();
+            let data = manager.allocate(Zone::Dma32, 1, DATA_OWNER).unwrap();
+            let token = if conflict {
+                Some(manager.retain_allocation(data).unwrap())
+            } else {
+                None
+            };
+            memory.reject_write_at = Some(5);
+            assert!(matches!(
+                ActiveAddressSpace::initialize(
+                    &mut manager,
+                    tables,
+                    data,
+                    &mut memory,
+                    ActiveAddressSpaceInput {
+                        manifest,
+                        original_cr3: ORIGINAL_ROOT,
+                        core,
+                        physical_address_bits: 48
+                    },
+                ),
+                Err(Error::Pmm | Error::MemoryAccess)
+            ));
+            assert_eq!(memory.writes, if conflict { 0 } else { 5 });
+            manager.free(tables).unwrap();
+            if let Some(token) = token {
+                manager.release_retention(token).unwrap();
+            }
+            manager.free(data).unwrap();
+            assert_eq!(manager.summary().allocated_pages, 0);
+        }
+    }
+
+    #[test]
+    fn uncertain_activation_rollback_keeps_both_owners() {
+        let (mut manager, mut space, mut memory, _) = prepared();
+        let mut hardware = hardware(&mut memory, space.tables[0]);
+        hardware.reject_candidate_readback = true;
+        hardware.reject_original_write = true;
+        assert!(space.activate(&mut hardware).is_err());
+        assert_retained(
+            &mut manager,
+            &[space.table_allocation, space.data_allocation],
+        );
+        assert_eq!(
+            space.release_tables(&mut manager, hardware.memory, None),
+            Err(Error::Lifecycle)
+        );
+    }
+
+    #[test]
+    fn wrong_manager_release_preserves_owners_for_exact_manager_retry() {
+        let (mut manager, mut space, mut memory, _) = prepared();
+        let (mut other, other_space, _, _) = prepared();
+        assert_eq!(space.table_allocation, other_space.table_allocation);
+        assert_eq!(space.data_allocation, other_space.data_allocation);
+        let mut hardware = hardware(&mut memory, space.tables[0]);
+        space.activate(&mut hardware).unwrap();
+        space.write_probe(&mut hardware).unwrap();
+        space.protect_user(&mut hardware).unwrap();
+        let user = space.begin_user_unmap(&mut hardware).unwrap();
+        assert_retained(&mut manager, &[space.data_allocation]);
+        let direct = space.revoke_data_direct_map(&mut hardware).unwrap();
+        assert_eq!(
+            space.complete_data_release(&mut other, &mut hardware, user, Some(direct)),
+            Err(Error::Pmm)
+        );
+        assert_retained(
+            &mut manager,
+            &[space.table_allocation, space.data_allocation],
+        );
+        assert_retained(
+            &mut other,
+            &[other_space.table_allocation, other_space.data_allocation],
+        );
+        space
+            .complete_data_release(&mut manager, &mut hardware, user, Some(direct))
+            .unwrap();
+        assert_eq!(
+            space.complete_data_release(&mut manager, &mut hardware, user, Some(direct)),
+            Err(Error::Pmm)
+        );
+        hardware.reject_original_write = true;
+        assert_eq!(space.restore(&mut hardware, 1), Err(Error::MemoryAccess));
+        assert_retained(&mut manager, &[space.table_allocation]);
+        hardware.reject_original_write = false;
+        let receipt = space.restore(&mut hardware, 1).unwrap();
+        assert_eq!(
+            space.release_tables(&mut other, hardware.memory, Some(receipt)),
+            Err(Error::Pmm)
+        );
+        assert_retained(&mut manager, &[space.table_allocation]);
+        assert_retained(
+            &mut other,
+            &[other_space.table_allocation, other_space.data_allocation],
+        );
+        space
+            .release_tables(&mut manager, hardware.memory, Some(receipt))
+            .unwrap();
+        assert_eq!(manager.summary().allocated_pages, 0);
+    }
+
+    #[test]
+    fn stale_retirement_partial_zero_and_alias_finish_failure_keep_tables_retained() {
+        let (mut manager, mut space, mut memory, _) = prepared();
+        let mut hardware = hardware(&mut memory, space.tables[0]);
+        space.activate(&mut hardware).unwrap();
+        space.write_probe(&mut hardware).unwrap();
+        space.protect_user(&mut hardware).unwrap();
+        let user = space.begin_user_unmap(&mut hardware).unwrap();
+        let direct = space.revoke_data_direct_map(&mut hardware).unwrap();
+        space
+            .complete_data_release(&mut manager, &mut hardware, user, Some(direct))
+            .unwrap();
+        let receipt = space.restore(&mut hardware, 1).unwrap();
+        let memory = hardware.memory;
+        assert_retained(&mut manager, &[space.table_allocation]);
+        let mut stale = receipt;
+        stale.retired_root_generation += 1;
+        let writes = memory.writes;
+        assert_eq!(
+            space.release_tables(&mut manager, memory, Some(stale)),
+            Err(Error::StaleReceipt)
+        );
+        assert_eq!(memory.writes, writes);
+        memory.reject_write_at = Some(writes + 9);
+        assert_eq!(
+            space.release_tables(&mut manager, memory, Some(receipt)),
+            Err(Error::MemoryAccess)
+        );
+        assert_eq!(memory.writes, writes + 9);
+        assert_retained(&mut manager, &[space.table_allocation]);
+        memory.reject_finish = true;
+        assert_eq!(
+            space.release_tables(&mut manager, memory, Some(receipt)),
+            Err(Error::MemoryAccess)
+        );
+        assert_retained(&mut manager, &[space.table_allocation]);
+        memory.reject_finish = false;
+        space
+            .release_tables(&mut manager, memory, Some(receipt))
+            .unwrap();
+        assert_eq!(manager.summary().allocated_pages, 0);
     }
 }

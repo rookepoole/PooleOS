@@ -9,6 +9,7 @@ import os
 import re
 import struct
 import uuid
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -1315,6 +1316,16 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str
     from runtime import native_kernel_load
 
     errors = _schema_errors(readiness, root, READINESS_SCHEMA_RELATIVE)
+    status_date = readiness.get("status_date")
+    try:
+        if (
+            not isinstance(status_date, str)
+            or len(status_date) != 10
+            or date.fromisoformat(status_date).isoformat() != status_date
+        ):
+            raise ValueError("noncanonical date")
+    except ValueError:
+        errors.append("readiness status_date is not a canonical calendar date")
     try:
         contract = read_json(root / CONTRACT_RELATIVE)
     except (OSError, json.JSONDecodeError, PooleBootError) as error:
