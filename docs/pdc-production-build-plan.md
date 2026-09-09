@@ -9,7 +9,27 @@ Machine ledger: `runs/pdc_production_roadmap.json`
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 171: Native Dependency Replay Complete
+## Cloud Closeout And Cycle 172 In Progress
+
+Cycles 166-171 are merged into `main` through PR #76 at `8006c7b`; the exact
+merged tree passed 105 runtime-inclusive canonical gates and 708 Doctor checks.
+The Cycle 171 sections and machine ledger below are frozen pre-closeout records,
+not a claim that this newer working tree has passed those checks.
+
+Cycle 172 implements the N12.3 `N12-CONCURRENCY-RECLAMATION-001` inactive
+task-stack ownership slice. Its 17-stage core qualifier passes with 34 lifecycle
+tests and 243 kernel regressions per host profile, plus 11 compile-fail tests.
+The linked kernel is unchanged; no live task-stack execution is claimed.
+The draft checkpoint still needs complete roadmap/architecture reconciliation,
+then source-frozen runtime-inclusive canonical qualification and publication,
+required-check and review gates before main merge. A backup branch is not a
+production promotion. No phase, ADD requirement or flag closes.
+
+Existing N12/N9 follow-up work includes guarded mappings, architectural context
+and CPU-retirement ownership, and integrating scrub-receipt ledger growth with
+stack teardown. [Cycle 172 evidence and remaining work](checkpoints/cycle172-task-stack-ownership.md).
+
+## Historical Cycle 171: Native Dependency Replay Complete
 
 N9.1-N9.4 memory/ACPI/VM and the dependent N8/N12 profiles pass on the unchanged
 Cycle 168 kernel: fourteen profiles, 28 final headless boots, 660 control groups

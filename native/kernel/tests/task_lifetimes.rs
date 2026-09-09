@@ -5,8 +5,13 @@ use std::sync::{
 };
 
 use poole_handoff::*;
-use poolekernel::physical_memory::{PhysicalMemoryError, PhysicalMemoryManager, Zone};
-use poolekernel::reclamation::task_lifetimes::{Error, Resources, Storage};
+use poolekernel::physical_memory::{
+    AllocationHandle, PageAccessError, PhysicalMemoryError, PhysicalMemoryManager,
+    PhysicalPageAccess, Zone,
+};
+use poolekernel::reclamation::task_lifetimes::{
+    Error, Resources, STACK_OWNER, STACK_PAGE_COUNT, Storage,
+};
 use poolekernel::reclamation::{Error as PoolError, Limits};
 use poolekernel::scheduler_smp::{self as sched, CpuId, TaskId, TaskState};
 use poolekernel::virtual_memory::{self as vm, AddressSpace, TableMemory};
@@ -15,6 +20,41 @@ use poolekernel::virtual_memory::{self as vm, AddressSpace, TableMemory};
 struct Memory {
     pages: BTreeMap<u64, [u64; 512]>,
     writes: u64,
+    fail_write: bool,
+    fail_read: bool,
+    corrupt_read: bool,
+    physical_writes: u64,
+    physical_reads: u64,
+    fail_write_after: Option<u64>,
+    fail_read_after: Option<u64>,
+}
+
+impl PhysicalPageAccess for Memory {
+    fn write_word(
+        &mut self,
+        address: u64,
+        index: usize,
+        value: u64,
+    ) -> Result<(), PageAccessError> {
+        if self.fail_write || self.fail_write_after == Some(self.physical_writes) {
+            return Err(PageAccessError::Access);
+        }
+        self.physical_writes += 1;
+        self.pages.entry(address).or_insert([u64::MAX; 512])[index] = value;
+        Ok(())
+    }
+
+    fn read_word(&mut self, address: u64, index: usize) -> Result<u64, PageAccessError> {
+        if self.fail_read || self.fail_read_after == Some(self.physical_reads) {
+            return Err(PageAccessError::Access);
+        }
+        self.physical_reads += 1;
+        Ok(if self.corrupt_read {
+            1
+        } else {
+            self.pages[&address][index]
+        })
+    }
 }
 
 impl TableMemory for Memory {
@@ -124,9 +164,41 @@ fn resource<T>(
     memory: &mut Memory,
     payload: T,
 ) -> Resources<T> {
-    Resources::new(space(manager, memory), payload, manager)
+    with_stack(space(manager, memory), payload, manager)
         .ok()
         .unwrap()
+}
+
+fn with_stack<T>(
+    space: AddressSpace,
+    payload: T,
+    manager: &mut PhysicalMemoryManager,
+) -> Result<Resources<T>, (Error, AddressSpace, AllocationHandle, T)> {
+    let stack = manager
+        .allocate(Zone::Dma32, STACK_PAGE_COUNT, STACK_OWNER)
+        .unwrap();
+    Resources::new(space, stack, payload, manager)
+}
+
+#[test]
+fn task_execution_stack_cannot_be_freed_through_a_copied_handle() {
+    let (mut manager, mut memory) = fixture();
+    let resources = resource(&mut manager, &mut memory, ());
+    let stack = resources.execution_stack().handle();
+    let mut store = Storage::new(Limits::default()).unwrap();
+    let mut tasks = store.attach().unwrap();
+    let id = tasks.create(0, 1, 1, resources).ok().unwrap();
+    let reader = tasks.pin(id).unwrap();
+    assert_eq!(
+        manager.free(stack),
+        Err(PhysicalMemoryError::AllocationRetained)
+    );
+    tasks.cancel_dormant(id).unwrap();
+    assert_eq!(
+        tasks.reclaim(id).err(),
+        Some(Error::Pool(PoolError::Pinned))
+    );
+    drop(reader);
 }
 
 #[test]
@@ -141,12 +213,7 @@ fn task_reader_retains_physical_tables_against_copied_allocator_handles() {
     let mut store = Storage::new(Limits::default()).unwrap();
     let mut tasks = store.attach().unwrap();
     let id = tasks
-        .create(
-            0,
-            1,
-            1,
-            Resources::new(address, (), &mut manager).ok().unwrap(),
-        )
+        .create(0, 1, 1, with_stack(address, (), &mut manager).ok().unwrap())
         .ok()
         .unwrap();
     tasks.activate(id, cpu(0)).unwrap();
@@ -170,7 +237,11 @@ fn task_reader_retains_physical_tables_against_copied_allocator_handles() {
         manager.free(tables),
         Err(PhysicalMemoryError::AllocationRetained)
     );
-    let (mut address, ()) = resources.into_parts(&mut manager).ok().unwrap();
+    let (mut address, stack, ()) = resources.into_parts(&mut manager).ok().unwrap();
+    stack
+        .release_scrubbed(&mut manager, &mut memory)
+        .ok()
+        .unwrap();
     address.release(&mut manager, &mut memory).unwrap();
     assert_eq!(manager.free(tables), Err(PhysicalMemoryError::StaleHandle));
     assert_eq!(manager.summary().allocated_pages, 0);
@@ -207,12 +278,7 @@ fn retains_actual_space_until_last_reader_and_explicit_physical_release() {
     let mut store = Storage::new(Limits::default()).unwrap();
     let mut tasks = store.attach().unwrap();
     let id = tasks
-        .create(
-            0,
-            1,
-            1,
-            Resources::new(address, 42, &mut manager).ok().unwrap(),
-        )
+        .create(0, 1, 1, with_stack(address, 42, &mut manager).ok().unwrap())
         .ok()
         .unwrap();
     tasks.activate(id, cpu(0)).unwrap();
@@ -230,13 +296,17 @@ fn retains_actual_space_until_last_reader_and_explicit_physical_release() {
     );
     assert_eq!(*reader.payload(), 42);
     drop(reader);
-    let (mut address, payload) = tasks
+    let (mut address, stack, payload) = tasks
         .reclaim(id)
         .unwrap()
         .into_parts(&mut manager)
         .ok()
         .unwrap();
     assert_eq!(payload, 42);
+    stack
+        .release_scrubbed(&mut manager, &mut memory)
+        .ok()
+        .unwrap();
     assert_eq!(manager.summary().allocated_pages, 4);
     address.release(&mut manager, &mut memory).unwrap();
     assert_eq!(manager.summary().allocated_pages, 0);
@@ -409,7 +479,7 @@ fn offline_timeout_restores_scheduler_but_does_not_release_resources() {
         tasks.acknowledge(ticket, ack(ticket)),
         Err(Error::Scheduler(sched::Error::PendingMissing))
     );
-    assert_eq!(manager.summary().allocated_pages, 4);
+    assert_eq!(manager.summary().allocated_pages, 8);
     tasks.cancel(id).unwrap();
     assert_eq!(
         tasks.reclaim(id).err(),
@@ -487,7 +557,7 @@ fn forgotten_reader_retains_capacity_without_forced_reclamation() {
             Some(Error::Pool(PoolError::Pinned))
         );
         assert!(!tasks.is_drained().unwrap());
-        assert_eq!(manager.summary().allocated_pages, 4);
+        assert_eq!(manager.summary().allocated_pages, 8);
     }
 }
 
@@ -589,7 +659,7 @@ fn controller_drop_retains_readers_and_forbids_namespace_reset() {
     assert_eq!(store.attach().err().map(|e| e), Some(Error::Attached));
     drop(store);
     assert_eq!(drops.load(Ordering::SeqCst), 1);
-    assert_eq!(manager.summary().allocated_pages, 4);
+    assert_eq!(manager.summary().allocated_pages, 8);
 }
 
 #[test]
@@ -597,10 +667,11 @@ fn rejects_already_released_address_space() {
     let (mut manager, mut memory) = fixture();
     let mut address = space(&mut manager, &mut memory);
     address.release(&mut manager, &mut memory).unwrap();
-    let (error, address, payload) = Resources::new(address, 2, &mut manager).err().unwrap();
+    let (error, address, stack, payload) = with_stack(address, 2, &mut manager).err().unwrap();
     assert_eq!(error, Error::AddressSpace);
     assert!(address.summary().root_released);
     assert_eq!(payload, 2);
+    manager.free(stack).unwrap();
 }
 
 #[test]
@@ -624,20 +695,15 @@ fn mapped_space_keeps_frame_and_unmap_receipt_until_owned_again() {
     let mut store = Storage::new(Limits::default()).unwrap();
     let mut tasks = store.attach().unwrap();
     let id = tasks
-        .create(
-            0,
-            1,
-            1,
-            Resources::new(address, 1, &mut manager).ok().unwrap(),
-        )
+        .create(0, 1, 1, with_stack(address, 1, &mut manager).ok().unwrap())
         .ok()
         .unwrap();
     let reader = tasks.pin(id).unwrap();
     tasks.cancel_dormant(id).unwrap();
     assert_eq!(reader.address_space().summary().pending_invalidations, 1);
-    assert_eq!(manager.summary().allocated_pages, 5);
+    assert_eq!(manager.summary().allocated_pages, 9);
     drop(reader);
-    let (mut address, _) = tasks
+    let (mut address, stack, _) = tasks
         .reclaim(id)
         .unwrap()
         .into_parts(&mut manager)
@@ -650,16 +716,22 @@ fn mapped_space_keeps_frame_and_unmap_receipt_until_owned_again() {
     address.acknowledge_inactive(pending).unwrap();
     address.complete_unmap(&mut manager, pending).unwrap();
     address.release(&mut manager, &mut memory).unwrap();
+    stack
+        .release_scrubbed(&mut manager, &mut memory)
+        .ok()
+        .unwrap();
     assert_eq!(manager.summary().allocated_pages, 0);
 }
 
 #[test]
 fn all_eight_task_slots_recycle_with_exact_destructor_counts() {
-    let (mut manager, mut memory) = fixture();
     let drops = Arc::new(AtomicUsize::new(0));
     let mut store = Storage::new(Limits::default()).unwrap();
     let mut tasks = store.attach().unwrap();
     for _ in 0..16 {
+        // Keep the same scheduler/pool namespace for all 128 generations.
+        // Each fully drained PMM batch has its own finite scrub-evidence ledger.
+        let (mut manager, mut memory) = fixture();
         let ids: Vec<_> = (0..8)
             .map(|slot| {
                 tasks
@@ -675,13 +747,17 @@ fn all_eight_task_slots_recycle_with_exact_destructor_counts() {
             .collect();
         for id in ids {
             tasks.cancel_dormant(id).unwrap();
-            let (mut address, payload) = tasks
+            let (mut address, stack, payload) = tasks
                 .reclaim(id)
                 .unwrap()
                 .into_parts(&mut manager)
                 .ok()
                 .unwrap();
             address.release(&mut manager, &mut memory).unwrap();
+            stack
+                .release_scrubbed(&mut manager, &mut memory)
+                .ok()
+                .unwrap();
             drop(payload);
         }
         assert_eq!(manager.summary().allocated_pages, 0);
@@ -722,17 +798,12 @@ fn duplicate_root_is_rejected_even_while_first_owner_is_retired() {
     let mut store = Storage::new(Limits::default()).unwrap();
     let mut tasks = store.attach().unwrap();
     let id = tasks
-        .create(
-            0,
-            1,
-            1,
-            Resources::new(first, 1, &mut manager).ok().unwrap(),
-        )
+        .create(0, 1, 1, with_stack(first, 1, &mut manager).ok().unwrap())
         .ok()
         .unwrap();
     tasks.cancel_dormant(id).unwrap();
     let before = tasks.scheduler().summary();
-    let (error, returned, payload) = Resources::new(duplicate, 2, &mut manager).err().unwrap();
+    let (error, returned, stack, payload) = with_stack(duplicate, 2, &mut manager).err().unwrap();
     assert_eq!(
         error,
         Error::PhysicalMemory(
@@ -742,6 +813,7 @@ fn duplicate_root_is_rejected_even_while_first_owner_is_retired() {
     assert_eq!(returned.summary().root_generation, tables.generation);
     assert_eq!(payload, 2);
     assert_eq!(tasks.scheduler().summary(), before);
+    manager.free(stack).unwrap();
 }
 
 #[test]
@@ -783,12 +855,7 @@ fn all_frames_aliases_and_pending_unmaps_are_mandatorily_retained() {
     let mut store = Storage::new(Limits::default()).unwrap();
     let mut tasks = store.attach().unwrap();
     let id = tasks
-        .create(
-            0,
-            1,
-            2,
-            Resources::new(address, (), &mut manager).ok().unwrap(),
-        )
+        .create(0, 1, 2, with_stack(address, (), &mut manager).ok().unwrap())
         .ok()
         .unwrap();
     tasks.activate(id, cpu(1)).unwrap();
@@ -818,7 +885,7 @@ fn all_frames_aliases_and_pending_unmaps_are_mandatorily_retained() {
             Err(PhysicalMemoryError::AllocationRetained)
         );
     }
-    let (mut address, ()) = resources.into_parts(&mut manager).ok().unwrap();
+    let (mut address, stack, ()) = resources.into_parts(&mut manager).ok().unwrap();
     address.acknowledge_inactive(pending).unwrap();
     address.complete_unmap(&mut manager, pending).unwrap();
     for index in [0, 2, 3, 4] {
@@ -829,6 +896,10 @@ fn all_frames_aliases_and_pending_unmaps_are_mandatorily_retained() {
         address.complete_unmap(&mut manager, pending).unwrap();
     }
     address.release(&mut manager, &mut memory).unwrap();
+    stack
+        .release_scrubbed(&mut manager, &mut memory)
+        .ok()
+        .unwrap();
     assert_eq!(manager.summary().allocated_pages, 0);
 }
 
@@ -853,9 +924,10 @@ fn late_frame_retention_failure_returns_original_space_and_payload() {
     let conflict = manager.retain_allocation(frame).unwrap();
     let before = address.summary();
     let drops = Arc::new(AtomicUsize::new(0));
-    let (error, address, payload) = Resources::new(address, Payload(drops.clone()), &mut manager)
-        .err()
-        .unwrap();
+    let (error, address, stack, payload) =
+        with_stack(address, Payload(drops.clone()), &mut manager)
+            .err()
+            .unwrap();
     assert_eq!(
         error,
         Error::PhysicalMemory(PhysicalMemoryError::AllocationRetained)
@@ -865,10 +937,12 @@ fn late_frame_retention_failure_returns_original_space_and_payload() {
     let tables_token = manager.retain_allocation(tables).unwrap();
     manager.release_retention(tables_token).unwrap();
     manager.release_retention(conflict).unwrap();
-    let resources = Resources::new(address, payload, &mut manager).ok().unwrap();
+    let resources = Resources::new(address, stack, payload, &mut manager)
+        .ok()
+        .unwrap();
     drop(resources);
     assert_eq!(drops.load(Ordering::SeqCst), 1);
-    for handle in [tables, frame] {
+    for handle in [tables, frame, stack] {
         assert_eq!(
             manager.free(handle),
             Err(PhysicalMemoryError::AllocationRetained)
@@ -890,10 +964,18 @@ fn failed_owner_release_returns_retention_for_retry_with_original_manager() {
     );
     assert_eq!(resources.address_space().summary(), summary);
     assert_eq!(*resources.payload(), 41);
-    let (mut address, _) = resources.into_parts(&mut manager).ok().unwrap();
+    let (mut address, stack, _) = resources.into_parts(&mut manager).ok().unwrap();
     address.release(&mut manager, &mut memory).unwrap();
-    let (mut address, _) = other_resources.into_parts(&mut other).ok().unwrap();
+    stack
+        .release_scrubbed(&mut manager, &mut memory)
+        .ok()
+        .unwrap();
+    let (mut address, stack, _) = other_resources.into_parts(&mut other).ok().unwrap();
     address.release(&mut other, &mut other_memory).unwrap();
+    stack
+        .release_scrubbed(&mut other, &mut other_memory)
+        .ok()
+        .unwrap();
     assert_eq!(manager.summary().allocated_pages, 0);
     assert_eq!(other.summary().allocated_pages, 0);
 }
@@ -911,4 +993,299 @@ fn scheduler_rejects_duplicate_physical_roots_from_distinct_manager_namespaces()
     let (error, returned) = tasks.create(1, 1, 1, second).err().unwrap();
     assert_eq!(error, Error::DuplicateRoot);
     assert_eq!(*returned.payload(), 2);
+}
+
+#[test]
+fn stack_retention_survives_task_reclaim_until_full_scrubbed_release() {
+    let (mut manager, mut memory) = fixture();
+    let resources = resource(&mut manager, &mut memory, 7);
+    let handle = resources.execution_stack().handle();
+    let mut storage = Storage::new(Limits::default()).unwrap();
+    let mut tasks = storage.attach().unwrap();
+    let id = tasks.create(0, 1, 1, resources).ok().unwrap();
+    tasks.cancel_dormant(id).unwrap();
+    let (mut address, stack, payload) = tasks
+        .reclaim(id)
+        .unwrap()
+        .into_parts(&mut manager)
+        .ok()
+        .unwrap();
+    assert_eq!(payload, 7);
+    assert_eq!(
+        manager.free(handle),
+        Err(PhysicalMemoryError::AllocationRetained)
+    );
+    address.release(&mut manager, &mut memory).unwrap();
+    assert_eq!(manager.summary().allocated_pages, STACK_PAGE_COUNT);
+    let receipt = stack
+        .release_scrubbed(&mut manager, &mut memory)
+        .ok()
+        .unwrap();
+    assert_eq!(
+        (
+            receipt.generation,
+            receipt.start_page,
+            receipt.page_count,
+            receipt.owner
+        ),
+        (
+            handle.generation,
+            handle.start_page,
+            STACK_PAGE_COUNT,
+            STACK_OWNER
+        )
+    );
+    assert_eq!(
+        (receipt.zeroed_bytes, receipt.verified_bytes),
+        (16384, 16384)
+    );
+    assert_eq!(memory.physical_writes, 2048);
+    assert_eq!(memory.physical_reads, 2048);
+    assert_eq!(manager.summary().allocated_pages, 0);
+    assert_eq!(manager.free(handle), Err(PhysicalMemoryError::StaleHandle));
+}
+
+#[test]
+fn invalid_stack_layout_returns_every_input_without_retaining_tables() {
+    for (pages, owner) in [
+        (1, STACK_OWNER),
+        (3, STACK_OWNER),
+        (5, STACK_OWNER),
+        (4, STACK_OWNER + 1),
+    ] {
+        let (mut manager, mut memory) = fixture();
+        let address = space(&mut manager, &mut memory);
+        let stack = manager.allocate(Zone::Dma32, pages, owner).unwrap();
+        let before = manager.summary();
+        let drops = Arc::new(AtomicUsize::new(0));
+        let (error, mut address, returned, payload) =
+            Resources::new(address, stack, Payload(drops.clone()), &mut manager)
+                .err()
+                .unwrap();
+        assert_eq!(error, Error::StackLayout);
+        assert_eq!(returned, stack);
+        assert_eq!(manager.summary(), before);
+        assert_eq!(drops.load(Ordering::SeqCst), 0);
+        address.release(&mut manager, &mut memory).unwrap();
+        manager.free(returned).unwrap();
+        assert_eq!(manager.summary().allocated_pages, 0);
+        drop(payload);
+        assert_eq!(drops.load(Ordering::SeqCst), 1);
+    }
+}
+
+#[test]
+fn stale_stack_handle_cannot_retain_a_replacement_allocation() {
+    let (mut manager, mut memory) = fixture();
+    let address = space(&mut manager, &mut memory);
+    let stale = manager
+        .allocate(Zone::Dma32, STACK_PAGE_COUNT, STACK_OWNER)
+        .unwrap();
+    manager.free(stale).unwrap();
+    let replacement = manager
+        .allocate(Zone::Dma32, STACK_PAGE_COUNT, STACK_OWNER)
+        .unwrap();
+    let (_, mut address, returned, ()) = Resources::new(address, stale, (), &mut manager)
+        .err()
+        .unwrap();
+    assert_eq!(returned, stale);
+    address.release(&mut manager, &mut memory).unwrap();
+    manager.free(replacement).unwrap();
+    assert_eq!(manager.summary().allocated_pages, 0);
+}
+
+#[test]
+fn late_stack_retention_conflict_leaves_all_tables_and_frames_unretained() {
+    let (mut manager, mut memory) = fixture();
+    let mut address = space(&mut manager, &mut memory);
+    let frame = manager.allocate(Zone::Dma32, 1, vm::DATA_OWNER).unwrap();
+    address
+        .map(
+            &manager,
+            &mut memory,
+            vm::USER_WINDOW_START,
+            frame,
+            vm::Permissions::USER_RW,
+            vm::CachePolicy::WriteBack,
+        )
+        .unwrap();
+    let stack = manager
+        .allocate(Zone::Dma32, STACK_PAGE_COUNT, STACK_OWNER)
+        .unwrap();
+    let conflict = manager.retain_allocation(stack).unwrap();
+    let before = manager.summary();
+    let (error, mut address, returned, payload) = Resources::new(address, stack, 21, &mut manager)
+        .err()
+        .unwrap();
+    assert_eq!(
+        error,
+        Error::PhysicalMemory(PhysicalMemoryError::AllocationRetained)
+    );
+    assert_eq!((returned, payload), (stack, 21));
+    assert_eq!(manager.summary(), before);
+    let frame_token = manager.retain_allocation(frame).unwrap();
+    manager.release_retention(frame_token).unwrap();
+    let pending = address
+        .begin_unmap(&mut memory, vm::USER_WINDOW_START)
+        .unwrap();
+    address.acknowledge_inactive(pending).unwrap();
+    address.complete_unmap(&mut manager, pending).unwrap();
+    address.release(&mut manager, &mut memory).unwrap();
+    manager.release_retention(conflict).unwrap();
+    manager.free(stack).unwrap();
+    assert_eq!(manager.summary().allocated_pages, 0);
+}
+
+#[test]
+fn failed_stack_scrub_keeps_owner_and_allocation_for_retry() {
+    for failure in 0..7 {
+        let (mut manager, mut memory) = fixture();
+        let resources = resource(&mut manager, &mut memory, ());
+        let (mut address, stack, ()) = resources.into_parts(&mut manager).ok().unwrap();
+        address.release(&mut manager, &mut memory).unwrap();
+        let handle = stack.handle();
+        match failure {
+            0..=2 => memory.fail_write_after = Some([0, 513, 2047][failure]),
+            3..=5 => memory.fail_read_after = Some([0, 513, 2047][failure - 3]),
+            _ => memory.corrupt_read = true,
+        }
+        let (_, stack) = stack
+            .release_scrubbed(&mut manager, &mut memory)
+            .err()
+            .unwrap();
+        assert_eq!(stack.handle(), handle);
+        assert_eq!(manager.summary().allocated_pages, STACK_PAGE_COUNT);
+        assert_eq!(
+            manager.free(handle),
+            Err(PhysicalMemoryError::AllocationRetained)
+        );
+        memory.fail_write_after = None;
+        memory.fail_read_after = None;
+        memory.corrupt_read = false;
+        let receipt = stack
+            .release_scrubbed(&mut manager, &mut memory)
+            .ok()
+            .unwrap();
+        assert_eq!(
+            (receipt.zeroed_bytes, receipt.verified_bytes),
+            (16384, 16384)
+        );
+        assert_eq!(manager.summary().allocated_pages, 0);
+    }
+}
+
+#[test]
+fn stack_release_on_wrong_manager_is_rejected_before_physical_access() {
+    let (mut manager, mut memory) = fixture();
+    let (mut other, mut other_memory) = fixture();
+    let resources = resource(&mut manager, &mut memory, ());
+    let other_resources = resource(&mut other, &mut other_memory, ());
+    let (mut address, stack, ()) = resources.into_parts(&mut manager).ok().unwrap();
+    let handle = stack.handle();
+    let (_, stack) = stack
+        .release_scrubbed(&mut other, &mut other_memory)
+        .err()
+        .unwrap();
+    assert_eq!(
+        (other_memory.physical_writes, other_memory.physical_reads),
+        (0, 0)
+    );
+    assert_eq!(stack.handle(), handle);
+    assert_eq!(
+        manager.free(handle),
+        Err(PhysicalMemoryError::AllocationRetained)
+    );
+    assert_eq!(
+        other.free(other_resources.execution_stack().handle()),
+        Err(PhysicalMemoryError::AllocationRetained)
+    );
+    address.release(&mut manager, &mut memory).unwrap();
+    stack
+        .release_scrubbed(&mut manager, &mut memory)
+        .ok()
+        .unwrap();
+}
+
+#[test]
+fn losing_stack_owner_never_silently_releases_pages() {
+    for forget in [false, true] {
+        let (mut manager, mut memory) = fixture();
+        let resources = resource(&mut manager, &mut memory, ());
+        let (mut address, stack, ()) = resources.into_parts(&mut manager).ok().unwrap();
+        let handle = stack.handle();
+        address.release(&mut manager, &mut memory).unwrap();
+        if forget {
+            std::mem::forget(stack);
+        } else {
+            drop(stack);
+        }
+        assert_eq!(
+            manager.free(handle),
+            Err(PhysicalMemoryError::AllocationRetained)
+        );
+        assert_eq!(manager.summary().allocated_pages, STACK_PAGE_COUNT);
+        assert_eq!((memory.physical_writes, memory.physical_reads), (0, 0));
+    }
+}
+
+#[test]
+fn overlapping_stacks_from_distinct_manager_namespaces_cannot_share_scheduler() {
+    let (mut manager, mut memory) = fixture();
+    let (mut other, mut other_memory) = fixture();
+    let first = resource(&mut manager, &mut memory, 1);
+    let _offset = other.allocate(Zone::Dma32, 1, vm::DATA_OWNER).unwrap();
+    let second = resource(&mut other, &mut other_memory, 2);
+    let first_stack = first.execution_stack().handle();
+    let second_stack = second.execution_stack().handle();
+    assert_ne!(
+        first.address_space().summary().root_physical,
+        second.address_space().summary().root_physical
+    );
+    assert!(second_stack.start_page < first_stack.start_page + first_stack.page_count);
+    let mut storage = Storage::new(Limits::default()).unwrap();
+    let mut tasks = storage.attach().unwrap();
+    let id = tasks.create(0, 1, 1, first).ok().unwrap();
+    tasks.cancel_dormant(id).unwrap();
+    let before = tasks.scheduler().summary();
+    let (error, returned) = tasks.create(1, 1, 1, second).err().unwrap();
+    assert_eq!(error, Error::DuplicateStack);
+    assert_eq!(returned.execution_stack().handle(), second_stack);
+    assert_eq!(tasks.scheduler().summary(), before);
+    assert_eq!(
+        other.free(second_stack),
+        Err(PhysicalMemoryError::AllocationRetained)
+    );
+}
+
+#[test]
+fn full_scrub_receipt_ledger_retains_the_next_stack_without_writes() {
+    let (mut manager, mut memory) = fixture();
+    for _ in 0..poolekernel::physical_memory::MAX_SCRUB_RECEIPTS {
+        let resources = resource(&mut manager, &mut memory, ());
+        let (mut address, stack, ()) = resources.into_parts(&mut manager).ok().unwrap();
+        address.release(&mut manager, &mut memory).unwrap();
+        stack
+            .release_scrubbed(&mut manager, &mut memory)
+            .ok()
+            .unwrap();
+        assert_eq!(manager.summary().allocated_pages, 0);
+    }
+    let resources = resource(&mut manager, &mut memory, ());
+    let (mut address, stack, ()) = resources.into_parts(&mut manager).ok().unwrap();
+    address.release(&mut manager, &mut memory).unwrap();
+    let before = manager.summary();
+    let accesses = (memory.physical_writes, memory.physical_reads);
+    let handle = stack.handle();
+    let (error, stack) = stack
+        .release_scrubbed(&mut manager, &mut memory)
+        .err()
+        .unwrap();
+    assert_eq!(error, PhysicalMemoryError::ReceiptCapacity);
+    assert_eq!(stack.handle(), handle);
+    assert_eq!(manager.summary(), before);
+    assert_eq!((memory.physical_writes, memory.physical_reads), accesses);
+    assert_eq!(
+        manager.free(handle),
+        Err(PhysicalMemoryError::AllocationRetained)
+    );
 }

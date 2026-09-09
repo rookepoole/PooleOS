@@ -4,20 +4,29 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
-**Cloud status:** qualified checkpoints through Cycle 165 are merged into `main`
-at `6f9399c` via [PR #75](https://github.com/rookepoole/PooleOS/pull/75).
-The exact merged tree passed all 105 canonical gates and 708 Doctor checks.
-Cycle 171 completes memory-through-lock replay on the unchanged Cycle 168 kernel on
-`agent/n12-ap-execution-ownership`, tracked by
-[draft PR #76](https://github.com/rookepoole/PooleOS/pull/76).
+**Cloud status:** qualified checkpoints through Cycle 171 are merged into `main`
+at `8006c7b` via [PR #76](https://github.com/rookepoole/PooleOS/pull/76).
+The exact merged tree passed all 105 runtime-inclusive canonical gates and
+708 Doctor checks, with both bundle and replay inputs. The original checkpoint
+branches remain available as history; they are not pending main merges.
+
+**In progress:** Cycle 172 adds mandatory inactive task-stack retention on
+`agent/n12-task-stack-ownership`. Its source-bound core qualifier passes, but
+roadmap/source-binding reconciliation and full exact-final qualification remain
+pending. This is a draft development checkpoint, not merge-qualified or a release.
+[Cycle 172 scope, evidence and merge blockers](docs/checkpoints/cycle172-task-stack-ownership.md).
+
+Historical Cycle 171 pre-closeout evidence: memory-through-lock replay on the
+unchanged Cycle 168 kernel, originally on `agent/n12-ap-execution-ownership`.
 Twenty-eight final headless boots pass across fourteen profiles, with 660
 negative-control groups and 2,126 rejected cases. SMP evidence now binds the
 current boot artifacts and rejects stale or malformed transfer dependencies.
 All 27 selected native checks pass. The 155-test profile/map/gate suite has
 153 passes and two optional local-transcript skips. Four superseded boots
 and all failing-then-passing regressions are preserved.
-Next is full runtime-inclusive exact-final qualification and publication/review
-gates before merge. PR #76 is not yet merge-qualified or production-ready.
+Full runtime-inclusive exact-final qualification and publication/review gates
+subsequently passed; PR #76 records their exact-source receipt and verified merge.
+That development qualification does not make PooleOS production-ready.
 [Cycle 171 proof, failures and next move](docs/checkpoints/cycle171-native-dependency-replay.md).
 [Prior CPU-state evidence](docs/checkpoints/cycle170-cpu-state-replay.md).
 [Prior boot-chain evidence](docs/checkpoints/cycle169-boot-chain-replay.md).

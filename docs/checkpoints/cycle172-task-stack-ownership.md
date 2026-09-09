@@ -1,0 +1,107 @@
+# Cycle 172: Inactive Task-Stack Ownership
+
+Status date: 2026-09-09
+Status: draft development backup; full qualification and progress reconciliation pending.
+Selected move: `N12-CONCURRENCY-RECLAMATION-001`, N12.3 with N12.7 context ownership dependencies.
+
+## Cloud Baseline
+
+Cycles 166-171 are already merged through
+[PR #76](https://github.com/rookepoole/PooleOS/pull/76). Main commit
+`8006c7be3a8fdbe314fa049f7161285f4def03cb` has tree
+`1499017b20234037b55663b413cb9469a696260d`, matching the qualified source.
+The exact-source final run passed 105 runtime-inclusive canonical gates and
+708 Doctor checks, including bundle and replay inputs. Its report SHA-256 is
+`4F140A6AFD8EB92B65C6F3A2083D77C023E94B1FAB10BDDE7E4B27CC69F9F077`.
+That is historical evidence for those bytes, not a full pass for Cycle 172.
+Retained checkpoint branches preserve original development history.
+
+This draft uses `agent/n12-task-stack-ownership`. A cloud backup may precede
+merge qualification; the standing merge gates are not bypassed.
+
+## Implementation
+
+`PKLIFE1` resources now require an explicit four-page `PKSTACK1` inactive-stack
+allocation, with owner label `0x1701`. The existing allocator atomically retains
+the stack together with the actual address-space tables and bound frames.
+Rejected construction returns every original input without partial retention.
+
+`InactiveStack` is non-Copy and holds a private retention token. A copied
+allocation handle is diagnostic identity, not allocator release authority.
+Reclaiming task resources returns an exclusive stack owner that stays retained
+until explicit zeroing, readback verification and scrub-receipt commit succeed.
+Failure preserves the owner for retry; dropping or forgetting it retains pages.
+The scheduler binding rejects overlapping stack ranges, including allocations
+from distinct manager namespaces. No unsafe code is added to this module.
+
+This is a prepared/inactive task-resource profile. It does not install guarded
+stack mappings, construct or activate an architectural context, establish CPU
+quiescence, or add a live guest selector. Those integration steps remain open.
+
+## Measured Evidence
+
+The source-bound 17-stage reclamation core qualifier passes:
+
+- 34 task-lifecycle tests per debug/optimized profile, including ten new stack cases.
+- 19 reclamation-pool tests per profile.
+- 243 kernel regressions per profile, including 20 physical-retention and 11 AP-resource cases.
+- Eleven compile-fail ownership/borrow tests, format, host and freestanding Clippy, and linked-kernel build.
+- Ten Python core-receipt tests pass on the current source, including 40 missing,
+  duplicate, failed and ignored stack-test evidence rejection cases.
+
+Public core receipt:
+`runs/native-kernel-reclamation-core-readiness.json`, schema 1.5, SHA-256
+`AFD1ABBE7EB217A132C0D9596004EC20AB2910CC23AEBD64D52E55EE645EF1D5`.
+It binds source and stage-log hashes and explicitly sets live stack verification,
+cross-CPU quiescence, N12.3 completion and production readiness to false.
+
+Rebuilding produced the unchanged 530,072-byte linked kernel, SHA-256
+`8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625`.
+This generic ownership code is not exercised by the existing live selector.
+There are zero new Cycle 172 QEMU boots; prior boot evidence is not relabeled.
+
+## Failure History And Limits
+
+The initial focused regression reproduced the missing stack-retention behavior:
+an ordinary copied-handle free succeeded while the task resource was retained.
+The failing log SHA-256 is
+`B115813E452A2E030565219A19EBAB0D91E96A6E6E07263461D6BC8E7AA63B12`.
+
+The first implementation suite passed 32 cases and failed one: the 128-task
+recycle test exhausted the allocator's existing 16-entry scrub-receipt ledger.
+Failing log SHA-256:
+`E677DE1335AF081D0B565DF62A92B4D7A09976C0DE2017E8848F713E418642C3`.
+The repaired recycle test retains one scheduler/pool across 128 generations,
+but uses a fresh fully drained manager per eight-task batch. It does not prove
+128 scrub releases in a single manager. A separate boundary test performs 16
+successful releases and verifies the seventeenth retains its owner and performs
+no physical writes. Automatic receipt growth is not added or claimed here.
+
+Fault cases cover first, partial and final-word writes and reads, corrupted
+readback, stale handles, incorrect owner/size, retention conflict, wrong-manager
+release, overlap, dropped/forgotten owners and receipt-capacity exhaustion.
+Successful stack release verifies all 16,384 bytes, with 2,048 writes and reads.
+
+## Why This Is Not Merged Yet
+
+The backup check of the roadmap and architecture suite ran 23 tests: 20 passed,
+three failed because the frozen Cycle 171 ledger/source bindings do not match
+the new receipt and source. The core receipt itself validates against the new
+source. No failing check is waived or presented as a full-suite pass.
+
+Before merging this draft:
+
+1. Reconcile all Cycle 172 progress authorities, source bindings, schemas,
+   documentation and measured test-count expectations; preserve the historical
+   Cycle 171 exact-final qualification separately from the current candidate.
+2. Keep all checklist, phase, ADD, flag and non-promotion boundaries conserved;
+   explicitly retain stack mapping, CPU-retirement and receipt-growth follow-ups.
+3. Revalidate current native evidence and run the full source-frozen canonical
+   qualification with runtime, bundle and replay inputs. Do not inherit the
+   historical Cycle 171 result. Preserve any failures and rerun after repair.
+4. Pass the exact-index publication scan and current required GitHub checks,
+   clean-merge and review conditions before marking ready and merging.
+
+No key/signing, governance, firmware, host-driver, physical-media, PooleGlyph,
+frozen demo ISO, phase-completion or production-promotion change is made here.
+Raw scratch logs and local work paths are not included in this cloud backup.

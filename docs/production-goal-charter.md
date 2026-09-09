@@ -9,7 +9,15 @@ Machine ledger: `runs/pdc_production_roadmap.json`
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
 Last roadmap reconciliation: PooleOS Cycle 171
 
-Current Cycle 171: fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles pass
+Cloud closeout: Cycles 166-171 merged through PR #76 at `8006c7b`, after
+105 runtime-inclusive canonical gates and 708 Doctor checks passed on the exact
+merged tree. Cycle 172's inactive task-stack ownership work is a draft on
+`agent/n12-task-stack-ownership`; core qualification passes but complete progress
+reconciliation and exact-final qualification remain pending. The normative
+charter is unchanged. No phase, flag or production condition closes.
+[Cycle 172 evidence and merge blockers](checkpoints/cycle172-task-stack-ownership.md).
+
+Historical Cycle 171 pre-closeout: fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles pass
 on the unchanged Cycle 168 kernel: 28 final headless boots, 660 control groups
 and 2,126 rejected cases. Four superseded boots remain separate. SMP receipt
 validation now binds current boot artifacts and rejects malformed dependencies.
