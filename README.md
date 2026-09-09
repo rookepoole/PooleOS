@@ -4,17 +4,20 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
-**Cloud status:** qualified checkpoints through Cycle 171 are merged into `main`
+**Qualified baseline:** checkpoints through Cycle 171 were merged into `main`
 at `8006c7b` via [PR #76](https://github.com/rookepoole/PooleOS/pull/76).
 The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**In progress:** Cycle 172 adds mandatory inactive task-stack retention on
-`agent/n12-task-stack-ownership`. Its source-bound core qualifier passes, but
-roadmap/source-binding reconciliation and full exact-final qualification remain
-pending. This is a draft development checkpoint, not merge-qualified or a release.
-[Cycle 172 scope, evidence and merge blockers](docs/checkpoints/cycle172-task-stack-ownership.md).
+**Latest checkpoint:** Cycle 172 adds mandatory inactive task-stack retention on
+`agent/n12-task-stack-ownership`, tracked by [PR #77](https://github.com/rookepoole/PooleOS/pull/77).
+Its 17-stage core qualifier, all 27 selected native checks and 34 focused Python
+tests pass. The roadmap and architecture bindings are reconciled; 945 Python
+tests are discovered. These source-frozen records precede the full exact-final
+audit. PR #77 records the subsequent qualification and merge state for the exact
+commit, without treating a development checkpoint as a production release.
+[Cycle 172 scope, evidence and remaining gates](docs/checkpoints/cycle172-task-stack-ownership.md).
 
 Historical Cycle 171 pre-closeout evidence: memory-through-lock replay on the
 unchanged Cycle 168 kernel, originally on `agent/n12-ap-execution-ownership`.

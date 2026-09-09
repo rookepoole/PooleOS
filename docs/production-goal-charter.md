@@ -7,14 +7,19 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 171
+Last roadmap reconciliation: PooleOS Cycle 172
 
 Cloud closeout: Cycles 166-171 merged through PR #76 at `8006c7b`, after
 105 runtime-inclusive canonical gates and 708 Doctor checks passed on the exact
-merged tree. Cycle 172's inactive task-stack ownership work is a draft on
-`agent/n12-task-stack-ownership`; core qualification passes but complete progress
-reconciliation and exact-final qualification remain pending. The normative
-charter is unchanged. No phase, flag or production condition closes.
+merged tree. Cycle 172 qualifies inactive task-stack ownership on
+`agent/n12-task-stack-ownership`: 34 lifecycle tests per host profile, 243 kernel
+regressions per profile, 11 compile-fail tests and an unchanged linked image.
+Progress and source bindings are reconciled, 34 focused Python tests and all
+27 selected native checks pass, and 945 Python tests are discovered. Full
+runtime-inclusive exact-final qualification and publication/review remain
+separate gates for PR #77. Live context/CPU retirement and receipt-growth
+integration remain open. The normative charter is unchanged; no phase, flag or
+production condition closes.
 [Cycle 172 evidence and merge blockers](checkpoints/cycle172-task-stack-ownership.md).
 
 Historical Cycle 171 pre-closeout: fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles pass

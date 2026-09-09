@@ -611,15 +611,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "34BCA3B042E9650F8AA3129189430361DDD47952BD27F8895499522C9A37F977",
-      "byte_count": 83126,
-      "line_count": 1087
+      "sha256": "85960D391B679591D554FA0DB79533921A20EEB26A5C13C8DDD675C366681FCD",
+      "byte_count": 84016,
+      "line_count": 1100
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "EEF6AB21694252E18D1BAF77EF620DAAAAA5E4267111A51917D0E339A8C84088",
-      "byte_count": 389103,
-      "line_count": 2759
+      "sha256": "CDBCB2189880E468B714095F384437B2795E063C1EFC6E546F07B65E1F2021BF",
+      "byte_count": 390936,
+      "line_count": 2788
     },
     {
       "path": "docs/publication-boundary.md",
@@ -1366,6 +1366,12 @@
       "line_count": 96
     },
     {
+      "path": "docs/checkpoints/cycle172-task-stack-ownership.md",
+      "sha256": "AE84BCBBEFC31E15AE93B3F485713339F6650A106866985827E91FB5BDE270A6",
+      "byte_count": 7219,
+      "line_count": 127
+    },
+    {
       "path": "docs/checkpoints/cycle171-native-dependency-replay.md",
       "sha256": "B24A90D354F8EF7852EC8FC3CB84359EB727D2BCEF798EAC0FB16493703EC6AE",
       "byte_count": 6143,
@@ -1373,21 +1379,21 @@
     },
     {
       "path": "native/kernel/src/reclamation/task_lifetimes.rs",
-      "sha256": "A5CDF65682124F707EDCAD2C120FE41C2E7B179A8D3ABC0F34C211C18208EBF2",
-      "byte_count": 14459,
-      "line_count": 448
+      "sha256": "CDD7A888C83D80BCD18D57704F5473623F1883FC4B1B5069E8E9513AF9B9A5AF",
+      "byte_count": 17938,
+      "line_count": 543
     },
     {
       "path": "native/kernel/tests/task_lifetimes.rs",
-      "sha256": "543A7713E61829CDFB505E38BA28C1070622321D496CFD928A526555B1B6DA1C",
-      "byte_count": 31624,
-      "line_count": 914
+      "sha256": "A9A264BB30D832DABC3B6944D3A8C750C6CDF174FB18076CF7E0872741F06E75",
+      "byte_count": 45553,
+      "line_count": 1291
     },
     {
       "path": "docs/native-kernel-task-lifetimes.md",
-      "sha256": "60BC3149121751122B2885B441D99630EAB495262A5F67D2699873026EE9C836",
-      "byte_count": 9168,
-      "line_count": 140
+      "sha256": "FAAA45BBCEE60AD1A3D851A959E8A2884E2856FD95A7FF23C58E2CD11C2BB125",
+      "byte_count": 11912,
+      "line_count": 176
     },
     {
       "path": "docs/native-kernel-physical-retention.md",
@@ -1415,27 +1421,27 @@
     },
     {
       "path": "tools/qualify_native_reclamation_core.py",
-      "sha256": "7CA05761B3F150A8E10406B6376996FA802AE8BDF3FBB7978A5EEA4B409BF7A2",
-      "byte_count": 13030,
-      "line_count": 252
+      "sha256": "0FAA790C9E15C3A82EE312DC1489B13ABCF567643C5C306B561D0A65B51CF4FC",
+      "byte_count": 14563,
+      "line_count": 277
     },
     {
       "path": "tests/test_native_reclamation_core.py",
-      "sha256": "8D4F717D63146520928C78481B44C109DAE28979F24220E68782C164EC9333B7",
-      "byte_count": 6491,
-      "line_count": 135
+      "sha256": "84D26F507B3EA12BEB9A38E63EDC094F6FA42295E7960F125C683D1781677808",
+      "byte_count": 7415,
+      "line_count": 150
     },
     {
       "path": "docs/native-kernel-reclamation-core.md",
-      "sha256": "A87CBA8887ED68BF8D2E5F50376346F6D2AB4E837F78B71C70FEF73E01394971",
-      "byte_count": 8777,
-      "line_count": 144
+      "sha256": "5A1ACC9F1835FE2CF9768954238BF235025669999B0AEF89BFDF285CB0737D24",
+      "byte_count": 9815,
+      "line_count": 159
     },
     {
       "path": "runs/native-kernel-reclamation-core-readiness.json",
-      "sha256": "98646A6726A0925B58B2D1F554E9E3EDD03A582B02D83D2D30D3C83959D52CCB",
-      "byte_count": 6894,
-      "line_count": 143
+      "sha256": "AFD1ABBE7EB217A132C0D9596004EC20AB2910CC23AEBD64D52E55EE645EF1D5",
+      "byte_count": 7033,
+      "line_count": 147
     },
     {
       "path": "runtime/native_kernel_physical_memory.py",

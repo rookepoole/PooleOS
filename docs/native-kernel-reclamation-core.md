@@ -1,11 +1,19 @@
 # PKRECLAIM1 Core
 
-Cycle 168's current source-bound receipt is version 1.4. It verifies 19 pool
-and 24 task-lifetime tests per host profile, 243 kernel regressions in both
-profiles, 20 retention cases across two modules, 11 AP-owner cases and nine
-compile-fail tests. Host evidence remains separate from live quiescence proof.
+Cycle 172's current source-bound receipt is version 1.5. It verifies 19 pool
+and 34 task-lifetime tests per host profile, including ten new PKSTACK1 cases,
+243 kernel regressions in both profiles, 20 retention cases across two modules,
+11 AP-owner cases and 11 compile-fail tests. Host evidence remains separate from
+live quiescence proof. The linked image is byte-identical to the Cycle 168 kernel;
+no fresh QEMU run or live task-stack context is claimed in Cycle 172.
+The [inactive stack-ownership checkpoint](checkpoints/cycle172-task-stack-ownership.md)
+records mandatory stack retention, scrubbed release and explicit capacity limits.
 The [bounded AP execution-ownership checkpoint](checkpoints/cycle168-ap-ownership-qualification.md)
 records the distinct two-run PKSMP5 integration; general retirement remains open.
+
+Historical Cycle 168's version 1.4 host receipt had 24 task-lifetime tests and
+nine compile-fail tests. Its live AP evidence was requalified in Cycle 171;
+neither historical run count is promoted to new Cycle 172 execution.
 
 Historical Cycle 152 adds [PKLIFE1 task lifetimes](native-kernel-task-lifetimes.md): actual
 PKSCHED4 scheduler ownership and moved inactive PKVM1 address spaces, protected
@@ -78,7 +86,10 @@ This chooses retention over unsafe reuse; eventual reclamation is not promised.
 
 ## Qualification
 
-Current Cycle 158 qualification is recorded by the version 1.3 receipt and
+Current qualification is the 17-stage Cycle 172 receipt described above and in
+`docs/native-kernel-task-lifetimes.md`; raw logs and source hashes are retained.
+
+Historical Cycle 158 qualification is recorded by the version 1.3 receipt and
 `docs/native-kernel-task-lifetimes.md`: 19 core tests, 24 lifetime tests, 219
 kernel tests (13 retention cases) in both host profiles, seven compile-fail
 checks, formatting and host/freestanding Clippy. Mandatory retention now covers
@@ -119,14 +130,18 @@ checks. No production panic profile or system-wide environment is changed.
 
 ## Remaining Work
 
-1. Extend the implemented scheduler/inactive-task retention to active roots
-   and architectural execution-stack lifecycles.
+1. Join the implemented inactive stack owner with guarded mappings, active roots
+   and architectural execution-stack lifecycles. Separate bounded active-root
+   and AP owners do not establish general task CPU retirement.
 2. Couple retirement to acknowledged cross-CPU quiescence, alias revocation,
    TLB shootdown and complete park/scrub/release ordering on the frozen topology.
 3. Qualify timeout, cancellation, offline/death, memory-pressure and shutdown
    sequences, including late or stale acknowledgements and rollback.
 4. Add an independent state oracle, live selector and immutable two-run evidence
    before closing `FLAG-N12-CONCURRENCY-RECLAMATION-001` or N12.3.
+5. Integrate the stack teardown path with existing PMM scrub-receipt growth,
+   migration and pressure handling. Current fixed-capacity exhaustion retains
+   ownership safely but does not guarantee eventual reclamation.
 
 No general RCU, epochs, hazard-pointer algorithm, hotplug, raw-reference
 reclamation, physical hardware, N12 exit or production claim is made.

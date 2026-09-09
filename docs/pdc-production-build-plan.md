@@ -1,33 +1,42 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-09
-Plan version: 2.75.0-native-memory-dependency-replay
-Roadmap cycle: PooleOS Cycle 171
+Plan version: 2.76.0-native-task-stack-ownership
+Roadmap cycle: PooleOS Cycle 172
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cloud Closeout And Cycle 172 In Progress
+## Cycle 172: Inactive Task-Stack Ownership
 
 Cycles 166-171 are merged into `main` through PR #76 at `8006c7b`; the exact
 merged tree passed 105 runtime-inclusive canonical gates and 708 Doctor checks.
-The Cycle 171 sections and machine ledger below are frozen pre-closeout records,
-not a claim that this newer working tree has passed those checks.
+The machine ledger preserves that historical exact-final receipt separately from
+the current Cycle 172 candidate. Historical sections below remain dated records.
 
 Cycle 172 implements the N12.3 `N12-CONCURRENCY-RECLAMATION-001` inactive
 task-stack ownership slice. Its 17-stage core qualifier passes with 34 lifecycle
 tests and 243 kernel regressions per host profile, plus 11 compile-fail tests.
 The linked kernel is unchanged; no live task-stack execution is claimed.
-The draft checkpoint still needs complete roadmap/architecture reconciliation,
-then source-frozen runtime-inclusive canonical qualification and publication,
-required-check and review gates before main merge. A backup branch is not a
-production promotion. No phase, ADD requirement or flag closes.
+Roadmap and architecture reconciliation now passes 34 focused Python tests,
+with 945 total tests discovered and 232 architecture source bindings. All 27
+selected native checks pass. The initial three stale-binding failures are
+preserved in the checkpoint; no check was waived. Source-frozen runtime-inclusive
+canonical qualification, publication, required-check and review gates still
+precede main merge. A backup branch is not a production promotion. No phase,
+ADD requirement or flag closes.
 
 Existing N12/N9 follow-up work includes guarded mappings, architectural context
 and CPU-retirement ownership, and integrating scrub-receipt ledger growth with
 stack teardown. [Cycle 172 evidence and remaining work](checkpoints/cycle172-task-stack-ownership.md).
+
+The 128-generation scheduler test uses a fresh drained PMM per eight-task batch.
+A separate test verifies 16 scrub receipts and safe rejection of the seventeenth;
+neither is evidence of automatic stack-release ledger growth. The existing
+N12 reclamation and N36 evidence-coverage flags retain these open integration
+and qualification requirements. Checklist and coverage bytes remain unchanged.
 
 ## Historical Cycle 171: Native Dependency Replay Complete
 

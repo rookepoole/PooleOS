@@ -1,7 +1,7 @@
 # Cycle 172: Inactive Task-Stack Ownership
 
 Status date: 2026-09-09
-Status: draft development backup; full qualification and progress reconciliation pending.
+Status: host ownership and progress reconciliation qualified; exact-final canonical audit pending at this source snapshot.
 Selected move: `N12-CONCURRENCY-RECLAMATION-001`, N12.3 with N12.7 context ownership dependencies.
 
 ## Cloud Baseline
@@ -89,13 +89,33 @@ three failed because the frozen Cycle 171 ledger/source bindings do not match
 the new receipt and source. The core receipt itself validates against the new
 source. No failing check is waived or presented as a full-suite pass.
 
+The resumed qualification cycle reconciles those bindings, updates the current
+contract/API documentation and preserves Cycle 171's projection/ownership
+records byte-for-byte as named history. The new host-only stack record binds
+schema 1.5, exact counts, receipt capacity and explicit non-claims. A regression
+checks that record against the actual core receipt and keeps both existing
+N12 reclamation and N36 evidence-coverage flags open.
+
+The reconciled focused suite passes 34/34 tests, including the expanded roadmap
+and architecture checks. All 27 selected native checks pass; 945 Python tests
+are discovered and all 232 architecture source bindings validate. These are
+not a full canonical pass. The locked 40 phases, 301 subphases, 57 added
+requirements, 94 flags with 35 open, 20 gaps and 8,996 checklist requirements
+are conserved. PooleGlyph remains Phase 65 with Phase 66 next and its existing
+owner-modified generated report unchanged.
+
+The initial patch assembly for long historical gap strings was rejected before
+any edit because it repeated a file target; the grouped patch succeeded without
+discarding history. No source or validation boundary was silently relaxed.
+
 Before merging this draft:
 
-1. Reconcile all Cycle 172 progress authorities, source bindings, schemas,
-   documentation and measured test-count expectations; preserve the historical
+1. Completed: reconcile Cycle 172 progress authorities, source bindings, schemas,
+   documentation and measured test-count expectations; preserve historical
    Cycle 171 exact-final qualification separately from the current candidate.
-2. Keep all checklist, phase, ADD, flag and non-promotion boundaries conserved;
-   explicitly retain stack mapping, CPU-retirement and receipt-growth follow-ups.
+2. Completed for this checkpoint: conserve checklist, phase, ADD, flag and
+   non-promotion boundaries and record open stack mapping, CPU-retirement and
+   receipt-growth follow-ups. This does not complete those implementation tasks.
 3. Revalidate current native evidence and run the full source-frozen canonical
    qualification with runtime, bundle and replay inputs. Do not inherit the
    historical Cycle 171 result. Preserve any failures and rerun after repair.
