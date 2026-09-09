@@ -1,15 +1,26 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-09-08
+Status date: 2026-09-09
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 168
+Last roadmap reconciliation: PooleOS Cycle 169
 
-Current cloud checkpoint: qualified Cycles 162-165 merged through PR #75 at
+Current Cycle 169: six N5 components pass on the unchanged Cycle 168 kernel.
+Six fresh headless boots include two actual kernel entries and nine-file
+revalidation before unsigned-policy denial. All 83 focused tests pass, with
+new source-current kernel-entry binding in the symbol receipt validator.
+The selected projection is 9/27, with 18 rejecting downstream checks and
+an additional required replay of the prior AP result against new boot inputs.
+Next is N7-TRAP-001, then ordered CPU/memory/IRQ/SMP/scheduler/atomic/lock replay
+and runtime-inclusive exact-final qualification before PR #76 can merge.
+Main remains qualified Cycle 165; no phase, flag, charter condition or
+production gate closes. [Cycle 169 evidence](checkpoints/cycle169-boot-chain-replay.md).
+
+Historical Cycle 168 checkpoint: qualified Cycles 162-165 merged through PR #75 at
 `6f9399c3cd70ebef2f7610f8b6fdb40ae262e27f`. The exact merged tree passed
 105 canonical gates and 708 Doctor checks. Cycle 168 qualifies bounded AP
 runtime/stack/frame ownership in two final four-vCPU runs with 27 copied-free

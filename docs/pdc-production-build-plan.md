@@ -1,15 +1,36 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-09-08
-Plan version: 2.72.0-native-ap-ownership
-Roadmap cycle: PooleOS Cycle 168
+Status date: 2026-09-09
+Plan version: 2.73.0-native-boot-chain-replay
+Roadmap cycle: PooleOS Cycle 169
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 168: Bounded AP Ownership Qualified
+## Cycle 169: Boot Chain Requalified
+
+N5.5/N5.6/N5.8 now has six current component receipts for the unchanged
+Cycle 168 kernel: PSYM1, PPOL1, PKLOAD6, PooleBoot, PKREVAL1 and PKXFER1.
+Six fresh headless boots include two actual kernel entries, independent
+nine-file revalidation and the expected unsigned-policy halt. All 83 focused
+regressions pass. Symbol identity and lookup geometry are independently
+remeasured; symbol readiness now rejects stale kernel-entry evidence.
+
+The selected projection passes 9/27 checks; 18 reject stale dependencies.
+The prior AP receipt still passes its declared bindings but also needs replay
+with the new boot artifact set during N8 qualification. Its two earlier boots
+are not new Cycle 169 evidence. Record the transitive-input coverage audit
+under the existing N36 receipt flag. Full canonical qualification is not run.
+
+Next is N7-TRAP-001, then CPU, memory, IRQ/SMP, scheduler, atomics and locks.
+Update current evidence in dependency order before exact-final qualification,
+publication and PR #76 merge review. Main remains qualified Cycle 165.
+No phase/flag or production gate closes; PooleGlyph, kernel and demo ISO bytes
+are unchanged. [Cycle 169 evidence](checkpoints/cycle169-boot-chain-replay.md).
+
+## Historical Cycle 168: Bounded AP Ownership Qualified
 
 N12.3 now has actual three-AP runtime/stack and two-frame retention, exposure
 tracking before startup, release denial during possible execution, and

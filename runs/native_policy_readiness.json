@@ -7,12 +7,12 @@
     "contract": {
       "path": "specs/native-policy-contract.json",
       "bytes": 8222,
-      "sha256": "553926AB9A50F626B57AB8FFA4D2DD14CEBB6406EE6D38D016A206E2B49C9B39"
+      "sha256": "0020385FE7A373A7523BB562E4B2AE25B8D329EABB30055453ADA146B26A971B"
     },
     "golden_vectors": {
       "path": "specs/native-policy-golden-vectors.json",
       "bytes": 43996,
-      "sha256": "25D0260C5F8A47E785B65BFE0556164088535C7CB62DCA0B861F63FAEC60F424"
+      "sha256": "68F19FC26F477CBFB5078CFB933E997A8A3551F591A86C6D3721B95BABFD2244"
     },
     "toolchain_lock": {
       "path": "specs/native-toolchain-lock.json",
@@ -77,8 +77,8 @@
       },
       {
         "path": "runtime/native_symbols.py",
-        "bytes": 54084,
-        "sha256": "1E99F19461CE43311E943F556F41968DA93A8A0E8370D5264E9FD94759C3120F"
+        "bytes": 55645,
+        "sha256": "345CBF5179CD1CBE881150BD17E8496B88A409BDD2763588A70AB61E1EE87FC2"
       },
       {
         "path": "runtime/native_microcode.py",

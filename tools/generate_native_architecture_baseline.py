@@ -190,6 +190,7 @@ BOUND_SOURCE_PATHS = (
     "native/kernel/src/reclamation/ap_resources.rs",
     "native/kernel/src/physical_memory/tests/ap_resources.rs",
     "docs/checkpoints/cycle168-ap-ownership-qualification.md",
+    "docs/checkpoints/cycle169-boot-chain-replay.md",
     "native/kernel/src/reclamation/task_lifetimes.rs",
     "native/kernel/tests/task_lifetimes.rs",
     "docs/native-kernel-task-lifetimes.md",

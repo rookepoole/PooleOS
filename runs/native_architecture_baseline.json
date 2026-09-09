@@ -569,9 +569,9 @@
     },
     {
       "path": "docs/native-symbol-bundle.md",
-      "sha256": "665DC92D83CFCC9311A674AE0B46E5E87B1FA08616D1EEA1C830F99F7E541B4F",
-      "byte_count": 8087,
-      "line_count": 124
+      "sha256": "F59E3E16BD212E502B64CFC7AE2B56E1984D275D900F161C273421D4ABEB09D9",
+      "byte_count": 8379,
+      "line_count": 128
     },
     {
       "path": "docs/native-system-manifest.md",
@@ -611,15 +611,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "9630DC6691A7593C52EA6EB5C6764840DC710DB85C63E40E764732AE22BA9562",
-      "byte_count": 80727,
-      "line_count": 1053
+      "sha256": "D80B2C7A9D8DE36DB5950C04DBED99DD855671064C2F2AF91B40620065D94D80",
+      "byte_count": 81500,
+      "line_count": 1064
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "8F0A26604DF366E66D210B6FF28BE4F024B5F75CEE695E64B37331AF1CB0849B",
-      "byte_count": 385195,
-      "line_count": 2695
+      "sha256": "35C241FE8ECF6DA0755F8A9B06A07CF258E130D880CE2C6AB898CE357EA605AB",
+      "byte_count": 386458,
+      "line_count": 2716
     },
     {
       "path": "docs/publication-boundary.md",
@@ -701,21 +701,21 @@
     },
     {
       "path": "runs/native_kernel_load_readiness.json",
-      "sha256": "C3995D72501990BEA2F962762D487582E2E995228E69034B704F9C7E9290E041",
+      "sha256": "290EE8726EA27444DFFF1582E2AD412E21AAE38684DD4A2104A1244E0F57104B",
       "byte_count": 189967,
       "line_count": 5365
     },
     {
       "path": "runs/native-kernel-revalidation-readiness.json",
-      "sha256": "BE2192F3D8FEEC60C7510161DADC54ED920EB58EAA9DF348C8E51CE2DEC0F038",
+      "sha256": "973791A9F07E62B373C19B45AF03A3574AF038EA977C711B65ED44013891C810",
       "byte_count": 16447,
       "line_count": 472
     },
     {
       "path": "runs/native-kernel-transfer-readiness.json",
-      "sha256": "7D07BDA3F3D967D570E22470C4B6890AA058BA5D617290CBDAA9EDFAFAEEEE75",
-      "byte_count": 168547,
-      "line_count": 4622
+      "sha256": "296E089DAAE4EF5F2E908D8ECB4E4883F16EC93DDA33FFA68EECE04A966FA75F",
+      "byte_count": 169191,
+      "line_count": 4637
     },
     {
       "path": "runs/native-kernel-trap-readiness.json",
@@ -797,13 +797,13 @@
     },
     {
       "path": "runs/native_pooleboot_readiness.json",
-      "sha256": "FF0D8154527AEB8EA66FE30F826688652FE9CF48BE85D97B4CBADEBC15C47877",
+      "sha256": "C3840B0DCAA092FF0B8B283D087AA1908DDB1D39E53437C4FD1BDA2BDDE3CAA5",
       "byte_count": 186912,
       "line_count": 5270
     },
     {
       "path": "runs/native_policy_readiness.json",
-      "sha256": "5D10ED417B85088BB37D936BD11097CBD8887943754E3A65021DB9E8EDC3E605",
+      "sha256": "DFC63C64BF2550F45894D5193339BED011E54D33EC6555020BE5B32FE3AA4AE1",
       "byte_count": 23405,
       "line_count": 834
     },
@@ -815,9 +815,9 @@
     },
     {
       "path": "runs/native_symbol_readiness.json",
-      "sha256": "38CA1F7D1C3FB7A2C69A9185AFA73717509724E6F56B382CF2D897CC0CFEC8EA",
-      "byte_count": 39632,
-      "line_count": 1371
+      "sha256": "9CA16D389EAC641FADC7DF310476F872C80255E1AFCA5566718C397A944B4170",
+      "byte_count": 40002,
+      "line_count": 1381
     },
     {
       "path": "runs/native_system_manifest_readiness.json",
@@ -1354,6 +1354,12 @@
       "line_count": 127
     },
     {
+      "path": "docs/checkpoints/cycle169-boot-chain-replay.md",
+      "sha256": "CA045B6BE530C251B77B754E71B626035E78AB97BB0062208DB3287B54D1FE6F",
+      "byte_count": 5704,
+      "line_count": 95
+    },
+    {
       "path": "native/kernel/src/reclamation/task_lifetimes.rs",
       "sha256": "A5CDF65682124F707EDCAD2C120FE41C2E7B179A8D3ABC0F34C211C18208EBF2",
       "byte_count": 14459,
@@ -1535,7 +1541,7 @@
     },
     {
       "path": "specs/native-policy-contract.json",
-      "sha256": "553926AB9A50F626B57AB8FFA4D2DD14CEBB6406EE6D38D016A206E2B49C9B39",
+      "sha256": "0020385FE7A373A7523BB562E4B2AE25B8D329EABB30055453ADA146B26A971B",
       "byte_count": 8222,
       "line_count": 251
     },
@@ -1547,7 +1553,7 @@
     },
     {
       "path": "specs/native-policy-golden-vectors.json",
-      "sha256": "25D0260C5F8A47E785B65BFE0556164088535C7CB62DCA0B861F63FAEC60F424",
+      "sha256": "68F19FC26F477CBFB5078CFB933E997A8A3551F591A86C6D3721B95BABFD2244",
       "byte_count": 43996,
       "line_count": 61
     },
@@ -1607,7 +1613,7 @@
     },
     {
       "path": "specs/native-symbol-golden-vectors.json",
-      "sha256": "52FDA6F1FF509AD9CA96CEB8748D3B890B733A61E425DC5F2D2B11D4503D60D1",
+      "sha256": "CE4A0C1E731AC31299386B926A7E12A139C70FC168E005DBF984112C1973A938",
       "byte_count": 9878,
       "line_count": 1
     },
