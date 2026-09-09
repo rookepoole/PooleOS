@@ -8,7 +8,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from runtime import native_kernel_transfer
+from runtime import native_inner_live, native_kernel_load, native_kernel_transfer
 from runtime.schema_validation import validate_json
 
 
@@ -98,6 +98,9 @@ IMPLEMENTATION_INPUTS = (
     "native/kernel/src/xstate.rs",
     "native/kmap/src/lib.rs",
     "runtime/native_kernel_smp_ipi.py",
+    "runtime/native_kernel_transfer.py",
+    "runtime/native_kernel_load.py",
+    "runtime/native_inner_live.py",
     "specs/native-kernel-entry-contract.json",
     "specs/native-kernel-map-contract.json",
     "specs/native-kernel-smp-ipi-contract.json",
@@ -193,7 +196,33 @@ def file_binding(root: Path, relative: str) -> dict[str, Any]:
 
 
 def expected_inputs(root: Path = ROOT) -> dict[str, Any]:
-    return {"implementation": [file_binding(root, path) for path in IMPLEMENTATION_INPUTS]}
+    return {
+        "implementation": [file_binding(root, path) for path in IMPLEMENTATION_INPUTS],
+        "boot_transfer": file_binding(root, native_kernel_transfer.READINESS_RELATIVE),
+        "boot_artifacts": [
+            {"path": path, "byte_count": len(data), "sha256": sha256_bytes(data)}
+            for path, data in sorted(native_kernel_load.canonical_artifact_files().items())
+        ],
+    }
+
+
+def _current_boot_revalidation(root: Path) -> dict[str, Any]:
+    dependency = read_json(root / native_kernel_transfer.READINESS_RELATIVE)
+    _require(isinstance(dependency, dict), "PKSMP5 transfer dependency must be an object")
+    if native_kernel_transfer.readiness_errors(dependency, root):
+        raise KernelSmpIpiError("PKSMP5 transfer dependency is not source-current")
+    runs = dependency["execution"]["runs"]
+    _require(len(runs) == 2, "PKSMP5 transfer dependency requires two runs")
+    observed = [native_kernel_transfer.validate_markers(run["markers"])["kernel_revalidation"]
+                for run in runs]
+    _require(observed[0] == observed[1], "PKSMP5 transfer dependency boot observations disagree")
+    files = native_kernel_load.canonical_artifact_files()
+    digest = native_inner_live.retained_set_sha256(
+        [files[item[4]] for item in native_kernel_load.ARTIFACT_DEFINITIONS]
+    )
+    _require(observed[0]["retained_set_sha256"] == digest,
+             "PKSMP5 transfer dependency does not describe current boot artifacts")
+    return observed[0]
 
 
 def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
@@ -209,23 +238,26 @@ def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     errors = [f"schema {issue.path}: {issue.message}" for issue in issues]
     if errors:
         return errors
-    if readiness.get("inputs") != expected_inputs(root):
-        errors.append("readiness input bindings are stale")
     controls = readiness.get("negative_controls", [])
     ids = [item.get("id") for item in controls if isinstance(item, dict)]
     if ids != list(NEGATIVE_CONTROL_IDS):
         errors.append("readiness negative-control order diverges")
     try:
+        if readiness.get("inputs") != expected_inputs(root):
+            errors.append("readiness input bindings are stale")
+        current_boot = _current_boot_revalidation(root)
         execution = readiness["execution"]
         runs = execution["runs"]
         if len(runs) != 2 or execution["run_count"] != 2:
             raise KernelSmpIpiError("PKSMP5 requires two recorded runs")
         observed = [validate_markers(run["markers"]) for run in runs]
+        if any(item["transfer_prefix"]["kernel_revalidation"] != current_boot for item in observed):
+            raise KernelSmpIpiError("PKSMP5 recorded runs do not match current boot revalidation")
         if any(run["marker_summary"] != item for run, item in zip(runs, observed, strict=True)):
             raise KernelSmpIpiError("PKSMP5 recorded marker summary disagrees with its markers")
         if execution["observation"] != observed[0]:
             raise KernelSmpIpiError("PKSMP5 aggregate observation disagrees with its first run")
-    except (KeyError, TypeError, ValueError, IndexError, KernelSmpIpiError) as error:
+    except (OSError, KeyError, TypeError, ValueError, IndexError, KernelSmpIpiError) as error:
         errors.append(f"recorded execution invalid: {error}")
     return errors
 

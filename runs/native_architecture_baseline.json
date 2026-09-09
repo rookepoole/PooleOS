@@ -509,9 +509,9 @@
     },
     {
       "path": "docs/native-kernel-physical-memory.md",
-      "sha256": "68A4CEA546DCA35E179C782AD6B24F1597B0087B88D0BED58B26304976969BC5",
-      "byte_count": 10382,
-      "line_count": 202
+      "sha256": "7425EF0A73F2746120A1819E19800E0D1D8564EC30BEE4B5157F2BC3D3C587B1",
+      "byte_count": 10495,
+      "line_count": 204
     },
     {
       "path": "docs/native-kernel-virtual-memory.md",
@@ -539,9 +539,9 @@
     },
     {
       "path": "docs/native-kernel-smp-ipi.md",
-      "sha256": "E53E4D17E42354C673DC5D36CD2CF3A01B69D20EB627A2860C47A60AD87227D3",
-      "byte_count": 6672,
-      "line_count": 59
+      "sha256": "954D4FD1B838157BE48CCEDBE2DDCA55E57AF1DE3C103B864CF1A84945790743",
+      "byte_count": 7321,
+      "line_count": 69
     },
     {
       "path": "docs/native-microcode-bundle.md",
@@ -611,15 +611,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "980A1C5AA69A5445DE3EBCE29EA3F0DD464F590C67FA45B713A7F4C650D9C5D2",
-      "byte_count": 82290,
-      "line_count": 1075
+      "sha256": "34BCA3B042E9650F8AA3129189430361DDD47952BD27F8895499522C9A37F977",
+      "byte_count": 83126,
+      "line_count": 1087
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "16C6841A3EDD7831D2BD939BC14262449476FC9FD2B64A3174586CF4C783A5A5",
-      "byte_count": 387706,
-      "line_count": 2737
+      "sha256": "EEF6AB21694252E18D1BAF77EF620DAAAAA5E4267111A51917D0E339A8C84088",
+      "byte_count": 389103,
+      "line_count": 2759
     },
     {
       "path": "docs/publication-boundary.md",
@@ -755,39 +755,39 @@
     },
     {
       "path": "runs/native-kernel-physical-memory-readiness.json",
-      "sha256": "827F8AA1FB21FB40970A79F8804618EB0C94D114AC3897C9C195E0C5E10BC35E",
-      "byte_count": 223569,
-      "line_count": 6302
+      "sha256": "3C6FBC663CB8110529789AC1A0EC90577223F92648E81DBD8422E6E00ECA071F",
+      "byte_count": 224216,
+      "line_count": 6317
     },
     {
       "path": "runs/native-kernel-virtual-memory-readiness.json",
-      "sha256": "C14722C1C88F853915391A9AAA648DB3CD8A9DF58C70BE7B71D94C953AC05908",
-      "byte_count": 192461,
-      "line_count": 5311
+      "sha256": "64056FA11745713B8323245D551953CA2A7D8F2C1E52773D20A9709BE12F193D",
+      "byte_count": 193099,
+      "line_count": 5326
     },
     {
       "path": "runs/native-kernel-interrupt-time-readiness.json",
-      "sha256": "5A009143E9145C7B1B37AA456E0963471EC40AA99E884162EE27B9CC12A49B54",
-      "byte_count": 184817,
-      "line_count": 5043
+      "sha256": "E74A03EAA6AAD28BF2B337F84FA21F01E9B174F8A5EDBB53A629C7055AE8013E",
+      "byte_count": 185461,
+      "line_count": 5058
     },
     {
       "path": "runs/native-kernel-smp-first-ap-readiness.json",
-      "sha256": "235AA56932A49B263CADC6300080015E8BCB5EAA8359A6C8D745489C29034F82",
-      "byte_count": 187502,
-      "line_count": 5126
+      "sha256": "7BC1746699B5F44015B8480D5697F9389BC7D19DB5C35A234EC1337CEC5891A5",
+      "byte_count": 188148,
+      "line_count": 5141
     },
     {
       "path": "runs/native-kernel-smp-percpu-runtime-readiness.json",
-      "sha256": "0A0F26D034B602CCA37DF6E94AF4413BDD8DF09D9C3F45AF4A1102659E6561AE",
-      "byte_count": 189496,
-      "line_count": 5021
+      "sha256": "77F0CF73C7EDD9B8B0DD1FAAE6BF0B8F36C87A94DE43736181C6976C8AE9D2F2",
+      "byte_count": 190139,
+      "line_count": 5036
     },
     {
       "path": "runs/native-kernel-smp-ipi-readiness.json",
-      "sha256": "E9C8A4A81AFF9C5BD9266C481C60012249228CA56E26399A6B99B5A8AF42FE24",
-      "byte_count": 211298,
-      "line_count": 5774
+      "sha256": "6B5323FB9C85844FF66D532B2CF96EF10F9C870F561686E1320BBF488298EC71",
+      "byte_count": 213111,
+      "line_count": 5826
     },
     {
       "path": "runs/native_microcode_readiness.json",
@@ -1364,6 +1364,12 @@
       "sha256": "F7A1B0856B82B3B629888457B369F1797F7E87BB5800CCC3C055C9F41FD10B8B",
       "byte_count": 5687,
       "line_count": 96
+    },
+    {
+      "path": "docs/checkpoints/cycle171-native-dependency-replay.md",
+      "sha256": "B24A90D354F8EF7852EC8FC3CB84359EB727D2BCEF798EAC0FB16493703EC6AE",
+      "byte_count": 6143,
+      "line_count": 115
     },
     {
       "path": "native/kernel/src/reclamation/task_lifetimes.rs",

@@ -63,15 +63,18 @@ class NativeDependencyReleaseGateTests(unittest.TestCase):
             check_fn = getattr(gate, "check_native_kernel_" + name + "_readiness")
             positive = check_fn()
             self.assertTrue(positive["ok"], positive["detail"])
-            mutations = [(path, 219)]
+            mutations = [(path, 219), (path, 228)]
             if profile in {"scheduler_deferred", "scheduler_smp", "scheduler_ap_workers", "scheduler_smp_preempt"}:
                 audit_name = "linked_switch_audit" if profile == "scheduler_deferred" else "linked_invlpg_audit"
                 audit = receipt.get("build", {}).get(audit_name)
                 self.assertIsInstance(audit, dict)
                 mutations.extend([
                     (("build", audit_name, "relocation_count"), 1305),
+                    (("build", audit_name, "relocation_count"), 1319),
                     (("build", audit_name, "canonical_sha256"),
                      "18EDADA10E141DBADA8C95C1C0B3454696122C5E96C528F45E0AECE6ADD2F07D"),
+                    (("build", audit_name, "canonical_sha256"),
+                     "D0AA3295F66AF02D48476BCEDC44D962A873E98FBA21F48A6753AA7BB9B24EA4"),
                 ])
             for field_path, stale in mutations:
                 with self.subTest(profile=profile, field=field_path):

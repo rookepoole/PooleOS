@@ -146,7 +146,7 @@ DEFAULT_GAPS = [
     "Rust 1.97.0 PE32+/ELF64 fixtures pass one-host qualification, but the second clean host, source-rebuilt compiler provenance, C17/assembly/ABI tools, and image toolchain remain open.",
     "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, six bounded TLC models cover all seven required domains and detect twenty-one required counterexamples, and a bounded PooleBoot proof executes under the pinned profile; current source rebuilds, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open.",
     "A reproducible unsigned PooleBoot proof application boots twice with deterministic twelve-file GPT/FAT32 media, exact GOP frames, retained PKMAP2 kernel/PSM1/six-artifact/PBTP1/PBTS1/table/guarded-stack/handoff storage, independently reconstructed PBLIVE4 bytes including a firmware RSDP record, bounded PBEXIT1 retry, successful ExitBootServices, and zero later firmware calls. The ordinary build stops before transfer; a separate opt-in QEMU-only PKXFER1 build installs retained CR3/RSP, transfers once, and live-executes PKREVAL1 over all nine retained files before an exact terminal unsigned-policy denial with zero signatures, authority, actions, writes, or firmware calls. PBSTATE1 still only models authenticated monotonic-anchor validation, deterministic redundant-copy selection, rollback/future rejection, repair/migration planning, and nine interrupted-transition recovery boundaries with no performed effects. Policy signature verification, authenticated revocation, a real cryptographic monotonic writable state provider, persistent backend I/O and executed repair/migration, Secure Boot-state verification, capability creation, activation or update application, policy application, recovery execution or symbol consumption, licensed real vendor payload intake and validation, live FMP/ESRT/PLDM inventory, privileged per-processor revision observation, initial-system execution, final framebuffer remap/revocation, production transfer, target-firmware and physical-media qualification, and N5 exit remain open.",
-    "Cycle 170 requalifies five trap/CPU/xstate/MSR profiles on the unchanged Cycle 168 kernel: fourteen fresh headless boots, 225 marker controls and 42 passing focused tests. One expected TCG exception diagnostic is separate. The trap gate's stale identity pins are repaired and 17 aggregate-gate regression cases reject stale identity or production/authority claims. Fourteen of 27 selected checks pass; thirteen downstream checks plus prior SMP new-boot-artifact replay remain. Next is N9-PMM-ACPI-CONSUMER-001. Full runtime-inclusive canonical qualification is pending; main stays qualified Cycle 165. No phase, flag or production gate closes. Historical Cycle 169 requalifies six N5 components on the unchanged Cycle 168 kernel: six fresh headless boots, two kernel entries, nine-file revalidation and 83 passing focused tests. PSYM1 now binds source-current kernel-entry evidence and measured identities. Nine of 27 selected checks pass; 18 downstream checks and a new-boot-artifact replay of the prior SMP result remain pending. Next is N7-TRAP-001. Full canonical qualification has not run; main stays qualified Cycle 165. No phase, flag or production gate closes. Historical Cycle 168 qualifies mandatory AP runtime/stack and frame retention with two final four-vCPU boots, 27 copied-free and 18 owner-release rejections per partial/full attempt, 249 rejected cases, and 243 kernel host tests. The 147-page kernel has corrected build and mapping diagnostics. All 56 focused tests pass, including serialized receipt and ownership controls. Four of 27 selected native checks pass; 23 changed-image dependencies need replay beginning N5-SYMBOLS-SEMANTICS-001. Main contains exact-final qualified Cycle 165 through PR75. Current full canonical qualification, general task-stack ownership and CPU retirement remain open. No phase, flag or production gate closes. Historical Cycle 165 completes fourteen current-kernel memory/VM/IRQ/SMP/scheduler/atomic/lock profiles with 28 final headless boots, 660 negative-control groups and 2120 rejected cases. Six superseded initial boots are excluded after three test-only corrections. All 27 selected native checks pass, and the 142-test profile/map/gate suite passes with two optional local-transcript skips. Native bytes are unchanged; data-frame scrub-before-reuse, execution-stack ownership, general CPU retirement and full runtime-inclusive exact-final qualification remain open. Main stays qualified Cycle 161, and no phase/flag or production gate closes. Historical Cycle 164 completes five N7 live profiles on the unchanged Cycle 162 kernel with fourteen successful headless boots, 225 marker controls and 41 focused Python tests. One expected TCG exception diagnostic is counted separately. The current selected projection passes 13/27; fourteen memory/VM/IRQ/SMP/scheduler/atomic/lock dependencies still need replay beginning N9-PMM-ACPI-CONSUMER-001. No current full canonical pass, phase closure, target qualification or production promotion is claimed. Historical Cycle 163 completes six N5 component replays with six final headless boots and 70 focused Python tests. Calendar-date validation repairs loader and PooleBoot fixed-day blockers without closing the broader N36 review. The current projection passes 8/27; nineteen downstream receipts, including transfer-dependent VM evidence, require replay beginning N7-TRAP-001. No current full canonical pass, phase closure or production promotion is claimed. Historical Cycle 162 adds mandatory PKVM3 table/data retention and atomic owner-authorized PMM cleanup. The 146-page kernel passes 228 host tests, 16 retention cases, two exact PKVM3 boots with six retained-free rejections each, 48 marker controls and two reproducible PKENTRY1 builds. The selected current-source projection passes 4/27 checks; 23 changed-image dependencies need replay, beginning N5-SYMBOLS-SEMANTICS-001. Main remains the fully qualified Cycle 161 baseline merged through PR74. Execution-stack ownership, general CPU retirement and the broader N36 schema/evidence audit remain open; no phase closure, demo rebase or production promotion follows. Historical Cycle 161 completes current-source replay of the Cycle 158 mandatory inactive table/frame-retention kernel after Cycle 159 boot-chain and Cycle 160 N7 qualification. Fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles pass 28 final headless boots, 658 control groups and 2,118 rejected cases on the unchanged 219-test kernel. All 26 selected native checks and the pre-closeout 105-check/708-Doctor/917-test canonical suite pass; exact-final qualification, publication and review checks still gate a main merge. The failed Cycle 158 audit is preserved separately. PKCPU1 recorded consistency and the two scheduler calendar-date repairs do not close the broader N36 schema/evidence audit. Active roots, execution stacks and CPU-retirement ownership remain open under N12.3. The native foundation includes PKENTRY1 intake, allocation-free PKREVAL1 verifier, bounded early diagnostics, opt-in QEMU-only live entry, BSP-only PKTRAP1 descriptor/exception containment, bounded BSP PKXSTATE1 x87/SSE ownership, PKPMM7 scrubbed lifecycle and checked repeated ledger growth, guarded stable-manager and generation-owned active-ledger transactions, PKACPI1 required-table snapshot/reclaim evidence, PKVM3 sparse PMM-owned direct-map evidence, PKIRQ1 one-BSP timer evidence, PKSMP1 one-AP lifecycle evidence, PKSMP2 one-AP processor-local runtime evidence, PKSMP5 fixed four-vCPU/three-AP startup, rollback, IPI, and one-page-per-root remote-invalidation evidence, PKSCHED1 cooperative scheduler/context-switch evidence, PKSCHED2 bounded BSP timer/wakeup preemption evidence, PKSCHED3 allocation-free BSP deferred-worker evidence, PKSCHED4 exact-topology AP scheduler ownership/wake/migration evidence, PKSCHED5 exact-topology typed AP-local worker evidence, and PKSCHED6 bounded exact-topology SMP-preemption evidence exist, but authenticated boot trust, measured boot, production transfer, production capability authority, general topology and shootdown, AP-local timer interrupt delivery, a general driver/service framework, arbitrary callbacks, general SMP preemption, retained crash evidence, target execution, and N6/N7/N8/N9/N12 exit remain open.",
+    "Cycle 171 completes fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles on the unchanged Cycle 168 kernel: 28 final headless boots, 660 control groups, 2126 rejected cases and 243 kernel host tests per qualifier. Four superseded boots are preserved separately. All 27 selected native checks pass. SMP evidence now binds current boot artifacts and rejects stale or malformed transfer dependencies; five new test methods cover nine rejection cases. The final 155-test focused suite passes with two optional local-transcript skips. Measured memory and host/image gate pins are reconciled with 20 memory and 38 stale-identity regression cases. Full runtime-inclusive exact-final qualification, publication and review gates still precede merge and N12.3 task-stack/CPU-retirement integration. Main stays qualified Cycle 165 at this pre-closeout checkpoint. No phase, flag or production gate closes. Historical Cycle 170 requalifies five trap/CPU/xstate/MSR profiles on the unchanged Cycle 168 kernel: fourteen fresh headless boots, 225 marker controls and 42 passing focused tests. One expected TCG exception diagnostic is separate. The trap gate's stale identity pins are repaired and 17 aggregate-gate regression cases reject stale identity or production/authority claims. Fourteen of 27 selected checks pass; thirteen downstream checks plus prior SMP new-boot-artifact replay remain. Next is N9-PMM-ACPI-CONSUMER-001. Full runtime-inclusive canonical qualification is pending; main stays qualified Cycle 165. No phase, flag or production gate closes. Historical Cycle 169 requalifies six N5 components on the unchanged Cycle 168 kernel: six fresh headless boots, two kernel entries, nine-file revalidation and 83 passing focused tests. PSYM1 now binds source-current kernel-entry evidence and measured identities. Nine of 27 selected checks pass; 18 downstream checks and a new-boot-artifact replay of the prior SMP result remain pending. Next is N7-TRAP-001. Full canonical qualification has not run; main stays qualified Cycle 165. No phase, flag or production gate closes. Historical Cycle 168 qualifies mandatory AP runtime/stack and frame retention with two final four-vCPU boots, 27 copied-free and 18 owner-release rejections per partial/full attempt, 249 rejected cases, and 243 kernel host tests. The 147-page kernel has corrected build and mapping diagnostics. All 56 focused tests pass, including serialized receipt and ownership controls. Four of 27 selected native checks pass; 23 changed-image dependencies need replay beginning N5-SYMBOLS-SEMANTICS-001. Main contains exact-final qualified Cycle 165 through PR75. Current full canonical qualification, general task-stack ownership and CPU retirement remain open. No phase, flag or production gate closes. Historical Cycle 165 completes fourteen current-kernel memory/VM/IRQ/SMP/scheduler/atomic/lock profiles with 28 final headless boots, 660 negative-control groups and 2120 rejected cases. Six superseded initial boots are excluded after three test-only corrections. All 27 selected native checks pass, and the 142-test profile/map/gate suite passes with two optional local-transcript skips. Native bytes are unchanged; data-frame scrub-before-reuse, execution-stack ownership, general CPU retirement and full runtime-inclusive exact-final qualification remain open. Main stays qualified Cycle 161, and no phase/flag or production gate closes. Historical Cycle 164 completes five N7 live profiles on the unchanged Cycle 162 kernel with fourteen successful headless boots, 225 marker controls and 41 focused Python tests. One expected TCG exception diagnostic is counted separately. The current selected projection passes 13/27; fourteen memory/VM/IRQ/SMP/scheduler/atomic/lock dependencies still need replay beginning N9-PMM-ACPI-CONSUMER-001. No current full canonical pass, phase closure, target qualification or production promotion is claimed. Historical Cycle 163 completes six N5 component replays with six final headless boots and 70 focused Python tests. Calendar-date validation repairs loader and PooleBoot fixed-day blockers without closing the broader N36 review. The current projection passes 8/27; nineteen downstream receipts, including transfer-dependent VM evidence, require replay beginning N7-TRAP-001. No current full canonical pass, phase closure or production promotion is claimed. Historical Cycle 162 adds mandatory PKVM3 table/data retention and atomic owner-authorized PMM cleanup. The 146-page kernel passes 228 host tests, 16 retention cases, two exact PKVM3 boots with six retained-free rejections each, 48 marker controls and two reproducible PKENTRY1 builds. The selected current-source projection passes 4/27 checks; 23 changed-image dependencies need replay, beginning N5-SYMBOLS-SEMANTICS-001. Main remains the fully qualified Cycle 161 baseline merged through PR74. Execution-stack ownership, general CPU retirement and the broader N36 schema/evidence audit remain open; no phase closure, demo rebase or production promotion follows. Historical Cycle 161 completes current-source replay of the Cycle 158 mandatory inactive table/frame-retention kernel after Cycle 159 boot-chain and Cycle 160 N7 qualification. Fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles pass 28 final headless boots, 658 control groups and 2,118 rejected cases on the unchanged 219-test kernel. All 26 selected native checks and the pre-closeout 105-check/708-Doctor/917-test canonical suite pass; exact-final qualification, publication and review checks still gate a main merge. The failed Cycle 158 audit is preserved separately. PKCPU1 recorded consistency and the two scheduler calendar-date repairs do not close the broader N36 schema/evidence audit. Active roots, execution stacks and CPU-retirement ownership remain open under N12.3. The native foundation includes PKENTRY1 intake, allocation-free PKREVAL1 verifier, bounded early diagnostics, opt-in QEMU-only live entry, BSP-only PKTRAP1 descriptor/exception containment, bounded BSP PKXSTATE1 x87/SSE ownership, PKPMM7 scrubbed lifecycle and checked repeated ledger growth, guarded stable-manager and generation-owned active-ledger transactions, PKACPI1 required-table snapshot/reclaim evidence, PKVM3 sparse PMM-owned direct-map evidence, PKIRQ1 one-BSP timer evidence, PKSMP1 one-AP lifecycle evidence, PKSMP2 one-AP processor-local runtime evidence, PKSMP5 fixed four-vCPU/three-AP startup, rollback, IPI, and one-page-per-root remote-invalidation evidence, PKSCHED1 cooperative scheduler/context-switch evidence, PKSCHED2 bounded BSP timer/wakeup preemption evidence, PKSCHED3 allocation-free BSP deferred-worker evidence, PKSCHED4 exact-topology AP scheduler ownership/wake/migration evidence, PKSCHED5 exact-topology typed AP-local worker evidence, and PKSCHED6 bounded exact-topology SMP-preemption evidence exist, but authenticated boot trust, measured boot, production transfer, production capability authority, general topology and shootdown, AP-local timer interrupt delivery, a general driver/service framework, arbitrary callbacks, general SMP preemption, retained crash evidence, target execution, and N6/N7/N8/N9/N12 exit remain open.",
     "PKERR1 freezes a pure exact-target CPU/errata rejection policy, PKXSTATE1 proves bounded x87/SSE standard-XSAVE ownership, PKXEXC1 proves deliberate #MF/#XM recovery plus terminal test-only #NM rejection with a linked scope audit under WHPX, and PKMSR1 proves only a read-only qemu64 BSP system-linkage/global-MCA/unsupported-PMU observation. PKPMM7 supplies bounded physical ownership, scrubbed lifecycle transactions, a stable guarded five-page manager, external generation-owned active ledgers, checked automatic growth with retirement, bounded-window fallback and pre-effect rejection, streamed lifecycle-gated Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation and retained copy/readback; PKVM1 supplies inactive page-table transactions; PKVM3 proves one-BSP activation/restoration of a complete-profile PMM-owned sparse direct map; PKIRQ1 proves one bounded local timer transaction; PKSMP1 proves one first-AP start/quiesce/park lifecycle; PKSMP2 proves one AP-local GDT/TSS/IDT, guarded-stack, x87/SSE-owner, and interrupt-vector runtime transaction; and PKSMP5 proves three simultaneous AP-local runtimes, partial-start rollback with fresh retry, six fixed IPI classes per AP, three AP-side one-page INVLPG operations, aggregate acknowledgement, and one deferred generation retirement. No target-qualified complete native CPU policy, applicable Model 40h-4Fh errata authority, direct numeric client microcode floor or ratified replacement, target-specific privileged-MSR semantics, syscall/MCE/PMU activation, AVX/extended state, user-task exception delivery, scheduler or migration integration, general interrupt routing/time services, production capability authority, general topology or SMP shootdown, AML or complete ACPI resource-graph execution, complete kernel/user address spaces, heap, MMIO/PAT/MTRR qualification, interrupt-context or concurrent allocator, general pressure, or OOM implementation exists.",
     "The sanitized Tier 1 identity and bounded user-mode CPUID transcript match, but MSR, PCI configuration-space, Secure Boot, TPM, SPD, sensor/power, standards-hash, lab-safety, native enumeration, and physical qualification evidence remain open.",
     "No native DMA/IOMMU/interrupt-remapping confinement.",
@@ -1632,8 +1632,8 @@ def check_native_kernel_physical_memory_readiness(
         "bootstrap_temporary_pte_writes": 23172,
         "complete_address_space_mapping_operations": 0,
         "final_temporary_alias_revoked": True,
-        "loader_reserved_pages_protected": 924,
-        "managed_pages": 129080,
+        "loader_reserved_pages_protected": 925,
+        "managed_pages": 129079,
         "marker_count": 45,
         "memory_entry_count": 98,
         "metadata_allocation_records_at_handoff": 1,
@@ -1693,7 +1693,7 @@ def check_native_kernel_physical_memory_readiness(
         "scrub_receipts": 128,
         "scrubbed_bytes": 46993408,
         "signature_verifications": 0,
-        "source_usable_pages": 117820,
+        "source_usable_pages": 117819,
         "verified_bytes": 46993408,
     }
     if artifact.get("summary") != expected_summary:
@@ -1707,7 +1707,7 @@ def check_native_kernel_physical_memory_readiness(
         errors.append("PKPMM7 overclaims N9 exit or production readiness")
     detail = (
         "contract=PKPMM7+PKACPI1; qemu64_bsp=1; runs=2/2; markers=45/45; controls=191/191; "
-        "map_entries=98; usable=117820; managed=129080; stack_pages=36; "
+        "map_entries=98; usable=117819; managed=129079; stack_pages=36; "
         "metadata=5+2_guards; manager_bytes=15632; metadata_receipts=1; "
         "ledger_growth=4_to_8_to_15_to_29_pages; capacities=2048/256/2048/128/16; "
         "ledger_guards=4; ledger_pte_writes=83; ledger_retired=27; "
@@ -1751,17 +1751,17 @@ def check_native_kernel_virtual_memory_readiness(
         "active_invalidation_receipts": 3,
         "active_leaf_mutations": 3,
         "authority_grants": 0,
-        "bootstrap_hardware_tlb_invalidations": 950698,
-        "coverage_checksum": "0xC306BD9E355C2D0B",
+        "bootstrap_hardware_tlb_invalidations": 950706,
+        "coverage_checksum": "0x3EA83610CCC8AD5F",
         "direct_directory_tables": 1,
-        "direct_map_gap_pages": 12946,
+        "direct_map_gap_pages": 12947,
         "direct_map_ranges": 11,
         "direct_page_tables": 237,
         "generation_retirement_receipts": 1,
         "marker_count": 40,
-        "mapped_owned_pages": 117819,
+        "mapped_owned_pages": 117818,
         "negative_controls_passed": 48,
-        "physical_table_writes": 367406,
+        "physical_table_writes": 367405,
         "production_claim_count": 0,
         "qemu_run_count": 2,
         "remote_shootdowns_pending": 0,
@@ -1769,7 +1769,7 @@ def check_native_kernel_virtual_memory_readiness(
         "signature_verifications": 0,
         "table_pages_materialized": 243,
         "retained_free_rejections": 6,
-        "temporary_pte_writes": 950698,
+        "temporary_pte_writes": 950706,
     }
     if artifact.get("summary") != expected_summary:
         errors.append("PKVM3 readiness summary changed")
@@ -1782,8 +1782,8 @@ def check_native_kernel_virtual_memory_readiness(
         errors.append("PKVM3 overclaims N9 exit or production readiness")
     detail = (
         "contract=PKVM3; qemu64_bsp=1; runs=2/2; markers=40/40; controls=48/48; "
-        "ranges=11; gaps=12946; tables=243; owned_pages=117819; "
-        "physical_writes=367406; temporary_pte_writes=950698; cr3_writes=2; "
+        "ranges=11; gaps=12947; tables=243; owned_pages=117818; "
+        "physical_writes=367405; temporary_pte_writes=950706; cr3_writes=2; "
         "active_invlpg=3; retirement_receipts=1; remote_shootdowns=0; authority=0; "
         "target=false; n9_exit=false; production_ready=false"
     )
@@ -1812,8 +1812,8 @@ def check_native_kernel_interrupt_time_readiness(
         )
     errors.extend(str(issue) for issue in native_kernel_interrupt_time.readiness_errors(artifact, ROOT))
     expected_summary = {
-        "kernel_host_tests_passed": 228,
-        "kernel_host_tests_total": 228,
+        "kernel_host_tests_passed": 243,
+        "kernel_host_tests_total": 243,
         "qemu_runs_passed": 2,
         "qemu_runs_total": 2,
         "markers_per_run": 36,
@@ -1898,8 +1898,8 @@ def check_native_kernel_smp_first_ap_readiness(
         "application_processors_parked": 1,
         "application_processors_quiesced": 1,
         "application_processors_started": 1,
-        "kernel_host_tests_passed": 228,
-        "kernel_host_tests_total": 228,
+        "kernel_host_tests_passed": 243,
+        "kernel_host_tests_total": 243,
         "markers_per_run": 38,
         "negative_controls_passed": 72,
         "negative_controls_total": 72,
@@ -1993,8 +1993,8 @@ def check_native_kernel_smp_percpu_runtime_readiness(
         "guarded_stack_classes": 3,
         "hostile_cases_total": 159,
         "installed_gates": 27,
-        "kernel_host_tests_passed": 228,
-        "kernel_host_tests_total": 228,
+        "kernel_host_tests_passed": 243,
+        "kernel_host_tests_total": 243,
         "markers_per_run": 42,
         "negative_controls_passed": 19,
         "negative_controls_total": 19,
@@ -2236,7 +2236,7 @@ def check_native_kernel_scheduler_readiness(
     errors.extend(native_kernel_scheduler.readiness_errors(artifact, ROOT))
     expected_summary = {
         "scheduler_tests": 14,
-        "kernel_host_tests": 228,
+        "kernel_host_tests": 243,
         "host_probe_receipts": 4,
         "trace_steps": 4096,
         "trace_dispatches": 1761,
@@ -2327,7 +2327,7 @@ def check_native_kernel_scheduler_readiness(
         errors.append("PKSCHED1 N12 exit or production boundary changed")
     detail = (
         "contract=PKSCHED1; qemu64_vcpus=1; bsp_only=true; runs=2/2; markers=34/34; "
-        "scheduler_tests=14; kernel_tests=228; trace_steps=4096; dispatches=1761; "
+        "scheduler_tests=14; kernel_tests=243; trace_steps=4096; dispatches=1761; "
         "migrations=2334; live_tasks=2; live_dispatches=8; transitions=16; "
         "switch_instructions=18; stack_scrub=32768/32768; controls=28/28; "
         "cases=115; n12_exit=false; production_ready=false"
@@ -2359,7 +2359,7 @@ def check_native_kernel_scheduler_preemption_readiness(
     errors.extend(native_kernel_scheduler_preempt.readiness_errors(artifact, ROOT))
     expected_summary = {
         "preemption_tests": 7,
-        "kernel_host_tests": 228,
+        "kernel_host_tests": 243,
         "host_probe_receipts": 3,
         "timer_ticks": 6,
         "timer_eois": 6,
@@ -2455,7 +2455,7 @@ def check_native_kernel_scheduler_preemption_readiness(
         errors.append("PKSCHED2 N12 exit or production boundary changed")
     detail = (
         "contract=PKSCHED2; qemu64_vcpus=1; bsp_only=true; runs=2/2; markers=70/70; "
-        "preemption_tests=7; kernel_tests=228; ticks=6; eois=6; tasks=4; "
+        "preemption_tests=7; kernel_tests=243; ticks=6; eois=6; tasks=4; "
         "trace=0,1,2,0,3,3; causes=none,quantum,wake,block,wake,none; "
         "frames=6/4; switches=4; stack_scrub=65536/65536; controls=25/25; "
         "cases=178; live_ap=false; n12_exit=false; production_ready=false"
@@ -2496,7 +2496,7 @@ def check_native_kernel_scheduler_deferred_readiness(
     linked = build.get("linked_switch_audit", {}) if isinstance(build, dict) else {}
     trace = host_probe.get("trace", {}) if isinstance(host_probe, dict) else {}
     if (
-        kernel_summary.get("rust_host_tests_total") != 228
+        kernel_summary.get("rust_host_tests_total") != 243
         or host_probe.get("receipt_count") != 5
         or host_probe.get("rust_python_exact_agreement") is not True
         or trace.get("slots") != [0, 2, 4, 1, 5, 6]
@@ -2518,9 +2518,9 @@ def check_native_kernel_scheduler_deferred_readiness(
         or linked.get("instruction_count") != 18
         or linked.get("scope_byte_count") != 36
         or linked.get("forbidden_instruction_count") != 0
-        or linked.get("relocation_count") != 1319
+        or linked.get("relocation_count") != 1321
         or linked.get("canonical_sha256")
-        != "D0AA3295F66AF02D48476BCEDC44D962A873E98FBA21F48A6753AA7BB9B24EA4"
+        != "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625"
         or linked.get("status") != "pass"
     ):
         errors.append("PKSCHED3 host oracle, source, or linked switch audit changed")
@@ -2594,7 +2594,7 @@ def check_native_kernel_scheduler_deferred_readiness(
         errors.append("PKSCHED3 N12 exit or production boundary changed")
     detail = (
         "contract=PKSCHED3; qemu64_vcpus=1; bsp_only=true; runs=2/2; markers=74/74; "
-        "deferred_tests=7; kernel_tests=228; enqueued=8; completed=5; cancelled=3; "
+        "deferred_tests=7; kernel_tests=243; enqueued=8; completed=5; cancelled=3; "
         "workers=2; dispatches=6; transitions=12; rollbacks=5; stack_scrub=32768/32768; "
         "controls=30/30; cases=208; live_ap=false; n12_exit=false; production_ready=false"
     )
@@ -2635,7 +2635,7 @@ def check_native_kernel_scheduler_smp_readiness(
     trace = host_probe.get("trace", {}) if isinstance(host_probe, dict) else {}
     expected_ap_trace = [[1, 2], [1, 1], [2, 4], [2, 3], [3, 6], [3, 5]]
     if (
-        kernel_summary.get("rust_host_tests_total") != 228
+        kernel_summary.get("rust_host_tests_total") != 243
         or host_probe.get("receipt_count") != 5
         or host_probe.get("rust_python_exact_agreement") is not True
         or trace.get("balance") != [3, 3]
@@ -2657,9 +2657,9 @@ def check_native_kernel_scheduler_smp_readiness(
         or linked.get("successor_profile_invlpg_instruction_count") != 1
         or linked.get("successor_profile_executed") is not False
         or linked.get("runtime_execution_count") != 3
-        or linked.get("relocation_count") != 1319
+        or linked.get("relocation_count") != 1321
         or linked.get("canonical_sha256")
-        != "D0AA3295F66AF02D48476BCEDC44D962A873E98FBA21F48A6753AA7BB9B24EA4"
+        != "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625"
         or linked.get("status") != "pass"
     ):
         errors.append("PKSCHED4 host oracle, source, or linked INVLPG audit changed")
@@ -2735,7 +2735,7 @@ def check_native_kernel_scheduler_smp_readiness(
         errors.append("PKSCHED4 flag, N12 exit, or production boundary changed")
     detail = (
         "contract=PKSCHED4; sandybridge_vcpus=4; aps=3; runs=2/2; markers=74/74; "
-        "scheduler_tests=8; kernel_tests=228; wake=1; migrations=2; transfer_acks=3; "
+        "scheduler_tests=8; kernel_tests=243; wake=1; migrations=2; transfer_acks=3; "
         "ap_dispatches=6; call_function=9; timeout_rollbacks=1; stale_rejects=2; "
         "scrub=417792/417792; controls=32/32; cases=209; general_smp=false; "
         "n12_exit=false; production_ready=false"
@@ -2779,7 +2779,7 @@ def check_native_kernel_scheduler_ap_workers_readiness(
         "1:1,1:2,1:0,1:3;2:5,2:6,2:4,2:7;3:9,3:10,3:8,3:11"
     )
     if (
-        kernel_summary.get("rust_host_tests_total") != 228
+        kernel_summary.get("rust_host_tests_total") != 243
         or host_probe.get("receipt_count") != 6
         or host_probe.get("rust_python_exact_agreement") is not True
         or trace.get("trace") != expected_trace
@@ -2802,9 +2802,9 @@ def check_native_kernel_scheduler_ap_workers_readiness(
         or linked.get("successor_profile_invlpg_instruction_count") != 1
         or linked.get("successor_profile_executed") is not False
         or linked.get("runtime_execution_count") != 3
-        or linked.get("relocation_count") != 1319
+        or linked.get("relocation_count") != 1321
         or linked.get("canonical_sha256")
-        != "D0AA3295F66AF02D48476BCEDC44D962A873E98FBA21F48A6753AA7BB9B24EA4"
+        != "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625"
         or linked.get("status") != "pass"
     ):
         errors.append("PKSCHED5 host oracle, source, or linked INVLPG audit changed")
@@ -2885,7 +2885,7 @@ def check_native_kernel_scheduler_ap_workers_readiness(
         errors.append("PKSCHED5 flag, N12 exit, or production boundary changed")
     detail = (
         "contract=PKSCHED5; sandybridge_vcpus=4; aps=3; workers=3; runs=2/2; "
-        "markers=74/74; worker_tests=10; kernel_tests=228; typed_calls=12; "
+        "markers=74/74; worker_tests=10; kernel_tests=243; typed_calls=12; "
         "queued_cancel=1; remote_cancel=1; timeout_rollbacks=1; reclaimed=13; "
         "scrub=417792/417792; controls=34/34; cases=226; arbitrary_callbacks=false; "
         "n12_exit=false; production_ready=false"
@@ -2921,7 +2921,7 @@ def check_native_kernel_scheduler_smp_preempt_readiness(
     source_audit = build.get("source_audit", {})
     linked = build.get("linked_invlpg_audit", {})
     if (
-        kernel_summary.get("rust_host_tests_total") != 228
+        kernel_summary.get("rust_host_tests_total") != 243
         or host_probe.get("receipt_count") != 7
         or host_probe.get("rust_python_exact_agreement") is not True
         or source_audit.get("focused_rust_test_count") != 5
@@ -2936,9 +2936,9 @@ def check_native_kernel_scheduler_smp_preempt_readiness(
         or linked.get("successor_profile_invlpg_instruction_count") != 1
         or linked.get("successor_profile_executed") is not False
         or linked.get("runtime_execution_count") != 3
-        or linked.get("relocation_count") != 1319
+        or linked.get("relocation_count") != 1321
         or linked.get("canonical_sha256")
-        != "D0AA3295F66AF02D48476BCEDC44D962A873E98FBA21F48A6753AA7BB9B24EA4"
+        != "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625"
         or linked.get("status") != "pass"
     ):
         errors.append("PKSCHED6 host oracle, source, or linked INVLPG audit changed")
@@ -3012,7 +3012,7 @@ def check_native_kernel_scheduler_smp_preempt_readiness(
         errors.append("PKSCHED6 flag, N12 exit, or production boundary changed")
     detail = (
         "contract=PKSCHED6; sandybridge_vcpus=4; aps=3; runs=2/2; "
-        "markers=76/76; scheduler_tests=5; kernel_tests=228; live_ipis=8; "
+        "markers=76/76; scheduler_tests=5; kernel_tests=243; live_ipis=8; "
         "model_acks=5; quantum_preemptions=3; timeout_rollbacks=1; "
         "scrub=417792/417792; controls=34/34; cases=232; ap_timer_interrupts=false; "
         "general_smp=false; n12_exit=false; production_ready=false"
@@ -3046,8 +3046,8 @@ def check_native_kernel_atomics_readiness(
     probe = artifact.get("host_probe", {})
     linked = artifact.get("linked_instruction_audit", {})
     if (
-        kernel.get("host_tests_passed") != 228
-        or kernel.get("host_tests_total") != 228
+        kernel.get("host_tests_passed") != 243
+        or kernel.get("host_tests_total") != 243
         or source.get("heap_api_token_count") != 0
         or source.get("typed_order_enum_count") != 4
         or source.get("atomic_wrapper_count") != 4
@@ -3126,7 +3126,7 @@ def check_native_kernel_atomics_readiness(
     ):
         errors.append("PKATOM1 flag, N12 exit, or production boundary changed")
     detail = (
-        "contract=PKATOM1; kernel_tests=228/228; host_receipts=8; publication_rounds=4096; "
+        "contract=PKATOM1; kernel_tests=243/243; host_receipts=8; publication_rounds=4096; "
         "contended_ops=20480; seqcst_rounds=2048; forbidden=0; linked_symbols=7; "
         "qemu_runs=2/2; markers=82/82; timer_updates=8; controls=29/29; cases=78; "
         "general_locks=false; reclamation=false; general_smp=false; n12_exit=false; "
@@ -3162,8 +3162,8 @@ def check_native_kernel_locks_readiness(
     source = build.get("source_audit", {})
     probe = build.get("host_probe", {})
     if (
-        host_tests.get("test_pass_count") != 228
-        or host_tests.get("test_count") != 228
+        host_tests.get("test_pass_count") != 243
+        or host_tests.get("test_count") != 243
         or source.get("heap_api_token_count") != 0
         or source.get("lock_primitive_count") != 6
         or source.get("rank_class_count") != 5
@@ -3247,7 +3247,7 @@ def check_native_kernel_locks_readiness(
     ):
         errors.append("PKLOCK1 phase, flag, N12 exit, or production boundary changed")
     detail = (
-        "contract=PKLOCK1; kernel_tests=228/228; host_receipts=9; ticket_acquisitions=8192; "
+        "contract=PKLOCK1; kernel_tests=243/243; host_receipts=9; ticket_acquisitions=8192; "
         "qemu_runs=2/2; vcpus=4; aps=3; markers=70/70; live_tickets=0,1,2,3; "
         "controls=30/30; cases=103; reclamation=false; general_smp=false; "
         "n12_exit=false; production_ready=false"

@@ -12,6 +12,59 @@ from tools import pooleos_release_gate
 
 
 class NativeKernelSmpIpiTests(unittest.TestCase):
+    def test_inputs_bind_current_transfer_and_six_boot_artifacts(self) -> None:
+        inputs = smp_ipi.expected_inputs()
+        self.assertEqual(smp_ipi.native_kernel_transfer.READINESS_RELATIVE,
+                         inputs["boot_transfer"]["path"])
+        self.assertEqual(6, len(inputs["boot_artifacts"]))
+        self.assertEqual(6, len({item["path"] for item in inputs["boot_artifacts"]}))
+
+    def test_relabelled_consistent_boot_digests_cannot_pass_current_readiness(self) -> None:
+        report = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        report["inputs"] = smp_ipi.expected_inputs()
+        fields = ("retained_set_sha256", "policy_sha256", "state_sha256")
+        original = report["execution"]["observation"]["transfer_prefix"]["kernel_revalidation"]
+        for field in fields:
+            changed = copy.deepcopy(report)
+            replacement = smp_ipi.sha256_bytes(original[field].encode("ascii"))
+            for run in changed["execution"]["runs"]:
+                run["markers"] = [line.replace(original[field], replacement) for line in run["markers"]]
+                run["marker_summary"] = smp_ipi.validate_markers(run["markers"])
+            changed["execution"]["observation"] = changed["execution"]["runs"][0]["marker_summary"]
+            with self.subTest(field=field):
+                errors = smp_ipi.readiness_errors(changed)
+                self.assertTrue(any("current boot" in error for error in errors), errors)
+
+    def test_stale_transfer_dependency_is_rejected(self) -> None:
+        report = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        report["inputs"] = smp_ipi.expected_inputs()
+        with patch.object(smp_ipi.native_kernel_transfer, "readiness_errors", return_value=["stale dependency"]):
+            errors = smp_ipi.readiness_errors(report)
+        self.assertTrue(any("transfer dependency" in error for error in errors), errors)
+
+    def test_malformed_transfer_dependency_returns_errors(self) -> None:
+        report = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        report["inputs"] = smp_ipi.expected_inputs()
+        read_json = smp_ipi.read_json
+        dependency = smp_ipi.ROOT / smp_ipi.native_kernel_transfer.READINESS_RELATIVE
+        for malformed in (None, [], "receipt", 1):
+            with self.subTest(value=malformed), patch.object(
+                smp_ipi, "read_json",
+                side_effect=lambda path: malformed if path == dependency else read_json(path),
+            ):
+                errors = smp_ipi.readiness_errors(report)
+                self.assertTrue(any("transfer dependency" in error for error in errors), errors)
+
+    def test_regenerated_boot_bytes_cannot_disagree_with_transfer(self) -> None:
+        report = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        files = smp_ipi.native_kernel_load.canonical_artifact_files()
+        first = next(iter(files))
+        files[first] = bytes([files[first][0] ^ 1]) + files[first][1:]
+        with patch.object(smp_ipi.native_kernel_load, "canonical_artifact_files", return_value=files):
+            report["inputs"] = smp_ipi.expected_inputs()
+            errors = smp_ipi.readiness_errors(report)
+        self.assertTrue(any("current boot artifacts" in error for error in errors), errors)
+
     def test_readiness_writer_emits_canonical_lf_bytes(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "readiness.json"

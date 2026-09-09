@@ -1,15 +1,37 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-09
-Plan version: 2.74.0-native-cpu-state-replay
-Roadmap cycle: PooleOS Cycle 170
+Plan version: 2.75.0-native-memory-dependency-replay
+Roadmap cycle: PooleOS Cycle 171
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 170: Trap And CPU State Requalified
+## Cycle 171: Native Dependency Replay Complete
+
+N9.1-N9.4 memory/ACPI/VM and the dependent N8/N12 profiles pass on the unchanged
+Cycle 168 kernel: fourteen profiles, 28 final headless boots, 660 control groups
+and 2,126 rejected cases. Four superseded boots are preserved separately.
+All 27 selected native checks pass; the final profile/map/gate suite passes
+153 tests with two optional local-transcript skips.
+
+The existing N36 audit now includes source-current SMP boot-artifact binding,
+malformed transfer-dependency rejection and regenerated-byte drift controls.
+Five added test methods cover nine dependency rejection cases. Measured PMM/VM
+page geometry, eleven host/image gates and three test expectations are corrected;
+twenty memory and 38 stale host/image regressions reject. No validation boundary
+is relaxed. General N36 coverage and N9/N12 ownership/hygiene remain open.
+
+Next: runtime-inclusive exact-final canonical qualification with bundle and
+replay inputs, then publication and GitHub review/merge gates. Only afterward
+resume N12-CONCURRENCY-RECLAMATION-001 task-stack and general CPU-retirement
+integration. Main is qualified Cycle 165 and PR #76 is draft at this checkpoint.
+No phase, flag, charter condition or production gate closes. PooleGlyph and demo
+ISO bytes are unchanged. [Cycle 171 evidence](checkpoints/cycle171-native-dependency-replay.md).
+
+## Historical Cycle 170: Trap And CPU State Requalified
 
 N7.1/N7.3-N7.6 replay completes on the unchanged Cycle 168 kernel: five live
 profiles, fourteen successful headless boots, 225 marker controls and 42

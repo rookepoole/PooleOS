@@ -7,18 +7,19 @@ PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available
 **Cloud status:** qualified checkpoints through Cycle 165 are merged into `main`
 at `6f9399c` via [PR #75](https://github.com/rookepoole/PooleOS/pull/75).
 The exact merged tree passed all 105 canonical gates and 708 Doctor checks.
-Cycle 170 requalifies trap and CPU state on the unchanged Cycle 168 kernel on
+Cycle 171 completes memory-through-lock replay on the unchanged Cycle 168 kernel on
 `agent/n12-ap-execution-ownership`, tracked by
 [draft PR #76](https://github.com/rookepoole/PooleOS/pull/76).
-Fourteen fresh headless boots and 42 focused tests pass across trap, CPU,
-vector-state and read-only MSR profiles. A separate expected TCG exception
-diagnostic is not counted as a successful boot. Seventeen gate regression
-cases reject stale trap identity and production or authority overclaims.
-Fourteen of 27 selected checks pass. Thirteen downstream checks and replay of
-the prior AP result with the new boot artifact set remain pending, beginning
-with physical-memory qualification. The full suite has not run on the candidate;
-PR #76 is not merge-qualified or production-ready.
-[Cycle 170 proof, failures and next move](docs/checkpoints/cycle170-cpu-state-replay.md).
+Twenty-eight final headless boots pass across fourteen profiles, with 660
+negative-control groups and 2,126 rejected cases. SMP evidence now binds the
+current boot artifacts and rejects stale or malformed transfer dependencies.
+All 27 selected native checks pass. The 155-test profile/map/gate suite has
+153 passes and two optional local-transcript skips. Four superseded boots
+and all failing-then-passing regressions are preserved.
+Next is full runtime-inclusive exact-final qualification and publication/review
+gates before merge. PR #76 is not yet merge-qualified or production-ready.
+[Cycle 171 proof, failures and next move](docs/checkpoints/cycle171-native-dependency-replay.md).
+[Prior CPU-state evidence](docs/checkpoints/cycle170-cpu-state-replay.md).
 [Prior boot-chain evidence](docs/checkpoints/cycle169-boot-chain-replay.md).
 [Prior AP ownership evidence](docs/checkpoints/cycle168-ap-ownership-qualification.md).
 

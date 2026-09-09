@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_kind": "pooleos_native_kernel_smp_ipi_readiness",
-  "status_date": "2026-09-08",
+  "status_date": "2026-09-09",
   "status": "pass_single_host_two_run_sandybridge_four_vcpu_three_ap_partial_rollback_and_aggregate_shootdown_non_promoting",
   "contract_id": "PKSMP5",
   "selected_move_id": "N8-SMP-MULTI-AP-001",
@@ -143,8 +143,23 @@
       },
       {
         "path": "runtime/native_kernel_smp_ipi.py",
-        "byte_count": 37741,
-        "sha256": "B656DAB2F39D8FB554CBF09F882B1483736AACA7878A7F001A6FCC51BDB315FA"
+        "byte_count": 39570,
+        "sha256": "A851B27DF397C369AA13AE916A9741AF6BCC18D925A5D95D19652CBBD0EA24C1"
+      },
+      {
+        "path": "runtime/native_kernel_transfer.py",
+        "byte_count": 23961,
+        "sha256": "4F1FC175884A339CEF2270C03681B226AA49E1347C164E5461012B3DFDAEA7B8"
+      },
+      {
+        "path": "runtime/native_kernel_load.py",
+        "byte_count": 118563,
+        "sha256": "701A030C521DD2CD01C46B08CAFF62C865084CA4D072CCF0A572DD36872C5FB6"
+      },
+      {
+        "path": "runtime/native_inner_live.py",
+        "byte_count": 5086,
+        "sha256": "ED98E5E46EC16F2762B9E0F440C2F8C27721C5F89933BB734E912A3B58FE5E35"
       },
       {
         "path": "specs/native-kernel-entry-contract.json",
@@ -178,13 +193,50 @@
       },
       {
         "path": "tests/test_native_kernel_smp_ipi.py",
-        "byte_count": 14844,
-        "sha256": "3C3EFEEE4826AA6DF5E59D8D089A58B1851AE5903274FBD0B620BD0C205BCEF3"
+        "byte_count": 18168,
+        "sha256": "A5FEB9CDE8B4CF3B19D688881D99B967AD55253D67C77F6681392F4058228FC5"
       },
       {
         "path": "docs/native-kernel-smp-ipi.md",
-        "byte_count": 6672,
-        "sha256": "E53E4D17E42354C673DC5D36CD2CF3A01B69D20EB627A2860C47A60AD87227D3"
+        "byte_count": 7321,
+        "sha256": "954D4FD1B838157BE48CCEDBE2DDCA55E57AF1DE3C103B864CF1A84945790743"
+      }
+    ],
+    "boot_transfer": {
+      "path": "runs/native-kernel-transfer-readiness.json",
+      "byte_count": 169191,
+      "sha256": "296E089DAAE4EF5F2E908D8ECB4E4883F16EC93DDA33FFA68EECE04A966FA75F"
+    },
+    "boot_artifacts": [
+      {
+        "path": "EFI/POOLEOS/FIRMWARE.PBA",
+        "byte_count": 1408,
+        "sha256": "BD162F099BB0145738BA3FAD57B0B903FDB12B0080BBC85812528DC9C1A7A728"
+      },
+      {
+        "path": "EFI/POOLEOS/INITIAL.PBA",
+        "byte_count": 1860,
+        "sha256": "00C28AB2DE744281CEC0459598A29E8C608E95BC2AF5207D78B67F494EF1E2F8"
+      },
+      {
+        "path": "EFI/POOLEOS/MICROCOD.PBA",
+        "byte_count": 1504,
+        "sha256": "04D5F70F88FE15BF747992390467BC8AE9E3BD0E28F6D131C427B73764641397"
+      },
+      {
+        "path": "EFI/POOLEOS/POLICY.PBA",
+        "byte_count": 2080,
+        "sha256": "1F236C8CA3F49E00DCC84AB269D37751D20399F3DF794E9B4559A432326BE51D"
+      },
+      {
+        "path": "EFI/POOLEOS/RECOVERY.PBA",
+        "byte_count": 1088,
+        "sha256": "FFAC48737878D6D4986CBF1936F4A8BE7898D544D4C4043F4D51144AEC728B59"
+      },
+      {
+        "path": "EFI/POOLEOS/SYMBOLS.PBA",
+        "byte_count": 821,
+        "sha256": "BCCF4EF786DCF0F52F00E8943AD7E18BFEA702D2921A2F7EAE1DD1681EBD865B"
       }
     ]
   },
@@ -1074,11 +1126,11 @@
   "media": {
     "clean_generation_count": 2,
     "exact_clean_generation_match": true,
-    "sha256": "53459585FBD365B0FDC4A0D7ADBFBA46A1AD2F8BF3C104834B925C27C4DCF1D1",
+    "sha256": "C28D1959E59A44E6F8F4136711E98C83577F52F5682EFBB788F2CE7F7555CF4E",
     "byte_count": 67108864,
     "inspection": {
       "image": {
-        "sha256": "53459585FBD365B0FDC4A0D7ADBFBA46A1AD2F8BF3C104834B925C27C4DCF1D1",
+        "sha256": "C28D1959E59A44E6F8F4136711E98C83577F52F5682EFBB788F2CE7F7555CF4E",
         "byte_count": 67108864,
         "sector_bytes": 512,
         "sector_count": 131072,
@@ -1124,7 +1176,7 @@
         },
         {
           "path": "EFI/POOLEOS/SYSTEM_A.PBM",
-          "sha256": "99DBB75F0B86A085E5CCAA0FDA250708E855F8AC649FA619A5BC070DD23AE0F9",
+          "sha256": "F1E42A1070FA2C9A8947EEE4C713FC4D0020DE1550E8128DB265B4FFB47ADE1E",
           "byte_count": 2615,
           "cluster_count": 6
         },
@@ -1148,7 +1200,7 @@
         },
         {
           "path": "EFI/POOLEOS/SYMBOLS.PBA",
-          "sha256": "E70627CB584A05BBB75102F4962027170AB8E7D213FE9D5AC9FB337A270A3A54",
+          "sha256": "BCCF4EF786DCF0F52F00E8943AD7E18BFEA702D2921A2F7EAE1DD1681EBD865B",
           "byte_count": 821,
           "cluster_count": 2
         },
@@ -1166,19 +1218,19 @@
         },
         {
           "path": "EFI/POOLEOS/POLICY.PBA",
-          "sha256": "7636BC1D641AA5C79DD2B04A7D154150FF7D084D6B0864137EA73E2F3DB2AC77",
+          "sha256": "1F236C8CA3F49E00DCC84AB269D37751D20399F3DF794E9B4559A432326BE51D",
           "byte_count": 2080,
           "cluster_count": 5
         },
         {
           "path": "EFI/POOLEOS/TRUST.PBT",
-          "sha256": "639192D41ED48F3CD6F294B0CA91FF32E517FC86CEBACECFA6638E53AB830814",
+          "sha256": "6D8C4B9F295FB032D33777E80F3BE7320AB1DAECD46EBBF4F873AFE5D101E7F9",
           "byte_count": 320,
           "cluster_count": 1
         },
         {
           "path": "EFI/POOLEOS/TRUSTST.PBS",
-          "sha256": "CA03C5D5BEA3C811CA655534A997248E75358B7B4AA9C46335C01EA03CCEBF81",
+          "sha256": "463B058E2CFB4FEAD916C5C69D4A8EDC447F16D31D50444896965D76827C478C",
           "byte_count": 256,
           "cluster_count": 1
         }
@@ -1303,7 +1355,7 @@
             "path": "\\EFI\\POOLEOS\\SYMBOLS.PBA",
             "file_bytes": 821,
             "image_bytes": 0,
-            "sha256": "E70627CB584A05BBB75102F4962027170AB8E7D213FE9D5AC9FB337A270A3A54",
+            "sha256": "BCCF4EF786DCF0F52F00E8943AD7E18BFEA702D2921A2F7EAE1DD1681EBD865B",
             "entry_contract": "none"
           },
           {
@@ -1336,12 +1388,12 @@
             "path": "\\EFI\\POOLEOS\\POLICY.PBA",
             "file_bytes": 2080,
             "image_bytes": 0,
-            "sha256": "7636BC1D641AA5C79DD2B04A7D154150FF7D084D6B0864137EA73E2F3DB2AC77",
+            "sha256": "1F236C8CA3F49E00DCC84AB269D37751D20399F3DF794E9B4559A432326BE51D",
             "entry_contract": "none"
           }
         ],
         "byte_count": 2615,
-        "sha256": "99DBB75F0B86A085E5CCAA0FDA250708E855F8AC649FA619A5BC070DD23AE0F9",
+        "sha256": "F1E42A1070FA2C9A8947EEE4C713FC4D0020DE1550E8128DB265B4FFB47ADE1E",
         "manifest_id_hash": "4A2625333244591C",
         "kernel_sha256_prefix": "8A2DA65C86B09F7B"
       },
@@ -1412,7 +1464,7 @@
         "artifact_count": 6,
         "file_bytes": 8761,
         "page_count": 6,
-        "fnv1a64": "1A56BF1F18804FEB",
+        "fnv1a64": "BD4DF045281C4716",
         "signatures_verified": false,
         "measured": false,
         "semantics_applied": false,
@@ -1452,12 +1504,12 @@
             "version": 1,
             "file_bytes": 821,
             "payload_bytes": 725,
-            "payload_sha256": "A1C5DAE24DCCF7F36E243B671EAB61F4BC27378A1D3763C7166FD1FAE610E36C",
-            "file_sha256": "E70627CB584A05BBB75102F4962027170AB8E7D213FE9D5AC9FB337A270A3A54",
+            "payload_sha256": "00A4E4441828A0879AE474E548874112ED9216D798F2AC284CA64BC788B82A74",
+            "file_sha256": "BCCF4EF786DCF0F52F00E8943AD7E18BFEA702D2921A2F7EAE1DD1681EBD865B",
             "path": "EFI/POOLEOS/SYMBOLS.PBA",
             "manifest_id": "d_symbols",
             "page_count": 1,
-            "loaded_fnv1a64": "304A1BC9C9A9B745"
+            "loaded_fnv1a64": "6329FACF7FD02807"
           },
           {
             "contract_id": "PBART1",
@@ -1494,12 +1546,12 @@
             "version": 1,
             "file_bytes": 2080,
             "payload_bytes": 1984,
-            "payload_sha256": "671CF4BB0A8A084D546372D79C382AB7D846B1FB6640CAA997754D775A76FFA1",
-            "file_sha256": "7636BC1D641AA5C79DD2B04A7D154150FF7D084D6B0864137EA73E2F3DB2AC77",
+            "payload_sha256": "24994425649D18E2E49DDC851DD3B948AAB92A697C77172600EE2936CCCD7FA9",
+            "file_sha256": "1F236C8CA3F49E00DCC84AB269D37751D20399F3DF794E9B4559A432326BE51D",
             "path": "EFI/POOLEOS/POLICY.PBA",
             "manifest_id": "g_policy",
             "page_count": 1,
-            "loaded_fnv1a64": "ABF1EB76AB12F896"
+            "loaded_fnv1a64": "EE7087DEB216B9FF"
           }
         ]
       },
@@ -1572,25 +1624,25 @@
           "segment_count": 4,
           "symbol_count": 3,
           "string_bytes": 69,
-          "image_bytes": 598016,
+          "image_bytes": 602112,
           "entry_offset": 40960,
           "preferred_virtual_base": 18446744071562067968,
           "virtual_window_end_exclusive": 18446744072635809792,
           "slide_alignment": 2097152,
-          "canonical_file_sha256": "D0AA3295F66AF02D48476BCEDC44D962A873E98FBA21F48A6753AA7BB9B24EA4",
-          "preferred_loaded_sha256": "A04DBBF39533A7A4013B94BB1551A281EF23F90CFCB270C06CBBD7B617F009FC",
-          "build_id_sha256": "510AD87CF26AC166CA47711CA2968F9FEFF28233523282CED8BA32A8A7B0F016",
-          "debug_file_sha256": "2FC6F49278205E854B283666B21F875968B854B1565775FFCD26AD38C257D7AB",
-          "source_manifest_sha256": "68D111CC7E4C79BD798FAA4269F1FB8AF77BE5DA85AC2ACAD80645688400CE7C",
-          "body_sha256": "F745BFCCFC8DE8F47EE969828BB0860F2F0D251C3BC39EC6A1BBE32E30C4B8E0"
+          "canonical_file_sha256": "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625",
+          "preferred_loaded_sha256": "940D941A32AAA3DC1E5F75295AFC47ECFB1FD07B75E359D9D4C5963A36E488BC",
+          "build_id_sha256": "62AC16F52550AAF62455B196A632E785825739656A473C627239DB0A839B667C",
+          "debug_file_sha256": "A4B9D19DC8B38E1F5DB5C8609DAF833B3BED1CBD30DD866981A6C1B3A66FBBF2",
+          "source_manifest_sha256": "51BD6E01E5A300FE3444EC2FF6352F7A6EAFE38C4728014596C540290A4779F2",
+          "body_sha256": "03E55BBCF8D891096F6DC139DF64B1AFB362BDBD7598FF0B2C8D7C4275D7C9A4"
         },
-        "bundle_sha256": "A1C5DAE24DCCF7F36E243B671EAB61F4BC27378A1D3763C7166FD1FAE610E36C",
+        "bundle_sha256": "00A4E4441828A0879AE474E548874112ED9216D798F2AC284CA64BC788B82A74",
         "bundle_version": 1,
         "segment_count": 4,
         "symbol_count": 3,
         "string_bytes": 69,
         "maximum_lookup_steps": 13,
-        "outer_payload_sha256": "A1C5DAE24DCCF7F36E243B671EAB61F4BC27378A1D3763C7166FD1FAE610E36C",
+        "outer_payload_sha256": "00A4E4441828A0879AE474E548874112ED9216D798F2AC284CA64BC788B82A74",
         "activation_allowed": false,
         "activation_errors": [
           "psym_activation_outer_signature",
@@ -1750,12 +1802,12 @@
           "initial_system_sha256": "FFE7243CEE75963D84905E6C9BF9F0D04310EEDBF097757C32E0EBE30FA0C3ED",
           "qualification_only": true
         },
-        "bundle_sha256": "671CF4BB0A8A084D546372D79C382AB7D846B1FB6640CAA997754D775A76FFA1",
+        "bundle_sha256": "24994425649D18E2E49DDC851DD3B948AAB92A697C77172600EE2936CCCD7FA9",
         "bundle_version": 1,
         "mode_count": 6,
         "capability_rule_count": 11,
         "initial_system_sha256": "FFE7243CEE75963D84905E6C9BF9F0D04310EEDBF097757C32E0EBE30FA0C3ED",
-        "outer_payload_sha256": "671CF4BB0A8A084D546372D79C382AB7D846B1FB6640CAA997754D775A76FFA1",
+        "outer_payload_sha256": "24994425649D18E2E49DDC851DD3B948AAB92A697C77172600EE2936CCCD7FA9",
         "activation_allowed": false,
         "activation_errors": [
           "ppol_activation_outer_signature",
@@ -1800,7 +1852,7 @@
         "development_denial_count": 6,
         "file_bytes": 8761,
         "payload_bytes": 8185,
-        "retained_set_sha256": "864A7094E7ED3AFDF282791CC53D97D5D1CD4064E998D1678BD7ED79EBF6B79D",
+        "retained_set_sha256": "2DC54F8C02425C44DEB80A0F6285CAF4687A90537114902D39BB338C14BD7664",
         "exact_retained_bytes": true,
         "policy_payload_digests_bound": true,
         "initial_routes_cross_bound": true,
@@ -1824,8 +1876,8 @@
         "binding_count": 14,
         "denial_count": 1,
         "denial": "pbtrust_policy_unsigned",
-        "policy_sha256": "639192D41ED48F3CD6F294B0CA91FF32E517FC86CEBACECFA6638E53AB830814",
-        "state_sha256": "CA03C5D5BEA3C811CA655534A997248E75358B7B4AA9C46335C01EA03CCEBF81",
+        "policy_sha256": "6D8C4B9F295FB032D33777E80F3BE7320AB1DAECD46EBBF4F873AFE5D101E7F9",
+        "state_sha256": "463B058E2CFB4FEAD916C5C69D4A8EDC447F16D31D50444896965D76827C478C",
         "development_unsigned": true,
         "state_source": "esp_candidate_not_persistent_authority",
         "state_authenticated": false,
@@ -1952,15 +2004,15 @@
           "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=530072 image_bytes=602112 sha256_prefix=8A2DA65C86B09F7B path=manifest",
           "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=530072 path=manifest_development",
           "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=602112 pages=147 entry_offset=40960 relocations=1321 files_closed=12 pools_freed=11 fnv1a64=5B68ABBD4C1D3BA9",
-          "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=1A56BF1F18804FEB retained=1 signatures=0 measured=0",
-          "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=864A7094E7ED3AFDF282791CC53D97D5D1CD4064E998D1678BD7ED79EBF6B79D retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
-          "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=639192D41ED48F3CD6F294B0CA91FF32E517FC86CEBACECFA6638E53AB830814 state_sha256=CA03C5D5BEA3C811CA655534A997248E75358B7B4AA9C46335C01EA03CCEBF81 source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
+          "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=BD4DF045281C4716 retained=1 signatures=0 measured=0",
+          "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=2DC54F8C02425C44DEB80A0F6285CAF4687A90537114902D39BB338C14BD7664 retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
+          "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=6D8C4B9F295FB032D33777E80F3BE7320AB1DAECD46EBBF4F873AFE5D101E7F9 state_sha256=463B058E2CFB4FEAD916C5C69D4A8EDC447F16D31D50444896965D76827C478C source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
           "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
           "POOLEBOOT/0.1 FRAME READY",
           "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=147 ro=24 rx=105 rw=18 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=2C93E3DFE8719D13",
           "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=5 kernel_pages=147 physical_bits=40 mapped_fnv1a64=5B68ABBD4C1D3BA9 framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
           "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=5 stack_pages=36 handoff_pages=256 guards=2 total_pages=439 stack_pt=148 handoff_pt=185 kernel_phys=000000001E0D0000 root=000000001E1E0000 stack_phys=000000001E21F000 stack_top=FFFFFFFF800B8000 handoff_phys=000000001DE2E000 handoff_virt=FFFFFFFF800B9000 retained_fnv1a64=73A699B7C26066DB original_cr3=restored firmware_calls_while_active=0",
-          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5480 records=5 memory_entries=106 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=84589616 fnv1a64=F63862911A552918 state=boot_services_exited bytes_unchanged=1",
+          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5480 records=5 memory_entries=106 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=C70AC828 fnv1a64=90A2A38D228896C1 state=boot_services_exited bytes_unchanged=1",
           "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=5088 descriptor_bytes=48 descriptors=106",
           "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=147 artifact_pages=9 table_pages=5 stack_pages=36 handoff_pages=256",
           "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF8000A000 handoff=FFFFFFFF800B9000 bytes=5480 stack_top=FFFFFFFF800B8000 root=000000001E1E0000 cr3=000000001E1E0000 trap_scenario=14 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
@@ -1969,19 +2021,19 @@
           "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE168-N12-AP-OWN-V002-0000000001 entry_count=1 serial=present",
           "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF800B9000 bytes=5480 entry=0xFFFFFFFF8000A000 stack_top=0xFFFFFFFF800B8000 root=0x000000001E1E0000 cr3=0x000000001E1E0000 rflags_if=0 rflags_df=0",
           "POOLEOS:KERNEL:PBP1 PASS profile=development records=5 artifacts=10 production_profile_valid=0",
-          "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=864A7094E7ED3AFDF282791CC53D97D5D1CD4064E998D1678BD7ED79EBF6B79D policy_sha256=639192D41ED48F3CD6F294B0CA91FF32E517FC86CEBACECFA6638E53AB830814 state_sha256=CA03C5D5BEA3C811CA655534A997248E75358B7B4AA9C46335C01EA03CCEBF81 denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
+          "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=2DC54F8C02425C44DEB80A0F6285CAF4687A90537114902D39BB338C14BD7664 policy_sha256=6D8C4B9F295FB032D33777E80F3BE7320AB1DAECD46EBBF4F873AFE5D101E7F9 state_sha256=463B058E2CFB4FEAD916C5C69D4A8EDC447F16D31D50444896965D76827C478C denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
           "POOLEOS:KERNEL:SMP-MULTI-TOPOLOGY PASS contract=PKSMP5 processors=4 enabled=4 bsp_apic_id=0 target_apic_ids=1,2,3 target_mask=0x000000000000000E apic_physical=0x00000000FEE00000 selection=exact_enabled_legacy_apic_topology",
           "POOLEOS:KERNEL:SMP-MULTI-PARTIAL-ROLLBACK PASS contract=PKSMP5 started_mask=0x0000000000000006 timeout_apic_id=4 timeout_mask=0x0000000000000010 timeout_count=1 parked_mask=0x0000000000000006 released_mask=0x000000000000000E resource_pages=96 frame_pages=6 zeroed_bytes=417792 verified_bytes=417792 retained_free_rejections=27 owner_release_rejections=18 fresh_allocation_required=1",
           "POOLEOS:KERNEL:SMP-MULTI-RETRY PASS contract=PKSMP5 retry_count=1 partial_rollback_count=1 started_mask=0x000000000000000E online_mask=0x000000000000000E simultaneous_online=1",
-          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=0 apic_id=1 physical_start=0x0000000000001000 pages=32 sipi_vector=1 trampoline_bytes=2852 allocation_sequence=24 frame_allocation_sequences=25,26 frame_release_sequences=35,42 resource_release_sequence=43 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=1 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000002 ack_mask=0x0000000000000002 invalidations=1 baseline_checksum=0x4D07467C8D2E5409 runtime_checksum=0x967AE234F844D00A response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
-          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=1 apic_id=2 physical_start=0x0000000000023000 pages=32 sipi_vector=35 trampoline_bytes=2852 allocation_sequence=27 frame_allocation_sequences=28,31 frame_release_sequences=36,40 resource_release_sequence=41 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=0 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000004 ack_mask=0x0000000000000004 invalidations=1 baseline_checksum=0x79AF869669C7EA96 runtime_checksum=0xDB5C061E32FB63E8 response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
-          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=2 apic_id=3 physical_start=0x0000000000045000 pages=32 sipi_vector=69 trampoline_bytes=2852 allocation_sequence=32 frame_allocation_sequences=33,34 frame_release_sequences=37,38 resource_release_sequence=39 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=0 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000008 ack_mask=0x0000000000000008 invalidations=1 baseline_checksum=0x120ADDF2754DE536 runtime_checksum=0xA4A0A828B8A72BFC response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
+          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=0 apic_id=1 physical_start=0x0000000000001000 pages=32 sipi_vector=1 trampoline_bytes=2852 allocation_sequence=24 frame_allocation_sequences=25,26 frame_release_sequences=35,42 resource_release_sequence=43 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=1 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000002 ack_mask=0x0000000000000002 invalidations=1 baseline_checksum=0x422E58DA110E3D00 runtime_checksum=0x221059FA9BDA15F0 response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
+          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=1 apic_id=2 physical_start=0x0000000000023000 pages=32 sipi_vector=35 trampoline_bytes=2852 allocation_sequence=27 frame_allocation_sequences=28,31 frame_release_sequences=36,40 resource_release_sequence=41 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=0 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000004 ack_mask=0x0000000000000004 invalidations=1 baseline_checksum=0x6B650F5B4BB228CD runtime_checksum=0x7A9C368E5DDE57F4 response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
+          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=2 apic_id=3 physical_start=0x0000000000045000 pages=32 sipi_vector=69 trampoline_bytes=2852 allocation_sequence=32 frame_allocation_sequences=33,34 frame_release_sequences=37,38 resource_release_sequence=39 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=0 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000008 ack_mask=0x0000000000000008 invalidations=1 baseline_checksum=0xFA32C44FBB3BC7A8 runtime_checksum=0xD9BD44338479FC9E response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
           "POOLEOS:KERNEL:SMP-MULTI-SHOOTDOWN PASS contract=PKSMP5 target_mask=0x000000000000000E ack_mask=0x000000000000000E retired_generation=1 active_generation=2 invalidations=3 root_checksum=0x5A6D5E693D7F53DC old_frame_checksum=0xBE1E07C6144BC01A new_frame_checksum=0xE351D68DF0864FAA premature_reclaim_rejections=2 retained_free_rejections=27 owner_release_rejections=18 reclaim_state=released",
           "POOLEOS:KERNEL:SMP-MULTI-LIFECYCLE PASS contract=PKSMP5 started_mask=0x000000000000000E online_mask=0x000000000000000E quiesced_mask=0x000000000000000E parked_mask=0x000000000000000E validated_mask=0x000000000000000E released_mask=0x000000000000000E timeout_count=1 retry_count=1 partial_rollback_count=1 exact_accounting=1",
           "POOLEOS:KERNEL:SMP-MULTI-RELEASE PASS contract=PKSMP5 resource_pages=96 frame_pages=6 resource_zeroed_bytes=393216 resource_verified_bytes=393216 frame_zeroed_bytes=24576 frame_verified_bytes=24576 total_pages=102 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged",
           "POOLEOS:KERNEL:SMP-MULTI-RESULT PASS contract=PKSMP5 profile=sandybridge_x87_sse_four_vcpu aps=3 simultaneous_online=1 partial_start_timeout=1 partial_rollback=1 fresh_retry=1 target_mask=0x000000000000000E ack_mask=0x000000000000000E tlb_invalidations=3 no_reuse_before_all_acks=1 stop_quiesced=3 ap_parked=3 resources_released=102 scheduler=0 general_broadcast=0 target_hardware=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],
-        "marker_sha256": "B171E38126B51DB35FB5D91DE21356719BE24A1C0689282F42CCE227F811E4EF",
+        "marker_sha256": "C9E637F748703EE8EEF712ECA8ED665486C10C8A13D9034D8C54CE97159EA038",
         "serial_debugcon_exact_match": true,
         "marker_summary": {
           "transfer_prefix": {
@@ -2032,7 +2084,7 @@
                 "page_count": 6,
                 "retained_input_count": 9,
                 "retained_input_page_count": 9,
-                "fnv1a64": "1A56BF1F18804FEB",
+                "fnv1a64": "BD4DF045281C4716",
                 "pages_retained": true,
                 "signatures_verified": false,
                 "measured": false,
@@ -2046,7 +2098,7 @@
                 "development_denial_count": 6,
                 "file_bytes": 8761,
                 "payload_bytes": 8185,
-                "retained_set_sha256": "864A7094E7ED3AFDF282791CC53D97D5D1CD4064E998D1678BD7ED79EBF6B79D",
+                "retained_set_sha256": "2DC54F8C02425C44DEB80A0F6285CAF4687A90537114902D39BB338C14BD7664",
                 "exact_retained_bytes": true,
                 "authority_grants": 0,
                 "actions_authorized": 0,
@@ -2060,8 +2112,8 @@
                 "binding_count": 14,
                 "denial_count": 1,
                 "denial": "pbtrust_policy_unsigned",
-                "policy_sha256": "639192D41ED48F3CD6F294B0CA91FF32E517FC86CEBACECFA6638E53AB830814",
-                "state_sha256": "CA03C5D5BEA3C811CA655534A997248E75358B7B4AA9C46335C01EA03CCEBF81",
+                "policy_sha256": "6D8C4B9F295FB032D33777E80F3BE7320AB1DAECD46EBBF4F873AFE5D101E7F9",
+                "state_sha256": "463B058E2CFB4FEAD916C5C69D4A8EDC447F16D31D50444896965D76827C478C",
                 "state_source": "esp_candidate_not_persistent_authority",
                 "signature_verifications": 0,
                 "authority_grants": 0,
@@ -2078,8 +2130,8 @@
                 "artifact_count": 10,
                 "descriptor_bytes": 48,
                 "exit_attempts": 1,
-                "message_crc32": "84589616",
-                "fnv1a64": "F63862911A552918",
+                "message_crc32": "C70AC828",
+                "fnv1a64": "90A2A38D228896C1",
                 "pre_exit": false,
                 "boot_services_exited": true,
                 "development_mode_only": true,
@@ -2201,9 +2253,9 @@
               "parser_count": 9,
               "manifest_bytes": 2615,
               "retained_file_bytes": 11952,
-              "retained_set_sha256": "864A7094E7ED3AFDF282791CC53D97D5D1CD4064E998D1678BD7ED79EBF6B79D",
-              "policy_sha256": "639192D41ED48F3CD6F294B0CA91FF32E517FC86CEBACECFA6638E53AB830814",
-              "state_sha256": "CA03C5D5BEA3C811CA655534A997248E75358B7B4AA9C46335C01EA03CCEBF81",
+              "retained_set_sha256": "2DC54F8C02425C44DEB80A0F6285CAF4687A90537114902D39BB338C14BD7664",
+              "policy_sha256": "6D8C4B9F295FB032D33777E80F3BE7320AB1DAECD46EBBF4F873AFE5D101E7F9",
+              "state_sha256": "463B058E2CFB4FEAD916C5C69D4A8EDC447F16D31D50444896965D76827C478C",
               "denial": "pbtrust_policy_unsigned",
               "authority_grants": 0,
               "actions_authorized": 0,
@@ -2508,9 +2560,9 @@
         "pbp1_transcript": {
           "contract_id": "PBLIVE4",
           "byte_count": 5480,
-          "sha256": "92F9F900B14D0C6AB06AB008F8FB685F088BB47AA96C1BEA670AF0C28866EE70",
-          "message_crc32": "84589616",
-          "fnv1a64": "F63862911A552918",
+          "sha256": "4CE4729E6B5660184B7703F0787AB54072E29183318D5FB4F2DA374BA0136349",
+          "message_crc32": "C70AC828",
+          "fnv1a64": "90A2A38D228896C1",
           "record_count": 5,
           "features": "000000000000001F",
           "required_features": "000000000000001B",
@@ -3317,7 +3369,7 @@
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
               "entry_virtual": "0000000000000000",
-              "sha256": "E70627CB584A05BBB75102F4962027170AB8E7D213FE9D5AC9FB337A270A3A54"
+              "sha256": "BCCF4EF786DCF0F52F00E8943AD7E18BFEA702D2921A2F7EAE1DD1681EBD865B"
             },
             {
               "role": 5,
@@ -3347,7 +3399,7 @@
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
               "entry_virtual": "0000000000000000",
-              "sha256": "7636BC1D641AA5C79DD2B04A7D154150FF7D084D6B0864137EA73E2F3DB2AC77"
+              "sha256": "1F236C8CA3F49E00DCC84AB269D37751D20399F3DF794E9B4559A432326BE51D"
             },
             {
               "role": 9,
@@ -3357,7 +3409,7 @@
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
               "entry_virtual": "0000000000000000",
-              "sha256": "99DBB75F0B86A085E5CCAA0FDA250708E855F8AC649FA619A5BC070DD23AE0F9"
+              "sha256": "F1E42A1070FA2C9A8947EEE4C713FC4D0020DE1550E8128DB265B4FFB47ADE1E"
             },
             {
               "role": 10,
@@ -3367,7 +3419,7 @@
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
               "entry_virtual": "0000000000000000",
-              "sha256": "639192D41ED48F3CD6F294B0CA91FF32E517FC86CEBACECFA6638E53AB830814"
+              "sha256": "6D8C4B9F295FB032D33777E80F3BE7320AB1DAECD46EBBF4F873AFE5D101E7F9"
             },
             {
               "role": 11,
@@ -3377,7 +3429,7 @@
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
               "entry_virtual": "0000000000000000",
-              "sha256": "CA03C5D5BEA3C811CA655534A997248E75358B7B4AA9C46335C01EA03CCEBF81"
+              "sha256": "463B058E2CFB4FEAD916C5C69D4A8EDC447F16D31D50444896965D76827C478C"
             }
           ],
           "kernel_artifact": {
@@ -3450,9 +3502,9 @@
           "parser_count": 9,
           "manifest_bytes": 2615,
           "retained_file_bytes": 11952,
-          "retained_set_sha256": "864A7094E7ED3AFDF282791CC53D97D5D1CD4064E998D1678BD7ED79EBF6B79D",
-          "policy_sha256": "639192D41ED48F3CD6F294B0CA91FF32E517FC86CEBACECFA6638E53AB830814",
-          "state_sha256": "CA03C5D5BEA3C811CA655534A997248E75358B7B4AA9C46335C01EA03CCEBF81",
+          "retained_set_sha256": "2DC54F8C02425C44DEB80A0F6285CAF4687A90537114902D39BB338C14BD7664",
+          "policy_sha256": "6D8C4B9F295FB032D33777E80F3BE7320AB1DAECD46EBBF4F873AFE5D101E7F9",
+          "state_sha256": "463B058E2CFB4FEAD916C5C69D4A8EDC447F16D31D50444896965D76827C478C",
           "denial": "pbtrust_policy_unsigned",
           "authority_grants": 0,
           "actions_authorized": 0,
@@ -3496,15 +3548,15 @@
           "POOLEBOOT/0.1 KERNEL_BINDING PASS version=1 file_bytes=530072 image_bytes=602112 sha256_prefix=8A2DA65C86B09F7B path=manifest",
           "POOLEBOOT/0.1 KERNEL_FILE PASS bytes=530072 path=manifest_development",
           "POOLEBOOT/0.1 KERNEL_LOAD PASS image_bytes=602112 pages=147 entry_offset=40960 relocations=1321 files_closed=12 pools_freed=11 fnv1a64=5B68ABBD4C1D3BA9",
-          "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=1A56BF1F18804FEB retained=1 signatures=0 measured=0",
-          "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=864A7094E7ED3AFDF282791CC53D97D5D1CD4064E998D1678BD7ED79EBF6B79D retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
-          "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=639192D41ED48F3CD6F294B0CA91FF32E517FC86CEBACECFA6638E53AB830814 state_sha256=CA03C5D5BEA3C811CA655534A997248E75358B7B4AA9C46335C01EA03CCEBF81 source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
+          "POOLEBOOT/0.1 ARTIFACT_SET PASS contract=PBART1 count=6 file_bytes=8761 pages=6 roles=2-7 fnv1a64=BD4DF045281C4716 retained=1 signatures=0 measured=0",
+          "POOLEBOOT/0.1 INNER_SET PASS proof=N5-INNER-LIVE-PARSE-001 artifacts=6 parsers=6 bindings=6 denials=6 file_bytes=8761 payload_bytes=8185 sha256=2DC54F8C02425C44DEB80A0F6285CAF4687A90537114902D39BB338C14BD7664 retained=1 authority_grants=0 actions=0 state_writes=0 hardware_observations=0",
+          "POOLEBOOT/0.1 TRUST_STATE DENY contract=PBTRUST1 policy_bytes=320 state_bytes=256 bindings=14 denials=1 denial=pbtrust_policy_unsigned policy_sha256=6D8C4B9F295FB032D33777E80F3BE7320AB1DAECD46EBBF4F873AFE5D101E7F9 state_sha256=463B058E2CFB4FEAD916C5C69D4A8EDC447F16D31D50444896965D76827C478C source=esp_candidate auth=missing monotonic=missing signatures=0 authority_grants=0 state_writes=0",
           "POOLEBOOT/0.1 GOP PASS width=1280 height=800 stride=1280 mode=0 format=BGR",
           "POOLEBOOT/0.1 FRAME READY",
           "POOLEBOOT/0.1 KERNEL_MAP_PLAN PASS contract=PKMAP2 mappings=4 kernel_pages=147 ro=24 rx=105 rw=18 wx=0 pml4=511 pdpt=510 pd=0 pt=0 leaf_fnv1a64=2C93E3DFE8719D13",
           "POOLEBOOT/0.1 KERNEL_MAP_ACTIVE PASS table_pages=5 kernel_pages=147 physical_bits=40 mapped_fnv1a64=5B68ABBD4C1D3BA9 framebuffer=preserved cache_signature=00 first_page_bytes=2097152 last_page_bytes=2097152",
           "POOLEBOOT/0.1 KERNEL_MAP_RETAIN PASS table_pages=5 stack_pages=36 handoff_pages=256 guards=2 total_pages=439 stack_pt=148 handoff_pt=185 kernel_phys=000000001E0D0000 root=000000001E1E0000 stack_phys=000000001E21F000 stack_top=FFFFFFFF800B8000 handoff_phys=000000001DE2E000 handoff_virt=FFFFFFFF800B9000 retained_fnv1a64=73A699B7C26066DB original_cr3=restored firmware_calls_while_active=0",
-          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5480 records=5 memory_entries=106 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=84589616 fnv1a64=F63862911A552918 state=boot_services_exited bytes_unchanged=1",
+          "POOLEBOOT/0.1 PBP1_FINAL PASS bytes=5480 records=5 memory_entries=106 framebuffer=1 firmware_tables=1 artifacts=10 descriptor_bytes=48 exit_attempts=1 message_crc32=C70AC828 fnv1a64=90A2A38D228896C1 state=boot_services_exited bytes_unchanged=1",
           "POOLEBOOT/0.1 EXIT_BOOT_SERVICES PASS contract=PBEXIT1 attempts=1 map_bytes=5088 descriptor_bytes=48 descriptors=106",
           "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=147 artifact_pages=9 table_pages=5 stack_pages=36 handoff_pages=256",
           "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF8000A000 handoff=FFFFFFFF800B9000 bytes=5480 stack_top=FFFFFFFF800B8000 root=000000001E1E0000 cr3=000000001E1E0000 trap_scenario=14 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
@@ -3513,19 +3565,19 @@
           "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE168-N12-AP-OWN-V002-0000000001 entry_count=1 serial=present",
           "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF800B9000 bytes=5480 entry=0xFFFFFFFF8000A000 stack_top=0xFFFFFFFF800B8000 root=0x000000001E1E0000 cr3=0x000000001E1E0000 rflags_if=0 rflags_df=0",
           "POOLEOS:KERNEL:PBP1 PASS profile=development records=5 artifacts=10 production_profile_valid=0",
-          "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=864A7094E7ED3AFDF282791CC53D97D5D1CD4064E998D1678BD7ED79EBF6B79D policy_sha256=639192D41ED48F3CD6F294B0CA91FF32E517FC86CEBACECFA6638E53AB830814 state_sha256=CA03C5D5BEA3C811CA655534A997248E75358B7B4AA9C46335C01EA03CCEBF81 denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
+          "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=2DC54F8C02425C44DEB80A0F6285CAF4687A90537114902D39BB338C14BD7664 policy_sha256=6D8C4B9F295FB032D33777E80F3BE7320AB1DAECD46EBBF4F873AFE5D101E7F9 state_sha256=463B058E2CFB4FEAD916C5C69D4A8EDC447F16D31D50444896965D76827C478C denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
           "POOLEOS:KERNEL:SMP-MULTI-TOPOLOGY PASS contract=PKSMP5 processors=4 enabled=4 bsp_apic_id=0 target_apic_ids=1,2,3 target_mask=0x000000000000000E apic_physical=0x00000000FEE00000 selection=exact_enabled_legacy_apic_topology",
           "POOLEOS:KERNEL:SMP-MULTI-PARTIAL-ROLLBACK PASS contract=PKSMP5 started_mask=0x0000000000000006 timeout_apic_id=4 timeout_mask=0x0000000000000010 timeout_count=1 parked_mask=0x0000000000000006 released_mask=0x000000000000000E resource_pages=96 frame_pages=6 zeroed_bytes=417792 verified_bytes=417792 retained_free_rejections=27 owner_release_rejections=18 fresh_allocation_required=1",
           "POOLEOS:KERNEL:SMP-MULTI-RETRY PASS contract=PKSMP5 retry_count=1 partial_rollback_count=1 started_mask=0x000000000000000E online_mask=0x000000000000000E simultaneous_online=1",
-          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=0 apic_id=1 physical_start=0x0000000000001000 pages=32 sipi_vector=1 trampoline_bytes=2852 allocation_sequence=24 frame_allocation_sequences=25,26 frame_release_sequences=35,42 resource_release_sequence=43 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=1 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000002 ack_mask=0x0000000000000002 invalidations=1 baseline_checksum=0x89890E03CFE5AB0D runtime_checksum=0xB871A244859A96FF response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
-          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=1 apic_id=2 physical_start=0x0000000000023000 pages=32 sipi_vector=35 trampoline_bytes=2852 allocation_sequence=27 frame_allocation_sequences=28,31 frame_release_sequences=36,40 resource_release_sequence=41 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=0 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000004 ack_mask=0x0000000000000004 invalidations=1 baseline_checksum=0xE5944943EE87AD55 runtime_checksum=0x1B03AD6F1C634F38 response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
-          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=2 apic_id=3 physical_start=0x0000000000045000 pages=32 sipi_vector=69 trampoline_bytes=2852 allocation_sequence=32 frame_allocation_sequences=33,34 frame_release_sequences=37,38 resource_release_sequence=39 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=0 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000008 ack_mask=0x0000000000000008 invalidations=1 baseline_checksum=0xA3F9E032B049413C runtime_checksum=0xD5BCC1A35F78CE06 response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
+          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=0 apic_id=1 physical_start=0x0000000000001000 pages=32 sipi_vector=1 trampoline_bytes=2852 allocation_sequence=24 frame_allocation_sequences=25,26 frame_release_sequences=35,42 resource_release_sequence=43 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=1 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000002 ack_mask=0x0000000000000002 invalidations=1 baseline_checksum=0xBC330CB395D46BA4 runtime_checksum=0x2F413ACE27943066 response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
+          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=1 apic_id=2 physical_start=0x0000000000023000 pages=32 sipi_vector=35 trampoline_bytes=2852 allocation_sequence=27 frame_allocation_sequences=28,31 frame_release_sequences=36,40 resource_release_sequence=41 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=0 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000004 ack_mask=0x0000000000000004 invalidations=1 baseline_checksum=0xA98DE6672C8CCE4E runtime_checksum=0x36708BE76A89250F response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
+          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=2 apic_id=3 physical_start=0x0000000000045000 pages=32 sipi_vector=69 trampoline_bytes=2852 allocation_sequence=32 frame_allocation_sequences=33,34 frame_release_sequences=37,38 resource_release_sequence=39 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=0 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000008 ack_mask=0x0000000000000008 invalidations=1 baseline_checksum=0xC48F9C0E79544DBF runtime_checksum=0x6EBB1FB788794648 response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
           "POOLEOS:KERNEL:SMP-MULTI-SHOOTDOWN PASS contract=PKSMP5 target_mask=0x000000000000000E ack_mask=0x000000000000000E retired_generation=1 active_generation=2 invalidations=3 root_checksum=0x5A6D5E693D7F53DC old_frame_checksum=0xBE1E07C6144BC01A new_frame_checksum=0xE351D68DF0864FAA premature_reclaim_rejections=2 retained_free_rejections=27 owner_release_rejections=18 reclaim_state=released",
           "POOLEOS:KERNEL:SMP-MULTI-LIFECYCLE PASS contract=PKSMP5 started_mask=0x000000000000000E online_mask=0x000000000000000E quiesced_mask=0x000000000000000E parked_mask=0x000000000000000E validated_mask=0x000000000000000E released_mask=0x000000000000000E timeout_count=1 retry_count=1 partial_rollback_count=1 exact_accounting=1",
           "POOLEOS:KERNEL:SMP-MULTI-RELEASE PASS contract=PKSMP5 resource_pages=96 frame_pages=6 resource_zeroed_bytes=393216 resource_verified_bytes=393216 frame_zeroed_bytes=24576 frame_verified_bytes=24576 total_pages=102 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged",
           "POOLEOS:KERNEL:SMP-MULTI-RESULT PASS contract=PKSMP5 profile=sandybridge_x87_sse_four_vcpu aps=3 simultaneous_online=1 partial_start_timeout=1 partial_rollback=1 fresh_retry=1 target_mask=0x000000000000000E ack_mask=0x000000000000000E tlb_invalidations=3 no_reuse_before_all_acks=1 stop_quiesced=3 ap_parked=3 resources_released=102 scheduler=0 general_broadcast=0 target_hardware=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],
-        "marker_sha256": "6BE96F9D2104223EFC65108B7F3148B280DECB67837C8D75B7D1FF8FEB4AB536",
+        "marker_sha256": "A35184AE61B659998CAF6115B84882FF1DFC8A7D25E7874CB02362DB83E5E1C6",
         "serial_debugcon_exact_match": true,
         "marker_summary": {
           "transfer_prefix": {
@@ -3576,7 +3628,7 @@
                 "page_count": 6,
                 "retained_input_count": 9,
                 "retained_input_page_count": 9,
-                "fnv1a64": "1A56BF1F18804FEB",
+                "fnv1a64": "BD4DF045281C4716",
                 "pages_retained": true,
                 "signatures_verified": false,
                 "measured": false,
@@ -3590,7 +3642,7 @@
                 "development_denial_count": 6,
                 "file_bytes": 8761,
                 "payload_bytes": 8185,
-                "retained_set_sha256": "864A7094E7ED3AFDF282791CC53D97D5D1CD4064E998D1678BD7ED79EBF6B79D",
+                "retained_set_sha256": "2DC54F8C02425C44DEB80A0F6285CAF4687A90537114902D39BB338C14BD7664",
                 "exact_retained_bytes": true,
                 "authority_grants": 0,
                 "actions_authorized": 0,
@@ -3604,8 +3656,8 @@
                 "binding_count": 14,
                 "denial_count": 1,
                 "denial": "pbtrust_policy_unsigned",
-                "policy_sha256": "639192D41ED48F3CD6F294B0CA91FF32E517FC86CEBACECFA6638E53AB830814",
-                "state_sha256": "CA03C5D5BEA3C811CA655534A997248E75358B7B4AA9C46335C01EA03CCEBF81",
+                "policy_sha256": "6D8C4B9F295FB032D33777E80F3BE7320AB1DAECD46EBBF4F873AFE5D101E7F9",
+                "state_sha256": "463B058E2CFB4FEAD916C5C69D4A8EDC447F16D31D50444896965D76827C478C",
                 "state_source": "esp_candidate_not_persistent_authority",
                 "signature_verifications": 0,
                 "authority_grants": 0,
@@ -3622,8 +3674,8 @@
                 "artifact_count": 10,
                 "descriptor_bytes": 48,
                 "exit_attempts": 1,
-                "message_crc32": "84589616",
-                "fnv1a64": "F63862911A552918",
+                "message_crc32": "C70AC828",
+                "fnv1a64": "90A2A38D228896C1",
                 "pre_exit": false,
                 "boot_services_exited": true,
                 "development_mode_only": true,
@@ -3745,9 +3797,9 @@
               "parser_count": 9,
               "manifest_bytes": 2615,
               "retained_file_bytes": 11952,
-              "retained_set_sha256": "864A7094E7ED3AFDF282791CC53D97D5D1CD4064E998D1678BD7ED79EBF6B79D",
-              "policy_sha256": "639192D41ED48F3CD6F294B0CA91FF32E517FC86CEBACECFA6638E53AB830814",
-              "state_sha256": "CA03C5D5BEA3C811CA655534A997248E75358B7B4AA9C46335C01EA03CCEBF81",
+              "retained_set_sha256": "2DC54F8C02425C44DEB80A0F6285CAF4687A90537114902D39BB338C14BD7664",
+              "policy_sha256": "6D8C4B9F295FB032D33777E80F3BE7320AB1DAECD46EBBF4F873AFE5D101E7F9",
+              "state_sha256": "463B058E2CFB4FEAD916C5C69D4A8EDC447F16D31D50444896965D76827C478C",
               "denial": "pbtrust_policy_unsigned",
               "authority_grants": 0,
               "actions_authorized": 0,
@@ -4052,9 +4104,9 @@
         "pbp1_transcript": {
           "contract_id": "PBLIVE4",
           "byte_count": 5480,
-          "sha256": "92F9F900B14D0C6AB06AB008F8FB685F088BB47AA96C1BEA670AF0C28866EE70",
-          "message_crc32": "84589616",
-          "fnv1a64": "F63862911A552918",
+          "sha256": "4CE4729E6B5660184B7703F0787AB54072E29183318D5FB4F2DA374BA0136349",
+          "message_crc32": "C70AC828",
+          "fnv1a64": "90A2A38D228896C1",
           "record_count": 5,
           "features": "000000000000001F",
           "required_features": "000000000000001B",
@@ -4861,7 +4913,7 @@
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
               "entry_virtual": "0000000000000000",
-              "sha256": "E70627CB584A05BBB75102F4962027170AB8E7D213FE9D5AC9FB337A270A3A54"
+              "sha256": "BCCF4EF786DCF0F52F00E8943AD7E18BFEA702D2921A2F7EAE1DD1681EBD865B"
             },
             {
               "role": 5,
@@ -4891,7 +4943,7 @@
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
               "entry_virtual": "0000000000000000",
-              "sha256": "7636BC1D641AA5C79DD2B04A7D154150FF7D084D6B0864137EA73E2F3DB2AC77"
+              "sha256": "1F236C8CA3F49E00DCC84AB269D37751D20399F3DF794E9B4559A432326BE51D"
             },
             {
               "role": 9,
@@ -4901,7 +4953,7 @@
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
               "entry_virtual": "0000000000000000",
-              "sha256": "99DBB75F0B86A085E5CCAA0FDA250708E855F8AC649FA619A5BC070DD23AE0F9"
+              "sha256": "F1E42A1070FA2C9A8947EEE4C713FC4D0020DE1550E8128DB265B4FFB47ADE1E"
             },
             {
               "role": 10,
@@ -4911,7 +4963,7 @@
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
               "entry_virtual": "0000000000000000",
-              "sha256": "639192D41ED48F3CD6F294B0CA91FF32E517FC86CEBACECFA6638E53AB830814"
+              "sha256": "6D8C4B9F295FB032D33777E80F3BE7320AB1DAECD46EBBF4F873AFE5D101E7F9"
             },
             {
               "role": 11,
@@ -4921,7 +4973,7 @@
               "virtual_base": "0000000000000000",
               "virtual_size": 0,
               "entry_virtual": "0000000000000000",
-              "sha256": "CA03C5D5BEA3C811CA655534A997248E75358B7B4AA9C46335C01EA03CCEBF81"
+              "sha256": "463B058E2CFB4FEAD916C5C69D4A8EDC447F16D31D50444896965D76827C478C"
             }
           ],
           "kernel_artifact": {
@@ -4994,9 +5046,9 @@
           "parser_count": 9,
           "manifest_bytes": 2615,
           "retained_file_bytes": 11952,
-          "retained_set_sha256": "864A7094E7ED3AFDF282791CC53D97D5D1CD4064E998D1678BD7ED79EBF6B79D",
-          "policy_sha256": "639192D41ED48F3CD6F294B0CA91FF32E517FC86CEBACECFA6638E53AB830814",
-          "state_sha256": "CA03C5D5BEA3C811CA655534A997248E75358B7B4AA9C46335C01EA03CCEBF81",
+          "retained_set_sha256": "2DC54F8C02425C44DEB80A0F6285CAF4687A90537114902D39BB338C14BD7664",
+          "policy_sha256": "6D8C4B9F295FB032D33777E80F3BE7320AB1DAECD46EBBF4F873AFE5D101E7F9",
+          "state_sha256": "463B058E2CFB4FEAD916C5C69D4A8EDC447F16D31D50444896965D76827C478C",
           "denial": "pbtrust_policy_unsigned",
           "authority_grants": 0,
           "actions_authorized": 0,
@@ -5054,7 +5106,7 @@
             "page_count": 6,
             "retained_input_count": 9,
             "retained_input_page_count": 9,
-            "fnv1a64": "1A56BF1F18804FEB",
+            "fnv1a64": "BD4DF045281C4716",
             "pages_retained": true,
             "signatures_verified": false,
             "measured": false,
@@ -5068,7 +5120,7 @@
             "development_denial_count": 6,
             "file_bytes": 8761,
             "payload_bytes": 8185,
-            "retained_set_sha256": "864A7094E7ED3AFDF282791CC53D97D5D1CD4064E998D1678BD7ED79EBF6B79D",
+            "retained_set_sha256": "2DC54F8C02425C44DEB80A0F6285CAF4687A90537114902D39BB338C14BD7664",
             "exact_retained_bytes": true,
             "authority_grants": 0,
             "actions_authorized": 0,
@@ -5082,8 +5134,8 @@
             "binding_count": 14,
             "denial_count": 1,
             "denial": "pbtrust_policy_unsigned",
-            "policy_sha256": "639192D41ED48F3CD6F294B0CA91FF32E517FC86CEBACECFA6638E53AB830814",
-            "state_sha256": "CA03C5D5BEA3C811CA655534A997248E75358B7B4AA9C46335C01EA03CCEBF81",
+            "policy_sha256": "6D8C4B9F295FB032D33777E80F3BE7320AB1DAECD46EBBF4F873AFE5D101E7F9",
+            "state_sha256": "463B058E2CFB4FEAD916C5C69D4A8EDC447F16D31D50444896965D76827C478C",
             "state_source": "esp_candidate_not_persistent_authority",
             "signature_verifications": 0,
             "authority_grants": 0,
@@ -5100,8 +5152,8 @@
             "artifact_count": 10,
             "descriptor_bytes": 48,
             "exit_attempts": 1,
-            "message_crc32": "84589616",
-            "fnv1a64": "F63862911A552918",
+            "message_crc32": "C70AC828",
+            "fnv1a64": "90A2A38D228896C1",
             "pre_exit": false,
             "boot_services_exited": true,
             "development_mode_only": true,
@@ -5223,9 +5275,9 @@
           "parser_count": 9,
           "manifest_bytes": 2615,
           "retained_file_bytes": 11952,
-          "retained_set_sha256": "864A7094E7ED3AFDF282791CC53D97D5D1CD4064E998D1678BD7ED79EBF6B79D",
-          "policy_sha256": "639192D41ED48F3CD6F294B0CA91FF32E517FC86CEBACECFA6638E53AB830814",
-          "state_sha256": "CA03C5D5BEA3C811CA655534A997248E75358B7B4AA9C46335C01EA03CCEBF81",
+          "retained_set_sha256": "2DC54F8C02425C44DEB80A0F6285CAF4687A90537114902D39BB338C14BD7664",
+          "policy_sha256": "6D8C4B9F295FB032D33777E80F3BE7320AB1DAECD46EBBF4F873AFE5D101E7F9",
+          "state_sha256": "463B058E2CFB4FEAD916C5C69D4A8EDC447F16D31D50444896965D76827C478C",
           "denial": "pbtrust_policy_unsigned",
           "authority_grants": 0,
           "actions_authorized": 0,
