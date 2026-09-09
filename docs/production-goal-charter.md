@@ -1,15 +1,63 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-09-08
+Status date: 2026-09-09
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 165
+Last roadmap reconciliation: PooleOS Cycle 171
 
-Cycle 165 completes fourteen memory, interrupt, SMP, scheduler, atomic and lock
+Current Cycle 171: fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles pass
+on the unchanged Cycle 168 kernel: 28 final headless boots, 660 control groups
+and 2,126 rejected cases. Four superseded boots remain separate. SMP receipt
+validation now binds current boot artifacts and rejects malformed dependencies.
+Measured gate and test expectations are reconciled; the 155-test focused suite
+passes with two optional local-transcript skips. All 27 selected native checks
+pass. Full runtime-inclusive exact-final qualification and publication/review
+gates still precede PR #76 merge and N12.3 task-stack/CPU-retirement integration.
+Main remains qualified Cycle 165 at this pre-closeout checkpoint. No phase,
+flag, charter condition or production gate closes.
+[Cycle 171 evidence](checkpoints/cycle171-native-dependency-replay.md).
+
+Historical Cycle 170: five trap/CPU/xstate/MSR profiles pass on the unchanged
+Cycle 168 kernel, with fourteen fresh headless boots, 225 marker controls and
+42 focused tests. One expected TCG exception diagnostic is separate. The trap
+gate's old kernel identity pins are repaired; 17 regression cases reject stale
+identity and unsupported production/authority claims. The selected projection
+passes 14/27; thirteen stale downstream checks plus prior SMP new-artifact
+replay remain. Next is N9-PMM-ACPI-CONSUMER-001, then ordered VM/IRQ/SMP,
+scheduler/atomic/lock replay and runtime-inclusive exact-final qualification.
+Main remains qualified Cycle 165 and PR #76 draft. No phase, flag or charter
+completion condition changes. [Cycle 170 evidence](checkpoints/cycle170-cpu-state-replay.md).
+
+Historical Cycle 169: six N5 components pass on the unchanged Cycle 168 kernel.
+Six fresh headless boots include two actual kernel entries and nine-file
+revalidation before unsigned-policy denial. All 83 focused tests pass, with
+new source-current kernel-entry binding in the symbol receipt validator.
+The selected projection is 9/27, with 18 rejecting downstream checks and
+an additional required replay of the prior AP result against new boot inputs.
+Next is N7-TRAP-001, then ordered CPU/memory/IRQ/SMP/scheduler/atomic/lock replay
+and runtime-inclusive exact-final qualification before PR #76 can merge.
+Main remains qualified Cycle 165; no phase, flag, charter condition or
+production gate closes. [Cycle 169 evidence](checkpoints/cycle169-boot-chain-replay.md).
+
+Historical Cycle 168 checkpoint: qualified Cycles 162-165 merged through PR #75 at
+`6f9399c3cd70ebef2f7610f8b6fdb40ae262e27f`. The exact merged tree passed
+105 canonical gates and 708 Doctor checks. Cycle 168 qualifies bounded AP
+runtime/stack/frame ownership in two final four-vCPU runs with 27 copied-free
+and 18 owner-release rejections per partial/full attempt, 249 negative cases,
+243 kernel tests and 56 focused regressions. The checker, serialized-receipt
+and mapping/identity failures are repaired and preserved in the checkpoint.
+The machine ledger distinguishes this 4/27 selected-native projection from
+historical qualification; 23 changed-image dependencies remain pending.
+Next is N5-SYMBOLS-SEMANTICS-001, then ordered replay and runtime-inclusive
+exact-final qualification before PR #76 may merge. No charter condition,
+phase or flag closes; general task-stack/CPU retirement and N0 remain open.
+[Current checkpoint and next move](checkpoints/cycle168-ap-ownership-qualification.md).
+
+Historical Cycle 165 pre-merge summary: fourteen memory, interrupt, SMP, scheduler, atomic and lock
 profiles on the unchanged Cycle 162 kernel: 28 final successful headless boots,
 660 negative-control groups and 2,120 rejected cases. Six superseded initial
 boots are preserved separately after correcting three stale test expectations.

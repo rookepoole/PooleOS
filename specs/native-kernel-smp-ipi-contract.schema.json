@@ -4,7 +4,7 @@
   "title": "PooleOS PKSMP5 contract",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "artifact_kind", "contract_id", "selected_move_id", "status_date", "status", "production_ready", "production_promotion_allowed", "phase_mapping", "source_requirement_ids", "profile", "topology", "resource_geometry", "partial_start_rollback", "transport", "shootdown", "shutdown_and_cleanup", "qualification", "required_negative_controls", "claims", "non_claims", "official_references"],
+  "required": ["schema_version", "artifact_kind", "contract_id", "selected_move_id", "status_date", "status", "production_ready", "production_promotion_allowed", "phase_mapping", "source_requirement_ids", "profile", "topology", "resource_geometry", "partial_start_rollback", "transport", "shootdown", "execution_ownership", "shutdown_and_cleanup", "qualification", "required_negative_controls", "claims", "non_claims", "official_references"],
   "properties": {
     "schema_version": {"const": "1.0"},
     "artifact_kind": {"const": "pooleos_native_kernel_smp_ipi_contract"},
@@ -101,6 +101,20 @@
         "reclaim_requires_every_unique_local_ack": {"const": true},
         "retired_frame_reuse_before_all_acks": {"const": false},
         "scope": {"type": "string"}
+      }
+    },
+    "execution_ownership": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_id", "retained_regions_per_ap", "retained_free_rejections_per_attempt", "owner_release_rejections_per_attempt", "attempt_count", "park_boundary", "general_cpu_retirement_verified"],
+      "properties": {
+        "contract_id": {"const": "PKAPOWN1"},
+        "retained_regions_per_ap": {"const": 3},
+        "retained_free_rejections_per_attempt": {"const": 27},
+        "owner_release_rejections_per_attempt": {"const": 18},
+        "attempt_count": {"const": 2},
+        "park_boundary": {"const": "unsafe_exact_mask_after_final_init"},
+        "general_cpu_retirement_verified": {"const": false}
       }
     },
     "shutdown_and_cleanup": {

@@ -101,7 +101,7 @@
         "frame_pages_released": {"const": 6},
         "verified_bytes": {"const": 417792},
         "negative_controls_total": {"const": 30},
-        "hostile_cases_total": {"const": 243},
+        "hostile_cases_total": {"const": 249},
         "production_claim_count": {"const": 0}
       }
     },

@@ -20,7 +20,21 @@ Run:
 python tools/qualify_native_kernel_entry.py --artifact-out outputs/PooleKernel.pkelf
 ```
 
-The qualifier uses the workspace-local pinned Rust toolchain, executes 189 host tests, checks formatting and Clippy, performs two clean offline builds in separate target directories, compares linked and canonical bytes, requires the exact contract build ID once in PKMID1 and once in the live diagnostic literal, runs hostile linked-ELF and canonical-PKELF controls, scans for host leakage, and compares exact loaded bytes from the independent Python and Rust PKELF1 implementations. Its deterministic public receipt is `runs/native_kernel_entry_readiness.json`; the current product has a 513,672-byte canonical file, a 585,728-byte loaded image, entry offset `0xA000`, text end `0x70000`, RELRO end and writable-data start `0x7D000`, 1,264 relative relocations, and canonical SHA-256 `FCE5C1F2478651D010A2F2781B80494FD0D9721880D33CE8C66A499B35C8DAB6`. The product file under `outputs/` remains local generated state.
+The qualifier uses the workspace-local pinned Rust toolchain, executes the exact
+243-test kernel suite, checks formatting and Clippy, and performs two clean
+offline builds in separate target directories. It compares linked and canonical
+bytes, requires the contract build ID once in PKMID1 and once in the live
+diagnostic literal, runs hostile ELF controls, scans for host leakage, and
+compares loaded bytes from independent Python and Rust PKELF1 implementations.
+Its public receipt is `runs/native_kernel_entry_readiness.json`; the receipt's
+source bindings must be current before its image identity may be accepted.
+
+The Cycle 167 candidate has a measured 530,072-byte canonical file and
+602,112-byte, 147-page image: entry `0xA000`, text end `0x73000`, RELRO end
+and writable-data start `0x81000`, image end `0x93000`. PKMAP2 reservations
+move by one page with the image guard. The exact SHA-256 and relocation count
+belong to the source-bound receipt, not an inherited historical image.
+The product file under `outputs/` remains local generated state.
 
 ## Nonclaims
 

@@ -68,8 +68,14 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 225)
+        self.assertEqual(len(self.artifact["bound_sources"]), 231)
         bound_paths = {binding["path"] for binding in self.artifact["bound_sources"]}
+        self.assertIn("native/kernel/src/reclamation/ap_resources.rs", bound_paths)
+        self.assertIn("native/kernel/src/physical_memory/tests/ap_resources.rs", bound_paths)
+        self.assertIn("docs/checkpoints/cycle168-ap-ownership-qualification.md", bound_paths)
+        self.assertIn("docs/checkpoints/cycle169-boot-chain-replay.md", bound_paths)
+        self.assertIn("docs/checkpoints/cycle170-cpu-state-replay.md", bound_paths)
+        self.assertIn("docs/checkpoints/cycle171-native-dependency-replay.md", bound_paths)
         self.assertIn("native/kernel/src/reclamation.rs", bound_paths)
         self.assertIn("native/kernel/src/reclamation/task_lifetimes.rs", bound_paths)
         self.assertIn("native/kernel/tests/task_lifetimes.rs", bound_paths)

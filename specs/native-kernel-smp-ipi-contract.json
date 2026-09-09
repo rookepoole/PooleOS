@@ -93,6 +93,15 @@
     "retired_frame_reuse_before_all_acks": false,
     "scope": "three AP-owned roots, one virtual page per root, one retired generation, three exact target APs"
   },
+  "execution_ownership": {
+    "contract_id": "PKAPOWN1",
+    "retained_regions_per_ap": 3,
+    "retained_free_rejections_per_attempt": 27,
+    "owner_release_rejections_per_attempt": 18,
+    "attempt_count": 2,
+    "park_boundary": "unsafe_exact_mask_after_final_init",
+    "general_cpu_retirement_verified": false
+  },
   "shutdown_and_cleanup": {
     "stop_quiesced_ap_count": 3,
     "final_init_parked_ap_count": 3,
@@ -119,7 +128,7 @@
     "screenshot_exact_match_required": true,
     "pbp1_exact_match_required": true,
     "negative_control_count": 30,
-    "hostile_case_count": 243
+    "hostile_case_count": 249
   },
   "required_negative_controls": [
     "NEG-N8-PKSMP5-MARKER-OMISSION",

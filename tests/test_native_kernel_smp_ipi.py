@@ -1,6 +1,9 @@
+import copy
+import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from runtime import native_kernel_smp_ipi as smp_ipi
 from runtime import native_tier0
@@ -9,6 +12,59 @@ from tools import pooleos_release_gate
 
 
 class NativeKernelSmpIpiTests(unittest.TestCase):
+    def test_inputs_bind_current_transfer_and_six_boot_artifacts(self) -> None:
+        inputs = smp_ipi.expected_inputs()
+        self.assertEqual(smp_ipi.native_kernel_transfer.READINESS_RELATIVE,
+                         inputs["boot_transfer"]["path"])
+        self.assertEqual(6, len(inputs["boot_artifacts"]))
+        self.assertEqual(6, len({item["path"] for item in inputs["boot_artifacts"]}))
+
+    def test_relabelled_consistent_boot_digests_cannot_pass_current_readiness(self) -> None:
+        report = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        report["inputs"] = smp_ipi.expected_inputs()
+        fields = ("retained_set_sha256", "policy_sha256", "state_sha256")
+        original = report["execution"]["observation"]["transfer_prefix"]["kernel_revalidation"]
+        for field in fields:
+            changed = copy.deepcopy(report)
+            replacement = smp_ipi.sha256_bytes(original[field].encode("ascii"))
+            for run in changed["execution"]["runs"]:
+                run["markers"] = [line.replace(original[field], replacement) for line in run["markers"]]
+                run["marker_summary"] = smp_ipi.validate_markers(run["markers"])
+            changed["execution"]["observation"] = changed["execution"]["runs"][0]["marker_summary"]
+            with self.subTest(field=field):
+                errors = smp_ipi.readiness_errors(changed)
+                self.assertTrue(any("current boot" in error for error in errors), errors)
+
+    def test_stale_transfer_dependency_is_rejected(self) -> None:
+        report = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        report["inputs"] = smp_ipi.expected_inputs()
+        with patch.object(smp_ipi.native_kernel_transfer, "readiness_errors", return_value=["stale dependency"]):
+            errors = smp_ipi.readiness_errors(report)
+        self.assertTrue(any("transfer dependency" in error for error in errors), errors)
+
+    def test_malformed_transfer_dependency_returns_errors(self) -> None:
+        report = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        report["inputs"] = smp_ipi.expected_inputs()
+        read_json = smp_ipi.read_json
+        dependency = smp_ipi.ROOT / smp_ipi.native_kernel_transfer.READINESS_RELATIVE
+        for malformed in (None, [], "receipt", 1):
+            with self.subTest(value=malformed), patch.object(
+                smp_ipi, "read_json",
+                side_effect=lambda path: malformed if path == dependency else read_json(path),
+            ):
+                errors = smp_ipi.readiness_errors(report)
+                self.assertTrue(any("transfer dependency" in error for error in errors), errors)
+
+    def test_regenerated_boot_bytes_cannot_disagree_with_transfer(self) -> None:
+        report = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        files = smp_ipi.native_kernel_load.canonical_artifact_files()
+        first = next(iter(files))
+        files[first] = bytes([files[first][0] ^ 1]) + files[first][1:]
+        with patch.object(smp_ipi.native_kernel_load, "canonical_artifact_files", return_value=files):
+            report["inputs"] = smp_ipi.expected_inputs()
+            errors = smp_ipi.readiness_errors(report)
+        self.assertTrue(any("current boot artifacts" in error for error in errors), errors)
+
     def test_readiness_writer_emits_canonical_lf_bytes(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "readiness.json"
@@ -21,7 +77,7 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
         contract = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.CONTRACT_RELATIVE)
         self.assertEqual([], smp_ipi.contract_errors(contract))
         self.assertEqual(30, len(smp_ipi.NEGATIVE_CONTROL_IDS))
-        self.assertEqual(243, contract["qualification"]["hostile_case_count"])
+        self.assertEqual(249, contract["qualification"]["hostile_case_count"])
 
     def test_three_private_resource_layouts_fit_below_one_mib(self) -> None:
         layouts = [smp_ipi.resource_layout(page, 32) for page in (1, 35, 69)]
@@ -180,9 +236,88 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
         self.assertEqual(3, observation["result"]["application_processors_online"])
         controls = qualify._negative_controls(readiness["execution"]["runs"][0]["markers"])
         self.assertEqual(list(smp_ipi.NEGATIVE_CONTROL_IDS), [item["id"] for item in controls])
-        self.assertEqual(243, sum(item["case_count"] for item in controls))
+        self.assertEqual(249, sum(item["case_count"] for item in controls))
         check = pooleos_release_gate.check_native_kernel_smp_ipi_readiness()
         self.assertTrue(check["ok"], check["detail"])
+
+
+    def test_ownership_contract_rejects_missing_or_changed_fields(self) -> None:
+        contract = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.CONTRACT_RELATIVE)
+        for field in contract["execution_ownership"]:
+            changed = copy.deepcopy(contract)
+            del changed["execution_ownership"][field]
+            with self.subTest(missing=field):
+                self.assertTrue(smp_ipi.contract_errors(changed))
+        for field, value in (
+            ("retained_regions_per_ap", 1), ("retained_free_rejections_per_attempt", 9),
+            ("owner_release_rejections_per_attempt", 0), ("attempt_count", 1),
+            ("park_boundary", "mailbox_only"), ("general_cpu_retirement_verified", True),
+        ):
+            changed = copy.deepcopy(contract)
+            changed["execution_ownership"][field] = value
+            with self.subTest(changed=field):
+                self.assertTrue(smp_ipi.contract_errors(changed))
+
+    def test_source_audit_requires_live_ownership_controls(self) -> None:
+        arch = (smp_ipi.ROOT / "native/kernel/src/arch/x86_64.rs").read_text(encoding="utf-8")
+        main = (smp_ipi.ROOT / "native/kernel/src/main.rs").read_text(encoding="utf-8")
+        ipi = (smp_ipi.ROOT / "native/kernel/src/smp_ipi.rs").read_text(encoding="utf-8")
+        qualify._audit_source_text(arch, main, ipi)
+        probe = main.partition("fn smp_ipi_probe_retained_resources(")[2].split("\nfn ", 1)[0]
+        for token in (
+            "ApResourcePart::Runtime", "ApResourcePart::OldFrame", "ApResourcePart::NewFrame",
+            "manager.free(handle)", "manager.free_scrubbed(handle, access)",
+            "manager.free_scrubbed_automatic(handle, access)",
+            "release_scrubbed(part, manager, access)",
+            "release_scrubbed_automatic(part, manager, access)",
+            "manager.summary() != before",
+        ):
+            with self.subTest(omitted=token), self.assertRaises(smp_ipi.KernelSmpIpiError):
+                qualify._audit_source_text(arch, main.replace(probe, probe.replace(token, "omitted", 1), 1), ipi)
+
+    def test_recorded_ownership_cannot_disagree_with_live_markers(self) -> None:
+        report = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        self.assertEqual([], smp_ipi.readiness_errors(report))
+        for mode in ("missing_run", "run_summary", "aggregate"):
+            changed = copy.deepcopy(report)
+            if mode == "missing_run":
+                changed["execution"]["runs"].pop()
+            elif mode == "run_summary":
+                changed["execution"]["runs"][1]["marker_summary"]["execution_ownership"]["owner_release_rejections_per_attempt"] = 0
+            else:
+                changed["execution"]["observation"]["execution_ownership"]["general_cpu_retirement_verified"] = True
+            with self.subTest(mode=mode):
+                self.assertTrue(smp_ipi.readiness_errors(changed))
+
+
+    def test_marker_observations_survive_json_round_trip(self) -> None:
+        report = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        for run in report["execution"]["runs"]:
+            observed = smp_ipi.validate_markers(run["markers"])
+            self.assertEqual(observed, json.loads(json.dumps(observed)))
+
+    def test_malformed_receipt_shapes_return_errors(self) -> None:
+        for value in (None, [], "receipt", 1, {"execution": None}, {"negative_controls": None}):
+            with self.subTest(value=value):
+                self.assertTrue(smp_ipi.readiness_errors(value))
+
+
+    def test_release_gate_rejects_stale_kernel_and_ownership_summaries(self) -> None:
+        report = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        check = pooleos_release_gate.check_native_kernel_smp_ipi_readiness()
+        self.assertTrue(check["ok"], check["detail"])
+        for field in ("kernel", "count", "ownership", "retirement_type"):
+            changed = copy.deepcopy(report)
+            if field == "kernel":
+                changed["build"]["kernel_entry"]["product"]["canonical_sha256"] = "D0AA3295F66AF02D48476BCEDC44D962A873E98FBA21F48A6753AA7BB9B24EA4"
+            elif field == "count":
+                changed["summary"]["hostile_cases_total"] = 243
+            elif field == "ownership":
+                changed["execution"]["observation"]["execution_ownership"]["owner_release_rejections_per_attempt"] = 0
+            else:
+                changed["execution"]["observation"]["execution_ownership"]["general_cpu_retirement_verified"] = 0
+            with self.subTest(field=field), patch.object(pooleos_release_gate, "_load_schema_artifact", return_value=(changed, [])):
+                self.assertFalse(pooleos_release_gate.check_native_kernel_smp_ipi_readiness()["ok"])
 
 
 if __name__ == "__main__":

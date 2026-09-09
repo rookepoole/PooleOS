@@ -7,6 +7,7 @@ import struct
 import subprocess
 import sys
 import unittest
+from unittest import mock
 from pathlib import Path
 
 
@@ -52,8 +53,39 @@ class NativeSymbolTests(unittest.TestCase):
         self.assertEqual(bundle.identity, psym1.canonical_identity())
         self.assertEqual(bundle.segments, psym1.canonical_segments())
         self.assertEqual(bundle.symbols, psym1.canonical_symbols())
-        self.assertEqual(bundle.image_bytes, 0x92000)
+        self.assertEqual(bundle.image_bytes, 0x93000)
         self.assertEqual(bundle.entry_offset, 0xA000)
+
+    def test_readiness_binds_kernel_entry_evidence_and_validator(self) -> None:
+        self.assertIn("runs/native_kernel_entry_readiness.json", psym1.IMPLEMENTATION_INPUTS)
+        self.assertIn("runtime/native_kernel_entry.py", psym1.IMPLEMENTATION_INPUTS)
+
+    def test_readiness_rejects_stale_or_mismatched_kernel_evidence(self) -> None:
+        from runtime import native_kernel_entry
+
+        readiness = psym1.read_json(ROOT / psym1.READINESS_RELATIVE)
+        with mock.patch.object(native_kernel_entry, "readiness_errors", return_value=["changed source probe"]):
+            errors = psym1.readiness_errors(readiness)
+        self.assertIn("PSYM1 kernel entry evidence: changed source probe", errors)
+        read_json = psym1.read_json
+        for field, replacement in (
+            ("canonical_sha256", "0" * 64),
+            ("loaded_sha256", "0" * 64),
+            ("linked_sha256", "0" * 64),
+            ("linked_byte_count", 1),
+            ("image_byte_count", 598016),
+            ("entry_offset", 0x9000),
+        ):
+            with self.subTest(field=field):
+                def changed(path):
+                    value = read_json(path)
+                    if path == ROOT / native_kernel_entry.READINESS_RELATIVE:
+                        value["product"][field] = replacement
+                    return value
+
+                with mock.patch.object(psym1, "read_json", side_effect=changed):
+                    errors = psym1.readiness_errors(readiness)
+                self.assertIn(f"PSYM1 kernel entry identity changed: {field}", errors)
 
     def test_lookup_handles_hits_gaps_slides_and_bounds(self) -> None:
         bundle = psym1.parse(psym1.canonical_bundle())

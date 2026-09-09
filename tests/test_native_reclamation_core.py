@@ -20,6 +20,7 @@ class ReclamationCoreTests(unittest.TestCase):
             "n12_3_complete", "focused_test_count", "kernel_regression_count", "compile_fail_borrow_tests",
             "task_lifetime_test_count",
             "physical_retention_test_count", "physical_retention_live_verified",
+            "ap_resource_test_count", "ap_resource_live_verified",
         ):
             with self.subTest(key=key):
                 changed = copy.deepcopy(self.report)
@@ -36,6 +37,9 @@ class ReclamationCoreTests(unittest.TestCase):
             ("schema_version", "1.2"),
             ("physical_retention_scope", "global_active_address_space_ownership"),
             ("physical_retention_contract_id", "PKRETAIN2"),
+            ("ap_resource_contract_id", "PKAPOWN2"),
+            ("ap_resource_scope", "general_cpu_retirement"),
+            ("schema_version", "1.3"),
         ):
             changed = copy.deepcopy(self.report)
             changed[key] = value
@@ -83,6 +87,48 @@ class ReclamationCoreTests(unittest.TestCase):
         ):
             with self.subTest(output=bad), self.assertRaises(ValueError):
                 core.require_test_result(bad, 19)
+
+
+    def test_named_cases_reject_missing_duplicate_and_failed_tests(self):
+        prefix = "physical_memory::tests::ap_resources::"
+        good = f"test {prefix}one ... ok\ntest {prefix}two ... ok\n"
+        core.require_named_test_result(good, prefix, 2)
+        for bad in (
+            "", good.replace("two", "one"), good.replace("two ... ok", "two ... FAILED"),
+            good + f"test {prefix}three ... ok\n", good.replace(prefix, "unrelated::"),
+            good + f"test {prefix}three ... FAILED\n",
+            good + f"test {prefix}three ... ignored\n",
+        ):
+            with self.subTest(output=bad), self.assertRaises(ValueError):
+                core.require_named_test_result(bad, prefix, 2)
+
+
+    def test_ownership_groups_require_both_retention_modules_and_ap_cases(self):
+        public = "physical_memory::tests::retention::"
+        internal = "physical_memory::retention::tests::"
+        ap = "physical_memory::tests::ap_resources::"
+        good = "".join(
+            f"test {prefix}case_{number} ... ok\n"
+            for prefix, count in ((public, 18), (internal, 2), (ap, 11))
+            for number in range(count)
+        )
+        core.require_ownership_test_results(good)
+        core.require_ownership_test_results(good.replace("\n", "\r\n"))
+        for prefix in (public, internal, ap):
+            line = f"test {prefix}case_0 ... ok\n"
+            for mutation, bad in (
+                ("missing", good.replace(line, "")),
+                ("duplicate", good + line),
+                ("failed", good.replace(line, line.replace("ok", "FAILED"))),
+                ("ignored", good.replace(line, line.replace("ok", "ignored"))),
+                ("relocated", good.replace(line, line.replace(prefix, "unrelated::"))),
+            ):
+                with self.subTest(prefix=prefix, mutation=mutation), self.assertRaises(ValueError):
+                    core.require_ownership_test_results(bad)
+        # An unchanged total cannot conceal loss of either retention module.
+        for bad in (good.replace(internal, public), good.replace(public, internal)):
+            with self.subTest(output=bad), self.assertRaises(ValueError):
+                core.require_ownership_test_results(bad)
 
 
 if __name__ == "__main__":

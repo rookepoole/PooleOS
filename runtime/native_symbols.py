@@ -9,6 +9,7 @@ import struct
 from pathlib import Path
 from typing import Any, Final, Iterable
 
+from runtime import native_kernel_entry
 from runtime.schema_validation import validate_json
 
 
@@ -108,16 +109,16 @@ PREFERRED_VIRTUAL_BASE: Final = 0xFFFF_FFFF_8000_0000
 VIRTUAL_WINDOW_END_EXCLUSIVE: Final = 0xFFFF_FFFF_C000_0000
 SLIDE_ALIGNMENT: Final = 2 * 1024 * 1024
 
-CANONICAL_IMAGE_BYTES: Final = 598_016
+CANONICAL_IMAGE_BYTES: Final = 602_112
 CANONICAL_ENTRY_OFFSET: Final = 0xA000
-CANONICAL_FILE_SHA256: Final = "D0AA3295F66AF02D48476BCEDC44D962A873E98FBA21F48A6753AA7BB9B24EA4"
-CANONICAL_LOADED_SHA256: Final = "A04DBBF39533A7A4013B94BB1551A281EF23F90CFCB270C06CBBD7B617F009FC"
-CANONICAL_BUILD_ID: Final = "PKBUILD1-CYCLE162-N12-ACTIVE-V001-0000000001"
-CANONICAL_BUILD_ID_SHA256: Final = "510AD87CF26AC166CA47711CA2968F9FEFF28233523282CED8BA32A8A7B0F016"
-CANONICAL_DEBUG_SHA256: Final = "2FC6F49278205E854B283666B21F875968B854B1565775FFCD26AD38C257D7AB"
-CANONICAL_DEBUG_BYTES: Final = 6_936_800
+CANONICAL_FILE_SHA256: Final = "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625"
+CANONICAL_LOADED_SHA256: Final = "940D941A32AAA3DC1E5F75295AFC47ECFB1FD07B75E359D9D4C5963A36E488BC"
+CANONICAL_BUILD_ID: Final = "PKBUILD1-CYCLE168-N12-AP-OWN-V002-0000000001"
+CANONICAL_BUILD_ID_SHA256: Final = "62AC16F52550AAF62455B196A632E785825739656A473C627239DB0A839B667C"
+CANONICAL_DEBUG_SHA256: Final = "A4B9D19DC8B38E1F5DB5C8609DAF833B3BED1CBD30DD866981A6C1B3A66FBBF2"
+CANONICAL_DEBUG_BYTES: Final = 7_024_792
 CANONICAL_SOURCE_MANIFEST_SHA256: Final = (
-    "68D111CC7E4C79BD798FAA4269F1FB8AF77BE5DA85AC2ACAD80645688400CE7C"
+    "51BD6E01E5A300FE3444EC2FF6352F7A6EAFE38C4728014596C540290A4779F2"
 )
 PUBLIC_SYMBOL_NAMES: Final = (
     "poole_kernel_entry",
@@ -146,6 +147,8 @@ IMPLEMENTATION_INPUTS: Final = (
     "native/kernel/Cargo.toml",
     "native/kernel/linker.ld",
     "native/kernel/manifest.pkm",
+    "runs/native_kernel_entry_readiness.json",
+    "runtime/native_kernel_entry.py",
     "runtime/native_symbols.py",
     "runtime/native_boot_artifact.py",
     "tools/generate_native_symbol_vectors.py",
@@ -850,9 +853,9 @@ def authorize_consumption(bundle: Bundle, context: ConsumptionContext) -> None:
 def canonical_segments() -> tuple[Segment, ...]:
     return (
         Segment(1, SEGMENT_RODATA, SEGMENT_READ, 0, 0xA000),
-        Segment(2, SEGMENT_TEXT, SEGMENT_READ | SEGMENT_EXECUTE, 0xA000, 0x68000),
-        Segment(3, SEGMENT_RELRO_DATA, SEGMENT_READ | SEGMENT_RELRO, 0x72000, 0xE000),
-        Segment(4, SEGMENT_DATA_BSS, SEGMENT_READ | SEGMENT_WRITE, 0x80000, 0x12000),
+        Segment(2, SEGMENT_TEXT, SEGMENT_READ | SEGMENT_EXECUTE, 0xA000, 0x69000),
+        Segment(3, SEGMENT_RELRO_DATA, SEGMENT_READ | SEGMENT_RELRO, 0x73000, 0xE000),
+        Segment(4, SEGMENT_DATA_BSS, SEGMENT_READ | SEGMENT_WRITE, 0x81000, 0x12000),
     )
 
 
@@ -860,8 +863,8 @@ def canonical_symbols() -> tuple[Symbol, ...]:
     public = SYMBOL_EXECUTABLE | SYMBOL_DIAGNOSTIC_PUBLIC
     return (
         Symbol(1, 2, SYMBOL_FUNCTION, BIND_GLOBAL, VISIBILITY_DEFAULT, PRIVACY_PUBLIC, public | SYMBOL_ENTRY, 0xA000, 71, "poole_kernel_entry"),
-        Symbol(2, 2, SYMBOL_FUNCTION, BIND_GLOBAL, VISIBILITY_DEFAULT, PRIVACY_PUBLIC, public | SYMBOL_PANIC_SAFE, 0x29A28, 198, "poole_kernel_emergency_panic"),
-        Symbol(3, 2, SYMBOL_FUNCTION, BIND_GLOBAL, VISIBILITY_DEFAULT, PRIVACY_PUBLIC, public, 0x29AEE, 70_643, "poole_kernel_rust_entry"),
+        Symbol(2, 2, SYMBOL_FUNCTION, BIND_GLOBAL, VISIBILITY_DEFAULT, PRIVACY_PUBLIC, public | SYMBOL_PANIC_SAFE, 0x2A604, 198, "poole_kernel_emergency_panic"),
+        Symbol(3, 2, SYMBOL_FUNCTION, BIND_GLOBAL, VISIBILITY_DEFAULT, PRIVACY_PUBLIC, public, 0x2A6CA, 70_876, "poole_kernel_rust_entry"),
     )
 
 
@@ -1375,6 +1378,29 @@ def golden_errors(value: dict[str, Any]) -> list[str]:
 
 def readiness_errors(value: dict[str, Any], root: Path = ROOT) -> list[str]:
     errors = validate_json(value, read_json(root / READINESS_SCHEMA_RELATIVE))
+    # The debug correspondence is meaningful only for current, matching entry evidence.
+    try:
+        kernel = read_json(root / native_kernel_entry.READINESS_RELATIVE)
+        kernel_issues = validate_json(kernel, read_json(root / native_kernel_entry.READINESS_SCHEMA_RELATIVE))
+        if kernel_issues:
+            errors.append("PSYM1 kernel entry evidence has invalid schema")
+        else:
+            errors.extend(f"PSYM1 kernel entry evidence: {error}" for error in native_kernel_entry.readiness_errors(kernel, root))
+            product = kernel["product"]
+            for field, expected in (
+                ("canonical_sha256", CANONICAL_FILE_SHA256),
+                ("loaded_sha256", CANONICAL_LOADED_SHA256),
+                ("linked_sha256", CANONICAL_DEBUG_SHA256),
+                ("linked_byte_count", CANONICAL_DEBUG_BYTES),
+                ("image_byte_count", CANONICAL_IMAGE_BYTES),
+                ("entry_offset", CANONICAL_ENTRY_OFFSET),
+            ):
+                if product.get(field) != expected:
+                    errors.append(f"PSYM1 kernel entry identity changed: {field}")
+            if product.get("manifest_fields", {}).get("build_id") != CANONICAL_BUILD_ID:
+                errors.append("PSYM1 kernel entry identity changed: build_id")
+    except (OSError, ValueError, KeyError, TypeError, AttributeError):
+        errors.append("PSYM1 kernel entry evidence is unavailable or malformed")
     if value.get("contract_id") != CONTRACT_ID or value.get("status") != "pass":
         errors.append("PSYM1 readiness status changed")
     if value.get("production_ready") is not False or value.get("production_promotion_allowed") is not False:

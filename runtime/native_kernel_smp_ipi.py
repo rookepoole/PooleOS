@@ -8,7 +8,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from runtime import native_kernel_transfer
+from runtime import native_inner_live, native_kernel_load, native_kernel_transfer
 from runtime.schema_validation import validate_json
 
 
@@ -87,6 +87,10 @@ IMPLEMENTATION_INPUTS = (
     "native/kernel/src/acpi.rs",
     "native/kernel/src/interrupt_time.rs",
     "native/kernel/src/physical_memory.rs",
+    "native/kernel/src/physical_memory/retention.rs",
+    "native/kernel/src/physical_memory/tests/ap_resources.rs",
+    "native/kernel/src/reclamation.rs",
+    "native/kernel/src/reclamation/ap_resources.rs",
     "native/kernel/src/smp.rs",
     "native/kernel/src/smp_runtime.rs",
     "native/kernel/src/smp_ipi.rs",
@@ -94,6 +98,9 @@ IMPLEMENTATION_INPUTS = (
     "native/kernel/src/xstate.rs",
     "native/kmap/src/lib.rs",
     "runtime/native_kernel_smp_ipi.py",
+    "runtime/native_kernel_transfer.py",
+    "runtime/native_kernel_load.py",
+    "runtime/native_inner_live.py",
     "specs/native-kernel-entry-contract.json",
     "specs/native-kernel-map-contract.json",
     "specs/native-kernel-smp-ipi-contract.json",
@@ -139,10 +146,10 @@ NEGATIVE_CONTROL_IDS = (
 
 EARLY = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-EARLY PASS contract=(?P<contract>PKSMP5) selector=(?P<selector>[0-9]+) bsp=(?P<bsp>[0-9]+) if=(?P<iflag>[0-9]+) stack=validated_by_wrapper serial=initialized$")
 TOPOLOGY = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-TOPOLOGY PASS contract=(?P<contract>PKSMP5) processors=(?P<processors>[0-9]+) enabled=(?P<enabled>[0-9]+) bsp_apic_id=(?P<bsp>[0-9]+) target_apic_ids=(?P<targets>[0-9,]+) target_mask=0x(?P<mask>[0-9A-F]{16}) apic_physical=0x(?P<apic>[0-9A-F]{16}) selection=(?P<selection>[a-z_]+)$")
-PARTIAL = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-PARTIAL-ROLLBACK PASS contract=(?P<contract>PKSMP5) started_mask=0x(?P<started>[0-9A-F]{16}) timeout_apic_id=(?P<timeout_apic>[0-9]+) timeout_mask=0x(?P<timeout_mask>[0-9A-F]{16}) timeout_count=(?P<timeouts>[0-9]+) parked_mask=0x(?P<parked>[0-9A-F]{16}) released_mask=0x(?P<released>[0-9A-F]{16}) resource_pages=(?P<resource_pages>[0-9]+) frame_pages=(?P<frame_pages>[0-9]+) zeroed_bytes=(?P<zeroed>[0-9]+) verified_bytes=(?P<verified>[0-9]+) fresh_allocation_required=(?P<fresh>[0-9]+)$")
+PARTIAL = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-PARTIAL-ROLLBACK PASS contract=(?P<contract>PKSMP5) started_mask=0x(?P<started>[0-9A-F]{16}) timeout_apic_id=(?P<timeout_apic>[0-9]+) timeout_mask=0x(?P<timeout_mask>[0-9A-F]{16}) timeout_count=(?P<timeouts>[0-9]+) parked_mask=0x(?P<parked>[0-9A-F]{16}) released_mask=0x(?P<released>[0-9A-F]{16}) resource_pages=(?P<resource_pages>[0-9]+) frame_pages=(?P<frame_pages>[0-9]+) zeroed_bytes=(?P<zeroed>[0-9]+) verified_bytes=(?P<verified>[0-9]+) retained_free_rejections=(?P<retained>[0-9]+) owner_release_rejections=(?P<owner>[0-9]+) fresh_allocation_required=(?P<fresh>[0-9]+)$")
 RETRY = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-RETRY PASS contract=(?P<contract>PKSMP5) retry_count=(?P<retry>[0-9]+) partial_rollback_count=(?P<rollbacks>[0-9]+) started_mask=0x(?P<started>[0-9A-F]{16}) online_mask=0x(?P<online>[0-9A-F]{16}) simultaneous_online=(?P<simultaneous>[0-9]+)$")
 AP = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=(?P<contract>PKSMP5) ap_index=(?P<index>[0-9]+) apic_id=(?P<apic_id>[0-9]+) physical_start=0x(?P<start>[0-9A-F]{16}) pages=(?P<pages>[0-9]+) sipi_vector=(?P<vector>[0-9]+) trampoline_bytes=(?P<trampoline>[0-9]+) allocation_sequence=(?P<allocation>[0-9]+) frame_allocation_sequences=(?P<frame_allocations>[0-9,]+) frame_release_sequences=(?P<frame_releases>[0-9,]+) resource_release_sequence=(?P<resource_release>[0-9]+) service_state=(?P<service>[0-9]+) mailbox_state=(?P<mailbox>[0-9]+) runtime_state=(?P<runtime>[0-9]+) deliveries=(?P<deliveries>[0-9]+) accepted=(?P<accepted>[0-9]+) denied=(?P<denied>[0-9]+) eois=(?P<eois>[0-9]+) diagnostic=(?P<diagnostic>[0-9]+) shootdown=(?P<shootdown>[0-9]+) stop=(?P<stop>[0-9]+) timeout_count=(?P<timeouts>[0-9]+) init_asserts=(?P<asserts>[0-9]+) init_deasserts=(?P<deasserts>[0-9]+) sipis=(?P<sipis>[0-9]+) target_mask=0x(?P<target>[0-9A-F]{16}) ack_mask=0x(?P<ack>[0-9A-F]{16}) invalidations=(?P<invalidations>[0-9]+) baseline_checksum=0x(?P<baseline>[0-9A-F]{16}) runtime_checksum=0x(?P<runtime_checksum>[0-9A-F]{16}) response_checksum=0x(?P<response>[0-9A-F]{16}) tss_busy=(?P<tss>[0-9]+) idt_verified=(?P<idt>[0-9]+) xstate_verified=(?P<xstate>[0-9]+) apic_table_verified=(?P<apic_table>[0-9]+) parked=(?P<parked>[0-9]+)$")
-SHOOTDOWN = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-SHOOTDOWN PASS contract=(?P<contract>PKSMP5) target_mask=0x(?P<target>[0-9A-F]{16}) ack_mask=0x(?P<ack>[0-9A-F]{16}) retired_generation=(?P<retired>[0-9]+) active_generation=(?P<active>[0-9]+) invalidations=(?P<invalidations>[0-9]+) root_checksum=0x(?P<roots>[0-9A-F]{16}) old_frame_checksum=0x(?P<old>[0-9A-F]{16}) new_frame_checksum=0x(?P<new>[0-9A-F]{16}) premature_reclaim_rejections=(?P<premature>[0-9]+) reclaim_state=(?P<state>[a-z_]+)$")
+SHOOTDOWN = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-SHOOTDOWN PASS contract=(?P<contract>PKSMP5) target_mask=0x(?P<target>[0-9A-F]{16}) ack_mask=0x(?P<ack>[0-9A-F]{16}) retired_generation=(?P<retired>[0-9]+) active_generation=(?P<active>[0-9]+) invalidations=(?P<invalidations>[0-9]+) root_checksum=0x(?P<roots>[0-9A-F]{16}) old_frame_checksum=0x(?P<old>[0-9A-F]{16}) new_frame_checksum=0x(?P<new>[0-9A-F]{16}) premature_reclaim_rejections=(?P<premature>[0-9]+) retained_free_rejections=(?P<retained>[0-9]+) owner_release_rejections=(?P<owner>[0-9]+) reclaim_state=(?P<state>[a-z_]+)$")
 LIFECYCLE = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-LIFECYCLE PASS contract=(?P<contract>PKSMP5) started_mask=0x(?P<started>[0-9A-F]{16}) online_mask=0x(?P<online>[0-9A-F]{16}) quiesced_mask=0x(?P<quiesced>[0-9A-F]{16}) parked_mask=0x(?P<parked>[0-9A-F]{16}) validated_mask=0x(?P<validated>[0-9A-F]{16}) released_mask=0x(?P<released>[0-9A-F]{16}) timeout_count=(?P<timeouts>[0-9]+) retry_count=(?P<retry>[0-9]+) partial_rollback_count=(?P<rollbacks>[0-9]+) exact_accounting=(?P<exact>[0-9]+)$")
 RELEASE = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-RELEASE PASS contract=(?P<contract>PKSMP5) resource_pages=(?P<resource_pages>[0-9]+) frame_pages=(?P<frame_pages>[0-9]+) resource_zeroed_bytes=(?P<resource_zeroed>[0-9]+) resource_verified_bytes=(?P<resource_verified>[0-9]+) frame_zeroed_bytes=(?P<frame_zeroed>[0-9]+) frame_verified_bytes=(?P<frame_verified>[0-9]+) total_pages=(?P<total>[0-9]+) capability_revoked=(?P<capability>[0-9]+) runtime_revoked=(?P<runtime>[0-9]+) mmio_revoked=(?P<mmio>[0-9]+) pic_restored=(?P<pic>[0-9]+) hpet_restored=(?P<hpet>[0-9]+) apic_base_restored=(?P<apic>[a-z_]+)$")
 RESULT = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-RESULT PASS contract=(?P<contract>PKSMP5) profile=(?P<profile>sandybridge_x87_sse_four_vcpu) aps=(?P<aps>[0-9]+) simultaneous_online=(?P<simultaneous>[0-9]+) partial_start_timeout=(?P<partial_timeout>[0-9]+) partial_rollback=(?P<rollback>[0-9]+) fresh_retry=(?P<retry>[0-9]+) target_mask=0x(?P<target>[0-9A-F]{16}) ack_mask=0x(?P<ack>[0-9A-F]{16}) tlb_invalidations=(?P<invalidations>[0-9]+) no_reuse_before_all_acks=(?P<no_reuse>[0-9]+) stop_quiesced=(?P<quiesced>[0-9]+) ap_parked=(?P<parked>[0-9]+) resources_released=(?P<released>[0-9]+) scheduler=(?P<scheduler>[0-9]+) general_broadcast=(?P<broadcast>[0-9]+) target_hardware=(?P<target_hardware>[0-9]+) signatures=(?P<signatures>[0-9]+) authority=(?P<authority>[0-9]+) actions=(?P<actions>[0-9]+) production=(?P<production>[0-9]+) terminal=(?P<terminal>[a-z_]+)$")
@@ -189,7 +196,33 @@ def file_binding(root: Path, relative: str) -> dict[str, Any]:
 
 
 def expected_inputs(root: Path = ROOT) -> dict[str, Any]:
-    return {"implementation": [file_binding(root, path) for path in IMPLEMENTATION_INPUTS]}
+    return {
+        "implementation": [file_binding(root, path) for path in IMPLEMENTATION_INPUTS],
+        "boot_transfer": file_binding(root, native_kernel_transfer.READINESS_RELATIVE),
+        "boot_artifacts": [
+            {"path": path, "byte_count": len(data), "sha256": sha256_bytes(data)}
+            for path, data in sorted(native_kernel_load.canonical_artifact_files().items())
+        ],
+    }
+
+
+def _current_boot_revalidation(root: Path) -> dict[str, Any]:
+    dependency = read_json(root / native_kernel_transfer.READINESS_RELATIVE)
+    _require(isinstance(dependency, dict), "PKSMP5 transfer dependency must be an object")
+    if native_kernel_transfer.readiness_errors(dependency, root):
+        raise KernelSmpIpiError("PKSMP5 transfer dependency is not source-current")
+    runs = dependency["execution"]["runs"]
+    _require(len(runs) == 2, "PKSMP5 transfer dependency requires two runs")
+    observed = [native_kernel_transfer.validate_markers(run["markers"])["kernel_revalidation"]
+                for run in runs]
+    _require(observed[0] == observed[1], "PKSMP5 transfer dependency boot observations disagree")
+    files = native_kernel_load.canonical_artifact_files()
+    digest = native_inner_live.retained_set_sha256(
+        [files[item[4]] for item in native_kernel_load.ARTIFACT_DEFINITIONS]
+    )
+    _require(observed[0]["retained_set_sha256"] == digest,
+             "PKSMP5 transfer dependency does not describe current boot artifacts")
+    return observed[0]
 
 
 def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
@@ -203,12 +236,29 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
 def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     issues = validate_json(readiness, read_json(root / READINESS_SCHEMA_RELATIVE))
     errors = [f"schema {issue.path}: {issue.message}" for issue in issues]
-    if readiness.get("inputs") != expected_inputs(root):
-        errors.append("readiness input bindings are stale")
+    if errors:
+        return errors
     controls = readiness.get("negative_controls", [])
     ids = [item.get("id") for item in controls if isinstance(item, dict)]
     if ids != list(NEGATIVE_CONTROL_IDS):
         errors.append("readiness negative-control order diverges")
+    try:
+        if readiness.get("inputs") != expected_inputs(root):
+            errors.append("readiness input bindings are stale")
+        current_boot = _current_boot_revalidation(root)
+        execution = readiness["execution"]
+        runs = execution["runs"]
+        if len(runs) != 2 or execution["run_count"] != 2:
+            raise KernelSmpIpiError("PKSMP5 requires two recorded runs")
+        observed = [validate_markers(run["markers"]) for run in runs]
+        if any(item["transfer_prefix"]["kernel_revalidation"] != current_boot for item in observed):
+            raise KernelSmpIpiError("PKSMP5 recorded runs do not match current boot revalidation")
+        if any(run["marker_summary"] != item for run, item in zip(runs, observed, strict=True)):
+            raise KernelSmpIpiError("PKSMP5 recorded marker summary disagrees with its markers")
+        if execution["observation"] != observed[0]:
+            raise KernelSmpIpiError("PKSMP5 aggregate observation disagrees with its first run")
+    except (OSError, KeyError, TypeError, ValueError, IndexError, KernelSmpIpiError) as error:
+        errors.append(f"recorded execution invalid: {error}")
     return errors
 
 
@@ -468,6 +518,11 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
     _require(_hex(topology, "mask") == TARGET_CPU_MASK and _hex(topology, "apic") == APIC_PHYSICAL_ADDRESS and topology.group("selection") == "exact_enabled_legacy_apic_topology", "PKSMP5 topology policy changed")
 
     lifecycle_model = MultiApLifecycleModel()
+    for label, observed in (("partial", partial), ("full", shootdown)):
+        _require(
+            (_dec(observed, "retained"), _dec(observed, "owner")) == (27, 18),
+            f"PKAPOWN1 {label} retained-resource release denials changed",
+        )
     lifecycle_model.partial(_hex(partial, "started"), _hex(partial, "timeout_mask"), _hex(partial, "parked"), _hex(partial, "released"))
     _require((_dec(partial, "timeout_apic"), _dec(partial, "timeouts"), _dec(partial, "resource_pages"), _dec(partial, "frame_pages"), _dec(partial, "zeroed"), _dec(partial, "verified"), _dec(partial, "fresh")) == (4, 1, 96, 6, 417792, 417792, 1), "PKSMP5 partial rollback receipt changed")
     lifecycle_model.retry(_hex(retry, "started"), _hex(retry, "online"))
@@ -494,7 +549,7 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         frame_allocations = _csv_numbers(match.group("frame_allocations"))
         frame_releases = _csv_numbers(match.group("frame_releases"))
         layouts.append(layout)
-        aps.append({"index": index, "apic_id": EXPECTED_APIC_IDS[index], "layout": layout, "allocation_sequence": _dec(match, "allocation"), "frame_allocation_sequences": frame_allocations, "frame_release_sequences": frame_releases, "resource_release_sequence": _dec(match, "resource_release"), "trampoline_bytes": _dec(match, "trampoline"), "response_checksum": response_expected})
+        aps.append({"index": index, "apic_id": EXPECTED_APIC_IDS[index], "layout": layout, "allocation_sequence": _dec(match, "allocation"), "frame_allocation_sequences": list(frame_allocations), "frame_release_sequences": list(frame_releases), "resource_release_sequence": _dec(match, "resource_release"), "trampoline_bytes": _dec(match, "trampoline"), "response_checksum": response_expected})
     validate_receipt_sequences(aps)
     _require([item["start"] for item in layouts] == [0x1000, 0x23000, 0x45000], "PKSMP5 private resource placement changed")
     _require(len({item["pml4"] for item in layouts}) == AP_COUNT, "PKSMP5 private roots alias")
@@ -538,6 +593,12 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         "topology": {"processors": 4, "enabled": 4, "bsp_apic_id": 0, "target_apic_ids": list(EXPECTED_APIC_IDS), "target_mask": TARGET_CPU_MASK},
         "partial_rollback": {"started_mask": PARTIAL_STARTED_MASK, "offline_apic_id": 4, "timeout_count": 1, "parked_mask": PARTIAL_STARTED_MASK, "released_mask": TARGET_CPU_MASK, "resource_pages": 96, "frame_pages": 6},
         "retry": {"retry_count": 1, "simultaneous_online": True},
+        "execution_ownership": {
+            "contract_id": "PKAPOWN1", "attempt_count": 2,
+            "retained_free_rejections_per_attempt": 27,
+            "owner_release_rejections_per_attempt": 18,
+            "general_cpu_retirement_verified": False,
+        },
         "aps": aps,
         "shootdown": {"target_mask": TARGET_CPU_MASK, "ack_mask": TARGET_CPU_MASK, "invalidation_count": 3, "premature_reclaim_rejections": 2, "stage": reclaim.stage},
         "release": {"resource_pages": 96, "frame_pages": 6, "total_pages": 102, "verified_bytes": 417792},

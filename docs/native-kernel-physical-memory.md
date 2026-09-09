@@ -78,14 +78,16 @@ repeats return the immutable receipt without physical access.
 ## Stable Manager and Ledgers
 
 The stable 15,632-byte manager occupies five scrubbed DMA32 pages owned by
-`0x4D45` and mapped supervisor RW/NX at `0xFFFFFFFF801BA000` between absent
+`0x4D45` and mapped supervisor RW/NX at `0xFFFFFFFF801BB000` between absent
 guards. It stores bounded bootstrap arrays, the active generation descriptor,
 integrity state, and rollback state. Once a ledger generation is active, all
 ordinary source, extent, allocation, scrub-receipt, and reclaim-receipt
 operations use that mapped generation.
 
-Two alternate guarded 32-page windows begin at `0xFFFFFFFF801C1000` and
-`0xFFFFFFFF801E3000`. PKPMM7 materializes four active generations:
+Two alternate guarded 32-page windows begin at `0xFFFFFFFF801C2000` and
+`0xFFFFFFFF801E4000`. These addresses follow the current 147-page kernel
+reservation in `poole_kmap`, not the earlier 146-page layout. PKPMM7
+materializes four active generations:
 
 1. generation 2: 4 pages, capacities `256/32/256/16/2`;
 2. generation 5: 8 pages, capacities `512/64/512/32/4`;

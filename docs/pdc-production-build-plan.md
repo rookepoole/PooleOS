@@ -1,15 +1,172 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-09-08
-Plan version: 2.71.0-native-dependency-replay
-Roadmap cycle: PooleOS Cycle 165
+Status date: 2026-09-09
+Plan version: 2.75.0-native-memory-dependency-replay
+Roadmap cycle: PooleOS Cycle 171
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 165 Native Dependency Replay
+## Cycle 171: Native Dependency Replay Complete
+
+N9.1-N9.4 memory/ACPI/VM and the dependent N8/N12 profiles pass on the unchanged
+Cycle 168 kernel: fourteen profiles, 28 final headless boots, 660 control groups
+and 2,126 rejected cases. Four superseded boots are preserved separately.
+All 27 selected native checks pass; the final profile/map/gate suite passes
+153 tests with two optional local-transcript skips.
+
+The existing N36 audit now includes source-current SMP boot-artifact binding,
+malformed transfer-dependency rejection and regenerated-byte drift controls.
+Five added test methods cover nine dependency rejection cases. Measured PMM/VM
+page geometry, eleven host/image gates and three test expectations are corrected;
+twenty memory and 38 stale host/image regressions reject. No validation boundary
+is relaxed. General N36 coverage and N9/N12 ownership/hygiene remain open.
+
+Next: runtime-inclusive exact-final canonical qualification with bundle and
+replay inputs, then publication and GitHub review/merge gates. Only afterward
+resume N12-CONCURRENCY-RECLAMATION-001 task-stack and general CPU-retirement
+integration. Main is qualified Cycle 165 and PR #76 is draft at this checkpoint.
+No phase, flag, charter condition or production gate closes. PooleGlyph and demo
+ISO bytes are unchanged. [Cycle 171 evidence](checkpoints/cycle171-native-dependency-replay.md).
+
+## Historical Cycle 170: Trap And CPU State Requalified
+
+N7.1/N7.3-N7.6 replay completes on the unchanged Cycle 168 kernel: five live
+profiles, fourteen successful headless boots, 225 marker controls and 42
+focused tests. One expected TCG exception diagnostic is separate from the
+two WHPX exception successes. Each qualifier passes 243 kernel host tests;
+no native implementation or kernel-image bytes change.
+
+Fresh trap execution exposed two stale aggregate-gate acceptance pins. Their
+measured repair and failing-then-passing seven-test result are preserved.
+A new regression rejects 17 stale identity and production/authority cases
+across the five current gates. Existing N36 receipt coverage remains open.
+
+The selected projection improves to 14/27. Thirteen checks remain stale;
+the prior SMP receipt separately requires current-boot-artifact replay and
+transitive-input audit. Next is N9-PMM-ACPI-CONSUMER-001, then VM/IRQ/SMP,
+scheduler, atomics and locks before exact-final runtime-inclusive qualification
+and PR #76 merge review. Main stays qualified Cycle 165. No phase, flag or
+production gate closes; all checklist mappings, PooleGlyph and demo ISO bytes
+are preserved. [Cycle 170 evidence](checkpoints/cycle170-cpu-state-replay.md).
+
+## Historical Cycle 169: Boot Chain Requalified
+
+N5.5/N5.6/N5.8 now has six current component receipts for the unchanged
+Cycle 168 kernel: PSYM1, PPOL1, PKLOAD6, PooleBoot, PKREVAL1 and PKXFER1.
+Six fresh headless boots include two actual kernel entries, independent
+nine-file revalidation and the expected unsigned-policy halt. All 83 focused
+regressions pass. Symbol identity and lookup geometry are independently
+remeasured; symbol readiness now rejects stale kernel-entry evidence.
+
+The selected projection passes 9/27 checks; 18 reject stale dependencies.
+The prior AP receipt still passes its declared bindings but also needs replay
+with the new boot artifact set during N8 qualification. Its two earlier boots
+are not new Cycle 169 evidence. Record the transitive-input coverage audit
+under the existing N36 receipt flag. Full canonical qualification is not run.
+
+Next is N7-TRAP-001, then CPU, memory, IRQ/SMP, scheduler, atomics and locks.
+Update current evidence in dependency order before exact-final qualification,
+publication and PR #76 merge review. Main remains qualified Cycle 165.
+No phase/flag or production gate closes; PooleGlyph, kernel and demo ISO bytes
+are unchanged. [Cycle 169 evidence](checkpoints/cycle169-boot-chain-replay.md).
+
+## Historical Cycle 168: Bounded AP Ownership Qualified
+
+N12.3 now has actual three-AP runtime/stack and two-frame retention, exposure
+tracking before startup, release denial during possible execution, and
+ownership-preserving scrub/readback/allocator commit. Two final four-vCPU
+guest runs exercise partial startup rollback and complete startup, each with
+27 copied-free and 18 owner-release rejections per attempt. Cleanup releases
+96 runtime pages and six frame pages only after parking and verification.
+
+The measured 147-page kernel passes 243 host tests, 43 entry negative controls,
+two identical clean same-host builds, 30 SMP control groups / 249 cases and
+56 focused regressions. The Rust retained-map probe and independent Python
+model agree. Test-count, serialized-receipt, build-ID and mapping-diagnostic
+failures are retained alongside the repairs and final reruns.
+
+The current projection passes 4/27 selected native checks, with reclamation
+separately source-verified. Twenty-three changed-image dependencies need replay.
+The machine ledger preserves old boot/CPU/dependency receipts as historical;
+the exact-final qualified Cycle 165 main revision does not qualify this image.
+PR #76 stays draft until full qualification and merge conditions pass.
+
+Existing ADD/FLAG-N12-CONCURRENCY-RECLAMATION-001 and the N36 receipt-coverage
+flag remain open. No phase, subphase, requirement or flag closes. Preserve
+40 phases, 301 subphases, 57 ADD requirements, 94 flags (35 open), 20 gaps and
+8,996 checklist requirements. General task-stack ownership, CPU retirement,
+hardware quiescence and whole-OS production functionality remain open.
+
+Next move: N5-SYMBOLS-SEMANTICS-001, followed by dependency-ordered boot, CPU,
+memory, interrupt, scheduler, atomic and lock replay. Then freeze and pass
+runtime-inclusive exact-final qualification, publication and GitHub review
+conditions. N0 custody is separate; PooleGlyph and the frozen demo are unchanged.
+[Cycle 168 evidence and retained failure history](checkpoints/cycle168-ap-ownership-qualification.md).
+
+## Historical Cycle 167 Branch Checkpoint
+
+Qualified work through Cycle 165 is already on `main` through PR #75.
+Cycles 166-167 are backed up through draft PR #76 on
+`agent/n12-ap-execution-ownership`; backup does not require merging unfinished
+kernel changes into the qualified baseline.
+
+Under N12.3 and the existing concurrency/reclamation ADD and flag, Cycle 167
+adds all-region AP ownership probes and observed-counter validation to the
+partial-start and full-start paths. The newly measured 147-page kernel passes
+PKENTRY1: 243 host tests, 43 negative controls and two byte-identical clean
+same-host builds. The reclamation qualifier then fails its named-test check:
+18 retention tests are in one module and two in another, while it expects all
+20 in the first. The underlying 243-test release run passes. This diagnostic
+does not substitute for a repaired qualifier and successful rerun.
+
+Fresh SMP guest boots have not run. Updated map fixtures, measured SMP control
+counts, source-bound receipts, machine-roadmap/architecture reconciliation,
+dependency-ordered native replay and the exact-final canonical suite remain
+pending. The machine ledger still describes Cycle 165; it does not qualify this
+work-in-progress branch. No phase, requirement, flag or production gate closes.
+The frozen demo and PooleGlyph remain unchanged.
+
+Next move: repair and negatively test the retention-count accounting, rerun
+reclamation and SMP qualification, then begin changed-image dependencies at
+N5-SYMBOLS-SEMANTICS-001. Complete the authority and receipt reconciliation
+before exact-final qualification and a main merge.
+[Cycle 167 evidence, failures and merge blockers](checkpoints/cycle167-ap-live-controls-wip.md).
+
+## Historical Cycle 166 Branch Checkpoint
+
+The requested checkpoint consolidation is complete through Cycle 165:
+[PR #75](https://github.com/rookepoole/PooleOS/pull/75) merged as `6f9399c`,
+with identical tested and merged trees. Its exact-final run passed 105/105
+canonical gates and 708/708 Doctor checks; the full Python suite succeeded
+with 924 discovered tests. This supersedes the historical pre-merge status
+below, not the qualification requirements for newly changed source.
+
+Current branch work is N12.3, `ADD-N12-CONCURRENCY-RECLAMATION-001` and
+`FLAG-N12-CONCURRENCY-RECLAMATION-001`. The actual three-AP path now uses a
+retained owner for the runtime/stack allocation and both data frames, tracks
+potential CPU exposure, and preserves retention across fallible scrubbing.
+Host verification passes 243 kernel tests in both modes, nine compile-fail
+tests, host/freestanding Clippy and a freestanding link. The initial unused
+field build failure and its repair are recorded. No new live boot is claimed.
+
+This is a source-backup checkpoint, not a completed roadmap reconciliation.
+The machine roadmap, architecture bindings and readiness ledgers still record
+the Cycle 165 baseline; they do not qualify the changed branch. Preserve the
+40 phases, 301 subphases, 57 ADD requirements, 94 flags (35 open), twenty gaps
+and all 8,996 checklist requirements. No phase or flag closes.
+
+Before this branch can merge: complete runtime/new-frame live ownership
+controls and review the hardware park boundary; assign and measure the new
+kernel identity/layout; replay changed-image dependencies; reconcile every
+affected source-bound readiness/roadmap/schema/test artifact; then pass the
+runtime-inclusive exact-final suite, publication scan and GitHub review gates.
+N0 custody remains separate. The frozen demo and PooleGlyph are unchanged.
+[Cycle 166 checkpoint and next move](checkpoints/cycle166-ap-ownership-wip.md).
+
+## Historical Cycle 165 Native Dependency Replay
 
 The N9.1/N9.2 `N9-PMM-ACPI-CONSUMER-001` and N9.3/N9.4
 `N9-VM-DIRECT-MAP-001` replay continues through the existing N8 interrupt/SMP

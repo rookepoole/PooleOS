@@ -43,6 +43,7 @@ use poolekernel::{
         run_profile as run_physical_memory_profile,
     },
     privilege_msr::{machine_check_bank_count, machine_check_ctl_present, validate_snapshot},
+    reclamation::ap_resources::{self, ApResources, Part as ApResourcePart},
     revalidation,
     scheduler::{
         ContextSwitchContract as SchedulerContextSwitchContract, CpuId as SchedulerCpuId,
@@ -443,7 +444,7 @@ pkvm_fragment!(
 );
 pkvm_fragment!(
     PKVM_LAYOUT,
-    b"POOLEOS:KERNEL:VM-LAYOUT PASS contract=PKVM1 canonical_bits=48 null_guard_end=0x0000000000010000 user_end=0x0000800000000000 kernel_start=0xFFFF800000000000 direct_start=0xFFFF900000000000 direct_end=0xFFFFD00000000000 temp_start=0xFFFFFFFF801B8000 temp_end=0xFFFFFFFF801B9000 kernel_image_start=0xFFFFFFFF80000000 kernel_image_end=0xFFFFFFFFC0000000 window_start=0x0000000040000000 window_pages=512\n"
+    b"POOLEOS:KERNEL:VM-LAYOUT PASS contract=PKVM1 canonical_bits=48 null_guard_end=0x0000000000010000 user_end=0x0000800000000000 kernel_start=0xFFFF800000000000 direct_start=0xFFFF900000000000 direct_end=0xFFFFD00000000000 temp_start=0xFFFFFFFF801B9000 temp_end=0xFFFFFFFF801BA000 kernel_image_start=0xFFFFFFFF80000000 kernel_image_end=0xFFFFFFFFC0000000 window_start=0x0000000040000000 window_pages=512\n"
 );
 pkvm_fragment!(
     PKVM_TABLES,
@@ -1124,6 +1125,8 @@ pksmp5_fragment!(PKSMP5_RESOURCE_PAGES, b" resource_pages=");
 pksmp5_fragment!(PKSMP5_FRAME_PAGES, b" frame_pages=");
 pksmp5_fragment!(PKSMP5_ZEROED_BYTES, b" zeroed_bytes=");
 pksmp5_fragment!(PKSMP5_VERIFIED_BYTES, b" verified_bytes=");
+pksmp5_fragment!(PKSMP5_RETAINED_FREES, b" retained_free_rejections=");
+pksmp5_fragment!(PKSMP5_OWNER_RELEASES, b" owner_release_rejections=");
 pksmp5_fragment!(PKSMP5_PARTIAL_TAIL, b" fresh_allocation_required=1\n");
 pksmp5_fragment!(PKSMP5_PARTIAL_ROLLBACK_COUNT, b" partial_rollback_count=");
 pksmp5_fragment!(PKSMP5_STARTED_MASK, b" started_mask=");
@@ -4399,11 +4402,10 @@ impl From<SmpRuntimeLiveError> for SmpIpiLiveError {
 
 struct SmpIpiApResource {
     target_apic_id: u32,
-    allocation: AllocationHandle,
     allocation_receipt: ScrubReceipt,
     layout: smp_runtime::ResourceLayout,
     old_frame: Option<AllocationHandle>,
-    old_frame_retention: Option<poolekernel::physical_memory::RetainedAllocation>,
+    ownership: ApResources,
     old_frame_allocation_receipt: ScrubReceipt,
     old_frame_physical: u64,
     new_frame: Option<AllocationHandle>,
@@ -4438,6 +4440,13 @@ struct SmpIpiPartialRollbackProof {
     frame_pages_released: u64,
     zeroed_bytes: u64,
     verified_bytes: u64,
+    retention: SmpIpiRetentionProof,
+}
+
+#[derive(Clone, Copy, Default)]
+struct SmpIpiRetentionProof {
+    copied_frees: u64,
+    owner_releases: u64,
 }
 
 struct SmpIpiLiveProof {
@@ -4452,6 +4461,7 @@ struct SmpIpiLiveProof {
     lifecycle: smp_ipi::MultiApReceipt,
     retirement: smp_ipi::MultiGenerationRetirementReceipt,
     premature_reclaim_rejections: u64,
+    retention: SmpIpiRetentionProof,
     scheduler: Option<SchedulerSmpLiveProof>,
     ap_workers: Option<SchedulerApWorkersLiveProof>,
     smp_preempt: Option<SchedulerSmpPreemptLiveProof>,
@@ -5852,19 +5862,17 @@ fn smp_ipi_allocate_ap_resource(
             apic_physical,
             &shootdown,
         )?;
-        let retained = manager
-            .retain_allocation(old_frame)
-            .map_err(smp_ipi_memory_error)?;
-        Ok((bytes, handlers, retained))
+        let ownership = ApResources::new(manager, target_apic_id, allocation, old_frame, new_frame)
+            .map_err(smp_ap_ownership_error)?;
+        Ok((bytes, handlers, ownership))
     })();
     match prepare_result {
-        Ok((trampoline_bytes, handlers, retained)) => Ok(SmpIpiApResource {
+        Ok((trampoline_bytes, handlers, ownership)) => Ok(SmpIpiApResource {
             target_apic_id,
-            allocation,
             allocation_receipt,
             layout,
             old_frame: Some(old_frame),
-            old_frame_retention: Some(retained),
+            ownership,
             old_frame_allocation_receipt,
             old_frame_physical,
             new_frame: Some(new_frame),
@@ -5888,28 +5896,34 @@ fn smp_ipi_allocate_ap_resource(
     }
 }
 
-fn smp_ipi_end_old_frame_retention(
+fn smp_ap_ownership_error(error: ap_resources::Error) -> SmpIpiLiveError {
+    match error {
+        ap_resources::Error::PhysicalMemory(error) => smp_ipi_memory_error(error),
+        _ => smp_ipi::Error::Transition.into(),
+    }
+}
+
+fn smp_ipi_release_owned_part(
     manager: &mut PhysicalMemoryManager,
+    access: &mut BootstrapTableMemory,
     resource: &mut SmpIpiApResource,
-) -> Result<(), SmpIpiLiveError> {
-    let Some(retained) = resource.old_frame_retention.take() else {
-        return if resource.old_frame.is_none() {
-            Ok(())
-        } else {
-            Err(smp_ipi::Error::Transition.into())
-        };
-    };
-    if Some(retained.handle()) != resource.old_frame {
-        resource.old_frame_retention = Some(retained);
-        return Err(smp_ipi::Error::Transition.into());
+    part: ApResourcePart,
+    automatic: bool,
+) -> Result<ScrubReceipt, SmpIpiLiveError> {
+    let receipt = if automatic {
+        resource
+            .ownership
+            .release_scrubbed_automatic(part, manager, access)
+    } else {
+        resource.ownership.release_scrubbed(part, manager, access)
     }
-    match manager.release_retention(retained) {
-        Ok(_) => Ok(()),
-        Err((error, retained)) => {
-            resource.old_frame_retention = Some(retained);
-            Err(smp_ipi_memory_error(error))
-        }
+    .map_err(smp_ap_ownership_error)?;
+    match part {
+        ApResourcePart::OldFrame => resource.old_frame = None,
+        ApResourcePart::NewFrame => resource.new_frame = None,
+        ApResourcePart::Runtime => {}
     }
+    Ok(receipt)
 }
 
 fn smp_ipi_release_ap_resource(
@@ -5919,33 +5933,62 @@ fn smp_ipi_release_ap_resource(
     mmio_active: bool,
 ) -> Result<SmpIpiReleaseProof, SmpIpiLiveError> {
     SMP_IPI_FAILURE_STAGE.store(40, Ordering::Relaxed);
-    // Callers either have not started this AP or have completed final INIT.
-    smp_ipi_end_old_frame_retention(manager, resource)?;
-    let old_frame = match resource.old_frame.take() {
-        Some(handle) => Some(
-            manager
-                .free_scrubbed_automatic(handle, access)
-                .map(|(receipt, _)| receipt)
-                .map_err(smp_ipi_memory_error)?,
-        ),
+    if resource.ownership.state() == ap_resources::State::MayExecute {
+        return Err(smp_ipi::Error::Transition.into());
+    }
+    let old_frame = match resource.old_frame {
+        Some(_) => Some(smp_ipi_release_owned_part(
+            manager,
+            access,
+            resource,
+            ApResourcePart::OldFrame,
+            true,
+        )?),
         None => None,
     };
     SMP_IPI_FAILURE_STAGE.store(41, Ordering::Relaxed);
-    let new_frame = match resource.new_frame.take() {
-        Some(handle) => Some(
-            manager
-                .free_scrubbed_automatic(handle, access)
-                .map(|(receipt, _)| receipt)
-                .map_err(smp_ipi_memory_error)?,
-        ),
+    let new_frame = match resource.new_frame {
+        Some(_) => Some(smp_ipi_release_owned_part(
+            manager,
+            access,
+            resource,
+            ApResourcePart::NewFrame,
+            true,
+        )?),
         None => None,
     };
     SMP_IPI_FAILURE_STAGE.store(42, Ordering::Relaxed);
     let resource_receipt = if mmio_active {
-        smp_runtime_release_resources_with_live_mmio(manager, access, resource.allocation)?
+        access
+            .revoke_temporary_mapping()
+            .map_err(|_| smp::Error::PhysicalAccess)?;
+        access
+            .validate_active_uncached_mmio()
+            .map_err(|_| smp::Error::PhysicalAccess)?;
+        let receipt =
+            smp_ipi_release_owned_part(manager, access, resource, ApResourcePart::Runtime, true)?;
+        access
+            .revoke_temporary_mapping()
+            .map_err(|_| smp::Error::PhysicalAccess)?;
+        access
+            .validate_active_uncached_mmio()
+            .map_err(|_| smp::Error::PhysicalAccess)?;
+        receipt
     } else {
-        smp_runtime_release_resources(manager, access, resource.allocation)?
+        TableMemory::finish(access).map_err(|_| smp::Error::PhysicalAccess)?;
+        let receipt =
+            smp_ipi_release_owned_part(manager, access, resource, ApResourcePart::Runtime, false)?;
+        TableMemory::finish(access).map_err(|_| smp::Error::PhysicalAccess)?;
+        receipt
     };
+    let expected_bytes = smp_runtime::RESOURCE_PAGE_COUNT * smp_runtime::PAGE_BYTES;
+    if resource_receipt.kind != ScrubKind::Release
+        || resource_receipt.page_count != smp_runtime::RESOURCE_PAGE_COUNT
+        || resource_receipt.zeroed_bytes != expected_bytes
+        || resource_receipt.verified_bytes != expected_bytes
+    {
+        return Err(smp_runtime::Error::Rollback.into());
+    }
     Ok(SmpIpiReleaseProof {
         old_frame,
         new_frame,
@@ -6006,6 +6049,13 @@ fn smp_ipi_start_ap(
     period_femtoseconds: u64,
     resource: &SmpIpiApResource,
 ) -> Result<(), SmpIpiLiveError> {
+    let target_mask =
+        smp_ipi::local_target_mask(resource.target_apic_id).ok_or(smp_ipi::Error::Target)?;
+    if resource.ownership.state() != ap_resources::State::MayExecute
+        || resource.ownership.possible_cpu_mask() & target_mask == 0
+    {
+        return Err(smp_ipi::Error::Transition.into());
+    }
     access
         .ensure_mapped(resource.layout.local())
         .map_err(|_| smp::Error::PhysicalAccess)?;
@@ -6078,6 +6128,52 @@ fn smp_ipi_stop_ap(
     Ok((smp_runtime_mailbox_snapshot(), ipi))
 }
 
+fn smp_ipi_probe_retained_resources(
+    manager: &mut PhysicalMemoryManager,
+    access: &mut BootstrapTableMemory,
+    resources: &mut [SmpIpiApResource; smp_ipi::AP_COUNT],
+    possible_cpu_mask: u64,
+) -> Result<SmpIpiRetentionProof, SmpIpiLiveError> {
+    let mut proof = SmpIpiRetentionProof::default();
+    for resource in resources {
+        if resource.ownership.state() != ap_resources::State::MayExecute
+            || resource.ownership.possible_cpu_mask() != possible_cpu_mask
+        {
+            return Err(smp_ipi::Error::Transition.into());
+        }
+        for part in [
+            ApResourcePart::Runtime,
+            ApResourcePart::OldFrame,
+            ApResourcePart::NewFrame,
+        ] {
+            let handle = resource.ownership.handle(part);
+            let before = manager.summary();
+            let effects = (access.reads, access.writes, access.temporary_pte_writes);
+            if manager.free(handle) != Err(PhysicalMemoryError::AllocationRetained)
+                || manager.free_scrubbed(handle, access)
+                    != Err(PhysicalMemoryError::AllocationRetained)
+                || manager.free_scrubbed_automatic(handle, access)
+                    != Err(PhysicalMemoryError::AllocationRetained)
+                || resource.ownership.release_scrubbed(part, manager, access)
+                    != Err(ap_resources::Error::State)
+                || resource
+                    .ownership
+                    .release_scrubbed_automatic(part, manager, access)
+                    != Err(ap_resources::Error::State)
+                || manager.summary() != before
+                || (access.reads, access.writes, access.temporary_pte_writes) != effects
+                || resource.ownership.state() != ap_resources::State::MayExecute
+                || resource.ownership.possible_cpu_mask() != possible_cpu_mask
+            {
+                return Err(smp_ipi::Error::Transition.into());
+            }
+            proof.copied_frees += 3;
+            proof.owner_releases += 2;
+        }
+    }
+    Ok(proof)
+}
+
 fn smp_ipi_run_partial_rollback(
     manager: &mut PhysicalMemoryManager,
     access: &mut BootstrapTableMemory,
@@ -6099,16 +6195,25 @@ fn smp_ipi_run_partial_rollback(
     transaction.reserve()?;
     transaction.prepare()?;
     let mut started_mask = 0u64;
+    let mut retention = SmpIpiRetentionProof::default();
     let attempt = (|| -> Result<(), SmpIpiLiveError> {
-        for (index, resource) in resources.iter().take(2).enumerate() {
+        let targets = resources.each_ref().map(|resource| resource.target_apic_id);
+        for (index, &target) in targets.iter().take(2).enumerate() {
             SMP_IPI_FAILURE_STAGE.store(22 + index as u32, Ordering::Relaxed);
             // A failed online acknowledgement does not prove the AP never started.
-            started_mask |= smp_ipi::local_target_mask(resource.target_apic_id)
-                .ok_or(smp_ipi::Error::Target)?;
-            smp_ipi_start_ap(hardware, access, period_femtoseconds, resource)?;
+            started_mask |= smp_ipi::local_target_mask(target).ok_or(smp_ipi::Error::Target)?;
+            for resource in &mut resources {
+                resource
+                    .ownership
+                    .expose_to_cpu(target)
+                    .map_err(smp_ap_ownership_error)?;
+            }
+            smp_ipi_start_ap(hardware, access, period_femtoseconds, &resources[index])?;
         }
         SMP_IPI_FAILURE_STAGE.store(24, Ordering::Relaxed);
         transaction.partial_started(started_mask)?;
+        retention =
+            smp_ipi_probe_retained_resources(manager, access, &mut resources, started_mask)?;
         access
             .ensure_mapped(resources[2].layout.local())
             .map_err(|_| smp::Error::PhysicalAccess)?;
@@ -6150,6 +6255,12 @@ fn smp_ipi_run_partial_rollback(
     }
     if parked_mask != started_mask {
         return Err(smp_ipi::Error::Rollback.into());
+    }
+    for resource in &mut resources {
+        // SAFETY: final INIT completed above for every attempted AP, including
+        // uncertain starts. The shared-alias exposure mask covers those APs.
+        unsafe { resource.ownership.confirm_parked(parked_mask) }
+            .map_err(smp_ap_ownership_error)?;
     }
     if let Err(error) = attempt {
         for resource in resources.iter_mut().rev() {
@@ -6207,6 +6318,7 @@ fn smp_ipi_run_partial_rollback(
         frame_pages_released,
         zeroed_bytes,
         verified_bytes,
+        retention,
     })
 }
 
@@ -7226,32 +7338,31 @@ fn run_smp_ipi_internal(
 
     let mut started_mask = 0u64;
     let mut parked_mask = 0u64;
+    let mut retention = SmpIpiRetentionProof::default();
     let bsp_tsc_before = arch::x86_64::read_tsc_ordered();
     let operation = (|| -> Result<SmpIpiExecutionReceipt, SmpIpiLiveError> {
         SMP_IPI_FAILURE_STAGE.store(3, Ordering::Relaxed);
-        for resource in &resources {
+        for (index, &target) in target_apic_ids.iter().enumerate() {
             // Include uncertain SIPI delivery in final INIT cleanup.
-            started_mask |= smp_ipi::local_target_mask(resource.target_apic_id)
-                .ok_or(smp_ipi::Error::Target)?;
-            smp_ipi_start_ap(&mut hardware, &mut page_access, period, resource)?;
+            started_mask |= smp_ipi::local_target_mask(target).ok_or(smp_ipi::Error::Target)?;
+            for resource in &mut resources {
+                resource
+                    .ownership
+                    .expose_to_cpu(target)
+                    .map_err(smp_ap_ownership_error)?;
+            }
+            smp_ipi_start_ap(&mut hardware, &mut page_access, period, &resources[index])?;
         }
         let bsp_tsc_after = arch::x86_64::read_tsc_ordered();
         lifecycle.all_online(started_mask, started_mask)?;
         SMP_IPI_FAILURE_STAGE.store(4, Ordering::Relaxed);
 
-        for resource in &resources {
-            let handle = resource.old_frame.ok_or(smp_ipi::Error::Transition)?;
-            let before = manager.summary();
-            if manager.free(handle) != Err(PhysicalMemoryError::AllocationRetained)
-                || manager.free_scrubbed(handle, &mut page_access)
-                    != Err(PhysicalMemoryError::AllocationRetained)
-                || manager.free_scrubbed_automatic(handle, &mut page_access)
-                    != Err(PhysicalMemoryError::AllocationRetained)
-                || manager.summary() != before
-            {
-                return Err(smp_ipi::Error::Transition.into());
-            }
-        }
+        retention = smp_ipi_probe_retained_resources(
+            manager,
+            &mut page_access,
+            &mut resources,
+            started_mask,
+        )?;
 
         for resource in &resources {
             page_access
@@ -7522,18 +7633,23 @@ fn run_smp_ipi_internal(
         if parked_mask != started_mask || parked_mask != smp_ipi::TARGET_CPU_MASK {
             return Err(smp_ipi::Error::Rollback.into());
         }
+        for resource in &mut resources {
+            // SAFETY: every exposed AP completed final INIT above; no AP may
+            // resume using the runtime stacks or shared old/new-frame aliases.
+            unsafe { resource.ownership.confirm_parked(parked_mask) }
+                .map_err(smp_ap_ownership_error)?;
+        }
 
         let mut old_releases: [Option<ScrubReceipt>; smp_ipi::AP_COUNT] = [None; smp_ipi::AP_COUNT];
         for (index, resource) in resources.iter_mut().enumerate() {
             SMP_IPI_FAILURE_STAGE.store(70 + index as u32, Ordering::Relaxed);
-            smp_ipi_end_old_frame_retention(manager, resource)?;
-            let handle = resource.old_frame.ok_or(smp_ipi::Error::Transition)?;
-            old_releases[index] = Some(
-                manager
-                    .free_scrubbed(handle, &mut page_access)
-                    .map_err(|_| smp::Error::Memory)?,
-            );
-            resource.old_frame = None;
+            old_releases[index] = Some(smp_ipi_release_owned_part(
+                manager,
+                &mut page_access,
+                resource,
+                ApResourcePart::OldFrame,
+                false,
+            )?);
         }
         reclaim
             .released(retirement)
@@ -7619,6 +7735,12 @@ fn run_smp_ipi_internal(
         return Err(smp_ipi::Error::Rollback.into());
     }
 
+    for resource in &mut resources {
+        // SAFETY: the cleanup loop completed final INIT on every uncertain or
+        // running AP before any remaining execution resource can be released.
+        unsafe { resource.ownership.confirm_parked(parked_mask) }
+            .map_err(smp_ap_ownership_error)?;
+    }
     let mut post_validation_error = None;
     let mut cleanup_failure_stage = 0u32;
     if let Ok((mailboxes, _, _, _, _, _, _, _, _)) = &operation {
@@ -7740,6 +7862,7 @@ fn run_smp_ipi_internal(
         ap_workers,
         smp_preempt,
         locks: lock_proof,
+        retention,
     })
 }
 
@@ -10522,6 +10645,10 @@ extern "C" fn poole_kernel_rust_entry(
         logger.write_decimal_u64(proof.partial.zeroed_bytes);
         logger.write_bytes(&PKSMP5_VERIFIED_BYTES);
         logger.write_decimal_u64(proof.partial.verified_bytes);
+        logger.write_bytes(&PKSMP5_RETAINED_FREES);
+        logger.write_decimal_u64(proof.partial.retention.copied_frees);
+        logger.write_bytes(&PKSMP5_OWNER_RELEASES);
+        logger.write_decimal_u64(proof.partial.retention.owner_releases);
         logger.write_bytes(&PKSMP5_PARTIAL_TAIL);
 
         logger.write_bytes(&PKSMP5_RETRY);
@@ -10640,6 +10767,10 @@ extern "C" fn poole_kernel_rust_entry(
         logger.write_hex_u64(proof.retirement.new_frame_checksum);
         logger.write_bytes(&PKSMP5_PREMATURE_RECLAIM_REJECTIONS);
         logger.write_decimal_u64(proof.premature_reclaim_rejections);
+        logger.write_bytes(&PKSMP5_RETAINED_FREES);
+        logger.write_decimal_u64(proof.retention.copied_frees);
+        logger.write_bytes(&PKSMP5_OWNER_RELEASES);
+        logger.write_decimal_u64(proof.retention.owner_releases);
         logger.write_bytes(&PKSMP5_SHOOTDOWN_TAIL);
 
         logger.write_bytes(&PKSMP5_LIFECYCLE);

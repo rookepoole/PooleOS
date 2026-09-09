@@ -4,7 +4,10 @@
 
 use core::sync::atomic::{AtomicU64, Ordering};
 
-use super::{AllocationHandle, PhysicalMemoryError as Error, PhysicalMemoryManager};
+use super::{
+    AllocationHandle, LedgerPressureOutcome, MetadataArenaAccess, PhysicalMemoryError as Error,
+    PhysicalMemoryManager, PhysicalPageAccess, ScrubReceipt,
+};
 
 // One boot-lifetime namespace across all managers. Zero is never issued, and
 // exhaustion permanently closes admission instead of recycling identities.
@@ -104,6 +107,32 @@ impl PhysicalMemoryManager {
             Ok(()) => Ok(()),
             Err(error) => Err((error, retained)),
         }
+    }
+
+    /// Retention remains live until zeroing, readback and allocator commit succeed.
+    pub(crate) fn free_retained_scrubbed<A: PhysicalPageAccess>(
+        &mut self,
+        retained: RetainedAllocation,
+        access: &mut A,
+    ) -> Result<ScrubReceipt, (Error, RetainedAllocation)> {
+        if retained.identity == 0 {
+            return Err((Error::RetentionIdentity, retained));
+        }
+        self.free_scrubbed_with_retention(retained.handle, retained.identity, access)
+            .map_err(|error| (error, retained))
+    }
+
+    /// Ledger growth and partial scrub failure cannot discard the owner's token.
+    pub(crate) fn free_retained_scrubbed_automatic<A: MetadataArenaAccess>(
+        &mut self,
+        retained: RetainedAllocation,
+        access: &mut A,
+    ) -> Result<(ScrubReceipt, LedgerPressureOutcome), (Error, RetainedAllocation)> {
+        if retained.identity == 0 {
+            return Err((Error::RetentionIdentity, retained));
+        }
+        self.free_scrubbed_automatic_with_retention(retained.handle, retained.identity, access)
+            .map_err(|error| (error, retained))
     }
 
     /// A failed group release returns every token with no retention removed.

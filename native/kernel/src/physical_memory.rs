@@ -3215,6 +3215,15 @@ impl PhysicalMemoryManager {
         handle: AllocationHandle,
         access: &mut A,
     ) -> Result<ScrubReceipt, PhysicalMemoryError> {
+        self.free_scrubbed_with_retention(handle, 0, access)
+    }
+
+    fn free_scrubbed_with_retention<A: PhysicalPageAccess>(
+        &mut self,
+        handle: AllocationHandle,
+        retention_id: u64,
+        access: &mut A,
+    ) -> Result<ScrubReceipt, PhysicalMemoryError> {
         self.require_operational()?;
         let result = (|| {
             if self.validate_allocation_inner(handle).is_err() {
@@ -3223,8 +3232,12 @@ impl PhysicalMemoryManager {
             }
             let slot = usize::from(handle.slot);
             let allocation = self.allocation_entries()[slot];
-            if allocation.retention_id != 0 {
-                return Err(PhysicalMemoryError::AllocationRetained);
+            if allocation.retention_id != retention_id {
+                return Err(if retention_id == 0 {
+                    PhysicalMemoryError::AllocationRetained
+                } else {
+                    PhysicalMemoryError::RetentionIdentity
+                });
             }
             if allocation.release_excluded {
                 self.metadata_release_rejections += 1;
@@ -3257,6 +3270,15 @@ impl PhysicalMemoryManager {
         handle: AllocationHandle,
         access: &mut A,
     ) -> Result<(ScrubReceipt, LedgerPressureOutcome), PhysicalMemoryError> {
+        self.free_scrubbed_automatic_with_retention(handle, 0, access)
+    }
+
+    fn free_scrubbed_automatic_with_retention<A: MetadataArenaAccess>(
+        &mut self,
+        handle: AllocationHandle,
+        retention_id: u64,
+        access: &mut A,
+    ) -> Result<(ScrubReceipt, LedgerPressureOutcome), PhysicalMemoryError> {
         self.require_operational()?;
         if self.validate_allocation_inner(handle).is_err() {
             self.rejected_double_frees = self.rejected_double_frees.saturating_add(1);
@@ -3264,8 +3286,12 @@ impl PhysicalMemoryManager {
             return Err(PhysicalMemoryError::StaleHandle);
         }
         let allocation = self.allocation_entries()[usize::from(handle.slot)];
-        if allocation.retention_id != 0 {
-            return Err(PhysicalMemoryError::AllocationRetained);
+        if allocation.retention_id != retention_id {
+            return Err(if retention_id == 0 {
+                PhysicalMemoryError::AllocationRetained
+            } else {
+                PhysicalMemoryError::RetentionIdentity
+            });
         }
         if allocation.release_excluded {
             self.metadata_release_rejections = self.metadata_release_rejections.saturating_add(1);
@@ -3287,7 +3313,7 @@ impl PhysicalMemoryManager {
         let free_extent_demand = usize::from(!merge_previous && !merge_next);
         let pressure = self
             .ensure_ledger_capacity(LedgerDemand::scrubbed_release(free_extent_demand), access)?;
-        let receipt = self.free_scrubbed(handle, access)?;
+        let receipt = self.free_scrubbed_with_retention(handle, retention_id, access)?;
         Ok((receipt, pressure))
     }
 
@@ -3834,6 +3860,7 @@ fn range_has_kind(
 mod tests {
     extern crate std;
 
+    mod ap_resources;
     mod retention;
 
     use super::*;

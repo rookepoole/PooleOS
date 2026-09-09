@@ -29,7 +29,7 @@ from tools import qualify_native_kernel_entry, qualify_native_pooleboot  # noqa:
 DEFAULT_TOOLCHAIN_ROOT = ROOT / ".toolchains" / "rust-1.97.0"
 DEFAULT_QEMU_ROOT = native_tier0.DEFAULT_QEMU_ROOT
 DEFAULT_OUT = ROOT / smp_ipi.READINESS_RELATIVE
-HOSTILE_CASE_COUNT = 243
+HOSTILE_CASE_COUNT = 249
 
 
 class QualificationError(RuntimeError):
@@ -120,6 +120,22 @@ def _audit_source_text(arch_text: str, main_text: str, ipi_text: str) -> dict[st
     smp_ipi._require(arch_text.count("invlpg [rax]") == 1, "PKSMP5 remote INVLPG source scope changed")
     smp_ipi._require(arch_text.count("invlpg [rbx]") == 1, "PKLOCK1 successor INVLPG source scope changed")
     smp_ipi._require(all(token in main_text for token in required_main), "PKSMP5 lifecycle source audit failed")
+    probe = main_text.partition("fn smp_ipi_probe_retained_resources(")[2].split("\nfn ", 1)[0]
+    retained_calls = (
+        "ApResourcePart::Runtime", "ApResourcePart::OldFrame", "ApResourcePart::NewFrame",
+        "manager.free(handle)", "manager.free_scrubbed(handle, access)",
+        "manager.free_scrubbed_automatic(handle, access)",
+        "release_scrubbed(part, manager, access)",
+        "release_scrubbed_automatic(part, manager, access)",
+        "ap_resources::Error::State", "manager.summary() != before",
+        "access.temporary_pte_writes", "possible_cpu_mask() != possible_cpu_mask",
+    )
+    smp_ipi._require(
+        all(token in probe for token in retained_calls)
+        and "ApResources::new(" in main_text
+        and main_text.count("smp_ipi_probe_retained_resources(") == 3,
+        "PKAPOWN1 live probe or ownership admission source is incomplete",
+    )
     smp_ipi._require(all(token in ipi_text for token in required_ipi), "PKSMP5 coordinator source audit failed")
     diagnostic_tokens = ("PKSMP5DBG", "SMP_MULTI_DEBUG", "MULTI_AP_FORCE_PASS")
     smp_ipi._require(not any(token in arch_text + main_text + ipi_text for token in diagnostic_tokens), "PKSMP5 transient diagnostics remain")
@@ -234,10 +250,10 @@ def _negative_controls(markers: list[str]) -> list[dict[str, Any]]:
     ap_fields = ("contract", "ap_index", "apic_id", "physical_start", "pages", "sipi_vector", "trampoline_bytes", "allocation_sequence", "frame_allocation_sequences", "frame_release_sequences", "resource_release_sequence", "service_state", "mailbox_state", "runtime_state", "deliveries", "accepted", "denied", "eois", "diagnostic", "shootdown", "stop", "timeout_count", "init_asserts", "init_deasserts", "sipis", "target_mask", "ack_mask", "invalidations", "baseline_checksum", "runtime_checksum", "response_checksum", "tss_busy", "idt_verified", "xstate_verified", "apic_table_verified", "parked")
     matrices = (
         (ids[4], 30, ("contract", "processors", "enabled", "bsp_apic_id", "target_apic_ids", "target_mask", "apic_physical", "selection")),
-        (ids[5], 31, ("contract", "started_mask", "timeout_apic_id", "timeout_mask", "timeout_count", "parked_mask", "released_mask", "resource_pages", "frame_pages", "zeroed_bytes", "verified_bytes", "fresh_allocation_required")),
+        (ids[5], 31, ("contract", "started_mask", "timeout_apic_id", "timeout_mask", "timeout_count", "parked_mask", "released_mask", "resource_pages", "frame_pages", "zeroed_bytes", "verified_bytes", "retained_free_rejections", "owner_release_rejections", "fresh_allocation_required")),
         (ids[6], 32, ("contract", "retry_count", "partial_rollback_count", "started_mask", "online_mask", "simultaneous_online")),
         (ids[7], 33, ap_fields), (ids[8], 34, ap_fields), (ids[9], 35, ap_fields),
-        (ids[10], 36, ("contract", "target_mask", "ack_mask", "retired_generation", "active_generation", "invalidations", "root_checksum", "old_frame_checksum", "new_frame_checksum", "premature_reclaim_rejections", "reclaim_state")),
+        (ids[10], 36, ("contract", "target_mask", "ack_mask", "retired_generation", "active_generation", "invalidations", "root_checksum", "old_frame_checksum", "new_frame_checksum", "premature_reclaim_rejections", "retained_free_rejections", "owner_release_rejections", "reclaim_state")),
         (ids[11], 37, ("contract", "started_mask", "online_mask", "quiesced_mask", "parked_mask", "validated_mask", "released_mask", "timeout_count", "retry_count", "partial_rollback_count", "exact_accounting")),
         (ids[12], 38, ("contract", "resource_pages", "frame_pages", "resource_zeroed_bytes", "resource_verified_bytes", "frame_zeroed_bytes", "frame_verified_bytes", "total_pages", "capability_revoked", "runtime_revoked", "mmio_revoked", "pic_restored", "hpet_restored", "apic_base_restored")),
         (ids[13], 39, ("contract", "profile", "aps", "simultaneous_online", "partial_start_timeout", "partial_rollback", "fresh_retry", "target_mask", "ack_mask", "tlb_invalidations", "no_reuse_before_all_acks", "stop_quiesced", "ap_parked", "resources_released", "scheduler", "general_broadcast", "target_hardware", "signatures", "authority", "actions", "production", "terminal")),
@@ -247,7 +263,11 @@ def _negative_controls(markers: list[str]) -> list[dict[str, Any]]:
     arch = (ROOT / "native/kernel/src/arch/x86_64.rs").read_text(encoding="utf-8")
     main = (ROOT / "native/kernel/src/main.rs").read_text(encoding="utf-8")
     ipi = (ROOT / "native/kernel/src/smp_ipi.rs").read_text(encoding="utf-8")
-    controls.append(_require_rejections(ids[14], [lambda: _audit_source_text(arch.replace("shl rbx, cl", "shl rbx, 1", 1), main, ipi)]))
+    controls.append(_require_rejections(ids[14], [
+        lambda: _audit_source_text(arch.replace("shl rbx, cl", "shl rbx, 1", 1), main, ipi),
+        lambda: _audit_source_text(arch, main.replace("ApResources::new(", "Unchecked::new(", 1), ipi),
+        lambda: _audit_source_text(arch, main.replace("smp_ipi_probe_retained_resources(", "omitted_probe(", 1), ipi),
+    ]))
     linked_fixture = "0000000000001000 <poole_ap_ipi_trampoline_start>:\n    1000: 0f 01 38\tinvlpg\t(%rax)\n0000000000001003 <poole_ap_ipi_trampoline_end>:\n"
     controls.append(_require_rejections(ids[15], [lambda: _linked_invlpg_scope(linked_fixture.replace("invlpg", "nop")), lambda: _linked_invlpg_scope(linked_fixture.replace("\n0000000000001003", "\n    1003: 0f 01 38\tinvlpg\t(%rax)\n0000000000001006"))]))
     controls.append(_require_rejections(ids[16], [lambda: smp_ipi.resource_layout(1, 31), lambda: smp_ipi.resource_layout(0, 32)]))
@@ -435,6 +455,8 @@ def make_readiness(toolchain_root: Path, qemu_root: Path, status_date: str, time
         "summary": {"application_processors_online": 3, "operation_classes_installed_per_ap": 6, "accepted_deliveries": 9, "denied_deliveries": 3, "offline_timeouts": 1, "partial_start_rollbacks": 1, "fresh_retries": 1, "eois": 12, "remote_tlb_invalidations": 3, "retired_generations": 1, "premature_reclaim_rejections": 2, "resource_pages_released": 96, "frame_pages_released": 6, "verified_bytes": 417792, "negative_controls_total": len(controls), "hostile_cases_total": sum(item["case_count"] for item in controls), "production_claim_count": 0},
         "open_items": ["scheduler ownership and CPU affinity", "general topology and x2APIC", "concurrent address-space replacement", "address-space-wide and concurrent-generation shootdown", "production capability minting and revocation", "additional live failure interleavings", "physical-target evidence", "N8 and N9 exit gates", "production signing and promotion"],
     }
+    # Validate the JSON value that readers will receive, not only Python objects.
+    report = json.loads(json.dumps(report))
     errors = smp_ipi.readiness_errors(report, ROOT)
     if errors:
         raise QualificationError("; ".join(errors))
