@@ -1,15 +1,36 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-09
-Plan version: 2.73.0-native-boot-chain-replay
-Roadmap cycle: PooleOS Cycle 169
+Plan version: 2.74.0-native-cpu-state-replay
+Roadmap cycle: PooleOS Cycle 170
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 169: Boot Chain Requalified
+## Cycle 170: Trap And CPU State Requalified
+
+N7.1/N7.3-N7.6 replay completes on the unchanged Cycle 168 kernel: five live
+profiles, fourteen successful headless boots, 225 marker controls and 42
+focused tests. One expected TCG exception diagnostic is separate from the
+two WHPX exception successes. Each qualifier passes 243 kernel host tests;
+no native implementation or kernel-image bytes change.
+
+Fresh trap execution exposed two stale aggregate-gate acceptance pins. Their
+measured repair and failing-then-passing seven-test result are preserved.
+A new regression rejects 17 stale identity and production/authority cases
+across the five current gates. Existing N36 receipt coverage remains open.
+
+The selected projection improves to 14/27. Thirteen checks remain stale;
+the prior SMP receipt separately requires current-boot-artifact replay and
+transitive-input audit. Next is N9-PMM-ACPI-CONSUMER-001, then VM/IRQ/SMP,
+scheduler, atomics and locks before exact-final runtime-inclusive qualification
+and PR #76 merge review. Main stays qualified Cycle 165. No phase, flag or
+production gate closes; all checklist mappings, PooleGlyph and demo ISO bytes
+are preserved. [Cycle 170 evidence](checkpoints/cycle170-cpu-state-replay.md).
+
+## Historical Cycle 169: Boot Chain Requalified
 
 N5.5/N5.6/N5.8 now has six current component receipts for the unchanged
 Cycle 168 kernel: PSYM1, PPOL1, PKLOAD6, PooleBoot, PKREVAL1 and PKXFER1.

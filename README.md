@@ -7,17 +7,19 @@ PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available
 **Cloud status:** qualified checkpoints through Cycle 165 are merged into `main`
 at `6f9399c` via [PR #75](https://github.com/rookepoole/PooleOS/pull/75).
 The exact merged tree passed all 105 canonical gates and 708 Doctor checks.
-Cycle 169 requalifies the boot chain on the unchanged Cycle 168 kernel on
+Cycle 170 requalifies trap and CPU state on the unchanged Cycle 168 kernel on
 `agent/n12-ap-execution-ownership`, tracked by
 [draft PR #76](https://github.com/rookepoole/PooleOS/pull/76).
-Six fresh headless boots include two actual kernel entries and independent
-nine-file revalidation before unsigned-policy denial. All 83 focused tests
-pass; symbol readiness now rejects stale kernel-entry evidence.
-Nine of 27 selected checks pass. Eighteen downstream checks and a replay of
+Fourteen fresh headless boots and 42 focused tests pass across trap, CPU,
+vector-state and read-only MSR profiles. A separate expected TCG exception
+diagnostic is not counted as a successful boot. Seventeen gate regression
+cases reject stale trap identity and production or authority overclaims.
+Fourteen of 27 selected checks pass. Thirteen downstream checks and replay of
 the prior AP result with the new boot artifact set remain pending, beginning
-with trap/CPU qualification. The full suite has not run on the final candidate;
+with physical-memory qualification. The full suite has not run on the candidate;
 PR #76 is not merge-qualified or production-ready.
-[Cycle 169 proof, failures and next move](docs/checkpoints/cycle169-boot-chain-replay.md).
+[Cycle 170 proof, failures and next move](docs/checkpoints/cycle170-cpu-state-replay.md).
+[Prior boot-chain evidence](docs/checkpoints/cycle169-boot-chain-replay.md).
 [Prior AP ownership evidence](docs/checkpoints/cycle168-ap-ownership-qualification.md).
 
 Historical Cycle 165 pre-merge summary: memory-through-lock dependency replay:

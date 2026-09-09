@@ -7,9 +7,20 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 169
+Last roadmap reconciliation: PooleOS Cycle 170
 
-Current Cycle 169: six N5 components pass on the unchanged Cycle 168 kernel.
+Current Cycle 170: five trap/CPU/xstate/MSR profiles pass on the unchanged
+Cycle 168 kernel, with fourteen fresh headless boots, 225 marker controls and
+42 focused tests. One expected TCG exception diagnostic is separate. The trap
+gate's old kernel identity pins are repaired; 17 regression cases reject stale
+identity and unsupported production/authority claims. The selected projection
+passes 14/27; thirteen stale downstream checks plus prior SMP new-artifact
+replay remain. Next is N9-PMM-ACPI-CONSUMER-001, then ordered VM/IRQ/SMP,
+scheduler/atomic/lock replay and runtime-inclusive exact-final qualification.
+Main remains qualified Cycle 165 and PR #76 draft. No phase, flag or charter
+completion condition changes. [Cycle 170 evidence](checkpoints/cycle170-cpu-state-replay.md).
+
+Historical Cycle 169: six N5 components pass on the unchanged Cycle 168 kernel.
 Six fresh headless boots include two actual kernel entries and nine-file
 revalidation before unsigned-policy denial. All 83 focused tests pass, with
 new source-current kernel-entry binding in the symbol receipt validator.
