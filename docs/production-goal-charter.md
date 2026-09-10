@@ -9,6 +9,16 @@ Machine ledger: `runs/pdc_production_roadmap.json`
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
 Last roadmap reconciliation: PooleOS Cycle 172
 
+Latest cloud-backup status: PR #77 remains draft after a failed exact-source
+audit at `9c111e2` (104/105 canonical, 707/708 Doctor). The kernel-entry binding
+repair passes 12 focused tests, but entry/symbol/SMP IPI evidence needs replay;
+the selected projection is 24/27, with 947 Python tests discovered. Generated
+roadmap/architecture records and the following summary remain pre-audit
+snapshots until reconciled. Main remains qualified through Cycle 171. Backup
+does not waive entry/dependency or full-candidate qualification before merge.
+
+Historical pre-audit Cycle 172 summary:
+
 Cloud closeout: Cycles 166-171 merged through PR #76 at `8006c7b`, after
 105 runtime-inclusive canonical gates and 708 Doctor checks passed on the exact
 merged tree. Cycle 172 qualifies inactive task-stack ownership on

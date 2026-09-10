@@ -1,7 +1,7 @@
 # Cycle 172: Inactive Task-Stack Ownership
 
 Status date: 2026-09-09
-Status: host ownership and progress reconciliation qualified; exact-final canonical audit pending at this source snapshot.
+Status: draft cloud checkpoint; full audit failed at 9c111e2; source-binding repair awaits receipt and full-candidate requalification.
 Selected move: `N12-CONCURRENCY-RECLAMATION-001`, N12.3 with N12.7 context ownership dependencies.
 
 ## Cloud Baseline
@@ -55,7 +55,7 @@ Public core receipt:
 It binds source and stage-log hashes and explicitly sets live stack verification,
 cross-CPU quiescence, N12.3 completion and production readiness to false.
 
-Rebuilding produced the unchanged 530,072-byte linked kernel, SHA-256
+Rebuilding produced the unchanged 530,072-byte canonical kernel, SHA-256
 `8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625`.
 This generic ownership code is not exercised by the existing live selector.
 There are zero new Cycle 172 QEMU boots; prior boot evidence is not relabeled.
@@ -96,9 +96,11 @@ schema 1.5, exact counts, receipt capacity and explicit non-claims. A regression
 checks that record against the actual core receipt and keeps both existing
 N12 reclamation and N36 evidence-coverage flags open.
 
-The reconciled focused suite passes 34/34 tests, including the expanded roadmap
-and architecture checks. All 27 selected native checks pass; 945 Python tests
-are discovered and all 232 architecture source bindings validate. These are
+Before the full audit, the reconciled focused suite passed 34/34 tests, including
+the expanded roadmap and architecture checks. All 27 selected native checks
+passed; 945 Python tests were discovered and all 232 architecture source bindings
+validated. These are historical measurements for the pre-repair source, not
+current qualification of the later repair. These were
 not a full canonical pass. The locked 40 phases, 301 subphases, 57 added
 requirements, 94 flags with 35 open, 20 gaps and 8,996 checklist requirements
 are conserved. PooleGlyph remains Phase 65 with Phase 66 next and its existing
@@ -108,6 +110,39 @@ The initial patch assembly for long historical gap strings was rejected before
 any edit because it repeated a file target; the grouped patch succeeded without
 discarding history. No source or validation boundary was silently relaxed.
 
+### Full Audit Failure And Repair Backup
+
+The runtime-inclusive, bundle/replay audit of commit
+`9c111e282372290d93a853240d4ef361b6666584`, tree
+`bae7e532e48a1a3ba9a912f9452824c3a18a764c`, finished with exit 1 after
+741.281 seconds: 104/105 canonical gates and 707/708 Doctor checks passed.
+The failed Doctor gate was `pooleos:unittest`. Source and the owner's PooleGlyph
+report remained unchanged during that run. Failed report SHA-256:
+`D5AF0E1BCA6C6278ED9E506DB2EBBA1E464AED74177DDC73C8EF30B977D52DD4`.
+
+A fail-fast diagnostic stopped at test 322 on kernel-entry exact reproduction:
+the raw linked ELF grew from 7,024,792 to 7,025,584 bytes while the canonical
+530,072-byte boot image remained unchanged. The old source-binding list omitted
+24 of the kernel crate's 38 Rust sources, including `reclamation/task_lifetimes.rs`.
+Diagnostic log SHA-256:
+`90E44BA2AD6BD810F73D163DE3A7E6565AA6F85C8EF2F0ADF3B7FE2AC19BD0CD`.
+
+The backed-up repair adds deterministic, unique binding of every Rust source
+under `native/kernel/src`. Two new regression methods first failed and now
+pass, including per-source digest mutation rejection across all 38 files.
+Those two methods and ten reclamation-core tests pass together (12/12).
+Focused log SHA-256:
+`3B2AA3D3DCA39244AA0E28E31303853C18D659D0EE85D8F6F4A0062383F12633`.
+No recorded artifact hash or reproduction assertion is relaxed to force a pass.
+
+The post-repair selected projection passes 24/27 checks. Kernel-entry, symbols
+and SMP IPI checks correctly reject stale entry/source evidence. All 17 existing
+core stage-log hashes still match, and the core source receipt validates.
+There are 947 discovered Python tests, not a measured full-suite pass.
+The generated roadmap/architecture records remain the earlier pre-audit snapshot
+and must be reconciled after the repair; their old 27/27 result is not current.
+Raw logs, scratch files and workstation-specific paths remain private.
+
 Before merging this draft:
 
 1. Completed: reconcile Cycle 172 progress authorities, source bindings, schemas,
@@ -116,9 +151,11 @@ Before merging this draft:
 2. Completed for this checkpoint: conserve checklist, phase, ADD, flag and
    non-promotion boundaries and record open stack mapping, CPU-retirement and
    receipt-growth follow-ups. This does not complete those implementation tasks.
-3. Revalidate current native evidence and run the full source-frozen canonical
-   qualification with runtime, bundle and replay inputs. Do not inherit the
-   historical Cycle 171 result. Preserve any failures and rerun after repair.
+3. Regenerate kernel-entry evidence and its exact linked/canonical artifacts;
+   replay affected dependencies, reconcile generated progress/source bindings,
+   and run full source-frozen canonical qualification with runtime, bundle and
+   replay inputs. Do not inherit Cycle 171 or the earlier partial Cycle 172
+   results. Preserve the failed full audit and rerun after repair.
 4. Pass the exact-index publication scan and current required GitHub checks,
    clean-merge and review conditions before marking ready and merging.
 

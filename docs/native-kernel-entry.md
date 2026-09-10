@@ -29,6 +29,21 @@ compares loaded bytes from independent Python and Rust PKELF1 implementations.
 Its public receipt is `runs/native_kernel_entry_readiness.json`; the receipt's
 source bindings must be current before its image identity may be accepted.
 
+Cycle 172's full audit found that task-lifetime changes altered the linked ELF
+while leaving canonical PKELF1 bytes unchanged. The previous manually selected
+input list omitted that module and other kernel-crate source files. PKENTRY1
+now binds every Rust source beneath `native/kernel/src`, including nested
+modules and host probes, in deterministic order alongside its declared contract,
+build and tool inputs. This is conservative crate-source coverage, not a claim
+that every bound module executes in the bootable image or that all transitive
+toolchain/workspace dependencies have a complete provenance audit.
+
+Regressions require complete unique crate-source coverage and rejection of a
+changed digest for each such source. Exact raw-linked and canonical artifact
+reproduction remain separate checks; an unchanged boot image cannot substitute
+for current debug/symbol provenance. Regenerated PKENTRY1 evidence must be
+followed by dependency validation before previously nested receipts are reused.
+
 The Cycle 167 candidate has a measured 530,072-byte canonical file and
 602,112-byte, 147-page image: entry `0xA000`, text end `0x73000`, RELRO end
 and writable-data start `0x81000`, image end `0x93000`. PKMAP2 reservations

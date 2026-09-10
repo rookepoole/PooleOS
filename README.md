@@ -12,11 +12,15 @@ branches remain available as history; they are not pending main merges.
 
 **Latest checkpoint:** Cycle 172 adds mandatory inactive task-stack retention on
 `agent/n12-task-stack-ownership`, tracked by [PR #77](https://github.com/rookepoole/PooleOS/pull/77).
-Its 17-stage core qualifier, all 27 selected native checks and 34 focused Python
-tests pass. The roadmap and architecture bindings are reconciled; 945 Python
-tests are discovered. These source-frozen records precede the full exact-final
-audit. PR #77 records the subsequent qualification and merge state for the exact
-commit, without treating a development checkpoint as a production release.
+Its full audit ended with 104/105 canonical gates and 707/708 Doctor checks
+passing at `9c111e2`; kernel-entry reproduction failed because the raw linked
+ELF changed while the canonical boot image did not. The pending repair binds
+all kernel-crate Rust sources. Twelve focused tests pass, but three dependent
+receipt checks now reject stale evidence (24/27 selected checks pass).
+The branch is a cloud backup, not a qualified main merge. Entry/dependency
+requalification, generated-progress reconciliation and a fresh full audit are
+still required. The earlier 945-test/27-check ledger is a pre-audit snapshot;
+947 Python tests are now discovered, not claimed to all pass.
 [Cycle 172 scope, evidence and remaining gates](docs/checkpoints/cycle172-task-stack-ownership.md).
 
 Historical Cycle 171 pre-closeout evidence: memory-through-lock replay on the

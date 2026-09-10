@@ -137,6 +137,15 @@ def contract_errors(contract: Any) -> list[str]:
     return errors
 
 
+def implementation_input_paths(root: Path = ROOT) -> tuple[Path, ...]:
+    # Include unused modules and probes: they can still affect linked debug data.
+    crate_sources = sorted(
+        (path.relative_to(root) for path in (root / "native/kernel/src").rglob("*.rs") if path.is_file()),
+        key=lambda path: path.as_posix(),
+    )
+    return tuple(dict.fromkeys((*IMPLEMENTATION_INPUTS, *crate_sources)))
+
+
 def expected_bindings(root: Path = ROOT) -> dict[str, Any]:
     return {
         "contract": file_binding(root / CONTRACT_RELATIVE, root),
@@ -145,7 +154,7 @@ def expected_bindings(root: Path = ROOT) -> dict[str, Any]:
         "pbp1_contract": file_binding(root / "specs/native-boot-handoff-contract.json", root),
         "pkelf1_contract": file_binding(root / "specs/native-elf-loader-contract.json", root),
         "toolchain_lock": file_binding(root / "specs/native-toolchain-lock.json", root),
-        "implementation_inputs": [file_binding(root / path, root) for path in IMPLEMENTATION_INPUTS],
+        "implementation_inputs": [file_binding(root / path, root) for path in implementation_input_paths(root)],
     }
 
 

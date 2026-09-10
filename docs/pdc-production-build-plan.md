@@ -11,6 +11,16 @@ Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
 ## Cycle 172: Inactive Task-Stack Ownership
 
+Latest cloud-backup status: the full audit at `9c111e2` failed, with 104/105
+canonical gates and 707/708 Doctor checks passing. Raw linked-ELF reproduction
+drift exposed incomplete kernel-entry source bindings. The backed-up repair
+passes 12 focused tests; 24/27 selected native checks pass, with entry, symbol
+and SMP IPI receipts stale. Entry/dependency requalification, generated ledger
+and architecture reconciliation (947 tests discovered), and a fresh full audit
+must precede PR #77 merge. The measurements below describe the earlier
+pre-audit snapshot, not qualification of this repair. No new native execution
+or completed phase is claimed by this backup.
+
 Cycles 166-171 are merged into `main` through PR #76 at `8006c7b`; the exact
 merged tree passed 105 runtime-inclusive canonical gates and 708 Doctor checks.
 The machine ledger preserves that historical exact-final receipt separately from
@@ -19,7 +29,7 @@ the current Cycle 172 candidate. Historical sections below remain dated records.
 Cycle 172 implements the N12.3 `N12-CONCURRENCY-RECLAMATION-001` inactive
 task-stack ownership slice. Its 17-stage core qualifier passes with 34 lifecycle
 tests and 243 kernel regressions per host profile, plus 11 compile-fail tests.
-The linked kernel is unchanged; no live task-stack execution is claimed.
+The canonical kernel is unchanged; no live task-stack execution is claimed.
 Roadmap and architecture reconciliation now passes 34 focused Python tests,
 with 945 total tests discovered and 232 architecture source bindings. All 27
 selected native checks pass. The initial three stale-binding failures are
