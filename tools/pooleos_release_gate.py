@@ -213,6 +213,12 @@ DEFAULT_GAPS[4] = (
 
 
 DEFAULT_GAPS[4] = (
+    "Cycle 180 qualifies five CPU profiles on the unchanged kernel with fourteen fresh virtual "
+    "boots, 225 controls and 46 focused tests; one expected TCG diagnostic remains separate. "
+    "Positive provenance tests now require untouched generated receipts, and nineteen aggregate "
+    "controls reject stale identities or promotion. Selected readiness is 13/27; fourteen "
+    "memory-through-lock profiles need replay beginning N9-PMM-ACPI-CONSUMER-001. Full exact "
+    "qualification, live task contexts/CPU retirement and production remain open. "
     "Cycle 179 qualifies six N5 components on the unchanged kernel: six final headless boots, "
     "two kernel entries, nine-file revalidation and 71 focused Python tests pass. PKREVAL1 "
     "requires semantic receipt acceptance before output; three admission and thirteen artifact/count "
@@ -1337,8 +1343,8 @@ def check_native_kernel_trap_readiness(
         or build.get("default_stop_marker_present") is not True
         or build.get("default_transfer_marker_absent") is not True
         or kernel_product.get("canonical_sha256")
-        != "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625"
-        or kernel_product.get("relocation_count") != 1321
+        != "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA"
+        or kernel_product.get("relocation_count") != 1325
     ):
         errors.append("PKTRAP1 build or feature isolation changed")
     if artifact.get("claims") != native_kernel_trap.expected_claims():

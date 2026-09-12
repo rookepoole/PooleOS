@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 179
+Last roadmap reconciliation: PooleOS Cycle 180
 
-Current Cycle 179: six N5 components pass qualification on the unchanged kernel,
+Current Cycle 180: five CPU profiles pass fourteen fresh virtual boots,
+225 controls and 46 focused Python tests. The separate expected TCG exception
+diagnostic is not a successful exception boot. Positive regressions now use
+untouched generated receipts; nineteen aggregate controls pass. Selected
+readiness is 13/27, with fourteen memory-through-lock profiles pending beginning
+`N9-PMM-ACPI-CONSUMER-001`. Main stays qualified Cycle 176; draft PR #78 needs
+full exact-candidate qualification. No normative condition or phase/flag closes.
+[Cycle 180 evidence](checkpoints/cycle180-cpu-qualification.md).
+
+Historical Cycle 179: six N5 components pass qualification on the unchanged kernel,
 with six final virtual boots, two kernel entries and 71 focused Python tests.
 PKREVAL1 now rejects semantically invalid receipts before output; three cases
 and thirteen aggregate identity/count controls pass. Two superseded boots and

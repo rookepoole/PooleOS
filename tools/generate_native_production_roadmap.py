@@ -631,6 +631,16 @@ PROGRAM_GAPS[4] = (
 )
 
 
+PROGRAM_GAPS[4] = (
+    "Cycle 180 qualifies five CPU profiles on the unchanged kernel with fourteen fresh virtual "
+    "boots, 225 controls and 46 focused tests; one expected TCG diagnostic remains separate. "
+    "Positive provenance tests now require untouched generated receipts, and nineteen aggregate "
+    "controls reject stale identities or promotion. Selected readiness is 13/27; fourteen "
+    "memory-through-lock profiles need replay beginning N9-PMM-ACPI-CONSUMER-001. Full exact "
+    "qualification, live task contexts/CPU retirement and production remain open. " + PROGRAM_GAPS[4]
+)
+
+
 def sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest().upper()
 
@@ -3426,12 +3436,133 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             phase["current_evidence"] = [evidence, *phase["current_evidence"]]
             phase["current_gaps"] = [gap, *phase["current_gaps"]]
         if phase["id"] == "N36":
-            phase["current_evidence"].insert(0, f"Cycle 179 source inventory: {test_count} Python tests discovered; full qualification pending")
+            phase["current_evidence"].insert(0, "Cycle 179 source inventory: 962 Python tests discovered; full qualification pending")
     for flag in roadmap["implementation_flags"]:
         if flag["id"] in {"FLAG-N5-SYMBOL-BUNDLE-001", "FLAG-N12-CONCURRENCY-RECLAMATION-001", "FLAG-N36-RECEIPT-COVERAGE-001"}:
             flag["evidence"] = [checkpoint, *flag["evidence"]]
         if flag["id"] == "FLAG-N36-RECEIPT-COVERAGE-001":
             flag["evidence"] = ["tests/test_native_kernel_revalidation.py", "tools/qualify_native_kernel_revalidation.py", *flag["evidence"]]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    checkpoint = "docs/checkpoints/cycle180-cpu-qualification.md"
+    protocol.update(last_updated_cycle=180, selected_move_id="N7-TRAP-001",
+                    owner_independent_next_move_id="N9-PMM-ACPI-CONSUMER-001")
+    protocol["required_records"].insert(0, checkpoint)
+    roadmap["baseline"]["pooleos_cycle"] = 180
+    for name in (
+        "focused_source_projection", "ownership_qualification", "task_stack_qualification",
+        "execution_qualification", "entry_provenance_qualification", "boot_chain_qualification",
+        "cpu_qualification", "dependency_qualification", "candidate_audit",
+    ):
+        historical_name = "source_projection" if name == "focused_source_projection" else name
+        gate["historical_cycle179_" + historical_name] = gate["current_" + name]
+    gate["qualification_status"] = "cpu_requalified_memory_replay_pending"
+    gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=180)
+    gate["current_focused_source_projection"] = {
+        "cycle": 180, "scope": "27_selected_native_checks_not_full_canonical_audit",
+        "passed_checks": 13, "total_checks": 27, "pending_downstream_native_checks": 14,
+        "passing_profiles": [
+            "native_kernel_entry_readiness", "native_symbol_readiness", "native_policy_readiness",
+            "native_kernel_load_readiness", "native_pooleboot_readiness",
+            "native_kernel_revalidation_readiness", "native_kernel_transfer_readiness",
+            "native_kernel_trap_readiness", "native_kernel_cpu_policy_readiness",
+            "native_kernel_errata_policy_readiness", "native_kernel_xstate_policy_readiness",
+            "native_kernel_xstate_exception_readiness", "native_kernel_privilege_msr_policy_readiness",
+        ],
+        "final_receipt_fresh_qemu_runs": 14, "expected_tcg_limitation_probes": 1,
+        "whpx_exception_runs": 2, "superseded_initial_runs": 0,
+        "negative_control_groups": 225, "aggregate_gate_regression_cases": 19,
+        "entry_receipt_sha256": entry_sha, "entry_kernel_host_tests": 245,
+        "entry_source_binding_count": 55, "entry_release_gate_controls": 12,
+        "focused_python_tests_passed": 46,
+        "focused_test_scope": "five_CPU_profiles_pure_errata_provenance_and_CPU_gate_not_full_audit",
+        "focused_test_log_sha256": "5F0968C7EA5288C3E189D04E06EEB246951C6AF40EB59C89307EC3301B92754D",
+        "core_receipt_sha256": core_sha, "core_live_execution_cycle": None,
+        "canonical_full_replay_performed": False, "production_ready": False,
+        "next_dependency_move_id": "N9-PMM-ACPI-CONSUMER-001",
+        "required_next_gate": "ordered_memory_replay_then_exact_full_qualification",
+    }
+    for name in ("entry_provenance", "boot_chain"):
+        gate["current_" + name + "_qualification"] = dict(
+            gate["current_" + name + "_qualification"], source_validation_cycle=180,
+        )
+    gate["current_cpu_qualification"] = dict(
+        gate["historical_cycle175_cpu_qualification"], cycle=180, source_validation_cycle=180,
+        status="single_host_cpu_replay_pass", applies_to_current_source=True,
+        scope="five_N7_profiles_with_untouched_generated_positive_receipts",
+        kernel_sha256=kernel_sha, kernel_host_tests_per_qualifier=245,
+        focused_python_tests=46, aggregate_gate_regression_cases=19,
+        qualified_profiles=["trap", "cpu_policy", "xstate_policy", "xstate_exception", "privilege_msr_policy"],
+        positive_receipts_rebound_in_tests=False, recorded_marker_replay_verified=True,
+        superseded_initial_runs=0,
+    )
+    gate["current_cpu_qualification"]["receipt_bindings"] = [
+        {
+            "profile": "trap", "path": "runs/native-kernel-trap-readiness.json",
+            "sha256": "2A997942A2AD844814BF4FE5A6C14D51A1C7A24044796D82FCEC73C3A403BD2C",
+            "fresh_runs": 6, "negative_controls": 51, "kernel_host_tests": 245,
+            "execution_log_sha256": "7E2F449373D9AC8C54B86D0CCC94BB7962EFED183681CAEBD68BF0C6D3DFB4AC",
+            "elapsed_seconds": 102.437,
+        },
+        {
+            "profile": "cpu_policy", "path": "runs/native-kernel-cpu-policy-readiness.json",
+            "sha256": "9BD6F02A53B34281CB60A13C86CEC26AC99C06F02958FFA23ABAB26A0A54A136",
+            "fresh_runs": 2, "negative_controls": 41, "kernel_host_tests": 245,
+            "execution_log_sha256": "CFA41675A79CE67949D1FDB8D08F791EB2FD1115237010D33465135306D1CE23",
+            "elapsed_seconds": 63.609,
+        },
+        {
+            "profile": "xstate_policy", "path": "runs/native-kernel-xstate-policy-readiness.json",
+            "sha256": "669B861DBA9E62A2BCD532BB37A87207DE9D2CC389CA92B2A0B1FF86B2C996C3",
+            "fresh_runs": 2, "negative_controls": 43, "kernel_host_tests": 245,
+            "execution_log_sha256": "4260145CE808D54618100843E5797A22DAFA156F94093C1D222D6D99730A162A",
+            "elapsed_seconds": 73.657,
+        },
+        {
+            "profile": "xstate_exception", "path": "runs/native-kernel-xstate-exception-readiness.json",
+            "sha256": "1BFC2D346562896621E72EBAABF05B224ECF517B1050E172DBF426AEF247BFB8",
+            "fresh_runs": 2, "negative_controls": 43, "kernel_host_tests": 245,
+            "execution_log_sha256": "F3ED8801D7E59F458EBE9E20B63EED505D5DEF7034E3E58654DA297E074BF60D",
+            "elapsed_seconds": 73.609,
+        },
+        {
+            "profile": "privilege_msr_policy", "path": "runs/native-kernel-privilege-msr-policy-readiness.json",
+            "sha256": "D6198669F7CE065B48D64EEEF3774C213E94B8DD0C1FA537B66B1BCDAE6ECFE0",
+            "fresh_runs": 2, "negative_controls": 47, "kernel_host_tests": 245,
+            "execution_log_sha256": "9B9A31059D4151F9B9A62622272025F3EDB8EEF33A8C29EEA6267DBE5A72AE32",
+            "elapsed_seconds": 69.609,
+        },
+    ]
+    gate["current_dependency_qualification"] = dict(
+        gate["current_dependency_qualification"], cycle=180, source_validation_cycle=180,
+    )
+    evidence = (
+        "Cycle 180: " + checkpoint + " qualifies five CPU profiles on the unchanged kernel with "
+        "fourteen fresh virtual boots, 225 controls and 46 focused tests. One expected TCG "
+        "diagnostic is separate from two WHPX exception boots. Positive provenance tests require "
+        "untouched generated receipts; eighty entry substitutions, twenty invalid dependencies "
+        "and nineteen aggregate controls reject. Exact current marker/channel/entry evidence and "
+        "linked exception/MSR audits pass; old failures and receipts remain preserved."
+    )
+    gap = (
+        "Cycle 180 passes 13/27 selected native checks. Fourteen memory-through-lock profiles "
+        "require replay beginning N9-PMM-ACPI-CONSUMER-001 before full exact-candidate qualification. "
+        "All-vector/user-context/guarded-IST coverage, target errata, physical hardware, independent "
+        "builders and N12.3 live task contexts/architectural CPU retirement remain open. "
+        "No phase, flag, new ISO or production claim follows."
+    )
+    for phase in roadmap["phases"]:
+        if phase["id"] in {"N7", "N12", "N36"}:
+            phase["current_evidence"] = [evidence, *phase["current_evidence"]]
+            phase["current_gaps"] = [gap, *phase["current_gaps"]]
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle 180 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in {
+            "FLAG-N7-TRAP-001", "FLAG-N7-CPU-POLICY-001", "FLAG-N7-XSTATE-POLICY-001",
+            "FLAG-N7-XSTATE-EXCEPTION-001", "FLAG-N7-PRIVILEGE-MSR-POLICY-001",
+            "FLAG-N12-CONCURRENCY-RECLAMATION-001", "FLAG-N36-RECEIPT-COVERAGE-001",
+        }:
+            flag["evidence"] = [checkpoint, *flag["evidence"]]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
 

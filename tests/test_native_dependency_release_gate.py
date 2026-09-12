@@ -59,6 +59,9 @@ class NativeDependencyReleaseGateTests(unittest.TestCase):
                     (("build", "kernel_entry", "product", "canonical_sha256"),
                      "D0AA3295F66AF02D48476BCEDC44D962A873E98FBA21F48A6753AA7BB9B24EA4"),
                     (("build", "kernel_entry", "product", "relocation_count"), 1319),
+                    (("build", "kernel_entry", "product", "canonical_sha256"),
+                     "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625"),
+                    (("build", "kernel_entry", "product", "relocation_count"), 1321),
                 ])
             for field_path, value in mutations:
                 with self.subTest(profile=profile, field=field_path):
@@ -69,10 +72,15 @@ class NativeDependencyReleaseGateTests(unittest.TestCase):
                     self.assertNotEqual(target[field_path[-1]], value)
                     target[field_path[-1]] = value
                     with patch.object(gate, "_load_schema_artifact", return_value=(candidate, [])):
-                        result = check_fn()
+                        if field_path[0] == "build":
+                            # Isolate the aggregate identity gate after its genuine positive baseline.
+                            with patch.object(module, "readiness_errors", return_value=[]):
+                                result = check_fn()
+                        else:
+                            result = check_fn()
                     self.assertFalse(result["ok"], result["detail"])
                     rejected += 1
-        self.assertEqual(rejected, 17)
+        self.assertEqual(rejected, 19)
 
     def test_stale_host_and_linked_image_pins_are_rejected(self) -> None:
         profiles = {

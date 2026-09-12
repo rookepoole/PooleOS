@@ -11,7 +11,15 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Latest development checkpoint:** Cycle 179 requalifies the six-component
+**Latest development checkpoint:** Cycle 180 qualifies five CPU profiles with
+fourteen fresh virtual boots, 225 controls and 46 focused regression tests.
+Positive tests now require untouched generated receipts. Selected readiness is
+13/27; fourteen memory-through-lock profiles remain, beginning
+`N9-PMM-ACPI-CONSUMER-001`. This is not a new ISO or a main-qualified release.
+The combined CPU/boot/entry/progress closeout passes 174 tests.
+[Cycle 180 evidence](docs/checkpoints/cycle180-cpu-qualification.md).
+
+**Historical checkpoint:** Cycle 179 requalifies the six-component
 native boot chain: six final virtual boots, two kernel entries, independent
 nine-file revalidation and 71 passing Python tests. Invalid revalidation
 receipts now reject before output. Eight of 27 selected checks pass;
@@ -20,8 +28,8 @@ This is pre-production development, not a new ISO or main-qualified release.
 [Cycle 179 evidence](docs/checkpoints/cycle179-boot-chain-requalification.md).
 
 **Development backup:** [draft PR #78](https://github.com/rookepoole/PooleOS/pull/78)
-tracks Cycles 177-179 on `agent/n12-dispatch-execution-holds`. The combined
-closeout suite passes 128 tests. Source checkpoints on this branch are separate
+tracks Cycles 177-180 on `agent/n12-dispatch-execution-holds`. Cycle 179's combined
+closeout suite passed 128 tests. Source checkpoints on this branch are separate
 from qualified `main`; private execution logs and media are not part of this backup.
 
 **Historical checkpoint:** Cycle 178 requalifies the kernel entry:

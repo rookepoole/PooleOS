@@ -1,15 +1,37 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-12
-Plan version: 2.82.0-native-boot-chain-requalification
-Roadmap cycle: PooleOS Cycle 179
+Plan version: 2.83.0-native-cpu-qualification
+Roadmap cycle: PooleOS Cycle 180
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 179: Boot Chain Requalification
+## Cycle 180: Current-Kernel CPU Qualification
+
+`N7-TRAP-001` at N7.5/N7.6 and the dependent N7.1/N7.3/N7.4 profiles pass
+fourteen fresh virtual boots and 225 controls on the unchanged Cycle 177 kernel.
+Two WHPX exception boots are separate from one expected TCG limitation probe.
+All 46 focused CPU tests pass, including eighty entry substitutions, twenty
+invalid entry dependencies and nineteen aggregate gate controls. Positive tests
+now use untouched generated receipts; old trap digest/relocation pins are
+repaired from fresh measurements. Failures and old receipts remain preserved.
+
+The combined CPU/boot/entry/roadmap/core/checklist closeout passes 174 tests,
+including exact entry-product reproduction. This includes the 46-test subset.
+
+Selected readiness is 13/27. Fourteen memory-through-lock profiles remain stale,
+beginning `N9-PMM-ACPI-CONSUMER-001`. Exact source/marker/channel/entry/core
+bindings are checked; the 962-test inventory is not a full-suite result.
+Architecture binds 250 paths. Main remains qualified Cycle 176; draft PR #78
+still needs ordered replay and full exact-candidate canonical/Doctor and review
+gates. Native Rust, entry/boot/core receipts, PooleGlyph, demo ISO, normative
+charter and all phase/flag states are unchanged. No production claim follows.
+[Cycle 180 evidence and limits](checkpoints/cycle180-cpu-qualification.md).
+
+## Historical Cycle 179: Boot Chain Requalification
 
 `N5-SYMBOLS-SEMANTICS-001` at N5.6/N5.9 and `ADD-BOOT-007` advances through
 PSYM1, PPOL1, PKLOAD6, PooleBoot, PKREVAL1 and PKXFER1 for the unchanged
@@ -1723,6 +1745,12 @@ Exit gate: every accepted boot is signature/digest/version bound; revocation and
 
 ### N7 - x86-64 CPU, Privilege, Descriptor, and Fault Foundation (`partial`)
 
+Cycle 180 replay: five current-kernel profiles pass fourteen final virtual
+boots and 225 controls, plus one separate expected TCG diagnostic. Forty-six
+focused regressions pass with genuine generated positive receipts. This does
+not qualify every vector, guarded IST/user contexts, target errata, physical
+hardware, general scheduler xstate ownership or the N7 exit gate.
+
 Inherited sections: `020-022`. Added: `ADD-N7-ERRATA-SOURCE-001`, `ADD-N7-XSTATE-001`.
 Goal: establish a correct processor contract before concurrency or user execution.
 
@@ -2586,6 +2614,12 @@ Exit gate: supported failures either recover locally or enter a known safe state
 
 ### N36 - Verification, Fuzzing, Fault Injection, Security, and Conformance (`partial`)
 
+Cycle 180 strengthens CPU provenance regressions with untouched generated
+positive receipts, eighty embedded-entry substitutions, twenty invalid current
+dependencies and nineteen aggregate gate controls. Forty-six focused tests
+pass; the broader transitive evidence and full exact-candidate audit remain
+open under the existing receipt-coverage requirement and flag.
+
 Cycle 179 repairs the reproduced PKREVAL1 schema-only receipt admission gap
 under `ADD-N36-RECEIPT-COVERAGE-001`. Both generation and CLI publication now
 require semantic acceptance; three malformed/stale/overclaim receipts reject
@@ -2845,7 +2879,14 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 
 ## 12. Near-Term Execution Sequence
 
-Current Cycle 179 sequence: the six-component boot chain passes. Continue with
+Current Cycle 180 sequence: the five CPU profiles pass. Continue with
+`N9-PMM-ACPI-CONSUMER-001`, followed by VM/IRQ/SMP/scheduler/atomic/lock replay.
+Fourteen of 27 selected checks remain stale. Full runtime-inclusive exact-source
+canonical/Doctor qualification and publication/review gate the draft PR #78
+merge before N12.3 live task contexts and architectural CPU retirement resume.
+N0 custody and physical target prerequisites remain separate blockers.
+
+Historical Cycle 179 sequence: the six-component boot chain passes. Continue with
 `N7-TRAP-001`, then the remaining CPU profiles and fourteen memory-through-lock
 profiles in dependency order. Nineteen of 27 selected checks remain stale.
 The runtime-inclusive exact-candidate canonical audit, publication and GitHub

@@ -358,6 +358,12 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle180-cpu-qualification.md",
+      "sha256": "840E833E22AF170147CD31BBABD28349E6C763A28606B210B09C9893EA7A9B1C",
+      "byte_count": 6543,
+      "line_count": 106
+    },
+    {
       "path": "docs/checkpoints/cycle179-boot-chain-requalification.md",
       "sha256": "238D6481921C7F6A1013F4DF88A565D835C5505F690885BEBC23A59EEBDFD100",
       "byte_count": 8073,
@@ -401,9 +407,9 @@
     },
     {
       "path": "tests/test_native_dependency_release_gate.py",
-      "sha256": "040525A7E93A625CBF6D94E388D2D61024F23C5A817AE2527E7DDBDB69BFE08A",
-      "byte_count": 6817,
-      "line_count": 125
+      "sha256": "45FF255666F0F7A01F7A68000CCC0B46CC0D9E1195CBD21A423B27242D1A8A0C",
+      "byte_count": 7406,
+      "line_count": 133
     },
     {
       "path": "docs/checkpoints/cycle177-dispatch-execution-holds.md",
@@ -443,9 +449,9 @@
     },
     {
       "path": "tests/test_native_cpu_entry_provenance.py",
-      "sha256": "58318223ECD528347234589BE95E34A0534ADB55FAC669984E1E5AD4E2E1FD4A",
-      "byte_count": 4486,
-      "line_count": 98
+      "sha256": "5DDA86B0590083EA5B73FB13F1F898CCEC27DA1B4FF51554BB635E1FE3B5D6EB",
+      "byte_count": 4453,
+      "line_count": 97
     },
     {
       "path": "LICENSE",
@@ -701,15 +707,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "B84B4F0AA39568CB4092CC8A2A383306B6AF779948E608194E147C67E2673F10",
-      "byte_count": 88245,
-      "line_count": 1164
+      "sha256": "2D337D494275DFA1601C8F239EE503ABB19C1FF59E50E32D0D05B8BAD888E9A8",
+      "byte_count": 88854,
+      "line_count": 1173
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "174D40E6A204F6A817A154E6B0A1A5EB8BC2B03ECF055BC3C1C6B27B6E728589",
-      "byte_count": 406894,
-      "line_count": 3036
+      "sha256": "FE2E20E6CA34DEAE4452A354C8A068506F4244A471EC1B4FE3EAEB118664E5F5",
+      "byte_count": 409467,
+      "line_count": 3077
     },
     {
       "path": "docs/publication-boundary.md",
@@ -809,15 +815,15 @@
     },
     {
       "path": "runs/native-kernel-trap-readiness.json",
-      "sha256": "8C14786643F1423656AD20D733A1F339CC7036BEB0957CF2945C605DCD40648F",
-      "byte_count": 466621,
-      "line_count": 11433
+      "sha256": "2A997942A2AD844814BF4FE5A6C14D51A1C7A24044796D82FCEC73C3A403BD2C",
+      "byte_count": 466833,
+      "line_count": 11438
     },
     {
       "path": "runs/native-kernel-cpu-policy-readiness.json",
-      "sha256": "F3A67A26D0E749921A1F3AAC6B924C6B74BF71564DBDA2B292B8B844718C0285",
-      "byte_count": 178725,
-      "line_count": 4789
+      "sha256": "9BD6F02A53B34281CB60A13C86CEC26AC99C06F02958FFA23ABAB26A0A54A136",
+      "byte_count": 178937,
+      "line_count": 4794
     },
     {
       "path": "runs/native-kernel-errata-policy-readiness.json",
@@ -827,21 +833,21 @@
     },
     {
       "path": "runs/native-kernel-xstate-policy-readiness.json",
-      "sha256": "9D66DD4EC4AC145A6639D6A0C50179D112D9221CE8B5224851DB5645CFD3BFE0",
-      "byte_count": 183919,
-      "line_count": 4995
+      "sha256": "669B861DBA9E62A2BCD532BB37A87207DE9D2CC389CA92B2A0B1FF86B2C996C3",
+      "byte_count": 184131,
+      "line_count": 5000
     },
     {
       "path": "runs/native-kernel-xstate-exception-readiness.json",
-      "sha256": "CE34466E452D16847F6773764BF55733F0F0C25601E4F37C36B7F13101B916C7",
-      "byte_count": 196957,
-      "line_count": 5374
+      "sha256": "1BFC2D346562896621E72EBAABF05B224ECF517B1050E172DBF426AEF247BFB8",
+      "byte_count": 197169,
+      "line_count": 5379
     },
     {
       "path": "runs/native-kernel-privilege-msr-policy-readiness.json",
-      "sha256": "AE0AC3771B7C8C749CF2F0AA1700FF35753973F2494A1B34342CB60A96B18632",
-      "byte_count": 182142,
-      "line_count": 4907
+      "sha256": "D6198669F7CE065B48D64EEEF3774C213E94B8DD0C1FA537B66B1BCDAE6ECFE0",
+      "byte_count": 182354,
+      "line_count": 4912
     },
     {
       "path": "runs/native-kernel-physical-memory-readiness.json",

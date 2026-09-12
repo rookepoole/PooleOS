@@ -43,11 +43,12 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 179,
-    "selected_move_id": "N5-SYMBOLS-SEMANTICS-001",
+    "last_updated_cycle": 180,
+    "selected_move_id": "N7-TRAP-001",
     "immediate_next_move_id": "N0-GOVERNANCE-CUSTODY-001",
-    "owner_independent_next_move_id": "N7-TRAP-001",
+    "owner_independent_next_move_id": "N9-PMM-ACPI-CONSUMER-001",
     "required_records": [
+      "docs/checkpoints/cycle180-cpu-qualification.md",
       "docs/checkpoints/cycle179-boot-chain-requalification.md",
       "docs/checkpoints/cycle178-kernel-entry-requalification.md",
       "docs/checkpoints/cycle177-dispatch-execution-holds.md",
@@ -138,7 +139,7 @@
     "added_requirement_count": 57
   },
   "baseline": {
-    "pooleos_cycle": 179,
+    "pooleos_cycle": 180,
     "entry_cycle": 79,
     "pooleos_test_count": 962,
     "historical_consistency_release_gate": {
@@ -156,13 +157,13 @@
       "explicit_gap_count": 20,
       "production_ready": false,
       "native_promotion_role": "partially_qualified_development_candidate_non_promoting",
-      "qualification_status": "boot_chain_requalified_cpu_and_memory_replay_pending",
+      "qualification_status": "cpu_requalified_memory_replay_pending",
       "passed_check_count_scope": "historical_cycle176_exact_final_canonical_audit",
       "current_cycle_full_canonical_audit_performed": false,
       "last_fully_qualified_cycle": 176,
       "last_fully_qualified_passed_checks": 105,
       "current_candidate_audit": {
-        "cycle": 179,
+        "cycle": 180,
         "status": "not_run",
         "applies_to_current_source": false,
         "aggregate_suite_passed": false,
@@ -258,11 +259,11 @@
         "production_ready": false
       },
       "current_focused_source_projection": {
-        "cycle": 179,
+        "cycle": 180,
         "scope": "27_selected_native_checks_not_full_canonical_audit",
-        "passed_checks": 8,
+        "passed_checks": 13,
         "total_checks": 27,
-        "pending_downstream_native_checks": 19,
+        "pending_downstream_native_checks": 14,
         "passing_profiles": [
           "native_kernel_entry_readiness",
           "native_symbol_readiness",
@@ -271,27 +272,32 @@
           "native_pooleboot_readiness",
           "native_kernel_revalidation_readiness",
           "native_kernel_transfer_readiness",
-          "native_kernel_errata_policy_readiness"
+          "native_kernel_trap_readiness",
+          "native_kernel_cpu_policy_readiness",
+          "native_kernel_errata_policy_readiness",
+          "native_kernel_xstate_policy_readiness",
+          "native_kernel_xstate_exception_readiness",
+          "native_kernel_privilege_msr_policy_readiness"
         ],
-        "final_receipt_fresh_qemu_runs": 6,
-        "superseded_initial_qemu_runs": 2,
-        "kernel_entry_runs": 2,
-        "revalidated_dependency_execution_cycle": 179,
+        "final_receipt_fresh_qemu_runs": 14,
+        "expected_tcg_limitation_probes": 1,
+        "whpx_exception_runs": 2,
+        "superseded_initial_runs": 0,
+        "negative_control_groups": 225,
+        "aggregate_gate_regression_cases": 19,
         "entry_receipt_sha256": "B9E79FE7CABA4931C3654134A68934B732DD77A6F1555179C2E09EF93D6212D6",
         "entry_kernel_host_tests": 245,
         "entry_source_binding_count": 55,
         "entry_release_gate_controls": 12,
-        "focused_python_tests_passed": 71,
-        "focused_test_scope": "six_N5_components_not_full_audit",
-        "focused_test_log_sha256": "BF2D89D92750BF5192042F8719DAD48F9DE94C28864269E6441A5F4C685212EE",
-        "boot_identity_rejection_cases": 13,
-        "qualifier_admission_rejection_cases": 3,
+        "focused_python_tests_passed": 46,
+        "focused_test_scope": "five_CPU_profiles_pure_errata_provenance_and_CPU_gate_not_full_audit",
+        "focused_test_log_sha256": "5F0968C7EA5288C3E189D04E06EEB246951C6AF40EB59C89307EC3301B92754D",
         "core_receipt_sha256": "7E289FE30319EA9577C66716FE31EB02600E779D8F0E380172D3C3C708900A71",
         "core_live_execution_cycle": null,
         "canonical_full_replay_performed": false,
         "production_ready": false,
-        "next_dependency_move_id": "N7-TRAP-001",
-        "required_next_gate": "ordered_CPU_memory_replay_then_exact_full_qualification"
+        "next_dependency_move_id": "N9-PMM-ACPI-CONSUMER-001",
+        "required_next_gate": "ordered_memory_replay_then_exact_full_qualification"
       },
       "historical_cycle171_source_projection": {
         "cycle": 171,
@@ -586,8 +592,8 @@
         "production_ready": false
       },
       "current_dependency_qualification": {
-        "cycle": 179,
-        "source_validation_cycle": 179,
+        "cycle": 180,
+        "source_validation_cycle": 180,
         "status": "source_requalification_required",
         "applies_to_current_source": false,
         "historical_record": "historical_cycle175_dependency_qualification",
@@ -686,7 +692,7 @@
       },
       "current_boot_chain_qualification": {
         "cycle": 179,
-        "source_validation_cycle": 179,
+        "source_validation_cycle": 180,
         "status": "single_host_replay_pass",
         "scope": "six_N5_components_for_current_dispatch_execution_hold_kernel",
         "applies_to_current_source": true,
@@ -983,23 +989,93 @@
         "production_ready": false
       },
       "current_cpu_qualification": {
-        "cycle": 179,
-        "source_validation_cycle": 179,
-        "status": "source_requalification_required",
-        "applies_to_current_source": false,
-        "historical_record": "historical_cycle175_cpu_qualification",
-        "readiness_replay_required_profiles": [
+        "cycle": 180,
+        "scope": "five_N7_profiles_with_untouched_generated_positive_receipts",
+        "kernel_sha256": "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA",
+        "fresh_qemu_runs": 14,
+        "expected_tcg_limitation_probes": 1,
+        "negative_control_groups": 225,
+        "aggregate_gate_regression_cases": 19,
+        "focused_python_tests": 46,
+        "kernel_host_tests_per_qualifier": 245,
+        "whpx_exception_runs": 2,
+        "exception_deliveries_per_run": 3,
+        "exception_recoveries_per_run": 2,
+        "linked_exception_audit_passed": true,
+        "linked_msr_audit_passed": true,
+        "receipt_bindings": [
+          {
+            "profile": "trap",
+            "path": "runs/native-kernel-trap-readiness.json",
+            "sha256": "2A997942A2AD844814BF4FE5A6C14D51A1C7A24044796D82FCEC73C3A403BD2C",
+            "fresh_runs": 6,
+            "negative_controls": 51,
+            "kernel_host_tests": 245,
+            "execution_log_sha256": "7E2F449373D9AC8C54B86D0CCC94BB7962EFED183681CAEBD68BF0C6D3DFB4AC",
+            "elapsed_seconds": 102.437
+          },
+          {
+            "profile": "cpu_policy",
+            "path": "runs/native-kernel-cpu-policy-readiness.json",
+            "sha256": "9BD6F02A53B34281CB60A13C86CEC26AC99C06F02958FFA23ABAB26A0A54A136",
+            "fresh_runs": 2,
+            "negative_controls": 41,
+            "kernel_host_tests": 245,
+            "execution_log_sha256": "CFA41675A79CE67949D1FDB8D08F791EB2FD1115237010D33465135306D1CE23",
+            "elapsed_seconds": 63.609
+          },
+          {
+            "profile": "xstate_policy",
+            "path": "runs/native-kernel-xstate-policy-readiness.json",
+            "sha256": "669B861DBA9E62A2BCD532BB37A87207DE9D2CC389CA92B2A0B1FF86B2C996C3",
+            "fresh_runs": 2,
+            "negative_controls": 43,
+            "kernel_host_tests": 245,
+            "execution_log_sha256": "4260145CE808D54618100843E5797A22DAFA156F94093C1D222D6D99730A162A",
+            "elapsed_seconds": 73.657
+          },
+          {
+            "profile": "xstate_exception",
+            "path": "runs/native-kernel-xstate-exception-readiness.json",
+            "sha256": "1BFC2D346562896621E72EBAABF05B224ECF517B1050E172DBF426AEF247BFB8",
+            "fresh_runs": 2,
+            "negative_controls": 43,
+            "kernel_host_tests": 245,
+            "execution_log_sha256": "F3ED8801D7E59F458EBE9E20B63EED505D5DEF7034E3E58654DA297E074BF60D",
+            "elapsed_seconds": 73.609
+          },
+          {
+            "profile": "privilege_msr_policy",
+            "path": "runs/native-kernel-privilege-msr-policy-readiness.json",
+            "sha256": "D6198669F7CE065B48D64EEEF3774C213E94B8DD0C1FA537B66B1BCDAE6ECFE0",
+            "fresh_runs": 2,
+            "negative_controls": 47,
+            "kernel_host_tests": 245,
+            "execution_log_sha256": "9B9A31059D4151F9B9A62622272025F3EDB8EEF33A8C29EEA6267DBE5A72AE32",
+            "elapsed_seconds": 69.609
+          }
+        ],
+        "current_candidate_full_gate_passed": false,
+        "production_ready": false,
+        "source_validation_cycle": 180,
+        "embedded_entry_provenance_replay_pending": false,
+        "readiness_replay_required_profiles": [],
+        "embedded_entry_rejection_cases": 80,
+        "invalid_current_entry_dependency_cases": 20,
+        "entry_identity_comparison": "canonical_JSON_typed_equality",
+        "provenance_coverage_scope": "five_N7_profiles_only_not_all_transitive_inputs",
+        "status": "single_host_cpu_replay_pass",
+        "applies_to_current_source": true,
+        "qualified_profiles": [
           "trap",
           "cpu_policy",
           "xstate_policy",
           "xstate_exception",
           "privilege_msr_policy"
         ],
-        "qualified_profiles": [],
-        "fresh_qemu_runs": 0,
-        "current_candidate_full_gate_passed": false,
-        "kernel_sha256": "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA",
-        "production_ready": false
+        "positive_receipts_rebound_in_tests": false,
+        "recorded_marker_replay_verified": true,
+        "superseded_initial_runs": 0
       },
       "historical_cycle164_cpu_qualification": {
         "cycle": 164,
@@ -1444,7 +1520,7 @@
       },
       "current_entry_provenance_qualification": {
         "cycle": 178,
-        "source_validation_cycle": 179,
+        "source_validation_cycle": 180,
         "status": "single_host_entry_reproduction_pass",
         "applies_to_current_source": true,
         "source_binding_count": 55,
@@ -2812,6 +2888,281 @@
         "aggregate_suite_passed": false,
         "merge_requires_runtime_inclusive_exact_final_qualification": true,
         "production_ready": false
+      },
+      "historical_cycle179_source_projection": {
+        "cycle": 179,
+        "scope": "27_selected_native_checks_not_full_canonical_audit",
+        "passed_checks": 8,
+        "total_checks": 27,
+        "pending_downstream_native_checks": 19,
+        "passing_profiles": [
+          "native_kernel_entry_readiness",
+          "native_symbol_readiness",
+          "native_policy_readiness",
+          "native_kernel_load_readiness",
+          "native_pooleboot_readiness",
+          "native_kernel_revalidation_readiness",
+          "native_kernel_transfer_readiness",
+          "native_kernel_errata_policy_readiness"
+        ],
+        "final_receipt_fresh_qemu_runs": 6,
+        "superseded_initial_qemu_runs": 2,
+        "kernel_entry_runs": 2,
+        "revalidated_dependency_execution_cycle": 179,
+        "entry_receipt_sha256": "B9E79FE7CABA4931C3654134A68934B732DD77A6F1555179C2E09EF93D6212D6",
+        "entry_kernel_host_tests": 245,
+        "entry_source_binding_count": 55,
+        "entry_release_gate_controls": 12,
+        "focused_python_tests_passed": 71,
+        "focused_test_scope": "six_N5_components_not_full_audit",
+        "focused_test_log_sha256": "BF2D89D92750BF5192042F8719DAD48F9DE94C28864269E6441A5F4C685212EE",
+        "boot_identity_rejection_cases": 13,
+        "qualifier_admission_rejection_cases": 3,
+        "core_receipt_sha256": "7E289FE30319EA9577C66716FE31EB02600E779D8F0E380172D3C3C708900A71",
+        "core_live_execution_cycle": null,
+        "canonical_full_replay_performed": false,
+        "production_ready": false,
+        "next_dependency_move_id": "N7-TRAP-001",
+        "required_next_gate": "ordered_CPU_memory_replay_then_exact_full_qualification"
+      },
+      "historical_cycle179_ownership_qualification": {
+        "cycle": 177,
+        "scope": "host_dispatch_hold_and_inactive_stack_retention",
+        "host_qualification_cycle": 177,
+        "fresh_current_cycle_qemu_runs": 0,
+        "lifetime_tests_per_host_profile": 40,
+        "pool_tests_per_host_profile": 19,
+        "kernel_tests_per_host_profile": 245,
+        "retention_test_count": 20,
+        "ap_resource_test_count": 11,
+        "compile_fail_tests": 15,
+        "kernel_sha256": "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA",
+        "reclamation_receipt_sha256": "7E289FE30319EA9577C66716FE31EB02600E779D8F0E380172D3C3C708900A71",
+        "live_receipt_source_current": false,
+        "live_replay_cycle": null,
+        "current_boot_artifact_set_replay_pending": true,
+        "active_root_current_image_replay_complete": false,
+        "ap_runtime_live_integration_verified": false,
+        "task_stack_live_integration_verified": false,
+        "general_task_CPU_retirement_integration_verified": false,
+        "current_candidate_full_gate_passed": false,
+        "production_ready": false
+      },
+      "historical_cycle179_task_stack_qualification": {
+        "cycle": 177,
+        "contract_id": "PKSTACK1",
+        "scope": "prepared_inactive_task_stack_retention_and_scrubbed_release",
+        "receipt_path": "runs/native-kernel-reclamation-core-readiness.json",
+        "receipt_sha256": "7E289FE30319EA9577C66716FE31EB02600E779D8F0E380172D3C3C708900A71",
+        "receipt_schema_version": "1.6",
+        "page_count": 4,
+        "byte_count": 16384,
+        "stack_test_methods": 10,
+        "lifetime_tests_per_host_profile": 40,
+        "pool_tests_per_host_profile": 19,
+        "kernel_tests_per_host_profile": 245,
+        "compile_fail_tests": 15,
+        "host_profile_count": 2,
+        "scrub_fault_cases": 7,
+        "evidence_parser_rejection_cases": 40,
+        "single_manager_scrub_receipt_capacity_tested": 16,
+        "rejected_receipt_ordinal": 17,
+        "scheduler_generations_tested": 128,
+        "fresh_manager_every_task_batch": 8,
+        "linked_kernel_byte_identical": false,
+        "fresh_qemu_runs": 0,
+        "task_stack_live_verified": false,
+        "guarded_stack_mappings_verified": false,
+        "architectural_context_activation_verified": false,
+        "cross_cpu_quiescence_verified": false,
+        "automatic_scrub_receipt_growth_integrated": false,
+        "n12_3_complete": false,
+        "production_ready": false
+      },
+      "historical_cycle179_execution_qualification": {
+        "cycle": 177,
+        "contract_id": "PKEXEC1",
+        "scope": "mandatory_dispatch_hold_architecture_quiescence_boundary",
+        "receipt_path": "runs/native-kernel-reclamation-core-readiness.json",
+        "receipt_sha256": "7E289FE30319EA9577C66716FE31EB02600E779D8F0E380172D3C3C708900A71",
+        "kernel_sha256": "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA",
+        "execution_test_methods": 6,
+        "evidence_parser_rejection_cases": 30,
+        "loss_modes": [
+          "drop",
+          "forget",
+          "unwind"
+        ],
+        "scheduler_exhaustion_regressions": 2,
+        "host_profile_count": 2,
+        "fresh_qemu_runs": 0,
+        "task_execution_live_verified": false,
+        "storage_address_stability_guaranteed": false,
+        "cross_cpu_quiescence_verified": false,
+        "n12_3_complete": false,
+        "production_ready": false
+      },
+      "historical_cycle179_entry_provenance_qualification": {
+        "cycle": 178,
+        "source_validation_cycle": 179,
+        "status": "single_host_entry_reproduction_pass",
+        "applies_to_current_source": true,
+        "source_binding_count": 55,
+        "kernel_crate_rust_source_count": 39,
+        "linked_byte_count": 7032744,
+        "linked_sha256": "50084E1DFDD64A7EBDC884EB041533B50F0F354997E3D9C9BC0CF5B6277C1E11",
+        "canonical_byte_count": 530072,
+        "canonical_sha256": "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA",
+        "entry_receipt_sha256": "B9E79FE7CABA4931C3654134A68934B732DD77A6F1555179C2E09EF93D6212D6",
+        "clean_matching_builds": 2,
+        "kernel_host_tests": 245,
+        "negative_controls": 43,
+        "entry_python_tests": 11,
+        "crate_digest_mutation_cases": 39,
+        "release_gate_rejection_cases": 12,
+        "exact_receipt_and_product_reproduction_passed": true,
+        "single_host_only": true,
+        "transitive_workspace_provenance_complete": false,
+        "fresh_qemu_runs": 0,
+        "n6_exit_gate_satisfied": false,
+        "production_ready": false
+      },
+      "historical_cycle179_boot_chain_qualification": {
+        "cycle": 179,
+        "source_validation_cycle": 179,
+        "status": "single_host_replay_pass",
+        "scope": "six_N5_components_for_current_dispatch_execution_hold_kernel",
+        "applies_to_current_source": true,
+        "kernel_sha256": "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA",
+        "qualified_profiles": [
+          "symbol",
+          "policy",
+          "kernel_load",
+          "pooleboot",
+          "kernel_revalidation",
+          "kernel_transfer"
+        ],
+        "readiness_replay_required_profiles": [],
+        "fresh_qemu_runs": 6,
+        "superseded_initial_runs": 2,
+        "superseded_profiles": [
+          "kernel_transfer"
+        ],
+        "superseded_reason": "revalidation_semantic_admission_and_source_binding_repair",
+        "kernel_entry_runs": 2,
+        "kernel_host_tests": 245,
+        "loader_host_tests": 330,
+        "retained_file_count": 9,
+        "inner_artifact_bytes": 8761,
+        "retained_bytes": 11952,
+        "inner_set_sha256": "A3078488088B2BF11B8D88F48862FA8D80957D610EB1F3FF4411AD5E4729FEAF",
+        "focused_python_tests": 71,
+        "boot_identity_rejection_cases": 13,
+        "qualifier_admission_rejection_cases": 3,
+        "prior_kernel_identity_cases_added": 4,
+        "receipt_generation_semantically_validated": true,
+        "receipt_write_semantically_validated": true,
+        "current_candidate_full_gate_passed": false,
+        "production_ready": false,
+        "receipt_bindings": [
+          {
+            "profile": "symbol",
+            "path": "runs/native_symbol_readiness.json",
+            "sha256": "6E251E2863ABC20B4F1302805F092C382BE7D9CF7CA0AA70CB4E20270E33F96F",
+            "fresh_runs": 0,
+            "execution_log_sha256": "39D622078702BC250B96EFD6CACB9EC04214EB6EEF0062BCFD4BF83419DC0038"
+          },
+          {
+            "profile": "policy",
+            "path": "runs/native_policy_readiness.json",
+            "sha256": "40DFF7B628EAC8DB946BA9535740053A5F6B044E5882D3C527D20C1A273AE39E",
+            "fresh_runs": 0,
+            "execution_log_sha256": "4E0AA1F9DB24DE8D841452D60CA70EBAD0B1883FF79739D7A96CB02A1045ECA7"
+          },
+          {
+            "profile": "kernel_load",
+            "path": "runs/native_kernel_load_readiness.json",
+            "sha256": "E9BB7A7CE5C709A02ED02CB53A47FF66A55C949ED85BFEEF1FEC277BA667F611",
+            "fresh_runs": 2,
+            "execution_log_sha256": "417C7B59688B1D98ACDF8391A970DF09430B126C4345FE53A04840D1C461B330"
+          },
+          {
+            "profile": "pooleboot",
+            "path": "runs/native_pooleboot_readiness.json",
+            "sha256": "7D748DB12AB52F126DF5FF007F257CF7CD625C972DA748C35D3DA1DC325CD2E5",
+            "fresh_runs": 2,
+            "execution_log_sha256": "56338F6E2175B97E50BB1E2377476252F07B88CAAEAF64E220040A84FE086C65"
+          },
+          {
+            "profile": "kernel_revalidation",
+            "path": "runs/native-kernel-revalidation-readiness.json",
+            "sha256": "8577B6060FB35C3D0C16629E7CCB2CEB676ABECDB6410B9FC34E3C48755A9454",
+            "fresh_runs": 0,
+            "execution_log_sha256": "A241574365E43C16D05D7D059E5D2DF662F24D5D5A58A65536FB8528DE34177D"
+          },
+          {
+            "profile": "kernel_transfer",
+            "path": "runs/native-kernel-transfer-readiness.json",
+            "sha256": "C41EC5F4709169B84C3F3C96B9B17ACF26CC128624D9481378BCB313B3DA1A9C",
+            "fresh_runs": 2,
+            "execution_log_sha256": "CFA47E76AB3375E41C02258ADFBB2C49320C3D8F2D0956B0CDC404ECD5A5D402"
+          }
+        ]
+      },
+      "historical_cycle179_cpu_qualification": {
+        "cycle": 179,
+        "source_validation_cycle": 179,
+        "status": "source_requalification_required",
+        "applies_to_current_source": false,
+        "historical_record": "historical_cycle175_cpu_qualification",
+        "readiness_replay_required_profiles": [
+          "trap",
+          "cpu_policy",
+          "xstate_policy",
+          "xstate_exception",
+          "privilege_msr_policy"
+        ],
+        "qualified_profiles": [],
+        "fresh_qemu_runs": 0,
+        "current_candidate_full_gate_passed": false,
+        "kernel_sha256": "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA",
+        "production_ready": false
+      },
+      "historical_cycle179_dependency_qualification": {
+        "cycle": 179,
+        "source_validation_cycle": 179,
+        "status": "source_requalification_required",
+        "applies_to_current_source": false,
+        "historical_record": "historical_cycle175_dependency_qualification",
+        "readiness_replay_required_profiles": [
+          "physical_memory",
+          "virtual_memory",
+          "interrupt_time",
+          "smp_first_ap",
+          "smp_percpu_runtime",
+          "smp_ipi",
+          "scheduler",
+          "scheduler_preempt",
+          "scheduler_deferred",
+          "scheduler_smp",
+          "scheduler_ap_workers",
+          "scheduler_smp_preempt",
+          "atomics",
+          "locks"
+        ],
+        "qualified_profiles": [],
+        "fresh_qemu_runs": 0,
+        "current_candidate_full_gate_passed": false,
+        "kernel_sha256": "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA",
+        "production_ready": false
+      },
+      "historical_cycle179_candidate_audit": {
+        "cycle": 179,
+        "status": "not_run",
+        "applies_to_current_source": false,
+        "aggregate_suite_passed": false,
+        "merge_requires_runtime_inclusive_exact_final_qualification": true,
+        "production_ready": false
       }
     },
     "native": {
@@ -3623,6 +3974,7 @@
         "ADD-N7-XSTATE-001"
       ],
       "current_evidence": [
+        "Cycle 180: docs/checkpoints/cycle180-cpu-qualification.md qualifies five CPU profiles on the unchanged kernel with fourteen fresh virtual boots, 225 controls and 46 focused tests. One expected TCG diagnostic is separate from two WHPX exception boots. Positive provenance tests require untouched generated receipts; eighty entry substitutions, twenty invalid dependencies and nineteen aggregate controls reject. Exact current marker/channel/entry evidence and linked exception/MSR audits pass; old failures and receipts remain preserved.",
         "Cycle 174: docs/checkpoints/cycle174-cpu-entry-provenance.md qualifies five CPU profiles with fourteen fresh successful virtual boots, 225 controls and 47 focused tests. Exact JSON-typed embedded entry identity rejects 80 malformed/stale/type cases and 20 invalid current dependencies. The projection is 24/27; memory and SMP provenance replay and full qualification remain open. No phase or flag closes.",
         "Cycle 173: docs/checkpoints/cycle173-entry-provenance-replay.md requalifies PKENTRY1 and six N5 components after full linked-ELF drift. All 38 kernel Rust sources are bound among 54 inputs; 11 entry tests, 71 boot-chain tests and six fresh QEMU runs pass. The selected projection is 22/27; five stale checks and broader embedded-entry CPU/memory/SMP provenance replay remain open. No phase, flag or production gate closes.",
         "Cycle 170: five current trap/CPU/xstate/MSR receipts qualify the unchanged Cycle 168 kernel with fourteen fresh headless boots, 225 marker controls and 42 focused Python tests. One expected TCG diagnostic is separate. The stale trap gate identity pins are repaired and 17 aggregate-gate cases reject stale identity or production/authority claims. Selected projection14/27;13 downstream checks plus prior SMP new-artifact replay remain. Next is N9-PMM-ACPI-CONSUMER-001; no N7 closure or target claim.",
@@ -3649,6 +4001,7 @@
         "runs/native-kernel-privilege-msr-policy-readiness.json: two exact fresh-vars TCG QEMU/OVMF runs, 35 markers, 47/47 hostile controls, 11 support-gated MSR reads, ten observed MCA banks, zero bank reads, zero runtime writes, and an exact linked-image audit of 43 RDMSR and three WRMSR sites that isolates PKSMP1, PKSMP2, PKSMP5/PKSCHED4, PKSCHED1, PKSCHED2, PKSCHED3, and PKIRQ1 accesses from the read-only PKMSR1 profile, with zero authority and explicit emulator/target/production nonclaims"
       ],
       "current_gaps": [
+        "Cycle 180 passes 13/27 selected native checks. Fourteen memory-through-lock profiles require replay beginning N9-PMM-ACPI-CONSUMER-001 before full exact-candidate qualification. All-vector/user-context/guarded-IST coverage, target errata, physical hardware, independent builders and N12.3 live task contexts/architectural CPU retirement remain open. No phase, flag, new ISO or production claim follows.",
         "Cycle 174 leaves PMM, VM and SMP IPI selected gates stale; all fourteen older memory-through-lock profiles need embedded-entry provenance replay from N9-PMM-ACPI-CONSUMER-001. Complete transitive coverage, independent builders, physical targets and the exact full audit remain open.",
         "Cycle 173 repairs kernel-entry and symbol provenance; replay CPU, memory and SMP dependencies from N7-TRAP-001 before exact full qualification. Passing selected checks is not new execution evidence. Full transitive-workspace input coverage and independent-builder qualification remain open.",
         "PKTRAP1 proves only one BSP descriptor/fault slice, PKCPU1 proves only a bounded qemu64 BSP read-only CPU snapshot, and PKERR1 freezes an exact-target rejection policy that correctly denies six current gaps. PKXSTATE1 proves bounded eager x87/SSE standard-XSAVE ownership and clearing; PKXEXC1 adds deliberate #MF/#XM delivery and exact bounded recovery, terminal test-only #NM eager-policy rejection, and a linked machine-code scope audit under WHPX on one BSP. PKMSR1 adds a read-only qemu64 BSP system-linkage/FS-GS/global-MCA/unsupported-PMU policy with eleven support-gated reads and zero activation. PKSMP5 adds three AP-local GDT/TSS/IDT, guarded RSP0/IST, x87/SSE-owner, and interrupt-vector state transactions without scheduler ownership or production capability authority. Exact board revision, stable firmware-image hash, an applicable AMD Family 1Ah Models 40h-4Fh errata guide or reviewed vendor-response disposition, a direct numeric client microcode floor or ratified replacement rule, native per-processor privileged revision evidence, target-specific privileged-MSR semantics, syscall and complete per-CPU activation transactions, machine-check delivery and recovery, supported PMU ownership, AVX and extended xstate, user-task exception delivery, scheduler integration, CPU migration, complete descriptor/fault handling, target qualification, and the N7 exit gate remain open"
@@ -4000,6 +4353,7 @@
         "ADD-N12-CONCURRENCY-RECLAMATION-001"
       ],
       "current_evidence": [
+        "Cycle 180: docs/checkpoints/cycle180-cpu-qualification.md qualifies five CPU profiles on the unchanged kernel with fourteen fresh virtual boots, 225 controls and 46 focused tests. One expected TCG diagnostic is separate from two WHPX exception boots. Positive provenance tests require untouched generated receipts; eighty entry substitutions, twenty invalid dependencies and nineteen aggregate controls reject. Exact current marker/channel/entry evidence and linked exception/MSR audits pass; old failures and receipts remain preserved.",
         "Cycle 179: docs/checkpoints/cycle179-boot-chain-requalification.md qualifies six N5 components with six final headless boots, two kernel entries, nine-file independent revalidation and 71 passing focused Python tests. The revalidation qualifier now semantically validates before returning and writing a receipt; three specific invalid candidates reject without output. Thirteen gate controls reject old artifact/trust identities and host counts. Two superseded transfer boots and all failures remain separate. Kernel and native Rust bytes are unchanged.",
         "Cycle 178: docs/checkpoints/cycle178-kernel-entry-requalification.md requalifies the unchanged Cycle 177 kernel through two clean matching linked/canonical builds, 245 host tests, 43 ELF controls and 55 source bindings covering 39 kernel Rust files. Entry image pins and release-gate type checks are repaired; twelve isolated gate controls reject. The combined 57-test entry, roadmap, architecture, core and checklist suite passes. Core ownership remains host-only.",
         "Cycle 177: docs/checkpoints/cycle177-dispatch-execution-holds.md records PKEXEC1 mandatory dispatch execution holds and two reproduced transaction/bypass exhaustion admission rollback repairs. All 17 core stages pass with 245 kernel, 40 lifecycle, 19 pool and 15 compile-fail tests. Six execution cases and 30 parser controls are host evidence only. Cycle 176 qualified 105/708 and merged PR77 to main ac15d1d. The 37-test reconciliation suite passes; an expanded 60-test suite fails with nine reports across five stale-dependent acceptance tests (55 methods pass). No new live dispatch, phase closure or production claim follows.",
@@ -4049,6 +4403,7 @@
         "ADD-N12-CONCURRENCY-RECLAMATION-001: Cycle 162 qualifies mandatory active PKVM3 table/data ownership. Replay changed-image N5-through-N12 prerequisites, then implement execution-stack ownership, acknowledged cross-CPU quiescence, live timeout/offline/death/pressure/shutdown rollback, an independent oracle and exact-topology live evidence before closing N12.3"
       ],
       "current_gaps": [
+        "Cycle 180 passes 13/27 selected native checks. Fourteen memory-through-lock profiles require replay beginning N9-PMM-ACPI-CONSUMER-001 before full exact-candidate qualification. All-vector/user-context/guarded-IST coverage, target errata, physical hardware, independent builders and N12.3 live task contexts/architectural CPU retirement remain open. No phase, flag, new ISO or production claim follows.",
         "Cycle 179 passes 8/27 selected native checks. Nineteen CPU and memory-through-lock profiles require replay beginning N7-TRAP-001. Independent builders, complete transitive evidence, live task contexts/CPU retirement and full exact-candidate qualification remain open. No phase, flag, authenticated boot, new demo ISO or production claim follows.",
         "Cycle 178 passes only 3/27 selected native checks. Twenty-four dependent profiles remain stale, beginning N5-SYMBOLS-SEMANTICS-001. No new QEMU execution, architecture quiescence, independent builder, full canonical qualification, phase closure or production claim follows.",
         "Cycle 177 changes the kernel and has only 2/27 current selected readiness checks; 25 dependencies require replay beginning N6-KENTRY-001. Guarded live task mappings, active contexts, architecture-confirmed CPU quiescence, automatic scrub receipt growth, complete transitive evidence, independent builders and full exact-candidate qualification remain open.",
@@ -5646,6 +6001,8 @@
         "ADD-TEST-001"
       ],
       "current_evidence": [
+        "Cycle 180 source inventory: 962 Python tests discovered; full qualification pending",
+        "Cycle 180: docs/checkpoints/cycle180-cpu-qualification.md qualifies five CPU profiles on the unchanged kernel with fourteen fresh virtual boots, 225 controls and 46 focused tests. One expected TCG diagnostic is separate from two WHPX exception boots. Positive provenance tests require untouched generated receipts; eighty entry substitutions, twenty invalid dependencies and nineteen aggregate controls reject. Exact current marker/channel/entry evidence and linked exception/MSR audits pass; old failures and receipts remain preserved.",
         "Cycle 179 source inventory: 962 Python tests discovered; full qualification pending",
         "Cycle 179: docs/checkpoints/cycle179-boot-chain-requalification.md qualifies six N5 components with six final headless boots, two kernel entries, nine-file independent revalidation and 71 passing focused Python tests. The revalidation qualifier now semantically validates before returning and writing a receipt; three specific invalid candidates reject without output. Thirteen gate controls reject old artifact/trust identities and host counts. Two superseded transfer boots and all failures remain separate. Kernel and native Rust bytes are unchanged.",
         "Cycle 178 source inventory: 961 Python tests discovered; full qualification pending",
@@ -5671,6 +6028,7 @@
         "native binary parser, reproduction, leakage, malformed, substitution, governance, hardware, Tier 0, bounded-model, deterministic boot-media, PBP1/PBC1/PSM1/PBART1, six inner-format, PBTRUST1/PBSTATE1, PKELF1, PKENTRY1, PKLOAD6/PBLIVE4/PKMAP2/PBEXIT1, PKREVAL1, PKXFER1, PKTRAP1, PKCPU1, PKERR1, PKXSTATE1, PKXEXC1, PKMSR1, PKPMM7/PKACPI1, PKVM1, PKVM3, PKIRQ1, PKSMP1, PKSMP2, PKSMP5, PKSCHED1 through PKSCHED6, PKATOM1, and PKLOCK1 source/live/zero-authority controls, PKRECLAIM1-CORE host-only evidence and source-freshness controls, canonical-LF readiness regression controls, PooleGlyph roadmap bindings, Doctor external-report nonmutation, and collector-smoke negatives"
       ],
       "current_gaps": [
+        "Cycle 180 passes 13/27 selected native checks. Fourteen memory-through-lock profiles require replay beginning N9-PMM-ACPI-CONSUMER-001 before full exact-candidate qualification. All-vector/user-context/guarded-IST coverage, target errata, physical hardware, independent builders and N12.3 live task contexts/architectural CPU retirement remain open. No phase, flag, new ISO or production claim follows.",
         "Cycle 179 passes 8/27 selected native checks. Nineteen CPU and memory-through-lock profiles require replay beginning N7-TRAP-001. Independent builders, complete transitive evidence, live task contexts/CPU retirement and full exact-candidate qualification remain open. No phase, flag, authenticated boot, new demo ISO or production claim follows.",
         "Cycle 178 passes only 3/27 selected native checks. Twenty-four dependent profiles remain stale, beginning N5-SYMBOLS-SEMANTICS-001. No new QEMU execution, architecture quiescence, independent builder, full canonical qualification, phase closure or production claim follows.",
         "Cycle 177 changes the kernel and has only 2/27 current selected readiness checks; 25 dependencies require replay beginning N6-KENTRY-001. Guarded live task mappings, active contexts, architecture-confirmed CPU quiescence, automatic scrub receipt growth, complete transitive evidence, independent builders and full exact-candidate qualification remain open.",
@@ -8427,6 +8785,7 @@
       "phase_id": "N7",
       "closure_condition": "Qualify a bounded BSP-only GDT/TSS/IDT and uniform integer trap-entry slice with exact deliberate breakpoint, invalid-opcode, guard-page-fault, double-fault, and malformed-frame evidence while preserving all per-CPU, all-vector, asynchronous, guarded-stack, target-hardware, and production nonclaims",
       "evidence": [
+        "docs/checkpoints/cycle180-cpu-qualification.md",
         "docs/pdc-production-build-plan.md",
         "runs/pooleos_native_checklist_coverage.json",
         "specs/native-kernel-trap-contract.json",
@@ -8451,6 +8810,7 @@
       "phase_id": "N7",
       "closure_condition": "Qualify a bounded BSP-only qemu64 read-only CPUID, required-feature, control-register, XCR0, and support-gated MSR observation policy with independent Rust/Python agreement, exact dual-channel QEMU evidence, zero writes, zero authority, and explicit target-family, errata, xstate-ownership, AP-local, target-hardware, and production nonclaims",
       "evidence": [
+        "docs/checkpoints/cycle180-cpu-qualification.md",
         "docs/pdc-production-build-plan.md",
         "runs/pooleos_native_checklist_coverage.json",
         "specs/native-kernel-cpu-policy-contract.json",
@@ -8495,6 +8855,7 @@
       "phase_id": "N7",
       "closure_condition": "Qualify bounded eager x87/SSE standard-XSAVE ownership with exact XCR0/XSS policy, aligned per-owner images, canonical initialization, round-trip isolation, sensitive-image clearing, context-switch preconditions, kernel-SIMD prohibition, independent Rust/Python agreement, and explicit scheduler/SMP/target nonclaims",
       "evidence": [
+        "docs/checkpoints/cycle180-cpu-qualification.md",
         "docs/pdc-production-build-plan.md",
         "runs/pooleos_native_checklist_coverage.json",
         "specs/native-kernel-xstate-policy-contract.json",
@@ -8520,6 +8881,7 @@
       "phase_id": "N7",
       "closure_condition": "Qualify deliberate x87 #MF and SIMD #XM delivery with exact bounded recovery, terminal test-only #NM eager-policy rejection, independent marker validation, expected TCG limitation evidence, linked-machine-code scope audit, and explicit scheduler/SMP/target nonclaims",
       "evidence": [
+        "docs/checkpoints/cycle180-cpu-qualification.md",
         "docs/pdc-production-build-plan.md",
         "runs/pooleos_native_checklist_coverage.json",
         "specs/native-kernel-xstate-exception-contract.json",
@@ -8542,6 +8904,7 @@
       "phase_id": "N7",
       "closure_condition": "Freeze and independently qualify a read-only qemu64 BSP system-linkage, FS/GS, support-gated TSC_AUX, global machine-check, and unsupported-PMU policy with reserved-bit and canonical-address rejection, linked no-write audit, exact emulator boundaries, and zero authority",
       "evidence": [
+        "docs/checkpoints/cycle180-cpu-qualification.md",
         "docs/pdc-production-build-plan.md",
         "runs/pooleos_native_checklist_coverage.json",
         "specs/native-kernel-privilege-msr-policy-contract.json",
@@ -9439,6 +9802,7 @@
       "phase_id": "N12",
       "closure_condition": "Define and qualify bounded deferred reclamation and ABA-safe object lifetime over PKATOM1 and PKLOCK1 with scheduler, generation, acknowledged cross-CPU quiescence, timeout, cancellation, offline, owner-death, pressure, shutdown, and rollback evidence without general-SMP, hotplug, target, N12-exit, or production overclaim",
       "evidence": [
+        "docs/checkpoints/cycle180-cpu-qualification.md",
         "docs/checkpoints/cycle179-boot-chain-requalification.md",
         "docs/checkpoints/cycle178-kernel-entry-requalification.md",
         "docs/checkpoints/cycle177-dispatch-execution-holds.md",
@@ -9666,6 +10030,7 @@
       "phase_id": "N36",
       "closure_condition": "Close ADD-N36-RECEIPT-COVERAGE-001 with a per-profile exact scenario/run/dependency/observation matrix and negative controls through component validators and release gates; keep consistency, fresh execution, authentication, independent builders and hardware evidence separate",
       "evidence": [
+        "docs/checkpoints/cycle180-cpu-qualification.md",
         "tests/test_native_kernel_revalidation.py",
         "tools/qualify_native_kernel_revalidation.py",
         "docs/checkpoints/cycle179-boot-chain-requalification.md",
@@ -9968,7 +10333,7 @@
       "Rust PE32+/ELF64 fixtures pass one-host qualification, but second-host reproduction, source provenance, C17/assembly/ABI tools, and image tooling remain open",
       "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, bounded checks for all seven required boot-slot/capability/virtual-memory/IPC/scheduler/update/PooleFS domains detect their required hostile violations, and a bounded PooleBoot proof executes under pinned OVMF, but source-rebuilt current QEMU/EDK II, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open",
       "A reproducible unsigned PooleBoot proof application boots twice with deterministic twelve-file GPT/FAT32 media, exact GOP frames, retained PKMAP2 kernel/PSM1/six-artifact/PBTP1/PBTS1/table/guarded-stack/handoff storage, independently reconstructed PBLIVE4 bytes including a firmware RSDP record, bounded PBEXIT1 retry, successful ExitBootServices, and zero later firmware calls. The ordinary build stops before transfer; a separate opt-in QEMU-only PKXFER1 build installs retained CR3/RSP, transfers once, and live-executes PKREVAL1 over all nine retained files before an exact terminal unsigned-policy denial with zero signatures, authority, actions, writes, or firmware calls. PBSTATE1 still only models authenticated monotonic-anchor validation, deterministic redundant-copy selection, rollback/future rejection, repair/migration planning, and nine interrupted-transition recovery boundaries with no performed effects. Policy signature verification, authenticated revocation, a real cryptographic monotonic writable state provider, persistent backend I/O and executed repair/migration, Secure Boot-state verification, capability creation, activation or update application, policy application, recovery execution or symbol consumption, licensed real vendor payload intake and validation, live FMP/ESRT/PLDM inventory, privileged per-processor revision observation, initial-system execution, final framebuffer remap/revocation, production transfer, target-firmware and physical-media qualification, and N5 exit remain open",
-      "Cycle 179 qualifies six N5 components on the unchanged kernel: six final headless boots, two kernel entries, nine-file revalidation and 71 focused Python tests pass. PKREVAL1 requires semantic receipt acceptance before output; three admission and thirteen artifact/count gate controls pass. Two superseded boots and prior failures remain preserved. Selected readiness is 8/27; nineteen CPU/memory profiles require replay beginning N7-TRAP-001. Full exact-candidate, independent-builder and production qualification remain pending. Cycle 178 requalifies PKENTRY1 for the unchanged Cycle 177 kernel with two clean matching builds, 245 host tests, 43 rejection controls and 55 bindings covering 39 kernel Rust sources. Twelve entry-gate controls cover stale identities and exact numeric types. The selected projection is 3/27; 24 boot/CPU/memory dependencies still need replay beginning N5-SYMBOLS-SEMANTICS-001. No fresh guest, independent builder, full canonical or production qualification follows. Prior failures and historical qualification remain preserved. Cycle 177 adds PKEXEC1 dispatch execution holds and repairs transaction/bypass exhaustion admission rollback. All 17 core stages pass with 245 kernel, 40 lifecycle and 15 compile-fail tests; the changed image has only 2/27 current selected checks and needs 25 dependency replays beginning N6-KENTRY-001. Cycle 176 qualified 105 canonical gates and 708 Doctor checks and merged PR77 to main; that baseline does not qualify the new image. Live guarded stacks, context activation, architectural CPU quiescence and full current qualification remain open. No phase, flag or production gate closes. Historical records follow. Cycle 175 qualifies fourteen final memory-through-lock profiles with 28 fresh virtual boots, 660 groups and 2126 rejected cases; two earlier SMP boots are superseded after a shape-guard repair. All 27 selected native checks pass. Embedded provenance rejects 224 substitutions and 56 invalid dependencies; 161 of 163 focused tests pass with two optional skips. Exact full qualification, publication/review and N12.3 live stack/context and CPU-retirement work remain open. No phase or production gate closes. Cycle 174 requalifies five CPU profiles with fourteen fresh successful virtual boots and 225 controls. Embedded entry evidence now requires exact JSON-typed identity with the current validated receipt. The selected projection passes 24/27; PMM, VM, SMP IPI and broader memory-through-lock provenance replay remain pending before full qualification. No phase or production gate closes. Cycle 173 repairs PKENTRY1 full linked-ELF provenance and replays six N5 components with six fresh boots. The selected projection passes 22/27, while five stale checks and broader embedded-entry CPU/memory/SMP replay remain open. The Cycle 172 full audit failed 104/105; no current full qualification or main merge is claimed. Historical records below are not current-source promotion. Cycle 172 qualifies mandatory PKSTACK1 inactive task-stack ownership in PKLIFE1: 34 lifecycle tests and 243 kernel regressions per host profile, 11 compile-fail tests and a source-bound 17-stage core receipt. All 27 selected native checks pass on the unchanged linked kernel; no new QEMU execution or active stack context is claimed. Scrub failure and the fixed 16-receipt boundary retain ownership. Guarded mappings, architectural context/CPU retirement and automatic receipt-growth integration remain open. Cycle 171 is exact-final qualified and merged through PR76 at main8006c7b. Full runtime-inclusive exact-final qualification and publication/review still gate PR77; no phase, flag or production condition closes. Historical Cycle 171 completes fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles on the unchanged Cycle 168 kernel: 28 final headless boots, 660 control groups, 2126 rejected cases and 243 kernel host tests per qualifier. Four superseded boots are preserved separately. All 27 selected native checks pass. SMP evidence now binds current boot artifacts and rejects stale or malformed transfer dependencies; five new test methods cover nine rejection cases. The final 155-test focused suite passes with two optional local-transcript skips. Measured memory and host/image gate pins are reconciled with 20 memory and 38 stale-identity regression cases. Full runtime-inclusive exact-final qualification, publication and review gates still precede merge and N12.3 task-stack/CPU-retirement integration. Main stays qualified Cycle 165 at this pre-closeout checkpoint. No phase, flag or production gate closes. Historical Cycle 170 requalifies five trap/CPU/xstate/MSR profiles on the unchanged Cycle 168 kernel: fourteen fresh headless boots, 225 marker controls and 42 passing focused tests. One expected TCG exception diagnostic is separate. The trap gate's stale identity pins are repaired and 17 aggregate-gate regression cases reject stale identity or production/authority claims. Fourteen of 27 selected checks pass; thirteen downstream checks plus prior SMP new-boot-artifact replay remain. Next is N9-PMM-ACPI-CONSUMER-001. Full runtime-inclusive canonical qualification is pending; main stays qualified Cycle 165. No phase, flag or production gate closes. Historical Cycle 169 requalifies six N5 components on the unchanged Cycle 168 kernel: six fresh headless boots, two kernel entries, nine-file revalidation and 83 passing focused tests. PSYM1 now binds source-current kernel-entry evidence and measured identities. Nine of 27 selected checks pass; 18 downstream checks and a new-boot-artifact replay of the prior SMP result remain pending. Next is N7-TRAP-001. Full canonical qualification has not run; main stays qualified Cycle 165. No phase, flag or production gate closes. Historical Cycle 168 qualifies mandatory AP runtime/stack and frame retention with two final four-vCPU boots, 27 copied-free and 18 owner-release rejections per partial/full attempt, 249 rejected cases, and 243 kernel host tests. The 147-page kernel has corrected build and mapping diagnostics. All 56 focused tests pass, including serialized receipt and ownership controls. Four of 27 selected native checks pass; 23 changed-image dependencies need replay beginning N5-SYMBOLS-SEMANTICS-001. Main contains exact-final qualified Cycle 165 through PR75. Current full canonical qualification, general task-stack ownership and CPU retirement remain open. No phase, flag or production gate closes. Historical Cycle 165 completes fourteen current-kernel memory/VM/IRQ/SMP/scheduler/atomic/lock profiles with 28 final headless boots, 660 negative-control groups and 2120 rejected cases. Six superseded initial boots are excluded after three test-only corrections. All 27 selected native checks pass, and the 142-test profile/map/gate suite passes with two optional local-transcript skips. Native bytes are unchanged; data-frame scrub-before-reuse, execution-stack ownership, general CPU retirement and full runtime-inclusive exact-final qualification remain open. Main stays qualified Cycle 161, and no phase/flag or production gate closes. Historical Cycle 164 completes five N7 live profiles on the unchanged Cycle 162 kernel with fourteen successful headless boots, 225 marker controls and 41 focused Python tests. One expected TCG exception diagnostic is counted separately. The current selected projection passes 13/27; fourteen memory/VM/IRQ/SMP/scheduler/atomic/lock dependencies still need replay beginning N9-PMM-ACPI-CONSUMER-001. No current full canonical pass, phase closure, target qualification or production promotion is claimed. Historical Cycle 163 completes six N5 component replays with six final headless boots and 70 focused Python tests. Calendar-date validation repairs loader and PooleBoot fixed-day blockers without closing the broader N36 review. The current projection passes 8/27; nineteen downstream receipts, including transfer-dependent VM evidence, require replay beginning N7-TRAP-001. No current full canonical pass, phase closure or production promotion is claimed. Historical Cycle 162 adds mandatory PKVM3 table/data retention and atomic owner-authorized PMM cleanup. The 146-page kernel passes 228 host tests, 16 retention cases, two exact PKVM3 boots with six retained-free rejections each, 48 marker controls and two reproducible PKENTRY1 builds. The selected current-source projection passes 4/27 checks; 23 changed-image dependencies need replay, beginning N5-SYMBOLS-SEMANTICS-001. Main remains the fully qualified Cycle 161 baseline merged through PR74. Execution-stack ownership, general CPU retirement and the broader N36 schema/evidence audit remain open; no phase closure, demo rebase or production promotion follows. Historical Cycle 161 completes current-source replay of the Cycle 158 mandatory inactive table/frame-retention kernel after Cycle 159 boot-chain and Cycle 160 N7 qualification. Fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles pass 28 final headless boots, 658 control groups and 2,118 rejected cases on the unchanged 219-test kernel. All 26 selected native checks and the pre-closeout 105-check/708-Doctor/917-test canonical suite pass; exact-final qualification, publication and review checks still gate a main merge. The failed Cycle 158 audit is preserved separately. PKCPU1 recorded consistency and the two scheduler calendar-date repairs do not close the broader N36 schema/evidence audit. Active roots, execution stacks and CPU-retirement ownership remain open under N12.3. The native foundation includes PKENTRY1 intake, allocation-free PKREVAL1 verifier, bounded early diagnostics, opt-in QEMU-only live entry, BSP-only PKTRAP1 descriptor/exception containment, bounded BSP PKXSTATE1 x87/SSE ownership, PKPMM7 scrubbed lifecycle and checked repeated ledger growth, guarded stable-manager and generation-owned active-ledger transactions, PKACPI1 required-table snapshot/reclaim evidence, PKVM3 sparse PMM-owned direct-map evidence, PKIRQ1 one-BSP timer evidence, PKSMP1 one-AP lifecycle evidence, PKSMP2 one-AP processor-local runtime evidence, PKSMP5 fixed four-vCPU/three-AP startup, rollback, IPI, and one-page-per-root remote-invalidation evidence, PKSCHED1 cooperative scheduler/context-switch evidence, PKSCHED2 bounded BSP timer/wakeup preemption evidence, PKSCHED3 bounded BSP deferred-work evidence, PKSCHED4 exact-topology live AP scheduler ownership/wake/migration evidence, PKSCHED5 exact-topology typed AP-local worker evidence, PKSCHED6 bounded exact-topology SMP-preemption evidence, PKATOM1 typed atomic/memory-order evidence, and PKLOCK1 bounded lock-family/exact-topology contention evidence exist, but authenticated boot trust, measured boot, production transfer, production capability authority, general topology and shootdown, AP-local timer interrupt delivery, deferred reclamation and ABA-safe object lifetime, a general driver/service framework, arbitrary callbacks, general SMP preemption, retained crash evidence, target execution, and N6/N7/N8/N9/N12 exit remain open",
+      "Cycle 180 qualifies five CPU profiles on the unchanged kernel with fourteen fresh virtual boots, 225 controls and 46 focused tests; one expected TCG diagnostic remains separate. Positive provenance tests now require untouched generated receipts, and nineteen aggregate controls reject stale identities or promotion. Selected readiness is 13/27; fourteen memory-through-lock profiles need replay beginning N9-PMM-ACPI-CONSUMER-001. Full exact qualification, live task contexts/CPU retirement and production remain open. Cycle 179 qualifies six N5 components on the unchanged kernel: six final headless boots, two kernel entries, nine-file revalidation and 71 focused Python tests pass. PKREVAL1 requires semantic receipt acceptance before output; three admission and thirteen artifact/count gate controls pass. Two superseded boots and prior failures remain preserved. Selected readiness is 8/27; nineteen CPU/memory profiles require replay beginning N7-TRAP-001. Full exact-candidate, independent-builder and production qualification remain pending. Cycle 178 requalifies PKENTRY1 for the unchanged Cycle 177 kernel with two clean matching builds, 245 host tests, 43 rejection controls and 55 bindings covering 39 kernel Rust sources. Twelve entry-gate controls cover stale identities and exact numeric types. The selected projection is 3/27; 24 boot/CPU/memory dependencies still need replay beginning N5-SYMBOLS-SEMANTICS-001. No fresh guest, independent builder, full canonical or production qualification follows. Prior failures and historical qualification remain preserved. Cycle 177 adds PKEXEC1 dispatch execution holds and repairs transaction/bypass exhaustion admission rollback. All 17 core stages pass with 245 kernel, 40 lifecycle and 15 compile-fail tests; the changed image has only 2/27 current selected checks and needs 25 dependency replays beginning N6-KENTRY-001. Cycle 176 qualified 105 canonical gates and 708 Doctor checks and merged PR77 to main; that baseline does not qualify the new image. Live guarded stacks, context activation, architectural CPU quiescence and full current qualification remain open. No phase, flag or production gate closes. Historical records follow. Cycle 175 qualifies fourteen final memory-through-lock profiles with 28 fresh virtual boots, 660 groups and 2126 rejected cases; two earlier SMP boots are superseded after a shape-guard repair. All 27 selected native checks pass. Embedded provenance rejects 224 substitutions and 56 invalid dependencies; 161 of 163 focused tests pass with two optional skips. Exact full qualification, publication/review and N12.3 live stack/context and CPU-retirement work remain open. No phase or production gate closes. Cycle 174 requalifies five CPU profiles with fourteen fresh successful virtual boots and 225 controls. Embedded entry evidence now requires exact JSON-typed identity with the current validated receipt. The selected projection passes 24/27; PMM, VM, SMP IPI and broader memory-through-lock provenance replay remain pending before full qualification. No phase or production gate closes. Cycle 173 repairs PKENTRY1 full linked-ELF provenance and replays six N5 components with six fresh boots. The selected projection passes 22/27, while five stale checks and broader embedded-entry CPU/memory/SMP replay remain open. The Cycle 172 full audit failed 104/105; no current full qualification or main merge is claimed. Historical records below are not current-source promotion. Cycle 172 qualifies mandatory PKSTACK1 inactive task-stack ownership in PKLIFE1: 34 lifecycle tests and 243 kernel regressions per host profile, 11 compile-fail tests and a source-bound 17-stage core receipt. All 27 selected native checks pass on the unchanged linked kernel; no new QEMU execution or active stack context is claimed. Scrub failure and the fixed 16-receipt boundary retain ownership. Guarded mappings, architectural context/CPU retirement and automatic receipt-growth integration remain open. Cycle 171 is exact-final qualified and merged through PR76 at main8006c7b. Full runtime-inclusive exact-final qualification and publication/review still gate PR77; no phase, flag or production condition closes. Historical Cycle 171 completes fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles on the unchanged Cycle 168 kernel: 28 final headless boots, 660 control groups, 2126 rejected cases and 243 kernel host tests per qualifier. Four superseded boots are preserved separately. All 27 selected native checks pass. SMP evidence now binds current boot artifacts and rejects stale or malformed transfer dependencies; five new test methods cover nine rejection cases. The final 155-test focused suite passes with two optional local-transcript skips. Measured memory and host/image gate pins are reconciled with 20 memory and 38 stale-identity regression cases. Full runtime-inclusive exact-final qualification, publication and review gates still precede merge and N12.3 task-stack/CPU-retirement integration. Main stays qualified Cycle 165 at this pre-closeout checkpoint. No phase, flag or production gate closes. Historical Cycle 170 requalifies five trap/CPU/xstate/MSR profiles on the unchanged Cycle 168 kernel: fourteen fresh headless boots, 225 marker controls and 42 passing focused tests. One expected TCG exception diagnostic is separate. The trap gate's stale identity pins are repaired and 17 aggregate-gate regression cases reject stale identity or production/authority claims. Fourteen of 27 selected checks pass; thirteen downstream checks plus prior SMP new-boot-artifact replay remain. Next is N9-PMM-ACPI-CONSUMER-001. Full runtime-inclusive canonical qualification is pending; main stays qualified Cycle 165. No phase, flag or production gate closes. Historical Cycle 169 requalifies six N5 components on the unchanged Cycle 168 kernel: six fresh headless boots, two kernel entries, nine-file revalidation and 83 passing focused tests. PSYM1 now binds source-current kernel-entry evidence and measured identities. Nine of 27 selected checks pass; 18 downstream checks and a new-boot-artifact replay of the prior SMP result remain pending. Next is N7-TRAP-001. Full canonical qualification has not run; main stays qualified Cycle 165. No phase, flag or production gate closes. Historical Cycle 168 qualifies mandatory AP runtime/stack and frame retention with two final four-vCPU boots, 27 copied-free and 18 owner-release rejections per partial/full attempt, 249 rejected cases, and 243 kernel host tests. The 147-page kernel has corrected build and mapping diagnostics. All 56 focused tests pass, including serialized receipt and ownership controls. Four of 27 selected native checks pass; 23 changed-image dependencies need replay beginning N5-SYMBOLS-SEMANTICS-001. Main contains exact-final qualified Cycle 165 through PR75. Current full canonical qualification, general task-stack ownership and CPU retirement remain open. No phase, flag or production gate closes. Historical Cycle 165 completes fourteen current-kernel memory/VM/IRQ/SMP/scheduler/atomic/lock profiles with 28 final headless boots, 660 negative-control groups and 2120 rejected cases. Six superseded initial boots are excluded after three test-only corrections. All 27 selected native checks pass, and the 142-test profile/map/gate suite passes with two optional local-transcript skips. Native bytes are unchanged; data-frame scrub-before-reuse, execution-stack ownership, general CPU retirement and full runtime-inclusive exact-final qualification remain open. Main stays qualified Cycle 161, and no phase/flag or production gate closes. Historical Cycle 164 completes five N7 live profiles on the unchanged Cycle 162 kernel with fourteen successful headless boots, 225 marker controls and 41 focused Python tests. One expected TCG exception diagnostic is counted separately. The current selected projection passes 13/27; fourteen memory/VM/IRQ/SMP/scheduler/atomic/lock dependencies still need replay beginning N9-PMM-ACPI-CONSUMER-001. No current full canonical pass, phase closure, target qualification or production promotion is claimed. Historical Cycle 163 completes six N5 component replays with six final headless boots and 70 focused Python tests. Calendar-date validation repairs loader and PooleBoot fixed-day blockers without closing the broader N36 review. The current projection passes 8/27; nineteen downstream receipts, including transfer-dependent VM evidence, require replay beginning N7-TRAP-001. No current full canonical pass, phase closure or production promotion is claimed. Historical Cycle 162 adds mandatory PKVM3 table/data retention and atomic owner-authorized PMM cleanup. The 146-page kernel passes 228 host tests, 16 retention cases, two exact PKVM3 boots with six retained-free rejections each, 48 marker controls and two reproducible PKENTRY1 builds. The selected current-source projection passes 4/27 checks; 23 changed-image dependencies need replay, beginning N5-SYMBOLS-SEMANTICS-001. Main remains the fully qualified Cycle 161 baseline merged through PR74. Execution-stack ownership, general CPU retirement and the broader N36 schema/evidence audit remain open; no phase closure, demo rebase or production promotion follows. Historical Cycle 161 completes current-source replay of the Cycle 158 mandatory inactive table/frame-retention kernel after Cycle 159 boot-chain and Cycle 160 N7 qualification. Fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles pass 28 final headless boots, 658 control groups and 2,118 rejected cases on the unchanged 219-test kernel. All 26 selected native checks and the pre-closeout 105-check/708-Doctor/917-test canonical suite pass; exact-final qualification, publication and review checks still gate a main merge. The failed Cycle 158 audit is preserved separately. PKCPU1 recorded consistency and the two scheduler calendar-date repairs do not close the broader N36 schema/evidence audit. Active roots, execution stacks and CPU-retirement ownership remain open under N12.3. The native foundation includes PKENTRY1 intake, allocation-free PKREVAL1 verifier, bounded early diagnostics, opt-in QEMU-only live entry, BSP-only PKTRAP1 descriptor/exception containment, bounded BSP PKXSTATE1 x87/SSE ownership, PKPMM7 scrubbed lifecycle and checked repeated ledger growth, guarded stable-manager and generation-owned active-ledger transactions, PKACPI1 required-table snapshot/reclaim evidence, PKVM3 sparse PMM-owned direct-map evidence, PKIRQ1 one-BSP timer evidence, PKSMP1 one-AP lifecycle evidence, PKSMP2 one-AP processor-local runtime evidence, PKSMP5 fixed four-vCPU/three-AP startup, rollback, IPI, and one-page-per-root remote-invalidation evidence, PKSCHED1 cooperative scheduler/context-switch evidence, PKSCHED2 bounded BSP timer/wakeup preemption evidence, PKSCHED3 bounded BSP deferred-work evidence, PKSCHED4 exact-topology live AP scheduler ownership/wake/migration evidence, PKSCHED5 exact-topology typed AP-local worker evidence, PKSCHED6 bounded exact-topology SMP-preemption evidence, PKATOM1 typed atomic/memory-order evidence, and PKLOCK1 bounded lock-family/exact-topology contention evidence exist, but authenticated boot trust, measured boot, production transfer, production capability authority, general topology and shootdown, AP-local timer interrupt delivery, deferred reclamation and ABA-safe object lifetime, a general driver/service framework, arbitrary callbacks, general SMP preemption, retained crash evidence, target execution, and N6/N7/N8/N9/N12 exit remain open",
       "PKERR1 freezes a pure exact-target CPU/errata rejection policy, PKXSTATE1 proves bounded x87/SSE standard-XSAVE ownership, PKXEXC1 proves deliberate #MF/#XM recovery plus terminal test-only #NM rejection with a linked scope audit under WHPX, and PKMSR1 proves only a read-only qemu64 BSP system-linkage/global-MCA/unsupported-PMU observation. PKPMM7 supplies bounded physical ownership, scrubbed lifecycle transactions, a stable guarded five-page manager, external generation-owned active ledgers, checked automatic growth with retirement, bounded-window fallback and pre-effect rejection, streamed lifecycle-gated Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation and retained copy/readback; PKVM1 supplies inactive page-table transactions; PKVM3 proves one-BSP activation/restoration of a complete-profile PMM-owned sparse direct map; PKIRQ1 proves one bounded local timer transaction; PKSMP1 proves one first-AP start/quiesce/park lifecycle; PKSMP2 proves one AP-local GDT/TSS/IDT, guarded-stack, x87/SSE-owner, and interrupt-vector runtime transaction; and PKSMP5 proves three simultaneous AP-local runtimes, partial-start rollback with fresh retry, six fixed IPI classes per AP, three AP-side one-page INVLPG operations, aggregate acknowledgement, and one deferred generation retirement. No target-qualified complete native CPU policy, applicable Model 40h-4Fh errata authority, direct numeric client microcode floor or ratified replacement, target-specific privileged-MSR semantics, syscall/MCE/PMU activation, AVX/extended state, user-task exception delivery, scheduler or migration integration, general interrupt routing/time services, production capability authority, general topology or SMP shootdown, AML or complete ACPI resource-graph execution, complete kernel/user address spaces, heap, MMIO/PAT/MTRR qualification, interrupt-context or concurrent allocator, general pressure, or OOM implementation exists",
       "The exact Tier 1 identity passes 24/24 required checks and 16 allowlisted user-mode CPUID records are captured with zero public raw registers, but seven required channels remain non-complete in total, including partial CPU/MSR and SPD/topology; 15 standards hashes, ten lab-safety prerequisites, native parsing, and physical qualification also remain open",
       "No native DMA/IOMMU/interrupt-remapping confinement",
@@ -10009,6 +10374,7 @@
     "blocked": true
   },
   "claim_boundaries": [
+    "Cycle 180: docs/checkpoints/cycle180-cpu-qualification.md qualifies five CPU profiles on the unchanged kernel with fourteen fresh virtual boots, 225 controls and 46 focused tests. One expected TCG diagnostic is separate from two WHPX exception boots. Positive provenance tests require untouched generated receipts; eighty entry substitutions, twenty invalid dependencies and nineteen aggregate controls reject. Exact current marker/channel/entry evidence and linked exception/MSR audits pass; old failures and receipts remain preserved. Cycle 180 passes 13/27 selected native checks. Fourteen memory-through-lock profiles require replay beginning N9-PMM-ACPI-CONSUMER-001 before full exact-candidate qualification. All-vector/user-context/guarded-IST coverage, target errata, physical hardware, independent builders and N12.3 live task contexts/architectural CPU retirement remain open. No phase, flag, new ISO or production claim follows.",
     "Cycle 179: docs/checkpoints/cycle179-boot-chain-requalification.md qualifies six N5 components with six final headless boots, two kernel entries, nine-file independent revalidation and 71 passing focused Python tests. The revalidation qualifier now semantically validates before returning and writing a receipt; three specific invalid candidates reject without output. Thirteen gate controls reject old artifact/trust identities and host counts. Two superseded transfer boots and all failures remain separate. Kernel and native Rust bytes are unchanged. Cycle 179 passes 8/27 selected native checks. Nineteen CPU and memory-through-lock profiles require replay beginning N7-TRAP-001. Independent builders, complete transitive evidence, live task contexts/CPU retirement and full exact-candidate qualification remain open. No phase, flag, authenticated boot, new demo ISO or production claim follows.",
     "Cycle 178: docs/checkpoints/cycle178-kernel-entry-requalification.md requalifies the unchanged Cycle 177 kernel through two clean matching linked/canonical builds, 245 host tests, 43 ELF controls and 55 source bindings covering 39 kernel Rust files. Entry image pins and release-gate type checks are repaired; twelve isolated gate controls reject. The combined 57-test entry, roadmap, architecture, core and checklist suite passes. Core ownership remains host-only. Cycle 178 passes only 3/27 selected native checks. Twenty-four dependent profiles remain stale, beginning N5-SYMBOLS-SEMANTICS-001. No new QEMU execution, architecture quiescence, independent builder, full canonical qualification, phase closure or production claim follows.",
     "Cycle 177: docs/checkpoints/cycle177-dispatch-execution-holds.md records PKEXEC1 mandatory dispatch execution holds and two reproduced transaction/bypass exhaustion admission rollback repairs. All 17 core stages pass with 245 kernel, 40 lifecycle, 19 pool and 15 compile-fail tests. Six execution cases and 30 parser controls are host evidence only. Cycle 176 qualified 105/708 and merged PR77 to main ac15d1d. The 37-test reconciliation suite passes; an expanded 60-test suite fails with nine reports across five stale-dependent acceptance tests (55 methods pass). No new live dispatch, phase closure or production claim follows. Cycle 177 changes the kernel and has only 2/27 current selected readiness checks; 25 dependencies require replay beginning N6-KENTRY-001. Guarded live task mappings, active contexts, architecture-confirmed CPU quiescence, automatic scrub receipt growth, complete transitive evidence, independent builders and full exact-candidate qualification remain open.",
