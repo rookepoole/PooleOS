@@ -12,6 +12,7 @@ from typing import Any
 
 from runtime import native_kernel_transfer
 from runtime.schema_validation import validate_json
+from runtime.native_kernel_profile_evidence import kernel_entry_errors
 
 
 CONTRACT_ID = "PKSCHED1"
@@ -37,6 +38,9 @@ FNV_PRIME = 0x0000_0100_0000_01B3
 COMPLETION_MARKER = b"POOLEOS:KERNEL:SCHED-RESULT PASS contract=PKSCHED1"
 
 IMPLEMENTATION_INPUTS = (
+    "runtime/native_kernel_profile_evidence.py",
+    "tests/test_native_memory_entry_provenance.py",
+    "runs/native_kernel_entry_readiness.json",
     "native/Cargo.lock",
     "native/boot/Cargo.toml",
     "native/boot/src/exit.rs",
@@ -244,6 +248,7 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
 def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     issues = validate_json(readiness, read_json(root / READINESS_SCHEMA_RELATIVE))
     errors = [f"schema {issue.path}: {issue.message}" for issue in issues]
+    errors.extend(kernel_entry_errors(readiness.get("build"), root))
     status_date = readiness.get("status_date")
     try:
         if (

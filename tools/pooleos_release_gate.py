@@ -181,6 +181,16 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 175 qualifies fourteen final memory-through-lock profiles with 28 fresh virtual boots, "
+    "660 groups and 2126 rejected cases; two earlier SMP boots are superseded after a shape-guard repair. "
+    "All 27 selected native checks pass. Embedded provenance rejects 224 substitutions and 56 invalid "
+    "dependencies; 161 of 163 focused tests pass with two optional skips. Exact full qualification, "
+    "publication/review and N12.3 live stack/context and CPU-retirement work remain open. No phase or "
+    "production gate closes. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:

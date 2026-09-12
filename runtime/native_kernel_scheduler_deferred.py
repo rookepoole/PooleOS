@@ -10,6 +10,7 @@ from typing import Any
 
 from runtime import native_kernel_transfer
 from runtime.schema_validation import validate_json
+from runtime.native_kernel_profile_evidence import kernel_entry_errors
 
 
 CONTRACT_ID = "PKSCHED3"
@@ -28,6 +29,9 @@ COMMON_KERNEL_MARKER_COUNT = 4
 COMPLETION_MARKER = b"POOLEOS:KERNEL:SCHED-DEFERRED-RESULT PASS contract=PKSCHED3"
 
 IMPLEMENTATION_INPUTS = (
+    "runtime/native_kernel_profile_evidence.py",
+    "tests/test_native_memory_entry_provenance.py",
+    "runs/native_kernel_entry_readiness.json",
     "native/Cargo.lock",
     "native/boot/Cargo.toml",
     "native/boot/src/exit.rs",
@@ -244,6 +248,7 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
 def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     issues = validate_json(readiness, read_json(root / READINESS_SCHEMA_RELATIVE))
     errors = [f"schema {issue.path}: {issue.message}" for issue in issues]
+    errors.extend(kernel_entry_errors(readiness.get("build"), root))
     if readiness.get("inputs") != expected_inputs(root):
         errors.append("readiness input bindings are stale")
     ids = [item.get("id") for item in readiness.get("negative_controls", []) if isinstance(item, dict)]

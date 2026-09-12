@@ -1,13 +1,32 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-12
-Plan version: 2.78.0-native-cpu-entry-provenance
-Roadmap cycle: PooleOS Cycle 174
+Plan version: 2.79.0-native-memory-entry-provenance
+Roadmap cycle: PooleOS Cycle 175
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 175: Memory Entry Provenance And Replay
+
+`N9-PMM-ACPI-CONSUMER-001` at N9.2-N9.4 and the dependent N8/N12 profiles
+pass fourteen final qualifiers: 28 fresh virtual boots, 660 control groups and
+2,126 rejected cases. All 27 selected native gates pass. Shared current-entry
+validation rejects 224 embedded substitutions and 56 invalid dependencies.
+The combined suite passes 161 tests with two optional local-transcript skips.
+An introduced SMP non-object input regression was fixed, its tests rerun and its
+two boots replaced; two superseded boots and all failure logs remain preserved.
+[Cycle 175 evidence](checkpoints/cycle175-memory-entry-provenance.md).
+
+No Rust or canonical kernel change, live task-stack promotion, phase/flag closure,
+PooleGlyph change, frozen demo update or production claim follows. The inventory
+is 958 discovered tests and 239 architecture bindings, not full qualification.
+Next is the exact canonical audit with runtime, bundle and replay inputs before
+PR #77 merge, then `N12-CONCURRENCY-RECLAMATION-001` live stack/context and general
+CPU-retirement work. Full transitive evidence coverage and independent builders
+remain open under `ADD-N36-RECEIPT-COVERAGE-001` and its existing flag.
 
 ## Cycle 174: CPU Entry Provenance And Replay
 
@@ -1683,6 +1702,10 @@ Exit gate: independent ABI fixtures validate every frame; deliberate exceptions 
 
 ### N8 - Interrupts, Time, SMP, and CPU Lifecycle (`partial`)
 
+Cycle 175 requalifies IRQ, first-AP, per-CPU and SMP IPI profiles on current entry
+evidence. Eight final boots pass; the SMP shape guard is repaired and two earlier
+boots are superseded. General topology, CPU lifecycle and N8 exit remain open.
+
 Inherited sections: `023-025`. Added: `ADD-TIME-001`.  
 Goal: operate all target CPUs with correct interrupt routing and time domains.
 
@@ -1728,6 +1751,10 @@ Subphases:
 Exit gate: all 16 logical processors repeatedly start under Tier 0 and Tier 1 profiles; timer monotonicity, interrupt routing, IPI, and SMP stress tests pass with bounded skew and no lost/duplicate work.
 
 ### N9 - Physical and Virtual Memory, MMIO, Allocation, and Reclaim (`partial`)
+
+Cycle 175 requalifies PMM/ACPI reclaim and sparse VM against current kernel-entry
+evidence with four fresh boots and 239 controls. Broader allocator/VM behavior
+and the existing N9 exit remain open; no source or phase-status promotion occurs.
 
 Inherited sections: `026-029`, `151`. Added: `ADD-MEM-001`.
 Goal: make ownership, mapping, cacheability, allocation, reclaim, and OOM behavior explicit and testable.
@@ -1886,6 +1913,11 @@ Subphases:
 Exit gate: a hostile driver/device cannot DMA outside its granted pages or inject unowned interrupts; all mappings disappear on teardown; fault evidence names exact requester and authority.
 
 ### N12 - Concurrency, Scheduler, Deferred Work, and Context Switching (`partial`)
+
+Cycle 175 requalifies eight scheduler/atomic/lock profiles with sixteen final
+boots. The existing host-only PKSTACK1 receipt remains current but does not prove
+live guarded stacks or architectural context activation. Exact full qualification
+precedes further N12.3 task-stack/context and general CPU-retirement integration.
 
 Inherited sections: `031-034`. Added: `ADD-N12-SCHED-FOUNDATION-001`,
 `ADD-N12-SCHED-PREEMPT-001`, `ADD-N12-SCHED-DEFERRED-001`, and
@@ -2447,6 +2479,12 @@ Exit gate: supported failures either recover locally or enter a known safe state
 
 ### N36 - Verification, Fuzzing, Fault Injection, Security, and Conformance (`partial`)
 
+Cycle 175 advances the existing receipt-coverage requirement across fourteen
+profiles with exact JSON-typed entry identity, 224 substitution cases and 56
+invalid dependencies. Combined regressions caught and verified repair of four
+SMP top-level shape exceptions. The full canonical audit, complete transitive
+input coverage and independent validation remain open; the flag stays open.
+
 Inherited sections: `128-134`, `140`. Added: `ADD-ASSURE-002`, `ADD-TEST-001`, `ADD-N36-RECEIPT-COVERAGE-001`.
 Goal: apply a universal evidence contract to every component and the integrated system.
 
@@ -2677,7 +2715,14 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 
 ## 12. Near-Term Execution Sequence
 
-Current Cycle 165 sequence: all 27 selected native dependency checks pass on
+Current Cycle 175 sequence: all 27 selected native checks and fourteen final
+dependency profiles pass. Run the exact full canonical qualification with
+`--include-runtime`, `--bundle` and `--replay-proof`; then publication and GitHub
+review/merge gates for PR #77. Resume N12.3 live guarded task stacks, context
+activation and CPU retirement only after that baseline. N0 custody remains
+separately blocked and needs no waiver for this owner-independent qualification.
+
+Historical Cycle 165 sequence: all 27 selected native dependency checks pass on
 the unchanged Cycle 162 kernel. Run the full exact-final canonical qualification
 with `--include-runtime`, `--bundle` and `--replay-proof`, then the publication
 scan and GitHub merge/review gates before merging draft PR #75. Resume N12.3

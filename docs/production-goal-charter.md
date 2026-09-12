@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 174
+Last roadmap reconciliation: PooleOS Cycle 175
 
-Current Cycle 174: five CPU profiles pass fourteen fresh virtual boots,
+Current Cycle 175: fourteen memory-through-lock profiles pass 28 final virtual
+boots, 660 groups and 2,126 rejected cases; two earlier SMP boots are superseded.
+All 27 selected native checks pass. Embedded-entry provenance tests and the
+repaired SMP malformed-input guard pass; the combined suite passes 161 tests
+with two optional skips. Full canonical qualification and publication/review
+precede PR #77 merge, then N12.3 task-stack/context and CPU-retirement work.
+No phase, flag, normative charter or production condition changes.
+[Cycle 175 evidence](checkpoints/cycle175-memory-entry-provenance.md).
+
+Historical Cycle 174: five CPU profiles pass fourteen fresh virtual boots,
 225 controls and 47 focused tests. Embedded kernel-entry evidence now requires
 exact JSON-typed identity with the current validated receipt. Eighty stale or
 malformed substitutions and twenty invalid dependency cases reject. The selected

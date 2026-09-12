@@ -10,7 +10,17 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Latest checkpoint:** Cycle 174 requalifies five native CPU profiles on
+**Latest checkpoint:** Cycle 175 qualifies fourteen memory-through-lock profiles:
+28 final fresh virtual boots, 660 control groups and 2,126 rejected cases. All
+27 selected native readiness checks pass. Embedded kernel-entry checks now reject
+224 stale/malformed/type substitutions and 56 invalid dependencies; the combined
+suite passes 161 tests with two optional skips. An SMP shape-handling regression
+was fixed and replayed, with two earlier boots retained as superseded evidence.
+Full canonical qualification still precedes merging [PR #77](https://github.com/rookepoole/PooleOS/pull/77).
+No new live task-stack, frozen demo or production claim follows.
+[Cycle 175 evidence and next move](docs/checkpoints/cycle175-memory-entry-provenance.md).
+
+**Historical checkpoint:** Cycle 174 requalifies five native CPU profiles on
 `agent/n12-task-stack-ownership`, tracked by [PR #77](https://github.com/rookepoole/PooleOS/pull/77).
 Fourteen fresh virtual boots, 225 controls and 47 focused tests pass. Embedded
 kernel-entry receipts must match current validated evidence with exact JSON types;
