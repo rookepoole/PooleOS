@@ -143,9 +143,9 @@
         "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
       },
       {
-        "byte_count": 8056,
+        "byte_count": 8479,
         "path": "runtime/native_kernel_entry.py",
-        "sha256": "B3C5ADDBE11CE54FA7D0CACC57479AE888C88305A834BB8E083656A2DE25ADC4"
+        "sha256": "E16BCE13F83D854188C135045B241AD521500E16EF03220CFC2974D957C6608A"
       },
       {
         "byte_count": 25233,
@@ -153,14 +153,134 @@
         "sha256": "11452D045779E9FEF830A3F9DF8738DD2B3FECC4B501E0CAA90D2C22496DA0C6"
       },
       {
-        "byte_count": 6406,
+        "byte_count": 7905,
         "path": "tests/test_native_kernel_entry.py",
-        "sha256": "6BA9E47F8C8571ACE11FA07D3549FBD588C8C260E80A4D93380F8186BB1BC87F"
+        "sha256": "9D209D90EA53E1B9AAB7DDC5D82FECB61DE4422276E3C0F93F9BAE06215DB46A"
       },
       {
-        "byte_count": 4677,
+        "byte_count": 5681,
         "path": "docs/native-kernel-entry.md",
-        "sha256": "61E96B73BFB72EAEA2AD28219413A754C6F84334598E56C1570BF38BE6EB566C"
+        "sha256": "3F5FC6C94AE8947219B71ABAFCA2876231A6A8E73FB70D213A97483A33364441"
+      },
+      {
+        "byte_count": 21215,
+        "path": "native/kernel/src/atomics.rs",
+        "sha256": "1B4228C921F0746C101B307A20E34DCF7D7D859895A440D027005FADE48D0B90"
+      },
+      {
+        "byte_count": 9304,
+        "path": "native/kernel/src/bin/pkatom1_probe.rs",
+        "sha256": "ADDCEAFF0E3C24DFCD3A29169EB41B30B1A0831D327D6BCAEAE4787F4A1EF6F2"
+      },
+      {
+        "byte_count": 10886,
+        "path": "native/kernel/src/bin/pklock1_probe.rs",
+        "sha256": "412335E97CA92749CE6CF2DB090B0ACA19F088E2DB05C149E49E8C08F2AE691B"
+      },
+      {
+        "byte_count": 7491,
+        "path": "native/kernel/src/bin/pkreval1_probe.rs",
+        "sha256": "8CED78F6C767FF41977C3B4C1D876B28B51BB1742C7B1F2DFFBCD320ADAECE52"
+      },
+      {
+        "byte_count": 8589,
+        "path": "native/kernel/src/bin/pksched1_probe.rs",
+        "sha256": "40D13FF8025835A579B7986D95469F5415C5FD6088D1026BD620A1927399E747"
+      },
+      {
+        "byte_count": 6103,
+        "path": "native/kernel/src/bin/pksched2_probe.rs",
+        "sha256": "DE3C0CC2D1C3DD7AC1E26CC720D59F88575FF267DE988FB104081B9BA62A29C5"
+      },
+      {
+        "byte_count": 6972,
+        "path": "native/kernel/src/bin/pksched3_probe.rs",
+        "sha256": "E1D2DD627FED9FBCF6E3D5AE7CEC7D738F129540364E02540B0EAF4944EAC444"
+      },
+      {
+        "byte_count": 6140,
+        "path": "native/kernel/src/bin/pksched4_probe.rs",
+        "sha256": "A1C92F33AB14AF77B88972F4E52D97667FDDB8A09EFAC64C498030F115FEAEC6"
+      },
+      {
+        "byte_count": 7033,
+        "path": "native/kernel/src/bin/pksched5_probe.rs",
+        "sha256": "7CCC0E7F5C39A00EDC569B0E61137E6A85634287381FC583F43E88ECFCA0C7AD"
+      },
+      {
+        "byte_count": 6364,
+        "path": "native/kernel/src/bin/pksched6_probe.rs",
+        "sha256": "1DEAC6140ABCBF887AC2FE393C12DC8C9E788351CFC5A5B7F4749BECCACBA7D0"
+      },
+      {
+        "byte_count": 35114,
+        "path": "native/kernel/src/interrupt_time.rs",
+        "sha256": "F6ACEB89BADEAECBC32AB5DAF888B577C1F2C093914DC5B0B22CD7AFCD80CBA5"
+      },
+      {
+        "byte_count": 59563,
+        "path": "native/kernel/src/locks.rs",
+        "sha256": "102A453683238E01DEE0516359B6FB80368AE89A9BAE19F0699FE8C3E123DF9A"
+      },
+      {
+        "byte_count": 10891,
+        "path": "native/kernel/src/privilege_msr.rs",
+        "sha256": "E968325A755937F504779F656DAF7B70B4D5B276DB6450BCB9AD51F026029C54"
+      },
+      {
+        "byte_count": 17938,
+        "path": "native/kernel/src/reclamation/task_lifetimes.rs",
+        "sha256": "CDD7A888C83D80BCD18D57704F5473623F1883FC4B1B5069E8E9513AF9B9A5AF"
+      },
+      {
+        "byte_count": 14384,
+        "path": "native/kernel/src/revalidation.rs",
+        "sha256": "875138AB0D62A8FD8061656CBC2DD9136366DABAB255AAC9A6E0D63455D11EF8"
+      },
+      {
+        "byte_count": 40352,
+        "path": "native/kernel/src/scheduler_ap_workers.rs",
+        "sha256": "E61261956C2CBDBD7B5B238FC014AC6A291BDC1E48C6D97D34DD7C12D131BBC4"
+      },
+      {
+        "byte_count": 29212,
+        "path": "native/kernel/src/scheduler_deferred.rs",
+        "sha256": "4AAE60E149A49AF5144D348D64AE552FC5B6C1D822CF48852A220FD9270860EA"
+      },
+      {
+        "byte_count": 44850,
+        "path": "native/kernel/src/scheduler_smp.rs",
+        "sha256": "8C3C13140D867F3766F6209B1B918970BA095EA5FA35634C721D5C0509469390"
+      },
+      {
+        "byte_count": 31212,
+        "path": "native/kernel/src/scheduler_smp_preempt.rs",
+        "sha256": "136026047A7C28693585DB3FB6338096527036EEA6154DDB722F1ACE4EE5EDBA"
+      },
+      {
+        "byte_count": 23749,
+        "path": "native/kernel/src/smp.rs",
+        "sha256": "D6B6E73D5C2D1F6D7EE35F5E5CDC6AE628212C5A6146FA0B751B4F3DBC0DEDEE"
+      },
+      {
+        "byte_count": 81037,
+        "path": "native/kernel/src/smp_ipi.rs",
+        "sha256": "724C599CDD61841245AE8705A110F6E809E30BBC88840AE0789E6A4C56E41F96"
+      },
+      {
+        "byte_count": 43608,
+        "path": "native/kernel/src/smp_runtime.rs",
+        "sha256": "322A687E6EE09E9438166EF09097C65FD00A3999448C4A7014AD88221BB4AFDD"
+      },
+      {
+        "byte_count": 12375,
+        "path": "native/kernel/src/xstate.rs",
+        "sha256": "B5BAD6DFFDFEB99FEB769DB6F227BA5F7B2C5131BE3AC3CB5B31EC377401DB78"
+      },
+      {
+        "byte_count": 12933,
+        "path": "native/kernel/src/xstate_exception.rs",
+        "sha256": "AA11CF24DE84DE38C5303598DE450B103B36906ACFD51FD254730F8052B45813"
       }
     ],
     "pbp1_contract": {
@@ -565,8 +685,8 @@
     "entry_prefix_hex": "FAFC4889E14885C9743B48F7C10F00000075324889C848C1E01048C1F8104839C87522410F20D89C",
     "host_leakage_hits": [],
     "image_byte_count": 602112,
-    "linked_byte_count": 7024792,
-    "linked_sha256": "A4B9D19DC8B38E1F5DB5C8609DAF833B3BED1CBD30DD866981A6C1B3A66FBBF2",
+    "linked_byte_count": 7025584,
+    "linked_sha256": "87B12B0278881804BDDA57132657950CF8CD8F515B7A0CC4BC9E2B6326FA1C0A",
     "loaded_sha256": "940D941A32AAA3DC1E5F75295AFC47ECFB1FD07B75E359D9D4C5963A36E488BC",
     "manifest_fields": {
       "build_id": "PKBUILD1-CYCLE168-N12-AP-OWN-V002-0000000001",

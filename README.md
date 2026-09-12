@@ -10,18 +10,15 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Latest checkpoint:** Cycle 172 adds mandatory inactive task-stack retention on
+**Latest checkpoint:** Cycle 173 requalifies kernel-entry provenance and the N5 boot chain on
 `agent/n12-task-stack-ownership`, tracked by [PR #77](https://github.com/rookepoole/PooleOS/pull/77).
-Its full audit ended with 104/105 canonical gates and 707/708 Doctor checks
-passing at `9c111e2`; kernel-entry reproduction failed because the raw linked
-ELF changed while the canonical boot image did not. The pending repair binds
-all kernel-crate Rust sources. Twelve focused tests pass, but three dependent
-receipt checks now reject stale evidence (24/27 selected checks pass).
-The branch is a cloud backup, not a qualified main merge. Entry/dependency
-requalification, generated-progress reconciliation and a fresh full audit are
-still required. The earlier 945-test/27-check ledger is a pre-audit snapshot;
-947 Python tests are now discovered, not claimed to all pass.
-[Cycle 172 scope, evidence and remaining gates](docs/checkpoints/cycle172-task-stack-ownership.md).
+Two clean linked/canonical builds, eleven entry tests, 71 boot-chain tests and
+six fresh QEMU runs pass. The exact reproduction failure from Cycle 172 is
+repaired; all 38 kernel-crate Rust sources are bound among 54 inputs.
+Selected readiness checks pass 22/27. CPU, memory and SMP provenance replay
+and a fresh full audit remain necessary; this draft is not merge-qualified.
+The canonical kernel and frozen demo ISO are unchanged. No production claim follows.
+[Cycle 173 evidence, failures and next move](docs/checkpoints/cycle173-entry-provenance-replay.md).
 
 Historical Cycle 171 pre-closeout evidence: memory-through-lock replay on the
 unchanged Cycle 168 kernel, originally on `agent/n12-ap-execution-ownership`.

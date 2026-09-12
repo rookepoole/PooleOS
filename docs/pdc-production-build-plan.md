@@ -1,15 +1,34 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-09-09
-Plan version: 2.76.0-native-task-stack-ownership
-Roadmap cycle: PooleOS Cycle 172
+Status date: 2026-09-12
+Plan version: 2.77.0-native-entry-provenance-replay
+Roadmap cycle: PooleOS Cycle 173
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 172: Inactive Task-Stack Ownership
+## Cycle 173: Entry Provenance And Boot Replay
+
+`N5-SYMBOLS-SEMANTICS-001` at N5.6/N5.9 requalifies the repaired N6 kernel-entry
+prerequisite and six boot-chain components. All 38 crate Rust sources are bound
+among 54 inputs. Two clean linked/canonical builds, eleven entry Python tests,
+71 boot-chain tests and six fresh QEMU runs pass. The canonical image remains
+unchanged, but the full debug ELF and dependent symbol/policy/retained identities
+are correctly regenerated. The failed Cycle 172 audit is preserved, not inherited
+as a pass. [Cycle 173 measured evidence](checkpoints/cycle173-entry-provenance-replay.md).
+
+The selected projection is 22/27. CPU policy, MSR, PMM, VM and SMP IPI checks
+reject stale evidence; broader CPU and memory-through-lock embedded provenance
+also requires replay. Next is `N7-TRAP-001` before later memory/SMP replay and
+full exact-candidate qualification. N0 custody remains a separate owner-dependent
+blocker. N12 live task-stack mapping/context/CPU-retirement work is still open.
+The current ledger discovers 950 Python tests and binds 234 architecture sources;
+these counts are not a full-suite pass. All phase/flag/checklist/ADD boundaries,
+PooleGlyph Phase 65 inputs and the frozen demo remain unchanged.
+
+## Historical Cycle 172: Inactive Task-Stack Ownership
 
 Latest cloud-backup status: the full audit at `9c111e2` failed, with 104/105
 canonical gates and 707/708 Doctor checks passing. Raw linked-ELF reproduction

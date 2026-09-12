@@ -1,15 +1,24 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-09-09
+Status date: 2026-09-12
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 172
+Last roadmap reconciliation: PooleOS Cycle 173
 
-Latest cloud-backup status: PR #77 remains draft after a failed exact-source
+Current Cycle 173: kernel-entry provenance and six N5 components are requalified.
+Two matching clean linked/canonical builds, eleven entry tests, 71 boot-chain
+tests and six fresh QEMU runs pass. The selected readiness projection is 22/27;
+CPU/memory/SMP embedded provenance and full exact-candidate qualification remain
+pending. The failed Cycle 172 audit remains historical evidence. Next is
+`N7-TRAP-001`; no phase, flag, charter condition or production gate closes.
+Main remains qualified Cycle 171; PR #77 remains draft.
+[Cycle 173 evidence and remaining work](checkpoints/cycle173-entry-provenance-replay.md).
+
+Historical Cycle 172 cloud-backup status: PR #77 remains draft after a failed exact-source
 audit at `9c111e2` (104/105 canonical, 707/708 Doctor). The kernel-entry binding
 repair passes 12 focused tests, but entry/symbol/SMP IPI evidence needs replay;
 the selected projection is 24/27, with 947 Python tests discovered. Generated

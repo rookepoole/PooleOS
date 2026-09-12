@@ -574,6 +574,14 @@ PROGRAM_GAPS = [
 ]
 
 
+PROGRAM_GAPS[4] = (
+    "Cycle 173 repairs PKENTRY1 full linked-ELF provenance and replays six N5 components with six fresh boots. "
+    "The selected projection passes 22/27, while five stale checks and broader embedded-entry CPU/memory/SMP "
+    "replay remain open. The Cycle 172 full audit failed 104/105; no current full qualification or main merge "
+    "is claimed. Historical records below are not current-source promotion. " + PROGRAM_GAPS[4]
+)
+
+
 def sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest().upper()
 
@@ -1534,7 +1542,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             }
         )
 
-    return {
+    roadmap = {
         "schema_version": "1.0",
         "artifact_kind": "pdc_production_roadmap",
         "status_date": status_date,
@@ -2787,12 +2795,129 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
         ],
     }
 
+    # Preserve the prior checkpoint before applying this measured replay.
+    checkpoint = "docs/checkpoints/cycle173-entry-provenance-replay.md"
+    protocol = roadmap["execution_protocol"]
+    protocol.update(last_updated_cycle=173, selected_move_id="N5-SYMBOLS-SEMANTICS-001",
+                    owner_independent_next_move_id="N7-TRAP-001")
+    protocol["required_records"].insert(0, checkpoint)
+    roadmap["baseline"]["pooleos_cycle"] = 173
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    for historical, current in (
+        ("historical_cycle172_source_projection", "current_focused_source_projection"),
+        ("historical_cycle172_ownership_qualification", "current_ownership_qualification"),
+        ("historical_cycle169_boot_chain_qualification", "current_boot_chain_qualification"),
+        ("historical_cycle170_cpu_qualification", "current_cpu_qualification"),
+        ("historical_cycle171_dependency_qualification", "current_dependency_qualification"),
+    ):
+        gate[historical] = gate[current]
+    gate["qualification_status"] = "entry_and_boot_replay_pass_downstream_provenance_replay_pending"
+    gate["historical_cycle172_n36_host_summary"] = {
+        "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
+        "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
+    }
+    gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=173)
+    gate["historical_cycle172_candidate_audit"] = {
+        "cycle": 172, "status": "fail", "applies_to_current_source": False,
+        "aggregate_suite_passed": False, "passed_checks": 104, "total_checks": 105,
+        "doctor_passed_checks": 707, "doctor_total_checks": 708,
+        "include_runtime": True, "both_bundle_and_replay_inputs_supplied": True,
+        "audited_source_commit": "9c111e282372290d93a853240d4ef361b6666584",
+        "audited_tree": "bae7e532e48a1a3ba9a912f9452824c3a18a764c",
+        "receipt_sha256": "D5AF0E1BCA6C6278ED9E506DB2EBBA1E464AED74177DDC73C8EF30B977D52DD4",
+        "failure": "kernel_entry_linked_ELF_reproduction_drift_and_incomplete_source_bindings",
+        "production_ready": False,
+    }
+    gate["current_focused_source_projection"] = dict(
+        gate["current_focused_source_projection"], cycle=173, passed_checks=22,
+        pending_downstream_native_checks=5, prior_smp_new_boot_artifact_set_replay_pending=True,
+        final_receipt_fresh_qemu_runs=6,
+        fresh_qemu_run_count_scope="two_each_PKLOAD6_PooleBoot_PKXFER1_cycle173_runs",
+        next_dependency_move_id="N7-TRAP-001",
+        required_next_gate="CPU_memory_and_SMP_dependency_replay_then_exact_full_qualification",
+        passing_selected_checks_do_not_requalify_old_embedded_entry_evidence=True,
+    )
+    gate["current_entry_provenance_qualification"] = {
+        "cycle": 173, "source_binding_count": 54, "kernel_crate_rust_source_count": 38,
+        "previously_omitted_kernel_source_count": 24,
+        "linked_byte_count": 7025584,
+        "linked_sha256": "87B12B0278881804BDDA57132657950CF8CD8F515B7A0CC4BC9E2B6326FA1C0A",
+        "canonical_byte_count": 530072,
+        "canonical_sha256": "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625",
+        "entry_receipt_sha256": "9998F12E922201BA60C46521444BD1AD6CB641A0172B36F4A3552DCF66434A0B",
+        "clean_matching_builds": 2, "kernel_host_tests": 243, "negative_controls": 43,
+        "entry_python_tests": 11, "crate_digest_mutation_cases": 38,
+        "exact_receipt_and_product_reproduction_passed": True,
+        "single_host_only": True, "transitive_workspace_provenance_complete": False,
+        "production_ready": False,
+    }
+    gate["current_ownership_qualification"] = dict(
+        gate["current_ownership_qualification"], cycle=173,
+        scope="cycle172_host_stack_receipt_with_cycle171_AP_execution_awaiting_provenance_replay",
+        live_receipt_source_current=False, current_boot_artifact_set_replay_pending=True,
+        active_root_current_image_replay_complete=False,
+        entry_receipt_sha256="9998F12E922201BA60C46521444BD1AD6CB641A0172B36F4A3552DCF66434A0B",
+    )
+    gate["current_boot_chain_qualification"] = dict(
+        gate["current_boot_chain_qualification"], cycle=173,
+        scope="six_N5_components_after_linked_debug_and_source_binding_repair",
+        inner_set_sha256="E4B88EAF9B322531292D03EBA9FDCFA6ECABF6EEF7A5210C29D130C8AE321D3A",
+        focused_python_tests=71, boot_identity_rejection_cases=5,
+        receipt_bindings=[
+            {"path": "runs/native_symbol_readiness.json", "sha256": "A116A0BBB288A6005BDEB4DFE8FF793D8A330C3DB2AA02581D89F9BEFEC8E409"},
+            {"path": "runs/native_policy_readiness.json", "sha256": "9262886C425628FF2732379B5D63683DEF98FF50310F17D8AE9D5FCFF9DC212D"},
+            {"path": "runs/native_kernel_load_readiness.json", "sha256": "02AAC204A50A5157228DE5FDA11B0819128BA64431E8A959255A8B99B0236EAA"},
+            {"path": "runs/native_pooleboot_readiness.json", "sha256": "DA8B44DA10144843E0DDF8AD6D6F8DD8490BE68967454E032ADC539ADEB2CDD8"},
+            {"path": "runs/native-kernel-revalidation-readiness.json", "sha256": "4F595F788E07D811D5D2CEC16CD944E50E2804B3A8BF22ED8F7A6671BA1D1BC0"},
+            {"path": "runs/native-kernel-transfer-readiness.json", "sha256": "295A8C43E1CE81325E09F7C72A3D419207AC98A05CF0D28D2EFAF3B52290E1B4"},
+        ],
+    )
+    gate["current_cpu_qualification"] = dict(
+        gate["current_cpu_qualification"], source_validation_cycle=173,
+        embedded_entry_provenance_replay_pending=True,
+        readiness_replay_required_profiles=["cpu_policy", "privilege_msr_policy"],
+    )
+    gate["current_dependency_qualification"] = dict(
+        gate["current_dependency_qualification"], source_validation_cycle=173,
+        embedded_entry_provenance_replay_pending=True,
+        readiness_replay_required_profiles=["physical_memory", "virtual_memory", "smp_ipi"],
+    )
+    evidence = (
+        "Cycle 173: " + checkpoint + " requalifies PKENTRY1 and six N5 components after full linked-ELF drift. "
+        "All 38 kernel Rust sources are bound among 54 inputs; 11 entry tests, 71 boot-chain tests and six fresh "
+        "QEMU runs pass. The selected projection is 22/27; five stale checks and broader embedded-entry "
+        "CPU/memory/SMP provenance replay remain open. No phase, flag or production gate closes."
+    )
+    gap = (
+        "Cycle 173 repairs kernel-entry and symbol provenance; replay CPU, memory and SMP dependencies from "
+        "N7-TRAP-001 before exact full qualification. Passing selected checks is not new execution evidence. "
+        "Full transitive-workspace input coverage and independent-builder qualification remain open."
+    )
+    for phase in roadmap["phases"]:
+        if phase["id"] == "N36":
+            mislabeled = f"Cycle 150 host baseline: {test_count} tests with three expected environment skips"
+            phase["current_evidence"] = [
+                f"Cycle 173 source inventory: {test_count} Python tests discovered; full qualification pending"
+                if item == mislabeled else item for item in phase["current_evidence"]
+            ]
+        if phase["id"] in {"N5", "N6", "N7", "N9", "N12", "N36"}:
+            phase["current_evidence"] = [evidence, *phase["current_evidence"]]
+            phase["current_gaps"] = [gap, *phase["current_gaps"]]
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in {"FLAG-N12-CONCURRENCY-RECLAMATION-001", "FLAG-N36-RECEIPT-COVERAGE-001"}:
+            flag["evidence"] = [checkpoint, *flag["evidence"]]
+        if flag["id"] == "FLAG-N36-RECEIPT-COVERAGE-001":
+            flag["evidence"].extend(["runtime/native_kernel_entry.py", "tests/test_native_kernel_entry.py",
+                                     "tests/test_native_boot_chain_release_gate.py"])
+    roadmap["claim_boundaries"].insert(0, evidence)
+    return roadmap
+
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=945)
-    parser.add_argument("--status-date", default="2026-09-09")
+    parser.add_argument("--test-count", type=int, default=950)
+    parser.add_argument("--status-date", default="2026-09-12")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)
     args.out.write_text(json.dumps(roadmap, indent=2, ensure_ascii=True) + "\n", encoding="utf-8", newline="\n")

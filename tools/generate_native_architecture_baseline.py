@@ -193,6 +193,8 @@ BOUND_SOURCE_PATHS = (
     "docs/checkpoints/cycle169-boot-chain-replay.md",
     "docs/checkpoints/cycle170-cpu-state-replay.md",
     "docs/checkpoints/cycle172-task-stack-ownership.md",
+    "docs/checkpoints/cycle173-entry-provenance-replay.md",
+    "tests/test_native_boot_chain_release_gate.py",
     "docs/checkpoints/cycle171-native-dependency-replay.md",
     "native/kernel/src/reclamation/task_lifetimes.rs",
     "native/kernel/tests/task_lifetimes.rs",

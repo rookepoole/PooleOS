@@ -69,10 +69,21 @@ The canonical development bundle binds these exact SHA-256 identities:
 | Canonical stripped PKELF1 | `8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625` |
 | Preferred loaded image | `940D941A32AAA3DC1E5F75295AFC47ECFB1FD07B75E359D9D4C5963A36E488BC` |
 | Build ID text | `62AC16F52550AAF62455B196A632E785825739656A473C627239DB0A839B667C` |
-| Full split-debug ELF | `A4B9D19DC8B38E1F5DB5C8609DAF833B3BED1CBD30DD866981A6C1B3A66FBBF2` |
+| Full split-debug ELF | `87B12B0278881804BDDA57132657950CF8CD8F515B7A0CC4BC9E2B6326FA1C0A` |
 | `native/kernel/manifest.pkm` | `51BD6E01E5A300FE3444EC2FF6352F7A6EAFE38C4728014596C540290A4779F2` |
 
-The qualification builds the full debug product twice and requires identical bytes. Both debug builds canonicalize to the exact stripped PKELF1 bytes. A separate release build must have no `.symtab` and no `.debug*` sections and must canonicalize to those same bytes.
+The qualification builds the full debug product twice and requires identical
+bytes. Their canonicalized output is the exact declared PKELF1 image. A separate
+release build is checked for absence of `.symtab` and `.debug*` sections; this
+does not prove that the separately stripped build has an equal image plan.
+The receipt explicitly records `stripped_and_debug_plans_equal=false`.
+
+Cycle 173 rebinds the 7,025,584-byte full ELF after task-stack source changes
+altered debug provenance without changing the canonical boot image. The old
+7,024,792-byte identity is rejected and preserved as failure history. The
+kernel-entry receipt binds all 38 kernel-crate Rust sources among 54 inputs;
+this is not complete transitive-workspace provenance or independent-builder
+qualification. Updated PSYM1 bytes require dependent boot-artifact replay.
 
 ## DWARF Provenance
 
