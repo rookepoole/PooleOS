@@ -1,15 +1,45 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-12
-Plan version: 2.81.0-native-kernel-entry-requalification
-Roadmap cycle: PooleOS Cycle 178
+Plan version: 2.82.0-native-boot-chain-requalification
+Roadmap cycle: PooleOS Cycle 179
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 178: Kernel Entry Requalification
+## Cycle 179: Boot Chain Requalification
+
+`N5-SYMBOLS-SEMANTICS-001` at N5.6/N5.9 and `ADD-BOOT-007` advances through
+PSYM1, PPOL1, PKLOAD6, PooleBoot, PKREVAL1 and PKXFER1 for the unchanged
+Cycle 177 kernel. Six final headless QEMU boots include two actual kernel
+entries, independent nine-file revalidation and terminal unsigned-policy denial.
+The symbol debug product reproduces twice, the loader passes 330 host tests,
+and the complete focused boot-chain suite passes 71 Python tests.
+
+The combined closeout suite passes 128 tests, including exact kernel-entry
+reproduction and progress/checklist conservation. Source backup proceeds on
+draft PR #78 independently of main qualification; private logs/media remain local.
+
+The transfer build-ID pin, revalidation host-count pins and aggregate artifact
+identities now match fresh measurements. A reproduced qualifier admission gap
+is repaired: complete semantic validation is required before returning a
+qualification and before the CLI writes its receipt or prints PASS. Three
+specific invalid receipts reject without output; thirteen aggregate controls
+reject old artifact/trust identities and host-test counts. The failed attempts
+and two superseded transfer boots remain separate from final qualification.
+
+Selected readiness is 8/27; nineteen CPU and memory-through-lock profiles still
+need replay, beginning `N7-TRAP-001`. Architecture binds 249 paths, including
+four directly bound boot-chain tests and this checkpoint; 962 Python tests are
+discovered, not all executed. No native Rust, kernel bytes, PooleGlyph, frozen
+demo, normative charter, phase/flag state or production condition changes.
+Main stays qualified Cycle 176 and PR #78 remains draft pending the complete
+exact-candidate canonical audit and review gates.
+[Cycle 179 evidence and limitations](checkpoints/cycle179-boot-chain-requalification.md).
+
+## Historical Cycle 178: Kernel Entry Requalification
 
 `N6-KENTRY-001` at N6.4-N6.6 requalifies the unchanged Cycle 177 kernel.
 Two clean linked/canonical builds match, 245 kernel tests and 43 ELF rejection
@@ -1428,6 +1458,12 @@ Exit gate: one command launches each pinned native test profile; logs and artifa
 
 ### N5 - Boot Media, Boot Protocol, and PooleBoot UEFI Loader (`partial`)
 
+Cycle 179 requalifies six N5 components against the current kernel and exact
+PSYM1-derived artifacts. Six final boots, two kernel entries, nine retained
+files, 71 focused Python tests and thirteen stale-identity/count gate controls
+pass. Two earlier transfer boots are superseded after repairing revalidation
+receipt admission. N5 remains partial and unsigned; no authority is enabled.
+
 Inherited sections: `013-015`. Added: `ADD-BOOT-001`, `ADD-BOOT-004`, `ADD-BOOT-005`, `ADD-BOOT-006`, `ADD-BOOT-007`, `ADD-BOOT-008`, `ADD-BOOT-009`, `ADD-BOOT-010`, `ADD-BOOT-011`, `ADD-BOOT-012`.
 Goal: author the complete firmware-to-kernel transition without third-party bootloader code in the production chain.
 
@@ -2550,6 +2586,14 @@ Exit gate: supported failures either recover locally or enter a known safe state
 
 ### N36 - Verification, Fuzzing, Fault Injection, Security, and Conformance (`partial`)
 
+Cycle 179 repairs the reproduced PKREVAL1 schema-only receipt admission gap
+under `ADD-N36-RECEIPT-COVERAGE-001`. Both generation and CLI publication now
+require semantic acceptance; three malformed/stale/overclaim receipts reject
+before any output file is created. Four boot-chain test files and the new
+checkpoint add five direct architecture bindings (249 total). This does not
+close the broader transitive-evidence audit, independent review or production
+qualification. All prior failures, flag states and exit requirements remain.
+
 Cycle 178 adds direct architecture bindings for the entry and dependency-gate
 tests and its checkpoint (244 total). PKENTRY1 entry/source coverage and exact
 reproduction are current; twelve independent entry-gate controls reject old
@@ -2801,7 +2845,14 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 
 ## 12. Near-Term Execution Sequence
 
-Current Cycle 178 sequence: entry reproduction passes; continue with
+Current Cycle 179 sequence: the six-component boot chain passes. Continue with
+`N7-TRAP-001`, then the remaining CPU profiles and fourteen memory-through-lock
+profiles in dependency order. Nineteen of 27 selected checks remain stale.
+The runtime-inclusive exact-candidate canonical audit, publication and GitHub
+review/check gates precede PR #78 merge; N12.3 live task contexts and CPU
+retirement remain subsequent foundation work. N0 custody remains separate.
+
+Historical Cycle 178 sequence: entry reproduction passes; continue with
 `N5-SYMBOLS-SEMANTICS-001`, then N5 load/boot/revalidation/transfer, the five N7
 CPU profiles and fourteen memory-through-lock profiles in dependency order.
 Entry, policy and errata policy pass among 27 selected checks. The full exact

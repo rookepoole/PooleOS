@@ -621,6 +621,16 @@ PROGRAM_GAPS[4] = (
 )
 
 
+PROGRAM_GAPS[4] = (
+    "Cycle 179 qualifies six N5 components on the unchanged kernel: six final headless boots, "
+    "two kernel entries, nine-file revalidation and 71 focused Python tests pass. PKREVAL1 "
+    "requires semantic receipt acceptance before output; three admission and thirteen artifact/count "
+    "gate controls pass. Two superseded boots and prior failures remain preserved. Selected "
+    "readiness is 8/27; nineteen CPU/memory profiles require replay beginning N7-TRAP-001. "
+    "Full exact-candidate, independent-builder and production qualification remain pending. " + PROGRAM_GAPS[4]
+)
+
+
 def sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest().upper()
 
@@ -3287,12 +3297,141 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             phase["current_evidence"] = [evidence, *phase["current_evidence"]]
             phase["current_gaps"] = [gap, *phase["current_gaps"]]
         if phase["id"] == "N36":
-            phase["current_evidence"].insert(0, f"Cycle 178 source inventory: {test_count} Python tests discovered; full qualification pending")
+            phase["current_evidence"].insert(0, "Cycle 178 source inventory: 961 Python tests discovered; full qualification pending")
     for flag in roadmap["implementation_flags"]:
         if flag["id"] in {"FLAG-N12-CONCURRENCY-RECLAMATION-001", "FLAG-N36-RECEIPT-COVERAGE-001"}:
             flag["evidence"] = [checkpoint, *flag["evidence"]]
         if flag["id"] == "FLAG-N36-RECEIPT-COVERAGE-001":
             flag["evidence"] = ["tests/test_native_dependency_release_gate.py", *flag["evidence"]]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    checkpoint = "docs/checkpoints/cycle179-boot-chain-requalification.md"
+    protocol.update(last_updated_cycle=179, selected_move_id="N5-SYMBOLS-SEMANTICS-001",
+                    owner_independent_next_move_id="N7-TRAP-001")
+    protocol["required_records"].insert(0, checkpoint)
+    roadmap["baseline"]["pooleos_cycle"] = 179
+    for name in (
+        "focused_source_projection", "ownership_qualification", "task_stack_qualification",
+        "execution_qualification", "entry_provenance_qualification", "boot_chain_qualification",
+        "cpu_qualification", "dependency_qualification", "candidate_audit",
+    ):
+        historical_name = "source_projection" if name == "focused_source_projection" else name
+        gate["historical_cycle178_" + historical_name] = gate["current_" + name]
+    gate["qualification_status"] = "boot_chain_requalified_cpu_and_memory_replay_pending"
+    gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=179)
+    gate["current_focused_source_projection"] = {
+        "cycle": 179, "scope": "27_selected_native_checks_not_full_canonical_audit",
+        "passed_checks": 8, "total_checks": 27, "pending_downstream_native_checks": 19,
+        "passing_profiles": [
+            "native_kernel_entry_readiness", "native_symbol_readiness", "native_policy_readiness",
+            "native_kernel_load_readiness", "native_pooleboot_readiness",
+            "native_kernel_revalidation_readiness", "native_kernel_transfer_readiness",
+            "native_kernel_errata_policy_readiness",
+        ],
+        "final_receipt_fresh_qemu_runs": 6, "superseded_initial_qemu_runs": 2,
+        "kernel_entry_runs": 2, "revalidated_dependency_execution_cycle": 179,
+        "entry_receipt_sha256": entry_sha, "entry_kernel_host_tests": 245,
+        "entry_source_binding_count": 55, "entry_release_gate_controls": 12,
+        "focused_python_tests_passed": 71, "focused_test_scope": "six_N5_components_not_full_audit",
+        "focused_test_log_sha256": "BF2D89D92750BF5192042F8719DAD48F9DE94C28864269E6441A5F4C685212EE",
+        "boot_identity_rejection_cases": 13, "qualifier_admission_rejection_cases": 3,
+        "core_receipt_sha256": core_sha, "core_live_execution_cycle": None,
+        "canonical_full_replay_performed": False, "production_ready": False,
+        "next_dependency_move_id": "N7-TRAP-001",
+        "required_next_gate": "ordered_CPU_memory_replay_then_exact_full_qualification",
+    }
+    gate["current_entry_provenance_qualification"] = dict(
+        gate["current_entry_provenance_qualification"], source_validation_cycle=179,
+    )
+    gate["current_boot_chain_qualification"] = {
+        "cycle": 179, "source_validation_cycle": 179, "status": "single_host_replay_pass",
+        "scope": "six_N5_components_for_current_dispatch_execution_hold_kernel",
+        "applies_to_current_source": True, "kernel_sha256": kernel_sha,
+        "qualified_profiles": ["symbol", "policy", "kernel_load", "pooleboot", "kernel_revalidation", "kernel_transfer"],
+        "readiness_replay_required_profiles": [], "fresh_qemu_runs": 6,
+        "superseded_initial_runs": 2, "superseded_profiles": ["kernel_transfer"],
+        "superseded_reason": "revalidation_semantic_admission_and_source_binding_repair",
+        "kernel_entry_runs": 2, "kernel_host_tests": 245, "loader_host_tests": 330,
+        "retained_file_count": 9, "inner_artifact_bytes": 8761, "retained_bytes": 11952,
+        "inner_set_sha256": "A3078488088B2BF11B8D88F48862FA8D80957D610EB1F3FF4411AD5E4729FEAF",
+        "focused_python_tests": 71, "boot_identity_rejection_cases": 13,
+        "qualifier_admission_rejection_cases": 3, "prior_kernel_identity_cases_added": 4,
+        "receipt_generation_semantically_validated": True,
+        "receipt_write_semantically_validated": True,
+        "current_candidate_full_gate_passed": False, "production_ready": False,
+    }
+    gate["current_boot_chain_qualification"]["receipt_bindings"] = [
+        {
+            "profile": "symbol",
+            "path": "runs/native_symbol_readiness.json",
+            "sha256": "6E251E2863ABC20B4F1302805F092C382BE7D9CF7CA0AA70CB4E20270E33F96F",
+            "fresh_runs": 0,
+            "execution_log_sha256": "39D622078702BC250B96EFD6CACB9EC04214EB6EEF0062BCFD4BF83419DC0038"
+        },
+        {
+            "profile": "policy",
+            "path": "runs/native_policy_readiness.json",
+            "sha256": "40DFF7B628EAC8DB946BA9535740053A5F6B044E5882D3C527D20C1A273AE39E",
+            "fresh_runs": 0,
+            "execution_log_sha256": "4E0AA1F9DB24DE8D841452D60CA70EBAD0B1883FF79739D7A96CB02A1045ECA7"
+        },
+        {
+            "profile": "kernel_load",
+            "path": "runs/native_kernel_load_readiness.json",
+            "sha256": "E9BB7A7CE5C709A02ED02CB53A47FF66A55C949ED85BFEEF1FEC277BA667F611",
+            "fresh_runs": 2,
+            "execution_log_sha256": "417C7B59688B1D98ACDF8391A970DF09430B126C4345FE53A04840D1C461B330"
+        },
+        {
+            "profile": "pooleboot",
+            "path": "runs/native_pooleboot_readiness.json",
+            "sha256": "7D748DB12AB52F126DF5FF007F257CF7CD625C972DA748C35D3DA1DC325CD2E5",
+            "fresh_runs": 2,
+            "execution_log_sha256": "56338F6E2175B97E50BB1E2377476252F07B88CAAEAF64E220040A84FE086C65"
+        },
+        {
+            "profile": "kernel_revalidation",
+            "path": "runs/native-kernel-revalidation-readiness.json",
+            "sha256": "8577B6060FB35C3D0C16629E7CCB2CEB676ABECDB6410B9FC34E3C48755A9454",
+            "fresh_runs": 0,
+            "execution_log_sha256": "A241574365E43C16D05D7D059E5D2DF662F24D5D5A58A65536FB8528DE34177D"
+        },
+        {
+            "profile": "kernel_transfer",
+            "path": "runs/native-kernel-transfer-readiness.json",
+            "sha256": "C41EC5F4709169B84C3F3C96B9B17ACF26CC128624D9481378BCB313B3DA1A9C",
+            "fresh_runs": 2,
+            "execution_log_sha256": "CFA47E76AB3375E41C02258ADFBB2C49320C3D8F2D0956B0CDC404ECD5A5D402"
+        }
+    ]
+    for name in ("cpu", "dependency"):
+        gate["current_" + name + "_qualification"] = dict(
+            gate["current_" + name + "_qualification"], cycle=179, source_validation_cycle=179,
+        )
+    evidence = (
+        "Cycle 179: " + checkpoint + " qualifies six N5 components with six final headless boots, "
+        "two kernel entries, nine-file independent revalidation and 71 passing focused Python tests. "
+        "The revalidation qualifier now semantically validates before returning and writing a receipt; "
+        "three specific invalid candidates reject without output. Thirteen gate controls reject "
+        "old artifact/trust identities and host counts. Two superseded transfer boots and all failures "
+        "remain separate. Kernel and native Rust bytes are unchanged."
+    )
+    gap = (
+        "Cycle 179 passes 8/27 selected native checks. Nineteen CPU and memory-through-lock profiles "
+        "require replay beginning N7-TRAP-001. Independent builders, complete transitive evidence, "
+        "live task contexts/CPU retirement and full exact-candidate qualification remain open. "
+        "No phase, flag, authenticated boot, new demo ISO or production claim follows."
+    )
+    for phase in roadmap["phases"]:
+        if phase["id"] in {"N5", "N6", "N12", "N36"}:
+            phase["current_evidence"] = [evidence, *phase["current_evidence"]]
+            phase["current_gaps"] = [gap, *phase["current_gaps"]]
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle 179 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in {"FLAG-N5-SYMBOL-BUNDLE-001", "FLAG-N12-CONCURRENCY-RECLAMATION-001", "FLAG-N36-RECEIPT-COVERAGE-001"}:
+            flag["evidence"] = [checkpoint, *flag["evidence"]]
+        if flag["id"] == "FLAG-N36-RECEIPT-COVERAGE-001":
+            flag["evidence"] = ["tests/test_native_kernel_revalidation.py", "tools/qualify_native_kernel_revalidation.py", *flag["evidence"]]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
 
@@ -3300,7 +3439,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=961)
+    parser.add_argument("--test-count", type=int, default=962)
     parser.add_argument("--status-date", default="2026-09-12")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

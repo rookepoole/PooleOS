@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 178
+Last roadmap reconciliation: PooleOS Cycle 179
 
-Current Cycle 178: the unchanged Cycle 177 kernel passes clean PKENTRY1
+Current Cycle 179: six N5 components pass qualification on the unchanged kernel,
+with six final virtual boots, two kernel entries and 71 focused Python tests.
+PKREVAL1 now rejects semantically invalid receipts before output; three cases
+and thirteen aggregate identity/count controls pass. Two superseded boots and
+prior failures are retained. Selected readiness is 8/27; nineteen CPU/memory
+profiles need replay beginning `N7-TRAP-001`. Main remains qualified Cycle 176,
+PR #78 stays draft, and no normative completion condition or phase/flag closes.
+[Cycle 179 evidence](checkpoints/cycle179-boot-chain-requalification.md).
+
+Historical Cycle 178: the unchanged Cycle 177 kernel passes clean PKENTRY1
 reproduction with 245 host tests, 43 controls and 55 source bindings. Twelve
 entry-gate controls reject stale identities and wrong numeric types. Selected
 readiness is 3/27; 24 dependent profiles need replay beginning

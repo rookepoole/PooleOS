@@ -24,6 +24,11 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle179-boot-chain-requalification.md",
+    "tests/test_native_symbols.py",
+    "tests/test_native_kernel_load.py",
+    "tests/test_native_kernel_transfer.py",
+    "tests/test_native_kernel_revalidation.py",
     "docs/checkpoints/cycle178-kernel-entry-requalification.md",
     "tests/test_native_kernel_entry.py",
     "tests/test_native_dependency_release_gate.py",

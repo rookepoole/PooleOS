@@ -2,8 +2,8 @@
 
 Status: candidate pre-ABI, single-host qualified, unsigned, non-promoting.
 
-Cycle 169 re-derives the identities below from a fresh split-debug build of
-the unchanged Cycle 168 kernel. Qualification must rebuild independently and
+Cycle 179 re-derives the identities below from a fresh split-debug build of
+the unchanged Cycle 177 kernel. Qualification must rebuild independently and
 match the exact canonical, loaded, debug, build-ID and manifest bytes. This
 replays N5-SYMBOLS-SEMANTICS-001 (N5.6/N5.9); it does not enable consumption or
 inherit the prior kernel's live evidence. Earlier identities remain in Git.
@@ -66,11 +66,11 @@ The canonical development bundle binds these exact SHA-256 identities:
 
 | Identity | SHA-256 |
 | --- | --- |
-| Canonical stripped PKELF1 | `8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625` |
-| Preferred loaded image | `940D941A32AAA3DC1E5F75295AFC47ECFB1FD07B75E359D9D4C5963A36E488BC` |
-| Build ID text | `62AC16F52550AAF62455B196A632E785825739656A473C627239DB0A839B667C` |
-| Full split-debug ELF | `87B12B0278881804BDDA57132657950CF8CD8F515B7A0CC4BC9E2B6326FA1C0A` |
-| `native/kernel/manifest.pkm` | `51BD6E01E5A300FE3444EC2FF6352F7A6EAFE38C4728014596C540290A4779F2` |
+| Canonical stripped PKELF1 | `563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA` |
+| Preferred loaded image | `F0D040BCD13B522CFD1DC18B2662539AFB561BEAE775247812818DFD4D2F4A66` |
+| Build ID text | `BB1FA6F852D6814B309D948CEA13F23679B0B1D69F81CFB5C616007F7B16DFEB` |
+| Full split-debug ELF | `50084E1DFDD64A7EBDC884EB041533B50F0F354997E3D9C9BC0CF5B6277C1E11` |
+| `native/kernel/manifest.pkm` | `01AA5A812CF32D3E850A93CF19E08B03BBB64F9F79217BD5788DC0B6A9ABA654` |
 
 The qualification builds the full debug product twice and requires identical
 bytes. Their canonicalized output is the exact declared PKELF1 image. A separate
@@ -78,7 +78,17 @@ release build is checked for absence of `.symtab` and `.debug*` sections; this
 does not prove that the separately stripped build has an equal image plan.
 The receipt explicitly records `stripped_and_debug_plans_equal=false`.
 
-Cycle 173 rebinds the 7,025,584-byte full ELF after task-stack source changes
+Cycle 179 binds the 7,032,744-byte full ELF and build ID
+`PKBUILD1-CYCLE177-N12-EX-HLD-V001-0000000001`. Fresh independent measurement
+matches the current PKENTRY1 linked, canonical and loaded bytes. The three
+public symbol offsets and sizes remain unchanged. Regression cases reject
+the earlier canonical, loaded, debug and build-ID identities. Kernel-entry
+evidence now covers all 39 kernel Rust sources among 55 bindings; this is
+single-host qualification, not independent-builder or live consumption proof.
+The qualifier retains its deterministic historical `status_date`; actual
+execution UTC timestamps are recorded separately, not inferred from that field.
+
+Historical Cycle 173 rebound the 7,025,584-byte full ELF after task-stack source changes
 altered debug provenance without changing the canonical boot image. The old
 7,024,792-byte identity is rejected and preserved as failure history. The
 kernel-entry receipt binds all 38 kernel-crate Rust sources among 54 inputs;
