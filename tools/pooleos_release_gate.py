@@ -173,6 +173,14 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 174 requalifies five CPU profiles with fourteen fresh successful virtual boots and 225 controls. "
+    "Embedded entry evidence now requires exact JSON-typed identity with the current validated receipt. "
+    "The selected projection passes 24/27; PMM, VM, SMP IPI and broader memory-through-lock provenance "
+    "replay remain pending before full qualification. No phase or production gate closes. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:

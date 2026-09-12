@@ -24,6 +24,9 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle174-cpu-entry-provenance.md",
+    "runtime/native_kernel_profile_evidence.py",
+    "tests/test_native_cpu_entry_provenance.py",
     "LICENSE",
     "NOTICE.md",
     "docs/adr-ratification-ceremony.md",

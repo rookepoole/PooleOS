@@ -582,6 +582,14 @@ PROGRAM_GAPS[4] = (
 )
 
 
+PROGRAM_GAPS[4] = (
+    "Cycle 174 requalifies five CPU profiles with fourteen fresh successful virtual boots and 225 controls. "
+    "Embedded entry evidence now requires exact JSON-typed identity with the current validated receipt. "
+    "The selected projection passes 24/27; PMM, VM, SMP IPI and broader memory-through-lock provenance "
+    "replay remain pending before full qualification. No phase or production gate closes. " + PROGRAM_GAPS[4]
+)
+
+
 def sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest().upper()
 
@@ -2897,7 +2905,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
         if phase["id"] == "N36":
             mislabeled = f"Cycle 150 host baseline: {test_count} tests with three expected environment skips"
             phase["current_evidence"] = [
-                f"Cycle 173 source inventory: {test_count} Python tests discovered; full qualification pending"
+                "Cycle 173 source inventory: 950 Python tests discovered; full qualification pending"
                 if item == mislabeled else item for item in phase["current_evidence"]
             ]
         if phase["id"] in {"N5", "N6", "N7", "N9", "N12", "N36"}:
@@ -2910,13 +2918,75 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             flag["evidence"].extend(["runtime/native_kernel_entry.py", "tests/test_native_kernel_entry.py",
                                      "tests/test_native_boot_chain_release_gate.py"])
     roadmap["claim_boundaries"].insert(0, evidence)
+    checkpoint = "docs/checkpoints/cycle174-cpu-entry-provenance.md"
+    protocol.update(last_updated_cycle=174, selected_move_id="N7-TRAP-001",
+                    owner_independent_next_move_id="N9-PMM-ACPI-CONSUMER-001")
+    protocol["required_records"].insert(0, checkpoint)
+    roadmap["baseline"]["pooleos_cycle"] = 174
+    for historical, current in (
+        ("historical_cycle173_source_projection", "current_focused_source_projection"),
+        ("historical_cycle173_ownership_qualification", "current_ownership_qualification"),
+        ("historical_cycle173_cpu_qualification", "current_cpu_qualification"),
+        ("historical_cycle173_dependency_qualification", "current_dependency_qualification"),
+    ):
+        gate[historical] = gate[current]
+    gate["qualification_status"] = "cpu_entry_provenance_replay_pass_memory_replay_pending"
+    gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=174)
+    gate["current_focused_source_projection"] = dict(
+        gate["current_focused_source_projection"], cycle=174, passed_checks=24,
+        pending_downstream_native_checks=3, final_receipt_fresh_qemu_runs=14,
+        fresh_qemu_run_count_scope="six_trap_and_two_each_CPU_XSTATE_XEXC_MSR_cycle174_runs",
+        next_dependency_move_id="N9-PMM-ACPI-CONSUMER-001",
+        required_next_gate="memory_IRQ_SMP_scheduler_dependency_replay_then_exact_full_qualification",
+    )
+    gate["current_ownership_qualification"] = dict(gate["current_ownership_qualification"], cycle=174)
+    gate["current_cpu_qualification"] = dict(
+        gate["current_cpu_qualification"], cycle=174, source_validation_cycle=174,
+        scope="five_N7_profiles_with_exact_current_embedded_entry_provenance",
+        embedded_entry_provenance_replay_pending=False, readiness_replay_required_profiles=[],
+        focused_python_tests=47, embedded_entry_rejection_cases=80,
+        invalid_current_entry_dependency_cases=20, entry_identity_comparison="canonical_JSON_typed_equality",
+        provenance_coverage_scope="five_N7_profiles_only_not_all_transitive_inputs",
+        receipt_bindings=[
+            {"path": "runs/native-kernel-trap-readiness.json", "sha256": "8C14786643F1423656AD20D733A1F339CC7036BEB0957CF2945C605DCD40648F"},
+            {"path": "runs/native-kernel-cpu-policy-readiness.json", "sha256": "F3A67A26D0E749921A1F3AAC6B924C6B74BF71564DBDA2B292B8B844718C0285"},
+            {"path": "runs/native-kernel-xstate-policy-readiness.json", "sha256": "9D66DD4EC4AC145A6639D6A0C50179D112D9221CE8B5224851DB5645CFD3BFE0"},
+            {"path": "runs/native-kernel-xstate-exception-readiness.json", "sha256": "CE34466E452D16847F6773764BF55733F0F0C25601E4F37C36B7F13101B916C7"},
+            {"path": "runs/native-kernel-privilege-msr-policy-readiness.json", "sha256": "AE0AC3771B7C8C749CF2F0AA1700FF35753973F2494A1B34342CB60A96B18632"},
+        ],
+    )
+    gate["current_dependency_qualification"] = dict(
+        gate["current_dependency_qualification"], source_validation_cycle=174,
+    )
+    evidence = (
+        "Cycle 174: " + checkpoint + " qualifies five CPU profiles with fourteen fresh successful virtual "
+        "boots, 225 controls and 47 focused tests. Exact JSON-typed embedded entry identity rejects 80 "
+        "malformed/stale/type cases and 20 invalid current dependencies. The projection is 24/27; memory "
+        "and SMP provenance replay and full qualification remain open. No phase or flag closes."
+    )
+    gap = (
+        "Cycle 174 leaves PMM, VM and SMP IPI selected gates stale; all fourteen older memory-through-lock "
+        "profiles need embedded-entry provenance replay from N9-PMM-ACPI-CONSUMER-001. Complete transitive "
+        "coverage, independent builders, physical targets and the exact full audit remain open."
+    )
+    for phase in roadmap["phases"]:
+        if phase["id"] in {"N7", "N8", "N9", "N12", "N36"}:
+            phase["current_evidence"] = [evidence, *phase["current_evidence"]]
+            phase["current_gaps"] = [gap, *phase["current_gaps"]]
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle 174 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] == "FLAG-N36-RECEIPT-COVERAGE-001":
+            flag["evidence"] = [checkpoint, "runtime/native_kernel_profile_evidence.py",
+                                "tests/test_native_cpu_entry_provenance.py", *flag["evidence"]]
+    roadmap["claim_boundaries"].insert(0, evidence)
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=950)
+    parser.add_argument("--test-count", type=int, default=954)
     parser.add_argument("--status-date", default="2026-09-12")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

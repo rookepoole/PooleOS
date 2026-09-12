@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from runtime import native_kernel_transfer
+from runtime.native_kernel_profile_evidence import kernel_entry_errors
 from runtime.schema_validation import validate_json
 
 
@@ -49,6 +50,9 @@ LLVM_TOOLS_ARCHIVE_URL = (
 LLVM_TOOLS_ARCHIVE_SHA256 = "671B509EC2C9220916D25D8FD546E71EFB552439F8E7AE75CE53208D9395DFB4"
 
 IMPLEMENTATION_INPUTS = (
+    "runtime/native_kernel_profile_evidence.py",
+    "tests/test_native_cpu_entry_provenance.py",
+    "runs/native_kernel_entry_readiness.json",
     "native/boot/Cargo.toml",
     "native/boot/src/exit.rs",
     "native/bootexit/src/lib.rs",
@@ -347,6 +351,7 @@ def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
         f"schema {item.path}: {item.message}"
         for item in validate_json(readiness, schema)
     ]
+    errors.extend(kernel_entry_errors(readiness.get("build"), root))
     contract = read_json(root / CONTRACT_RELATIVE)
     errors.extend(contract_errors(contract))
     if readiness.get("inputs") != expected_inputs(root):

@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 173
+Last roadmap reconciliation: PooleOS Cycle 174
 
-Current Cycle 173: kernel-entry provenance and six N5 components are requalified.
+Current Cycle 174: five CPU profiles pass fourteen fresh virtual boots,
+225 controls and 47 focused tests. Embedded kernel-entry evidence now requires
+exact JSON-typed identity with the current validated receipt. Eighty stale or
+malformed substitutions and twenty invalid dependency cases reject. The selected
+projection is 24/27; memory/SMP provenance replay and full qualification remain
+pending. Next is `N9-PMM-ACPI-CONSUMER-001`. No phase, flag, normative charter
+condition or production gate closes; main stays Cycle 171 and PR #77 stays draft.
+[Cycle 174 evidence](checkpoints/cycle174-cpu-entry-provenance.md).
+
+Historical Cycle 173: kernel-entry provenance and six N5 components are requalified.
 Two matching clean linked/canonical builds, eleven entry tests, 71 boot-chain
 tests and six fresh QEMU runs pass. The selected readiness projection is 22/27;
 CPU/memory/SMP embedded provenance and full exact-candidate qualification remain

@@ -1,15 +1,33 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-12
-Plan version: 2.77.0-native-entry-provenance-replay
-Roadmap cycle: PooleOS Cycle 173
+Plan version: 2.78.0-native-cpu-entry-provenance
+Roadmap cycle: PooleOS Cycle 174
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 173: Entry Provenance And Boot Replay
+## Cycle 174: CPU Entry Provenance And Replay
+
+`N7-TRAP-001` at N7.5/N7.6 and dependent N7.1/N7.3/N7.4 profiles pass five
+qualifiers, fourteen fresh successful virtual boots, 225 controls and 47 focused
+tests. A shared validator requires embedded PKENTRY1 evidence to match the current
+validated receipt with exact JSON types. Eighty malformed/stale/type substitutions
+and twenty invalid current dependencies reject. The initial missing checks and
+numeric-equality repair failure are preserved in the
+[Cycle 174 checkpoint](checkpoints/cycle174-cpu-entry-provenance.md).
+
+The selected projection is 24/27: PMM, VM and SMP IPI remain stale. All fourteen
+older memory-through-lock profiles require embedded-entry provenance replay,
+including those with narrower passing checks. Next is `N9-PMM-ACPI-CONSUMER-001`,
+then ordered VM/IRQ/SMP/scheduler replay and full exact-candidate qualification.
+The inventory is 954 discovered tests and 237 architecture bindings, not a full
+suite pass. All phase/flag states and exit conditions remain unchanged. No native
+Rust, PooleGlyph, frozen demo, N0 custody or production condition changes.
+
+## Historical Cycle 173: Entry Provenance And Boot Replay
 
 `N5-SYMBOLS-SEMANTICS-001` at N5.6/N5.9 requalifies the repaired N6 kernel-entry
 prerequisite and six boot-chain components. All 38 crate Rust sources are bound
