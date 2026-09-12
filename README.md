@@ -4,20 +4,45 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
-**Cloud status:** qualified checkpoints through Cycle 165 are merged into `main`
-at `6f9399c` via [PR #75](https://github.com/rookepoole/PooleOS/pull/75).
-The exact merged tree passed all 105 canonical gates and 708 Doctor checks.
-Cycle 171 completes memory-through-lock replay on the unchanged Cycle 168 kernel on
-`agent/n12-ap-execution-ownership`, tracked by
-[draft PR #76](https://github.com/rookepoole/PooleOS/pull/76).
+**Qualified baseline:** checkpoints through Cycle 171 were merged into `main`
+at `8006c7b` via [PR #76](https://github.com/rookepoole/PooleOS/pull/76).
+The exact merged tree passed all 105 runtime-inclusive canonical gates and
+708 Doctor checks, with both bundle and replay inputs. The original checkpoint
+branches remain available as history; they are not pending main merges.
+
+**Latest checkpoint:** Cycle 175 qualifies fourteen memory-through-lock profiles:
+28 final fresh virtual boots, 660 control groups and 2,126 rejected cases. All
+27 selected native readiness checks pass. Embedded kernel-entry checks now reject
+224 stale/malformed/type substitutions and 56 invalid dependencies; the combined
+suite passes 161 tests with two optional skips. An SMP shape-handling regression
+was fixed and replayed, with two earlier boots retained as superseded evidence.
+Full canonical qualification still precedes merging [PR #77](https://github.com/rookepoole/PooleOS/pull/77).
+No new live task-stack, frozen demo or production claim follows.
+[Cycle 175 evidence and next move](docs/checkpoints/cycle175-memory-entry-provenance.md).
+
+**Historical checkpoint:** Cycle 174 requalifies five native CPU profiles on
+`agent/n12-task-stack-ownership`, tracked by [PR #77](https://github.com/rookepoole/PooleOS/pull/77).
+Fourteen fresh virtual boots, 225 controls and 47 focused tests pass. Embedded
+kernel-entry receipts must match current validated evidence with exact JSON types;
+80 malformed/stale/type substitutions and 20 invalid dependency cases reject.
+Selected readiness checks pass 24/27. Memory/SMP provenance replay and the full
+audit remain pending; this draft is not merge-qualified. The canonical kernel
+and frozen demo ISO are unchanged. No production claim follows.
+[Cycle 174 evidence and next move](docs/checkpoints/cycle174-cpu-entry-provenance.md).
+Cycle 173's entry and boot-chain replay remains preserved in its
+[historical checkpoint](docs/checkpoints/cycle173-entry-provenance-replay.md).
+
+Historical Cycle 171 pre-closeout evidence: memory-through-lock replay on the
+unchanged Cycle 168 kernel, originally on `agent/n12-ap-execution-ownership`.
 Twenty-eight final headless boots pass across fourteen profiles, with 660
 negative-control groups and 2,126 rejected cases. SMP evidence now binds the
 current boot artifacts and rejects stale or malformed transfer dependencies.
 All 27 selected native checks pass. The 155-test profile/map/gate suite has
 153 passes and two optional local-transcript skips. Four superseded boots
 and all failing-then-passing regressions are preserved.
-Next is full runtime-inclusive exact-final qualification and publication/review
-gates before merge. PR #76 is not yet merge-qualified or production-ready.
+Full runtime-inclusive exact-final qualification and publication/review gates
+subsequently passed; PR #76 records their exact-source receipt and verified merge.
+That development qualification does not make PooleOS production-ready.
 [Cycle 171 proof, failures and next move](docs/checkpoints/cycle171-native-dependency-replay.md).
 [Prior CPU-state evidence](docs/checkpoints/cycle170-cpu-state-replay.md).
 [Prior boot-chain evidence](docs/checkpoints/cycle169-boot-chain-replay.md).

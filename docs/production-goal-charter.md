@@ -1,15 +1,65 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-09-09
+Status date: 2026-09-12
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 171
+Last roadmap reconciliation: PooleOS Cycle 175
 
-Current Cycle 171: fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles pass
+Current Cycle 175: fourteen memory-through-lock profiles pass 28 final virtual
+boots, 660 groups and 2,126 rejected cases; two earlier SMP boots are superseded.
+All 27 selected native checks pass. Embedded-entry provenance tests and the
+repaired SMP malformed-input guard pass; the combined suite passes 161 tests
+with two optional skips. Full canonical qualification and publication/review
+precede PR #77 merge, then N12.3 task-stack/context and CPU-retirement work.
+No phase, flag, normative charter or production condition changes.
+[Cycle 175 evidence](checkpoints/cycle175-memory-entry-provenance.md).
+
+Historical Cycle 174: five CPU profiles pass fourteen fresh virtual boots,
+225 controls and 47 focused tests. Embedded kernel-entry evidence now requires
+exact JSON-typed identity with the current validated receipt. Eighty stale or
+malformed substitutions and twenty invalid dependency cases reject. The selected
+projection is 24/27; memory/SMP provenance replay and full qualification remain
+pending. Next is `N9-PMM-ACPI-CONSUMER-001`. No phase, flag, normative charter
+condition or production gate closes; main stays Cycle 171 and PR #77 stays draft.
+[Cycle 174 evidence](checkpoints/cycle174-cpu-entry-provenance.md).
+
+Historical Cycle 173: kernel-entry provenance and six N5 components are requalified.
+Two matching clean linked/canonical builds, eleven entry tests, 71 boot-chain
+tests and six fresh QEMU runs pass. The selected readiness projection is 22/27;
+CPU/memory/SMP embedded provenance and full exact-candidate qualification remain
+pending. The failed Cycle 172 audit remains historical evidence. Next is
+`N7-TRAP-001`; no phase, flag, charter condition or production gate closes.
+Main remains qualified Cycle 171; PR #77 remains draft.
+[Cycle 173 evidence and remaining work](checkpoints/cycle173-entry-provenance-replay.md).
+
+Historical Cycle 172 cloud-backup status: PR #77 remains draft after a failed exact-source
+audit at `9c111e2` (104/105 canonical, 707/708 Doctor). The kernel-entry binding
+repair passes 12 focused tests, but entry/symbol/SMP IPI evidence needs replay;
+the selected projection is 24/27, with 947 Python tests discovered. Generated
+roadmap/architecture records and the following summary remain pre-audit
+snapshots until reconciled. Main remains qualified through Cycle 171. Backup
+does not waive entry/dependency or full-candidate qualification before merge.
+
+Historical pre-audit Cycle 172 summary:
+
+Cloud closeout: Cycles 166-171 merged through PR #76 at `8006c7b`, after
+105 runtime-inclusive canonical gates and 708 Doctor checks passed on the exact
+merged tree. Cycle 172 qualifies inactive task-stack ownership on
+`agent/n12-task-stack-ownership`: 34 lifecycle tests per host profile, 243 kernel
+regressions per profile, 11 compile-fail tests and an unchanged linked image.
+Progress and source bindings are reconciled, 34 focused Python tests and all
+27 selected native checks pass, and 945 Python tests are discovered. Full
+runtime-inclusive exact-final qualification and publication/review remain
+separate gates for PR #77. Live context/CPU retirement and receipt-growth
+integration remain open. The normative charter is unchanged; no phase, flag or
+production condition closes.
+[Cycle 172 evidence and merge blockers](checkpoints/cycle172-task-stack-ownership.md).
+
+Historical Cycle 171 pre-closeout: fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles pass
 on the unchanged Cycle 168 kernel: 28 final headless boots, 660 control groups
 and 2,126 rejected cases. Four superseded boots remain separate. SMP receipt
 validation now binds current boot artifacts and rejects malformed dependencies.

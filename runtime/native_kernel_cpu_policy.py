@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from runtime import native_kernel_transfer, native_pooleboot
+from runtime.native_kernel_profile_evidence import kernel_entry_errors
 from runtime.schema_validation import validate_json
 
 
@@ -49,6 +50,8 @@ ALLOWED_EFER = (1 << 0) | (1 << 8) | (1 << 10) | (1 << 11) | (1 << 12) | (1 << 1
 MSR_READ_MASK = 0x1F
 
 IMPLEMENTATION_INPUTS = (
+    "runtime/native_kernel_profile_evidence.py",
+    "tests/test_native_cpu_entry_provenance.py",
     "native/boot/Cargo.toml",
     "native/boot/src/exit.rs",
     "native/bootexit/src/lib.rs",
@@ -329,6 +332,7 @@ def recorded_execution_errors(execution: Any) -> list[str]:
 def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     schema = read_json(root / SCHEMA_RELATIVE)
     errors = [f"schema {item.path}: {item.message}" for item in validate_json(readiness, schema)]
+    errors.extend(kernel_entry_errors(readiness.get("build"), root))
     contract = read_json(root / CONTRACT_RELATIVE)
     errors.extend(contract_errors(contract))
     if readiness.get("inputs") != expected_inputs(root):

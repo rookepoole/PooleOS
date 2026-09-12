@@ -12,6 +12,7 @@ from typing import Any
 
 from runtime import native_kernel_transfer
 from runtime.schema_validation import validate_json
+from runtime.native_kernel_profile_evidence import kernel_entry_errors
 
 
 CONTRACT_ID = "PKIRQ1"
@@ -42,6 +43,9 @@ SPURIOUS_VECTOR = 0xFF
 EXPECTED_DELIVERIES = 8
 
 IMPLEMENTATION_INPUTS = (
+    "runtime/native_kernel_profile_evidence.py",
+    "tests/test_native_memory_entry_provenance.py",
+    "runs/native_kernel_entry_readiness.json",
     "native/Cargo.lock",
     "native/boot/Cargo.toml",
     "native/boot/src/exit.rs",
@@ -228,6 +232,7 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
 def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     schema = read_json(root / READINESS_SCHEMA_RELATIVE)
     errors = list(validate_json(readiness, schema))
+    errors.extend(kernel_entry_errors(readiness.get("build"), root))
     if readiness.get("inputs") != expected_inputs(root):
         errors.append("readiness input bindings are stale")
     controls = readiness.get("negative_controls", [])

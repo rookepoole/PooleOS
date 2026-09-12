@@ -215,7 +215,7 @@
     {
       "path": "runtime/native_symbols.py",
       "bytes": 55645,
-      "sha256": "345CBF5179CD1CBE881150BD17E8496B88A409BDD2763588A70AB61E1EE87FC2"
+      "sha256": "78174F355C73662F36FB72FF20DEA36BD020A4F47712D5844CDEA77774AFA0F1"
     },
     {
       "path": "runtime/native_microcode.py",

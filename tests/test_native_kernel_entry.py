@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 from runtime import native_kernel_entry as entry
@@ -49,6 +51,30 @@ class NativeKernelEntryTests(unittest.TestCase):
             "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625",
         )
         self.assertTrue(product["entry_prefix_hex"].startswith("FAFC4889E14885C9"))
+
+    def test_kernel_crate_sources_are_completely_and_uniquely_bound(self) -> None:
+        expected = {path.relative_to(ROOT).as_posix() for path in (ROOT / "native/kernel/src").rglob("*.rs")}
+        bindings = entry.expected_bindings(ROOT)["implementation_inputs"]
+        actual = [binding["path"] for binding in bindings]
+        self.assertIn("native/kernel/src/reclamation/task_lifetimes.rs", expected)
+        self.assertTrue(expected.issubset(actual), sorted(expected - set(actual)))
+        self.assertEqual(len(actual), len(set(actual)))
+
+    def test_each_kernel_crate_source_mutation_stales_the_receipt(self) -> None:
+        candidate = copy.deepcopy(self.readiness)
+        candidate["bindings"] = entry.expected_bindings(ROOT)
+        self.assertEqual(entry.readiness_errors(candidate, ROOT), [])
+        original = entry.file_binding
+        sources = sorted((ROOT / "native/kernel/src").rglob("*.rs"))
+        for changed_path in sources:
+            def changed_binding(path, root=ROOT):
+                binding = original(path, root)
+                if path == changed_path:
+                    binding["sha256"] = "0" * 64
+                return binding
+            with self.subTest(source=changed_path.relative_to(ROOT).as_posix()):
+                with mock.patch.object(entry, "file_binding", side_effect=changed_binding):
+                    self.assertIn("readiness input bindings are stale", entry.readiness_errors(candidate, ROOT))
 
     def test_manifest_binds_all_three_contracts(self) -> None:
         fields = self.readiness["product"]["manifest_fields"]

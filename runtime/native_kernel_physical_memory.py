@@ -10,6 +10,7 @@ from typing import Any
 
 from runtime import native_kernel_map, native_kernel_transfer
 from runtime.schema_validation import validate_json
+from runtime.native_kernel_profile_evidence import kernel_entry_errors
 
 
 CONTRACT_ID = "PKPMM7"
@@ -86,6 +87,9 @@ METADATA_PTE_WRITES = 5
 STALE_PATTERN = 0xA5A55A5AC3C33C3C
 
 IMPLEMENTATION_INPUTS = (
+    "runtime/native_kernel_profile_evidence.py",
+    "tests/test_native_memory_entry_provenance.py",
+    "runs/native_kernel_entry_readiness.json",
     "native/boot/Cargo.toml",
     "native/boot/src/exit.rs",
     "native/bootexit/src/lib.rs",
@@ -592,6 +596,7 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
 def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     schema = read_json(root / SCHEMA_RELATIVE)
     errors = [f"schema {item.path}: {item.message}" for item in validate_json(readiness, schema)]
+    errors.extend(kernel_entry_errors(readiness.get("build"), root))
     errors.extend(contract_errors(read_json(root / CONTRACT_RELATIVE), root))
     if readiness.get("inputs") != expected_inputs(root):
         errors.append("PKPMM6 readiness input bindings are stale")

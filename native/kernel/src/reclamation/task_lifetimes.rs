@@ -4,11 +4,17 @@
 #![forbid(unsafe_code)]
 
 use super::{Handle, Limits, Owner, Pin, Pool};
-use crate::physical_memory::{PhysicalMemoryError, PhysicalMemoryManager, RetainedAllocation};
+use crate::physical_memory::{
+    AllocationHandle, PhysicalMemoryError, PhysicalMemoryManager, PhysicalPageAccess,
+    RetainedAllocation, ScrubReceipt,
+};
 use crate::scheduler_smp::{self as sched, CpuId, SmpScheduler, TaskId, TaskState};
 use crate::virtual_memory::{AddressSpace, MAX_FRAMES};
 
 pub const CONTRACT_ID: &str = "PKLIFE1";
+pub const STACK_CONTRACT_ID: &str = "PKSTACK1";
+pub const STACK_PAGE_COUNT: u64 = 4;
+pub const STACK_OWNER: u16 = 0x1701;
 const CAPACITY: usize = sched::TASK_CAPACITY;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -22,8 +28,10 @@ pub enum Error {
     Stale,
     GenerationExhausted,
     AddressSpace,
+    StackLayout,
     PhysicalMemory(PhysicalMemoryError),
     DuplicateRoot,
+    DuplicateStack,
     NotDead,
     Retired,
     NotRetired,
@@ -41,6 +49,44 @@ impl From<super::Error> for Error {
     }
 }
 
+/// Owns the 16-KiB stack allocation for this inactive task-resource profile.
+/// This API does not install mappings or construct an architectural context.
+/// No CPU exposure or context activation API exists yet. A future architectural
+/// adapter must transfer this owner before publishing any resumable context.
+/// Dropping or forgetting it leaves allocator retention in place.
+///
+/// ```compile_fail
+/// use poolekernel::reclamation::task_lifetimes::InactiveStack;
+/// fn duplicate(stack: &InactiveStack) -> InactiveStack { stack.clone() }
+/// ```
+///
+/// ```compile_fail
+/// use poolekernel::reclamation::task_lifetimes::Resources;
+/// fn steal(resources: &Resources<()>) { let stack = *resources.execution_stack(); }
+/// ```
+pub struct InactiveStack {
+    retained: RetainedAllocation,
+}
+
+impl InactiveStack {
+    /// Diagnostic identity only; ordinary allocator release remains forbidden.
+    pub const fn handle(&self) -> AllocationHandle {
+        self.retained.handle()
+    }
+
+    /// Preserve the exclusive token through every failed zero/readback/commit.
+    #[allow(clippy::result_large_err)]
+    pub fn release_scrubbed<A: PhysicalPageAccess>(
+        self,
+        manager: &mut PhysicalMemoryManager,
+        access: &mut A,
+    ) -> Result<ScrubReceipt, (PhysicalMemoryError, Self)> {
+        manager
+            .free_retained_scrubbed(self.retained, access)
+            .map_err(|(error, retained)| (error, Self { retained }))
+    }
+}
+
 /// Owns the actual PKVM1 object and mandatory retention of its tables and frames.
 /// No mutable address-space or retention-token access escapes through a reader.
 /// Dropping resources retains physical allocations; it never fabricates quiescence.
@@ -48,8 +94,8 @@ impl From<super::Error> for Error {
 /// ```compile_fail
 /// use poolekernel::reclamation::task_lifetimes::Resources;
 /// use poolekernel::virtual_memory::AddressSpace;
-/// fn unretained(space: AddressSpace) {
-///     let _ = Resources::new(space, ());
+/// fn unretained(space: AddressSpace, manager: &mut poolekernel::physical_memory::PhysicalMemoryManager) {
+///     let _ = Resources::new(space, (), manager);
 /// }
 /// ```
 ///
@@ -62,6 +108,7 @@ impl From<super::Error> for Error {
 /// ```
 pub struct Resources<T> {
     space: AddressSpace,
+    stack: InactiveStack,
     payload: T,
     retained: [Option<RetainedAllocation>; MAX_FRAMES + 1],
 }
@@ -71,20 +118,38 @@ impl<T> Resources<T> {
     #[allow(clippy::result_large_err)]
     pub fn new(
         space: AddressSpace,
+        stack: AllocationHandle,
         payload: T,
         manager: &mut PhysicalMemoryManager,
-    ) -> Result<Self, (Error, AddressSpace, T)> {
+    ) -> Result<Self, (Error, AddressSpace, AllocationHandle, T)> {
         let summary = space.summary();
         if summary.root_active || summary.root_released || summary.root_generation == 0 {
-            return Err((Error::AddressSpace, space, payload));
+            return Err((Error::AddressSpace, space, stack, payload));
         }
-        match manager.retain_allocations(space.allocation_handles()) {
-            Ok(retained) => Ok(Self {
-                space,
-                payload,
-                retained,
-            }),
-            Err(error) => Err((Error::PhysicalMemory(error), space, payload)),
+        if stack.page_count != STACK_PAGE_COUNT || stack.owner != STACK_OWNER {
+            return Err((Error::StackLayout, space, stack, payload));
+        }
+        let space_handles = space.allocation_handles();
+        let handles: [_; MAX_FRAMES + 2] = core::array::from_fn(|index| {
+            if index <= MAX_FRAMES {
+                space_handles[index]
+            } else {
+                Some(stack)
+            }
+        });
+        match manager.retain_allocations(handles) {
+            Ok(mut retained) => {
+                let stack = InactiveStack {
+                    retained: retained[MAX_FRAMES + 1].take().expect("PKLIFE1 stack"),
+                };
+                Ok(Self {
+                    space,
+                    stack,
+                    payload,
+                    retained: core::array::from_fn(|index| retained[index].take()),
+                })
+            }
+            Err(error) => Err((Error::PhysicalMemory(error), space, stack, payload)),
         }
     }
 
@@ -96,25 +161,32 @@ impl<T> Resources<T> {
         &self.payload
     }
 
-    /// Only an exclusive owner (never a pinned reader) can end retention.
+    pub const fn execution_stack(&self) -> &InactiveStack {
+        &self.stack
+    }
+
+    /// Only an exclusive owner (never a pinned reader) can end space retention.
     /// This returns an inactive PKVM1 object; unmap receipts and physical release
-    /// still belong to that object. Failure returns the complete retained owner.
+    /// still belong to that object. The stack remains retained until scrubbed
+    /// release. Failure returns the complete retained owner.
     #[allow(clippy::result_large_err)]
     pub fn into_parts(
         self,
         manager: &mut PhysicalMemoryManager,
-    ) -> Result<(AddressSpace, T), (Error, Self)> {
+    ) -> Result<(AddressSpace, InactiveStack, T), (Error, Self)> {
         let Self {
             space,
+            stack,
             payload,
             retained,
         } = self;
         match manager.release_retentions(retained) {
-            Ok(()) => Ok((space, payload)),
+            Ok(()) => Ok((space, stack, payload)),
             Err((error, retained)) => Err((
                 Error::PhysicalMemory(error),
                 Self {
                     space,
+                    stack,
                     payload,
                     retained,
                 },
@@ -180,6 +252,8 @@ struct Binding<'a, T> {
     handle: Handle<'a, Resources<T>, CAPACITY>,
     owner: Owner,
     root: u64,
+    stack_start: u64,
+    stack_end: u64,
     retired: bool,
 }
 
@@ -243,9 +317,28 @@ impl<'a, T> TaskLifetimes<'a, T> {
             {
                 return Err(Error::DuplicateRoot);
             }
-            Ok((generation, space.root_generation, space.root_physical))
+            let stack = resources.stack.handle();
+            let stack_end = stack
+                .start_page
+                .checked_add(stack.page_count)
+                .ok_or(Error::StackLayout)?;
+            if self
+                .entries
+                .iter()
+                .flatten()
+                .any(|item| stack.start_page < item.stack_end && item.stack_start < stack_end)
+            {
+                return Err(Error::DuplicateStack);
+            }
+            Ok((
+                generation,
+                space.root_generation,
+                space.root_physical,
+                stack.start_page,
+                stack_end,
+            ))
         };
-        let (generation, root_generation, root) = match validate() {
+        let (generation, root_generation, root, stack_start, stack_end) = match validate() {
             Ok(value) => value,
             Err(error) => return Err((error, resources)),
         };
@@ -283,6 +376,8 @@ impl<'a, T> TaskLifetimes<'a, T> {
             handle,
             owner,
             root,
+            stack_start,
+            stack_end,
             retired: false,
         });
         Ok(task)

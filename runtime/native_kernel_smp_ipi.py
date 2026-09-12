@@ -10,6 +10,7 @@ from typing import Any
 
 from runtime import native_inner_live, native_kernel_load, native_kernel_transfer
 from runtime.schema_validation import validate_json
+from runtime.native_kernel_profile_evidence import kernel_entry_errors
 
 
 CONTRACT_ID = "PKSMP5"
@@ -74,6 +75,9 @@ OPERATIONS = {
 }
 
 IMPLEMENTATION_INPUTS = (
+    "runtime/native_kernel_profile_evidence.py",
+    "tests/test_native_memory_entry_provenance.py",
+    "runs/native_kernel_entry_readiness.json",
     "native/Cargo.lock",
     "native/boot/Cargo.toml",
     "native/boot/src/exit.rs",
@@ -236,6 +240,9 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
 def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     issues = validate_json(readiness, read_json(root / READINESS_SCHEMA_RELATIVE))
     errors = [f"schema {issue.path}: {issue.message}" for issue in issues]
+    if not isinstance(readiness, dict):
+        return errors
+    errors.extend(kernel_entry_errors(readiness.get("build"), root))
     if errors:
         return errors
     controls = readiness.get("negative_controls", [])

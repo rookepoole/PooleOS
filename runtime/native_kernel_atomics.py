@@ -10,6 +10,7 @@ from typing import Any
 
 from runtime import native_kernel_interrupt_time, native_kernel_transfer
 from runtime.schema_validation import validate_json
+from runtime.native_kernel_profile_evidence import kernel_entry_errors
 
 
 CONTRACT_ID = "PKATOM1"
@@ -28,6 +29,9 @@ COMMON_KERNEL_MARKER_COUNT = 4
 COMPLETION_MARKER = b"POOLEOS:KERNEL:ATOMICS-RESULT PASS contract=PKATOM1"
 
 IMPLEMENTATION_INPUTS = (
+    "runtime/native_kernel_profile_evidence.py",
+    "tests/test_native_memory_entry_provenance.py",
+    "runs/native_kernel_entry_readiness.json",
     "native/Cargo.lock",
     "native/boot/Cargo.toml",
     "native/boot/src/exit.rs",
@@ -287,6 +291,9 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
 def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     issues = validate_json(readiness, read_json(root / READINESS_SCHEMA_RELATIVE))
     errors = [f"schema {issue.path}: {issue.message}" for issue in issues]
+    summary = readiness.get("kernel_summary")
+    embedded = summary.get("entry_readiness") if isinstance(summary, dict) else None
+    errors.extend(kernel_entry_errors({"kernel_entry": embedded}, root))
     if readiness.get("inputs") != expected_inputs(root):
         errors.append("readiness input bindings are stale")
     controls = readiness.get("negative_controls", [])

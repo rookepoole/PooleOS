@@ -21,6 +21,7 @@ class ReclamationCoreTests(unittest.TestCase):
             "task_lifetime_test_count",
             "physical_retention_test_count", "physical_retention_live_verified",
             "ap_resource_test_count", "ap_resource_live_verified",
+            "task_stack_test_count", "task_stack_page_count", "task_stack_live_verified",
         ):
             with self.subTest(key=key):
                 changed = copy.deepcopy(self.report)
@@ -40,6 +41,9 @@ class ReclamationCoreTests(unittest.TestCase):
             ("ap_resource_contract_id", "PKAPOWN2"),
             ("ap_resource_scope", "general_cpu_retirement"),
             ("schema_version", "1.3"),
+            ("schema_version", "1.4"),
+            ("task_lifetime_scope", "mandatory_inactive_table_and_bound_frame_retention"),
+            ("task_stack_contract_id", "PKSTACK2"),
         ):
             changed = copy.deepcopy(self.report)
             changed[key] = value
@@ -52,6 +56,17 @@ class ReclamationCoreTests(unittest.TestCase):
             changed["task_lifetime_test_count"] = value
             with self.subTest(value=value), self.assertRaises(ValueError):
                 core.validate_report(changed)
+
+    def test_stack_test_evidence_rejects_missing_duplicate_failed_and_ignored_cases(self):
+        good = "\n".join(f"test {name} ... ok" for name in core.STACK_TESTS)
+        core.require_stack_test_results(good)
+        for name in core.STACK_TESTS:
+            line = f"test {name} ... ok"
+            for bad in (good.replace(line, ""), good + "\n" + line,
+                        good.replace(line, f"test {name} ... FAILED"),
+                        good.replace(line, f"test {name} ... ignored")):
+                with self.subTest(name=name, output=bad), self.assertRaises(ValueError):
+                    core.require_stack_test_results(bad)
 
     def test_missing_reordered_or_failed_stage_rejects(self):
         for mutation in ("missing", "reordered", "failed", "digest", "extra"):

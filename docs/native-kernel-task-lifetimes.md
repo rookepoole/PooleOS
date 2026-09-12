@@ -1,18 +1,21 @@
 # PKLIFE1 Task Lifetimes
 
-Cycle 158 advances `N12-CONCURRENCY-RECLAMATION-001`, N12.3, source section
+Cycle 172 advances `N12-CONCURRENCY-RECLAMATION-001`, N12.3, source section
 031.3 and `ADD-N12-CONCURRENCY-RECLAMATION-001`. The existing requirement and
 flag remain open. This is original, allocation-free `no_std` kernel code,
 host-executed and freestanding-checked, not a new guest boot selector.
 
 ## Mandatory Physical Ownership
 
-`Resources::new(space, payload, manager)` now acquires allocator retention for
-the four-page root allocation and every distinct frame bound to the actual
+`Resources::new(space, stack, payload, manager)` acquires allocator retention for
+the four-page `PKSTACK1` inactive stack, the four-page root allocation and every distinct frame bound to the actual
 inactive PKVM1 object. This includes frames with pending invalidations and
 multiple virtual aliases. Retention is no longer an optional generic payload.
 There is no public unretained constructor or mutable address-space escape.
-Execution stacks and active PKVM3 roots are not covered by this contract.
+The stack must have owner label `0x1701` and exactly four pages. Retention is
+acquired in the same transaction as the tables and frames, not after admission.
+This contract covers prepared inactive stack storage, not guarded mappings,
+architectural context activation or active PKVM3 root/context integration.
 
 The crate-private PKPMM group operation validates every handle, duplicate,
 retention and metadata-exclusion condition before reserving a contiguous,
@@ -24,9 +27,12 @@ serialized transactions under exclusive manager access, not hardware atomics
 over the whole group, power-loss transactions or interrupt-safe allocation.
 
 `into_parts(manager)` consumes an exclusive resource owner after scheduler
-reclamation (or before admission), ends retention, and returns the inactive
-PKVM1 object and original payload. It does not free pages or waive pending
-unmap receipts. Dropping the resources or storage never releases their pages.
+reclamation (or before admission), ends table/frame retention, and returns the
+inactive PKVM1 object, an exclusive non-Copy `InactiveStack` owner and the original
+payload. The stack remains retained until `release_scrubbed(manager, access)`
+verifies complete zeroing/readback and commits a scrub receipt. Failure returns
+the stack owner for retry. No page free or pending unmap receipt is implied by
+`into_parts`. Dropping or forgetting resources or the stack owner retains pages.
 This remains a trusted-kernel ownership boundary: copyable low-level handles,
 raw memory backends and duplicate PKVM1 metadata are not capabilities. No
 global physical-manager uniqueness or protection against raw alias writes is
@@ -36,10 +42,13 @@ implied.
 
 `native/kernel/src/reclamation/task_lifetimes.rs` composes the actual PKSCHED4
 `SmpScheduler`, PKRECLAIM1 `Pool`, and PKVM1 `AddressSpace`. A task binding owns
-the moved address-space object and payload, not a caller-supplied generation
+the moved address-space object, retained inactive stack and payload, not a caller-supplied generation
 claim. Pool owner labels derive from the controller's checked task generation
 and the address space's PMM-backed root generation. Duplicate physical roots
 are rejected within the namespace, including roots awaiting reclamation.
+Overlapping stack physical page ranges also reject, including different root
+allocations from distinct manager namespaces. Reclamation must release the old
+binding before its stack range can be admitted again in that scheduler.
 
 `Storage::attach` requires an exclusive borrow and permits one controller per
 storage lifetime. The controller owns its scheduler and exposes no mutable
@@ -89,20 +98,40 @@ memory; it is not a production supervisor recovery strategy.
 | TL7 | Host object evidence does not imply physical quiescence | Strict receipt fields, promotion mutation tests, explicit boundaries below |
 | TL8 | Every admitted root and bound/pending frame resists ordinary free | Mandatory group constructor; all-frame, alias and pending-invalidation tests |
 | TL9 | Late acquisition/release failure cannot partially transfer retention | Sparse group, stale/duplicate/conflicting handle, wrong-manager and migration tests |
+| TL10 | Copied stack identity never grants ordinary allocator release | Mandatory table/frame/stack transaction, readonly owner access and copied-free tests |
+| TL11 | Scrub or receipt-capacity failure retains the exclusive stack owner | Seven write/read/corruption fault cases, wrong-manager check and 16/17 receipt-capacity boundary |
 
 ## Qualification
 
-The existing `tools/qualify_native_reclamation_core.py` now emits a version 1.3
-source-bound receipt that includes PKLIFE1. Nineteen core tests and twenty-four
-lifetime tests run separately in both debug and optimized host profiles. Seven
-compile-fail borrowing tests, 219 kernel regressions (13 retention tests), formatting,
-host Clippy and freestanding x86-64 Clippy also run. Every subprocess has a
+The existing `tools/qualify_native_reclamation_core.py` emits a version 1.5
+source-bound receipt that includes PKLIFE1 and PKSTACK1. Nineteen pool tests and
+34 lifecycle tests run separately in both debug and optimized host profiles.
+Eleven compile-fail borrowing tests, 243 kernel regressions (20 retention and
+11 AP-resource cases), formatting, host Clippy and freestanding x86-64 Clippy
+also pass. Every subprocess has a
 180-second limit; source hashes are checked before and after qualification.
 
 The harness uses the actual PBP1 codec to initialize PKPMM7, materializes real
 PKVM1 page-table words in bounded host-backed storage, moves AddressSpace into
 the task controller, and verifies explicit unmap/invalidation/release after
-reclamation. The page-table backend is simulated; no hardware TLB is tested.
+reclamation. The page-table and physical-access backend is simulated; no hardware
+TLB or CPU stack activation is tested. All 16,384 stack bytes are zeroed and
+read-verified before successful release. The 128-generation scheduler test uses
+a fresh fully drained manager per eight-task batch; it does not establish an
+unbounded receipt ledger. A separate test proves 16 successful scrub releases
+and rejection of the seventeenth without physical writes or ownership loss.
+
+The 17-stage Cycle 172 qualifier rebuilds the same 530,072-byte linked kernel,
+SHA-256 `8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625`.
+No new guest selector calls this generic task-resource code. Twenty-seven
+selected native receipt checks pass by source/current-image revalidation; no
+new QEMU execution is claimed. Full current-candidate qualification remains a
+separate merge gate. [Cycle 172 evidence](checkpoints/cycle172-task-stack-ownership.md).
+
+## Historical Cycle 158 Qualification
+
+Cycle 158's version 1.3 receipt ran 19 pool and 24 lifecycle tests per profile,
+219 kernel regressions, 13 retention cases and seven compile-fail tests.
 
 A canonical linked build must reproduce the exact new digest frozen in the
 qualifier. The initial build rejected the Cycle 157 digest as expected: the
@@ -117,10 +146,11 @@ The isolated Cycle 151 demo is left frozen, not relabeled as a PKLIFE1 demo.
 
 ## Remaining Work
 
-1. Bind active PKVM3 roots, their data and architectural execution stacks to
-   mandatory retention and scheduler context ownership. Inactive PKVM1 tables
-   and bound frames are now mandatory, but arbitrary payload allocations are
-   not enumerated. Replay the changed kernel's dependencies before any merge.
+1. Join the prepared inactive stack owner to guarded mappings, active PKVM3
+   roots/data and actual scheduler architectural contexts. Bounded active-root
+   and AP ownership exists separately; it is not general task CPU retirement.
+   Inactive tables, bound frames and stack storage are mandatory here, but
+   arbitrary payload allocations are not enumerated.
 2. Join scoped object pins to the exact PKSMP5 alias revocation, acknowledged
    shootdown, CPU park, scrub verification and allocator-release path. A Dead
    task, scheduler ACK, offline label or zero Rust pins is not a CPU grace period.
@@ -131,10 +161,16 @@ The isolated Cycle 151 demo is left frozen, not relabeled as a PKLIFE1 demo.
    bounded integration passes. General RCU, epochs, hotplug, shared process
    address spaces, ring 3, capability authority, interrupt-safe allocation,
    target hardware, N12 exit and production remain unqualified.
+5. Integrate existing PMM receipt-ledger growth/migration and pressure handling
+   with stack release. The fixed-backend capacity test proves retention on
+   exhaustion, not automatic growth or eventual reclamation under pressure.
 
 The removal/reclamation distinction follows the
 [kernel RCU design reference](https://docs.kernel.org/RCU/whatisRCU.html), not
 Linux implementation code. Rust's
 [UnsafeCell aliasing contract](https://doc.rust-lang.org/core/cell/struct.UnsafeCell.html)
-continues to constrain the underlying pool. Reviewed 2026-09-04. No third-party
-code or dependency was added.
+continues to constrain the underlying pool. Rust's
+[forget contract](https://doc.rust-lang.org/core/mem/fn.forget.html) permits safe
+code to omit destructors, so releasing allocator retention must not depend on a
+destructor running. RCU and forget references reviewed 2026-09-09; no third-party
+code or dependency was added. This is not a Linux production dependency.
