@@ -9,7 +9,24 @@ Machine ledger: `runs/pdc_production_roadmap.json`
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 175: Memory Entry Provenance And Replay
+## Cycle 177 Work In Progress: Cloud Backup
+
+Cycle 176 qualified the exact candidate with 105/105 canonical gates and
+708/708 Doctor checks, then merged PR #77 to main at `ac15d1d`.
+Cycle 177 implements PKEXEC1 mandatory dispatch execution holds and repairs
+transaction/bypass exhaustion admission rollback under
+`N12-CONCURRENCY-RECLAMATION-001` / `ADD-N12-CONCURRENCY-RECLAMATION-001`.
+The 17-stage host/core qualifier passes. The changed image passes only 2/27
+selected native readiness checks; entry and dependent receipts need replay.
+
+This is an interrupted, non-promoting backup checkpoint, not a finished plan
+revision. The version and machine ledger above remain Cycle 175 historical
+records. Reconcile generators, schemas, tests, flags, gaps and architecture
+bindings before continuing with `N6-KENTRY-001`, then ordered downstream replay
+and the exact-candidate canonical merge gate. No phase or flag is closed.
+[Evidence, limitations and pending reconciliation](checkpoints/cycle177-dispatch-execution-holds.md).
+
+## Historical Cycle 175: Memory Entry Provenance And Replay
 
 `N9-PMM-ACPI-CONSUMER-001` at N9.2-N9.4 and the dependent N8/N12 profiles
 pass fourteen final qualifiers: 28 fresh virtual boots, 660 control groups and

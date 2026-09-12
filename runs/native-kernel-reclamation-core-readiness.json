@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.5",
+  "schema_version": "1.6",
   "contract_id": "PKRECLAIM1-CORE",
   "selected_move_id": "N12-CONCURRENCY-RECLAMATION-001",
   "phase": "N12.3",
@@ -9,8 +9,8 @@
   "cross_cpu_quiescence_verified": false,
   "n12_3_complete": false,
   "focused_test_count": 19,
-  "kernel_regression_count": 243,
-  "compile_fail_borrow_tests": 11,
+  "kernel_regression_count": 245,
+  "compile_fail_borrow_tests": 15,
   "physical_retention_contract_id": "PKRETAIN1",
   "physical_retention_scope": "allocator_enforced_for_explicitly_retained_allocations",
   "physical_retention_test_count": 20,
@@ -20,42 +20,49 @@
   "ap_resource_scope": "mandatory_three_ap_runtime_and_two_frames",
   "ap_resource_live_verified": false,
   "task_lifetime_contract_id": "PKLIFE1",
-  "task_lifetime_test_count": 34,
-  "task_lifetime_scope": "mandatory_inactive_table_frame_and_stack_retention",
+  "task_lifetime_test_count": 40,
+  "task_lifetime_scope": "mandatory_inactive_resources_and_dispatch_execution_hold",
+  "task_execution_contract_id": "PKEXEC1",
+  "task_execution_test_count": 6,
+  "task_execution_scope": "mandatory_dispatch_hold_architecture_quiescence_boundary",
+  "task_execution_live_verified": false,
   "task_stack_contract_id": "PKSTACK1",
   "task_stack_page_count": 4,
   "task_stack_test_count": 10,
   "task_stack_live_verified": false,
-  "linked_kernel_sha256": "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625",
+  "linked_kernel_sha256": "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA",
   "linked_kernel_byte_count": 530072,
   "sources": {
-    "native/kernel/src/reclamation.rs": "118197DAEB079295F6A3E9279AC986D6EBE6C306155E85293A9D4F3DCCA4CCD7",
+    "native/kernel/src/reclamation.rs": "3F341CD3C830D04CBD6332E20D97928072C2CBBED56176B382E525532A93B48F",
     "native/kernel/src/reclamation/ap_resources.rs": "3EDF558319B69961D0E19D0350A440CEE34C04C82A22C3AF336982FDB6ED3CF7",
-    "native/kernel/src/reclamation/task_lifetimes.rs": "CDD7A888C83D80BCD18D57704F5473623F1883FC4B1B5069E8E9513AF9B9A5AF",
-    "native/kernel/src/lib.rs": "A462E54DDE5D98BBCD1E08A739516831708AB98D40890B14E76F5D435348BC09",
+    "native/kernel/src/reclamation/execution.rs": "D268C414A4BAF321194F01600251771B007A10BDB5FE3CDD10D112AD4E9CB666",
+    "native/kernel/src/reclamation/task_lifetimes.rs": "D582161D3E27AECA77D551AD3BA8D31C0AB7656C8C100E56BC073EA19307B9EE",
+    "native/kernel/src/lib.rs": "236F7B116A5654B4A46B71CF17BADF3DDF60CB00434145B82856799116A1CC68",
     "native/kernel/src/atomics.rs": "1B4228C921F0746C101B307A20E34DCF7D7D859895A440D027005FADE48D0B90",
     "native/kernel/src/locks.rs": "102A453683238E01DEE0516359B6FB80368AE89A9BAE19F0699FE8C3E123DF9A",
     "native/kernel/tests/reclamation_core.rs": "43D28759ABC933FE5A4F85D22AFE8A588EEE559FDC20C6188C3347B8D2F74FCA",
-    "native/kernel/tests/task_lifetimes.rs": "A9A264BB30D832DABC3B6944D3A8C750C6CDF174FB18076CF7E0872741F06E75",
-    "native/kernel/src/scheduler_smp.rs": "8C3C13140D867F3766F6209B1B918970BA095EA5FA35634C721D5C0509469390",
+    "native/kernel/tests/task_lifetimes.rs": "E1059432B50DEA369671028DD0DFADE9B190C40E46F7FD14FCEE7B7BAE8D6C34",
+    "native/kernel/src/scheduler_smp.rs": "5E7FE82B57D825528519C4C39FD1AC33C592F2A6A393A51235DE543833E9A852",
     "native/kernel/src/virtual_memory.rs": "956CB1A42A93B82B1F56637158ECF3AF7DE0ED55DF2565E3A0BCDD2DDB7E601D",
     "native/kernel/src/active_virtual_memory.rs": "A922E790E573B9D92A9882DB7498CB9017487FAB933B83B4B7BFCBEE11AA9DED",
     "native/kernel/src/physical_memory.rs": "ABFEF48FEE61D4BA7AC00E067901804795FEBBBB1611878E84D5C40892587F72",
     "native/kernel/src/physical_memory/retention.rs": "CEBC587CFCD784D747C202EF4935EDCFD5A1FEE6E97F28EDCB3AD8EA6CD61EB8",
     "native/kernel/src/physical_memory/tests/retention.rs": "4489C91A41BA378B0330BFC88EB9E0F0FC4CD2E52009F93DE13CDAB812180F78",
     "native/kernel/src/physical_memory/tests/ap_resources.rs": "B3CDC5A67BC98AC4918184D01DAB57BA1FBB8A33887D45E1B741B3A37656682C",
-    "tests/test_native_reclamation_core.py": "84D26F507B3EA12BEB9A38E63EDC094F6FA42295E7960F125C683D1781677808",
+    "tests/test_native_reclamation_core.py": "5B08D75E6AB08BE163F9C0C9FD4AA04827B6B673A4C642F4BC5B21A623901FFC",
     "native/kernel/src/main.rs": "58FC29B2585F62C68C55A398B12D63C41571E6507FD1EBA480C65AC0CE9D0EB7",
     "native/kernel/linker.ld": "1D5CD169A537957B4D61A734DBC71974702A1B825F0A58A10B022F8A2D3E8AC0",
-    "native/kernel/manifest.pkm": "51BD6E01E5A300FE3444EC2FF6352F7A6EAFE38C4728014596C540290A4779F2",
-    "specs/native-kernel-entry-contract.json": "2B7AE3FF260D8D8C1246BC73AFD0B9322BDFBFD3DDC6AC941EC9F1A938A8B413",
-    "specs/native-kernel-entry-contract.schema.json": "71D81893A6B877C49A506772B8CE54D3C6581EE8F5908C320A2185F3BD21D01E",
+    "native/kernel/manifest.pkm": "01AA5A812CF32D3E850A93CF19E08B03BBB64F9F79217BD5788DC0B6A9ABA654",
+    "specs/native-kernel-entry-contract.json": "F3186586A7E511681138A48EF3728A5B55B1E62315AEAC62C9AECE2CD3EF3530",
+    "specs/native-kernel-entry-contract.schema.json": "B7A4A41B814EFC92D1381FC987CAD07F748CFB96FB8DDFA4D8CA0AF0DFC0DAA4",
     "native/kmap/src/lib.rs": "5CFD8D3308B429C29E1FF7143F43410E081275FFD33F71715A2B626189699CD1",
     "native/handoff/src/lib.rs": "983DAFD71E0B892F6F98C614D43600CBEBDDBD7C0AA1E2D81CDAA545E165B110",
     "native/kernel/Cargo.toml": "F9F3AB6D84008B0354A5B82B0F616C5652C076C15F3313F14B862ED0DB1C1C43",
     "native/Cargo.lock": "29CE9938C5C60DEA5AEA244A6961BB1924D88AEC601D1E02EAAA510B0B36E390",
     "specs/native-toolchain-lock.json": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E",
-    "tools/qualify_native_reclamation_core.py": "0FAA790C9E15C3A82EE312DC1489B13ABCF567643C5C306B561D0A65B51CF4FC"
+    "tools/qualify_native_reclamation_core.py": "B32422C02EAAB6DF54C2559D2510B742CE5AB5DE93CCF679865C05D14295903C",
+    "tools/qualify_native_kernel_entry.py": "F8521399E1EFE957EDAB70AC8A101567C45BFE1655CC7AA75132B8844FE56FC1",
+    "runtime/native_kernel_image.py": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
   },
   "stages": [
     {
@@ -66,7 +73,7 @@
     {
       "name": "host-build-debug",
       "status": "pass",
-      "output_sha256": "A00322A50866FAB77B56DF601EB617D319F50A432FC3BF6FE633CCA614A4ECF2"
+      "output_sha256": "F383AD18B289FFA32F899F8C3511AB28265156096F1056DF1A0E62349EA35964"
     },
     {
       "name": "test-build-debug",
@@ -86,12 +93,12 @@
     {
       "name": "lifetime-tests-debug",
       "status": "pass",
-      "output_sha256": "067895958141ED7160543C8E4777B33785D7C1994E663CDD21F13F8CB19C47E6"
+      "output_sha256": "3168BD4BB154366C54D7BD94FDC52AD98A7A3093AA32629D7666A94376E283BD"
     },
     {
       "name": "host-build-release",
       "status": "pass",
-      "output_sha256": "08A0B19E850F2933502945F6A38A65A510F45937B72A928C195DFBB0CA371CD0"
+      "output_sha256": "EFA3E9D4147C4B6A4A150A54501DFC95BED5BB6BAC31AE6BDE1E2302B32D5B47"
     },
     {
       "name": "test-build-release",
@@ -111,37 +118,37 @@
     {
       "name": "lifetime-tests-release",
       "status": "pass",
-      "output_sha256": "D16EA98CAAF2EACE3A9B2F5582A9E7602688D066CFCA0B945173FDC91EC5F80D"
+      "output_sha256": "11430D40E4B644AD8B986CCEE6796C96E1B07EFED90592E699427762CB44A1F4"
     },
     {
       "name": "kernel-regressions-release",
       "status": "pass",
-      "output_sha256": "6C8F489C2ED8FDBD84E072A925D0F34F5258698F35589513145A12B684D09D99"
+      "output_sha256": "C0B663FB691A75CF8D8A16D69982E710E1A3A09726CE07DC91DCE4D5F3F86723"
     },
     {
       "name": "borrow-doctests",
       "status": "pass",
-      "output_sha256": "C890F57443354D30856E87CACF7E45533040732EC91AD863141FB8BB490650C1"
+      "output_sha256": "C4FB82D10702873D53472F900B244EBF15DCE07353ED5CB8883417B0A5BD0CB8"
     },
     {
       "name": "kernel-regressions",
       "status": "pass",
-      "output_sha256": "249919DD412BD81332A4FBC90D4EE1340963672811C403159DC609B573DF41AE"
+      "output_sha256": "E40989EEC5294050EF6F994CD90DCA7DE69648D0641534ED4652A33249C330BE"
     },
     {
       "name": "host-clippy",
       "status": "pass",
-      "output_sha256": "2480BB2CEF8576E6C9EB4DB2C821BBB3B5BADA2873EC0F72C1FBADBCE0A1B938"
+      "output_sha256": "81BDA452A322447F15820F0ED5002453976404FA8B360B641B0FAA405EE2D000"
     },
     {
       "name": "freestanding-clippy",
       "status": "pass",
-      "output_sha256": "55AE58F9B35900F097AA2AE93894131010DA29ED8EEDF640FE41F5E3D2375DCA"
+      "output_sha256": "89F07181D6F301EE97CE509F7B3C96ADC7F04038C964429547EAE92F7825C7CC"
     },
     {
       "name": "linked-kernel-build",
       "status": "pass",
-      "output_sha256": "34B38D88E5236D5033DBCBA8B8F30121C4D74EBCFE15436F6EA23318FF451FD4"
+      "output_sha256": "92F781872122B454EC755E2CE959C34FF6F0A29B9E8D5C3FD2474BE5B18D1139"
     }
   ]
 }

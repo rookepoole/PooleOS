@@ -4,19 +4,29 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
-**Qualified baseline:** checkpoints through Cycle 171 were merged into `main`
-at `8006c7b` via [PR #76](https://github.com/rookepoole/PooleOS/pull/76).
+**Qualified baseline:** checkpoints through Cycle 175 were merged into `main`
+at `ac15d1d` via [PR #77](https://github.com/rookepoole/PooleOS/pull/77)
+during Cycle 176.
 The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Latest checkpoint:** Cycle 175 qualifies fourteen memory-through-lock profiles:
+**Work-in-progress cloud checkpoint:** Cycle 177 adds native dispatch execution
+holds and two scheduler admission rollback fixes. All 17 core qualification
+stages pass, but the changed kernel needs fresh entry and dependency replay:
+only 2 of 27 selected readiness checks are current. This draft is not
+merge-qualified. Roadmap and architecture reconciliation remains unfinished;
+their Cycle 175 records do not qualify this changed source.
+[Cycle 177 status and remaining work](docs/checkpoints/cycle177-dispatch-execution-holds.md).
+
+**Historical checkpoint:** Cycle 175 qualifies fourteen memory-through-lock profiles:
 28 final fresh virtual boots, 660 control groups and 2,126 rejected cases. All
 27 selected native readiness checks pass. Embedded kernel-entry checks now reject
 224 stale/malformed/type substitutions and 56 invalid dependencies; the combined
 suite passes 161 tests with two optional skips. An SMP shape-handling regression
 was fixed and replayed, with two earlier boots retained as superseded evidence.
-Full canonical qualification still precedes merging [PR #77](https://github.com/rookepoole/PooleOS/pull/77).
+Cycle 176 subsequently passed full canonical qualification and merged
+[PR #77](https://github.com/rookepoole/PooleOS/pull/77).
 No new live task-stack, frozen demo or production claim follows.
 [Cycle 175 evidence and next move](docs/checkpoints/cycle175-memory-entry-provenance.md).
 

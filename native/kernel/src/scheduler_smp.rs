@@ -490,12 +490,13 @@ impl SmpScheduler {
         )
     }
 
-    pub fn stage_dispatch(
-        &mut self,
+    /// Read-only selection lets resource owners reserve retention before handoff.
+    pub(crate) fn peek_dispatch(
+        &self,
         cpu: CpuId,
         attempt: u64,
         sequence: u64,
-    ) -> Result<TransferTicket, Error> {
+    ) -> Result<TaskId, Error> {
         self.require_no_pending()?;
         self.require_online(cpu)?;
         if self.current[cpu.index()].is_some() {
@@ -505,7 +506,32 @@ impl SmpScheduler {
             return Err(Error::Acknowledgement);
         }
         let queue_index = self.pick(cpu)?;
-        let id = self.queues[cpu.index()].remove_at(queue_index)?;
+        let id = self.queues[cpu.index()].entries[queue_index].ok_or(Error::Invariant)?;
+        self.transaction.checked_add(1).ok_or(Error::Counter)?;
+        let selected_priority = self.tasks[self.task_index(id)?].priority;
+        for other in self.queues[cpu.index()].entries[..self.queues[cpu.index()].len]
+            .iter()
+            .flatten()
+        {
+            let task = self.tasks[self.task_index(*other)?];
+            if *other != id && task.priority == selected_priority {
+                task.bypass_count
+                    .checked_add(1)
+                    .filter(|count| *count <= MAX_EQUAL_PRIORITY_BYPASS)
+                    .ok_or(Error::Counter)?;
+            }
+        }
+        Ok(id)
+    }
+
+    pub fn stage_dispatch(
+        &mut self,
+        cpu: CpuId,
+        attempt: u64,
+        sequence: u64,
+    ) -> Result<TransferTicket, Error> {
+        let id = self.peek_dispatch(cpu, attempt, sequence)?;
+        self.queues[cpu.index()].remove(id)?;
         let index = self.task_index(id)?;
         let selected_priority = self.tasks[index].priority;
         for cursor in 0..self.queues[cpu.index()].len {
@@ -1154,6 +1180,42 @@ mod tests {
         let id = scheduler.create_task(slot, 1, 16, affinity).unwrap();
         scheduler.activate(id, cpu(owner)).unwrap();
         id
+    }
+
+    #[test]
+    fn dispatch_preflight_transaction_exhaustion_preserves_ownership() {
+        let mut scheduler = SmpScheduler::new();
+        let id = task(&mut scheduler, 0, 2, 1);
+        scheduler.transaction = u64::MAX;
+        let before = scheduler.summary();
+        let task_before = scheduler.task_snapshot(id).unwrap();
+        assert_eq!(scheduler.stage_dispatch(cpu(1), 1, 1), Err(Error::Counter));
+        assert_eq!(scheduler.summary(), before);
+        assert_eq!(scheduler.task_snapshot(id).unwrap(), task_before);
+        assert_eq!(scheduler.queue_len(cpu(1)), Ok(1));
+        assert_eq!(scheduler.validate(), Ok(()));
+    }
+
+    #[test]
+    fn dispatch_preflight_bypass_exhaustion_preserves_entire_queue() {
+        for count in [MAX_EQUAL_PRIORITY_BYPASS, u8::MAX] {
+            let mut scheduler = SmpScheduler::new();
+            let first = task(&mut scheduler, 0, 2, 1);
+            let second = task(&mut scheduler, 1, 2, 1);
+            scheduler.tasks[first.index()].bypass_count = count;
+            scheduler.tasks[second.index()].bypass_count = count;
+            let before = scheduler.summary();
+            let snapshots = [
+                scheduler.task_snapshot(first).unwrap(),
+                scheduler.task_snapshot(second).unwrap(),
+            ];
+            assert_eq!(scheduler.stage_dispatch(cpu(1), 1, 1), Err(Error::Counter));
+            assert_eq!(scheduler.summary(), before);
+            assert_eq!(scheduler.task_snapshot(first).unwrap(), snapshots[0]);
+            assert_eq!(scheduler.task_snapshot(second).unwrap(), snapshots[1]);
+            assert_eq!(scheduler.queue_len(cpu(1)), Ok(2));
+            assert!(!scheduler.has_pending());
+        }
     }
 
     #[test]
