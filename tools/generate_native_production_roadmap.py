@@ -611,6 +611,16 @@ PROGRAM_GAPS[4] = (
 )
 
 
+PROGRAM_GAPS[4] = (
+    "Cycle 178 requalifies PKENTRY1 for the unchanged Cycle 177 kernel with two clean matching "
+    "builds, 245 host tests, 43 rejection controls and 55 bindings covering 39 kernel Rust sources. "
+    "Twelve entry-gate controls cover stale identities and exact numeric types. The selected "
+    "projection is 3/27; 24 boot/CPU/memory dependencies still need replay beginning "
+    "N5-SYMBOLS-SEMANTICS-001. No fresh guest, independent builder, full canonical or production "
+    "qualification follows. Prior failures and historical qualification remain preserved. " + PROGRAM_GAPS[4]
+)
+
+
 def sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest().upper()
 
@@ -3205,10 +3215,84 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             phase["current_evidence"] = [evidence, *phase["current_evidence"]]
             phase["current_gaps"] = [gap, *phase["current_gaps"]]
         if phase["id"] == "N36":
-            phase["current_evidence"].insert(0, f"Cycle 177 source inventory: {test_count} Python tests discovered; full qualification pending")
+            phase["current_evidence"].insert(0, "Cycle 177 source inventory: 960 Python tests discovered; full qualification pending")
     for flag in roadmap["implementation_flags"]:
         if flag["id"] in {"FLAG-N12-CONCURRENCY-RECLAMATION-001", "FLAG-N36-RECEIPT-COVERAGE-001"}:
             flag["evidence"] = [checkpoint, "native/kernel/src/reclamation/execution.rs", *flag["evidence"]]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    checkpoint = "docs/checkpoints/cycle178-kernel-entry-requalification.md"
+    protocol.update(last_updated_cycle=178, selected_move_id="N6-KENTRY-001",
+                    owner_independent_next_move_id="N5-SYMBOLS-SEMANTICS-001")
+    protocol["required_records"].insert(0, checkpoint)
+    roadmap["baseline"]["pooleos_cycle"] = 178
+    for name in (
+        "focused_source_projection", "ownership_qualification", "task_stack_qualification",
+        "execution_qualification", "entry_provenance_qualification", "boot_chain_qualification",
+        "cpu_qualification", "dependency_qualification", "candidate_audit",
+    ):
+        historical_name = "source_projection" if name == "focused_source_projection" else name
+        gate["historical_cycle177_" + historical_name] = gate["current_" + name]
+    gate["qualification_status"] = "kernel_entry_requalified_boot_and_downstream_replay_pending"
+    gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=178)
+    entry_sha = "B9E79FE7CABA4931C3654134A68934B732DD77A6F1555179C2E09EF93D6212D6"
+    gate["current_focused_source_projection"] = {
+        "cycle": 178, "scope": "27_selected_native_checks_not_full_canonical_audit",
+        "passed_checks": 3, "total_checks": 27, "pending_downstream_native_checks": 24,
+        "passing_profiles": ["native_kernel_entry_readiness", "native_policy_readiness", "native_kernel_errata_policy_readiness"],
+        "final_receipt_fresh_qemu_runs": 0, "revalidated_dependency_execution_cycle": None,
+        "entry_clean_builds_per_qualifier": 2, "entry_kernel_host_tests": 245,
+        "entry_negative_controls": 43, "entry_source_binding_count": 55,
+        "entry_receipt_sha256": entry_sha, "entry_release_gate_controls": 12,
+        "focused_python_tests_passed": 57,
+        "focused_test_scope": "entry_roadmap_architecture_core_coverage_and_entry_gate_not_full_audit",
+        "focused_test_log_sha256": "4AC7C41FDFE2CF79F96A1BB6E25C6313D84A65DC620BA62BF4B737256142D009",
+        "core_receipt_sha256": core_sha, "core_live_execution_cycle": None,
+        "canonical_full_replay_performed": False, "production_ready": False,
+        "next_dependency_move_id": "N5-SYMBOLS-SEMANTICS-001",
+        "required_next_gate": "ordered_boot_CPU_memory_replay_then_exact_full_qualification",
+    }
+    gate["current_entry_provenance_qualification"] = {
+        "cycle": 178, "source_validation_cycle": 178,
+        "status": "single_host_entry_reproduction_pass", "applies_to_current_source": True,
+        "source_binding_count": 55, "kernel_crate_rust_source_count": 39,
+        "linked_byte_count": 7032744,
+        "linked_sha256": "50084E1DFDD64A7EBDC884EB041533B50F0F354997E3D9C9BC0CF5B6277C1E11",
+        "canonical_byte_count": 530072, "canonical_sha256": kernel_sha,
+        "entry_receipt_sha256": entry_sha, "clean_matching_builds": 2,
+        "kernel_host_tests": 245, "negative_controls": 43,
+        "entry_python_tests": 11, "crate_digest_mutation_cases": 39,
+        "release_gate_rejection_cases": 12,
+        "exact_receipt_and_product_reproduction_passed": True,
+        "single_host_only": True, "transitive_workspace_provenance_complete": False,
+        "fresh_qemu_runs": 0, "n6_exit_gate_satisfied": False, "production_ready": False,
+    }
+    for name in ("boot_chain", "cpu", "dependency"):
+        gate["current_" + name + "_qualification"] = dict(
+            gate["current_" + name + "_qualification"], cycle=178, source_validation_cycle=178,
+        )
+    evidence = (
+        "Cycle 178: " + checkpoint + " requalifies the unchanged Cycle 177 kernel through two "
+        "clean matching linked/canonical builds, 245 host tests, 43 ELF controls and 55 source "
+        "bindings covering 39 kernel Rust files. Entry image pins and release-gate type checks "
+        "are repaired; twelve isolated gate controls reject. The combined 57-test entry, roadmap, "
+        "architecture, core and checklist suite passes. Core ownership remains host-only."
+    )
+    gap = (
+        "Cycle 178 passes only 3/27 selected native checks. Twenty-four dependent profiles remain "
+        "stale, beginning N5-SYMBOLS-SEMANTICS-001. No new QEMU execution, architecture quiescence, "
+        "independent builder, full canonical qualification, phase closure or production claim follows."
+    )
+    for phase in roadmap["phases"]:
+        if phase["id"] in {"N5", "N6", "N12", "N36"}:
+            phase["current_evidence"] = [evidence, *phase["current_evidence"]]
+            phase["current_gaps"] = [gap, *phase["current_gaps"]]
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle 178 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in {"FLAG-N12-CONCURRENCY-RECLAMATION-001", "FLAG-N36-RECEIPT-COVERAGE-001"}:
+            flag["evidence"] = [checkpoint, *flag["evidence"]]
+        if flag["id"] == "FLAG-N36-RECEIPT-COVERAGE-001":
+            flag["evidence"] = ["tests/test_native_dependency_release_gate.py", *flag["evidence"]]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
 
@@ -3216,7 +3300,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=960)
+    parser.add_argument("--test-count", type=int, default=961)
     parser.add_argument("--status-date", default="2026-09-12")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

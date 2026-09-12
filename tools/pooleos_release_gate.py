@@ -202,6 +202,16 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 178 requalifies PKENTRY1 for the unchanged Cycle 177 kernel with two clean matching "
+    "builds, 245 host tests, 43 rejection controls and 55 bindings covering 39 kernel Rust sources. "
+    "Twelve entry-gate controls cover stale identities and exact numeric types. The selected "
+    "projection is 3/27; 24 boot/CPU/memory dependencies still need replay beginning "
+    "N5-SYMBOLS-SEMANTICS-001. No fresh guest, independent builder, full canonical or production "
+    "qualification follows. Prior failures and historical qualification remain preserved. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -3800,8 +3810,8 @@ def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINE
         )
     errors.extend(native_kernel_entry.readiness_errors(artifact))
     expected_summary = {
-        "rust_host_tests_passed": 243,
-        "rust_host_tests_total": 243,
+        "rust_host_tests_passed": 245,
+        "rust_host_tests_total": 245,
         "rustfmt_packages_passed": 2,
         "clippy_runs_passed": 2,
         "clippy_runs_total": 2,
@@ -3813,24 +3823,33 @@ def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINE
         "exact_loaded_byte_implementations_total": 2,
         "production_claim_count": 0,
     }
-    if artifact.get("summary") != expected_summary:
+    summary = artifact.get("summary")
+    if (
+        not isinstance(summary, dict)
+        or summary.keys() != expected_summary.keys()
+        or any(type(summary[key]) is not int or summary[key] != value
+               for key, value in expected_summary.items())
+    ):
         errors.append("PKENTRY1 qualification summary changed")
     product = artifact.get("product", {})
-    if (
-        product.get("canonical_byte_count") != 530_072
-        or product.get("image_byte_count") != 602_112
-        or product.get("entry_offset") != 0xA000
-        or product.get("relocation_count") != 1321
-        or product.get("canonical_sha256")
-        != "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625"
+    expected_product = {
+        "canonical_byte_count": 530_072,
+        "image_byte_count": 602_112,
+        "entry_offset": 0xA000,
+        "relocation_count": 1325,
+        "canonical_sha256": "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA",
+    }
+    if not isinstance(product, dict) or any(
+        type(product.get(key)) is not type(value) or product.get(key) != value
+        for key, value in expected_product.items()
     ):
         errors.append("PKENTRY1 product identity changed")
     if artifact.get("claims") != native_kernel_entry.expected_claims():
         errors.append("PKENTRY1 claim boundary changed")
     detail = (
-        "contract=PKENTRY1; kernel_tests=243/243; clean_builds=2/2; negative=43/43; "
+        "contract=PKENTRY1; kernel_tests=245/245; clean_builds=2/2; negative=43/43; "
         "exact_loaded=2/2; bytes=530072; image_bytes=602112; entry=0xA000; "
-        "relocations=1321; live_transfer=false; "
+        "relocations=1325; live_transfer=false; "
         "target_execution=false; n6_exit=false; production_ready=false"
     )
     return readiness.make_check(

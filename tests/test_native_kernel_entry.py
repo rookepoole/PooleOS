@@ -45,10 +45,10 @@ class NativeKernelEntryTests(unittest.TestCase):
         self.assertEqual(product["canonical_byte_count"], 530072)
         self.assertEqual(product["image_byte_count"], 602112)
         self.assertEqual(product["entry_offset"], 0xA000)
-        self.assertEqual(product["relocation_count"], 1321)
+        self.assertEqual(product["relocation_count"], 1325)
         self.assertEqual(
             product["canonical_sha256"],
-            "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625",
+            "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA",
         )
         self.assertTrue(product["entry_prefix_hex"].startswith("FAFC4889E14885C9"))
 
@@ -57,6 +57,7 @@ class NativeKernelEntryTests(unittest.TestCase):
         bindings = entry.expected_bindings(ROOT)["implementation_inputs"]
         actual = [binding["path"] for binding in bindings]
         self.assertIn("native/kernel/src/reclamation/task_lifetimes.rs", expected)
+        self.assertIn("native/kernel/src/reclamation/execution.rs", expected)
         self.assertTrue(expected.issubset(actual), sorted(expected - set(actual)))
         self.assertEqual(len(actual), len(set(actual)))
 

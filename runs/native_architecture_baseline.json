@@ -358,6 +358,24 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle178-kernel-entry-requalification.md",
+      "sha256": "3C834BAEEC7C590BF84E6FFC0F8986B77D62B41C40B86628526CE5C241F1C292",
+      "byte_count": 5921,
+      "line_count": 100
+    },
+    {
+      "path": "tests/test_native_kernel_entry.py",
+      "sha256": "97287CCCD3CDEA6048DA3B8167519F25B055EBDFEE96635AA9BF8BD5C658187B",
+      "byte_count": 7983,
+      "line_count": 170
+    },
+    {
+      "path": "tests/test_native_dependency_release_gate.py",
+      "sha256": "040525A7E93A625CBF6D94E388D2D61024F23C5A817AE2527E7DDBDB69BFE08A",
+      "byte_count": 6817,
+      "line_count": 125
+    },
+    {
       "path": "docs/checkpoints/cycle177-dispatch-execution-holds.md",
       "sha256": "731A3B3185C7266B1701F716303AEE4E6EC8D4799E6922198626BAA34746D642",
       "byte_count": 6255,
@@ -491,9 +509,9 @@
     },
     {
       "path": "docs/native-kernel-entry.md",
-      "sha256": "3F5FC6C94AE8947219B71ABAFCA2876231A6A8E73FB70D213A97483A33364441",
-      "byte_count": 5681,
-      "line_count": 56
+      "sha256": "542400FF1A6FD98ECB052DDE0DC06D4C2B0972EB05952BB5502B4494BB83A89F",
+      "byte_count": 7025,
+      "line_count": 77
     },
     {
       "path": "docs/native-kernel-load.md",
@@ -653,15 +671,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "E228B1A1C99D1666296DBF6C8F50F2E0241696A3BB763C2DA0DFD2007E534B41",
-      "byte_count": 87101,
-      "line_count": 1147
+      "sha256": "6EBB14D6141C302B8FAD091A20AD6AF77C7726D06FA66789F0685F4C200DD7B7",
+      "byte_count": 87615,
+      "line_count": 1155
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "2CDCCEA6C93F4FA64A2451B67736161B19032BD495925EE3483965F18A7E8D2D",
-      "byte_count": 400766,
-      "line_count": 2939
+      "sha256": "0330E64856DAB15E1F7425D59BB9160D97C42F2B7D687CB0060C2624F52C1D6C",
+      "byte_count": 403625,
+      "line_count": 2985
     },
     {
       "path": "docs/publication-boundary.md",
@@ -737,9 +755,9 @@
     },
     {
       "path": "runs/native_kernel_entry_readiness.json",
-      "sha256": "9998F12E922201BA60C46521444BD1AD6CB641A0172B36F4A3552DCF66434A0B",
-      "byte_count": 27826,
-      "line_count": 801
+      "sha256": "B9E79FE7CABA4931C3654134A68934B732DD77A6F1555179C2E09EF93D6212D6",
+      "byte_count": 28018,
+      "line_count": 806
     },
     {
       "path": "runs/native_kernel_load_readiness.json",

@@ -7,9 +7,17 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 177
+Last roadmap reconciliation: PooleOS Cycle 178
 
-Current Cycle 177: PKEXEC1 dispatch execution holds and two
+Current Cycle 178: the unchanged Cycle 177 kernel passes clean PKENTRY1
+reproduction with 245 host tests, 43 controls and 55 source bindings. Twelve
+entry-gate controls reject stale identities and wrong numeric types. Selected
+readiness is 3/27; 24 dependent profiles need replay beginning
+`N5-SYMBOLS-SEMANTICS-001`. No new guest, independent builder, full canonical
+pass or production promotion follows. The draft remains unmerged.
+[Cycle 178 evidence](checkpoints/cycle178-kernel-entry-requalification.md).
+
+Historical Cycle 177: PKEXEC1 dispatch execution holds and two
 scheduler rollback fixes pass all 17 native core stages. The changed image has
 2/27 current selected readiness checks and requires fresh entry/dependency
 qualification beginning `N6-KENTRY-001`. This draft is not merge-qualified;

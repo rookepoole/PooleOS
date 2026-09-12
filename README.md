@@ -11,7 +11,14 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Latest development checkpoint:** Cycle 177 adds native dispatch execution
+**Latest development checkpoint:** Cycle 178 requalifies the kernel entry:
+two clean matching builds, 245 kernel tests, 43 rejection controls and complete
+39-file kernel-source binding. Twelve entry-gate controls reject stale image
+pins and wrong numeric types. Three of 27 selected checks pass; 24 downstream
+profiles still need replay. Next is `N5-SYMBOLS-SEMANTICS-001`.
+[Cycle 178 evidence and limitations](docs/checkpoints/cycle178-kernel-entry-requalification.md).
+
+**Historical checkpoint:** Cycle 177 adds native dispatch execution
 holds and two scheduler admission rollback fixes. All 17 core qualification
 stages pass, but the changed kernel needs fresh entry and dependency replay:
 only 2 of 27 selected readiness checks are current. This draft is not

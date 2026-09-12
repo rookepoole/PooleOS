@@ -1,15 +1,38 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-12
-Plan version: 2.80.0-native-dispatch-execution-holds
-Roadmap cycle: PooleOS Cycle 177
+Plan version: 2.81.0-native-kernel-entry-requalification
+Roadmap cycle: PooleOS Cycle 178
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 177: Dispatch Execution Holds
+## Cycle 178: Kernel Entry Requalification
+
+`N6-KENTRY-001` at N6.4-N6.6 requalifies the unchanged Cycle 177 kernel.
+Two clean linked/canonical builds match, 245 kernel tests and 43 ELF rejection
+controls pass, and 55 bindings cover all 39 kernel Rust source files. The final
+canonical digest remains
+`563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA`.
+
+Entry regression and release-gate pins now match the measured image. Twelve
+targeted gate controls reject stale identities, numerically equal wrong types
+and malformed product/summary objects. The type/error-path repair is scoped to
+this gate and does not close the broader N36 evidence audit.
+The combined 57-test entry, roadmap, architecture, ownership-core, checklist
+and entry-gate suite passes, including exact receipt/product reproduction.
+
+The selected projection improves to 3/27. Twenty-four dependent boot, CPU and
+memory-through-lock receipts still require replay, starting with
+`N5-SYMBOLS-SEMANTICS-001`. The inventory is 961 discovered Python tests and
+244 architecture bindings. There is no fresh QEMU execution, independent-host
+reproduction, phase/flag closure or full canonical pass. Main remains the
+qualified Cycle 176 baseline; PR #78 remains draft.
+[Cycle 178 evidence](checkpoints/cycle178-kernel-entry-requalification.md).
+
+## Historical Cycle 177: Dispatch Execution Holds
 
 Cycle 176 qualified the exact candidate with 105/105 canonical gates and
 708/708 Doctor checks, then merged PR #77 to main at `ac15d1d`.
@@ -1626,7 +1649,13 @@ Exit gate: PooleBoot reproducibly boots under pinned OVMF and target firmware, v
 
 ### N6 - Boot Trust, Kernel Image, Early Runtime, and Emergency Diagnostics (`partial`)
 
-Cycle 177 changes the build identity and canonical kernel digest to
+Cycle 178 requalifies the entry boundary for the unchanged Cycle 177 kernel:
+two clean builds, 245 host tests, 43 rejection controls, 55 implementation inputs
+and 39 kernel Rust sources. Current entry evidence passes while 24 dependent
+profiles remain stale. Exact image pin and integer-type gate repairs pass
+twelve isolated controls. No N6 exit or production boot claim follows.
+
+Historical Cycle 177 changes the build identity and canonical kernel digest to
 `563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA`.
 The linked build is measured, but the old PKENTRY1 receipt does not cover the
 new source or 245-test count. `N6-KENTRY-001` must reproduce clean entry evidence
@@ -2521,6 +2550,14 @@ Exit gate: supported failures either recover locally or enter a known safe state
 
 ### N36 - Verification, Fuzzing, Fault Injection, Security, and Conformance (`partial`)
 
+Cycle 178 adds direct architecture bindings for the entry and dependency-gate
+tests and its checkpoint (244 total). PKENTRY1 entry/source coverage and exact
+reproduction are current; twelve independent entry-gate controls reject old
+image pins, float/boolean substitutions and null objects. The reproduced
+six numeric acceptance failures and one malformed-product error are repaired
+within this gate. Full transitive provenance, all downstream current receipts,
+independent builders and production qualification remain open.
+
 Cycle 177 retains the exact Cycle 176 passing main receipt and all older failures.
 The current host core receipt binds 30 inputs and 17 executed stage logs; its
 new execution-case parser has 30 rejection controls. Current selected readiness
@@ -2764,7 +2801,16 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 
 ## 12. Near-Term Execution Sequence
 
-Current Cycle 177 sequence: reproduce the changed kernel through
+Current Cycle 178 sequence: entry reproduction passes; continue with
+`N5-SYMBOLS-SEMANTICS-001`, then N5 load/boot/revalidation/transfer, the five N7
+CPU profiles and fourteen memory-through-lock profiles in dependency order.
+Entry, policy and errata policy pass among 27 selected checks. The full exact
+runtime-inclusive canonical audit, publication scan and GitHub review/check
+gates still precede PR #78 merge. General live task contexts and CPU retirement
+remain N12.3 work after this qualification. N0 custody is a separate external
+blocker; local qualification needs no additional owner approval.
+
+Historical Cycle 177 sequence: reproduce the changed kernel through
 `N6-KENTRY-001`, then replay N5 symbols/load/boot/revalidation/transfer, the five
 N7 CPU profiles and fourteen memory-through-lock profiles in dependency order.
 Only policy and errata policy currently pass among 27 selected checks. Run the
