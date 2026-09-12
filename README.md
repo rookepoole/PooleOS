@@ -11,12 +11,12 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Work-in-progress cloud checkpoint:** Cycle 177 adds native dispatch execution
+**Latest development checkpoint:** Cycle 177 adds native dispatch execution
 holds and two scheduler admission rollback fixes. All 17 core qualification
 stages pass, but the changed kernel needs fresh entry and dependency replay:
 only 2 of 27 selected readiness checks are current. This draft is not
-merge-qualified. Roadmap and architecture reconciliation remains unfinished;
-their Cycle 175 records do not qualify this changed source.
+merge-qualified. The roadmap separates current host evidence from historical
+live receipts; the next qualification move is `N6-KENTRY-001`.
 [Cycle 177 status and remaining work](docs/checkpoints/cycle177-dispatch-execution-holds.md).
 
 **Historical checkpoint:** Cycle 175 qualifies fourteen memory-through-lock profiles:

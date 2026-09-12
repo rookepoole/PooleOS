@@ -1,7 +1,7 @@
-# Cycle 177: Dispatch Execution Holds (Work In Progress)
+# Cycle 177: Dispatch Execution Holds
 
 Date: 2026-09-12
-State: interrupted development checkpoint for cloud backup, not merge-qualified.
+State: host-qualified native development checkpoint, dependency replay pending.
 Branch: `agent/n12-dispatch-execution-holds`.
 Selected move: `N12-CONCURRENCY-RECLAMATION-001`, phase N12.3,
 under existing `ADD-N12-CONCURRENCY-RECLAMATION-001`.
@@ -70,16 +70,31 @@ lock receipts are unchanged historical evidence, not current-image passes.
 
 ## Pending Before Merge
 
-1. Finish Cycle 177 progress reconciliation in the roadmap generator, schemas,
-   tests, architecture source bindings, native guide, gaps, flags and release
-   projection. Preserve all historical receipts and prior failures. The current
-   generated Cycle 175 ledgers are explicitly historical on this draft branch.
-2. Run the focused reconciliation tests and conservation checks. Inventory is
-   currently 960 discovered Python tests; discovery is not a full-suite pass.
-3. Execute `N6-KENTRY-001` with clean kernel-entry reproduction, then replay the
+1. Execute `N6-KENTRY-001` with clean kernel-entry reproduction, then replay the
    ordered dependent boot, CPU, memory, SMP, scheduler, atomics and locks profiles.
-4. Run exact-candidate runtime-inclusive canonical qualification, publication
+2. Run exact-candidate runtime-inclusive canonical qualification, publication
    scan and GitHub review/check gates before marking the draft ready or merging.
+
+Cycle 177 progress reconciliation now separates current host ownership from
+all superseded live qualification records. The roadmap and architecture
+generators, schemas, tests, native guide, plan, flags and gaps are updated.
+The source inventory is 960 discovered Python tests and 241 architecture
+bindings; discovery and binding counts are not full-suite passes.
+
+The 37-test roadmap, architecture and core reconciliation suite passes.
+An expanded 60-method run including checklist, publication and release-boundary
+tests **fails**: 55 methods pass, five fail, with nine failure reports. These
+failures are the positive baselines for stale boot/CPU/memory receipts; their
+dependent mutation checks cannot be counted as executed after those baselines
+fail. The acceptance tests are unchanged and remain prerequisites for merge.
+The retained failed log has SHA-256
+`8BED42149F82D07C4EAA48C7AABF6A35E23E69351F774AC4D5A56AAD11F85176`.
+Conservation checks preserve all historical records and requirement/flag states.
+
+An earlier interrupted WIP backup was pushed as `8fa7ca9` and
+[draft PR #78](https://github.com/rookepoole/PooleOS/pull/78) before this
+reconciliation. That backup did not qualify the new image or close this cycle's
+remaining dependency replay. Private logs and earlier failed runs are retained.
 
 The locked 8,996 requirements, 57 added requirements, 40 phases, 301 subphases,
 94 flags (35 open) and 20 program gaps are not closed by this checkpoint.

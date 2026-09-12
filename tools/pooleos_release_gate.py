@@ -191,6 +191,17 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 177 adds PKEXEC1 dispatch execution holds and repairs transaction/bypass exhaustion "
+    "admission rollback. All 17 core stages pass with 245 kernel, 40 lifecycle and 15 compile-fail "
+    "tests; the changed image has only 2/27 current selected checks and needs 25 dependency replays "
+    "beginning N6-KENTRY-001. Cycle 176 qualified 105 canonical gates and 708 Doctor checks and "
+    "merged PR77 to main; that baseline does not qualify the new image. Live guarded stacks, "
+    "context activation, architectural CPU quiescence and full current qualification remain open. "
+    "No phase, flag or production gate closes. Historical records follow. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:

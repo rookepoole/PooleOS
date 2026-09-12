@@ -7,16 +7,17 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 175
+Last roadmap reconciliation: PooleOS Cycle 177
 
-Current work-in-progress Cycle 177: PKEXEC1 dispatch execution holds and two
+Current Cycle 177: PKEXEC1 dispatch execution holds and two
 scheduler rollback fixes pass all 17 native core stages. The changed image has
 2/27 current selected readiness checks and requires fresh entry/dependency
-qualification. This cloud backup is not merge-qualified; full roadmap and
-architecture reconciliation remains pending. Main is the qualified Cycle 176
+qualification beginning `N6-KENTRY-001`. This draft is not merge-qualified;
+the roadmap separates new host evidence from historical live receipts and binds
+241 architecture inputs. Main is the qualified Cycle 176
 merge of PR #77 at `ac15d1d` (105 canonical gates and 708 Doctor checks).
 No normative charter condition or production gate changes.
-[Cycle 177 work-in-progress checkpoint](checkpoints/cycle177-dispatch-execution-holds.md).
+[Cycle 177 evidence](checkpoints/cycle177-dispatch-execution-holds.md).
 
 Historical Cycle 175: fourteen memory-through-lock profiles pass 28 final virtual
 boots, 660 groups and 2,126 rejected cases; two earlier SMP boots are superseded.

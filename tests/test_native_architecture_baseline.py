@@ -68,13 +68,15 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 239)
+        self.assertEqual(len(self.artifact["bound_sources"]), 241)
         self.assertIn("docs/checkpoints/cycle175-memory-entry-provenance.md", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("tests/test_native_memory_entry_provenance.py", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("runtime/native_kernel_profile_evidence.py", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("tests/test_native_cpu_entry_provenance.py", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("docs/checkpoints/cycle174-cpu-entry-provenance.md", {item["path"] for item in self.artifact["bound_sources"]})
         bound_paths = {binding["path"] for binding in self.artifact["bound_sources"]}
+        self.assertIn("docs/checkpoints/cycle177-dispatch-execution-holds.md", bound_paths)
+        self.assertIn("native/kernel/src/reclamation/execution.rs", bound_paths)
         self.assertIn("native/kernel/src/reclamation/ap_resources.rs", bound_paths)
         self.assertIn("native/kernel/src/physical_memory/tests/ap_resources.rs", bound_paths)
         self.assertIn("docs/checkpoints/cycle168-ap-ownership-qualification.md", bound_paths)

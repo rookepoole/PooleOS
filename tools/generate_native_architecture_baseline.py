@@ -24,6 +24,8 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle177-dispatch-execution-holds.md",
+    "native/kernel/src/reclamation/execution.rs",
     "docs/checkpoints/cycle175-memory-entry-provenance.md",
     "tests/test_native_memory_entry_provenance.py",
     "docs/checkpoints/cycle174-cpu-entry-provenance.md",

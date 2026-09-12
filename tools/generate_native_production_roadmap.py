@@ -600,6 +600,17 @@ PROGRAM_GAPS[4] = (
 )
 
 
+PROGRAM_GAPS[4] = (
+    "Cycle 177 adds PKEXEC1 dispatch execution holds and repairs transaction/bypass exhaustion "
+    "admission rollback. All 17 core stages pass with 245 kernel, 40 lifecycle and 15 compile-fail "
+    "tests; the changed image has only 2/27 current selected checks and needs 25 dependency replays "
+    "beginning N6-KENTRY-001. Cycle 176 qualified 105 canonical gates and 708 Doctor checks and "
+    "merged PR77 to main; that baseline does not qualify the new image. Live guarded stacks, "
+    "context activation, architectural CPU quiescence and full current qualification remain open. "
+    "No phase, flag or production gate closes. Historical records follow. " + PROGRAM_GAPS[4]
+)
+
+
 def sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest().upper()
 
@@ -3070,20 +3081,142 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             phase["current_evidence"] = [evidence, *phase["current_evidence"]]
             phase["current_gaps"] = [gap, *phase["current_gaps"]]
         if phase["id"] == "N36":
-            phase["current_evidence"].insert(0, f"Cycle 175 source inventory: {test_count} Python tests discovered; full qualification pending")
+            phase["current_evidence"].insert(0, "Cycle 175 source inventory: 958 Python tests discovered; full qualification pending")
     for flag in roadmap["implementation_flags"]:
         if flag["id"] in {"FLAG-N12-CONCURRENCY-RECLAMATION-001", "FLAG-N36-RECEIPT-COVERAGE-001"}:
             flag["evidence"] = [checkpoint, *flag["evidence"]]
         if flag["id"] == "FLAG-N36-RECEIPT-COVERAGE-001":
             flag["evidence"].append("tests/test_native_memory_entry_provenance.py")
     roadmap["claim_boundaries"].insert(0, evidence)
+    checkpoint = "docs/checkpoints/cycle177-dispatch-execution-holds.md"
+    protocol.update(last_updated_cycle=177, selected_move_id="N12-CONCURRENCY-RECLAMATION-001",
+                    owner_independent_next_move_id="N6-KENTRY-001")
+    protocol["required_records"].insert(0, checkpoint)
+    roadmap["baseline"]["pooleos_cycle"] = 177
+    for name in (
+        "focused_source_projection", "ownership_qualification", "task_stack_qualification",
+        "entry_provenance_qualification", "boot_chain_qualification", "cpu_qualification",
+        "dependency_qualification", "candidate_audit",
+    ):
+        historical_name = "source_projection" if name == "focused_source_projection" else name
+        gate["historical_cycle175_" + historical_name] = gate["current_" + name]
+    gate["historical_cycle176_canonical_replay"] = {
+        "cycle": 176, "status": "pass", "passed_checks": 105, "total_checks": 105,
+        "doctor_passed_checks": 708, "doctor_total_checks": 708, "pooleos_test_count": 958,
+        "tracked_file_count": 1535, "tracked_source_unchanged": True,
+        "include_runtime": True, "both_bundle_and_replay_inputs_supplied": True,
+        "source_commit": "ac95c38840e07be725d6f3e85c536668f4142ea6",
+        "merged_main_commit": "ac15d1da5304eab19ae3ed098d26cdcadfa78156",
+        "merged_tree": "1bce3ce5317a9202e80f4df482ce0b4766093d44",
+        "merge_pr": 77, "merged_at": "2026-09-12T12:35:05Z",
+        "final_receipt_sha256": "57C7C95D0EA982FB16763C8440A24103E5C6E0F21C133C56E6EEDC9AA7A4AA0A",
+        "execution_receipt_sha256": "1368149CCC695ACDEE91AD662430C497B929BAA66CBE414DCCE43A5AEF70CD6F",
+        "publication_report_sha256": "4EBDA0081406FB44AC414FBCCFB17038968FF0212D13A823F2DBB14DECC3AE65",
+        "applies_to_current_source": False, "production_ready": False,
+    }
+    gate.update(
+        qualification_status="dispatch_execution_holds_host_verified_entry_and_dependency_replay_pending",
+        passed_check_count_scope="historical_cycle176_exact_final_canonical_audit",
+        last_fully_qualified_cycle=176, current_cycle_full_canonical_audit_performed=False,
+    )
+    gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=177)
+    core_sha = "7E289FE30319EA9577C66716FE31EB02600E779D8F0E380172D3C3C708900A71"
+    kernel_sha = "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA"
+    gate["current_focused_source_projection"] = {
+        "cycle": 177, "scope": "27_selected_native_checks_not_full_canonical_audit",
+        "passed_checks": 2, "total_checks": 27, "pending_downstream_native_checks": 25,
+        "passing_profiles": ["native_policy_readiness", "native_kernel_errata_policy_readiness"],
+        "final_receipt_fresh_qemu_runs": 0, "revalidated_dependency_execution_cycle": None,
+        "core_qualification_stage_count": 17, "lifetime_tests_per_host_profile": 40,
+        "compile_fail_tests": 15, "core_receipt_sha256": core_sha,
+        "reconciliation_python_tests_passed": 37,
+        "expanded_python_test_methods": 60, "expanded_python_passed_methods": 55,
+        "expanded_python_failed_methods": 5, "expanded_python_failure_reports": 9,
+        "expanded_python_suite_passed": False,
+        "expanded_failure_scope": "stale_boot_cpu_memory_positive_baselines_block_dependent_tests",
+        "expanded_test_log_sha256": "8BED42149F82D07C4EAA48C7AABF6A35E23E69351F774AC4D5A56AAD11F85176",
+        "canonical_full_replay_performed": False, "production_ready": False,
+        "next_dependency_move_id": "N6-KENTRY-001",
+        "required_next_gate": "entry_then_ordered_dependency_replay_then_exact_full_qualification",
+    }
+    gate["current_ownership_qualification"] = {
+        "cycle": 177, "scope": "host_dispatch_hold_and_inactive_stack_retention",
+        "host_qualification_cycle": 177, "fresh_current_cycle_qemu_runs": 0,
+        "lifetime_tests_per_host_profile": 40, "pool_tests_per_host_profile": 19,
+        "kernel_tests_per_host_profile": 245, "retention_test_count": 20,
+        "ap_resource_test_count": 11, "compile_fail_tests": 15,
+        "kernel_sha256": kernel_sha, "reclamation_receipt_sha256": core_sha,
+        "live_receipt_source_current": False, "live_replay_cycle": None,
+        "current_boot_artifact_set_replay_pending": True,
+        "active_root_current_image_replay_complete": False,
+        "ap_runtime_live_integration_verified": False, "task_stack_live_integration_verified": False,
+        "general_task_CPU_retirement_integration_verified": False,
+        "current_candidate_full_gate_passed": False, "production_ready": False,
+    }
+    gate["current_task_stack_qualification"] = dict(
+        gate["current_task_stack_qualification"], cycle=177, receipt_sha256=core_sha,
+        receipt_schema_version="1.6", lifetime_tests_per_host_profile=40,
+        kernel_tests_per_host_profile=245, compile_fail_tests=15,
+        linked_kernel_byte_identical=False,
+    )
+    gate["current_execution_qualification"] = {
+        "cycle": 177, "contract_id": "PKEXEC1",
+        "scope": "mandatory_dispatch_hold_architecture_quiescence_boundary",
+        "receipt_path": "runs/native-kernel-reclamation-core-readiness.json",
+        "receipt_sha256": core_sha, "kernel_sha256": kernel_sha,
+        "execution_test_methods": 6, "evidence_parser_rejection_cases": 30,
+        "loss_modes": ["drop", "forget", "unwind"], "scheduler_exhaustion_regressions": 2,
+        "host_profile_count": 2, "fresh_qemu_runs": 0,
+        "task_execution_live_verified": False, "storage_address_stability_guaranteed": False,
+        "cross_cpu_quiescence_verified": False, "n12_3_complete": False, "production_ready": False,
+    }
+    replay_profiles = {
+        "entry_provenance": ["kernel_entry"],
+        "boot_chain": ["symbol", "kernel_load", "pooleboot", "kernel_revalidation", "kernel_transfer"],
+        "cpu": ["trap", "cpu_policy", "xstate_policy", "xstate_exception", "privilege_msr_policy"],
+        "dependency": list(gate["historical_cycle175_dependency_qualification"]["qualified_profiles"]),
+    }
+    for name, profiles in replay_profiles.items():
+        gate["current_" + name + "_qualification"] = {
+            "cycle": 177, "source_validation_cycle": 177,
+            "status": "source_requalification_required", "applies_to_current_source": False,
+            "historical_record": "historical_cycle175_" + name + "_qualification",
+            "readiness_replay_required_profiles": profiles, "qualified_profiles": [],
+            "fresh_qemu_runs": 0, "current_candidate_full_gate_passed": False,
+            "kernel_sha256": kernel_sha, "production_ready": False,
+        }
+    evidence = (
+        "Cycle 177: " + checkpoint + " records PKEXEC1 mandatory dispatch execution holds and two "
+        "reproduced transaction/bypass exhaustion admission rollback repairs. All 17 core stages pass "
+        "with 245 kernel, 40 lifecycle, 19 pool and 15 compile-fail tests. Six execution cases and "
+        "30 parser controls are host evidence only. Cycle 176 qualified 105/708 and merged PR77 to "
+        "main ac15d1d. The 37-test reconciliation suite passes; an expanded 60-test suite fails "
+        "with nine reports across five stale-dependent acceptance tests (55 methods pass). "
+        "No new live dispatch, phase closure or production claim follows."
+    )
+    gap = (
+        "Cycle 177 changes the kernel and has only 2/27 current selected readiness checks; 25 "
+        "dependencies require replay beginning N6-KENTRY-001. Guarded live task mappings, active "
+        "contexts, architecture-confirmed CPU quiescence, automatic scrub receipt growth, complete "
+        "transitive evidence, independent builders and full exact-candidate qualification remain open."
+    )
+    for phase in roadmap["phases"]:
+        if phase["id"] in {"N6", "N8", "N9", "N12", "N36"}:
+            phase["current_evidence"] = [evidence, *phase["current_evidence"]]
+            phase["current_gaps"] = [gap, *phase["current_gaps"]]
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle 177 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in {"FLAG-N12-CONCURRENCY-RECLAMATION-001", "FLAG-N36-RECEIPT-COVERAGE-001"}:
+            flag["evidence"] = [checkpoint, "native/kernel/src/reclamation/execution.rs", *flag["evidence"]]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=958)
+    parser.add_argument("--test-count", type=int, default=960)
     parser.add_argument("--status-date", default="2026-09-12")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)
