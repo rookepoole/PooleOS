@@ -22,6 +22,7 @@ class ReclamationCoreTests(unittest.TestCase):
             "physical_retention_test_count", "physical_retention_live_verified",
             "ap_resource_test_count", "ap_resource_live_verified",
             "task_stack_test_count", "task_stack_page_count", "task_stack_live_verified",
+            "task_execution_test_count", "task_execution_live_verified",
         ):
             with self.subTest(key=key):
                 changed = copy.deepcopy(self.report)
@@ -44,6 +45,10 @@ class ReclamationCoreTests(unittest.TestCase):
             ("schema_version", "1.4"),
             ("task_lifetime_scope", "mandatory_inactive_table_and_bound_frame_retention"),
             ("task_stack_contract_id", "PKSTACK2"),
+            ("schema_version", "1.5"),
+            ("task_lifetime_scope", "mandatory_inactive_table_frame_and_stack_retention"),
+            ("task_execution_contract_id", "PKEXEC2"),
+            ("task_execution_scope", "verified_general_cpu_quiescence"),
         ):
             changed = copy.deepcopy(self.report)
             changed[key] = value
@@ -67,6 +72,31 @@ class ReclamationCoreTests(unittest.TestCase):
                         good.replace(line, f"test {name} ... ignored")):
                 with self.subTest(name=name, output=bad), self.assertRaises(ValueError):
                     core.require_stack_test_results(bad)
+
+    def test_execution_evidence_rejects_missing_duplicate_failed_ignored_and_relocated_cases(self):
+        good = "\n".join(f"test {name} ... ok" for name in core.EXECUTION_TESTS)
+        core.require_execution_test_results(good)
+        for name in core.EXECUTION_TESTS:
+            line = f"test {name} ... ok"
+            for bad in (good.replace(line, ""), good + "\n" + line,
+                        good.replace(line, f"test {name} ... FAILED"),
+                        good.replace(line, f"test {name} ... ignored"),
+                        good.replace(name, "unrelated_case")):
+                with self.subTest(name=name, output=bad), self.assertRaises(ValueError):
+                    core.require_execution_test_results(bad)
+
+    def test_execution_types_and_absent_fields_reject(self):
+        for key, value in (("task_execution_test_count", 6.0),
+                           ("task_execution_test_count", True),
+                           ("task_execution_live_verified", 0)):
+            changed = copy.deepcopy(self.report)
+            changed[key] = value
+            with self.subTest(key=key, value=value), self.assertRaises(ValueError):
+                core.validate_report(changed)
+        changed = copy.deepcopy(self.report)
+        changed.pop("task_execution_live_verified")
+        with self.assertRaises(ValueError):
+            core.validate_report(changed)
 
     def test_missing_reordered_or_failed_stage_rejects(self):
         for mutation in ("missing", "reordered", "failed", "digest", "extra"):

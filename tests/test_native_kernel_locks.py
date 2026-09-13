@@ -107,7 +107,8 @@ class NativeKernelLocksTests(unittest.TestCase):
         self.assertTrue(check["ok"], check["detail"])
         gate_source = (ROOT / "tools/pooleos_release_gate.py").read_text(encoding="utf-8")
         self.assertIn("args.native_kernel_locks_readiness,", gate_source)
-        self.assertIn("kernel_tests=243/243", check["detail"])
+        host = self.readiness["build"]["kernel_entry"]["host_tests"]
+        self.assertIn(f"kernel_tests={host['test_pass_count']}/{host['test_count']}", check["detail"])
         self.assertIn("controls=30/30", check["detail"])
         self.assertIn("reclamation=false", check["detail"])
         self.assertIn("production_ready=false", check["detail"])

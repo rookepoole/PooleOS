@@ -20,7 +20,6 @@ sys.path.insert(0, str(ROOT))
 
 from runtime import native_boot_handoff as pbp1  # noqa: E402
 from runtime import native_kernel_revalidation as revalidation  # noqa: E402
-from runtime.schema_validation import validate_json  # noqa: E402
 
 
 NATIVE_ROOT = ROOT / "native"
@@ -149,8 +148,8 @@ def _build(toolchain_root: Path, temporary: Path) -> tuple[Path, dict[str, Any],
         env=env,
     )
     match = re.search(r"test result: ok\. ([0-9]+) passed; 0 failed", test_output)
-    if match is None or int(match.group(1)) != 243:
-        raise QualificationError("expected exactly 243 PooleKernel Rust host tests")
+    if match is None or int(match.group(1)) != 245:
+        raise QualificationError("expected exactly 245 PooleKernel Rust host tests")
     _run(
         _cargo(
             cargo,
@@ -211,7 +210,7 @@ def _build(toolchain_root: Path, temporary: Path) -> tuple[Path, dict[str, Any],
         raise QualificationError("PKREVAL1 host probe is missing")
     return probe, {
         "rustc": rustc.name,
-        "host_test_count": 243,
+        "host_test_count": int(match.group(1)),
         "format_check": "pass" if not fmt_output.strip() else "pass_with_output",
         "host_probe_sha256": hashlib.sha256(probe.read_bytes()).hexdigest().upper(),
         "targets": target_results,
@@ -371,7 +370,6 @@ def _controls(
 
 def make_readiness(toolchain_root: Path, status_date: str) -> dict[str, object]:
     contract = revalidation.read_json(ROOT / revalidation.CONTRACT_RELATIVE)
-    schema = revalidation.read_json(ROOT / revalidation.SCHEMA_RELATIVE)
     if contract.get("contract_id") != revalidation.CONTRACT_ID:
         raise QualificationError("PKREVAL1 contract ID changed")
     with tempfile.TemporaryDirectory(prefix="pooleos-pkreval1-") as temporary_value:
@@ -445,9 +443,9 @@ def make_readiness(toolchain_root: Path, status_date: str) -> dict[str, object]:
             "Qualify target firmware, physical hardware, a second builder, signed ISO, installer, and recovery flows."
         ],
     }
-    errors = list(validate_json(readiness, schema))
+    errors = revalidation.readiness_errors(readiness, ROOT)
     if errors:
-        raise QualificationError("PKREVAL1 readiness schema failed: " + "; ".join(errors[:8]))
+        raise QualificationError("PKREVAL1 generated readiness failed: " + "; ".join(errors[:8]))
     return readiness
 
 
@@ -458,6 +456,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--status-date", default="2026-07-18")
     args = parser.parse_args(argv)
     readiness = make_readiness(args.toolchain_root.resolve(), args.status_date)
+    errors = revalidation.readiness_errors(readiness, ROOT)
+    if errors:
+        raise QualificationError("PKREVAL1 generated readiness failed: " + "; ".join(errors[:8]))
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(readiness, indent=2) + "\n", encoding="utf-8", newline="\n")
     print(

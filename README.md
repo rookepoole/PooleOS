@@ -4,19 +4,66 @@ PooleOS is a source-available, commercial-rights-reserved native operating syste
 
 PooleGlyph IP is owned by Rooke Poole. PooleOS follows the same source-available path unless the owner later adopts a different licensing structure.
 
-**Qualified baseline:** checkpoints through Cycle 171 were merged into `main`
-at `8006c7b` via [PR #76](https://github.com/rookepoole/PooleOS/pull/76).
+**Qualified baseline:** checkpoints through Cycle 175 were merged into `main`
+at `ac15d1d` via [PR #77](https://github.com/rookepoole/PooleOS/pull/77)
+during Cycle 176.
 The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Latest checkpoint:** Cycle 175 qualifies fourteen memory-through-lock profiles:
+**In-progress cloud checkpoint:** Cycle 181 replays fourteen memory-through-lock
+profiles with 28 final virtual boots; 164 focused tests pass and two skip.
+All 27 selected consistency checks pass, but at least 65 scheduler control
+groups lack individually bound execution evidence. Metadata reconciliation and
+full exact-candidate qualification remain unfinished. This source backup is not
+merge-qualified; the generated progress ledgers still describe Cycle 180.
+[Cycle 181 status and resume order](docs/checkpoints/cycle181-memory-qualification.md).
+
+**Last completed development checkpoint:** Cycle 180 qualifies five CPU profiles with
+fourteen fresh virtual boots, 225 controls and 46 focused regression tests.
+Positive tests now require untouched generated receipts. Selected readiness is
+13/27; fourteen memory-through-lock profiles remain, beginning
+`N9-PMM-ACPI-CONSUMER-001`. This is not a new ISO or a main-qualified release.
+The combined CPU/boot/entry/progress closeout passes 174 tests.
+[Cycle 180 evidence](docs/checkpoints/cycle180-cpu-qualification.md).
+
+**Historical checkpoint:** Cycle 179 requalifies the six-component
+native boot chain: six final virtual boots, two kernel entries, independent
+nine-file revalidation and 71 passing Python tests. Invalid revalidation
+receipts now reject before output. Eight of 27 selected checks pass;
+nineteen CPU/memory profiles still need replay, beginning `N7-TRAP-001`.
+This is pre-production development, not a new ISO or main-qualified release.
+[Cycle 179 evidence](docs/checkpoints/cycle179-boot-chain-requalification.md).
+
+**Development backup:** [draft PR #78](https://github.com/rookepoole/PooleOS/pull/78)
+tracks Cycles 177-180 and the unfinished Cycle 181 checkpoint on
+`agent/n12-dispatch-execution-holds`. Cycle 179's combined
+closeout suite passed 128 tests. Source checkpoints on this branch are separate
+from qualified `main`; private execution logs and media are not part of this backup.
+
+**Historical checkpoint:** Cycle 178 requalifies the kernel entry:
+two clean matching builds, 245 kernel tests, 43 rejection controls and complete
+39-file kernel-source binding. Twelve entry-gate controls reject stale image
+pins and wrong numeric types. Three of 27 selected checks pass; 24 downstream
+profiles still need replay. Next is `N5-SYMBOLS-SEMANTICS-001`.
+[Cycle 178 evidence and limitations](docs/checkpoints/cycle178-kernel-entry-requalification.md).
+
+**Historical checkpoint:** Cycle 177 adds native dispatch execution
+holds and two scheduler admission rollback fixes. All 17 core qualification
+stages pass, but the changed kernel needs fresh entry and dependency replay:
+only 2 of 27 selected readiness checks are current. This draft is not
+merge-qualified. The roadmap separates current host evidence from historical
+live receipts; the next qualification move is `N6-KENTRY-001`.
+[Cycle 177 status and remaining work](docs/checkpoints/cycle177-dispatch-execution-holds.md).
+
+**Historical checkpoint:** Cycle 175 qualifies fourteen memory-through-lock profiles:
 28 final fresh virtual boots, 660 control groups and 2,126 rejected cases. All
 27 selected native readiness checks pass. Embedded kernel-entry checks now reject
 224 stale/malformed/type substitutions and 56 invalid dependencies; the combined
 suite passes 161 tests with two optional skips. An SMP shape-handling regression
 was fixed and replayed, with two earlier boots retained as superseded evidence.
-Full canonical qualification still precedes merging [PR #77](https://github.com/rookepoole/PooleOS/pull/77).
+Cycle 176 subsequently passed full canonical qualification and merged
+[PR #77](https://github.com/rookepoole/PooleOS/pull/77).
 No new live task-stack, frozen demo or production claim follows.
 [Cycle 175 evidence and next move](docs/checkpoints/cycle175-memory-entry-provenance.md).
 

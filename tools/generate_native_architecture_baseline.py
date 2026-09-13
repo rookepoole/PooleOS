@@ -24,6 +24,18 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle181-memory-qualification.md",
+    "docs/checkpoints/cycle180-cpu-qualification.md",
+    "docs/checkpoints/cycle179-boot-chain-requalification.md",
+    "tests/test_native_symbols.py",
+    "tests/test_native_kernel_load.py",
+    "tests/test_native_kernel_transfer.py",
+    "tests/test_native_kernel_revalidation.py",
+    "docs/checkpoints/cycle178-kernel-entry-requalification.md",
+    "tests/test_native_kernel_entry.py",
+    "tests/test_native_dependency_release_gate.py",
+    "docs/checkpoints/cycle177-dispatch-execution-holds.md",
+    "native/kernel/src/reclamation/execution.rs",
     "docs/checkpoints/cycle175-memory-entry-provenance.md",
     "tests/test_native_memory_entry_provenance.py",
     "docs/checkpoints/cycle174-cpu-entry-provenance.md",

@@ -126,6 +126,8 @@ def _source_audit() -> dict[str, Any]:
         "pub fn stage_dispatch", "pub fn acknowledge", "pub fn timeout",
         "pub fn reject_stale_ack", "pub fn select_least_loaded", "pub fn offline_idle_cpu",
         "pub fn validate",
+        "fn dispatch_preflight_transaction_exhaustion_preserves_ownership()",
+        "fn dispatch_preflight_bypass_exhaustion_preserves_entire_queue()",
     )
     required_main = (
         "PKSCHED4_EARLY", "PKSCHED4_TOPOLOGY", "PKSCHED4_TRANSFER", "PKSCHED4_DISPATCH",
@@ -154,13 +156,13 @@ def _source_audit() -> dict[str, Any]:
         or '"development-scheduler-smp"' not in texts["pooleboot_qualifier"]
     ):
         raise QualificationError("PKSCHED4 selector isolation source audit failed")
-    if texts["scheduler"].count("#[test]") != 8:
+    if texts["scheduler"].count("#[test]") != 10:
         raise QualificationError("PKSCHED4 focused Rust test count changed")
     if re.search(r"\b(?:Vec|Box|String|HashMap|dyn)\b", texts["scheduler"]):
         raise QualificationError("PKSCHED4 controller gained heap or dynamic storage")
     return {
         "max_development_trap_scenario": int(maximum_match.group(1)),
-        "focused_rust_test_count": 8,
+        "focused_rust_test_count": 10,
         "fixed_cpu_count": 4,
         "fixed_task_capacity": 8,
         "allocation_free_controller": True,
@@ -201,7 +203,7 @@ def _negative_controls(
     controls.append(_require_rejections(ids[13], probe_fields))
     oracle_hostile = probe_lines.copy(); oracle_hostile[2] = _set_field(oracle_hostile[2], "ap_trace", "1:1,1:2,2:4,2:3,3:6,3:5")
     controls.append(_require_rejections(ids[14], [_probe_operation(oracle_hostile)]))
-    if source_audit["focused_rust_test_count"] != 8 or source_audit["ap_handler_saved_register_count"] != 15:
+    if source_audit["focused_rust_test_count"] != 10 or source_audit["ap_handler_saved_register_count"] != 15:
         raise QualificationError("PKSCHED4 source controls lack passing evidence")
     for control_id in ids[15:31]:
         controls.append({"id": control_id, "status": "pass", "expected": "rejected", "case_count": 1})

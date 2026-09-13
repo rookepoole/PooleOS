@@ -1,15 +1,117 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-12
-Plan version: 2.79.0-native-memory-entry-provenance
-Roadmap cycle: PooleOS Cycle 175
+Plan version: 2.83.0-native-cpu-qualification
+Roadmap cycle: PooleOS Cycle 180
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 175: Memory Entry Provenance And Replay
+## Cycle 180: Current-Kernel CPU Qualification
+
+`N7-TRAP-001` at N7.5/N7.6 and the dependent N7.1/N7.3/N7.4 profiles pass
+fourteen fresh virtual boots and 225 controls on the unchanged Cycle 177 kernel.
+Two WHPX exception boots are separate from one expected TCG limitation probe.
+All 46 focused CPU tests pass, including eighty entry substitutions, twenty
+invalid entry dependencies and nineteen aggregate gate controls. Positive tests
+now use untouched generated receipts; old trap digest/relocation pins are
+repaired from fresh measurements. Failures and old receipts remain preserved.
+
+The combined CPU/boot/entry/roadmap/core/checklist closeout passes 174 tests,
+including exact entry-product reproduction. This includes the 46-test subset.
+
+Selected readiness is 13/27. Fourteen memory-through-lock profiles remain stale,
+beginning `N9-PMM-ACPI-CONSUMER-001`. Exact source/marker/channel/entry/core
+bindings are checked; the 962-test inventory is not a full-suite result.
+Architecture binds 250 paths. Main remains qualified Cycle 176; draft PR #78
+still needs ordered replay and full exact-candidate canonical/Doctor and review
+gates. Native Rust, entry/boot/core receipts, PooleGlyph, demo ISO, normative
+charter and all phase/flag states are unchanged. No production claim follows.
+[Cycle 180 evidence and limits](checkpoints/cycle180-cpu-qualification.md).
+
+## Historical Cycle 179: Boot Chain Requalification
+
+`N5-SYMBOLS-SEMANTICS-001` at N5.6/N5.9 and `ADD-BOOT-007` advances through
+PSYM1, PPOL1, PKLOAD6, PooleBoot, PKREVAL1 and PKXFER1 for the unchanged
+Cycle 177 kernel. Six final headless QEMU boots include two actual kernel
+entries, independent nine-file revalidation and terminal unsigned-policy denial.
+The symbol debug product reproduces twice, the loader passes 330 host tests,
+and the complete focused boot-chain suite passes 71 Python tests.
+
+The combined closeout suite passes 128 tests, including exact kernel-entry
+reproduction and progress/checklist conservation. Source backup proceeds on
+draft PR #78 independently of main qualification; private logs/media remain local.
+
+The transfer build-ID pin, revalidation host-count pins and aggregate artifact
+identities now match fresh measurements. A reproduced qualifier admission gap
+is repaired: complete semantic validation is required before returning a
+qualification and before the CLI writes its receipt or prints PASS. Three
+specific invalid receipts reject without output; thirteen aggregate controls
+reject old artifact/trust identities and host-test counts. The failed attempts
+and two superseded transfer boots remain separate from final qualification.
+
+Selected readiness is 8/27; nineteen CPU and memory-through-lock profiles still
+need replay, beginning `N7-TRAP-001`. Architecture binds 249 paths, including
+four directly bound boot-chain tests and this checkpoint; 962 Python tests are
+discovered, not all executed. No native Rust, kernel bytes, PooleGlyph, frozen
+demo, normative charter, phase/flag state or production condition changes.
+Main stays qualified Cycle 176 and PR #78 remains draft pending the complete
+exact-candidate canonical audit and review gates.
+[Cycle 179 evidence and limitations](checkpoints/cycle179-boot-chain-requalification.md).
+
+## Historical Cycle 178: Kernel Entry Requalification
+
+`N6-KENTRY-001` at N6.4-N6.6 requalifies the unchanged Cycle 177 kernel.
+Two clean linked/canonical builds match, 245 kernel tests and 43 ELF rejection
+controls pass, and 55 bindings cover all 39 kernel Rust source files. The final
+canonical digest remains
+`563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA`.
+
+Entry regression and release-gate pins now match the measured image. Twelve
+targeted gate controls reject stale identities, numerically equal wrong types
+and malformed product/summary objects. The type/error-path repair is scoped to
+this gate and does not close the broader N36 evidence audit.
+The combined 57-test entry, roadmap, architecture, ownership-core, checklist
+and entry-gate suite passes, including exact receipt/product reproduction.
+
+The selected projection improves to 3/27. Twenty-four dependent boot, CPU and
+memory-through-lock receipts still require replay, starting with
+`N5-SYMBOLS-SEMANTICS-001`. The inventory is 961 discovered Python tests and
+244 architecture bindings. There is no fresh QEMU execution, independent-host
+reproduction, phase/flag closure or full canonical pass. Main remains the
+qualified Cycle 176 baseline; PR #78 remains draft.
+[Cycle 178 evidence](checkpoints/cycle178-kernel-entry-requalification.md).
+
+## Historical Cycle 177: Dispatch Execution Holds
+
+Cycle 176 qualified the exact candidate with 105/105 canonical gates and
+708/708 Doctor checks, then merged PR #77 to main at `ac15d1d`.
+Cycle 177 implements PKEXEC1 mandatory dispatch execution holds and repairs
+transaction/bypass exhaustion admission rollback under
+`N12-CONCURRENCY-RECLAMATION-001` / `ADD-N12-CONCURRENCY-RECLAMATION-001`.
+The 17-stage host/core qualifier passes. The changed image passes only 2/27
+selected native readiness checks; entry and dependent receipts need replay.
+
+The core has 245 kernel, 40 lifecycle, 19 pool and 15 compile-fail tests. Six
+execution-hold cases cover real resource retention, drop/forget/unwind loss,
+pin-budget rollback, invalid admission, per-CPU release and stale-generation ACK.
+Architectural quiescence is an unsafe caller obligation, not detected by this
+host-tested mechanism. No live selector consumes the hold yet.
+
+The roadmap preserves the qualified Cycle 176 baseline separately from the
+current 2/27 selected checks. Twenty-five current-image dependencies need replay
+starting with `N6-KENTRY-001`, then ordered downstream qualification and the
+exact-candidate canonical merge gate. No phase or flag is closed. The inventory
+is 960 discovered Python tests and 241 architecture bindings, not a full pass.
+The focused reconciliation suite passes 37 tests. An expanded 60-method run
+fails nine reports across five stale-dependent acceptance tests, with 55
+methods passing. That failed evidence is retained; the positive acceptance
+checks remain unchanged until fresh replay succeeds.
+[Evidence and limitations](checkpoints/cycle177-dispatch-execution-holds.md).
+
+## Historical Cycle 175: Memory Entry Provenance And Replay
 
 `N9-PMM-ACPI-CONSUMER-001` at N9.2-N9.4 and the dependent N8/N12 profiles
 pass fourteen final qualifiers: 28 fresh virtual boots, 660 control groups and
@@ -1378,6 +1480,12 @@ Exit gate: one command launches each pinned native test profile; logs and artifa
 
 ### N5 - Boot Media, Boot Protocol, and PooleBoot UEFI Loader (`partial`)
 
+Cycle 179 requalifies six N5 components against the current kernel and exact
+PSYM1-derived artifacts. Six final boots, two kernel entries, nine retained
+files, 71 focused Python tests and thirteen stale-identity/count gate controls
+pass. Two earlier transfer boots are superseded after repairing revalidation
+receipt admission. N5 remains partial and unsigned; no authority is enabled.
+
 Inherited sections: `013-015`. Added: `ADD-BOOT-001`, `ADD-BOOT-004`, `ADD-BOOT-005`, `ADD-BOOT-006`, `ADD-BOOT-007`, `ADD-BOOT-008`, `ADD-BOOT-009`, `ADD-BOOT-010`, `ADD-BOOT-011`, `ADD-BOOT-012`.
 Goal: author the complete firmware-to-kernel transition without third-party bootloader code in the production chain.
 
@@ -1599,6 +1707,18 @@ Exit gate: PooleBoot reproducibly boots under pinned OVMF and target firmware, v
 
 ### N6 - Boot Trust, Kernel Image, Early Runtime, and Emergency Diagnostics (`partial`)
 
+Cycle 178 requalifies the entry boundary for the unchanged Cycle 177 kernel:
+two clean builds, 245 host tests, 43 rejection controls, 55 implementation inputs
+and 39 kernel Rust sources. Current entry evidence passes while 24 dependent
+profiles remain stale. Exact image pin and integer-type gate repairs pass
+twelve isolated controls. No N6 exit or production boot claim follows.
+
+Historical Cycle 177 changes the build identity and canonical kernel digest to
+`563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA`.
+The linked build is measured, but the old PKENTRY1 receipt does not cover the
+new source or 245-test count. `N6-KENTRY-001` must reproduce clean entry evidence
+before the affected N5/N7/N8/N9/N12 profiles can qualify this image.
+
 Inherited sections: `016-019`, `148-149`. Added: `ADD-BOOT-002`, `ADD-BOOT-003`, `ADD-KERNEL-001`.
 Goal: make the earliest native path authenticated, measurable, diagnosable, and recoverable before higher services exist.
 
@@ -1624,6 +1744,12 @@ Cycle 101 PKENTRY1 evidence:
 Exit gate: every accepted boot is signature/digest/version bound; revocation and malformed signatures fail closed into recovery; deliberate failures at every early stage yield retained serial evidence without silent reset loops.
 
 ### N7 - x86-64 CPU, Privilege, Descriptor, and Fault Foundation (`partial`)
+
+Cycle 180 replay: five current-kernel profiles pass fourteen final virtual
+boots and 225 controls, plus one separate expected TCG diagnostic. Forty-six
+focused regressions pass with genuine generated positive receipts. This does
+not qualify every vector, guarded IST/user contexts, target errata, physical
+hardware, general scheduler xstate ownership or the N7 exit gate.
 
 Inherited sections: `020-022`. Added: `ADD-N7-ERRATA-SOURCE-001`, `ADD-N7-XSTATE-001`.
 Goal: establish a correct processor contract before concurrency or user execution.
@@ -1913,6 +2039,15 @@ Subphases:
 Exit gate: a hostile driver/device cannot DMA outside its granted pages or inject unowned interrupts; all mappings disappear on teardown; fault evidence names exact requester and authority.
 
 ### N12 - Concurrency, Scheduler, Deferred Work, and Context Switching (`partial`)
+
+Cycle 177 adds mandatory PKEXEC1 dispatch holds before remote scheduler queue
+mutation. Scheduler ACK, Dead, drop, forget and unwind do not release execution
+ownership; consuming unsafe architectural quiescence is required. Two reproduced
+counter-exhaustion defects now reject before queue mutation. Six execution cases,
+40 lifecycle tests and 15 compile-fail cases pass within the 17-stage core
+qualifier. Guarded live stacks, stable architectural contexts, active-root
+integration and acknowledged CPU retirement remain open under the existing
+N12.3 reclamation requirement and flag. No fresh guest execution is claimed.
 
 Cycle 175 requalifies eight scheduler/atomic/lock profiles with sixteen final
 boots. The existing host-only PKSTACK1 receipt remains current but does not prove
@@ -2479,6 +2614,35 @@ Exit gate: supported failures either recover locally or enter a known safe state
 
 ### N36 - Verification, Fuzzing, Fault Injection, Security, and Conformance (`partial`)
 
+Cycle 180 strengthens CPU provenance regressions with untouched generated
+positive receipts, eighty embedded-entry substitutions, twenty invalid current
+dependencies and nineteen aggregate gate controls. Forty-six focused tests
+pass; the broader transitive evidence and full exact-candidate audit remain
+open under the existing receipt-coverage requirement and flag.
+
+Cycle 179 repairs the reproduced PKREVAL1 schema-only receipt admission gap
+under `ADD-N36-RECEIPT-COVERAGE-001`. Both generation and CLI publication now
+require semantic acceptance; three malformed/stale/overclaim receipts reject
+before any output file is created. Four boot-chain test files and the new
+checkpoint add five direct architecture bindings (249 total). This does not
+close the broader transitive-evidence audit, independent review or production
+qualification. All prior failures, flag states and exit requirements remain.
+
+Cycle 178 adds direct architecture bindings for the entry and dependency-gate
+tests and its checkpoint (244 total). PKENTRY1 entry/source coverage and exact
+reproduction are current; twelve independent entry-gate controls reject old
+image pins, float/boolean substitutions and null objects. The reproduced
+six numeric acceptance failures and one malformed-product error are repaired
+within this gate. Full transitive provenance, all downstream current receipts,
+independent builders and production qualification remain open.
+
+Cycle 177 retains the exact Cycle 176 passing main receipt and all older failures.
+The current host core receipt binds 30 inputs and 17 executed stage logs; its
+new execution-case parser has 30 rejection controls. Current selected readiness
+is 2/27, not the historical 105-gate pass. The 241 architecture bindings and 960
+discovered tests are inventories. Complete transitive qualification, independent
+builders, live execution ownership and full current canonical replay remain open.
+
 Cycle 175 advances the existing receipt-coverage requirement across fourteen
 profiles with exact JSON-typed entry identity, 224 substitution cases and 56
 invalid dependencies. Combined regressions caught and verified repair of four
@@ -2715,7 +2879,40 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 
 ## 12. Near-Term Execution Sequence
 
-Current Cycle 175 sequence: all 27 selected native checks and fourteen final
+Current Cycle 180 sequence: the five CPU profiles pass. Continue with
+`N9-PMM-ACPI-CONSUMER-001`, followed by VM/IRQ/SMP/scheduler/atomic/lock replay.
+Fourteen of 27 selected checks remain stale. Full runtime-inclusive exact-source
+canonical/Doctor qualification and publication/review gate the draft PR #78
+merge before N12.3 live task contexts and architectural CPU retirement resume.
+N0 custody and physical target prerequisites remain separate blockers.
+
+Historical Cycle 179 sequence: the six-component boot chain passes. Continue with
+`N7-TRAP-001`, then the remaining CPU profiles and fourteen memory-through-lock
+profiles in dependency order. Nineteen of 27 selected checks remain stale.
+The runtime-inclusive exact-candidate canonical audit, publication and GitHub
+review/check gates precede PR #78 merge; N12.3 live task contexts and CPU
+retirement remain subsequent foundation work. N0 custody remains separate.
+
+Historical Cycle 178 sequence: entry reproduction passes; continue with
+`N5-SYMBOLS-SEMANTICS-001`, then N5 load/boot/revalidation/transfer, the five N7
+CPU profiles and fourteen memory-through-lock profiles in dependency order.
+Entry, policy and errata policy pass among 27 selected checks. The full exact
+runtime-inclusive canonical audit, publication scan and GitHub review/check
+gates still precede PR #78 merge. General live task contexts and CPU retirement
+remain N12.3 work after this qualification. N0 custody is a separate external
+blocker; local qualification needs no additional owner approval.
+
+Historical Cycle 177 sequence: reproduce the changed kernel through
+`N6-KENTRY-001`, then replay N5 symbols/load/boot/revalidation/transfer, the five
+N7 CPU profiles and fourteen memory-through-lock profiles in dependency order.
+Only policy and errata policy currently pass among 27 selected checks. Run the
+exact full canonical suite with `--include-runtime`, `--bundle` and
+`--replay-proof`, then publication and GitHub review/check gates before merging
+draft PR #78. Continue N12.3 guarded mappings, live contexts and architectural
+CPU retirement after qualification. N0 custody remains a separate external
+blocker and does not block these owner-independent builds and replays.
+
+Historical Cycle 175 sequence (completed by Cycle 176): all 27 selected native checks and fourteen final
 dependency profiles pass. Run the exact full canonical qualification with
 `--include-runtime`, `--bundle` and `--replay-proof`; then publication and GitHub
 review/merge gates for PR #77. Resume N12.3 live guarded task stacks, context

@@ -181,6 +181,248 @@ fn with_stack<T>(
 }
 
 #[test]
+fn dispatch_execution_holds_actual_stack_until_architectural_release() {
+    let (mut manager, mut memory) = fixture();
+    let resources = resource(&mut manager, &mut memory, 42);
+    let stack_handle = resources.execution_stack().handle();
+    let root = resources.address_space().summary();
+    let mut store = Storage::new(Limits::default()).unwrap();
+    let mut tasks = store.attach().unwrap();
+    let id = tasks.create(0, 1, 2, resources).ok().unwrap();
+    tasks.activate(id, cpu(1)).unwrap();
+    let execution = tasks.stage_dispatch(cpu(1), 1, 1).unwrap();
+    let ticket = execution.ticket();
+    assert_eq!(ticket.task, id);
+    assert_eq!(ticket.target_cpu, 1);
+    assert_eq!(*execution.resources().payload(), 42);
+    assert_eq!(
+        execution.resources().execution_stack().handle(),
+        stack_handle
+    );
+    assert_eq!(execution.resources().address_space().summary(), root);
+    tasks.acknowledge(ticket, ack(ticket)).unwrap();
+    tasks.complete_current(cpu(1)).unwrap();
+    assert_eq!(
+        tasks.reclaim(id).err(),
+        Some(Error::Pool(PoolError::Pinned))
+    );
+    assert_eq!(
+        manager.free(stack_handle),
+        Err(PhysicalMemoryError::AllocationRetained)
+    );
+    assert_eq!(memory.physical_writes, 0);
+    // SAFETY: this is a host ownership test; no architectural consumer exists.
+    unsafe { execution.confirm_quiescent() };
+    let owned = tasks.reclaim(id).unwrap();
+    let (mut address, stack, payload) = owned.into_parts(&mut manager).ok().unwrap();
+    assert_eq!(payload, 42);
+    address.release(&mut manager, &mut memory).unwrap();
+    stack
+        .release_scrubbed(&mut manager, &mut memory)
+        .ok()
+        .unwrap();
+    assert_eq!(memory.physical_writes, 2048);
+    assert_eq!(memory.physical_reads, 2048);
+    assert_eq!(manager.summary().allocated_pages, 0);
+}
+
+#[test]
+fn dispatch_execution_loss_never_fabricates_quiescence() {
+    for loss in 0..3 {
+        let (mut manager, mut memory) = fixture();
+        let mut store = Storage::new(Limits::default()).unwrap();
+        let mut tasks = store.attach().unwrap();
+        let id = tasks
+            .create(0, 1, 2, resource(&mut manager, &mut memory, ()))
+            .ok()
+            .unwrap();
+        tasks.activate(id, cpu(1)).unwrap();
+        let execution = tasks.stage_dispatch(cpu(1), 1, 1).unwrap();
+        let ticket = execution.ticket();
+        let handle = execution.resources().execution_stack().handle();
+        match loss {
+            0 => drop(execution),
+            1 => std::mem::forget(execution),
+            _ => {
+                let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(move || {
+                    let _held = execution;
+                    panic!("host-only owner unwind");
+                }));
+                assert!(result.is_err());
+            }
+        }
+        tasks.acknowledge(ticket, ack(ticket)).unwrap();
+        tasks.complete_current(cpu(1)).unwrap();
+        tasks.begin_shutdown().unwrap();
+        for _ in 0..32 {
+            assert_eq!(
+                tasks.reclaim(id).err(),
+                Some(Error::Pool(PoolError::Pinned))
+            );
+            assert!(!tasks.is_drained().unwrap());
+            assert_eq!(
+                manager.free(handle),
+                Err(PhysicalMemoryError::AllocationRetained)
+            );
+        }
+        drop(tasks);
+        drop(store);
+        assert_eq!(
+            manager.free(handle),
+            Err(PhysicalMemoryError::AllocationRetained)
+        );
+        assert_eq!(memory.physical_writes, 0);
+    }
+}
+
+#[test]
+fn dispatch_execution_pin_exhaustion_precedes_queue_mutation() {
+    let (mut manager, mut memory) = fixture();
+    let mut store = Storage::new(Limits {
+        pins_per_object: 1,
+        generations_per_slot: 2,
+    })
+    .unwrap();
+    let mut tasks = store.attach().unwrap();
+    let id = tasks
+        .create(0, 1, 2, resource(&mut manager, &mut memory, ()))
+        .ok()
+        .unwrap();
+    tasks.activate(id, cpu(1)).unwrap();
+    let reader = tasks.pin(id).unwrap();
+    let before = tasks.scheduler().summary();
+    let task_before = tasks.snapshot(id).unwrap();
+    for _ in 0..8 {
+        assert_eq!(
+            tasks.stage_dispatch(cpu(1), 1, 1).err(),
+            Some(Error::Pool(PoolError::PinLimit))
+        );
+        assert_eq!(tasks.scheduler().summary(), before);
+        assert_eq!(tasks.snapshot(id).unwrap(), task_before);
+        assert!(!tasks.scheduler().has_pending());
+    }
+    drop(reader);
+    let execution = tasks.stage_dispatch(cpu(1), 1, 1).unwrap();
+    let ticket = execution.ticket();
+    tasks.acknowledge(ticket, ack(ticket)).unwrap();
+    tasks.complete_current(cpu(1)).unwrap();
+    // SAFETY: no host-test CPU or alias was ever given the task's physical pages.
+    unsafe { execution.confirm_quiescent() };
+    assert!(tasks.reclaim(id).is_ok());
+}
+
+#[test]
+fn dispatch_execution_invalid_admission_does_not_consume_pins() {
+    let (mut manager, mut memory) = fixture();
+    let mut store = Storage::new(Limits {
+        pins_per_object: 1,
+        generations_per_slot: 2,
+    })
+    .unwrap();
+    let mut tasks = store.attach().unwrap();
+    let id = tasks
+        .create(0, 1, 2, resource(&mut manager, &mut memory, ()))
+        .ok()
+        .unwrap();
+    tasks.activate(id, cpu(1)).unwrap();
+    let before = tasks.scheduler().summary();
+    for (lane, attempt, sequence) in [(1, 0, 1), (1, 1, 0), (2, 1, 1)] {
+        assert!(tasks.stage_dispatch(cpu(lane), attempt, sequence).is_err());
+        assert_eq!(tasks.scheduler().summary(), before);
+        drop(tasks.pin(id).unwrap());
+    }
+    tasks.begin_shutdown().unwrap();
+    assert_eq!(
+        tasks.stage_dispatch(cpu(1), 1, 1).err(),
+        Some(Error::Draining)
+    );
+    tasks.cancel(id).unwrap();
+    assert!(tasks.reclaim(id).is_ok());
+}
+
+#[test]
+fn dispatch_execution_cpu_holds_retire_independently() {
+    let (mut manager, mut memory) = fixture();
+    let mut store = Storage::new(Limits::default()).unwrap();
+    let mut tasks = store.attach().unwrap();
+    let a = tasks
+        .create(0, 1, 2, resource(&mut manager, &mut memory, 11))
+        .ok()
+        .unwrap();
+    let b = tasks
+        .create(1, 1, 4, resource(&mut manager, &mut memory, 22))
+        .ok()
+        .unwrap();
+    tasks.activate(a, cpu(1)).unwrap();
+    tasks.activate(b, cpu(2)).unwrap();
+    let first = tasks.stage_dispatch(cpu(1), 1, 1).unwrap();
+    tasks
+        .acknowledge(first.ticket(), ack(first.ticket()))
+        .unwrap();
+    let second = tasks.stage_dispatch(cpu(2), 2, 1).unwrap();
+    tasks
+        .acknowledge(second.ticket(), ack(second.ticket()))
+        .unwrap();
+    tasks.complete_current(cpu(1)).unwrap();
+    tasks.complete_current(cpu(2)).unwrap();
+    assert_eq!(tasks.reclaim(a).err(), Some(Error::Pool(PoolError::Pinned)));
+    assert_eq!(tasks.reclaim(b).err(), Some(Error::Pool(PoolError::Pinned)));
+    // SAFETY: the synthetic lane has no hardware consumer or resumable context.
+    unsafe { first.confirm_quiescent() };
+    assert_eq!(*tasks.reclaim(a).unwrap().payload(), 11);
+    assert_eq!(tasks.reclaim(b).err(), Some(Error::Pool(PoolError::Pinned)));
+    assert_eq!(*second.resources().payload(), 22);
+    // SAFETY: the second synthetic lane also has no hardware consumer.
+    unsafe { second.confirm_quiescent() };
+    assert_eq!(*tasks.reclaim(b).unwrap().payload(), 22);
+}
+
+#[test]
+fn dispatch_execution_reuse_rejects_prior_generation_ack() {
+    let (mut manager, mut memory) = fixture();
+    let mut store = Storage::new(Limits::default()).unwrap();
+    let mut tasks = store.attach().unwrap();
+    let old = tasks
+        .create(0, 1, 2, resource(&mut manager, &mut memory, ()))
+        .ok()
+        .unwrap();
+    tasks.activate(old, cpu(1)).unwrap();
+    let first = tasks.stage_dispatch(cpu(1), 1, 1).unwrap();
+    let old_ticket = first.ticket();
+    tasks.acknowledge(old_ticket, ack(old_ticket)).unwrap();
+    tasks.complete_current(cpu(1)).unwrap();
+    let (error, replacement) = tasks
+        .create(0, 1, 2, resource(&mut manager, &mut memory, ()))
+        .err()
+        .unwrap();
+    assert_eq!(error, Error::Occupied);
+    // SAFETY: no context was installed or executed by this host-only harness.
+    unsafe { first.confirm_quiescent() };
+    let _retired = tasks.reclaim(old).unwrap();
+    let new = tasks.create(0, 1, 2, replacement).ok().unwrap();
+    assert!(new.generation > old.generation);
+    tasks.activate(new, cpu(1)).unwrap();
+    let second = tasks.stage_dispatch(cpu(1), 2, 2).unwrap();
+    let before = tasks.scheduler().summary();
+    assert_eq!(
+        tasks.acknowledge(old_ticket, ack(old_ticket)),
+        Err(Error::Scheduler(sched::Error::TicketMismatch))
+    );
+    assert_eq!(tasks.scheduler().summary(), before);
+    tasks
+        .acknowledge(second.ticket(), ack(second.ticket()))
+        .unwrap();
+    tasks.complete_current(cpu(1)).unwrap();
+    assert_eq!(
+        tasks.reclaim(new).err(),
+        Some(Error::Pool(PoolError::Pinned))
+    );
+    // SAFETY: the second generation also never acquired a hardware consumer.
+    unsafe { second.confirm_quiescent() };
+    assert!(tasks.reclaim(new).is_ok());
+}
+
+#[test]
 fn task_execution_stack_cannot_be_freed_through_a_copied_handle() {
     let (mut manager, mut memory) = fixture();
     let resources = resource(&mut manager, &mut memory, ());
@@ -421,7 +663,8 @@ fn remote_transfer_running_and_bad_ack_cannot_reclaim() {
         .ok()
         .unwrap();
     tasks.activate(id, cpu(1)).unwrap();
-    let ticket = tasks.stage_dispatch(cpu(1), 2, 3).unwrap();
+    let execution = tasks.stage_dispatch(cpu(1), 2, 3).unwrap();
+    let ticket = execution.ticket();
     let before = tasks.scheduler().summary();
     let mut wrong = ack(ticket);
     wrong.sequence += 1;
@@ -450,6 +693,12 @@ fn remote_transfer_running_and_bad_ack_cannot_reclaim() {
         Some(Error::Pool(PoolError::Pinned))
     );
     drop(reader);
+    assert_eq!(
+        tasks.reclaim(id).err(),
+        Some(Error::Pool(PoolError::Pinned))
+    );
+    // SAFETY: this host harness never publishes a CPU context or hardware alias.
+    unsafe { execution.confirm_quiescent() };
     assert!(tasks.reclaim(id).is_ok());
 }
 
@@ -529,12 +778,20 @@ fn shutdown_with_pending_dispatch_retains_until_ack_completion_and_reader_drop()
         .ok()
         .unwrap();
     tasks.activate(id, cpu(1)).unwrap();
-    let ticket = tasks.stage_dispatch(cpu(1), 1, 1).unwrap();
+    let execution = tasks.stage_dispatch(cpu(1), 1, 1).unwrap();
+    let ticket = execution.ticket();
     tasks.begin_shutdown().unwrap();
     assert!(!tasks.is_drained().unwrap());
     assert!(tasks.cancel(id).is_err());
     tasks.acknowledge(ticket, ack(ticket)).unwrap();
     tasks.complete_current(cpu(1)).unwrap();
+    assert_eq!(
+        tasks.reclaim(id).err(),
+        Some(Error::Pool(PoolError::Pinned))
+    );
+    assert!(!tasks.is_drained().unwrap());
+    // SAFETY: the host backend performs no CPU execution or architectural access.
+    unsafe { execution.confirm_quiescent() };
     assert!(tasks.reclaim(id).is_ok());
     assert!(tasks.is_drained().unwrap());
 }
@@ -860,7 +1117,8 @@ fn all_frames_aliases_and_pending_unmaps_are_mandatorily_retained() {
         .unwrap();
     tasks.activate(id, cpu(1)).unwrap();
     let reader = tasks.pin(id).unwrap();
-    let ticket = tasks.stage_dispatch(cpu(1), 99, 1).unwrap();
+    let execution = tasks.stage_dispatch(cpu(1), 99, 1).unwrap();
+    let ticket = execution.ticket();
     for handle in std::iter::once(tables).chain(frames.iter().copied()) {
         assert_eq!(
             manager.free(handle),
@@ -878,6 +1136,12 @@ fn all_frames_aliases_and_pending_unmaps_are_mandatorily_retained() {
         vm::MAX_FRAMES
     );
     drop(reader);
+    assert_eq!(
+        tasks.reclaim(id).err(),
+        Some(Error::Pool(PoolError::Pinned))
+    );
+    // SAFETY: no CPU or external actor ever accessed these host-owned pages.
+    unsafe { execution.confirm_quiescent() };
     let resources = tasks.reclaim(id).unwrap();
     for handle in std::iter::once(tables).chain(frames.iter().copied()) {
         assert_eq!(

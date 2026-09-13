@@ -7,9 +7,45 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 175
+Last roadmap reconciliation: PooleOS Cycle 180
 
-Current Cycle 175: fourteen memory-through-lock profiles pass 28 final virtual
+Current Cycle 180: five CPU profiles pass fourteen fresh virtual boots,
+225 controls and 46 focused Python tests. The separate expected TCG exception
+diagnostic is not a successful exception boot. Positive regressions now use
+untouched generated receipts; nineteen aggregate controls pass. Selected
+readiness is 13/27, with fourteen memory-through-lock profiles pending beginning
+`N9-PMM-ACPI-CONSUMER-001`. Main stays qualified Cycle 176; draft PR #78 needs
+full exact-candidate qualification. No normative condition or phase/flag closes.
+[Cycle 180 evidence](checkpoints/cycle180-cpu-qualification.md).
+
+Historical Cycle 179: six N5 components pass qualification on the unchanged kernel,
+with six final virtual boots, two kernel entries and 71 focused Python tests.
+PKREVAL1 now rejects semantically invalid receipts before output; three cases
+and thirteen aggregate identity/count controls pass. Two superseded boots and
+prior failures are retained. Selected readiness is 8/27; nineteen CPU/memory
+profiles need replay beginning `N7-TRAP-001`. Main remains qualified Cycle 176,
+PR #78 stays draft, and no normative completion condition or phase/flag closes.
+[Cycle 179 evidence](checkpoints/cycle179-boot-chain-requalification.md).
+
+Historical Cycle 178: the unchanged Cycle 177 kernel passes clean PKENTRY1
+reproduction with 245 host tests, 43 controls and 55 source bindings. Twelve
+entry-gate controls reject stale identities and wrong numeric types. Selected
+readiness is 3/27; 24 dependent profiles need replay beginning
+`N5-SYMBOLS-SEMANTICS-001`. No new guest, independent builder, full canonical
+pass or production promotion follows. The draft remains unmerged.
+[Cycle 178 evidence](checkpoints/cycle178-kernel-entry-requalification.md).
+
+Historical Cycle 177: PKEXEC1 dispatch execution holds and two
+scheduler rollback fixes pass all 17 native core stages. The changed image has
+2/27 current selected readiness checks and requires fresh entry/dependency
+qualification beginning `N6-KENTRY-001`. This draft is not merge-qualified;
+the roadmap separates new host evidence from historical live receipts and binds
+241 architecture inputs. Main is the qualified Cycle 176
+merge of PR #77 at `ac15d1d` (105 canonical gates and 708 Doctor checks).
+No normative charter condition or production gate changes.
+[Cycle 177 evidence](checkpoints/cycle177-dispatch-execution-holds.md).
+
+Historical Cycle 175: fourteen memory-through-lock profiles pass 28 final virtual
 boots, 660 groups and 2,126 rejected cases; two earlier SMP boots are superseded.
 All 27 selected native checks pass. Embedded-entry provenance tests and the
 repaired SMP malformed-input guard pass; the combined suite passes 161 tests

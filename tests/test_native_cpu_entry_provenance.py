@@ -26,11 +26,7 @@ class NativeCpuEntryProvenanceTests(unittest.TestCase):
         cls.entry = entry.read_json(ROOT / entry.READINESS_RELATIVE)
 
     def candidate(self, profile):
-        # Synthetic validator input only, never a replacement execution receipt.
-        report = json.loads((ROOT / profile.READINESS_RELATIVE).read_text(encoding="utf-8"))
-        report["inputs"] = profile.expected_inputs(ROOT)
-        report["build"]["kernel_entry"] = copy.deepcopy(self.entry)
-        return report
+        return json.loads((ROOT / profile.READINESS_RELATIVE).read_text(encoding="utf-8"))
 
     def test_profiles_accept_current_entry_provenance(self) -> None:
         for profile in PROFILES:
@@ -40,6 +36,7 @@ class NativeCpuEntryProvenanceTests(unittest.TestCase):
     def test_profiles_reject_stale_or_malformed_embedded_entry(self) -> None:
         for profile in PROFILES:
             baseline = self.candidate(profile)
+            self.assertEqual(profile.readiness_errors(baseline, ROOT), [])
             cases = []
             for value in (None, [], "invalid", {}):
                 candidate = copy.deepcopy(baseline)
@@ -77,9 +74,11 @@ class NativeCpuEntryProvenanceTests(unittest.TestCase):
         stale = copy.deepcopy(self.entry)
         stale["bindings"]["implementation_inputs"] = []
         for profile in PROFILES:
+            baseline = self.candidate(profile)
+            self.assertEqual(profile.readiness_errors(baseline, ROOT), [])
             for invalid in (None, [], {"summary": None}, stale):
                 with self.subTest(profile=profile.CONTRACT_ID, dependency=invalid):
-                    candidate = self.candidate(profile)
+                    candidate = copy.deepcopy(baseline)
                     def read(path):
                         return invalid if path == ROOT / entry.READINESS_RELATIVE else original(path)
                     with mock.patch.object(entry, "read_json", side_effect=read):

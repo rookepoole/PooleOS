@@ -19,6 +19,7 @@ from tools import qualify_native_kernel_entry as entry  # noqa: E402
 SOURCES = (
     "native/kernel/src/reclamation.rs",
     "native/kernel/src/reclamation/ap_resources.rs",
+    "native/kernel/src/reclamation/execution.rs",
     "native/kernel/src/reclamation/task_lifetimes.rs",
     "native/kernel/src/lib.rs",
     "native/kernel/src/atomics.rs",
@@ -44,10 +45,20 @@ SOURCES = (
     "native/Cargo.lock",
     "specs/native-toolchain-lock.json",
     "tools/qualify_native_reclamation_core.py",
+    "tools/qualify_native_kernel_entry.py",
+    "runtime/native_kernel_image.py",
 )
 REPORT = ROOT / "runs/native-kernel-reclamation-core-readiness.json"
 TEST_COUNT = 19
-LIFETIME_TEST_COUNT = 34
+LIFETIME_TEST_COUNT = 40
+EXECUTION_TESTS = (
+    "dispatch_execution_holds_actual_stack_until_architectural_release",
+    "dispatch_execution_loss_never_fabricates_quiescence",
+    "dispatch_execution_pin_exhaustion_precedes_queue_mutation",
+    "dispatch_execution_invalid_admission_does_not_consume_pins",
+    "dispatch_execution_cpu_holds_retire_independently",
+    "dispatch_execution_reuse_rejects_prior_generation_ack",
+)
 STACK_TESTS = (
     "task_execution_stack_cannot_be_freed_through_a_copied_handle",
     "stack_retention_survives_task_reclaim_until_full_scrubbed_release",
@@ -60,7 +71,7 @@ STACK_TESTS = (
     "overlapping_stacks_from_distinct_manager_namespaces_cannot_share_scheduler",
     "full_scrub_receipt_ledger_retains_the_next_stack_without_writes",
 )
-KERNEL_SHA256 = "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625"
+KERNEL_SHA256 = "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA"
 STAGES = (
     "format", "host-build-debug", "test-build-debug", "tests-debug",
     "lifetime-build-debug", "lifetime-tests-debug",
@@ -98,21 +109,29 @@ def require_ownership_test_results(output: str) -> None:
     require_named_test_result(output, "physical_memory::tests::ap_resources::", 11)
 
 
-def require_stack_test_results(output: str) -> None:
+def require_explicit_test_results(output: str, names: tuple[str, ...]) -> None:
     records = re.findall(r"^test ([A-Za-z0-9_]+) \.\.\. (.*)$", output.replace("\r\n", "\n"), re.MULTILINE)
-    for name in STACK_TESTS:
+    for name in names:
         if [status for case, status in records if case == name] != ["ok"]:
-            raise ValueError(f"expected exactly one passing stack test: {name}")
+            raise ValueError(f"expected exactly one passing ownership test: {name}")
+
+
+def require_stack_test_results(output: str) -> None:
+    require_explicit_test_results(output, STACK_TESTS)
+
+
+def require_execution_test_results(output: str) -> None:
+    require_explicit_test_results(output, EXECUTION_TESTS)
 
 
 def validate_report(report: dict, root: Path = ROOT) -> None:
     expected = {
-        "schema_version": "1.5", "contract_id": "PKRECLAIM1-CORE",
+        "schema_version": "1.6", "contract_id": "PKRECLAIM1-CORE",
         "selected_move_id": "N12-CONCURRENCY-RECLAMATION-001", "phase": "N12.3",
         "status": "host_verified_live_integration_pending", "production_ready": False,
         "live_integration_verified": False, "cross_cpu_quiescence_verified": False,
         "n12_3_complete": False, "focused_test_count": TEST_COUNT,
-        "kernel_regression_count": 243, "compile_fail_borrow_tests": 11,
+        "kernel_regression_count": 245, "compile_fail_borrow_tests": 15,
         "physical_retention_contract_id": "PKRETAIN1",
         "physical_retention_scope": "allocator_enforced_for_explicitly_retained_allocations",
         "physical_retention_test_count": 20, "physical_retention_live_verified": False,
@@ -122,7 +141,11 @@ def validate_report(report: dict, root: Path = ROOT) -> None:
         "ap_resource_live_verified": False,
         "task_lifetime_contract_id": "PKLIFE1",
         "task_lifetime_test_count": LIFETIME_TEST_COUNT,
-        "task_lifetime_scope": "mandatory_inactive_table_frame_and_stack_retention",
+        "task_lifetime_scope": "mandatory_inactive_resources_and_dispatch_execution_hold",
+        "task_execution_contract_id": "PKEXEC1",
+        "task_execution_test_count": len(EXECUTION_TESTS),
+        "task_execution_scope": "mandatory_dispatch_hold_architecture_quiescence_boundary",
+        "task_execution_live_verified": False,
         "task_stack_contract_id": "PKSTACK1", "task_stack_page_count": 4,
         "task_stack_test_count": len(STACK_TESTS), "task_stack_live_verified": False,
         "linked_kernel_sha256": KERNEL_SHA256, "linked_kernel_byte_count": 530072,
@@ -175,6 +198,7 @@ def qualify(work: Path) -> dict:
             require_ownership_test_results(output)
         if name in {"lifetime-tests-debug", "lifetime-tests-release"}:
             require_stack_test_results(output)
+            require_execution_test_results(output)
         stages.append({"name": name, "status": "pass", "output_sha256": hashlib.sha256(raw).hexdigest().upper()})
 
     base = ["--manifest-path", str(entry.NATIVE_ROOT / "Cargo.toml"), "--package", "poolekernel"]
@@ -213,10 +237,10 @@ def qualify(work: Path) -> dict:
         run(f"lifetime-tests-{profile}", [str(lifetime_binary), "--test-threads=1"], LIFETIME_TEST_COUNT)
         if profile == "release":
             run("kernel-regressions-release", [str(cargo), "test", *base, "--lib", *host,
-                "--release", "--", "--test-threads=1"], 243)
+                "--release", "--", "--test-threads=1"], 245)
     env.pop("CARGO_PROFILE_RELEASE_PANIC", None)
-    run("borrow-doctests", [str(cargo), "test", *base, "--doc", *host], 11)
-    run("kernel-regressions", [str(cargo), "test", *base, "--lib", *host, "--", "--test-threads=1"], 243)
+    run("borrow-doctests", [str(cargo), "test", *base, "--doc", *host], 15)
+    run("kernel-regressions", [str(cargo), "test", *base, "--lib", *host, "--", "--test-threads=1"], 245)
     run("host-clippy", [str(cargo), "clippy", *base, "--lib", *host, "--", "-D", "warnings"])
     run("freestanding-clippy", [str(cargo), "clippy", *base, "--lib", "--release",
         "--target", entry.PRODUCT_TARGET, "--locked", "--offline", "--target-dir", str(target),
@@ -236,12 +260,12 @@ def qualify(work: Path) -> dict:
     if before != bind_sources():
         raise ValueError("source changed during qualification")
     report = {
-        "schema_version": "1.5", "contract_id": "PKRECLAIM1-CORE",
+        "schema_version": "1.6", "contract_id": "PKRECLAIM1-CORE",
         "selected_move_id": "N12-CONCURRENCY-RECLAMATION-001", "phase": "N12.3",
         "status": "host_verified_live_integration_pending", "production_ready": False,
         "live_integration_verified": False, "cross_cpu_quiescence_verified": False,
         "n12_3_complete": False, "focused_test_count": TEST_COUNT,
-        "kernel_regression_count": 243, "compile_fail_borrow_tests": 11,
+        "kernel_regression_count": 245, "compile_fail_borrow_tests": 15,
         "physical_retention_contract_id": "PKRETAIN1",
         "physical_retention_scope": "allocator_enforced_for_explicitly_retained_allocations",
         "physical_retention_test_count": 20, "physical_retention_live_verified": False,
@@ -251,7 +275,11 @@ def qualify(work: Path) -> dict:
         "ap_resource_live_verified": False,
         "task_lifetime_contract_id": "PKLIFE1",
         "task_lifetime_test_count": LIFETIME_TEST_COUNT,
-        "task_lifetime_scope": "mandatory_inactive_table_frame_and_stack_retention",
+        "task_lifetime_scope": "mandatory_inactive_resources_and_dispatch_execution_hold",
+        "task_execution_contract_id": "PKEXEC1",
+        "task_execution_test_count": len(EXECUTION_TESTS),
+        "task_execution_scope": "mandatory_dispatch_hold_architecture_quiescence_boundary",
+        "task_execution_live_verified": False,
         "task_stack_contract_id": "PKSTACK1", "task_stack_page_count": 4,
         "task_stack_test_count": len(STACK_TESTS), "task_stack_live_verified": False,
         "linked_kernel_sha256": KERNEL_SHA256, "linked_kernel_byte_count": len(canonical),
@@ -269,7 +297,7 @@ def main() -> int:
     report = qualify(args.work.resolve())
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n")
-    print(f"PKRECLAIM1_CORE PASS tests={TEST_COUNT} lifecycle={LIFETIME_TEST_COUNT} stack={len(STACK_TESTS)} retention=20 ap_resources=11 profiles=2 regressions=243 live=0 production=0")
+    print(f"PKRECLAIM1_CORE PASS tests={TEST_COUNT} lifecycle={LIFETIME_TEST_COUNT} stack={len(STACK_TESTS)} execution={len(EXECUTION_TESTS)} retention=20 ap_resources=11 profiles=2 regressions=245 live=0 production=0")
     return 0
 
 
