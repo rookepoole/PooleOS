@@ -68,7 +68,7 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 250)
+        self.assertEqual(len(self.artifact["bound_sources"]), 251)
         self.assertIn("docs/checkpoints/cycle175-memory-entry-provenance.md", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("tests/test_native_memory_entry_provenance.py", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("runtime/native_kernel_profile_evidence.py", {item["path"] for item in self.artifact["bound_sources"]})
@@ -76,6 +76,7 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertIn("docs/checkpoints/cycle174-cpu-entry-provenance.md", {item["path"] for item in self.artifact["bound_sources"]})
         bound_paths = {binding["path"] for binding in self.artifact["bound_sources"]}
         self.assertIn("docs/checkpoints/cycle180-cpu-qualification.md", bound_paths)
+        self.assertIn("docs/checkpoints/cycle181-memory-qualification.md", bound_paths)
         self.assertIn("docs/checkpoints/cycle179-boot-chain-requalification.md", bound_paths)
         for name in ("symbols", "kernel_load", "kernel_transfer", "kernel_revalidation"):
             self.assertIn("tests/test_native_" + name + ".py", bound_paths)

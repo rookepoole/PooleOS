@@ -24,6 +24,7 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle181-memory-qualification.md",
     "docs/checkpoints/cycle180-cpu-qualification.md",
     "docs/checkpoints/cycle179-boot-chain-requalification.md",
     "tests/test_native_symbols.py",

@@ -632,6 +632,7 @@ PROGRAM_GAPS[4] = (
 
 
 PROGRAM_GAPS[4] = (
+    "Cycle 181 replays fourteen memory-through-lock profiles with 28 final virtual boots and four superseded boots. All 27 selected consistency checks and 164 of 166 focused tests pass (two optional skips). The 660 groups and 2126 cases are reported counts: at least 65 scheduler source-control entries lack per-control rejection execution. Repair ADD-N36-RECEIPT-COVERAGE-001 beginning PKSCHED3 before exact full qualification, publication/review and PR78 merge, then N12.3 live contexts. No phase, flag, native bytes or production condition closes. "
     "Cycle 180 qualifies five CPU profiles on the unchanged kernel with fourteen fresh virtual "
     "boots, 225 controls and 46 focused tests; one expected TCG diagnostic remains separate. "
     "Positive provenance tests now require untouched generated receipts, and nineteen aggregate "
@@ -3560,6 +3561,385 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
         if flag["id"] in {
             "FLAG-N7-TRAP-001", "FLAG-N7-CPU-POLICY-001", "FLAG-N7-XSTATE-POLICY-001",
             "FLAG-N7-XSTATE-EXCEPTION-001", "FLAG-N7-PRIVILEGE-MSR-POLICY-001",
+            "FLAG-N12-CONCURRENCY-RECLAMATION-001", "FLAG-N36-RECEIPT-COVERAGE-001",
+        }:
+            flag["evidence"] = [checkpoint, *flag["evidence"]]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+
+    checkpoint = "docs/checkpoints/cycle181-memory-qualification.md"
+    protocol.update(last_updated_cycle=181, selected_move_id="N9-PMM-ACPI-CONSUMER-001",
+                    owner_independent_next_move_id="ADD-N36-RECEIPT-COVERAGE-001")
+    protocol["required_records"].insert(0, checkpoint)
+    roadmap["baseline"]["pooleos_cycle"] = 181
+    for name in (
+        "focused_source_projection", "ownership_qualification", "task_stack_qualification",
+        "execution_qualification", "entry_provenance_qualification", "boot_chain_qualification",
+        "cpu_qualification", "dependency_qualification", "candidate_audit",
+    ):
+        historical_name = "source_projection" if name == "focused_source_projection" else name
+        gate["historical_cycle180_" + historical_name] = gate["current_" + name]
+    gate["qualification_status"] = "native_replay_pass_control_execution_audit_pending"
+    gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=181)
+    gate["current_focused_source_projection"] = {
+        "cycle": 181, "scope": "27_selected_native_checks_not_full_canonical_audit",
+        "passed_checks": 27, "total_checks": 27, "pending_downstream_native_checks": 0,
+        "final_receipt_fresh_qemu_runs": 28, "superseded_initial_runs": 4,
+        "failed_pre_guest_attempts": 1, "revalidated_dependency_execution_cycle": 181,
+        "negative_control_groups": 660, "negative_control_cases": 2126,
+        "reported_case_count_is_not_executed_rejection_count": True,
+        "unproven_per_control_rejection_groups_at_least": 65,
+        "aggregate_gate_regression_cases": 79, "source_audit_rejection_cases": 4,
+        "focused_python_tests": 166, "focused_python_passed": 164, "focused_python_skipped": 2,
+        "focused_test_log_sha256": "F3433D8B55D3FDF95A7B3C75633657CFDB1A4C9FD7E2748A9CC153860FFCE915",
+        "entry_receipt_sha256": entry_sha, "core_receipt_sha256": core_sha,
+        "core_qualification_stage_count": 17, "core_live_execution_cycle": None,
+        "canonical_full_replay_performed": False, "production_ready": False,
+        "next_dependency_move_id": "ADD-N36-RECEIPT-COVERAGE-001",
+        "required_next_gate": "per_control_execution_evidence_then_exact_full_qualification_publication_and_review",
+    }
+    for name in ("entry_provenance", "boot_chain", "cpu"):
+        gate["current_" + name + "_qualification"] = dict(
+            gate["current_" + name + "_qualification"], source_validation_cycle=181,
+        )
+    gate["current_ownership_qualification"] = dict(
+        gate["current_ownership_qualification"], cycle=181,
+        scope="host177_dispatch_and_inactive_stack_receipt_with_cycle181_VM_and_AP_replay",
+        live_receipt_scope="two_current_VM_and_two_current_four_vcpu_AP_runs",
+        live_replay_cycle=181, fresh_current_cycle_qemu_runs=4,
+        live_receipt_source_current=True, current_boot_artifact_set_replay_pending=False,
+        active_root_current_image_replay_complete=True, ap_runtime_live_integration_verified=True,
+        entry_receipt_sha256=entry_sha,
+        virtual_memory_receipt_sha256="4AFEA30E25DB4DCD0D9038E01D3FE1CC6EE5D82DBAB4595A4631D34902460BB7",
+        smp_receipt_sha256="2B1F8D623D31476F2C8886DFD583BE9514C68A2B3D0DA36BC75DDD13D6823CCA",
+    )
+    gate["current_dependency_qualification"] = dict(
+        gate["historical_cycle175_dependency_qualification"], cycle=181, source_validation_cycle=181,
+        status="live_replay_pass_control_execution_incomplete", applies_to_current_source=True,
+        scope="fourteen_current_guest_receipts_not_complete_per_control_execution_evidence",
+        kernel_sha256=kernel_sha, fresh_qemu_runs=28, superseded_initial_runs=4,
+        superseded_profiles=["atomics", "locks"], failed_pre_guest_attempts=1,
+        focused_python_tests=166, focused_python_passed=164, focused_python_skipped=2,
+        memory_gate_rejection_cases=20, host_identity_gate_rejection_cases=59,
+        source_audit_rejection_cases=4, positive_receipts_rebound_in_tests=False,
+        recorded_marker_replay_verified=True, independent_memory_oracle_replay_verified=True,
+        reported_case_count_is_not_executed_rejection_count=True,
+        control_execution_complete=False, unproven_per_control_rejection_groups_at_least=65,
+    )
+    gate["current_dependency_qualification"]["receipt_bindings"] = [
+        {
+            "profile": "physical_memory",
+            "path": "runs/native-kernel-physical-memory-readiness.json",
+            "sha256": "EEFD0E8592CB98E8D0EDBCB480FFD6DDEF761C5432AE0ED4FB3C95C73E10D008",
+            "fresh_runs": 2,
+            "kernel_host_tests": 245,
+            "negative_groups": 191,
+            "negative_cases": 191,
+            "marker_count": 45,
+            "execution_log_sha256": "73D78CC992A80B448CB62D488AC4EFA73BF8EED5DBCA5B8F76C37B5AF855061A",
+            "elapsed_seconds": 115.297
+        },
+        {
+            "profile": "virtual_memory",
+            "path": "runs/native-kernel-virtual-memory-readiness.json",
+            "sha256": "4AFEA30E25DB4DCD0D9038E01D3FE1CC6EE5D82DBAB4595A4631D34902460BB7",
+            "fresh_runs": 2,
+            "kernel_host_tests": 245,
+            "negative_groups": 48,
+            "negative_cases": 48,
+            "marker_count": 40,
+            "execution_log_sha256": "3F150DB57A3859B6474CCAE0679F8D501C0B6264436950A77C7EDC5EE719DE52",
+            "elapsed_seconds": 63.813
+        },
+        {
+            "profile": "interrupt_time",
+            "path": "runs/native-kernel-interrupt-time-readiness.json",
+            "sha256": "19FB9DA0B525064D56126E9EEE159C887A46B4FD1EB6B6DA3646C5F88182E7B2",
+            "fresh_runs": 2,
+            "kernel_host_tests": 245,
+            "negative_groups": 58,
+            "negative_cases": 58,
+            "marker_count": 36,
+            "execution_log_sha256": "98DE2D5B7B345ED29CFDA5E1BBE0160126A332F0E4319B4AF91FCE66567C4606",
+            "elapsed_seconds": 65.797
+        },
+        {
+            "profile": "smp_first_ap",
+            "path": "runs/native-kernel-smp-first-ap-readiness.json",
+            "sha256": "58F0EBEEA6C844714D4E57568C56987C0A9E03D92A9D29421974A6D7C91FD5AC",
+            "fresh_runs": 2,
+            "kernel_host_tests": 245,
+            "negative_groups": 72,
+            "negative_cases": 72,
+            "marker_count": 38,
+            "execution_log_sha256": "D2823B8479F27386573962DB57FA0DC7211F656CDEC4BDF03C890911B24C5242",
+            "elapsed_seconds": 71.594
+        },
+        {
+            "profile": "smp_percpu_runtime",
+            "path": "runs/native-kernel-smp-percpu-runtime-readiness.json",
+            "sha256": "03B2E751984D8FADBB64302748E3D4CBB025F5DF285D665AAD8399CDA9DC07C2",
+            "fresh_runs": 2,
+            "kernel_host_tests": 245,
+            "negative_groups": 19,
+            "negative_cases": 159,
+            "marker_count": 42,
+            "execution_log_sha256": "6AA6B171C06F825AB34FD35B6DC0F0C4AE1B3C3BDBEA115B9A29D1DDD4812575",
+            "elapsed_seconds": 55.906
+        },
+        {
+            "profile": "smp_ipi",
+            "path": "runs/native-kernel-smp-ipi-readiness.json",
+            "sha256": "2B1F8D623D31476F2C8886DFD583BE9514C68A2B3D0DA36BC75DDD13D6823CCA",
+            "fresh_runs": 2,
+            "kernel_host_tests": 245,
+            "negative_groups": 30,
+            "negative_cases": 249,
+            "marker_count": 40,
+            "execution_log_sha256": "B52F64CD5C85DB0561172F386D850EE8876DE82BDE1CD3453EF45FD17EE63EE9",
+            "elapsed_seconds": 65.609
+        },
+        {
+            "profile": "scheduler",
+            "path": "runs/native-kernel-scheduler-readiness.json",
+            "sha256": "CC340D6AFAD07D3A17A3E63AC296A228E8366EC48D623B277DAAFEF588B4E6D2",
+            "fresh_runs": 2,
+            "kernel_host_tests": 245,
+            "negative_groups": 28,
+            "negative_cases": 115,
+            "marker_count": 34,
+            "execution_log_sha256": "399BEE5F394C0AAB2849ABCE27436416C874B83E860D63D92D413338C2E8878D",
+            "elapsed_seconds": 75.437
+        },
+        {
+            "profile": "scheduler_preempt",
+            "path": "runs/native-kernel-scheduler-preemption-readiness.json",
+            "sha256": "D1F027454CDE978D504FFA232A427ABC7992D92193B593DBF9261EF2C9E190BE",
+            "fresh_runs": 2,
+            "kernel_host_tests": 245,
+            "negative_groups": 25,
+            "negative_cases": 178,
+            "marker_count": 35,
+            "execution_log_sha256": "3102C866D1525AAE7C4AB92053387BFE6AFE3C814F048166A939B0B59ED990A8",
+            "elapsed_seconds": 86.078
+        },
+        {
+            "profile": "scheduler_deferred",
+            "path": "runs/native-kernel-scheduler-deferred-readiness.json",
+            "sha256": "05F5250DD497E0803959AA67939362DBA19023A97089C06AA1B66837AF6C64AC",
+            "fresh_runs": 2,
+            "kernel_host_tests": 245,
+            "negative_groups": 30,
+            "negative_cases": 208,
+            "marker_count": 37,
+            "execution_log_sha256": "4EBE89807DC249C40962D3E7447C0C9F29E74969E1379DC547ECA0E970986D14",
+            "elapsed_seconds": 77.125
+        },
+        {
+            "profile": "scheduler_smp",
+            "path": "runs/native-kernel-scheduler-smp-readiness.json",
+            "sha256": "47382C39021EB7BF6580844B6E4B1F2BAC53C05FD56ECB2313E036C81A1A391C",
+            "fresh_runs": 2,
+            "kernel_host_tests": 245,
+            "negative_groups": 32,
+            "negative_cases": 209,
+            "marker_count": 37,
+            "execution_log_sha256": "A5FEC8483EF1E11FC817A0D5BC72936936C71B95AF19DC428C50CC70F7197FAE",
+            "elapsed_seconds": 77.031
+        },
+        {
+            "profile": "scheduler_ap_workers",
+            "path": "runs/native-kernel-scheduler-ap-workers-readiness.json",
+            "sha256": "828E48B8EBBFF8472A9BD27B7EA7BCD2DA64E418B58E38F9FD375B640CA365C0",
+            "fresh_runs": 2,
+            "kernel_host_tests": 245,
+            "negative_groups": 34,
+            "negative_cases": 226,
+            "marker_count": 37,
+            "execution_log_sha256": "21900BB29BF0D4A76CAF00CA05051C739A38319DA0A37D143DA90AAA6A15CED7",
+            "elapsed_seconds": 68.438
+        },
+        {
+            "profile": "scheduler_smp_preempt",
+            "path": "runs/native-kernel-scheduler-smp-preempt-readiness.json",
+            "sha256": "269B22A60B6E5B7D512EC18BF1EC30396C6E0AB41B2182303BF4E89A3AF18076",
+            "fresh_runs": 2,
+            "kernel_host_tests": 245,
+            "negative_groups": 34,
+            "negative_cases": 232,
+            "marker_count": 38,
+            "execution_log_sha256": "658B2791846126535D9385743AD633421B22FF64E22437D38E3F4EAF6561C867",
+            "elapsed_seconds": 68.313
+        },
+        {
+            "profile": "atomics",
+            "path": "runs/native-kernel-atomics-readiness.json",
+            "sha256": "7DB057751A677EE46115146E84FCE19EDD3F49B5E7B699948B13307DA1ACA986",
+            "fresh_runs": 2,
+            "kernel_host_tests": 245,
+            "negative_groups": 29,
+            "negative_cases": 78,
+            "marker_count": 41,
+            "execution_log_sha256": "588C498E72D9B75AF3C7F38B31973A207CC4E90C8ECD6AAD53ED893E8B670857",
+            "elapsed_seconds": 90.156
+        },
+        {
+            "profile": "locks",
+            "path": "runs/native-kernel-locks-readiness.json",
+            "sha256": "837AF50A257AA54316E72014E4B63BB6B18E33161E42FD854A849F2D7AE96F79",
+            "fresh_runs": 2,
+            "kernel_host_tests": 245,
+            "negative_groups": 30,
+            "negative_cases": 103,
+            "marker_count": 35,
+            "execution_log_sha256": "F3D19104BFF87F4D07C6D36EBECE56413E7410894E64B393FEB255C8DF8FAADF",
+            "elapsed_seconds": 60.953
+        }
+    ]
+    gate["current_control_execution_audit"] = {
+        "cycle": 181, "status": "open", "requirement_id": "ADD-N36-RECEIPT-COVERAGE-001",
+        "flag_id": "FLAG-N36-RECEIPT-COVERAGE-001", "blocks_merge_qualification": True,
+        "scope": "four_scheduler_qualifier_loops_not_an_exhaustive_all_profile_audit",
+        "unproven_per_control_rejection_groups_at_least": 65,
+        "reported_case_count_is_not_executed_rejection_count": True,
+        "next_profile": "scheduler_deferred", "production_ready": False,
+        "source_control_gaps": [
+            {
+                "profile": "scheduler_deferred",
+                "source_path": "tools/qualify_native_kernel_scheduler_deferred.py",
+                "source_sha256": "0A5157E0AF2BB4B886FEE5C97F53CB3417F94EAF59212C3F30B583239C57C42C",
+                "control_ids": [
+                    "NEG-N12-PKSCHED3-FIXED-CAPACITY",
+                    "NEG-N12-PKSCHED3-DUPLICATE-SUPPRESSION",
+                    "NEG-N12-PKSCHED3-TOP-HALF-CONTEXT",
+                    "NEG-N12-PKSCHED3-RECURSION",
+                    "NEG-N12-PKSCHED3-EOI-PERMIT",
+                    "NEG-N12-PKSCHED3-PRIORITY-BYPASS",
+                    "NEG-N12-PKSCHED3-QUEUED-CANCEL",
+                    "NEG-N12-PKSCHED3-RUNNING-CANCEL",
+                    "NEG-N12-PKSCHED3-FLUSH-WATERMARK",
+                    "NEG-N12-PKSCHED3-STALE-GENERATION",
+                    "NEG-N12-PKSCHED3-FAULT-ROLLBACK",
+                    "NEG-N12-PKSCHED3-SHUTDOWN-ORDER",
+                    "NEG-N12-PKSCHED3-NO-HEAP-OR-CALLBACK",
+                    "NEG-N12-PKSCHED3-WORKER-STACK-OWNERSHIP"
+                ],
+                "reported_case_count": 14,
+                "slice_start": 15,
+                "slice_end": 29,
+                "classification": "source_audit_attestation_without_per_control_rejection_execution"
+            },
+            {
+                "profile": "scheduler_smp",
+                "source_path": "tools/qualify_native_kernel_scheduler_smp.py",
+                "source_sha256": "6D6175C9FAA2C1B4235A0249FC6C9B886182D3EBE9F4FC17BEFE938B1369CA39",
+                "control_ids": [
+                    "NEG-N12-PKSCHED4-EXACT-TOPOLOGY",
+                    "NEG-N12-PKSCHED4-DUPLICATE-RUNNABLE",
+                    "NEG-N12-PKSCHED4-STALE-GENERATION",
+                    "NEG-N12-PKSCHED4-OWNER-EPOCH",
+                    "NEG-N12-PKSCHED4-WAKE-ACK-BINDING",
+                    "NEG-N12-PKSCHED4-MIGRATION-ACK-BINDING",
+                    "NEG-N12-PKSCHED4-DISPATCH-ACK-BINDING",
+                    "NEG-N12-PKSCHED4-OFFLINE-TIMEOUT",
+                    "NEG-N12-PKSCHED4-LATE-ACK",
+                    "NEG-N12-PKSCHED4-SOURCE-QUEUE-ROLLBACK",
+                    "NEG-N12-PKSCHED4-TOPOLOGY-BALANCING",
+                    "NEG-N12-PKSCHED4-FAIRNESS-BOUND",
+                    "NEG-N12-PKSCHED4-IDLE-OWNERSHIP",
+                    "NEG-N12-PKSCHED4-AP-REGISTER-RESTORE",
+                    "NEG-N12-PKSCHED4-PARK-SCRUB-RELEASE",
+                    "NEG-N12-PKSCHED4-NO-HEAP-OR-CALLBACK"
+                ],
+                "reported_case_count": 16,
+                "slice_start": 15,
+                "slice_end": 31,
+                "classification": "source_audit_attestation_without_per_control_rejection_execution"
+            },
+            {
+                "profile": "scheduler_ap_workers",
+                "source_path": "tools/qualify_native_kernel_scheduler_ap_workers.py",
+                "source_sha256": "21C8A734AC8100BCF8EB82FE1B201E0012F843D9EA39773C74B120B8ECE7882D",
+                "control_ids": [
+                    "NEG-N12-PKSCHED5-TYPED-CALL-ALLOWLIST",
+                    "NEG-N12-PKSCHED5-ARBITRARY-CALLBACK",
+                    "NEG-N12-PKSCHED5-TOP-HALF-CONTEXT",
+                    "NEG-N12-PKSCHED5-DISPATCH-BEFORE-EOI",
+                    "NEG-N12-PKSCHED5-DUPLICATE-WORK",
+                    "NEG-N12-PKSCHED5-QUEUED-CANCEL",
+                    "NEG-N12-PKSCHED5-REMOTE-CANCEL",
+                    "NEG-N12-PKSCHED5-ACK-BINDING",
+                    "NEG-N12-PKSCHED5-OFFLINE-TIMEOUT",
+                    "NEG-N12-PKSCHED5-SOURCE-QUEUE-ROLLBACK",
+                    "NEG-N12-PKSCHED5-LATE-ACK",
+                    "NEG-N12-PKSCHED5-FAIRNESS-BOUND",
+                    "NEG-N12-PKSCHED5-FLUSH-WATERMARK",
+                    "NEG-N12-PKSCHED5-RECLAIM-GENERATION",
+                    "NEG-N12-PKSCHED5-STALE-ID",
+                    "NEG-N12-PKSCHED5-IST1-STACK-GATE",
+                    "NEG-N12-PKSCHED5-AP-REGISTER-RESTORE",
+                    "NEG-N12-PKSCHED5-PARK-SCRUB-RELEASE"
+                ],
+                "reported_case_count": 18,
+                "slice_start": 15,
+                "slice_end": 33,
+                "classification": "source_audit_attestation_without_per_control_rejection_execution"
+            },
+            {
+                "profile": "scheduler_smp_preempt",
+                "source_path": "tools/qualify_native_kernel_scheduler_smp_preempt.py",
+                "source_sha256": "C075F0FAEB9AC177508ACC25201F8A78C8A03136F3511DFE67C6BDB6EB71DB6B",
+                "control_ids": [
+                    "NEG-N12-PKSCHED6-FRAME-CPU",
+                    "NEG-N12-PKSCHED6-FRAME-APIC",
+                    "NEG-N12-PKSCHED6-FRAME-EPOCH",
+                    "NEG-N12-PKSCHED6-FRAME-STACK",
+                    "NEG-N12-PKSCHED6-TIMER-EPOCH",
+                    "NEG-N12-PKSCHED6-EVENT-DEADLINE",
+                    "NEG-N12-PKSCHED6-EVENT-ORDER",
+                    "NEG-N12-PKSCHED6-ACK-BINDING",
+                    "NEG-N12-PKSCHED6-ACK-GATED-OWNER",
+                    "NEG-N12-PKSCHED6-OFFLINE-TIMEOUT",
+                    "NEG-N12-PKSCHED6-SOURCE-QUEUE-ROLLBACK",
+                    "NEG-N12-PKSCHED6-LATE-ACK",
+                    "NEG-N12-PKSCHED6-WATCHDOG-BOUND",
+                    "NEG-N12-PKSCHED6-STARVATION-BOUND",
+                    "NEG-N12-PKSCHED6-DUPLICATE-RUNNABLE",
+                    "NEG-N12-PKSCHED6-AP-REGISTER-RESTORE",
+                    "NEG-N12-PKSCHED6-PARK-SCRUB-RELEASE"
+                ],
+                "reported_case_count": 17,
+                "slice_start": 16,
+                "slice_end": 33,
+                "classification": "source_audit_attestation_without_per_control_rejection_execution"
+            }
+        ],
+    }
+    evidence = (
+        "Cycle 181: " + checkpoint + " replays fourteen current-kernel memory-through-lock profiles "
+        "with 28 final boots, four superseded atomics/locks boots and one pre-guest source-audit "
+        "failure. All 27 selected consistency checks pass; 164 of 166 focused tests pass with two "
+        "optional local-transcript skips. Untouched positive receipts guard 224 entry substitutions "
+        "and 56 invalid dependencies. Source audit requires all ten SMP scheduler tests and both "
+        "rollback regressions; four source-audit and 79 aggregate identity/accounting cases pass. "
+        "The 660 groups and 2126 cases are reported qualifier counts, not all executed rejections."
+    )
+    gap = (
+        "Cycle 181 identifies at least 65 PKSCHED3/4/5/6 source-control entries (14/16/18/17) "
+        "labeled passed/rejected without per-control rejection execution. Repair this existing "
+        "ADD-N36-RECEIPT-COVERAGE-001 requirement beginning scheduler_deferred before exact full "
+        "canonical qualification, publication/review and PR78 merge, then N12.3 live task contexts "
+        "and architectural CPU retirement. Other profiles also need coverage audit; complete "
+        "transitive provenance, independent builders, hardware and production remain open."
+    )
+    for phase in roadmap["phases"]:
+        if phase["id"] in {"N8", "N9", "N12", "N36"}:
+            phase["current_evidence"] = [evidence, *phase["current_evidence"]]
+            phase["current_gaps"] = [gap, *phase["current_gaps"]]
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle 181 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in {
+            "FLAG-N9-PMM-ACPI-CONSUMER-001", "FLAG-N9-VM-DIRECT-MAP-001",
             "FLAG-N12-CONCURRENCY-RECLAMATION-001", "FLAG-N36-RECEIPT-COVERAGE-001",
         }:
             flag["evidence"] = [checkpoint, *flag["evidence"]]
