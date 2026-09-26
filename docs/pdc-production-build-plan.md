@@ -1,15 +1,43 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-26
-Plan version: 2.84.0-native-memory-qualification
-Roadmap cycle: PooleOS Cycle 181
+Plan version: 2.85.0-native-host-toolchain-repair
+Roadmap cycle: PooleOS Cycle 182
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 181: Memory Replay And Control-Evidence Gap
+## Cycle 182: Host Toolchain Reproduction Repair
+
+`N6-KENTRY-001` at N6.4-N6.6 and N3.3/N3.5/N3.6 isolates the probe-size drift
+to MSVC CRT library selection through seven controlled builds. Four hash-pinned
+host input trees and shared environment sanitation restore exact kernel-entry
+and fixture receipt reproduction. The first hostile run exposes a UEFI fixture
+linker-option leak; the repaired suite passes all 39 tests with zero skips.
+Kernel bytes remain unchanged. Entry binds six additional host inputs; no exact
+comparison is weakened and all failed/superseded evidence remains preserved.
+
+The selected consistency projection is now 3/27: 24 dependent checks reject
+stale entry/fixture provenance, not changed kernel functionality. Replay `N5-ELF-001` and
+N5 symbols/boot, then CPU/memory dependencies. Implement individual execution
+evidence for the existing 65 scheduler control gaps before final scheduler
+qualification, full canonical/Doctor/publication/review gates and PR #78 merge.
+Then resume N12.3 live task contexts. Main stays qualified Cycle 176.
+
+The host pin is not complete host attestation: system DLLs, parent Cargo config,
+concurrent tamper, installer/source provenance and independent builders remain
+open under N3/N36. No phase or flag closes, no native/PooleGlyph/demo bytes or
+normative charter conditions change, and no new ISO or production claim follows.
+[Cycle 182 evidence](checkpoints/cycle182-host-toolchain-repair.md).
+
+Progress reconciliation passes 45 metadata/core/checklist tests. Architecture
+binds 259 paths and discovery inventories 981 Python tests, not a full-suite
+pass. Historical failures, all requirement counts and all phase/flag states
+are conserved; complete qualification and production exits remain open.
+
+## Historical Cycle 181: Memory Replay And Control-Evidence Gap
 
 `N9-PMM-ACPI-CONSUMER-001` at N9.2-N9.4 and the dependent N8/N12 profiles
 pass fourteen final qualifiers and 28 virtual boots on unchanged Cycle 177
@@ -1436,6 +1464,13 @@ Cycle 84 and Cycle 87 evidence:
 Exit gate: Tier 0 and Tier 1 manifests are complete and hashed; destructive-test safety is accepted; every implementation phase has lawful normative references and errata tracking.
 
 ### N3 - Toolchain, Build, CI, and Low-Level Safety (`partial`)
+
+Cycle 182 pins four MSVC/linker/SDK library trees and repairs ambient build-option
+leakage. Exact entry and fixture receipts reproduce under hostile overrides;
+39 focused regressions pass. N3.3/N3.5/N3.6 remain partial: host OS/system DLLs,
+parent Cargo configuration, concurrent tamper, source provenance and second
+builder closure are not established. Dependent qualification must be regenerated
+from real runs, not rebound. See the Cycle 182 checkpoint and existing N36 flag.
 
 Inherited sections: `008-011`.  
 Goal: produce hermetic freestanding artifacts without host leakage and enforce low-level safety before hardware execution.
@@ -2928,7 +2963,13 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 
 ## 12. Near-Term Execution Sequence
 
-Current Cycle 181 sequence: memory-through-lock replay passes all 27 selected
+Current Cycle 182 sequence: replay N5-ELF-001 after the host-tool repair, then
+N5-SYMBOLS-SEMANTICS-001 and boot/CPU/memory dependencies. Before final scheduler
+qualification, resolve the 65 control-execution gaps and broader N36 audit.
+Full exact-candidate qualification and publication/review precede PR78 merge;
+N12.3 live task contexts follow. The selected current projection is 3/27.
+
+Historical Cycle 181 sequence: memory-through-lock replay passes all 27 selected
 consistency checks, but 65 individually unproven scheduler control groups block
 merge qualification. The resumed combined suite also fails exact entry-receipt
 reproduction despite matching kernel bytes. First resolve `N6-KENTRY-001`

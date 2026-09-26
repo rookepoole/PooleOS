@@ -49,6 +49,12 @@ IMPLEMENTATION_INPUTS = (
     Path("tools/qualify_native_kernel_entry.py"),
     Path("tests/test_native_kernel_entry.py"),
     Path("docs/native-kernel-entry.md"),
+    Path("native/.cargo/config.toml"),
+    Path("specs/native-host-msvc-profile.json"),
+    Path("tools/native_host_toolchain.py"),
+    Path("tools/qualify_native_toolchain.py"),
+    Path("tools/qualify_native_elf_loader.py"),
+    Path("tests/test_native_host_toolchain.py"),
 )
 
 
@@ -166,6 +172,17 @@ def readiness_errors(readiness: Any, root: Path = ROOT) -> list[str]:
     errors.extend(f"contract {item}" for item in contract_errors(read_json(root / CONTRACT_RELATIVE)))
     if readiness.get("bindings") != expected_bindings(root):
         errors.append("readiness input bindings are stale")
+    expected_host = {
+        "profile_id": "POOLEOS-HOST-MSVC-1",
+        "profile_sha256": sha256_bytes((root / "specs/native-host-msvc-profile.json").read_bytes()),
+        "verified_before_build": True,
+        "scope": "host_linker_and_library_trees_not_complete_host_attestation",
+    }
+    toolchain = readiness.get("toolchain")
+    probe = toolchain.get("pkelf1_probe_qualification") if isinstance(toolchain, dict) else None
+    host = probe.get("host_toolchain") if isinstance(probe, dict) else None
+    if json.dumps(host, sort_keys=True) != json.dumps(expected_host, sort_keys=True):
+        errors.append("readiness host-toolchain profile mismatch")
     if readiness.get("claims") != expected_claims():
         errors.append("readiness claim boundary mismatch")
     if readiness.get("production_ready") is not False:

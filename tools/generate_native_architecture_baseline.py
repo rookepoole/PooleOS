@@ -24,6 +24,14 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle182-host-toolchain-repair.md",
+    "specs/native-host-msvc-profile.json",
+    "tools/native_host_toolchain.py",
+    "tests/test_native_host_toolchain.py",
+    "tools/qualify_native_elf_loader.py",
+    "tools/qualify_native_toolchain.py",
+    "tests/test_native_toolchain_qualification.py",
+    "runtime/native_kernel_entry.py",
     "docs/checkpoints/cycle181-memory-qualification.md",
     "docs/checkpoints/cycle180-cpu-qualification.md",
     "docs/checkpoints/cycle179-boot-chain-requalification.md",

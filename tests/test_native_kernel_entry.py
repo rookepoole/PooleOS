@@ -90,6 +90,37 @@ class NativeKernelEntryTests(unittest.TestCase):
             digest = hashlib.sha256((ROOT / path).read_bytes()).hexdigest().upper()
             self.assertEqual(fields[field], digest)
 
+    def test_host_toolchain_profile_mutations_are_rejected(self) -> None:
+        self.assertEqual(entry.readiness_errors(self.readiness), [])
+        for field, value in (("profile_id", "other"), ("profile_sha256", "0" * 64),
+                             ("verified_before_build", False), ("verified_before_build", 1),
+                             ("scope", "complete_host_attestation")):
+            with self.subTest(field=field, value=value):
+                candidate = copy.deepcopy(self.readiness)
+                candidate["toolchain"]["pkelf1_probe_qualification"]["host_toolchain"][field] = value
+                self.assertIn("readiness host-toolchain profile mismatch", entry.readiness_errors(candidate))
+        for value in (None, {}, [], "verified"):
+            with self.subTest(value=value):
+                candidate = copy.deepcopy(self.readiness)
+                candidate["toolchain"]["pkelf1_probe_qualification"] = value
+                self.assertIn("readiness host-toolchain profile mismatch", entry.readiness_errors(candidate))
+
+    def test_host_build_inputs_are_bound_and_mutations_stale_receipt(self) -> None:
+        paths = ("native/.cargo/config.toml", "specs/native-host-msvc-profile.json",
+                 "tools/native_host_toolchain.py", "tools/qualify_native_toolchain.py",
+                 "tools/qualify_native_elf_loader.py", "tests/test_native_host_toolchain.py")
+        actual = {item["path"] for item in self.readiness["bindings"]["implementation_inputs"]}
+        self.assertTrue(set(paths).issubset(actual))
+        original = entry.file_binding
+        for relative in paths:
+            def changed_binding(path, root=ROOT):
+                result = original(path, root)
+                if path == ROOT / relative:
+                    result["sha256"] = "0" * 64
+                return result
+            with self.subTest(path=relative), mock.patch.object(entry, "file_binding", side_effect=changed_binding):
+                self.assertIn("readiness input bindings are stale", entry.readiness_errors(self.readiness))
+
     def test_live_build_id_matches_the_entry_contract(self) -> None:
         build_id = self.contract["product"]["build_id"]
         kernel_source = (ROOT / "native/kernel/src/lib.rs").read_text(encoding="utf-8")

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import json
 import re
@@ -640,6 +641,17 @@ PROGRAM_GAPS[4] = (
     "controls reject stale identities or promotion. Selected readiness is 13/27; fourteen "
     "memory-through-lock profiles need replay beginning N9-PMM-ACPI-CONSUMER-001. Full exact "
     "qualification, live task contexts/CPU retirement and production remain open. " + PROGRAM_GAPS[4]
+)
+
+
+PROGRAM_GAPS[4] = (
+    "Cycle 182 isolates the host probe size drift to MSVC runtime libraries and pins four host input trees. "
+    "Shared environment repair rejects ambient LINK/_LINK_ and Cargo overrides; 39 hostile-environment "
+    "regressions, exact entry reproduction and fixture reproduction pass. The earlier 38-test failure "
+    "is preserved. Kernel bytes remain unchanged; new entry/fixture provenance leaves 24/27 selected checks "
+    "stale. Replay N5-ELF-001 and N5 symbols/boot, CPU and memory dependencies, including actual "
+    "execution evidence for at least 65 scheduler controls, before full qualification or PR78 merge. "
+    "Complete host attestation, independent builders and production remain open. " + PROGRAM_GAPS[4]
 )
 
 
@@ -3559,7 +3571,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             phase["current_evidence"] = [evidence, *phase["current_evidence"]]
             phase["current_gaps"] = [gap, *phase["current_gaps"]]
         if phase["id"] == "N36":
-            phase["current_evidence"].insert(0, f"Cycle 180 source inventory: {test_count} Python tests discovered; full qualification pending")
+            phase["current_evidence"].insert(0, "Cycle 180 source inventory: 962 Python tests discovered; full qualification pending")
     for flag in roadmap["implementation_flags"]:
         if flag["id"] in {
             "FLAG-N7-TRAP-001", "FLAG-N7-CPU-POLICY-001", "FLAG-N7-XSTATE-POLICY-001",
@@ -3965,7 +3977,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             phase["current_evidence"] = [evidence, *phase["current_evidence"]]
             phase["current_gaps"] = [gap, *phase["current_gaps"]]
         if phase["id"] == "N36":
-            phase["current_evidence"].insert(0, f"Cycle 181 source inventory: {test_count} Python tests discovered; full qualification pending")
+            phase["current_evidence"].insert(0, "Cycle 181 source inventory: 962 Python tests discovered; full qualification pending")
     for flag in roadmap["implementation_flags"]:
         if flag["id"] in {
             "FLAG-N9-PMM-ACPI-CONSUMER-001", "FLAG-N9-VM-DIRECT-MAP-001",
@@ -3974,13 +3986,115 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
         }:
             flag["evidence"] = [checkpoint, *flag["evidence"]]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle182(roadmap, test_count)
+
+
+def apply_cycle182(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle182-host-toolchain-repair.md"
+    protocol = roadmap["execution_protocol"]
+    protocol.update(last_updated_cycle=182, selected_move_id="N6-KENTRY-001",
+                    owner_independent_next_move_id="N5-ELF-001")
+    protocol["required_records"].insert(0, checkpoint)
+    roadmap["baseline"]["pooleos_cycle"] = 182
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    for name in (
+        "focused_source_projection", "ownership_qualification", "entry_provenance_qualification",
+        "boot_chain_qualification", "cpu_qualification", "dependency_qualification",
+        "closeout_regression", "candidate_audit",
+    ):
+        historical = "source_projection" if name == "focused_source_projection" else name
+        gate["historical_cycle181_" + historical] = copy.deepcopy(gate["current_" + name])
+    entry_sha = "5B3A8DAD63C21416A43074664F9C52B9BE8FB6E906824AF30F805F5FFC65CED5"
+    gate["qualification_status"] = "host_toolchain_repaired_entry_reproduced_dependency_and_control_replay_pending"
+    gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=182)
+    gate["current_focused_source_projection"] = {
+        "cycle": 182, "scope": "27_selected_native_checks_not_full_canonical_audit",
+        "passed_checks": 3, "total_checks": 27, "pending_downstream_native_checks": 24,
+        "final_receipt_fresh_qemu_runs": 0, "canonical_full_replay_performed": False,
+        "passing_profiles": ["kernel_entry", "kernel_revalidation", "kernel_errata_policy"],
+        "entry_receipt_sha256": entry_sha, "production_ready": False,
+        "next_dependency_move_id": "N5-ELF-001",
+        "required_next_gate": "shared_loader_and_ordered_dependencies_then_control_audit_and_exact_full_qualification",
+        "unproven_per_control_rejection_groups_at_least": 65,
+        "reported_case_count_is_not_executed_rejection_count": True,
+    }
+    gate["current_entry_provenance_qualification"] = dict(
+        gate["current_entry_provenance_qualification"], cycle=182, source_validation_cycle=182,
+        entry_receipt_sha256=entry_sha, source_binding_count=61,
+        exact_receipt_and_product_reproduction_passed=True, latest_reproduction_cycle=182,
+        latest_reproduction_status="exact_receipt_and_product_reproduced_under_hostile_environment",
+    )
+    gate["current_host_toolchain_qualification"] = {
+        "cycle": 182, "status": "scoped_repair_verified", "profile_path": "specs/native-host-msvc-profile.json",
+        "profile_sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182",
+        "msvc_version": "14.44.35207", "windows_sdk_version": "10.0.18362.0",
+        "pinned_trees": 4, "pinned_files": 720, "pinned_bytes": 889212229,
+        "matrix_variants": 7, "observed_size_change_cause": "MSVC_CRT_library_tree_selection",
+        "old_crt_probe_bytes": 148480, "new_crt_probe_bytes": 147968,
+        "matrix_sha256": "25748BD729DC814C1C9532A198DECBA12AFBB64523CA32FC129F846907A6FAB9",
+        "cross_matrix_sha256": "75795B2ACB21C8A36D71CEF44FB66A152479EEAB641B9616B501C69E709CB409",
+        "kernel_product_unchanged": True, "environment_changed_globally": False,
+        "toolchain_fixture_receipt_sha256": "87668ADC571427244CD490D172CD01BAA3871709A0D76F7319D665526B68CFB5",
+        "initial_hostile_regression": {"tests_run": 38, "tests_passed": 37, "tests_failed": 1,
+            "failure": "fixture_UEFI_linker_inherited__LINK__option",
+            "log_sha256": "E76BA9D6444174F1401C7265DC880B7A8F35588CADB9393494A86044640BDF7D"},
+        "complete_host_attestation": False, "second_builder_reproduced": False,
+        "production_ready": False,
+    }
+    gate["current_closeout_regression"] = {
+        "cycle": 182, "status": "pass", "scope": "host_toolchain_entry_and_fixture_tests_only",
+        "tests_run": 39, "tests_passed": 39, "tests_failed": 0, "tests_skipped": 0,
+        "hostile_environment": True,
+        "log_sha256": "F3056EA5AD8415E934307A9947D0E186DB83E3209155DF393D58B34E0F45E2AF",
+        "canonical_full_replay_performed": False, "merge_qualified": False, "production_ready": False,
+    }
+    for name in ("boot_chain", "cpu", "dependency"):
+        previous = gate["historical_cycle181_" + name + "_qualification"]
+        gate["current_" + name + "_qualification"] = dict(
+            previous, cycle=182, source_validation_cycle=182, applies_to_current_source=False,
+            status="replay_required_after_host_toolchain_provenance_repair", fresh_qemu_runs=0,
+            qualified_profiles=[], readiness_replay_required_profiles=previous["qualified_profiles"],
+            retained_execution_cycle=previous["cycle"], current_candidate_full_gate_passed=False,
+        )
+    gate["current_ownership_qualification"] = dict(
+        gate["current_ownership_qualification"], cycle=182,
+        scope="retained_host177_evidence_live_provenance_replay_required",
+        fresh_current_cycle_qemu_runs=0, live_receipt_source_current=False,
+        current_boot_artifact_set_replay_pending=True, active_root_current_image_replay_complete=False,
+        ap_runtime_live_integration_verified=False,
+    )
+    evidence = (
+        "Cycle 182: " + checkpoint + " isolates probe-size drift to the MSVC CRT library tree through "
+        "seven controlled builds. Four pinned host trees (720 files) and shared environment sanitation "
+        "restore exact entry and fixture reproduction under hostile overrides; 39 focused tests pass. "
+        "The first 38-test hostile run failed in the fixture UEFI linker and remains preserved. "
+        "Kernel product bytes are unchanged; six new entry input bindings expose host provenance."
+    )
+    gap = (
+        "The selected projection is 3/27; 24 dependent checks reject stale entry/fixture provenance. "
+        "N5-ELF-001 shared-loader qualification precedes N5 symbols/boot, CPU and memory replay. "
+        "The existing N36 audit still requires at least 65 scheduler rejection executions and broader "
+        "coverage review before exact canonical/Doctor/publication/review qualification and PR78 merge. "
+        "Core host evidence remains Cycle 177 with incomplete transitive tool provenance. No new guest, "
+        "native feature, ISO, phase closure, independent builder or production readiness is claimed."
+    )
+    for phase in roadmap["phases"]:
+        if phase["id"] in {"N3", "N5", "N6", "N12", "N36"}:
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle 182 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in {"FLAG-N36-RECEIPT-COVERAGE-001", "FLAG-N6-KENTRY-001", "FLAG-N5-ELF-001"}:
+            flag["evidence"].insert(0, checkpoint)
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=962)
+    parser.add_argument("--test-count", type=int, default=981)
     parser.add_argument("--status-date", default="2026-09-26")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

@@ -7,9 +7,20 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 181
+Last roadmap reconciliation: PooleOS Cycle 182
 
-Current Cycle 181: fourteen memory-through-lock profiles pass 28 final virtual
+Current Cycle 182: controlled builds isolate host-probe size drift to MSVC CRT
+libraries. Explicit hash-pinned inputs and shared environment sanitation restore
+exact entry and fixture receipt reproduction; 39 hostile-environment regression
+tests pass. The earlier fixture option-leak failure is preserved. Kernel bytes
+are unchanged, but new entry/fixture provenance leaves 24 of 27 selected checks stale.
+Replay N5-ELF-001 and ordered N5/CPU/memory dependencies, resolve the existing
+65 scheduler control-evidence gaps, then fully qualify before PR #78 merge.
+No phase, flag or normative completion condition changes; this is not complete
+host attestation, an independent builder, new guest boot, native feature or ISO.
+[Cycle 182 evidence](checkpoints/cycle182-host-toolchain-repair.md).
+
+Historical Cycle 181: fourteen memory-through-lock profiles pass 28 final virtual
 boots on the unchanged Cycle 177 kernel; four superseded boots and a pre-guest
 failure remain separate. All 27 selected consistency checks pass; 164 focused
 tests pass and two skip. At least 65 scheduler control entries lack individually

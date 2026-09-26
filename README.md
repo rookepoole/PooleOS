@@ -11,7 +11,15 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Latest development checkpoint:** Cycle 181 replays fourteen memory-through-lock
+**Latest development checkpoint:** Cycle 182 repairs host build reproducibility.
+Controlled builds isolate the drift to MSVC runtime libraries; pinned inputs and
+shared environment sanitation restore exact entry and fixture reproduction.
+All 39 focused hostile-environment regressions pass. Kernel bytes are unchanged;
+24 dependent checks require replay under the new provenance, and 65 scheduler
+control-evidence gaps remain. This is not a new ISO or merge-qualified release.
+[Cycle 182 evidence and next steps](docs/checkpoints/cycle182-host-toolchain-repair.md).
+
+**Historical checkpoint:** Cycle 181 replays fourteen memory-through-lock
 profiles with 28 final virtual boots; 164 focused tests pass and two skip.
 All 27 selected consistency checks pass, but at least 65 scheduler control
 groups lack individually bound execution evidence. The September 26 closeout
@@ -39,7 +47,7 @@ This is pre-production development, not a new ISO or main-qualified release.
 [Cycle 179 evidence](docs/checkpoints/cycle179-boot-chain-requalification.md).
 
 **Development backup:** [draft PR #78](https://github.com/rookepoole/PooleOS/pull/78)
-tracks Cycles 177-181 on
+tracks Cycles 177 onward on
 `agent/n12-dispatch-execution-holds`. Cycle 179's combined
 closeout suite passed 128 tests. Source checkpoints on this branch are separate
 from qualified `main`; private execution logs and media are not part of this backup.

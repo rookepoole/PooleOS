@@ -358,6 +358,54 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle182-host-toolchain-repair.md",
+      "sha256": "FEAD86147A35B006E71E3B0A321083A049FCB01FF4BB45E5E93135573E84BFBB",
+      "byte_count": 8572,
+      "line_count": 143
+    },
+    {
+      "path": "specs/native-host-msvc-profile.json",
+      "sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182",
+      "byte_count": 2092,
+      "line_count": 49
+    },
+    {
+      "path": "tools/native_host_toolchain.py",
+      "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F",
+      "byte_count": 5317,
+      "line_count": 116
+    },
+    {
+      "path": "tests/test_native_host_toolchain.py",
+      "sha256": "EAB54E9FDE9435B29C56866CD5A4A6600E54AB2CB14BE0604818685105316393",
+      "byte_count": 8341,
+      "line_count": 174
+    },
+    {
+      "path": "tools/qualify_native_elf_loader.py",
+      "sha256": "075739F71298917D0AC3DE754D63DC57BFD64AF7A302D232D4AFA608FC539F6B",
+      "byte_count": 33002,
+      "line_count": 805
+    },
+    {
+      "path": "tools/qualify_native_toolchain.py",
+      "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50",
+      "byte_count": 22364,
+      "line_count": 573
+    },
+    {
+      "path": "tests/test_native_toolchain_qualification.py",
+      "sha256": "E2FE69E871374E8E5B721BDE08CCD81E63363B3294523BD0260FAAECD6FB961F",
+      "byte_count": 10595,
+      "line_count": 223
+    },
+    {
+      "path": "runtime/native_kernel_entry.py",
+      "sha256": "A59F1242952CC3F3AED861542B2C964962ED8599B9F7649BB25F89851AA1B730",
+      "byte_count": 9417,
+      "line_count": 217
+    },
+    {
       "path": "docs/checkpoints/cycle181-memory-qualification.md",
       "sha256": "C7E240FB6532BFDE6F08509569A3E68A577AE7570D6FB7F07B4CD725D657A252",
       "byte_count": 9102,
@@ -407,9 +455,9 @@
     },
     {
       "path": "tests/test_native_kernel_entry.py",
-      "sha256": "97287CCCD3CDEA6048DA3B8167519F25B055EBDFEE96635AA9BF8BD5C658187B",
-      "byte_count": 7983,
-      "line_count": 170
+      "sha256": "6E2578B3EF160D1A0F84A9CD95853CA461887A6B10D693401F1ECA43818DF47B",
+      "byte_count": 10052,
+      "line_count": 201
     },
     {
       "path": "tests/test_native_dependency_release_gate.py",
@@ -713,15 +761,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "F882E48487778996C36B1886BBAA3E02AF8F06BEA1B1157AF887D545F2015866",
-      "byte_count": 89909,
-      "line_count": 1188
+      "sha256": "1B772E4BFA7549B4D99AE88C5AD91D8257E1409FE26736EA304A3982FE69767A",
+      "byte_count": 90703,
+      "line_count": 1199
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "B9260D8D7AB9B6D45685CCCEBDA5D4D610ED391E84123F293C344DF9868C2CCD",
-      "byte_count": 413442,
-      "line_count": 3137
+      "sha256": "53C29F61CBA96AF767B7FCB2516265A6E4EA98EB589ACD8D2B776008F9BCBBAA",
+      "byte_count": 416090,
+      "line_count": 3178
     },
     {
       "path": "docs/publication-boundary.md",
@@ -797,9 +845,9 @@
     },
     {
       "path": "runs/native_kernel_entry_readiness.json",
-      "sha256": "B9E79FE7CABA4931C3654134A68934B732DD77A6F1555179C2E09EF93D6212D6",
-      "byte_count": 28018,
-      "line_count": 806
+      "sha256": "5B3A8DAD63C21416A43074664F9C52B9BE8FB6E906824AF30F805F5FFC65CED5",
+      "byte_count": 29404,
+      "line_count": 842
     },
     {
       "path": "runs/native_kernel_load_readiness.json",
