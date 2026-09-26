@@ -722,7 +722,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
             item.replace("TEST_COUNT", str(test_count))
             for item in PHASE_EVIDENCE.get(phase_id, [])
         ]
-        phase["current_gaps"] = PHASE_GAPS[phase_id]
+        phase["current_gaps"] = list(PHASE_GAPS[phase_id])
         phase["exit_gate"] = exit_gates[phase_id]
 
     status_counts = Counter(phase["status"] for phase in phases)

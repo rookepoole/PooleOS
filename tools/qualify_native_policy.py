@@ -660,7 +660,7 @@ def main(argv: list[str] | None = None) -> int:
     readiness = qualify(args.toolchain_root.resolve())
     errors = ppol1.readiness_errors(readiness, ROOT)
     if errors:
-        raise QualificationError("generated PPOL1 readiness is invalid: " + "; ".join(errors))
+        raise QualificationError("generated PPOL1 readiness is invalid: " + "; ".join(str(error) for error in errors))
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(readiness, indent=2) + "\n", encoding="utf-8", newline="\n")
     print(

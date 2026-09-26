@@ -6,8 +6,8 @@
   "inputs": {
     "contract": {
       "path": "specs/native-policy-contract.json",
-      "bytes": 8222,
-      "sha256": "A236C577393FDC05FC4701222D487E0DEA09203B68243205C55ED08BE16E1F6A"
+      "bytes": 9387,
+      "sha256": "02A343483A7539DFCE1E8EF90B88269FD30E0DAB7EE879555159B7F5741A4F00"
     },
     "golden_vectors": {
       "path": "specs/native-policy-golden-vectors.json",
@@ -22,7 +22,7 @@
     "toolchain_qualification": {
       "path": "runs/native_toolchain_qualification.json",
       "bytes": 14423,
-      "sha256": "7D38E83F0A9078D7426DDB9A1D1D0A8F43E5E18057066D2151F81CBDA40464FF"
+      "sha256": "87668ADC571427244CD490D172CD01BAA3871709A0D76F7319D665526B68CFB5"
     },
     "tier1_profile": {
       "path": "specs/tier1-hardware-target.json",
@@ -30,6 +30,41 @@
       "sha256": "E6976539E72D32974918B2ABA7AB53043AB44AB478D8CBA0ABF9E30E66869F89"
     },
     "implementation_inputs": [
+      {
+        "path": "native/.cargo/config.toml",
+        "bytes": 539,
+        "sha256": "7983881C5CAD2B909CCA64BFA7F5895EC56377B0E52967444CB2818A69FA4FE1"
+      },
+      {
+        "path": "native/rust-toolchain.toml",
+        "bytes": 131,
+        "sha256": "06C4E0BD63FE84DCB26A0FAE52D96F23C38979DBE6F154D58EAB1547F81FA26B"
+      },
+      {
+        "path": "specs/native-toolchain-lock.json",
+        "bytes": 4017,
+        "sha256": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E"
+      },
+      {
+        "path": "specs/native-host-msvc-profile.json",
+        "bytes": 2092,
+        "sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182"
+      },
+      {
+        "path": "tools/native_host_toolchain.py",
+        "bytes": 5317,
+        "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+      },
+      {
+        "path": "tools/qualify_native_toolchain.py",
+        "bytes": 22364,
+        "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+      },
+      {
+        "path": "tests/test_native_boot_host_toolchain.py",
+        "bytes": 8247,
+        "sha256": "39514B13649D45BB60C2C0471F80F45D4B176C018ED7C7B9B430BC4D8DE63C02"
+      },
       {
         "path": "native/Cargo.toml",
         "bytes": 601,
@@ -57,8 +92,8 @@
       },
       {
         "path": "runtime/native_policy.py",
-        "bytes": 58470,
-        "sha256": "6B7240337791A2AF2377F321109144FCE4E0861E2D99BD773CBA19E1CAAAC39B"
+        "bytes": 59322,
+        "sha256": "1301C4D02F3333F1CBB72D7F0CCC37FCDE7E7AB6A7B1388F0E39B97F6C2527C4"
       },
       {
         "path": "runtime/native_boot_artifact.py",
@@ -77,8 +112,8 @@
       },
       {
         "path": "runtime/native_symbols.py",
-        "bytes": 55645,
-        "sha256": "41AF28F0C3E446F5E1A3C6B59AA82C78C1378EFF612DB8EBBAABA0301C100D7F"
+        "bytes": 56515,
+        "sha256": "F360441FBDBAEADAC34DA5041867A40B44A525E73AC593F73A886D00B5EAE5F8"
       },
       {
         "path": "runtime/native_microcode.py",
@@ -87,8 +122,8 @@
       },
       {
         "path": "runtime/native_firmware.py",
-        "bytes": 51184,
-        "sha256": "9787C5D73D8EA045E2F3CF088CFF39FABC453FC779DCD2D71FCD11393DC37808"
+        "bytes": 52263,
+        "sha256": "CA55F8DA2D3FE585FB35D9E10E576B5B7FC8F132A752EAE92CFDE0521A63EDFC"
       },
       {
         "path": "tools/generate_native_policy_vectors.py",
@@ -97,8 +132,8 @@
       },
       {
         "path": "tools/qualify_native_policy.py",
-        "bytes": 35406,
-        "sha256": "D6EFD20411001ADF59C6722784D579A94C2D725745B0C9DE7A7EFE8A25DB84CB"
+        "bytes": 34945,
+        "sha256": "0C42B98FEFC77EC338AFE00F61561DE801EF81949DB59E57BF89B07FE8DD5F44"
       },
       {
         "path": "tests/test_native_policy.py",
@@ -116,6 +151,12 @@
     "status": "pass",
     "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
     "host_tests": 6,
+    "host_toolchain": {
+      "profile_id": "POOLEOS-HOST-MSVC-1",
+      "profile_sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182",
+      "verified_before_build": true,
+      "scope": "host_linker_and_library_trees_not_complete_host_attestation"
+    },
     "rustfmt_packages": 1,
     "clippy_targets": 1,
     "no_std_targets": [

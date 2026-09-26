@@ -30,6 +30,41 @@
     },
     "implementation_inputs": [
       {
+        "byte_count": 539,
+        "path": "native/.cargo/config.toml",
+        "sha256": "7983881C5CAD2B909CCA64BFA7F5895EC56377B0E52967444CB2818A69FA4FE1"
+      },
+      {
+        "byte_count": 131,
+        "path": "native/rust-toolchain.toml",
+        "sha256": "06C4E0BD63FE84DCB26A0FAE52D96F23C38979DBE6F154D58EAB1547F81FA26B"
+      },
+      {
+        "byte_count": 4017,
+        "path": "specs/native-toolchain-lock.json",
+        "sha256": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E"
+      },
+      {
+        "byte_count": 2092,
+        "path": "specs/native-host-msvc-profile.json",
+        "sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182"
+      },
+      {
+        "byte_count": 5317,
+        "path": "tools/native_host_toolchain.py",
+        "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+      },
+      {
+        "byte_count": 22364,
+        "path": "tools/qualify_native_toolchain.py",
+        "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+      },
+      {
+        "byte_count": 8247,
+        "path": "tests/test_native_boot_host_toolchain.py",
+        "sha256": "39514B13649D45BB60C2C0471F80F45D4B176C018ED7C7B9B430BC4D8DE63C02"
+      },
+      {
         "byte_count": 601,
         "path": "native/Cargo.toml",
         "sha256": "210BCDAF2778606B42C688E7BACD950FC0EEF3045081E884CF7846B9A7D78DF4"
@@ -70,19 +105,19 @@
         "sha256": "01AA5A812CF32D3E850A93CF19E08B03BBB64F9F79217BD5788DC0B6A9ABA654"
       },
       {
-        "byte_count": 28018,
+        "byte_count": 31364,
         "path": "runs/native_kernel_entry_readiness.json",
-        "sha256": "B9E79FE7CABA4931C3654134A68934B732DD77A6F1555179C2E09EF93D6212D6"
+        "sha256": "ACAEC303FA750DD75CA8B721B0BD359E4291CF1C4218B3DDFBFE09AF17390B65"
       },
       {
-        "byte_count": 8479,
+        "byte_count": 9490,
         "path": "runtime/native_kernel_entry.py",
-        "sha256": "B95FD6BD0512D6F23EDEC90B1E622C340F214012089C6D0C13CE4E01AB04B6F3"
+        "sha256": "D5573D19200D2C8AB0EEE71DD082E5881BA3285EA327AD120C03101D4E894934"
       },
       {
-        "byte_count": 55645,
+        "byte_count": 56515,
         "path": "runtime/native_symbols.py",
-        "sha256": "41AF28F0C3E446F5E1A3C6B59AA82C78C1378EFF612DB8EBBAABA0301C100D7F"
+        "sha256": "F360441FBDBAEADAC34DA5041867A40B44A525E73AC593F73A886D00B5EAE5F8"
       },
       {
         "byte_count": 8217,
@@ -95,9 +130,9 @@
         "sha256": "6F228DD0585AAB71461FF4D8C948AA4198E4A6869363E276BED26DBDCC116F8A"
       },
       {
-        "byte_count": 32873,
+        "byte_count": 32361,
         "path": "tools/qualify_native_symbols.py",
-        "sha256": "177C3883276CAAD4545932F3113750553BC2E344FAFC0E1FE886BC68F27CAE5E"
+        "sha256": "E4BA1BB880FD893CCBF5000D6D9E08CB4570DABAFA797C72FF829EAD291956AF"
       },
       {
         "byte_count": 9735,
@@ -1370,6 +1405,12 @@
   "validator_qualification": {
     "clippy_targets": 1,
     "host_tests": 4,
+    "host_toolchain": {
+      "profile_id": "POOLEOS-HOST-MSVC-1",
+      "profile_sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182",
+      "scope": "host_linker_and_library_trees_not_complete_host_attestation",
+      "verified_before_build": true
+    },
     "no_std_targets": [
       "x86_64-unknown-none",
       "x86_64-unknown-uefi"

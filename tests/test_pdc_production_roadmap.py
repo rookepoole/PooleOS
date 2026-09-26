@@ -29,6 +29,17 @@ class PdcProductionRoadmapTests(unittest.TestCase):
     def test_roadmap_matches_schema(self) -> None:
         self.assertEqual(validate_json(self.roadmap, self.schema), [])
 
+    def test_generation_is_repeatable_without_mutating_prior_results(self) -> None:
+        from tools.generate_native_production_roadmap import make_roadmap
+
+        count = self.roadmap["baseline"]["pooleos_test_count"]
+        date = self.roadmap["status_date"]
+        first = make_roadmap(count, date)
+        frozen = json.dumps(first, sort_keys=True)
+        second = make_roadmap(count, date)
+        self.assertEqual(json.dumps(first, sort_keys=True), frozen)
+        self.assertEqual(json.dumps(second, sort_keys=True), frozen)
+
     def test_native_architecture_is_unambiguous(self) -> None:
         architecture = self.roadmap["architecture"]
         self.assertEqual(architecture["mode"], "native_capability_microkernel")

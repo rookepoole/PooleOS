@@ -82,16 +82,26 @@
         "policy_readiness": {"$ref": "#/$defs/binding"},
         "boot_trust_contract": {"$ref": "#/$defs/binding"},
         "boot_trust_readiness": {"$ref": "#/$defs/binding"},
-        "implementation_inputs": {"type": "array", "minItems": 177, "maxItems": 177, "items": {"$ref": "#/$defs/binding"}}
+        "implementation_inputs": {"type": "array", "minItems": 181, "maxItems": 181, "items": {"$ref": "#/$defs/binding"}}
       }
     },
     "build": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["host_contract_test_count", "host_contract_test_pass_count", "development_transfer_feature", "selected_development_feature", "clean_build_count", "exact_clean_build_match", "sha256", "byte_count", "inspection", "host_leakage_marker_count", "host_leakage_hit_count"],
+      "required": ["host_toolchain", "host_contract_test_count", "host_contract_test_pass_count", "development_transfer_feature", "selected_development_feature", "clean_build_count", "exact_clean_build_match", "sha256", "byte_count", "inspection", "host_leakage_marker_count", "host_leakage_hit_count"],
       "properties": {
-        "host_contract_test_count": {"minimum": 70},
-        "host_contract_test_pass_count": {"minimum": 70},
+        "host_toolchain": {
+          "type": "object", "additionalProperties": false,
+          "required": ["profile_id", "profile_sha256", "verified_before_build", "scope"],
+          "properties": {
+            "profile_id": {"const": "POOLEOS-HOST-MSVC-1"},
+            "profile_sha256": {"$ref": "#/$defs/sha256"},
+            "verified_before_build": {"type": "boolean", "const": true},
+            "scope": {"const": "host_linker_and_library_trees_not_complete_host_attestation"}
+          }
+        },
+        "host_contract_test_count": {"type": "integer", "const": 8},
+        "host_contract_test_pass_count": {"type": "integer", "const": 8},
         "development_transfer_feature": {"const": false},
         "selected_development_feature": {"const": null},
         "clean_build_count": {"const": 2},

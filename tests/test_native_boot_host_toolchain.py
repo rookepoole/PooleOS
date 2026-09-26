@@ -8,8 +8,10 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from runtime import native_kernel_revalidation, native_policy, native_pooleboot, native_symbols
+from runtime import native_boot_trust, native_firmware, native_kernel_revalidation, native_policy, native_pooleboot, native_symbols
 from tools import (
+    qualify_native_boot_trust,
+    qualify_native_firmware,
     qualify_native_kernel_revalidation,
     qualify_native_policy,
     qualify_native_pooleboot,
@@ -24,6 +26,8 @@ PROFILES = (
     (qualify_native_policy, native_policy, "build", "inputs", native_policy.readiness_errors),
     (qualify_native_pooleboot, native_pooleboot, "build", "bindings", native_pooleboot.readiness_contract_errors),
     (qualify_native_kernel_revalidation, native_kernel_revalidation, "build", "inputs", native_kernel_revalidation.readiness_errors),
+    (qualify_native_firmware, native_firmware, "build", "inputs", native_firmware.readiness_errors),
+    (qualify_native_boot_trust, native_boot_trust, "build", "inputs", native_boot_trust.readiness_errors),
 )
 HOST_INPUTS = (
     "native/.cargo/config.toml", "native/rust-toolchain.toml", "specs/native-host-msvc-profile.json",

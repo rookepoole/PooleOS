@@ -723,7 +723,7 @@ def make_readiness(toolchain_root: Path) -> dict[str, Any]:
     golden = psym1.read_json(ROOT / psym1.GOLDEN_RELATIVE)
     errors = psym1.contract_errors(contract) + psym1.golden_errors(golden)
     if errors:
-        raise QualificationError("; ".join(errors))
+        raise QualificationError("; ".join(str(error) for error in errors))
     (ROOT / "tmp").mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="psym1-", dir=ROOT / "tmp") as temporary:
         temporary_root = Path(temporary)
@@ -809,7 +809,7 @@ def main(argv: list[str] | None = None) -> int:
     readiness = make_readiness(args.toolchain_root.resolve())
     errors = psym1.readiness_errors(readiness)
     if errors:
-        raise QualificationError("; ".join(errors))
+        raise QualificationError("; ".join(str(error) for error in errors))
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(
         json.dumps(readiness, indent=2, sort_keys=True) + "\n",

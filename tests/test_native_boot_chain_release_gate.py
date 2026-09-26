@@ -1,5 +1,6 @@
 import copy
 import json
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -10,6 +11,41 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class NativeBootChainReleaseGateTests(unittest.TestCase):
+    def test_pooleboot_gate_rejects_forged_host_test_counts(self) -> None:
+        self.assertTrue(gate.check_native_pooleboot_readiness()["ok"])
+        receipt = json.loads((ROOT / "runs/native_pooleboot_readiness.json").read_bytes())
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "receipt.json"
+            for field in ("host_contract_test_count", "host_contract_test_pass_count"):
+                self.assertEqual(receipt["build"][field], 8)
+                for value in (0, 7, 9, True, "8", None):
+                    with self.subTest(field=field, value=value):
+                        candidate = copy.deepcopy(receipt)
+                        candidate["build"][field] = value
+                        path.write_text(json.dumps(candidate), encoding="utf-8")
+                        check = gate.check_native_pooleboot_readiness(path)
+                        self.assertFalse(check["ok"], check["detail"])
+
+    def test_exact_input_schema_counts_match_declared_source_sets(self) -> None:
+        from runtime import native_boot_trust, native_kernel_load, native_pooleboot
+
+        for module, section, inputs in (
+            (native_boot_trust, "inputs", native_boot_trust.IMPLEMENTATION_INPUTS),
+            (native_kernel_load, "bindings", native_kernel_load.IMPLEMENTATION_INPUTS),
+            (native_pooleboot, "bindings", native_pooleboot.PROOF_IMPLEMENTATION_INPUTS),
+        ):
+            with self.subTest(module=module.__name__):
+                schema = json.loads((ROOT / module.READINESS_SCHEMA_RELATIVE).read_bytes())
+                declaration = schema["properties"][section]["properties"]["implementation_inputs"]
+                self.assertEqual(declaration["minItems"], len(inputs))
+                self.assertEqual(declaration["maxItems"], len(inputs))
+                self.assertEqual(len(inputs), len(set(inputs)))
+                if module is not native_kernel_load:
+                    self.assertIn("host_toolchain", schema["properties"]["build"]["required"])
+        contract = json.loads((ROOT / native_boot_trust.CONTRACT_SCHEMA_RELATIVE).read_bytes())
+        self.assertEqual(contract["properties"]["implementation_bindings"]["minItems"], len(native_boot_trust.IMPLEMENTATION_INPUTS))
+        self.assertEqual(contract["properties"]["implementation_bindings"]["maxItems"], len(native_boot_trust.IMPLEMENTATION_INPUTS))
+
     def test_boot_chain_accepts_source_current_receipts(self) -> None:
         for profile in ("symbol", "policy", "kernel_load", "pooleboot", "kernel_revalidation", "kernel_transfer"):
             with self.subTest(profile=profile):

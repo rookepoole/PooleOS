@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_kind": "pooleos_native_kernel_revalidation_readiness",
-  "status_date": "2026-09-12",
+  "status_date": "2026-09-26",
   "status": "pass_single_host_fail_closed_non_promoting",
   "contract_id": "PKREVAL1",
   "selected_move_id": "N5-INNER-KERNEL-REVALIDATE-001",
@@ -19,6 +19,41 @@
       "byte_count": 4017
     },
     "implementation_inputs": [
+      {
+        "path": "native/.cargo/config.toml",
+        "sha256": "7983881C5CAD2B909CCA64BFA7F5895EC56377B0E52967444CB2818A69FA4FE1",
+        "byte_count": 539
+      },
+      {
+        "path": "native/rust-toolchain.toml",
+        "sha256": "06C4E0BD63FE84DCB26A0FAE52D96F23C38979DBE6F154D58EAB1547F81FA26B",
+        "byte_count": 131
+      },
+      {
+        "path": "specs/native-toolchain-lock.json",
+        "sha256": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E",
+        "byte_count": 4017
+      },
+      {
+        "path": "specs/native-host-msvc-profile.json",
+        "sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182",
+        "byte_count": 2092
+      },
+      {
+        "path": "tools/native_host_toolchain.py",
+        "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F",
+        "byte_count": 5317
+      },
+      {
+        "path": "tools/qualify_native_toolchain.py",
+        "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50",
+        "byte_count": 22364
+      },
+      {
+        "path": "tests/test_native_boot_host_toolchain.py",
+        "sha256": "39514B13649D45BB60C2C0471F80F45D4B176C018ED7C7B9B430BC4D8DE63C02",
+        "byte_count": 8247
+      },
       {
         "path": "native/handoff/src/lib.rs",
         "sha256": "983DAFD71E0B892F6F98C614D43600CBEBDDBD7C0AA1E2D81CDAA545E165B110",
@@ -71,13 +106,13 @@
       },
       {
         "path": "runtime/native_kernel_revalidation.py",
-        "sha256": "6923D052A41647A30F3E02D245E9AB438792721CD51F4AF12575014C4590CC9C",
-        "byte_count": 24960
+        "sha256": "BBB2C801FC590C47BFD24D008AFAE2C5ECCC6E0B3B32AD3E4CCA99DA0C2D8AD9",
+        "byte_count": 25758
       },
       {
         "path": "tools/qualify_native_kernel_revalidation.py",
-        "sha256": "7EA18961D671DBB659BE9D2CA4D5BB89A995BA204C0BF2CEA7E4221EA4587A21",
-        "byte_count": 18229
+        "sha256": "E2CB22A74B5F5F1012F8E61A96365EE1DC08A84CBE33A6EE202A25CB8C8D899F",
+        "byte_count": 17754
       },
       {
         "path": "tests/test_native_kernel_revalidation.py",
@@ -101,8 +136,8 @@
       },
       {
         "path": "runs/native_symbol_readiness.json",
-        "sha256": "6E251E2863ABC20B4F1302805F092C382BE7D9CF7CA0AA70CB4E20270E33F96F",
-        "byte_count": 40002
+        "sha256": "F2AD36EBD03B14BF9C1BE17CA9AABFFA146703D507B5DB70E7EEB9AC8147BCE0",
+        "byte_count": 41552
       },
       {
         "path": "runs/native_microcode_readiness.json",
@@ -111,18 +146,18 @@
       },
       {
         "path": "runs/native_firmware_readiness.json",
-        "sha256": "8D795E2DB9166CE4519FB2F41352E517660FCB7A3960C0E292743CB3C13072F4",
-        "byte_count": 18880
+        "sha256": "BEDA71BC705EDF813259778E1B40CAB425DF7AAFDD70A4D0B85460E0FB4610A0",
+        "byte_count": 20395
       },
       {
         "path": "runs/native_policy_readiness.json",
-        "sha256": "40DFF7B628EAC8DB946BA9535740053A5F6B044E5882D3C527D20C1A273AE39E",
-        "byte_count": 23405
+        "sha256": "4B3C4CFBEB27119D7D84317F718AB472B0F5F48B6CB89B110E3272767AE2EC8B",
+        "byte_count": 24920
       },
       {
         "path": "runs/native_boot_trust_readiness.json",
-        "sha256": "51E86CA2039D0059F99A8D5D7A60A4225F30B241561FA74EE23A8E366F54ADFD",
-        "byte_count": 36618
+        "sha256": "85E7EEF84704C436213904C0C2D67F9A76EE9090923A822D98EBF34880A20D47",
+        "byte_count": 38168
       },
       {
         "path": "runs/native_system_manifest_readiness.json",
@@ -132,10 +167,16 @@
     ]
   },
   "build": {
+    "host_toolchain": {
+      "profile_id": "POOLEOS-HOST-MSVC-1",
+      "profile_sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182",
+      "verified_before_build": true,
+      "scope": "host_linker_and_library_trees_not_complete_host_attestation"
+    },
     "rustc": "rustc.exe",
     "host_test_count": 245,
     "format_check": "pass",
-    "host_probe_sha256": "917BFAD08C364FC74088E3942C2CE0A12123EEB8AF8602A35B15E6ED773B7794",
+    "host_probe_sha256": "9EB2D3DF43DFFE4AF95B34484427DC49902846084509CFED15A63BB5453CD605",
     "targets": {
       "x86_64-unknown-none": {
         "package": "poolekernel",
