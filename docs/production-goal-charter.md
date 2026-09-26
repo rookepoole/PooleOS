@@ -1,15 +1,30 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-09-12
+Status date: 2026-09-26
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 180
+Last roadmap reconciliation: PooleOS Cycle 181
 
-Current Cycle 180: five CPU profiles pass fourteen fresh virtual boots,
+Current Cycle 181: fourteen memory-through-lock profiles pass 28 final virtual
+boots on the unchanged Cycle 177 kernel; four superseded boots and a pre-guest
+failure remain separate. All 27 selected consistency checks pass; 164 focused
+tests pass and two skip. At least 65 scheduler control entries lack individually
+bound rejection execution, so the reported 660 groups / 2,126 cases are not an
+executed-rejection total. The resumed combined suite passes 331 tests, fails
+exact entry-receipt reproduction once and skips two. A retained rebuild matches
+all kernel product fields and bytes; only the host-probe size differs. Resolve
+`N6-KENTRY-001` reproduction before `ADD-N36-RECEIPT-COVERAGE-001`, starting
+PKSCHED3, full exact-candidate qualification and any PR #78 merge.
+No normative condition, phase, flag or production gate closes. The September 26
+resumption reconciles September 12/13 evidence and diagnoses receipt drift,
+not new guest boots or native features.
+[Cycle 181 evidence and limits](checkpoints/cycle181-memory-qualification.md).
+
+Historical Cycle 180: five CPU profiles pass fourteen fresh virtual boots,
 225 controls and 46 focused Python tests. The separate expected TCG exception
 diagnostic is not a successful exception boot. Positive regressions now use
 untouched generated receipts; nineteen aggregate controls pass. Selected

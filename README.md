@@ -11,12 +11,15 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**In-progress cloud checkpoint:** Cycle 181 replays fourteen memory-through-lock
+**Latest development checkpoint:** Cycle 181 replays fourteen memory-through-lock
 profiles with 28 final virtual boots; 164 focused tests pass and two skip.
 All 27 selected consistency checks pass, but at least 65 scheduler control
-groups lack individually bound execution evidence. Metadata reconciliation and
-full exact-candidate qualification remain unfinished. This source backup is not
-merge-qualified; the generated progress ledgers still describe Cycle 180.
+groups lack individually bound execution evidence. The September 26 closeout
+also fails exact entry-receipt reproduction: 331 tests pass, one fails and two
+skip. A preserved rebuild confirms identical kernel bytes; only a host probe's
+recorded size differs. Progress ledgers now describe Cycle 181. Next resolve
+`N6-KENTRY-001` reproduction, then scheduler control evidence and full
+qualification. This remains a pre-production checkpoint, not merge-qualified.
 [Cycle 181 status and resume order](docs/checkpoints/cycle181-memory-qualification.md).
 
 **Last completed development checkpoint:** Cycle 180 qualifies five CPU profiles with
@@ -36,7 +39,7 @@ This is pre-production development, not a new ISO or main-qualified release.
 [Cycle 179 evidence](docs/checkpoints/cycle179-boot-chain-requalification.md).
 
 **Development backup:** [draft PR #78](https://github.com/rookepoole/PooleOS/pull/78)
-tracks Cycles 177-180 and the unfinished Cycle 181 checkpoint on
+tracks Cycles 177-181 on
 `agent/n12-dispatch-execution-holds`. Cycle 179's combined
 closeout suite passed 128 tests. Source checkpoints on this branch are separate
 from qualified `main`; private execution logs and media are not part of this backup.

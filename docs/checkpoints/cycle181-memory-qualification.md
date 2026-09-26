@@ -1,4 +1,61 @@
-# Cycle 181: Memory Qualification, In-Progress Cloud Checkpoint
+# Cycle 181: Memory Replay And Reproduction Blockers
+
+Current status, 2026-09-26: **progress reconciled; not merge-qualified**.
+The paused source snapshot at `f0e513e` was resumed under the full native goal.
+The previous backup turn is classified as progress: its source commit and
+remote preservation were verified. No live process was assumed from old notes.
+
+## Resumed Closeout
+
+The roadmap, architecture bindings, build plan, charter status and tests now
+track Cycle 181. They preserve all 8,996 locked requirements, 57 additions,
+40 phases, 301 subphases, 94 flags (35 open) and 20 release gaps. The normative
+charter is unchanged. Architecture binds 251 paths; 962 tests are discovered,
+which is not a full-suite pass. The original backup below remains history.
+
+The initial metadata suite failed one stale 13/27 expectation; the corrected
+suite passes all 45 tests. Its log SHA-256 is
+`5C836C076F91ECF9F7DC0709107F4E1A0FC6DCECB20C9A871147AEEABB954261`.
+The earlier failed log is retained separately, not relabeled successful.
+
+The combined suite ran 334 tests: **331 passed, one failed, two skipped**.
+The failure is `test_qualifier_reproduces_receipt_and_product_exactly`.
+Combined log SHA-256:
+`B9AA16FF5BE22A4EDCFE29F93EA36065612476EEC7605890D5472F06B8C52477`.
+Neither the full canonical audit nor merge qualification passed.
+
+An additional preserved, non-promoting entry rebuild passes 245 kernel host
+tests, 43 controls and two matching clean kernel builds. Its canonical kernel
+bytes and all product fields match the public Cycle 178 receipt exactly.
+The single receipt difference is:
+
+- Field: `toolchain.pkelf1_probe_qualification.host_probe_byte_count`.
+- Recorded: 148,480 bytes; observed: 147,968 bytes.
+- Diagnostic receipt SHA-256:
+  `0E4876E1E8A67E91791FB2C16DB658667AD671122B66EF6E88032ED7FC03F1C5`.
+- Diagnostic execution log SHA-256:
+  `A8D5A5CCC1B43EF0D4BECA8AD7DE2A0887D24BFA6F531C24AA587FD09893971C`.
+
+The probe is described as ephemeral host-only transport. That description does
+not explain its drift or authorize ignoring a failed exact comparison. The
+root cause remains unproven. The test has not been weakened; the original
+public entry receipt and every downstream receipt remain unchanged. These
+builds are not new guest boots, new native functionality or a new ISO.
+
+Current next move: `N6-KENTRY-001` at N6.4-N6.6, with N2 host-tool provenance
+and the existing open N36 evidence requirement. Retain and compare actual
+host probes, compiler/linker inputs and environment; repair the build/evidence
+contract only from a reproduced cause. Then requalify affected dependencies.
+Next address PKSCHED3, PKSCHED4/5/6 and the broader control-coverage audit,
+followed by exact canonical/Doctor/publication/review gates and N12.3 contexts.
+The existing bounded-product flag is not evidence that receipt reproduction
+or the full release gate passes; no additional flag or phase closes here.
+
+PooleGlyph Phase 65, its owner-modified report and the frozen demo are rechecked
+and unchanged. No syntax, AST, semantics, Core IR, PGASM, PGB2, PGVM2, host ABI,
+policy or public/private integration boundary changes. Phase 66 remains open.
+
+## Historical Backup Snapshot
 
 Status: **in progress; source backup only; not merge-qualified**.
 Status date: 2026-09-12. Execution records continue into 2026-09-13 UTC.

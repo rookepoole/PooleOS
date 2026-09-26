@@ -213,6 +213,7 @@ DEFAULT_GAPS[4] = (
 
 
 DEFAULT_GAPS[4] = (
+    "Cycle 181 resumed closeout fails exact entry-receipt reproduction: the host-only PKELF1 probe is 147968 bytes rather than 148480. A preserved rebuild confirms identical kernel product fields and canonical bytes; host-probe provenance/root cause remains unqualified. Resolve N6-KENTRY-001 before the scheduler control audit; the combined suite has 331 passes, one failure and two skips, not a full pass. "
     "Cycle 181 replays fourteen memory-through-lock profiles with 28 final virtual boots and four superseded boots. All 27 selected consistency checks and 164 of 166 focused tests pass (two optional skips). The 660 groups and 2126 cases are reported counts: at least 65 scheduler source-control entries lack per-control rejection execution. Repair ADD-N36-RECEIPT-COVERAGE-001 beginning PKSCHED3 before exact full qualification, publication/review and PR78 merge, then N12.3 live contexts. No phase, flag, native bytes or production condition closes. "
     "Cycle 180 qualifies five CPU profiles on the unchanged kernel with fourteen fresh virtual "
     "boots, 225 controls and 46 focused tests; one expected TCG diagnostic remains separate. "

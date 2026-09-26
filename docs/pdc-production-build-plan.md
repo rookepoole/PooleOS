@@ -1,15 +1,46 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-09-12
-Plan version: 2.83.0-native-cpu-qualification
-Roadmap cycle: PooleOS Cycle 180
+Status date: 2026-09-26
+Plan version: 2.84.0-native-memory-qualification
+Roadmap cycle: PooleOS Cycle 181
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 180: Current-Kernel CPU Qualification
+## Cycle 181: Memory Replay And Control-Evidence Gap
+
+`N9-PMM-ACPI-CONSUMER-001` at N9.2-N9.4 and the dependent N8/N12 profiles
+pass fourteen final qualifiers and 28 virtual boots on unchanged Cycle 177
+native bytes. Four earlier atomics/locks boots are superseded and one SMP
+source-audit failure occurred before guest launch. All 27 selected native
+consistency checks pass; 164 focused tests pass and two optional transcripts
+skip. Fresh guest markers, current entry, independent memory oracles and
+the exact generated receipts are checked without in-memory receipt rebinding.
+
+The source audit now pins ten SMP scheduler Rust tests and both exhaustion
+regressions. Four source-audit negatives and 79 aggregate identity/accounting
+cases pass. However, the 660 reported control groups / 2,126 cases include at
+least 65 PKSCHED3/4/5/6 attestations without individual rejection execution.
+This is a merge blocker under existing `ADD-N36-RECEIPT-COVERAGE-001`, not a
+new phase or a reason to describe all reported cases as executed rejections.
+
+The September 26 resumption reconciles the interrupted September 12/13
+checkpoint. Architecture binds 251 paths; the 962-test discovery inventory is
+not a full-suite pass. N0 custody remains separate, all phase/flag states and
+the normative charter remain unchanged, and main remains qualified Cycle 176.
+The combined closeout has 331 passes, one exact-entry-reproduction failure and
+two skips. A retained rebuild matches kernel bytes and every product field;
+only the host-only PKELF1 probe size differs (148,480 versus 147,968 bytes).
+The cause remains unproven; no public receipt is replaced or test weakened.
+Next resolve `N6-KENTRY-001` with N2 host-tool provenance, then repair PKSCHED3
+control execution, PKSCHED4/5/6 and broader coverage;
+run full exact-candidate qualification/publication/review before PR #78 merge
+and N12.3 live context/CPU-retirement integration. No new ISO or production
+claim follows. [Cycle 181 evidence](checkpoints/cycle181-memory-qualification.md).
+
+## Historical Cycle 180: Current-Kernel CPU Qualification
 
 `N7-TRAP-001` at N7.5/N7.6 and the dependent N7.1/N7.3/N7.4 profiles pass
 fourteen fresh virtual boots and 225 controls on the unchanged Cycle 177 kernel.
@@ -1878,6 +1909,11 @@ Exit gate: all 16 logical processors repeatedly start under Tier 0 and Tier 1 pr
 
 ### N9 - Physical and Virtual Memory, MMIO, Allocation, and Reclaim (`partial`)
 
+Cycle 181 replays current PKPMM7/PKACPI1 and PKVM3 with independent marker
+oracles and exact entry provenance. The bounded active-root/AP ownership
+evidence is current again; general live task contexts and CPU retirement remain
+open. This replay does not close N9 or the cross-profile control-evidence audit.
+
 Cycle 175 requalifies PMM/ACPI reclaim and sparse VM against current kernel-entry
 evidence with four fresh boots and 239 controls. Broader allocator/VM behavior
 and the existing N9 exit remain open; no source or phase-status promotion occurs.
@@ -2039,6 +2075,12 @@ Subphases:
 Exit gate: a hostile driver/device cannot DMA outside its granted pages or inject unowned interrupts; all mappings disappear on teardown; fault evidence names exact requester and authority.
 
 ### N12 - Concurrency, Scheduler, Deferred Work, and Context Switching (`partial`)
+
+Cycle 181 refreshes the unchanged kernel's scheduler/atomic/lock execution
+receipts. At least 65 source-control attestations in PKSCHED3/4/5/6 lack
+individually executed rejection evidence. Resolve the existing N36 coverage
+requirement before merge; live task-context/architectural retirement ownership
+remains the next N12.3 implementation boundary, not a completed replay claim.
 
 Cycle 177 adds mandatory PKEXEC1 dispatch holds before remote scheduler queue
 mutation. Scheduler ACK, Dead, drop, forget and unwind do not release execution
@@ -2614,6 +2656,13 @@ Exit gate: supported failures either recover locally or enter a known safe state
 
 ### N36 - Verification, Fuzzing, Fault Injection, Security, and Conformance (`partial`)
 
+Cycle 181 identifies a concrete control-evidence gap: PKSCHED3/4/5/6 append
+14/16/18/17 success records without executing each rejection. Track these under
+`ADD-N36-RECEIPT-COVERAGE-001` and its open flag, starting PKSCHED3. Preserve
+all raw receipts and failed attempts, distinguish static attestations from
+execution, and audit other profiles. Selected consistency passes do not waive
+this gap, the exact-candidate audit, independent builders or release evidence.
+
 Cycle 180 strengthens CPU provenance regressions with untouched generated
 positive receipts, eighty embedded-entry substitutions, twenty invalid current
 dependencies and nineteen aggregate gate controls. Forty-six focused tests
@@ -2879,7 +2928,18 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 
 ## 12. Near-Term Execution Sequence
 
-Current Cycle 180 sequence: the five CPU profiles pass. Continue with
+Current Cycle 181 sequence: memory-through-lock replay passes all 27 selected
+consistency checks, but 65 individually unproven scheduler control groups block
+merge qualification. The resumed combined suite also fails exact entry-receipt
+reproduction despite matching kernel bytes. First resolve `N6-KENTRY-001`
+host-probe build/evidence drift, retaining the failing artifacts and exact
+comparison. Then repair `ADD-N36-RECEIPT-COVERAGE-001` starting PKSCHED3,
+then PKSCHED4/5/6 and the broader coverage audit. Requalify affected evidence;
+pass full exact-candidate canonical/Doctor, publication and review gates before
+PR #78 merge, then resume N12.3 live contexts and architectural CPU retirement.
+N0 custody and physical target prerequisites remain separate blockers.
+
+Historical Cycle 180 sequence: the five CPU profiles pass. Continue with
 `N9-PMM-ACPI-CONSUMER-001`, followed by VM/IRQ/SMP/scheduler/atomic/lock replay.
 Fourteen of 27 selected checks remain stale. Full runtime-inclusive exact-source
 canonical/Doctor qualification and publication/review gate the draft PR #78

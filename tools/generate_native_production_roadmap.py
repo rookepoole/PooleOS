@@ -632,6 +632,7 @@ PROGRAM_GAPS[4] = (
 
 
 PROGRAM_GAPS[4] = (
+    "Cycle 181 resumed closeout fails exact entry-receipt reproduction: the host-only PKELF1 probe is 147968 bytes rather than 148480. A preserved rebuild confirms identical kernel product fields and canonical bytes; host-probe provenance/root cause remains unqualified. Resolve N6-KENTRY-001 before the scheduler control audit; the combined suite has 331 passes, one failure and two skips, not a full pass. "
     "Cycle 181 replays fourteen memory-through-lock profiles with 28 final virtual boots and four superseded boots. All 27 selected consistency checks and 164 of 166 focused tests pass (two optional skips). The 660 groups and 2126 cases are reported counts: at least 65 scheduler source-control entries lack per-control rejection execution. Repair ADD-N36-RECEIPT-COVERAGE-001 beginning PKSCHED3 before exact full qualification, publication/review and PR78 merge, then N12.3 live contexts. No phase, flag, native bytes or production condition closes. "
     "Cycle 180 qualifies five CPU profiles on the unchanged kernel with fourteen fresh virtual "
     "boots, 225 controls and 46 focused tests; one expected TCG diagnostic remains separate. "
@@ -3111,6 +3112,8 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
         if phase["id"] in {"N8", "N9", "N12", "N36"}:
             phase["current_evidence"] = [evidence, *phase["current_evidence"]]
             phase["current_gaps"] = [gap, *phase["current_gaps"]]
+        if phase["id"] == "N6":
+            phase["current_gaps"] = [gap, *phase["current_gaps"]]
         if phase["id"] == "N36":
             phase["current_evidence"].insert(0, "Cycle 175 source inventory: 958 Python tests discovered; full qualification pending")
     for flag in roadmap["implementation_flags"]:
@@ -3568,7 +3571,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
 
     checkpoint = "docs/checkpoints/cycle181-memory-qualification.md"
     protocol.update(last_updated_cycle=181, selected_move_id="N9-PMM-ACPI-CONSUMER-001",
-                    owner_independent_next_move_id="ADD-N36-RECEIPT-COVERAGE-001")
+                    owner_independent_next_move_id="N6-KENTRY-001")
     protocol["required_records"].insert(0, checkpoint)
     roadmap["baseline"]["pooleos_cycle"] = 181
     for name in (
@@ -3578,7 +3581,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
     ):
         historical_name = "source_projection" if name == "focused_source_projection" else name
         gate["historical_cycle180_" + historical_name] = gate["current_" + name]
-    gate["qualification_status"] = "native_replay_pass_control_execution_audit_pending"
+    gate["qualification_status"] = "native_replay_pass_entry_reproduction_and_control_audit_pending"
     gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=181)
     gate["current_focused_source_projection"] = {
         "cycle": 181, "scope": "27_selected_native_checks_not_full_canonical_audit",
@@ -3594,13 +3597,36 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
         "entry_receipt_sha256": entry_sha, "core_receipt_sha256": core_sha,
         "core_qualification_stage_count": 17, "core_live_execution_cycle": None,
         "canonical_full_replay_performed": False, "production_ready": False,
-        "next_dependency_move_id": "ADD-N36-RECEIPT-COVERAGE-001",
-        "required_next_gate": "per_control_execution_evidence_then_exact_full_qualification_publication_and_review",
+        "next_dependency_move_id": "N6-KENTRY-001",
+        "required_next_gate": "entry_receipt_reproduction_then_control_execution_and_exact_full_qualification",
     }
     for name in ("entry_provenance", "boot_chain", "cpu"):
         gate["current_" + name + "_qualification"] = dict(
             gate["current_" + name + "_qualification"], source_validation_cycle=181,
         )
+    gate["current_entry_provenance_qualification"].update(
+        exact_receipt_and_product_reproduction_passed=False,
+        latest_reproduction_cycle=181,
+        latest_reproduction_status="receipt_mismatch_kernel_product_identical",
+    )
+    gate["current_closeout_regression"] = {
+        "cycle": 181, "status_date": "2026-09-26", "status": "fail",
+        "tests_run": 334, "tests_passed": 331, "tests_failed": 1, "tests_skipped": 2,
+        "log_sha256": "B9AA16FF5BE22A4EDCFE29F93EA36065612476EEC7605890D5472F06B8C52477",
+        "failed_test": "tests.test_native_kernel_entry.NativeKernelEntryTests.test_qualifier_reproduces_receipt_and_product_exactly",
+        "canonical_full_replay_performed": False, "merge_qualified": False,
+        "production_ready": False,
+        "preserved_entry_diagnostic": {
+            "status": "receipt_mismatch_kernel_product_identical",
+            "differing_path": "$.toolchain.pkelf1_probe_qualification.host_probe_byte_count",
+            "recorded_value": 148480, "observed_value": 147968,
+            "recorded_receipt_sha256": entry_sha,
+            "diagnostic_receipt_sha256": "0E4876E1E8A67E91791FB2C16DB658667AD671122B66EF6E88032ED7FC03F1C5",
+            "execution_log_sha256": "A8D5A5CCC1B43EF0D4BECA8AD7DE2A0887D24BFA6F531C24AA587FD09893971C",
+            "all_kernel_product_fields_equal": True, "canonical_kernel_sha256": kernel_sha,
+            "host_probe_root_cause_established": False, "public_receipt_replaced": False,
+        },
+    }
     gate["current_ownership_qualification"] = dict(
         gate["current_ownership_qualification"], cycle=181,
         scope="host177_dispatch_and_inactive_stack_receipt_with_cycle181_VM_and_AP_replay",
@@ -3924,6 +3950,9 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
         "The 660 groups and 2126 cases are reported qualifier counts, not all executed rejections."
     )
     gap = (
+        "Cycle 181 resumed closeout fails exact entry-receipt reproduction at the host-only "
+        "probe byte count (148480 recorded, 147968 observed); all kernel product fields and "
+        "canonical bytes reproduce. Resolve N6-KENTRY-001 before the control audit. "
         "Cycle 181 identifies at least 65 PKSCHED3/4/5/6 source-control entries (14/16/18/17) "
         "labeled passed/rejected without per-control rejection execution. Repair this existing "
         "ADD-N36-RECEIPT-COVERAGE-001 requirement beginning scheduler_deferred before exact full "
@@ -3941,6 +3970,7 @@ def make_roadmap(test_count: int, status_date: str) -> dict:
         if flag["id"] in {
             "FLAG-N9-PMM-ACPI-CONSUMER-001", "FLAG-N9-VM-DIRECT-MAP-001",
             "FLAG-N12-CONCURRENCY-RECLAMATION-001", "FLAG-N36-RECEIPT-COVERAGE-001",
+            "FLAG-N6-KENTRY-001",
         }:
             flag["evidence"] = [checkpoint, *flag["evidence"]]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
@@ -3951,7 +3981,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
     parser.add_argument("--test-count", type=int, default=962)
-    parser.add_argument("--status-date", default="2026-09-12")
+    parser.add_argument("--status-date", default="2026-09-26")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)
     args.out.write_text(json.dumps(roadmap, indent=2, ensure_ascii=True) + "\n", encoding="utf-8", newline="\n")
