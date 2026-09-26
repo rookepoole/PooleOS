@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from runtime import native_kernel_transfer, native_pooleboot
-from runtime.native_kernel_profile_evidence import kernel_entry_errors
+from runtime.native_kernel_profile_evidence import kernel_entry_errors, recorded_pair_errors
 from runtime.schema_validation import validate_json
 
 
@@ -261,7 +261,7 @@ def recorded_execution_errors(execution: Any) -> list[str]:
     """Check recorded consistency; fresh execution and authentication remain separate."""
     if not isinstance(execution, dict):
         return ["PKCPU1 recorded execution is not an object"]
-    errors: list[str] = []
+    errors = recorded_pair_errors(execution, "cpu-policy-run", validate_markers, "PKCPU1")
     if (
         type(execution.get("run_count")) is not int
         or execution.get("run_count") != 2

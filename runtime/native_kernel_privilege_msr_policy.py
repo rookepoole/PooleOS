@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from runtime import native_kernel_transfer
-from runtime.native_kernel_profile_evidence import kernel_entry_errors
+from runtime.native_kernel_profile_evidence import kernel_entry_errors, recorded_pair_errors
 from runtime.schema_validation import validate_json
 
 
@@ -242,6 +242,7 @@ def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     if readiness.get("inputs") != expected_inputs(root):
         errors.append("PKMSR1 readiness input bindings are stale")
     execution = readiness.get("execution", {})
+    errors.extend(recorded_pair_errors(execution, "privilege-msr-policy-run", validate_markers, "PKMSR1"))
     if not isinstance(execution, dict) or tuple(
         execution.get(key)
         for key in ("run_count", "exact_marker_match", "exact_screenshot_match", "exact_pbp1_match")

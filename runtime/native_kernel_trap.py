@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from runtime import native_kernel_transfer, native_pooleboot
-from runtime.native_kernel_profile_evidence import kernel_entry_errors
+from runtime.native_kernel_profile_evidence import kernel_entry_errors, recorded_pair_errors
 from runtime.schema_validation import validate_json
 
 
@@ -260,6 +260,10 @@ def recorded_execution_errors(execution: Any) -> list[str]:
         return ["PKTRAP1 recorded scenario coverage changed"]
     errors: list[str] = []
     for item, (name, profile) in zip(scenarios, SCENARIOS.items(), strict=True):
+        errors.extend(recorded_pair_errors(
+            item, f"{name}-run", lambda markers, selected=name: validate_markers(markers, selected),
+            f"PKTRAP1 {name}",
+        ))
         if (
             (item.get("selector"), item.get("feature"), item.get("marker_count"))
             != (profile["selector"], profile["feature"], profile["marker_count"])

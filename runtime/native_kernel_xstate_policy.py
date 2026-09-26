@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from runtime import native_kernel_transfer
-from runtime.native_kernel_profile_evidence import kernel_entry_errors
+from runtime.native_kernel_profile_evidence import kernel_entry_errors, recorded_pair_errors
 from runtime.schema_validation import validate_json
 
 
@@ -274,6 +274,7 @@ def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     ):
         errors.append("PKXSTATE1 hostile controls changed")
     execution = readiness.get("execution", {})
+    errors.extend(recorded_pair_errors(execution, "xstate-policy-run", validate_markers, "PKXSTATE1"))
     if not isinstance(execution, dict) or tuple(
         execution.get(key) for key in ("run_count", "cpu_model", "exact_marker_match")
     ) != (2, CPU_MODEL, True):
