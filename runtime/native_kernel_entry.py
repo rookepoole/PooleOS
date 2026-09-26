@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from runtime import native_elf_loader as elf
 from runtime.schema_validation import validate_json
 
 
@@ -149,7 +150,7 @@ def implementation_input_paths(root: Path = ROOT) -> tuple[Path, ...]:
         (path.relative_to(root) for path in (root / "native/kernel/src").rglob("*.rs") if path.is_file()),
         key=lambda path: path.as_posix(),
     )
-    return tuple(dict.fromkeys((*IMPLEMENTATION_INPUTS, *crate_sources)))
+    return tuple(dict.fromkeys((*IMPLEMENTATION_INPUTS, *elf.IMPLEMENTATION_INPUTS, *crate_sources)))
 
 
 def expected_bindings(root: Path = ROOT) -> dict[str, Any]:

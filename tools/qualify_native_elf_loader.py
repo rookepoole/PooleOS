@@ -789,10 +789,10 @@ def main() -> int:
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     args = parser.parse_args()
     readiness = make_readiness(args.toolchain_root.resolve())
-    elf.write_json(readiness, args.out)
     errors = elf.readiness_errors(readiness)
     if errors:
         raise QualificationError("; ".join(errors))
+    elf.write_json(readiness, args.out)
     print(
         f"PKELF1 qualification passed: tests={readiness['summary']['rust_host_tests_passed']}; "
         f"negative={readiness['summary']['negative_controls_passed']}; "

@@ -9,7 +9,15 @@ Machine ledger: `runs/pdc_production_roadmap.json`
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
 Last roadmap reconciliation: PooleOS Cycle 182
 
-Current Cycle 182: controlled builds isolate host-probe size drift to MSVC CRT
+Cycle 183 unfinished cloud-backup notice: pending N5-ELF-001 changes are saved
+separately from main qualification. The Cycle 182 machine ledgers and readiness
+counts below are pre-change snapshots until entry replay, regressions and
+progress reconciliation finish. One new ELF candidate qualification passes;
+it does not qualify the branch for merge. PR #78 remains draft and main stays
+at Cycle 176. This notice changes no normative completion or merge requirement.
+[Backup and resumption point](checkpoints/cycle183-unfinished-cloud-backup.md).
+
+Historical Cycle 182: controlled builds isolate host-probe size drift to MSVC CRT
 libraries. Explicit hash-pinned inputs and shared environment sanitation restore
 exact entry and fixture receipt reproduction; 39 hostile-environment regression
 tests pass. The earlier fixture option-leak failure is preserved. Kernel bytes

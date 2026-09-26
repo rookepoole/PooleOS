@@ -121,6 +121,23 @@ class NativeKernelEntryTests(unittest.TestCase):
             with self.subTest(path=relative), mock.patch.object(entry, "file_binding", side_effect=changed_binding):
                 self.assertIn("readiness input bindings are stale", entry.readiness_errors(self.readiness))
 
+    def test_shared_loader_inputs_are_transitively_bound(self) -> None:
+        from runtime import native_elf_loader as elf
+
+        actual = {b["path"] for b in self.readiness["bindings"]["implementation_inputs"]}
+        expected = {p.as_posix() for p in elf.IMPLEMENTATION_INPUTS}
+        self.assertTrue(expected.issubset(actual))
+        self.assertEqual(entry.readiness_errors(self.readiness), [])
+        original = entry.file_binding
+        for relative in elf.IMPLEMENTATION_INPUTS:
+            def changed_binding(path, root=ROOT):
+                result = original(path, root)
+                if path == ROOT / relative:
+                    result["sha256"] = "0" * 64
+                return result
+            with self.subTest(path=relative), mock.patch.object(entry, "file_binding", side_effect=changed_binding):
+                self.assertIn("readiness input bindings are stale", entry.readiness_errors(self.readiness))
+
     def test_live_build_id_matches_the_entry_contract(self) -> None:
         build_id = self.contract["product"]["build_id"]
         kernel_source = (ROOT / "native/kernel/src/lib.rs").read_text(encoding="utf-8")
