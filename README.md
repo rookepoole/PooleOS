@@ -11,7 +11,18 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Latest development checkpoint:** Cycle 183 completes shared-loader and entry
+**Latest development checkpoint:** Cycle 184 qualifies boot-chain host provenance.
+Six qualifiers now verify isolated pinned host inputs, and eight generated
+receipts pass current validation. All 109 focused tests pass; six final virtual
+boots include two kernel entries. Kernel bytes remain unchanged. Selected
+readiness is 8/27, with nineteen CPU/memory dependencies next from `N7-TRAP-001`.
+At least 65 scheduler execution-evidence gaps and full qualification still block
+a main merge. This is not a new ISO or a production-ready release.
+[Cycle 184 evidence and next steps](docs/checkpoints/cycle184-boot-host-provenance.md).
+The combined closeout passes 171 tests with zero skips; checklist, historical
+evidence, source and product conservation also pass.
+
+**Historical development checkpoint:** Cycle 183 completes shared-loader and entry
 provenance qualification. Invalid loader receipts reject before output, and
 entry inherits the loader's declared inputs. All 59 focused tests pass under
 hostile environment overrides, including exact receipt reproduction; kernel

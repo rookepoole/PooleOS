@@ -1,15 +1,50 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-26
-Plan version: 2.86.0-native-loader-provenance
-Roadmap cycle: PooleOS Cycle 183
+Plan version: 2.87.0-native-boot-host-provenance
+Roadmap cycle: PooleOS Cycle 184
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 183: Shared Loader And Entry Provenance
+## Cycle 184: Boot-Chain Host Provenance
+
+`N5-SYMBOLS-SEMANTICS-001` at N5.6/N5.9, supporting N3.5 and N36.1/N36.2/N36.10,
+now has eight current generated boot-chain/prerequisite receipts. Six host
+qualifiers isolate ambient build options and verify pinned host inputs.
+Typed profile evidence and source-binding sets are enforced; malformed output
+rejects before writing. Trust/PooleBoot schema counts match declared inputs.
+PooleBoot's two counters now require the eight tests actually executed, and
+twelve forged-count cases reject through the real release gate. Repeated
+roadmap generation no longer mutates prior phase-gap results.
+
+All 109 focused boot-chain methods pass. Six final headless QEMU boots include
+two entries into the unchanged kernel; eight superseded successful boots and
+thirteen failed runner records remain separate, including the first metadata
+closeout's stale schema pins. The selected projection is 8/27;
+separate firmware, boot-trust and ELF checks pass. N5's broader exit stays open.
+The source inventory is 994 discovered tests and 279 architecture bindings,
+not a full-suite pass. All 8,996 requirements, 57 additions, 40 phases, 301
+subphases, 94 flags (35 open) and 20 program gaps remain accounted for.
+
+Next is `N7-TRAP-001` and nineteen CPU/memory dependencies, followed by the
+existing 65 scheduler control-execution gaps and full exact-candidate
+canonical/Doctor/publication/review qualification before PR #78 merge.
+The schema and evidence work remains under `ADD-N36-RECEIPT-COVERAGE-001`;
+no existing phase, subphase or flag closes. PooleGlyph, native Rust, kernel
+bytes and the frozen demo are unchanged. No independent builder, new native
+feature, new ISO or production readiness is claimed.
+[Cycle 184 evidence and limits](checkpoints/cycle184-boot-host-provenance.md).
+
+Closeout: the repaired metadata/checklist/architecture/core suite passes all
+46 methods, the combined hostile-environment regression passes all 171, and
+history/source/product conservation passes. No skips or full-canonical claim.
+Current partial measurements remain separate from the historical release-gate
+file, which is not qualification for this candidate.
+
+## Historical Cycle 183: Shared Loader And Entry Provenance
 
 `N5-ELF-001` at N5.5, supported by N3.5 and N36.1/N36.2/N36.10, now requires
 typed host-profile evidence and binds eight additional build/profile/test
@@ -2998,7 +3033,15 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 
 ## 12. Near-Term Execution Sequence
 
-Current Cycle 182 sequence: replay N5-ELF-001 after the host-tool repair, then
+Current Cycle 184 sequence: the boot chain and its firmware/trust prerequisites
+pass current-source qualification. Start `N7-TRAP-001`, then the remaining CPU
+and memory/IRQ/SMP/scheduler/atomic/lock profiles. Nineteen selected checks are
+still unqualified. Repair at least 65 individually unproven scheduler rejection
+controls before full exact-candidate canonical/Doctor, publication and review
+gates, then PR #78 merge and N12.3 live contexts. N0 custody and physical target
+prerequisites remain separate blockers. No phase or production exit is implied.
+
+Historical Cycle 182 sequence: replay N5-ELF-001 after the host-tool repair, then
 N5-SYMBOLS-SEMANTICS-001 and boot/CPU/memory dependencies. Before final scheduler
 qualification, resolve the 65 control-execution gaps and broader N36 audit.
 Full exact-candidate qualification and publication/review precede PR78 merge;

@@ -68,13 +68,22 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 263)
+        self.assertEqual(len(self.artifact["bound_sources"]), 279)
         self.assertIn("docs/checkpoints/cycle175-memory-entry-provenance.md", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("tests/test_native_memory_entry_provenance.py", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("runtime/native_kernel_profile_evidence.py", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("tests/test_native_cpu_entry_provenance.py", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("docs/checkpoints/cycle174-cpu-entry-provenance.md", {item["path"] for item in self.artifact["bound_sources"]})
         bound_paths = {binding["path"] for binding in self.artifact["bound_sources"]}
+        self.assertEqual(len(bound_paths), len(self.artifact["bound_sources"]))
+        for path in ("docs/checkpoints/cycle184-boot-host-provenance.md",
+                     "docs/checkpoints/cycle184-unfinished-cloud-backup.md",
+                     "docs/checkpoints/cycle184-validated-boot-cloud-backup.md",
+                     "tests/test_native_boot_host_toolchain.py"):
+            self.assertIn(path, bound_paths)
+        for name in ("symbols", "policy", "pooleboot", "kernel_revalidation", "firmware", "boot_trust"):
+            self.assertIn("runtime/native_" + name + ".py", bound_paths)
+            self.assertIn("tools/qualify_native_" + name + ".py", bound_paths)
         self.assertIn("docs/checkpoints/cycle183-elf-loader-provenance.md", bound_paths)
         self.assertIn("docs/checkpoints/cycle183-unfinished-cloud-backup.md", bound_paths)
         self.assertIn("runtime/native_elf_loader.py", bound_paths)

@@ -4182,10 +4182,147 @@ def apply_cycle183(roadmap: dict, test_count: int) -> dict:
             phase["current_evidence"].insert(0, evidence)
             phase["current_gaps"].insert(0, gap)
         if phase["id"] == "N36":
-            phase["current_evidence"].insert(0, f"Cycle 183 source inventory: {test_count} Python tests discovered; full qualification pending")
+            phase["current_evidence"].insert(0, "Cycle 183 source inventory: 986 Python tests discovered; full qualification pending")
     for flag in roadmap["implementation_flags"]:
         if flag["id"] in {"FLAG-N36-RECEIPT-COVERAGE-001", "FLAG-N6-KENTRY-001", "FLAG-N5-ELF-001"}:
             flag["evidence"].insert(0, checkpoint)
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle184(roadmap, test_count)
+
+
+def apply_cycle184(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle184-boot-host-provenance.md"
+    protocol = roadmap["execution_protocol"]
+    protocol.update(last_updated_cycle=184, selected_move_id="N5-SYMBOLS-SEMANTICS-001",
+                    owner_independent_next_move_id="N7-TRAP-001")
+    protocol["required_records"][0:0] = [checkpoint,
+        "docs/checkpoints/cycle184-unfinished-cloud-backup.md",
+        "docs/checkpoints/cycle184-validated-boot-cloud-backup.md"]
+    roadmap["baseline"]["pooleos_cycle"] = 184
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    for name in (
+        "focused_source_projection", "ownership_qualification", "entry_provenance_qualification",
+        "boot_chain_qualification", "cpu_qualification", "dependency_qualification",
+        "closeout_regression", "candidate_audit", "host_toolchain_qualification", "shared_loader_qualification",
+    ):
+        suffix = "source_projection" if name == "focused_source_projection" else name
+        gate["historical_cycle183_" + suffix] = copy.deepcopy(gate["current_" + name])
+    gate["qualification_status"] = "boot_chain_host_provenance_replayed_cpu_memory_and_control_replay_pending"
+    gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=184)
+    gate["current_focused_source_projection"] = dict(
+        gate["current_focused_source_projection"], cycle=184, passed_checks=8,
+        pending_downstream_native_checks=19, final_receipt_fresh_qemu_runs=6,
+        kernel_entry_runs=2, superseded_initial_qemu_runs=8,
+        passing_profiles=["kernel_entry", "symbol", "policy", "kernel_load", "pooleboot",
+                          "kernel_revalidation", "kernel_transfer", "kernel_errata_policy"],
+        next_dependency_move_id="N7-TRAP-001",
+        required_next_gate="CPU_memory_replay_then_control_execution_audit_and_exact_full_qualification",
+        focused_python_tests_passed=109, focused_python_tests_skipped=0,
+        focused_test_log_sha256="A2F46811D85AC57D35BDE1641F295116046CF3BA1AABAF039EEE1899793149FE",
+    )
+    gate["current_entry_provenance_qualification"] = dict(
+        gate["current_entry_provenance_qualification"], source_validation_cycle=184,
+    )
+    gate["current_shared_loader_qualification"] = dict(
+        gate["current_shared_loader_qualification"], source_validation_cycle=184,
+    )
+    gate["current_ownership_qualification"] = dict(gate["current_ownership_qualification"], cycle=184)
+    for name in ("cpu", "dependency"):
+        gate["current_" + name + "_qualification"] = {
+            "cycle": 184, "source_validation_cycle": 184,
+            "status": "replay_required_after_entry_and_boot_host_provenance_repair",
+            "applies_to_current_source": False, "qualified_profiles": [], "fresh_qemu_runs": 0,
+            "historical_record": "historical_cycle183_" + name + "_qualification",
+            "current_candidate_full_gate_passed": False, "production_ready": False,
+        }
+    bindings = [
+        {"profile": profile, "path": path, "sha256": digest, "fresh_runs": runs,
+         "execution_log_sha256": log}
+        for profile, path, digest, runs, log in (
+            ("symbol", "runs/native_symbol_readiness.json", "F2AD36EBD03B14BF9C1BE17CA9AABFFA146703D507B5DB70E7EEB9AC8147BCE0", 0, "39D622078702BC250B96EFD6CACB9EC04214EB6EEF0062BCFD4BF83419DC0038"),
+            ("policy", "runs/native_policy_readiness.json", "4B3C4CFBEB27119D7D84317F718AB472B0F5F48B6CB89B110E3272767AE2EC8B", 0, "4E0AA1F9DB24DE8D841452D60CA70EBAD0B1883FF79739D7A96CB02A1045ECA7"),
+            ("kernel_load", "runs/native_kernel_load_readiness.json", "998D67B4B8ABB92534163E9C311938335E0AEBEF013382AD1C1F6A6C7F7EFE65", 2, "417C7B59688B1D98ACDF8391A970DF09430B126C4345FE53A04840D1C461B330"),
+            ("pooleboot", "runs/native_pooleboot_readiness.json", "C94B4FC184FB2F7A76AF3C9AFA577C4C1B27DF5D50A961720558A1B1E6B6583E", 2, "56338F6E2175B97E50BB1E2377476252F07B88CAAEAF64E220040A84FE086C65"),
+            ("kernel_revalidation", "runs/native-kernel-revalidation-readiness.json", "0BF1A4E6EC9097738E6BC57BA68A43B4BFE2417AA617BBD8879149AA174F89CB", 0, "A241574365E43C16D05D7D059E5D2DF662F24D5D5A58A65536FB8528DE34177D"),
+            ("kernel_transfer", "runs/native-kernel-transfer-readiness.json", "1FA247B02A1B8DB0D54E4AEB20DA2E911B8C1840A765B36AB299A7A96164ABD1", 2, "CFA47E76AB3375E41C02258ADFBB2C49320C3D8F2D0956B0CDC404ECD5A5D402"),
+            ("firmware", "runs/native_firmware_readiness.json", "BEDA71BC705EDF813259778E1B40CAB425DF7AAFDD70A4D0B85460E0FB4610A0", 0, "AADE70D894175EDA671F0E8A35E4F908346E57AD18A962EBB3D699970A085289"),
+            ("boot_trust", "runs/native_boot_trust_readiness.json", "85E7EEF84704C436213904C0C2D67F9A76EE9090923A822D98EBF34880A20D47", 0, "E86826A26679C8FCABA1858EA95FC621D3E4D8F00B5CD0AA68C272F09A7C581D"),
+        )
+    ]
+    gate["current_boot_chain_qualification"] = {
+        "cycle": 184, "source_validation_cycle": 184, "status": "single_host_replay_pass",
+        "scope": "six_N5_profiles_plus_firmware_and_boot_trust_prerequisites",
+        "applies_to_current_source": True, "qualified_profiles": [b["profile"] for b in bindings[:6]],
+        "receipt_bindings": bindings[:6], "prerequisite_receipt_bindings": bindings[6:],
+        "fresh_qemu_runs": 6, "superseded_initial_runs": 8, "kernel_entry_runs": 2,
+        "superseded_run_reason": "admission_error_formatter_and_PooleBoot_count_schema_repairs",
+        "failed_unadmitted_guest_attempts_excluded_from_success_count": True,
+        "preserved_failed_runner_attempts": 13,
+        "kernel_sha256": "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA",
+        "kernel_host_tests": 245, "loader_host_tests": 330, "pooleboot_host_tests": 8,
+        "focused_python_tests": 109, "focused_python_passed": 109, "focused_python_skipped": 0,
+        "retained_file_count": 9, "inner_artifact_bytes": 8761, "retained_bytes": 11952,
+        "inner_set_sha256": "A3078488088B2BF11B8D88F48862FA8D80957D610EB1F3FF4411AD5E4729FEAF",
+        "host_pinned_qualifier_count": 6,
+        "host_profile_sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182",
+        "host_profile_rejection_cases": 66, "host_input_binding_mutation_cases": 36,
+        "symbol_policy_invalid_output_cases": 8, "forged_PooleBoot_host_test_count_rejections": 12,
+        "boot_identity_rejection_cases": 13,
+        "receipt_generation_semantically_validated": True, "receipt_write_semantically_validated": True,
+        "readiness_replay_required_profiles": [], "complete_host_attestation": False,
+        "second_builder_reproduced": False, "n5_exit_gate_satisfied": False,
+        "current_candidate_full_gate_passed": False, "production_ready": False,
+    }
+    gate["current_closeout_regression"] = {
+        "cycle": 184, "status": "pass", "scope": "boot_chain_host_profile_and_aggregate_gate_tests_only",
+        "tests_run": 109, "tests_passed": 109, "tests_failed": 0, "tests_skipped": 0,
+        "hostile_environment": True,
+        "log_sha256": "A2F46811D85AC57D35BDE1641F295116046CF3BA1AABAF039EEE1899793149FE",
+        "canonical_full_replay_performed": False, "merge_qualified": False, "production_ready": False,
+        "initial_metadata_closeout": {
+            "status": "fail", "tests_run": 46, "tests_passed": 43, "tests_failed": 3,
+            "reason": "roadmap_cycle_move_and_architecture_binding_count_schema_pins_not_yet_updated",
+            "log_sha256": "34C875F50562F0A2D1ADB89420BC9056DD859091AFD40FD5FDE455ADB26B4C68",
+        },
+        "repaired_metadata_closeout": {
+            "status": "pass", "tests_run": 46, "tests_passed": 46, "tests_failed": 0,
+            "log_sha256": "C2C7DD3732334E8CF83DC0B8FE11F00950490C8A02B56F0705E02D657E2195F5",
+        },
+        "combined_regression": {
+            "scope": "boot_host_profile_progress_checklist_and_core_not_full_canonical",
+            "status": "pass", "tests_run": 171, "tests_passed": 171, "tests_skipped": 0,
+            "log_sha256": "D4A090A04863193E760C720A550B11564AEB54DC75B034EEFC8087BA43926BE5",
+        },
+    }
+    evidence = (
+        "Cycle 184: " + checkpoint + " pins six host qualifiers and admits eight actual generated "
+        "boot-chain/prerequisite receipts. Six final headless boots include two kernel entries; "
+        "109 focused Python tests pass. Typed host evidence, source bindings, invalid-output preservation, "
+        "exact schema counts and twelve forged PooleBoot host-test-count rejections are verified. "
+        "Repeated roadmap generation no longer mutates earlier results. Kernel bytes are unchanged."
+    )
+    gap = (
+        "Selected readiness is 8/27, with nineteen CPU/memory checks pending from N7-TRAP-001. "
+        "At least 65 scheduler controls still need individually bound rejection execution before "
+        "full exact-candidate canonical/Doctor/publication/review qualification and PR78 merge. "
+        "Thirteen failed runner attempts, including the first metadata closeout, and eight "
+        "superseded successful boots remain preserved. "
+        "No complete host attestation, independent builder, phase/flag closure, new native feature, "
+        "new ISO or production readiness is claimed."
+    )
+    for phase in roadmap["phases"]:
+        if phase["id"] in {"N3", "N5", "N6", "N12", "N36"}:
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle 184 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in {"FLAG-N36-RECEIPT-COVERAGE-001", "FLAG-N5-SYMBOL-BUNDLE-001",
+                          "FLAG-N5-FIRMWARE-BUNDLE-001", "FLAG-N5-POLICY-BUNDLE-001",
+                          "FLAG-N5-INNER-KERNEL-REVALIDATE-001", "FLAG-N5-KERNEL-TRANSFER-001"}:
+            flag["evidence"].insert(0, checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"] = list(roadmap["gap_summary"]["native_program_gaps"])
+    roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
 
@@ -4193,7 +4330,7 @@ def apply_cycle183(roadmap: dict, test_count: int) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=986)
+    parser.add_argument("--test-count", type=int, default=994)
     parser.add_argument("--status-date", default="2026-09-26")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)
