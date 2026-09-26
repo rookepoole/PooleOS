@@ -4489,7 +4489,7 @@ def apply_cycle185(roadmap: dict, test_count: int) -> dict:
             phase["current_evidence"].insert(0, evidence)
             phase["current_gaps"].insert(0, gap)
         if phase["id"] == "N36":
-            phase["current_evidence"].insert(0, f"Cycle 185 source inventory: {test_count} Python tests discovered; full qualification pending")
+            phase["current_evidence"].insert(0, "Cycle 185 source inventory: 998 Python tests discovered; full qualification pending")
     for flag in roadmap["implementation_flags"]:
         if flag["id"] in {
             "FLAG-N7-TRAP-001", "FLAG-N7-CPU-POLICY-001", "FLAG-N7-XSTATE-POLICY-001",
@@ -4500,13 +4500,122 @@ def apply_cycle185(roadmap: dict, test_count: int) -> dict:
     roadmap["gap_summary"]["native_program_gaps"] = list(roadmap["gap_summary"]["native_program_gaps"])
     roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle186(roadmap, test_count)
+
+
+def apply_cycle186(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle186-pmm-recorded-evidence.md"
+    roadmap["baseline"]["pooleos_cycle"] = 186
+    protocol = roadmap["execution_protocol"]
+    protocol.update(last_updated_cycle=186, selected_move_id="N9-PMM-ACPI-CONSUMER-001",
+                    owner_independent_next_move_id="N9-VM-DIRECT-MAP-001")
+    protocol["required_records"].insert(0, checkpoint)
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    for name in ("focused_source_projection", "dependency_qualification", "closeout_regression", "candidate_audit"):
+        suffix = "source_projection" if name == "focused_source_projection" else name
+        gate["historical_cycle185_" + suffix] = copy.deepcopy(gate["current_" + name])
+    gate["qualification_status"] = "pmm_recorded_evidence_repaired_thirteen_dependencies_and_control_audit_pending"
+    gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=186)
+    gate["current_focused_source_projection"] = {
+        "cycle": 186, "scope": "27_selected_native_checks_not_full_canonical_audit",
+        "passed_checks": 14, "total_checks": 27, "pending_downstream_native_checks": 13,
+        "passing_profiles": [*gate["historical_cycle185_source_projection"]["passing_profiles"],
+                             "native_kernel_physical_memory_readiness"],
+        "final_receipt_fresh_qemu_runs": 2, "kernel_entry_runs": 2, "superseded_initial_qemu_runs": 2,
+        "run_count_scope": "current_cycle_PMM_only_prior_boot_and_CPU_qualification_retained_separately",
+        "next_dependency_move_id": "N9-VM-DIRECT-MAP-001",
+        "required_next_gate": "ordered_remaining_dependency_replay_then_control_audit_and_exact_full_qualification",
+        "focused_python_tests_passed": 12, "focused_python_tests_skipped": 0,
+        "focused_test_log_sha256": "C1FE871A6BD5AD1BA4A1EE34485EEAF4BAEB42FBB234B081560BAB2E7B43314C",
+        "recorded_evidence_rejection_cases": 234,
+        "canonical_full_replay_performed": False, "production_ready": False,
+    }
+    gate["current_dependency_qualification"] = {
+        "cycle": 186, "source_validation_cycle": 186, "status": "PMM_pass_thirteen_profiles_pending",
+        "scope": "physical_memory_only", "applies_to_current_source": True,
+        "all_fourteen_profiles_current": False, "qualified_profiles": ["physical_memory"],
+        "readiness_replay_required_profiles": ["virtual_memory", "interrupt_time", "smp_first_ap",
+            "smp_percpu_runtime", "smp_ipi", "scheduler", "scheduler_preempt", "scheduler_deferred",
+            "scheduler_smp", "scheduler_ap_workers", "scheduler_smp_preempt", "atomics", "locks"],
+        "fresh_qemu_runs": 2, "superseded_initial_runs": 2, "negative_control_groups": 191,
+        "kernel_sha256": "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA",
+        "receipt_bindings": [{"profile": "physical_memory", "path": "runs/native-kernel-physical-memory-readiness.json",
+            "sha256": "3FD215CB703F8DF55A8EAB4D5716EF9466F33384A89F805FCF704DE395BF8F16",
+            "fresh_runs": 2, "negative_controls": 191, "kernel_host_tests": 245,
+            "execution_log_sha256": "73D78CC992A80B448CB62D488AC4EFA73BF8EED5DBCA5B8F76C37B5AF855061A",
+            "elapsed_seconds": 86.641}],
+        "recorded_evidence_cases": {"exit": 14, "coverage": 16, "evidence": 29, "accounting": 7, "summary": 168},
+        "recorded_evidence_case_total": 234,
+        "recorded_evidence_rejections_exercised_through_runtime_and_gate": True,
+        "pre_repair_counterexample": {"cases": 65, "runtime_accepted": 62, "aggregate_gate_accepted": 61,
+            "record_sha256": "93AA3A4D8930107C92E32F16938C56222831EF5BD8F800F888A323A5F5F56651"},
+        "initial_receipt_sha256": "42F0575EC9893B58A5586EC4839D8A52C887E1022DA6C1EC963AF4F015906D51",
+        "historical_PMM_receipt_sha256": "EEFD0E8592CB98E8D0EDBCB480FFD6DDEF761C5432AE0ED4FB3C95C73E10D008",
+        "positive_receipts_rebound_in_tests": False, "pair_validation_is_freshness_or_authentication": False,
+        "control_execution_complete": False, "unproven_per_control_rejection_groups_at_least": 65,
+        "current_candidate_full_gate_passed": False, "production_ready": False,
+    }
+    gate["current_closeout_regression"] = {
+        "cycle": 186, "status": "pass", "scope": "physical_memory_accounting_and_recorded_evidence_only",
+        "tests_run": 12, "tests_passed": 12, "tests_failed": 0, "tests_skipped": 0,
+        "hostile_environment": True,
+        "log_sha256": "C1FE871A6BD5AD1BA4A1EE34485EEAF4BAEB42FBB234B081560BAB2E7B43314C",
+        "qualifier_output_preservation_cases": 2,
+        "canonical_full_replay_performed": False, "merge_qualified": False, "production_ready": False,
+        "initial_combined_closeout": {
+            "status": "fail", "tests_run": 234, "tests_passed": 233, "tests_failed": 1,
+            "reason": "historical_CPU_closeout_assertion_selected_current_PMM_closeout",
+            "log_sha256": "67427264FF6C15911AE0174A1542CA9CD3E5E617D1F3FDB1371E9EE9C58E139F",
+        },
+        "initial_conservation_audit": {
+            "status": "fail", "reason": "private_audit_empty_historical_list_suffix_bug",
+            "history_removed": False,
+        },
+        "combined_regression": {
+            "status": "pass", "scope": "PMM_CPU_boot_host_progress_checklist_and_core_not_full_canonical",
+            "tests_run": 234, "tests_passed": 234, "tests_skipped": 0,
+            "log_sha256": "C6517C55F2D73B6B03D6EA8BE688F17F8966AEA05568853164B8E787EC322B87",
+        },
+        "original_counterexample_replay": {
+            "cases": 65, "runtime_accepted": 0, "aggregate_gate_accepted": 0,
+            "genuine_positive_runtime_and_gate_pass": True,
+        },
+    }
+    evidence = (
+        "Cycle 186: " + checkpoint + " repairs PMM recorded execution and independently rederives "
+        "ACPI/PMM accounting from both PBP1 handoffs. Two fresh virtual boots and 191 marker controls "
+        "pass on unchanged kernel bytes; 12 focused tests pass, including 234 malformed records "
+        "through runtime and actual gate plus two rejected-output preservation cases. "
+        "Positive source-qualified receipts are genuinely generated, never rebound."
+    )
+    gap = (
+        "Selected readiness is 14/27; thirteen memory-through-lock profiles need replay from "
+        "N9-VM-DIRECT-MAP-001. At least 65 scheduler controls still require individually bound "
+        "rejection execution and full exact-candidate canonical/Doctor/publication/review before "
+        "PR78 merge. The original 65 mutation cases, 62 runtime and 61 gate admissions, and two "
+        "superseded initial boots remain preserved. Recorded consistency is not authentication "
+        "or freshness. No phase/flag, target hardware, independent builder, kernel feature, ISO "
+        "or production gate closes."
+    )
+    for phase in roadmap["phases"]:
+        if phase["id"] in {"N9", "N10", "N36"}:
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle 186 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in {"FLAG-N9-PMM-ACPI-CONSUMER-001", "FLAG-N36-RECEIPT-COVERAGE-001"}:
+            flag["evidence"].insert(0, checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"] = list(roadmap["gap_summary"]["native_program_gaps"])
+    roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=998)
+    parser.add_argument("--test-count", type=int, default=1002)
     parser.add_argument("--status-date", default="2026-09-26")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

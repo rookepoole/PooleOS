@@ -8,6 +8,25 @@ automatic growth, and Boot Services reclaim while adding a bounded native ACPI
 table snapshot whose opaque success evidence is required before ACPI
 reclaimable pages can be admitted. It does not satisfy N9 or promote PooleOS.
 
+## Recorded Evidence Admission
+
+Cycle 186 adds strict saved-receipt validation. Both uniquely identified runs
+must have integer zero emulator exits, valid marker/frame digests, exact typed
+marker summaries, matching handoff bindings, guest-bound revalidation and true
+dual-channel agreement. Flags alone cannot establish two-run coverage.
+
+The validator independently repeats PMM and ACPI accounting from each recorded
+PBP1 transcript, including reserved ownership, snapshot placement and gated
+reclaim. Per-run oracles, aggregate observation, independent memory summary and
+the complete readiness summary must match with exact JSON types. The release
+gate also retains its independently specified bounded-profile expectations.
+The qualifier revalidates before creating an output directory or replacing a
+receipt. Malformed evidence does not replace an existing output.
+
+These checks establish consistency of the recorded payload, not its freshness,
+authentication, target-hardware behavior or complete N9 qualification. Current
+source bindings and freshly executed qualification remain separate requirements.
+
 ## Firmware Handoff
 
 PooleBoot now emits `PBLIVE4`, a five-record PBP1 profile containing core,

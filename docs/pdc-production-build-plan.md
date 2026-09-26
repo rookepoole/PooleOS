@@ -1,13 +1,40 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-26
-Plan version: 2.88.0-native-cpu-recorded-evidence
-Roadmap cycle: PooleOS Cycle 185
+Plan version: 2.89.0-native-pmm-recorded-evidence
+Roadmap cycle: PooleOS Cycle 186
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 186: PMM Recorded Evidence
+
+`N9-PMM-ACPI-CONSUMER-001` at N9.1/N9.2, supporting N10/N36, repairs
+saved PMM execution and ACPI accounting admission. Before repair, 62/65
+corruptions passed the runtime and 61/65 passed the actual gate. Strict two-run
+validation and independently rederived memory accounting now reject malformed
+records. The qualifier also preserves output when validation rejects.
+
+Two final virtual boots, 191 marker controls and all 12 focused tests pass,
+including 234 recorded-evidence corruptions through runtime and actual gate.
+The two initial boots and their audit remain superseded evidence. No positive
+receipt is rebound; kernel product bytes and prior CPU/boot receipts are unchanged.
+
+Selected readiness is 14/27, with thirteen profiles pending from
+`N9-VM-DIRECT-MAP-001`. At least 65 scheduler execution-evidence gaps and full
+exact-candidate qualification still precede PR #78 merge. Existing
+`ADD-N36-RECEIPT-COVERAGE-001` tracks this work; no phase or flag closes.
+Inventory is 1,002 discovered tests and 284 architecture bindings. All checklist
+requirements, additions, historical records and normative conditions remain.
+No new kernel feature, target hardware, independent builder, ISO or production
+readiness is claimed. [Cycle 186 evidence](checkpoints/cycle186-pmm-recorded-evidence.md).
+
+The combined scoped suite passes 234 tests, zero skipped. The initial 233/234
+historical-record assertion failure and private conservation-helper failure
+remain preserved. All 65 original counterexamples now reject in both runtime
+and gate; historical/checklist/product/owner-data conservation passes.
 
 ## Cycle 185: CPU Recorded Evidence
 
