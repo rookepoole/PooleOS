@@ -11,7 +11,17 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Latest development checkpoint:** Cycle 186 repairs PMM recorded execution and
+**Latest development checkpoint:** Cycle 187 repairs VM recorded execution and
+sparse direct-map accounting admission. Two final virtual boots and 48 controls
+pass; all 10 focused tests pass, including 115 malformed receipts rejected through
+runtime and actual gate. Selected readiness is 15/27, with twelve profiles pending
+from interrupt/time and further scheduler evidence/full qualification before main
+merge. Kernel and ISO bytes are unchanged; this is pre-production qualification.
+[Cycle 187 evidence and next steps](docs/checkpoints/cycle187-vm-recorded-evidence.md).
+Combined scoped regressions pass 245 distinct methods; the initial historical
+assertion failure and 16 repeated host-toolchain executions are documented.
+
+**Historical development checkpoint:** Cycle 186 repairs PMM recorded execution and
 ACPI/memory accounting admission. Two final virtual boots and 191 controls pass;
 all 12 focused tests pass, including 234 corrupted receipts rejected through
 runtime and actual gate. Selected readiness is 14/27; thirteen profiles remain

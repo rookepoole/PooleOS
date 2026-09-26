@@ -358,6 +358,12 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle187-vm-recorded-evidence.md",
+      "sha256": "A394A99446783555343CD720F30F93154B6C80498AC13865E2A1CFB98FE82868",
+      "byte_count": 4747,
+      "line_count": 80
+    },
+    {
       "path": "docs/checkpoints/cycle186-pmm-recorded-evidence.md",
       "sha256": "92E6B85B65C0B964B5FDBA87E93D455FBE84B89CD233A40E15C324AB82F0CAF4",
       "byte_count": 4605,
@@ -815,9 +821,9 @@
     },
     {
       "path": "docs/native-kernel-virtual-memory.md",
-      "sha256": "27ACF3DEEF450B21EE478089996349F2309E8B57E7B6FCCACBEAC53EA77970E8",
-      "byte_count": 9307,
-      "line_count": 157
+      "sha256": "98DD42FC0F196184FA69F6E205FCFD5BE6D255EEC5F79DFFF3EFDC5494CFF64E",
+      "byte_count": 10271,
+      "line_count": 173
     },
     {
       "path": "docs/native-kernel-interrupt-time.md",
@@ -911,15 +917,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "8DBB2C9F33FDFF810F2682D6D26778C5B23DF428035588B1D8362E579B74EF8D",
-      "byte_count": 94594,
-      "line_count": 1257
+      "sha256": "DA1D2FFA274A10EC30A7B279ACEC43E510C70FECC5E17645866B28AF59F8E0C7",
+      "byte_count": 95498,
+      "line_count": 1271
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "BD9E96C816A5E2A81E1C246786182CF81064CFCB0D77E4AC0DFB532E8E08CD5D",
-      "byte_count": 424715,
-      "line_count": 3316
+      "sha256": "0B63F622F184BAFE04E63237A1761174F1DDE39B4C7D45C5501706A386DB9345",
+      "byte_count": 426340,
+      "line_count": 3343
     },
     {
       "path": "docs/publication-boundary.md",
@@ -1061,9 +1067,9 @@
     },
     {
       "path": "runs/native-kernel-virtual-memory-readiness.json",
-      "sha256": "4AFEA30E25DB4DCD0D9038E01D3FE1CC6EE5D82DBAB4595A4631D34902460BB7",
-      "byte_count": 198834,
-      "line_count": 5466
+      "sha256": "F2CC0C55F09600DE728D2BDAB1F26855EF7BE624AF9F6B1D00B4F16D9418A1FC",
+      "byte_count": 203130,
+      "line_count": 5569
     },
     {
       "path": "runs/native-kernel-interrupt-time-readiness.json",
@@ -1805,21 +1811,21 @@
     },
     {
       "path": "runtime/native_kernel_virtual_memory.py",
-      "sha256": "CB87B3CBEF8972BC90478CFE393A361DE29FA5E55A777FB4A2A0F9CCB34860A8",
-      "byte_count": 27408,
-      "line_count": 647
+      "sha256": "84C3B9FDC440A85C98031414D924B52E8D8E27C855BBB51EC2214C7B22535D89",
+      "byte_count": 29359,
+      "line_count": 682
     },
     {
       "path": "tools/qualify_native_kernel_virtual_memory.py",
-      "sha256": "8FBE10755B53D60981B94987F62DBFFA43689CC7DC162C03163DE082F62F302D",
-      "byte_count": 23238,
-      "line_count": 486
+      "sha256": "5CF4E08F7C7BCD0C0D45EE83ACD34D10F347124A70D32863C5F2FF3D20CD2B54",
+      "byte_count": 21611,
+      "line_count": 463
     },
     {
       "path": "tests/test_native_kernel_virtual_memory.py",
-      "sha256": "868E2E496F74C8AC4574852EC5494453678C1D7A19ACCEBD5F8CA5784CCFAC16",
-      "byte_count": 6815,
-      "line_count": 129
+      "sha256": "33C5C70066C3BF70E0C9A27BC0E6CD192745D58B33926B5A2C1E03E1E41D0B5F",
+      "byte_count": 14082,
+      "line_count": 262
     },
     {
       "path": "specs/native-microcode-contract.json",

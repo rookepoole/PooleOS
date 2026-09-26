@@ -1,13 +1,40 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-26
-Plan version: 2.89.0-native-pmm-recorded-evidence
-Roadmap cycle: PooleOS Cycle 186
+Plan version: 2.90.0-native-vm-recorded-evidence
+Roadmap cycle: PooleOS Cycle 187
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 187: Virtual-Memory Recorded Evidence
+
+`N9-VM-DIRECT-MAP-001` at N9.3/N9.4, supporting N36, repairs saved VM
+execution, direct-map accounting and typed-summary admission. The initial audit
+found 46/65 corruptions accepted by runtime and 45/65 by the actual gate;
+all 65 now reject on genuine regenerated evidence. Strict pair validation and
+independent handoff-derived accounting preserve existing retention checks.
+
+Two final virtual boots, 48 controls and all 10 focused tests pass, including
+115 malformed records through runtime and gate plus two rejected-output cases.
+The initial two boots remain superseded, and no positive receipt is rebound.
+Selected readiness is 15/27; twelve profiles remain from `N8-IRQ-001`, followed
+by individually bound rejection evidence for at least 65 scheduler controls
+and full exact-candidate qualification before PR #78 merge.
+
+Existing `ADD-N36-RECEIPT-COVERAGE-001` tracks this work. Inventory is 1,006
+discovered tests and 285 architecture bindings, not a full-suite pass. All
+requirements, additions, prior evidence and normative conditions remain; no
+phase or flag closes. Kernel/ISO bytes and PooleGlyph are unchanged. No new
+kernel feature, target hardware or production readiness is claimed.
+[Cycle 187 evidence](checkpoints/cycle187-vm-recorded-evidence.md).
+
+The combined suite passes 245 distinct methods, zero skipped; its raw repaired
+run includes 16 repeated host-toolchain executions, recorded separately. The
+initial 244/245 historical-hash assertion failure remains preserved. Checklist,
+historical evidence, native products and owner-data conservation pass.
 
 ## Cycle 186: PMM Recorded Evidence
 

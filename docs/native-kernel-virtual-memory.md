@@ -1,5 +1,21 @@
 # PKVM3 PMM-Owned Sparse Direct Map
 
+## Recorded Evidence Admission
+
+Cycle 187 requires strict saved two-run evidence: named distinct runs, integer
+zero exits, exact marker/frame digests, typed parsed summaries, transfer bindings,
+guest-bound revalidation and true dual-channel agreement. Each recorded handoff
+independently rederives PMM ownership and direct-map ranges, table counts, gaps
+and checksum. Per-run oracles and aggregate observations/accounting must match
+with exact JSON types, as must the complete readiness summary. Existing retained
+page rejection, CR3 restoration and local invalidation checks remain required.
+
+The qualifier revalidates before creating a directory or replacing output.
+The actual release gate retains its separately specified bounded-profile
+expectations. These checks establish recorded consistency, not freshness,
+authentication, target-hardware acceptance or complete N9 qualification.
+Source qualification and actual guest execution remain separate evidence.
+
 ## Cycle 162 Active Ownership
 
 The N12.3 candidate adds mandatory exclusive retention of the PKVM3 table and
