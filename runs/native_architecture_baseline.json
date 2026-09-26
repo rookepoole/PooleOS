@@ -358,6 +358,12 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle188-irq-recorded-evidence.md",
+      "sha256": "E113DF2F20E00B0B888F4445FC6ED918BB6900B0C7DE7AABA3B3E228D9EBCC1C",
+      "byte_count": 4392,
+      "line_count": 77
+    },
+    {
       "path": "docs/checkpoints/cycle187-vm-recorded-evidence.md",
       "sha256": "A394A99446783555343CD720F30F93154B6C80498AC13865E2A1CFB98FE82868",
       "byte_count": 4747,
@@ -389,9 +395,9 @@
     },
     {
       "path": "tools/pooleos_release_gate.py",
-      "sha256": "8AC2B7F29DB7963F39B2D6F70590EA68DDB9A2EEDF5C7891F9FCC3DB96393305",
-      "byte_count": 353753,
-      "line_count": 7139
+      "sha256": "B9DE975035C2B91F9B0F9FDB820E9BD9B8D8F8015782CE3A41AFACF3625A220B",
+      "byte_count": 353872,
+      "line_count": 7141
     },
     {
       "path": "docs/checkpoints/cycle184-boot-host-provenance.md",
@@ -827,9 +833,9 @@
     },
     {
       "path": "docs/native-kernel-interrupt-time.md",
-      "sha256": "21797E7FB4396E7B4A53472D3E024779223571C5E2A9452607C08DC2FB63E292",
-      "byte_count": 6887,
-      "line_count": 68
+      "sha256": "35938DFCD23FDC845F0DB0C636B6770CDE5FF8BD6AFB1473F8C5F593B4DC0295",
+      "byte_count": 7812,
+      "line_count": 85
     },
     {
       "path": "docs/native-kernel-smp-first-ap.md",
@@ -917,15 +923,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "DA1D2FFA274A10EC30A7B279ACEC43E510C70FECC5E17645866B28AF59F8E0C7",
-      "byte_count": 95498,
-      "line_count": 1271
+      "sha256": "59BBF39726DA18E5D1638E388162EB1B0F0FF51187C2E7804A6993B0D46784EE",
+      "byte_count": 96419,
+      "line_count": 1285
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "0B63F622F184BAFE04E63237A1761174F1DDE39B4C7D45C5501706A386DB9345",
-      "byte_count": 426340,
-      "line_count": 3343
+      "sha256": "742E6D020BE37FE6F20640B7CA8A5FC12C1853209C46EDFE38EF5B0985198F30",
+      "byte_count": 427839,
+      "line_count": 3369
     },
     {
       "path": "docs/publication-boundary.md",
@@ -1073,9 +1079,9 @@
     },
     {
       "path": "runs/native-kernel-interrupt-time-readiness.json",
-      "sha256": "19FB9DA0B525064D56126E9EEE159C887A46B4FD1EB6B6DA3646C5F88182E7B2",
-      "byte_count": 191196,
-      "line_count": 5198
+      "sha256": "A8812EE8F48CBA157554EB3264EA945082641014D9E2FE1C7A3982D648FF046B",
+      "byte_count": 195683,
+      "line_count": 5306
     },
     {
       "path": "runs/native-kernel-smp-first-ap-readiness.json",

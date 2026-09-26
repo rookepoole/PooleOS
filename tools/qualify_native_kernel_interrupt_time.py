@@ -352,19 +352,7 @@ def make_readiness(toolchain_root: Path, qemu_root: Path, status_date: str, time
         "negative_controls": controls,
         "claims": contract["claims"],
         "non_claims": contract["non_claims"],
-        "summary": {
-            "kernel_host_tests_passed": kernel_readiness["host_tests"]["test_pass_count"],
-            "kernel_host_tests_total": kernel_readiness["host_tests"]["test_count"],
-            "qemu_runs_passed": 2,
-            "qemu_runs_total": 2,
-            "markers_per_run": interrupt_time.MARKER_COUNT,
-            "negative_controls_passed": len(controls),
-            "negative_controls_total": len(controls),
-            "timer_interrupts_delivered": observation["delivery"]["timer_deliveries"],
-            "timer_eois": observation["delivery"]["eois"],
-            "application_processors_started": 0,
-            "production_claim_count": 0,
-        },
+        "summary": interrupt_time.interrupt_time_readiness_summary(observation, kernel_readiness["host_tests"]),
         "open_items": [
             "Start and rollback the first application processor with guarded per-CPU state.",
             "Implement real IPI delivery and SMP TLB-shootdown acknowledgement before PKVM3 remote retirement.",
@@ -391,11 +379,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         report = make_readiness(args.toolchain_root.resolve(), args.qemu_root.resolve(), args.status_date, args.timeout)
-        args.out.parent.mkdir(parents=True, exist_ok=True)
-        args.out.write_bytes(native_pooleboot.canonical_json_bytes(report))
-        errors = interrupt_time.readiness_errors(interrupt_time.read_json(args.out), ROOT)
+        errors = interrupt_time.readiness_errors(report, ROOT)
         if errors:
             raise QualificationError("; ".join(errors))
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_bytes(native_pooleboot.canonical_json_bytes(report))
     except (OSError, ValueError, KeyError, json.JSONDecodeError, QualificationError, interrupt_time.KernelInterruptTimeError, native_kernel_load.KernelLoadError, native_kernel_transfer.KernelTransferError, native_tier0.Tier0Error) as error:
         print(f"NATIVE_KERNEL_INTERRUPT_TIME_QUALIFICATION FAIL {type(error).__name__}: {error}")
         return 1

@@ -24,6 +24,7 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle188-irq-recorded-evidence.md",
     "docs/checkpoints/cycle187-vm-recorded-evidence.md",
     "docs/checkpoints/cycle186-pmm-recorded-evidence.md",
     "docs/checkpoints/cycle185-cpu-recorded-evidence.md",

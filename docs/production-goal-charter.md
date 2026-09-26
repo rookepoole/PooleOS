@@ -7,9 +7,23 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 187
+Last roadmap reconciliation: PooleOS Cycle 188
 
-Current Cycle 187: VM enforces strict recorded execution and independently
+Current Cycle 188: IRQ enforces strict recorded execution, typed aggregate
+observations/summaries and independent calibration bounds. Two final virtual
+boots, 58 controls and 12 focused tests pass. All 64 original counterexamples
+reject without validator exceptions; 229 permanent recorded mutations and six
+malformed root/control cases reject through runtime and actual gate. Selected
+readiness is 16/27; eleven profiles remain from N8-SMP-FIRST-AP-001, plus the
+65 scheduler control-evidence gaps and full exact-candidate qualification.
+Initial admissions/exceptions and superseded boots remain preserved. No normative
+condition, phase, flag, kernel feature, ISO or production gate closes.
+[Cycle 188 evidence](checkpoints/cycle188-irq-recorded-evidence.md).
+
+Cycle 188 combined scoped regressions pass 258 tests, zero skipped. Conservation
+passes; this is not full canonical qualification or production promotion.
+
+Historical Cycle 187: VM enforces strict recorded execution and independently
 rederived sparse direct-map accounting. Two final virtual boots, 48 controls
 and all 10 focused tests pass; 115 malformed records reject through runtime and
 actual gate. The original 46/65 runtime and 45/65 gate admissions and two

@@ -1,13 +1,39 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-26
-Plan version: 2.90.0-native-vm-recorded-evidence
-Roadmap cycle: PooleOS Cycle 187
+Plan version: 2.91.0-native-irq-recorded-evidence
+Roadmap cycle: PooleOS Cycle 188
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 188: Interrupt/Time Recorded Evidence
+
+`N8-IRQ-001` at N8.1/N8.3, supporting N36, repairs recorded-run admission,
+typed observation/summary checks and bounded calibration before frequency
+arithmetic. The initial 64-case audit exposed 52 runtime and 44 gate admissions,
+one runtime and four gate exceptions, and a zero-sample division error. All
+original cases now reject without validator exceptions; failures are preserved.
+
+Two final virtual boots, 58 executed controls and all 12 focused tests pass,
+including 229 recorded mutations, six malformed root/control cases, six direct
+clock cases and two output-preservation cases. Initial boots are superseded.
+Selected readiness is 16/27; eleven profiles remain from
+`N8-SMP-FIRST-AP-001`, followed by at least 65 scheduler control-execution gaps
+and exact full qualification before PR #78 merge.
+
+Existing `ADD-N36-RECEIPT-COVERAGE-001` tracks the repair. Inventory is 1,011
+discovered tests and 286 architecture bindings, not a full-suite pass. All
+requirements, additions, phase/flag states and historical evidence are retained.
+No native feature, phase, flag, ISO or production gate closes. PooleGlyph and
+kernel/demo bytes are unchanged.
+[Cycle 188 evidence](checkpoints/cycle188-irq-recorded-evidence.md).
+
+The combined scoped suite passes 258 tests, zero skipped, with unchanged source
+snapshots. Checklist, history, phase/flag, native product and owner-data
+conservation pass; full canonical qualification remains a separate gate.
 
 ## Cycle 187: Virtual-Memory Recorded Evidence
 

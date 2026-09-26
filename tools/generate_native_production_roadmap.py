@@ -4723,9 +4723,116 @@ def apply_cycle187(roadmap: dict, test_count: int) -> dict:
             phase["current_evidence"].insert(0, evidence)
             phase["current_gaps"].insert(0, gap)
         if phase["id"] == "N36":
-            phase["current_evidence"].insert(0, f"Cycle 187 source inventory: {test_count} Python tests discovered; full qualification pending")
+            phase["current_evidence"].insert(0, "Cycle 187 source inventory: 1006 Python tests discovered; full qualification pending")
     for flag in roadmap["implementation_flags"]:
         if flag["id"] in {"FLAG-N9-VM-DIRECT-MAP-001", "FLAG-N36-RECEIPT-COVERAGE-001"}:
+            flag["evidence"].insert(0, checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"] = list(roadmap["gap_summary"]["native_program_gaps"])
+    roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle188(roadmap, test_count)
+
+
+def apply_cycle188(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle188-irq-recorded-evidence.md"
+    roadmap["baseline"]["pooleos_cycle"] = 188
+    protocol = roadmap["execution_protocol"]
+    protocol.update(last_updated_cycle=188, selected_move_id="N8-IRQ-001",
+                    owner_independent_next_move_id="N8-SMP-FIRST-AP-001")
+    protocol["required_records"].insert(0, checkpoint)
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    for name in ("focused_source_projection", "dependency_qualification", "closeout_regression", "candidate_audit"):
+        suffix = "source_projection" if name == "focused_source_projection" else name
+        gate["historical_cycle187_" + suffix] = copy.deepcopy(gate["current_" + name])
+    gate["qualification_status"] = "IRQ_recorded_evidence_repaired_eleven_dependencies_and_control_audit_pending"
+    gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=188)
+    gate["current_focused_source_projection"] = {
+        "cycle": 188, "scope": "27_selected_native_checks_not_full_canonical_audit",
+        "passed_checks": 16, "total_checks": 27, "pending_downstream_native_checks": 11,
+        "passing_profiles": [*gate["historical_cycle187_source_projection"]["passing_profiles"],
+                             "native_kernel_interrupt_time_readiness"],
+        "final_receipt_fresh_qemu_runs": 2, "kernel_entry_runs": 2, "superseded_initial_qemu_runs": 2,
+        "run_count_scope": "current_cycle_IRQ_only_prior_VM_PMM_CPU_and_boot_qualification_retained_separately",
+        "next_dependency_move_id": "N8-SMP-FIRST-AP-001",
+        "required_next_gate": "ordered_remaining_dependency_replay_then_control_audit_and_exact_full_qualification",
+        "focused_python_tests_passed": 12, "focused_python_tests_skipped": 0,
+        "focused_test_log_sha256": "8477E89A8F5030CE86DB3659E0C22E57E74AC1E7BDDBEB48D48F86C3F0D3F3A7",
+        "recorded_evidence_rejection_cases": 229, "malformed_root_and_control_cases": 6,
+        "canonical_full_replay_performed": False, "production_ready": False,
+    }
+    prior = gate["historical_cycle187_dependency_qualification"]
+    gate["current_dependency_qualification"] = {
+        "cycle": 188, "source_validation_cycle": 188, "status": "PMM_VM_IRQ_pass_eleven_profiles_pending",
+        "scope": "physical_memory_virtual_memory_and_interrupt_time_only", "applies_to_current_source": True,
+        "all_fourteen_profiles_current": False,
+        "qualified_profiles": [*prior["qualified_profiles"], "interrupt_time"],
+        "newly_qualified_profiles": ["interrupt_time"],
+        "readiness_replay_required_profiles": prior["readiness_replay_required_profiles"][1:],
+        "fresh_qemu_runs": 2, "run_count_scope": "current_cycle_IRQ_only",
+        "superseded_initial_runs": 2, "negative_control_groups": 58,
+        "kernel_sha256": prior["kernel_sha256"],
+        "receipt_bindings": [*copy.deepcopy(prior["receipt_bindings"]), {
+            "profile": "interrupt_time", "path": "runs/native-kernel-interrupt-time-readiness.json",
+            "sha256": "A8812EE8F48CBA157554EB3264EA945082641014D9E2FE1C7A3982D648FF046B",
+            "fresh_runs": 2, "negative_controls": 58, "kernel_host_tests": 245,
+            "execution_log_sha256": "98DE2D5B7B345ED29CFDA5E1BBE0160126A332F0E4319B4AF91FCE66567C4606",
+            "elapsed_seconds": 78.312}],
+        "prior_memory_qualification_record": "historical_cycle187_dependency_qualification",
+        "recorded_evidence_cases": {"exit": 14, "coverage": 16, "evidence": 23, "shape": 3,
+                                    "observation": 145, "summary": 22, "clock": 6},
+        "recorded_evidence_case_total": 229, "malformed_root_and_control_cases": 6,
+        "recorded_evidence_rejections_exercised_through_runtime_and_gate": True,
+        "pre_repair_counterexample": {"cases": 64, "runtime_accepted": 52, "aggregate_gate_accepted": 44,
+            "runtime_exceptions": 1, "aggregate_gate_exceptions": 4,
+            "zero_sample_direct_parser": "ZeroDivisionError",
+            "record_sha256": "011B519EB45330A2E04E3C7CCCBF237127A0AEA1D74E895E5209223203515329"},
+        "initial_receipt_sha256": "6AD05F1D92CB328088D56DD064F4D011D818D85FDD15153DF1314F2B7B939076",
+        "historical_IRQ_receipt_sha256": "19FB9DA0B525064D56126E9EEE159C887A46B4FD1EB6B6DA3646C5F88182E7B2",
+        "positive_receipts_rebound_in_tests": False, "pair_validation_is_freshness_or_authentication": False,
+        "control_execution_complete": False, "unproven_per_control_rejection_groups_at_least": 65,
+        "current_candidate_full_gate_passed": False, "production_ready": False,
+    }
+    gate["current_closeout_regression"] = {
+        "cycle": 188, "status": "pass", "scope": "IRQ_recorded_evidence_and_clock_calibration_only",
+        "tests_run": 12, "tests_passed": 12, "tests_failed": 0, "tests_skipped": 0,
+        "hostile_environment": True,
+        "log_sha256": "8477E89A8F5030CE86DB3659E0C22E57E74AC1E7BDDBEB48D48F86C3F0D3F3A7",
+        "qualifier_output_preservation_cases": 2, "direct_clock_boundary_rejections": 6,
+        "original_counterexample_replay": {"cases": 64, "runtime_accepted": 0, "aggregate_gate_accepted": 0,
+            "runtime_exceptions": 0, "aggregate_gate_exceptions": 0,
+            "genuine_positive_runtime_and_gate_pass": True,
+            "record_sha256": "D06DA52166453BD9E72604ABFF7A6C860D530A64AEB1A7C1CB155817E13350AD"},
+        "combined_regression": {
+            "status": "pass", "scope": "IRQ_VM_PMM_CPU_boot_host_progress_checklist_and_core_not_full_canonical",
+            "tests_run": 258, "tests_passed": 258, "tests_skipped": 0,
+            "log_sha256": "E7C1BEF95B382EE94A18126281845A2750A43521B8BCFCB17190A1CF68F21810",
+        },
+        "canonical_full_replay_performed": False, "merge_qualified": False, "production_ready": False,
+    }
+    evidence = (
+        "Cycle 188: " + checkpoint + " repairs IRQ recorded execution, typed aggregate observations "
+        "and summaries, fail-closed malformed input and checked calibration before frequency arithmetic. "
+        "Two final boots, 58 executed controls and 12 focused tests pass on unchanged kernel bytes, "
+        "including 229 recorded mutations, six malformed root/control cases and two output-preservation "
+        "cases. All 64 original audit cases now reject without validator exceptions."
+    )
+    gap = (
+        "Selected readiness is 16/27; eleven SMP-through-lock profiles remain from N8-SMP-FIRST-AP-001. "
+        "At least 65 scheduler controls still need individually bound rejection execution before exact "
+        "full canonical/Doctor/publication/configured-check/review qualification and PR78 merge. "
+        "The prior 52 runtime and 44 gate admissions, one runtime and four gate exceptions, direct "
+        "zero-sample division failure and two superseded initial boots remain preserved. Recorded "
+        "consistency is not freshness or authentication; no phase, flag, kernel feature, hardware, "
+        "independent builder, ISO or production gate closes."
+    )
+    for phase in roadmap["phases"]:
+        if phase["id"] in {"N8", "N36"}:
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle 188 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in {"FLAG-N8-IRQ-001", "FLAG-N36-RECEIPT-COVERAGE-001"}:
             flag["evidence"].insert(0, checkpoint)
     roadmap["gap_summary"]["native_program_gaps"] = list(roadmap["gap_summary"]["native_program_gaps"])
     roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
@@ -4736,7 +4843,7 @@ def apply_cycle187(roadmap: dict, test_count: int) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1006)
+    parser.add_argument("--test-count", type=int, default=1011)
     parser.add_argument("--status-date", default="2026-09-26")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

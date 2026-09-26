@@ -1878,6 +1878,8 @@ def check_native_kernel_interrupt_time_readiness(
             "; ".join(errors) or "native kernel interrupt/time readiness is not an object",
         )
     errors.extend(str(issue) for issue in native_kernel_interrupt_time.readiness_errors(artifact, ROOT))
+    if errors:
+        return readiness.make_check("native_kernel_interrupt_time_readiness", False, "; ".join(errors))
     expected_summary = {
         "kernel_host_tests_passed": 245,
         "kernel_host_tests_total": 245,
