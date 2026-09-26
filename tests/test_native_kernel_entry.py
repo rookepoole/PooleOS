@@ -63,7 +63,6 @@ class NativeKernelEntryTests(unittest.TestCase):
 
     def test_each_kernel_crate_source_mutation_stales_the_receipt(self) -> None:
         candidate = copy.deepcopy(self.readiness)
-        candidate["bindings"] = entry.expected_bindings(ROOT)
         self.assertEqual(entry.readiness_errors(candidate, ROOT), [])
         original = entry.file_binding
         sources = sorted((ROOT / "native/kernel/src").rglob("*.rs"))

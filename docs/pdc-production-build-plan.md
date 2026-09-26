@@ -1,34 +1,48 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-26
-Plan version: 2.85.0-native-host-toolchain-repair
-Roadmap cycle: PooleOS Cycle 182
+Plan version: 2.86.0-native-loader-provenance
+Roadmap cycle: PooleOS Cycle 183
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 183: Unfinished Cloud Backup
+## Cycle 183: Shared Loader And Entry Provenance
 
-The owner requested a merge if no blocker exists, principally to ensure cloud
-storage. Checkpoints through Cycle 182 already exist on the remote development
-branch. PR #78 is mechanically mergeable but not qualified: dependency replay,
-65 scheduler control-execution gaps and full exact-candidate qualification
-remain required. Main therefore stays at qualified Cycle 176.
+`N5-ELF-001` at N5.5, supported by N3.5 and N36.1/N36.2/N36.10, now requires
+typed host-profile evidence and binds eight additional build/profile/test
+inputs. The qualifier rejects invalid receipts before creating or replacing
+output. Kernel entry inherits all 19 declared loader inputs in 72 total source
+bindings; its positive source-mutation test now uses the untouched generated
+receipt. Actual ELF and entry qualifications pass with pinned host inputs and
+hostile environment overrides, and all 59 focused regression tests pass.
 
-Pending `N5-ELF-001` work at N5.5 adds host-profile validation, transitive loader
-input binding and rejection before receipt publication. One bounded hostile
-environment ELF qualification passes; its generated receipt remains private
-pending admission and regressions. Kernel-entry replay and the new Python
-tests have not yet run. This cloud save is not a completed development cycle.
+ELF executes 12 Rust tests, 129 negative controls and 16,384 differential cases
+with zero mismatches. Entry executes 245 host tests and 43 controls with two
+matching clean builds. Exact receipts reproduce; all kernel product fields and
+bytes remain unchanged. Old receipts, failures and the earlier interrupted
+cloud checkpoint remain separate historical evidence.
 
-The roadmap, architecture, coverage and release-gate artifacts remain Cycle 182
-pre-change snapshots, not current candidate qualification. Resume by admitting
-the real generated ELF receipt, requalifying entry, running the focused suite,
-and reconciling those authorities before the ordered downstream replay. No
-phase, flag, requirement, production criterion or approval gate is waived.
-[Exact backup scope and evidence](checkpoints/cycle183-unfinished-cloud-backup.md).
+The separate ELF gate passes; the measured selected projection is still 3/27,
+with 24 dependent checks stale. Next is `N5-SYMBOLS-SEMANTICS-001`, followed by
+ordered N5 policy/boot and CPU/memory replay. At least 65 scheduler controls
+still need individually bound execution evidence before final qualification.
+Full canonical/Doctor, publication and review conditions precede PR #78 merge.
+
+The reconciled inventory is 986 discovered Python tests and 263 architecture
+bindings, not a full-suite pass. All 8,996 requirements, 57 additions, 40 phases,
+301 subphases and phase/flag states are conserved. N0 custody, broader N3/N36
+host/evidence work, independent builders, native feature work and production
+exits remain open. No new guest boot, native feature, ISO, phase/flag closure or
+production promotion is claimed. PooleGlyph and the frozen demo are unchanged.
+[Cycle 183 evidence and limits](checkpoints/cycle183-elf-loader-provenance.md).
+
+The combined focused suite passes 105 Python tests with zero failures or skips,
+including twelve aggregate entry rejection cases. The separate 45-test
+metadata/core/checklist suite and historical/source conservation check pass.
+These results are not the full canonical release gate or a production exit.
 
 ## Historical Cycle 182: Host Toolchain Reproduction Repair
 

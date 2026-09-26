@@ -24,6 +24,10 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle183-elf-loader-provenance.md",
+    "docs/checkpoints/cycle183-unfinished-cloud-backup.md",
+    "runtime/native_elf_loader.py",
+    "tests/test_native_elf_loader.py",
     "docs/checkpoints/cycle182-host-toolchain-repair.md",
     "specs/native-host-msvc-profile.json",
     "tools/native_host_toolchain.py",

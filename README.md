@@ -11,15 +11,16 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Unfinished cloud checkpoint:** Cycle 183 loader-provenance changes are being
-saved on the existing draft PR #78 branch at the owner's request. One bounded
-ELF qualification passed, but the new receipt is still a private candidate;
-entry replay, focused regression and progress reconciliation remain pending.
-The Cycle 182 ledger and readiness counts below are pre-change snapshots, not
-qualification of this working checkpoint. Nothing is merged or released.
-[Cycle 183 backup and resumption point](docs/checkpoints/cycle183-unfinished-cloud-backup.md).
+**Latest development checkpoint:** Cycle 183 completes shared-loader and entry
+provenance qualification. Invalid loader receipts reject before output, and
+entry inherits the loader's declared inputs. All 59 focused tests pass under
+hostile environment overrides, including exact receipt reproduction; kernel
+bytes are unchanged. The ELF gate passes, while 24 of 27 selected downstream
+checks still need replay. The 65 scheduler execution-evidence gaps and full
+qualification remain open. This is not a new ISO or a merge-qualified release.
+[Cycle 183 evidence and next steps](docs/checkpoints/cycle183-elf-loader-provenance.md).
 
-**Last reconciled development checkpoint:** Cycle 182 repairs host build reproducibility.
+**Historical development checkpoint:** Cycle 182 repairs host build reproducibility.
 Controlled builds isolate the drift to MSVC runtime libraries; pinned inputs and
 shared environment sanitation restore exact entry and fixture reproduction.
 All 39 focused hostile-environment regressions pass. Kernel bytes are unchanged;

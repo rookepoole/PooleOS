@@ -143,9 +143,9 @@
         "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
       },
       {
-        "byte_count": 9417,
+        "byte_count": 9490,
         "path": "runtime/native_kernel_entry.py",
-        "sha256": "A59F1242952CC3F3AED861542B2C964962ED8599B9F7649BB25F89851AA1B730"
+        "sha256": "D5573D19200D2C8AB0EEE71DD082E5881BA3285EA327AD120C03101D4E894934"
       },
       {
         "byte_count": 25233,
@@ -153,9 +153,9 @@
         "sha256": "F8521399E1EFE957EDAB70AC8A101567C45BFE1655CC7AA75132B8844FE56FC1"
       },
       {
-        "byte_count": 10052,
+        "byte_count": 10928,
         "path": "tests/test_native_kernel_entry.py",
-        "sha256": "6E2578B3EF160D1A0F84A9CD95853CA461887A6B10D693401F1ECA43818DF47B"
+        "sha256": "933C35AA3E4A99AD38403C99B8A9DAD482201A434E117A96DEA524D1418D3D48"
       },
       {
         "byte_count": 7025,
@@ -185,12 +185,67 @@
       {
         "byte_count": 33002,
         "path": "tools/qualify_native_elf_loader.py",
-        "sha256": "075739F71298917D0AC3DE754D63DC57BFD64AF7A302D232D4AFA608FC539F6B"
+        "sha256": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B"
       },
       {
         "byte_count": 8341,
         "path": "tests/test_native_host_toolchain.py",
         "sha256": "EAB54E9FDE9435B29C56866CD5A4A6600E54AB2CB14BE0604818685105316393"
+      },
+      {
+        "byte_count": 342,
+        "path": "native/elf/Cargo.toml",
+        "sha256": "FD1F6C50EF6C3CE82C5602386BB68A7BED933819C89284FADAECEE7434654389"
+      },
+      {
+        "byte_count": 36472,
+        "path": "native/elf/src/lib.rs",
+        "sha256": "15CEF64F884F17A97F7581A794555E23F80D099C1B2E152B42CD59D64A884DA4"
+      },
+      {
+        "byte_count": 5760,
+        "path": "native/elf/src/bin/poole_elf_probe.rs",
+        "sha256": "5D75C4150FD4CAEFF40ACAD5A9AFF38CD6DCD0519060E1407EB24DF73531DCCE"
+      },
+      {
+        "byte_count": 1863,
+        "path": "native/boot/Cargo.toml",
+        "sha256": "C9175879FB21AAE932016F9E1E4F46DD0070BF0D6A2DB32AB370AF7C4D0687F6"
+      },
+      {
+        "byte_count": 16266,
+        "path": "native/boot/src/lib.rs",
+        "sha256": "9937D6DBE1F55646B042B81D9CD0BC5A4AC150E8710A469C2BD378F229F1A5DD"
+      },
+      {
+        "byte_count": 31837,
+        "path": "runtime/native_elf_loader.py",
+        "sha256": "EDB7798C4CF70A65F9F3826A96E1996E0DA2B01443940BBB517E0E1702D29E3C"
+      },
+      {
+        "byte_count": 3946,
+        "path": "tools/generate_native_elf_loader_vectors.py",
+        "sha256": "8A28A89C340BC4B59E532E16E52B89FA78B91D111D9A3289F158E7D3459CFD74"
+      },
+      {
+        "byte_count": 5451,
+        "path": "docs/native-elf-loader.md",
+        "sha256": "C67E4C762280B7799733AF6ACB6ADCBA62B7EA083A78F41E530F41D8A35FC38D"
+      },
+      {
+        "byte_count": 131,
+        "path": "native/rust-toolchain.toml",
+        "sha256": "06C4E0BD63FE84DCB26A0FAE52D96F23C38979DBE6F154D58EAB1547F81FA26B"
+      },
+      {
+        "byte_count": 4017,
+        "path": "specs/native-toolchain-lock.json",
+        "sha256": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E"
+      },
+      {
+        "byte_count": 12903,
+        "path": "tests/test_native_elf_loader.py",
+        "sha256": "95961C82225CC2FAB3E49984B735C1AD1497D34DD11859E5D34F597EF0F48C1B"
       },
       {
         "byte_count": 21215,
