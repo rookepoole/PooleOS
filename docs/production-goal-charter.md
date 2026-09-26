@@ -7,9 +7,25 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 184
+Last roadmap reconciliation: PooleOS Cycle 185
 
-Current Cycle 184: six host qualifiers verify isolated pinned inputs; eight
+Current Cycle 185: five CPU profiles enforce typed recorded-pair evidence;
+fourteen final virtual boots and 225 marker controls pass on unchanged kernel
+bytes. All 50 focused tests pass, including 371 malformed-record cases through
+the runtime and actual release gates. The prior 42 accepted exit mutations,
+two gate exceptions, initial test-field failure and six superseded trap boots
+remain preserved. Selected readiness is 13/27; fourteen memory-through-lock
+profiles need replay from N9-PMM-ACPI-CONSUMER-001. At least 65 scheduler
+execution-evidence gaps and full exact-candidate qualification still precede
+PR #78 merge. No phase, flag, normative condition, new ISO or production gate
+closes. [Cycle 185 evidence](checkpoints/cycle185-cpu-recorded-evidence.md).
+
+Cycle 185 combined closeout passes 221 tests with zero skips after correcting
+two old roadmap assertions. The failed 219/221 run remains preserved.
+Historical evidence, checklist, native products and owner-data conservation pass;
+this is not the full canonical suite or a main-merge qualification.
+
+Historical Cycle 184: six host qualifiers verify isolated pinned inputs; eight
 generated boot-chain/prerequisite receipts pass current validation. Typed
 profiles, exact input/count schemas, rejected-output preservation and roadmap
 repeatability are repaired. All 109 focused tests pass; six final virtual boots

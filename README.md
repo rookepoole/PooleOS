@@ -11,7 +11,19 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Latest development checkpoint:** Cycle 184 qualifies boot-chain host provenance.
+**Latest development checkpoint:** Cycle 185 repairs CPU recorded-execution
+validation and two malformed-input gate exceptions. Five profiles pass fourteen
+final virtual boots and 225 marker controls on unchanged kernel bytes. All 50
+focused tests pass, including 371 malformed-record cases through runtime and
+actual gates. Selected readiness is 13/27; fourteen memory-through-lock replays
+are next from `N9-PMM-ACPI-CONSUMER-001`. At least 65 scheduler evidence gaps and
+full qualification still block a main merge. This is not a new kernel feature,
+ISO or production release. Earlier failures and superseded boots are retained.
+[Cycle 185 evidence and next steps](docs/checkpoints/cycle185-cpu-recorded-evidence.md).
+The combined CPU/boot/progress closeout passes 221 tests with zero skips;
+checklist, history, native products and owner-data conservation also pass.
+
+**Historical development checkpoint:** Cycle 184 qualifies boot-chain host provenance.
 Six qualifiers now verify isolated pinned host inputs, and eight generated
 receipts pass current validation. All 109 focused tests pass; six final virtual
 boots include two kernel entries. Kernel bytes remain unchanged. Selected

@@ -1,13 +1,46 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-26
-Plan version: 2.87.0-native-boot-host-provenance
-Roadmap cycle: PooleOS Cycle 184
+Plan version: 2.88.0-native-cpu-recorded-evidence
+Roadmap cycle: PooleOS Cycle 185
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 185: CPU Recorded Evidence
+
+`N7-TRAP-001` at N7.5/N7.6, supporting N3.5 and N36.1/N36.2, now validates
+strictly typed recorded execution across five CPU profiles. The old trap
+validator and aggregate gate accepted all 42 malformed exit-status mutations;
+the shared pair validator repairs that gap. Null run-list and revalidation
+objects now fail the CPU gate instead of raising exceptions.
+
+Five genuine regenerated receipts pass fourteen final virtual boots and 225
+marker controls on unchanged kernel bytes. All 50 focused tests pass, including
+98 exit, 112 coverage and 161 evidence mutations through both runtime and actual
+gates. Positive receipts are never rebound. The expected TCG diagnostic is
+separate from two successful WHPX exception boots. Six superseded trap boots,
+the initial test-field mistake and both gate exceptions remain preserved.
+
+Selected readiness is 13/27; firmware, boot-trust and ELF separately pass.
+Eight prior boot receipts remain unchanged. Next is `N9-PMM-ACPI-CONSUMER-001`
+and fourteen memory-through-lock replays. At least 65 scheduler controls still
+need individually bound rejection execution before exact-candidate canonical/
+Doctor/publication/review qualification and PR #78 merge. This work remains
+under `ADD-N36-RECEIPT-COVERAGE-001`; no phase or flag closes.
+
+The inventory is 998 discovered tests and 283 architecture bindings, not a full
+suite pass. All 8,996 requirements, 57 additions, 40 phases, 301 subphases,
+94 flags with 35 open and 20 gaps remain accounted for. Historical records and
+the normative charter are preserved. No new kernel feature, target-hardware
+proof, independent builder, new ISO or production readiness is claimed.
+[Cycle 185 evidence and exact next move](checkpoints/cycle185-cpu-recorded-evidence.md).
+
+The combined closeout passes 221 tests with zero skips. Two initially stale
+roadmap assertions were corrected; the failed 219/221 run is preserved.
+Checklist, historical evidence, source/product and owner-data conservation pass.
 
 ## Cycle 184: Boot-Chain Host Provenance
 

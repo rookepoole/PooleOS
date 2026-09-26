@@ -1398,13 +1398,15 @@ def check_native_kernel_cpu_policy_readiness(
     execution = artifact.get("execution", {})
     runs = execution.get("runs", []) if isinstance(execution, dict) else []
     if (
-        len(runs) != 2
+        not isinstance(runs, list)
+        or len(runs) != 2
         or execution.get("cpu_model") != "qemu64"
         or execution.get("acceleration") != "tcg_single_thread"
         or any(
             not isinstance(run, dict)
             or run.get("serial_debugcon_exact_match") is not True
             or run.get("pbp1_serial_debugcon_exact_match") is not True
+            or not isinstance(run.get("independent_kernel_revalidation"), dict)
             or run.get("independent_kernel_revalidation", {}).get("guest_host_exact_match")
             is not True
             for run in runs

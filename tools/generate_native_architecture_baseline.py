@@ -24,6 +24,10 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle185-cpu-recorded-evidence.md",
+    "docs/checkpoints/cycle185-unfinished-cloud-backup.md",
+    "runtime/native_kernel_trap.py",
+    "tools/pooleos_release_gate.py",
     "docs/checkpoints/cycle184-boot-host-provenance.md",
     "docs/checkpoints/cycle184-unfinished-cloud-backup.md",
     "docs/checkpoints/cycle184-validated-boot-cloud-backup.md",
