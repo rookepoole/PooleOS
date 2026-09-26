@@ -7,7 +7,6 @@ import argparse
 import dataclasses
 import hashlib
 import json
-import os
 import random
 import re
 import struct
@@ -22,6 +21,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from runtime import native_policy as ppol1  # noqa: E402
+from tools.native_host_toolchain import profile_receipt, verified_environment  # noqa: E402
+from tools.qualify_native_toolchain import QualificationError as HostToolchainError, isolated_environment  # noqa: E402
 
 
 NATIVE_ROOT = ROOT / "native"
@@ -78,38 +79,11 @@ def _toolchain(toolchain_root: Path) -> tuple[Path, Path, dict[str, str]]:
     rustc = installed / "bin" / "rustc.exe"
     if not cargo.is_file() or not rustc.is_file():
         raise QualificationError("workspace-local Rust toolchain is missing")
-    env = dict(os.environ)
-    for key in (
-        "CARGO_BUILD_RUSTC",
-        "CARGO_ENCODED_RUSTFLAGS",
-        "CARGO_HOME",
-        "CARGO_INCREMENTAL",
-        "CARGO_TARGET_DIR",
-        "RUSTC",
-        "RUSTC_BOOTSTRAP",
-        "RUSTC_WRAPPER",
-        "RUSTDOCFLAGS",
-        "RUSTFLAGS",
-        "RUSTUP_HOME",
-        "RUSTUP_TOOLCHAIN",
-    ):
-        env.pop(key, None)
-    system_root = Path(env.get("SystemRoot", r"C:\Windows"))
-    env.update(
-        {
-            "CARGO_HOME": str(toolchain_root / "cargo"),
-            "CARGO_INCREMENTAL": "0",
-            "LANG": "C",
-            "LC_ALL": "C",
-            "PATH": os.pathsep.join(
-                [str(installed / "bin"), str(toolchain_root / "cargo" / "bin"), str(system_root / "System32")]
-            ),
-            "RUSTC": str(rustc),
-            "RUSTUP_HOME": str(toolchain_root / "rustup"),
-            "SOURCE_DATE_EPOCH": "0",
-            "TZ": "UTC",
-        }
-    )
+    env = isolated_environment(toolchain_root, installed / "bin", rustc)
+    try:
+        env = verified_environment(env, ROOT)
+    except HostToolchainError as exc:
+        raise QualificationError(str(exc)) from exc
     remap = f"--remap-path-prefix={NATIVE_ROOT.resolve()}=/pooleos/native"
     for target in ("X86_64_UNKNOWN_UEFI", "X86_64_UNKNOWN_NONE"):
         env[f"CARGO_TARGET_{target}_RUSTFLAGS"] = " ".join(
@@ -160,6 +134,7 @@ def _build_validators(toolchain_root: Path, temporary_root: Path) -> tuple[Path,
         "status": "pass",
         "rustc": _run([str(rustc), "--version"], cwd=ROOT, env=env).strip(),
         "host_tests": 6,
+        "host_toolchain": profile_receipt(ROOT),
         "rustfmt_packages": 1,
         "clippy_targets": 1,
         "no_std_targets": targets,
@@ -683,11 +658,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     args = parser.parse_args(argv)
     readiness = qualify(args.toolchain_root.resolve())
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(readiness, indent=2) + "\n", encoding="utf-8", newline="\n")
     errors = ppol1.readiness_errors(readiness, ROOT)
     if errors:
         raise QualificationError("generated PPOL1 readiness is invalid: " + "; ".join(errors))
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(json.dumps(readiness, indent=2) + "\n", encoding="utf-8", newline="\n")
     print(
         f"PPOL1 QUALIFY PASS controls={len(readiness['negative_controls'])} "
         f"differential={sum(item['cases'] for item in readiness['differential'].values())} "

@@ -28,6 +28,13 @@ CONTRACT_RELATIVE = "specs/native-kernel-revalidation-contract.json"
 SCHEMA_RELATIVE = "specs/native-kernel-revalidation-readiness.schema.json"
 READINESS_RELATIVE = "runs/native-kernel-revalidation-readiness.json"
 IMPLEMENTATION_INPUTS = (
+    "native/.cargo/config.toml",
+    "native/rust-toolchain.toml",
+    "specs/native-toolchain-lock.json",
+    "specs/native-host-msvc-profile.json",
+    "tools/native_host_toolchain.py",
+    "tools/qualify_native_toolchain.py",
+    "tests/test_native_boot_host_toolchain.py",
     "native/handoff/src/lib.rs",
     "native/livehandoff/src/lib.rs",
     "native/boot/src/kload.rs",
@@ -181,6 +188,15 @@ def readiness_errors(readiness: dict[str, object], root: Path = ROOT) -> list[st
     if readiness.get("inputs") != expected_inputs:
         errors.append("PKREVAL1 readiness input bindings are stale")
     build = readiness.get("build", {})
+    host = build.get("host_toolchain") if isinstance(build, dict) else None
+    expected_host = {
+        "profile_id": "POOLEOS-HOST-MSVC-1",
+        "profile_sha256": sha256_bytes((root / "specs/native-host-msvc-profile.json").read_bytes()),
+        "verified_before_build": True,
+        "scope": "host_linker_and_library_trees_not_complete_host_attestation",
+    }
+    if json.dumps(host, sort_keys=True) != json.dumps(expected_host, sort_keys=True):
+        errors.append("PKREVAL1 host-toolchain profile mismatch")
     if not isinstance(build, dict) or build.get("host_test_count") != 245 or set(
         build.get("targets", {}) if isinstance(build.get("targets"), dict) else {}
     ) != {"x86_64-unknown-none", "x86_64-unknown-uefi"}:
