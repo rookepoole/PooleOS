@@ -9,7 +9,14 @@ Machine ledger: `runs/pdc_production_roadmap.json`
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
 Last roadmap reconciliation: PooleOS Cycle 191
 
-Current Cycle 191: IPI admission validates raw execution, typed accounting,
+Unfinished Cycle 192 backup: native PKMBX1 export and its host oracle are
+implemented but not yet live-qualified. Four bounded receipts are admitted;
+the selected projection is 4/27 after the kernel identity change. Older dependent
+receipts are historical, not evidence for these new bytes. The roadmap remains
+at its last completed Cycle 191 reconciliation. No normative condition or
+merge requirement changes. [Backup and resume order](checkpoints/cycle192-unfinished-cloud-backup.md).
+
+Last reconciled Cycle 191: IPI admission validates raw execution, typed accounting,
 frame-address checksums and exact control counts; three constant-only controls
 now call the real validator. Two final four-vCPU boots, 249 cases in 30 categories
 and 31 focused tests pass. All 66 original corruptions reject without exceptions.

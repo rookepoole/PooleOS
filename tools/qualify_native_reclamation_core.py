@@ -35,6 +35,7 @@ SOURCES = (
     "native/kernel/src/physical_memory/tests/ap_resources.rs",
     "tests/test_native_reclamation_core.py",
     "native/kernel/src/main.rs",
+    "native/kernel/src/smp_runtime.rs",
     "native/kernel/linker.ld",
     "native/kernel/manifest.pkm",
     "specs/native-kernel-entry-contract.json",
@@ -71,7 +72,7 @@ STACK_TESTS = (
     "overlapping_stacks_from_distinct_manager_namespaces_cannot_share_scheduler",
     "full_scrub_receipt_ledger_retains_the_next_stack_without_writes",
 )
-KERNEL_SHA256 = "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA"
+KERNEL_SHA256 = "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8"
 STAGES = (
     "format", "host-build-debug", "test-build-debug", "tests-debug",
     "lifetime-build-debug", "lifetime-tests-debug",
@@ -131,7 +132,7 @@ def validate_report(report: dict, root: Path = ROOT) -> None:
         "status": "host_verified_live_integration_pending", "production_ready": False,
         "live_integration_verified": False, "cross_cpu_quiescence_verified": False,
         "n12_3_complete": False, "focused_test_count": TEST_COUNT,
-        "kernel_regression_count": 245, "compile_fail_borrow_tests": 15,
+        "kernel_regression_count": 246, "compile_fail_borrow_tests": 15,
         "physical_retention_contract_id": "PKRETAIN1",
         "physical_retention_scope": "allocator_enforced_for_explicitly_retained_allocations",
         "physical_retention_test_count": 20, "physical_retention_live_verified": False,
@@ -237,10 +238,10 @@ def qualify(work: Path) -> dict:
         run(f"lifetime-tests-{profile}", [str(lifetime_binary), "--test-threads=1"], LIFETIME_TEST_COUNT)
         if profile == "release":
             run("kernel-regressions-release", [str(cargo), "test", *base, "--lib", *host,
-                "--release", "--", "--test-threads=1"], 245)
+                "--release", "--", "--test-threads=1"], 246)
     env.pop("CARGO_PROFILE_RELEASE_PANIC", None)
     run("borrow-doctests", [str(cargo), "test", *base, "--doc", *host], 15)
-    run("kernel-regressions", [str(cargo), "test", *base, "--lib", *host, "--", "--test-threads=1"], 245)
+    run("kernel-regressions", [str(cargo), "test", *base, "--lib", *host, "--", "--test-threads=1"], 246)
     run("host-clippy", [str(cargo), "clippy", *base, "--lib", *host, "--", "-D", "warnings"])
     run("freestanding-clippy", [str(cargo), "clippy", *base, "--lib", "--release",
         "--target", entry.PRODUCT_TARGET, "--locked", "--offline", "--target-dir", str(target),
@@ -265,7 +266,7 @@ def qualify(work: Path) -> dict:
         "status": "host_verified_live_integration_pending", "production_ready": False,
         "live_integration_verified": False, "cross_cpu_quiescence_verified": False,
         "n12_3_complete": False, "focused_test_count": TEST_COUNT,
-        "kernel_regression_count": 245, "compile_fail_borrow_tests": 15,
+        "kernel_regression_count": 246, "compile_fail_borrow_tests": 15,
         "physical_retention_contract_id": "PKRETAIN1",
         "physical_retention_scope": "allocator_enforced_for_explicitly_retained_allocations",
         "physical_retention_test_count": 20, "physical_retention_live_verified": False,
@@ -297,7 +298,7 @@ def main() -> int:
     report = qualify(args.work.resolve())
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n")
-    print(f"PKRECLAIM1_CORE PASS tests={TEST_COUNT} lifecycle={LIFETIME_TEST_COUNT} stack={len(STACK_TESTS)} execution={len(EXECUTION_TESTS)} retention=20 ap_resources=11 profiles=2 regressions=245 live=0 production=0")
+    print(f"PKRECLAIM1_CORE PASS tests={TEST_COUNT} lifecycle={LIFETIME_TEST_COUNT} stack={len(STACK_TESTS)} execution={len(EXECUTION_TESTS)} retention=20 ap_resources=11 profiles=2 regressions=246 live=0 production=0")
     return 0
 
 

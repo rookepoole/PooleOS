@@ -45,10 +45,10 @@ class NativeKernelEntryTests(unittest.TestCase):
         self.assertEqual(product["canonical_byte_count"], 530072)
         self.assertEqual(product["image_byte_count"], 602112)
         self.assertEqual(product["entry_offset"], 0xA000)
-        self.assertEqual(product["relocation_count"], 1325)
+        self.assertEqual(product["relocation_count"], 1327)
         self.assertEqual(
             product["canonical_sha256"],
-            "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA",
+            "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8",
         )
         self.assertTrue(product["entry_prefix_hex"].startswith("FAFC4889E14885C9"))
 

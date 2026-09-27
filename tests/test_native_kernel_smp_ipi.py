@@ -139,8 +139,8 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
     def test_contract_schema_and_negative_control_order(self) -> None:
         contract = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.CONTRACT_RELATIVE)
         self.assertEqual([], smp_ipi.contract_errors(contract))
-        self.assertEqual(30, len(smp_ipi.NEGATIVE_CONTROL_IDS))
-        self.assertEqual(249, contract["qualification"]["hostile_case_count"])
+        self.assertEqual(33, len(smp_ipi.NEGATIVE_CONTROL_IDS))
+        self.assertEqual(609, contract["qualification"]["hostile_case_count"])
 
     def test_three_private_resource_layouts_fit_below_one_mib(self) -> None:
         layouts = [smp_ipi.resource_layout(page, 32) for page in (1, 35, 69)]
@@ -299,7 +299,7 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
         self.assertEqual(3, observation["result"]["application_processors_online"])
         controls = qualify._negative_controls(readiness["execution"]["runs"][0]["markers"])
         self.assertEqual(list(smp_ipi.NEGATIVE_CONTROL_IDS), [item["id"] for item in controls])
-        self.assertEqual(249, sum(item["case_count"] for item in controls))
+        self.assertEqual(609, sum(item["case_count"] for item in controls))
         check = pooleos_release_gate.check_native_kernel_smp_ipi_readiness()
         self.assertTrue(check["ok"], check["detail"])
 
@@ -430,7 +430,7 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
                 with self.subTest(field=field, altered=altered), self.assertRaises(smp_ipi.KernelSmpIpiError):
                     smp_ipi.validate_markers(candidate)
 
-    def test_opaque_ap_checksums_are_explicitly_not_host_recomputed(self) -> None:
+    def test_ap_checksums_are_recomputed_before_normalization(self) -> None:
         baseline = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
         markers = baseline["execution"]["runs"][0]["markers"]
         normalized = smp_ipi.normalize_dynamic_markers(markers)
@@ -440,13 +440,42 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
                 candidate[index] = qualify._set_field(candidate[index], field, "0x0000000000000000")
                 with self.subTest(index=index, field=field), self.assertRaises(smp_ipi.KernelSmpIpiError):
                     smp_ipi.normalize_dynamic_markers(candidate)
-        # Document the export gap, not fabricated live evidence or an independent oracle.
         synthetic = markers.copy()
         for index in range(33, 36):
             synthetic[index] = qualify._set_field(synthetic[index], "baseline_checksum", "0x0000000000000001")
             synthetic[index] = qualify._set_field(synthetic[index], "runtime_checksum", "0x0000000000000002")
-        self.assertEqual(normalized, smp_ipi.normalize_dynamic_markers(synthetic))
-        self.assertIn("<guest-checked-dynamic>", normalized[33])
+        with self.assertRaises(smp_ipi.KernelSmpIpiError):
+            smp_ipi.normalize_dynamic_markers(synthetic)
+        self.assertIn("<validated-dynamic>", normalized[33])
+        self.assertNotIn("guest-checked", normalized[33])
+
+    def test_complete_mailbox_mutations_reject_before_normalization(self) -> None:
+        baseline = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        self.assertEqual([], smp_ipi.readiness_errors(baseline))
+        markers = baseline["execution"]["runs"][0]["markers"]
+        for index in range(3):
+            candidates = list(qualify.mailbox_mutations(markers, index))
+            self.assertEqual(120, len(candidates))
+            for case, candidate in enumerate(candidates):
+                with self.subTest(ap=index, case=case), self.assertRaises(smp_ipi.KernelSmpIpiError):
+                    smp_ipi.normalize_dynamic_markers(candidate)
+
+    def test_opaque_historical_marker_and_inconsistent_context_rejected(self) -> None:
+        import re
+        baseline = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        markers = baseline["execution"]["runs"][0]["markers"]
+        smp_ipi.validate_markers(markers)
+        old = markers.copy()
+        old[33] = re.sub(r" mailbox_evidence=.*?(?= tss_busy=)", "", old[33])
+        with self.assertRaises(smp_ipi.KernelSmpIpiError):
+            smp_ipi.validate_markers(old)
+        changed = markers.copy()
+        match = smp_ipi.AP.fullmatch(changed[34])
+        context = match.group("context_words").split(",")
+        context[-1] = f"0x{int(context[-1], 16) + 1:016X}"
+        changed[34] = qualify._set_field(changed[34], "context_words", ",".join(context))
+        with self.assertRaisesRegex(smp_ipi.KernelSmpIpiError, "context differs"):
+            smp_ipi.normalize_dynamic_markers(changed)
 
     def test_release_accounting_controls_execute_real_validator(self) -> None:
         smp_ipi.validate_release_accounting(96, 6, 417792)

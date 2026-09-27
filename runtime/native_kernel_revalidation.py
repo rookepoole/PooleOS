@@ -197,7 +197,7 @@ def readiness_errors(readiness: dict[str, object], root: Path = ROOT) -> list[st
     }
     if json.dumps(host, sort_keys=True) != json.dumps(expected_host, sort_keys=True):
         errors.append("PKREVAL1 host-toolchain profile mismatch")
-    if not isinstance(build, dict) or build.get("host_test_count") != 245 or set(
+    if not isinstance(build, dict) or build.get("host_test_count") != 246 or set(
         build.get("targets", {}) if isinstance(build.get("targets"), dict) else {}
     ) != {"x86_64-unknown-none", "x86_64-unknown-uefi"}:
         errors.append("PKREVAL1 build evidence changed")

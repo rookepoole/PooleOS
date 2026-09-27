@@ -67,8 +67,8 @@
     },
     "negative_controls": {
       "type": "array",
-      "minItems": 30,
-      "maxItems": 30,
+      "minItems": 33,
+      "maxItems": 33,
       "items": {
         "type": "object",
         "required": ["id", "status", "expected", "case_count"],
@@ -100,8 +100,8 @@
         "resource_pages_released": {"const": 96},
         "frame_pages_released": {"const": 6},
         "verified_bytes": {"const": 417792},
-        "negative_controls_total": {"const": 30},
-        "hostile_cases_total": {"const": 249},
+        "negative_controls_total": {"const": 33},
+        "hostile_cases_total": {"const": 609},
         "production_claim_count": {"const": 0}
       }
     },

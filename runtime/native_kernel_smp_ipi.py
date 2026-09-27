@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from runtime import native_inner_live, native_kernel_load, native_kernel_transfer, native_pooleboot
+from runtime import native_kernel_smp_mailbox as mailbox_evidence
 from runtime.schema_validation import validate_json
 from runtime.native_kernel_profile_evidence import kernel_entry_errors
 
@@ -105,6 +106,8 @@ IMPLEMENTATION_INPUTS = (
     "native/kernel/src/xstate.rs",
     "native/kmap/src/lib.rs",
     "runtime/native_kernel_smp_ipi.py",
+    "runtime/native_kernel_smp_mailbox.py",
+    "tests/test_native_kernel_smp_mailbox.py",
     "runtime/native_kernel_transfer.py",
     "runtime/native_kernel_load.py",
     "runtime/native_inner_live.py",
@@ -149,13 +152,16 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N8-PKSMP5-DUPLICATE-ACK-MODEL",
     "NEG-N8-PKSMP5-AGGREGATE-ACK-MODEL",
     "NEG-N8-PKSMP5-RELEASE-ACCOUNTING-MODEL",
+    "NEG-N8-PKMBX1-AP0-ORACLE",
+    "NEG-N8-PKMBX1-AP1-ORACLE",
+    "NEG-N8-PKMBX1-AP2-ORACLE",
 )
 
 EARLY = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-EARLY PASS contract=(?P<contract>PKSMP5) selector=(?P<selector>[0-9]+) bsp=(?P<bsp>[0-9]+) if=(?P<iflag>[0-9]+) stack=validated_by_wrapper serial=initialized$")
 TOPOLOGY = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-TOPOLOGY PASS contract=(?P<contract>PKSMP5) processors=(?P<processors>[0-9]+) enabled=(?P<enabled>[0-9]+) bsp_apic_id=(?P<bsp>[0-9]+) target_apic_ids=(?P<targets>[0-9,]+) target_mask=0x(?P<mask>[0-9A-F]{16}) apic_physical=0x(?P<apic>[0-9A-F]{16}) selection=(?P<selection>[a-z_]+)$")
 PARTIAL = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-PARTIAL-ROLLBACK PASS contract=(?P<contract>PKSMP5) started_mask=0x(?P<started>[0-9A-F]{16}) timeout_apic_id=(?P<timeout_apic>[0-9]+) timeout_mask=0x(?P<timeout_mask>[0-9A-F]{16}) timeout_count=(?P<timeouts>[0-9]+) parked_mask=0x(?P<parked>[0-9A-F]{16}) released_mask=0x(?P<released>[0-9A-F]{16}) resource_pages=(?P<resource_pages>[0-9]+) frame_pages=(?P<frame_pages>[0-9]+) zeroed_bytes=(?P<zeroed>[0-9]+) verified_bytes=(?P<verified>[0-9]+) retained_free_rejections=(?P<retained>[0-9]+) owner_release_rejections=(?P<owner>[0-9]+) fresh_allocation_required=(?P<fresh>[0-9]+)$")
 RETRY = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-RETRY PASS contract=(?P<contract>PKSMP5) retry_count=(?P<retry>[0-9]+) partial_rollback_count=(?P<rollbacks>[0-9]+) started_mask=0x(?P<started>[0-9A-F]{16}) online_mask=0x(?P<online>[0-9A-F]{16}) simultaneous_online=(?P<simultaneous>[0-9]+)$")
-AP = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=(?P<contract>PKSMP5) ap_index=(?P<index>[0-9]+) apic_id=(?P<apic_id>[0-9]+) physical_start=0x(?P<start>[0-9A-F]{16}) pages=(?P<pages>[0-9]+) sipi_vector=(?P<vector>[0-9]+) trampoline_bytes=(?P<trampoline>[0-9]+) allocation_sequence=(?P<allocation>[0-9]+) frame_allocation_sequences=(?P<frame_allocations>[0-9,]+) frame_release_sequences=(?P<frame_releases>[0-9,]+) resource_release_sequence=(?P<resource_release>[0-9]+) service_state=(?P<service>[0-9]+) mailbox_state=(?P<mailbox>[0-9]+) runtime_state=(?P<runtime>[0-9]+) deliveries=(?P<deliveries>[0-9]+) accepted=(?P<accepted>[0-9]+) denied=(?P<denied>[0-9]+) eois=(?P<eois>[0-9]+) diagnostic=(?P<diagnostic>[0-9]+) shootdown=(?P<shootdown>[0-9]+) stop=(?P<stop>[0-9]+) timeout_count=(?P<timeouts>[0-9]+) init_asserts=(?P<asserts>[0-9]+) init_deasserts=(?P<deasserts>[0-9]+) sipis=(?P<sipis>[0-9]+) target_mask=0x(?P<target>[0-9A-F]{16}) ack_mask=0x(?P<ack>[0-9A-F]{16}) invalidations=(?P<invalidations>[0-9]+) baseline_checksum=0x(?P<baseline>[0-9A-F]{16}) runtime_checksum=0x(?P<runtime_checksum>[0-9A-F]{16}) response_checksum=0x(?P<response>[0-9A-F]{16}) tss_busy=(?P<tss>[0-9]+) idt_verified=(?P<idt>[0-9]+) xstate_verified=(?P<xstate>[0-9]+) apic_table_verified=(?P<apic_table>[0-9]+) parked=(?P<parked>[0-9]+)$")
+AP = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=(?P<contract>PKSMP5) ap_index=(?P<index>[0-9]+) apic_id=(?P<apic_id>[0-9]+) physical_start=0x(?P<start>[0-9A-F]{16}) pages=(?P<pages>[0-9]+) sipi_vector=(?P<vector>[0-9]+) trampoline_bytes=(?P<trampoline>[0-9]+) allocation_sequence=(?P<allocation>[0-9]+) frame_allocation_sequences=(?P<frame_allocations>[0-9,]+) frame_release_sequences=(?P<frame_releases>[0-9,]+) resource_release_sequence=(?P<resource_release>[0-9]+) service_state=(?P<service>[0-9]+) mailbox_state=(?P<mailbox>[0-9]+) runtime_state=(?P<runtime>[0-9]+) deliveries=(?P<deliveries>[0-9]+) accepted=(?P<accepted>[0-9]+) denied=(?P<denied>[0-9]+) eois=(?P<eois>[0-9]+) diagnostic=(?P<diagnostic>[0-9]+) shootdown=(?P<shootdown>[0-9]+) stop=(?P<stop>[0-9]+) timeout_count=(?P<timeouts>[0-9]+) init_asserts=(?P<asserts>[0-9]+) init_deasserts=(?P<deasserts>[0-9]+) sipis=(?P<sipis>[0-9]+) target_mask=0x(?P<target>[0-9A-F]{16}) ack_mask=0x(?P<ack>[0-9A-F]{16}) invalidations=(?P<invalidations>[0-9]+) baseline_checksum=0x(?P<baseline>[0-9A-F]{16}) runtime_checksum=0x(?P<runtime_checksum>[0-9A-F]{16}) response_checksum=0x(?P<response>[0-9A-F]{16}) mailbox_evidence=(?P<mailbox_evidence>PKMBX1) snapshot=(?P<snapshot>quiesced) context_words=(?P<context_words>0x[0-9A-F]{16}(?:,0x[0-9A-F]{16}){4}) baseline_words=(?P<baseline_words>0x[0-9A-F]{16}(?:,0x[0-9A-F]{16}){14}) runtime_words=(?P<runtime_words>0x[0-9A-F]{16}(?:,0x[0-9A-F]{16}){37}) tss_busy=(?P<tss>[0-9]+) idt_verified=(?P<idt>[0-9]+) xstate_verified=(?P<xstate>[0-9]+) apic_table_verified=(?P<apic_table>[0-9]+) parked=(?P<parked>[0-9]+)$")
 SHOOTDOWN = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-SHOOTDOWN PASS contract=(?P<contract>PKSMP5) target_mask=0x(?P<target>[0-9A-F]{16}) ack_mask=0x(?P<ack>[0-9A-F]{16}) retired_generation=(?P<retired>[0-9]+) active_generation=(?P<active>[0-9]+) invalidations=(?P<invalidations>[0-9]+) root_checksum=0x(?P<roots>[0-9A-F]{16}) old_frame_checksum=0x(?P<old>[0-9A-F]{16}) new_frame_checksum=0x(?P<new>[0-9A-F]{16}) premature_reclaim_rejections=(?P<premature>[0-9]+) retained_free_rejections=(?P<retained>[0-9]+) owner_release_rejections=(?P<owner>[0-9]+) reclaim_state=(?P<state>[a-z_]+)$")
 LIFECYCLE = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-LIFECYCLE PASS contract=(?P<contract>PKSMP5) started_mask=0x(?P<started>[0-9A-F]{16}) online_mask=0x(?P<online>[0-9A-F]{16}) quiesced_mask=0x(?P<quiesced>[0-9A-F]{16}) parked_mask=0x(?P<parked>[0-9A-F]{16}) validated_mask=0x(?P<validated>[0-9A-F]{16}) released_mask=0x(?P<released>[0-9A-F]{16}) timeout_count=(?P<timeouts>[0-9]+) retry_count=(?P<retry>[0-9]+) partial_rollback_count=(?P<rollbacks>[0-9]+) exact_accounting=(?P<exact>[0-9]+)$")
 RELEASE = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-RELEASE PASS contract=(?P<contract>PKSMP5) resource_pages=(?P<resource_pages>[0-9]+) frame_pages=(?P<frame_pages>[0-9]+) resource_zeroed_bytes=(?P<resource_zeroed>[0-9]+) resource_verified_bytes=(?P<resource_verified>[0-9]+) frame_zeroed_bytes=(?P<frame_zeroed>[0-9]+) frame_verified_bytes=(?P<frame_verified>[0-9]+) total_pages=(?P<total>[0-9]+) capability_revoked=(?P<capability>[0-9]+) runtime_revoked=(?P<runtime>[0-9]+) mmio_revoked=(?P<mmio>[0-9]+) pic_restored=(?P<pic>[0-9]+) hpet_restored=(?P<hpet>[0-9]+) apic_base_restored=(?P<apic>[a-z_]+)$")
@@ -167,7 +173,7 @@ class KernelSmpIpiError(RuntimeError):
 
 
 NEGATIVE_CONTROL_CASE_COUNTS = (1, 1, 1, 2, 8, 14, 6, 36, 36, 36, 13, 11, 14, 22,
-                                3, 2, 2, 2, 2, 2, 8, 8, 2, 2, 2, 4, 3, 1, 2, 3)
+                                3, 2, 2, 2, 2, 2, 8, 8, 2, 2, 2, 4, 3, 1, 2, 3, 120, 120, 120)
 
 
 def _require(condition: bool, message: str) -> None:
@@ -241,6 +247,8 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
     errors = [f"schema {issue.path}: {issue.message}" for issue in issues]
     if contract.get("required_negative_controls") != list(NEGATIVE_CONTROL_IDS):
         errors.append("required negative controls diverge")
+    if json.dumps(contract.get("mailbox_evidence"), sort_keys=True) != json.dumps(mailbox_evidence.CONTRACT, sort_keys=True):
+        errors.append("PKMBX1 mailbox evidence contract diverges")
     return errors
 
 
@@ -301,7 +309,7 @@ def ipi_readiness_summary(observation: dict[str, Any]) -> dict[str, int]:
 
 
 def recorded_ipi_errors(execution: Any, summary: Any) -> list[str]:
-    """Check raw consistency; opaque AP mailbox checksums remain guest-checked."""
+    """Check raw execution and independently validated PKMBX1 mailbox snapshots."""
     if not isinstance(execution, dict):
         return ["PKSMP5 recorded execution is not an object"]
     errors: list[str] = []
@@ -669,11 +677,20 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         _require((_hex(match, "target"), _hex(match, "ack"), _dec(match, "invalidations")) == (local_mask, local_mask, 1), "PKSMP5 AP acknowledgement changed")
         _require(tuple(_dec(match, name) for name in ("tss", "idt", "xstate", "apic_table", "parked")) == (1, 1, 1, 1, 1), "PKSMP5 AP validation receipt changed")
         _require(_hex(match, "baseline") != 0 and _hex(match, "runtime_checksum") != 0 and _hex(match, "baseline") != _hex(match, "runtime_checksum"), "PKSMP5 AP runtime checksums are invalid")
+        try:
+            mailbox = mailbox_evidence.validate(
+                match.group("context_words"), match.group("baseline_words"), match.group("runtime_words"),
+                _hex(match, "baseline"), _hex(match, "runtime_checksum"), EXPECTED_APIC_IDS[index], layout["start"])
+        except mailbox_evidence.MailboxEvidenceError as error:
+            raise KernelSmpIpiError(str(error)) from error
+        if aps:
+            _require(mailbox["context"] == aps[0]["mailbox_evidence"]["context"], "PKMBX1 BSP context differs between APs")
         _require(_hex(match, "response") == response_expected, "PKSMP5 AP response checksum changed")
         frame_allocations = _csv_numbers(match.group("frame_allocations"))
         frame_releases = _csv_numbers(match.group("frame_releases"))
         layouts.append(layout)
         aps.append({"index": index, "apic_id": EXPECTED_APIC_IDS[index], "layout": layout, "allocation_sequence": _dec(match, "allocation"), "frame_allocation_sequences": list(frame_allocations), "frame_release_sequences": list(frame_releases), "resource_release_sequence": _dec(match, "resource_release"), "trampoline_bytes": _dec(match, "trampoline"), "response_checksum": response_expected})
+        aps[-1]["mailbox_evidence"] = mailbox
     validate_receipt_sequences(aps)
     _require([item["start"] for item in layouts] == [0x1000, 0x23000, 0x45000], "PKSMP5 private resource placement changed")
     _require(len({item["pml4"] for item in layouts}) == AP_COUNT, "PKSMP5 private roots alias")
@@ -738,10 +755,17 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
 
 
 def normalize_dynamic_markers(markers: list[str]) -> list[str]:
-    validate_markers(markers)
+    observation = validate_markers(markers)
     normalized = markers.copy()
     for index in range(33, 36):
         for field in ("baseline_checksum", "runtime_checksum"):
-            # Full mailbox inputs are not exported; only the guest recomputes these.
-            normalized[index] = re.sub(rf"{field}=0x[0-9A-F]{{16}}", f"{field}=<guest-checked-dynamic>", normalized[index], count=1)
+            normalized[index] = re.sub(rf"{field}=0x[0-9A-F]{{16}}", f"{field}=<validated-dynamic>", normalized[index], count=1)
+        mailbox = observation["aps"][index - 33]["mailbox_evidence"]
+        for field, section, dynamic in (
+            ("context_words", "context", mailbox_evidence.CONTEXT_FIELDS[2:]),
+            ("baseline_words", "baseline", ("tsc_online", "tsc_stop")),
+            ("runtime_words", "runtime", ("baseline_checksum",)),
+        ):
+            words = mailbox_evidence.normalized_words(mailbox[section], dynamic)
+            normalized[index] = re.sub(rf"{field}=[^ ]+", f"{field}={words}", normalized[index], count=1)
     return normalized

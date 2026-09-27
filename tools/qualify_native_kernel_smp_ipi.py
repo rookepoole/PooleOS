@@ -29,7 +29,7 @@ from tools import qualify_native_kernel_entry, qualify_native_pooleboot  # noqa:
 DEFAULT_TOOLCHAIN_ROOT = ROOT / ".toolchains" / "rust-1.97.0"
 DEFAULT_QEMU_ROOT = native_tier0.DEFAULT_QEMU_ROOT
 DEFAULT_OUT = ROOT / smp_ipi.READINESS_RELATIVE
-HOSTILE_CASE_COUNT = 249
+HOSTILE_CASE_COUNT = 609
 
 
 class QualificationError(RuntimeError):
@@ -137,6 +137,11 @@ def _audit_source_text(arch_text: str, main_text: str, ipi_text: str) -> dict[st
         "PKAPOWN1 live probe or ownership admission source is incomplete",
     )
     smp_ipi._require(all(token in ipi_text for token in required_ipi), "PKSMP5 coordinator source audit failed")
+    smp_ipi._require(all(token in main_text for token in (
+        "mailbox_evidence=PKMBX1 snapshot=quiesced context_words=",
+        "operation.mailbox_context.iter()", "smp_runtime::baseline_checksum_words(&mailbox)",
+        "smp_runtime::runtime_checksum_words(&mailbox)",
+    )), "PKMBX1 saved mailbox export source is incomplete")
     diagnostic_tokens = ("PKSMP5DBG", "SMP_MULTI_DEBUG", "MULTI_AP_FORCE_PASS")
     smp_ipi._require(not any(token in arch_text + main_text + ipi_text for token in diagnostic_tokens), "PKSMP5 transient diagnostics remain")
     return {
@@ -231,6 +236,56 @@ def _linked_invlpg_audit(toolchain_root: Path, expected_kernel: bytes, target_di
 def _multi_requests() -> list[dict[str, int]]:
     starts = (0x1000, 0x23000, 0x45000)
     return [smp_ipi.canonical_shootdown_request(start + 0x1000, start + 0x20000, start + 0x21000, apic_id) for start, apic_id in zip(starts, smp_ipi.EXPECTED_APIC_IDS, strict=True)]
+
+
+def mailbox_mutations(markers: list[str], ap_index: int):
+    """Corrupt raw exported inputs; coherent mutations get both fresh digests."""
+    marker_index = 33 + ap_index
+    original = markers[marker_index]
+    match = smp_ipi.AP.fullmatch(original)
+    if match is None:
+        raise QualificationError("PKMBX1 mutation seed is not a current AP marker")
+    fields = ("context_words", "baseline_words", "runtime_words")
+    rows = [[int(word, 16) for word in match.group(field).split(",")] for field in fields]
+
+    def candidate(changed, reseal):
+        line = original
+        if reseal:
+            baseline = smp_ipi.mailbox_evidence.checksum(changed[1])
+            line = _set_field(line, "baseline_checksum", f"0x{baseline:016X}")
+            line = _set_field(line, "runtime_checksum", f"0x{smp_ipi.mailbox_evidence.checksum(changed[2]):016X}")
+        for field, words in zip(fields, changed, strict=True):
+            line = _set_field(line, field, ",".join(f"0x{word:016X}" for word in words))
+        result = markers.copy()
+        result[marker_index] = line
+        return result
+
+    for section, row in enumerate(rows):
+        for index, value in enumerate(row):
+            changed = copy.deepcopy(rows)
+            changed[section][index] = 0 if value else 1
+            if section == 2 and index == 19:
+                changed[section][index] = 4
+            if section == 2 and index == 20:
+                changed[section][index] = 0x202
+            if section != 2 or index != 0:
+                changed[2][0] = smp_ipi.mailbox_evidence.checksum(changed[1])
+            yield candidate(changed, True)
+    for section in (1, 2):
+        for index in range(len(rows[section])):
+            changed = copy.deepcopy(rows)
+            changed[section][index] ^= 1
+            yield candidate(changed, False)
+    malformed = [(field, match.group(field) + "0") for field in fields]
+    malformed += [("mailbox_evidence", "PKMBX0"), ("snapshot", "online"),
+                  ("baseline_words", match.group("baseline_words").split(",", 1)[1]),
+                  ("baseline_words", match.group("baseline_words") + ",0x0000000000000000"),
+                  ("baseline_words", ",".join(reversed(match.group("baseline_words").split(",")))),
+                  ("context_words", match.group("context_words") + " context_words=" + match.group("context_words"))]
+    for field, value in malformed:
+        changed = markers.copy()
+        changed[marker_index] = _set_field(original, field, value)
+        yield changed
 
 
 def _negative_controls(markers: list[str]) -> list[dict[str, Any]]:
@@ -334,6 +389,9 @@ def _negative_controls(markers: list[str]) -> list[dict[str, Any]]:
         lambda: smp_ipi.validate_release_accounting(96, 5, 417792),
         lambda: smp_ipi.validate_release_accounting(96, 6, 413696),
     ]))
+    for index in range(smp_ipi.AP_COUNT):
+        controls.append(_require_rejections(ids[30 + index],
+            [_marker_operation(candidate) for candidate in mailbox_mutations(markers, index)]))
 
     if [item["id"] for item in controls] != list(ids):
         raise QualificationError("PKSMP5 hostile-control order diverged")

@@ -11,7 +11,15 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Latest development checkpoint:** Cycle 191 repairs IPI recorded execution,
+**Unfinished development backup:** Cycle 192 adds native `PKMBX1` AP mailbox
+export and an independent host checksum validator. Native builds and four
+bounded receipts pass, but fresh mailbox execution and dependent qualification
+are unfinished. The changed kernel requires new evidence: the backup-time
+selected projection is 4/27, not Cycle 191's historical 19/27. This is not a
+merge-qualified build, new ISO or release. The last reconciled roadmap is still
+Cycle 191. [Backup scope and resume order](docs/checkpoints/cycle192-unfinished-cloud-backup.md).
+
+**Last reconciled development checkpoint:** Cycle 191 repairs IPI recorded execution,
 frame-address checksum validation and release-accounting control execution.
 Two final four-vCPU boots, 249 rejection cases and all 31 focused tests pass;
 528 corrupted records reject through runtime and actual gate. Selected readiness

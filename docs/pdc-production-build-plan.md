@@ -9,6 +9,16 @@ Machine ledger: `runs/pdc_production_roadmap.json`
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
+## Unfinished Cycle 192 Backup
+
+`N8-SMP-MAILBOX-ORACLE-001` now has native snapshot export and a host oracle,
+but live qualification and the completed-cycle reconciliation are unfinished.
+The kernel identity changed; Cycle 191's 19/27 projection is historical. The
+backup-time projection is 4/27, with dependent-image replay still required.
+No phase, subphase, flag or gap is closed. The machine ledger and architecture
+baseline remain the last reconciled Cycle 191 snapshots, not current-build
+qualification. [Saved work, evidence and resume order](checkpoints/cycle192-unfinished-cloud-backup.md).
+
 ## Cycle 191: IPI Recorded Evidence
 
 `N8-SMP-IPI-001`, N8.5/N8.6/N9.5 supporting N36, repairs strict recorded

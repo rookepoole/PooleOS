@@ -1181,7 +1181,7 @@ def check_native_kernel_revalidation_readiness(
         )
     errors.extend(native_kernel_revalidation.readiness_errors(artifact, ROOT))
     build = artifact.get("build", {})
-    if not isinstance(build, dict) or build.get("host_test_count") != 245:
+    if not isinstance(build, dict) or build.get("host_test_count") != 246:
         errors.append("PKREVAL1 host-test evidence is incomplete")
     controls = artifact.get("negative_controls", [])
     if (
@@ -1225,7 +1225,7 @@ def check_native_kernel_revalidation_readiness(
     ) is not False:
         errors.append("PKREVAL1 overclaims production readiness")
     detail = (
-        "contract=PKREVAL1; kernel_tests=245/245; python_tests=9/9; targets=2/2; "
+        "contract=PKREVAL1; kernel_tests=246/246; python_tests=9/9; targets=2/2; "
         "retained_files=9; parsers=9; controls=36/36; differential=32768/32768; "
         "denial=pbtrust_policy_unsigned; authority=0; actions=0; state_writes=0; "
         "live_kernel_entry=false; production_ready=false"
@@ -1345,8 +1345,8 @@ def check_native_kernel_trap_readiness(
         or build.get("default_stop_marker_present") is not True
         or build.get("default_transfer_marker_absent") is not True
         or kernel_product.get("canonical_sha256")
-        != "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA"
-        or kernel_product.get("relocation_count") != 1325
+        != "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8"
+        or kernel_product.get("relocation_count") != 1327
     ):
         errors.append("PKTRAP1 build or feature isolation changed")
     if artifact.get("claims") != native_kernel_trap.expected_claims():
@@ -1881,8 +1881,8 @@ def check_native_kernel_interrupt_time_readiness(
     if errors:
         return readiness.make_check("native_kernel_interrupt_time_readiness", False, "; ".join(errors))
     expected_summary = {
-        "kernel_host_tests_passed": 245,
-        "kernel_host_tests_total": 245,
+        "kernel_host_tests_passed": 246,
+        "kernel_host_tests_total": 246,
         "qemu_runs_passed": 2,
         "qemu_runs_total": 2,
         "markers_per_run": 36,
@@ -1969,8 +1969,8 @@ def check_native_kernel_smp_first_ap_readiness(
         "application_processors_parked": 1,
         "application_processors_quiesced": 1,
         "application_processors_started": 1,
-        "kernel_host_tests_passed": 245,
-        "kernel_host_tests_total": 245,
+        "kernel_host_tests_passed": 246,
+        "kernel_host_tests_total": 246,
         "markers_per_run": 38,
         "negative_controls_passed": 72,
         "negative_controls_total": 72,
@@ -2066,8 +2066,8 @@ def check_native_kernel_smp_percpu_runtime_readiness(
         "guarded_stack_classes": 3,
         "hostile_cases_total": 159,
         "installed_gates": 27,
-        "kernel_host_tests_passed": 245,
-        "kernel_host_tests_total": 245,
+        "kernel_host_tests_passed": 246,
+        "kernel_host_tests_total": 246,
         "markers_per_run": 42,
         "negative_controls_passed": 19,
         "negative_controls_total": 19,
@@ -2173,7 +2173,7 @@ def check_native_kernel_smp_ipi_readiness(
     kernel = build.get("kernel_entry", {}) if isinstance(build, dict) else {}
     if not isinstance(kernel, dict) or native_kernel_entry.readiness_errors(kernel):
         errors.append("PKSMP5 embedded kernel entry evidence is stale")
-    elif kernel.get("product", {}).get("canonical_sha256") != "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA":
+    elif kernel.get("product", {}).get("canonical_sha256") != "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8":
         errors.append("PKSMP5 embedded kernel identity changed")
     expected_summary = {
         "application_processors_online": 3,
@@ -2190,8 +2190,8 @@ def check_native_kernel_smp_ipi_readiness(
         "resource_pages_released": 96,
         "frame_pages_released": 6,
         "verified_bytes": 417_792,
-        "negative_controls_total": 30,
-        "hostile_cases_total": 249,
+        "negative_controls_total": 33,
+        "hostile_cases_total": 609,
         "production_claim_count": 0,
     }
     if artifact.get("summary") != expected_summary:
@@ -2223,9 +2223,9 @@ def check_native_kernel_smp_ipi_readiness(
     controls = artifact.get("negative_controls", [])
     if (
         not isinstance(controls, list)
-        or len(controls) != 30
+        or len(controls) != 33
         or sum(item.get("case_count", 0) for item in controls if isinstance(item, dict))
-        != 249
+        != 609
     ):
         errors.append("PKSMP5 hostile-control evidence is incomplete")
     observation = execution.get("observation", {}) if isinstance(execution, dict) else {}
@@ -2279,7 +2279,7 @@ def check_native_kernel_smp_ipi_readiness(
         errors.append("PKSMP5 flag closure, N8/N9 exit, or production boundary changed")
     detail = (
         "contract=PKSMP5; sandybridge_vcpus=4; aps=3/3; runs=2/2; markers=40/40; "
-        "controls=30/30; cases=249; accepted=9/9; denied=3/3; eois=12/12; "
+        "controls=33/33; cases=609; mailbox=PKMBX1; accepted=9/9; denied=3/3; eois=12/12; "
         "ap_ownership=PKAPOWN1; retained_free_rejections=27; owner_release_rejections=18; "
         "partial_rollbacks=1/1; retries=1/1; resources=102/102; scrub=417792/417792; "
         "target_ack_mask=0xE/0xE; tlb_invalidations=3; retired_generations=1; "
@@ -2311,7 +2311,7 @@ def check_native_kernel_scheduler_readiness(
     errors.extend(native_kernel_scheduler.readiness_errors(artifact, ROOT))
     expected_summary = {
         "scheduler_tests": 14,
-        "kernel_host_tests": 245,
+        "kernel_host_tests": 246,
         "host_probe_receipts": 4,
         "trace_steps": 4096,
         "trace_dispatches": 1761,
@@ -2402,7 +2402,7 @@ def check_native_kernel_scheduler_readiness(
         errors.append("PKSCHED1 N12 exit or production boundary changed")
     detail = (
         "contract=PKSCHED1; qemu64_vcpus=1; bsp_only=true; runs=2/2; markers=34/34; "
-        "scheduler_tests=14; kernel_tests=245; trace_steps=4096; dispatches=1761; "
+        "scheduler_tests=14; kernel_tests=246; trace_steps=4096; dispatches=1761; "
         "migrations=2334; live_tasks=2; live_dispatches=8; transitions=16; "
         "switch_instructions=18; stack_scrub=32768/32768; controls=28/28; "
         "cases=115; n12_exit=false; production_ready=false"
@@ -2434,7 +2434,7 @@ def check_native_kernel_scheduler_preemption_readiness(
     errors.extend(native_kernel_scheduler_preempt.readiness_errors(artifact, ROOT))
     expected_summary = {
         "preemption_tests": 7,
-        "kernel_host_tests": 245,
+        "kernel_host_tests": 246,
         "host_probe_receipts": 3,
         "timer_ticks": 6,
         "timer_eois": 6,
@@ -2530,7 +2530,7 @@ def check_native_kernel_scheduler_preemption_readiness(
         errors.append("PKSCHED2 N12 exit or production boundary changed")
     detail = (
         "contract=PKSCHED2; qemu64_vcpus=1; bsp_only=true; runs=2/2; markers=70/70; "
-        "preemption_tests=7; kernel_tests=245; ticks=6; eois=6; tasks=4; "
+        "preemption_tests=7; kernel_tests=246; ticks=6; eois=6; tasks=4; "
         "trace=0,1,2,0,3,3; causes=none,quantum,wake,block,wake,none; "
         "frames=6/4; switches=4; stack_scrub=65536/65536; controls=25/25; "
         "cases=178; live_ap=false; n12_exit=false; production_ready=false"
@@ -2571,7 +2571,7 @@ def check_native_kernel_scheduler_deferred_readiness(
     linked = build.get("linked_switch_audit", {}) if isinstance(build, dict) else {}
     trace = host_probe.get("trace", {}) if isinstance(host_probe, dict) else {}
     if (
-        kernel_summary.get("rust_host_tests_total") != 245
+        kernel_summary.get("rust_host_tests_total") != 246
         or host_probe.get("receipt_count") != 5
         or host_probe.get("rust_python_exact_agreement") is not True
         or trace.get("slots") != [0, 2, 4, 1, 5, 6]
@@ -2593,9 +2593,9 @@ def check_native_kernel_scheduler_deferred_readiness(
         or linked.get("instruction_count") != 18
         or linked.get("scope_byte_count") != 36
         or linked.get("forbidden_instruction_count") != 0
-        or linked.get("relocation_count") != 1325
+        or linked.get("relocation_count") != 1327
         or linked.get("canonical_sha256")
-        != "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA"
+        != "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8"
         or linked.get("status") != "pass"
     ):
         errors.append("PKSCHED3 host oracle, source, or linked switch audit changed")
@@ -2669,7 +2669,7 @@ def check_native_kernel_scheduler_deferred_readiness(
         errors.append("PKSCHED3 N12 exit or production boundary changed")
     detail = (
         "contract=PKSCHED3; qemu64_vcpus=1; bsp_only=true; runs=2/2; markers=74/74; "
-        "deferred_tests=7; kernel_tests=245; enqueued=8; completed=5; cancelled=3; "
+        "deferred_tests=7; kernel_tests=246; enqueued=8; completed=5; cancelled=3; "
         "workers=2; dispatches=6; transitions=12; rollbacks=5; stack_scrub=32768/32768; "
         "controls=30/30; cases=208; live_ap=false; n12_exit=false; production_ready=false"
     )
@@ -2710,7 +2710,7 @@ def check_native_kernel_scheduler_smp_readiness(
     trace = host_probe.get("trace", {}) if isinstance(host_probe, dict) else {}
     expected_ap_trace = [[1, 2], [1, 1], [2, 4], [2, 3], [3, 6], [3, 5]]
     if (
-        kernel_summary.get("rust_host_tests_total") != 245
+        kernel_summary.get("rust_host_tests_total") != 246
         or host_probe.get("receipt_count") != 5
         or host_probe.get("rust_python_exact_agreement") is not True
         or trace.get("balance") != [3, 3]
@@ -2732,9 +2732,9 @@ def check_native_kernel_scheduler_smp_readiness(
         or linked.get("successor_profile_invlpg_instruction_count") != 1
         or linked.get("successor_profile_executed") is not False
         or linked.get("runtime_execution_count") != 3
-        or linked.get("relocation_count") != 1325
+        or linked.get("relocation_count") != 1327
         or linked.get("canonical_sha256")
-        != "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA"
+        != "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8"
         or linked.get("status") != "pass"
     ):
         errors.append("PKSCHED4 host oracle, source, or linked INVLPG audit changed")
@@ -2810,7 +2810,7 @@ def check_native_kernel_scheduler_smp_readiness(
         errors.append("PKSCHED4 flag, N12 exit, or production boundary changed")
     detail = (
         "contract=PKSCHED4; sandybridge_vcpus=4; aps=3; runs=2/2; markers=74/74; "
-        "scheduler_tests=10; kernel_tests=245; wake=1; migrations=2; transfer_acks=3; "
+        "scheduler_tests=10; kernel_tests=246; wake=1; migrations=2; transfer_acks=3; "
         "ap_dispatches=6; call_function=9; timeout_rollbacks=1; stale_rejects=2; "
         "scrub=417792/417792; controls=32/32; cases=209; general_smp=false; "
         "n12_exit=false; production_ready=false"
@@ -2854,7 +2854,7 @@ def check_native_kernel_scheduler_ap_workers_readiness(
         "1:1,1:2,1:0,1:3;2:5,2:6,2:4,2:7;3:9,3:10,3:8,3:11"
     )
     if (
-        kernel_summary.get("rust_host_tests_total") != 245
+        kernel_summary.get("rust_host_tests_total") != 246
         or host_probe.get("receipt_count") != 6
         or host_probe.get("rust_python_exact_agreement") is not True
         or trace.get("trace") != expected_trace
@@ -2877,9 +2877,9 @@ def check_native_kernel_scheduler_ap_workers_readiness(
         or linked.get("successor_profile_invlpg_instruction_count") != 1
         or linked.get("successor_profile_executed") is not False
         or linked.get("runtime_execution_count") != 3
-        or linked.get("relocation_count") != 1325
+        or linked.get("relocation_count") != 1327
         or linked.get("canonical_sha256")
-        != "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA"
+        != "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8"
         or linked.get("status") != "pass"
     ):
         errors.append("PKSCHED5 host oracle, source, or linked INVLPG audit changed")
@@ -2960,7 +2960,7 @@ def check_native_kernel_scheduler_ap_workers_readiness(
         errors.append("PKSCHED5 flag, N12 exit, or production boundary changed")
     detail = (
         "contract=PKSCHED5; sandybridge_vcpus=4; aps=3; workers=3; runs=2/2; "
-        "markers=74/74; worker_tests=10; kernel_tests=245; typed_calls=12; "
+        "markers=74/74; worker_tests=10; kernel_tests=246; typed_calls=12; "
         "queued_cancel=1; remote_cancel=1; timeout_rollbacks=1; reclaimed=13; "
         "scrub=417792/417792; controls=34/34; cases=226; arbitrary_callbacks=false; "
         "n12_exit=false; production_ready=false"
@@ -2996,7 +2996,7 @@ def check_native_kernel_scheduler_smp_preempt_readiness(
     source_audit = build.get("source_audit", {})
     linked = build.get("linked_invlpg_audit", {})
     if (
-        kernel_summary.get("rust_host_tests_total") != 245
+        kernel_summary.get("rust_host_tests_total") != 246
         or host_probe.get("receipt_count") != 7
         or host_probe.get("rust_python_exact_agreement") is not True
         or source_audit.get("focused_rust_test_count") != 5
@@ -3011,9 +3011,9 @@ def check_native_kernel_scheduler_smp_preempt_readiness(
         or linked.get("successor_profile_invlpg_instruction_count") != 1
         or linked.get("successor_profile_executed") is not False
         or linked.get("runtime_execution_count") != 3
-        or linked.get("relocation_count") != 1325
+        or linked.get("relocation_count") != 1327
         or linked.get("canonical_sha256")
-        != "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA"
+        != "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8"
         or linked.get("status") != "pass"
     ):
         errors.append("PKSCHED6 host oracle, source, or linked INVLPG audit changed")
@@ -3087,7 +3087,7 @@ def check_native_kernel_scheduler_smp_preempt_readiness(
         errors.append("PKSCHED6 flag, N12 exit, or production boundary changed")
     detail = (
         "contract=PKSCHED6; sandybridge_vcpus=4; aps=3; runs=2/2; "
-        "markers=76/76; scheduler_tests=5; kernel_tests=245; live_ipis=8; "
+        "markers=76/76; scheduler_tests=5; kernel_tests=246; live_ipis=8; "
         "model_acks=5; quantum_preemptions=3; timeout_rollbacks=1; "
         "scrub=417792/417792; controls=34/34; cases=232; ap_timer_interrupts=false; "
         "general_smp=false; n12_exit=false; production_ready=false"
@@ -3121,8 +3121,8 @@ def check_native_kernel_atomics_readiness(
     probe = artifact.get("host_probe", {})
     linked = artifact.get("linked_instruction_audit", {})
     if (
-        kernel.get("host_tests_passed") != 245
-        or kernel.get("host_tests_total") != 245
+        kernel.get("host_tests_passed") != 246
+        or kernel.get("host_tests_total") != 246
         or source.get("heap_api_token_count") != 0
         or source.get("typed_order_enum_count") != 4
         or source.get("atomic_wrapper_count") != 4
@@ -3201,7 +3201,7 @@ def check_native_kernel_atomics_readiness(
     ):
         errors.append("PKATOM1 flag, N12 exit, or production boundary changed")
     detail = (
-        "contract=PKATOM1; kernel_tests=245/245; host_receipts=8; publication_rounds=4096; "
+        "contract=PKATOM1; kernel_tests=246/246; host_receipts=8; publication_rounds=4096; "
         "contended_ops=20480; seqcst_rounds=2048; forbidden=0; linked_symbols=7; "
         "qemu_runs=2/2; markers=82/82; timer_updates=8; controls=29/29; cases=78; "
         "general_locks=false; reclamation=false; general_smp=false; n12_exit=false; "
@@ -3237,8 +3237,8 @@ def check_native_kernel_locks_readiness(
     source = build.get("source_audit", {})
     probe = build.get("host_probe", {})
     if (
-        host_tests.get("test_pass_count") != 245
-        or host_tests.get("test_count") != 245
+        host_tests.get("test_pass_count") != 246
+        or host_tests.get("test_count") != 246
         or source.get("heap_api_token_count") != 0
         or source.get("lock_primitive_count") != 6
         or source.get("rank_class_count") != 5
@@ -3322,7 +3322,7 @@ def check_native_kernel_locks_readiness(
     ):
         errors.append("PKLOCK1 phase, flag, N12 exit, or production boundary changed")
     detail = (
-        "contract=PKLOCK1; kernel_tests=245/245; host_receipts=9; ticket_acquisitions=8192; "
+        "contract=PKLOCK1; kernel_tests=246/246; host_receipts=9; ticket_acquisitions=8192; "
         "qemu_runs=2/2; vcpus=4; aps=3; markers=70/70; live_tickets=0,1,2,3; "
         "controls=30/30; cases=103; reclamation=false; general_smp=false; "
         "n12_exit=false; production_ready=false"
@@ -3838,8 +3838,8 @@ def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINE
         )
     errors.extend(native_kernel_entry.readiness_errors(artifact))
     expected_summary = {
-        "rust_host_tests_passed": 245,
-        "rust_host_tests_total": 245,
+        "rust_host_tests_passed": 246,
+        "rust_host_tests_total": 246,
         "rustfmt_packages_passed": 2,
         "clippy_runs_passed": 2,
         "clippy_runs_total": 2,
@@ -3864,8 +3864,8 @@ def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINE
         "canonical_byte_count": 530_072,
         "image_byte_count": 602_112,
         "entry_offset": 0xA000,
-        "relocation_count": 1325,
-        "canonical_sha256": "563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA",
+        "relocation_count": 1327,
+        "canonical_sha256": "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8",
     }
     if not isinstance(product, dict) or any(
         type(product.get(key)) is not type(value) or product.get(key) != value
@@ -3875,9 +3875,9 @@ def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINE
     if artifact.get("claims") != native_kernel_entry.expected_claims():
         errors.append("PKENTRY1 claim boundary changed")
     detail = (
-        "contract=PKENTRY1; kernel_tests=245/245; clean_builds=2/2; negative=43/43; "
+        "contract=PKENTRY1; kernel_tests=246/246; clean_builds=2/2; negative=43/43; "
         "exact_loaded=2/2; bytes=530072; image_bytes=602112; entry=0xA000; "
-        "relocations=1325; live_transfer=false; "
+        "relocations=1327; live_transfer=false; "
         "target_execution=false; n6_exit=false; production_ready=false"
     )
     return readiness.make_check(

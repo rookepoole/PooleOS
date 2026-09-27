@@ -123,8 +123,8 @@ def _build(toolchain_root: Path, temporary: Path) -> tuple[Path, dict[str, Any],
         env=env,
     )
     match = re.search(r"test result: ok\. ([0-9]+) passed; 0 failed", test_output)
-    if match is None or int(match.group(1)) != 245:
-        raise QualificationError("expected exactly 245 PooleKernel Rust host tests")
+    if match is None or int(match.group(1)) != 246:
+        raise QualificationError("expected exactly 246 PooleKernel Rust host tests")
     _run(
         _cargo(
             cargo,
