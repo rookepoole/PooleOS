@@ -822,6 +822,8 @@ def _negative_controls(markers: list[str], probe_lines: list[str]) -> list[dict[
     case_count = sum(item["case_count"] for item in controls)
     if case_count != HOSTILE_CASE_COUNT:
         raise QualificationError(f"PKSCHED1 hostile-case count changed: {case_count}")
+    if tuple(item["case_count"] for item in controls) != scheduler.NEGATIVE_CONTROL_CASE_COUNTS:
+        raise QualificationError("PKSCHED1 per-control case counts changed")
     return controls
 
 
@@ -1049,17 +1051,22 @@ def make_readiness(
     return report
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--toolchain-root", type=Path, default=DEFAULT_TOOLCHAIN_ROOT)
     parser.add_argument("--qemu-root", type=Path, default=DEFAULT_QEMU_ROOT)
     parser.add_argument("--status-date", default="2026-07-30")
     parser.add_argument("--timeout", type=int, default=90)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
-    args = parser.parse_args()
-    report = make_readiness(
-        args.toolchain_root, args.qemu_root, args.status_date, args.timeout
-    )
+    args = parser.parse_args(argv)
+    try:
+        report = make_readiness(args.toolchain_root, args.qemu_root, args.status_date, args.timeout)
+        errors = scheduler.readiness_errors(report, ROOT)
+        if errors:
+            raise QualificationError("; ".join(errors))
+    except (QualificationError, scheduler.KernelSchedulerError) as error:
+        print(f"PKSCHED1 qualification FAIL: {error}")
+        return 1
     args.out.parent.mkdir(parents=True, exist_ok=True)
     _write_readiness(args.out, report)
     print(f"PKSCHED1 qualification PASS: {args.out}")

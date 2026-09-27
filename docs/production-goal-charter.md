@@ -9,6 +9,15 @@ Machine ledger: `runs/pdc_production_roadmap.json`
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
 Last roadmap reconciliation: PooleOS Cycle 194
 
+Cycle 195 is an unfinished development-branch cloud backup. Scheduler receipt
+validation passes two fresh guest boots and 23 scoped scheduler/publication
+tests; the selected projection is 20/27. Seven dependent profiles, 65 existing
+control-execution gaps, progress reconciliation and full exact-candidate merge
+qualification remain. GitHub storage does not require a main merge. Cycle 194
+machine-roadmap and architecture records remain historical snapshots until
+reconciled. No normative condition, phase, flag, ISO or production claim changes.
+[Cycle 195 backup and resume order](checkpoints/cycle195-scheduler-cloud-backup.md).
+
 Cycle 194: PMM, VM, IRQ, first AP and per-CPU runtime are freshly qualified on
 the unchanged Cycle 192 kernel. Ten boots, 528 rejection cases in 388 groups
 and 57 focused tests pass, including 990 corrupted-record cases and disabled

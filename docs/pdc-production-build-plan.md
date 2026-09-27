@@ -9,6 +9,29 @@ Machine ledger: `runs/pdc_production_roadmap.json`
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
+## Cycle 195 In Progress: Scheduler Evidence Cloud Backup
+
+`N12-SCHED-001`, supporting N12.1/N12.2/N12.5/N12.6/N12.7 and N36, repairs
+recorded scheduler receipt admission. Two final guest boots, 115 executed
+rejection cases in 28 groups and 246 native kernel host tests pass. All 14
+scheduler tests pass, including 221 corrupted receipts; the cloud-backup
+regression passes 23 scheduler/publication tests with zero skips.
+
+The selected current-kernel projection is 20/27. Seven profiles still fail
+current-image admission: preemption, deferred work, SMP scheduling, AP workers,
+SMP preemption, atomics and locks. At least 65 existing control-execution gaps
+also remain. GitHub reports a conflict-free draft, not qualifying check results.
+Completed checkpoints are already backed up on the development branch; this
+backup preserves further unfinished work without merging unqualified code.
+
+Next: reconcile roadmap/architecture/history, run combined regression and
+conservation, then `N12-SCHED-PREEMPT-001` and the remaining dependencies.
+The machine ledger and architecture remain Cycle 194 historical snapshots until
+that reconciliation. No phase, flag or production gate closes. Full exact-
+candidate canonical/Doctor/publication/configured-check/review gates remain
+required before main merge. Native kernel and demo ISO bytes are unchanged.
+[Evidence, failure history and resume order](checkpoints/cycle195-scheduler-cloud-backup.md).
+
 ## Cycle 194: Current-Kernel Memory and AP Replay
 
 N9.1/N9.2 supporting N10/N36 begins with `N9-PMM-ACPI-CONSUMER-001` and

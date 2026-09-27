@@ -2345,6 +2345,8 @@ def check_native_kernel_scheduler_readiness(
             "; ".join(errors) or "native kernel scheduler readiness is not an object",
         )
     errors.extend(native_kernel_scheduler.readiness_errors(artifact, ROOT))
+    if errors:
+        return readiness.make_check("native_kernel_scheduler_readiness", False, "; ".join(errors[:8]))
     expected_summary = {
         "scheduler_tests": 14,
         "kernel_host_tests": 246,

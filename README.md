@@ -11,7 +11,15 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 194 requalifies physical memory,
+**Work in progress, Cycle 195:** scheduler recorded-evidence validation now
+passes two fresh guest boots and 23 scoped scheduler/publication tests. The
+selected current-kernel projection is 20/27; seven profiles and the existing
+65 control-execution gaps still precede full merge qualification. This is a
+development-branch cloud backup, not a main merge. Roadmap and architecture
+reconciliation remain unfinished at Cycle 194.
+[Backup evidence and exact resume order](docs/checkpoints/cycle195-scheduler-cloud-backup.md).
+
+**Last reconciled development checkpoint:** Cycle 194 requalifies physical memory,
 virtual memory, interrupts/time, first AP and per-CPU runtime on the unchanged
 Cycle 192 kernel. Ten fresh guest boots, 528 rejection cases in 388 groups and
 57 focused regression tests pass. Selected readiness is 19/27; eight scheduler-

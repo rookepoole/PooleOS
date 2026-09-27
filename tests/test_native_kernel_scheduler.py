@@ -1,10 +1,15 @@
 import copy
+import contextlib
+import io
+import json
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
 from runtime import native_kernel_scheduler as scheduler
+from runtime import native_pooleboot
+from tests.test_native_cpu_entry_provenance import pair_mutations
 from tools import pooleos_release_gate, qualify_native_kernel_scheduler as qualify
 
 
@@ -42,6 +47,61 @@ def linked_switch_fixture() -> str:
         + "\n".join(instructions)
         + "\n0000000000001024 <poole_scheduler_context_switch_end>:\n"
     )
+
+
+def recorded_receipt_mutations(baseline):
+    for family in ("exit", "coverage", "evidence"):
+        for label, pair in pair_mutations(baseline["execution"], family):
+            if label == "exact_marker_match":
+                pair["static_markers_exact_match"] = pair.pop("exact_marker_match")
+            candidate = copy.deepcopy(baseline)
+            candidate["execution"] = pair
+            yield family, label, candidate
+
+    def changed(path, value):
+        candidate = copy.deepcopy(baseline)
+        target = candidate
+        for key in path[:-1]:
+            target = target[key]
+        target[path[-1]] = value
+        return candidate
+
+    for path in (("execution",), ("execution", "observation"), ("summary",), ("build", "host_probe")):
+        yield "shape", str(path), changed(path, None)
+    for key, value in (("virtual_cpu_count", 1.0), ("dynamic_fields_revalidated", 1),
+                       ("cpu_model", "wrong"), ("acceleration", "wrong"),
+                       ("deterministic_instruction_clock", 1), ("bsp_only", 1),
+                       ("machine", "wrong"), ("profile_id", "wrong")):
+        yield "profile", key, changed(("execution", key), value)
+    for section, fields in baseline["execution"]["observation"].items():
+        yield "observation", section, changed(("execution", "observation", section), None)
+        if section == "transfer_prefix":
+            continue
+        for key, value in fields.items():
+            substitute = int(value) if type(value) is bool else float(value) if type(value) is int else "invalid"
+            for label, replacement in (("null", None), ("type-or-value", substitute)):
+                path = ("execution", "observation", section, key)
+                yield "observation", str(path) + label, changed(path, replacement)
+    for key, value in baseline["summary"].items():
+        for label, replacement in (("null", None), ("type", float(value))):
+            yield "summary", key + label, changed(("summary", key), replacement)
+    for section, fields in baseline["build"]["host_probe"].items():
+        if isinstance(fields, dict):
+            for key, value in fields.items():
+                substitute = float(value) if type(value) is int else None
+                yield "host-probe", section + "." + key, changed(("build", "host_probe", section, key), substitute)
+        else:
+            yield "host-probe", section, changed(("build", "host_probe", section), None)
+    for index, control in enumerate(baseline["negative_controls"]):
+        for value in (control["case_count"] + 1, float(control["case_count"])):
+            yield "controls", str((index, value)), changed(("negative_controls", index, "case_count"), value)
+    candidate = copy.deepcopy(baseline)
+    candidate["negative_controls"][0]["case_count"] += 1
+    candidate["negative_controls"][3]["case_count"] -= 1
+    yield "controls", "redistribution-same-total", candidate
+    for value in (None, [], "invalid"):
+        yield "root-shape", repr(value), value
+        yield "control-shape", repr(value), changed(("negative_controls",), value)
 
 
 class NativeKernelSchedulerTests(unittest.TestCase):
@@ -150,6 +210,78 @@ class NativeKernelSchedulerTests(unittest.TestCase):
         )
         self.assertEqual(list(scheduler.NEGATIVE_CONTROL_IDS), [item["id"] for item in controls])
         self.assertEqual(115, sum(item["case_count"] for item in controls))
+
+    def test_recorded_scheduler_rejects_inconsistent_payloads(self) -> None:
+        baseline = scheduler.read_json(scheduler.ROOT / scheduler.READINESS_RELATIVE)
+        self.assertEqual([], scheduler.recorded_scheduler_errors(baseline["execution"], baseline["summary"], baseline["build"]))
+        for family, label, candidate in recorded_receipt_mutations(baseline):
+            if family in ("controls", "root-shape", "control-shape"):
+                continue
+            with self.subTest(family=family, case=label):
+                self.assertTrue(scheduler.recorded_scheduler_errors(candidate["execution"], candidate["summary"], candidate["build"]))
+
+    def test_runtime_and_real_gate_reject_corrupted_records(self) -> None:
+        baseline = scheduler.read_json(scheduler.ROOT / scheduler.READINESS_RELATIVE)
+        self.assertEqual([], scheduler.readiness_errors(baseline))
+        self.assertTrue(pooleos_release_gate.check_native_kernel_scheduler_readiness()["ok"])
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "candidate.json"
+            for family, label, candidate in recorded_receipt_mutations(baseline):
+                with self.subTest(family=family, case=label):
+                    self.assertTrue(scheduler.readiness_errors(candidate))
+                    path.write_text(json.dumps(candidate, allow_nan=False), encoding="utf-8")
+                    self.assertFalse(pooleos_release_gate.check_native_kernel_scheduler_readiness(path)["ok"])
+
+    def test_qualifier_rejects_invalid_result_before_writing(self) -> None:
+        baseline = scheduler.read_json(scheduler.ROOT / scheduler.READINESS_RELATIVE)
+        self.assertEqual([], scheduler.readiness_errors(baseline))
+        baseline["execution"]["runs"][0]["qemu_exit_code"] = False
+        with tempfile.TemporaryDirectory() as folder:
+            for exists in (False, True):
+                path = Path(folder) / ("existing.json" if exists else "absent/result.json")
+                if exists:
+                    path.write_bytes(b"preserve-existing-output")
+                with patch.object(qualify, "make_readiness", return_value=baseline):
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        self.assertEqual(1, qualify.main(["--out", str(path)]))
+                if exists:
+                    self.assertEqual(b"preserve-existing-output", path.read_bytes())
+                else:
+                    self.assertFalse(path.parent.exists())
+
+    def test_hostile_controls_detect_disabled_validators(self) -> None:
+        baseline = scheduler.read_json(scheduler.ROOT / scheduler.READINESS_RELATIVE)
+        markers = baseline["execution"]["runs"][0]["markers"]
+        lines = baseline["build"]["host_probe"]["lines"]
+        controls = qualify._negative_controls(markers, lines)
+        self.assertEqual(tuple(c["case_count"] for c in controls), scheduler.NEGATIVE_CONTROL_CASE_COUNTS)
+        for target, name, result in (
+            (scheduler, "validate_markers", scheduler.validate_markers(markers)),
+            (scheduler, "parse_probe_output", scheduler.parse_probe_output("\n".join(lines))),
+            (qualify, "_audit_source_text", {}),
+        ):
+            with self.subTest(disabled=name), patch.object(target, name, return_value=result):
+                with self.assertRaisesRegex(qualify.QualificationError, "did not reject"):
+                    qualify._negative_controls(markers, lines)
+
+    def test_pair_validation_rejects_coherent_marker_and_host_probe_corruption(self) -> None:
+        baseline = scheduler.read_json(scheduler.ROOT / scheduler.READINESS_RELATIVE)
+        self.assertEqual([], scheduler.recorded_scheduler_errors(baseline["execution"], baseline["summary"], baseline["build"]))
+        candidate = copy.deepcopy(baseline)
+        for run in candidate["execution"]["runs"]:
+            run["markers"][31] = qualify._set_field(run["markers"][31], "dispatches", "9")
+            run["marker_sha256"] = scheduler.sha256_bytes(native_pooleboot.canonical_json_bytes(run["markers"]))
+            run["marker_summary"]["switch"]["dispatches"] = 9
+        candidate["execution"]["observation"]["switch"]["dispatches"] = 9
+        candidate["summary"]["live_dispatches"] = 9
+        self.assertTrue(scheduler.recorded_scheduler_errors(candidate["execution"], candidate["summary"], candidate["build"]))
+        candidate = copy.deepcopy(baseline)
+        host = candidate["build"]["host_probe"]
+        host["lines"][0] = qualify._set_field(host["lines"][0], "dispatches", "1762")
+        host["stress"]["dispatches"] = 1762
+        host["output_sha256"] = scheduler.sha256_bytes(("\n".join(host["lines"]) + "\n").encode())
+        candidate["summary"]["trace_dispatches"] = 1762
+        self.assertTrue(scheduler.recorded_scheduler_errors(candidate["execution"], candidate["summary"], candidate["build"]))
 
 
 if __name__ == "__main__":
