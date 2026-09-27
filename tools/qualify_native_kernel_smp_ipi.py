@@ -328,10 +328,11 @@ def _negative_controls(markers: list[str]) -> list[dict[str, Any]]:
         for index in range(count): model.acknowledge(smp_ipi.canonical_shootdown_snapshot(requests[index]), smp_ipi.EXPECTED_APIC_IDS[index])
         model.authorize()
     controls.append(_require_rejections(ids[28], [lambda: authorize_after(1), lambda: authorize_after(2)]))
+    smp_ipi.validate_release_accounting(96, 6, 417792)
     controls.append(_require_rejections(ids[29], [
-        lambda: smp_ipi._require(95 == 96, "resource pages"),
-        lambda: smp_ipi._require(5 == 6, "frame pages"),
-        lambda: smp_ipi._require(413696 == 417792, "verified bytes"),
+        lambda: smp_ipi.validate_release_accounting(95, 6, 417792),
+        lambda: smp_ipi.validate_release_accounting(96, 5, 417792),
+        lambda: smp_ipi.validate_release_accounting(96, 6, 413696),
     ]))
 
     if [item["id"] for item in controls] != list(ids):
@@ -452,7 +453,7 @@ def make_readiness(toolchain_root: Path, qemu_root: Path, status_date: str, time
             "exact_pbp1_match": True, "runs": runs, "observation": observation,
         },
         "negative_controls": controls, "claims": contract["claims"], "non_claims": contract["non_claims"],
-        "summary": {"application_processors_online": 3, "operation_classes_installed_per_ap": 6, "accepted_deliveries": 9, "denied_deliveries": 3, "offline_timeouts": 1, "partial_start_rollbacks": 1, "fresh_retries": 1, "eois": 12, "remote_tlb_invalidations": 3, "retired_generations": 1, "premature_reclaim_rejections": 2, "resource_pages_released": 96, "frame_pages_released": 6, "verified_bytes": 417792, "negative_controls_total": len(controls), "hostile_cases_total": sum(item["case_count"] for item in controls), "production_claim_count": 0},
+        "summary": smp_ipi.ipi_readiness_summary(observation),
         "open_items": ["scheduler ownership and CPU affinity", "general topology and x2APIC", "concurrent address-space replacement", "address-space-wide and concurrent-generation shootdown", "production capability minting and revocation", "additional live failure interleavings", "physical-target evidence", "N8 and N9 exit gates", "production signing and promotion"],
     }
     # Validate the JSON value that readers will receive, not only Python objects.
@@ -463,15 +464,18 @@ def make_readiness(toolchain_root: Path, qemu_root: Path, status_date: str, time
     return report
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--toolchain-root", type=Path, default=DEFAULT_TOOLCHAIN_ROOT)
     parser.add_argument("--qemu-root", type=Path, default=DEFAULT_QEMU_ROOT)
     parser.add_argument("--status-date", default="2026-07-29")
     parser.add_argument("--timeout", type=int, default=90)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     report = make_readiness(args.toolchain_root, args.qemu_root, args.status_date, args.timeout)
+    errors = smp_ipi.readiness_errors(report, ROOT)
+    if errors:
+        raise QualificationError("; ".join(errors))
     args.out.parent.mkdir(parents=True, exist_ok=True)
     _write_readiness(args.out, report)
     print(f"PKSMP5 qualification PASS: {args.out}")

@@ -2167,6 +2167,8 @@ def check_native_kernel_smp_ipi_readiness(
             "; ".join(errors) or "native kernel SMP IPI readiness is not an object",
         )
     errors.extend(native_kernel_smp_ipi.readiness_errors(artifact, ROOT))
+    if errors:
+        return readiness.make_check("native_kernel_smp_ipi_readiness", False, "; ".join(errors))
     build = artifact.get("build", {})
     kernel = build.get("kernel_entry", {}) if isinstance(build, dict) else {}
     if not isinstance(kernel, dict) or native_kernel_entry.readiness_errors(kernel):

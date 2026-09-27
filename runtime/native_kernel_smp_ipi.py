@@ -8,7 +8,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from runtime import native_inner_live, native_kernel_load, native_kernel_transfer
+from runtime import native_inner_live, native_kernel_load, native_kernel_transfer, native_pooleboot
 from runtime.schema_validation import validate_json
 from runtime.native_kernel_profile_evidence import kernel_entry_errors
 
@@ -59,6 +59,8 @@ SHOOTDOWN_RESPONSE_CHECKSUM_SEED = 0x5348_4F4F_5452_5350
 AGGREGATE_FNV_OFFSET = 0xCBF2_9CE4_8422_2325
 AGGREGATE_FNV_PRIME = 0x0000_0100_0000_01B3
 AGGREGATE_ROOT_DOMAIN = 0x524F_4F54_0000_0001
+AGGREGATE_OLD_FRAME_DOMAIN = 0x4F4C_4446_0000_0001
+AGGREGATE_NEW_FRAME_DOMAIN = 0x4E45_5746_0000_0001
 RETIRED_GENERATION = 1
 ACTIVE_GENERATION = 2
 PROBE_VIRTUAL_ADDRESS = 0x001F_F000
@@ -77,6 +79,7 @@ OPERATIONS = {
 IMPLEMENTATION_INPUTS = (
     "runtime/native_kernel_profile_evidence.py",
     "tests/test_native_memory_entry_provenance.py",
+    "tests/test_native_cpu_entry_provenance.py",
     "runs/native_kernel_entry_readiness.json",
     "native/Cargo.lock",
     "native/boot/Cargo.toml",
@@ -161,6 +164,10 @@ RESULT = re.compile(r"^POOLEOS:KERNEL:SMP-MULTI-RESULT PASS contract=(?P<contrac
 
 class KernelSmpIpiError(RuntimeError):
     """Raised when PKSMP5 data or evidence violates the frozen contract."""
+
+
+NEGATIVE_CONTROL_CASE_COUNTS = (1, 1, 1, 2, 8, 14, 6, 36, 36, 36, 13, 11, 14, 22,
+                                3, 2, 2, 2, 2, 2, 8, 8, 2, 2, 2, 4, 3, 1, 2, 3)
 
 
 def _require(condition: bool, message: str) -> None:
@@ -249,6 +256,9 @@ def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
     ids = [item.get("id") for item in controls if isinstance(item, dict)]
     if ids != list(NEGATIVE_CONTROL_IDS):
         errors.append("readiness negative-control order diverges")
+    elif any(type(item.get("case_count")) is not int or item["case_count"] != expected
+             for item, expected in zip(controls, NEGATIVE_CONTROL_CASE_COUNTS, strict=True)):
+        errors.append("PKSMP5 per-control case counts diverge")
     try:
         if readiness.get("inputs") != expected_inputs(root):
             errors.append("readiness input bindings are stale")
@@ -266,6 +276,103 @@ def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
             raise KernelSmpIpiError("PKSMP5 aggregate observation disagrees with its first run")
     except (OSError, KeyError, TypeError, ValueError, IndexError, KernelSmpIpiError) as error:
         errors.append(f"recorded execution invalid: {error}")
+    errors.extend(recorded_ipi_errors(readiness.get("execution"), readiness.get("summary")))
+    return errors
+
+
+def ipi_readiness_summary(observation: dict[str, Any]) -> dict[str, int]:
+    count = len(observation["aps"])
+    return {
+        "application_processors_online": observation["result"]["application_processors_online"],
+        "operation_classes_installed_per_ap": len(OPERATIONS),
+        "accepted_deliveries": count * 3, "denied_deliveries": count, "eois": count * 4,
+        "offline_timeouts": observation["partial_rollback"]["timeout_count"],
+        "partial_start_rollbacks": 1, "fresh_retries": observation["retry"]["retry_count"],
+        "remote_tlb_invalidations": observation["shootdown"]["invalidation_count"],
+        "retired_generations": ACTIVE_GENERATION - RETIRED_GENERATION,
+        "premature_reclaim_rejections": observation["shootdown"]["premature_reclaim_rejections"],
+        "resource_pages_released": observation["release"]["resource_pages"],
+        "frame_pages_released": observation["release"]["frame_pages"],
+        "verified_bytes": observation["release"]["verified_bytes"],
+        "negative_controls_total": len(NEGATIVE_CONTROL_IDS),
+        "hostile_cases_total": sum(NEGATIVE_CONTROL_CASE_COUNTS),
+        "production_claim_count": observation["result"]["production"],
+    }
+
+
+def recorded_ipi_errors(execution: Any, summary: Any) -> list[str]:
+    """Check raw consistency; opaque AP mailbox checksums remain guest-checked."""
+    if not isinstance(execution, dict):
+        return ["PKSMP5 recorded execution is not an object"]
+    errors: list[str] = []
+    if (any(type(execution.get(key)) is not int or execution[key] != count
+            for key, count in (("run_count", 2), ("virtual_cpu_count", 4), ("application_processor_count", 3)))
+            or any(execution.get(key) is not True for key in (
+                "static_markers_exact_match", "dynamic_fields_revalidated",
+                "exact_screenshot_match", "exact_pbp1_match"))):
+        errors.append("PKSMP5 recorded two-run metadata changed")
+    profile = {"profile_id": "sandybridge-x87-sse-four-vcpu-three-ap", "machine": "pc-q35-11.0",
+               "cpu_model": "SandyBridge,-avx", "acceleration": "tcg_multi_thread"}
+    if (any(execution.get(key) != value for key, value in profile.items())
+            or execution.get("deterministic_instruction_clock") is not False):
+        errors.append("PKSMP5 recorded execution profile changed")
+    runs = execution.get("runs")
+    if (not isinstance(runs, list) or len(runs) != 2
+            or any(not isinstance(run, dict) for run in runs)
+            or [run.get("run_id") for run in runs] != ["smp-multi-run-1", "smp-multi-run-2"]):
+        return [*errors, "PKSMP5 recorded run coverage changed"]
+
+    def exact(left: Any, right: Any) -> bool:
+        return json.dumps(left, sort_keys=True, allow_nan=False) == json.dumps(right, sort_keys=True, allow_nan=False)
+
+    observations = []
+    normalized = []
+    for run in runs:
+        try:
+            _require(type(run.get("qemu_exit_code")) is int and run["qemu_exit_code"] == 0,
+                     "recorded emulator exit is missing, malformed or unsuccessful")
+            frame = run.get("screenshot")
+            _require(isinstance(frame, dict) and frame.get("nonblank") is True
+                     and isinstance(frame.get("sha256"), str)
+                     and re.fullmatch(r"[0-9A-F]{64}", frame["sha256"]) is not None,
+                     "recorded frame is missing or malformed")
+            markers = run.get("markers")
+            _require(isinstance(markers, list) and all(isinstance(item, str) for item in markers),
+                     "recorded markers are not a string list")
+            observation = validate_markers(markers)
+            _require(exact(run.get("marker_summary"), observation), "recorded summary differs from parsed markers or types")
+            _require(run.get("marker_sha256") == sha256_bytes(native_pooleboot.canonical_json_bytes(markers)),
+                     "recorded marker digest changed")
+            transcript = run.get("pbp1_transcript")
+            _require(isinstance(transcript, dict) and isinstance(transcript.get("core"), dict),
+                     "recorded handoff or core is malformed")
+            prefix = observation["transfer_prefix"]
+            binding = native_kernel_transfer.validate_transcript_binding(prefix, transcript)
+            _require(exact(run.get("transcript_binding"), binding), "recorded transfer binding changed")
+            oracle = run.get("independent_kernel_revalidation")
+            guest = prefix["kernel_revalidation"]
+            _require(isinstance(oracle, dict) and oracle.get("contract_id") == "PKREVAL1"
+                     and oracle.get("guest_host_exact_match") is True
+                     and exact({key: oracle.get(key) for key in guest}, guest),
+                     "recorded revalidation differs from guest markers")
+            _require(all(run.get(key) is True for key in
+                         ("serial_debugcon_exact_match", "pbp1_serial_debugcon_exact_match")),
+                     "recorded dual-channel agreement changed")
+            observations.append(observation)
+            normalized.append(normalize_dynamic_markers(markers))
+        except (KernelSmpIpiError, native_kernel_transfer.KernelTransferError,
+                KeyError, TypeError, ValueError, AttributeError, OverflowError) as error:
+            errors.append(f"PKSMP5 {run['run_id']} invalid recorded evidence: {error}")
+    if errors:
+        return errors
+    try:
+        _require(exact(normalized[0], normalized[1]), "recorded static markers differ")
+        _require(all(exact(runs[0].get(key), runs[1].get(key)) for key in ("pbp1_transcript", "screenshot")),
+                 "recorded handoff/frame pair differs")
+        _require(exact(execution.get("observation"), observations[0]), "recorded aggregate observation changed")
+        _require(exact(summary, ipi_readiness_summary(observations[0])), "recorded readiness summary changed")
+    except (KernelSmpIpiError, KeyError, TypeError, ValueError, AttributeError) as error:
+        errors.append(f"PKSMP5 recorded accounting is invalid: {error}")
     return errors
 
 
@@ -504,6 +611,16 @@ def validate_receipt_sequences(aps: list[dict[str, Any]]) -> None:
     _require(max(allocations) < min(releases), "PKSMP5 release preceded complete retry allocation")
 
 
+def validate_release_accounting(resource_pages: int, frame_pages: int, verified_bytes: int) -> None:
+    expected_resources = AP_COUNT * RESOURCE_PAGE_COUNT
+    expected_frames = AP_COUNT * 2
+    _require(all(type(value) is int for value in (resource_pages, frame_pages, verified_bytes)),
+             "PKSMP5 release accounting must use integer counts")
+    _require((resource_pages, frame_pages, verified_bytes) ==
+             (expected_resources, expected_frames, (expected_resources + expected_frames) * PAGE_BYTES),
+             "PKSMP5 release accounting does not cover every AP resource and frame")
+
+
 def validate_markers(markers: list[str]) -> dict[str, Any]:
     _require(len(markers) == MARKER_COUNT, f"expected {MARKER_COUNT} PKSMP5 markers")
     arm = native_kernel_transfer.TRANSFER_ARM.fullmatch(markers[23])
@@ -583,7 +700,12 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
         AGGREGATE_ROOT_DOMAIN,
     )
     _require(_hex(shootdown, "roots") == expected_root_checksum, "PKSMP5 aggregate root checksum changed")
-    _require(_hex(shootdown, "old") != 0 and _hex(shootdown, "new") != 0 and _hex(shootdown, "old") != _hex(shootdown, "new"), "PKSMP5 aggregate frame checksums are invalid")
+    for field, offset, domain in (("old", 0, AGGREGATE_OLD_FRAME_DOMAIN),
+                                   ("new", PAGE_BYTES, AGGREGATE_NEW_FRAME_DOMAIN)):
+        expected = aggregate_address_checksum(
+            [(local_target_mask(EXPECTED_APIC_IDS[index]), layout["end"] + offset)
+             for index, layout in enumerate(layouts)], domain)
+        _require(_hex(shootdown, field) == expected, "PKSMP5 aggregate frame checksum changed")
 
     lifecycle_model.complete(_hex(lifecycle, "quiesced"), _hex(lifecycle, "parked"), _hex(lifecycle, "validated"), _hex(lifecycle, "released"))
     _require((_hex(lifecycle, "started"), _hex(lifecycle, "online")) == (TARGET_CPU_MASK, TARGET_CPU_MASK), "PKSMP5 lifecycle start changed")
@@ -591,6 +713,8 @@ def validate_markers(markers: list[str]) -> dict[str, Any]:
 
     _require(tuple(_dec(release, name) for name in ("resource_pages", "frame_pages", "resource_zeroed", "resource_verified", "frame_zeroed", "frame_verified", "total", "capability", "runtime", "mmio", "pic", "hpet")) == (96, 6, 393216, 393216, 24576, 24576, 102, 1, 1, 1, 1, 1), "PKSMP5 release accounting changed")
     _require(release.group("apic") == "unchanged", "PKSMP5 APIC base changed")
+    validate_release_accounting(_dec(release, "resource_pages"), _dec(release, "frame_pages"),
+                                _dec(release, "resource_verified") + _dec(release, "frame_verified"))
     _require(tuple(_dec(result, name) for name in ("aps", "simultaneous", "partial_timeout", "rollback", "retry", "invalidations", "no_reuse", "quiesced", "parked", "released", "scheduler", "broadcast", "target_hardware", "signatures", "authority", "actions", "production")) == (3, 1, 1, 1, 1, 3, 1, 3, 3, 102, 0, 0, 0, 0, 0, 0, 0), "PKSMP5 claim boundary changed")
     _require((_hex(result, "target"), _hex(result, "ack")) == (TARGET_CPU_MASK, TARGET_CPU_MASK), "PKSMP5 result mask changed")
     _require(result.group("terminal") == "halt", "PKSMP5 terminal changed")
@@ -618,5 +742,6 @@ def normalize_dynamic_markers(markers: list[str]) -> list[str]:
     normalized = markers.copy()
     for index in range(33, 36):
         for field in ("baseline_checksum", "runtime_checksum"):
-            normalized[index] = re.sub(rf"{field}=0x[0-9A-F]{{16}}", f"{field}=<validated-dynamic>", normalized[index], count=1)
+            # Full mailbox inputs are not exported; only the guest recomputes these.
+            normalized[index] = re.sub(rf"{field}=0x[0-9A-F]{{16}}", f"{field}=<guest-checked-dynamic>", normalized[index], count=1)
     return normalized

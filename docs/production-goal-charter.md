@@ -7,9 +7,23 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 190
+Last roadmap reconciliation: PooleOS Cycle 191
 
-Current Cycle 190: per-CPU admission validates raw execution, dual checksums,
+Current Cycle 191: IPI admission validates raw execution, typed accounting,
+frame-address checksums and exact control counts; three constant-only controls
+now call the real validator. Two final four-vCPU boots, 249 cases in 30 categories
+and 31 focused tests pass. All 66 original corruptions reject without exceptions.
+Selected readiness is 19/27. Bounded AP ownership is current; native mailbox
+export and independent host recomputation remain open and block merge. Next is
+N8-SMP-MAILBOX-ORACLE-001 before affected-image replay, eight remaining profiles,
+scheduler evidence and full exact qualification. No normative condition, phase,
+flag, native feature, ISO or production gate changes.
+[Cycle 191 evidence](checkpoints/cycle191-ipi-recorded-evidence.md).
+Combined scoped regression passes 314 tests, zero skipped; the initial two
+historical-assertion failures are retained. Conservation passes. Full exact
+qualification and the open mailbox oracle still precede main merge.
+
+Historical Cycle 190: per-CPU admission validates raw execution, dual checksums,
 typed accounting and exact per-control case counts. Two final boots, 159 executed
 cases in 19 categories and all 10 focused tests pass. All 69 original corruptions
 reject without validator exceptions; failures and superseded boots are retained.

@@ -11,7 +11,19 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Latest development checkpoint:** Cycle 190 repairs per-CPU recorded evidence,
+**Latest development checkpoint:** Cycle 191 repairs IPI recorded execution,
+frame-address checksum validation and release-accounting control execution.
+Two final four-vCPU boots, 249 rejection cases and all 31 focused tests pass;
+528 corrupted records reject through runtime and actual gate. Selected readiness
+is 19/27. Next is native AP mailbox export and independent host recomputation,
+then affected-image replay, eight remaining profiles and full qualification.
+Kernel/demo bytes are unchanged; the mailbox gap still blocks main merge.
+[Cycle 191 evidence and next steps](docs/checkpoints/cycle191-ipi-recorded-evidence.md).
+Combined scoped regression passes 314 tests, zero skipped; the initial two
+historical-assertion failures are retained. Conservation passes. This remains
+a pre-production development checkpoint, not a new ISO or release.
+
+**Historical development checkpoint:** Cycle 190 repairs per-CPU recorded evidence,
 dual-checksum validation and per-control case-count binding. Two final boots,
 159 executed cases across 19 categories and all 10 focused tests pass. All 69
 original corruptions now reject without validator exceptions. Selected readiness

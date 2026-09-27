@@ -1,13 +1,39 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-26
-Plan version: 2.93.0-native-percpu-recorded-evidence
-Roadmap cycle: PooleOS Cycle 190
+Plan version: 2.94.0-native-ipi-recorded-evidence
+Roadmap cycle: PooleOS Cycle 191
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 191: IPI Recorded Evidence
+
+`N8-SMP-IPI-001`, N8.5/N8.6/N9.5 supporting N36, repairs strict recorded
+execution, typed accounting, raw frame-address checksums, exact control counts
+and pre-write admission. Three constant-only controls now exercise the real
+release-accounting validator. Two final four-vCPU boots, 249 executed cases in
+30 categories and all 31 focused tests pass. All 66 initial counterexamples
+reject without exceptions; the original failures and initial boots are retained.
+
+Selected readiness is 19/27. The bounded PKAPOWN1 AP-ownership replay is current,
+but full AP mailbox inputs are not exported for independent host checksum
+recomputation. Next is `N8-SMP-MAILBOX-ORACLE-001`, under existing
+`ADD-N36-RECEIPT-COVERAGE-001` / `FLAG-N36-RECEIPT-COVERAGE-001`: export native
+baseline/runtime snapshots, independently recompute before normalization, reject
+coherent input corruption, and requalify the changed kernel and its dependencies.
+Then resume eight scheduler-through-lock profiles, the 65 scheduler control
+gaps and full exact qualification. This mailbox gap blocks merge qualification.
+
+All requirement, phase and flag states are preserved. Inventory is 1,028 methods
+and 289 bindings, not a full-suite pass. Kernel/ISO bytes and PooleGlyph are
+unchanged. General task-stack/CPU retirement, hardware and production remain open.
+[Detailed evidence and ordered subphases](checkpoints/cycle191-ipi-recorded-evidence.md).
+Combined scoped regression passes all 314 tests, zero skipped. The initial
+312/314 historical-assertion failure is retained; conservation passes.
+This is not full canonical qualification or main-merge acceptance.
 
 ## Cycle 190: Per-CPU Recorded Evidence
 

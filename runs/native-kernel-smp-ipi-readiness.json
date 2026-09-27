@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_kind": "pooleos_native_kernel_smp_ipi_readiness",
-  "status_date": "2026-09-12",
+  "status_date": "2026-09-26",
   "status": "pass_single_host_two_run_sandybridge_four_vcpu_three_ap_partial_rollback_and_aggregate_shootdown_non_promoting",
   "contract_id": "PKSMP5",
   "selected_move_id": "N8-SMP-MULTI-AP-001",
@@ -28,8 +28,8 @@
     "implementation": [
       {
         "path": "runtime/native_kernel_profile_evidence.py",
-        "byte_count": 1299,
-        "sha256": "6A05845B85396E3496B9D58F313A3230301987F6022CB147E9FD480F68DFFC45"
+        "byte_count": 5594,
+        "sha256": "0BEE77BBDF9979C7BEF8311DAEDF7D3A57424EB89A68DBBACCE731615BB69E4F"
       },
       {
         "path": "tests/test_native_memory_entry_provenance.py",
@@ -37,9 +37,14 @@
         "sha256": "35E35598C58B141DDD2E895BD0CC39CD296DFC6CB2F0DDE2BFBE88AA47DA513A"
       },
       {
+        "path": "tests/test_native_cpu_entry_provenance.py",
+        "byte_count": 11853,
+        "sha256": "AC64B1A74AD37F2FAD7A7032DF2480ACA0DCAD6F3B2626EE2B3C5B3A7232138F"
+      },
+      {
         "path": "runs/native_kernel_entry_readiness.json",
-        "byte_count": 28018,
-        "sha256": "B9E79FE7CABA4931C3654134A68934B732DD77A6F1555179C2E09EF93D6212D6"
+        "byte_count": 31364,
+        "sha256": "ACAEC303FA750DD75CA8B721B0BD359E4291CF1C4218B3DDFBFE09AF17390B65"
       },
       {
         "path": "native/Cargo.lock",
@@ -158,8 +163,8 @@
       },
       {
         "path": "runtime/native_kernel_smp_ipi.py",
-        "byte_count": 39920,
-        "sha256": "D491E71B332F971B8A6CA71A95FB050D8AD830AEDDD375B2FC5BE9807A0F5785"
+        "byte_count": 47899,
+        "sha256": "0604FD2B5D6E9D315907C133EC660207217393A27ECBF64202A00DEC65DCAAA1"
       },
       {
         "path": "runtime/native_kernel_transfer.py",
@@ -203,24 +208,24 @@
       },
       {
         "path": "tools/qualify_native_kernel_smp_ipi.py",
-        "byte_count": 32363,
-        "sha256": "016E4720CE5DDAC825B42CED37A7C20590A0DDB512B991DC3A9EA2314DBC4520"
+        "byte_count": 32099,
+        "sha256": "75E3322497610C782252887E00B37325FB06BCBE862AD7378270977E40A039A5"
       },
       {
         "path": "tests/test_native_kernel_smp_ipi.py",
-        "byte_count": 18168,
-        "sha256": "A5FEB9CDE8B4CF3B19D688881D99B967AD55253D67C77F6681392F4058228FC5"
+        "byte_count": 28115,
+        "sha256": "260EB9E831E5CB5BFF746D6BD4E508591786C721243855675166D074D384DAAC"
       },
       {
         "path": "docs/native-kernel-smp-ipi.md",
-        "byte_count": 7321,
-        "sha256": "954D4FD1B838157BE48CCEDBE2DDCA55E57AF1DE3C103B864CF1A84945790743"
+        "byte_count": 8531,
+        "sha256": "BD3BCFFED6ECD13FFD09A14E20DEA53593F67836B44F8DCA3E7CCAC12A272260"
       }
     ],
     "boot_transfer": {
       "path": "runs/native-kernel-transfer-readiness.json",
-      "byte_count": 174351,
-      "sha256": "C41EC5F4709169B84C3F3C96B9B17ACF26CC128624D9481378BCB313B3DA1A9C"
+      "byte_count": 178645,
+      "sha256": "1FA247B02A1B8DB0D54E4AEB20DA2E911B8C1840A765B36AB299A7A96164ABD1"
     },
     "boot_artifacts": [
       {
@@ -436,8 +441,8 @@
           },
           {
             "path": "runtime/native_kernel_entry.py",
-            "byte_count": 8479,
-            "sha256": "B95FD6BD0512D6F23EDEC90B1E622C340F214012089C6D0C13CE4E01AB04B6F3"
+            "byte_count": 9490,
+            "sha256": "D5573D19200D2C8AB0EEE71DD082E5881BA3285EA327AD120C03101D4E894934"
           },
           {
             "path": "tools/qualify_native_kernel_entry.py",
@@ -446,13 +451,98 @@
           },
           {
             "path": "tests/test_native_kernel_entry.py",
-            "byte_count": 7983,
-            "sha256": "97287CCCD3CDEA6048DA3B8167519F25B055EBDFEE96635AA9BF8BD5C658187B"
+            "byte_count": 10928,
+            "sha256": "933C35AA3E4A99AD38403C99B8A9DAD482201A434E117A96DEA524D1418D3D48"
           },
           {
             "path": "docs/native-kernel-entry.md",
             "byte_count": 7025,
             "sha256": "542400FF1A6FD98ECB052DDE0DC06D4C2B0972EB05952BB5502B4494BB83A89F"
+          },
+          {
+            "path": "native/.cargo/config.toml",
+            "byte_count": 539,
+            "sha256": "7983881C5CAD2B909CCA64BFA7F5895EC56377B0E52967444CB2818A69FA4FE1"
+          },
+          {
+            "path": "specs/native-host-msvc-profile.json",
+            "byte_count": 2092,
+            "sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182"
+          },
+          {
+            "path": "tools/native_host_toolchain.py",
+            "byte_count": 5317,
+            "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+          },
+          {
+            "path": "tools/qualify_native_toolchain.py",
+            "byte_count": 22364,
+            "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+          },
+          {
+            "path": "tools/qualify_native_elf_loader.py",
+            "byte_count": 33002,
+            "sha256": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B"
+          },
+          {
+            "path": "tests/test_native_host_toolchain.py",
+            "byte_count": 8341,
+            "sha256": "EAB54E9FDE9435B29C56866CD5A4A6600E54AB2CB14BE0604818685105316393"
+          },
+          {
+            "path": "native/elf/Cargo.toml",
+            "byte_count": 342,
+            "sha256": "FD1F6C50EF6C3CE82C5602386BB68A7BED933819C89284FADAECEE7434654389"
+          },
+          {
+            "path": "native/elf/src/lib.rs",
+            "byte_count": 36472,
+            "sha256": "15CEF64F884F17A97F7581A794555E23F80D099C1B2E152B42CD59D64A884DA4"
+          },
+          {
+            "path": "native/elf/src/bin/poole_elf_probe.rs",
+            "byte_count": 5760,
+            "sha256": "5D75C4150FD4CAEFF40ACAD5A9AFF38CD6DCD0519060E1407EB24DF73531DCCE"
+          },
+          {
+            "path": "native/boot/Cargo.toml",
+            "byte_count": 1863,
+            "sha256": "C9175879FB21AAE932016F9E1E4F46DD0070BF0D6A2DB32AB370AF7C4D0687F6"
+          },
+          {
+            "path": "native/boot/src/lib.rs",
+            "byte_count": 16266,
+            "sha256": "9937D6DBE1F55646B042B81D9CD0BC5A4AC150E8710A469C2BD378F229F1A5DD"
+          },
+          {
+            "path": "runtime/native_elf_loader.py",
+            "byte_count": 31837,
+            "sha256": "EDB7798C4CF70A65F9F3826A96E1996E0DA2B01443940BBB517E0E1702D29E3C"
+          },
+          {
+            "path": "tools/generate_native_elf_loader_vectors.py",
+            "byte_count": 3946,
+            "sha256": "8A28A89C340BC4B59E532E16E52B89FA78B91D111D9A3289F158E7D3459CFD74"
+          },
+          {
+            "path": "docs/native-elf-loader.md",
+            "byte_count": 5451,
+            "sha256": "C67E4C762280B7799733AF6ACB6ADCBA62B7EA083A78F41E530F41D8A35FC38D"
+          },
+          {
+            "path": "native/rust-toolchain.toml",
+            "byte_count": 131,
+            "sha256": "06C4E0BD63FE84DCB26A0FAE52D96F23C38979DBE6F154D58EAB1547F81FA26B"
+          },
+          {
+            "path": "specs/native-toolchain-lock.json",
+            "byte_count": 4017,
+            "sha256": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E"
+          },
+          {
+            "path": "tests/test_native_elf_loader.py",
+            "byte_count": 12903,
+            "sha256": "95961C82225CC2FAB3E49984B735C1AD1497D34DD11859E5D34F597EF0F48C1B"
           },
           {
             "path": "native/kernel/src/atomics.rs",
@@ -651,7 +741,13 @@
           ],
           "host_probe_byte_count": 148480,
           "host_probe_artifact_identity_recorded": false,
-          "host_probe_role": "ephemeral host-only differential and exact-byte transport"
+          "host_probe_role": "ephemeral host-only differential and exact-byte transport",
+          "host_toolchain": {
+            "profile_id": "POOLEOS-HOST-MSVC-1",
+            "profile_sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182",
+            "verified_before_build": true,
+            "scope": "host_linker_and_library_trees_not_complete_host_attestation"
+          }
         }
       },
       "host_tests": {
@@ -1063,6 +1159,12 @@
       ]
     },
     "default_pooleboot": {
+      "host_toolchain": {
+        "profile_id": "POOLEOS-HOST-MSVC-1",
+        "profile_sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182",
+        "verified_before_build": true,
+        "scope": "host_linker_and_library_trees_not_complete_host_attestation"
+      },
       "host_contract_test_count": 8,
       "host_contract_test_pass_count": 8,
       "development_transfer_feature": false,
@@ -1137,6 +1239,12 @@
       "host_leakage_hit_count": 0
     },
     "smp_ipi_pooleboot": {
+      "host_toolchain": {
+        "profile_id": "POOLEOS-HOST-MSVC-1",
+        "profile_sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182",
+        "verified_before_build": true,
+        "scope": "host_linker_and_library_trees_not_complete_host_attestation"
+      },
       "host_contract_test_count": 8,
       "host_contract_test_pass_count": 8,
       "development_transfer_feature": true,
@@ -2165,15 +2273,15 @@
           "POOLEOS:KERNEL:SMP-MULTI-TOPOLOGY PASS contract=PKSMP5 processors=4 enabled=4 bsp_apic_id=0 target_apic_ids=1,2,3 target_mask=0x000000000000000E apic_physical=0x00000000FEE00000 selection=exact_enabled_legacy_apic_topology",
           "POOLEOS:KERNEL:SMP-MULTI-PARTIAL-ROLLBACK PASS contract=PKSMP5 started_mask=0x0000000000000006 timeout_apic_id=4 timeout_mask=0x0000000000000010 timeout_count=1 parked_mask=0x0000000000000006 released_mask=0x000000000000000E resource_pages=96 frame_pages=6 zeroed_bytes=417792 verified_bytes=417792 retained_free_rejections=27 owner_release_rejections=18 fresh_allocation_required=1",
           "POOLEOS:KERNEL:SMP-MULTI-RETRY PASS contract=PKSMP5 retry_count=1 partial_rollback_count=1 started_mask=0x000000000000000E online_mask=0x000000000000000E simultaneous_online=1",
-          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=0 apic_id=1 physical_start=0x0000000000001000 pages=32 sipi_vector=1 trampoline_bytes=2852 allocation_sequence=24 frame_allocation_sequences=25,26 frame_release_sequences=35,42 resource_release_sequence=43 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=1 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000002 ack_mask=0x0000000000000002 invalidations=1 baseline_checksum=0x7D42BBE0CF23B645 runtime_checksum=0xA1D2D08C15E021A9 response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
-          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=1 apic_id=2 physical_start=0x0000000000023000 pages=32 sipi_vector=35 trampoline_bytes=2852 allocation_sequence=27 frame_allocation_sequences=28,31 frame_release_sequences=36,40 resource_release_sequence=41 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=0 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000004 ack_mask=0x0000000000000004 invalidations=1 baseline_checksum=0x4A2DB6C0B1A70117 runtime_checksum=0x4449CAABD73E0045 response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
-          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=2 apic_id=3 physical_start=0x0000000000045000 pages=32 sipi_vector=69 trampoline_bytes=2852 allocation_sequence=32 frame_allocation_sequences=33,34 frame_release_sequences=37,38 resource_release_sequence=39 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=0 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000008 ack_mask=0x0000000000000008 invalidations=1 baseline_checksum=0x135671E06B46A146 runtime_checksum=0x3436C9410DC42FA8 response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
+          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=0 apic_id=1 physical_start=0x0000000000001000 pages=32 sipi_vector=1 trampoline_bytes=2852 allocation_sequence=24 frame_allocation_sequences=25,26 frame_release_sequences=35,42 resource_release_sequence=43 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=1 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000002 ack_mask=0x0000000000000002 invalidations=1 baseline_checksum=0x2F0D7EDD9ED8CEA3 runtime_checksum=0xDDC11F63DF668D38 response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
+          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=1 apic_id=2 physical_start=0x0000000000023000 pages=32 sipi_vector=35 trampoline_bytes=2852 allocation_sequence=27 frame_allocation_sequences=28,31 frame_release_sequences=36,40 resource_release_sequence=41 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=0 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000004 ack_mask=0x0000000000000004 invalidations=1 baseline_checksum=0x25587B433485FD9F runtime_checksum=0x30BBD5FDB6166B4C response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
+          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=2 apic_id=3 physical_start=0x0000000000045000 pages=32 sipi_vector=69 trampoline_bytes=2852 allocation_sequence=32 frame_allocation_sequences=33,34 frame_release_sequences=37,38 resource_release_sequence=39 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=0 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000008 ack_mask=0x0000000000000008 invalidations=1 baseline_checksum=0x0AF15A254C395BD0 runtime_checksum=0x03C352ECB4DB8FEA response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
           "POOLEOS:KERNEL:SMP-MULTI-SHOOTDOWN PASS contract=PKSMP5 target_mask=0x000000000000000E ack_mask=0x000000000000000E retired_generation=1 active_generation=2 invalidations=3 root_checksum=0x5A6D5E693D7F53DC old_frame_checksum=0xBE1E07C6144BC01A new_frame_checksum=0xE351D68DF0864FAA premature_reclaim_rejections=2 retained_free_rejections=27 owner_release_rejections=18 reclaim_state=released",
           "POOLEOS:KERNEL:SMP-MULTI-LIFECYCLE PASS contract=PKSMP5 started_mask=0x000000000000000E online_mask=0x000000000000000E quiesced_mask=0x000000000000000E parked_mask=0x000000000000000E validated_mask=0x000000000000000E released_mask=0x000000000000000E timeout_count=1 retry_count=1 partial_rollback_count=1 exact_accounting=1",
           "POOLEOS:KERNEL:SMP-MULTI-RELEASE PASS contract=PKSMP5 resource_pages=96 frame_pages=6 resource_zeroed_bytes=393216 resource_verified_bytes=393216 frame_zeroed_bytes=24576 frame_verified_bytes=24576 total_pages=102 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged",
           "POOLEOS:KERNEL:SMP-MULTI-RESULT PASS contract=PKSMP5 profile=sandybridge_x87_sse_four_vcpu aps=3 simultaneous_online=1 partial_start_timeout=1 partial_rollback=1 fresh_retry=1 target_mask=0x000000000000000E ack_mask=0x000000000000000E tlb_invalidations=3 no_reuse_before_all_acks=1 stop_quiesced=3 ap_parked=3 resources_released=102 scheduler=0 general_broadcast=0 target_hardware=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],
-        "marker_sha256": "FB7F63CBC7336E02BC3F2E2462185112C9627B6FAE530147B06245B34B9D3264",
+        "marker_sha256": "FA670F8FAD65063E22072C23865F62BE4AA7473874F566535745A1D95FB3FF99",
         "serial_debugcon_exact_match": true,
         "marker_summary": {
           "transfer_prefix": {
@@ -3709,15 +3817,15 @@
           "POOLEOS:KERNEL:SMP-MULTI-TOPOLOGY PASS contract=PKSMP5 processors=4 enabled=4 bsp_apic_id=0 target_apic_ids=1,2,3 target_mask=0x000000000000000E apic_physical=0x00000000FEE00000 selection=exact_enabled_legacy_apic_topology",
           "POOLEOS:KERNEL:SMP-MULTI-PARTIAL-ROLLBACK PASS contract=PKSMP5 started_mask=0x0000000000000006 timeout_apic_id=4 timeout_mask=0x0000000000000010 timeout_count=1 parked_mask=0x0000000000000006 released_mask=0x000000000000000E resource_pages=96 frame_pages=6 zeroed_bytes=417792 verified_bytes=417792 retained_free_rejections=27 owner_release_rejections=18 fresh_allocation_required=1",
           "POOLEOS:KERNEL:SMP-MULTI-RETRY PASS contract=PKSMP5 retry_count=1 partial_rollback_count=1 started_mask=0x000000000000000E online_mask=0x000000000000000E simultaneous_online=1",
-          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=0 apic_id=1 physical_start=0x0000000000001000 pages=32 sipi_vector=1 trampoline_bytes=2852 allocation_sequence=24 frame_allocation_sequences=25,26 frame_release_sequences=35,42 resource_release_sequence=43 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=1 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000002 ack_mask=0x0000000000000002 invalidations=1 baseline_checksum=0x1C61F2EEB2416219 runtime_checksum=0x7EA4D4F71504B8A9 response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
-          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=1 apic_id=2 physical_start=0x0000000000023000 pages=32 sipi_vector=35 trampoline_bytes=2852 allocation_sequence=27 frame_allocation_sequences=28,31 frame_release_sequences=36,40 resource_release_sequence=41 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=0 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000004 ack_mask=0x0000000000000004 invalidations=1 baseline_checksum=0x4EC79658DF3529DD runtime_checksum=0x89A056F6E9392461 response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
-          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=2 apic_id=3 physical_start=0x0000000000045000 pages=32 sipi_vector=69 trampoline_bytes=2852 allocation_sequence=32 frame_allocation_sequences=33,34 frame_release_sequences=37,38 resource_release_sequence=39 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=0 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000008 ack_mask=0x0000000000000008 invalidations=1 baseline_checksum=0x7080E48AB8722430 runtime_checksum=0x5529B3BA18627696 response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
+          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=0 apic_id=1 physical_start=0x0000000000001000 pages=32 sipi_vector=1 trampoline_bytes=2852 allocation_sequence=24 frame_allocation_sequences=25,26 frame_release_sequences=35,42 resource_release_sequence=43 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=1 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000002 ack_mask=0x0000000000000002 invalidations=1 baseline_checksum=0xEC939C01A1AD3A76 runtime_checksum=0x54CEB5B02BDC5D98 response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
+          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=1 apic_id=2 physical_start=0x0000000000023000 pages=32 sipi_vector=35 trampoline_bytes=2852 allocation_sequence=27 frame_allocation_sequences=28,31 frame_release_sequences=36,40 resource_release_sequence=41 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=0 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000004 ack_mask=0x0000000000000004 invalidations=1 baseline_checksum=0x9CBFE19333D18D78 runtime_checksum=0xFBBEE41E43A523BC response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
+          "POOLEOS:KERNEL:SMP-MULTI-AP PASS contract=PKSMP5 ap_index=2 apic_id=3 physical_start=0x0000000000045000 pages=32 sipi_vector=69 trampoline_bytes=2852 allocation_sequence=32 frame_allocation_sequences=33,34 frame_release_sequences=37,38 resource_release_sequence=39 service_state=4 mailbox_state=3 runtime_state=5 deliveries=4 accepted=3 denied=1 eois=4 diagnostic=1 shootdown=1 stop=1 timeout_count=0 init_asserts=1 init_deasserts=1 sipis=2 target_mask=0x0000000000000008 ack_mask=0x0000000000000008 invalidations=1 baseline_checksum=0xC96C06B6546C3D7B runtime_checksum=0x946BB56B099D01C1 response_checksum=0x1A04060253500005 tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1",
           "POOLEOS:KERNEL:SMP-MULTI-SHOOTDOWN PASS contract=PKSMP5 target_mask=0x000000000000000E ack_mask=0x000000000000000E retired_generation=1 active_generation=2 invalidations=3 root_checksum=0x5A6D5E693D7F53DC old_frame_checksum=0xBE1E07C6144BC01A new_frame_checksum=0xE351D68DF0864FAA premature_reclaim_rejections=2 retained_free_rejections=27 owner_release_rejections=18 reclaim_state=released",
           "POOLEOS:KERNEL:SMP-MULTI-LIFECYCLE PASS contract=PKSMP5 started_mask=0x000000000000000E online_mask=0x000000000000000E quiesced_mask=0x000000000000000E parked_mask=0x000000000000000E validated_mask=0x000000000000000E released_mask=0x000000000000000E timeout_count=1 retry_count=1 partial_rollback_count=1 exact_accounting=1",
           "POOLEOS:KERNEL:SMP-MULTI-RELEASE PASS contract=PKSMP5 resource_pages=96 frame_pages=6 resource_zeroed_bytes=393216 resource_verified_bytes=393216 frame_zeroed_bytes=24576 frame_verified_bytes=24576 total_pages=102 capability_revoked=1 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged",
           "POOLEOS:KERNEL:SMP-MULTI-RESULT PASS contract=PKSMP5 profile=sandybridge_x87_sse_four_vcpu aps=3 simultaneous_online=1 partial_start_timeout=1 partial_rollback=1 fresh_retry=1 target_mask=0x000000000000000E ack_mask=0x000000000000000E tlb_invalidations=3 no_reuse_before_all_acks=1 stop_quiesced=3 ap_parked=3 resources_released=102 scheduler=0 general_broadcast=0 target_hardware=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],
-        "marker_sha256": "06C357F78F1FCA12F67E7184452D6AEE5926369B159BF91C22CCF5C41633F251",
+        "marker_sha256": "044C456994EADFDB75EF5500EE58EFDFF83CD9E3833F78350DA786A60923F84A",
         "serial_debugcon_exact_match": true,
         "marker_summary": {
           "transfer_prefix": {
@@ -5938,10 +6046,10 @@
     "operation_classes_installed_per_ap": 6,
     "accepted_deliveries": 9,
     "denied_deliveries": 3,
+    "eois": 12,
     "offline_timeouts": 1,
     "partial_start_rollbacks": 1,
     "fresh_retries": 1,
-    "eois": 12,
     "remote_tlb_invalidations": 3,
     "retired_generations": 1,
     "premature_reclaim_rejections": 2,

@@ -7,8 +7,70 @@ from unittest.mock import patch
 
 from runtime import native_kernel_smp_ipi as smp_ipi
 from runtime import native_tier0
+from tests.test_native_cpu_entry_provenance import pair_mutations
 from tools import qualify_native_kernel_smp_ipi as qualify
 from tools import pooleos_release_gate
+
+
+def recorded_receipt_mutations(baseline):
+    for family in ("exit", "coverage", "evidence"):
+        for label, pair in pair_mutations(baseline["execution"], family):
+            if label == "exact_marker_match":
+                pair["static_markers_exact_match"] = pair.pop("exact_marker_match")
+            candidate = copy.deepcopy(baseline)
+            candidate["execution"] = pair
+            yield family, label, candidate
+
+    def changed(path, value):
+        candidate = copy.deepcopy(baseline)
+        target = candidate
+        for key in path[:-1]:
+            target = target[key]
+        target[path[-1]] = value
+        return candidate
+
+    def leaves(value, path):
+        if isinstance(value, dict):
+            for key, item in value.items():
+                yield from leaves(item, (*path, key))
+        elif isinstance(value, list):
+            for index, item in enumerate(value):
+                yield from leaves(item, (*path, index))
+        else:
+            yield path, value
+
+    for path in (("execution",), ("execution", "observation"), ("summary",)):
+        yield "shape", str(path), changed(path, None)
+    for key, value in (("virtual_cpu_count", 4.0), ("application_processor_count", 3.0),
+                       ("dynamic_fields_revalidated", 1), ("cpu_model", "qemu64"),
+                       ("acceleration", "tcg_single_thread"), ("deterministic_instruction_clock", 0),
+                       ("machine", "wrong"), ("profile_id", "wrong")):
+        yield "dynamic-policy", key, changed(("execution", key), value)
+    for section, fields in baseline["execution"]["observation"].items():
+        path = ("execution", "observation", section)
+        yield "observation", section, changed(path, None)
+        if section == "transfer_prefix":
+            continue
+        for leaf, value in leaves(fields, path):
+            substitute = int(value) if type(value) is bool else float(value) if type(value) is int else "invalid"
+            for label, replacement in (("null", None), ("type-or-value", substitute)):
+                yield "observation", str(leaf) + label, changed(leaf, replacement)
+    for key, value in baseline["summary"].items():
+        for label, replacement in (("null", None), ("type", float(value))):
+            yield "summary", key + label, changed(("summary", key), replacement)
+    for field in ("old_frame_checksum", "new_frame_checksum"):
+        candidate = copy.deepcopy(baseline)
+        for run in candidate["execution"]["runs"]:
+            run["markers"][36] = qualify._set_field(run["markers"][36], field, "0x0000000000000001")
+            run["marker_sha256"] = smp_ipi.sha256_bytes(smp_ipi.native_pooleboot.canonical_json_bytes(run["markers"]))
+        yield "raw-frame", field, candidate
+    for index, control in enumerate(baseline["negative_controls"]):
+        for value in (control["case_count"] + 1, float(control["case_count"])):
+            yield "controls", str((index, value)), changed(("negative_controls", index, "case_count"), value)
+    candidate = copy.deepcopy(baseline)
+    candidate["negative_controls"][0]["case_count"] += 1
+    candidate["negative_controls"][3]["case_count"] -= 1
+    yield "controls", "redistribution-same-total", candidate
 
 
 class NativeKernelSmpIpiTests(unittest.TestCase):
@@ -21,7 +83,7 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
 
     def test_relabelled_consistent_boot_digests_cannot_pass_current_readiness(self) -> None:
         report = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
-        report["inputs"] = smp_ipi.expected_inputs()
+        self.assertEqual([], smp_ipi.readiness_errors(report))
         fields = ("retained_set_sha256", "policy_sha256", "state_sha256")
         original = report["execution"]["observation"]["transfer_prefix"]["kernel_revalidation"]
         for field in fields:
@@ -37,14 +99,14 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
 
     def test_stale_transfer_dependency_is_rejected(self) -> None:
         report = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
-        report["inputs"] = smp_ipi.expected_inputs()
+        self.assertEqual([], smp_ipi.readiness_errors(report))
         with patch.object(smp_ipi.native_kernel_transfer, "readiness_errors", return_value=["stale dependency"]):
             errors = smp_ipi.readiness_errors(report)
         self.assertTrue(any("transfer dependency" in error for error in errors), errors)
 
     def test_malformed_transfer_dependency_returns_errors(self) -> None:
         report = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
-        report["inputs"] = smp_ipi.expected_inputs()
+        self.assertEqual([], smp_ipi.readiness_errors(report))
         read_json = smp_ipi.read_json
         dependency = smp_ipi.ROOT / smp_ipi.native_kernel_transfer.READINESS_RELATIVE
         for malformed in (None, [], "receipt", 1):
@@ -57,6 +119,7 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
 
     def test_regenerated_boot_bytes_cannot_disagree_with_transfer(self) -> None:
         report = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        self.assertEqual([], smp_ipi.readiness_errors(report))
         files = smp_ipi.native_kernel_load.canonical_artifact_files()
         first = next(iter(files))
         files[first] = bytes([files[first][0] ^ 1]) + files[first][1:]
@@ -318,6 +381,103 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
                 changed["execution"]["observation"]["execution_ownership"]["general_cpu_retirement_verified"] = 0
             with self.subTest(field=field), patch.object(pooleos_release_gate, "_load_schema_artifact", return_value=(changed, [])):
                 self.assertFalse(pooleos_release_gate.check_native_kernel_smp_ipi_readiness()["ok"])
+
+
+    def test_recorded_payload_rejects_inconsistent_execution(self) -> None:
+        # Payload consistency alone never establishes current-source qualification.
+        baseline = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        self.assertEqual([], smp_ipi.recorded_ipi_errors(baseline["execution"], baseline["summary"]))
+        for family, label, candidate in recorded_receipt_mutations(baseline):
+            if family == "controls":
+                continue
+            with self.subTest(family=family, case=label):
+                self.assertTrue(smp_ipi.recorded_ipi_errors(candidate["execution"], candidate["summary"]))
+
+    def test_runtime_and_real_gate_reject_corrupted_records(self) -> None:
+        baseline = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        self.assertEqual([], smp_ipi.readiness_errors(baseline))
+        self.assertTrue(pooleos_release_gate.check_native_kernel_smp_ipi_readiness()["ok"])
+        candidates = list(recorded_receipt_mutations(baseline))
+        for value in (None, [], "invalid"):
+            candidates.append(("root-shape", repr(value), value))
+            candidate = copy.deepcopy(baseline)
+            candidate["negative_controls"] = value
+            candidates.append(("control-shape", repr(value), candidate))
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "candidate.json"
+            for family, label, candidate in candidates:
+                with self.subTest(family=family, case=label):
+                    self.assertTrue(smp_ipi.readiness_errors(candidate))
+                    path.write_text(json.dumps(candidate, allow_nan=False), encoding="utf-8")
+                    self.assertFalse(pooleos_release_gate.check_native_kernel_smp_ipi_readiness(path)["ok"])
+
+    def test_frame_checksum_oracle_uses_addresses_order_and_domain(self) -> None:
+        old = [(2, 0x21000), (4, 0x43000), (8, 0x65000)]
+        new = [(2, 0x22000), (4, 0x44000), (8, 0x66000)]
+        self.assertEqual(0xBE1E07C6144BC01A, smp_ipi.aggregate_address_checksum(old, smp_ipi.AGGREGATE_OLD_FRAME_DOMAIN))
+        self.assertEqual(0xE351D68DF0864FAA, smp_ipi.aggregate_address_checksum(new, smp_ipi.AGGREGATE_NEW_FRAME_DOMAIN))
+        self.assertNotEqual(smp_ipi.aggregate_address_checksum(old, smp_ipi.AGGREGATE_OLD_FRAME_DOMAIN),
+                            smp_ipi.aggregate_address_checksum(old, smp_ipi.AGGREGATE_NEW_FRAME_DOMAIN))
+        baseline = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        markers = baseline["execution"]["runs"][0]["markers"]
+        smp_ipi.validate_markers(markers)
+        for field, values, domain in (("old_frame_checksum", old, smp_ipi.AGGREGATE_OLD_FRAME_DOMAIN),
+                                      ("new_frame_checksum", new, smp_ipi.AGGREGATE_NEW_FRAME_DOMAIN)):
+            for altered in (list(reversed(values)), [(mask, address + 4096) for mask, address in values]):
+                candidate = markers.copy()
+                checksum = smp_ipi.aggregate_address_checksum(altered, domain)
+                candidate[36] = qualify._set_field(candidate[36], field, f"0x{checksum:016X}")
+                with self.subTest(field=field, altered=altered), self.assertRaises(smp_ipi.KernelSmpIpiError):
+                    smp_ipi.validate_markers(candidate)
+
+    def test_opaque_ap_checksums_are_explicitly_not_host_recomputed(self) -> None:
+        baseline = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        markers = baseline["execution"]["runs"][0]["markers"]
+        normalized = smp_ipi.normalize_dynamic_markers(markers)
+        for index in range(33, 36):
+            for field in ("baseline_checksum", "runtime_checksum"):
+                candidate = markers.copy()
+                candidate[index] = qualify._set_field(candidate[index], field, "0x0000000000000000")
+                with self.subTest(index=index, field=field), self.assertRaises(smp_ipi.KernelSmpIpiError):
+                    smp_ipi.normalize_dynamic_markers(candidate)
+        # Document the export gap, not fabricated live evidence or an independent oracle.
+        synthetic = markers.copy()
+        for index in range(33, 36):
+            synthetic[index] = qualify._set_field(synthetic[index], "baseline_checksum", "0x0000000000000001")
+            synthetic[index] = qualify._set_field(synthetic[index], "runtime_checksum", "0x0000000000000002")
+        self.assertEqual(normalized, smp_ipi.normalize_dynamic_markers(synthetic))
+        self.assertIn("<guest-checked-dynamic>", normalized[33])
+
+    def test_release_accounting_controls_execute_real_validator(self) -> None:
+        smp_ipi.validate_release_accounting(96, 6, 417792)
+        for values in ((95, 6, 417792), (96, 5, 417792), (96, 6, 413696),
+                       (96.0, 6, 417792), (96, 6.0, 417792), (96, 6, 417792.0)):
+            with self.subTest(values=values), self.assertRaises(smp_ipi.KernelSmpIpiError):
+                smp_ipi.validate_release_accounting(*values)
+        baseline = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        markers = baseline["execution"]["runs"][0]["markers"]
+        controls = qualify._negative_controls(markers)
+        self.assertEqual(list(smp_ipi.NEGATIVE_CONTROL_CASE_COUNTS), [item["case_count"] for item in controls])
+        with patch.object(smp_ipi, "validate_release_accounting", return_value=None):
+            with self.assertRaisesRegex(qualify.QualificationError, "RELEASE-ACCOUNTING-MODEL"):
+                qualify._negative_controls(markers)
+
+    def test_qualifier_rejects_invalid_result_before_writing(self) -> None:
+        baseline = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
+        self.assertEqual([], smp_ipi.readiness_errors(baseline))
+        baseline["execution"]["runs"][0]["qemu_exit_code"] = False
+        with tempfile.TemporaryDirectory() as folder:
+            for exists in (False, True):
+                path = Path(folder) / ("existing.json" if exists else "absent/result.json")
+                if exists:
+                    path.write_bytes(b"preserve-existing-output")
+                with patch.object(qualify, "make_readiness", return_value=baseline):
+                    with self.assertRaises(qualify.QualificationError):
+                        qualify.main(["--out", str(path)])
+                if exists:
+                    self.assertEqual(b"preserve-existing-output", path.read_bytes())
+                else:
+                    self.assertFalse(path.parent.exists())
 
 
 if __name__ == "__main__":
