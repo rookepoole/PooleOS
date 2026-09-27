@@ -68,7 +68,8 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 286)
+        self.assertEqual(len(self.artifact["bound_sources"]), 287)
+        self.assertIn("docs/checkpoints/cycle189-first-ap-recorded-evidence.md", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("docs/checkpoints/cycle188-irq-recorded-evidence.md", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("docs/checkpoints/cycle187-vm-recorded-evidence.md", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("docs/checkpoints/cycle186-pmm-recorded-evidence.md", {item["path"] for item in self.artifact["bound_sources"]})

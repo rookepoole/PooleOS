@@ -1962,6 +1962,8 @@ def check_native_kernel_smp_first_ap_readiness(
             "; ".join(errors) or "native kernel SMP first-AP readiness is not an object",
         )
     errors.extend(str(issue) for issue in native_kernel_smp_first_ap.readiness_errors(artifact, ROOT))
+    if errors:
+        return readiness.make_check("native_kernel_smp_first_ap_readiness", False, "; ".join(errors))
     expected_summary = {
         "application_processors_online": 1,
         "application_processors_parked": 1,

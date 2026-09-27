@@ -148,8 +148,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
 
     def test_production_boundary_and_next_move_are_explicit(self) -> None:
         self.assertFalse(self.roadmap["production_ready"])
-        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 188)
-        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1011)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_cycle"], 189)
+        self.assertEqual(self.roadmap["baseline"]["pooleos_test_count"], 1016)
         n36 = next(phase for phase in self.roadmap["phases"] if phase["id"] == "N36")
         self.assertIn("Cycle 173 source inventory: 950 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 174 source inventory: 954 Python tests discovered; full qualification pending", n36["current_evidence"])
@@ -161,6 +161,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertIn("Cycle 186 source inventory: 1002 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 187 source inventory: 1006 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertIn("Cycle 188 source inventory: 1011 Python tests discovered; full qualification pending", n36["current_evidence"])
+        self.assertIn("Cycle 189 source inventory: 1016 Python tests discovered; full qualification pending", n36["current_evidence"])
         self.assertFalse(any(item.startswith("Cycle 150 host baseline:") for item in n36["current_evidence"]))
         native = self.roadmap["baseline"]["native"]
         self.assertTrue(native["source_controlled"])
@@ -181,8 +182,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
             "text": "Cycle 150 host baseline: 945 tests with three expected environment skips",
             "status": "superseded_mislabeled_dynamic_test_inventory_not_execution_evidence",
         })
-        self.assertEqual(current["qualification_status"], "IRQ_recorded_evidence_repaired_eleven_dependencies_and_control_audit_pending")
-        self.assertEqual(current["current_candidate_audit"]["cycle"], 188)
+        self.assertEqual(current["qualification_status"], "first_AP_recorded_evidence_repaired_ten_dependencies_and_control_audit_pending")
+        self.assertEqual(current["current_candidate_audit"]["cycle"], 189)
         self.assertEqual(current["current_candidate_audit"]["status"], "not_run")
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
         audit = current["historical_cycle162_candidate_audit"]
@@ -763,7 +764,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(current["historical_cycle173_source_projection"]["passed_checks"], 22)
         self.assertEqual(current["historical_cycle174_source_projection"]["passed_checks"], 24)
         self.assertEqual(current["historical_cycle180_source_projection"]["passed_checks"], 13)
-        self.assertEqual(current["current_focused_source_projection"]["passed_checks"], 16)
+        self.assertEqual(current["current_focused_source_projection"]["passed_checks"], 17)
         self.assertFalse(current["current_candidate_audit"]["aggregate_suite_passed"])
 
     def test_task_stack_qualification_is_host_only_and_source_bound(self) -> None:
@@ -890,6 +891,10 @@ class PdcProductionRoadmapTests(unittest.TestCase):
                     continue
                 if profile == "interrupt_time":
                     self.assertEqual(binding["sha256"], "19FB9DA0B525064D56126E9EEE159C887A46B4FD1EB6B6DA3646C5F88182E7B2")
+                    self.assertNotEqual(hashlib.sha256(raw).hexdigest().upper(), binding["sha256"])
+                    continue
+                if profile == "smp_first_ap":
+                    self.assertEqual(binding["sha256"], "58F0EBEEA6C844714D4E57568C56987C0A9E03D92A9D29421974A6D7C91FD5AC")
                     self.assertNotEqual(hashlib.sha256(raw).hexdigest().upper(), binding["sha256"])
                     continue
                 self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), binding["sha256"])
@@ -1019,13 +1024,13 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         from tests.test_native_kernel_interrupt_time import recorded_receipt_mutations
 
         current = self.roadmap["baseline"]["native_consistency_release_gate"]
-        focused = current["current_focused_source_projection"]
+        focused = current["historical_cycle188_source_projection"]
         self.assertEqual((focused["cycle"], focused["passed_checks"], focused["total_checks"]), (188, 16, 27))
         self.assertEqual(focused["pending_downstream_native_checks"], 11)
         self.assertEqual(focused["next_dependency_move_id"], "N8-SMP-FIRST-AP-001")
         self.assertEqual((focused["focused_python_tests_passed"], focused["focused_python_tests_skipped"]), (12, 0))
         self.assertFalse(focused["canonical_full_replay_performed"])
-        record = current["current_dependency_qualification"]
+        record = current["historical_cycle188_dependency_qualification"]
         self.assertEqual(record["qualified_profiles"], ["physical_memory", "virtual_memory", "interrupt_time"])
         self.assertEqual(record["newly_qualified_profiles"], ["interrupt_time"])
         self.assertEqual(len(record["readiness_replay_required_profiles"]), 11)
@@ -1049,9 +1054,45 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         old = record["pre_repair_counterexample"]
         self.assertEqual((old["cases"], old["runtime_accepted"], old["aggregate_gate_accepted"]), (64, 52, 44))
         self.assertEqual((old["runtime_exceptions"], old["aggregate_gate_exceptions"]), (1, 4))
-        repaired = current["current_closeout_regression"]["original_counterexample_replay"]
+        repaired = current["historical_cycle188_closeout_regression"]["original_counterexample_replay"]
         self.assertEqual((repaired["runtime_accepted"], repaired["aggregate_gate_accepted"],
                           repaired["runtime_exceptions"], repaired["aggregate_gate_exceptions"]), (0, 0, 0, 0))
+
+    def test_current_first_ap_replay_binds_dynamic_evidence_without_general_smp(self) -> None:
+        from collections import Counter
+        from runtime import native_kernel_smp_first_ap as ap
+        from tests.test_native_kernel_smp_first_ap import recorded_receipt_mutations
+
+        current = self.roadmap["baseline"]["native_consistency_release_gate"]
+        focused = current["current_focused_source_projection"]
+        self.assertEqual((focused["cycle"], focused["passed_checks"], focused["pending_downstream_native_checks"]), (189, 17, 10))
+        self.assertEqual(focused["next_dependency_move_id"], "N8-SMP-PERCPU-RUNTIME-001")
+        self.assertEqual(focused["focused_python_tests_passed"], 12)
+        record = current["current_dependency_qualification"]
+        self.assertEqual(record["qualified_profiles"], ["physical_memory", "virtual_memory", "interrupt_time", "smp_first_ap"])
+        self.assertEqual(record["newly_qualified_profiles"], ["smp_first_ap"])
+        self.assertEqual(len(record["readiness_replay_required_profiles"]), 10)
+        self.assertFalse(record["all_fourteen_profiles_current"])
+        self.assertFalse(record["pair_validation_is_freshness_or_authentication"])
+        self.assertFalse(record["current_candidate_full_gate_passed"])
+        binding = record["receipt_bindings"][-1]
+        raw = (ROOT / ap.READINESS_RELATIVE).read_bytes()
+        receipt = json.loads(raw)
+        self.assertEqual(hashlib.sha256(raw).hexdigest().upper(), binding["sha256"])
+        self.assertEqual([], ap.readiness_errors(receipt))
+        self.assertTrue(pooleos_release_gate.check_native_kernel_smp_first_ap_readiness()["ok"])
+        self.assertEqual((binding["fresh_runs"], binding["negative_controls"], binding["kernel_host_tests"]), (2, 72, 245))
+        counts = dict(Counter(family for family, _, _ in recorded_receipt_mutations(receipt)))
+        self.assertEqual(counts, record["recorded_evidence_cases"])
+        self.assertEqual(sum(counts.values()), 159)
+        self.assertEqual(record["malformed_root_and_control_cases"], 6)
+        self.assertEqual(record["dynamic_comparison_scope"], "validated_TSC_online_TSC_stop_and_dependent_checksum_only")
+        old = record["pre_repair_counterexample"]
+        self.assertEqual((old["cases"], old["runtime_accepted"], old["aggregate_gate_accepted"]), (67, 55, 46))
+        closeout = current["current_closeout_regression"]
+        self.assertEqual(len(closeout["preserved_intake_helper_failures"]), 2)
+        self.assertFalse(closeout["synthetic_consistency_is_fresh_execution"])
+        self.assertFalse(current["current_ownership_qualification"]["ap_runtime_live_integration_verified"])
 
     def test_cpu_qualification_is_bound_to_five_live_receipts(self) -> None:
         current = self.roadmap["baseline"]["native_consistency_release_gate"]
@@ -1072,7 +1113,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertEqual(historical["expected_tcg_limitation_probes"], 1)
         self.assertFalse(historical["production_ready"])
         self.assertFalse(current["current_cycle_full_canonical_audit_performed"])
-        self.assertEqual(current["current_focused_source_projection"]["pending_downstream_native_checks"], 11)
+        self.assertEqual(current["current_focused_source_projection"]["pending_downstream_native_checks"], 10)
         qualification = current["historical_cycle175_cpu_qualification"]
         encoded = json.dumps(qualification, sort_keys=True, separators=(",", ":")).encode()
         self.assertEqual(hashlib.sha256(encoded).hexdigest().upper(), "7636441DA8B930B2AC164056A6AE31E21BBB707074360FEDAF3885DB295D6B4C")
@@ -1183,7 +1224,8 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertTrue(protocol["verify_master_checklist_coverage_each_turn"])
         self.assertTrue(protocol["new_work_must_be_flagged"])
         self.assertEqual(protocol["last_updated_cycle"], self.roadmap["baseline"]["pooleos_cycle"])
-        self.assertEqual(protocol["selected_move_id"], "N8-IRQ-001")
+        self.assertEqual(protocol["selected_move_id"], "N8-SMP-FIRST-AP-001")
+        self.assertIn("docs/checkpoints/cycle189-first-ap-recorded-evidence.md", protocol["required_records"])
         self.assertIn("docs/checkpoints/cycle188-irq-recorded-evidence.md", protocol["required_records"])
         self.assertIn("docs/checkpoints/cycle187-vm-recorded-evidence.md", protocol["required_records"])
         self.assertIn("docs/checkpoints/cycle186-pmm-recorded-evidence.md", protocol["required_records"])
@@ -1205,7 +1247,7 @@ class PdcProductionRoadmapTests(unittest.TestCase):
         self.assertIn("docs/checkpoints/cycle172-task-stack-ownership.md", protocol["required_records"])
         self.assertEqual(
             protocol["owner_independent_next_move_id"],
-            "N8-SMP-FIRST-AP-001",
+            "N8-SMP-PERCPU-RUNTIME-001",
         )
         self.assertIn("runs/hardware_target_readiness.json", protocol["required_records"])
         self.assertIn("runs/native_tier0_readiness.json", protocol["required_records"])

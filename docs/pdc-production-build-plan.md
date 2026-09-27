@@ -1,13 +1,40 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-26
-Plan version: 2.91.0-native-irq-recorded-evidence
-Roadmap cycle: PooleOS Cycle 188
+Plan version: 2.92.0-native-first-ap-recorded-evidence
+Roadmap cycle: PooleOS Cycle 189
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 189: First-AP Recorded Evidence
+
+`N8-SMP-FIRST-AP-001` at N8.5, supporting N36, repairs recorded execution,
+typed lifecycle/cleanup accounting and fail-closed malformed input. Each raw
+run validates before allowing only TSC/checksum differences. All67 initial
+counterexamples now reject; earlier55runtime/46gate admissions and1runtime/
+4gate exceptions remain preserved.
+
+Two final virtual boots,72 executed controls and all12 focused tests pass,
+including159 recorded mutations, six root/control shapes and two rejected-output
+cases. Synthetic dynamic consistency is explicitly separate from live evidence.
+Two initial boots and two failed intake-helper pins are retained separately.
+Selected readiness is17/27; ten profiles remain from
+`N8-SMP-PERCPU-RUNTIME-001`, followed by the65scheduler execution-evidence gaps
+and full exact-candidate qualification before PR #78 merge.
+
+Existing `ADD-N36-RECEIPT-COVERAGE-001` tracks this repair. All requirements,
+additions, historical evidence and phase/flag states are retained. Inventory is
+1,016 discovered methods and287 architecture bindings, not a full-suite pass.
+Native kernel/ISO bytes and PooleGlyph are unchanged; no phase, flag, native
+feature, general CPU retirement or production gate closes.
+[Cycle 189 evidence](checkpoints/cycle189-first-ap-recorded-evidence.md).
+
+Combined scoped regressions pass 271 distinct tests, zero skipped. Checklist,
+history, native-product and owner-data conservation pass. This checkpoint is
+eligible for development-branch backup, not main merge or production promotion.
 
 ## Cycle 188: Interrupt/Time Recorded Evidence
 

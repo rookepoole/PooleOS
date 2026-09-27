@@ -11,7 +11,20 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Latest development checkpoint:** Cycle 188 repairs interrupt/time recorded
+**Latest development checkpoint:** Cycle 189 repairs first-AP recorded evidence
+while preserving independently validated timestamp/checksum variation. Two final
+boots and 72 controls pass; all 12 focused tests pass, including 159 corrupt-record
+and six malformed root/control cases through runtime and actual gate. Selected
+readiness is 17/27; ten profiles remain from per-CPU runtime, followed by scheduler
+evidence and full qualification before main merge. Kernel and demo bytes are unchanged.
+[Cycle 189 evidence and next steps](docs/checkpoints/cycle189-first-ap-recorded-evidence.md).
+Combined scoped regressions pass 271 tests with zero skips; checklist, history
+and owner-data conservation pass. Development checkpoints are saved on
+[`agent/n12-dispatch-execution-holds`](https://github.com/rookepoole/PooleOS/tree/agent/n12-dispatch-execution-holds)
+under [draft PR #78](https://github.com/rookepoole/PooleOS/pull/78).
+Cloud backup does not require merging unqualified work into `main`.
+
+**Historical development checkpoint:** Cycle 188 repairs interrupt/time recorded
 execution, typed accounting, calibration bounds and fail-closed malformed input.
 Two final boots and 58 controls pass; all 12 focused tests pass, including 229
 corrupt-record cases and six malformed root/control cases through runtime and

@@ -11,6 +11,12 @@
       "host_contract_test_pass_count": 8,
       "host_leakage_hit_count": 0,
       "host_leakage_marker_count": 7,
+      "host_toolchain": {
+        "profile_id": "POOLEOS-HOST-MSVC-1",
+        "profile_sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182",
+        "scope": "host_linker_and_library_trees_not_complete_host_attestation",
+        "verified_before_build": true
+      },
       "inspection": {
         "byte_count": 207360,
         "characteristics": 34,
@@ -223,9 +229,9 @@
             "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
           },
           {
-            "byte_count": 8479,
+            "byte_count": 9490,
             "path": "runtime/native_kernel_entry.py",
-            "sha256": "B95FD6BD0512D6F23EDEC90B1E622C340F214012089C6D0C13CE4E01AB04B6F3"
+            "sha256": "D5573D19200D2C8AB0EEE71DD082E5881BA3285EA327AD120C03101D4E894934"
           },
           {
             "byte_count": 25233,
@@ -233,14 +239,99 @@
             "sha256": "F8521399E1EFE957EDAB70AC8A101567C45BFE1655CC7AA75132B8844FE56FC1"
           },
           {
-            "byte_count": 7983,
+            "byte_count": 10928,
             "path": "tests/test_native_kernel_entry.py",
-            "sha256": "97287CCCD3CDEA6048DA3B8167519F25B055EBDFEE96635AA9BF8BD5C658187B"
+            "sha256": "933C35AA3E4A99AD38403C99B8A9DAD482201A434E117A96DEA524D1418D3D48"
           },
           {
             "byte_count": 7025,
             "path": "docs/native-kernel-entry.md",
             "sha256": "542400FF1A6FD98ECB052DDE0DC06D4C2B0972EB05952BB5502B4494BB83A89F"
+          },
+          {
+            "byte_count": 539,
+            "path": "native/.cargo/config.toml",
+            "sha256": "7983881C5CAD2B909CCA64BFA7F5895EC56377B0E52967444CB2818A69FA4FE1"
+          },
+          {
+            "byte_count": 2092,
+            "path": "specs/native-host-msvc-profile.json",
+            "sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182"
+          },
+          {
+            "byte_count": 5317,
+            "path": "tools/native_host_toolchain.py",
+            "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+          },
+          {
+            "byte_count": 22364,
+            "path": "tools/qualify_native_toolchain.py",
+            "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+          },
+          {
+            "byte_count": 33002,
+            "path": "tools/qualify_native_elf_loader.py",
+            "sha256": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B"
+          },
+          {
+            "byte_count": 8341,
+            "path": "tests/test_native_host_toolchain.py",
+            "sha256": "EAB54E9FDE9435B29C56866CD5A4A6600E54AB2CB14BE0604818685105316393"
+          },
+          {
+            "byte_count": 342,
+            "path": "native/elf/Cargo.toml",
+            "sha256": "FD1F6C50EF6C3CE82C5602386BB68A7BED933819C89284FADAECEE7434654389"
+          },
+          {
+            "byte_count": 36472,
+            "path": "native/elf/src/lib.rs",
+            "sha256": "15CEF64F884F17A97F7581A794555E23F80D099C1B2E152B42CD59D64A884DA4"
+          },
+          {
+            "byte_count": 5760,
+            "path": "native/elf/src/bin/poole_elf_probe.rs",
+            "sha256": "5D75C4150FD4CAEFF40ACAD5A9AFF38CD6DCD0519060E1407EB24DF73531DCCE"
+          },
+          {
+            "byte_count": 1863,
+            "path": "native/boot/Cargo.toml",
+            "sha256": "C9175879FB21AAE932016F9E1E4F46DD0070BF0D6A2DB32AB370AF7C4D0687F6"
+          },
+          {
+            "byte_count": 16266,
+            "path": "native/boot/src/lib.rs",
+            "sha256": "9937D6DBE1F55646B042B81D9CD0BC5A4AC150E8710A469C2BD378F229F1A5DD"
+          },
+          {
+            "byte_count": 31837,
+            "path": "runtime/native_elf_loader.py",
+            "sha256": "EDB7798C4CF70A65F9F3826A96E1996E0DA2B01443940BBB517E0E1702D29E3C"
+          },
+          {
+            "byte_count": 3946,
+            "path": "tools/generate_native_elf_loader_vectors.py",
+            "sha256": "8A28A89C340BC4B59E532E16E52B89FA78B91D111D9A3289F158E7D3459CFD74"
+          },
+          {
+            "byte_count": 5451,
+            "path": "docs/native-elf-loader.md",
+            "sha256": "C67E4C762280B7799733AF6ACB6ADCBA62B7EA083A78F41E530F41D8A35FC38D"
+          },
+          {
+            "byte_count": 131,
+            "path": "native/rust-toolchain.toml",
+            "sha256": "06C4E0BD63FE84DCB26A0FAE52D96F23C38979DBE6F154D58EAB1547F81FA26B"
+          },
+          {
+            "byte_count": 4017,
+            "path": "specs/native-toolchain-lock.json",
+            "sha256": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E"
+          },
+          {
+            "byte_count": 12903,
+            "path": "tests/test_native_elf_loader.py",
+            "sha256": "95961C82225CC2FAB3E49984B735C1AD1497D34DD11859E5D34F597EF0F48C1B"
           },
           {
             "byte_count": 21215,
@@ -829,6 +920,12 @@
           "host_probe_artifact_identity_recorded": false,
           "host_probe_byte_count": 148480,
           "host_probe_role": "ephemeral host-only differential and exact-byte transport",
+          "host_toolchain": {
+            "profile_id": "POOLEOS-HOST-MSVC-1",
+            "profile_sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182",
+            "scope": "host_linker_and_library_trees_not_complete_host_attestation",
+            "verified_before_build": true
+          },
           "no_std_target_builds": [
             {
               "byte_count": 93930,
@@ -894,6 +991,12 @@
       "host_contract_test_pass_count": 8,
       "host_leakage_hit_count": 0,
       "host_leakage_marker_count": 7,
+      "host_toolchain": {
+        "profile_id": "POOLEOS-HOST-MSVC-1",
+        "profile_sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182",
+        "scope": "host_linker_and_library_trees_not_complete_host_attestation",
+        "verified_before_build": true
+      },
       "inspection": {
         "byte_count": 208896,
         "characteristics": 34,
@@ -1108,10 +1211,10 @@
         "production": 0
       },
       "stop": {
-        "checksum": 5391256271053130494,
+        "checksum": 659543014029464266,
         "parked": true,
-        "tsc_online": 1990686629,
-        "tsc_stop": 1990886737
+        "tsc_online": 1990683555,
+        "tsc_stop": 1990883663
       },
       "topology": {
         "bsp_apic_id": 0,
@@ -1373,7 +1476,7 @@
           "state_writes": 0
         },
         "local_paths_recorded": false,
-        "marker_sha256": "C581C253B4AC67DD623E449192FF48593153B3AE232172F1BA9582EE81833098",
+        "marker_sha256": "5FCCE63524ABA6DDC3C06853EFA77FF3ADE9B16A88D50A75B3ED51986EE909DF",
         "marker_summary": {
           "online": {
             "cr0": 3758161937,
@@ -1406,10 +1509,10 @@
             "production": 0
           },
           "stop": {
-            "checksum": 5391256271053130494,
+            "checksum": 659543014029464266,
             "parked": true,
-            "tsc_online": 1990686629,
-            "tsc_stop": 1990886737
+            "tsc_online": 1990683555,
+            "tsc_stop": 1990883663
           },
           "topology": {
             "bsp_apic_id": 0,
@@ -1682,7 +1785,7 @@
           "POOLEOS:KERNEL:SMP-TABLES PASS contract=PKSMP1 pml4=0x0000000000002000 pdpt=0x0000000000003000 pd=0x0000000000004000 pt=0x0000000000005000 identity_pages=6 trampoline=rx stack=rw_nx per_cpu=rw_nx guards=absent high_alias=revocable",
           "POOLEOS:KERNEL:SMP-START PASS contract=PKSMP1 init_asserts=1 init_deasserts=1 sipis=2 delivery_timeouts=0 sequence=init_sipi_sipi",
           "POOLEOS:KERNEL:SMP-ONLINE PASS contract=PKSMP1 state=2 observed_apic_id=1 leaf1_ecx=0x0000000080002001 leaf1_edx=0x00000000178BFBFD cr0=0x00000000E0010011 cr3=0x0000000000002000 cr4=0x0000000000000020 efer=0x0000000000000D00 mode=x86_64 tsc_order=validated",
-          "POOLEOS:KERNEL:SMP-STOP PASS contract=PKSMP1 command=1 state=3 tsc_online=0x0000000076A777A5 tsc_stop=0x0000000076AA8551 checksum=0x4AD19703B1380AFE final_init=1 parked=1 mailbox_validated=1",
+          "POOLEOS:KERNEL:SMP-STOP PASS contract=PKSMP1 command=1 state=3 tsc_online=0x0000000076A76BA3 tsc_stop=0x0000000076AA794F checksum=0x09272AE0795112CA final_init=1 parked=1 mailbox_validated=1",
           "POOLEOS:KERNEL:SMP-RELEASE PASS contract=PKSMP1 release_sequence=3 zeroed_bytes=57344 verified_bytes=57344 resources_released=14 mailbox_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged",
           "POOLEOS:KERNEL:SMP-RESULT PASS contract=PKSMP1 profile=qemu64_tier0_two_vcpu bsp=1 ap_started=1 ap_online=1 ap_quiesced=1 ap_parked=1 per_cpu=1 stack_pages=4 guards=4 rollback=host_verified ipi_service=0 shootdown=0 scheduler=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],
@@ -2672,7 +2775,7 @@
           "state_writes": 0
         },
         "local_paths_recorded": false,
-        "marker_sha256": "22E8CB40E6D877C984AB10A6D878765E92437A6FFE4958100530C32471E7298D",
+        "marker_sha256": "714D0BA5AE928E868D408B54539B67273B2A338CE4FB014E1E4B93382FF3E758",
         "marker_summary": {
           "online": {
             "cr0": 3758161937,
@@ -2705,10 +2808,10 @@
             "production": 0
           },
           "stop": {
-            "checksum": 11857174757006961504,
+            "checksum": 9440436521438957890,
             "parked": true,
-            "tsc_online": 1990681251,
-            "tsc_stop": 1990881349
+            "tsc_online": 1990683484,
+            "tsc_stop": 1990883592
           },
           "topology": {
             "bsp_apic_id": 0,
@@ -2981,7 +3084,7 @@
           "POOLEOS:KERNEL:SMP-TABLES PASS contract=PKSMP1 pml4=0x0000000000002000 pdpt=0x0000000000003000 pd=0x0000000000004000 pt=0x0000000000005000 identity_pages=6 trampoline=rx stack=rw_nx per_cpu=rw_nx guards=absent high_alias=revocable",
           "POOLEOS:KERNEL:SMP-START PASS contract=PKSMP1 init_asserts=1 init_deasserts=1 sipis=2 delivery_timeouts=0 sequence=init_sipi_sipi",
           "POOLEOS:KERNEL:SMP-ONLINE PASS contract=PKSMP1 state=2 observed_apic_id=1 leaf1_ecx=0x0000000080002001 leaf1_edx=0x00000000178BFBFD cr0=0x00000000E0010011 cr3=0x0000000000002000 cr4=0x0000000000000020 efer=0x0000000000000D00 mode=x86_64 tsc_order=validated",
-          "POOLEOS:KERNEL:SMP-STOP PASS contract=PKSMP1 command=1 state=3 tsc_online=0x0000000076A762A3 tsc_stop=0x0000000076AA7045 checksum=0xA48D259E9720EB60 final_init=1 parked=1 mailbox_validated=1",
+          "POOLEOS:KERNEL:SMP-STOP PASS contract=PKSMP1 command=1 state=3 tsc_online=0x0000000076A76B5C tsc_stop=0x0000000076AA7908 checksum=0x83032AFFA8FE5142 final_init=1 parked=1 mailbox_validated=1",
           "POOLEOS:KERNEL:SMP-RELEASE PASS contract=PKSMP1 release_sequence=3 zeroed_bytes=57344 verified_bytes=57344 resources_released=14 mailbox_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged",
           "POOLEOS:KERNEL:SMP-RESULT PASS contract=PKSMP1 profile=qemu64_tier0_two_vcpu bsp=1 ap_started=1 ap_online=1 ap_quiesced=1 ap_parked=1 per_cpu=1 stack_pages=4 guards=4 rollback=host_verified ipi_service=0 shootdown=0 scheduler=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],
@@ -3959,9 +4062,9 @@
   "inputs": {
     "implementation": [
       {
-        "byte_count": 1299,
+        "byte_count": 5594,
         "path": "runtime/native_kernel_profile_evidence.py",
-        "sha256": "6A05845B85396E3496B9D58F313A3230301987F6022CB147E9FD480F68DFFC45"
+        "sha256": "0BEE77BBDF9979C7BEF8311DAEDF7D3A57424EB89A68DBBACCE731615BB69E4F"
       },
       {
         "byte_count": 4686,
@@ -3969,9 +4072,14 @@
         "sha256": "35E35598C58B141DDD2E895BD0CC39CD296DFC6CB2F0DDE2BFBE88AA47DA513A"
       },
       {
-        "byte_count": 28018,
+        "byte_count": 11853,
+        "path": "tests/test_native_cpu_entry_provenance.py",
+        "sha256": "AC64B1A74AD37F2FAD7A7032DF2480ACA0DCAD6F3B2626EE2B3C5B3A7232138F"
+      },
+      {
+        "byte_count": 31364,
         "path": "runs/native_kernel_entry_readiness.json",
-        "sha256": "B9E79FE7CABA4931C3654134A68934B732DD77A6F1555179C2E09EF93D6212D6"
+        "sha256": "ACAEC303FA750DD75CA8B721B0BD359E4291CF1C4218B3DDFBFE09AF17390B65"
       },
       {
         "byte_count": 4193,
@@ -4054,9 +4162,9 @@
         "sha256": "5CFD8D3308B429C29E1FF7143F43410E081275FFD33F71715A2B626189699CD1"
       },
       {
-        "byte_count": 21333,
+        "byte_count": 27368,
         "path": "runtime/native_kernel_smp_first_ap.py",
-        "sha256": "21BA8AA9EC549CB741BD3CE8A5053844F9BCEC9369334198B4D4FFEC71575D82"
+        "sha256": "06EEBF13A5514E611624514752264A5419D9E4DC1E98D21F956A5DB4F7DED863"
       },
       {
         "byte_count": 10872,
@@ -4084,19 +4192,19 @@
         "sha256": "39C8C19871C1C220AE058D933EADB17880136C7C0D526E15D4ED4FAE47FD0BD8"
       },
       {
-        "byte_count": 21982,
+        "byte_count": 21156,
         "path": "tools/qualify_native_kernel_smp_first_ap.py",
-        "sha256": "0BB1B5AB87B6D63DDE424995B707A9C4FDBD5B362A2C44C43A7964B2D5EB46BB"
+        "sha256": "8928F463747BD9E4E1D82CBEDBA78731C31E8FC82ED7F4933D677011354D7CB5"
       },
       {
-        "byte_count": 5110,
+        "byte_count": 12850,
         "path": "tests/test_native_kernel_smp_first_ap.py",
-        "sha256": "0A160100DA460A76A9BB7F54364C936450848233441C5BC1AB3B5EE3B7732EED"
+        "sha256": "3044E3F673462A16C21FD0BBBAEF725911719B97B7661FED91D89ECE3C05BA48"
       },
       {
-        "byte_count": 3927,
+        "byte_count": 4664,
         "path": "docs/native-kernel-smp-first-ap.md",
-        "sha256": "C5E86EDBDE4BBA2D7619AEAAFEABD291740FF11DC4A499ECDE9E2695A9B7C1BD"
+        "sha256": "9276C73022A620F75027C25C303641813AF9C5160CC5746EFE148504916B9DD8"
       }
     ]
   },
@@ -5260,7 +5368,7 @@
   "schema_version": "1.0",
   "selected_move_id": "N8-SMP-FIRST-AP-001",
   "status": "pass_single_host_two_run_qemu64_two_vcpu_first_ap_non_promoting",
-  "status_date": "2026-09-12",
+  "status_date": "2026-09-26",
   "summary": {
     "application_processors_online": 1,
     "application_processors_parked": 1,
