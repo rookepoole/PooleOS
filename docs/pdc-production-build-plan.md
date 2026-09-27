@@ -1,13 +1,42 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-26
-Plan version: 2.95.0-native-mailbox-oracle
-Roadmap cycle: PooleOS Cycle 192
+Plan version: 2.96.0-native-current-cpu-replay
+Roadmap cycle: PooleOS Cycle 193
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 193: Current-Kernel CPU Replay
+
+N7.3-N7.6 supporting N36, beginning `N7-TRAP-001`, now has five freshly
+qualified profiles on the unchanged Cycle 192 kernel: traps, CPU policy, xstate
+ownership, xstate exceptions and privilege/MSR policy. Fourteen final guest
+boots, 225 executed rejection controls, linked exception/MSR audits and 246
+kernel host tests per qualifier pass. One expected software-emulator limitation
+probe is retained separately from the two hardware-accelerated exception boots.
+
+The 51-test focused regression rejects 371 corrupted execution records through
+runtime and actual release gates, 80 malformed embedded-entry records, and 20
+invalid current-entry dependencies. A new regression verifies all 51 trap
+control calls and detects a deliberately disabled validator. Prior receipts
+remain historical; none were rebound to the new image.
+
+Selected readiness is 14/27. Next is `N9-PMM-ACPI-CONSUMER-001`, then VM,
+interrupt/time, first AP, per-CPU runtime, scheduler, preemption, deferred work,
+SMP scheduling, AP workers, SMP preemption, atomics and locks. The 65 scheduler
+control-execution gaps and full exact-candidate canonical/Doctor/publication/
+configured-check/review requirements still block main merge. No phase, flag or
+production gate closes. The checklist, PooleGlyph owner data and demo ISO remain
+unchanged. Architecture binds 302 sources; 1,042 discovered tests are inventory,
+not a full-suite pass.
+[Exact evidence and limitations](checkpoints/cycle193-current-kernel-cpu-replay.md).
+Combined regression passes 249 tests, zero skips, including exact entry
+reproduction. The initial metadata 40/41 result exposed one stale projection
+assertion; corrected 41/41 passes, and the failure remains preserved.
+Requirement, history and owner-data conservation pass.
 
 ## Cycle 192: Native Mailbox Oracle
 

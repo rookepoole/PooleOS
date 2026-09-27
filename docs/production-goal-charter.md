@@ -7,9 +7,20 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 192
+Last roadmap reconciliation: PooleOS Cycle 193
 
-Cycle 192: native PKMBX1 export and its host oracle now pass
+Cycle 193: all five N7 profiles are freshly qualified against the unchanged
+Cycle 192 kernel. Fourteen guest boots, 225 rejection controls, linked audits
+and 51 focused tests pass; the expected TCG limitation probe is not a passing
+exception test. The selected projection is 14/27, leaving thirteen profiles
+from N9-PMM-ACPI-CONSUMER-001, then scheduler control evidence and full exact
+qualification. Historical CPU evidence remains immutable; no normative term,
+phase, flag, merge requirement, ISO or production claim changes.
+[Cycle 193 evidence](checkpoints/cycle193-current-kernel-cpu-replay.md).
+Combined scoped regression passes 249 tests, zero skips. Corrected roadmap and
+checklist regression passes 41/41; the initial 40/41 result remains history.
+
+Historical Cycle 192: native PKMBX1 export and its host oracle now pass
 two final four-vCPU boots and 609 rejection cases. Boot-chain replay passes;
 57 scoped regression tests pass. The selected projection is 9/27, with 18
 dependent profiles still requiring qualification against the changed kernel.

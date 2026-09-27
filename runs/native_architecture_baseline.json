@@ -358,6 +358,24 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle193-current-kernel-cpu-replay.md",
+      "sha256": "B9CDA70100BE5B5BAEBBBF8E74951A829CFE682F43133B552F895FCC18EB4E1F",
+      "byte_count": 5935,
+      "line_count": 110
+    },
+    {
+      "path": "tools/qualify_native_kernel_trap.py",
+      "sha256": "520FE227AA83BE7B858E32642071C372C9492975F56B13B134ECC65EE3B92574",
+      "byte_count": 18994,
+      "line_count": 451
+    },
+    {
+      "path": "tests/test_native_kernel_trap.py",
+      "sha256": "434B323AAE5AB2FFA9EAAAE89AF4B5CEA7B6DBE23BBDBD7108C4634AA0153236",
+      "byte_count": 8829,
+      "line_count": 165
+    },
+    {
       "path": "docs/checkpoints/cycle192-native-mailbox-oracle.md",
       "sha256": "65C54E2CE50D34BECAA4DA5CCC4F07B04FC6432E7919AE280FCCDE8D4FB96F55",
       "byte_count": 7425,
@@ -473,9 +491,9 @@
     },
     {
       "path": "tools/pooleos_release_gate.py",
-      "sha256": "4F4BA178F3AAA8C0AE102009FF7502B97E6DEE05BCFA737FEF517104930F2111",
-      "byte_count": 355178,
-      "line_count": 7160
+      "sha256": "E605C02EE546513BAE0F5E12FC48E05D18E92DFE77AB928A209252192D4502AA",
+      "byte_count": 355916,
+      "line_count": 7172
     },
     {
       "path": "docs/checkpoints/cycle184-boot-host-provenance.md",
@@ -1001,15 +1019,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "C6B7DB610F64D975BA6E98C20B15AC85DC35C37CA36C979FE5B9A80E3D5C2FD9",
-      "byte_count": 100096,
-      "line_count": 1339
+      "sha256": "177612B66C00C07B1218FF98137C375DF0528D95C1B97B40053890CBF5AD7CA7",
+      "byte_count": 100865,
+      "line_count": 1350
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "3480E69CB4BC9024800CC4EA2F4408BDBE64D556189B2A54824BA4AA41B8EC83",
-      "byte_count": 433956,
-      "line_count": 3468
+      "sha256": "8FBAA3D8B34AB38F5EEB5B4DA4574FE86B2A9905C0975B7B67AC9C8D2629E632",
+      "byte_count": 435766,
+      "line_count": 3497
     },
     {
       "path": "docs/publication-boundary.md",
@@ -1109,13 +1127,13 @@
     },
     {
       "path": "runs/native-kernel-trap-readiness.json",
-      "sha256": "3FE6CEDF9A96978A22C5B422D57E584BE05D0EA948B787EB80DABA7F5F7B7391",
+      "sha256": "D85B45BE21B4BEF1380D8A3DCB6F8E84D7F211B828A8B26BFABAEE26BDF79116",
       "byte_count": 471748,
       "line_count": 11553
     },
     {
       "path": "runs/native-kernel-cpu-policy-readiness.json",
-      "sha256": "7AE0D57D223A1C01A389303767F255B5FF45A77EFDB22A19A32EDE7A52BB1ECE",
+      "sha256": "167A164D7DF161CC4DB41964D16F88A6A3D54200BB91C78BA57C5FB7CD316E5D",
       "byte_count": 183232,
       "line_count": 4897
     },
@@ -1127,19 +1145,19 @@
     },
     {
       "path": "runs/native-kernel-xstate-policy-readiness.json",
-      "sha256": "B6C8EA6AFE80F11A98597CBA5EF47837E29E5B48B0CAAA97C8A05C8E8535F06B",
+      "sha256": "22B5BAC22729C90A04650AB380AA6C79B56E9E65821C1B43EE03332F2B577253",
       "byte_count": 188426,
       "line_count": 5103
     },
     {
       "path": "runs/native-kernel-xstate-exception-readiness.json",
-      "sha256": "C0A4808E2D6150CEC87FBCD4DF1F4C66CC0F112D1B332269739C742B54211B7A",
+      "sha256": "7F25AE4A722855B4E24B5359E0074B0DC39DB2727C443817363A800C78D697C0",
       "byte_count": 201464,
       "line_count": 5482
     },
     {
       "path": "runs/native-kernel-privilege-msr-policy-readiness.json",
-      "sha256": "CE291CC5C0679FEA1F88A85F10E913EF10F2C9A0820AFC98B82E0D543C648261",
+      "sha256": "00DD6ADC8CBF3289DE7D16B831E145C8171C401B65BE9E9D6873BD2FAC31BCF7",
       "byte_count": 186649,
       "line_count": 5015
     },

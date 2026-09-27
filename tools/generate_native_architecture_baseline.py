@@ -24,6 +24,9 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle193-current-kernel-cpu-replay.md",
+    "tools/qualify_native_kernel_trap.py",
+    "tests/test_native_kernel_trap.py",
     "docs/checkpoints/cycle192-native-mailbox-oracle.md",
     "docs/checkpoints/cycle192-unfinished-cloud-backup.md",
     "docs/checkpoints/cycle192-mailbox-qualified-backup.md",

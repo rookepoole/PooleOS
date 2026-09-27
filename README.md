@@ -11,7 +11,18 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 192 implements native `PKMBX1` saved
+**Current development checkpoint:** Cycle 193 requalifies all five N7 profiles
+against the Cycle 192 kernel: trap recovery/containment, CPU policy, xstate
+ownership, xstate exceptions and read-only privilege/MSR policy. Fourteen fresh
+guest boots, 225 rejection controls and 51 focused regression tests pass.
+The selected readiness projection is now 14/27, with thirteen profiles pending
+from physical memory onward. No kernel bytes or demo ISO changed this cycle.
+The draft remains unqualified for main merge or production.
+[Cycle 193 evidence and next steps](docs/checkpoints/cycle193-current-kernel-cpu-replay.md).
+Combined regression passes 249 tests, zero skips; corrected roadmap/checklist
+regression passes 41/41. The initial stale-count failure remains recorded.
+
+**Historical development checkpoint:** Cycle 192 implements native `PKMBX1` saved
 AP mailbox export and independent host validation. Two final four-vCPU IPI boots,
 609 rejection cases and 57 focused regression tests pass, alongside boot-chain
 replay. The changed kernel's selected projection is 9/27; 18 dependent profiles

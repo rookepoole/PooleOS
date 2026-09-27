@@ -243,6 +243,18 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 193 requalifies all five N7 profiles on the unchanged Cycle192 kernel: fourteen fresh "
+    "guest boots, 225 rejection controls and 51 focused tests pass. The tests reject 371 corrupted "
+    "execution records through runtime and the actual gate and detect a disabled trap validator. "
+    "One expected TCG limitation probe remains diagnostic only. Selected readiness is 14/27; "
+    "thirteen memory/IRQ/AP/scheduler/atomic/lock profiles remain from N9-PMM-ACPI-CONSUMER-001, "
+    "followed by 65 scheduler control-execution gaps and full exact-candidate qualification. "
+    "No phase, flag, main merge, ISO or production promotion follows. Prior evidence remains history. "
+    + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
