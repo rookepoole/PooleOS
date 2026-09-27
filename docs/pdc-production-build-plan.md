@@ -1,15 +1,15 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-26
-Plan version: 2.94.0-native-ipi-recorded-evidence
-Roadmap cycle: PooleOS Cycle 191
+Plan version: 2.95.0-native-mailbox-oracle
+Roadmap cycle: PooleOS Cycle 192
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Unfinished Cycle 192 Backup
+## Cycle 192: Native Mailbox Oracle
 
 `N8-SMP-MAILBOX-ORACLE-001` now passes bounded live qualification: two final
 four-vCPU boots, 609 rejection cases in 33 groups and 246 native kernel host
@@ -19,12 +19,16 @@ tests. Loader, PooleBoot, revalidation and transfer receipts are admitted;
 
 Eighteen dependent CPU, memory, interrupt, AP, scheduler, atomic and lock profiles
 still need qualification, starting with `N7-TRAP-001`. At least 65 scheduler
-control-execution gaps and full exact-candidate qualification remain. Complete
-Cycle 192 ledger, architecture-binding and historical-test reconciliation before
-continuing that ordered replay. No phase, subphase, flag or gap is closed. The
-machine ledger and architecture baseline remain the last reconciled Cycle 191
-snapshots, not current-build qualification.
-[Saved work, evidence and resume order](checkpoints/cycle192-mailbox-qualified-backup.md).
+control-execution gaps and full exact-candidate qualification remain. Roadmap 192
+archives all eleven prior current records, binds the new receipts, and explicitly
+marks current CPU/VM qualification pending. Architecture inventory is 299 source
+bindings; Python inventory is 1,041 discovered tests, not a full-suite pass.
+No phase, subphase, flag or gap is closed. Earlier backups and failed results
+remain preserved, along with the unchanged checklist, demo and PooleGlyph data.
+[Evidence and ordered subphases](checkpoints/cycle192-native-mailbox-oracle.md).
+Combined regression passes 189 tests, zero skips. Corrected reconciliation passes
+33/33; the initial 30/33 result is retained. Checklist and history conservation
+pass. This remains scoped evidence, not full canonical or main-merge qualification.
 
 ## Cycle 191: IPI Recorded Evidence
 

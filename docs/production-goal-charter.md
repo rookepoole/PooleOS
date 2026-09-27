@@ -7,18 +7,22 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 191
+Last roadmap reconciliation: PooleOS Cycle 192
 
-Unfinished Cycle 192 backup: native PKMBX1 export and its host oracle now pass
+Cycle 192: native PKMBX1 export and its host oracle now pass
 two final four-vCPU boots and 609 rejection cases. Boot-chain replay passes;
 57 scoped regression tests pass. The selected projection is 9/27, with 18
 dependent profiles still requiring qualification against the changed kernel.
-The machine roadmap and architecture baseline remain historical Cycle 191
-snapshots pending reconciliation. Full exact-candidate qualification is not
-complete. No normative condition or merge requirement changes.
-[Current backup and resume order](checkpoints/cycle192-mailbox-qualified-backup.md).
+Roadmap 192 archives the previous current records without rewriting history;
+current CPU/VM evidence is explicitly pending. Architecture bindings include
+the native export and independent oracle. Next is N7-TRAP-001, followed by the
+other affected dependencies, scheduler controls and full exact qualification.
+No normative condition, phase, flag or merge requirement changes.
+[Cycle 192 evidence and resume order](checkpoints/cycle192-native-mailbox-oracle.md).
+Combined scoped regression passes 189 tests, zero skips; conservation passes.
+The initial three metadata-test failures and corrected 33/33 result are retained.
 
-Last reconciled Cycle 191: IPI admission validates raw execution, typed accounting,
+Historical Cycle 191: IPI admission validates raw execution, typed accounting,
 frame-address checksums and exact control counts; three constant-only controls
 now call the real validator. Two final four-vCPU boots, 249 cases in 30 categories
 and 31 focused tests pass. All 66 original corruptions reject without exceptions.

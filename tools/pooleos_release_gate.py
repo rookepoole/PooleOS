@@ -230,6 +230,19 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 192 implements native PKMBX1 saved mailbox export and independent host validation. "
+    "Two final four-vCPU boots pass 609 rejection cases in 33 groups and 246 native kernel tests; "
+    "six boot-chain runs, 57 focused tests and 189 combined scoped regression tests pass. Source-current projection is 9/27 "
+    "after the kernel changed. Eighteen CPU/memory/IRQ/AP/scheduler/atomic/lock profiles require "
+    "qualification from N7-TRAP-001; prior CPU/VM evidence is historical. At least 65 scheduler "
+    "control-execution gaps and full exact canonical/Doctor/publication/configured-check/review "
+    "qualification still block main merge. General CPU/task retirement, independent builders, "
+    "hardware and production remain unproved. PKMBX1 consistency is not authentication. "
+    "Failures and superseded boots are retained; no phase, flag or production gate closes. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:

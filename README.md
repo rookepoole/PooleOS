@@ -11,17 +11,19 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Unfinished development backup:** Cycle 192 now passes fresh native `PKMBX1`
-mailbox qualification and the boot-chain replay. Two final four-vCPU IPI boots,
-609 rejection cases and 57 scoped regression tests pass. The changed kernel's
-selected projection is 9/27; 18 dependent profiles still require qualification.
-Full exact-candidate qualification and progress-ledger reconciliation remain
-unfinished. This is not a merge-qualified build, new ISO or release. The machine
-roadmap and architecture baseline remain historical Cycle 191 snapshots.
-[Current evidence and merge blockers](docs/checkpoints/cycle192-mailbox-qualified-backup.md).
-The [initial backup](docs/checkpoints/cycle192-unfinished-cloud-backup.md) is retained unchanged.
+**Current development checkpoint:** Cycle 192 implements native `PKMBX1` saved
+AP mailbox export and independent host validation. Two final four-vCPU IPI boots,
+609 rejection cases and 57 focused regression tests pass, alongside boot-chain
+replay. The changed kernel's selected projection is 9/27; 18 dependent profiles
+still require qualification, starting with `N7-TRAP-001`. Roadmap 192 preserves
+the prior evidence as history, with current CPU/VM status explicitly pending.
+This is not a merge-qualified build, new ISO or release.
+[Cycle 192 evidence and next steps](docs/checkpoints/cycle192-native-mailbox-oracle.md).
+Both intermediate cloud-backup records remain unchanged.
+Combined regression passes 189 tests, zero skips; reconciliation and conservation
+pass. The initial three metadata-test failures remain recorded.
 
-**Last reconciled development checkpoint:** Cycle 191 repairs IPI recorded execution,
+**Historical development checkpoint:** Cycle 191 repairs IPI recorded execution,
 frame-address checksum validation and release-accounting control execution.
 Two final four-vCPU boots, 249 rejection cases and all 31 focused tests pass;
 528 corrupted records reject through runtime and actual gate. Selected readiness

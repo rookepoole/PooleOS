@@ -24,6 +24,16 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle192-native-mailbox-oracle.md",
+    "docs/checkpoints/cycle192-unfinished-cloud-backup.md",
+    "docs/checkpoints/cycle192-mailbox-qualified-backup.md",
+    "runtime/native_kernel_smp_mailbox.py",
+    "tests/test_native_kernel_smp_mailbox.py",
+    "runtime/native_kernel_smp_ipi.py",
+    "tools/qualify_native_kernel_smp_ipi.py",
+    "tests/test_native_kernel_smp_ipi.py",
+    "native/kernel/src/main.rs",
+    "native/kernel/src/smp_runtime.rs",
     "docs/checkpoints/cycle188-irq-recorded-evidence.md",
     "docs/checkpoints/cycle189-first-ap-recorded-evidence.md",
     "docs/checkpoints/cycle190-percpu-recorded-evidence.md",
