@@ -26,6 +26,7 @@ ADR_NAMES = (
 BOUND_SOURCE_PATHS = (
     "docs/checkpoints/cycle188-irq-recorded-evidence.md",
     "docs/checkpoints/cycle189-first-ap-recorded-evidence.md",
+    "docs/checkpoints/cycle190-percpu-recorded-evidence.md",
     "docs/checkpoints/cycle187-vm-recorded-evidence.md",
     "docs/checkpoints/cycle186-pmm-recorded-evidence.md",
     "docs/checkpoints/cycle185-cpu-recorded-evidence.md",

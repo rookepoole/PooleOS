@@ -11,7 +11,17 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Latest development checkpoint:** Cycle 189 repairs first-AP recorded evidence
+**Latest development checkpoint:** Cycle 190 repairs per-CPU recorded evidence,
+dual-checksum validation and per-control case-count binding. Two final boots,
+159 executed cases across 19 categories and all 10 focused tests pass. All 69
+original corruptions now reject without validator exceptions. Selected readiness
+is 18/27; nine profiles remain from IPI, followed by scheduler evidence and full
+qualification before main merge. Kernel and demo bytes remain unchanged.
+[Cycle 190 evidence and next steps](docs/checkpoints/cycle190-percpu-recorded-evidence.md).
+Combined scoped regression passes 282 tests, zero skipped; checklist, history
+and owner-data conservation pass. The checkpoint remains pre-production.
+
+**Historical development checkpoint:** Cycle 189 repairs first-AP recorded evidence
 while preserving independently validated timestamp/checksum variation. Two final
 boots and 72 controls pass; all 12 focused tests pass, including 159 corrupt-record
 and six malformed root/control cases through runtime and actual gate. Selected

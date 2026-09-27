@@ -370,6 +370,12 @@
       "line_count": 82
     },
     {
+      "path": "docs/checkpoints/cycle190-percpu-recorded-evidence.md",
+      "sha256": "9DFAE292AA8B827212CF2420B2C38C32EC57F63644B7878EBEF3446B4DD81EBD",
+      "byte_count": 4728,
+      "line_count": 84
+    },
+    {
       "path": "docs/checkpoints/cycle187-vm-recorded-evidence.md",
       "sha256": "A394A99446783555343CD720F30F93154B6C80498AC13865E2A1CFB98FE82868",
       "byte_count": 4747,
@@ -401,9 +407,9 @@
     },
     {
       "path": "tools/pooleos_release_gate.py",
-      "sha256": "4F427AEAAEC8803AEB9AA4F8609FE40E4262CF4A4E7A77404D2892E6CF075A12",
-      "byte_count": 353989,
-      "line_count": 7143
+      "sha256": "B1B50492AF439193FE620F7A636D5EF0CDBFF68A3C62ECFD7A4409C4E52D512D",
+      "byte_count": 354112,
+      "line_count": 7145
     },
     {
       "path": "docs/checkpoints/cycle184-boot-host-provenance.md",
@@ -851,9 +857,9 @@
     },
     {
       "path": "docs/native-kernel-smp-percpu-runtime.md",
-      "sha256": "027903D4F7E46EB0D0C34FADF1B518811B5CA7C2ABC1214D6FDF8901AEC27D70",
-      "byte_count": 2867,
-      "line_count": 27
+      "sha256": "2B6A13433E9AAAD1974A461DC92C435EF2DD90D760EF2037D3C9C1D0315BFA48",
+      "byte_count": 3573,
+      "line_count": 37
     },
     {
       "path": "docs/native-kernel-smp-ipi.md",
@@ -929,15 +935,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "52880278D8123EF2E834CAD7C05B849E502956E5DEA60DE27568D4CE3744102E",
-      "byte_count": 97407,
-      "line_count": 1300
+      "sha256": "057F95FAAC0D3B3DA24E6CE036DEB532C09287FC58FB3691EB039FF1F7F1DA01",
+      "byte_count": 98196,
+      "line_count": 1312
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "06C105FC2CC7A65CBE8B21FD9F02FFBF3D2291206A518706E5904C3C0514BBB8",
-      "byte_count": 429415,
-      "line_count": 3396
+      "sha256": "80850C13672CBA1A90B2F796EB7CDE5CA7D48C3F205F18156CF2B8B2929B6425",
+      "byte_count": 430913,
+      "line_count": 3421
     },
     {
       "path": "docs/publication-boundary.md",
@@ -1097,9 +1103,9 @@
     },
     {
       "path": "runs/native-kernel-smp-percpu-runtime-readiness.json",
-      "sha256": "03B2E751984D8FADBB64302748E3D4CBB025F5DF285D665AAD8399CDA9DC07C2",
-      "byte_count": 195878,
-      "line_count": 5176
+      "sha256": "1E1778C2E204F40D8D12C992BFF7DCEFC20067D16F9DFE1BC83CCCECFE8BD9B7",
+      "byte_count": 200366,
+      "line_count": 5284
     },
     {
       "path": "runs/native-kernel-smp-ipi-readiness.json",

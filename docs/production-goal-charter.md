@@ -7,9 +7,21 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 189
+Last roadmap reconciliation: PooleOS Cycle 190
 
-Current Cycle 189: first-AP validates strict raw recorded execution before
+Current Cycle 190: per-CPU admission validates raw execution, dual checksums,
+typed accounting and exact per-control case counts. Two final boots, 159 executed
+cases in 19 categories and all 10 focused tests pass. All 69 original corruptions
+reject without validator exceptions; failures and superseded boots are retained.
+Selected readiness is 18/27, with nine profiles pending from N8-SMP-IPI-001,
+scheduler evidence and full exact qualification before main merge. No normative
+condition, phase, flag, native feature, ISO or production gate changes.
+[Cycle 190 evidence](checkpoints/cycle190-percpu-recorded-evidence.md).
+
+Cycle 190 combined scoped regression passes 282 tests, zero skipped. Conservation
+passes. Full exact-candidate qualification remains pending before main merge.
+
+Historical Cycle 189: first-AP validates strict raw recorded execution before
 allowing only independently checked TSC/checksum differences. Two final boots,
 72controls and12focused tests pass, including159recorded corruptions and six
 malformed root/control cases through runtime and actual gate. All67original

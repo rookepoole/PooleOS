@@ -11,6 +11,12 @@
       "host_contract_test_pass_count": 8,
       "host_leakage_hit_count": 0,
       "host_leakage_marker_count": 7,
+      "host_toolchain": {
+        "profile_id": "POOLEOS-HOST-MSVC-1",
+        "profile_sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182",
+        "scope": "host_linker_and_library_trees_not_complete_host_attestation",
+        "verified_before_build": true
+      },
       "inspection": {
         "byte_count": 207360,
         "characteristics": 34,
@@ -223,9 +229,9 @@
             "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
           },
           {
-            "byte_count": 8479,
+            "byte_count": 9490,
             "path": "runtime/native_kernel_entry.py",
-            "sha256": "B95FD6BD0512D6F23EDEC90B1E622C340F214012089C6D0C13CE4E01AB04B6F3"
+            "sha256": "D5573D19200D2C8AB0EEE71DD082E5881BA3285EA327AD120C03101D4E894934"
           },
           {
             "byte_count": 25233,
@@ -233,14 +239,99 @@
             "sha256": "F8521399E1EFE957EDAB70AC8A101567C45BFE1655CC7AA75132B8844FE56FC1"
           },
           {
-            "byte_count": 7983,
+            "byte_count": 10928,
             "path": "tests/test_native_kernel_entry.py",
-            "sha256": "97287CCCD3CDEA6048DA3B8167519F25B055EBDFEE96635AA9BF8BD5C658187B"
+            "sha256": "933C35AA3E4A99AD38403C99B8A9DAD482201A434E117A96DEA524D1418D3D48"
           },
           {
             "byte_count": 7025,
             "path": "docs/native-kernel-entry.md",
             "sha256": "542400FF1A6FD98ECB052DDE0DC06D4C2B0972EB05952BB5502B4494BB83A89F"
+          },
+          {
+            "byte_count": 539,
+            "path": "native/.cargo/config.toml",
+            "sha256": "7983881C5CAD2B909CCA64BFA7F5895EC56377B0E52967444CB2818A69FA4FE1"
+          },
+          {
+            "byte_count": 2092,
+            "path": "specs/native-host-msvc-profile.json",
+            "sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182"
+          },
+          {
+            "byte_count": 5317,
+            "path": "tools/native_host_toolchain.py",
+            "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+          },
+          {
+            "byte_count": 22364,
+            "path": "tools/qualify_native_toolchain.py",
+            "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+          },
+          {
+            "byte_count": 33002,
+            "path": "tools/qualify_native_elf_loader.py",
+            "sha256": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B"
+          },
+          {
+            "byte_count": 8341,
+            "path": "tests/test_native_host_toolchain.py",
+            "sha256": "EAB54E9FDE9435B29C56866CD5A4A6600E54AB2CB14BE0604818685105316393"
+          },
+          {
+            "byte_count": 342,
+            "path": "native/elf/Cargo.toml",
+            "sha256": "FD1F6C50EF6C3CE82C5602386BB68A7BED933819C89284FADAECEE7434654389"
+          },
+          {
+            "byte_count": 36472,
+            "path": "native/elf/src/lib.rs",
+            "sha256": "15CEF64F884F17A97F7581A794555E23F80D099C1B2E152B42CD59D64A884DA4"
+          },
+          {
+            "byte_count": 5760,
+            "path": "native/elf/src/bin/poole_elf_probe.rs",
+            "sha256": "5D75C4150FD4CAEFF40ACAD5A9AFF38CD6DCD0519060E1407EB24DF73531DCCE"
+          },
+          {
+            "byte_count": 1863,
+            "path": "native/boot/Cargo.toml",
+            "sha256": "C9175879FB21AAE932016F9E1E4F46DD0070BF0D6A2DB32AB370AF7C4D0687F6"
+          },
+          {
+            "byte_count": 16266,
+            "path": "native/boot/src/lib.rs",
+            "sha256": "9937D6DBE1F55646B042B81D9CD0BC5A4AC150E8710A469C2BD378F229F1A5DD"
+          },
+          {
+            "byte_count": 31837,
+            "path": "runtime/native_elf_loader.py",
+            "sha256": "EDB7798C4CF70A65F9F3826A96E1996E0DA2B01443940BBB517E0E1702D29E3C"
+          },
+          {
+            "byte_count": 3946,
+            "path": "tools/generate_native_elf_loader_vectors.py",
+            "sha256": "8A28A89C340BC4B59E532E16E52B89FA78B91D111D9A3289F158E7D3459CFD74"
+          },
+          {
+            "byte_count": 5451,
+            "path": "docs/native-elf-loader.md",
+            "sha256": "C67E4C762280B7799733AF6ACB6ADCBA62B7EA083A78F41E530F41D8A35FC38D"
+          },
+          {
+            "byte_count": 131,
+            "path": "native/rust-toolchain.toml",
+            "sha256": "06C4E0BD63FE84DCB26A0FAE52D96F23C38979DBE6F154D58EAB1547F81FA26B"
+          },
+          {
+            "byte_count": 4017,
+            "path": "specs/native-toolchain-lock.json",
+            "sha256": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E"
+          },
+          {
+            "byte_count": 12903,
+            "path": "tests/test_native_elf_loader.py",
+            "sha256": "95961C82225CC2FAB3E49984B735C1AD1497D34DD11859E5D34F597EF0F48C1B"
           },
           {
             "byte_count": 21215,
@@ -829,6 +920,12 @@
           "host_probe_artifact_identity_recorded": false,
           "host_probe_byte_count": 148480,
           "host_probe_role": "ephemeral host-only differential and exact-byte transport",
+          "host_toolchain": {
+            "profile_id": "POOLEOS-HOST-MSVC-1",
+            "profile_sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182",
+            "scope": "host_linker_and_library_trees_not_complete_host_attestation",
+            "verified_before_build": true
+          },
           "no_std_target_builds": [
             {
               "byte_count": 93930,
@@ -894,6 +991,12 @@
       "host_contract_test_pass_count": 8,
       "host_leakage_hit_count": 0,
       "host_leakage_marker_count": 7,
+      "host_toolchain": {
+        "profile_id": "POOLEOS-HOST-MSVC-1",
+        "profile_sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182",
+        "scope": "host_linker_and_library_trees_not_complete_host_attestation",
+        "verified_before_build": true
+      },
       "inspection": {
         "byte_count": 208896,
         "characteristics": 34,
@@ -1126,11 +1229,11 @@
         "rsp0": 45056
       },
       "stop": {
-        "baseline_checksum": 2228485522325841854,
+        "baseline_checksum": 1827929965315527740,
         "parked": true,
-        "runtime_checksum": 2770966398436079169,
-        "tsc_online": 7312338327,
-        "tsc_stop": 7313823621
+        "runtime_checksum": 4233289262958932699,
+        "tsc_online": 7377286145,
+        "tsc_stop": 7378617984
       },
       "topology": {
         "bsp_apic_id": 0,
@@ -1398,7 +1501,7 @@
           "state_writes": 0
         },
         "local_paths_recorded": false,
-        "marker_sha256": "8562FC915138AC7218269C49EDC93B847D16B9AB6B2F16DE2ED146C729F2215C",
+        "marker_sha256": "16B4E9E1B23DD0D9436D762C8C913A71AE1261AE85AF15BCBD7F975F07D4A32F",
         "marker_summary": {
           "descriptors": {
             "gates": 27,
@@ -1448,11 +1551,11 @@
             "rsp0": 45056
           },
           "stop": {
-            "baseline_checksum": 2228485522325841854,
+            "baseline_checksum": 1827929965315527740,
             "parked": true,
-            "runtime_checksum": 2770966398436079169,
-            "tsc_online": 7312338327,
-            "tsc_stop": 7313823621
+            "runtime_checksum": 4233289262958932699,
+            "tsc_online": 7377286145,
+            "tsc_stop": 7378617984
           },
           "topology": {
             "bsp_apic_id": 0,
@@ -1735,7 +1838,7 @@
           "POOLEOS:KERNEL:SMP-RUNTIME-XSTATE PASS contract=PKSMP2 base=0x000000000001E000 bytes=4096 supported_xcr0=0x0000000000000003 enabled_bytes=576 maximum_bytes=576 xcr0=0x0000000000000003 xstate_bv=0x0000000000000003 fcw=0x000000000000037F mxcsr=0x0000000000001F80 owner_initial=0x0000000050580001 owner_final=0x0000000000000000 saves=1 restores=1 image_verified=1 policy=eager",
           "POOLEOS:KERNEL:SMP-RUNTIME-VECTORS PASS contract=PKSMP2 exceptions=8 interrupts=19 timer=64 ipi_first=224 ipi_last=239 error=240 spurious=255 if=0 fault=0",
           "POOLEOS:KERNEL:SMP-RUNTIME-ONLINE PASS contract=PKSMP2 state=2 runtime_state=4 observed_apic_id=1 leaf1_ecx=0x000000008EB82203 leaf1_edx=0x00000000178BFBFD cr0=0x00000000E0010033 cr3=0x0000000000002000 cr4=0x0000000000040620 efer=0x0000000000000D00 rflags=0x0000000000000006 mode=x86_64 tsc_order=validated",
-          "POOLEOS:KERNEL:SMP-RUNTIME-STOP PASS contract=PKSMP2 command=1 state=3 runtime_state=5 tsc_online=0x00000001B3D96D97 tsc_stop=0x00000001B3F01785 baseline_checksum=0x1EED2BC6895527BE runtime_checksum=0x2674734217537641 final_init=1 parked=1 mailbox_validated=1 resources_validated=1",
+          "POOLEOS:KERNEL:SMP-RUNTIME-STOP PASS contract=PKSMP2 command=1 state=3 runtime_state=5 tsc_online=0x00000001B7B87401 tsc_stop=0x00000001B7CCC680 baseline_checksum=0x195E1C9E60EC943C runtime_checksum=0x3ABFAA27DE2472DB final_init=1 parked=1 mailbox_validated=1 resources_validated=1",
           "POOLEOS:KERNEL:SMP-RUNTIME-RELEASE PASS contract=PKSMP2 release_sequence=3 zeroed_bytes=131072 verified_bytes=131072 resources_released=32 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged",
           "POOLEOS:KERNEL:SMP-RUNTIME-RESULT PASS contract=PKSMP2 profile=sandybridge_x87_sse_two_vcpu bsp=1 ap_started=1 ap_online=1 descriptors=1 stacks=3 xstate=1 vectors=27 ap_quiesced=1 ap_parked=1 resources_released=32 rollback=host_verified ipi_service=0 shootdown=0 scheduler=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],
@@ -2746,7 +2849,7 @@
           "state_writes": 0
         },
         "local_paths_recorded": false,
-        "marker_sha256": "3F688FBABB708C120EB7500589F4CFA85B45AD1EC5C07949109FAA4DBA4E5064",
+        "marker_sha256": "BDF74B4F8E7CB34A5D4AD22123A4BA7B5B9CBC644624CDC518700442FE3C4BD9",
         "marker_summary": {
           "descriptors": {
             "gates": 27,
@@ -2796,11 +2899,11 @@
             "rsp0": 45056
           },
           "stop": {
-            "baseline_checksum": 8067273134151455151,
+            "baseline_checksum": 6071324293149523681,
             "parked": true,
-            "runtime_checksum": 9086156294032569060,
-            "tsc_online": 7409660945,
-            "tsc_stop": 7411667751
+            "runtime_checksum": 16104861101274437913,
+            "tsc_online": 7422525314,
+            "tsc_stop": 7424348679
           },
           "topology": {
             "bsp_apic_id": 0,
@@ -3083,7 +3186,7 @@
           "POOLEOS:KERNEL:SMP-RUNTIME-XSTATE PASS contract=PKSMP2 base=0x000000000001E000 bytes=4096 supported_xcr0=0x0000000000000003 enabled_bytes=576 maximum_bytes=576 xcr0=0x0000000000000003 xstate_bv=0x0000000000000003 fcw=0x000000000000037F mxcsr=0x0000000000001F80 owner_initial=0x0000000050580001 owner_final=0x0000000000000000 saves=1 restores=1 image_verified=1 policy=eager",
           "POOLEOS:KERNEL:SMP-RUNTIME-VECTORS PASS contract=PKSMP2 exceptions=8 interrupts=19 timer=64 ipi_first=224 ipi_last=239 error=240 spurious=255 if=0 fault=0",
           "POOLEOS:KERNEL:SMP-RUNTIME-ONLINE PASS contract=PKSMP2 state=2 runtime_state=4 observed_apic_id=1 leaf1_ecx=0x000000008EB82203 leaf1_edx=0x00000000178BFBFD cr0=0x00000000E0010033 cr3=0x0000000000002000 cr4=0x0000000000040620 efer=0x0000000000000D00 rflags=0x0000000000000006 mode=x86_64 tsc_order=validated",
-          "POOLEOS:KERNEL:SMP-RUNTIME-STOP PASS contract=PKSMP2 command=1 state=3 runtime_state=5 tsc_online=0x00000001B9A67411 tsc_stop=0x00000001B9C51327 baseline_checksum=0x6FF4B62C5B2651AF runtime_checksum=0x7E188302477DB2E4 final_init=1 parked=1 mailbox_validated=1 resources_validated=1",
+          "POOLEOS:KERNEL:SMP-RUNTIME-STOP PASS contract=PKSMP2 command=1 state=3 runtime_state=5 tsc_online=0x00000001BA6ABF82 tsc_stop=0x00000001BA869207 baseline_checksum=0x5441AD4701607EE1 runtime_checksum=0xDF7FF5D82A781919 final_init=1 parked=1 mailbox_validated=1 resources_validated=1",
           "POOLEOS:KERNEL:SMP-RUNTIME-RELEASE PASS contract=PKSMP2 release_sequence=3 zeroed_bytes=131072 verified_bytes=131072 resources_released=32 runtime_revoked=1 mmio_revoked=1 pic_restored=1 hpet_restored=1 apic_base_restored=unchanged",
           "POOLEOS:KERNEL:SMP-RUNTIME-RESULT PASS contract=PKSMP2 profile=sandybridge_x87_sse_two_vcpu bsp=1 ap_started=1 ap_online=1 descriptors=1 stacks=3 xstate=1 vectors=27 ap_quiesced=1 ap_parked=1 resources_released=32 rollback=host_verified ipi_service=0 shootdown=0 scheduler=0 target=0 signatures=0 authority=0 actions=0 production=0 terminal=halt"
         ],
@@ -4082,9 +4185,9 @@
   "inputs": {
     "implementation": [
       {
-        "byte_count": 1299,
+        "byte_count": 5594,
         "path": "runtime/native_kernel_profile_evidence.py",
-        "sha256": "6A05845B85396E3496B9D58F313A3230301987F6022CB147E9FD480F68DFFC45"
+        "sha256": "0BEE77BBDF9979C7BEF8311DAEDF7D3A57424EB89A68DBBACCE731615BB69E4F"
       },
       {
         "byte_count": 4686,
@@ -4092,9 +4195,14 @@
         "sha256": "35E35598C58B141DDD2E895BD0CC39CD296DFC6CB2F0DDE2BFBE88AA47DA513A"
       },
       {
-        "byte_count": 28018,
+        "byte_count": 11853,
+        "path": "tests/test_native_cpu_entry_provenance.py",
+        "sha256": "AC64B1A74AD37F2FAD7A7032DF2480ACA0DCAD6F3B2626EE2B3C5B3A7232138F"
+      },
+      {
+        "byte_count": 31364,
         "path": "runs/native_kernel_entry_readiness.json",
-        "sha256": "B9E79FE7CABA4931C3654134A68934B732DD77A6F1555179C2E09EF93D6212D6"
+        "sha256": "ACAEC303FA750DD75CA8B721B0BD359E4291CF1C4218B3DDFBFE09AF17390B65"
       },
       {
         "byte_count": 4193,
@@ -4187,9 +4295,9 @@
         "sha256": "5CFD8D3308B429C29E1FF7143F43410E081275FFD33F71715A2B626189699CD1"
       },
       {
-        "byte_count": 26946,
+        "byte_count": 34129,
         "path": "runtime/native_kernel_smp_percpu_runtime.py",
-        "sha256": "8C9BF0EF43FB8AA544A95CFBF3C1FCA5626A23DB0985DF713CFB3A311BFF791C"
+        "sha256": "3EDC8DB3B00E4A4655CB64FC0BC7F0371F9E7453727652E9122DB3C494AAC4B8"
       },
       {
         "byte_count": 10872,
@@ -4217,19 +4325,19 @@
         "sha256": "32D55E484378F444F353771188F58C59B8EB76C934A306DA7823C16BC223A5BE"
       },
       {
-        "byte_count": 22376,
+        "byte_count": 21462,
         "path": "tools/qualify_native_kernel_smp_percpu_runtime.py",
-        "sha256": "634B8A334D32AE3251C1F63DEA8FAE9205679844E94DE80A8B5D6AA8F795D32B"
+        "sha256": "BBC7790D49DFE0E41CB25334CB801033CF027DDBB023E351FE92D6851CF339B2"
       },
       {
-        "byte_count": 4626,
+        "byte_count": 11753,
         "path": "tests/test_native_kernel_smp_percpu_runtime.py",
-        "sha256": "FD2EF0D65503486FE7B0F760DB507421EB6E19284CFC823AA185EFE3DB0DFD5D"
+        "sha256": "4BD759753D73B43A3B70129BE9A9ECB39D039C3EC07EF6AD962FC65BACE27BF0"
       },
       {
-        "byte_count": 2867,
+        "byte_count": 3573,
         "path": "docs/native-kernel-smp-percpu-runtime.md",
-        "sha256": "027903D4F7E46EB0D0C34FADF1B518811B5CA7C2ABC1214D6FDF8901AEC27D70"
+        "sha256": "2B6A13433E9AAAD1974A461DC92C435EF2DD90D760EF2037D3C9C1D0315BFA48"
       }
     ]
   },
@@ -5150,7 +5258,7 @@
   "schema_version": "1.0",
   "selected_move_id": "N8-SMP-PERCPU-RUNTIME-001",
   "status": "pass_single_host_two_run_sandybridge_two_vcpu_ap_local_runtime_non_promoting",
-  "status_date": "2026-09-12",
+  "status_date": "2026-09-26",
   "summary": {
     "application_processors_online": 1,
     "application_processors_parked": 1,

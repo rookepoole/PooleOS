@@ -1,13 +1,38 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-26
-Plan version: 2.92.0-native-first-ap-recorded-evidence
-Roadmap cycle: PooleOS Cycle 189
+Plan version: 2.93.0-native-percpu-recorded-evidence
+Roadmap cycle: PooleOS Cycle 190
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 190: Per-CPU Recorded Evidence
+
+`N8-SMP-PERCPU-RUNTIME-001`, N8.5 supporting N36, repairs raw recorded execution,
+typed runtime/cleanup accounting, dynamic dual-checksum comparison, malformed
+input handling and exact per-category rejection counts. All 69 initial cases
+now reject without exceptions; the earlier 57 runtime and 48 gate admissions,
+one runtime and four gate exceptions remain preserved.
+
+Two final virtual boots, 159 executed cases in 19 categories and all 10 focused
+tests pass. Permanent regression covers 253 record corruptions, six root/control
+shapes and two output-preservation cases. Two initial boots remain superseded.
+Selected readiness is 18/27; nine profiles remain from `N8-SMP-IPI-001`, then
+the 65 scheduler evidence gaps and full exact qualification before PR #78 merge.
+
+Existing `ADD-N36-RECEIPT-COVERAGE-001` tracks the repair. Requirements, additions,
+history and phase/flag states are retained. Inventory is 1,021 discovered methods
+and 288 architecture bindings, not a full-suite pass. Native kernel/ISO bytes
+and PooleGlyph are unchanged. General AP ownership integration, CPU retirement,
+hardware, independent builders and production remain open.
+[Cycle 190 evidence](checkpoints/cycle190-percpu-recorded-evidence.md).
+
+Combined scoped regression passes 282 distinct tests, zero skipped. Checklist,
+history, native products and owner data are conserved. Development-branch backup
+does not satisfy full canonical qualification or authorize main merge.
 
 ## Cycle 189: First-AP Recorded Evidence
 

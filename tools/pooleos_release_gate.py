@@ -2056,6 +2056,8 @@ def check_native_kernel_smp_percpu_runtime_readiness(
             "; ".join(errors) or "native kernel SMP per-CPU runtime readiness is not an object",
         )
     errors.extend(str(issue) for issue in native_kernel_smp_percpu_runtime.readiness_errors(artifact, ROOT))
+    if errors:
+        return readiness.make_check("native_kernel_smp_percpu_runtime_readiness", False, "; ".join(errors))
     expected_summary = {
         "application_processors_online": 1,
         "application_processors_parked": 1,
