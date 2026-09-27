@@ -1066,7 +1066,7 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
         "inner_set_parser_count": 6,
         "inner_set_cross_binding_count": 6,
         "inner_set_development_denial_count": 6,
-        "inner_set_retained_set_sha256": "A3078488088B2BF11B8D88F48862FA8D80957D610EB1F3FF4411AD5E4729FEAF",
+        "inner_set_retained_set_sha256": "FE35AE51B905BDFE7CB59F32CB2AF69A56910DA24DA83A74A9D92BB1BE5C7F0B",
         "inner_set_authority_grants": 0,
         "inner_set_actions_authorized": 0,
         "inner_set_state_writes": 0,
@@ -1081,8 +1081,8 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
         "policy_profile": "synthetic_qualification_only",
         "trust_binding_count": 14,
         "trust_denial": "pbtrust_policy_unsigned",
-        "trust_policy_sha256": "DDECB7E8BE1EEA8B491FDA3AA04AB56F81510BFBA69E1C0F30A93DC17C012803",
-        "trust_state_sha256": "C3C4C6412480A4C715C91F059A35EFBAA5E9D4A003916D8B8580C9C04A6B59BC",
+        "trust_policy_sha256": "7FD68927AECC739F8459ED6C6B2AB154318B357929F478A2D5B4B6D8C306C6B3",
+        "trust_state_sha256": "5F8AE1BE86EE3DC024C332D5CA3BA5D5B8ED09B60BAB17855A410A16A64634AD",
         "trust_authority_grants": 0,
         "trust_state_writes": 0,
         "production_claim_count": 0,
@@ -1096,7 +1096,7 @@ def check_native_pooleboot_readiness(path: Path = NATIVE_POOLEBOOT_READINESS) ->
     detail = (
         "contract=POOLEOS-N5-POOLEBOOT-7; host_tests=8/8; builds=2/2; media=2/2; "
         "guest_runs=2/2; markers=25; serial_debugcon=2/2; gop_frames=2/2; "
-        "retained_files=9; inner=6/6; inner_sha256=A3078488088B; authority=0; actions=0; state=0; hardware=0; "
+        "retained_files=9; inner=6/6; inner_sha256=FE35AE51B905; authority=0; actions=0; state=0; hardware=0; "
         "trust=unsigned-deny; trust_bindings=14; trust_authority=0; trust_writes=0; "
         "pbp1=2/2; kmap=2/2; exit=2/2; negatives=155/155; pmcu1=synthetic-never-apply; pfwm1=synthetic-never-apply; ppol1=qualification-only; production_claims=0; n5_exit=false; production_ready=false"
     )
@@ -1125,7 +1125,7 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     summary = artifact.get("summary", {})
     if summary.get("guest_runs_passed") != 2 or summary.get("guest_runs_total") != 2:
         errors.append("PKLOAD6 guest-run evidence is incomplete")
-    if summary.get("rust_host_tests_passed") != 330 or summary.get("rust_host_tests_total") != 330:
+    if summary.get("rust_host_tests_passed") != 331 or summary.get("rust_host_tests_total") != 331:
         errors.append("PKLOAD6 Rust host-test evidence is incomplete")
     if summary.get("ordered_marker_count") != 25:
         errors.append("PKLOAD6 marker evidence is incomplete")
@@ -1138,7 +1138,7 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     ) != 155:
         errors.append("PKLOAD6 negative controls are incomplete")
     if summary.get("inner_retained_set_sha256") != (
-        "A3078488088B2BF11B8D88F48862FA8D80957D610EB1F3FF4411AD5E4729FEAF"
+        "FE35AE51B905BDFE7CB59F32CB2AF69A56910DA24DA83A74A9D92BB1BE5C7F0B"
     ):
         errors.append("PKLOAD6 retained inner-set identity changed")
     if artifact.get("claims") != native_kernel_load.expected_claims():
@@ -1148,9 +1148,9 @@ def check_native_kernel_load_readiness(path: Path = NATIVE_KERNEL_LOAD_READINESS
     ) is not False:
         errors.append("PKLOAD6 overclaims N5 exit or production readiness")
     detail = (
-        "contract=PKLOAD6; rust_tests=330/330; boot_builds=2/2; kernel_builds=2/2; "
+        "contract=PKLOAD6; rust_tests=331/331; boot_builds=2/2; kernel_builds=2/2; "
         "media=2/2; guest_runs=2/2; markers=25; retained_files=9; inner=6/6; "
-        "inner_sha256=A3078488088B; "
+        "inner_sha256=FE35AE51B905; "
         "trust=unsigned-deny; trust_bindings=14; trust_authority=0; trust_writes=0; "
         "oracle=2/2; pbp1=2/2; kmap=2/2; exit=2/2; firmware_after_exit=0; "
         "negatives=155/155; pmcu1=synthetic-never-apply; pfwm1=synthetic-never-apply; "
@@ -1210,7 +1210,7 @@ def check_native_kernel_revalidation_readiness(
     ) != (
         9,
         9,
-        "A3078488088B2BF11B8D88F48862FA8D80957D610EB1F3FF4411AD5E4729FEAF",
+        "FE35AE51B905BDFE7CB59F32CB2AF69A56910DA24DA83A74A9D92BB1BE5C7F0B",
         "pbtrust_policy_unsigned",
         0,
         0,

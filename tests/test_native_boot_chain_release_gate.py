@@ -75,6 +75,23 @@ class NativeBootChainReleaseGateTests(unittest.TestCase):
             ("kernel_load", "native_kernel_load_readiness.json", "summary", "rust_host_tests_passed", 328),
             ("kernel_load", "native_kernel_load_readiness.json", "summary", "rust_host_tests_total", 328),
             ("kernel_revalidation", "native-kernel-revalidation-readiness.json", "build", "host_test_count", 243),
+            ("pooleboot", "native_pooleboot_readiness.json", "summary", "inner_set_retained_set_sha256",
+             "A3078488088B2BF11B8D88F48862FA8D80957D610EB1F3FF4411AD5E4729FEAF"),
+            ("pooleboot", "native_pooleboot_readiness.json", "summary", "trust_policy_sha256",
+             "DDECB7E8BE1EEA8B491FDA3AA04AB56F81510BFBA69E1C0F30A93DC17C012803"),
+            ("pooleboot", "native_pooleboot_readiness.json", "summary", "trust_state_sha256",
+             "C3C4C6412480A4C715C91F059A35EFBAA5E9D4A003916D8B8580C9C04A6B59BC"),
+            ("kernel_load", "native_kernel_load_readiness.json", "summary", "inner_retained_set_sha256",
+             "A3078488088B2BF11B8D88F48862FA8D80957D610EB1F3FF4411AD5E4729FEAF"),
+            ("kernel_revalidation", "native-kernel-revalidation-readiness.json", "golden", "retained_set_sha256",
+             "A3078488088B2BF11B8D88F48862FA8D80957D610EB1F3FF4411AD5E4729FEAF"),
+            ("kernel_load", "native_kernel_load_readiness.json", "summary", "rust_host_tests_passed", 330),
+            ("kernel_load", "native_kernel_load_readiness.json", "summary", "rust_host_tests_total", 330),
+            ("kernel_revalidation", "native-kernel-revalidation-readiness.json", "build", "host_test_count", 245),
+            ("pooleboot", "native_pooleboot_readiness.json", "summary", "trust_policy_sha256",
+             "5DB6ACF8D65D1483E3F313526A2E1D4DBB37E942F004D8CDE863C7FA2FAAA41C"),
+            ("pooleboot", "native_pooleboot_readiness.json", "summary", "trust_state_sha256",
+             "3A31DF48162FA95E125A5F30C5214B71C5D38AFF5550A8FD6DD5308EF14A7777"),
         )
         for profile, filename, section, field, superseded in cases:
             with self.subTest(profile=profile, field=field):

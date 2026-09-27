@@ -11,13 +11,20 @@ Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
 ## Unfinished Cycle 192 Backup
 
-`N8-SMP-MAILBOX-ORACLE-001` now has native snapshot export and a host oracle,
-but live qualification and the completed-cycle reconciliation are unfinished.
-The kernel identity changed; Cycle 191's 19/27 projection is historical. The
-backup-time projection is 4/27, with dependent-image replay still required.
-No phase, subphase, flag or gap is closed. The machine ledger and architecture
-baseline remain the last reconciled Cycle 191 snapshots, not current-build
-qualification. [Saved work, evidence and resume order](checkpoints/cycle192-unfinished-cloud-backup.md).
+`N8-SMP-MAILBOX-ORACLE-001` now passes bounded live qualification: two final
+four-vCPU boots, 609 rejection cases in 33 groups and 246 native kernel host
+tests. Loader, PooleBoot, revalidation and transfer receipts are admitted;
+57 scoped regression tests pass. The changed kernel's selected projection is
+9/27; Cycle 191's 19/27 is historical, not evidence for the new image.
+
+Eighteen dependent CPU, memory, interrupt, AP, scheduler, atomic and lock profiles
+still need qualification, starting with `N7-TRAP-001`. At least 65 scheduler
+control-execution gaps and full exact-candidate qualification remain. Complete
+Cycle 192 ledger, architecture-binding and historical-test reconciliation before
+continuing that ordered replay. No phase, subphase, flag or gap is closed. The
+machine ledger and architecture baseline remain the last reconciled Cycle 191
+snapshots, not current-build qualification.
+[Saved work, evidence and resume order](checkpoints/cycle192-mailbox-qualified-backup.md).
 
 ## Cycle 191: IPI Recorded Evidence
 

@@ -141,6 +141,11 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
         self.assertEqual([], smp_ipi.contract_errors(contract))
         self.assertEqual(33, len(smp_ipi.NEGATIVE_CONTROL_IDS))
         self.assertEqual(609, contract["qualification"]["hostile_case_count"])
+        for field in smp_ipi.mailbox_evidence.CONTRACT:
+            changed = copy.deepcopy(contract)
+            del changed["mailbox_evidence"][field]
+            with self.subTest(missing_mailbox_field=field):
+                self.assertTrue(smp_ipi.contract_errors(changed))
 
     def test_three_private_resource_layouts_fit_below_one_mib(self) -> None:
         layouts = [smp_ipi.resource_layout(page, 32) for page in (1, 35, 69)]
@@ -270,6 +275,13 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
             qualify._audit_source_text(arch.replace("shl rbx, cl", "shl rbx, 1", 1), main, ipi)
         with self.assertRaises(smp_ipi.KernelSmpIpiError):
             qualify._audit_source_text(arch.replace(".Lpoole_ap_ipi_count_stop:", ".Lpoole_ap_ipi_count_terminal:", 1), main, ipi)
+        for token in (
+            "mailbox_evidence=PKMBX1 snapshot=quiesced context_words=",
+            "operation.mailbox_context.iter()", "smp_runtime::baseline_checksum_words(&mailbox)",
+            "smp_runtime::runtime_checksum_words(&mailbox)",
+        ):
+            with self.subTest(omitted=token), self.assertRaisesRegex(smp_ipi.KernelSmpIpiError, "PKMBX1"):
+                qualify._audit_source_text(arch, main.replace(token, "omitted", 1), ipi)
 
     def test_linked_invlpg_scope_separates_ipi_and_successor_profile(self) -> None:
         disassembly = (
@@ -453,12 +465,24 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
         baseline = smp_ipi.read_json(smp_ipi.ROOT / smp_ipi.READINESS_RELATIVE)
         self.assertEqual([], smp_ipi.readiness_errors(baseline))
         markers = baseline["execution"]["runs"][0]["markers"]
-        for index in range(3):
-            candidates = list(qualify.mailbox_mutations(markers, index))
-            self.assertEqual(120, len(candidates))
-            for case, candidate in enumerate(candidates):
-                with self.subTest(ap=index, case=case), self.assertRaises(smp_ipi.KernelSmpIpiError):
-                    smp_ipi.normalize_dynamic_markers(candidate)
+        self.assertTrue(pooleos_release_gate.check_native_kernel_smp_ipi_readiness()["ok"])
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "candidate.json"
+            for index in range(3):
+                candidates = list(qualify.mailbox_mutations(markers, index))
+                self.assertEqual(120, len(candidates))
+                for case, candidate in enumerate(candidates):
+                    with self.subTest(ap=index, case=case):
+                        with self.assertRaises(smp_ipi.KernelSmpIpiError):
+                            smp_ipi.normalize_dynamic_markers(candidate)
+                        changed = copy.deepcopy(baseline)
+                        run = changed["execution"]["runs"][0]
+                        run["markers"] = candidate
+                        run["marker_sha256"] = smp_ipi.sha256_bytes(
+                            smp_ipi.native_pooleboot.canonical_json_bytes(candidate))
+                        self.assertTrue(smp_ipi.readiness_errors(changed))
+                        path.write_text(json.dumps(changed, allow_nan=False), encoding="utf-8")
+                        self.assertFalse(pooleos_release_gate.check_native_kernel_smp_ipi_readiness(path)["ok"])
 
     def test_opaque_historical_marker_and_inconsistent_context_rejected(self) -> None:
         import re
@@ -489,6 +513,11 @@ class NativeKernelSmpIpiTests(unittest.TestCase):
         self.assertEqual(list(smp_ipi.NEGATIVE_CONTROL_CASE_COUNTS), [item["case_count"] for item in controls])
         with patch.object(smp_ipi, "validate_release_accounting", return_value=None):
             with self.assertRaisesRegex(qualify.QualificationError, "RELEASE-ACCOUNTING-MODEL"):
+                qualify._negative_controls(markers)
+        by_ap = {ap["apic_id"]: ap["mailbox_evidence"] for ap in smp_ipi.validate_markers(markers)["aps"]}
+        with patch.object(smp_ipi.mailbox_evidence, "validate",
+                          side_effect=lambda *args: copy.deepcopy(by_ap[args[-2]])):
+            with self.assertRaisesRegex(qualify.QualificationError, "PKMBX1-AP0-ORACLE"):
                 qualify._negative_controls(markers)
 
     def test_qualifier_rejects_invalid_result_before_writing(self) -> None:
