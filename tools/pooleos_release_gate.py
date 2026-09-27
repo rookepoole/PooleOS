@@ -255,6 +255,17 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 194 requalifies PMM, VM, IRQ, first AP and per-CPU runtime on the unchanged Cycle192 "
+    "kernel: ten fresh guest boots, 388 control groups, 528 executed rejection cases and 57 focused "
+    "tests pass. The tests reject 990 corrupted records through runtime and actual gates and detect "
+    "disabled PMM parser/oracle checks. Selected readiness is 19/27; eight scheduler-through-lock "
+    "profiles remain from N12-SCHED-001, alongside 65 scheduler control-execution gaps and full "
+    "exact-candidate qualification before main merge. IPI192/CPU193 are retained, not fresh runs. "
+    "No phase, flag, ISO or production gate closes. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:

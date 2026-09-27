@@ -11,7 +11,17 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 193 requalifies all five N7 profiles
+**Current development checkpoint:** Cycle 194 requalifies physical memory,
+virtual memory, interrupts/time, first AP and per-CPU runtime on the unchanged
+Cycle 192 kernel. Ten fresh guest boots, 528 rejection cases in 388 groups and
+57 focused regression tests pass. Selected readiness is 19/27; eight scheduler-
+through-lock profiles and 65 scheduler control-execution gaps remain before
+full exact-candidate qualification and main merge. No kernel bytes or ISO changed.
+[Cycle 194 evidence and next steps](docs/checkpoints/cycle194-memory-runtime-replay.md).
+Combined regression passes 307 tests, zero skips, including exact kernel-entry
+reproduction. Roadmap/checklist regression passes 42/42; conservation passes.
+
+**Historical development checkpoint:** Cycle 193 requalifies all five N7 profiles
 against the Cycle 192 kernel: trap recovery/containment, CPU policy, xstate
 ownership, xstate exceptions and read-only privilege/MSR policy. Fourteen fresh
 guest boots, 225 rejection controls and 51 focused regression tests pass.

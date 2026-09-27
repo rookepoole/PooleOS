@@ -1,13 +1,40 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-09-26
-Plan version: 2.96.0-native-current-cpu-replay
-Roadmap cycle: PooleOS Cycle 193
+Status date: 2026-09-27
+Plan version: 2.97.0-native-memory-runtime-replay
+Roadmap cycle: PooleOS Cycle 194
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 194: Current-Kernel Memory and AP Replay
+
+N9.1/N9.2 supporting N10/N36 begins with `N9-PMM-ACPI-CONSUMER-001` and
+freshly qualifies PMM, VM, IRQ, first AP and per-CPU runtime on the unchanged
+Cycle 192 kernel. Ten fresh boots, 388 control groups, 528 executed rejection
+cases and 246 native kernel host tests per qualifier pass. All 57 focused tests
+pass, including 990 corrupted records through runtime and actual release gates.
+A new regression detects disabled PMM parser and independent accounting checks.
+
+Selected readiness is 19/27. Current active-root VM ownership is re-established;
+IPI192 and CPU193 remain valid retained evidence, not new Cycle194 boots.
+Six replaced current records are archived without changing historical evidence.
+Architecture binds 303 sources; 1,044 discovered Python tests are inventory,
+not a full-suite pass. The initial private measurement-helper summary-key error
+is retained and corrected by counting independently validated execution arrays.
+
+Next is `N12-SCHED-001`, then preemption, deferred work, SMP scheduling, AP
+workers, SMP preemption, atomics and locks. The existing 65 scheduler control
+execution gaps must be repaired before full exact-candidate canonical/Doctor/
+publication/configured-check/review qualification and main merge. No phase,
+flag, production gate, checklist, PooleGlyph owner file or demo ISO changes.
+[Exact evidence and limitations](checkpoints/cycle194-memory-runtime-replay.md).
+Combined scoped regression passes 307 tests, zero skips, including exact entry
+reproduction; initial metadata passes 42/42 and conservation passes. The initial
+combined invocation ran zero tests because of argument order, then the corrected
+invocation passed. This failure remains recorded, not counted as a test result.
 
 ## Cycle 193: Current-Kernel CPU Replay
 

@@ -1,15 +1,27 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-09-26
+Status date: 2026-09-27
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 193
+Last roadmap reconciliation: PooleOS Cycle 194
 
-Cycle 193: all five N7 profiles are freshly qualified against the unchanged
+Cycle 194: PMM, VM, IRQ, first AP and per-CPU runtime are freshly qualified on
+the unchanged Cycle 192 kernel. Ten boots, 528 rejection cases in 388 groups
+and 57 focused tests pass, including 990 corrupted-record cases and disabled
+PMM parser/oracle detection. Selected readiness is 19/27; eight profiles remain
+from N12-SCHED-001, alongside the 65 scheduler control-execution gaps and full
+exact-candidate qualification before main merge. Prior evidence is preserved;
+no normative term, phase, flag, ISO or production claim changes.
+[Cycle 194 evidence](checkpoints/cycle194-memory-runtime-replay.md).
+Combined scoped regression passes 307 tests, zero skips; initial metadata passes
+42/42 and conservation passes. Qualification date is September 26; closeout is
+September 27. This is not the full canonical suite or a main-merge qualification.
+
+Historical Cycle 193: all five N7 profiles are freshly qualified against the unchanged
 Cycle 192 kernel. Fourteen guest boots, 225 rejection controls, linked audits
 and 51 focused tests pass; the expected TCG limitation probe is not a passing
 exception test. The selected projection is 14/27, leaving thirteen profiles

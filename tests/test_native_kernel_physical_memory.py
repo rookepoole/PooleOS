@@ -262,6 +262,21 @@ class NativeKernelPhysicalMemoryTests(unittest.TestCase):
         self.assertTrue(audit["final_temporary_alias_revocation_required"])
         self.assertTrue(audit["final_guarded_metadata_mapping_retention_required"])
 
+    def test_hostile_controls_detect_disabled_parser_and_memory_oracle(self) -> None:
+        transcript = self.run_evidence["pbp1_transcript"]
+        observation = physical_memory.validate_markers(self.markers)
+        with mock.patch.object(physical_memory, "validate_markers", wraps=physical_memory.validate_markers) as parser:
+            controls = qualify_native_kernel_physical_memory._negative_controls(self.markers, transcript)
+        self.assertEqual(len(controls), 191)
+        self.assertEqual(parser.call_count, 189)
+        self.assertEqual([item["id"] for item in controls], list(physical_memory.NEGATIVE_CONTROL_IDS))
+        with mock.patch.object(physical_memory, "validate_markers", return_value=observation):
+            with self.assertRaisesRegex(qualify_native_kernel_physical_memory.QualificationError, "did not reject"):
+                qualify_native_kernel_physical_memory._negative_controls(self.markers, transcript)
+        with mock.patch.object(physical_memory, "validate_observation_binding", return_value={}):
+            with self.assertRaisesRegex(qualify_native_kernel_physical_memory.QualificationError, "did not reject"):
+                qualify_native_kernel_physical_memory._negative_controls(self.markers, transcript)
+
     def test_source_audit_rejects_missing_multi_ap_boundary(self) -> None:
         source = (physical_memory.ROOT / "native/kernel/src/main.rs").read_text(
             encoding="utf-8"
