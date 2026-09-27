@@ -7,18 +7,23 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 194
+Last roadmap reconciliation: PooleOS Cycle 195
 
-Cycle 195 is an unfinished development-branch cloud backup. Scheduler receipt
-validation passes two fresh guest boots and 23 scoped scheduler/publication
-tests; the selected projection is 20/27. Seven dependent profiles, 65 existing
-control-execution gaps, progress reconciliation and full exact-candidate merge
-qualification remain. GitHub storage does not require a main merge. Cycle 194
-machine-roadmap and architecture records remain historical snapshots until
-reconciled. No normative condition, phase, flag, ISO or production claim changes.
-[Cycle 195 backup and resume order](checkpoints/cycle195-scheduler-cloud-backup.md).
+Cycle 195: scheduler admission reparses raw paired execution and host evidence,
+typed observations/summaries and exact control counts. Two final guest boots,
+115 rejection cases and 14 focused tests pass, including 221 corrupt records.
+All 219 original counterexamples now reject without exceptions. Roadmap 195
+preserves prior history; selected readiness is 20/27. Seven dependent profiles
+remain from N12-SCHED-PREEMPT-001, alongside at least 74 control-execution gaps and full
+exact-candidate qualification before main merge. No normative term, phase,
+flag, kernel feature, ISO or production claim changes. Combined scoped regression
+passes 322 tests, zero skips. Nine newly verified constant-only preemption
+controls supplement the prior non-exhaustive 65-control audit; no kernel defect
+is inferred from this source-level evidence gap.
+[Cycle 195 evidence](checkpoints/cycle195-scheduler-recorded-evidence.md).
+The intermediate cloud-backup record remains historical, not rewritten.
 
-Cycle 194: PMM, VM, IRQ, first AP and per-CPU runtime are freshly qualified on
+Historical Cycle 194: PMM, VM, IRQ, first AP and per-CPU runtime are freshly qualified on
 the unchanged Cycle 192 kernel. Ten boots, 528 rejection cases in 388 groups
 and 57 focused tests pass, including 990 corrupted-record cases and disabled
 PMM parser/oracle detection. Selected readiness is 19/27; eight profiles remain

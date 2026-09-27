@@ -358,6 +358,48 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle195-scheduler-recorded-evidence.md",
+      "sha256": "ACC853D0539723F91E1E9C1F2A25E41DF6AACDCBBFAF2F4E811A73137D9C95AE",
+      "byte_count": 7186,
+      "line_count": 127
+    },
+    {
+      "path": "docs/checkpoints/cycle195-scheduler-cloud-backup.md",
+      "sha256": "3D24BBD076DE8D341461AA4C075CD126A195D7C448FBCB6E4DAE1F2885174F9B",
+      "byte_count": 5126,
+      "line_count": 91
+    },
+    {
+      "path": "runtime/native_kernel_scheduler.py",
+      "sha256": "5FAE21F0C2A2F6B63CA458D349974A323795F85BB3579DC0170B288FB7052103",
+      "byte_count": 29682,
+      "line_count": 682
+    },
+    {
+      "path": "tools/qualify_native_kernel_scheduler.py",
+      "sha256": "83FBF99766B373FFFDEBAE31030432B5C2105B091024962C22F654AA4FACD9CD",
+      "byte_count": 40099,
+      "line_count": 1077
+    },
+    {
+      "path": "tools/qualify_native_kernel_scheduler_preempt.py",
+      "sha256": "9461C3A0DE65CDEA1C9F1E31FAF7518225293E5B1DAFE2238C85D33DB6783473",
+      "byte_count": 22436,
+      "line_count": 450
+    },
+    {
+      "path": "tests/test_native_kernel_scheduler.py",
+      "sha256": "BA1FD65F5236E59A63C124F806D96938DBB75C13479260F60B333D2CAF8E80FC",
+      "byte_count": 15927,
+      "line_count": 288
+    },
+    {
+      "path": "docs/native-kernel-scheduler.md",
+      "sha256": "A072AA29B7B2332D5617B05E77B2D03064AE629277E6A3ACF918B43B67F4F322",
+      "byte_count": 5577,
+      "line_count": 48
+    },
+    {
       "path": "docs/checkpoints/cycle194-memory-runtime-replay.md",
       "sha256": "704FBD91C23CEFD31419A96BD325C2AEA20F67B5C4DA179911B98C17D701046D",
       "byte_count": 6029,
@@ -497,9 +539,9 @@
     },
     {
       "path": "tools/pooleos_release_gate.py",
-      "sha256": "E9EEA1824C8A616F6E407F422889A3CAAF08CB670C22D41C2F6FBED39F7B3AE8",
-      "byte_count": 356612,
-      "line_count": 7183
+      "sha256": "2FFF3F210E8A5E6B04E7C68AF5AD19B2B430CDE6F37416514B53FC35A1482F4C",
+      "byte_count": 357427,
+      "line_count": 7196
     },
     {
       "path": "docs/checkpoints/cycle184-boot-host-provenance.md",
@@ -1025,15 +1067,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "0D92884012D114B181D0599C5ACB4A4F48F35908039FC5E5373A77B941C2483C",
-      "byte_count": 101723,
-      "line_count": 1362
+      "sha256": "9B08689A503EF9531905071B5EE45928FFEE39B6C53D44721840C79DFD7C89BF",
+      "byte_count": 102723,
+      "line_count": 1376
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "1F9B4F2AED611A217667F377257955B1C0446CB0ED72B3425769145EDE5CFFA4",
-      "byte_count": 437550,
-      "line_count": 3524
+      "sha256": "91D6B728AA445C8F684C92CE98E1587F3A7ACD8E34CCF99924492BC40D1A91F2",
+      "byte_count": 440297,
+      "line_count": 3567
     },
     {
       "path": "docs/publication-boundary.md",

@@ -266,6 +266,17 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 195 qualifies strict scheduler recorded evidence on the unchanged Cycle192 kernel: "
+    "two final boots, 28 groups/115 executed rejection cases and 14 focused tests pass, including "
+    "221 corrupted records and disabled-validator detection. All 219 original counterexamples "
+    "now reject without exceptions. Selected readiness is 20/27; seven profiles remain from "
+    "N12-SCHED-PREEMPT-001. Nine additional constant-only preemption control records bring the known "
+    "control-execution gap lower bound to 74, alongside full exact-candidate "
+    "qualification before main merge. No phase, flag, ISO or production gate closes. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:

@@ -24,6 +24,13 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle195-scheduler-recorded-evidence.md",
+    "docs/checkpoints/cycle195-scheduler-cloud-backup.md",
+    "runtime/native_kernel_scheduler.py",
+    "tools/qualify_native_kernel_scheduler.py",
+    "tools/qualify_native_kernel_scheduler_preempt.py",
+    "tests/test_native_kernel_scheduler.py",
+    "docs/native-kernel-scheduler.md",
     "docs/checkpoints/cycle194-memory-runtime-replay.md",
     "docs/checkpoints/cycle193-current-kernel-cpu-replay.md",
     "tools/qualify_native_kernel_trap.py",

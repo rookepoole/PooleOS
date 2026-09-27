@@ -43,11 +43,13 @@
     "inspect_live_pooleglyph_each_turn": true,
     "verify_master_checklist_coverage_each_turn": true,
     "new_work_must_be_flagged": true,
-    "last_updated_cycle": 194,
-    "selected_move_id": "N9-PMM-ACPI-CONSUMER-001",
+    "last_updated_cycle": 195,
+    "selected_move_id": "N12-SCHED-001",
     "immediate_next_move_id": "N0-GOVERNANCE-CUSTODY-001",
-    "owner_independent_next_move_id": "N12-SCHED-001",
+    "owner_independent_next_move_id": "N12-SCHED-PREEMPT-001",
     "required_records": [
+      "docs/checkpoints/cycle195-scheduler-recorded-evidence.md",
+      "docs/checkpoints/cycle195-scheduler-cloud-backup.md",
       "docs/checkpoints/cycle194-memory-runtime-replay.md",
       "docs/checkpoints/cycle193-current-kernel-cpu-replay.md",
       "docs/checkpoints/cycle192-native-mailbox-oracle.md",
@@ -159,9 +161,9 @@
     "added_requirement_count": 57
   },
   "baseline": {
-    "pooleos_cycle": 194,
+    "pooleos_cycle": 195,
     "entry_cycle": 79,
-    "pooleos_test_count": 1044,
+    "pooleos_test_count": 1050,
     "historical_consistency_release_gate": {
       "passed_checks": 58,
       "total_checks": 58,
@@ -177,13 +179,13 @@
       "explicit_gap_count": 20,
       "production_ready": false,
       "native_promotion_role": "partially_qualified_development_candidate_non_promoting",
-      "qualification_status": "memory_runtime_replay_pass_eight_dependencies_and_control_audit_pending",
+      "qualification_status": "scheduler_evidence_pass_seven_dependencies_and_control_audit_pending",
       "passed_check_count_scope": "historical_cycle176_exact_final_canonical_audit",
       "current_cycle_full_canonical_audit_performed": false,
       "last_fully_qualified_cycle": 176,
       "last_fully_qualified_passed_checks": 105,
       "current_candidate_audit": {
-        "cycle": 194,
+        "cycle": 195,
         "status": "not_run",
         "applies_to_current_source": false,
         "aggregate_suite_passed": false,
@@ -279,11 +281,11 @@
         "production_ready": false
       },
       "current_focused_source_projection": {
-        "cycle": 194,
+        "cycle": 195,
         "scope": "27_selected_native_checks_not_full_canonical_audit",
-        "passed_checks": 19,
+        "passed_checks": 20,
         "total_checks": 27,
-        "pending_downstream_native_checks": 8,
+        "pending_downstream_native_checks": 7,
         "passing_profiles": [
           "native_kernel_entry_readiness",
           "native_symbol_readiness",
@@ -303,18 +305,19 @@
           "native_kernel_interrupt_time_readiness",
           "native_kernel_smp_first_ap_readiness",
           "native_kernel_smp_percpu_runtime_readiness",
-          "native_kernel_smp_ipi_readiness"
+          "native_kernel_smp_ipi_readiness",
+          "native_kernel_scheduler_readiness"
         ],
-        "final_receipt_fresh_qemu_runs": 10,
-        "kernel_entry_runs": 10,
-        "superseded_initial_qemu_runs": 0,
-        "run_count_scope": "Cycle194_five_memory_IRQ_AP_profiles_only_not_retained_CPU_boot_IPI",
-        "next_dependency_move_id": "N12-SCHED-001",
-        "required_next_gate": "eight_scheduler_atomic_lock_profiles_control_execution_repair_then_full_candidate",
-        "focused_python_tests_passed": 57,
+        "final_receipt_fresh_qemu_runs": 2,
+        "kernel_entry_runs": 2,
+        "superseded_initial_qemu_runs": 2,
+        "run_count_scope": "Cycle195_final_scheduler_only_not_retained_profiles",
+        "next_dependency_move_id": "N12-SCHED-PREEMPT-001",
+        "required_next_gate": "seven_preemption_through_lock_profiles_control_execution_repair_then_full_candidate",
+        "focused_python_tests_passed": 14,
         "focused_python_tests_skipped": 0,
-        "focused_test_log_sha256": "3D9CF2291DCB897F2ED2443A43C8819640BA3513C62A2EDF228B7601B907CE96",
-        "recorded_evidence_rejection_cases": 990,
+        "focused_test_log_sha256": "E58C5B0675259CBFDA13624156F7C6C24DDC46152986DEDF36E7AE0372F4C5DE",
+        "recorded_evidence_rejection_cases": 221,
         "canonical_full_replay_performed": false,
         "production_ready": false
       },
@@ -622,10 +625,10 @@
         "production_ready": false
       },
       "current_dependency_qualification": {
-        "cycle": 194,
-        "source_validation_cycle": 194,
-        "status": "six_current_profiles_eight_pending",
-        "scope": "five_fresh_memory_IRQ_AP_profiles_plus_retained_Cycle192_IPI",
+        "cycle": 195,
+        "source_validation_cycle": 195,
+        "status": "seven_current_profiles_seven_pending",
+        "scope": "fresh_scheduler_with_six_retained_memory_IRQ_AP_IPI_profiles",
         "applies_to_current_source": true,
         "all_fourteen_profiles_current": false,
         "qualified_profiles": [
@@ -634,17 +637,13 @@
           "interrupt_time",
           "smp_first_ap",
           "smp_percpu_runtime",
-          "smp_ipi"
+          "smp_ipi",
+          "scheduler"
         ],
         "newly_qualified_profiles": [
-          "physical_memory",
-          "virtual_memory",
-          "interrupt_time",
-          "smp_first_ap",
-          "smp_percpu_runtime"
+          "scheduler"
         ],
         "readiness_replay_required_profiles": [
-          "scheduler",
           "scheduler_preempt",
           "scheduler_deferred",
           "scheduler_smp",
@@ -653,11 +652,11 @@
           "atomics",
           "locks"
         ],
-        "fresh_qemu_runs": 10,
-        "run_count_scope": "Cycle194_five_profiles_only_not_retained_IPI",
-        "superseded_initial_runs": 0,
-        "negative_control_groups": 388,
-        "negative_control_cases": 528,
+        "fresh_qemu_runs": 2,
+        "run_count_scope": "Cycle195_final_scheduler_only_not_retained_profiles",
+        "superseded_initial_runs": 2,
+        "negative_control_groups": 28,
+        "negative_control_cases": 115,
         "kernel_sha256": "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8",
         "receipt_bindings": [
           {
@@ -769,18 +768,61 @@
             "kernel_host_tests": 246,
             "execution_log_sha256": "4B314EC1800F8184E16D843D507E35981A96115FE26798BD1E83E590C3FE2EF3",
             "elapsed_seconds": 319.219
+          },
+          {
+            "profile": "scheduler",
+            "path": "runs/native-kernel-scheduler-readiness.json",
+            "sha256": "0CA89C0F579FB5BA086ED61FF7D56B0F68E6C82A974B4698CFEA84F621B83363",
+            "fresh_runs": 2,
+            "negative_controls": 28,
+            "hostile_cases": 115,
+            "kernel_host_tests": 246,
+            "execution_log_sha256": "8F867ACC242340662A5873DD9035F537409D16A81AF05268BEABE7274F48A33F",
+            "elapsed_seconds": 87.578
           }
         ],
-        "retained_IPI_qualification_record": "historical_cycle193_dependency_qualification",
-        "recorded_evidence_case_total": 990,
-        "recorded_evidence_scope": "five_fresh_profiles_only",
+        "retained_qualification_record": "historical_cycle194_dependency_qualification",
+        "recorded_evidence_cases": {
+          "exit": 14,
+          "coverage": 16,
+          "evidence": 23,
+          "shape": 4,
+          "profile": 8,
+          "observation": 37,
+          "summary": 26,
+          "host-probe": 30,
+          "controls": 57,
+          "root-shape": 3,
+          "control-shape": 3
+        },
+        "recorded_evidence_case_total": 221,
+        "recorded_evidence_scope": "scheduler_only_including_six_malformed_root_control_cases",
         "recorded_evidence_rejections_exercised_through_runtime_and_gate": true,
+        "pre_repair_counterexample": {
+          "cases": 219,
+          "runtime_accepted": 172,
+          "aggregate_gate_accepted": 100,
+          "runtime_exceptions": 4,
+          "aggregate_gate_exceptions": 9,
+          "log_sha256": "04155A4918C88EC0251F4012000D8653DD16325996CE57451E74DCA25798F7A4"
+        },
+        "post_repair_counterexample_replay": {
+          "cases": 219,
+          "runtime_accepted": 0,
+          "aggregate_gate_accepted": 0,
+          "runtime_exceptions": 0,
+          "aggregate_gate_exceptions": 0,
+          "log_sha256": "2BA5A86349B0ADEB8E02B971473CDE3A036B6C34B18EA86CF32738B3FDBC9762"
+        },
+        "per_control_case_counts_bound": true,
+        "raw_host_probe_independently_reparsed": true,
+        "typed_observation_and_summary_rederived": true,
+        "disabled_validator_checks": 3,
+        "rejected_output_preservation_cases": 2,
         "positive_receipts_rebound_in_tests": false,
         "pair_validation_is_freshness_or_authentication": false,
-        "disabled_PMM_parser_and_memory_oracle_detected": true,
-        "PMM_marker_validator_calls": 189,
         "control_execution_complete": false,
-        "unproven_per_control_rejection_groups_at_least": 65,
+        "unproven_per_control_rejection_groups_at_least": 74,
         "current_candidate_full_gate_passed": false,
         "production_ready": false
       },
@@ -3716,41 +3758,76 @@
         "production_ready": false
       },
       "current_closeout_regression": {
-        "cycle": 194,
+        "cycle": 195,
         "status": "pass",
-        "scope": "five_memory_IRQ_AP_profiles_not_full_canonical",
-        "tests_run": 57,
-        "tests_passed": 57,
+        "scope": "scheduler_recorded_evidence_and_executed_controls_only",
+        "tests_run": 14,
+        "tests_passed": 14,
         "tests_failed": 0,
         "tests_skipped": 0,
-        "elapsed_seconds": 43.642,
-        "log_sha256": "3D9CF2291DCB897F2ED2443A43C8819640BA3513C62A2EDF228B7601B907CE96",
+        "elapsed_seconds": 16.423,
+        "log_sha256": "E58C5B0675259CBFDA13624156F7C6C24DDC46152986DEDF36E7AE0372F4C5DE",
         "source_unchanged_during_execution": true,
         "owner_report_unchanged": true,
-        "disabled_PMM_parser_and_memory_oracle_detected": true,
-        "preserved_measurement_helper_failure": "KeyError_qemu_run_count_IRQ_schema_uses_qemu_runs_total_corrected_by_counting_validated_runs",
-        "initial_metadata_regression": {
-          "tests_run": 42,
-          "tests_passed": 42,
+        "disabled_validator_checks": 3,
+        "rejected_output_preservation_cases": 2,
+        "pre_repair_counterexample": {
+          "cases": 219,
+          "runtime_accepted": 172,
+          "aggregate_gate_accepted": 100,
+          "runtime_exceptions": 4,
+          "aggregate_gate_exceptions": 9,
+          "log_sha256": "04155A4918C88EC0251F4012000D8653DD16325996CE57451E74DCA25798F7A4"
+        },
+        "post_repair_counterexample_replay": {
+          "cases": 219,
+          "runtime_accepted": 0,
+          "aggregate_gate_accepted": 0,
+          "runtime_exceptions": 0,
+          "aggregate_gate_exceptions": 0,
+          "log_sha256": "2BA5A86349B0ADEB8E02B971473CDE3A036B6C34B18EA86CF32738B3FDBC9762"
+        },
+        "initial_payload_regression": {
+          "tests_run": 4,
+          "tests_passed": 2,
+          "tests_failed": 1,
+          "tests_errored": 1,
+          "classification": "old_public_scheduler_fixture_had_stale_kernel_entry_identity",
+          "log_sha256": "75F703268BC6B22151A302382B24B24DD65EEFE58B0AF2D76F2981AD8F8AD4FB"
+        },
+        "cloud_backup_regression": {
+          "tests_run": 23,
+          "tests_passed": 23,
           "tests_failed": 0,
           "tests_skipped": 0,
-          "log_sha256": "3715D1F869CCC7FCC802E760E20CAE4EDC95CBE66A92D349F2BE36AEDE2EB7C3"
-        },
-        "initial_combined_invocation": {
-          "return_code": 2,
-          "tests_run": 0,
-          "classification": "unittest_rejected_test_names_after_interleaved_verbose_option_before_test_execution",
-          "log_sha256": "E5BD949E09F100EBA3AF6986500A528EFC66CE300495179FC4558DC29BD5BE74"
+          "elapsed_seconds": 105.171,
+          "log_sha256": "9AC6DE2CD459085794B28E5DF9B85614C456BEC207ED44B40CC7328FF151BD1F"
         },
         "combined_regression": {
           "status": "pass",
-          "scope": "memory_IRQ_AP_N7_entry_boot_mailbox_IPI_core_progress_checklist_publication_not_full_canonical",
-          "tests_run": 307,
-          "tests_passed": 307,
+          "scope": "scheduler_memory_IRQ_AP_N7_entry_boot_mailbox_IPI_core_progress_publication_not_full_canonical",
+          "tests_run": 322,
+          "tests_passed": 322,
           "tests_failed": 0,
           "tests_skipped": 0,
-          "elapsed_seconds": 289.696,
-          "log_sha256": "2C98C22223D5F67165F3499344B0D0898A6913E609955666CDFDD389641D9FBA"
+          "elapsed_seconds": 303.618,
+          "log_sha256": "C8B15D4B8BF19675781D0C5C2F7B22DF7111E01F41065D1F2CED90292831C40A",
+          "final_metadata_replay_required_after_supplemental_preemption_audit": true
+        },
+        "initial_metadata_regression": {
+          "tests_run": 43,
+          "tests_passed": 42,
+          "tests_failed": 1,
+          "tests_skipped": 0,
+          "classification": "historical_entry_test_still_expected_current_scheduler_receipt_to_be_stale",
+          "log_sha256": "F518887F1351092BC2AADC32A1388191921DF9122AC03513BBB58CCD53336A20"
+        },
+        "corrected_metadata_regression": {
+          "tests_run": 43,
+          "tests_passed": 43,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "log_sha256": "FA5B3191D619D6AF939D0C57572B85BB0E64A40294FE2FA6BC99CB6506CF0C0B"
         },
         "canonical_full_replay_performed": false,
         "merge_qualified": false,
@@ -6919,7 +6996,7 @@
         "source_current_scope": "VM187_declared_inputs_only_AP_receipt181_stale"
       },
       "current_ipi_mailbox_oracle_gap": {
-        "cycle": 194,
+        "cycle": 195,
         "status": "bounded_oracle_verified_affected_dependency_replay_pending",
         "move_id": "N8-SMP-MAILBOX-ORACLE-001",
         "requirement_id": "ADD-N36-RECEIPT-COVERAGE-001",
@@ -6941,14 +7018,10 @@
         "disabled_oracle_detected": true,
         "authentication_proved": false,
         "all_coherent_forgeries_excluded": false,
-        "remaining_affected_profiles": 8,
+        "remaining_affected_profiles": 7,
         "production_ready": false,
         "newly_requalified_profiles": [
-          "physical_memory",
-          "virtual_memory",
-          "interrupt_time",
-          "smp_first_ap",
-          "smp_percpu_runtime"
+          "scheduler"
         ]
       },
       "historical_cycle191_source_projection": {
@@ -7897,6 +7970,327 @@
           "xstate_exception",
           "privilege_msr_policy"
         ]
+      },
+      "historical_cycle194_source_projection": {
+        "cycle": 194,
+        "scope": "27_selected_native_checks_not_full_canonical_audit",
+        "passed_checks": 19,
+        "total_checks": 27,
+        "pending_downstream_native_checks": 8,
+        "passing_profiles": [
+          "native_kernel_entry_readiness",
+          "native_symbol_readiness",
+          "native_policy_readiness",
+          "native_kernel_load_readiness",
+          "native_pooleboot_readiness",
+          "native_kernel_revalidation_readiness",
+          "native_kernel_transfer_readiness",
+          "native_kernel_trap_readiness",
+          "native_kernel_cpu_policy_readiness",
+          "native_kernel_errata_policy_readiness",
+          "native_kernel_xstate_policy_readiness",
+          "native_kernel_xstate_exception_readiness",
+          "native_kernel_privilege_msr_policy_readiness",
+          "native_kernel_physical_memory_readiness",
+          "native_kernel_virtual_memory_readiness",
+          "native_kernel_interrupt_time_readiness",
+          "native_kernel_smp_first_ap_readiness",
+          "native_kernel_smp_percpu_runtime_readiness",
+          "native_kernel_smp_ipi_readiness"
+        ],
+        "final_receipt_fresh_qemu_runs": 10,
+        "kernel_entry_runs": 10,
+        "superseded_initial_qemu_runs": 0,
+        "run_count_scope": "Cycle194_five_memory_IRQ_AP_profiles_only_not_retained_CPU_boot_IPI",
+        "next_dependency_move_id": "N12-SCHED-001",
+        "required_next_gate": "eight_scheduler_atomic_lock_profiles_control_execution_repair_then_full_candidate",
+        "focused_python_tests_passed": 57,
+        "focused_python_tests_skipped": 0,
+        "focused_test_log_sha256": "3D9CF2291DCB897F2ED2443A43C8819640BA3513C62A2EDF228B7601B907CE96",
+        "recorded_evidence_rejection_cases": 990,
+        "canonical_full_replay_performed": false,
+        "production_ready": false
+      },
+      "historical_cycle194_dependency_qualification": {
+        "cycle": 194,
+        "source_validation_cycle": 194,
+        "status": "six_current_profiles_eight_pending",
+        "scope": "five_fresh_memory_IRQ_AP_profiles_plus_retained_Cycle192_IPI",
+        "applies_to_current_source": true,
+        "all_fourteen_profiles_current": false,
+        "qualified_profiles": [
+          "physical_memory",
+          "virtual_memory",
+          "interrupt_time",
+          "smp_first_ap",
+          "smp_percpu_runtime",
+          "smp_ipi"
+        ],
+        "newly_qualified_profiles": [
+          "physical_memory",
+          "virtual_memory",
+          "interrupt_time",
+          "smp_first_ap",
+          "smp_percpu_runtime"
+        ],
+        "readiness_replay_required_profiles": [
+          "scheduler",
+          "scheduler_preempt",
+          "scheduler_deferred",
+          "scheduler_smp",
+          "scheduler_ap_workers",
+          "scheduler_smp_preempt",
+          "atomics",
+          "locks"
+        ],
+        "fresh_qemu_runs": 10,
+        "run_count_scope": "Cycle194_five_profiles_only_not_retained_IPI",
+        "superseded_initial_runs": 0,
+        "negative_control_groups": 388,
+        "negative_control_cases": 528,
+        "kernel_sha256": "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8",
+        "receipt_bindings": [
+          {
+            "profile": "physical_memory",
+            "path": "runs/native-kernel-physical-memory-readiness.json",
+            "sha256": "BB5C864CF76128B9D144D360B12792E70C0E2ED6A5986019328967A5B15CF0A8",
+            "fresh_runs": 2,
+            "negative_controls": 191,
+            "hostile_cases": 191,
+            "kernel_host_tests": 246,
+            "execution_log_sha256": "73D78CC992A80B448CB62D488AC4EFA73BF8EED5DBCA5B8F76C37B5AF855061A",
+            "elapsed_seconds": 68.844,
+            "recorded_evidence_cases": {
+              "exit": 14,
+              "coverage": 16,
+              "evidence": 29,
+              "accounting": 7,
+              "summary": 168
+            }
+          },
+          {
+            "profile": "virtual_memory",
+            "path": "runs/native-kernel-virtual-memory-readiness.json",
+            "sha256": "2D2FC54F7AC8DB642E5F628CCF381F33C05100D9FE1D1245FE73374A114B2CAF",
+            "fresh_runs": 2,
+            "negative_controls": 48,
+            "hostile_cases": 48,
+            "kernel_host_tests": 246,
+            "execution_log_sha256": "3F150DB57A3859B6474CCAE0679F8D501C0B6264436950A77C7EDC5EE719DE52",
+            "elapsed_seconds": 65.828,
+            "recorded_evidence_cases": {
+              "exit": 14,
+              "coverage": 16,
+              "evidence": 28,
+              "accounting": 7,
+              "summary": 50
+            }
+          },
+          {
+            "profile": "interrupt_time",
+            "path": "runs/native-kernel-interrupt-time-readiness.json",
+            "sha256": "9FED29AEE36D11165C2F800376DE4EC9BE0E558AB5225170908C6A176F19DE81",
+            "fresh_runs": 2,
+            "negative_controls": 58,
+            "hostile_cases": 58,
+            "kernel_host_tests": 246,
+            "execution_log_sha256": "047FF2DF6EB68D3816503F9E81C83FA820E6D47828691C1D6F48D6B95C2F54B1",
+            "elapsed_seconds": 68.422,
+            "recorded_evidence_cases": {
+              "exit": 14,
+              "coverage": 16,
+              "evidence": 23,
+              "shape": 3,
+              "observation": 145,
+              "summary": 22,
+              "clock": 6
+            }
+          },
+          {
+            "profile": "smp_first_ap",
+            "path": "runs/native-kernel-smp-first-ap-readiness.json",
+            "sha256": "7B20241B707FBC077AA2DD937354E4347AD7952673491C9CA9A77EDD40C43401",
+            "fresh_runs": 2,
+            "negative_controls": 72,
+            "hostile_cases": 72,
+            "kernel_host_tests": 246,
+            "execution_log_sha256": "6A25DBB4AE5AC7A23E7328961F320F5551C3A189A91211F1B4C970530B8614E1",
+            "elapsed_seconds": 71.031,
+            "recorded_evidence_cases": {
+              "exit": 14,
+              "coverage": 16,
+              "evidence": 23,
+              "shape": 3,
+              "dynamic-policy": 2,
+              "observation": 69,
+              "summary": 30,
+              "raw-stop": 2
+            }
+          },
+          {
+            "profile": "smp_percpu_runtime",
+            "path": "runs/native-kernel-smp-percpu-runtime-readiness.json",
+            "sha256": "4C218EAAEB01673F7F0C45ED9DA92895E6EC564AA6A5EEAA57BFB09162F1B99B",
+            "fresh_runs": 2,
+            "negative_controls": 19,
+            "hostile_cases": 159,
+            "kernel_host_tests": 246,
+            "execution_log_sha256": "BEDC73DE58B81C522F0C0F23D34D0E0573C50C2BA8A22ADF37436DC4F4E4C890",
+            "elapsed_seconds": 59.219,
+            "recorded_evidence_cases": {
+              "exit": 14,
+              "coverage": 16,
+              "evidence": 23,
+              "shape": 3,
+              "dynamic-policy": 7,
+              "observation": 108,
+              "summary": 40,
+              "raw-stop": 3,
+              "controls": 39
+            }
+          },
+          {
+            "profile": "smp_ipi",
+            "path": "runs/native-kernel-smp-ipi-readiness.json",
+            "sha256": "D302E39890B500E1D8B732EDE823A62893A0C6453E5E78FC0747FE91DF7CF2F7",
+            "fresh_runs": 2,
+            "negative_controls": 33,
+            "hostile_cases": 609,
+            "kernel_host_tests": 246,
+            "execution_log_sha256": "4B314EC1800F8184E16D843D507E35981A96115FE26798BD1E83E590C3FE2EF3",
+            "elapsed_seconds": 319.219
+          }
+        ],
+        "retained_IPI_qualification_record": "historical_cycle193_dependency_qualification",
+        "recorded_evidence_case_total": 990,
+        "recorded_evidence_scope": "five_fresh_profiles_only",
+        "recorded_evidence_rejections_exercised_through_runtime_and_gate": true,
+        "positive_receipts_rebound_in_tests": false,
+        "pair_validation_is_freshness_or_authentication": false,
+        "disabled_PMM_parser_and_memory_oracle_detected": true,
+        "PMM_marker_validator_calls": 189,
+        "control_execution_complete": false,
+        "unproven_per_control_rejection_groups_at_least": 65,
+        "current_candidate_full_gate_passed": false,
+        "production_ready": false
+      },
+      "historical_cycle194_closeout_regression": {
+        "cycle": 194,
+        "status": "pass",
+        "scope": "five_memory_IRQ_AP_profiles_not_full_canonical",
+        "tests_run": 57,
+        "tests_passed": 57,
+        "tests_failed": 0,
+        "tests_skipped": 0,
+        "elapsed_seconds": 43.642,
+        "log_sha256": "3D9CF2291DCB897F2ED2443A43C8819640BA3513C62A2EDF228B7601B907CE96",
+        "source_unchanged_during_execution": true,
+        "owner_report_unchanged": true,
+        "disabled_PMM_parser_and_memory_oracle_detected": true,
+        "preserved_measurement_helper_failure": "KeyError_qemu_run_count_IRQ_schema_uses_qemu_runs_total_corrected_by_counting_validated_runs",
+        "initial_metadata_regression": {
+          "tests_run": 42,
+          "tests_passed": 42,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "log_sha256": "3715D1F869CCC7FCC802E760E20CAE4EDC95CBE66A92D349F2BE36AEDE2EB7C3"
+        },
+        "initial_combined_invocation": {
+          "return_code": 2,
+          "tests_run": 0,
+          "classification": "unittest_rejected_test_names_after_interleaved_verbose_option_before_test_execution",
+          "log_sha256": "E5BD949E09F100EBA3AF6986500A528EFC66CE300495179FC4558DC29BD5BE74"
+        },
+        "combined_regression": {
+          "status": "pass",
+          "scope": "memory_IRQ_AP_N7_entry_boot_mailbox_IPI_core_progress_checklist_publication_not_full_canonical",
+          "tests_run": 307,
+          "tests_passed": 307,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "elapsed_seconds": 289.696,
+          "log_sha256": "2C98C22223D5F67165F3499344B0D0898A6913E609955666CDFDD389641D9FBA"
+        },
+        "canonical_full_replay_performed": false,
+        "merge_qualified": false,
+        "production_ready": false
+      },
+      "historical_cycle194_candidate_audit": {
+        "cycle": 194,
+        "status": "not_run",
+        "applies_to_current_source": false,
+        "aggregate_suite_passed": false,
+        "merge_requires_runtime_inclusive_exact_final_qualification": true,
+        "production_ready": false
+      },
+      "historical_cycle194_ipi_mailbox_oracle_gap": {
+        "cycle": 194,
+        "status": "bounded_oracle_verified_affected_dependency_replay_pending",
+        "move_id": "N8-SMP-MAILBOX-ORACLE-001",
+        "requirement_id": "ADD-N36-RECEIPT-COVERAGE-001",
+        "flag_id": "FLAG-N36-RECEIPT-COVERAGE-001",
+        "phases": [
+          "N8.5",
+          "N8.6",
+          "N36"
+        ],
+        "blocks_merge_qualification": true,
+        "scope": "PKMBX1_saved_quiesced_snapshots_for_three_APs",
+        "guest_recomputes_checksums": true,
+        "host_independently_recomputes_checksums": true,
+        "export_complete": true,
+        "context_word_count": 5,
+        "baseline_word_count": 15,
+        "runtime_word_count": 38,
+        "raw_mailbox_rejection_cases": 360,
+        "disabled_oracle_detected": true,
+        "authentication_proved": false,
+        "all_coherent_forgeries_excluded": false,
+        "remaining_affected_profiles": 8,
+        "production_ready": false,
+        "newly_requalified_profiles": [
+          "physical_memory",
+          "virtual_memory",
+          "interrupt_time",
+          "smp_first_ap",
+          "smp_percpu_runtime"
+        ]
+      },
+      "current_preemption_control_execution_audit": {
+        "cycle": 195,
+        "status": "open",
+        "move_id": "N12-SCHED-PREEMPT-001",
+        "requirement_id": "ADD-N36-RECEIPT-COVERAGE-001",
+        "flag_id": "FLAG-N36-RECEIPT-COVERAGE-001",
+        "blocks_merge_qualification": true,
+        "profile": "scheduler_preempt",
+        "scope": "one_additional_PKSCHED2_loop_without_per_control_rejection_calls",
+        "source_path": "tools/qualify_native_kernel_scheduler_preempt.py",
+        "source_sha256": "9461C3A0DE65CDEA1C9F1E31FAF7518225293E5B1DAFE2238C85D33DB6783473",
+        "slice_start": 15,
+        "slice_end": 24,
+        "reported_case_count": 9,
+        "control_ids": [
+          "NEG-N12-PKSCHED2-INTERRUPT-FRAME-CONTRACT",
+          "NEG-N12-PKSCHED2-CONTEXT-OWNERSHIP",
+          "NEG-N12-PKSCHED2-EVENT-CAPACITY",
+          "NEG-N12-PKSCHED2-EVENT-DEADLINE",
+          "NEG-N12-PKSCHED2-EVENT-DUPLICATE",
+          "NEG-N12-PKSCHED2-QUANTUM-BOUNDARY",
+          "NEG-N12-PKSCHED2-TRANSACTIONAL-ROLLBACK",
+          "NEG-N12-PKSCHED2-LINKED-SWITCH-SCOPE",
+          "NEG-N12-PKSCHED2-RETAINED-STACK-PARTITION"
+        ],
+        "classification": "source_audit_attestation_without_per_control_rejection_execution",
+        "loop_calls": [
+          "controls.append"
+        ],
+        "prior_audit_record": "current_control_execution_audit",
+        "prior_audit_groups": 65,
+        "aggregate_unproven_groups_at_least": 74,
+        "native_preemption_defect_proved": false,
+        "all_profile_control_execution_audited": false,
+        "production_ready": false
       }
     },
     "native": {
@@ -9153,6 +9547,7 @@
         "ADD-N12-CONCURRENCY-RECLAMATION-001"
       ],
       "current_evidence": [
+        "Cycle 195: docs/checkpoints/cycle195-scheduler-recorded-evidence.md qualifies strict scheduler recorded-evidence admission on the unchanged Cycle192 kernel. Two final boots, 115 executed rejection cases in 28 groups and 246 kernel host tests pass. Fourteen focused tests reject 221 corruptions through runtime and actual gate, detect three disabled validators and preserve rejected output. The original 219 counterexamples all reject without exceptions; initial acceptance and failures remain history.",
         "Cycle 194: docs/checkpoints/cycle194-memory-runtime-replay.md admits five fresh PMM/VM/IRQ/first-AP/per-CPU receipts on the unchanged Cycle192 kernel: ten guest boots, 388 control groups, 528 executed rejection cases and 246 kernel host tests per qualifier. All 57 focused tests pass, including 990 corrupted records through runtime and actual gates and disabled PMM parser/oracle detection.",
         "Cycle 193: docs/checkpoints/cycle193-current-kernel-cpu-replay.md admits five fresh N7 receipts against the unchanged Cycle192 kernel: fourteen guest boots, 225 executed rejection controls, linked exception/MSR audits and 246 kernel host tests per qualifier. One expected TCG limitation probe remains diagnostic only. Fifty-one focused tests pass, including 371 recorded-evidence corruptions through runtime and actual gate, 80 embedded-entry and 20 invalid-dependency cases, and disabled trap-validator detection.",
         "Cycle 192: docs/checkpoints/cycle192-native-mailbox-oracle.md implements native PKMBX1 saved AP mailbox export and independent host checksum/state validation before normalization. Two final four-vCPU IPI boots pass 609 rejection cases in 33 groups and 246 native kernel tests. Six final boot-chain runs and 57 scoped regression tests pass, including 906 recorded-evidence and 360 raw-mailbox corruptions through runtime and actual gate. The changed kernel has nine admitted bounded receipts; independent builders, general CPU/task retirement, hardware and production remain unproved.",
@@ -9212,6 +9607,7 @@
         "ADD-N12-CONCURRENCY-RECLAMATION-001: Cycle 162 qualifies mandatory active PKVM3 table/data ownership. Replay changed-image N5-through-N12 prerequisites, then implement execution-stack ownership, acknowledged cross-CPU quiescence, live timeout/offline/death/pressure/shutdown rollback, an independent oracle and exact-topology live evidence before closing N12.3"
       ],
       "current_gaps": [
+        "Selected readiness is 20/27; seven profiles remain from N12-SCHED-PREEMPT-001. Nine newly verified constant-only preemption control records add to the prior 65, leaving at least 74 scheduler control-execution gaps. These and full exact-candidate qualification still block main merge. Retained memory/AP/IPI/CPU evidence is not fresh scheduler execution. Recorded consistency is not authentication or freshness. No phase or flag closes; native general task/CPU retirement, independent builders, hardware and production remain open.",
         "Selected readiness is 19/27, with eight scheduler-through-lock profiles pending from N12-SCHED-001. The 65 scheduler control-execution gaps and full exact-candidate qualification still block main merge. Retained IPI192 and CPU193 evidence is not fresh Cycle194 execution. No phase or flag closes; general task/CPU retirement, independent builders, hardware and production remain open.",
         "Selected readiness is 14/27; thirteen memory/IRQ/AP/scheduler/atomic/lock profiles remain from N9-PMM-ACPI-CONSUMER-001. The current N7 records replace stale image evidence without rebinding it. The 65 scheduler control-execution gaps and full exact-candidate canonical/Doctor/publication/configured-check/review qualification still block main merge. User exceptions, general task/CPU retirement, independent builders, hardware and production are not proved. No phase or flag closes.",
         "Selected readiness is 9/27 after the kernel change; historical 19/27 is not current-image evidence. Eighteen CPU, memory, IRQ, AP, scheduler, atomic and lock profiles require replay from N7-TRAP-001. Prior VM/CPU receipts are explicitly historical. At least 65 scheduler control-execution gaps and full exact-candidate canonical/Doctor/publication/configured-check/review qualification still block merge. PKMBX1 consistency is not authentication or exclusion of all coherent forgeries. Initial failures and two superseded IPI boots are retained. No phase, flag or production gate closes.",
@@ -10819,6 +11215,8 @@
         "ADD-TEST-001"
       ],
       "current_evidence": [
+        "Cycle 195 source inventory: 1050 Python tests discovered; full qualification pending",
+        "Cycle 195: docs/checkpoints/cycle195-scheduler-recorded-evidence.md qualifies strict scheduler recorded-evidence admission on the unchanged Cycle192 kernel. Two final boots, 115 executed rejection cases in 28 groups and 246 kernel host tests pass. Fourteen focused tests reject 221 corruptions through runtime and actual gate, detect three disabled validators and preserve rejected output. The original 219 counterexamples all reject without exceptions; initial acceptance and failures remain history.",
         "Cycle 194 source inventory: 1044 Python tests discovered; full qualification pending",
         "Cycle 194: docs/checkpoints/cycle194-memory-runtime-replay.md admits five fresh PMM/VM/IRQ/first-AP/per-CPU receipts on the unchanged Cycle192 kernel: ten guest boots, 388 control groups, 528 executed rejection cases and 246 kernel host tests per qualifier. All 57 focused tests pass, including 990 corrupted records through runtime and actual gates and disabled PMM parser/oracle detection.",
         "Cycle 193 source inventory: 1042 Python tests discovered; full qualification pending",
@@ -10874,6 +11272,7 @@
         "native binary parser, reproduction, leakage, malformed, substitution, governance, hardware, Tier 0, bounded-model, deterministic boot-media, PBP1/PBC1/PSM1/PBART1, six inner-format, PBTRUST1/PBSTATE1, PKELF1, PKENTRY1, PKLOAD6/PBLIVE4/PKMAP2/PBEXIT1, PKREVAL1, PKXFER1, PKTRAP1, PKCPU1, PKERR1, PKXSTATE1, PKXEXC1, PKMSR1, PKPMM7/PKACPI1, PKVM1, PKVM3, PKIRQ1, PKSMP1, PKSMP2, PKSMP5, PKSCHED1 through PKSCHED6, PKATOM1, and PKLOCK1 source/live/zero-authority controls, PKRECLAIM1-CORE host-only evidence and source-freshness controls, canonical-LF readiness regression controls, PooleGlyph roadmap bindings, Doctor external-report nonmutation, and collector-smoke negatives"
       ],
       "current_gaps": [
+        "Selected readiness is 20/27; seven profiles remain from N12-SCHED-PREEMPT-001. Nine newly verified constant-only preemption control records add to the prior 65, leaving at least 74 scheduler control-execution gaps. These and full exact-candidate qualification still block main merge. Retained memory/AP/IPI/CPU evidence is not fresh scheduler execution. Recorded consistency is not authentication or freshness. No phase or flag closes; native general task/CPU retirement, independent builders, hardware and production remain open.",
         "Selected readiness is 19/27, with eight scheduler-through-lock profiles pending from N12-SCHED-001. The 65 scheduler control-execution gaps and full exact-candidate qualification still block main merge. Retained IPI192 and CPU193 evidence is not fresh Cycle194 execution. No phase or flag closes; general task/CPU retirement, independent builders, hardware and production remain open.",
         "Selected readiness is 14/27; thirteen memory/IRQ/AP/scheduler/atomic/lock profiles remain from N9-PMM-ACPI-CONSUMER-001. The current N7 records replace stale image evidence without rebinding it. The 65 scheduler control-execution gaps and full exact-candidate canonical/Doctor/publication/configured-check/review qualification still block main merge. User exceptions, general task/CPU retirement, independent builders, hardware and production are not proved. No phase or flag closes.",
         "Selected readiness is 9/27 after the kernel change; historical 19/27 is not current-image evidence. Eighteen CPU, memory, IRQ, AP, scheduler, atomic and lock profiles require replay from N7-TRAP-001. Prior VM/CPU receipts are explicitly historical. At least 65 scheduler control-execution gaps and full exact-candidate canonical/Doctor/publication/configured-check/review qualification still block merge. PKMBX1 consistency is not authentication or exclusion of all coherent forgeries. Initial failures and two superseded IPI boots are retained. No phase, flag or production gate closes.",
@@ -14364,6 +14763,7 @@
       "phase_id": "N12",
       "closure_condition": "Freeze and qualify a bounded allocation-free scheduler core with generation-safe tasks, deterministic queues, explicit CPU ownership and affinity, bounded neutral priority policy, wake/block/cancel/timeout/teardown, selected synchronization and lifetime primitives, exact cooperative BSP context switching, stack isolation and clearing, independent oracle agreement, and no preemption, live AP, ring-3, address-space, target, N12-exit, or production overclaim",
       "evidence": [
+        "docs/checkpoints/cycle195-scheduler-recorded-evidence.md",
         "docs/pdc-production-build-plan.md",
         "runs/pooleos_native_checklist_coverage.json",
         "specs/native-kernel-scheduler-contract.json",
@@ -14387,6 +14787,7 @@
       "phase_id": "N12",
       "closure_condition": "Integrate PKIRQ1 timer and wake/cancel paths with PKSCHED1 through a bounded interrupt-frame and deferred-reschedule contract; prove deterministic BSP quantum expiration, wakeup preemption, nesting and interrupt-state rules, exact context/stack ownership, rollback and cleanup, starvation/accounting bounds, and zero live-AP, ring-3, address-space, target, N12-exit, or production overclaim",
       "evidence": [
+        "docs/checkpoints/cycle195-scheduler-recorded-evidence.md",
         "docs/pdc-production-build-plan.md",
         "runs/pooleos_native_checklist_coverage.json",
         "specs/native-kernel-scheduler-contract.json",
@@ -14927,6 +15328,7 @@
       "phase_id": "N36",
       "closure_condition": "Close ADD-N36-RECEIPT-COVERAGE-001 with a per-profile exact scenario/run/dependency/observation matrix and negative controls through component validators and release gates; keep consistency, fresh execution, authentication, independent builders and hardware evidence separate",
       "evidence": [
+        "docs/checkpoints/cycle195-scheduler-recorded-evidence.md",
         "docs/checkpoints/cycle194-memory-runtime-replay.md",
         "docs/checkpoints/cycle193-current-kernel-cpu-replay.md",
         "docs/checkpoints/cycle192-native-mailbox-oracle.md",
@@ -15244,7 +15646,7 @@
       "Rust PE32+/ELF64 fixtures pass one-host qualification, but second-host reproduction, source provenance, C17/assembly/ABI tools, and image tooling remain open",
       "The native-only q35/QEMU/OVMF/VIRTIO profile passes one-host paused-instantiation controls, bounded checks for all seven required boot-slot/capability/virtual-memory/IPC/scheduler/update/PooleFS domains detect their required hostile violations, and a bounded PooleBoot proof executes under pinned OVMF, but source-rebuilt current QEMU/EDK II, complete reference devices/fault campaigns, six implementation-trace cross-checks, liveness/refinement/conformance work, and second-host reproduction remain open",
       "A reproducible unsigned PooleBoot proof application boots twice with deterministic twelve-file GPT/FAT32 media, exact GOP frames, retained PKMAP2 kernel/PSM1/six-artifact/PBTP1/PBTS1/table/guarded-stack/handoff storage, independently reconstructed PBLIVE4 bytes including a firmware RSDP record, bounded PBEXIT1 retry, successful ExitBootServices, and zero later firmware calls. The ordinary build stops before transfer; a separate opt-in QEMU-only PKXFER1 build installs retained CR3/RSP, transfers once, and live-executes PKREVAL1 over all nine retained files before an exact terminal unsigned-policy denial with zero signatures, authority, actions, writes, or firmware calls. PBSTATE1 still only models authenticated monotonic-anchor validation, deterministic redundant-copy selection, rollback/future rejection, repair/migration planning, and nine interrupted-transition recovery boundaries with no performed effects. Policy signature verification, authenticated revocation, a real cryptographic monotonic writable state provider, persistent backend I/O and executed repair/migration, Secure Boot-state verification, capability creation, activation or update application, policy application, recovery execution or symbol consumption, licensed real vendor payload intake and validation, live FMP/ESRT/PLDM inventory, privileged per-processor revision observation, initial-system execution, final framebuffer remap/revocation, production transfer, target-firmware and physical-media qualification, and N5 exit remain open",
-      "Cycle 194: docs/checkpoints/cycle194-memory-runtime-replay.md admits five fresh PMM/VM/IRQ/first-AP/per-CPU receipts on the unchanged Cycle192 kernel: ten guest boots, 388 control groups, 528 executed rejection cases and 246 kernel host tests per qualifier. All 57 focused tests pass, including 990 corrupted records through runtime and actual gates and disabled PMM parser/oracle detection. Selected readiness is 19/27, with eight scheduler-through-lock profiles pending from N12-SCHED-001. The 65 scheduler control-execution gaps and full exact-candidate qualification still block main merge. Retained IPI192 and CPU193 evidence is not fresh Cycle194 execution. No phase or flag closes; general task/CPU retirement, independent builders, hardware and production remain open. Cycle 193: docs/checkpoints/cycle193-current-kernel-cpu-replay.md admits five fresh N7 receipts against the unchanged Cycle192 kernel: fourteen guest boots, 225 executed rejection controls, linked exception/MSR audits and 246 kernel host tests per qualifier. One expected TCG limitation probe remains diagnostic only. Fifty-one focused tests pass, including 371 recorded-evidence corruptions through runtime and actual gate, 80 embedded-entry and 20 invalid-dependency cases, and disabled trap-validator detection. Selected readiness is 14/27; thirteen memory/IRQ/AP/scheduler/atomic/lock profiles remain from N9-PMM-ACPI-CONSUMER-001. The current N7 records replace stale image evidence without rebinding it. The 65 scheduler control-execution gaps and full exact-candidate canonical/Doctor/publication/configured-check/review qualification still block main merge. User exceptions, general task/CPU retirement, independent builders, hardware and production are not proved. No phase or flag closes. Cycle 192: docs/checkpoints/cycle192-native-mailbox-oracle.md implements native PKMBX1 saved AP mailbox export and independent host checksum/state validation before normalization. Two final four-vCPU IPI boots pass 609 rejection cases in 33 groups and 246 native kernel tests. Six final boot-chain runs and 57 scoped regression tests pass, including 906 recorded-evidence and 360 raw-mailbox corruptions through runtime and actual gate. The changed kernel has nine admitted bounded receipts; independent builders, general CPU/task retirement, hardware and production remain unproved. Selected readiness is 9/27 after the kernel change; historical 19/27 is not current-image evidence. Eighteen CPU, memory, IRQ, AP, scheduler, atomic and lock profiles require replay from N7-TRAP-001. Prior VM/CPU receipts are explicitly historical. At least 65 scheduler control-execution gaps and full exact-candidate canonical/Doctor/publication/configured-check/review qualification still block merge. PKMBX1 consistency is not authentication or exclusion of all coherent forgeries. Initial failures and two superseded IPI boots are retained. No phase, flag or production gate closes. Cycle 191: docs/checkpoints/cycle191-ipi-recorded-evidence.md repairs strict IPI recorded execution, typed observations and summaries, per-control counts and pre-write admission. The host now recomputes frozen frame-address checksums; three constant-only controls now execute the real release-accounting validator. Two final four-vCPU boots, 249 executed cases in 30 categories and 31 focused tests pass, including 528 corrupted records through runtime and gate. All 66 original cases reject without exceptions. Bounded PKAPOWN1 ownership is current on these two runs; general task-stack/CPU retirement is not proved. Selected readiness is 19/27, not independent complete mailbox validation. Next N8-SMP-MAILBOX-ORACLE-001 must export complete native AP mailbox inputs and independently recompute both checksums before normalization under ADD-N36-RECEIPT-COVERAGE-001 / FLAG-N36-RECEIPT-COVERAGE-001. This blocks merge qualification, followed by affected-image replay, eight scheduler-through-lock profiles, at least 65 scheduler control-execution gaps and exact full qualification. The prior 48 runtime/40 gate admissions, three gate exceptions, three constant-only controls and two superseded boots remain preserved. No phase, flag, kernel feature, ISO or production gate closes. Cycle 190: docs/checkpoints/cycle190-percpu-recorded-evidence.md repairs per-CPU recorded execution, exact typed accounting, dynamic timestamp and dual-checksum validation, malformed-input rejection and per-control case-count binding. Two final boots, 159 executed cases in 19 categories and 10 focused tests pass, including 253 corrupt records, six root/control shapes and two output-preservation cases. All 69 original counterexamples reject without validator exceptions. Selected readiness is 18/27; nine IPI-through-lock profiles remain from N8-SMP-IPI-001. At least 65 scheduler controls still require individually bound rejection execution before full exact canonical/Doctor/publication/configured-check/review qualification and PR78 merge. The prior 57 runtime and 48 gate admissions, one runtime and four gate exceptions, and two superseded initial boots remain preserved. General CPU retirement, AP resource ownership integration, hardware, independent builders and production remain unproved. No phase, flag, native kernel feature, ISO or production gate closes. Cycle 189: docs/checkpoints/cycle189-first-ap-recorded-evidence.md repairs first-AP recorded execution, typed lifecycle/cleanup accounting and fail-closed malformed admission. Raw runs validate before allowing only TSC and dependent-checksum differences. Two final boots, 72 executed controls and 12 focused tests pass, including 159 corrupt records, six malformed root/control cases and two output-preservation cases. All 67 original counterexamples reject without exceptions. Selected readiness is 17/27; ten per-CPU-runtime-through-lock profiles remain from N8-SMP-PERCPU-RUNTIME-001. At least 65 scheduler controls still require individually bound rejection execution before full exact canonical/Doctor/publication/configured-check/review qualification and PR78 merge. The prior 55 runtime and 46 gate admissions, one runtime and four gate exceptions, two superseded initial boots and two intake-helper pin failures remain preserved. No general AP runtime, CPU retirement, hardware, independent builder, phase, flag, native kernel feature, ISO or production gate closes. Cycle 188: docs/checkpoints/cycle188-irq-recorded-evidence.md repairs IRQ recorded execution, typed aggregate observations and summaries, fail-closed malformed input and checked calibration before frequency arithmetic. Two final boots, 58 executed controls and 12 focused tests pass on unchanged kernel bytes, including 229 recorded mutations, six malformed root/control cases and two output-preservation cases. All 64 original audit cases now reject without validator exceptions. Selected readiness is 16/27; eleven SMP-through-lock profiles remain from N8-SMP-FIRST-AP-001. At least 65 scheduler controls still need individually bound rejection execution before exact full canonical/Doctor/publication/configured-check/review qualification and PR78 merge. The prior 52 runtime and 44 gate admissions, one runtime and four gate exceptions, direct zero-sample division failure and two superseded initial boots remain preserved. Recorded consistency is not freshness or authentication; no phase, flag, kernel feature, hardware, independent builder, ISO or production gate closes. Cycle 187: docs/checkpoints/cycle187-vm-recorded-evidence.md repairs strict VM recorded execution, independently rederived direct-map accounting and typed summaries. Two final virtual boots and 48 marker controls pass on unchanged kernel bytes. All 10 focused tests pass, including 115 corruptions through runtime and actual gate and two output-preservation cases. The original 65 counterexamples now reject; genuine positive receipts are never rebound. Selected readiness is 15/27; twelve interrupt/time-through-lock profiles remain from N8-IRQ-001. At least 65 scheduler controls still require individually bound rejection execution and full exact-candidate canonical/Doctor/publication/review before PR78 merge. The original 46 runtime and 45 gate admissions and two superseded initial boots remain preserved. Recorded consistency is not freshness or authentication. No phase, flag, native kernel feature, target hardware, independent builder, ISO or production gate closes. Cycle 186: docs/checkpoints/cycle186-pmm-recorded-evidence.md repairs PMM recorded execution and independently rederives ACPI/PMM accounting from both PBP1 handoffs. Two fresh virtual boots and 191 marker controls pass on unchanged kernel bytes; 12 focused tests pass, including 234 malformed records through runtime and actual gate plus two rejected-output preservation cases. Positive source-qualified receipts are genuinely generated, never rebound. Selected readiness is 14/27; thirteen memory-through-lock profiles need replay from N9-VM-DIRECT-MAP-001. At least 65 scheduler controls still require individually bound rejection execution and full exact-candidate canonical/Doctor/publication/review before PR78 merge. The original 65 mutation cases, 62 runtime and 61 gate admissions, and two superseded initial boots remain preserved. Recorded consistency is not authentication or freshness. No phase/flag, target hardware, independent builder, kernel feature, ISO or production gate closes. Cycle 185: docs/checkpoints/cycle185-cpu-recorded-evidence.md repairs typed recorded execution across five CPU profiles. Fourteen final virtual boots and 225 marker controls pass on unchanged kernel bytes. All 50 focused tests pass, including 98 exit, 112 run-coverage and 161 record-evidence mutations through both the runtime validators and actual release gates. Two malformed CPU gate exceptions are repaired. Genuine generated positive receipts are never rebound. Selected readiness is 13/27; fourteen memory-through-lock profiles need replay beginning N9-PMM-ACPI-CONSUMER-001. At least 65 scheduler controls still lack individually bound rejection execution before full exact-candidate canonical/Doctor/publication/review and PR78 merge. The 42 accepted pre-repair exit counterexamples, initial test error, two gate exceptions and six superseded initial trap boots remain preserved. Recorded consistency is not freshness or authentication. No phase/flag closure, independent builder, target hardware, new kernel feature, new ISO or production readiness is claimed. Cycle 184: docs/checkpoints/cycle184-boot-host-provenance.md pins six host qualifiers and admits eight actual generated boot-chain/prerequisite receipts. Six final headless boots include two kernel entries; 109 focused Python tests pass. Typed host evidence, source bindings, invalid-output preservation, exact schema counts and twelve forged PooleBoot host-test-count rejections are verified. Repeated roadmap generation no longer mutates earlier results. Kernel bytes are unchanged. Selected readiness is 8/27, with nineteen CPU/memory checks pending from N7-TRAP-001. At least 65 scheduler controls still need individually bound rejection execution before full exact-candidate canonical/Doctor/publication/review qualification and PR78 merge. Thirteen failed runner attempts, including the first metadata closeout, and eight superseded successful boots remain preserved. No complete host attestation, independent builder, phase/flag closure, new native feature, new ISO or production readiness is claimed. Cycle 183 requalifies the shared ELF loader and kernel entry against declared pinned host inputs. ELF validates typed host evidence and rejects invalid receipts before creating or replacing output. Entry inherits all 19 loader inputs in 72 total bindings; its unchanged kernel product reproduces. All 59 hostile-environment focused tests pass. The separate ELF gate passes, while the selected projection remains 3/27 with 24 downstream dependencies stale. N5-SYMBOLS-SEMANTICS-001 begins ordered symbol/policy/boot and CPU/memory replay. At least 65 scheduler controls still require individual execution evidence before full exact-candidate qualification or PR78 merge. No native feature, new guest boot, independent builder, ISO or production promotion follows. Cycle 182 isolates the host probe size drift to MSVC runtime libraries and pins four host input trees. Shared environment repair rejects ambient LINK/_LINK_ and Cargo overrides; 39 hostile-environment regressions, exact entry reproduction and fixture reproduction pass. The earlier 38-test failure is preserved. Kernel bytes remain unchanged; new entry/fixture provenance leaves 24/27 selected checks stale. Replay N5-ELF-001 and N5 symbols/boot, CPU and memory dependencies, including actual execution evidence for at least 65 scheduler controls, before full qualification or PR78 merge. Complete host attestation, independent builders and production remain open. Cycle 181 resumed closeout fails exact entry-receipt reproduction: the host-only PKELF1 probe is 147968 bytes rather than 148480. A preserved rebuild confirms identical kernel product fields and canonical bytes; host-probe provenance/root cause remains unqualified. Resolve N6-KENTRY-001 before the scheduler control audit; the combined suite has 331 passes, one failure and two skips, not a full pass. Cycle 181 replays fourteen memory-through-lock profiles with 28 final virtual boots and four superseded boots. All 27 selected consistency checks and 164 of 166 focused tests pass (two optional skips). The 660 groups and 2126 cases are reported counts: at least 65 scheduler source-control entries lack per-control rejection execution. Repair ADD-N36-RECEIPT-COVERAGE-001 beginning PKSCHED3 before exact full qualification, publication/review and PR78 merge, then N12.3 live contexts. No phase, flag, native bytes or production condition closes. Cycle 180 qualifies five CPU profiles on the unchanged kernel with fourteen fresh virtual boots, 225 controls and 46 focused tests; one expected TCG diagnostic remains separate. Positive provenance tests now require untouched generated receipts, and nineteen aggregate controls reject stale identities or promotion. Selected readiness is 13/27; fourteen memory-through-lock profiles need replay beginning N9-PMM-ACPI-CONSUMER-001. Full exact qualification, live task contexts/CPU retirement and production remain open. Cycle 179 qualifies six N5 components on the unchanged kernel: six final headless boots, two kernel entries, nine-file revalidation and 71 focused Python tests pass. PKREVAL1 requires semantic receipt acceptance before output; three admission and thirteen artifact/count gate controls pass. Two superseded boots and prior failures remain preserved. Selected readiness is 8/27; nineteen CPU/memory profiles require replay beginning N7-TRAP-001. Full exact-candidate, independent-builder and production qualification remain pending. Cycle 178 requalifies PKENTRY1 for the unchanged Cycle 177 kernel with two clean matching builds, 245 host tests, 43 rejection controls and 55 bindings covering 39 kernel Rust sources. Twelve entry-gate controls cover stale identities and exact numeric types. The selected projection is 3/27; 24 boot/CPU/memory dependencies still need replay beginning N5-SYMBOLS-SEMANTICS-001. No fresh guest, independent builder, full canonical or production qualification follows. Prior failures and historical qualification remain preserved. Cycle 177 adds PKEXEC1 dispatch execution holds and repairs transaction/bypass exhaustion admission rollback. All 17 core stages pass with 245 kernel, 40 lifecycle and 15 compile-fail tests; the changed image has only 2/27 current selected checks and needs 25 dependency replays beginning N6-KENTRY-001. Cycle 176 qualified 105 canonical gates and 708 Doctor checks and merged PR77 to main; that baseline does not qualify the new image. Live guarded stacks, context activation, architectural CPU quiescence and full current qualification remain open. No phase, flag or production gate closes. Historical records follow. Cycle 175 qualifies fourteen final memory-through-lock profiles with 28 fresh virtual boots, 660 groups and 2126 rejected cases; two earlier SMP boots are superseded after a shape-guard repair. All 27 selected native checks pass. Embedded provenance rejects 224 substitutions and 56 invalid dependencies; 161 of 163 focused tests pass with two optional skips. Exact full qualification, publication/review and N12.3 live stack/context and CPU-retirement work remain open. No phase or production gate closes. Cycle 174 requalifies five CPU profiles with fourteen fresh successful virtual boots and 225 controls. Embedded entry evidence now requires exact JSON-typed identity with the current validated receipt. The selected projection passes 24/27; PMM, VM, SMP IPI and broader memory-through-lock provenance replay remain pending before full qualification. No phase or production gate closes. Cycle 173 repairs PKENTRY1 full linked-ELF provenance and replays six N5 components with six fresh boots. The selected projection passes 22/27, while five stale checks and broader embedded-entry CPU/memory/SMP replay remain open. The Cycle 172 full audit failed 104/105; no current full qualification or main merge is claimed. Historical records below are not current-source promotion. Cycle 172 qualifies mandatory PKSTACK1 inactive task-stack ownership in PKLIFE1: 34 lifecycle tests and 243 kernel regressions per host profile, 11 compile-fail tests and a source-bound 17-stage core receipt. All 27 selected native checks pass on the unchanged linked kernel; no new QEMU execution or active stack context is claimed. Scrub failure and the fixed 16-receipt boundary retain ownership. Guarded mappings, architectural context/CPU retirement and automatic receipt-growth integration remain open. Cycle 171 is exact-final qualified and merged through PR76 at main8006c7b. Full runtime-inclusive exact-final qualification and publication/review still gate PR77; no phase, flag or production condition closes. Historical Cycle 171 completes fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles on the unchanged Cycle 168 kernel: 28 final headless boots, 660 control groups, 2126 rejected cases and 243 kernel host tests per qualifier. Four superseded boots are preserved separately. All 27 selected native checks pass. SMP evidence now binds current boot artifacts and rejects stale or malformed transfer dependencies; five new test methods cover nine rejection cases. The final 155-test focused suite passes with two optional local-transcript skips. Measured memory and host/image gate pins are reconciled with 20 memory and 38 stale-identity regression cases. Full runtime-inclusive exact-final qualification, publication and review gates still precede merge and N12.3 task-stack/CPU-retirement integration. Main stays qualified Cycle 165 at this pre-closeout checkpoint. No phase, flag or production gate closes. Historical Cycle 170 requalifies five trap/CPU/xstate/MSR profiles on the unchanged Cycle 168 kernel: fourteen fresh headless boots, 225 marker controls and 42 passing focused tests. One expected TCG exception diagnostic is separate. The trap gate's stale identity pins are repaired and 17 aggregate-gate regression cases reject stale identity or production/authority claims. Fourteen of 27 selected checks pass; thirteen downstream checks plus prior SMP new-boot-artifact replay remain. Next is N9-PMM-ACPI-CONSUMER-001. Full runtime-inclusive canonical qualification is pending; main stays qualified Cycle 165. No phase, flag or production gate closes. Historical Cycle 169 requalifies six N5 components on the unchanged Cycle 168 kernel: six fresh headless boots, two kernel entries, nine-file revalidation and 83 passing focused tests. PSYM1 now binds source-current kernel-entry evidence and measured identities. Nine of 27 selected checks pass; 18 downstream checks and a new-boot-artifact replay of the prior SMP result remain pending. Next is N7-TRAP-001. Full canonical qualification has not run; main stays qualified Cycle 165. No phase, flag or production gate closes. Historical Cycle 168 qualifies mandatory AP runtime/stack and frame retention with two final four-vCPU boots, 27 copied-free and 18 owner-release rejections per partial/full attempt, 249 rejected cases, and 243 kernel host tests. The 147-page kernel has corrected build and mapping diagnostics. All 56 focused tests pass, including serialized receipt and ownership controls. Four of 27 selected native checks pass; 23 changed-image dependencies need replay beginning N5-SYMBOLS-SEMANTICS-001. Main contains exact-final qualified Cycle 165 through PR75. Current full canonical qualification, general task-stack ownership and CPU retirement remain open. No phase, flag or production gate closes. Historical Cycle 165 completes fourteen current-kernel memory/VM/IRQ/SMP/scheduler/atomic/lock profiles with 28 final headless boots, 660 negative-control groups and 2120 rejected cases. Six superseded initial boots are excluded after three test-only corrections. All 27 selected native checks pass, and the 142-test profile/map/gate suite passes with two optional local-transcript skips. Native bytes are unchanged; data-frame scrub-before-reuse, execution-stack ownership, general CPU retirement and full runtime-inclusive exact-final qualification remain open. Main stays qualified Cycle 161, and no phase/flag or production gate closes. Historical Cycle 164 completes five N7 live profiles on the unchanged Cycle 162 kernel with fourteen successful headless boots, 225 marker controls and 41 focused Python tests. One expected TCG exception diagnostic is counted separately. The current selected projection passes 13/27; fourteen memory/VM/IRQ/SMP/scheduler/atomic/lock dependencies still need replay beginning N9-PMM-ACPI-CONSUMER-001. No current full canonical pass, phase closure, target qualification or production promotion is claimed. Historical Cycle 163 completes six N5 component replays with six final headless boots and 70 focused Python tests. Calendar-date validation repairs loader and PooleBoot fixed-day blockers without closing the broader N36 review. The current projection passes 8/27; nineteen downstream receipts, including transfer-dependent VM evidence, require replay beginning N7-TRAP-001. No current full canonical pass, phase closure or production promotion is claimed. Historical Cycle 162 adds mandatory PKVM3 table/data retention and atomic owner-authorized PMM cleanup. The 146-page kernel passes 228 host tests, 16 retention cases, two exact PKVM3 boots with six retained-free rejections each, 48 marker controls and two reproducible PKENTRY1 builds. The selected current-source projection passes 4/27 checks; 23 changed-image dependencies need replay, beginning N5-SYMBOLS-SEMANTICS-001. Main remains the fully qualified Cycle 161 baseline merged through PR74. Execution-stack ownership, general CPU retirement and the broader N36 schema/evidence audit remain open; no phase closure, demo rebase or production promotion follows. Historical Cycle 161 completes current-source replay of the Cycle 158 mandatory inactive table/frame-retention kernel after Cycle 159 boot-chain and Cycle 160 N7 qualification. Fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles pass 28 final headless boots, 658 control groups and 2,118 rejected cases on the unchanged 219-test kernel. All 26 selected native checks and the pre-closeout 105-check/708-Doctor/917-test canonical suite pass; exact-final qualification, publication and review checks still gate a main merge. The failed Cycle 158 audit is preserved separately. PKCPU1 recorded consistency and the two scheduler calendar-date repairs do not close the broader N36 schema/evidence audit. Active roots, execution stacks and CPU-retirement ownership remain open under N12.3. The native foundation includes PKENTRY1 intake, allocation-free PKREVAL1 verifier, bounded early diagnostics, opt-in QEMU-only live entry, BSP-only PKTRAP1 descriptor/exception containment, bounded BSP PKXSTATE1 x87/SSE ownership, PKPMM7 scrubbed lifecycle and checked repeated ledger growth, guarded stable-manager and generation-owned active-ledger transactions, PKACPI1 required-table snapshot/reclaim evidence, PKVM3 sparse PMM-owned direct-map evidence, PKIRQ1 one-BSP timer evidence, PKSMP1 one-AP lifecycle evidence, PKSMP2 one-AP processor-local runtime evidence, PKSMP5 fixed four-vCPU/three-AP startup, rollback, IPI, and one-page-per-root remote-invalidation evidence, PKSCHED1 cooperative scheduler/context-switch evidence, PKSCHED2 bounded BSP timer/wakeup preemption evidence, PKSCHED3 bounded BSP deferred-work evidence, PKSCHED4 exact-topology live AP scheduler ownership/wake/migration evidence, PKSCHED5 exact-topology typed AP-local worker evidence, PKSCHED6 bounded exact-topology SMP-preemption evidence, PKATOM1 typed atomic/memory-order evidence, and PKLOCK1 bounded lock-family/exact-topology contention evidence exist, but authenticated boot trust, measured boot, production transfer, production capability authority, general topology and shootdown, AP-local timer interrupt delivery, deferred reclamation and ABA-safe object lifetime, a general driver/service framework, arbitrary callbacks, general SMP preemption, retained crash evidence, target execution, and N6/N7/N8/N9/N12 exit remain open",
+      "Cycle 195: docs/checkpoints/cycle195-scheduler-recorded-evidence.md qualifies strict scheduler recorded-evidence admission on the unchanged Cycle192 kernel. Two final boots, 115 executed rejection cases in 28 groups and 246 kernel host tests pass. Fourteen focused tests reject 221 corruptions through runtime and actual gate, detect three disabled validators and preserve rejected output. The original 219 counterexamples all reject without exceptions; initial acceptance and failures remain history. Selected readiness is 20/27; seven profiles remain from N12-SCHED-PREEMPT-001. Nine newly verified constant-only preemption control records add to the prior 65, leaving at least 74 scheduler control-execution gaps. These and full exact-candidate qualification still block main merge. Retained memory/AP/IPI/CPU evidence is not fresh scheduler execution. Recorded consistency is not authentication or freshness. No phase or flag closes; native general task/CPU retirement, independent builders, hardware and production remain open. Cycle 194: docs/checkpoints/cycle194-memory-runtime-replay.md admits five fresh PMM/VM/IRQ/first-AP/per-CPU receipts on the unchanged Cycle192 kernel: ten guest boots, 388 control groups, 528 executed rejection cases and 246 kernel host tests per qualifier. All 57 focused tests pass, including 990 corrupted records through runtime and actual gates and disabled PMM parser/oracle detection. Selected readiness is 19/27, with eight scheduler-through-lock profiles pending from N12-SCHED-001. The 65 scheduler control-execution gaps and full exact-candidate qualification still block main merge. Retained IPI192 and CPU193 evidence is not fresh Cycle194 execution. No phase or flag closes; general task/CPU retirement, independent builders, hardware and production remain open. Cycle 193: docs/checkpoints/cycle193-current-kernel-cpu-replay.md admits five fresh N7 receipts against the unchanged Cycle192 kernel: fourteen guest boots, 225 executed rejection controls, linked exception/MSR audits and 246 kernel host tests per qualifier. One expected TCG limitation probe remains diagnostic only. Fifty-one focused tests pass, including 371 recorded-evidence corruptions through runtime and actual gate, 80 embedded-entry and 20 invalid-dependency cases, and disabled trap-validator detection. Selected readiness is 14/27; thirteen memory/IRQ/AP/scheduler/atomic/lock profiles remain from N9-PMM-ACPI-CONSUMER-001. The current N7 records replace stale image evidence without rebinding it. The 65 scheduler control-execution gaps and full exact-candidate canonical/Doctor/publication/configured-check/review qualification still block main merge. User exceptions, general task/CPU retirement, independent builders, hardware and production are not proved. No phase or flag closes. Cycle 192: docs/checkpoints/cycle192-native-mailbox-oracle.md implements native PKMBX1 saved AP mailbox export and independent host checksum/state validation before normalization. Two final four-vCPU IPI boots pass 609 rejection cases in 33 groups and 246 native kernel tests. Six final boot-chain runs and 57 scoped regression tests pass, including 906 recorded-evidence and 360 raw-mailbox corruptions through runtime and actual gate. The changed kernel has nine admitted bounded receipts; independent builders, general CPU/task retirement, hardware and production remain unproved. Selected readiness is 9/27 after the kernel change; historical 19/27 is not current-image evidence. Eighteen CPU, memory, IRQ, AP, scheduler, atomic and lock profiles require replay from N7-TRAP-001. Prior VM/CPU receipts are explicitly historical. At least 65 scheduler control-execution gaps and full exact-candidate canonical/Doctor/publication/configured-check/review qualification still block merge. PKMBX1 consistency is not authentication or exclusion of all coherent forgeries. Initial failures and two superseded IPI boots are retained. No phase, flag or production gate closes. Cycle 191: docs/checkpoints/cycle191-ipi-recorded-evidence.md repairs strict IPI recorded execution, typed observations and summaries, per-control counts and pre-write admission. The host now recomputes frozen frame-address checksums; three constant-only controls now execute the real release-accounting validator. Two final four-vCPU boots, 249 executed cases in 30 categories and 31 focused tests pass, including 528 corrupted records through runtime and gate. All 66 original cases reject without exceptions. Bounded PKAPOWN1 ownership is current on these two runs; general task-stack/CPU retirement is not proved. Selected readiness is 19/27, not independent complete mailbox validation. Next N8-SMP-MAILBOX-ORACLE-001 must export complete native AP mailbox inputs and independently recompute both checksums before normalization under ADD-N36-RECEIPT-COVERAGE-001 / FLAG-N36-RECEIPT-COVERAGE-001. This blocks merge qualification, followed by affected-image replay, eight scheduler-through-lock profiles, at least 65 scheduler control-execution gaps and exact full qualification. The prior 48 runtime/40 gate admissions, three gate exceptions, three constant-only controls and two superseded boots remain preserved. No phase, flag, kernel feature, ISO or production gate closes. Cycle 190: docs/checkpoints/cycle190-percpu-recorded-evidence.md repairs per-CPU recorded execution, exact typed accounting, dynamic timestamp and dual-checksum validation, malformed-input rejection and per-control case-count binding. Two final boots, 159 executed cases in 19 categories and 10 focused tests pass, including 253 corrupt records, six root/control shapes and two output-preservation cases. All 69 original counterexamples reject without validator exceptions. Selected readiness is 18/27; nine IPI-through-lock profiles remain from N8-SMP-IPI-001. At least 65 scheduler controls still require individually bound rejection execution before full exact canonical/Doctor/publication/configured-check/review qualification and PR78 merge. The prior 57 runtime and 48 gate admissions, one runtime and four gate exceptions, and two superseded initial boots remain preserved. General CPU retirement, AP resource ownership integration, hardware, independent builders and production remain unproved. No phase, flag, native kernel feature, ISO or production gate closes. Cycle 189: docs/checkpoints/cycle189-first-ap-recorded-evidence.md repairs first-AP recorded execution, typed lifecycle/cleanup accounting and fail-closed malformed admission. Raw runs validate before allowing only TSC and dependent-checksum differences. Two final boots, 72 executed controls and 12 focused tests pass, including 159 corrupt records, six malformed root/control cases and two output-preservation cases. All 67 original counterexamples reject without exceptions. Selected readiness is 17/27; ten per-CPU-runtime-through-lock profiles remain from N8-SMP-PERCPU-RUNTIME-001. At least 65 scheduler controls still require individually bound rejection execution before full exact canonical/Doctor/publication/configured-check/review qualification and PR78 merge. The prior 55 runtime and 46 gate admissions, one runtime and four gate exceptions, two superseded initial boots and two intake-helper pin failures remain preserved. No general AP runtime, CPU retirement, hardware, independent builder, phase, flag, native kernel feature, ISO or production gate closes. Cycle 188: docs/checkpoints/cycle188-irq-recorded-evidence.md repairs IRQ recorded execution, typed aggregate observations and summaries, fail-closed malformed input and checked calibration before frequency arithmetic. Two final boots, 58 executed controls and 12 focused tests pass on unchanged kernel bytes, including 229 recorded mutations, six malformed root/control cases and two output-preservation cases. All 64 original audit cases now reject without validator exceptions. Selected readiness is 16/27; eleven SMP-through-lock profiles remain from N8-SMP-FIRST-AP-001. At least 65 scheduler controls still need individually bound rejection execution before exact full canonical/Doctor/publication/configured-check/review qualification and PR78 merge. The prior 52 runtime and 44 gate admissions, one runtime and four gate exceptions, direct zero-sample division failure and two superseded initial boots remain preserved. Recorded consistency is not freshness or authentication; no phase, flag, kernel feature, hardware, independent builder, ISO or production gate closes. Cycle 187: docs/checkpoints/cycle187-vm-recorded-evidence.md repairs strict VM recorded execution, independently rederived direct-map accounting and typed summaries. Two final virtual boots and 48 marker controls pass on unchanged kernel bytes. All 10 focused tests pass, including 115 corruptions through runtime and actual gate and two output-preservation cases. The original 65 counterexamples now reject; genuine positive receipts are never rebound. Selected readiness is 15/27; twelve interrupt/time-through-lock profiles remain from N8-IRQ-001. At least 65 scheduler controls still require individually bound rejection execution and full exact-candidate canonical/Doctor/publication/review before PR78 merge. The original 46 runtime and 45 gate admissions and two superseded initial boots remain preserved. Recorded consistency is not freshness or authentication. No phase, flag, native kernel feature, target hardware, independent builder, ISO or production gate closes. Cycle 186: docs/checkpoints/cycle186-pmm-recorded-evidence.md repairs PMM recorded execution and independently rederives ACPI/PMM accounting from both PBP1 handoffs. Two fresh virtual boots and 191 marker controls pass on unchanged kernel bytes; 12 focused tests pass, including 234 malformed records through runtime and actual gate plus two rejected-output preservation cases. Positive source-qualified receipts are genuinely generated, never rebound. Selected readiness is 14/27; thirteen memory-through-lock profiles need replay from N9-VM-DIRECT-MAP-001. At least 65 scheduler controls still require individually bound rejection execution and full exact-candidate canonical/Doctor/publication/review before PR78 merge. The original 65 mutation cases, 62 runtime and 61 gate admissions, and two superseded initial boots remain preserved. Recorded consistency is not authentication or freshness. No phase/flag, target hardware, independent builder, kernel feature, ISO or production gate closes. Cycle 185: docs/checkpoints/cycle185-cpu-recorded-evidence.md repairs typed recorded execution across five CPU profiles. Fourteen final virtual boots and 225 marker controls pass on unchanged kernel bytes. All 50 focused tests pass, including 98 exit, 112 run-coverage and 161 record-evidence mutations through both the runtime validators and actual release gates. Two malformed CPU gate exceptions are repaired. Genuine generated positive receipts are never rebound. Selected readiness is 13/27; fourteen memory-through-lock profiles need replay beginning N9-PMM-ACPI-CONSUMER-001. At least 65 scheduler controls still lack individually bound rejection execution before full exact-candidate canonical/Doctor/publication/review and PR78 merge. The 42 accepted pre-repair exit counterexamples, initial test error, two gate exceptions and six superseded initial trap boots remain preserved. Recorded consistency is not freshness or authentication. No phase/flag closure, independent builder, target hardware, new kernel feature, new ISO or production readiness is claimed. Cycle 184: docs/checkpoints/cycle184-boot-host-provenance.md pins six host qualifiers and admits eight actual generated boot-chain/prerequisite receipts. Six final headless boots include two kernel entries; 109 focused Python tests pass. Typed host evidence, source bindings, invalid-output preservation, exact schema counts and twelve forged PooleBoot host-test-count rejections are verified. Repeated roadmap generation no longer mutates earlier results. Kernel bytes are unchanged. Selected readiness is 8/27, with nineteen CPU/memory checks pending from N7-TRAP-001. At least 65 scheduler controls still need individually bound rejection execution before full exact-candidate canonical/Doctor/publication/review qualification and PR78 merge. Thirteen failed runner attempts, including the first metadata closeout, and eight superseded successful boots remain preserved. No complete host attestation, independent builder, phase/flag closure, new native feature, new ISO or production readiness is claimed. Cycle 183 requalifies the shared ELF loader and kernel entry against declared pinned host inputs. ELF validates typed host evidence and rejects invalid receipts before creating or replacing output. Entry inherits all 19 loader inputs in 72 total bindings; its unchanged kernel product reproduces. All 59 hostile-environment focused tests pass. The separate ELF gate passes, while the selected projection remains 3/27 with 24 downstream dependencies stale. N5-SYMBOLS-SEMANTICS-001 begins ordered symbol/policy/boot and CPU/memory replay. At least 65 scheduler controls still require individual execution evidence before full exact-candidate qualification or PR78 merge. No native feature, new guest boot, independent builder, ISO or production promotion follows. Cycle 182 isolates the host probe size drift to MSVC runtime libraries and pins four host input trees. Shared environment repair rejects ambient LINK/_LINK_ and Cargo overrides; 39 hostile-environment regressions, exact entry reproduction and fixture reproduction pass. The earlier 38-test failure is preserved. Kernel bytes remain unchanged; new entry/fixture provenance leaves 24/27 selected checks stale. Replay N5-ELF-001 and N5 symbols/boot, CPU and memory dependencies, including actual execution evidence for at least 65 scheduler controls, before full qualification or PR78 merge. Complete host attestation, independent builders and production remain open. Cycle 181 resumed closeout fails exact entry-receipt reproduction: the host-only PKELF1 probe is 147968 bytes rather than 148480. A preserved rebuild confirms identical kernel product fields and canonical bytes; host-probe provenance/root cause remains unqualified. Resolve N6-KENTRY-001 before the scheduler control audit; the combined suite has 331 passes, one failure and two skips, not a full pass. Cycle 181 replays fourteen memory-through-lock profiles with 28 final virtual boots and four superseded boots. All 27 selected consistency checks and 164 of 166 focused tests pass (two optional skips). The 660 groups and 2126 cases are reported counts: at least 65 scheduler source-control entries lack per-control rejection execution. Repair ADD-N36-RECEIPT-COVERAGE-001 beginning PKSCHED3 before exact full qualification, publication/review and PR78 merge, then N12.3 live contexts. No phase, flag, native bytes or production condition closes. Cycle 180 qualifies five CPU profiles on the unchanged kernel with fourteen fresh virtual boots, 225 controls and 46 focused tests; one expected TCG diagnostic remains separate. Positive provenance tests now require untouched generated receipts, and nineteen aggregate controls reject stale identities or promotion. Selected readiness is 13/27; fourteen memory-through-lock profiles need replay beginning N9-PMM-ACPI-CONSUMER-001. Full exact qualification, live task contexts/CPU retirement and production remain open. Cycle 179 qualifies six N5 components on the unchanged kernel: six final headless boots, two kernel entries, nine-file revalidation and 71 focused Python tests pass. PKREVAL1 requires semantic receipt acceptance before output; three admission and thirteen artifact/count gate controls pass. Two superseded boots and prior failures remain preserved. Selected readiness is 8/27; nineteen CPU/memory profiles require replay beginning N7-TRAP-001. Full exact-candidate, independent-builder and production qualification remain pending. Cycle 178 requalifies PKENTRY1 for the unchanged Cycle 177 kernel with two clean matching builds, 245 host tests, 43 rejection controls and 55 bindings covering 39 kernel Rust sources. Twelve entry-gate controls cover stale identities and exact numeric types. The selected projection is 3/27; 24 boot/CPU/memory dependencies still need replay beginning N5-SYMBOLS-SEMANTICS-001. No fresh guest, independent builder, full canonical or production qualification follows. Prior failures and historical qualification remain preserved. Cycle 177 adds PKEXEC1 dispatch execution holds and repairs transaction/bypass exhaustion admission rollback. All 17 core stages pass with 245 kernel, 40 lifecycle and 15 compile-fail tests; the changed image has only 2/27 current selected checks and needs 25 dependency replays beginning N6-KENTRY-001. Cycle 176 qualified 105 canonical gates and 708 Doctor checks and merged PR77 to main; that baseline does not qualify the new image. Live guarded stacks, context activation, architectural CPU quiescence and full current qualification remain open. No phase, flag or production gate closes. Historical records follow. Cycle 175 qualifies fourteen final memory-through-lock profiles with 28 fresh virtual boots, 660 groups and 2126 rejected cases; two earlier SMP boots are superseded after a shape-guard repair. All 27 selected native checks pass. Embedded provenance rejects 224 substitutions and 56 invalid dependencies; 161 of 163 focused tests pass with two optional skips. Exact full qualification, publication/review and N12.3 live stack/context and CPU-retirement work remain open. No phase or production gate closes. Cycle 174 requalifies five CPU profiles with fourteen fresh successful virtual boots and 225 controls. Embedded entry evidence now requires exact JSON-typed identity with the current validated receipt. The selected projection passes 24/27; PMM, VM, SMP IPI and broader memory-through-lock provenance replay remain pending before full qualification. No phase or production gate closes. Cycle 173 repairs PKENTRY1 full linked-ELF provenance and replays six N5 components with six fresh boots. The selected projection passes 22/27, while five stale checks and broader embedded-entry CPU/memory/SMP replay remain open. The Cycle 172 full audit failed 104/105; no current full qualification or main merge is claimed. Historical records below are not current-source promotion. Cycle 172 qualifies mandatory PKSTACK1 inactive task-stack ownership in PKLIFE1: 34 lifecycle tests and 243 kernel regressions per host profile, 11 compile-fail tests and a source-bound 17-stage core receipt. All 27 selected native checks pass on the unchanged linked kernel; no new QEMU execution or active stack context is claimed. Scrub failure and the fixed 16-receipt boundary retain ownership. Guarded mappings, architectural context/CPU retirement and automatic receipt-growth integration remain open. Cycle 171 is exact-final qualified and merged through PR76 at main8006c7b. Full runtime-inclusive exact-final qualification and publication/review still gate PR77; no phase, flag or production condition closes. Historical Cycle 171 completes fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles on the unchanged Cycle 168 kernel: 28 final headless boots, 660 control groups, 2126 rejected cases and 243 kernel host tests per qualifier. Four superseded boots are preserved separately. All 27 selected native checks pass. SMP evidence now binds current boot artifacts and rejects stale or malformed transfer dependencies; five new test methods cover nine rejection cases. The final 155-test focused suite passes with two optional local-transcript skips. Measured memory and host/image gate pins are reconciled with 20 memory and 38 stale-identity regression cases. Full runtime-inclusive exact-final qualification, publication and review gates still precede merge and N12.3 task-stack/CPU-retirement integration. Main stays qualified Cycle 165 at this pre-closeout checkpoint. No phase, flag or production gate closes. Historical Cycle 170 requalifies five trap/CPU/xstate/MSR profiles on the unchanged Cycle 168 kernel: fourteen fresh headless boots, 225 marker controls and 42 passing focused tests. One expected TCG exception diagnostic is separate. The trap gate's stale identity pins are repaired and 17 aggregate-gate regression cases reject stale identity or production/authority claims. Fourteen of 27 selected checks pass; thirteen downstream checks plus prior SMP new-boot-artifact replay remain. Next is N9-PMM-ACPI-CONSUMER-001. Full runtime-inclusive canonical qualification is pending; main stays qualified Cycle 165. No phase, flag or production gate closes. Historical Cycle 169 requalifies six N5 components on the unchanged Cycle 168 kernel: six fresh headless boots, two kernel entries, nine-file revalidation and 83 passing focused tests. PSYM1 now binds source-current kernel-entry evidence and measured identities. Nine of 27 selected checks pass; 18 downstream checks and a new-boot-artifact replay of the prior SMP result remain pending. Next is N7-TRAP-001. Full canonical qualification has not run; main stays qualified Cycle 165. No phase, flag or production gate closes. Historical Cycle 168 qualifies mandatory AP runtime/stack and frame retention with two final four-vCPU boots, 27 copied-free and 18 owner-release rejections per partial/full attempt, 249 rejected cases, and 243 kernel host tests. The 147-page kernel has corrected build and mapping diagnostics. All 56 focused tests pass, including serialized receipt and ownership controls. Four of 27 selected native checks pass; 23 changed-image dependencies need replay beginning N5-SYMBOLS-SEMANTICS-001. Main contains exact-final qualified Cycle 165 through PR75. Current full canonical qualification, general task-stack ownership and CPU retirement remain open. No phase, flag or production gate closes. Historical Cycle 165 completes fourteen current-kernel memory/VM/IRQ/SMP/scheduler/atomic/lock profiles with 28 final headless boots, 660 negative-control groups and 2120 rejected cases. Six superseded initial boots are excluded after three test-only corrections. All 27 selected native checks pass, and the 142-test profile/map/gate suite passes with two optional local-transcript skips. Native bytes are unchanged; data-frame scrub-before-reuse, execution-stack ownership, general CPU retirement and full runtime-inclusive exact-final qualification remain open. Main stays qualified Cycle 161, and no phase/flag or production gate closes. Historical Cycle 164 completes five N7 live profiles on the unchanged Cycle 162 kernel with fourteen successful headless boots, 225 marker controls and 41 focused Python tests. One expected TCG exception diagnostic is counted separately. The current selected projection passes 13/27; fourteen memory/VM/IRQ/SMP/scheduler/atomic/lock dependencies still need replay beginning N9-PMM-ACPI-CONSUMER-001. No current full canonical pass, phase closure, target qualification or production promotion is claimed. Historical Cycle 163 completes six N5 component replays with six final headless boots and 70 focused Python tests. Calendar-date validation repairs loader and PooleBoot fixed-day blockers without closing the broader N36 review. The current projection passes 8/27; nineteen downstream receipts, including transfer-dependent VM evidence, require replay beginning N7-TRAP-001. No current full canonical pass, phase closure or production promotion is claimed. Historical Cycle 162 adds mandatory PKVM3 table/data retention and atomic owner-authorized PMM cleanup. The 146-page kernel passes 228 host tests, 16 retention cases, two exact PKVM3 boots with six retained-free rejections each, 48 marker controls and two reproducible PKENTRY1 builds. The selected current-source projection passes 4/27 checks; 23 changed-image dependencies need replay, beginning N5-SYMBOLS-SEMANTICS-001. Main remains the fully qualified Cycle 161 baseline merged through PR74. Execution-stack ownership, general CPU retirement and the broader N36 schema/evidence audit remain open; no phase closure, demo rebase or production promotion follows. Historical Cycle 161 completes current-source replay of the Cycle 158 mandatory inactive table/frame-retention kernel after Cycle 159 boot-chain and Cycle 160 N7 qualification. Fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles pass 28 final headless boots, 658 control groups and 2,118 rejected cases on the unchanged 219-test kernel. All 26 selected native checks and the pre-closeout 105-check/708-Doctor/917-test canonical suite pass; exact-final qualification, publication and review checks still gate a main merge. The failed Cycle 158 audit is preserved separately. PKCPU1 recorded consistency and the two scheduler calendar-date repairs do not close the broader N36 schema/evidence audit. Active roots, execution stacks and CPU-retirement ownership remain open under N12.3. The native foundation includes PKENTRY1 intake, allocation-free PKREVAL1 verifier, bounded early diagnostics, opt-in QEMU-only live entry, BSP-only PKTRAP1 descriptor/exception containment, bounded BSP PKXSTATE1 x87/SSE ownership, PKPMM7 scrubbed lifecycle and checked repeated ledger growth, guarded stable-manager and generation-owned active-ledger transactions, PKACPI1 required-table snapshot/reclaim evidence, PKVM3 sparse PMM-owned direct-map evidence, PKIRQ1 one-BSP timer evidence, PKSMP1 one-AP lifecycle evidence, PKSMP2 one-AP processor-local runtime evidence, PKSMP5 fixed four-vCPU/three-AP startup, rollback, IPI, and one-page-per-root remote-invalidation evidence, PKSCHED1 cooperative scheduler/context-switch evidence, PKSCHED2 bounded BSP timer/wakeup preemption evidence, PKSCHED3 bounded BSP deferred-work evidence, PKSCHED4 exact-topology live AP scheduler ownership/wake/migration evidence, PKSCHED5 exact-topology typed AP-local worker evidence, PKSCHED6 bounded exact-topology SMP-preemption evidence, PKATOM1 typed atomic/memory-order evidence, and PKLOCK1 bounded lock-family/exact-topology contention evidence exist, but authenticated boot trust, measured boot, production transfer, production capability authority, general topology and shootdown, AP-local timer interrupt delivery, deferred reclamation and ABA-safe object lifetime, a general driver/service framework, arbitrary callbacks, general SMP preemption, retained crash evidence, target execution, and N6/N7/N8/N9/N12 exit remain open",
       "PKERR1 freezes a pure exact-target CPU/errata rejection policy, PKXSTATE1 proves bounded x87/SSE standard-XSAVE ownership, PKXEXC1 proves deliberate #MF/#XM recovery plus terminal test-only #NM rejection with a linked scope audit under WHPX, and PKMSR1 proves only a read-only qemu64 BSP system-linkage/global-MCA/unsupported-PMU observation. PKPMM7 supplies bounded physical ownership, scrubbed lifecycle transactions, a stable guarded five-page manager, external generation-owned active ledgers, checked automatic growth with retirement, bounded-window fallback and pre-effect rejection, streamed lifecycle-gated Boot Services reclaim, and PKACPI1-gated ACPI reclaim after required-table validation and retained copy/readback; PKVM1 supplies inactive page-table transactions; PKVM3 proves one-BSP activation/restoration of a complete-profile PMM-owned sparse direct map; PKIRQ1 proves one bounded local timer transaction; PKSMP1 proves one first-AP start/quiesce/park lifecycle; PKSMP2 proves one AP-local GDT/TSS/IDT, guarded-stack, x87/SSE-owner, and interrupt-vector runtime transaction; and PKSMP5 proves three simultaneous AP-local runtimes, partial-start rollback with fresh retry, six fixed IPI classes per AP, three AP-side one-page INVLPG operations, aggregate acknowledgement, and one deferred generation retirement. No target-qualified complete native CPU policy, applicable Model 40h-4Fh errata authority, direct numeric client microcode floor or ratified replacement, target-specific privileged-MSR semantics, syscall/MCE/PMU activation, AVX/extended state, user-task exception delivery, scheduler or migration integration, general interrupt routing/time services, production capability authority, general topology or SMP shootdown, AML or complete ACPI resource-graph execution, complete kernel/user address spaces, heap, MMIO/PAT/MTRR qualification, interrupt-context or concurrent allocator, general pressure, or OOM implementation exists",
       "The exact Tier 1 identity passes 24/24 required checks and 16 allowlisted user-mode CPUID records are captured with zero public raw registers, but seven required channels remain non-complete in total, including partial CPU/MSR and SPD/topology; 15 standards hashes, ten lab-safety prerequisites, native parsing, and physical qualification also remain open",
       "No native DMA/IOMMU/interrupt-remapping confinement",
@@ -15285,6 +15687,7 @@
     "blocked": true
   },
   "claim_boundaries": [
+    "Cycle 195: docs/checkpoints/cycle195-scheduler-recorded-evidence.md qualifies strict scheduler recorded-evidence admission on the unchanged Cycle192 kernel. Two final boots, 115 executed rejection cases in 28 groups and 246 kernel host tests pass. Fourteen focused tests reject 221 corruptions through runtime and actual gate, detect three disabled validators and preserve rejected output. The original 219 counterexamples all reject without exceptions; initial acceptance and failures remain history. Selected readiness is 20/27; seven profiles remain from N12-SCHED-PREEMPT-001. Nine newly verified constant-only preemption control records add to the prior 65, leaving at least 74 scheduler control-execution gaps. These and full exact-candidate qualification still block main merge. Retained memory/AP/IPI/CPU evidence is not fresh scheduler execution. Recorded consistency is not authentication or freshness. No phase or flag closes; native general task/CPU retirement, independent builders, hardware and production remain open.",
     "Cycle 194: docs/checkpoints/cycle194-memory-runtime-replay.md admits five fresh PMM/VM/IRQ/first-AP/per-CPU receipts on the unchanged Cycle192 kernel: ten guest boots, 388 control groups, 528 executed rejection cases and 246 kernel host tests per qualifier. All 57 focused tests pass, including 990 corrupted records through runtime and actual gates and disabled PMM parser/oracle detection. Selected readiness is 19/27, with eight scheduler-through-lock profiles pending from N12-SCHED-001. The 65 scheduler control-execution gaps and full exact-candidate qualification still block main merge. Retained IPI192 and CPU193 evidence is not fresh Cycle194 execution. No phase or flag closes; general task/CPU retirement, independent builders, hardware and production remain open.",
     "Cycle 193: docs/checkpoints/cycle193-current-kernel-cpu-replay.md admits five fresh N7 receipts against the unchanged Cycle192 kernel: fourteen guest boots, 225 executed rejection controls, linked exception/MSR audits and 246 kernel host tests per qualifier. One expected TCG limitation probe remains diagnostic only. Fifty-one focused tests pass, including 371 recorded-evidence corruptions through runtime and actual gate, 80 embedded-entry and 20 invalid-dependency cases, and disabled trap-validator detection. Selected readiness is 14/27; thirteen memory/IRQ/AP/scheduler/atomic/lock profiles remain from N9-PMM-ACPI-CONSUMER-001. The current N7 records replace stale image evidence without rebinding it. The 65 scheduler control-execution gaps and full exact-candidate canonical/Doctor/publication/configured-check/review qualification still block main merge. User exceptions, general task/CPU retirement, independent builders, hardware and production are not proved. No phase or flag closes.",
     "Cycle 192: docs/checkpoints/cycle192-native-mailbox-oracle.md implements native PKMBX1 saved AP mailbox export and independent host checksum/state validation before normalization. Two final four-vCPU IPI boots pass 609 rejection cases in 33 groups and 246 native kernel tests. Six final boot-chain runs and 57 scoped regression tests pass, including 906 recorded-evidence and 360 raw-mailbox corruptions through runtime and actual gate. The changed kernel has nine admitted bounded receipts; independent builders, general CPU/task retirement, hardware and production remain unproved. Selected readiness is 9/27 after the kernel change; historical 19/27 is not current-image evidence. Eighteen CPU, memory, IRQ, AP, scheduler, atomic and lock profiles require replay from N7-TRAP-001. Prior VM/CPU receipts are explicitly historical. At least 65 scheduler control-execution gaps and full exact-candidate canonical/Doctor/publication/configured-check/review qualification still block merge. PKMBX1 consistency is not authentication or exclusion of all coherent forgeries. Initial failures and two superseded IPI boots are retained. No phase, flag or production gate closes.",

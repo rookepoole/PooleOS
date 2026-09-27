@@ -11,15 +11,19 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Work in progress, Cycle 195:** scheduler recorded-evidence validation now
-passes two fresh guest boots and 23 scoped scheduler/publication tests. The
-selected current-kernel projection is 20/27; seven profiles and the existing
-65 control-execution gaps still precede full merge qualification. This is a
-development-branch cloud backup, not a main merge. Roadmap and architecture
-reconciliation remain unfinished at Cycle 194.
-[Backup evidence and exact resume order](docs/checkpoints/cycle195-scheduler-cloud-backup.md).
+**Current development checkpoint:** Cycle 195 repairs scheduler recorded-evidence
+admission. Two fresh guest boots, 115 rejection cases and 14 focused tests pass,
+including 221 corrupted receipts. All 219 original audit counterexamples now
+reject without validator exceptions. Roadmap 195 preserves prior results and
+tracks 20/27 selected checks passing; seven profiles and at least 74 control-
+execution gaps remain before full exact-candidate qualification and main merge.
+The audit found nine additional constant-only preemption controls alongside
+the previously known 65. Architecture binds 310 sources. No kernel or ISO changed.
+[Cycle 195 evidence and next steps](docs/checkpoints/cycle195-scheduler-recorded-evidence.md).
+The intermediate cloud-backup checkpoint remains immutable history. Combined
+scoped regression passes 322 tests, zero skips; this is not a full qualification.
 
-**Last reconciled development checkpoint:** Cycle 194 requalifies physical memory,
+**Historical development checkpoint:** Cycle 194 requalifies physical memory,
 virtual memory, interrupts/time, first AP and per-CPU runtime on the unchanged
 Cycle 192 kernel. Ten fresh guest boots, 528 rejection cases in 388 groups and
 57 focused regression tests pass. Selected readiness is 19/27; eight scheduler-

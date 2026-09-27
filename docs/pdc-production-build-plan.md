@@ -1,15 +1,15 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-27
-Plan version: 2.97.0-native-memory-runtime-replay
-Roadmap cycle: PooleOS Cycle 194
+Plan version: 2.98.0-native-scheduler-recorded-evidence
+Roadmap cycle: PooleOS Cycle 195
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 195 In Progress: Scheduler Evidence Cloud Backup
+## Cycle 195: Scheduler Recorded Evidence
 
 `N12-SCHED-001`, supporting N12.1/N12.2/N12.5/N12.6/N12.7 and N36, repairs
 recorded scheduler receipt admission. Two final guest boots, 115 executed
@@ -19,18 +19,38 @@ regression passes 23 scheduler/publication tests with zero skips.
 
 The selected current-kernel projection is 20/27. Seven profiles still fail
 current-image admission: preemption, deferred work, SMP scheduling, AP workers,
-SMP preemption, atomics and locks. At least 65 existing control-execution gaps
-also remain. GitHub reports a conflict-free draft, not qualifying check results.
-Completed checkpoints are already backed up on the development branch; this
-backup preserves further unfinished work without merging unqualified code.
+SMP preemption, atomics and locks. At least 74 control-execution gaps also
+remain: nine newly verified preemption controls plus the prior 65 in four
+later qualifiers. The nine-record loop appends constant pass records without
+per-control rejection calls; source audit and a regression bind this finding.
+This does not prove a kernel preemption defect. Existing receipt-coverage and
+preemption flags track the repair. GitHub reports a conflict-free draft, not
+qualifying check results.
+Completed checkpoints are backed up on the development branch. The intermediate
+backup is retained as history, not rewritten after reconciliation. Roadmap 195
+archives five replaced current records; retained memory/AP/IPI evidence is not
+counted as new scheduler execution. Architecture now directly binds scheduler
+sources, the audited preemption qualifier and both checkpoints, for 310 bindings.
+The 1,050 discovered Python
+tests are inventory, not a full-suite pass. No prior failure is erased.
 
-Next: reconcile roadmap/architecture/history, run combined regression and
-conservation, then `N12-SCHED-PREEMPT-001` and the remaining dependencies.
-The machine ledger and architecture remain Cycle 194 historical snapshots until
-that reconciliation. No phase, flag or production gate closes. Full exact-
+The original 219-record audit admitted 172 runtime and 100 actual-gate corruptions
+and raised four/nine exceptions. After repair all 219 reject without exceptions.
+An early payload test used a stale public receipt: two passes, one failure, one
+error. Genuine fresh evidence and positive-baseline checks resolved that failure
+without weakening validation. Two initial boots remain superseded, not final.
+
+Combined scoped regression passes 322 tests, zero skips, including exact entry
+reproduction. The first metadata run passed 42/43; an old assertion still
+expected scheduler evidence to be stale. Corrected 43/43 passes, preserving the
+failed run. Final metadata and conservation checks cover closeout changes.
+
+Next: `N12-SCHED-PREEMPT-001`, repairing recorded-evidence admission and the nine
+constant-only controls before accepting fresh qualification, then the remaining
+dependencies. No phase, flag or production gate closes. Full exact-
 candidate canonical/Doctor/publication/configured-check/review gates remain
 required before main merge. Native kernel and demo ISO bytes are unchanged.
-[Evidence, failure history and resume order](checkpoints/cycle195-scheduler-cloud-backup.md).
+[Evidence, failure history and resume order](checkpoints/cycle195-scheduler-recorded-evidence.md).
 
 ## Cycle 194: Current-Kernel Memory and AP Replay
 

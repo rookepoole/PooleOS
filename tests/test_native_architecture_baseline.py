@@ -68,7 +68,7 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 303)
+        self.assertEqual(len(self.artifact["bound_sources"]), 310)
         self.assertIn("docs/checkpoints/cycle191-ipi-recorded-evidence.md", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("docs/checkpoints/cycle190-percpu-recorded-evidence.md", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("docs/checkpoints/cycle189-first-ap-recorded-evidence.md", {item["path"] for item in self.artifact["bound_sources"]})
@@ -82,7 +82,12 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertIn("docs/checkpoints/cycle174-cpu-entry-provenance.md", {item["path"] for item in self.artifact["bound_sources"]})
         bound_paths = {binding["path"] for binding in self.artifact["bound_sources"]}
         self.assertEqual(len(bound_paths), len(self.artifact["bound_sources"]))
-        for path in ("docs/checkpoints/cycle194-memory-runtime-replay.md",
+        for path in ("docs/checkpoints/cycle195-scheduler-recorded-evidence.md",
+                     "docs/checkpoints/cycle195-scheduler-cloud-backup.md",
+                     "runtime/native_kernel_scheduler.py", "tools/qualify_native_kernel_scheduler.py",
+                     "tools/qualify_native_kernel_scheduler_preempt.py",
+                     "tests/test_native_kernel_scheduler.py", "docs/native-kernel-scheduler.md",
+                     "docs/checkpoints/cycle194-memory-runtime-replay.md",
                      "tests/test_native_kernel_physical_memory.py",
                      "docs/checkpoints/cycle193-current-kernel-cpu-replay.md",
                      "tools/qualify_native_kernel_trap.py", "tests/test_native_kernel_trap.py"):
