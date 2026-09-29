@@ -11,7 +11,17 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 196 replaces nine constant-only
+**Current development checkpoint:** Cycle 197 repairs native deferred-work
+transactions, fault-path priority accounting and shutdown ordering. Eleven
+original native failures are repaired; 21 native tests pass in debug and optimized
+builds, and four deliberately disabled fixes are detected. All 17 core stages,
+two matching kernel builds and 54 scoped Python tests pass. Kernel bytes changed;
+selected readiness is 3/27, requiring 24 dependency replays before full merge
+qualification. Deferred receipt admission and 65 known control-execution gaps
+remain open. The demo ISO is unchanged. No new-kernel guest boot is claimed.
+[Cycle 197 evidence and replay order](docs/checkpoints/cycle197-native-deferred-transactions.md).
+
+**Historical development checkpoint:** Cycle 196 replaces nine constant-only
 preemption control groups with executed native-host and linked/source audit
 checks. Two final guest boots, 246 kernel host tests, 226 rejection cases and
 17 focused tests pass, including 232 corrupt receipts and seven disabled native

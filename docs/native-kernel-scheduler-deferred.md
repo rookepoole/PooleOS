@@ -2,6 +2,18 @@
 
 ## Scope
 
+Cycle 197 repairs native state transactions, priority accounting on rejected
+pre-execution faults, and shutdown admission. Counter-exhaustion rejection
+preserves slots, generations, owners, lanes and accounting, including compound
+dispatch and batch retirement. Accepted duplicate diagnostics and injected
+faults retain their specified counters and consumed reservation generations.
+The fixed-size candidate copy allocates no heap and adds no callback API.
+This is state-transaction integrity under the existing BSP/lock contract, not
+cross-CPU atomicity. Twenty-one native tests pass in debug and optimized host
+builds, with four disabled-fix variants detected. Changed-image guest replay,
+recorded-evidence admission repair and 14 executed control groups are pending;
+historical qualification below does not qualify the new kernel.
+
 PKSCHED3 advances `N12-SCHED-DEFERRED-001` with one allocation-free deferred-work controller and two fixed BSP kernel workers. It composes the PKIRQ1 local-APIC timer path, the PKSCHED1 scheduler primitives, and the PKSCHED2 interrupt-return foundation. It does not create a general callback facility, driver API, service API, AP scheduler, or production authority.
 
 The selector-17 development profile is isolated behind `development-scheduler-deferred`. Default PooleBoot still stops before transfer. A selector-17 build cannot be combined with another post-transfer development scenario.

@@ -7,9 +7,18 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 196
+Last roadmap reconciliation: PooleOS Cycle 197
 
-Cycle 196: nine constant-only preemption control groups are replaced with
+Cycle 197 repairs native deferred transactions, fault fairness and shutdown
+ordering. The new kernel passes 21 native tests in two host profiles, four
+disabled-fix variants, all 17 core stages, two matching builds and 54 scoped
+Python tests. Selected readiness is 3/27; 24 changed-image dependencies require
+replay from N5-SYMBOLS-SEMANTICS-001. Deferred recorded-evidence defects and at
+least 65 control-execution gaps remain open. The deferred flag is reopened;
+no normative charter term, phase, ISO or production condition changes.
+[Cycle 197 evidence](checkpoints/cycle197-native-deferred-transactions.md).
+
+Historical Cycle 196: nine constant-only preemption control groups are replaced with
 executed native-host and linked/source audit checks. Two final guest boots,
 226 rejection cases and 17 focused tests pass, including 232 corrupted records
 and seven disabled native validator variants. Selected readiness is 21/27;

@@ -24,6 +24,9 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle197-native-deferred-transactions.md",
+    "tests/test_native_deferred_transactions.py",
+    "tests/fixtures/pksched3_transaction_probe.rs",
     "docs/checkpoints/cycle196-preemption-executed-controls.md",
     "runtime/native_kernel_scheduler_preempt.py",
     "specs/native-kernel-scheduler-preemption-readiness.schema.json",

@@ -1,13 +1,54 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-29
-Plan version: 2.99.0-native-preemption-executed-controls
-Roadmap cycle: PooleOS Cycle 196
+Plan version: 2.100.0-native-deferred-transactions
+Roadmap cycle: PooleOS Cycle 197
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 197: Native Deferred Transactions
+
+`N12-SCHED-DEFERRED-001`, under existing `ADD-N12-SCHED-DEFERRED-001` and
+`ADD-N36-RECEIPT-COVERAGE-001`, exposed native state changes after rejected
+counter-exhaustion operations, premature shutdown retirement and fault-path
+fairness changes. Fixed-size candidate state now commits only accepted
+operations and the explicitly documented diagnostic transitions. Shutdown
+must close intake before retirement. This is controller transaction integrity,
+not new cross-CPU synchronization or arbitrary callbacks.
+
+Eleven of the original 19 native tests failed before repair; all 19 passed
+afterward. Expanded coverage passes 21 tests at each of optimization levels
+0 and 3. Four independently compiled disabled-fix variants fail as intended.
+All 17 native core stages, two exact matching builds, 43 entry rejection
+controls and 54 scoped Python tests pass. The measured kernel has 530,072
+canonical bytes, 602,112 loaded bytes and 1,326 relocations, SHA-256
+`B19D4F7E854ECED3495D88C00F7379061B913EF00477FBD3701929B2F77D80F1`.
+
+The new image has 3/27 current selected checks; earlier passes remain historical
+evidence for their exact kernels. Reopen `FLAG-N12-SCHED-DEFERRED-001` until
+corrected native guest and hostile-control qualification passes. The roadmap
+retains 94 flags, now 36 open, and all 57 existing additions without changing
+the locked 8,996-requirement checklist or its coverage. No phase closes.
+
+Required next subphases, in dependency order:
+
+1. Requalify N5 symbols, then boot/load/revalidation/transfer dependencies.
+2. Replay affected CPU, memory, IRQ and SMP profiles on the changed image.
+3. Repair deferred recorded-evidence admission, then replace all 14 constant-only
+   deferred control groups with executed, source-bound controls and fresh boots.
+4. Finish remaining scheduler, atomic and lock evidence; at least 65 known
+   control-execution groups remain unproved across four qualifiers.
+5. Run full exact-candidate canonical/Doctor, publication and review gates before
+   main merge. No release or production promotion follows from host passes.
+
+The genuine pre-repair 121-case audit admitted 114 malformed records in runtime
+and 47 through the release gate; four runtime exceptions and one gate exception
+also remain recorded. The private old-kernel two-boot diagnostic is not final
+qualification, and no new-kernel guest boot or ISO is claimed this cycle.
+[Evidence and failure history](checkpoints/cycle197-native-deferred-transactions.md).
 
 ## Cycle 196: Executed Preemption Controls
 

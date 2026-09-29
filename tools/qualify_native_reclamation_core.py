@@ -17,6 +17,9 @@ sys.path.insert(0, str(ROOT))
 from tools import qualify_native_kernel_entry as entry  # noqa: E402
 
 SOURCES = (
+    "native/kernel/src/scheduler_deferred.rs",
+    "tests/fixtures/pksched3_transaction_probe.rs",
+    "tests/test_native_deferred_transactions.py",
     "native/kernel/src/reclamation.rs",
     "native/kernel/src/reclamation/ap_resources.rs",
     "native/kernel/src/reclamation/execution.rs",
@@ -72,7 +75,7 @@ STACK_TESTS = (
     "overlapping_stacks_from_distinct_manager_namespaces_cannot_share_scheduler",
     "full_scrub_receipt_ledger_retains_the_next_stack_without_writes",
 )
-KERNEL_SHA256 = "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8"
+KERNEL_SHA256 = "B19D4F7E854ECED3495D88C00F7379061B913EF00477FBD3701929B2F77D80F1"
 STAGES = (
     "format", "host-build-debug", "test-build-debug", "tests-debug",
     "lifetime-build-debug", "lifetime-tests-debug",

@@ -288,6 +288,19 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 197 repairs native deferred transaction rollback, fault fairness and shutdown ordering. "
+    "Eleven original native failures are repaired; 21 native tests per debug/optimized profile, four "
+    "disabled-fix variants, 17 core stages, two exact builds and 54 scoped Python tests pass. "
+    "The changed kernel has only 3/27 current selected checks; 24 dependencies require replay from "
+    "N5-SYMBOLS-SEMANTICS-001. Deferred recorded admission still accepts malformed evidence: the genuine "
+    "121-case before-audit recorded 114 runtime and 47 gate admissions, four runtime exceptions and one "
+    "gate exception. Fourteen constant-only deferred groups remain within at least 65 open control "
+    "groups. The deferred flag is reopened. No new-kernel guest boot, ISO, phase closure or production "
+    "promotion follows; full exact-candidate qualification precedes main merge. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -3926,8 +3939,8 @@ def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINE
         "canonical_byte_count": 530_072,
         "image_byte_count": 602_112,
         "entry_offset": 0xA000,
-        "relocation_count": 1327,
-        "canonical_sha256": "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8",
+        "relocation_count": 1326,
+        "canonical_sha256": "B19D4F7E854ECED3495D88C00F7379061B913EF00477FBD3701929B2F77D80F1",
     }
     if not isinstance(product, dict) or any(
         type(product.get(key)) is not type(value) or product.get(key) != value
@@ -3939,7 +3952,7 @@ def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINE
     detail = (
         "contract=PKENTRY1; kernel_tests=246/246; clean_builds=2/2; negative=43/43; "
         "exact_loaded=2/2; bytes=530072; image_bytes=602112; entry=0xA000; "
-        "relocations=1327; live_transfer=false; "
+        "relocations=1326; live_transfer=false; "
         "target_execution=false; n6_exit=false; production_ready=false"
     )
     return readiness.make_check(

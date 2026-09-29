@@ -4,12 +4,12 @@
     "contract": {
       "byte_count": 10872,
       "path": "specs/native-kernel-entry-contract.json",
-      "sha256": "90F9399317F7824CD96DE964C3C0327EE5CC5E4B617AF5E79AC27EE7F19436E9"
+      "sha256": "ABBF730D7ADED8900A6CAFCFD62CAC6DE76DB9F773E9EFE7AEF8A82248997D1D"
     },
     "contract_schema": {
       "byte_count": 3952,
       "path": "specs/native-kernel-entry-contract.schema.json",
-      "sha256": "FFCB9B4B8A7A2CF9420B378AF6F5163B3D433AA9C1FF679402122C79E0690A3E"
+      "sha256": "1C9FD3A56D76F69A7FEF1D4424EA5FFEDCC60A00EEA63F045523067AEC9DB9CC"
     },
     "implementation_inputs": [
       {
@@ -45,12 +45,12 @@
       {
         "byte_count": 447,
         "path": "native/kernel/manifest.pkm",
-        "sha256": "1D675EBE6819D5717FC32F758CD004729ED402C6EA834E6664C2EE76B87A9885"
+        "sha256": "20B81D2295ADAF58EBD3088ED76171953FCEB166A9172BB71A115AFA2E5407F5"
       },
       {
         "byte_count": 65667,
         "path": "native/kernel/src/lib.rs",
-        "sha256": "6A3E3495AD1613B4190D6ADC5877C2811BADFDD39E3CBAB48BD8F7B128FB139B"
+        "sha256": "C5E6C93843E58FD41EC57B622F9F75D1C7D6C403A925368A4FAF68885C141CF2"
       },
       {
         "byte_count": 538452,
@@ -155,7 +155,7 @@
       {
         "byte_count": 10928,
         "path": "tests/test_native_kernel_entry.py",
-        "sha256": "F0E407B6C998A81511226B30D73A82FCC2DEEBE655886297A93BC5FD4492269E"
+        "sha256": "C89AA537D51C2427DF4F33E2D5D4292F9AFCB5D893BCDF851F7E76E9B56E91D4"
       },
       {
         "byte_count": 7025,
@@ -333,9 +333,9 @@
         "sha256": "E61261956C2CBDBD7B5B238FC014AC6A291BDC1E48C6D97D34DD7C12D131BBC4"
       },
       {
-        "byte_count": 29212,
+        "byte_count": 31778,
         "path": "native/kernel/src/scheduler_deferred.rs",
-        "sha256": "4AAE60E149A49AF5144D348D64AE552FC5B6C1D822CF48852A220FD9270860EA"
+        "sha256": "1F8AE8F0521C08DDAE73BBADB16E91B33235129FCC695191AF83A98ABDD8786E"
       },
       {
         "byte_count": 47559,
@@ -770,27 +770,27 @@
   },
   "product": {
     "canonical_byte_count": 530072,
-    "canonical_sha256": "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8",
+    "canonical_sha256": "B19D4F7E854ECED3495D88C00F7379061B913EF00477FBD3701929B2F77D80F1",
     "entry_offset": 40960,
     "entry_prefix_hex": "FAFC4889E14885C9743B48F7C10F00000075324889C848C1E01048C1F8104839C87522410F20D89C",
     "host_leakage_hits": [],
     "image_byte_count": 602112,
-    "linked_byte_count": 7036160,
-    "linked_sha256": "6FFC3709DDBFD66328B734AD735153FCCEE192B5E68AC5D1EF42D1F6E5DFC980",
-    "loaded_sha256": "C91D80EF16FB5EA9EBEFC114EEA7CBC29C33A4BF605CF65B310741124C422FA7",
+    "linked_byte_count": 7042768,
+    "linked_sha256": "907EACFD6BC6D5669CA88489BC4A3E1121ED52F648FE434D3C05A4CB606C345A",
+    "loaded_sha256": "04CD0746E0601456DFBD57D791EC573E3142AB9231A2FDAA8663198106329EAC",
     "manifest_fields": {
-      "build_id": "PKBUILD1-CYCLE192-N8-MBX-ORCL-V01-0000000001",
+      "build_id": "PKBUILD1-CYCLE197-N12-DEFERRED-V1-0000000001",
       "entry_contract": "PKENTRY1",
       "entry_offset": "0x0000A000",
       "handoff_contract": "PBP1",
       "image_contract": "PKELF1",
       "pbp1_contract_sha256": "89EA7517EF7D2E30C7EBEC4C28D092E3F01D95519EC6768E7B4D5C0F586B58E7",
       "pkelf1_contract_sha256": "A0CE48E9EF992B97333D84ECB2850E221D482E2ACF11BB312B5F769DAFF992AA",
-      "pkentry1_contract_sha256": "90F9399317F7824CD96DE964C3C0327EE5CC5E4B617AF5E79AC27EE7F19436E9"
+      "pkentry1_contract_sha256": "ABBF730D7ADED8900A6CAFCFD62CAC6DE76DB9F773E9EFE7AEF8A82248997D1D"
     },
     "manifest_offset": 544,
     "relocation_canonical_offset": 471104,
-    "relocation_count": 1327,
+    "relocation_count": 1326,
     "relocation_source_offset": 471264,
     "relro_byte_count": 57344,
     "relro_offset": 471040
