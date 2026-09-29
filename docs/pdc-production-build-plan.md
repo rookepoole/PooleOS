@@ -1,13 +1,44 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-29
-Plan version: 2.100.0-native-deferred-transactions
-Roadmap cycle: PooleOS Cycle 197
+Plan version: 2.101.0-native-symbol-admission-boot-replay
+Roadmap cycle: PooleOS Cycle 198
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 198: Symbol Admission and Boot Replay
+
+`N5-SYMBOLS-SEMANTICS-001`, N5.6/N5.9 and N36, under existing
+`ADD-N36-RECEIPT-COVERAGE-001`, repairs symbol receipt admission. The genuine
+646-case pre-repair audit admitted 494 corruptions in runtime and 467 through
+the release gate, with six and eleven exceptions respectively. Strict typed
+evidence, bindings, reconstructed parser/activation results and exact control
+ordering now reject all 650 final cases through both paths without exceptions.
+Four additional cases cover the newly bound test source. This is recorded
+consistency, not authentication or proof of fresh execution.
+
+The symbol and policy campaigns pass; loader, PooleBoot and kernel transfer
+produce six final successful virtual boots, including two real native entries
+ending at the expected unsigned-development halt. All 80 focused Python tests
+pass. The first transfer qualification and one identity regression failed
+because the transfer validator still expected the Cycle 192 build ID. The
+corrected validator, three identity tests and two final transfer boots pass;
+the failed attempt remains historical, not counted as final qualification.
+
+Selected readiness is 8/27, with 19 profiles pending from `N7-TRAP-001`:
+CPU, then memory/IRQ/SMP, scheduler, atomics and locks. Deferred admission
+defects and at least 65 control-execution groups remain open. Full exact-source
+canonical/Doctor, release, publication, configured-check and review gates must
+pass before main merge. A pushed development checkpoint provides cloud backup
+without waiving these requirements. No phase or flag closes, no native kernel
+bytes or ISO change, and no release or production promotion occurs.
+[Evidence, failure history and next steps](checkpoints/cycle198-symbol-admission-and-boot-replay.md).
+Closeout's combined scoped regression passes 178 tests, zero skips; initial
+metadata passes 45/45. Conservation validates 16 parent-record archives and
+324 current source bindings while preserving owner, checklist and ISO evidence.
 
 ## Cycle 197: Native Deferred Transactions
 

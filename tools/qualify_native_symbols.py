@@ -700,22 +700,7 @@ def _qualify_debug_correspondence(
 
 
 def expected_readiness_claims() -> dict[str, bool]:
-    return {
-        "format_frozen": True,
-        "python_oracle_implemented": True,
-        "no_std_parser_implemented": True,
-        "bounded_lookup_implemented": True,
-        "split_debug_correspondence_qualified": True,
-        "development_activation_denied": True,
-        "symbol_consumption_enabled": False,
-        "pooleboot_enforced": False,
-        "poolekernel_enforced": False,
-        "kernel_export_authority_created": False,
-        "full_debug_file_on_boot_media": False,
-        "runtime_addresses_disclosed_by_default": False,
-        "n5_exit_gate_satisfied": False,
-        "production_ready": False,
-    }
+    return psym1.expected_readiness_claims()
 
 
 def make_readiness(toolchain_root: Path) -> dict[str, Any]:

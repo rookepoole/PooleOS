@@ -7,9 +7,21 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 197
+Last roadmap reconciliation: PooleOS Cycle 198
 
-Cycle 197 repairs native deferred transactions, fault fairness and shutdown
+Cycle 198 repairs recorded symbol admission and replays the boot chain on the
+unchanged Cycle 197 kernel. All 650 corrupted records reject without exceptions;
+six final virtual boots, two native kernel entries and 80 focused tests pass.
+The failed first transfer attempt and identity regression remain preserved.
+Selected readiness is 8/27; 19 profiles remain from N7-TRAP-001, followed by
+deferred admission/control repairs and full exact-candidate merge qualification.
+Development-branch cloud backup is not main-merge or production acceptance.
+No normative charter condition, phase, flag, kernel byte or ISO changes.
+[Cycle 198 evidence](checkpoints/cycle198-symbol-admission-and-boot-replay.md).
+Combined scoped regression passes 178 tests, zero skips; initial metadata
+passes 45/45 and conservation passes. Full canonical qualification is pending.
+
+Historical Cycle 197 repairs native deferred transactions, fault fairness and shutdown
 ordering. The new kernel passes 21 native tests in two host profiles, four
 disabled-fix variants, all 17 core stages, two matching builds and 54 scoped
 Python tests. Selected readiness is 3/27; 24 changed-image dependencies require

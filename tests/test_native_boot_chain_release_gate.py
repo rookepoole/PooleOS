@@ -55,6 +55,16 @@ class NativeBootChainReleaseGateTests(unittest.TestCase):
     def test_boot_chain_rejects_superseded_artifact_and_trust_identities(self) -> None:
         old_inner = "2DC54F8C02425C44DEB80A0F6285CAF4687A90537114902D39BB338C14BD7664"
         cases = (
+            ("pooleboot", "native_pooleboot_readiness.json", "summary", "inner_set_retained_set_sha256",
+             "FE35AE51B905BDFE7CB59F32CB2AF69A56910DA24DA83A74A9D92BB1BE5C7F0B"),
+            ("kernel_load", "native_kernel_load_readiness.json", "summary", "inner_retained_set_sha256",
+             "FE35AE51B905BDFE7CB59F32CB2AF69A56910DA24DA83A74A9D92BB1BE5C7F0B"),
+            ("kernel_revalidation", "native-kernel-revalidation-readiness.json", "golden", "retained_set_sha256",
+             "FE35AE51B905BDFE7CB59F32CB2AF69A56910DA24DA83A74A9D92BB1BE5C7F0B"),
+            ("pooleboot", "native_pooleboot_readiness.json", "summary", "trust_policy_sha256",
+             "7FD68927AECC739F8459ED6C6B2AB154318B357929F478A2D5B4B6D8C306C6B3"),
+            ("pooleboot", "native_pooleboot_readiness.json", "summary", "trust_state_sha256",
+             "5F8AE1BE86EE3DC024C332D5CA3BA5D5B8ED09B60BAB17855A410A16A64634AD"),
             ("pooleboot", "native_pooleboot_readiness.json", "summary", "inner_set_retained_set_sha256", old_inner),
             ("pooleboot", "native_pooleboot_readiness.json", "summary", "trust_policy_sha256",
              "6D8C4B9F295FB032D33777E80F3BE7320AB1DAECD46EBBF4F873AFE5D101E7F9"),

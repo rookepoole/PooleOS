@@ -5,7 +5,9 @@ from __future__ import annotations
 import dataclasses
 import hashlib
 import json
+import random
 import struct
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Final, Iterable
 
@@ -111,14 +113,14 @@ SLIDE_ALIGNMENT: Final = 2 * 1024 * 1024
 
 CANONICAL_IMAGE_BYTES: Final = 602_112
 CANONICAL_ENTRY_OFFSET: Final = 0xA000
-CANONICAL_FILE_SHA256: Final = "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8"
-CANONICAL_LOADED_SHA256: Final = "C91D80EF16FB5EA9EBEFC114EEA7CBC29C33A4BF605CF65B310741124C422FA7"
-CANONICAL_BUILD_ID: Final = "PKBUILD1-CYCLE192-N8-MBX-ORCL-V01-0000000001"
-CANONICAL_BUILD_ID_SHA256: Final = "676A50F732AA1B63BF44C179C4DCB88FD1AC0C2A49662DE4B840EDE3BCDA20FB"
-CANONICAL_DEBUG_SHA256: Final = "6FFC3709DDBFD66328B734AD735153FCCEE192B5E68AC5D1EF42D1F6E5DFC980"
-CANONICAL_DEBUG_BYTES: Final = 7_036_160
+CANONICAL_FILE_SHA256: Final = "B19D4F7E854ECED3495D88C00F7379061B913EF00477FBD3701929B2F77D80F1"
+CANONICAL_LOADED_SHA256: Final = "04CD0746E0601456DFBD57D791EC573E3142AB9231A2FDAA8663198106329EAC"
+CANONICAL_BUILD_ID: Final = "PKBUILD1-CYCLE197-N12-DEFERRED-V1-0000000001"
+CANONICAL_BUILD_ID_SHA256: Final = "B49796B1FE3D97583110FDD8BA5316E6303C8A7E0B6F3BEF40ED8EB45112C63D"
+CANONICAL_DEBUG_SHA256: Final = "907EACFD6BC6D5669CA88489BC4A3E1121ED52F648FE434D3C05A4CB606C345A"
+CANONICAL_DEBUG_BYTES: Final = 7_042_768
 CANONICAL_SOURCE_MANIFEST_SHA256: Final = (
-    "1D675EBE6819D5717FC32F758CD004729ED402C6EA834E6664C2EE76B87A9885"
+    "20B81D2295ADAF58EBD3088ED76171953FCEB166A9172BB71A115AFA2E5407F5"
 )
 PUBLIC_SYMBOL_NAMES: Final = (
     "poole_kernel_entry",
@@ -161,6 +163,7 @@ IMPLEMENTATION_INPUTS: Final = (
     "tools/generate_native_symbol_vectors.py",
     "tools/qualify_native_symbols.py",
     "tests/test_native_symbols.py",
+    "tests/test_native_symbol_admission.py",
     "docs/native-symbol-bundle.md",
 )
 
@@ -1383,8 +1386,159 @@ def golden_errors(value: dict[str, Any]) -> list[str]:
     return errors
 
 
-def readiness_errors(value: dict[str, Any], root: Path = ROOT) -> list[str]:
-    errors = validate_json(value, read_json(root / READINESS_SCHEMA_RELATIVE))
+def expected_readiness_claims() -> dict[str, bool]:
+    return {
+        "format_frozen": True, "python_oracle_implemented": True,
+        "no_std_parser_implemented": True, "bounded_lookup_implemented": True,
+        "split_debug_correspondence_qualified": True, "development_activation_denied": True,
+        "symbol_consumption_enabled": False, "pooleboot_enforced": False,
+        "poolekernel_enforced": False, "kernel_export_authority_created": False,
+        "full_debug_file_on_boot_media": False, "runtime_addresses_disclosed_by_default": False,
+        "n5_exit_gate_satisfied": False, "production_ready": False,
+    }
+
+
+@lru_cache(maxsize=1)
+def _expected_negative_results(canonical: bytes) -> tuple[tuple[str, str, str], ...]:
+    # Reconstruct the deterministic parser controls without trusting recorded outcomes.
+    rng = random.Random(0x5053_594D_31FF)
+    rows = []
+    for attempt in range(1, 4097):
+        mutated = bytearray(canonical)
+        position = rng.randrange(len(mutated))
+        mutated[position] ^= 1 << rng.randrange(8)
+        if attempt % 2 == 0 and position >= HEADER_BYTES:
+            mutated[304:336] = hashlib.sha256(mutated[HEADER_BYTES:]).digest()
+        try:
+            parse(bytes(mutated))
+        except SymbolError as error:
+            rows.append((f"NEG-PSYM1-PARSER-{len(rows) + 1:03d}", "parser", f"ERR:{error.code}"))
+        if len(rows) == 128:
+            break
+    if len(rows) != 128:
+        raise SymbolError("psym_readiness_parser_controls")
+    bundle = parse(canonical)
+    qualified = synthetic_qualified_consumption_context(bundle)
+    contexts = [development_consumption_context(bundle)]
+    for mutation in (
+        {"outer_signature_verified": False}, {"inner_signature_verified": False},
+        {"manifest_signature_verified": False}, {"kernel_signature_verified": False},
+        {"outer_role": 3}, {"outer_version": 2}, {"outer_payload_sha256": "0" * 64},
+        {"expected_outer_file_sha256": "B" * 64}, {"canonical_file_sha256": "B" * 64},
+        {"preferred_loaded_sha256": "B" * 64}, {"build_id_sha256": "B" * 64},
+        {"debug_file_sha256": "B" * 64}, {"source_manifest_sha256": "B" * 64},
+        {"identity_evidence_verified": False}, {"stripped_correspondence_verified": False},
+        {"dwarf5_verified": False}, {"public_policy_verified": False},
+        {"source_paths_absent": False}, {"pointer_redaction_enabled": False},
+        {"diagnostics_authorized": False}, {"runtime_base": bundle.preferred_virtual_base + 1},
+        {"symbol_capacity": 0}, {"string_capacity": 0}, {"lookup_step_capacity": 0},
+        {"authority_effect_requested": True},
+    ):
+        contexts.append(dataclasses.replace(qualified, **mutation))
+    for index, context in enumerate(contexts, start=1):
+        try:
+            authorize_consumption(bundle, context)
+        except SymbolError as error:
+            rows.append((f"NEG-PSYM1-ACTIVATION-{index:03d}", "activation", f"ERR:{error.code}"))
+        else:
+            raise SymbolError("psym_readiness_activation_control")
+    rows.extend((f"NEG-PSYM1-DEBUG-{name}", "debug_elf", error) for name, error in (
+        ("TRUNCATED", "psym_debug_elf_size"), ("MAGIC", "psym_debug_elf_ident"),
+        ("TYPE", "psym_debug_elf_header"), ("HOST-PATH", "psym_debug_host_path"),
+    ))
+    return tuple(rows)
+
+
+def _recorded_evidence_errors(value: dict[str, Any], root: Path) -> list[str]:
+    def same(actual: Any, expected: Any) -> bool:
+        return json.dumps(actual, sort_keys=True) == json.dumps(expected, sort_keys=True)
+
+    kernel = read_json(root / native_kernel_entry.READINESS_RELATIVE)
+    product = kernel["product"]
+    lock = read_json(root / "specs/native-toolchain-lock.json")
+    golden = make_golden_vectors()
+    expected = {
+        "phase_status": {"N5": "partial", "N5.6": "partial", "N5.9": "partial"},
+        "validator_qualification": {
+            "status": "pass", "rustc": "rustc " + lock["channel_manifest"]["rust_version"],
+            "host_tests": 4, "rustfmt_packages": 1, "clippy_targets": 1,
+            "no_std_targets": ["x86_64-unknown-none", "x86_64-unknown-uefi"],
+            "host_toolchain": {
+                "profile_id": "POOLEOS-HOST-MSVC-1",
+                "profile_sha256": sha256_bytes((root / "specs/native-host-msvc-profile.json").read_bytes()),
+                "verified_before_build": True,
+                "scope": "host_linker_and_library_trees_not_complete_host_attestation",
+            },
+        },
+        "debug_correspondence": {
+            "status": "pass", "debug_build_count": 2, "debug_builds_byte_identical": True,
+            "debug_file_byte_count": CANONICAL_DEBUG_BYTES, "debug_file_sha256": CANONICAL_DEBUG_SHA256,
+            "dwarf_compilation_unit_count": 61, "pooleos_leading_dwarf5_unit_count": 3,
+            "observed_dwarf_versions": [4, 5], "required_section_count": len(REQUIRED_DWARF5_SECTIONS),
+            "public_symbol_count": len(canonical_symbols()),
+            "canonical_file_byte_count": product["canonical_byte_count"],
+            "canonical_file_sha256": CANONICAL_FILE_SHA256, "canonical_image_byte_count": CANONICAL_IMAGE_BYTES,
+            "canonical_entry_offset": CANONICAL_ENTRY_OFFSET, "stripped_and_debug_plans_equal": False,
+            "stripped_symtab_absent": True, "stripped_debug_sections_absent": True,
+            "source_paths_absent": True, "debug_file_staged_on_boot_media": False,
+            "debug_derived_bundle_sha256": sha256_bytes(canonical_bundle()),
+        },
+        "golden_vectors": [{
+            "id": vector["id"], "bundle_sha256": vector["bundle_sha256"],
+            "lookup_sample_count": len(vector["lookup_samples"]), "python_result": "pass",
+            "rust_result": "pass", "status": "pass",
+        } for vector in golden["vectors"]],
+        "negative_controls": [{"id": identifier, "surface": surface, "expected": result,
+            "observed": result, "status": "pass"}
+            for identifier, surface, result in _expected_negative_results(canonical_bundle())],
+        "activation_qualification": {
+            "status": "pass", "synthetic_all_true_result": "OK:activation",
+            "synthetic_all_true_context_is_trust_evidence": False,
+            "current_unsigned_development_activation_allowed": False,
+            "individual_rejecting_context_count": 26,
+        },
+        "parser_differential": {
+            "campaign_id": "PSYM1-PARSER-DIFF-1", "seed": "0x5053594D3101",
+            "case_count": 16384, "accepted_count": 860, "rejected_count": 15524,
+            "digest_repaired_deep_mutations": True, "mismatch_count": 0,
+            "corpus_published": False, "status": "pass",
+        },
+        "lookup_differential": {
+            "campaign_id": "PSYM1-LOOKUP-DIFF-1", "seed": "0x5053594D3102",
+            "case_count": 16384, "hit_count": 4483, "miss_count": 5721, "rejected_count": 6180,
+            "mismatch_count": 0, "maximum_observed_steps": 2, "corpus_published": False, "status": "pass",
+        },
+        "summary": {
+            "rust_host_tests_passed": 4, "rust_host_tests_total": 4,
+            "no_std_target_builds_passed": 2, "no_std_target_builds_total": 2,
+            "golden_vectors_matched": 3, "golden_vectors_total": 3,
+            "negative_controls_passed": 158, "negative_controls_total": 158,
+            "parser_differential_cases": 16384, "lookup_differential_cases": 16384,
+            "differential_mismatches": 0, "debug_reproducible_builds": 2,
+            "public_symbols": 3, "production_claim_count": 0,
+        },
+        "claims": expected_readiness_claims(),
+    }
+    bindings = {name: _binding_record(root / path) for name, path in (
+        ("contract", CONTRACT_RELATIVE), ("contract_schema", CONTRACT_SCHEMA_RELATIVE),
+        ("golden_vectors", GOLDEN_RELATIVE), ("golden_schema", GOLDEN_SCHEMA_RELATIVE),
+        ("readiness_schema", READINESS_SCHEMA_RELATIVE),
+    )}
+    bindings["implementation_inputs"] = implementation_bindings(root)
+    expected["bindings"] = bindings
+    errors = [f"PSYM1 recorded {name} evidence changed" for name, record in expected.items()
+              if not same(value.get(name), record)]
+    for name in ("production_ready", "production_promotion_allowed", "n5_exit_gate_satisfied"):
+        if value.get(name) is not False:
+            errors.append(f"PSYM1 {name} must remain false")
+    return errors
+
+
+def readiness_errors(value: Any, root: Path = ROOT) -> list[str]:
+    errors = [f"PSYM1 {issue.path}: {issue.message}"
+              for issue in validate_json(value, read_json(root / READINESS_SCHEMA_RELATIVE))]
+    if errors:
+        return errors
     build = value.get("validator_qualification", {})
     host = build.get("host_toolchain") if isinstance(build, dict) else None
     expected_host = {
@@ -1418,6 +1572,10 @@ def readiness_errors(value: dict[str, Any], root: Path = ROOT) -> list[str]:
                 errors.append("PSYM1 kernel entry identity changed: build_id")
     except (OSError, ValueError, KeyError, TypeError, AttributeError):
         errors.append("PSYM1 kernel entry evidence is unavailable or malformed")
+    try:
+        errors.extend(_recorded_evidence_errors(value, root))
+    except (OSError, ValueError, KeyError, TypeError, AttributeError, SymbolError):
+        errors.append("PSYM1 recorded evidence dependencies are unavailable or malformed")
     if value.get("contract_id") != CONTRACT_ID or value.get("status") != "pass":
         errors.append("PSYM1 readiness status changed")
     if value.get("production_ready") is not False or value.get("production_promotion_allowed") is not False:

@@ -24,6 +24,10 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle198-symbol-admission-and-boot-replay.md",
+    "tests/test_native_symbol_admission.py",
+    "runtime/native_kernel_transfer.py",
+    "tools/qualify_native_kernel_transfer.py",
     "docs/checkpoints/cycle197-native-deferred-transactions.md",
     "tests/test_native_deferred_transactions.py",
     "tests/fixtures/pksched3_transaction_probe.rs",

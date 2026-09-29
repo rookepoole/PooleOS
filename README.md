@@ -11,7 +11,20 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 197 repairs native deferred-work
+**Current development checkpoint:** Cycle 198 repairs recorded symbol-evidence
+admission and requalifies the boot chain on the repaired Cycle 197 kernel.
+All 650 corrupted-record cases reject without validator exceptions. Six final
+virtual boots pass, including two native kernel entries and the expected unsigned
+development halt. All 80 focused Python tests pass. Selected readiness is 8/27;
+19 CPU and downstream profiles, deferred evidence/control repairs and full
+exact-candidate qualification still precede main merge. Cloud backup on the
+development branch is separate from merge acceptance. No new ISO or production
+readiness is claimed.
+[Cycle 198 evidence and merge blockers](docs/checkpoints/cycle198-symbol-admission-and-boot-replay.md).
+Combined scoped regression passes 178 tests, zero skips, including exact kernel
+reproduction. Earlier evidence and owner/checklist/ISO conservation pass.
+
+**Historical development checkpoint:** Cycle 197 repairs native deferred-work
 transactions, fault-path priority accounting and shutdown ordering. Eleven
 original native failures are repaired; 21 native tests pass in debug and optimized
 builds, and four deliberately disabled fixes are detected. All 17 core stages,

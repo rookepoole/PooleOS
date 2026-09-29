@@ -2,6 +2,18 @@
 
 Status: candidate pre-ABI, single-host qualified, unsigned, non-promoting.
 
+Cycle 198 measures the Cycle 197 deferred-work repair from its validated linked
+kernel and rebuilds PSYM1 for those exact bytes. Recorded admission now requires
+typed, exact source/schema bindings, compiler/target identity, debug correspondence,
+golden-vector results, all 158 ordered control outcomes and both differential
+campaigns. Parser and activation control outcomes are independently reconstructed;
+campaign counts and debug geometry are pinned to this measured source profile.
+Malformed receipts are rejected without exceptions, and rejected qualification
+cannot overwrite or create an output receipt. These checks establish recorded
+consistency, not signatures, fresh execution or exclusion of coherent forgeries.
+The genuine pre-repair corruption audit and its failures remain in the Cycle 198
+checkpoint. Earlier kernel identities and receipts remain historical.
+
 Cycle 179 re-derives the identities below from a fresh split-debug build of
 the unchanged Cycle 177 kernel. Qualification must rebuild independently and
 match the exact canonical, loaded, debug, build-ID and manifest bytes. This
