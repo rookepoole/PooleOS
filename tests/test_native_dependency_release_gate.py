@@ -62,6 +62,9 @@ class NativeDependencyReleaseGateTests(unittest.TestCase):
                     (("build", "kernel_entry", "product", "canonical_sha256"),
                      "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625"),
                     (("build", "kernel_entry", "product", "relocation_count"), 1321),
+                    (("build", "kernel_entry", "product", "canonical_sha256"),
+                     "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8"),
+                    (("build", "kernel_entry", "product", "relocation_count"), 1327),
                 ])
             for field_path, value in mutations:
                 with self.subTest(profile=profile, field=field_path):
@@ -80,7 +83,7 @@ class NativeDependencyReleaseGateTests(unittest.TestCase):
                             result = check_fn()
                     self.assertFalse(result["ok"], result["detail"])
                     rejected += 1
-        self.assertEqual(rejected, 19)
+        self.assertEqual(rejected, 21)
 
     def test_stale_host_and_linked_image_pins_are_rejected(self) -> None:
         rejected = 0

@@ -6224,9 +6224,158 @@ def apply_cycle198(roadmap: dict, test_count: int) -> dict:
             phase["current_evidence"].insert(0, evidence)
             phase["current_gaps"].insert(0, gap)
         if phase["id"] == "N36":
-            phase["current_evidence"].insert(0, f"Cycle 198 source inventory: {test_count} Python tests discovered; full qualification pending")
+            phase["current_evidence"].insert(0, "Cycle 198 source inventory: 1066 Python tests discovered; full qualification pending")
     for flag in roadmap["implementation_flags"]:
         if flag["id"] in {"FLAG-N5-SYMBOL-BUNDLE-001", "FLAG-N36-RECEIPT-COVERAGE-001"}:
+            flag["evidence"].insert(0, checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle199(roadmap, test_count)
+
+
+def apply_cycle199(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle199-cpu-control-admission-and-replay.md"
+    next_move = "N9-PMM-ACPI-CONSUMER-001"
+    roadmap["baseline"]["pooleos_cycle"] = 199
+    protocol = roadmap["execution_protocol"]
+    protocol.update(last_updated_cycle=199, selected_move_id="N7-TRAP-001",
+                    owner_independent_next_move_id=next_move)
+    protocol["required_records"].insert(0, checkpoint)
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    for key, value in list(gate.items()):
+        if key.startswith("current_") and isinstance(value, dict):
+            suffix = "source_projection" if key == "current_focused_source_projection" else key.removeprefix("current_")
+            gate["historical_cycle198_" + suffix] = copy.deepcopy(value)
+    gate["qualification_status"] = "CPU_control_admission_repaired_five_current_profiles_fourteen_dependencies_pending"
+    gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=199)
+    rows = (
+        ("trap", "50D9C781FBC7CF7ED15EE3295028B09DD713BEC0AE53DC909F13F832BD7006B6", 6, 51,
+         "67789E03FB49A6D11DE6132978D80CEFC5269C87DBE992EB2A626BD242C956C1", 119.656),
+        ("cpu_policy", "98CFFDC8BADF7681B519D8936D5491DE27EBD32B5BE51196AC8EC26C37D39C07", 2, 41,
+         "CFA41675A79CE67949D1FDB8D08F791EB2FD1115237010D33465135306D1CE23", 90.671),
+        ("xstate_policy", "8B683AC3B32FBB3576771F6D8742B12C412394D98AC9C9A947DF98AC8A876621", 2, 43,
+         "4260145CE808D54618100843E5797A22DAFA156F94093C1D222D6D99730A162A", 66.453),
+        ("xstate_exception", "33F94DD2D6D37256D74E7D29411BF0DCB8ADEB6C09EC738F9E62CC73DEBD0AD7", 2, 43,
+         "F3ED8801D7E59F458EBE9E20B63EED505D5DEF7034E3E58654DA297E074BF60D", 78.172),
+        ("privilege_msr_policy", "D5027EF6F51ADCCA9A6B33308CA91D8FF617BC08483F91B47F321A88776452FC", 2, 47,
+         "9B9A31059D4151F9B9A62622272025F3EDB8EEF33A8C29EEA6267DBE5A72AE32", 76.078),
+    )
+    bindings = [dict(profile=profile, path="runs/native-kernel-" + profile.replace("_", "-") + "-readiness.json",
+                     sha256=digest, fresh_runs=runs, negative_controls=controls, kernel_host_tests=246,
+                     execution_log_sha256=log, elapsed_seconds=seconds)
+                for profile, digest, runs, controls, log, seconds in rows]
+    gate["current_cpu_qualification"] = {
+        "cycle": 199, "source_validation_cycle": 199, "status": "single_host_cpu_replay_pass",
+        "scope": "five_N7_profiles_and_strict_control_admission_on_Cycle197_kernel",
+        "applies_to_current_source": True, "kernel_sha256": gate["current_boot_chain_qualification"]["kernel_sha256"],
+        "qualified_profiles": [b["profile"] for b in bindings], "receipt_bindings": bindings,
+        "readiness_replay_required_profiles": [], "embedded_entry_provenance_replay_pending": False,
+        "fresh_qemu_runs": 14, "superseded_initial_runs": 6, "negative_control_groups": 225,
+        "kernel_host_tests_per_qualifier": 246, "whpx_exception_runs": 2, "expected_tcg_limitation_probes": 1,
+        "exception_deliveries_per_run": 3, "exception_recoveries_per_run": 2,
+        "focused_python_tests": 54, "aggregate_gate_regression_cases": 21,
+        "embedded_entry_rejection_cases": 80, "invalid_current_entry_dependency_cases": 20,
+        "recorded_pair_count": 7, "recorded_exit_rejection_cases": 98,
+        "recorded_coverage_rejection_cases": 112, "recorded_evidence_rejection_cases": 161,
+        "recorded_evidence_total_rejection_cases": 371,
+        "recorded_control_rejection_cases": {"trap": 1084, "cpu_policy": 546, "xstate_policy": 572,
+                                           "xstate_exception": 572, "privilege_msr_policy": 624},
+        "recorded_control_total_rejection_cases": 3398,
+        "control_corpus_matches_before_generator": True,
+        "recorded_evidence_rejections_exercised_through_runtime_and_gate": True,
+        "positive_receipts_rebound_in_tests": False, "pair_validation_is_freshness_or_authentication": False,
+        "trap_control_validator_calls": 51, "disabled_trap_validator_detected": True,
+        "entry_identity_comparison": "canonical_JSON_typed_equality",
+        "canonical_kernel_changed_this_cycle": False, "current_candidate_full_gate_passed": False,
+        "pre_repair_control_counterexample": {
+            "cases": 1084, "genuine_source_current_positive": True,
+            "runtime_accepted": 663, "runtime_rejected": 416, "runtime_exceptions": 5,
+            "aggregate_gate_accepted": 663, "aggregate_gate_rejected": 421, "aggregate_gate_exceptions": 0,
+            "receipt_sha256": "8B46672DFA24980C4D3728D9A9CAFBFAD9548AB73D58D2581C277CF96C213C97",
+            "audit_sha256": "1260297B4F4D703D17667851E571291AC57DF9264380389F68F8D0FF00B53972",
+        },
+        "post_repair_control_counterexample_replay": {
+            "cases": 1084, "genuine_source_current_positive": True, "runtime_accepted": 0,
+            "aggregate_gate_accepted": 0, "runtime_rejected": 1084, "aggregate_gate_rejected": 1084,
+            "runtime_exceptions": 0, "aggregate_gate_exceptions": 0,
+            "audit_sha256": "9D10D6F8357739B92F195896FFDA1907347F97172388F3EEA7F8781B8F49786E",
+        },
+        "coherent_forgery_excluded": False, "production_ready": False,
+    }
+    passing = ["native_" + name + "_readiness" for name in (
+        "kernel_entry", "symbol", "policy", "kernel_load", "pooleboot", "kernel_revalidation",
+        "kernel_transfer", "kernel_trap", "kernel_cpu_policy", "kernel_errata_policy",
+        "kernel_xstate_policy", "kernel_xstate_exception", "kernel_privilege_msr_policy")]
+    gate["current_focused_source_projection"] = {
+        "cycle": 199, "scope": "27_selected_native_checks_not_full_canonical_audit",
+        "passed_checks": 13, "total_checks": 27, "pending_downstream_native_checks": 14,
+        "passing_profiles": passing, "final_receipt_fresh_qemu_runs": 14, "kernel_entry_runs": 14,
+        "superseded_initial_qemu_runs": 6, "expected_tcg_limitation_probes": 1,
+        "run_count_scope": "Cycle199_five_CPU_profiles_not_retained_Cycle198_boot_chain",
+        "next_dependency_move_id": next_move,
+        "required_next_gate": "fourteen_memory_IRQ_SMP_scheduler_atomic_lock_profiles_then_controls_and_full_candidate",
+        "focused_python_tests_passed": 54, "focused_python_tests_skipped": 0,
+        "canonical_full_replay_performed": False, "production_ready": False,
+    }
+    gate["current_entry_provenance_qualification"] = dict(
+        gate["current_entry_provenance_qualification"], latest_reproduction_cycle=199)
+    gate["current_ipi_mailbox_oracle_gap"] = dict(
+        gate["current_ipi_mailbox_oracle_gap"], cycle=199, remaining_affected_profiles=14,
+        newly_requalified_profiles=[b["profile"] for b in bindings])
+    gate["current_closeout_regression"] = {
+        "cycle": 199, "status": "pass", "scope": "CPU_profiles_errata_recorded_admission_and_two_selected_aggregate_gate_tests",
+        "tests_run": 54, "tests_passed": 54, "tests_failed": 0, "tests_skipped": 0,
+        "elapsed_seconds": 176.656, "log_sha256": "D3599A8C5F5C9ECCFE3030674165E0B1D0A60F51C357909883AC5C85B944630B",
+        "initial_gate_pin_regression": {"tests_run": 1, "tests_failed": 1, "elapsed_seconds": 0.797,
+            "cause": "aggregate_trap_gate_retained_Cycle192_hash_and_relocation_count",
+            "log_sha256": "D18042EB201DF92A159C8B0B027247C05F63FDB90D5913C99ACB999F40579402"},
+        "corrected_gate_pin_verified_in_focused_regression": True,
+        "control_audit_before_log_sha256": "27AF30A3BA175B093796D7754DD7E829CD895A8DD34935B65007EC158F0F54ED",
+        "control_audit_after_log_sha256": "1A34878B0ECA4777EB791678250085E3785F8BDA9CFC8B7549EAECC18A42A044",
+        "source_unchanged_during_execution": True, "owner_report_unchanged": True,
+        "initial_metadata_regression": {
+            "status": "pass", "tests_run": 46, "tests_passed": 46, "tests_failed": 0, "tests_skipped": 0,
+            "elapsed_seconds": 14.657,
+            "log_sha256": "E6CCFFEB776508E6218383DF5C0D9B7164609A8C056C8F0D42180D614EAF019B",
+        },
+        "combined_regression": {
+            "status": "pass", "scope": "boot_kernel_CPU_admission_native_deferred_metadata_publication_not_full_canonical",
+            "tests_run": 233, "tests_passed": 233, "tests_failed": 0, "tests_skipped": 0,
+            "elapsed_seconds": 343.453,
+            "log_sha256": "D1BF6DC903758E38583778E0C507F1BC8E8DAF2568DC3F0973B91D6E678EDEA4",
+            "source_unchanged_during_execution": True, "owner_report_unchanged": True,
+        },
+        "initial_conservation": {
+            "status": "pass", "archived_records": 17, "architecture_bindings": 325,
+            "test_inventory": 1069, "selected_checks": "13/27", "flag_statuses_unchanged": True,
+            "normative_charter_checklist_owner_ISO_preserved": True,
+        },
+        "canonical_full_replay_performed": False, "merge_qualified": False, "production_ready": False,
+    }
+    evidence = (
+        "Cycle 199: " + checkpoint + " repairs complete CPU control-record admission and malformed root rejection. "
+        "The genuine 1084-case trap audit admitted 663 corruptions through runtime and gate, with five runtime "
+        "exceptions; all original cases now reject without exceptions. Five final CPU profiles pass fourteen "
+        "guest boots, 225 executed controls and 54 focused tests, including 3398 control-record and 371 paired "
+        "execution corruptions. Six initial boots and the stale aggregate-pin failure remain historical."
+    )
+    gap = (
+        "Selected readiness is 13/27; fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles remain from "
+        + next_move + ". Deferred admission and at least 65 scheduler control-execution groups remain open. "
+        "Recorded consistency is not authentication or exclusion of coherent forgery. Full all-vector, guarded "
+        "IST, user-context, target-hardware and N7-exit qualification remain open. Full exact-candidate "
+        "canonical/Doctor/publication/configured-check/review qualification still precedes main merge."
+    )
+    for phase in roadmap["phases"]:
+        if phase["id"] in {"N7", "N36"}:
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle 199 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in {"FLAG-N7-TRAP-001", "FLAG-N7-CPU-POLICY-001", "FLAG-N7-XSTATE-POLICY-001",
+                          "FLAG-N7-XSTATE-EXCEPTION-001", "FLAG-N7-PRIVILEGE-MSR-POLICY-001",
+                          "FLAG-N36-RECEIPT-COVERAGE-001"}:
             flag["evidence"].insert(0, checkpoint)
     roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
@@ -6236,7 +6385,7 @@ def apply_cycle198(roadmap: dict, test_count: int) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1066)
+    parser.add_argument("--test-count", type=int, default=1069)
     parser.add_argument("--status-date", default="2026-09-29")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

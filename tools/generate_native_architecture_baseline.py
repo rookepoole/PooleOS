@@ -25,6 +25,7 @@ ADR_NAMES = (
 )
 BOUND_SOURCE_PATHS = (
     "docs/checkpoints/cycle198-symbol-admission-and-boot-replay.md",
+    "docs/checkpoints/cycle199-cpu-control-admission-and-replay.md",
     "tests/test_native_symbol_admission.py",
     "runtime/native_kernel_transfer.py",
     "tools/qualify_native_kernel_transfer.py",

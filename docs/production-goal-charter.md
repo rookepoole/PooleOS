@@ -7,9 +7,22 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 198
+Last roadmap reconciliation: PooleOS Cycle 199
 
-Cycle 198 repairs recorded symbol admission and replays the boot chain on the
+Cycle 199 repairs CPU control-record admission and requalifies five N7 profiles
+on the unchanged Cycle 197 kernel. Fourteen final virtual boots, 225 executed
+controls and 54 focused tests pass, including 3,398 control-record and 371 paired
+execution corruptions. The original 1,084-case counterexample now rejects through
+runtime and gate without exceptions; the earlier bad admissions and stale-pin
+failure remain preserved. Selected readiness is 13/27 with fourteen profiles
+pending from N9-PMM-ACPI-CONSUMER-001, then deferred admission/control repairs and
+full exact-candidate merge qualification. No normative condition, phase, flag,
+kernel byte, ISO or production claim changes. Backup is separate from merge.
+[Cycle 199 evidence](checkpoints/cycle199-cpu-control-admission-and-replay.md).
+Combined scoped regression passes 233 tests, zero skips; initial metadata passes
+46/46 and conservation passes. Full canonical qualification remains pending.
+
+Historical Cycle 198 repairs recorded symbol admission and replays the boot chain on the
 unchanged Cycle 197 kernel. All 650 corrupted records reject without exceptions;
 six final virtual boots, two native kernel entries and 80 focused tests pass.
 The failed first transfer attempt and identity regression remain preserved.

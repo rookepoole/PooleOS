@@ -11,7 +11,19 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 198 repairs recorded symbol-evidence
+**Current development checkpoint:** Cycle 199 repairs CPU control-record admission
+and requalifies five N7 profiles on the unchanged Cycle 197 kernel. Fourteen final
+virtual boots, 225 executed controls and 54 focused tests pass. All 3,398 malformed
+control records and 371 paired-run corruptions reject through runtime and gate.
+Selected readiness is 13/27; fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles,
+deferred evidence/control repairs and full exact-candidate qualification remain.
+Next is `N9-PMM-ACPI-CONSUMER-001`. Development-branch backup is not main-merge
+acceptance; no new ISO, phase completion or production readiness is claimed.
+[Cycle 199 evidence and merge blockers](docs/checkpoints/cycle199-cpu-control-admission-and-replay.md).
+Combined scoped regression passes 233 tests, zero skips. Initial metadata passes
+46/46; conservation preserves 17 parent records and verifies 325 source bindings.
+
+**Historical development checkpoint:** Cycle 198 repairs recorded symbol-evidence
 admission and requalifies the boot chain on the repaired Cycle 197 kernel.
 All 650 corrupted-record cases reject without validator exceptions. Six final
 virtual boots pass, including two native kernel entries and the expected unsigned

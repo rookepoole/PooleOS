@@ -1,15 +1,44 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-29
-Plan version: 2.101.0-native-symbol-admission-boot-replay
-Roadmap cycle: PooleOS Cycle 198
+Plan version: 2.102.0-native-cpu-control-admission
+Roadmap cycle: PooleOS Cycle 199
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 198: Symbol Admission and Boot Replay
+## Cycle 199: CPU Control Admission and Replay
+
+`N7-TRAP-001` at N7.5/N7.6, followed by N7.1/N7.3/N7.4 CPU dependencies,
+advances under `ADD-N36-RECEIPT-COVERAGE-001`. A genuine current-positive trap
+audit found 663 of 1,084 corrupted control records accepted through runtime and
+aggregate gate, plus five runtime exceptions. Exact ordered field/type/value
+admission and malformed-root rejection repair this bounded defect. All original
+cases now reject through both paths without exceptions. This is recorded
+consistency, not authentication, proof of freshness or exclusion of coherent forgery.
+
+Five final profiles pass fourteen virtual boots and 225 executed controls on
+the unchanged Cycle 197 kernel. Six initial trap boots are superseded; one
+expected TCG exception limitation is separate from the two qualifying WHPX runs.
+All 54 focused Python tests pass, including 3,398 malformed control records,
+371 paired-run corruptions, 80 embedded-entry cases, 20 invalid dependencies and
+21 aggregate-gate cases. A failed stale aggregate-pin test remains preserved.
+
+Current selected readiness is 13/27. Resume at `N9-PMM-ACPI-CONSUMER-001` for
+fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles, then deferred admission
+repairs, at least 65 open control-execution groups and full exact-candidate
+canonical/Doctor/publication/configured-check/review qualification before merge.
+The discovered test inventory is 1,069, not a full-suite pass. No phase or flag
+closes; no new native kernel bytes, ISO, independent builder, physical target,
+signature or production promotion is claimed. Earlier evidence remains historical.
+[Evidence, failure history and next steps](checkpoints/cycle199-cpu-control-admission-and-replay.md).
+Combined scoped regression passes 233 tests with zero skips in 343.453 seconds;
+initial metadata passes 46/46 and conservation verifies 17 archived parent records
+and 325 current architecture bindings. This is not full canonical qualification.
+
+## Historical Cycle 198: Symbol Admission and Boot Replay
 
 `N5-SYMBOLS-SEMANTICS-001`, N5.6/N5.9 and N36, under existing
 `ADD-N36-RECEIPT-COVERAGE-001`, repairs symbol receipt admission. The genuine

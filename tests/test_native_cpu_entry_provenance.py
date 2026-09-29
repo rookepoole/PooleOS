@@ -104,6 +104,31 @@ def pair_mutations(pair, family):
         raise ValueError(f"unknown mutation family: {family}")
 
 
+def control_mutations(receipt):
+    for index, control in enumerate(receipt["negative_controls"]):
+        for field in control:
+            for label, value in (("wrong", "invalid"), ("null", None), ("boolean", False), ("missing", None)):
+                candidate = copy.deepcopy(receipt)
+                if label == "missing":
+                    candidate["negative_controls"][index].pop(field)
+                else:
+                    candidate["negative_controls"][index][field] = value
+                yield f"{index}.{field}.{label}", candidate
+        candidate = copy.deepcopy(receipt)
+        candidate["negative_controls"][index]["unverified_extra_result"] = "accepted"
+        yield f"{index}.extra", candidate
+    for label, value in (("null", None), ("object", {}), ("empty", []), ("string", "pass"),
+                         ("short", receipt["negative_controls"][:-1]),
+                         ("duplicate", [receipt["negative_controls"][0]] * len(receipt["negative_controls"])),
+                         ("reverse", list(reversed(receipt["negative_controls"]))),
+                         ("extra", receipt["negative_controls"] + [receipt["negative_controls"][0]])):
+        candidate = copy.deepcopy(receipt)
+        candidate["negative_controls"] = value
+        yield f"controls.{label}", candidate
+    for index, value in enumerate((None, [], 1, True, "pass")):
+        yield f"root.{index}", value
+
+
 class NativeCpuEntryProvenanceTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -222,6 +247,33 @@ class NativeCpuEntryProvenanceTests(unittest.TestCase):
 
     def test_profile_and_gate_reparse_typed_recorded_evidence(self) -> None:
         self.assert_profile_and_gate_reject_pair_mutations("evidence")
+
+    def test_profile_and_gate_reject_malformed_control_records(self) -> None:
+        for profile in PROFILES:
+            baseline = self.candidate(profile)
+            check = getattr(gate, "check_" + profile.__name__.split(".")[-1] + "_readiness")
+            self.assertEqual(profile.readiness_errors(baseline, ROOT), [])
+            self.assertTrue(check(ROOT / profile.READINESS_RELATIVE)["ok"])
+            with tempfile.TemporaryDirectory() as directory:
+                path = Path(directory) / "candidate.json"
+                for label, candidate in control_mutations(baseline):
+                    with self.subTest(profile=profile.CONTRACT_ID, case=label):
+                        errors = profile.readiness_errors(candidate, ROOT)
+                        self.assertTrue(errors)
+                        self.assertTrue(all(isinstance(error, str) for error in errors))
+                        path.write_text(json.dumps(candidate, allow_nan=False), encoding="utf-8")
+                        result = check(path)
+                        self.assertFalse(result["ok"], result["detail"])
+
+    def test_control_validator_rejects_non_json_and_wrong_typed_evidence(self) -> None:
+        from runtime.native_kernel_profile_evidence import recorded_control_errors
+
+        expected = [{"id": "test", "status": "pass", "expected": "rejected"}]
+        self.assertEqual(recorded_control_errors(expected, ("test",), "TEST"), [])
+        for value in (None, {"test"}, float("nan"), float("inf"),
+                      [{"id": "test", "status": True, "expected": "rejected"}]):
+            with self.subTest(value=value):
+                self.assertTrue(recorded_control_errors(value, ("test",), "TEST"))
 
 
 if __name__ == "__main__":

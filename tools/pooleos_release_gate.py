@@ -311,6 +311,18 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 199 repairs complete CPU control-record admission and requalifies five N7 profiles on the unchanged "
+    "Cycle 197 kernel. Fourteen final virtual boots, 225 executed controls and 54 focused tests pass, including "
+    "3398 control-record and 371 paired-run corruptions. The genuine 1084-case audit's 663 bad admissions and "
+    "five runtime exceptions are repaired; the initial stale-pin failure and six superseded boots remain history. "
+    "Selected readiness is 13/27; fourteen profiles remain from N9-PMM-ACPI-CONSUMER-001, then deferred admission, "
+    "at least 65 control-execution groups and full exact-candidate qualification before main merge. "
+    "Recorded consistency is not authentication; no phase, flag, native kernel byte, ISO or production gate changes. "
+    + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -1426,8 +1438,8 @@ def check_native_kernel_trap_readiness(
         or build.get("default_stop_marker_present") is not True
         or build.get("default_transfer_marker_absent") is not True
         or kernel_product.get("canonical_sha256")
-        != "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8"
-        or kernel_product.get("relocation_count") != 1327
+        != "B19D4F7E854ECED3495D88C00F7379061B913EF00477FBD3701929B2F77D80F1"
+        or kernel_product.get("relocation_count") != 1326
     ):
         errors.append("PKTRAP1 build or feature isolation changed")
     if artifact.get("claims") != native_kernel_trap.expected_claims():

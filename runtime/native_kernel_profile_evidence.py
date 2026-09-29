@@ -30,6 +30,23 @@ def kernel_entry_errors(build: Any, root: Path) -> list[str]:
         return [f"embedded kernel entry dependency cannot be validated: {type(error).__name__}"]
 
 
+def recorded_control_errors(
+    controls: Any,
+    identifiers: tuple[str, ...],
+    context: str,
+    fields: dict[str, str] | None = None,
+) -> list[str]:
+    """Require the complete ordered control records, not just success labels."""
+    expected_fields = {"status": "pass", "expected": "rejected"} if fields is None else fields
+    expected = [{"id": identifier, **expected_fields} for identifier in identifiers]
+    try:
+        if json.dumps(controls, sort_keys=True, allow_nan=False) == json.dumps(expected, sort_keys=True, allow_nan=False):
+            return []
+    except (TypeError, ValueError):
+        pass
+    return [f"{context} recorded hostile-control evidence changed"]
+
+
 def recorded_pair_errors(
     execution: Any,
     run_prefix: str,
