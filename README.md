@@ -11,7 +11,18 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 195 repairs scheduler recorded-evidence
+**Current development checkpoint:** Cycle 196 replaces nine constant-only
+preemption control groups with executed native-host and linked/source audit
+checks. Two final guest boots, 246 kernel host tests, 226 rejection cases and
+17 focused tests pass, including 232 corrupt receipts and seven disabled native
+validator variants. Selected readiness is 21/27; six profiles, at least 65
+remaining control-execution gaps and full exact-candidate qualification still
+precede main merge. Native kernel bytes and the demo ISO are unchanged.
+[Cycle 196 evidence and next steps](docs/checkpoints/cycle196-preemption-executed-controls.md).
+Broader regression passes 339 tests with zero skips; this is not the full
+canonical suite or production qualification.
+
+**Historical development checkpoint:** Cycle 195 repairs scheduler recorded-evidence
 admission. Two fresh guest boots, 115 rejection cases and 14 focused tests pass,
 including 221 corrupted receipts. All 219 original audit counterexamples now
 reject without validator exceptions. Roadmap 195 preserves prior results and

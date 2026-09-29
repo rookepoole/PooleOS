@@ -277,6 +277,17 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 196 qualifies strict preemption recorded evidence and nine executed control groups: "
+    "two final boots, 226 rejection cases and 17 focused tests pass, including 232 corrupted "
+    "records and seven disabled native validator variants. Selected readiness is 21/27; six "
+    "profiles remain from N12-SCHED-DEFERRED-001, with at least 65 control-execution gaps and "
+    "full exact-candidate qualification before main merge. Native-host tests and linked/source "
+    "audits do not establish hardware fault coverage; kernel bytes are unchanged. No phase, "
+    "flag, ISO or production gate closes. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -2481,6 +2492,8 @@ def check_native_kernel_scheduler_preemption_readiness(
             or "native kernel scheduler preemption readiness is not an object",
         )
     errors.extend(native_kernel_scheduler_preempt.readiness_errors(artifact, ROOT))
+    if errors:
+        return readiness.make_check("native_kernel_scheduler_preemption_readiness", False, "; ".join(errors[:8]))
     expected_summary = {
         "preemption_tests": 7,
         "kernel_host_tests": 246,
@@ -2491,7 +2504,7 @@ def check_native_kernel_scheduler_preemption_readiness(
         "interrupt_frame_switches": 4,
         "stack_bytes_cleared": 65_536,
         "negative_controls_total": 25,
-        "hostile_cases_total": 178,
+        "hostile_cases_total": 226,
         "production_claim_count": 0,
     }
     if artifact.get("summary") != expected_summary:
@@ -2566,7 +2579,7 @@ def check_native_kernel_scheduler_preemption_readiness(
         not isinstance(controls, list)
         or len(controls) != 25
         or sum(item.get("case_count", 0) for item in controls if isinstance(item, dict))
-        != 178
+        != 226
     ):
         errors.append("PKSCHED2 hostile-control evidence is incomplete")
     if artifact.get("claims") != native_kernel_scheduler_preempt.expected_claims():
@@ -2582,7 +2595,7 @@ def check_native_kernel_scheduler_preemption_readiness(
         "preemption_tests=7; kernel_tests=246; ticks=6; eois=6; tasks=4; "
         "trace=0,1,2,0,3,3; causes=none,quantum,wake,block,wake,none; "
         "frames=6/4; switches=4; stack_scrub=65536/65536; controls=25/25; "
-        "cases=178; live_ap=false; n12_exit=false; production_ready=false"
+        "cases=226; live_ap=false; n12_exit=false; production_ready=false"
     )
     return readiness.make_check(
         "native_kernel_scheduler_preemption_readiness",

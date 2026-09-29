@@ -358,6 +358,48 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle196-preemption-executed-controls.md",
+      "sha256": "E58EDC89B6288547F06BC098510F9497A5111FF0397D1AA5896E4BB348F5995C",
+      "byte_count": 5201,
+      "line_count": 91
+    },
+    {
+      "path": "runtime/native_kernel_scheduler_preempt.py",
+      "sha256": "52824FBEA71C219454773C177687DE84081E72ACCEA613BE86F300D8493D72C9",
+      "byte_count": 26675,
+      "line_count": 526
+    },
+    {
+      "path": "specs/native-kernel-scheduler-preemption-readiness.schema.json",
+      "sha256": "E160D2AF1DD798C86412A864D17BC14BE22E502F2D09466C5B1966257A72DA3A",
+      "byte_count": 3973,
+      "line_count": 72
+    },
+    {
+      "path": "tests/test_native_kernel_scheduler_preempt.py",
+      "sha256": "B40684A60E88773B2FBE59AA04714187AB5CB092655A0EF7369A479062C9C8E7",
+      "byte_count": 9831,
+      "line_count": 183
+    },
+    {
+      "path": "tests/test_native_preemption_controls.py",
+      "sha256": "900A8C16109C6E59F28E04FDDC8DBA2BEB6254A9F2CC4DBE0211770E0718A83B",
+      "byte_count": 6235,
+      "line_count": 108
+    },
+    {
+      "path": "tests/fixtures/pksched2_control_probe.rs",
+      "sha256": "1F0A80CF4DAB8434C0A367F6B50B26670A6B9B09F0D8043F61956E1463EEFC9D",
+      "byte_count": 9025,
+      "line_count": 229
+    },
+    {
+      "path": "docs/native-kernel-scheduler-preemption.md",
+      "sha256": "407D7AFF34A6763D5BABB1C05829B0738C8713C69CDE3A922FF4A0E382533D82",
+      "byte_count": 4823,
+      "line_count": 45
+    },
+    {
       "path": "docs/checkpoints/cycle195-scheduler-recorded-evidence.md",
       "sha256": "ACC853D0539723F91E1E9C1F2A25E41DF6AACDCBBFAF2F4E811A73137D9C95AE",
       "byte_count": 7186,
@@ -383,9 +425,9 @@
     },
     {
       "path": "tools/qualify_native_kernel_scheduler_preempt.py",
-      "sha256": "9461C3A0DE65CDEA1C9F1E31FAF7518225293E5B1DAFE2238C85D33DB6783473",
-      "byte_count": 22436,
-      "line_count": 450
+      "sha256": "75C83ADE9DBDC4725140E90FE3A55A744B54C5508302D2BDA2DE6424B37EDB96",
+      "byte_count": 29363,
+      "line_count": 575
     },
     {
       "path": "tests/test_native_kernel_scheduler.py",
@@ -539,9 +581,9 @@
     },
     {
       "path": "tools/pooleos_release_gate.py",
-      "sha256": "2FFF3F210E8A5E6B04E7C68AF5AD19B2B430CDE6F37416514B53FC35A1482F4C",
-      "byte_count": 357427,
-      "line_count": 7196
+      "sha256": "488BFED1633CBEA62A51A51663BB76DA5254364CB99DBBCB9F44FC1B8200819D",
+      "byte_count": 358215,
+      "line_count": 7209
     },
     {
       "path": "docs/checkpoints/cycle184-boot-host-provenance.md",
@@ -1067,15 +1109,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "9B08689A503EF9531905071B5EE45928FFEE39B6C53D44721840C79DFD7C89BF",
-      "byte_count": 102723,
-      "line_count": 1376
+      "sha256": "421AC274067424C9E48798C24C1BC49D0FDE4A4F48264F744DC35DB3699E5FEB",
+      "byte_count": 103436,
+      "line_count": 1386
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "91D6B728AA445C8F684C92CE98E1587F3A7ACD8E34CCF99924492BC40D1A91F2",
-      "byte_count": 440297,
-      "line_count": 3567
+      "sha256": "BC42F3E30CFE4126C4F55893658A42D5F908F80CD9E02B6888FB1CB1E26383E5",
+      "byte_count": 441856,
+      "line_count": 3592
     },
     {
       "path": "docs/publication-boundary.md",

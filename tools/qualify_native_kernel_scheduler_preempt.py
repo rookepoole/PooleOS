@@ -19,6 +19,7 @@ sys.path.insert(0, str(ROOT))
 
 from runtime import (  # noqa: E402
     native_kernel_load,
+    native_kernel_scheduler as scheduler,
     native_kernel_scheduler_preempt as preempt,
     native_kernel_transfer,
     native_tier0,
@@ -70,6 +71,8 @@ def _probe_operation(lines: list[str]) -> Callable[[], Any]:
 
 
 def _require_rejections(control_id: str, operations: list[Callable[[], Any]]) -> dict[str, Any]:
+    if not operations:
+        raise QualificationError(f"PKSCHED2 hostile control has no operations: {control_id}")
     for operation in operations:
         try:
             operation()
@@ -123,6 +126,43 @@ def _run_host_probe(toolchain_root: Path, target_dir: Path) -> dict[str, Any]:
     return result
 
 
+def _build_native_control_probe(toolchain_root: Path, target_dir: Path, source: Path | None = None) -> tuple[Path, dict[str, str]]:
+    _, rustc, env = qualify_native_kernel_entry._toolchain(toolchain_root)
+    target_dir.mkdir(parents=True, exist_ok=True)
+    executable = target_dir / "pksched2-controls.exe"
+    completed = subprocess.run(
+        [str(rustc), "--edition=2021", "--crate-name", "pksched2_controls",
+         str(source or ROOT / "tests/fixtures/pksched2_control_probe.rs"), "-o", str(executable)],
+        cwd=ROOT, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        check=False, timeout=120, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+    )
+    if completed.returncode != 0:
+        raise QualificationError(f"PKSCHED2 native control build failed: {completed.stdout.decode('utf-8', errors='replace')[-3000:]}")
+    return executable, env
+
+
+def _run_native_control_probe(toolchain_root: Path, target_dir: Path) -> dict[str, Any]:
+    executable, env = _build_native_control_probe(toolchain_root, target_dir)
+    completed = subprocess.run(
+        [str(executable)], cwd=ROOT, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        check=False, timeout=30, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+    )
+    output = completed.stdout.decode("utf-8", errors="strict").replace("\r\n", "\n")
+    if completed.returncode != 0:
+        raise QualificationError(f"PKSCHED2 native control probe failed: {output[-3000:]}")
+    controls = preempt.parse_native_control_output(output)
+    return {
+        "scope": "host_execution_of_native_scheduler_modules_not_privileged_guest_execution",
+        "exit_code": completed.returncode, "lines": output.splitlines(),
+        "output_sha256": preempt.sha256_bytes(output.encode("utf-8")),
+        "executable_sha256": preempt.sha256_bytes(executable.read_bytes()),
+        "controls": controls, "hostile_cases_total": sum(item["case_count"] for item in controls),
+        "sources": [preempt.file_binding(ROOT, path) for path in (
+            "tests/fixtures/pksched2_control_probe.rs", "native/kernel/src/scheduler.rs",
+            "native/kernel/src/scheduler_preempt.rs")],
+    }
+
+
 def _source_audit() -> dict[str, Any]:
     paths = {
         "scheduler": ROOT / "native/kernel/src/scheduler.rs",
@@ -135,6 +175,15 @@ def _source_audit() -> dict[str, Any]:
         "pooleboot_qualifier": ROOT / "tools/qualify_native_pooleboot.py",
     }
     texts = {name: path.read_text(encoding="utf-8") for name, path in paths.items()}
+    result = _audit_source_text(texts)
+    result["files"] = {
+        name: {"path": path.relative_to(ROOT).as_posix(), "sha256": preempt.sha256_bytes(path.read_bytes())}
+        for name, path in paths.items()
+    }
+    return result
+
+
+def _audit_source_text(texts: dict[str, str]) -> dict[str, Any]:
     required_preempt = (
         "pub const MAX_DEFERRED_EVENTS: usize = 8",
         "pub struct BspPreemption",
@@ -152,6 +201,9 @@ def _source_audit() -> dict[str, Any]:
         "SCHEDULER_PREEMPT_STACK_BASE",
         "RETAINED_KERNEL_STACK_BYTES",
         "current_rsp < task_region_top",
+        "task_region_top > kernel_stack_top",
+        "current_rsp >= kernel_stack_top",
+        ".checked_add(SCHEDULER_PREEMPT_REGION_BYTES as u64)",
         "frame.rsp <= top",
         "write_bytes(base, 0, SCHEDULER_PREEMPT_STACK_BYTES)",
         "switch_flags_after != switch_flags_before",
@@ -201,14 +253,77 @@ def _source_audit() -> dict[str, Any]:
         "allocation_free_controller": True,
         "live_marker_count": 6,
         "transient_diagnostic_token_count": 0,
-        "files": {
-            name: {"path": path.relative_to(ROOT).as_posix(), "sha256": preempt.sha256_bytes(path.read_bytes())}
-            for name, path in paths.items()
-        },
     }
 
 
-def _negative_controls(markers: list[str], probe_lines: list[str], source_audit: dict[str, Any], linked_audit: dict[str, Any]) -> list[dict[str, Any]]:
+def _retained_stack_controls(texts: dict[str, str]) -> dict[str, Any]:
+    _audit_source_text(texts)
+    operations = []
+    for token in (
+        "current_rsp < task_region_top", "task_region_top > kernel_stack_top",
+        "current_rsp >= kernel_stack_top", ".checked_add(SCHEDULER_PREEMPT_REGION_BYTES as u64)",
+    ):
+        hostile = dict(texts, arch=texts["arch"].replace(token, "REMOVED_STACK_GUARD"))
+        def reject(candidate: dict[str, str] = hostile) -> None:
+            try:
+                _audit_source_text(candidate)
+            except QualificationError as error:
+                raise preempt.KernelSchedulerPreemptError(str(error)) from error
+        operations.append(reject)
+    return _require_rejections(preempt.NEGATIVE_CONTROL_IDS[23], operations)
+
+
+def _linked_scope_controls(disassembly: str, symbols: str) -> dict[str, Any]:
+    qualify_native_kernel_scheduler._linked_switch_scope(disassembly, symbols)
+    variants = (
+        (disassembly.replace("<poole_scheduler_context_switch>:", "<removed_switch>:"), symbols),
+        (disassembly + disassembly, symbols),
+        (disassembly, symbols + symbols),
+    )
+    operations = []
+    for text, table in variants:
+        def reject(candidate: str = text, names: str = table) -> None:
+            try:
+                qualify_native_kernel_scheduler._linked_switch_scope(candidate, names)
+            except scheduler.KernelSchedulerError as error:
+                raise preempt.KernelSchedulerPreemptError(str(error)) from error
+        operations.append(reject)
+    return _require_rejections(preempt.NEGATIVE_CONTROL_IDS[22], operations)
+
+
+def _run_audit_controls(linked_audit: dict[str, Any], target_dir: Path, source_audit: dict[str, Any]) -> dict[str, Any]:
+    artifact = target_dir / qualify_native_kernel_entry.PRODUCT_TARGET / "release" / "PooleKernelLinked"
+    if preempt.sha256_bytes(artifact.read_bytes()) != linked_audit["linked_sha256"]:
+        raise QualificationError("PKSCHED2 hostile linked audit identity changed")
+    objdump = ROOT / linked_audit["llvm_objdump_path"]
+    if preempt.sha256_bytes(objdump.read_bytes()) != linked_audit["llvm_objdump_sha256"]:
+        raise QualificationError("PKSCHED2 hostile linked audit tool changed")
+    outputs = []
+    for option in ("-d", "-t"):
+        completed = subprocess.run(
+            [str(objdump), option, str(artifact)], cwd=ROOT,
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False, timeout=30,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+        if completed.returncode != 0:
+            raise QualificationError("PKSCHED2 hostile linked disassembly failed")
+        outputs.append(completed.stdout.decode("ascii", errors="strict").replace("\r\n", "\n"))
+    texts = {}
+    for name, binding in source_audit["files"].items():
+        content = (ROOT / binding["path"]).read_bytes()
+        if preempt.sha256_bytes(content) != binding["sha256"]:
+            raise QualificationError("PKSCHED2 hostile source audit identity changed")
+        texts[name] = content.decode("utf-8")
+    return {
+        "scope": "mutated_linked_disassembly_and_stack_guard_source_audit_not_hardware_fault_injection",
+        "linked_sha256": linked_audit["linked_sha256"],
+        "disassembly_sha256": preempt.sha256_bytes(outputs[0].encode("ascii")),
+        "symbol_table_sha256": preempt.sha256_bytes(outputs[1].encode("ascii")),
+        "controls": [_linked_scope_controls(*outputs), _retained_stack_controls(texts)],
+    }
+
+
+def _negative_controls(markers: list[str], probe_lines: list[str], source_audit: dict[str, Any], linked_audit: dict[str, Any], native_probe: dict[str, Any], audit_controls: dict[str, Any]) -> list[dict[str, Any]]:
     preempt.validate_markers(markers)
     preempt.parse_probe_output("\n".join(probe_lines) + "\n")
     ids = preempt.NEGATIVE_CONTROL_IDS
@@ -245,8 +360,11 @@ def _negative_controls(markers: list[str], probe_lines: list[str], source_audit:
     controls.append(_require_rejections(ids[14], [_probe_operation(oracle_hostile)]))
     if source_audit["focused_rust_test_count"] != 7 or linked_audit.get("status") != "pass":
         raise QualificationError("PKSCHED2 source or linked controls lack passing evidence")
-    for control_id in ids[15:24]:
-        controls.append({"id": control_id, "status": "pass", "expected": "rejected", "case_count": 1})
+    native_controls = preempt.parse_native_control_output("\n".join(native_probe["lines"]) + "\n")
+    if native_probe.get("exit_code") != 0 or native_probe.get("controls") != native_controls:
+        raise QualificationError("PKSCHED2 native control evidence diverged")
+    controls.extend(native_controls)
+    controls.extend(audit_controls["controls"])
     controls.append(
         _require_rejections(
             ids[24],
@@ -277,6 +395,7 @@ def make_readiness(toolchain_root: Path, qemu_root: Path, status_date: str, time
     with tempfile.TemporaryDirectory(prefix="pksched2-qualification-", dir=ROOT / "tmp") as temporary:
         temporary_root = Path(temporary)
         host_probe = _run_host_probe(toolchain_root, temporary_root / "host-probe")
+        native_probe = _run_native_control_probe(toolchain_root, temporary_root / "native-controls")
         default_boot, default_build = qualify_native_pooleboot._build_and_test(toolchain_root, temporary_root / "default-boot")
         preempt_boot, preempt_build = qualify_native_pooleboot._build_and_test(toolchain_root, temporary_root / "preempt-boot", development_feature=preempt.FEATURE)
         if b"POOLEBOOT/0.1 TRANSFER_ARM PASS" in default_boot or b"POOLEBOOT/0.1 STOP BEFORE TRANSFER" not in default_boot:
@@ -285,6 +404,7 @@ def make_readiness(toolchain_root: Path, qemu_root: Path, status_date: str, time
             raise QualificationError("default and PKSCHED2 PooleBoot binaries are not distinct")
         source_audit = _source_audit()
         linked_audit = qualify_native_kernel_scheduler._linked_switch_audit(toolchain_root, kernel, temporary_root / "linked-audit")
+        audit_controls = _run_audit_controls(linked_audit, temporary_root / "linked-audit", source_audit)
         media_one = native_kernel_load.build_media_bytes(preempt_boot, config, manifest, kernel, artifacts)
         media_two = native_kernel_load.build_media_bytes(preempt_boot, config, manifest, kernel, artifacts)
         if media_one != media_two:
@@ -331,7 +451,7 @@ def make_readiness(toolchain_root: Path, qemu_root: Path, status_date: str, time
             raise QualificationError("two PKSCHED2 runs produced different frames")
         if handoffs[0] != handoffs[1]:
             raise QualificationError("two PKSCHED2 runs produced different PBP1 bytes")
-    controls = _negative_controls(runs[0]["markers"], host_probe["lines"], source_audit, linked_audit)
+    controls = _negative_controls(runs[0]["markers"], host_probe["lines"], source_audit, linked_audit, native_probe, audit_controls)
     observation = preempt.validate_markers(runs[0]["markers"])
     firmware = {item["role"]: item for item in lock["firmware"]["files"]}
     report = {
@@ -355,6 +475,8 @@ def make_readiness(toolchain_root: Path, qemu_root: Path, status_date: str, time
             "default_stop_marker_present": True,
             "default_transfer_marker_absent": True,
             "host_probe": host_probe,
+            "native_control_probe": native_probe,
+            "audit_controls": audit_controls,
             "source_audit": source_audit,
             "linked_switch_audit": linked_audit,
         },
@@ -425,15 +547,18 @@ def make_readiness(toolchain_root: Path, qemu_root: Path, status_date: str, time
     return report
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--toolchain-root", type=Path, default=DEFAULT_TOOLCHAIN_ROOT)
     parser.add_argument("--qemu-root", type=Path, default=DEFAULT_QEMU_ROOT)
     parser.add_argument("--status-date", default="2026-08-01")
     parser.add_argument("--timeout", type=int, default=90)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     report = make_readiness(args.toolchain_root.resolve(), args.qemu_root.resolve(), args.status_date, args.timeout)
+    errors = preempt.readiness_errors(report, ROOT)
+    if errors:
+        raise QualificationError("; ".join(errors))
     _write_json(args.out.resolve(), report)
     summary = report["summary"]
     print(

@@ -24,6 +24,13 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle196-preemption-executed-controls.md",
+    "runtime/native_kernel_scheduler_preempt.py",
+    "specs/native-kernel-scheduler-preemption-readiness.schema.json",
+    "tests/test_native_kernel_scheduler_preempt.py",
+    "tests/test_native_preemption_controls.py",
+    "tests/fixtures/pksched2_control_probe.rs",
+    "docs/native-kernel-scheduler-preemption.md",
     "docs/checkpoints/cycle195-scheduler-recorded-evidence.md",
     "docs/checkpoints/cycle195-scheduler-cloud-backup.md",
     "runtime/native_kernel_scheduler.py",

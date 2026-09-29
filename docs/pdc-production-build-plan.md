@@ -1,13 +1,38 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-09-27
-Plan version: 2.98.0-native-scheduler-recorded-evidence
-Roadmap cycle: PooleOS Cycle 195
+Status date: 2026-09-29
+Plan version: 2.99.0-native-preemption-executed-controls
+Roadmap cycle: PooleOS Cycle 196
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 196: Executed Preemption Controls
+
+`N12-SCHED-PREEMPT-001`, supporting N12.1/N12.2/N12.3/N12.5/N12.6/N12.7 and N36,
+now executes the nine formerly constant-only groups. Fifty native-controller
+host rejection cases and seven linked/source audit cases replace those records.
+Seven disabled native variants and disabled-auditor regressions detect missing
+validation. Strict recorded evidence and typed counts are required before
+admission, and rejected qualification cannot replace or create output.
+
+Two final guest boots, 246 kernel host tests, 226 rejection cases in 25 groups
+and 17 focused tests pass, including 232 corrupt records. Four earlier boots
+are superseded, not counted as final. All history and the mistaken pre-test
+runner invocation are retained. No native kernel byte or ISO changed.
+
+The current selected projection is 21/27. Six profiles remain, beginning
+`N12-SCHED-DEFERRED-001`; at least 65 control-execution gaps remain in four
+later qualifiers. Full exact-candidate canonical/Doctor/publication/review
+gates still precede main merge. Roadmap 196 preserves Cycle 195 as historical
+records. The 1,060 discovered Python tests are inventory, not a suite pass.
+No phase, flag or production condition closes. Evidence and non-claims are in
+[the Cycle 196 checkpoint](checkpoints/cycle196-preemption-executed-controls.md).
+Broader regression passes 339 tests with zero skips, including exact kernel
+reproduction. Initial conservation passes; final metadata and publication
+checks remain mandatory before committing this checkpoint.
 
 ## Cycle 195: Scheduler Recorded Evidence
 

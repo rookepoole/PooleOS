@@ -1,6 +1,9 @@
 import copy
+import contextlib
+import io
 import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -11,7 +14,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from runtime import native_kernel_scheduler_preempt as preempt  # noqa: E402
-from tools import pooleos_release_gate  # noqa: E402
+from tools import pooleos_release_gate, qualify_native_kernel_scheduler_preempt as qualifier  # noqa: E402
+from tests.test_native_kernel_scheduler import recorded_receipt_mutations  # noqa: E402
 
 
 PROBE = """\
@@ -111,6 +115,68 @@ class NativeKernelSchedulerPreemptTests(unittest.TestCase):
         self.assertEqual(32, layout["ledger_a_page_capacity"])
         self.assertEqual(32, layout["ledger_b_page_capacity"])
         self.assertLess(layout["mmio_guard_high_page_index"], 1024)
+
+    def test_recorded_evidence_corruptions_fail_runtime_and_actual_gate(self) -> None:
+        baseline = preempt.read_json(ROOT / preempt.READINESS_RELATIVE)
+        self.assertEqual([], preempt.readiness_errors(baseline, ROOT))
+        self.assertTrue(pooleos_release_gate.check_native_kernel_scheduler_preemption_readiness()["ok"])
+        count = 0
+        for family, label, candidate in recorded_receipt_mutations(baseline):
+            with self.subTest(family=family, label=label):
+                self.assertTrue(preempt.readiness_errors(candidate, ROOT))
+                with patch.object(pooleos_release_gate, "_load_schema_artifact", return_value=(candidate, [])):
+                    self.assertFalse(pooleos_release_gate.check_native_kernel_scheduler_preemption_readiness()["ok"])
+            count += 1
+        self.assertGreaterEqual(count, 200)
+
+    def test_executed_control_receipts_reject_shape_count_type_and_source_corruption(self) -> None:
+        baseline = preempt.read_json(ROOT / preempt.READINESS_RELATIVE)
+        self.assertEqual([], preempt.readiness_errors(baseline, ROOT))
+        candidates = []
+        for section in ("native_control_probe", "audit_controls", "source_audit", "linked_switch_audit"):
+            for replacement in (None, [], {}, "invalid"):
+                candidate = copy.deepcopy(baseline)
+                candidate["build"][section] = replacement
+                candidates.append(candidate)
+        for key in baseline["build"]["native_control_probe"]:
+            candidate = copy.deepcopy(baseline)
+            candidate["build"]["native_control_probe"][key] = None
+            candidates.append(candidate)
+        for key, value in (("exit_code", False), ("hostile_cases_total", 50.0)):
+            candidate = copy.deepcopy(baseline)
+            candidate["build"]["native_control_probe"][key] = value
+            candidates.append(candidate)
+        for candidate in candidates:
+            with self.subTest(candidate=candidate["build"]):
+                self.assertTrue(preempt.readiness_errors(candidate, ROOT))
+                with patch.object(pooleos_release_gate, "_load_schema_artifact", return_value=(candidate, [])):
+                    self.assertFalse(pooleos_release_gate.check_native_kernel_scheduler_preemption_readiness()["ok"])
+
+    def test_disabled_marker_validator_is_detected_by_controls(self) -> None:
+        baseline = preempt.read_json(ROOT / preempt.READINESS_RELATIVE)
+        self.assertEqual([], preempt.readiness_errors(baseline, ROOT))
+        build = baseline["build"]
+        with patch.object(preempt, "validate_markers", return_value=baseline["execution"]["observation"]):
+            with self.assertRaises(qualifier.QualificationError):
+                qualifier._negative_controls(baseline["execution"]["runs"][0]["markers"], build["host_probe"]["lines"],
+                    build["source_audit"], build["linked_switch_audit"], build["native_control_probe"], build["audit_controls"])
+
+    def test_main_rejects_invalid_report_without_creating_or_replacing_output(self) -> None:
+        baseline = preempt.read_json(ROOT / preempt.READINESS_RELATIVE)
+        self.assertEqual([], preempt.readiness_errors(baseline, ROOT))
+        candidate = copy.deepcopy(baseline)
+        candidate["execution"]["runs"][0]["qemu_exit_code"] = True
+        with tempfile.TemporaryDirectory(dir=ROOT / "tmp") as temporary:
+            root = Path(temporary)
+            existing = root / "existing.json"
+            existing.write_bytes(b"existing evidence\n")
+            missing = root / "absent" / "report.json"
+            for output in (existing, missing):
+                with patch.object(qualifier, "make_readiness", return_value=candidate), contextlib.redirect_stdout(io.StringIO()):
+                    with self.assertRaises(qualifier.QualificationError):
+                        qualifier.main(["--out", str(output)])
+            self.assertEqual(b"existing evidence\n", existing.read_bytes())
+            self.assertFalse(missing.parent.exists())
 
 
 if __name__ == "__main__":

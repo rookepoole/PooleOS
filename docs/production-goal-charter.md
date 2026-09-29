@@ -1,15 +1,25 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-09-27
+Status date: 2026-09-29
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 195
+Last roadmap reconciliation: PooleOS Cycle 196
 
-Cycle 195: scheduler admission reparses raw paired execution and host evidence,
+Cycle 196: nine constant-only preemption control groups are replaced with
+executed native-host and linked/source audit checks. Two final guest boots,
+226 rejection cases and 17 focused tests pass, including 232 corrupted records
+and seven disabled native validator variants. Selected readiness is 21/27;
+six profiles, at least 65 remaining control-execution gaps and full exact-candidate
+qualification still precede main merge. Prior history remains unchanged; broader
+regression passes 339 tests with zero skips and initial conservation passes. No normative term,
+phase, flag, kernel bytes, ISO or production claim changes.
+[Cycle 196 evidence](checkpoints/cycle196-preemption-executed-controls.md).
+
+Historical Cycle 195: scheduler admission reparses raw paired execution and host evidence,
 typed observations/summaries and exact control counts. Two final guest boots,
 115 rejection cases and 14 focused tests pass, including 221 corrupt records.
 All 219 original counterexamples now reject without exceptions. Roadmap 195
