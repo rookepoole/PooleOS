@@ -11,7 +11,21 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 205 qualifies five CPU profiles on
+**Current development checkpoint:** Cycle 206 qualifies six memory, interrupt
+and multiprocessor profiles on unchanged kernel203. Twelve virtual boots,
+421 control groups covering 1,137 cases and 93 focused tests pass. Tests reject
+1,896 corrupted records, 360 raw-mailbox cases and seven independent IPI image
+pins. The initial stale-pin admission failure is preserved and corrected.
+Selected readiness is **19/27**; eight scheduler, atomic and lock profiles remain
+from `N12-SCHED-001`, plus SMP recorded admission and at least 51 control groups.
+No phase, flag, native byte, demo ISO or production status changes. Main merge
+still requires full exact-candidate qualification; cloud branch backup is separate.
+[Cycle 206 evidence](docs/checkpoints/cycle206-memory-and-multiprocessor-replay.md).
+Combined scoped regression passes 283/283, zero skips; corrected metadata passes
+53/53 and conservation verifies 347 bindings and 19 unchanged archived records.
+Counts overlap; full canonical merge qualification remains pending.
+
+**Historical development checkpoint:** Cycle 205 qualifies five CPU profiles on
 unchanged kernel203. Fourteen virtual boots, 225 controls and 54 focused tests
 pass; one expected TCG limitation probe is separate. Tests reject 3,398 corrupted
 control records, 371 run-evidence cases and 26 aggregate identity/promotion cases.

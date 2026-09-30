@@ -101,7 +101,8 @@ class NativeDependencyReleaseGateTests(unittest.TestCase):
         for wrong in (
             "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8",
             "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625",
-            "0" * 64, False,
+            "B19D4F7E854ECED3495D88C00F7379061B913EF00477FBD3701929B2F77D80F1",
+            "0" * 64, False, None, "",
         ):
             with self.subTest(wrong=wrong):
                 self.assertNotEqual(wrong, current)

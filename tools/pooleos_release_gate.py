@@ -385,6 +385,18 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 206 qualifies six memory/IRQ/SMP profiles on unchanged kernel203: twelve virtual boots, "
+    "421 control groups covering 1137 cases and 93 focused tests pass. Tests reject 1896 corrupted "
+    "records, 360 raw-mailbox cases and seven independent IPI image pins. The obsolete aggregate IPI "
+    "pin failure is preserved and corrected without guest evidence changes. Selected readiness is "
+    "19/27; eight scheduler/atomic/lock profiles remain from N12-SCHED-001, plus SMP recorded admission "
+    "and at least 51 later control groups. No native byte, phase, flag, ISO or production changes. "
+    "Full exact-candidate qualification precedes main merge; cloud branch backup is separate. "
+    "Prior qualification below is historical. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -2328,7 +2340,7 @@ def check_native_kernel_smp_ipi_readiness(
     kernel = build.get("kernel_entry", {}) if isinstance(build, dict) else {}
     if not isinstance(kernel, dict) or native_kernel_entry.readiness_errors(kernel):
         errors.append("PKSMP5 embedded kernel entry evidence is stale")
-    elif kernel.get("product", {}).get("canonical_sha256") != "B19D4F7E854ECED3495D88C00F7379061B913EF00477FBD3701929B2F77D80F1":
+    elif kernel.get("product", {}).get("canonical_sha256") != "A943DCB6E41A27F952868F05ED2B3523B47D9D7A7B5DB909EE385205F7CA3B31":
         errors.append("PKSMP5 embedded kernel identity changed")
     expected_summary = {
         "application_processors_online": 3,

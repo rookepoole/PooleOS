@@ -7,9 +7,21 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 205
+Last roadmap reconciliation: PooleOS Cycle 206
 
-Cycle 205 qualifies five CPU profiles on unchanged kernel203: fourteen virtual
+Cycle 206 qualifies six memory/IRQ/SMP profiles on unchanged kernel203: twelve
+virtual boots, 421 control groups, 1,137 cases and 93 focused tests pass. The
+stale IPI aggregate pin failure is preserved and corrected without rewriting
+guest evidence. Selected readiness is 19/27; eight profiles remain from
+N12-SCHED-001, plus SMP recorded admission and at least 51 later control groups.
+No normative condition, phase, flag, native byte, ISO or production status changes.
+Full exact-candidate qualification still precedes main merge.
+[Cycle 206 evidence](checkpoints/cycle206-memory-and-multiprocessor-replay.md).
+Combined scoped regression passes 283/283 with zero skips; corrected metadata
+passes 53/53 and conservation verifies 347 bindings and 19 unchanged archives.
+Counts overlap; full canonical qualification remains pending.
+
+Historical Cycle 205 qualifies five CPU profiles on unchanged kernel203: fourteen virtual
 boots, 225 controls and 54/54 focused tests pass; one expected TCG limitation
 probe is separate. Selected readiness is 13/27, with fourteen downstream profiles
 pending from N9-PMM-ACPI-CONSUMER-001 and at least 51 later control groups open.
