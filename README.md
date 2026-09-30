@@ -11,7 +11,18 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 200 qualifies six memory, interrupt and
+**Current development checkpoint:** Cycle 201 qualifies native cooperative
+scheduling and BSP timer/wakeup preemption on the unchanged Cycle 197 kernel.
+Four fresh virtual boots, 53 control groups, 341 rejection cases and 31 focused
+tests pass. The tests reject 453 malformed records and detect seven disabled
+native preemption checks. Selected readiness is 21/27; six profiles remain.
+Next is `N12-SCHED-DEFERRED-001`: repair deferred admission and executed-control
+coverage before its replay. No phase, flag, new ISO or production promotion.
+[Cycle 201 evidence](docs/checkpoints/cycle201-scheduler-and-preemption-replay.md).
+Combined scoped regression passes 128 tests, zero skips; repaired metadata passes
+48/48 and conservation passes. This is not full canonical merge qualification.
+
+**Historical development checkpoint:** Cycle 200 qualifies six memory, interrupt and
 multiprocessor profiles on the unchanged Cycle 197 kernel: twelve final virtual
 boots, 421 control groups and 1,137 executed rejection cases. All 93 scoped tests
 pass, including 1,896 malformed receipts and independent memory/IPI gate tests.

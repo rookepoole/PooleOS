@@ -1,15 +1,39 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-29
-Plan version: 2.103.0-native-memory-multiprocessor-replay
-Roadmap cycle: PooleOS Cycle 200
+Plan version: 2.104.0-native-scheduler-preemption-replay
+Roadmap cycle: PooleOS Cycle 201
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 200: Memory and Multiprocessor Replay
+## Cycle 201: Scheduler and Preemption Replay
+
+`N12-SCHED-001` and dependent `N12-SCHED-PREEMPT-001`, supporting
+N12.1/N12.2/N12.5/N12.6/N12.7 and N36, advance under
+`ADD-N36-RECEIPT-COVERAGE-001`. Four fresh virtual boots, 53 control groups,
+341 rejection cases and all 31 focused tests pass on the unchanged Cycle 197
+kernel. Evidence covers native two-task cooperative switching and four-task
+BSP timer/wakeup preemption, independent trace and linked-switch checks,
+453 malformed records and seven disabled native preemption variants.
+
+Selected readiness is 21/27. Six later profiles remain, starting with
+`N12-SCHED-DEFERRED-001`: repair recorded admission and execute its 14
+constant-only control groups before qualification. The at-least-65-group
+aggregate gap, full exact-candidate canonical/Doctor/release/publication/check/
+review qualification, general task/CPU retirement, N0 custody, N5 authentication,
+independent builders and production remain open. Retained Cycle 200 memory/AP
+evidence is not fresh Cycle 201 execution. No phase, flag, native source or ISO
+changes. The test inventory is 1,072, not full-suite execution.
+[Evidence and next steps](checkpoints/cycle201-scheduler-and-preemption-replay.md).
+Combined scoped regression passes 128 tests with zero skips in 171.172 seconds,
+including entry/core, deferred transactions, IRQ, scheduler/preemption and metadata.
+Repaired metadata passes 48/48; conservation verifies 17 parent records and 327
+bindings. Two failed metadata runs remain preserved; full qualification is pending.
+
+## Historical Cycle 200: Memory and Multiprocessor Replay
 
 `N9-PMM-ACPI-CONSUMER-001`, N9.1/N9.2 supporting N10/N36 and dependent
 VM/IRQ/AP/IPI profiles, advances under `ADD-N36-RECEIPT-COVERAGE-001`.

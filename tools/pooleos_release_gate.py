@@ -335,6 +335,18 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 201 requalifies scheduler and BSP preemption on the unchanged Cycle197 kernel: four fresh "
+    "virtual boots, 53 control groups, 341 rejection cases and 31 focused tests pass. All 453 recorded "
+    "corruptions reject and seven disabled native preemption checks are detected. Selected readiness is "
+    "21/27; six profiles remain from N12-SCHED-DEFERRED-001. Repair deferred admission and its 14 constant-only "
+    "groups within the existing at-least-65-group gap, then qualify the remaining profiles and exact full "
+    "candidate before main merge. Retained memory/CPU evidence is not fresh Cycle201 execution. N0 custody, "
+    "N5 authentication, general task/CPU retirement, independent builders and production remain open. "
+    + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:

@@ -7,9 +7,19 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 200
+Last roadmap reconciliation: PooleOS Cycle 201
 
-Cycle 200 qualifies six memory/IRQ/SMP profiles on the unchanged Cycle 197
+Cycle 201 qualifies cooperative scheduling and BSP preemption on the unchanged
+Cycle 197 kernel: four fresh virtual boots, 53 control groups, 341 rejection cases
+and 31 focused tests pass. Selected readiness is 21/27, with six later profiles
+pending from N12-SCHED-DEFERRED-001. Deferred admission and at least 65
+control-execution groups remain open before full exact-candidate qualification.
+No normative condition, phase, flag, kernel byte, ISO or production claim changes.
+[Cycle 201 evidence](checkpoints/cycle201-scheduler-and-preemption-replay.md).
+Combined scoped regression passes 128 tests, zero skips; repaired metadata passes
+48/48 and conservation passes. Full canonical qualification remains pending.
+
+Historical Cycle 200 qualifies six memory/IRQ/SMP profiles on the unchanged Cycle 197
 kernel: twelve virtual boots, 421 control groups, 1,137 rejection cases and
 93 scoped tests pass. The stale aggregate IPI image pin is repaired; the initial
 admission failure and unchanged guest evidence are preserved. Selected readiness
