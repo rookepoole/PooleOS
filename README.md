@@ -11,7 +11,20 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 208 repairs SMP evidence admission and
+**Current development checkpoint:** Cycle 209 repairs native AP-worker failure
+atomicity, generation wrap and counter validation. Thirty native cases in each
+of two host profiles and fifteen disabled-repair variants pass. Core qualification
+passes all 17 stages; two clean kernel builds match, with 246 kernel tests and
+43 hostile image controls passing. This is kernel implementation, not live-boot
+qualification. Changed kernel bytes leave **3/27** selected checks current;
+24 profiles require replay from symbols and the boot chain. The AP-worker flag
+is reopened, no phase closes, and the demo ISO is unchanged.
+[Cycle 209 evidence](docs/checkpoints/cycle209-native-ap-worker-transactions.md).
+Combined scoped regression passes 117/117, zero skips, including 56 repaired
+metadata tests. Counts overlap the focused tests; prior failures are preserved.
+Full exact-candidate qualification still precedes main merge and production.
+
+**Historical development checkpoint:** Cycle 208 repairs SMP evidence admission and
 replaces sixteen constant-only reports with executed controls. Two final virtual
 boots pass 303 cases, including 59 compiled-native boundary scenarios. All 18
 focused tests pass: 326 corrupted records and eight independent gate cases reject;

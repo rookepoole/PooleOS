@@ -423,6 +423,21 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 209 repairs native AP-worker failure atomicity, generation wrap and wide-counter validation. "
+    "Thirty native cases per debug/optimized profile, fifteen disabled variants, six combined transaction "
+    "methods, 17 core stages, two matching builds, 246 kernel tests and 43 hostile image controls pass. "
+    "Sixteen pre-repair native failures and compiler/order/anchor/linker failures are preserved. Kernel "
+    "bytes changed; selected readiness is 3/27, with 24 profiles requiring replay from N5-SYMBOLS-SEMANTICS-001. "
+    "The AP-worker flag is reopened. Recorded admission and eighteen constant-only AP groups remain within "
+    "at least 35 unproven groups. No current-kernel live boot, cross-CPU atomicity, phase closure, ISO change "
+    "or production claim. N0 custody, N5 authentication and full exact-candidate merge qualification remain. "
+    "Final combined scoped regression passes 117/117, zero skips, including 56 repaired metadata tests; "
+    "both earlier combined failures remain preserved. Counts overlap and are not full canonical qualification. "
+    "Branch cloud backup is separate; prior qualification below is historical. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -4062,11 +4077,11 @@ def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINE
         errors.append("PKENTRY1 qualification summary changed")
     product = artifact.get("product", {})
     expected_product = {
-        "canonical_byte_count": 530_072,
-        "image_byte_count": 602_112,
+        "canonical_byte_count": 534_168,
+        "image_byte_count": 606_208,
         "entry_offset": 0xA000,
-        "relocation_count": 1326,
-        "canonical_sha256": "A943DCB6E41A27F952868F05ED2B3523B47D9D7A7B5DB909EE385205F7CA3B31",
+        "relocation_count": 1323,
+        "canonical_sha256": "72C37783A5729229E6A259E38DC8DF55034FD467B77839FFFC4AA62B66E33EBF",
     }
     if not isinstance(product, dict) or any(
         type(product.get(key)) is not type(value) or product.get(key) != value
@@ -4077,8 +4092,8 @@ def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINE
         errors.append("PKENTRY1 claim boundary changed")
     detail = (
         "contract=PKENTRY1; kernel_tests=246/246; clean_builds=2/2; negative=43/43; "
-        "exact_loaded=2/2; bytes=530072; image_bytes=602112; entry=0xA000; "
-        "relocations=1326; live_transfer=false; "
+        "exact_loaded=2/2; bytes=534168; image_bytes=606208; entry=0xA000; "
+        "relocations=1323; live_transfer=false; "
         "target_execution=false; n6_exit=false; production_ready=false"
     )
     return readiness.make_check(

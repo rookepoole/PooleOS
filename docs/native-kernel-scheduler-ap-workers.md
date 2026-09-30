@@ -1,6 +1,27 @@
 # PKSCHED5 AP-Local Typed Workers
 
-PKSCHED5 closes `FLAG-N12-SCHED-AP-WORKERS-001` for one bounded development topology. It composes PKSCHED3 deferred work with PKSCHED4's exact BSP-0 and AP-1,2,3 legacy-xAPIC scheduler/runtime. Selector 19 is isolated behind `development-scheduler-ap-workers`; the default image still stops before transfer.
+PKSCHED5 historically closed `FLAG-N12-SCHED-AP-WORKERS-001` for one bounded development topology. Cycle 209 reopens that flag after reproducing non-atomic failure paths; the historical live profile below is not current-kernel qualification. It composes PKSCHED3 deferred work with PKSCHED4's exact BSP-0 and AP-1,2,3 legacy-xAPIC scheduler/runtime. Selector 19 is isolated behind `development-scheduler-ap-workers`; the default image still stops before transfer.
+
+## Cycle 209 Transaction Repair
+
+Enqueue, dispatch, offline staging, acknowledgement, cancellation, timeout,
+reclaim, terminal retirement, worker offlining and shutdown now stage changes
+in an allocation-free controller copy and commit only after validation. Duplicate
+enqueue intentionally retains its suppression diagnostic; failed counter updates
+do not consume work, generation, ticket, priority, ownership or intake state.
+Generation wrap rejects before publication. Validation uses checked/wide sums.
+
+Dispatch preflights all pending consumer commits in transaction order, including
+other APs, before exposing a ticket. This is local capacity validation, not a
+fabricated remote acknowledgement. Actual acknowledgements still require exact
+ticket, generation, payload, checksum and ownership validation.
+
+Thirty native cases execute in debug and optimized host builds, including twenty
+new private-state fault cases; fifteen disabled-repair variants must be detected.
+The controller remains at most 2,048 bytes. These tests require exclusive
+controller ownership and do not establish cross-CPU atomicity or live injected
+fault recovery. Recorded-evidence admission, eighteen constant-only control
+groups and fresh current-kernel AP execution remain open.
 
 ## Ownership Contract
 
@@ -10,7 +31,7 @@ Each dispatch ticket binds the work slot and generation, source and target CPU, 
 
 ## Typed Consumers
 
-The AP `CallFunction` path accepts exactly three payloads: the pre-existing no-op, a timer-driver bottom-half token, and a generation-reclaim service token. The two new tokens produce distinct fixed result values. Any other payload is denied before execution. The AP path retains the PKSMP5 fifteen-register save/restore sequence, balanced EOI, and private guarded IST1 stack.
+The AP `CallFunction` path accepts exactly three payloads: the pre-existing no-op, a timer-driver bottom-half token, and a generation-reclaim service token. The two new tokens produce distinct fixed result values. Any other payload is denied before execution. The AP path stack-saves and restores fourteen GPRs while preserving RBP without modification, with balanced EOI and a private guarded IST1 stack.
 
 The live profile dispatches nine driver items and three service items, four per AP. It produces driver sum 177 and service generation 4. No function pointer, arbitrary callback, heap allocation, or dynamic consumer registration enters the controller.
 

@@ -105,7 +105,10 @@ impl Consumer {
             Self::ServiceGenerationReclaim {
                 retired_generation,
                 active_generation,
-            } => retired_generation != 0 && active_generation == retired_generation.wrapping_add(1),
+            } => match retired_generation.checked_add(1) {
+                Some(next) => retired_generation != 0 && next == active_generation,
+                None => false,
+            },
         }
     }
 }
@@ -360,6 +363,20 @@ impl ApWorkerController {
         context: TopHalfContext,
         request: WorkRequest,
     ) -> Result<WorkId, Error> {
+        let mut next = *self;
+        let result = next.enqueue_from_top_half_inner(context, request);
+        // Duplicate suppression is an intentional diagnostic update on rejection.
+        if result.is_ok() || result == Err(Error::Duplicate) {
+            *self = next;
+        }
+        result
+    }
+
+    fn enqueue_from_top_half_inner(
+        &mut self,
+        context: TopHalfContext,
+        request: WorkRequest,
+    ) -> Result<WorkId, Error> {
         if !self.intake_open {
             return Err(Error::IntakeClosed);
         }
@@ -442,6 +459,21 @@ impl ApWorkerController {
         request_attempt: u64,
         request_sequence: u64,
     ) -> Result<DispatchTicket, Error> {
+        let mut next = *self;
+        let ticket =
+            next.stage_dispatch_inner(target_cpu, permit, request_attempt, request_sequence)?;
+        next.preflight_pending_commits()?;
+        *self = next;
+        Ok(ticket)
+    }
+
+    fn stage_dispatch_inner(
+        &mut self,
+        target_cpu: u8,
+        permit: DispatchPermit,
+        request_attempt: u64,
+        request_sequence: u64,
+    ) -> Result<DispatchTicket, Error> {
         self.require_dispatch_permit(permit)?;
         let target = self.require_ap(target_cpu)?;
         if self.pending[target].is_some() {
@@ -466,6 +498,27 @@ impl ApWorkerController {
     }
 
     pub fn stage_offline_probe(
+        &mut self,
+        id: WorkId,
+        offline_cpu: u8,
+        permit: DispatchPermit,
+        request_attempt: u64,
+        request_sequence: u64,
+    ) -> Result<DispatchTicket, Error> {
+        let mut next = *self;
+        let ticket = next.stage_offline_probe_inner(
+            id,
+            offline_cpu,
+            permit,
+            request_attempt,
+            request_sequence,
+        )?;
+        next.preflight_pending_commits()?;
+        *self = next;
+        Ok(ticket)
+    }
+
+    fn stage_offline_probe_inner(
         &mut self,
         id: WorkId,
         offline_cpu: u8,
@@ -501,6 +554,13 @@ impl ApWorkerController {
     }
 
     pub fn cancel(&mut self, id: WorkId) -> Result<(), Error> {
+        let mut next = *self;
+        next.cancel_inner(id)?;
+        *self = next;
+        Ok(())
+    }
+
+    fn cancel_inner(&mut self, id: WorkId) -> Result<(), Error> {
         let index = self.resolve(id)?;
         match self.slots[index].state {
             WorkState::Queued => {
@@ -524,6 +584,17 @@ impl ApWorkerController {
         ticket: DispatchTicket,
         ack: RemoteAck,
     ) -> Result<Receipt, Error> {
+        let mut next = *self;
+        let receipt = next.acknowledge_inner(ticket, ack)?;
+        *self = next;
+        Ok(receipt)
+    }
+
+    fn acknowledge_inner(
+        &mut self,
+        ticket: DispatchTicket,
+        ack: RemoteAck,
+    ) -> Result<Receipt, Error> {
         let target = self.require_ap(ticket.target_cpu)?;
         if self.pending[target] != Some(ticket) {
             return Err(Error::TicketMismatch);
@@ -537,6 +608,14 @@ impl ApWorkerController {
             || ack.result != ticket.expected_result
         {
             return Err(Error::Acknowledgement);
+        }
+        self.commit_acknowledgement(ticket)
+    }
+
+    fn commit_acknowledgement(&mut self, ticket: DispatchTicket) -> Result<Receipt, Error> {
+        let target = self.require_ap(ticket.target_cpu)?;
+        if self.pending[target] != Some(ticket) {
+            return Err(Error::TicketMismatch);
         }
         let index = self.resolve(ticket.id)?;
         if self.slots[index].state != WorkState::Dispatching
@@ -585,19 +664,26 @@ impl ApWorkerController {
             self.active_service_generation = next_service_generation;
             WorkState::Completed
         };
-        self.complete_terminal(index, state, ack.result)?;
+        self.complete_terminal(index, state, ticket.expected_result)?;
         let receipt = Receipt {
             id: ticket.id,
             target_cpu: ticket.target_cpu,
             state,
             completion_sequence: self.slots[index].completion_sequence,
-            result: ack.result,
+            result: ticket.expected_result,
         };
         self.validate()?;
         Ok(receipt)
     }
 
     pub fn timeout(&mut self, ticket: DispatchTicket) -> Result<(), Error> {
+        let mut next = *self;
+        next.timeout_inner(ticket)?;
+        *self = next;
+        Ok(())
+    }
+
+    fn timeout_inner(&mut self, ticket: DispatchTicket) -> Result<(), Error> {
         if ticket.target_cpu != OFFLINE_PROBE_CPU || self.offline_pending != Some(ticket) {
             return Err(Error::TimeoutTarget);
         }
@@ -633,6 +719,13 @@ impl ApWorkerController {
     }
 
     pub fn reclaim(&mut self, id: WorkId, token: FlushToken) -> Result<(), Error> {
+        let mut next = *self;
+        next.reclaim_inner(id, token)?;
+        *self = next;
+        Ok(())
+    }
+
+    fn reclaim_inner(&mut self, id: WorkId, token: FlushToken) -> Result<(), Error> {
         if !self.flush_complete(token) {
             return Err(Error::FlushPending);
         }
@@ -656,6 +749,13 @@ impl ApWorkerController {
     }
 
     pub fn retire_all_terminal(&mut self, token: FlushToken) -> Result<u8, Error> {
+        let mut next = *self;
+        let retired = next.retire_all_terminal_inner(token)?;
+        *self = next;
+        Ok(retired)
+    }
+
+    fn retire_all_terminal_inner(&mut self, token: FlushToken) -> Result<u8, Error> {
         if !self.flush_complete(token) {
             return Err(Error::FlushPending);
         }
@@ -667,7 +767,7 @@ impl ApWorkerController {
             ) && self.slots[index].enqueue_sequence <= token.enqueue_watermark
             {
                 let id = self.slots[index].id(index);
-                self.reclaim(id, token)?;
+                self.reclaim_inner(id, token)?;
                 retired = retired.checked_add(1).ok_or(Error::Counter)?;
             }
         }
@@ -675,6 +775,13 @@ impl ApWorkerController {
     }
 
     pub fn offline_worker(&mut self, cpu: u8) -> Result<(), Error> {
+        let mut next = *self;
+        next.offline_worker_inner(cpu)?;
+        *self = next;
+        Ok(())
+    }
+
+    fn offline_worker_inner(&mut self, cpu: u8) -> Result<(), Error> {
         let index = self.require_ap(cpu)?;
         if self.pending[index].is_some()
             || self
@@ -693,6 +800,13 @@ impl ApWorkerController {
     }
 
     pub fn finish_shutdown(&mut self) -> Result<(), Error> {
+        let mut next = *self;
+        next.finish_shutdown_inner()?;
+        *self = next;
+        Ok(())
+    }
+
+    fn finish_shutdown_inner(&mut self) -> Result<(), Error> {
         self.intake_open = false;
         if self.online_mask != 1
             || self.offline_pending.is_some()
@@ -802,9 +916,15 @@ impl ApWorkerController {
         let pending_count =
             self.pending.iter().flatten().count() + usize::from(self.offline_pending.is_some());
         if pending_count != dispatching
-            || self.completed + self.cancelled + self.reclaimed > self.enqueued + self.reclaimed
+            || u64::from(self.completed) + u64::from(self.cancelled) > u64::from(self.enqueued)
             || self.remote_cancel_completions > self.remote_cancel_requests
-            || self.remote_acks != self.worker_entries.iter().copied().sum::<u32>()
+            || u64::from(self.remote_acks)
+                != self
+                    .worker_entries
+                    .iter()
+                    .copied()
+                    .map(u64::from)
+                    .sum::<u64>()
             || self.maximum_high_bypass > MAX_HIGH_BYPASS
             || self.worker_retirements > AP_COUNT as u32
             || self.active_service_generation == 0
@@ -818,6 +938,25 @@ impl ApWorkerController {
                 || self.slots.iter().any(|slot| slot.state != WorkState::Free))
         {
             return Err(Error::Invariant);
+        }
+        Ok(())
+    }
+
+    fn preflight_pending_commits(&self) -> Result<(), Error> {
+        // Check local completion capacity for all outstanding work before publication.
+        // This discarded state neither accepts nor fabricates a remote acknowledgement.
+        let mut trial = *self;
+        while let Some(ticket) = trial
+            .pending
+            .iter()
+            .flatten()
+            .min_by_key(|t| t.transaction)
+            .copied()
+        {
+            trial.commit_acknowledgement(ticket)?;
+        }
+        if let Some(ticket) = trial.offline_pending {
+            trial.timeout_inner(ticket)?;
         }
         Ok(())
     }
@@ -1124,11 +1263,32 @@ mod tests {
             .enqueue_from_top_half(top_half(), service(1, 1, 2))
             .unwrap();
         let permit = controller.observe_eoi().unwrap();
-        let ticket = controller.stage_dispatch(1, permit, 3, 2).unwrap();
+        let before = controller.summary();
+        assert_eq!(
+            controller.stage_dispatch(1, permit, 3, 2),
+            Err(Error::ReclaimOrder)
+        );
+        assert_eq!(controller.summary(), before);
+        assert!(controller.pending.iter().all(Option::is_none));
+        controller
+            .enqueue_from_top_half(top_half(), service(2, 2, 1))
+            .unwrap();
+        let permit = controller.observe_eoi().unwrap();
+        let first = controller.stage_dispatch(2, permit, 3, 2).unwrap();
+        controller.acknowledge(first, ack(first)).unwrap();
+        let ticket = controller.stage_dispatch(1, permit, 3, 3).unwrap();
+        controller.active_service_generation = 1;
+        let before = controller.summary();
         assert_eq!(
             controller.acknowledge(ticket, ack(ticket)),
             Err(Error::ReclaimOrder)
         );
+        assert_eq!(controller.summary(), before);
+        assert_eq!(controller.pending[1], Some(ticket));
+        controller.active_service_generation = 2;
+        controller.acknowledge(ticket, ack(ticket)).unwrap();
+        assert_eq!(controller.active_service_generation, 3);
+        assert_eq!(controller.validate(), Ok(()));
     }
 
     #[test]

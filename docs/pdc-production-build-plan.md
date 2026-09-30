@@ -1,15 +1,46 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-30
-Plan version: 2.111.0-native-smp-controls
-Roadmap cycle: PooleOS Cycle 208
+Plan version: 2.112.0-native-ap-worker-transactions
+Roadmap cycle: PooleOS Cycle 209
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 208: SMP Admission and Executed Controls
+## Cycle 209: Native AP-Worker Transactions
+
+`N12-SCHED-AP-WORKERS-001`, N12.4-N12.7/N36 and N6 image qualification, advances
+under `ADD-N12-SCHED-AP-WORKERS-001` and `ADD-N36-RECEIPT-COVERAGE-001`.
+The actual native controller now preserves state on failed enqueue, dispatch,
+acknowledgement, cancellation, timeout, reclaim, retirement, offlining and
+shutdown. It rejects generation wrap and uses checked/wide validation sums.
+Dispatch preflights all pending local consumer commits in transaction order;
+this neither fabricates remote acknowledgements nor proves cross-CPU atomicity.
+
+Before repair, 16 of 28 native cases failed in each host profile. Thirty final
+cases in debug and optimized builds, fifteen disabled-repair variants and six
+combined AP/SMP/deferred transaction test methods pass. All 17 core stages,
+two matching clean builds, 246 kernel tests and 43 hostile image controls pass.
+Compiler, order/anchor-test and three measured linker-boundary failures remain
+preserved. Each required layout endpoint grew by one page with W^X separation.
+
+Selected readiness is 3/27: entry, policy and errata remain current. Twenty-four
+profiles require changed-image replay from `N5-SYMBOLS-SEMANTICS-001`, then boot,
+CPU, memory and scheduler dependencies. The AP-worker flag is reopened;
+recorded admission and eighteen constant-only groups remain within at least
+35 unproven groups. No phase closes. N0 custody, N5 authentication, general
+task/CPU retirement, independent builders and full merge qualification remain.
+No new-kernel guest boot, new ISO or production promotion is claimed.
+[Evidence](checkpoints/cycle209-native-ap-worker-transactions.md).
+Final combined scoped regression passes 117/117 with zero skips, including 56
+metadata tests. Both initial combined failures (old transfer ID, then its
+synthetic fixture) are preserved and repaired. Conservation passes twenty
+unchanged archived records, 354 source bindings and 1,103 discovered tests.
+These counts overlap; this is not full canonical merge qualification.
+
+## Historical Cycle 208: SMP Admission and Executed Controls
 
 `N12-SCHED-SMP-001`, N12.4-N12.7/N36, advances under `ADD-N12-SCHED-SMP-001`
 and `ADD-N36-RECEIPT-COVERAGE-001`. Recorded SMP evidence is now reparsed and

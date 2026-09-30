@@ -7934,10 +7934,193 @@ def apply_cycle208(roadmap: dict, test_count: int) -> dict:
             phase["current_evidence"].insert(0, evidence)
             phase["current_gaps"].insert(0, gap)
         if phase["id"] == "N36":
-            phase["current_evidence"].insert(0, f"Cycle 208 source inventory: {test_count} Python tests discovered; full qualification pending")
+            phase["current_evidence"].insert(0, "Cycle 208 source inventory: 1100 Python tests discovered; full qualification pending")
     for flag in roadmap["implementation_flags"]:
         if flag["id"] in {"FLAG-N12-SCHED-SMP-001", "FLAG-N36-RECEIPT-COVERAGE-001"}:
             flag["evidence"].insert(0, checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle209(roadmap, test_count)
+
+
+def apply_cycle209(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle209-native-ap-worker-transactions.md"
+    kernel_sha = "72C37783A5729229E6A259E38DC8DF55034FD467B77839FFFC4AA62B66E33EBF"
+    entry_sha = "81D4EF8ABBF735A1A39B3E8D40966A9C299377BC36E77C469CCAA61BCB8788E8"
+    core_sha = "DD0436EFBAD686C4AB352EB1B4FF97F20158BB53DA7B44E3A7AC7F8143EA814F"
+    next_move = "N5-SYMBOLS-SEMANTICS-001"
+    roadmap["baseline"]["pooleos_cycle"] = 209
+    protocol = roadmap["execution_protocol"]
+    protocol.update(last_updated_cycle=209, selected_move_id="N12-SCHED-AP-WORKERS-001",
+                    owner_independent_next_move_id=next_move)
+    protocol["required_records"].insert(0, checkpoint)
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    for key, value in list(gate.items()):
+        if key.startswith("current_") and isinstance(value, dict):
+            suffix = "source_projection" if key == "current_focused_source_projection" else key.removeprefix("current_")
+            gate["historical_cycle208_" + suffix] = copy.deepcopy(value)
+    gate["qualification_status"] = "native_AP_worker_transactions_repaired_changed_image_replay_and_controls_pending"
+    gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=209)
+    gate["current_focused_source_projection"] = {
+        "cycle": 209, "scope": "27_selected_native_checks_not_full_canonical_audit",
+        "passed_checks": 3, "total_checks": 27, "pending_downstream_native_checks": 24,
+        "passing_profiles": ["native_kernel_entry_readiness", "native_policy_readiness", "native_kernel_errata_policy_readiness"],
+        "final_receipt_fresh_qemu_runs": 0, "kernel_entry_runs": 0,
+        "next_dependency_move_id": next_move,
+        "required_next_gate": "changed_image_symbols_boot_CPU_memory_scheduler_replay_and_executed_AP_controls",
+        "native_transaction_tests_per_profile": 30, "native_transaction_host_profiles": 2,
+        "canonical_full_replay_performed": False, "production_ready": False,
+    }
+    pending_profiles = {
+        "boot_chain": ["symbol", "kernel_load", "pooleboot", "kernel_revalidation", "kernel_transfer"],
+        "cpu": ["trap", "cpu_policy", "xstate_policy", "xstate_exception", "privilege_msr_policy"],
+        "dependency": ["physical_memory", "virtual_memory", "interrupt_time", "smp_first_ap", "smp_percpu_runtime",
+                       "smp_ipi", "scheduler", "scheduler_preempt", "scheduler_deferred", "scheduler_smp",
+                       "scheduler_ap_workers", "scheduler_smp_preempt", "atomics", "locks"],
+    }
+    for group, profiles in pending_profiles.items():
+        gate["current_" + group + "_qualification"] = {
+            "cycle": 209, "source_validation_cycle": 209, "status": "source_requalification_required",
+            "applies_to_current_source": False, "kernel_sha256": kernel_sha,
+            "historical_record": "historical_cycle208_" + group + "_qualification",
+            "qualified_profiles": ["policy"] if group == "boot_chain" else [],
+            "readiness_replay_required_profiles": profiles,
+            "fresh_qemu_runs": 0, "receipt_bindings": [], "embedded_entry_provenance_replay_pending": True,
+            "all_fourteen_profiles_current": False, "control_execution_complete": False,
+            "unproven_per_control_rejection_groups_at_least": 35,
+            "current_candidate_full_gate_passed": False, "production_ready": False,
+        }
+    gate["current_entry_provenance_qualification"] = dict(
+        gate["current_entry_provenance_qualification"], cycle=209, source_validation_cycle=209,
+        linked_byte_count=7091272, linked_sha256="B29916B90D42010CCDBDCC8927E10F8FCEEF14020CA037051367CCB4CC29F841",
+        canonical_byte_count=534168, canonical_sha256=kernel_sha, entry_receipt_sha256=entry_sha,
+        source_binding_count=76, latest_reproduction_cycle=209,
+    )
+    gate["current_task_stack_qualification"] = dict(gate["current_task_stack_qualification"], cycle=209, receipt_sha256=core_sha)
+    gate["current_execution_qualification"] = dict(gate["current_execution_qualification"], cycle=209,
+        receipt_sha256=core_sha, kernel_sha256=kernel_sha)
+    gate["current_ownership_qualification"] = dict(
+        gate["current_ownership_qualification"], cycle=209, host_qualification_cycle=209,
+        scope="host209_only_prior_IPI_and_VM_receipts_historical", kernel_sha256=kernel_sha,
+        reclamation_receipt_sha256=core_sha, entry_receipt_sha256=entry_sha,
+        fresh_current_cycle_qemu_runs=0, live_receipt_source_current=False,
+        current_boot_artifact_set_replay_pending=True, active_root_current_image_replay_complete=False,
+        ap_runtime_live_integration_verified=False, virtual_memory_live_receipt_source_current=False,
+        live_receipt_scope="historical_IPI_and_VM206_not_current_kernel_execution",
+        source_current_scope="host_core_and_entry_only", historical_record="historical_cycle208_ownership_qualification",
+    )
+    gate["current_ipi_mailbox_oracle_gap"] = dict(gate["current_ipi_mailbox_oracle_gap"], cycle=209,
+        remaining_affected_profiles=24, newly_requalified_profiles=[], current_kernel_live_replay_pending=True)
+    gate["current_control_execution_audit"] = dict(gate["current_control_execution_audit"], cycle=209)
+    for name in ("preemption_control_execution_audit", "deferred_transaction_qualification",
+                 "symbol_admission_qualification", "deferred_control_qualification",
+                 "smp_transaction_qualification", "smp_control_qualification"):
+        gate["current_" + name] = dict(gate["current_" + name], applies_to_current_source=False,
+            current_kernel_live_replay_pending=True, current_receipt_admitted=False,
+            historical_record="historical_cycle208_" + name)
+    gate["current_ap_worker_transaction_qualification"] = {
+        "cycle": 209, "move_id": "N12-SCHED-AP-WORKERS-001",
+        "requirements": ["ADD-N12-SCHED-AP-WORKERS-001", "ADD-N36-RECEIPT-COVERAGE-001"],
+        "status": "native_host_transactions_verified_current_boot_and_controls_pending",
+        "scope": "exclusive_controller_state_transactions_not_cross_CPU_atomicity",
+        "initial_native_tests_per_profile": 28, "initial_native_passed": 12, "initial_native_failed": 16,
+        "initial_log_sha256": "C02F786B0630E8D7C6EF1F12FA3E5F6F8A0F75DBE4EA78999AB4A234E7CC13A4",
+        "final_native_tests_per_profile": 30, "new_private_state_tests": 20, "host_optimization_levels": [0, 3],
+        "disabled_native_variants_detected": 15, "focused_python_test_methods": 2,
+        "combined_transaction_methods_passed": 6,
+        "control_log_sha256": "401921DBF877082D913FDB223D23DFF814CF04D269351C09E85A9626801209AE",
+        "sources": {
+            "native/kernel/src/scheduler_ap_workers.rs": "AD365CC34066F7D26921B4F9D264D5C7FDE7797086B07AD67C8C34DCCD1452A7",
+            "tests/fixtures/pksched5_transaction_probe.rs": "8E5F5EFA7587BE6491CEDC3AFCC650B24A8932DDC4ACB8B2A476C54C48B52126",
+            "tests/test_native_ap_worker_transactions.py": "6774DFA9A106BDABE1C348D3CE0DBCA833D54DF90D102563B47E515325CCA850",
+        },
+        "kernel_sha256": kernel_sha, "kernel_bytes_changed": True,
+        "entry_receipt_sha256": entry_sha, "core_receipt_sha256": core_sha,
+        "preserved_rejected_attempts": [
+            {"tag": "repaired", "cause": "Option_comparison_not_const_stable", "log_sha256": "74ECE56963B6689C14523713F27CD62884A527BA12E9CE42D82C771FBA3AFFAF"},
+            {"tag": "repaired2", "cause": "existing_order_test_expected_late_ack_not_early_dispatch_rejection", "log_sha256": "8D31C21C74CE59D378AD2ED1CD8319B6ED5854E90B9EF62729F7888A673C8F9F"},
+            {"tag": "controls", "cause": "mutation_anchor_changed_by_rustfmt", "log_sha256": "EF07FB07EF4639002B3E9A41C0B45BE27325A8F624A910C51CE5E80F89BD7FD3"},
+            {"tag": "measure", "cause": "text_boundary_short_by_1150_bytes", "log_sha256": "6838C356CCE2C342F62F83A8E83911103EDD7E12ADF73E7C7B9FA613F960B2C2"},
+            {"tag": "measure2", "cause": "RELRO_boundary_short_by_144_bytes", "log_sha256": "F7E1E22320A8239F2951EC52CEAE5CA5B5F279355A20B50344ABC89D00E755D7"},
+            {"tag": "measure3", "cause": "image_boundary_short_by_3572_bytes", "log_sha256": "CF5826CE9C77B09C012C9B0FEEA692C9607B654555BDFEA55B6600FFAC281A6C"},
+        ],
+        "remote_ack_synthesized_or_accepted_by_preflight": False,
+        "recorded_evidence_admission_repaired": False, "constant_only_control_groups_replaced": 0,
+        "remaining_AP_worker_control_groups": 18, "remaining_global_control_groups_at_least": 35,
+        "controller_size_upper_bound_bytes": 2048, "new_kernel_qemu_runs": 0,
+        "cross_cpu_atomicity_proved": False, "production_ready": False,
+    }
+    gate["current_closeout_regression"] = {
+        "cycle": 209, "status": "pass",
+        "scope": "native_AP_worker_host_core_entry_not_full_canonical",
+        "tests_run": 117, "tests_passed": 117, "tests_failed": 0, "tests_skipped": 0,
+        "elapsed_seconds": 163.739, "runner_elapsed_seconds": 164.703,
+        "log_sha256": "6A2F2869405F2693416AFF31CF008539BBDF7EDEBD651D2C5D608D134D094EEC",
+        "includes_native_transactions_entry_core_host_transfer_publication_and_metadata": True,
+        "repaired_metadata_tests_passed": 56, "counts_overlap_prior_tests": True,
+        "source_unchanged_during_execution": True, "owner_report_unchanged": True,
+        "core": {"stages_passed": 17, "elapsed_seconds": 39.547,
+            "log_sha256": "2AB8D226E34E1EC1FD773B540A39E2E660DA56CAD8E6063453F24A14CBE3DD9D"},
+        "entry": {"clean_builds": 2, "kernel_tests": 246, "rejection_cases": 43, "elapsed_seconds": 38.390,
+            "log_sha256": "812247C631861F134E36E05396EF5D5167953BCFF34A0322E7CA7A343FF45D3E"},
+        "initial_metadata": {"tests_run": 56, "failure_records": 23, "tests_skipped": 0,
+            "elapsed_seconds": 12.532, "runner_elapsed_seconds": 13.328,
+            "cause": "old_cycle_schema_and_historical_receipts_still_expected_current",
+            "log_sha256": "10DB2FC9AACC7A4B4577F8D9F1FF2BD5E55B3EE816785E3DA16458563498DCD9"},
+        "second_metadata": {"tests_run": 56, "tests_passed": 53, "tests_failed": 3, "tests_skipped": 0,
+            "elapsed_seconds": 21.885, "runner_elapsed_seconds": 22.687,
+            "cause": "remaining_old_pending_count_current_CPU_acceptance_and_old_marker_identity",
+            "log_sha256": "E5147F725F88B41A121AA2C63DC35714CCB7F53BECF24DC82790BBBEC083FF4B"},
+        "initial_conservation_diagnostics": [
+            "helper_numeric_substitution_changed_locked_coverage_hash_literal_not_the_coverage_file",
+            "metadata_test_indentation_error_temporarily_prevented_full_test_discovery",
+        ],
+        "initial_conservation": {"status": "pass", "archived_parent_current_records": 20,
+            "architecture_bindings": 354, "test_inventory": 1103, "selected_checks": "3/27",
+            "all_prior_boot_receipts_and_normative_charter_preserved": True,
+            "only_AP_worker_flag_reopened_and_no_phase_status_changed": True},
+        "initial_combined_regression": {"tests_run": 117, "tests_passed": 116, "tests_failed": 1,
+            "tests_skipped": 0, "elapsed_seconds": 163.711, "runner_elapsed_seconds": 164.625,
+            "cause": "transfer_validator_still_pinned_Cycle203_build_ID",
+            "log_sha256": "3E7D107D74277F38D93E71AD48473FE6DCDCE3D55D375E45BA6CCBB972A4783E",
+            "source_unchanged_during_execution": True, "owner_report_unchanged": True,
+            "metadata_tests_passed": 56},
+        "second_combined_regression": {"tests_run": 117, "tests_passed": 116, "tests_failed": 0,
+            "tests_errored": 1, "tests_skipped": 0, "elapsed_seconds": 172.417, "runner_elapsed_seconds": 173.343,
+            "cause": "synthetic_transfer_fixture_still_carried_Cycle203_build_ID",
+            "log_sha256": "1AB00AB6C637EF2DBF33D9B7AE607D13D79721679AD793C7E6ED9D1C0074E8F6",
+            "source_unchanged_during_execution": True, "owner_report_unchanged": True,
+            "recorded_guest_transcripts_rebound": False},
+        "canonical_full_replay_performed": False, "merge_qualified": False, "production_ready": False,
+    }
+    evidence = (
+        "Cycle 209: " + checkpoint + " repairs native AP-worker queue, dispatch, acknowledgement, cancellation, "
+        "timeout, reclaim, retirement, offlining and shutdown transactions, generation wrap and wide-counter validation. "
+        "Sixteen pre-repair native failures per host profile are preserved. Thirty final native cases per debug/optimized "
+        "profile and fifteen disabled variants pass; six combined transaction methods, 17 core stages, two matching "
+        "kernel builds, 246 kernel tests and 43 hostile image controls pass. Failed compiler, order/anchor tests and "
+        "three measured linker-boundary attempts remain separate. Final combined scoped regression passes "
+        "117/117 with zero skips, including 56 repaired metadata tests and the corrected transfer identity "
+        "and synthetic fixture. Both initial combined failures are preserved; counts overlap prior tests."
+    )
+    gap = (
+        "Kernel bytes changed. Selected readiness is 3/27; entry, policy and errata pass while 24 profiles require "
+        "replay from " + next_move + ". The AP-worker flag is reopened; recorded admission and eighteen constant-only "
+        "groups remain within at least 35 unproven groups. No phase closes. N0 custody, N5 authentication, general "
+        "task/CPU retirement, independent builders and production remain open. No new-kernel guest boot, cross-CPU "
+        "atomicity, ISO change or main merge is claimed. Full exact-candidate qualification still precedes merge."
+    )
+    for phase in roadmap["phases"]:
+        if phase["id"] in {"N5", "N6", "N12", "N36"}:
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle 209 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in {"FLAG-N12-SCHED-AP-WORKERS-001", "FLAG-N36-RECEIPT-COVERAGE-001"}:
+            flag["evidence"].insert(0, checkpoint)
+        if flag["id"] == "FLAG-N12-SCHED-AP-WORKERS-001":
+            flag["status"] = "open"
     roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
     return roadmap
@@ -7946,7 +8129,7 @@ def apply_cycle208(roadmap: dict, test_count: int) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1100)
+    parser.add_argument("--test-count", type=int, default=1103)
     parser.add_argument("--status-date", default="2026-09-30")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

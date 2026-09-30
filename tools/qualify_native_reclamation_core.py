@@ -32,6 +32,9 @@ SOURCES = (
     "native/kernel/src/scheduler_smp.rs",
     "tests/fixtures/pksched4_transaction_probe.rs",
     "tests/test_native_smp_transactions.py",
+    "native/kernel/src/scheduler_ap_workers.rs",
+    "tests/fixtures/pksched5_transaction_probe.rs",
+    "tests/test_native_ap_worker_transactions.py",
     "native/kernel/src/virtual_memory.rs",
     "native/kernel/src/active_virtual_memory.rs",
     "native/kernel/src/physical_memory.rs",
@@ -77,7 +80,7 @@ STACK_TESTS = (
     "overlapping_stacks_from_distinct_manager_namespaces_cannot_share_scheduler",
     "full_scrub_receipt_ledger_retains_the_next_stack_without_writes",
 )
-KERNEL_SHA256 = "A943DCB6E41A27F952868F05ED2B3523B47D9D7A7B5DB909EE385205F7CA3B31"
+KERNEL_SHA256 = "72C37783A5729229E6A259E38DC8DF55034FD467B77839FFFC4AA62B66E33EBF"
 STAGES = (
     "format", "host-build-debug", "test-build-debug", "tests-debug",
     "lifetime-build-debug", "lifetime-tests-debug",
@@ -154,7 +157,7 @@ def validate_report(report: dict, root: Path = ROOT) -> None:
         "task_execution_live_verified": False,
         "task_stack_contract_id": "PKSTACK1", "task_stack_page_count": 4,
         "task_stack_test_count": len(STACK_TESTS), "task_stack_live_verified": False,
-        "linked_kernel_sha256": KERNEL_SHA256, "linked_kernel_byte_count": 530072,
+        "linked_kernel_sha256": KERNEL_SHA256, "linked_kernel_byte_count": 534168,
     }
     if not isinstance(report, dict) or set(report) != set(expected) | {"sources", "stages"}:
         raise ValueError("reclamation report fields changed")
@@ -261,7 +264,7 @@ def qualify(work: Path) -> dict:
         env = host_env
     linked = (target / entry.PRODUCT_TARGET / "release/PooleKernelLinked").read_bytes()
     canonical, _ = entry.kernel_image.canonicalize_linked_image(linked)
-    if len(canonical) != 530072 or hashlib.sha256(canonical).hexdigest().upper() != KERNEL_SHA256:
+    if len(canonical) != 534168 or hashlib.sha256(canonical).hexdigest().upper() != KERNEL_SHA256:
         raise ValueError("linked kernel changed; existing live receipts cannot be inherited")
     if before != bind_sources():
         raise ValueError("source changed during qualification")

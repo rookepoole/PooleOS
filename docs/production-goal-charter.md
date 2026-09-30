@@ -7,9 +7,20 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 208
+Last roadmap reconciliation: PooleOS Cycle 209
 
-Cycle 208 repairs SMP admission and sixteen constant-only control groups. Two
+Cycle 209 repairs native AP-worker state transactions, generation wrap and wide
+counter validation. Thirty native cases in two host profiles, fifteen disabled
+variants, 17 core stages, two matching builds, 246 kernel tests and 43 image
+controls pass. Kernel bytes changed; readiness is 3/27, with 24 profiles needing
+replay from symbols/boot. The AP-worker flag is reopened, but no phase closes.
+N0 custody, N5 authentication and full exact-candidate merge qualification remain.
+No normative condition, demo ISO or production claim changes.
+[Cycle 209 evidence](checkpoints/cycle209-native-ap-worker-transactions.md).
+Combined scoped regression passes 117/117 and repaired metadata 56/56, zero
+skips. Counts overlap; full exact-candidate merge qualification remains pending.
+
+Historical Cycle 208 repairs SMP admission and sixteen constant-only control groups. Two
 final virtual boots pass 303 cases; 18 focused tests pass, including 326 recorded
 corruption rejections and eight independent gate cases. The diagnostic baseline,
 old image-pin failure and two test-harness failures are preserved. Readiness is

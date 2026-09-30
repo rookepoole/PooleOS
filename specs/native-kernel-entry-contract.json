@@ -51,17 +51,17 @@
     "handoff_contract": "PBP1",
     "entry_symbol": "poole_kernel_entry",
     "entry_offset": 40960,
-    "image_memory_bytes": 602112,
-    "canonical_file_bytes": 530072,
+    "image_memory_bytes": 606208,
+    "canonical_file_bytes": 534168,
     "maximum_linked_file_bytes": 8388608,
     "maximum_relocations": 4096,
-    "build_id": "PKBUILD1-CYCLE203-N12-SMP-TXN-V1-00000000001",
+    "build_id": "PKBUILD1-CYCLE209-N12-APW-TXN-V1-00000000001",
     "segment_boundaries": {
       "read_only_end": 40960,
       "text_start": 40960,
-      "text_end": 471040,
-      "relro_end": 528384,
-      "image_end": 602112
+      "text_end": 475136,
+      "relro_end": 532480,
+      "image_end": 606208
     },
     "manifest_path": "native/kernel/manifest.pkm",
     "manifest_contract_bindings": [
