@@ -18,3 +18,28 @@ enforce `format`, so this validation is explicit. Date metadata does not prove
 fresh execution or authentication; the broader N36 evidence review stays open.
 
 This receipt does not prove live AP dispatch, cross-CPU migration, ring 3, process address-space switching, per-task FS/GS/xstate/debug/PMU ownership, a general timer wheel, deferred workers, target hardware, N12 exit, release readiness, or production readiness.
+
+## Cycle 196 Evidence Repair
+
+Qualification now executes all 25 control groups, totaling 226 rejection cases.
+The seven controller groups import the actual native scheduler and preemption
+Rust modules into a standalone host harness outside the kernel product sources.
+Their 50 cases cover frame authority, context ownership, queue capacity,
+deadlines, duplicates, quantum bounds and transactional rollback. State snapshots
+and repeated failing events check that rejection does not silently mutate state.
+Seven independently compiled fault-injected variants must fail the harness.
+
+The remaining two repaired groups execute three linked-scope corruption checks
+against the current linked image and four retained-stack guard-removal checks
+against current source. These are disassembly/source admission controls, not
+hardware stack-corruption experiments. Disabled-auditor regressions distinguish
+execution of the negative checks from unconditional pass records.
+
+Admission reparses both raw guest runs and the host receipts, rederives typed
+observations and accounting, and requires exact per-group rejection counts.
+The actual release gate fails closed before traversing malformed evidence.
+The command-line qualifier validates before creating or replacing its output.
+Source hashes, output hashes and consistency checks are not signatures, proof
+of freshness, independent-builder qualification, or protection against every
+coherently forged receipt. Fresh qualification and closeout results are recorded
+in the Cycle 196 checkpoint; implementation alone does not close the N36 gap.

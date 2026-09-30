@@ -5,12 +5,13 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from datetime import date
 from pathlib import Path
 from typing import Any
 
 from runtime import native_kernel_transfer
 from runtime.schema_validation import validate_json
-from runtime.native_kernel_profile_evidence import kernel_entry_errors
+from runtime.native_kernel_profile_evidence import kernel_entry_errors, recorded_pair_errors
 
 
 CONTRACT_ID = "PKSCHED4"
@@ -53,6 +54,8 @@ IMPLEMENTATION_INPUTS = (
     "tools/qualify_native_pooleboot.py",
     "tools/qualify_native_kernel_scheduler_smp.py",
     "tests/test_native_kernel_scheduler_smp.py",
+    "tests/test_native_smp_controls.py",
+    "tests/fixtures/pksched4_control_probe.rs",
     "docs/native-kernel-scheduler-smp.md",
 )
 
@@ -90,6 +93,41 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N12-PKSCHED4-NO-HEAP-OR-CALLBACK",
     "NEG-N12-PKSCHED4-INPUT-BINDING",
 )
+
+NATIVE_CONTROL_CASE_COUNTS = (6, 3, 4, 3, 7, 7, 7, 4, 3, 3, 4, 3, 5)
+NEGATIVE_CONTROL_CASE_COUNTS = (
+    37, 36, 37, 1, 9, 7, 7, 8, 8, 16, 13, 5, 2, 5, 1,
+    *NATIVE_CONTROL_CASE_COUNTS, 35, 10, 6, 1,
+)
+NATIVE_CONTROL_SOURCES = (
+    "tests/fixtures/pksched4_control_probe.rs", "native/kernel/src/scheduler_smp.rs",
+)
+SOURCE_AUDIT_PATHS = {
+    "scheduler": "native/kernel/src/scheduler_smp.rs",
+    "ipi": "native/kernel/src/smp_ipi.rs",
+    "arch": "native/kernel/src/arch/x86_64.rs",
+    "main": "native/kernel/src/main.rs",
+    "boot_exit": "native/boot/src/exit.rs",
+    "boot_manifest": "native/boot/Cargo.toml",
+    "bootexit": "native/bootexit/src/lib.rs",
+    "pooleboot_qualifier": "tools/qualify_native_pooleboot.py",
+}
+
+
+def expected_controls() -> list[dict[str, Any]]:
+    return [{"id": control_id, "status": "pass",
+             "expected": "boundary_verified" if 15 <= index < 28 else "rejected", "case_count": count}
+            for index, (control_id, count) in enumerate(zip(NEGATIVE_CONTROL_IDS, NEGATIVE_CONTROL_CASE_COUNTS))]
+
+
+def parse_native_control_output(output: str) -> list[dict[str, Any]]:
+    """Count executed scenarios, including ownership conservation and valid recovery."""
+    lines = output.splitlines()
+    _require(len(lines) == 13, "PKSCHED4 native control receipt count changed")
+    for line, control_id, count in zip(lines, NEGATIVE_CONTROL_IDS[15:28], NATIVE_CONTROL_CASE_COUNTS):
+        _require(line == f"PKSCHED4:CONTROL PASS id={control_id} cases={count} verified={count}",
+                 "PKSCHED4 native control evidence changed")
+    return expected_controls()[15:28]
 
 EARLY = re.compile(
     r"^POOLEOS:KERNEL:SCHED-SMP-EARLY PASS contract=PKSCHED4 selector=(?P<selector>[0-9]+) "
@@ -254,18 +292,121 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
     return errors
 
 
-def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
+def readiness_errors(readiness: Any, root: Path = ROOT) -> list[str]:
+    if not isinstance(readiness, dict):
+        return ["PKSCHED4 readiness is not an object"]
     issues = validate_json(readiness, read_json(root / READINESS_SCHEMA_RELATIVE))
     errors = [f"schema {issue.path}: {issue.message}" for issue in issues]
     errors.extend(kernel_entry_errors(readiness.get("build"), root))
-    if readiness.get("inputs") != expected_inputs(root):
-        errors.append("readiness input bindings are stale")
-    ids = [item.get("id") for item in readiness.get("negative_controls", []) if isinstance(item, dict)]
-    if ids != list(NEGATIVE_CONTROL_IDS):
-        errors.append("readiness negative-control order diverges")
-    if readiness.get("claims") != expected_claims():
-        errors.append("readiness claim boundary diverges")
+    status_date = readiness.get("status_date")
+    try:
+        if not isinstance(status_date, str) or len(status_date) != 10 or date.fromisoformat(status_date).isoformat() != status_date:
+            raise ValueError("noncanonical date")
+    except ValueError:
+        errors.append("readiness status_date is not a canonical calendar date")
+    if errors:
+        return errors
+    try:
+        _typed_equal(readiness.get("inputs"), expected_inputs(root), "input bindings")
+        _typed_equal(readiness.get("negative_controls"), expected_controls(), "per-control accounting")
+        _typed_equal(readiness.get("claims"), expected_claims(), "claim boundary")
+        _typed_equal(readiness.get("nonclaims"), read_json(root / CONTRACT_RELATIVE)["nonclaims"], "nonclaims")
+        _typed_equal(readiness.get("phase_status"), {name: "partial" for name in ("N12", *(f"N12.{i}" for i in range(1, 8)))}, "phase status")
+        _typed_equal(readiness.get("status"), "pass_single_host_two_run_sandybridge_four_vcpu_ack_gated_scheduler_non_promoting", "status")
+    except (KernelSchedulerSmpError, TypeError, ValueError) as error:
+        errors.append(str(error))
+    if errors:
+        return errors
+    errors.extend(recorded_smp_errors(readiness.get("execution"), readiness.get("observation"), readiness["build"], root))
     return errors
+
+
+def _typed_equal(actual: Any, expected: Any, label: str) -> None:
+    _require(json.dumps(actual, sort_keys=True, allow_nan=False) == json.dumps(expected, sort_keys=True, allow_nan=False),
+             f"recorded {label} differs from parsed evidence or exact types")
+
+
+def recorded_smp_errors(execution: Any, observation: Any, build: Any, root: Path = ROOT) -> list[str]:
+    """Reconstruct recorded consistency, not authenticity or fresh execution."""
+    if not isinstance(execution, dict):
+        return ["PKSCHED4 recorded execution is not an object"]
+
+    def parsed(markers: list[str]) -> dict[str, Any]:
+        try:
+            return validate_markers(markers)
+        except KernelSchedulerSmpError as error:
+            raise ValueError(str(error)) from error
+
+    pair = dict(execution, exact_marker_match=execution.get("static_markers_exact_match"))
+    try:
+        errors = recorded_pair_errors(pair, "scheduler-smp-run", parsed, CONTRACT_ID)
+    except (native_kernel_transfer.KernelTransferError, KeyError, TypeError, ValueError, AttributeError) as error:
+        return [f"PKSCHED4 recorded runs are invalid: {error}"]
+    if errors:
+        return errors
+    try:
+        for key, expected in (("host_environment_count", 1), ("virtual_cpu_count", 4),
+                              ("application_processor_count", 3), ("dynamic_fields_revalidated", True),
+                              ("deterministic_instruction_clock", False), ("cpu_model", "SandyBridge,-avx"),
+                              ("acceleration", "tcg_multi_thread"), ("machine", "pc-q35-11.0"),
+                              ("profile_id", "sandybridge-four-vcpu-ack-gated-scheduler")):
+            _typed_equal(execution.get(key), expected, "execution " + key)
+        _require("bsp_only" not in execution, "SMP profile cannot declare BSP-only execution")
+        lock = read_json(root / "specs/native-tier0-lock.json")
+        firmware = {item["role"]: item for item in lock["firmware"]["files"]}
+        for key, digest in (("qemu_sha256", lock["windows_runner"]["qemu_system_x86_64"]["sha256"]),
+                            ("firmware_code_sha256", firmware["debug_code_read_only"]["sha256"]),
+                            ("vars_template_sha256", firmware["vars_template_copy_only"]["sha256"])):
+            _typed_equal(execution.get(key), digest, "execution " + key)
+        _typed_equal(observation, parsed(execution["runs"][0]["markers"]), "observation")
+        host = build["host_probe"]
+        lines = host["lines"]
+        _require(isinstance(lines, list) and len(lines) == 5 and all(isinstance(line, str) for line in lines), "host probe lines are malformed")
+        output = "\n".join(lines) + "\n"
+        _typed_equal(host, dict(parse_probe_output(output), output_sha256=sha256_bytes(output.encode("utf-8"))), "host probe")
+        native = build["native_control_probe"]
+        lines = native["lines"]
+        _require(isinstance(lines, list) and all(isinstance(line, str) for line in lines), "native control lines are malformed")
+        output = "\n".join(lines) + "\n"
+        controls = parse_native_control_output(output)
+        _require(isinstance(native["executable_sha256"], str) and re.fullmatch(r"[0-9A-F]{64}", native["executable_sha256"]) is not None,
+                 "native control executable digest is malformed")
+        _typed_equal(native, {
+            "scope": "host_execution_of_native_smp_scheduler_not_privileged_guest_execution",
+            "exit_code": 0, "lines": lines, "output_sha256": sha256_bytes(output.encode("utf-8")),
+            "executable_sha256": native["executable_sha256"], "controls": controls,
+            "verified_cases_total": sum(NATIVE_CONTROL_CASE_COUNTS),
+            "sources": [file_binding(root, path) for path in NATIVE_CONTROL_SOURCES],
+        }, "native control probe")
+        files = {name: {key: value for key, value in file_binding(root, path).items() if key != "byte_count"}
+                 for name, path in SOURCE_AUDIT_PATHS.items()}
+        maximum = re.search(r"MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = (\d+);", (root / SOURCE_AUDIT_PATHS["bootexit"]).read_text(encoding="utf-8"))
+        _require(maximum is not None, "development selector maximum is missing")
+        _typed_equal(build["source_audit"], {
+            "max_development_trap_scenario": int(maximum.group(1)), "focused_rust_test_count": 10,
+            "fixed_cpu_count": 4, "fixed_task_capacity": 8, "allocation_free_controller": True,
+            "arbitrary_callback_count": 0, "ap_handler_preserved_register_count": 15,
+            "live_marker_count": MARKER_COUNT, "files": files,
+        }, "source audit")
+        linked = build["linked_invlpg_audit"]
+        tool_path = ".toolchains/rust-1.97.0/rustup/toolchains/1.97.0-x86_64-pc-windows-msvc/lib/rustlib/x86_64-pc-windows-msvc/bin/llvm-objdump.exe"
+        _typed_equal(linked, {
+            "scope": "poole_ap_ipi_trampoline_start..poole_ap_ipi_trampoline_end",
+            "invlpg_instruction_count": 2, "remote_shootdown_invlpg_instruction_count": 1,
+            "runtime_execution_count": 3, "operand": "(%rax)",
+            "successor_profile_invlpg_instruction_count": 1, "successor_profile_operand": "(%rbx)",
+            "successor_profile_executed": False, "status": "pass",
+            **{key: build["kernel_entry"]["product"][key] for key in (
+                "canonical_sha256", "canonical_byte_count", "linked_sha256", "linked_byte_count", "relocation_count")},
+            "llvm_objdump_path": tool_path, "llvm_objdump_sha256": sha256_bytes((root / tool_path).read_bytes()),
+        }, "linked audit")
+        _typed_equal(build["audit_controls"], {
+            "scope": "mutated_register_cleanup_heap_callback_source_not_hardware_fault_injection",
+            "files": files, "controls": expected_controls()[28:31],
+        }, "source audit controls")
+    except (KernelSchedulerSmpError, KeyError, TypeError, ValueError, AttributeError, OSError) as error:
+        return [f"PKSCHED4 recorded accounting is invalid: {error}"]
+    return []
 
 
 def trace_oracle() -> dict[str, Any]:

@@ -34,6 +34,14 @@ IMPLEMENTATION_INPUTS = (
     Path("tools/generate_native_elf_loader_vectors.py"),
     Path("tools/qualify_native_elf_loader.py"),
     Path("docs/native-elf-loader.md"),
+    Path("native/.cargo/config.toml"),
+    Path("native/rust-toolchain.toml"),
+    Path("specs/native-toolchain-lock.json"),
+    Path("specs/native-host-msvc-profile.json"),
+    Path("tools/native_host_toolchain.py"),
+    Path("tools/qualify_native_toolchain.py"),
+    Path("tests/test_native_elf_loader.py"),
+    Path("tests/test_native_host_toolchain.py"),
 )
 
 PAGE_SIZE = 4096
@@ -758,6 +766,16 @@ def readiness_errors(readiness: Any) -> list[str]:
     }
     if readiness.get("bindings") != expected_bindings:
         errors.append("readiness input bindings are stale")
+    expected_host = {
+        "profile_id": "POOLEOS-HOST-MSVC-1",
+        "profile_sha256": sha256_bytes((ROOT / "specs/native-host-msvc-profile.json").read_bytes()),
+        "verified_before_build": True,
+        "scope": "host_linker_and_library_trees_not_complete_host_attestation",
+    }
+    parser = readiness.get("parser_qualification")
+    host = parser.get("host_toolchain") if isinstance(parser, dict) else None
+    if json.dumps(host, sort_keys=True) != json.dumps(expected_host, sort_keys=True):
+        errors.append("readiness host-toolchain profile mismatch")
     if readiness.get("production_ready") is not False or readiness.get("production_promotion_allowed") is not False:
         errors.append("readiness promotion boundary mismatch")
     if readiness.get("n5_exit_gate_satisfied") is not False:

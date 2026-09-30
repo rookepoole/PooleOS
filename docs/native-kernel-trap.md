@@ -1,5 +1,15 @@
 # PKTRAP1 bounded BSP exception entry
 
+## Recorded Control Admission
+
+Cycle 199 requires the complete ordered negative-control records, including
+their layer, expected rejection, observed rejection and success status. Missing,
+extra, contradictory or wrongly typed fields reject; malformed root records
+return validation errors. The other four N7 CPU profiles share the strict
+control-record checker while retaining their declared record shapes.
+This checks recorded consistency, not authentication or freshness. Qualification
+must still execute every control and bind fresh guest evidence to current source.
+
 ## Scope
 
 `PKTRAP1` is the first live PooleKernel descriptor-table and exception-entry milestone. It extends the opt-in, QEMU-only `PKXFER1` development transfer with three mutually exclusive scenario features while preserving selector `0` for the ordinary unsigned terminal-denial path and preserving the feature-disabled PooleBoot stop-before-transfer path.

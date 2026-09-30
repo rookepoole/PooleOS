@@ -32,14 +32,24 @@
         "toolchain_lock": {"$ref": "#/$defs/binding"},
         "toolchain_qualification": {"$ref": "#/$defs/binding"},
         "tier1_profile": {"$ref": "#/$defs/binding"},
-        "implementation_inputs": {"type": "array", "minItems": 16, "maxItems": 16, "items": {"$ref": "#/$defs/binding"}}
+        "implementation_inputs": {"type": "array", "minItems": 23, "maxItems": 23, "items": {"$ref": "#/$defs/binding"}}
       }
     },
     "build": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["rustc", "rust_host_tests_passed", "rust_host_tests_total", "rustfmt_packages", "clippy_targets", "no_std_targets", "pooleboot_uefi_integration_builds_passed", "pooleboot_uefi_integration_builds_total"],
+      "required": ["host_toolchain", "rustc", "rust_host_tests_passed", "rust_host_tests_total", "rustfmt_packages", "clippy_targets", "no_std_targets", "pooleboot_uefi_integration_builds_passed", "pooleboot_uefi_integration_builds_total"],
       "properties": {
+        "host_toolchain": {
+          "type": "object", "additionalProperties": false,
+          "required": ["profile_id", "profile_sha256", "verified_before_build", "scope"],
+          "properties": {
+            "profile_id": {"const": "POOLEOS-HOST-MSVC-1"},
+            "profile_sha256": {"$ref": "#/$defs/sha256"},
+            "verified_before_build": {"type": "boolean", "const": true},
+            "scope": {"const": "host_linker_and_library_trees_not_complete_host_attestation"}
+          }
+        },
         "rustc": {"type": "string"},
         "rust_host_tests_passed": {"const": 12},
         "rust_host_tests_total": {"const": 12},

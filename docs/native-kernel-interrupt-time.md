@@ -55,7 +55,24 @@ python tools/qualify_native_kernel_interrupt_time.py
 python -m unittest tests.test_native_kernel_interrupt_time
 ```
 
-Qualification requires two byte-identical clean PooleKernel builds, two byte-identical feature-enabled PooleBoot builds, two deterministic ordinary-file media generations, two fresh-variable qemu64 TCG executions, exact marker/screenshot/PBP1 equality, independent boot and handoff binding, all 214 current kernel host tests, and all 58 hostile controls.
+Qualification requires two byte-identical clean PooleKernel builds, two byte-identical feature-enabled PooleBoot builds, two deterministic ordinary-file media generations, two fresh-variable qemu64 TCG executions, exact marker/screenshot/PBP1 equality, independent boot and handoff binding, all 245 current kernel host tests, and all 58 hostile controls.
+
+## Recorded Evidence Admission
+
+Cycle 188 requires two uniquely identified runs with integer zero emulator exits,
+nonblank frame digests, exact parsed marker summaries and marker digests,
+handoff-derived transfer bindings, guest-bound revalidation and true dual-channel
+agreement. Identically corrupt records are not corroboration. Aggregate observation
+and all summary fields must match parsed evidence with exact JSON types; host-test
+counts come from the current validated embedded entry receipt. Clock samples must
+satisfy the independent calibration bounds before frequency arithmetic.
+
+Malformed records fail closed in the runtime and aggregate gate. The qualifier
+validates before creating output directories or replacing an existing receipt.
+These checks establish recorded consistency, not freshness, authentication,
+independent reproduction, physical-target behavior or production readiness.
+
+## Historical Replay
 
 The Cycle 157 replay candidate is the unchanged retention-capable Cycle 153
 kernel: 517,784 canonical bytes, a 589,824-byte/144-page image, and SHA-256

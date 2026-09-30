@@ -12,7 +12,7 @@ from typing import Any
 
 from runtime import native_kernel_transfer
 from runtime.schema_validation import validate_json
-from runtime.native_kernel_profile_evidence import kernel_entry_errors
+from runtime.native_kernel_profile_evidence import kernel_entry_errors, recorded_pair_errors
 
 
 CONTRACT_ID = "PKSCHED1"
@@ -94,6 +94,9 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N12-PKSCHED1-STACK-AND-TRANSITION-ACCOUNTING",
     "NEG-N12-PKSCHED1-INPUT-BINDING",
 )
+
+NEGATIVE_CONTROL_CASE_COUNTS = (1, 1, 1, 2, 13, 17, 8, 16, 3, 3, 1, 1, 3, 4,
+                                5, 4, 2, 2, 2, 1, 2, 4, 5, 2, 2, 4, 4, 2)
 
 EARLY = re.compile(
     r"^POOLEOS:KERNEL:SCHED-EARLY PASS contract=(?P<contract>PKSCHED1) "
@@ -246,6 +249,8 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
 
 
 def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
+    if not isinstance(readiness, dict):
+        return ["PKSCHED1 readiness is not an object"]
     issues = validate_json(readiness, read_json(root / READINESS_SCHEMA_RELATIVE))
     errors = [f"schema {issue.path}: {issue.message}" for issue in issues]
     errors.extend(kernel_entry_errors(readiness.get("build"), root))
@@ -259,15 +264,90 @@ def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
             raise ValueError("noncanonical date")
     except ValueError:
         errors.append("readiness status_date is not a canonical calendar date")
+    if errors:
+        return errors
     if readiness.get("inputs") != expected_inputs(root):
         errors.append("readiness input bindings are stale")
     controls = readiness.get("negative_controls", [])
     ids = [item.get("id") for item in controls if isinstance(item, dict)]
     if ids != list(NEGATIVE_CONTROL_IDS):
         errors.append("readiness negative-control order diverges")
+    if (len(controls) != len(NEGATIVE_CONTROL_CASE_COUNTS)
+            or any(type(item.get("case_count")) is not int or item["case_count"] != expected
+                   for item, expected in zip(controls, NEGATIVE_CONTROL_CASE_COUNTS))):
+        errors.append("PKSCHED1 per-control rejection counts changed")
     if readiness.get("claims") != expected_claims():
         errors.append("readiness claim boundary diverges")
+    errors.extend(recorded_scheduler_errors(readiness.get("execution"), readiness.get("summary"), readiness["build"]))
     return errors
+
+
+def scheduler_readiness_summary(observation: dict[str, Any], host_tests: dict[str, Any],
+                                probe: dict[str, Any]) -> dict[str, int]:
+    return {
+        "scheduler_tests": 14,
+        "kernel_host_tests": host_tests["test_count"],
+        "host_probe_receipts": len(probe["lines"]),
+        "trace_steps": 4096,
+        "trace_dispatches": probe["stress"]["dispatches"],
+        "trace_migrations": probe["stress"]["migrations"],
+        "live_tasks": observation["switch"]["tasks"],
+        "live_dispatches": observation["switch"]["dispatches"],
+        "machine_transitions": observation["switch"]["transitions"],
+        "stack_bytes_cleared": observation["cleanup"]["stack_bytes_cleared"],
+        "negative_controls_total": len(NEGATIVE_CONTROL_IDS),
+        "hostile_cases_total": sum(NEGATIVE_CONTROL_CASE_COUNTS),
+        "production_claim_count": observation["result"]["production"],
+    }
+
+
+def recorded_scheduler_errors(execution: Any, summary: Any, build: Any) -> list[str]:
+    """Reparse recorded guest and host evidence; this does not prove freshness."""
+    if not isinstance(execution, dict):
+        return ["PKSCHED1 recorded execution is not an object"]
+
+    def parsed(markers: list[str]) -> dict[str, Any]:
+        try:
+            return validate_markers(markers)
+        except KernelSchedulerError as error:
+            raise ValueError(str(error)) from error
+
+    pair = dict(execution, exact_marker_match=execution.get("static_markers_exact_match"))
+    try:
+        errors = recorded_pair_errors(pair, "scheduler-run", parsed, CONTRACT_ID)
+    except (native_kernel_transfer.KernelTransferError, KeyError, TypeError, ValueError, AttributeError) as error:
+        return [f"PKSCHED1 recorded run evidence is invalid: {error}"]
+    if errors:
+        return errors
+    try:
+        _require(all(type(execution.get(key)) is int and execution[key] == 1
+                     for key in ("host_environment_count", "virtual_cpu_count")),
+                 "recorded host/CPU count changed")
+        _require(all(execution.get(key) is True for key in
+                     ("bsp_only", "dynamic_fields_revalidated", "deterministic_instruction_clock")),
+                 "recorded scheduler execution mode changed")
+        _require(execution.get("cpu_model") == "qemu64" and execution.get("acceleration") == "tcg_single_thread"
+                 and execution.get("profile_id") == "POOLEOS-TIER0-Q35-1" and execution.get("machine") == "pc-q35-11.0",
+                 "recorded scheduler CPU profile changed")
+        observation = parsed(execution["runs"][0]["markers"])
+        host = build["host_probe"]
+        lines = host["lines"]
+        _require(isinstance(lines, list) and len(lines) == 4 and all(isinstance(line, str) for line in lines),
+                 "recorded host probe lines are malformed")
+        output = "\n".join(lines) + "\n"
+        probe = parse_probe_output(output)
+        expected_host = dict(probe, output_sha256=sha256_bytes(output.encode("utf-8")),
+                             receipt_count=4, rust_python_exact_agreement=True)
+        for label, actual, expected in (
+            ("host probe", host, expected_host),
+            ("observation", execution.get("observation"), observation),
+            ("summary", summary, scheduler_readiness_summary(observation, build["kernel_entry"]["host_tests"], probe)),
+        ):
+            _require(json.dumps(actual, sort_keys=True, allow_nan=False) == json.dumps(expected, sort_keys=True, allow_nan=False),
+                     f"recorded {label} differs from parsed evidence or exact types")
+    except (KernelSchedulerError, KeyError, TypeError, ValueError, AttributeError) as error:
+        return [f"PKSCHED1 recorded accounting is invalid: {error}"]
+    return []
 
 
 @dataclass

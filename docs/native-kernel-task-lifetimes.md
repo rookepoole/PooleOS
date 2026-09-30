@@ -1,6 +1,6 @@
 # PKLIFE1 Task Lifetimes
 
-Cycle 172 advances `N12-CONCURRENCY-RECLAMATION-001`, N12.3, source section
+Cycle 177 advances `N12-CONCURRENCY-RECLAMATION-001`, N12.3, source section
 031.3 and `ADD-N12-CONCURRENCY-RECLAMATION-001`. The existing requirement and
 flag remain open. This is original, allocation-free `no_std` kernel code,
 host-executed and freestanding-checked, not a new guest boot selector.
@@ -73,7 +73,8 @@ Never-activated cancellation uses a serialized activate/cancel pair inside the
 controller; no dispatch, guest execution or callback occurs in that pair.
 
 Retirement closes new pin admission. Existing readers remain usable. Reclaim
-returns the actual resource object only after the final pin drops. A task slot
+returns the actual resource object only after all ordinary readers and explicit
+execution holds release their pins. A task slot
 cannot be recreated while its previous resources are still retained, even when
 the scheduler already says Dead. The new generation rejects stale IDs.
 
@@ -101,7 +102,51 @@ memory; it is not a production supervisor recovery strategy.
 | TL10 | Copied stack identity never grants ordinary allocator release | Mandatory table/frame/stack transaction, readonly owner access and copied-free tests |
 | TL11 | Scrub or receipt-capacity failure retains the exclusive stack owner | Seven write/read/corruption fault cases, wrong-manager check and 16/17 receipt-capacity boundary |
 
-## Qualification
+## Dispatch Execution Ownership
+
+PKEXEC1 `Dispatch` is an opaque, non-Copy, non-Clone ticket plus resource pin.
+`TaskLifetimes::stage_dispatch` preflights admission and acquires that pin before
+mutating the runnable queue. Its `resources()` view names the actual retained
+root, stack and payload. A copied `ticket()` remains only scheduler protocol
+identity, not reclamation authority.
+
+Scheduler completion may retire the task, but the execution pin stays held.
+Dropping, forgetting or unwinding a Dispatch deliberately retains its reader.
+Only consuming unsafe `confirm_quiescent` releases it. The architecture caller
+must prevent every current and future CPU use of the context, root and stack,
+revoke resumable contexts and aliases, and complete applicable invalidations.
+An ACK, Dead state, timeout or offline label does not discharge that obligation.
+For unpublished work, the caller must also prevent later publication.
+
+The handle does not pin Storage's address or enumerate allocations inside a
+generic payload. Stable architectural storage and raw-pointer validity remain
+separate adapter obligations. No guest selector or hardware handoff consumes
+Dispatch yet. Host tests invoke the unsafe boundary only where no CPU or
+external context ever acquired the resources.
+
+Read-only scheduler admission also preflights transaction and equal-priority
+bypass counter exhaustion. Both previously reproduced partial-queue-mutation
+failures now reject before mutation. This is a dispatch-specific guarantee.
+
+## Cycle 177 Qualification
+
+The schema 1.6 core receipt binds 30 source inputs. All 17 stages pass, including
+245 kernel tests, 40 lifecycle tests per debug/release profile, 19 pool tests
+and 15 compile-fail cases. Six explicit execution tests exercise retained stack
+storage and full scrub, three lost-handle modes, pin exhaustion, invalid
+admission, independent CPU holds and stale-generation ACK rejection. Thirty
+parser controls reject missing, duplicate, failed, ignored or relocated cases.
+
+The canonical kernel changes to SHA-256
+`563ED1976CAB4DA773BAE9BCE49F370242C893760E7C221239C1B31F44D969CA`.
+Its final core receipt is
+`7E289FE30319EA9577C66716FE31EB02600E779D8F0E380172D3C3C708900A71`.
+Only 2/27 selected native readiness checks remain current; entry and downstream
+replay begin at `N6-KENTRY-001`. There is no new guest, hardware, general CPU
+quiescence or full-candidate qualification claim.
+[Cycle 177 evidence](checkpoints/cycle177-dispatch-execution-holds.md).
+
+## Historical Cycle 172 Qualification
 
 The existing `tools/qualify_native_reclamation_core.py` emits a version 1.5
 source-bound receipt that includes PKLIFE1 and PKSTACK1. Nineteen pool tests and

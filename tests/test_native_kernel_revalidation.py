@@ -1,6 +1,9 @@
 import copy
 import hashlib
+import tempfile
 import unittest
+from pathlib import Path
+from unittest import mock
 
 from runtime import native_boot_handoff as pbp1
 from runtime import native_kernel_revalidation as revalidation
@@ -128,6 +131,29 @@ class NativeKernelRevalidationTests(unittest.TestCase):
             "PKREVAL1 readiness input bindings are stale",
             revalidation.readiness_errors(stale),
         )
+
+    def test_qualifier_rejects_inconsistent_receipt_before_writing(self) -> None:
+        from tools import qualify_native_kernel_revalidation as qualifier
+
+        receipt = revalidation.read_json(revalidation.ROOT / revalidation.READINESS_RELATIVE)
+        self.assertEqual([], revalidation.readiness_errors(receipt))
+        for field_path, value, expected in (
+            (("build", "host_test_count"), 243, "PKREVAL1 build evidence changed"),
+            (("negative_controls",), [], "PKREVAL1 hostile-control evidence changed"),
+            (("production_ready",), True, "PKREVAL1 readiness overclaims production"),
+        ):
+            with self.subTest(field=field_path):
+                candidate = copy.deepcopy(receipt)
+                target = candidate
+                for field in field_path[:-1]:
+                    target = target[field]
+                target[field_path[-1]] = value
+                with tempfile.TemporaryDirectory(dir=revalidation.ROOT / "tmp") as temporary:
+                    output = Path(temporary) / "rejected-readiness.json"
+                    with mock.patch.object(qualifier, "make_readiness", return_value=candidate):
+                        with self.assertRaisesRegex(qualifier.QualificationError, expected):
+                            qualifier.main(["--out", str(output)])
+                    self.assertFalse(output.exists())
 
 
 if __name__ == "__main__":

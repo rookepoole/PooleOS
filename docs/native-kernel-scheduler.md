@@ -23,3 +23,26 @@ metadata, not authentication or proof of freshness. Broader schema and recorded
 evidence validation remain open under ADD-N36-RECEIPT-COVERAGE-001.
 
 PKSCHED1 does not implement interrupt-driven preemption, live AP dispatch, cross-CPU migration, wakeup preemption, per-CPU idle tasks, address-space or ring-3 switching, per-task FS/GS, full xstate/debug/PMU switching, chained inheritance, general sleeping locks, IRQ-save/NMI-safe locks, topology balancing, hotplug, NUMA, tickless idle, latency targets, watchdogs, or a PDC policy hook. It does not close N12, target-hardware qualification, signing, release promotion, or production readiness.
+
+## Recorded Evidence Admission
+
+Cycle 195 requires two ordered, successful, strictly typed recorded guest runs.
+Both raw marker streams are reparsed before admitting summaries; canonical
+marker digests, dual-channel agreement, exact frame/PBP1 equality, transfer
+binding and independent revalidation fields must agree. The four raw host-probe
+lines are parsed against the independent stress/wake/inheritance/context oracle,
+and their typed observations and output digest must match the stored record.
+Readiness accounting is reconstructed from the parsed evidence, not trusted
+because a stored summary says pass. Every one of the 28 control groups has its
+own frozen rejection-case count; redistribution preserving the total is invalid.
+
+Malformed roots and nested evidence return errors through both runtime admission
+and the release gate. The qualifier validates again before creating output paths
+or replacing files. Corrupted-record regressions include both runs altered alike,
+bool/int and float/int substitutions, coherent marker/hash changes, host-probe
+corruption, per-control redistribution and disabled validator detection.
+
+These checks establish bounded recorded consistency, not authentication,
+freshness, resistance to every coherent forgery or general scheduler correctness.
+Broader receipt coverage and the later scheduler control-execution audit remain
+open under ADD-N36-RECEIPT-COVERAGE-001.

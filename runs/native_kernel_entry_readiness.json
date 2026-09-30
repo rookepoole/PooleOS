@@ -4,12 +4,12 @@
     "contract": {
       "byte_count": 10872,
       "path": "specs/native-kernel-entry-contract.json",
-      "sha256": "2B7AE3FF260D8D8C1246BC73AFD0B9322BDFBFD3DDC6AC941EC9F1A938A8B413"
+      "sha256": "C4D47D88A662A53B3CF5B508866CF7C7A978CC9C59678EFA62D43780C80766CB"
     },
     "contract_schema": {
       "byte_count": 3952,
       "path": "specs/native-kernel-entry-contract.schema.json",
-      "sha256": "71D81893A6B877C49A506772B8CE54D3C6581EE8F5908C320A2185F3BD21D01E"
+      "sha256": "820A5D7F8A9B47268813A1E41A4DDB7521A6C03F7F9527976E8FD44C330EBE25"
     },
     "implementation_inputs": [
       {
@@ -40,22 +40,22 @@
       {
         "byte_count": 2048,
         "path": "native/kernel/linker.ld",
-        "sha256": "1D5CD169A537957B4D61A734DBC71974702A1B825F0A58A10B022F8A2D3E8AC0"
+        "sha256": "891C725E24D882C2243BE0816B002D23857C2BE341F507B922B360204D9CFD87"
       },
       {
         "byte_count": 447,
         "path": "native/kernel/manifest.pkm",
-        "sha256": "51BD6E01E5A300FE3444EC2FF6352F7A6EAFE38C4728014596C540290A4779F2"
+        "sha256": "4F3316E34877743B406E0A95BE70473EC755DEF318C8D8D26552726DE5047602"
       },
       {
         "byte_count": 65667,
         "path": "native/kernel/src/lib.rs",
-        "sha256": "A462E54DDE5D98BBCD1E08A739516831708AB98D40890B14E76F5D435348BC09"
+        "sha256": "FBE412B2A0E1131E10E95B508340EF30F67C60E467CD91E7ECC4409D6102415F"
       },
       {
-        "byte_count": 536752,
+        "byte_count": 538452,
         "path": "native/kernel/src/main.rs",
-        "sha256": "58FC29B2585F62C68C55A398B12D63C41571E6507FD1EBA480C65AC0CE9D0EB7"
+        "sha256": "33D87133FB1154AC300D9270D0D2D7F0AB8E2ADF929285C0468077C55DC56FB7"
       },
       {
         "byte_count": 162769,
@@ -98,9 +98,9 @@
         "sha256": "B3CDC5A67BC98AC4918184D01DAB57BA1FBB8A33887D45E1B741B3A37656682C"
       },
       {
-        "byte_count": 11638,
+        "byte_count": 11657,
         "path": "native/kernel/src/reclamation.rs",
-        "sha256": "118197DAEB079295F6A3E9279AC986D6EBE6C306155E85293A9D4F3DCCA4CCD7"
+        "sha256": "3F341CD3C830D04CBD6332E20D97928072C2CBBED56176B382E525532A93B48F"
       },
       {
         "byte_count": 6430,
@@ -143,24 +143,129 @@
         "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
       },
       {
-        "byte_count": 8479,
+        "byte_count": 9714,
         "path": "runtime/native_kernel_entry.py",
-        "sha256": "E16BCE13F83D854188C135045B241AD521500E16EF03220CFC2974D957C6608A"
+        "sha256": "8CC1AD6EA388583DD5E0C35EB3D063E050D6B9CA120CD7322649755EEB66532E"
       },
       {
         "byte_count": 25233,
         "path": "tools/qualify_native_kernel_entry.py",
-        "sha256": "11452D045779E9FEF830A3F9DF8738DD2B3FECC4B501E0CAA90D2C22496DA0C6"
+        "sha256": "8B03FFD23EC9C2F3C6F82ED98185A71668B7FE75F137E30A89184F28C7BDF36C"
       },
       {
-        "byte_count": 7905,
+        "byte_count": 10928,
         "path": "tests/test_native_kernel_entry.py",
-        "sha256": "9D209D90EA53E1B9AAB7DDC5D82FECB61DE4422276E3C0F93F9BAE06215DB46A"
+        "sha256": "1F309C04C67118624F61760FDA1FF15085452D36FE6BED7E861C52B3039B770A"
       },
       {
-        "byte_count": 5681,
+        "byte_count": 4248,
+        "path": "tests/test_native_smp_transactions.py",
+        "sha256": "321374D12C8C113A4F6887E8255F9241FF005D0171A199419F4E2DB71667947F"
+      },
+      {
+        "byte_count": 10676,
+        "path": "tests/fixtures/pksched4_transaction_probe.rs",
+        "sha256": "13C3D0934B6FE435404DABAA0D2B22F913B556AE4D0A25BD809972D435DC8F56"
+      },
+      {
+        "byte_count": 6463,
+        "path": "tests/test_native_ap_worker_transactions.py",
+        "sha256": "6774DFA9A106BDABE1C348D3CE0DBCA833D54DF90D102563B47E515325CCA850"
+      },
+      {
+        "byte_count": 13612,
+        "path": "tests/fixtures/pksched5_transaction_probe.rs",
+        "sha256": "8E5F5EFA7587BE6491CEDC3AFCC650B24A8932DDC4ACB8B2A476C54C48B52126"
+      },
+      {
+        "byte_count": 7799,
         "path": "docs/native-kernel-entry.md",
-        "sha256": "3F5FC6C94AE8947219B71ABAFCA2876231A6A8E73FB70D213A97483A33364441"
+        "sha256": "9E67B35D7D985B77B0F3EC3BF4A87FBF0CD16D22BD77BB61545A5B05219DFD37"
+      },
+      {
+        "byte_count": 539,
+        "path": "native/.cargo/config.toml",
+        "sha256": "7983881C5CAD2B909CCA64BFA7F5895EC56377B0E52967444CB2818A69FA4FE1"
+      },
+      {
+        "byte_count": 2092,
+        "path": "specs/native-host-msvc-profile.json",
+        "sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182"
+      },
+      {
+        "byte_count": 5317,
+        "path": "tools/native_host_toolchain.py",
+        "sha256": "4AC87084B9B1F023C1FE2518858899A4A71BF90B9CA4DF3D312E342257E3099F"
+      },
+      {
+        "byte_count": 22364,
+        "path": "tools/qualify_native_toolchain.py",
+        "sha256": "655FCC0A572AE4FB2899840007F22A31CDCF9D114952C60F657EE3F4BF0F9C50"
+      },
+      {
+        "byte_count": 33002,
+        "path": "tools/qualify_native_elf_loader.py",
+        "sha256": "AD74BACCA21B2B70A9AEA4D5AD672D222D19016407C43E985D12D1DEA205F03B"
+      },
+      {
+        "byte_count": 8341,
+        "path": "tests/test_native_host_toolchain.py",
+        "sha256": "EAB54E9FDE9435B29C56866CD5A4A6600E54AB2CB14BE0604818685105316393"
+      },
+      {
+        "byte_count": 342,
+        "path": "native/elf/Cargo.toml",
+        "sha256": "FD1F6C50EF6C3CE82C5602386BB68A7BED933819C89284FADAECEE7434654389"
+      },
+      {
+        "byte_count": 36472,
+        "path": "native/elf/src/lib.rs",
+        "sha256": "15CEF64F884F17A97F7581A794555E23F80D099C1B2E152B42CD59D64A884DA4"
+      },
+      {
+        "byte_count": 5760,
+        "path": "native/elf/src/bin/poole_elf_probe.rs",
+        "sha256": "5D75C4150FD4CAEFF40ACAD5A9AFF38CD6DCD0519060E1407EB24DF73531DCCE"
+      },
+      {
+        "byte_count": 1863,
+        "path": "native/boot/Cargo.toml",
+        "sha256": "C9175879FB21AAE932016F9E1E4F46DD0070BF0D6A2DB32AB370AF7C4D0687F6"
+      },
+      {
+        "byte_count": 16266,
+        "path": "native/boot/src/lib.rs",
+        "sha256": "9937D6DBE1F55646B042B81D9CD0BC5A4AC150E8710A469C2BD378F229F1A5DD"
+      },
+      {
+        "byte_count": 31837,
+        "path": "runtime/native_elf_loader.py",
+        "sha256": "EDB7798C4CF70A65F9F3826A96E1996E0DA2B01443940BBB517E0E1702D29E3C"
+      },
+      {
+        "byte_count": 3946,
+        "path": "tools/generate_native_elf_loader_vectors.py",
+        "sha256": "8A28A89C340BC4B59E532E16E52B89FA78B91D111D9A3289F158E7D3459CFD74"
+      },
+      {
+        "byte_count": 5451,
+        "path": "docs/native-elf-loader.md",
+        "sha256": "C67E4C762280B7799733AF6ACB6ADCBA62B7EA083A78F41E530F41D8A35FC38D"
+      },
+      {
+        "byte_count": 131,
+        "path": "native/rust-toolchain.toml",
+        "sha256": "06C4E0BD63FE84DCB26A0FAE52D96F23C38979DBE6F154D58EAB1547F81FA26B"
+      },
+      {
+        "byte_count": 4017,
+        "path": "specs/native-toolchain-lock.json",
+        "sha256": "79084B39BC43C0B3B96ABE93328184338470A2FFFF257C6E2305215E6B2CCA4E"
+      },
+      {
+        "byte_count": 12903,
+        "path": "tests/test_native_elf_loader.py",
+        "sha256": "95961C82225CC2FAB3E49984B735C1AD1497D34DD11859E5D34F597EF0F48C1B"
       },
       {
         "byte_count": 21215,
@@ -228,9 +333,14 @@
         "sha256": "E968325A755937F504779F656DAF7B70B4D5B276DB6450BCB9AD51F026029C54"
       },
       {
-        "byte_count": 17938,
+        "byte_count": 3244,
+        "path": "native/kernel/src/reclamation/execution.rs",
+        "sha256": "D268C414A4BAF321194F01600251771B007A10BDB5FE3CDD10D112AD4E9CB666"
+      },
+      {
+        "byte_count": 18263,
         "path": "native/kernel/src/reclamation/task_lifetimes.rs",
-        "sha256": "CDD7A888C83D80BCD18D57704F5473623F1883FC4B1B5069E8E9513AF9B9A5AF"
+        "sha256": "D582161D3E27AECA77D551AD3BA8D31C0AB7656C8C100E56BC073EA19307B9EE"
       },
       {
         "byte_count": 14384,
@@ -238,19 +348,19 @@
         "sha256": "875138AB0D62A8FD8061656CBC2DD9136366DABAB255AAC9A6E0D63455D11EF8"
       },
       {
-        "byte_count": 40352,
+        "byte_count": 45429,
         "path": "native/kernel/src/scheduler_ap_workers.rs",
-        "sha256": "E61261956C2CBDBD7B5B238FC014AC6A291BDC1E48C6D97D34DD7C12D131BBC4"
+        "sha256": "AD365CC34066F7D26921B4F9D264D5C7FDE7797086B07AD67C8C34DCCD1452A7"
       },
       {
-        "byte_count": 29212,
+        "byte_count": 31778,
         "path": "native/kernel/src/scheduler_deferred.rs",
-        "sha256": "4AAE60E149A49AF5144D348D64AE552FC5B6C1D822CF48852A220FD9270860EA"
+        "sha256": "1F8AE8F0521C08DDAE73BBADB16E91B33235129FCC695191AF83A98ABDD8786E"
       },
       {
-        "byte_count": 44850,
+        "byte_count": 49297,
         "path": "native/kernel/src/scheduler_smp.rs",
-        "sha256": "8C3C13140D867F3766F6209B1B918970BA095EA5FA35634C721D5C0509469390"
+        "sha256": "392A986CFEC545BB56A54A669005011096FAE243FB863036C6FC3F06909461D4"
       },
       {
         "byte_count": 31212,
@@ -268,9 +378,9 @@
         "sha256": "724C599CDD61841245AE8705A110F6E809E30BBC88840AE0789E6A4C56E41F96"
       },
       {
-        "byte_count": 43608,
+        "byte_count": 45756,
         "path": "native/kernel/src/smp_runtime.rs",
-        "sha256": "322A687E6EE09E9438166EF09097C65FD00A3999448C4A7014AD88221BB4AFDD"
+        "sha256": "D3F08E444104C04A66CDC057483AE0945AE30E0105C5604296B408ED3092B4E0"
       },
       {
         "byte_count": 12375,
@@ -357,8 +467,8 @@
       "poolekernel-fixture"
     ],
     "status": "pass",
-    "test_count": 243,
-    "test_pass_count": 243
+    "test_count": 246,
+    "test_pass_count": 246
   },
   "n6_exit_gate_satisfied": false,
   "negative_controls": [
@@ -679,31 +789,31 @@
     "N6.6": "partial"
   },
   "product": {
-    "canonical_byte_count": 530072,
-    "canonical_sha256": "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625",
+    "canonical_byte_count": 534168,
+    "canonical_sha256": "72C37783A5729229E6A259E38DC8DF55034FD467B77839FFFC4AA62B66E33EBF",
     "entry_offset": 40960,
     "entry_prefix_hex": "FAFC4889E14885C9743B48F7C10F00000075324889C848C1E01048C1F8104839C87522410F20D89C",
     "host_leakage_hits": [],
-    "image_byte_count": 602112,
-    "linked_byte_count": 7025584,
-    "linked_sha256": "87B12B0278881804BDDA57132657950CF8CD8F515B7A0CC4BC9E2B6326FA1C0A",
-    "loaded_sha256": "940D941A32AAA3DC1E5F75295AFC47ECFB1FD07B75E359D9D4C5963A36E488BC",
+    "image_byte_count": 606208,
+    "linked_byte_count": 7091272,
+    "linked_sha256": "B29916B90D42010CCDBDCC8927E10F8FCEEF14020CA037051367CCB4CC29F841",
+    "loaded_sha256": "1349BD9105DF44CB7367B8867E84F9470EAD309AF947351B473B3B2173AC0E23",
     "manifest_fields": {
-      "build_id": "PKBUILD1-CYCLE168-N12-AP-OWN-V002-0000000001",
+      "build_id": "PKBUILD1-CYCLE209-N12-APW-TXN-V1-00000000001",
       "entry_contract": "PKENTRY1",
       "entry_offset": "0x0000A000",
       "handoff_contract": "PBP1",
       "image_contract": "PKELF1",
       "pbp1_contract_sha256": "89EA7517EF7D2E30C7EBEC4C28D092E3F01D95519EC6768E7B4D5C0F586B58E7",
       "pkelf1_contract_sha256": "A0CE48E9EF992B97333D84ECB2850E221D482E2ACF11BB312B5F769DAFF992AA",
-      "pkentry1_contract_sha256": "2B7AE3FF260D8D8C1246BC73AFD0B9322BDFBFD3DDC6AC941EC9F1A938A8B413"
+      "pkentry1_contract_sha256": "C4D47D88A662A53B3CF5B508866CF7C7A978CC9C59678EFA62D43780C80766CB"
     },
     "manifest_offset": 544,
-    "relocation_canonical_offset": 471104,
-    "relocation_count": 1321,
-    "relocation_source_offset": 471264,
+    "relocation_canonical_offset": 475200,
+    "relocation_count": 1323,
+    "relocation_source_offset": 475360,
     "relro_byte_count": 57344,
-    "relro_offset": 471040
+    "relro_offset": 475136
   },
   "production_promotion_allowed": false,
   "production_ready": false,
@@ -721,8 +831,8 @@
     "negative_controls_passed": 43,
     "negative_controls_total": 43,
     "production_claim_count": 0,
-    "rust_host_tests_passed": 243,
-    "rust_host_tests_total": 243,
+    "rust_host_tests_passed": 246,
+    "rust_host_tests_total": 246,
     "rustfmt_packages_passed": 2
   },
   "toolchain": {
@@ -744,6 +854,12 @@
       "host_probe_artifact_identity_recorded": false,
       "host_probe_byte_count": 148480,
       "host_probe_role": "ephemeral host-only differential and exact-byte transport",
+      "host_toolchain": {
+        "profile_id": "POOLEOS-HOST-MSVC-1",
+        "profile_sha256": "4BD6B069392E11215EE1942425B3A12CE2CAEC6746A9450EAC20B037FC538182",
+        "scope": "host_linker_and_library_trees_not_complete_host_attestation",
+        "verified_before_build": true
+      },
       "no_std_target_builds": [
         {
           "byte_count": 93930,

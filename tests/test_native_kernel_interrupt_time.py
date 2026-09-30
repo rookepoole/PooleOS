@@ -1,10 +1,72 @@
 from __future__ import annotations
 
 import copy
+import contextlib
+import io
+import json
+import tempfile
 import unittest
+from pathlib import Path
+from unittest import mock
 
 from runtime import native_kernel_interrupt_time as interrupt_time
+from tests.test_native_cpu_entry_provenance import pair_mutations
 from tools import pooleos_release_gate, qualify_native_kernel_interrupt_time
+
+
+def clock_marker_mutations(markers):
+    cases = (
+        ("zero-sample", {"sample_ticks": 0, "sample_ns": 0}),
+        ("short-sample", {"sample_ticks": 10, "sample_ns": 100}),
+        ("long-sample", {"sample_ticks": 100_000_001, "sample_ns": 1_000_000_010}),
+        ("apic-counter-overflow", {"apic_ticks": 0x1_0000_0000}),
+        ("low-frequency", {"sample_ticks": 100_000, "sample_ns": 1_000_000,
+                           "apic_ticks": 1, "apic_hz": 1_000, "one_shot_initial": 10}),
+        ("high-frequency", {"sample_ticks": 100_000, "sample_ns": 1_000_000,
+                            "apic_ticks": 100_000_000, "apic_hz": 100_000_000_000,
+                            "one_shot_initial": 1_000_000_000}),
+    )
+    for label, fields in cases:
+        candidate = markers.copy()
+        for name, value in fields.items():
+            candidate[33] = qualify_native_kernel_interrupt_time._set_field(candidate[33], name, str(value))
+        yield label, candidate
+
+
+def recorded_receipt_mutations(baseline):
+    for family in ("exit", "coverage", "evidence"):
+        for label, pair in pair_mutations(baseline["execution"], family):
+            candidate = copy.deepcopy(baseline)
+            candidate["execution"] = pair
+            yield family, label, candidate
+
+    def changed(path, value):
+        candidate = copy.deepcopy(baseline)
+        target = candidate
+        for key in path[:-1]:
+            target = target[key]
+        target[path[-1]] = value
+        return candidate
+
+    for path in (("execution",), ("execution", "observation"), ("summary",)):
+        yield "shape", str(path), changed(path, None)
+    for section, fields in baseline["execution"]["observation"].items():
+        yield "observation", section, changed(("execution", "observation", section), None)
+        if section == "transfer_prefix":
+            continue
+        for key, value in fields.items():
+            substitute = float(value) if type(value) is int else "invalid"
+            for label, replacement in (("null", None), ("type-or-value", substitute)):
+                path = ("execution", "observation", section, key)
+                yield "observation", str(path) + label, changed(path, replacement)
+    for key, value in baseline["summary"].items():
+        for label, replacement in (("null", None), ("type", float(value))):
+            yield "summary", key + label, changed(("summary", key), replacement)
+    for label, markers in clock_marker_mutations(baseline["execution"]["runs"][0]["markers"]):
+        candidate = copy.deepcopy(baseline)
+        for run in candidate["execution"]["runs"]:
+            run["markers"] = markers.copy()
+        yield "clock", label, candidate
 
 
 class NativeKernelInterruptTimeTests(unittest.TestCase):
@@ -95,6 +157,61 @@ class NativeKernelInterruptTimeTests(unittest.TestCase):
         self.assertIn("eoi=8/8", check["detail"])
         self.assertIn("ap_start=0", check["detail"])
         self.assertIn("n8_exit=false", check["detail"])
+
+    def test_recorded_irq_rejects_inconsistent_payloads(self) -> None:
+        # Historical payload consistency is not current-source qualification.
+        baseline = interrupt_time.read_json(interrupt_time.ROOT / interrupt_time.READINESS_RELATIVE)
+        host_tests = baseline["build"]["kernel_entry"]["host_tests"]
+        self.assertEqual([], interrupt_time.recorded_interrupt_time_errors(
+            baseline["execution"], baseline["summary"], host_tests))
+        for family, label, candidate in recorded_receipt_mutations(baseline):
+            with self.subTest(family=family, case=label):
+                self.assertTrue(interrupt_time.recorded_interrupt_time_errors(
+                    candidate["execution"], candidate["summary"], host_tests))
+
+    def test_runtime_and_real_gate_reject_corrupted_records(self) -> None:
+        baseline = interrupt_time.read_json(interrupt_time.ROOT / interrupt_time.READINESS_RELATIVE)
+        self.assertEqual([], interrupt_time.readiness_errors(baseline))
+        self.assertTrue(pooleos_release_gate.check_native_kernel_interrupt_time_readiness()["ok"])
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "candidate.json"
+            candidates = list(recorded_receipt_mutations(baseline))
+            for value in (None, [], "invalid"):
+                candidates.append(("root-shape", repr(value), value))
+                candidate = copy.deepcopy(baseline)
+                candidate["negative_controls"] = value
+                candidates.append(("controls-shape", repr(value), candidate))
+            for family, label, candidate in candidates:
+                with self.subTest(family=family, case=label):
+                    self.assertTrue(interrupt_time.readiness_errors(candidate))
+                    path.write_text(json.dumps(candidate, allow_nan=False), encoding="utf-8")
+                    self.assertFalse(pooleos_release_gate.check_native_kernel_interrupt_time_readiness(path)["ok"])
+
+    def test_clock_markers_reject_invalid_calibration_without_crashing(self) -> None:
+        baseline = interrupt_time.read_json(interrupt_time.ROOT / interrupt_time.READINESS_RELATIVE)
+        markers = baseline["execution"]["runs"][0]["markers"]
+        self.assertEqual(8, interrupt_time.validate_markers(markers)["delivery"]["eois"])
+        for label, candidate in clock_marker_mutations(markers):
+            with self.subTest(case=label):
+                with self.assertRaises(interrupt_time.KernelInterruptTimeError):
+                    interrupt_time.validate_markers(candidate)
+
+    def test_qualifier_rejects_invalid_result_before_writing(self) -> None:
+        baseline = interrupt_time.read_json(interrupt_time.ROOT / interrupt_time.READINESS_RELATIVE)
+        self.assertEqual([], interrupt_time.readiness_errors(baseline))
+        baseline["execution"]["runs"][0]["qemu_exit_code"] = False
+        with tempfile.TemporaryDirectory() as folder:
+            for exists in (False, True):
+                path = Path(folder) / ("existing.json" if exists else "absent/result.json")
+                if exists:
+                    path.write_bytes(b"preserve-existing-output")
+                with mock.patch.object(qualify_native_kernel_interrupt_time, "make_readiness", return_value=baseline):
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        self.assertEqual(1, qualify_native_kernel_interrupt_time.main(["--out", str(path)]))
+                if exists:
+                    self.assertEqual(b"preserve-existing-output", path.read_bytes())
+                else:
+                    self.assertFalse(path.parent.exists())
 
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from runtime import native_kernel_transfer
-from runtime.native_kernel_profile_evidence import kernel_entry_errors
+from runtime.native_kernel_profile_evidence import kernel_entry_errors, recorded_control_errors, recorded_pair_errors
 from runtime.schema_validation import validate_json
 
 
@@ -345,12 +345,14 @@ def contract_errors(contract: dict[str, Any]) -> list[str]:
     return errors
 
 
-def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
+def readiness_errors(readiness: Any, root: Path = ROOT) -> list[str]:
     schema = read_json(root / READINESS_SCHEMA_RELATIVE)
     errors = [
         f"schema {item.path}: {item.message}"
         for item in validate_json(readiness, schema)
     ]
+    if not isinstance(readiness, dict):
+        return errors
     errors.extend(kernel_entry_errors(readiness.get("build"), root))
     contract = read_json(root / CONTRACT_RELATIVE)
     errors.extend(contract_errors(contract))
@@ -361,19 +363,9 @@ def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
         or readiness.get("non_claims") != contract.get("non_claims")
     ):
         errors.append("PKXEXC1 readiness boundary changed")
-    controls = readiness.get("negative_controls", [])
-    if (
-        not isinstance(controls, list)
-        or len(controls) != len(NEGATIVE_CONTROL_IDS)
-        or [item.get("id") for item in controls if isinstance(item, dict)]
-        != list(NEGATIVE_CONTROL_IDS)
-        or any(
-            not isinstance(item, dict) or item.get("status") != "pass"
-            for item in controls
-        )
-    ):
-        errors.append("PKXEXC1 hostile controls changed")
+    errors.extend(recorded_control_errors(readiness.get("negative_controls"), NEGATIVE_CONTROL_IDS, CONTRACT_ID))
     execution = readiness.get("execution", {})
+    errors.extend(recorded_pair_errors(execution, "xstate-exception-run", validate_markers, "PKXEXC1"))
     if not isinstance(execution, dict) or tuple(
         execution.get(key) for key in ("run_count", "cpu_model", "exact_marker_match")
     ) != (2, CPU_MODEL, True):

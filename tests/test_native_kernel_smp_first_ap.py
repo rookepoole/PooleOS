@@ -1,10 +1,58 @@
 from __future__ import annotations
 
 import copy
+import contextlib
+import io
+import json
+import tempfile
 import unittest
+from pathlib import Path
+from unittest import mock
 
 from runtime import native_kernel_smp_first_ap as smp_first_ap
+from runtime import native_pooleboot
+from tests.test_native_cpu_entry_provenance import pair_mutations
 from tools import pooleos_release_gate, qualify_native_kernel_smp_first_ap
+
+
+def recorded_receipt_mutations(baseline):
+    for family in ("exit", "coverage", "evidence"):
+        for label, pair in pair_mutations(baseline["execution"], family):
+            if label == "exact_marker_match":
+                pair["static_markers_exact_match"] = pair.pop("exact_marker_match")
+            candidate = copy.deepcopy(baseline)
+            candidate["execution"] = pair
+            yield family, label, candidate
+
+    def changed(path, value):
+        candidate = copy.deepcopy(baseline)
+        target = candidate
+        for key in path[:-1]:
+            target = target[key]
+        target[path[-1]] = value
+        return candidate
+
+    for path in (("execution",), ("execution", "observation"), ("summary",)):
+        yield "shape", str(path), changed(path, None)
+    for key, value in (("virtual_cpu_count", 2.0), ("dynamic_tsc_and_checksum_fields_revalidated", 1)):
+        yield "dynamic-policy", key, changed(("execution", key), value)
+    for section, fields in baseline["execution"]["observation"].items():
+        yield "observation", section, changed(("execution", "observation", section), None)
+        if section == "transfer_prefix":
+            continue
+        for key, value in fields.items():
+            substitute = int(value) if type(value) is bool else float(value) if type(value) is int else "invalid"
+            for label, replacement in (("null", None), ("type-or-value", substitute)):
+                path = ("execution", "observation", section, key)
+                yield "observation", str(path) + label, changed(path, replacement)
+    for key, value in baseline["summary"].items():
+        for label, replacement in (("null", None), ("type", float(value))):
+            yield "summary", key + label, changed(("summary", key), replacement)
+    for field, value in (("checksum", "0x0000000000000000"), ("parked", "0")):
+        candidate = copy.deepcopy(baseline)
+        for run in candidate["execution"]["runs"]:
+            run["markers"][35] = qualify_native_kernel_smp_first_ap._set_field(run["markers"][35], field, value)
+        yield "raw-stop", field, candidate
 
 
 class NativeKernelSmpFirstApTests(unittest.TestCase):
@@ -102,6 +150,86 @@ class NativeKernelSmpFirstApTests(unittest.TestCase):
         self.assertIn("ap=1/1", check["detail"])
         self.assertIn("parked=1/1", check["detail"])
         self.assertIn("n8_exit=false", check["detail"])
+
+    def test_recorded_first_ap_rejects_inconsistent_payloads(self) -> None:
+        # Payload-only validation deliberately does not establish fresh execution.
+        baseline = smp_first_ap.read_json(smp_first_ap.ROOT / smp_first_ap.READINESS_RELATIVE)
+        host = baseline["build"]["kernel_entry"]["host_tests"]
+        self.assertEqual([], smp_first_ap.recorded_first_ap_errors(baseline["execution"], baseline["summary"], host))
+        for family, label, candidate in recorded_receipt_mutations(baseline):
+            with self.subTest(family=family, case=label):
+                self.assertTrue(smp_first_ap.recorded_first_ap_errors(candidate["execution"], candidate["summary"], host))
+
+    def test_runtime_and_real_gate_reject_corrupted_records(self) -> None:
+        baseline = smp_first_ap.read_json(smp_first_ap.ROOT / smp_first_ap.READINESS_RELATIVE)
+        self.assertEqual([], smp_first_ap.readiness_errors(baseline))
+        self.assertTrue(pooleos_release_gate.check_native_kernel_smp_first_ap_readiness()["ok"])
+        candidates = list(recorded_receipt_mutations(baseline))
+        for value in (None, [], "invalid"):
+            candidates.append(("root-shape", repr(value), value))
+            candidate = copy.deepcopy(baseline)
+            candidate["negative_controls"] = value
+            candidates.append(("control-shape", repr(value), candidate))
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "candidate.json"
+            for family, label, candidate in candidates:
+                with self.subTest(family=family, case=label):
+                    self.assertTrue(smp_first_ap.readiness_errors(candidate))
+                    path.write_text(json.dumps(candidate, allow_nan=False), encoding="utf-8")
+                    self.assertFalse(pooleos_release_gate.check_native_kernel_smp_first_ap_readiness(path)["ok"])
+
+    def test_dynamic_normalization_preserves_only_validated_clock_fields(self) -> None:
+        baseline = smp_first_ap.read_json(smp_first_ap.ROOT / smp_first_ap.READINESS_RELATIVE)
+        host = baseline["build"]["kernel_entry"]["host_tests"]
+        pair = copy.deepcopy(baseline["execution"])
+        run = pair["runs"][1]
+        observation = smp_first_ap.validate_markers(run["markers"])
+        online, stop = observation["online"], observation["stop"]
+        values = {"state": 3, "command": 1, "target_apic_id": 1, "bsp_apic_id": 0,
+                  "observed_apic_id": 1, "leaf1_ecx": online["ecx"], "leaf1_edx": online["edx"],
+                  **{key: online[key] for key in ("cr0", "cr3", "cr4", "efer")},
+                  "tsc_online": stop["tsc_online"] + 1, "tsc_stop": stop["tsc_stop"] + 1}
+
+        def bind_synthetic_run():
+            for field in ("tsc_online", "tsc_stop", "checksum"):
+                value = smp_first_ap.mailbox_checksum(values) if field == "checksum" else values[field]
+                run["markers"][35] = qualify_native_kernel_smp_first_ap._set_field(run["markers"][35], field, f"0x{value:016X}")
+            run["marker_summary"] = smp_first_ap.validate_markers(run["markers"])
+            run["marker_sha256"] = smp_first_ap.sha256_bytes(native_pooleboot.canonical_json_bytes(run["markers"]))
+
+        bind_synthetic_run()
+        # A synthetic consistency test, never passed off as a current live receipt.
+        self.assertEqual([], smp_first_ap.recorded_first_ap_errors(pair, baseline["summary"], host))
+        valid = copy.deepcopy(pair)
+        run["markers"][35] = qualify_native_kernel_smp_first_ap._set_field(run["markers"][35], "checksum", "0x0000000000000000")
+        self.assertTrue(smp_first_ap.recorded_first_ap_errors(pair, baseline["summary"], host))
+        pair = copy.deepcopy(valid)
+        run = pair["runs"][1]
+        values["cr0"] ^= 1 << 5
+        run["markers"][34] = qualify_native_kernel_smp_first_ap._set_field(run["markers"][34], "cr0", f"0x{values['cr0']:016X}")
+        bind_synthetic_run()
+        errors = smp_first_ap.recorded_first_ap_errors(pair, baseline["summary"], host)
+        self.assertTrue(any("static markers differ" in error for error in errors), errors)
+        pair = copy.deepcopy(valid)
+        pair["runs"][1]["screenshot"]["sha256"] = "0" * 64
+        self.assertTrue(smp_first_ap.recorded_first_ap_errors(pair, baseline["summary"], host))
+
+    def test_qualifier_rejects_invalid_result_before_writing(self) -> None:
+        baseline = smp_first_ap.read_json(smp_first_ap.ROOT / smp_first_ap.READINESS_RELATIVE)
+        self.assertEqual([], smp_first_ap.readiness_errors(baseline))
+        baseline["execution"]["runs"][0]["qemu_exit_code"] = False
+        with tempfile.TemporaryDirectory() as folder:
+            for exists in (False, True):
+                path = Path(folder) / ("existing.json" if exists else "absent/result.json")
+                if exists:
+                    path.write_bytes(b"preserve-existing-output")
+                with mock.patch.object(qualify_native_kernel_smp_first_ap, "make_readiness", return_value=baseline):
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        self.assertEqual(1, qualify_native_kernel_smp_first_ap.main(["--out", str(path)]))
+                if exists:
+                    self.assertEqual(b"preserve-existing-output", path.read_bytes())
+                else:
+                    self.assertFalse(path.parent.exists())
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,6 +15,7 @@ sys.path.insert(0, str(ROOT))
 from runtime import native_elf_loader as elf  # noqa: E402
 from runtime.schema_validation import validate_json  # noqa: E402
 from tools import pooleos_release_gate  # noqa: E402
+from tools import qualify_native_elf_loader as qualifier  # noqa: E402
 
 
 class NativeElfLoaderTests(unittest.TestCase):
@@ -172,6 +174,67 @@ class NativeElfLoaderTests(unittest.TestCase):
         self.assertNotIn("C:\\Users", encoded)
         self.assertFalse(self.readiness["differential_fuzz"]["corpus_published"])
         self.assertFalse(self.readiness["parser_qualification"]["host_probe_artifact_identity_recorded"])
+
+    def test_host_profile_substitutions_fail_closed(self) -> None:
+        self.assertEqual([], elf.readiness_errors(self.readiness))
+        for key, value in (("profile_id", "other"), ("profile_sha256", "0" * 64),
+                           ("verified_before_build", False), ("verified_before_build", 1),
+                           ("scope", "complete_host_attestation")):
+            with self.subTest(key=key, value=value):
+                changed = copy.deepcopy(self.readiness)
+                changed["parser_qualification"]["host_toolchain"][key] = value
+                self.assertIn("readiness host-toolchain profile mismatch", elf.readiness_errors(changed))
+        for value in (None, [], {}, "verified", True):
+            with self.subTest(parser=value):
+                changed = copy.deepcopy(self.readiness)
+                changed["parser_qualification"] = value
+                self.assertIn("readiness host-toolchain profile mismatch", elf.readiness_errors(changed))
+
+    def test_host_build_inputs_are_bound_and_each_mutation_stales_receipt(self) -> None:
+        paths = ("native/.cargo/config.toml", "native/rust-toolchain.toml",
+                 "specs/native-toolchain-lock.json", "specs/native-host-msvc-profile.json",
+                 "tools/native_host_toolchain.py", "tools/qualify_native_toolchain.py",
+                 "tests/test_native_elf_loader.py", "tests/test_native_host_toolchain.py")
+        actual = {b["path"] for b in self.readiness["bindings"]["implementation_inputs"]}
+        self.assertTrue(set(paths).issubset(actual))
+        original = elf.file_binding
+        for relative in paths:
+            def changed_binding(path):
+                result = original(path)
+                if path == ROOT / relative:
+                    result["sha256"] = "0" * 64
+                return result
+            with self.subTest(path=relative), mock.patch.object(elf, "file_binding", side_effect=changed_binding):
+                self.assertIn("readiness input bindings are stale", elf.readiness_errors(self.readiness))
+
+    def test_invalid_receipt_does_not_create_or_replace_output(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="pooleos-pkelf-admission-") as temporary:
+            output = Path(temporary) / "receipt.json"
+            for existing in (False, True):
+                with self.subTest(existing=existing):
+                    if existing:
+                        output.write_bytes(b"preserve-existing-output")
+                    changed = copy.deepcopy(self.readiness)
+                    changed["production_ready"] = True
+                    with mock.patch.object(qualifier, "make_readiness", return_value=changed), \
+                         mock.patch.object(sys, "argv", ["qualify_native_elf_loader.py", "--out", str(output)]):
+                        with self.assertRaisesRegex(qualifier.QualificationError, "promotion boundary mismatch"):
+                            qualifier.main()
+                    if existing:
+                        self.assertEqual(output.read_bytes(), b"preserve-existing-output")
+                    else:
+                        self.assertFalse(output.exists())
+
+    def test_qualifier_reproduces_exact_receipt(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="pooleos-pkelf-reproduce-") as temporary:
+            output = Path(temporary) / "receipt.json"
+            completed = subprocess.run(
+                [sys.executable, str(ROOT / "tools/qualify_native_elf_loader.py"), "--out", str(output)],
+                cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                check=False, timeout=180,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stdout)
+            self.assertEqual(output.read_bytes(), (ROOT / elf.READINESS_RELATIVE).read_bytes())
 
 
 if __name__ == "__main__":

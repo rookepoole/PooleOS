@@ -1166,6 +1166,12 @@ pksmp5_fragment!(PKSMP5_BASELINE_CHECKSUM, b" baseline_checksum=");
 pksmp5_fragment!(PKSMP5_RUNTIME_CHECKSUM, b" runtime_checksum=");
 pksmp5_fragment!(PKSMP5_RESPONSE_CHECKSUM, b" response_checksum=");
 pksmp5_fragment!(
+    PKSMP5_MAILBOX_CONTEXT,
+    b" mailbox_evidence=PKMBX1 snapshot=quiesced context_words="
+);
+pksmp5_fragment!(PKSMP5_BASELINE_WORDS, b" baseline_words=");
+pksmp5_fragment!(PKSMP5_RUNTIME_WORDS, b" runtime_words=");
+pksmp5_fragment!(
     PKSMP5_AP_TAIL,
     b" tss_busy=1 idt_verified=1 xstate_verified=1 apic_table_verified=1 parked=1\n"
 );
@@ -4419,6 +4425,7 @@ struct SmpIpiApResource {
 #[derive(Clone, Copy)]
 struct SmpIpiApOperationProof {
     mailbox: RuntimeMailboxSnapshot,
+    mailbox_context: [u64; 5],
     ipi: IpiSnapshot,
     init_asserts: u64,
     init_deasserts: u64,
@@ -7340,6 +7347,7 @@ fn run_smp_ipi_internal(
     let mut parked_mask = 0u64;
     let mut retention = SmpIpiRetentionProof::default();
     let bsp_tsc_before = arch::x86_64::read_tsc_ordered();
+    let mut mailbox_context = [0u64; 5];
     let operation = (|| -> Result<SmpIpiExecutionReceipt, SmpIpiLiveError> {
         SMP_IPI_FAILURE_STAGE.store(3, Ordering::Relaxed);
         for (index, &target) in target_apic_ids.iter().enumerate() {
@@ -7620,6 +7628,13 @@ fn run_smp_ipi_internal(
             mailboxes[index] = Some(mailbox);
             ipis[index] = Some(ipi);
         }
+        mailbox_context = [
+            u64::from(bsp_leaf1_ecx),
+            u64::from(bsp_leaf1_edx),
+            bsp_tsc_before,
+            bsp_tsc_after,
+            arch::x86_64::read_tsc_ordered(),
+        ];
         lifecycle.quiesced(smp_ipi::TARGET_CPU_MASK)?;
 
         // Shared lock aliases need more than the one-page shootdown. Complete
@@ -7829,6 +7844,7 @@ fn run_smp_ipi_internal(
         let release = releases[index].ok_or(smp_ipi::Error::Rollback)?;
         operations[index] = Some(SmpIpiApOperationProof {
             mailbox: mailboxes[index],
+            mailbox_context,
             ipi: ipis[index],
             init_asserts: 1,
             init_deasserts: 1,
@@ -10736,6 +10752,34 @@ extern "C" fn poole_kernel_rust_entry(
             logger.write_hex_u64(mailbox.runtime_checksum);
             logger.write_bytes(&PKSMP5_RESPONSE_CHECKSUM);
             logger.write_hex_u64(ipi.response_checksum);
+            // Only saved quiesced state is read here; AP allocations are released.
+            logger.write_bytes(&PKSMP5_MAILBOX_CONTEXT);
+            for (word_index, word) in operation.mailbox_context.iter().enumerate() {
+                if word_index != 0 {
+                    logger.write_bytes(&PKSMP5_COMMA);
+                }
+                logger.write_hex_u64(*word);
+            }
+            logger.write_bytes(&PKSMP5_BASELINE_WORDS);
+            for (word_index, word) in smp_runtime::baseline_checksum_words(&mailbox)
+                .iter()
+                .enumerate()
+            {
+                if word_index != 0 {
+                    logger.write_bytes(&PKSMP5_COMMA);
+                }
+                logger.write_hex_u64(*word);
+            }
+            logger.write_bytes(&PKSMP5_RUNTIME_WORDS);
+            for (word_index, word) in smp_runtime::runtime_checksum_words(&mailbox)
+                .iter()
+                .enumerate()
+            {
+                if word_index != 0 {
+                    logger.write_bytes(&PKSMP5_COMMA);
+                }
+                logger.write_hex_u64(*word);
+            }
             logger.write_bytes(&PKSMP5_AP_TAIL);
 
             resource_pages += operation.resource_release_receipt.page_count;

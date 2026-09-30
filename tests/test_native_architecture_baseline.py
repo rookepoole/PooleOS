@@ -68,13 +68,74 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 239)
+        self.assertEqual(len(self.artifact["bound_sources"]), 354)
+        self.assertIn("docs/checkpoints/cycle191-ipi-recorded-evidence.md", {item["path"] for item in self.artifact["bound_sources"]})
+        self.assertIn("docs/checkpoints/cycle190-percpu-recorded-evidence.md", {item["path"] for item in self.artifact["bound_sources"]})
+        self.assertIn("docs/checkpoints/cycle189-first-ap-recorded-evidence.md", {item["path"] for item in self.artifact["bound_sources"]})
+        self.assertIn("docs/checkpoints/cycle188-irq-recorded-evidence.md", {item["path"] for item in self.artifact["bound_sources"]})
+        self.assertIn("docs/checkpoints/cycle187-vm-recorded-evidence.md", {item["path"] for item in self.artifact["bound_sources"]})
+        self.assertIn("docs/checkpoints/cycle186-pmm-recorded-evidence.md", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("docs/checkpoints/cycle175-memory-entry-provenance.md", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("tests/test_native_memory_entry_provenance.py", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("runtime/native_kernel_profile_evidence.py", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("tests/test_native_cpu_entry_provenance.py", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("docs/checkpoints/cycle174-cpu-entry-provenance.md", {item["path"] for item in self.artifact["bound_sources"]})
         bound_paths = {binding["path"] for binding in self.artifact["bound_sources"]}
+        self.assertEqual(len(bound_paths), len(self.artifact["bound_sources"]))
+        for path in ("docs/checkpoints/cycle196-preemption-executed-controls.md",
+                     "runtime/native_kernel_scheduler_preempt.py",
+                     "specs/native-kernel-scheduler-preemption-readiness.schema.json",
+                     "tests/test_native_kernel_scheduler_preempt.py", "tests/test_native_preemption_controls.py",
+                     "tests/fixtures/pksched2_control_probe.rs", "docs/native-kernel-scheduler-preemption.md"):
+            self.assertIn(path, bound_paths)
+        for path in ("docs/checkpoints/cycle195-scheduler-recorded-evidence.md",
+                     "docs/checkpoints/cycle195-scheduler-cloud-backup.md",
+                     "runtime/native_kernel_scheduler.py", "tools/qualify_native_kernel_scheduler.py",
+                     "tools/qualify_native_kernel_scheduler_preempt.py",
+                     "tests/test_native_kernel_scheduler.py", "docs/native-kernel-scheduler.md",
+                     "docs/checkpoints/cycle194-memory-runtime-replay.md",
+                     "tests/test_native_kernel_physical_memory.py",
+                     "docs/checkpoints/cycle193-current-kernel-cpu-replay.md",
+                     "tools/qualify_native_kernel_trap.py", "tests/test_native_kernel_trap.py"):
+            self.assertIn(path, bound_paths)
+        for path in ("docs/checkpoints/cycle192-native-mailbox-oracle.md",
+                     "docs/checkpoints/cycle192-unfinished-cloud-backup.md",
+                     "docs/checkpoints/cycle192-mailbox-qualified-backup.md",
+                     "runtime/native_kernel_smp_mailbox.py", "tests/test_native_kernel_smp_mailbox.py",
+                     "runtime/native_kernel_smp_ipi.py", "tools/qualify_native_kernel_smp_ipi.py",
+                     "tests/test_native_kernel_smp_ipi.py", "native/kernel/src/main.rs",
+                     "native/kernel/src/smp_runtime.rs"):
+            self.assertIn(path, bound_paths)
+        for path in ("docs/checkpoints/cycle185-cpu-recorded-evidence.md",
+                     "docs/checkpoints/cycle185-unfinished-cloud-backup.md",
+                     "runtime/native_kernel_trap.py", "tools/pooleos_release_gate.py"):
+            self.assertIn(path, bound_paths)
+        for path in ("docs/checkpoints/cycle184-boot-host-provenance.md",
+                     "docs/checkpoints/cycle184-unfinished-cloud-backup.md",
+                     "docs/checkpoints/cycle184-validated-boot-cloud-backup.md",
+                     "tests/test_native_boot_host_toolchain.py"):
+            self.assertIn(path, bound_paths)
+        for name in ("symbols", "policy", "pooleboot", "kernel_revalidation", "firmware", "boot_trust"):
+            self.assertIn("runtime/native_" + name + ".py", bound_paths)
+            self.assertIn("tools/qualify_native_" + name + ".py", bound_paths)
+        self.assertIn("docs/checkpoints/cycle183-elf-loader-provenance.md", bound_paths)
+        self.assertIn("docs/checkpoints/cycle183-unfinished-cloud-backup.md", bound_paths)
+        self.assertIn("runtime/native_elf_loader.py", bound_paths)
+        self.assertIn("tests/test_native_elf_loader.py", bound_paths)
+        self.assertIn("docs/checkpoints/cycle180-cpu-qualification.md", bound_paths)
+        self.assertIn("docs/checkpoints/cycle181-memory-qualification.md", bound_paths)
+        self.assertIn("docs/checkpoints/cycle182-host-toolchain-repair.md", bound_paths)
+        self.assertIn("specs/native-host-msvc-profile.json", bound_paths)
+        self.assertIn("tools/native_host_toolchain.py", bound_paths)
+        self.assertIn("tests/test_native_host_toolchain.py", bound_paths)
+        self.assertIn("docs/checkpoints/cycle179-boot-chain-requalification.md", bound_paths)
+        for name in ("symbols", "kernel_load", "kernel_transfer", "kernel_revalidation"):
+            self.assertIn("tests/test_native_" + name + ".py", bound_paths)
+        self.assertIn("docs/checkpoints/cycle178-kernel-entry-requalification.md", bound_paths)
+        self.assertIn("tests/test_native_kernel_entry.py", bound_paths)
+        self.assertIn("tests/test_native_dependency_release_gate.py", bound_paths)
+        self.assertIn("docs/checkpoints/cycle177-dispatch-execution-holds.md", bound_paths)
+        self.assertIn("native/kernel/src/reclamation/execution.rs", bound_paths)
         self.assertIn("native/kernel/src/reclamation/ap_resources.rs", bound_paths)
         self.assertIn("native/kernel/src/physical_memory/tests/ap_resources.rs", bound_paths)
         self.assertIn("docs/checkpoints/cycle168-ap-ownership-qualification.md", bound_paths)

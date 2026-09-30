@@ -297,15 +297,7 @@ def make_readiness(toolchain_root: Path, qemu_root: Path, status_date: str, time
             "exact_screenshot_match": True, "exact_pbp1_match": True, "runs": runs, "observation": observation,
         },
         "negative_controls": controls, "claims": contract["claims"], "non_claims": contract["non_claims"],
-        "summary": {
-            "kernel_host_tests_passed": kernel_readiness["host_tests"]["test_pass_count"], "kernel_host_tests_total": kernel_readiness["host_tests"]["test_count"],
-            "qemu_runs_passed": 2, "qemu_runs_total": 2, "markers_per_run": smp_runtime.MARKER_COUNT,
-            "negative_controls_passed": len(controls), "negative_controls_total": len(controls), "hostile_cases_total": sum(item["case_count"] for item in controls),
-            "application_processors_started": 1, "application_processors_online": 1, "application_processors_quiesced": 1, "application_processors_parked": 1,
-            "processor_local_descriptor_sets": 1, "guarded_stack_classes": 3, "xstate_round_trips": 1, "installed_gates": 27,
-            "resource_pages_released": observation["release"]["resources_released"], "zeroed_bytes": observation["release"]["zeroed_bytes"],
-            "verified_bytes": observation["release"]["verified_bytes"], "production_claim_count": 0,
-        },
+        "summary": smp_runtime.percpu_readiness_summary(observation, kernel_readiness["host_tests"]),
         "open_items": [
             "Inject live failures after INIT and each SIPI and prove final-INIT park before retained-resource cleanup.",
             "Implement capability-gated IPI delivery with sender, target, vector, generation, timeout, and acknowledgement checks.",
@@ -332,11 +324,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         report = make_readiness(args.toolchain_root.resolve(), args.qemu_root.resolve(), args.status_date, args.timeout)
-        args.out.parent.mkdir(parents=True, exist_ok=True)
-        args.out.write_bytes(native_pooleboot.canonical_json_bytes(report))
-        errors = smp_runtime.readiness_errors(smp_runtime.read_json(args.out), ROOT)
+        errors = smp_runtime.readiness_errors(report, ROOT)
         if errors:
             raise QualificationError("; ".join(errors))
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_bytes(native_pooleboot.canonical_json_bytes(report))
     except (OSError, ValueError, KeyError, json.JSONDecodeError, QualificationError, smp_runtime.KernelSmpPerCpuRuntimeError, native_kernel_load.KernelLoadError, native_kernel_transfer.KernelTransferError, native_tier0.Tier0Error) as error:
         print(f"NATIVE_KERNEL_SMP_PERCPU_RUNTIME_QUALIFICATION FAIL {type(error).__name__}: {error}")
         return 1

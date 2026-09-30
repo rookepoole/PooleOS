@@ -19,14 +19,17 @@
     "inputs": {"type": "object"},
     "build": {
       "type": "object",
-      "required": ["kernel_entry", "default_pooleboot", "scheduler_preempt_pooleboot", "profile_count", "all_profile_binaries_distinct", "default_stop_marker_present", "default_transfer_marker_absent", "host_probe", "source_audit"],
+      "required": ["kernel_entry", "default_pooleboot", "scheduler_preempt_pooleboot", "profile_count", "all_profile_binaries_distinct", "default_stop_marker_present", "default_transfer_marker_absent", "host_probe", "source_audit", "linked_switch_audit", "native_control_probe", "audit_controls"],
       "properties": {
         "profile_count": {"const": 2},
         "all_profile_binaries_distinct": {"const": true},
         "default_stop_marker_present": {"const": true},
         "default_transfer_marker_absent": {"const": true},
         "host_probe": {"type": "object"},
-        "source_audit": {"type": "object"}
+        "source_audit": {"type": "object"},
+        "linked_switch_audit": {"type": "object"},
+        "native_control_probe": {"type": "object"},
+        "audit_controls": {"type": "object"}
       }
     },
     "media": {

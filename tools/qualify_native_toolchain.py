@@ -228,21 +228,24 @@ def run_checked(
 
 def isolated_environment(toolchain_root: Path, toolchain_bin: Path, rustc: Path) -> dict[str, str]:
     env = dict(os.environ)
-    for key in (
-        "CARGO_BUILD_RUSTC",
+    removed = {
         "CARGO_ENCODED_RUSTFLAGS",
+        "CARGO_ENCODED_RUSTDOCFLAGS",
         "CARGO_HOME",
         "CARGO_INCREMENTAL",
-        "CARGO_TARGET_DIR",
         "RUSTC",
         "RUSTC_BOOTSTRAP",
         "RUSTC_WRAPPER",
+        "RUSTC_WORKSPACE_WRAPPER",
         "RUSTDOCFLAGS",
         "RUSTFLAGS",
         "RUSTUP_HOME",
         "RUSTUP_TOOLCHAIN",
-    ):
-        env.pop(key, None)
+        "LINK", "_LINK_", "LIB", "LIBPATH", "INCLUDE", "CL", "_CL_",
+    }
+    for key in list(env):
+        if key.upper() in removed or key.upper().startswith(("CARGO_BUILD_", "CARGO_PROFILE_", "CARGO_TARGET_")):
+            del env[key]
     system_root = Path(env.get("SystemRoot", r"C:\Windows"))
     path_parts = [str(toolchain_bin), str(toolchain_root / "cargo" / "bin"), str(system_root / "System32")]
     env.update(

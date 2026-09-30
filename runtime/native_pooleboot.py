@@ -328,6 +328,10 @@ CONTRACT_SCHEMA_RELATIVE = "specs/native-pooleboot-proof.schema.json"
 READINESS_RELATIVE = "runs/native_pooleboot_readiness.json"
 READINESS_SCHEMA_RELATIVE = "specs/native-pooleboot-readiness.schema.json"
 PROOF_IMPLEMENTATION_INPUTS = (
+    "specs/native-host-msvc-profile.json",
+    "tools/native_host_toolchain.py",
+    "tools/qualify_native_toolchain.py",
+    "tests/test_native_boot_host_toolchain.py",
     "native/Cargo.toml",
     "native/Cargo.lock",
     "native/rust-toolchain.toml",
@@ -1371,6 +1375,17 @@ def readiness_contract_errors(readiness: dict[str, Any], root: Path) -> list[str
             _check_binding(errors, item, root, relative_path, f"implementation input {relative_path}")
 
     build = readiness.get("build", {})
+    if not isinstance(build, dict):
+        errors.append("PooleBoot build evidence is not an object")
+        build = {}
+    expected_host = {
+        "profile_id": "POOLEOS-HOST-MSVC-1",
+        "profile_sha256": sha256_bytes((root / "specs/native-host-msvc-profile.json").read_bytes()),
+        "verified_before_build": True,
+        "scope": "host_linker_and_library_trees_not_complete_host_attestation",
+    }
+    if json.dumps(build.get("host_toolchain"), sort_keys=True) != json.dumps(expected_host, sort_keys=True):
+        errors.append("PooleBoot host-toolchain profile mismatch")
     inspection = build.get("inspection", {})
     expected_pe = {
         "format": "PE32+",

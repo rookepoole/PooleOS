@@ -42,13 +42,13 @@ class NativeKernelEntryTests(unittest.TestCase):
 
     def test_product_identity_and_entry_prefix_are_frozen(self) -> None:
         product = self.readiness["product"]
-        self.assertEqual(product["canonical_byte_count"], 530072)
-        self.assertEqual(product["image_byte_count"], 602112)
+        self.assertEqual(product["canonical_byte_count"], 534168)
+        self.assertEqual(product["image_byte_count"], 606208)
         self.assertEqual(product["entry_offset"], 0xA000)
-        self.assertEqual(product["relocation_count"], 1321)
+        self.assertEqual(product["relocation_count"], 1323)
         self.assertEqual(
             product["canonical_sha256"],
-            "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625",
+            "72C37783A5729229E6A259E38DC8DF55034FD467B77839FFFC4AA62B66E33EBF",
         )
         self.assertTrue(product["entry_prefix_hex"].startswith("FAFC4889E14885C9"))
 
@@ -57,12 +57,12 @@ class NativeKernelEntryTests(unittest.TestCase):
         bindings = entry.expected_bindings(ROOT)["implementation_inputs"]
         actual = [binding["path"] for binding in bindings]
         self.assertIn("native/kernel/src/reclamation/task_lifetimes.rs", expected)
+        self.assertIn("native/kernel/src/reclamation/execution.rs", expected)
         self.assertTrue(expected.issubset(actual), sorted(expected - set(actual)))
         self.assertEqual(len(actual), len(set(actual)))
 
     def test_each_kernel_crate_source_mutation_stales_the_receipt(self) -> None:
         candidate = copy.deepcopy(self.readiness)
-        candidate["bindings"] = entry.expected_bindings(ROOT)
         self.assertEqual(entry.readiness_errors(candidate, ROOT), [])
         original = entry.file_binding
         sources = sorted((ROOT / "native/kernel/src").rglob("*.rs"))
@@ -88,6 +88,54 @@ class NativeKernelEntryTests(unittest.TestCase):
         ):
             digest = hashlib.sha256((ROOT / path).read_bytes()).hexdigest().upper()
             self.assertEqual(fields[field], digest)
+
+    def test_host_toolchain_profile_mutations_are_rejected(self) -> None:
+        self.assertEqual(entry.readiness_errors(self.readiness), [])
+        for field, value in (("profile_id", "other"), ("profile_sha256", "0" * 64),
+                             ("verified_before_build", False), ("verified_before_build", 1),
+                             ("scope", "complete_host_attestation")):
+            with self.subTest(field=field, value=value):
+                candidate = copy.deepcopy(self.readiness)
+                candidate["toolchain"]["pkelf1_probe_qualification"]["host_toolchain"][field] = value
+                self.assertIn("readiness host-toolchain profile mismatch", entry.readiness_errors(candidate))
+        for value in (None, {}, [], "verified"):
+            with self.subTest(value=value):
+                candidate = copy.deepcopy(self.readiness)
+                candidate["toolchain"]["pkelf1_probe_qualification"] = value
+                self.assertIn("readiness host-toolchain profile mismatch", entry.readiness_errors(candidate))
+
+    def test_host_build_inputs_are_bound_and_mutations_stale_receipt(self) -> None:
+        paths = ("native/.cargo/config.toml", "specs/native-host-msvc-profile.json",
+                 "tools/native_host_toolchain.py", "tools/qualify_native_toolchain.py",
+                 "tools/qualify_native_elf_loader.py", "tests/test_native_host_toolchain.py")
+        actual = {item["path"] for item in self.readiness["bindings"]["implementation_inputs"]}
+        self.assertTrue(set(paths).issubset(actual))
+        original = entry.file_binding
+        for relative in paths:
+            def changed_binding(path, root=ROOT):
+                result = original(path, root)
+                if path == ROOT / relative:
+                    result["sha256"] = "0" * 64
+                return result
+            with self.subTest(path=relative), mock.patch.object(entry, "file_binding", side_effect=changed_binding):
+                self.assertIn("readiness input bindings are stale", entry.readiness_errors(self.readiness))
+
+    def test_shared_loader_inputs_are_transitively_bound(self) -> None:
+        from runtime import native_elf_loader as elf
+
+        actual = {b["path"] for b in self.readiness["bindings"]["implementation_inputs"]}
+        expected = {p.as_posix() for p in elf.IMPLEMENTATION_INPUTS}
+        self.assertTrue(expected.issubset(actual))
+        self.assertEqual(entry.readiness_errors(self.readiness), [])
+        original = entry.file_binding
+        for relative in elf.IMPLEMENTATION_INPUTS:
+            def changed_binding(path, root=ROOT):
+                result = original(path, root)
+                if path == ROOT / relative:
+                    result["sha256"] = "0" * 64
+                return result
+            with self.subTest(path=relative), mock.patch.object(entry, "file_binding", side_effect=changed_binding):
+                self.assertIn("readiness input bindings are stale", entry.readiness_errors(self.readiness))
 
     def test_live_build_id_matches_the_entry_contract(self) -> None:
         build_id = self.contract["product"]["build_id"]

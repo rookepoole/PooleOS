@@ -7,7 +7,6 @@ import argparse
 import binascii
 import copy
 import json
-import os
 import re
 import shutil
 import socket
@@ -25,6 +24,8 @@ sys.path.insert(0, str(ROOT))
 
 from runtime import native_live_boot_handoff, native_pooleboot, native_tier0  # noqa: E402
 from runtime.native_binary import inspect_binary, scan_forbidden_markers, validate_binary  # noqa: E402
+from tools.native_host_toolchain import profile_receipt, verified_environment  # noqa: E402
+from tools.qualify_native_toolchain import QualificationError as HostToolchainError, isolated_environment  # noqa: E402
 
 
 CONTRACT_RELATIVE = native_pooleboot.CONTRACT_RELATIVE
@@ -86,38 +87,11 @@ def _toolchain(toolchain_root: Path) -> tuple[Path, Path, dict[str, str]]:
     rustc = installed / "bin" / "rustc.exe"
     if not cargo.is_file() or not rustc.is_file():
         raise QualificationError("workspace-local Rust toolchain is missing")
-    env = dict(os.environ)
-    for key in (
-        "CARGO_BUILD_RUSTC",
-        "CARGO_ENCODED_RUSTFLAGS",
-        "CARGO_HOME",
-        "CARGO_INCREMENTAL",
-        "CARGO_TARGET_DIR",
-        "RUSTC",
-        "RUSTC_BOOTSTRAP",
-        "RUSTC_WRAPPER",
-        "RUSTDOCFLAGS",
-        "RUSTFLAGS",
-        "RUSTUP_HOME",
-        "RUSTUP_TOOLCHAIN",
-    ):
-        env.pop(key, None)
-    system_root = Path(env.get("SystemRoot", r"C:\Windows"))
-    env.update(
-        {
-            "CARGO_HOME": str(toolchain_root / "cargo"),
-            "CARGO_INCREMENTAL": "0",
-            "LANG": "C",
-            "LC_ALL": "C",
-            "PATH": os.pathsep.join(
-                [str(installed / "bin"), str(toolchain_root / "cargo" / "bin"), str(system_root / "System32")]
-            ),
-            "RUSTC": str(rustc),
-            "RUSTUP_HOME": str(toolchain_root / "rustup"),
-            "SOURCE_DATE_EPOCH": "0",
-            "TZ": "UTC",
-        }
-    )
+    env = isolated_environment(toolchain_root, installed / "bin", rustc)
+    try:
+        env = verified_environment(env, ROOT)
+    except HostToolchainError as exc:
+        raise QualificationError(str(exc)) from exc
     native_root = NATIVE_ROOT.resolve()
     env["CARGO_TARGET_X86_64_UNKNOWN_UEFI_RUSTFLAGS"] = " ".join(
         (
@@ -266,6 +240,7 @@ def _build_and_test(
     if leakage:
         raise QualificationError("host marker leaked into PooleBoot PE32+")
     return builds[0], {
+        "host_toolchain": profile_receipt(ROOT),
         "host_contract_test_count": test_count,
         "host_contract_test_pass_count": test_count,
         "development_transfer_feature": selected_feature is not None,

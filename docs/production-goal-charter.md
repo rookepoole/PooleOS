@@ -1,15 +1,410 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-09-12
+Status date: 2026-09-30
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 175
+Last roadmap reconciliation: PooleOS Cycle 209
 
-Current Cycle 175: fourteen memory-through-lock profiles pass 28 final virtual
+Cycle 209 repairs native AP-worker state transactions, generation wrap and wide
+counter validation. Thirty native cases in two host profiles, fifteen disabled
+variants, 17 core stages, two matching builds, 246 kernel tests and 43 image
+controls pass. Kernel bytes changed; readiness is 3/27, with 24 profiles needing
+replay from symbols/boot. The AP-worker flag is reopened, but no phase closes.
+N0 custody, N5 authentication and full exact-candidate merge qualification remain.
+No normative condition, demo ISO or production claim changes.
+[Cycle 209 evidence](checkpoints/cycle209-native-ap-worker-transactions.md).
+Combined scoped regression passes 117/117 and repaired metadata 56/56, zero
+skips. Counts overlap; full exact-candidate merge qualification remains pending.
+
+Historical Cycle 208 repairs SMP admission and sixteen constant-only control groups. Two
+final virtual boots pass 303 cases; 18 focused tests pass, including 326 recorded
+corruption rejections and eight independent gate cases. The diagnostic baseline,
+old image-pin failure and two test-harness failures are preserved. Readiness is
+23/27; four profiles and at least 35 control groups remain from
+N12-SCHED-AP-WORKERS-001. No normative condition, phase, flag, native byte, ISO or
+production status changes. Full exact-candidate qualification precedes main merge.
+[Cycle 208 evidence](checkpoints/cycle208-smp-admission-and-controls.md).
+Combined scoped regression passes 183/183 and repaired metadata 55/55, zero skips.
+Counts overlap; the full exact-candidate merge qualification remains pending.
+
+Historical Cycle 207 qualifies cooperative scheduling, BSP preemption and deferred work on
+unchanged kernel203: six virtual boots, 83 control groups, 595 executed cases and
+47 focused tests pass. The obsolete deferred image-pin failure is preserved and
+corrected without guest evidence changes. Selected readiness is 22/27; five
+profiles remain from N12-SCHED-SMP-001, plus at least 51 executed-control groups.
+No normative condition, phase, flag, native byte, ISO or production status changes.
+Full exact-candidate qualification still precedes main merge.
+[Cycle 207 evidence](checkpoints/cycle207-current-kernel-scheduler-replay.md).
+Combined scoped regression passes 166/166 with zero skips; repaired metadata
+passes 54/54 and conservation verifies 348 bindings and 19 unchanged archives.
+Counts overlap; full canonical qualification remains pending.
+
+Historical Cycle 206 qualifies six memory/IRQ/SMP profiles on unchanged kernel203: twelve
+virtual boots, 421 control groups, 1,137 cases and 93 focused tests pass. The
+stale IPI aggregate pin failure is preserved and corrected without rewriting
+guest evidence. Selected readiness is 19/27; eight profiles remain from
+N12-SCHED-001, plus SMP recorded admission and at least 51 later control groups.
+No normative condition, phase, flag, native byte, ISO or production status changes.
+Full exact-candidate qualification still precedes main merge.
+[Cycle 206 evidence](checkpoints/cycle206-memory-and-multiprocessor-replay.md).
+Combined scoped regression passes 283/283 with zero skips; corrected metadata
+passes 53/53 and conservation verifies 347 bindings and 19 unchanged archives.
+Counts overlap; full canonical qualification remains pending.
+
+Historical Cycle 205 qualifies five CPU profiles on unchanged kernel203: fourteen virtual
+boots, 225 controls and 54/54 focused tests pass; one expected TCG limitation
+probe is separate. Selected readiness is 13/27, with fourteen downstream profiles
+pending from N9-PMM-ACPI-CONSUMER-001 and at least 51 later control groups open.
+No normative condition, phase, flag, native byte, ISO or production status changes.
+Full exact-candidate qualification still precedes main merge.
+[Cycle 205 evidence](checkpoints/cycle205-current-kernel-cpu-replay.md).
+Combined scoped regression passes 242/242 with zero skips; metadata passes 52/52
+and conservation verifies 346 bindings and 19 unchanged archived records.
+Counts overlap; this is not full canonical qualification or main-merge eligibility.
+
+Historical Cycle 204 qualifies six boot-chain profiles on unchanged kernel203: six virtual
+boots, two kernel entries, expected unsigned-development denial and 81/81 focused
+tests pass. Selected readiness is 8/27, with 19 profiles pending from N7-TRAP-001
+and at least 51 later control groups still unproven. No phase, flag, normative
+condition, ISO or production status changes. Main merge still requires full
+exact-candidate qualification; branch cloud backup does not require main merge.
+[Cycle 204 evidence](checkpoints/cycle204-current-kernel-boot-replay.md).
+Combined scoped regression passes 188/188 with zero skips; conservation verifies
+345 bindings and 19 unchanged archived records. Counts overlap; this is not
+full canonical qualification or main-merge eligibility.
+
+Historical Cycle 203 repairs native SMP state transactions. Seven reproduced failures now
+pass; 19 native cases in two host profiles, nine disabled-repair variants,
+17 core stages, two matching builds, 246 kernel tests and 43 image controls pass.
+Kernel bytes changed: selected readiness is 2/27, with 25 profiles requiring
+current-image replay from N5-SYMBOLS-SEMANTICS-001. The SMP flag is reopened;
+recorded admission and 16 SMP control groups remain within 51 open groups.
+Earlier boot evidence is historical. No normative condition, phase, ISO or
+production claim changes. Main merge still requires exact-candidate qualification.
+[Cycle 203 evidence](checkpoints/cycle203-native-smp-transactions.md).
+Combined scoped regression passes 109/109, zero skips; conservation verifies
+344 source bindings and 18 unchanged parent progress records. Counts overlap;
+this does not establish full canonical qualification or main-merge eligibility.
+
+Historical Cycle 202 repairs deferred-work recorded admission and replaces fourteen
+constant-only control groups with executed native/source cases. Two final
+virtual boots, 254 cases and all 17 focused tests pass; 315 corrupted records
+are rejected. Selected readiness is 22/27, with five profiles pending and at
+least 51 unproven groups in later scheduler profiles. Next: N12-SCHED-SMP-001.
+No normative condition, phase, flag, kernel byte, ISO or production claim changes.
+[Cycle 202 evidence](checkpoints/cycle202-deferred-admission-and-controls.md).
+Combined scoped regression passes 144/144 with zero skips; repaired metadata
+passes 49/49 and conservation verifies 338 source bindings. Counts overlap.
+
+Historical Cycle 201 qualifies cooperative scheduling and BSP preemption on the unchanged
+Cycle 197 kernel: four fresh virtual boots, 53 control groups, 341 rejection cases
+and 31 focused tests pass. Selected readiness is 21/27, with six later profiles
+pending from N12-SCHED-DEFERRED-001. Deferred admission and at least 65
+control-execution groups remain open before full exact-candidate qualification.
+No normative condition, phase, flag, kernel byte, ISO or production claim changes.
+[Cycle 201 evidence](checkpoints/cycle201-scheduler-and-preemption-replay.md).
+Combined scoped regression passes 128 tests, zero skips; repaired metadata passes
+48/48 and conservation passes. Full canonical qualification remains pending.
+
+Historical Cycle 200 qualifies six memory/IRQ/SMP profiles on the unchanged Cycle 197
+kernel: twelve virtual boots, 421 control groups, 1,137 rejection cases and
+93 scoped tests pass. The stale aggregate IPI image pin is repaired; the initial
+admission failure and unchanged guest evidence are preserved. Selected readiness
+is 19/27, with eight profiles remaining from N12-SCHED-001, then deferred admission,
+at least 65 control-execution groups and full exact-candidate merge qualification.
+No normative condition, phase, flag, kernel byte, ISO or production claim changes.
+[Cycle 200 evidence](checkpoints/cycle200-memory-and-multiprocessor-replay.md).
+Combined scoped regression passes 327 tests, zero skips; corrected metadata
+passes 47/47 and conservation passes. Full canonical qualification remains pending.
+
+Historical Cycle 199 repairs CPU control-record admission and requalifies five N7 profiles
+on the unchanged Cycle 197 kernel. Fourteen final virtual boots, 225 executed
+controls and 54 focused tests pass, including 3,398 control-record and 371 paired
+execution corruptions. The original 1,084-case counterexample now rejects through
+runtime and gate without exceptions; the earlier bad admissions and stale-pin
+failure remain preserved. Selected readiness is 13/27 with fourteen profiles
+pending from N9-PMM-ACPI-CONSUMER-001, then deferred admission/control repairs and
+full exact-candidate merge qualification. No normative condition, phase, flag,
+kernel byte, ISO or production claim changes. Backup is separate from merge.
+[Cycle 199 evidence](checkpoints/cycle199-cpu-control-admission-and-replay.md).
+Combined scoped regression passes 233 tests, zero skips; initial metadata passes
+46/46 and conservation passes. Full canonical qualification remains pending.
+
+Historical Cycle 198 repairs recorded symbol admission and replays the boot chain on the
+unchanged Cycle 197 kernel. All 650 corrupted records reject without exceptions;
+six final virtual boots, two native kernel entries and 80 focused tests pass.
+The failed first transfer attempt and identity regression remain preserved.
+Selected readiness is 8/27; 19 profiles remain from N7-TRAP-001, followed by
+deferred admission/control repairs and full exact-candidate merge qualification.
+Development-branch cloud backup is not main-merge or production acceptance.
+No normative charter condition, phase, flag, kernel byte or ISO changes.
+[Cycle 198 evidence](checkpoints/cycle198-symbol-admission-and-boot-replay.md).
+Combined scoped regression passes 178 tests, zero skips; initial metadata
+passes 45/45 and conservation passes. Full canonical qualification is pending.
+
+Historical Cycle 197 repairs native deferred transactions, fault fairness and shutdown
+ordering. The new kernel passes 21 native tests in two host profiles, four
+disabled-fix variants, all 17 core stages, two matching builds and 54 scoped
+Python tests. Selected readiness is 3/27; 24 changed-image dependencies require
+replay from N5-SYMBOLS-SEMANTICS-001. Deferred recorded-evidence defects and at
+least 65 control-execution gaps remain open. The deferred flag is reopened;
+no normative charter term, phase, ISO or production condition changes.
+[Cycle 197 evidence](checkpoints/cycle197-native-deferred-transactions.md).
+
+Historical Cycle 196: nine constant-only preemption control groups are replaced with
+executed native-host and linked/source audit checks. Two final guest boots,
+226 rejection cases and 17 focused tests pass, including 232 corrupted records
+and seven disabled native validator variants. Selected readiness is 21/27;
+six profiles, at least 65 remaining control-execution gaps and full exact-candidate
+qualification still precede main merge. Prior history remains unchanged; broader
+regression passes 339 tests with zero skips and initial conservation passes. No normative term,
+phase, flag, kernel bytes, ISO or production claim changes.
+[Cycle 196 evidence](checkpoints/cycle196-preemption-executed-controls.md).
+
+Historical Cycle 195: scheduler admission reparses raw paired execution and host evidence,
+typed observations/summaries and exact control counts. Two final guest boots,
+115 rejection cases and 14 focused tests pass, including 221 corrupt records.
+All 219 original counterexamples now reject without exceptions. Roadmap 195
+preserves prior history; selected readiness is 20/27. Seven dependent profiles
+remain from N12-SCHED-PREEMPT-001, alongside at least 74 control-execution gaps and full
+exact-candidate qualification before main merge. No normative term, phase,
+flag, kernel feature, ISO or production claim changes. Combined scoped regression
+passes 322 tests, zero skips. Nine newly verified constant-only preemption
+controls supplement the prior non-exhaustive 65-control audit; no kernel defect
+is inferred from this source-level evidence gap.
+[Cycle 195 evidence](checkpoints/cycle195-scheduler-recorded-evidence.md).
+The intermediate cloud-backup record remains historical, not rewritten.
+
+Historical Cycle 194: PMM, VM, IRQ, first AP and per-CPU runtime are freshly qualified on
+the unchanged Cycle 192 kernel. Ten boots, 528 rejection cases in 388 groups
+and 57 focused tests pass, including 990 corrupted-record cases and disabled
+PMM parser/oracle detection. Selected readiness is 19/27; eight profiles remain
+from N12-SCHED-001, alongside the 65 scheduler control-execution gaps and full
+exact-candidate qualification before main merge. Prior evidence is preserved;
+no normative term, phase, flag, ISO or production claim changes.
+[Cycle 194 evidence](checkpoints/cycle194-memory-runtime-replay.md).
+Combined scoped regression passes 307 tests, zero skips; initial metadata passes
+42/42 and conservation passes. Qualification date is September 26; closeout is
+September 27. This is not the full canonical suite or a main-merge qualification.
+
+Historical Cycle 193: all five N7 profiles are freshly qualified against the unchanged
+Cycle 192 kernel. Fourteen guest boots, 225 rejection controls, linked audits
+and 51 focused tests pass; the expected TCG limitation probe is not a passing
+exception test. The selected projection is 14/27, leaving thirteen profiles
+from N9-PMM-ACPI-CONSUMER-001, then scheduler control evidence and full exact
+qualification. Historical CPU evidence remains immutable; no normative term,
+phase, flag, merge requirement, ISO or production claim changes.
+[Cycle 193 evidence](checkpoints/cycle193-current-kernel-cpu-replay.md).
+Combined scoped regression passes 249 tests, zero skips. Corrected roadmap and
+checklist regression passes 41/41; the initial 40/41 result remains history.
+
+Historical Cycle 192: native PKMBX1 export and its host oracle now pass
+two final four-vCPU boots and 609 rejection cases. Boot-chain replay passes;
+57 scoped regression tests pass. The selected projection is 9/27, with 18
+dependent profiles still requiring qualification against the changed kernel.
+Roadmap 192 archives the previous current records without rewriting history;
+current CPU/VM evidence is explicitly pending. Architecture bindings include
+the native export and independent oracle. Next is N7-TRAP-001, followed by the
+other affected dependencies, scheduler controls and full exact qualification.
+No normative condition, phase, flag or merge requirement changes.
+[Cycle 192 evidence and resume order](checkpoints/cycle192-native-mailbox-oracle.md).
+Combined scoped regression passes 189 tests, zero skips; conservation passes.
+The initial three metadata-test failures and corrected 33/33 result are retained.
+
+Historical Cycle 191: IPI admission validates raw execution, typed accounting,
+frame-address checksums and exact control counts; three constant-only controls
+now call the real validator. Two final four-vCPU boots, 249 cases in 30 categories
+and 31 focused tests pass. All 66 original corruptions reject without exceptions.
+Selected readiness is 19/27. Bounded AP ownership is current; native mailbox
+export and independent host recomputation remain open and block merge. Next is
+N8-SMP-MAILBOX-ORACLE-001 before affected-image replay, eight remaining profiles,
+scheduler evidence and full exact qualification. No normative condition, phase,
+flag, native feature, ISO or production gate changes.
+[Cycle 191 evidence](checkpoints/cycle191-ipi-recorded-evidence.md).
+Combined scoped regression passes 314 tests, zero skipped; the initial two
+historical-assertion failures are retained. Conservation passes. Full exact
+qualification and the open mailbox oracle still precede main merge.
+
+Historical Cycle 190: per-CPU admission validates raw execution, dual checksums,
+typed accounting and exact per-control case counts. Two final boots, 159 executed
+cases in 19 categories and all 10 focused tests pass. All 69 original corruptions
+reject without validator exceptions; failures and superseded boots are retained.
+Selected readiness is 18/27, with nine profiles pending from N8-SMP-IPI-001,
+scheduler evidence and full exact qualification before main merge. No normative
+condition, phase, flag, native feature, ISO or production gate changes.
+[Cycle 190 evidence](checkpoints/cycle190-percpu-recorded-evidence.md).
+
+Cycle 190 combined scoped regression passes 282 tests, zero skipped. Conservation
+passes. Full exact-candidate qualification remains pending before main merge.
+
+Historical Cycle 189: first-AP validates strict raw recorded execution before
+allowing only independently checked TSC/checksum differences. Two final boots,
+72controls and12focused tests pass, including159recorded corruptions and six
+malformed root/control cases through runtime and actual gate. All67original
+cases now reject without validator crashes; initial admissions/exceptions,
+superseded boots and two intake-helper failures remain preserved. Selected
+readiness is17/27, with ten profiles pending from N8-SMP-PERCPU-RUNTIME-001,
+plus scheduler evidence and full exact-candidate qualification before merge.
+No normative condition, phase, flag, native feature, ISO or production gate changes.
+[Cycle 189 evidence](checkpoints/cycle189-first-ap-recorded-evidence.md).
+
+Cycle 189 combined scoped regressions pass 271 tests, zero skipped. Conservation
+passes; development-branch cloud backup is separate from main-merge acceptance.
+Full exact-candidate qualification remains pending.
+
+Historical Cycle 188: IRQ enforces strict recorded execution, typed aggregate
+observations/summaries and independent calibration bounds. Two final virtual
+boots, 58 controls and 12 focused tests pass. All 64 original counterexamples
+reject without validator exceptions; 229 permanent recorded mutations and six
+malformed root/control cases reject through runtime and actual gate. Selected
+readiness is 16/27; eleven profiles remain from N8-SMP-FIRST-AP-001, plus the
+65 scheduler control-evidence gaps and full exact-candidate qualification.
+Initial admissions/exceptions and superseded boots remain preserved. No normative
+condition, phase, flag, kernel feature, ISO or production gate closes.
+[Cycle 188 evidence](checkpoints/cycle188-irq-recorded-evidence.md).
+
+Cycle 188 combined scoped regressions pass 258 tests, zero skipped. Conservation
+passes; this is not full canonical qualification or production promotion.
+
+Historical Cycle 187: VM enforces strict recorded execution and independently
+rederived sparse direct-map accounting. Two final virtual boots, 48 controls
+and all 10 focused tests pass; 115 malformed records reject through runtime and
+actual gate. The original 46/65 runtime and 45/65 gate admissions and two
+superseded initial boots remain preserved. Selected readiness is 15/27; twelve
+profiles remain from N8-IRQ-001, plus at least 65 scheduler evidence gaps and
+full exact-candidate qualification before PR #78 merge. No normative condition,
+phase, flag, kernel feature, ISO or production gate closes.
+[Cycle 187 evidence](checkpoints/cycle187-vm-recorded-evidence.md).
+
+Cycle 187 scoped closeout passes 245 distinct methods, zero skips; 16 repeated
+host-toolchain executions are not extra distinct tests. The initial 244/245
+historical-hash assertion failure is preserved, and conservation passes.
+
+Historical Cycle 186: PMM enforces strict recorded execution and independently
+rederived ACPI/memory accounting. Two final virtual boots, 191 marker controls
+and all 12 focused tests pass; 234 corrupted records reject through runtime
+and actual gate. The prior 62/65 runtime and 61/65 gate admissions and two
+initial boots remain preserved. Selected readiness is 14/27; thirteen profiles
+remain from N9-VM-DIRECT-MAP-001, plus the existing 65 scheduler control-evidence
+gaps and full exact-candidate qualification before PR #78 merge. No normative
+condition, phase, flag, kernel feature, ISO or production gate closes.
+[Cycle 186 evidence](checkpoints/cycle186-pmm-recorded-evidence.md).
+
+Cycle 186 combined closeout passes 234 tests, zero skips. Its initial 233/234
+historical-record assertion failure remains preserved; all 65 original audit
+counterexamples now reject. This remains scoped, not full merge qualification.
+
+Historical Cycle 185: five CPU profiles enforce typed recorded-pair evidence;
+fourteen final virtual boots and 225 marker controls pass on unchanged kernel
+bytes. All 50 focused tests pass, including 371 malformed-record cases through
+the runtime and actual release gates. The prior 42 accepted exit mutations,
+two gate exceptions, initial test-field failure and six superseded trap boots
+remain preserved. Selected readiness is 13/27; fourteen memory-through-lock
+profiles need replay from N9-PMM-ACPI-CONSUMER-001. At least 65 scheduler
+execution-evidence gaps and full exact-candidate qualification still precede
+PR #78 merge. No phase, flag, normative condition, new ISO or production gate
+closes. [Cycle 185 evidence](checkpoints/cycle185-cpu-recorded-evidence.md).
+
+Cycle 185 combined closeout passes 221 tests with zero skips after correcting
+two old roadmap assertions. The failed 219/221 run remains preserved.
+Historical evidence, checklist, native products and owner-data conservation pass;
+this is not the full canonical suite or a main-merge qualification.
+
+Historical Cycle 184: six host qualifiers verify isolated pinned inputs; eight
+generated boot-chain/prerequisite receipts pass current validation. Typed
+profiles, exact input/count schemas, rejected-output preservation and roadmap
+repeatability are repaired. All 109 focused tests pass; six final virtual boots
+include two kernel entries. Kernel bytes are unchanged. Selected readiness is
+8/27; nineteen CPU/memory checks need replay from N7-TRAP-001. At least 65
+scheduler controls still lack individually bound rejection execution before
+full exact-candidate qualification or PR #78 merge. Failures and superseded
+boots remain preserved. No phase, flag, normative condition, ISO or production
+gate closes. [Cycle 184 evidence](checkpoints/cycle184-boot-host-provenance.md).
+
+Cycle 184 closeout passes 46 metadata/checklist/core tests, 171 combined
+hostile-environment regressions and history/source/product conservation.
+The initial schema-pin failure remains preserved, not counted as a pass.
+Partial measurements remain separate from the historical release-gate file;
+full current-candidate qualification has not run.
+
+Historical Cycle 183: N5-ELF-001 validates typed host-profile evidence and rejects
+invalid receipts before output. Entry inherits all 19 declared loader inputs
+in 72 bindings; 245 kernel tests and 43 controls pass with unchanged product
+bytes. All 59 focused hostile-environment tests pass, including exact receipt
+reproduction. The separate ELF gate passes; selected readiness remains 3/27.
+Next is N5-SYMBOLS-SEMANTICS-001 and ordered dependent replay, then the existing
+65 scheduler execution-evidence gaps and full qualification before PR #78 merge.
+The earlier unfinished backup remains historical. No phase, flag or normative
+condition closes; no new guest boot, native feature or ISO is claimed.
+[Cycle 183 evidence](checkpoints/cycle183-elf-loader-provenance.md).
+
+Historical Cycle 182: controlled builds isolate host-probe size drift to MSVC CRT
+libraries. Explicit hash-pinned inputs and shared environment sanitation restore
+exact entry and fixture receipt reproduction; 39 hostile-environment regression
+tests pass. The earlier fixture option-leak failure is preserved. Kernel bytes
+are unchanged, but new entry/fixture provenance leaves 24 of 27 selected checks stale.
+Replay N5-ELF-001 and ordered N5/CPU/memory dependencies, resolve the existing
+65 scheduler control-evidence gaps, then fully qualify before PR #78 merge.
+No phase, flag or normative completion condition changes; this is not complete
+host attestation, an independent builder, new guest boot, native feature or ISO.
+[Cycle 182 evidence](checkpoints/cycle182-host-toolchain-repair.md).
+
+Historical Cycle 181: fourteen memory-through-lock profiles pass 28 final virtual
+boots on the unchanged Cycle 177 kernel; four superseded boots and a pre-guest
+failure remain separate. All 27 selected consistency checks pass; 164 focused
+tests pass and two skip. At least 65 scheduler control entries lack individually
+bound rejection execution, so the reported 660 groups / 2,126 cases are not an
+executed-rejection total. The resumed combined suite passes 331 tests, fails
+exact entry-receipt reproduction once and skips two. A retained rebuild matches
+all kernel product fields and bytes; only the host-probe size differs. Resolve
+`N6-KENTRY-001` reproduction before `ADD-N36-RECEIPT-COVERAGE-001`, starting
+PKSCHED3, full exact-candidate qualification and any PR #78 merge.
+No normative condition, phase, flag or production gate closes. The September 26
+resumption reconciles September 12/13 evidence and diagnoses receipt drift,
+not new guest boots or native features.
+[Cycle 181 evidence and limits](checkpoints/cycle181-memory-qualification.md).
+
+Historical Cycle 180: five CPU profiles pass fourteen fresh virtual boots,
+225 controls and 46 focused Python tests. The separate expected TCG exception
+diagnostic is not a successful exception boot. Positive regressions now use
+untouched generated receipts; nineteen aggregate controls pass. Selected
+readiness is 13/27, with fourteen memory-through-lock profiles pending beginning
+`N9-PMM-ACPI-CONSUMER-001`. Main stays qualified Cycle 176; draft PR #78 needs
+full exact-candidate qualification. No normative condition or phase/flag closes.
+[Cycle 180 evidence](checkpoints/cycle180-cpu-qualification.md).
+
+Historical Cycle 179: six N5 components pass qualification on the unchanged kernel,
+with six final virtual boots, two kernel entries and 71 focused Python tests.
+PKREVAL1 now rejects semantically invalid receipts before output; three cases
+and thirteen aggregate identity/count controls pass. Two superseded boots and
+prior failures are retained. Selected readiness is 8/27; nineteen CPU/memory
+profiles need replay beginning `N7-TRAP-001`. Main remains qualified Cycle 176,
+PR #78 stays draft, and no normative completion condition or phase/flag closes.
+[Cycle 179 evidence](checkpoints/cycle179-boot-chain-requalification.md).
+
+Historical Cycle 178: the unchanged Cycle 177 kernel passes clean PKENTRY1
+reproduction with 245 host tests, 43 controls and 55 source bindings. Twelve
+entry-gate controls reject stale identities and wrong numeric types. Selected
+readiness is 3/27; 24 dependent profiles need replay beginning
+`N5-SYMBOLS-SEMANTICS-001`. No new guest, independent builder, full canonical
+pass or production promotion follows. The draft remains unmerged.
+[Cycle 178 evidence](checkpoints/cycle178-kernel-entry-requalification.md).
+
+Historical Cycle 177: PKEXEC1 dispatch execution holds and two
+scheduler rollback fixes pass all 17 native core stages. The changed image has
+2/27 current selected readiness checks and requires fresh entry/dependency
+qualification beginning `N6-KENTRY-001`. This draft is not merge-qualified;
+the roadmap separates new host evidence from historical live receipts and binds
+241 architecture inputs. Main is the qualified Cycle 176
+merge of PR #77 at `ac15d1d` (105 canonical gates and 708 Doctor checks).
+No normative charter condition or production gate changes.
+[Cycle 177 evidence](checkpoints/cycle177-dispatch-execution-holds.md).
+
+Historical Cycle 175: fourteen memory-through-lock profiles pass 28 final virtual
 boots, 660 groups and 2,126 rejected cases; two earlier SMP boots are superseded.
 All 27 selected native checks pass. Embedded-entry provenance tests and the
 repaired SMP malformed-input guard pass; the combined suite passes 161 tests

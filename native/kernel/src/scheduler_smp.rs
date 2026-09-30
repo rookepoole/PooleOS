@@ -490,12 +490,13 @@ impl SmpScheduler {
         )
     }
 
-    pub fn stage_dispatch(
-        &mut self,
+    /// Read-only selection lets resource owners reserve retention before handoff.
+    pub(crate) fn peek_dispatch(
+        &self,
         cpu: CpuId,
         attempt: u64,
         sequence: u64,
-    ) -> Result<TransferTicket, Error> {
+    ) -> Result<TaskId, Error> {
         self.require_no_pending()?;
         self.require_online(cpu)?;
         if self.current[cpu.index()].is_some() {
@@ -505,7 +506,44 @@ impl SmpScheduler {
             return Err(Error::Acknowledgement);
         }
         let queue_index = self.pick(cpu)?;
-        let id = self.queues[cpu.index()].remove_at(queue_index)?;
+        let id = self.queues[cpu.index()].entries[queue_index].ok_or(Error::Invariant)?;
+        self.transaction.checked_add(1).ok_or(Error::Counter)?;
+        let selected_priority = self.tasks[self.task_index(id)?].priority;
+        for other in self.queues[cpu.index()].entries[..self.queues[cpu.index()].len]
+            .iter()
+            .flatten()
+        {
+            let task = self.tasks[self.task_index(*other)?];
+            if *other != id && task.priority == selected_priority {
+                task.bypass_count
+                    .checked_add(1)
+                    .filter(|count| *count <= MAX_EQUAL_PRIORITY_BYPASS)
+                    .ok_or(Error::Counter)?;
+            }
+        }
+        Ok(id)
+    }
+
+    pub fn stage_dispatch(
+        &mut self,
+        cpu: CpuId,
+        attempt: u64,
+        sequence: u64,
+    ) -> Result<TransferTicket, Error> {
+        let mut next = *self;
+        let ticket = next.stage_dispatch_inner(cpu, attempt, sequence)?;
+        *self = next;
+        Ok(ticket)
+    }
+
+    fn stage_dispatch_inner(
+        &mut self,
+        cpu: CpuId,
+        attempt: u64,
+        sequence: u64,
+    ) -> Result<TransferTicket, Error> {
+        let id = self.peek_dispatch(cpu, attempt, sequence)?;
+        self.queues[cpu.index()].remove(id)?;
         let index = self.task_index(id)?;
         let selected_priority = self.tasks[index].priority;
         for cursor in 0..self.queues[cpu.index()].len {
@@ -591,6 +629,13 @@ impl SmpScheduler {
         {
             return Err(Error::Acknowledgement);
         }
+        let mut next = *self;
+        next.commit_acknowledgement(ticket)?;
+        *self = next;
+        Ok(())
+    }
+
+    fn commit_acknowledgement(&mut self, ticket: TransferTicket) -> Result<(), Error> {
         let index = self.task_index(ticket.task)?;
         if self.tasks[index].owner_epoch != ticket.owner_epoch {
             return Err(Error::GenerationStale);
@@ -694,6 +739,13 @@ impl SmpScheduler {
     }
 
     pub fn cancel_task(&mut self, id: TaskId) -> Result<(), Error> {
+        let mut next = *self;
+        next.cancel_task_inner(id)?;
+        *self = next;
+        Ok(())
+    }
+
+    fn cancel_task_inner(&mut self, id: TaskId) -> Result<(), Error> {
         self.require_no_pending()?;
         let index = self.task_index(id)?;
         match self.tasks[index].state {
@@ -723,6 +775,13 @@ impl SmpScheduler {
     }
 
     pub fn timeout(&mut self, ticket: TransferTicket) -> Result<(), Error> {
+        let mut next = *self;
+        next.timeout_inner(ticket)?;
+        *self = next;
+        Ok(())
+    }
+
+    fn timeout_inner(&mut self, ticket: TransferTicket) -> Result<(), Error> {
         let pending = self.pending.ok_or(Error::PendingMissing)?;
         if pending.ticket != ticket || ticket.kind != TransferKind::OfflineProbe {
             return Err(Error::TicketMismatch);
@@ -754,6 +813,13 @@ impl SmpScheduler {
     }
 
     pub fn complete_current(&mut self, cpu: CpuId) -> Result<TaskId, Error> {
+        let mut next = *self;
+        let id = next.complete_current_inner(cpu)?;
+        *self = next;
+        Ok(id)
+    }
+
+    fn complete_current_inner(&mut self, cpu: CpuId) -> Result<TaskId, Error> {
         self.require_no_pending()?;
         self.require_online(cpu)?;
         let id = self.current[cpu.index()].take().ok_or(Error::CpuNotIdle)?;
@@ -772,6 +838,13 @@ impl SmpScheduler {
     }
 
     pub fn dispatch_local(&mut self, cpu: CpuId) -> Result<TaskId, Error> {
+        let mut next = *self;
+        let id = next.dispatch_local_inner(cpu)?;
+        *self = next;
+        Ok(id)
+    }
+
+    fn dispatch_local_inner(&mut self, cpu: CpuId) -> Result<TaskId, Error> {
         self.require_no_pending()?;
         self.require_online(cpu)?;
         if cpu.value() != 0 || self.current[cpu.index()].is_some() {
@@ -790,7 +863,7 @@ impl SmpScheduler {
         self.bsp_dispatch_count = increment(self.bsp_dispatch_count)?;
         self.bump();
         self.validate()?;
-        self.complete_current(cpu)
+        self.complete_current_inner(cpu)
     }
 
     pub fn select_least_loaded(&self, affinity_mask: u8) -> Result<CpuId, Error> {
@@ -1033,10 +1106,10 @@ impl SmpScheduler {
         if request_attempt == 0 || request_sequence == 0 {
             return Err(Error::Acknowledgement);
         }
-        self.transaction = self.transaction.checked_add(1).ok_or(Error::Counter)?;
+        let transaction = self.transaction.checked_add(1).ok_or(Error::Counter)?;
         let owner_epoch = self.tasks[self.task_index(task)?].owner_epoch;
         let ticket = TransferTicket {
-            transaction: self.transaction,
+            transaction,
             kind,
             task,
             source_cpu,
@@ -1045,9 +1118,20 @@ impl SmpScheduler {
             request_attempt,
             request_sequence,
         };
-        self.pending = Some(Pending { ticket });
-        self.bump();
-        self.validate()?;
+        let mut next = *self;
+        next.transaction = transaction;
+        next.pending = Some(Pending { ticket });
+        next.bump();
+        next.validate()?;
+        // Prove local commit capacity before issuing work; discard this trial state.
+        // No remote acknowledgement is synthesized or accepted by the preflight.
+        let mut trial = next;
+        if kind == TransferKind::OfflineProbe {
+            trial.timeout_inner(ticket)?;
+        } else {
+            trial.commit_acknowledgement(ticket)?;
+        }
+        *self = next;
         Ok(ticket)
     }
 
@@ -1154,6 +1238,42 @@ mod tests {
         let id = scheduler.create_task(slot, 1, 16, affinity).unwrap();
         scheduler.activate(id, cpu(owner)).unwrap();
         id
+    }
+
+    #[test]
+    fn dispatch_preflight_transaction_exhaustion_preserves_ownership() {
+        let mut scheduler = SmpScheduler::new();
+        let id = task(&mut scheduler, 0, 2, 1);
+        scheduler.transaction = u64::MAX;
+        let before = scheduler.summary();
+        let task_before = scheduler.task_snapshot(id).unwrap();
+        assert_eq!(scheduler.stage_dispatch(cpu(1), 1, 1), Err(Error::Counter));
+        assert_eq!(scheduler.summary(), before);
+        assert_eq!(scheduler.task_snapshot(id).unwrap(), task_before);
+        assert_eq!(scheduler.queue_len(cpu(1)), Ok(1));
+        assert_eq!(scheduler.validate(), Ok(()));
+    }
+
+    #[test]
+    fn dispatch_preflight_bypass_exhaustion_preserves_entire_queue() {
+        for count in [MAX_EQUAL_PRIORITY_BYPASS, u8::MAX] {
+            let mut scheduler = SmpScheduler::new();
+            let first = task(&mut scheduler, 0, 2, 1);
+            let second = task(&mut scheduler, 1, 2, 1);
+            scheduler.tasks[first.index()].bypass_count = count;
+            scheduler.tasks[second.index()].bypass_count = count;
+            let before = scheduler.summary();
+            let snapshots = [
+                scheduler.task_snapshot(first).unwrap(),
+                scheduler.task_snapshot(second).unwrap(),
+            ];
+            assert_eq!(scheduler.stage_dispatch(cpu(1), 1, 1), Err(Error::Counter));
+            assert_eq!(scheduler.summary(), before);
+            assert_eq!(scheduler.task_snapshot(first).unwrap(), snapshots[0]);
+            assert_eq!(scheduler.task_snapshot(second).unwrap(), snapshots[1]);
+            assert_eq!(scheduler.queue_len(cpu(1)), Ok(2));
+            assert!(!scheduler.has_pending());
+        }
     }
 
     #[test]

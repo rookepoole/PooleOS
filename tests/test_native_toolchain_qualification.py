@@ -7,6 +7,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,7 +21,7 @@ from runtime.native_binary import (  # noqa: E402
 )
 from runtime.schema_validation import validate_json  # noqa: E402
 from tools import pooleos_release_gate  # noqa: E402
-from tools.qualify_native_toolchain import QualificationError, run_checked, tree_binding  # noqa: E402
+from tools.qualify_native_toolchain import QualificationError, isolated_environment, run_checked, tree_binding  # noqa: E402
 
 
 def synthetic_pe32_plus() -> bytes:
@@ -197,6 +198,19 @@ class NativeToolchainQualificationTests(unittest.TestCase):
             )
             self.assertEqual(completed.returncode, 0, completed.stdout)
             self.assertEqual(output.read_bytes(), self.report_path.read_bytes())
+
+    def test_ambient_linker_and_cargo_overrides_do_not_reach_fixture_builds(self) -> None:
+        keys = ("LINK", "_LINK_", "LIB", "LIBPATH", "CL", "_CL_", "INCLUDE",
+                "RUSTC_WORKSPACE_WRAPPER", "CARGO_BUILD_RUSTC_WRAPPER", "CARGO_BUILD_RUSTFLAGS",
+                "CARGO_PROFILE_RELEASE_OPT_LEVEL", "CARGO_TARGET_X86_64_UNKNOWN_UEFI_LINKER",
+                "CARGO_TARGET_X86_64_UNKNOWN_NONE_RUSTFLAGS", "CARGO_ENCODED_RUSTDOCFLAGS")
+        with mock.patch.dict(os.environ, dict.fromkeys(keys, "injected")):
+            before = dict(os.environ)
+            result = isolated_environment(ROOT / ".toolchains/rust-1.97.0", ROOT / "bin", ROOT / "bin/rustc.exe")
+            self.assertEqual(dict(os.environ), before)
+        for key in keys:
+            self.assertNotIn(key, result)
+        self.assertEqual(result["SOURCE_DATE_EPOCH"], "0")
 
     def test_release_gate_carries_bounded_native_toolchain_evidence(self) -> None:
         check = pooleos_release_gate.check_native_toolchain_qualification(self.report_path)
