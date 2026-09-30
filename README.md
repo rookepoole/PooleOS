@@ -11,7 +11,19 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 203 repairs native SMP scheduler
+**Current development checkpoint:** Cycle 204 qualifies the boot chain on the
+repaired Cycle 203 kernel. Six fresh virtual boots pass, including two kernel
+entries ending in the expected unsigned-development denial. All 81 focused
+tests pass, including 650 corrupted symbol records and 20 independent old-image
+pin rejections. Selected readiness is **8/27**, with 19 profiles pending from
+`N7-TRAP-001` and at least 51 later scheduler control groups still unproven.
+Kernel bytes and the demo ISO are unchanged. This is pre-production, not full
+canonical merge qualification or a phase closure.
+[Cycle 204 evidence](docs/checkpoints/cycle204-current-kernel-boot-replay.md).
+Combined scoped regression passes 188/188 with zero skips; conservation verifies
+345 bindings and 19 unchanged archived progress records. Counts overlap.
+
+**Historical development checkpoint:** Cycle 203 repairs native SMP scheduler
 transactions so rejected acknowledgements, dispatch, cancellation, timeout and
 retirement cannot partially change ownership or queues. Seven reproduced native
 failures now pass; 19 native tests pass in debug and optimized profiles, and nine

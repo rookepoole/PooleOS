@@ -7,9 +7,20 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 203
+Last roadmap reconciliation: PooleOS Cycle 204
 
-Cycle 203 repairs native SMP state transactions. Seven reproduced failures now
+Cycle 204 qualifies six boot-chain profiles on unchanged kernel203: six virtual
+boots, two kernel entries, expected unsigned-development denial and 81/81 focused
+tests pass. Selected readiness is 8/27, with 19 profiles pending from N7-TRAP-001
+and at least 51 later control groups still unproven. No phase, flag, normative
+condition, ISO or production status changes. Main merge still requires full
+exact-candidate qualification; branch cloud backup does not require main merge.
+[Cycle 204 evidence](checkpoints/cycle204-current-kernel-boot-replay.md).
+Combined scoped regression passes 188/188 with zero skips; conservation verifies
+345 bindings and 19 unchanged archived records. Counts overlap; this is not
+full canonical qualification or main-merge eligibility.
+
+Historical Cycle 203 repairs native SMP state transactions. Seven reproduced failures now
 pass; 19 native cases in two host profiles, nine disabled-repair variants,
 17 core stages, two matching builds, 246 kernel tests and 43 image controls pass.
 Kernel bytes changed: selected readiness is 2/27, with 25 profiles requiring

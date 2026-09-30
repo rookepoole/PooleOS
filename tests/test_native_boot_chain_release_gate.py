@@ -52,6 +52,38 @@ class NativeBootChainReleaseGateTests(unittest.TestCase):
                 check = getattr(gate, "check_native_" + profile + "_readiness")()
                 self.assertTrue(check["ok"], check["detail"])
 
+    def test_independent_boot_gates_reject_previous_image_pins(self) -> None:
+        previous_inner = "A50F908DB5C6C4119FDECD0D267E4D06BEE3626F9AE209B94B5A99DC3453F5EE"
+        cases = (
+            ("pooleboot", "native_pooleboot_readiness.json", gate.native_pooleboot,
+             "readiness_contract_errors", "summary", "inner_set_retained_set_sha256", previous_inner),
+            ("pooleboot", "native_pooleboot_readiness.json", gate.native_pooleboot,
+             "readiness_contract_errors", "summary", "trust_policy_sha256",
+             "B8B49BBD847C28832458B9B375067191AA204620411D9ADBDAD653F757EFB7AD"),
+            ("pooleboot", "native_pooleboot_readiness.json", gate.native_pooleboot,
+             "readiness_contract_errors", "summary", "trust_state_sha256",
+             "6D5A23B7DAD78CF9659AD4F839BCA96CF0D6A5E74FEFC4C364542BF98E2D4B30"),
+            ("kernel_load", "native_kernel_load_readiness.json", gate.native_kernel_load,
+             "readiness_errors", "summary", "inner_retained_set_sha256", previous_inner),
+            ("kernel_revalidation", "native-kernel-revalidation-readiness.json", gate.native_kernel_revalidation,
+             "readiness_errors", "golden", "retained_set_sha256", previous_inner),
+        )
+        for profile, filename, module, validator, section, field, previous in cases:
+            receipt = json.loads((ROOT / "runs" / filename).read_bytes())
+            check = getattr(gate, "check_native_" + profile + "_readiness")
+            self.assertTrue(check()["ok"])
+            self.assertNotEqual(receipt[section][field], previous)
+            with mock.patch.object(module, validator, return_value=[]):
+                with mock.patch.object(gate, "_load_schema_artifact", return_value=(receipt, [])):
+                    self.assertTrue(check()["ok"])
+                for value in (previous, "0" * 64, None, False):
+                    with self.subTest(profile=profile, field=field, value=value):
+                        candidate = copy.deepcopy(receipt)
+                        candidate[section][field] = value
+                        with mock.patch.object(gate, "_load_schema_artifact", return_value=(candidate, [])):
+                            result = check()
+                        self.assertFalse(result["ok"], result["detail"])
+
     def test_boot_chain_rejects_superseded_artifact_and_trust_identities(self) -> None:
         old_inner = "2DC54F8C02425C44DEB80A0F6285CAF4687A90537114902D39BB338C14BD7664"
         cases = (

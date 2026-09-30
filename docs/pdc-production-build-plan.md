@@ -1,15 +1,38 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-29
-Plan version: 2.106.0-native-smp-transactions
-Roadmap cycle: PooleOS Cycle 203
+Plan version: 2.107.0-native-current-kernel-boot-replay
+Roadmap cycle: PooleOS Cycle 204
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 203: Native SMP Transactions
+## Cycle 204: Current-Kernel Boot Replay
+
+`N5-SYMBOLS-SEMANTICS-001`, N5.6/N5.9 and N36, advances under existing
+`ADD-BOOT-007` and `ADD-N36-RECEIPT-COVERAGE-001`. Measured symbol pins and
+canonical PSYM1/PPOL1 vectors now bind unchanged kernel203. Fresh symbols,
+policy, load, PooleBoot, revalidation and transfer receipts pass. Six virtual
+boots include two actual kernel entries terminating in unsigned-development
+denial, with no authority, state writes or post-exit firmware calls.
+
+All 81 focused tests pass, including 650 corrupted symbol receipts and 20
+independent old-identity pin rejections. Two failed symbol attempts are retained.
+Selected readiness rises from 2/27 to 8/27; 19 dependent profiles remain from
+`N7-TRAP-001`. At least 51 later scheduler control groups and SMP recorded
+admission remain open. No native source, entry/core receipt, phase status,
+flag status, demo ISO or production condition changes. Full exact-candidate
+qualification still precedes main merge; branch backup is separate.
+[Evidence and limitations](checkpoints/cycle204-current-kernel-boot-replay.md).
+Combined scoped regression passes 188/188 with zero skips, including native
+transaction tests, exact entry reproduction, publication and 51 metadata/checklist
+tests. Conservation verifies 345 bindings and 19 unchanged parent-record archives.
+Initial roadmap/architecture checks pass 43/43. Counts overlap; full qualification
+remains pending.
+
+## Historical Cycle 203: Native SMP Transactions
 
 `N12-SCHED-SMP-001`, N12.1-N12.7 and N36, advances under existing
 `ADD-N12-SCHED-SMP-001` and `ADD-N36-RECEIPT-COVERAGE-001`. Native failure
@@ -3572,7 +3595,14 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 
 ## 12. Near-Term Execution Sequence
 
-Current Cycle 203 sequence: save the verified native SMP transaction checkpoint
+Current Cycle 204 sequence: save the six qualified boot-chain profiles on the
+development branch, then replay `N7-TRAP-001` and the remaining CPU, memory,
+interrupt and scheduler dependencies on the same kernel. Repair SMP recorded
+admission and execute the remaining scheduler controls before their admission.
+Full exact-candidate qualification and review precede main merge. Cloud backup
+does not require main merge; 19 selected profiles remain pending.
+
+Historical Cycle 203 sequence: save the verified native SMP transaction checkpoint
 to the development branch; requalify symbols and policy for the changed image,
 then boot/CPU/memory/scheduler dependencies. Repair SMP recorded admission and
 execute its 16 control groups before its fresh qualification, followed by AP
