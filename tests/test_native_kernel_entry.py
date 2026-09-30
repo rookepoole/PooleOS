@@ -48,7 +48,7 @@ class NativeKernelEntryTests(unittest.TestCase):
         self.assertEqual(product["relocation_count"], 1326)
         self.assertEqual(
             product["canonical_sha256"],
-            "B19D4F7E854ECED3495D88C00F7379061B913EF00477FBD3701929B2F77D80F1",
+            "A943DCB6E41A27F952868F05ED2B3523B47D9D7A7B5DB909EE385205F7CA3B31",
         )
         self.assertTrue(product["entry_prefix_hex"].startswith("FAFC4889E14885C9"))
 

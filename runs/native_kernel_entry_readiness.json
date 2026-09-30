@@ -4,12 +4,12 @@
     "contract": {
       "byte_count": 10872,
       "path": "specs/native-kernel-entry-contract.json",
-      "sha256": "ABBF730D7ADED8900A6CAFCFD62CAC6DE76DB9F773E9EFE7AEF8A82248997D1D"
+      "sha256": "A9FF7AD219385D18CCA883D2DCCAABC80C6D920106F0525E964E9F4186D8BCD6"
     },
     "contract_schema": {
       "byte_count": 3952,
       "path": "specs/native-kernel-entry-contract.schema.json",
-      "sha256": "1C9FD3A56D76F69A7FEF1D4424EA5FFEDCC60A00EEA63F045523067AEC9DB9CC"
+      "sha256": "73968BBE353A34EF7927C2A370164A357547824EE912D76541621E0448376273"
     },
     "implementation_inputs": [
       {
@@ -45,12 +45,12 @@
       {
         "byte_count": 447,
         "path": "native/kernel/manifest.pkm",
-        "sha256": "20B81D2295ADAF58EBD3088ED76171953FCEB166A9172BB71A115AFA2E5407F5"
+        "sha256": "72A05420D51D580789C52038A87E1B82AFD662A1EF962403F39DE58AC573AC11"
       },
       {
         "byte_count": 65667,
         "path": "native/kernel/src/lib.rs",
-        "sha256": "C5E6C93843E58FD41EC57B622F9F75D1C7D6C403A925368A4FAF68885C141CF2"
+        "sha256": "3B70B20BA36952222BBEDEDBE83DDAA2DD0C09D1EE43E0D0A0998FF9DE2869E3"
       },
       {
         "byte_count": 538452,
@@ -143,9 +143,9 @@
         "sha256": "27D29DF0BBB5180AB9F8A9E8131EB4C4851C3DA0FF87A5D770DAA35BA73DE76A"
       },
       {
-        "byte_count": 9490,
+        "byte_count": 9599,
         "path": "runtime/native_kernel_entry.py",
-        "sha256": "B525879395584B5EF4D87B256543AEB9CA17E1499A72C2E150EBA40853FB1A00"
+        "sha256": "780E6FABCA58B8665EAD731F6BBB0DE5EBB8DC20A5299F5EAF19088E3594B019"
       },
       {
         "byte_count": 25233,
@@ -155,7 +155,17 @@
       {
         "byte_count": 10928,
         "path": "tests/test_native_kernel_entry.py",
-        "sha256": "C89AA537D51C2427DF4F33E2D5D4292F9AFCB5D893BCDF851F7E76E9B56E91D4"
+        "sha256": "C58571FC92ED314275F920C09E8FCBEA074DF87DC06F79D847B03D7F6178E121"
+      },
+      {
+        "byte_count": 4248,
+        "path": "tests/test_native_smp_transactions.py",
+        "sha256": "321374D12C8C113A4F6887E8255F9241FF005D0171A199419F4E2DB71667947F"
+      },
+      {
+        "byte_count": 10676,
+        "path": "tests/fixtures/pksched4_transaction_probe.rs",
+        "sha256": "13C3D0934B6FE435404DABAA0D2B22F913B556AE4D0A25BD809972D435DC8F56"
       },
       {
         "byte_count": 7025,
@@ -338,9 +348,9 @@
         "sha256": "1F8AE8F0521C08DDAE73BBADB16E91B33235129FCC695191AF83A98ABDD8786E"
       },
       {
-        "byte_count": 47559,
+        "byte_count": 49297,
         "path": "native/kernel/src/scheduler_smp.rs",
-        "sha256": "5E7FE82B57D825528519C4C39FD1AC33C592F2A6A393A51235DE543833E9A852"
+        "sha256": "392A986CFEC545BB56A54A669005011096FAE243FB863036C6FC3F06909461D4"
       },
       {
         "byte_count": 31212,
@@ -770,23 +780,23 @@
   },
   "product": {
     "canonical_byte_count": 530072,
-    "canonical_sha256": "B19D4F7E854ECED3495D88C00F7379061B913EF00477FBD3701929B2F77D80F1",
+    "canonical_sha256": "A943DCB6E41A27F952868F05ED2B3523B47D9D7A7B5DB909EE385205F7CA3B31",
     "entry_offset": 40960,
     "entry_prefix_hex": "FAFC4889E14885C9743B48F7C10F00000075324889C848C1E01048C1F8104839C87522410F20D89C",
     "host_leakage_hits": [],
     "image_byte_count": 602112,
-    "linked_byte_count": 7042768,
-    "linked_sha256": "907EACFD6BC6D5669CA88489BC4A3E1121ED52F648FE434D3C05A4CB606C345A",
-    "loaded_sha256": "04CD0746E0601456DFBD57D791EC573E3142AB9231A2FDAA8663198106329EAC",
+    "linked_byte_count": 7046784,
+    "linked_sha256": "557687A9F39EEECFFD839A8619D696CEBB4E391B229778162725752C72B4D9AA",
+    "loaded_sha256": "F4698CB6E7DE51E07041410A274E3BE08886D09F51E681290E743E1361858FFC",
     "manifest_fields": {
-      "build_id": "PKBUILD1-CYCLE197-N12-DEFERRED-V1-0000000001",
+      "build_id": "PKBUILD1-CYCLE203-N12-SMP-TXN-V1-00000000001",
       "entry_contract": "PKENTRY1",
       "entry_offset": "0x0000A000",
       "handoff_contract": "PBP1",
       "image_contract": "PKELF1",
       "pbp1_contract_sha256": "89EA7517EF7D2E30C7EBEC4C28D092E3F01D95519EC6768E7B4D5C0F586B58E7",
       "pkelf1_contract_sha256": "A0CE48E9EF992B97333D84ECB2850E221D482E2ACF11BB312B5F769DAFF992AA",
-      "pkentry1_contract_sha256": "ABBF730D7ADED8900A6CAFCFD62CAC6DE76DB9F773E9EFE7AEF8A82248997D1D"
+      "pkentry1_contract_sha256": "A9FF7AD219385D18CCA883D2DCCAABC80C6D920106F0525E964E9F4186D8BCD6"
     },
     "manifest_offset": 544,
     "relocation_canonical_offset": 471104,

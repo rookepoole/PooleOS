@@ -24,6 +24,12 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle203-native-smp-transactions.md",
+    "native/kernel/src/scheduler_smp.rs",
+    "native/kernel/src/lib.rs",
+    "native/kernel/manifest.pkm",
+    "tests/fixtures/pksched4_transaction_probe.rs",
+    "tests/test_native_smp_transactions.py",
     "docs/checkpoints/cycle202-deferred-admission-and-controls.md",
     "runtime/native_kernel_scheduler_deferred.py",
     "tools/qualify_native_kernel_scheduler_deferred.py",

@@ -49,6 +49,8 @@ IMPLEMENTATION_INPUTS = (
     Path("runtime/native_kernel_entry.py"),
     Path("tools/qualify_native_kernel_entry.py"),
     Path("tests/test_native_kernel_entry.py"),
+    Path("tests/test_native_smp_transactions.py"),
+    Path("tests/fixtures/pksched4_transaction_probe.rs"),
     Path("docs/native-kernel-entry.md"),
     Path("native/.cargo/config.toml"),
     Path("specs/native-host-msvc-profile.json"),

@@ -11,7 +11,25 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 202 repairs deferred-work evidence
+**Current development checkpoint:** Cycle 203 repairs native SMP scheduler
+transactions so rejected acknowledgements, dispatch, cancellation, timeout and
+retirement cannot partially change ownership or queues. Seven reproduced native
+failures now pass; 19 native tests pass in debug and optimized profiles, and nine
+disabled-repair variants are detected. All 17 core stages and two matching builds
+pass. The kernel changed, so selected current-image readiness is **2/27**;
+25 dependent profiles need replay from `N5-SYMBOLS-SEMANTICS-001`.
+The SMP flag is reopened. Its recorded admission and 16 control groups remain
+open within the 51-group lower bound. Earlier boots remain historical evidence.
+No new ISO, new-kernel guest boot, phase closure or production promotion is claimed.
+[Cycle 203 evidence](docs/checkpoints/cycle203-native-smp-transactions.md).
+Combined scoped regression passes 109/109, zero skips; conservation verifies
+344 source bindings and 18 unchanged archived progress records. This is not
+full canonical merge qualification.
+Development checkpoints are backed up on the branch in
+[PR #78](https://github.com/rookepoole/PooleOS/pull/78); main merge still requires
+full exact-candidate qualification. Branch backup does not require main merge.
+
+**Historical development checkpoint:** Cycle 202 repairs deferred-work evidence
 admission and replaces 14 unexecuted controls with actual native/source tests.
 Two final virtual boots and all 17 focused tests pass, including 315 corrupted
 records rejected and twelve disabled native variants detected. Selected readiness

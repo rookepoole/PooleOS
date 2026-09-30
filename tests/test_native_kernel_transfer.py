@@ -44,7 +44,7 @@ def valid_markers() -> list[str]:
         "POOLEBOOT/0.1 FIRMWARE_BOUNDARY PASS calls_after_exit=0 kernel_pages=147 artifact_pages=9 table_pages=5 stack_pages=36 handoff_pages=256",
         "POOLEBOOT/0.1 TRANSFER_ARM PASS contract=PKXFER1 mode=development emulator_only=1 entry=FFFFFFFF8000A000 handoff=FFFFFFFF800B9000 bytes=5160 stack_top=FFFFFFFF800B8000 root=000000001DDF9000 cr3=000000001DDF9000 trap_scenario=0 signatures=0 authority=0 actions=0 writes=0 firmware_calls_after_exit=0",
         native_kernel_transfer.TRANSFER_BOUNDARY,
-        "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE197-N12-DEFERRED-V1-0000000001 entry_count=1 serial=present",
+        "POOLEOS:KERNEL:ENTRY PASS contract=PKENTRY1 transfer_contract=PKXFER1 build=PKBUILD1-CYCLE203-N12-SMP-TXN-V1-00000000001 entry_count=1 serial=present",
         "POOLEOS:KERNEL:STATE PASS handoff=0xFFFFFFFF800B9000 bytes=5160 entry=0xFFFFFFFF8000A000 stack_top=0xFFFFFFFF800B8000 root=0x000000001DDF9000 cr3=0x000000001DDF9000 rflags_if=0 rflags_df=0",
         "POOLEOS:KERNEL:PBP1 PASS profile=development records=5 artifacts=10 production_profile_valid=0",
         "POOLEOS:KERNEL:PKREVAL PASS contract=PKREVAL1 files=9 artifacts=6 parsers=9 manifest_bytes=2615 retained_bytes=11952 retained_set_sha256=A3078488088B2BF11B8D88F48862FA8D80957D610EB1F3FF4411AD5E4729FEAF policy_sha256=DDECB7E8BE1EEA8B491FDA3AA04AB56F81510BFBA69E1C0F30A93DC17C012803 state_sha256=C3C4C6412480A4C715C91F059A35EFBAA5E9D4A003916D8B8580C9C04A6B59BC denial=pbtrust_policy_unsigned authority=0 actions=0 writes=0",
@@ -88,8 +88,8 @@ class NativeKernelTransferTests(unittest.TestCase):
 
     def test_profile_revalidation_and_authority_mutations_reject(self) -> None:
         cases = (
-            (25, "build=PKBUILD1-CYCLE197-N12-DEFERRED-V1-0000000001", "build=PKBUILD1-CYCLE168-N12-AP-OWN-V002-0000000001"),
-            (25, "build=PKBUILD1-CYCLE197-N12-DEFERRED-V1-0000000001", "build=PKBUILD1-CYCLE192-N8-MBX-ORCL-V01-0000000001"),
+            (25, "build=PKBUILD1-CYCLE203-N12-SMP-TXN-V1-00000000001", "build=PKBUILD1-CYCLE168-N12-AP-OWN-V002-0000000001"),
+            (25, "build=PKBUILD1-CYCLE203-N12-SMP-TXN-V1-00000000001", "build=PKBUILD1-CYCLE197-N12-DEFERRED-V1-0000000001"),
             (27, "production_profile_valid=0", "production_profile_valid=1"),
             (28, "files=9", "files=8"),
             (28, "authority=0", "authority=1"),

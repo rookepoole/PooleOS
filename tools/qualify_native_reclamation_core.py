@@ -30,6 +30,8 @@ SOURCES = (
     "native/kernel/tests/reclamation_core.rs",
     "native/kernel/tests/task_lifetimes.rs",
     "native/kernel/src/scheduler_smp.rs",
+    "tests/fixtures/pksched4_transaction_probe.rs",
+    "tests/test_native_smp_transactions.py",
     "native/kernel/src/virtual_memory.rs",
     "native/kernel/src/active_virtual_memory.rs",
     "native/kernel/src/physical_memory.rs",
@@ -75,7 +77,7 @@ STACK_TESTS = (
     "overlapping_stacks_from_distinct_manager_namespaces_cannot_share_scheduler",
     "full_scrub_receipt_ledger_retains_the_next_stack_without_writes",
 )
-KERNEL_SHA256 = "B19D4F7E854ECED3495D88C00F7379061B913EF00477FBD3701929B2F77D80F1"
+KERNEL_SHA256 = "A943DCB6E41A27F952868F05ED2B3523B47D9D7A7B5DB909EE385205F7CA3B31"
 STAGES = (
     "format", "host-build-debug", "test-build-debug", "tests-debug",
     "lifetime-build-debug", "lifetime-tests-debug",

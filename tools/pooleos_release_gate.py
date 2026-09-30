@@ -360,6 +360,18 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 203 repairs native SMP state transactions: seven reproduced failures now pass, nineteen native "
+    "cases pass in debug/optimized profiles, and nine disabled-repair variants are detected. Seventeen "
+    "core stages and two matching kernel builds pass. Kernel bytes changed: selected readiness is 2/27 "
+    "with 25 profiles requiring fresh replay from N5-SYMBOLS-SEMANTICS-001, including policy. The SMP "
+    "flag is reopened; its recorded admission and 16 constant-only groups remain within at least 51 "
+    "unproven groups. No new-kernel guest boot, ISO, cross-CPU atomicity proof, phase closure or production "
+    "promotion is claimed. Cloud branch backup is separate from full exact-candidate main-merge qualification. "
+    + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -4001,7 +4013,7 @@ def check_native_kernel_entry_readiness(path: Path = NATIVE_KERNEL_ENTRY_READINE
         "image_byte_count": 602_112,
         "entry_offset": 0xA000,
         "relocation_count": 1326,
-        "canonical_sha256": "B19D4F7E854ECED3495D88C00F7379061B913EF00477FBD3701929B2F77D80F1",
+        "canonical_sha256": "A943DCB6E41A27F952868F05ED2B3523B47D9D7A7B5DB909EE385205F7CA3B31",
     }
     if not isinstance(product, dict) or any(
         type(product.get(key)) is not type(value) or product.get(key) != value

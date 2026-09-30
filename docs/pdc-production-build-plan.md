@@ -1,15 +1,44 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-29
-Plan version: 2.105.0-native-deferred-admission-controls
-Roadmap cycle: PooleOS Cycle 202
+Plan version: 2.106.0-native-smp-transactions
+Roadmap cycle: PooleOS Cycle 203
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 202: Deferred Admission and Executed Controls
+## Cycle 203: Native SMP Transactions
+
+`N12-SCHED-SMP-001`, N12.1-N12.7 and N36, advances under existing
+`ADD-N12-SCHED-SMP-001` and `ADD-N36-RECEIPT-COVERAGE-001`. Native failure
+injection exposed partial queue, task, pending-ticket and counter mutations.
+Allocation-free copy/commit now protects acknowledgement, dispatch, cancellation,
+timeout and retirement. Ticket publication preflights the local commit and
+rollback paths; it does not fabricate a remote acknowledgement.
+
+Seven reproduced failures now pass. Expanded 19-case debug/optimized native
+runs and nine disabled-repair variants verify the bounded state repair. All
+17 reclamation-core stages pass; two clean builds match, with 246 kernel tests,
+43 image controls and 12 independent entry-gate rejection cases. Failed injector,
+manifest/build-ID attempts and the initial 57/58 focused regression are retained.
+
+The kernel changed, so current selected readiness is 2/27, not the historical
+22/27. Replay 25 source-dependent profiles from `N5-SYMBOLS-SEMANTICS-001`,
+including policy, boot, CPU, memory and scheduler dependencies. SMP recorded
+admission and its 16 constant-only groups remain open; at least 51 groups remain
+across three profiles. Reopen `FLAG-N12-SCHED-SMP-001`. No phase closes, and no
+new-kernel QEMU boot, cross-CPU atomicity proof, ISO or production promotion is
+claimed. Full canonical/Doctor/release/publication/check/review qualification
+still precedes main merge; cloud branch backup is separate.
+[Evidence and limitations](checkpoints/cycle203-native-smp-transactions.md).
+Combined scoped regression passes 109/109 with zero skips, including the corrected
+58-test focused scope, independent entry-gate check and 50 metadata tests.
+Conservation verifies 344 bindings and all 18 unchanged parent progress records.
+Initial 40/50 and 49/50 metadata failures remain recorded; counts overlap.
+
+## Historical Cycle 202: Deferred Admission and Executed Controls
 
 `N12-SCHED-DEFERRED-001`, N12.1-N12.7 and N36, advances under
 `ADD-N36-RECEIPT-COVERAGE-001`. Strict recorded admission and 14 executed
@@ -3507,7 +3536,7 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 | `FLAG-N12-SCHED-FOUNDATION-001` | REQUIRED | Closed in Cycle 142 | PKSCHED1 freezes and qualifies a bounded allocation-free four-CPU/eight-task core, generation-safe identity and lifecycle, deterministic fixed-priority queues with a bypass bound, affinity and modeled migration, selected lifetime/locking primitives, an independent stress oracle, and an exact live two-task cooperative BSP context switch with stack isolation and clearing; preemption, live AP dispatch, ring 3, address-space switching, full per-task architectural state, target, N12 exit, and production remain open |
 | `FLAG-N12-SCHED-PREEMPT-001` | REQUIRED | Closed in Cycle 143 | PKSCHED2 composes PKSCHED1 and PKIRQ1 through exact interrupt frames and proves bounded BSP quantum/wakeup preemption, deterministic event ordering, balanced EOIs, stack ownership, rollback, teardown, and complete stack/MMIO cleanup without live-AP, ring-3, address-space, target, N12-exit, or production promotion |
 | `FLAG-N12-SCHED-DEFERRED-001` | REQUIRED | Closed in Cycle 144 | PKSCHED3 proves a bounded allocation-free eight-slot deferred-work controller with typed operations, generation-safe ownership, duplicate suppression, EOI-gated dispatch, bounded priority bypass, queued/running cancellation, flush, five rollback boundaries, exact retirement/shutdown, two private BSP worker stacks, independent oracle agreement, and complete cleanup without arbitrary callbacks, consumers, AP dispatch, target, N12-exit, or production promotion |
-| `FLAG-N12-SCHED-SMP-001` | REQUIRED | Closed in Cycle 145 | PKSCHED4 proves explicit CPU ownership, four local queues, acknowledgement-gated remote wake and migration, offline-target timeout rollback, topology balancing, idle ownership, live AP dispatch, stale rejection, and exact park/scrub/release teardown only for one frozen four-vCPU development topology |
+| `FLAG-N12-SCHED-SMP-001` | REQUIRED | Reopened in Cycle 203 | Native state transactions are repaired and host-tested; changed-image replay, recorded admission and 16 executed-control groups remain pending. Cycle 145's bounded topology evidence is preserved as historical, not current qualification |
 | `FLAG-N12-SCHED-AP-WORKERS-001` | REQUIRED | Closed in Cycle 146 | PKSCHED5 proves three AP-local queues and workers, fixed typed timer-driver and generation-reclaim consumers, EOI-gated dispatch, queued and remote cancellation, offline rollback, flush-before-reclaim, bounded priority bypass, exact retirement, and complete park/scrub/release only for one frozen four-vCPU development topology |
 | `FLAG-N12-SCHED-SMP-PREEMPT-001` | REQUIRED | Closed in Cycle 147 | PKSCHED6 proves four bounded timer/event/frame/run-queue lanes, deterministic cancel/wake/migration ordering, eight live acknowledgement-gated reschedule IPIs, three quantum switches, offline rollback, watchdog/fairness bounds, eight task retirements, and exact 102-page teardown only for one frozen four-vCPU development topology; AP-local timer interrupts and general SMP remain open |
 | `FLAG-N12-CONCURRENCY-ATOMICS-001` | REQUIRED | Closed in Cycle 148 | PKATOM1 freezes allocation-free typed `u32`/`u64`/`usize`/pointer atomics and operation-specific order types; rejects invalid orderings; proves host publication, contended RMW/CAS, sequential consistency, overflow-safe reference counts, seven linked x86-64 mappings, and one BSP process-to-interrupt release/acquire plus RMW path ordered before EOI without claiming general locks, live multi-AP contention, reclamation, portability, target, N12 exit, or production |
@@ -3543,7 +3572,14 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 
 ## 12. Near-Term Execution Sequence
 
-Current Cycle 184 sequence: the boot chain and its firmware/trust prerequisites
+Current Cycle 203 sequence: save the verified native SMP transaction checkpoint
+to the development branch; requalify symbols and policy for the changed image,
+then boot/CPU/memory/scheduler dependencies. Repair SMP recorded admission and
+execute its 16 control groups before its fresh qualification, followed by AP
+workers, SMP preemption, atomics, locks and full exact-candidate qualification.
+Do not rebind old positive boot receipts or merge while required checks fail.
+
+Historical Cycle 184 sequence: the boot chain and its firmware/trust prerequisites
 pass current-source qualification. Start `N7-TRAP-001`, then the remaining CPU
 and memory/IRQ/SMP/scheduler/atomic/lock profiles. Nineteen selected checks are
 still unqualified. Repair at least 65 individually unproven scheduler rejection
