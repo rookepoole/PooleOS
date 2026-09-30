@@ -1,15 +1,27 @@
 # PooleOS Native Production Goal Charter
 
 Charter version: 2.0.0-native-reset  
-Status date: 2026-09-29
+Status date: 2026-09-30
 Owner and IP holder: Rooke Poole  
 Parent objective: production-ready native PooleOS with a Poole-authored microkernel  
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 206
+Last roadmap reconciliation: PooleOS Cycle 207
 
-Cycle 206 qualifies six memory/IRQ/SMP profiles on unchanged kernel203: twelve
+Cycle 207 qualifies cooperative scheduling, BSP preemption and deferred work on
+unchanged kernel203: six virtual boots, 83 control groups, 595 executed cases and
+47 focused tests pass. The obsolete deferred image-pin failure is preserved and
+corrected without guest evidence changes. Selected readiness is 22/27; five
+profiles remain from N12-SCHED-SMP-001, plus at least 51 executed-control groups.
+No normative condition, phase, flag, native byte, ISO or production status changes.
+Full exact-candidate qualification still precedes main merge.
+[Cycle 207 evidence](checkpoints/cycle207-current-kernel-scheduler-replay.md).
+Combined scoped regression passes 166/166 with zero skips; repaired metadata
+passes 54/54 and conservation verifies 348 bindings and 19 unchanged archives.
+Counts overlap; full canonical qualification remains pending.
+
+Historical Cycle 206 qualifies six memory/IRQ/SMP profiles on unchanged kernel203: twelve
 virtual boots, 421 control groups, 1,137 cases and 93 focused tests pass. The
 stale IPI aggregate pin failure is preserved and corrected without rewriting
 guest evidence. Selected readiness is 19/27; eight profiles remain from

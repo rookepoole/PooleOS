@@ -1,15 +1,39 @@
 # PooleOS Native Architecture Production Build Plan
 
-Status date: 2026-09-29
-Plan version: 2.109.0-native-memory-multiprocessor-replay
-Roadmap cycle: PooleOS Cycle 206
+Status date: 2026-09-30
+Plan version: 2.110.0-native-scheduler-replay
+Roadmap cycle: PooleOS Cycle 207
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 206: Current-Kernel Memory and Multiprocessor Replay
+## Cycle 207: Current-Kernel Scheduler Replay
+
+`N12-SCHED-001`, preemption and deferred work, N12.4-N12.7/N36, advance under
+the foundation, preemption, deferred and N36 receipt-coverage requirements.
+Three fresh receipts bind unchanged kernel203. Six virtual boots, 83 groups and
+595 executed cases pass, including 545 rejections and 50 native boundary cases.
+All 47 focused tests pass, rejecting 768 corrupted records and eleven independent
+linked-identity mutations while detecting 19 disabled native variants. The stale
+deferred aggregate-pin failure is retained; the same candidate passes after its
+measured correction. No guest bytes were rewritten or boots rerun.
+
+Current-image readiness is 22/27. Five profiles remain from `N12-SCHED-SMP-001`:
+SMP scheduling, AP workers, SMP preemption, atomics and locks. SMP recorded
+admission and 16 executed-control groups come next; at least 51 groups remain
+overall. Prior records, native/entry/core/boot/CPU/memory bytes, owner data,
+checklist, normative charter and demo ISO are preserved. No phase/flag closure,
+general task/CPU retirement or N12 exit is claimed. Full exact-candidate
+qualification still precedes main merge; cloud backup is separate.
+[Evidence and limitations](checkpoints/cycle207-current-kernel-scheduler-replay.md).
+Combined scoped regression passes 166/166, zero skips; repaired metadata passes
+54/54 and conservation verifies 348 bindings and 19 unchanged archived records.
+Both initial metadata failures remain documented; counts overlap and full
+canonical merge qualification is still pending.
+
+## Historical Cycle 206: Current-Kernel Memory and Multiprocessor Replay
 
 `N9-PMM-ACPI-CONSUMER-001`, N9.1/N9.2 and N9.3/N9.4, followed by dependent
 N8.1/N8.3/N8.5/N8.6, advances under `ADD-MEM-001`, `ADD-TIME-001` and
@@ -3642,8 +3666,9 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 
 ## 12. Near-Term Execution Sequence
 
-Current Cycle 206 sequence: save the six qualified memory/IRQ/SMP profiles,
-then replay `N12-SCHED-001`, preemption and deferred work on unchanged kernel203.
+Current Cycle 207 sequence: save the three qualified scheduler profiles, then
+repair `N12-SCHED-SMP-001` recorded admission and execute its sixteen missing
+control groups before fresh SMP qualification on unchanged kernel203 if possible.
 Repair SMP recorded admission and the remaining 51 executed-control groups,
 then qualify the remaining scheduler/atomic/lock profiles and full exact candidate.
 Eight selected profiles remain pending. Main merge still requires complete

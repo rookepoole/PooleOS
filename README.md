@@ -11,7 +11,21 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 206 qualifies six memory, interrupt
+**Current development checkpoint:** Cycle 207 qualifies cooperative scheduling,
+BSP preemption and deferred work on unchanged kernel203. Six virtual boots,
+83 control groups covering 595 executed cases and 47 focused tests pass. Tests
+reject 768 recorded corruptions and eleven independent linked-identity mutations;
+19 disabled native variants are detected. The stale deferred image-pin failure
+is retained and corrected without rewriting guest evidence. Readiness is **22/27**;
+five profiles and at least 51 later control groups remain from `N12-SCHED-SMP-001`.
+No phase, flag, native byte, demo ISO or production status changes. Full
+exact-candidate qualification still precedes main merge; branch backup is separate.
+[Cycle 207 evidence](docs/checkpoints/cycle207-current-kernel-scheduler-replay.md).
+Combined scoped regression passes 166/166, zero skips; repaired metadata passes
+54/54 and conservation verifies 348 bindings and 19 unchanged archived records.
+Counts overlap; full canonical qualification remains pending.
+
+**Historical development checkpoint:** Cycle 206 qualifies six memory, interrupt
 and multiprocessor profiles on unchanged kernel203. Twelve virtual boots,
 421 control groups covering 1,137 cases and 93 focused tests pass. Tests reject
 1,896 corrupted records, 360 raw-mailbox cases and seven independent IPI image

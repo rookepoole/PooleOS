@@ -116,6 +116,30 @@ class NativeDependencyReleaseGateTests(unittest.TestCase):
                 self.assertFalse(result["ok"], result["detail"])
                 self.assertIn("embedded kernel identity changed", result["detail"])
 
+    def test_current_deferred_gate_independently_rejects_stale_linked_identity(self) -> None:
+        module = gate.native_kernel_scheduler_deferred
+        receipt = module.read_json(module.ROOT / module.READINESS_RELATIVE)
+        positive = gate.check_native_kernel_scheduler_deferred_readiness()
+        self.assertTrue(positive["ok"], positive["detail"])
+        self.assertEqual(module.readiness_errors(receipt), [])
+        mutations = [("canonical_sha256", wrong) for wrong in (
+            "B19D4F7E854ECED3495D88C00F7379061B913EF00477FBD3701929B2F77D80F1",
+            "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8",
+            "0" * 64, None, False, "",
+        )]
+        mutations.extend(("relocation_count", wrong) for wrong in (1305, 1319, 1321, None, False))
+        for field, wrong in mutations:
+            with self.subTest(field=field, wrong=wrong):
+                candidate = copy.deepcopy(receipt)
+                self.assertNotEqual(candidate["build"]["linked_switch_audit"][field], wrong)
+                candidate["build"]["linked_switch_audit"][field] = wrong
+                # Isolate aggregate admission only after the genuine positive passes.
+                with patch.object(gate, "_load_schema_artifact", return_value=(candidate, [])), \
+                     patch.object(module, "readiness_errors", return_value=[]):
+                    result = gate.check_native_kernel_scheduler_deferred_readiness()
+                self.assertFalse(result["ok"], result["detail"])
+                self.assertIn("host oracle, source, or linked switch audit changed", result["detail"])
+
     def test_stale_host_and_linked_image_pins_are_rejected(self) -> None:
         rejected = 0
         profiles = {

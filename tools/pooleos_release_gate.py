@@ -397,6 +397,18 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 207 qualifies cooperative scheduling, BSP preemption and deferred work on unchanged kernel203: "
+    "six virtual boots, 83 control groups and 595 executed cases pass. All 47 focused tests pass, including "
+    "768 recorded corruptions, eleven linked-identity cases and detection of 19 disabled native variants. "
+    "The stale deferred aggregate image-pin rejection is preserved and corrected without guest changes. "
+    "Selected readiness is 22/27; five profiles, SMP recorded admission and at least 51 executed-control "
+    "groups remain from N12-SCHED-SMP-001. No native byte, phase, flag, ISO, N12 exit or production change. "
+    "Full exact-candidate qualification precedes main merge; cloud branch backup is separate. "
+    "Prior qualification below is historical. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -2768,7 +2780,7 @@ def check_native_kernel_scheduler_deferred_readiness(
         or linked.get("forbidden_instruction_count") != 0
         or linked.get("relocation_count") != 1326
         or linked.get("canonical_sha256")
-        != "B19D4F7E854ECED3495D88C00F7379061B913EF00477FBD3701929B2F77D80F1"
+        != "A943DCB6E41A27F952868F05ED2B3523B47D9D7A7B5DB909EE385205F7CA3B31"
         or linked.get("status") != "pass"
     ):
         errors.append("PKSCHED3 host oracle, source, or linked switch audit changed")
