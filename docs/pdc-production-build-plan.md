@@ -1,15 +1,45 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-30
-Plan version: 2.110.0-native-scheduler-replay
-Roadmap cycle: PooleOS Cycle 207
+Plan version: 2.111.0-native-smp-controls
+Roadmap cycle: PooleOS Cycle 208
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 207: Current-Kernel Scheduler Replay
+## Cycle 208: SMP Admission and Executed Controls
+
+`N12-SCHED-SMP-001`, N12.4-N12.7/N36, advances under `ADD-N12-SCHED-SMP-001`
+and `ADD-N36-RECEIPT-COVERAGE-001`. Recorded SMP evidence is now reparsed and
+type-checked, including actual exits, paired runs, marker and handoff consistency,
+observations, host/native probes, source bindings, linked identity and control counts.
+The genuine before audit accepted 264/279 corruptions at runtime and 168/279 at
+the aggregate gate, with 4/18 exceptions. Fresh after-repair evidence rejects
+all 279 at both boundaries without exceptions.
+
+Sixteen constant-only groups are replaced by thirteen compiled-native groups
+(59 boundary scenarios) and three source-audit groups (51 rejected mutations).
+Two final boots pass all 32 groups/303 cases. All 18 focused tests pass, including
+47 additional record mutations, eight independent gate checks, detection of
+thirteen disabled safeguards and nine disabled transaction repairs, and nineteen
+native transaction tests in both debug and optimized builds. Two diagnostic boots,
+two superseded register-label boots, the obsolete aggregate image pin, both
+test-harness failures and both metadata assertion failures remain separate.
+Repaired metadata passes 55/55 and combined scoped regression 183/183, zero skips.
+Counts overlap and do not represent the full exact-candidate canonical suite.
+
+Readiness is 23/27. Next: `N12-SCHED-AP-WORKERS-001`, inspect and repair recorded
+admission plus eighteen constant-only groups before fresh qualification. SMP
+preemption, atomics and locks follow; at least 35 groups remain overall. The SMP
+flag stays open pending downstream integration and closure review. N0 custody,
+N5 authentication, general task/CPU retirement and full exact-candidate main-merge
+qualification remain open. No native kernel, prior qualified receipt, demo ISO,
+phase, flag, N12 exit or production status change is claimed. Source audit mutation
+is not hardware fault injection. [Evidence](checkpoints/cycle208-smp-admission-and-controls.md).
+
+## Historical Cycle 207: Current-Kernel Scheduler Replay
 
 `N12-SCHED-001`, preemption and deferred work, N12.4-N12.7/N36, advance under
 the foundation, preemption, deferred and N36 receipt-coverage requirements.

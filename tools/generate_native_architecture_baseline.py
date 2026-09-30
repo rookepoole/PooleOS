@@ -24,6 +24,9 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle208-smp-admission-and-controls.md",
+    "tests/test_native_smp_controls.py",
+    "tests/fixtures/pksched4_control_probe.rs",
     "docs/checkpoints/cycle207-current-kernel-scheduler-replay.md",
     "docs/checkpoints/cycle206-memory-and-multiprocessor-replay.md",
     "docs/checkpoints/cycle205-current-kernel-cpu-replay.md",

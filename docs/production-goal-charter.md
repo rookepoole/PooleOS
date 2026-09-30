@@ -7,9 +7,20 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 207
+Last roadmap reconciliation: PooleOS Cycle 208
 
-Cycle 207 qualifies cooperative scheduling, BSP preemption and deferred work on
+Cycle 208 repairs SMP admission and sixteen constant-only control groups. Two
+final virtual boots pass 303 cases; 18 focused tests pass, including 326 recorded
+corruption rejections and eight independent gate cases. The diagnostic baseline,
+old image-pin failure and two test-harness failures are preserved. Readiness is
+23/27; four profiles and at least 35 control groups remain from
+N12-SCHED-AP-WORKERS-001. No normative condition, phase, flag, native byte, ISO or
+production status changes. Full exact-candidate qualification precedes main merge.
+[Cycle 208 evidence](checkpoints/cycle208-smp-admission-and-controls.md).
+Combined scoped regression passes 183/183 and repaired metadata 55/55, zero skips.
+Counts overlap; the full exact-candidate merge qualification remains pending.
+
+Historical Cycle 207 qualifies cooperative scheduling, BSP preemption and deferred work on
 unchanged kernel203: six virtual boots, 83 control groups, 595 executed cases and
 47 focused tests pass. The obsolete deferred image-pin failure is preserved and
 corrected without guest evidence changes. Selected readiness is 22/27; five

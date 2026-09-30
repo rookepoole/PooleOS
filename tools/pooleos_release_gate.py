@@ -409,6 +409,20 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 208 repairs SMP admission and replaces sixteen constant-only groups with executed native/source "
+    "checks. Two final boots pass 303 cases (244 rejections and 59 native boundary scenarios). All 18 focused "
+    "tests pass, rejecting 326 corrupted records and eight independent gate cases; thirteen disabled native "
+    "safeguards and nine transaction-repair variants are detected. The genuine pre-repair audit accepted "
+    "264 runtime/168 aggregate corruptions; the repaired 279-case replay rejects all without exceptions. "
+    "Selected readiness is 23/27. Four profiles and at least 35 control groups remain from "
+    "N12-SCHED-AP-WORKERS-001. Kernel/ISO bytes and phase/flag statuses are unchanged. Source mutations "
+    "are not live fault injection. N0 custody, N5 authentication, general task/CPU retirement, independent "
+    "builders and production remain open. Full exact-candidate qualification precedes main merge. "
+    "Branch cloud backup is separate; prior qualification below is historical. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -2883,6 +2897,8 @@ def check_native_kernel_scheduler_smp_readiness(
             or "native kernel scheduler SMP readiness is not an object",
         )
     errors.extend(native_kernel_scheduler_smp.readiness_errors(artifact, ROOT))
+    if errors:
+        return readiness.make_check("native_kernel_scheduler_smp_readiness", False, "; ".join(errors[:8]))
     build = artifact.get("build", {})
     kernel_summary = (
         build.get("kernel_entry", {}).get("summary", {})
@@ -2910,16 +2926,16 @@ def check_native_kernel_scheduler_smp_readiness(
         or source_audit.get("fixed_task_capacity") != 8
         or source_audit.get("allocation_free_controller") is not True
         or source_audit.get("arbitrary_callback_count") != 0
-        or source_audit.get("ap_handler_saved_register_count") != 15
+        or source_audit.get("ap_handler_preserved_register_count") != 15
         or source_audit.get("live_marker_count") != 37
         or linked.get("invlpg_instruction_count") != 2
         or linked.get("remote_shootdown_invlpg_instruction_count") != 1
         or linked.get("successor_profile_invlpg_instruction_count") != 1
         or linked.get("successor_profile_executed") is not False
         or linked.get("runtime_execution_count") != 3
-        or linked.get("relocation_count") != 1327
+        or linked.get("relocation_count") != 1326
         or linked.get("canonical_sha256")
-        != "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8"
+        != "A943DCB6E41A27F952868F05ED2B3523B47D9D7A7B5DB909EE385205F7CA3B31"
         or linked.get("status") != "pass"
     ):
         errors.append("PKSCHED4 host oracle, source, or linked INVLPG audit changed")
@@ -2981,7 +2997,7 @@ def check_native_kernel_scheduler_smp_readiness(
         not isinstance(controls, list)
         or len(controls) != 32
         or sum(item.get("case_count", 0) for item in controls if isinstance(item, dict))
-        != 209
+        != 303
     ):
         errors.append("PKSCHED4 hostile-control evidence is incomplete")
     if artifact.get("claims") != native_kernel_scheduler_smp.expected_claims():
@@ -2997,7 +3013,7 @@ def check_native_kernel_scheduler_smp_readiness(
         "contract=PKSCHED4; sandybridge_vcpus=4; aps=3; runs=2/2; markers=74/74; "
         "scheduler_tests=10; kernel_tests=246; wake=1; migrations=2; transfer_acks=3; "
         "ap_dispatches=6; call_function=9; timeout_rollbacks=1; stale_rejects=2; "
-        "scrub=417792/417792; controls=32/32; cases=209; general_smp=false; "
+        "scrub=417792/417792; controls=32/32; cases=303; native_cases=59; general_smp=false; "
         "n12_exit=false; production_ready=false"
     )
     return readiness.make_check(

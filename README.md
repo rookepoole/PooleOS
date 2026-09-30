@@ -11,7 +11,19 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 207 qualifies cooperative scheduling,
+**Current development checkpoint:** Cycle 208 repairs SMP evidence admission and
+replaces sixteen constant-only reports with executed controls. Two final virtual
+boots pass 303 cases, including 59 compiled-native boundary scenarios. All 18
+focused tests pass: 326 corrupted records and eight independent gate cases reject;
+thirteen disabled native safeguards and nine transaction-repair variants are caught.
+Readiness is **23/27**. AP workers, SMP preemption, atomics and locks remain, with
+at least 35 unproven control groups. Native kernel and demo ISO bytes are unchanged;
+this is pre-production qualification, not a phase closure or main-merge approval.
+[Cycle 208 evidence](docs/checkpoints/cycle208-smp-admission-and-controls.md).
+Combined scoped regression passes 183/183 and repaired metadata 55/55, zero skips.
+Counts overlap; the full exact-candidate merge qualification remains pending.
+
+**Historical development checkpoint:** Cycle 207 qualifies cooperative scheduling,
 BSP preemption and deferred work on unchanged kernel203. Six virtual boots,
 83 control groups covering 595 executed cases and 47 focused tests pass. Tests
 reject 768 recorded corruptions and eleven independent linked-identity mutations;

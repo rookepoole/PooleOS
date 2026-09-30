@@ -1,6 +1,6 @@
 # PKSCHED4 Exact-Topology SMP Scheduler
 
-PKSCHED4 closes `FLAG-N12-SCHED-SMP-001` for one bounded development topology. It composes the allocation-free PKSCHED1 task model with PKSMP5's exact BSP-0 and AP-1,2,3 legacy-xAPIC runtime. Selector 18 is isolated behind `development-scheduler-smp`; the default image still stops before transfer.
+PKSCHED4 covers one bounded development topology. Its earlier flag closure was reopened by Cycle 203; the current roadmap, not this profile description, controls closure. It composes the allocation-free PKSCHED1 task model with PKSMP5's exact BSP-0 and AP-1,2,3 legacy-xAPIC runtime. Selector 18 is isolated behind `development-scheduler-smp`; the default image still stops before transfer.
 
 ## Ownership Contract
 
@@ -33,7 +33,9 @@ The independent Python oracle reproduces the queue transforms and traces:
 - CPU 2: `4,3`;
 - CPU 3: `6,5`.
 
-The qualifier requires two exact fresh-vars QEMU runs, the five-receipt host probe, eight focused Rust tests within the 214-test kernel suite, input hashes, exact marker equality, exact frame and PBP1 equality, source audits, and 32 hostile-control categories covering 209 rejected cases. Both four-vCPU runs reproduce all 37 markers, six AP dispatches, two BSP dispatches, nine `CallFunction` executions, one timeout rollback, two stale-acknowledgement rejections, and complete cleanup.
+The qualifier requires two exact fresh-vars QEMU runs, the five-receipt host probe, ten focused Rust tests within the 246-test kernel suite, input hashes, exact marker equality, exact frame and PBP1 equality, source audits, and 32 control groups. Cycle 208 replaces sixteen constant-only control reports: thirteen groups execute 59 native scheduler boundary scenarios; three groups execute 51 source-audit mutations. Including existing marker/probe/input controls gives 303 cases, of which 244 are rejection cases and 59 include positive transitions and ownership conservation. Source mutations are not hardware fault injection. The host fixture compiles the actual native module, and disabled native checks must fail its assertions.
+
+Recorded admission reparses both runs, exits, markers, summaries, digests and handoffs; checks exact types, observations, native/host probe output, source bindings, linked identity and per-group counts; and rejects malformed shapes without throwing. This establishes recorded consistency, not authentication or a substitute for fresh execution. AP register auditing distinguishes fourteen saved/restored registers from untouched RBP; preserving fifteen GPRs does not mean fifteen stack pushes. Full architectural state, live failure-path injection and production qualification remain unclaimed.
 
 The scheduler pushed PKENTRY1 beyond its former text reservation, so Cycle 145 also requalifies a coherent page-aligned image layout: entry `0xA000`, text end `0x66000`, RELRO end and writable-data start `0x74000`, and unchanged image end `0x88000`. After the downstream stack repair, the canonical kernel is 476,808 bytes with 1,181 relocations and SHA-256 `9C23236E85A6D2C7AEEFDA12F3CEC202DC3BF34B89D9CEAEEBB7037A079DA168`; the in-memory image remains 557,056 bytes or 136 pages with no writable-executable mapping.
 
