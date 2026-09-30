@@ -65,6 +65,12 @@ class NativeDependencyReleaseGateTests(unittest.TestCase):
                     (("build", "kernel_entry", "product", "canonical_sha256"),
                      "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8"),
                     (("build", "kernel_entry", "product", "relocation_count"), 1327),
+                    (("build", "kernel_entry", "product", "canonical_sha256"),
+                     "B19D4F7E854ECED3495D88C00F7379061B913EF00477FBD3701929B2F77D80F1"),
+                    (("build", "kernel_entry", "product", "canonical_sha256"), "0" * 64),
+                    (("build", "kernel_entry", "product", "canonical_sha256"), None),
+                    (("build", "kernel_entry", "product", "canonical_sha256"), False),
+                    (("build", "kernel_entry", "product", "canonical_sha256"), ""),
                 ])
             for field_path, value in mutations:
                 with self.subTest(profile=profile, field=field_path):
@@ -83,7 +89,7 @@ class NativeDependencyReleaseGateTests(unittest.TestCase):
                             result = check_fn()
                     self.assertFalse(result["ok"], result["detail"])
                     rejected += 1
-        self.assertEqual(rejected, 21)
+        self.assertEqual(rejected, 26)
 
     def test_current_ipi_gate_independently_rejects_prior_kernel_pins(self) -> None:
         module = gate.native_kernel_smp_ipi

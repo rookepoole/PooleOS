@@ -1,15 +1,38 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-29
-Plan version: 2.107.0-native-current-kernel-boot-replay
-Roadmap cycle: PooleOS Cycle 204
+Plan version: 2.108.0-native-current-kernel-cpu-replay
+Roadmap cycle: PooleOS Cycle 205
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 204: Current-Kernel Boot Replay
+## Cycle 205: Current-Kernel CPU Replay
+
+`N7-TRAP-001`, N7.5/N7.6 and dependent N7.1/N7.3/N7.4, advances under
+`ADD-N7-XSTATE-001` and `ADD-N36-RECEIPT-COVERAGE-001`. Five fresh CPU
+receipts bind unchanged kernel203; fourteen virtual boots and 225 controls pass.
+Two WHPX exception runs deliver three exceptions and two recoveries each; one
+expected TCG limitation probe is retained separately. The obsolete aggregate
+trap kernel pin is reconciled from the measured image, without weakening gates.
+
+All 54 focused tests pass, including 3,398 corrupt control records, 371 malformed
+run-evidence cases and 26 aggregate identity/promotion rejections. The trap test
+observes 51 marker-validator calls and detects a disabled validator. Existing
+control-admission failures remain historical, not claimed as new repairs.
+Selected readiness is 13/27; fourteen memory/IRQ/SMP/scheduler/atomic/lock
+profiles remain from `N9-PMM-ACPI-CONSUMER-001`. At least 51 later scheduler
+control groups and SMP recorded admission remain open. No native source, prior
+boot receipt, phase, flag, demo ISO or production condition changes. Full exact-
+candidate qualification still precedes main merge; cloud backup is separate.
+[Evidence and limitations](checkpoints/cycle205-current-kernel-cpu-replay.md).
+Combined scoped regression passes 242/242, zero skips; metadata passes 52/52
+and conservation verifies 346 source bindings and 19 unchanged parent records.
+Counts overlap; full canonical qualification remains pending.
+
+## Historical Cycle 204: Current-Kernel Boot Replay
 
 `N5-SYMBOLS-SEMANTICS-001`, N5.6/N5.9 and N36, advances under existing
 `ADD-BOOT-007` and `ADD-N36-RECEIPT-COVERAGE-001`. Measured symbol pins and
@@ -3595,7 +3618,14 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 
 ## 12. Near-Term Execution Sequence
 
-Current Cycle 204 sequence: save the six qualified boot-chain profiles on the
+Current Cycle 205 sequence: save the five qualified CPU profiles, then replay
+`N9-PMM-ACPI-CONSUMER-001` and the remaining memory, IRQ, SMP, scheduler,
+atomic and lock dependencies on unchanged kernel203. Repair SMP recorded
+admission and execute the remaining 51 scheduler control groups before their
+admission. Fourteen selected profiles remain pending. Full exact-candidate
+qualification and review precede main merge; branch backup remains separate.
+
+Historical Cycle 204 sequence: save the six qualified boot-chain profiles on the
 development branch, then replay `N7-TRAP-001` and the remaining CPU, memory,
 interrupt and scheduler dependencies on the same kernel. Repair SMP recorded
 admission and execute the remaining scheduler controls before their admission.

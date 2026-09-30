@@ -11,7 +11,20 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 204 qualifies the boot chain on the
+**Current development checkpoint:** Cycle 205 qualifies five CPU profiles on
+unchanged kernel203. Fourteen virtual boots, 225 controls and 54 focused tests
+pass; one expected TCG limitation probe is separate. Tests reject 3,398 corrupted
+control records, 371 run-evidence cases and 26 aggregate identity/promotion cases.
+Selected readiness is **13/27**; fourteen downstream profiles remain from
+`N9-PMM-ACPI-CONSUMER-001`, plus at least 51 later scheduler control groups.
+No phase, flag, native byte, demo ISO or production status changes. Main merge
+still requires full exact-candidate qualification; cloud branch backup is separate.
+[Cycle 205 evidence](docs/checkpoints/cycle205-current-kernel-cpu-replay.md).
+Combined scoped regression passes 242/242 with zero skips; metadata passes
+52/52 and conservation verifies 346 bindings and 19 unchanged archived records.
+Counts overlap; these are not the full canonical merge gates.
+
+**Historical development checkpoint:** Cycle 204 qualifies the boot chain on the
 repaired Cycle 203 kernel. Six fresh virtual boots pass, including two kernel
 entries ending in the expected unsigned-development denial. All 81 focused
 tests pass, including 650 corrupted symbol records and 20 independent old-image

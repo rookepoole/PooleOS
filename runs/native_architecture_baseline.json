@@ -358,6 +358,12 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle205-current-kernel-cpu-replay.md",
+      "sha256": "1FA40252AC8CDDAAC1A1A13F91C5C67E8F4B6BF224B1931B1EC8B01A51183707",
+      "byte_count": 7033,
+      "line_count": 118
+    },
+    {
       "path": "docs/checkpoints/cycle204-current-kernel-boot-replay.md",
       "sha256": "398A5DE52E577E2B073140AB47492D773EC6877CB8709D104DDCD102DEB6CD77",
       "byte_count": 6900,
@@ -749,9 +755,9 @@
     },
     {
       "path": "tools/pooleos_release_gate.py",
-      "sha256": "E5A0709A48C669100E0C7DFFE00902CC1970EACCD8415977C48B0E8506825285",
-      "byte_count": 364093,
-      "line_count": 7295
+      "sha256": "7B3FAFBF1D54FDEA1362BA2ABB45B44FBD08D611389C54E4B8D1E3473B43560A",
+      "byte_count": 364989,
+      "line_count": 7308
     },
     {
       "path": "docs/checkpoints/cycle184-boot-host-provenance.md",
@@ -977,9 +983,9 @@
     },
     {
       "path": "tests/test_native_dependency_release_gate.py",
-      "sha256": "2BC8C572A672818CFD00660BFD4F5D7889C0AFA2E901E87C6AF5A306C5C50894",
-      "byte_count": 10668,
-      "line_count": 182
+      "sha256": "3E7553D80829E9C7EDC3A7F1F89156E6CBFDFA57E4FDED4EDA3010455DFCDC4E",
+      "byte_count": 11184,
+      "line_count": 188
     },
     {
       "path": "docs/checkpoints/cycle177-dispatch-execution-holds.md",
@@ -1277,15 +1283,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "B984A91C3AD1A69D2E64EA76AF528B9C99376DAED1D7728854DC0081FFC56E2B",
-      "byte_count": 109861,
-      "line_count": 1475
+      "sha256": "1F4C29A59D81D122B08E26A23A6AC2F7DAFBD8DFFC410803D317D2779CDD8017",
+      "byte_count": 110651,
+      "line_count": 1486
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "74203B688D834326ADDA62F766CB55E350DB3355CD82E36D3543ABDA9B58D5B5",
-      "byte_count": 457439,
-      "line_count": 3832
+      "sha256": "58BFCEC178283340D762B5C11D5AAC68754C171791B494638DC630C47F6092A0",
+      "byte_count": 459408,
+      "line_count": 3862
     },
     {
       "path": "docs/publication-boundary.md",
@@ -1385,15 +1391,15 @@
     },
     {
       "path": "runs/native-kernel-trap-readiness.json",
-      "sha256": "50D9C781FBC7CF7ED15EE3295028B09DD713BEC0AE53DC909F13F832BD7006B6",
-      "byte_count": 471748,
-      "line_count": 11553
+      "sha256": "6CCBE079A996F2257D9605047331DD7FFCF51130F97B4F173E50A68911208674",
+      "byte_count": 472170,
+      "line_count": 11563
     },
     {
       "path": "runs/native-kernel-cpu-policy-readiness.json",
-      "sha256": "98CFFDC8BADF7681B519D8936D5491DE27EBD32B5BE51196AC8EC26C37D39C07",
-      "byte_count": 183232,
-      "line_count": 4897
+      "sha256": "9EA8402056FB8A83F37AA8A541043B79F55A9AE656AA4B442D6E94AA7FEE8014",
+      "byte_count": 183654,
+      "line_count": 4907
     },
     {
       "path": "runs/native-kernel-errata-policy-readiness.json",
@@ -1403,21 +1409,21 @@
     },
     {
       "path": "runs/native-kernel-xstate-policy-readiness.json",
-      "sha256": "8B683AC3B32FBB3576771F6D8742B12C412394D98AC9C9A947DF98AC8A876621",
-      "byte_count": 188426,
-      "line_count": 5103
+      "sha256": "48095CE52295F2C8512DD2CBAA7581FE4C1F3DA2EEA5194843299901D35CC551",
+      "byte_count": 188848,
+      "line_count": 5113
     },
     {
       "path": "runs/native-kernel-xstate-exception-readiness.json",
-      "sha256": "33F94DD2D6D37256D74E7D29411BF0DCB8ADEB6C09EC738F9E62CC73DEBD0AD7",
-      "byte_count": 201464,
-      "line_count": 5482
+      "sha256": "5EEA8DA366205957DF6C735D54A46A6B80EC7264D700F80A5F7D775B02EEAAE0",
+      "byte_count": 201886,
+      "line_count": 5492
     },
     {
       "path": "runs/native-kernel-privilege-msr-policy-readiness.json",
-      "sha256": "D5027EF6F51ADCCA9A6B33308CA91D8FF617BC08483F91B47F321A88776452FC",
-      "byte_count": 186649,
-      "line_count": 5015
+      "sha256": "2C4F4AD1A98C3626182DCFEDB1D9C2664BD34E9090905E5C4D96A054CCD11CD7",
+      "byte_count": 187071,
+      "line_count": 5025
     },
     {
       "path": "runs/native-kernel-physical-memory-readiness.json",

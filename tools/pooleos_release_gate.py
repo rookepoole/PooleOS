@@ -372,6 +372,19 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 205 qualifies five CPU profiles on unchanged kernel203: fourteen virtual boots, 225 controls, "
+    "two WHPX exception runs and one separate expected TCG limitation probe. All 54 focused tests pass, "
+    "including 3398 corrupted control records, 371 run-evidence cases and 26 aggregate identity/promotion "
+    "rejections. The obsolete trap image pin is reconciled. Cycle204's six boot-chain receipts remain "
+    "current. Selected readiness is 13/27; fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles remain "
+    "from N9-PMM-ACPI-CONSUMER-001. SMP recorded admission and at least 51 later control groups remain "
+    "open. No phase, flag, native byte, ISO or production status changes. Full exact-candidate qualification "
+    "precedes main merge; branch cloud backup is separate. Prior qualification below is historical. "
+    + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -1487,7 +1500,7 @@ def check_native_kernel_trap_readiness(
         or build.get("default_stop_marker_present") is not True
         or build.get("default_transfer_marker_absent") is not True
         or kernel_product.get("canonical_sha256")
-        != "B19D4F7E854ECED3495D88C00F7379061B913EF00477FBD3701929B2F77D80F1"
+        != "A943DCB6E41A27F952868F05ED2B3523B47D9D7A7B5DB909EE385205F7CA3B31"
         or kernel_product.get("relocation_count") != 1326
     ):
         errors.append("PKTRAP1 build or feature isolation changed")
