@@ -11,7 +11,18 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 201 qualifies native cooperative
+**Current development checkpoint:** Cycle 202 repairs deferred-work evidence
+admission and replaces 14 unexecuted controls with actual native/source tests.
+Two final virtual boots and all 17 focused tests pass, including 315 corrupted
+records rejected and twelve disabled native variants detected. Selected readiness
+is 22/27; five profiles and at least 51 later scheduler control groups remain.
+Next: `N12-SCHED-SMP-001`. Kernel bytes and the demo ISO are unchanged.
+[Cycle 202 evidence](docs/checkpoints/cycle202-deferred-admission-and-controls.md).
+This is pre-production work, not full canonical merge qualification.
+Combined scoped regression passes 144/144 with zero skips; repaired metadata
+passes 49/49 and conservation verifies 338 source bindings. Counts overlap.
+
+**Historical development checkpoint:** Cycle 201 qualifies native cooperative
 scheduling and BSP timer/wakeup preemption on the unchanged Cycle 197 kernel.
 Four fresh virtual boots, 53 control groups, 341 rejection cases and 31 focused
 tests pass. The tests reject 453 malformed records and detect seven disabled

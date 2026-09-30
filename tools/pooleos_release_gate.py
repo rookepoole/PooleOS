@@ -347,6 +347,19 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 202 repairs deferred admission and replaces 14 constant-only groups with executed native/source "
+    "controls. Two final virtual boots, 254 cases (204 rejections and 50 native boundary scenarios), "
+    "17 focused tests and 315 malformed-record rejections pass. Twelve disabled native variants are "
+    "detected. Selected readiness is 22/27; five profiles and at least 51 groups remain. Next is "
+    "N12-SCHED-SMP-001: inspect recorded admission and implement its 16 groups before fresh qualification, "
+    "then AP workers, SMP preemption, atomics and locks, and exact full-candidate qualification before "
+    "main merge. Kernel and ISO bytes are unchanged; N0 custody, N5 authentication, general task/CPU "
+    "retirement, independent builders and production remain open. "
+    + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -2681,6 +2694,8 @@ def check_native_kernel_scheduler_deferred_readiness(
             or "native kernel scheduler deferred readiness is not an object",
         )
     errors.extend(native_kernel_scheduler_deferred.readiness_errors(artifact, ROOT))
+    if errors:
+        return readiness.make_check("native_kernel_scheduler_deferred_readiness", False, "; ".join(errors[:8]))
     build = artifact.get("build", {})
     kernel_summary = (
         build.get("kernel_entry", {}).get("summary", {})
@@ -2714,9 +2729,9 @@ def check_native_kernel_scheduler_deferred_readiness(
         or linked.get("instruction_count") != 18
         or linked.get("scope_byte_count") != 36
         or linked.get("forbidden_instruction_count") != 0
-        or linked.get("relocation_count") != 1327
+        or linked.get("relocation_count") != 1326
         or linked.get("canonical_sha256")
-        != "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8"
+        != "B19D4F7E854ECED3495D88C00F7379061B913EF00477FBD3701929B2F77D80F1"
         or linked.get("status") != "pass"
     ):
         errors.append("PKSCHED3 host oracle, source, or linked switch audit changed")
@@ -2777,7 +2792,7 @@ def check_native_kernel_scheduler_deferred_readiness(
         not isinstance(controls, list)
         or len(controls) != 30
         or sum(item.get("case_count", 0) for item in controls if isinstance(item, dict))
-        != 208
+        != 254
     ):
         errors.append("PKSCHED3 hostile-control evidence is incomplete")
     if artifact.get("claims") != native_kernel_scheduler_deferred.expected_claims():
@@ -2792,7 +2807,7 @@ def check_native_kernel_scheduler_deferred_readiness(
         "contract=PKSCHED3; qemu64_vcpus=1; bsp_only=true; runs=2/2; markers=74/74; "
         "deferred_tests=7; kernel_tests=246; enqueued=8; completed=5; cancelled=3; "
         "workers=2; dispatches=6; transitions=12; rollbacks=5; stack_scrub=32768/32768; "
-        "controls=30/30; cases=208; live_ap=false; n12_exit=false; production_ready=false"
+        "controls=30/30; cases=254; native_boundary_cases=50; live_ap=false; n12_exit=false; production_ready=false"
     )
     return readiness.make_check(
         "native_kernel_scheduler_deferred_readiness",

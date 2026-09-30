@@ -1,15 +1,37 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-29
-Plan version: 2.104.0-native-scheduler-preemption-replay
-Roadmap cycle: PooleOS Cycle 201
+Plan version: 2.105.0-native-deferred-admission-controls
+Roadmap cycle: PooleOS Cycle 202
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 201: Scheduler and Preemption Replay
+## Cycle 202: Deferred Admission and Executed Controls
+
+`N12-SCHED-DEFERRED-001`, N12.1-N12.7 and N36, advances under
+`ADD-N36-RECEIPT-COVERAGE-001`. Strict recorded admission and 14 executed
+control groups replace the previous unchecked records and constant-only entries.
+Two final virtual boots pass with 254 cases across 30 groups: 194 marker/probe/
+path rejections, 50 native boundary scenarios and ten source-audit rejections.
+All 17 focused tests pass, including 315 corrupted records, twelve disabled
+native variants and the existing debug/optimized transaction regressions.
+The original admission defects and failed mutation-target test are preserved.
+Combined scoped regression passes 144/144, zero skips; repaired metadata passes
+49/49 after two preserved stale-expectation failures. Conservation verifies
+338 source bindings and 17 unchanged parent-record archives. Counts overlap.
+
+Selected readiness is 22/27; at least 51 control groups remain unproven in
+three later scheduler profiles. Next is `N12-SCHED-SMP-001`: inspect recorded
+admission and implement its 16 executed groups before fresh qualification.
+AP workers, SMP preemption, atomics, locks and full exact-candidate qualification
+follow. No phase, flag, native kernel byte, demo ISO or production status changes.
+N0 custody, N5 authentication, general task/CPU retirement and PooleGlyph Phase 66
+remain open. [Evidence and limitations](checkpoints/cycle202-deferred-admission-and-controls.md).
+
+## Historical Cycle 201: Scheduler and Preemption Replay
 
 `N12-SCHED-001` and dependent `N12-SCHED-PREEMPT-001`, supporting
 N12.1/N12.2/N12.5/N12.6/N12.7 and N36, advance under

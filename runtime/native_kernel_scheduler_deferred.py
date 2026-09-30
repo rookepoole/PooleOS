@@ -5,12 +5,13 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from datetime import date
 from pathlib import Path
 from typing import Any
 
 from runtime import native_kernel_transfer
 from runtime.schema_validation import validate_json
-from runtime.native_kernel_profile_evidence import kernel_entry_errors
+from runtime.native_kernel_profile_evidence import kernel_entry_errors, recorded_pair_errors
 
 
 CONTRACT_ID = "PKSCHED3"
@@ -53,6 +54,8 @@ IMPLEMENTATION_INPUTS = (
     "tools/qualify_native_pooleboot.py",
     "tools/qualify_native_kernel_scheduler_deferred.py",
     "tests/test_native_kernel_scheduler_deferred.py",
+    "tests/test_native_deferred_controls.py",
+    "tests/fixtures/pksched3_control_probe.rs",
     "docs/native-kernel-scheduler-deferred.md",
 )
 
@@ -88,6 +91,40 @@ NEGATIVE_CONTROL_IDS = (
     "NEG-N12-PKSCHED3-WORKER-STACK-OWNERSHIP",
     "NEG-N12-PKSCHED3-INPUT-BINDING",
 )
+
+NATIVE_CONTROL_CASE_COUNTS = (3, 4, 5, 2, 5, 5, 3, 4, 4, 5, 5, 5)
+NEGATIVE_CONTROL_CASE_COUNTS = (
+    37, 36, 37, 1, 12, 7, 9, 8, 8, 12, 13, 5, 2, 5, 1,
+    *NATIVE_CONTROL_CASE_COUNTS, 6, 4, 1,
+)
+NATIVE_CONTROL_SOURCES = (
+    "tests/fixtures/pksched3_control_probe.rs", "native/kernel/src/scheduler_deferred.rs",
+)
+SOURCE_AUDIT_PATHS = {
+    "deferred": "native/kernel/src/scheduler_deferred.rs",
+    "arch": "native/kernel/src/arch/x86_64.rs",
+    "main": "native/kernel/src/main.rs",
+    "boot_exit": "native/boot/src/exit.rs",
+    "boot_manifest": "native/boot/Cargo.toml",
+    "bootexit": "native/bootexit/src/lib.rs",
+    "pooleboot_qualifier": "tools/qualify_native_pooleboot.py",
+}
+
+
+def expected_controls() -> list[dict[str, Any]]:
+    return [{"id": control_id, "status": "pass",
+             "expected": "boundary_verified" if 15 <= index < 27 else "rejected", "case_count": count}
+            for index, (control_id, count) in enumerate(zip(NEGATIVE_CONTROL_IDS, NEGATIVE_CONTROL_CASE_COUNTS))]
+
+
+def parse_native_control_output(output: str) -> list[dict[str, Any]]:
+    """Counts describe executed scenarios, including transition invariants, not only Err returns."""
+    lines = output.splitlines()
+    _require(len(lines) == 12, "PKSCHED3 native control receipt count changed")
+    for line, control_id, count in zip(lines, NEGATIVE_CONTROL_IDS[15:27], NATIVE_CONTROL_CASE_COUNTS):
+        _require(line == f"PKSCHED3:CONTROL PASS id={control_id} cases={count} verified={count}",
+                 "PKSCHED3 native control evidence changed")
+    return expected_controls()[15:27]
 
 EARLY = re.compile(
     r"^POOLEOS:KERNEL:SCHED-DEFERRED-EARLY PASS contract=PKSCHED3 selector=(?P<selector>[0-9]+) "
@@ -245,18 +282,118 @@ def contract_errors(contract: dict[str, Any], root: Path = ROOT) -> list[str]:
     return errors
 
 
-def readiness_errors(readiness: dict[str, Any], root: Path = ROOT) -> list[str]:
+def readiness_errors(readiness: Any, root: Path = ROOT) -> list[str]:
+    if not isinstance(readiness, dict):
+        return ["PKSCHED3 readiness is not an object"]
     issues = validate_json(readiness, read_json(root / READINESS_SCHEMA_RELATIVE))
     errors = [f"schema {issue.path}: {issue.message}" for issue in issues]
     errors.extend(kernel_entry_errors(readiness.get("build"), root))
-    if readiness.get("inputs") != expected_inputs(root):
-        errors.append("readiness input bindings are stale")
-    ids = [item.get("id") for item in readiness.get("negative_controls", []) if isinstance(item, dict)]
-    if ids != list(NEGATIVE_CONTROL_IDS):
-        errors.append("readiness negative-control order diverges")
-    if readiness.get("claims") != expected_claims():
-        errors.append("readiness claim boundary diverges")
+    status_date = readiness.get("status_date")
+    try:
+        if not isinstance(status_date, str) or len(status_date) != 10 or date.fromisoformat(status_date).isoformat() != status_date:
+            raise ValueError("noncanonical date")
+    except ValueError:
+        errors.append("readiness status_date is not a canonical calendar date")
+    if errors:
+        return errors
+    try:
+        _typed_equal(readiness.get("inputs"), expected_inputs(root), "input bindings")
+        _typed_equal(readiness.get("negative_controls"), expected_controls(), "per-control accounting")
+        _typed_equal(readiness.get("claims"), expected_claims(), "claim boundary")
+        _typed_equal(readiness.get("nonclaims"), read_json(root / CONTRACT_RELATIVE)["nonclaims"], "nonclaims")
+        _typed_equal(readiness.get("phase_status"), {name: "partial" for name in ("N12", *(f"N12.{i}" for i in range(1, 8)))}, "phase status")
+        _typed_equal(readiness.get("status"), "pass_single_host_two_run_qemu64_bsp_interrupt_deferred_workers_non_promoting", "qualification status")
+    except (KernelSchedulerDeferredError, TypeError, ValueError) as error:
+        errors.append(str(error))
+    if errors:
+        return errors
+    errors.extend(recorded_deferred_errors(readiness.get("execution"), readiness.get("observation"), readiness["build"], root))
     return errors
+
+
+def _typed_equal(actual: Any, expected: Any, label: str) -> None:
+    _require(json.dumps(actual, sort_keys=True, allow_nan=False) == json.dumps(expected, sort_keys=True, allow_nan=False),
+             f"recorded {label} differs from parsed evidence or exact types")
+
+
+def recorded_deferred_errors(execution: Any, observation: Any, build: Any, root: Path = ROOT) -> list[str]:
+    """Reconstruct recorded consistency; this does not authenticate or freshly execute evidence."""
+    if not isinstance(execution, dict):
+        return ["PKSCHED3 recorded execution is not an object"]
+
+    def parsed(markers: list[str]) -> dict[str, Any]:
+        try:
+            return validate_markers(markers)
+        except KernelSchedulerDeferredError as error:
+            raise ValueError(str(error)) from error
+
+    pair = dict(execution, exact_marker_match=execution.get("static_markers_exact_match"))
+    try:
+        errors = recorded_pair_errors(pair, "scheduler-deferred-run", parsed, CONTRACT_ID)
+    except (native_kernel_transfer.KernelTransferError, KeyError, TypeError, ValueError, AttributeError) as error:
+        return [f"PKSCHED3 recorded run evidence is invalid: {error}"]
+    if errors:
+        return errors
+    try:
+        for key, expected in (("host_environment_count", 1), ("virtual_cpu_count", 1),
+                              ("bsp_only", True), ("dynamic_fields_revalidated", True),
+                              ("deterministic_instruction_clock", True), ("cpu_model", "qemu64"),
+                              ("acceleration", "tcg_single_thread"), ("profile_id", "POOLEOS-TIER0-Q35-1"),
+                              ("machine", "pc-q35-11.0")):
+            _typed_equal(execution.get(key), expected, "execution " + key)
+        _typed_equal(observation, parsed(execution["runs"][0]["markers"]), "observation")
+        host = build["host_probe"]
+        lines = host["lines"]
+        _require(isinstance(lines, list) and len(lines) == 5 and all(isinstance(line, str) for line in lines),
+                 "recorded host probe lines are malformed")
+        output = "\n".join(lines) + "\n"
+        _typed_equal(host, dict(parse_probe_output(output), output_sha256=sha256_bytes(output.encode("utf-8"))), "host probe")
+        native = build["native_control_probe"]
+        lines = native["lines"]
+        _require(isinstance(lines, list) and all(isinstance(line, str) for line in lines), "native control lines are malformed")
+        output = "\n".join(lines) + "\n"
+        controls = parse_native_control_output(output)
+        _require(isinstance(native["executable_sha256"], str) and re.fullmatch(r"[0-9A-F]{64}", native["executable_sha256"]) is not None,
+                 "native control executable digest is malformed")
+        _typed_equal(native, {
+            "scope": "host_execution_of_native_deferred_module_not_privileged_guest_execution",
+            "exit_code": 0, "lines": lines, "output_sha256": sha256_bytes(output.encode("utf-8")),
+            "executable_sha256": native["executable_sha256"], "controls": controls,
+            "verified_cases_total": sum(NATIVE_CONTROL_CASE_COUNTS),
+            "sources": [file_binding(root, path) for path in NATIVE_CONTROL_SOURCES],
+        }, "native control probe")
+        source, linked, audit = build["source_audit"], build["linked_switch_audit"], build["audit_controls"]
+        for key, value in (("focused_rust_test_count", 7), ("fixed_work_capacity", 8), ("worker_count", 2),
+                           ("worker_stack_bytes_each", 16384), ("allocation_free_controller", True),
+                           ("arbitrary_callback_count", 0), ("live_marker_count", 37)):
+            _typed_equal(source.get(key), value, "source audit " + key)
+        maximum = re.search(r"MAX_DEVELOPMENT_TRAP_SCENARIO: u8 = (\d+);", (root / SOURCE_AUDIT_PATHS["bootexit"]).read_text(encoding="utf-8"))
+        _require(maximum is not None, "development selector bound is missing")
+        _typed_equal(source.get("max_development_trap_scenario"), int(maximum.group(1)), "selector maximum")
+        files = {name: {key: value for key, value in file_binding(root, path).items() if key != "byte_count"}
+                 for name, path in SOURCE_AUDIT_PATHS.items()}
+        _typed_equal(source.get("files"), files, "source audit files")
+        for key, value in (("instruction_count", 18), ("scope_byte_count", 36), ("forbidden_instruction_count", 0),
+                           ("status", "pass"), ("end_symbol_verified", True)):
+            _typed_equal(linked.get(key), value, "linked audit " + key)
+        for key in ("canonical_sha256", "canonical_byte_count", "linked_sha256", "linked_byte_count", "relocation_count"):
+            _typed_equal(linked.get(key), build["kernel_entry"]["product"][key], "linked product " + key)
+        _typed_equal(linked.get("scope"), "poole_scheduler_context_switch..poole_scheduler_context_switch_end", "linked scope")
+        _typed_equal(linked.get("mnemonics"), ["pushfq", *(["pushq"] * 6), "movq", "incq", "movq", *(["popq"] * 6), "popfq", "retq"], "linked instructions")
+        for key in ("start_address", "end_address"):
+            _require(isinstance(linked.get(key), str) and re.fullmatch(r"0x[0-9A-F]{16}", linked[key]) is not None,
+                     "linked symbol address is malformed")
+        _require(int(linked["end_address"], 16) - int(linked["start_address"], 16) == 36, "linked symbol extent changed")
+        tool_path = ".toolchains/rust-1.97.0/rustup/toolchains/1.97.0-x86_64-pc-windows-msvc/lib/rustlib/x86_64-pc-windows-msvc/bin/llvm-objdump.exe"
+        _typed_equal(linked.get("llvm_objdump_path"), tool_path, "linked tool path")
+        _typed_equal(linked.get("llvm_objdump_sha256"), sha256_bytes((root / tool_path).read_bytes()), "linked tool digest")
+        _typed_equal(audit, {
+            "scope": "mutated_heap_callback_and_stack_guard_source_not_hardware_fault_injection",
+            "files": files, "controls": expected_controls()[27:29],
+        }, "source audit controls")
+    except (KernelSchedulerDeferredError, KeyError, TypeError, ValueError, AttributeError, OSError) as error:
+        return [f"PKSCHED3 recorded accounting is invalid: {error}"]
+    return []
 
 
 def trace_oracle() -> dict[str, Any]:

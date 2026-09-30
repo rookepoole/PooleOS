@@ -358,6 +358,72 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle202-deferred-admission-and-controls.md",
+      "sha256": "A1B7A2A27F0C35F2F4A746ACC9BF90D0375975F3BACFB98BEBB437091425DAB3",
+      "byte_count": 6730,
+      "line_count": 114
+    },
+    {
+      "path": "runtime/native_kernel_scheduler_deferred.py",
+      "sha256": "D4BA8C0A0FFCF8172DF0B53D92DB2781121C44DB54AEF391C93D475DE512B084",
+      "byte_count": 29414,
+      "line_count": 540
+    },
+    {
+      "path": "tools/qualify_native_kernel_scheduler_deferred.py",
+      "sha256": "411628099598B3490526F3F0D10E7947C2F1FD1249451D0636DCC76A75DAE9A4",
+      "byte_count": 25584,
+      "line_count": 500
+    },
+    {
+      "path": "tests/test_native_kernel_scheduler_deferred.py",
+      "sha256": "2FB0A889569425982CCDA1D8B2A6913D9D4C2C9DBCB6593CAC34BC6EBF24C972",
+      "byte_count": 4057,
+      "line_count": 104
+    },
+    {
+      "path": "tests/test_native_deferred_controls.py",
+      "sha256": "84D7FAF93EFDB69CDABAE7371074B43CDD881DFAFC82BDC508FD55499DB89E40",
+      "byte_count": 11077,
+      "line_count": 188
+    },
+    {
+      "path": "tests/fixtures/pksched3_control_probe.rs",
+      "sha256": "0BC4DDBC11E25A475E0CF3C676A1DAA9ACB95591A3545A13A14F7FC054BDC1B7",
+      "byte_count": 12450,
+      "line_count": 327
+    },
+    {
+      "path": "specs/native-kernel-scheduler-deferred-contract.json",
+      "sha256": "F2101D3E562FB6C2E7CEE819BE501D1448C727D069CA7F5B6AFDBF52AD978B39",
+      "byte_count": 4946,
+      "line_count": 121
+    },
+    {
+      "path": "specs/native-kernel-scheduler-deferred-contract.schema.json",
+      "sha256": "1E79D803E2FE57979E0A3CF6534CBACEBCD2F6461A40A8772F102694435F4A77",
+      "byte_count": 2568,
+      "line_count": 62
+    },
+    {
+      "path": "specs/native-kernel-scheduler-deferred-readiness.schema.json",
+      "sha256": "B51CF56754AB50A1641897A912DB712E0BB49E1826EBBAB012DCC1F98121626B",
+      "byte_count": 2383,
+      "line_count": 69
+    },
+    {
+      "path": "docs/native-kernel-scheduler-deferred.md",
+      "sha256": "8DF33650C867B4D074379138C88A22A32AA37AF9604ADDCA250F536360A15991",
+      "byte_count": 7729,
+      "line_count": 106
+    },
+    {
+      "path": "runs/native-kernel-scheduler-deferred-readiness.json",
+      "sha256": "5DEB81D744D08EC14895631699B64A9573F57587F6D3520476A7A57E01262F3A",
+      "byte_count": 198418,
+      "line_count": 5382
+    },
+    {
       "path": "docs/checkpoints/cycle198-symbol-admission-and-boot-replay.md",
       "sha256": "86116CD13135D5BA0C760565C17EA6D43DB0678ACA747AD7FBD21FF83843C9DB",
       "byte_count": 6447,
@@ -641,9 +707,9 @@
     },
     {
       "path": "tools/pooleos_release_gate.py",
-      "sha256": "24E4AA28C54512033A388995C212F46BD18FF67A1A95D363D4F7F66C10A49ED6",
-      "byte_count": 362303,
-      "line_count": 7268
+      "sha256": "173126111AF1885BDA82FA2FF6EB949DFF8022259EBD84C62024E5301EF3F629",
+      "byte_count": 363300,
+      "line_count": 7283
     },
     {
       "path": "docs/checkpoints/cycle184-boot-host-provenance.md",
@@ -1169,15 +1235,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "41A60EC09D3700A3BC12E76B285A5F460E13A32796448E76F038F6AC1E96E290",
-      "byte_count": 107433,
-      "line_count": 1441
+      "sha256": "77314E34364C9E9430FB3BF2003F4AE4FEBC44612B82E25780C4879CFAC6B78F",
+      "byte_count": 108141,
+      "line_count": 1451
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "81CAB929F538CE925C73C84C983B24F23EAB25EC5F4E485990ED1F23D34E9215",
-      "byte_count": 451747,
-      "line_count": 3744
+      "sha256": "2F6ED1F0081F60CE7BD79A3D5AF01C344B0F5C0FF2B7F5D318B9D0A7C12FC87B",
+      "byte_count": 453227,
+      "line_count": 3766
     },
     {
       "path": "docs/publication-boundary.md",

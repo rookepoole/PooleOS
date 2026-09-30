@@ -24,6 +24,17 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle202-deferred-admission-and-controls.md",
+    "runtime/native_kernel_scheduler_deferred.py",
+    "tools/qualify_native_kernel_scheduler_deferred.py",
+    "tests/test_native_kernel_scheduler_deferred.py",
+    "tests/test_native_deferred_controls.py",
+    "tests/fixtures/pksched3_control_probe.rs",
+    "specs/native-kernel-scheduler-deferred-contract.json",
+    "specs/native-kernel-scheduler-deferred-contract.schema.json",
+    "specs/native-kernel-scheduler-deferred-readiness.schema.json",
+    "docs/native-kernel-scheduler-deferred.md",
+    "runs/native-kernel-scheduler-deferred-readiness.json",
     "docs/checkpoints/cycle198-symbol-admission-and-boot-replay.md",
     "docs/checkpoints/cycle199-cpu-control-admission-and-replay.md",
     "docs/checkpoints/cycle200-memory-and-multiprocessor-replay.md",

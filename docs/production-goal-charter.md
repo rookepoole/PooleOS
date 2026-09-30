@@ -7,9 +7,19 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 201
+Last roadmap reconciliation: PooleOS Cycle 202
 
-Cycle 201 qualifies cooperative scheduling and BSP preemption on the unchanged
+Cycle 202 repairs deferred-work recorded admission and replaces fourteen
+constant-only control groups with executed native/source cases. Two final
+virtual boots, 254 cases and all 17 focused tests pass; 315 corrupted records
+are rejected. Selected readiness is 22/27, with five profiles pending and at
+least 51 unproven groups in later scheduler profiles. Next: N12-SCHED-SMP-001.
+No normative condition, phase, flag, kernel byte, ISO or production claim changes.
+[Cycle 202 evidence](checkpoints/cycle202-deferred-admission-and-controls.md).
+Combined scoped regression passes 144/144 with zero skips; repaired metadata
+passes 49/49 and conservation verifies 338 source bindings. Counts overlap.
+
+Historical Cycle 201 qualifies cooperative scheduling and BSP preemption on the unchanged
 Cycle 197 kernel: four fresh virtual boots, 53 control groups, 341 rejection cases
 and 31 focused tests pass. Selected readiness is 21/27, with six later profiles
 pending from N12-SCHED-DEFERRED-001. Deferred admission and at least 65
