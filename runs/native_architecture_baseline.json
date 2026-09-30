@@ -370,6 +370,12 @@
       "line_count": 111
     },
     {
+      "path": "docs/checkpoints/cycle200-memory-and-multiprocessor-replay.md",
+      "sha256": "1C5AC9FC2A39FCC8C00D8C6F35DD3263A3EFD789288B15BEB331856E8A3AFBC1",
+      "byte_count": 6974,
+      "line_count": 120
+    },
+    {
       "path": "tests/test_native_symbol_admission.py",
       "sha256": "2FCB434E27E41ABE61A179D05B06163EA2DB12142BB48F174F5DCE1B1BC5FED2",
       "byte_count": 5082,
@@ -629,9 +635,9 @@
     },
     {
       "path": "tools/pooleos_release_gate.py",
-      "sha256": "F5A4C62E08AB3B72FBF99AC2E1E1B83C833DF6A7D729249372725966C615E347",
-      "byte_count": 360709,
-      "line_count": 7244
+      "sha256": "5B56EEABA3D0226525B3C4946A603CFBB1394ADA29884E0DBF6D1B7D4BCBF97B",
+      "byte_count": 361507,
+      "line_count": 7256
     },
     {
       "path": "docs/checkpoints/cycle184-boot-host-provenance.md",
@@ -857,9 +863,9 @@
     },
     {
       "path": "tests/test_native_dependency_release_gate.py",
-      "sha256": "E5C782FF7E760ACC5EC9107C52CBBA75D75B183198AD48A263C7A1B81A531135",
-      "byte_count": 9149,
-      "line_count": 158
+      "sha256": "2BC8C572A672818CFD00660BFD4F5D7889C0AFA2E901E87C6AF5A306C5C50894",
+      "byte_count": 10668,
+      "line_count": 182
     },
     {
       "path": "docs/checkpoints/cycle177-dispatch-execution-holds.md",
@@ -1157,15 +1163,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "F8E8C5ABEC0B90AE4BD75990B36814800D58066C2C9514221C08C88F51AE13B2",
-      "byte_count": 105890,
-      "line_count": 1420
+      "sha256": "334814540817CB2A943F01726452D84E1771FF0013E5FC816534C0CFE887A016",
+      "byte_count": 106706,
+      "line_count": 1431
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "80C0E06DA4D9553945F1B2FF19D535B8C2AD0BE3EF67247A809B33635A58A6DF",
-      "byte_count": 448381,
-      "line_count": 3693
+      "sha256": "A6FD62F8BE190EBC2DCE503E1B35E430B71B62A6B39678E71DC5167E9032F2B7",
+      "byte_count": 450186,
+      "line_count": 3720
     },
     {
       "path": "docs/publication-boundary.md",
@@ -1301,38 +1307,38 @@
     },
     {
       "path": "runs/native-kernel-physical-memory-readiness.json",
-      "sha256": "BB5C864CF76128B9D144D360B12792E70C0E2ED6A5986019328967A5B15CF0A8",
+      "sha256": "C4AD82F6B52D987F303DB02E5FBFEF7B782277168ACD921A0B27510AFB6E328B",
       "byte_count": 234245,
       "line_count": 6560
     },
     {
       "path": "runs/native-kernel-virtual-memory-readiness.json",
-      "sha256": "2D2FC54F7AC8DB642E5F628CCF381F33C05100D9FE1D1245FE73374A114B2CAF",
+      "sha256": "52526BF1B46D4739B636032D6BAFDA774E31495EF1F381863B0785BFF6E2FF13",
       "byte_count": 203130,
       "line_count": 5569
     },
     {
       "path": "runs/native-kernel-interrupt-time-readiness.json",
-      "sha256": "9FED29AEE36D11165C2F800376DE4EC9BE0E558AB5225170908C6A176F19DE81",
+      "sha256": "558819215BF1EE636FEFBE496BD5F06612B1362DF92D29AD4A8E771CE9A7F2BA",
       "byte_count": 195683,
       "line_count": 5306
     },
     {
       "path": "runs/native-kernel-smp-first-ap-readiness.json",
-      "sha256": "7B20241B707FBC077AA2DD937354E4347AD7952673491C9CA9A77EDD40C43401",
-      "byte_count": 198369,
+      "sha256": "6293B3B799ED48F4F923AD6483C218D68D4EBA885EE2A02C04825929B7845B31",
+      "byte_count": 198368,
       "line_count": 5389
     },
     {
       "path": "runs/native-kernel-smp-percpu-runtime-readiness.json",
-      "sha256": "4C218EAAEB01673F7F0C45ED9DA92895E6EC564AA6A5EEAA57BFB09162F1B99B",
-      "byte_count": 200369,
+      "sha256": "31C04EFD10CD2BE8E1DBCDF3E08655AB525909987E61F83E52D1CAD907543888",
+      "byte_count": 200366,
       "line_count": 5284
     },
     {
       "path": "runs/native-kernel-smp-ipi-readiness.json",
-      "sha256": "D302E39890B500E1D8B732EDE823A62893A0C6453E5E78FC0747FE91DF7CF2F7",
-      "byte_count": 255772,
+      "sha256": "1CECF18AF71AA97276AF28BC6AFA1815649A110B50084ACDFEFAA6A2D2468619",
+      "byte_count": 255743,
       "line_count": 6732
     },
     {

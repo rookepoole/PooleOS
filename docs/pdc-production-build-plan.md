@@ -1,15 +1,42 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-09-29
-Plan version: 2.102.0-native-cpu-control-admission
-Roadmap cycle: PooleOS Cycle 199
+Plan version: 2.103.0-native-memory-multiprocessor-replay
+Roadmap cycle: PooleOS Cycle 200
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 199: CPU Control Admission and Replay
+## Cycle 200: Memory and Multiprocessor Replay
+
+`N9-PMM-ACPI-CONSUMER-001`, N9.1/N9.2 supporting N10/N36 and dependent
+VM/IRQ/AP/IPI profiles, advances under `ADD-N36-RECEIPT-COVERAGE-001`.
+Six profiles pass twelve fresh virtual boots, 421 control groups and 1,137
+executed rejection cases on the unchanged Cycle 197 kernel. All 93 scoped tests
+pass, including 1,896 corrupted records, 360 mailbox mutations, disabled-validator
+detection, 20 memory gate cases and four independent IPI pin rejection cases.
+
+Initial IPI admission failed because the aggregate gate retained the Cycle 192
+image hash. Its runtime and guest qualifier had passed. After the pin correction,
+the same unchanged receipt passes runtime and gate; the original failure remains
+recorded. No guest evidence is rewritten or extra boot counted.
+
+Selected readiness is 19/27. Current bounded VM and AP ownership is established,
+not general task-stack or CPU-retirement integration. Eight profiles remain from
+`N12-SCHED-001`, followed by preemption, deferred work, SMP scheduling, AP workers,
+SMP preemption, atomics and locks. Deferred admission and at least 65 control
+groups remain open. Full exact-candidate canonical/Doctor/publication/check/review
+qualification still precedes main merge. No phase, flag, kernel byte, ISO or
+production condition changes. Test inventory is 1,071, not full-suite execution.
+[Evidence and next steps](checkpoints/cycle200-memory-and-multiprocessor-replay.md).
+Combined scoped regression passes 327 tests with zero skips in 472.891 seconds.
+Corrected metadata passes 47/47 after six obsolete stale-receipt assertions were
+reconciled; the initial failure remains recorded. Conservation verifies 17
+archived parent records and 326 architecture bindings. Full qualification is pending.
+
+## Historical Cycle 199: CPU Control Admission and Replay
 
 `N7-TRAP-001` at N7.5/N7.6, followed by N7.1/N7.3/N7.4 CPU dependencies,
 advances under `ADD-N36-RECEIPT-COVERAGE-001`. A genuine current-positive trap

@@ -85,6 +85,30 @@ class NativeDependencyReleaseGateTests(unittest.TestCase):
                     rejected += 1
         self.assertEqual(rejected, 21)
 
+    def test_current_ipi_gate_independently_rejects_prior_kernel_pins(self) -> None:
+        module = gate.native_kernel_smp_ipi
+        receipt = module.read_json(module.ROOT / module.READINESS_RELATIVE)
+        positive = gate.check_native_kernel_smp_ipi_readiness()
+        self.assertTrue(positive["ok"], positive["detail"])
+        self.assertEqual(module.readiness_errors(receipt), [])
+        current = receipt["build"]["kernel_entry"]["product"]["canonical_sha256"]
+        for wrong in (
+            "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8",
+            "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625",
+            "0" * 64, False,
+        ):
+            with self.subTest(wrong=wrong):
+                self.assertNotEqual(wrong, current)
+                candidate = copy.deepcopy(receipt)
+                candidate["build"]["kernel_entry"]["product"]["canonical_sha256"] = wrong
+                # Isolate the aggregate pin after validating the genuine positive.
+                with patch.object(gate, "_load_schema_artifact", return_value=(candidate, [])), \
+                     patch.object(module, "readiness_errors", return_value=[]), \
+                     patch.object(gate.native_kernel_entry, "readiness_errors", return_value=[]):
+                    result = gate.check_native_kernel_smp_ipi_readiness()
+                self.assertFalse(result["ok"], result["detail"])
+                self.assertIn("embedded kernel identity changed", result["detail"])
+
     def test_stale_host_and_linked_image_pins_are_rejected(self) -> None:
         rejected = 0
         profiles = {

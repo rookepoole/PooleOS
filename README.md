@@ -11,7 +11,20 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 199 repairs CPU control-record admission
+**Current development checkpoint:** Cycle 200 qualifies six memory, interrupt and
+multiprocessor profiles on the unchanged Cycle 197 kernel: twelve final virtual
+boots, 421 control groups and 1,137 executed rejection cases. All 93 scoped tests
+pass, including 1,896 malformed receipts and independent memory/IPI gate tests.
+An old aggregate IPI image pin is repaired without rewriting guest evidence.
+Selected readiness is 19/27; eight scheduler-through-lock profiles, deferred
+evidence/control repairs and full exact-candidate merge qualification remain.
+Next is `N12-SCHED-001`. No phase, new ISO or production promotion is claimed.
+[Cycle 200 evidence](docs/checkpoints/cycle200-memory-and-multiprocessor-replay.md).
+Combined scoped regression passes 327 tests with zero skips. Corrected metadata
+passes 47/47; conservation verifies 17 archived parent records and 326 bindings.
+These checks do not replace the full canonical merge qualification.
+
+**Historical development checkpoint:** Cycle 199 repairs CPU control-record admission
 and requalifies five N7 profiles on the unchanged Cycle 197 kernel. Fourteen final
 virtual boots, 225 executed controls and 54 focused tests pass. All 3,398 malformed
 control records and 371 paired-run corruptions reject through runtime and gate.
