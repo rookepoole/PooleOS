@@ -11,7 +11,22 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 211 qualifies five CPU profiles on the
+**Current development checkpoint:** Cycle 212 qualifies memory, virtual memory,
+interrupts, first-AP startup, per-CPU runtime and IPI on the unchanged Cycle 210
+kernel. Twelve VM boots and all 93 focused tests pass. Ten obsolete accounting
+and identity pins are reconciled from independent evidence; original admission
+failures remain recorded. Selected readiness is **19/27**; eight scheduler,
+atomic and lock profiles, at least 35 control groups and AP-worker recorded
+admission remain open. The next move is `N12-SCHED-001`.
+[Cycle 212 evidence](docs/checkpoints/cycle212-current-kernel-memory-and-multiprocessor-replay.md).
+Development checkpoints are backed up through the branch in
+[PR #78](https://github.com/rookepoole/PooleOS/pull/78); main merge requires the
+full exact-candidate qualification suite. No native bytes, phase status or demo
+ISO changes in this cycle. This is not production qualification.
+Corrected progress/architecture/checklist tests pass 59/59; the initial stale
+IPI assertion failure remains recorded.
+
+**Historical development checkpoint:** Cycle 211 qualifies five CPU profiles on the
 unchanged Cycle 210 kernel: 14 final VM runs, 225 controls and 55 focused tests
 pass. Receipt admission now rejects 80 malformed nested-build cases without
 exceptions and enforces an integer relocation count. Readiness is **13/27**;

@@ -1,13 +1,49 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-03
-Plan version: 2.114.0-native-cpu-admission-and-replay
-Roadmap cycle: PooleOS Cycle 211
+Plan version: 2.115.0-native-memory-and-multiprocessor-replay
+Roadmap cycle: PooleOS Cycle 212
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 212: Current-Kernel Memory and Multiprocessor Replay
+
+`N9-PMM-ACPI-CONSUMER-001`, N9.1/N9.2 through N9.3/N9.4 and dependent
+N8.1/N8.3/N8.5/N8.6, supports N10/N36 under `ADD-MEM-001`, `ADD-TIME-001`
+and `ADD-N36-RECEIPT-COVERAGE-001`. The unchanged Cycle 210 kernel completes
+twelve fresh VM boots across physical/virtual memory, interrupts, first AP,
+per-CPU runtime and IPI. All 421 control groups covering 1137 cases pass.
+
+All 93 focused tests pass with no skips: 1896 recorded-evidence corruptions,
+360 raw-mailbox cases, eight isolated IPI identity cases, 23 memory summary
+cases, 189 PMM marker-validator calls and disabled-parser/oracle detection.
+These counts overlap tests; they do not denote independent hardware samples.
+Three PMM and six VM accounting pins plus one IPI image pin were obsolete.
+Their genuine admission failures remain recorded; independently measured
+corrections admit identical candidates without rewriting or rerunning guests.
+
+Selected readiness advances from 13/27 to 19/27. Host ownership evidence is
+still Cycle 210; bounded live VM/IPI evidence is now Cycle 212. Exact original
+root restoration, local invalidation and AP resource release do not establish
+general task/CPU retirement. Six boot receipts210 and five CPU receipts211,
+native source, entry/core, prior checkpoints and the demo ISO remain unchanged.
+The 94 flags (38 open), 40 phases, 301 subphases, 57 added requirements and
+locked checklist coverage are preserved. Twenty-two current dictionaries are
+archived verbatim; the source inventory is 1108 tests, not an execution count.
+
+Next is `N12-SCHED-001`: eight scheduler/atomic/lock current-image profiles,
+AP-worker recorded admission and at least 35 executed-control groups remain.
+Canonical runtime-inclusive qualification, Doctor, release gate, exact-index
+publication scan and configured GitHub/review gates still precede main merge.
+Checkpoint commits can be pushed to PR #78 for cloud backup before those gates
+pass. No phase closes and no production claim changes.
+[Evidence](checkpoints/cycle212-current-kernel-memory-and-multiprocessor-replay.md).
+Corrected metadata passes 59/59 after one preserved stale IPI progress assertion
+failure (58/59). Conservation verifies 357 source bindings and 22 unchanged
+archived records. These focused results are not a canonical full-suite pass.
 
 ## Cycle 211: Current-Kernel CPU Admission and Replay
 

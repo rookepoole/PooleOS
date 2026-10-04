@@ -139,6 +139,7 @@ class NativeDependencyReleaseGateTests(unittest.TestCase):
         self.assertEqual(module.readiness_errors(receipt), [])
         current = receipt["build"]["kernel_entry"]["product"]["canonical_sha256"]
         for wrong in (
+            "A943DCB6E41A27F952868F05ED2B3523B47D9D7A7B5DB909EE385205F7CA3B31",
             "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8",
             "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625",
             "B19D4F7E854ECED3495D88C00F7379061B913EF00477FBD3701929B2F77D80F1",
