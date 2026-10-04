@@ -1,15 +1,39 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-04
-Plan version: 2.122.0-current-kernel-memory-replay
-Roadmap cycle: PooleOS Cycle 219
+Plan version: 2.123.0-current-kernel-scheduler-replay
+Roadmap cycle: PooleOS Cycle 220
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 219: Current-Kernel Memory Replay
+## Cycle 220: Current-Kernel Scheduler Replay
+
+`N12-SCHED-001`, `N12-SCHED-PREEMPT-001` and `N12-SCHED-DEFERRED-001` advance
+N12.4-N12.7/N36, preserving the existing N12.1-N12.3 boundaries. Requirements:
+`ADD-N12-SCHED-FOUNDATION-001`, `ADD-N12-SCHED-PREEMPT-001`,
+`ADD-N12-SCHED-DEFERRED-001`, `ADD-N36-RECEIPT-COVERAGE-001`.
+
+Three profiles pass **six virtual boots**, 83 control groups/595 cases and
+**47 focused tests**. Two deferred-image expectations are updated only after
+independent validation of the current kernel hash and 1326 relocations. The
+initial rejected admission remains; the same candidate passes without altered
+guest evidence or extra guest runs. [Cycle 220 evidence](checkpoints/cycle220-current-kernel-scheduler-replay.md).
+
+Readiness is **22/27**. Next is `N12-SCHED-SMP-001`, then AP workers, SMP preemption,
+atomics and locks. Five profiles plus seventeen SMP-preemption control groups
+and admission remain. N36 shared-helper bindings, N0 custody, N5 authentication,
+general retirement and hardware qualification stay open. All 25 parent records,
+phase/flag statuses, checklist and PooleGlyph boundaries are preserved. Native
+code, boot/CPU218 and memory219 evidence, and the demo ISO are unchanged.
+Inventory: 1137 Python tests, 373 architecture bindings. No phase closure or
+promotion follows; full exact-candidate qualification precedes main merge.
+Progress/architecture/checklist regression passes 67/67. Conservation verifies
+all 373 source bindings and 25 archived parent records, preserving prior failures.
+
+## Historical Cycle 219: Current-Kernel Memory Replay
 
 `N9-PMM-ACPI-CONSUMER-001`, N9.1-N9.4 with N8.1/N8.3/N8.5, N10/N36,
 advances under `ADD-MEM-001`, `ADD-TIME-001` and `ADD-N36-RECEIPT-COVERAGE-001`.
@@ -4032,6 +4056,12 @@ seL4 is an assurance and architecture reference only. PooleKernel remains an ori
 | `FLAG-BUILDROOT-LEGACY-001` | SUPERSEDED | Closed by architecture reset | Buildroot remains historical reference and cannot promote native status |
 
 ## 12. Near-Term Execution Sequence
+
+Cycle 220 current sequence: `N12-SCHED-SMP-001`, AP-worker replay, SMP-preemption
+control/admission completion and replay, atomics and locks, then full exact-candidate
+canonical/Doctor/release/publication/GitHub/review qualification before PR78 merge.
+Readiness22/27; five profiles and seventeen control groups remain. The historical
+sequences below preserve prior decisions, not additional current instructions.
 
 Current Cycle 207 sequence: save the three qualified scheduler profiles, then
 repair `N12-SCHED-SMP-001` recorded admission and execute its sixteen missing

@@ -560,6 +560,18 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 220 qualifies scheduler, BSP preemption and deferred work on unchanged kernel216: six virtual "
+    "boots, 83 control groups/595 cases and 47 focused tests pass. Two measured deferred image pins are "
+    "reconciled; the initial failed admission remains and the identical candidate passes. Readiness is "
+    "22/27; five SMP scheduler/AP-worker/preemption/atomic/lock profiles remain from N12-SCHED-SMP-001, "
+    "plus seventeen SMP-preemption control groups and recorded admission. Shared-helper binding review "
+    "remains N36. No phase, flag, native byte, ISO or production change; full exact-candidate gates "
+    "precede main merge and cloud branch backup is separate. "
+    + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -2934,9 +2946,9 @@ def check_native_kernel_scheduler_deferred_readiness(
         or linked.get("scope_byte_count") != 36
         or linked.get("forbidden_instruction_count") != 0
         or type(linked.get("relocation_count")) is not int
-        or linked.get("relocation_count") != 1323
+        or linked.get("relocation_count") != 1326
         or linked.get("canonical_sha256")
-        != "AE3422B2D44E6EC87AB1D5B51414C023E46F2EE3461A0D0895B9D1242E10D25A"
+        != "FD6C2A0C709957B9EDFFC0647D534E060ED68215C075F07D70AB2AEBCA6C81D1"
         or linked.get("status") != "pass"
     ):
         errors.append("PKSCHED3 host oracle, source, or linked switch audit changed")

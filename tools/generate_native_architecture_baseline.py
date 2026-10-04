@@ -24,6 +24,7 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle220-current-kernel-scheduler-replay.md",
     "docs/checkpoints/cycle219-current-kernel-memory-replay.md",
     "docs/checkpoints/cycle218-terminal-capture-and-cpu-replay.md",
     "tests/test_native_boot_capture.py",

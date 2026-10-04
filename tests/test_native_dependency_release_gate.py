@@ -167,12 +167,13 @@ class NativeDependencyReleaseGateTests(unittest.TestCase):
         self.assertTrue(positive["ok"], positive["detail"])
         self.assertEqual(module.readiness_errors(receipt), [])
         mutations = [("canonical_sha256", wrong) for wrong in (
+            "AE3422B2D44E6EC87AB1D5B51414C023E46F2EE3461A0D0895B9D1242E10D25A",
             "B19D4F7E854ECED3495D88C00F7379061B913EF00477FBD3701929B2F77D80F1",
             "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8",
             "A943DCB6E41A27F952868F05ED2B3523B47D9D7A7B5DB909EE385205F7CA3B31",
             "0" * 64, None, False, "",
         )]
-        mutations.extend(("relocation_count", wrong) for wrong in (1305, 1319, 1321, 1326, 1323.0, None, False))
+        mutations.extend(("relocation_count", wrong) for wrong in (1305, 1319, 1321, 1323, 1323.0, 1326.0, None, False))
         for field, wrong in mutations:
             with self.subTest(field=field, wrong=wrong):
                 candidate = copy.deepcopy(receipt)
