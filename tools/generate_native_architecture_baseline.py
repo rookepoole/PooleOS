@@ -25,6 +25,7 @@ ADR_NAMES = (
 )
 BOUND_SOURCE_PATHS = (
     "docs/checkpoints/cycle210-retained-map-growth-and-boot-replay.md",
+    "docs/checkpoints/cycle211-current-kernel-cpu-admission-and-replay.md",
     "docs/checkpoints/cycle209-native-ap-worker-transactions.md",
     "tests/test_native_ap_worker_transactions.py",
     "tests/fixtures/pksched5_transaction_probe.rs",

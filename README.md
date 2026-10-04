@@ -11,7 +11,19 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 210 fixes a real boot-layout failure:
+**Current development checkpoint:** Cycle 211 qualifies five CPU profiles on the
+unchanged Cycle 210 kernel: 14 final VM runs, 225 controls and 55 focused tests
+pass. Receipt admission now rejects 80 malformed nested-build cases without
+exceptions and enforces an integer relocation count. Readiness is **13/27**;
+14 downstream profiles and at least 35 control groups remain. Checkpoints are
+saved on the development branch in [PR #78](https://github.com/rookepoole/PooleOS/pull/78).
+Main merge still requires full exact-candidate qualification. No phase or flag
+closes; the kernel and demo ISO are unchanged.
+[Cycle 211 evidence](docs/checkpoints/cycle211-current-kernel-cpu-admission-and-replay.md).
+Corrected metadata passes 58/58. The earlier combined run remains recorded as
+248/249, with its stale metadata assertion repaired; no full-suite pass is claimed.
+
+**Historical development checkpoint:** Cycle 210 fixes a real boot-layout failure:
 the 148-page kernel collided with the old retained-stack guard. A 192-page
 reservation, unmapped guards, NX permissions and before-write overflow rejection
 now pass native boundary tests and six final VM boots, including two kernel entries.

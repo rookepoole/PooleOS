@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import copy
 import importlib
+import json
+from pathlib import Path
+import tempfile
 import unittest
 from unittest.mock import patch
 
@@ -71,6 +74,14 @@ class NativeDependencyReleaseGateTests(unittest.TestCase):
                     (("build", "kernel_entry", "product", "canonical_sha256"), None),
                     (("build", "kernel_entry", "product", "canonical_sha256"), False),
                     (("build", "kernel_entry", "product", "canonical_sha256"), ""),
+                    (("build", "kernel_entry", "product", "canonical_sha256"),
+                     "A943DCB6E41A27F952868F05ED2B3523B47D9D7A7B5DB909EE385205F7CA3B31"),
+                    (("build", "kernel_entry", "product", "canonical_sha256"),
+                     "72C37783A5729229E6A259E38DC8DF55034FD467B77839FFFC4AA62B66E33EBF"),
+                    (("build", "kernel_entry", "product", "relocation_count"), 1326),
+                    (("build", "kernel_entry", "product", "relocation_count"), 1323.0),
+                    (("build", "kernel_entry", "product", "relocation_count"), None),
+                    (("build", "kernel_entry", "product", "relocation_count"), False),
                 ])
             for field_path, value in mutations:
                 with self.subTest(profile=profile, field=field_path):
@@ -78,7 +89,8 @@ class NativeDependencyReleaseGateTests(unittest.TestCase):
                     target = candidate
                     for key in field_path[:-1]:
                         target = target[key]
-                    self.assertNotEqual(target[field_path[-1]], value)
+                    self.assertTrue(type(target[field_path[-1]]) is not type(value)
+                                    or target[field_path[-1]] != value)
                     target[field_path[-1]] = value
                     with patch.object(gate, "_load_schema_artifact", return_value=(candidate, [])):
                         if field_path[0] == "build":
@@ -89,7 +101,35 @@ class NativeDependencyReleaseGateTests(unittest.TestCase):
                             result = check_fn()
                     self.assertFalse(result["ok"], result["detail"])
                     rejected += 1
-        self.assertEqual(rejected, 26)
+        self.assertEqual(rejected, 32)
+
+    def test_cpu_gates_reject_malformed_nested_build_without_exceptions(self) -> None:
+        rejected = 0
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "candidate.json"
+            for profile in ("trap", "cpu_policy", "xstate_policy", "xstate_exception", "privilege_msr_policy"):
+                module = importlib.import_module("runtime.native_kernel_" + profile)
+                receipt = module.read_json(module.ROOT / module.READINESS_RELATIVE)
+                check_fn = getattr(gate, "check_native_kernel_" + profile + "_readiness")
+                positive = check_fn()
+                self.assertTrue(positive["ok"], positive["detail"])
+                fields = [("build",), ("build", "kernel_entry"),
+                          ("build", "kernel_entry", "product")]
+                if profile == "cpu_policy":
+                    fields.append(("build", "source_audit"))
+                for field_path in fields:
+                    for value in (None, [], False, "invalid", {}):
+                        with self.subTest(profile=profile, field=field_path, value=value):
+                            candidate = copy.deepcopy(receipt)
+                            target = candidate
+                            for key in field_path[:-1]:
+                                target = target[key]
+                            target[field_path[-1]] = value
+                            path.write_text(json.dumps(candidate), encoding="utf-8")
+                            result = check_fn(path)
+                            self.assertFalse(result["ok"], result["detail"])
+                            rejected += 1
+        self.assertEqual(rejected, 80)
 
     def test_current_ipi_gate_independently_rejects_prior_kernel_pins(self) -> None:
         module = gate.native_kernel_smp_ipi

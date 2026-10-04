@@ -451,6 +451,18 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 211 qualifies five CPU profiles on unchanged kernel210: fourteen final VM runs, 225 controls "
+    "and 55 focused tests pass. Aggregate admission repairs twelve malformed nested-build exceptions "
+    "and an isolated float-relocation pin case; all 80 malformed cases now reject without exceptions. "
+    "Selected readiness is 13/27; fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles remain from "
+    "N9-PMM-ACPI-CONSUMER-001. At least 35 control groups and AP-worker recorded admission remain open. "
+    "Full exact-candidate canonical, Doctor, release, publication and configured GitHub/review checks "
+    "still gate main merge. Branch cloud backup is separate; no phase, flag, native byte, ISO or "
+    "production status changes. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -1558,16 +1570,19 @@ def check_native_kernel_trap_readiness(
     ) != (3, 6, 3, 1, 1, 51):
         errors.append("PKTRAP1 summary changed")
     build = artifact.get("build", {})
-    kernel_product = build.get("kernel_entry", {}).get("product", {}) if isinstance(build, dict) else {}
+    kernel_entry = build.get("kernel_entry") if isinstance(build, dict) else None
+    kernel_product = kernel_entry.get("product") if isinstance(kernel_entry, dict) else None
     if (
         not isinstance(build, dict)
         or build.get("profile_count") != 4
         or build.get("all_profile_binaries_distinct") is not True
         or build.get("default_stop_marker_present") is not True
         or build.get("default_transfer_marker_absent") is not True
+        or not isinstance(kernel_product, dict)
         or kernel_product.get("canonical_sha256")
-        != "A943DCB6E41A27F952868F05ED2B3523B47D9D7A7B5DB909EE385205F7CA3B31"
-        or kernel_product.get("relocation_count") != 1326
+        != "AE3422B2D44E6EC87AB1D5B51414C023E46F2EE3461A0D0895B9D1242E10D25A"
+        or type(kernel_product.get("relocation_count")) is not int
+        or kernel_product.get("relocation_count") != 1323
     ):
         errors.append("PKTRAP1 build or feature isolation changed")
     if artifact.get("claims") != native_kernel_trap.expected_claims():
@@ -1642,6 +1657,7 @@ def check_native_kernel_cpu_policy_readiness(
         or build.get("all_profile_binaries_distinct") is not True
         or build.get("default_stop_marker_present") is not True
         or build.get("default_transfer_marker_absent") is not True
+        or not isinstance(source_audit, dict)
         or source_audit.get("forbidden_instruction_hits") != []
         or source_audit.get("result") != "pass_no_cpu_state_write_instruction"
     ):

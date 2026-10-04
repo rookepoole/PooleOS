@@ -1,15 +1,43 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-03
-Plan version: 2.113.0-native-retained-map-growth
-Roadmap cycle: PooleOS Cycle 210
+Plan version: 2.114.0-native-cpu-admission-and-replay
+Roadmap cycle: PooleOS Cycle 211
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 210: Retained Map Growth and Boot Replay
+## Cycle 211: Current-Kernel CPU Admission and Replay
+
+`N7-TRAP-001`, N7.1/N7.3/N7.4/N7.5/N7.6 and N36, advances under
+`ADD-N7-XSTATE-001` and `ADD-N36-RECEIPT-COVERAGE-001`. Five current-image CPU
+profiles pass fourteen final VM runs and 225 controls; the expected TCG exception
+limitation probe is separate. Kernel210, entry/core and boot receipts are unchanged.
+All 55 focused tests pass, including 3398 corrupt-control cases, 371 run-evidence
+cases, 32 independent identity/promotion cases and 80 malformed nested-build cases.
+
+The aggregate gate previously raised twelve exceptions for malformed nested
+objects and accepted a float relocation only when schema/component validation
+was deliberately bypassed. Guarded extraction and exact integer admission repair
+these counterexamples; all eighty full-gate cases now reject without exceptions.
+The full gate accepted none before repair. The stale trap image pin is updated
+from measured kernel evidence, not by rewriting guest receipts.
+
+Readiness is 13/27. Next is `N9-PMM-ACPI-CONSUMER-001`; fourteen memory/IRQ/SMP/
+scheduler/atomic/lock profiles, AP-worker recorded admission and at least 35
+executed-control groups remain. No phase/flag status changes or production
+promotion. Full canonical, Doctor, release, publication and configured GitHub/
+review checks still gate main merge. Checkpoints can be backed up on the branch
+without weakening those gates. No checkpoint, checklist, owner data, native byte
+or demo ISO is discarded. [Evidence](checkpoints/cycle211-current-kernel-cpu-admission-and-replay.md).
+Corrected metadata passes 58/58 without skips. Initial metadata passed 56/58;
+the combined run passed 248/249 with a remaining stale current-CPU expectation.
+That expectation is repaired and covered by the corrected metadata replay;
+the failed combined run is preserved, not promoted to a clean suite result.
+
+## Historical Cycle 210: Retained Map Growth and Boot Replay
 
 `N5-KMAP-001` and `N6-KENTRY-001`, N5/N6/N36, repair a genuine loader failure
 discovered during `N5-SYMBOLS-SEMANTICS-001`. The 148-page kernel overlapped the

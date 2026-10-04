@@ -7,9 +7,20 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 210
+Last roadmap reconciliation: PooleOS Cycle 211
 
-Cycle 210 repairs the retained guard collision from kernel growth. A 192-page
+Cycle 211 qualifies five CPU profiles on unchanged kernel210: fourteen final VM
+runs, 225 controls and 55 focused tests pass. Aggregate admission repairs twelve
+malformed nested-build exceptions and an isolated float-relocation pin case;
+all 80 malformed cases now reject cleanly. Readiness is 13/27; fourteen profiles
+and at least 35 control groups remain from N9-PMM-ACPI-CONSUMER-001. Full exact-
+candidate qualification still gates main merge; branch cloud backup is separate.
+No normative condition, phase, flag, kernel, demo ISO or production status changes.
+[Cycle 211 evidence](checkpoints/cycle211-current-kernel-cpu-admission-and-replay.md).
+Corrected metadata passes 58/58; the earlier 248/249 combined run is preserved
+as failed, with its remaining stale metadata expectation repaired separately.
+
+Historical Cycle 210 repairs the retained guard collision from kernel growth. A 192-page
 reservation with before-write overflow rejection passes native boundary tests,
 fresh core/entry qualification and six final VM boots, including two kernel entries.
 All 97 focused tests pass. Readiness is 8/27; nineteen downstream profiles and

@@ -8254,9 +8254,125 @@ def apply_cycle210(roadmap: dict, test_count: int) -> dict:
             phase["current_evidence"].insert(0, evidence)
             phase["current_gaps"].insert(0, gap)
         if phase["id"] == "N36":
-            phase["current_evidence"].insert(0, f"Cycle 210 source inventory: {test_count} Python tests discovered; full qualification pending")
+            phase["current_evidence"].insert(0, "Cycle 210 source inventory: 1105 Python tests discovered; full qualification pending")
     for flag in roadmap["implementation_flags"]:
         if flag["id"] in {"FLAG-N5-KMAP-001", "FLAG-N6-KENTRY-001", "FLAG-N5-SYMBOL-BUNDLE-001", "FLAG-N36-RECEIPT-COVERAGE-001"}:
+            flag["evidence"].insert(0, checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle211(roadmap, test_count)
+
+
+def apply_cycle211(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle211-current-kernel-cpu-admission-and-replay.md"
+    next_move = "N9-PMM-ACPI-CONSUMER-001"
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    for key, value in list(gate.items()):
+        if key.startswith("current_") and isinstance(value, dict):
+            suffix = "source_projection" if key == "current_focused_source_projection" else key.removeprefix("current_")
+            gate["historical_cycle210_" + suffix] = copy.deepcopy(value)
+    roadmap["baseline"]["pooleos_cycle"] = 211
+    roadmap["execution_protocol"].update(last_updated_cycle=211, selected_move_id="N7-TRAP-001",
+        owner_independent_next_move_id=next_move)
+    roadmap["execution_protocol"]["required_records"].insert(0, checkpoint)
+    gate["qualification_status"] = "current_kernel_CPU_admission_repaired_fourteen_dependencies_pending"
+    gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=211)
+    rows = (
+        ("trap", "F2D74BF5725E695206ED378E169DE9694800DFB74EC2B5EF7AC9F6B10C5E2E5E", 6, 51,
+         "E11DA9317E145FC30364A9927DC273C1159991B3A0CD287E11D5B7DC65869F68", 398.188),
+        ("cpu_policy", "667877ADB4100D7C972C4E1897A00936C6F51A4DB95B33C3155CDBC188531D5F", 2, 41,
+         "CFA41675A79CE67949D1FDB8D08F791EB2FD1115237010D33465135306D1CE23", 121.500),
+        ("xstate_policy", "6577398A5EC288D3D82B0335B216564E35C169FAE657C82DE5EB945FF8C8B518", 2, 43,
+         "4260145CE808D54618100843E5797A22DAFA156F94093C1D222D6D99730A162A", 96.656),
+        ("xstate_exception", "95B614172F92F68D8EAEDA87EAA1A3673058DBA43DCC02E46CFD3034277F3108", 2, 43,
+         "F3ED8801D7E59F458EBE9E20B63EED505D5DEF7034E3E58654DA297E074BF60D", 81.718),
+        ("privilege_msr_policy", "E3F549D9BD679B38060B636555EEB17061A7FD278EA0867B744DB66190C8E418", 2, 47,
+         "9B9A31059D4151F9B9A62622272025F3EDB8EEF33A8C29EEA6267DBE5A72AE32", 77.906),
+    )
+    bindings = [dict(profile=profile, path="runs/native-kernel-" + profile.replace("_", "-") + "-readiness.json",
+        sha256=digest, fresh_runs=runs, negative_controls=controls, kernel_host_tests=246,
+        execution_log_sha256=log, elapsed_seconds=seconds)
+        for profile, digest, runs, controls, log, seconds in rows]
+    cpu = copy.deepcopy(gate["historical_cycle208_cpu_qualification"])
+    cpu.update(cycle=211, source_validation_cycle=211, scope="five_N7_profiles_on_unchanged_Cycle210_kernel",
+        kernel_sha256=gate["current_entry_provenance_qualification"]["canonical_sha256"], receipt_bindings=bindings,
+        focused_python_tests=55, aggregate_gate_regression_cases=32,
+        new_previous_image_and_wrong_typed_pin_rejection_cases=6)
+    cpu["nested_build_admission_audit"] = {
+        "genuine_current_positives": 5, "full_gate_cases": 80,
+        "before_rejected": 68, "before_exceptions": 12, "before_accepted": 0,
+        "after_rejected": 80, "after_exceptions": 0, "after_accepted": 0,
+        "isolated_float_relocation_accepted_before": True, "isolated_float_relocation_accepted_after": False,
+        "schema_and_component_bypassed_only_for_isolated_pin_case": True,
+        "malformed_shapes": ["null", "array", "boolean", "string", "empty_object"],
+        "before_gate_source_sha256": "46AB564FD3788D44CDB33F9D97323D411CC42014A1A020C8BA074A9694A40757",
+        "after_gate_source_sha256": "E0B370DB0D132A3F33E1385BB22B4E3D164F491EB26CEDACA84AFC7DE433EC0F",
+        "source_hash_scope": "at_audit_execution_before_later_gap_text_update",
+        "receipt_rewriting_or_validator_bypass_in_real_admission": False,
+    }
+    gate["current_cpu_qualification"] = cpu
+    projection = copy.deepcopy(gate["historical_cycle205_source_projection"])
+    projection.update(cycle=211, run_count_scope="CPU211_not_retained_boot210", focused_python_tests_passed=55)
+    gate["current_focused_source_projection"] = projection
+    gate["current_entry_provenance_qualification"] = dict(gate["current_entry_provenance_qualification"], latest_reproduction_cycle=211)
+    gate["current_ipi_mailbox_oracle_gap"] = dict(gate["current_ipi_mailbox_oracle_gap"], cycle=211,
+        remaining_affected_profiles=14, newly_requalified_profiles=[b["profile"] for b in bindings])
+    gate["current_control_execution_audit"] = dict(gate["current_control_execution_audit"], cycle=211)
+    gate["current_closeout_regression"] = {
+        "cycle": 211, "status": "pass", "scope": "five_CPU_profiles_and_aggregate_admission_not_full_canonical",
+        "tests_run": 55, "tests_passed": 55, "tests_failed": 0, "tests_skipped": 0,
+        "elapsed_seconds": 177.854, "runner_elapsed_seconds": 178.766,
+        "log_sha256": "4049032FB36A9882BABCD61442E0CCC28F70B7623D6869E3BC4F81502AE486DA",
+        "source_unchanged_during_execution": True, "owner_report_unchanged": True,
+        "initial_metadata": {"tests_run": 58, "tests_passed": 56, "tests_failed": 2, "tests_skipped": 0,
+            "elapsed_seconds": 23.101, "runner_elapsed_seconds": 23.891,
+            "cause": "historical_CPU_tests_still_expected_current_receipts_to_be_stale",
+            "log_sha256": "D54FA418AACF096D9E3DD4BE911B59577D9FF1A5DFFDAC86969038198837D062"},
+        "initial_combined_scoped_regression": {
+            "tests_run": 249, "tests_passed": 248, "tests_failed": 1, "tests_skipped": 0,
+            "elapsed_seconds": 396.655, "runner_elapsed_seconds": 398.094,
+            "log_sha256": "47805465466321560B97E2219754924EABD42C7CDC732747B0EA64F29358E68C",
+            "scope": "boot_CPU_entry_host_publication_metadata_not_full_canonical",
+            "cause": "one_remaining_stale_current_CPU_assertion_in_historical_metadata_test",
+            "source_unchanged_during_execution": True, "owner_report_unchanged": True,
+            "counts_overlap_focused_tests": True, "admitted_as_passing_suite": False,
+        },
+        "corrected_metadata_regression": {
+            "tests_run": 58, "tests_passed": 58, "tests_failed": 0, "tests_skipped": 0,
+            "elapsed_seconds": 29.005, "runner_elapsed_seconds": 29.844,
+            "log_sha256": "4003E25622DE08D904FCD891E0A1B59B373349AF06FBA36E1F8F1DEB6EDAC4DE",
+            "source_unchanged_during_execution": True, "owner_report_unchanged": True,
+            "full_combined_suite_rerun_after_metadata_only_fix": False,
+        },
+        "obsolete_trap_aggregate_pin_observed_rejecting_current_receipt": True,
+        "obsolete_pin_reconciled_from_measured_kernel_not_claim_bypass": True,
+        "canonical_full_replay_performed": False, "merge_qualified": False, "production_ready": False,
+    }
+    evidence = (
+        "Cycle 211: " + checkpoint + " qualifies five CPU profiles on unchanged kernel210: fourteen fresh "
+        "virtual boots, 225 controls, two WHPX exception runs and one separate expected TCG limitation probe. "
+        "All 55 focused tests pass, including 3398 control-record corruptions, 371 run-evidence corruptions, "
+        "32 independent identity/promotion cases and 80 malformed nested-build cases. The before audit raised "
+        "12 exceptions and rejected 68 cases; all 80 now reject without exceptions. An isolated float relocation "
+        "pin counterexample is repaired; the full gate had accepted none. The stale trap image pin is reconciled."
+        " Initial metadata passes 56/58; combined regression passes 248/249 with one remaining stale current-CPU "
+        "expectation. Corrected metadata passes 58/58 with no skips; the failed combined run is not promoted."
+    )
+    gap = (
+        "Selected readiness is 13/27; fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles remain from "
+        + next_move + ". At least 35 control groups and AP-worker recorded admission remain open. "
+        "No phase, flag, kernel byte, ISO or production status changes; full exact-candidate canonical, Doctor, "
+        "release, publication and configured GitHub/review gates still precede main merge. Branch cloud backup "
+        "does not require main merge. N0 custody, N5 authentication and general retirement remain open."
+    )
+    for phase in roadmap["phases"]:
+        if phase["id"] in {"N7", "N36"}:
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle 211 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in {"FLAG-N7-TRAP-001", "FLAG-N36-RECEIPT-COVERAGE-001"}:
             flag["evidence"].insert(0, checkpoint)
     roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
@@ -8266,7 +8382,7 @@ def apply_cycle210(roadmap: dict, test_count: int) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1105)
+    parser.add_argument("--test-count", type=int, default=1107)
     parser.add_argument("--status-date", default="2026-10-03")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)
