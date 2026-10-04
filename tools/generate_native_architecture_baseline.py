@@ -24,6 +24,8 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle223-atomics-admission-and-instruction-audit.md",
+    "tests/test_native_atomics_admission.py",
     "docs/checkpoints/cycle222-smp-preemption-admission-and-controls.md",
     "tests/test_native_smp_preempt_controls.py",
     "tests/fixtures/pksched6_control_probe.rs",

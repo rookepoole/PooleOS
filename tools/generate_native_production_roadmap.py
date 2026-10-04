@@ -9836,9 +9836,133 @@ def apply_cycle222(roadmap: dict, test_count: int) -> dict:
             phase["current_evidence"].insert(0, evidence)
             phase["current_gaps"].insert(0, gap)
         if phase["id"] == "N36":
-            phase["current_evidence"].insert(0, f"Cycle 222 source inventory: {test_count} Python tests discovered; full qualification pending")
+            phase["current_evidence"].insert(0, "Cycle 222 source inventory: 1149 Python tests discovered; full qualification pending")
     for flag in roadmap["implementation_flags"]:
         if flag["id"] in {"FLAG-N12-SCHED-SMP-PREEMPT-001", "FLAG-N36-RECEIPT-COVERAGE-001"}:
+            flag["evidence"].insert(0, checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle223(roadmap, test_count)
+
+
+def apply_cycle223(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle223-atomics-admission-and-instruction-audit.md"
+    next_move = "N12-CONCURRENCY-LOCKS-001"
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    for key, value in list(gate.items()):
+        if key.startswith("current_") and isinstance(value, dict):
+            suffix = "source_projection" if key == "current_focused_source_projection" else key.removeprefix("current_")
+            gate["historical_cycle222_" + suffix] = copy.deepcopy(value)
+    roadmap["baseline"]["pooleos_cycle"] = 223
+    roadmap["execution_protocol"].update(last_updated_cycle=223,
+        selected_move_id="N12-CONCURRENCY-ATOMICS-001", owner_independent_next_move_id=next_move)
+    roadmap["execution_protocol"]["required_records"].insert(0, checkpoint)
+    gate["qualification_status"] = "atomics_admission_and_instruction_audit_repaired_locks_pending"
+    gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=223)
+    digest = "1E684D59C800F1C08BD05C1BEAB940654FD1CC8550779217FFE5AA4162DAB3CC"
+    binding = dict(profile="atomics", path="runs/native-kernel-atomics-readiness.json", sha256=digest,
+        fresh_runs=2, negative_controls=29, hostile_cases=78, kernel_host_tests=246,
+        execution_log_sha256="0BF036FC79C939C9EB6CDB0C580AB2D279EE05C4D7B64A29D07B34995FCC76BD",
+        elapsed_seconds=93.828, recorded_evidence_cases=356)
+    previous = gate["historical_cycle222_dependency_qualification"]
+    record = copy.deepcopy(previous)
+    record.update(cycle=223, source_validation_cycle=223, status="thirteen_current_profiles_locks_pending",
+        scope="retained_twelve_profiles_and_fresh_atomics223_on_unchanged_kernel216",
+        qualified_profiles=previous["qualified_profiles"] + ["atomics"], newly_qualified_profiles=["atomics"],
+        readiness_replay_required_profiles=["locks"],
+        receipt_bindings=copy.deepcopy(previous["receipt_bindings"]) + [binding],
+        embedded_entry_provenance_pending_scope="remaining_lock_profile",
+        fresh_qemu_runs=2, superseded_initial_runs=6, failed_guest_runs=0,
+        run_count_scope="Cycle223_two_final_boots_only_two_diagnostic_and_four_superseded_boots_excluded",
+        negative_control_groups=29, negative_control_cases=78, executed_rejection_cases=78,
+        native_boundary_cases=0, focused_python_tests=22, generic_recorded_evidence_cases=356,
+        additional_control_profile_receipt_cases=0, recorded_evidence_case_total=356,
+        recorded_evidence_scope="fresh_atomics_profile_plus_separate_instruction_mutants",
+        independent_aggregate_cases=8, independent_current_image_pin_cases=8,
+        disabled_native_safeguard_variants_detected=8, disabled_transaction_variants_detected=0)
+    gate["current_dependency_qualification"] = record
+    projection = gate["current_focused_source_projection"]
+    gate["current_focused_source_projection"] = dict(projection, cycle=223, passed_checks=26,
+        pending_downstream_native_checks=1,
+        passing_profiles=projection["passing_profiles"] + ["native_kernel_atomics_readiness"],
+        final_receipt_fresh_qemu_runs=2, kernel_entry_runs=2, superseded_initial_qemu_runs=6,
+        run_count_scope=record["run_count_scope"], next_dependency_move_id=next_move,
+        required_next_gate="locks_shared_helper_binding_review_then_full_exact_candidate",
+        focused_python_tests_passed=22, recorded_evidence_rejection_cases=356)
+    gate["current_entry_provenance_qualification"] = dict(gate["current_entry_provenance_qualification"], latest_reproduction_cycle=223)
+    gate["current_ipi_mailbox_oracle_gap"] = dict(gate["current_ipi_mailbox_oracle_gap"], cycle=223,
+        remaining_affected_profiles=1, newly_requalified_profiles=["atomics"])
+    gate["current_control_execution_audit"] = dict(gate["current_control_execution_audit"], cycle=223, next_profile="locks")
+    gate["current_atomics_admission_qualification"] = {
+        "cycle": 223, "source_validation_cycle": 223, "move_id": "N12-CONCURRENCY-ATOMICS-001",
+        "status": "pass", "applies_to_current_source": True, "current_receipt_admitted": True,
+        "receipt_sha256": digest, "kernel_sha256": record["kernel_sha256"],
+        "recorded_corruption_cases": 356, "independent_gate_cases": 8,
+        "rehashed_instruction_receipt_cases": 7, "comment_only_symbol_cases": 7,
+        "opcode_operand_branch_instruction_cases": 7, "disabled_auditor_variants": 2,
+        "disabled_native_guard_variants": 8, "native_guard_optimization_levels": [0, 3],
+        "native_guard_mutant_executions": 16, "native_unit_tests_per_baseline": 7,
+        "direct_loader_and_transfer_sources_bound": True,
+        "diagnostic_baseline": {
+            "receipt_sha256": "61AC116FD675948E45F9BCE626F338B5B03C3496A146608A114FE15511FC568F",
+            "runtime_accepted": True, "aggregate_gate_accepted": True, "mutation_cases": 277,
+            "runtime_corruptions_accepted": 168, "gate_corruptions_accepted": 91,
+            "runtime_exceptions": 4, "gate_exceptions": 19, "comment_only_assembly_accepted": True,
+            "admitted_as_final": False,
+        },
+        "after_audit": {"genuine_runtime_accepted": True, "genuine_gate_accepted": True,
+            "runtime_corruptions_accepted": 0, "gate_corruptions_accepted": 0,
+            "runtime_exceptions": 0, "gate_exceptions": 0},
+        "pair_validation_is_freshness_or_authentication": False, "positive_receipt_rebound_in_tests": False,
+        "native_kernel_changed": False, "live_AP_litmus_verified": False, "production_ready": False,
+    }
+    gate["current_closeout_regression"] = {
+        "cycle": 223, "status": "pass", "scope": "atomics_admission_instructions_and_native_guards_not_full_canonical",
+        "tests_run": 22, "tests_passed": 22, "tests_failed": 0, "tests_skipped": 0,
+        "elapsed_seconds": 26.831, "runner_elapsed_seconds": 27.703,
+        "log_sha256": "8097A531343C60DA999DC5708F91F2C42F44BA26BDB763E41102922C2A52544C",
+        "source_unchanged_during_execution": True, "owner_report_unchanged": True,
+        "initial_admission": {"status": "fail", "case_count": 356, "invalid_mutation_cases": 1,
+            "cause": "test_replaced_null_selected_default_feature_with_identical_null",
+            "unchanged_valid_receipt_correctly_accepted": True, "admitted_as_pass": False,
+            "repair": "use_a_distinct_invalid_value_then_fresh_qualification_no_receipt_rebinding"},
+        "initial_metadata": {"tests_run": 70, "tests_passed": 69, "tests_failed": 1, "tests_skipped": 0,
+            "log_sha256": "4E79A2DF7D88E2962630ACD07EE1A7A861F8783F619DD359C0AA922334125FF2",
+            "cause": "obsolete_two_pending_profiles_assertion_after_atomics_admission", "admitted_as_pass": False},
+        "superseded_focused_receipt_sha256": "FFCA7FD621C9E12C91C3FE7C52B2606402642895B720AFDF7BDF37C940043004",
+        "final_source_change_after_focused": "bind_existing_direct_loader_and_transfer_helpers_then_fresh_qualification",
+        "combined_regression": {"tests_run": 146, "tests_passed": 146, "tests_failed": 0, "tests_skipped": 0,
+            "elapsed_seconds": 160.360, "runner_elapsed_seconds": 161.297,
+            "log_sha256": "93361F4A4C29D8A740FDAFD174986E04AA4652C20DCB97EC16884074F2C1F2AD",
+            "scope": "final_bound_atomics_entry_IRQ_preemption_capture_and_70_metadata_tests_not_full_canonical",
+            "source_unchanged_during_execution": True, "owner_report_unchanged": True,
+            "counts_overlap_focused_and_metadata": True},
+        "conservation": {"status": "pass", "architecture_bindings": 379, "test_inventory": 1157,
+            "unchanged_parent_current_records_archived": 26, "selected_checks": "26/27",
+            "phase_flag_and_normative_charter_preserved": True, "native_and_demo_bytes_preserved": True},
+        "canonical_full_replay_performed": False, "merge_qualified": False, "production_ready": False,
+    }
+    evidence = (
+        "Cycle 223: " + checkpoint + " repairs atomics recorded admission and comment-spoofable instruction checks. "
+        "Two final one-BSP boots pass 29 groups/78 cases; 22 focused tests pass. Both gates reject 356 corruptions; "
+        "eight independent image/count cases, seven rehashed bodies, fourteen disassembly attacks and eight "
+        "disabled native guards at two optimization levels are detected. Diagnostic defects and one invalid "
+        "test mutation remain recorded; no native kernel bytes changed."
+    )
+    gap = (
+        "Readiness is 26/27. Next " + next_move + ", then N36 shared-helper transitive binding review and full "
+        "exact-candidate canonical/Doctor/release/publication/GitHub/review gates before main merge. All prior "
+        "checkpoint records remain historical. No phase/flag/ISO/production change. N0 custody, N5 authentication, "
+        "full architectural task state, general retirement, hardware and independent builders remain open."
+    )
+    for phase in roadmap["phases"]:
+        if phase["id"] in {"N12", "N36"}:
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle 223 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in {"FLAG-N12-CONCURRENCY-ATOMICS-001", "FLAG-N36-RECEIPT-COVERAGE-001"}:
             flag["evidence"].insert(0, checkpoint)
     roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
@@ -9848,7 +9972,7 @@ def apply_cycle222(roadmap: dict, test_count: int) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1149)
+    parser.add_argument("--test-count", type=int, default=1157)
     parser.add_argument("--status-date", default="2026-10-04")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

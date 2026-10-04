@@ -358,6 +358,18 @@
   ],
   "bound_sources": [
     {
+      "path": "docs/checkpoints/cycle223-atomics-admission-and-instruction-audit.md",
+      "sha256": "7C6FF44F218CBAD48A249525ADC1DE97E7D04112EABBC28B8E91A722238C8034",
+      "byte_count": 6464,
+      "line_count": 105
+    },
+    {
+      "path": "tests/test_native_atomics_admission.py",
+      "sha256": "AA6CCADF605F1677781B561C929E9DAA739E81F6BA46E5E229200D4CF59A0F6F",
+      "byte_count": 11977,
+      "line_count": 190
+    },
+    {
       "path": "docs/checkpoints/cycle222-smp-preemption-admission-and-controls.md",
       "sha256": "52E33BFF58BDEE224960E5D4836663D0933D6FC3A7BE77E3D215E28FFCE3C21E",
       "byte_count": 6209,
@@ -941,9 +953,9 @@
     },
     {
       "path": "tools/pooleos_release_gate.py",
-      "sha256": "5A09919D0E8613428A37F4E638C546DB280A55A063FD34B391FA699EE71400CF",
-      "byte_count": 379203,
-      "line_count": 7519
+      "sha256": "61870E1C3D1758EE1D1F5927AAC7E208B1DD1A2FCF0ED5D6CB2F78A87B02B587",
+      "byte_count": 380670,
+      "line_count": 7541
     },
     {
       "path": "docs/checkpoints/cycle184-boot-host-provenance.md",
@@ -1469,15 +1481,15 @@
     },
     {
       "path": "docs/production-goal-charter.md",
-      "sha256": "F0D0075B6E48D98DE8A963CE5215B2F96EC8BC784E3622E0EF596902FCCB81D5",
-      "byte_count": 124330,
-      "line_count": 1674
+      "sha256": "927C82476B4B937BE0370A0495338652B6F35EBF668F6CC2BA903B573697D1DD",
+      "byte_count": 124920,
+      "line_count": 1682
     },
     {
       "path": "docs/pdc-production-build-plan.md",
-      "sha256": "D7F04FA1A68A56B77C64329B672B80E8668F0F4FDDC284D87F0308C8B189F74F",
-      "byte_count": 492878,
-      "line_count": 4368
+      "sha256": "5346570327E5B244161DB71F57854A8BB33DBDA8D51753EDE341F3C794A2C7D3",
+      "byte_count": 494470,
+      "line_count": 4392
     },
     {
       "path": "docs/publication-boundary.md",

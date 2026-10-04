@@ -1,15 +1,39 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-04
-Plan version: 2.125.0-smp-preemption-admission-and-controls
-Roadmap cycle: PooleOS Cycle 222
+Plan version: 2.126.0-atomics-admission-and-instruction-audit
+Roadmap cycle: PooleOS Cycle 223
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 222: SMP-Preemption Admission and Controls
+## Cycle 223: Atomics Admission and Instruction Audit
+
+`N12-CONCURRENCY-ATOMICS-001`, N12.1/N36, advances
+`ADD-N12-CONCURRENCY-ATOMICS-001` and `ADD-N36-RECEIPT-COVERAGE-001`.
+Recorded admission now reconstructs typed run, probe, source and image evidence;
+linked audits validate instruction bytes, operands and the retry branch, not
+words in comments. Two final one-BSP boots pass 29 groups/78 cases; 22 focused
+tests pass. Both gates reject 356 corrupted receipts. Eight disabled native
+guards are detected at optimization 0 and 3. Prior validator defects and one
+invalid test mutation remain recorded; new qualification follows its repair.
+[Cycle 223 evidence](checkpoints/cycle223-atomics-admission-and-instruction-audit.md).
+
+Readiness **26/27**. Next **N12-CONCURRENCY-LOCKS-001**, then N36 shared-helper
+transitive-binding review and full exact-candidate qualification before main
+merge. Inventory 1157 tests, 379 source bindings; all 26 parent records archived.
+No native/kernel/ISO, phase/flag, checklist, PooleGlyph boundary or production
+change. Existing ADD requirements cover these repairs; no new requirement is
+needed. N0 custody, N5 authentication, complete task state, general retirement,
+independent builders and physical qualification remain open.
+The final bound-source combined regression passes **146/146**, zero skips,
+including all 22 focused tests and 70 metadata tests. Conservation passes all
+379 bindings and preserves all 26 parent records. The initial 69/70 metadata
+result remains a recorded failure; its stale pending-profile assertion is fixed.
+
+## Historical Cycle 222: SMP-Preemption Admission and Controls
 
 `N12-SCHED-SMP-PREEMPT-001`, N12.5-N12.7/N36, advances
 `ADD-N12-SCHED-SMP-PREEMPT-001` and `ADD-N36-RECEIPT-COVERAGE-001`,

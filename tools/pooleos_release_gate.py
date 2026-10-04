@@ -582,6 +582,16 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 223 repairs atomics recorded admission and comment-spoofable instruction auditing. Two final "
+    "one-BSP boots and 22 focused tests pass; 356 corrupted records reject, and eight disabled native guards "
+    "are detected at optimization 0 and 3. Earlier defects and a corrected no-op test mutation are retained. "
+    "Readiness26/27 leaves N12-CONCURRENCY-LOCKS-001, then shared-helper binding review and full exact-candidate "
+    "qualification before main merge. Native kernel, ISO, phase/flag and production status are unchanged. "
+    "Prior qualification below is historical. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -3488,10 +3498,22 @@ def check_native_kernel_atomics_readiness(
             "; ".join(errors) or "native kernel atomics readiness is not an object",
         )
     errors.extend(native_kernel_atomics.readiness_errors(artifact, ROOT))
+    if errors:
+        return readiness.make_check("native_kernel_atomics_readiness", False, "; ".join(errors[:8]))
     kernel = artifact.get("kernel_summary", {})
     source = kernel.get("source_audit", {})
     probe = artifact.get("host_probe", {})
     linked = artifact.get("linked_instruction_audit", {})
+    pins = {
+        "canonical_sha256": "FD6C2A0C709957B9EDFFC0647D534E060ED68215C075F07D70AB2AEBCA6C81D1",
+        "canonical_byte_count": 538264,
+        "linked_sha256": "5E40AB31AFB4BCE79BEDB32D7B66D64D957B42CA915B2B70D2F15049F90B7D91",
+        "linked_byte_count": 7158864, "image_byte_count": 610304, "symbol_count": 7,
+    }
+    if (any(type(linked.get(k)) is not type(v) or linked.get(k) != v for k, v in pins.items())
+        or kernel.get("canonical_sha256") != pins["canonical_sha256"]
+        or any(type(kernel.get(k)) is not int or kernel[k] != 246 for k in ("host_tests_passed", "host_tests_total"))):
+        errors.append("PKATOM1 independently pinned current image or exact counts changed")
     if (
         kernel.get("host_tests_passed") != 246
         or kernel.get("host_tests_total") != 246
