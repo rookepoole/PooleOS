@@ -83,7 +83,14 @@ class NativeBootChainReleaseGateTests(unittest.TestCase):
                     "trust_policy_sha256": "DF9BD076267061F731263B86BDE62EBE161B8666605EDC3AA32606870EEE2049",
                     "trust_state_sha256": "073CEB317F1B6314274452846AC1959F988EFE9537A72456AEFB493F1DEB69CE",
                 }[field]
-                for value in (previous, latest_previous, "0" * 64, None, False):
+                cycle210 = {
+                    "inner_set_retained_set_sha256": "163EDAC3648C52267DAD983A6283D0860668B04B2E9B077A40F1855046A81DB1",
+                    "inner_retained_set_sha256": "163EDAC3648C52267DAD983A6283D0860668B04B2E9B077A40F1855046A81DB1",
+                    "retained_set_sha256": "163EDAC3648C52267DAD983A6283D0860668B04B2E9B077A40F1855046A81DB1",
+                    "trust_policy_sha256": "957F07706B7B7CA495B9745CB50721B0698AAE79EBFE87A4BDB8B10F6892CEDC",
+                    "trust_state_sha256": "CC015F3A79444B1BB91B1F7BEB985BEC9024759CAC2A688BA62339CCD48CAEF2",
+                }[field]
+                for value in (previous, latest_previous, cycle210, "0" * 64, None, False):
                     with self.subTest(profile=profile, field=field, value=value):
                         candidate = copy.deepcopy(receipt)
                         candidate[section][field] = value

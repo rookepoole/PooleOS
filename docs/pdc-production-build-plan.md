@@ -1,15 +1,44 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-04
-Plan version: 2.119.0-native-smp-preemption-transactions
-Roadmap cycle: PooleOS Cycle 216
+Plan version: 2.120.0-current-kernel-boot-replay
+Roadmap cycle: PooleOS Cycle 217
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 216: Native SMP-Preemption Transactions and Tick Continuation
+## Cycle 217: Current-Kernel Boot Replay
+
+`N5-SYMBOLS-SEMANTICS-001`, N5.6/N5.9 and N36, advances under existing
+`ADD-BOOT-007` and `ADD-N36-RECEIPT-COVERAGE-001`. Symbols and dependent
+artifacts now bind independently measured kernel216 bytes. Native symbol-test
+addresses and the PKMAP2 host probe's 149-page geometry are repaired; production
+kernel implementation, the 192-page reservation and overflow checks are unchanged.
+
+Six fresh virtual boots pass, including two kernel entries that revalidate nine
+retained files and stop at the required unsigned-development denial. No authority,
+authorized actions, state writes or post-exit firmware calls occur. All **97/97**
+focused tests pass, including the formerly failing live-transfer positive,
+650 corrupted symbol receipts, 30 independent identity rejections and 16 map tests.
+Initial symbol-address and map-probe failures remain recorded. Matching builds
+are on one host, not independent-builder proof.
+[Cycle 217 evidence](checkpoints/cycle217-current-kernel-boot-replay.md).
+
+Selected readiness is **8/27**; nineteen downstream profiles remain from
+`N7-TRAP-001`. Seventeen SMP-preemption control groups and recorded admission
+remain open before full canonical qualification. All 24 parent progress records
+are retained as history; no phase or flag closes. The 1125 discovered Python
+tests are inventory, not full-suite evidence. PooleGlyph Phase 65/66, owner
+changes, the locked checklist and demo ISO are preserved. No production trust,
+physical boot, new ISO or promotion is claimed. Source checkpoints are backed
+up through the PR #78 branch; main still requires full exact-candidate gates.
+Corrected roadmap/architecture/checklist regression passes 64/64; the initial
+62/64 run is retained. Conservation verifies 369 bindings and all 24 parent
+progress records without changing prior checkpoint history or phase statuses.
+
+## Historical Cycle 216: Native SMP-Preemption Transactions and Tick Continuation
 
 `N12-SCHED-SMP-PREEMPT-001` advances N12.5/N12.6/N12.7 and N36 under
 `ADD-N12-SCHED-SMP-PREEMPT-001` and `ADD-N36-RECEIPT-COVERAGE-001`.

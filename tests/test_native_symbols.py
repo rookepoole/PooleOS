@@ -53,7 +53,7 @@ class NativeSymbolTests(unittest.TestCase):
         self.assertEqual(bundle.identity, psym1.canonical_identity())
         self.assertEqual(bundle.segments, psym1.canonical_segments())
         self.assertEqual(bundle.symbols, psym1.canonical_symbols())
-        self.assertEqual(bundle.image_bytes, 0x94000)
+        self.assertEqual(bundle.image_bytes, 0x95000)
         self.assertEqual(bundle.entry_offset, 0xA000)
 
     def test_readiness_binds_kernel_entry_evidence_and_validator(self) -> None:
@@ -78,6 +78,11 @@ class NativeSymbolTests(unittest.TestCase):
             ("canonical_sha256", "8A2DA65C86B09F7BCF2D5ACDB90029A5B7B7361581BA841ADC3B62AEE168B625"),
             ("loaded_sha256", "940D941A32AAA3DC1E5F75295AFC47ECFB1FD07B75E359D9D4C5963A36E488BC"),
             ("linked_sha256", "87B12B0278881804BDDA57132657950CF8CD8F515B7A0CC4BC9E2B6326FA1C0A"),
+            ("canonical_sha256", "AE3422B2D44E6EC87AB1D5B51414C023E46F2EE3461A0D0895B9D1242E10D25A"),
+            ("loaded_sha256", "8288BA39AD5B65499B1E59280D3ED9F088609A95760952D1E8489B42CA8391EE"),
+            ("linked_sha256", "6B168F59888CE36050918908E9D7DDB4EEA87F4B8A13FF90EB80E26E0C248BD5"),
+            ("linked_byte_count", 7_091_272),
+            ("image_byte_count", 606_208),
         ):
             with self.subTest(field=field):
                 def changed(path):

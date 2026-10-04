@@ -24,6 +24,7 @@ ADR_NAMES = (
     "0007-repository-governance-and-source-tree.md",
 )
 BOUND_SOURCE_PATHS = (
+    "docs/checkpoints/cycle217-current-kernel-boot-replay.md",
     "docs/checkpoints/cycle216-native-smp-preempt-transactions.md",
     "native/kernel/src/scheduler_smp_preempt.rs",
     "native/kernel/src/bin/pksched6_probe.rs",

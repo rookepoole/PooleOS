@@ -11,7 +11,19 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 216 repairs native SMP-preemption
+**Current development checkpoint:** Cycle 217 qualifies the boot chain against
+the rebuilt kernel: six virtual boots, two kernel entries and **97/97 focused
+tests pass**. Symbol addresses and the host mapping probe now match the 149-page
+image; the formerly failing live-transfer test passes. Kernel implementation is
+unchanged. Selected readiness is **8/27**, with nineteen downstream profiles
+pending from `N7-TRAP-001`. Seventeen SMP-preemption control groups remain open.
+[Cycle 217 evidence](docs/checkpoints/cycle217-current-kernel-boot-replay.md).
+Checkpoints are backed up through [PR #78](https://github.com/rookepoole/PooleOS/pull/78);
+main merge still requires full qualification. The demo ISO is unchanged.
+Unsigned-denial boot evidence is not production trust. Pre-production.
+Progress/architecture/checklist tests pass 64/64; prior failures are retained.
+
+**Historical development checkpoint:** Cycle 216 repairs native SMP-preemption
 transactions and same-tick event/quantum progress. Twenty-seven native cases
 pass in both host profiles, fourteen disabled repairs are detected, and all
 17 ownership/core stages plus two clean matching kernel builds pass. The

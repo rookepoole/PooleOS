@@ -990,17 +990,21 @@ mod tests {
     fn lookup_is_image_relative_and_bounded() {
         let bundle = parse(CANONICAL).expect("canonical PSYM1");
         let base = bundle.preferred_virtual_base;
-        let result = lookup(&bundle, base, base + 0x2A765)
+        let result = lookup(&bundle, base, base + 174_436)
             .expect("lookup")
             .expect("known symbol");
         assert_eq!(result.symbol.name, b"poole_kernel_rust_entry");
         assert_eq!(result.symbol_offset, 0);
         assert!(result.steps <= MAX_LOOKUP_STEPS);
-        let previous_entry = lookup(&bundle, base, base + 0x2A750)
-            .expect("previous entry address")
+        let panic_interior = lookup(&bundle, base, base + 174_415)
+            .expect("panic interior address")
             .expect("current panic symbol");
-        assert_eq!(previous_entry.symbol.name, b"poole_kernel_emergency_panic");
-        assert_eq!(previous_entry.symbol_offset, 177);
+        assert_eq!(panic_interior.symbol.name, b"poole_kernel_emergency_panic");
+        assert_eq!(panic_interior.symbol_offset, 177);
+        assert_eq!(
+            lookup(&bundle, base, base + 0x2A765).expect("Cycle 210 symbol gap"),
+            None
+        );
         assert_eq!(lookup(&bundle, base, base + 0xA047).expect("gap"), None);
         assert_eq!(
             lookup(&bundle, base, base + 0x28A08).expect("old symbol gap"),
