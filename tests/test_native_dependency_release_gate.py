@@ -78,8 +78,10 @@ class NativeDependencyReleaseGateTests(unittest.TestCase):
                      "A943DCB6E41A27F952868F05ED2B3523B47D9D7A7B5DB909EE385205F7CA3B31"),
                     (("build", "kernel_entry", "product", "canonical_sha256"),
                      "72C37783A5729229E6A259E38DC8DF55034FD467B77839FFFC4AA62B66E33EBF"),
-                    (("build", "kernel_entry", "product", "relocation_count"), 1326),
-                    (("build", "kernel_entry", "product", "relocation_count"), 1323.0),
+                    (("build", "kernel_entry", "product", "canonical_sha256"),
+                     "AE3422B2D44E6EC87AB1D5B51414C023E46F2EE3461A0D0895B9D1242E10D25A"),
+                    (("build", "kernel_entry", "product", "relocation_count"), 1323),
+                    (("build", "kernel_entry", "product", "relocation_count"), 1326.0),
                     (("build", "kernel_entry", "product", "relocation_count"), None),
                     (("build", "kernel_entry", "product", "relocation_count"), False),
                 ])
@@ -101,7 +103,7 @@ class NativeDependencyReleaseGateTests(unittest.TestCase):
                             result = check_fn()
                     self.assertFalse(result["ok"], result["detail"])
                     rejected += 1
-        self.assertEqual(rejected, 32)
+        self.assertEqual(rejected, 33)
 
     def test_cpu_gates_reject_malformed_nested_build_without_exceptions(self) -> None:
         rejected = 0

@@ -366,7 +366,7 @@ def _execute_once(
         serial_path = run_dir / profile["evidence_contract"]["serial_log"]
         screenshot_path = run_dir / "pooleboot-frame.ppm"
         deadline = time.monotonic() + timeout
-        screenshot_captured = False
+        frame_ready_observed = False
         completion_marker_observed = False
         while time.monotonic() < deadline:
             raw_debug = debug_path.read_bytes() if debug_path.is_file() else b""
@@ -377,21 +377,15 @@ def _execute_once(
                 or b"POOLEOS:NESTED-PANIC" in raw_debug
             ):
                 raise QualificationError("PooleBoot emitted an error or panic marker")
-            if not screenshot_captured and b"POOLEBOOT/0.1 FRAME READY" in raw_debug:
-                client.execute(
-                    "screendump",
-                    {"filename": str(screenshot_path.resolve()), "format": "ppm"},
-                )
-                if not screenshot_path.is_file():
-                    raise QualificationError("QMP screendump did not create the proof frame")
-                screenshot_captured = True
+            if b"POOLEBOOT/0.1 FRAME READY" in raw_debug:
+                frame_ready_observed = True
             if completion_marker in raw_debug:
                 completion_marker_observed = True
                 break
             if process.poll() is not None:
                 raise QualificationError(f"QEMU exited before the completion marker: {process.returncode}")
             time.sleep(0.02)
-        if not screenshot_captured or not completion_marker_observed:
+        if not frame_ready_observed or not completion_marker_observed:
             raise QualificationError("PooleBoot frame or completion marker timed out")
         time.sleep(0.05)
         debug_raw = debug_path.read_bytes()
@@ -408,6 +402,13 @@ def _execute_once(
             raise QualificationError(str(error)) from error
         if debug_transcript.data != serial_transcript.data:
             raise QualificationError("serial and debugcon PBP1 transcripts differ")
+        # Kernel entry can paint after FRAME READY; capture only the validated terminal state.
+        client.execute(
+            "screendump",
+            {"filename": str(screenshot_path.resolve()), "format": "ppm"},
+        )
+        if not screenshot_path.is_file():
+            raise QualificationError("QMP screendump did not create the proof frame")
         screenshot_data = screenshot_path.read_bytes()
         screenshot = native_pooleboot.inspect_ppm(screenshot_data)
         client.execute("quit")

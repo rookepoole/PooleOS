@@ -536,6 +536,18 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 218 repairs early QMP screenshot capture and qualifies five CPU profiles plus refreshed boot "
+    "evidence on unchanged kernel216. Twenty final virtual boots and 64 focused tests pass; original "
+    "frame failure, diagnostic reruns and four deterministic pre-repair failures remain separate. "
+    "Readiness is 13/27; fourteen memory/IRQ/SMP/scheduler/atomic/lock profiles remain from "
+    "N9-PMM-ACPI-CONSUMER-001, plus seventeen SMP-preemption control groups and recorded admission. "
+    "Shared-helper transitive binding review remains within N36. No phase, flag, native byte, ISO or "
+    "production status change; full qualification gates main merge and branch backup is separate. "
+    + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -1653,9 +1665,9 @@ def check_native_kernel_trap_readiness(
         or build.get("default_transfer_marker_absent") is not True
         or not isinstance(kernel_product, dict)
         or kernel_product.get("canonical_sha256")
-        != "AE3422B2D44E6EC87AB1D5B51414C023E46F2EE3461A0D0895B9D1242E10D25A"
+        != "FD6C2A0C709957B9EDFFC0647D534E060ED68215C075F07D70AB2AEBCA6C81D1"
         or type(kernel_product.get("relocation_count")) is not int
-        or kernel_product.get("relocation_count") != 1323
+        or kernel_product.get("relocation_count") != 1326
     ):
         errors.append("PKTRAP1 build or feature isolation changed")
     if artifact.get("claims") != native_kernel_trap.expected_claims():

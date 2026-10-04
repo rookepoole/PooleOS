@@ -7,9 +7,21 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 217
+Last roadmap reconciliation: PooleOS Cycle 218
 
-Cycle 217 qualifies six boot-chain profiles on unchanged kernel216. Six fresh
+Cycle 218 repairs early QMP capture and qualifies five CPU profiles with refreshed
+boot evidence on unchanged kernel216. Twenty final virtual boots and 64 focused
+tests pass. Four deterministic pre-repair failures, two initial failed trap runs
+and six diagnostic reruns remain separate. Original differing frames were lost
+to cleanup; their exact cause is unproven. Readiness is 13/27; fourteen profiles
+remain from N9-PMM-ACPI-CONSUMER-001, plus seventeen SMP-preemption control groups
+and admission. No normative condition, phase, flag, native byte, ISO or production
+claim changes. Shared-helper binding review remains within N36. Full qualification
+precedes main merge. [Cycle 218 evidence](checkpoints/cycle218-terminal-capture-and-cpu-replay.md).
+Corrected metadata passes 65/65 and conservation passes; five initial stale
+expectation failures remain recorded. No normative completion condition changes.
+
+Historical Cycle 217 qualifies six boot-chain profiles on unchanged kernel216. Six fresh
 virtual boots, two kernel entries and 97 focused tests pass; the prior failing
 live-transfer positive now passes. Initial symbol-address and map-probe failures
 are retained and repaired. Readiness is 8/27; nineteen profiles need replay from

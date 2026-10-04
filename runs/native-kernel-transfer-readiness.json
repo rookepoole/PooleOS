@@ -2363,13 +2363,13 @@
         "screenshot": {
           "bright_cyan_pixel_count": 44970,
           "byte_count": 3072016,
-          "dark_pixel_count": 979030,
+          "dark_pixel_count": 977945,
           "height": 800,
           "nonblank": true,
           "pixel_count": 1024000,
           "poole_identity_palette_observed": true,
-          "sampled_unique_color_count": 6,
-          "sha256": "E9D4CFD48C23DBA760AED5B2049B39DCA49A0D172F680D570082EB0680FDFDBD",
+          "sampled_unique_color_count": 8,
+          "sha256": "6AA5C90B92B580D07C11397FB89D44E2EBD090C04D526AC3E9F5D37A7B355B58",
           "width": 1280
         },
         "serial_debugcon_exact_match": true,
@@ -3555,13 +3555,13 @@
         "screenshot": {
           "bright_cyan_pixel_count": 44970,
           "byte_count": 3072016,
-          "dark_pixel_count": 979030,
+          "dark_pixel_count": 977945,
           "height": 800,
           "nonblank": true,
           "pixel_count": 1024000,
           "poole_identity_palette_observed": true,
-          "sampled_unique_color_count": 6,
-          "sha256": "E9D4CFD48C23DBA760AED5B2049B39DCA49A0D172F680D570082EB0680FDFDBD",
+          "sampled_unique_color_count": 8,
+          "sha256": "6AA5C90B92B580D07C11397FB89D44E2EBD090C04D526AC3E9F5D37A7B355B58",
           "width": 1280
         },
         "serial_debugcon_exact_match": true,
@@ -3657,7 +3657,7 @@
       {
         "byte_count": 190245,
         "path": "runs/native_kernel_load_readiness.json",
-        "sha256": "A1A03D71AADF381FFE34217F74C3BFF583DBFF9EF9EF4FA41CED21EDC9BB0021"
+        "sha256": "CD0F9CFBA4472AE5F6BB98EE20D244447A4E50C276C39E9D81581132989C4B68"
       }
     ],
     "tier0_lock": {

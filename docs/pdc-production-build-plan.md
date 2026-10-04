@@ -1,15 +1,41 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-04
-Plan version: 2.120.0-current-kernel-boot-replay
-Roadmap cycle: PooleOS Cycle 217
+Plan version: 2.121.0-terminal-capture-and-cpu-replay
+Roadmap cycle: PooleOS Cycle 218
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 217: Current-Kernel Boot Replay
+## Cycle 218: Terminal Capture and CPU Replay
+
+`N7-TRAP-001` advances N7.5/N7.6 and N7.1/N7.3/N7.4, with N5 replay and
+N36 under `ADD-N36-RECEIPT-COVERAGE-001`. A shared QMP capture race is fixed:
+screenshots are taken after validated terminal markers instead of early frame
+readiness. Nine tests reproduce four old failures and pass after repair.
+Native boot/kernel bytes and exact frame comparisons are unchanged.
+
+All **20 final virtual boots** pass: six boot-chain and fourteen CPU runs,
+with 225 CPU controls and one separate expected TCG limitation probe. All
+**64/64 focused tests** pass, including 3,398 control-record corruptions,
+371 paired-evidence corruptions, 33 identity/promotion cases and 80 malformed
+nested-build cases. Two failed initial trap runs and six diagnostic runs remain
+separate. Original differing frames were not retained; their exact pixel cause
+is unproven. [Cycle 218 evidence](checkpoints/cycle218-terminal-capture-and-cpu-replay.md).
+
+Readiness is **13/27**; fourteen profiles remain from `N9-PMM-ACPI-CONSUMER-001`,
+plus seventeen SMP-preemption control groups and recorded admission. Shared-helper
+transitive bindings remain within N36. All 24 parent progress records, phase/flag
+statuses, locked checklist, PooleGlyph Phase65/66 boundary and demo ISO are preserved.
+Inventory is 1135 Python tests, not a full-suite pass. No main merge or promotion;
+full exact-candidate qualification is required and cloud branch backup is separate.
+Corrected progress/architecture/checklist regression passes 65/65; the initial
+60/65 result is retained. Conservation verifies 371 architecture bindings and
+all 24 archived parent records without closing any phase or flag.
+
+## Historical Cycle 217: Current-Kernel Boot Replay
 
 `N5-SYMBOLS-SEMANTICS-001`, N5.6/N5.9 and N36, advances under existing
 `ADD-BOOT-007` and `ADD-N36-RECEIPT-COVERAGE-001`. Symbols and dependent

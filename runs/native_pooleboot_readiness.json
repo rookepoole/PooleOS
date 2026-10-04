@@ -823,9 +823,9 @@
         "sha256": "4A54F44A0AE5D794A3D3EA87CCBED7B3CED3298E4660F7B5FEAE706AB22206D2"
       },
       {
-        "byte_count": 42224,
+        "byte_count": 42246,
         "path": "tools/qualify_native_pooleboot.py",
-        "sha256": "9377738EC9F76CE255D7D563ED98DE8D5053ED1D0C1644FE833E3A58F283A7B5"
+        "sha256": "3A79880536517335113FBB2F65AD17B320D5041EC70E6F507B96A0A120309636"
       },
       {
         "byte_count": 25233,
@@ -956,7 +956,7 @@
     "kernel_load_readiness": {
       "byte_count": 190245,
       "path": "runs/native_kernel_load_readiness.json",
-      "sha256": "A1A03D71AADF381FFE34217F74C3BFF583DBFF9EF9EF4FA41CED21EDC9BB0021"
+      "sha256": "CD0F9CFBA4472AE5F6BB98EE20D244447A4E50C276C39E9D81581132989C4B68"
     },
     "microcode_contract": {
       "byte_count": 5083,

@@ -871,8 +871,8 @@
       },
       {
         "path": "tools/qualify_native_pooleboot.py",
-        "sha256": "9377738EC9F76CE255D7D563ED98DE8D5053ED1D0C1644FE833E3A58F283A7B5",
-        "byte_count": 42224
+        "sha256": "3A79880536517335113FBB2F65AD17B320D5041EC70E6F507B96A0A120309636",
+        "byte_count": 42246
       },
       {
         "path": "tools/qualify_native_boot_trust.py",
