@@ -572,6 +572,16 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 222 repairs SMP-preemption admission and seventeen constant-only groups. Two final four-vCPU "
+    "boots pass 34 groups/322 cases and 19 focused tests pass, including 339 corrupt receipts, 11 independent "
+    "gate cases and 29 disabled native variants. Prior diagnostic admissions, exceptions and harness failures "
+    "remain recorded. Readiness25/27 leaves atomics and locks from N12-CONCURRENCY-ATOMICS-001, then broader "
+    "N36 shared-helper binding review and full exact-candidate qualification before main merge. No phase, "
+    "flag, native byte, ISO or production change. Prior qualification below is historical. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -3349,6 +3359,8 @@ def check_native_kernel_scheduler_smp_preempt_readiness(
             or "native kernel scheduler SMP-preemption readiness is not an object",
         )
     errors.extend(native_kernel_scheduler_smp_preempt.readiness_errors(artifact, ROOT))
+    if errors:
+        return readiness.make_check("native_kernel_scheduler_smp_preempt_readiness", False, "; ".join(errors[:8]))
     build = artifact.get("build", {})
     kernel_summary = build.get("kernel_entry", {}).get("summary", {})
     host_probe = build.get("host_probe", {})
@@ -3370,9 +3382,10 @@ def check_native_kernel_scheduler_smp_preempt_readiness(
         or linked.get("successor_profile_invlpg_instruction_count") != 1
         or linked.get("successor_profile_executed") is not False
         or linked.get("runtime_execution_count") != 3
-        or linked.get("relocation_count") != 1327
+        or type(linked.get("relocation_count")) is not int
+        or linked.get("relocation_count") != 1326
         or linked.get("canonical_sha256")
-        != "B9AF7DFB13472C0A0D3CBE70036EFAD7C3B792F13FC9944ACEC935B362F0FBA8"
+        != "FD6C2A0C709957B9EDFFC0647D534E060ED68215C075F07D70AB2AEBCA6C81D1"
         or linked.get("status") != "pass"
     ):
         errors.append("PKSCHED6 host oracle, source, or linked INVLPG audit changed")
@@ -3432,7 +3445,7 @@ def check_native_kernel_scheduler_smp_preempt_readiness(
         not isinstance(controls, list)
         or len(controls) != 34
         or sum(item.get("case_count", 0) for item in controls if isinstance(item, dict))
-        != 232
+        != 322
     ):
         errors.append("PKSCHED6 hostile-control evidence is incomplete")
     if artifact.get("claims") != native_kernel_scheduler_smp_preempt.expected_claims():
@@ -3448,7 +3461,7 @@ def check_native_kernel_scheduler_smp_preempt_readiness(
         "contract=PKSCHED6; sandybridge_vcpus=4; aps=3; runs=2/2; "
         "markers=76/76; scheduler_tests=5; kernel_tests=246; live_ipis=8; "
         "model_acks=5; quantum_preemptions=3; timeout_rollbacks=1; "
-        "scrub=417792/417792; controls=34/34; cases=232; ap_timer_interrupts=false; "
+        "scrub=417792/417792; controls=34/34; cases=322; native_cases=61; ap_timer_interrupts=false; "
         "general_smp=false; n12_exit=false; production_ready=false"
     )
     return readiness.make_check(

@@ -1,15 +1,40 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-04
-Plan version: 2.124.0-current-kernel-smp-ap-worker-replay
-Roadmap cycle: PooleOS Cycle 221
+Plan version: 2.125.0-smp-preemption-admission-and-controls
+Roadmap cycle: PooleOS Cycle 222
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
 
-## Cycle 221: Current-Kernel SMP and AP-Worker Replay
+## Cycle 222: SMP-Preemption Admission and Controls
+
+`N12-SCHED-SMP-PREEMPT-001`, N12.5-N12.7/N36, advances
+`ADD-N12-SCHED-SMP-PREEMPT-001` and `ADD-N36-RECEIPT-COVERAGE-001`,
+retaining N12.1-N12.4 dependencies. Seventeen constant-only groups now have
+executed evidence:61 native boundary scenarios and46 source mutations.
+Recorded admission reconstructs both runs, typed counts, probes and audits.
+Two final four-vCPU boots pass34groups/322cases;19 focused tests pass,
+rejecting339 corrupted records and11 independent gate cases and detecting29
+disabled native variants. Prior diagnostic failures, a masked watchdog mutation,
+an optional-log skip and six non-final boots remain preserved separately.
+[Cycle 222 evidence](checkpoints/cycle222-smp-preemption-admission-and-controls.md).
+
+Readiness **25/27**. Next **N12-CONCURRENCY-ATOMICS-001**, then locks,
+shared-helper transitive-binding review and full exact-candidate qualification
+before main merge. Known constant-only scheduler groups are repaired; broader
+N36 verification remains open. No phase/flag closure or new ADD requirement.
+All25 parent records are archived; checklist, PooleGlyph boundaries, native
+kernel, earlier receipts and demo ISO are preserved. Inventory1149 tests,
+377 source bindings. N0 custody, N5 authentication, full task state, general
+retirement, physical hardware and independent builders remain open.
+Combined regression passes **167/167**, zero skips, including 69 progress and
+architecture tests. Initial metadata failures and a historical-count conservation
+failure remain recorded; corrected conservation preserves all parent records.
+
+## Historical Cycle 221: Current-Kernel SMP and AP-Worker Replay
 
 `N12-SCHED-SMP-001` and `N12-SCHED-AP-WORKERS-001`, N12.4-N12.7/N36,
 advance `ADD-N12-SCHED-SMP-001`, `ADD-N12-SCHED-AP-WORKERS-001` and

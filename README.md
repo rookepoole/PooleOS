@@ -11,7 +11,19 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 221 qualifies SMP scheduling and AP
+**Current development checkpoint:** Cycle 222 repairs SMP-preemption evidence
+validation and replaces seventeen unexecuted control groups. Two final four-vCPU
+boots and **19/19 focused tests** pass, with 339 corrupted receipts rejected.
+Readiness is **25/27**; atomics and locks remain. Kernel and demo ISO are unchanged.
+[Cycle 222 evidence](docs/checkpoints/cycle222-smp-preemption-admission-and-controls.md).
+Next: `N12-CONCURRENCY-ATOMICS-001`, then locks and full qualification before
+main merge. Checkpoints are backed up through [PR #78](https://github.com/rookepoole/PooleOS/pull/78).
+Pre-production; no phase or production gate closes.
+The combined regression passes **167/167**, zero skips, including 69 progress
+and architecture tests. Conservation verifies 377 source bindings and preserves
+all 25 parent progress records.
+
+**Historical development checkpoint:** Cycle 221 qualifies SMP scheduling and AP
 workers on the unchanged kernel: **four four-vCPU boots** and **39 focused tests
 pass**. Four obsolete measured expectations are corrected; both initial rejected
 admissions are retained. Readiness **24/27** leaves SMP preemption, atomics and

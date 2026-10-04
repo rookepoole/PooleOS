@@ -89,18 +89,20 @@ def test_probe_parser_rejects_order_ack_watchdog_and_cleanup_drift() -> None:
             smp_preempt.parse_probe_output("\n".join(hostile) + "\n")
 
 
-def test_live_serial_transcript_matches_independent_oracle_when_present() -> None:
-    path = ROOT / "tmp/pksched6-debug-run-2/pooleos.serial.log"
-    if not path.is_file():
-        _skip("local QEMU transcript is not a repository input")
-    markers = smp_preempt.extract_markers(path.read_bytes())
-    summary = smp_preempt.validate_markers(markers)
-    assert len(markers) == 38
-    assert summary["reschedule"] == {
-        "live_ipis": 8,
-        "model_acks": 5,
-        "quantum_preemptions": 3,
-    }
+def test_retained_guest_transcripts_match_independent_oracle() -> None:
+    receipt = smp_preempt.read_json(ROOT / smp_preempt.READINESS_RELATIVE)
+    assert smp_preempt.readiness_errors(receipt) == []
+    assert len(receipt["execution"]["runs"]) == 2
+    for run in receipt["execution"]["runs"]:
+        markers = run["markers"]
+        summary = smp_preempt.validate_markers(markers)
+        assert summary == run["marker_summary"]
+        assert len(markers) == 38
+        assert summary["reschedule"] == {
+            "live_ipis": 8,
+            "model_acks": 5,
+            "quantum_preemptions": 3,
+        }
 
 
 def test_input_binding_rejects_escape_and_is_complete() -> None:
