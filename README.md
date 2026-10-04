@@ -11,7 +11,19 @@ The exact merged tree passed all 105 runtime-inclusive canonical gates and
 708 Doctor checks, with both bundle and replay inputs. The original checkpoint
 branches remain available as history; they are not pending main merges.
 
-**Current development checkpoint:** Cycle 213 qualifies scheduler, preemption
+**Current development checkpoint:** Cycle 214 qualifies the SMP scheduler on the
+unchanged Cycle 210 kernel. Two four-vCPU boots and 19 focused tests pass,
+including 326 corrupted records and 22 disabled native variants. Measured image
+pins and an independent integer-type check are repaired. An initial source-binding
+mistake and failed 13/18 regression remain recorded; the corrected suite passes.
+Readiness is **23/27**. AP workers, SMP preemption, atomics and locks remain,
+with at least 35 unproven control groups. Next: `N12-SCHED-AP-WORKERS-001`.
+[Cycle 214 evidence](docs/checkpoints/cycle214-current-kernel-smp-scheduler-replay.md).
+Branch backup in [PR #78](https://github.com/rookepoole/PooleOS/pull/78) is separate
+from main qualification. Native kernel and demo ISO bytes are unchanged.
+Progress, architecture and checklist tests pass 61/61 with no skips.
+
+**Historical development checkpoint:** Cycle 213 qualifies scheduler, preemption
 and deferred work on the unchanged Cycle 210 kernel. Six VM boots and 47 focused
 tests pass, including 768 corrupted records and 19 disabled native variants.
 Two measured image pins and an isolated integer-type check are repaired without

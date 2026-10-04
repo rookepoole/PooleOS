@@ -68,7 +68,8 @@ class NativeArchitectureBaselineTests(unittest.TestCase):
         self.assertEqual(len(names.values()), len(set(names.values())))
 
     def test_bound_sources_reproduce_without_private_paths(self) -> None:
-        self.assertEqual(len(self.artifact["bound_sources"]), 358)
+        self.assertEqual(len(self.artifact["bound_sources"]), 359)
+        self.assertIn("docs/checkpoints/cycle214-current-kernel-smp-scheduler-replay.md", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("docs/checkpoints/cycle213-current-kernel-scheduler-replay.md", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("docs/checkpoints/cycle212-current-kernel-memory-and-multiprocessor-replay.md", {item["path"] for item in self.artifact["bound_sources"]})
         self.assertIn("docs/checkpoints/cycle211-current-kernel-cpu-admission-and-replay.md", {item["path"] for item in self.artifact["bound_sources"]})

@@ -7,9 +7,19 @@ Parent objective: production-ready native PooleOS with a Poole-authored microker
 Authoritative Build Plan: `docs/pdc-production-build-plan.md`  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Master-checklist coverage: `runs/pooleos_native_checklist_coverage.json`  
-Last roadmap reconciliation: PooleOS Cycle 213
+Last roadmap reconciliation: PooleOS Cycle 214
 
-Cycle 213 qualifies scheduler, preemption and deferred work on unchanged kernel210:
+Cycle 214 qualifies the SMP scheduler on unchanged kernel210: two four-vCPU
+boots, 32 groups/303 cases and 19 focused tests pass. Measured image pins and
+an independent integer-type guard are repaired. Initial source-binding and
+premature-regression failures are retained. Readiness is 23/27; four profiles,
+AP-worker admission and at least 35 control groups remain from
+N12-SCHED-AP-WORKERS-001. Main merge still requires exact-candidate qualification;
+branch backup is separate. No normative condition, phase, flag, kernel or ISO changes.
+[Cycle 214 evidence](checkpoints/cycle214-current-kernel-smp-scheduler-replay.md).
+Metadata passes 61/61; conservation verifies 359 bindings and 22 archived records.
+
+Historical Cycle 213 qualifies scheduler, preemption and deferred work on unchanged kernel210:
 six VM boots, 83 control groups covering 595 cases and 47 focused tests pass.
 Measured deferred image pins and an isolated exact-integer check are repaired;
 full admission already rejected the wrong-typed value. Readiness is 22/27; five

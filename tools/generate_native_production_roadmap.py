@@ -8609,10 +8609,127 @@ def apply_cycle213(roadmap: dict, test_count: int) -> dict:
             phase["current_evidence"].insert(0, evidence)
             phase["current_gaps"].insert(0, gap)
         if phase["id"] == "N36":
-            phase["current_evidence"].insert(0, f"Cycle 213 source inventory: {test_count} Python tests discovered; full qualification pending")
+            phase["current_evidence"].insert(0, "Cycle 213 source inventory: 1109 Python tests discovered; full qualification pending")
     for flag in roadmap["implementation_flags"]:
         if flag["id"] in {"FLAG-N12-SCHED-FOUNDATION-001", "FLAG-N12-SCHED-PREEMPT-001",
                           "FLAG-N12-SCHED-DEFERRED-001", "FLAG-N36-RECEIPT-COVERAGE-001"}:
+            flag["evidence"].insert(0, checkpoint)
+    roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
+    roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
+    return apply_cycle214(roadmap, test_count)
+
+
+def apply_cycle214(roadmap: dict, test_count: int) -> dict:
+    checkpoint = "docs/checkpoints/cycle214-current-kernel-smp-scheduler-replay.md"
+    next_move = "N12-SCHED-AP-WORKERS-001"
+    gate = roadmap["baseline"]["native_consistency_release_gate"]
+    for key, value in list(gate.items()):
+        if key.startswith("current_") and isinstance(value, dict):
+            suffix = "source_projection" if key == "current_focused_source_projection" else key.removeprefix("current_")
+            gate["historical_cycle213_" + suffix] = copy.deepcopy(value)
+    roadmap["baseline"]["pooleos_cycle"] = 214
+    roadmap["execution_protocol"].update(last_updated_cycle=214,
+        selected_move_id="N12-SCHED-SMP-001", owner_independent_next_move_id=next_move)
+    roadmap["execution_protocol"]["required_records"].insert(0, checkpoint)
+    gate["qualification_status"] = "current_kernel_SMP_scheduler_admitted_four_dependencies_pending"
+    gate["current_candidate_audit"] = dict(gate["current_candidate_audit"], cycle=214)
+    digest = "6A7EDCA3DCC42389D55170584C975D9DEAEBA8DBE790A21E13A7E243298FE527"
+    binding = dict(profile="scheduler_smp", path="runs/native-kernel-scheduler-smp-readiness.json",
+        sha256=digest, fresh_runs=2, negative_controls=32, hostile_cases=303, kernel_host_tests=246,
+        execution_log_sha256="B4AFCEDC4E0B5203EA8C7434E85C6ABD1BFF4D8CFEFFE76250C1A9A84BB46958",
+        elapsed_seconds=82.594, recorded_evidence_cases=279)
+    retained = gate["historical_cycle213_dependency_qualification"]
+    record = copy.deepcopy(gate["historical_cycle208_dependency_qualification"])
+    record.update(cycle=214, source_validation_cycle=214,
+        scope="retained_memory212_scheduler213_and_fresh_SMP214_on_unchanged_kernel210",
+        qualified_profiles=retained["qualified_profiles"] + ["scheduler_smp"],
+        receipt_bindings=copy.deepcopy(retained["receipt_bindings"]) + [binding],
+        kernel_sha256=retained["kernel_sha256"], superseded_initial_runs=0,
+        run_count_scope="Cycle214_two_fresh_SMP_boots_only_not_retained_memory_scheduler_CPU_boot_runs",
+        focused_python_tests=19, independent_aggregate_cases=11)
+    gate["current_dependency_qualification"] = record
+    projection = gate["current_focused_source_projection"]
+    gate["current_focused_source_projection"] = dict(projection, cycle=214,
+        passed_checks=23, pending_downstream_native_checks=4,
+        passing_profiles=projection["passing_profiles"] + ["native_kernel_scheduler_smp_readiness"],
+        final_receipt_fresh_qemu_runs=2, kernel_entry_runs=2, superseded_initial_qemu_runs=0,
+        run_count_scope="Cycle214_two_fresh_SMP_boots_only", next_dependency_move_id=next_move,
+        required_next_gate="AP_worker_admission_and_18_controls_four_profiles_then_full_candidate",
+        focused_python_tests_passed=19, recorded_evidence_rejection_cases=326)
+    gate["current_entry_provenance_qualification"] = dict(gate["current_entry_provenance_qualification"], latest_reproduction_cycle=214)
+    gate["current_ipi_mailbox_oracle_gap"] = dict(gate["current_ipi_mailbox_oracle_gap"], cycle=214,
+        remaining_affected_profiles=4, newly_requalified_profiles=["scheduler_smp"])
+    gate["current_control_execution_audit"] = dict(gate["current_control_execution_audit"], cycle=214)
+    gate["current_smp_control_qualification"] = dict(gate["current_smp_control_qualification"],
+        cycle=214, source_validation_cycle=214, original_repair_cycle=208,
+        applies_to_current_source=True, receipt_sha256=digest, current_receipt_admitted=True,
+        current_kernel_live_replay_pending=False, measured_canonical_sha256=record["kernel_sha256"],
+        measured_relocation_count=1323, historical_record="historical_cycle213_smp_control_qualification",
+        original_failure_audits_reexecuted_this_cycle=False,
+        after_audit_scope="historical_Cycle208_admission_repair_latest_replay_recorded_in_current_closeout")
+    gate["current_smp_transaction_qualification"] = dict(gate["current_smp_transaction_qualification"],
+        latest_live_replay_cycle=214, latest_live_receipt_sha256=digest,
+        latest_live_kernel_sha256=record["kernel_sha256"], current_kernel_live_replay_pending=False,
+        current_receipt_admitted=True, historical_artifact_identity_retained=True,
+        applies_to_current_source_scope="original_Cycle203_entry_and_core_artifacts_not_current_kernel",
+        historical_record="historical_cycle213_smp_transaction_qualification")
+    gate["current_closeout_regression"] = {
+        "cycle": 214, "status": "pass", "scope": "SMP_scheduler_controls_transactions_and_identity_gate_not_full_canonical",
+        "tests_run": 19, "tests_passed": 19, "tests_failed": 0, "tests_skipped": 0,
+        "elapsed_seconds": 43.153, "runner_elapsed_seconds": 44.047,
+        "log_sha256": "AFACEB291245818E00FFF30CF69D48EBE6BA167285B51B3AF8B15282ED4BCEBC",
+        "source_unchanged_during_execution": True, "owner_report_unchanged": True,
+        "initial_SMP_admission": {"status": "fail", "detail": "PKSCHED4 host oracle, source, or linked INVLPG audit changed",
+            "candidate_sha256": digest, "failed_guest_runs": 0},
+        "corrected_SMP_admission": {"status": "pass", "same_candidate_sha256": digest,
+            "guest_evidence_rewritten_or_rerun": False, "schema_or_component_validation_bypassed": False},
+        "isolated_relocation_type_audit": {"wrong_value": 1323.0,
+            "full_gate_accepted_before": False, "full_gate_accepted_after": False,
+            "isolated_pin_accepted_before": True, "isolated_pin_accepted_after": False,
+            "component_bypassed_only_for_isolated_diagnostic": True},
+        "source_binding_workflow_failure": {
+            "temporary_test_edit_invalidated_candidate": True,
+            "after_audit_and_admission_stopped_before_copy": True,
+            "regression_launched_despite_failed_admission": True,
+            "old_public_receipt_used_in_failed_regression": True,
+            "aggregate_regression_moved_to_unbound_gate_test_module": True,
+            "original_bound_test_restored_byte_exactly": True,
+            "positive_receipt_rebound_or_validation_bypassed": False,
+        },
+        "initial_focused_regression": {"tests_run": 18, "tests_passed": 13, "tests_failed": 5, "tests_skipped": 0,
+            "elapsed_seconds": 29.212, "runner_elapsed_seconds": 30.109,
+            "log_sha256": "88669854A9DED7DBFC07E703B95959F5F92FB516C2E27F9D4490467E87C9D912",
+            "cause": "tests_launched_after_rejected_admission_still_read_previous_kernel_receipt",
+            "admitted_as_passing_suite": False},
+        "metadata_regression": {"tests_run": 61, "tests_passed": 61, "tests_failed": 0, "tests_skipped": 0,
+            "elapsed_seconds": 34.397, "runner_elapsed_seconds": 35.234,
+            "log_sha256": "99561256817568CF85572EF0270D9F5AA8701DF4431A7A665BCF2E9D2105928A",
+            "source_unchanged_during_execution": True, "owner_report_unchanged": True,
+            "scope": "roadmap_architecture_and_locked_checklist_not_full_canonical"},
+        "canonical_full_replay_performed": False, "merge_qualified": False, "production_ready": False,
+    }
+    evidence = (
+        "Cycle 214: " + checkpoint + " admits the SMP scheduler on unchanged kernel210. Two four-vCPU "
+        "boots, 32 control groups covering 303 cases and 19 focused tests pass, including 326 corrupted "
+        "records, 11 independent aggregate cases and 22 disabled native variants. Two measured image "
+        "pins and an isolated integer-type guard are repaired. The same guest candidate is admitted. "
+        "An initial bound-test edit and premature regression caused five failures; all are preserved."
+    )
+    gap = (
+        "Selected readiness is 23/27; four AP-worker/SMP-preemption/atomic/lock profiles remain from " + next_move + ". "
+        "At least 35 control groups and AP-worker recorded admission remain open. No native byte, phase, "
+        "flag, ISO or production status changes. Full exact-candidate canonical, Doctor, release, publication "
+        "and configured GitHub/review gates still precede main merge; branch backup is separate. "
+        "N0 custody, N5 authentication, general retirement and physical hardware remain open."
+    )
+    for phase in roadmap["phases"]:
+        if phase["id"] in {"N12", "N36"}:
+            phase["current_evidence"].insert(0, evidence)
+            phase["current_gaps"].insert(0, gap)
+        if phase["id"] == "N36":
+            phase["current_evidence"].insert(0, f"Cycle 214 source inventory: {test_count} Python tests discovered; full qualification pending")
+    for flag in roadmap["implementation_flags"]:
+        if flag["id"] in {"FLAG-N12-SCHED-SMP-001", "FLAG-N36-RECEIPT-COVERAGE-001"}:
             flag["evidence"].insert(0, checkpoint)
     roadmap["gap_summary"]["native_program_gaps"][4] = evidence + " " + gap + " " + roadmap["gap_summary"]["native_program_gaps"][4]
     roadmap["claim_boundaries"].insert(0, evidence + " " + gap)
@@ -8622,7 +8739,7 @@ def apply_cycle213(roadmap: dict, test_count: int) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=ROOT / "runs/pdc_production_roadmap.json")
-    parser.add_argument("--test-count", type=int, default=1109)
+    parser.add_argument("--test-count", type=int, default=1111)
     parser.add_argument("--status-date", default="2026-10-03")
     args = parser.parse_args()
     roadmap = make_roadmap(args.test_count, args.status_date)

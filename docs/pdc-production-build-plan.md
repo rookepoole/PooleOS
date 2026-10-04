@@ -1,13 +1,45 @@
 # PooleOS Native Architecture Production Build Plan
 
 Status date: 2026-10-03
-Plan version: 2.116.0-native-scheduler-current-image-replay
-Roadmap cycle: PooleOS Cycle 213
+Plan version: 2.117.0-native-smp-scheduler-current-image-replay
+Roadmap cycle: PooleOS Cycle 214
 Implementation baseline entering this revision: PooleOS Cycle 79, PooleGlyph Phase 65  
 Author and IP owner: Rooke Poole  
 Machine ledger: `runs/pdc_production_roadmap.json`  
 Checklist coverage ledger: `runs/pooleos_native_checklist_coverage.json`  
 Coverage schema: `specs/pooleos-native-checklist-coverage.schema.json`
+
+## Cycle 214: Current-Kernel SMP Scheduler Replay
+
+`N12-SCHED-SMP-001` advances N12.5/N12.6/N12.7 and N36 under
+`ADD-N12-SCHED-SMP-001` and `ADD-N36-RECEIPT-COVERAGE-001`. Two four-vCPU
+boots on unchanged kernel210 pass 32 control groups/303 cases: 244 rejection
+cases and 59 compiled-native boundary scenarios. All 19 focused tests pass,
+including 326 corrupt records, 11 independent aggregate cases and 22 disabled
+native safeguard/transaction variants. Nineteen native tests pass at each of
+two optimization levels. Counts overlap; these are not physical-hardware trials.
+
+The aggregate SMP gate initially rejected obsolete hash/relocation pins.
+Independent evidence establishes the current kernel and integer 1323 relocations.
+An isolated wrong-type check accepted float 1323.0 only with component validation
+bypassed; full admission already rejected it. The independent pin now rejects it.
+A first regression edit invalidated the receipt's test-source binding. Admission
+stopped, but a prematurely launched suite still read the old public receipt and
+failed 5/18. The aggregate-only regression was relocated, the original bound test
+restored exactly, and the unchanged candidate admitted before a passing 19/19 rerun.
+No guest evidence was rewritten, fabricated or rerun for these corrections.
+
+Readiness is 23/27; next is `N12-SCHED-AP-WORKERS-001`, then SMP preemption,
+atomics and locks. At least 35 AP-worker/SMP-preemption control groups remain.
+Cycle208's repaired SMP groups are not counted as open. Retained nine memory/
+scheduler receipts, CPU211, boot210, ownership212, native source, entry/core,
+owner evidence and demo ISO are unchanged. Twenty-two current records are archived;
+source inventory is 1111 tests, not a full-suite result. No phase or flag closes.
+Full exact-candidate canonical/Doctor/release/publication/GitHub/review gates
+remain prerequisites to main merge; branch checkpoint backup is separate.
+[Evidence](checkpoints/cycle214-current-kernel-smp-scheduler-replay.md).
+Progress/architecture/checklist regression passes 61/61 without skips.
+Conservation verifies 359 source bindings, 1111-test inventory and 22 archives.
 
 ## Cycle 213: Current-Kernel Scheduler Replay
 

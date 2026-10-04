@@ -487,6 +487,18 @@ DEFAULT_GAPS[4] = (
 )
 
 
+DEFAULT_GAPS[4] = (
+    "Cycle 214 admits current-kernel SMP scheduling: two four-vCPU boots, 32 groups/303 cases and "
+    "19 focused tests pass. Measured image pins and an isolated integer-type guard are repaired; "
+    "the same guest candidate passes. A bound-test edit invalidated initial admission and a premature "
+    "regression failed 5/18; the test was relocated, original binding restored and passing rerun retained. "
+    "Selected readiness is 23/27. Four profiles, AP-worker recorded admission and at least 35 control "
+    "groups remain from N12-SCHED-AP-WORKERS-001. Full exact-candidate canonical, Doctor, release, "
+    "publication and configured GitHub/review gates precede main merge. Branch backup is separate; "
+    "no native byte, phase, flag, ISO or production status changes. " + DEFAULT_GAPS[4]
+)
+
+
 def run_doctor(*, include_runtime: bool) -> dict:
     cmd = [sys.executable, str(ROOT / "tools" / "pooleos_doctor.py")]
     if not include_runtime:
@@ -3002,9 +3014,10 @@ def check_native_kernel_scheduler_smp_readiness(
         or linked.get("successor_profile_invlpg_instruction_count") != 1
         or linked.get("successor_profile_executed") is not False
         or linked.get("runtime_execution_count") != 3
-        or linked.get("relocation_count") != 1326
+        or type(linked.get("relocation_count")) is not int
+        or linked.get("relocation_count") != 1323
         or linked.get("canonical_sha256")
-        != "A943DCB6E41A27F952868F05ED2B3523B47D9D7A7B5DB909EE385205F7CA3B31"
+        != "AE3422B2D44E6EC87AB1D5B51414C023E46F2EE3461A0D0895B9D1242E10D25A"
         or linked.get("status") != "pass"
     ):
         errors.append("PKSCHED4 host oracle, source, or linked INVLPG audit changed")
